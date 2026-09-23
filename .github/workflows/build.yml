@@ -1,0 +1,387 @@
+name: Build Mesa Switch SDK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version. Leave it empty to avoid publishing a release.'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVKITPRO: /opt/devkitpro
+  DEVKITA64: /opt/devkitpro/devkitA64
+  # rustc-switch-wrapper.sh only cross-compiles when this is set;
+  # build-unified.sh exports the same value.
+  MESA_SWITCH_RUST_TARGET: aarch64-unknown-linux-gnu
+  RUST_TOOLCHAIN: nightly
+  # Mesa 26.2 requires SPIRV-Tools >= 2024.1, newer than the Debian package.
+  SPIRV_TAG: vulkan-sdk-1.3.290.0
+  SPIRV_PREFIX: /opt/spirv-tools
+  CARGO_HOME: /root/.cargo
+  RUSTUP_HOME: /root/.rustup
+  LC_ALL: C
+  TZ: UTC
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    container:
+      image: devkitpro/devkita64:latest
+      options: --user root
+
+    steps:
+      # Runs before the checkout on purpose: actions/checkout needs git, and the
+      # toolchain packages do not depend on the source tree.
+      - name: Install host build dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build pkg-config \
+            flex bison curl ca-certificates git xz-utils \
+            clang libclang-dev \
+            llvm-15-dev libclang-15-dev libclang-common-15-dev \
+            libclc-15-dev libllvmspirvlib-15-dev \
+            python3-pip python3-setuptools python3-wheel
+          apt-get clean
+          rm -rf /var/lib/apt/lists/*
+
+      # meson >= 1.4.0, mako >= 0.8.0, PyYAML and packaging are all hard
+      # requirements of Mesa's configure step.
+      - name: Install Python build modules
+        run: pip3 install --break-system-packages --no-cache-dir meson mako pyyaml packaging
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Trust the workspace checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      # switch-mesa is deliberately NOT installed: this repository *is* Mesa and
+      # the prebuilt portlib would shadow what we build.
+      # switch-libdrm_nouveau is required for its headers only (nouveau.h,
+      # nouveau_drm.h, nvif/*): with __SWITCH__ the Gallium driver and
+      # src/gallium/winsys/nouveau/switch are written against that libdrm API
+      # (struct nouveau_list, 5-argument nouveau_device_new, fifo->object,
+      # drm_nouveau_gem_pushbuf_bo.bo). Nothing links libdrm_nouveau.a; the
+      # functions are implemented by nouveau_switch_*.c on top of Horizon.
+      - name: Install Switch portlibs
+        run: |
+          if dkp-pacman -Q switch-mesa >/dev/null 2>&1; then
+            dkp-pacman -Rdd --noconfirm switch-mesa
+          fi
+          dkp-pacman -S --noconfirm --needed \
+            switch-pkg-config \
+            switch-zlib \
+            switch-libzstd \
+            switch-libexpat \
+            switch-libdrm_nouveau
+
+      - name: Resolve SDK version
+        id: sdk
+        run: |
+          VERSION="$(cat VERSION)"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "basename=mesa-${VERSION}-switch-unified-horizon-sdk" >> "$GITHUB_OUTPUT"
+          echo "Mesa ${VERSION}"
+
+      - name: Cache SPIRV-Tools
+        id: cache-spirv
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.SPIRV_PREFIX }}
+          key: spirv-tools-${{ env.SPIRV_TAG }}-devkita64
+
+      - name: Build SPIRV-Tools
+        if: steps.cache-spirv.outputs.cache-hit != 'true'
+        run: |
+          rm -rf /tmp/SPIRV-Tools
+          git clone --depth 1 --branch "$SPIRV_TAG" \
+            https://github.com/KhronosGroup/SPIRV-Tools.git /tmp/SPIRV-Tools
+          git clone --depth 1 --branch "$SPIRV_TAG" \
+            https://github.com/KhronosGroup/SPIRV-Headers.git \
+            /tmp/SPIRV-Tools/external/spirv-headers
+          cmake -S /tmp/SPIRV-Tools -B /tmp/SPIRV-Tools/build -G Ninja \
+            -DCMAKE_INSTALL_PREFIX="$SPIRV_PREFIX" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSPIRV_SKIP_TESTS=ON
+          cmake --build /tmp/SPIRV-Tools/build
+          cmake --install /tmp/SPIRV-Tools/build
+          rm -rf /tmp/SPIRV-Tools
+
+      - name: Cache Rust toolchain
+        id: cache-rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            /root/.cargo
+            /root/.rustup
+          key: rust-nightly-bindgen-cbindgen-devkita64
+
+      # NAK needs rustc >= 1.85, bindgen >= 0.71.1 and cbindgen >= 0.28; the
+      # distro packages are older, so install them through rustup/cargo.
+      - name: Install Rust nightly, bindgen and cbindgen
+        if: steps.cache-rust.outputs.cache-hit != 'true'
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+            | sh -s -- -y --default-toolchain "$RUST_TOOLCHAIN" --profile minimal
+          . "$CARGO_HOME/env"
+          rustup component add rust-src
+          rustup target add "$MESA_SWITCH_RUST_TARGET"
+          cargo install bindgen-cli cbindgen
+
+      - name: Export Rust toolchain to PATH
+        run: echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"
+
+      # switch_cross_file.txt hardcodes /usr/local/libexec/{rustc,bindgen}, and
+      # bindgen-switch-wrapper.sh resolves the atomic shim next to itself.
+      - name: Install cross-compilation wrappers
+        run: |
+          mkdir -p /usr/local/libexec
+          install -m 755 bindgen-switch-wrapper.sh /usr/local/libexec/bindgen
+          install -m 755 rustc-switch-wrapper.sh /usr/local/libexec/rustc
+          install -m 644 bindgen-atomic-shim.h /usr/local/libexec/bindgen-atomic-shim.h
+
+      # Do NOT copy src/gallium/winsys/nouveau/drm/nouveau.h here: that is the
+      # Linux DRM facade and is incompatible with the Switch winsys. Overwriting
+      # libdrm_nouveau's nouveau.h with it breaks nouveau_switch_libdrm.c.
+      - name: Install in-tree Nouveau headers into portlibs
+        run: |
+          inc="$DEVKITPRO/portlibs/switch/include"
+          if ! grep -q 'struct nouveau_list' "$inc/nouveau.h"; then
+            echo "$inc/nouveau.h is not the switch-libdrm_nouveau header; reinstalling." >&2
+            dkp-pacman -S --noconfirm switch-libdrm_nouveau
+          fi
+          install -m 644 src/nouveau/headers/nv_device_info.h "$inc/"
+
+      # Mesa bundles opencl-c.h / opencl-c-base.h into mesa_clc from
+      # <llvm-libdir>/clang/<version>/include (see src/compiler/clc/meson.build).
+      # Pin llvm-config so that directory - and libclc - always come from the
+      # same LLVM 15 that Docker.rust targets, instead of whichever llvm-config
+      # the distro happens to put first on PATH.
+      - name: Pin LLVM 15 and verify Clang OpenCL headers
+        run: |
+          llvm_config=/usr/bin/llvm-config-15
+          libdir="$("$llvm_config" --libdir)"
+          version="$("$llvm_config" --version)"
+          major="${version%%.*}"
+          res="$libdir/clang/$version/include"
+          if [ ! -d "$res" ]; then
+            res="$libdir/clang/$major/include"
+          fi
+          if [ ! -f "$res/opencl-c-base.h" ]; then
+            echo "opencl-c-base.h not found for LLVM $version." >&2
+            echo "Install libclang-common-${major}-dev." >&2
+            ls -l "$libdir/clang" >&2 || true
+            exit 1
+          fi
+          # Mesa derives the directory from the full version below LLVM 16 and
+          # from the major version onwards; make both spellings resolve.
+          if [ ! -e "$libdir/clang/$version" ]; then
+            ln -sfn "$major" "$libdir/clang/$version"
+          fi
+          if [ ! -e "$libdir/clang/$major" ]; then
+            ln -sfn "$version" "$libdir/clang/$major"
+          fi
+          echo "LLVM $version, Clang resource dir: $res"
+          cat > "$GITHUB_WORKSPACE/llvm-native.txt" <<EOF
+          [binaries]
+          llvm-config = '$llvm_config'
+          EOF
+          cat "$GITHUB_WORKSPACE/llvm-native.txt"
+
+      # Rust's std links -lrt -ldl -lutil, which Horizon does not provide.
+      # src/nouveau/vulkan/rust_switch_stubs.c supplies the real symbols.
+      - name: Provide POSIX stub archives for Rust std
+        run: |
+          lib="$DEVKITPRO/portlibs/switch/lib"
+          if [ ! -f "$lib/libdl.a" ]; then
+            tmp="$(mktemp -d)"
+            echo 'void __mesa_switch_stub_lib(void) {}' > "$tmp/stub_posix.c"
+            "$DEVKITA64/bin/aarch64-none-elf-gcc" -c "$tmp/stub_posix.c" -o "$tmp/stub_posix.o"
+            for l in dl rt util; do
+              "$DEVKITA64/bin/aarch64-none-elf-ar" rcs "$lib/lib${l}.a" "$tmp/stub_posix.o"
+            done
+            rm -rf "$tmp"
+          fi
+
+      # mesa-clc=system / precomp-compiler=system in the cross build require
+      # these two host binaries on PATH. mesa-clc-bundle-headers=enabled embeds
+      # opencl-c.h / opencl-c-base.h into mesa_clc; with a shared LLVM the
+      # default 'auto' leaves it resolving them from disk at runtime, which
+      # fails as "'opencl-c-base.h' file not found" when compiling nvkcl.spv.
+      - name: Build native host tools (mesa_clc, vtn_bindgen2)
+        env:
+          PKG_CONFIG_PATH: /opt/spirv-tools/lib/pkgconfig
+          CMAKE_PREFIX_PATH: /opt/spirv-tools
+        run: |
+          meson setup builddir-native \
+            --native-file "$GITHUB_WORKSPACE/llvm-native.txt" \
+            --buildtype=release \
+            -Dvulkan-drivers= \
+            -Dgallium-drivers= \
+            -Dshader-cache=enabled \
+            -Dplatforms= \
+            -Dglx=disabled \
+            -Degl=disabled \
+            -Dopengl=false \
+            -Dgles1=disabled \
+            -Dgles2=disabled \
+            -Dtools=[] \
+            -Dllvm=enabled \
+            -Dmesa-clc=enabled \
+            -Dmesa-clc-bundle-headers=enabled \
+            -Dprecomp-compiler=enabled \
+            -Dinstall-mesa-clc=true
+          ninja -C builddir-native \
+            src/compiler/clc/mesa_clc \
+            src/compiler/spirv/vtn_bindgen2
+          echo "$GITHUB_WORKSPACE/builddir-native/src/compiler/clc" >> "$GITHUB_PATH"
+          echo "$GITHUB_WORKSPACE/builddir-native/src/compiler/spirv" >> "$GITHUB_PATH"
+
+      # Unified SDK: EGL + desktop GL + GLES1/2/3 (NVC0 and Zink) + loaderless NVK.
+      - name: Configure cross build
+        run: |
+          SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> "$GITHUB_ENV"
+          export SOURCE_DATE_EPOCH
+          export ZERO_AR_DATE=1
+          meson setup builddir-switch \
+            --cross-file switch_cross_file.txt \
+            --default-library=static \
+            --prefix=/opt/devkitpro/portlibs/switch \
+            --libdir=lib \
+            --buildtype=release \
+            -Doptimization=2 \
+            -Db_lto=false \
+            -Db_ndebug=true \
+            -Dvulkan-drivers=nouveau \
+            -Dgallium-drivers=nouveau,zink \
+            -Dgallium-rusticl=false \
+            -Dplatforms=switch \
+            -Degl-native-platform=switch \
+            -Dglx=disabled \
+            -Degl=enabled \
+            -Dopengl=true \
+            -Dgles1=enabled \
+            -Dgles2=enabled \
+            -Dvideo-codecs= \
+            -Dshader-cache=enabled \
+            -Dxmlconfig=enabled \
+            -Dexpat=enabled \
+            -Dtools=[] \
+            -Dllvm=disabled \
+            -Dshared-glapi=disabled \
+            -Dshared-llvm=disabled \
+            -Dmesa-clc=system \
+            -Dprecomp-compiler=system \
+            -Dcpp_rtti=false \
+            -Dbuild-tests=false \
+            -Dnvk-build-id="$(git rev-parse HEAD)"
+
+      - name: Build
+        run: ninja -C builddir-switch
+
+      - name: Stage SDK
+        run: |
+          rm -rf mesa-unified-install
+          meson install -C builddir-switch --destdir "$GITHUB_WORKSPACE/mesa-unified-install"
+          sdk="$GITHUB_WORKSPACE/mesa-unified-install/opt/devkitpro/portlibs/switch"
+          for pc in "$sdk"/lib/pkgconfig/*.pc; do
+            sed -i 's|^prefix=.*|prefix=${pcfiledir}/../..|' "$pc"
+          done
+
+      - name: Verify SDK contents
+        run: |
+          sdk="$GITHUB_WORKSPACE/mesa-unified-install/opt/devkitpro/portlibs/switch"
+          missing=0
+          for f in \
+            lib/libEGL.a lib/libGL.a lib/libGLESv1_CM.a lib/libGLESv2.a \
+            lib/libglapi.a lib/libvulkan.a \
+            lib/pkgconfig/egl.pc lib/pkgconfig/gl.pc lib/pkgconfig/glesv1_cm.pc \
+            lib/pkgconfig/glesv2.pc lib/pkgconfig/glapi.pc lib/pkgconfig/vulkan.pc \
+            lib/cmake/OpenGL/OpenGLConfig.cmake lib/cmake/Vulkan/VulkanConfig.cmake \
+            include/EGL/egl.h include/EGL/eglext.h \
+            include/GL/gl.h include/GL/glcorearb.h include/GLES2/gl2.h \
+            include/vulkan/vulkan.h include/vulkan/vulkan_vi.h \
+            share/drirc.d/00-zink-defaults.conf
+          do
+            if [ ! -f "$sdk/$f" ]; then
+              echo "Unified SDK is missing $f" >&2
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      # GitHub always serves an artifact as a zip. Uploading the staged
+      # directory (not a pre-built zip) makes the downloaded file open straight
+      # to opt/devkitpro/portlibs/switch, without a zip nested inside.
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.sdk.outputs.basename }}
+          path: mesa-unified-install/
+          if-no-files-found: error
+
+      # The deterministic zip is only needed as a release asset.
+      - name: Package deterministic SDK zip
+        if: github.event_name == 'workflow_dispatch' && inputs.version != ''
+        run: |
+          python3 tools/package-switch-sdk.py \
+            --stage "$GITHUB_WORKSPACE/mesa-unified-install" \
+            --output "$GITHUB_WORKSPACE/dist/${{ steps.sdk.outputs.basename }}.zip" \
+            --epoch "$SOURCE_DATE_EPOCH"
+
+      - name: Upload release zip
+        if: github.event_name == 'workflow_dispatch' && inputs.version != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-zip
+          path: dist/*.zip
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload Meson logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: meson-logs
+          path: |
+            builddir-native/meson-logs/
+            builddir-switch/meson-logs/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.version != ''
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ inputs.version }}"
+          name: "Mesa Switch SDK v${{ inputs.version }}"
+          files: '*.zip'
+          draft: false
+          prerelease: false
