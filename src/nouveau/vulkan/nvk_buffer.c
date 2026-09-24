@@ -248,11 +248,7 @@ nvk_GetPhysicalDeviceExternalBufferProperties(
       if (!pdev->nvkmd->kmd_info.has_host_ptr_import)
          goto unsupported;
       pExternalBufferProperties->externalMemoryProperties =
-         (VkExternalMemoryProperties) {
-            .externalMemoryFeatures = VK_EXTERNAL_MEMORY_FEATURE_IMPORTABLE_BIT,
-            .compatibleHandleTypes =
-               VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT,
-         };
+         nvk_host_allocation_mem_props;
       return;
    default:
       goto unsupported;

@@ -9,6 +9,10 @@
 #include "nvk_image.h"
 #include "nvk_physical_device.h"
 #include "nvkmd/nvkmd.h"
+#ifdef __SWITCH__
+#include "nvk_switch_wsi.h"
+#include "nvkmd/switch/nvkmd_switch.h"
+#endif
 #include "util/u_atomic.h"
 
 #include <inttypes.h>
@@ -40,6 +44,12 @@ const VkExternalMemoryProperties nvk_dma_buf_mem_props = {
    .compatibleHandleTypes =
       VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT |
       VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT,
+};
+
+const VkExternalMemoryProperties nvk_host_allocation_mem_props = {
+   .externalMemoryFeatures = VK_EXTERNAL_MEMORY_FEATURE_IMPORTABLE_BIT,
+   .compatibleHandleTypes =
+      VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT,
 };
 
 static enum nvkmd_mem_flags
@@ -129,11 +139,13 @@ enum nvk_memory_init {
    NVK_MEMORY_INIT_TRASH,
 };
 
-VKAPI_ATTR VkResult VKAPI_CALL
-nvk_AllocateMemory(VkDevice device,
-                   const VkMemoryAllocateInfo *pAllocateInfo,
-                   const VkAllocationCallbacks *pAllocator,
-                   VkDeviceMemory *pMem)
+static VkResult
+nvk_allocate_memory(VkDevice device,
+                    const VkMemoryAllocateInfo *pAllocateInfo,
+                    const VkAllocationCallbacks *pAllocator,
+                    uint32_t switch_nvmap_id,
+                    bool switch_shared,
+                    VkDeviceMemory *pMem)
 {
    VK_FROM_HANDLE(nvk_device, dev, device);
    struct nvk_physical_device *pdev = nvk_device_physical_mut(dev);
@@ -160,7 +172,7 @@ nvk_AllocateMemory(VkDevice device,
    if (fd_info != NULL)
       handle_types |= fd_info->handleType;
 
-   const bool not_shared = handle_types == 0;
+   const bool not_shared = handle_types == 0 && !switch_shared;
    bool pinned_to_vram = false;
 
    /* Align to os page size (typically 4K) as a start as this works for
@@ -230,15 +242,31 @@ nvk_AllocateMemory(VkDevice device,
 #endif
    }
 
-   const enum nvkmd_mem_flags flags =
+   enum nvkmd_mem_flags flags =
       nvk_memory_type_flags(type, handle_types, pinned_to_vram);
+   if (switch_shared)
+      flags |= NVKMD_MEM_SHARED;
 
    const uint64_t aligned_size =
       align64(pAllocateInfo->allocationSize, alignment);
 
    const bool is_import = fd_info && fd_info->handleType;
    const bool is_host_import = mem->vk.host_ptr != NULL;
-   if (is_import) {
+#ifdef __SWITCH__
+   const bool is_nvmap_import = switch_nvmap_id != 0;
+#else
+   const bool is_nvmap_import = false;
+#endif
+   if (is_nvmap_import) {
+#ifdef __SWITCH__
+      result = nvkmd_switch_dev_import_nvmap(dev->nvkmd, &dev->vk.base,
+                                             switch_nvmap_id, aligned_size,
+                                             alignment, pte_kind, tile_mode,
+                                             flags, &mem->mem);
+      if (result != VK_SUCCESS)
+         goto fail_alloc;
+#endif
+   } else if (is_import) {
       assert(fd_info->handleType ==
                VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT ||
              fd_info->handleType ==
@@ -280,7 +308,7 @@ nvk_AllocateMemory(VkDevice device,
    }
 
    enum nvk_memory_init init;
-   if (is_import || is_host_import) {
+   if (is_import || is_host_import || is_nvmap_import) {
       /* From the Vulkan 1.4.315 spec:
        *
        *    VUID-VkMemoryAllocateFlagsInfo-flags-10760
@@ -354,6 +382,46 @@ fail_alloc:
    vk_device_memory_destroy(&dev->vk, pAllocator, &mem->vk);
    return result;
 }
+
+VKAPI_ATTR VkResult VKAPI_CALL
+nvk_AllocateMemory(VkDevice device,
+                   const VkMemoryAllocateInfo *pAllocateInfo,
+                   const VkAllocationCallbacks *pAllocator,
+                   VkDeviceMemory *pMem)
+{
+   return nvk_allocate_memory(device, pAllocateInfo, pAllocator,
+                              0, false, pMem);
+}
+
+#ifdef __SWITCH__
+VkResult
+nvk_switch_allocate_shared_memory(
+   VkDevice device,
+   const VkMemoryAllocateInfo *allocate_info,
+   const VkAllocationCallbacks *allocator,
+   uint32_t nvmap_id,
+   VkDeviceMemory *memory_out)
+{
+   return nvk_allocate_memory(device, allocate_info, allocator,
+                              nvmap_id, true, memory_out);
+}
+
+bool
+nvk_switch_export_memory(VkDeviceMemory _memory,
+                         uint32_t *nvmap_id_out,
+                         void **reference_out)
+{
+   VK_FROM_HANDLE(nvk_device_memory, memory, _memory);
+   return memory != NULL &&
+          nvkmd_switch_mem_export(memory->mem, nvmap_id_out, reference_out);
+}
+
+void
+nvk_switch_release_memory_reference(void *reference)
+{
+   nvkmd_switch_memory_reference_release(reference);
+}
+#endif
 
 VKAPI_ATTR void VKAPI_CALL
 nvk_FreeMemory(VkDevice device,

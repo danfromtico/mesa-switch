@@ -555,6 +555,9 @@ nouveau_horizon_memory_sync_from_gpu(
 uint64_t
 nouveau_horizon_memory_get_size(struct nouveau_horizon_memory *memory);
 
+uint32_t
+nouveau_horizon_memory_get_flags(struct nouveau_horizon_memory *memory);
+
 uint8_t
 nouveau_horizon_memory_get_backing_kind(
    struct nouveau_horizon_memory *memory);

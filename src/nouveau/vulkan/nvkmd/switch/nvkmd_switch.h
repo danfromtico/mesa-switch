@@ -81,6 +81,22 @@ VkResult nvkmd_switch_sync_copy_payloads(struct vk_device *device,
  */
 uint32_t nvkmd_switch_mem_get_nvmap_id(struct nvkmd_mem *mem);
 
+VkResult nvkmd_switch_dev_import_nvmap(struct nvkmd_dev *dev,
+                                       struct vk_object_base *log_obj,
+                                       uint32_t nvmap_id,
+                                       uint64_t size_B,
+                                       uint64_t align_B,
+                                       uint8_t pte_kind,
+                                       uint16_t tile_mode,
+                                       enum nvkmd_mem_flags flags,
+                                       struct nvkmd_mem **mem_out);
+
+bool nvkmd_switch_mem_export(struct nvkmd_mem *mem,
+                             uint32_t *nvmap_id_out,
+                             void **reference_out);
+
+void nvkmd_switch_memory_reference_release(void *reference);
+
 /* Thin queue adapters for the process-wide Horizon ZBC snapshot. */
 void nvkmd_switch_dev_get_zbc_state(
    struct nvkmd_dev *dev, struct nouveau_horizon_zbc_state *state_out);

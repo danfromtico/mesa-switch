@@ -545,9 +545,6 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
 
    const VkExternalMemoryProperties *ext_mem_props = NULL;
    if (external_info != NULL && external_info->handleType != 0) {
-      if (!pdev->nvkmd->kmd_info.has_dma_buf)
-         return VK_ERROR_FORMAT_NOT_SUPPORTED;
-
       bool tiling_has_explicit_layout;
       switch (pImageFormatInfo->tiling) {
       case VK_IMAGE_TILING_LINEAR:
@@ -563,6 +560,8 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
 
       switch (external_info->handleType) {
       case VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT:
+         if (!pdev->nvkmd->kmd_info.has_dma_buf)
+            return VK_ERROR_FORMAT_NOT_SUPPORTED;
          /* No special restrictions */
          if (tiling_has_explicit_layout) {
             /* With an explicit memory layout, we don't care which type of
@@ -576,6 +575,8 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
          break;
 
       case VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT:
+         if (!pdev->nvkmd->kmd_info.has_dma_buf)
+            return VK_ERROR_FORMAT_NOT_SUPPORTED;
          /* VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT requires
           * VK_IMAGE_TILING_LINEAR or VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT
           */
@@ -583,6 +584,12 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
             return VK_ERROR_FORMAT_NOT_SUPPORTED;
 
          ext_mem_props = &nvk_dma_buf_mem_props;
+         break;
+
+      case VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT:
+         if (!pdev->nvkmd->kmd_info.has_host_ptr_import)
+            return VK_ERROR_FORMAT_NOT_SUPPORTED;
+         ext_mem_props = &nvk_host_allocation_mem_props;
          break;
 
       default:
