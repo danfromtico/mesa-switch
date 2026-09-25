@@ -869,6 +869,128 @@ nvkmd_switch_dev_alloc_tiled_mem(struct nvkmd_dev *_dev,
                                            flags, mem_out);
 }
 
+VkResult
+nvkmd_switch_dev_import_nvmap(struct nvkmd_dev *_dev,
+                              struct vk_object_base *log_obj,
+                              uint32_t nvmap_id,
+                              uint64_t size_B,
+                              uint64_t align_B,
+                              uint8_t pte_kind,
+                              uint16_t tile_mode,
+                              enum nvkmd_mem_flags flags,
+                              struct nvkmd_mem **mem_out)
+{
+   struct nvkmd_switch_dev *dev = nvkmd_switch_dev(_dev);
+   struct nouveau_horizon_device_properties properties;
+   nouveau_horizon_device_get_properties(dev->horizon, &properties);
+   const uint32_t bind_align_B = properties.bind_align_B;
+
+   size_B = nvkmd_switch_align_up(size_B, bind_align_B);
+   align_B = MAX2(align_B, (uint64_t)bind_align_B);
+   if (nvmap_id == 0 || size_B == 0 ||
+       !util_is_power_of_two_nonzero64(align_B))
+      return vk_error(log_obj, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+
+   struct nvkmd_switch_mem *mem = CALLOC_STRUCT(nvkmd_switch_mem);
+   if (mem == NULL)
+      return vk_error(log_obj, VK_ERROR_OUT_OF_HOST_MEMORY);
+
+   const struct nouveau_horizon_memory_import_info import_info = {
+      .nvmap_id = nvmap_id,
+      .require_existing = true,
+   };
+   enum nouveau_horizon_status status = nouveau_horizon_memory_import(
+      dev->horizon, &import_info, &mem->memory);
+   if (status != NOUVEAU_HORIZON_SUCCESS) {
+      FREE(mem);
+      return nvkmd_switch_status_result(log_obj, status,
+                                         VK_ERROR_INVALID_EXTERNAL_HANDLE,
+                                         "import NvMap memory");
+   }
+
+   struct nouveau_horizon_memory_layout layout;
+   nouveau_horizon_memory_get_layout(mem->memory, &layout);
+   const bool layout_valid = pte_kind != 0 || tile_mode != 0;
+   const uint32_t identity_flags =
+      NOUVEAU_HORIZON_MEMORY_CPU_VISIBLE |
+      NOUVEAU_HORIZON_MEMORY_CPU_CACHED |
+      NOUVEAU_HORIZON_MEMORY_GPU_CACHED;
+   const uint32_t expected_flags =
+      nvkmd_switch_memory_flags(flags) & identity_flags;
+   const uint32_t actual_flags =
+      nouveau_horizon_memory_get_flags(mem->memory) & identity_flags;
+
+   if (nouveau_horizon_memory_get_size(mem->memory) != size_B ||
+       layout.valid != layout_valid || layout.pte_kind != pte_kind ||
+       layout.tile_mode != tile_mode || actual_flags != expected_flags) {
+      nouveau_horizon_memory_put(mem->memory);
+      FREE(mem);
+      return vk_error(log_obj, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+   }
+
+   status = nouveau_horizon_memory_map(mem->memory, &mem->cpu_addr);
+   if (status != NOUVEAU_HORIZON_SUCCESS) {
+      nouveau_horizon_memory_put(mem->memory);
+      FREE(mem);
+      return nvkmd_switch_status_result(log_obj, status,
+                                         VK_ERROR_MEMORY_MAP_FAILED,
+                                         "map imported NvMap memory");
+   }
+
+   nvkmd_mem_init(&dev->base, &mem->base, &nvkmd_switch_mem_ops,
+                  flags, size_B, bind_align_B);
+
+   VkResult result = nvkmd_dev_alloc_va(&dev->base, log_obj, 0, pte_kind,
+                                        size_B, align_B, 0, &mem->base.va);
+   if (result != VK_SUCCESS)
+      goto fail_memory;
+
+   result = nvkmd_va_bind_mem(mem->base.va, log_obj, 0, &mem->base,
+                              0, size_B);
+   if (result != VK_SUCCESS)
+      goto fail_va;
+
+   simple_mtx_lock(&_dev->mems_mutex);
+   list_addtail(&mem->base.link, &_dev->mems);
+   simple_mtx_unlock(&_dev->mems_mutex);
+   *mem_out = &mem->base;
+   return VK_SUCCESS;
+
+fail_va:
+   nvkmd_va_free(mem->base.va);
+   mem->base.va = NULL;
+fail_memory:
+   simple_mtx_destroy(&mem->base.map_mutex);
+   nouveau_horizon_memory_put(mem->memory);
+   FREE(mem);
+   return result;
+}
+
+bool
+nvkmd_switch_mem_export(struct nvkmd_mem *_mem,
+                        uint32_t *nvmap_id_out,
+                        void **reference_out)
+{
+   if (_mem == NULL || nvmap_id_out == NULL || reference_out == NULL)
+      return false;
+
+   struct nouveau_horizon_memory *memory = nvkmd_switch_mem(_mem)->memory;
+   const uint32_t nvmap_id =
+      nouveau_horizon_memory_export_nvmap_id(memory);
+   if (nvmap_id == 0)
+      return false;
+
+   *nvmap_id_out = nvmap_id;
+   *reference_out = nouveau_horizon_memory_ref(memory);
+   return true;
+}
+
+void
+nvkmd_switch_memory_reference_release(void *reference)
+{
+   nouveau_horizon_memory_put(reference);
+}
+
 /* Imported host memory is GPU-mapped once at a kernel-chosen small-page VA;
  * nothing rebinds it.
  */

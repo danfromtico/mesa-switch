@@ -63,6 +63,19 @@ VkResult nvk_switch_get_scanout_layout(VkImage image,
                                        VkDeviceMemory memory,
                                        struct nvk_switch_scanout_layout *out);
 
+VkResult nvk_switch_allocate_shared_memory(
+   VkDevice device,
+   const VkMemoryAllocateInfo *allocate_info,
+   const VkAllocationCallbacks *allocator,
+   uint32_t nvmap_id,
+   VkDeviceMemory *memory_out);
+
+bool nvk_switch_export_memory(VkDeviceMemory memory,
+                              uint32_t *nvmap_id_out,
+                              void **reference_out);
+
+void nvk_switch_release_memory_reference(void *reference);
+
 /* Export an installed native VkFence payload. If absent or CPU-only,
  * return false; presentation must wait on the Vulkan fence instead.
  */

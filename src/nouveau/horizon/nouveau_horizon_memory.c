@@ -464,6 +464,18 @@ nouveau_horizon_memory_wrapper_create(
    return memory;
 }
 
+static uint32_t
+nouveau_horizon_memory_identity_wrapper_flags(
+   const struct nouveau_horizon_memory_identity *identity)
+{
+   uint32_t flags = identity->flags;
+   if (identity->cpu_addr != NULL)
+      flags |= NOUVEAU_HORIZON_MEMORY_CPU_VISIBLE;
+   if (identity->cpu_cacheable)
+      flags |= NOUVEAU_HORIZON_MEMORY_CPU_CACHED;
+   return flags;
+}
+
 /* libnx's nvMapCreate flushes the CPU cache before making an uncached map,
  * but ignores the result of svcSetMemoryAttribute. Check it ourselves so a
  * coherent allocation can never succeed with cacheable CPU pages. Closing
@@ -821,7 +833,11 @@ nouveau_horizon_memory_import(
    }
 
    struct nouveau_horizon_memory *memory =
-      nouveau_horizon_memory_wrapper_create(device, identity, 0, true);
+      nouveau_horizon_memory_wrapper_create(
+         device, identity,
+         import_info->require_existing ?
+            nouveau_horizon_memory_identity_wrapper_flags(identity) : 0,
+         true);
    if (memory == NULL) {
       nouveau_horizon_memory_record_import_failure(device);
       nouveau_horizon_memory_identity_put(identity);
@@ -997,6 +1013,12 @@ uint64_t
 nouveau_horizon_memory_get_size(struct nouveau_horizon_memory *memory)
 {
    return memory != NULL ? memory->identity->size_B : 0;
+}
+
+uint32_t
+nouveau_horizon_memory_get_flags(struct nouveau_horizon_memory *memory)
+{
+   return memory != NULL ? memory->flags : 0;
 }
 
 uint8_t

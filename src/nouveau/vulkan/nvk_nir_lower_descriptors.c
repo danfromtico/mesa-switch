@@ -460,6 +460,14 @@ build_cbuf_map(nir_shader *nir, struct lower_descriptors_ctx *ctx)
       max_cbuf_bindings = 16;
    }
 
+#ifdef HAVE_SWITCH_PLATFORM
+   /* Horizon skips the setup for fragment helper global loads. */
+   const bool fragment_cbufs = ctx->dev_info->sm == 53 &&
+                              nir->info.stage == MESA_SHADER_FRAGMENT;
+#else
+   const bool fragment_cbufs = false;
+#endif
+
    for (uint32_t i = 0; i < num_cbufs; i++) {
       if (ctx->cbuf_map->cbuf_count >= max_cbuf_bindings)
          break;
@@ -470,15 +478,13 @@ build_cbuf_map(nir_shader *nir, struct lower_descriptors_ctx *ctx)
           cbufs[i].key.type == NVK_CBUF_TYPE_UBO_DESC)
          continue;
 
-      /* Prior to Turing, a cbuf whose descriptor the CPU cannot read at bind
-       * time needs the pushbuf split so the command streamer fetches it, which
-       * costs a non-prefetchable fetch per bind.  Push descriptor sets are
-       * readable, so promote those and leave the rest on global loads.
+      /* Non-push descriptors need a non-prefetchable pushbuf fetch before
+       * Turing. Avoid it unless fragment helper lanes require cbuf loads.
        */
       if (ctx->dev_info->cls_eng3d < TURING_A &&
           cbufs[i].key.type == NVK_CBUF_TYPE_UBO_DESC &&
           (debug_get_bool_option("NVK_SWITCH_NO_UBO_CBUF", false) ||
-           !cbuf_set_is_push(ctx, cbufs[i].key.desc_set)))
+           (!fragment_cbufs && !cbuf_set_is_push(ctx, cbufs[i].key.desc_set))))
          continue;
 
       ctx->cbuf_map->cbufs[ctx->cbuf_map->cbuf_count++] = cbufs[i].key;
