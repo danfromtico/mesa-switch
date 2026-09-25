@@ -82,7 +82,7 @@ nvk_physical_device_compiler_flags(const struct nvk_physical_device *pdev)
    return (no_cbufs ? 1 << 12 : 0)
       | (use_edb_buffer_views ? 1 << 13 : 0)
       | (instance->drirc.misc.ssbo_align_4b ? 1 << 14 : 0)
-      | (UINT64_C(8) << 16) /* Interlock compiler ABI revision. */
+      | (UINT64_C(9) << 16) /* Compiler ABI revision. */
       | (nak_flags << 48);
 }
 
