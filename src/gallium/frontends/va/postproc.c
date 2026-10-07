@@ -302,18 +302,6 @@ vlVaPostProc(vlVaDriver *drv, vlVaContext *context, struct pipe_video_buffer *sr
    if (!proc)
       return VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
 
-   if (!drv->pipe->screen->is_video_format_supported(drv->pipe->screen,
-                                                     src->buffer_format,
-                                                     PIPE_VIDEO_PROFILE_UNKNOWN,
-                                                     PIPE_VIDEO_ENTRYPOINT_PROCESSING))
-      return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
-
-   if (!drv->pipe->screen->is_video_format_supported(drv->pipe->screen,
-                                                     dst->buffer_format,
-                                                     PIPE_VIDEO_PROFILE_UNKNOWN,
-                                                     PIPE_VIDEO_ENTRYPOINT_PROCESSING))
-      return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
-
    if (!context || context->needs_begin_frame) {
       proc->begin_frame(proc, dst, &param->base);
       if (context)

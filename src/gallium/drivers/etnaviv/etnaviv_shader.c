@@ -34,6 +34,7 @@
 #include "etnaviv_screen.h"
 #include "etnaviv_util.h"
 
+#include "nir/nir_xfb_info.h"
 #include "nir/tgsi_to_nir.h"
 #include "util/u_atomic.h"
 #include "util/u_cpu_detect.h"
@@ -165,16 +166,42 @@ etna_link_shaders(struct etna_context *ctx, struct compiled_shader_state *cs,
    cs->pa_shader_attributes_states = link.num_varyings;
 
    cs->VS_END_PC = vs->code_size / 4;
-   cs->VS_OUTPUT_COUNT = 1 + link.num_varyings; /* position + varyings */
 
    /* vs outputs (varyings) */
    DEFINE_ETNA_BITARRAY(vs_output, ARRAY_SIZE(cs->VS_OUTPUT) * 4, 8) = {0};
    int varid = 0;
+   memset(cs->vs_output_slot, -1, sizeof(cs->vs_output_slot));
+   cs->vs_output_slot[VARYING_SLOT_POS] = varid;
    etna_bitarray_set(vs_output, 8, varid++, vs->vs_pos_out_reg);
    for (int idx = 0; idx < link.num_varyings; ++idx)
       etna_bitarray_set(vs_output, 8, varid++, link.varyings[idx].reg);
-   if (vs->vs_pointsize_out_reg >= 0)
+   for (int idx = 0; idx < fs->infile.num_reg; ++idx)
+      cs->vs_output_slot[fs->infile.reg[idx].slot] = fs->infile.reg[idx].reg;
+
+   const nir_xfb_info *xfb_info = vs->shader->nir->xfb_info;
+   if (VIV_FEATURE(ctx->screen, ETNA_FEATURE_HWTFB) && xfb_info) {
+      for (unsigned i = 0; i < xfb_info->output_count; i++) {
+         const unsigned location = xfb_info->outputs[i].location;
+
+         if (location == VARYING_SLOT_PSIZ || cs->vs_output_slot[location] >= 0)
+            continue;
+
+         for (int j = 0; j < vs->outfile.num_reg; j++) {
+            if (vs->outfile.reg[j].slot == location) {
+               cs->vs_output_slot[location] = varid;
+               etna_bitarray_set(vs_output, 8, varid++, vs->outfile.reg[j].reg);
+               break;
+            }
+         }
+      }
+   }
+
+   cs->VS_OUTPUT_COUNT = varid;
+
+   if (vs->vs_pointsize_out_reg >= 0) {
+      cs->vs_output_slot[VARYING_SLOT_PSIZ] = varid;
       etna_bitarray_set(vs_output, 8, varid++, vs->vs_pointsize_out_reg); /* pointsize is last */
+   }
 
    for (int idx = 0; idx < ARRAY_SIZE(cs->VS_OUTPUT); ++idx)
       cs->VS_OUTPUT[idx] = vs_output[idx];

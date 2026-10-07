@@ -1197,7 +1197,7 @@ compute_spill_cost(bi_context *ctx)
       bi_find_loop_blocks(ctx, block, loop_block);
 
       for (uint32_t b = 0; b < ctx->num_blocks; ++b) {
-         if (BITSET_SET(loop_block, b))
+         if (BITSET_TEST(loop_block, b))
             block_depth[b] += 1;
       }
    }

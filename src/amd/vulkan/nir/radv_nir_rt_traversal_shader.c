@@ -1079,6 +1079,10 @@ handle_candidate_aabb(nir_builder *b, struct radv_leaf_intersection *intersectio
          radv_nir_load_sbt_entry(b, nir_load_sbt_base_amd(b), sbt_idx, SBT_HIT, SBT_INTERSECTION_IDX);
       nir_store_var(b, ahit_vars.shader_record_ptr, sbt_data.shader_record_ptr, 0x1);
 
+      nir_def *prev_hit_attribs[RADV_MAX_HIT_ATTRIB_DWORDS];
+      for (uint32_t i = 0; i < RADV_MAX_HIT_ATTRIB_DWORDS; i++)
+         prev_hit_attribs[i] = nir_load_hit_attrib_amd(b, .base = i);
+
       struct traversal_inlining_params inlining_params = {
          .compiler_info = data->compiler_info,
          .trav_vars = &data->trav_vars,
@@ -1103,6 +1107,11 @@ handle_candidate_aabb(nir_builder *b, struct radv_leaf_intersection *intersectio
       {
          copy_traversal_result(b, &data->trav_vars.result, &candidate_result);
          nir_break_if(b, nir_load_var(b, ahit_vars.ahit_terminate));
+      }
+      nir_push_else(b, NULL);
+      {
+         for (uint32_t i = 0; i < RADV_MAX_HIT_ATTRIB_DWORDS; i++)
+            nir_store_hit_attrib_amd(b, prev_hit_attribs[i], .base = i);
       }
       nir_pop_if(b, NULL);
    } else {

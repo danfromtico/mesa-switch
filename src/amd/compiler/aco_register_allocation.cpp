@@ -1032,8 +1032,10 @@ get_reg_simple(ra_ctx& ctx, const RegisterFile& reg_file, DefInfo info,
                            [](unsigned v) { return v == 0; });
 
             /* check if also the neighboring reg is free if needed */
-            if (reg_found && i + rc.bytes() > 4)
-               reg_found = (reg_file[PhysReg{entry.first + 1}] == 0);
+            if (reg_found && i + rc.bytes() > 4) {
+               PhysReg next = PhysReg{entry.first + 1};
+               reg_found = next < bounds.end().reg && reg_file[next] == 0;
+            }
 
             if (reg_found) {
                PhysReg res{entry.first};

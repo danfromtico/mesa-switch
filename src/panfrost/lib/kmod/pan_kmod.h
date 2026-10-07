@@ -856,7 +856,7 @@ pan_kmod_get_dummy_object(struct pan_kmod_vm *vm)
    simple_mtx_lock(&vm->sparse_dummy.lock);
 
    if (!vm->sparse_dummy.bo) {
-      struct pan_kmod_bo *bo = pan_kmod_bo_alloc(vm->dev, NULL, PAN_PGSIZE_2M,
+      struct pan_kmod_bo *bo = pan_kmod_bo_alloc(vm->dev, vm, PAN_PGSIZE_2M,
                                                  PAN_KMOD_BO_FLAG_NO_MMAP);
       if (!bo)
          goto dummy_exit;

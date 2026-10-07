@@ -76,6 +76,11 @@
 #define VC4_DIRTY_FS_INPUTS     (1 << 26)
 #define VC4_DIRTY_UBO_1_SIZE    (1 << 27)
 
+#define VC4_DIRTY_CLIP_WINDOW   (VC4_DIRTY_SCISSOR | \
+                                 VC4_DIRTY_VIEWPORT | \
+                                 VC4_DIRTY_RASTERIZER | \
+                                 VC4_DIRTY_FRAMEBUFFER)
+
 /* bitmask */
 enum vc4_blitter_op {
         VC4_SAVE_TEXTURES          = (1u << 1),
@@ -387,6 +392,8 @@ struct vc4_context {
         struct pipe_framebuffer_state framebuffer;
         struct pipe_poly_stipple stipple;
         struct pipe_viewport_state viewport;
+        struct pipe_scissor_state clip_window;
+        bool clip_window_empty;
         struct vc4_constbuf_stateobj constbuf[MESA_SHADER_STAGES];
         struct vc4_vertexbuf_stateobj vertexbuf;
 
@@ -508,6 +515,8 @@ void vc4_flush_jobs_writing_resource(struct vc4_context *vc4,
 void vc4_flush_jobs_reading_resource(struct vc4_context *vc4,
                                      struct pipe_resource *prsc);
 void vc4_emit_state(struct pipe_context *pctx);
+bool vc4_get_clip_window(struct vc4_context *vc4,
+                         struct pipe_scissor_state *clip);
 void vc4_generate_code(struct vc4_context *vc4, struct vc4_compile *c);
 struct qpu_reg *vc4_register_allocate(struct vc4_context *vc4, struct vc4_compile *c);
 bool vc4_update_compiled_shaders(struct vc4_context *vc4, uint8_t prim_mode);

@@ -186,7 +186,10 @@ lower_accel_struct_intrinsic(nir_builder *b, nir_intrinsic_instr *intrin,
    b->cursor = nir_after_instr(&intrin->instr);
 
    nir_def *accel_addr = build_load_descriptor_mem(
-      b, 1, 64, intrin->src[0].ssa, 0, pdevice);
+      b,
+      intrin->def.num_components,
+      intrin->def.bit_size,
+      intrin->src[0].ssa, 0, pdevice);
    nir_def_replace(&intrin->def, accel_addr);
 
    return true;

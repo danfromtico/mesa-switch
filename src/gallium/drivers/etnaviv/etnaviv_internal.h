@@ -266,6 +266,7 @@ struct compiled_shader_state {
    uint32_t *PS_INST_MEM;
    struct etna_reloc PS_INST_ADDR;
    struct etna_reloc VS_INST_ADDR;
+   int8_t vs_output_slot[VARYING_SLOT_MAX];
    unsigned writes_z:1;
    unsigned uses_discard:1;
 };

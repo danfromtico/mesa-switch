@@ -474,6 +474,9 @@ drisw_allocate_textures(struct dri_context *stctx,
        */
       templ.width0 = drawable->w;
       templ.height0 = drawable->h;
+
+      dri_drawable_allocate_msaa_textures(stctx, drawable, statts, count,
+                                          &templ);
    } else {
       for (i = 0; i < count; i++) {
          enum pipe_format format;

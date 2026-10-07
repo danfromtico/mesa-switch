@@ -850,7 +850,7 @@ panvk_queue_submit_init(struct panvk_queue_submit *submit,
    submit->force_sync = PANVK_DEBUG(TRACE) || PANVK_DEBUG(SYNC);
 }
 
-static void
+static VkResult
 panvk_queue_submit_init_storage(
    struct panvk_queue_submit *submit, const struct vk_queue_submit *vk_submit,
    struct panvk_queue_submit_stack_storage *stack_storage)
@@ -954,10 +954,15 @@ panvk_queue_submit_init_storage(
       submit->qsubmit_count <= ARRAY_SIZE(stack_storage->qsubmits)
          ? stack_storage->qsubmits
          : malloc(sizeof(*submit->qsubmits) * submit->qsubmit_count);
+   if (!submit->qsubmits)
+      return panvk_error(submit->dev, VK_ERROR_OUT_OF_HOST_MEMORY);
 
    submit->wait_ops = syncop_count <= ARRAY_SIZE(stack_storage->syncops)
                          ? stack_storage->syncops
                          : malloc(sizeof(*submit->wait_ops) * syncop_count);
+   if (!submit->wait_ops)
+      return panvk_error(submit->dev, VK_ERROR_OUT_OF_HOST_MEMORY);
+
    submit->signal_ops = submit->wait_ops + vk_submit->wait_count;
 
    /* reset so that we can initialize submit->qsubmits incrementally */
@@ -967,7 +972,11 @@ panvk_queue_submit_init_storage(
       submit->utrace.data_storage =
          malloc(sizeof(*submit->utrace.data_storage) *
                 util_bitcount(submit->utrace.queue_mask));
+      if (!submit->utrace.data_storage)
+         return panvk_error(submit->dev, VK_ERROR_OUT_OF_HOST_MEMORY);
    }
+
+   return VK_SUCCESS;
 }
 
 static void
@@ -1356,7 +1365,9 @@ panvk_per_arch(gpu_queue_submit)(struct vk_queue *vk_queue, struct vk_queue_subm
       return VK_ERROR_DEVICE_LOST;
 
    panvk_queue_submit_init(&submit, vk_queue);
-   panvk_queue_submit_init_storage(&submit, vk_submit, &stack_storage);
+   result = panvk_queue_submit_init_storage(&submit, vk_submit, &stack_storage);
+   if (result != VK_SUCCESS)
+      goto out;
    panvk_queue_submit_init_utrace(&submit, vk_submit);
    panvk_queue_submit_init_req_resource(&submit);
    panvk_queue_submit_init_waits(&submit, vk_submit);

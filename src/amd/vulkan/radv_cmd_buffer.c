@@ -2486,7 +2486,7 @@ radv_gfx10_compute_bin_size(struct radv_cmd_buffer *cmd_buffer)
    }
 
    extent.width = MAX2(extent.width, 128);
-   extent.height = MAX2(extent.width, pdev->info.gfx_level >= GFX12 ? 128 : 64);
+   extent.height = MAX2(extent.height, pdev->info.gfx_level >= GFX12 ? 128 : 64);
 
    if (pdev->info.gfx_level >= GFX12) {
       /* GFX12+ notes:
@@ -2790,8 +2790,6 @@ radv_get_disabled_binning_state(struct radv_cmd_buffer *cmd_buffer)
          S_028C44_BIN_SIZE_Y_EXTEND(util_logbase2(bin_size_y) - 5) | S_028C44_DISABLE_START_OF_PRIM(1) |
          S_028C44_FPOVS_PER_BATCH(63) | S_028C44_OPTIMAL_BIN_SELECTION(1) | S_028C44_FLUSH_ON_BINNING_TRANSITION(1);
    } else if (pdev->info.gfx_level >= GFX10) {
-      const unsigned binning_disabled =
-         pdev->info.gfx_level >= GFX11_5 ? V_028C44_BINNING_DISABLED : V_028C44_DISABLE_BINNING_USE_NEW_SC;
       unsigned min_bytes_per_pixel = 0;
 
       for (unsigned i = 0; i < render->color_att_count; ++i) {
@@ -2808,13 +2806,13 @@ radv_get_disabled_binning_state(struct radv_cmd_buffer *cmd_buffer)
             min_bytes_per_pixel = bytes;
       }
 
-      pa_sc_binner_cntl_0 = S_028C44_BINNING_MODE(binning_disabled) | S_028C44_BIN_SIZE_X(0) | S_028C44_BIN_SIZE_Y(0) |
-                            S_028C44_BIN_SIZE_X_EXTEND(2) |                                /* 128 */
+      pa_sc_binner_cntl_0 = S_028C44_BINNING_MODE(V_028C44_BINNING_DISABLED) | S_028C44_BIN_SIZE_X(0) |
+                            S_028C44_BIN_SIZE_Y(0) | S_028C44_BIN_SIZE_X_EXTEND(2) |       /* 128 */
                             S_028C44_BIN_SIZE_Y_EXTEND(min_bytes_per_pixel <= 4 ? 2 : 1) | /* 128 or 64 */
                             S_028C44_DISABLE_START_OF_PRIM(1) | S_028C44_FLUSH_ON_BINNING_TRANSITION(1);
    } else {
       pa_sc_binner_cntl_0 =
-         S_028C44_BINNING_MODE(V_028C44_DISABLE_BINNING_USE_LEGACY_SC) | S_028C44_DISABLE_START_OF_PRIM(1) |
+         S_028C44_BINNING_MODE(V_028C44_BINNING_DISABLED) | S_028C44_DISABLE_START_OF_PRIM(1) |
          S_028C44_FLUSH_ON_BINNING_TRANSITION(pdev->info.family == CHIP_VEGA12 || pdev->info.family == CHIP_VEGA20 ||
                                               pdev->info.family >= CHIP_RAVEN2);
    }
@@ -14615,6 +14613,11 @@ radv_CmdExecuteGeneratedCommandsEXT(VkCommandBuffer commandBuffer, VkBool32 isPr
    if (rt) {
       radv_after_trace_rays(cmd_buffer);
    } else if (compute) {
+      /* Bound shaders/pipelines are undefined after executing an IES, reset the bound compute
+       * pipeline to make sure it's re-emitted on the next bind.
+       */
+      if (ies)
+         cmd_buffer->state.compute_pipeline = NULL;
       radv_after_dispatch(cmd_buffer);
    } else {
       if (!(layout->vk.dgc_info & BITFIELD_BIT(MESA_VK_DGC_DRAW_INDEXED))) {
@@ -15494,42 +15497,49 @@ radv_init_fmask(struct radv_cmd_buffer *cmd_buffer, struct radv_image *image, co
    return radv_clear_fmask(cmd_buffer, image, range, value);
 }
 
+static bool
+radv_image_need_dcc_fixup(const struct radv_device *device, const struct radv_image *image, uint32_t *dcc_fixup_offset)
+{
+   const struct radv_physical_device *pdev = radv_device_physical(device);
+
+   if (pdev->info.gfx_level != GFX8)
+      return false;
+
+   /* Compute the size of all fast clearable DCC levels. */
+   for (unsigned i = 0; i < image->planes[0].surface.num_meta_levels; i++) {
+      const struct legacy_surf_dcc_level *dcc_level = &image->planes[0].surface.u.legacy.color.dcc_level[i];
+      unsigned dcc_fast_clear_size = dcc_level->dcc_slice_fast_clear_size * image->vk.array_layers;
+
+      if (!dcc_fast_clear_size)
+         break;
+
+      *dcc_fixup_offset = dcc_level->dcc_offset + dcc_fast_clear_size;
+   }
+
+   /* Initialize the mipmap levels without DCC. */
+   return *dcc_fixup_offset != image->planes[0].surface.meta_size;
+}
+
 uint32_t
 radv_init_dcc(struct radv_cmd_buffer *cmd_buffer, struct radv_image *image, const VkImageSubresourceRange *range,
               uint32_t value)
 {
    struct radv_device *device = radv_cmd_buffer_device(cmd_buffer);
-   const struct radv_physical_device *pdev = radv_device_physical(device);
    struct radv_barrier_data barrier = {0};
    uint32_t flush_bits = 0;
-   unsigned size = 0;
+   unsigned dcc_fixup_offset = 0;
 
    barrier.layout_transitions.init_mask_ram = 1;
    radv_describe_layout_transition(cmd_buffer, &barrier);
 
    flush_bits |= radv_clear_dcc(cmd_buffer, image, range, value);
 
-   if (pdev->info.gfx_level == GFX8) {
-      /* When DCC is enabled with mipmaps, some levels might not
-       * support fast clears and we have to initialize them as "fully
-       * expanded".
-       */
-      /* Compute the size of all fast clearable DCC levels. */
-      for (unsigned i = 0; i < image->planes[0].surface.num_meta_levels; i++) {
-         struct legacy_surf_dcc_level *dcc_level = &image->planes[0].surface.u.legacy.color.dcc_level[i];
-         unsigned dcc_fast_clear_size = dcc_level->dcc_slice_fast_clear_size * image->vk.array_layers;
-
-         if (!dcc_fast_clear_size)
-            break;
-
-         size = dcc_level->dcc_offset + dcc_fast_clear_size;
-      }
-
-      /* Initialize the mipmap levels without DCC. */
-      if (size != image->planes[0].surface.meta_size) {
-         flush_bits |= radv_fill_image(cmd_buffer, image, image->planes[0].surface.meta_offset + size,
-                                       image->planes[0].surface.meta_size - size, 0xffffffff);
-      }
+   /* When DCC is enabled with mipmaps, some levels might not support fast clears and we have to
+    * initialize them as "fully expanded".
+    */
+   if (radv_image_need_dcc_fixup(device, image, &dcc_fixup_offset)) {
+      flush_bits |= radv_fill_image(cmd_buffer, image, image->planes[0].surface.meta_offset + dcc_fixup_offset,
+                                    image->planes[0].surface.meta_size - dcc_fixup_offset, 0xffffffff);
    }
 
    return flush_bits;
@@ -15586,7 +15596,10 @@ radv_init_color_image_metadata(struct radv_cmd_buffer *cmd_buffer, struct radv_i
 
    /* Skip redundant operations when the image is already zero-initialized. */
    if (src_layout == VK_IMAGE_LAYOUT_ZERO_INITIALIZED_EXT) {
-      need_dcc_init = dcc_init_value != DCC_CLEAR_0000;
+      uint32_t dcc_fixup_offset = 0;
+
+      need_dcc_init = dcc_init_value != DCC_CLEAR_0000 || radv_image_use_dcc_predication(device, image) ||
+                      radv_image_need_dcc_fixup(device, image, &dcc_fixup_offset);
       need_metadata_init = false;
    }
 
@@ -16981,10 +16994,12 @@ radv_CmdBindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const
                        const VkShaderEXT *pShaders)
 {
    VK_FROM_HANDLE(radv_cmd_buffer, cmd_buffer, commandBuffer);
-   VkShaderStageFlagBits bound_stages = 0;
+   VkShaderStageFlagBits stages = 0, bound_stages = 0;
 
    for (uint32_t i = 0; i < stageCount; i++) {
       const mesa_shader_stage stage = vk_to_mesa_shader_stage(pStages[i]);
+
+      stages |= pStages[i];
 
       if (!pShaders) {
          cmd_buffer->state.shader_objs[stage] = NULL;
@@ -17012,7 +17027,8 @@ radv_CmdBindShadersEXT(VkCommandBuffer commandBuffer, uint32_t stageCount, const
       /* Graphics shaders are handled at draw time because of shader variants. */
    }
 
-   cmd_buffer->state.dirty |= RADV_CMD_DIRTY_GRAPHICS_SHADERS;
+   if (stages & RADV_GRAPHICS_STAGE_BITS)
+      cmd_buffer->state.dirty |= RADV_CMD_DIRTY_GRAPHICS_SHADERS;
 }
 
 VKAPI_ATTR void VKAPI_CALL

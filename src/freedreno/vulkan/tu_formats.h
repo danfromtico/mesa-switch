@@ -32,4 +32,7 @@ struct tu_native_format tu6_format_texture(enum pipe_format format, enum a6xx_ti
 bool tu6_mutable_format_list_ubwc_compatible(const struct fd_dev_info *info,
                                              const VkImageFormatListCreateInfo *fmt_list);
 
+bool tu_format_linear_filtering_supported(struct tu_physical_device *physical_device,
+                                          VkFormat vk_format);
+
 #endif /* TU_FORMATS_H */

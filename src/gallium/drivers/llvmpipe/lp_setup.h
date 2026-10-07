@@ -149,6 +149,9 @@ void
 lp_setup_set_vertex_info(struct lp_setup_context *setup,
                          struct vertex_info *info);
 
+bool
+lp_setup_linear_rasterizer_supported(void);
+
 void
 lp_setup_set_linear_mode(struct lp_setup_context *setup,
                          bool permit_linear_rasterizer);

@@ -2629,7 +2629,7 @@ zink_query_memory_info(struct pipe_screen *pscreen, struct pipe_memory_info *inf
       VKSCR(GetPhysicalDeviceMemoryProperties2)(screen->pdev, &mem);
 
       for (unsigned i = 0; i < mem.memoryProperties.memoryHeapCount; i++) {
-         if (mem.memoryProperties.memoryHeaps[i].flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+         if (mem.memoryProperties.memoryHeaps[i].flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT && !screen->is_cpu) {
             /* VRAM */
             info->total_device_memory += mem.memoryProperties.memoryHeaps[i].size / 1024;
             info->avail_device_memory += (mem.memoryProperties.memoryHeaps[i].size - budget.heapUsage[i]) / 1024;

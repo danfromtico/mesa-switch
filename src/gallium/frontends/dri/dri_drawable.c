@@ -392,6 +392,73 @@ dri_pipe_blit(struct pipe_context *pipe,
    pipe->blit(pipe, &blit);
 }
 
+/**
+ * Allocate the private MSAA color buffers for the color attachments in
+ * \p statts, initialized from the single-sample buffers.
+ *
+ * \p templ must have the drawable's dimensions.
+ */
+void
+dri_drawable_allocate_msaa_textures(struct dri_context *ctx,
+                                    struct dri_drawable *drawable,
+                                    const enum st_attachment_type *statts,
+                                    unsigned statts_count,
+                                    const struct pipe_resource *templ)
+{
+   struct pipe_screen *pscreen = drawable->screen->base.screen;
+   struct pipe_resource msaa_templ = *templ;
+
+   if (drawable->stvis.samples <= 1)
+      return;
+
+   for (unsigned i = 0; i < statts_count; i++) {
+      enum st_attachment_type statt = statts[i];
+
+      if (statt == ST_ATTACHMENT_DEPTH_STENCIL)
+         continue;
+
+      if (drawable->textures[statt]) {
+         msaa_templ.format = drawable->textures[statt]->format;
+         msaa_templ.bind = drawable->textures[statt]->bind &
+                           (PIPE_BIND_RENDER_TARGET | PIPE_BIND_BLENDABLE |
+                            PIPE_BIND_SAMPLER_VIEW);
+         msaa_templ.nr_samples = drawable->stvis.samples;
+         msaa_templ.nr_storage_samples = drawable->stvis.samples;
+
+         /* Try to reuse the resource.
+          * (the other resource parameters should be constant)
+          */
+         if (!drawable->msaa_textures[statt] ||
+             drawable->msaa_textures[statt]->width0 != msaa_templ.width0 ||
+             drawable->msaa_textures[statt]->height0 != msaa_templ.height0) {
+            /* Allocate a new one. */
+            pipe_resource_reference(&drawable->msaa_textures[statt], NULL);
+
+            drawable->msaa_textures[statt] =
+               pscreen->resource_create(pscreen, &msaa_templ);
+            assert(drawable->msaa_textures[statt]);
+
+            /* If there are any MSAA resources, we should initialize them
+             * such that they contain the same data as the single-sample
+             * resources we just got from the X server.
+             *
+             * The reason for this is that the gallium frontend (and
+             * therefore the app) can access the MSAA resources only.
+             * The single-sample resources are not exposed
+             * to the gallium frontend.
+             *
+             */
+            dri_pipe_blit(ctx->st->pipe,
+                          drawable->msaa_textures[statt],
+                          drawable->textures[statt]);
+         }
+      }
+      else {
+         pipe_resource_reference(&drawable->msaa_textures[statt], NULL);
+      }
+   }
+}
+
 struct notify_before_flush_cb_args {
    struct dri_context *ctx;
    struct dri_drawable *drawable;

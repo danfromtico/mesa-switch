@@ -2083,7 +2083,6 @@ vk_video_encode_h264_sps(const StdVideoH264SequenceParameterSet *sps,
 
    vl_bitstream_flush(&enc);
    *data_size_ptr += vl_bitstream_get_byte_count(&enc);
-   vl_bitstream_encoder_free(&enc);
 }
 
 void
@@ -2127,7 +2126,6 @@ vk_video_encode_h264_pps(const StdVideoH264PictureParameterSet *pps,
 
    vl_bitstream_flush(&enc);
    *data_size_ptr += vl_bitstream_get_byte_count(&enc);
-   vl_bitstream_encoder_free(&enc);
 }
 
 static void
@@ -2222,7 +2220,6 @@ vk_video_encode_h265_vps(const StdVideoH265VideoParameterSet *vps,
 
    vl_bitstream_flush(&enc);
    *data_size_ptr += vl_bitstream_get_byte_count(&enc);
-   vl_bitstream_encoder_free(&enc);
 }
 
 static void
@@ -2418,7 +2415,6 @@ vk_video_encode_h265_sps(const StdVideoH265SequenceParameterSet *sps,
 
    vl_bitstream_flush(&enc);
    *data_size_ptr += vl_bitstream_get_byte_count(&enc);
-   vl_bitstream_encoder_free(&enc);
 }
 
 void
@@ -2493,7 +2489,6 @@ vk_video_encode_h265_pps(const StdVideoH265PictureParameterSet *pps,
 
    vl_bitstream_flush(&enc);
    *data_size_ptr += vl_bitstream_get_byte_count(&enc);
-   vl_bitstream_encoder_free(&enc);
 }
 
 void
@@ -2669,7 +2664,6 @@ vk_video_encode_h264_slice_header(const StdVideoEncodeH264PictureInfo *pic_info,
 
    vl_bitstream_flush(&enc);
    *data_size_ptr += bits_written;
-   vl_bitstream_encoder_free(&enc);
 
    return;
 }
@@ -2975,7 +2969,6 @@ finish:
    vl_bitstream_rbsp_trailing(&enc);
    vl_bitstream_flush(&enc);
    *data_size_ptr += vl_bitstream_get_byte_count(&enc);
-   vl_bitstream_encoder_free(&enc);
 
    return;
 }
@@ -3245,13 +3238,14 @@ vk_video_encode_av1_seq_hdr(const struct vk_video_session_parameters *params,
    vk_video_encode_av1_code_leb128(obu_size_bin, 2, obu_size);
 
    /* update obu_size */
-   for (int i = 0; i < sizeof(obu_size_bin); i++) {
-      *(size_offset++) = obu_size_bin[i];
+   if (data_ptr && !enc.overflow) {
+      for (int i = 0; i < sizeof(obu_size_bin); i++) {
+         *(size_offset++) = obu_size_bin[i];
+      }
    }
 
    vl_bitstream_flush(&enc);
    *data_size_ptr += vl_bitstream_get_byte_count(&enc);
-   vl_bitstream_encoder_free(&enc);
 
    return VK_SUCCESS;
 }

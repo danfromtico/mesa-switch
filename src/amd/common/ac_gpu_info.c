@@ -1649,10 +1649,10 @@ ac_query_gpu_info(int fd, void *dev_p, struct radeon_info *info,
       info->pcie_bandwidth_mbps = info->pcie_num_lanes * 0.985 * 1024;
       break;
    case 4:
-      info->pcie_bandwidth_mbps = info->pcie_num_lanes * 1.969 * 1024;
+      info->pcie_bandwidth_mbps = info->pcie_num_lanes * 1.970 * 1024;
       break;
    case 5:
-      info->pcie_bandwidth_mbps = info->pcie_num_lanes * 3.938 * 1024;
+      info->pcie_bandwidth_mbps = info->pcie_num_lanes * 3.940 * 1024;
       break;
    case 6:
       info->pcie_bandwidth_mbps = info->pcie_num_lanes * 7.563 * 1024;

@@ -147,6 +147,13 @@ dri_pipe_blit(struct pipe_context *pipe,
               struct pipe_resource *src);
 
 void
+dri_drawable_allocate_msaa_textures(struct dri_context *ctx,
+                                    struct dri_drawable *drawable,
+                                    const enum st_attachment_type *statts,
+                                    unsigned statts_count,
+                                    const struct pipe_resource *templ);
+
+void
 dri_flush(struct dri_context *ctx,
           struct dri_drawable *drawable,
           unsigned flags,

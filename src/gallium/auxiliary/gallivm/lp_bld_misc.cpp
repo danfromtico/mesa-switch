@@ -418,7 +418,7 @@ lp_build_fill_mattrs(std::vector<std::string> &MAttrs)
    MAttrs.push_back(util_get_cpu_caps()->has_rv_v ? "+v" : "-v");
    MAttrs.push_back(util_get_cpu_caps()->has_rv_zba ? "+zba" : "-zba");
    MAttrs.push_back(util_get_cpu_caps()->has_rv_zbb ? "+zbb" : "-zbb");
-   MAttrs.push_back(util_get_cpu_caps()->has_rv_zbs ? "+zbb" : "-zbs");
+   MAttrs.push_back(util_get_cpu_caps()->has_rv_zbs ? "+zbs" : "-zbs");
 #endif
 
 #if DETECT_ARCH_LOONGARCH64 == 1

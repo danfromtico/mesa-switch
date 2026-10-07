@@ -1396,8 +1396,13 @@ wsi_GetPastPresentationTimingGOOGLE(VkDevice _device,
 
    for (uint32_t i = 0; i < swapchain->present_timing.timings_count; i++) {
       struct wsi_presentation_timing *in_timing = &swapchain->present_timing.timings[i];
+      VkPastPresentationTimingGOOGLE *timing = NULL;
 
-      if (!swapchain->present_timing.timings[i].complete || stop_timing_removal) {
+      /* As in wsi_GetPastPresentationTimingEXT, a record that does not fit stays queued. */
+      if (in_timing->complete && !stop_timing_removal)
+         timing = vk_outarray_next_typed(VkPastPresentationTimingGOOGLE, &timings);
+
+      if (!timing) {
          /* Keep output ordered to be compliant without having to re-sort every time.
           * Queue depth for timestamps is expected to be small. */
          swapchain->present_timing.timings[new_timings_count++] = swapchain->present_timing.timings[i];
@@ -1415,13 +1420,11 @@ wsi_GetPastPresentationTimingGOOGLE(VkDevice _device,
          swapchain->present_timing.minimum_complete_time = in_timing->complete_time;
       }
 
-      vk_outarray_append_typed(VkPastPresentationTimingGOOGLE, &timings, timing) {
-         timing->presentID = in_timing->present_id;
-         timing->desiredPresentTime = in_timing->target_time;
-         timing->actualPresentTime = in_timing->complete_time;
-         timing->earliestPresentTime = in_timing->earliest_present_time;
-         timing->presentMargin = in_timing->present_margin;
-      }
+      timing->presentID = in_timing->present_id;
+      timing->desiredPresentTime = in_timing->target_time;
+      timing->actualPresentTime = in_timing->complete_time;
+      timing->earliestPresentTime = in_timing->earliest_present_time;
+      timing->presentMargin = in_timing->present_margin;
    }
 
    swapchain->present_timing.timings_count = new_timings_count;
@@ -1999,8 +2002,14 @@ wsi_GetPastPresentationTimingEXT(
 
    for (uint32_t i = 0; i < swapchain->present_timing.timings_count; i++) {
       struct wsi_presentation_timing *in_timing = &swapchain->present_timing.timings[i];
+      VkPastPresentationTimingEXT *timing = NULL;
 
-      if (!swapchain->present_timing.timings[i].complete || stop_timing_removal) {
+      /* Only a record written out frees its slot. A complete record that does not fit stays
+       * queued for a later call, and the outarray reports VK_INCOMPLETE for it. */
+      if (in_timing->complete && !stop_timing_removal)
+         timing = vk_outarray_next_typed(VkPastPresentationTimingEXT, &timings);
+
+      if (!timing) {
          /* Keep output ordered to be compliant without having to re-sort every time.
           * Queue depth for timestamps is expected to be small. */
          swapchain->present_timing.timings[new_timings_count++] = swapchain->present_timing.timings[i];
@@ -2029,48 +2038,46 @@ wsi_GetPastPresentationTimingEXT(
          swapchain->present_timing.minimum_complete_time = in_timing->complete_time;
       }
 
-      vk_outarray_append_typed(VkPastPresentationTimingEXT, &timings, timing) {
-         timing->targetTime = swapchain->present_timing.timings[i].target_time;
-         timing->presentId = in_timing->present_id;
-         timing->timeDomain = VK_TIME_DOMAIN_PRESENT_STAGE_LOCAL_EXT;
-         timing->timeDomainId = 0;
-         timing->reportComplete = in_timing->complete;
+      timing->targetTime = swapchain->present_timing.timings[i].target_time;
+      timing->presentId = in_timing->present_id;
+      timing->timeDomain = VK_TIME_DOMAIN_PRESENT_STAGE_LOCAL_EXT;
+      timing->timeDomainId = 0;
+      timing->reportComplete = in_timing->complete;
 
-         /* No INCOMPLETE is reported here. Failures are silent.
-          * However, application already knows upper bound for stage count based on the query,
-          * so this should never fail. */
+      /* No INCOMPLETE is reported here. Failures are silent.
+       * However, application already knows upper bound for stage count based on the query,
+       * so this should never fail. */
 
-         /* CTS expects that presentStageCount is overwritten (from 0 to something), not checked as an upper bound.
-          * VUID 12230 and 12231 require that presentStageCount is conservatively allocated.
-          * However, given the VUs, this is invalid usage. */
-         timing->presentStageCount = UINT32_MAX;
+      /* CTS expects that presentStageCount is overwritten (from 0 to something), not checked as an upper bound.
+       * VUID 12230 and 12231 require that presentStageCount is conservatively allocated.
+       * However, given the VUs, this is invalid usage. */
+      timing->presentStageCount = UINT32_MAX;
 
-         VK_OUTARRAY_MAKE_TYPED(VkPresentStageTimeEXT, stages, timing->pPresentStages, &timing->presentStageCount);
+      VK_OUTARRAY_MAKE_TYPED(VkPresentStageTimeEXT, stages, timing->pPresentStages, &timing->presentStageCount);
 
-         if (in_timing->requested_feedback & VK_PRESENT_STAGE_QUEUE_OPERATIONS_END_BIT_EXT) {
-            vk_outarray_append_typed(VkPresentStageTimeEXT, &stages, stage) {
-               stage->stage = VK_PRESENT_STAGE_QUEUE_OPERATIONS_END_BIT_EXT;
-               stage->time = in_timing->queue_done_time;
-            }
+      if (in_timing->requested_feedback & VK_PRESENT_STAGE_QUEUE_OPERATIONS_END_BIT_EXT) {
+         vk_outarray_append_typed(VkPresentStageTimeEXT, &stages, stage) {
+            stage->stage = VK_PRESENT_STAGE_QUEUE_OPERATIONS_END_BIT_EXT;
+            stage->time = in_timing->queue_done_time;
          }
+      }
 
-         /* CTS expects that we are able to return something for all stages, even if they are not supported. */
-         static const VkPresentStageFlagBitsEXT candidate_stages[] = {
-            VK_PRESENT_STAGE_REQUEST_DEQUEUED_BIT_EXT,
-            VK_PRESENT_STAGE_IMAGE_FIRST_PIXEL_OUT_BIT_EXT,
-            VK_PRESENT_STAGE_IMAGE_FIRST_PIXEL_VISIBLE_BIT_EXT,
-         };
+      /* CTS expects that we are able to return something for all stages, even if they are not supported. */
+      static const VkPresentStageFlagBitsEXT candidate_stages[] = {
+         VK_PRESENT_STAGE_REQUEST_DEQUEUED_BIT_EXT,
+         VK_PRESENT_STAGE_IMAGE_FIRST_PIXEL_OUT_BIT_EXT,
+         VK_PRESENT_STAGE_IMAGE_FIRST_PIXEL_VISIBLE_BIT_EXT,
+      };
 
-         for (int stage_index = 0; stage_index < ARRAY_SIZE(candidate_stages); stage_index++) {
-            bool requested = (in_timing->requested_feedback & candidate_stages[stage_index]) != 0;
-            bool supported = (swapchain->present_timing.supported_query_stages & candidate_stages[stage_index]) != 0;
+      for (int stage_index = 0; stage_index < ARRAY_SIZE(candidate_stages); stage_index++) {
+         bool requested = (in_timing->requested_feedback & candidate_stages[stage_index]) != 0;
+         bool supported = (swapchain->present_timing.supported_query_stages & candidate_stages[stage_index]) != 0;
 
-            if (requested) {
-               vk_outarray_append_typed(VkPresentStageTimeEXT, &stages, stage) {
-                  stage->stage = candidate_stages[stage_index];
-                  /* It is expected that implementation will only expose one timing value. */
-                  stage->time = supported ? in_timing->complete_time : 0;
-               }
+         if (requested) {
+            vk_outarray_append_typed(VkPresentStageTimeEXT, &stages, stage) {
+               stage->stage = candidate_stages[stage_index];
+               /* It is expected that implementation will only expose one timing value. */
+               stage->time = supported ? in_timing->complete_time : 0;
             }
          }
       }
@@ -3166,14 +3173,14 @@ wsi_create_buffer_blit_context(const struct wsi_swapchain *chain,
    VkMemoryAllocateInfo buf_mem_info = {
       .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
       .pNext = &buf_mem_dedicated_info,
-      .allocationSize = info->linear_size,
+      .allocationSize = reqs.size,
       .memoryTypeIndex =
          info->select_blit_dst_memory_type(wsi, reqs.memoryTypeBits),
    };
 
    void *sw_host_ptr = NULL;
    if (info->alloc_shm)
-      sw_host_ptr = info->alloc_shm(image, info->linear_size);
+      sw_host_ptr = info->alloc_shm(image, reqs.size);
 
    VkExportMemoryAllocateInfo memory_export_info;
    VkImportMemoryHostPointerInfoEXT host_ptr_info;
@@ -3505,6 +3512,7 @@ wsi_configure_buffer_image(UNUSED const struct wsi_swapchain *chain,
    assert(util_is_power_of_two_nonzero(size_align));
 
    info->create.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+   info->usage2.usage |= VK_IMAGE_USAGE_2_TRANSFER_SRC_BIT_KHR;
    info->wsi.blit_src = true;
 
    const uint32_t cpp = vk_format_get_blocksize(pCreateInfo->imageFormat);
@@ -3530,6 +3538,7 @@ wsi_configure_image_blit_image(UNUSED const struct wsi_swapchain *chain,
                                struct wsi_image_info *info)
 {
    info->create.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+   info->usage2.usage |= VK_IMAGE_USAGE_2_TRANSFER_SRC_BIT_KHR;
    info->wsi.blit_src = true;
    info->finish_create = wsi_finish_create_blit_context;
 }

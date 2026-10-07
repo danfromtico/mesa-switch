@@ -97,7 +97,7 @@ tu6_mutable_format_list_ubwc_compatible(const struct fd_dev_info *info,
    return true;
 }
 
-static bool
+bool
 tu_format_linear_filtering_supported(struct tu_physical_device *physical_device,
                                      VkFormat vk_format)
 {

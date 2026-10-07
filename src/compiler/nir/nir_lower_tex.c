@@ -900,6 +900,8 @@ lower_tex_to_txd(nir_builder *b, nir_tex_instr *tex)
    txd->is_new_style_shadow = tex->is_new_style_shadow;
    txd->is_sparse = tex->is_sparse;
    txd->can_speculate = tex->can_speculate;
+   txd->texture_non_uniform = tex->texture_non_uniform;
+   txd->sampler_non_uniform = tex->sampler_non_uniform;
 
    /* reuse existing srcs */
    for (unsigned i = 0; i < tex->num_srcs; i++) {
@@ -944,6 +946,8 @@ lower_txb_to_txl(nir_builder *b, nir_tex_instr *tex)
    txl->is_new_style_shadow = tex->is_new_style_shadow;
    txl->is_sparse = tex->is_sparse;
    txl->can_speculate = tex->can_speculate;
+   txl->texture_non_uniform = tex->texture_non_uniform;
+   txl->sampler_non_uniform = tex->sampler_non_uniform;
 
    /* reuse all but bias src */
    for (int i = 0; i < tex->num_srcs; i++) {
@@ -1199,6 +1203,8 @@ lower_tg4_offsets(nir_builder *b, nir_tex_instr *tex)
       tex_copy->sampler_index = tex->sampler_index;
       tex_copy->backend_flags = tex->backend_flags;
       tex_copy->can_speculate = tex->can_speculate;
+      tex_copy->texture_non_uniform = tex->texture_non_uniform;
+      tex_copy->sampler_non_uniform = tex->sampler_non_uniform;
 
       for (unsigned j = 0; j < tex->num_srcs; ++j) {
          tex_copy->src[j].src = nir_src_for_ssa(tex->src[j].src.ssa);

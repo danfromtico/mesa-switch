@@ -334,6 +334,17 @@ vc4_draw_vbo(struct pipe_context *pctx, const struct pipe_draw_info *info,
         if (vc4_draw_workaround_line_loop_2(pctx, info, drawid_offset, indirect, draws))
                 return;
 
+        if (vc4->dirty & VC4_DIRTY_CLIP_WINDOW) {
+                vc4->clip_window_empty =
+                        !vc4_get_clip_window(vc4, &vc4->clip_window);
+        }
+        /* A draw with an empty clip window covers no pixels, and emitting
+         * a zero-sized CLIP_WINDOW hangs the binner, so drop it before
+         * anything reaches the CL.
+         */
+        if (vc4->clip_window_empty)
+                return;
+
         /* Before setting up the draw, do any fixup blits necessary. */
         vc4_predraw_check_textures(pctx, &vc4->verttex);
         vc4_predraw_check_textures(pctx, &vc4->fragtex);

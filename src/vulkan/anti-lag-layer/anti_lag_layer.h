@@ -86,7 +86,7 @@ typedef struct device_context {
    struct {
       int64_t delta;
       uint64_t recalibrate_when;
-      float timestamp_period;
+      double timestamp_period;
    } calibration;
 
    RINGBUFFER_DECLARE(frames, frame, MAX_FRAMES);

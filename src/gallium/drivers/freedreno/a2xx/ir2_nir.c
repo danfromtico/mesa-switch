@@ -140,7 +140,14 @@ load_const(struct ir2_context *ctx, float *value_f, unsigned ncomp)
    unsigned idx, i, j;
    unsigned imm_ncomp = 0;
    unsigned swiz = 0;
-   uint32_t *value = (uint32_t *)value_f;
+   uint32_t value[4];
+
+   /* type-punned through memcpy: reading the caller's float array through
+    * a uint32_t pointer is undefined and gcc on arm reorders the read
+    * ahead of the store, turning the immediate into stack garbage
+    */
+   assert(ncomp <= ARRAY_SIZE(value));
+   memcpy(value, value_f, ncomp * sizeof(*value));
 
    /* try to merge with existing immediate (TODO: try with neg) */
    for (idx = 0; idx < so->num_immediates; idx++) {

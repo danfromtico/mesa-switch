@@ -3807,6 +3807,14 @@ brw_from_nir_emit_fs_intrinsic(nir_to_brw_state &ntb,
          cmp = bld.CMP(bld.null_reg_f(), some_reg, some_reg, BRW_CONDITIONAL_NZ);
       }
 
+      if (instr->intrinsic == nir_intrinsic_terminate_if) {
+         brw_inst *iff = bld.IF(BRW_PREDICATE_NORMAL);
+         iff->predicate_inverse = true;
+
+         cmp = bld.MOV(retype(brw_null_reg(), BRW_TYPE_UW), brw_imm_uw(0));
+         cmp->conditional_mod = BRW_CONDITIONAL_NZ;
+      }
+
       cmp->predicate = BRW_PREDICATE_NORMAL;
       cmp->flag_subreg = sample_mask_flag_subreg(s);
 
@@ -3824,6 +3832,10 @@ brw_from_nir_emit_fs_intrinsic(nir_to_brw_state &ntb,
          jump->predicate = (devinfo->ver >= 20 ? XE2_PREDICATE_ANY :
                             BRW_PREDICATE_ALIGN1_ANY4H);
       }
+
+      if (instr->intrinsic == nir_intrinsic_terminate_if)
+         bld.emit(BRW_OPCODE_ENDIF);
+
       break;
    }
 

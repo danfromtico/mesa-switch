@@ -92,9 +92,18 @@ radv_decompress_resolve_rendering(struct radv_cmd_buffer *cmd_buffer, const VkRe
       const struct radv_image_view *d_iview = radv_image_view_from_handle(depth_att->imageView);
       const struct radv_image_view *s_iview = radv_image_view_from_handle(stencil_att->imageView);
       const struct radv_image_view *src_iview = d_iview ? d_iview : s_iview;
+      VkImageAspectFlags ds_att_aspects;
+
+      if (d_iview && s_iview) {
+         ds_att_aspects = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+      } else if (d_iview) {
+         ds_att_aspects = VK_IMAGE_ASPECT_DEPTH_BIT;
+      } else {
+         ds_att_aspects = VK_IMAGE_ASPECT_STENCIL_BIT;
+      }
 
       const VkImageSubresourceLayers subresource = {
-         .aspectMask = src_iview->vk.aspects,
+         .aspectMask = ds_att_aspects,
          .mipLevel = src_iview->vk.base_mip_level,
          .baseArrayLayer = src_iview->vk.base_array_layer,
          .layerCount = layer_count,
@@ -280,6 +289,7 @@ radv_cmd_buffer_resolve_rendering(struct radv_cmd_buffer *cmd_buffer, const VkRe
       const VkRenderingAttachmentInfo *stencil_att = pRenderingInfo->pStencilAttachment;
       struct radv_image_view *d_iview = NULL, *s_iview = NULL;
       struct radv_image_view *d_res_iview = NULL, *s_res_iview = NULL;
+      VkImageAspectFlags ds_att_aspects;
 
       d_iview = radv_image_view_from_handle(depth_att->imageView);
       if (depth_att->resolveMode != VK_RESOLVE_MODE_NONE && depth_att->resolveImageView != VK_NULL_HANDLE)
@@ -288,6 +298,14 @@ radv_cmd_buffer_resolve_rendering(struct radv_cmd_buffer *cmd_buffer, const VkRe
       s_iview = radv_image_view_from_handle(stencil_att->imageView);
       if (stencil_att->resolveMode != VK_RESOLVE_MODE_NONE && stencil_att->resolveImageView != VK_NULL_HANDLE)
          s_res_iview = radv_image_view_from_handle(stencil_att->resolveImageView);
+
+      if (d_iview && s_iview) {
+         ds_att_aspects = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+      } else if (d_iview) {
+         ds_att_aspects = VK_IMAGE_ASPECT_DEPTH_BIT;
+      } else {
+         ds_att_aspects = VK_IMAGE_ASPECT_STENCIL_BIT;
+      }
 
       struct radv_image_view *src_iview = d_iview ? d_iview : s_iview;
       struct radv_image_view *dst_iview = d_res_iview ? d_res_iview : s_res_iview;
@@ -304,14 +322,14 @@ radv_cmd_buffer_resolve_rendering(struct radv_cmd_buffer *cmd_buffer, const VkRe
             },
          .srcSubresource =
             (VkImageSubresourceLayers){
-               .aspectMask = src_iview->vk.aspects,
+               .aspectMask = ds_att_aspects,
                .mipLevel = src_iview->vk.base_mip_level,
                .baseArrayLayer = src_iview->vk.base_array_layer,
                .layerCount = layer_count,
             },
          .dstSubresource =
             (VkImageSubresourceLayers){
-               .aspectMask = dst_iview->vk.aspects,
+               .aspectMask = ds_att_aspects,
                .mipLevel = dst_iview->vk.base_mip_level,
                .baseArrayLayer = dst_iview->vk.base_array_layer,
                .layerCount = layer_count,

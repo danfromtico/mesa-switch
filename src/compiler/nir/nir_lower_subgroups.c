@@ -1021,7 +1021,10 @@ build_vote(nir_builder *b, nir_def *src,
       ballot = nir_iand(b, ballot, mask);
    }
 
-   return all ? nir_ieq_imm(b, ballot, 0) : nir_ine_imm(b, ballot, 0);
+   nir_def *zero = nir_imm_zero(b, options->ballot_components,
+                                options->ballot_bit_size);
+   return all ? nir_ball_iequal(b, ballot, zero)
+              : nir_bany_inequal(b, ballot, zero);
 }
 
 static nir_def *

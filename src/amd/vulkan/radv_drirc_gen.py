@@ -90,6 +90,9 @@ def declare_options():
         B("radv_force_nan_preserve_min_max", False,
           "Treat FMax/FMin/FClamp like NMax/NMin/NClamp.",
           c_name="force_nan_preserve_min_max"),
+        B("radv_disable_binning_gfx11", False,
+          "Disable primitive binning on GFX11 to workaround a hw bug.",
+          c_name="disable_binning_gfx11"),
     ]
 
     performance_options = [

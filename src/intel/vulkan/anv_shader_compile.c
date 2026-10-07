@@ -117,24 +117,41 @@ is_local_invoc_id_used_with_simd32_assumption(nir_intrinsic_instr *subgroup_inv)
          continue;
 
       nir_alu_instr *alu = nir_instr_as_alu(instr);
-      if (alu->op != nir_op_iand)
-         continue;
 
-      /* nir_print_instr(&alu->instr, stderr); */
-      /* fprintf(stderr, "\n"); */
+      switch (alu->op) {
+      case nir_op_iand:
+         for (uint32_t i = 0; i < 2; i++) {
+            if (&alu->src[i].src == src)
+               continue;
 
-      for (uint32_t i = 0; i < 2; i++) {
-         if (&alu->src[i].src == src)
-            continue;
+            if (!nir_src_is_const(alu->src[i].src))
+               continue;
 
-         if (!nir_src_is_const(alu->src[i].src))
-            continue;
+            if (nir_src_as_uint(alu->src[i].src) != 0xffffffe0)
+               continue;
 
-         if (nir_src_as_uint(alu->src[i].src) != 0xffffffe0)
-            continue;
-
-         if (is_alu_used_for_umod_subgroup_size(alu))
+            if (is_alu_used_for_umod_subgroup_size(alu))
+               return true;
+         }
+         break;
+      /* Detect if we have local invocation id divided by BRW_SUBGROUP_SIZE. */
+      case nir_op_ushr:
+         if (alu->src[0].src.ssa == &subgroup_inv->def &&
+             nir_src_is_const(alu->src[1].src) &&
+             nir_src_as_int(alu->src[1].src) == 5) {
             return true;
+         }
+         break;
+      case nir_op_udiv:
+      case nir_op_idiv:
+         if (alu->src[0].src.ssa == &subgroup_inv->def &&
+             nir_src_is_const(alu->src[1].src) &&
+             nir_src_as_int(alu->src[1].src) == 32) {
+            return true;
+         }
+         break;
+      default:
+         break;
       }
    }
 

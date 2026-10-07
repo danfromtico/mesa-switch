@@ -55,8 +55,19 @@ struct panthor_kmod_vm {
       /* Lock protecting VA allocation/freeing. */
       simple_mtx_t lock;
 
-      /* VA heap used to automatically assign a VA. */
-      struct util_vma_heap heap;
+      /* VA heap used to automatically assign a VA for non executable buffers.
+       * This heap is prefered when there's space left, but we fallback to
+       * the "any" heap otherwise.
+       */
+      struct {
+         struct util_vma_heap heap;
+         uint64_t start;
+      } no_exec;
+
+      /* VA heap used to automatically assign a VA for any kind of buffer. */
+      struct {
+         struct util_vma_heap heap;
+      } any;
 
       /* VA ranges to garbage collect. */
       struct list_head gc_list;
@@ -818,10 +829,18 @@ panthor_kmod_vm_create(struct pan_kmod_dev *dev, uint32_t flags,
    }
 
    if (flags & PAN_KMOD_VM_FLAG_AUTO_VA) {
+      uint64_t user_va_end = user_va_start + user_va_range;
+      uint64_t any_heap_va_end = MIN2(user_va_end,
+                                      ALIGN_POT(user_va_start + 1, 1ull << 32));
+
       simple_mtx_init(&panthor_vm->auto_va.lock, mtx_plain);
       list_inithead(&panthor_vm->auto_va.gc_list);
-      util_vma_heap_init(&panthor_vm->auto_va.heap, user_va_start,
-                         user_va_range);
+
+      util_vma_heap_init(&panthor_vm->auto_va.any.heap, user_va_start,
+                         any_heap_va_end - user_va_start);
+      panthor_vm->auto_va.no_exec.start = any_heap_va_end;
+      util_vma_heap_init(&panthor_vm->auto_va.no_exec.heap, any_heap_va_end,
+                         user_va_end - any_heap_va_end);
    }
 
    if (flags & PAN_KMOD_VM_FLAG_TRACK_ACTIVITY) {
@@ -854,12 +873,22 @@ err_destroy_sync:
 
 err_free_vm:
    if (flags & PAN_KMOD_VM_FLAG_AUTO_VA) {
-      util_vma_heap_finish(&panthor_vm->auto_va.heap);
+      util_vma_heap_finish(&panthor_vm->auto_va.any.heap);
+      util_vma_heap_finish(&panthor_vm->auto_va.no_exec.heap);
       simple_mtx_destroy(&panthor_vm->auto_va.lock);
    }
 
    pan_kmod_dev_free(dev, panthor_vm);
    return NULL;
+}
+
+static struct util_vma_heap *
+select_heap_for_va(struct panthor_kmod_vm *vm, uint64_t va)
+{
+   if (va >= vm->auto_va.no_exec.start)
+      return &vm->auto_va.no_exec.heap;
+
+   return &vm->auto_va.any.heap;
 }
 
 static void
@@ -886,7 +915,7 @@ panthor_kmod_vm_collect_freed_vas(struct panthor_kmod_vm *vm)
       }
 
       list_del(&req->node);
-      util_vma_heap_free(&vm->auto_va.heap, req->va, req->size);
+      util_vma_heap_free(select_heap_for_va(vm, req->va), req->va, req->size);
       pan_kmod_dev_free(vm->base.dev, req);
    }
 }
@@ -913,10 +942,12 @@ panthor_kmod_vm_destroy(struct pan_kmod_vm *vm)
       list_for_each_entry_safe(struct panthor_kmod_va_collect, req,
                                &panthor_vm->auto_va.gc_list, node) {
          list_del(&req->node);
-         util_vma_heap_free(&panthor_vm->auto_va.heap, req->va, req->size);
+         util_vma_heap_free(select_heap_for_va(panthor_vm, req->va), req->va,
+                            req->size);
          pan_kmod_dev_free(vm->dev, req);
       }
-      util_vma_heap_finish(&panthor_vm->auto_va.heap);
+      util_vma_heap_finish(&panthor_vm->auto_va.any.heap);
+      util_vma_heap_finish(&panthor_vm->auto_va.no_exec.heap);
       simple_mtx_unlock(&panthor_vm->auto_va.lock);
       simple_mtx_destroy(&panthor_vm->auto_va.lock);
    }
@@ -926,16 +957,27 @@ panthor_kmod_vm_destroy(struct pan_kmod_vm *vm)
 }
 
 static uint64_t
-panthor_kmod_vm_alloc_va(struct panthor_kmod_vm *panthor_vm, uint64_t size)
+panthor_kmod_vm_alloc_va(struct panthor_kmod_vm *panthor_vm,
+                         const struct pan_kmod_bo *bo, uint64_t size)
 {
-   uint64_t va;
+   uint64_t va = 0;
 
    assert(panthor_vm->base.flags & PAN_KMOD_VM_FLAG_AUTO_VA);
 
    simple_mtx_lock(&panthor_vm->auto_va.lock);
    panthor_kmod_vm_collect_freed_vas(panthor_vm);
-   va = util_vma_heap_alloc(&panthor_vm->auto_va.heap, size,
-      pan_choose_gpu_va_alignment(&panthor_vm->base, size));
+
+   if (!(bo->flags & PAN_KMOD_BO_FLAG_EXECUTABLE)) {
+      va = util_vma_heap_alloc(
+         &panthor_vm->auto_va.no_exec.heap, size,
+         pan_choose_gpu_va_alignment(&panthor_vm->base, size));
+   }
+
+   if (!va) {
+      va = util_vma_heap_alloc(
+         &panthor_vm->auto_va.any.heap, size,
+         pan_choose_gpu_va_alignment(&panthor_vm->base, size));
+   }
    simple_mtx_unlock(&panthor_vm->auto_va.lock);
 
    return va;
@@ -948,7 +990,7 @@ panthor_kmod_vm_free_va(struct panthor_kmod_vm *panthor_vm, uint64_t va,
    assert(panthor_vm->base.flags & PAN_KMOD_VM_FLAG_AUTO_VA);
 
    simple_mtx_lock(&panthor_vm->auto_va.lock);
-   util_vma_heap_free(&panthor_vm->auto_va.heap, va, size);
+   util_vma_heap_free(select_heap_for_va(panthor_vm, va), va, size);
    simple_mtx_unlock(&panthor_vm->auto_va.lock);
 }
 
@@ -1148,8 +1190,8 @@ panthor_kmod_vm_bind(struct pan_kmod_vm *vm, enum pan_kmod_vm_op_mode mode,
          }
 
          if (ops[i].va.start == PAN_KMOD_VM_MAP_AUTO_VA) {
-            bind_ops[i].va =
-               panthor_kmod_vm_alloc_va(panthor_vm, bind_ops[i].size);
+            bind_ops[i].va = panthor_kmod_vm_alloc_va(panthor_vm, ops[i].map.bo,
+                                                      bind_ops[i].size);
             if (!bind_ops[i].va) {
                mesa_loge("VA allocation failed");
                ret = -1;

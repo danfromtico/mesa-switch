@@ -64,11 +64,13 @@ panvk_per_arch(dispatch_precomp)(struct panvk_precomp_ctx *ctx,
    const struct cs_tracing_ctx *tracing_ctx =
       &cmdbuf->state.cs[PANVK_SUBQUEUE_COMPUTE].tracing;
 
-   /* Copy the global TLS pointer to the per-job TSD. */
+   /* Copy the global TLS pointer and size to the per-job TSD. */
    if (shader->info.tls_size) {
       cs_move64_to(b, cs_scratch_reg64(b, 0), cmdbuf->state.tls.desc.gpu);
+      cs_load32_to(b, cs_scratch_reg32(b, 4), cs_scratch_reg64(b, 0), 0);
       cs_load64_to(b, cs_scratch_reg64(b, 2), cs_scratch_reg64(b, 0), 8);
       cs_move64_to(b, cs_scratch_reg64(b, 0), tsd);
+      cs_store32(b, cs_scratch_reg32(b, 4), cs_scratch_reg64(b, 0), 0);
       cs_store64(b, cs_scratch_reg64(b, 2), cs_scratch_reg64(b, 0), 8);
       cs_flush_stores(b);
    }

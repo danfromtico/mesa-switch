@@ -85,6 +85,7 @@ VKAPI_ATTR VkResult VKAPI_CALL lvp_GetPipelineCacheData(
          hdr[2] = VK_VENDOR_ID_MESA;
          hdr[3] = 0;
          lvp_device_get_cache_uuid(&hdr[4]);
+         *pDataSize = 5 * sizeof(uint32_t);
       }
    } else
       *pDataSize = 32;

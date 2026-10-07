@@ -67,6 +67,20 @@ static const uint32_t zero = 0;
 #define ISTBLACK(v) (memcmp(&(v), &zero, sizeof(zero)) == 0)
 
 /*
+ * A block is 128 bits stored as four little-endian 32-bit words. The codec
+ * works on host-order words; these read and write bit fields that may cross
+ * a word boundary. CC_BITS needs a fifth, zero word after the block.
+ */
+#define CC_BITS(cc, bit) \
+   ((uint32_t)((((uint64_t)(cc)[(bit) / 32 + 1] << 32) | (cc)[(bit) / 32]) >> ((bit) & 31)))
+#define CC_SET(cc, bit, v)                                               \
+   do {                                                                  \
+      (cc)[(bit) / 32] |= (uint32_t)(v) << ((bit) & 31);                 \
+      if ((bit) & 31)                                                    \
+         (cc)[(bit) / 32 + 1] |= (uint32_t)(v) >> (32 - ((bit) & 31));   \
+   } while (0)
+
+/*
  * Define a 64-bit unsigned integer type and macros
  */
 #if 1
@@ -78,6 +92,7 @@ typedef uint64_t Fx64;
 #define FX64_MOV32(a, b) a = b
 #define FX64_OR32(a, b)  a |= b
 #define FX64_SHL(a, c)   a <<= c
+#define FX64_STORE(cc, a) do { (cc)[2] = (uint32_t)(a); (cc)[3] = (a) >> 32; } while (0)
 
 #else
 
@@ -89,6 +104,7 @@ typedef struct {
 
 #define FX64_MOV32(a, b) a.lo = b
 #define FX64_OR32(a, b)  a.lo |= b
+#define FX64_STORE(cc, a) do { (cc)[2] = (a).lo; (cc)[3] = (a).hi; } while (0)
 
 #define FX64_SHL(a, c)                                 \
    do {                                                \
@@ -433,7 +449,7 @@ fxt1_quantize_CHROMA (uint32_t *cc,
          FX64_OR32(hi, (uint32_t)(vec[j][i] / 8.0F));
       }
    }
-   ((Fx64 *)cc)[1] = hi;
+   FX64_STORE(cc, hi);
 
    lohi = lolo = 0;
    /* right microtile */
@@ -486,7 +502,7 @@ fxt1_quantize_ALPHA0 (uint32_t *cc,
          FX64_OR32(hi, (uint32_t)(vec[j][i] / 8.0F));
       }
    }
-   ((Fx64 *)cc)[1] = hi;
+   FX64_STORE(cc, hi);
 
    lohi = lolo = 0;
    /* right microtile */
@@ -657,7 +673,7 @@ fxt1_quantize_ALPHA1 (uint32_t *cc,
          FX64_OR32(hi, (uint32_t)(vec[j][i] / 8.0F));
       }
    }
-   ((Fx64 *)cc)[1] = hi;
+   FX64_STORE(cc, hi);
 }
 
 
@@ -719,7 +735,6 @@ fxt1_quantize_HI (uint32_t *cc,
    /* add in texels */
    for (k = N_TEXELS - 1; k >= 0; k--) {
       int32_t t = k * 3;
-      uint32_t *kk = (uint32_t *)((char *)cc + t / 8);
       int32_t texel = n_vect + 1; /* transparent black */
 
       if (!ISTBLACK(input[k])) {
@@ -727,11 +742,11 @@ fxt1_quantize_HI (uint32_t *cc,
             /* interpolate color */
             CALCCDOT(texel, n_vect, n_comp, iv, b, input[k]);
             /* add in texel */
-            kk[0] |= texel << (t & 7);
+            CC_SET(cc, t, texel);
          }
       } else {
          /* add in texel */
-         kk[0] |= texel << (t & 7);
+         CC_SET(cc, t, texel);
       }
    }
 }
@@ -871,7 +886,7 @@ fxt1_quantize_MIXED1 (uint32_t *cc,
          FX64_OR32(hi, vec[j][i] >> 3);
       }
    }
-   ((Fx64 *)cc)[1] = hi;
+   FX64_STORE(cc, hi);
 }
 
 
@@ -1040,7 +1055,7 @@ fxt1_quantize_MIXED0 (uint32_t *cc,
          FX64_OR32(hi, vec[j][i] >> 3);
       }
    }
-   ((Fx64 *)cc)[1] = hi;
+   FX64_STORE(cc, hi);
 }
 
 
@@ -1175,7 +1190,7 @@ fxt1_encode (uint32_t width, uint32_t height, int32_t comps,
 {
    uint32_t x, y;
    const uint8_t *data;
-   uint32_t *encoded = (uint32_t *)dest;
+   uint8_t *encoded = (uint8_t *)dest;
    void *newSource = NULL;
 
    assert(comps == 3 || comps == 4);
@@ -1207,11 +1222,16 @@ fxt1_encode (uint32_t width, uint32_t height, int32_t comps,
          lines[2] = lines[1] + srcRowStride;
          lines[3] = lines[2] + srcRowStride;
          offs += 8 * comps;
-         fxt1_quantize(encoded, lines, comps);
+         uint32_t cc[5] = { 0 };
+         fxt1_quantize(cc, lines, comps);
          /* 128 bits per 8x4 block */
-         encoded += 4;
+         for (int32_t w = 0; w < 4; w++) {
+            uint32_t le = util_cpu_to_le32(cc[w]);
+            memcpy(encoded, &le, 4);
+            encoded += 4;
+         }
       }
-      encoded += destRowStride;
+      encoded += destRowStride * 4;
    }
 
    free(newSource);
@@ -1247,26 +1267,24 @@ static const uint8_t _rgb_scale_6[] = {
 };
 
 
-#define CC_SEL(cc, which) (((uint32_t *)(cc))[(which) / 32] >> ((which) & 31))
+#define CC_SEL(cc, which) ((cc)[(which) / 32] >> ((which) & 31))
 #define UP5(c) _rgb_scale_5[(c) & 31]
 #define UP6(c, b) _rgb_scale_6[(((c) & 31) << 1) | ((b) & 1)]
 #define LERP(n, t, c0, c1) (((n) - (t)) * (c0) + (t) * (c1) + (n) / 2) / (n)
 
 
 static void
-fxt1_decode_1HI (const uint8_t *code, int32_t t, uint8_t *rgba)
+fxt1_decode_1HI (const uint32_t *code, int32_t t, uint8_t *rgba)
 {
    const uint32_t *cc;
 
-   t *= 3;
-   cc = (const uint32_t *)(code + t / 8);
-   t = (cc[0] >> (t & 7)) & 7;
+   t = CC_BITS(code, t * 3) & 7;
 
    if (t == 7) {
       rgba[RCOMP] = rgba[GCOMP] = rgba[BCOMP] = rgba[ACOMP] = 0;
    } else {
       uint8_t r, g, b;
-      cc = (const uint32_t *)(code + 12);
+      cc = code + 3;
       if (t == 0) {
          b = UP5(CC_SEL(cc, 0));
          g = UP5(CC_SEL(cc, 5));
@@ -1289,21 +1307,19 @@ fxt1_decode_1HI (const uint8_t *code, int32_t t, uint8_t *rgba)
 
 
 static void
-fxt1_decode_1CHROMA (const uint8_t *code, int32_t t, uint8_t *rgba)
+fxt1_decode_1CHROMA (const uint32_t *code, int32_t t, uint8_t *rgba)
 {
    const uint32_t *cc;
    uint32_t kk;
 
-   cc = (const uint32_t *)code;
+   cc = code;
    if (t & 16) {
       cc++;
       t &= 15;
    }
    t = (cc[0] >> (t * 2)) & 3;
 
-   t *= 15;
-   cc = (const uint32_t *)(code + 8 + t / 8);
-   kk = cc[0] >> (t & 7);
+   kk = CC_BITS(code, 64 + t * 15);
    rgba[BCOMP] = UP5(kk);
    rgba[GCOMP] = UP5(kk >> 5);
    rgba[RCOMP] = UP5(kk >> 10);
@@ -1312,18 +1328,18 @@ fxt1_decode_1CHROMA (const uint8_t *code, int32_t t, uint8_t *rgba)
 
 
 static void
-fxt1_decode_1MIXED (const uint8_t *code, int32_t t, uint8_t *rgba)
+fxt1_decode_1MIXED (const uint32_t *code, int32_t t, uint8_t *rgba)
 {
    const uint32_t *cc;
    uint32_t col[2][3];
    int32_t glsb, selb;
 
-   cc = (const uint32_t *)code;
+   cc = code;
    if (t & 16) {
       t &= 15;
       t = (cc[1] >> (t * 2)) & 3;
       /* col 2 */
-      col[0][BCOMP] = (*(const uint32_t *)(code + 11)) >> 6;
+      col[0][BCOMP] = CC_BITS(cc, 94);
       col[0][GCOMP] = CC_SEL(cc, 99);
       col[0][RCOMP] = CC_SEL(cc, 104);
       /* col 3 */
@@ -1398,12 +1414,12 @@ fxt1_decode_1MIXED (const uint8_t *code, int32_t t, uint8_t *rgba)
 
 
 static void
-fxt1_decode_1ALPHA (const uint8_t *code, int32_t t, uint8_t *rgba)
+fxt1_decode_1ALPHA (const uint32_t *code, int32_t t, uint8_t *rgba)
 {
    const uint32_t *cc;
    uint8_t r, g, b, a;
 
-   cc = (const uint32_t *)code;
+   cc = code;
    if (CC_SEL(cc, 124) & 1) {
       /* lerp == 1 */
       uint32_t col0[4];
@@ -1412,7 +1428,7 @@ fxt1_decode_1ALPHA (const uint8_t *code, int32_t t, uint8_t *rgba)
          t &= 15;
          t = (cc[1] >> (t * 2)) & 3;
          /* col 2 */
-         col0[BCOMP] = (*(const uint32_t *)(code + 11)) >> 6;
+         col0[BCOMP] = CC_BITS(cc, 94);
          col0[GCOMP] = CC_SEL(cc, 99);
          col0[RCOMP] = CC_SEL(cc, 104);
          col0[ACOMP] = CC_SEL(cc, 119);
@@ -1455,11 +1471,8 @@ fxt1_decode_1ALPHA (const uint8_t *code, int32_t t, uint8_t *rgba)
          r = g = b = a = 0;
       } else {
          uint32_t kk;
-         cc = (const uint32_t *)code;
-         a = UP5(cc[3] >> (t * 5 + 13));
-         t *= 15;
-         cc = (const uint32_t *)(code + 8 + t / 8);
-         kk = cc[0] >> (t & 7);
+         a = UP5(code[3] >> (t * 5 + 13));
+         kk = CC_BITS(code, 64 + t * 15);
          b = UP5(kk);
          g = UP5(kk >> 5);
          r = UP5(kk >> 10);
@@ -1476,7 +1489,7 @@ static void
 fxt1_decode_1 (const void *texture, int32_t stride, /* in pixels */
                int32_t i, int32_t j, uint8_t *rgba)
 {
-   static void (*decode_1[]) (const uint8_t *, int32_t, uint8_t *) = {
+   static void (*decode_1[]) (const uint32_t *, int32_t, uint8_t *) = {
       fxt1_decode_1HI,     /* cc-high   = "00?" */
       fxt1_decode_1HI,     /* cc-high   = "00?" */
       fxt1_decode_1CHROMA, /* cc-chroma = "010" */
@@ -1487,8 +1500,13 @@ fxt1_decode_1 (const void *texture, int32_t stride, /* in pixels */
       fxt1_decode_1MIXED   /* mixed     = "1??" */
    };
 
-   const uint8_t *code = (const uint8_t *)texture +
-                         ((j / 4) * (stride / 8) + (i / 8)) * 16;
+   const uint8_t *block = (const uint8_t *)texture +
+                          ((j / 4) * (stride / 8) + (i / 8)) * 16;
+   uint32_t code[5] = { 0 };
+   for (int32_t w = 0; w < 4; w++) {
+      memcpy(&code[w], block + 4 * w, 4);
+      code[w] = util_le32_to_cpu(code[w]);
+   }
    int32_t mode = CC_SEL(code, 125);
    int32_t t = i & 7;
 

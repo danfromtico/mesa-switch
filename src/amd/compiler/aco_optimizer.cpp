@@ -3809,8 +3809,14 @@ op_info_get_constant(opt_ctx& ctx, alu_opt_op op_info, aco_type type, uint64_t* 
 {
    if (op_info.op.isTemp()) {
       unsigned id = original_temp_id(ctx, op_info.op.getTemp());
+
+      /* Use the size from the Temp, not the type here, to avoid truncating
+       * values that are accessed with extracts of the high bits.
+       */
+      unsigned constant_size = op_info.op.bytes() * 8;
+
       if (ctx.info[id].is_constant())
-         op_info.op = get_constant_op(ctx, ctx.info[id], type.bytes() * 8);
+         op_info.op = get_constant_op(ctx, ctx.info[id], constant_size);
    }
    if (!op_info.op.isConstant())
       return false;

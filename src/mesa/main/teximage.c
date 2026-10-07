@@ -6417,7 +6417,7 @@ _mesa_get_texbuffer_format(const struct gl_context *ctx, GLenum internalFormat)
 
    switch (internalFormat) {
    case GL_RGBA8:
-      return MESA_FORMAT_R8G8B8A8_UNORM;
+      return MESA_FORMAT_RGBA_UNORM8;
    case GL_RGBA16:
       if (_mesa_is_gles(ctx) && !_mesa_has_EXT_texture_norm16(ctx))
          return MESA_FORMAT_NONE;

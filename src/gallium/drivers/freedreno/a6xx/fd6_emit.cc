@@ -887,7 +887,7 @@ fd6_emit_static_non_context_regs(struct fd_context *ctx, fd_cs &cs)
     */
    if (CHIP < A8XX) {
       ncrb.add(A6XX_RB_DBG_ECO_CNTL(.dword = screen->info->magic.RB_DBG_ECO_CNTL));
-      ncrb.add(A6XX_SP_NC_MODE_CNTL_2(.f16_no_inf = true));
+      ncrb.add(A6XX_SP_NC_MODE_CNTL_2(.f16_no_inf = false));
       ncrb.add(VPC_LB_MODE_CNTL(CHIP));
       ncrb.add(PC_CONTEXT_SWITCH_GFX_PREEMPTION_MODE(CHIP));
    }

@@ -3540,6 +3540,7 @@ radv_GetEncodedVideoSessionParametersKHR(VkDevice device,
          const StdVideoH264SequenceParameterSet *sps = vk_video_find_h264_enc_std_sps(templ, h264_get_info->stdSPSId);
          assert(sps);
          vk_video_encode_h264_sps(sps, size_limit, &sps_size, pData);
+         size_limit = size_limit > sps_size ? size_limit - sps_size : 0;
          if (h264_feedback_info)
             h264_feedback_info->hasStdSPSOverrides = VK_FALSE;
       }
@@ -3567,6 +3568,7 @@ radv_GetEncodedVideoSessionParametersKHR(VkDevice device,
          const StdVideoH265VideoParameterSet *vps = vk_video_find_h265_enc_std_vps(templ, h265_get_info->stdVPSId);
          assert(vps);
          vk_video_encode_h265_vps(vps, size_limit, &vps_size, pData);
+         size_limit = size_limit > vps_size ? size_limit - vps_size : 0;
          if (h265_feedback_info)
             h265_feedback_info->hasStdVPSOverrides = VK_FALSE;
       }
@@ -3575,6 +3577,7 @@ radv_GetEncodedVideoSessionParametersKHR(VkDevice device,
          assert(sps);
          char *data_ptr = pData ? (char *)pData + vps_size : NULL;
          vk_video_encode_h265_sps(sps, size_limit, &sps_size, data_ptr);
+         size_limit = size_limit > sps_size ? size_limit - sps_size : 0;
          if (h265_feedback_info)
             h265_feedback_info->hasStdSPSOverrides = VK_TRUE;
          has_overrides = VK_TRUE;
@@ -3602,6 +3605,11 @@ radv_GetEncodedVideoSessionParametersKHR(VkDevice device,
 
    if (pFeedbackInfo)
       pFeedbackInfo->hasOverrides = has_overrides;
+
+   if (pData && *pDataSize < total_size) {
+      *pDataSize = 0;
+      return VK_INCOMPLETE;
+   }
 
    *pDataSize = total_size;
    return VK_SUCCESS;

@@ -34,6 +34,10 @@
 #ifndef VIRTGPU_BLOB_MEM_GUEST_VRAM
 #define VIRTGPU_BLOB_MEM_GUEST_VRAM 0x0004
 #endif
+/* Device alignment requirement for blob sizes. */
+#ifndef VIRTGPU_PARAM_BLOB_ALIGNMENT
+#define VIRTGPU_PARAM_BLOB_ALIGNMENT 9
+#endif
 
 #define VIRTGPU_PCI_VENDOR_ID 0x1af4
 #define VIRTGPU_PCI_DEVICE_ID 0x1050
@@ -75,6 +79,8 @@ struct virtgpu {
 
    uint32_t shmem_blob_mem;
    uint32_t bo_blob_mem;
+   /* blob sizes must be multiples of this (a power of two) */
+   uint32_t blob_alignment;
 
    /* note that we use gem_handle instead of res_id to index because
     * res_id is monotonically increasing by default (see
@@ -164,10 +170,15 @@ virtgpu_ioctl_resource_create_blob(struct virtgpu *gpu,
                                    uint64_t blob_id,
                                    uint32_t *res_id)
 {
+   /* The kernel rejects sizes that are not multiples of the blob alignment,
+    * which hosts with pages larger than the guest's (e.g. 16K on macOS) need
+    * to map blobs into the host visible region.  Mappings still use the
+    * requested size.
+    */
    struct drm_virtgpu_resource_create_blob args = {
       .blob_mem = blob_mem,
       .blob_flags = blob_flags,
-      .size = blob_size,
+      .size = align64(blob_size, gpu->blob_alignment),
       .cmd_size = batch ? batch->cs_size : 0,
       .cmd = batch ? (uintptr_t)batch->cs_data : 0,
       .blob_id = blob_id,
@@ -1037,9 +1048,18 @@ virtgpu_init_params(struct virtgpu *gpu)
       }
    }
 
+   gpu->blob_alignment = 1;
    val = virtgpu_ioctl_getparam(gpu, VIRTGPU_PARAM_HOST_VISIBLE);
    if (val) {
       gpu->bo_blob_mem = VIRTGPU_BLOB_MEM_HOST3D;
+
+      /* VIRTGPU_PARAM_GUEST_VRAM is a downstream param that shares the value
+       * of VIRTGPU_PARAM_BLOB_ALIGNMENT, so only query it with HOST_VISIBLE.
+       */
+      const uint32_t blob_alignment =
+         virtgpu_ioctl_getparam(gpu, VIRTGPU_PARAM_BLOB_ALIGNMENT);
+      if (util_is_power_of_two_nonzero(blob_alignment))
+         gpu->blob_alignment = blob_alignment;
    } else {
       val = virtgpu_ioctl_getparam(gpu, VIRTGPU_PARAM_GUEST_VRAM);
       if (val) {

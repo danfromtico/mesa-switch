@@ -1753,10 +1753,16 @@ shader_desc_info_deserialize(struct panvk_device *dev,
 
 #if PAN_ARCH < 9
    shader->desc_info.dyn_ubos.count = blob_read_uint32(blob);
+   if (shader->desc_info.dyn_ubos.count >
+       ARRAY_SIZE(shader->desc_info.dyn_ubos.map))
+      return panvk_error(shader, VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT);
    blob_copy_bytes(blob, shader->desc_info.dyn_ubos.map,
                    sizeof(*shader->desc_info.dyn_ubos.map) *
                       shader->desc_info.dyn_ubos.count);
    shader->desc_info.dyn_ssbos.count = blob_read_uint32(blob);
+   if (shader->desc_info.dyn_ssbos.count >
+       ARRAY_SIZE(shader->desc_info.dyn_ssbos.map))
+      return panvk_error(shader, VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT);
    blob_copy_bytes(blob, shader->desc_info.dyn_ssbos.map,
                    sizeof(*shader->desc_info.dyn_ssbos.map) *
                       shader->desc_info.dyn_ssbos.count);
@@ -1764,6 +1770,8 @@ shader_desc_info_deserialize(struct panvk_device *dev,
    uint32_t others_count = 0;
    for (unsigned i = 0; i < ARRAY_SIZE(shader->desc_info.others.count); i++) {
       shader->desc_info.others.count[i] = blob_read_uint32(blob);
+      if (shader->desc_info.others.count[i] > UINT32_MAX - others_count)
+         return panvk_error(shader, VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT);
       others_count += shader->desc_info.others.count[i];
    }
 
@@ -1784,6 +1792,9 @@ shader_desc_info_deserialize(struct panvk_device *dev,
    }
 #else
    shader->desc_info.dyn_bufs.count = blob_read_uint32(blob);
+   if (shader->desc_info.dyn_bufs.count >
+       ARRAY_SIZE(shader->desc_info.dyn_bufs.map))
+      return panvk_error(shader, VK_ERROR_INCOMPATIBLE_SHADER_BINARY_EXT);
    blob_copy_bytes(blob, shader->desc_info.dyn_bufs.map,
                    sizeof(*shader->desc_info.dyn_bufs.map) *
                       shader->desc_info.dyn_bufs.count);

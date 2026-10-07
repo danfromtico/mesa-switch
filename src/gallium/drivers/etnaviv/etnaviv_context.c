@@ -633,11 +633,13 @@ etna_flush(struct pipe_context *pctx, struct pipe_fence_handle **fence,
    ctx->stats.flushes++;
 
    if (VIV_FEATURE(ctx->screen, ETNA_FEATURE_HWTFB)) {
-      if (ctx->streamout.xfb_hw_state == ETNA_XFB_HW_ACTIVE)
+      if (ctx->streamout.xfb_hw_state == ETNA_XFB_HW_ACTIVE) {
          etna_set_state(ctx->stream, VIVS_TFB_COMMAND, TFB_COMMAND_DISABLE);
+         ctx->streamout.xfb_hw_state = ETNA_XFB_HW_PAUSED;
+      }
 
-      ctx->streamout.xfb_hw_state = ETNA_XFB_HW_IDLE;
-      ctx->streamout.xfb_should_be_active = false;
+      if (!ctx->streamout.xfb_should_be_active)
+         ctx->streamout.xfb_hw_state = ETNA_XFB_HW_IDLE;
    }
 
    list_for_each_entry(struct etna_acc_query, aq, &ctx->active_acc_queries, node)

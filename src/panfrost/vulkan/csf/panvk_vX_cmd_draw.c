@@ -1799,7 +1799,7 @@ get_fb_descs(struct panvk_cmd_buffer *cmdbuf)
          uint32_t fn_idx = calc_fn_set_fbds_provoking_vertex_idx(cmdbuf);
          uint32_t fn_stride =
             dev->draw_ctx->fn_set_fbds_provoking_vertex_stride;
-         uint32_t fn_addr =
+         uint64_t fn_addr =
             dev->draw_ctx->fns_bo->addr.dev + fn_idx * fn_stride;
          cs_move64_to(b, addr_reg, fn_addr);
          cs_move32_to(b, length_reg, fn_stride);
@@ -3064,6 +3064,8 @@ launch_indirect_draw(struct panvk_cmd_buffer *cmdbuf,
                        shader_remapped_sysval_offset(
                           vs, sysval_offset(graphics, vs.base_instance)));
          }
+
+         cs_flush_stores(b);
       }
 
       /* NIR expects zero-based instance ID, but even if it did have an

@@ -1115,26 +1115,6 @@ compare_xfb_outputs(const void *a, const void *b) {
    return out_a->offset - out_b->offset;
 }
 
-static signed
-find_register_for_components(const struct etna_shader_variant *fs, const nir_xfb_output_info *output)
-{
-   /* pos is hardcoded to register 0 for fs */
-   if (output->location == VARYING_SLOT_POS)
-      return 0;
-
-   /* psize is the last register for fs */
-   if (output->location == VARYING_SLOT_PSIZ)
-      return fs->infile.num_reg + 1;
-
-   for (int j = 0; j < fs->infile.num_reg; j++) {
-      if (fs->infile.reg[j].slot == output->location) {
-         return fs->infile.reg[j].reg;
-      }
-   }
-
-   return -1;
-}
-
 static bool
 etna_update_hwxfb(struct etna_context *ctx)
 {
@@ -1142,7 +1122,6 @@ etna_update_hwxfb(struct etna_context *ctx)
       return true;
 
    const struct etna_shader_variant *vs = ctx->shader.vs;
-   const struct etna_shader_variant *fs = ctx->shader.fs;
    struct nir_xfb_info *xfb_info = vs->shader->nir->xfb_info;
 
    for (unsigned buffer = 0; buffer < 4; buffer++) {
@@ -1155,7 +1134,6 @@ etna_update_hwxfb(struct etna_context *ctx)
       return true;
 
    assert(xfb_info->streams_written == 1);
-   assert(fs);
 
    u_foreach_bit(buffer, xfb_info->buffers_written) {
       const struct pipe_stream_output_target *target = ctx->streamout.targets[buffer];
@@ -1184,11 +1162,8 @@ etna_update_hwxfb(struct etna_context *ctx)
 
       ctx->streamout.TFB_DESCRIPTOR_COUNT[output->buffer / 128]++;
 
-      /* Hardware expects that we provide the fs input register
-       * numbers for each vs xfb output.
-       */
-      const int32_t reg = find_register_for_components(fs, output);
-      assert(reg != -1);
+      const int reg = ctx->shader_state.vs_output_slot[output->location];
+      assert(reg >= 0);
 
       ctx->streamout.TFB_DESCRIPTOR[i] =
          VIVS_TFB_DESCRIPTOR_OUTPUT_BUFFER(output->buffer) |

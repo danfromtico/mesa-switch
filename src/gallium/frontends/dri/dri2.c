@@ -308,56 +308,8 @@ dri2_allocate_textures(struct dri_context *ctx,
    templ.width0 = drawable->w;
    templ.height0 = drawable->h;
 
-   /* Allocate private MSAA colorbuffers. */
-   if (drawable->stvis.samples > 1) {
-      for (i = 0; i < statts_count; i++) {
-         enum st_attachment_type statt = statts[i];
-
-         if (statt == ST_ATTACHMENT_DEPTH_STENCIL)
-            continue;
-
-         if (drawable->textures[statt]) {
-            templ.format = drawable->textures[statt]->format;
-            templ.bind = drawable->textures[statt]->bind &
-                         (PIPE_BIND_RENDER_TARGET | PIPE_BIND_BLENDABLE |
-                          PIPE_BIND_SAMPLER_VIEW);
-            templ.nr_samples = drawable->stvis.samples;
-            templ.nr_storage_samples = drawable->stvis.samples;
-
-            /* Try to reuse the resource.
-             * (the other resource parameters should be constant)
-             */
-            if (!drawable->msaa_textures[statt] ||
-                drawable->msaa_textures[statt]->width0 != templ.width0 ||
-                drawable->msaa_textures[statt]->height0 != templ.height0) {
-               /* Allocate a new one. */
-               pipe_resource_reference(&drawable->msaa_textures[statt], NULL);
-
-               drawable->msaa_textures[statt] =
-                  screen->base.screen->resource_create(screen->base.screen,
-                                                       &templ);
-               assert(drawable->msaa_textures[statt]);
-
-               /* If there are any MSAA resources, we should initialize them
-                * such that they contain the same data as the single-sample
-                * resources we just got from the X server.
-                *
-                * The reason for this is that the gallium frontend (and
-                * therefore the app) can access the MSAA resources only.
-                * The single-sample resources are not exposed
-                * to the gallium frontend.
-                *
-                */
-               dri_pipe_blit(ctx->st->pipe,
-                             drawable->msaa_textures[statt],
-                             drawable->textures[statt]);
-            }
-         }
-         else {
-            pipe_resource_reference(&drawable->msaa_textures[statt], NULL);
-         }
-      }
-   }
+   dri_drawable_allocate_msaa_textures(ctx, drawable, statts, statts_count,
+                                       &templ);
 
    /* Allocate a private depth-stencil buffer. */
    if (alloc_depthstencil) {

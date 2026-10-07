@@ -1,0 +1,289 @@
+Mesa 26.2.4 Release Notes / 2026-10-01
+======================================
+
+Mesa 26.2.4 is a bug fix release which fixes bugs found since the 26.2.3 release.
+
+Mesa 26.2.4 implements the OpenGL 4.6 API, but the version reported by
+glGetString(GL_VERSION) or glGetIntegerv(GL_MAJOR_VERSION) /
+glGetIntegerv(GL_MINOR_VERSION) depends on the particular driver being used.
+Some drivers don't support all the features required in OpenGL 4.6. OpenGL
+4.6 is **only** available if requested at context creation.
+Compatibility contexts may report a lower version depending on each driver.
+
+Mesa 26.2.4 implements the OpenCL 3.1 API, but the version reported by
+the CL_DEVICE_VERSION, CL_DEVICE_NUMERIC_VERSION and CL_DEVICE_OPENCL_C_ALL_VERSIONS
+clGetDeviceInfo queries depends on the particular driver being used.
+
+Mesa 26.2.4 implements the Vulkan 1.4 API, but the version reported by
+the apiVersion property of the VkPhysicalDeviceProperties struct
+depends on the particular driver being used.
+
+SHA checksums
+-------------
+
+::
+
+    TBD.
+
+
+New features
+------------
+
+- None
+
+
+Bug fixes
+---------
+
+- "TY the Tasmanian Tiger 3" always crashes in the same cutscene on amd gpus
+- VK_VALVE_video_encode_rgb_conversion always outputs limited color range
+- X-Plane 12 (2014780) Flickering artifacts on textures with Intel Arc B580
+- [DG2] ANV: Enshrouded (1203620) - character invisible, transparent billboards rendered as opaque spheres on discrete Arc GPU
+- [RADV] GFX8: Black screen in UE5 DX12 (Half Sword) after commit 15990c78b8e ("allow DCC for concurrent images without DCC stores")
+- anv: VK_EXT_calibrated_timestamps returns a GPU timestamp ahead of CPU time on Arc B390 (Panther Lake), crashing Unreal Engine 5.8
+- asahi: Mario Kart WiiCompiled graphical glitches
+- dEQP-VK.image.swapchain_mutable.wayland.2d.r8g8b8a8_srgb_r8g8b8a8_unorm_draw_texture_format_list crash
+- radeonsi/va: vaGetImage to I420/YUYV fails with UNSUPPORTED_RT_FORMAT since Mesa 26.2 on GPUs with VPE (Radeon 890M)
+- radeonsi: GPU page fault (SQC) / context loss when using Iris shaderpacks on RX 9070 XT (gfx1201)
+- radv: NULL deref in radv_get_vgt_shader_key after binding a compute shader object
+- radv: PCIe 4.0 x4 fails the "PCIe 3.0 x8" bandwidth check for VRAM command buffers by 4 MB/s (rounded per-lane constants); up to 13% decode loss in llama.cpp
+- radv: UNREACHABLE clearing DEPTH|STENCIL when the dynamic render pass has no stencil attachment
+- radv: VkDescriptorUpdateTemplate takes a pointer to the set_layout memory
+
+
+Changes
+-------
+
+Allen Ballway (1):
+
+- intel/compiler: fix bounds check in Wa_18035690555
+
+Benjamin Cheng (1):
+
+- ac/video: Adjust HEVC min_qp for VCN1/VCN2
+
+Boris Brezillon (2):
+
+- pan/kmod: Make sure all executables live in the same 4G VA range
+- panvk: Don't downcast CS func address to a 32-bit VA
+
+Caio Oliveira (1):
+
+- brw: Re-lower immediate offsets after mesh nir_opt_offsets
+
+Christian Gmeiner (3):
+
+- lavapipe: Guard BDA handle arrays with bda_lock
+- etnaviv: Capture varyings not read by the fragment shader
+- etnaviv: Keep transform feedback active across flushes
+
+Cooper Morgan (3):
+
+- vulkan/wsi: keep present timing records that do not fit the output array
+- vulkan/wsi: keep GOOGLE display timing records that do not fit
+- anti-lag: convert GPU timestamps to ns in double precision
+
+David Rosca (8):
+
+- vulkan/video: Don't update OBU size with NULL data_ptr
+- vl/bitstream: Fix coding ue() for large numbers
+- vl/bitstream: Don't use internal buffer for size only use
+- vl/bitstream: Move overflow check to vl_bitstream_write_byte_start_code
+- radv/video: Fix handling size limit in GetEncodedVideoSessionParameters
+- va: Drop format support checks in vlVaPostProc
+- va: Don't check format support in EndPicture for processing
+- radv/video: Only report BT709/Limited support for RGB conversion on VCN5
+
+David Sanders (1):
+
+- radv: reset compute pipeline after IES in vkCmdExecuteGeneratedCommandsEXT
+
+Dmitry Baryshkov (3):
+
+- freedreno/a2xx: don't type-pun the immediate values through a cast
+- tu: resolve wide formats with a shader on A702
+- freedreno/qrisc: fix hang on a650 / a660 firmware
+
+Eric Engestrom (2):
+
+- docs: add sha sum for 26.2.3
+- .pick_status.json: Update to 30da39187d8d3cf03c58ecd2bebb497b84501f51
+
+Eric R. Smith (1):
+
+- pvr: move assert for buffer usage
+
+Georg Lehmann (4):
+
+- aco/sched_vopd: work around GFX11 VOPD interlock hazard
+- aco/optimizer: do not truncate constants before resolving extracts
+- aco/opcodes: add dest/src types for VOPD opcodes
+- aco/insert_fp_mode: handle both vopd opcodes
+
+Glenn Kennard (1):
+
+- nv30: Fix for loops in fragment shaders on nv40
+
+Helen Koike (1):
+
+- vulkan/overlay: Draw on the present queue when possible
+
+Ian Romanick (1):
+
+- brw: Only HALT for terminate_if of non-helper pixels
+
+Icenowy Zheng (3):
+
+- gallivm: fix enablement of RISC-V Zbs extension
+- vulkan/wsi: support allocating more memory for buffers
+- meson: list MIPS(64) in llvm_has_mcjit list
+
+Job Noorman (2):
+
+- ir3: interpret const \@load/store_global_offset offset as unsigned
+- nir/lower_tex: copy texture/sampler_non_uniform flags
+
+Jose Maria Casanova Crespo (2):
+
+- vc4: helper vc4_get_clip_window() for the clip window computation
+- vc4: skip draws whose clip window is empty
+
+Jyotiranjan Bhuyan (1):
+
+- radeonsi: invalidate I$/SMEM$/VMEM$ at IB start on gfx12
+
+Kajal Kajal (2):
+
+- freedreno/a6xx: upload a dummy sampler when textures but no samplers bound
+- rusticl/kernel: emit image/texture barriers after a kernel launch
+
+Konstantin Seurer (1):
+
+- radv/rt: Restore hit attribs after rejecting AABBs
+
+Lionel Landwerlin (6):
+
+- anv: respect bit_size/num_component from the IR with acceleration structures
+- blorp: fix shader kernel pointer with multi size kernels
+- anv: add missing constant cache invalidation in DGC path
+- nir/lower_input_attachments: add support for heap subpass image load
+- anv: disable DRM_XE_DEVICE_QUERY_ENGINE_CYCLES with UnrealEngine 5.8
+- vulkan/wsi: add missing usage2 flags
+
+Lorenzo Rossi (2):
+
+- pan/bi: Fix spill cost overestimation
+- kraid/opt_copy_prop: Fix zero-extension on 64-bit swizzles
+
+Luigi Santivetti (2):
+
+- pvr: speculative fix for out-of-bound access of winsys_heaps
+- pvr: set the UM stride when querying heap static areas
+
+Marek Olšák (1):
+
+- radv: fix checking whether a FS is present
+
+Matt Turner (11):
+
+- dri: allocate MSAA color buffers for drisw image loader buffers
+- llvmpipe: don't skip draw's viewport clipping without the linear rasterizer
+- mesa: use a byte-array format for GL_RGBA8 texture buffers
+- mesa: store boolean custom glGet values in value_bool
+- mesa: pack GL_MAX_COMBINED_DIMENSIONS without depending on byte order
+- dri: describe GR1616 as R16G16_UNORM
+- util: fix the Z32_FLOAT_S8X24_UINT clear value on big-endian
+- util/format: store R11G11B10_FLOAT and R9G9B9E5_FLOAT in host byte order
+- util/astc: read the 128-bit block as little-endian words
+- util/format: make the FXT1 codec independent of host byte order
+- gallivm: reinterpret image texels using the shader's format qualifier
+
+Mike Blumenkrantz (9):
+
+- lavapipe: independently calculate src/dst blit depth
+- lavapipe: add more layouts to lvp_host_copy_image_layouts
+- lavapipe: handle planar views as rendering attachments
+- llvmpipe: use os_free_aligned for non-vma case
+- lavapipe: update returned size in GetPipelineCacheData
+- zink: don't claim VRAM on cpu implementations
+- zink: check swapchain timline when pruning
+- zink: stop leaking swapchains
+- zink: clamp present regions to 0x0 when out of bounds
+
+Mikhail Mlhcnn (2):
+
+- panvk/csf: flush the FAU stores before indirect draws read them
+- panvk/csf: give compute jobs the TLS size of the shared allocation
+
+Oliver Clarke (1):
+
+- asahi/agx: Add shift mask for bitfield_extract and fused shift ops
+
+Patrick Gaskin (1):
+
+- egl: don't clobber an initialized display's device in eglGetPlatformDisplay
+
+Randy Palamar (1):
+
+- aco/insert_fp_mode: fix rounding mode for fma_mixhi_f16
+
+Rhys Perry (1):
+
+- aco/ra: check next register against bounds in subdword get_reg_simple path
+
+Ryan Zhang (2):
+
+- panvk: validate descriptor counts in shader deserialization
+- panvk/csf: check malloc return values in queue submit storage init
+
+Samuel Pitoiset (12):
+
+- radv: fix initializing the DCC predication value when stores aren't supported
+- radv: fix initializing DCC with mipmaps on GFX8
+- radv: disable binning correctly on GFX9-11
+- radv: fix a typo when computing the binning size on GFX10-11.7
+- radv: add radv_disable_binning_gfx11 and enable for Sunset Overdrive
+- nir/lower_abort: fix payload alignment to 8-bytes
+- radv: do not abort when the app specifies an invalid modifier
+- radv: do not abort when a GPU hang report is created with deviceFaultVendorBinary
+- radv: fix depth/stencil aspects for resolves
+- radv: fix immutable samplers lifetime with descriptor update templates
+- radv: fix dirtying graphics shaders when shader objects are bound
+- radv: ignore aspects that have no effects during clears
+
+Tapani Pälli (1):
+
+- anv: add additional heuristic to simd32 assumption pass
+
+Timothy Arceri (1):
+
+- nir: temporarily disable floating point exception flags
+
+Tupili Krishna Gowtham Reddy (1):
+
+- freedreno/a6xx: enable f16 infinities for freedreno driver
+
+Valentine Burley (2):
+
+- nir/lower_subgroups: Fix vote lowering with vector ballots
+- ir3: Lower quad votes
+
+Vinson Lee (1):
+
+- pps: Initialize Counter member variable units
+
+Vinícius (1):
+
+- ac/gpu_info: make PCIe 4.0 and 5.0 lane bandwidth exact multiples of 3.0
+
+Yiwei Zhang (1):
+
+- pan/kmod: dummy BO is per VM for emulated sparse
+
+joe.wang (1):
+
+- radv: also apply the DiRT 4 HiZ workaround profile to the native port
+
+matthewperiut (1):
+
+- venus: honor the virtio-gpu blob alignment

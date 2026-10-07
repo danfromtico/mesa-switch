@@ -36,6 +36,7 @@
 #include "texcompress_astc.h"
 #include "macros.h"
 #include "util/half_float.h"
+#include "util/u_math.h"
 #include <stdio.h>
 #include <cstdlib>  // for abort() on windows
 #include <stdarg.h>
@@ -643,6 +644,8 @@ decode_error::type Decoder::decode(const uint8_t *in, uint16_t *output) const
    Block blk;
    InputBitVector in_vec;
    memcpy(&in_vec.data, in, 16);
+   for (int i = 0; i < 4; i++)
+      in_vec.data[i] = util_le32_to_cpu(in_vec.data[i]);
    decode_error::type err = blk.decode(*this, in_vec);
    if (err == decode_error::ok) {
       blk.write_decoded(*this, output);

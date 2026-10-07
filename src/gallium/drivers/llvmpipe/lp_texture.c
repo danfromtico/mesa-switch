@@ -1391,7 +1391,7 @@ llvmpipe_free_memory(struct pipe_screen *pscreen,
    if (mem->cpu_addr != MAP_FAILED)
       munmap(mem->cpu_addr, mem->size);
 #else
-   free(mem->cpu_addr);
+   os_free_aligned(mem->cpu_addr);
 #endif
 
    FREE(mem);

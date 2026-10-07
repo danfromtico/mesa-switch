@@ -273,7 +273,13 @@ get_vopd_info(const SchedILPContext& ctx, const Instruction* instr)
 
    info.is_dst_odd = instr->definitions[0].physReg().reg() & 0x1;
 
-   static const unsigned bank_mask[3] = {0x3, 0x3, 0x1};
+   /* GFX11 has a hazard that makes a port using two odd/even operands unsafe:
+    * https://github.com/llvm/llvm-project/pull/220348
+    */
+   const bool has_interlock_hazard = ctx.program->gfx_level <= GFX11_5;
+   const unsigned bank_mask[3] = {has_interlock_hazard ? 0x1u : 0x3u,
+                                  has_interlock_hazard ? 0x1u : 0x3u, 0x1u};
+
    bool has_sgpr = false;
    for (unsigned i = 0; i < instr->operands.size(); i++) {
       uint8_t swizzle = (info.operand_swizzle >> (i * 2)) & 0x3;

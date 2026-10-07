@@ -420,6 +420,8 @@ nir_build_texture_query(nir_builder *b, nir_tex_instr *tex, nir_texop texop,
    query->texture_index = tex->texture_index;
    query->sampler_index = tex->sampler_index;
    query->can_speculate = tex->can_speculate;
+   query->texture_non_uniform = tex->texture_non_uniform;
+   query->sampler_non_uniform = tex->sampler_non_uniform;
    query->dest_type = dest_type;
 
    if (include_coord) {

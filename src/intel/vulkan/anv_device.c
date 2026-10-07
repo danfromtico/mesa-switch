@@ -2318,7 +2318,9 @@ VkResult anv_GetCalibratedTimestampsKHR(
    uint64_t begin, end;
    uint64_t max_clock_period = 0;
    const enum intel_kmd_type kmd_type = device->physical->info.kmd_type;
-   const bool has_correlate_timestamp = kmd_type == INTEL_KMD_TYPE_XE;
+   const bool has_correlate_timestamp =
+      kmd_type == INTEL_KMD_TYPE_XE &&
+      unlikely(!device->physical->instance->drirc.debug.disable_xe_engine_cycles);
    const VkTimeDomainKHR default_cpu_time_domain = anv_get_default_cpu_time_domain();
    const clockid_t default_cpu_clock_id = vk_time_domain_to_clockid(default_cpu_time_domain);
    clockid_t cpu_clock_id = -1;

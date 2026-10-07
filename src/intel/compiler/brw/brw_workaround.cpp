@@ -87,8 +87,9 @@ brw_workaround_emit_dummy_mov_mulmac(brw_shader &s)
 
       /* Issue 2 */
       else if ((!IS_MUL_CLASS(prev_inst) && !IS_MACL_CLASS(prev_inst)) &&
-               (IS_MACL_CLASS(inst) && IS_FLAT(inst, 1)) &&
-               (prev_inst->sources && phys_nr(s.devinfo, inst->src[1]) ==
+               (prev_inst->sources > 1 &&
+                IS_MACL_CLASS(inst) && IS_FLAT(inst, 1)) &&
+               (phys_nr(s.devinfo, inst->src[1]) ==
                 phys_nr(s.devinfo, prev_inst->src[1]))) {
          emit_mov = true;
       }

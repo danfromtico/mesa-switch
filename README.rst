@@ -5,7 +5,7 @@ A Nintendo Switch (Horizon OS) port of `Mesa <https://mesa3d.org>`_, providing
 native EGL, OpenGL, OpenGL ES and Vulkan on the Tegra X1 ``GM20B`` GPU through
 Mesa's Nouveau drivers.
 
-Based on Mesa 26.2.2.
+Based on Mesa 26.2.4.
 
 This repository lives at https://github.com/danfromtico/mesa-switch.
 

@@ -400,7 +400,10 @@ vlVaEndPicture(VADriverContextP ctx, VAContextID context_id)
       context->desc.base.out_pipe_fence = &surf->pipe_fence;
    }
 
-   if (!drv->pipe->screen->is_video_format_supported(drv->pipe->screen,
+   /* This only checks the hw processor supported formats, but for procssing
+    * we also have a shader fallback which may support different formats. */
+   if (context->decoder->entrypoint != PIPE_VIDEO_ENTRYPOINT_PROCESSING &&
+       !drv->pipe->screen->is_video_format_supported(drv->pipe->screen,
                                                      context->target->buffer_format,
                                                      context->decoder->profile,
                                                      context->decoder->entrypoint)) {

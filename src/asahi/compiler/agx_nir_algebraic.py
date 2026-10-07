@@ -23,6 +23,41 @@ for s in [8, 16, 32, 64]:
         lower_sm5_shift += [((shift, f'a@{s}', b),
                              (shift, a, ('iand', b, s - 1)))]
 
+    for shift in ["imadshl_agx", "imsubshl_agx"]:
+        lower_sm5_shift += [((shift, f'a@{s}', b, c, d),
+                             (shift, a, b, c, ('iand', d, s - 1)))]
+
+    # bitfield_extracts do a shift internally, so we need to mask the offset parameter
+    lower_sm5_shift += [
+        # These are based on the lowerings from nir_opt_algebraic, but conditioned
+        # on the number of bits not being constant. If the bit count is constant
+        # (the happy path) we can use our native instruction instead.
+        (('ibitfield_extract', f'value@{s}', 'offset', 'bits(is_not_const)'),
+         ('bcsel', ('ieq', 0, 'bits'),
+          0,
+          ('ishr',
+           ('ishl', 'value', ('isub', ('isub', 32, 'bits'), ('iand', 'offset', s - 1))),
+           ('isub', 32, 'bits')))),
+
+        (('ubitfield_extract', f'value@{s}', 'offset', 'bits(is_not_const)'),
+         ('iand',
+          ('ushr', 'value', ('iand', 'offset', s - 1)),
+          ('bcsel', ('ieq', 'bits', 32),
+           0xffffffff,
+           ('isub', ('ishl', 1, 'bits'), 1)))),
+
+        # At this point, bitfield extracts are constant. We can only do constant
+        # unsigned bitfield extract, so lower signed to unsigned + sign extend.
+        (('ibitfield_extract', f'a@{s}', b, '#bits'),
+         ('ishr', ('ishl', ('ubitfield_extract', a, ('iand', b, s - 1), 'bits'), ('isub', 32, 'bits')),
+          ('isub', 32, 'bits'))),
+
+        (("ibitfield_extract", f'a@{s}', 'offset', '#bits'),
+         ("ibitfield_extract", a, ('iand', 'offset', s - 1), 'bits')),
+        (("ubitfield_extract", f'value@{s}', 'offset', '#bits'),
+         ("ubitfield_extract", 'value', ('iand', 'offset', s - 1), 'bits'))
+    ]
+
 lower_pack = [
     (('pack_half_2x16_split', a, b),
      ('pack_32_2x16_split', ('f2f16', a), ('f2f16', b))),
@@ -57,32 +92,9 @@ lower_pack = [
      ('bcsel', ('flt', ('fabs', a), ('fabs', ('f2f32', ('f2f16_rtne', a)))),
       ('isub', ('f2f16_rtne', a), 1), ('f2f16_rtne', a))),
 
-    # These are based on the lowerings from nir_opt_algebraic, but conditioned
-    # on the number of bits not being constant. If the bit count is constant
-    # (the happy path) we can use our native instruction instead.
-    (('ibitfield_extract', 'value', 'offset', 'bits(is_not_const)'),
-     ('bcsel', ('ieq', 0, 'bits'),
-      0,
-      ('ishr',
-       ('ishl', 'value', ('isub', ('isub', 32, 'bits'), 'offset')),
-       ('isub', 32, 'bits')))),
-
-    (('ubitfield_extract', 'value', 'offset', 'bits(is_not_const)'),
-     ('iand',
-      ('ushr', 'value', 'offset'),
-      ('bcsel', ('ieq', 'bits', 32),
-       0xffffffff,
-       ('isub', ('ishl', 1, 'bits'), 1)))),
-
     # Codegen depends on this trivial case being optimized out.
     (('ubitfield_extract', 'value', 'offset', 0), 0),
     (('ibitfield_extract', 'value', 'offset', 0), 0),
-
-    # At this point, bitfield extracts are constant. We can only do constant
-    # unsigned bitfield extract, so lower signed to unsigned + sign extend.
-    (('ibitfield_extract', a, b, '#bits'),
-     ('ishr', ('ishl', ('ubitfield_extract', a, b, 'bits'), ('isub', 32, 'bits')),
-      ('isub', 32, 'bits'))),
 ]
 
 lower_selects = []

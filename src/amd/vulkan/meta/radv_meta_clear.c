@@ -1497,6 +1497,11 @@ emit_clear(struct radv_cmd_buffer *cmd_buffer, const VkClearAttachment *clear_at
       if (ds_att->format == VK_FORMAT_UNDEFINED)
          return;
 
+      /* Ignore aspects that have no effects. */
+      aspects &= render->ds_att_aspects;
+      if (!aspects)
+         return;
+
       VkClearDepthStencilValue clear_value = clear_att->clearValue.depthStencil;
 
       assert(aspects & (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT));
@@ -1516,10 +1521,10 @@ emit_clear(struct radv_cmd_buffer *cmd_buffer, const VkClearAttachment *clear_at
       }
 
       if (can_fast_clear_depth && can_fast_clear_stencil) {
-         radv_fast_clear_depth(cmd_buffer, ds_att->iview, clear_att->clearValue.depthStencil, clear_att->aspectMask,
+         radv_fast_clear_depth(cmd_buffer, ds_att->iview, clear_att->clearValue.depthStencil, aspects,
                                pre_flush, post_flush);
       } else if (!can_fast_clear_depth && !can_fast_clear_stencil) {
-         emit_depthstencil_clear(cmd_buffer, clear_att->clearValue.depthStencil, clear_att->aspectMask, clear_rect,
+         emit_depthstencil_clear(cmd_buffer, clear_att->clearValue.depthStencil, aspects, clear_rect,
                                  view_mask);
       } else {
          if (can_fast_clear_depth) {

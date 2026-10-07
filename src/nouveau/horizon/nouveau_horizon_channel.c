@@ -810,10 +810,12 @@ nouveau_horizon_channel_reserve_entries_locked(
 {
    const uint32_t total_order_entry =
       channel->device->total_order_channels ? 1 : 0;
+   const uint32_t completion_entries =
+      channel->mapped_completion_enabled ? 2 : 1;
    const uint64_t required =
       (uint64_t)channel->gpu_channel.num_entries + entries + tail_entries +
-      NOUVEAU_HORIZON_GPFIFO_FINAL_SKID + total_order_entry;
-   if (required > GPFIFO_QUEUE_SIZE)
+      completion_entries + total_order_entry;
+   if (required > NOUVEAU_HORIZON_GPFIFO_SUBMIT_CAPACITY)
       return NOUVEAU_HORIZON_ERROR_NO_SPACE;
    return NOUVEAU_HORIZON_SUCCESS;
 }
@@ -837,7 +839,7 @@ nouveau_horizon_channel_append_locked(
 
    if (consume_reserved) {
       status = channel->gpu_channel.num_entries + 1 + tail_entries <=
-                  GPFIFO_QUEUE_SIZE ?
+                  NOUVEAU_HORIZON_GPFIFO_SUBMIT_CAPACITY ?
                   NOUVEAU_HORIZON_SUCCESS :
                   NOUVEAU_HORIZON_ERROR_NO_SPACE;
    } else {
@@ -1257,13 +1259,11 @@ nouveau_horizon_channel_submit_locked(
          (uint64_t)NOUVEAU_HORIZON_GM20B_REPORT_WORDS *
             sizeof(uint32_t) : 0);
 
-   /* Reserve the full tail and reclaim a ledger slot before writing its
-    * report slice. Older accepted work may still fetch that storage.
-    */
-   status = nouveau_horizon_channel_reserve_entries_locked(
-      channel, tail_entries, 0);
-   if (status != NOUVEAU_HORIZON_SUCCESS)
+   /* Consume the tail space reserved while recording commands. */
+   if (incoming_entries > NOUVEAU_HORIZON_GPFIFO_SUBMIT_CAPACITY) {
+      status = NOUVEAU_HORIZON_ERROR_NO_SPACE;
       goto done;
+   }
    status = nouveau_horizon_channel_throttle_inflight_locked(
       channel, incoming_entries, incoming_command_bytes);
    if (status != NOUVEAU_HORIZON_SUCCESS)
@@ -1989,20 +1989,9 @@ nouveau_horizon_channel_exec_submit(
    const uint32_t acquire_entries =
       exec_count > 0 && !channel->cache_acquire_emitted ? 2 : 0;
    const uint32_t barrier_entries = full_barrier ? 3 : 0;
-   const uint32_t completion_entries =
-      channel->mapped_completion_enabled ? 2 : 1;
-   /* Reserve an extra slot for submit_locked's tail check after its
-    * possible total-order wait; it must not reject an already-appended
-    * prefix.
-    */
-   const uint32_t second_order_reservation =
-      channel->device->total_order_channels ? 1 : 0;
    if (exec_count > 0 || full_barrier) {
       status = nouveau_horizon_channel_reserve_entries_locked(
-         channel,
-         exec_count + acquire_entries + barrier_entries +
-            completion_entries + second_order_reservation,
-         0);
+         channel, exec_count + acquire_entries + barrier_entries, 0);
    }
    if (exec_count > 0) {
       if (status == NOUVEAU_HORIZON_SUCCESS) {

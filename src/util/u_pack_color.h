@@ -530,8 +530,13 @@ util_pack64_mask_z_stencil(enum pipe_format format, uint32_t z, uint8_t s)
 
    switch (format) {
    case PIPE_FORMAT_Z32_FLOAT_S8X24_UINT:
+#if UTIL_ARCH_BIG_ENDIAN
+      packed = util_pack64_mask_z(format, z) << 32ull;
+      packed |= s;
+#else
       packed = util_pack64_mask_z(format, z);
       packed |= (uint64_t)s << 32ull;
+#endif
       return packed;
    default:
       return util_pack_mask_z_stencil(format, z, s);
@@ -639,8 +644,13 @@ util_pack64_z_stencil(enum pipe_format format, double z, uint8_t s)
 
    switch (format) {
    case PIPE_FORMAT_Z32_FLOAT_S8X24_UINT:
+#if UTIL_ARCH_BIG_ENDIAN
+      packed = util_pack64_z(format, z) << 32ull;
+      packed |= s;
+#else
       packed = util_pack64_z(format, z);
       packed |= (uint64_t)s << 32ull;
+#endif
       break;
    default:
       return util_pack_z_stencil(format, z, s);

@@ -23,53 +23,79 @@
 
 #include "vc4_context.h"
 
+/**
+ * Computes the clip window for the current context.
+ *
+ * Returns false when the window is empty.
+ */
+bool
+vc4_get_clip_window(struct vc4_context *vc4, struct pipe_scissor_state *clip)
+{
+        float *vpscale = vc4->viewport.scale;
+        float *vptranslate = vc4->viewport.translate;
+        float vp_minx = -fabsf(vpscale[0]) + vptranslate[0];
+        float vp_maxx = fabsf(vpscale[0]) + vptranslate[0];
+        float vp_miny = -fabsf(vpscale[1]) + vptranslate[1];
+        float vp_maxy = fabsf(vpscale[1]) + vptranslate[1];
+
+        /* Clip to the scissor if it's enabled, but still clip to the drawable
+         * regardless since that controls where the binner tries to put
+         * things.
+         *
+         * Additionally, always clip the rendering to the viewport, since the
+         * hardware does guardband clipping, meaning primitives would
+         * rasterize outside of the view volume.
+         */
+        if (!vc4->rasterizer->base.scissor) {
+                clip->minx = MAX2(vp_minx, 0);
+                clip->miny = MAX2(vp_miny, 0);
+                clip->maxx = MAX2(MIN2(vp_maxx, vc4->framebuffer.width),
+                                  clip->minx);
+                clip->maxy = MAX2(MIN2(vp_maxy, vc4->framebuffer.height),
+                                  clip->miny);
+        } else {
+                clip->minx = MAX2(vp_minx, vc4->scissor.minx);
+                clip->miny = MAX2(vp_miny, vc4->scissor.miny);
+                clip->maxx = MAX2(MIN2(vp_maxx, vc4->scissor.maxx),
+                                  clip->minx);
+                clip->maxy = MAX2(MIN2(vp_maxy, vc4->scissor.maxy),
+                                  clip->miny);
+        }
+
+        return clip->minx < clip->maxx && clip->miny < clip->maxy;
+}
+
 void
 vc4_emit_state(struct pipe_context *pctx)
 {
         struct vc4_context *vc4 = vc4_context(pctx);
         struct vc4_job *job = vc4->job;
 
-        if (vc4->dirty & (VC4_DIRTY_SCISSOR | VC4_DIRTY_VIEWPORT |
-                          VC4_DIRTY_RASTERIZER)) {
-                float *vpscale = vc4->viewport.scale;
-                float *vptranslate = vc4->viewport.translate;
-                float vp_minx = -fabsf(vpscale[0]) + vptranslate[0];
-                float vp_maxx = fabsf(vpscale[0]) + vptranslate[0];
-                float vp_miny = -fabsf(vpscale[1]) + vptranslate[1];
-                float vp_maxy = fabsf(vpscale[1]) + vptranslate[1];
+        if (vc4->dirty & VC4_DIRTY_CLIP_WINDOW) {
+                const struct pipe_scissor_state *clip = &vc4->clip_window;
+                assert(!vc4->clip_window_empty);
 
-                /* Clip to the scissor if it's enabled, but still clip to the
-                 * drawable regardless since that controls where the binner
-                 * tries to put things.
-                 *
-                 * Additionally, always clip the rendering to the viewport,
-                 * since the hardware does guardband clipping, meaning
-                 * primitives would rasterize outside of the view volume.
-                 */
-                uint32_t minx, miny, maxx, maxy;
-                if (!vc4->rasterizer->base.scissor) {
-                        minx = MAX2(vp_minx, 0);
-                        miny = MAX2(vp_miny, 0);
-                        maxx = MAX2(MIN2(vp_maxx, job->draw_width), minx);
-                        maxy = MAX2(MIN2(vp_maxy, job->draw_height), miny);
-                } else {
-                        minx = MAX2(vp_minx, vc4->scissor.minx);
-                        miny = MAX2(vp_miny, vc4->scissor.miny);
-                        maxx = MAX2(MIN2(vp_maxx, vc4->scissor.maxx), minx);
-                        maxy = MAX2(MIN2(vp_maxy, vc4->scissor.maxy), miny);
+#ifndef NDEBUG
+                /* Cached clip window shouldn't be modified by nested blits */
+                struct pipe_scissor_state check;
+                vc4_get_clip_window(vc4, &check);
+                assert(check.minx == clip->minx && check.miny == clip->miny &&
+                       check.maxx == clip->maxx && check.maxy == clip->maxy);
+#endif
+
+                cl_emit(&job->bcl, CLIP_WINDOW, window) {
+                        window.clip_window_left_pixel_coordinate = clip->minx;
+                        window.clip_window_bottom_pixel_coordinate = clip->miny;
+                        window.clip_window_height_in_pixels =
+                                clip->maxy - clip->miny;
+                        window.clip_window_width_in_pixels =
+                                clip->maxx - clip->minx;
                 }
 
-                cl_emit(&job->bcl, CLIP_WINDOW, clip) {
-                        clip.clip_window_left_pixel_coordinate = minx;
-                        clip.clip_window_bottom_pixel_coordinate = miny;
-                        clip.clip_window_height_in_pixels = maxy - miny;
-                        clip.clip_window_width_in_pixels = maxx - minx;
-                }
-
-                job->draw_min_x = MIN2(job->draw_min_x, minx);
-                job->draw_min_y = MIN2(job->draw_min_y, miny);
-                job->draw_max_x = MAX2(job->draw_max_x, maxx);
-                job->draw_max_y = MAX2(job->draw_max_y, maxy);
+                job->draw_min_x = MIN2(job->draw_min_x, clip->minx);
+                job->draw_min_y = MIN2(job->draw_min_y, clip->miny);
+                job->draw_max_x = MAX2(job->draw_max_x, clip->maxx);
+                job->draw_max_y = MAX2(job->draw_max_y, clip->maxy);
         }
 
         if (vc4->dirty & (VC4_DIRTY_RASTERIZER |

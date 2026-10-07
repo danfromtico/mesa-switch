@@ -1172,11 +1172,11 @@ _mesa_GetInternalformativ(GLenum target, GLenum internalformat, GLenum pname,
       if (_mesa_is_cube_map_texture(target))
          combined_value *= 6;
 
-      /* We pack the 64-bit value on two 32-bit values. Calling the 32-bit
-       * query, this would work as far as the value can be hold on a 32-bit
-       * signed integer. For the 64-bit query, the wrapper around the 32-bit
-       * query will unpack the value */
-      memcpy(buffer, &combined_value, sizeof(GLint64));
+      /* Low half in buffer[0], high half in buffer[1]. The 32-bit query
+       * returns only the low half; glGetInternalformati64v() joins them.
+       */
+      buffer[0] = combined_value & 0xffffffff;
+      buffer[1] = combined_value >> 32;
       break;
    }
 
@@ -1734,7 +1734,7 @@ _mesa_GetInternalformati64v(GLenum target, GLenum internalformat,
    _mesa_GetInternalformativ(target, internalformat, pname, callSize, params32);
 
    if (pname == GL_MAX_COMBINED_DIMENSIONS) {
-      memcpy(params, params32, sizeof(GLint64));
+      params[0] = (uint64_t)params32[1] << 32 | (uint32_t)params32[0];
    } else {
       for (i = 0; i < realSize; i++) {
          /* We only copy back the values that changed */

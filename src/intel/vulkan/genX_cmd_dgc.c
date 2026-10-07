@@ -808,6 +808,7 @@ void genX(CmdExecuteGeneratedCommandsEXT)(
                                    VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT_KHR,
                                    VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
                                    ANV_PIPE_DATA_CACHE_FLUSH_BIT |
+                                   ANV_PIPE_CONSTANT_CACHE_INVALIDATE_BIT |
                                    ANV_PIPE_CS_STALL_BIT,
                                    "after generated commands");
          genX(cmd_buffer_apply_pipe_flushes)(cmd_buffer);
@@ -939,6 +940,7 @@ void genX(CmdExecuteGeneratedCommandsEXT)(
                                    VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR,
                                    VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
                                    ANV_PIPE_DATA_CACHE_FLUSH_BIT |
+                                   ANV_PIPE_CONSTANT_CACHE_INVALIDATE_BIT |
                                    ANV_PIPE_CS_STALL_BIT,
                                    "after generated commands");
          genX(cmd_buffer_apply_pipe_flushes)(cmd_buffer);
@@ -1061,6 +1063,7 @@ void genX(CmdExecuteGeneratedCommandsEXT)(
                                    VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT_KHR,
                                    VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
                                    ANV_PIPE_DATA_CACHE_FLUSH_BIT |
+                                   ANV_PIPE_CONSTANT_CACHE_INVALIDATE_BIT |
                                    ANV_PIPE_CS_STALL_BIT,
                                    "after generated commands");
          genX(cmd_buffer_apply_pipe_flushes)(cmd_buffer);

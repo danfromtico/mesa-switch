@@ -13,7 +13,7 @@ find_library(_VULKAN_SWITCH_ZSTD_LIBRARY zstd)
 find_library(_VULKAN_SWITCH_Z_LIBRARY z)
 find_library(_VULKAN_SWITCH_NX_LIBRARY nx)
 
-set(Vulkan_VERSION "26.2.3")
+set(Vulkan_VERSION "26.2.4")
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Vulkan
 	REQUIRED_VARS

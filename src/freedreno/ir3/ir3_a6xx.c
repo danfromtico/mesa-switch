@@ -522,19 +522,19 @@ ldg_stg_offset(struct ir3_context *ctx, nir_intrinsic_instr *intr)
 
    struct ldg_stg_offset offset = {};
    nir_src *offset_src = nir_get_io_offset_src(intr);
-   int32_t base = nir_intrinsic_base(intr);
+   uint32_t base = nir_intrinsic_base(intr);
    unsigned offset_shift = nir_intrinsic_offset_shift(intr);
    struct ir3_builder *b = &ctx->build;
 
    if (nir_src_is_const(*offset_src)) {
-      int32_t full_imm_offset = base + nir_src_as_int(*offset_src);
-      int32_t full_imm_offset_bytes = full_imm_offset << offset_shift;
+      uint32_t full_imm_offset = base + nir_src_as_uint(*offset_src);
+      uint32_t full_imm_offset_bytes = full_imm_offset << offset_shift;
 
-      /* ldg/stg offset immediate is 13 bits. Note that ldg/stg use byte offsets
-       * even on a6xx.
+      /* ldg/stg offset immediate is 13 bits signed but we only get unsigned
+       * offsets out if NIR so we can only use 12 of those bits. Note that
+       * ldg/stg use byte offsets even on a6xx.
        */
-      if (full_imm_offset_bytes < (1 << 12) &&
-          full_imm_offset_bytes >= -(1 << 12)) {
+      if (full_imm_offset_bytes < (1 << 12)) {
          offset.imm = create_immed(b, full_imm_offset_bytes);
       } else {
          /* The immediate offset does not fit. Generate ldg/stg.a with the

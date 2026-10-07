@@ -4793,6 +4793,48 @@ lp_build_img_op_no_format(struct gallivm_state *gallivm,
 }
 
 
+/**
+ * Return the bound image's layout with the channel types of the shader's
+ * format qualifier if the two differ in pure integer-ness.
+ */
+static const struct util_format_description *
+lp_img_access_format_desc(const struct util_format_description *format_desc,
+                          enum pipe_format qualifier,
+                          struct util_format_description *tmp)
+{
+   if (qualifier == PIPE_FORMAT_NONE ||
+       format_desc->layout != UTIL_FORMAT_LAYOUT_PLAIN)
+      return format_desc;
+
+   const struct util_format_description *qual_desc =
+      util_format_description(qualifier);
+   if (!qual_desc || qual_desc->block.bits != format_desc->block.bits ||
+       util_format_is_pure_integer(qualifier) ==
+       util_format_is_pure_integer(format_desc->format))
+      return format_desc;
+
+   const struct util_format_channel_description *qual_chan =
+      &qual_desc->channel[util_format_get_first_non_void_channel(qualifier)];
+
+   *tmp = *format_desc;
+   for (unsigned i = 0; i < format_desc->nr_channels; i++) {
+      if (tmp->channel[i].type == UTIL_FORMAT_TYPE_VOID)
+         continue;
+
+      /* Bail out if a channel can't hold the qualifier's type. */
+      if (qual_chan->type == UTIL_FORMAT_TYPE_FLOAT &&
+          tmp->channel[i].size != 16 && tmp->channel[i].size != 32)
+         return format_desc;
+
+      tmp->channel[i].type = qual_chan->type;
+      tmp->channel[i].normalized = qual_chan->normalized;
+      tmp->channel[i].pure_integer = qual_chan->pure_integer;
+   }
+
+   return tmp;
+}
+
+
 void
 lp_build_img_op_soa(const struct lp_static_texture_state *static_texture_state,
                     struct lp_sampler_dynamic_state *dynamic_state,
@@ -4803,8 +4845,10 @@ lp_build_img_op_soa(const struct lp_static_texture_state *static_texture_state,
 {
    const enum pipe_texture_target target = params->target;
    const unsigned dims = texture_dims(target);
+   struct util_format_description access_desc;
    const struct util_format_description *format_desc =
-      util_format_description(static_texture_state->format);
+      lp_img_access_format_desc(util_format_description(static_texture_state->format),
+                                params->format, &access_desc);
    const struct util_format_description *res_format_desc =
       util_format_description(static_texture_state->res_format);
    LLVMValueRef x = params->coords[0], y = params->coords[1],

@@ -1484,26 +1484,26 @@ for (name, defs, ops, num, cls) in default_class(VOP3, InstrClass.Valu32):
 
 
 VOPD = {
-   ("v_dual_fmac_f32",         op(gfx11=0x00)),
-   ("v_dual_fmaak_f32",        op(gfx11=0x01)),
-   ("v_dual_fmamk_f32",        op(gfx11=0x02)),
-   ("v_dual_mul_f32",          op(gfx11=0x03)),
-   ("v_dual_add_f32",          op(gfx11=0x04)),
-   ("v_dual_sub_f32",          op(gfx11=0x05)),
-   ("v_dual_subrev_f32",       op(gfx11=0x06)),
-   ("v_dual_mul_dx9_zero_f32", op(gfx11=0x07)),
-   ("v_dual_mov_b32",          op(gfx11=0x08)),
-   ("v_dual_cndmask_b32",      op(gfx11=0x09)),
-   ("v_dual_max_f32",          op(gfx11=0x0a)),
-   ("v_dual_min_f32",          op(gfx11=0x0b)),
-   ("v_dual_dot2acc_f32_f16",  op(gfx11=0x0c)),
-   ("v_dual_dot2acc_f32_bf16", op(gfx11=0x0d)),
-   ("v_dual_add_nc_u32",       op(gfx11=0x10)),
-   ("v_dual_lshlrev_b32",      op(gfx11=0x11)),
-   ("v_dual_and_b32",          op(gfx11=0x12)),
+   ("v_dual_fmac_f32",         dst(F32), src(F32, F32, F32),       op(gfx11=0x00)),
+   ("v_dual_fmaak_f32",        dst(F32), src(F32, F32, IMM),       op(gfx11=0x01)),
+   ("v_dual_fmamk_f32",        dst(F32), src(F32, F32, IMM),       op(gfx11=0x02)),
+   ("v_dual_mul_f32",          dst(F32), src(F32, F32),            op(gfx11=0x03)),
+   ("v_dual_add_f32",          dst(F32), src(F32, F32),            op(gfx11=0x04)),
+   ("v_dual_sub_f32",          dst(F32), src(F32, F32),            op(gfx11=0x05)),
+   ("v_dual_subrev_f32",       dst(F32), src(F32, F32),            op(gfx11=0x06)),
+   ("v_dual_mul_dx9_zero_f32", dst(F32), src(F32, F32),            op(gfx11=0x07)),
+   ("v_dual_mov_b32",          dst(U32), src(U32),                 op(gfx11=0x08)),
+   ("v_dual_cndmask_b32",      dst(U32), src(U32, U32, VCC),       op(gfx11=0x09)),
+   ("v_dual_max_f32",          dst(F32), src(F32, F32),            op(gfx11=0x0a)),
+   ("v_dual_min_f32",          dst(F32), src(F32, F32),            op(gfx11=0x0b)),
+   ("v_dual_dot2acc_f32_f16",  dst(F32), src(PkF16, PkF16, F32),   op(gfx11=0x0c)),
+   ("v_dual_dot2acc_f32_bf16", dst(F32), src(PkBF16, PkBF16, F32), op(gfx11=0x0d)),
+   ("v_dual_add_nc_u32",       dst(U32), src(U32, U32),            op(gfx11=0x10)),
+   ("v_dual_lshlrev_b32",      dst(U32), src(U32, U32),            op(gfx11=0x11)),
+   ("v_dual_and_b32",          dst(U32), src(U32, U32),            op(gfx11=0x12)),
 }
-for (name, num) in VOPD:
-   insn(name, num, format = Format.VOPD, cls = InstrClass.Valu32)
+for (name, defs, ops, num) in VOPD:
+   insn(name, num, format = Format.VOPD, cls = InstrClass.Valu32, definitions = noMods(defs), operands = noMods(ops))
 
 
 # DS instructions: 3 inputs (1 addr, 2 data), 1 output

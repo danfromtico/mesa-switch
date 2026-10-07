@@ -2060,7 +2060,8 @@ blorp_exec_compute(struct blorp_batch *batch, const struct blorp_params *params)
 #endif
 
       .InterfaceDescriptor = (struct GENX(INTERFACE_DESCRIPTOR_DATA)) {
-         .KernelStartPointer = params->cs_prog_kernel,
+         .KernelStartPointer = params->cs_prog_kernel +
+            brw_cs_prog_data_prog_offset(cs_prog_data, dispatch.simd_size),
          .SamplerStatePointer = samplers_offset,
          .SamplerCount = params->src.enabled ? 1 : 0,
          .BindingTableEntryCount = params->src.enabled ? 2 : 1,
@@ -2127,7 +2128,8 @@ blorp_exec_compute(struct blorp_batch *batch, const struct blorp_params *params)
    }
 
    struct GENX(INTERFACE_DESCRIPTOR_DATA) idd = {
-      .KernelStartPointer = params->cs_prog_kernel,
+      .KernelStartPointer = params->cs_prog_kernel +
+         brw_cs_prog_data_prog_offset(cs_prog_data, dispatch.simd_size),
       .SamplerStatePointer = samplers_offset,
       .SamplerCount = params->src.enabled ? 1 : 0,
       .BindingTableEntryCount = params->src.enabled ? 2 : 1,

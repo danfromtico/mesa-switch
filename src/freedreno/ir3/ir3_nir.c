@@ -1065,6 +1065,7 @@ ir3_nir_post_finalize(struct ir3_shader *shader)
             .lower_rotate_to_shuffle = !compiler->has_shfl,
             .lower_rotate_clustered_to_shuffle = true,
             .lower_inverse_ballot = true,
+            .lower_quad_vote = true,
             .lower_reduce = true,
             .filter = ir3_nir_lower_subgroups_filter,
             .filter_data = compiler,

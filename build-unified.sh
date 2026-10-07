@@ -15,7 +15,7 @@ PYTHON_BIN="${PYTHON:-python}"
 BUILD_TYPE="${MESA_BUILD_TYPE:-release}"
 OPTIMIZATION="${MESA_OPTIMIZATION:-2}"
 ALLOW_DIRTY="${ALLOW_DIRTY:-0}"
-SDK_BASENAME="${SDK_BASENAME:-mesa-26.2.3-switch-unified-horizon-sdk}"
+SDK_BASENAME="${SDK_BASENAME:-mesa-26.2.4-switch-unified-horizon-sdk}"
 export MESA_SWITCH_RUST_TARGET="${MESA_SWITCH_RUST_TARGET:-aarch64-unknown-linux-gnu}"
 
 if [[ -n "${MSYSTEM:-}" ]]; then

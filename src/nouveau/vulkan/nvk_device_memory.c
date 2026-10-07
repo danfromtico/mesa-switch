@@ -191,14 +191,16 @@ nvk_allocate_memory(VkDevice device,
        mem->vk.host_ptr == NULL) {
       VK_FROM_HANDLE(nvk_image, image, dedicated_info->image);
 
-      mem->dedicated_image = image;
-
 #ifdef __SWITCH__
+      /* The stencil-copy plane needs a different PTE kind from the depth plane. */
+      mem->dedicated_image = image->stencil_copy_temp.nil.size_B ? NULL : image;
+
       /* Use NIL kinds for dedicated Switch block-linear images.
        * Compressible private images use compressed_pte_kind; scanout stays
        * uncompressed. Horizon has no discrete VRAM or DRM modifiers.
        */
-      if (image->vk.tiling == VK_IMAGE_TILING_OPTIMAL &&
+      if (mem->dedicated_image &&
+          image->vk.tiling == VK_IMAGE_TILING_OPTIMAL &&
           image->plane_count == 1 &&
           image->planes[0].nil.pte_kind != 0) {
          alignment = MAX2(alignment, image->planes[0].nil.align_B);
@@ -210,6 +212,7 @@ nvk_allocate_memory(VkDevice device,
          }
       }
 #else
+      mem->dedicated_image = image;
       if (image->vk.tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT &&
           image->vk.drm_format_mod != DRM_FORMAT_MOD_LINEAR) {
          /* This image might be shared with GL so we need to set the BO flags

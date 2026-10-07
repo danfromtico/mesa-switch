@@ -177,9 +177,9 @@ vmem_default_needs(const Instruction* instr)
 }
 
 bool
-instr_ignores_round_mode(const Instruction* instr)
+opcode_ignores_round_mode(aco_opcode opcode)
 {
-   switch (instr->opcode) {
+   switch (opcode) {
    case aco_opcode::v_min_f64_e64:
    case aco_opcode::v_min_f64:
    case aco_opcode::v_min_f32:
@@ -216,6 +216,8 @@ instr_ignores_round_mode(const Instruction* instr)
    case aco_opcode::v_pk_max_f16:
    case aco_opcode::v_pk_minimum_f16:
    case aco_opcode::v_pk_maximum_f16:
+   case aco_opcode::v_dual_min_f32:
+   case aco_opcode::v_dual_max_f32:
    case aco_opcode::v_cvt_pkrtz_f16_f32:
    case aco_opcode::v_cvt_pkrtz_f16_f32_e64:
    case aco_opcode::v_pack_b32_f16:
@@ -253,6 +255,51 @@ instr_ignores_round_mode(const Instruction* instr)
    case aco_opcode::s_rndne_f16: return true;
    default: return false;
    }
+}
+
+mode_mask
+alu_default_needs(aco_opcode opcode)
+{
+   mode_mask res = 0;
+
+   const aco_alu_opcode_info& info = instr_info.alu_opcode_infos[(int)opcode];
+
+   for (unsigned i = 0; i < info.num_operands; i++) {
+      aco_type type = info.op_types[i];
+      if (type.base_type != aco_base_type_float && type.base_type != aco_base_type_bfloat)
+         continue;
+
+      if (type.bit_size == 32)
+         res |= BITFIELD_BIT(mode_denorm32);
+      else if (type.bit_size >= 16)
+         res |= BITFIELD_BIT(mode_denorm16_64);
+   }
+
+   aco_type type = info.def_types[0];
+   if (type.base_type == aco_base_type_float || type.base_type == aco_base_type_bfloat) {
+      if (type.bit_size == 32)
+         res |= BITFIELD_BIT(mode_denorm32) | BITFIELD_BIT(mode_round32);
+      else if (type.bit_size >= 16)
+         res |= BITFIELD_BIT(mode_denorm16_64) | BITFIELD_BIT(mode_round16_64);
+
+      if (type.bit_size <= 16)
+         res |= BITFIELD_BIT(mode_fp16_ovfl);
+   }
+
+   if (opcode == aco_opcode::v_fma_mixlo_f16 || opcode == aco_opcode::v_fma_mixhi_f16) {
+      res |= BITFIELD_BIT(mode_round32);
+   } else if (opcode == aco_opcode::v_fma_mix_f32) {
+      /* In theory, this is only needed with opsel_hi, but v_fma_mix_f32 without
+       * opsel_hi is pointless and shouldn't be used.
+       */
+      res |= BITFIELD_BIT(mode_denorm16_64);
+   }
+
+   if (opcode_ignores_round_mode(opcode))
+      res &= ~(BITFIELD_BIT(mode_fp16_ovfl) | BITFIELD_BIT(mode_round32) |
+               BITFIELD_BIT(mode_round16_64));
+
+   return res;
 }
 
 mode_mask
@@ -299,40 +346,10 @@ instr_default_needs(const fp_mode_ctx* ctx, const Instruction* instr)
    if (instr->definitions.empty())
       return 0;
 
-   const aco_alu_opcode_info& info = instr_info.alu_opcode_infos[(int)instr->opcode];
+   mode_mask res = alu_default_needs(instr->opcode);
 
-   mode_mask res = 0;
-
-   for (unsigned i = 0; i < info.num_operands; i++) {
-      aco_type type = info.op_types[i];
-      if (type.base_type != aco_base_type_float && type.base_type != aco_base_type_bfloat)
-         continue;
-
-      if (type.bit_size == 32)
-         res |= BITFIELD_BIT(mode_denorm32);
-      else if (type.bit_size >= 16)
-         res |= BITFIELD_BIT(mode_denorm16_64);
-   }
-
-   aco_type type = info.def_types[0];
-   if (type.base_type == aco_base_type_float || type.base_type == aco_base_type_bfloat) {
-      if (type.bit_size == 32)
-         res |= BITFIELD_BIT(mode_denorm32) | BITFIELD_BIT(mode_round32);
-      else if (type.bit_size >= 16)
-         res |= BITFIELD_BIT(mode_denorm16_64) | BITFIELD_BIT(mode_round16_64);
-
-      if (type.bit_size <= 16)
-         res |= BITFIELD_BIT(mode_fp16_ovfl);
-   }
-
-   if (instr->opcode == aco_opcode::v_fma_mixlo_f16 || instr->opcode == aco_opcode::v_fma_mixlo_f16)
-      res |= BITFIELD_BIT(mode_round32);
-   else if (instr->opcode == aco_opcode::v_fma_mix_f32 && instr->valu().opsel_hi)
-      res |= BITFIELD_BIT(mode_denorm16_64);
-
-   if (instr_ignores_round_mode(instr))
-      res &= ~(BITFIELD_BIT(mode_fp16_ovfl) | BITFIELD_BIT(mode_round32) |
-               BITFIELD_BIT(mode_round16_64));
+   if (instr->isVOPD())
+      res |= alu_default_needs(instr->vopd().opy);
 
    return res;
 }

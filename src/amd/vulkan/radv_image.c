@@ -1410,7 +1410,9 @@ radv_select_modifier(const struct radv_device *dev, VkFormat format,
          }
       }
    }
-   UNREACHABLE("App specified an invalid modifier");
+
+   free(mods);
+   return VK_ERROR_UNKNOWN;
 }
 
 VkResult
@@ -1464,7 +1466,7 @@ radv_image_create(VkDevice _device, const struct radv_image_create_info *create_
       result = radv_select_modifier(device, format, mod_list, &modifier);
       if (result != VK_SUCCESS) {
          radv_destroy_image(device, alloc, image);
-         return vk_error(device, result);
+         return vk_errorf(device, result, "Invalid modifier specified");
       }
    } else if (explicit_mod) {
       modifier = explicit_mod->drmFormatModifier;

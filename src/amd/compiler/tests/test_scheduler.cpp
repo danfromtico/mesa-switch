@@ -171,27 +171,27 @@ BEGIN_TEST(vopd_sched.war)
 
       PhysReg reg_v0{256};
       PhysReg reg_v1{257};
-      PhysReg reg_v3{259};
+      PhysReg reg_v2{258};
 
       //>> p_unit_test 0
-      //~gfx11! v1: %0:v[1] = v_dual_add_f32 %0:v[3], %0:v[1] :: v1: %0:v[0] = v_dual_mul_f32 %0:v[1], %0:v[3]
-      //~gfx12! v1: %0:v[0] = v_dual_mul_f32 %0:v[1], %0:v[3] :: v1: %0:v[1] = v_dual_add_f32 %0:v[3], %0:v[1]
+      //~gfx11! v1: %0:v[1] = v_dual_add_f32 %0:v[2], %0:v[1] :: v1: %0:v[0] = v_dual_mul_f32 %0:v[1], %0:v[2]
+      //~gfx12! v1: %0:v[0] = v_dual_mul_f32 %0:v[1], %0:v[2] :: v1: %0:v[1] = v_dual_add_f32 %0:v[2], %0:v[1]
       bld.pseudo(aco_opcode::p_unit_test, Operand::zero());
       bld.vop2(aco_opcode::v_mul_f32, Definition(reg_v0, v1), Operand(reg_v1, v1),
-               Operand(reg_v3, v1));
-      bld.vop2(aco_opcode::v_add_f32, Definition(reg_v1, v1), Operand(reg_v3, v1),
+               Operand(reg_v2, v1));
+      bld.vop2(aco_opcode::v_add_f32, Definition(reg_v1, v1), Operand(reg_v2, v1),
                Operand(reg_v1, v1));
 
       /* We can't use OPX for the v_mul_f32 because of the WaR, but we also can't use OPX for the
        * v_add_u32 because that opcode is OPY-only. */
       //>> p_unit_test 1
-      //~gfx11! v1: %0:v[1] = v_dual_mul_f32 %0:v[3], %0:v[1] :: v1: %0:v[0] = v_dual_add_nc_u32 %0:v[1], %0:v[3]
-      //~gfx12! v1: %0:v[0] = v_add_u32 %0:v[1], %0:v[3]
-      //~gfx12! v1: %0:v[1] = v_mul_f32 %0:v[3], %0:v[1]
+      //~gfx11! v1: %0:v[1] = v_dual_mul_f32 %0:v[2], %0:v[1] :: v1: %0:v[0] = v_dual_add_nc_u32 %0:v[1], %0:v[2]
+      //~gfx12! v1: %0:v[0] = v_add_u32 %0:v[1], %0:v[2]
+      //~gfx12! v1: %0:v[1] = v_mul_f32 %0:v[2], %0:v[1]
       bld.pseudo(aco_opcode::p_unit_test, Operand::c32(1));
       bld.vop2(aco_opcode::v_add_u32, Definition(reg_v0, v1), Operand(reg_v1, v1),
-               Operand(reg_v3, v1));
-      bld.vop2(aco_opcode::v_mul_f32, Definition(reg_v1, v1), Operand(reg_v3, v1),
+               Operand(reg_v2, v1));
+      bld.vop2(aco_opcode::v_mul_f32, Definition(reg_v1, v1), Operand(reg_v2, v1),
                Operand(reg_v1, v1));
 
       finish_schedule_vopd_test();
@@ -209,19 +209,19 @@ BEGIN_TEST(vopd_sched.same_vgpr)
       PhysReg reg_v3{259};
 
       //>> p_unit_test 0
-      //~gfx11! v1: %0:v[1] = v_dual_add_f32 %0:v[1], %0:v[2] :: v1: %0:v[0] = v_dual_add_f32 %0:v[2], %0:v[0]
-      //~gfx12! v1: %0:v[1] = v_dual_add_f32 %0:v[2], %0:v[1] :: v1: %0:v[0] = v_dual_add_f32 %0:v[2], %0:v[0]
+      //~gfx11! v1: %0:v[1] = v_dual_add_f32 %0:v[1], %0:v[2] :: v1: %0:v[0] = v_dual_add_f32 %0:v[2], %0:v[3]
+      //~gfx12! v1: %0:v[1] = v_dual_add_f32 %0:v[2], %0:v[1] :: v1: %0:v[0] = v_dual_add_f32 %0:v[2], %0:v[3]
       bld.pseudo(aco_opcode::p_unit_test, Operand::zero());
       bld.vop2(aco_opcode::v_add_f32, Definition(reg_v0, v1), Operand(reg_v2, v1),
-               Operand(reg_v0, v1));
+               Operand(reg_v3, v1));
       bld.vop2(aco_opcode::v_add_f32, Definition(reg_v1, v1), Operand(reg_v2, v1),
                Operand(reg_v1, v1));
 
       //>> p_unit_test 1
-      //~gfx11! v1: %0:v[1] = v_dual_add_f32 %0:v[2], %0:v[1] :: v1: %0:v[0] = v_dual_add_f32 %0:v[0], %0:v[2]
-      //~gfx12! v1: %0:v[1] = v_dual_add_f32 %0:v[1], %0:v[2] :: v1: %0:v[0] = v_dual_add_f32 %0:v[0], %0:v[2]
+      //~gfx11! v1: %0:v[1] = v_dual_add_f32 %0:v[2], %0:v[1] :: v1: %0:v[0] = v_dual_add_f32 %0:v[3], %0:v[2]
+      //~gfx12! v1: %0:v[1] = v_dual_add_f32 %0:v[1], %0:v[2] :: v1: %0:v[0] = v_dual_add_f32 %0:v[3], %0:v[2]
       bld.pseudo(aco_opcode::p_unit_test, Operand::c32(1));
-      bld.vop2(aco_opcode::v_add_f32, Definition(reg_v0, v1), Operand(reg_v0, v1),
+      bld.vop2(aco_opcode::v_add_f32, Definition(reg_v0, v1), Operand(reg_v3, v1),
                Operand(reg_v2, v1));
       bld.vop2(aco_opcode::v_add_f32, Definition(reg_v1, v1), Operand(reg_v1, v1),
                Operand(reg_v2, v1));
