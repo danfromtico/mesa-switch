@@ -994,8 +994,16 @@ nvk_get_device_properties(const struct nvk_instance *instance,
       .storageImageSampleCounts = sample_counts,
       .maxSampleMaskWords = 1,
       .timestampComputeAndGraphics = true,
+#ifdef __SWITCH__
+      /* The Tegra X1's PTIMER counts in units of 1 ns of a 31.25 MHz reference
+       * (32 per tick) but is clocked from 19.2 MHz, so one unit is
+       * 31.25 / 19.2 = 1.6276 ns (nvgpu: PTIMER_REF_FREQ_HZ, ptimer_src_freq).
+       */
+      .timestampPeriod = 31250000.0f / 19200000.0f,
+#else
       /* FIXME: Is timestamp period actually 1? */
       .timestampPeriod = 1.0f,
+#endif
       .maxClipDistances = 8,
       .maxCullDistances = 8,
       .maxCombinedClipAndCullDistances = 8,
