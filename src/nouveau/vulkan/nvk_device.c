@@ -363,7 +363,7 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
       dev->vk.get_timestamp = nvk_device_get_timestamp;
 #ifdef __SWITCH__
       dev->vk.copy_sync_payloads = nvkmd_switch_sync_copy_payloads;
-#else
+#elif !defined(_WIN32)
       dev->vk.copy_sync_payloads = vk_drm_syncobj_copy_payloads;
 #endif
 

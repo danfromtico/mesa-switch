@@ -2168,7 +2168,7 @@ if dep_elf.found()
   pre_args += '-DUSE_LIBELF'
 elif with_gallium_radeonsi and with_gfx_compute
   error('Gallium driver radeonsi requires libelf')
-elif with_nouveau_vk and not with_platform_switch
+elif with_nouveau_vk and not with_platform_switch and not with_platform_windows
   error('NVK requires libelf')
 endif
 

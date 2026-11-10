@@ -4,10 +4,10 @@
  */
 
 #include "nvkmd.h"
-#ifndef HAVE_SWITCH_PLATFORM
-#include "nouveau/nvkmd_nouveau.h"
-#else
+#ifdef HAVE_SWITCH_PLATFORM
 #include "switch/nvkmd_switch.h"
+#elif !defined(_WIN32)
+#include "nouveau/nvkmd_nouveau.h"
 #endif
 #include "nv_push.h"
 #include "util/cache_ops.h"
@@ -86,7 +86,7 @@ nvkmd_mem_init(struct nvkmd_dev *dev,
    simple_mtx_init(&mem->map_mutex, mtx_plain);
 }
 
-#ifndef HAVE_SWITCH_PLATFORM
+#if !defined(HAVE_SWITCH_PLATFORM) && !defined(_WIN32)
 VkResult
 nvkmd_try_create_pdev_for_drm(struct _drmDevice *drm_device,
                               struct vk_object_base *log_obj,
@@ -159,7 +159,7 @@ nvkmd_dev_alloc_mapped_mem(struct nvkmd_dev *dev,
    assert(!(map_flags & NVKMD_MEM_MAP_FIXED));
    result = nvkmd_mem_map(mem, log_obj, map_flags, NULL, NULL);
    if (result != VK_SUCCESS) {
-      mem->ops->free(mem);
+      nvkmd_mem_unref(mem);
       return result;
    }
 
@@ -439,7 +439,6 @@ nvkmd_mem_map(struct nvkmd_mem *mem, struct vk_object_base *log_obj,
       simple_mtx_lock(&mem->map_mutex);
 
       assert((mem->map_cnt == 0) == (mem->map == NULL));
-      mem->map_cnt++;
 
       VkResult result = VK_SUCCESS;
       if (mem->map == NULL) {
@@ -453,6 +452,8 @@ nvkmd_mem_map(struct nvkmd_mem *mem, struct vk_object_base *log_obj,
       } else {
          map = mem->map;
       }
+      if (result == VK_SUCCESS)
+         mem->map_cnt++;
 
       simple_mtx_unlock(&mem->map_mutex);
 

@@ -94,6 +94,12 @@ if with_platform_switch
     'nvkmd/switch/nvkmd_switch_dev.c',
     'nvkmd/switch/nvkmd_switch_pdev.c',
   )
+elif with_platform_windows
+  nvk_files += files(
+    'nvkmd/windows/nvkmd_windows.c',
+    'nvkmd/windows/nvkmd_windows_queue.c',
+    'nvkmd/windows/kmt.c',
+  )
 else
   nvk_files += files(
     'nvkmd/nouveau/nvkmd_nouveau.h',
@@ -309,8 +315,21 @@ if host_machine.system() == 'horizon'
     requires_private : ['libelf', 'expat', 'zlib', 'libzstd'],
   )
 else
+  nvk_shared_kwargs = {}
+  if with_platform_windows
+    nvk_kmt_object = get_option('nvk-windows-kmt-object')
+    if nvk_kmt_object == ''
+      error('Build the Windows SDK KMT bridge with src/nouveau/vulkan/nvkmd/windows/build_icd.py')
+    endif
+    nvk_shared_kwargs += {
+      'vs_module_defs' : 'nvkmd/windows/nvk_windows.def',
+      'objects' : files(nvk_kmt_object),
+      'dependencies' : cc.find_library('gdi32'),
+    }
+  endif
   libvulkan_nouveau = shared_library(
     'vulkan_nouveau',
+    kwargs : nvk_shared_kwargs,
     link_whole : [libnvk],
     link_args: [ld_args_build_id, ld_args_bsymbolic, ld_args_gc_sections],
     gnu_symbol_visibility : 'hidden',

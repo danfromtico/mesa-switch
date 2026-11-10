@@ -1143,7 +1143,12 @@ nvk_cmd_invalidate_deps(struct nvk_cmd_buffer *cmd,
          P_NVC86F_MEM_OP_C(p, { .membar_type = 0 });
          P_NVC86F_MEM_OP_D(p, { .operation = OPERATION_MEMBAR });
       } else {
+#ifdef _WIN32
+         /* USERD.Reference belongs to the KMD's retirement packet. */
+         __push_immd(p, last_subchannel, NVB06F_WFI, NVB06F_WFI_SCOPE_ALL);
+#else
          __push_immd(p, last_subchannel, NV906F_SET_REFERENCE, 0);
+#endif
       }
    }
 

@@ -16,11 +16,6 @@
 #include "util/u_atomic.h"
 
 #include <inttypes.h>
-#ifndef __SWITCH__
-#include <sys/mman.h>
-#else
-#include <util/switch_mman.h>
-#endif
 
 /* Supports opaque fd only */
 const VkExternalMemoryProperties nvk_opaque_fd_mem_props = {
@@ -213,6 +208,7 @@ nvk_allocate_memory(VkDevice device,
       }
 #else
       mem->dedicated_image = image;
+#ifndef _WIN32
       if (image->vk.tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT &&
           image->vk.drm_format_mod != DRM_FORMAT_MOD_LINEAR) {
          /* This image might be shared with GL so we need to set the BO flags
@@ -222,7 +218,9 @@ nvk_allocate_memory(VkDevice device,
          alignment = MAX2(alignment, image->planes[0].nil.align_B);
          pte_kind = image->planes[0].nil.pte_kind;
          tile_mode = image->planes[0].nil.tile_mode;
-      } else if (image->can_compress && not_shared) {
+      } else
+#endif
+      if (image->can_compress && not_shared) {
          /* If it's a dedicated alloc and it's not modifiers or shared, then
           * it's marked for compression and larger pages, so we set the pinned
           * bit and up the alignment.

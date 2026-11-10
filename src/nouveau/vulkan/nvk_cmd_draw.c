@@ -5,6 +5,7 @@
 #include "nvk_buffer.h"
 #include "nvk_entrypoints.h"
 #include "nvk_cmd_buffer.h"
+#include "util/detect_os.h"
 #include "nvk_device.h"
 #include "nvk_format.h"
 #include "nvk_image.h"
@@ -154,6 +155,9 @@ nvk_push_draw_state_init(struct nvk_queue *queue, struct nv_push *p)
    });
 
    for (uint32_t mme = 0, mme_pos = 0; mme < NVK_MME_COUNT; mme++) {
+      if (DETECT_OS_WINDOWS &&
+          (mme == NVK_MME_SET_PRIV_REG || mme == NVK_MME_SET_CONSERVATIVE_RASTER_STATE))
+         continue;
       size_t size;
       uint32_t *dw = nvk_build_mme(&pdev->info, mme, &size);
       if (dw == NULL)
@@ -200,7 +204,7 @@ nvk_push_draw_state_init(struct nvk_queue *queue, struct nv_push *p)
     * occasionally fail.
     */
    /* Horizon does not expose the private-register MME path. */
-#ifndef HAVE_SWITCH_PLATFORM
+#if !defined(HAVE_SWITCH_PLATFORM) && !defined(_WIN32)
    if (pdev->info.cls_eng3d >= MAXWELL_B) {
       unsigned reg = get_sm_disp_ctrl_reg(&pdev->info);
       P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SET_PRIV_REG));
@@ -256,7 +260,7 @@ nvk_push_draw_state_init(struct nvk_queue *queue, struct nv_push *p)
     *
     * This clears bit 14 of gr_gpcs_tpcs_sms_hww_warp_esr_report_mask
     */
-#ifndef HAVE_SWITCH_PLATFORM
+#if !defined(HAVE_SWITCH_PLATFORM) && !defined(_WIN32)
    if (pdev->info.cls_eng3d >= MAXWELL_B) {
       unsigned reg = get_sms_hww_warp_esp_report_mask_reg(&pdev->info);
       P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SET_PRIV_REG));
@@ -3216,7 +3220,7 @@ nvk_flush_rs_state(struct nvk_cmd_buffer *cmd)
 
    if (BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_RS_CONSERVATIVE_MODE) ||
        BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_RS_EXTRA_PRIMITIVE_OVERESTIMATION_SIZE)) {
-      if (nvk_cmd_buffer_3d_cls(cmd) < MAXWELL_B) {
+      if (DETECT_OS_WINDOWS || nvk_cmd_buffer_3d_cls(cmd) < MAXWELL_B) {
          assert(dyn->rs.conservative_mode == VK_CONSERVATIVE_RASTERIZATION_MODE_DISABLED_EXT);
       } else if (dyn->rs.conservative_mode == VK_CONSERVATIVE_RASTERIZATION_MODE_DISABLED_EXT) {
          P_IMMD(p, NVB197, SET_CONSERVATIVE_RASTER, ENABLE_FALSE);

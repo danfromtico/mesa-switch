@@ -1443,16 +1443,18 @@ nvk_get_image_memory_requirements(struct nvk_device *dev,
       switch (ext->sType) {
       case VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS: {
          VkMemoryDedicatedRequirements *dedicated = (void *)ext;
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(_WIN32)
          if (image->vk.tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT &&
              image->vk.drm_format_mod != DRM_FORMAT_MOD_LINEAR) {
             dedicated->prefersDedicatedAllocation = true;
             dedicated->requiresDedicatedAllocation = true;
          } else if (image->can_compress) {
-#else
+#elif defined(__SWITCH__)
          /* No DRM format modifiers on Switch; struct vk_image has no
           * drm_format_mod field on this platform. */
          if (image->can_compress && size_B > (1u << 20)) {
+#else
+         if (image->can_compress) {
 #endif
             /* We need dedicated allocations as compressed images have to be
              * pinned to VRAM due to nouveau, and we can't have a separate

@@ -95,6 +95,10 @@ nvk_EnumerateInstanceLayerProperties(uint32_t *pPropertyCount,
    return VK_SUCCESS;
 }
 
+#ifdef _WIN32
+VkResult nvk_enumerate_windows_physical_devices(struct vk_instance *instance);
+#endif
+
 #ifdef __SWITCH__
 static VkResult
 nvk_enumerate_switch_physical_devices(struct vk_instance *_instance)
@@ -203,6 +207,9 @@ nvk_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
 #ifdef __SWITCH__
    instance->vk.physical_devices.enumerate =
       nvk_enumerate_switch_physical_devices;
+#elif defined(_WIN32)
+   instance->vk.physical_devices.enumerate =
+      nvk_enumerate_windows_physical_devices;
 #else
    instance->vk.physical_devices.try_create_for_drm =
       nvk_create_drm_physical_device;
