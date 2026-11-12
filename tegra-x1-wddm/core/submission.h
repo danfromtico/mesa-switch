@@ -28,4 +28,13 @@ bool tg_gpu_prepare_submission(void *commands, size_t bytes, uint64_t physical,
     uint64_t internal_va, void *instance, size_t instance_bytes,
     uint64_t instance_physical, uint64_t application_va, uint32_t application_bytes,
     uint32_t fence_value);
+/* Optional indirect GPFIFO segment (SYNC_WAIT, USER) and continuation suffix
+ * (PROCEED, USER) inside application_va..application_va+application_bytes.
+ * Writes the total GPFIFO entry count (2..4) to *gp_put_out when non-NULL.
+ */
+bool tg_gpu_prepare_indirect_submission(void *commands, size_t bytes, uint64_t physical,
+    uint64_t internal_va, void *instance, size_t instance_bytes,
+    uint64_t instance_physical, uint64_t application_va, uint32_t application_bytes,
+    uint64_t indirect_va, uint32_t indirect_bytes, uint32_t suffix_offset,
+    uint32_t fence_value, uint32_t *gp_put_out);
 #endif

@@ -138,7 +138,7 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
       .KHR_compute_shader_derivatives = info->cls_eng3d >= TURING_A,
       .KHR_cooperative_matrix = info->cls_eng3d >= TURING_A,
       .KHR_copy_commands2 = true,
-      .KHR_copy_memory_indirect = true,
+      .KHR_copy_memory_indirect = !DETECT_OS_WINDOWS,
       .KHR_create_renderpass2 = true,
       .KHR_dedicated_allocation = true,
       .KHR_depth_clamp_zero_one = true,
@@ -251,7 +251,7 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
       .EXT_depth_range_unrestricted = info->cls_eng3d >= VOLTA_A,
       .EXT_descriptor_buffer = info->cls_eng3d >= MAXWELL_A,
       .EXT_descriptor_indexing = true,
-      .EXT_device_generated_commands = info->cls_eng3d >= MAXWELL_B,
+      .EXT_device_generated_commands = !DETECT_OS_WINDOWS && info->cls_eng3d >= MAXWELL_B,
       .EXT_discard_rectangles = true,
 #ifdef VK_USE_PLATFORM_DISPLAY_KHR
       .EXT_display_control = true,
@@ -528,7 +528,7 @@ nvk_get_device_features(const struct nv_device_info *info,
       .pushDescriptor = true,
 
       /* VK_KHR_copy_memory_indirect */
-      .indirectMemoryCopy = true,
+      .indirectMemoryCopy = !DETECT_OS_WINDOWS,
 
       /* VK_KHR_cooperative_matrix */
       /* TU11X can run coop matrix but the performances are abysal */
@@ -665,8 +665,8 @@ nvk_get_device_features(const struct nv_device_info *info,
        *
        * See also nvk_cmd_buffer_alloc_qmd().
        */
-      .deviceGeneratedCommands = info->cls_eng3d >= MAXWELL_B,
-      .dynamicGeneratedPipelineLayout = info->cls_eng3d >= MAXWELL_B,
+      .deviceGeneratedCommands = !DETECT_OS_WINDOWS && info->cls_eng3d >= MAXWELL_B,
+      .dynamicGeneratedPipelineLayout = !DETECT_OS_WINDOWS && info->cls_eng3d >= MAXWELL_B,
 
       /* VK_EXT_dynamic_rendering_unused_attachments */
       .dynamicRenderingUnusedAttachments = true,

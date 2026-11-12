@@ -5299,7 +5299,7 @@ nvk_CmdDrawIndirect2KHR(VkCommandBuffer commandBuffer,
       nvk_cmd_buffer_switch_mme_consumer(cmd);
 #endif
       const uint32_t max_draws_per_push =
-         MAX2(((NV_PUSH_MAX_COUNT - 3) * 4) / stride, 1);
+         MAX2(((NV_PUSH_MAX_COUNT - 4) * 4) / stride, 1);
 
       uint64_t draw_addr = pInfo->addressRange.address;
       uint32_t draw_count = pInfo->drawCount;
@@ -5316,7 +5316,10 @@ nvk_CmdDrawIndirect2KHR(VkCommandBuffer commandBuffer,
             ignored = 0;
          }
 
-         struct nv_push *p = nvk_cmd_buffer_push(cmd, 3);
+         struct nv_push *p = nvk_cmd_buffer_push(cmd, 4);
+#ifdef _WIN32
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+#endif
          P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_DRAW_INDIRECT));
          P_INLINE_DATA(p, count);
          P_INLINE_DATA(p, ignored);
@@ -5411,7 +5414,7 @@ nvk_CmdDrawIndexedIndirect2KHR(VkCommandBuffer commandBuffer,
          nvk_cmd_buffer_switch_mme_consumer(cmd);
 #endif
       const uint32_t max_draws_per_push =
-         MAX2(((NV_PUSH_MAX_COUNT - 3) * 4) / stride, 1);
+         MAX2(((NV_PUSH_MAX_COUNT - 4) * 4) / stride, 1);
 
       uint64_t draw_addr = pInfo->addressRange.address;
       uint32_t draw_count = pInfo->drawCount;
@@ -5428,7 +5431,10 @@ nvk_CmdDrawIndexedIndirect2KHR(VkCommandBuffer commandBuffer,
             ignored = 0;
          }
 
-         struct nv_push *p = nvk_cmd_buffer_push(cmd, 3);
+         struct nv_push *p = nvk_cmd_buffer_push(cmd, 4);
+#ifdef _WIN32
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+#endif
          P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_DRAW_INDEXED_INDIRECT));
          P_INLINE_DATA(p, count);
          P_INLINE_DATA(p, ignored);
@@ -5666,10 +5672,13 @@ nvk_CmdDrawIndirectByteCount2EXT(VkCommandBuffer commandBuffer,
 #ifdef HAVE_SWITCH_PLATFORM
       nvk_cmd_buffer_switch_mme_consumer(cmd);
 #endif
-      struct nv_push *p = nvk_cmd_buffer_push(cmd, 8);
+      struct nv_push *p = nvk_cmd_buffer_push(cmd, 9);
       P_IMMD(p, NV9097, SET_DRAW_AUTO_START, counterOffset);
       P_IMMD(p, NV9097, SET_DRAW_AUTO_STRIDE, vertexStride);
 
+#ifdef _WIN32
+      nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+#endif
       P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_XFB_DRAW_INDIRECT));
       P_INLINE_DATA(p, instanceCount);
       P_INLINE_DATA(p, firstInstance);
@@ -5947,13 +5956,18 @@ nvk_CmdBindTransformFeedbackBuffers2EXT(VkCommandBuffer commandBuffer,
       struct nv_push *p = nvk_cmd_buffer_push(cmd, 5);
 
       P_MTHD(p, NV9097, SET_STREAM_OUT_BUFFER_ENABLE(idx));
-      P_NV9097_SET_STREAM_OUT_BUFFER_ENABLE(p, idx, V_TRUE);
-      P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_A(p, idx, addr_range.address >> 32);
-      P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_B(p, idx, addr_range.address);
-      P_NV9097_SET_STREAM_OUT_BUFFER_SIZE(p, idx, (uint32_t)addr_range.size);
+      if (addr_range.address == 0 || addr_range.size == 0) {
+         P_NV9097_SET_STREAM_OUT_BUFFER_ENABLE(p, idx, V_FALSE);
+         P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_A(p, idx, 0);
+         P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_B(p, idx, 0);
+         P_NV9097_SET_STREAM_OUT_BUFFER_SIZE(p, idx, 0);
+      } else {
+         P_NV9097_SET_STREAM_OUT_BUFFER_ENABLE(p, idx, V_TRUE);
+         P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_A(p, idx, addr_range.address >> 32);
+         P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_B(p, idx, addr_range.address);
+         P_NV9097_SET_STREAM_OUT_BUFFER_SIZE(p, idx, (uint32_t)addr_range.size);
+      }
    }
-
-   // TODO: do we need to SET_STREAM_OUT_BUFFER_ENABLE V_FALSE ?
 }
 
 void
@@ -6016,7 +6030,10 @@ nvk_CmdBeginTransformFeedback2EXT(VkCommandBuffer commandBuffer,
 #ifdef HAVE_SWITCH_PLATFORM
          nvk_cmd_buffer_switch_mme_consumer(cmd);
 #endif
-         struct nv_push *p = nvk_cmd_buffer_push(cmd, 2);
+         struct nv_push *p = nvk_cmd_buffer_push(cmd, 3);
+#ifdef _WIN32
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+#endif
          P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_XFB_COUNTER_LOAD));
          P_INLINE_DATA(p, cr_idx);
          nv_push_update_count(p, 1);

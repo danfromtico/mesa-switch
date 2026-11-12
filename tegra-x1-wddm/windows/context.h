@@ -94,8 +94,9 @@ struct _TG_GPU_CONTEXT_WORK {
     TG_GPU_CONTEXT_ENGINE *Engine;
     TG_GPU_CONTEXT *Context;
     TG_GPU_ROOT_TABLE Root;
-    UINT64 DmaAddress, FencePhysicalAddress, InternalVa;
-    UINT DmaBytes, SubmissionFence, CompletionFence, Expected;
+    UINT64 DmaAddress, IndirectAddress, FencePhysicalAddress, InternalVa;
+    UINT DmaBytes, IndirectBytes, IndirectSuffixOffset, GpPut;
+    UINT SubmissionFence, CompletionFence, Expected;
     BOOLEAN Signaling, Notified, Prepared, HardwareBusy, Submitted, Attempted, Retired, CompletionReady, Paging;
     BOOLEAN Software,Rejected,Preemption;
     BOOLEAN GpuCompleted,CpuCompleted,UploadsMme;

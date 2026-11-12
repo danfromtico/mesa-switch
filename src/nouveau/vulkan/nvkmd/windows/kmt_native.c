@@ -747,12 +747,21 @@ tg_kmt_signal_gpu(uint32_t context, uint32_t count, const uint32_t *handles,
 }
 
 LONG
-tg_kmt_submit_primaries(uint32_t context, uint64_t address, const void *words,
-                       uint32_t bytes, uint32_t count, const uint32_t *allocations)
+tg_kmt_submit_indirect(uint32_t context, uint64_t address, const void *words,
+                       uint32_t bytes,
+                       const struct tg_gpu_submit_indirect *indirect,
+                       uint32_t count, const uint32_t *allocations)
 {
-   if (!context || !address || !words || !bytes || (bytes & 3) || bytes > TG_GPU_SUBMIT_MAX_BYTES ||
-       count > D3DDDI_MAX_WRITTEN_PRIMARIES || (count && !allocations))
+   if (!context || !address || !words || !bytes || (bytes & 3) ||
+       bytes > TG_GPU_SUBMIT_MAX_BYTES || count > D3DDDI_MAX_WRITTEN_PRIMARIES ||
+       (count && !allocations))
       return TG_KMT_INVALID_PARAMETER;
+   if (indirect && (!indirect->address || (indirect->address & 3) ||
+       !indirect->bytes || (indirect->bytes & 3) ||
+       indirect->bytes > TG_GPU_SUBMIT_MAX_BYTES ||
+       (indirect->suffix_offset & 3) || indirect->suffix_offset >= bytes))
+      return TG_KMT_INVALID_PARAMETER;
+
    for (uint32_t i = 0; i < count; ++i) {
       if (!allocations[i])
          return TG_KMT_INVALID_PARAMETER;
@@ -760,26 +769,40 @@ tg_kmt_submit_primaries(uint32_t context, uint64_t address, const void *words,
          if (allocations[i] == allocations[j])
             return TG_KMT_INVALID_PARAMETER;
    }
-   const uint32_t size = sizeof(struct tg_gpu_submit_request) + bytes;
-   struct tg_gpu_submit_request *request = malloc(size);
-   if (!request)
+   const uint32_t header_bytes = sizeof(struct tg_gpu_submit_request) +
+      (indirect ? sizeof(*indirect) : 0u);
+   const uint32_t size = header_bytes + bytes;
+   uint8_t *payload = malloc(size);
+   if (!payload)
       return TG_KMT_NO_MEMORY;
-   *request = (struct tg_gpu_submit_request) {
-      .version = TG_GPU_SUBMIT_ABI, .size = size, .command_bytes = bytes,
+   const struct tg_gpu_submit_request request = {
+      .version = indirect ? TG_GPU_SUBMIT_ABI_INDIRECT : TG_GPU_SUBMIT_ABI,
+      .size = size,
+      .command_bytes = bytes,
    };
+   memcpy(payload, &request, sizeof(request));
+   if (indirect)
+      memcpy(payload + sizeof(request), indirect, sizeof(*indirect));
    MemoryBarrier();
-   memcpy(request + 1, words, bytes);
+   memcpy(payload + header_bytes, words, bytes);
    D3DKMT_SUBMITCOMMAND args = {
+      .NumPrimaries = count,
       .Commands = address, .CommandLength = bytes,
       .BroadcastContextCount = 1, .BroadcastContext = { context },
-      .pPrivateDriverData = request, .PrivateDriverDataSize = size,
-      .NumPrimaries = count,
+      .pPrivateDriverData = payload, .PrivateDriverDataSize = size,
    };
    if (count)
       memcpy(args.WrittenPrimaries, allocations, count * sizeof(*allocations));
    LONG status = D3DKMTSubmitCommand(&args);
-   free(request);
+   free(payload);
    return status;
+}
+
+LONG
+tg_kmt_submit_primaries(uint32_t context, uint64_t address, const void *words,
+                       uint32_t bytes, uint32_t count, const uint32_t *allocations)
+{
+   return tg_kmt_submit_indirect(context, address, words, bytes, NULL, count, allocations);
 }
 
 LONG

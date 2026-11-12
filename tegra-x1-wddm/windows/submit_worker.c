@@ -103,12 +103,13 @@ NTSTATUS TgGpuSubmitContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
     w->HardwareBusy=TRUE;w->Attempted=TRUE;
     instance=(UINT64)w->Context->Instance.SystemPhysicalAddress.QuadPart;
     runlist=(UINT64)e->Commands.SystemPhysicalAddress.QuadPart+TG_GPU_COMMAND_RUNLIST;
+    const UINT gp_put=w->GpPut?w->GpPut:2u;
     KeReleaseSpinLock(&e->Lock,irql);
     /* All waits/MMIO run outside the object spin lock. References remain held
      * even when a partial bind fails or a teardown request races this worker.
      */
-    result=tg_gpu_channel_submit(io,power,w->Root.DeviceAddress,instance,runlist,
-                                 e->UserdBar1Offset,w,&e->Channel);
+    result=tg_gpu_channel_submit_entries(io,power,w->Root.DeviceAddress,instance,runlist,
+                                         e->UserdBar1Offset,gp_put,w,&e->Channel);
     KeAcquireSpinLock(&e->Lock,&irql);
     w->Submitted=result==TG_GPU_CHANNEL_OK;w->HardwareBusy=FALSE;
     KeReleaseSpinLock(&e->Lock,irql);return channel_status(result);

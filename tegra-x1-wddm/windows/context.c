@@ -182,7 +182,8 @@ NTSTATUS APIENTRY TgGpuDdiCreateContext(HANDLE device, DXGKARG_CREATECONTEXT *a)
         a->ContextInfo.DmaBufferPrivateDataSize=sizeof(TG_GPU_QUEUE_ENTRY);
     } else
         a->ContextInfo.DmaBufferPrivateDataSize=sizeof(TG_GPU_QUEUE_ENTRY)+
-            sizeof(struct tg_gpu_submit_request)+TG_GPU_SUBMIT_MAX_BYTES;
+            sizeof(struct tg_gpu_submit_request)+sizeof(struct tg_gpu_submit_indirect)+
+            TG_GPU_SUBMIT_MAX_BYTES;
     /* WDDM requires a 256-entry allocation list for GDI contexts. */
     if (a->Flags.GdiContext) a->ContextInfo.AllocationListSize=256;
     a->ContextInfo.Caps.NoPatchingRequired=a->Flags.VirtualAddressing;
@@ -473,11 +474,13 @@ NTSTATUS TgGpuPrepareContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w
         status=TgGpuInstallInternalRoot(e->Tables,&w->Root,&c->Device->Process->Internal);
     }
     if(NT_SUCCESS(status))status=TgGpuMapContextGraphics(&c->Device->Process->Internal,&c->Instance);
-    if (NT_SUCCESS(status) && !tg_gpu_prepare_submission(e->Commands.CpuAddress,e->Commands.Bytes,
+    uint32_t gp_put=0;
+    if (NT_SUCCESS(status) && !tg_gpu_prepare_indirect_submission(e->Commands.CpuAddress,e->Commands.Bytes,
         (UINT64)e->Commands.SystemPhysicalAddress.QuadPart,w->InternalVa,
         c->Instance.CpuAddress,c->Instance.Bytes,(UINT64)c->Instance.SystemPhysicalAddress.QuadPart,
-        w->DmaAddress,w->DmaBytes,w->Expected)) status=STATUS_INVALID_PARAMETER;
-    if (NT_SUCCESS(status)) { KeMemoryBarrier();w->Prepared=TRUE; }
+        w->DmaAddress,w->DmaBytes,w->IndirectAddress,w->IndirectBytes,
+        w->IndirectSuffixOffset,w->Expected,&gp_put)) status=STATUS_INVALID_PARAMETER;
+    if (NT_SUCCESS(status)) { w->GpPut=gp_put;KeMemoryBarrier();w->Prepared=TRUE; }
     w->HardwareBusy=FALSE;
     KeReleaseSpinLock(&e->Lock,irql);return status;
 }

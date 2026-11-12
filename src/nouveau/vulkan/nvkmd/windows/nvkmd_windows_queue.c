@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 #include "nvkmd_windows.h"
+#include "exec_transport.h"
 #include "nvk_device.h"
 #include "submit_abi.h"
 #include "util/os_time.h"
@@ -341,14 +342,117 @@ win_ctx_signal(struct nvkmd_ctx *base, struct vk_object_base *log,
 }
 
 static VkResult
+copy_exec_cpu_words(struct nvkmd_dev *dev, struct vk_object_base *log,
+                    uint64_t addr, uint32_t size_B, void *dst)
+{
+   uint64_t offset = 0;
+   struct nvkmd_mem *mem = nvkmd_dev_lookup_mem_by_va(dev, addr, &offset);
+   if (!mem)
+      return vk_error(log, VK_ERROR_DEVICE_LOST);
+
+   VkResult result = VK_ERROR_DEVICE_LOST;
+   if (offset <= mem->size_B && size_B <= mem->size_B - offset) {
+      void *cpu = NULL;
+      result = nvkmd_mem_map(mem, log, NVKMD_MEM_MAP_RD, NULL, &cpu);
+      if (result == VK_SUCCESS) {
+         memcpy(dst, (const uint8_t *)cpu + offset, size_B);
+         nvkmd_mem_unmap(mem, 0);
+      } else {
+         result = vk_error(log, result);
+      }
+   } else {
+      result = vk_error(log, VK_ERROR_DEVICE_LOST);
+   }
+   nvkmd_mem_unref(mem);
+   return result;
+}
+
+static bool
+exec_va_range_live(struct nvkmd_dev *dev, uint64_t addr, uint32_t size_B)
+{
+   uint64_t offset = 0;
+   struct nvkmd_mem *mem = nvkmd_dev_lookup_mem_by_va(dev, addr, &offset);
+   if (!mem)
+      return false;
+   const bool ok = offset <= mem->size_B && size_B <= mem->size_B - offset;
+   nvkmd_mem_unref(mem);
+   return ok;
+}
+
+static VkResult
+win_ctx_exec_indirect(struct nvkmd_ctx *base, struct vk_object_base *log,
+                      const struct nvkmd_ctx_exec *execs, uint32_t remaining,
+                      uint32_t *consumed)
+{
+   if (ctx_runtime(base->dev))
+      return vk_errorf(log, VK_ERROR_FEATURE_NOT_PRESENT,
+                       "The D3D runtime submit callback cannot carry indirect parameters");
+
+   struct tg_win_exec_slice slices[3];
+   const uint32_t count = MIN2(remaining, ARRAY_SIZE(slices));
+   for (uint32_t i = 0; i < count; i++) {
+      slices[i] = (struct tg_win_exec_slice) {
+         .addr = execs[i].addr, .size_B = execs[i].size_B,
+         .incomplete = execs[i].incomplete, .no_prefetch = execs[i].no_prefetch,
+      };
+   }
+   enum tg_win_exec_status status = tg_win_exec_check_head(slices, 0, count);
+   if (status != TG_WIN_EXEC_INDIRECT)
+      return vk_errorf(log, VK_ERROR_FEATURE_NOT_PRESENT, "%s", tg_win_exec_status_str(status));
+
+   uint32_t *words = malloc(TG_GPU_SUBMIT_MAX_BYTES);
+   if (!words)
+      return vk_error(log, VK_ERROR_OUT_OF_HOST_MEMORY);
+   VkResult result = copy_exec_cpu_words(base->dev, log, slices[0].addr, slices[0].size_B, words);
+   if (result != VK_SUCCESS)
+      goto done;
+
+   struct tg_win_exec_packet pkt = tg_win_exec_plan_step(slices, 0, count, words);
+   if (pkt.status != TG_WIN_EXEC_INDIRECT) {
+      result = vk_errorf(log, VK_ERROR_FEATURE_NOT_PRESENT, "%s (MME slot %u)",
+                         tg_win_exec_status_str(pkt.status), pkt.mme_slot);
+      goto done;
+   }
+   if (!exec_va_range_live(base->dev, pkt.indirect.address, pkt.indirect.bytes)) {
+      result = vk_error(log, VK_ERROR_DEVICE_LOST);
+      goto done;
+   }
+   if (pkt.indirect.suffix_offset) {
+      result = copy_exec_cpu_words(base->dev, log, slices[2].addr,
+                                   pkt.command_bytes - pkt.indirect.suffix_offset,
+                                   (uint8_t *)words + pkt.indirect.suffix_offset);
+      if (result != VK_SUCCESS)
+         goto done;
+   }
+
+   struct windows_ctx *ctx = container_of(base, struct windows_ctx, base);
+   LONG submit = tg_kmt_submit_indirect(ctx->context, slices[0].addr, words,
+                                        pkt.command_bytes, &pkt.indirect,
+                                        execs[0].written_count, execs[0].written_allocations);
+   result = nvkmd_windows_status(log, "D3DKMTSubmitCommand (indirect)", submit,
+                                 VK_ERROR_DEVICE_LOST);
+   *consumed = pkt.consumed;
+done:
+   free(words);
+   return result;
+}
+
+static VkResult
 win_ctx_exec(struct nvkmd_ctx *base, struct vk_object_base *log,
              uint32_t count, const struct nvkmd_ctx_exec *execs)
 {
    struct windows_ctx *ctx = container_of(base, struct windows_ctx, base);
    for (uint32_t i = 0; i < count; i++) {
       const struct nvkmd_ctx_exec *exec = &execs[i];
-      if (exec->incomplete || exec->no_prefetch || !exec->size_B ||
-          exec->size_B > TG_GPU_SUBMIT_MAX_BYTES)
+      if (exec->incomplete || exec->no_prefetch) {
+         uint32_t consumed;
+         VkResult result = win_ctx_exec_indirect(base, log, exec, count - i, &consumed);
+         if (result != VK_SUCCESS)
+            return result;
+         i += consumed - 1;
+         continue;
+      }
+      if (!exec->size_B || exec->size_B > TG_GPU_SUBMIT_MAX_BYTES)
          return vk_errorf(log, VK_ERROR_FEATURE_NOT_PRESENT,
                           "Windows NVK requires complete CPU-visible push buffers");
 

@@ -1030,7 +1030,7 @@ static void Write(void *context,UINT32 address,UINT32 value)
     CHECK(context==&hw && level==PASSIVE_LEVEL);++hw.writes;
     switch(address) {
     case 0x5801308c:
-        CHECK(hw.inst && hw.ctrl && hw.runlist==2 && !hw.sched && value==2);
+        CHECK(hw.inst && hw.ctrl && hw.runlist==2 && !hw.sched && value>=2 && value<=4);
         hw.userd_put=value;++hw.doorbells;break;
     case 0x57000200:hw.mc=value;break;
     case 0x57000204:hw.pb=value;break;
@@ -2085,6 +2085,27 @@ static __declspec(noinline) VOID TestQueuedProgramState(const DXGKRNL_INTERFACE 
     CHECK(TgGpuServiceWorkQueue(&q,&io,&power)==STATUS_SUCCESS);
     CHECK(e.LastCompletedFence==301 && interrupts==before+2 && !c->References);
     CHECK(IsListEmpty(&q.Pending) && !q.Current.Engine && !e.Active && !e.Notification);
+    /* Verify 3-entry indirect draw submission through snapshot, mapping check, and GPFIFO put=3. */
+    struct {
+        struct tg_gpu_submit_request Header;
+        struct tg_gpu_submit_indirect Indirect;
+        UINT Words[4];
+    } ind_draw={
+        {TG_GPU_SUBMIT_ABI_INDIRECT,sizeof(ind_draw),sizeof(ind_draw.Words),0},
+        {.address=0x9000,.bytes=16,.suffix_offset=0},
+        {0x8001001e, /* IMMD WFI SCOPE_ALL */
+         0xa0060000|(NVB197_CALL_MME_MACRO(NVK_MME_DRAW_INDIRECT)>>2),1,0}
+    };
+    submit.DmaBufferSize=sizeof(ind_draw.Words);submit.pDmaBufferPrivateData=&ind_draw;
+    submit.DmaBufferPrivateDataSize=submit.DmaBufferUmdPrivateDataSize=sizeof(ind_draw);
+    submit.SubmissionFenceId=302;
+    CHECK(TgGpuDdiSubmitCommandVirtual(&e,&submit)==STATUS_SUCCESS && c->References==1);
+    CHECK(TgGpuServiceWorkQueue(&q,&io,&power)==STATUS_PENDING);
+    CHECK(q.Current.IndirectBytes==16 && q.Current.IndirectAddress==0x9000 &&
+          q.Current.GpPut==3 && hw.userd_put==3);
+    hw.gpu_fence=q.Current.Expected;expected_fence=expected_driver_fence=302;notify_references=0;
+    CHECK(TgGpuServiceWorkQueue(&q,&io,&power)==STATUS_SUCCESS);
+    CHECK(e.LastCompletedFence==302 && interrupts==before+3 && !c->References);
     notify_engine=NULL;notify_context=NULL;
     CHECK(TgGpuStopWorkQueue(&q)==STATUS_SUCCESS);e.HardwareOwner=NULL;
     CHECK(TgGpuDdiDestroyContext(c)==STATUS_SUCCESS && TgGpuDdiDestroyDevice(device.hDevice)==STATUS_SUCCESS);
@@ -2227,7 +2248,7 @@ void start(void)
     CHECK(((UINT32 *)((UCHAR *)instance+TG_GPU_CONTEXT_GR_OFFSET))[0xa8/4]==1);
     CHECK(create.ContextInfo.Caps.NoPatchingRequired && !create.ContextInfo.Caps.DriverManagesResidency);
     CHECK(create.ContextInfo.DmaBufferPrivateDataSize==sizeof(TG_GPU_QUEUE_ENTRY)+
-        sizeof(struct tg_gpu_submit_request)+TG_GPU_SUBMIT_MAX_BYTES);
+        sizeof(struct tg_gpu_submit_request)+sizeof(struct tg_gpu_submit_indirect)+TG_GPU_SUBMIT_MAX_BYTES);
     create.hContext=(HANDLE)103;CHECK(NT_SUCCESS(ddi.DxgkDdiCreateContext(device.hDevice,&create)));c2=create.hContext;
     CHECK(c!=c2 && ((TG_GPU_DEVICE *)device.hDevice)->Contexts==2);
     CHECK(ddi.DxgkDdiDestroyDevice(device.hDevice)==STATUS_DEVICE_BUSY);

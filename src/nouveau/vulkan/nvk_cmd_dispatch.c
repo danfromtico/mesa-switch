@@ -616,9 +616,14 @@ nvk_CmdDispatchIndirect2KHR(VkCommandBuffer commandBuffer,
    uint32_t global_size[3] = { 0, 0, 0 };
    nvk_flush_compute_state(cmd, base_workgroup, global_size);
 
+   uint32_t qmd[TG_GPU_QMD_WORDS] = {0};
+   uint32_t *inline_qmd =
+      (NVK_CAPTURE_DIRECT_QMD &&
+       nvk_cmd_buffer_compute_cls(cmd) < TURING_COMPUTE_A) ? qmd : NULL;
    uint64_t qmd_addr = 0, root_desc_addr = 0;
    VkResult result = nvk_cmd_flush_cs_qmd(cmd, &cmd->state, global_size,
-                                          &qmd_addr, &root_desc_addr, NULL);
+                                          &qmd_addr, &root_desc_addr,
+                                          inline_qmd);
    if (result != VK_SUCCESS) {
       vk_command_buffer_set_error(&cmd->vk, result);
       return;
@@ -651,14 +656,16 @@ nvk_CmdDispatchIndirect2KHR(VkCommandBuffer commandBuffer,
       P_INLINE_DATA(p, qmd_addr);
       P_INLINE_DATA(p, nvk_compute_local_size(cmd));
    } else {
-      p = nvk_cmd_buffer_push(cmd, 5);
+      const uint32_t reserve_dw =
+         16 + (inline_qmd ? TG_GPU_QMD_RECORD_WORDS : 0);
+      p = nvk_cmd_buffer_push(cmd, reserve_dw);
       /* Stall the command streamer */
       if (pdev->info.cls_compute >= HOPPER_COMPUTE_A) {
          P_IMMD(p, NVC86F, WFI, 0);
       } else {
 #ifdef HAVE_SWITCH_PLATFORM
          nvk_cmd_buffer_switch_sync_host(cmd);
-         p = nvk_cmd_buffer_push(cmd, 5);
+         p = nvk_cmd_buffer_push(cmd, reserve_dw);
 #else
          nvk_push_legacy_host_wfi(p, SUBC_NV9097);
 #endif
@@ -673,6 +680,12 @@ nvk_CmdDispatchIndirect2KHR(VkCommandBuffer commandBuffer,
       P_INLINE_DATA(p, qmd_addr >> 32);
       P_INLINE_DATA(p, qmd_addr);
       P_INLINE_DATA(p, nvk_compute_local_size(cmd));
+      if (inline_qmd) {
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+         nvk_push_direct_dispatch(cmd, qmd_addr, inline_qmd, false);
+         nvk_cmd_buffer_flush_indirect_continuation(cmd);
+         return;
+      }
    }
 
    P_MTHD(p, NVA0C0, SEND_PCAS_A);

@@ -68,13 +68,23 @@ struct tg_gpu_command_info {
  * packets. B197 color and depth attachments supply complete layout state.
  * Optional process bounds exclude KMD memory from these accesses.
  */
+struct tg_gpu_submit_indirect;
+
 bool tg_gpu_inspect_command_stream(const uint32_t *, size_t bytes,
                                    const struct tg_gpu_command_va *,
                                    struct tg_gpu_command_info *);
+bool tg_gpu_inspect_indirect_command_stream(const uint32_t *, size_t bytes,
+                                            const struct tg_gpu_submit_indirect *,
+                                            const struct tg_gpu_command_va *,
+                                            struct tg_gpu_command_info *);
 /* Prepare the KMD-owned snapshot for execution, including direct QMDs. */
 bool tg_gpu_prepare_command_stream(uint32_t *, size_t bytes,
                                    const struct tg_gpu_command_va *,
                                    struct tg_gpu_command_info *);
+bool tg_gpu_prepare_indirect_command_stream(uint32_t *, size_t bytes,
+                                            const struct tg_gpu_submit_indirect *,
+                                            const struct tg_gpu_command_va *,
+                                            struct tg_gpu_command_info *);
 /* Check texture pools, shader entries, inline uploads and direct constant
  * buffers in a prepared snapshot. Programs starts at the retired context
  * state and is updated only on success. The caller publishes it on retirement.
@@ -84,6 +94,10 @@ typedef bool (*tg_gpu_command_range_check)(void *, uint64_t base, uint64_t end,
 bool tg_gpu_check_command_mappings(const uint32_t *, size_t bytes,
                                    struct tg_gpu_program_state *,
                                    tg_gpu_command_range_check, void *);
+bool tg_gpu_check_stream_mappings(const uint32_t *, size_t bytes,
+                                  const struct tg_gpu_submit_indirect *,
+                                  struct tg_gpu_program_state *,
+                                  tg_gpu_command_range_check, void *);
 bool tg_gpu_command_range_allowed(const struct tg_gpu_command_va *, uint64_t address,
                                   uint64_t bytes, uint64_t *max_end);
 

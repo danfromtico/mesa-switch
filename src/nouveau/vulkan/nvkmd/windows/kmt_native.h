@@ -128,4 +128,9 @@ LONG tg_kmt_submit(uint32_t context, uint64_t address, const void *words,
 LONG tg_kmt_submit_primaries(uint32_t context, uint64_t address, const void *words,
                            uint32_t bytes, uint32_t count, const uint32_t *allocations);
 
+LONG tg_kmt_submit_indirect(uint32_t context, uint64_t address, const void *words,
+                            uint32_t bytes,
+                            const struct tg_gpu_submit_indirect *indirect,
+                            uint32_t count, const uint32_t *allocations);
+
 #endif

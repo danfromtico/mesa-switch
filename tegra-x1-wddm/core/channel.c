@@ -158,15 +158,21 @@ enum tg_gpu_channel_result tg_gpu_channel_publish(const struct tg_gpu_power_io *
     if(c->last_value!=gp_put)return TG_GPU_CHANNEL_IO;
     return fault(io,c);
 }
+enum tg_gpu_channel_result tg_gpu_channel_submit_entries(const struct tg_gpu_power_io *io,
+    const struct tg_gpu_power *power,uint64_t root,uint64_t instance,uint64_t runlist,
+    uint32_t userd_bar1_offset,uint32_t gp_put,const void *owner,struct tg_gpu_channel *c)
+{
+    enum tg_gpu_channel_result result;
+    if(!userd_page(userd_bar1_offset) || gp_put<2 || gp_put>4)return TG_GPU_CHANNEL_ARGUMENT;
+    result=tg_gpu_channel_bind(io,power,root,instance,runlist,owner,c);
+    if(result!=TG_GPU_CHANNEL_OK)return result;
+    return tg_gpu_channel_publish(io,power,userd_bar1_offset,gp_put,owner,c);
+}
 enum tg_gpu_channel_result tg_gpu_channel_submit(const struct tg_gpu_power_io *io,
     const struct tg_gpu_power *power,uint64_t root,uint64_t instance,uint64_t runlist,
     uint32_t userd_bar1_offset,const void *owner,struct tg_gpu_channel *c)
 {
-    enum tg_gpu_channel_result result;
-    if(!userd_page(userd_bar1_offset))return TG_GPU_CHANNEL_ARGUMENT;
-    result=tg_gpu_channel_bind(io,power,root,instance,runlist,owner,c);
-    if(result!=TG_GPU_CHANNEL_OK)return result;
-    return tg_gpu_channel_publish(io,power,userd_bar1_offset,2,owner,c);
+    return tg_gpu_channel_submit_entries(io,power,root,instance,runlist,userd_bar1_offset,2,owner,c);
 }
 enum tg_gpu_channel_result tg_gpu_channel_retire(const struct tg_gpu_power_io *io,
     const struct tg_gpu_power *power,const void *owner,struct tg_gpu_channel *c)

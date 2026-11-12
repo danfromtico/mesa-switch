@@ -54,6 +54,13 @@ enum tg_gpu_channel_result tg_gpu_channel_publish(const struct tg_gpu_power_io *
 enum tg_gpu_channel_result tg_gpu_channel_submit(const struct tg_gpu_power_io *,
     const struct tg_gpu_power *, uint64_t root, uint64_t instance, uint64_t runlist,
     uint32_t userd_bar1_offset, const void *owner, struct tg_gpu_channel *);
+/* Multi-entry WDDM batch (2..4 GPFIFO entries): USER prefix, optional USER
+ * indirect segment and continuation suffix, plus KERNEL completion packet.
+ */
+enum tg_gpu_channel_result tg_gpu_channel_submit_entries(const struct tg_gpu_power_io *,
+    const struct tg_gpu_power *, uint64_t root, uint64_t instance, uint64_t runlist,
+    uint32_t userd_bar1_offset, uint32_t gp_put, const void *owner,
+    struct tg_gpu_channel *);
 /* Success means preempt/GR unload/runlist/unbind/FB flush/TLB invalidation
  * finished. GR unload is checked only when MC reports the GR engine enabled.
  * Failure retains referenced/owner: do not recycle any backing until retry

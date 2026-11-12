@@ -309,6 +309,7 @@ nvk_cmd_buffer_pool(struct nvk_cmd_buffer *cmd)
 }
 
 void nvk_cmd_buffer_new_push(struct nvk_cmd_buffer *cmd);
+void nvk_cmd_buffer_flush_indirect_continuation(struct nvk_cmd_buffer *cmd);
 
 void nvk_push_legacy_host_wfi(struct nv_push *p, uint32_t subchannel);
 

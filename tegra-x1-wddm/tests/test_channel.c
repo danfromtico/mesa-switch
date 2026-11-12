@@ -171,6 +171,16 @@ int main(void)
     assert(c.referenced && c.submitted && m.doorbells==1);
     m.fifo=0;
     assert(tg_gpu_channel_retire(&io,&power,&owner,&c)==TG_GPU_CHANNEL_OK);
+    init(&m,&c);
+    assert(tg_gpu_channel_submit_entries(&io,&power,0xc0000000,0xc0040000,0xc0045000,0x13000,1,&owner,&c)==TG_GPU_CHANNEL_ARGUMENT);
+    assert(tg_gpu_channel_submit_entries(&io,&power,0xc0000000,0xc0040000,0xc0045000,0x13000,5,&owner,&c)==TG_GPU_CHANNEL_ARGUMENT);
+    assert(tg_gpu_channel_submit_entries(&io,&power,0xc0000000,0xc0040000,0xc0045000,0x13000,3,&owner,&c)==TG_GPU_CHANNEL_OK);
+    assert(c.submitted && c.last_put==3 && m.put==3 && m.doorbells==1);
+    assert(tg_gpu_channel_retire(&io,&power,&owner,&c)==TG_GPU_CHANNEL_OK);
+    init(&m,&c);
+    assert(tg_gpu_channel_submit_entries(&io,&power,0xc0000000,0xc0040000,0xc0045000,0x13000,4,&owner,&c)==TG_GPU_CHANNEL_OK);
+    assert(c.submitted && c.last_put==4 && m.put==4 && m.doorbells==1);
+    assert(tg_gpu_channel_retire(&io,&power,&owner,&c)==TG_GPU_CHANNEL_OK);
     puts("GM20B hot channel binding, BAR1 notification and retained ownership: PASS (model only)");
     return 0;
 }

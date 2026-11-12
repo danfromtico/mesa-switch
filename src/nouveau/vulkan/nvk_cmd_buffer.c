@@ -331,6 +331,23 @@ nvk_cmd_buffer_push_indirect(struct nvk_cmd_buffer *cmd,
    util_dynarray_append(&cmd->pushes, push);
 }
 
+void
+nvk_cmd_buffer_flush_indirect_continuation(struct nvk_cmd_buffer *cmd)
+{
+   nvk_cmd_buffer_flush_push(cmd, false);
+
+   /* Leave a 4-byte gap in push_mem so subsequent commands in the same
+    * VkCommandBuffer start a separate nvk_cmd_push rather than merging into
+    * this DispatchIndirect continuation suffix.
+    */
+   if (cmd->push_mem != NULL && cmd->push.end < cmd->push_mem_limit) {
+      *cmd->push.end++ = 0;
+      cmd->push.start = cmd->push.end;
+      cmd->push.last_hdr = NULL;
+      cmd->push.last_hdr_dw = 0;
+   }
+}
+
 VkResult
 nvk_cmd_buffer_upload_alloc(struct nvk_cmd_buffer *cmd,
                             uint32_t size, uint32_t alignment,
@@ -1002,7 +1019,11 @@ nvk_cmd_flush_wait_dep(struct nvk_cmd_buffer *cmd,
          nvk_push_legacy_host_wfi(p, last_subchannel);
       }
 
-      /* MEM_OP_D path is really usable starting with Maxwell B */
+#ifndef _WIN32
+      /* MEM_OP_D/MEM_OP_B (< 0x100) are privileged host operations rejected
+       * by the GM20B WDDM command-stream validator; unified SoC DRAM relies on
+       * the host WFI and engine cache invalidations emitted around this block.
+       */
       if (pdev->info.cls_eng3d >= MAXWELL_B) {
          __push_mthd(p, last_subchannel, NVC86F_MEM_OP_D);
          P_NVC86F_MEM_OP_D(p, {.operation = OPERATION_L2_SYSMEM_INVALIDATE});
@@ -1010,6 +1031,7 @@ nvk_cmd_flush_wait_dep(struct nvk_cmd_buffer *cmd,
          __push_mthd(p, last_subchannel, NV906F_MEM_OP_B);
          P_NV906F_MEM_OP_B(p, {.operation = OPERATION_L2_SYSMEM_INVALIDATE});
       }
+#endif
    }
 }
 

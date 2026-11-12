@@ -7,6 +7,8 @@
 #include "submit_abi.h"
 typedef struct _TG_GPU_COMMAND_SNAPSHOT {
     UINT Bytes;
+    BOOLEAN HasIndirect;
+    struct tg_gpu_submit_indirect Indirect;
     struct tg_gpu_command_info Info;
     UINT Words[];
 } TG_GPU_COMMAND_SNAPSHOT;

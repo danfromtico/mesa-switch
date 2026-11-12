@@ -172,15 +172,15 @@ static void test_copy_stream(void)
 }
 
 struct range_checks {
-    struct tg_gpu_texture_pool_range expected[2];
-    enum tg_gpu_pitch_access access[2];
+    struct tg_gpu_texture_pool_range expected[8];
+    enum tg_gpu_pitch_access access[8];
     unsigned next;
 };
 
 static bool check_range(void *data, uint64_t base, uint64_t end, enum tg_gpu_pitch_access access)
 {
     struct range_checks *checks = data;
-    if (checks->next >= 2)
+    if (checks->next >= 8)
         return false;
     const unsigned index = checks->next++;
     const struct tg_gpu_texture_pool_range *range = &checks->expected[index];
@@ -782,6 +782,177 @@ static void test_native_umd_barrier(void)
     assert(!memcmp(push + TG_GPU_QMD_WORDS, qmd, sizeof(qmd)));
 }
 
+static void test_indirect_and_xfb_streams(void)
+{
+    const struct tg_gpu_command_va va = {0x300000000, 0x80000000, 0x80100000};
+    struct tg_gpu_command_info info;
+    struct tg_gpu_program_state programs = {
+        .end = {[TG_GPU_PROGRAM_3D] = 0x200000000, [TG_GPU_PROGRAM_COMPUTE] = 0x200000000},
+        .graphics_enabled = 1u << 1,
+        .graphics_offset = {[1] = 0x30},
+    };
+
+    /* Stream-out buffer bindings and conditional rendering. */
+    uint32_t xfb_cond[] = {
+        INCR(0, NVB197_SET_STREAM_OUT_BUFFER_ENABLE(0), 4), 1, 0, 0x50000, 64,
+        INCR(0, NVB197_SET_STREAM_OUT_BUFFER_ENABLE(1), 4), 0, 0, 0, 0,
+        INCR(0, NVB197_SET_GLOBAL_RENDER_ENABLE_A, 3), 0, 0x60000,
+        NVB197_SET_GLOBAL_RENDER_ENABLE_C_MODE_CONDITIONAL,
+        INCR(0, NVB197_SET_GLOBAL_RENDER_ENABLE_A, 3), 0, 0,
+        NVB197_SET_GLOBAL_RENDER_ENABLE_C_MODE_TRUE,
+    };
+    assert(tg_gpu_inspect_command_stream(xfb_cond, sizeof(xfb_cond), &va, &info));
+    assert(info.va_end == 0x60020);
+    struct range_checks xfb_checks = {
+        .expected = {{0x50000, 0x50040}, {0x60000, 0x60020}},
+        .access = {TG_GPU_PITCH_WRITE, TG_GPU_PITCH_READ_ONLY},
+    };
+    assert(tg_gpu_check_command_mappings(xfb_cond, sizeof(xfb_cond), &programs, check_range, &xfb_checks));
+    assert(xfb_checks.next == 2);
+    xfb_cond[3] = 0x50002; /* unaligned XFB address */
+    assert(!tg_gpu_validate_command_stream(xfb_cond, sizeof(xfb_cond)));
+    xfb_cond[3] = 0x50000;
+    xfb_cond[8] = 0x50000; /* disabled slot must zero address */
+    assert(!tg_gpu_validate_command_stream(xfb_cond, sizeof(xfb_cond)));
+    xfb_cond[8] = 0;
+    xfb_cond[12] = 0x60008; /* conditional render enable requires 16B alignment */
+    assert(!tg_gpu_validate_command_stream(xfb_cond, sizeof(xfb_cond)));
+    xfb_cond[12] = 0x60000;
+
+    /* Indirect Draw / DrawIndexed / XFB Draw / XFB Counter Load. */
+    uint32_t draw_ind[] = {
+        IMMD(0, NVB06F_WFI, NVB06F_WFI_SCOPE_ALL),
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_DRAW_INDIRECT), 12),
+        2, 1, /* 2 draws, 1 pad word -> 2 * (4 + 1) = 10 indirect words */
+    };
+    struct tg_gpu_submit_indirect ind = {.address = 0x70000, .bytes = 40, .suffix_offset = 0};
+    assert(tg_gpu_inspect_indirect_command_stream(draw_ind, sizeof(draw_ind), &ind, &va, &info));
+    assert(info.va_end == 0x70028 && info.requires_mme && info.requires_cb0 &&
+           info.requires_program == (1u << TG_GPU_PROGRAM_3D));
+    programs.end[TG_GPU_PROGRAM_3D] = 0x200000000;
+    struct range_checks ind_checks = {
+        .expected = {{0x70000, 0x70028}, {0x100000030, 0x100000900}},
+        .access = {TG_GPU_PITCH_READ, TG_GPU_PITCH_READ_ONLY},
+    };
+    assert(tg_gpu_check_stream_mappings(draw_ind, sizeof(draw_ind), &ind, &programs, check_range, &ind_checks));
+    assert(ind_checks.next == 2);
+
+    /* Missing WFI or intervening draw before indirect call must be rejected. */
+    assert(!tg_gpu_inspect_indirect_command_stream(draw_ind + 1, sizeof(draw_ind) - 4, &ind, &va, &info));
+    const uint32_t bad_intervening[] = {
+        IMMD(0, NVB06F_WFI, NVB06F_WFI_SCOPE_ALL),
+        IMMD(0, NVB197_DRAW_VERTEX_ARRAY, 3),
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_DRAW_INDIRECT), 6),
+        1, 0,
+    };
+    const struct tg_gpu_submit_indirect single_draw = {.address = 0x70000, .bytes = 16, .suffix_offset = 0};
+    assert(!tg_gpu_inspect_indirect_command_stream(bad_intervening, sizeof(bad_intervening), &single_draw, &va, &info));
+
+    /* DrawIndexedIndirect, XfbDrawIndirect, XfbCounterLoad. */
+    const uint32_t idx_ind[] = {
+        INCR(0, NVB06F_WFI, 1), NVB06F_WFI_SCOPE_ALL,
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_DRAW_INDEXED_INDIRECT), 7),
+        1, 0,
+    };
+    const struct tg_gpu_submit_indirect single_idx = {.address = 0x71000, .bytes = 20, .suffix_offset = 0};
+    assert(tg_gpu_inspect_indirect_command_stream(idx_ind, sizeof(idx_ind), &single_idx, &va, &info));
+    assert(info.va_end == 0x71014);
+
+    const uint32_t xfb_draw[] = {
+        IMMD(0, NVB06F_WFI, NVB06F_WFI_SCOPE_ALL),
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_XFB_DRAW_INDIRECT), 3),
+        4, 16,
+    };
+    const struct tg_gpu_submit_indirect word_ind = {.address = 0x72000, .bytes = 4, .suffix_offset = 0};
+    assert(tg_gpu_inspect_indirect_command_stream(xfb_draw, sizeof(xfb_draw), &word_ind, &va, &info));
+    assert(info.va_end == 0x72004 && info.requires_program == (1u << TG_GPU_PROGRAM_3D));
+
+    uint32_t xfb_load[] = {
+        IMMD(0, NVB06F_WFI, NVB06F_WFI_SCOPE_ALL),
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_XFB_COUNTER_LOAD), 2),
+        3,
+    };
+    assert(tg_gpu_inspect_indirect_command_stream(xfb_load, sizeof(xfb_load), &word_ind, &va, &info));
+    assert(info.va_end == 0x72004 && !info.requires_program);
+    xfb_load[2] = 4; /* stream index >= 4 */
+    assert(!tg_gpu_inspect_indirect_command_stream(xfb_load, sizeof(xfb_load), &word_ind, &va, &info));
+
+    /* DispatchIndirect: prefix + 3-word indirect + suffix with [root, qmd_zero, local_size, WFI, QMD, PCAS]. */
+    enum { SUFFIX = 3, Q_HDR = SUFFIX + 7, PCAS = Q_HDR + 1 + TG_GPU_QMD_RECORD_WORDS };
+    uint32_t disp[PCAS + 3] = {
+        [0] = INCR(0, NVB06F_WFI, 1),
+        [1] = NVB06F_WFI_SCOPE_ALL,
+        [2] = ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_DISPATCH_INDIRECT), 8),
+        [SUFFIX + 0] = 0,
+        [SUFFIX + 1] = 0x90000, /* root_desc VA (256B aligned) */
+        [SUFFIX + 2] = 0,
+        [SUFFIX + 3] = 0,
+        [SUFFIX + 4] = 64,      /* local_size = 8 * 8 * 1 */
+        [SUFFIX + 5] = INCR(0, NVB06F_WFI, 1),
+        [SUFFIX + 6] = NVB06F_WFI_SCOPE_ALL,
+        [Q_HDR] = NONINCR(1, NVB1C0_NO_OPERATION, TG_GPU_QMD_RECORD_WORDS),
+        [PCAS] = INCR(1, NVB1C0_SEND_PCAS_A, 1),
+        [PCAS + 2] = IMMD(1, NVB1C0_SEND_SIGNALING_PCAS_B, 3),
+    };
+    uint32_t *qmd = disp + Q_HDR + 1;
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, PROGRAM_OFFSET, 0x200);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, API_VISIBLE_CALL_LIMIT, 1);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CTA_RASTER_WIDTH, 1);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CTA_RASTER_HEIGHT, 1);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CTA_RASTER_DEPTH, 1);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, QMD_VERSION, 6);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CTA_THREAD_DIMENSION0, 8);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CTA_THREAD_DIMENSION1, 8);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CTA_THREAD_DIMENSION2, 1);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, L1_CONFIGURATION, 1);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, REGISTER_COUNT, 16);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, SASS_VERSION, 0x30);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CONSTANT_BUFFER_VALID, 0, 1);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CONSTANT_BUFFER_ADDR_LOWER, 0, 0x90000);
+    NVVAL_MW_SET(qmd, NVB1C0, QMDV00_06, CONSTANT_BUFFER_SIZE, 0, 256);
+
+    const struct tg_gpu_submit_indirect disp_ind = {
+        .address = 0x73000, .bytes = 12, .suffix_offset = SUFFIX * sizeof(uint32_t),
+    };
+    assert(tg_gpu_inspect_indirect_command_stream(disp, sizeof(disp), &disp_ind, &va, &info));
+    assert(info.requires_mme && info.requires_program == (1u << TG_GPU_PROGRAM_COMPUTE));
+
+    uint32_t staged[PCAS + 3];
+    memcpy(staged, disp, sizeof(disp));
+    assert(tg_gpu_prepare_indirect_command_stream(staged, sizeof(staged), &disp_ind, &va, &info));
+    const uint64_t qmd_va = ((va.reserved_base + TG_GPU_COMMAND_QMD + (Q_HDR + 1) * 4u) + 255u) & ~UINT64_C(255);
+    assert(info.has_qmd);
+    assert(staged[SUFFIX + 2] == (uint32_t)(qmd_va >> 32));
+    assert(staged[SUFFIX + 3] == (uint32_t)qmd_va);
+    assert(staged[PCAS + 1] == (uint32_t)(qmd_va >> 8));
+
+    programs.end[TG_GPU_PROGRAM_COMPUTE] = 0x200000000;
+    struct range_checks disp_checks = {
+        .expected = {
+            {0x73000, 0x7300c},         /* indirect buffer */
+            {0x9000c, 0x90018},         /* root_desc cs.group_count[3] writable */
+            {0x100000200, 0x100000a80}, /* compute program */
+            {0x90000, 0x90100},         /* QMD cbuf 0 */
+        },
+        .access = {
+            TG_GPU_PITCH_READ,
+            TG_GPU_PITCH_WRITE,
+            TG_GPU_PITCH_READ_ONLY,
+            TG_GPU_PITCH_READ,
+        },
+    };
+    assert(tg_gpu_check_stream_mappings(staged, sizeof(staged), &disp_ind, &programs,
+                                        check_range, &disp_checks));
+    assert(disp_checks.next == 4);
+
+    /* Corrupt local_size mismatch or nonzero unpatched qmd_addr must fail. */
+    disp[SUFFIX + 4] = 32;
+    assert(!tg_gpu_inspect_indirect_command_stream(disp, sizeof(disp), &disp_ind, &va, &info));
+    disp[SUFFIX + 4] = 64;
+    disp[SUFFIX + 3] = 0x1000;
+    assert(!tg_gpu_inspect_indirect_command_stream(disp, sizeof(disp), &disp_ind, &va, &info));
+}
+
 int main(void)
 {
     uint32_t w[16]={0x20010000,0xb197,0x20020100,0x20010014,0xdeadbeef,0};
@@ -837,5 +1008,6 @@ int main(void)
     test_shader_local_memory();
     test_captured_qmd();
     test_native_umd_barrier();
+    test_indirect_and_xfb_streams();
     puts("B06F packets, GM20B MME and command address ranges passed");return 0;
 }

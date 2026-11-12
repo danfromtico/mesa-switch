@@ -167,6 +167,33 @@ static void test_submission(void)
     assert(!tg_gpu_prepare_submission(command,sizeof(command),0xc0000000,0x4000000,
         instance,sizeof(instance),0xc0040000,0x20000000,0x800000,0x2468ace0));
     assert(command[TG_GPU_COMMAND_FENCE/4]==0xeca86420 && push[3]==0x13579bdf);
+    {
+        uint32_t gp_put = 0;
+        assert(tg_gpu_prepare_indirect_submission(command, sizeof(command), 0xc0000000, 0x4000000,
+            instance, sizeof(instance), 0xc0040000, 0x20000000, 24,
+            0x30000000, 40, 0, 0x55aa1234, &gp_put));
+        assert(gp_put == 3);
+        assert(command[0] == 0x20000000 && command[1] == 0x1800);
+        assert(command[2] == 0x30000000 && command[3] == 0x80002800);
+        assert(command[4] == 0x04001000 && command[5] == 0x80001100);
+        assert(command[6] == 0 && command[7] == 0);
+
+        assert(tg_gpu_prepare_indirect_submission(command, sizeof(command), 0xc0000000, 0x4000000,
+            instance, sizeof(instance), 0xc0040000, 0x20000000, 48,
+            0x31000000, 12, 16, 0x66bb5678, &gp_put));
+        assert(gp_put == 4);
+        assert(command[0] == 0x20000000 && command[1] == 0x1000);
+        assert(command[2] == 0x31000000 && command[3] == 0x80000c00);
+        assert(command[4] == 0x20000010 && command[5] == 0x2000);
+        assert(command[6] == 0x04001000 && command[7] == 0x80001100);
+
+        assert(!tg_gpu_prepare_indirect_submission(command, sizeof(command), 0xc0000000, 0x4000000,
+            instance, sizeof(instance), 0xc0040000, 0x20000000, 48,
+            0x31000000, 12, 48, 0x1, &gp_put));
+        assert(!tg_gpu_prepare_indirect_submission(command, sizeof(command), 0xc0000000, 0x4000000,
+            instance, sizeof(instance), 0xc0040000, 0x20000000, 24,
+            0x30000002, 40, 0, 0x1, &gp_put));
+    }
 }
 
 int main(void)
