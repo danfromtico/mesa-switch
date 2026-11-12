@@ -12,6 +12,7 @@ vtn_bindgen2 in PATH (-Dmesa-clc=system). Build products go in --out.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -134,6 +135,8 @@ def main():
     p.add_argument("--rustc", type=Path, help="rustc binary (defaults to rustc in PATH)")
     p.add_argument("--sdk-include", type=Path, required=True, help="SDK Include/<version>")
     p.add_argument("--wdk-include", type=Path, required=True, help="WDK Include/<version>")
+    p.add_argument("--package-cache-dir", type=Path,
+                   help="Meson subproject packagecache directory (sets MESON_PACKAGE_CACHE_DIR)")
     p.add_argument("--prepare-only", action="store_true",
                    help="build the SDK ABI fixture, KMT bridge and tests without configuring Mesa")
     a = p.parse_args()
@@ -247,6 +250,23 @@ def main():
     else:
         cross_file = cross_file.resolve()
 
+    env = os.environ.copy()
+    if a.package_cache_dir is not None:
+        env["MESON_PACKAGE_CACHE_DIR"] = str(a.package_cache_dir.resolve())
+    if "BINDGEN_EXTRA_CLANG_ARGS" not in env:
+        clang_lib = mingw_root / "lib/clang"
+        resource_dirs = sorted(p for p in clang_lib.iterdir() if p.is_dir()) if clang_lib.is_dir() else []
+        bindgen_args = [
+            f"--target={spec['bindgen_target']}",
+            f"--sysroot={mingw_root / spec['mingw_triple']}",
+        ]
+        if resource_dirs:
+            bindgen_args += ["-resource-dir", str(resource_dirs[-1])]
+        generic_inc = mingw_root / "generic-w64-mingw32/include"
+        if generic_inc.is_dir():
+            bindgen_args += ["-isystem", str(generic_inc)]
+        env["BINDGEN_EXTRA_CLANG_ARGS"] = " ".join(bindgen_args)
+
     build = out / "build"
     digest = hashlib.sha256(rev.encode())
     digest.update(subprocess.check_output(["git", "-C", str(src), "diff", "--binary", "HEAD"]))
@@ -258,10 +278,10 @@ def main():
         "-Dlibunwind=disabled", "-Dgles1=disabled", "-Dgles2=disabled", "-Dopengl=false",
         "-Dshader-cache=enabled", "-Dzlib=disabled", "-Dzstd=disabled", "-Dexpat=disabled",
         "-Dmesa-clc=system", "-Dbuildtype=release", f"-Dnvk-windows-kmt-object={kmt_object}",
-        "-Dnvk-build-id=" + digest.hexdigest())
+        "-Dnvk-build-id=" + digest.hexdigest(), env=env)
     controls = ["test-nvk-win32-sync.exe", "test-nvk-win32-owner.exe", "test-nvk-win32-written.exe"]
     run("ninja", "-C", build, "src/nouveau/vulkan/libvulkan_nouveau.dll",
-        *("src/nouveau/vulkan/" + name for name in controls))
+        *("src/nouveau/vulkan/" + name for name in controls), env=env)
     for name in controls:
         shutil.copyfile(build / "src/nouveau/vulkan" / name, out / name)
     dll = out / "libvulkan_nouveau.dll"

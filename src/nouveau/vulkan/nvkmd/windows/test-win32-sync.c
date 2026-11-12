@@ -307,6 +307,22 @@ tg_kmt_submit_primaries(uint32_t context, uint64_t address, const void *words,
 }
 
 LONG
+tg_kmt_submit_indirect(uint32_t context, uint64_t address, const void *words,
+                       uint32_t bytes, const struct tg_gpu_submit_indirect *indirect,
+                       uint32_t count, const uint32_t *allocations)
+{
+   (void)context;
+   (void)address;
+   (void)words;
+   (void)bytes;
+   (void)indirect;
+   (void)count;
+   (void)allocations;
+   CHECK(false); /* A synchronization control must never execute GPU commands. */
+   return TG_KMT_INVALID_PARAMETER;
+}
+
+LONG
 tg_kmt_wait_fences(const struct tg_kmt_device *dev, uint32_t count,
                    const uint32_t *handles, const uint64_t *points, bool any, DWORD timeout)
 {

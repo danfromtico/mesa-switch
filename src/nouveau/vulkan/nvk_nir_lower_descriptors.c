@@ -406,7 +406,9 @@ cbuf_set_is_push(const struct lower_descriptors_ctx *ctx, uint8_t desc_set)
 
    return set_layout != NULL &&
           (set_layout->flags &
-           VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT);
+           VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT) &&
+          !(set_layout->flags &
+            VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
 }
 
 static void

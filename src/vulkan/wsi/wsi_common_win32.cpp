@@ -187,19 +187,11 @@ wsi_win32_surface_get_capabilities(VkIcdSurfaceBase *surf,
    if (!GetClientRect(surface->hwnd, &win_rect))
       return VK_ERROR_SURFACE_LOST_KHR;
 
-   caps->surfaceCapabilities.minImageCount = 1;
-
-   if (!wsi_device->sw && wsi_device->win32.get_d3d12_command_queue) {
-      /* DXGI doesn't support random presenting order (images need to
-       * be presented in the order they were acquired), so we can't
-       * expose more than two image per swapchain.
-       */
-      caps->surfaceCapabilities.minImageCount = caps->surfaceCapabilities.maxImageCount = 2;
-   } else {
-      caps->surfaceCapabilities.minImageCount = 1;
-      /* Software callbacke, there is no real maximum */
-      caps->surfaceCapabilities.maxImageCount = 0;
-   }
+   wsi_win32_get_surface_image_count_bounds(
+      wsi_device->sw,
+      wsi_device->win32.get_d3d12_command_queue != NULL,
+      &caps->surfaceCapabilities.minImageCount,
+      &caps->surfaceCapabilities.maxImageCount);
 
    caps->surfaceCapabilities.currentExtent = {
       (uint32_t)win_rect.right - (uint32_t)win_rect.left,

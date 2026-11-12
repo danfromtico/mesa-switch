@@ -3,8 +3,32 @@
 #define WSI_WIN32_PACING_H
 
 #include <windows.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+
+static inline void
+wsi_win32_get_surface_image_count_bounds(bool sw,
+                                         bool has_d3d12_queue,
+                                         uint32_t *min_images,
+                                         uint32_t *max_images)
+{
+   if (!sw && has_d3d12_queue) {
+      /* DXGI requires in-order presentation, so cap at double buffering. */
+      *min_images = 2;
+      *max_images = 2;
+   } else if (!sw) {
+      /* Hardware GDI/CPU presentation allocates a device-local image, a
+       * linear host-visible blit buffer, and a 32-bpp DIB per swapchain
+       * slot. Require at least double buffering and cap in-flight images.
+       */
+      *min_images = 2;
+      *max_images = 4;
+   } else {
+      *min_images = 1;
+      *max_images = 0;
+   }
+}
 
 /* CPU presentation has no swapchain wait object. Use a private one-shot
  * timer, without changing the system timer resolution or polling the CPU.

@@ -1807,12 +1807,19 @@ nvk_cmd_buffer_get_cbuf_addr(struct nvk_cmd_buffer *cmd,
    }
 
    case NVK_CBUF_TYPE_UBO_DESC: {
+      if (desc->sets[cbuf->desc_set].type == NVK_DESCRIPTOR_SET_TYPE_NONE) {
+         *addr_out = (struct nvk_buffer_address) { .size = 0 };
+         return true;
+      }
+
       if (desc->sets[cbuf->desc_set].type != NVK_DESCRIPTOR_SET_TYPE_PUSH)
          return false;
 
       struct nvk_push_descriptor_set *push = desc->sets[cbuf->desc_set].push;
-      if (push == NULL)
-         return false;
+      if (push == NULL) {
+         *addr_out = (struct nvk_buffer_address) { .size = 0 };
+         return true;
+      }
 
       assert(cbuf->desc_offset < NVK_PUSH_DESCRIPTOR_SET_SIZE);
       union nvk_buffer_descriptor desc;

@@ -20,6 +20,14 @@ static uint64_t cpu_ticks(void)
 
 int main(void)
 {
+   uint32_t min_images = 0, max_images = 0;
+   wsi_win32_get_surface_image_count_bounds(false, false, &min_images, &max_images);
+   CHECK(min_images == 2 && max_images == 4);
+   wsi_win32_get_surface_image_count_bounds(false, true, &min_images, &max_images);
+   CHECK(min_images == 2 && max_images == 2);
+   wsi_win32_get_surface_image_count_bounds(true, false, &min_images, &max_images);
+   CHECK(min_images == 1 && max_images == 0);
+
    struct wsi_win32_pacer pacer;
    CHECK(wsi_win32_pacer_init(&pacer, 0) && !pacer.timer);
    CHECK(wsi_win32_pacer_wait(&pacer));
