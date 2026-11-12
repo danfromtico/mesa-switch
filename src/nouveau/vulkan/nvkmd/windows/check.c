@@ -29,6 +29,18 @@ int main(int argc, char **argv)
    PFN_vkGetInstanceProcAddr gipa =
       (void *)GetProcAddress(lib, loader ? "vkGetInstanceProcAddr" : "vk_icdGetInstanceProcAddr");
    if (!gipa) { FreeLibrary(lib); return 5; }
+   uint32_t icd_version = 0;
+   if (!loader) {
+      typedef VkResult (VKAPI_PTR *PFN_negotiate)(uint32_t *);
+      PFN_negotiate negotiate =
+         (void *)GetProcAddress(lib, "vk_icdNegotiateLoaderICDInterfaceVersion");
+      void *gpdpa = (void *)GetProcAddress(lib, "vk_icdGetPhysicalDeviceProcAddr");
+      if (!negotiate || !gpdpa) { FreeLibrary(lib); return 5; }
+      icd_version = 7;
+      if (negotiate(&icd_version) != VK_SUCCESS || icd_version < 5) {
+         FreeLibrary(lib); return 5;
+      }
+   }
    PFN_vkEnumerateInstanceVersion version = (void *)gipa(NULL, "vkEnumerateInstanceVersion");
    PFN_vkCreateInstance create = (void *)gipa(NULL, "vkCreateInstance");
    if (!version || !create) { FreeLibrary(lib); return 6; }
@@ -81,11 +93,11 @@ int main(int argc, char **argv)
    }
    destroy(instance, NULL);
    FreeLibrary(lib);
-   printf("{\"scope\":\"NVK Windows ICD identity\",\"loader\":%s,\"api_version\":%u,"
+   printf("{\"scope\":\"NVK Windows ICD identity\",\"loader\":%s,\"icd_interface\":%u,\"api_version\":%u,"
           "\"kmt_adapters\":%u,\"private_queries_ok\":%u,\"matching_kmd\":%u,"
           "\"native_ready_kmd\":%u,\"enumerate_result\":%d,\"physical_devices\":%u,"
           "\"kmt_luid\":\"%016llx\",\"matching_luid\":%s}\n",
-          loader ? "true" : "false", api, scan.enumerated, scan.queried, scan.matched, scan.native_ready, r, count,
+          loader ? "true" : "false", icd_version, api, scan.enumerated, scan.queried, scan.matched, scan.native_ready, r, count,
           (unsigned long long)expected, luid_match ? "true" : "false");
    return r == VK_SUCCESS && (scan.native_ready ? luid_match : count == 0) ? 0 : 10;
 }

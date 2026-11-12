@@ -322,7 +322,7 @@ else
       error('Build the Windows SDK KMT bridge with src/nouveau/vulkan/nvkmd/windows/build_icd.py')
     endif
     nvk_shared_kwargs += {
-      'vs_module_defs' : 'nvkmd/windows/nvk_windows.def',
+      'vs_module_defs' : vulkan_api_def,
       'objects' : files(nvk_kmt_object),
       'dependencies' : cc.find_library('gdi32'),
     }
@@ -339,18 +339,32 @@ endif
 
 icd_file_name = libname_prefix + 'vulkan_nouveau.' + libname_suffix
 
+nouveau_icd_command = [
+  prog_python, '@INPUT0@',
+  '--api-version', '1.4', '--xml', '@INPUT1@',
+  '--sizeof-pointer', sizeof_pointer,
+  '--icd-lib-path', vulkan_icd_lib_path,
+  '--icd-filename', icd_file_name,
+  '--out', '@OUTPUT@',
+]
+nouveau_dev_icd_command = [
+  prog_python, '@INPUT0@',
+  '--api-version', '1.4', '--xml', '@INPUT1@',
+  '--sizeof-pointer', sizeof_pointer,
+  '--icd-lib-path', meson.current_build_dir(),
+  '--icd-filename', icd_file_name,
+  '--out', '@OUTPUT@',
+]
+if with_platform_windows
+  nouveau_icd_command += '--use-backslash'
+  nouveau_dev_icd_command += '--use-backslash'
+endif
+
 nouveau_icd = custom_target(
   'nouveau_icd',
   input : [vk_icd_gen, vk_api_xml],
   output : 'nouveau_icd.' + vulkan_manifest_suffix,
-  command : [
-    prog_python, '@INPUT0@',
-    '--api-version', '1.4', '--xml', '@INPUT1@',
-    '--sizeof-pointer', sizeof_pointer,
-    '--icd-lib-path', vulkan_icd_lib_path,
-    '--icd-filename', icd_file_name,
-    '--out', '@OUTPUT@',
-  ],
+  command : nouveau_icd_command,
   build_by_default : true,
   install_dir : with_vulkan_icd_dir,
   install_tag : 'runtime',
@@ -362,14 +376,7 @@ _dev_icd = custom_target(
   'nouveau_devenv_icd',
   input : [vk_icd_gen, vk_api_xml],
   output : _dev_icdname,
-  command : [
-    prog_python, '@INPUT0@',
-    '--api-version', '1.4', '--xml', '@INPUT1@',
-    '--sizeof-pointer', sizeof_pointer,
-    '--icd-lib-path', meson.current_build_dir(),
-    '--icd-filename', icd_file_name,
-    '--out', '@OUTPUT@',
-  ],
+  command : nouveau_dev_icd_command,
   build_by_default : true,
 )
 

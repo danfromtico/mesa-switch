@@ -74,7 +74,12 @@ create_mapping_control(HANDLE file, LPSECURITY_ATTRIBUTES security,
 
 /* Intercept this SDK import in the fixture only. Successful requests still
  * use the real Windows section API and VirtualQuery checks below. */
+#ifdef _M_IX86
+create_mapping_fn imp_CreateFileMappingW __asm__("__imp__CreateFileMappingW@24") =
+   create_mapping_control;
+#else
 create_mapping_fn __imp_CreateFileMappingW = create_mapping_control;
+#endif
 
 static void
 check_object_attributes(const OBJECT_ATTRIBUTES *attributes)

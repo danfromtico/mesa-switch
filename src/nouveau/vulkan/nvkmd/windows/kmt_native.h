@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "kmt.h"
 #include "memory_budget.h"
+#include "submit_abi.h"
 
 #define TG_KMT_PAGE_SIZE UINT64_C(4096)
 #define TG_KMT_VA_START UINT64_C(0x10000)

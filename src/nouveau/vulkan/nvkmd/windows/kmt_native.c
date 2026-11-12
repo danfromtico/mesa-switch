@@ -274,6 +274,8 @@ allocate_memory(struct tg_kmt_device *dev, uint64_t size, bool cpu_visible,
    if (size > UINT64_MAX - (TG_KMT_PAGE_SIZE - 1))
       return TG_KMT_NO_VIDEO_MEMORY;
    size = (size + TG_KMT_PAGE_SIZE - 1) & ~(TG_KMT_PAGE_SIZE - 1);
+   if (cpu_visible && size > SIZE_MAX)
+      return TG_KMT_NO_MEMORY;
    if (!charge_memory(dev, size))
       return TG_KMT_NO_VIDEO_MEMORY;
 
