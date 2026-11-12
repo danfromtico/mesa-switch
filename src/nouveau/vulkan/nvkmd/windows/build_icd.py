@@ -64,9 +64,17 @@ def main():
     run(*sdk_cc, "/O2", "/GS-", "/Zl", f"/Fo{displayable_test}", "--", win / "test-kmt-displayable.c")
     run(a.cc, displayable_test, kmt_object, "-Wl,--gc-sections", "-lgdi32",
         "-o", out / "test-kmt-displayable.exe")
+
+    memory_test = out / "test-kmt-memory.obj"
+    run(*sdk_cc, "/O2", "/GS-", "/Zl", f"/Fo{memory_test}", "--", win / "test-kmt-memory.c")
+    run(a.cc, memory_test, kmt_object, "-Wl,--gc-sections", "-lgdi32",
+        "-o", out / "test-kmt-memory.exe")
     run(a.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
         win / "check-shared.c", win / "kmt.c", kmt_object, "-lgdi32",
         "-o", out / "nvk-windows-shared-check.exe")
+    run(a.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+        win / "check-memory.c", win / "kmt.c", kmt_object, "-lgdi32",
+        "-o", out / "nvk-windows-memory-check.exe")
     run(a.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror", "-I" + str(src / "include"),
         win / "check-vulkan-shared.c", win / "kmt.c",
         "-o", out / "nvk-windows-vulkan-shared-check.exe")
@@ -111,6 +119,7 @@ def main():
              out / "test-kmt-shared.exe", out / "test-kmt-sync.exe", out / "test-kmt-displayable.exe",
              *(out / name for name in controls),
              out / "nvk-windows-shared-check.exe",
+             out / "test-kmt-memory.exe", out / "nvk-windows-memory-check.exe",
              out / "nvk-windows-vulkan-shared-check.exe", out / "test-win32-image-flags.exe",
              out / "test-win32-pacing.exe", manifest]
     hashes = {f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in files}

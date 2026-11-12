@@ -111,6 +111,72 @@ tg_kmt_close_device(struct tg_kmt_device *dev)
 }
 
 LONG
+tg_kmt_query_video_memory(const struct tg_gpu_adapter_info *info,
+                          struct tg_kmt_video_memory groups[TG_KMT_MEMORY_GROUPS])
+{
+   _Static_assert(TG_KMT_MEMORY_LOCAL == D3DKMT_MEMORY_SEGMENT_GROUP_LOCAL &&
+                  TG_KMT_MEMORY_NON_LOCAL == D3DKMT_MEMORY_SEGMENT_GROUP_NON_LOCAL,
+                  "segment group ABI");
+   struct tg_kmt_video_memory result[TG_KMT_MEMORY_GROUPS] = {0};
+   memset(groups, 0, sizeof(result));
+   D3DKMT_OPENADAPTERFROMLUID open = {
+      .AdapterLuid = { .LowPart = info->luid_low, .HighPart = info->luid_high },
+   };
+   LONG status = D3DKMTOpenAdapterFromLuid(&open);
+   if (status < 0)
+      return status;
+
+   for (UINT group = 0; group < TG_KMT_MEMORY_GROUPS && status >= 0; group++) {
+      /* A null hProcess selects the calling process (d3dkmthk.h). */
+      D3DKMT_QUERYVIDEOMEMORYINFO query = {
+         .hAdapter = open.hAdapter,
+         .MemorySegmentGroup = (D3DKMT_MEMORY_SEGMENT_GROUP)group,
+      };
+      status = D3DKMTQueryVideoMemoryInfo(&query);
+      result[group] = (struct tg_kmt_video_memory) {
+         .budget = query.Budget, .usage = query.CurrentUsage,
+         .reservation = query.CurrentReservation,
+         .available_for_reservation = query.AvailableForReservation,
+      };
+   }
+   const D3DKMT_CLOSEADAPTER close = { .hAdapter = open.hAdapter };
+   const LONG closed = D3DKMTCloseAdapter(&close);
+   if (status >= 0)
+      status = closed;
+   if (status >= 0)
+      memcpy(groups, result, sizeof(result));
+   return status;
+}
+
+LONG
+tg_kmt_query_segment(const struct tg_gpu_adapter_info *info, uint32_t segment,
+                     struct tg_kmt_segment_statistics *statistics)
+{
+   *statistics = (struct tg_kmt_segment_statistics){0};
+   /* Too large for a small stack; the layout is the SDK's. */
+   D3DKMT_QUERYSTATISTICS *query = calloc(1, sizeof(*query));
+   if (!query)
+      return TG_KMT_NO_MEMORY;
+   query->Type = D3DKMT_QUERYSTATISTICS_SEGMENT;
+   query->AdapterLuid.LowPart = info->luid_low;
+   query->AdapterLuid.HighPart = info->luid_high;
+   query->QuerySegment.SegmentId = segment;
+   const LONG status = D3DKMTQueryStatistics(query);
+   if (status >= 0) {
+      const D3DKMT_QUERYSTATISTICS_SEGMENT_INFORMATION *s =
+         &query->QueryResult.SegmentInformation;
+      statistics->commit_limit = s->CommitLimit;
+      statistics->committed = s->BytesCommitted;
+      statistics->resident = s->BytesResident;
+      statistics->aperture = s->Aperture;
+      memcpy(&statistics->properties, &s->SegmentProperties,
+             sizeof(statistics->properties));
+   }
+   free(query);
+   return status;
+}
+
+LONG
 tg_kmt_create_context(const struct tg_kmt_device *dev, uint32_t *context)
 {
    D3DKMT_CREATECONTEXTVIRTUAL args = {

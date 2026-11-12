@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include "kmt.h"
+#include "memory_budget.h"
 
 #define TG_KMT_PAGE_SIZE UINT64_C(4096)
 #define TG_KMT_VA_START UINT64_C(0x10000)
@@ -53,6 +54,22 @@ LONG tg_kmt_open_runtime_alias(struct tg_kmt_device *dev, uint32_t resource,
  * its unwind fails; the caller must retain it for cleanup, never use it. */
 LONG tg_kmt_close_runtime_alias(const struct tg_kmt_device *dev,
                                struct tg_kmt_runtime_alias *alias);
+
+/* D3DKMT_QUERYSTATISTICS_SEGMENT outputs, unmodified. `properties` holds the
+ * raw SegmentProperties bits; their layout depends on the OS WDDM level.
+ */
+struct tg_kmt_segment_statistics {
+   uint64_t commit_limit, committed, resident, properties;
+   uint32_t aperture;
+};
+
+/* Both queries open and close their own adapter handle and need no device.
+ * A failure returns the first failing NTSTATUS and leaves the outputs zero.
+ */
+LONG tg_kmt_query_video_memory(const struct tg_gpu_adapter_info *adapter,
+                               struct tg_kmt_video_memory groups[TG_KMT_MEMORY_GROUPS]);
+LONG tg_kmt_query_segment(const struct tg_gpu_adapter_info *adapter, uint32_t segment,
+                          struct tg_kmt_segment_statistics *statistics);
 
 LONG tg_kmt_open_device(struct tg_kmt_device *dev,
                         const struct tg_gpu_adapter_info *adapter);

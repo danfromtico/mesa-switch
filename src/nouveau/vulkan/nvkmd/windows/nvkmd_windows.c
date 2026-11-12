@@ -2,6 +2,8 @@
 #include "nvkmd_windows.h"
 #include "nvk_instance.h"
 #include "nvk_physical_device.h"
+#include "util/os_misc.h"
+#include "util/u_atomic.h"
 #include "util/u_math.h"
 #include "vk_log.h"
 #include "vk_sync_binary.h"
@@ -11,6 +13,8 @@
 struct nvkmd_windows_pdev {
    struct nvkmd_pdev base;
    struct tg_gpu_adapter_info adapter;
+   int budget_group; /* TG_KMT_MEMORY_* or TG_KMT_MEMORY_UNMEASURED */
+   int budget_query_failed;
    struct vk_sync_binary_type binary_type;
    const struct vk_sync_type *sync_types[3];
 };
@@ -76,6 +80,26 @@ const struct tg_gpu_adapter_info *
 nvkmd_windows_adapter(const struct nvkmd_pdev *pdev)
 {
    return &container_of(pdev, const struct nvkmd_windows_pdev, base)->adapter;
+}
+
+bool
+nvkmd_windows_measured_memory(struct nvkmd_pdev *base, struct vk_object_base *log,
+                              struct tg_kmt_video_memory *memory)
+{
+   struct nvkmd_windows_pdev *pdev = container_of(base, struct nvkmd_windows_pdev, base);
+   if (pdev->budget_group == TG_KMT_MEMORY_UNMEASURED)
+      return false;
+   struct tg_kmt_video_memory groups[TG_KMT_MEMORY_GROUPS];
+   const LONG status = tg_kmt_query_video_memory(&pdev->adapter, groups);
+   if (status < 0) {
+      /* Report the original status once; the estimate remains in use. */
+      if (!p_atomic_xchg(&pdev->budget_query_failed, 1))
+         vk_logw(VK_LOG_OBJS(log), "D3DKMTQueryVideoMemoryInfo returned 0x%08lx; "
+                 "memory budget falls back to the estimate", (unsigned long)status);
+      return false;
+   }
+   *memory = groups[pdev->budget_group];
+   return true;
 }
 
 static void
@@ -543,6 +567,7 @@ nvk_enumerate_windows_physical_devices(struct vk_instance *vk)
    if (!pdev)
       return vk_error(vk, VK_ERROR_OUT_OF_HOST_MEMORY);
    pdev->adapter = scan.first_ready;
+   pdev->budget_group = tg_gpu_parse_budget_group(os_get_option("NVK_WINDOWS_BUDGET_GROUP"));
    pdev->base.ops = &win_pdev_ops;
    pdev->base.debug_flags = instance->debug_flags;
    pdev->base.bind_align_B = TG_KMT_PAGE_SIZE;

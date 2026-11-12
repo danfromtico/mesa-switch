@@ -1971,6 +1971,23 @@ nvk_GetPhysicalDeviceMemoryProperties2(
             p->heapBudget[i] =
                vk_physical_device_heap_budget(available, percent, heap->size,
                                               used);
+
+#ifdef _WIN32
+            /* The values above are estimates: free system RAM and this
+             * process's vkAllocateMemory total. Once the segment group that
+             * VidMm charges for this heap has been measured on the device
+             * and selected, report VidMm's own budget and usage instead,
+             * bounded by the adapter ceiling.
+             */
+            struct tg_kmt_video_memory vidmm;
+            const bool measured =
+               nvkmd_windows_measured_memory(pdev->nvkmd, &pdev->vk.base, &vidmm);
+            const struct tg_gpu_heap_budget budget =
+               tg_gpu_heap_budget(heap->size, measured ? &vidmm : NULL,
+                                  p->heapBudget[i], used);
+            p->heapBudget[i] = budget.budget;
+            p->heapUsage[i] = budget.usage;
+#endif
          }
 
          /* From the Vulkan 1.3.278 spec:

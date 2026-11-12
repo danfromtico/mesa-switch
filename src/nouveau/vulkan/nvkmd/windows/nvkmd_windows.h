@@ -24,6 +24,12 @@ nvkmd_windows_dev(struct nvkmd_dev *dev)
 }
 
 const struct tg_gpu_adapter_info *nvkmd_windows_adapter(const struct nvkmd_pdev *pdev);
+/* VidMm's values for the segment group that NVK_WINDOWS_BUDGET_GROUP names
+ * as the measured home of this adapter's heap. False when no group was
+ * selected or the query failed; the caller then keeps its own estimate.
+ */
+bool nvkmd_windows_measured_memory(struct nvkmd_pdev *pdev, struct vk_object_base *log,
+                                   struct tg_kmt_video_memory *memory);
 VkResult nvkmd_windows_export_memory(struct nvkmd_mem *mem, struct vk_object_base *log,
                                      const VkExportMemoryWin32HandleInfoKHR *info,
                                      HANDLE *handle);

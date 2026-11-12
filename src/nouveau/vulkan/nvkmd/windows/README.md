@@ -68,6 +68,14 @@ committing a 512 MiB Windows allocation. Successful small section requests
 still use the real Windows API and verify write-combined mapping.
 [Allocation and budget audit](../../../../../tegra-x1-wddm/docs/PORTING.md#host-allocation-and-budget-audit)
 
+`test-kmt-memory.exe` checks the per-group `D3DKMTQueryVideoMemoryInfo`
+bridge and the heap-budget rules with controlled substitutes.
+`nvk-windows-memory-check.exe <LUID> [MiB]` is a live probe: it prints both
+VidMm segment groups unmerged and reports which one is charged for a resident
+allocation. `NVK_WINDOWS_BUDGET_GROUP=local|non-local` selects that measured
+group for `VK_EXT_memory_budget`; unset, the heap keeps its estimates.
+[Budget mapping](../../../../../tegra-x1-wddm/docs/PORTING.md#radv-windows-reference)
+
 Native offscreen Vulkan and D3D11 runtime rendering at feature level 10_0
 have physical passes on Switch Lite. Win32 Vulkan presentation, D3D runtime
 shared-resource integration and sustained DWM composition remain in

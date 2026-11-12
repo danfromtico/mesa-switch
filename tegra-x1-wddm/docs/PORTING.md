@@ -1166,11 +1166,26 @@ while keeping GM20B resource metadata and submission on the Tegra ABI.
   to its kernel driver.
   [NT resource sizing](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_queryresourceinfofromnthandle)
   [Allocations and imports](https://gitlab.freedesktop.org/lfrb/mesa/-/blob/801c9763c6043f0de8408e905a5324eea06d81d7/src/amd/vulkan/winsys/wddm2/radv_wddm2_bo.c) · [Queue submission](https://gitlab.freedesktop.org/lfrb/mesa/-/blob/801c9763c6043f0de8408e905a5324eea06d81d7/src/amd/vulkan/winsys/wddm2/radv_wddm2_cs.c)
-- **`VK_EXT_memory_budget`.** NVK already exposes this extension. Use
-  RADV's `QueryVideoMemoryInfo` integration as a reference for live VidMm
-  data. Map `Budget` and `CurrentUsage` to the GM20B heaps within the 512 MiB
-  ceiling. `CurrentReservation` is a distinct WDDM value.
-  [RADV query](https://gitlab.freedesktop.org/lfrb/mesa/-/blob/801c9763c6043f0de8408e905a5324eea06d81d7/src/amd/vulkan/winsys/wddm2/radv_wddm2_winsys.c#L436) · [Windows budget fields](https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_4/ns-dxgi1_4-dxgi_query_video_memory_info)
+- **`VK_EXT_memory_budget`.** NVK already exposes this extension. Its
+  Windows values are estimates by default: free system RAM scaled into the
+  512 MiB heap, and this process's `vkAllocateMemory` total. The KMT bridge
+  can query `D3DKMTQueryVideoMemoryInfo` for the calling process and keeps
+  the local and non-local segment groups separate. Which group VidMm charges
+  for the heap is not decided by source: the KMD's page-table and scanout
+  segments declare `LocalBudgetGroup`, but the paging-aperture segment that
+  holds every ordinary allocation declares neither budget-group flag, and
+  the WDK does not document a default. `nvk-windows-memory-check.exe <LUID>`
+  measures it on the device by sampling both groups around one resident
+  allocation; it also prints `Budget`, `CurrentUsage`, `CurrentReservation`
+  and `AvailableForReservation` per group and the raw segment statistics.
+  After a measured result, `NVK_WINDOWS_BUDGET_GROUP=local` or `non-local`
+  makes the heap report that group's `Budget` (bounded by the 512 MiB
+  ceiling) and `CurrentUsage`. A zero `Budget` or a failed query keeps the
+  estimate; `CurrentReservation` is never counted as usage. Without the
+  variable nothing changes. `test-kmt-memory.exe` covers the query ABI,
+  failure statuses, adapter-handle ownership and these rules with controlled
+  substitutes. The physical measurement is pending.
+  [Budget rules](../../src/nouveau/vulkan/nvkmd/windows/memory_budget.h) · [Segment flags](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_segmentflags) · [RADV query](https://gitlab.freedesktop.org/lfrb/mesa/-/blob/801c9763c6043f0de8408e905a5324eea06d81d7/src/amd/vulkan/winsys/wddm2/radv_wddm2_winsys.c#L436) · [Windows budget fields](https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_4/ns-dxgi1_4-dxgi_query_video_memory_info)
 - **`VK_EXT_pageable_device_local_memory`.** The RADV branch provides
   examples of `MakeResident`, paging-fence waits and `Evict`. Implement and
   verify the extension on GM20B with `VK_EXT_memory_priority`, live allocation
