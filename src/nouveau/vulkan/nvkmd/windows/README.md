@@ -76,6 +76,16 @@ allocation. `NVK_WINDOWS_BUDGET_GROUP=local|non-local` selects that measured
 group for `VK_EXT_memory_budget`; unset, the heap keeps its estimates.
 [Budget mapping](../../../../../tegra-x1-wddm/docs/PORTING.md#radv-windows-reference)
 
+`test-exec-transport.exe` checks the inline (`TG_GPU_SUBMIT_ABI = 1`) and
+indirect (`TG_GPU_SUBMIT_ABI_INDIRECT = 2`) submission transport model used
+for pre-Turing `DrawIndirect`, `DrawIndexedIndirect`, transform-feedback
+`DrawAuto` / counter loads, and `DispatchIndirect`. `build_icd.py --arch
+{arm64,arm64ec,x64,x86}` validates the Windows SDK KMT ABI and undecorated ICD
+v7 exports across native ARM64, ARM64EC, x64, and 32-bit WOW64 x86 targets
+(full `libvulkan_nouveau.dll` linking requires the matching Rust `rust-std`
+target for NAK and LLVM-MinGW sysroot).
+[DXVK game path and indirect transport](../../../../../tegra-x1-wddm/docs/DXVK_GAMES.md)
+
 Native offscreen Vulkan and D3D11 runtime rendering at feature level 10_0
 have physical passes on Switch Lite. Win32 Vulkan presentation, D3D runtime
 shared-resource integration and sustained DWM composition remain in

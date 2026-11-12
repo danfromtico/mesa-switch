@@ -1,0 +1,292 @@
+# Direct3D 9/10/11 applications through DXVK
+
+Game-facing Direct3D 9, 10, and 11 applications use upstream DXVK on top of the
+Windows NVK ICD (`libvulkan_nouveau.dll`), the KMT transport bridge, and the
+GM20B WDDM KMD. The Windows desktop retains its separate D3D UMD and Zink path;
+nothing here modifies desktop composition, CPU clock policy, fan, sleep, power,
+or display mode management.
+
+**Status: source, KMD/ICD/KMT ABIs, host models, and cross-builds implemented;
+no GM20B hardware execution is claimed here.** Earlier offscreen smoke runs
+passed on an x86-64 host under Wine with Mesa lavapipe (software Vulkan
+control). Native Switch Lite GM20B hardware validation remains a separate step.
+
+## Pinned DXVK and license boundary
+
+| Field | Value |
+|---|---|
+| Upstream repository | `https://github.com/doitsujin/dxvk.git` |
+| Tag | `v3.1.1` |
+| Commit | `b1a1c99ab52b687cf950d62c88bc2fa316b41663` |
+| Submodules | `dxbc-spirv` `bf14419e`, `libdisplay-info` `275e6459`, Vulkan headers `8864cdc8`, SPIR-V headers `04f10f65`, DirectX headers `9df86f23`, `spirv_headers` `c8ad050f` |
+| Upstream license | zlib/libpng (retained unmodified; DXVK source is not vendored into this repository) |
+
+`tegra-x1-wddm/tools/dxvk/build_dxvk.py` builds only a clean checkout of that
+exact commit and submodule state, refusing any modified tracked files or
+mismatched SHA. All adaptation lives in NVK, Windows WSI, KMT, and the GM20B
+KMD inside this repository.
+
+## Vulkan requirements read from DXVK `v3.1.1`
+
+Requirements audited directly from `src/dxvk/dxvk_instance.h` and
+`src/dxvk/dxvk_device_info.cpp` at `b1a1c99ab52b687cf950d62c88bc2fa316b41663`:
+
+- **Vulkan 1.3.** `DxvkVulkanApiVersion = VK_API_VERSION_1_3`; devices
+  reporting a lower `apiVersion` are rejected.
+- **Required extensions** (`getFeatureList()` entries with `require = true`):
+  `VK_EXT_depth_clip_enable`, `VK_EXT_robustness2` (`robustBufferAccess2`,
+  `nullDescriptor`), `VK_KHR_load_store_op_none`, `VK_KHR_maintenance5`,
+  `VK_KHR_maintenance6`, and `VK_KHR_swapchain`.
+- **Required core features:**
+  - **1.0:** `depthBiasClamp`, `depthClamp`, `dualSrcBlend`,
+    `fillModeNonSolid`, `fragmentStoresAndAtomics`, `fullDrawIndexUint32`,
+    `geometryShader`, `imageCubeArray`, `independentBlend`,
+    `multiDrawIndirect`, `multiViewport`, `occlusionQueryPrecise`,
+    `robustBufferAccess`, `sampleRateShading`, `samplerAnisotropy`,
+    `shaderClipDistance`, `shaderCullDistance`, `shaderImageGatherExtended`,
+    `shaderInt16`, `shaderInt64`, `shaderSampledImageArrayDynamicIndexing`,
+    `textureCompressionBC`.
+  - **1.1:** `shaderDrawParameters`, `storageBuffer16BitAccess`.
+  - **1.2:** `bufferDeviceAddress`, `descriptorIndexing`
+    (`descriptorBindingSampledImageUpdateAfterBind`,
+    `descriptorBindingUpdateUnusedWhilePending`,
+    `descriptorBindingPartiallyBound`), `hostQueryReset`,
+    `runtimeDescriptorArray`, `samplerMirrorClampToEdge`, `scalarBlockLayout`,
+    `shaderInt8`, `storageBuffer8BitAccess`, `timelineSemaphore`,
+    `uniformBufferStandardLayout`, `vulkanMemoryModel`.
+  - **1.3:** `inlineUniformBlock`, `computeFullSubgroups`, `dynamicRendering`,
+    `maintenance4`, `shaderDemoteToHelperInvocation`,
+    `shaderZeroInitializeWorkgroupMemory`, `subgroupSizeControl`,
+    `synchronization2`.
+- **Queue and limits:** a graphics queue and `maxPushConstantsSize >= 256`
+  (NVK exposes `256` bytes).
+- **Optional extensions/features used when advertised:**
+  `VK_EXT_transform_feedback`, `VK_EXT_memory_budget`, `VK_EXT_multi_draw`,
+  `VK_EXT_descriptor_buffer`, `VK_EXT_swapchain_maintenance1` /
+  `VK_KHR_swapchain_maintenance1`, `VK_EXT_Attachment_feedback_loop_layout`,
+  `VK_EXT_custom_border_color`, `VK_EXT_depth_bias_control`,
+  `VK_EXT_extended_dynamic_state3`, `VK_EXT_conservative_rasterization` (not
+  supported on GM20B SM 5.3; stayed disabled), `tessellationShader`,
+  `logicOp`, `drawIndirectFirstInstance`, `pipelineStatisticsQuery`.
+- **Intentionally unadvertised on Windows GM20B:**
+  - `VK_KHR_present_id{,2}`, `VK_KHR_present_wait{,2}`, and
+    `VK_EXT_present_timing` (disabled on `VK_USE_PLATFORM_WIN32_KHR` because
+    GDI presentation has no kernel vblank completion timestamp/ID).
+  - `VK_EXT_memory_priority` and `VK_EXT_pageable_device_local_memory`
+    (allocations are made resident on creation without a priority/evict path).
+  - `VK_KHR_copy_memory_indirect` and `VK_EXT_device_generated_commands`
+    (gated off on `_WIN32` because their Turing+/arbitrary indirect command
+    token streams are outside the validated GM20B indirect ABI).
+
+## Binding model and constant-buffer invariant
+
+- DXVK `v3.1.1` selects its `VK_EXT_descriptor_buffer` binding model for
+  `VK_DRIVER_ID_MESA_NVK`.
+- Direct draws use `vkCmdDrawMultiEXT` / `vkCmdDrawMultiIndexedEXT`, which NVK
+  records as inline `NVK_MME_DRAW` / `NVK_MME_DRAW_INDEXED` calls accepted by
+  the KMD validator.
+- Before Turing (`cls_eng3d < TURING_A`), `nvk_nir_lower_descriptors.c`
+  promotes UBO descriptors to hardware constant-buffer bindings
+  (`NVK_CBUF_TYPE_UBO_DESC`) **only** for host-pushed descriptor sets
+  (`VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT` *without*
+  `VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT`), whose addresses
+  are resolved on the CPU during recording. Descriptor-buffer sets—including
+  descriptor-buffer push sets bound via `vkCmdSetDescriptorBufferOffsetsEXT`—lower
+  UBO reads to global memory loads and never emit `NVK_MME_BIND_CBUF_DESC`
+  indirect GPFIFO segments. Unpushed/null push sets unbind the constant-buffer
+  slot cleanly.
+
+## Indirect command and transform-feedback submission (`TG_GPU_SUBMIT_ABI_INDIRECT = 2`)
+
+Pre-Turing GM20B executes indirect draws, `DrawAuto`, transform-feedback
+counter loads, and indirect compute dispatches by opening an MME macro call in
+an inline push slice, fetching the indirect argument words from application GPU
+memory via a middle GPFIFO entry, and finishing in a validated inline suffix
+slice:
+
+| Vulkan command | Direct3D 10/11 origin | GPFIFO topology | Indirect payload |
+|---|---|---|---|
+| `vkCmdDrawIndirect` / `vkCmdDrawIndirectCount` (count=1) | D3D11 `DrawInstancedIndirect` | 3 entries (`prefix -> indirect -> suffix`) | `16 * drawCount` bytes (`VkDrawIndirectCommand`) |
+| `vkCmdDrawIndexedIndirect` | D3D11 `DrawIndexedInstancedIndirect` | 3 entries (`prefix -> indirect -> suffix`) | `20 * drawCount` bytes (`VkDrawIndexedIndirectCommand`) |
+| `vkCmdDrawIndirectByteCountEXT` | D3D10/11 `DrawAuto` | 3 entries (`prefix -> indirect -> suffix`) | `4` bytes (XFB byte counter) |
+| `vkCmdBeginTransformFeedbackEXT` (counter buffers) | D3D10/11 `SOSetTargets` append/resume | 3 entries (`prefix -> indirect -> suffix`) | `4` bytes per counter |
+| `vkCmdDispatchIndirect` | D3D11 `DispatchIndirect` | 4 entries (`prefix -> indirect[NO_PREFETCH] -> suffix_mme[PROCEED] -> suffix_pcas`) | `12` bytes (`VkDispatchIndirectCommand`) |
+
+### End-to-end submission and validator contract
+
+1. **No CPU readback, no per-draw queue idle, no busy polling.** NVK splits the
+   command stream around each `nvk_cmd_buffer_push_indirect()` segment, keeping
+   the indirect argument fetch on the GPU channel. `nvk_CmdDispatchIndirect2KHR`
+   flushes its inline QMD + `SEND_PCAS_A` continuation immediately after the
+   indirect argument slice so every indirect dispatch forms a self-contained
+   `(prefix, indirect, suffix)` tuple in `exec_transport.h`.
+2. **Transport ABI (`struct tg_gpu_submit_indirect`).** Carries
+   `version = TG_GPU_SUBMIT_ABI_INDIRECT` (`2`), `indirect_va`,
+   `indirect_bytes`, and `suffix_offset` splitting the private inline buffer
+   into `[0, suffix_offset)` (prefix) and `[suffix_offset, inline_bytes)`
+   (suffix). Submissions without indirect arguments continue using ABI v1
+   (`TG_GPU_SUBMIT_ABI = 1`) unchanged.
+3. **KMD command-stream validation (`tegra-x1-wddm/core/command_stream.c`):**
+   - Prefix must open *exactly one* allow-listed indirect MME macro call
+     (`NVK_MME_DRAW_INDIRECT`, `NVK_MME_DRAW_INDEXED_INDIRECT`,
+     `NVK_MME_XFB_DRAW_INDIRECT`, `NVK_MME_XFB_COUNTER_LOAD`, or
+     `NVK_MME_DISPATCH_INDIRECT`) as its final method header, preceded by a
+     host `NVB06F_WFI(SCOPE_ALL)` (and preceded in suffix for compute before
+     `SEND_PCAS_A`) so prior GPU writes to the indirect buffer or QMD complete
+     before host/PBDMA fetch.
+   - `indirect_bytes` must equal the exact expected macro argument byte count
+     (4-byte aligned, non-zero, within `TG_GPU_MAX_INDIRECT_BYTES = 256 KiB`),
+     ensuring GPU-fetched words are consumed purely as MME macro data and can
+     never be interpreted as GPU method headers.
+   - For `NVK_MME_DISPATCH_INDIRECT`, the validator verifies the 64-word inline
+     QMD record, relocates it to a 256-byte-aligned KMD QMD slot, patches both
+     `SEND_PCAS_A` *and* the MME suffix's `qmd_addr` parameter so MME's
+     `STORE_RAM` writes ` gridDimX/Y/Z ` into the exact live QMD launched by
+     `SEND_PCAS_A`, and splits the suffix at the `WFI` boundary with `PROCEED`
+     so `SEND_PCAS_A` is not prefetched before MME updates the QMD.
+   - Validates transform-feedback target buffer ranges (`SetStreamOutBuffer*`)
+     and conditional-rendering semaphore ranges (`SetRenderEnable*`, 32-byte
+     pair) against mapped context allocations.
+4. **Residency, lifetime, and synchronization (`context.c` / `core.c`):**
+   - KMD resolves `indirect_va` + `indirect_bytes` inside the submitting
+     context's locked VA table before queuing, rejecting unmapped, non-GPU-visible,
+     read-only-violating, or cross-boundary ranges.
+   - Submission completion is tracked on the channel's hardware syncpt /
+     monitored fence (`tg_kmt_signal_gpu` / `tg_kmt_wait_gpu`), keeping both
+     KMD inline/QMD slots and application indirect buffers ordered without
+     CPU stalls.
+
+## Windows application architectures (`ARM64`, `ARM64EC`, `x64`, `x86`)
+
+Windows on ARM loads user-mode Vulkan ICDs and DXVK DLLs strictly matching the
+process architecture:
+
+| Application process | DXVK DLLs (`build_dxvk.py`) | KMT ABI & `kmt-native.obj` (`build_icd.py`) | ICD v7 `.def` exports (`vulkan_api_def`) | Full `libvulkan_nouveau.dll` link status on this build host |
+|---|---|---|---|---|
+| Native `ARM64` | Supported (`--arch arm64`, `IMAGE_FILE_MACHINE_ARM64`) | Verified (`aarch64-pc-windows-msvc`, 64-bit KMT) | Verified undecorated | **Supported & linked** (`aarch64-pc-windows-gnullvm` installed) |
+| Emulated `x64` | Supported (`--arch x64`, `IMAGE_FILE_MACHINE_AMD64`) | Verified (`x86_64-pc-windows-msvc`, 64-bit KMT + PE tests linked) | Verified undecorated | Blocked only by missing offline Rust `rust-std` target `x86_64-pc-windows-gnullvm` for NAK |
+| Emulated `x86` (32-bit WOW64) | Supported (`--arch x86`, `IMAGE_FILE_MACHINE_I386`) | Verified (`i686-pc-windows-msvc`, 32-bit pointer / 64-bit GPU VA WOW64 KMT + PE tests linked) | Verified undecorated (`__stdcall` `@N` aliased via `vulkan_api.def.in`) | Blocked only by missing offline Rust `rust-std` target `i686-pc-windows-gnullvm` for NAK |
+| `ARM64EC` | Upstream DXVK uses `x64` DLLs in emulated/hybrid processes | Verified (`arm64ec-pc-windows-msvc` SDK layout + `kmt-native.obj` compiled) | Supported (`vulkan_api_def`) | Blocked by missing `arm64ec-w64-mingw32` CRT/import sysroot in LLVM-MinGW `20261104` and missing Rust `arm64ec-pc-windows-msvc` target |
+
+### KMT 32-bit WOW64 & 64-bit ABI details
+
+- `kmt_abi.h` and `test-kmt-sdk.c` verify `D3DKMT_*` structures against
+  Windows SDK `10.0.26100.0` (`shared/d3dkmthk.h`) on `arm64`, `arm64ec`, `x64`,
+  and 32-bit `x86` (`WOW64`, where pointer members such as `pPrivateDriverData`,
+  `pData`, `CpuVirtualAddress`, and `FenceValueCPUVirtualAddress` are 32-bit
+  with 8-byte `UINT64` alignment on GPU virtual addresses and fence values).
+- All private KMD payloads (`tg_gpu_adapter_info`, `tg_gpu_alloc_priv`,
+  `tg_gpu_submit`, `tg_gpu_submit_indirect`) use fixed-width 32/64-bit integers
+  with identical sizes and field offsets across 32-bit `x86` and 64-bit builds
+  so WOW64 user processes talk directly to the 64-bit ARM64 GM20B KMD.
+- `kmt_native.c` rejects allocation sizes exceeding 32-bit `SIZE_MAX` before
+  calling `CreateFileMappingW` / `VirtualQuery` in 32-bit processes.
+- Once `rust-std` for `x86_64-pc-windows-gnullvm` and `i686-pc-windows-gnullvm`
+  is installed into the Rust sysroot, `build_icd.py --arch x64` and
+  `build_icd.py --arch x86` can link `libvulkan_nouveau.dll` directly
+  (`nvk_windows_icd.json` for 64-bit `VulkanDriverName` and
+  `nvk_windows_icd.x86.json` for 32-bit `VulkanDriverNameWow`).
+
+## Win32 WSI presentation and synchronization
+
+- **60 Hz blocking frame pacing:** `nvk_wsi.c` sets `cpu_present_fps = 60`.
+  `wsi_win32_pacing.h` uses a per-swapchain high-resolution waitable timer
+  (`CreateWaitableTimerExW` with `CREATE_WAITABLE_TIMER_HIGH_RESOLUTION` and
+  `WaitForSingleObject(..., INFINITE)`), avoiding CPU spin-waiting, global
+  system timer resolution changes, and catch-up frame bursts after a slow
+  frame.
+- **Bounded swapchain images (`2..4`):** For hardware devices on the Win32
+  GDI/CPU presentation path (`!wsi_device->sw && !get_d3d12_command_queue`),
+  `wsi_common_win32.cpp` reports `minImageCount = 2` and `maxImageCount = 4`
+  with `VK_PRESENT_MODE_FIFO_KHR`. Each swapchain slot allocates a device-local
+  image, a linear host-visible blit buffer, and a 32-bpp DIB section; capping
+  at 4 images prevents exhausting the 512 MiB GM20B ceiling while guaranteeing
+  at least double buffering (DXVK selects 3 images by default).
+- **Resource & timeline synchronization:** `wsi_common.c` waits on the WSI blit
+  fence before copying into the DIB, flushes GDI (`GdiFlush()`) and DWM
+  (`DwmFlush()`), and supports `VK_KHR_swapchain_maintenance1` present fences
+  and image release. Cross-API Win32 timeline NT fences (`VK_KHR_external_semaphore_win32`)
+  use KMT shared monitored fences (`tg_kmt_wait_gpu` / `tg_kmt_signal_gpu`).
+  Direct Flip / MPO scanout bypass remains deferred.
+
+## Memory budget (`LOCAL` vs `NON_LOCAL` and 512 MiB ceiling)
+
+- `tg_kmt_query_video_memory()` queries `D3DKMTQueryVideoMemoryInfo` separately
+  for `D3DKMT_MEMORY_SEGMENT_GROUP_LOCAL` (`0`) and
+  `D3DKMT_MEMORY_SEGMENT_GROUP_NON_LOCAL` (`1`), keeping `Budget`,
+  `CurrentUsage`, `CurrentReservation`, and `AvailableForReservation`
+  **unmerged**.
+- Because the GM20B KMD's paging-aperture segment does not yet have a
+  hardware-measured budget-group assignment, the two groups are **never**
+  summed blindly. By default, NVK reports its conservative internal heap
+  estimate capped at `512 MiB` (`TG_GPU_MEMORY_BUDGET_BYTES`).
+- `nvk-windows-memory-check.exe <LUID> [MiB]` measures live `LOCAL` and
+  `NON_LOCAL` deltas around one resident allocation on hardware. Setting
+  `NVK_WINDOWS_BUDGET_GROUP=local` or `non-local` opts into reporting that
+  single measured group (`heapBudget = min(512 MiB, Budget)`,
+  `heapUsage = CurrentUsage`, never counting `CurrentReservation` as usage, and
+  falling back to the internal estimate on query failure or zero `Budget`).
+
+## Build recipes and offscreen smoke test
+
+### 1. Build DXVK `v3.1.1` and `dxvk-offscreen.exe`
+
+```sh
+git clone --recurse-submodules --branch v3.1.1 https://github.com/doitsujin/dxvk.git
+python3 tegra-x1-wddm/tools/dxvk/build_dxvk.py \
+  --dxvk dxvk --arch arm64 --out build/dxvk-arm64
+```
+
+Pass `--arch x64` or `--arch x86` (and optional `--mingw-bin`) to build the
+64-bit x64 or 32-bit x86 packages. [Build recipe](../tools/dxvk/build_dxvk.py)
+
+### 2. Build NVK Windows ICD and KMT test suite
+
+```sh
+python3 src/nouveau/vulkan/nvkmd/windows/build_icd.py \
+  --arch arm64 --out build/icd-arm64 \
+  --cc "$ARM64_MINGW_CC" --clang-cl "$CLANG_CL" \
+  --sdk-include "$SDK_INCLUDE" --wdk-include "$WDK_INCLUDE" \
+  --package-cache-dir "$MESA_PACKAGE_CACHE"
+```
+
+Add `--prepare-only` with `--arch {arm64,arm64ec,x64,x86}` to validate the SDK
+KMT layout and build the per-architecture KMT object and standalone PE tests.
+
+### 3. Offscreen smoke test (`dxvk-offscreen.exe`)
+
+`dxvk-offscreen.exe <d3d9|d3d10|d3d11>` loads `d3d9.dll`, `d3d10core.dll`,
+`d3d11.dll`, and `dxgi.dll` by absolute path from its own directory, renders a
+clear and a constant-buffer colored triangle into a `64x64` offscreen render
+target, and verifies CPU readback without presenting.
+
+- `dxvk-offscreen.exe selftest` verifies pixel tolerance, triangle coverage,
+  and BGRA/RGBA swizzle rules without loading Direct3D.
+- `dxvk-offscreen.exe d3d11 --indirect` additionally exercises all four
+  indirect GPU submission stages at feature level `11_0`:
+  1. `DrawInstancedIndirect` (exit `12` on failure)
+  2. `DrawIndexedInstancedIndirect` (exit `13` on failure)
+  3. Stream-Output + `DrawAuto` (exit `14` on failure)
+  4. `DispatchIndirect` compute UAV write + staging readback (exit `15` on failure)
+- `--system` runs the identical sequence against System32 Direct3D DLLs as a
+  test control and refuses to run if DXVK DLLs sit beside the executable.
+
+Exit codes: `0` pass, `1` usage, `2` module load/isolation, `3` device
+creation, `4` `d3dcompiler_47.dll` unavailable, `5` resource creation,
+`10` clear mismatch, `11` direct draw mismatch, `12` indirect draw failure,
+`13` indirect indexed draw failure, `14` `DrawAuto` failure, `15` indirect
+compute dispatch failure. [Smoke test source](../tools/dxvk/dxvk_offscreen.cpp)
+
+## Native GM20B checks required on hardware
+
+1. Deploy the matched KMD (`TegraGpuCore.lib` with `TG_GPU_SUBMIT_ABI_INDIRECT = 2`)
+   and ARM64 `libvulkan_nouveau.dll`.
+2. Run `test-kmt-memory.exe`, `test-exec-transport.exe`, `test-win32-pacing.exe`,
+   and `nvk-windows-memory-check.exe <LUID>`, recording which VidMm segment
+   group reflects resident allocations before setting `NVK_WINDOWS_BUDGET_GROUP`.
+3. From the ARM64 DXVK `package/` directory with `NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1`,
+   run `dxvk-offscreen.exe selftest`, `d3d9`, `d3d10`, `d3d11`, and
+   `d3d11 --indirect`, retaining stdout, process exit codes, and DXVK logs.
+4. Run `--system` controls from an isolated directory without DXVK DLLs.
+5. Separately validate windowed Win32 swapchain presentation (60 Hz pacing,
+   memory usage within 512 MiB, and visible client output).

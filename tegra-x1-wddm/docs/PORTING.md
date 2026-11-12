@@ -1207,15 +1207,26 @@ while keeping GM20B resource metadata and submission on the Tegra ABI.
   DXGI present. GM20B needs hardware allocation, submission and present
   behind those entry points.
   [Mesa DDI example](../../src/gallium/targets/d3d10umd/README.md)
-- **Direct3D 9, 10 and 11.** Check the chosen DXVK version against the
-  live ICD. Its current requirements include `VK_EXT_depth_clip_enable`,
-  `VK_KHR_maintenance5`, `VK_KHR_maintenance6`, `VK_KHR_load_store_op_none`,
-  `VK_EXT_robustness2` and `VK_EXT_transform_feedback`. The common NVK
-  source already advertises these names. Verify the features and Win32
+- **Direct3D 9, 10 and 11.** DXVK is pinned to `v3.1.1`
+  (`b1a1c99ab52b687cf950d62c88bc2fa316b41663`). At that commit it requires
+  Vulkan 1.3, `VK_EXT_depth_clip_enable`, `VK_KHR_maintenance5`,
+  `VK_KHR_maintenance6`, `VK_KHR_load_store_op_none`, `VK_EXT_robustness2`
+  and `VK_KHR_swapchain`; `VK_EXT_transform_feedback` and
+  `VK_EXT_descriptor_buffer` are optional and enabled on NVK. Pre-Turing
+  indirect draws, `DrawAuto`, transform-feedback counter loads, and
+  `DispatchIndirect` use the validated `TG_GPU_SUBMIT_ABI_INDIRECT` (v2)
+  GPFIFO submission path across NVK, KMT, and the GM20B KMD. Native ARM64
+  DXVK and the ARM64 NVK ICD build with LLVM-MinGW; `x64`, `x86` (WOW64), and
+  `ARM64EC` KMT and ICD export ABIs are implemented, while full `x64`/`x86`
+  ICD DLL linking additionally requires the corresponding Rust `rust-std`
+  targets for NAK (`arm64ec` also requires an ARM64EC CRT/import sysroot).
+  Verify the features, indirect stages, VidMm budget group, and Win32
   swapchain on GM20B for each tested process architecture.
-  `VK_KHR_present_wait`, `VK_KHR_swapchain_maintenance1`
-  and `VK_EXT_attachment_feedback_loop_layout` are separate compatibility
-  checks. Compare the RADV WSI and synchronization paths for this work.
+  [Requirements, indirect submission, multi-arch status, build and smoke test](DXVK_GAMES.md)
+  `VK_KHR_swapchain_maintenance1` and
+  `VK_EXT_attachment_feedback_loop_layout` are separate compatibility
+  checks (`VK_KHR_present_wait` is disabled on Win32 GDI WSI). Compare the
+  RADV WSI and synchronization paths for this work.
   [DXVK driver support](https://github.com/doitsujin/dxvk/wiki/Driver-support) · [NVK platform gate](../../src/nouveau/vulkan/nvk_physical_device.h)
 - **Zink.** Run Mesa's `zink_check_requirements` against the live Windows
   NVK driver to identify the OpenGL levels it can support. Check window
