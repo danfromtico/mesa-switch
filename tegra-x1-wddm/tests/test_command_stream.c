@@ -953,6 +953,53 @@ static void test_indirect_and_xfb_streams(void)
     assert(!tg_gpu_inspect_indirect_command_stream(disp, sizeof(disp), &disp_ind, &va, &info));
 }
 
+static void test_pipeline_statistics_stream(void)
+{
+    /* Combined 3D + compute VK_QUERY_TYPE_PIPELINE_STATISTICS stream emitted
+     * for DXVK D3D11_QUERY_PIPELINE_STATISTICS: clears 3D report + CS scratch,
+     * enables 3D counters via MME, accumulates direct CS invocations via MME,
+     * writes 3D 4-word report + CS 2-word report, disables counters, releases
+     * 1-word availability, and acquires availability before copy-query meta.
+     */
+    const struct tg_gpu_command_va va = {0x100050000, 0x100020000, 0x100030000};
+    struct tg_gpu_command_info info;
+    const uint32_t stat_report =
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, OPERATION, REPORT_ONLY) |
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, PIPELINE_LOCATION, VERTEX_SHADER) |
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, REPORT, VS_INVOCATIONS) |
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, STRUCTURE_SIZE, FOUR_WORDS) |
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, FLUSH_DISABLE, TRUE);
+    const uint32_t avail_release =
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, OPERATION, RELEASE) |
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, RELEASE, AFTER_ALL_PRECEEDING_WRITES_COMPLETE) |
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, PIPELINE_LOCATION, ALL) |
+        NVDEF(NVB197, SET_REPORT_SEMAPHORE_D, STRUCTURE_SIZE, ONE_WORD);
+    const uint32_t avail_acquire =
+        NVDEF(NVB06F, SEMAPHORED, OPERATION, ACQ_GEQ) |
+        NVDEF(NVB06F, SEMAPHORED, ACQUIRE_SWITCH, ENABLED) |
+        NVDEF(NVB06F, SEMAPHORED, RELEASE_SIZE, 4BYTE);
+
+    uint32_t stream[] = {
+        IMMD(0, NVB197_CLEAR_REPORT_VALUE, NVB197_CLEAR_REPORT_VALUE_TYPE_VS_INVOCATIONS),
+        IMMD(0, NVB197_SET_MME_SHADOW_SCRATCH(3), 0),
+        IMMD(0, NVB197_SET_MME_SHADOW_SCRATCH(4), 0),
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_SET_STATISTICS_COUNTERS), 2), 1, 0x4,
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_ADD_CS_INVOCATIONS), 2), 0, 8,
+        INCR(0, NVB197_SET_REPORT_SEMAPHORE_A, 4), 1, 0x40100, 0, stat_report,
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_WRITE_CS_INVOCATIONS), 2), 1, 0x40110,
+        IMMD(0, NVB197_FLUSH_PENDING_WRITES, 0),
+        ONEINCR(0, NVB197_CALL_MME_MACRO(NVK_MME_SET_STATISTICS_COUNTERS), 2), 0, 0x4,
+        INCR(0, NVB197_SET_REPORT_SEMAPHORE_A, 4), 1, 0x40000, 1, avail_release,
+        INCR(0, NVB06F_SEMAPHOREA, 4), 1, 0x40000, 1, avail_acquire,
+    };
+    assert(tg_gpu_inspect_command_stream(stream, sizeof(stream), &va, &info));
+    assert(info.requires_mme && info.va_end == 0x100040118);
+
+    /* Unaligned CS report address must fail. */
+    stream[16] = 0x40112;
+    assert(!tg_gpu_inspect_command_stream(stream, sizeof(stream), &va, &info));
+}
+
 int main(void)
 {
     uint32_t w[16]={0x20010000,0xb197,0x20020100,0x20010014,0xdeadbeef,0};
@@ -1009,5 +1056,6 @@ int main(void)
     test_captured_qmd();
     test_native_umd_barrier();
     test_indirect_and_xfb_streams();
+    test_pipeline_statistics_stream();
     puts("B06F packets, GM20B MME and command address ranges passed");return 0;
 }

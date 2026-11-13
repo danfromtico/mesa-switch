@@ -670,9 +670,11 @@ nvk_cmd_set_statistics_counters(struct nvk_cmd_buffer *cmd,
          P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SET_STATISTICS_COUNTERS));
          P_INLINE_DATA(p, enable);
          P_INLINE_DATA(p, pool->statistics_counter_mask);
-      } else if (pool->vk.query_type == VK_QUERY_TYPE_PIPELINE_STATISTICS &&
-                 pool->vk.pipeline_statistics &
-                    VK_QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT) {
+      }
+
+      if (pool->vk.query_type == VK_QUERY_TYPE_PIPELINE_STATISTICS &&
+          (pool->vk.pipeline_statistics &
+           VK_QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT)) {
          cmd->state.cs.active_compute_invocations_query = enable;
       }
       break;
