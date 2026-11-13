@@ -60,15 +60,28 @@ Requirements audited directly from `src/dxvk/dxvk_instance.h` and
     `synchronization2`.
 - **Queue and limits:** a graphics queue and `maxPushConstantsSize >= 256`
   (NVK exposes `256` bytes).
-- **Optional extensions/features used when advertised:**
+- **Optional extensions/features used when advertised on Windows GM20B:**
   `VK_EXT_transform_feedback`, `VK_EXT_memory_budget`, `VK_EXT_multi_draw`,
-  `VK_EXT_descriptor_buffer`, `VK_EXT_swapchain_maintenance1` /
-  `VK_KHR_swapchain_maintenance1`, `VK_EXT_Attachment_feedback_loop_layout`,
-  `VK_EXT_custom_border_color`, `VK_EXT_depth_bias_control`,
-  `VK_EXT_extended_dynamic_state3`, `VK_EXT_conservative_rasterization` (not
-  supported on GM20B SM 5.3; stayed disabled), `tessellationShader`,
-  `logicOp`, `drawIndirectFirstInstance`, `pipelineStatisticsQuery`.
+  `VK_EXT_descriptor_buffer`, `VK_EXT_graphics_pipeline_library` /
+  `VK_KHR_pipeline_library`, `VK_EXT_shader_module_identifier`,
+  `VK_EXT_swapchain_maintenance1` / `VK_KHR_swapchain_maintenance1`,
+  `VK_KHR_swapchain_mutable_format`, `VK_KHR_incremental_present`,
+  `VK_EXT_attachment_feedback_loop_layout`, `VK_EXT_custom_border_color`,
+  `VK_EXT_border_color_swizzle`, `VK_EXT_depth_bias_control`,
+  `VK_EXT_extended_dynamic_state3`, `VK_EXT_fragment_shader_interlock`,
+  `VK_EXT_line_rasterization`, `VK_EXT_non_seamless_cube_map`,
+  `VK_EXT_vertex_attribute_divisor`, `VK_KHR_dynamic_rendering_local_read`,
+  `VK_KHR_maintenance7`, `VK_KHR_unified_image_layouts`,
+  `VK_KHR_external_memory_win32`, `VK_KHR_external_semaphore_win32`,
+  `tessellationShader`, `logicOp`, `drawIndirectFirstInstance`,
+  `pipelineStatisticsQuery` (with combined 3D + direct/indirect compute
+  `CSInvocations` tracking in `nvk_query_pool.c`).
 - **Intentionally unadvertised on Windows GM20B:**
+  - `VK_EXT_conservative_rasterization` (GM20B `MAXWELL_B` supports conservative
+    rasterization in hardware, but pre-Volta NVK implements it via privileged
+    register writes in `NVK_MME_SET_CONSERVATIVE_RASTER_STATE`, which the
+    Windows GM20B KMD command-stream validator rejects; gated by
+    `!DETECT_OS_WINDOWS` in `nvk_physical_device.c`).
   - `VK_KHR_present_id{,2}`, `VK_KHR_present_wait{,2}`, and
     `VK_EXT_present_timing` (disabled on `VK_USE_PLATFORM_WIN32_KHR` because
     GDI presentation has no kernel vblank completion timestamp/ID).
@@ -146,7 +159,10 @@ slice:
      so `SEND_PCAS_A` is not prefetched before MME updates the QMD.
    - Validates transform-feedback target buffer ranges (`SetStreamOutBuffer*`)
      and conditional-rendering semaphore ranges (`SetRenderEnable*`, 32-byte
-     pair) against mapped context allocations.
+     pair) against mapped context allocations. Note: upstream DXVK `v3.1.1`
+     stubs `ID3D11DeviceContext::SetPredication` (`src/d3d11/d3d11_context.cpp:2680`)
+     and does not enable `VK_EXT_conditional_rendering`; NVK and the GM20B KMD
+     validate `SetRenderEnable*` for direct Vulkan and Zink callers.
 4. **Residency, lifetime, and synchronization (`context.c` / `core.c`):**
    - KMD resolves `indirect_va` + `indirect_bytes` inside the submitting
      context's locked VA table before queuing, rejecting unmapped, non-GPU-visible,
@@ -256,18 +272,36 @@ KMT layout and build the per-architecture KMT object and standalone PE tests.
 ### 3. Offscreen smoke test (`dxvk-offscreen.exe`)
 
 `dxvk-offscreen.exe <d3d9|d3d10|d3d11>` loads `d3d9.dll`, `d3d10core.dll`,
-`d3d11.dll`, and `dxgi.dll` by absolute path from its own directory, renders a
-clear and a constant-buffer colored triangle into a `64x64` offscreen render
-target, and verifies CPU readback without presenting.
+`d3d11.dll`, and `dxgi.dll` by absolute path from its own directory, renders
+into a `64x64` offscreen render target, and verifies CPU readback without
+presenting:
 
+- `d3d9`: render-target clear, fixed-function `XYZRHW | DIFFUSE` triangle draw,
+  and programmable SM 2.0 (`vs_2_0` / `ps_2_0`) `DrawIndexedPrimitive` with
+  `SetPixelShaderConstantF`, a 2x2 `D3DFMT_A8R8G8B8` quadrant texture, and
+  `D3DFMT_D24S8` depth-pass / depth-reject occlusion.
+- `d3d10`: render-target clear, VS/PS constant-buffer triangle draw, and
+  `DrawIndexed` with a 2x2 `R8G8B8A8_UNORM` SRV texture, dynamic constant-buffer
+  scaling, and `D24_UNORM_S8_UINT` depth-pass / depth-reject occlusion.
+- `d3d11`: all `d3d10` stages plus `D3D11_QUERY_OCCLUSION` (visible vs
+  depth-rejected sample counts) and combined 3D + direct compute
+  `D3D11_QUERY_PIPELINE_STATISTICS` (`IAVertices`, `IAPrimitives`,
+  `VSInvocations`, `PSInvocations`, and `CSInvocations`).
 - `dxvk-offscreen.exe selftest` verifies pixel tolerance, triangle coverage,
-  and BGRA/RGBA swizzle rules without loading Direct3D.
-- `dxvk-offscreen.exe d3d11 --indirect` additionally exercises all four
+  textured-quadrant/depth coverage, full-target coverage, and BGRA/RGBA swizzle
+  rules without loading Direct3D.
+- `dxvk-offscreen.exe d3d11 --indirect` additionally exercises all pre-Turing
   indirect GPU submission stages at feature level `11_0`:
-  1. `DrawInstancedIndirect` (exit `12` on failure)
-  2. `DrawIndexedInstancedIndirect` (exit `13` on failure)
-  3. Stream-Output + `DrawAuto` (exit `14` on failure)
-  4. `DispatchIndirect` compute UAV write + staging readback (exit `15` on failure)
+  1. `DrawInstancedIndirect` with non-zero `AlignedByteOffsetForArgs` and
+     `StartVertexLocation` (exit `12` on failure)
+  2. `DrawIndexedInstancedIndirect` with non-zero `AlignedByteOffsetForArgs`,
+     `StartIndexLocation`, and `BaseVertexLocation` (exit `13` on failure)
+  3. Two-pass Stream-Output append (`offset = 0` followed by `offset = ~0u`) +
+     `D3D11_QUERY_SO_STATISTICS` + `DrawAuto`, exercising both
+     `STREAMING_BYTE_COUNT` writeback, `NVK_MME_XFB_COUNTER_LOAD`, and
+     `NVK_MME_XFB_DRAW_INDIRECT` (exit `14` on failure)
+  4. `DispatchIndirect` with non-zero `AlignedByteOffsetForArgs` + structured
+     UAV write and staging readback (exit `15` on failure)
 - `--system` runs the identical sequence against System32 Direct3D DLLs as a
   test control and refuses to run if DXVK DLLs sit beside the executable.
 
