@@ -253,6 +253,10 @@ def main():
     env = os.environ.copy()
     if a.package_cache_dir is not None:
         env["MESON_PACKAGE_CACHE_DIR"] = str(a.package_cache_dir.resolve())
+    if "LIBCLANG_PATH" not in env:
+        clang_cl_lib = a.clang_cl.resolve().parent.parent / "lib"
+        if any((clang_cl_lib / name).is_file() for name in ("libclang.dylib", "libclang.so", "libclang.dll")):
+            env["LIBCLANG_PATH"] = str(clang_cl_lib)
     if "BINDGEN_EXTRA_CLANG_ARGS" not in env:
         clang_lib = mingw_root / "lib/clang"
         resource_dirs = sorted(p for p in clang_lib.iterdir() if p.is_dir()) if clang_lib.is_dir() else []
@@ -267,6 +271,11 @@ def main():
             bindgen_args += ["-isystem", str(generic_inc)]
         env["BINDGEN_EXTRA_CLANG_ARGS"] = " ".join(bindgen_args)
 
+    meson_options_file = src / "meson.options"
+    extra_meson_args = []
+    if meson_options_file.is_file() and "'tgd3d'" in meson_options_file.read_text(encoding="utf-8", errors="ignore"):
+        extra_meson_args.append("-Dtgd3d=disabled")
+
     build = out / "build"
     digest = hashlib.sha256(rev.encode())
     digest.update(subprocess.check_output(["git", "-C", str(src), "diff", "--binary", "HEAD"]))
@@ -278,7 +287,7 @@ def main():
         "-Dlibunwind=disabled", "-Dgles1=disabled", "-Dgles2=disabled", "-Dopengl=false",
         "-Dshader-cache=enabled", "-Dzlib=disabled", "-Dzstd=disabled", "-Dexpat=disabled",
         "-Dmesa-clc=system", "-Dbuildtype=release", f"-Dnvk-windows-kmt-object={kmt_object}",
-        "-Dnvk-build-id=" + digest.hexdigest(), env=env)
+        "-Dnvk-build-id=" + digest.hexdigest(), *extra_meson_args, env=env)
     controls = ["test-nvk-win32-sync.exe", "test-nvk-win32-owner.exe", "test-nvk-win32-written.exe"]
     run("ninja", "-C", build, "src/nouveau/vulkan/libvulkan_nouveau.dll",
         *("src/nouveau/vulkan/" + name for name in controls), env=env)
