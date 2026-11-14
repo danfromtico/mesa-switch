@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 . (Join-Path $PSScriptRoot 'Merge-Common.ps1')
 $m=Merge-Check
+Sync-PackageFiles $MergeRoot $m.Files 'merge-manifest.json'
 $state=Join-Path $MergeRoot 'install-state.json'
 if(Test-Path $state){throw 'Installation was already staged; inspect its recorded state'}
 $active=[IO.Path]::GetFullPath((Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\tegragpurender\Tgd3dDefault').Directory)

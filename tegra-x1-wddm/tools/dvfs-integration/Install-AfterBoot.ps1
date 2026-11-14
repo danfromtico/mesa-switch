@@ -28,6 +28,8 @@ try {
  $output=@(& (Join-Path $MergeRoot 'gpu\Prepare.ps1'));$line=@($output|Where-Object{$_ -like 'PREPARED_DIRECTORY=*'})
  if($line.Count -ne 1){throw 'Prepared GPU directory was not published'}
  $directory=$line[0].Substring('PREPARED_DIRECTORY='.Length);$r|Add-Member -NotePropertyName CandidateDirectory -NotePropertyValue $directory -Force;Save-Json $state $r
+ $gpu=Read-Json (Join-Path $directory 'trial-components.json')
+ Sync-PackageFiles $directory $gpu.files 'trial-components.json'
  & (Join-Path $directory 'Install-Default.ps1') -Prepared|Out-File (Join-Path $MergeRoot 'gpu-install.log')
  & (Join-Path $directory 'app\tgd3d-contracts.exe')|Out-File (Join-Path $MergeRoot 'umd-controls.log')
  if($LASTEXITCODE){throw 'Native ARM64 UMD CPU controls failed'}

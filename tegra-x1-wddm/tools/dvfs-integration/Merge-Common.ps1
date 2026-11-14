@@ -14,6 +14,16 @@ function Copy-Durable([string]$Source,[string]$Target) {
  try{$f.Flush($true)}finally{$f.Dispose()}
  if((File-Hash $Source) -ne (File-Hash $Target)){throw ('Copy differs: '+$Target)}
 }
+function Sync-PackageFiles([string]$Directory,$Records,[string]$ManifestName) {
+ # A cached hash is not proof of persistence across a reset. Flush every
+ # checked stream, including NTFS resident files and the manifest itself.
+ foreach($name in @($Records.PSObject.Properties.Name)+@($ManifestName)) {
+  $path=Join-Path $Directory $name
+  $f=[IO.FileStream]::new($path,[IO.FileMode]::Open,[IO.FileAccess]::ReadWrite,[IO.FileShare]::Read)
+  try{$f.Flush($true)}finally{$f.Dispose()}
+ }
+ foreach($entry in $Records.PSObject.Properties){Check-File (Join-Path $Directory $entry.Name) $entry.Value}
+}
 function Close-NativeGate {
  if(Get-ScheduledTask Tgd3dDefaultEnable -ErrorAction SilentlyContinue){Disable-ScheduledTask Tgd3dDefaultEnable|Out-Null}
  $s=[Microsoft.Win32.Registry]::LocalMachine.OpenSubKey('SYSTEM\CurrentControlSet\Services\tegragpurender',$true)
