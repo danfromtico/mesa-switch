@@ -1965,3 +1965,41 @@ CLI进程仍在，尚未观察到终态。仅确认交付文件匹配，54项测
 初审已记录报告误称host1x syncpoint（实际是USERD.Reference完成链），以及warmboot/BPMP
 配置、显示恢复和XUSB完整重载等未闭合条件；未合入或部署。详情在委派目录的
 sc7-received-review-status.json，不能将此交付标记为SC7实机完成。
+
+
+## 2026-11-14 CPU-sync timing control and recovery (UTC)
+
+Only `TGD3D_CPU_SYNC_CONTROL` differed from the frozen b1a77251 source set.
+ARM64 UMD SHA256 `4ad681c06275d4228835ebcaeab264de860a3bbc748a1b03ac231bc8857fe87d`;
+KMD remains 7b745085… and ICD dee3d580…. This diagnostic retains the local Vulkan
+timeline, omits runtime bridge ingress/egress, and waits for real GPU completion
+on ordinary Flush/Present. It is not the production default or a final fix.
+CPU controls passed on Wine x64 and native ARM64; no offscreen GPU test was run.
+
+Native boot 19:16:05.4986840, DWM772, LUID `00000000000d1a0f`, Windows22631/2861,
+external power Online. The one 270→90→180 sequence ran 19:22:34–19:24:38 and
+returned `SoftwareChecksCompleted`, exit0. Each angle completed its capture:
+5020 RGB samples, tolerance0, differences0 (15060 total); nine scanout snapshots
+retained physical720×1280/pitch2880/DCrotation0 and expected corner colors.
+DWM and Explorer PIDs survived the sequence; the 19:27:58 query retained the same
+boot and Code0. No physical-panel or five-minute stability acceptance is claimed.
+
+The 4562-row trace includes TraceEnd: matched4521, invalid0, eventsLost0,
+buffersLost0, processStatus0. TraceEnd query_status4201 means the session was
+already stopped. All 211 Vulkan submit pairs have phase2; no runtime phase1/3
+bridge submits occur. DWM has160 successful Flip Presents,160 sync-control waits
+and3 readback waits. Actual captures submit/complete local seq106,123,161.
+Four pending Map reports are DONOTWAIT, not device removal. ETL SHA256
+`66685ce5317f89a80a1e4df65dbce70eb68f70f746402db58cc0982c242f0867`.
+This narrows the failure toward asynchronous ordering/concurrency/lifetime;
+it does not identify a particular Fence deadlock or exclude GPU timing effects.
+
+93 evidence files/9983368 bytes and14 recovery files/21666 bytes were retrieved
+and fully hash-verified. One planned recovery restart booted20:29:37.9173480;
+restoration finished20:32:42.1650187, original I KMD1a86a02b…/UMD0cd34833…/ICDdee3d580…,
+DWM820, Code0, CPU1497600/GPU460800/RAM1600000, Fan13. The20:35:33 interactive
+read-only query verified current/saved portrait720×1280/orientation0/60Hz.
+20:44:23 cleanup confirmed no rotcpu files, tasks or ETW session remain. The
+production GPU bridge and logon startup are restored. Full records and the
+machine-readable result are in OUT/rotation-cpu-sync-control; the current baseline
+record is updated. Do not treat the unobserved wall-clock gap as a stability run.
