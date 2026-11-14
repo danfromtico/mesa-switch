@@ -18,6 +18,8 @@ struct model_event {
 
 static uint32_t registers[0x140000 / 4];
 static bool counter_bad, calibration_timeout, slowdown_stuck, live_mode, pmic_fail;
+static bool pmic_fail_after_write;
+static uint32_t pmic_read_failures;
 static uint32_t fail_counter_for_khz;
 static uint32_t gpu_speedo_fuse;
 static uint32_t adc_fuse;
@@ -89,6 +91,10 @@ static bool read_pmic(void *ctx, uint8_t address, uint8_t reg, uint8_t *value)
 {
     (void)ctx;
     assert(address == 0x33);
+    if (reg == 0x23 && pmic_read_failures) {
+        --pmic_read_failures;
+        return false;
+    }
     *value = reg == 0x23 ? rail : 0x41;
     return true;
 }
@@ -104,7 +110,7 @@ static bool write_pmic(void *ctx, uint8_t addr, uint8_t reg, uint8_t value)
     rail = value;
     if (live_mode)
         push_event(EV_PMIC_WRITE, 250000u + (uint32_t)value * 5000u);
-    return true;
+    return !pmic_fail_after_write;
 }
 
 static void delay(void *ctx, uint32_t us) { (void)ctx; (void)us; }
@@ -121,6 +127,8 @@ static void reset(void)
     rail = 110;
     target_khz = TG_GPU_FIXED_KHZ;
     counter_bad = calibration_timeout = slowdown_stuck = live_mode = pmic_fail = false;
+    pmic_fail_after_write = false;
+    pmic_read_failures = 0;
     fail_counter_for_khz = 0;
     writes = 0;
     event_count = 0;
@@ -133,10 +141,18 @@ static void test_hiopt_characterization(void)
      */
     static const uint32_t expected_freqs[TG_GPU_HIOPT_OPP_COUNT] = {
         76800u, 153600u, 230400u, 307200u, 384000u, 460800u,
-        537600u, 614400u, 691200u, 768000u, 844800u
+        537600u, 614400u, 691200u, 768000u, 844800u, 921600u,
+        998400u, 1075200u, 1152000u, 1228800u
     };
-    static const uint32_t expected_844_uv[TG_GPU_THERMAL_RANGES] = {
-        800000u, 615000u, 610000u, 605000u, 600000u, 595000u
+    /* >=921.6 MHz: independent fixed-upstream HighOPT CVB calculation,
+     * not part of the captured DT-limited 844.8 MHz hardware table. */
+    static const uint32_t expected_high_uv[6][TG_GPU_THERMAL_RANGES] = {
+        {800000,615000,610000,605000,600000,595000},
+        {800000,635000,630000,630000,625000,620000},
+        {800000,665000,665000,665000,670000,670000},
+        {800000,695000,695000,700000,705000,705000},
+        {800000,720000,725000,730000,735000,735000},
+        {800000,755000,770000,785000,800000,800000},
     };
     uint32_t i, r;
     for (i = 0; i < TG_GPU_HIOPT_OPP_COUNT; ++i) {
@@ -152,8 +168,8 @@ static void test_hiopt_characterization(void)
                 assert(uv_1600 == 590000u);
                 assert(uv_2500 == 630000u);
             } else {
-                assert(uv_1600 == expected_844_uv[r]);
-                assert(uv_2500 == 630000u);
+                assert(uv_1600 == expected_high_uv[i-10u][r]);
+                assert(uv_2500 == (uv_1600 > 630000u ? uv_1600 : 630000u));
             }
         }
     }
@@ -174,6 +190,27 @@ static void test_hiopt_characterization(void)
     assert(tg_gpu_clock_thermal_range(91, 4) == 5);
     assert(tg_gpu_clock_thermal_range(90, 5) == 5);
     assert(tg_gpu_clock_thermal_range(89, 5) == 4);
+}
+
+static void test_full_oc_ladder(void)
+{
+    struct tg_gpu_power p = {.owned=true,.ready=true,.pmic_address=0x33};
+    struct tg_gpu_power_io io = {NULL,read_reg,write_reg,read_pmic,write_pmic,delay};
+    struct tg_gpu_clock c = {0};
+    reset(); gpu_speedo_fuse=1659u; target_khz=460800u;
+    assert(tg_gpu_clock_start(&io,&p,460800u,&c)==TG_GPU_CLOCK_OK);
+    live_mode=true;
+    for (uint32_t i=0; i<TG_GPU_HIOPT_OPP_COUNT; ++i) {
+        uint32_t khz=tg_gpu_clock_hiopt_freq_khz(i);
+        uint32_t uv=tg_gpu_clock_hiopt_uv(1659u,khz,2u,1600000u);
+        event_count=0;
+        assert(tg_gpu_clock_set_rate(&io,&p,khz,uv,&c)==TG_GPU_CLOCK_OK);
+        assert(c.measured_khz==khz && c.rail_uv==uv);
+    }
+    event_count=0;
+    assert(tg_gpu_clock_set_rate(&io,&p,76800u,590000u,&c)==TG_GPU_CLOCK_OK);
+    assert(events[0].kind==EV_PLL_BYPASS && events[event_count-1].kind==EV_PMIC_WRITE);
+    assert(tg_gpu_clock_stop(&io,&c)==TG_GPU_CLOCK_OK);
 }
 
 static void test_live_dvfs_ordering_and_rollback(void)
@@ -255,6 +292,45 @@ static void test_live_dvfs_ordering_and_rollback(void)
     assert(registers[0x20160 / 4] == 0x00220000);
 }
 
+static void test_partial_pmic_failure(void)
+{
+    struct tg_gpu_power p = {.owned = true, .ready = true, .pmic_address = 0x33};
+    struct tg_gpu_power_io io = {NULL, read_reg, write_reg, read_pmic, write_pmic, delay};
+    struct tg_gpu_clock c = {0};
+    reset();
+    gpu_speedo_fuse = 1659u;
+    target_khz = TG_GPU_LOW_POWER_KHZ;
+    assert(tg_gpu_clock_start(&io, &p, target_khz, &c) == TG_GPU_CLOCK_OK);
+    live_mode = true;
+
+    /* The lowering write succeeds, but its first readback fails. Reconcile
+     * the real 590 mV rail; the next boost must raise voltage before PLL. */
+    pmic_read_failures = 1;
+    assert(tg_gpu_clock_set_rate(&io, &p, 153600u, 590000u, &c) == TG_GPU_CLOCK_RAIL_ERROR);
+    assert(c.running && c.target_khz == 153600u && c.rail_uv == 590000u);
+    event_count = 0;
+    assert(tg_gpu_clock_set_rate(&io, &p, 844800u, 615000u, &c) == TG_GPU_CLOCK_OK);
+    assert(events[0].kind == EV_PMIC_WRITE && events[0].value == 615000u);
+
+    /* The bridge itself can fail AFTER applying the write. */
+    pmic_fail_after_write = true;
+    assert(tg_gpu_clock_set_rate(&io, &p, 153600u, 590000u, &c) == TG_GPU_CLOCK_RAIL_ERROR);
+    assert(c.running && c.rail_uv == 590000u);
+    pmic_fail_after_write = false;
+    assert(tg_gpu_clock_set_rate(&io, &p, 844800u, 615000u, &c) == TG_GPU_CLOCK_OK);
+
+    /* If readback remains unavailable, do not continue submitting or boost
+     * using an assumed voltage. Recovery must reinitialize the clock. */
+    pmic_read_failures = 2;
+    assert(tg_gpu_clock_set_rate(&io, &p, 153600u, 590000u, &c) == TG_GPU_CLOCK_RAIL_ERROR);
+    assert(!c.running && c.rail_uv == 0);
+    event_count = 0;
+    assert(tg_gpu_clock_set_rate(&io, &p, 844800u, 615000u, &c) == TG_GPU_CLOCK_BAD_STATE);
+    assert(event_count == 0);
+    live_mode = false;
+    assert(tg_gpu_clock_stop(&io, &c) == TG_GPU_CLOCK_OK);
+}
+
 int main(void)
 {
     struct tg_gpu_power p = {.owned = true, .ready = true, .pmic_address = 0x33};
@@ -317,7 +393,9 @@ int main(void)
     assert(c.measured_khz != c.target_khz && c.owned);
     assert(tg_gpu_clock_stop(&io, &c) == TG_GPU_CLOCK_OK);
     test_hiopt_characterization();
+    test_full_oc_ladder();
     test_live_dvfs_ordering_and_rollback();
+    test_partial_pmic_failure();
     puts("T214 C1 NA clock ordering, HighOPT CVB, live DVFS and unwind tests passed (host model).");
     return 0;
 }

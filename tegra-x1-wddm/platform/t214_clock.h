@@ -12,14 +12,15 @@
 #define TG_GPU_CLOCK_SAVED_REGS 13u
 
 /* T210B01 NAPLL En - p4v2-AggressiveHighOPT (gspd_id=3) OPP ladder. */
-#define TG_GPU_HIOPT_OPP_COUNT 11u
+#define TG_GPU_HIOPT_OPP_COUNT 16u
 #define TG_GPU_HIOPT_MIN_KHZ   76800u
-#define TG_GPU_HIOPT_IDLE_KHZ  153600u
+#define TG_GPU_HIOPT_IDLE_KHZ   76800u
 #define TG_GPU_HIOPT_SAFE_KHZ  460800u
 #define TG_GPU_HIOPT_DOCK_KHZ  768000u
-#define TG_GPU_HIOPT_MAX_KHZ   844800u
+#define TG_GPU_HIOPT_MAX_KHZ  1228800u
 #define TG_GPU_THERMAL_RANGES  6u
 #define TG_GPU_SKU83_MAX_UV    800000u
+#define TG_GPU_HIOPT_OC_MAX_UV 900000u /* Switchroot HighOPT characterization limit */
 #define TG_GPU_HIOPT_VMIN_UV   590000u
 
 /* The low-power control is an explicit build choice, not a live governor. */

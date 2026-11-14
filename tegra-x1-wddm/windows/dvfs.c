@@ -90,7 +90,13 @@ static VOID report_telemetry(TG_GPU_DVFS *d, const TG_GPU_HARDWARE *h)
 {
     struct tg_gpu_pmic_request op;
     UINT32 opp, temp_byte, status_word;
+    uint8_t rail_code = 0;
+    UINT32 rail_uv = 0;
     if (!d->Platform || !d->PolicyBridgeSupported) return;
+    op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_REPORT_ABI, 1, TG_GPU_LIVE_COUNTER_ABI};
+    (VOID)TgGpuPlatformTryRequest(d->Platform, &op);
+    if (h->Io.read_pmic(h->Io.context, h->Power.pmic_address, 0x23u, &rail_code))
+        rail_uv = 250000u + (UINT32)rail_code * 5000u;
     opp = tg_gpu_clock_hiopt_index(h->Clock.target_khz);
     if (opp == UINT32_MAX) opp = 0x3fu;
     temp_byte = d->TempValid ? (UINT32)((UINT8)d->TempC) : 0xffu;
@@ -99,7 +105,7 @@ static VOID report_telemetry(TG_GPU_DVFS *d, const TG_GPU_HARDWARE *h)
         d->ThermalThrottled, opp, temp_byte, d->Transitions);
     op = (struct tg_gpu_pmic_request){ 0, TG_GPU_PMIC_REPORT_GPU_KHZ, 1, h->Clock.measured_khz };
     (VOID)TgGpuPlatformTryRequest(d->Platform, &op);
-    op = (struct tg_gpu_pmic_request){ 0, TG_GPU_PMIC_REPORT_GPU_UV, 1, h->Clock.rail_uv };
+    op = (struct tg_gpu_pmic_request){ 0, TG_GPU_PMIC_REPORT_GPU_UV, 1, rail_uv };
     (VOID)TgGpuPlatformTryRequest(d->Platform, &op);
     op = (struct tg_gpu_pmic_request){ 0, TG_GPU_PMIC_REPORT_GPU_STATUS, 1, status_word };
     (VOID)TgGpuPlatformTryRequest(d->Platform, &op);
@@ -242,7 +248,7 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
     KIRQL q_irql, e_irql;
     LIST_ENTRY *link;
     UINT32 pending_depth = 0, want_khz, want_uv;
-    BOOLEAN busy_now, stable, quiescent, pending_arrived;
+    BOOLEAN busy_now, stable, quiescent, pending_arrived, unchanged;
     enum tg_gpu_clock_result res;
     NTSTATUS wait;
     PAGED_CODE();
@@ -288,6 +294,9 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
         UINT32 eff_min, cur_opp, next_opp;
         if (!d->TempValid && eff_max > d->SafeOpp)
             eff_max = d->SafeOpp;
+        while (eff_max && tg_gpu_clock_hiopt_uv(h->Clock.gpu_speedo,
+               tg_gpu_clock_hiopt_freq_khz(eff_max), d->ThermalRange, d->EmcKhz) == UINT32_MAX)
+            --eff_max;
         if (d->ThermalThrottled)
             eff_max = d->MinOpp <= eff_max ? d->MinOpp : eff_max;
         eff_min = d->MinOpp <= eff_max ? d->MinOpp : eff_max;
@@ -317,14 +326,10 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
         }
     }
 
-    if (want_khz == h->Clock.target_khz && want_uv == h->Clock.rail_uv) {
-        if (d->Mode == TgGpuDvfsHighOpt && (now - d->LastReportUs) >= TG_DVFS_HEARTBEAT_US) {
-            report_telemetry(d, h);
-            d->LastReportUs = now;
-        }
+    unchanged = want_khz == h->Clock.target_khz && want_uv == h->Clock.rail_uv;
+    if (unchanged && (now - d->LastReportUs) < TG_DVFS_HEARTBEAT_US)
         return STATUS_SUCCESS;
-    }
-    if (now < d->CooldownUntilUs && !d->ThermalThrottled && d->Mode == TgGpuDvfsHighOpt)
+    if (!unchanged && now < d->CooldownUntilUs && !d->ThermalThrottled && d->Mode == TgGpuDvfsHighOpt)
         return STATUS_SUCCESS;
 
     wait = KeWaitForSingleObject(&q->DispatchGate, Executive, KernelMode, FALSE, NULL);
@@ -346,6 +351,19 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
     if (!quiescent || (pending_arrived && want_khz < h->Clock.target_khz &&
                        !d->ThermalThrottled && d->Mode == TgGpuDvfsHighOpt)) {
         (VOID)KeReleaseMutex(&q->DispatchGate, FALSE);
+        return STATUS_SUCCESS;
+    }
+
+    if (unchanged) {
+        /* GPCCLK measurement temporarily overrides slowdown. Do it only at
+         * the same idle/ownership boundary as rate changes, never in flight.
+         * A telemetry failure is unavailable data, not a new clock transition. */
+        res = tg_gpu_clock_measure(&h->Io, &h->Clock);
+        if (res != TG_GPU_CLOCK_OK) h->Clock.measured_khz = 0;
+        h->Status.measured_khz = h->Clock.measured_khz;
+        (VOID)KeReleaseMutex(&q->DispatchGate, FALSE);
+        report_telemetry(d, h);
+        d->LastReportUs = now;
         return STATUS_SUCCESS;
     }
 

@@ -14,6 +14,8 @@
 #define TG_GPU_PMIC_REPORT_GPU_KHZ    0x105u
 #define TG_GPU_PMIC_REPORT_GPU_UV     0x106u
 #define TG_GPU_PMIC_REPORT_GPU_STATUS 0x107u
+#define TG_GPU_PMIC_REPORT_ABI        0x108u
+#define TG_GPU_LIVE_COUNTER_ABI       0x00020001u
 
 /* Packed 32-bit DVFS policy word returned by TG_GPU_PMIC_QUERY_DVFS_POLICY:
  *   [3:0]   mode (0 = fixed boot profile, 1 = T210B01 HighOPT NAPLL DVFS)

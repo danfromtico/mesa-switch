@@ -87,6 +87,11 @@ static const struct tg_gpu_hiopt_entry hiopt_table[TG_GPU_HIOPT_OPP_COUNT] = {
     { 691200u, 36u, 1u, 838712, -7304, -552,  1785, -56250,   -450 },
     { 768000u, 40u, 1u, 880210, -7955, -584,     0, -42735,   8775 },
     { 844800u, 44u, 1u, 926398, -8892, -602,  -900,  -5760, -20925 },
+    { 921600u, 48u, 1u, 970060, -10108, -614, -2685, 22620, -2925 },
+    { 998400u, 52u, 1u,1065665, -16075, -497, -2685, 48195,  2025 },
+    {1075200u, 56u, 1u,1132576, -16093, -648,     0, 16155,  9000 },
+    {1152000u, 60u, 1u,1180029, -14534, -830,     0, 22035, 24750 },
+    {1228800u, 64u, 1u,1248293, -16383, -859,     0, 55830, 70425 },
 };
 
 static uint32_t pll_coeff_for_khz(uint32_t target_khz)
@@ -163,6 +168,7 @@ uint32_t tg_gpu_clock_hiopt_uv(uint32_t speedo, uint32_t target,
     static const uint32_t vts_vmin_mv[TG_GPU_THERMAL_RANGES] = { 800u, 590u, 590u, 590u, 590u, 590u };
     uint32_t opp = tg_gpu_clock_hiopt_index(target);
     uint32_t i, j, row_mv = 0, uv, emc_uv;
+    uint32_t ceiling_uv = target > 844800u ? TG_GPU_HIOPT_OC_MAX_UV : TG_GPU_SKU83_MAX_UV;
     if (!speedo || speedo > 5000u || opp == UINT32_MAX || thermal_range >= TG_GPU_THERMAL_RANGES)
         return UINT32_MAX;
     for (i = 0; i <= opp; ++i) {
@@ -177,6 +183,9 @@ uint32_t tg_gpu_clock_hiopt_uv(uint32_t speedo, uint32_t target,
             int32_t mvj = base + div_nearest(t_term * t, 150);
             uint32_t rounded = round_cvb_mv_5mv(mvj);
             if (rounded < vts_vmin_mv[j]) rounded = vts_vmin_mv[j];
+            /* Upstream excludes an OPP if ANY temperature range exceeds
+             * its rail ceiling, not just the currently selected range. */
+            if (rounded * 1000u > ceiling_uv) return UINT32_MAX;
             range_mv[j] = rounded;
             if (j && range_mv[j - 1u] < rounded)
                 range_mv[j - 1u] = rounded;
@@ -187,8 +196,7 @@ uint32_t tg_gpu_clock_hiopt_uv(uint32_t speedo, uint32_t target,
     uv = row_mv * 1000u;
     emc_uv = tg_gpu_clock_emc_floor_uv(emc_khz);
     if (uv < emc_uv) uv = emc_uv;
-    /* T210B01 SKU 0x83 nominal GPU Vmax is 800 mV. */
-    return uv <= TG_GPU_SKU83_MAX_UV ? uv : UINT32_MAX;
+    return uv <= ceiling_uv ? uv : UINT32_MAX;
 }
 
 uint32_t tg_gpu_clock_required_uv(uint32_t speedo, uint32_t target)
@@ -417,6 +425,28 @@ static bool write_gpu_rail_checked(const struct tg_gpu_power_io *io,
     return true;
 }
 
+static enum tg_gpu_clock_result reconcile_rail_error(const struct tg_gpu_power_io *io,
+    uint8_t address, uint32_t minimum_uv, struct tg_gpu_clock *c)
+{
+    uint8_t enabled = 0, code = 0;
+    /* An I2C write may have reached the regulator even when its completion or
+     * readback failed. Never let a later F-up rely on the old cached voltage. */
+    if (io->read_pmic(io->context, address, 0x06, &enabled) && (enabled & 1u) &&
+        io->read_pmic(io->context, address, 0x23, &code)) {
+        uint32_t actual_uv = 250000u + (uint32_t)code * 5000u;
+        if (actual_uv >= minimum_uv && actual_uv <= 1050000u) {
+            c->rail_uv = actual_uv;
+            io->delay_us(io->context, 1000u);
+            return TG_GPU_CLOCK_RAIL_ERROR;
+        }
+    }
+    /* An unverified rail is not a usable clock state. The worker must stop
+     * submitting and take its existing device-failure/reset path. */
+    c->rail_uv = 0;
+    c->running = false;
+    return TG_GPU_CLOCK_RAIL_ERROR;
+}
+
 enum tg_gpu_clock_result tg_gpu_clock_set_rate(const struct tg_gpu_power_io *io,
     const struct tg_gpu_power *power, uint32_t target, uint32_t required_uv,
     struct tg_gpu_clock *c)
@@ -450,7 +480,7 @@ enum tg_gpu_clock_result tg_gpu_clock_set_rate(const struct tg_gpu_power_io *io,
     /* 1. Voltage UP first (with PMIC readback + ramp delay) before frequency UP. */
     if (required_uv > old_uv) {
         if (!write_gpu_rail_checked(io, power->pmic_address, required_uv, 1000u))
-            return TG_GPU_CLOCK_RAIL_ERROR;
+            return reconcile_rail_error(io, power->pmic_address, old_uv, c);
         c->rail_uv = required_uv;
     }
 
@@ -475,7 +505,7 @@ enum tg_gpu_clock_result tg_gpu_clock_set_rate(const struct tg_gpu_power_io *io,
     /* 3. Voltage DOWN only AFTER register readback and live counter confirm F-down. */
     if (required_uv < old_uv) {
         if (!write_gpu_rail_checked(io, power->pmic_address, required_uv, 200u))
-            return TG_GPU_CLOCK_RAIL_ERROR;
+            return reconcile_rail_error(io, power->pmic_address, required_uv, c);
         c->rail_uv = required_uv;
     }
     return TG_GPU_CLOCK_OK;

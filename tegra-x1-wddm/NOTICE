@@ -140,3 +140,10 @@ Zlib license, retained verbatim in LICENSES/Zlib.txt. Only linear BGRA/XRGB
 180-degree copies are supported by this bounded WDDM command encoder; it
 does not import the Horizon memory, synchronization, or queue ABI. Mesa's
 nvc0_surface.c was also consulted for the 902D linear surface layout.
+
+The reviewed HighOPT numerical characterization also uses the full
+GPUB01_NA_CVB_TABLE_HIOPT in tegra210-dvfs.c at
+2d0059fd3167a8df756de2aa0489d4aa70a9fc15 (NVIDIA / CTCaer).
+The 76.8..844.8 MHz subset was cross-checked against the installed Noble table;
+the OC continuation through 1228.8 MHz comes from the fixed upstream source,
+not from a physical OC result. See docs/DVFS_REVIEWED_20261114.md.

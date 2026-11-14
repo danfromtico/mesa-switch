@@ -75,6 +75,7 @@ static NTSTATUS NTAPI Ioctl(HANDLE file,HANDLE event,PIO_APC_ROUTINE apc,PVOID c
     else if(op->reg==TG_GPU_PMIC_QUERY_TEMP)op->value=model.temp;
     else if(op->reg==TG_GPU_PMIC_QUERY_EMC_KHZ)op->value=model.emc_khz;
     else if(op->reg==TG_GPU_PMIC_QUERY_DVFS_POLICY)op->value=model.policy;
+    else if(op->reg==TG_GPU_PMIC_REPORT_ABI){CHECK(op->write==1 && op->value==TG_GPU_LIVE_COUNTER_ABI);}
     else if(op->reg==TG_GPU_PMIC_REPORT_GPU_KHZ){CHECK(op->write==1);model.reported_khz=op->value;}
     else if(op->reg==TG_GPU_PMIC_REPORT_GPU_UV){CHECK(op->write==1);model.reported_uv=op->value;}
     else if(op->reg==TG_GPU_PMIC_REPORT_GPU_STATUS){CHECK(op->write==1);model.reported_status=op->value;}
