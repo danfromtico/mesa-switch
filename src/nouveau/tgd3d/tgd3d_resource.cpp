@@ -24,6 +24,14 @@ HRESULT resource_result(VkResult result)
 
 static inline View *V(void *p) { return static_cast<View *>(p); }
 
+static bool empty_box(const D3D10_DDI_BOX *box)
+{
+   /* D3D defines inverted intervals as empty too. Test signed endpoints
+    * before subtraction can turn them into a huge unsigned copy extent. */
+   return box && (box->left >= box->right || box->top >= box->bottom ||
+                  box->front >= box->back);
+}
+
 static uint32_t block_dim(const FormatInfo *info) { return (info->flags & FMT_BC) ? 4 : 1; }
 
 static uint32_t row_bytes(const FormatInfo *info, uint32_t width)
@@ -1073,6 +1081,8 @@ static void APIENTRY ResourceUpdateSubresourceUP(D3D10DDI_HDEVICE hDevice, D3D10
                                                  UINT sub, const D3D10_DDI_BOX *box,
                                                  const VOID *data, UINT row_pitch, UINT depth_pitch)
 {
+   if (empty_box(box))
+      return;
    Device *dev = D(hDevice);
    Resource *res = R(hDst);
    HRESULT hr = S_OK;
@@ -1170,6 +1180,8 @@ static VkBufferImageCopy staging_region(const Resource *staging, UINT sub, uint3
 static void copy_region(Device *dev, Resource *dst, UINT dst_sub, UINT dx, UINT dy, UINT dz,
                         Resource *src, UINT src_sub, const D3D10_DDI_BOX *box)
 {
+   if (empty_box(box))
+      return;
    HRESULT hr = S_OK;
    if (dst->kind == ResKind::Buffer && src->kind == ResKind::Buffer) {
       const VkDeviceSize begin = box ? (VkDeviceSize)box->left : 0;

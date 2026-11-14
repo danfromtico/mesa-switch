@@ -5,6 +5,10 @@
 
 ## 当前设备授权（2026-11-14 UTC）
 
+本地后续修正：空/倒置区域的复制与更新现在直接不操作，ARM64/x64构建及x64 CPU控制
+通过，尚未上机。本轮未连接或改变实机；最新设备核验仍为下述18:25轮的原I配对。
+继续审查读回、GDI shadow与完成同步，不将本地控制当作重启已修复。详见文末。
+
 **最新：2f6e35c7修正Draw错误回报后直接首测270°，该方向模式调用成功，三次扫描面
 快照的地址/可见性/四色均正确；随后在图案/抓屏阶段非计划重启，整轮失败。
 90°、180°未执行，本组合没有实屏或五分钟验收。18:18:50 UTC已恢复原I配对`.158 / Code0`，
@@ -1875,3 +1879,36 @@ OUT/tgd3d-current-baseline.json原先仍记录08:22的B组合；已依据本轮�
 “第三次切换累积”或“270°主表面完全没绑定成功”解释。下一步审查读回/复制、抓屏涉及
 的GDI/KMD路径，以及其提交完成与资源生命周期；抓屏未完成只是关联点，尚不能认定
 工具是根因。稳定性、物理方向和五分钟交互仍未通过。
+
+### 空区域复制/更新修正：本地构建和控制通过，未部署
+
+静态审查发现`copy_region`先将有符号端点之差转为`VkExtent3D`的无符号宽高深，
+只检查差值是否为零。倒置区间会成为巨大复制范围，能够进入GPU命令或CPU staging
+拷贝；`ResourceUpdateSubresourceUP`也没有在上传/等待/重命名前统一过滤空区域。
+[微软ResourceCopyRegion DDI](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/nc-d3d10umddi-pfnd3d10ddi_resourcecopyregion)
+明确规定任一轴起点大于或等于终点即为空，不执行复制；
+[UpdateSubresource](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-updatesubresource)
+也规定空区域不更新。按该契约在两个入口先比较端点，NULL仍表示完整子资源。
+本次只改此问题，不扩大为通用边界校验或同时修改KMD/ICD。
+
+新增控制经真实DDI表覆盖三轴等于/倒置及全零共7种box，在image→image、image→staging、
+staging→image、staging→staging、buffer→buffer路径分别执行复制和更新。已有未完成工作
+不应触发额外命令、等待、提交、错误、重命名或内存修改；NULL的65×17×2完整复制仍保留
+偏移16、row pitch260和depth pitch4420，并核对CPU目标区外字节未变。
+新控制链接上一轮对象，立即在“空区域不得提交复制”断言失败；修正对象的x64 Wine
+CPU控制通过。ARM64和x64均编译完成，ARM64控制尚未在Windows执行，无GPU/实屏结果。
+
+冻结源码沿用OUT/draw-error-contract/source，仅带入resource.cpp和contracts.cpp的本次
+差异，双向GPU Fence、着色器缓存开启。完整构建输入、对象哈希和结果在OUT/empty-copy-box：
+ARM64 UMD SHA256 `73bbeb98a98e2cd284198f9a71806867952cba9d55dfcca79548c2594519ff67`，
+x64 UMD SHA256 `4dc367d015f4b2d0518790008c2293a364c61857ae9fe0f47589d897a830030c`。
+尚未观察到实机传入这类box，不能认定它解释了270°重启，也未安装新候选。
+
+读回和shadow审查的当前边界：标准shadow可为逻辑1280×720，primary固定720×1280；
+KMD的GDI Rotate Blt执行真实GPU搬运，tgd3d的DXGI rotated_blit则使用Vulkan着色器绘制。
+最近保留的DWM记录是Flip且无UMD Blt，不能声称每帧都走这两条旋转复制路径。
+CPU Map等待sliceLastWrite；NVK已有执行/数据缓存屏障。KMD在GPU的WFI→Reference标记
+完成后调用`t214_frontend.c`的sync_memory，执行FB flush及L2写回/失效并检查完成，
+然后才置GpuCompleted，不能仅因Windows的NVK屏障使用WFI就断言缺少DRAM写回。
+这些是代码路径核对，尚未证明故障轮具体读回提交的顺序、范围和退休正确；继续沿实际
+读回及GDI调用链查明后再选下一轮实机候选，不修改测试来回避既有失败。

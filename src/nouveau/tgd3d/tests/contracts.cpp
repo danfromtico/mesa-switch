@@ -418,6 +418,86 @@ static void draw_error_contract()
    std::puts("PASS: all Draw DDIs report only removal on allocation/view failure and stop further work; non-Draw OOM remains recoverable (CPU control)");
 }
 
+static unsigned regionCopies;
+static VkImageCopy regionImage;
+static VkBufferImageCopy regionTransfer;
+
+static void empty_box_contract()
+{
+   const D3D10_DDI_BOX boxes[] = {
+      {8,0,0,4,1,1}, {4,0,0,4,1,1},
+      {0,5,0,1,3,1}, {0,3,0,1,3,1},
+      {0,0,1,1,1,0}, {0,0,1,1,1,1}, {0,0,0,0,0,0},
+   };
+   const ResKind kinds[][2] = {
+      {ResKind::Image, ResKind::Image}, {ResKind::Image, ResKind::Staging},
+      {ResKind::Staging, ResKind::Image}, {ResKind::Staging, ResKind::Staging},
+      {ResKind::Buffer, ResKind::Buffer},
+   };
+   D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
+   for (const auto &kind : kinds) {
+      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      regionCopies = 0;
+      dev.submitted = dev.gated = 1; /* Existing work must remain untouched by a no-op. */
+      dev.vk.CmdCopyImage = [](VkCommandBuffer, VkImage, VkImageLayout, VkImage, VkImageLayout,
+                              uint32_t count, const VkImageCopy *r) {
+         CHECK(count == 1); ++regionCopies; regionImage = *r;
+      };
+      dev.vk.CmdCopyImageToBuffer = [](VkCommandBuffer, VkImage, VkImageLayout, VkBuffer,
+                                      uint32_t count, const VkBufferImageCopy *r) {
+         CHECK(count == 1); ++regionCopies; regionTransfer = *r;
+      };
+      dev.vk.CmdCopyBufferToImage = [](VkCommandBuffer, VkBuffer, VkImage, VkImageLayout,
+                                      uint32_t count, const VkBufferImageCopy *r) {
+         CHECK(count == 1); ++regionCopies; regionTransfer = *r;
+      };
+      dev.vk.CmdCopyBuffer = [](VkCommandBuffer, VkBuffer, VkBuffer, uint32_t, const VkBufferCopy *) {
+         ++regionCopies;
+      };
+      std::vector<uint8_t> source(9216, 0x19), destination(9216, 0xa5), upload(8840, 0x3c);
+      Chunk sc, dc; sc.cpu = source.data(); dc.cpu = destination.data();
+      sc.buffer = handle<VkBuffer>(100); dc.buffer = handle<VkBuffer>(101);
+      Resource src, dst;
+      auto init = [&](Resource &r, ResKind k, Chunk *chunk, uintptr_t image) {
+         r.dev = &dev; r.kind = k; r.dim = k == ResKind::Buffer ? D3D10DDIRESOURCE_BUFFER : D3D10DDIRESOURCE_TEXTURE3D;
+         r.format = DXGI_FORMAT_B8G8R8A8_UNORM; r.width = 65; r.height = 17; r.depth = 2;
+         r.storage.image = handle<VkImage>(image); r.storage.layoutReady = true;
+         r.storage.lastUse = r.sliceLastUse = r.sliceLastWrite = 1;
+         r.aspects = VK_IMAGE_ASPECT_COLOR_BIT;
+         r.slice = {chunk, 16, 8840}; r.size = 8840;
+         r.layout.push_back({0, 260, 4420, 65, 17, 2}); r.maps.resize(1);
+      };
+      init(src, kind[0], &sc, 200); init(dst, kind[1], &dc, 201);
+      for (const auto &box : boxes) {
+         table.pfnResourceCopyRegion({&dev}, {&dst}, 0, 0, 0, 0, {&src}, 0, &box);
+         CHECK(!regionCopies && !dev.cmd && !setErrorCalls && !cpuWaits && !submissions);
+         table.pfnResourceUpdateSubresourceUP({&dev}, {&dst}, 0, &box, upload.data(), 260, 4420);
+         CHECK(!regionCopies && !dev.cmd && !setErrorCalls && !cpuWaits && !submissions);
+         CHECK(destination == std::vector<uint8_t>(9216, 0xa5));
+         CHECK(dev.submitted == 1 && !completedValue && dev.deferredSlices.empty());
+         CHECK(!dev.stats.copyBytes && !dev.stats.uploadBytes);
+      }
+      /* NULL still means the full nonempty source, not an empty box. */
+      completedValue = 1;
+      table.pfnResourceCopyRegion({&dev}, {&dst}, 0, 0, 0, 0, {&src}, 0, nullptr);
+      if (kind[0] == ResKind::Staging && kind[1] == ResKind::Staging) {
+         CHECK(!regionCopies);
+         for (size_t i = 0; i < destination.size(); i++)
+            CHECK(destination[i] == (i >= 16 && i < 8856 ? 0x19 : 0xa5));
+      } else {
+         CHECK(regionCopies == 1);
+         if (kind[0] == ResKind::Image && kind[1] == ResKind::Image)
+            CHECK(regionImage.extent.width == 65 && regionImage.extent.height == 17 && regionImage.extent.depth == 2);
+         else if (kind[0] != ResKind::Buffer)
+            CHECK(regionTransfer.imageExtent.width == 65 && regionTransfer.imageExtent.height == 17 &&
+                  regionTransfer.imageExtent.depth == 2 && regionTransfer.bufferOffset == 16 &&
+                  regionTransfer.bufferRowLength == 65 && regionTransfer.bufferImageHeight == 17);
+      }
+      CHECK(!setErrorCalls);
+   }
+   std::puts("PASS: empty/inverted copy and update boxes touch no commands, waits or memory; NULL full 65x17x2 copies retain exact layout (CPU control)");
+}
+
 static uint32_t read32(const BYTE *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 
 static void query_contract()
@@ -960,7 +1040,7 @@ int main(int argc, char **argv)
    }
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();
    device_error_contract();
-   rotated_views(); descriptor_contract(); draw_error_contract();
+   rotated_views(); descriptor_contract(); draw_error_contract(); empty_box_contract();
    query_contract();
    query_failure_contract();
    shader_contract(g_VS, true, "tgd3d-vs.spv"); shader_contract(g_PS, false, "tgd3d-ps.spv");
