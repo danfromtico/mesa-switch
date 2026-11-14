@@ -5,6 +5,33 @@
 
 ## 当前设备授权（2026-11-14 UTC）
 
+**22:53 UTC当前状态：DVFS/Pacecar已整合并完成短时模式0–6切换及七次固定7恢复，
+两个工具开机启动均在重启后验证。当前`.158 / Code0`，目录
+`C:\ProgramData\SwitchWOA\GpuUpdate\tgd3d-b1a77251-20261115-051506`，KMD
+`3ada55a42a3a116d41951a452893b2c09e3f01cc440e67ffd4b8b06b6d5c7918`，UMD
+`8d7da8c1a3d9e9556a8e88b2b8bef67956dcf588c980d763e5f6684aaf6489c2`，ICD
+`30a8d6a97d96d917b93ecb1f8a34489ce5613ca2082752b04c5823d6cb408e8d`。
+Fan19/Battery12、DFLL handoff v2固件及扩展ACPI保持；固定7为CPU1497600/GPU460800/
+RAM1600000kHz，充电限制85。登录后5秒启用，生产双向GPU Fence保持开启。
+本轮恢复目标是此整合配对及竖屏，不是下文历史I配对、Fan13或`.59`。**
+
+完整平台哈希与模式验收见[DVFS交付记录](DVFS_REVIEWED_20261114.md)和OUT的
+`tgd3d-current-baseline.json`。当前22:46:08 UTC启动、DWM772，22:50恢复原生启用。
+22:51交互只读核对当前及保存方向均720×1280/orientation0/60Hz，DWM实际加载上述UMD/ICD。
+22:53已核对本轮四个临时任务及工具/上传包清理完成，默认启用任务Ready，两个工具仍运行。SSH为
+`ruje@192.168.8.6`；没有保持现场限制。用户取消五分钟交互，也不再做离屏检查。
+下文早期“未合入”及恢复配对均是历史状态，不能覆盖此节。
+
+22:44轮直接验证当前整合生产配对270→90→180，沿用已有屏上图案、扫描面和逻辑抓屏，
+没有安装驱动、计划重启或新增ETW/转储。270°短时逻辑像素及扫描面检查通过，90°图案/
+抓屏阶段再次非计划重启，180°未执行，整轮失败；此配对的横屏与物理面板尚未验收。
+恢复保留同一整合配对、双向Fence及固定频率，没有追加系统重启。结果详见文末。
+此前CPU同步对照同时移除了桥接并增加CPU等待，只能缩小并发/完成/生命周期排查范围，
+不能单独证明双向Fence死锁。正常路径静态核对尚未找到可确认的环形等待；不据此宣称
+同步实现已经正确，也不为制造补丁而修改未证实的路径。
+
+## 先前旋转轮次（历史，不作为当前恢复指令）
+
 **最新：b1a77251空区域修正完成构建、Windows ARM64 CPU控制及一次首测270°实机试验。
 模式切换和三次扫描面四色检查成功，随后图案/抓屏阶段再次非计划重启，整轮失败，
 90°和180°未执行。18:58:50 UTC已无追加重启地恢复原I配对`.158 / Code0`，DWM828加载
@@ -2003,3 +2030,57 @@ read-only query verified current/saved portrait720×1280/orientation0/60Hz.
 production GPU bridge and logon startup are restored. Full records and the
 machine-readable result are in OUT/rotation-cpu-sync-control; the current baseline
 record is updated. Do not treat the unobserved wall-clock gap as a stability run.
+
+
+## 22:44 整合生产配对旋转失败及同配对恢复
+
+本轮没有构建/安装新的GPU驱动，也没有关闭双向GPU Fence。测试的是顶部记录的
+3ada55a4…/8d7da8c1…/30a8d6a9…整合配对，Fan19、Battery12、handoff v2及扩展ACPI。
+UMD的源码哈希集合和保留链接输入此前已与冻结b1a77251核对一致；重新编译路径与
+二进制布局使DLL哈希不同。它不是4ad681c0… CPU同步诊断版。
+Windows10.0.22631/UBR2861；本轮原生LUID0000000000081941，原启动22:17:19 UTC、
+DWM836，外接电源Online。固定7保持CPU1497600/GPU460800/RAM1600000kHz。
+
+* 270°：模式调用返回0，图案完成约30秒；逻辑1280×720，四块16×16及一像素白边
+  共5020个RGB像素，容差0、差异0，PNG已查看。三次扫描面快照均720×1280、pitch2880，
+  source_visible/target_active/WIN_ENABLE均开启，DC列扫描旋转位关闭；实际地址和
+  displayed_address均0xfaf35000，蓝/红/黄/绿四点符合270°预期。
+* 90°：模式调用返回0，三次扫描面快照同样几何、可见性正确；实际地址和
+  displayed_address均0xfb2b9000，绿/黄/红/蓝四点符合90°预期。
+  22:45:48.359 UTC保存了抓屏前的Default桌面/1280×720/图案窗口前台记录，随后没有PNG、
+  图案完成结果或最终测试结果。SSH断线后读回新启动22:46:08.317 UTC、DWM772、Code43，
+  确认非计划重启。该检查点只能定位到图案/抓屏阶段，不能证明具体某个API已经是根因。
+* 180°未执行。整轮失败，不记为横屏、物理方向、触摸或长期稳定性通过；没有五分钟
+  交互、离屏检查、ETW或新增转储。
+
+22:48确认重启后停用本轮测试及定时恢复任务，不重测同一组合。22:49只启用一次当前
+整合配对，22:50:10恢复Code0和竖屏，没有请求系统重启。22:51交互核对当前与保存方向
+均720×1280/orientation0/60Hz，DWM772实际UMD/ICD路径与完整哈希匹配；CPU/GPU/RAM
+恢复固定7，Fan19和充电限制85保留。Pacecar1704及SwitchPowerTray4044均session1，
+HKCU Run两项及登录后5秒tgd3d任务保持。没有回退旧I、Fan13或`.59`。
+
+结果位于OUT `rotation-integrated-baseline/evidence/`，59个文件、1168093字节的SHA256
+和同一打开文件流的长度全部核对通过；ZIP SHA256为
+`578cc472008212bf3d60367d09e336f5b9f255e92304d686ede140a942bea7a5`。
+原枚举清单把90°图案stdout文件长度记成0，实际流长度114，SHA256本来就一致。
+保留原始清单及差异，并用同一FileStream读取长度和计算哈希修正工具记录，没有改写
+试验内容。22:53:49只读确认四个临时任务、测试目录、上传ZIP和证据ZIP均已清理。
+首次清理命令观察超时后只读核对发现已经执行完成，没有重复删除或启动测试。
+
+### 静态审查结论与下一处契约核对
+
+`tgd3d_cmd.cpp`正常链是runtime signal→Vulkan wait/render/signal→runtime wait，
+下一次runtime signal排在上一次runtime wait之后；尚未证明存在环形依赖。
+NVK的正常GPU信号走KMT GPU队列，完成值读取在当前Clang构建使用acquire原子读取。
+KMD正常硬件完成要求GPU marker、通道退休及CPU可见性确认后才通知DMA完成。
+这些只说明检查到的正常路径，不能证明错误/销毁路径或跨设备共享已经正确。
+
+继续审查两个具体边界：一是runtime资源与Vulkan资源各自最后一次使用后的GPU VA释放；
+二是`kmt_native.c::tg_kmt_submit`现在没有填`NumPrimaries/WrittenPrimaries`。
+微软的[D3DKMT_SUBMITCOMMAND说明（2024-10-22）](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_submitcommand)
+和[SubmitCommand回调契约](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/nc-d3dumddi-pfnd3dddi_submitcommandcb)
+要求GPU VA提交报告写入的primary/swapchain backing，供VidMm协调渲染与Flip。
+该接口适用于当前WDDM2.6路径；不能拿WDDM3.x硬件队列替换现有接口。
+需要追踪runtime allocation是否属于提交设备、哪些实际写入以及句柄存活期，再做局部
+修正；不能把另一个设备的句柄直接塞进数组，也不能把此缺口直接写成此次重启根因。
+该NVK提交路径也由Zink共用，源码差异与旧CPU同步对照仍需分别解释。
