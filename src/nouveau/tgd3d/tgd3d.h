@@ -344,6 +344,7 @@ struct Device {
    HANDLE hContext = nullptr;           /* runtime-registered context: sync signals and Present */
    UINT interfaceVersion = 0;
    HRESULT lost = S_OK;
+   bool inDraw = false; /* Draw DDIs can report only device removal. */
 
    /* Vulkan */
    VkDevice vkdev = VK_NULL_HANDLE;

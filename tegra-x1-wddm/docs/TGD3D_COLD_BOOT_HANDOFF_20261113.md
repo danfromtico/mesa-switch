@@ -1777,3 +1777,41 @@ SHA256 `dc7408c52ae00b4489fa11fa077b0ce8c3fcac5b58a1a890752da64677610c0b`。
 下一步继续静态审查实际Flip路径在连续模式切换中的主表面、视图与在途资源退休。
 两轮都在第三次方向切换附近失败，仍不能区分270°专属问题和连续切换累积问题。
 保留已确认的完成边界修正，不把它包装成稳定性修复，也不扩大到同时修改全部组件。
+
+### Flip退休审查与Draw错误契约（2026-11-14，新候选待实机）
+
+在35eb1c79失败后继续静态审查实际Flip链路。ImageStorage.lastUse随身份交换移动，
+DestroyResource正常路径等待该序号；storage_destroy清理其他逻辑资源缓存的同一image视图，
+并将视图排在image/memory之前退休。shader与sampler同样按lastSeq延迟释放。未发现这些
+正常路径中可以直接判定为提前释放的代码，不因此增加每帧CPU等待或删除双向桥接。
+
+KMD扫描段BaseAddress就是其系统物理基址，显示DDI地址经边界检查后仍为同一物理地址，
+VBlank报告实际锁存地址；没有发现这里重复加段基址。对照微软
+[中断数据](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkargcb_notify_interrupt_data)
+及[SetVidPnSourceAddress参数](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkarg_setvidpnsourceaddress)
+核对，显示隐藏时仍保留非零扫描地址。此结论仅覆盖当前固定pitch扫描段，不能外推成
+整个分页/缓存链已被证明无误；本候选不改KMD或ICD。
+
+确认另一处DDI契约缺陷：descriptor_set_alloc将所有失败改报E_OUTOFMEMORY，且把系统OOM
+也当作池耗尽重试；Draw中的视图创建、懒编译也会直接调用通用SetErrorCb。微软
+[Draw](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/nc-d3d10umddi-pfnd3d10ddi_draw)、
+[DrawIndexedInstanced](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/nc-d3d10umddi-pfnd3d10ddi_drawindexedinstanced)
+（2024-02-22）及[DrawAuto](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/nc-d3d10umddi-pfnd3d10ddi_drawauto)
+（2021-04-01）规定这些DDI只应回报D3DDDIERR_DEVICEREMOVED，其他错误将被runtime视作严重错误。
+Vulkan[描述符分配规则](https://docs.vulkan.org/refpages/latest/refpages/source/vkAllocateDescriptorSets.html)
+区分池容量不足与主机/设备内存不足；上述文档均于2026-11-14查阅。
+
+最小修正：五个Draw入口设置局部错误作用域，离开时恢复；本驱动未声明free-threading。
+Device::setError先记录原始HRESULT，再在Draw作用域将失败转换为设备移除并停止后续工作。
+非Draw的资源创建保留原OOM等错误。描述符分配仅在OUT_OF_POOL_MEMORY/FRAGMENTED_POOL时
+尝试另一池，其他错误直接传播，失败的第二次分配不再额外创建未使用的池。
+DrawAuto仍未实现流输出，不会被标成支持；其错误也遵循Draw契约。
+
+通过真实DDI表注入pool创建、set分配和image view创建的主机OOM、设备OOM、设备丢失，
+覆盖四种普通Draw入口，确认只回报移除、没有发出绘制，重复Draw不再分配。
+另验证DrawAuto、无操作Draw后非Draw OOM语义，以及池耗尽/碎片化后的成功重试。
+新控制配旧对象时在“仅回报设备移除”断言失败；修正后的x64 Wine控制通过，ARM64/x64
+构建完成。ARM64 UMD SHA256 `7e3d5b254e68333b81790e9acf29d19409c0540dcde4fb7ed044eea046c38ca0`。
+这是CPU控制和明确的契约修复，尚无证据证明前轮270°重启触发了此错误分支。
+下一轮只携带该UMD差异，直接按270→90→180测试，以区分方向特有问题与连续切换累积问题。
+材料位于OUT/draw-error-contract；原I恢复基线、频率、双向Fence、登录后启用均保持。

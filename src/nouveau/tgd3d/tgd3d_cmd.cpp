@@ -21,6 +21,11 @@ typedef NTSTATUS(APIENTRY *PFN_ShareObjects)(UINT, const D3DKMT_HANDLE *, void *
 void Device::setError(HRESULT hr, const char *file, int line)
 {
    trace_error(hr, file, (unsigned)line);
+   /* Keep the original failure in the trace, but Draw has no recoverable
+    * OOM/unsupported result. Runtime treats any error other than removal as
+    * a critical driver error. Stop this device if draw preparation fails. */
+   if (inDraw && FAILED(hr))
+      hr = D3DDDIERR_DEVICEREMOVED;
    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == D3DDDIERR_DEVICEREMOVED ||
        hr == DXGI_ERROR_DEVICE_RESET) {
       lost = hr;

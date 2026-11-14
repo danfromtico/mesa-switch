@@ -332,6 +332,92 @@ static void descriptor_contract()
    std::puts("PASS: all 42 constant-buffer slots; immutable full snapshots after one-slot changes");
 }
 
+static VkResult drawFailure;
+static unsigned drawFailureAt, poolCreates, setAllocates, imageViews, drawCalls;
+
+static void draw_error_contract()
+{
+   D3D10DDI_DEVICEFUNCS table = {}; draw_fill_table(&table);
+   for (unsigned entry = 0; entry < 4; entry++)
+   for (unsigned where = 0; where < 3; where++)
+   for (VkResult failure : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY,
+                            VK_ERROR_DEVICE_LOST}) {
+      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      drawFailure = failure; drawFailureAt = where;
+      poolCreates = setAllocates = imageViews = drawCalls = 0;
+      dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
+                                      const VkAllocationCallbacks *, VkDescriptorPool *out) {
+         ++poolCreates; *out = VK_NULL_HANDLE;
+         CHECK(drawFailureAt == 0); return drawFailure;
+      };
+      dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
+         ++setAllocates; *out = VK_NULL_HANDLE;
+         CHECK(drawFailureAt == 1); return drawFailure;
+      };
+      dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *,
+                                 const VkAllocationCallbacks *, VkImageView *out) {
+         ++imageViews; *out = VK_NULL_HANDLE;
+         CHECK(drawFailureAt == 2); return drawFailure;
+      };
+      dev.vk.CmdDraw = [](VkCommandBuffer, uint32_t, uint32_t, uint32_t, uint32_t) { ++drawCalls; };
+      dev.vk.CmdDrawIndexed = [](VkCommandBuffer, uint32_t, uint32_t, uint32_t, int32_t, uint32_t) { ++drawCalls; };
+      if (where == 1) dev.framePools.push_back(handle<VkDescriptorPool>(200));
+      Shader vs; vs.dev = &dev; vs.stage = STAGE_VS; vs.cbMask = 1;
+      vs.variants.push_back({0, handle<VkShaderEXT>(600)}); dev.stage[STAGE_VS].shader = &vs;
+      Chunk chunk; chunk.buffer = handle<VkBuffer>(500);
+      Resource buffer; buffer.slice = {&chunk, 0, 64}; buffer.size = 64;
+      dev.stage[STAGE_VS].cb[0] = dev.indexBuffer = &buffer;
+      Resource target; target.dev = &dev; target.kind = ResKind::Image;
+      target.storage.image = handle<VkImage>(700); target.storage.layoutReady = true;
+      View view; view.dev = &dev; view.res = &target; view.type = ViewType::RTV;
+      view.width = view.height = 32;
+      if (where != 2) view.cache[0] = {target.storage.image, handle<VkImageView>(701), false};
+      dev.rtv[0] = &view; dev.viewportCount = 1; dev.viewports[0].Width = dev.viewports[0].Height = 32;
+      auto draw = [&] {
+         switch (entry) {
+         case 0: table.pfnDraw({&dev}, 3, 0); break;
+         case 1: table.pfnDrawIndexed({&dev}, 3, 0, 0); break;
+         case 2: table.pfnDrawInstanced({&dev}, 3, 2, 0, 0); break;
+         case 3: table.pfnDrawIndexedInstanced({&dev}, 3, 2, 0, 0, 0); break;
+         }
+      };
+      draw();
+      CHECK(setErrorCalls == 1 && lastError == D3DDDIERR_DEVICEREMOVED);
+      CHECK(dev.lost == D3DDDIERR_DEVICEREMOVED && !drawCalls);
+      CHECK(poolCreates + setAllocates + imageViews == 1);
+      draw();
+      CHECK(setErrorCalls == 1 && !drawCalls && poolCreates + setAllocates + imageViews == 1);
+   }
+   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   /* A no-op Draw must leave the ordinary allocation error contract intact. */
+   table.pfnDraw({&dev}, 0, 0);
+   dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
+                                   const VkAllocationCallbacks *, VkDescriptorPool *) {
+      return VK_ERROR_OUT_OF_HOST_MEMORY;
+   };
+   CHECK(!descriptor_set_alloc(&dev, 0) && lastError == E_OUTOFMEMORY && SUCCEEDED(dev.lost));
+   setErrorCalls = 0;
+   table.pfnDrawAuto({&dev});
+   CHECK(lastError == D3DDDIERR_DEVICEREMOVED && dev.lost == D3DDDIERR_DEVICEREMOVED);
+   table.pfnDrawAuto({&dev}); CHECK(setErrorCalls == 1);
+   for (VkResult full : {VK_ERROR_OUT_OF_POOL_MEMORY, VK_ERROR_FRAGMENTED_POOL}) {
+      reset(); Adapter a; Device d = make_device(&a);
+      drawFailure = full; poolCreates = setAllocates = 0;
+      d.framePools.push_back(handle<VkDescriptorPool>(200));
+      d.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
+         if (++setAllocates == 1) { *out = VK_NULL_HANDLE; return drawFailure; }
+         *out = handle<VkDescriptorSet>(300); return VK_SUCCESS;
+      };
+      d.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
+                                    const VkAllocationCallbacks *, VkDescriptorPool *out) {
+         ++poolCreates; *out = handle<VkDescriptorPool>(201); return VK_SUCCESS;
+      };
+      CHECK(descriptor_set_alloc(&d, 0) == handle<VkDescriptorSet>(300));
+      CHECK(setAllocates == 2 && poolCreates == 1 && !setErrorCalls && SUCCEEDED(d.lost));
+   }
+   std::puts("PASS: all Draw DDIs report only removal on allocation/view failure and stop further work; non-Draw OOM remains recoverable (CPU control)");
+}
+
 static uint32_t read32(const BYTE *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 
 static void query_contract()
@@ -874,7 +960,7 @@ int main(int argc, char **argv)
    }
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();
    device_error_contract();
-   rotated_views(); descriptor_contract();
+   rotated_views(); descriptor_contract(); draw_error_contract();
    query_contract();
    query_failure_contract();
    shader_contract(g_VS, true, "tgd3d-vs.spv"); shader_contract(g_PS, false, "tgd3d-ps.spv");

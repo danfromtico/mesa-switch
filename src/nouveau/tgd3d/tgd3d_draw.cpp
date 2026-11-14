@@ -81,6 +81,8 @@ void device_layouts_destroy(Device *dev)
 
 VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set)
 {
+   if (FAILED(dev->lost))
+      return VK_NULL_HANDLE;
    for (int attempt = 0; attempt < 2; attempt++) {
       if (!dev->framePools.empty()) {
          VkDescriptorSetAllocateInfo info = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
@@ -88,8 +90,15 @@ VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set)
          info.descriptorSetCount = 1;
          info.pSetLayouts = &dev->setLayouts[set];
          VkDescriptorSet handle = VK_NULL_HANDLE;
-         if (dev->vk.AllocateDescriptorSets(dev->vkdev, &info, &handle) == VK_SUCCESS)
+         const VkResult result = dev->vk.AllocateDescriptorSets(dev->vkdev, &info, &handle);
+         if (result == VK_SUCCESS)
             return handle;
+         if (result != VK_ERROR_OUT_OF_POOL_MEMORY && result != VK_ERROR_FRAGMENTED_POOL) {
+            TG_ERROR(dev, resource_result(result));
+            return VK_NULL_HANDLE;
+         }
+         if (attempt == 1)
+            break;
       }
       VkDescriptorPool pool = VK_NULL_HANDLE;
       if (!dev->freePools.empty()) {
@@ -107,8 +116,11 @@ VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set)
          info.maxSets = 2 * SETS + 8;
          info.poolSizeCount = 4;
          info.pPoolSizes = sizes;
-         if (dev->vk.CreateDescriptorPool(dev->vkdev, &info, nullptr, &pool) != VK_SUCCESS)
-            break;
+         const VkResult result = dev->vk.CreateDescriptorPool(dev->vkdev, &info, nullptr, &pool);
+         if (result != VK_SUCCESS) {
+            TG_ERROR(dev, resource_result(result));
+            return VK_NULL_HANDLE;
+         }
       }
       dev->framePools.push_back(pool);
    }
@@ -723,9 +735,17 @@ static VkCommandBuffer prepare_draw(Device *dev, bool indexed)
    return cmd;
 }
 
+struct DrawErrorScope {
+   Device *dev;
+   bool previous;
+   explicit DrawErrorScope(Device *dev) : dev(dev), previous(dev->inDraw) { dev->inDraw = true; }
+   ~DrawErrorScope() { dev->inDraw = previous; }
+};
+
 static void APIENTRY Draw(D3D10DDI_HDEVICE hDevice, UINT count, UINT start)
 {
    Device *dev = D(hDevice);
+   DrawErrorScope errors(dev);
    if (VkCommandBuffer cmd = prepare_draw(dev, false))
       dev->vk.CmdDraw(cmd, count, 1, start, 0);
 }
@@ -733,6 +753,7 @@ static void APIENTRY Draw(D3D10DDI_HDEVICE hDevice, UINT count, UINT start)
 static void APIENTRY DrawIndexed(D3D10DDI_HDEVICE hDevice, UINT count, UINT start, INT base)
 {
    Device *dev = D(hDevice);
+   DrawErrorScope errors(dev);
    if (VkCommandBuffer cmd = prepare_draw(dev, true))
       dev->vk.CmdDrawIndexed(cmd, count, 1, start, base, 0);
 }
@@ -741,6 +762,7 @@ static void APIENTRY DrawInstanced(D3D10DDI_HDEVICE hDevice, UINT count, UINT in
                                    UINT start_instance)
 {
    Device *dev = D(hDevice);
+   DrawErrorScope errors(dev);
    if (VkCommandBuffer cmd = prepare_draw(dev, false))
       dev->vk.CmdDraw(cmd, count, instances, start, start_instance);
 }
@@ -749,14 +771,19 @@ static void APIENTRY DrawIndexedInstanced(D3D10DDI_HDEVICE hDevice, UINT count, 
                                           UINT start, INT base, UINT start_instance)
 {
    Device *dev = D(hDevice);
+   DrawErrorScope errors(dev);
    if (VkCommandBuffer cmd = prepare_draw(dev, true))
       dev->vk.CmdDrawIndexed(cmd, count, instances, start, base, start_instance);
 }
 
 static void APIENTRY DrawAuto(D3D10DDI_HDEVICE hDevice)
 {
+   Device *dev = D(hDevice);
+   if (FAILED(dev->lost))
+      return;
+   DrawErrorScope errors(dev);
    /* Depends on stream output, which is not implemented. */
-   TG_ERROR(D(hDevice), E_NOTIMPL);
+   TG_ERROR(dev, E_NOTIMPL);
 }
 
 /* ------------------------------------------------------------------ */
