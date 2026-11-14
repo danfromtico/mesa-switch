@@ -106,7 +106,12 @@ static HRESULT APIENTRY SetDisplayMode(DXGI_DDI_ARG_SETDISPLAYMODE *args)
    trace(TGD3D_TRACE_RED_PRIMARY, hr,
          UINT64_C(1) << 32 | runtime_allocation(res->storage.runtime), dev->submitted);
 #else
-   HRESULT hr = flush(dev, true);
+   /* SetDisplayModeCb selects a scanout allocation synchronously; it is not
+    * queued behind the runtime context's GPU wait like an ordinary Present.
+    * Finish the submitted NVK work before handing the primary to runtime. */
+   HRESULT hr = flush(dev, false);
+   if (SUCCEEDED(hr))
+      hr = wait_sequence(dev, dev->submitted, TGD3D_WAIT_MODE_CHANGE);
 #endif
    if (SUCCEEDED(hr))
       hr = runtime_set_display_mode(res->storage.runtime, dev, args->SubResourceIndex);

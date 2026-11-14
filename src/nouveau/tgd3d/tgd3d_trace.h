@@ -60,6 +60,7 @@ enum tgd3d_wait_reason {
    TGD3D_WAIT_DESTROY = 3,
    TGD3D_WAIT_QUERY = 4,
    TGD3D_WAIT_SYNC_CONTROL = 5,
+   TGD3D_WAIT_MODE_CHANGE = 6,
 };
 
 struct tgd3d_trace_data {

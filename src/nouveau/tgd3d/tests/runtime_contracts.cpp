@@ -324,6 +324,77 @@ static void primary_creation_contract()
    std::puts("PASS: rotated primary creation requests DXGI's GPU-copy fallback before allocation (CPU control)");
 }
 
+static uint64_t modeCompleted;
+static VkResult modeWaitResult;
+static unsigned modeWaits, modeCallbacks, modeErrors;
+
+static void primary_mode_completion_contract()
+{
+   const struct {
+      uint64_t completed;
+      VkResult wait;
+      unsigned waits;
+   } cases[] = {
+      {0, VK_SUCCESS, 1},
+      {1, VK_SUCCESS, 0},
+      {0, VK_TIMEOUT, 30},
+      {0, VK_ERROR_DEVICE_LOST, 1},
+   };
+   for (const auto &c : cases) {
+      Adapter adapter; Device dev;
+      init(&dev, &adapter, 0);
+      modeCompleted = c.completed; modeWaitResult = c.wait;
+      modeWaits = modeCallbacks = modeErrors = 0;
+      dev.submitted = dev.gated = 1;
+      dev.fence = (VkSemaphore)3;
+      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore fence, uint64_t *out) {
+         CHECK(fence == (VkSemaphore)3); *out = modeCompleted; return VK_SUCCESS;
+      };
+      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *wait, uint64_t timeout) {
+         CHECK(wait->semaphoreCount == 1 && *wait->pSemaphores == (VkSemaphore)3);
+         CHECK(*wait->pValues == 1 && timeout == UINT64_C(1000000000));
+         ++modeWaits;
+         if (modeWaitResult == VK_SUCCESS)
+            modeCompleted = 1; /* Simulated GPU completion, never a CPU signal. */
+         return modeWaitResult;
+      };
+      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) {
+         CHECK(hr == D3DDDIERR_DEVICEREMOVED); ++modeErrors;
+      };
+      dev.kt.pfnSetDisplayModeCb = [](HANDLE h, D3DDDICB_SETDISPLAYMODE *mode) -> HRESULT {
+         CHECK(h == rt_device(0) && mode->hPrimaryAllocation == 0x60);
+         CHECK(modeCompleted == 1); ++modeCallbacks; return S_OK;
+      };
+      tg_gpu_primary_allocation_request primary = {
+         {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_DISPLAY_PRIMARY, 3686400},
+         D3DDDIFMT_A8R8G8B8, {60, 1}, D3DDDI_ROTATION_IDENTITY, 720, 1280, 2880, D3DDDI_ROTATION_270};
+      D3DDDI_OPENALLOCATIONINFO allocation = {};
+      allocation.hAllocation = 0x60; allocation.pPrivateDriverData = &primary;
+      allocation.PrivateDriverDataSize = sizeof(primary);
+      D3D10DDIARG_OPENRESOURCE open = {};
+      open.NumAllocations = 1; open.pOpenAllocationInfo = &allocation;
+      RuntimeSharedDescription description;
+      Resource res; res.dev = &dev;
+      CHECK(runtime_shared_open(&dev, &open, {rt_resource(0)}, &res.storage.runtime, &description) == S_OK);
+      DXGI1_1_DDI_BASE_FUNCTIONS dxgi = {}; dxgi_fill_table(&dxgi, true);
+      DXGI_DDI_ARG_SETDISPLAYMODE mode = {};
+      mode.hDevice = (DXGI_DDI_HDEVICE)&dev; mode.hResource = (DXGI_DDI_HRESOURCE)&res;
+      const HRESULT hr = dxgi.pfnSetDisplayMode(&mode);
+      CHECK(modeWaits == c.waits && dev.submitted == 1);
+      if (c.wait == VK_SUCCESS) {
+         CHECK(hr == S_OK && modeCallbacks == 1 && !modeErrors && modeCompleted == 1);
+      } else {
+         CHECK(hr == DXGI_ERROR_DEVICE_REMOVED && dev.lost == hr);
+         CHECK(!modeCallbacks && modeErrors == 1 && !modeCompleted);
+      }
+      /* This fixture imports runtime metadata only: no real GPU backing or
+       * in-flight work exists to release after a simulated wait failure. */
+      CHECK(runtime_destroy(res.storage.runtime) == S_OK); res.storage.runtime = nullptr;
+      runtime_device_destroy(&dev);
+   }
+   std::puts("PASS: SetDisplayMode waits for submitted GPU work; completed work does not wait; timeout/removal cannot publish the primary (CPU control)");
+}
+
 void runtime_contracts()
 {
    Adapter adapter; Device producer, consumer; init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
@@ -434,4 +505,5 @@ void runtime_contracts()
    runtime_device_destroy(&consumer); runtime_device_destroy(&producer);
    std::puts("PASS: rejected ignored owner import; Present preserves token/status and requests interval one (no timing proof)");
    primary_creation_contract();
+   primary_mode_completion_contract();
 }

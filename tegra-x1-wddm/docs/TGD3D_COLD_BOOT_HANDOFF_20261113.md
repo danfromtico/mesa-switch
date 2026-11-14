@@ -1684,3 +1684,44 @@ shadow旋转命令，更不重装同一失败组合代替分析。
 无残留；默认任务Ready、原I目录及Code0保持。12项恢复记录14967字节已取回并核验。
 Gemini SC7仍在原Antigravity Carbon High会话独立开发，尚无SC7报告/diff；DVFS/Pacecar
 交接包已接收，但未混入本轮显示修正或部署。
+
+### SetDisplayMode的真实完成边界（2026-11-14，实机验证待进行）
+
+对e276a32d的实际Flip路径继续审查，发现tgd3d的SetDisplayMode只调用`flush(dev, true)`。
+双向Fence保证两个提交上下文之间的顺序，但该函数只在超过两笔在途提交时限流，
+不能保证最新提交已经完成。`pfnSetDisplayModeCb`同步选择扫描allocation，没有传入
+渲染hContext，不能当作普通Present自动排在该上下文的GPU wait之后。旧Zink桌面前端
+`DxgiFns.cpp::_SetDisplayMode`在`RuntimePrimarySetMode`之前调用`RuntimeResourceFinish`。
+
+微软[SetDisplayModeCb文档](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/nc-d3dumddi-pfnd3dddi_setdisplaymodecb)
+（页面更新2021-04-01，本轮查阅2026-11-14）说明此回调设置实际扫描的allocation；
+其中R200示例不能直接证明NVK独立提交上下文已完成。另核对实机Windows 22621组件和
+微软公开符号，以下RVA/调用结论仅适用于这些精确二进制，不外推到其他Windows版本：
+
+- dxgkrnl.sys 10.0.22621.2792，SHA256
+  `99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6`。
+  UpdateModeWithPrimary（RVA ef348）调用FlushScheduler(reason8)；fe618读取调度接口
+  的0x308槽位，再以type1调用该函数。
+- dxgmms2.sys 10.0.22621.2792，SHA256
+  `94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5`，公开PDB
+  AF63A8A49D01FA371A266959E133EB0B/age1。该槽位为VidSchFlushQueuePackets（RVA18730），
+  下游type1撤销待执行的MMIO Flip并清理FlipDevice；不是独立的VidSchFlushAdapter。
+  不能把这里的Flush理解为全部NVK渲染完成。
+- d3d11.dll 10.0.22621.2715，SHA256
+  `ccc352f7097d0320368000dbe9ff92772d8fc909185d95c8a0753cb8f115f880`。
+  RotateResourceIdentities（RVA19210）由runtime交换内部内核身份，随后通知UMD；
+  现有storage交换和runtime_rebind未发现需改动的句柄对应错误。
+
+本次只改SetDisplayMode：先正常提交并保留双向桥接，再等待`submitted`的真实Vulkan
+timeline完成，成功后调用runtime。等待失败则返回设备丢失，不发布主表面，也不由CPU
+伪造完成。新增等待原因6用于区分模式切换与普通Present回压。KMD、ICD、日常Present
+和GPU旋转着色器均不变；此次发现不是270°阶段重启根因已被证明。
+
+控制测试调用真实DXGI DDI表及runtime owner实现，覆盖一笔未完成提交、已完成免等待、
+超时和设备丢失。新测试配旧SetDisplayMode对象时在`modeCompleted == 1`断言失败；
+补丁后的x64 Wine控制全部通过，ARM64/x64 DLL与控制工具构建完成。仅为CPU控制，
+不代表GPU、实屏或稳定性通过。冻结候选只移植这处修正，未混入HEAD其他query修改。
+ARM64 UMD SHA256 `22c4be6184deb402779412bdccc8a6d645538b9b2c5c79227dd17cedd3d005bd`；
+复用e276a32d的7b745085…签名KMD和dee3d580…ICD，维持WDDM2.6。
+材料位于OUT/mode-change-completion，二进制审查材料在OUT/flip-retirement-audit；
+微软二进制/PDB仅本地分析，不纳入仓库。
