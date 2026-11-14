@@ -141,3 +141,39 @@ HKCU Run path are enabled with the monitoring bar visible. After the planned
 acceptance. Charge-limit85 was retained; CPU/GPU/RAM fixed recovery remains
 1497.6/460.8/1600MHz. Original-platform and Fan17 pre-update backups have been
 downloaded and all 13+5 file hashes checked.
+
+
+## Native policy-transition acceptance (Fan19, 2026-11-14)
+
+WindowsDrivers b4057defa984c9c76f3428308f94180467295127 corrects the idle
+handoff: CTRL=0, DVCO_RESET=1 and FORCE=0 permit disabling the retained
+I2C_ENABLE bit and draining pending writes before acquisition. Active loops
+and forced output remain rejected. Fan18's captured idle fixture fails the old
+adapter and passes the correction with ASan/UBSan, including busy-I2C refusal.
+
+On boot 2026-11-14T22:17:19.3200260Z, the test ran 22:22:15–22:23:05 UTC.
+All modes 1,0,2,3,4,5,6 completed their short policy transition and individual
+return to mode7. Each mode verified CPU DFLL active, no CPU error, live GPU
+dynamic status, fresh clock samples, temperature bounds and unchanged RAM1600.
+Every fixed return read CPU1497600kHz/1120mV, GPU460800kHz/800000uV and
+DFLL/GPU dynamic disabled. DWM836 and Code0 remained through the test.
+
+Actual short samples included CPU308191–1963500kHz and GPU76800–1228800kHz.
+This does not validate every OPP, sustained OC stability, physical scanout,
+landscape, FPS/API presentation or five-minute interaction. The five-minute
+interaction was explicitly cancelled by the user and was not repeated.
+
+Frozen components: KMD3ada55a42a3a116d41951a452893b2c09e3f01cc440e67ffd4b8b06b6d5c7918,
+UMD8d7da8c1a3d9e9556a8e88b2b8bef67956dcf588c980d763e5f6684aaf6489c2,
+ICD30a8d6a97d96d917b93ecb1f8a34489ce5613ca2082752b04c5823d6cb408e8d,
+Fan19 SYS0579f19e75c3cc317506f8419c95fd0d1557be9bfdec680b4854e04fce1961ee,
+firmware5ceb30735636ad4ca8be1428cce30629b0346e033d9799d89d6e167129093c3f.
+ACPI14d2ca28b6b3d6e8afcef5200ba31c90010900783b78ed4cb52ffb1fdd6bc162
+and Battery12 remain. Display code and the default GPU bridge were retained.
+
+SwitchPowerTray4924 and Pacecar2752 were both observed in user session1 after
+the same boot. Both HKCU Run entries remain enabled; Pacecar starts with its
+bar visible. Tgd3dDefaultEnable is enabled with its existing login+5s trigger.
+Final policy is fixed7; charge-limit85 is retained. Receipts and exact recovery
+are in OUT/dvfs-pacecar-integration/dfll-idle-handoff; the original I pairing is
+still available through the integration Restore-Dvfs.ps1.
