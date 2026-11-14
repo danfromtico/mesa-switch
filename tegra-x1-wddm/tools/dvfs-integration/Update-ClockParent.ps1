@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# Paired Fan16/firmware correction; preserves the installed display package.
+# Paired Fan/firmware correction; preserves the installed display package.
 param([ValidateSet('Stage','AfterBoot','Restore','RestoreAfterBoot')][string]$Action='Stage')
 $FixRoot=$PSScriptRoot
 . (Join-Path $FixRoot '..\dvfsmerge-20261114\Merge-Common.ps1')
@@ -36,7 +36,7 @@ if($Action -in @('Stage','Restore')) {
   if($devices.Count -ne 1){throw 'Expected one SwitchFan device'}
   $oem=(Get-PnpDeviceProperty -InstanceId $devices[0].InstanceId -KeyName DEVPKEY_Device_DriverInfPath).Data
   & pnputil.exe /export-driver $oem $backup|Out-File (Join-Path $backup 'export.log')
-  if($LASTEXITCODE){throw 'Cannot export active Fan15'}
+  if($LASTEXITCODE){throw 'Cannot export the active Fan package'}
   $infs=@(Get-ChildItem $backup -Recurse -Filter switchfan.inf);if($infs.Count -ne 1){throw 'Exported Fan package differs'}
   Check-File (Join-Path $infs[0].DirectoryName 'switchfan.sys') $manifest.BeforeFan
   $files=@{};foreach($f in Get-ChildItem $backup -Recurse -File){$files[$f.FullName.Substring($FixRoot.Length+1)]=@{Length=$f.Length;Sha256=File-Hash $f.FullName}}
@@ -68,11 +68,11 @@ try {
  if((Device-Property 'ProblemCode') -ne 43){throw 'Platform selection requires the closed GPU startup gate'}
  if($Action -eq 'AfterBoot') {
   Check-File $manifest.FirmwarePath $manifest.Files.'bl33.bin'
-  $inf=Join-Path $FixRoot 'package\switchfan.inf';$sys=$manifest.Files.'package\switchfan.sys';$version=16
+  $inf=Join-Path $FixRoot 'package\switchfan.inf';$sys=$manifest.Files.'package\switchfan.sys';$version=if($manifest.FanVersion){$manifest.FanVersion}else{16}
  }else {
   $backup=Read-Json (Join-Path $FixRoot 'backup.json')
   Check-File $manifest.FirmwarePath $manifest.BeforeFirmware
-  $inf=$backup.Inf;$sys=$manifest.BeforeFan;$version=15
+  $inf=$backup.Inf;$sys=$manifest.BeforeFan;$version=if($manifest.BeforeFanVersion){$manifest.BeforeFanVersion}else{15}
  }
  $r.Phase='SelectingFan';Save-Json $statePath $r
  $r.Selection=Update-PlatformDriver 'switchfan' 'ACPI\SWOA0402' $inf $sys.Sha256
@@ -90,7 +90,9 @@ try {
  $limit=[DateTime]::UtcNow.AddSeconds(110);$ok=$false
  do {
   Start-Sleep -Seconds 1
-  $a=Read-Json (Join-Path $manifest.Directory 'default-state.json')
+  # The activation task writes this file in place with write-through. A
+  # transient sharing violation/partial JSON is not an activation failure.
+  try{$a=Read-Json (Join-Path $manifest.Directory 'default-state.json')}catch{continue}
   if($a.End -and $a.Status -eq 'Enabled' -and [DateTime]::Parse($a.End).ToUniversalTime() -ge $start -and (Device-Property 'ProblemCode') -eq 0){$ok=$true;break}
   if($a.Status -eq 'Failed' -and [DateTime]::Parse($a.Utc).ToUniversalTime() -ge $start){throw ('Native activation failed: '+$a.Error)}
  }while([DateTime]::UtcNow -lt $limit)

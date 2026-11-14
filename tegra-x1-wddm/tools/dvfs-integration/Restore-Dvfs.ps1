@@ -9,7 +9,7 @@ $r=if(Test-Path $state){Read-Json $state}else{$null}
 if($r -and $r.Phase -eq 'Restored'){return}
 if(!$r -or $r.Phase -ne 'RebootRequested') {
  $fan=Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\switchfan\Parameters'
- if($fan.DriverVersion -in @(15,16)){$null=& (Join-Path $MergeRoot 'Power-State.ps1') -Mode 7 -PowerOnly}
+ if($fan.DriverVersion -in @(15,16,17)){$null=& (Join-Path $MergeRoot 'Power-State.ps1') -Mode 7 -PowerOnly}
  Close-NativeGate
  Disable-ScheduledTask Tgd3dDvfsInstall -ErrorAction SilentlyContinue|Out-Null
  Copy-Durable (Join-Path $MergeRoot 'backup\bl33.bin') $backup.FirmwarePath
