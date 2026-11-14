@@ -5,12 +5,18 @@
 
 ## 当前设备授权（2026-11-14 UTC）
 
-**最新：MPO有效掩码修正e28f5886已推送，并完成一次正常UMD横屏测试，仍失败。
+**最新：de3f5b25平滑旋转候选已完成直接横屏测试，仍未上屏。SetTimings实际调用并
+成功更新1→2；CommitVidPn/UpdateActive本轮没有调用。DWM随后反复隐藏显示源。
+16:27:12 UTC已恢复1a86a02b…/0cd34833…/dee3d580…及`.158 / Code0`；当前/保存方向
+均720×1280，双向Fence、频率与登录后启用保持，16:31:03确认本轮临时任务/工具清理。
+正在修正主表面的显示模式Rotation与扫描存储Rotation混用，尚未安装新候选。**
+
+以下为MPO有效掩码修正e28f5886的历史结果，已推送并完成一次正常UMD横屏测试，仍失败。
 14:49轮的source_visible/WIN_ENABLE仍为0，实际扫描面12点为0；逻辑图案5020点正确
 不能替代上屏。该轮没有自动重启，14:49:50恢复竖屏；14:54:21发出计划恢复重启，
 14:58:14已恢复原缓存组合1a86a02b…/0cd34833…/dee3d580…、Code0及原频率。
 15:21:33交互只读确认当前/保存方向720×1280、DWM828加载原缓存UMD/ICD。
-当前按用户新要求实现真正的GDI Rotate Blt及横屏shadow；只做本地构建，尚未安装。**
+当时按用户新要求实现真正的GDI Rotate Blt及横屏shadow；后续结果见文末。
 
 **14:21最新测试：强开WIN_ENABLE诊断0dd8c544已经安装并完成一次横屏红屏对照。
 三个采样均source_visible0、WIN_ENABLE1，实际锁存地址`0xfbba1000`，12点红色一致；
@@ -1568,3 +1574,60 @@ HEAD较新的reset-packet/执行诊断。ARM64构建通过，Switch原I基线Cod
 test-context和test-panel-timings均退出0，包含能力位、四方向路径更新和完整入口/
 返回配对。这仍是CPU控制，尚无本候选GPU/物理结果。UMD d28d5669…、ICD
 dee3d580…保持上一轮冻结版本，不重编译无关组件。
+
+### 平滑旋转实机结果与恢复（2026-11-14 16:19–16:31 UTC）
+
+候选源码de3f5b25537112ef0b66e90f98c0ff9201197b34，SYS
+`33bcb3d7faa09e622b8f4a1db007864b85abde35be00cdcd258808f91203c1b6`，UMD
+`d28d5669ca284f1b2dcd7541bccc05c2ca5d409f6cf6283884dadade110999c4`，ICD
+`dee3d5805af80696f87d094ec1c5f557d662f435336207992baf588e2dc1cee0`。
+16:19:39原生启用完成，Code0，DWM816，LUID`00000000000c65e1`，外接电源Online。
+
+模式跟踪完整返回456条入口/出口记录：CommitVidPn=0次、UpdateActive=0次；
+SetTimings=2次，其中16:20:25.6800715–16:20:25.6800951的实际旋转调用返回0，
+PathRotation从1变2。SourceVisibility共226次，其中DWM线程224次重复Visible=FALSE，
+所有返回成功。这排除了本轮“Commit/Update回调卡住”的说法，不能排除其余契约问题。
+
+90°阶段的软件扫描检查失败：source_visible=0、target_active=1、WIN_ENABLE=0，
+地址仍`0xfc2bd000`、PresentId36，无pending；像素还是旧桌面。DWM随后进入反复主表面
+建立/隐藏循环。未继续180/270，没有横屏物理验收。16:21:02恢复竖屏，16:23:31请求
+一次计划恢复重启；16:27:12确认原I缓存组合恢复，DWM812加载原UMD/ICD，频率、风扇13、
+默认启用任务及当前/保存720×1280均核对通过。16:30:18删除3任务19项，16:31:03清理
+辅助脚本并核对无本轮残留。未恢复`.59`，未追加超时重启。
+
+本地保留OUT/smooth-rotation的53项取回结果，15067314字节且逐项哈希/长度一致；
+ETL SHA256 `ec1be44bddfa0cea9cc82683bd3bd7b663be4d681010b3d5b7c6f91236960975`，
+导出12991记录、456模式记录，UMD实时匹配12533记录且loss/invalid均0。成功回调不是
+成功上屏，日志结束完整也不代表渲染正确。
+
+### 主表面模式方向与扫描存储方向分离（本地修正，实机待验证）
+
+WDK10.0.26100.0把DescribeAllocation.Rotation注明为“Rotation for display mode”；
+[公开结构页](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkarg_describeallocation)
+仍标reserved，不能据此忽略真实调用。固定物理720×1280/storage identity不意味着
+所处显示模式也是identity；[NONPREROTATED](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi_ddi_primary_desc)
+允许应用预先调整输出方向。
+
+再次只读核对系统文件：dxgkrnl.sys10.0.22621.2792，SHA256
+`99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6`；
+d3d11.dll10.0.22621.2715，SHA256
+`ccc352f7097d0320368000dbe9ff92772d8fc909185d95c8a0753cb8f115f880`。
+与11月11日本地分析文件逐字节一致。DXGDEVICE::SetDisplayMode在RVA1494c8调用
+DescribeAllocation，1494ec/269ab4比较非UINT_MAX的返回Rotation与显示模式；
+不等时269b04取269ff0的`STATUS_GRAPHICS_PRESENT_MODE_CHANGED=0xc01e0005`。
+此前SetDisplayModeCB摘录实际属于**d3d11.dll**中的NDXGI，不能按dxgi.dll地址解释。
+其RVA54a50识别该状态、54b20保存线程结果，54b3c在特定分支向UMD返回S_OK；故
+UMD的228次S_OK不能单独证明内核模式校验通过。此为静态分支证据，尚非本轮实际
+命中该分支的调用栈证明。
+
+修正把48字节私有描述末尾原reserved DWORD用于ModeRotation：tgd3d保留输入的
+Primary.ModeDesc.Rotation，标准primary记录创建时的路径方向；DescribeAllocation
+返回这份不可变模式元数据。Rotation/Width/Height/Pitch仍描述真实扫描存储，
+不改变GPU旋转复制、MPO准入、地址、屏障或完成通知。ModeRotation=0兼容旧描述；
+旧KMD会拒绝新字段非零，需配对部署本轮UMD/KMD，现有ICD不变。CPU控制覆盖四个
+模式方向对应同一720×1280存储、旧对象元数据不随新创建请求变化，以及非法方向拒绝。
+这是一处可检验修正，不把推测写成横屏已修复。
+
+ARM64 KMD、ARM64/x64 UMD均构建通过；Wine x64控制和Switch原I基线上的
+test-context、test-panel-timings、tgd3d-contracts均退出0。全部为CPU契约/模型检查，
+没有新增GPU离屏测试。候选尚未启用，下一步签名打包后直接测旋转。

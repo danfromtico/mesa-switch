@@ -94,7 +94,9 @@ static NTSTATUS request(const DXGK_ALLOCATIONINFO *info,TG_GPU_ALLOCATION_DESC *
         primary->Pitch=T214_DC_PANEL_PITCH;
     }
     if(!(r->flags&TG_GPU_ALLOCATION_CPU_VISIBLE) || r->bytes!=T214_GPU_POST_FB_SIZE ||
-        primary->Reserved || primary->Rotation!=D3DDDI_ROTATION_IDENTITY ||
+        primary->ModeRotation>D3DDDI_ROTATION_270 ||
+        (primary->ModeRotation && !(r->flags&TG_GPU_ALLOCATION_DISPLAY_PRIMARY)) ||
+        primary->Rotation!=D3DDDI_ROTATION_IDENTITY ||
         !((primary->Width==T214_DC_PANEL_WIDTH && primary->Height==T214_DC_PANEL_HEIGHT) ||
           (!(r->flags&TG_GPU_ALLOCATION_DISPLAY_PRIMARY) &&
            primary->Width==T214_DC_PANEL_HEIGHT && primary->Height==T214_DC_PANEL_WIDTH)) ||
@@ -252,8 +254,10 @@ static NTSTATUS APIENTRY describe_allocation(HANDLE adapter,DXGKARG_DESCRIBEALLO
     if(buffer && ((desc->Buffer.flags&TG_GPU_ALLOCATION_DISPLAY_PRIMARY) ||
         args->Flags.CheckDisplayMode || desc->Buffer.bytes>UINT32_MAX))
         return STATUS_NOT_SUPPORTED;
-    /* Report the allocation's own layout, not the panel's latest mode: old
-     * and new primaries can coexist during a mode change. */
+    /* Geometry is storage; Rotation is the primary's DISPLAY MODE (WDK).
+     * Dxgkrnl compares it with the active display-mode rotation when
+     * CheckDisplayMode is set. NONPREROTATED changes the stored pixels, not
+     * this mode metadata. Keep it immutable: old and new primaries coexist. */
     *args=(DXGKARG_DESCRIBEALLOCATION){
         .hAllocation=args->hAllocation,
         .Width=buffer?(UINT)desc->Buffer.bytes:linear?allocation->Desc.Linear.Width:desc->Width,
@@ -263,7 +267,8 @@ static NTSTATUS APIENTRY describe_allocation(HANDLE adapter,DXGKARG_DESCRIBEALLO
         .RefreshRate=(linear||buffer)?(D3DDDI_RATIONAL){0}:
             (D3DDDI_RATIONAL){desc->RefreshRate.Numerator,desc->RefreshRate.Denominator},
         .Flags=args->Flags,
-        .Rotation=(linear||buffer)?D3DDDI_ROTATION_IDENTITY:(D3DDDI_ROTATION)desc->Rotation,
+        .Rotation=(linear||buffer)?D3DDDI_ROTATION_IDENTITY:
+            (D3DDDI_ROTATION)(desc->ModeRotation?desc->ModeRotation:desc->Rotation),
     };
     return STATUS_SUCCESS;
 }
@@ -516,6 +521,9 @@ NTSTATUS APIENTRY TgGpuDdiGetStandardAllocationDriverData(HANDLE context,
         .Width = width, .Height = height, .Pitch = width * sizeof(UINT32),
     };
     if (primary) {
+        const UINT rotation=adapter->Panel.PathRotation;
+        request.ModeRotation=rotation>=D3DKMDT_VPPR_IDENTITY && rotation<=D3DKMDT_VPPR_ROTATE270?
+            rotation:D3DDDI_ROTATION_IDENTITY;
         request.RefreshRate.Numerator = args->pCreateSharedPrimarySurfaceData->RefreshRate.Numerator;
         request.RefreshRate.Denominator = args->pCreateSharedPrimarySurfaceData->RefreshRate.Denominator;
     } else

@@ -19,7 +19,7 @@ static unsigned allocations, deallocations, maps, frees, locks, unlocks, waits, 
 static HRESULT presentStatus;
 static HRESULT primaryError;
 static D3DDDIFORMAT primaryFormat;
-static UINT primaryWidth, primaryHeight, primaryPitch, primaryRotation;
+static UINT primaryWidth, primaryHeight, primaryPitch, primaryRotation, primaryModeRotation;
 static unsigned primaryImages, primaryModes;
 static unsigned primaryFailureStep, primaryAllocations, primaryResidents, expectedPrimaryDeallocations;
 static VkResult primaryFailure;
@@ -154,6 +154,7 @@ static void primary_creation_contract()
       primaryError = S_OK;
       primaryFormat = alpha ? D3DDDIFMT_A8R8G8B8 : D3DDDIFMT_X8R8G8B8;
       primaryRotation = D3DDDI_ROTATION_IDENTITY;
+      primaryModeRotation = rotation;
       primaryWidth = 720;
       primaryHeight = 1280;
       primaryPitch = primaryWidth * 4;
@@ -174,6 +175,7 @@ static void primary_creation_contract()
          CHECK(r.Buffer.flags == (TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_DISPLAY_PRIMARY));
          CHECK(r.Format == primaryFormat && r.Width == primaryWidth && r.Height == primaryHeight);
          CHECK(r.Pitch == primaryPitch && r.Buffer.bytes == 3686400 && r.Rotation == primaryRotation);
+         CHECK(r.ModeRotation == primaryModeRotation);
          ++primaryAllocations;
          if (primaryFailureStep == 4)
             return primaryRuntimeFailure;
@@ -250,7 +252,7 @@ static void primary_creation_contract()
       D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
       tg_gpu_primary_allocation_request standard = {
          {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_DISPLAY_PRIMARY, 3686400},
-         primaryFormat, {60, 1}, D3DDDI_ROTATION_IDENTITY, primaryWidth, primaryHeight, primaryPitch, 0};
+         primaryFormat, {60, 1}, D3DDDI_ROTATION_IDENTITY, primaryWidth, primaryHeight, primaryPitch, rotation};
       D3DDDI_OPENALLOCATIONINFO allocation = {};
       allocation.hAllocation = 0x60; allocation.pPrivateDriverData = &standard;
       allocation.PrivateDriverDataSize = sizeof(standard);
@@ -284,6 +286,7 @@ static void primary_creation_contract()
    }
    std::puts("PASS: ARGB/XRGB fixed-portrait primary Create/OpenResource and NONPREROTATED modes, exact pitch/extent, imported GPU VA and teardown (CPU control)");
    std::puts("PASS: accepted optional/mandatory primaries publish direct-scanout DriverFlags without stale NO_SCANOUT (CPU control)");
+   std::puts("PASS: four display-mode angles retain fixed portrait storage through primary creation/open (CPU control)");
    std::puts("PASS: primary Create/OpenResource propagate image/import/bind OOM and runtime removal after releasing partial ownership (CPU control)");
 
    /* DXGI must receive its DDI opt-out, before any scanout allocation exists.
@@ -375,9 +378,9 @@ void runtime_contracts()
          CHECK(description.format == (alpha ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_B8G8R8X8_UNORM));
          CHECK(bool(description.bind_flags & D3D10_DDI_BIND_PRESENT) == bool(primary));
          CHECK(SUCCEEDED(runtime_destroy(opened)));
-         standard.Reserved = 1;
+         standard.ModeRotation = primary ? D3DDDI_ROTATION_270 + 1 : D3DDDI_ROTATION_IDENTITY;
          CHECK(runtime_shared_open(&consumer, &so, {rt_resource(1)}, &opened, &description) == DXGI_ERROR_UNSUPPORTED && !opened);
-         standard.Reserved = 0; standard.Buffer.bytes += 4096;
+         standard.ModeRotation = 0; standard.Buffer.bytes += 4096;
          CHECK(runtime_shared_open(&consumer, &so, {rt_resource(1)}, &opened, &description) == DXGI_ERROR_UNSUPPORTED && !opened);
          standard.Buffer.bytes -= 4096;
          standard.Rotation = D3DDDI_ROTATION_90;

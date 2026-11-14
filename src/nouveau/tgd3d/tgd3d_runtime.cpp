@@ -472,7 +472,8 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
           a.Buffer.flags != (TG_GPU_ALLOCATION_CPU_VISIBLE |
                              (primary ? TG_GPU_ALLOCATION_DISPLAY_PRIMARY : 0)) ||
           (a.Format != D3DDDIFMT_A8R8G8B8 && a.Format != D3DDDIFMT_X8R8G8B8) ||
-          a.Rotation != D3DDDI_ROTATION_IDENTITY || a.Reserved ||
+          a.Rotation != D3DDDI_ROTATION_IDENTITY ||
+          a.ModeRotation > D3DDDI_ROTATION_270 || (!primary && a.ModeRotation) ||
           !valid_extent || a.Pitch != a.Width * 4 ||
           a.Buffer.bytes != UINT64_C(720) * 1280 * 4)
          return DXGI_ERROR_UNSUPPORTED;
@@ -586,7 +587,7 @@ HRESULT runtime_primary_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
        (uint64_t)pitch * height},
       desc->Format == DXGI_FORMAT_B8G8R8X8_UNORM ? D3DDDIFMT_X8R8G8B8 : D3DDDIFMT_A8R8G8B8,
       {primary.ModeDesc.RefreshRate.Numerator, primary.ModeDesc.RefreshRate.Denominator},
-      D3DDDI_ROTATION_IDENTITY, width, height, pitch, 0};
+      D3DDDI_ROTATION_IDENTITY, width, height, pitch, mode_rotation};
    D3DDDI_ALLOCATIONINFO2 info = {};
    info.pPrivateDriverData = &request;
    info.PrivateDriverDataSize = sizeof(request);

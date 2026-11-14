@@ -21,7 +21,12 @@ _Static_assert(sizeof(struct tg_gpu_allocation_request)==16,"allocation ABI");
 
 /* Explicit pitch-linear primary/shadow layout. Format and Rotation use the
  * numeric D3DDDIFORMAT and D3DDDI_ROTATION values; neither is a raw display
- * register value. Width/Height/Pitch describe the actual allocation storage.
+ * register value. Width/Height/Pitch and Rotation describe allocation storage.
+ * ModeRotation is the primary's display-mode rotation for DescribeAllocation,
+ * independent of storage: NONPREROTATED pixels still scan out in portrait.
+ * Zero retains the old descriptor's Rotation value. Shadows leave it zero.
+ * This uses the last formerly reserved DWORD without changing the size;
+ * older KMDs reject nonzero values instead of misinterpreting the layout.
  * The old 32-byte portrait descriptor ended with a zero reserved word and
  * is still accepted by the KMD. New producers supply all 48 bytes. */
 #define TG_GPU_PRIMARY_LEGACY_BYTES 32u
@@ -30,7 +35,7 @@ struct tg_gpu_primary_allocation_request {
     uint32_t Format;
     struct { uint32_t Numerator, Denominator; } RefreshRate;
     uint32_t Rotation;
-    uint32_t Width, Height, Pitch, Reserved;
+    uint32_t Width, Height, Pitch, ModeRotation;
 };
 _Static_assert(sizeof(struct tg_gpu_primary_allocation_request)==48,"primary layout ABI");
 

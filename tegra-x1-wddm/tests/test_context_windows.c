@@ -866,6 +866,26 @@ __declspec(noinline) static void TestAllocations(TG_GPU_CONTEXT_ENGINE *e,TG_GPU
     CHECK(ddi->DxgkDdiCreateAllocation(e,&create)==STATUS_INVALID_PARAMETER);
     primary.Rotation=D3DDDI_ROTATION_90;primary.Width=720;primary.Height=1280;primary.Pitch=2880;
     CHECK(ddi->DxgkDdiCreateAllocation(e,&create)==STATUS_INVALID_PARAMETER);
+    /* A rotated DISPLAY MODE must not reinterpret the physical primary.
+     * Changing the producer descriptor after creation cannot alter an old
+     * allocation's mode, geometry, or scanout binding. */
+    primary.Rotation=D3DDDI_ROTATION_IDENTITY;
+    for(UINT rotation=D3DDDI_ROTATION_IDENTITY;rotation<=D3DDDI_ROTATION_270;++rotation) {
+        primary.ModeRotation=rotation;
+        CHECK(NT_SUCCESS(ddi->DxgkDdiCreateAllocation(e,&create)));
+        primary.ModeRotation=rotation==D3DDDI_ROTATION_270?1:rotation+1;
+        describe=(DXGKARG_DESCRIBEALLOCATION){.hAllocation=info[0].hAllocation,
+            .Flags.CheckDisplayMode=1,.Rotation=(D3DDDI_ROTATION)UINT32_MAX};
+        CHECK(NT_SUCCESS(ddi->DxgkDdiDescribeAllocation(e,&describe)) &&
+              (UINT)describe.Rotation==rotation && describe.Width==720 && describe.Height==1280);
+        CHECK(TgGpuGetScanoutSurface(e,info[0].hAllocation,&scanout)==STATUS_SUCCESS &&
+              scanout.Rotation==D3DDDI_ROTATION_IDENTITY && scanout.ModeRotation==rotation &&
+              scanout.Width==720 && scanout.Height==1280 && scanout.Pitch==2880);
+        CHECK(NT_SUCCESS(ddi->DxgkDdiDestroyAllocation(e,&destroy)) && !e->AllocationBytes);
+    }
+    primary.ModeRotation=D3DDDI_ROTATION_270+1;
+    CHECK(ddi->DxgkDdiCreateAllocation(e,&create)==STATUS_INVALID_PARAMETER);
+    primary.ModeRotation=0;
     static TG_GPU_ADAPTER surface_adapter;
     surface_adapter.Panel.Dc.owned=true;
     D3DKMDT_SHADOWSURFACEDATA shadow={.Width=T214_DC_PANEL_WIDTH,
@@ -878,7 +898,7 @@ __declspec(noinline) static void TestAllocations(TG_GPU_CONTEXT_ENGINE *e,TG_GPU
     standard.pAllocationPrivateDriverData=&primary;
     CHECK(TgGpuDdiGetStandardAllocationDriverData(&surface_adapter,&standard)==STATUS_SUCCESS);
     CHECK(primary.Buffer.flags==TG_GPU_ALLOCATION_CPU_VISIBLE &&
-          primary.Buffer.bytes==T214_GPU_POST_FB_SIZE && !primary.Reserved);
+          primary.Buffer.bytes==T214_GPU_POST_FB_SIZE && !primary.ModeRotation);
     CHECK(NT_SUCCESS(ddi->DxgkDdiCreateAllocation(e,&create)));
     CHECK(info[0].FlagsWddm2.CpuVisible && !info[0].FlagsWddm2.AccessedPhysically &&
           e->AllocationBytes==T214_GPU_POST_FB_SIZE);
@@ -896,6 +916,16 @@ __declspec(noinline) static void TestAllocations(TG_GPU_CONTEXT_ENGINE *e,TG_GPU
     CHECK(!info[0].FlagsWddm2.AccessedPhysically && e->AllocationBytes==T214_GPU_POST_FB_SIZE);
     CHECK(TgGpuGetScanoutSurface(e,info[0].hAllocation,&scanout)==STATUS_NOT_SUPPORTED);
     CHECK(NT_SUCCESS(ddi->DxgkDdiDestroyAllocation(e,&destroy)) && !e->AllocationBytes);
+    D3DKMDT_SHAREDPRIMARYSURFACEDATA shared={.Width=720,.Height=1280,
+        .Format=D3DDDIFMT_A8R8G8B8,.RefreshRate={60,1}};
+    standard.StandardAllocationType=D3DKMDT_STANDARDALLOCATION_SHAREDPRIMARYSURFACE;
+    standard.pCreateSharedPrimarySurfaceData=&shared;
+    for(UINT rotation=1;rotation<=4;++rotation) {
+        surface_adapter.Panel.PathRotation=rotation;
+        CHECK(TgGpuDdiGetStandardAllocationDriverData(&surface_adapter,&standard)==STATUS_SUCCESS);
+        CHECK(primary.ModeRotation==rotation && primary.Rotation==D3DDDI_ROTATION_IDENTITY &&
+              primary.Width==720 && primary.Height==1280 && primary.Pitch==2880);
+    }
     info[0].pPrivateDriverData=&desc[0];
     info[0].PrivateDriverDataSize=sizeof(desc[0]);
     desc[0].flags=0;desc[0].bytes=TG_GPU_MEMORY_BUDGET_BYTES-TG_GPU_SCANOUT_SEGMENT_BYTES+1;
