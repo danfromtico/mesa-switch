@@ -23,6 +23,13 @@ static NTSTATUS NTAPI UnexpectedIo(HANDLE h,HANDLE event,PIO_APC_ROUTINE apc,PVO
 static VOID NTAPI UnexpectedStall(ULONG us){CHECK(FALSE);}
 static NTSTATUS NTAPI UnexpectedDelay(KPROCESSOR_MODE mode,BOOLEAN alertable,PLARGE_INTEGER interval)
 {CHECK(FALSE);return STATUS_UNSUCCESSFUL;}
+static NTSTATUS NTAPI UnexpectedOpenKey(PHANDLE k,ACCESS_MASK a,POBJECT_ATTRIBUTES o)
+{CHECK(FALSE);return STATUS_UNSUCCESSFUL;}
+static NTSTATUS NTAPI UnexpectedQueryValueKey(HANDLE k,PUNICODE_STRING n,KEY_VALUE_INFORMATION_CLASS c,
+    PVOID i,ULONG l,PULONG r)
+{CHECK(FALSE);return STATUS_UNSUCCESSFUL;}
+static LARGE_INTEGER NTAPI UnexpectedQpc(PLARGE_INTEGER f)
+{LARGE_INTEGER z={0};CHECK(FALSE);return z;}
 #pragma clang diagnostic pop
 NTSTATUS (* const __imp_PsCreateSystemThread)(PHANDLE,ULONG,POBJECT_ATTRIBUTES,HANDLE,PCLIENT_ID,PKSTART_ROUTINE,PVOID)=UnexpectedThread;
 NTSTATUS (* const __imp_PsTerminateSystemThread)(NTSTATUS)=UnexpectedTerminate;
@@ -34,3 +41,7 @@ NTSTATUS (NTAPI * const __imp_ZwDeviceIoControlFile)(HANDLE,HANDLE,PIO_APC_ROUTI
     ULONG,PVOID,ULONG,PVOID,ULONG)=UnexpectedIo;
 VOID (NTAPI * const __imp_KeStallExecutionProcessor)(ULONG)=UnexpectedStall;
 NTSTATUS (NTAPI * const __imp_KeDelayExecutionThread)(KPROCESSOR_MODE,BOOLEAN,PLARGE_INTEGER)=UnexpectedDelay;
+NTSTATUS (NTAPI * const __imp_ZwOpenKey)(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES)=UnexpectedOpenKey;
+NTSTATUS (NTAPI * const __imp_ZwQueryValueKey)(HANDLE,PUNICODE_STRING,KEY_VALUE_INFORMATION_CLASS,
+    PVOID,ULONG,PULONG)=UnexpectedQueryValueKey;
+LARGE_INTEGER (NTAPI * const __imp_KeQueryPerformanceCounter)(PLARGE_INTEGER)=UnexpectedQpc;

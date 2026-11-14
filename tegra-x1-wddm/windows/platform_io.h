@@ -16,6 +16,9 @@ typedef struct _TG_GPU_PLATFORM {
 NTSTATUS TgGpuOpenPlatform(TG_GPU_PLATFORM *,const TG_GPU_RESOURCES *);
 NTSTATUS TgGpuClosePlatform(TG_GPU_PLATFORM *);
 NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
+/* Optional capability/telemetry request: does not latch IoStatus when an older
+ * SwitchFan build returns STATUS_INVALID_PARAMETER or STATUS_NOT_SUPPORTED. */
+NTSTATUS TgGpuPlatformTryRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
 NTSTATUS TgGpuPlatformPreflight(TG_GPU_PLATFORM *,UCHAR *PmicAddress);
 /* Mapped-register reads/writes can run in the ISR. PMIC/PLLP queries and
  * delays that sleep are PASSIVE worker operations, as in the diagnostic.

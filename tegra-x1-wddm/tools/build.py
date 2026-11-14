@@ -207,7 +207,7 @@ for source in [*core, power, clock, root / "platform/t214_dc.c", root / "windows
                root / "windows/query.c", root / "windows/adapter.c",
                root / "windows/submit_ddi.c",root / "windows/present.c",root / "windows/command_snapshot.c",root / "windows/recovery.c",
                root / "windows/diagnostic_events.c",
-               root / "windows/platform_io.c",root / "windows/worker.c",
+               root / "windows/platform_io.c",root / "windows/dvfs.c",root / "windows/worker.c",
                root / "windows/platform_adapter.c",root / "windows/gr_firmware_io.c",
                root / "windows/reset_backend.c",root / "windows/adapter_reset.c"]:
     obj = args.out / (source.stem + ".obj")
@@ -285,6 +285,14 @@ if args.windows_tests:
                     "/include:_load_config_used","/nodefaultlib","/release","/opt:ref","/timestamp:0",
                     f"/out:{args.out / 'test-worker.exe'}",str(worker_test),
                     str(args.out / "worker.obj"),str(sdk_lib)],check=True)
+    dvfs_test=args.out / "test_dvfs_windows.obj"
+    subprocess.run([args.clang_cl,*flags,"/clang:-funwind-tables",f"/Fo{dvfs_test}","--",
+                    str(root / "tests/test_dvfs_windows.c")],check=True)
+    subprocess.run([args.link,"/nologo","/machine:arm64","/subsystem:console,10.0","/entry:start",
+                    "/include:_load_config_used","/nodefaultlib","/release","/opt:ref","/timestamp:0",
+                    f"/out:{args.out / 'test-dvfs.exe'}",str(dvfs_test),
+                    str(args.out / "dvfs.obj"),str(args.out / "t214_clock.obj"),
+                    str(args.out / "platform_io.obj"),str(sdk_lib)],check=True)
     diagnostic_test=args.out / "test_diagnostic_windows.obj"
     subprocess.run([args.clang_cl,*flags,"/clang:-funwind-tables",f"/Fo{diagnostic_test}","--",
                     str(root / "tests/test_diagnostic_windows.c")],check=True)

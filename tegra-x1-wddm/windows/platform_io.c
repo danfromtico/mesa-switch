@@ -35,7 +35,7 @@ NTSTATUS TgGpuClosePlatform(TG_GPU_PLATFORM *p)
     if(NT_SUCCESS(status)){p->Bridge=NULL;p->Resources=NULL;}
     return failure(p,status);
 }
-NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op)
+static NTSTATUS platform_request(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op,BOOLEAN optional)
 {
     IO_STATUS_BLOCK iosb={0};NTSTATUS status;
     PAGED_CODE();
@@ -49,8 +49,15 @@ NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op)
     }
     if(status!=STATUS_SUCCESS && NT_SUCCESS(status))status=STATUS_DEVICE_PROTOCOL_ERROR;
     if(NT_SUCCESS(status) && iosb.Information!=sizeof(*op))status=STATUS_DEVICE_PROTOCOL_ERROR;
+    if(optional && (status==STATUS_INVALID_PARAMETER || status==STATUS_NOT_SUPPORTED ||
+                    status==STATUS_INVALID_DEVICE_REQUEST || status==STATUS_DEVICE_NOT_READY))
+        return status;
     return failure(p,status);
 }
+NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op)
+{ return platform_request(p,op,FALSE); }
+NTSTATUS TgGpuPlatformTryRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op)
+{ return platform_request(p,op,TRUE); }
 NTSTATUS TgGpuPlatformPreflight(TG_GPU_PLATFORM *p,UCHAR *address)
 {
     struct tg_gpu_pmic_request request={0,TG_GPU_PMIC_QUERY_ADDRESS,0,0};NTSTATUS status;

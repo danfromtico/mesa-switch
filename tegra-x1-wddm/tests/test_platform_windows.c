@@ -54,6 +54,9 @@ static NTSTATUS NTAPI Ioctl(HANDLE file,HANDLE event,PIO_APC_ROUTINE apc,PVOID c
     if(op->reg==TG_GPU_PMIC_QUERY_ADDRESS)op->value=model.address;
     else if(op->reg==TG_GPU_PMIC_QUERY_TEMP)op->value=model.temp;
     else if(op->reg==TG_GPU_PMIC_QUERY_PLLP)op->value=0x12345678;
+    else if(op->reg==TG_GPU_PMIC_QUERY_DVFS_POLICY)op->value=TG_GPU_DVFS_POLICY_PACK(1,153600,460800,2);
+    else if(op->reg==TG_GPU_PMIC_QUERY_EMC_KHZ)op->value=1600000;
+    else if(op->reg==TG_GPU_PMIC_REPORT_GPU_STATUS)CHECK(op->write==1);
     else {CHECK(op->address==0x33 && op->reg==0x23);if(!op->write)op->value=80;}
     iosb->Status=model.completion;iosb->Information=model.bytes;return model.io;
 }
@@ -134,6 +137,15 @@ void start(void)
     CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_IO_TIMEOUT);
     model.io=STATUS_SUCCESS;model.bytes-=1;
     CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_DEVICE_PROTOCOL_ERROR);
+    model.bytes=sizeof(struct tg_gpu_pmic_request);platform.IoStatus=STATUS_SUCCESS;
+    struct tg_gpu_pmic_request opt={0,TG_GPU_PMIC_QUERY_DVFS_POLICY,0,0};
+    model.io=STATUS_INVALID_PARAMETER;
+    CHECK(TgGpuPlatformTryRequest(&platform,&opt)==STATUS_INVALID_PARAMETER && platform.IoStatus==STATUS_SUCCESS);
+    model.io=STATUS_NOT_SUPPORTED;
+    CHECK(TgGpuPlatformTryRequest(&platform,&opt)==STATUS_NOT_SUPPORTED && platform.IoStatus==STATUS_SUCCESS);
+    model.io=STATUS_SUCCESS;
+    CHECK(TgGpuPlatformTryRequest(&platform,&opt)==STATUS_SUCCESS && TG_GPU_DVFS_POLICY_MODE(opt.value)==1);
+    CHECK(TG_GPU_DVFS_POLICY_MIN_KHZ(opt.value)==153600 && TG_GPU_DVFS_POLICY_MAX_KHZ(opt.value)==460800);
     CHECK(TgGpuClosePlatform(&platform)==STATUS_SUCCESS);
     CHECK(WriteFile(GetStdHandle((ULONG)-11),pass,sizeof(pass)-1,&written,NULL));ExitProcess(0);
 }

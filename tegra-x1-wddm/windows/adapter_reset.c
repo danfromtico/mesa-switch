@@ -31,7 +31,10 @@ NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *a)
         if(NT_SUCCESS(status) && !NT_SUCCESS(a->Platform.IoStatus))status=a->Platform.IoStatus;
     }
     TgGpuFirmwareFree(&firmware);a->QueueReady=a->Queue.Engine==&a->Engine;
-    if(NT_SUCCESS(status))a->State=TgGpuAdapterReady;
+    if(NT_SUCCESS(status)) {
+        TgGpuDvfsAttach(&a->Hardware,&a->Platform,&a->Queue);
+        a->State=TgGpuAdapterReady;
+    }
     return status;
 }
 NTSTATUS APIENTRY TgGpuDdiRestartFromTimeout(HANDLE adapter)

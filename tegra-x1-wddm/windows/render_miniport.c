@@ -170,9 +170,10 @@ static NTSTATUS APIENTRY format_history(HANDLE context,DXGKARG_FORMATHISTORYBUFF
 
 static VOID APIENTRY set_stable_power(HANDLE adapter,const DXGKARG_SETSTABLEPOWERSTATE *args)
 {
-    /* The powered GPU already runs at a fixed clock. */
-    UNREFERENCED_PARAMETER(adapter);
-    UNREFERENCED_PARAMETER(args);
+    TG_GPU_ADAPTER *a=adapter;
+    if(!a || !args)return;
+    TgGpuDvfsSetStablePower(&a->Hardware.Dvfs,args->Enabled!=FALSE);
+    if(a->QueueReady)(VOID)KeSetEvent(&a->Queue.Wake,IO_NO_INCREMENT,FALSE);
 }
 
 static NTSTATUS APIENTRY set_vm_data(HANDLE adapter,const DXGKARG_SETVIRTUALMACHINEDATA *args)

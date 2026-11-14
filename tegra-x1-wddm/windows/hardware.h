@@ -2,6 +2,7 @@
 #ifndef TG_GPU_WINDOWS_HARDWARE_H
 #define TG_GPU_WINDOWS_HARDWARE_H
 #include "context.h"
+#include "dvfs.h"
 #include "../core/execute.h"
 
 typedef struct _TG_GPU_HARDWARE {
@@ -12,6 +13,7 @@ typedef struct _TG_GPU_HARDWARE {
     struct tg_gpu_execution Execution;
     TG_GPU_PRIVATE_MEMORY Boot,Work;
     struct tg_gpu_status Status;
+    TG_GPU_DVFS Dvfs;
     BOOLEAN Ready,GpuOwned,Isolated;
 } TG_GPU_HARDWARE;
 

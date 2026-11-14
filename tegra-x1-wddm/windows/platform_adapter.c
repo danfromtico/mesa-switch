@@ -18,6 +18,7 @@ NTSTATUS TgGpuStartPlatformAdapter(TG_GPU_ADAPTER *a)
         if(NT_SUCCESS(status) && !NT_SUCCESS(a->Platform.IoStatus))status=a->Platform.IoStatus;
     }
     TgGpuFirmwareFree(&firmware);
+    if(NT_SUCCESS(status))TgGpuDvfsAttach(&a->Hardware,&a->Platform,NULL);
     if(NT_SUCCESS(status))status=TgGpuStartWorker(&a->Worker,&a->Queue,&a->Hardware);
     if(NT_SUCCESS(status))return STATUS_SUCCESS;
     cleanup=TgGpuDdiStopDevice(a);

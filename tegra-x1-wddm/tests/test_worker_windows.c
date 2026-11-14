@@ -18,9 +18,10 @@ static TG_GPU_CONTEXT_ENGINE engine;
 static struct {
     PKSTART_ROUTINE routine;
     PVOID context;
-    NTSTATUS create,join,close,exit_status,service[3];
+    NTSTATUS create,join,close,exit_status,service[3],dvfs_status;
     NTSTATUS waits[4];BOOLEAN timed[4],terminated;
-    UINT services,wait_count,joins,closes,recovery_requests;
+    LONGLONG expected_timeout[4];
+    UINT services,wait_count,joins,closes,recovery_requests,dvfs_steps,dvfs_wakes,dvfs_begins,dvfs_completes;
 } model;
 /* No real thread/dispatcher/GPU is used by this native scheduling fixture. */
 static NTSTATUS Create(PHANDLE out,ULONG access,POBJECT_ATTRIBUTES attr,HANDLE process,
@@ -45,7 +46,8 @@ static NTSTATUS NTAPI Wait(ULONG count,PVOID objects[],WAIT_TYPE type,KWAIT_REAS
     UINT i=model.wait_count++;
     CHECK(i<4 && count==2 && objects[0]==&worker.Stop && objects[1]==&queue.Wake);
     CHECK(type==WaitAny && reason==Executive && mode==KernelMode && !alertable && !blocks);
-    CHECK((timeout!=NULL)==model.timed[i]);if(timeout)CHECK(timeout->QuadPart==-10000);
+    CHECK((timeout!=NULL)==model.timed[i]);
+    if(timeout)CHECK(timeout->QuadPart==(model.expected_timeout[i]?model.expected_timeout[i]:-10000));
     return model.waits[i];
 }
 static NTSTATUS NTAPI Join(HANDLE h,BOOLEAN alertable,PLARGE_INTEGER timeout)
@@ -75,10 +77,23 @@ NTSTATUS TgGpuRequestEngineRecoveryAt(TG_GPU_CONTEXT_ENGINE *e,NTSTATUS status,
     CHECK(e==&engine && !NT_SUCCESS(status) && queue.Paused && queue.Failure==status);
     ++model.recovery_requests;return STATUS_SUCCESS;
 }
+PLARGE_INTEGER TgGpuDvfsWaitTimeout(const TG_GPU_DVFS *d,LARGE_INTEGER *storage)
+{
+    CHECK(d==&hardware.Dvfs && storage && d->Configured);
+    storage->QuadPart=-2000000LL;return storage;
+}
+VOID TgGpuDvfsNoteServiceBegin(TG_GPU_DVFS *d){CHECK(d==&hardware.Dvfs && d->Configured);++model.dvfs_begins;}
+VOID TgGpuDvfsNoteServiceComplete(TG_GPU_DVFS *d){CHECK(d==&hardware.Dvfs && d->Configured);++model.dvfs_completes;}
+NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h,TG_GPU_WORK_QUEUE *q,BOOLEAN woke)
+{
+    CHECK(h==&hardware && q==&queue && h->Dvfs.Configured && !queue.Lock && !model.terminated);
+    ++model.dvfs_steps;if(woke)++model.dvfs_wakes;return model.dvfs_status;
+}
 static void Setup(void)
 {
     CHECK(!worker.Thread && !worker.Queue && !worker.Hardware);
-    memset(&worker,0,sizeof(worker));memset(&queue,0,sizeof(queue));memset(&model,0,sizeof(model));
+    memset(&worker,0,sizeof(worker));memset(&queue,0,sizeof(queue));
+    memset(&hardware,0,sizeof(hardware));memset(&model,0,sizeof(model));
     queue.Engine=&engine;hardware.Engine=&engine;hardware.Ready=TRUE;
     hardware.Power.owned=hardware.Power.ready=true;engine.UserdBar1Ready=TRUE;
     model.waits[0]=STATUS_WAIT_0+1;model.waits[1]=STATUS_TIMEOUT;
@@ -115,7 +130,25 @@ void start(void)
     Setup();model.waits[0]=STATUS_UNSUCCESSFUL;
     CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);model.routine(model.context);
     CHECK(!model.services && queue.Paused && worker.Failure==STATUS_UNSUCCESSFUL);
-    CHECK(model.recovery_requests==1);
+    CHECK(model.recovery_requests==1 && !model.dvfs_steps);
+    CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS);
+    /* Configured DVFS hook: idle holdoff timer, quiescent wake/idle steps, and
+     * zero DVFS calls while a packet is pending on the GPU. */
+    Setup();hardware.Dvfs.Configured=1;
+    model.timed[0]=model.timed[1]=model.timed[2]=model.timed[3]=TRUE;
+    model.expected_timeout[0]=model.expected_timeout[3]=-2000000LL;
+    model.expected_timeout[1]=-10000LL;model.expected_timeout[2]=-2000000LL;
+    model.waits[0]=STATUS_WAIT_0+1;model.waits[1]=STATUS_TIMEOUT;
+    model.waits[2]=STATUS_TIMEOUT;model.waits[3]=STATUS_WAIT_0;
+    model.service[0]=STATUS_PENDING;model.service[1]=STATUS_SUCCESS;
+    CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);model.routine(model.context);
+    CHECK(model.wait_count==4 && model.services==2 && model.dvfs_steps==2 && model.dvfs_wakes==1);
+    CHECK(model.dvfs_begins==1 && model.dvfs_completes==1 && !queue.Paused && !model.recovery_requests);
+    CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS);
+    Setup();hardware.Dvfs.Configured=1;model.timed[0]=TRUE;model.expected_timeout[0]=-2000000LL;
+    model.waits[0]=STATUS_TIMEOUT;model.dvfs_status=STATUS_DEVICE_DATA_ERROR;
+    CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);model.routine(model.context);
+    CHECK(model.dvfs_steps==1 && !model.services && queue.Paused && model.recovery_requests==1);
     CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS);
     CHECK(WriteFile(GetStdHandle((ULONG)-11),pass,sizeof(pass)-1,&written,NULL));ExitProcess(0);
 }

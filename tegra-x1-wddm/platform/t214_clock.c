@@ -1,8 +1,9 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright (c) 2014-2018 NVIDIA CORPORATION. All rights reserved.
  * Copyright 2026 ruje0504-2
- * C1 NA PLL sequence and counter follow Switchroot nvgpu clk_gm20b.c
- * at 1ae0167d. See NOTICE. No live frequency scaling is implemented.
+ * C1 NA PLL startup, bypass relock and counter follow Switchroot nvgpu
+ * clk_gm20b.c (MIT). T210B01 HighOPT characterization coefficients reflect
+ * captured hardware table NAPLL En - p4v2-AggressiveHighOPT. See NOTICE.
  */
 #include "t214_clock.h"
 #include "../core/identity.h"
@@ -63,6 +64,133 @@ static void clk_select(const struct tg_gpu_power_io *io, uint32_t vco)
 static int32_t div_nearest(int32_t n, int32_t d)
 { return n < 0 ? -((-n + d / 2) / d) : (n + d / 2) / d; }
 
+struct tg_gpu_hiopt_entry {
+    uint32_t khz;
+    uint8_t n;
+    uint8_t pl;
+    int32_t c0, c1, c2, c3, c4, c5;
+};
+
+/* T210B01 GPUB01_NA_CVB_TABLE_HIOPT (gspd_id=3), speedo_scale=100,
+ * thermal_scale=150, voltage_scale=1000. All (N, PL) pairs keep C1 VCO
+ * (38.4 MHz * N) inside 1300..2600 MHz with SDM=-4096 (integer N).
+ */
+static const struct tg_gpu_hiopt_entry hiopt_table[TG_GPU_HIOPT_OPP_COUNT] = {
+    {  76800u, 36u, 9u, 590000,     0,    0,     0,      0,      0 },
+    { 153600u, 40u, 5u, 590000,     0,    0,     0,      0,      0 },
+    { 230400u, 36u, 3u, 590000,     0,    0,     0,      0,      0 },
+    { 307200u, 48u, 3u, 590000,     0,    0,     0,      0,      0 },
+    { 384000u, 40u, 2u, 590000,     0,    0,     0,      0,      0 },
+    { 460800u, 48u, 2u, 590000,     0,    0,     0,      0,      0 },
+    { 537600u, 56u, 2u, 590000,     0,    0,     0,      0,      0 },
+    { 614400u, 64u, 2u, 590000,     0,    0,     0,      0,      0 },
+    { 691200u, 36u, 1u, 838712, -7304, -552,  1785, -56250,   -450 },
+    { 768000u, 40u, 1u, 880210, -7955, -584,     0, -42735,   8775 },
+    { 844800u, 44u, 1u, 926398, -8892, -602,  -900,  -5760, -20925 },
+};
+
+static uint32_t pll_coeff_for_khz(uint32_t target_khz)
+{
+    uint32_t i;
+    for (i = 0; i < TG_GPU_HIOPT_OPP_COUNT; ++i) {
+        if (hiopt_table[i].khz == target_khz)
+            return 1u | ((uint32_t)hiopt_table[i].n << 8) | ((uint32_t)hiopt_table[i].pl << 16);
+    }
+    if (target_khz == TG_GPU_FIXED_KHZ || target_khz == TG_GPU_OVERCLOCK_KHZ)
+        return 0x00010001u | ((target_khz / 19200u) << 8);
+    return 0;
+}
+
+uint32_t tg_gpu_clock_hiopt_freq_khz(uint32_t index)
+{
+    return index < TG_GPU_HIOPT_OPP_COUNT ? hiopt_table[index].khz : 0;
+}
+
+uint32_t tg_gpu_clock_hiopt_index(uint32_t target_khz)
+{
+    uint32_t i;
+    for (i = 0; i < TG_GPU_HIOPT_OPP_COUNT; ++i)
+        if (hiopt_table[i].khz == target_khz) return i;
+    return UINT32_MAX;
+}
+
+uint32_t tg_gpu_clock_thermal_range(int32_t temp_c, uint32_t prev_range)
+{
+    static const int32_t trips[TG_GPU_THERMAL_RANGES - 1u] = { 20, 30, 50, 70, 90 };
+    uint32_t r = 0;
+    while (r < TG_GPU_THERMAL_RANGES - 1u && temp_c > trips[r])
+        ++r;
+    if (prev_range < TG_GPU_THERMAL_RANGES && r < prev_range) {
+        /* 1 C downward hysteresis across thermal trip boundaries. */
+        while (r < prev_range && temp_c > trips[r] - 1)
+            ++r;
+    }
+    return r;
+}
+
+uint32_t tg_gpu_clock_emc_floor_uv(uint32_t emc_khz)
+{
+    /* T210B01 gpub01_dvfs_table vdd-gpu(emc) floor, already 5 mV aligned. */
+    static const struct { uint32_t max_emc_khz; uint32_t uv; } emc_floor[] = {
+        { 2233000u, 590000u }, { 2333000u, 600000u }, { 2366000u, 610000u },
+        { 2433000u, 620000u }, { 2500000u, 630000u }, { 2533000u, 640000u },
+        { 2600000u, 650000u }, { 2666000u, 660000u }, { 2733000u, 670000u },
+        { 2800000u, 680000u }, { 2866000u, 690000u }, { 2933000u, 700000u },
+        { 3000000u, 710000u }, { 3066000u, 720000u }, { 3133000u, 730000u },
+        { 3200000u, 740000u },
+    };
+    uint32_t i;
+    for (i = 0; i < sizeof(emc_floor) / sizeof(emc_floor[0]); ++i)
+        if (emc_khz <= emc_floor[i].max_emc_khz) return emc_floor[i].uv;
+    return 760000u;
+}
+
+static uint32_t round_cvb_mv_5mv(int32_t scaled_mv)
+{
+    /* MAX77812 alignment: offset_uv=250000, step_uv=5000, voltage_scale=1000. */
+    int64_t scaled_uv = (int64_t)scaled_mv * 1000;
+    int64_t offset = 250000LL * 1000LL;
+    int64_t step = 5000LL * 1000LL;
+    int64_t rem = scaled_uv > offset ? (scaled_uv - offset) : 0;
+    int64_t steps = (rem + step - 1) / step;
+    return (uint32_t)((steps * 5000LL + 250000LL) / 1000LL);
+}
+
+uint32_t tg_gpu_clock_hiopt_uv(uint32_t speedo, uint32_t target,
+    uint32_t thermal_range, uint32_t emc_khz)
+{
+    static const int32_t vts_trips[TG_GPU_THERMAL_RANGES] = { -25, 20, 30, 50, 70, 90 };
+    static const uint32_t vts_vmin_mv[TG_GPU_THERMAL_RANGES] = { 800u, 590u, 590u, 590u, 590u, 590u };
+    uint32_t opp = tg_gpu_clock_hiopt_index(target);
+    uint32_t i, j, row_mv = 0, uv, emc_uv;
+    if (!speedo || speedo > 5000u || opp == UINT32_MAX || thermal_range >= TG_GPU_THERMAL_RANGES)
+        return UINT32_MAX;
+    for (i = 0; i <= opp; ++i) {
+        const struct tg_gpu_hiopt_entry *e = &hiopt_table[i];
+        int32_t base = div_nearest(e->c2 * (int32_t)speedo, 100);
+        uint32_t range_mv[TG_GPU_THERMAL_RANGES];
+        base = div_nearest((base + e->c1) * (int32_t)speedo, 100) + e->c0;
+        for (j = 0; j < TG_GPU_THERMAL_RANGES; ++j) {
+            int32_t t = vts_trips[j];
+            int32_t t_term = div_nearest(e->c3 * (int32_t)speedo, 100) + e->c4 +
+                             div_nearest(e->c5 * t, 150);
+            int32_t mvj = base + div_nearest(t_term * t, 150);
+            uint32_t rounded = round_cvb_mv_5mv(mvj);
+            if (rounded < vts_vmin_mv[j]) rounded = vts_vmin_mv[j];
+            range_mv[j] = rounded;
+            if (j && range_mv[j - 1u] < rounded)
+                range_mv[j - 1u] = rounded;
+        }
+        if (range_mv[thermal_range] > row_mv)
+            row_mv = range_mv[thermal_range];
+    }
+    uv = row_mv * 1000u;
+    emc_uv = tg_gpu_clock_emc_floor_uv(emc_khz);
+    if (uv < emc_uv) uv = emc_uv;
+    /* T210B01 SKU 0x83 nominal GPU Vmax is 800 mV. */
+    return uv <= TG_GPU_SKU83_MAX_UV ? uv : UINT32_MAX;
+}
+
 uint32_t tg_gpu_clock_required_uv(uint32_t speedo, uint32_t target)
 {
     int32_t base, peak = 0, t, c0, c1, c2, c4, c5;
@@ -109,7 +237,8 @@ enum tg_gpu_clock_result tg_gpu_clock_start(const struct tg_gpu_power_io *io,
     /* Freshly reset GPU only. Existing clock owners are never displaced. */
     if ((clk_read(io, CFG) & ENABLE) || (clk_read(io, VCO) & 1))
         return TG_GPU_CLOCK_BAD_STATE;
-    required_uv = tg_gpu_clock_required_uv(io->read32(io->context, 0x7000f930u), target);
+    c->gpu_speedo = io->read32(io->context, 0x7000f930u);
+    required_uv = tg_gpu_clock_required_uv(c->gpu_speedo, target);
     /* Conservative B01 table limit. Do not overvolt a part whose calculated
      * envelope would need more than 1050 mV. Only the GPU M1 rail changes.
      */
@@ -246,6 +375,109 @@ enum tg_gpu_clock_result tg_gpu_clock_measure(const struct tg_gpu_power_io *io,
         c->measured_khz > c->target_khz * 1005u / 1000u)
         return TG_GPU_CLOCK_COUNTER_ERROR;
     c->stage = 5;
+    return TG_GPU_CLOCK_OK;
+}
+
+static bool program_pll_under_bypass(const struct tg_gpu_power_io *io,
+    uint32_t coeff, uint32_t dfs_coeff, int32_t ext_cal)
+{
+    clk_select(io, 0);
+    clk_update(io, CFG, SYNC, 0);
+    clk_update(io, CFG, ENABLE, 0);
+    clk_update(io, DVFS2, 1u << 16, 1u << 16);
+    clk_update(io, DVFS0, 0x7f7f, dfs_coeff);
+    io->delay_us(io->context, 1);
+    clk_update(io, DVFS2, 1u << 16, 0);
+    clk_update(io, DVFS2, 0x7f, (uint32_t)ext_cal);
+    io->delay_us(io->context, 1);
+    clk_update(io, DVFS1, 0x0fff0000, 0x0e010000);
+    clk_update(io, CFG2, 0xff, 0xf0);
+    clk_update(io, COEFF, 0x3fffff, coeff);
+    clk_update(io, CFG, ENABLE, ENABLE);
+    io->delay_us(io->context, 40);
+    clk_update(io, CFG, SYNC, SYNC);
+    clk_select(io, 1);
+    return (clk_read(io, COEFF) & 0x3fffff) == coeff &&
+           (clk_read(io, CFG) & (ENABLE | SYNC | IDDQ)) == (ENABLE | SYNC) &&
+           (clk_read(io, VCO) & 1) != 0 &&
+           (clk_read(io, CFG2) & 0xff) == 0xf0;
+}
+
+static bool write_gpu_rail_checked(const struct tg_gpu_power_io *io,
+    uint8_t pmic_address, uint32_t target_uv, uint32_t settle_us)
+{
+    uint8_t enabled = 0, readback = 0;
+    uint8_t code = (uint8_t)((target_uv - 250000u) / 5000u);
+    if (!io->read_pmic(io->context, pmic_address, 0x06, &enabled) || !(enabled & 1))
+        return false;
+    if (!io->write_pmic(io->context, pmic_address, 0x23, code) ||
+        !io->read_pmic(io->context, pmic_address, 0x23, &readback) || readback != code)
+        return false;
+    io->delay_us(io->context, settle_us);
+    return true;
+}
+
+enum tg_gpu_clock_result tg_gpu_clock_set_rate(const struct tg_gpu_power_io *io,
+    const struct tg_gpu_power *power, uint32_t target, uint32_t required_uv,
+    struct tg_gpu_clock *c)
+{
+    uint32_t coeff, dfs_coeff, mv, old_khz, old_uv, old_coeff, old_dvfs0;
+    int32_t ext_cal, old_cal;
+    enum tg_gpu_clock_result res;
+    if (!io || !power || !c || !io->read32 || !io->write32 || !io->read_pmic ||
+        !io->write_pmic || !io->delay_us || !power->owned || !power->ready ||
+        !c->owned || !c->running || !c->adc_slope_uv)
+        return TG_GPU_CLOCK_BAD_STATE;
+    coeff = pll_coeff_for_khz(target);
+    if (!coeff) return TG_GPU_CLOCK_BAD_STATE;
+    if (required_uv < TG_GPU_HIOPT_VMIN_UV || required_uv > 1050000u ||
+        (required_uv - 250000u) % 5000u != 0)
+        return TG_GPU_CLOCK_RAIL_ERROR;
+    ext_cal = div_nearest((int32_t)required_uv - c->adc_intercept_uv, c->adc_slope_uv);
+    mv = required_uv / 1000u;
+    dfs_coeff = (uint32_t)div_nearest(div_nearest(-172550 * (int32_t)mv, 1000) + 195374, 1000);
+    if (ext_cal <= -64 || ext_cal >= 64 || dfs_coeff > 127u)
+        return TG_GPU_CLOCK_CALIBRATION_ERROR;
+    if (target == c->target_khz && required_uv == c->rail_uv)
+        return TG_GPU_CLOCK_OK;
+
+    old_khz = c->target_khz;
+    old_uv = c->rail_uv;
+    old_cal = c->external_calibration;
+    old_coeff = clk_read(io, COEFF) & 0x3fffff;
+    old_dvfs0 = clk_read(io, DVFS0) & 0x7f7f;
+
+    /* 1. Voltage UP first (with PMIC readback + ramp delay) before frequency UP. */
+    if (required_uv > old_uv) {
+        if (!write_gpu_rail_checked(io, power->pmic_address, required_uv, 1000u))
+            return TG_GPU_CLOCK_RAIL_ERROR;
+        c->rail_uv = required_uv;
+    }
+
+    /* 2. Reprogram NA GPCPLL under bypass and verify live GPCCLK counter. */
+    if (!program_pll_under_bypass(io, coeff, dfs_coeff, ext_cal)) {
+        res = TG_GPU_CLOCK_READBACK_ERROR;
+    } else {
+        c->target_khz = target;
+        c->external_calibration = ext_cal;
+        res = tg_gpu_clock_measure(io, c);
+    }
+    if (res != TG_GPU_CLOCK_OK) {
+        /* Roll back PLL to the prior verified clock without lowering voltage. */
+        c->target_khz = old_khz;
+        c->external_calibration = old_cal;
+        if (!program_pll_under_bypass(io, old_coeff, old_dvfs0, old_cal) ||
+            tg_gpu_clock_measure(io, c) != TG_GPU_CLOCK_OK)
+            c->running = false;
+        return res;
+    }
+
+    /* 3. Voltage DOWN only AFTER register readback and live counter confirm F-down. */
+    if (required_uv < old_uv) {
+        if (!write_gpu_rail_checked(io, power->pmic_address, required_uv, 200u))
+            return TG_GPU_CLOCK_RAIL_ERROR;
+        c->rail_uv = required_uv;
+    }
     return TG_GPU_CLOCK_OK;
 }
 
