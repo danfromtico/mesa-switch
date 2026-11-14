@@ -520,6 +520,7 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
          goto fail_mem_cache;
    }
 
+   util_graphics_api_marker_open(&dev->graphics_api_marker, 1); /* active Vulkan device */
    *pDevice = nvk_device_to_handle(dev);
 
    return VK_SUCCESS;
@@ -676,6 +677,7 @@ nvk_DestroyDevice(VkDevice _device, const VkAllocationCallbacks *pAllocator)
       nvkmd_dev_destroy(dev->nvkmd);
    }
 
+   util_graphics_api_marker_close(&dev->graphics_api_marker);
    vk_device_finish(&dev->vk);
    vk_free(&dev->vk.alloc, dev);
 }

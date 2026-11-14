@@ -1708,6 +1708,7 @@ zink_destroy_screen(struct pipe_screen *pscreen)
       close(screen->drm_fd);
 
    slab_destroy_parent(&screen->transfer_pool);
+   util_graphics_api_marker_close(&screen->graphics_api_marker);
    ralloc_free(screen);
    glsl_type_singleton_decref();
 }
@@ -3929,6 +3930,7 @@ zink_internal_create_screen(const struct pipe_screen_config *config, int64_t dev
 
    if (error)
       error->instance = instance_diagnostics;
+   util_graphics_api_marker_open(&screen->graphics_api_marker, 2); /* active Zink screen */
    return screen;
 
 fail:

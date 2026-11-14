@@ -6,6 +6,7 @@
 #define NVK_DEVICE_H 1
 
 #include "nvk_private.h"
+#include "util/u_graphics_api_marker.h"
 
 #include "nvk_edb_bview_cache.h"
 #include "nvk_descriptor_table.h"
@@ -45,6 +46,7 @@ nvk_slm_area_get_mem_ref(struct nvk_slm_area *area,
 
 struct nvk_device {
    struct vk_device vk;
+   struct util_graphics_api_marker graphics_api_marker;
 
    struct nvkmd_dev *nvkmd;
 

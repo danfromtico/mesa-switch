@@ -40,6 +40,7 @@
 #include "util/pb_slab.h"
 
 #include "util/blob.h"
+#include "util/u_graphics_api_marker.h"
 
 #ifdef HAVE_LIBDRM
 #include "renderonly/renderonly.h"
@@ -1371,6 +1372,7 @@ struct zink_format_props {
 
 struct zink_screen {
    struct pipe_screen base;
+   struct util_graphics_api_marker graphics_api_marker;
 
    const char *vendor_name;
    const char *device_name;
