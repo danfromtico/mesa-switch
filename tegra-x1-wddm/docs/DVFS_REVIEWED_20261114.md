@@ -91,3 +91,53 @@ existing screen-off checks; ARM64 platform drivers and tray API controls also
 passed. Initial native policy remains mode7, CPU1497.6/GPU460.8/RAM1600 MHz,
 with existing display/logon startup and dual GPU bridge. No SC7 patch is included.
 Full integration/build/native receipts live in OUT/dvfs-pacecar-integration.
+
+## Native mode-selection failure and clock-parent correction
+
+Fan15 with the integrated display package reached Code0 and DWM loaded the
+current tgd3d/NVK pair. The first mode1 request failed with Win32 error21,
+matching the user's tray dialog. No other dynamic mode was attempted; mode7
+returned successfully with CPU1497600/GPU460800/RAM1600000 kHz. This is a
+policy-initialization failure, not a completed DFLL transition or proof of a
+GPU fault. The five-minute interaction was cancelled at the user's request.
+
+WindowsDrivers ee3dc1e91d1b5522625451c1645fda59c1353b08 fixes two assumptions:
+T210 PLLP_OUT0 is the VCO output, so BASE.DIVP must not divide its rate; and
+WinX/Hekate I2C5 uses CLK_M selector6, whereas the initial adapter only accepted
+selector0/PLLP. It preserves the shared I2C5 mux/divider. WinX 33a600c extends
+the private DFLL handoff to version2 with the oscillator-derived CLK_M rate,
+avoiding an out-of-resource CAR read in the Windows driver. Public power ABI2,
+ACPI/display resources and the installed graphics binaries do not change.
+
+The old adapter fails a control fixture with PLLP BASE.DIVP=1. Patched
+CLK_M19.2MHz and PLLP/5 controls pass under ASan/UBSan, including existing
+clock/PMIC recovery tests. These are MMIO models, not native DVFS acceptance.
+The ordering open-loop DFLL -> CPU parent -> closed-loop DFLL matches the
+pinned Switchroot clk-tegra210.c resume path; no speculative reordering was
+introduced. Fan16 and the paired firmware were built, signed and staged with
+an exact Fan15/firmware backup; native mode-switch results remain pending.
+
+`tools/dvfs-integration/Update-ClockParent.ps1` changes only that paired platform
+correction, selects the Fan driver with native GPU startup gated after a planned
+restart, and then reactivates the existing display package. Its Restore action
+returns the exact Fan15/firmware pair. Full original-platform recovery remains
+available through Restore-Dvfs.ps1. The boot comparison tolerates the observed
+8ms WMI boot-time jitter; it still requires a genuinely different boot.
+
+
+Fan16 native mode1 still failed Win32 error21. Fan17 (WindowsDrivers
+75180376caee1aaa2657fe2ca00881604cd2f3e6) additionally honors the fixed-PLLP
+OVERRIDE=0 rule from pinned clk-pll.c. Native values were PLLP_BASE=0x48115408,
+CLK_M=19200kHz, I2C5_SOURCE=0xc0000000 and I2C=19200kHz. The request now reaches
+the later DFLL gate/ownership checks but still returns error21. Fixed7 returned
+successfully and Code0 remained; no dynamic mode is accepted yet. Fan18 adds
+one-shot rejection/readback traces without changing the gate decisions.
+
+The user requested both applications at login. SwitchPowerTray's HKCU Run
+entry remains enabled; PacecarSwitch config.start_with_windows and its quoted
+HKCU Run path are enabled with the monitoring bar visible. After the planned
+2026-11-14T21:57:58.5296220Z boot, both processes were observed in session1
+(Pacecar5876, PowerTray5896). This confirms autostart, not FPS or physical-panel
+acceptance. Charge-limit85 was retained; CPU/GPU/RAM fixed recovery remains
+1497.6/460.8/1600MHz. Original-platform and Fan17 pre-update backups have been
+downloaded and all 13+5 file hashes checked.
