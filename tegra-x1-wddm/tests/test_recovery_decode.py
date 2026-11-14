@@ -25,6 +25,25 @@ def export(payload=PAYLOAD, version=1, count=1, event_id=1):
 
 
 class RecoveryDecode(unittest.TestCase):
+    def test_display_path_entry_and_return(self):
+        payload = bytes.fromhex('''
+            01000000 03000000 88776655 44332211 00000000 01000000
+            00000000 02000000 01000000 02000000 01000000 01000000 01000000
+        ''')
+        records, summary = decoder.decode(export(payload, event_id=4))
+        r = records[0]
+        self.assertEqual(summary['display_records'], 1)
+        self.assertEqual((r['operation'], r['phase'], r['status']),
+                         ('update_active_path', 'return', '0x00000000'))
+        self.assertEqual(r['adapter_luid'], '1122334455667788')
+        self.assertEqual((r['requested_rotation'], r['before_rotation'], r['after_rotation']), (2, 1, 2))
+        self.assertTrue(r['source_visible'] and r['target_active'])
+        entry = bytearray(payload)
+        struct.pack_into('<II', entry, 16, 0x103, 0)
+        self.assertEqual(decoder.decode(export(entry, event_id=4))[0][0]['phase'], 'entry')
+        for bad in (payload[:-4], b'\x02' + payload[1:]):
+            with self.assertRaises(ValueError): decoder.decode(export(bad, event_id=4))
+
     def test_reset_packet_chunks_and_missing_data(self):
         # 144-byte header, little-endian identities, then actual command words.
         header = bytes.fromhex('''

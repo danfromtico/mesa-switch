@@ -64,6 +64,7 @@ static UINT packet_trace_chunks,packet_trace_bytes;
 static UCHAR packet_trace_data[TG_GPU_COMMAND_CAPTURE_BYTES];
 static TG_GPU_RESET_PACKET_EVENT packet_trace_record;
 BOOLEAN TgGpuTraceResetPacketEnabled(VOID){return packet_trace_enabled;}
+VOID TgGpuTraceDisplay(const TG_GPU_DISPLAY_EVENT *record){(VOID)record;}
 VOID TgGpuTraceResetPacket(const TG_GPU_RESET_PACKET_EVENT *record,const VOID *commands)
 {
     TG_GPU_WORK_QUEUE *q=trace_engine?trace_engine->QueueOwner:NULL;
@@ -1133,7 +1134,7 @@ static __declspec(noinline) void TestAdapterQueries(TG_GPU_CONTEXT_ENGINE *e,DRI
     CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)));
     CHECK(driver.WDDMVersion==DXGKDDI_WDDMv2_6 && driver.MiscCaps.ComputeOnly &&
           driver.GpuEngineTopology.NbAsymetricProcessingNodes==1);
-    CHECK(!driver.SupportNonVGA && !driver.FlipCaps.FlipOnVSyncMmIo);
+    CHECK(!driver.SupportNonVGA && !driver.FlipCaps.FlipOnVSyncMmIo && !driver.SupportSmoothRotation);
     CHECK(!driver.PresentationCaps.Value);
     CHECK(driver.MemoryManagementCaps.GpuMmuSupported && driver.SchedulingCaps.PreemptionAware &&
           driver.MemoryManagementCaps.CrossAdapterResource && !driver.MemoryManagementCaps.IoMmuSupported);
@@ -1141,6 +1142,7 @@ static __declspec(noinline) void TestAdapterQueries(TG_GPU_CONTEXT_ENGINE *e,DRI
     e->Tables->Scanout=scanout;
     CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)));
     CHECK(driver.SupportNonVGA && driver.FlipCaps.FlipOnVSyncMmIo && !driver.MiscCaps.ComputeOnly);
+    CHECK(driver.SupportSmoothRotation && !driver.SupportMultiPlaneOverlay && !driver.MaxOverlayPlanes);
     CHECK(driver.PresentationCaps.NoCacheCoherentApertureMemory &&
           driver.PresentationCaps.NoScreenToScreenBlt && driver.PresentationCaps.NoOverlapScreenBlt &&
           !output[1].desc.Flags.CacheCoherent && !driver.PresentationCaps.SupportKernelModeCommandBuffer);

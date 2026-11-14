@@ -2,6 +2,7 @@
  * Real WDK layout, controlled display visibility; no hardware execution.
  */
 #include "../windows/adapter.h"
+#include "../windows/diagnostic_events.h"
 #include <ntimage.h>
 
 __declspec(dllimport) void __stdcall ExitProcess(ULONG code);
@@ -19,6 +20,18 @@ const D3DKMDT_VIDEO_SIGNAL_INFO TgGpuPanelSignal = {
 static NTSTATUS visibility_status;
 static ULONG visibility_calls;
 static BOOLEAN visible;
+static TG_GPU_DISPLAY_EVENT display_entry,display_return;
+static ULONG display_entries,display_returns;
+VOID TgGpuTraceDisplay(const TG_GPU_DISPLAY_EVENT *event)
+{
+    CHECK(event->Version==1 && event->Phase<=1 && event->Operation>=1 && event->Operation<=4);
+    if(!event->Phase){CHECK(event->Status==STATUS_PENDING);display_entry=*event;++display_entries;}
+    else {
+        CHECK(display_entries==display_returns+1 && display_entry.Operation==event->Operation &&
+            display_entry.BeforeRotation==event->BeforeRotation && display_entry.PathId==event->PathId);
+        display_return=*event;++display_returns;
+    }
+}
 
 NTSTATUS TgGpuPanelSetVisibility(TG_GPU_ADAPTER *adapter, BOOLEAN enabled)
 {
@@ -236,8 +249,25 @@ static void test_rotation(TG_GPU_ADAPTER *adapter,const DRIVER_INITIALIZATION_DA
         CHECK((UINT)adapter->Panel.PathRotation==r);
         CHECK(d->DxgkDdiCommitVidPn(adapter,&commit)==STATUS_SUCCESS && visible && (UINT)adapter->Panel.PathRotation==r);
         update.VidPnPresentPathInfo.ContentTransformation.Rotation=(D3DKMDT_VIDPN_PRESENT_PATH_ROTATION)(r%4+1);
+        /* A path-only update must preserve the old displayed/pending frame,
+         * visibility, timing and ownership. Only the future Blt angle moves. */
+        TG_GPU_PANEL expected=adapter->Panel;
+        expected.PathRotation=update.VidPnPresentPathInfo.ContentTransformation.Rotation;
+        const ULONG old_visibility_calls=visibility_calls;
+        CHECK(d->DxgkDdiUpdateActiveVidPnPresentPath(adapter,&update)==STATUS_SUCCESS);
+        CHECK(visibility_calls==old_visibility_calls);
+        CHECK(display_return.Operation==TgGpuDisplayUpdatePath && display_return.Status==STATUS_SUCCESS &&
+            display_return.BeforeRotation==r && display_return.AfterRotation==r%4+1 &&
+            display_return.RequestedRotation==r%4+1 && display_returns==display_entries);
+        for(UINT b=0;b<sizeof(expected);++b)
+            CHECK(((const UCHAR *)&expected)[b]==((const UCHAR *)&adapter->Panel)[b]);
+        update.VidPnPresentPathInfo.ContentTransformation.Rotation=D3DKMDT_VPPR_UNPINNED;
         CHECK(d->DxgkDdiUpdateActiveVidPnPresentPath(adapter,&update)==
-            STATUS_GRAPHICS_PATH_CONTENT_GEOMETRY_TRANSFORMATION_NOT_SUPPORTED && (UINT)adapter->Panel.PathRotation==r);
+            STATUS_GRAPHICS_PATH_CONTENT_GEOMETRY_TRANSFORMATION_NOT_SUPPORTED &&
+            adapter->Panel.PathRotation==expected.PathRotation);
+        update.VidPnPresentPathInfo=test_path;
+        CHECK(d->DxgkDdiUpdateActiveVidPnPresentPath(adapter,&update)==STATUS_SUCCESS &&
+            (UINT)adapter->Panel.PathRotation==r && visibility_calls==old_visibility_calls);
         CHECK(!path_refs && !source_refs && !target_refs && !source_sets && !target_sets);
     }
     /* Preserving an inherited target without a VidPN does not supply a new

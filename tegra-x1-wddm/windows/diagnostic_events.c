@@ -29,6 +29,8 @@ VOID TgGpuTraceRecovery(const TG_GPU_RECOVERY_EVENT *record)
 {write_event(1,2,record,sizeof(*record));}
 VOID TgGpuTraceExecution(const TG_GPU_EXECUTION_EVENT *record)
 {write_event(2,4,record,sizeof(*record));}
+VOID TgGpuTraceDisplay(const TG_GPU_DISPLAY_EVENT *record)
+{write_event(4,4,record,sizeof(*record));}
 static const EVENT_DESCRIPTOR reset_packet_event={.Id=3,.Version=1,.Level=4,.Keyword=1};
 BOOLEAN TgGpuTraceResetPacketEnabled(VOID)
 {return provider && EtwEventEnabled(provider,&reset_packet_event);}

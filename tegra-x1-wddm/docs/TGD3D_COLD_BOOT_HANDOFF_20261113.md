@@ -1535,3 +1535,36 @@ ARM64 KMD构建通过，Switch上test-context/test-panel-timings退出0（包括
 [miniport旋转](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/supporting-rotation-in-a-display-miniport-driver)
 也明确共享primary用未旋转尺寸。不能仅看到CCD source仍720×1280便认定工具或
 VidPN错误，更不能再以宽高直接互换或强制source_visible掩盖协商失败。
+
+### WDDM2.6平滑旋转与模式入口核对（候选构建完成，尚未安装）
+
+用户确认继续WDDM2.6，要求核对CommitVidPn、SmoothRotation/MPO声明及
+UpdateActiveVidPnPresentPath。实际构建宏和QueryAdapterInfo均为2.6；使用
+WDK10.0.26100.0不等于声明3.1。远端Claude尚未恢复，本轮没有调用它。
+
+静态审查确认：已有四方向RotationSupport，但SupportSmoothRotation为0，
+UpdateActiveVidPnPresentPath明确拒绝任何不同角度。微软
+[Optimized Screen Rotation](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/optimized-screen-rotation-support)
+要求支持旋转的WDDM1.2及以上驱动支持这条更新路径；这是可确认的契约缺口，
+并非已证明上一轮201次SetDisplayMode重试的唯一根因。
+
+候选只补齐这一处行为：显示适配器声明SupportSmoothRotation；合法的四方向
+UpdateActive仅更新后续Rotate Blt使用的PathRotation，不改旧扫描地址、pitch、
+时序、SourceVisible、TargetActive、Pending/Displayed或完成值。CPU控制逐字节
+核对Panel状态只有角度变化，并覆盖无效角度保持原状态。
+
+SupportMultiPlaneOverlay/MaxOverlayPlanes仍为0。当前只支持完整主平面，
+没有额外图层混合/缩放/YUV实现；MPO3承载主平面不等于多层overlay能力。
+本轮不虚报该能力，也不改MPO准入或伪造完成通知。
+
+为直接回答实际调用问题，在现有KMD ETW provider新增event4/version1：记录
+CommitVidPn、SetTimingsFromVidPn、UpdateActive和SourceVisibility的入口/返回、
+NTSTATUS、LUID、请求/前后角度和显隐状态。入口STATUS_PENDING不是成功；
+Commit/SetTimings只有VidPN句柄时RequestedRotation记0，不能当作identity。
+不增加磁盘/转储/GPU工作；仅本次显式启用ETW会话收集，结束停止并清理。
+
+本地解析器6项检查通过，冻结基线中只移植event4后对应4项检查通过；没有携入
+HEAD较新的reset-packet/执行诊断。ARM64构建通过，Switch原I基线Code0下运行
+test-context和test-panel-timings均退出0，包含能力位、四方向路径更新和完整入口/
+返回配对。这仍是CPU控制，尚无本候选GPU/物理结果。UMD d28d5669…、ICD
+dee3d580…保持上一轮冻结版本，不重编译无关组件。

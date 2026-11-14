@@ -72,6 +72,10 @@ NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYAD
         caps.MiscCaps.ComputeOnly=!display;
         caps.FlipCaps.FlipOnVSyncMmIo=display;
         caps.SupportNonVGA=display; /* The panel DDIs release POST ownership. */
+        caps.SupportSmoothRotation=display;
+        /* MPO3 also carries the ordinary primary on current Windows. That
+         * entry point does not imply support for extra overlay planes:
+         * SupportMultiPlaneOverlay and MaxOverlayPlanes remain zero. */
         /* QUERYSEGMENT4 exposes only a noncoherent paging aperture. */
         caps.PresentationCaps.NoCacheCoherentApertureMemory=display;
         /* The fixed-panel Present path copies between shadow and primary;

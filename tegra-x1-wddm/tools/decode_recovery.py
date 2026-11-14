@@ -19,6 +19,8 @@ EVENT = struct.Struct('<Q16sIIHHHHBBB5x')
 PAYLOAD = struct.Struct('<6IQ10I')
 EXECUTION_PAYLOAD = struct.Struct('<8I3Q24I')
 RESET_PACKET_HEADER = struct.Struct('<4I2Q28I')
+DISPLAY_PAYLOAD = struct.Struct('<13I')
+DISPLAY_OPERATIONS = ('unknown', 'commit_vidpn', 'set_timings', 'update_active_path', 'source_visibility')
 RESET_HARDWARE_FIELDS = ('flags', 'mc_enable', 'pbdma_enable', 'pbdma_before', 'pbdma_after',
     'userd_get', 'userd_put', 'userd_reference', 'gp_get', 'gp_put', 'gp_fetch',
     'pb_get_lo', 'pb_get_hi', 'pb_fetch_lo', 'pb_fetch_hi', 'pb_header', 'method0',
@@ -60,6 +62,19 @@ def decode(data):
         offset += size
         total += 1
         if provider != PROVIDER:
+            continue
+        if event_id == 4:
+            if version != 1 or size != DISPLAY_PAYLOAD.size:
+                raise ValueError('unsupported display-path schema')
+            v = DISPLAY_PAYLOAD.unpack(payload)
+            if v[0] != 1 or not 1 <= v[1] <= 4 or v[5] > 1 or v[10] > 1 or v[11] > 1:
+                raise ValueError('invalid display-path event')
+            records.append({'event': 'DisplayPath', 'time': time, 'pid': pid, 'tid': tid, 'cpu': cpu,
+                'operation': DISPLAY_OPERATIONS[v[1]], 'phase': 'return' if v[5] else 'entry',
+                'adapter_luid': f'{v[3]:08x}{v[2]:08x}', 'status': f'0x{v[4]:08x}',
+                'path_id': v[6], 'requested_rotation': v[7], 'before_rotation': v[8],
+                'after_rotation': v[9], 'source_visible': bool(v[10]), 'target_active': bool(v[11]),
+                'flags': f'0x{v[12]:08x}'})
             continue
         if event_id == 3:
             if version != 1 or size < RESET_PACKET_HEADER.size:
@@ -128,6 +143,7 @@ def decode(data):
                      'recovery_records': sum(r['event'] == 'FirstRecoveryRequest' for r in records),
                      'execution_records': sum(r['event'] == 'ExecutionState' for r in records),
                      'reset_packet_chunks': sum(r['event'] == 'ResetPacket' for r in records),
+                     'display_records': sum(r['event'] == 'DisplayPath' for r in records),
                      'last_timestamp': last, 'requested_seconds': seconds,
                      'sha256': hashlib.sha256(data).hexdigest()}
 

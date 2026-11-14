@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 #include "adapter.h"
+#include "diagnostic_events.h"
 
 typedef struct _PANEL_PATH {
     const DXGK_VIDPN_INTERFACE *VidPn;
@@ -362,7 +363,7 @@ static NTSTATUS APIENTRY recommend_functional(HANDLE context,
     return STATUS_GRAPHICS_NO_RECOMMENDED_FUNCTIONAL_VIDPN;
 }
 
-static NTSTATUS APIENTRY commit_vidpn(HANDLE context, const DXGKARG_COMMITVIDPN *args)
+static NTSTATUS commit_vidpn_impl(HANDLE context, const DXGKARG_COMMITVIDPN *args)
 {
     TG_GPU_ADAPTER *adapter = context;
     PAGED_CODE();
@@ -384,7 +385,7 @@ static NTSTATUS APIENTRY commit_vidpn(HANDLE context, const DXGKARG_COMMITVIDPN 
     return status;
 }
 
-static NTSTATUS APIENTRY set_timings(HANDLE context, DXGKARG_SETTIMINGSFROMVIDPN *args)
+static NTSTATUS set_timings_impl(HANDLE context, DXGKARG_SETTIMINGSFROMVIDPN *args)
 {
     TG_GPU_ADAPTER *adapter = context;
     PAGED_CODE();
@@ -438,7 +439,7 @@ static NTSTATUS APIENTRY set_timings(HANDLE context, DXGKARG_SETTIMINGSFROMVIDPN
     return status;
 }
 
-static NTSTATUS APIENTRY source_visibility(HANDLE context,
+static NTSTATUS source_visibility_impl(HANDLE context,
     const DXGKARG_SETVIDPNSOURCEVISIBILITY *args)
 {
     PAGED_CODE();
@@ -449,7 +450,7 @@ static NTSTATUS APIENTRY source_visibility(HANDLE context,
     return TgGpuPanelSetVisibility(context, args->Visible);
 }
 
-static NTSTATUS APIENTRY update_active_path(HANDLE context,
+static NTSTATUS update_active_path_impl(HANDLE context,
     const DXGKARG_UPDATEACTIVEVIDPNPRESENTPATH *args)
 {
     TG_GPU_ADAPTER *adapter = context;
@@ -464,12 +465,53 @@ static NTSTATUS APIENTRY update_active_path(HANDLE context,
         return STATUS_NOT_SUPPORTED;
     if (!adapter->Panel.Dc.owned)
         return STATUS_DEVICE_NOT_READY;
-    /* Smooth rotation is not advertised. A changed angle needs CommitVidPn
-     * and the matching primary; path-only updates must not rotate old storage. */
-    if (path_rotation(path) != adapter->Panel.PathRotation)
+    const D3DKMDT_VIDPN_PRESENT_PATH_ROTATION rotation=path->ContentTransformation.Rotation;
+    if (!fixed_rotation(rotation))
         return STATUS_GRAPHICS_PATH_CONTENT_GEOMETRY_TRANSFORMATION_NOT_SUPPORTED;
+    /* All scanout allocations have the same portrait layout. A smooth path
+     * change updates the angle consumed by future Rotate Blts; it neither
+     * reinterprets old pixels nor disables output. DWM/GPU completion and
+     * the subsequent actual primary latch still control frame retirement. */
+    adapter->Panel.PathRotation=rotation;
     return STATUS_SUCCESS;
 }
+
+static void trace_display(const TG_GPU_ADAPTER *adapter, ULONG operation, ULONG phase,
+    NTSTATUS status, ULONG before, ULONG path, ULONG rotation, ULONG flags)
+{
+    if (!adapter) return;
+    const TG_GPU_DISPLAY_EVENT event={.Version=1,.Operation=operation,
+        .AdapterLuid=adapter->Engine.AdapterLuid,.Status=status,.Phase=phase,
+        .PathId=path,.RequestedRotation=rotation,.BeforeRotation=before,
+        .AfterRotation=adapter->Panel.PathRotation,
+        .SourceVisible=adapter->Panel.SourceVisible,.TargetActive=adapter->Panel.TargetActive,.Flags=flags};
+    TgGpuTraceDisplay(&event);
+}
+
+/* Pair every return, including validation failures, with its real entry.
+ * No topology queries, MMIO, disk writes or extra GPU commands for tracing. */
+#define DISPLAY_WRAPPER(name, type, operation, path_id, rotation, input_flags) \
+static NTSTATUS APIENTRY name(HANDLE context, type *args) \
+{ \
+    const TG_GPU_ADAPTER *adapter=context; \
+    const ULONG before=adapter?adapter->Panel.PathRotation:0; \
+    const ULONG path=args?(path_id):0, angle=args?(rotation):0, flags=args?(input_flags):0; \
+    trace_display(adapter,operation,0,STATUS_PENDING,before,path,angle,flags); \
+    NTSTATUS status=name##_impl(context,args); \
+    trace_display(adapter,operation,1,status,before,path,angle,flags); \
+    return status; \
+}
+DISPLAY_WRAPPER(commit_vidpn,const DXGKARG_COMMITVIDPN,TgGpuDisplayCommit,
+    args->AffectedVidPnSourceId,0,args->Flags.PathPowerTransition | (args->Flags.PathPoweredOff<<1))
+DISPLAY_WRAPPER(set_timings,DXGKARG_SETTIMINGSFROMVIDPN,TgGpuDisplaySetTimings,
+    args->PathCount && args->pSetTimingPathInfo ? args->pSetTimingPathInfo[0].VidPnTargetId : 0,
+    0,args->SetFlags.Value)
+DISPLAY_WRAPPER(update_active_path,const DXGKARG_UPDATEACTIVEVIDPNPRESENTPATH,TgGpuDisplayUpdatePath,
+    args->VidPnPresentPathInfo.VidPnSourceId,args->VidPnPresentPathInfo.ContentTransformation.Rotation,
+    args->VidPnPresentPathInfo.ContentTransformation.Scaling)
+DISPLAY_WRAPPER(source_visibility,const DXGKARG_SETVIDPNSOURCEVISIBILITY,TgGpuDisplayVisibility,
+    args->VidPnSourceId,0,args->Visible)
+#undef DISPLAY_WRAPPER
 
 void TgGpuRegisterPanelVidPn(DRIVER_INITIALIZATION_DATA *ddis)
 {

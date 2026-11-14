@@ -63,6 +63,23 @@ typedef struct _TG_GPU_RESET_PACKET_EVENT {
 } TG_GPU_RESET_PACKET_EVENT;
 C_ASSERT(sizeof(TG_GPU_RESET_PACKET_EVENT)==144);
 
+/* Event 4/version 1: mode-path entry/return, not a Present completion.
+ * RequestedRotation is zero when the request carries a VidPN handle rather
+ * than an inline angle. PathId is a source ID, or target ID for SetTimings.
+ * Flags is Commit flags, SetTimings flags, scaling for Update, or visibility. */
+enum tg_gpu_display_operation {
+    TgGpuDisplayCommit=1, TgGpuDisplaySetTimings, TgGpuDisplayUpdatePath,
+    TgGpuDisplayVisibility
+};
+typedef struct _TG_GPU_DISPLAY_EVENT {
+    ULONG Version,Operation;
+    LUID AdapterLuid;
+    NTSTATUS Status;
+    ULONG Phase,PathId,RequestedRotation,BeforeRotation,AfterRotation;
+    ULONG SourceVisible,TargetActive,Flags;
+} TG_GPU_DISPLAY_EVENT;
+C_ASSERT(sizeof(TG_GPU_DISPLAY_EVENT)==52);
+
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS TgGpuTraceInitialize(VOID);
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -76,4 +93,6 @@ _IRQL_requires_(PASSIVE_LEVEL)
 BOOLEAN TgGpuTraceResetPacketEnabled(VOID);
 _IRQL_requires_(PASSIVE_LEVEL)
 VOID TgGpuTraceResetPacket(const TG_GPU_RESET_PACKET_EVENT *,const VOID *Commands);
+_IRQL_requires_(PASSIVE_LEVEL)
+VOID TgGpuTraceDisplay(const TG_GPU_DISPLAY_EVENT *);
 #endif
