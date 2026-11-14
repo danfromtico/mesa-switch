@@ -1488,3 +1488,50 @@ ARM64 KMD构建通过，Switch上test-context/test-panel-timings退出0（包括
 四方向能力、multipass、实际WDK结构的Present编码和snapshot捕获）。早先同UMD
 的ARM64 runtime controls已通过并复用。这些均为CPU控制，不是GPU或物理验收。
 设备15:41:33UTC仍原缓存I基线Code0，启动时间14:55:12，DWM828；本候选尚未安装。
+
+### 四方向候选798595d0：90°扫描检查失败，180/270°停止扩大测试
+
+798595d0a73fa84196a6ef48b1fcd6afad77f622已推送tgd3d-vulkan（两次HTTP/1.1
+超时后，默认传输成功；没有改Git配置）。签名SYS
+`d9be1b6cc0cd2493efbbbc58e61588f15fe111917cf83e1df4eb0153bd32f7c6`，UMD
+`d28d5669ca284f1b2dcd7541bccc05c2ca5d409f6cf6283884dadade110999c4`，ICD
+`dee3d5805af80696f87d094ec1c5f557d662f435336207992baf588e2dc1cee0`。
+13个CAT成员和71个可还原包文件校验通过；包variant沿用受检的gpu460-vidpn枚举，
+四方向补丁另记gdi_rotation_patch_commit，未放宽恢复基线校验。
+
+15:45:41UTC请求一次安装门控重启，15:46:15启动；SSH恢复后确认旧I内核Code43、
+默认启用Disabled，未因连接超时重复启动/重启。15:49:04启动一次安装任务；
+15:50:14新候选Code0，DWM780加载本轮UMD，gpu-bridge开启，频率保持。
+
+15:50:55–15:51:44只完成了90°这一轮，LUID `00000000000d6fcf`：
+
+- Windows逻辑1280×720图案5020个像素比较无差异；不能代表物理输出。
+- 15:51:12.833、14.489、15.958三次扫描快照均source_visible0、target_active1、
+  WIN_ENABLE0；地址和displayed_address仍为`0xfbf27000`，PresentId38，pending0，
+  720×1280/pitch2880/offset0。12点仍是旧桌面颜色，underflow3保持。
+- 工具退出1：`Portrait scanout activation/layout did not match rotation 90`。
+  因本方向失败，没有继续测180/270°，不能把其CPU控制结果写成实机通过。
+- 15:51:42当前/保存配置恢复720×1280/orientation0/60Hz，trace停止，短时恢复
+  guard解除。51文件13648768字节取回并全部长度/SHA256匹配。
+- trace完整结束，matched12446，invalid/events_lost/log_buffers_lost/realtime
+  _buffers_lost均0。按QPC转换，15:51:10以后DWM有201次SetDisplayMode成功返回，
+  没有Blt、Present或OpenResource返回记录；重复创建资源主要是720×1280。
+  这限定了下一步的模式建立/primary协商排查范围；仅缺少返回事件不能证明函数
+  从未进入，也不能证明新增GPU复制已执行或其完成通知就是根因。
+
+15:53:05请求一次计划恢复重启；保留四方向源码实现，撤下失败的实机候选。
+取证位置OUT `gdi-rotation/evidence/`；摘要 `gdi-rotation/test-summary.json`。
+
+恢复任务15:56:53UTC完成，Code0；KMD1a86a02b…、缓存UMD0cd34833…、ICDdee3d580…
+均恢复，DWM784实际加载对应模块。CPU1497600、GPU460800、RAM1600000kHz及风扇13
+核对通过，默认启用Ready。15:58:13交互只读查询当前/保存均720×1280、方向0、60Hz。
+13个恢复文件取回并校验；16:00:03清理完成，删除3个任务、20个本轮目录/文件，
+不删除当前缓存基线和共用签名工具。
+
+用户问“VidPN死循环”：目前应表述为模式建立反复重试，不能宣布已证实VidPN内部
+死锁。继续核对primary描述、旋转元数据和MPO准入的组合。微软
+[primary描述](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi_ddi_primary_desc)
+明确NONPREROTATED表示由应用处理方向、primary代表identity；
+[miniport旋转](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/supporting-rotation-in-a-display-miniport-driver)
+也明确共享primary用未旋转尺寸。不能仅看到CCD source仍720×1280便认定工具或
+VidPN错误，更不能再以宽高直接互换或强制source_visible掩盖协商失败。
