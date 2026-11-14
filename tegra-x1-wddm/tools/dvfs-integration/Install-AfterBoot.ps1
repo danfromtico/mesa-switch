@@ -3,7 +3,7 @@
 $m=Merge-Check;$state=Join-Path $MergeRoot 'install-state.json';$r=Read-Json $state
 if($r.Phase -ne 'StagedRebootRequested'){return}
 $boot=(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o')
-if($boot -eq $r.Boot){throw 'The planned gate/ACPI restart has not occurred'}
+if([Math]::Abs(([DateTime]::Parse($boot)-[DateTime]::Parse($r.Boot)).TotalSeconds) -le 2){throw 'The planned gate/ACPI restart has not occurred'}
 Disable-ScheduledTask Tgd3dDvfsInstall|Out-Null
 $r|Add-Member -NotePropertyName AfterBoot -NotePropertyValue $boot -Force
 try {
