@@ -232,7 +232,7 @@ void test_execute_init(void)
 {
     static _Alignas(4096) uint8_t arena[TG_GPU_ARENA_BYTES];
     struct fifo_model m = {.instance=0x80000400, .asid={0x80000011,0x80000012}, .pb=2, .runlist_map=1};
-    struct tg_gpu_power_io io = {&m,read32,write32,NULL,NULL,delay};
+    struct tg_gpu_power_io io = {&m,read32,write32,NULL,NULL,delay, NULL};
     struct tg_gpu_power power = {0};
     struct tg_gpu_execution state = {0};
     struct tg_gpu_status result = {.expected={0x13579bdf,0x2468ace0}};

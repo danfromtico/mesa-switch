@@ -12,7 +12,7 @@
 #define TG_DVFS_ROLLBACK_COOLDOWN_US 2000000ULL
 #define TG_DVFS_THROTTLE_ENTER_C         80
 #define TG_DVFS_THROTTLE_RELEASE_C       72
-#define TG_DVFS_DEFAULT_EMC_KHZ     1600000u
+#define TG_DVFS_UNKNOWN_EMC_KHZ     3200000u
 
 static ULONGLONG query_now_us(TG_GPU_DVFS *d)
 {
@@ -95,6 +95,10 @@ static VOID report_telemetry(TG_GPU_DVFS *d, const TG_GPU_HARDWARE *h)
     if (!d->Platform || !d->PolicyBridgeSupported) return;
     op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_REPORT_ABI, 1, TG_GPU_LIVE_COUNTER_ABI};
     (VOID)TgGpuPlatformTryRequest(d->Platform, &op);
+    if (d->EmcVoteSupported) {
+        op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_REPORT_EMC_ABI, 1, TG_GPU_EMC_VOTE_ABI};
+        (VOID)TgGpuPlatformTryRequest(d->Platform, &op);
+    }
     if (h->Io.read_pmic(h->Io.context, h->Power.pmic_address, 0x23u, &rail_code))
         rail_uv = 250000u + (UINT32)rail_code * 5000u;
     opp = tg_gpu_clock_hiopt_index(h->Clock.target_khz);
@@ -157,10 +161,45 @@ static VOID poll_platform_state(TG_GPU_DVFS *d, ULONGLONG now, BOOLEAN initial)
         if (NT_SUCCESS(TgGpuPlatformTryRequest(d->Platform, &op)) &&
             op.value >= 204000u && op.value <= 3200000u)
             d->EmcKhz = op.value;
-        else
-            d->EmcKhz = TG_DVFS_DEFAULT_EMC_KHZ;
+        /* Retain the last confirmed EMC clock on a transient read failure.
+         * Before the first sample, cover the characterized maximum instead
+         * of assuming the old 1600 MHz boot profile is still active. */
+    }
+    op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_QUERY_EMC_VOTE, 0, 0};
+    if (NT_SUCCESS(TgGpuPlatformTryRequest(d->Platform, &op))) {
+        UINT32 floor = TG_GPU_EMC_VOTE_UV(op.value);
+        if ((!floor || (floor >= 590000u && floor <= 760000u)) &&
+            (!op.value || op.value != d->EmcFailedWord)) {
+            d->EmcVoteSupported = TRUE;
+            d->EmcVoteWord = op.value;
+            d->EmcFloorUv = floor;
+        }
     }
     d->LastPollUs = now;
+}
+
+/* DispatchGate held and the engine quiescent. A PMIC read alone cannot
+ * replace NAPLL recalibration; call only after a successful clock operation. */
+static VOID acknowledge_emc(TG_GPU_DVFS *d, const TG_GPU_HARDWARE *h)
+{
+    struct tg_gpu_pmic_request op;
+    if (!d->EmcVoteSupported || !d->EmcVoteWord || d->EmcVoteWord == d->EmcAckWord ||
+        !h->Clock.running || h->Clock.rail_uv < d->EmcFloorUv) return;
+    op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_REPORT_EMC_ACK, 1, d->EmcVoteWord};
+    if (NT_SUCCESS(TgGpuPlatformTryRequest(d->Platform, &op))) d->EmcAckWord = d->EmcVoteWord;
+}
+
+static VOID reject_emc(TG_GPU_DVFS *d)
+{
+    if (d->EmcVoteWord && d->EmcVoteWord != d->EmcAckWord) {
+        struct tg_gpu_pmic_request op={0,TG_GPU_PMIC_REPORT_EMC_FAILURE,1,d->EmcVoteWord};
+        d->EmcFailedWord=d->EmcVoteWord;
+        (VOID)TgGpuPlatformTryRequest(d->Platform,&op);
+        /* No successful ack authorized an EMC increase. Keep the last
+         * established vote and do not retry this failed generation forever. */
+        d->EmcVoteWord=d->EmcAckWord;
+        d->EmcFloorUv=TG_GPU_EMC_VOTE_UV(d->EmcAckWord);
+    }
 }
 
 VOID TgGpuDvfsAttach(TG_GPU_HARDWARE *h, TG_GPU_PLATFORM *p, TG_GPU_WORK_QUEUE *q)
@@ -181,7 +220,7 @@ VOID TgGpuDvfsAttach(TG_GPU_HARDWARE *h, TG_GPU_PLATFORM *p, TG_GPU_WORK_QUEUE *
     d->BootKhz = h->Clock.target_khz;
     d->BootUv = h->Clock.rail_uv;
     d->SafeOpp = snap_max_opp(TG_GPU_HIOPT_SAFE_KHZ);
-    d->EmcKhz = TG_DVFS_DEFAULT_EMC_KHZ;
+    d->EmcKhz = TG_DVFS_UNKNOWN_EMC_KHZ;
     d->ThermalRange = TG_GPU_THERMAL_RANGES;
     load_registry_overrides(d);
     d->Mode = d->RegMode;
@@ -248,7 +287,7 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
     KIRQL q_irql, e_irql;
     LIST_ENTRY *link;
     UINT32 pending_depth = 0, want_khz, want_uv;
-    BOOLEAN busy_now, stable, quiescent, pending_arrived, unchanged;
+    BOOLEAN busy_now, stable, quiescent, pending_arrived, unchanged, emc_pending;
     enum tg_gpu_clock_result res;
     NTSTATUS wait;
     PAGED_CODE();
@@ -261,13 +300,14 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
 
     now = query_now_us(d);
     stable = InterlockedCompareExchange(&d->StablePowerRequested, 0, 0) != 0;
-    if (d->Mode == TgGpuDvfsFixed && !stable &&
+    if (d->Mode == TgGpuDvfsFixed && !stable && d->EmcVoteWord == d->EmcAckWord &&
         h->Clock.target_khz == d->BootKhz && h->Clock.rail_uv == d->BootUv &&
         (!d->PolicyBridgeSupported || (now - d->LastPollUs) < TG_DVFS_POLL_INTERVAL_US))
         return STATUS_SUCCESS;
 
     if (!d->LastPollUs || (now - d->LastPollUs) >= TG_DVFS_POLL_INTERVAL_US)
         poll_platform_state(d, now, FALSE);
+    emc_pending = d->EmcVoteWord != d->EmcAckWord;
 
     KeAcquireSpinLock(&q->Lock, &q_irql);
     for (link = q->Pending.Flink; link != &q->Pending && pending_depth < 4u; link = link->Flink)
@@ -326,15 +366,20 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
         }
     }
 
+    if (want_uv < d->EmcFloorUv) want_uv = d->EmcFloorUv;
     unchanged = want_khz == h->Clock.target_khz && want_uv == h->Clock.rail_uv;
-    if (unchanged && (now - d->LastReportUs) < TG_DVFS_HEARTBEAT_US)
+    if (unchanged && !emc_pending && (now - d->LastReportUs) < TG_DVFS_HEARTBEAT_US)
         return STATUS_SUCCESS;
-    if (!unchanged && now < d->CooldownUntilUs && !d->ThermalThrottled && d->Mode == TgGpuDvfsHighOpt)
+    if (!unchanged && !emc_pending && now < d->CooldownUntilUs && !d->ThermalThrottled && d->Mode == TgGpuDvfsHighOpt)
         return STATUS_SUCCESS;
 
     wait = KeWaitForSingleObject(&q->DispatchGate, Executive, KernelMode, FALSE, NULL);
     if (wait != STATUS_SUCCESS)
         return NT_SUCCESS(wait) ? STATUS_SUCCESS : wait;
+    if (!InterlockedCompareExchange(&d->Configured, 0, 0)) {
+        (VOID)KeReleaseMutex(&q->DispatchGate, FALSE);
+        return STATUS_SUCCESS;
+    }
 
     KeAcquireSpinLock(&q->Lock, &q_irql);
     KeAcquireSpinLock(&e->Lock, &e_irql);
@@ -359,7 +404,8 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
          * the same idle/ownership boundary as rate changes, never in flight.
          * A telemetry failure is unavailable data, not a new clock transition. */
         res = tg_gpu_clock_measure(&h->Io, &h->Clock);
-        if (res != TG_GPU_CLOCK_OK) h->Clock.measured_khz = 0;
+        if (res != TG_GPU_CLOCK_OK) { h->Clock.measured_khz = 0; reject_emc(d); }
+        else acknowledge_emc(d, h);
         h->Status.measured_khz = h->Clock.measured_khz;
         (VOID)KeReleaseMutex(&q->DispatchGate, FALSE);
         report_telemetry(d, h);
@@ -374,10 +420,12 @@ NTSTATUS TgGpuDvfsStep(TG_GPU_HARDWARE *h, TG_GPU_WORK_QUEUE *q, BOOLEAN woke_fo
     h->Status.clock_result = res;
     if (res == TG_GPU_CLOCK_OK) {
         ++d->Transitions;
+        acknowledge_emc(d, h);
     } else if (h->Clock.running) {
+        reject_emc(d);
         ++d->Rollbacks;
         d->CooldownUntilUs = now + TG_DVFS_ROLLBACK_COOLDOWN_US;
-    }
+    } else reject_emc(d);
     (VOID)KeReleaseMutex(&q->DispatchGate, FALSE);
 
     report_telemetry(d, h);

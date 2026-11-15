@@ -36,6 +36,25 @@ function Register-MergeTask([string]$Name,[string]$File,[string]$User) {
  $settings=New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 12)
  Register-ScheduledTask -TaskName $Name -Action $action -Trigger $trigger -Settings $settings -User SYSTEM -RunLevel Highest -Force|Out-Null
 }
+function Stage-PlatformDriver([string]$Name) {
+ # Stage only: no /install, device restart or policy mutation. Windows may
+ # reuse an existing package for identical INF metadata despite a changed SYS.
+ # Prove the exact candidate reached DriverStore before changing boot files.
+ $directory=Join-Path $MergeRoot ('platform\'+$Name)
+ $inf=Join-Path $directory ($Name+'.inf');$sys=Join-Path $directory ($Name+'.sys')
+ & pnputil.exe /add-driver $inf|Out-File (Join-Path $MergeRoot ($Name+'-stage.log'))
+ if($LASTEXITCODE){throw ('Cannot stage platform driver: '+$Name)}
+ $expectedInf=File-Hash $inf;$expectedSys=File-Hash $sys
+ $store=Join-Path $env:windir 'System32\DriverStore\FileRepository'
+ $matches=@(Get-ChildItem -LiteralPath $store -Directory -Filter ($Name+'.inf_arm64_*')|Where-Object {
+  $storedInf=Join-Path $_.FullName ($Name+'.inf');$storedSys=Join-Path $_.FullName ($Name+'.sys')
+  (Test-Path $storedSys) -and (File-Hash $storedInf) -eq $expectedInf -and (File-Hash $storedSys) -eq $expectedSys
+ })
+ if($matches.Count -ne 1){throw ('Exact platform package missing/ambiguous in DriverStore: '+$Name)}
+ Save-Json (Join-Path $MergeRoot ($Name+'-staged.json')) @{
+  Utc=[DateTime]::UtcNow.ToString('o');Directory=$matches[0].FullName;InfSha256=$expectedInf;SysSha256=$expectedSys;Installed=$false
+ }
+}
 function Update-PlatformDriver([string]$Name,[string]$HardwareId,[string]$Inf,[string]$Expected) {
  if((Device-Property 'ProblemCode') -ne 43){throw 'Platform update requires the closed GPU gate'}
  if(!('DvfsDriverSelection' -as [type])) {

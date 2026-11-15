@@ -47,6 +47,7 @@ function Check-File([string]$Path,$Expected) {
 }
 function Kernel-BaselineHash($Manifest) {
     switch($Manifest.kmd_variant) {
+        'reviewed-dvfs-emc' {'e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e';return}
         'shader-output-bit14' {'46d1757674ff156028ce5b729ba53671981ffab09948fcaf125751c46bb10088';return}
         'shader-output-bit14-native-boot' {'46d1757674ff156028ce5b729ba53671981ffab09948fcaf125751c46bb10088';return}
         'shader-output-bit14-gpu460' {'c629328e7309381aa1b9923576ab57a4e664102a393d385ecf5643113641dd53';return}
@@ -66,7 +67,21 @@ function Check-Package {
     if($m.kmd_variant -and $m.baseline_kmd.'tegragpurender.sys'.Sha256 -ne (Kernel-BaselineHash $m)) { throw 'Unexpected kernel recovery baseline' }
     if($m.kmd_variant -in @('shader-output-bit14-gpu460','shader-output-bit14-gpu460-vidpn') -and
        ($m.startup_mode -notin @('logon-default','native-boot') -or $m.kmd_gpu_khz -ne 460800)) { throw 'Clock control requires the reviewed 460.8 MHz package' }
+    if($m.kmd_variant -eq 'reviewed-dvfs-emc' -and
+       ($m.startup_mode -ne 'logon-default' -or $m.sync_mode -ne 'gpu-bridge' -or
+        $m.platform_fan_version -ne 33 -or !$m.kmd -or
+        ((@($m.baseline_kmd.PSObject.Properties.Name|Sort-Object) -join ',') -ne (@($m.kmd.PSObject.Properties.Name|Sort-Object) -join ',')))){throw 'EMC requires the matched Fan33/ACTMON-IRQ/GPU-bridge logon package'}
     foreach($entry in $m.files.PSObject.Properties) { Check-File (Package-Path $entry.Name) $entry.Value }
+    if(!$m.helpers -or !$m.helpers.PSObject.Properties['display158.aml']) { throw 'Missing packaged ACPI table identity' }
+    Check-File (Package-Path 'display158.aml') $m.helpers.'display158.aml'
+    if($m.kmd_variant) {
+        if(!$m.baseline_kmd -or !$m.kmd) { throw 'Missing kernel package manifest' }
+        foreach($req in @('tegragpurender.inf','tegragpurender.cat','tegragpurender.sys','tegragpuno3d.dll')) {
+            if(!$m.baseline_kmd.PSObject.Properties[$req] -or !$m.kmd.PSObject.Properties[$req]) { throw ('Missing kernel package member: '+$req) }
+        }
+        foreach($entry in $m.baseline_kmd.PSObject.Properties) { Check-File (Package-Path ('baseline-kmd/'+$entry.Name)) $entry.Value }
+        foreach($entry in $m.kmd.PSObject.Properties) { Check-File (Package-Path ('package/'+$entry.Name)) $entry.Value }
+    }
     foreach($file in Get-ChildItem -LiteralPath $script:TrialRoot -Filter '*.ps1') {
         $tokens=$null;$errors=$null
         $null=[System.Management.Automation.Language.Parser]::ParseFile($file.FullName,[ref]$tokens,[ref]$errors)
@@ -90,7 +105,7 @@ function Check-Baseline {
         }
         if((Device-Property 'Service') -ne 'tegragpurender' -or
            (File-Hash "$env:windir\System32\drivers\tegragpurender.sys") -notin $hashes -or
-           (File-Hash "$env:windir\System32\acpitabl.dat") -ne '515D8D9C1612514CA2F197D6C96774A9265785A7E519921A195F0F8D257AA500') { throw 'Retained .158 baseline differs' }
+           (File-Hash "$env:windir\System32\acpitabl.dat") -ne $manifest.helpers.'display158.aml'.Sha256) { throw 'Retained .158 baseline differs' }
     } elseif($version -eq '0.1.0.59' -and $problem -eq 0) {
         # One-time migration from the previous baseline; recovery never
         # automatically reinstalls this version.

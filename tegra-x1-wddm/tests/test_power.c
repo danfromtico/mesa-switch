@@ -10,6 +10,8 @@ struct model {
     unsigned int writes;
     bool fail_voltage_once, fail_mc, fail_reset, fail_out5;
     bool fail_clamp_set, fail_reset_set, unreadable_mc_status;
+    bool fail_release;
+    unsigned releases;
 };
 
 static uint32_t read32(void *opaque, uint32_t address)
@@ -87,6 +89,18 @@ static void delay_us(void *opaque, uint32_t us)
     assert(us == 2 || us == 10 || us == 5000);
 }
 
+static bool release_pmic(void *opaque, uint8_t address, uint8_t enable, uint8_t voltage)
+{
+    struct model *m = opaque;
+    assert(address == 0x33 && enable == 0x50 && voltage == 70);
+    assert((m->clamp & 1u) && (m->reset & 0x01000000u));
+    ++m->releases;
+    if (m->fail_release) return false;
+    m->enable |= 1u;
+    m->voltage = 98; /* owner retains a 740 mV EMC vote */
+    return true;
+}
+
 int main(void)
 {
     const struct model initial = {
@@ -96,7 +110,7 @@ int main(void)
     };
     struct model model = initial;
     struct tg_gpu_power state = {0};
-    struct tg_gpu_power_io io = { &model, read32, write32, read_pmic, write_pmic, delay_us };
+    struct tg_gpu_power_io io = { &model, read32, write32, read_pmic, write_pmic, delay_us, NULL};
 
     assert(tg_gpu_power_up(&io, 0x33, &state) == TG_GPU_POWER_OK);
     assert(state.ready && state.owned && state.stage == TG_GPU_STAGE_READY);
@@ -176,6 +190,15 @@ int main(void)
         assert(tg_gpu_power_down(&io,&state)==TG_GPU_POWER_OK && !state.owned);
         assert(model.enable==initial.enable && model.flush==initial.flush);
     }
-    puts("T214 power ordering and unwind tests passed (model, not hardware).");
+    model = initial; memset(&state, 0, sizeof(state)); io.release_pmic = release_pmic;
+    assert(tg_gpu_power_up(&io,0x33,&state) == TG_GPU_POWER_OK);
+    model.fail_mc = true;
+    assert(tg_gpu_power_down(&io,&state) == TG_GPU_POWER_MC_TIMEOUT && !model.releases);
+    model.fail_mc = false; model.fail_release = true;
+    assert(tg_gpu_power_down(&io,&state) == TG_GPU_POWER_PMIC_ERROR && state.owned && model.releases == 1);
+    model.fail_release = false;
+    assert(tg_gpu_power_down(&io,&state) == TG_GPU_POWER_OK && !state.owned && model.releases == 2);
+    assert(model.enable == 0x51 && model.voltage == 98);
+    puts("T214 power ordering, EMC rail retention and unwind tests passed (model, not hardware).");
     return 0;
 }

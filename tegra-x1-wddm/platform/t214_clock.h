@@ -85,7 +85,7 @@ uint32_t tg_gpu_clock_required_uv(uint32_t gpu_speedo, uint32_t target_khz);
 uint32_t tg_gpu_clock_hiopt_freq_khz(uint32_t index);
 uint32_t tg_gpu_clock_hiopt_index(uint32_t target_khz);
 uint32_t tg_gpu_clock_thermal_range(int32_t temp_c, uint32_t prev_range);
-uint32_t tg_gpu_clock_emc_floor_uv(uint32_t emc_khz);
+uint32_t tg_gpu_clock_emc_floor_uv(uint32_t gpu_speedo, uint32_t emc_khz);
 uint32_t tg_gpu_clock_hiopt_uv(uint32_t gpu_speedo, uint32_t target_khz,
     uint32_t thermal_range, uint32_t emc_khz);
 

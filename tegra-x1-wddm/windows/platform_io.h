@@ -6,13 +6,21 @@
 #include "../platform/t214_power.h"
 typedef struct _TG_GPU_PLATFORM {
     const TG_GPU_RESOURCES *Resources; /* borrowed through hardware retirement */
+    KSPIN_LOCK HandleLock;
     HANDLE Bridge;
+    PVOID FileObject;
+    PVOID OwnerDevice;
+    PVOID PnpNotify;
+    ULONG BridgeEpoch;
     NTSTATUS IoStatus;
+    BOOLEAN EmcRailOwner,RailClaimed,QueryRemove,NeedReclaim,Initialized,Opening,Closing;
 } TG_GPU_PLATFORM;
 
-/* PASSIVE, serialized bridge lifetime; mappings remain owned by the caller.
- * Kernel handle to the existing SwitchFan PMIC owner, not a new SPB target.
- */
+/* Open/Close and requests have a serialized adapter lifetime. PnP callbacks
+ * can run concurrently; HandleLock and BridgeEpoch protect publication.
+ * DriverObject registration enables TargetDeviceChange PnP unbind and
+ * IoSetCompletionRoutineEx unload-safe IRP completions on the adapter FDO. */
+VOID TgGpuSetPlatformDriverObject(PVOID DriverObject);
 NTSTATUS TgGpuOpenPlatform(TG_GPU_PLATFORM *,const TG_GPU_RESOURCES *);
 NTSTATUS TgGpuClosePlatform(TG_GPU_PLATFORM *);
 NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
@@ -20,8 +28,6 @@ NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
  * SwitchFan build returns STATUS_INVALID_PARAMETER or STATUS_NOT_SUPPORTED. */
 NTSTATUS TgGpuPlatformTryRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
 NTSTATUS TgGpuPlatformPreflight(TG_GPU_PLATFORM *,UCHAR *PmicAddress);
-/* Mapped-register reads/writes can run in the ISR. PMIC/PLLP queries and
- * delays that sleep are PASSIVE worker operations, as in the diagnostic.
- */
+VOID TgGpuPlatformAbandonRail(TG_GPU_PLATFORM *,UCHAR PmicAddress);
 struct tg_gpu_power_io TgGpuPlatformIo(TG_GPU_PLATFORM *);
 #endif

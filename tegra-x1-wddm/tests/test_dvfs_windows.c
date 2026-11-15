@@ -17,6 +17,7 @@ __declspec(dllimport) BOOL __stdcall WriteFile(HANDLE,const void *,ULONG,ULONG *
 #define CHECK(x) do {if(!(x))ExitProcess(__LINE__);}while(0)
 void *memset(void *p,int c,size_t n){UCHAR *d=p;while(n--)*d++=(UCHAR)c;return p;}
 void *memcpy(void *p,const void *s,size_t n){UCHAR *d=p;const UCHAR *a=s;while(n--)*d++=*a++;return p;}
+int memcmp(const void *a,const void *b,size_t n){const UCHAR *x=a,*y=b;for(;n--;++x,++y)if(*x!=*y)return (int)*x-(int)*y;return 0;}
 
 static TG_GPU_RESOURCES resources;
 static TG_GPU_PLATFORM platform;
@@ -34,8 +35,9 @@ static const ULONG bases[]={T214_GPU_REG_BASE,T214_GPU_BAR1_BASE,T214_GPU_AUX_BA
 static struct {
     ULONGLONG qpc_ticks;
     ULONG policy,temp,emc_khz,reported_khz,reported_uv,reported_status;
+    ULONG emc_vote,emc_ack,emc_failed,emc_failures;
     UCHAR rail;
-    BOOLEAN counter_bad,fail_target_counter;
+    BOOLEAN counter_bad,fail_target_counter,stop_on_gate;
     UINT32 fail_khz;
     UINT gate_depth,pmic_writes;
     KIRQL level;
@@ -65,15 +67,50 @@ static NTSTATUS NTAPI QueryValueKey(HANDLE key,PUNICODE_STRING name,KEY_VALUE_IN
     UNREFERENCED_PARAMETER(info);UNREFERENCED_PARAMETER(length);UNREFERENCED_PARAMETER(result_len);
     return STATUS_OBJECT_NAME_NOT_FOUND;
 }
-static NTSTATUS NTAPI Ioctl(HANDLE file,HANDLE event,PIO_APC_ROUTINE apc,PVOID ctx,
-    PIO_STATUS_BLOCK iosb,ULONG code,PVOID in,ULONG in_bytes,PVOID out,ULONG out_bytes)
+static POBJECT_TYPE dvfs_file_type=(POBJECT_TYPE)(ULONG_PTR)0x46494c45u;
+POBJECT_TYPE *IoFileObjectType=&dvfs_file_type;
+static DEVICE_OBJECT dvfs_dev={.StackSize=1};
+static DRIVER_OBJECT dvfs_driver;
+static DEVICE_OBJECT dvfs_owner={.DriverObject=&dvfs_driver,.StackSize=1};
+static FILE_OBJECT dvfs_file={.DeviceObject=&dvfs_dev};
+static UCHAR dvfs_pool[512],dvfs_irp_buf[512];
+static VOID NTAPI DvfsInitSpin(PKSPIN_LOCK l){*l=0;}
+static VOID NTAPI DvfsInitEvent(PRKEVENT ev,EVENT_TYPE t,BOOLEAN state){CHECK(ev && t==NotificationEvent);ev->Header.SignalState=state?1:0;}
+static PVOID NTAPI DvfsAllocPool2(POOL_FLAGS f,SIZE_T b,ULONG t){UNREFERENCED_PARAMETER(f);UNREFERENCED_PARAMETER(t);CHECK(b<=sizeof(dvfs_pool));memset(dvfs_pool,0,b);return dvfs_pool;}
+static VOID NTAPI DvfsFreePool(PVOID p,ULONG t){UNREFERENCED_PARAMETER(t);CHECK(p==dvfs_pool);}
+static PIRP NTAPI DvfsAllocIrp(CCHAR s,BOOLEAN q){UNREFERENCED_PARAMETER(q);PIRP irp=(PIRP)dvfs_irp_buf;memset(irp,0,sizeof(dvfs_irp_buf));irp->Type=IO_TYPE_IRP;irp->Size=(USHORT)sizeof(dvfs_irp_buf);irp->StackCount=s;irp->CurrentLocation=(CCHAR)(s+1);irp->Tail.Overlay.CurrentStackLocation=(PIO_STACK_LOCATION)(irp+1)+s;return irp;}
+static VOID NTAPI DvfsFreeIrp(PIRP irp){CHECK((PVOID)irp==dvfs_irp_buf);}
+static NTSTATUS NTAPI DvfsSetCompEx(PDEVICE_OBJECT d,PIRP irp,PIO_COMPLETION_ROUTINE cb,PVOID ctx,BOOLEAN s,BOOLEAN e,BOOLEAN c)
+{CHECK(d==&dvfs_owner);IoSetCompletionRoutine(irp,cb,ctx,s,e,c);return STATUS_SUCCESS;}
+static NTSTATUS NTAPI DvfsRefHandle(HANDLE h,ACCESS_MASK a,POBJECT_TYPE t,KPROCESSOR_MODE m,PVOID *o,POBJECT_HANDLE_INFORMATION i)
+{UNREFERENCED_PARAMETER(h);UNREFERENCED_PARAMETER(a);UNREFERENCED_PARAMETER(t);UNREFERENCED_PARAMETER(m);UNREFERENCED_PARAMETER(i);*o=&dvfs_file;return STATUS_SUCCESS;}
+static LONG_PTR FASTCALL DvfsRefObj(PVOID o){CHECK(o==&dvfs_file || o==&dvfs_owner);return 1;}
+static LONG_PTR FASTCALL DvfsDerefObj(PVOID o){CHECK(o==&dvfs_file || o==&dvfs_owner);return 0;}
+static PDEVICE_OBJECT NTAPI DvfsRelDev(PFILE_OBJECT fo){CHECK(fo==&dvfs_file);return &dvfs_dev;}
+static BOOLEAN NTAPI DvfsCancelIrp(PIRP irp){UNREFERENCED_PARAMETER(irp);return FALSE;}
+static NTSTATUS NTAPI DvfsRegPnp(IO_NOTIFICATION_EVENT_CATEGORY c,ULONG f,PVOID d,PDRIVER_OBJECT drv,PDRIVER_NOTIFICATION_CALLBACK_ROUTINE cb,PVOID ctx,PVOID *e)
+{UNREFERENCED_PARAMETER(c);UNREFERENCED_PARAMETER(f);UNREFERENCED_PARAMETER(d);UNREFERENCED_PARAMETER(drv);UNREFERENCED_PARAMETER(cb);UNREFERENCED_PARAMETER(ctx);*e=(PVOID)1;return STATUS_SUCCESS;}
+static NTSTATUS NTAPI DvfsUnregPnp(PVOID e){UNREFERENCED_PARAMETER(e);return STATUS_SUCCESS;}
+static NTSTATUS FASTCALL DvfsCallDriver(PDEVICE_OBJECT dev,PIRP irp)
 {
-    struct tg_gpu_pmic_request *op=in;
-    CHECK(file==(HANDLE)123 && !event && !apc && !ctx && code==TG_GPU_IOCTL_PMIC);
-    CHECK(in==out && in_bytes==sizeof(*op) && out_bytes==sizeof(*op));
+    PIO_STACK_LOCATION sp=IoGetNextIrpStackLocation(irp);
+    struct tg_gpu_pmic_request *op=irp->AssociatedIrp.SystemBuffer;
+    CHECK(model.level==PASSIVE_LEVEL && dev==&dvfs_dev && sp->Parameters.DeviceIoControl.IoControlCode==TG_GPU_IOCTL_PMIC);
     if(op->reg==TG_GPU_PMIC_QUERY_ADDRESS)op->value=0x33;
     else if(op->reg==TG_GPU_PMIC_QUERY_TEMP)op->value=model.temp;
     else if(op->reg==TG_GPU_PMIC_QUERY_EMC_KHZ)op->value=model.emc_khz;
+    else if(op->reg==TG_GPU_PMIC_QUERY_EMC_VOTE)op->value=model.emc_vote;
+    else if(op->reg==TG_GPU_PMIC_REPORT_EMC_ABI){CHECK(op->write==1 && op->value==TG_GPU_EMC_VOTE_ABI);}
+    else if(op->reg==TG_GPU_PMIC_REPORT_EMC_ACK){
+        CHECK(op->write==1 && model.gate_depth && !queue.Current.Engine && !engine.Channel.referenced);
+        CHECK(op->value==model.emc_vote && hardware.Clock.running &&
+              250000u+5000u*model.rail>=TG_GPU_EMC_VOTE_UV(op->value));
+        model.emc_ack=op->value;
+    }
+    else if(op->reg==TG_GPU_PMIC_REPORT_EMC_FAILURE){
+        CHECK(op->write==1 && op->value==model.emc_vote && model.gate_depth);
+        model.emc_failed=op->value;++model.emc_failures;
+    }
     else if(op->reg==TG_GPU_PMIC_QUERY_DVFS_POLICY)op->value=model.policy;
     else if(op->reg==TG_GPU_PMIC_REPORT_ABI){CHECK(op->write==1 && op->value==TG_GPU_LIVE_COUNTER_ABI);}
     else if(op->reg==TG_GPU_PMIC_REPORT_GPU_KHZ){CHECK(op->write==1);model.reported_khz=op->value;}
@@ -88,10 +125,10 @@ static NTSTATUS NTAPI Ioctl(HANDLE file,HANDLE event,PIO_APC_ROUTINE apc,PVOID c
             else op->value=model.rail;
         }
     }
-    iosb->Status=STATUS_SUCCESS;iosb->Information=sizeof(*op);return STATUS_SUCCESS;
+    irp->IoStatus.Status=STATUS_SUCCESS;irp->IoStatus.Information=sizeof(*op);
+    (VOID)sp->CompletionRoutine(dev,irp,sp->Context);
+    return STATUS_SUCCESS;
 }
-static NTSTATUS NTAPI WaitFile(HANDLE h,BOOLEAN alertable,PLARGE_INTEGER timeout)
-{UNREFERENCED_PARAMETER(h);UNREFERENCED_PARAMETER(alertable);UNREFERENCED_PARAMETER(timeout);return STATUS_SUCCESS;}
 static LARGE_INTEGER NTAPI QueryQpc(PLARGE_INTEGER freq)
 {
     LARGE_INTEGER out;
@@ -101,13 +138,17 @@ static LARGE_INTEGER NTAPI QueryQpc(PLARGE_INTEGER freq)
 static NTSTATUS NTAPI WaitObject(PVOID obj,KWAIT_REASON reason,KPROCESSOR_MODE mode,
     BOOLEAN alertable,PLARGE_INTEGER timeout)
 {
-    CHECK(obj==&queue.DispatchGate && reason==Executive && mode==KernelMode && !alertable && !timeout);
-    CHECK(model.level==PASSIVE_LEVEL);++model.gate_depth;return STATUS_SUCCESS;
+    CHECK(reason==Executive && mode==KernelMode && !alertable && model.level==PASSIVE_LEVEL);
+    if(timeout){CHECK(timeout->QuadPart==-10000000LL);return STATUS_SUCCESS;}
+    CHECK(obj==&queue.DispatchGate);
+    ++model.gate_depth;
+    if(model.stop_on_gate)hardware.Dvfs.Configured=0;
+    return STATUS_SUCCESS;
 }
 static LONG NTAPI ReleaseMutex(PRKMUTEX m,BOOLEAN wait)
 {CHECK(m==&queue.DispatchGate && !wait && model.gate_depth && model.level==PASSIVE_LEVEL);--model.gate_depth;return 0;}
 static LONG NTAPI SetEvent(PRKEVENT e,KPRIORITY prio,BOOLEAN wait)
-{CHECK(e==&queue.Wake && !prio && !wait);return 0;}
+{CHECK((e==&queue.Wake || ((PUCHAR)e>=dvfs_pool && (PUCHAR)e<dvfs_pool+sizeof(dvfs_pool))) && !prio && !wait);e->Header.SignalState=1;return 0;}
 static KIRQL NTAPI LockSpin(PKSPIN_LOCK l)
 {KIRQL old=model.level;CHECK(!*l);*l=1;model.level=DISPATCH_LEVEL;return old;}
 static VOID NTAPI UnlockSpin(PKSPIN_LOCK l,KIRQL old)
@@ -143,9 +184,22 @@ NTSTATUS (NTAPI * const __imp_ZwClose)(HANDLE)=CloseHandle;
 NTSTATUS (NTAPI * const __imp_ZwOpenKey)(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES)=OpenKey;
 NTSTATUS (NTAPI * const __imp_ZwQueryValueKey)(HANDLE,PUNICODE_STRING,KEY_VALUE_INFORMATION_CLASS,
     PVOID,ULONG,PULONG)=QueryValueKey;
-NTSTATUS (NTAPI * const __imp_ZwDeviceIoControlFile)(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,
-    ULONG,PVOID,ULONG,PVOID,ULONG)=Ioctl;
-NTSTATUS (NTAPI * const __imp_ZwWaitForSingleObject)(HANDLE,BOOLEAN,PLARGE_INTEGER)=WaitFile;
+NTSTATUS (NTAPI * const __imp_ObReferenceObjectByHandle)(HANDLE,ACCESS_MASK,POBJECT_TYPE,KPROCESSOR_MODE,PVOID *,POBJECT_HANDLE_INFORMATION)=DvfsRefHandle;
+LONG_PTR (FASTCALL * const __imp_ObfReferenceObject)(PVOID)=DvfsRefObj;
+LONG_PTR (FASTCALL * const __imp_ObfDereferenceObject)(PVOID)=DvfsDerefObj;
+PDEVICE_OBJECT (NTAPI * const __imp_IoGetRelatedDeviceObject)(PFILE_OBJECT)=DvfsRelDev;
+VOID (NTAPI * const __imp_KeInitializeSpinLock)(PKSPIN_LOCK)=DvfsInitSpin;
+VOID (NTAPI * const __imp_KeInitializeEvent)(PRKEVENT,EVENT_TYPE,BOOLEAN)=DvfsInitEvent;
+PVOID (NTAPI * const __imp_ExAllocatePool2)(POOL_FLAGS,SIZE_T,ULONG)=DvfsAllocPool2;
+VOID (NTAPI * const __imp_ExFreePoolWithTag)(PVOID,ULONG)=DvfsFreePool;
+PIRP (NTAPI * const __imp_IoAllocateIrp)(CCHAR,BOOLEAN)=DvfsAllocIrp;
+VOID (NTAPI * const __imp_IoFreeIrp)(PIRP)=DvfsFreeIrp;
+NTSTATUS (NTAPI * const __imp_IoSetCompletionRoutineEx)(PDEVICE_OBJECT,PIRP,PIO_COMPLETION_ROUTINE,PVOID,BOOLEAN,BOOLEAN,BOOLEAN)=DvfsSetCompEx;
+BOOLEAN (NTAPI * const __imp_IoCancelIrp)(PIRP)=DvfsCancelIrp;
+NTSTATUS (FASTCALL * const __imp_IofCallDriver)(PDEVICE_OBJECT,PIRP)=DvfsCallDriver;
+NTSTATUS (NTAPI * const __imp_IoRegisterPlugPlayNotification)(IO_NOTIFICATION_EVENT_CATEGORY,ULONG,PVOID,PDRIVER_OBJECT,
+    PDRIVER_NOTIFICATION_CALLBACK_ROUTINE,PVOID,PVOID *)=DvfsRegPnp;
+NTSTATUS (NTAPI * const __imp_IoUnregisterPlugPlayNotificationEx)(PVOID)=DvfsUnregPnp;
 LARGE_INTEGER (NTAPI * const __imp_KeQueryPerformanceCounter)(PLARGE_INTEGER)=QueryQpc;
 NTSTATUS (NTAPI * const __imp_KeWaitForSingleObject)(PVOID,KWAIT_REASON,KPROCESSOR_MODE,
     BOOLEAN,PLARGE_INTEGER)=WaitObject;
@@ -195,6 +249,8 @@ void start(void)
     model.rail=110;
     model.policy=TG_GPU_DVFS_POLICY_PACK(0,460800u,460800u,0);
 
+    dvfs_driver.DeviceObject=&dvfs_owner;
+    TgGpuSetPlatformDriverObject(&dvfs_driver);
     CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_SUCCESS);
     hardware.Io=TgGpuPlatformIo(&platform);
     hardware.Io.read32=GpuRead32;
@@ -288,6 +344,51 @@ void start(void)
     model.qpc_ticks+=2500000ULL;
     CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS);
     CHECK(hardware.Dvfs.Mode==TgGpuDvfsFixed && hardware.Clock.target_khz==460800u && hardware.Clock.rail_uv==800000u);
+
+    /* EMC acknowledgement is a real idle-boundary voltage transition, even
+     * during a rollback cooldown or when only the request generation changes. */
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,460800u,460800u,3);
+    model.emc_vote=(1u<<8)|98u; /* 740 mV */
+    model.qpc_ticks+=300000ULL;
+    hardware.Dvfs.CooldownUntilUs=model.qpc_ticks+2000000ULL;
+    engine.Channel.referenced=true;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && !model.emc_ack);
+    engine.Channel.referenced=false;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS);
+    CHECK(model.emc_ack==model.emc_vote && hardware.Clock.rail_uv==740000u);
+    model.emc_vote=(2u<<8)|98u;
+    model.emc_khz=3200000u;
+    model.qpc_ticks+=300000ULL;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_ack==model.emc_vote);
+    CHECK(hardware.Dvfs.EmcKhz==3200000u);
+    model.emc_khz=0; /* unavailable telemetry must not become 1600 MHz */
+    model.qpc_ticks+=300000ULL;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && hardware.Dvfs.EmcKhz==3200000u);
+    model.emc_khz=1600000u;
+    model.emc_vote=(3u<<8)|68u;
+    model.qpc_ticks+=300000ULL;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS);
+    CHECK(model.emc_ack==model.emc_vote && hardware.Clock.rail_uv==590000u);
+    model.emc_vote=(4u<<8)|98u;
+    model.qpc_ticks+=300000ULL;
+    model.stop_on_gate=true;
+    UINT writes_before_stop=model.pmic_writes;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS);
+    CHECK(!hardware.Dvfs.Configured && model.emc_ack!=model.emc_vote && model.pmic_writes==writes_before_stop);
+    model.stop_on_gate=false;
+    hardware.Dvfs.Configured=1;
+    hardware.Dvfs.CooldownUntilUs=0;
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,614400u,614400u,4);
+    model.fail_target_counter=TRUE;model.fail_khz=614400u;
+    model.qpc_ticks+=300000ULL;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && hardware.Clock.running);
+    CHECK(model.emc_failed==model.emc_vote && model.emc_failures==1 && model.emc_ack!=model.emc_vote);
+    CHECK(hardware.Clock.rail_uv==740000u); /* failed F-up retains the raised voltage */
+    model.fail_target_counter=FALSE;
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,460800u,460800u,5);
+    model.qpc_ticks+=2500000ULL;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS);
+    CHECK(model.emc_failures==1 && model.emc_ack!=model.emc_vote && hardware.Clock.rail_uv==590000u);
 
     /* Force fatal double counter loss -> STATUS_DEVICE_DATA_ERROR. */
     model.policy=TG_GPU_DVFS_POLICY_PACK(1,153600u,460800u,3);

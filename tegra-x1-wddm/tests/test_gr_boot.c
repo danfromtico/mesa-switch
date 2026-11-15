@@ -114,7 +114,7 @@ static void reset(struct model *m)
 static enum tg_gpu_gr_result run(struct model *m, struct tg_gpu_gr_image *image,
     struct tg_gpu_gr_netlist *netlist, struct tg_gpu_gr_status *s)
 {
-    struct tg_gpu_power_io io = {m,read32,write32,NULL,NULL,delay};
+    struct tg_gpu_power_io io = {m,read32,write32,NULL,NULL,delay, NULL};
     struct tg_gpu_power power = {.owned=true,.ready=true};
     struct tg_gpu_frontend_status frontend = {.stage=11};
     if (m->secure) {
@@ -192,7 +192,7 @@ int main(void)
     assert(tg_gpu_gr_boot_secure(NULL,NULL,NULL,NULL,NULL,0,0,NULL,NULL,&s)
            ==TG_GPU_GR_SECURITY_REQUIRED);
     {
-        struct tg_gpu_power_io io={&m,read32,write32,NULL,NULL,delay};
+        struct tg_gpu_power_io io={&m,read32,write32,NULL,NULL,delay, NULL};
         struct tg_gpu_power power={.owned=true,.ready=true};
         struct tg_gpu_frontend_status fe={.stage=11,.ltc_count=2};
         reset(&m);assert(run(&m,&image,&net,&s)==TG_GPU_GR_OK);

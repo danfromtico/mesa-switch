@@ -8,10 +8,29 @@ from pathlib import Path
 import shutil
 import subprocess
 import zipfile
+from build_display_acpi import validate_table
 
 
 def identity(path):
     return {"Length": path.stat().st_size, "Sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+
+
+def normalize_records(records):
+    if not isinstance(records, dict) or not records:
+        return None
+    normalized = {}
+    for name, record in records.items():
+        if (not isinstance(name, str) or not isinstance(record, dict) or
+                set(record) != {"Length", "Sha256"} or
+                not isinstance(record["Length"], int) or isinstance(record["Length"], bool) or
+                not isinstance(record["Sha256"], str) or len(record["Sha256"]) != 64):
+            return None
+        try:
+            int(record["Sha256"], 16)
+        except ValueError:
+            return None
+        normalized[name] = {"Length": record["Length"], "Sha256": record["Sha256"].lower()}
+    return normalized
 
 
 def checked_copy(source, target, expected):
@@ -41,8 +60,38 @@ def main():
     umd = json.loads((args.umd / "manifest.json").read_text())
     icd = json.loads((args.icd / "manifest.json").read_text())
     frozen = json.loads(args.frozen_manifest.read_text(encoding="utf-8-sig"))
-    if frozen["kmd_version"] != "0.1.0.158" or frozen["kmd"]["tegragpurender.sys"]["Sha256"] != "46d1757674ff156028ce5b729ba53671981ffab09948fcaf125751c46bb10088":
+    frozen_kmd = normalize_records(frozen.get("kmd"))
+    frozen_helpers = normalize_records(frozen.get("helpers"))
+    candidate = (json.loads((args.candidate_kmd / "manifest.json").read_text(encoding="utf-8-sig"))
+                 if args.candidate_kmd else None)
+    emc_stack = candidate is not None and candidate.get("variant") == "reviewed-dvfs-emc"
+    baseline_hash = ("e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e"
+                     if emc_stack else "46d1757674ff156028ce5b729ba53671981ffab09948fcaf125751c46bb10088")
+    if (frozen.get("kmd_version") != "0.1.0.158" or not frozen_kmd or not frozen_helpers or
+            frozen_kmd.get("tegragpurender.sys", {}).get("Sha256") != baseline_hash):
         raise ValueError("Only the retained visible-desktop .158 KMD is allowed")
+    frozen["kmd"] = frozen_kmd
+    frozen["helpers"] = frozen_helpers
+    if emc_stack:
+        # A plain firmware DSDT has FAN0 but omits the retained render GPU.
+        # Reject it before creating any installable package directory.
+        validate_table(args.helpers / "display158.aml", display=True, emc=True, actmon_irq=True)
+        cand_base_files = normalize_records(candidate.get("baseline_signed_files"))
+        cand_signed_files = normalize_records(candidate.get("signed_files"))
+        cand_source = candidate.get("source")
+        frozen_source = frozen.get("kmd_source")
+        if (args.native_boot or umd.get("sync_mode") != "gpu-bridge" or
+                not isinstance(frozen_source, str) or not frozen_source.strip() or
+                frozen_source.strip().lower().startswith("6c854e9f") or
+                candidate.get("base") != frozen_source or
+                not isinstance(cand_source, str) or not cand_source.strip() or
+                cand_source.strip().lower().startswith("6c854e9f") or
+                candidate.get("windows_signature_verified") is not True or
+                cand_base_files != frozen_kmd or
+                not cand_signed_files or set(cand_signed_files) != set(frozen_kmd) or
+                candidate.get("platform_fan_version") != 33 or
+                isinstance(candidate.get("platform_fan_version"), bool)):
+            raise ValueError("EMC requires the signed, matched .158/Fan33 ACTMON-IRQ logon stack and exact recovery package")
     args.out.mkdir(parents=True, exist_ok=False)
     manifest = {"scope": "tgd3d-vulkan trial; retain the active .158 after testing; recovery is manual",
                 "automatic_recovery": False,
@@ -59,8 +108,15 @@ def main():
         manifest["scope"] = "frozen .158 with automatic tgd3d enablement after logon; manual testing"
         manifest["startup_mode"] = "logon-default"
     kernel = args.kmd
-    if args.candidate_kmd:
-        candidate = json.loads((args.candidate_kmd / "manifest.json").read_text())
+    if emc_stack:
+        manifest.update(kmd_variant="reviewed-dvfs-emc", baseline_kmd=frozen_kmd,
+                        kmd=cand_signed_files, kmd_source=cand_source.strip(),
+                        platform_fan_version=candidate["platform_fan_version"], dvfs_integration=True,
+                        scope=".158 EMC integration; Handheld/85%; GPU bridge; logon+5s; physical acceptance pending")
+        kernel = args.candidate_kmd / "signed-package"
+        for name, record in frozen["kmd"].items():
+            checked_copy(args.kmd / name, args.out / "baseline-kmd" / name, record)
+    if args.candidate_kmd and not emc_stack:
         changed = {"tegra-x1-wddm/platform/t214_gr_context.c",
                    "tegra-x1-wddm/tests/test_gr_context.c"}
         vidpn_fix = candidate["variant"] == "shader-output-bit14-gpu460-vidpn"
@@ -110,7 +166,7 @@ def main():
                 raise ValueError("Candidate must restore its reviewed .158 clock baseline")
         if (candidate["base"] != frozen["kmd_source"] or
             candidate["variant"] not in ("shader-output-bit14", "shader-output-bit14-native-boot", "shader-output-bit14-gpu460", "shader-output-bit14-gpu460-vidpn") or
-            not candidate.get("windows_signature_verified") or
+            candidate.get("windows_signature_verified") is not True or
             set(candidate["changed_files"]) != changed):
             raise ValueError("Unreviewed kernel variant or unsigned artifact")
         manifest["baseline_kmd"] = frozen["kmd"]
@@ -161,7 +217,7 @@ def main():
         for name, sha in component["files"].items():
             src = directory / name
             record = identity(src)
-            if record["Sha256"] != sha:
+            if record["Sha256"].lower() != sha.lower():
                 raise ValueError(f"Built artifact differs: {src}")
             checked_copy(src, args.out / "app" / name, record)
             manifest["app"][name] = record
@@ -205,7 +261,7 @@ def main():
             if len(data) != record["Length"] or hashlib.sha256(data).hexdigest() != record["Sha256"]:
                 raise ValueError("Archive manifest differs: " + name)
     result = {"archive": str(archive.resolve()), **identity(archive), "files": len(manifest["files"]),
-              "umd_source": umd["mesa"], "icd_source": icd["mesa"], "kmd_source": frozen["kmd_source"]}
+              "umd_source": umd["mesa"], "icd_source": icd["mesa"], "kmd_source": manifest["kmd_source"]}
     archive.with_suffix(".delivery.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
 

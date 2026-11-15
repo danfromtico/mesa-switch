@@ -479,7 +479,7 @@ static void TestRoot(void)
     TG_GPU_ROOT_TABLE root = {0};
     DXGK_BUILDPAGINGBUFFER_FLUSHTLB flush = {.RootPageTableAddress={1,0,TG_GPU_TABLE_BYTES}};
     struct tlb_model model = {.Control=0x18000};
-    struct tg_gpu_power_io io = {&model,TlbRead,TlbWrite,NULL,NULL,TlbDelay};
+    struct tg_gpu_power_io io = {&model,TlbRead,TlbWrite,NULL,NULL,TlbDelay, NULL};
     struct tg_gpu_power power = {.owned=true,.ready=true};
     CHECK(TgGpuRootTableSize(&size)==PAGE_SIZE && size.NumberOfPte==512);
     size.NumberOfPte=513;
@@ -578,7 +578,7 @@ static void TestPagingBuffer(void)
     DXGKARG_BUILDPAGINGBUFFER args = {0}, flush = {0};
     UINT64 *entries = (UINT64 *)segment_bytes;
     struct tlb_model model = {.Control=0x18000,.ExpectedEntry=&entries[7],.Expected=UINT64_C(0x101700011)};
-    struct tg_gpu_power_io io = {&model,TlbRead,TlbWrite,NULL,NULL,TlbDelay};
+    struct tg_gpu_power_io io = {&model,TlbRead,TlbWrite,NULL,NULL,TlbDelay, NULL};
     struct tg_gpu_power power = {.owned=true,.ready=true};
     SIZE_T prefix, bytes, completed = 99;
     UINT saved, i;

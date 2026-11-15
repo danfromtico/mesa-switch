@@ -16,6 +16,10 @@ struct tg_gpu_power_io {
     bool (*read_pmic)(void *context, uint8_t address, uint8_t reg, uint8_t *value);
     bool (*write_pmic)(void *context, uint8_t address, uint8_t reg, uint8_t value);
     void (*delay_us)(void *context, uint32_t delay);
+    /* Called only after MC drain, clamp and reset have isolated the GPU.
+     * A shared rail owner may retain M1 for EMC instead of restoring it. */
+    bool (*release_pmic)(void *context, uint8_t address,
+                         uint8_t original_enable, uint8_t original_voltage);
 };
 
 enum tg_gpu_power_result {

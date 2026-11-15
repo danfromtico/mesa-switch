@@ -120,7 +120,7 @@ static void reset(struct model *m)
 static enum tg_gpu_gr_context_result run(struct model *m,struct tg_gpu_gr_netlist *net,
     struct tg_gpu_gr_context_status *s)
 {
-    struct tg_gpu_power_io io={m,read32,write32,NULL,NULL,delay};
+    struct tg_gpu_power_io io={m,read32,write32,NULL,NULL,delay, NULL};
     struct tg_gpu_power power={.owned=true,.ready=true};
     struct tg_gpu_frontend_status fe={.stage=11,.ltc_count=2};
     struct tg_gpu_gr_status gr={.stage=15,.context_bytes=0x13800};
@@ -156,7 +156,7 @@ int main(int argc,char **argv)
     assert(m.output_exception_writes==1 &&
            m.saved_warp_report_mask==(SM_WARP_REPORT_DEFAULT&~SM_OUT_OF_RANGE_ADDR));
     {
-        struct tg_gpu_power_io io={&m,read32,write32,NULL,NULL,delay};
+        struct tg_gpu_power_io io={&m,read32,write32,NULL,NULL,delay, NULL};
         struct tg_gpu_power power={.owned=true,.ready=true};
         struct tg_gpu_frontend_status fe={.stage=11,.ltc_count=2};
         struct tg_gpu_gr_work work={m.work,0x90000000,TG_GPU_GR_CHANNEL_WORK_BYTES};

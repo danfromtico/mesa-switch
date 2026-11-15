@@ -136,6 +136,15 @@ static void reset(void)
 
 static void test_hiopt_characterization(void)
 {
+    assert(tg_gpu_clock_emc_floor_uv(1583u,2233000u) == 600000u);
+    assert(tg_gpu_clock_emc_floor_uv(1584u,2233000u) == 590000u);
+    assert(tg_gpu_clock_emc_floor_uv(1694u,2466000u) == 630000u);
+    assert(tg_gpu_clock_emc_floor_uv(1695u,2466000u) == 590000u);
+    assert(tg_gpu_clock_emc_floor_uv(1583u,3200000u) == 760000u);
+    assert(tg_gpu_clock_emc_floor_uv(1659u,3200000u) == 740000u);
+    assert(tg_gpu_clock_emc_floor_uv(1700u,3200000u) == 720000u);
+    assert(tg_gpu_clock_emc_floor_uv(0u,1600000u) == UINT32_MAX);
+    assert(tg_gpu_clock_emc_floor_uv(1659u,3200001u) == UINT32_MAX);
     /* Reference Switch Lite fused GPU Speedo = 1659, captured Noble 4.9.140-l4t
      * NAPLL En - p4v2-AggressiveHighOPT (gspd_id=3) table.
      */
@@ -195,7 +204,7 @@ static void test_hiopt_characterization(void)
 static void test_full_oc_ladder(void)
 {
     struct tg_gpu_power p = {.owned=true,.ready=true,.pmic_address=0x33};
-    struct tg_gpu_power_io io = {NULL,read_reg,write_reg,read_pmic,write_pmic,delay};
+    struct tg_gpu_power_io io = {NULL,read_reg,write_reg,read_pmic,write_pmic,delay, NULL};
     struct tg_gpu_clock c = {0};
     reset(); gpu_speedo_fuse=1659u; target_khz=460800u;
     assert(tg_gpu_clock_start(&io,&p,460800u,&c)==TG_GPU_CLOCK_OK);
@@ -216,7 +225,7 @@ static void test_full_oc_ladder(void)
 static void test_live_dvfs_ordering_and_rollback(void)
 {
     struct tg_gpu_power p = {.owned = true, .ready = true, .pmic_address = 0x33};
-    struct tg_gpu_power_io io = {NULL, read_reg, write_reg, read_pmic, write_pmic, delay};
+    struct tg_gpu_power_io io = {NULL, read_reg, write_reg, read_pmic, write_pmic, delay, NULL};
     struct tg_gpu_clock c = {0};
 
     reset();
@@ -295,7 +304,7 @@ static void test_live_dvfs_ordering_and_rollback(void)
 static void test_partial_pmic_failure(void)
 {
     struct tg_gpu_power p = {.owned = true, .ready = true, .pmic_address = 0x33};
-    struct tg_gpu_power_io io = {NULL, read_reg, write_reg, read_pmic, write_pmic, delay};
+    struct tg_gpu_power_io io = {NULL, read_reg, write_reg, read_pmic, write_pmic, delay, NULL};
     struct tg_gpu_clock c = {0};
     reset();
     gpu_speedo_fuse = 1659u;
@@ -334,7 +343,7 @@ static void test_partial_pmic_failure(void)
 int main(void)
 {
     struct tg_gpu_power p = {.owned = true, .ready = true, .pmic_address = 0x33};
-    struct tg_gpu_power_io io = {NULL, read_reg, write_reg, read_pmic, write_pmic, delay};
+    struct tg_gpu_power_io io = {NULL, read_reg, write_reg, read_pmic, write_pmic, delay, NULL};
     struct tg_gpu_clock c = {0};
     assert(tg_gpu_clock_required_uv(0, TG_GPU_FIXED_KHZ) == UINT32_MAX);
     assert(tg_gpu_clock_required_uv(5001, TG_GPU_FIXED_KHZ) == UINT32_MAX);

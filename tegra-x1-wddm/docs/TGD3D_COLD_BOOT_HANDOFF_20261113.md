@@ -1,26 +1,327 @@
 # tgd3d 冷启动重启：探索记录与后续交接
 
+## Current round — 2026-11-15, Fan33 accepted by owner
+
+**Latest instructions:** publish the EMC/tools sources and tables, then implement
+landscape. The owner has finished manual testing and reported success ("完美").
+SSH/SFTP is disconnected; no remote commands will run until device access is
+explicitly returned. Do not let older authorization or baseline entries below
+supersede this section.
+
+| Item | Current result / next action |
+|---|---|
+| Installed pairing | Fan33/Core7/Battery14; WinX2500MHz boot request, original `.158`+bit14 KMD and UMD/ICD; bidirectional GPU bridge, login+5s, dynamic512MiB GPU budget |
+| RAM |204/1331.2/1600/2500MHz trained points; Noble ACTMON watermark IRQ plus CPU/display bandwidth floors; no manual RAM lock |
+| Native readiness | Boot16:11:46UTC, enabled16:14:58UTC;16:18:12UTC Code0, RAM1600MHz,532 completed transitions, IRQ flag256, all EMC/ACTMON/QoS errors0 |
+| Power choices | First-use/reset Handheld; independently restore last confirmed power/fan choices. Final check OC_CPU2/Cool2, charge85% (80–90% band) |
+| Desktop tools | Both responding in session1; saved startup, Joy-Con icon,50% Pacecar opacity, fresh battery net power and live RAM readback |
+| Acceptance | Owner manual test passed. No agent Fan33 workload, duration-specific stress, new landscape or vkcube acceptance claimed |
+| Next | Keep the accepted power/platform pairing; implement four-direction landscape display, then native Win32 vkcube. SC7 off; FPS/DX12 deferred |
+| Cleanup | Final optional cleanup command timed out with no receipt. Do not claim probe cleanup completed or reconnect only to check it; no local SSH/SFTP or load-test process remains |
+
+[Current component hashes, source references and remaining governor differences](DVFS_REVIEWED_20261114.md#noble-alignment--2026-11-15).
+Exact local receipts: `OUT/emc-runtime/noble-profile-tools-20261115/`, especially
+`fan33-install-final-parsed.json`, `fan33-bundle.json`, `ssh-disconnected.json`.
+Source manifests preserve the pre-commit build identities. Four unrelated Mesa
+`src/` resource/API-marker edits are not part of this EMC publication or installed
+UMD/ICD and require separate validation before any graphics update.
+
+## Historical records (later user instructions supersede holds below)
+
 更新：2026-11-14（本机时区；交付回执使用 UTC）。包含原生桌面、冷启动探索、旋转
 候选及后续审查；较早交接状态按时间保留，当前设备约束以本节为准。
 
-## 当前设备授权（2026-11-14 UTC）
+## 当前设备授权（2026-11-15 UTC）
 
-**22:53 UTC当前状态：DVFS/Pacecar已整合并完成短时模式0–6切换及七次固定7恢复，
-两个工具开机启动均在重启后验证。当前`.158 / Code0`，目录
+**最新用户修订：EMC本轮暂记测试通过；下一阶段为Tegra DC列扫描横屏，随后Win32原生vkcube。**
+保留`.158` KMD、bit14、当前修复ICD、双向GPU Fence、登录后约5秒启用tgd3d、Handheld1、85%充电限制和动态512MiB GPU预算。
+横屏采用Tegra DC列扫描，协调0／90／180／270度的源表面布局、pitch／offset、VidPN模式、VBlank锁存与真实翻转完成通知；物理面板保持720×1280，正常手持逻辑桌面为1280×720。
+以同机Noble新读回及微软WDDM2.6契约为参考，保留每台机器既有的面板／DSI时序；不得全局写死该OLED面板参数，不整体回退较新的显示／资源退休／Fence修正，不把GPU预旋转作为本阶段默认路径。
+四方向分别构建、独立审核及验收；无实屏证据时明确未验收。完成横屏后再验证原生vkcube；FPS、SC7和DX12继续后置，SC7默认关闭。
+本轮RAM实机记录：53次采样、204000→1331200→204000kHz，成功切频计数2→4，所有EMC／QoS／ACTMON错误为0、采样最大年龄171ms；Handheld→Console→Handheld成功，CPU错误0，GPU Code0，启动时间保持12:29:50。
+Fan28于12:33:06完成安装，DWM PID780加载原UMD／ICD；Pacecar与Switch Power在session1自动启动。1600000kHz启动读回已记录，持续高负载1600MHz尚未验证，不扩大本轮通过范围。
+回执见OUT `emc-runtime/fan28-native/installed-candidate-native.json`、`memory-load-summary.json`、`mode-switch-summary.json`。
+
+**最新设备限制：用户接回实机自己测试，明确停止SSH以免增加负载。本窗口只做本地源码、构建、审核和打包；用户交回前不连接、安装、重启或远程取样。**
+最后一条SSH连接在建立前超时，未执行拟议的身份补查及清理；已没有本窗口在运行的SSH／测试进程。Fan28安装任务已禁用，Fan26／Fan28暂存任务无触发器，实际负载已结束。
+临时CAT目录、上传ZIP、Bounded-EmcLoad脚本及三个已完成任务的清理留待重新授权设备操作；恢复包和已取回结果继续保留。首次独立NVK身份检查缺少GM20B实验设备开关而退出10：KMT LUID为`00000000000b4e07`，不能算Vulkan枚举通过；不据此认定桌面或EMC故障。
+应用目标卡片仍为进行中；现有目标工具只支持修改状态，不支持正文，自动控制Codex应用也被工具拒绝。因此这里是最新工作目标修订记录，不能声称已经修改了目标卡片正文。
+
+以下为按时间保留的历史记录，当前授权及路线以上述最新用户修订为准。
+
+**最新：用户明确“你可以链接switch测试”，本窗口设备操作授权已恢复。先读取实际系统／组合，再完成EMC匹配更新和验证；EMC通过后才安装、测试列扫描横屏。此次授权覆盖下面10:18的临时本地限制。**
+
+**12:28 UTC：Fan28匹配包完整预检通过，已发起一次安装任务及计划重启。尚无动态EMC通过结论。**
+10文件独立审核已经收尾；内核收尾事务未发现阻断问题，审核指出的包清单Fan27／门禁Fan28不一致已按一行建议diff修正。
+错误包未启动安装或重启，远端已清理。重建包在设备上同时通过Merge-Check和Check-Package，保留当前KMD／UMD／ICD／固件／ACPI与Fan26恢复组合。
+修正包ZIP SHA256为`b73a483a9bb9aa6bb9960ee4328396ddfa760ca292eae1a4621f19b5277c6bc6`；任务`Tgd3dEmcFan28Stage`只启动一次。
+审核新增全部部分归零组合、无回调／错误目标、失败回退及电压票保持控制通过，独立ARM64构建与本机构建逐字节相同；这不代替实机验收。
+审核CLI进程退出0，但聚合终结仍带quota error，按实际交付文件核验接受，未记录CLI成功。详见OUT `gemini-full-audit-20261115/post-mtc-zero-delta-20261115/DELIVERY-VERIFIED.json`。
+
+**12:11 UTC 实机最新：Fan27试验失败后，已恢复原Fan26／`.158`／Code0、Handheld1／85%。**
+计划重启后于11:49:53启动；Fan27先通过平台安装与1600000kHz读取，GPU原生启用后在设置Handheld的IOCTL `0x22a04c` 返回Win32错误21。
+安装器于11:53:03启动恢复，11:53:49再次启动，11:56:21完成恢复；第二次为恢复脚本发起，不能当成硬件看门狗重启的证据。Handheld未就绪的具体条件仍未确定。
+这次单独的变频后快照已定位EMC的真实-2：204000kHz后`grant/CPU_READ/CPU_WRITE`全为0，DIS16、RING1 53、RING2 12、其余ISO／LA／DRAM配置保持已准备值。
+当前恢复后的Fan26实际停在1331200kHz，仍是`QosError=-2`、成功计数0；用户看到RAM1331与此相符，不代表动态调频通过。
+原始回执及恢复证据见OUT `emc-runtime/fan27-native/native-diagnosis.json`、`recovered-state.json`、`cleanup-restored.json`。
+Fan27临时安装／恢复任务、签名暂存目录和远端ZIP已清理；保留匹配恢复包、运行日志及本地证据，没有重复安装同一失败候选。
+
+**Fan28本地修正已构建：只处理已确认的“变频后三项时钟配额全零”状态。**
+独立收尾回调要求pending事务、GET_RATE与目标一致、所有非时钟字段保持不变；先写grant并锁存验证，再写CPU配额并锁存验证。
+不修改DIS／RING／其他客户端；部分清零、无pending、其他字段变化继续失败。部分写入失败先清CPU并锁存，再恢复零grant并锁存，仍返回失败，不伪造完成。
+真实控制器调用链、三档所有组合、五个写失败点／丢写、shadow与immediate CPU模型、异常拒绝及ARM64构建通过。
+新增安装器policy设置前只读状态快照，用来定位21的来源；未放宽该失败处理。未签名SYS SHA256 `45238c88ddbc5af312bb9b79da1a94ad2a146b26825c1a3810f8496148730fb3`，
+签名SYS为`93bfb84a1c909ed7225bd6ef0841fe3622b69982e81f453542d3b7d93719860d`（89608字节）；尚未上机验收。10文件差异由同一Gemini会话独立补审。
+源码与控制见OUT `emc-runtime/post-mtc-zero/`，待安装包见`emc-runtime/fan28-native/`；显示KMD／UMD／ICD、固件与ACPI保持当前组合。
+
+**2026-11-15 10:18 UTC起：用户接回Switch切换Noble，明确要求先本地开发。停止SSH、安装、重启及所有实机操作，直到用户重新交回设备。Fan26的临时目录／无触发器暂存任务清理也后置；安装任务已完成并自行禁用，没有新发恢复任务。**
+
+**11:19 UTC 本地最新：Fan27新增切频全配对准入检查，修复已有较高父配额时“降得下去、升不回来”的边界。**
+旧源码在Ring295／300场景下允许先降到204MHz，新回归明确失败；修正后在任何MC寄存器／时钟写入前拒绝，Ring294边界及现有三档正常升降通过。
+对已有未知配额继续保留，不能因新增显示需求而挪用；Dis0／Ring274的8个额外配额保留后为Ring282，重复重绑不会继续增长。
+独立审查另指出静态AML名称校验与第二阶段prepare失败记录缺口，已处理；147项ACPI控制通过，生成的4839字节表仍为`50b68ede…`，显示配置未改变。
+本地ASan／UBSan、NDEBUG与ARM64构建通过，最新未签名SYS为`b30983b45b1ca3da21b54329657ad88d4ecd102f882b66482d0e67a78a48f202`（84992字节）。
+源码／控制在OUT `emc-runtime/qos-admission-review-fixes/`；此前两个未安装Fan27构建已被替代，不能误用旧产物打包。
+9文件最终报告／建议diff已收到并核验9/9源码哈希；CLI退出0，但聚合结果仍带与上一轮相同的quota ERROR，不把它记为CLI成功。
+4文件修正冻结为`gemini-full-audit-20261115/qos-admission-delta-20261115/`，按最新提示等待到11:43:28 UTC后补审，不改账号配置。
+动态EMC仍未实机验收，Fan26的post-clock -2具体字段仍未知。
+
+11:28 UTC：同一源码的Fan27 SYS已完成本地Authenticode签名与校验，签名后88072字节，
+SHA256 `61bdd10d0fd90d2388e7e64ba198af0c59969e42ceefcc6ff2bab90053c264af`；INF为`83ecca22d16d847c36e5509ba2e403139ad255cd4257c0856a91466790ad06e3`。
+尚未生成CAT／匹配安装恢复包，尚未安装，不是可发布的完整驱动包。回执见OUT `emc-runtime/qos-admission-review-fixes/signed-component.json`。
+固定Hekate源码与Switchroot bootstack文档（`5a3fec9cf3a19dab20e4868cf4a872e208ae3df8`）已核对：公开Minerva针对T210，B01由独立BPMP固件／MTC表处理，后两者源码未公开。
+本地WinX仅包含MRQ_CLK调用端，不能据其成功返回推断BPMP对MC字段的具体写入；没有据此修改固件或猜测实机-2的根因。
+
+**侧聊天新交接：EMC完成后，横屏改回Tegra DC列扫描路径，按每台机器既有面板配置工作。**
+侧聊天报告同机OLED在Noble24.04.5／内核#149实屏正常，两次Window A读回为WIN_OPTIONS `0x40010011`、stride `0x1400`、H_OFFSET `0x13ff`、V_OFFSET0，物理720×1280／60Hz。
+这覆盖较早Noble2024内核SCAN_COLUMN=0的观察，但不能替代Windows实屏验收，也不能把该机DSI参数全局写死。
+Windows隔离探针回执Stages7／ProbeStatus0／RestoreStatus0；逐行图获用户确认，列扫描的“纯绿”反馈后来有疑问，仍记实屏未确认。
+DWM两张图的回执为DwmFlush0，用户确认完整；独立D3D11第一次Present为`0x887A0005`，不算呈现通过。
+侧聊天已于11:00:58恢复原KMD `e95287cb…`，记录Code0，后续报告tgd3d UMD `4c8a13d0…`及默认启动任务正常、临时项已清理。
+本窗口未据此恢复设备操作。交接与原始文件哈希见OUT `emc-runtime/qos-admission-review-fixes/column-scan-handoff.json`。
+当前源码中，DC提交会清除列扫描位，KMD主表面只接收竖屏布局，tgd3d则要求runtime走旋转Blt；三处必须协调改动，不能只恢复一个寄存器位或整批回退旧提交。
+后续还要把旋转布局纳入锁存完成比较，并单独核对列扫描取数的EMC带宽条件。只完成本地源码定位，显示源码尚未改动；7文件哈希和微软契约见OUT `dc-column-scan-restoration-20261115/source-audit.json`。
+
+执行方式按用户最新要求自主判断；原目标中已被用户撤销的技能要求不再适用。
+
+**最新工作顺序：EMC内存调频修复 → 横屏上屏 → Win32原生vkcube。Gemini并行接续NVK Windows、Zink/OpenGL与已有DXVK8–11工作；DX12与SC7后置，SC7继续默认关闭。**
+**07:20 UTC 实机确认：Fan21/Core7/Battery13与新版KMD/UMD/ICD、固件和ACPI已整套安装。用户要求保留本组合为工作基线，修复RAM调频后再升级，不回退旧版。两个应用已在本次实际重启后自动运行；FPS暂缓。**
+
+**07:58 UTC 后续：Fan22候选已安装，07:53:25计划启动后于07:56:40完成原生启用，GPU Code0，DWM PID816加载原UMD/ICD。显示、固件、ACPI均未改。Fan21仍是已冻结的恢复组合；动态EMC尚未验收，不把Fan22标成调频修复完成。**
+这次已明确枚举失败位置：固件MRQ32返回204000/1331200/1600000kHz三个有效电压点，电压全部1100mV，
+在驱动1050mV上限校验处被拒绝，尚未调用ROUND_RATE。允许重复频点并未解决当前故障；下一步核对
+T210B01的Linux电压归属和固件训练档位，不能仅抬高电压上限来让检查通过。
+回执及完整数据见OUT `emc-runtime/emc-enumeration/phase-6.json`、`enumeration-diagnosis.json`。
+
+**08:18 UTC 最新状态：Fan23于08:11:31原生启用，启动时间08:08:22，DWM PID676加载原UMD/ICD，四设备Code0。**
+Mariko DVB选择逻辑修正后，真实枚举204000/1331200/1600000kHz三档，EnumerationError0、ACTMON有效。
+剩余失败为显示带宽QoS检查返回-2；尚未成功切换频率，TransitionCount0，RAM保持1600000kHz，不能记为动态调频通过。
+原始MRQ32诊断值已由Fan23清除；新数据见OUT `emc-runtime/mariko-dvb/phase-5.json`及`installed-candidate-native.json`。
+用户曾手动选择Perf_OC_All6并关闭工具，随后明确交回设备控制；08:18已恢复Handheld1。
+桌面新增用户要求的“打开硬件工具.cmd”，普通交互令牌实际运行退出0，两个工具运行于session1，前后模式均1、充电85%。
+源码位于WindowsDrivers `app/SwitchPowerTray/Open-HardwareTools.cmd`；按用户要求等EMC修复结束一起提交推送，不单独push。
+
+**08:59 UTC 更新：Fan24第一次安装因显示配置保存工具的完成通知超时而中止，未启用原生GPU。08:53:44已恢复Fan23／当前`.158`，Code0、Handheld1和85%充电限制核对通过。**
+显示工具实际输出status0并写入1192字节快照；其JSON约28秒后落盘，安装器只等25秒便停止任务，留下0字节退出回执。
+`Prepare.ps1`现改为临时文件写完后重命名发布退出码，拒绝空／畸形回执，等待90秒、任务限时100秒，并分别报告超时与非零退出码。
+直接运行同一生产代码块的原生控制于08:58:00通过：5.1089秒、退出0、快照1192字节，任务已清理；显示只读状态仍为720×1280／60Hz。
+这不是EMC／GPU验收。Fan24七文件独立审核已收尾PASS；新增Prepare一文件另行补审，不阻塞已授权部署。
+修正安装包见OUT `emc-runtime/snapshot-completion/matched-bundle.json`，Fan24 SYS仍为`137abbfb…`；KMD／UMD／ICD／固件／ACPI未改。
+诊断目标仍是首次QoS prepare的17个寄存器，成功定位并修正契约后删除临时快照代码；尚无调频成功记录。
+桌面启动脚本的独立复核已验收；两条可选加固建议不影响当前交互式桌面用途，处置见OUT `emc-runtime/desktop-launcher/review-disposition.json`。
+
+**09:05 UTC 实机更新：修正完成回执后的Fan24于09:04:38完成原生启用，启动时间09:01:19，DWM PID780实际加载当前UMD／ICD；四设备Code0，Handheld1／85%，两个工具随登录运行。**
+17个PTSA只读值已明确唯一失败谓词：`MC_PTSA_GRANT_DECREMENT=0`；DIS/RING/CPU及其它已读PTSA rate也全为0，
+DIS/RING min/max为0x3f，LA为0x001e001e，DRAM配置0x9160a00d的低两位确认为LPDDR4。
+这说明旧实现“固件已经初始化grant/CPU PTSA”的前提在当前启动链不成立；不能删掉非零校验后直接SET_RATE。
+参考固定Switchroot `76e6d489…` 的独立`tegra_latency_allowance_init → t21x_init_ptsa`和Hekate `8e1392df…`的MC up/down寄存器更新顺序。
+WindowsDrivers新`emc_ptsa.h`已移植LPDDR4的grant/CPU速率计算，保留上游MHz截断和DDA取整；ASan/UBSan及逐位参考对照通过。
+**该计算尚未接入MMIO，动态EMC仍未通过**；需要完成参与客户端初始化、ACPI授权范围、时序锁存与变频前后归属，再独立复核及上机。
+当前Fan24是定位用候选，不是调频已完成的发布基线；失败快照代码在契约修正实测后移除。安装暂存任务／CAT临时目录已清理，保留匹配恢复包。
+数据见OUT `emc-runtime/snapshot-completion/qos-diagnosis.json`、`installed-native.json`和`emc-runtime/ptsa-init/clock-port.json`。
+
+后续本地实现已补上24组客户端的PTSA配置计划及事务函数：先验证复位状态（包括未改RATE的其它客户端），
+按上游先写grant并触发MC时序锁存，再配置父队列和客户端；保留保留位，逐项读回，任何部分写入失败都恢复完整原值并区分回退失败。
+ASan／UBSan控制覆盖全部60个写入失败点、丢写、混合状态拒绝及回退失败。09:54已完成WDF映射与QoS调用链接入、最终ARM64构建及组合控制；这些仍只是主机控制与构建通过。
+同机Noble启动参数已确认`latency_allowance.ptsa_rework`。Minerva up/down表不包含显示A的DC_0／scaled LA，
+因此保留它们的严格值比较；此前关于显示LA会随该表更新的初步推断已撤回，不据此放宽检查。
+当前资源、复核及实机步骤见OUT `emc-runtime/ptsa-init/WORK-IN-PROGRESS.json`。
+ACPI工具已补FAN0／完整设备列表重编译比较及清单文件覆盖保护，正向重编译与当前4106字节AML逐字节相同，负向控制拒绝损坏FAN和增加设备；
+完整98项Memory32Fixed及权限验证已接入；98项权限逐一破坏、错误FAN范围／状态、普通固件表及旧表的负向控制通过。最终13文件增量复核仍在进行，不能把工具检查记为EMC硬件通过。
+
+**09:58 UTC Fan25部署进度：SYS／INF／CAT原生签名校验通过，88文件匹配包与实际Fan24恢复身份核对通过；09:58:41只启动了一次安装任务，09:58:58记录为BackingUp，随后SSH在计划重启期间断开。尚未确认Fan25安装或调频成功。**
+Fan25 SYS为`7df099f5a470c55956fc43aecd8f6be589e9b2d850ec5582e4c9dbe954aa75bc`，显示覆盖AML为4839字节、
+`50b68ede51d6a60cf97281fe4e7930a8254db911fce2f5e6d9530cfa711b3c3d`；只替换FAN0资源，保留其余24个显示／平台设备。
+当前恢复目标是实装Fan24 `137abbfb…`与相同`.158`图形组合，不是早期Fan21／Fan23。完整包、签名、源码冻结与回执见OUT `emc-runtime/ptsa-init/`。
+PTSA算术审核的显式策略与NDEBUG测试两项建议已落实；后续60写事务／WDF／ACPI不冒用该算术审核的覆盖结果，另有13文件独立审核在途。
+
+**10:03 UTC Fan25结果：09:59:44计划启动，10:03:00完成原生启用，DWM492加载原UMD／ICD，四设备Code0；EMC初始化读回返回-4，事务回退未返回-5，尚未SET_RATE，RAM1600000kHz、TransitionCount0。调频验收失败。**
+发现主代码在grant写入与MC_TIMING_CONTROL之间提前比较读回，未覆盖影子值在锁存前不可见的情形。
+Fan26改为完成该写入对后、任何客户端获得非零credit之前验证grant。旧顺序在新增影子寄存器模型中明确失败，新顺序与原立即读回模型、全部60个写失败回退、丢写控制通过；ARM64已构建。
+这尚不能证明Fan25的全部实机失败都由该顺序引起：Fan25没有保存具体失败offset。Fan26只记录既有必需读回的首次不匹配offset／expected／observed三个DWORD，不额外扫描MMIO；与原临时快照在确认修复后一起删除。
+当前保留Fan25的安全拒绝状态，未追加重启或重跑同一失败候选；Fan26进入签名打包，资料见OUT `emc-runtime/ptsa-latch/`。
+
+**10:17 UTC Fan26结果：10:13:09计划启动，10:16:24完成原生启用，DWM772加载原UMD／ICD，Fan26／GPU Code0。BPMP实际读回已经由1600000变为204000kHz，但变频后QoS检查返回-2并锁存，TransitionCount仍为0。**
+因此“频率已改变”通过，“完整动态调频”未通过；这轮不能记为升降频修复完成。用户随后确认画面似乎正常、Pacecar显示约200MHz，切换模式仍约200MHz，与驱动暂停后续调频相符。
+Fan26没有bootstrap首次不匹配记录，说明锁存修正已越过初始化检查；当前缺少的是变频后具体哪个QoS字段不合法，不能直接认定为grant被BPMP清零。
+保留现有严格检查；本地补齐按真实频点计算的预算及失败读回。Gemini概念审核因额度耗尽中断，其scratch建议已发现旧固定预算在204MHz的grant下超过100%：DIS216×4≥589，RING571×2≥589。
+该建议未正式交付、未验收，并且仍含旧策略／锁存实现，不能整份覆盖当前源码。它只模拟“固件更新正确值”或“固件保持旧值”，未覆盖本轮实际-2的未知字段，不能用其模型PASS冒充本轮故障已修复。
+实机记录见OUT `emc-runtime/ptsa-latch/phase-3.json`及`user-handoff-noble.json`。三个Gemini会话均因quota ERROR停止，最早10:28:32 UTC后再恢复；优先收尾最新源码审核，不重新全量探索。
+
+10:27本地进度：新增`emc_qos_budget.h`按实际训练频点计算DDA预算，三档得到display16、RING53／232／274，并拒绝达到100%的过量预留；未将该规划器接入WDF切频，因为Windows私有BPMP在切换后的寄存器归属仍未证明。
+QoS结构单独保存必需的变频后读回，失败时一次记录，不再用初始化前的17字快照解释变频后的-2。控制覆盖grant为0、另一种CPU字段越界和读中断清零，避免把不同协议失败误认成同一根因。
+本地Fan27 ARM64构建及相关ASan／UBSan控制通过；**未签名、未安装，未解决或验收全部EMC同步问题**。用户仍持有设备，本窗口没有恢复SSH。代码与待办见OUT `emc-runtime/post-clock-local/status.json`。
+
+**11:05 UTC 本地后续（覆盖上一段“规划器未接入”的实现状态，实机结论不变）：频点预算、clock配额事务和WDF调用链已经接入。**
+降频前先降低CPU配额并锁存，随后降低父配额，再降低grant并锁存；升频前先提供父配额余量，确认实际升频后再完成grant／CPU项。按真实三档检查全部切换组合，不使用虚构训练频率。
+事务保存保留位，在写入前检验中间状态，部分写入失败按相反方向完整恢复；读回不符与回退失败分开。整体控制直接调用生产`sw_emc_set_rate → QoS → PTSA`，验证两种已知固件行为（保持已准备值／写入正确目标值）及三类未知字段错误。
+**该实现仍拒绝未知或零grant的变频后结果，并保留失败读回与电压要求；没有据此声称解决Fan26的实际-2。** 正常／NDEBUG的ASan／UBSan、每个部分写入失败点及ARM64完整驱动构建通过；未签名、未安装。
+Gemini的15文件报告、覆盖清单和建议diff已收取并核验哈希；CLI终端仍带quota ERROR，不把CLI记为成功。F1的预算与时序缺口在后续源码中推进；F2首次检查失败清prepared、F5不可删除的CHECK控制已处理；F3补QosMap重复／只读资源保护；F4补静态AML作用域及资源流边界。
+主窗口额外修正了建议解析器仍可接受root Device／嵌套相对_SB的问题；98项权限翻转及9类异常输入全部拒绝，IASL重编译仍与已安装4839字节表`50b68ede…`完全一致，没有改变显示表。
+当前本地源码与控制见OUT `emc-runtime/qos-clock-integration/`；9文件新差异于11:05交给同一Gemini会话补审，目录`gemini-full-audit-20261115/qos-clock-delta-20261115/`。NVK／Zink／既有DXVK任务于11:09恢复原整理会话，先收敛现有52文件改动和多架构构建，不扩展DX12或操作设备。
+
+| 项目 | 当前结论 | 仍待完成 |
+|---|---|---|
+| Switch Power | SHA256 `b4dc8feab13e13cf84ebac1addc57d1d0d1f14777f929775cd128cd9957ee1da`；07:06:47启动后自动运行于session1，登录任务启用；Console→Handheld实际切换断言通过 | 充电电流效果另需在相应供电和电量条件下验证 |
+| Pacecar | SHA256 `fdf4949e1a78934e259218a176f471516b8ab8d2baf3b3114ecdee43864d5469`；同次启动自动运行于session1，登录任务启用；原生采样返回 `ram_khz=1600000`、valid127、error0 | FPS按用户要求暂缓；动态RAM随EMC修复验证 |
+| 审核 | 9文件最终报告已核验；准入／解析器／失败记录问题已处理，4文件修正已冻结 | 补审按额度提示排队；实机条件未满足 |
+| EMC | Fan26实际204MHz、post-QoS=-2／完整成功0次；本地Fan27已接入预算／配额事务及所有升频组合准入，控制与ARM64构建通过 | 未安装最新候选；动态EMC仍未验收，未知实机字段继续拒绝。等待用户交回设备后明确post-clock契约 |
+| 横屏／SC7 | 接收新版Noble同机列扫描证据；Windows列扫描实屏仍未确认；SC7默认关闭 | EMC完成后按现有面板时序接回DC列扫描并验收，再vkcube；SC7后置 |
+
+当前组合的完整哈希、安装回执、源代码位置与未完成项见OUT `tgd3d-current-baseline.json`的active记录和`emc-runtime/progress.json`。
+`emc-runtime/fan21/installed-working-baseline.json`只保留最初冻结组合；Fan25包恢复目标为实际Fan24 `137abbfb…`，不能把Fan21或Fan23冒充本轮恢复目标。
+KMD `.158` 为 `e95287cb…`、Core7为`54c5529e…`、Battery13为`b2f53b48…`；UMD `4c8a13d0…`与ICD `95b97df4…`不变。
+固件为`d1387482…`，显示ACPI为4106字节`caeeb93b…`。Handheld1、85%充电档、双向Fence及登录后启用保留。
+安装/恢复任务已禁用，默认登录启用任务仍启用，没有待执行回退。
+显示状态工具只读返回当前及保存模式720×1280、0°、60Hz；该工具未输出LUID，本轮LUID尚未补录，不能用上述结果代替实屏横屏验收。
+Console/Handheld第二次控制的实际字段断言通过，但输出用Select-Object直接处理Hashtable导致摘要字段null；
+原始回执已标注该工具格式问题，不能把null当成设备值。随后完整读回确认Handheld及目标上限。
+
+用户随后取消了Gemini的DX1–12图形兼容及其缓存扩展任务，要求删除本轮任务和隔离源码/产物。
+任务已停止、隔离工作树及任务目录已删除，没有兼容改动合入当前主基线；不得自动恢复此任务。
+最小取消回执见OUT `cancelled-dx1-12-20261115.json`。该自研前端任务不恢复。
+用户随后另行授权接续NVK Windows、Zink/OpenGL和旧DXVK8–11工作，DX12后置；新会话先按要求停止，
+主窗口核对17项来源提交及旧验收后整理统一交接，再恢复同一新会话。完整范围和提交矩阵见OUT
+`delegation-nvk-windows-20261115/CONSOLIDATED-HANDOFF.txt`及`INVENTORY.json`；禁止侧任务操作实机或整批合并main。
+
+以下06:25及更早安装过程保留为历史记录；“旧驱动”“待安装”和“待审核”不覆盖上面的当前状态。
+
+应用更新回执：OUT `emc-runtime/review-fixes/desktop-tools-reviewed-installed.json` 与
+`desktop-tools-reviewed-final-readback.json`。05:15第一次请求SSH断开；05:19确认没有安装任务／回执且仍为旧应用，
+之后才重新发出更新。05:20:53–05:21:01安装完成，退出0；没有安装驱动、改电源模式或请求重启。
+备份保留在设备 `C:\Users\ruje\AppData\Local\SwitchWOA\Backups\desktop-tools-20261115-052054-856`。
+临时更新任务及未执行的旧应用暂存包已清理，没有创建桌面快捷方式。06:09:34恢复重启后，06:24读回确认两个应用和任务均在运行；凭据为OUT `emc-runtime/review-fixes/lifecycle/current-after-resume.json`及`matched-recovery-status.json`。
+
+06:06首次匹配安装错误地把普通固件DSDT作为显示覆盖表，缺少`SWOA0F01`设备，安装在平台驱动更新前被门控检查阻断。06:12已恢复原固件、ACPI、驱动和Handheld/85%。该包标记禁止重装。修正工具只把新平台FAN0资源合入原显示覆盖表，保留其余24个设备；结果4094字节、SHA256 `94ce1cbe308e35d1b54d2abaf13f88f95a3bdf9e67313feffb087da4084ba94f`。错误的普通DSDT已被负向控制证明会在创建包前拒绝。修正包为OUT `emc-runtime/review-fixes/lifecycle/matched-emc-acpi-20261115-0627`；不得把已上传和签名通过当作安装通过。
+
+本轮生命周期补丁位于OUT `emc-runtime/review-fixes/lifecycle`；独立复核目录
+`gemini-full-audit-20261115/lifecycle-closure-20261115`，会话`e661211e-a61b-4876-9eb3-b363841db7b2`。
+控制覆盖延迟IRP完成晚于Close、完成例程注册失败、PnP移除发生在句柄发布期间、重连索取电源轨失败，
+以及未隔离GPU不得交还电源轨；EMC停机控制使用实际函数和WDF/BPMP替身，检查读回及释放失败传播。
+这些均不是GPU／DRAM硬件验收；生命周期复核及最终签名已完成，当前待审仅为新增ACPI打包修正。不能使用旧的作废签名包。
+
+以下04:31及更早内容保留为历史记录，涉及“尚未安装”的应用状态以上表为准。
+
+**04:31 UTC 收尾进度（不覆盖下列实机基线）：** 1285项全量和81项增量审核均已收到并校验交付；
+本轮23项修正仍在同一Gemini会话复核，目录`gemini-full-audit-20261115/review-fixes-20261115-0404`。
+新版Pacecar ARM64为`fdf4949e1a78934e259218a176f471516b8ab8d2baf3b3114ecdee43864d5469`，
+配对Switch Power为`b4dc8feab13e13cf84ebac1addc57d1d0d1f14777f929775cd128cd9957ee1da`；
+更新包已上传并核对四个成员，目录`C:\ProgramData\SwitchWOA\GpuUpdate\desktop-tools-review-20261115`，
+**尚未执行安装、重启或电源模式变更**。04:14读回仍为旧Power PID6136、Pacecar任务Disabled且进程缺失。
+
+为避免继续使用OUT中临时修改的旧脚本，canonical部署链补齐Core驱动备份和恢复顺序，
+取消Fan13/固定7恢复判据、保留登录启用任务、原生启用后明确应用Handheld/85%。
+这3文件已另交Gemini会话`e661211e-a61b-4876-9eb3-b363841db7b2`审核，目录`deployment-delta-20261115-0422`。
+后续发现GPU打包/Prepare/Common仍绑定旧哈希和Fan13，已新增`reviewed-dvfs-emc`匹配包路径，
+固定回退当前`3ada55a4…`完整SYS身份，只允许Fan20、双向Fence和登录启动；新增3文件冻结于
+`deployment-helper-delta-20261115`，已单独并行交Gemini补审这3个新文件，不重复此前范围。Python语法及全部新增PS的Windows原生Parser通过；
+直接冷启动、未核验签名和错误Fan版本的打包输入均被拒绝且未创建输出目录。解析临时文件已删除。
+
+当前最新未安装构建：Fan20 `226932c4…`、ICD `95b97df4…`、固件`b98d0faf…`、
+DSDT `3d6b8678…`、M06 UMD `4c8a13d0…`；完整哈希和验证结果见OUT的`emc-runtime/progress.json`
+及`emc-runtime/review-fixes`。GPU初始EMC电压保留和异步I/O/PnP生命周期仍在收尾，
+不要使用作废的`catalog-20261115-0204`，也不要把本地构建或包已上传写成安装/开机自启验收通过。
+04:34已核对实机现存ARM64 `Pacecar.Sensors.exe`：`60966d1351aeb7f91fe3ce207877a948cb7272181659fe5f4db9e1f4a273a065`，
+与已安装整合包清单一致；采集进程当前未运行。FPS真实事件/节拍及界面仍需随更新验收，不能把组件存在当作功能通过。
+
+**最新约束与进度（2026-11-15 UTC）：** 正常启动、部署及恢复均为 Handheld（模式1）；
+充电默认85%档（80–90%迟滞）。00:12实机读回该档有效。用户随后再次报告Pacecar未随重启恢复，
+因此旧的自启动通过记录不能代表当前问题已解决。源码已定位并修正Pacecar启动时用默认false
+反向禁用登录任务的问题，ARM64构建通过，新的实际登录验证尚未进行。
+03:22 UTC只读SSH再次确认：Switch Power PID6136及其登录任务正在运行；
+Pacecar登录任务为Disabled，按`Pacecar*`查找也没有运行进程。两个工具尚未完成最终交付，
+EMC动态调频候选仍未安装；不得将旧的一次自启动通过记录当作当前已经解决。
+
+首轮审核的M-06已按建议单独修复：动态纹理Unmap在无法创建命令时释放尚未提交的上传Slice。
+x64/ARM64构建及真实DDI CPU控制通过；使用旧ResourceUnmap运行新控制会因上传Slice未释放而失败，
+修正后通过。该控制不执行GPU；修正未安装，不宣称它已解释横屏或异常重启。
+完整源码哈希、构建及反向控制存于OUT的`resource-unmap-audit/umd`，新增控制已冻结待补审。
+WinX离线安装脚本也已应用首轮审核的单行SWOA0601重绑修正，与WindowsDrivers副本保持一致。
+
+Antigravity CLI / Gemini 4 Carbon High 正在审核本窗口全部现行自研及修改代码，冻结清单1285项，
+包括相对固定上游的所有Mesa差异、WindowsDrivers、WinX、私人Pacecar和部署工具；不只审本轮diff。
+会话 `7f9f6a7f-3fd0-404b-8da3-f6444071c32a`；清单、逐文件进度和建议补丁位于OUT的
+`gemini-full-audit-20261115`。未改动的上游Mesa排除；02:11覆盖表已记录1211项已审、
+40项上下文、34项二进制资产、0项未审，首轮于02:44:57 UTC正常完成并交付报告和六份diff；主窗口已核对清单、快照与产物。
+独立审计交付已收到，建议补丁尚未整批采用，错误处理/电源/指标真实性等建议需分别核实。
+用户追加规则：以后每轮新增代码也由Gemini独立审核一次，相同源码版本不重复，修改后补审差异；
+已记录于根目录AGENTS.md。本轮81项新增EMC/ACTMON/QoS及修正于02:48:28 UTC在同一会话启动增量审核，
+快照`followup-20261115-022016`；原首轮报告、快照和补丁保持不变。
+
+EMC运行期BPMP读回、CPU/Core/GPU电压协同已进入本地实现：新GPU电压请求在空闲边界确认，
+失败明确拒绝，GPU隔离后仍保留RAM所需的共享电压；未知RAM读数不再冒充启动1600MHz。
+ACTMON独立采样定时器、负载选档及显示带宽保护已接入，原生GPU所有权及电压确认就绪后才调用
+SET_RATE；频率和QoS读回成功后才降低电压。相关控制与ARM64构建通过，4份SYS/CAT已签名，
+Windows签名校验22个成员全部通过。结果存于OUT的`emc-runtime`；增量独立审核和实机验证待做，
+这批修改没有安装或推送。01:55 SSH读回`.158 / Code0`，Switch Power在运行，Pacecar未运行。
+实机仍为下述Fan19/Battery12及原KMD/UMD/ICD组合。
+03:33增量审核发现并由主窗口用固定Switchroot源码确认：未安装候选误将ACTMON 119映射到CAR U组。
+驱动和ACPI已改为V组，状态读取也改用正确的0x358/0x360寄存器；ARM64编译和地址控制通过，
+旧地址在同一控制中失败。`emc-runtime/catalog-20261115-0204`已放置`INSTALL-BLOCKED.json`，
+禁止继续安装旧签名包。源码MUX采用固定上游的bits31:30/parent3，未采纳未经证实的三位MUX建议。
+新增修正及剩余电源生命周期/API分类问题需完成复核后再出包，不能把81项覆盖表完整当作交付结束。
+SC7交付继续后置、默认关闭；待EMC/Pacecar实机启动验证完成后统一更新表格并按仓库各推送一次。
+
+**23:49 UTC历史实机记录：用户指定以后正常部署、测试及恢复均以 Handheld（模式1）为基线，
+固定7不再作为菜单选项或正常默认。实际读回模式1，CPU DFLL和GPU动态策略已启用。
+此前模式0–6短时切换通过。本轮两个工具改为每用户交互登录任务，23:46:28 UTC的一次
+计划重启后均已自动运行于session1，并读回Handheld；双向Fence保持开启。当前`.158 / Code0`，目录
 `C:\ProgramData\SwitchWOA\GpuUpdate\tgd3d-b1a77251-20261115-051506`，KMD
 `3ada55a42a3a116d41951a452893b2c09e3f01cc440e67ffd4b8b06b6d5c7918`，UMD
 `8d7da8c1a3d9e9556a8e88b2b8bef67956dcf588c980d763e5f6684aaf6489c2`，ICD
 `30a8d6a97d96d917b93ecb1f8a34489ce5613ca2082752b04c5823d6cb408e8d`。
-Fan19/Battery12、DFLL handoff v2固件及扩展ACPI保持；固定7为CPU1497600/GPU460800/
-RAM1600000kHz，充电限制85。登录后5秒启用，生产双向GPU Fence保持开启。
+Fan19/Battery12、DFLL handoff v2固件及扩展ACPI保持；Handheld的CPU上限1581000、
+GPU上限537600kHz，RAM当前1600000kHz，充电限制0/off。登录后5秒启用，生产双向GPU Fence保持开启。
 本轮恢复目标是此整合配对及竖屏，不是下文历史I配对、Fan13或`.59`。**
 
 完整平台哈希与模式验收见[DVFS交付记录](DVFS_REVIEWED_20261114.md)和OUT的
-`tgd3d-current-baseline.json`。当前22:46:08 UTC启动、DWM772，22:50恢复原生启用。
+`tgd3d-current-baseline.json`。最新23:46:28 UTC启动、DWM824，23:48:47确认原生启用完成。
 22:51交互只读核对当前及保存方向均720×1280/orientation0/60Hz，DWM实际加载上述UMD/ICD。
-22:53已核对本轮四个临时任务及工具/上传包清理完成，默认启用任务Ready，两个工具仍运行。SSH为
+22:53已核对上一轮四个临时任务及工具/上传包清理完成，23:26默认启用任务Ready。SSH为
 `ruje@192.168.8.6`；没有保持现场限制。用户取消五分钟交互，也不再做离屏检查。
 下文早期“未合入”及恢复配对均是历史状态，不能覆盖此节。
+
+23:36已删除桌面旧`Switch硬件监控.exe`，WindowsDrivers中的`app/SwitchTelemetry`
+源码也已移除。23:50:06在确认开机启动后，删除Pacecar及Switch Power桌面快捷方式。
+EMC交付的12项哈希/长度已核对，控制/传输核心已加入WindowsDrivers工作树并通过ASan/UBSan；
+运行期BPMP/ACTMON/电压投票仍待接入，未发布或安装EMC动态调频驱动，RAM显示仍取启动交接值。
+NVK主表面写入提交候选曾构建并通过CPU/API控制，但未启用；实机仍用上述显示组合。
+01:55审计确认该实验缺少跨设备句柄有效性保证，另有批次数量/清理问题；已按原冻结SHA核对并
+归档撤下其12文件未提交修改，记录在`gemini-full-audit-20261115/coordinator-patches/withdrawal.json`。
+不得将其旧UMD/ICD产物混入本轮EMC部署。GPU桥接同步I/O的无限等待等审计发现仍需进一步处理。
+23:45已清理该未启用候选及控制工具的实机临时目录，本地构建/结果保留。
+
+Switch Power启动版73b9b759…及Pacecar38eb8017…已经实际重启验证。用户随后报告切换时
+弹出硬件详情；源码确认切换成功不弹窗，但托盘双击绑定了ShowDetailsDialog。已移除该
+隐式入口，详情仅在明确菜单项打开，失败提示保留。UI修正版df3e9299…已编译；23:51:53
+发出`SwitchPowerUiUpdate`交互更新任务，只换托盘程序，不重启、不改用户当前电源模式。
+随后SSH暂时失联；恢复后确认设备在23:52:32 UTC再次启动，这次没有由本窗口发出重启，
+原因未定。23:55读回Code0、Handheld、CPU DFLL active、GpuPolicyMode1、CPU错误0，
+修正版托盘df3e9299…（PID5016）及Pacecar38eb8017…（PID4092）均已自动启动于session1。
+更新任务结果0，但详细回执是179字节全零，已按SHA256取回，不能据此标记回调测试通过；
+停止扩大实机测试，不重复安装或重启。实机临时任务/安装目录按既定流程清理，备份保留。
+WindowsDrivers本地提交962e253，
+私人Pacecar本地提交69d4e43，尚未推送；EMC完成后按用户要求统一交付到对应仓库。
 
 22:44轮直接验证当前整合生产配对270→90→180，沿用已有屏上图案、扫描面和逻辑抓屏，
 没有安装驱动、计划重启或新增ETW/转储。270°短时逻辑像素及扫描面检查通过，90°图案/

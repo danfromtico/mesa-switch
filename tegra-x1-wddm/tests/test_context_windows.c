@@ -1434,7 +1434,7 @@ __declspec(noinline) static void TestPagingDispatch(const DXGKRNL_INTERFACE *dxg
     DXGK_PTE ptes[3]={{.Valid=1,.Segment=1,.PageAddress=TG_GPU_TABLE_BYTES>>PAGE_SHIFT}};
     struct tg_gpu_power power={.owned=true,.ready=true,.pmic_address=0x33,.original_enable=0x40,.original_voltage=50};
     struct tg_gpu_clock clock={0};
-    struct tg_gpu_power_io io={&hw,Read,Write,ReadPmic,WritePmic,Delay};
+    struct tg_gpu_power_io io={&hw,Read,Write,ReadPmic,WritePmic,Delay, NULL};
     UINT64 *leaf=(UINT64 *)(paging_tables+TG_GPU_TABLE_BYTES);UINT before=interrupts;
     CHECK(TgGpuInitializeContextEngine(&e,dxgk,&tables)==STATUS_SUCCESS);TestGraphicsTemplate(&e);
     TgGpuRegisterContextDdis(&ddi);
@@ -1764,7 +1764,7 @@ static __declspec(noinline) VOID TestPreemption(const DXGKRNL_INTERFACE *dxgk)
     DXGKARG_SUBMITCOMMANDVIRTUAL submit={.DmaBufferVirtualAddress=0x10000,.DmaBufferSize=40,
         .pDmaBufferPrivateData=&entries[0],.DmaBufferPrivateDataSize=sizeof(entries[0])};
     struct tg_gpu_power power={.owned=true,.ready=true,.stage=TG_GPU_STAGE_READY};
-    struct tg_gpu_power_io io={&hw,Read,Write,ReadPmic,WritePmic,Delay};
+    struct tg_gpu_power_io io={&hw,Read,Write,ReadPmic,WritePmic,Delay, NULL};
     struct tg_gpu_clock clock={0};DRIVER_INITIALIZATION_DATA ddi={0};TG_GPU_CONTEXT *c;
     UINT events=preemption_interrupts,dma=interrupts,pools,accesses,faults=recovery_interrupts;
     CHECK(TgGpuInitializeContextEngine(&e,dxgk,&tables)==STATUS_SUCCESS);TestGraphicsTemplate(&e);
@@ -1931,7 +1931,7 @@ static __declspec(noinline) VOID TestQueuedProgramState(const DXGKRNL_INTERFACE 
     DXGKARG_CREATECONTEXT create={.EngineAffinity=1,.Flags.VirtualAddressing=1};
     DXGKARG_SETROOTPAGETABLE root={.Address={1,0,0},.NumEntries=TG_GPU_TABLE_ENTRIES};
     struct tg_gpu_power power={.owned=true,.ready=true,.stage=TG_GPU_STAGE_READY};
-    struct tg_gpu_power_io io={&hw,Read,Write,ReadPmic,WritePmic,Delay};
+    struct tg_gpu_power_io io={&hw,Read,Write,ReadPmic,WritePmic,Delay, NULL};
     enum { MME_WORDS=sizeof(tg_gpu_nvk_mme_init)/sizeof(UINT) };
     static struct {
         struct tg_gpu_submit_request Header;

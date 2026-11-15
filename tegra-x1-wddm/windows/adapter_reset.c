@@ -19,7 +19,7 @@ NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *a)
     struct tg_gpu_power_io io;UCHAR address=0;NTSTATUS status;
     PAGED_CODE();
     if(!a || !a->EngineReady || !a->Engine.Resetting ||
-       !a->Platform.Bridge || !a->Hardware.Isolated)return STATUS_INVALID_DEVICE_STATE;
+       !a->Platform.Resources || !a->Hardware.Isolated)return STATUS_INVALID_DEVICE_STATE;
     /* The OS has completed its cleanup interval. Only now load firmware,
      * preflight the platform and perform a new cold hardware initialization. */
     status=TgGpuPlatformPreflight(&a->Platform,&address);
@@ -34,6 +34,8 @@ NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *a)
     if(NT_SUCCESS(status)) {
         TgGpuDvfsAttach(&a->Hardware,&a->Platform,&a->Queue);
         a->State=TgGpuAdapterReady;
+    } else if(!a->Hardware.Power.owned) {
+        TgGpuPlatformAbandonRail(&a->Platform,address);
     }
     return status;
 }

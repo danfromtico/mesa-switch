@@ -190,10 +190,15 @@ tg_gpu_power_down(const struct tg_gpu_power_io *io, struct tg_gpu_power *state)
     io->write32(io->context, CAR_CLOCK_SET, GPU_CLOCKS & state->original_clocks);
     update32(io, CAR_PLLP_OUT5, OUT5_MASK, state->original_pllp_out5);
     update32(io, MC_FLUSH, MC_GPU_BIT, state->original_mc_flush);
-    /* Read-modify-write EN_CTRL so M3 (DDR), M4 (CPU), and other bits survive. */
-    ok = set_m1_enable(io, state, (state->original_enable & PMIC_M1_ENABLE) != 0);
-    ok = write_pmic_checked(io, state->pmic_address, PMIC_M1_VOLTAGE,
-                            state->original_voltage) && ok;
+    if (io->release_pmic) {
+        ok = io->release_pmic(io->context, state->pmic_address,
+                              state->original_enable, state->original_voltage);
+    } else {
+        /* Read-modify-write EN_CTRL so M3 (DDR), M4 (CPU), and other bits survive. */
+        ok = set_m1_enable(io, state, (state->original_enable & PMIC_M1_ENABLE) != 0);
+        ok = write_pmic_checked(io, state->pmic_address, PMIC_M1_VOLTAGE,
+                                state->original_voltage) && ok;
+    }
     io->delay_us(io->context, 5000);
     state->ready = false;
     if (!ok)

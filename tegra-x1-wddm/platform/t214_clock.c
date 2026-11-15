@@ -6,6 +6,7 @@
  * captured hardware table NAPLL En - p4v2-AggressiveHighOPT. See NOTICE.
  */
 #include "t214_clock.h"
+#include "t214_emc_gpu_floor.h"
 #include "../core/identity.h"
 
 #define GPU 0x57000000u
@@ -133,22 +134,8 @@ uint32_t tg_gpu_clock_thermal_range(int32_t temp_c, uint32_t prev_range)
     return r;
 }
 
-uint32_t tg_gpu_clock_emc_floor_uv(uint32_t emc_khz)
-{
-    /* T210B01 gpub01_dvfs_table vdd-gpu(emc) floor, already 5 mV aligned. */
-    static const struct { uint32_t max_emc_khz; uint32_t uv; } emc_floor[] = {
-        { 2233000u, 590000u }, { 2333000u, 600000u }, { 2366000u, 610000u },
-        { 2433000u, 620000u }, { 2500000u, 630000u }, { 2533000u, 640000u },
-        { 2600000u, 650000u }, { 2666000u, 660000u }, { 2733000u, 670000u },
-        { 2800000u, 680000u }, { 2866000u, 690000u }, { 2933000u, 700000u },
-        { 3000000u, 710000u }, { 3066000u, 720000u }, { 3133000u, 730000u },
-        { 3200000u, 740000u },
-    };
-    uint32_t i;
-    for (i = 0; i < sizeof(emc_floor) / sizeof(emc_floor[0]); ++i)
-        if (emc_khz <= emc_floor[i].max_emc_khz) return emc_floor[i].uv;
-    return 760000u;
-}
+uint32_t tg_gpu_clock_emc_floor_uv(uint32_t gpu_speedo, uint32_t emc_khz)
+{ return tg_gpu_emc_floor_policy_uv(gpu_speedo, emc_khz); }
 
 static uint32_t round_cvb_mv_5mv(int32_t scaled_mv)
 {
@@ -194,7 +181,7 @@ uint32_t tg_gpu_clock_hiopt_uv(uint32_t speedo, uint32_t target,
             row_mv = range_mv[thermal_range];
     }
     uv = row_mv * 1000u;
-    emc_uv = tg_gpu_clock_emc_floor_uv(emc_khz);
+    emc_uv = tg_gpu_clock_emc_floor_uv(speedo, emc_khz);
     if (uv < emc_uv) uv = emc_uv;
     return uv <= ceiling_uv ? uv : UINT32_MAX;
 }

@@ -94,7 +94,7 @@ static void reset(struct model *m)
 { memset(m,0,sizeof(*m)); m->regs[0x100/4]=0x50; m->regs[8/4]=0x10; }
 static enum tg_gpu_pmu_result run(struct model *m,struct tg_gpu_pmu_status *s)
 {
-    struct tg_gpu_power_io io={m,read32,write32,NULL,NULL,delay};
+    struct tg_gpu_power_io io={m,read32,write32,NULL,NULL,delay, NULL};
     struct tg_gpu_power power={.owned=true,.ready=true};
     struct tg_gpu_acr_hw_status acr={.stage=9,.security=1,.dmem_size=0x6000};
     return tg_gpu_pmu_start(&io,&power,&acr,s);

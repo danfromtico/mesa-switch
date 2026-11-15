@@ -27,6 +27,10 @@ typedef struct _TG_GPU_DVFS {
     UINT32 MaxOpp;
     UINT32 SafeOpp;
     UINT32 EmcKhz;
+    UINT32 EmcVoteWord;
+    UINT32 EmcAckWord;
+    UINT32 EmcFailedWord;
+    UINT32 EmcFloorUv;
     INT32 TempC;
     UINT32 ThermalRange;
     UINT32 PolicySeq;
@@ -34,6 +38,7 @@ typedef struct _TG_GPU_DVFS {
     UINT32 Transitions;
     UINT32 Rollbacks;
     BOOLEAN PolicyBridgeSupported;
+    BOOLEAN EmcVoteSupported;
     BOOLEAN PolicyOverrideActive;
     BOOLEAN TempValid;
     BOOLEAN ThermalThrottled;

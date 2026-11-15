@@ -105,7 +105,7 @@ static void Write(void *p,UINT32 a,UINT32 v){(void)p;(void)a;(void)v;CHECK(FALSE
 static void Delay(void *p,UINT32 us){(void)p;(void)us;CHECK(FALSE);}
 static bool ReadPmic(void *p,UINT8 a,UINT8 r,UINT8 *v){(void)p;(void)a;(void)r;(void)v;CHECK(FALSE);return false;}
 static bool WritePmic(void *p,UINT8 a,UINT8 r,UINT8 v){(void)p;(void)a;(void)r;(void)v;CHECK(FALSE);return false;}
-static struct tg_gpu_power_io io={&model,Read,Write,ReadPmic,WritePmic,Delay};
+static struct tg_gpu_power_io io={&model,Read,Write,ReadPmic,WritePmic,Delay, NULL};
 enum tg_gpu_power_result tg_gpu_power_up(const struct tg_gpu_power_io *i,uint8_t address,struct tg_gpu_power *p)
 {
     CHECK(i && i->context==&model && address==0x33 && level==PASSIVE_LEVEL);

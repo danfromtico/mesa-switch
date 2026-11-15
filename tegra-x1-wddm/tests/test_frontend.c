@@ -74,7 +74,7 @@ static void reset(void)
 }
 int main(void)
 {
-    struct tg_gpu_power_io io = {NULL,read32,write32,NULL,NULL,delay};
+    struct tg_gpu_power_io io = {NULL,read32,write32,NULL,NULL,delay, NULL};
     struct tg_gpu_power power = {0};
     struct tg_gpu_frontend_status s = {0};
     reset();

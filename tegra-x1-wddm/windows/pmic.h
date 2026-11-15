@@ -15,7 +15,20 @@
 #define TG_GPU_PMIC_REPORT_GPU_UV     0x106u
 #define TG_GPU_PMIC_REPORT_GPU_STATUS 0x107u
 #define TG_GPU_PMIC_REPORT_ABI        0x108u
+#define TG_GPU_PMIC_QUERY_EMC_VOTE    0x109u
+#define TG_GPU_PMIC_REPORT_EMC_ACK    0x10au
+#define TG_GPU_PMIC_REPORT_EMC_ABI    0x10bu
+#define TG_GPU_PMIC_QUERY_EMC_GUARD   0x10cu
+#define TG_GPU_PMIC_RELEASE_RAIL      0x10du
+#define TG_GPU_PMIC_CLAIM_RAIL        0x10eu
+#define TG_GPU_PMIC_REPORT_EMC_FAILURE 0x10fu
 #define TG_GPU_LIVE_COUNTER_ABI       0x00020001u
+#define TG_GPU_EMC_VOTE_ABI           0x00010001u
+/* Low byte is MAX77812 M1 voltage code (zero = no EMC vote); high 24 bits
+ * identify a request. Only the quiescent GPU clock owner acknowledges it. */
+#define TG_GPU_EMC_VOTE_CODE(word) ((uint32_t)(word) & 0xffu)
+#define TG_GPU_EMC_VOTE_UV(word) (TG_GPU_EMC_VOTE_CODE(word) ? \
+    250000u + 5000u * TG_GPU_EMC_VOTE_CODE(word) : 0u)
 
 /* Packed 32-bit DVFS policy word returned by TG_GPU_PMIC_QUERY_DVFS_POLICY:
  *   [3:0]   mode (0 = fixed boot profile, 1 = T210B01 HighOPT NAPLL DVFS)

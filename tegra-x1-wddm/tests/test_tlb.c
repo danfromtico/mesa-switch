@@ -21,7 +21,7 @@ static void delay(void *ctx, uint32_t us) { (void)ctx; assert(us == 2); ++delays
 int main(void)
 {
     struct tg_gpu_power power = {.owned=true, .ready=true};
-    struct tg_gpu_power_io io = {NULL, read32, write32, NULL, NULL, delay};
+    struct tg_gpu_power_io io = {NULL, read32, write32, NULL, NULL, delay, NULL};
     assert(tg_gpu_tlb_invalidate(&io, &power, UINT64_C(0x170020000)) == TG_GPU_TLB_OK);
     assert(observed_root == 0x01700200 && writes == 2);
     writes = delays = 0; mode = 1;

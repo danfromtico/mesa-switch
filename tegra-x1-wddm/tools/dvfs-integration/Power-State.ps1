@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-param([int]$Mode=-1,[int]$ChargeLimit=-1,[switch]$PowerOnly)
+param([int]$Mode=-1,[int]$ChargeLimit=-1,[switch]$PowerOnly,[switch]$EmcOnly)
 $ErrorActionPreference='Stop'
 if(!('SwitchPowerIo' -as [type])) {
 Add-Type @'
@@ -21,6 +21,23 @@ function Power-Request([string]$Path,[uint32]$Code,[byte[]]$InputBytes,[int]$Out
   if($bytes -ne $OutputBytes){throw 'Power ABI result length differs'}
   return ,$out
  }finally{[void][SwitchPowerIo]::CloseHandle($h)}
+}
+if($EmcOnly){
+ if($Mode -ge 0 -or $ChargeLimit -ge 0){throw 'EMC status is read-only; do not combine it with policy changes'}
+ # SWFAN_EMC_STATUS v1, paired with drivers/SwitchFan/src/emc_ioctl.h.
+ $data=Power-Request '\\.\SwitchBacklight' 0x00226054 @() 188
+ $names=@('Version','Flags','ActualKhz','BootKhz','SampleAgeMs','LastError','EnumerationError','RateCount')
+ $emc=[ordered]@{}
+ for($i=0;$i -lt $names.Count;$i++){
+  $emc[$names[$i]]=if($i -in @(5,6)){[BitConverter]::ToInt32($data,4*$i)}else{[BitConverter]::ToUInt32($data,4*$i)}
+ }
+ if($emc.Version -ne 1 -or $emc.RateCount -gt 32){throw 'Unexpected EMC status version or rate count'}
+ $emc.RatesKhz=@(for($i=0;$i -lt $emc.RateCount;$i++){[BitConverter]::ToUInt32($data,32+4*$i)})
+ $names=@('ActmonError','AverageActiveKhz','RawActiveKhz','TargetKhz','DisplayFloorKhz','QosError','TransitionCount')
+ for($i=0;$i -lt $names.Count;$i++){
+  $emc[$names[$i]]=if($i -in @(0,5)){[BitConverter]::ToInt32($data,160+4*$i)}else{[BitConverter]::ToUInt32($data,160+4*$i)}
+ }
+ [pscustomobject]@{Utc=[DateTime]::UtcNow.ToString('o');Emc=$emc};return
 }
 if($Mode -ge 0){$null=Power-Request '\\.\SwitchBacklight' 0x0022a04c ([byte[]]([BitConverter]::GetBytes([uint32]2)+[BitConverter]::GetBytes([uint32]$Mode))) 0}
 if($ChargeLimit -ge 0){$null=Power-Request '\\.\SwitchBattery' 0x0022a054 ([BitConverter]::GetBytes([uint32]$ChargeLimit)) 0}

@@ -8,6 +8,7 @@ Check-Baseline
 if(Get-ScheduledTask -TaskName 'TgGpuDisplay*','Tgd3dTrial*' -ErrorAction SilentlyContinue) { throw 'Another GPU trial or restore task is present' }
 if(Get-ChildItem "$env:windir\System32\drivers\TgGpuBootTest*.bin" -ErrorAction SilentlyContinue) { throw 'A GPU startup permit already exists' }
 if(Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Services\tegragpurender\AllowDesktopStart') { throw 'A GPU startup grant already exists' }
+if(Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Services\tegragpurender\AllowNativeBoot') { throw 'Persistent native startup already exists' }
 if(!$Installed) {
     $name='tgd3d-'+([string]$m.umd_source).Substring(0,8)+'-'+(Get-Date -Format 'yyyyMMdd-HHmmss')
     $dest=Join-Path $env:ProgramData ('SwitchWOA\GpuUpdate\'+$name)
@@ -32,7 +33,13 @@ $os=Get-CimInstance Win32_OperatingSystem
 $version=Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
 @{Caption=$os.Caption;Version=$os.Version;Build=$os.BuildNumber;UBR=$version.UBR;Boot=$os.LastBootUpTime.ToUniversalTime().ToString('o')}|ConvertTo-Json|Set-Content (Join-Path $PSScriptRoot 'windows-version.json') -Encoding UTF8
 $platform=& (Join-Path $PSScriptRoot 'Read-PlatformState.ps1')
-if($platform.CpuActualKhz -ne 1497600 -or $platform.CpuOverclockEnabled -ne 1 -or $platform.FanVersion -ne 13) { throw 'CPU/fan baseline differs' }
+if($m.kmd_variant -eq 'reviewed-dvfs-emc') {
+    # The enclosing EMC installer verifies fresh CPU/BPMP status. CPU clocks
+    # can vary in Handheld; this package must bind the matched platform owner.
+    if($platform.FanVersion -ne $m.platform_fan_version -or $null -eq $platform.CpuActualKhz -or [int64]$platform.CpuActualKhz -le 0 -or
+       @(Get-PnpDevice -PresentOnly|Where-Object{$_.InstanceId -like 'ACPI\SWOA0402\*' -and $_.Status -eq 'OK'}).Count -ne 1 -or
+       @(Get-PnpDevice -PresentOnly|Where-Object{$_.InstanceId -like 'ACPI\SWOA0601\*' -and $_.Status -eq 'OK'}).Count -ne 1){throw 'Matched EMC platform is unavailable'}
+} elseif($platform.CpuActualKhz -ne 1497600 -or $platform.CpuOverclockEnabled -ne 1 -or $platform.FanVersion -ne 13) { throw 'CPU/fan baseline differs' }
 $platform|ConvertTo-Json|Set-Content (Join-Path $PSScriptRoot 'before-platform.json') -Encoding UTF8
 if(Test-Path (Join-Path $PSScriptRoot 'recovery.json')) { throw 'This trial is already prepared' }
 $backupDir=Join-Path $PSScriptRoot 'rollback'
@@ -57,17 +64,33 @@ New-Item -ItemType Directory -Path $evidence|Out-Null
 if($LASTEXITCODE -ne 0) { throw 'Evidence directory access failed' }
 $snapshot=Join-Path $evidence 'user-display.bin'
 $exitFile=Join-Path $evidence 'snapshot.exit'
-$cmd="@echo off`r`n`"$PSScriptRoot\display-state.exe`" save `"$snapshot`" > `"$evidence\snapshot.json`" 2> `"$evidence\snapshot.err`"`r`necho %errorlevel% > `"$exitFile`"`r`n"
+# Publish a closed receipt after the child exits. File creation alone is not
+# completion: redirection can expose an empty file before echo writes its code.
+$cmd="@echo off`r`nsetlocal`r`nset `"ERRORLEVEL=`"`r`n`"$PSScriptRoot\display-state.exe`" save `"$snapshot`" > `"$evidence\snapshot.json`" 2> `"$evidence\snapshot.err`"`r`nset `"snapshotResult=%errorlevel%`"`r`n> `"$exitFile.tmp`" echo %snapshotResult%`r`nmove /y `"$exitFile.tmp`" `"$exitFile`" >nul`r`nexit /b %snapshotResult%`r`n"
 [IO.File]::WriteAllText((Join-Path $PSScriptRoot 'snapshot.cmd'),$cmd,[Text.Encoding]::ASCII)
 $action=New-ScheduledTaskAction -Execute "$env:windir\System32\cmd.exe" -Argument ('/d /c "'+$PSScriptRoot+'\snapshot.cmd"')
 $principal=New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Highest
-$settings=New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Seconds 30)
+$settings=New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Seconds 100)
 Register-ScheduledTask -TaskName 'Tgd3dTrialSnapshot' -Action $action -Principal $principal -Settings $settings|Out-Null
 try {
     Start-ScheduledTask -TaskName 'Tgd3dTrialSnapshot'
-    $limit=[DateTime]::UtcNow.AddSeconds(25)
-    while(!(Test-Path $exitFile) -and [DateTime]::UtcNow -lt $limit) { Start-Sleep -Milliseconds 200 }
-    if(!(Test-Path $exitFile) -or [int]([IO.File]::ReadAllText($exitFile).Trim()) -ne 0) { throw 'Display preference snapshot failed' }
+    $limit=[DateTime]::UtcNow.AddSeconds(90)
+    $complete=$false;$snapshotExit=0
+    do {
+        if(Test-Path $exitFile) {
+            $receipt=[IO.File]::ReadAllText($exitFile).Trim()
+            if($receipt -and [int]::TryParse($receipt,[ref]$snapshotExit)) {$complete=$true;break}
+            if($receipt) {throw 'Malformed display preference completion receipt'}
+        }
+        Start-Sleep -Milliseconds 200
+    }while([DateTime]::UtcNow -lt $limit)
+    if(!$complete) {
+        $task=Get-ScheduledTask 'Tgd3dTrialSnapshot'
+        $info=Get-ScheduledTaskInfo 'Tgd3dTrialSnapshot'
+        throw ('Display preference snapshot timed out: task='+$task.State+' result='+$info.LastTaskResult+'; inspect evidence/snapshot.*')
+    }
+    if($snapshotExit -ne 0) {throw ('Display preference snapshot exited '+$snapshotExit+'; inspect evidence/snapshot.err')}
+    if(!(Test-Path $snapshot) -or (Get-Item $snapshot).Length -eq 0) {throw 'Display preference snapshot file is missing or empty'}
     Copy-Item $snapshot (Join-Path $PSScriptRoot 'user-display.bin')
 } finally {
     Stop-ScheduledTask -TaskName 'Tgd3dTrialSnapshot' -ErrorAction SilentlyContinue
