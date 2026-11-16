@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 import importlib.util
+import json
 from pathlib import Path
 import struct
 import unittest
@@ -22,6 +23,93 @@ def export(payload=PAYLOAD, version=1, count=1, event_id=1):
     return (struct.pack('<8sQQII', b'SWETW001', count, 1337, 12, 48) +
             struct.pack('<Q16sIIHHHHBBB5x', 1337, decoder.PROVIDER,
                         4, 6020, 2, event_id, 0x40, len(payload), 0, version, 2) + payload)
+
+
+START = {'event': 'TraceStart', 'session': 'capture', 'pid': 1200,
+         'clock': 'qpc', 'clock_context': 1, 'qpc_stamp': 500,
+         'qpc_frequency': 19200000, 'query_status': 0, 'process_status': 0,
+         'events_lost': 0, 'log_buffers_lost': 0, 'realtime_buffers_lost': 0,
+         'invalid': 0}
+
+
+def live_event(payload=PAYLOAD, event_id=1, **changes):
+    record = {'provider': 'c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0',
+              'raw': True, 'id': event_id, 'version': 1, 'header_flags': 576,
+              'pid': 4, 'tid': 6020, 'qpc_stamp': 1337,
+              'bytes': len(payload), 'data': payload.hex()}
+    record.update(changes)
+    return record
+
+
+def json_lines(*records):
+    return b''.join(json.dumps(r).encode() + b'\n' for r in records)
+
+
+class LiveRecoveryDecode(unittest.TestCase):
+    def test_qpc_and_original_payload_without_invented_metadata(self):
+        records, summary = decoder.decode_live(json_lines(START, live_event()))
+        binary, _ = decoder.decode(export())
+        expected = {k: v for k, v in binary[0].items() if k not in ('time', 'cpu')}
+        expected.update(input_line=2, qpc_stamp=1337, header_flags=576)
+        self.assertEqual(records, [expected])
+        self.assertEqual(summary['issues'], [])
+        self.assertEqual(summary['clock'], 'qpc')
+        self.assertFalse(summary['coverage_proven'])
+        self.assertIsNone(summary['trace_end'])
+
+    def test_reboot_tail_preserves_prefix_and_prior_loss(self):
+        queried = dict(START, event='TraceState', events_lost=3)
+        stopped = dict(START, event='TraceEnd', query_status=4201, clock_context=0)
+        raw = json_lines(START, live_event(), queried, stopped) + b'{"provider":'
+        records, summary = decoder.decode_live(raw)
+        self.assertEqual(len(records), 1)
+        self.assertEqual(summary['truncated_tail_bytes'], 12)
+        self.assertEqual(summary['last_successful_trace_query']['events_lost'], 3)
+        self.assertEqual(summary['trace_end']['query_status'], 4201)
+        self.assertFalse(summary['coverage_proven'])
+
+    def test_corruption_and_unknown_schema_remain_explicit(self):
+        for change in ({'bytes': 71}, {'data': 'zz' * 72}, {'version': 2},
+                       {'qpc_stamp': -1}, {'pid': True}, {'raw': False}):
+            with self.subTest(change=change):
+                records, summary = decoder.decode_live(json_lines(START, live_event(**change)))
+                self.assertEqual(records, [])
+                self.assertEqual(len(summary['issues']), 1)
+        records, summary = decoder.decode_live(json_lines(START) + b'\x00\x00\n' + json_lines(live_event()))
+        self.assertEqual(len(records), 1)
+        self.assertEqual(summary['issues'][0]['line'], 2)
+
+    def test_display_boundaries_keep_threads_and_missing_calls_separate(self):
+        entry = bytes.fromhex('''
+            01000000 03000000 88776655 44332211 03010000 00000000
+            00000000 02000000 01000000 01000000 01000000 01000000 01000000
+        ''')
+        returned = bytearray(entry)
+        struct.pack_into('<II', returned, 16, 0, 1)
+        struct.pack_into('<I', returned, 36, 2)
+        events = [live_event(entry, 4, qpc_stamp=1000),
+                  live_event(returned, 4, tid=42, qpc_stamp=1500),
+                  live_event(returned, 4, qpc_stamp=2000),
+                  live_event(entry, 4, qpc_stamp=3000)]
+        _, summary = decoder.decode_live(json_lines(START, *events))
+        self.assertEqual([c['observation'] for c in summary['display_calls']], [
+            'both_boundaries_recorded', 'return_without_recorded_entry',
+            'entry_without_recorded_return'])
+        self.assertEqual(summary['display_calls'][0]['returned']['qpc_stamp'], 2000)
+        self.assertFalse(summary['coverage_proven'])
+        # A different consumer/boot cannot be paired with the first stream.
+        _, mixed = decoder.decode_live(json_lines(START, *events, dict(START, pid=99)))
+        self.assertTrue(mixed['display_pairing_skipped'])
+        self.assertEqual(mixed['display_calls'], [])
+
+    def test_unverified_clock_and_other_providers(self):
+        for start in (dict(START, clock_context=2), dict(START, qpc_frequency=0)):
+            _, summary = decoder.decode_live(json_lines(start, live_event()))
+            self.assertEqual(summary['clock'], 'unverified')
+            self.assertTrue(summary['issues'])
+        records, summary = decoder.decode_live(json_lines(START, live_event(provider='other')))
+        self.assertEqual(records, [])
+        self.assertEqual(summary['issues'], [])
 
 
 class RecoveryDecode(unittest.TestCase):

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
-"""Read KMD recovery/execution events from a SWETW001 ProcessTrace export.
+"""Read KMD recovery/execution/display events from retained trace exports.
 
-Input is the retained binary export, not the original ETL. Output is JSONL;
-counts and input identity go to stderr. Absence of an event is not success.
+Default input is SWETW001, not the original ETL. --live-jsonl reads the
+--follow-all export without converting QPC ticks into wall-clock time.
+Output is JSONL; counts and input identity go to stderr. Missing records,
+including a missing return, do not establish success or a hung DDI.
 """
 import argparse
 import hashlib
@@ -44,6 +46,81 @@ EXECUTION_FIELDS = ('submission_fence', 'last_completed_fence', 'expected', 'obs
     'cached_fecs_host', 'poll_count', 'request_dma_bytes', 'private_bytes', 'umd_private_bytes')
 
 
+def _decode_event(event_id, version, payload, metadata):
+    """Decode the same fixed KMD payload for binary and live exports."""
+    size = len(payload)
+    if event_id == 4:
+        if version != 1 or size != DISPLAY_PAYLOAD.size:
+            raise ValueError('unsupported display-path schema')
+        v = DISPLAY_PAYLOAD.unpack(payload)
+        if v[0] != 1 or not 1 <= v[1] <= 4 or v[5] > 1 or v[10] > 1 or v[11] > 1:
+            raise ValueError('invalid display-path event')
+        return ({'event': 'DisplayPath', **metadata,
+            'operation': DISPLAY_OPERATIONS[v[1]], 'phase': 'return' if v[5] else 'entry',
+            'adapter_luid': f'{v[3]:08x}{v[2]:08x}', 'status': f'0x{v[4]:08x}',
+            'path_id': v[6], 'requested_rotation': v[7], 'before_rotation': v[8],
+            'after_rotation': v[9], 'source_visible': bool(v[10]), 'target_active': bool(v[11]),
+            'flags': f'0x{v[12]:08x}'})
+    if event_id == 3:
+        if version != 1 or size < RESET_PACKET_HEADER.size:
+            raise ValueError('unsupported reset packet schema')
+        v = RESET_PACKET_HEADER.unpack_from(payload)
+        chunk_bytes, dma_bytes, command_bytes, chunk_offset = v[1], v[9], v[10], v[11]
+        if (v[0] != 1 or chunk_bytes != size - RESET_PACKET_HEADER.size or
+                chunk_bytes > 1024 or command_bytes > 65536 or
+                (chunk_bytes | command_bytes | chunk_offset) & 3 or
+                chunk_offset + chunk_bytes > command_bytes or
+                (command_bytes and (not chunk_bytes or command_bytes != dma_bytes))):
+            raise ValueError('invalid reset packet chunk')
+        return ({'event': 'ResetPacket', **metadata,
+            'adapter_luid': f'{v[3]:08x}{v[2]:08x}', 'context': f'0x{v[4]:016x}',
+            'dma_address': f'0x{v[5]:016x}', 'submission_fence': v[6],
+            'graphics_generation': v[7], 'expected': v[8], 'dma_bytes': dma_bytes,
+            'command_bytes': command_bytes, 'offset': chunk_offset, 'chunk_bytes': chunk_bytes,
+            'hardware': dict(zip(RESET_HARDWARE_FIELDS, v[12:])),
+            'commands_hex': payload[RESET_PACKET_HEADER.size:].hex()})
+    if (event_id, version, size) == (2, 1, EXECUTION_PAYLOAD.size):
+        values = EXECUTION_PAYLOAD.unpack(payload)
+        if values[0] != 1:
+            raise ValueError('unsupported execution payload version')
+        source, stage = values[1], values[7]
+        record = {'event': 'ExecutionState', **metadata,
+            'source': source, 'source_name': EXECUTION_SOURCES[source] if source < len(EXECUTION_SOURCES) else 'unknown',
+            'adapter_luid': f'{values[3]:08x}{values[2]:08x}', 'status': f'0x{values[4]:08x}',
+            'request_fence': values[5], 'request_flags': f'0x{values[6]:08x}',
+            'stage': stage, 'stage_name': STAGES[stage] if stage < len(STAGES) else 'unknown',
+            'request_context': f'0x{values[8]:016x}', 'context': f'0x{values[9]:016x}',
+            'dma_address': f'0x{values[10]:016x}'}
+        record.update(zip(EXECUTION_FIELDS, values[11:]))
+        record['work_state'] = [name for bit, name in enumerate(WORK_FLAGS) if record['work_flags'] & (1 << bit)]
+        record['queue_state'] = [name for bit, name in enumerate(QUEUE_FLAGS) if record['queue_flags'] & (1 << bit)]
+        for key in ('queue_failure', 'work_flags', 'queue_flags', 'channel_register', 'channel_value',
+                    'cached_fifo', 'cached_mmu', 'cached_pbdma', 'cached_pbdma1', 'cached_mc',
+                    'cached_gr', 'cached_fecs_error', 'cached_fecs_host'):
+            record[key] = f'0x{record[key]:08x}'
+        return record
+    if (event_id, version, size) != (1, 1, PAYLOAD.size):
+        raise ValueError('unsupported KMD recovery event schema')
+    values = PAYLOAD.unpack(payload)
+    if values[0] != 1:
+        raise ValueError('unsupported recovery payload version')
+    source = values[1]
+    return ({
+        'event': 'FirstRecoveryRequest', **metadata, 'source': source,
+        'source_name': SOURCES[source] if source < len(SOURCES) else 'unknown',
+        'adapter_luid': f'{values[3]:08x}{values[2]:08x}',
+        'status': f'0x{values[4]:08x}', 'flags': f'0x{values[5]:08x}',
+        'context': f'0x{values[6]:016x}', 'dma_bytes': values[7],
+        'private_bytes': values[8], 'umd_private_bytes': values[9],
+        'submission_fence': values[10], 'last_completed_fence': values[11],
+        'graphics_generation': values[12],
+        'cached_fifo': f'0x{values[13]:08x}',
+        'cached_mmu': f'0x{values[14]:08x}',
+        'cached_pbdma': f'0x{values[15]:08x}',
+        'cached_pbdma1': f'0x{values[16]:08x}',
+    })
+
+
 def decode(data):
     if len(data) < HEADER.size:
         raise ValueError('truncated export header')
@@ -63,80 +140,8 @@ def decode(data):
         total += 1
         if provider != PROVIDER:
             continue
-        if event_id == 4:
-            if version != 1 or size != DISPLAY_PAYLOAD.size:
-                raise ValueError('unsupported display-path schema')
-            v = DISPLAY_PAYLOAD.unpack(payload)
-            if v[0] != 1 or not 1 <= v[1] <= 4 or v[5] > 1 or v[10] > 1 or v[11] > 1:
-                raise ValueError('invalid display-path event')
-            records.append({'event': 'DisplayPath', 'time': time, 'pid': pid, 'tid': tid, 'cpu': cpu,
-                'operation': DISPLAY_OPERATIONS[v[1]], 'phase': 'return' if v[5] else 'entry',
-                'adapter_luid': f'{v[3]:08x}{v[2]:08x}', 'status': f'0x{v[4]:08x}',
-                'path_id': v[6], 'requested_rotation': v[7], 'before_rotation': v[8],
-                'after_rotation': v[9], 'source_visible': bool(v[10]), 'target_active': bool(v[11]),
-                'flags': f'0x{v[12]:08x}'})
-            continue
-        if event_id == 3:
-            if version != 1 or size < RESET_PACKET_HEADER.size:
-                raise ValueError('unsupported reset packet schema')
-            v = RESET_PACKET_HEADER.unpack_from(payload)
-            chunk_bytes, dma_bytes, command_bytes, chunk_offset = v[1], v[9], v[10], v[11]
-            if (v[0] != 1 or chunk_bytes != size - RESET_PACKET_HEADER.size or
-                    chunk_bytes > 1024 or command_bytes > 65536 or
-                    (chunk_bytes | command_bytes | chunk_offset) & 3 or
-                    chunk_offset + chunk_bytes > command_bytes or
-                    (command_bytes and (not chunk_bytes or command_bytes != dma_bytes))):
-                raise ValueError('invalid reset packet chunk')
-            records.append({'event': 'ResetPacket', 'time': time, 'pid': pid, 'tid': tid, 'cpu': cpu,
-                'adapter_luid': f'{v[3]:08x}{v[2]:08x}', 'context': f'0x{v[4]:016x}',
-                'dma_address': f'0x{v[5]:016x}', 'submission_fence': v[6],
-                'graphics_generation': v[7], 'expected': v[8], 'dma_bytes': dma_bytes,
-                'command_bytes': command_bytes, 'offset': chunk_offset, 'chunk_bytes': chunk_bytes,
-                'hardware': dict(zip(RESET_HARDWARE_FIELDS, v[12:])),
-                'commands_hex': payload[RESET_PACKET_HEADER.size:].hex()})
-            continue
-        if (event_id, version, size) == (2, 1, EXECUTION_PAYLOAD.size):
-            values = EXECUTION_PAYLOAD.unpack(payload)
-            if values[0] != 1:
-                raise ValueError('unsupported execution payload version')
-            source, stage = values[1], values[7]
-            record = {'event': 'ExecutionState', 'time': time, 'pid': pid, 'tid': tid, 'cpu': cpu,
-                'source': source, 'source_name': EXECUTION_SOURCES[source] if source < len(EXECUTION_SOURCES) else 'unknown',
-                'adapter_luid': f'{values[3]:08x}{values[2]:08x}', 'status': f'0x{values[4]:08x}',
-                'request_fence': values[5], 'request_flags': f'0x{values[6]:08x}',
-                'stage': stage, 'stage_name': STAGES[stage] if stage < len(STAGES) else 'unknown',
-                'request_context': f'0x{values[8]:016x}', 'context': f'0x{values[9]:016x}',
-                'dma_address': f'0x{values[10]:016x}'}
-            record.update(zip(EXECUTION_FIELDS, values[11:]))
-            record['work_state'] = [name for bit, name in enumerate(WORK_FLAGS) if record['work_flags'] & (1 << bit)]
-            record['queue_state'] = [name for bit, name in enumerate(QUEUE_FLAGS) if record['queue_flags'] & (1 << bit)]
-            for key in ('queue_failure', 'work_flags', 'queue_flags', 'channel_register', 'channel_value',
-                        'cached_fifo', 'cached_mmu', 'cached_pbdma', 'cached_pbdma1', 'cached_mc',
-                        'cached_gr', 'cached_fecs_error', 'cached_fecs_host'):
-                record[key] = f'0x{record[key]:08x}'
-            records.append(record)
-            continue
-        if (event_id, version, size) != (1, 1, PAYLOAD.size):
-            raise ValueError('unsupported KMD recovery event schema')
-        values = PAYLOAD.unpack(payload)
-        if values[0] != 1:
-            raise ValueError('unsupported recovery payload version')
-        source = values[1]
-        records.append({
-            'event': 'FirstRecoveryRequest', 'time': time, 'pid': pid,
-            'tid': tid, 'cpu': cpu, 'source': source,
-            'source_name': SOURCES[source] if source < len(SOURCES) else 'unknown',
-            'adapter_luid': f'{values[3]:08x}{values[2]:08x}',
-            'status': f'0x{values[4]:08x}', 'flags': f'0x{values[5]:08x}',
-            'context': f'0x{values[6]:016x}', 'dma_bytes': values[7],
-            'private_bytes': values[8], 'umd_private_bytes': values[9],
-            'submission_fence': values[10], 'last_completed_fence': values[11],
-            'graphics_generation': values[12],
-            'cached_fifo': f'0x{values[13]:08x}',
-            'cached_mmu': f'0x{values[14]:08x}',
-            'cached_pbdma': f'0x{values[15]:08x}',
-            'cached_pbdma1': f'0x{values[16]:08x}',
-        })
+        records.append(_decode_event(event_id, version, payload,
+            {'time': time, 'pid': pid, 'tid': tid, 'cpu': cpu}))
     if total != expected:
         raise ValueError(f'export event count differs: {total}/{expected}')
     return records, {'export_records': total,
@@ -146,6 +151,125 @@ def decode(data):
                      'display_records': sum(r['event'] == 'DisplayPath' for r in records),
                      'last_timestamp': last, 'requested_seconds': seconds,
                      'sha256': hashlib.sha256(data).hexdigest()}
+
+
+def _uint(record, key, bits):
+    value = record[key]
+    if type(value) is not int or not 0 <= value < (1 << bits):
+        raise ValueError(f'invalid {key}')
+    return value
+
+
+def observed_display_calls(records):
+    """Pair recorded boundaries only; ETW loss can hide either boundary."""
+    pending, calls = {}, []
+    identity = ('adapter_luid', 'pid', 'tid', 'operation', 'path_id',
+                'requested_rotation', 'before_rotation', 'flags')
+    for r in sorted((r for r in records if r['event'] == 'DisplayPath'),
+                    key=lambda r: (r['qpc_stamp'], r['input_line'])):
+        key = tuple(r[k] for k in identity)
+        stack = pending.setdefault(key, [])
+        boundary = {'line': r['input_line'], 'qpc_stamp': r['qpc_stamp'],
+                    'status': r['status']}
+        if r['phase'] == 'entry':
+            call = {k: r[k] for k in identity}
+            call.update(entry=boundary, returned=None,
+                        observation='entry_without_recorded_return')
+            if stack:
+                for other in stack:
+                    other['ambiguous'] = True
+                call['ambiguous'] = True
+            stack.append(call)
+            calls.append(call)
+        elif stack:
+            call = stack.pop()
+            call.update(returned=boundary, observation='both_boundaries_recorded')
+        else:
+            call = {k: r[k] for k in identity}
+            call.update(entry=None, returned=boundary,
+                        observation='return_without_recorded_entry')
+            calls.append(call)
+    return calls
+
+
+def decode_live(data):
+    """Keep a valid prefix and explicit gaps when a reboot cuts off JSONL."""
+    records, states, issues = [], [], []
+    end = data.rfind(b'\n') + 1
+    lines = data[:end].split(b'\n')[:-1]
+    starts, finishes = [], []
+    for number, line in enumerate(lines, 1):
+        try:
+            item = json.loads(line)
+            if not isinstance(item, dict):
+                raise ValueError('record is not an object')
+            if item.get('event') in ('TraceStart', 'TraceState', 'TraceEnd'):
+                state = dict(item, input_line=number)
+                states.append(state)
+                if item['event'] == 'TraceStart':
+                    starts.append(state)
+                    if (item.get('clock') != 'qpc' or item.get('clock_context') != 1
+                            or item.get('query_status') != 0
+                            or not _uint(item, 'qpc_frequency', 64)):
+                        raise ValueError('live trace has no verified QPC clock')
+                elif item['event'] == 'TraceEnd':
+                    finishes.append(state)
+                continue
+            if item.get('provider') != str(uuid.UUID(bytes_le=PROVIDER)):
+                continue
+            if item.get('raw') is not True:
+                raise ValueError('KMD record has no raw payload')
+            size = _uint(item, 'bytes', 16)
+            encoded = item['data']
+            if not isinstance(encoded, str) or len(encoded) != size * 2:
+                raise ValueError('raw payload length mismatch')
+            payload = bytes.fromhex(encoded)
+            if len(payload) != size:
+                raise ValueError('raw payload length mismatch')
+            metadata = {'input_line': number, 'qpc_stamp': _uint(item, 'qpc_stamp', 64),
+                        'pid': _uint(item, 'pid', 32), 'tid': _uint(item, 'tid', 32),
+                        'header_flags': _uint(item, 'header_flags', 16)}
+            # This exporter has no CPU index. Do not invent one, or label QPC
+            # as FILETIME merely to pass through the old binary container.
+            records.append(_decode_event(_uint(item, 'id', 16),
+                _uint(item, 'version', 8), payload, metadata))
+        except (ValueError, KeyError, TypeError) as error:
+            issues.append({'line': number, 'error': str(error)})
+    if len(starts) != 1 or len(finishes) > 1:
+        issues.append({'error': 'expected one trace start and at most one trace end'})
+    identity_valid = len(starts) == 1 and len(finishes) <= 1
+    if starts:
+        for state in states:
+            if any(state.get(k) != starts[0].get(k)
+                   for k in ('session', 'pid', 'qpc_frequency')):
+                identity_valid = False
+                issues.append({'line': state['input_line'], 'error': 'trace identity changed'})
+    clock_valid = (identity_valid and starts[0].get('clock') == 'qpc'
+                   and starts[0].get('clock_context') == 1
+                   and starts[0].get('query_status') == 0
+                   and type(starts[0].get('qpc_frequency')) is int
+                   and 0 < starts[0]['qpc_frequency'] < (1 << 64))
+    # A stopped session commonly returns 4201 to the final query. Its zeroed
+    # counters are not a successful final loss query. Keep the last actual
+    # query and the TraceEnd separately, even when ProcessTrace returned 0.
+    queried = [s for s in states if s.get('query_status') == 0]
+    return records, {
+        'input_format': 'live-jsonl', 'clock': 'qpc' if clock_valid else 'unverified',
+        'sha256': hashlib.sha256(data).hexdigest(), 'input_bytes': len(data),
+        'complete_lines': len(lines), 'truncated_tail_bytes': len(data) - end,
+        'issues': issues, 'kmd_records': len(records),
+        'trace_start': starts[0] if len(starts) == 1 else None,
+        'trace_end': finishes[0] if len(finishes) == 1 else None,
+        'last_successful_trace_query': queried[-1] if queried else None,
+        'loss_observations': [{k: s.get(k) for k in (
+            'input_line', 'qpc_stamp', 'invalid', 'events_lost',
+            'log_buffers_lost', 'realtime_buffers_lost')} for s in queried],
+        'display_calls': observed_display_calls(records) if clock_valid else [],
+        'display_pairing_skipped': not clock_valid,
+        'coverage_proven': False,
+        'coverage_note': 'Recorded boundaries only. Missing returns, zero observed loss, '
+                         'and normal ProcessTrace exit do not prove fault coverage.',
+    }
 
 
 def reconstruct_reset_packets(records):
@@ -159,7 +283,8 @@ def reconstruct_reset_packets(records):
         key = tuple(r[k] for k in identity)
         if r['offset'] == 0 or key not in current:
             g = {k: r[k] for k in identity}
-            g.update(time=r['time'], hardware=r['hardware'], chunks={}, consistent=True)
+            clock = 'qpc_stamp' if 'qpc_stamp' in r else 'time'
+            g.update({clock: r[clock]}, hardware=r['hardware'], chunks={}, consistent=True)
             groups.append(g)
             current[key] = g
         g = current[key]
@@ -181,10 +306,11 @@ def reconstruct_reset_packets(records):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('binary', type=Path)
+    parser.add_argument('input', type=Path)
+    parser.add_argument('--live-jsonl', action='store_true', help='read --follow-all JSONL with QPC timestamps')
     parser.add_argument('--packet-dir', type=Path, help='write only complete reset command captures')
     args = parser.parse_args()
-    records, summary = decode(args.binary.read_bytes())
+    records, summary = (decode_live if args.live_jsonl else decode)(args.input.read_bytes())
     if args.packet_dir:
         args.packet_dir.mkdir(parents=True, exist_ok=True)
         for i, packet in enumerate(reconstruct_reset_packets(records)):
@@ -199,3 +325,5 @@ if __name__ == '__main__':
     for record in records:
         print(json.dumps(record, separators=(',', ':')))
     print(json.dumps(summary), file=sys.stderr)
+    if args.live_jsonl and (summary['issues'] or summary['truncated_tail_bytes']):
+        raise SystemExit(2)
