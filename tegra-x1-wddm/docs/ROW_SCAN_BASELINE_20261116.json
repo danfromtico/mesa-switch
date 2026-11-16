@@ -307,17 +307,18 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-16T14:26:14.614761+00:00",
+  "updated_utc": "2026-11-16T15:17:35.856714+00:00",
   "device_access": {
     "owner": "user",
-    "purpose": "Switch Win Box64 testing",
+    "purpose": "User manually opens vkcube; explicitly no further SSH",
     "main_local_work_allowed": true,
-    "main_native_access": "Suspended until explicit device return; Desktop upload exception completed",
+    "main_native_access": "Suspended: no SSH/SFTP, native queries, launch, cleanup, driver/display/power changes or reboot until new authorization",
     "user_instructions": [
       "你先做本地吧，我要测试switch win box64",
       "你先传进去",
       "放桌面",
-      "不用校验"
+      "不用校验",
+      "你补进去我来打开就行，连着ssh似乎容易重启"
     ],
     "additional_checks_after_last_instruction": false
   },
@@ -417,14 +418,14 @@
     "package_manifest_sha256": "6c50c060e0408d9f1f7aa5d2a41549a3ec43da02b905cae8139435ff01f3208c",
     "archive_sha256": "64c8f91290ab96a4c58edce3be8c94333b317ffc1ea08032c94514093f5caf4e",
     "uploaded_archive_removed": true,
-    "native_executed_by_agent": false,
+    "native_executed_by_agent": null,
     "gpu_acceptance": false,
     "driver_changed": false,
     "display_changed": false,
     "reboot_requested": false,
     "baseline_replaced": false,
     "native_pending": [
-      "native loader discovery and current LUID",
+      "Recheck device identity if a subsequent authorized boot changes LUID",
       "40-second ordinary window interaction",
       "short small-window cube presentation",
       "move/resize/occlusion/recovery",
@@ -435,6 +436,43 @@
     "ordinary_desktop_five_minutes": false,
     "offscreen_gpu_test": false,
     "existing_review_status": "No driver or helper source changes. Existing pending Gemini review remains pending until 2026-11-20T23:53:18Z; upstream binaries not independently approved",
-    "evidence_directory": "OUT/fixed90-wsi-20261116"
+    "evidence_directory": "OUT/fixed90-wsi-20261116",
+    "native_executed_at_staging": false,
+    "startup_repair": {
+      "photo": "CRT assertion cube.c:4251 !err after vkEnumeratePhysicalDevices; not evidence of missing VC runtime",
+      "enumeration_utc": "2026-11-16T15:06:51.1459813Z",
+      "unset": {
+        "result": -3,
+        "physical_devices": 0,
+        "helper_exit": 10
+      },
+      "process_opt_in": {
+        "name": "NVK_I_WANT_A_BROKEN_VULKAN_DRIVER",
+        "value": "1",
+        "result": 0,
+        "physical_devices": 1,
+        "helper_exit": 0,
+        "matching_native_luid": "000000000007ac5d"
+      },
+      "enumeration_scope": "No VkDevice, queue or rendering; does not prove WSI",
+      "repair_confirmed_utc": "2026-11-16T15:09:18.5366084Z",
+      "deployed_launcher": "Run-vkcube.ps1",
+      "deployed_launcher_sha256": "4e42e0fbe594e89bca8309098f8424c305a5885a7add74eb699a34f78491453a",
+      "shortcut_updated": true,
+      "persistent_environment_changed": false,
+      "vc_runtime_installed": false,
+      "startup_observer": "One 60-frame startup check dispatch timed out after 50 seconds. No completion receipt. Execution and outcome unknown; no subsequent native read.",
+      "pending_cleanup": {
+        "task": "Tgd3dCubeStartup_20261116",
+        "status": "unknown",
+        "recurring_trigger": false,
+        "configured_limit_seconds": 120,
+        "action": "Do not redispatch; cleanup only after new user authorization"
+      },
+      "ssh_reboot_causality": "Not established",
+      "local_packaging_fix": "build_vkcube.py copies the same PS1 plus a CMD entry point and records launcher hashes; new CMD has not been uploaded",
+      "review": "Pending Gemini4 Carbon High, quota recovery 2026-11-20T23:53:18Z; not retried",
+      "evidence_directory": "OUT/vkcube-startup-20261116"
+    }
   }
 }

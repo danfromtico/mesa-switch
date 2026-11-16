@@ -5,6 +5,7 @@
 Pass a Khronos Vulkan-Tools checkout, matching Vulkan-Headers include directory,
 and the ARM64 LLVM-MinGW C compiler. The executable dynamically loads the
 Windows Vulkan loader; place vulkan-1.dll alongside it for an app-local test.
+Run Run-vkcube.cmd to apply the GM20B opt-in to this process only.
 This tool neither downloads dependencies nor installs a driver.
 """
 import argparse
@@ -40,6 +41,9 @@ def main():
                "-DVK_USE_PLATFORM_WIN32_KHR", "-I" + str(headers),
                str(cube / "cube.c"), "-lgdi32", "-lshell32", "-o", str(exe)]
     subprocess.run(command, check=True)
+    launchers = [out / name for name in ("Run-vkcube.ps1", "Run-vkcube.cmd")]
+    for launcher in launchers:
+        shutil.copyfile(Path(__file__).resolve().parent / launcher.name, launcher)
     shutil.copyfile(source / "LICENSE.txt", out / "vkcube-LICENSE.txt")
     notice = (cube / "cube.c").read_text().split("*/", 1)[0] + "*/\n"
     (out / "vkcube-NOTICE.txt").write_text(notice +
@@ -55,6 +59,8 @@ def main():
         "source_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs},
         "vulkan_core_h_sha256": hashlib.sha256((headers / "vulkan/vulkan_core.h").read_bytes()).hexdigest(),
         "executable_sha256": hashlib.sha256(exe.read_bytes()).hexdigest(),
+        "launcher_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in launchers},
+        "launch": "Run-vkcube.cmd (process-local GM20B NVK opt-in, 320x240 FIFO)",
         "scope": "Build only; native rendering, Win32 presentation and device identity need live verification",
     }, indent=2) + "\n")
     print(f"Built unmodified upstream vkcube at {revision}: {exe}")
