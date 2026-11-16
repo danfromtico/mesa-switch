@@ -19,6 +19,8 @@ struct nvkmd_windows_mem {
    struct nvkmd_mem base;
    struct tg_kmt_allocation allocation;
    struct wsi_win32_memory wsi;
+   struct tg_kmt_runtime_alias alias;
+   struct nvkmd_windows_mem *next_pending_alias;
    SRWLOCK map_lock;
    uint32_t maps;
    void *cpu;
@@ -162,13 +164,29 @@ win_alloc_va(struct nvkmd_dev *dev, struct vk_object_base *log,
    return VK_SUCCESS;
 }
 
-static void
+static bool
 win_release_allocation(struct nvkmd_dev *dev, struct nvkmd_windows_mem *mem)
 {
-   if (mem->wsi.version)
+   if (mem->wsi.version) {
+      struct nvkmd_windows_dev *win = nvkmd_windows_dev(dev);
+      LONG status = tg_kmt_close_runtime_alias(&win->kmt, &mem->alias);
+      if (status < 0) {
+         /* FreeMemory has no error return. Keep the source-owner reference
+          * and failed-close handles until device destruction can retire them.
+          * Reuse this allocation; cleanup itself must not allocate memory. */
+         nvkmd_windows_status(NULL, "defer runtime write-alias cleanup", status,
+                              VK_ERROR_DEVICE_LOST);
+         AcquireSRWLockExclusive(&win->alias_cleanup_lock);
+         mem->next_pending_alias = win->pending_aliases;
+         win->pending_aliases = mem;
+         ReleaseSRWLockExclusive(&win->alias_cleanup_lock);
+         return false;
+      }
       mem->wsi.release(mem->wsi.context);
-   else
+   } else {
       tg_kmt_free(&nvkmd_windows_dev(dev)->kmt, &mem->allocation);
+   }
+   return true;
 }
 
 static void
@@ -176,9 +194,9 @@ win_free_mem(struct nvkmd_mem *base)
 {
    struct nvkmd_windows_mem *mem = container_of(base, struct nvkmd_windows_mem, base);
    nvkmd_va_free(base->va);
-   win_release_allocation(base->dev, mem);
    simple_mtx_destroy(&base->map_mutex);
-   free(mem);
+   if (win_release_allocation(base->dev, mem))
+      free(mem);
 }
 
 static VkResult
@@ -271,8 +289,8 @@ win_finish_mem(struct nvkmd_dev *dev, struct vk_object_base *log,
    return VK_SUCCESS;
 
 fail_allocation:
-   win_release_allocation(dev, mem);
-   free(mem);
+   if (win_release_allocation(dev, mem))
+      free(mem);
    return result;
 }
 
@@ -334,7 +352,11 @@ win_import_wsi_memory(struct nvkmd_dev *dev, struct vk_object_base *log,
 {
    const struct tg_gpu_adapter_info *adapter = nvkmd_windows_adapter(dev->pdev);
    const uint64_t luid = (uint64_t)(uint32_t)adapter->luid_high << 32 | adapter->luid_low;
-   if (!memory || memory->version != WSI_WIN32_MEMORY_VERSION ||
+   struct wsi_win32_memory owner;
+   if (!wsi_win32_memory_copy(&owner, memory))
+      return vk_error(log, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+   memory = &owner;
+   if (
        !memory->allocation || memory->adapter_luid != luid ||
        !size || size > memory->size || (memory->size & (TG_KMT_PAGE_SIZE - 1)) ||
        !memory->retain || !memory->release || !memory->map_gpu || !memory->free_gpu ||
@@ -350,7 +372,24 @@ win_import_wsi_memory(struct nvkmd_dev *dev, struct vk_object_base *log,
    mem->allocation.handle = memory->allocation;
    mem->allocation.size = memory->size;
    memory->retain(memory->context);
+   if (memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION) {
+      LONG status = tg_kmt_open_runtime_alias(&nvkmd_windows_dev(dev)->kmt,
+         memory->kernel_resource, memory->size, &mem->alias);
+      if (status < 0) {
+         if (win_release_allocation(dev, mem))
+            free(mem);
+         return nvkmd_windows_status(log, "open runtime write alias", status,
+                                     VK_ERROR_INVALID_EXTERNAL_HANDLE);
+      }
+   }
    return win_finish_mem(dev, log, mem, alignment, kind, flags, out);
+}
+
+uint32_t
+nvkmd_windows_written_allocation(struct nvkmd_mem *base)
+{
+   const struct nvkmd_windows_mem *mem = container_of(base, struct nvkmd_windows_mem, base);
+   return mem->alias.allocation;
 }
 
 VkResult
@@ -390,7 +429,35 @@ static void
 win_destroy_device(struct nvkmd_dev *base)
 {
    struct nvkmd_windows_dev *dev = nvkmd_windows_dev(base);
-   tg_kmt_close_device(&dev->kmt);
+   struct nvkmd_windows_mem **link = &dev->pending_aliases;
+   while (*link) {
+      struct nvkmd_windows_mem *mem = *link;
+      if (tg_kmt_close_runtime_alias(&dev->kmt, &mem->alias) >= 0) {
+         *link = mem->next_pending_alias;
+         mem->wsi.release(mem->wsi.context);
+         free(mem);
+      } else {
+         link = &mem->next_pending_alias;
+      }
+   }
+   LONG status = tg_kmt_close_device(&dev->kmt);
+   if (!dev->kmt.handle) {
+      /* Closing the kernel device releases any remaining alias references. */
+      while (dev->pending_aliases) {
+         struct nvkmd_windows_mem *mem = dev->pending_aliases;
+         dev->pending_aliases = mem->next_pending_alias;
+         mem->wsi.release(mem->wsi.context);
+         free(mem);
+      }
+   }
+   if (dev->kmt.handle || dev->kmt.adapter) {
+      /* A failed kernel-device teardown is not proof of GPU retirement.
+       * Retain these references for OS process cleanup, rather than freeing
+       * an owner while kernel aliases may still exist. */
+      nvkmd_windows_status(NULL, "kernel device and runtime aliases remain", status,
+                           VK_ERROR_DEVICE_LOST);
+      return;
+   }
    simple_mtx_destroy(&base->mems_mutex);
    free(dev);
 }
@@ -412,6 +479,7 @@ win_create_device(struct nvkmd_pdev *pdev, struct vk_object_base *log, struct nv
    struct nvkmd_windows_dev *dev = calloc(1, sizeof(*dev));
    if (!dev)
       return vk_error(log, VK_ERROR_OUT_OF_HOST_MEMORY);
+   InitializeSRWLock(&dev->alias_cleanup_lock);
    LONG status = tg_kmt_open_device(&dev->kmt, nvkmd_windows_adapter(pdev));
    if (status < 0) {
       free(dev);

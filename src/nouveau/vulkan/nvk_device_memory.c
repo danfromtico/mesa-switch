@@ -18,6 +18,7 @@
 #endif
 #include "util/u_atomic.h"
 #include "vk_internal_exts.h"
+#include "vk_wsi_win32_memory.h"
 
 #include <inttypes.h>
 
@@ -298,6 +299,11 @@ nvk_allocate_memory(VkDevice device,
 #endif
    if (is_wsi_win32_import) {
 #ifdef _WIN32
+      if (wsi_info->win32_memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION &&
+          !wsi_info->win32_written_allocation) {
+         result = vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+         goto fail_alloc;
+      }
       result = nvkmd_dev_import_wsi_win32_memory(dev->nvkmd, &dev->vk.base,
          wsi_info->win32_memory, aligned_size, alignment, pte_kind, flags, &mem->mem);
       if (result != VK_SUCCESS)
@@ -452,6 +458,8 @@ nvk_allocate_memory(VkDevice device,
 #ifdef _WIN32
    if (is_wsi_win32_import && wsi_info->win32_imported)
       *wsi_info->win32_imported = true;
+   if (is_wsi_win32_import && wsi_info->win32_memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION)
+      *wsi_info->win32_written_allocation = nvkmd_windows_written_allocation(mem->mem);
 #endif
 
    return VK_SUCCESS;

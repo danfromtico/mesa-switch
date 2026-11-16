@@ -15,6 +15,10 @@ not accepted. The linear-buffer/error-contract candidate reached modern device
 creation but failed before presentation; modern negotiation is withheld again.
 Local render/paging fence guards now reject all-ones completion values. These
 guards passed builds and CPU controls, but have not been installed or accepted.
+Displayable-write tracking now reaches NVK submissions with bounded batches and
+owned asynchronous metadata. ARM64/x64 CPU controls pass; runtime NT-shareability
+and kernel-resource access remain unresolved, so modern admission stays withheld.
+The new UMD/ICD pair has not been installed or accepted.
 [Current handoff and evidence](tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)
 supersede the historical package milestones below.
 

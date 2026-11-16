@@ -113,6 +113,7 @@ struct ImageStorage {
    VkImage image = VK_NULL_HANDLE;
    VkDeviceMemory memory = VK_NULL_HANDLE;
    RuntimeResource *runtime = nullptr;   /* runtime-owned WDDM allocation */
+   uint32_t writtenAllocation = 0;      /* same backing, NVK submitting device's handle */
    VkImageAspectFlags aspects = VK_IMAGE_ASPECT_COLOR_BIT;
    bool layoutReady = false;
    bool preinitialized = false;          /* imported contents must survive the first use */
@@ -399,6 +400,8 @@ struct Device {
    Resource *resources = nullptr;
    uint64_t periodicTrimSequence = 0;
    std::vector<VkImage> sharedImages; /* acquired this recording; release before submission */
+   uint32_t writtenAllocations[16] = {};
+   UINT writtenCount = 0;
 
    /* Bound state */
    StageBindings stage[STAGE_COUNT];
@@ -469,7 +472,8 @@ SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER, const D3D10DDIARG_CALCP
 HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER, D3D10DDIARG_CREATEDEVICE *);
 
 /* tgd3d_cmd.cpp: command recording, submission and the queue fence */
-VkCommandBuffer cmd_begin(Device *dev);       /* command buffer for non-draw commands; ends rendering */
+VkCommandBuffer cmd_begin(Device *dev, ImageStorage *write = nullptr);
+bool prepare_image_writes(Device *dev, const ImageStorage *const *images, UINT count);
 VkCommandBuffer cmd_draw(Device *dev);        /* command buffer inside the current render pass */
 void end_rendering(Device *dev);
 HRESULT flush(Device *dev, bool waitForSpace);
@@ -594,13 +598,14 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
 HRESULT runtime_destroy(RuntimeResource *resource);
 HRESULT runtime_set_display_mode(RuntimeResource *resource, Device *dev, UINT subresource);
 bool runtime_is_primary(const RuntimeResource *resource);
+bool runtime_is_displayable(const RuntimeResource *resource);
 bool runtime_primary_compatible(const RuntimeResource *source, const RuntimeResource *target);
 D3DKMT_HANDLE runtime_allocation(const RuntimeResource *resource);
 void runtime_rebind(RuntimeResource *resource, D3D10DDI_HRTRESOURCE runtime);
 /* Binds `image` to the runtime allocation: NVK owner import, or a host
  * pointer in the test build. No pixels are copied on either path. */
 HRESULT runtime_bind_image(Device *dev, RuntimeResource *resource, VkImage image,
-                           VkDeviceMemory *memory);
+                           VkDeviceMemory *memory, uint32_t *written_allocation = nullptr);
 HRESULT runtime_bind_buffer(Device *dev, RuntimeResource *resource, VkBuffer buffer,
                             VkDeviceMemory *memory);
 

@@ -338,6 +338,10 @@ struct nvkmd_ctx_exec {
     */
    bool incomplete;
    bool no_prefetch;
+#ifdef _WIN32
+   uint32_t written_count;
+   const uint32_t *written_allocations;
+#endif
 };
 
 struct nvkmd_ctx_bind {

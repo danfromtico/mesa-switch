@@ -1,7 +1,8 @@
 # Displayable资源、提交device与WrittenPrimaries
 
-本轮基于`0f1760d79ade28daaa8c8a7d01651f83c0e9d75a`，继续57a原生失败后的源码排查。
-新增的是提交端基础能力，尚未接通UMD，未启用现代接口，未安装新ICD/KMD或改变显示方向。
+最初后端基于`0f1760d79ade28daaa8c8a7d01651f83c0e9d75a`，已提交为`f01448d0`。
+后续接通UMD写入跟踪、NVK引用和队列列表，构建及CPU控制通过；现代接口仍关闭。
+尚未证明真实runtime所有呈现资源可导出，没有安装新UMD/ICD/KMD或改变显示方向。
 列扫描仍是目标路线，Noble的物理布局证据沿用前轮，不采用GPU预旋转或强开寄存器替代。
 
 ## 已确认的契约缺口
@@ -49,10 +50,38 @@ STATUS_INVALID_PARAMETER路径。不是简单的同进程GPU VA相等就允许�
   检查16上限、空句柄、重复句柄和命令长度。原无列表提交包装保留，不添加空写入标记或伪造完成。
 - KMT分页等待同步补入全1完成值拒绝，与tgd3d私有分页防护一致；未修改任意Vulkan应用timeline的合法值域。
 
-**未接通的部分：** UMD保存hKMResource、importer持有alias、提交前按实际写入形成列表、
-16项边界处按完整操作分批、列表跨异步提交的存活、失败回收和真正GPU完成后的释放。
-还要验证runtime是否允许导出各类呈现资源；导出失败不得通过虚构句柄/布局绕过。
-这些完成前，不放开DISPLAYABLE_SURFACE接纳，不启用现代默认协商，不把本轮作为黑屏修复版。
+## UMD至NVK连接（基于f01448d0）
+
+- owner v1保留原ABI前缀，v2另携带真正的kernel resource及导入确认；保护页控制验证新ICD
+  不读取旧UMD不存在的尾部。旧ICD拒绝v2，不能假装接受新提交契约。
+- 线性／tiled共享元数据分别保留v1／v2，并增加带DISPLAYABLE标志的v3／v4；OpenResource
+  恢复相同属性，拒绝错误版本、未知保留位、布局和设备／驱动身份不匹配。
+- 写引用跟随ImageStorage实际backing，在clear、draw、upload、copy／Blt及GenMips写入时收集；
+  排除只读访问、去重，并在整次操作取得命令／描述符前分批。33项延迟clear形成16／16／1，
+  分批保留原双向Fence协议，不用CPU信号模拟完成。
+- 私有提交链进入Mesa公共队列时复制16项以内的内联列表，NVK实际命令提交携带该列表。
+  通用提交合并遇到写引用就保留边界，防止元数据丢失或越过16上限；普通提交仍可合并。
+- alias关闭失败保留句柄和owner引用；销毁设备成功后才释放剩余引用。内核设备关闭也失败时，
+  保留对象到进程清理，不声称已完成退休。tg_kmt_close_device不再无条件清零失败的句柄。
+- 带显示引用的资源不参与当前Offer／Trim路径，避免只释放原device的一份驻留引用就声称回收预算。
+
+## 新确认的适用限制：不能据控制测试重新开放现代接口
+
+微软D3DKMTShareObjects明确要求原对象创建时具有NtSecuritySharing。DISPLAYABLE_SURFACE
+只描述呈现用途，不足以证明可导出NT共享引用。匹配d3d11.dll的原生
+`NDXGI::CDevice::AllocateCB`（RVA0xc080–0xc6e0）在0xc388读取内部共享描述+0x38，
+0xc38c按零值跳过，0xc390才把0x40写入KMT CreateAllocation Flags（NtSecuritySharing位）。
+这是有条件的分支，不能由本轮CPU替身的ShareObjects成功推断普通DWM资源都能经过它。
+
+同一原生函数未发现对调用者D3DDDICB_ALLOCATE.hKMResource（+0x18）的回写；它更新内部
+resource对象的kernel handle（0xc53c–0xc540）。这项静态观察仍需核对完整callback适配路径，
+不能解引用hRTResource私有布局获取内部句柄，也不能把控制中人为返回的0x90当作真实输出证明。
+本实现缺少合法kernel resource或NT导出失败时直接拒绝，不使用foreign allocation兜底。
+
+下一步需完成**不依赖所有资源都可NT导出的真实提交所有权路径**：核对通过runtime创建第二个
+受管理context、在原DDI线程提交真实NVK命令的可行性，连同GPU等待／信号、错误和销毁一起处理。
+这只是下一步设计方向，尚未实现；不能提交空命令或伪造WrittenPrimaries来补账。
+现代GetSupportedVersions继续只公布原三项接口，KMD仍为WDDM2.6。列扫描几何和当前电源修正保留。
 
 ## 验证
 
@@ -82,3 +111,40 @@ Gemini独立审计仍待2026-11-20T23:53:18Z额度恢复。现有5b UMD/E95 KMD/
 （2023-10-06页面；本轮读取2026-11-16）、
 [DDI MiscFlags](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/ne-d3d10umddi-d3d10_ddi_resource_misc_flag)、
 [primary与呈现资源区别](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/passing-dxgi-information-at-resource-creation-time)。
+
+## 连接轮控制和构建结果
+
+2026-11-16 08:42:49 UTC，Switch上四项ARM64控制全部退出0、无超时：
+
+| 控制 | SHA256 |
+|---|---|
+| KMT引用／关闭失败／WrittenPrimaries | `db654af68025724c61fcfea69ebc103aac12b0ec904767200f4698560bd4d93a` |
+| 实际NVK owner导入／清理 | `e29fb4646a61c70645b710384f423338d98bfc6be71c6c2fa4231ea318849399` |
+| 实际公共队列、后台提交列表寿命及合并 | `4057d3299fe55df646f8f0cd46f041d6977759390e5c981a059c09e8a17289d0` |
+| tgd3d完整CPU契约 | `baca64cdfd490911d295b21a63de5b703bcf3bf27f8bad2ef4c99bab25b2af68` |
+
+相同逻辑x64控制在本地Wine通过，包括原同步控制。owner控制初版误调用backend内部函数，绕过
+公共导入器的allocation链表注册，随后unref导致控制崩溃；已改用真实公共入口后通过，原失败日志保留。
+新队列控制执行真实公共QueueSubmit2及工作线程，但driver_submit由替身接管；KMT运输也由替身接管，
+未执行任何GPU命令。08:43:33 UTC临时目录已删除，启动07:17:34和DWM1176保持，Code0，
+UMD5b66bbec／ICD95b97df4／KMDe95287cb完整哈希和加载路径均与恢复状态相同。
+
+本地未部署产物：
+
+| 产物 | SHA256 |
+|---|---|
+| ARM64 UMD | `10b718abf70b6f4b74178eed873c8115dc886430ee2cf3a1033e40c4ba3e414c` |
+| ARM64 ICD | `ec908de545538914f2c623a876de0c71678aa6d1d90e778835ea719a3214b7d3` |
+
+ICD build-id `588733c530697c06c24ff17cea73b11caa39407cb7253f6071319eadfc446d5e`。
+源码diff、原有未提交工作、附加测试、交叉配置和构建日志独立冻结于OUT `displayable-bridge-20261116/`。
+没有重建／替换KMD，没有上屏或列扫描新增通过结论。Gemini独立审计仍待额度恢复。
+
+新增参考（读取2026-11-16）：
+[ShareObjects与NT共享前提](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtshareobjects)、
+[Allocate callback结构](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/ns-d3dumddi-_d3dddicb_allocate)、
+[callback线程和上下文规则](https://learn.microsoft.com/en-us/windows-hardware/drivers/display/changes-from-direct3d-10)。
+
+最后补入QueueSubmit2后续批次验证失败时释放此前尚未提交的记录和临时同步引用。分配计数控制确认
+无泄漏，x64通过；08:47:55 UTC仅重测新ARM64队列控制，退出0、DWM1176不变、临时目录已删除。
+该最终控制SHA256 `2636bb322610cabc3dfce055d66ceedaf2640e8a3111f27e78d62313d24638bd`；上表保留08:42原四项的实际哈希，不混写测试轮次。

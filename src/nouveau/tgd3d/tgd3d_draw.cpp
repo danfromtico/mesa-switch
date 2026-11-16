@@ -361,7 +361,6 @@ static bool begin_rendering(Device *dev)
    if (width == ~0u)
       return false;       /* nothing to render into */
 
-   flush_pending_clears(dev, dev->dsv ? dev->dsv : dev->rtv[0]);
    command_barrier(dev);
    for (uint32_t i = 0; i < colors; i++)
       if (dev->rtv[i])
@@ -712,6 +711,13 @@ static VkCommandBuffer prepare_draw(Device *dev, bool indexed)
    if (FAILED(dev->lost) || !dev->stage[STAGE_VS].shader || !dev->viewportCount)
       return VK_NULL_HANDLE;
    if (indexed && (!dev->indexBuffer || !dev->indexBuffer->slice))
+      return VK_NULL_HANDLE;
+   flush_pending_clears(dev, dev->dsv ? dev->dsv : dev->rtv[0]);
+   const ImageStorage *writes[D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT + 1] = {};
+   for (UINT i = 0; i < D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
+      if (dev->rtv[i]) writes[i] = &dev->rtv[i]->res->storage;
+   if (dev->dsv) writes[D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT] = &dev->dsv->res->storage;
+   if (!prepare_image_writes(dev, writes, D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT + 1))
       return VK_NULL_HANDLE;
    prepare_reads(dev);
    barrier_for_read(dev, dev->bufferWriteSerial);

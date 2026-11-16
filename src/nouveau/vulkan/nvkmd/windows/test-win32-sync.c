@@ -133,8 +133,10 @@ tg_kmt_signal_gpu(uint32_t context, uint32_t count, const uint32_t *handles,
 }
 
 LONG
-tg_kmt_submit(uint32_t context, uint64_t address, const void *words, uint32_t bytes)
+tg_kmt_submit_primaries(uint32_t context, uint64_t address, const void *words,
+                       uint32_t bytes, uint32_t count, const uint32_t *allocations)
 {
+   CHECK(!count); (void)allocations;
    CHECK(false); /* A synchronization control must never execute GPU commands. */
    return TG_KMT_INVALID_PARAMETER;
 }

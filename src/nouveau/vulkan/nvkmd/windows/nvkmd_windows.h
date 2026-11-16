@@ -6,9 +6,13 @@
 #include "kmt_native.h"
 #include <vulkan/vulkan_win32.h>
 
+struct nvkmd_windows_mem;
+
 struct nvkmd_windows_dev {
    struct nvkmd_dev base;
    struct tg_kmt_device kmt;
+   SRWLOCK alias_cleanup_lock;
+   struct nvkmd_windows_mem *pending_aliases;
 };
 
 static inline struct nvkmd_windows_dev *
@@ -21,6 +25,7 @@ const struct tg_gpu_adapter_info *nvkmd_windows_adapter(const struct nvkmd_pdev 
 VkResult nvkmd_windows_export_memory(struct nvkmd_mem *mem, struct vk_object_base *log,
                                      const VkExportMemoryWin32HandleInfoKHR *info,
                                      HANDLE *handle);
+uint32_t nvkmd_windows_written_allocation(struct nvkmd_mem *mem);
 VkResult nvkmd_windows_status(struct vk_object_base *log, const char *operation,
                              LONG status, VkResult failure);
 VkResult nvkmd_windows_create_ctx(struct nvkmd_dev *dev, struct vk_object_base *log,

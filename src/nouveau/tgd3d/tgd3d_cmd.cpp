@@ -10,11 +10,13 @@
  * Flush/Present may wait once two submissions are outstanding.
  */
 #include "tgd3d.h"
+#include "vulkan/util/vk_internal_exts.h"
 #include <winternl.h>
 
 namespace tgd3d {
 
 enum { TGD3D_MAX_IN_FLIGHT = 2 };
+static HRESULT flush_recorded(Device *dev, bool waitForSpace);
 
 typedef NTSTATUS(APIENTRY *PFN_ShareObjects)(UINT, const D3DKMT_HANDLE *, void *, DWORD, HANDLE *);
 
@@ -241,10 +243,40 @@ VkCommandBuffer cmd_draw(Device *dev)
    return cmd;
 }
 
-VkCommandBuffer cmd_begin(Device *dev)
+bool prepare_image_writes(Device *dev, const ImageStorage *const *images, UINT count)
+{
+   if (FAILED(dev->lost)) return false;
+   uint32_t incoming[WSI_WIN32_MAX_WRITTEN_PRIMARIES] = {};
+   UINT unique = 0, additional = 0;
+   for (UINT i = 0; i < count; ++i) {
+      const uint32_t allocation = images[i] ? images[i]->writtenAllocation : 0;
+      if (!allocation) continue;
+      bool seen = false;
+      for (UINT j = 0; j < unique; ++j) seen |= incoming[j] == allocation;
+      if (seen) continue;
+      if (unique == WSI_WIN32_MAX_WRITTEN_PRIMARIES) {
+         TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED); return false;
+      }
+      incoming[unique++] = allocation;
+      for (UINT j = 0; j < dev->writtenCount; ++j) seen |= dev->writtenAllocations[j] == allocation;
+      additional += !seen;
+   }
+   /* Split before a complete operation acquires command/descriptor state.
+    * Pending clears remain in their existing ordering domain; recursively
+    * draining them here could execute a later clear before the current one. */
+   if (dev->writtenCount + additional > WSI_WIN32_MAX_WRITTEN_PRIMARIES &&
+       FAILED(flush_recorded(dev, false)))
+      return false;
+   return SUCCEEDED(dev->lost);
+}
+
+VkCommandBuffer cmd_begin(Device *dev, ImageStorage *write)
 {
    end_rendering(dev);
    flush_pending_clears(dev, nullptr);
+   const ImageStorage *image = write;
+   if (!prepare_image_writes(dev, &image, 1))
+      return VK_NULL_HANDLE;
    VkCommandBuffer cmd = ensure_cmd(dev);
    if (!cmd)
       return VK_NULL_HANDLE;
@@ -275,6 +307,17 @@ void command_barrier(Device *dev)
 
 void image_use(Device *dev, ImageStorage &storage, bool write)
 {
+   if (write && storage.writtenAllocation) {
+      bool seen = false;
+      for (UINT i = 0; i < dev->writtenCount; ++i)
+         seen |= dev->writtenAllocations[i] == storage.writtenAllocation;
+      if (!seen) {
+         if (dev->writtenCount == WSI_WIN32_MAX_WRITTEN_PRIMARIES) {
+            TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED); return;
+         }
+         dev->writtenAllocations[dev->writtenCount++] = storage.writtenAllocation;
+      }
+   }
    storage.lastUse = dev->recordingSeq();
    if (storage.externalShared && storage.acquireSeq != dev->recordingSeq()) {
       end_rendering(dev);
@@ -360,6 +403,8 @@ void flush_pending_clears(Device *dev, const View *except_bound)
          }
       }
       View *view = clear.view;
+      const ImageStorage *image = &view->res->storage;
+      if (!prepare_image_writes(dev, &image, 1)) return;
       command_barrier(dev);
       image_use(dev, view->res->storage, true);
       VkCommandBuffer cmd = ensure_cmd(dev);
@@ -554,11 +599,8 @@ static HRESULT gate_runtime(Device *dev)
    return S_OK;
 }
 
-HRESULT flush(Device *dev, bool waitForSpace)
+static HRESULT flush_recorded(Device *dev, bool waitForSpace)
 {
-   if (FAILED(dev->lost))
-      return dev->lost;
-   flush_pending_clears(dev, nullptr);
    if (FAILED(dev->lost))
       return dev->lost;
    if (dev->cmd && dev->cmdHasWork) {
@@ -644,6 +686,10 @@ HRESULT flush(Device *dev, bool waitForSpace)
       VkCommandBufferSubmitInfo buffer = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO};
       buffer.commandBuffer = dev->cmd;
       VkSubmitInfo2 submit = {VK_STRUCTURE_TYPE_SUBMIT_INFO_2};
+      wsi_win32_written_primaries written = {VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA};
+      written.version = 1; written.count = dev->writtenCount;
+      memcpy(written.allocations, dev->writtenAllocations, written.count * sizeof(uint32_t));
+      if (written.count) submit.pNext = &written;
       submit.waitSemaphoreInfoCount = waitCount;
       submit.pWaitSemaphoreInfos = waits;
       submit.commandBufferInfoCount = 1;
@@ -661,6 +707,7 @@ HRESULT flush(Device *dev, bool waitForSpace)
       }
       SubmittedCommands done = {dev->cmd, value, {}};
       dev->sharedImages.clear();
+      dev->writtenCount = 0;
       done.pools.swap(dev->framePools);
       dev->submittedCommands.push_back(done);
       dev->cmd = VK_NULL_HANDLE;
@@ -719,6 +766,13 @@ HRESULT flush(Device *dev, bool waitForSpace)
    }
 #endif
    return FAILED(hr) ? hr : dev->lost;
+}
+
+HRESULT flush(Device *dev, bool waitForSpace)
+{
+   if (FAILED(dev->lost)) return dev->lost;
+   flush_pending_clears(dev, nullptr);
+   return flush_recorded(dev, waitForSpace);
 }
 
 }

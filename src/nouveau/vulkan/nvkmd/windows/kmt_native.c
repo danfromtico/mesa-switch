@@ -81,20 +81,32 @@ tg_kmt_close_device(struct tg_kmt_device *dev)
    if (dev->paging_queue) {
       D3DDDI_DESTROYPAGINGQUEUE queue = { .hPagingQueue = dev->paging_queue };
       status = D3DKMTDestroyPagingQueue(&queue);
+      if (status >= 0) {
+         dev->paging_queue = 0;
+         dev->paging = (struct tg_kmt_fence){0};
+      }
    }
    if (dev->handle) {
       const D3DKMT_DESTROYDEVICE device = { .hDevice = dev->handle };
       LONG next = D3DKMTDestroyDevice(&device);
       if (status >= 0)
          status = next;
+      if (next >= 0) {
+         dev->handle = dev->paging_queue = 0;
+         dev->paging = (struct tg_kmt_fence){0};
+         dev->allocated = 0;
+      }
    }
-   if (dev->adapter) {
+   if (dev->adapter && !dev->handle) {
       const D3DKMT_CLOSEADAPTER adapter = { .hAdapter = dev->adapter };
       LONG next = D3DKMTCloseAdapter(&adapter);
       if (status >= 0)
          status = next;
+      if (next >= 0)
+         dev->adapter = 0;
    }
-   *dev = (struct tg_kmt_device){0};
+   if (!dev->handle && !dev->adapter)
+      *dev = (struct tg_kmt_device){0};
    return status;
 }
 

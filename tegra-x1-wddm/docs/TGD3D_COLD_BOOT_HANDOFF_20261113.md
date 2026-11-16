@@ -1,4 +1,22 @@
-# 当前进度 — 2026-11-16 呈现资源写入契约与提交device引用
+# 当前进度 — 2026-11-16 08:48 UTC 写入跟踪连接完成，真实导出范围未闭合
+
+在f01448d0后端上接通owner v2、显示表面属性、实际写入列表和NVK命令提交；完整操作前按16项
+分批，异步队列复制列表，禁止通用合并丢失列表。清理失败保留引用；显示引用不误报Trim回收。
+四项原生ARM64 CPU控制和相应x64控制通过。详见[呈现资源契约](DISPLAYABLE_RESOURCE_CONTRACT_20261116.md)。
+
+**未开放现代接口，未安装新候选。** 新核对发现ShareObjects要求NtSecuritySharing，匹配runtime
+只在特定共享描述下设置该位；AllocateCB的kernel-resource输出可用性也未闭合。不能把CPU替身的
+成功当作DWM资源可导出的证明。下一步审查runtime管理的第二个提交context与真实NVK命令路径，
+保持当前双向Fence和列扫描目标，不通过空命令／伪完成绕过WrittenPrimaries。
+
+08:43:33已清理CPU控制目录，启动仍07:17:34.328844Z、DWM1176、Code0；加载5b66bbec UMD／
+95b97df4 ICD、e95287cb KMD及平台设置保留。无安装、切方向或重启；没有新增实屏验收。
+08:47:55只补测后续批次失败清理的新队列控制，退出0，DWM1176不变，临时目录已删除。
+新ARM64 UMD/ICD及完整源码、哈希、控制结果在OUT `displayable-bridge-20261116/manifest.json`。
+Gemini独立审计待2026-11-20T23:53:18Z额度恢复，未声称审核通过。
+
+## 前一轮 — 呈现资源写入契约与提交device引用
+
 
 接0f1760d7继续核对：DISPLAYABLE_SURFACE未被资源路径支持，NVK提交也缺少WrittenPrimaries。
 匹配dxgmms2确认该列表拒绝别的device的allocation句柄；GPU VA相同不能替代所有权。

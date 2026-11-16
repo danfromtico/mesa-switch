@@ -573,7 +573,7 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
          saved.bind = D3D10_DDI_BIND_SHADER_RESOURCE;
          hr = image_create(dev, &saved);
          if (FAILED(hr)) return hr;
-         VkCommandBuffer cmd = cmd_begin(dev);
+         VkCommandBuffer cmd = cmd_begin(dev, &saved.storage);
          if (cmd) {
             image_use(dev, src->storage, false);
             barrier_for_read(dev, src->storage.writeSerial);
@@ -610,7 +610,7 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
       const int32_t sh = source ? source->bottom - sy : (int32_t)src->mipHeight(src_mip);
       const int32_t dw = (int32_t)(args->DstRight - args->DstLeft);
       const int32_t dh = (int32_t)(args->DstBottom - args->DstTop);
-      VkCommandBuffer cmd = cmd_begin(dev);
+      VkCommandBuffer cmd = cmd_begin(dev, &dst->storage);
       if (!cmd)
          return FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
       image_use(dev, src->storage, false);

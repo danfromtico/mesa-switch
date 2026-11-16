@@ -511,6 +511,10 @@ nvk_queue_submit_exec(struct nvk_queue *queue,
             .size_B = push->range,
             .incomplete = push->incomplete,
             .no_prefetch = push->no_prefetch,
+#ifdef _WIN32
+            .written_count = submit->win32_written_count,
+            .written_allocations = submit->win32_written_allocations,
+#endif
          };
       }
 
@@ -689,6 +693,9 @@ nvk_queue_create(struct nvk_device *dev,
    result = vk_queue_init(&queue->vk, &dev->vk, pCreateInfo, index_in_family);
    if (result != VK_SUCCESS)
       goto fail_alloc;
+#ifdef _WIN32
+   queue->vk.supports_wsi_written_primaries = true;
+#endif
 
    nvk_queue_state_init(&queue->state);
 

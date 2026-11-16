@@ -2,6 +2,7 @@
  * CPU controls of the production DDI code. No Vulkan driver is loaded.
  */
 #include "tgd3d.h"
+#include "vulkan/util/vk_internal_exts.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -23,6 +24,7 @@ static unsigned signals, submissions, gates, cpuWaits, cpuSignals, barriers, vie
 static unsigned failAt, layouts, descriptorSets, updates, setErrorCalls;
 static HRESULT lastError;
 static std::vector<unsigned> events;
+static std::vector<std::vector<uint32_t>> writtenBatches;
 static std::vector<uint32_t> cbBindings;
 static VkDeviceSize cbOffsets[3];
 static VkDeviceSize cbRanges[3];
@@ -99,6 +101,12 @@ static Device make_device(Adapter *adapter)
       CHECK(count == 1 && info->commandBufferInfoCount == 1 && info->signalSemaphoreInfoCount == 1);
       CHECK(info->pSignalSemaphoreInfos[0].value == submissions + 1);
       CHECK(info->pSignalSemaphoreInfos[0].semaphore == handle<VkSemaphore>(3));
+      if (info->pNext) {
+         const auto *written = static_cast<const wsi_win32_written_primaries *>(info->pNext);
+         CHECK(written->sType == VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA &&
+               written->version == 1 && written->count && written->count <= 16 && !written->pNext);
+         writtenBatches.emplace_back(written->allocations, written->allocations + written->count);
+      }
 #ifdef TGD3D_CPU_SYNC_CONTROL
       CHECK(info->waitSemaphoreInfoCount == (submissions ? 1u : 0u));
 #else
@@ -135,7 +143,45 @@ static void reset()
    completedValue = 0;
    signals = submissions = gates = cpuWaits = cpuSignals = barriers = viewsDestroyed = 0;
    failAt = layouts = descriptorSets = updates = setErrorCalls = 0;
-   lastError = S_OK; events.clear(); cbBindings.clear();
+   lastError = S_OK; events.clear(); cbBindings.clear(); writtenBatches.clear();
+}
+
+static void displayable_write_batches()
+{
+   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   Resource resources[33]; View views[33];
+   dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *info,
+                              const VkAllocationCallbacks *, VkImageView *out) -> VkResult {
+      *out = (VkImageView)info->image; return VK_SUCCESS;
+   };
+   for (UINT i = 0; i < 33; ++i) {
+      auto &res = resources[i]; res.dev = &dev; res.kind = ResKind::Image;
+      res.storage.image = handle<VkImage>(0x1000 + i); res.storage.layoutReady = true;
+      res.storage.writtenAllocation = 200 + i;
+      auto &view = views[i]; view.dev = &dev; view.res = &res; view.type = ViewType::RTV;
+      view.width = view.height = 32; view.layers = 1;
+      dev.pendingClears.push_back({&view, {}, VK_IMAGE_ASPECT_COLOR_BIT});
+   }
+   CHECK(flush(&dev, false) == S_OK && dev.pendingClears.empty() && !dev.writtenCount);
+   CHECK(writtenBatches.size() == 3 && submissions == 3 && !cpuSignals && !cpuWaits);
+   CHECK(writtenBatches[0].size() == 16 && writtenBatches[1].size() == 16 && writtenBatches[2].size() == 1);
+   for (UINT i = 0; i < 33; ++i) {
+      CHECK(writtenBatches[i / 16][i % 16] == 200 + i);
+      CHECK(resources[i].storage.lastUse == i / 16 + 1);
+   }
+   /* Read-only use is absent; identity moves preserve the backing's handle;
+    * repeated writes are deduplicated without changing the GPU fence. */
+   reset(); dev = make_device(&adapter);
+   ImageStorage image; image.image = handle<VkImage>(0x6000); image.layoutReady = true;
+   image.writtenAllocation = 500;
+   CHECK(cmd_begin(&dev)); image_use(&dev, image, false);
+   CHECK(flush(&dev, false) == S_OK && writtenBatches.empty());
+   ImageStorage moved = image; image = {};
+   CHECK(cmd_begin(&dev, &moved)); image_use(&dev, moved, true); image_use(&dev, moved, true);
+   CHECK(flush(&dev, false) == S_OK && writtenBatches.size() == 1 &&
+         writtenBatches[0] == std::vector<uint32_t>({500}) && moved.lastUse == 2);
+   CHECK(!cpuSignals && !cpuWaits);
+   std::puts("PASS: displayable writes split 33 deferred clears into 16/16/1, exclude reads, deduplicate and follow backing identity without CPU completion");
 }
 
 static void shared_ownership_contract()
@@ -1630,7 +1676,7 @@ int main(int argc, char **argv)
       return 0;
    }
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();
-   completion_failure_propagates(); removed_fence_never_completes();
+   completion_failure_propagates(); removed_fence_never_completes(); displayable_write_batches();
    shared_ownership_contract();
    ddi11_contracts();
    overlap_contracts();

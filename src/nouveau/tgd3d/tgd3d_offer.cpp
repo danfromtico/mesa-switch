@@ -26,7 +26,8 @@ static HRESULT owners(Device *dev, const DXGI_DDI_HRESOURCE *resources, UINT cou
       /* Offering shared resources requires keyed-mutex ownership. The current
        * device cannot create keyed-mutex resources and must not offer an
        * ordinary shared surface that another process may still be accessing. */
-      if (res->misc & D3D10_DDI_RESOURCE_MISC_SHARED) return E_INVALIDARG;
+      if (res->misc & (D3D10_DDI_RESOURCE_MISC_SHARED |
+                       D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) return E_INVALIDARG;
       out[i] = resource_runtime(res);
       if (!out[i]) return DXGI_ERROR_UNSUPPORTED;
       if (runtime_is_offered(out[i]) != offered) return E_INVALIDARG;
@@ -130,7 +131,8 @@ HRESULT trim_residency_for_allocation(Device *dev, RuntimeResource *exclude,
    const bool exhaust = requested == 0;
    for (Resource *res = dev->resources; res; res = res->next) {
       RuntimeResource *owner = resource_runtime(res);
-      if (!owner || owner == exclude || res->primary || resource_last_use(res) > done) continue;
+      if (!owner || owner == exclude || res->primary || runtime_is_displayable(owner) ||
+          resource_last_use(res) > done) continue;
       bool mapped = res->bufferMapped;
       for (const auto &map : res->maps) mapped |= map.mapped;
       if (mapped) continue;
@@ -164,7 +166,7 @@ HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args)
       const uint64_t use = resource_last_use(res);
       bool mapped = res->bufferMapped;
       for (const auto &map : res->maps) mapped |= map.mapped;
-      if (mapped || use > done || res->primary) continue;
+      if (mapped || use > done || res->primary || runtime_is_displayable(resource_runtime(res))) continue;
       if (!(args->TrimFlags.PeriodicTrim && use <= cutoff) && !budget) continue;
       uint64_t bytes = 0, remaining = 0;
       hr = runtime_evict(resource_runtime(res), &bytes, &remaining);

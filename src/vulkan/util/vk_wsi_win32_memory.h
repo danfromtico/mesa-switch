@@ -5,6 +5,8 @@
 #include <vulkan/vulkan_core.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
 /* Mesa-internal import of a runtime-owned WDDM allocation. These are not
  * Win32 external-memory handles and must never be passed to ShareObjects or
@@ -23,6 +25,7 @@
  * runtime's CreateResource/DestroyResource lifetime contract.
  */
 #define WSI_WIN32_MEMORY_VERSION 1u
+#define WSI_WIN32_MEMORY_DISPLAYABLE_VERSION 2u
 struct wsi_win32_memory {
    uint32_t version;
    uint32_t allocation;
@@ -38,7 +41,27 @@ struct wsi_win32_memory {
    VkResult (*free_gpu)(void *context, uint64_t reservation_base, uint64_t reservation_size);
    VkResult (*map_cpu)(void *context, void **address);
    void (*unmap_cpu)(void *context);
+
+   /* Version 2 only: actual kernel resource returned by Allocate/OpenResource,
+    * never hRTResource. Version 1 ends before this member. Version 2 requires
+    * an importing-device write reference and positive acknowledgement. */
+   uint32_t kernel_resource;
+   uint32_t reserved;
 };
+
+static inline bool
+wsi_win32_memory_copy(struct wsi_win32_memory *dst, const struct wsi_win32_memory *src)
+{
+   memset(dst, 0, sizeof(*dst));
+   if (!src || (src->version != WSI_WIN32_MEMORY_VERSION &&
+                src->version != WSI_WIN32_MEMORY_DISPLAYABLE_VERSION))
+      return false;
+   /* Old UMDs provide only the v1 prefix. Do not read the new tail. */
+   memcpy(dst, src, src->version == WSI_WIN32_MEMORY_VERSION ?
+          offsetof(struct wsi_win32_memory, kernel_resource) : sizeof(*dst));
+   return src->version == WSI_WIN32_MEMORY_VERSION ||
+          (dst->kernel_resource && !dst->reserved);
+}
 
 /* A runtime allocation has one stored format. The only other way to view it
  * is the sRGB encoding of the same bytes, which Direct3D applications use

@@ -165,7 +165,8 @@ HRESULT image_create(Device *dev, Resource *res)
       hr = runtime ? runtime_shared_tiled_check(dev, runtime, ici, req) :
          runtime_shared_tiled_create(dev, res, ici, req, &res->storage.runtime);
       if (SUCCEEDED(hr))
-         hr = runtime_bind_image(dev, res->storage.runtime, res->storage.image, &res->storage.memory);
+         hr = runtime_bind_image(dev, res->storage.runtime, res->storage.image, &res->storage.memory,
+                                 &res->storage.writtenAllocation);
       if (SUCCEEDED(hr)) {
          res->storage.externalShared = true;
          /* The private runtime owner imports the producer's actual NVK
@@ -186,7 +187,8 @@ HRESULT image_create(Device *dev, Resource *res)
       }
       if (SUCCEEDED(hr)) {
          trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 4, (uintptr_t)res);
-         hr = runtime_bind_image(dev, runtime, res->storage.image, &res->storage.memory);
+         hr = runtime_bind_image(dev, runtime, res->storage.image, &res->storage.memory,
+                                 &res->storage.writtenAllocation);
          trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 4, (uintptr_t)res);
       }
    } else {
@@ -197,7 +199,8 @@ HRESULT image_create(Device *dev, Resource *res)
           * ownership changes; this is not a linear/shared image import. */
          hr = runtime_private_create(dev, res->hRT, req.size, &res->storage.runtime);
          if (SUCCEEDED(hr))
-            hr = runtime_bind_image(dev, res->storage.runtime, res->storage.image, &res->storage.memory);
+            hr = runtime_bind_image(dev, res->storage.runtime, res->storage.image, &res->storage.memory,
+                                    &res->storage.writtenAllocation);
       } else {
          VkMemoryAllocateInfo alloc = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
          alloc.allocationSize = req.size;
@@ -335,7 +338,7 @@ static HRESULT upload_texels(Device *dev, Resource *res, UINT sub, const D3D10_D
    for (uint32_t z = 0; z < depth; z++)
       copy_rows(slice.cpu() + (size_t)z * bytes * rows, bytes,
                 static_cast<const uint8_t *>(data) + (size_t)z * depth_pitch, row_pitch, bytes, rows);
-   VkCommandBuffer cmd = cmd_begin(dev);
+   VkCommandBuffer cmd = cmd_begin(dev, &res->storage);
    if (!cmd) {
       slice_release(dev, slice, 0);
       return FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
@@ -491,7 +494,8 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    res->imageType = res->dim == D3D10DDIRESOURCE_TEXTURE1D ? VK_IMAGE_TYPE_1D :
                     res->dim == D3D10DDIRESOURCE_TEXTURE3D ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D;
    res->cube = res->dim == D3D10DDIRESOURCE_TEXTURECUBE;
-   res->tiledShared = !desc->pPrimaryDesc && (res->misc & D3D10_DDI_RESOURCE_MISC_SHARED) &&
+   res->tiledShared = !desc->pPrimaryDesc && (res->misc & (D3D10_DDI_RESOURCE_MISC_SHARED |
+      D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) &&
       (res->arraySize != 1 || (res->format != DXGI_FORMAT_B8G8R8A8_UNORM &&
                                res->format != DXGI_FORMAT_R8G8B8A8_UNORM));
    if (res->tiledShared) {
@@ -529,7 +533,8 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
       hr = runtime_primary_create(dev, desc, res->hRT, &res->storage.runtime, &width, &height, &pitch);
       res->primary = true;
       res->pitch = pitch;
-   } else if (SUCCEEDED(hr) && (res->misc & D3D10_DDI_RESOURCE_MISC_SHARED) && !res->tiledShared) {
+   } else if (SUCCEEDED(hr) && (res->misc & (D3D10_DDI_RESOURCE_MISC_SHARED |
+             D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) && !res->tiledShared) {
       hr = runtime_shared_create(dev, desc, res->hRT, &res->storage.runtime, &res->pitch);
    } else if (SUCCEEDED(hr) && !res->tiledShared && (res->misc & ~(D3D10_DDI_RESOURCE_AUTO_GEN_MIP_MAP |
                                             D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT))) {
@@ -591,6 +596,8 @@ static void APIENTRY OpenResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_OP
       res->usage = d.usage;
       res->bind = d.bind_flags;
       res->misc = D3D10_DDI_RESOURCE_MISC_SHARED;
+      if (runtime_is_displayable(res->storage.runtime))
+         res->misc |= D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE;
       res->format = d.format;
       res->width = d.width;
       res->height = d.height;
@@ -1174,7 +1181,7 @@ static void APIENTRY ResourceUnmap(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURCE 
    const FormatInfo *info = format_info(res->format);
    const UINT mip = sub % res->mips;
    const uint32_t pitch = (row_bytes(info, res->mipWidth(mip)) + 3) & ~3u;
-   VkCommandBuffer cmd = cmd_begin(dev);
+   VkCommandBuffer cmd = cmd_begin(dev, &res->storage);
    if (!cmd) {
       slice_release(dev, map.upload, 0);
       map.upload = Slice();
@@ -1446,7 +1453,7 @@ static bool copy_region(Device *dev, Resource *dst, UINT dst_sub, UINT dx, UINT 
       return true;
    }
 
-   VkCommandBuffer cmd = cmd_begin(dev);
+   VkCommandBuffer cmd = cmd_begin(dev, dst->kind == ResKind::Image ? &dst->storage : nullptr);
    if (!cmd) return false;
    if (src->kind == ResKind::Image) {
       image_use(dev, src->storage, false);
@@ -1534,7 +1541,7 @@ static void APIENTRY GenMips(D3D10DDI_HDEVICE hDevice, D3D10DDI_HSHADERRESOURCEV
    const VkImageSubresourceRange range = view->info.subresourceRange;
    if (range.levelCount < 2)
       return;
-   VkCommandBuffer cmd = cmd_begin(dev);
+   VkCommandBuffer cmd = cmd_begin(dev, &res->storage);
    if (!cmd) return;
    image_use(dev, res->storage, true);
    cmd = dev->cmd;

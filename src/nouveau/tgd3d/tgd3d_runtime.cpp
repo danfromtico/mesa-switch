@@ -480,7 +480,7 @@ HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes, uint64_t *remaining_b
    HRESULT hr = S_OK;
    /* Scanout can outlive rendering completion. Its residency remains tied to
     * the primary/runtime lifetime, not the rendering queue's trim cutoff. */
-   if (!p->dead && p->resident && !p->primary && !p->offered) {
+   if (!p->dead && p->resident && !p->primary && !runtime_is_displayable(p) && !p->offered) {
       if (!p->callbacks.pfnEvictCb) hr = DXGI_ERROR_UNSUPPORTED;
       else {
          D3DDDICB_EVICT evict = {};
@@ -499,12 +499,17 @@ HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes, uint64_t *remaining_b
    return hr;
 }
 
-static HRESULT make_ready(Device *dev, RuntimeResource *p, uint64_t bytes)
+static HRESULT make_ready(Device *dev, RuntimeResource *p, uint64_t bytes,
+                          uint32_t kernel_resource = 0, bool displayable = false)
 {
+   if (displayable && (!dev->nvk || !kernel_resource ||
+       dev->interfaceVersion != D3DWDDM2_0_DDI_INTERFACE_VERSION))
+      return DXGI_ERROR_UNSUPPORTED;
    HRESULT hr = runtime_make_resident(dev, p);
    if (FAILED(hr))
       return hr;
-   p->memory.version = WSI_WIN32_MEMORY_VERSION;
+   p->memory.version = displayable ? WSI_WIN32_MEMORY_DISPLAYABLE_VERSION : WSI_WIN32_MEMORY_VERSION;
+   p->memory.kernel_resource = kernel_resource;
    p->memory.size = bytes;
    p->memory.context = p;
    p->memory.retain = owner_retain;
@@ -543,7 +548,7 @@ HRESULT runtime_private_create(Device *dev, D3D10DDI_HRTRESOURCE resource,
    if (SUCCEEDED(hr)) {
       p->memory.allocation = info.hAllocation;
       p->associated = info.hAllocation != 0;
-      hr = make_ready(dev, p, bytes);
+      hr = make_ready(dev, p, bytes, allocate.hKMResource);
    }
    if (FAILED(hr)) { runtime_destroy(p); return hr; }
    *out = p;
@@ -577,6 +582,9 @@ HRESULT runtime_offer(Device *dev, RuntimeResource *const *resources, UINT count
       return E_INVALIDARG;
    HRESULT hr = validate_residency_owners(dev, resources, count, false);
    if (FAILED(hr) || !count) return hr;
+   for (UINT i = 0; i < count; ++i)
+      if (resources[i]->primary || runtime_is_displayable(resources[i]))
+         return DXGI_ERROR_UNSUPPORTED;
    if (!dev->kt.pfnOfferAllocationsCb) return DXGI_ERROR_UNSUPPORTED;
    std::unique_ptr<D3DKMT_HANDLE[]> handles(new (std::nothrow) D3DKMT_HANDLE[count]);
    if (!handles) return E_OUTOFMEMORY;
@@ -712,8 +720,9 @@ HRESULT runtime_shared_tiled_validate(Device *dev, const Resource *res)
        !res->width || !res->height || !res->arraySize || res->arraySize > 2 ||
        res->width > dev->caps->maxImageDimension2D || res->height > dev->caps->maxImageDimension2D ||
        res->arraySize > dev->caps->maxImageArrayLayers ||
-       !(res->misc & D3D10_DDI_RESOURCE_MISC_SHARED) ||
-       (res->misc & ~(D3D10_DDI_RESOURCE_MISC_SHARED | D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT)) ||
+       !(res->misc & (D3D10_DDI_RESOURCE_MISC_SHARED | D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) ||
+       (res->misc & ~(D3D10_DDI_RESOURCE_MISC_SHARED | D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT |
+                       D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) ||
        (res->bind & ~(D3D10_DDI_BIND_SHADER_RESOURCE | D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_PRESENT)))
       return DXGI_ERROR_UNSUPPORTED;
    switch (res->format) {
@@ -757,7 +766,7 @@ static HRESULT tiled_metadata_validate(Device *dev, const SharedTiledMetadata &m
 {
    Resource res;
    res.dim = D3D10DDIRESOURCE_TEXTURE2D; res.usage = m.description.usage;
-   res.bind = m.description.bind_flags; res.misc = D3D10_DDI_RESOURCE_MISC_SHARED;
+   res.bind = m.description.bind_flags; res.misc = D3D10_DDI_RESOURCE_MISC_SHARED | m.reserved[0];
    res.width = m.description.width; res.height = m.description.height;
    res.format = m.description.format; res.arraySize = m.array_size;
    HRESULT hr = runtime_shared_tiled_validate(dev, &res);
@@ -766,8 +775,10 @@ static HRESULT tiled_metadata_validate(Device *dev, const SharedTiledMetadata &m
    const FormatInfo *format = format_info(res.format);
    const UINT memoryTypes = dev->caps->memory.memoryTypeCount >= 32 ? UINT_MAX :
       (1u << dev->caps->memory.memoryTypeCount) - 1;
-   if (m.magic != shared_magic || m.version != 2 || m.description.pitch ||
-       m.reserved[0] || m.reserved[1] || s.reserved[0] || s.reserved[1] ||
+   if (m.magic != shared_magic ||
+       !((m.version == 2 && !m.reserved[0]) ||
+         (m.version == 4 && m.reserved[0] == D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) ||
+       m.description.pitch || m.reserved[1] || s.reserved[0] || s.reserved[1] ||
        s.version != TG_GPU_RESOURCE_ABI || s.header_bytes != sizeof(s) || s.allocation_count != 1 ||
        s.driver_data_bytes != sizeof(m) - sizeof(s) ||
        !m.image_bytes || m.image_bytes > TG_GPU_MEMORY_BUDGET_BYTES ||
@@ -827,7 +838,9 @@ HRESULT runtime_shared_tiled_create(Device *dev, const Resource *res,
    SharedTiledMetadata m = {};
    m.storage = {TG_GPU_RESOURCE_ABI, sizeof(m.storage), 1, sizeof(m) - sizeof(m.storage),
       (requirements.size + 4095) & ~UINT64_C(4095), {0, 0}};
-   m.magic = shared_magic; m.version = 2;
+   const bool displayable = res->misc & D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE;
+   m.magic = shared_magic; m.version = displayable ? 4 : 2;
+   m.reserved[0] = displayable ? D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE : 0;
    m.description = {res->width, res->height, 0, res->format, res->bind, res->usage};
    m.array_size = res->arraySize; m.vk_format = image.format;
    m.image_flags = image.flags; m.image_usage = image.usage;
@@ -856,7 +869,7 @@ HRESULT runtime_shared_tiled_create(Device *dev, const Resource *res,
    if (SUCCEEDED(hr)) {
       p->memory.allocation = info.hAllocation;
       p->associated = info.hAllocation != 0;
-      hr = make_ready(dev, p, request.bytes);
+      hr = make_ready(dev, p, request.bytes, allocate.hKMResource, displayable);
    }
    if (FAILED(hr)) { runtime_destroy(p); return hr; }
    *out = p;
@@ -872,9 +885,10 @@ HRESULT runtime_shared_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *des
    *out = nullptr;
    if (!desc->pMipInfoList || desc->pPrimaryDesc ||
        desc->ResourceDimension != D3D10DDIRESOURCE_TEXTURE2D ||
-       !(desc->MiscFlags & D3D10_DDI_RESOURCE_MISC_SHARED) ||
+       !(desc->MiscFlags & (D3D10_DDI_RESOURCE_MISC_SHARED | D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) ||
        (desc->MiscFlags & ~(D3D10_DDI_RESOURCE_MISC_SHARED |
-                            D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT)) || desc->MapFlags ||
+                            D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT |
+                            D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) || desc->MapFlags ||
        desc->MipLevels != 1 || desc->ArraySize != 1 ||
        desc->SampleDesc.Count != 1 || desc->SampleDesc.Quality ||
        desc->pMipInfoList[0].TexelDepth != 1)
@@ -889,7 +903,9 @@ HRESULT runtime_shared_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *des
       return hr;
    d.pitch = request.Pitch;
    metadata.magic = shared_magic;
-   metadata.version = 1;
+   const bool displayable = desc->MiscFlags & D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE;
+   metadata.version = displayable ? 3 : 1;
+   metadata.reserved[0] = displayable ? D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE : 0;
    metadata.storage = {TG_GPU_RESOURCE_ABI, sizeof(metadata.storage), 1,
       sizeof(metadata) - sizeof(metadata.storage), request.Buffer.bytes, {0, 0}};
    RuntimeResource *p = nullptr;
@@ -913,7 +929,7 @@ HRESULT runtime_shared_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *des
    }
    p->associated = true;
    p->memory.allocation = info.hAllocation;
-   hr = make_ready(dev, p, request.Buffer.bytes);
+   hr = make_ready(dev, p, request.Buffer.bytes, allocate.hKMResource, displayable);
    if (FAILED(hr)) {
       runtime_destroy(p);
       return hr;
@@ -969,7 +985,8 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
       if (primary)
          p->primary_layout = a;
       p->memory.allocation = info.hAllocation;
-      hr = make_ready(dev, p, a.Buffer.bytes);
+      hr = make_ready(dev, p, a.Buffer.bytes, args->hKMResource.handle,
+         primary && dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION);
       if (FAILED(hr)) {
          runtime_destroy(p);
          return hr;
@@ -998,7 +1015,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
       if (FAILED(hr)) return hr;
       p->associated = true; p->tiled_shared = true; p->tiled_layout = metadata;
       p->memory.allocation = info.hAllocation;
-      hr = make_ready(dev, p, expected.bytes);
+      hr = make_ready(dev, p, expected.bytes, args->hKMResource.handle, metadata.version == 4);
       if (FAILED(hr)) { runtime_destroy(p); return hr; }
       *description = metadata.description; *out = p;
       return S_OK;
@@ -1007,8 +1024,10 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
    SharedMetadata metadata;
    memcpy(&metadata, args->pPrivateDriverData, sizeof(metadata));
    const auto &s = metadata.storage;
-   if (metadata.magic != shared_magic || metadata.version != 1 ||
-       metadata.reserved[0] || metadata.reserved[1] ||
+   if (metadata.magic != shared_magic ||
+       !((metadata.version == 1 && !metadata.reserved[0]) ||
+         (metadata.version == 3 && metadata.reserved[0] == D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) ||
+       metadata.reserved[1] ||
        s.version != TG_GPU_RESOURCE_ABI || s.header_bytes != sizeof(s) ||
        s.allocation_count != 1 || s.driver_data_bytes != sizeof(metadata) - sizeof(s) ||
        s.reserved[0] || s.reserved[1])
@@ -1035,7 +1054,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
     * the producer's handles are never used. */
    p->associated = true;
    p->memory.allocation = info.hAllocation;
-   hr = make_ready(dev, p, expected.Buffer.bytes);
+   hr = make_ready(dev, p, expected.Buffer.bytes, args->hKMResource.handle, metadata.version == 3);
    if (FAILED(hr)) {
       runtime_destroy(p);
       return hr;
@@ -1109,7 +1128,8 @@ HRESULT runtime_primary_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    }
    p->associated = true;
    p->memory.allocation = info.hAllocation;
-   hr = make_ready(dev, p, request.Buffer.bytes);
+   hr = make_ready(dev, p, request.Buffer.bytes, allocate.hKMResource,
+      dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION);
    if (FAILED(hr)) {
       runtime_destroy(p);
       return hr;
@@ -1156,6 +1176,10 @@ HRESULT runtime_set_display_mode(RuntimeResource *p, Device *dev, UINT subresour
 }
 
 bool runtime_is_primary(const RuntimeResource *p) { return p && p->primary; }
+bool runtime_is_displayable(const RuntimeResource *p)
+{
+   return p && p->memory.version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION;
+}
 bool runtime_primary_compatible(const RuntimeResource *source, const RuntimeResource *target)
 {
    if (!runtime_is_primary(source) || !runtime_is_primary(target) ||
@@ -1182,12 +1206,17 @@ void runtime_rebind(RuntimeResource *p, D3D10DDI_HRTRESOURCE runtime)
 }
 
 static HRESULT allocate_import(Device *dev, RuntimeResource *p, const VkMemoryRequirements &req,
-                               VkMemoryPropertyFlags properties, VkDeviceMemory *memory)
+                               VkMemoryPropertyFlags properties, VkDeviceMemory *memory,
+                               uint32_t *written_allocation = nullptr)
 {
+   if (written_allocation) *written_allocation = 0;
+   if (runtime_is_displayable(p) && !written_allocation)
+      return DXGI_ERROR_UNSUPPORTED;
    if (req.size > p->memory.size)
       return DXGI_ERROR_UNSUPPORTED;
    VkMemoryAllocateInfo alloc = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
    bool imported = false;
+   uint32_t imported_write_allocation = 0;
    struct wsi_memory_allocate_info owner = {};
    VkImportMemoryHostPointerInfoEXT host = {VK_STRUCTURE_TYPE_IMPORT_MEMORY_HOST_POINTER_INFO_EXT};
    const VulkanAdapter &va = dev->adapter->vk;
@@ -1197,6 +1226,7 @@ static HRESULT allocate_import(Device *dev, RuntimeResource *p, const VkMemoryRe
       owner.sType = VK_STRUCTURE_TYPE_WSI_MEMORY_ALLOCATE_INFO_MESA;
       owner.win32_memory = &p->memory;
       owner.win32_imported = &imported;
+      owner.win32_written_allocation = &imported_write_allocation;
       alloc.pNext = &owner;
       alloc.allocationSize = req.size;
       alloc.memoryTypeIndex = va.findMemoryType(req.memoryTypeBits, properties);
@@ -1234,23 +1264,30 @@ static HRESULT allocate_import(Device *dev, RuntimeResource *p, const VkMemoryRe
          FAILED(p->error) ? p->error : resource_result(result);
    /* An ICD that ignored the owner structure would have allocated unrelated
     * memory: the image would render, and nobody else would ever see it. */
-   HRESULT hr = imported ? S_OK : DXGI_ERROR_UNSUPPORTED;
+   HRESULT hr = imported && (!runtime_is_displayable(p) ||
+      (imported_write_allocation && imported_write_allocation != p->memory.allocation)) ?
+      S_OK : DXGI_ERROR_UNSUPPORTED;
    if (FAILED(hr)) {
       dev->vk.FreeMemory(dev->vkdev, *memory, nullptr);
       *memory = VK_NULL_HANDLE;
       return hr;
    }
+   if (written_allocation) *written_allocation = imported_write_allocation;
    return S_OK;
 }
 
-HRESULT runtime_bind_image(Device *dev, RuntimeResource *p, VkImage image, VkDeviceMemory *memory)
+HRESULT runtime_bind_image(Device *dev, RuntimeResource *p, VkImage image, VkDeviceMemory *memory,
+                           uint32_t *written_allocation)
 {
    VkMemoryRequirements req;
    dev->vk.GetImageMemoryRequirements(dev->vkdev, image, &req);
-   HRESULT hr = allocate_import(dev, p, req, 0, memory);
+   HRESULT hr = allocate_import(dev, p, req, 0, memory, written_allocation);
    if (SUCCEEDED(hr)) {
       hr = resource_result(dev->vk.BindImageMemory(dev->vkdev, image, *memory, 0));
-      if (FAILED(hr)) { dev->vk.FreeMemory(dev->vkdev, *memory, nullptr); *memory = VK_NULL_HANDLE; }
+      if (FAILED(hr)) {
+         dev->vk.FreeMemory(dev->vkdev, *memory, nullptr); *memory = VK_NULL_HANDLE;
+         if (written_allocation) *written_allocation = 0;
+      }
    }
    return hr;
 }

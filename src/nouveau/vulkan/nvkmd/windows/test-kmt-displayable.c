@@ -16,6 +16,23 @@ static unsigned failure;
 static bool fail_close, alias_live;
 static uint32_t expected_count;
 static LONG submit_status;
+static unsigned teardown_failure, destroyed_queues, destroyed_devices, closed_adapters;
+
+NTSTATUS APIENTRY D3DKMTDestroyPagingQueue(D3DDDI_DESTROYPAGINGQUEUE *q)
+{
+   CHECK(q->hPagingQueue == 7); ++destroyed_queues;
+   return teardown_failure & 1 ? TG_KMT_DEVICE_REMOVED : 0;
+}
+NTSTATUS APIENTRY D3DKMTDestroyDevice(const D3DKMT_DESTROYDEVICE *d)
+{
+   CHECK(d->hDevice == 2); ++destroyed_devices;
+   return teardown_failure & 2 ? TG_KMT_DEVICE_REMOVED : 0;
+}
+NTSTATUS APIENTRY D3DKMTCloseAdapter(const D3DKMT_CLOSEADAPTER *a)
+{
+   CHECK(a->hAdapter == 1); ++closed_adapters;
+   return teardown_failure & 4 ? TG_KMT_DEVICE_REMOVED : 0;
+}
 
 NTSTATUS APIENTRY
 D3DKMTShareObjects(UINT count, const D3DKMT_HANDLE *objects,
@@ -161,6 +178,22 @@ int main(void)
    expected_count = 0; CHECK(tg_kmt_submit(9, 0x20000, words, sizeof(words)) == 0);
    primaries[0] = 22; expected_count = 1; submit_status = TG_KMT_DEVICE_REMOVED;
    CHECK(tg_kmt_submit_primaries(9, 0x20000, words, sizeof(words), 1, primaries) == submit_status);
+   for (unsigned mask = 0; mask < 8; ++mask) {
+      dev.handle = 2; dev.adapter = 1; dev.paging_queue = 7;
+      dev.paging = (struct tg_kmt_fence){8, &paging}; dev.allocated = 123456;
+      teardown_failure = mask; destroyed_queues = destroyed_devices = closed_adapters = 0;
+      LONG status = tg_kmt_close_device(&dev);
+      CHECK((status < 0) == (mask != 0));
+      CHECK(destroyed_queues == 1 && destroyed_devices == 1);
+      CHECK(closed_adapters == (mask & 2 ? 0u : 1u));
+      CHECK(dev.handle == (mask & 2 ? 2u : 0u));
+      CHECK(dev.paging_queue == ((mask & 3) == 3 ? 7u : 0u));
+      CHECK(dev.paging.handle == ((mask & 3) == 3 ? 8u : 0u));
+      CHECK(dev.adapter == (mask & 6 ? 1u : 0u));
+      teardown_failure = 0;
+      CHECK(tg_kmt_close_device(&dev) == 0);
+      CHECK(!dev.handle && !dev.adapter && !dev.paging_queue && !dev.paging.handle && !dev.allocated);
+   }
    puts("PASS: submitting-device aliases, bounded metadata, residency/removal, failed cleanup ownership and WrittenPrimaries (CPU control)");
    return 0;
 }

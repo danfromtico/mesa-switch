@@ -404,6 +404,18 @@ if with_tests and with_platform_windows
     dependencies : nvk_deps,
     link_with : libnvk,
     link_args : ld_args_gc_sections), suite : ['nouveau'])
+  test('nvk_win32_owner', executable('test-nvk-win32-owner',
+    'nvkmd/windows/test-win32-owner.c',
+    include_directories : [inc_include, inc_src, include_directories('.')],
+    dependencies : nvk_deps,
+    link_with : libnvk,
+    link_args : ld_args_gc_sections), suite : ['nouveau'])
+  test('nvk_win32_written', executable('test-nvk-win32-written',
+    'nvkmd/windows/test-win32-written.c',
+    include_directories : [inc_include, inc_src, include_directories('.')],
+    dependencies : nvk_deps,
+    link_with : libnvk,
+    link_args : ld_args_gc_sections), suite : ['nouveau'])
 endif
 
 if with_tests and not with_platform_android

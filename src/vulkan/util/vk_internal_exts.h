@@ -74,6 +74,9 @@ struct wsi_memory_allocate_info {
      * The importing driver retains this owner through its callbacks. */
     const struct wsi_win32_memory *win32_memory;
     bool *win32_imported;
+    /* Read only for a v2 displayable owner. Written on successful import with
+     * an allocation belonging to the ICD's submitting device. */
+    uint32_t *win32_written_allocation;
 #endif
 };
 
@@ -102,6 +105,22 @@ struct wsi_surface_supported_counters {
    struct wsi_memory_allocate_info
 #define VK_STRUCTURE_TYPE_WSI_SURFACE_SUPPORTED_COUNTERS_MESA_cast \
    struct wsi_surface_supported_counters
+
+#ifdef _WIN32
+/* Private tgd3d/NVK contract. Handles belong to NVK's submitting device and
+ * their VkDeviceMemory owners outlive actual GPU completion. The runtime
+ * copies the inline array; it never retains the caller's stack pointer. */
+#define WSI_WIN32_MAX_WRITTEN_PRIMARIES 16u
+struct wsi_win32_written_primaries {
+   VkStructureType sType;
+   const void *pNext;
+   uint32_t version;
+   uint32_t count;
+   uint32_t allocations[WSI_WIN32_MAX_WRITTEN_PRIMARIES];
+};
+#define VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA (VkStructureType)1000001006
+#define VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA_cast struct wsi_win32_written_primaries
+#endif
 
 /* Chained to VkInstanceCreateInfo by an in-tree Windows user-mode driver that
  * loads the NVK ICD by path, without a Vulkan loader. It replaces the

@@ -236,8 +236,9 @@ win_ctx_exec(struct nvkmd_ctx *base, struct vk_object_base *log,
          void *cpu = NULL;
          result = nvkmd_mem_map(mem, log, NVKMD_MEM_MAP_RD, NULL, &cpu);
          if (result == VK_SUCCESS) {
-            LONG status = tg_kmt_submit(ctx->context, exec->addr,
-                                        (const uint8_t *)cpu + offset, exec->size_B);
+            LONG status = tg_kmt_submit_primaries(ctx->context, exec->addr,
+               (const uint8_t *)cpu + offset, exec->size_B,
+               exec->written_count, exec->written_allocations);
             nvkmd_mem_unmap(mem, 0);
             result = nvkmd_windows_status(log, "D3DKMTSubmitCommand", status,
                                           VK_ERROR_DEVICE_LOST);

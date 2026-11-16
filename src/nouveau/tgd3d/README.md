@@ -13,6 +13,9 @@
 MakeResident预算裁减修正已包含在失败的57a候选中；不能据此认定预算为黑屏根因。
 新补丁拒绝私有渲染／分页Fence的UINT64_MAX，防止错误放行和提前退休；ARM64/x64构建及本地
 CPU控制通过，尚未安装。详见[匹配内核／Noble／WDDM核对](../../../tegra-x1-wddm/docs/WDDM26_CONTEXT_FENCE_AUDIT_20261116.md)。
+显示资源写引用已接入NVK实际提交，包含16项分批、异步列表寿命和失败引用保留；ARM64/x64
+CPU控制通过。但ShareObjects的NT共享前提及runtime kernel-resource输出仍未闭合，现代接口继续
+关闭，新配套UMD/ICD未部署。[适用范围与控制结果](../../../tegra-x1-wddm/docs/DISPLAYABLE_RESOURCE_CONTRACT_20261116.md)。
 这不是新Feature Level或完整D3D10一致性认证，MSAA、buffer RTV、UAV／视频仍有缺口。
 Tegra DC列扫描和vkcube仍待验收，设备与产物的最新状态以
 [交接记录](../../../tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)为准。

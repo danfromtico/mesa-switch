@@ -161,7 +161,7 @@ HRESULT red_primary_clear(Device *dev, Resource *res, UINT subresource)
    VkImageView view = VK_NULL_HANDLE;
    HRESULT hr = blit_view(dev, res, 0, false, format, &view);
    if (FAILED(hr)) return hr;
-   if (!cmd_begin(dev)) return FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
+   if (!cmd_begin(dev, &res->storage)) return FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
    image_use(dev, res->storage, true);
    VkRenderingAttachmentInfo attachment = {VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO};
    attachment.imageView = view;
@@ -207,6 +207,9 @@ HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args, const RECT *sour
    if (SUCCEEDED(hr)) hr = blit_view(dev, src, args->SrcSubresource, true, source_format, &source_view);
    if (SUCCEEDED(hr)) hr = blit_view(dev, dst, args->DstSubresource, false, target_format, &target_view);
    if (FAILED(hr)) return hr;
+   /* Split before allocating descriptors: a split retires the old pools. */
+   VkCommandBuffer cmd = cmd_begin(dev, &dst->storage);
+   if (!cmd) return FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
    VkDescriptorSet set = descriptor_set_alloc(dev, SET_TEX);
    if (!set) return E_OUTOFMEMORY;
 
@@ -234,8 +237,6 @@ HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args, const RECT *sour
       writes[i].pImageInfo = &images[i];
    }
    dev->vk.UpdateDescriptorSets(dev->vkdev, 2, writes, 0, nullptr);
-   VkCommandBuffer cmd = cmd_begin(dev);
-   if (!cmd) return FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
    image_use(dev, src->storage, false);
    barrier_for_read(dev, src->storage.writeSerial);
    image_use(dev, dst->storage, true);

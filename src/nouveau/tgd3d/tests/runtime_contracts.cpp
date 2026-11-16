@@ -536,6 +536,7 @@ static void presentation13_contracts()
       allocation.hAllocation = 0x60; allocation.pPrivateDriverData = &primary;
       allocation.PrivateDriverDataSize = sizeof(primary);
       D3D10DDIARG_OPENRESOURCE open = {};
+      open.hKMResource.handle = 0x90;
       open.NumAllocations = 1; open.pOpenAllocationInfo = &allocation;
       RuntimeSharedDescription description;
       Resource res; res.dev = &dev; res.kind = ResKind::Image;
@@ -794,15 +795,18 @@ static tg_gpu_allocation_request tiledAllocation;
 static bool tiledMapped[2], tiledFailBind, tiledMismatch;
 static UINT tiledErrors, tiledImages;
 static HRESULT tiledError;
+static PFN_vkAllocateMemory tiledImportBase;
 
 static void shared_tiled_contracts()
 {
+   for (bool displayable : {false, true})
    for (DXGI_FORMAT format : {DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
                              DXGI_FORMAT_R10G10B10A2_UNORM, DXGI_FORMAT_R16G16B16A16_FLOAT}) {
       Adapter adapter; Device producer, consumer;
       ignoreImport = false; tiledFailBind = tiledMismatch = false; tiledErrors = tiledImages = 0;
       tiledMapped[0] = tiledMapped[1] = false;
       init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
+      tiledImportBase = producer.vk.AllocateMemory;
       adapter.vk.caps.maxImageDimension2D = 8192; adapter.vk.caps.maxImageArrayLayers = 2048;
       adapter.vk.caps.driverVersion = 0x1234;
       memset(adapter.vk.caps.deviceUUID, 0x31, VK_UUID_SIZE);
@@ -813,6 +817,16 @@ static void shared_tiled_contracts()
       };
       for (Device *dev : {&producer, &consumer}) {
          dev->caps = &adapter.vk.caps; dev->interfaceVersion = D3DWDDM2_0_DDI_INTERFACE_VERSION;
+         dev->vk.AllocateMemory = [](VkDevice device, const VkMemoryAllocateInfo *a,
+                                    const VkAllocationCallbacks *cb, VkDeviceMemory *out) {
+            VkResult result = tiledImportBase(device, a, cb, out);
+            const auto *info = static_cast<const wsi_memory_allocate_info *>(a->pNext);
+            if (result == VK_SUCCESS && info->win32_memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION) {
+               CHECK(info->win32_memory->kernel_resource == ((uintptr_t)device == 1 ? 0x9875u : 0x9876u));
+               *info->win32_written_allocation = info->win32_memory->allocation + 0x100;
+            }
+            return result;
+         };
          dev->um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { ++tiledErrors; tiledError = hr; };
          dev->vk.CreateImage = [](VkDevice d, const VkImageCreateInfo *in,
                                   const VkAllocationCallbacks *, VkImage *out) {
@@ -862,7 +876,8 @@ static void shared_tiled_contracts()
          memcpy(&tiledAllocation, a->pAllocationInfo2->pPrivateDriverData, sizeof(tiledAllocation));
          CHECK(tiledAllocation.version == TG_GPU_ALLOCATION_ABI &&
                tiledAllocation.flags == TG_GPU_ALLOCATION_CPU_VISIBLE && tiledAllocation.bytes == sizeof(bytes));
-         a->pAllocationInfo2->hAllocation = 0x60; ++allocations; return S_OK;
+         a->pAllocationInfo2->hAllocation = 0x60; a->hKMResource = 0x9875;
+         ++allocations; return S_OK;
       };
       // Runtime owners capture their own device's callbacks only after this point.
       D3DWDDM2_0DDI_DEVICEFUNCS table; device_fill_table20(&table);
@@ -872,11 +887,13 @@ static void shared_tiled_contracts()
       D3D11DDIARG_CREATERESOURCE desc = {};
       desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D; desc.pMipInfoList = &mip;
       desc.Usage = D3D10_DDI_USAGE_DEFAULT; desc.MiscFlags = D3D10_DDI_RESOURCE_MISC_SHARED;
+      if (displayable) desc.MiscFlags |= D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE;
       desc.BindFlags = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_SHADER_RESOURCE;
       desc.Format = format; desc.MipLevels = desc.SampleDesc.Count = 1; desc.ArraySize = 2;
       table.pfnCreateResource({&producer}, &desc, {p}, {rt_resource(0)});
       CHECK(!tiledErrors && p->tiledShared && p->arraySize == 2 && !p->pitch &&
             p->storage.externalShared && !p->storage.layoutReady && !p->storage.preinitialized);
+      CHECK(p->storage.writtenAllocation == (displayable ? 0x160u : 0u));
       const auto originalMetadata = tiledMetadata;
       const UINT beforeAllocations = allocations;
       D3DDDI_OPENALLOCATIONINFO allocationInfo = {};
@@ -911,6 +928,8 @@ static void shared_tiled_contracts()
       CHECK(c->arraySize == 2 && c->maps.size() == 2 && c->format == format && !c->pitch &&
             c->storage.externalShared && c->storage.layoutReady && !c->storage.preinitialized);
       CHECK(runtime_allocation(c->storage.runtime) == 0x61 && !memcmp(bytes, expected.data(), sizeof(bytes)));
+      CHECK(c->storage.writtenAllocation == (displayable ? 0x161u : 0u));
+      CHECK(bool(c->misc & D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE) == displayable);
       // Import and release must preserve both layers and padding. This is an
       // opaque byte model, not a claim that CPU storage emulates NIL tiling.
       table.pfnDestroyResource({&producer}, {p});
@@ -953,6 +972,86 @@ static void removed_paging_fence_contract()
    }
    pagingValues[0] = 0;
    std::puts("PASS: all-ones paging fence before/during wait rejects admission and releases failed allocation");
+}
+
+static PFND3DDDI_ALLOCATECB displayableAllocateBase;
+static PFN_vkAllocateMemory displayableImportBase;
+static unsigned displayableReply;
+
+static void displayable_owner_contract()
+{
+   /* A v1 owner ends at the new tail. Put its last byte against an inaccessible
+    * page so a full-size copy from an old UMD is a real control failure. */
+   auto *guard = static_cast<BYTE *>(VirtualAlloc(nullptr, 8192, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE));
+   CHECK(guard); DWORD previous;
+   CHECK(VirtualProtect(guard + 4096, 4096, PAGE_NOACCESS, &previous));
+   constexpr size_t prefix = offsetof(wsi_win32_memory, kernel_resource);
+   wsi_win32_memory old = {}; old.version = WSI_WIN32_MEMORY_VERSION; old.allocation = 99;
+   memcpy(guard + 4096 - prefix, &old, prefix);
+   wsi_win32_memory copied;
+   CHECK(wsi_win32_memory_copy(&copied, reinterpret_cast<wsi_win32_memory *>(guard + 4096 - prefix)) &&
+         copied.allocation == 99 && !copied.kernel_resource && !copied.reserved);
+   CHECK(VirtualFree(guard, 0, MEM_RELEASE));
+
+   Adapter adapter; Device producer, consumer;
+   pagingValues[0] = pagingValues[1] = 0;
+   init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
+   producer.interfaceVersion = consumer.interfaceVersion = D3DWDDM2_0_DDI_INTERFACE_VERSION;
+   displayableAllocateBase = producer.kt.pfnAllocateCb;
+   producer.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
+      HRESULT hr = displayableAllocateBase(h, a); a->hKMResource = 0x90; return hr;
+   };
+   displayableImportBase = producer.vk.AllocateMemory;
+   auto importer = [](VkDevice device, const VkMemoryAllocateInfo *a,
+                      const VkAllocationCallbacks *callbacks, VkDeviceMemory *memory) -> VkResult {
+      const auto *info = static_cast<const wsi_memory_allocate_info *>(a->pNext);
+      CHECK(info->win32_memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION);
+      CHECK(info->win32_memory->kernel_resource == ((uintptr_t)device == 1 ? 0x90u : 0x91u));
+      VkResult result = displayableImportBase(device, a, callbacks, memory);
+      if (result == VK_SUCCESS && displayableReply)
+         *info->win32_written_allocation = info->win32_memory->allocation + (displayableReply == 1 ? 0x100 : 0);
+      return result;
+   };
+   producer.vk.AllocateMemory = consumer.vk.AllocateMemory = importer;
+   D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = 65; mip.TexelHeight = 17; mip.TexelDepth = 1;
+   D3D10DDIARG_CREATERESOURCE desc = {};
+   desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D;
+   desc.Usage = D3D10_DDI_USAGE_DEFAULT;
+   desc.BindFlags = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_SHADER_RESOURCE | D3D10_DDI_BIND_PRESENT;
+   desc.MiscFlags = D3D10_DDI_RESOURCE_MISC_SHARED | D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE;
+   desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; desc.SampleDesc.Count = 1;
+   desc.MipLevels = desc.ArraySize = 1;
+   RuntimeResource *p = nullptr, *c = nullptr; UINT pitch;
+   CHECK(runtime_shared_create(&producer, &desc, {rt_resource(0)}, &p, &pitch) == S_OK);
+   CHECK(runtime_is_displayable(p));
+   VkDeviceMemory memory = VK_NULL_HANDLE; uint32_t written = 0;
+   for (displayableReply = 0; displayableReply <= 2; ++displayableReply) {
+      HRESULT hr = runtime_bind_image(&producer, p, (VkImage)1, &memory, &written);
+      if (displayableReply == 1) {
+         CHECK(hr == S_OK && written == 0x160 && memory);
+         producer.vk.FreeMemory(producer.vkdev, memory, nullptr);
+      } else {
+         CHECK(hr == DXGI_ERROR_UNSUPPORTED && !written && !memory && !owners[0]);
+      }
+   }
+   displayableReply = 1;
+   uint64_t bytes_evicted = 99;
+   CHECK(runtime_evict(p, &bytes_evicted) == S_OK && !bytes_evicted);
+   CHECK(runtime_offer(&producer, &p, 1, D3DDDI_OFFER_PRIORITY_LOW) == DXGI_ERROR_UNSUPPORTED);
+   D3DDDI_OPENALLOCATIONINFO allocation_info = {};
+   allocation_info.hAllocation = 0x61; allocation_info.pPrivateDriverData = &allocation;
+   allocation_info.PrivateDriverDataSize = sizeof(allocation);
+   D3D10DDIARG_OPENRESOURCE open = {}; open.hKMResource.handle = 0x91;
+   open.NumAllocations = 1; open.pOpenAllocationInfo = &allocation_info;
+   open.pPrivateDriverData = metadata; open.PrivateDriverDataSize = sizeof(metadata);
+   RuntimeSharedDescription description;
+   CHECK(runtime_shared_open(&consumer, &open, {rt_resource(1)}, &c, &description) == S_OK);
+   CHECK(runtime_is_displayable(c));
+   CHECK(runtime_bind_image(&consumer, c, (VkImage)2, &memory, &written) == S_OK && written == 0x161);
+   consumer.vk.FreeMemory(consumer.vkdev, memory, nullptr);
+   CHECK(runtime_destroy(c) == S_OK && runtime_destroy(p) == S_OK);
+   runtime_device_destroy(&consumer); runtime_device_destroy(&producer);
+   std::puts("PASS: guarded v1 ABI, v2 displayable owner handshake, foreign/ignored acknowledgement rejection, shared reopen and residency protection");
 }
 
 void runtime_contracts()
@@ -1079,4 +1178,5 @@ void runtime_contracts()
    presentation13_contracts();
    shared_tiled_contracts();
    removed_paging_fence_contract();
+   displayable_owner_contract();
 }

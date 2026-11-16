@@ -132,7 +132,7 @@ void APIENTRY ClearView11(D3D10DDI_HDEVICE h, D3D11DDI_HANDLETYPE type, void *ha
    if (!any) return;
    VkImageView image_view = view_get(view);
    if (!image_view) return;
-   VkCommandBuffer cmd = cmd_begin(dev); /* flush older clears and order attachment LOAD */
+   VkCommandBuffer cmd = cmd_begin(dev, &view->res->storage); /* clear ordering, then write-batch capacity */
    if (!cmd) return;
    image_use(dev, view->res->storage, true);
    if (FAILED(dev->lost)) return;

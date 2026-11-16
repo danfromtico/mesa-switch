@@ -89,9 +89,11 @@ def main():
         "-Dshader-cache=enabled", "-Dzlib=disabled", "-Dzstd=disabled", "-Dexpat=disabled",
         "-Dmesa-clc=system", "-Dbuildtype=release", f"-Dnvk-windows-kmt-object={kmt_object}",
         "-Dnvk-build-id=" + digest.hexdigest())
+    controls = ["test-nvk-win32-sync.exe", "test-nvk-win32-owner.exe", "test-nvk-win32-written.exe"]
     run("ninja", "-C", build, "src/nouveau/vulkan/libvulkan_nouveau.dll",
-        "src/nouveau/vulkan/test-nvk-win32-sync.exe")
-    shutil.copyfile(build / "src/nouveau/vulkan/test-nvk-win32-sync.exe", out / "test-nvk-win32-sync.exe")
+        *("src/nouveau/vulkan/" + name for name in controls))
+    for name in controls:
+        shutil.copyfile(build / "src/nouveau/vulkan" / name, out / name)
     for source, name in (("check.c", "nvk-windows-check.exe"), ("test-kmt.c", "test-kmt.exe")):
         run(a.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror", "-I" + str(src / "include"),
             "-I" + str(win), win / source, win / "kmt.c", "-o", out / name)
@@ -106,7 +108,7 @@ def main():
     }}, indent=2) + "\n")
     files = [dll, out / "nvk-windows-check.exe", out / "test-kmt.exe",
              out / "test-kmt-shared.exe", out / "test-kmt-sync.exe", out / "test-kmt-displayable.exe",
-             out / "test-nvk-win32-sync.exe",
+             *(out / name for name in controls),
              out / "nvk-windows-shared-check.exe",
              out / "nvk-windows-vulkan-shared-check.exe", out / "test-win32-image-flags.exe",
              out / "test-win32-pacing.exe", manifest]
