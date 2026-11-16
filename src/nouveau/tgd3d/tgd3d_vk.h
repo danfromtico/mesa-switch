@@ -75,6 +75,7 @@ namespace tgd3d {
    X(DestroyDescriptorSetLayout) \
    X(CreatePipelineLayout) \
    X(DestroyPipelineLayout) \
+   X(CmdPushConstants) \
    X(CreateDescriptorPool) \
    X(DestroyDescriptorPool) \
    X(ResetDescriptorPool) \
@@ -99,6 +100,8 @@ namespace tgd3d {
    X(CmdBlitImage) \
    X(CmdDraw) \
    X(CmdDrawIndexed) \
+   X(CmdDrawIndirect) \
+   X(CmdDrawIndexedIndirect) \
    X(CmdBindVertexBuffers2) \
    X(CmdBindIndexBuffer) \
    X(CmdBindDescriptorSets) \
@@ -193,6 +196,7 @@ struct VulkanCaps {
    VkPhysicalDeviceMemoryProperties memory = {};
    /* Optional features that change the reported D3D capabilities. */
    bool geometryShader = false;
+   bool drawIndirectFirstInstance = false;
    bool depthClamp = false;
    bool alphaToOne = false;
    bool tessellationShader = false;

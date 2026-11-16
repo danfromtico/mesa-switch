@@ -112,6 +112,9 @@ SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER, const D3D10DDIARG_CALCP
 
 HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVICE *args)
 {
+   if (!hAdapter.pDrvPrivate || !args || !args->hDrvDevice.pDrvPrivate ||
+       !args->pKTCallbacks || !args->pUMCallbacks)
+      return E_INVALIDARG;
    Adapter *adapter = A(hAdapter);
    switch (args->Interface) {
    case D3D10_0_DDI_INTERFACE_VERSION:
@@ -126,8 +129,10 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    dev->adapter = adapter;
    dev->hRTDevice = args->hRTDevice;
    dev->hRTCoreLayer = args->hRTCoreLayer;
-   dev->kt = *args->pKTCallbacks;
-   dev->um = *args->pUMCallbacks;
+   runtime_copy_callbacks(&dev->kt, args->pKTCallbacks);
+   /* SetError is the only core-layer callback used by this implementation.
+    * Do not copy unused fields whose signatures change in newer tables. */
+   dev->um.pfnSetErrorCb = args->pUMCallbacks->pfnSetErrorCb;
    dev->dxgi = args->DXGIBaseDDI.pDXGIBaseCallbacks;
    dev->interfaceVersion = args->Interface;
    dev->caps = &adapter->vk.caps;

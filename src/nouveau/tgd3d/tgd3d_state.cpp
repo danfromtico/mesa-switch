@@ -359,14 +359,36 @@ static void APIENTRY IaSetTopology(D3D10DDI_HDEVICE hDevice, D3D10_DDI_PRIMITIVE
 /* ------------------------------------------------------------------ */
 /* Shader stage bindings                                               */
 
-static void set_constant_buffers(Device *dev, Stage stage, UINT start, UINT count,
-                                 const D3D10DDI_HRESOURCE *buffers)
+void set_constant_buffers(Device *dev, Stage stage, UINT start, UINT count,
+                          const D3D10DDI_HRESOURCE *buffers, const UINT *first, const UINT *sizes)
 {
-   StageBindings &s = dev->stage[stage];
-   for (UINT i = 0; i < count && start + i < D3D_CB_SLOTS; i++) {
+   if (stage >= STAGE_COUNT || start > D3D_CB_SLOTS || count > D3D_CB_SLOTS - start ||
+       (count && !buffers)) {
+      TG_ERROR(dev, E_INVALIDARG);
+      return;
+   }
+   /* Validate the whole request before changing state. Ranges are allowed to
+    * extend beyond the allocation: Vulkan's robust descriptor bound supplies
+    * zeros outside its intersection with the requested D3D window. */
+   for (UINT i = 0; i < count; ++i) {
       Resource *buffer = R(buffers[i]);
-      if (s.cb[start + i] != buffer) {
+      if ((buffer && (buffer->dev != dev || buffer->kind != ResKind::Buffer)) ||
+          (first && (first[i] & 15)) ||
+          (sizes && ((sizes[i] & 15) || sizes[i] > 4096))) {
+         TG_ERROR(dev, E_INVALIDARG);
+         return;
+      }
+   }
+   StageBindings &s = dev->stage[stage];
+   for (UINT i = 0; i < count; i++) {
+      Resource *buffer = R(buffers[i]);
+      const VkDeviceSize offset = first ? VkDeviceSize(first[i]) * 16 : 0;
+      const VkDeviceSize bytes = sizes ? VkDeviceSize(sizes[i]) * 16 : 65536;
+      if (s.cb[start + i] != buffer || s.cbOffset[start + i] != offset ||
+          s.cbBytes[start + i] != bytes) {
          s.cb[start + i] = buffer;
+         s.cbOffset[start + i] = offset;
+         s.cbBytes[start + i] = bytes;
          s.cbDirty |= 1u << (start + i);
       }
    }
@@ -435,8 +457,9 @@ static void APIENTRY SetRenderTargets(D3D10DDI_HDEVICE hDevice, const D3D10DDI_H
    end_rendering(dev);
    memcpy(dev->rtv, next, sizeof(next));
    dev->dsv = dsv;
-   /* Attachment count and formats feed blend state and the scissor default. */
-   dev->dirty |= DIRTY_BLEND | DIRTY_SCISSORS | DIRTY_SHADERS;
+   /* A different DSV can change the write masks without changing the bound
+    * depth/stencil state object (read-only depth or stencil planes). */
+   dev->dirty |= DIRTY_BLEND | DIRTY_SCISSORS | DIRTY_SHADERS | DIRTY_DEPTH_STENCIL;
 }
 
 static void APIENTRY SetViewports(D3D10DDI_HDEVICE hDevice, UINT count, UINT clear,

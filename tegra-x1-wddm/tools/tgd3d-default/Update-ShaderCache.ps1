@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: MIT
-# Stage a cache-only UMD beside the active package. Activation is on reboot;
+# Stage a UMD-only fix beside the active package. Activation is on reboot;
 # never replace a mapped DLL or restart a running GPU device here.
 [CmdletBinding()]
 param([Parameter(Mandatory=$true)][string]$CandidateDirectory,[switch]$Restart)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 $payload=[IO.File]::ReadAllText((Join-Path $CandidateDirectory 'update.json'))|ConvertFrom-Json
+$scope=if($payload.PSObject.Properties.Name -contains 'change_scope'){[string]$payload.change_scope}else{'shader-cache'}
+if($scope -notin @('shader-cache','resource-teardown','copy-lifetime')){throw 'Unsupported UMD-only update scope'}
 $settings='HKLM:\SYSTEM\CurrentControlSet\Services\tegragpurender\Tgd3dDefault'
 $previous=[string](Get-ItemProperty $settings).Directory
 if($previous -ne $payload.expected_directory){throw 'Active package changed; inspect before updating'}
@@ -13,7 +15,7 @@ Require-Administrator
 $m=Check-Package
 $recovery=Check-Recovery
 if($m.startup_mode -ne 'logon-default' -or $m.sync_mode -ne 'gpu-bridge' -or
-   $payload.sync_mode -ne 'gpu-bridge' -or $payload.gpu_prerotation -or !$payload.cache.enabled){throw 'Expected a cache-only update of the logon GPU bridge package'}
+   $payload.sync_mode -ne 'gpu-bridge' -or $payload.gpu_prerotation -or !$payload.cache.enabled){throw 'Expected a UMD-only update of the logon GPU bridge package'}
 if((Device-Property 'ProblemCode') -ne 0 -or
    (File-Hash "$env:windir\System32\drivers\tegragpurender.sys") -ne $payload.expected_kmd -or
    (File-Hash ($previous+'\app\TegraGpuD3DVk.dll')) -ne $payload.expected_umd -or
@@ -21,12 +23,20 @@ if((Device-Property 'ProblemCode') -ne 0 -or
 Check-File ($CandidateDirectory+'\TegraGpuD3DVk.dll') $payload.candidate_umd
 Check-File ($CandidateDirectory+'\tgd3d-contracts.exe') $payload.control
 $control=Read-Json ($CandidateDirectory+'\controls-state.json')
-if($control.Phase -ne 'Passed' -or $control.Exit -ne 0 -or $control.Candidate -ne $payload.candidate_umd.Sha256 -or $control.GPUExecuted){throw 'Native CPU cache controls have not passed for this UMD'}
+if($control.Phase -ne 'Passed' -or $control.Exit -ne 0 -or $control.Candidate -ne $payload.candidate_umd.Sha256 -or $control.GPUExecuted){throw 'Native CPU controls have not passed for this UMD'}
 $task=Get-ScheduledTask Tgd3dDefaultEnable
 if($task.State -ne 'Ready'){throw 'Native startup task must be idle and enabled'}
 $state=Join-Path $CandidateDirectory 'installed.json'
 if(Test-Path $state){throw 'Update already staged; inspect installed.json instead of repeating it'}
-$dest=Join-Path (Split-Path $previous) ('tgd3d-cache-'+$payload.candidate_umd.Sha256.Substring(0,8)+'-'+(Get-Date -Format 'yyyyMMdd-HHmmss'))
+$fileKeys=@{}
+foreach($name in @('TegraGpuD3DVk.dll','tgd3d-contracts.exe')){
+    # Earlier packages used forward slashes; merged platform packages use
+    # Windows separators. Update the existing record, never add a second key.
+    $entries=@($m.files.PSObject.Properties|Where-Object{$_.Name.Replace('\','/') -eq ('app/'+$name)})
+    if($entries.Count -ne 1 -or !$m.app.PSObject.Properties[$name]){throw ('Missing or ambiguous UMD manifest entry: '+$name)}
+    $fileKeys[$name]=$entries[0].Name
+}
+$dest=Join-Path (Split-Path $previous) ('tgd3d-'+$scope+'-'+$payload.candidate_umd.Sha256.Substring(0,8)+'-'+(Get-Date -Format 'yyyyMMdd-HHmmss'))
 if(Test-Path $dest){throw 'Destination already exists'}
 New-Item -ItemType Directory $dest|Out-Null
 # Retain the existing package and its exact recovery files. No KMD/ICD install.
@@ -39,17 +49,26 @@ foreach($name in ($names|Select-Object -Unique)){
 Copy-Item ($CandidateDirectory+'\TegraGpuD3DVk.dll') ($dest+'\app\TegraGpuD3DVk.dll') -Force
 Copy-Item ($CandidateDirectory+'\tgd3d-contracts.exe') ($dest+'\app\tgd3d-contracts.exe') -Force
 Copy-Item ($PSScriptRoot+'\Restore-ShaderCache.ps1') ($dest+'\Restore-ShaderCache.ps1') -Force
+Check-File ($dest+'\app\TegraGpuD3DVk.dll') $payload.candidate_umd
+Check-File ($dest+'\app\tgd3d-contracts.exe') $payload.control
 foreach($name in @('TegraGpuD3DVk.dll','tgd3d-contracts.exe')){
     $file=Get-Item ($dest+'\app\'+$name);$record=@{Length=$file.Length;Sha256=(File-Hash $file.FullName)}
     $m.app.PSObject.Properties[$name].Value=$record
-    $m.files.PSObject.Properties['app/'+$name].Value=$record
+    $m.files.PSObject.Properties[$fileKeys[$name]].Value=$record
 }
 $restore=Get-Item ($dest+'\Restore-ShaderCache.ps1')
 $m.files|Add-Member -NotePropertyName 'Restore-ShaderCache.ps1' -NotePropertyValue @{Length=$restore.Length;Sha256=(File-Hash $restore.FullName)} -Force
 $m|Add-Member -NotePropertyName shader_cache -NotePropertyValue $payload.cache -Force
 $m|Add-Member -NotePropertyName umd_frozen_base -NotePropertyValue $payload.frozen_base -Force
 $m|Add-Member -NotePropertyName umd_patch_commits -NotePropertyValue $payload.patches -Force
-$m.scope='.158 existing KMD/ICD with cache-only tgd3d UMD; logon start; cache performance acceptance pending'
+$m|Add-Member -NotePropertyName umd_update_scope -NotePropertyValue $scope -Force
+$m.umd_source=$payload.frozen_base
+if($payload.source_identity){$m|Add-Member -NotePropertyName umd_source_identity -NotePropertyValue $payload.source_identity -Force}
+$m.scope=switch($scope){
+    'resource-teardown' {'.158 retained KMD/ICD with tgd3d DestroyResource error-contract fix; logon start; native stability acceptance pending'}
+    'copy-lifetime' {'.158 retained KMD/ICD with tgd3d overlap-copy, view bounds and lifetime fixes; modern DDI tables remain unadvertised; logon start; native stability acceptance pending'}
+    default {'.158 existing KMD/ICD with cache-only tgd3d UMD; logon start; cache performance acceptance pending'}
+}
 Save-Json ($dest+'\trial-components.json') $m
 $registration=Read-Json ($previous+'\icd-registration.json')
 $key=[Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($registration.Subkey,$true)
@@ -65,6 +84,15 @@ try{
     & (Join-Path $dest 'Enable-RuntimeAppContainerRead.ps1') -Directory ($dest+'\app')|Set-Content ($dest+'\runtime-access.json') -Encoding UTF8
     . (Join-Path $dest 'Common.ps1')
     $null=Check-Package;$null=Sync-Recovery
+    # The next boot must not depend on data still held by the lazy writer.
+    # Sync-Recovery covers only the recovery set, not the new UMD/package.
+    $flushNames=@($m.files.PSObject.Properties.Name)+@('trial-components.json',
+        'cache-prior-task.xml','cache-update-backup.json','icd-registration.json','runtime-access.json')
+    foreach($name in ($flushNames|Select-Object -Unique)){
+        $stream=[IO.FileStream]::new((Join-Path $dest $name),[IO.FileMode]::Open,
+            [IO.FileAccess]::ReadWrite,[IO.FileShare]::Read)
+        try{$stream.Flush($true)}finally{$stream.Dispose()}
+    }
     # Changes are reversible using the retained registration/task snapshot.
     [string[]]$updated=$old.Clone();$updated[1]=$updated[2]=$registration.TemporaryUmd
     $key.SetValue('UserModeDriverName',$updated,[Microsoft.Win32.RegistryValueKind]::MultiString)

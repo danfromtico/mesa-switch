@@ -13,6 +13,15 @@ namespace tgd3d {
 
 static inline Device *DD(DXGI_DDI_HDEVICE h) { return reinterpret_cast<Device *>(h); }
 static inline Resource *DR(DXGI_DDI_HRESOURCE h) { return reinterpret_cast<Resource *>(h); }
+static HRESULT APIENTRY Blt1(DXGI_DDI_ARG_BLT1 *args);
+
+static HRESULT present_result(Device *dev, HRESULT hr)
+{
+   if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == D3DDDIERR_DEVICEREMOVED ||
+       hr == DXGI_ERROR_DEVICE_RESET)
+      dev->lost = hr;
+   return hr;
+}
 
 static HRESULT APIENTRY Present(DXGI_DDI_ARG_PRESENT *args)
 {
@@ -29,6 +38,8 @@ static HRESULT APIENTRY Present(DXGI_DDI_ARG_PRESENT *args)
    const bool flip = args->Flags.Flip;
    HRESULT hr = S_OK;
    if (flip == (bool)args->Flags.Blt || args->Flags.PreferRight || args->Flags.TemporaryMono ||
+       args->Flags.AllowTearing || args->Flags.AllowFlexibleRefresh ||
+       args->Flags.NoScanoutTransform || args->Flags.Reserved ||
        args->SrcSubResourceIndex || (destination && args->DstSubResourceIndex) ||
        (unsigned)args->FlipInterval > DXGI_DDI_FLIP_INTERVAL_FOUR ||
        !dev->hContext || !dev->dxgi || !dev->dxgi->pfnPresentCb)
@@ -65,15 +76,198 @@ static HRESULT APIENTRY Present(DXGI_DDI_ARG_PRESENT *args)
          DXGI_DDI_FLIP_INTERVAL_ONE : args->FlipInterval;
       hr = dev->dxgi->pfnPresentCb(dev->hRTDevice.handle, &present);
       qpc[3] = qpc_now();
-      if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == D3DDDIERR_DEVICEREMOVED ||
-          hr == DXGI_ERROR_DEVICE_RESET)
-         dev->lost = hr;
+      present_result(dev, hr);
    }
    const uint64_t completed = dev->completed();
    const uint64_t value[6] = {args->Flags.Value, (uint64_t)args->FlipInterval,
                               dev->submitted - completed, backpressure, 0, 0};
    trace_timing(TGD3D_TIMING_PRESENT, hr, dev->submitted, completed, qpc, value);
    return hr;
+}
+
+static bool inside(const RECT &rect, UINT width, UINT height)
+{
+   return rect.left >= 0 && rect.top >= 0 && rect.right >= rect.left &&
+          rect.bottom >= rect.top && (UINT)rect.right <= width && (UINT)rect.bottom <= height;
+}
+
+static bool full_rect(const RECT &rect, UINT width, UINT height)
+{
+   return !rect.left && !rect.top && rect.right == (LONG)width && rect.bottom == (LONG)height;
+}
+
+/* Scanout is restricted to the exact linear primary layouts understood by
+ * the KMD. A private VkImage or a shared texture is not automatically a primary. */
+static bool scanout_resource(Device *dev, const Resource *res)
+{
+   return res && res->dev == dev && res->kind == ResKind::Image &&
+          res->imageType == VK_IMAGE_TYPE_2D && res->storage.image &&
+          res->mips == 1 && res->arraySize == 1 && res->depth == 1 &&
+          runtime_is_primary(res->storage.runtime) && runtime_allocation(res->storage.runtime) &&
+          (res->format == DXGI_FORMAT_B8G8R8A8_UNORM || res->format == DXGI_FORMAT_B8G8R8X8_UNORM) &&
+          ((res->width == 720 && res->height == 1280) ||
+           (res->width == 1280 && res->height == 720)) && res->pitch == res->width * 4;
+}
+
+bool direct_flip_compatible(Device *dev, const Resource *source, const Resource *target)
+{
+   return dev && SUCCEEDED(dev->lost) && scanout_resource(dev, source) &&
+          scanout_resource(dev, target) && source->width == target->width &&
+          source->height == target->height && source->pitch == target->pitch &&
+          source->format == target->format &&
+          runtime_primary_compatible(source->storage.runtime, target->storage.runtime);
+}
+
+static HRESULT APIENTRY Present1(DXGI_DDI_ARG_PRESENT1 *args)
+{
+   if (!args || !args->hDevice || args->Reserved || args->SurfacesToPresent != 1 ||
+       !args->phSurfacesToPresent || !args->phSurfacesToPresent[0].hSurface ||
+       (args->DirtyRects && !args->pDirtyRects))
+      return E_INVALIDARG;
+   const auto &source = args->phSurfacesToPresent[0];
+   const Resource *res = DR(source.hSurface);
+   if (res->dev != DD(args->hDevice) || source.SubResourceIndex >= res->subresources())
+      return E_INVALIDARG;
+   const UINT mip = source.SubResourceIndex % res->mips;
+   for (UINT i = 0; i < args->DirtyRects; ++i)
+      if (!inside(args->pDirtyRects[i], res->mipWidth(mip), res->mipHeight(mip)))
+         return E_INVALIDARG;
+   /* PresentCb consumes the opaque runtime token, including dirty rectangles.
+    * Do not recreate the token or issue one callback per rectangle. */
+   DXGI_DDI_ARG_PRESENT present = {};
+   present.hDevice = args->hDevice;
+   present.hSurfaceToPresent = source.hSurface;
+   present.SrcSubResourceIndex = source.SubResourceIndex;
+   present.hDstResource = args->hDstResource;
+   present.DstSubResourceIndex = args->DstSubResourceIndex;
+   present.pDXGIContext = args->pDXGIContext;
+   present.Flags = args->Flags;
+   present.FlipInterval = args->FlipInterval;
+   /* BackBufferMultiplicity belongs to WDDM 2.0, not this 1.3 table. */
+   return Present(&present);
+}
+
+static bool mpo_plane(Device *dev, const DXGI_DDI_PRESENT_MULTIPLANE_OVERLAY &plane)
+{
+   if (plane.LayerIndex || (plane.Enabled != TRUE && plane.Enabled != FALSE))
+      return false;
+   /* Disabled planes have no allocation. Their other attributes are ignored. */
+   if (!plane.Enabled)
+      return true;
+   const Resource *res = DR(plane.hResource);
+   if (!scanout_resource(dev, res) || plane.SubResourceIndex)
+      return false;
+   const auto &a = plane.PlaneAttributes;
+   const bool quarter = a.Rotation == DXGI_DDI_MODE_ROTATION_ROTATE90 ||
+                        a.Rotation == DXGI_DDI_MODE_ROTATION_ROTATE270;
+   if (a.Rotation < DXGI_DDI_MODE_ROTATION_IDENTITY ||
+       a.Rotation > DXGI_DDI_MODE_ROTATION_ROTATE270 ||
+       res->width != (quarter ? 1280u : 720u) || res->height != (quarter ? 720u : 1280u) ||
+       a.Flags || !full_rect(a.SrcRect, res->width, res->height) ||
+       !full_rect(a.DstRect, 720, 1280) ||
+       !(full_rect(a.ClipRect, 720, 1280) ||
+         (!a.ClipRect.left && !a.ClipRect.top && !a.ClipRect.right && !a.ClipRect.bottom)) ||
+       a.Blend != DXGI_DDI_MULTIPLANE_OVERLAY_BLEND_OPAQUE ||
+       a.VideoFrameFormat != DXGI_DDI_MULIIPLANE_OVERLAY_VIDEO_FRAME_FORMAT_PROGRESSIVE ||
+       a.YCbCrFlags || a.StereoFormat != DXGI_DDI_MULTIPLANE_OVERLAY_STEREO_FORMAT_MONO ||
+       a.StereoFlipMode != DXGI_DDI_MULTIPLANE_OVERLAY_STEREO_FLIP_NONE ||
+       (a.DirtyRectCount && !a.pDirtyRects))
+      return false;
+   for (UINT i = 0; i < a.DirtyRectCount; ++i)
+      if (!inside(a.pDirtyRects[i], res->width, res->height))
+         return false;
+   return true;
+}
+
+static HRESULT APIENTRY PresentMultiplaneOverlay(DXGI_DDI_ARG_PRESENTMULTIPLANEOVERLAY *args)
+{
+   if (!args || !args->hDevice || args->VidPnSourceId || args->Reserved ||
+       args->PresentPlaneCount != 1 || !args->pPresentPlanes)
+      return E_INVALIDARG;
+   Device *dev = DD(args->hDevice);
+   if (FAILED(dev->lost))
+      return dev->lost;
+   const auto &plane = args->pPresentPlanes[0];
+   /* This callback version cannot override interval zero. Immediate/tearing
+    * and independent flip are not advertised by the paired display driver. */
+   if (!args->Flags.Flip || args->Flags.Blt || args->Flags.PreferRight ||
+       args->Flags.TemporaryMono || args->Flags.AllowTearing || args->Flags.AllowFlexibleRefresh ||
+       args->Flags.NoScanoutTransform || args->Flags.Reserved ||
+       args->FlipInterval < DXGI_DDI_FLIP_INTERVAL_ONE ||
+       args->FlipInterval > DXGI_DDI_FLIP_INTERVAL_FOUR || !mpo_plane(dev, plane) ||
+       !dev->hContext || !dev->dxgi || !dev->dxgi->pfnPresentMultiplaneOverlayCb)
+      return DXGI_ERROR_UNSUPPORTED;
+   HRESULT hr = flush(dev, true);
+   /* Retirement reads the completion counter and can discover device loss
+    * after QueueSubmit/gate succeeded. Never present after that failure. */
+   if (FAILED(hr) || FAILED(dev->lost))
+      return FAILED(hr) ? hr : dev->lost;
+   DXGIDDICB_PRESENT_MULTIPLANE_OVERLAY present = {};
+   present.pDXGIContext = args->pDXGIContext;
+   present.hContext = dev->hContext;
+   present.AllocationInfoCount = 1;
+   if (plane.Enabled)
+      present.AllocationInfo[0].PresentAllocation = runtime_allocation(DR(plane.hResource)->storage.runtime);
+   /* The token carries rotation and the plane attributes unchanged. No blit,
+    * CPU fence wait or synthetic completion belongs in this handoff. */
+   return present_result(dev, dev->dxgi->pfnPresentMultiplaneOverlayCb(dev->hRTDevice.handle, &present));
+}
+
+static HRESULT APIENTRY GetMultiplaneOverlayCaps(DXGI_DDI_ARG_GETMULTIPLANEOVERLAYCAPS *args)
+{
+   if (!args || !args->hDevice || args->VidPnSourceId)
+      return E_INVALIDARG;
+   if (FAILED(DD(args->hDevice)->lost))
+      return DD(args->hDevice)->lost;
+   args->MultiplaneOverlayCaps = {1, 1};
+   return S_OK;
+}
+
+static HRESULT APIENTRY GetMultiplaneOverlayGroupCaps(DXGI_DDI_ARG_GETMULTIPLANEOVERLAYGROUPCAPS *args)
+{
+   if (!args || !args->hDevice || args->VidPnSourceId || args->GroupIndex)
+      return E_INVALIDARG;
+   if (FAILED(DD(args->hDevice)->lost))
+      return DD(args->hDevice)->lost;
+   args->MultiplaneOverlayGroupCaps = {1, 1.0f, 1.0f,
+      DXGI_DDI_MULTIPLANE_OVERLAY_FEATURE_CAPS_RGB |
+      DXGI_DDI_MULTIPLANE_OVERLAY_FEATURE_CAPS_ROTATION_WITHOUT_INDEPENDENT_FLIP, 0};
+   return S_OK;
+}
+
+static HRESULT APIENTRY CheckPresentDurationSupport(DXGI_DDI_ARG_CHECKPRESENTDURATIONSUPPORT *args)
+{
+   if (!args || !args->hDevice || args->VidPnSourceId)
+      return E_INVALIDARG;
+   if (FAILED(DD(args->hDevice)->lost))
+      return DD(args->hDevice)->lost;
+   /* Fixed panel timing; no seamless refresh-rate switching is supported. */
+   args->ClosestSmallerDuration = args->ClosestLargerDuration = 0;
+   return S_OK;
+}
+
+void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table)
+{
+   *table = {};
+   DXGI1_1_DDI_BASE_FUNCTIONS old = {};
+   dxgi_fill_table(&old, true);
+   /* The prefix is shared semantically, not by casting the longer table. */
+   table->pfnPresent = old.pfnPresent;
+   table->pfnGetGammaCaps = old.pfnGetGammaCaps;
+   table->pfnSetDisplayMode = old.pfnSetDisplayMode;
+   table->pfnSetResourcePriority = old.pfnSetResourcePriority;
+   table->pfnQueryResourceResidency = old.pfnQueryResourceResidency;
+   table->pfnRotateResourceIdentities = old.pfnRotateResourceIdentities;
+   table->pfnBlt = old.pfnBlt;
+   table->pfnResolveSharedResource = old.pfnResolveSharedResource;
+   dxgi_fill_residency13(table);
+   table->pfnBlt1 = Blt1;
+   table->pfnPresent1 = Present1;
+   table->pfnPresentMultiplaneOverlay = PresentMultiplaneOverlay;
+   table->pfnGetMultiplaneOverlayCaps = GetMultiplaneOverlayCaps;
+   table->pfnGetMultiplaneOverlayGroupCaps = GetMultiplaneOverlayGroupCaps;
+   table->pfnCheckPresentDurationSupport = CheckPresentDurationSupport;
+   table->pfnReserved1 = table->pfnReserved2 = nullptr;
 }
 
 static HRESULT APIENTRY GetGammaCaps(DXGI_DDI_ARG_GET_GAMMA_CONTROL_CAPS *args)
@@ -96,6 +290,12 @@ static HRESULT APIENTRY SetDisplayMode(DXGI_DDI_ARG_SETDISPLAYMODE *args)
       return E_INVALIDARG;
    Device *dev = DD(args->hDevice);
    Resource *res = DR(args->hResource);
+   if (res->dev != dev || args->SubResourceIndex)
+      return E_INVALIDARG;
+   if (!runtime_is_primary(res->storage.runtime))
+      return DXGI_ERROR_UNSUPPORTED;
+   if (!runtime_allocation(res->storage.runtime))
+      return D3DDDIERR_DEVICEREMOVED;
 #ifdef TGD3D_RED_PRIMARY_CONTROL
    /* The modeset test must execute even when DXGI never reaches rotated Blt.
     * Wait for the real clear before handing this same allocation to runtime;
@@ -128,9 +328,10 @@ static HRESULT APIENTRY SetResourcePriority(DXGI_DDI_ARG_SETRESOURCEPRIORITY *ar
    Resource *res = DR(args->hResource);
    if (res->dev != dev)
       return E_INVALIDARG;
-   const D3DKMT_HANDLE allocation = runtime_allocation(res->storage.runtime);
+   RuntimeResource *owner = resource_runtime(res);
+   const D3DKMT_HANDLE allocation = runtime_allocation(owner);
    /* Private NVK storage holds a residency reference for its entire life. */
-   if (!res->storage.runtime)
+   if (!owner)
       return S_OK;
    if (!allocation)
       return D3DDDIERR_DEVICEREMOVED;
@@ -153,9 +354,10 @@ static HRESULT APIENTRY QueryResourceResidency(DXGI_DDI_ARG_QUERYRESOURCERESIDEN
       if (!res || res->dev != dev)
          return E_INVALIDARG;
       args->pStatus[i] = DXGI_DDI_RESIDENCY_FULLY_RESIDENT;
-      if (!res->storage.runtime)
+      RuntimeResource *owner = resource_runtime(res);
+      if (!owner)
          continue;
-      const D3DKMT_HANDLE allocation = runtime_allocation(res->storage.runtime);
+      const D3DKMT_HANDLE allocation = runtime_allocation(owner);
       if (!allocation)
          return D3DDDIERR_DEVICEREMOVED;
       if (!dev->kt.pfnQueryResidencyCb)
@@ -221,11 +423,12 @@ static HRESULT APIENTRY RotateResourceIdentities(DXGI_DDI_ARG_ROTATE_RESOURCE_ID
    return hr;
 }
 
-static HRESULT APIENTRY Blt(DXGI_DDI_ARG_BLT *args)
+static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
 {
    if (!args || !args->hDevice || !args->hDstResource || !args->hSrcResource)
       return E_INVALIDARG;
    Device *dev = DD(args->hDevice);
+   if (FAILED(dev->lost)) return dev->lost;
    Resource *dst = DR(args->hDstResource), *src = DR(args->hSrcResource);
    HRESULT hr = S_OK;
    if (dst->dev != dev || src->dev != dev ||
@@ -235,6 +438,12 @@ static HRESULT APIENTRY Blt(DXGI_DDI_ARG_BLT *args)
        args->DstRight > dst->mipWidth(args->DstSubresource % dst->mips) ||
        args->DstBottom > dst->mipHeight(args->DstSubresource % dst->mips))
       hr = E_INVALIDARG;
+   else if (source && (!inside(*source, src->mipWidth(args->SrcSubresource % src->mips),
+                                           src->mipHeight(args->SrcSubresource % src->mips)) ||
+                       source->left == source->right || source->top == source->bottom))
+      hr = E_INVALIDARG;
+   else if (src->storage.image == dst->storage.image)
+      hr = DXGI_ERROR_UNSUPPORTED;
    else if (args->Flags.Resolve || args->Flags.Reserved)
       hr = DXGI_ERROR_UNSUPPORTED;
    else if (args->Rotate != DXGI_DDI_MODE_ROTATION_IDENTITY &&
@@ -246,13 +455,15 @@ static HRESULT APIENTRY Blt(DXGI_DDI_ARG_BLT *args)
       hr = DXGI_ERROR_UNSUPPORTED;
    if (SUCCEEDED(hr)) {
       if (args->Rotate >= DXGI_DDI_MODE_ROTATION_ROTATE90) {
-         hr = rotated_blit(dev, args);
+         hr = rotated_blit(dev, args, source);
          trace(TGD3D_TRACE_BLT, hr, args->Flags.Value, args->Rotate);
          return hr;
       }
       const UINT src_mip = args->SrcSubresource % src->mips;
       const UINT dst_mip = args->DstSubresource % dst->mips;
-      const int32_t sw = (int32_t)src->mipWidth(src_mip), sh = (int32_t)src->mipHeight(src_mip);
+      const int32_t sx = source ? source->left : 0, sy = source ? source->top : 0;
+      const int32_t sw = source ? source->right - sx : (int32_t)src->mipWidth(src_mip);
+      const int32_t sh = source ? source->bottom - sy : (int32_t)src->mipHeight(src_mip);
       const int32_t dw = (int32_t)(args->DstRight - args->DstLeft);
       const int32_t dh = (int32_t)(args->DstBottom - args->DstTop);
       VkCommandBuffer cmd = cmd_begin(dev);
@@ -265,7 +476,8 @@ static HRESULT APIENTRY Blt(DXGI_DDI_ARG_BLT *args)
       VkImageBlit blit = {};
       blit.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, src_mip, args->SrcSubresource / src->mips, 1};
       blit.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, dst_mip, args->DstSubresource / dst->mips, 1};
-      blit.srcOffsets[1] = {sw, sh, 1};
+      blit.srcOffsets[0] = {sx, sy, 0};
+      blit.srcOffsets[1] = {sx + sw, sy + sh, 1};
       blit.dstOffsets[0] = {(int32_t)args->DstLeft, (int32_t)args->DstTop, 0};
       blit.dstOffsets[1] = {(int32_t)args->DstRight, (int32_t)args->DstBottom, 1};
       dev->vk.CmdBlitImage(cmd, src->storage.image, VK_IMAGE_LAYOUT_GENERAL, dst->storage.image,
@@ -275,6 +487,28 @@ static HRESULT APIENTRY Blt(DXGI_DDI_ARG_BLT *args)
    }
    trace(TGD3D_TRACE_BLT, hr, args->Flags.Value, args->Rotate);
    return hr;
+}
+
+static HRESULT APIENTRY Blt(DXGI_DDI_ARG_BLT *args)
+{
+   return blt(args, nullptr);
+}
+
+static HRESULT APIENTRY Blt1(DXGI_DDI_ARG_BLT1 *args)
+{
+   if (!args || args->SrcLeft > INT32_MAX || args->SrcTop > INT32_MAX ||
+       args->SrcRight > INT32_MAX || args->SrcBottom > INT32_MAX)
+      return E_INVALIDARG;
+   DXGI_DDI_ARG_BLT copy = {};
+   copy.hDevice = args->hDevice; copy.hDstResource = args->hDstResource;
+   copy.DstSubresource = args->DstSubresource;
+   copy.DstLeft = args->DstLeft; copy.DstTop = args->DstTop;
+   copy.DstRight = args->DstRight; copy.DstBottom = args->DstBottom;
+   copy.hSrcResource = args->hSrcResource; copy.SrcSubresource = args->SrcSubresource;
+   copy.Flags = args->Flags; copy.Rotate = args->Rotate;
+   const RECT source = {(LONG)args->SrcLeft, (LONG)args->SrcTop,
+                         (LONG)args->SrcRight, (LONG)args->SrcBottom};
+   return blt(&copy, &source);
 }
 
 static HRESULT APIENTRY ResolveSharedResource(DXGI_DDI_ARG_RESOLVESHAREDRESOURCE *args)

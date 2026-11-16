@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
- * DXGI presentation rotation on the Vulkan graphics queue. The display
- * controller always scans an ordinary portrait primary; no CPU pixels move.
+ * DXGI's explicitly requested rotation copy on the Vulkan graphics queue.
+ * DC column presentation uses the original surface and bypasses this path.
  */
 #include "tgd3d.h"
 #include "shaders/blit_spv.h"
@@ -17,6 +17,17 @@ static HRESULT blit_error(Device *dev, VkResult result)
 
 static HRESULT blit_shaders(Device *dev, UINT rotation)
 {
+   const VkPushConstantRange region = {VK_SHADER_STAGE_VERTEX_BIT, 0, 4 * sizeof(float)};
+   if (!dev->blitPipelineLayout) {
+      VkPipelineLayoutCreateInfo layout = {VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
+      layout.setLayoutCount = SET_COUNT;
+      layout.pSetLayouts = dev->setLayouts;
+      layout.pushConstantRangeCount = 1;
+      layout.pPushConstantRanges = &region;
+      HRESULT hr = blit_error(dev, dev->vk.CreatePipelineLayout(dev->vkdev, &layout, nullptr,
+                                                                 &dev->blitPipelineLayout));
+      if (FAILED(hr)) return hr;
+   }
    if (!dev->blitVertex[rotation]) {
       VkSpecializationMapEntry map = {0, 0, sizeof(rotation)};
       VkSpecializationInfo constants = {1, &map, sizeof(rotation), &rotation};
@@ -29,6 +40,8 @@ static HRESULT blit_shaders(Device *dev, UINT rotation)
       info.pName = "main";
       info.setLayoutCount = SET_COUNT;
       info.pSetLayouts = dev->setLayouts;
+      info.pushConstantRangeCount = 1;
+      info.pPushConstantRanges = &region;
       info.pSpecializationInfo = &constants;
       HRESULT hr = blit_error(dev, dev->vk.CreateShadersEXT(dev->vkdev, 1, &info, nullptr,
                                                             &dev->blitVertex[rotation]));
@@ -43,6 +56,8 @@ static HRESULT blit_shaders(Device *dev, UINT rotation)
       info.pName = "main";
       info.setLayoutCount = SET_COUNT;
       info.pSetLayouts = dev->setLayouts;
+      info.pushConstantRangeCount = 1;
+      info.pPushConstantRanges = &region;
       HRESULT hr = blit_error(dev, dev->vk.CreateShadersEXT(dev->vkdev, 1, &info, nullptr,
                                                             &dev->blitFragment));
       if (FAILED(hr)) return hr;
@@ -69,8 +84,10 @@ void blit_destroy(Device *dev)
    }
    if (dev->blitFragment) dev->vk.DestroyShaderEXT(dev->vkdev, dev->blitFragment, nullptr);
    if (dev->blitPointSampler) dev->vk.DestroySampler(dev->vkdev, dev->blitPointSampler, nullptr);
+   if (dev->blitPipelineLayout) dev->vk.DestroyPipelineLayout(dev->vkdev, dev->blitPipelineLayout, nullptr);
    dev->blitFragment = VK_NULL_HANDLE;
    dev->blitPointSampler = VK_NULL_HANDLE;
+   dev->blitPipelineLayout = VK_NULL_HANDLE;
 }
 
 /* DXGI presentation copies preserve encoded sRGB values when the destination
@@ -164,7 +181,7 @@ HRESULT red_primary_clear(Device *dev, Resource *res, UINT subresource)
 }
 #endif
 
-HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args)
+HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args, const RECT *source)
 {
    Resource *src = reinterpret_cast<Resource *>(args->hSrcResource);
    Resource *dst = reinterpret_cast<Resource *>(args->hDstResource);
@@ -193,8 +210,13 @@ HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args)
    VkDescriptorSet set = descriptor_set_alloc(dev, SET_TEX);
    if (!set) return E_OUTOFMEMORY;
 
-   const UINT sw = src->mipWidth(args->SrcSubresource % src->mips);
-   const UINT sh = src->mipHeight(args->SrcSubresource % src->mips);
+   const UINT imageWidth = src->mipWidth(args->SrcSubresource % src->mips);
+   const UINT imageHeight = src->mipHeight(args->SrcSubresource % src->mips);
+   const UINT sw = source ? source->right - source->left : imageWidth;
+   const UINT sh = source ? source->bottom - source->top : imageHeight;
+   const float region[4] = {source ? float(source->left) / imageWidth : 0.0f,
+      source ? float(source->top) / imageHeight : 0.0f,
+      float(sw) / imageWidth, float(sh) / imageHeight};
    const UINT dw = args->DstRight - args->DstLeft, dh = args->DstBottom - args->DstTop;
    const bool quarter = rotation & 1;
    const bool scaled = dw != (quarter ? sh : sw) || dh != (quarter ? sw : sh);
@@ -239,8 +261,10 @@ HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args)
       stages[count++] = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
    }
    vk.CmdBindShadersEXT(cmd, count, stages, shaders);
-   vk.CmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->pipelineLayout,
+   vk.CmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->blitPipelineLayout,
                            SET_TEX, 1, &set, 0, nullptr);
+   vk.CmdPushConstants(cmd, dev->blitPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT,
+                       0, sizeof(region), region);
    vk.CmdSetVertexInputEXT(cmd, 0, nullptr, 0, nullptr);
    vk.CmdSetPrimitiveTopology(cmd, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
    vk.CmdSetPrimitiveRestartEnable(cmd, VK_FALSE);

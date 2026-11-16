@@ -21,10 +21,11 @@ typedef NTSTATUS(APIENTRY *PFN_ShareObjects)(UINT, const D3DKMT_HANDLE *, void *
 void Device::setError(HRESULT hr, const char *file, int line)
 {
    trace_error(hr, file, (unsigned)line);
-   /* Keep the original failure in the trace, but Draw has no recoverable
-    * OOM/unsupported result. Runtime treats any error other than removal as
-    * a critical driver error. Stop this device if draw preparation fails. */
-   if (inDraw && FAILED(hr))
+   /* Keep the original failure in the trace. Draw and DestroyResource allow
+    * only device removal; runtime treats OOM/invalid-argument and other errors
+    * from these DDIs as critical driver errors. Create/Open keep their own
+    * recoverable error rules outside this scope. */
+   if (removalOnlyErrors && FAILED(hr))
       hr = D3DDDIERR_DEVICEREMOVED;
    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == D3DDDIERR_DEVICEREMOVED ||
        hr == DXGI_ERROR_DEVICE_RESET) {
@@ -41,7 +42,7 @@ void Device::setError(HRESULT hr, const char *file, int line)
 uint64_t Device::completed()
 {
    uint64_t value = 0;
-   if (!fence || !vk.GetSemaphoreCounterValue)
+   if (FAILED(lost) || !fence || !vk.GetSemaphoreCounterValue)
       return 0;
    if (vk.GetSemaphoreCounterValue(vkdev, fence, &value) != VK_SUCCESS) {
       TG_ERROR(this, DXGI_ERROR_DEVICE_REMOVED);
@@ -337,7 +338,12 @@ void flush_pending_clears(Device *dev, const View *except_bound)
          return;
       dev->cmdHasWork = true;
       VkRenderingAttachmentInfo attachment = {VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO};
-      attachment.imageView = view_get(view);
+      {
+         /* Materializing a recorded clear inside Flush/Present/QueryEnd/Destroy
+          * cannot report recoverable OOM or drop the clear while leaving lost == S_OK. */
+         RemovalOnlyErrorScope errors(dev);
+         attachment.imageView = view_get(view);
+      }
       if (!attachment.imageView)
          return;
       attachment.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
@@ -408,7 +414,11 @@ static void destroy_deferred(Device *dev, const Deferred &d)
 
 void retire(Device *dev, bool force)
 {
+   if (!force && FAILED(dev->lost))
+      return;
    const uint64_t done = force ? UINT64_MAX : dev->completed();
+   if (!force && FAILED(dev->lost))
+      return;
    while (!dev->submittedCommands.empty() && dev->submittedCommands.front().seq <= done) {
       SubmittedCommands &submitted = dev->submittedCommands.front();
       dev->vk.ResetCommandBuffer(submitted.cmd, 0);
@@ -446,6 +456,8 @@ static HRESULT wait_cpu(Device *dev, uint64_t seq, tgd3d_wait_reason reason)
    if (FAILED(dev->lost))
       return dev->lost;
    const uint64_t completed = dev->completed();
+   if (FAILED(dev->lost))
+      return dev->lost;
    if (completed >= seq)
       return S_OK;
    const uint64_t begin = qpc_now();
@@ -468,13 +480,15 @@ static HRESULT wait_cpu(Device *dev, uint64_t seq, tgd3d_wait_reason reason)
       dev->stats.backpressureNs += qpc_nanoseconds(end - begin);
    const uint64_t qpc[4] = {begin, end, 0, 0};
    const uint64_t value[6] = {(uint64_t)reason, seq, (uint32_t)result, 0, 0, 0};
+   const uint64_t after = result == VK_SUCCESS ? dev->completed() : completed;
    trace_timing(TGD3D_TIMING_CPU_WAIT, result == VK_SUCCESS ? S_OK : E_FAIL, dev->submitted,
-                dev->completed(), qpc, value);
+                after, qpc, value);
    if (result != VK_SUCCESS) {
       TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
       return DXGI_ERROR_DEVICE_REMOVED;
    }
-   return S_OK;
+   /* The completion sample used by timing can itself report device loss. */
+   return dev->lost;
 }
 
 HRESULT wait_sequence(Device *dev, uint64_t seq, tgd3d_wait_reason reason)
@@ -485,8 +499,10 @@ HRESULT wait_sequence(Device *dev, uint64_t seq, tgd3d_wait_reason reason)
          return hr;
    }
    HRESULT hr = wait_cpu(dev, seq, reason);
+   if (FAILED(hr))
+      return hr;
    retire(dev);
-   return hr;
+   return dev->lost;
 }
 
 static HRESULT gate_runtime(Device *dev)
@@ -514,8 +530,12 @@ HRESULT flush(Device *dev, bool waitForSpace)
    if (FAILED(dev->lost))
       return dev->lost;
    flush_pending_clears(dev, nullptr);
+   if (FAILED(dev->lost))
+      return dev->lost;
    if (dev->cmd && dev->cmdHasWork) {
       end_rendering(dev);
+      if (FAILED(dev->lost))
+         return dev->lost;
       /* Coherent upload/readback storage still needs a device-to-host
        * memory dependency before a CPU fence wait can expose GPU writes. */
       VkMemoryBarrier2 host = {VK_STRUCTURE_TYPE_MEMORY_BARRIER_2};
@@ -603,29 +623,46 @@ HRESULT flush(Device *dev, bool waitForSpace)
 
    }
    /* Every submission, including upload/readback-triggered ones, must be
-    * visible to subsequent runtime signals and waits. */
+    * visible to subsequent runtime signals and waits, even if the optional
+    * post-submit timing sample just observed device loss. */
    HRESULT hr = gate_runtime(dev);
    if (FAILED(hr)) {
-      TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
+      if (SUCCEEDED(dev->lost))
+         TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
       return dev->lost;
    }
+   if (FAILED(dev->lost))
+      return dev->lost;
    retire(dev);
+   /* Retirement reads the real completion fence. A failed read cannot be
+    * turned into a successful Flush/Present/SetDisplayMode by returning the
+    * earlier runtime-queue gate result. Keep outstanding objects owned. */
+   if (FAILED(dev->lost))
+      return dev->lost;
 #ifdef TGD3D_CPU_SYNC_CONTROL
    /* Ordinary Flush, Present and shared-resource release must complete the
     * rendering before the runtime can signal its own context. Polling calls
     * still submit without waiting, preserving DONOTWAIT / QueryGetData. */
    if (waitForSpace && SUCCEEDED(hr)) {
       hr = wait_cpu(dev, dev->submitted, TGD3D_WAIT_SYNC_CONTROL);
+      if (FAILED(hr))
+         return hr;
       retire(dev);
    }
 #else
-   if (waitForSpace && SUCCEEDED(hr) && dev->submitted > TGD3D_MAX_IN_FLIGHT &&
-       dev->completed() < dev->submitted - TGD3D_MAX_IN_FLIGHT) {
-      hr = wait_cpu(dev, dev->submitted - TGD3D_MAX_IN_FLIGHT, TGD3D_WAIT_BACKPRESSURE);
-      retire(dev);
+   if (waitForSpace && SUCCEEDED(hr) && dev->submitted > TGD3D_MAX_IN_FLIGHT) {
+      const uint64_t completed = dev->completed();
+      if (FAILED(dev->lost))
+         return dev->lost;
+      if (completed < dev->submitted - TGD3D_MAX_IN_FLIGHT) {
+         hr = wait_cpu(dev, dev->submitted - TGD3D_MAX_IN_FLIGHT, TGD3D_WAIT_BACKPRESSURE);
+         if (FAILED(hr))
+            return hr;
+         retire(dev);
+      }
    }
 #endif
-   return hr;
+   return FAILED(hr) ? hr : dev->lost;
 }
 
 }

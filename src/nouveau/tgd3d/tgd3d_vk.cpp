@@ -275,6 +275,7 @@ HRESULT VulkanAdapter::open(uint64_t luid)
    caps.denormFlush = props12.shaderDenormFlushToZeroFloat32;
    caps.zeroInfNanPreserve = props12.shaderSignedZeroInfNanPreserveFloat32;
    caps.geometryShader = f.geometryShader;
+   caps.drawIndirectFirstInstance = f.drawIndirectFirstInstance;
    caps.depthClamp = f.depthClamp;
    caps.pipelineStatistics = f.pipelineStatisticsQuery;
    caps.textureCompressionBC = f.textureCompressionBC;
@@ -318,6 +319,7 @@ VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue
    f.independentBlend = f.depthBiasClamp = f.fillModeNonSolid = f.samplerAnisotropy = VK_TRUE;
    f.dualSrcBlend = f.fullDrawIndexUint32 = f.robustBufferAccess = VK_TRUE;
    f.geometryShader = hf.geometryShader;
+   f.drawIndirectFirstInstance = hf.drawIndirectFirstInstance;
    f.depthClamp = hf.depthClamp;
    f.occlusionQueryPrecise = hf.occlusionQueryPrecise;
    f.pipelineStatisticsQuery = hf.pipelineStatisticsQuery;

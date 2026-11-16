@@ -12,12 +12,15 @@ dep_dxbc_spv = dxbc_spv.get_variable('dxbc_spv_dep')
 
 tgd3d_files = files(
   'tgd3d_blit.cpp',
+  'tgd3d_clear.cpp',
   'tgd3d_cmd.cpp',
+  'tgd3d_ddi11.cpp',
   'tgd3d_device.cpp',
   'tgd3d_draw.cpp',
   'tgd3d_dxgi.cpp',
   'tgd3d_entry.cpp',
   'tgd3d_format.cpp',
+   'tgd3d_offer.cpp',
   'tgd3d_query.cpp',
   'tgd3d_resource.cpp',
   'tgd3d_runtime.cpp',

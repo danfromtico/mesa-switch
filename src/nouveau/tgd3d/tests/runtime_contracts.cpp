@@ -140,8 +140,12 @@ static void primary_creation_contract()
       {4, VK_SUCCESS, D3DDDIERR_DEVICEREMOVED, D3DDDIERR_DEVICEREMOVED},
       {5, VK_SUCCESS, D3DDDIERR_OUTOFVIDEOMEMORY, E_OUTOFMEMORY},
       {5, VK_SUCCESS, D3DDDIERR_DEVICEREMOVED, D3DDDIERR_DEVICEREMOVED},
+      {6, VK_SUCCESS, E_INVALIDARG, D3DDDIERR_DEVICEREMOVED},
+      {6, VK_SUCCESS, E_OUTOFMEMORY, D3DDDIERR_DEVICEREMOVED},
+      {6, VK_SUCCESS, D3DDDIERR_OUTOFVIDEOMEMORY, D3DDDIERR_DEVICEREMOVED},
    };
    for (UINT rotation = D3DDDI_ROTATION_IDENTITY; rotation <= D3DDDI_ROTATION_270; rotation++)
+   for (bool nonprerotated : {false, true})
    for (bool alpha : {false, true}) for (bool opened : {false, true})
    for (bool optional : {false, true}) for (const auto &failure : cases) {
       if (opened && optional)
@@ -153,10 +157,11 @@ static void primary_creation_contract()
       init(&dev, &adapter, 0);
       primaryError = S_OK;
       primaryFormat = alpha ? D3DDDIFMT_A8R8G8B8 : D3DDDIFMT_X8R8G8B8;
-      primaryRotation = D3DDDI_ROTATION_IDENTITY;
+      primaryRotation = nonprerotated ? D3DDDI_ROTATION_IDENTITY : rotation;
       primaryModeRotation = rotation;
-      primaryWidth = 720;
-      primaryHeight = 1280;
+      const bool quarter = primaryRotation == D3DDDI_ROTATION_90 || primaryRotation == D3DDDI_ROTATION_270;
+      primaryWidth = quarter ? 1280 : 720;
+      primaryHeight = quarter ? 720 : 1280;
       primaryPitch = primaryWidth * 4;
       primaryImages = primaryModes = 0;
       primaryAllocations = primaryResidents = 0;
@@ -197,7 +202,8 @@ static void primary_creation_contract()
          a->VirtualAddress = a->BaseAddress; return S_OK;
       };
       dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE h, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) -> HRESULT {
-         CHECK(h == rt_device(0) && a->BaseAddress == 0x100000 && a->Size == 3686400); return S_OK;
+         CHECK(h == rt_device(0) && a->BaseAddress == 0x100000 && a->Size == 3686400);
+         return primaryFailureStep == 6 ? primaryRuntimeFailure : S_OK;
       };
       dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *a, const VkAllocationCallbacks *, VkImage *image) {
          CHECK(a->format == VK_FORMAT_B8G8R8A8_UNORM && a->tiling == VK_IMAGE_TILING_LINEAR);
@@ -228,14 +234,16 @@ static void primary_creation_contract()
       };
       dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) {
          const auto *owner = owners[0];
-         CHECK(owner && owner->free_gpu(owner->context, 0x100000, 3686400) == VK_SUCCESS);
+         CHECK(owner);
+         const VkResult result = owner->free_gpu(owner->context, 0x100000, 3686400);
+         CHECK((result == VK_SUCCESS) == (primaryFailureStep != 6));
          owner->release(owner->context); owners[0] = nullptr;
       };
       dev.vk.DestroyImage = [](VkDevice, VkImage image, const VkAllocationCallbacks *) { CHECK(image == (VkImage)0x22); --primaryImages; };
       D3D10DDI_MIPINFO mip = {primaryWidth, primaryHeight, 1, primaryWidth, primaryHeight, 1};
       DXGI_DDI_PRIMARY_DESC primary = {};
       primary.Flags = (optional ? DXGI_DDI_PRIMARY_OPTIONAL : 0) |
-         (rotation == D3DDDI_ROTATION_IDENTITY ? 0 : DXGI_DDI_PRIMARY_NONPREROTATED);
+         (nonprerotated ? DXGI_DDI_PRIMARY_NONPREROTATED : 0);
       /* DriverFlags is an output, including when the caller reuses a
        * descriptor that previously requested copy-style presentation. */
       primary.DriverFlags = DXGI_DDI_PRIMARY_DRIVER_FLAG_NO_SCANOUT;
@@ -252,7 +260,7 @@ static void primary_creation_contract()
       D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
       tg_gpu_primary_allocation_request standard = {
          {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_DISPLAY_PRIMARY, 3686400},
-         primaryFormat, {60, 1}, D3DDDI_ROTATION_IDENTITY, primaryWidth, primaryHeight, primaryPitch, rotation};
+         primaryFormat, {60, 1}, primaryRotation, primaryWidth, primaryHeight, primaryPitch, rotation};
       D3DDDI_OPENALLOCATIONINFO allocation = {};
       allocation.hAllocation = 0x60; allocation.pPrivateDriverData = &standard;
       allocation.PrivateDriverDataSize = sizeof(standard);
@@ -262,7 +270,7 @@ static void primary_creation_contract()
          else table.pfnCreateResource({&dev}, &desc, {storage}, {rt_resource(0)});
       };
       create_or_open();
-      if (failure.step) {
+      if (failure.step && failure.step != 6) {
          CHECK(primaryError == failure.expected && !primaryImages && !owners[0]);
          CHECK(FAILED(dev.lost) == (failure.expected == D3DDDIERR_DEVICEREMOVED));
          if (FAILED(dev.lost)) {
@@ -281,13 +289,16 @@ static void primary_creation_contract()
       CHECK(res->width == primaryWidth && res->height == primaryHeight);
       CHECK(SUCCEEDED(runtime_set_display_mode(res->storage.runtime, &dev, 0)) && primaryModes == 1);
       table.pfnDestroyResource({&dev}, {storage});
-      CHECK(!primaryImages && !owners[0] && primaryError == S_OK);
+      CHECK(!primaryImages && !owners[0] && primaryError == (failure.step == 6 ? failure.expected : S_OK));
+      CHECK(FAILED(dev.lost) == (failure.step == 6));
+      CHECK(!dev.removalOnlyErrors);
       runtime_device_destroy(&dev);
    }
-   std::puts("PASS: ARGB/XRGB fixed-portrait primary Create/OpenResource and NONPREROTATED modes, exact pitch/extent, imported GPU VA and teardown (CPU control)");
+   std::puts("PASS: ARGB/XRGB four-direction primary Create/OpenResource and NONPREROTATED modes, exact pitch/extent, imported GPU VA and teardown (CPU control)");
    std::puts("PASS: accepted optional/mandatory primaries publish direct-scanout DriverFlags without stale NO_SCANOUT (CPU control)");
-   std::puts("PASS: four display-mode angles retain fixed portrait storage through primary creation/open (CPU control)");
+   std::puts("PASS: four display-mode angles use explicit DC orientation; NONPREROTATED retains identity storage (CPU control)");
    std::puts("PASS: primary Create/OpenResource propagate image/import/bind OOM and runtime removal after releasing partial ownership (CPU control)");
+   std::puts("PASS: DestroyResource reports only device removal for GPU-VA release failures, after cleanup; Create/OpenResource OOM stays recoverable (CPU control)");
 
    /* DXGI must receive its DDI opt-out, before any scanout allocation exists.
     * Returning a normal DXGI API error or S_OK here prevents rotated Blt. */
@@ -302,7 +313,8 @@ static void primary_creation_contract()
          CHECK(false); return VK_ERROR_DEVICE_LOST;
       };
       const bool quarter = rotation != DXGI_DDI_MODE_ROTATION_ROTATE180;
-      D3D10DDI_MIPINFO mip = {quarter ? 1280u : 720u, quarter ? 720u : 1280u, 1, 0, 0, 1};
+      /* Deliberately wrong extent for the requested storage rotation. */
+      D3D10DDI_MIPINFO mip = {quarter ? 720u : 1280u, quarter ? 1280u : 720u, 1, 0, 0, 1};
       DXGI_DDI_PRIMARY_DESC primary = {};
       primary.Flags = optional;
       primary.ModeDesc.Rotation = (DXGI_DDI_MODE_ROTATION)rotation;
@@ -317,16 +329,112 @@ static void primary_creation_contract()
       alignas(Resource) unsigned char storage[sizeof(Resource)];
       D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
       table.pfnCreateResource({&dev}, &desc, {storage}, {rt_resource(0)});
-      CHECK(primaryError == DXGI_DDI_ERR_UNSUPPORTED && SUCCEEDED(dev.lost));
-      CHECK(primary.DriverFlags == DXGI_DDI_PRIMARY_DRIVER_FLAG_NO_SCANOUT);
+      CHECK(primaryError == DXGI_ERROR_UNSUPPORTED && SUCCEEDED(dev.lost));
+      CHECK(primary.DriverFlags == 0);
       runtime_device_destroy(&dev);
    }
-   std::puts("PASS: rotated primary creation requests DXGI's GPU-copy fallback before allocation (CPU control)");
+   std::puts("PASS: invalid rotated primary extents are rejected before allocation (CPU control)");
 }
 
 static uint64_t modeCompleted;
 static VkResult modeWaitResult;
 static unsigned modeWaits, modeCallbacks, modeErrors;
+
+static UINT sourceFormat, wantedFormat, privateModeCalls, privateFormatCalls;
+static HRESULT privateInitial, privateChange, privateRetry;
+
+static void primary_private_format_contract()
+{
+   const struct {
+      HRESULT initial, change, retry, expected;
+      UINT current; /* 4 = unknown, 5 = already the requested layout */
+      bool callback;
+      UINT modes, formats;
+   } cases[] = {
+      {S_OK, S_OK, S_OK, S_OK, 0, true, 1, 0},
+      {E_INVALIDARG, S_OK, S_OK, E_INVALIDARG, 0, true, 1, 0},
+      {D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, S_OK, S_OK, D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, 4, true, 1, 0},
+      {D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, S_OK, S_OK, D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, 5, true, 1, 0},
+      {D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, S_OK, S_OK, D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, 0, false, 1, 0},
+      {D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, E_FAIL, S_OK, E_FAIL, 0, true, 1, 1},
+      {D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, S_OK, S_OK, S_OK, 0, true, 2, 1},
+      {D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, S_OK, D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT,
+         D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, 0, true, 2, 1},
+      {D3DDDIERR_INCOMPATIBLEPRIVATEFORMAT, S_OK, D3DDDIERR_DEVICEREMOVED,
+         D3DDDIERR_DEVICEREMOVED, 0, true, 2, 1},
+   };
+   for (UINT rotation = 1; rotation <= 4; ++rotation)
+   for (bool opened : {false, true}) for (const auto &c : cases) {
+      Adapter adapter; Device dev;
+      init(&dev, &adapter, 0);
+      wantedFormat = rotation - 1;
+      sourceFormat = c.current == 5 ? wantedFormat :
+         (c.current == 4 ? 4 : (wantedFormat + 1) % 4);
+      privateInitial = c.initial; privateChange = c.change; privateRetry = c.retry;
+      privateModeCalls = privateFormatCalls = 0;
+      dev.kt.pfnSetDisplayModeCb = [](HANDLE h, D3DDDICB_SETDISPLAYMODE *a) -> HRESULT {
+         CHECK(h == rt_device(0) && a->hPrimaryAllocation == 0x60);
+         CHECK(!a->PrivateDriverFormatAttribute);
+         ++privateModeCalls;
+         a->PrivateDriverFormatAttribute = sourceFormat;
+         return privateModeCalls == 1 ? privateInitial : privateRetry;
+      };
+      if (c.callback) dev.kt.pfnSetDisplayPrivateDriverFormatCb = [](HANDLE h,
+         const D3DDDICB_SETDISPLAYPRIVATEDRIVERFORMAT *a) -> HRESULT {
+         CHECK(h == rt_device(0) && !a->VidPnSourceId);
+         CHECK(a->PrivateDriverFormatAttribute == wantedFormat);
+         CHECK(privateModeCalls == 1 && !privateFormatCalls);
+         ++privateFormatCalls;
+         if (SUCCEEDED(privateChange)) sourceFormat = wantedFormat;
+         return privateChange;
+      };
+      dev.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
+         CHECK(h == rt_device(0) && a->NumAllocations == 1 && a->pAllocationInfo2->Flags.Primary);
+         const auto &r = *static_cast<const tg_gpu_primary_allocation_request *>(a->pAllocationInfo2->pPrivateDriverData);
+         CHECK(r.Rotation == wantedFormat + 1);
+         a->pAllocationInfo2->hAllocation = 0x60; return S_OK;
+      };
+      const bool quarter = rotation == 2 || rotation == 4;
+      tg_gpu_primary_allocation_request primary = {
+         {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_DISPLAY_PRIMARY, 3686400},
+         D3DDDIFMT_A8R8G8B8, {60, 1}, rotation,
+         quarter ? 1280u : 720u, quarter ? 720u : 1280u, quarter ? 5120u : 2880u,
+         rotation == 1 ? 4u : rotation}; /* NONPREROTATED storage is independent of mode rotation. */
+      RuntimeResource *res = nullptr;
+      if (opened) {
+         D3DDDI_OPENALLOCATIONINFO allocation = {};
+         allocation.hAllocation = 0x60; allocation.pPrivateDriverData = &primary;
+         allocation.PrivateDriverDataSize = sizeof(primary);
+         D3D10DDIARG_OPENRESOURCE open = {};
+         open.NumAllocations = 1; open.pOpenAllocationInfo = &allocation;
+         RuntimeSharedDescription description;
+         CHECK(runtime_shared_open(&dev, &open, {rt_resource(0)}, &res, &description) == S_OK);
+      } else {
+         D3D10DDI_MIPINFO mip = {primary.Width, primary.Height, 1, 0, 0, 1};
+         DXGI_DDI_PRIMARY_DESC desc = {};
+         desc.Flags = rotation == 1 ? DXGI_DDI_PRIMARY_NONPREROTATED : 0;
+         desc.ModeDesc.Rotation = (DXGI_DDI_MODE_ROTATION)primary.ModeRotation;
+         desc.ModeDesc.Width = primary.Width; desc.ModeDesc.Height = primary.Height;
+         desc.ModeDesc.RefreshRate = {60, 1};
+         D3D10DDIARG_CREATERESOURCE create = {};
+         create.pMipInfoList = &mip; create.pPrimaryDesc = &desc;
+         create.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D;
+         create.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+         create.MipLevels = create.ArraySize = create.SampleDesc.Count = 1;
+         UINT w, h, pitch;
+         CHECK(runtime_primary_create(&dev, &create, {rt_resource(0)}, &res, &w, &h, &pitch) == S_OK);
+         CHECK(w == primary.Width && h == primary.Height && pitch == primary.Pitch);
+      }
+      CHECK(runtime_set_display_mode(res, &dev, 1) == E_INVALIDARG && !privateModeCalls);
+      CHECK(runtime_set_display_mode(res, &dev, 0) == c.expected);
+      CHECK(privateModeCalls == c.modes && privateFormatCalls == c.formats);
+      CHECK(runtime_allocation(res) == 0x60 && dev.submitted == 0);
+      if (c.formats && SUCCEEDED(c.change)) CHECK(sourceFormat == wantedFormat);
+      CHECK(runtime_destroy(res) == S_OK);
+      runtime_device_destroy(&dev);
+   }
+   std::puts("PASS: primary source-format negotiation covers four storage layouts, bounded retry and failure propagation (CPU control)");
+}
 
 static void primary_mode_completion_contract()
 {
@@ -379,6 +487,13 @@ static void primary_mode_completion_contract()
       DXGI1_1_DDI_BASE_FUNCTIONS dxgi = {}; dxgi_fill_table(&dxgi, true);
       DXGI_DDI_ARG_SETDISPLAYMODE mode = {};
       mode.hDevice = (DXGI_DDI_HDEVICE)&dev; mode.hResource = (DXGI_DDI_HRESOURCE)&res;
+      mode.SubResourceIndex = 1;
+      CHECK(dxgi.pfnSetDisplayMode(&mode) == E_INVALIDARG && !modeWaits && !modeCallbacks);
+      mode.SubResourceIndex = 0;
+      Device foreign;
+      mode.hDevice = (DXGI_DDI_HDEVICE)&foreign;
+      CHECK(dxgi.pfnSetDisplayMode(&mode) == E_INVALIDARG && !modeWaits && !modeCallbacks);
+      mode.hDevice = (DXGI_DDI_HDEVICE)&dev;
       const HRESULT hr = dxgi.pfnSetDisplayMode(&mode);
       CHECK(modeWaits == c.waits && dev.submitted == 1);
       if (c.wait == VK_SUCCESS) {
@@ -393,6 +508,217 @@ static void primary_mode_completion_contract()
       runtime_device_destroy(&dev);
    }
    std::puts("PASS: SetDisplayMode waits for submitted GPU work; completed work does not wait; timeout/removal cannot publish the primary (CPU control)");
+}
+
+// These fixtures exercise the real Present1/MPO implementations with runtime
+// callbacks and Vulkan substitutes. They never create a GPU or display device.
+static std::vector<unsigned> presentOrder;
+static UINT presentFailure;
+static DWORD presentThread;
+static bool presentPlaneEnabled;
+static HRESULT modernPresentStatus;
+
+static void presentation13_contracts()
+{
+   for (UINT angle = D3DDDI_ROTATION_IDENTITY; angle <= D3DDDI_ROTATION_270; ++angle)
+   for (UINT failure = 0; failure < 6; ++failure) {
+      Adapter adapter; Device dev;
+      init(&dev, &adapter, 0);
+      const bool quarter = angle == D3DDDI_ROTATION_90 || angle == D3DDDI_ROTATION_270;
+      tg_gpu_primary_allocation_request primary = {
+         {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_DISPLAY_PRIMARY, 3686400},
+         D3DDDIFMT_A8R8G8B8, {60, 1}, angle, quarter ? 1280u : 720u,
+         quarter ? 720u : 1280u, quarter ? 5120u : 2880u, angle};
+      D3DDDI_OPENALLOCATIONINFO allocation = {};
+      allocation.hAllocation = 0x60; allocation.pPrivateDriverData = &primary;
+      allocation.PrivateDriverDataSize = sizeof(primary);
+      D3D10DDIARG_OPENRESOURCE open = {};
+      open.NumAllocations = 1; open.pOpenAllocationInfo = &allocation;
+      RuntimeSharedDescription description;
+      Resource res; res.dev = &dev; res.kind = ResKind::Image;
+      CHECK(runtime_shared_open(&dev, &open, {rt_resource(0)}, &res.storage.runtime, &description) == S_OK);
+      res.width = description.width; res.height = description.height; res.pitch = description.pitch;
+      res.format = description.format; res.storage.image = (VkImage)5;
+      CHECK(direct_flip_compatible(&dev, &res, &res));
+      // Same extent with an opposite scan direction must not be accepted by
+      // CheckDirectFlipSupport merely because its pitch and format match.
+      Resource other = res;
+      primary.Rotation = angle <= D3DDDI_ROTATION_90 ? angle + 2 : angle - 2;
+      CHECK(runtime_shared_open(&dev, &open, {rt_resource(0)}, &other.storage.runtime, &description) == S_OK);
+      CHECK(!direct_flip_compatible(&dev, &res, &other));
+      CHECK(runtime_destroy(other.storage.runtime) == S_OK);
+      other = res; other.pitch += 64; CHECK(!direct_flip_compatible(&dev, &res, &other));
+      other = res; other.dev = nullptr; CHECK(!direct_flip_compatible(&dev, &res, &other));
+      other = res; other.storage.runtime = nullptr; CHECK(!direct_flip_compatible(&dev, &res, &other));
+      other = res; other.format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+      CHECK(!direct_flip_compatible(&dev, &res, &other));
+
+      DXGI1_3_DDI_BASE_FUNCTIONS dxgi = {};
+      dxgi_fill_presentation13(&dxgi);
+      CHECK(!dxgi.pfnReserved1 && !dxgi.pfnReserved2);
+      DXGI_DDI_ARG_GETMULTIPLANEOVERLAYCAPS caps = {};
+      caps.hDevice = (DXGI_DDI_HDEVICE)&dev;
+      CHECK(dxgi.pfnGetMultiplaneOverlayCaps(&caps) == S_OK &&
+            caps.MultiplaneOverlayCaps.MaxPlanes == 1 && caps.MultiplaneOverlayCaps.NumCapabilityGroups == 1);
+      DXGI_DDI_ARG_GETMULTIPLANEOVERLAYGROUPCAPS group = {};
+      group.hDevice = caps.hDevice;
+      CHECK(dxgi.pfnGetMultiplaneOverlayGroupCaps(&group) == S_OK);
+      CHECK(group.MultiplaneOverlayGroupCaps.NumPlanes == 1 &&
+            group.MultiplaneOverlayGroupCaps.OverlayCaps ==
+            (DXGI_DDI_MULTIPLANE_OVERLAY_FEATURE_CAPS_RGB |
+             DXGI_DDI_MULTIPLANE_OVERLAY_FEATURE_CAPS_ROTATION_WITHOUT_INDEPENDENT_FLIP));
+      CHECK(group.MultiplaneOverlayGroupCaps.MaxStretchFactor == 1.0f &&
+            group.MultiplaneOverlayGroupCaps.MaxShrinkFactor == 1.0f);
+      group.GroupIndex = 1;
+      CHECK(dxgi.pfnGetMultiplaneOverlayGroupCaps(&group) == E_INVALIDARG);
+      DXGI_DDI_ARG_CHECKPRESENTDURATIONSUPPORT duration = {};
+      duration.hDevice = caps.hDevice; duration.DesiredPresentDuration = 100000;
+      duration.ClosestSmallerDuration = duration.ClosestLargerDuration = UINT_MAX;
+      CHECK(dxgi.pfnCheckPresentDurationSupport(&duration) == S_OK &&
+            !duration.ClosestSmallerDuration && !duration.ClosestLargerDuration);
+
+      DXGI_DDI_BASE_CALLBACKS callbacks = {};
+      callbacks.pfnPresentMultiplaneOverlayCb = [](HANDLE device,
+            const DXGIDDICB_PRESENT_MULTIPLANE_OVERLAY *present) -> HRESULT {
+         CHECK(GetCurrentThreadId() == presentThread);
+         CHECK(device == rt_device(0) && present->hContext == (HANDLE)0x300 &&
+               present->pDXGIContext == (void *)0xdeadbeef && !present->BroadcastContextCount);
+         CHECK(present->AllocationInfoCount == 1 && !present->AllocationInfo[0].SubResourceIndex);
+         CHECK(present->AllocationInfo[0].PresentAllocation == (presentPlaneEnabled ? 0x60u : 0u));
+         presentOrder.push_back(4);
+         return modernPresentStatus;
+      };
+      dev.dxgi = &callbacks;
+      presentThread = GetCurrentThreadId(); presentFailure = failure;
+      presentPlaneEnabled = true; modernPresentStatus = failure == 4 ? DXGI_ERROR_DEVICE_REMOVED : S_OK;
+      presentOrder.clear();
+      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { CHECK(hr == D3DDDIERR_DEVICEREMOVED); };
+      dev.fence = (VkSemaphore)8; dev.runtimeFence = 0x70;
+      dev.ingress = (VkSemaphore)9; dev.runtimeIngress = 0x71;
+      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) -> VkResult {
+         CHECK(false && "MPO must queue GPU synchronization, not wait for this frame on the CPU");
+         return VK_ERROR_DEVICE_LOST;
+      };
+      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore fence, uint64_t *value) {
+         CHECK(fence == (VkSemaphore)8); *value = 0;
+         return presentFailure == 5 ? VK_ERROR_DEVICE_LOST : VK_SUCCESS;
+      };
+      dev.kt.pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE device,
+            const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *signal) -> HRESULT {
+         CHECK(device == rt_device(0) && signal->hContext == (HANDLE)0x300);
+         CHECK(signal->ObjectCount == 1 && *signal->ObjectHandleArray == 0x71 &&
+               *signal->MonitoredFenceValueArray == 1);
+         presentOrder.push_back(1);
+         return presentFailure == 1 ? E_FAIL : S_OK;
+      };
+      dev.vk.QueueSubmit2 = [](VkQueue, uint32_t count, const VkSubmitInfo2 *submit, VkFence) -> VkResult {
+         CHECK(count == 1 && submit->waitSemaphoreInfoCount == 1 && submit->signalSemaphoreInfoCount == 1);
+         CHECK(submit->pWaitSemaphoreInfos[0].semaphore == (VkSemaphore)9 &&
+               submit->pWaitSemaphoreInfos[0].value == 1 &&
+               submit->pWaitSemaphoreInfos[0].stageMask == VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
+         CHECK(submit->pSignalSemaphoreInfos[0].semaphore == (VkSemaphore)8 &&
+               submit->pSignalSemaphoreInfos[0].value == 1);
+         presentOrder.push_back(2);
+         return presentFailure == 2 ? VK_ERROR_DEVICE_LOST : VK_SUCCESS;
+      };
+      dev.kt.pfnWaitForSynchronizationObjectFromGpuCb = [](HANDLE device,
+            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *wait) -> HRESULT {
+         CHECK(device == rt_device(0) && wait->hContext == (HANDLE)0x300);
+         CHECK(wait->ObjectCount == 1 && *wait->ObjectHandleArray == 0x70 &&
+               *wait->MonitoredFenceValueArray == 1);
+         presentOrder.push_back(3);
+         return presentFailure == 3 ? E_FAIL : S_OK;
+      };
+      dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer, const VkDependencyInfo *) {};
+      dev.vk.EndCommandBuffer = [](VkCommandBuffer) { return VK_SUCCESS; };
+      DXGI_DDI_PRESENT_MULTIPLANE_OVERLAY plane = {};
+      plane.Enabled = TRUE; plane.hResource = (DXGI_DDI_HRESOURCE)&res;
+      plane.PlaneAttributes.SrcRect = {0, 0, (LONG)res.width, (LONG)res.height};
+      plane.PlaneAttributes.DstRect = plane.PlaneAttributes.ClipRect = {0, 0, 720, 1280};
+      plane.PlaneAttributes.Rotation = (DXGI_DDI_MODE_ROTATION)angle;
+      DXGI_DDI_ARG_PRESENTMULTIPLANEOVERLAY present = {};
+      present.hDevice = (DXGI_DDI_HDEVICE)&dev; present.pDXGIContext = (void *)0xdeadbeef;
+      present.Flags.Flip = 1; present.FlipInterval = DXGI_DDI_FLIP_INTERVAL_ONE;
+      present.PresentPlaneCount = 1; present.pPresentPlanes = &plane;
+      const auto good = plane;
+      for (unsigned bad = 0; bad < 7; ++bad) {
+         plane = good;
+         switch (bad) {
+         case 0: plane.LayerIndex = 1; break;
+         case 1: plane.SubResourceIndex = 1; break;
+         case 2: plane.PlaneAttributes.DstRect.right--; break;
+         case 3: plane.PlaneAttributes.SrcRect.right--; break;
+         case 4: plane.PlaneAttributes.Blend = DXGI_DDI_MULTIPLANE_OVERLAY_BLEND_ALPHABLEND; break;
+         case 5: plane.PlaneAttributes.Rotation = DXGI_DDI_MODE_ROTATION_UNSPECIFIED; break;
+         case 6: plane.hResource = 0; break;
+         }
+         CHECK(dxgi.pfnPresentMultiplaneOverlay(&present) == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+      }
+      plane = good;
+      present.FlipInterval = DXGI_DDI_FLIP_INTERVAL_IMMEDIATE;
+      CHECK(dxgi.pfnPresentMultiplaneOverlay(&present) == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+      present.FlipInterval = DXGI_DDI_FLIP_INTERVAL_ONE;
+      present.Flags.AllowTearing = 1;
+      CHECK(dxgi.pfnPresentMultiplaneOverlay(&present) == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+      present.Flags.AllowTearing = 0;
+      dev.cmd = (VkCommandBuffer)0x19; dev.cmdHasWork = true;
+      const HRESULT result = dxgi.pfnPresentMultiplaneOverlay(&present);
+      const std::vector<unsigned> expected = failure == 1 ? std::vector<unsigned>{1} :
+         failure == 2 ? std::vector<unsigned>{1, 2} :
+         failure == 3 || failure == 5 ? std::vector<unsigned>{1, 2, 3} :
+         std::vector<unsigned>{1, 2, 3, 4};
+      CHECK(presentOrder == expected && result == (failure ? DXGI_ERROR_DEVICE_REMOVED : S_OK));
+      CHECK(dev.completed() == 0 && dev.submittedCommands.size() == (failure == 1 || failure == 2 ? 0u : 1u));
+      if (!failure) {
+         presentOrder.clear(); presentPlaneEnabled = false;
+         plane.Enabled = FALSE; plane.hResource = 0;
+         CHECK(dxgi.pfnPresentMultiplaneOverlay(&present) == S_OK && presentOrder == std::vector<unsigned>{4});
+         CHECK(dev.submitted == 1 && dev.gated == 1 && dev.completed() == 0);
+      }
+      // Only simulated commands exist in this fixture; no backing is in flight.
+      dev.cmd = VK_NULL_HANDLE; dev.cmdHasWork = false; dev.submittedCommands.clear();
+      CHECK(runtime_destroy(res.storage.runtime) == S_OK);
+      runtime_device_destroy(&dev);
+   }
+   std::puts("PASS: MPO four rotations validate exact layouts; runtime signal -> Vulkan wait/submit -> runtime GPU wait -> same-thread Present callback; no CPU completion or early retirement (CPU control)");
+
+   Adapter adapter; Device dev;
+   init(&dev, &adapter, 0);
+   D3D10DDI_MIPINFO mip = {65,17,1,65,17,1};
+   D3D10DDIARG_CREATERESOURCE desc = {};
+   desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D; desc.pMipInfoList = &mip;
+   desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; desc.MipLevels = desc.ArraySize = desc.SampleDesc.Count = 1;
+   desc.MiscFlags = D3D10_DDI_RESOURCE_MISC_SHARED;
+   Resource surface; surface.dev = &dev; surface.width = 65; surface.height = 17;
+   CHECK(runtime_shared_create(&dev, &desc, {rt_resource(0)}, &surface.storage.runtime, &surface.pitch) == S_OK);
+   DXGI_DDI_BASE_CALLBACKS callbacks = {};
+   callbacks.pfnPresentCb = [](HANDLE device, DXGIDDICB_PRESENT *present) -> HRESULT {
+      CHECK(GetCurrentThreadId() == presentThread && device == rt_device(0));
+      CHECK(present->hContext == (HANDLE)0x300 && present->hSrcAllocation == 0x60 && !present->hDstAllocation);
+      CHECK(present->pDXGIContext == (void *)0xbeef && present->SyncIntervalOverrideValid &&
+            present->SyncIntervalOverride == DXGI_DDI_FLIP_INTERVAL_ONE);
+      presentOrder.push_back(4); return DXGI_STATUS_OCCLUDED;
+   };
+   dev.dxgi = &callbacks; presentThread = GetCurrentThreadId(); presentOrder.clear();
+   DXGI1_3_DDI_BASE_FUNCTIONS dxgi = {}; dxgi_fill_presentation13(&dxgi);
+   DXGI_DDI_ARG_PRESENTSURFACE source = {(DXGI_DDI_HRESOURCE)&surface, 0};
+   RECT dirty[] = {{0, 0, 10, 9}, {10, 9, 65, 17}};
+   DXGI_DDI_ARG_PRESENT1 present = {};
+   present.hDevice = (DXGI_DDI_HDEVICE)&dev; present.phSurfacesToPresent = &source;
+   present.SurfacesToPresent = 1; present.Flags.Blt = 1; present.pDXGIContext = (void *)0xbeef;
+   present.DirtyRects = 2; present.pDirtyRects = dirty; present.BackBufferMultiplicity = 0x12345678;
+   CHECK(dxgi.pfnPresent1(&present) == DXGI_STATUS_OCCLUDED && presentOrder == std::vector<unsigned>{4});
+   CHECK(present.BackBufferMultiplicity == 0x12345678); // WDDM 1.3 may not touch this later field.
+   presentOrder.clear(); dirty[1].right = 66;
+   CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
+   dirty[1].right = 65; present.SurfacesToPresent = 2;
+   CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
+   present.SurfacesToPresent = 1; surface.dev = nullptr;
+   CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
+   surface.dev = &dev;
+   CHECK(runtime_destroy(surface.storage.runtime) == S_OK);
+   runtime_device_destroy(&dev);
+   std::puts("PASS: Present1 preserves opaque context/status and one callback for dirty rects; validates bounds/ownership and leaves WDDM2 fields untouched (CPU control)");
 }
 
 void runtime_contracts()
@@ -458,8 +784,17 @@ void runtime_contracts()
          /* A new angle cannot reinterpret the producer's old storage. */
          CHECK(runtime_shared_open(&consumer, &so, {rt_resource(1)}, &opened, &description) == DXGI_ERROR_UNSUPPORTED && !opened);
          standard.Width = 1280; standard.Height = 720; standard.Pitch = 5120;
-         /* Neither primaries nor shadows may request DC rotation. */
-         CHECK(runtime_shared_open(&consumer, &so, {rt_resource(1)}, &opened, &description) == DXGI_ERROR_UNSUPPORTED && !opened);
+         /* Rotated direct primaries carry matching storage; shadows remain
+          * logical copy sources and cannot themselves request DC rotation. */
+         const HRESULT rotated = runtime_shared_open(&consumer, &so, {rt_resource(1)}, &opened, &description);
+         if (primary) {
+            CHECK(rotated == S_OK && opened && runtime_is_primary(opened));
+            CHECK(description.width == 1280 && description.height == 720 && description.pitch == 5120);
+            CHECK(allocations == allocated_before_standard && runtime_allocation(opened) == 0x61);
+            CHECK(SUCCEEDED(runtime_destroy(opened)));
+         } else {
+            CHECK(rotated == DXGI_ERROR_UNSUPPORTED && !opened);
+         }
          standard.Rotation = D3DDDI_ROTATION_IDENTITY;
          const HRESULT landscape = runtime_shared_open(&consumer, &so, {rt_resource(1)}, &opened, &description);
          if (primary) {
@@ -505,5 +840,7 @@ void runtime_contracts()
    runtime_device_destroy(&consumer); runtime_device_destroy(&producer);
    std::puts("PASS: rejected ignored owner import; Present preserves token/status and requests interval one (no timing proof)");
    primary_creation_contract();
+   primary_private_format_contract();
    primary_mode_completion_contract();
+   presentation13_contracts();
 }

@@ -315,8 +315,11 @@ static bool bind_constant_buffers(Device *dev, VkCommandBuffer cmd)
             continue;
          Resource *res = stage.cb[slot];
          VkDescriptorBufferInfo &info = infos[count];
-         if (res && res->slice) {
-            info = {res->slice.buffer(), res->slice.offset, res->size};
+         const VkDeviceSize offset = stage.cbOffset[slot];
+         const VkDeviceSize bytes = stage.cbBytes[slot];
+         if (res && res->slice && offset < res->size && bytes) {
+            info = {res->slice.buffer(), res->slice.offset + offset,
+                    std::min(bytes, res->size - offset)};
             res->sliceLastUse = dev->recordingSeq();
          } else {
             info = {VK_NULL_HANDLE, 0, VK_WHOLE_SIZE};   /* reads zero */
@@ -509,7 +512,9 @@ static void emit_state(Device *dev, VkCommandBuffer cmd)
          d.FrontFace = d.BackFace = keep;
       }
       vk.CmdSetDepthTestEnable(cmd, d.DepthEnable != 0);
-      vk.CmdSetDepthWriteEnable(cmd, d.DepthEnable && d.DepthWriteMask == D3D10_DDI_DEPTH_WRITE_MASK_ALL);
+      const UINT readOnly = dev->dsv ? dev->dsv->dsvFlags : 0;
+      vk.CmdSetDepthWriteEnable(cmd, d.DepthEnable && d.DepthWriteMask == D3D10_DDI_DEPTH_WRITE_MASK_ALL &&
+                                  !(readOnly & D3D11_DDI_CREATE_DSV_READ_ONLY_DEPTH));
       vk.CmdSetDepthCompareOp(cmd, compare_op(d.DepthFunc));
       vk.CmdSetStencilTestEnable(cmd, d.StencilEnable != 0);
       const auto &front = d.FrontEnable ? d.FrontFace : keep;
@@ -521,7 +526,8 @@ static void emit_state(Device *dev, VkCommandBuffer cmd)
                          stencil_op(back.StencilPassOp), stencil_op(back.StencilDepthFailOp),
                          compare_op(back.StencilFunc));
       vk.CmdSetStencilCompareMask(cmd, VK_STENCIL_FACE_FRONT_AND_BACK, d.StencilReadMask);
-      vk.CmdSetStencilWriteMask(cmd, VK_STENCIL_FACE_FRONT_AND_BACK, d.StencilWriteMask);
+      vk.CmdSetStencilWriteMask(cmd, VK_STENCIL_FACE_FRONT_AND_BACK,
+         (readOnly & D3D11_DDI_CREATE_DSV_READ_ONLY_STENCIL) ? 0 : d.StencilWriteMask);
       vk.CmdSetStencilReference(cmd, VK_STENCIL_FACE_FRONT_AND_BACK, dev->stencilRef);
    }
 
@@ -735,17 +741,10 @@ static VkCommandBuffer prepare_draw(Device *dev, bool indexed)
    return cmd;
 }
 
-struct DrawErrorScope {
-   Device *dev;
-   bool previous;
-   explicit DrawErrorScope(Device *dev) : dev(dev), previous(dev->inDraw) { dev->inDraw = true; }
-   ~DrawErrorScope() { dev->inDraw = previous; }
-};
-
 static void APIENTRY Draw(D3D10DDI_HDEVICE hDevice, UINT count, UINT start)
 {
    Device *dev = D(hDevice);
-   DrawErrorScope errors(dev);
+   RemovalOnlyErrorScope errors(dev);
    if (VkCommandBuffer cmd = prepare_draw(dev, false))
       dev->vk.CmdDraw(cmd, count, 1, start, 0);
 }
@@ -753,7 +752,7 @@ static void APIENTRY Draw(D3D10DDI_HDEVICE hDevice, UINT count, UINT start)
 static void APIENTRY DrawIndexed(D3D10DDI_HDEVICE hDevice, UINT count, UINT start, INT base)
 {
    Device *dev = D(hDevice);
-   DrawErrorScope errors(dev);
+   RemovalOnlyErrorScope errors(dev);
    if (VkCommandBuffer cmd = prepare_draw(dev, true))
       dev->vk.CmdDrawIndexed(cmd, count, 1, start, base, 0);
 }
@@ -762,7 +761,7 @@ static void APIENTRY DrawInstanced(D3D10DDI_HDEVICE hDevice, UINT count, UINT in
                                    UINT start_instance)
 {
    Device *dev = D(hDevice);
-   DrawErrorScope errors(dev);
+   RemovalOnlyErrorScope errors(dev);
    if (VkCommandBuffer cmd = prepare_draw(dev, false))
       dev->vk.CmdDraw(cmd, count, instances, start, start_instance);
 }
@@ -771,9 +770,49 @@ static void APIENTRY DrawIndexedInstanced(D3D10DDI_HDEVICE hDevice, UINT count, 
                                           UINT start, INT base, UINT start_instance)
 {
    Device *dev = D(hDevice);
-   DrawErrorScope errors(dev);
+   RemovalOnlyErrorScope errors(dev);
    if (VkCommandBuffer cmd = prepare_draw(dev, true))
       dev->vk.CmdDrawIndexed(cmd, count, instances, start, base, start_instance);
+}
+
+static void draw_indirect(Device *dev, Resource *args, UINT offset, bool indexed)
+{
+   RemovalOnlyErrorScope errors(dev);
+   if (FAILED(dev->lost))
+      return;
+   const VkDeviceSize bytes = indexed ? sizeof(VkDrawIndexedIndirectCommand) : sizeof(VkDrawIndirectCommand);
+   if (!args || args->dev != dev || args->kind != ResKind::Buffer || !args->slice ||
+       !(args->misc & D3D11_DDI_RESOURCE_MISC_DRAWINDIRECT_ARGS) ||
+       (offset & 3) || offset > args->size || bytes > args->size - offset ||
+       offset > args->slice.size || bytes > args->slice.size - offset ||
+       runtime_is_offered(resource_runtime(args))) {
+      TG_ERROR(dev, E_INVALIDARG);
+      return;
+   }
+   if (!dev->caps->drawIndirectFirstInstance) {
+      TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED);
+      return;
+   }
+   /* The argument buffer stays on the GPU. prepare_draw orders preceding
+    * buffer writes before indirect reads; retirement follows the same real
+    * completion sequence as vertex/index buffers, including after renaming. */
+   if (VkCommandBuffer cmd = prepare_draw(dev, indexed)) {
+      args->sliceLastUse = dev->recordingSeq();
+      if (indexed)
+         dev->vk.CmdDrawIndexedIndirect(cmd, args->slice.buffer(), args->slice.offset + offset, 1, bytes);
+      else
+         dev->vk.CmdDrawIndirect(cmd, args->slice.buffer(), args->slice.offset + offset, 1, bytes);
+   }
+}
+
+void APIENTRY DrawIndirect11(D3D10DDI_HDEVICE device, D3D10DDI_HRESOURCE args, UINT offset)
+{
+   draw_indirect(D(device), static_cast<Resource *>(args.pDrvPrivate), offset, false);
+}
+
+void APIENTRY DrawIndexedIndirect11(D3D10DDI_HDEVICE device, D3D10DDI_HRESOURCE args, UINT offset)
+{
+   draw_indirect(D(device), static_cast<Resource *>(args.pDrvPrivate), offset, true);
 }
 
 static void APIENTRY DrawAuto(D3D10DDI_HDEVICE hDevice)
@@ -781,7 +820,7 @@ static void APIENTRY DrawAuto(D3D10DDI_HDEVICE hDevice)
    Device *dev = D(hDevice);
    if (FAILED(dev->lost))
       return;
-   DrawErrorScope errors(dev);
+   RemovalOnlyErrorScope errors(dev);
    /* Depends on stream output, which is not implemented. */
    TG_ERROR(dev, E_NOTIMPL);
 }
@@ -852,9 +891,10 @@ static void APIENTRY ClearDepthStencilView(D3D10DDI_HDEVICE hDevice, D3D10DDI_HD
    Device *dev = D(hDevice);
    View *view = static_cast<View *>(hView.pDrvPrivate);
    VkImageAspectFlags aspects = 0;
-   if (flags & D3D10_DDI_CLEAR_DEPTH)
+   if ((flags & D3D10_DDI_CLEAR_DEPTH) && !(view->dsvFlags & D3D11_DDI_CREATE_DSV_READ_ONLY_DEPTH))
       aspects |= VK_IMAGE_ASPECT_DEPTH_BIT;
-   if ((flags & D3D10_DDI_CLEAR_STENCIL) && (view->formatFlags & FMT_STENCIL))
+   if ((flags & D3D10_DDI_CLEAR_STENCIL) && (view->formatFlags & FMT_STENCIL) &&
+       !(view->dsvFlags & D3D11_DDI_CREATE_DSV_READ_ONLY_STENCIL))
       aspects |= VK_IMAGE_ASPECT_STENCIL_BIT;
    if (!aspects)
       return;

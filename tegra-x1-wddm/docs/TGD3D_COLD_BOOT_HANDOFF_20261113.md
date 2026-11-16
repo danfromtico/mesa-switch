@@ -1,5 +1,343 @@
 # tgd3d 冷启动重启：探索记录与后续交接
 
+## 当前工作 — 2026-11-16 UMD 复制与生命周期
+
+**已安装候选 UMD，短时自动窗口流程完成；未提升列扫描基线。** UMD SHA256为
+`5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a`，当前目录
+`C:\ProgramData\SwitchWOA\GpuUpdate\tgd3d-copy-lifetime-5b66bbec-20261116-122524`。
+KMD仍为`e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e`，ICD仍为
+`95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff`。
+04:37:48 UTC核对11项文件、Code0、Handheld、85%充电限制、风扇模式1和动态EMC。
+仅一次计划加载重启，启动时间04:26:20；登录启用任务仍有效。原4c8 UMD、注册和任务备份
+保留在既有恢复工具中。没有回退`.59`、切显示方向、安装KMD/ICD或改变平台策略。
+
+04:34:15–04:35:01 UTC在ruje交互会话执行45.31秒GDI/WinForms窗口流程：移动、缩放各7次，
+遮挡、最小化和恢复各1次，按时关闭、退出0。前后DWM PID1416及启动时间相同，
+同一原生LUID`000000000007c1d1`，实际tgd3d Vulkan设备计数均为1；系统启动时间不变。
+**这只属于自动窗口检查，未验证本轮物理画面、已知GPU像素或列扫描。** 两次各30个VBlank
+等待样本的唤醒频率约59.95/59.99Hz，不能当桌面FPS。DWM时序计数来自不同探测进程，
+不得跨进程相减宣称累计呈现帧数。DWM私有内存单次增长约6MiB，不能据此判断泄漏与否。
+
+本轮工具失败分别为：CPU检查器没有保留有效进程退出码、安装器只识别正斜杠清单路径、
+窗口任务误用SYSTEM会话。均已区分为工具问题并修正；前两次失败没有安装/启用新驱动，
+错误窗口任务在交互会话校验处退出，没有执行窗口测试。修正后的原生CPU控制退出0、
+安装完成、ruje窗口任务退出0。原始失败记录与最终记录均保留在OUT交付目录。
+04:39:45 UTC已删除本轮4个临时任务、测试exe／脚本／SPIR-V、上传包及失败安装留下的
+未注册目录；当前候选、默认登录启用任务和恢复备份保留，清理没有重启或更换驱动。
+
+用户取消强开 KMD 的物理验证，要求继续 UMD；随后授权由本窗口自行实机测试。
+本地已补齐重叠 buffer／2D／3D／带行填充 staging 复制的先保存后写回，真实完成后的
+scratch 退休，以及创建／分配／绑定／命令申请失败清理。间接绘制使用 GPU 参数缓冲区，
+启用实际支持的 drawIndirectFirstInstance；只读 DSV 随视图切换更新写掩码，补 mip／层范围
+校验。完整 DXGI1.3 表按类型赋值。现代表仍未加入 GetSupportedVersions／CreateDevice，
+没有扩大 Feature Level 或多采样、UAV、计算着色器等声明。ARM64／x64 构建和 CPU 控制通过；
+实机测试进度以 OUT `modern-ddi-resources-20261116/` 的状态文件为准。
+
+接口依据：微软[间接绘制DDI](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/nc-d3d10umddi-pfnd3d11ddi_drawinstancedindirect)、
+[只读DSV标志](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/ne-d3d10umddi-d3d11_ddi_createdepthstencilview_flag)，
+以及[Vulkan间接绘制规范](https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDrawIndirect.html)。
+头文件为SDK/WDK10.0.26100.0；语义复核使用Microsoft/D3D11On12
+`c6b5a961ee5e0761136fc2091b5e57f7bd9235f2f`及D3D12TranslationLayer
+`4b9c8f8a49c9b68df19be817d56f123d65704fd2`。仅参考对应契约，未整批移植上游代码。
+
+**纠正前一节因果判断：旧 UMD 已能通过 runtime 到达 KMD MPO3。** 本轮 PresentId=241
+来自 `panel_scanout.c::set_primary_mpo`；旧 D3D10 primary 创建也已有1280×720/pitch5120路径。
+仍未解释的是横向 primary 的请求／选择及 plane0 最终为何采用 identity 竖向存储。
+“现代 UMD 表未启用”是实现状态，不能作为列扫描黑屏的已证根因或必要前提。
+Noble 已证明硬件列扫描能力；不再增加强开寄存器探针。本轮拟只换 UMD，保留当前
+E95 KMD、95b ICD、电源／风扇和双向 Fence；不把功能控制通过记为列扫描验收。
+
+## 当前状态 — 2026-11-16 03:36 UTC
+
+**本轮短时横屏正常上屏，由用户照片确认；Tegra DC列扫描没有启用。** 用户随后再次明确
+“是的，要列扫描”。本轮在普通DWM上只做了一次入口测试：逻辑1280×720、VidPN90°，
+但实际720×1280/pitch2880/rotation0、WIN_OPTIONS=0x40000000。显隐开启、新地址已锁存；
+不得再把这一组合或旧红屏强开当列扫描证据。由于入口未进入列扫描，四色窗口未启动。
+照片及原始结果保存在OUT `mpo-null-context-20261116/`。
+
+新KMD只修正匹配dxgkrnl反汇编所示的无context MMIO Present误拒绝。该分支本轮是否到达
+未证实，也不称为重启根因。KMD102218b0+原候选UMD379e521d+ICD95b97df4，完整哈希见
+`candidate-package.json`。ARM64控制和13项Windows签名检查通过；正常桌面观察证据
+不能代替GPU像素或列扫描验收。安装前源树e534766c及具体diff完整保留。
+
+当前**已恢复本轮之前的E95/4c8/95b、Fan33/Core7/Battery14**：03:33:51 UTC核对11文件、
+Code0、DWM原UMD/ICD、登录启用任务，以及当前/保存720×1280方向0/60Hz。
+Handheld、85%充电限制、独立风扇策略保留。恢复启动03:28:45，来源为明确发出的恢复任务；
+本轮安装和恢复各一次计划重启，入口测试至恢复前没有观测到自行重启。
+恢复任务在用户照片到达前已启动；正常横屏候选和照片已保留，没有丢弃这项进展。
+03:35:40已清理6个临时任务及21个临时路径，探针/图案工具已删除；备份及候选来源保留。
+清理首个SSH客户端超时，随后原生cmd读回cleanup.json确认完成，未重复执行清理。
+
+**后续复核已修正此判断（见顶部）：**tgd3d只协商原D3D10接口，但旧UMD仍可经runtime
+到达KMD MPO3；横向primary创建路径也已存在。缺少的是横向表面最终被选用并完成列扫描
+锁存的证据，不能仅凭未注册现代typed table认定接口缺失导致黑屏。
+NVK ICD仍为现有修复版，不应将所有普通纹理改方向。
+下一轮先补足普通DWM的横向主表面路径，在实际1280×720/pitch5120/COLUMN锁存后才做图案。
+保留现有面板时序、电源及双向Fence，不再以仅修改KMD的逐行结果替代该步骤。
+
+本地另完成现代DDI Offer/Reclaim的runtime私有分配、真实paging fence及CPU映射刷新，
+ARM64/x64构建和CPU控制通过，未部署、未声称现代DDI实机通过。详见
+[内核与呈现交接审查](DXGKRNL_COLUMN_HANDOFF_AUDIT_20261116.md)及
+OUT `runtime-offer-reclaim-20261116/checkpoint.json`。
+Gemini独立审核仍待2026-11-20T23:53:18Z额度恢复，未重复尝试。
+
+
+## 当前状态 — 2026-11-16 01:54 UTC
+
+**当前验收基线已恢复：E95/4c8/95b + Fan33/Core7/Battery14。用户新要求的一次真实列扫描
+四色测试尚未执行；继续接通普通DWM列扫描路径。** 01:44:35 UTC精确核对11项文件、
+Code0、DWM PID1392的4c8/95b及默认登录任务；启动时间01:39:17，当前及保存方向均为
+720×1280/方向0/60Hz。Handheld、85%充电限制及独立风扇策略保留。01:48:52清理5个
+已结束任务和20个临时路径，另一个图案任务已不存在；恢复备份与来源清单保留。
+
+本轮对比 `01e5aa3e` 的父提交 `54dc559731a48408266177bdbae192f04a643536` 与恢复代码。
+旧/新四向列扫描布局一致；历史代码及逐行红屏强开均不作为列扫描已通过基线。
+修正 `panel.c` 的一处显隐契约：源Visible=TRUE重新启用主平面，保留目标门控和
+FormatAwaitingPrimary。ARM64 CPU控制由修前468变为修后0；没有伪造Flip完成。
+详见 [历史列扫描审查](COLUMN_SCAN_HISTORY_AUDIT_20261116.md)。
+
+相对前轮列扫描候选cf30/379/95b，本次只换KMD为7cf，保留379 UMD、95b ICD、GPU bridge
+和全部平台组件。01:34:26–01:34:32进行普通GDI/DWM四色测试；用户明确确认实屏横屏、
+四色图案、回到正常横屏桌面约2秒后自动重启。**短时实屏横屏有效，但实际读回仍为逐行
+扫描720×1280/pitch2880/rotation0，列扫描未接通。** 图案退出0后，脚本开始恢复原竖屏；
+持久状态停在Restoring、无RestoreExit。01:35:13的新启动确认异常重启。
+原始面板输出及图案日志在重启后为全零，只采用原子保存的状态字段，不能补造地址或像素。
+这定位了失败时间段，尚未证明具体回调、GPU指令或资源退休根因。
+
+已主动复核匹配的dxgkrnl.sys（10.0.22621.2792、SHA256 99d425e1…），GUID及DBI age匹配。
+新增只读反汇编覆盖11个显示相关入口，并追踪GetContentRotationHw和目标虚拟化标志。
+已证明存在把硬件旋转变为identity的虚拟化分支；**尚未证明本轮进入该分支**。
+当前基线的官方虚拟分辨率查询返回ERROR_NOT_SUPPORTED(50)，没有修改该设置。
+不要据此直接改注册表、强开窗口或把现代UMD原型整批启用。
+
+源、控制、组件完整哈希、实机状态、用户观察、精确恢复及清理记录位于OUT
+`column-scan-history-audit-20261116/`。只读虚拟化查询工具及临时文件已于02:02:12 UTC清理，
+未改显示设置。后续反汇编复核见[内核交接核对](DXGKRNL_COLUMN_HANDOFF_AUDIT_20261116.md)。
+Gemini审核仍待2026-11-20T23:53:18Z额度恢复。现代DDI11类型桥仍未协商、未安装。
+下一步依照真实内核调用与DDI契约补齐DWM新主表面→DC列扫描，以及切回时的锁存和退休；
+满足1280×720/pitch5120/COLUMN位后执行用户要求的同样四色测试，不重复逐行预旋转试验。
+
+## 当前状态 — 2026-11-16 00:55 UTC
+
+**已恢复 E95/4c8/95b + Fan33/Core7/Battery14 验收基线；回到普通 DWM 横屏路径。**
+00:50:26 UTC 核对 11 个文件哈希、Code 0、DWM PID1376 的 4c8/95b 模块和默认登录
+启用任务。恢复启动为 00:42:29 UTC；当前及保存方向均为 720×1280、方向 0、60 Hz。
+保留 Handheld、电池限制 85 及独立风扇选择。00:53:29 清理本轮 6 个结束任务和
+16 个临时路径，保留备份及正常启动任务。没有提升显示基线，也没有新的物理屏幕验收。
+
+本轮唯一诊断重放沿用前轮 cf30/379/95b，不含新的驱动修正；变化仅是已通过本机
+CPU 控制的进程内 ETW 观察器。计划安装启动为 00:31:28 UTC，00:34:57 NativeEnabled。
+00:37:07–00:37:13 的独占窗口探针设备和窗口交换链创建成功，进入独占 E_FAIL，
+退出状态 1，没有测试 Present；随后退出独占并恢复方向。该轮未观察到非计划重启。
+
+34 个完整事件全部属于探针 PID1456，零事件/缓冲丢失；该进程没有进入 primary 创建或
+SetDisplayMode。**观察器不覆盖 DWM/KMD，因此不能据此推断桌面没有执行模式回调。**
+这明确区分了新增独占窗口失败与用户指出的“逻辑横屏已切成、物理面板黑屏”。独占
+全屏不再作为桌面横屏的前置条件。已退掉本轮临时 ETW 源码，冻结副本和结果仍保留。
+
+用户要求核对 WDDM 2.6，本轮完成显示路径静态审查，见
+[WDDM 2.6 显示契约核对](WDDM26_DISPLAY_AUDIT_20261116.md)。明确缺失的是
+CollectDiagnosticInfo；更贴近横屏的问题是活动路径方向到主表面/DC 的衔接，以及
+现代 UMD 呈现接口尚未注册。三项分别记录，均未冒充已证明的黑屏根因。
+实际 VBlank 完成回调存在，不添加伪造 HsyncFlipCompletion，不盲目强开显示窗口。
+
+本次审查没有部署新驱动或追加重启；只是完成上一轮已请求的恢复和清理。
+下一步复用 `rotation_pattern.cpp` 经普通 GDI/DWM 验证新 backing、源可见性及实际
+DC 地址/布局锁存。源码/WDK 哈希在 OUT `wddm26-display-audit-20261116/`；诊断与
+精确恢复记录在 `fullscreen-return-contract-20261116/test-assessment.json` 和
+`recovery-archive/`。Gemini 仍待 2026-11-20T23:53:18Z 的额度恢复。
+
+## 当前状态 — 2026-11-16 00:13 UTC
+
+**已恢复用户验收的 E95/4c8/95b + Fan33/Core7/Battery14 基线，横屏仍未通过。**
+00:11:54 UTC 核对全部 11 个文件哈希、Code 0、DWM 原 UMD/ICD 及默认登录启用任务；
+恢复启动时间为 00:08:03 UTC。当前和保存配置均为 720×1280、方向 0、60 Hz。
+这属于系统配置读回；本轮没有新的物理屏幕验收。00:13:11 UTC 移除 6 个已结束任务和
+20 个本轮临时路径，保留恢复备份、候选来源资料及正常启动任务。没有升级基线。
+
+本轮补齐 UMD/KMD 的私有主表面布局协商：DescribeAllocation 使用不可变存储方向
+区分扫描布局；UMD 只在 INCOMPATIBLEPRIVATEFORMAT 时尝试调整显示源并重试一次；
+KMD 在 VBlank 先隐藏旧布局，再设置新布局，等待有效的新主表面绑定后恢复 fetch。
+新绑定或新格式请求优先，超时和失败不伪造 Present/GPU 完成，UMD 不盲目回写过时格式。
+采用微软源格式/分配格式契约，接口仍为 WDDM 2.6，编译头为 10.0.26100.0。
+这是一项契约修正候选，**尚未证明与原生故障有因果关系**。
+
+ARM64 构建完成。原生 CPU 替身控制验证通过（旧 KMD 在新增检查退出 213，新 KMD 和
+UMD 为 0），13 项本机签名/目录检查通过。扩展测试曾在 POST 恢复处失败，原因是测试
+时钟只模拟 WINDOW 锁存、遗漏 GENERAL 锁存；修正模型后通过，没有放宽生产超时。
+这些测试没有执行真实 GPU，也没有证明真实 VBlank 节拍。
+
+实际测试组合：KMD
+`cf30b6405cb2859c31f28471fe60292d374470aea2951506794124f6a1813d80`，
+UMD `379e521d1d6d82c2eb6d8ef0be179c1bd1270d07965b70ffcf7a4d204585649d`，
+ICD `95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff`。
+ICD、平台组件及保留的电源策略未改变，双向 GPU bridge 开启。
+安装计划启动为 00:00:35 UTC；00:04:00 完成 NativeEnabled，DWM PID1412 加载匹配的
+UMD/ICD。测试原生 LUID 为 `00000000000c10cc`。
+
+**00:05:14–00:05:18 的 90° 原生测试失败。** 临时逻辑模式切到 1280×720、方向 1，
+返回 0；同 LUID 原始 KMT 模式仍为 720×1280、orientation=2。前台窗口准备、原生设备
+及交换链创建成功；`SetFullscreenState(TRUE)` 返回 `E_FAIL(0x80004005)`，紧接着
+`GetDeviceRemovedReason` 为 S_OK。未到达测试图案上传、完成查询或第一次 Present。
+退出全屏和恢复原方向返回 0；00:05:58 的读回仍为同一次启动。没有本轮异常重启证据，
+但不能把单次未复现当稳定性修复；也不能据此声称新的私有格式 callback 已实际执行。
+没有横屏 DC 锁存、已知图案像素或 OLED 物理输出通过结果，vkcube 尚未进入测试。
+
+只发出一次恢复请求，完成上述基线恢复。本轮两次计划启动分别用于安装和恢复。
+下一步沿匹配系统 DXGI/D3D 的全屏主表面失败路径审查，明确实际 SetDisplayMode/
+私有格式回调是否到达及其返回点，再决定单项改动，不反复安装本轮候选。
+独立 Gemini Carbon High 审查仍待额度恢复（2026-11-20T23:53:18Z），未宣称已审查通过。
+
+精确记录位于 OUT `private-scanout-format-20261115/`：`candidate.diff`、
+`source-manifest.json`、`reference-review.json`、`native-controls.json`、
+`native-signatures.json`、`test-assessment.json`、`exact-recovery-verification.json`、
+`cleanup.json`。源码维护仍在本分支；该目录的 source/ 是实际构建冻结副本，未整批取用
+工作树中的未注册 Present1/MPO 原型或其他未部署改动。
+
+## 当前状态 — 2026-11-15 23:22 UTC
+
+**已恢复用户验收的 E95/4c8/95b + Fan33/Core7/Battery14 基线。**
+23:22:10 UTC 核对全部 11 个文件哈希、Code 0、DWM 加载路径及默认登录启用任务；
+本次恢复启动时间为 23:18:29 UTC。只读交互会话查询确认当前及保存配置均为
+720×1280、方向 0、60 Hz。横屏候选没有升级为基线，物理横屏及 vkcube 均未验收。
+设备操作授权仍由本聊天统一负责；本轮失败后停止扩大测试，继续源码审查。
+
+本轮实测区分了两种尺寸：90° 下 DXGI 暴露 1280×720，而同一 LUID 的
+`KMTQAITYPE_CURRENTDISPLAYMODE` 返回 720×1280、orientation=2。
+结合匹配本机 Windows 22631.2861 的微软公开符号及 WDK 10.0.26100.0，
+确认 `DXGDEVICE::SetDisplayMode` 在比较旋转值之前先比较模式宽高。
+候选只修正 `DescribeAllocation(CheckDisplayMode)` 的显示模式尺寸；普通资源查询、
+真实 backing、pitch 和 DC 扫描方向保持原有描述。旧代码在新增控制断言退出 890，
+修正后为 0；ARM64 构建和签名校验通过。这些结果不构成 GPU 或实屏通过。
+
+本轮候选完整标识：KMD
+`a82f2510be5b6718f91349956e1eea706cf60c4012e11c16865d1426389ce32c`，
+UMD `dd6be11e0396322a3c9f8f06b97d9fa7e23274dfd984de9e7d21f8ef97cb46f1`，
+ICD `95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff`。
+双向 GPU bridge 保持开启。23:12:01 UTC 完成 NativeEnabled，DWM PID1384 加载
+对应 UMD/ICD；测试原生 LUID 为 `00000000000be887`。
+
+**原生测试失败。** 23:12:49 开始 90° 测试，模式预检查成功；最后持久化状态为
+`Applying`，`mode-apply.json` 为 0 字节，没有后续模式查询、图案 readiness 或成功
+Present 的记录。随后检测到 23:13:19 的非计划新启动。不能从这些缺失记录还原崩溃栈，
+也不能断言原因是 Fence、着色器、供电或 DC。修正后的 fullscreen 调用本身尚无完成结果。
+只发出一次失败恢复请求，随后完成上述精确基线恢复；本轮不重装同一 GPU 候选。
+
+安装工具另有一次本聊天引入的打包错误：重新生成外层 Files 字典时使用 `/`，
+与重启后脚本按 `firmware\bl33.bin` / `gpu\display158.aml` 取值不匹配。
+第一次包在候选驱动替换之前被校验拦截，并触发恢复重启。已改为 Windows 分隔符，
+补上缺失必要条目及错误分隔符的重启前检查；修正包五项 schema 检查通过。
+此故障与上述随后发生的原生模式切换失败分别记录。
+
+重启后任务的注册、CIM/COM 读回及 OS 存储刷新检查已完成 11 项本机控制验证；
+本轮安装及恢复任务也实际跨计划重启执行。它们证明本轮行为，不解释历史任务丢失根因。
+新增代码的 Gemini 独立审查仍受额度限制，待 2026-11-20T23:53:18Z 后再继续；
+没有把审查状态标为通过。用户已授权不等待审查即可构建和测试。
+
+下一步审查显示模式尺寸、实际存储布局的兼容标识，以及 modeset 时地址、几何与旧
+backing 的交接。微软 `DxgkDdiSetDisplayPrivateDriverFormat` 契约需与 UMD callback
+一并核对；仅增加布局编号而未实现相应协商的旧原型仍未装机，不能直接启用。
+
+完整结果与恢复记录位于 OUT `fullscreen-mode-contract-20261115/`，尤其
+`static-findings.json`、`native-signatures-controls.json`、`package-v2/test-assessment.json`、
+`package-v2/exact-recovery-verification.json`。23:25:47 UTC 清理完成：移除 5 个已结束
+任务和 32 个本轮临时路径，异常重启后已不存在的图案任务另行记录；保留默认启用
+任务、恢复备份及候选来源材料。实际回执为 `package-v2/cleanup.json`。
+
+## Current device state — 2026-11-15 22:14 UTC
+
+**Accepted baseline remains E95/4c8/95b + Fan33/Core7/Battery14.** It was
+restored and all eleven component hashes verified at22:14:17UTC, Code0,
+720x1280 original direction, normal login activation enabled. The recovery
+boot is22:05:41UTC. No candidate was promoted; no new physical landscape or
+vkcube acceptance exists. The owner has authorized this chat to operate Switch.
+
+The direct fullscreen-primary trial used signed KMD
+`08f34c1b2b5be619fbb1b7c5301afbecfe3821a4b3501d99f08b88816d330cdd`,
+UMD `dd6be11e0396322a3c9f8f06b97d9fa7e23274dfd984de9e7d21f8ef97cb46f1`,
+and the retained ICD95b. Windows11Pro22631.2861, native LUID`00000000000b92f4`.
+Its production delta from the preceding candidate is the reviewed functional
+VidPN topology/transform/mode validation. The new negative CPU fixture fails
+the prior code at233 and passes the correction at0; ARM64 compilation and
+native control checks passed. These are not GPU/display acceptance.
+
+At22:02:28–22:02:33UTC, native device creation and windowed swapchain creation
+succeeded; `SetFullscreenState(TRUE)` returned`E_FAIL(0x80004005)` before the
+test's upload/query/Present. Leaving fullscreen and restoring the original
+desktop mode returned0. **Zero test frames were presented.** This result does
+not test column scan and does not locate a Fence, shader or electrical fault.
+The optional color test's snapshot validator now correctly compares rotation
+in degrees(90), not the internal enum ordinal(1), and checks active-layout,
+latched-address and four exact memory-color samples separately from real-panel
+acceptance. A snapshot remains insufficient to prove OLED visibility.
+
+An earlier packaging attempt in this round incorrectly changed `kmd_variant`,
+which is the recovery-family selector. The existing package guard rejected it
+before any candidate installation or graphics test. The corrected package
+retains `reviewed-dvfs-emc`; `Merge-Check` now validates the complete nested
+GPU package before staging can close the startup gate. File-only native checks
+passed for the real package and rejected both the observed invalid selector
+and a wrong recovery hash. Do not bypass those guards or reuse a signed SYS
+with an unrelated INF.
+
+Recovery then exposed a separate tooling failure: after the requested reboot,
+`Tgd3dDvfsRestore` was absent and the candidate remained gated atCode43.
+The cause of the missing task is unproven. A guarded continuation verified
+the new boot, closed gate, exact candidate/backup hashes and absence of a
+running recovery, recreated only the missing task and restored the accepted
+pairing in the same boot. **No extra reboot was requested for that continuation.**
+Verify persistence of postboot recovery registration before another deployment.
+
+Read-only mode inventory at22:15:12UTC on the restored portrait baseline
+(LUID`00000000000ed2e6`) enumerated one BGRA87 mode,720x1280@60; a1280x720
+closest-mode request returned that portrait mode. XRGB88 andRGBA28 had no
+listed modes. This was not a landscape-mode query and does not prove absence
+of rotation support. Next inspect the actual fullscreen mode/primary negotiation;
+do not blindly add a newer DDI format-support bit to the legacy interface or
+reinterpret an already pre-rotated DWM primary as horizontal storage.
+
+Exact records: OUT `rotation-primary-native-20261115/package-v2/`
+(`test-assessment.json`, `exact-recovery-verification.json`, `recovery-archive/`)
+and `rotation-primary-native-20261115/mode-inventory/summary.json`.
+New mode-reader and nested-schema-preflight changes remain pending independent
+review because Gemini's quota was exhausted; this limitation does not turn a
+local build, control check or API success into native acceptance.
+
+## Current device round — 2026-11-15 21:36 UTC
+
+The owner explicitly handed Switch testing back to this chat. The earlier
+SSH hold below is superseded. Only this chat operates the device.
+
+The accepted Fan33/Core7/Battery14 and E95/4c8/95b graphics pairing was
+restored and verified at 21:36:11 UTC after the hardware-capability trial.
+All eleven retained files match, Code 0, DWM loads the original UMD/ICD,
+720x1280 original orientation, Handheld power/fan and charge85 retained.
+The normal login activation task is enabled. No baseline promotion occurred.
+
+The candidate `fc6af00f… / dd6be11e… / 95b97df4…` corrected the VidPN
+`DriverRotation` declaration. Its 90-degree test reached logical1280x720,
+source-visible/target-active and enabled Window A, but the actual primary
+remained720x1280/pitch2880/identity scan at21:30:14. `Displayed.PresentId=193`
+proves the KMD MPO3 path was reached even with the legacy UMD interface.
+This is a failed column-scan selection result, **not physical black-screen
+proof**. Original-mode restoration returned0 and exact baseline recovery
+completed; the five temporary tasks and24 temporary paths were removed.
+
+Next: test a bounded ordinary DXGI fullscreen primary without application
+pre-rotation, separately from DWM's NONPREROTATED composition choice. Do not
+reinterpret portrait pixels as a landscape allocation or fabricate flip
+completion. The snapshot `rotation` field is in degrees, not enum ordinals;
+new acceptance checks use90 and require actual layout/latch and pixel matches.
+Native fullscreen/physical landscape/vkcube remain unaccepted.
+
+Evidence and full hashes: OUT `vidpn-hwrotation-contract-20261115/package-v2/`
+(`exact-recovery-verification.json`, `cleanup.json`, `device-results/landscape90`).
+Gemini's rotation and completion-contract reviews were received. Its installer
+review ended on quota exhaustion without a final report; new independent review
+remains pending until the reported reset2026-11-20T23:53:18Z. Do not retry early
+or change account/model configuration. The optional VPS Claude second opinion
+returned "Not logged in"; it did not perform a review.
+
 ## Current round — 2026-11-15, Fan33 accepted by owner
 
 **Latest instructions:** publish the EMC/tools sources and tables, then implement

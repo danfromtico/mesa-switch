@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <type_traits>
 #include <d3dcompiler.h>
 #include "gallium/targets/d3d10umd/tests/tri_vs_4_0.h"
@@ -24,6 +25,8 @@ static HRESULT lastError;
 static std::vector<unsigned> events;
 static std::vector<uint32_t> cbBindings;
 static VkDeviceSize cbOffsets[3];
+static VkDeviceSize cbRanges[3];
+static VkBuffer cbBuffers[3];
 static const char *shaderOutput;
 static Shader *failedShader;
 static void *shaderAllocations[3];
@@ -52,6 +55,7 @@ static Device make_device(Adapter *adapter)
    dev.adapter = adapter;
    adapter->vk.caps.cbSlots = D3D_CB_SLOTS;
    adapter->vk.caps.geometryShader = true;
+   adapter->vk.caps.drawIndirectFirstInstance = true;
    adapter->vk.caps.maxViewports = 16;
    dev.caps = &adapter->vk.caps;
    dev.vkdev = handle<VkDevice>(1);
@@ -132,6 +136,127 @@ static void reset()
    signals = submissions = gates = cpuWaits = cpuSignals = barriers = viewsDestroyed = 0;
    failAt = layouts = descriptorSets = updates = setErrorCalls = 0;
    lastError = S_OK; events.clear(); cbBindings.clear();
+}
+
+static void clear_view_contract()
+{
+   Adapter adapter; reset(); Device dev = make_device(&adapter);
+   D3D11_1DDI_DEVICEFUNCS table = {}; device_fill_table11(&table);
+   static struct {
+      unsigned begins, ends, batches, views;
+      VkAttachmentLoadOp load;
+      VkClearValue value;
+      std::vector<VkClearRect> rects;
+   } seen;
+   seen = {};
+   dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *info,
+                              const VkAllocationCallbacks *, VkImageView *out) {
+      CHECK(info->viewType == VK_IMAGE_VIEW_TYPE_2D_ARRAY &&
+            info->subresourceRange.baseMipLevel == 1 &&
+            info->subresourceRange.baseArrayLayer == 2 &&
+            info->subresourceRange.layerCount == 3);
+      *out = handle<VkImageView>(0x1000 + ++seen.views); return VK_SUCCESS;
+   };
+   dev.vk.CmdBeginRendering = [](VkCommandBuffer cmd, const VkRenderingInfo *info) {
+      CHECK(cmd && info->colorAttachmentCount == 1 && info->layerCount == 3 &&
+            !info->renderArea.offset.x && !info->renderArea.offset.y &&
+            info->renderArea.extent.width == 65 && info->renderArea.extent.height == 17);
+      const auto &a = info->pColorAttachments[0];
+      CHECK(a.imageLayout == VK_IMAGE_LAYOUT_GENERAL && a.storeOp == VK_ATTACHMENT_STORE_OP_STORE);
+      seen.load = a.loadOp; seen.value = a.clearValue; ++seen.begins;
+   };
+   dev.vk.CmdClearAttachments = [](VkCommandBuffer, UINT count, const VkClearAttachment *a,
+                                   UINT rectCount, const VkClearRect *rects) {
+      CHECK(count == 1 && a->aspectMask == VK_IMAGE_ASPECT_COLOR_BIT && !a->colorAttachment);
+      CHECK(rectCount && rectCount <= 32);
+      seen.value = a->clearValue; ++seen.batches;
+      for (UINT i = 0; i < rectCount; ++i) {
+         CHECK(!rects[i].baseArrayLayer && rects[i].layerCount == 3);
+         seen.rects.push_back(rects[i]);
+      }
+   };
+   dev.vk.CmdEndRendering = [](VkCommandBuffer) { ++seen.ends; };
+   dev.vk.CmdBeginQuery = [](VkCommandBuffer, VkQueryPool, UINT, VkQueryControlFlags) { CHECK(false); };
+   dev.vk.CmdEndQuery = [](VkCommandBuffer, VkQueryPool, UINT) { CHECK(false); };
+   dev.vk.CmdDraw = [](VkCommandBuffer, UINT, UINT, UINT, UINT) { CHECK(false); };
+   Resource res; res.dev = &dev; res.kind = ResKind::Image;
+   res.imageType = VK_IMAGE_TYPE_2D; res.storage.image = handle<VkImage>(0x800);
+   res.storage.preinitialized = true; // imported pixels outside rectangles must survive
+   View view; view.dev = &dev; view.res = &res; view.type = ViewType::RTV;
+   view.width = 65; view.height = 17; view.layers = 3;
+   view.info = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
+   view.info.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+   view.info.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 1, 1, 2, 3};
+   view.format = DXGI_FORMAT_B8G8R8X8_UNORM;
+   view.formatFlags = FMT_ALPHA_ONE; view.info.format = VK_FORMAT_B8G8R8A8_UNORM;
+   dev.views.push_back(&view);
+   const FLOAT color[4] = {.25f, .5f, .75f, 0};
+   auto clear = [&](const FLOAT *c, const RECT *rects, UINT count) {
+      table.pfnClearView({&dev}, D3D10DDI_HT_RENDERTARGETVIEW, &view, c, rects, count);
+   };
+   const RECT empty[] = {{2, 3, 2, 8}, {-9, -9, -1, -1}, {65, 17, 90, 20}};
+   clear(color, empty, 3); clear(color, empty, 0);
+   CHECK(!dev.cmdHasWork && !seen.views && !barriers && !seen.begins);
+   const RECT clipped[] = {{-2, 3, 9, 30}, {60, -8, 99, 8}, {2, 2, 2, 9}};
+   clear(color, clipped, 3);
+   CHECK(seen.begins == 1 && seen.ends == 1 && seen.batches == 1 && seen.rects.size() == 2);
+   CHECK(seen.load == VK_ATTACHMENT_LOAD_OP_LOAD && seen.value.color.float32[3] == 1);
+   CHECK(seen.rects[0].rect.offset.x == 0 && seen.rects[0].rect.offset.y == 3 &&
+         seen.rects[0].rect.extent.width == 9 && seen.rects[0].rect.extent.height == 14);
+   CHECK(seen.rects[1].rect.offset.x == 60 && seen.rects[1].rect.offset.y == 0 &&
+         seen.rects[1].rect.extent.width == 5 && seen.rects[1].rect.extent.height == 8);
+   CHECK(barriers >= 2 && res.storage.layoutReady && res.storage.lastUse == dev.recordingSeq());
+   RECT many[65]; for (auto &r : many) r = {1, 2, 3, 4};
+   const unsigned priorBatches = seen.batches;
+   clear(color, many, 65);
+   CHECK(seen.batches == priorBatches + 3 && seen.rects.size() == 67 && seen.views == 1);
+   View numeric[7]; unsigned next = 0;
+   const auto all = [&](DXGI_FORMAT format, const FLOAT *c) {
+      CHECK(next < 7);
+      View &v = numeric[next++];
+      v.dev = &dev; v.res = &res; v.type = ViewType::RTV;
+      v.width = view.width; v.height = view.height; v.layers = view.layers;
+      v.info = view.info; v.format = format; v.formatFlags = format_info(format)->flags;
+      v.info.format = resource_vk_format(&dev, format, D3D10_DDI_BIND_RENDER_TARGET);
+      dev.views.push_back(&v);
+      const unsigned batches = seen.batches;
+      table.pfnClearView({&dev}, D3D10DDI_HT_RENDERTARGETVIEW, &v, c, nullptr, 123);
+      CHECK(seen.load == VK_ATTACHMENT_LOAD_OP_CLEAR && seen.batches == batches);
+   };
+   const FLOAT extremes[4] = {std::numeric_limits<float>::quiet_NaN(),
+      std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), 9.75f};
+   all(DXGI_FORMAT_R10G10B10A2_UINT, extremes);
+   CHECK(seen.value.color.uint32[0] == 0 && seen.value.color.uint32[1] == 1023 &&
+         seen.value.color.uint32[2] == 0 && seen.value.color.uint32[3] == 3);
+   all(DXGI_FORMAT_R8G8B8A8_SINT, extremes);
+   CHECK(seen.value.color.int32[0] == 0 && seen.value.color.int32[1] == 127 &&
+         seen.value.color.int32[2] == -128 && seen.value.color.int32[3] == 9);
+   all(DXGI_FORMAT_R32G32B32A32_UINT, extremes);
+   CHECK(seen.value.color.uint32[1] == UINT32_MAX);
+   all(DXGI_FORMAT_R32G32B32A32_SINT, extremes);
+   CHECK(seen.value.color.int32[1] == INT32_MAX && seen.value.color.int32[2] == INT32_MIN);
+   all(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, color);
+   CHECK(seen.value.color.float32[0] == .25f && seen.value.color.float32[2] == .75f);
+   all(DXGI_FORMAT_R8G8B8A8_SNORM, extremes);
+   CHECK(seen.value.color.float32[0] == 0 && seen.value.color.float32[1] == 1 &&
+         seen.value.color.float32[2] == -1);
+   const FLOAT alpha[4] = {.9f, .8f, .7f, .125f};
+   all(DXGI_FORMAT_A8_UNORM, alpha);
+   CHECK(numeric[6].info.format == VK_FORMAT_R8_UNORM && seen.value.color.float32[0] == .125f);
+   CHECK(seen.begins == seen.ends && !dev.rendering && !setErrorCalls &&
+         !cpuWaits && !cpuSignals && !submissions && !gates);
+   // No recorded use or cached view may retire before real queue completion.
+   storage_destroy(&dev, res.storage, false); retire(&dev); CHECK(!viewsDestroyed);
+   completedValue = dev.recordingSeq(); retire(&dev); CHECK(viewsDestroyed == seen.views);
+   cmd_destroy(&dev); dev.views.clear();
+
+   reset(); dev = make_device(&adapter); res.dev = &dev;
+   res.storage.image = handle<VkImage>(0x800); view.dev = &dev;
+   const RECT invalid[] = {{0, 0, 5, 5}, {9, 0, 3, 4}};
+   clear(color, invalid, 2);
+   CHECK(!dev.cmdHasWork && !res.storage.lastUse && setErrorCalls == 1 &&
+         lastError == D3DDDIERR_DEVICEREMOVED);
+   std::puts("PASS: ClearView clips rectangles/all array slices, preserves outside pixels in command encoding, batches boundedly, converts integer/alpha formats, and retains in-flight backing (CPU only)");
 }
 
 static void submission_contract()
@@ -215,6 +340,12 @@ static void incomplete_fence_keeps_resources()
       reset(); Device dev = make_device(&adapter);
       CHECK(cmd_begin(&dev)); CHECK(SUCCEEDED(flush(&dev, false)));
       defer(&dev, DeferredType::ImageView, 0x500, 1);
+      if (result == VK_ERROR_DEVICE_LOST) {
+         dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) {
+            if (cpuWaits) return VK_ERROR_DEVICE_LOST;
+            *out = completedValue; return VK_SUCCESS;
+         };
+      }
       dev.vk.WaitSemaphores = result == VK_TIMEOUT ?
          +[](VkDevice, const VkSemaphoreWaitInfo *, uint64_t timeout) -> VkResult {
             CHECK(timeout == UINT64_C(1000000000)); ++cpuWaits; return VK_TIMEOUT;
@@ -222,14 +353,130 @@ static void incomplete_fence_keeps_resources()
             ++cpuWaits; return VK_ERROR_DEVICE_LOST;
          };
       CHECK(wait_sequence(&dev, 1, TGD3D_WAIT_DESTROY) == DXGI_ERROR_DEVICE_REMOVED);
-      CHECK(lastError == D3DDDIERR_DEVICEREMOVED);
+      CHECK(lastError == D3DDDIERR_DEVICEREMOVED && setErrorCalls == 1);
       CHECK(cpuWaits == (result == VK_TIMEOUT ? 30u : 1u));
       CHECK(!completedValue && !cpuSignals && !viewsDestroyed);
       CHECK(dev.submittedCommands.size() == 1 && dev.deferred.size() == 1);
       const unsigned previous = cpuWaits;
       CHECK(FAILED(wait_sequence(&dev, 1, TGD3D_WAIT_READBACK)) && cpuWaits == previous);
+      CHECK(setErrorCalls == 1);
    }
    std::puts("PASS: timeout and device loss never complete or retire in-flight resources");
+}
+
+static unsigned completionReads, completionFailureRead;
+static VkResult clearViewFailure;
+
+static void completion_failure_propagates()
+{
+   Adapter adapter;
+   auto hook_counter = [](Device &dev) {
+      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) {
+         if (++completionReads >= completionFailureRead)
+            return VK_ERROR_DEVICE_LOST;
+         *out = completedValue;
+         return VK_SUCCESS;
+      };
+   };
+   auto verify_quiescent = [](Device &dev, HRESULT hr, unsigned reads) {
+      retire(&dev);
+      CHECK(!sequence_done(&dev, 1) && dev.completed() == 0);
+      CHECK(flush(&dev, false) == hr);
+      CHECK(wait_sequence(&dev, 1, TGD3D_WAIT_MODE_CHANGE) == hr);
+      CHECK(completionReads == reads && setErrorCalls == 1 && !viewsDestroyed);
+   };
+
+   /* Active submission through flush(false): bidirectional GPU fence bridge
+    * completes before retirement's completion sample reports device loss. */
+   {
+      reset(); Device dev = make_device(&adapter);
+      CHECK(cmd_begin(&dev));
+      defer(&dev, DeferredType::ImageView, 0x500, 1);
+      completionReads = 0; completionFailureRead = 1;
+      hook_counter(dev);
+      const HRESULT hr = flush(&dev, false);
+      CHECK(hr == DXGI_ERROR_DEVICE_REMOVED && dev.lost == hr);
+      CHECK(lastError == D3DDDIERR_DEVICEREMOVED && setErrorCalls == 1);
+      CHECK(dev.submitted == 1 && submissions == 1 && completionReads == 1);
+#ifndef TGD3D_CPU_SYNC_CONTROL
+      CHECK(dev.gated == 1 && events == std::vector<unsigned>({1, 2, 3}));
+#endif
+      CHECK(!cpuWaits && !cpuSignals && !viewsDestroyed);
+      CHECK(dev.submittedCommands.size() == 1 && dev.deferred.size() == 1);
+      verify_quiescent(dev, hr, 1);
+   }
+
+   /* Real backpressure / sync-control flush(true) with > MAX_IN_FLIGHT queued
+    * submissions: test every completion-read site without duplicate SetErrorCb
+    * or post-failure retirement. */
+#ifdef TGD3D_CPU_SYNC_CONTROL
+   const unsigned flushReads = 4, waitStartRead = 3;
+#else
+   const unsigned flushReads = 5, waitStartRead = 4;
+#endif
+   D3D10DDI_DEVICEFUNCS devTable = {}; device_fill_table(&devTable);
+   for (unsigned failRead = 1; failRead <= flushReads; ++failRead) {
+      reset(); Device dev = make_device(&adapter);
+      for (unsigned s = 0; s < 3; ++s) {
+         CHECK(cmd_begin(&dev)); CHECK(flush(&dev, false) == S_OK);
+      }
+      defer(&dev, DeferredType::ImageView, 0x500, 1);
+      completionReads = 0; completionFailureRead = failRead;
+      hook_counter(dev);
+      const HRESULT hr = flush(&dev, true);
+      CHECK(hr == DXGI_ERROR_DEVICE_REMOVED && dev.lost == hr);
+      CHECK(lastError == D3DDDIERR_DEVICEREMOVED && setErrorCalls == 1);
+      CHECK(completionReads == failRead);
+      CHECK(cpuWaits == (failRead >= waitStartRead ? 1u : 0u));
+      CHECK(!cpuSignals && !viewsDestroyed);
+      CHECK(dev.submittedCommands.size() == 3 && dev.deferred.size() == 1);
+      verify_quiescent(dev, hr, failRead);
+      devTable.pfnFlush({&dev});
+      CHECK(setErrorCalls == 2 && lastError == D3DDDIERR_DEVICEREMOVED);
+      CHECK(completionReads == failRead && !viewsDestroyed);
+   }
+
+   /* wait_sequence: seq == 0 early-return trap, initial wait sample, post-wait
+    * timing sample, and retirement after an already-completed sequence. */
+   for (unsigned mode = 0; mode < 4; ++mode) {
+      reset(); Device dev = make_device(&adapter);
+      if (mode) {
+         CHECK(cmd_begin(&dev)); CHECK(flush(&dev, false) == S_OK);
+      }
+      defer(&dev, DeferredType::ImageView, 0x500, 1);
+      completionReads = 0;
+      completionFailureRead = mode < 2 ? 1 : 2;
+      completedValue = mode == 3 ? 1 : 0;
+      hook_counter(dev);
+      const HRESULT hr = wait_sequence(&dev, mode ? 1 : 0, TGD3D_WAIT_MODE_CHANGE);
+      CHECK(hr == DXGI_ERROR_DEVICE_REMOVED && dev.lost == hr);
+      CHECK(lastError == D3DDDIERR_DEVICEREMOVED && setErrorCalls == 1);
+      CHECK(completionReads == completionFailureRead);
+      CHECK(cpuWaits == (mode == 2 ? 1u : 0u) && !cpuSignals && !viewsDestroyed);
+      CHECK(dev.submittedCommands.size() == (mode ? 1u : 0u) && dev.deferred.size() == 1);
+      verify_quiescent(dev, hr, completionFailureRead);
+   }
+
+   /* Deferred clear materialization failure inside flush must set dev.lost and
+    * report D3DDDIERR_DEVICEREMOVED rather than leaking OOM or S_OK. */
+   for (VkResult failure : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY,
+                            VK_ERROR_UNKNOWN, VK_ERROR_DEVICE_LOST}) {
+      reset(); Device dev = make_device(&adapter);
+      clearViewFailure = failure;
+      dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *,
+                                  const VkAllocationCallbacks *, VkImageView *out) {
+         *out = VK_NULL_HANDLE; return clearViewFailure;
+      };
+      Resource target; target.dev = &dev; target.kind = ResKind::Image;
+      target.storage.image = handle<VkImage>(700); target.storage.layoutReady = true;
+      View view; view.dev = &dev; view.res = &target; view.type = ViewType::RTV;
+      view.width = view.height = 32; view.layers = 1;
+      dev.pendingClears.push_back({&view, {}, VK_IMAGE_ASPECT_COLOR_BIT});
+      const HRESULT hr = flush(&dev, true);
+      CHECK(hr == D3DDDIERR_DEVICEREMOVED && dev.lost == hr);
+      CHECK(lastError == D3DDDIERR_DEVICEREMOVED && setErrorCalls == 1 && !submissions);
+   }
+   std::puts("PASS: completion-read failure propagates from Flush/wait/retirement; no further wait, submission or early resource release (CPU control)");
 }
 
 static void device_error_contract()
@@ -303,6 +550,7 @@ static void descriptor_contract()
       for (unsigned i = 0; i < count; i++) {
          CHECK(writes[i].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
          cbBindings.push_back(writes[i].dstBinding); cbOffsets[i] = writes[i].pBufferInfo->offset;
+         cbRanges[i] = writes[i].pBufferInfo->range; cbBuffers[i] = writes[i].pBufferInfo->buffer;
       }
    };
    CHECK(SUCCEEDED(device_layouts_create(&dev)) && layouts == 3);
@@ -312,8 +560,10 @@ static void descriptor_contract()
       shaders[i].dev = &dev; shaders[i].stage = (Stage)i;
       shaders[i].cbMask = 1 << 13; shaders[i].variants.push_back({0, handle<VkShaderEXT>(600 + i)});
       dev.stage[i].shader = &shaders[i];
+      cb[i].dev = &dev; cb[i].kind = ResKind::Buffer;
       cb[i].slice = {&chunk, i * 256, 64}; cb[i].size = 64;
-      dev.stage[i].cb[13] = &cb[i];
+      const D3D10DDI_HRESOURCE binding = {&cb[i]};
+      set_constant_buffers(&dev, (Stage)i, 13, 1, &binding);
    }
    Resource target; target.dev = &dev; target.kind = ResKind::Image;
    target.storage.image = handle<VkImage>(700); target.storage.layoutReady = true;
@@ -329,6 +579,25 @@ static void descriptor_contract()
    cb[0].slice.offset = 768; dev.stage[0].cbDirty = 1 << 13;
    table.pfnDraw({&dev}, 3, 0);
    CHECK(updates == 2 && cbOffsets[0] == 768 && cbOffsets[1] == 256 && cbOffsets[2] == 512);
+   D3D11_1DDI_DEVICEFUNCS modern = {}; device_fill_table11(&modern);
+   cb[0].size = cb[0].slice.size = 896;
+   const D3D10DDI_HRESOURCE binding = {&cb[0]};
+   UINT first = 48, constants = 16;
+   modern.pfnVsSetConstantBuffers({&dev}, 13, 1, &binding, &first, &constants);
+   table.pfnDraw({&dev}, 3, 0);
+   CHECK(updates == 3 && cbBuffers[0] == chunk.buffer && cbOffsets[0] == 1536 && cbRanges[0] == 128);
+   first = UINT32_MAX & ~15u;
+   modern.pfnVsSetConstantBuffers({&dev}, 13, 1, &binding, &first, &constants);
+   table.pfnDraw({&dev}, 3, 0);
+   CHECK(updates == 4 && cbBuffers[0] == VK_NULL_HANDLE && cbRanges[0] == VK_WHOLE_SIZE);
+   first = 0; constants = 0;
+   modern.pfnVsSetConstantBuffers({&dev}, 13, 1, &binding, &first, &constants);
+   table.pfnDraw({&dev}, 3, 0);
+   CHECK(updates == 5 && cbBuffers[0] == VK_NULL_HANDLE);
+   state_fill_table(&table);
+   table.pfnVsSetConstantBuffers({&dev}, 13, 1, &binding);
+   table.pfnDraw({&dev}, 3, 0);
+   CHECK(updates == 6 && cbBuffers[0] == chunk.buffer && cbOffsets[0] == 768 && cbRanges[0] == 896);
    std::puts("PASS: all 42 constant-buffer slots; immutable full snapshots after one-slot changes");
 }
 
@@ -338,7 +607,8 @@ static unsigned drawFailureAt, poolCreates, setAllocates, imageViews, drawCalls;
 static void draw_error_contract()
 {
    D3D10DDI_DEVICEFUNCS table = {}; draw_fill_table(&table);
-   for (unsigned entry = 0; entry < 4; entry++)
+   D3D11_1DDI_DEVICEFUNCS modern = {}; device_fill_table11(&modern);
+   for (unsigned entry = 0; entry < 6; entry++)
    for (unsigned where = 0; where < 3; where++)
    for (VkResult failure : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY,
                             VK_ERROR_DEVICE_LOST}) {
@@ -361,11 +631,14 @@ static void draw_error_contract()
       };
       dev.vk.CmdDraw = [](VkCommandBuffer, uint32_t, uint32_t, uint32_t, uint32_t) { ++drawCalls; };
       dev.vk.CmdDrawIndexed = [](VkCommandBuffer, uint32_t, uint32_t, uint32_t, int32_t, uint32_t) { ++drawCalls; };
+      dev.vk.CmdDrawIndirect = dev.vk.CmdDrawIndexedIndirect =
+         [](VkCommandBuffer, VkBuffer, VkDeviceSize, uint32_t, uint32_t) { ++drawCalls; };
       if (where == 1) dev.framePools.push_back(handle<VkDescriptorPool>(200));
       Shader vs; vs.dev = &dev; vs.stage = STAGE_VS; vs.cbMask = 1;
       vs.variants.push_back({0, handle<VkShaderEXT>(600)}); dev.stage[STAGE_VS].shader = &vs;
       Chunk chunk; chunk.buffer = handle<VkBuffer>(500);
-      Resource buffer; buffer.slice = {&chunk, 0, 64}; buffer.size = 64;
+      Resource buffer; buffer.dev = &dev; buffer.slice = {&chunk, 0, 64}; buffer.size = 64;
+      buffer.misc = D3D11_DDI_RESOURCE_MISC_DRAWINDIRECT_ARGS;
       dev.stage[STAGE_VS].cb[0] = dev.indexBuffer = &buffer;
       Resource target; target.dev = &dev; target.kind = ResKind::Image;
       target.storage.image = handle<VkImage>(700); target.storage.layoutReady = true;
@@ -379,6 +652,8 @@ static void draw_error_contract()
          case 1: table.pfnDrawIndexed({&dev}, 3, 0, 0); break;
          case 2: table.pfnDrawInstanced({&dev}, 3, 2, 0, 0); break;
          case 3: table.pfnDrawIndexedInstanced({&dev}, 3, 2, 0, 0, 0); break;
+         case 4: modern.pfnDrawInstancedIndirect({&dev}, {&buffer}, 0); break;
+         case 5: modern.pfnDrawIndexedInstancedIndirect({&dev}, {&buffer}, 0); break;
          }
       };
       draw();
@@ -416,6 +691,121 @@ static void draw_error_contract()
       CHECK(setAllocates == 2 && poolCreates == 1 && !setErrorCalls && SUCCEEDED(d.lost));
    }
    std::puts("PASS: all Draw DDIs report only removal on allocation/view failure and stop further work; non-Draw OOM remains recoverable (CPU control)");
+}
+
+static void draw_fixture(Device &dev, Shader &vs, Resource &target, View &view)
+{
+   vs.dev = &dev; vs.stage = STAGE_VS;
+   vs.variants.push_back({0, handle<VkShaderEXT>(600)});
+   dev.stage[STAGE_VS].shader = &vs;
+   target.dev = &dev; target.kind = ResKind::Image;
+   target.storage.image = handle<VkImage>(700); target.storage.layoutReady = true;
+   view.dev = &dev; view.res = &target; view.type = ViewType::RTV;
+   view.width = view.height = 32;
+   view.cache[0] = {target.storage.image, handle<VkImageView>(701), false};
+   dev.rtv[0] = &view; dev.viewportCount = 1;
+   dev.viewports[0].Width = dev.viewports[0].Height = 32;
+}
+
+static void indirect_draw_contract()
+{
+   D3DWDDM1_3DDI_DEVICEFUNCS t; device_fill_table13(&t);
+   for (bool indexed : {false, true}) {
+      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      Shader vs; Resource target; View view; draw_fixture(dev, vs, target, view);
+      Chunk chunk; chunk.buffer = handle<VkBuffer>(500); chunk.size = 512; chunk.live = 1;
+      Resource args; args.dev = &dev; args.size = 64; args.slice = {&chunk, 256, 64};
+      args.misc = D3D11_DDI_RESOURCE_MISC_DRAWINDIRECT_ARGS;
+      dev.indexBuffer = &args;
+      /* Deliberately no CPU mapping: any argument readback would be invalid. */
+      drawCalls = 0;
+      dev.vk.CmdDrawIndirect = [](VkCommandBuffer, VkBuffer b, VkDeviceSize offset, UINT count, UINT stride) {
+         CHECK(b == handle<VkBuffer>(500) && offset == 304 && count == 1 && stride == 16 && barriers);
+         ++drawCalls;
+      };
+      dev.vk.CmdDrawIndexedIndirect = [](VkCommandBuffer, VkBuffer b, VkDeviceSize offset, UINT count, UINT stride) {
+         CHECK(b == handle<VkBuffer>(500) && offset == 300 && count == 1 && stride == 20 && barriers);
+         ++drawCalls;
+      };
+      dev.vk.MapMemory = [](VkDevice, VkDeviceMemory, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **) {
+         CHECK(false); return VK_ERROR_MEMORY_MAP_FAILED;
+      };
+      CHECK(cmd_draw(&dev)); buffer_written(&dev);
+      auto draw = indexed ? t.pfnDrawIndexedInstancedIndirect : t.pfnDrawInstancedIndirect;
+      draw({&dev}, {&args}, indexed ? 44 : 48);
+      CHECK(drawCalls == 1 && !setErrorCalls && !cpuWaits && !cpuSignals && args.sliceLastUse == 1);
+      CHECK(dev.barrierSerial >= dev.bufferWriteSerial);
+      slice_release(&dev, args.slice, args.sliceLastUse); args.slice = {};
+      retire(&dev); CHECK(chunk.live == 1 && dev.deferredSlices.size() == 1);
+      dev.submitted = completedValue = 1;
+      retire(&dev); CHECK(!chunk.live && dev.deferredSlices.empty() && !cpuWaits);
+   }
+   for (unsigned invalid = 0; invalid < 8; ++invalid) {
+      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      Shader vs; Resource target; View view; draw_fixture(dev, vs, target, view);
+      Chunk chunk; chunk.buffer = handle<VkBuffer>(500);
+      Resource args; args.dev = &dev; args.size = 64; args.slice = {&chunk, 0, 64};
+      args.misc = D3D11_DDI_RESOURCE_MISC_DRAWINDIRECT_ARGS;
+      UINT offset = 0;
+      switch (invalid) {
+      case 0: offset = 1; break;
+      case 1: offset = 52; break;
+      case 2: offset = UINT32_MAX - 3; break;
+      case 3: args.misc = 0; break;
+      case 4: args.dev = nullptr; break;
+      case 5: args.slice = {}; break;
+      case 6: args.slice.size = 12; break;
+      case 7: adapter.vk.caps.drawIndirectFirstInstance = false; break;
+      }
+      t.pfnDrawInstancedIndirect({&dev}, {&args}, offset);
+      CHECK(setErrorCalls == 1 && lastError == D3DDDIERR_DEVICEREMOVED && !dev.cmd && !args.sliceLastUse);
+      t.pfnDrawInstancedIndirect({&dev}, {&args}, 0);
+      CHECK(setErrorCalls == 1 && !cpuWaits);
+   }
+   std::puts("PASS: indirect draw uses GPU-only arguments with bounds/flags/features checked, write ordering and completion-based retirement; no CPU readback (CPU control)");
+}
+
+static void readonly_depth_contract()
+{
+   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   D3DWDDM1_3DDI_DEVICEFUNCS t; device_fill_table13(&t);
+   Shader vs; Resource target; View view; draw_fixture(dev, vs, target, view);
+   Resource depth; depth.dev = &dev; depth.kind = ResKind::Image;
+   depth.storage.image = handle<VkImage>(800); depth.storage.layoutReady = true;
+   DepthStencilState state = {};
+   state.desc.DepthEnable = state.desc.StencilEnable = TRUE;
+   state.desc.DepthWriteMask = D3D10_DDI_DEPTH_WRITE_MASK_ALL;
+   state.desc.StencilWriteMask = 0x5a; dev.depthStencil = &state;
+   static VkBool32 depthWrites;
+   static uint32_t stencilWrites;
+   static unsigned stateChanges;
+   stateChanges = 0;
+   dev.vk.CmdSetDepthWriteEnable = [](VkCommandBuffer, VkBool32 value) { depthWrites = value; ++stateChanges; };
+   dev.vk.CmdSetStencilWriteMask = [](VkCommandBuffer, VkStencilFaceFlags, UINT value) { stencilWrites = value; };
+   View dsv[4];
+   for (UINT flags = 0; flags < 4; ++flags) {
+      dsv[flags].dev = &dev; dsv[flags].res = &depth; dsv[flags].type = ViewType::DSV;
+      dsv[flags].dsvFlags = flags; dsv[flags].formatFlags = FMT_DEPTH | FMT_STENCIL;
+      dsv[flags].width = dsv[flags].height = 32;
+      dsv[flags].cache[0] = {depth.storage.image, handle<VkImageView>(801), false};
+   }
+   for (UINT flags : {0u, 1u, 2u, 3u, 0u}) {
+      D3D10DDI_HRENDERTARGETVIEW rtv = {&view};
+      const UINT previous = stateChanges;
+      t.pfnSetRenderTargets({&dev}, &rtv, 1, 0, {&dsv[flags]}, nullptr, nullptr, 0, 0, 0, 0);
+      t.pfnDraw({&dev}, 3, 0);
+      CHECK(!setErrorCalls && stateChanges == previous + 1);
+      CHECK(depthWrites == !(flags & 1) && stencilWrites == ((flags & 2) ? 0 : 0x5a));
+      end_rendering(&dev);
+      t.pfnClearDepthStencilView({&dev}, {&dsv[flags]}, D3D10_DDI_CLEAR_DEPTH | D3D10_DDI_CLEAR_STENCIL, 0.5f, 7);
+      const VkImageAspectFlags expected = ((flags & 1) ? 0 : VK_IMAGE_ASPECT_DEPTH_BIT) |
+                                         ((flags & 2) ? 0 : VK_IMAGE_ASPECT_STENCIL_BIT);
+      if (expected) CHECK(dev.pendingClears.size() == 1 && dev.pendingClears[0].aspects == expected);
+      else CHECK(dev.pendingClears.empty());
+      dev.pendingClears.clear();
+   }
+   CHECK(!cpuWaits);
+   std::puts("PASS: read-only depth/stencil views suppress matching writes/clears, and switching back restores writable state (CPU control)");
 }
 
 static unsigned regionCopies;
@@ -869,12 +1259,30 @@ static void presentation_rotation_contract()
    for (UINT i = 0; i < SET_COUNT; ++i) dev.setLayouts[i] = handle<VkDescriptorSetLayout>(0x10+i);
    dev.pipelineLayout = handle<VkPipelineLayout>(0x20);
    dev.defaultSampler = handle<VkSampler>(0x30);
-   static struct { UINT shaderCalls, viewCalls, draws, angle, width, height; bool scaled; } observed;
+   static struct {
+      UINT shaderCalls, viewCalls, draws, angle, width, height, layoutCalls, copies;
+      float uv[4]; bool scaled;
+   } observed;
    observed = {};
+   dev.vk.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *info,
+                                    const VkAllocationCallbacks *, VkPipelineLayout *out) {
+      CHECK(info->setLayoutCount == SET_COUNT && info->pushConstantRangeCount == 1 &&
+            info->pPushConstantRanges[0].stageFlags == VK_SHADER_STAGE_VERTEX_BIT &&
+            !info->pPushConstantRanges[0].offset && info->pPushConstantRanges[0].size == 16);
+      ++observed.layoutCalls; *out = handle<VkPipelineLayout>(0x21); return VK_SUCCESS;
+   };
+   dev.vk.CmdPushConstants = [](VkCommandBuffer, VkPipelineLayout layout,
+                                 VkShaderStageFlags stages, UINT offset, UINT size, const void *data) {
+      CHECK(layout == handle<VkPipelineLayout>(0x21) && stages == VK_SHADER_STAGE_VERTEX_BIT &&
+            !offset && size == sizeof(observed.uv));
+      std::memcpy(observed.uv, data, size);
+   };
    dev.vk.CreateShadersEXT = [](VkDevice, UINT count, const VkShaderCreateInfoEXT *info,
                               const VkAllocationCallbacks *, VkShaderEXT *shader) {
       CHECK(count == 1 && info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT &&
             info->setLayoutCount == SET_COUNT && info->codeSize > 20);
+      CHECK(info->pushConstantRangeCount == 1 && info->pPushConstantRanges[0].size == 16 &&
+            info->pPushConstantRanges[0].stageFlags == VK_SHADER_STAGE_VERTEX_BIT);
       ++observed.shaderCalls;
       if (info->stage == VK_SHADER_STAGE_VERTEX_BIT) {
          const auto *c = info->pSpecializationInfo;
@@ -959,6 +1367,7 @@ static void presentation_rotation_contract()
       args.Rotate = (DXGI_DDI_MODE_ROTATION)(DXGI_DDI_MODE_ROTATION_IDENTITY+angle);
       CHECK(table.pfnBlt(&args) == S_OK && dev.dirty == DIRTY_ALL && !dev.rendering);
       CHECK(src.storage.lastUse == dev.recordingSeq() && dst.storage.lastUse == dev.recordingSeq());
+      CHECK(observed.uv[0] == 0 && observed.uv[1] == 0 && observed.uv[2] == 1 && observed.uv[3] == 1);
    }
    CHECK(observed.shaderCalls == 4 && observed.viewCalls == 2 && observed.draws == 4);
    observed.angle = 1; observed.scaled = true; observed.width = 13; observed.height = 7;
@@ -966,6 +1375,39 @@ static void presentation_rotation_contract()
    CHECK(table.pfnBlt(&args) == S_OK && observed.draws == 5);
    args.Rotate = (DXGI_DDI_MODE_ROTATION)99;
    CHECK(table.pfnBlt(&args) == E_INVALIDARG && observed.draws == 5);
+   DXGI1_3_DDI_BASE_FUNCTIONS modern = {}; dxgi_fill_presentation13(&modern);
+   DXGI_DDI_ARG_BLT1 sub = {};
+   sub.hDevice = args.hDevice; sub.hSrcResource = args.hSrcResource; sub.hDstResource = args.hDstResource;
+   sub.SrcSubresource = 3; sub.SrcLeft = 3; sub.SrcTop = 1; sub.SrcRight = 15; sub.SrcBottom = 7;
+   sub.DstLeft = 7; sub.DstTop = 11;
+   for (UINT angle : {1u, 2u, 3u}) {
+      observed.angle = angle; observed.scaled = false;
+      observed.width = angle & 1 ? 6 : 12; observed.height = angle & 1 ? 12 : 6;
+      sub.DstRight = sub.DstLeft + observed.width; sub.DstBottom = sub.DstTop + observed.height;
+      sub.Rotate = (DXGI_DDI_MODE_ROTATION)(DXGI_DDI_MODE_ROTATION_IDENTITY + angle);
+      CHECK(modern.pfnBlt1(&sub) == S_OK);
+      CHECK(observed.uv[0] == 3.0f / 17 && observed.uv[1] == 1.0f / 9 &&
+            observed.uv[2] == 12.0f / 17 && observed.uv[3] == 6.0f / 9);
+   }
+   CHECK(observed.draws == 8 && observed.shaderCalls == 4 && observed.layoutCalls == 1);
+   dev.vk.CmdBlitImage = [](VkCommandBuffer, VkImage src, VkImageLayout sl, VkImage dst,
+                            VkImageLayout dl, UINT count, const VkImageBlit *blit, VkFilter filter) {
+      CHECK(src == handle<VkImage>(0x100) && dst == handle<VkImage>(0x200) &&
+            sl == VK_IMAGE_LAYOUT_GENERAL && dl == VK_IMAGE_LAYOUT_GENERAL && count == 1);
+      CHECK(blit->srcSubresource.mipLevel == 1 && blit->srcSubresource.baseArrayLayer == 1);
+      CHECK(blit->srcOffsets[0].x == 3 && blit->srcOffsets[0].y == 1 &&
+            blit->srcOffsets[1].x == 15 && blit->srcOffsets[1].y == 7);
+      CHECK(blit->dstOffsets[0].x == 7 && blit->dstOffsets[0].y == 11 &&
+            blit->dstOffsets[1].x == 19 && blit->dstOffsets[1].y == 17 && filter == VK_FILTER_NEAREST);
+      ++observed.copies;
+   };
+   sub.Rotate = DXGI_DDI_MODE_ROTATION_IDENTITY; sub.DstRight = 19; sub.DstBottom = 17;
+   CHECK(modern.pfnBlt1(&sub) == S_OK && observed.copies == 1);
+   const unsigned beforeInvalid = barriers;
+   sub.SrcRight = 18; CHECK(modern.pfnBlt1(&sub) == E_INVALIDARG);
+   sub.SrcRight = UINT_MAX; CHECK(modern.pfnBlt1(&sub) == E_INVALIDARG);
+   sub.SrcRight = sub.SrcLeft; CHECK(modern.pfnBlt1(&sub) == E_INVALIDARG);
+   CHECK(barriers == beforeInvalid && observed.draws == 8 && observed.copies == 1);
    CHECK(!cpuWaits && !cpuSignals && !submissions); // copy only records GPU work
    storage_destroy(&dev, src.storage, false); storage_destroy(&dev, dst.storage, false);
    CHECK(!viewsDestroyed);
@@ -1028,6 +1470,10 @@ static void export_dxbc(const char *inputPath, const char *outputPath)
    shader_contract(data, stage == 1, outputPath, false, true);
 }
 
+void ddi11_contracts();
+void overlap_contracts();
+void offer_contracts();
+
 int main(int argc, char **argv)
 {
    if (argc == 4 && !strcmp(argv[1], "--export-dxbc")) {
@@ -1039,8 +1485,13 @@ int main(int argc, char **argv)
       return 0;
    }
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();
+   completion_failure_propagates();
+   ddi11_contracts();
+   overlap_contracts();
+   clear_view_contract();
    device_error_contract();
    rotated_views(); descriptor_contract(); draw_error_contract(); empty_box_contract();
+   indirect_draw_contract(); readonly_depth_contract();
    query_contract();
    query_failure_contract();
    shader_contract(g_VS, true, "tgd3d-vs.spv"); shader_contract(g_PS, false, "tgd3d-ps.spv");
@@ -1061,6 +1512,7 @@ int main(int argc, char **argv)
    presentation_rotation_contract();
    runtime_contracts();
    resource_creation_contracts();
+   offer_contracts();
    shader_cache_contracts(false);
    std::puts("CPU controls passed; no GPU execution, WDDM runtime or physical display tested.");
 }

@@ -81,6 +81,7 @@ uint32_t format_numeric_class(DXGI_FORMAT format); /* 0 float/norm, 1 uint, 2 si
 struct Chunk {
    VkBuffer buffer = VK_NULL_HANDLE;
    VkDeviceMemory memory = VK_NULL_HANDLE;
+   RuntimeResource *runtime = nullptr; // dedicated application backing, modern DDI only
    uint8_t *cpu = nullptr;
    VkDeviceSize size = 0;
    VkDeviceSize used = 0;
@@ -147,6 +148,7 @@ struct Resource {
    ResKind kind = ResKind::Buffer;
    bool primary = false;
    bool opened = false;
+   bool bufferMapped = false;
 
    /* Buffer and staging storage. Renamed on discard; never written while the
     * previous contents are still referenced by recorded or queued commands. */
@@ -182,6 +184,7 @@ struct View {
    ViewType type = ViewType::SRV;
    DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
    uint16_t formatFlags = 0;
+   UINT dsvFlags = 0;
    VkImageViewCreateInfo info = {};
    /* One Vulkan view per backing image: a flip chain settles after one
     * rotation of every buffer and then creates nothing per frame. */
@@ -293,6 +296,9 @@ enum Dirty : uint32_t {
 struct StageBindings {
    Shader *shader = nullptr;
    Resource *cb[D3D_CB_SLOTS] = {};
+   VkDeviceSize cbOffset[D3D_CB_SLOTS] = {};
+   /* Zero means an empty binding; the legacy DDI supplies a full 64 KiB window. */
+   VkDeviceSize cbBytes[D3D_CB_SLOTS] = {};
    View *srv[D3D_SRV_SLOTS] = {};
    Sampler *sampler[D3D_SAMPLER_SLOTS] = {};
    uint32_t cbDirty = 0;
@@ -344,7 +350,7 @@ struct Device {
    HANDLE hContext = nullptr;           /* runtime-registered context: sync signals and Present */
    UINT interfaceVersion = 0;
    HRESULT lost = S_OK;
-   bool inDraw = false; /* Draw DDIs can report only device removal. */
+   bool removalOnlyErrors = false; /* Draw and DestroyResource DDI error contract. */
 
    /* Vulkan */
    VkDevice vkdev = VK_NULL_HANDLE;
@@ -363,6 +369,7 @@ struct Device {
    VkDescriptorSetLayout setLayouts[SET_COUNT] = {};
    VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
    VkShaderEXT blitVertex[4] = {}, blitFragment = VK_NULL_HANDLE;
+   VkPipelineLayout blitPipelineLayout = VK_NULL_HANDLE;
    VkSampler blitPointSampler = VK_NULL_HANDLE;
 
    /* Queue fence. `submitted` is the value the last vkQueueSubmit2 signals;
@@ -425,11 +432,29 @@ struct Device {
 
 #define TG_ERROR(dev, hr) (dev)->setError((hr), __FILE__, __LINE__)
 
+struct RemovalOnlyErrorScope {
+   Device *dev;
+   bool previous;
+   explicit RemovalOnlyErrorScope(Device *dev)
+      : dev(dev), previous(dev->removalOnlyErrors) { dev->removalOnlyErrors = true; }
+   ~RemovalOnlyErrorScope() { dev->removalOnlyErrors = previous; }
+   RemovalOnlyErrorScope(const RemovalOnlyErrorScope &) = delete;
+   RemovalOnlyErrorScope &operator=(const RemovalOnlyErrorScope &) = delete;
+};
+
 static inline Device *D(D3D10DDI_HDEVICE h) { return static_cast<Device *>(h.pDrvPrivate); }
 static inline Resource *R(D3D10DDI_HRESOURCE h) { return static_cast<Resource *>(h.pDrvPrivate); }
+static inline bool runtime_private_allocations(const Device *dev)
+{
+   return dev->nvk && dev->interfaceVersion >= D3D11_1_DDI_INTERFACE_VERSION;
+}
 
 /* tgd3d_device.cpp */
 void device_fill_table(D3D10DDI_DEVICEFUNCS *table);
+/* Typed bridge under development; not advertised until all required modern
+ * device and DXGI operations have been implemented and checked. */
+void device_fill_table11(D3D11_1DDI_DEVICEFUNCS *table);
+void device_fill_table13(D3DWDDM1_3DDI_DEVICEFUNCS *table);
 SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER, const D3D10DDIARG_CALCPRIVATEDEVICESIZE *);
 HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER, D3D10DDIARG_CREATEDEVICE *);
 
@@ -452,9 +477,14 @@ void image_use(Device *dev, ImageStorage &storage, bool write);
 void buffer_written(Device *dev);
 void barrier_for_read(Device *dev, uint64_t writeSerial);
 void flush_pending_clears(Device *dev, const View *except_bound);
+void APIENTRY ClearView11(D3D10DDI_HDEVICE, D3D11DDI_HANDLETYPE, void *,
+                          const FLOAT[4], const D3D10_DDI_RECT *, UINT);
 
 /* tgd3d_upload.cpp */
 HRESULT slice_alloc(Device *dev, VkDeviceSize size, VkDeviceSize alignment, Slice *slice);
+HRESULT resource_slice_alloc(Resource *res, Slice *slice);
+HRESULT slice_map(Device *dev, Slice slice);
+void slice_unmap(Device *dev, Slice slice);
 void slice_release(Device *dev, Slice slice, uint64_t lastUse);
 void upload_destroy(Device *dev);
 
@@ -463,12 +493,18 @@ HRESULT resource_result(VkResult result);
 void resource_fill_table(D3D10DDI_DEVICEFUNCS *table);
 VkImageView view_get(View *view, bool arrayed = false);
 VkBufferView view_get_buffer(View *view);
+void create_depth_stencil_view(Device *dev, const D3D10DDIARG_CREATEDEPTHSTENCILVIEW *args,
+                               void *memory, UINT flags);
 void resource_unbind(Device *dev, Resource *res);
+RuntimeResource *resource_runtime(const Resource *res);
 HRESULT image_create(Device *dev, Resource *res);
 void storage_destroy(Device *dev, ImageStorage &storage, bool immediate);
 
 /* tgd3d_state.cpp */
 void state_fill_table(D3D10DDI_DEVICEFUNCS *table);
+void set_constant_buffers(Device *dev, Stage stage, UINT start, UINT count,
+                          const D3D10DDI_HRESOURCE *buffers,
+                          const UINT *first = nullptr, const UINT *sizes = nullptr);
 bool blend_uses_dual_source(const BlendState *state);
 
 /* tgd3d_shader.cpp */
@@ -478,6 +514,8 @@ VkResult create_shader_cached(Device *dev, const VkShaderCreateInfoEXT &info, Vk
 
 /* tgd3d_draw.cpp */
 void draw_fill_table(D3D10DDI_DEVICEFUNCS *table);
+void APIENTRY DrawIndirect11(D3D10DDI_HDEVICE device, D3D10DDI_HRESOURCE args, UINT offset);
+void APIENTRY DrawIndexedIndirect11(D3D10DDI_HDEVICE device, D3D10DDI_HRESOURCE args, UINT offset);
 HRESULT device_layouts_create(Device *dev);
 void device_layouts_destroy(Device *dev);
 VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set);
@@ -489,7 +527,12 @@ void query_pass_end(Device *dev, VkCommandBuffer cmd);
 
 /* tgd3d_dxgi.cpp */
 void dxgi_fill_table(DXGI1_1_DDI_BASE_FUNCTIONS *table, bool has_resolve);
-HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args);
+/* Presentation portion of the newer negotiated table. Device registration
+ * must not expose this table until its remaining required DDIs are supplied. */
+void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
+void dxgi_fill_residency13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
+bool direct_flip_compatible(Device *dev, const Resource *source, const Resource *target);
+HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args, const RECT *source = nullptr);
 void blit_destroy(Device *dev);
 #ifdef TGD3D_RED_PRIMARY_CONTROL
 HRESULT red_primary_clear(Device *dev, Resource *res, UINT subresource);
@@ -502,7 +545,15 @@ struct RuntimeSharedDescription {
    UINT bind_flags, usage;
 };
 HRESULT runtime_device_create(Device *dev);
+void runtime_copy_callbacks(D3DDDI_DEVICECALLBACKS *out, const D3DDDI_DEVICECALLBACKS *in);
 void runtime_device_destroy(Device *dev);
+HRESULT runtime_private_create(Device *dev, D3D10DDI_HRTRESOURCE resource,
+                                uint64_t bytes, RuntimeResource **out);
+bool runtime_requires_resource_lifetime(const RuntimeResource *resource);
+bool runtime_is_offered(const RuntimeResource *resource);
+HRESULT runtime_offer(Device *dev, RuntimeResource *const *resources, UINT count,
+                       D3DDDI_OFFER_PRIORITY priority);
+HRESULT runtime_reclaim(Device *dev, RuntimeResource *const *resources, UINT count, BOOL *discarded);
 HRESULT runtime_primary_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *desc,
                                D3D10DDI_HRTRESOURCE runtime, RuntimeResource **out,
                                UINT *width, UINT *height, UINT *pitch);
@@ -516,12 +567,15 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
 HRESULT runtime_destroy(RuntimeResource *resource);
 HRESULT runtime_set_display_mode(RuntimeResource *resource, Device *dev, UINT subresource);
 bool runtime_is_primary(const RuntimeResource *resource);
+bool runtime_primary_compatible(const RuntimeResource *source, const RuntimeResource *target);
 D3DKMT_HANDLE runtime_allocation(const RuntimeResource *resource);
 void runtime_rebind(RuntimeResource *resource, D3D10DDI_HRTRESOURCE runtime);
 /* Binds `image` to the runtime allocation: NVK owner import, or a host
  * pointer in the test build. No pixels are copied on either path. */
 HRESULT runtime_bind_image(Device *dev, RuntimeResource *resource, VkImage image,
                            VkDeviceMemory *memory);
+HRESULT runtime_bind_buffer(Device *dev, RuntimeResource *resource, VkBuffer buffer,
+                            VkDeviceMemory *memory);
 
 }
 

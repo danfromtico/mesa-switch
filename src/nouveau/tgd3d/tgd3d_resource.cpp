@@ -175,20 +175,28 @@ HRESULT image_create(Device *dev, Resource *res)
    } else {
       VkMemoryRequirements req;
       dev->vk.GetImageMemoryRequirements(dev->vkdev, res->storage.image, &req);
-      VkMemoryAllocateInfo alloc = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
-      alloc.allocationSize = req.size;
-      alloc.memoryTypeIndex = dev->adapter->vk.findMemoryType(
-         req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-      if (alloc.memoryTypeIndex == UINT32_MAX)
-         alloc.memoryTypeIndex = dev->adapter->vk.findMemoryType(req.memoryTypeBits, 0);
-      trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 2, (uintptr_t)res);
-      hr = alloc.memoryTypeIndex == UINT32_MAX ? DXGI_ERROR_UNSUPPORTED :
-         resource_result(dev->vk.AllocateMemory(dev->vkdev, &alloc, nullptr, &res->storage.memory));
-      trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 2, (uintptr_t)res);
-      if (SUCCEEDED(hr)) {
-         trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 3, (uintptr_t)res);
-         hr = resource_result(dev->vk.BindImageMemory(dev->vkdev, res->storage.image, res->storage.memory, 0));
-         trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 3, (uintptr_t)res);
+      if (runtime_private_allocations(dev) && res->hRT.handle) {
+         /* Keep optimal tiling and its per-plane PTE kinds. Only backing
+          * ownership changes; this is not a linear/shared image import. */
+         hr = runtime_private_create(dev, res->hRT, req.size, &res->storage.runtime);
+         if (SUCCEEDED(hr))
+            hr = runtime_bind_image(dev, res->storage.runtime, res->storage.image, &res->storage.memory);
+      } else {
+         VkMemoryAllocateInfo alloc = {VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+         alloc.allocationSize = req.size;
+         alloc.memoryTypeIndex = dev->adapter->vk.findMemoryType(
+            req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+         if (alloc.memoryTypeIndex == UINT32_MAX)
+            alloc.memoryTypeIndex = dev->adapter->vk.findMemoryType(req.memoryTypeBits, 0);
+         trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 2, (uintptr_t)res);
+         hr = alloc.memoryTypeIndex == UINT32_MAX ? DXGI_ERROR_UNSUPPORTED :
+            resource_result(dev->vk.AllocateMemory(dev->vkdev, &alloc, nullptr, &res->storage.memory));
+         trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 2, (uintptr_t)res);
+         if (SUCCEEDED(hr)) {
+            trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 3, (uintptr_t)res);
+            hr = resource_result(dev->vk.BindImageMemory(dev->vkdev, res->storage.image, res->storage.memory, 0));
+            trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 3, (uintptr_t)res);
+         }
       }
    }
    if (FAILED(hr)) {
@@ -426,7 +434,7 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    if (res->dim == D3D10DDIRESOURCE_BUFFER) {
       res->kind = ResKind::Buffer;
       res->size = res->width;
-      hr = slice_alloc(dev, res->size, 256, &res->slice);
+      hr = resource_slice_alloc(res, &res->slice);
       if (SUCCEEDED(hr) && desc->pInitialDataUP && desc->pInitialDataUP[0].pSysMem)
          memcpy(res->slice.cpu(), desc->pInitialDataUP[0].pSysMem, res->size);
       return hr;
@@ -444,7 +452,7 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
        !(res->misc & D3D10_DDI_RESOURCE_MISC_SHARED)) {
       res->kind = ResKind::Staging;
       staging_layout(res, info);
-      hr = slice_alloc(dev, res->size, 256, &res->slice);
+      hr = resource_slice_alloc(res, &res->slice);
       if (FAILED(hr))
          return hr;
       for (UINT sub = 0; desc->pInitialDataUP && sub < res->subresources(); sub++) {
@@ -538,8 +546,27 @@ static void APIENTRY OpenResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_OP
       resource_fail(dev, res, hr);
 }
 
+RuntimeResource *resource_runtime(const Resource *res)
+{
+   return res->kind == ResKind::Image ? res->storage.runtime :
+      res->slice ? res->slice.chunk->runtime : nullptr;
+}
+
 void resource_unbind(Device *dev, Resource *res)
 {
+   for (auto &stage : dev->stage)
+      for (auto &srv : stage.srv)
+         if (srv && srv->res == res) {
+            srv = nullptr;
+            dev->dirty |= DIRTY_TEXTURES | DIRTY_TEXEL_BUFFERS;
+         }
+   for (auto &rtv : dev->rtv)
+      if (rtv && rtv->res == res) {
+         end_rendering(dev); rtv = nullptr; dev->dirty = DIRTY_ALL;
+      }
+   if (dev->dsv && dev->dsv->res == res) {
+      end_rendering(dev); dev->dsv = nullptr; dev->dirty = DIRTY_ALL;
+   }
    for (auto &stage : dev->stage)
       for (UINT i = 0; i < D3D_CB_SLOTS; i++)
          if (stage.cb[i] == res) {
@@ -560,6 +587,7 @@ void resource_unbind(Device *dev, Resource *res)
 static void APIENTRY DestroyResource(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURCE hResource)
 {
    Device *dev = D(hDevice);
+   RemovalOnlyErrorScope errors(dev);
    Resource *res = R(hResource);
    flush_pending_clears(dev, nullptr);
    resource_unbind(dev, res);
@@ -570,7 +598,8 @@ static void APIENTRY DestroyResource(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURC
       slice_release(dev, res->slice, res->sliceLastUse > res->sliceLastWrite ?
                                         res->sliceLastUse : res->sliceLastWrite);
    if (res->storage.image) {
-      if (res->storage.runtime && !sequence_done(dev, res->storage.lastUse)) {
+      const bool runtime_lifetime = runtime_requires_resource_lifetime(res->storage.runtime);
+      if (runtime_lifetime && !sequence_done(dev, res->storage.lastUse)) {
          /* The allocation returns to the runtime inside this call, so the
           * GPU must be done with it first. This is the one synchronous
           * wait on teardown; private images are released by sequence. */
@@ -581,7 +610,7 @@ static void APIENTRY DestroyResource(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURC
             TG_ERROR(dev, hr);
          }
       }
-      storage_destroy(dev, res->storage, res->storage.runtime != nullptr);
+      storage_destroy(dev, res->storage, runtime_lifetime);
    }
    res->~Resource();
 }
@@ -698,8 +727,10 @@ static void view_destroy(Device *dev, View *view)
    for (auto &rtv : dev->rtv)
       if (rtv == view)
          rtv = nullptr;
-   if (dev->dsv == view)
+   if (dev->dsv == view) {
       dev->dsv = nullptr;
+      dev->dirty |= DIRTY_DEPTH_STENCIL;
+   }
    const uint64_t seq = dev->lastSeq();
    for (auto &entry : view->cache)
       defer(dev, DeferredType::ImageView, (uint64_t)entry.view, seq, entry.image);
@@ -729,8 +760,18 @@ static bool view_image_info(Device *dev, View *view, VkImageViewType type, uint3
    if (res->kind != ResKind::Image ||
        !view_vk_format(dev, res->format, res->bind, view->format, &format, &aspect, &swizzle))
       return false;
-   if (mips == ~0u || mips > res->mips - mip)
+   if (mip >= res->mips || !mips || !layers)
+      return false;
+   if (mips == ~0u)
       mips = res->mips - mip;
+   if (mips > res->mips - mip)
+      return false;
+   /* A 2D attachment view of a 3D image selects depth slices; a 3D SRV
+    * still has one Vulkan array layer. Reject before subtracting/shifting. */
+   const UINT available = res->imageType == VK_IMAGE_TYPE_3D && type != VK_IMAGE_VIEW_TYPE_3D ?
+                          res->mipDepth(mip) : res->arraySize;
+   if (layer >= available || layers > available - layer)
+      return false;
    view->info = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
    view->info.viewType = type;
    view->info.format = format;
@@ -833,7 +874,11 @@ static void APIENTRY CreateRenderTargetView(D3D10DDI_HDEVICE hDevice,
       break;
    case D3D10DDIRESOURCE_TEXTURE3D: {
       /* Depth slices of a volume are rendered as layers of a 2D array view. */
+      if (args->Tex3D.MipSlice >= res->mips)
+         break;
       const UINT depth = res->mipDepth(args->Tex3D.MipSlice);
+      if (args->Tex3D.FirstW >= depth)
+         break;
       const UINT count = args->Tex3D.WSize == ~0u ? depth - args->Tex3D.FirstW : args->Tex3D.WSize;
       ok = view_image_info(dev, view, count > 1 ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D,
                            args->Tex3D.MipSlice, 1, args->Tex3D.FirstW, count);
@@ -861,14 +906,13 @@ static SIZE_T APIENTRY CalcPrivateDepthStencilViewSize(D3D10DDI_HDEVICE,
    return sizeof(View);
 }
 
-static void APIENTRY CreateDepthStencilView(D3D10DDI_HDEVICE hDevice,
-                                            const D3D10DDIARG_CREATEDEPTHSTENCILVIEW *args,
-                                            D3D10DDI_HDEPTHSTENCILVIEW hView,
-                                            D3D10DDI_HRTDEPTHSTENCILVIEW)
+void create_depth_stencil_view(Device *dev, const D3D10DDIARG_CREATEDEPTHSTENCILVIEW *args,
+                               void *memory, UINT flags)
 {
-   Device *dev = D(hDevice);
    Resource *res = R(args->hDrvResource);
-   View *view = view_init(dev, hView.pDrvPrivate, res, ViewType::DSV, args->Format);
+   if (!memory || !res || res->dev != dev) { TG_ERROR(dev, E_INVALIDARG); return; }
+   View *view = view_init(dev, memory, res, ViewType::DSV, args->Format);
+   view->dsvFlags = flags;
    bool ok = false;
    switch (args->ResourceDimension) {
    case D3D10DDIRESOURCE_TEXTURE1D:
@@ -900,6 +944,14 @@ static void APIENTRY CreateDepthStencilView(D3D10DDI_HDEVICE hDevice,
       view_destroy(dev, view);
       TG_ERROR(dev, E_INVALIDARG);
    }
+}
+
+static void APIENTRY CreateDepthStencilView(D3D10DDI_HDEVICE hDevice,
+                                            const D3D10DDIARG_CREATEDEPTHSTENCILVIEW *args,
+                                            D3D10DDI_HDEPTHSTENCILVIEW hView,
+                                            D3D10DDI_HRTDEPTHSTENCILVIEW)
+{
+   create_depth_stencil_view(D(hDevice), args, hView.pDrvPrivate, 0);
 }
 
 static void APIENTRY DestroyDepthStencilView(D3D10DDI_HDEVICE hDevice, D3D10DDI_HDEPTHSTENCILVIEW hView)
@@ -934,7 +986,7 @@ static HRESULT buffer_discard(Device *dev, Resource *res)
    if (!last || sequence_done(dev, last))
       return S_OK;
    Slice fresh;
-   HRESULT hr = slice_alloc(dev, res->size, 256, &fresh);
+   HRESULT hr = resource_slice_alloc(res, &fresh);
    if (FAILED(hr))
       return hr;
    slice_release(dev, res->slice, last);
@@ -967,6 +1019,7 @@ static void APIENTRY ResourceMap(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURCE hR
    Resource *res = R(hResource);
    out->pData = nullptr;
    out->RowPitch = out->DepthPitch = 0;
+   if (runtime_is_offered(resource_runtime(res))) { TG_ERROR(dev, DXGI_ERROR_INVALID_CALL); return; }
    const bool reads = type == D3D10_DDI_MAP_READ || type == D3D10_DDI_MAP_READWRITE;
    const bool writes = type != D3D10_DDI_MAP_READ;
    HRESULT hr = S_OK;
@@ -983,8 +1036,11 @@ static void APIENTRY ResourceMap(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURCE hR
          TG_ERROR(dev, hr);
          return;
       }
+      hr = slice_map(dev, res->slice);
+      if (FAILED(hr)) { TG_ERROR(dev, hr); return; }
       out->pData = res->slice.cpu();
       out->RowPitch = out->DepthPitch = (UINT)res->size;
+      res->bufferMapped = true;
       return;
    }
 
@@ -1002,6 +1058,8 @@ static void APIENTRY ResourceMap(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURCE hR
          TG_ERROR(dev, hr);
          return;
       }
+      hr = slice_map(dev, res->slice);
+      if (FAILED(hr)) { TG_ERROR(dev, hr); return; }
       const SubLayout &l = res->layout[sub];
       out->pData = res->slice.cpu() + l.offset;
       out->RowPitch = l.rowPitch;
@@ -1042,7 +1100,8 @@ static void APIENTRY ResourceUnmap(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURCE 
 {
    Device *dev = D(hDevice);
    Resource *res = R(hResource);
-   if (res->kind == ResKind::Buffer || sub >= res->maps.size())
+   if (res->kind == ResKind::Buffer) { res->bufferMapped = false; return; }
+   if (sub >= res->maps.size())
       return;
    MapState &map = res->maps[sub];
    if (!map.mapped)
@@ -1054,7 +1113,11 @@ static void APIENTRY ResourceUnmap(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURCE 
    const UINT mip = sub % res->mips;
    const uint32_t pitch = (row_bytes(info, res->mipWidth(mip)) + 3) & ~3u;
    VkCommandBuffer cmd = cmd_begin(dev);
-   if (!cmd) return;
+   if (!cmd) {
+      slice_release(dev, map.upload, 0);
+      map.upload = Slice();
+      return;
+   }
    image_use(dev, res->storage, true);
    VkBufferImageCopy region = {};
    region.bufferOffset = map.upload.offset;
@@ -1086,6 +1149,7 @@ static void APIENTRY ResourceUpdateSubresourceUP(D3D10DDI_HDEVICE hDevice, D3D10
    Device *dev = D(hDevice);
    Resource *res = R(hDst);
    HRESULT hr = S_OK;
+   if (runtime_is_offered(resource_runtime(res))) { TG_ERROR(dev, DXGI_ERROR_INVALID_CALL); return; }
    if (res->kind == ResKind::Buffer) {
       const VkDeviceSize begin = box ? (VkDeviceSize)box->left : 0;
       const VkDeviceSize end = box ? (VkDeviceSize)box->right : res->size;
@@ -1101,7 +1165,7 @@ static void APIENTRY ResourceUpdateSubresourceUP(D3D10DDI_HDEVICE hDevice, D3D10
           * carry over the bytes this update does not replace. */
          Slice old = res->slice;
          Slice fresh;
-         hr = slice_alloc(dev, res->size, 256, &fresh);
+         hr = resource_slice_alloc(res, &fresh);
          if (FAILED(hr)) {
             TG_ERROR(dev, hr);
             return;
@@ -1109,6 +1173,7 @@ static void APIENTRY ResourceUpdateSubresourceUP(D3D10DDI_HDEVICE hDevice, D3D10
          if (!whole) {
             if (res->sliceLastWrite && !sequence_done(dev, res->sliceLastWrite))
                hr = wait_sequence(dev, res->sliceLastWrite, TGD3D_WAIT_READBACK);
+            if (SUCCEEDED(hr)) hr = slice_map(dev, old);
             if (FAILED(hr)) {
                slice_release(dev, fresh, 0);
                TG_ERROR(dev, hr);
@@ -1121,6 +1186,8 @@ static void APIENTRY ResourceUpdateSubresourceUP(D3D10DDI_HDEVICE hDevice, D3D10
          res->sliceLastUse = res->sliceLastWrite = 0;
          buffer_renamed(dev, res);
       }
+      hr = slice_map(dev, res->slice);
+      if (FAILED(hr)) { TG_ERROR(dev, hr); return; }
       memcpy(res->slice.cpu() + begin, data, end - begin);
       dev->stats.uploadBytes += end - begin;
       if (FAILED(hr))
@@ -1140,6 +1207,7 @@ static void APIENTRY ResourceUpdateSubresourceUP(D3D10DDI_HDEVICE hDevice, D3D10
       hr = wait_sequence(dev, res->sliceLastUse > res->sliceLastWrite ? res->sliceLastUse :
                                                                          res->sliceLastWrite,
                          TGD3D_WAIT_READBACK);
+      if (SUCCEEDED(hr)) hr = slice_map(dev, res->slice);
       if (FAILED(hr)) {
          TG_ERROR(dev, hr);
          return;
@@ -1177,47 +1245,105 @@ static VkBufferImageCopy staging_region(const Resource *staging, UINT sub, uint3
    return region;
 }
 
-static void copy_region(Device *dev, Resource *dst, UINT dst_sub, UINT dx, UINT dy, UINT dz,
+static bool copy_region(Device *dev, Resource *dst, UINT dst_sub, UINT dx, UINT dy, UINT dz,
                         Resource *src, UINT src_sub, const D3D10_DDI_BOX *box)
 {
    if (empty_box(box))
-      return;
+      return true;
+   if (FAILED(dev->lost)) return false;
+   if (runtime_is_offered(resource_runtime(src)) || runtime_is_offered(resource_runtime(dst))) {
+      TG_ERROR(dev, DXGI_ERROR_INVALID_CALL); return false;
+   }
    HRESULT hr = S_OK;
    if (dst->kind == ResKind::Buffer && src->kind == ResKind::Buffer) {
       const VkDeviceSize begin = box ? (VkDeviceSize)box->left : 0;
       const VkDeviceSize end = box ? (VkDeviceSize)box->right : src->size;
       if (begin >= end || end > src->size || dx + (end - begin) > dst->size)
-         return;
+         return false;
+      const bool same_buffer = src->slice.buffer() == dst->slice.buffer();
+      const VkDeviceSize from = src->slice.offset + begin, to = dst->slice.offset + dx;
+      if (same_buffer && from == to) return true;
+      const bool overlap = same_buffer && from < to + (end - begin) && to < from + (end - begin);
+      Slice scratch;
+      if (overlap) {
+         hr = slice_alloc(dev, end - begin, 256, &scratch);
+         if (FAILED(hr)) { TG_ERROR(dev, hr); return false; }
+      }
       VkCommandBuffer cmd = cmd_begin(dev);
-      if (!cmd) return;
+      if (!cmd) { slice_release(dev, scratch, 0); return false; }
       barrier_for_read(dev, dev->writeSerial);
       VkBufferCopy region = {src->slice.offset + begin, dst->slice.offset + dx, end - begin};
-      dev->vk.CmdCopyBuffer(cmd, src->slice.buffer(), dst->slice.buffer(), 1, &region);
+      if (overlap) {
+         /* Vulkan forbids overlapping source/destination bytes in one copy.
+          * Capture the source before writing any part of the destination. */
+         VkBufferCopy first = {from, scratch.offset, region.size};
+         dev->vk.CmdCopyBuffer(dev->cmd, src->slice.buffer(), scratch.buffer(), 1, &first);
+         buffer_written(dev);
+         barrier_for_read(dev, dev->bufferWriteSerial);
+         region.srcOffset = scratch.offset;
+         dev->vk.CmdCopyBuffer(dev->cmd, scratch.buffer(), dst->slice.buffer(), 1, &region);
+         slice_release(dev, scratch, dev->recordingSeq());
+      } else {
+         dev->vk.CmdCopyBuffer(dev->cmd, src->slice.buffer(), dst->slice.buffer(), 1, &region);
+      }
       src->sliceLastUse = dst->sliceLastUse = dst->sliceLastWrite = dev->recordingSeq();
       buffer_written(dev);
       dev->stats.copyBytes += end - begin;
-      return;
+      return true;
    }
    if (dst->kind == ResKind::Buffer || src->kind == ResKind::Buffer ||
        dst_sub >= dst->subresources() || src_sub >= src->subresources()) {
       TG_ERROR(dev, E_INVALIDARG);
-      return;
+      return false;
    }
    const UINT src_mip = src_sub % src->mips;
    D3D10_DDI_BOX full = {0, 0, 0, (LONG)src->mipWidth(src_mip), (LONG)src->mipHeight(src_mip),
                          (LONG)src->mipDepth(src_mip)};
    if (!box)
       box = &full;
+   const UINT dst_mip = dst_sub % dst->mips;
+   if (box->left < 0 || box->top < 0 || box->front < 0 ||
+       (UINT)box->right > src->mipWidth(src_mip) ||
+       (UINT)box->bottom > src->mipHeight(src_mip) ||
+       (UINT)box->back > src->mipDepth(src_mip) ||
+       dx > dst->mipWidth(dst_mip) || dy > dst->mipHeight(dst_mip) || dz > dst->mipDepth(dst_mip) ||
+       (UINT)(box->right - box->left) > dst->mipWidth(dst_mip) - dx ||
+       (UINT)(box->bottom - box->top) > dst->mipHeight(dst_mip) - dy ||
+       (UINT)(box->back - box->front) > dst->mipDepth(dst_mip) - dz) {
+      TG_ERROR(dev, E_INVALIDARG); return false;
+   }
    const VkExtent3D extent = {(uint32_t)(box->right - box->left), (uint32_t)(box->bottom - box->top),
                               (uint32_t)(box->back - box->front)};
    if (!extent.width || !extent.height || !extent.depth)
-      return;
+      return true;
    const FormatInfo *info = format_info(src->format);
+   const bool same_sub = src == dst && src_sub == dst_sub;
+   if (same_sub && dx == (UINT)box->left && dy == (UINT)box->top && dz == (UINT)box->front)
+      return true;
+   const bool overlap = same_sub && dx < (UINT)box->right && (UINT)box->left < dx + extent.width &&
+      dy < (UINT)box->bottom && (UINT)box->top < dy + extent.height &&
+      dz < (UINT)box->back && (UINT)box->front < dz + extent.depth;
+
+   if (overlap && src->kind == ResKind::Image) {
+      Resource scratch;
+      scratch.dev = dev; scratch.kind = ResKind::Image; scratch.dim = src->dim;
+      scratch.format = src->format; scratch.vkFormat = src->vkFormat;
+      scratch.imageType = src->imageType; scratch.aspects = src->aspects;
+      scratch.width = extent.width; scratch.height = extent.height; scratch.depth = extent.depth;
+      hr = image_create(dev, &scratch);
+      if (FAILED(hr)) { TG_ERROR(dev, hr); return false; }
+      const bool copied = copy_region(dev, &scratch, 0, 0, 0, 0, src, src_sub, box) &&
+         SUCCEEDED(dev->lost) && copy_region(dev, dst, dst_sub, dx, dy, dz, &scratch, 0, nullptr);
+      /* Both copies use the ordinary image barriers and the same real
+       * completion sequence. No CPU wait or early backing release. */
+      storage_destroy(dev, scratch.storage, false);
+      return copied;
+   }
 
    if ((src->kind == ResKind::Staging || dst->kind == ResKind::Staging) &&
        ((src->aspects | dst->aspects) & VK_IMAGE_ASPECT_STENCIL_BIT)) {
       TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED);
-      return;
+      return false;
    }
 
    if (dst->kind == ResKind::Staging && src->kind == ResKind::Staging) {
@@ -1227,24 +1353,39 @@ static void copy_region(Device *dev, Resource *dst, UINT dst_sub, UINT dx, UINT 
          hr = wait_sequence(dev, dst->sliceLastUse > dst->sliceLastWrite ? dst->sliceLastUse :
                                                                           dst->sliceLastWrite,
                             TGD3D_WAIT_READBACK);
+      if (SUCCEEDED(hr)) hr = slice_map(dev, src->slice);
+      if (SUCCEEDED(hr)) hr = slice_map(dev, dst->slice);
       if (FAILED(hr)) {
          TG_ERROR(dev, hr);
-         return;
+         return false;
       }
       const SubLayout &sl = src->layout[src_sub], &dl = dst->layout[dst_sub];
       const uint32_t block = block_dim(info);
+      const uint32_t bytes = row_bytes(info, extent.width), rows = row_count(info, extent.height);
+      uint8_t *saved = nullptr;
+      if (overlap) {
+         saved = new (std::nothrow) uint8_t[(size_t)bytes * rows * extent.depth];
+         if (!saved) { TG_ERROR(dev, E_OUTOFMEMORY); return false; }
+         for (uint32_t z = 0; z < extent.depth; ++z)
+            copy_rows(saved + (size_t)z * bytes * rows, bytes,
+               src->slice.cpu() + sl.offset + (size_t)(box->front + z) * sl.depthPitch +
+                  (size_t)(box->top / block) * sl.rowPitch + (size_t)(box->left / block) * info->bytes,
+               sl.rowPitch, bytes, rows);
+      }
       for (uint32_t z = 0; z < extent.depth; z++)
          copy_rows(dst->slice.cpu() + dl.offset + (size_t)(dz + z) * dl.depthPitch +
                       (size_t)(dy / block) * dl.rowPitch + (size_t)(dx / block) * info->bytes,
                    dl.rowPitch,
+                   saved ? saved + (size_t)z * bytes * rows :
                    src->slice.cpu() + sl.offset + (size_t)(box->front + z) * sl.depthPitch +
                       (size_t)(box->top / block) * sl.rowPitch + (size_t)(box->left / block) * info->bytes,
-                   sl.rowPitch, row_bytes(info, extent.width), row_count(info, extent.height));
-      return;
+                   saved ? bytes : sl.rowPitch, bytes, rows);
+      delete[] saved;
+      return true;
    }
 
    VkCommandBuffer cmd = cmd_begin(dev);
-   if (!cmd) return;
+   if (!cmd) return false;
    if (src->kind == ResKind::Image) {
       image_use(dev, src->storage, false);
       barrier_for_read(dev, src->storage.writeSerial);
@@ -1288,6 +1429,7 @@ static void copy_region(Device *dev, Resource *dst, UINT dst_sub, UINT dx, UINT 
                                    VK_IMAGE_LAYOUT_GENERAL, 1, &region);
       dev->stats.uploadBytes += bytes;
    }
+   return true;
 }
 
 static void APIENTRY ResourceCopyRegion(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURCE hDst,

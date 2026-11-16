@@ -16,7 +16,8 @@ enum : VkDeviceSize {
    MAX_IDLE_CHUNKS = 4,
 };
 
-static HRESULT chunk_create(Device *dev, VkDeviceSize size, bool dedicated, Chunk **out)
+static HRESULT chunk_create(Device *dev, VkDeviceSize size, bool dedicated, Chunk **out,
+                             D3D10DDI_HRTRESOURCE resource = {})
 {
    *out = nullptr;
    Chunk *chunk = new (std::nothrow) Chunk();
@@ -26,7 +27,8 @@ static HRESULT chunk_create(Device *dev, VkDeviceSize size, bool dedicated, Chun
    info.size = size;
    info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT |
-                VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
    info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
    HRESULT hr = resource_result(dev->vk.CreateBuffer(dev->vkdev, &info, nullptr, &chunk->buffer));
    if (FAILED(hr)) {
@@ -40,16 +42,22 @@ static HRESULT chunk_create(Device *dev, VkDeviceSize size, bool dedicated, Chun
    alloc.memoryTypeIndex = dev->adapter->vk.findMemoryType(
       req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
    void *cpu = nullptr;
-   hr = alloc.memoryTypeIndex == UINT32_MAX ? DXGI_ERROR_UNSUPPORTED :
-      resource_result(dev->vk.AllocateMemory(dev->vkdev, &alloc, nullptr, &chunk->memory));
-   if (SUCCEEDED(hr))
-      hr = resource_result(dev->vk.BindBufferMemory(dev->vkdev, chunk->buffer, chunk->memory, 0));
+   if (resource.handle) {
+      hr = runtime_private_create(dev, resource, req.size, &chunk->runtime);
+      if (SUCCEEDED(hr)) hr = runtime_bind_buffer(dev, chunk->runtime, chunk->buffer, &chunk->memory);
+   } else {
+      hr = alloc.memoryTypeIndex == UINT32_MAX ? DXGI_ERROR_UNSUPPORTED :
+         resource_result(dev->vk.AllocateMemory(dev->vkdev, &alloc, nullptr, &chunk->memory));
+      if (SUCCEEDED(hr))
+         hr = resource_result(dev->vk.BindBufferMemory(dev->vkdev, chunk->buffer, chunk->memory, 0));
+   }
    if (SUCCEEDED(hr))
       hr = resource_result(dev->vk.MapMemory(dev->vkdev, chunk->memory, 0, VK_WHOLE_SIZE, 0, &cpu));
    if (FAILED(hr)) {
       dev->vk.DestroyBuffer(dev->vkdev, chunk->buffer, nullptr);
       if (chunk->memory)
          dev->vk.FreeMemory(dev->vkdev, chunk->memory, nullptr);
+      if (chunk->runtime) runtime_destroy(chunk->runtime);
       delete chunk;
       return hr;
    }
@@ -73,7 +81,55 @@ static void chunk_destroy(Device *dev, Chunk *chunk)
       dev->currentChunk = nullptr;
    dev->vk.DestroyBuffer(dev->vkdev, chunk->buffer, nullptr);
    dev->vk.FreeMemory(dev->vkdev, chunk->memory, nullptr);
+   if (chunk->runtime) {
+      HRESULT hr = runtime_destroy(chunk->runtime);
+      if (FAILED(hr)) TG_ERROR(dev, hr);
+   }
    delete chunk;
+}
+
+HRESULT resource_slice_alloc(Resource *res, Slice *out)
+{
+   Device *dev = res->dev;
+   if (!runtime_private_allocations(dev)) return slice_alloc(dev, res->size, 256, out);
+   *out = {};
+   if (FAILED(dev->lost)) return dev->lost;
+   if (!res->hRT.handle || !res->size || res->size > TG_GPU_MEMORY_BUDGET_BYTES)
+      return E_INVALIDARG;
+   /* An offered application buffer must not discard unrelated slices of an
+    * upload pool. Driver-internal uploads retain the existing pooled path. */
+   Chunk *chunk = nullptr;
+   HRESULT hr = chunk_create(dev, (res->size + 4095) & ~VkDeviceSize(4095), true, &chunk, res->hRT);
+   if (FAILED(hr)) return hr;
+   chunk->live = 1;
+   chunk->used = res->size;
+   *out = {chunk, 0, res->size};
+   return S_OK;
+}
+
+HRESULT slice_map(Device *dev, Slice slice)
+{
+   if (!slice) return E_INVALIDARG;
+   if (FAILED(dev->lost)) return dev->lost;
+   if (runtime_is_offered(slice.chunk->runtime)) return DXGI_ERROR_INVALID_CALL;
+   if (slice.chunk->cpu) return S_OK;
+   void *cpu = nullptr;
+   HRESULT hr = resource_result(dev->vk.MapMemory(dev->vkdev, slice.chunk->memory,
+                                                  0, VK_WHOLE_SIZE, 0, &cpu));
+   if (SUCCEEDED(hr) && !cpu) {
+      dev->vk.UnmapMemory(dev->vkdev, slice.chunk->memory);
+      return E_FAIL;
+   }
+   if (SUCCEEDED(hr)) slice.chunk->cpu = static_cast<uint8_t *>(cpu);
+   return hr;
+}
+
+void slice_unmap(Device *dev, Slice slice)
+{
+   if (slice && slice.chunk->cpu) {
+      dev->vk.UnmapMemory(dev->vkdev, slice.chunk->memory);
+      slice.chunk->cpu = nullptr;
+   }
 }
 
 HRESULT slice_alloc(Device *dev, VkDeviceSize size, VkDeviceSize alignment, Slice *out)

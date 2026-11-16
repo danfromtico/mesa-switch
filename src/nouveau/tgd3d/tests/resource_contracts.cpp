@@ -53,6 +53,52 @@ static void init(Device *dev, Adapter *adapter)
    dev->vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) { CHECK(liveMemory == 1); --liveMemory; };
 }
 
+static void dynamic_unmap_failure_contract()
+{
+   for (bool dedicated : {false, true}) {
+      Adapter adapter; Device dev; init(&dev, &adapter);
+      D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
+      uint8_t mappedByte = 0;
+      Chunk *chunk = new Chunk;
+      chunk->buffer = (VkBuffer)(uintptr_t)3;
+      chunk->memory = (VkDeviceMemory)(uintptr_t)4;
+      chunk->cpu = &mappedByte;
+      chunk->size = chunk->used = 512;
+      chunk->dedicated = dedicated;
+      chunk->live = dedicated ? 1 : 2; /* pooled case has an unrelated live slice */
+      liveBuffers = liveMemory = 1;
+      dev.chunks.push_back(chunk);
+      if (!dedicated) dev.currentChunk = chunk;
+      dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory memory) {
+         CHECK(memory == (VkDeviceMemory)(uintptr_t)4 && liveMemory == 1);
+      };
+      Resource res;
+      res.dev = &dev; res.kind = ResKind::Image;
+      res.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+      res.width = res.height = 8; res.depth = res.mips = 1;
+      res.maps.resize(1);
+      res.maps[0].mapped = res.maps[0].write = true;
+      res.maps[0].upload = {chunk, 0, 256};
+      /* A successful Map preceded the device loss; Unmap must still release
+       * its CPU-only upload. No command or completion is fabricated. */
+      dev.lost = DXGI_ERROR_DEVICE_REMOVED;
+      table.pfnDynamicResourceUnmap({&dev}, {&res}, 0);
+      CHECK(!res.maps[0].mapped && !res.maps[0].upload && dev.deferredSlices.empty());
+      CHECK(dev.cmd == VK_NULL_HANDLE && !dev.cmdHasWork && !notifications);
+      table.pfnDynamicResourceUnmap({&dev}, {&res}, 0); /* no double release */
+      if (dedicated) {
+         CHECK(dev.chunks.empty() && !liveBuffers && !liveMemory);
+      } else {
+         CHECK(chunk->live == 1 && chunk->used == 512 && liveBuffers == 1 && liveMemory == 1);
+         slice_release(&dev, {chunk, 256, 256}, 0);
+         CHECK(!chunk->live && !chunk->used);
+      }
+      upload_destroy(&dev);
+      CHECK(dev.chunks.empty() && !liveBuffers && !liveMemory);
+   }
+   std::puts("PASS: failed dynamic-texture Unmap releases its upload once, preserves other live slices and submits no GPU work (CPU control)");
+}
+
 void resource_creation_contracts()
 {
    /* Private image, pooled buffer, dedicated buffer and staging texture. */
@@ -102,5 +148,6 @@ void resource_creation_contracts()
       CHECK(view_get_buffer(&view) == VK_NULL_HANDLE && notifications == 2);
       CHECK(reported == (error == VK_ERROR_UNKNOWN ? E_FAIL : E_OUTOFMEMORY));
    }
+   dynamic_unmap_failure_contract();
    std::puts("PASS: image/buffer/staging allocation and map failures report OOM after cleanup; removed devices allocate nothing; view errors retain their class (CPU control)");
 }
