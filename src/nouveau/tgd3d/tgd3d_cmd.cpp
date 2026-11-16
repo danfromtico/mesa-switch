@@ -44,7 +44,11 @@ uint64_t Device::completed()
    uint64_t value = 0;
    if (FAILED(lost) || !fence || !vk.GetSemaphoreCounterValue)
       return 0;
-   if (vk.GetSemaphoreCounterValue(vkdev, fence, &value) != VK_SUCCESS) {
+   /* This is our private zero-based submission timeline, not an arbitrary
+    * application semaphore. WDDM can unblock monitored fences with all bits
+    * set on device removal. A successful counter query does not make that
+    * value GPU completion: accepting it would retire every in-flight object. */
+   if (vk.GetSemaphoreCounterValue(vkdev, fence, &value) != VK_SUCCESS || value == UINT64_MAX) {
       TG_ERROR(this, DXGI_ERROR_DEVICE_REMOVED);
       return 0;
    }

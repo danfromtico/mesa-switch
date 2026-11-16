@@ -93,13 +93,22 @@ static VkResult vk_result(RuntimeResource *p, HRESULT hr)
 static HRESULT wait_paging(const D3DDDI_DEVICECALLBACKS &cb, HANDLE device, D3DKMT_HANDLE fence,
                            const volatile UINT64 *current, UINT64 value)
 {
-   if (!value || (current && *current >= value))
+   const uint64_t completed = current ? *current : 0;
+   /* Removal can release monitored-fence waiters with UINT64_MAX. Neither
+    * the fast path nor a successful CPU wait may treat this as residency or
+    * a completed GPU page-table update. Sample again after the blocking call. */
+   if (completed == UINT64_MAX || value == UINT64_MAX)
+      return D3DDDIERR_DEVICEREMOVED;
+   if (!value || (current && completed >= value))
       return S_OK;
    D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU wait = {};
    wait.ObjectCount = 1;
    wait.ObjectHandleArray = &fence;
    wait.FenceValueArray = &value;
-   return cb.pfnWaitForSynchronizationObjectFromCpuCb(device, &wait);
+   HRESULT hr = cb.pfnWaitForSynchronizationObjectFromCpuCb(device, &wait);
+   if (SUCCEEDED(hr) && current && *current == UINT64_MAX)
+      return D3DDDIERR_DEVICEREMOVED;
+   return hr;
 }
 
 static void owner_retain(void *context)

@@ -1,10 +1,35 @@
-# 当前进度 — 2026-11-16 现代资源入口修正
+# 当前进度 — 2026-11-16 现代入口失败已恢复；本地修正异常Fence完成值
 
-匹配runtime源码路径确认：CPU可访问buffer的TextureLayout由runtime自动设ROW_MAJOR，旧适配器
-错误拒绝；资源失败还混用了API与DDI错误。已修正线性buffer/staging接纳及Create/Open错误边界，
-新候选恢复现代接口声明，下一步原生验证。详见[资源入口记录](UMD_LINEAR_RESOURCE_ADMISSION_20261116.md)。
-最终候选状态见OUT `modern-resource-audit-20261116/checkpoint.json`；未据此宣称黑屏或列扫描通过。
-设备截至上一轮核对仍为5b/E95/95b，双向Fence和当前平台配置保留。VPS补充审计未登录，Gemini待额度恢复。
+57a0845c资源入口候选已做原生验证：DWM现代设备创建及15个buffer成功，但随后发生资源拒绝、
+设备失败和DWM重建。没有成功Present，也没有切方向；此前两次事件10成功应为SetDisplayMode。
+现代接口已再次撤下默认声明，保留typed实现和资源修正。详见[原生结果](UMD_LINEAR_RESOURCE_ADMISSION_20261116.md)。
+
+失败UMD SHA256 `f9bec71061d2f6ed0c1fdb207beffa480cb048d2937e54c6b41d17a930094c44`。
+07:16:53 UTC恢复原注册，启动时间07:17:34.328844Z；07:21确认DWM PID1176实际加载原UMD/ICD，
+07:25:01完整核对11项文件、Code0及平台配置。当前活动目录仍为
+`C:\ProgramData\SwitchWOA\GpuUpdate\tgd3d-copy-lifetime-5b66bbec-20261116-122524`：
+
+| 组件 | SHA256 |
+|---|---|
+| UMD | `5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a` |
+| KMD | `e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e` |
+| ICD | `95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff` |
+
+Handheld、85%充电限制、fan1、EMC204/1331.2/1600/2500、双向Fence和登录后启用保持。
+临时任务、ETW会话、失败包、测试目录、上传包和收据临时文件已清理；原活动包保留。
+恢复实屏未另行验收；测试前后电源原始读数不同，未记录为全程插电。完整11项哈希和状态见OUT
+`modern-resource-audit-20261116/exact-recovery-verification.json`及`recovery-state-1.json`。
+
+PID500首个提交的completed=UINT64_MAX，旧代码可能据此提前退休。本地新增私有渲染Fence检查，
+并在分页等待前/后拒绝全1值；ARM64/x64构建和x64 CPU控制通过。新ARM64 DLL
+`4f73f56dc2efc675a82fb4b8d9e7d2de37e0a2a78555e4ff144280a4a51dd179`未安装，没有新增GPU验收。
+新控制程序`3760750f8657076844afe9a882147f5eaf103fda4b1594125787be28f7db872b`仅构建。
+冻结源码和产物在OUT `modern-resource-audit-20261116/fence-fix/manifest.json`。
+
+已对照匹配dxgkrnl.sys、同机Noble交接及WDDM2.6适用契约，见
+[上下文和Fence审计](WDDM26_CONTEXT_FENCE_AUDIT_20261116.md)。下一步处理32×32呈现纹理请求、
+NVK设备丢失和分页等待的剩余缺口，再恢复现代入口验证；不重复安装57a失败组合。
+列扫描、已知像素、vkcube均未因此通过。Gemini待2026-11-20T23:53:18Z额度恢复，VPS未登录未完成审计。
 
 ## 前一轮 — 2026-11-16 WDDM2.0试验失败，已恢复
 

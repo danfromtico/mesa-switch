@@ -4,14 +4,15 @@
 `tgd3d`，DLL 为 `TegraGpuD3DVk.dll`；Zink 的 `TegraGpuD3D.dll` 和注册入口
 保持独立。构建开启不等于 Windows 已切换到这个 UMD。
 
-**上一轮WDDM2.0 UMD／DXGI1.4 MPO1候选实机失败。** 本轮修正runtime合法ROW_MAJOR缓冲区
-误拒绝及资源创建DDI错误码，新候选恢复接口声明，原生验证仍待完成；详见
-[资源入口修正](../../../tegra-x1-wddm/docs/UMD_LINEAR_RESOURCE_ADMISSION_20261116.md)。新实现保留供修正和
-控制验证；KMD仍为WDDM2.6，不能将两个版本号混为一谈。`0b9b7044`候选在切换方向之前即黑屏、
-鼠标时隐时现，DWM重建。06:31 UTC已核对恢复5b66bbec UMD、Code0和原ICD／KMD，清理候选工具。
+**WDDM2.0 UMD／DXGI1.4 MPO1仍未通过原生验收。** `57a0845c`修正ROW_MAJOR缓冲区和
+资源创建DDI错误后，真实DWM成功创建现代设备及15个buffer，但随后失败，未完成Present或切方向。
+现代接口再次撤下默认声明，实现保留；KMD仍为WDDM2.6，不能将两个版本号混为一谈。
+07:25 UTC已核对恢复5b66bbec UMD、Code0和原ICD／KMD，清理候选工具。详见
+[资源入口结果](../../../tegra-x1-wddm/docs/UMD_LINEAR_RESOURCE_ADMISSION_20261116.md)。
 双向GPU Fence、登录约5秒后启用及平台设置保持。恢复实屏尚未另行验收。
-静态审计已修正MakeResident超预算后缺少裁减／重试的问题，ARM64/x64构建及本地CPU控制通过；
-此补丁未安装，尚不能认定为黑屏根因。详见[上下文／驻留审计](../../../tegra-x1-wddm/docs/WDDM2_CONTEXT_RESIDENCY_AUDIT_20261116.md)。
+MakeResident预算裁减修正已包含在失败的57a候选中；不能据此认定预算为黑屏根因。
+新补丁拒绝私有渲染／分页Fence的UINT64_MAX，防止错误放行和提前退休；ARM64/x64构建及本地
+CPU控制通过，尚未安装。详见[匹配内核／Noble／WDDM核对](../../../tegra-x1-wddm/docs/WDDM26_CONTEXT_FENCE_AUDIT_20261116.md)。
 这不是新Feature Level或完整D3D10一致性认证，MSAA、buffer RTV、UAV／视频仍有缺口。
 Tegra DC列扫描和vkcube仍待验收，设备与产物的最新状态以
 [交接记录](../../../tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)为准。

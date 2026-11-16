@@ -477,6 +477,35 @@ static void incomplete_fence_keeps_resources()
    std::puts("PASS: timeout and device loss never complete or retire in-flight resources");
 }
 
+static void removed_fence_never_completes()
+{
+   Adapter adapter;
+   for (unsigned mode = 0; mode < 3; ++mode) {
+      reset(); Device dev = make_device(&adapter);
+      CHECK(cmd_begin(&dev));
+      if (mode) CHECK(flush(&dev, false) == S_OK);
+      defer(&dev, DeferredType::ImageView, 0x500, 1);
+      if (mode == 2) {
+         dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) -> VkResult {
+            ++cpuWaits; completedValue = UINT64_MAX; return VK_SUCCESS;
+         };
+      } else {
+         completedValue = UINT64_MAX;
+      }
+      const HRESULT hr = mode == 0 ? flush(&dev, false) :
+         wait_sequence(&dev, 1, TGD3D_WAIT_READBACK);
+      CHECK(hr == DXGI_ERROR_DEVICE_REMOVED && dev.lost == hr);
+      CHECK(lastError == D3DDDIERR_DEVICEREMOVED && setErrorCalls == 1);
+      CHECK(dev.submitted == 1 && submissions == 1 && !viewsDestroyed && !cpuSignals);
+      CHECK(dev.submittedCommands.size() == 1 && dev.deferred.size() == 1);
+      CHECK(cpuWaits == (mode == 2 ? 1u : 0u));
+      retire(&dev);
+      CHECK(!sequence_done(&dev, 1) && dev.completed() == 0);
+      CHECK(flush(&dev, false) == hr && !viewsDestroyed && setErrorCalls == 1);
+   }
+   std::puts("PASS: all-ones render fence, including successful wait, never retires in-flight resources");
+}
+
 static unsigned completionReads, completionFailureRead;
 static VkResult clearViewFailure;
 
@@ -1601,7 +1630,7 @@ int main(int argc, char **argv)
       return 0;
    }
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();
-   completion_failure_propagates();
+   completion_failure_propagates(); removed_fence_never_completes();
    shared_ownership_contract();
    ddi11_contracts();
    overlap_contracts();

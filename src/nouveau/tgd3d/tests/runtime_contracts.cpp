@@ -924,6 +924,37 @@ static void shared_tiled_contracts()
    std::puts("PASS: optimal shared 2D arrays use versioned same-device/driver metadata, distinct runtime handles and PTE mappings; corrupt layout rejected, failed import cleaned, producer release preserves consumer bytes (CPU control; no NIL/GPU pixels validated)");
 }
 
+static void removed_paging_fence_contract()
+{
+   for (bool during_wait : {false, true}) {
+      Adapter adapter; Device dev;
+      pagingValues[0] = during_wait ? 0 : UINT64_MAX;
+      init(&dev, &adapter, 0);
+      dev.kt.pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE h,
+            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) -> HRESULT {
+         CHECK(index(h) == 0 && a->ObjectCount == 1 && a->ObjectHandleArray[0] == 0x50);
+         pagingValues[0] = UINT64_MAX; ++waits; return S_OK;
+      };
+      D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = 65; mip.TexelHeight = 17; mip.TexelDepth = 1;
+      D3D10DDIARG_CREATERESOURCE desc = {};
+      desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D;
+      desc.Usage = D3D10_DDI_USAGE_DEFAULT;
+      desc.BindFlags = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_SHADER_RESOURCE;
+      desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; desc.SampleDesc.Count = 1;
+      desc.MipLevels = desc.ArraySize = 1;
+      desc.MiscFlags = D3D10_DDI_RESOURCE_MISC_SHARED | D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT;
+      const unsigned old_allocations = allocations, old_deallocations = deallocations;
+      const unsigned old_waits = waits, old_maps = maps;
+      RuntimeResource *resource = nullptr; UINT pitch = 0;
+      CHECK(runtime_shared_create(&dev, &desc, {rt_resource(0)}, &resource, &pitch) == D3DDDIERR_DEVICEREMOVED);
+      CHECK(!resource && allocations == old_allocations + 1 && deallocations == old_deallocations + 1);
+      CHECK(maps == old_maps && waits == old_waits + unsigned(during_wait));
+      runtime_device_destroy(&dev);
+   }
+   pagingValues[0] = 0;
+   std::puts("PASS: all-ones paging fence before/during wait rejects admission and releases failed allocation");
+}
+
 void runtime_contracts()
 {
    Adapter adapter; Device producer, consumer; init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
@@ -1047,4 +1078,5 @@ void runtime_contracts()
    primary_mode_completion_contract();
    presentation13_contracts();
    shared_tiled_contracts();
+   removed_paging_fence_contract();
 }
