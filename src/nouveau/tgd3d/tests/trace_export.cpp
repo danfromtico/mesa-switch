@@ -10,9 +10,50 @@
 #include <cstddef>
 
 static const GUID provider = TGD3D_TRACE_GUID_INIT;
+static const GUID kernel_provider =
+   {0xc27c1f9b, 0x62e8, 0x4e21, {0xb2, 0x9b, 0x6b, 0xb2, 0xd5, 0x85, 0xc6, 0xd0}};
+static const GUID dxg_provider =
+   {0x802ec45a, 0x1e99, 0x4b83, {0x99, 0x20, 0x87, 0xc9, 0x82, 0x77, 0xba, 0x9d}};
 static unsigned matched, invalid;
+static unsigned raw_matched;
+static bool follow_all;
 static const WCHAR *live_session;
 static ULONGLONG last_state;
+static HANDLE flush_stop;
+static volatile LONG flush_error;
+
+/* This flushes tracing buffers only. It neither submits GPU commands nor
+ * acknowledges a rendering/display fence. File-only ETL capture previously
+ * lost the interval containing a direction-change reset. */
+static ULONG flush_session()
+{
+   struct {
+      EVENT_TRACE_PROPERTIES properties;
+      WCHAR session[1024], filename[1024];
+   } buffer = {};
+   auto props = &buffer.properties;
+   props->Wnode.BufferSize = sizeof(buffer);
+   props->LoggerNameOffset = sizeof(*props);
+   props->LogFileNameOffset = sizeof(*props) + sizeof(buffer.session);
+   ULONG status = ControlTraceW(0, live_session, props, EVENT_TRACE_CONTROL_QUERY);
+   if (!status)
+      status = ControlTraceW(0, live_session, props, EVENT_TRACE_CONTROL_FLUSH);
+   return status;
+}
+
+static DWORD WINAPI flush_thread(void *)
+{
+   while (WaitForSingleObject(flush_stop, 20) == WAIT_TIMEOUT) {
+      const ULONG status = flush_session();
+      if (status == ERROR_WMI_INSTANCE_NOT_FOUND)
+         break; /* The controller stopped our session. */
+      if (status) {
+         InterlockedExchange(&flush_error, status);
+         break;
+      }
+   }
+   return 0;
+}
 
 static void json_string(const WCHAR *value)
 {
@@ -50,7 +91,44 @@ static void header(const EVENT_HEADER &h, const WCHAR *image, uint64_t process_s
 static void WINAPI record(EVENT_RECORD *event)
 {
    const auto &h = event->EventHeader;
-   if (std::memcmp(&h.ProviderId, &provider, sizeof(provider))) return;
+   if (std::memcmp(&h.ProviderId, &provider, sizeof(provider))) {
+      if (!follow_all)
+         return;
+      const char *name = nullptr;
+      if (!std::memcmp(&h.ProviderId, &kernel_provider, sizeof(kernel_provider)))
+         name = "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0";
+      else if (!std::memcmp(&h.ProviderId, &dxg_provider, sizeof(dxg_provider)))
+         name = "802ec45a-1e99-4b83-9920-87c98277ba9d";
+      if (!name)
+         return;
+      if (event->UserDataLength && !event->UserData) { ++invalid; return; }
+      ++raw_matched;
+      /* Preserve the provider's actual bytes. Decode using the matching
+       * driver schema or this machine's manifest, never guessed layouts. */
+      std::printf("{\"provider\":\"%s\",\"raw\":true,\"id\":%u,\"version\":%u,"
+         "\"opcode\":%u,\"task\":%u,\"header_flags\":%u,\"pid\":%lu,\"tid\":%lu,"
+         "\"qpc_stamp\":%llu,\"bytes\":%u,\"data\":\"",
+         name, h.EventDescriptor.Id, h.EventDescriptor.Version,
+         h.EventDescriptor.Opcode, h.EventDescriptor.Task, h.Flags,
+         h.ProcessId, h.ThreadId, (unsigned long long)h.TimeStamp.QuadPart,
+         event->UserDataLength);
+      const auto bytes = static_cast<const unsigned char *>(event->UserData);
+      static const char digits[] = "0123456789abcdef";
+      char hex[1024];
+      for (unsigned offset = 0; offset < event->UserDataLength;) {
+         const unsigned left = event->UserDataLength - offset;
+         const unsigned count = left < sizeof(hex) / 2 ? left : sizeof(hex) / 2;
+         for (unsigned i = 0; i < count; ++i) {
+            hex[i * 2] = digits[bytes[offset + i] >> 4];
+            hex[i * 2 + 1] = digits[bytes[offset + i] & 15];
+         }
+         std::fwrite(hex, 2, count, stdout);
+         offset += count;
+      }
+      std::puts("\"}");
+      std::fflush(stdout);
+      return;
+   }
    if (h.EventDescriptor.Version != 1 && h.EventDescriptor.Version != 2) { ++invalid; return; }
    if (h.EventDescriptor.Id == TGD3D_TRACE_ERROR) {
       tgd3d_trace_error p;
@@ -81,6 +159,8 @@ static void WINAPI record(EVENT_RECORD *event)
          (unsigned)p.result, (unsigned long long)p.arg0, (unsigned long long)p.arg1);
    }
    std::puts("}");
+   if (follow_all)
+      std::fflush(stdout);
 }
 
 /* Live-buffer/query handling reused from the existing D3D trace exporter.
@@ -96,7 +176,8 @@ static ULONG live_state(const char *event, ULONG process_status = ERROR_SUCCESS)
    props->LoggerNameOffset = sizeof(*props);
    props->LogFileNameOffset = sizeof(*props) + sizeof(buffer.session);
    ULONG status = ControlTraceW(0, live_session, props, EVENT_TRACE_CONTROL_QUERY);
-   if (!status && !(props->LogFileMode & EVENT_TRACE_REAL_TIME_MODE))
+   if (!status && (!(props->LogFileMode & EVENT_TRACE_REAL_TIME_MODE) ||
+                   props->Wnode.ClientContext != 1))
       status = ERROR_INVALID_PARAMETER;
    FILETIME now;
    GetSystemTimeAsFileTime(&now);
@@ -107,11 +188,14 @@ static ULONG live_state(const char *event, ULONG process_status = ERROR_SUCCESS)
    std::printf("{\"event\":\"%s\",\"time\":%llu,\"pid\":%lu,\"session\":",
       event, (unsigned long long)time, GetCurrentProcessId());
    json_string(live_session);
-   std::printf(",\"clock\":\"qpc\",\"qpc_stamp\":%llu,\"qpc_frequency\":%llu",
-      (unsigned long long)counter.QuadPart, (unsigned long long)frequency.QuadPart);
+   std::printf(",\"clock\":\"qpc\",\"clock_context\":%lu,\"qpc_stamp\":%llu,\"qpc_frequency\":%llu",
+      props->Wnode.ClientContext, (unsigned long long)counter.QuadPart,
+      (unsigned long long)frequency.QuadPart);
    std::printf(",\"query_status\":%lu,\"process_status\":%lu,\"matched\":%u,\"invalid\":%u,"
+      "\"raw_matched\":%u,\"flush_interval_ms\":%u,\"flush_status\":%ld,"
       "\"events_lost\":%lu,\"log_buffers_lost\":%lu,\"realtime_buffers_lost\":%lu}\n",
-      status, process_status, matched, invalid, props->EventsLost,
+      status, process_status, matched, invalid, raw_matched, follow_all ? 20u : 0u,
+      InterlockedCompareExchange(&flush_error, 0, 0), props->EventsLost,
       props->LogBuffersLost, props->RealTimeBuffersLost);
    last_state = GetTickCount64();
    std::fflush(stdout);
@@ -130,9 +214,10 @@ static ULONG WINAPI live_buffer(EVENT_TRACE_LOGFILEW *)
 
 int wmain(int argc, WCHAR **argv)
 {
-   const bool follow = argc == 3 && !std::wcscmp(argv[1], L"--follow");
+   follow_all = argc == 3 && !std::wcscmp(argv[1], L"--follow-all");
+   const bool follow = follow_all || (argc == 3 && !std::wcscmp(argv[1], L"--follow"));
    if (argc != 2 && !follow) {
-      std::fprintf(stderr, "usage: tgd3d-trace-export.exe trace.etl | --follow session\n");
+      std::fprintf(stderr, "usage: tgd3d-trace-export.exe trace.etl | --follow session | --follow-all session\n");
       return 2;
    }
    EVENT_TRACE_LOGFILEW log = {};
@@ -149,16 +234,42 @@ int wmain(int argc, WCHAR **argv)
    if (handle == INVALID_PROCESSTRACE_HANDLE) {
       std::fprintf(stderr, "OpenTrace failed: %lu\n", GetLastError()); return 1;
    }
+   HANDLE flusher = nullptr;
+   if (follow_all) {
+      const ULONG status = flush_session();
+      flush_stop = CreateEventW(nullptr, TRUE, FALSE, nullptr);
+      if (status || !flush_stop || !(flusher = CreateThread(nullptr, 0, flush_thread, nullptr, 0, nullptr))) {
+         std::fprintf(stderr, "Live flush setup failed: %lu\n", status ? status : GetLastError());
+         if (flush_stop) CloseHandle(flush_stop);
+         CloseTrace(handle);
+         return 1;
+      }
+   }
    if (follow && live_state("TraceStart") != ERROR_SUCCESS) {
+      if (flusher) {
+         SetEvent(flush_stop);
+         if (WaitForSingleObject(flusher, 5000) == WAIT_OBJECT_0)
+            CloseHandle(flush_stop);
+         CloseHandle(flusher);
+      }
       CloseTrace(handle);
       return 1;
    }
    const ULONG status = ProcessTrace(&handle, 1, nullptr, nullptr);
    CloseTrace(handle);
+   if (flusher) {
+      SetEvent(flush_stop);
+      if (WaitForSingleObject(flusher, 5000) == WAIT_OBJECT_0)
+         CloseHandle(flush_stop);
+      else
+         InterlockedExchange(&flush_error, ERROR_TIMEOUT);
+      CloseHandle(flusher);
+   }
    if (follow)
       live_state("TraceEnd", status);
    std::fprintf(stderr, "ProcessTrace=%lu matched=%u invalid=%u events_lost=%lu buffers_lost=%lu end_time=%llu buffers_written=%lu\n",
                 status, matched, invalid, log.LogfileHeader.EventsLost, log.LogfileHeader.BuffersLost,
                 (unsigned long long)log.LogfileHeader.EndTime.QuadPart, log.LogfileHeader.BuffersWritten);
-   return status || invalid || !matched || std::ferror(stdout) ? 1 : 0;
+   return status || invalid || !(matched || raw_matched) ||
+      InterlockedCompareExchange(&flush_error, 0, 0) || std::ferror(stdout) ? 1 : 0;
 }
