@@ -31,6 +31,9 @@ tgd3d_files = files(
   'tgd3d_trace.cpp',
   'tgd3d_upload.cpp',
   'tgd3d_vk.cpp',
+  'tgd3d_csc.c',
+  'tgd3d_h264_map.c',
+  'tgd3d_video.cpp',
 )
 
 tgd3d_inc = [inc_include, inc_src, inc_winddk]

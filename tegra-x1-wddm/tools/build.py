@@ -37,6 +37,10 @@ parser.add_argument("--native-test-version", type=int, metavar="N",
                     help="with --display, build gated native submission as package 0.1.0.N")
 parser.add_argument("--render-gpu-khz", type=int, choices=(460800, 729600), default=729600,
                     help="fixed GPU clock; 460800 is an opt-in display power control")
+parser.add_argument("--nvdec-firmware", type=Path,
+                    help="external nvidia/tegra210/nvdec.bin for NVDEC host tests")
+parser.add_argument("--nvdec-sample", type=Path,
+                    help="720p H.264 Annex B sample for NVDEC parser/command tests")
 args = parser.parse_args()
 if args.native_test_version is not None and (not args.display or not 1 <= args.native_test_version <= 65535):
     parser.error("--native-test-version requires --display and a version from 1 to 65535")
@@ -127,6 +131,67 @@ subprocess.run([args.cc,"-std=c11","-O2","-Wall","-Wextra","-Werror",
                 str(root / "platform/t214_frontend.c"),str(root / "tests/test_channel.c"),
                 "-o",str(channel_test)],check=True)
 subprocess.run([str(channel_test.resolve())],check=True)
+
+# --- NVDEC H.264 backend control tests -------------------------------------
+nvdec_dir = mesa_src / "nouveau/nvdec"
+nvdec_core = [nvdec_dir / "nvdec_sha256.c", nvdec_dir / "nvdec_fw.c",
+              nvdec_dir / "nvdec_h264.c", nvdec_dir / "nvdec_engine.c"]
+nvdec_inc = [*mesa_includes, nvdec_dir]
+nvdec_platform_test = args.out / "test-nvdec-platform"
+subprocess.run([args.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+                f"-I{root / 'platform'}",
+                str(root / "platform/t214_nvdec.c"),
+                str(root / "tests/test_nvdec_platform.c"),
+                "-o", str(nvdec_platform_test)], check=True)
+subprocess.run([str(nvdec_platform_test.resolve())], check=True)
+if args.nvdec_firmware:
+    nvdec_model_test = args.out / "test-nvdec-model"
+    subprocess.run([args.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+                    *[f"-I{p}" for p in nvdec_inc],
+                    str(root / "tests/test_nvdec.c"),
+                    *map(str, nvdec_core),
+                    "-o", str(nvdec_model_test)], check=True)
+    subprocess.run([str(nvdec_model_test.resolve()),
+                    str(args.nvdec_firmware.resolve())], check=True)
+else:
+    print("NVDEC firmware model test skipped: --nvdec-firmware not provided")
+if args.nvdec_sample:
+    nvdec_h264_test = args.out / "test-nvdec-h264"
+    subprocess.run([args.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+                    *[f"-I{p}" for p in nvdec_inc],
+                    str(root / "tests/test_nvdec_h264.c"),
+                    str(nvdec_dir / "nvdec_h264.c"), str(nvdec_dir / "nvdec_parse.c"),
+                    "-o", str(nvdec_h264_test)], check=True)
+    subprocess.run([str(nvdec_h264_test.resolve()),
+                    str(args.nvdec_sample.resolve())], check=True)
+else:
+    print("NVDEC H.264 control test skipped: --nvdec-sample not provided")
+
+# --- tgd3d D3D11VA mapping and NV12 CSC controls ---------------------------
+csc_test = args.out / "test-tgd3d-csc"
+subprocess.run([args.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+                f"-I{mesa_src / 'nouveau/tgd3d'}",
+                str(root / "tests/test_tgd3d_csc.c"),
+                str(mesa_src / "nouveau/tgd3d/tgd3d_csc.c"),
+                "-o", str(csc_test), "-lm"], check=True)
+subprocess.run([str(csc_test.resolve())], check=True)
+h264_map_test = args.out / "test-tgd3d-h264-map"
+subprocess.run([args.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+                f"-I{mesa_src / 'nouveau/tgd3d'}", f"-I{nvdec_dir}",
+                str(root / "tests/test_tgd3d_h264_map.c"),
+                str(mesa_src / "nouveau/tgd3d/tgd3d_h264_map.c"),
+                "-o", str(h264_map_test)], check=True)
+subprocess.run([str(h264_map_test.resolve())], check=True)
+if shutil.which("glslangValidator") and shutil.which("spirv-val"):
+    for stage in ("vert", "frag"):
+        spv = args.out / ("nv12." + stage + ".spv")
+        subprocess.run(["glslangValidator", "-V", "--target-env", "vulkan1.1",
+                        "-o", str(spv), str(mesa_src / "nouveau/tgd3d/shaders" / ("nv12." + stage))],
+                       check=True)
+        subprocess.run(["spirv-val", "--target-env", "vulkan1.1", str(spv)], check=True)
+    print("NV12 CSC SPIR-V validated")
+else:
+    print("NV12 CSC SPIR-V validation skipped: glslangValidator/spirv-val unavailable")
 gr_firmware = root / "core/gr_firmware.c"
 gr_firmware_test = args.out / "test-gr-firmware"
 subprocess.run([args.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
@@ -401,6 +466,14 @@ if args.probe:
                             str(root / "windows/diagnostic_backend.c")], check=True)
             libs.append(diagnostic)
             libs.append(library)
+            for source in [nvdec_dir / "nvdec_sha256.c", nvdec_dir / "nvdec_fw.c",
+                           nvdec_dir / "nvdec_h264.c", nvdec_dir / "nvdec_engine.c",
+                           root / "platform/t214_nvdec.c",
+                           root / "windows/nvdec_backend.c"]:
+                nvobj = args.out / ("nvdec-" + source.stem + ".obj")
+                subprocess.run([args.clang_cl, *kflags, f"/I{nvdec_dir}",
+                                f"/Fo{nvobj}", "--", str(source)], check=True)
+                libs.append(nvobj)
             copy_firmware(dest)
         subprocess.run([args.link, "/nologo", "/driver", "/subsystem:native,10.0", "/machine:arm64",
                         "/entry:FxDriverEntry", "/nodefaultlib", "/release", "/opt:ref", "/opt:icf",

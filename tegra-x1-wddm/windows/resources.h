@@ -4,6 +4,15 @@
 
 #include <ntddk.h>
 #include <dispmprt.h>
+#include "nvdec_abi.h"
+#include "../platform/t214_resources.h"
+
+enum tg_nvdec_aperture_resource {
+#define NVDEC_APERTURE(name, base, size, writable) TgNvdec##name,
+    T214_NVDEC_RESOURCES(NVDEC_APERTURE)
+#undef NVDEC_APERTURE
+    TgNvdecApertureCount
+};
 
 enum tg_gpu_aperture {
     TgGpuRegisters,
@@ -34,6 +43,9 @@ typedef struct _TG_GPU_RESOURCES {
      */
     PVOID DisplayRegisters;
     BOOLEAN PanelAvailable; /* POST range, writable registers and display IRQ. */
+    CM_PARTIAL_RESOURCE_DESCRIPTOR NvdecMemory[TgNvdecApertureCount];
+    PVOID NvdecMapping[TgNvdecApertureCount];
+    struct tg_nvdec_resource_info NvdecInfo;
 } TG_GPU_RESOURCES;
 
 /* Adapter start/stop helpers following the render-only WDDM sample's

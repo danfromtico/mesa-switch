@@ -13,6 +13,8 @@
 #include "../core/execute.h"
 #include "gr_firmware_io.h"
 #include "diagnostic_backend.h"
+#include "nvdec_backend.h"
+#include "nvdec_control.h"
 
 struct gpu_map { ULONG base, size; volatile UCHAR *va; };
 static const struct gpu_map map_profile[] = {
@@ -42,6 +44,14 @@ typedef struct _GPU_DEVICE {
     struct tg_gpu_irq_state irq;
     volatile LONG irq_live, irq_dpcs;
     KEVENT irq_event;
+    /* Experimental NVDEC bring-up transport; only explicit, validated LOAD
+     * requests map its registers or create the engine. */
+    volatile UINT32 *nvdec_regs;
+    volatile UINT32 *host1x_regs;
+    volatile UINT32 *pmc_regs;
+    volatile UINT32 *car_regs;
+    volatile UINT32 *mc_regs;
+    struct tg_nvdec_win *nvdec;
 } GPU_DEVICE;
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(GPU_DEVICE, GpuContext)
 DRIVER_INITIALIZE DriverEntry;
@@ -52,6 +62,249 @@ EVT_WDF_DEVICE_D0_EXIT GpuD0Exit;
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL GpuControl;
 EVT_WDF_INTERRUPT_ISR GpuInterrupt;
 EVT_WDF_DPC GpuInterruptDpc;
+
+static BOOLEAN GpuNvdecMap(GPU_DEVICE *d)
+{
+    UNREFERENCED_PARAMETER(d);
+    /* The legacy probe replaces GPU0 and never received the NVDEC/Host1x,
+     * shared clock or SMMU resources through PnP. Do not resurrect its raw
+     * MmMapIoSpace route. The render KMD now owns optional resource discovery;
+     * decode remains unavailable until its execution/clock/DMA contract is
+     * connected. The reusable firmware/codec core stays separate. */
+    return FALSE;
+}
+
+static NTSTATUS GpuNvdecUnmap(GPU_DEVICE *d)
+{
+    if (d->nvdec) {
+        NTSTATUS status = TgNvdecDestroy(d->nvdec);
+        if (!NT_SUCCESS(status)) return status;
+        d->nvdec = NULL;
+    }
+    if (d->nvdec_regs) { MmUnmapIoSpace((PVOID)d->nvdec_regs, 0x40000); d->nvdec_regs = NULL; }
+    if (d->host1x_regs) { MmUnmapIoSpace((PVOID)d->host1x_regs, 0x40000); d->host1x_regs = NULL; }
+    if (d->pmc_regs) { MmUnmapIoSpace((PVOID)d->pmc_regs, 0x1000); d->pmc_regs = NULL; }
+    if (d->car_regs) { MmUnmapIoSpace((PVOID)d->car_regs, 0x1000); d->car_regs = NULL; }
+    if (d->mc_regs) { MmUnmapIoSpace((PVOID)d->mc_regs, 0x1000); d->mc_regs = NULL; }
+    return STATUS_SUCCESS;
+}
+
+static void NvdecCopyError(char *dst, const char *src)
+{
+    if (src && src[0])
+        (VOID)RtlStringCchCopyA(dst, TG_NVDEC_ERROR_SIZE, src);
+    else
+        (VOID)RtlStringCchCopyA(dst, TG_NVDEC_ERROR_SIZE, "NVDEC request failed");
+}
+
+static void GpuNvdecControl(WDFDEVICE device, WDFREQUEST request, ULONG code)
+{
+    GPU_DEVICE *d = GpuContext(device);
+    NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
+    size_t in_len = 0, out_len = 0;
+    PVOID in = NULL, out = NULL;
+    size_t reply_bytes = 0;
+    union {
+        struct tg_nvdec_load_result load;
+        struct tg_nvdec_config_result config;
+        struct tg_nvdec_decode_result decode;
+        struct tg_nvdec_status_result status;
+    } reply;
+
+    /* METHOD_BUFFERED input and output are the same system buffer. Build
+     * headers separately until all request fields/payload have been read. */
+
+    if (code == TG_GPU_IOCTL_NVDEC_STATUS && !d->nvdec) {
+        struct tg_nvdec_status_result *res;
+        status = WdfRequestRetrieveOutputBuffer(request, sizeof(*res), &out, &out_len);
+        if (NT_SUCCESS(status)) {
+            res = out;
+            RtlZeroMemory(res, sizeof(*res));
+            res->version = TG_NVDEC_CONTROL_VERSION;
+            res->created = 0;
+        }
+        WdfRequestCompleteWithInformation(request, status,
+            NT_SUCCESS(status) ? sizeof(struct tg_nvdec_status_result) : 0);
+        return;
+    }
+    if (!d->nvdec && code != TG_GPU_IOCTL_NVDEC_LOAD) {
+        WdfRequestComplete(request, STATUS_DEVICE_NOT_READY);
+        return;
+    }
+
+    if (code == TG_GPU_IOCTL_NVDEC_LOAD) {
+        struct tg_nvdec_load_request *req;
+        struct tg_nvdec_load_result *res;
+        status = WdfRequestRetrieveInputBuffer(request, sizeof(*req), &in, &in_len);
+        if (!NT_SUCCESS(status))
+            goto done;
+        status = WdfRequestRetrieveOutputBuffer(request, sizeof(*res), &out, &out_len);
+        if (!NT_SUCCESS(status))
+            goto done;
+        req = in;
+        res = &reply.load;
+        reply_bytes = sizeof(*res);
+        RtlZeroMemory(res, sizeof(*res));
+        res->version = TG_NVDEC_CONTROL_VERSION;
+        if (in_len < sizeof(*req) || req->version != TG_NVDEC_CONTROL_VERSION ||
+            req->size != in_len - sizeof(*req)) {
+            res->result = STATUS_INVALID_PARAMETER;
+            NvdecCopyError(res->error, "firmware request header/size mismatch");
+            status = STATUS_SUCCESS;
+            goto done;
+        }
+        if (!TgNvdecFirmwareValid((const UINT8 *)in + sizeof(*req),
+                                  req->size, req->sha256)) {
+            res->result = STATUS_INVALID_PARAMETER;
+            NvdecCopyError(res->error, "firmware does not match the supported image");
+            status = STATUS_SUCCESS;
+            goto done;
+        }
+        if (!d->nvdec) {
+            NTSTATUS created = STATUS_DEVICE_NOT_READY;
+            if (GpuNvdecMap(d))
+                created = TgNvdecCreate(d->nvdec_regs, d->host1x_regs,
+                                         d->pmc_regs, d->car_regs, d->mc_regs, &d->nvdec);
+            if (!NT_SUCCESS(created)) {
+                res->result = (UINT32)created;
+                status = STATUS_SUCCESS;
+                goto done;
+            }
+        }
+        res->result = (UINT32)TgNvdecLoadFirmware(d->nvdec,
+            (const UINT8 *)in + sizeof(*req), req->size, req->sha256);
+        res->firmware_bytes = req->size;
+        res->booted = NT_SUCCESS((NTSTATUS)res->result) && TgNvdecFirmwareReady(d->nvdec);
+        RtlCopyMemory(res->sha256, req->sha256, TG_NVDEC_SHA256_SIZE);
+        if (!NT_SUCCESS((NTSTATUS)res->result))
+            NvdecCopyError(res->error, TgNvdecLastError(d->nvdec));
+        status = STATUS_SUCCESS;
+    } else if (code == TG_GPU_IOCTL_NVDEC_CONFIGURE) {
+        struct tg_nvdec_config_request *req;
+        struct tg_nvdec_config_result *res;
+        UINT32 pitch = 0, ah = 0, fs = 0;
+        status = WdfRequestRetrieveInputBuffer(request, sizeof(*req), &in, &in_len);
+        if (!NT_SUCCESS(status))
+            goto done;
+        status = WdfRequestRetrieveOutputBuffer(request, sizeof(*res), &out, &out_len);
+        if (!NT_SUCCESS(status))
+            goto done;
+        req = in;
+        res = &reply.config;
+        reply_bytes = sizeof(*res);
+        RtlZeroMemory(res, sizeof(*res));
+        res->version = TG_NVDEC_CONTROL_VERSION;
+        if (req->version != TG_NVDEC_CONTROL_VERSION) {
+            res->result = STATUS_REVISION_MISMATCH;
+            status = STATUS_SUCCESS;
+            goto done;
+        }
+        res->result = (UINT32)TgNvdecConfigure(d->nvdec, req->width, req->height,
+                                               &pitch, &ah, &fs);
+        if (NT_SUCCESS((NTSTATUS)res->result)) {
+            res->pitch = pitch;
+            res->aligned_height = ah;
+            res->frame_size = fs;
+        } else {
+            NvdecCopyError(res->error, TgNvdecLastError(d->nvdec));
+        }
+        status = STATUS_SUCCESS;
+    } else if (code == TG_GPU_IOCTL_NVDEC_DECODE) {
+        struct tg_nvdec_decode_request *req;
+        struct tg_nvdec_decode_result *res;
+        const UINT8 *bits;
+        const UINT32 *offsets;
+        struct tg_nvdec_status st = {0};
+        UINT32 aligned_offsets[TG_NVDEC_MAX_SLICES + 1u];
+        UINT32 expected = 0, observed = 0;
+        size_t need;
+        status = WdfRequestRetrieveInputBuffer(request, sizeof(*req), &in, &in_len);
+        if (!NT_SUCCESS(status))
+            goto done;
+        status = WdfRequestRetrieveOutputBuffer(request, sizeof(*res), &out, &out_len);
+        if (!NT_SUCCESS(status))
+            goto done;
+        req = in;
+        res = &reply.decode;
+        reply_bytes = sizeof(*res);
+        RtlZeroMemory(res, sizeof(*res));
+        res->version = TG_NVDEC_CONTROL_VERSION;
+        if (req->version != TG_NVDEC_CONTROL_VERSION || !req->bitstream_size ||
+            !req->slice_count || req->slice_count > TG_NVDEC_MAX_SLICES) {
+            res->result = STATUS_INVALID_PARAMETER;
+            status = STATUS_SUCCESS;
+            goto done;
+        }
+        need = sizeof(*req) + req->bitstream_size +
+               ((size_t)req->slice_count + 1u) * sizeof(UINT32);
+        if (in_len < need) {
+            res->result = STATUS_BUFFER_TOO_SMALL;
+            status = STATUS_SUCCESS;
+            goto done;
+        }
+        bits = (const UINT8 *)in + sizeof(*req);
+        RtlCopyMemory(aligned_offsets, bits + req->bitstream_size,
+                      ((size_t)req->slice_count + 1u) * sizeof(UINT32));
+        offsets = aligned_offsets;
+        res->result = (UINT32)TgNvdecDecode(d->nvdec, &req->pic, bits,
+            req->bitstream_size, offsets, req->slice_count,
+            (UINT8 *)out + sizeof(*res), out_len - sizeof(*res),
+            &st, &expected, &observed);
+        res->mbs_correctly_decoded = st.mbs_correctly_decoded;
+        res->mbs_in_error = st.mbs_in_error;
+        res->cycles = st.cycles;
+        res->error_status = st.error_status;
+        res->slice_header_error_code = st.slice_header_error_code;
+        res->expected_syncpoint = expected;
+        res->observed_syncpoint = observed;
+        TgNvdecGetConfig(d->nvdec, &res->width, &res->height, &res->pitch,
+                         &res->aligned_height, &res->frame_size);
+        if (!NT_SUCCESS((NTSTATUS)res->result)) {
+            NvdecCopyError(res->error, TgNvdecLastError(d->nvdec));
+        } else {
+            res->bytes_written = res->frame_size;
+            RtlCopyMemory(out, res, sizeof(*res));
+            WdfRequestCompleteWithInformation(request, STATUS_SUCCESS,
+                                              sizeof(*res) + res->frame_size);
+            return;
+        }
+        status = STATUS_SUCCESS;
+    } else if (code == TG_GPU_IOCTL_NVDEC_STATUS) {
+        struct tg_nvdec_status_result *res;
+        status = WdfRequestRetrieveOutputBuffer(request, sizeof(*res), &out, &out_len);
+        if (!NT_SUCCESS(status))
+            goto done;
+        res = &reply.status;
+        reply_bytes = sizeof(*res);
+        RtlZeroMemory(res, sizeof(*res));
+        res->version = TG_NVDEC_CONTROL_VERSION;
+        res->created = 1;
+        res->firmware_ready = TgNvdecFirmwareReady(d->nvdec);
+        res->surfaces_ready = TgNvdecSurfacesReady(d->nvdec);
+        TgNvdecGetConfig(d->nvdec, &res->width, &res->height, &res->pitch,
+                         &res->aligned_height, &res->frame_size);
+        status = STATUS_SUCCESS;
+    } else if (code == TG_GPU_IOCTL_NVDEC_RESET) {
+        struct tg_nvdec_status_result *res;
+        status = WdfRequestRetrieveOutputBuffer(request, sizeof(*res), &out, &out_len);
+        if (!NT_SUCCESS(status))
+            goto done;
+        status = TgNvdecReset(d->nvdec);
+        if (!NT_SUCCESS(status)) goto done;
+        res = &reply.status;
+        reply_bytes = sizeof(*res);
+        RtlZeroMemory(res, sizeof(*res));
+        res->version = TG_NVDEC_CONTROL_VERSION;
+        res->created = 1;
+        status = STATUS_SUCCESS;
+    }
+
+done:
+    if (NT_SUCCESS(status) && reply_bytes)
+        RtlCopyMemory(out, &reply, reply_bytes);
+    WdfRequestCompleteWithInformation(request, status,
+        NT_SUCCESS(status) ? reply_bytes : 0);
+}
 
 static NTSTATUS GpuOpenPlatform(WDFDEVICE device)
 {
@@ -336,6 +589,12 @@ VOID GpuControl(WDFQUEUE queue, WDFREQUEST request, size_t out_size, size_t in_s
     struct tg_gpu_request *in, op;
     NTSTATUS status;
     UNREFERENCED_PARAMETER(out_size); UNREFERENCED_PARAMETER(in_size);
+    if (code == TG_GPU_IOCTL_NVDEC_LOAD || code == TG_GPU_IOCTL_NVDEC_CONFIGURE ||
+        code == TG_GPU_IOCTL_NVDEC_DECODE || code == TG_GPU_IOCTL_NVDEC_STATUS ||
+        code == TG_GPU_IOCTL_NVDEC_RESET) {
+        GpuNvdecControl(device, request, code);
+        return;
+    }
     status = WdfRequestRetrieveOutputBuffer(request, sizeof(*out), (PVOID *)&out, NULL);
     if (!NT_SUCCESS(status)) { WdfRequestComplete(request, status); return; }
     if (code == TG_GPU_IOCTL_RUN || code == TG_GPU_IOCTL_GR_RUN || code==TG_GPU_IOCTL_IRQ_RUN ||
@@ -416,6 +675,11 @@ NTSTATUS GpuD0Exit(WDFDEVICE device, WDF_POWER_DEVICE_STATE target)
     }
     if (d->power.owned || d->execution.owned || d->arena || d->irq.saved) GpuCleanup(d);
     if(d->power.owned || d->irq.saved)return STATUS_DEVICE_BUSY;
+    if (d->nvdec) {
+        NTSTATUS nvdec_status = TgNvdecDestroy(d->nvdec);
+        if (!NT_SUCCESS(nvdec_status)) return nvdec_status;
+        d->nvdec = NULL;
+    }
     return TgGpuClosePlatform(&d->platform);
 }
 NTSTATUS GpuRelease(WDFDEVICE device, WDFCMRESLIST resources)
@@ -423,6 +687,11 @@ NTSTATUS GpuRelease(WDFDEVICE device, WDFCMRESLIST resources)
     GPU_DEVICE *d = GpuContext(device);
     ULONG i;
     UNREFERENCED_PARAMETER(resources);
+    {
+        NTSTATUS nvdec_status = GpuNvdecUnmap(d);
+        if (!NT_SUCCESS(nvdec_status)) return nvdec_status;
+    }
+
     if(d->backend) {
         NTSTATUS status=TgGpuStopDiagnosticBackend(&d->backend,&d->last);
         if(d->backend || !NT_SUCCESS(status))return NT_SUCCESS(status)?STATUS_DEVICE_BUSY:status;

@@ -20,6 +20,73 @@ _Static_assert(TgGpuApertureCount == T214_GPU_RESOURCE_COUNT, "GPU resource coun
 _Static_assert(T214_DC_WIN_A_ADDR_HI * sizeof(ULONG) < T214_GPU_DC_SIZE, "Display A aperture");
 _Static_assert(T214_DC_PANEL_PITCH * T214_DC_PANEL_HEIGHT == T214_GPU_POST_FB_SIZE, "POST size");
 
+static const struct { ULONG Base, Bytes; BOOLEAN Writable; } NvdecRanges[] = {
+#define NVDEC_RANGE(name, base, size, writable) {base, size, writable},
+    T214_NVDEC_RESOURCES(NVDEC_RANGE)
+#undef NVDEC_RANGE
+};
+_Static_assert(TgNvdecApertureCount == T214_NVDEC_RESOURCE_COUNT, "NVDEC resources");
+#define NVDEC_ALL_RESOURCES ((1u << TgNvdecApertureCount) - 1u)
+
+static VOID map_nvdec_resources(const DXGKRNL_INTERFACE *Dxgk,
+                                TG_GPU_RESOURCES *r)
+{
+    struct tg_nvdec_resource_info *s = &r->NvdecInfo;
+    ULONG i;
+    if (s->status == TG_NVDEC_RESOURCES_INVALID)
+        return;
+    if (s->resource_mask != NVDEC_ALL_RESOURCES) {
+        s->status = s->resource_mask ? TG_NVDEC_RESOURCES_PARTIAL : TG_NVDEC_RESOURCES_ABSENT;
+        return;
+    }
+    s->flags = TG_NVDEC_QUERY_RESOURCES_VALID;
+    for (i = 0; i < TgNvdecApertureCount; i++) {
+        PVOID mapping = NULL;
+        NTSTATUS status = Dxgk->DxgkCbMapMemory(Dxgk->DeviceHandle,
+            r->NvdecMemory[i].u.Memory.Start, NvdecRanges[i].Bytes,
+            FALSE, FALSE, MmNonCached, &mapping);
+        if (NT_SUCCESS(status) && !mapping)
+            status = STATUS_DEVICE_CONFIGURATION_ERROR;
+        if (!NT_SUCCESS(status)) {
+            s->status = TG_NVDEC_RESOURCES_MAP_FAILED;
+            s->map_status = (UINT32)status;
+            /* Optional decode mapping failure does not tear down the working
+             * render device. Retain any failed-unmap pointer for StopDevice. */
+            while (i) {
+                --i;
+                if (NT_SUCCESS(Dxgk->DxgkCbUnmapMemory(Dxgk->DeviceHandle,
+                                                      r->NvdecMapping[i])))
+                    r->NvdecMapping[i] = NULL;
+            }
+            return;
+        }
+        r->NvdecMapping[i] = mapping;
+    }
+    s->flags |= TG_NVDEC_QUERY_MAPPED;
+    /* Read only always-on identification, PMC, CAR and MC views. Do not read
+     * the unpowered NVDEC aperture or an unleased Host1x clock domain. */
+    s->hidrev = READ_REGISTER_ULONG((PULONG)r->Mapping[TgGpuHidrev]);
+    s->powergate_status = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecPmc] + 2);
+    s->clock_y = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecCarY]);
+    s->reset_y = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecCarY] + 3);
+    s->nvdec_clock_source = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecCarSource]);
+    s->nvjpg_clock_source = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecCarSource] + 1);
+    s->smmu_config = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecSmmu]);
+    s->smmu_host1x_asid = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecHcAsid]);
+    s->smmu_nvdec_asid = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecNvdecAsid]);
+    s->smmu_nvjpg_asid = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecNvjpgAsid]);
+    if (s->hidrev == MAXULONG || s->powergate_status == MAXULONG ||
+        s->clock_y == MAXULONG || s->reset_y == MAXULONG ||
+        s->nvdec_clock_source == MAXULONG || s->nvjpg_clock_source == MAXULONG ||
+        s->smmu_config == MAXULONG || s->smmu_host1x_asid == MAXULONG ||
+        s->smmu_nvdec_asid == MAXULONG || s->smmu_nvjpg_asid == MAXULONG) {
+        s->status = TG_NVDEC_RESOURCES_REGS_INVALID;
+        return;
+    }
+    s->flags |= TG_NVDEC_QUERY_BOOT_REGS_VALID;
+    s->status = TG_NVDEC_RESOURCES_CAPTURED;
+}
+
 static uint32_t read_dc_register(void *registers, uint32_t word)
 {
     return READ_REGISTER_ULONG((PULONG)registers + word);
@@ -32,10 +99,23 @@ TgGpuReleaseResources(const DXGKRNL_INTERFACE *Dxgk,
     NTSTATUS result = STATUS_SUCCESS;
     ULONG i;
     PAGED_CODE();
+    Resources->NvdecInfo.flags = 0;
+    for (i = TgNvdecApertureCount; i != 0; --i) {
+        if (Resources->NvdecMapping[i - 1]) {
+            NTSTATUS status = Dxgk->DxgkCbUnmapMemory(Dxgk->DeviceHandle,
+                                                     Resources->NvdecMapping[i - 1]);
+            if (NT_SUCCESS(status))
+                Resources->NvdecMapping[i - 1] = NULL;
+            else if (NT_SUCCESS(result))
+                result = status;
+        }
+    }
     if (Resources->DisplayRegisters) {
-        result = Dxgk->DxgkCbUnmapMemory(Dxgk->DeviceHandle, Resources->DisplayRegisters);
-        if (NT_SUCCESS(result))
+        NTSTATUS status = Dxgk->DxgkCbUnmapMemory(Dxgk->DeviceHandle, Resources->DisplayRegisters);
+        if (NT_SUCCESS(status))
             Resources->DisplayRegisters = NULL;
+        else if (NT_SUCCESS(result))
+            result = status;
     }
     if(Resources->LicMapping) {
         NTSTATUS status=Dxgk->DxgkCbUnmapMemory(Dxgk->DeviceHandle,Resources->LicMapping);
@@ -71,7 +151,12 @@ TgGpuAcquireResources(const DXGKRNL_INTERFACE *Dxgk,
     for (i = 0; i < TgGpuApertureCount; ++i)
         if (Resources->Mapping[i])
             return STATUS_INVALID_DEVICE_STATE;
+    for (i = 0; i < TgNvdecApertureCount; ++i)
+        if (Resources->NvdecMapping[i])
+            return STATUS_INVALID_DEVICE_STATE;
     RtlZeroMemory(Resources, sizeof(*Resources));
+    Resources->NvdecInfo.version = TG_NVDEC_QUERY_ABI;
+    Resources->NvdecInfo.size = sizeof(Resources->NvdecInfo);
 
     status = Dxgk->DxgkCbGetDeviceInformation(Dxgk->DeviceHandle, &info);
     if (!NT_SUCCESS(status))
@@ -84,6 +169,25 @@ TgGpuAcquireResources(const DXGKRNL_INTERFACE *Dxgk,
     for (i = 0; i < list->Count; ++i) {
         const CM_PARTIAL_RESOURCE_DESCRIPTOR *resource = &list->PartialDescriptors[i];
         if (resource->Type == CmResourceTypeMemory) {
+            ULONG n;
+            for (n = 0; n < TgNvdecApertureCount; n++)
+                if (resource->u.Memory.Start.QuadPart == NvdecRanges[n].Base)
+                    break;
+            if (n < TgNvdecApertureCount) {
+                const ULONG bit = 1u << n;
+                const USHORT access = resource->Flags &
+                    (CM_RESOURCE_MEMORY_READ_ONLY | CM_RESOURCE_MEMORY_WRITE_ONLY);
+                if (resource->u.Memory.Length != NvdecRanges[n].Bytes ||
+                    resource->ShareDisposition != CmResourceShareDeviceExclusive ||
+                    access != (NvdecRanges[n].Writable ? 0 : CM_RESOURCE_MEMORY_READ_ONLY) ||
+                    (Resources->NvdecInfo.resource_mask & bit)) {
+                    Resources->NvdecInfo.status = TG_NVDEC_RESOURCES_INVALID;
+                } else {
+                    Resources->NvdecMemory[n] = *resource;
+                    Resources->NvdecInfo.resource_mask |= bit;
+                }
+                continue;
+            }
             if (resource->u.Memory.Start.QuadPart == T214_GPU_DC_BASE) {
                 if (display || resource->u.Memory.Length != T214_GPU_DC_SIZE ||
                     resource->ShareDisposition != CmResourceShareDeviceExclusive ||
@@ -171,5 +275,6 @@ TgGpuAcquireResources(const DXGKRNL_INTERFACE *Dxgk,
             return NT_SUCCESS(cleanup) ? status : cleanup;
         }
     }
+    map_nvdec_resources(Dxgk, Resources);
     return STATUS_SUCCESS;
 }

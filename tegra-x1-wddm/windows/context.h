@@ -7,6 +7,7 @@
 #include "../core/command_stream.h"
 #include "../platform/t214_clock.h"
 #include "adapter_abi.h"
+#include "nvdec_abi.h"
 #include "graphics.h"
 #include "diagnostic_events.h"
 
@@ -76,6 +77,7 @@ struct _TG_GPU_CONTEXT_ENGINE {
     BOOLEAN Stopping;
     LUID AdapterLuid;
     BOOLEAN AdapterIdentityReady, PagingOnly;
+    struct tg_nvdec_resource_info NvdecInfo; /* copied start snapshot; no borrowed MMIO */
     NTSTATUS RecoveryStatus;
     BOOLEAN RecoveryPending,RecoverySending,RecoveryNotified,Resetting;
 };

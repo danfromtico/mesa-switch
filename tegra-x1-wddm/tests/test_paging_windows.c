@@ -22,7 +22,19 @@ __declspec(dllimport) BOOL __stdcall WriteFile(HANDLE File, const void *Buffer,
                                             ULONG Bytes, ULONG *Written, void *Overlapped);
 static UINT64 table[TG_GPU_TABLE_ENTRIES], scratch[TG_GPU_TABLE_ENTRIES];
 static ULONG calls, failed_index;
-#define CHECK(x) do { ++failed_index; if (!(x)) ExitProcess(failed_index); } while (0)
+static void FailCheck(UINT line)
+{
+    char message[64] = "FAIL paging/resource control line ";
+    char digits[10];
+    UINT n = 0, at = sizeof("FAIL paging/resource control line ") - 1;
+    ULONG written;
+    do { digits[n++] = '0' + line % 10; line /= 10; } while (line);
+    while (n) message[at++] = digits[--n];
+    message[at++] = '\n';
+    WriteFile(GetStdHandle((ULONG)-12), message, at, &written, NULL);
+    ExitProcess(failed_index);
+}
+#define CHECK(x) do { ++failed_index; if (!(x)) FailCheck(__LINE__); } while (0)
 
 #include "resource_fixture.h"
 
@@ -124,6 +136,8 @@ static void TestDisplayResources(void)
           resources.Interrupt[1].u.Interrupt.Vector == 0x201);
     CHECK(TgGpuReleaseResources(&dxgk, &resources) == STATUS_SUCCESS && !resource_live);
 }
+
+#include "nvdec_resource_fixture.h"
 
 struct display_model {
     ULONG regs[T214_GPU_DC_SIZE / sizeof(ULONG)];
@@ -730,6 +744,7 @@ void start(void)
     static const char message[] = "PASS: WDK physical system/table PTEs, multipass ordering, alias bounds and TLB failures\r\n";
     TestResources();
     TestDisplayResources();
+    TestNvdecResources();
     TestDisplayFlip();
     TestSegment();
     TestRoot();

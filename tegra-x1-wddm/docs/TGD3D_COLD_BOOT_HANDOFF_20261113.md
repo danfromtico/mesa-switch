@@ -1,4 +1,27 @@
-# 当前交接：固定90°逐行DWM及原生vkcube本轮验收完成
+# 当前阶段：先完成720p H.264，再验收1080p
+
+用户最新范围为“先做720 1080吧，2k 4k记为待定，有实现未检测”。
+先完成720p真实NVDEC／D3D11VA／NV12及窗口呈现链，再推进1080p；
+2K／4K仅保留已有独立实现，未检测、是否整合待定，不能标成当前基线支持。
+新版目标文件为`/Users/rujian/.codex/attachments/1b7d356a-80e7-4946-9a43-e65288027e19/goal-objective.md`，
+并以此后的上述用户范围调整为准；旧目标文件及下方历史阶段不覆盖最新指令。
+
+本地已接入可选NVDEC PnP资源及启动状态查询，停用独占探针的原始MMIO映射路线；
+缺少／无效资源或映射失败时保留原显示路径，修复释放失败被后续成功覆盖的问题。
+资源失败清理、旧48字节／新112字节查询及别名缓冲区控制通过；这些都是CPU控制。
+从E95冻结源码及原EMC输入构建的资源核查KMD已完成ARM64构建与本地SYS签名验证，
+ACPI候选保留原显示／电源AML；尚未生成原生目录签名、安装或取得真实SMMU状态。
+这不是已完成的硬解候选，NVDEC执行、NV12／视频DDI和GPU CSC仍需完成并实测。
+
+完整组件身份、冻结补丁和控制结果见OUT `nvdec-integration-20261116/resource-preflight/`
+及`work-state.json`；版本表`decode_integration`与已安装`baseline_files`分开。
+新增代码待Gemini4 Carbon High额度恢复审核；本轮没有连接Switch或改变已安装组合。
+本批源码、外部来源、完整哈希及未完成项集中于
+[解码整合记录](NVDEC_INTEGRATION_20261116.json)。原始交付保存在
+[`nvdec-deepseek-delivery-20261116`](https://github.com/ruje0504-2/mesa-switch-woa/tree/nvdec-deepseek-delivery-20261116)
+归档分支；其中高分辨率提交及旧独占探针不能作为当前基线已支持硬解的证据。
+
+# 已完成：固定90°逐行DWM及原生vkcube本轮验收
 
 用户随后明确交回Switch继续vkcube验收，最终确认五分钟运行、移动／放大正常，
 并在单独15秒橙色遮挡补测后确认恢复正常。完整结果见

@@ -13,6 +13,7 @@ static BOOLEAN mapped(const TG_GPU_ADAPTER *a)
 {
     if(a->Resources.LicMapping || a->Resources.DisplayRegisters)return TRUE;
     for(UINT i=0;i<TgGpuApertureCount;++i)if(a->Resources.Mapping[i])return TRUE;
+    for(UINT i=0;i<TgNvdecApertureCount;++i)if(a->Resources.NvdecMapping[i])return TRUE;
     return FALSE;
 }
 NTSTATUS APIENTRY TgGpuDdiAddDevice(PDEVICE_OBJECT physical,PVOID *out)
@@ -96,6 +97,7 @@ NTSTATUS APIENTRY TgGpuDdiStartDevice(PVOID context,DXGK_START_INFO *start,
     status=TgGpuInitializeContextEngine(&a->Engine,dxgk,&a->Tables);
     if(!NT_SUCCESS(status))goto fail;
     a->EngineReady=TRUE;
+    a->Engine.NvdecInfo=a->Resources.NvdecInfo;
     status=TgGpuInitializeWorkQueue(&a->Queue,&a->Engine);
     if(!NT_SUCCESS(status))goto fail;
     a->QueueReady=TRUE;

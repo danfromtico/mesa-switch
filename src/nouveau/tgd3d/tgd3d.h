@@ -549,6 +549,8 @@ void query_pass_end(Device *dev, VkCommandBuffer cmd);
 
 /* tgd3d_dxgi.cpp */
 void dxgi_fill_table(DXGI1_1_DDI_BASE_FUNCTIONS *table, bool has_resolve);
+/* Video integration is not advertised until its runtime/resources are ready. */
+void video_fill_table(D3D11_1DDI_VIDEODEVICEFUNCS *table);
 /* Versioned presentation tables, paired with the matching device ABI. */
 void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
 void dxgi_fill_presentation14(DXGI1_4_DDI_BASE_FUNCTIONS *table);

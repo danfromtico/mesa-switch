@@ -94,7 +94,8 @@ def main():
         *("src/nouveau/vulkan/" + name for name in controls))
     for name in controls:
         shutil.copyfile(build / "src/nouveau/vulkan" / name, out / name)
-    for source, name in (("check.c", "nvk-windows-check.exe"), ("test-kmt.c", "test-kmt.exe")):
+    for source, name in (("check.c", "nvk-windows-check.exe"), ("test-kmt.c", "test-kmt.exe"),
+                         ("nvdec_check.c", "nvdec-resource-query.exe")):
         run(a.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror", "-I" + str(src / "include"),
             "-I" + str(win), win / source, win / "kmt.c", "-o", out / name)
     dll = out / "libvulkan_nouveau.dll"
@@ -106,7 +107,7 @@ def main():
     manifest.write_text(json.dumps({"file_format_version": "1.0.0", "ICD": {
         "library_path": r".\libvulkan_nouveau.dll", "api_version": "1.4.0",
     }}, indent=2) + "\n")
-    files = [dll, out / "nvk-windows-check.exe", out / "test-kmt.exe",
+    files = [dll, out / "nvk-windows-check.exe", out / "test-kmt.exe", out / "nvdec-resource-query.exe",
              out / "test-kmt-shared.exe", out / "test-kmt-sync.exe", out / "test-kmt-displayable.exe",
              *(out / name for name in controls),
              out / "nvk-windows-shared-check.exe",

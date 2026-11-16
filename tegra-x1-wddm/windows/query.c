@@ -142,6 +142,12 @@ NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYAD
             if(!e->PagingOnly)info.flags|=TG_GPU_ADAPTER_NATIVE_SUBMIT;
         }
         RtlCopyMemory(a->pOutputData,&info,sizeof(info));
+        if(a->OutputDataSize>=sizeof(struct tg_gpu_adapter_nvdec_info)) {
+            struct tg_nvdec_resource_info nvdec=e->NvdecInfo;
+            /* Older start/test paths do not populate the optional snapshot. */
+            nvdec.version=TG_NVDEC_QUERY_ABI;nvdec.size=sizeof(nvdec);
+            RtlCopyMemory((UCHAR *)a->pOutputData+sizeof(info),&nvdec,sizeof(nvdec));
+        }
         return STATUS_SUCCESS;
     }
     case DXGKQAITYPE_QUERYSEGMENT4: {

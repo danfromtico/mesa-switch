@@ -1001,5 +1001,34 @@
       "LastCode": 0,
       "LastCodeUtc": "2026-11-16T15:40:17.3461023Z"
     }
+  },
+  "decode_integration": {
+    "updated_utc": "2026-11-16T17:08:49.447681+00:00",
+    "state": "Local candidate only; installed display/power baseline unchanged",
+    "active_sequence": [
+      "720p H.264",
+      "1080p H.264 after720 acceptance"
+    ],
+    "2k_4k": "Independent implementation exists; untested; integration undecided",
+    "external_source_head": "280440f3fc8dbcd00e9afc0152820bf1bd1eafb4",
+    "selected_720p_head": "96e24579a02b5c041be4f8871f67a1818917475e",
+    "resource_preflight": {
+      "directory": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/resource-preflight",
+      "source_base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+      "emc_input_identity": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
+      "patch_sha256": "db088ba8220c54667dc09bdb40117c0bf03db2c6b4b2d2b167b3e29bb4534a2c",
+      "signed_kmd_sha256": "e340ffcceb68b17693854b26a8d581e6b0944c6a58e763f67609ddd66f2b678c",
+      "acpi_sha256": "6b058b409beda750473fa61430cb5196c6191d3801167d7f3c13846077fdcf49",
+      "query_tool_sha256": "5015d34e22878b225b58dcfb29fd484161f4412aec9d46ed99adb9371dda8a5d",
+      "scope": "Optional resources plus immutable always-on state snapshot only; no NVDEC power-up, firmware, DMA, node or capability enabled",
+      "catalog_generated": false,
+      "windows_signature_verified": false,
+      "native_installed": false,
+      "signature_verified_local": true,
+      "review": "Pending Gemini4 Carbon High; not before2026-11-20T23:53:18Z",
+      "controls": "Missing/partial/malformed resources, each map failure, null-success map, retained failed unmaps, snapshot and legacy/extended query guards/alias forms pass CPU controls; release masking regression red-before/green-after; real-WDK ARM64 objects and full render package build",
+      "pairing": "Candidate KMD+extended ACPI must be installed/restored as a pair; baseline E95 alone rejects the additional resource descriptors"
+    },
+    "native_decode_accepted": false
   }
 }

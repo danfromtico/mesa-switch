@@ -29,6 +29,44 @@ void *memset(void *p,int value,size_t n)
 void *memcpy(void *p,const void *source,size_t n)
 { UCHAR *d=p;const UCHAR *s=source;while(n--) *d++=*s++;return p; }
 
+/* The platform bridge now imports unload-safe IRP/PnP functions. Context
+ * controls never open that bridge; fail if any of these substitutes is called.
+ * Bridge execution/lifetime is covered separately by test-platform/test-dvfs. */
+int memcmp(const void *a,const void *b,size_t n)
+{const UCHAR *x=a,*y=b;for(;n--;++x,++y)if(*x!=*y)return (int)*x-(int)*y;return 0;}
+static POBJECT_TYPE context_file_type;
+POBJECT_TYPE *IoFileObjectType=&context_file_type;
+static NTSTATUS NTAPI ContextRefHandle(HANDLE h,ACCESS_MASK a,POBJECT_TYPE t,KPROCESSOR_MODE m,
+    PVOID *o,POBJECT_HANDLE_INFORMATION i)
+{(void)h;(void)a;(void)t;(void)m;(void)o;(void)i;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
+static LONG_PTR FASTCALL ContextObjectRef(PVOID p){(void)p;CHECK(FALSE);return 0;}
+LONG_PTR (FASTCALL *const __imp_ObfReferenceObject)(PVOID)=ContextObjectRef;
+LONG_PTR (FASTCALL *const __imp_ObfDereferenceObject)(PVOID)=ContextObjectRef;
+static PDEVICE_OBJECT NTAPI ContextRelatedDevice(PFILE_OBJECT f)
+{(void)f;CHECK(FALSE);return NULL;}
+static PIRP NTAPI ContextAllocateIrp(CCHAR s,BOOLEAN q)
+{(void)s;(void)q;CHECK(FALSE);return NULL;}
+static VOID NTAPI ContextFreeIrp(PIRP p){(void)p;CHECK(FALSE);}
+static NTSTATUS NTAPI ContextCompletion(PDEVICE_OBJECT d,PIRP p,PIO_COMPLETION_ROUTINE r,
+    PVOID c,BOOLEAN s,BOOLEAN e,BOOLEAN x)
+{(void)d;(void)p;(void)r;(void)c;(void)s;(void)e;(void)x;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
+static BOOLEAN NTAPI ContextCancelIrp(PIRP p){(void)p;CHECK(FALSE);return FALSE;}
+static NTSTATUS FASTCALL ContextCallDriver(PDEVICE_OBJECT d,PIRP p)
+{(void)d;(void)p;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
+static NTSTATUS NTAPI ContextRegisterPnp(IO_NOTIFICATION_EVENT_CATEGORY c,ULONG f,PVOID d,
+    PDRIVER_OBJECT o,PDRIVER_NOTIFICATION_CALLBACK_ROUTINE r,PVOID x,PVOID *n)
+{(void)c;(void)f;(void)d;(void)o;(void)r;(void)x;(void)n;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
+static NTSTATUS NTAPI ContextUnregisterPnp(PVOID p){(void)p;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
+NTSTATUS (NTAPI *const __imp_ObReferenceObjectByHandle)(HANDLE,ACCESS_MASK,POBJECT_TYPE,KPROCESSOR_MODE,PVOID *,POBJECT_HANDLE_INFORMATION)=ContextRefHandle;
+PDEVICE_OBJECT (NTAPI *const __imp_IoGetRelatedDeviceObject)(PFILE_OBJECT)=ContextRelatedDevice;
+PIRP (NTAPI *const __imp_IoAllocateIrp)(CCHAR,BOOLEAN)=ContextAllocateIrp;
+VOID (NTAPI *const __imp_IoFreeIrp)(PIRP)=ContextFreeIrp;
+NTSTATUS (NTAPI *const __imp_IoSetCompletionRoutineEx)(PDEVICE_OBJECT,PIRP,PIO_COMPLETION_ROUTINE,PVOID,BOOLEAN,BOOLEAN,BOOLEAN)=ContextCompletion;
+BOOLEAN (NTAPI *const __imp_IoCancelIrp)(PIRP)=ContextCancelIrp;
+NTSTATUS (FASTCALL *const __imp_IofCallDriver)(PDEVICE_OBJECT,PIRP)=ContextCallDriver;
+NTSTATUS (NTAPI *const __imp_IoRegisterPlugPlayNotification)(IO_NOTIFICATION_EVENT_CATEGORY,ULONG,PVOID,PDRIVER_OBJECT,PDRIVER_NOTIFICATION_CALLBACK_ROUTINE,PVOID,PVOID *)=ContextRegisterPnp;
+NTSTATUS (NTAPI *const __imp_IoUnregisterPlugPlayNotificationEx)(PVOID)=ContextUnregisterPnp;
+
 /* Real WDK types and backend code, with explicit OS/GPU substitutes. Nothing
  * here allocates through live Dxgkrnl or proves physical GPU completion.
  */
@@ -1191,6 +1229,31 @@ static __declspec(noinline) void TestAdapterQueries(TG_GPU_CONTEXT_ENGINE *e,DRI
     CHECK(abi.info.luid_low==(e->AdapterIdentityReady?e->AdapterLuid.LowPart:0u));
     CHECK(abi.info.luid_high==(e->AdapterIdentityReady?e->AdapterLuid.HighPart:0));
     for(i=0;i<sizeof(abi.guard);++i)CHECK(abi.guard[i]==0xa5);
+    /* Extended callers receive only the complete optional snapshot. Legacy
+     * 48-byte queries (and their guard above) retain their exact ABI. */
+    struct {struct tg_gpu_adapter_nvdec_info info;UCHAR guard[16];} ext;
+    struct tg_nvdec_resource_info saved_nvdec=e->NvdecInfo;
+    e->NvdecInfo=(struct tg_nvdec_resource_info){
+        .version=TG_NVDEC_QUERY_ABI,.size=64,.flags=7,.resource_mask=0x1ff,
+        .status=TG_NVDEC_RESOURCES_CAPTURED,.hidrev=0x22110021,
+        .smmu_nvdec_asid=0x80000002};
+    for(UINT form=0;form<3;++form) {
+        memset(&ext,0xa5,sizeof(ext));ext.info.base=request;
+        a.pOutputData=&ext;a.OutputDataSize=sizeof(ext);
+        a.pInputData=form==0?&request:(form==1?&ext.info.base:NULL);
+        a.InputDataSize=form==2?0:sizeof(request);
+        CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)));
+        CHECK(ext.info.base.version==TG_GPU_ADAPTER_ABI && ext.info.base.size==48);
+        CHECK(!memcmp(&ext.info.nvdec,&e->NvdecInfo,sizeof(e->NvdecInfo)));
+        for(i=0;i<sizeof(ext.guard);++i)CHECK(ext.guard[i]==0xa5);
+    }
+    memset(&ext,0xa5,sizeof(ext));
+    a.OutputDataSize=sizeof(ext.info)-1;
+    CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)));
+    for(i=sizeof(ext.info.base);i<sizeof(ext);++i)CHECK(((UCHAR *)&ext)[i]==0xa5);
+    e->NvdecInfo=saved_nvdec;
+    a.pInputData=&request;a.InputDataSize=sizeof(request);
+    a.pOutputData=&abi;a.OutputDataSize=sizeof(abi);
     const BOOLEAN saved_paging=e->PagingOnly,saved_identity=e->AdapterIdentityReady;
     e->PagingOnly=TRUE;e->AdapterIdentityReady=TRUE;
     CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)) && abi.info.flags==TG_GPU_ADAPTER_LUID_VALID);
