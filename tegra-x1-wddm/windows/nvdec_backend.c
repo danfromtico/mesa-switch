@@ -5,6 +5,8 @@
 #include <ntddk.h>
 
 struct tg_nvdec_win {
+    DXGKRNL_INTERFACE dxgk;
+    TG_NVDEC_MEMORY memory;
     struct tg_nvdec_platform_io pio;
     struct tg_nvdec_platform_owner owner;
     UINT32 channel, syncpt;
@@ -38,36 +40,24 @@ static void win_delay(void *ctx, UINT32 us)
 
 static bool win_dma_alloc(void *ctx, SIZE_T size, struct tg_nvdec_dma *out)
 {
-    PHYSICAL_ADDRESS low, high, skip;
-    void *p;
-    PHYSICAL_ADDRESS pa;
-
-    UNREFERENCED_PARAMETER(ctx);
-    low.QuadPart = 0;
-    high.QuadPart = 0xffffffffull;   /* Current encoder admits only low32-bit addresses. */
-    skip.QuadPart = 0;
-    p = MmAllocateContiguousMemorySpecifyCache(size, low, high, skip, MmNonCached);
-    if (!p)
-        return false;
-    pa = MmGetPhysicalAddress(p);
-    if (pa.QuadPart <= 0 || (ULONGLONG)pa.QuadPart > 0xffffffffull ||
-        size > 0x100000000ull - (ULONGLONG)pa.QuadPart) {
-        MmFreeContiguousMemory(p);
-        return false;
-    }
-    RtlZeroMemory(p, size);
-    out->cpu = p;
-    out->bus = pa.QuadPart;
-    out->size = size;
-    return true;
+    struct tg_nvdec_win *w = ctx;
+    return TgNvdecMemoryAllocate(&w->memory, size, out) != FALSE;
 }
 
 static void win_dma_free(void *ctx, struct tg_nvdec_dma *dma)
 {
+    struct tg_nvdec_win *w = ctx;
+    TgNvdecMemoryRetire(&w->memory, dma);
+}
+
+static void win_dma_sync(void *ctx, const struct tg_nvdec_dma *dma, bool to_device)
+{
     UNREFERENCED_PARAMETER(ctx);
-    if (dma->cpu)
-        MmFreeContiguousMemory(dma->cpu);
-    RtlZeroMemory(dma, sizeof(*dma));
+    UNREFERENCED_PARAMETER(dma);
+    UNREFERENCED_PARAMETER(to_device);
+    /* Private allocations use an uncached CPU mapping. Order CPU writes
+     * before publication and device output reads after verified completion. */
+    KeMemoryBarrier();
 }
 
 static enum tg_nvdec_result win_submit(void *ctx, const struct tg_nvdec_dma *gather,
@@ -78,7 +68,7 @@ static enum tg_nvdec_result win_submit(void *ctx, const struct tg_nvdec_dma *gat
     struct tg_nvdec_win *w = ctx;
     enum tg_nvdec_platform_result r;
 
-    if (syncpt_id != w->syncpt)
+    if (syncpt_id != w->syncpt || !tg_nvdec_platform_direct_dma(&w->pio))
         return TG_NVDEC_ERR_ARGUMENT;
     r = tg_nvdec_host1x_submit(&w->pio, &w->platform, gather->cpu, words,
                                gather->bus, w->push.cpu, w->push.bus,
@@ -97,37 +87,43 @@ static bool win_cancel(void *ctx)
     return tg_nvdec_host1x_stop(&w->pio, &w->platform) == TG_NVDEC_PLATFORM_OK;
 }
 
-static void release_surfaces(struct tg_nvdec_win *w)
+static NTSTATUS release_surfaces(struct tg_nvdec_win *w)
 {
     UINT32 i;
     for (i = 0; i < TG_NVDEC_MAX_SURFACES; i++)
         win_dma_free(w, &w->surfaces[i]);
     w->surfaces_ready = FALSE;
+    return TgNvdecMemoryRetryRetired(&w->memory);
 }
 
 NTSTATUS TgNvdecReleaseSurfaces(struct tg_nvdec_win *w)
 {
     if (!w) return STATUS_INVALID_PARAMETER;
     if (w->engine.in_flight) return STATUS_DEVICE_BUSY;
-    release_surfaces(w);
-    return STATUS_SUCCESS;
+    return release_surfaces(w);
 }
 
-NTSTATUS TgNvdecCreate(const struct tg_nvdec_platform_io *io,
+NTSTATUS TgNvdecCreate(const DXGKRNL_INTERFACE *dxgk,
+                       const struct tg_nvdec_platform_io *io,
                        const struct tg_nvdec_platform_owner *owner,
                        UINT32 channel, UINT32 syncpt,
                        struct tg_nvdec_win **result)
 {
     struct tg_nvdec_win *w;
+    NTSTATUS status;
 
-    if (!result || *result || !io || !io->read32 || !io->write32 || !io->delay_us ||
+    if (!dxgk || !result || *result || !io || !io->read32 || !io->write32 || !io->delay_us ||
         !owner || !owner->acquire_host1x || !owner->release_host1x ||
         channel >= 12 || syncpt >= 192)
         return STATUS_INVALID_PARAMETER;
+    if (!tg_nvdec_platform_direct_dma(io)) return STATUS_NOT_SUPPORTED;
     w = ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(*w), 'cvdN');
     if (!w)
         return STATUS_INSUFFICIENT_RESOURCES;
     RtlZeroMemory(w, sizeof(*w));
+    w->dxgk = *dxgk;
+    status = TgNvdecMemoryInit(&w->memory, &w->dxgk);
+    if (!NT_SUCCESS(status)) { ExFreePoolWithTag(w, 'cvdN'); return status; }
     w->pio = *io;
     w->owner = *owner;
     w->channel = channel;
@@ -139,6 +135,7 @@ NTSTATUS TgNvdecCreate(const struct tg_nvdec_platform_io *io,
     w->hal.delay_us = win_delay;
     w->hal.dma_alloc = win_dma_alloc;
     w->hal.dma_free = win_dma_free;
+    w->hal.dma_sync = win_dma_sync;
     w->hal.submit = win_submit;
     w->hal.cancel = win_cancel;
     tg_nvdec_init(&w->engine, &w->hal, w->syncpt);
@@ -166,8 +163,10 @@ NTSTATUS TgNvdecDestroy(struct tg_nvdec_win *w)
         return STATUS_DEVICE_BUSY;
     if (tg_nvdec_platform_shutdown(&w->pio, &w->platform) != TG_NVDEC_PLATFORM_OK)
         return STATUS_DEVICE_BUSY;
-    release_surfaces(w);
+    (VOID)release_surfaces(w);
     win_dma_free(w, &w->push);
+    if (!NT_SUCCESS(TgNvdecMemoryFinish(&w->memory)))
+        return STATUS_DEVICE_BUSY;
     ExFreePoolWithTag(w, 'cvdN');
     return STATUS_SUCCESS;
 }
@@ -224,6 +223,7 @@ NTSTATUS TgNvdecLoadFirmware(struct tg_nvdec_win *w, const void *data,
     if (w->platform.quiesced &&
         tg_nvdec_platform_shutdown(&w->pio, &w->platform) != TG_NVDEC_PLATFORM_OK)
         return STATUS_DEVICE_BUSY;
+    if (!tg_nvdec_platform_direct_dma(&w->pio)) return STATUS_NOT_SUPPORTED;
     if (!w->platform.active &&
         tg_nvdec_platform_init(&w->pio, &w->platform, w->channel, w->syncpt, &w->owner) != TG_NVDEC_PLATFORM_OK)
         return STATUS_DEVICE_NOT_READY;
@@ -262,10 +262,11 @@ NTSTATUS TgNvdecConfigure(struct tg_nvdec_win *w, UINT32 width, UINT32 height,
     if (!bytes)
         return STATUS_INVALID_PARAMETER;
 
-    release_surfaces(w);
+    NTSTATUS released = release_surfaces(w);
+    if (!NT_SUCCESS(released)) return released;
     for (i = 0; i < TG_NVDEC_MAX_SURFACES; i++) {
         if (!win_dma_alloc(w, bytes, &w->surfaces[i])) {
-            release_surfaces(w);
+            (VOID)release_surfaces(w);
             return STATUS_INSUFFICIENT_RESOURCES;
         }
     }
@@ -343,7 +344,8 @@ NTSTATUS TgNvdecReset(struct tg_nvdec_win *w)
         tg_nvdec_platform_shutdown(&w->pio, &w->platform) != TG_NVDEC_PLATFORM_OK)
         return STATUS_DEVICE_BUSY;
     tg_nvdec_init(&w->engine, &w->hal, w->syncpt);
-    release_surfaces(w);
+    NTSTATUS released = release_surfaces(w);
+    if (!NT_SUCCESS(released)) return released;
     w->width = w->height = w->pitch = w->aligned_height = w->frame_size = 0;
     return STATUS_SUCCESS;
 }

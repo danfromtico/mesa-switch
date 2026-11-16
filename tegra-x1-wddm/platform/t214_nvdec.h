@@ -78,6 +78,10 @@ struct tg_nvdec_platform {
 };
 
 void tg_nvdec_platform_zero(struct tg_nvdec_platform *p);
+/* Live read of the two DMA clients used by this backend. Admit only the
+ * explicitly untranslated route; do not disable somebody else's SMMU map.
+ * This check is not an allocation or evidence of successful device DMA. */
+bool tg_nvdec_platform_direct_dma(const struct tg_nvdec_platform_io *io);
 /* p must be freshly zeroed or successfully shut down. The caller holds the
  * adapter's lifecycle/MC lock and reserves channel/syncpt until shutdown
  * succeeds. A failed init may retain ownership: call shutdown, never zero it.

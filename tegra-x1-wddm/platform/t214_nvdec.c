@@ -122,6 +122,23 @@ static bool valid_io(const struct tg_nvdec_platform_io *io)
     return io && io->read32 && io->write32 && io->delay_us;
 }
 
+bool tg_nvdec_platform_direct_dma(const struct tg_nvdec_platform_io *io)
+{
+    uint32_t en0, en1, en3, hc, dec;
+    if (!io || !io->read32) return false;
+    en0 = r32(io, TG_NVDEC_AP_MC, 0x228u);
+    en1 = r32(io, TG_NVDEC_AP_MC, 0x22cu);
+    en3 = r32(io, TG_NVDEC_AP_MC, 0x234u);
+    hc = r32(io, TG_NVDEC_AP_MC, 0x250u);
+    dec = r32(io, TG_NVDEC_AP_MC, 0xab4u);
+    if (en0 == UINT32_MAX || en1 == UINT32_MAX || en3 == UINT32_MAX ||
+        hc == UINT32_MAX || dec == UINT32_MAX) return false;
+    /* HC read clients 0x16/0x17, HC write0x36, NVDEC read/write0x78/0x79.
+     * NVJPG performs no DMA in this path; its clock/reset stay inactive. */
+    return !(en0 & (3u << 22)) && !(en1 & (1u << 22)) &&
+           !(en3 & (3u << 24)) && !((hc | dec) & (1u << 31));
+}
+
 /* The caller serializes this shared MC word against graphics reset/power
  * transitions. Only NVDEC's client bit may change. */
 static bool set_mc_flush(const struct tg_nvdec_platform_io *io, bool set)

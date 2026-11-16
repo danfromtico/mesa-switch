@@ -262,7 +262,7 @@ objects = []
 for source in [*core, power, clock, root / "platform/t214_dc.c", root / "windows/resources.c",
                root / "windows/panel.c", root / "windows/panel_vidpn.c",
                root / "windows/panel_scanout.c",
-               root / "windows/private_memory.c", root / "windows/paging.c",
+               root / "windows/private_memory.c", root / "windows/nvdec_memory.c", root / "windows/paging.c",
                root / "windows/table_segment.c", root / "windows/root_table.c",
                root / "windows/paging_buffer.c",root / "windows/paging_dispatch.c",
                root / "windows/paging_submit.c",root / "windows/context.c",
@@ -301,6 +301,14 @@ if args.windows_tests:
                     str(args.out / "root_table.obj"), str(args.out / "t214_mmu.obj"),
                     str(args.out / "paging_buffer.obj"), str(args.out / "paging_dma.obj"),
                     str(args.out / "resources.obj"), str(args.out / "t214_dc.obj"),
+                    str(sdk_lib)], check=True)
+    nvdec_memory_test = args.out / "test_nvdec_memory_windows.obj"
+    subprocess.run([args.clang_cl, *flags, "/clang:-funwind-tables", f"/Fo{nvdec_memory_test}", "--",
+                    str(root / "tests/test_nvdec_memory_windows.c")], check=True)
+    subprocess.run([args.link, "/nologo", "/machine:arm64", "/subsystem:console,10.0",
+                    "/entry:start", "/include:_load_config_used", "/nodefaultlib", "/release", "/opt:ref", "/timestamp:0",
+                    f"/out:{args.out / 'test-nvdec-memory.exe'}", str(nvdec_memory_test),
+                    str(args.out / "nvdec_memory.obj"), str(args.out / "private_memory.obj"),
                     str(sdk_lib)], check=True)
     context_test = args.out / "test_context_windows.obj"
     subprocess.run([args.clang_cl, *flags, "/clang:-funwind-tables", f"/Fo{context_test}", "--",

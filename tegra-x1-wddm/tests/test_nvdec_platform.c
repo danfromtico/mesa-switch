@@ -228,11 +228,29 @@ static void test_failed_cleanup_retains_ownership(void)
         retained_boot_state();
     }
 }
+static void test_direct_route_is_not_assumed(void)
+{
+    prepare();
+    CHECK(tg_nvdec_platform_direct_dma(&io));
+    const uint32_t offsets[] = {0x228, 0x228, 0x22c, 0x234, 0x234, 0x250, 0xab4};
+    const uint32_t bits[] = {22, 23, 22, 24, 25, 31, 31};
+    for (unsigned i = 0; i < sizeof(bits)/sizeof(bits[0]); ++i) {
+        m.mc[offsets[i]/4] = 1u << bits[i];
+        CHECK(!tg_nvdec_platform_direct_dma(&io));
+        m.mc[offsets[i]/4] = UINT32_MAX;
+        CHECK(!tg_nvdec_platform_direct_dma(&io));
+        m.mc[offsets[i]/4] = 0;
+    }
+    /* NVJPG does not execute DMA for H.264. Its dependency is power-only. */
+    m.mc[0x234/4] = 3u << 30; m.mc[0xac0/4] = 1u << 31;
+    CHECK(tg_nvdec_platform_direct_dma(&io) && !m.writes);
+}
 int main(void)
 {
     test_inherited_and_submit();
     test_refuse_foreign_or_unknown_state();
     test_failed_cleanup_retains_ownership();
+    test_direct_route_is_not_assumed();
     if (failures) { fprintf(stderr, "%d failure(s)\n", failures); return 1; }
     puts("PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)");
     return 0;
