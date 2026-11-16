@@ -46,6 +46,16 @@ the producer, and re-export. The latter requires a registered ICD and an
 active native-submit KMD. These live probes are not default build tests.
 [Win32 memory contract and physical evidence](../../../../../tegra-x1-wddm/docs/VULKAN_WIN32_MEMORY.md)
 
+`test-kmt-displayable.exe` checks the submitting-device reference and
+`WrittenPrimaries` transport for runtime-owned backing. A source kernel
+resource is exported and opened on the submitting device; foreign allocation
+handles are never substituted. The helper does not allocate replacement pixel
+storage, and cleanup does not debit the original owner's memory counter.
+Failed cleanup retains its handles for retry. Paging removal is not completion.
+These helpers are not yet connected to UMD write tracking or ordinary NVK queue
+submission. Modern tgd3d admission remains withheld until that integration is
+complete. [Contract audit and CPU controls](../../../../../tegra-x1-wddm/docs/DISPLAYABLE_RESOURCE_CONTRACT_20261116.md)
+
 Shared CPU-visible allocations use page-rounded byte counts and
 `PAGE_READWRITE | SEC_COMMIT | SEC_WRITECOMBINE`, without large-page flags.
 Failed `CreateFileMappingW` calls retain their Win32 error in the SDK's

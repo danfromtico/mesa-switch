@@ -149,9 +149,15 @@ tg_kmt_wait_fences(const struct tg_kmt_device *dev, uint32_t count,
 static LONG
 wait_paging(const struct tg_kmt_device *dev, uint64_t target)
 {
-   if (dev->paging.value && *dev->paging.value >= target)
+   const uint64_t completed = dev->paging.value ? *dev->paging.value : 0;
+   if (completed == UINT64_MAX || target == UINT64_MAX)
+      return TG_KMT_DEVICE_REMOVED;
+   if (!target || (dev->paging.value && completed >= target))
       return 0;
-   return tg_kmt_wait_fences(dev, 1, &dev->paging.handle, &target, false, INFINITE);
+   LONG status = tg_kmt_wait_fences(dev, 1, &dev->paging.handle, &target, false, INFINITE);
+   if (status >= 0 && dev->paging.value && *dev->paging.value == UINT64_MAX)
+      return TG_KMT_DEVICE_REMOVED;
+   return status;
 }
 
 static bool
@@ -663,10 +669,19 @@ tg_kmt_signal_gpu(uint32_t context, uint32_t count, const uint32_t *handles,
 }
 
 LONG
-tg_kmt_submit(uint32_t context, uint64_t address, const void *words, uint32_t bytes)
+tg_kmt_submit_primaries(uint32_t context, uint64_t address, const void *words,
+                       uint32_t bytes, uint32_t count, const uint32_t *allocations)
 {
-   if (!context || !address || !words || !bytes || (bytes & 3) || bytes > TG_GPU_SUBMIT_MAX_BYTES)
+   if (!context || !address || !words || !bytes || (bytes & 3) || bytes > TG_GPU_SUBMIT_MAX_BYTES ||
+       count > D3DDDI_MAX_WRITTEN_PRIMARIES || (count && !allocations))
       return TG_KMT_INVALID_PARAMETER;
+   for (uint32_t i = 0; i < count; ++i) {
+      if (!allocations[i])
+         return TG_KMT_INVALID_PARAMETER;
+      for (uint32_t j = 0; j < i; ++j)
+         if (allocations[i] == allocations[j])
+            return TG_KMT_INVALID_PARAMETER;
+   }
    const uint32_t size = sizeof(struct tg_gpu_submit_request) + bytes;
    struct tg_gpu_submit_request *request = malloc(size);
    if (!request)
@@ -676,12 +691,128 @@ tg_kmt_submit(uint32_t context, uint64_t address, const void *words, uint32_t by
    };
    MemoryBarrier();
    memcpy(request + 1, words, bytes);
-   const D3DKMT_SUBMITCOMMAND args = {
+   D3DKMT_SUBMITCOMMAND args = {
       .Commands = address, .CommandLength = bytes,
       .BroadcastContextCount = 1, .BroadcastContext = { context },
       .pPrivateDriverData = request, .PrivateDriverDataSize = size,
+      .NumPrimaries = count,
    };
+   if (count)
+      memcpy(args.WrittenPrimaries, allocations, count * sizeof(*allocations));
    LONG status = D3DKMTSubmitCommand(&args);
    free(request);
+   return status;
+}
+
+LONG
+tg_kmt_submit(uint32_t context, uint64_t address, const void *words, uint32_t bytes)
+{
+   return tg_kmt_submit_primaries(context, address, words, bytes, 0, NULL);
+}
+
+LONG
+tg_kmt_close_runtime_alias(const struct tg_kmt_device *dev, struct tg_kmt_runtime_alias *alias)
+{
+   if (!dev || !alias || (alias->device && alias->device != dev->handle))
+      return TG_KMT_INVALID_PARAMETER;
+   if (!alias->resource && !alias->allocation) {
+      *alias = (struct tg_kmt_runtime_alias){0};
+      return 0;
+   }
+   const D3DKMT_DESTROYALLOCATION2 destroy = {
+      .hDevice = dev->handle, .hResource = alias->resource,
+      .AllocationCount = alias->resource ? 0 : 1,
+      .phAllocationList = alias->resource ? NULL : &alias->allocation,
+   };
+   LONG status = D3DKMTDestroyAllocation2(&destroy);
+   if (status >= 0)
+      *alias = (struct tg_kmt_runtime_alias){0};
+   return status;
+}
+
+LONG
+tg_kmt_open_runtime_alias(struct tg_kmt_device *dev, uint32_t resource,
+                          uint64_t expected_bytes, struct tg_kmt_runtime_alias *alias)
+{
+   if (!dev || !dev->handle || !resource || !alias || alias->device || alias->resource ||
+       alias->allocation || !expected_bytes || (expected_bytes & (TG_KMT_PAGE_SIZE - 1)))
+      return TG_KMT_INVALID_PARAMETER;
+   HANDLE handle = NULL;
+   LONG status = export_object_win32(resource, NULL,
+      STANDARD_RIGHTS_READ | SHARED_ALLOCATION_WRITE, NULL, &handle);
+   if (status < 0)
+      return status; /* Do not fall back to a foreign device's allocation. */
+   if (!handle)
+      return TG_KMT_INVALID_PARAMETER;
+   D3DKMT_QUERYRESOURCEINFOFROMNTHANDLE query = {
+      .hDevice = dev->handle, .hNtHandle = handle,
+   };
+   status = D3DKMTQueryResourceInfoFromNtHandle(&query);
+   void *runtime_data = NULL, *resource_data = NULL, *allocation_data = NULL;
+   if (status < 0)
+      goto done;
+   /* This transport is only for one validated Tegra allocation. Runtime
+    * private data is opaque; bound each returned length before allocation. */
+   if (query.NumAllocations != 1 || query.PrivateRuntimeDataSize > 1024 * 1024 ||
+       query.ResourcePrivateDriverDataSize > 4096 ||
+       query.TotalPrivateDriverDataSize < sizeof(struct tg_gpu_allocation_request) ||
+       query.TotalPrivateDriverDataSize > 4096) {
+      status = TG_KMT_INVALID_PARAMETER;
+      goto done;
+   }
+   runtime_data = calloc(1, query.PrivateRuntimeDataSize ? query.PrivateRuntimeDataSize : 1);
+   resource_data = calloc(1, query.ResourcePrivateDriverDataSize ? query.ResourcePrivateDriverDataSize : 1);
+   allocation_data = calloc(1, query.TotalPrivateDriverDataSize);
+   if (!runtime_data || !resource_data || !allocation_data) {
+      status = TG_KMT_NO_MEMORY;
+      goto done;
+   }
+   D3DDDI_OPENALLOCATIONINFO2 info = {0};
+   D3DKMT_OPENRESOURCEFROMNTHANDLE open = {
+      .hDevice = dev->handle, .hNtHandle = handle,
+      .NumAllocations = 1, .pOpenAllocationInfo2 = &info,
+      .PrivateRuntimeDataSize = query.PrivateRuntimeDataSize, .pPrivateRuntimeData = runtime_data,
+      .ResourcePrivateDriverDataSize = query.ResourcePrivateDriverDataSize,
+      .pResourcePrivateDriverData = resource_data,
+      .TotalPrivateDriverDataBufferSize = query.TotalPrivateDriverDataSize,
+      .pTotalPrivateDriverDataBuffer = allocation_data,
+   };
+   status = D3DKMTOpenResourceFromNtHandle(&open);
+   *alias = (struct tg_kmt_runtime_alias) {dev->handle, open.hResource, info.hAllocation};
+   if (status < 0)
+      goto unwind;
+   const uintptr_t begin = (uintptr_t)allocation_data, data = (uintptr_t)info.pPrivateDriverData;
+   const uint32_t private_bytes = query.TotalPrivateDriverDataSize;
+   status = TG_KMT_INVALID_PARAMETER;
+   if (!alias->resource || !alias->allocation ||
+       open.TotalPrivateDriverDataBufferSize != private_bytes ||
+       open.PrivateRuntimeDataSize != query.PrivateRuntimeDataSize ||
+       open.ResourcePrivateDriverDataSize != query.ResourcePrivateDriverDataSize ||
+       info.PrivateDriverDataSize < sizeof(struct tg_gpu_allocation_request) ||
+       data < begin || data - begin > private_bytes ||
+       info.PrivateDriverDataSize > private_bytes - (data - begin))
+      goto unwind;
+   struct tg_gpu_allocation_request storage;
+   memcpy(&storage, info.pPrivateDriverData, sizeof(storage));
+   if (storage.version != TG_GPU_ALLOCATION_ABI || storage.bytes != expected_bytes ||
+       (storage.flags & ~(TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_DISPLAY_PRIMARY |
+                          TG_GPU_ALLOCATION_LINEAR_SURFACE)))
+      goto unwind;
+   D3DDDI_MAKERESIDENT resident = {
+      .hPagingQueue = dev->paging_queue, .NumAllocations = 1,
+      .AllocationList = &alias->allocation,
+   };
+   status = D3DKMTMakeResident(&resident);
+   if (status >= 0)
+      status = wait_paging(dev, resident.PagingFenceValue);
+   if (status < 0) {
+unwind:;
+      LONG cleanup = tg_kmt_close_runtime_alias(dev, alias);
+      if (cleanup < 0)
+         status = cleanup; /* Keep failed-close ownership in alias. */
+   }
+done:
+   free(allocation_data); free(resource_data); free(runtime_data);
+   CloseHandle(handle);
    return status;
 }

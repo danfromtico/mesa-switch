@@ -39,6 +39,21 @@ struct tg_kmt_va {
    uint64_t reserved_base, reserved_size;
 };
 
+/* A second device's reference to the same runtime-owned backing. It does not
+ * allocate memory or own the producer's handles, and is not charged twice to
+ * the local allocator's byte counter. VidMm still admits this device's own
+ * residency reference. Close only after the actual submitting GPU completes. */
+struct tg_kmt_runtime_alias {
+   uint32_t device, resource, allocation;
+};
+
+LONG tg_kmt_open_runtime_alias(struct tg_kmt_device *dev, uint32_t resource,
+                              uint64_t expected_bytes, struct tg_kmt_runtime_alias *alias);
+/* Failed close preserves the handles. Open may also return a live alias when
+ * its unwind fails; the caller must retain it for cleanup, never use it. */
+LONG tg_kmt_close_runtime_alias(const struct tg_kmt_device *dev,
+                               struct tg_kmt_runtime_alias *alias);
+
 LONG tg_kmt_open_device(struct tg_kmt_device *dev,
                         const struct tg_gpu_adapter_info *adapter);
 LONG tg_kmt_close_device(struct tg_kmt_device *dev);
@@ -92,5 +107,8 @@ LONG tg_kmt_signal_gpu(uint32_t context, uint32_t count,
                        const uint32_t *handles, const uint64_t *values);
 LONG tg_kmt_submit(uint32_t context, uint64_t address, const void *words,
                     uint32_t bytes);
+/* Allocation handles must belong to the device owning context. */
+LONG tg_kmt_submit_primaries(uint32_t context, uint64_t address, const void *words,
+                           uint32_t bytes, uint32_t count, const uint32_t *allocations);
 
 #endif

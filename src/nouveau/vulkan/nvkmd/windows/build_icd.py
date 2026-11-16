@@ -60,6 +60,10 @@ def main():
     run(*sdk_cc, "/O2", "/GS-", "/Zl", f"/Fo{sync_test}", "--", win / "test-kmt-sync.c")
     run(a.cc, sync_test, kmt_object, "-Wl,--gc-sections", "-lgdi32", "-ladvapi32",
         "-o", out / "test-kmt-sync.exe")
+    displayable_test = out / "test-kmt-displayable.obj"
+    run(*sdk_cc, "/O2", "/GS-", "/Zl", f"/Fo{displayable_test}", "--", win / "test-kmt-displayable.c")
+    run(a.cc, displayable_test, kmt_object, "-Wl,--gc-sections", "-lgdi32",
+        "-o", out / "test-kmt-displayable.exe")
     run(a.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
         win / "check-shared.c", win / "kmt.c", kmt_object, "-lgdi32",
         "-o", out / "nvk-windows-shared-check.exe")
@@ -101,7 +105,8 @@ def main():
         "library_path": r".\libvulkan_nouveau.dll", "api_version": "1.4.0",
     }}, indent=2) + "\n")
     files = [dll, out / "nvk-windows-check.exe", out / "test-kmt.exe",
-             out / "test-kmt-shared.exe", out / "test-kmt-sync.exe", out / "test-nvk-win32-sync.exe",
+             out / "test-kmt-shared.exe", out / "test-kmt-sync.exe", out / "test-kmt-displayable.exe",
+             out / "test-nvk-win32-sync.exe",
              out / "nvk-windows-shared-check.exe",
              out / "nvk-windows-vulkan-shared-check.exe", out / "test-win32-image-flags.exe",
              out / "test-win32-pacing.exe", manifest]
