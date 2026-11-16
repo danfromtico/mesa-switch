@@ -789,6 +789,139 @@ static void presentation13_contracts()
    std::puts("PASS: Present1 preserves opaque context/status and one callback for dirty rects; validates bounds/ownership and leaves WDDM2 fields untouched (CPU control)");
 }
 
+static std::vector<BYTE> tiledMetadata;
+static tg_gpu_allocation_request tiledAllocation;
+static bool tiledMapped[2], tiledFailBind, tiledMismatch;
+static UINT tiledErrors, tiledImages;
+static HRESULT tiledError;
+
+static void shared_tiled_contracts()
+{
+   for (DXGI_FORMAT format : {DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_B8G8R8X8_UNORM_SRGB,
+                             DXGI_FORMAT_R10G10B10A2_UNORM, DXGI_FORMAT_R16G16B16A16_FLOAT}) {
+      Adapter adapter; Device producer, consumer;
+      ignoreImport = false; tiledFailBind = tiledMismatch = false; tiledErrors = tiledImages = 0;
+      tiledMapped[0] = tiledMapped[1] = false;
+      init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
+      adapter.vk.caps.maxImageDimension2D = 8192; adapter.vk.caps.maxImageArrayLayers = 2048;
+      adapter.vk.caps.driverVersion = 0x1234;
+      memset(adapter.vk.caps.deviceUUID, 0x31, VK_UUID_SIZE);
+      memset(adapter.vk.caps.driverUUID, 0x72, VK_UUID_SIZE);
+      adapter.vk.vk.GetPhysicalDeviceFormatProperties = [](VkPhysicalDevice, VkFormat, VkFormatProperties *out) {
+         *out = {}; out->optimalTilingFeatures = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
+            VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT | VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT;
+      };
+      for (Device *dev : {&producer, &consumer}) {
+         dev->caps = &adapter.vk.caps; dev->interfaceVersion = D3DWDDM2_0_DDI_INTERFACE_VERSION;
+         dev->um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { ++tiledErrors; tiledError = hr; };
+         dev->vk.CreateImage = [](VkDevice d, const VkImageCreateInfo *in,
+                                  const VkAllocationCallbacks *, VkImage *out) {
+            CHECK(in->tiling == VK_IMAGE_TILING_OPTIMAL && in->initialLayout == VK_IMAGE_LAYOUT_UNDEFINED);
+            CHECK(in->extent.width == 17 && in->extent.height == 9 && in->extent.depth == 1 &&
+                  in->arrayLayers == 2 && in->mipLevels == 1 && (in->flags & VK_IMAGE_CREATE_ALIAS_BIT));
+            *out = (VkImage)(uintptr_t)(0x800 + (uintptr_t)d); ++tiledImages; return VK_SUCCESS;
+         };
+         dev->vk.GetImageMemoryRequirements = [](VkDevice d, VkImage, VkMemoryRequirements *out) {
+            *out = {sizeof(bytes) + (tiledMismatch && (uintptr_t)d == 2 ? 4096u : 0u), 4096, 1};
+         };
+         dev->kt.pfnMapGpuVirtualAddressCb = [](HANDLE d, D3DDDI_MAPGPUVIRTUALADDRESS *a) -> HRESULT {
+            unsigned n = index(d);
+            CHECK(a->hPagingQueue == 0x40 + n && a->hAllocation == 0x60 + n && a->SizeInPages == 2);
+            CHECK((a->DriverProtection == 0 && a->BaseAddress == 0x100000) ||
+                  (a->DriverProtection == 0xfe && a->BaseAddress == 0x120000 + n * 0x10000));
+            a->VirtualAddress = a->BaseAddress; a->PagingFenceValue = 8; ++maps; return E_PENDING;
+         };
+         dev->kt.pfnFreeGpuVirtualAddressCb = [](HANDLE d, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) -> HRESULT {
+            unsigned n = index(d);
+            CHECK(a->Size == sizeof(bytes) && (a->BaseAddress == 0x100000 ||
+                  a->BaseAddress == 0x120000 + n * 0x10000)); ++frees; return S_OK;
+         };
+         dev->vk.BindImageMemory = [](VkDevice d, VkImage, VkDeviceMemory, VkDeviceSize offset) {
+            unsigned n = (uintptr_t)d - 1; CHECK(!offset && owners[n]);
+            if (tiledFailBind && n == 1) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+            const auto *owner = owners[n];
+            uint64_t address = 0x120000 + n * 0x10000;
+            CHECK(owner->map_gpu(owner->context, address, 0, sizeof(bytes), 0xfe, false,
+                                  address, sizeof(bytes)) == VK_SUCCESS);
+            tiledMapped[n] = true; return VK_SUCCESS;
+         };
+         dev->vk.DestroyImage = [](VkDevice d, VkImage, const VkAllocationCallbacks *) {
+            unsigned n = (uintptr_t)d - 1; CHECK(tiledImages); --tiledImages;
+            if (tiledMapped[n]) {
+               CHECK(owners[n] && owners[n]->free_gpu(owners[n]->context,
+                  0x120000 + n * 0x10000, sizeof(bytes)) == VK_SUCCESS);
+               tiledMapped[n] = false;
+            }
+         };
+      }
+      producer.kt.pfnAllocateCb = [](HANDLE d, D3DDDICB_ALLOCATE *a) -> HRESULT {
+         CHECK(index(d) == 0 && a->hResource == rt_resource(0) && a->NumAllocations == 1);
+         CHECK(a->PrivateDriverDataSize == 152 && a->pAllocationInfo2->PrivateDriverDataSize == sizeof(tiledAllocation));
+         const auto data = (const BYTE *)a->pPrivateDriverData;
+         tiledMetadata.assign(data, data + a->PrivateDriverDataSize);
+         memcpy(&tiledAllocation, a->pAllocationInfo2->pPrivateDriverData, sizeof(tiledAllocation));
+         CHECK(tiledAllocation.version == TG_GPU_ALLOCATION_ABI &&
+               tiledAllocation.flags == TG_GPU_ALLOCATION_CPU_VISIBLE && tiledAllocation.bytes == sizeof(bytes));
+         a->pAllocationInfo2->hAllocation = 0x60; ++allocations; return S_OK;
+      };
+      // Runtime owners capture their own device's callbacks only after this point.
+      D3DWDDM2_0DDI_DEVICEFUNCS table; device_fill_table20(&table);
+      alignas(Resource) BYTE producerStorage[sizeof(Resource)], consumerStorage[sizeof(Resource)];
+      Resource *p = (Resource *)producerStorage, *c = (Resource *)consumerStorage;
+      D3D10DDI_MIPINFO mip = {17,9,1,17,9,1};
+      D3D11DDIARG_CREATERESOURCE desc = {};
+      desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D; desc.pMipInfoList = &mip;
+      desc.Usage = D3D10_DDI_USAGE_DEFAULT; desc.MiscFlags = D3D10_DDI_RESOURCE_MISC_SHARED;
+      desc.BindFlags = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_SHADER_RESOURCE;
+      desc.Format = format; desc.MipLevels = desc.SampleDesc.Count = 1; desc.ArraySize = 2;
+      table.pfnCreateResource({&producer}, &desc, {p}, {rt_resource(0)});
+      CHECK(!tiledErrors && p->tiledShared && p->arraySize == 2 && !p->pitch &&
+            p->storage.externalShared && !p->storage.layoutReady && !p->storage.preinitialized);
+      const auto originalMetadata = tiledMetadata;
+      const UINT beforeAllocations = allocations;
+      D3DDDI_OPENALLOCATIONINFO allocationInfo = {};
+      allocationInfo.hAllocation = 0x61; allocationInfo.pPrivateDriverData = &tiledAllocation;
+      allocationInfo.PrivateDriverDataSize = sizeof(tiledAllocation);
+      D3D10DDIARG_OPENRESOURCE open = {};
+      open.NumAllocations = 1; open.pOpenAllocationInfo = &allocationInfo;
+      open.hKMResource.handle = 0x9876;
+      open.pPrivateDriverData = tiledMetadata.data(); open.PrivateDriverDataSize = tiledMetadata.size();
+      // Every value-bearing metadata byte is contractual, including UUIDs,
+      // allocation size/shape and reserved bytes. Corruption must not allocate.
+      for (UINT offset : {0u, 8u, 16u, 24u, 32u, 36u, 40u, 48u, 64u, 68u, 72u, 76u, 80u,
+                         88u, 96u, 100u, 104u, 120u, 136u, 144u}) {
+         tiledMetadata[offset] ^= 0x80;
+         RuntimeResource *bad = nullptr; RuntimeSharedDescription description;
+         CHECK(FAILED(runtime_shared_open(&consumer, &open, {rt_resource(1)}, &bad, &description)) && !bad);
+         tiledMetadata[offset] ^= 0x80;
+      }
+      for (unsigned failure = 0; failure < 2; ++failure) {
+         tiledErrors = 0; tiledMismatch = failure == 0; tiledFailBind = failure == 1;
+         table.pfnOpenResource({&consumer}, &open, {c}, {rt_resource(1)});
+         CHECK(tiledErrors == 1 && !owners[1] && tiledImages == 1 && !tiledMapped[1]);
+         CHECK(tiledError == (failure == 0 ? DXGI_ERROR_UNSUPPORTED : E_OUTOFMEMORY));
+      }
+      tiledMismatch = tiledFailBind = false; tiledErrors = 0;
+      for (size_t i = 0; i < sizeof(bytes); ++i) bytes[i] = (BYTE)(i * 29 + i / 17);
+      std::vector<BYTE> expected(bytes, bytes + sizeof(bytes));
+      table.pfnOpenResource({&consumer}, &open, {c}, {rt_resource(1)});
+      CHECK(!tiledErrors && allocations == beforeAllocations && tiledImages == 2);
+      CHECK(c->arraySize == 2 && c->maps.size() == 2 && c->format == format && !c->pitch &&
+            c->storage.externalShared && c->storage.layoutReady && !c->storage.preinitialized);
+      CHECK(runtime_allocation(c->storage.runtime) == 0x61 && !memcmp(bytes, expected.data(), sizeof(bytes)));
+      // Import and release must preserve both layers and padding. This is an
+      // opaque byte model, not a claim that CPU storage emulates NIL tiling.
+      table.pfnDestroyResource({&producer}, {p});
+      CHECK(!owners[0] && owners[1] && tiledImages == 1 && !memcmp(bytes, expected.data(), sizeof(bytes)));
+      void *mapped = nullptr;
+      CHECK(owners[1]->map_cpu(owners[1]->context, &mapped) == VK_SUCCESS && mapped == bytes);
+      table.pfnDestroyResource({&consumer}, {c});
+      CHECK(!owners[1] && !tiledImages && tiledMetadata == originalMetadata);
+      runtime_device_destroy(&consumer); runtime_device_destroy(&producer);
+   }
+   std::puts("PASS: optimal shared 2D arrays use versioned same-device/driver metadata, distinct runtime handles and PTE mappings; corrupt layout rejected, failed import cleaned, producer release preserves consumer bytes (CPU control; no NIL/GPU pixels validated)");
+}
+
 void runtime_contracts()
 {
    Adapter adapter; Device producer, consumer; init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
@@ -911,4 +1044,5 @@ void runtime_contracts()
    primary_private_format_contract();
    primary_mode_completion_contract();
    presentation13_contracts();
+   shared_tiled_contracts();
 }

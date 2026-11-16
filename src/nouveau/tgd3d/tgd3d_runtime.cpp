@@ -22,6 +22,25 @@
 
 namespace tgd3d {
 
+/* Version 1's 72-byte linear description remains unchanged. Version 2 is a
+ * same-NVK optimal-image contract, never a physical address or NT handle.
+ * Array stride and PTE kinds are selected by the matching NVK image creator;
+ * the producer's exact creation/requirements and driver identity are checked
+ * again by each importer before binding its own runtime allocation handle. */
+struct SharedTiledMetadata {
+   tg_gpu_resource_request storage;
+   uint32_t magic, version;
+   RuntimeSharedDescription description;
+   uint32_t array_size, vk_format, image_flags, image_usage;
+   uint64_t image_bytes, alignment;
+   uint32_t memory_types, driver_version;
+   uint8_t device_uuid[VK_UUID_SIZE], driver_uuid[VK_UUID_SIZE];
+   uint64_t adapter_luid;
+   uint32_t reserved[2];
+};
+static_assert(sizeof(SharedTiledMetadata) == 152, "optimal shared-image metadata ABI");
+static constexpr uint32_t shared_magic = 0x52534754; /* TGSR */
+
 struct Mapping {
    uint64_t address, size;
    bool freed;
@@ -39,6 +58,8 @@ struct RuntimeResource {
    HRESULT error, cleanup_error;
    bool cpu_locked, dead, associated, primary;
    bool device_owned, offered, reclaim_pending, discarded;
+   bool tiled_shared;
+   SharedTiledMetadata tiled_layout;
    uint64_t reclaim_fence;
    tg_gpu_primary_allocation_request primary_layout;
    void *cpu;
@@ -139,7 +160,10 @@ static VkResult owner_map_gpu(void *context, uint64_t address, uint64_t offset, 
    if (p->dead) {
       hr = D3DDDIERR_DEVICEREMOVED;
    } else if (!p->offered && bytes && !((address | offset | bytes | reserved | reserved_size) & 4095) &&
-              (!kind || p->device_owned) &&
+              /* Linear primaries/shared surfaces require pitch PTEs. Private
+               * images and validated version-2 shared images use NVK's exact
+               * block-linear kind when the image is bound to this backing. */
+              (!kind || p->device_owned || p->tiled_shared) &&
               offset <= p->memory.size && bytes <= p->memory.size - offset &&
               address >= reserved && address - reserved <= reserved_size &&
               bytes <= reserved_size - (address - reserved)) {
@@ -546,7 +570,6 @@ struct SharedMetadata {
    uint32_t reserved[2];
 };
 static_assert(sizeof(SharedMetadata) == 72, "shared image metadata ABI");
-static constexpr uint32_t shared_magic = 0x52534754; /* TGSR */
 
 static HRESULT shared_layout(const RuntimeSharedDescription &d,
                              tg_gpu_linear_allocation_request *allocation)
@@ -574,6 +597,177 @@ static HRESULT shared_layout(const RuntimeSharedDescription &d,
       format, d.width, d.height, (UINT)pitch};
    return S_OK;
 }
+
+static bool nonzero_uuid(const uint8_t *uuid)
+{
+   uint8_t bits = 0;
+   for (UINT i = 0; i < VK_UUID_SIZE; ++i) bits |= uuid[i];
+   return bits != 0;
+}
+
+HRESULT runtime_shared_tiled_validate(Device *dev, const Resource *res)
+{
+   if (!dev || !res || !dev->nvk || !dev->caps || !dev->adapter ||
+       dev->interfaceVersion < D3DWDDM2_0_DDI_INTERFACE_VERSION || !dev->adapter->luid ||
+       !nonzero_uuid(dev->caps->deviceUUID) || !nonzero_uuid(dev->caps->driverUUID) ||
+       res->dim != D3D10DDIRESOURCE_TEXTURE2D || res->primary || res->depth != 1 ||
+       res->usage != D3D10_DDI_USAGE_DEFAULT || res->mapFlags || res->mips != 1 ||
+       !res->width || !res->height || !res->arraySize || res->arraySize > 2 ||
+       res->width > dev->caps->maxImageDimension2D || res->height > dev->caps->maxImageDimension2D ||
+       res->arraySize > dev->caps->maxImageArrayLayers ||
+       !(res->misc & D3D10_DDI_RESOURCE_MISC_SHARED) ||
+       (res->misc & ~(D3D10_DDI_RESOURCE_MISC_SHARED | D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT)) ||
+       (res->bind & ~(D3D10_DDI_BIND_SHADER_RESOURCE | D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_PRESENT)))
+      return DXGI_ERROR_UNSUPPORTED;
+   switch (res->format) {
+   case DXGI_FORMAT_R8G8B8A8_UNORM: case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+   case DXGI_FORMAT_B8G8R8A8_UNORM: case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+   case DXGI_FORMAT_B8G8R8X8_UNORM: case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+   case DXGI_FORMAT_R10G10B10A2_UNORM: case DXGI_FORMAT_R16G16B16A16_FLOAT:
+      return S_OK;
+   default: return DXGI_ERROR_UNSUPPORTED;
+   }
+}
+
+static VkImageUsageFlags shared_image_usage(UINT bind)
+{
+   VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+   if (bind & (D3D10_DDI_BIND_SHADER_RESOURCE | D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_PRESENT))
+      usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+   if (bind & D3D10_DDI_BIND_RENDER_TARGET) usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+   return usage;
+}
+
+static VkFormat shared_srgb_twin(VkFormat format)
+{
+   switch (format) {
+   case VK_FORMAT_R8G8B8A8_UNORM: return VK_FORMAT_R8G8B8A8_SRGB;
+   case VK_FORMAT_R8G8B8A8_SRGB: return VK_FORMAT_R8G8B8A8_UNORM;
+   case VK_FORMAT_B8G8R8A8_UNORM: return VK_FORMAT_B8G8R8A8_SRGB;
+   case VK_FORMAT_B8G8R8A8_SRGB: return VK_FORMAT_B8G8R8A8_UNORM;
+   default: return VK_FORMAT_UNDEFINED;
+   }
+}
+
+static VkImageCreateFlags shared_image_flags(const RuntimeSharedDescription &d)
+{
+   const bool mutableView = (d.bind_flags & (D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_PRESENT)) &&
+      shared_srgb_twin(format_info(d.format)->vk) != VK_FORMAT_UNDEFINED;
+   return VK_IMAGE_CREATE_ALIAS_BIT | (mutableView ? VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT : 0);
+}
+
+static HRESULT tiled_metadata_validate(Device *dev, const SharedTiledMetadata &m)
+{
+   Resource res;
+   res.dim = D3D10DDIRESOURCE_TEXTURE2D; res.usage = m.description.usage;
+   res.bind = m.description.bind_flags; res.misc = D3D10_DDI_RESOURCE_MISC_SHARED;
+   res.width = m.description.width; res.height = m.description.height;
+   res.format = m.description.format; res.arraySize = m.array_size;
+   HRESULT hr = runtime_shared_tiled_validate(dev, &res);
+   if (FAILED(hr)) return hr;
+   const auto &s = m.storage;
+   const FormatInfo *format = format_info(res.format);
+   const UINT memoryTypes = dev->caps->memory.memoryTypeCount >= 32 ? UINT_MAX :
+      (1u << dev->caps->memory.memoryTypeCount) - 1;
+   if (m.magic != shared_magic || m.version != 2 || m.description.pitch ||
+       m.reserved[0] || m.reserved[1] || s.reserved[0] || s.reserved[1] ||
+       s.version != TG_GPU_RESOURCE_ABI || s.header_bytes != sizeof(s) || s.allocation_count != 1 ||
+       s.driver_data_bytes != sizeof(m) - sizeof(s) ||
+       !m.image_bytes || m.image_bytes > TG_GPU_MEMORY_BUDGET_BYTES ||
+       m.image_bytes < (uint64_t)res.width * res.height * res.arraySize * format->bytes ||
+       !m.alignment || (m.alignment & (m.alignment - 1)) || m.alignment > TG_GPU_MEMORY_BUDGET_BYTES ||
+       !m.memory_types || (m.memory_types & ~memoryTypes) ||
+       s.allocation_bytes != ((m.image_bytes + 4095) & ~UINT64_C(4095)) ||
+       m.vk_format != format->vk || m.image_usage != shared_image_usage(res.bind) ||
+       m.image_flags != shared_image_flags(m.description) ||
+       m.adapter_luid != dev->adapter->luid || m.driver_version != dev->caps->driverVersion ||
+       memcmp(m.device_uuid, dev->caps->deviceUUID, VK_UUID_SIZE) ||
+       memcmp(m.driver_uuid, dev->caps->driverUUID, VK_UUID_SIZE))
+      return DXGI_ERROR_UNSUPPORTED;
+   return S_OK;
+}
+
+HRESULT runtime_shared_tiled_check(Device *dev, const RuntimeResource *p,
+   const VkImageCreateInfo &image, const VkMemoryRequirements &requirements)
+{
+   if (!p || !p->tiled_shared || p->dead) return DXGI_ERROR_UNSUPPORTED;
+   const auto &m = p->tiled_layout;
+   HRESULT hr = tiled_metadata_validate(dev, m);
+   if (FAILED(hr)) return hr;
+   if (image.imageType != VK_IMAGE_TYPE_2D || image.tiling != VK_IMAGE_TILING_OPTIMAL ||
+       image.extent.width != m.description.width || image.extent.height != m.description.height ||
+       image.extent.depth != 1 || image.mipLevels != 1 || image.arrayLayers != m.array_size ||
+       image.samples != VK_SAMPLE_COUNT_1_BIT || image.sharingMode != VK_SHARING_MODE_EXCLUSIVE ||
+       image.initialLayout != VK_IMAGE_LAYOUT_UNDEFINED ||
+       image.format != m.vk_format || image.flags != m.image_flags || image.usage != m.image_usage ||
+       requirements.size != m.image_bytes || requirements.alignment != m.alignment ||
+       requirements.memoryTypeBits != m.memory_types)
+      return DXGI_ERROR_UNSUPPORTED;
+   /* Version 2 fixes the view-format list to the stored format and its
+    * sRGB/linear twin. Changing that contract requires a metadata version
+    * change; matching total bytes alone cannot prove alias compatibility. */
+   if (image.flags & VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT) {
+      const auto *list = static_cast<const VkImageFormatListCreateInfo *>(image.pNext);
+      const VkFormat twin = shared_srgb_twin(image.format);
+      if (!list || list->sType != VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO ||
+          list->pNext || list->viewFormatCount != 2 || !list->pViewFormats ||
+          !((list->pViewFormats[0] == image.format && list->pViewFormats[1] == twin) ||
+            (list->pViewFormats[1] == image.format && list->pViewFormats[0] == twin)))
+         return DXGI_ERROR_UNSUPPORTED;
+   } else if (image.pNext) {
+      return DXGI_ERROR_UNSUPPORTED;
+   }
+   return S_OK;
+}
+
+HRESULT runtime_shared_tiled_create(Device *dev, const Resource *res,
+   const VkImageCreateInfo &image, const VkMemoryRequirements &requirements, RuntimeResource **out)
+{
+   *out = nullptr;
+   HRESULT hr = runtime_shared_tiled_validate(dev, res);
+   if (FAILED(hr)) return hr;
+   if (!res->hRT.handle) return E_INVALIDARG;
+   SharedTiledMetadata m = {};
+   m.storage = {TG_GPU_RESOURCE_ABI, sizeof(m.storage), 1, sizeof(m) - sizeof(m.storage),
+      (requirements.size + 4095) & ~UINT64_C(4095), {0, 0}};
+   m.magic = shared_magic; m.version = 2;
+   m.description = {res->width, res->height, 0, res->format, res->bind, res->usage};
+   m.array_size = res->arraySize; m.vk_format = image.format;
+   m.image_flags = image.flags; m.image_usage = image.usage;
+   m.image_bytes = requirements.size; m.alignment = requirements.alignment;
+   m.memory_types = requirements.memoryTypeBits; m.driver_version = dev->caps->driverVersion;
+   memcpy(m.device_uuid, dev->caps->deviceUUID, VK_UUID_SIZE);
+   memcpy(m.driver_uuid, dev->caps->driverUUID, VK_UUID_SIZE);
+   m.adapter_luid = dev->adapter->luid;
+   hr = tiled_metadata_validate(dev, m);
+   if (FAILED(hr)) return hr;
+   RuntimeResource *p = nullptr;
+   hr = create_owner(dev, res->hRT, &p);
+   if (FAILED(hr)) return hr;
+   p->tiled_shared = true; p->tiled_layout = m;
+   hr = runtime_shared_tiled_check(dev, p, image, requirements);
+   if (FAILED(hr)) { runtime_destroy(p); return hr; }
+   tg_gpu_allocation_request request = {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE,
+      m.storage.allocation_bytes};
+   D3DDDI_ALLOCATIONINFO2 info = {};
+   info.pPrivateDriverData = &request; info.PrivateDriverDataSize = sizeof(request);
+   D3DDDICB_ALLOCATE allocate = {};
+   allocate.hResource = res->hRT.handle;
+   allocate.pPrivateDriverData = &m; allocate.PrivateDriverDataSize = sizeof(m);
+   allocate.NumAllocations = 1; allocate.pAllocationInfo2 = &info;
+   hr = p->callbacks.pfnAllocateCb(p->device, &allocate);
+   if (SUCCEEDED(hr)) {
+      p->memory.allocation = info.hAllocation;
+      p->associated = info.hAllocation != 0;
+      hr = make_ready(p, request.bytes);
+   }
+   if (FAILED(hr)) { runtime_destroy(p); return hr; }
+   *out = p;
+   return S_OK;
+}
+
+bool runtime_is_tiled_shared(const RuntimeResource *p) { return p && p->tiled_shared; }
+UINT runtime_shared_layers(const RuntimeResource *p) { return runtime_is_tiled_shared(p) ? p->tiled_layout.array_size : 1; }
 
 HRESULT runtime_shared_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *desc,
                               D3D10DDI_HRTRESOURCE runtime, RuntimeResource **out, UINT *pitch)
@@ -691,9 +885,28 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
       *out = p;
       return S_OK;
    }
-   if (!args->hKMResource.handle || !args->pPrivateDriverData ||
-       args->PrivateDriverDataSize != sizeof(SharedMetadata))
+   if (!args->hKMResource.handle || !args->pPrivateDriverData)
       return DXGI_ERROR_UNSUPPORTED;
+   if (args->PrivateDriverDataSize == sizeof(SharedTiledMetadata)) {
+      SharedTiledMetadata metadata;
+      memcpy(&metadata, args->pPrivateDriverData, sizeof(metadata));
+      HRESULT hr = tiled_metadata_validate(dev, metadata);
+      if (FAILED(hr)) return hr;
+      const tg_gpu_allocation_request expected = {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE,
+         metadata.storage.allocation_bytes};
+      if (info.PrivateDriverDataSize != sizeof(expected) ||
+          memcmp(info.pPrivateDriverData, &expected, sizeof(expected))) return DXGI_ERROR_UNSUPPORTED;
+      RuntimeResource *p = nullptr;
+      hr = create_owner(dev, runtime, &p);
+      if (FAILED(hr)) return hr;
+      p->associated = true; p->tiled_shared = true; p->tiled_layout = metadata;
+      p->memory.allocation = info.hAllocation;
+      hr = make_ready(p, expected.bytes);
+      if (FAILED(hr)) { runtime_destroy(p); return hr; }
+      *description = metadata.description; *out = p;
+      return S_OK;
+   }
+   if (args->PrivateDriverDataSize != sizeof(SharedMetadata)) return DXGI_ERROR_UNSUPPORTED;
    SharedMetadata metadata;
    memcpy(&metadata, args->pPrivateDriverData, sizeof(metadata));
    const auto &s = metadata.storage;

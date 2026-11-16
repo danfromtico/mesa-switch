@@ -110,6 +110,8 @@ HRESULT image_create(Device *dev, Resource *res)
       ici.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
    ici.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
    ici.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+   if (res->tiledShared)
+      ici.flags |= VK_IMAGE_CREATE_ALIAS_BIT;
    if (res->cube)
       ici.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
    if (res->imageType == VK_IMAGE_TYPE_3D && (res->bind & D3D10_DDI_BIND_RENDER_TARGET))
@@ -131,7 +133,7 @@ HRESULT image_create(Device *dev, Resource *res)
    struct wsi_image_create_info layout = {};
    VkExternalMemoryImageCreateInfo external = {VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO};
    RuntimeResource *runtime = res->storage.runtime;
-   if (runtime) {
+   if (runtime && !res->tiledShared) {
       /* Linear storage with the allocation's own pitch. The image is laid
        * over memory another owner may already have rendered. */
       ici.tiling = VK_IMAGE_TILING_LINEAR;
@@ -155,9 +157,24 @@ HRESULT image_create(Device *dev, Resource *res)
       return hr;
    res->storage.aspects = res->aspects;
    res->storage.layoutReady = false;
-   res->storage.preinitialized = runtime != nullptr;
+   res->storage.preinitialized = runtime != nullptr && !res->tiledShared;
 
-   if (runtime) {
+   if (res->tiledShared) {
+      VkMemoryRequirements req;
+      dev->vk.GetImageMemoryRequirements(dev->vkdev, res->storage.image, &req);
+      hr = runtime ? runtime_shared_tiled_check(dev, runtime, ici, req) :
+         runtime_shared_tiled_create(dev, res, ici, req, &res->storage.runtime);
+      if (SUCCEEDED(hr))
+         hr = runtime_bind_image(dev, res->storage.runtime, res->storage.image, &res->storage.memory);
+      if (SUCCEEDED(hr)) {
+         res->storage.externalShared = true;
+         /* The private runtime owner imports the producer's actual NVK
+          * backing. Its contents are in GENERAL after external release;
+          * transitioning an opened optimal image from UNDEFINED would lose
+          * them. The first use acquires external ownership instead. */
+         res->storage.layoutReady = res->opened;
+      }
+   } else if (runtime) {
       {
          /* Verify both the private-pitch ICD and the generic control driver.
           * A successful CreateImage alone does not prove shared addressing. */
@@ -446,6 +463,15 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    res->imageType = res->dim == D3D10DDIRESOURCE_TEXTURE1D ? VK_IMAGE_TYPE_1D :
                     res->dim == D3D10DDIRESOURCE_TEXTURE3D ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D;
    res->cube = res->dim == D3D10DDIRESOURCE_TEXTURECUBE;
+   res->tiledShared = !desc->pPrimaryDesc && (res->misc & D3D10_DDI_RESOURCE_MISC_SHARED) &&
+      (res->arraySize != 1 || (res->format != DXGI_FORMAT_B8G8R8A8_UNORM &&
+                               res->format != DXGI_FORMAT_R8G8B8A8_UNORM));
+   if (res->tiledShared) {
+      if (desc->SampleDesc.Count != 1 || desc->SampleDesc.Quality)
+         return DXGI_ERROR_UNSUPPORTED;
+      hr = runtime_shared_tiled_validate(dev, res);
+      if (FAILED(hr)) return hr;
+   }
    res->maps.resize(res->subresources());
 
    if (res->usage == D3D10_DDI_USAGE_STAGING && !desc->pPrimaryDesc &&
@@ -475,9 +501,9 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
       hr = runtime_primary_create(dev, desc, res->hRT, &res->storage.runtime, &width, &height, &pitch);
       res->primary = true;
       res->pitch = pitch;
-   } else if (SUCCEEDED(hr) && (res->misc & D3D10_DDI_RESOURCE_MISC_SHARED)) {
+   } else if (SUCCEEDED(hr) && (res->misc & D3D10_DDI_RESOURCE_MISC_SHARED) && !res->tiledShared) {
       hr = runtime_shared_create(dev, desc, res->hRT, &res->storage.runtime, &res->pitch);
-   } else if (SUCCEEDED(hr) && (res->misc & ~(D3D10_DDI_RESOURCE_AUTO_GEN_MIP_MAP |
+   } else if (SUCCEEDED(hr) && !res->tiledShared && (res->misc & ~(D3D10_DDI_RESOURCE_AUTO_GEN_MIP_MAP |
                                             D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT))) {
       /* Keyed-mutex, GDI-compatible and NT-handle sharing need DDI levels
        * this driver does not negotiate. */
@@ -536,7 +562,9 @@ static void APIENTRY OpenResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_OP
       res->width = d.width;
       res->height = d.height;
       res->pitch = d.pitch;
-      res->maps.resize(1);
+      res->tiledShared = runtime_is_tiled_shared(res->storage.runtime);
+      res->arraySize = runtime_shared_layers(res->storage.runtime);
+      res->maps.resize(res->arraySize);
       hr = init_image_fields(dev, res);
    }
    if (SUCCEEDED(hr))

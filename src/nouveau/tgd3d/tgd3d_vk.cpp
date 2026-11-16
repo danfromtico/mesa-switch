@@ -177,8 +177,12 @@ HRESULT VulkanAdapter::open(uint64_t luid)
       VkPhysicalDeviceIDProperties id = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES};
       props.pNext = &id;
       vk.GetPhysicalDeviceProperties2(devices[i], &props);
-      if (id.deviceLUIDValid && !memcmp(id.deviceLUID, &luid, sizeof(luid)))
+      if (id.deviceLUIDValid && !memcmp(id.deviceLUID, &luid, sizeof(luid))) {
          pdev = devices[i];
+         caps.driverVersion = props.properties.driverVersion;
+         memcpy(caps.deviceUUID, id.deviceUUID, VK_UUID_SIZE);
+         memcpy(caps.driverUUID, id.driverUUID, VK_UUID_SIZE);
+      }
    }
 #ifdef TGD3D_GENERIC_VULKAN
    /* The test loader's software device has no WDDM adapter identity. */

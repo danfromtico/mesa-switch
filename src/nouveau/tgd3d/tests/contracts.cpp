@@ -138,6 +138,62 @@ static void reset()
    lastError = S_OK; events.clear(); cbBindings.clear();
 }
 
+static void shared_ownership_contract()
+{
+   static std::vector<VkImageMemoryBarrier2> transitions;
+   for (bool imported : {false, true}) {
+      Adapter adapter; reset(); Device dev = make_device(&adapter);
+      adapter.vk.caps.queueFamily = 2; transitions.clear();
+      dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer cmd, const VkDependencyInfo *info) {
+         CHECK(cmd);
+         for (UINT i = 0; i < info->imageMemoryBarrierCount; ++i)
+            transitions.push_back(info->pImageMemoryBarriers[i]);
+      };
+      ImageStorage image;
+      image.image = handle<VkImage>(0x123); image.externalShared = true; image.layoutReady = imported;
+      image_use(&dev, image, true);
+      image_use(&dev, image, false); // same command recording acquires it once
+      CHECK(transitions.size() == 1 && dev.sharedImages.size() == 1 && image.acquireSeq == 1);
+      const auto &acquire = transitions[0];
+      CHECK(acquire.image == image.image && acquire.newLayout == VK_IMAGE_LAYOUT_GENERAL &&
+            acquire.oldLayout == (imported ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_UNDEFINED));
+      CHECK(acquire.srcQueueFamilyIndex == (imported ? VK_QUEUE_FAMILY_EXTERNAL : VK_QUEUE_FAMILY_IGNORED) &&
+            acquire.dstQueueFamilyIndex == (imported ? 2u : VK_QUEUE_FAMILY_IGNORED));
+      CHECK(acquire.dstAccessMask == (VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT));
+      // Move the backing exactly as RotateResourceIdentities does. Release
+      // must still name the acquired image, not the logical Resource address.
+      ImageStorage moved = image; image = {};
+      CHECK(flush(&dev, false) == S_OK && transitions.size() == 2 && dev.sharedImages.empty());
+      const auto &release = transitions[1];
+      CHECK(release.image == moved.image && release.oldLayout == VK_IMAGE_LAYOUT_GENERAL &&
+            release.newLayout == VK_IMAGE_LAYOUT_GENERAL && release.srcQueueFamilyIndex == 2 &&
+            release.dstQueueFamilyIndex == VK_QUEUE_FAMILY_EXTERNAL);
+      CHECK(release.srcStageMask == VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT &&
+            (release.srcAccessMask & VK_ACCESS_2_MEMORY_WRITE_BIT) && !release.dstStageMask);
+      CHECK((events == std::vector<unsigned>{1, 2, 3}) && dev.submitted == 1 && dev.completed() == 0);
+      image_use(&dev, moved, false);
+      CHECK(transitions.size() == 3 && transitions[2].oldLayout == VK_IMAGE_LAYOUT_GENERAL &&
+            transitions[2].srcQueueFamilyIndex == VK_QUEUE_FAMILY_EXTERNAL && moved.acquireSeq == 2);
+      CHECK(flush(&dev, false) == S_OK && transitions.size() == 4 && dev.submitted == 2 &&
+            !dev.completed() && !cpuWaits && !cpuSignals);
+      // CPU-only fixture: model completions for command-buffer retirement.
+      completedValue = dev.submitted; retire(&dev); cmd_destroy(&dev);
+   }
+   for (UINT failure : {1u, 2u, 3u}) {
+      Adapter adapter; reset(); Device dev = make_device(&adapter); failAt = failure;
+      ImageStorage image; image.image = handle<VkImage>(0x124);
+      image.externalShared = image.layoutReady = true;
+      image_use(&dev, image, true);
+      CHECK(FAILED(flush(&dev, false)) && FAILED(dev.lost) && !dev.completed() && !cpuSignals);
+      CHECK(dev.submitted == (failure == 3 ? 1u : 0u));
+      CHECK(dev.sharedImages.empty() == (failure == 3));
+      // No real command buffers or memory exist in this substitute device.
+      dev.cmd = VK_NULL_HANDLE; dev.cmdHasWork = false; dev.submittedCommands.clear();
+      dev.sharedImages.clear();
+   }
+   std::puts("PASS: optimal shared images acquire/release external ownership in GENERAL per submission, survive identity moves, and preserve real Fence/error ordering without CPU completion (CPU control)");
+}
+
 static void clear_view_contract()
 {
    Adapter adapter; reset(); Device dev = make_device(&adapter);
@@ -1486,6 +1542,7 @@ int main(int argc, char **argv)
    }
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();
    completion_failure_propagates();
+   shared_ownership_contract();
    ddi11_contracts();
    overlap_contracts();
    clear_view_contract();

@@ -115,6 +115,8 @@ struct ImageStorage {
    VkImageAspectFlags aspects = VK_IMAGE_ASPECT_COLOR_BIT;
    bool layoutReady = false;
    bool preinitialized = false;          /* imported contents must survive the first use */
+   bool externalShared = false;         /* optimal runtime-owned shared image */
+   uint64_t acquireSeq = 0;             /* ownership acquired for this command sequence */
    uint64_t lastUse = 0;                 /* submit sequence of the last GPU use */
    uint64_t writeSerial = 0;             /* barrier bookkeeping */
    struct BlitView {
@@ -148,6 +150,7 @@ struct Resource {
    ResKind kind = ResKind::Buffer;
    bool primary = false;
    bool opened = false;
+   bool tiledShared = false;
    bool bufferMapped = false;
 
    /* Buffer and staging storage. Renamed on discard; never written while the
@@ -390,6 +393,7 @@ struct Device {
    std::deque<DeferredSlice> deferredSlices;
    std::deque<Deferred> deferred;
    std::vector<View *> views; /* includes views caching rotated swapchain images */
+   std::vector<VkImage> sharedImages; /* acquired this recording; release before submission */
 
    /* Bound state */
    StageBindings stage[STAGE_COUNT];
@@ -546,6 +550,13 @@ struct RuntimeSharedDescription {
    DXGI_FORMAT format;
    UINT bind_flags, usage;
 };
+HRESULT runtime_shared_tiled_validate(Device *dev, const Resource *res);
+HRESULT runtime_shared_tiled_create(Device *dev, const Resource *res,
+   const VkImageCreateInfo &image, const VkMemoryRequirements &requirements, RuntimeResource **out);
+HRESULT runtime_shared_tiled_check(Device *dev, const RuntimeResource *owner,
+   const VkImageCreateInfo &image, const VkMemoryRequirements &requirements);
+bool runtime_is_tiled_shared(const RuntimeResource *owner);
+UINT runtime_shared_layers(const RuntimeResource *owner);
 HRESULT runtime_device_create(Device *dev);
 void runtime_copy_callbacks(D3DDDI_DEVICECALLBACKS *out, const D3DDDI_DEVICECALLBACKS *in);
 void runtime_device_destroy(Device *dev);

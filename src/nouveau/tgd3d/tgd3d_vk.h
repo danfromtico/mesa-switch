@@ -181,6 +181,8 @@ enum : uint32_t {
 
 struct VulkanCaps {
    uint32_t apiVersion = 0;
+   uint32_t driverVersion = 0;
+   uint8_t deviceUUID[VK_UUID_SIZE] = {}, driverUUID[VK_UUID_SIZE] = {};
    uint32_t queueFamily = 0;
    uint32_t cbSlots = 0;            /* full D3D10 constant-buffer slots per stage */
    uint32_t maxImageDimension2D = 0;

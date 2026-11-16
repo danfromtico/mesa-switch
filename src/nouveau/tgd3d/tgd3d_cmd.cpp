@@ -165,6 +165,7 @@ void cmd_destroy(Device *dev)
    dev->framePools.clear();
    dev->freePools.clear();
    dev->submittedCommands.clear();
+   dev->sharedImages.clear();
    if (dev->cmdPool)
       dev->vk.DestroyCommandPool(dev->vkdev, dev->cmdPool, nullptr);
    dev->cmdPool = VK_NULL_HANDLE;
@@ -271,7 +272,31 @@ void command_barrier(Device *dev)
 void image_use(Device *dev, ImageStorage &storage, bool write)
 {
    storage.lastUse = dev->recordingSeq();
-   if (!storage.layoutReady) {
+   if (storage.externalShared && storage.acquireSeq != dev->recordingSeq()) {
+      end_rendering(dev);
+      VkCommandBuffer cmd = ensure_cmd(dev);
+      if (!cmd) return;
+      try {
+         dev->sharedImages.push_back(storage.image);
+      } catch (const std::bad_alloc &) {
+         TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED); return;
+      }
+      VkImageMemoryBarrier2 barrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2};
+      barrier.srcStageMask = VK_PIPELINE_STAGE_2_NONE;
+      barrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+      barrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
+      barrier.oldLayout = storage.layoutReady ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_UNDEFINED;
+      barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+      barrier.srcQueueFamilyIndex = storage.layoutReady ? VK_QUEUE_FAMILY_EXTERNAL : VK_QUEUE_FAMILY_IGNORED;
+      barrier.dstQueueFamilyIndex = storage.layoutReady ? dev->caps->queueFamily : VK_QUEUE_FAMILY_IGNORED;
+      barrier.image = storage.image;
+      barrier.subresourceRange = {storage.aspects, 0, VK_REMAINING_MIP_LEVELS, 0, VK_REMAINING_ARRAY_LAYERS};
+      VkDependencyInfo info = {VK_STRUCTURE_TYPE_DEPENDENCY_INFO};
+      info.imageMemoryBarrierCount = 1; info.pImageMemoryBarriers = &barrier;
+      dev->vk.CmdPipelineBarrier2(cmd, &info);
+      storage.layoutReady = true; storage.acquireSeq = dev->recordingSeq();
+      dev->cmdHasWork = true;
+   } else if (!storage.layoutReady) {
       /* Every image lives in GENERAL. Imported runtime allocations already
        * hold another owner's pixels, which the transition must keep. */
       end_rendering(dev);
@@ -536,6 +561,26 @@ HRESULT flush(Device *dev, bool waitForSpace)
       end_rendering(dev);
       if (FAILED(dev->lost))
          return dev->lost;
+      /* Every shared optimal image used by this recording leaves in GENERAL
+       * before the real NVK fence is signaled. The runtime queue's GPU wait
+       * then orders the next owner's access; no CPU completion is invented.
+       * Track image handles, not Resource pointers, because DXGI may rotate
+       * logical resource identities before this command buffer is submitted. */
+      for (VkImage image : dev->sharedImages) {
+         VkImageMemoryBarrier2 release = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2};
+         release.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+         release.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
+         release.dstStageMask = VK_PIPELINE_STAGE_2_NONE;
+         release.oldLayout = release.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+         release.srcQueueFamilyIndex = dev->caps->queueFamily;
+         release.dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL;
+         release.image = image;
+         release.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_REMAINING_MIP_LEVELS, 0,
+                                     VK_REMAINING_ARRAY_LAYERS};
+         VkDependencyInfo info = {VK_STRUCTURE_TYPE_DEPENDENCY_INFO};
+         info.imageMemoryBarrierCount = 1; info.pImageMemoryBarriers = &release;
+         dev->vk.CmdPipelineBarrier2(dev->cmd, &info);
+      }
       /* Coherent upload/readback storage still needs a device-to-host
        * memory dependency before a CPU fence wait can expose GPU writes. */
       VkMemoryBarrier2 host = {VK_STRUCTURE_TYPE_MEMORY_BARRIER_2};
@@ -605,6 +650,7 @@ HRESULT flush(Device *dev, bool waitForSpace)
          return dev->lost;
       }
       SubmittedCommands done = {dev->cmd, value, {}};
+      dev->sharedImages.clear();
       done.pools.swap(dev->framePools);
       dev->submittedCommands.push_back(done);
       dev->cmd = VK_NULL_HANDLE;
