@@ -561,6 +561,12 @@ HRESULT flush(Device *dev, bool waitForSpace)
       end_rendering(dev);
       if (FAILED(dev->lost))
          return dev->lost;
+      /* Restore evicted backing before either queue can execute this batch.
+       * Paging completion is independent of, and cannot advance, the render fence. */
+      if (FAILED(prepare_resource_residency(dev))) {
+         TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
+         return dev->lost;
+      }
       /* Every shared optimal image used by this recording leaves in GENERAL
        * before the real NVK fence is signaled. The runtime queue's GPU wait
        * then orders the next owner's access; no CPU completion is invented.

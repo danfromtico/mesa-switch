@@ -13,6 +13,51 @@ using namespace tgd3d;
 static HRESULT error;
 static unsigned errors;
 
+static void adapter_caps_contracts()
+{
+   Adapter adapter;
+   D3D10DDI_HADAPTER h = {&adapter};
+   D3D10_2DDI_ADAPTERFUNCS functions = {};
+   adapter_fill_queries(&functions);
+   UINT count = 0;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 3);
+   UINT64 versions[4] = {0xfeed, 0, 0, 0xbeef}; count = 1;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 3);
+   CHECK(versions[0] == 0xfeed && versions[3] == 0xbeef);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == S_OK);
+   CHECK(versions[0] == D3D10_0_DDI_SUPPORTED && versions[2] == D3D10_0_7_DDI_SUPPORTED && versions[3] == 0xbeef);
+   CHECK(functions.pfnGetSupportedVersions(h, nullptr, versions) == E_INVALIDARG);
+   struct { UINT before, caps, after; } out = {0xdeadbeef, 0xffffffff, 0xbeefdead};
+   D3D10_2DDIARG_GETCAPS query = {D3D11DDICAPS_3DPIPELINESUPPORT, nullptr, &out.caps, sizeof(out.caps)};
+   CHECK(functions.pfnGetCaps(h, &query) == S_OK && out.caps == 1);
+   CHECK(out.before == 0xdeadbeef && out.after == 0xbeefdead);
+   for (auto type : {D3D11DDICAPS_THREADING, D3D11DDICAPS_SHADER, D3DWDDM1_3DDICAPS_D3D11_OPTIONS1,
+                    D3DWDDM1_3DDICAPS_MARKER, D3DWDDM2_0DDICAPS_D3D11_OPTIONS2,
+                    D3DWDDM2_0DDICAPS_D3D11_OPTIONS3, D3DWDDM2_2DDICAPS_SHADERCACHE}) {
+      query.Type = type; out.caps = 0xffffffff;
+      CHECK(functions.pfnGetCaps(h, &query) == S_OK && !out.caps);
+   }
+   query.Type = D3DWDDM2_0DDICAPS_GPUVA_CAPS;
+   CHECK(functions.pfnGetCaps(h, &query) == S_OK && out.caps == 40);
+   query.pInfo = &out; // unused input for this query must not be interpreted as layout metadata
+   CHECK(functions.pfnGetCaps(h, &query) == S_OK && out.caps == 40);
+   D3DWDDM2_0DDI_MEMORY_ARCHITECTURE_CAPS memory = {};
+   query = {D3DWDDM2_0DDICAPS_MEMORY_ARCHITECTURE, nullptr, &memory, sizeof(memory)};
+   CHECK(functions.pfnGetCaps(h, &query) == S_OK && memory.UMA && !memory.CacheCoherent);
+   D3DWDDM2_0DDI_TEXTURE_LAYOUT_CAPS layout = {7,7,TRUE};
+   query = {D3DWDDM2_0DDICAPS_TEXTURE_LAYOUT, nullptr, &layout, sizeof(layout)};
+   CHECK(functions.pfnGetCaps(h, &query) == S_OK && !layout.DeviceDependentLayoutCount &&
+         !layout.DeviceDependentSwizzleCount && !layout.Supports64KStandardSwizzle);
+   query.DataSize = sizeof(layout)-1;
+   CHECK(functions.pfnGetCaps(h, &query) == E_INVALIDARG);
+   query.DataSize = sizeof(layout); query.pInfo = &out;
+   CHECK(functions.pfnGetCaps(h, &query) == E_INVALIDARG);
+   query.Type = static_cast<D3D10_2DDICAPS_TYPE>(0x7fff);
+   CHECK(functions.pfnGetCaps(h, &query) == E_NOTIMPL);
+   CHECK(functions.pfnGetCaps(h, nullptr) == E_INVALIDARG);
+   std::puts("PASS: typed adapter queries report only the existing D3D10 pipeline, no optional compute/threading/layout promises; exact output bounds and UMA/coherence distinction (CPU control)");
+}
+
 template<typename T> struct Storage {
    alignas(T) unsigned char bytes[sizeof(T)];
    T *object() { return reinterpret_cast<T *>(bytes); }
@@ -40,7 +85,7 @@ static void ddi20_contracts()
    CHECK(dxgi.table.pfnPresent && dxgi.table.pfnPresent1 && dxgi.table.pfnPresentMultiplaneOverlay &&
          dxgi.table.pfnPresentMultiplaneOverlay1 && dxgi.table.pfnCheckMultiplaneOverlayColorSpaceSupport &&
          dxgi.table.pfnOfferResources && dxgi.table.pfnReclaimResources);
-   CHECK(!dxgi.table.pfnReserved1 && !dxgi.table.pfnReserved2 && !dxgi.table.pfnTrimResidencySet);
+   CHECK(!dxgi.table.pfnReserved1 && !dxgi.table.pfnReserved2 && dxgi.table.pfnTrimResidencySet);
    // Exact slot read by the matched native D3D11 runtime. No shifted 1.3 table.
    static_assert(offsetof(DXGI1_4_DDI_BASE_FUNCTIONS, pfnPresentMultiplaneOverlay1) == 20 * sizeof(void *));
    static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, DriverPrivateDataSize) == 24);
@@ -133,6 +178,7 @@ static void ddi20_contracts()
 
 void ddi11_contracts()
 {
+   adapter_caps_contracts();
    ddi20_contracts();
    Device dev;
    dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };

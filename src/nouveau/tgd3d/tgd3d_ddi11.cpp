@@ -380,8 +380,13 @@ static BOOL APIENTRY Flush(D3D10DDI_HDEVICE h, UINT flags)
 {
    Device *dev = D(h);
    RemovalOnlyErrorScope errors(dev);
-   if (flags & ~D3D11_1DDI_FLUSH_UNLESS_NO_COMMANDS) { TG_ERROR(dev, E_INVALIDARG); return FALSE; }
+   /* New flags may only introduce reasons not to flush. Unknown flags must
+    * conservatively submit, rather than rejecting a valid future request. */
    legacy().pfnFlush(h);
+   if (SUCCEEDED(dev->lost) && (flags & D3DWDDM1_3DDI_TRIM_MEMORY)) {
+      HRESULT hr = trim_memory(dev);
+      if (FAILED(hr)) TG_ERROR(dev, hr);
+   }
    return SUCCEEDED(dev->lost);
 }
 

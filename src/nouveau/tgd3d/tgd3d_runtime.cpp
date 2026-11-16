@@ -59,6 +59,8 @@ struct RuntimeResource {
    bool cpu_locked, dead, associated, primary;
    bool device_owned, offered, reclaim_pending, discarded;
    bool tiled_shared;
+   bool residency_requested, resident;
+   uint64_t residency_fence;
    SharedTiledMetadata tiled_layout;
    uint64_t reclaim_fence;
    tg_gpu_primary_allocation_request primary_layout;
@@ -306,6 +308,7 @@ void runtime_copy_callbacks(D3DDDI_DEVICECALLBACKS *out, const D3DDDI_DEVICECALL
    COPY(pfnSetDisplayPrivateDriverFormatCb);
    COPY(pfnCreateSynchronizationObject2Cb);
    COPY(pfnMakeResidentCb);
+   COPY(pfnEvictCb);
    COPY(pfnWaitForSynchronizationObjectFromCpuCb);
    COPY(pfnWaitForSynchronizationObjectFromGpuCb);
    COPY(pfnSignalSynchronizationObjectFromGpuCb);
@@ -392,19 +395,64 @@ static HRESULT create_owner(Device *dev, D3D10DDI_HRTRESOURCE runtime, RuntimeRe
    return S_OK;
 }
 
+HRESULT runtime_make_resident(RuntimeResource *p)
+{
+   if (!p) return S_OK; // internal Vulkan memory has its own owner
+   AcquireSRWLockExclusive(&p->lock);
+   HRESULT hr = S_OK;
+   if (p->dead || !p->memory.allocation || p->offered) hr = DXGI_ERROR_INVALID_CALL;
+   else if (!p->resident) {
+      if (!p->residency_requested) {
+         D3DDDI_MAKERESIDENT resident = {};
+         resident.hPagingQueue = p->queue;
+         resident.NumAllocations = 1;
+         resident.AllocationList = &p->memory.allocation;
+         hr = p->callbacks.pfnMakeResidentCb(p->device, &resident);
+         rt_trace(p, 2, hr, resident.PagingFenceValue);
+         if (SUCCEEDED(hr) || hr == E_PENDING) {
+            p->residency_requested = true;
+            p->residency_fence = resident.PagingFenceValue;
+            hr = S_OK;
+         }
+      }
+      if (SUCCEEDED(hr))
+         hr = rt_trace(p, 3, wait_paging(p->callbacks, p->device, p->fence, p->fence_value,
+                                         p->residency_fence), p->residency_fence);
+      if (SUCCEEDED(hr)) p->resident = true;
+   }
+   ReleaseSRWLockExclusive(&p->lock);
+   return hr;
+}
+
+HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes)
+{
+   *bytes = 0;
+   if (!p) return S_OK;
+   AcquireSRWLockExclusive(&p->lock);
+   HRESULT hr = S_OK;
+   /* Scanout can outlive rendering completion. Its residency remains tied to
+    * the primary/runtime lifetime, not the rendering queue's trim cutoff. */
+   if (!p->dead && p->resident && !p->primary && !p->offered) {
+      if (!p->callbacks.pfnEvictCb) hr = DXGI_ERROR_UNSUPPORTED;
+      else {
+         D3DDDICB_EVICT evict = {};
+         evict.NumAllocations = 1;
+         evict.AllocationList = &p->memory.allocation;
+         hr = rt_trace(p, 13, p->callbacks.pfnEvictCb(p->device, &evict), p->memory.size);
+         if (SUCCEEDED(hr)) {
+            p->resident = p->residency_requested = false;
+            p->residency_fence = 0;
+            *bytes = p->memory.size;
+         }
+      }
+   }
+   ReleaseSRWLockExclusive(&p->lock);
+   return hr;
+}
+
 static HRESULT make_ready(RuntimeResource *p, uint64_t bytes)
 {
-   if (!p->memory.allocation)
-      return E_FAIL;
-   D3DDDI_MAKERESIDENT resident = {};
-   resident.hPagingQueue = p->queue;
-   resident.NumAllocations = 1;
-   resident.AllocationList = &p->memory.allocation;
-   HRESULT hr = p->callbacks.pfnMakeResidentCb(p->device, &resident);
-   rt_trace(p, 2, hr, resident.PagingFenceValue);
-   if (SUCCEEDED(hr) || hr == E_PENDING)
-      hr = rt_trace(p, 3, wait_paging(p->callbacks, p->device, p->fence, p->fence_value,
-                                      resident.PagingFenceValue), resident.PagingFenceValue);
+   HRESULT hr = runtime_make_resident(p);
    if (FAILED(hr))
       return hr;
    p->memory.version = WSI_WIN32_MEMORY_VERSION;

@@ -41,6 +41,7 @@ struct Adapter {
    uint64_t luid = 0;
    VulkanAdapter vk;
 };
+void adapter_fill_queries(D3D10_2DDI_ADAPTERFUNCS *table);
 
 /* ------------------------------------------------------------------ */
 /* Formats                                                             */
@@ -141,6 +142,7 @@ struct MapState {
 
 struct Resource {
    Device *dev = nullptr;
+   Resource *next = nullptr;           /* device-owned list; no allocation on creation */
    D3D10DDI_HRTRESOURCE hRT = {};
    D3D10DDIRESOURCE_TYPE dim = D3D10DDIRESOURCE_BUFFER;
    UINT usage = 0, bind = 0, mapFlags = 0, misc = 0;
@@ -393,6 +395,8 @@ struct Device {
    std::deque<DeferredSlice> deferredSlices;
    std::deque<Deferred> deferred;
    std::vector<View *> views; /* includes views caching rotated swapchain images */
+   Resource *resources = nullptr;
+   uint64_t periodicTrimSequence = 0;
    std::vector<VkImage> sharedImages; /* acquired this recording; release before submission */
 
    /* Bound state */
@@ -492,6 +496,7 @@ HRESULT slice_map(Device *dev, Slice slice);
 void slice_unmap(Device *dev, Slice slice);
 void slice_release(Device *dev, Slice slice, uint64_t lastUse);
 void upload_destroy(Device *dev);
+void upload_trim(Device *dev);
 
 /* tgd3d_resource.cpp */
 HRESULT resource_result(VkResult result);
@@ -537,6 +542,10 @@ void dxgi_fill_table(DXGI1_1_DDI_BASE_FUNCTIONS *table, bool has_resolve);
 void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
 void dxgi_fill_presentation14(DXGI1_4_DDI_BASE_FUNCTIONS *table);
 void dxgi_fill_residency13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
+HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args);
+HRESULT trim_memory(Device *dev);
+uint64_t resource_last_use(const Resource *res);
+HRESULT prepare_resource_residency(Device *dev);
 bool direct_flip_compatible(Device *dev, const Resource *source, const Resource *target);
 HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args, const RECT *source = nullptr);
 void blit_destroy(Device *dev);
@@ -564,6 +573,8 @@ HRESULT runtime_private_create(Device *dev, D3D10DDI_HRTRESOURCE resource,
                                 uint64_t bytes, RuntimeResource **out);
 bool runtime_requires_resource_lifetime(const RuntimeResource *resource);
 bool runtime_is_offered(const RuntimeResource *resource);
+HRESULT runtime_make_resident(RuntimeResource *resource);
+HRESULT runtime_evict(RuntimeResource *resource, uint64_t *bytes);
 HRESULT runtime_offer(Device *dev, RuntimeResource *const *resources, UINT count,
                        D3DDDI_OFFER_PRIORITY priority);
 HRESULT runtime_reclaim(Device *dev, RuntimeResource *const *resources, UINT count, BOOL *discarded);

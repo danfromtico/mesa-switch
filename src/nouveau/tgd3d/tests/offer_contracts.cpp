@@ -23,6 +23,7 @@ template<typename R, typename... A> struct Stub<R(VKAPI_PTR *)(A...)> {
 struct Allocation {
    std::vector<BYTE> cpu, old;
    bool offered = false;
+   bool resident = false;
 };
 struct Memory {
    const wsi_win32_memory *owner;
@@ -36,10 +37,12 @@ struct State {
    UINT nextAllocation = 0x500, nextMemory = 0x100, nextBuffer = 0x700;
    UINT offers = 0, reclaims = 0, deallocations = 0, pagingWaits = 0, renderWaits = 0;
    UINT locks = 0, unlocks = 0, unmaps = 0, kinds = 0, errors = 0;
+   UINT residents = 0, evictions = 0;
    uint64_t paging = 0, nextPaging = 0, render = 0;
    bool failPaging = false;
    UINT discard = 0;
    HRESULT offerResult = S_OK;
+   HRESULT evictResult = S_OK;
    std::vector<int> order;
 } s;
 
@@ -86,7 +89,16 @@ void init(Device *dev, Adapter *adapter)
    };
    cb.pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *a) -> HRESULT {
       CHECK(a->hPagingQueue == 0x40 && a->NumAllocations == 1 && s.allocations.count(a->AllocationList[0]));
+      auto &allocation = s.allocations.at(a->AllocationList[0]);
+      CHECK(!allocation.resident); allocation.resident = true; ++s.residents;
       a->PagingFenceValue = ++s.nextPaging; return E_PENDING;
+   };
+   cb.pfnEvictCb = [](HANDLE d, D3DDDICB_EVICT *a) -> HRESULT {
+      CHECK(d == h<HANDLE>(0x1000) && a->NumAllocations == 1 && !a->Flags.Value);
+      auto &allocation = s.allocations.at(a->AllocationList[0]);
+      CHECK(allocation.resident && !allocation.offered);
+      if (FAILED(s.evictResult)) return s.evictResult;
+      allocation.resident = false; ++s.evictions; return S_OK;
    };
    cb.pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE,
       const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) -> HRESULT {
@@ -205,6 +217,65 @@ void init(Device *dev, Adapter *adapter)
    };
    CHECK(runtime_device_create(dev) == S_OK);
 }
+
+static void trim_contracts()
+{
+   Adapter adapter; Device dev; init(&dev, &adapter);
+   D3D11_1DDI_DEVICEFUNCS table = {}; device_fill_table11(&table);
+   DXGI1_4_DDI_BASE_FUNCTIONS dxgi = {}; dxgi_fill_presentation14(&dxgi);
+   alignas(Resource) BYTE storage[3][sizeof(Resource)];
+   Resource *res[3];
+   D3D10DDI_MIPINFO mip = {256,1,1,256,1,1};
+   D3D11DDIARG_CREATERESOURCE desc = {};
+   desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_BUFFER;
+   desc.Usage = D3D10_DDI_USAGE_DYNAMIC; desc.BindFlags = D3D10_DDI_BIND_VERTEX_BUFFER;
+   desc.MipLevels = desc.ArraySize = desc.SampleDesc.Count = 1;
+   for (UINT i = 0; i < 3; ++i) {
+      res[i] = reinterpret_cast<Resource *>(storage[i]);
+      table.pfnCreateResource({&dev}, &desc, {res[i]}, {h<HANDLE>(i+1)});
+   }
+   CHECK(!s.errors && dev.resources == res[2] && s.residents == 3);
+   res[2]->primary = true; // a rendering fence cannot decide scanout lifetime
+   res[1]->sliceLastUse = 2; dev.submitted = 2; s.render = 1;
+   DXGI_DDI_ARG_TRIMRESIDENCYSET trim = {};
+   trim.hDevice = (DXGI_DDI_HDEVICE)&dev; trim.TrimFlags.RestartPeriodicTrim = 1;
+   CHECK(dxgi.pfnTrimResidencySet(&trim) == S_OK && !s.evictions && dev.periodicTrimSequence == 1);
+   trim.TrimFlags.Value = 0; trim.TrimFlags.PeriodicTrim = 1;
+   CHECK(dxgi.pfnTrimResidencySet(&trim) == S_OK && s.evictions == 1 && !s.renderWaits);
+   CHECK(dxgi.pfnTrimResidencySet(&trim) == S_OK && s.evictions == 1); // balanced reference
+   CHECK(!s.allocations.at(runtime_allocation(resource_runtime(res[0]))).resident);
+   CHECK(cmd_begin(&dev)); res[0]->sliceLastUse = dev.recordingSeq();
+   const UINT paging = s.pagingWaits;
+   CHECK(flush(&dev, false) == S_OK && dev.submitted == 3 && s.render == 1 &&
+         s.residents == 4 && s.pagingWaits > paging && !s.renderWaits && !s.deallocations);
+   s.render = 3;
+   trim.TrimFlags.Value = 0; trim.TrimFlags.TrimToBudget = 1; trim.NumBytesToTrim = 4096;
+   CHECK(dxgi.pfnTrimResidencySet(&trim) == S_OK && s.evictions == 2);
+   // A failed paging wait may be retried without incrementing MakeResident's refcount twice.
+   s.failPaging = true;
+   CHECK(runtime_make_resident(resource_runtime(res[1])) == E_FAIL && s.residents == 5);
+   CHECK(runtime_make_resident(resource_runtime(res[1])) == S_OK && s.residents == 5 && s.render == 3);
+   // Eviction failure keeps residency and contents; an idle retry can succeed.
+   s.evictResult = E_OUTOFMEMORY;
+   CHECK(dxgi.pfnTrimResidencySet(&trim) == E_OUTOFMEMORY && s.evictions == 2);
+   s.evictResult = S_OK;
+   CHECK(dxgi.pfnTrimResidencySet(&trim) == S_OK && s.evictions == 3);
+   // Destroy-before-submit restores the old backing, then retires it only after GPU completion.
+   CHECK(cmd_begin(&dev)); res[1]->sliceLastUse = dev.recordingSeq();
+   table.pfnDestroyResource({&dev}, {res[1]});
+   CHECK(s.residents == 6 && !s.deallocations && dev.resources->next == res[0]);
+   CHECK(flush(&dev, false) == S_OK && dev.submitted == 4 && s.render == 3);
+   CHECK(!s.deallocations);
+   s.render = 4; retire(&dev); CHECK(s.deallocations == 1);
+   trim.TrimFlags.PeriodicTrim = trim.TrimFlags.RestartPeriodicTrim = 1;
+   CHECK(dxgi.pfnTrimResidencySet(&trim) == E_INVALIDARG);
+   table.pfnDestroyResource({&dev}, {res[0]}); table.pfnDestroyResource({&dev}, {res[2]});
+   CHECK(!dev.resources && s.allocations.empty() && s.memory.empty() && !s.errors && !s.renderWaits);
+   CHECK(table.pfnFlush({&dev}, D3DWDDM1_3DDI_TRIM_MEMORY | 0x1000)); // unknown flag conservatively flushes
+   CHECK(dev.freePools.empty() && dev.freeCommands.empty());
+   cmd_destroy(&dev); runtime_device_destroy(&dev);
+   std::puts("PASS: periodic/budget Trim evicts only completed idle backing, preserves scanout and in-flight memory, restores paging before GPU use, balances retry references and handles destroy-before-submit (CPU control)");
+}
 }
 
 void offer_contracts()
@@ -284,5 +355,6 @@ void offer_contracts()
    CHECK(s.allocations.empty() && s.memory.empty() && s.buffers.empty() && !s.errors && !s.renderWaits);
    CHECK(dev.chunks.empty()); cmd_destroy(&dev); runtime_device_destroy(&dev);
    std::puts("PASS: runtime-owned private image/buffer backing, optimal PTE kind, distinct buffers, GPU-gated Offer, deduplication, paging-retry Reclaim, stale CPU remapping and real render retirement (CPU control)");
+   trim_contracts();
 #endif
 }

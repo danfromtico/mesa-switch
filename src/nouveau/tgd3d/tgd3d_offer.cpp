@@ -83,4 +83,68 @@ void dxgi_fill_residency13(DXGI1_3_DDI_BASE_FUNCTIONS *table)
    table->pfnReclaimResources = ReclaimResources;
 }
 
+uint64_t resource_last_use(const Resource *res)
+{
+   return res->kind == ResKind::Image ? res->storage.lastUse :
+      std::max(res->sliceLastUse, res->sliceLastWrite);
+}
+
+HRESULT prepare_resource_residency(Device *dev)
+{
+   for (Resource *res = dev->resources; res; res = res->next) {
+      if (resource_last_use(res) <= dev->submitted) continue;
+      HRESULT hr = runtime_make_resident(resource_runtime(res));
+      if (FAILED(hr)) return hr;
+   }
+   return S_OK;
+}
+
+HRESULT trim_memory(Device *dev)
+{
+   if (FAILED(dev->lost)) return dev->lost;
+   retire(dev); // only the actual completed queue value retires commands/slices
+   if (FAILED(dev->lost)) return dev->lost;
+   upload_trim(dev);
+   for (auto pool : dev->freePools) dev->vk.DestroyDescriptorPool(dev->vkdev, pool, nullptr);
+   dev->freePools.clear();
+   if (!dev->freeCommands.empty()) {
+      dev->vk.FreeCommandBuffers(dev->vkdev, dev->cmdPool,
+         static_cast<uint32_t>(dev->freeCommands.size()), dev->freeCommands.data());
+      dev->freeCommands.clear();
+   }
+   return dev->lost;
+}
+
+HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args)
+{
+   if (!args || !args->hDevice || args->TrimFlags.Reserved ||
+       (args->TrimFlags.PeriodicTrim && args->TrimFlags.RestartPeriodicTrim)) return E_INVALIDARG;
+   auto *dev = reinterpret_cast<Device *>(args->hDevice);
+   if (FAILED(dev->lost)) return dev->lost;
+   /* Use the runtime's serialized DDI entry. Do not dispatch allocation
+    * callbacks or access this list from a driver-created worker thread. */
+   const uint64_t done = dev->completed();
+   if (FAILED(dev->lost)) return dev->lost;
+   const uint64_t cutoff = dev->periodicTrimSequence;
+   if (args->TrimFlags.PeriodicTrim || args->TrimFlags.RestartPeriodicTrim)
+      dev->periodicTrimSequence = done;
+   HRESULT hr = trim_memory(dev);
+   if (FAILED(hr)) return hr;
+   uint64_t budget = args->TrimFlags.TrimToBudget ? args->NumBytesToTrim : 0;
+   for (Resource *res = dev->resources; res; res = res->next) {
+      const uint64_t use = resource_last_use(res);
+      bool mapped = res->bufferMapped;
+      for (const auto &map : res->maps) mapped |= map.mapped;
+      if (mapped || use > done || res->primary) continue;
+      if (!(args->TrimFlags.PeriodicTrim && use <= cutoff) && !budget) continue;
+      uint64_t bytes = 0;
+      hr = runtime_evict(resource_runtime(res), &bytes);
+      if (FAILED(hr)) return residency_result(dev, hr);
+      budget -= std::min(budget, bytes);
+   }
+   /* Live/in-flight and scanout backing can exceed a requested trim amount.
+    * Preserve it; never pretend that a render fence completed to meet budget. */
+   return S_OK;
+}
+
 } // namespace tgd3d

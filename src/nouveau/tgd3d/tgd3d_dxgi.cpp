@@ -364,6 +364,7 @@ void dxgi_fill_presentation14(DXGI1_4_DDI_BASE_FUNCTIONS *table)
 #undef SAME
    table->pfnPresentMultiplaneOverlay1 = PresentMultiplaneOverlay1;
    table->pfnCheckMultiplaneOverlayColorSpaceSupport = CheckMultiplaneOverlayColorSpaceSupport;
+   table->pfnTrimResidencySet = TrimResidencySet;
    /* Still unadvertised: finish WDDM2 device/capability/residency negotiation
     * before enabling this table. A 1.3 table cannot supply the 1.4 MPO1 slot
     * tested by DWM's D3D11 runtime for single-plane MPO3 conversion. */

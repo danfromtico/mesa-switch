@@ -229,6 +229,9 @@ HRESULT image_create(Device *dev, Resource *res)
 void storage_destroy(Device *dev, ImageStorage &storage, bool immediate)
 {
    const uint64_t seq = immediate ? 0 : storage.lastUse;
+   if (seq > dev->submitted && SUCCEEDED(dev->lost) &&
+       FAILED(runtime_make_resident(storage.runtime)))
+      TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
    /* Rotation leaves cached views in other logical resources. Retire all
     * views of this backing before its image, including already-deferred ones. */
    std::vector<uint64_t> views;
@@ -403,6 +406,13 @@ static HRESULT init_image_fields(Device *dev, Resource *res)
    return S_OK;
 }
 
+static void resource_untrack(Device *dev, Resource *res)
+{
+   for (Resource **link = &dev->resources; *link; link = &(*link)->next) {
+      if (*link == res) { *link = res->next; res->next = nullptr; return; }
+   }
+}
+
 static void resource_fail(Device *dev, Resource *res, HRESULT hr)
 {
    /* Earlier initial-data uploads can already reference this backing when
@@ -415,6 +425,7 @@ static void resource_fail(Device *dev, Resource *res, HRESULT hr)
       slice_release(dev, res->slice, 0);
    if (res->storage.image || res->storage.runtime)
       storage_destroy(dev, res->storage, true);
+   resource_untrack(dev, res);
    res->~Resource();
    /* Create/OpenResource accept E_OUTOFMEMORY, not the legacy video-memory
     * error. Preserve removal discovered while unwinding initial uploads. */
@@ -532,6 +543,8 @@ static void APIENTRY CreateResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_
    Resource *res = new (hResource.pDrvPrivate) Resource();
    res->dev = dev;
    res->hRT = hRT;
+   res->next = dev->resources;
+   dev->resources = res;
    trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 0, (uintptr_t)res);
    HRESULT hr = create_resource(dev, desc, res);
    if (FAILED(hr))
@@ -546,6 +559,8 @@ static void APIENTRY OpenResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_OP
    Resource *res = new (hResource.pDrvPrivate) Resource();
    res->dev = dev;
    res->hRT = hRT;
+   res->next = dev->resources;
+   dev->resources = res;
    res->opened = true;
    RuntimeSharedDescription d = {};
    HRESULT hr = FAILED(dev->lost) ? dev->lost :
@@ -640,6 +655,7 @@ static void APIENTRY DestroyResource(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURC
       }
       storage_destroy(dev, res->storage, runtime_lifetime);
    }
+   resource_untrack(dev, res);
    res->~Resource();
 }
 
