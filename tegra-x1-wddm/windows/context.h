@@ -78,6 +78,7 @@ struct _TG_GPU_CONTEXT_ENGINE {
     LUID AdapterLuid;
     BOOLEAN AdapterIdentityReady, PagingOnly;
     struct tg_nvdec_resource_info NvdecInfo; /* copied start snapshot; no borrowed MMIO */
+    struct tg_nvdec_client_info NvdecClients;
     NTSTATUS RecoveryStatus;
     BOOLEAN RecoveryPending,RecoverySending,RecoveryNotified,Resetting;
 };

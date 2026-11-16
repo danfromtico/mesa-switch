@@ -57,14 +57,17 @@ main(void)
          struct tg_kmt_query q = {.handle = adapters[n].handle, .type = TG_KMT_UMDRIVERPRIVATE,
                                  .data = &base, .bytes = sizeof(base)};
          if (api.query(&q) >= 0 && matches(&base, &adapters[n].luid)) {
-            struct tg_gpu_adapter_nvdec_info info = {
-               .base = {.version = TG_GPU_ADAPTER_ABI, .size = sizeof(base)},
+            struct tg_gpu_adapter_nvdec_clients_info info = {
+               .resource.base = {.version = TG_GPU_ADAPTER_ABI, .size = sizeof(base)},
             };
             q.data = &info; q.bytes = sizeof(info);
             LONG queried = api.query(&q);
-            const struct tg_nvdec_resource_info *s = &info.nvdec;
-            const int available = queried >= 0 && matches(&info.base, &adapters[n].luid) &&
+            const struct tg_nvdec_resource_info *s = &info.resource.nvdec;
+            const struct tg_nvdec_client_info *c = &info.clients;
+            const int available = queried >= 0 && matches(&info.resource.base, &adapters[n].luid) &&
                s->version == TG_NVDEC_QUERY_ABI && s->size == sizeof(*s);
+            const int clients_available = available &&
+               c->version == TG_NVDEC_CLIENT_QUERY_ABI && c->size == sizeof(*c);
             supported += available;
             printf("%s{\"luid\":\"%08" PRIx32 "%08" PRIx32 "\","
                    "\"query_status\":\"%08" PRIx32 "\",\"snapshot_available\":%s,"
@@ -74,12 +77,22 @@ main(void)
                    "\"clock_y\":\"%08" PRIx32 "\",\"reset_y\":\"%08" PRIx32 "\","
                    "\"nvdec_clock_source\":\"%08" PRIx32 "\",\"nvjpg_clock_source\":\"%08" PRIx32 "\","
                    "\"smmu_config\":\"%08" PRIx32 "\",\"smmu_host1x_asid\":\"%08" PRIx32 "\","
-                   "\"smmu_nvdec_asid\":\"%08" PRIx32 "\",\"smmu_nvjpg_asid\":\"%08" PRIx32 "\"}",
+                   "\"smmu_nvdec_asid\":\"%08" PRIx32 "\",\"smmu_nvjpg_asid\":\"%08" PRIx32 "\","
+                   "\"clients_available\":%s,\"client_flags\":%u,"
+                   "\"smmu_translation_enable0\":\"%08" PRIx32 "\","
+                   "\"smmu_translation_enable1\":\"%08" PRIx32 "\","
+                   "\"smmu_translation_enable3\":\"%08" PRIx32 "\","
+                   "\"mc_flush\":\"%08" PRIx32 "\",\"mc_flush_status\":\"%08" PRIx32 "\","
+                   "\"pmc_clamp_status\":\"%08" PRIx32 "\",\"pmc_toggle\":\"%08" PRIx32 "\"}",
                    matched++ ? "," : "", (uint32_t)adapters[n].luid.high, adapters[n].luid.low,
                    (uint32_t)queried, available ? "true" : "false", s->version, s->size, s->flags,
                    s->resource_mask, s->status, s->map_status, s->hidrev, s->powergate_status,
                    s->clock_y, s->reset_y, s->nvdec_clock_source, s->nvjpg_clock_source,
-                   s->smmu_config, s->smmu_host1x_asid, s->smmu_nvdec_asid, s->smmu_nvjpg_asid);
+                   s->smmu_config, s->smmu_host1x_asid, s->smmu_nvdec_asid, s->smmu_nvjpg_asid,
+                   clients_available ? "true" : "false", c->flags,
+                   c->smmu_translation_enable0, c->smmu_translation_enable1,
+                   c->smmu_translation_enable3, c->mc_flush, c->mc_flush_status,
+                   c->pmc_clamp_status, c->pmc_toggle);
          }
          const struct tg_kmt_close c = {.handle = adapters[n].handle};
          LONG closed = api.close(&c);

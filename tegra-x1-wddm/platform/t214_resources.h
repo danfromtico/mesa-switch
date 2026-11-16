@@ -51,13 +51,15 @@
 #define T214_NVDEC_RESOURCES(X) \
     X(Registers, 0x54480000, 0x00040000, 1) \
     X(Host1x,    0x50000000, 0x00040000, 1) \
-    X(Pmc,       0x7000E430, 0x0000000C, 1) \
+    X(Pmc,       0x7000E42C, 0x00000010, 1) \
     X(CarY,      0x60006298, 0x00000018, 1) \
     X(CarSource, 0x60006698, 0x00000008, 1) \
     X(Smmu,      0x70019010, 0x00000004, 0) \
     X(HcAsid,    0x70019250, 0x00000004, 0) \
     X(NvdecAsid, 0x70019AB4, 0x00000004, 0) \
-    X(NvjpgAsid, 0x70019AC0, 0x00000004, 0)
-#define T214_NVDEC_RESOURCE_COUNT 9
+    X(NvjpgAsid, 0x70019AC0, 0x00000004, 0) \
+    X(SmmuEn01,  0x70019228, 0x00000008, 0) \
+    X(SmmuEn3,   0x70019234, 0x00000004, 0)
+#define T214_NVDEC_RESOURCE_COUNT 11
 
 #endif

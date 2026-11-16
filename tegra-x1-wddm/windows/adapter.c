@@ -98,6 +98,7 @@ NTSTATUS APIENTRY TgGpuDdiStartDevice(PVOID context,DXGK_START_INFO *start,
     if(!NT_SUCCESS(status))goto fail;
     a->EngineReady=TRUE;
     a->Engine.NvdecInfo=a->Resources.NvdecInfo;
+    a->Engine.NvdecClients=a->Resources.NvdecClients;
     status=TgGpuInitializeWorkQueue(&a->Queue,&a->Engine);
     if(!NT_SUCCESS(status))goto fail;
     a->QueueReady=TRUE;

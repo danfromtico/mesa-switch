@@ -148,6 +148,12 @@ NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYAD
             nvdec.version=TG_NVDEC_QUERY_ABI;nvdec.size=sizeof(nvdec);
             RtlCopyMemory((UCHAR *)a->pOutputData+sizeof(info),&nvdec,sizeof(nvdec));
         }
+        if(a->OutputDataSize>=sizeof(struct tg_gpu_adapter_nvdec_clients_info)) {
+            struct tg_nvdec_client_info clients=e->NvdecClients;
+            clients.version=TG_NVDEC_CLIENT_QUERY_ABI;clients.size=sizeof(clients);
+            RtlCopyMemory((UCHAR *)a->pOutputData+sizeof(struct tg_gpu_adapter_nvdec_info),
+                          &clients,sizeof(clients));
+        }
         return STATUS_SUCCESS;
     }
     case DXGKQAITYPE_QUERYSEGMENT4: {

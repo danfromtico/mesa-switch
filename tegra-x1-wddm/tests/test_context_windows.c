@@ -1252,6 +1252,25 @@ static __declspec(noinline) void TestAdapterQueries(TG_GPU_CONTEXT_ENGINE *e,DRI
     CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)));
     for(i=sizeof(ext.info.base);i<sizeof(ext);++i)CHECK(((UCHAR *)&ext)[i]==0xa5);
     e->NvdecInfo=saved_nvdec;
+    struct {struct tg_gpu_adapter_nvdec_clients_info info;UCHAR guard[16];} clients;
+    struct tg_nvdec_client_info saved_clients=e->NvdecClients;
+    e->NvdecClients=(struct tg_nvdec_client_info){
+        .version=TG_NVDEC_CLIENT_QUERY_ABI,.size=40,.flags=TG_NVDEC_CLIENT_REGS_VALID,
+        .smmu_translation_enable0=1u<<22,.mc_flush=0x100};
+    for(UINT form=0;form<3;++form) {
+        memset(&clients,0xa5,sizeof(clients));clients.info.resource.base=request;
+        a.pOutputData=&clients;a.OutputDataSize=sizeof(clients);
+        a.pInputData=form==0?&request:(form==1?&clients.info.resource.base:NULL);
+        a.InputDataSize=form==2?0:sizeof(request);
+        CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)));
+        CHECK(!memcmp(&clients.info.clients,&e->NvdecClients,sizeof(e->NvdecClients)));
+        for(i=0;i<sizeof(clients.guard);++i)CHECK(clients.guard[i]==0xa5);
+    }
+    memset(&clients,0xa5,sizeof(clients));
+    a.OutputDataSize=sizeof(clients.info)-1;
+    CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)));
+    for(i=sizeof(clients.info.resource);i<sizeof(clients);++i)CHECK(((UCHAR *)&clients)[i]==0xa5);
+    e->NvdecClients=saved_clients;
     a.pInputData=&request;a.InputDataSize=sizeof(request);
     a.pOutputData=&abi;a.OutputDataSize=sizeof(abi);
     const BOOLEAN saved_paging=e->PagingOnly,saved_identity=e->AdapterIdentityReady;

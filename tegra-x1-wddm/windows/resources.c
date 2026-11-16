@@ -32,6 +32,7 @@ static VOID map_nvdec_resources(const DXGKRNL_INTERFACE *Dxgk,
                                 TG_GPU_RESOURCES *r)
 {
     struct tg_nvdec_resource_info *s = &r->NvdecInfo;
+    struct tg_nvdec_client_info *c = &r->NvdecClients;
     ULONG i;
     if (s->status == TG_NVDEC_RESOURCES_INVALID)
         return;
@@ -66,7 +67,9 @@ static VOID map_nvdec_resources(const DXGKRNL_INTERFACE *Dxgk,
     /* Read only always-on identification, PMC, CAR and MC views. Do not read
      * the unpowered NVDEC aperture or an unleased Host1x clock domain. */
     s->hidrev = READ_REGISTER_ULONG((PULONG)r->Mapping[TgGpuHidrev]);
-    s->powergate_status = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecPmc] + 2);
+    s->powergate_status = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecPmc] + 3);
+    c->pmc_clamp_status = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecPmc]);
+    c->pmc_toggle = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecPmc] + 1);
     s->clock_y = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecCarY]);
     s->reset_y = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecCarY] + 3);
     s->nvdec_clock_source = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecCarSource]);
@@ -75,6 +78,29 @@ static VOID map_nvdec_resources(const DXGKRNL_INTERFACE *Dxgk,
     s->smmu_host1x_asid = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecHcAsid]);
     s->smmu_nvdec_asid = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecNvdecAsid]);
     s->smmu_nvjpg_asid = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecNvjpgAsid]);
+    c->smmu_translation_enable0 = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecSmmuEn01]);
+    c->smmu_translation_enable1 = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecSmmuEn01] + 1);
+    c->smmu_translation_enable3 = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecSmmuEn3]);
+    c->mc_flush = READ_REGISTER_ULONG((PULONG)r->Mapping[TgGpuMcFlush]);
+    c->mc_flush_status = READ_REGISTER_ULONG((PULONG)r->Mapping[TgGpuMcFlush] + 1);
+    if (c->smmu_translation_enable0 != MAXULONG &&
+        c->smmu_translation_enable1 != MAXULONG &&
+        c->smmu_translation_enable3 != MAXULONG &&
+        c->mc_flush != MAXULONG && c->mc_flush_status != MAXULONG &&
+        s->smmu_host1x_asid != MAXULONG && s->smmu_nvdec_asid != MAXULONG &&
+        s->smmu_nvjpg_asid != MAXULONG) {
+        c->flags = TG_NVDEC_CLIENT_REGS_VALID;
+        /* T210 HC read clients 0x16/0x17, HC write 0x36,
+         * NVDEC read/write 0x78/0x79, NVJPG read/write 0x7e/0x7f.
+         * Both the per-client enables and group ASID_ENABLE must be clear.
+         * Never write them to bypass an existing owner or address space. */
+        if (!(c->smmu_translation_enable0 & (3u << 22)) &&
+            !(c->smmu_translation_enable1 & (1u << 22)) &&
+            !(c->smmu_translation_enable3 & ((3u << 24) | (3u << 30))) &&
+            !((s->smmu_host1x_asid | s->smmu_nvdec_asid |
+               s->smmu_nvjpg_asid) & (1u << 31)))
+            c->flags |= TG_NVDEC_CLIENT_TRANSLATION_DISABLED;
+    }
     if (s->hidrev == MAXULONG || s->powergate_status == MAXULONG ||
         s->clock_y == MAXULONG || s->reset_y == MAXULONG ||
         s->nvdec_clock_source == MAXULONG || s->nvjpg_clock_source == MAXULONG ||
@@ -100,6 +126,7 @@ TgGpuReleaseResources(const DXGKRNL_INTERFACE *Dxgk,
     ULONG i;
     PAGED_CODE();
     Resources->NvdecInfo.flags = 0;
+    Resources->NvdecClients.flags = 0;
     for (i = TgNvdecApertureCount; i != 0; --i) {
         if (Resources->NvdecMapping[i - 1]) {
             NTSTATUS status = Dxgk->DxgkCbUnmapMemory(Dxgk->DeviceHandle,
@@ -157,6 +184,8 @@ TgGpuAcquireResources(const DXGKRNL_INTERFACE *Dxgk,
     RtlZeroMemory(Resources, sizeof(*Resources));
     Resources->NvdecInfo.version = TG_NVDEC_QUERY_ABI;
     Resources->NvdecInfo.size = sizeof(Resources->NvdecInfo);
+    Resources->NvdecClients.version = TG_NVDEC_CLIENT_QUERY_ABI;
+    Resources->NvdecClients.size = sizeof(Resources->NvdecClients);
 
     status = Dxgk->DxgkCbGetDeviceInformation(Dxgk->DeviceHandle, &info);
     if (!NT_SUCCESS(status))

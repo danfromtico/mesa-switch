@@ -46,6 +46,7 @@ typedef struct _TG_GPU_RESOURCES {
     CM_PARTIAL_RESOURCE_DESCRIPTOR NvdecMemory[TgNvdecApertureCount];
     PVOID NvdecMapping[TgNvdecApertureCount];
     struct tg_nvdec_resource_info NvdecInfo;
+    struct tg_nvdec_client_info NvdecClients;
 } TG_GPU_RESOURCES;
 
 /* Adapter start/stop helpers following the render-only WDDM sample's

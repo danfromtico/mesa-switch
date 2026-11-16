@@ -7,6 +7,7 @@ static const ULONG nvdec_resource_profile[][3] = {
 #undef NVDEC_PAIR
 };
 static ULONG nvdec_words[TgNvdecApertureCount][6], nvdec_hidrev;
+static ULONG nvdec_mc_flush[2];
 static UINT nvdec_maps, nvdec_unmaps, nvdec_live;
 static UINT nvdec_fail_map, nvdec_null_map, nvdec_fail_unmap;
 
@@ -33,6 +34,8 @@ static NTSTATUS APIENTRY NvdecResourceMap(HANDLE device, PHYSICAL_ADDRESS addres
     NTSTATUS status = MapDisplayResource(device, address, bytes, io, user, cache, out);
     if (NT_SUCCESS(status) && address.QuadPart == resource_profile[TgGpuHidrev][0])
         *out = &nvdec_hidrev;
+    if (NT_SUCCESS(status) && address.QuadPart == resource_profile[TgGpuMcFlush][0])
+        *out = nvdec_mc_flush;
     return status;
 }
 
@@ -48,6 +51,8 @@ static NTSTATUS APIENTRY NvdecResourceUnmap(HANDLE device, PVOID mapping)
     }
     if (mapping == &nvdec_hidrev)
         mapping = (PVOID)(ULONG_PTR)(0x10000 + (TgGpuHidrev + 1) * PAGE_SIZE);
+    if (mapping == nvdec_mc_flush)
+        mapping = (PVOID)(ULONG_PTR)(0x10000 + (TgGpuMcFlush + 1) * PAGE_SIZE);
     return UnmapDisplayResource(device, mapping);
 }
 
@@ -58,7 +63,10 @@ static CM_PARTIAL_RESOURCE_LIST *NvdecResourceList(UINT count, BOOLEAN display)
     nvdec_fail_map = nvdec_null_map = nvdec_fail_unmap = 0;
     nvdec_hidrev = 0x22110021;
     RtlZeroMemory(nvdec_words, sizeof(nvdec_words));
-    nvdec_words[TgNvdecPmc][2] = 0x02000000;
+    RtlZeroMemory(nvdec_mc_flush, sizeof(nvdec_mc_flush));
+    nvdec_words[TgNvdecPmc][0] = 0x8f9a;
+    nvdec_words[TgNvdecPmc][1] = 0x11;
+    nvdec_words[TgNvdecPmc][3] = 0x02000000;
     nvdec_words[TgNvdecCarY][0] = 0x80;
     nvdec_words[TgNvdecCarY][3] = 0xc0;
     nvdec_words[TgNvdecCarSource][0] = 0x80000002;
@@ -122,9 +130,13 @@ static void TestNvdecResources(void)
     CHECK(r.NvdecInfo.nvdec_clock_source == 0x80000002 && r.NvdecInfo.nvjpg_clock_source == 0x80000004);
     CHECK(r.NvdecInfo.smmu_config == 1 && r.NvdecInfo.smmu_host1x_asid == 0x80000001);
     CHECK(r.NvdecInfo.smmu_nvdec_asid == 0x80000002 && r.NvdecInfo.smmu_nvjpg_asid == 0x80000003);
+    CHECK(r.NvdecClients.version == TG_NVDEC_CLIENT_QUERY_ABI && r.NvdecClients.size == 40);
+    CHECK(r.NvdecClients.pmc_clamp_status == 0x8f9a && r.NvdecClients.pmc_toggle == 0x11);
+    CHECK(r.NvdecClients.flags == TG_NVDEC_CLIENT_REGS_VALID);
     CHECK(r.DisplayRegisters == boot_display && !r.PanelAvailable);
     CHECK(TgGpuReleaseResources(&dxgk, &r) == STATUS_SUCCESS && !nvdec_live && !resource_live);
     CHECK(!r.NvdecInfo.flags && nvdec_maps == nvdec_unmaps);
+    CHECK(!r.NvdecClients.flags);
 
     for (UINT fail = 1; fail <= TgNvdecApertureCount; ++fail) {
         NvdecResourceList(TgNvdecApertureCount, FALSE);
@@ -160,4 +172,30 @@ static void TestNvdecResources(void)
     CHECK(r.NvdecInfo.status == TG_NVDEC_RESOURCES_REGS_INVALID);
     CHECK(r.NvdecInfo.flags == (TG_NVDEC_QUERY_RESOURCES_VALID | TG_NVDEC_QUERY_MAPPED));
     CHECK(TgGpuReleaseResources(&dxgk, &r) == STATUS_SUCCESS && !nvdec_live && !resource_live);
+
+    /* Real preflight returned an unreadable global SMMU_CONFIG. Client-state
+     * reporting remains independent; no global-register value is invented. */
+    for (UINT blocked = 0; blocked < 12; ++blocked) {
+        NvdecResourceList(TgNvdecApertureCount, FALSE);
+        nvdec_words[TgNvdecSmmu][0] = MAXULONG;
+        nvdec_words[TgNvdecHcAsid][0] = 0;
+        nvdec_words[TgNvdecNvdecAsid][0] = 0;
+        nvdec_words[TgNvdecNvjpgAsid][0] = 0;
+        if (blocked == 1) nvdec_words[TgNvdecSmmuEn01][0] = 1u << 22;
+        if (blocked == 2) nvdec_words[TgNvdecSmmuEn01][0] = 1u << 23;
+        if (blocked == 3) nvdec_words[TgNvdecSmmuEn01][1] = 1u << 22;
+        if (blocked == 4) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 24;
+        if (blocked == 5) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 25;
+        if (blocked == 6) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 30;
+        if (blocked == 7) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 31;
+        if (blocked >= 8 && blocked <= 10)
+            nvdec_words[TgNvdecHcAsid + blocked - 8][0] = 1u << 31;
+        if (blocked == 11) nvdec_words[TgNvdecSmmuEn3][0] = MAXULONG;
+        CHECK(TgGpuAcquireResources(&dxgk, &r) == STATUS_SUCCESS);
+        CHECK(r.NvdecInfo.status == TG_NVDEC_RESOURCES_REGS_INVALID);
+        CHECK(r.NvdecClients.flags == (blocked == 11 ? 0 :
+            TG_NVDEC_CLIENT_REGS_VALID | (blocked ? 0 : TG_NVDEC_CLIENT_TRANSLATION_DISABLED)));
+        CHECK(r.NvdecInfo.smmu_config == MAXULONG);
+        CHECK(TgGpuReleaseResources(&dxgk, &r) == STATUS_SUCCESS && !nvdec_live && !resource_live);
+    }
 }

@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-16T18:57:40.435143+00:00",
+  "state": "Built and locally signed resource candidate; native connection unavailable before authentication; not installed",
+  "baseline_changed": false,
+  "source": {
+    "branch": "tgd3d-vulkan",
+    "integration_parent": "89b0fa93bc0e5defd1968e02f2214d296b8d7688",
+    "installed_kmd_source_base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+    "retained_emc_input_identity": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
+    "prior_resource_patch_sha256": "db088ba8220c54667dc09bdb40117c0bf03db2c6b4b2d2b167b3e29bb4534a2c",
+    "client_route_patch_sha256": "70b03d861af1bfac9b182a2f25a4959a181a348c017777072d7bcfeacebc699a",
+    "files": {
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_abi.h": "ffd05fb124b630a3d04ac051ae7f7c7d58a20baafb4a6312e3c72ef0e645e5ed",
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_check.c": "aa96a24c60d15223ad9f7cfebfb53a857c2f9abcb2caf0113abfd2a112b3480a",
+      "tegra-x1-wddm/platform/t214_resources.h": "2f96a36033f2b654e2a765dc2860b5c85cf14a8414b6d9845ad399034f2e35ae",
+      "tegra-x1-wddm/windows/resources.c": "f36ae53e91acdcbd0c05d155790d87b448dfdaaa4a9f0271a46aeab20e02f6f5",
+      "tegra-x1-wddm/windows/resources.h": "969a69a00ce276f7ffa427c616b536b2379b5c358138885b4ed229b532b614df",
+      "tegra-x1-wddm/windows/context.h": "dfc16d1228b299c6cc2c6bc1138b0fb127ec1ae7446c04c74be82f82fa7c0e73",
+      "tegra-x1-wddm/windows/adapter.c": "c9e3527a93e8f75d38b54a90ef197bd16fd9b1e43cdd813b7143369cc4e518f3",
+      "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "b74f9f068dde828e85655807894e443a2d3d63f070c442abf3236dd7952391f3",
+      "tegra-x1-wddm/tools/build_nvdec_acpi.py": "f6d69d066d06353dd73291473b2e1cd1175fb1a26de8d9251856d4af992ffd9b",
+      "tegra-x1-wddm/windows/query.c": "db7b45113a2b10cf39c019152397756983f7313d7026e0a66e533ad228973050",
+      "tegra-x1-wddm/tests/test_context_windows.c": "2bbe82ae7bdc7d71d1d8624653cfe6b932bf401300533dcb6f0306f1afb29476"
+    },
+    "excluded": "Inherited uncommitted display/MPO/activation and power changes are excluded from the frozen native candidate."
+  },
+  "changes": [
+    "Append a40-byte client/PMC/MC snapshot to the existing48+64-byte query; legacy48/112-byte layouts and incomplete-output guards remain unchanged.",
+    "Add read-only translated GPU0 PnP views forMC0x228/0x22c and0x234; extend assigned PMC range from0x30..0x38 to0x2c..0x38 to include clamp status. No unowned register is read.",
+    "Report individual client and group ASID translation state independently of unreadable globalSMMU_CONFIG; do not change global or per-client routing.",
+    "Keep every state immutable from adapter startup; no firmware, DMA, decode or D3D video capability is enabled."
+  ],
+  "components": {
+    "kmd": {
+      "unsigned_sha256": "f18c4eb0c3bf2bf6f8152611244e0d39c0d2618a65a45a25df30891321fba2fe",
+      "signed_sha256": "ed09a227cd25bd1604ea4b8de1fdd8f725a7bf927fe275a3830ed1f1db381bf4",
+      "bytes": 207880,
+      "signer_chain_sha256": "460d3d9b2b84b0f486e41d1bbb9c34bf0489a4ed0347337aff6d279623a40031",
+      "verify_exit": 0,
+      "installed": false,
+      "native_catalog_created": false
+    },
+    "acpi": {
+      "baseline_sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438",
+      "sha256": "827b81c385963153aef6ce73f891603d546511c4672595e699f5cfed9c648ee9",
+      "bytes": 4981,
+      "updated_device": "GPU0",
+      "added_ranges": [
+        [
+          "Registers",
+          1414004736,
+          262144,
+          1
+        ],
+        [
+          "Host1x",
+          1342177280,
+          262144,
+          1
+        ],
+        [
+          "Pmc",
+          1879106604,
+          16,
+          1
+        ],
+        [
+          "CarY",
+          1610637976,
+          24,
+          1
+        ],
+        [
+          "CarSource",
+          1610639000,
+          8,
+          1
+        ],
+        [
+          "Smmu",
+          1879150608,
+          4,
+          0
+        ],
+        [
+          "HcAsid",
+          1879151184,
+          4,
+          0
+        ],
+        [
+          "NvdecAsid",
+          1879153332,
+          4,
+          0
+        ],
+        [
+          "NvjpgAsid",
+          1879153344,
+          4,
+          0
+        ],
+        [
+          "SmmuEn01",
+          1879151144,
+          8,
+          0
+        ],
+        [
+          "SmmuEn3",
+          1879151156,
+          4,
+          0
+        ]
+      ],
+      "other_device_aml_unchanged": true,
+      "gpu_nonresource_aml_unchanged": true,
+      "native_installed": false,
+      "decode_enabled": false
+    },
+    "query_tool": {
+      "command": [
+        "/Users/rujian/.local/share/mesa-switch-woa-build/toolchain/llvm-mingw-20261104-ucrt-macos-universal/bin/aarch64-w64-mingw32-clang",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/vulkan/nvkmd/windows/nvdec_check.c",
+        "-o",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/client-route/nvdec-resource-query.exe"
+      ],
+      "exit": 0,
+      "sha256": "dfd5285857615c6497d0726c9a117af1563b1fc83c6b07ae5893b1bc0aa4cc73",
+      "bytes": 62976
+    }
+  },
+  "validation": {
+    "arm64_build": {
+      "exit": 0,
+      "seconds": 26.70194101333618,
+      "revision": 2,
+      "installed": false
+    },
+    "resource_and_query_controls": [
+      {
+        "test": "resource-only",
+        "exit": 0,
+        "scope": "WDK CPU fixture under Wine, not actual DMA or decoder completion"
+      },
+      {
+        "test": "query-only",
+        "exit": 0,
+        "scope": "WDK CPU fixture under Wine, not actual DMA or decoder completion"
+      }
+    ],
+    "scope": "WDK CPU fixtures under Wine and ARM64 compilation, not native DMA or hardware decode proof",
+    "fixture_correction": {
+      "exit": 0,
+      "initial_exit": 246,
+      "initial_cause": "query-only copied from current display draft expected MPO; candidate uses frozen E95 query. Regenerated test from same candidate source, without modifying driver or assertions.",
+      "scope": "WDK CPU fixture under Wine, no native runtime or hardware proof"
+    },
+    "acpi_preservation": "Builder verified all non-GPU device AML and GPU0 outside_CRS byte-identical to pinned0502baseline"
+  },
+  "native_attempt": {
+    "commands_completed": 0,
+    "uploaded": false,
+    "driver_installed": false,
+    "restart_requested": false,
+    "attempts": 3,
+    "outcome": "TCP22 connected; peer closed before SSH identification/key exchange and authentication. No PowerShell/cmd payload executed.",
+    "evidence_files": {
+      "native-before.stderr": "e90236a6fb2d8c780b5da65069afdd8434b33bdce97a84c17500ea54936d094a",
+      "native-reconnect.stderr": "e90236a6fb2d8c780b5da65069afdd8434b33bdce97a84c17500ea54936d094a",
+      "native-handshake.stderr": "21f56ccfebd55f9e0016ec7e61e054962a3958d493c670af7e524606e8a384a9"
+    },
+    "last_confirmed_restored_state": "2026-11-16T18:12:24.0060013Z, preceding resource preflight cleanup; no fresh device or physical-screen confirmation this round"
+  },
+  "remaining": [
+    "Read real per-client route, clamp/toggle and MC state with this paired candidate when current device access is available.",
+    "Capture pre-selection EMC status and resolve prior ACTMON -3 difference before promotion.",
+    "Replace legacy assumption that already-powered means foreign owner; retain inherited NVDEC/NVJPG power, prove idle/reset/clamp state and obtain Host1x clock ownership via FAN0.",
+    "Use actual tracked WDDM memory and live client-route validation; no physical-address-as-bus assumption from CPU controls.",
+    "Close coexisting decoder transport, true completion/lifetimes, NV12, video DDI and GPU CSC before720p hardware acceptance, then1080p."
+  ],
+  "review": {
+    "status": "Pending Gemini4 Carbon High",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "retry_performed": false
+  },
+  "deferred_load_restarts": "LOAD_STABILITY_FOLLOWUP_20261116.json; vkpeak+CPU-Z/battery, weather/widgets and browser cases remain grouped as possibly related, not a confirmed common cause; no replay.",
+  "references": [
+    {
+      "url": "https://raw.githubusercontent.com/torvalds/linux/v6.8/drivers/memory/tegra/tegra210.c",
+      "local_sha256": "a4218704578578fc53e9db1efb74955b73362d196cc0aa3543ce358e8d95af5d",
+      "use": "MC register/client bit definitions only; no GPL implementation copied."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/iommu-based-gpu-isolation",
+      "scope": "WDDM2.4 legacy allocation callbacks describe physical pages mapped at the same logical address; this must not be generalized to WDDM3 linear remapping."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkargcb_allocatecontiguousmemory",
+      "scope": "Public allocation result handle and memory lifetime; PASSIVE callback and paired free."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-4.9/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/platform/tegra/powergate/powergate-t21x.c",
+      "local_sha256": "870cf1cafdacb2a26fa43b02c0d1b04c16a2f2b2d17c496c29185ce2b6f8788e",
+      "scope": "NVJPG dependency, inherited partition reference counts, PMC clamp status0x2c, T210B01 exception to SLCG workaround; reference only."
+    }
+  ],
+  "archived_system_contract": {
+    "version": "dxgkrnl10.0.22621.2792 ARM64",
+    "sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+    "pdb_sha256": "7f0a811d1c74569f9dbe428cc2d73355beb4e0864b7b77c81e1bbf3540fa74e9",
+    "rsds_guid": "797F457A-6488-C67C-8E55-B0F3E771DC32",
+    "rsds_age": 1,
+    "public_pdb_internal_age": 2,
+    "download_key": "797F457A6488C67C8E55B0F3E771DC321",
+    "pdb_age_caveat": "Microsoft public symbol file retrieved under image GUID+age1 has the same GUID but reports internal age2; do not claim the two ages match. Function labels corroborate the inspected public callback argument layout and imported allocator.",
+    "static_findings": [
+      "DxgkAllocateContiguousMemoryCB RVA0x58d80 rounds to pages and forwards public fields to SysMmCreateContiguousMemoryPhysicalObject RVA0x765a0.",
+      "The latter calls imported MmAllocateContiguousMemorySpecifyCache via IAT RVA0xd4c70; it returns the allocation only after tracked-object creation succeeds, and frees it on failure.",
+      "DxgkFreeContiguousMemoryCB RVA0x59120 drops tracking references and returns success. No runtime private object is read by driver code."
+    ],
+    "limit": "Archived native system binary, not re-fetched or newly traced on device this round. This validates the local contract analysis, not actual NVDEC DMA completion."
+  }
+}

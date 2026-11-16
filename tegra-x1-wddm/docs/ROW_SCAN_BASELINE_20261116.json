@@ -305,7 +305,7 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-16T15:44:39.255830+00:00",
+  "updated_utc": "2026-11-16T18:57:40.435143+00:00",
   "device_access": {
     "owner": "user",
     "purpose": "Native cube acceptance completed; device returned to user",
@@ -1041,6 +1041,14 @@
       "baseline_restored": true,
       "cleanup_complete": true,
       "candidate_promoted": false
+    },
+    "client_route_candidate": {
+      "record": "NVDEC_CLIENT_ROUTE_20261116.json",
+      "kmd_sha256": "ed09a227cd25bd1604ea4b8de1fdd8f725a7bf927fe275a3830ed1f1db381bf4",
+      "acpi_sha256": "827b81c385963153aef6ce73f891603d546511c4672595e699f5cfed9c648ee9",
+      "query_sha256": "dfd5285857615c6497d0726c9a117af1563b1fc83c6b07ae5893b1bc0aa4cc73",
+      "installed": false,
+      "baseline_promoted": false
     }
   },
   "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",

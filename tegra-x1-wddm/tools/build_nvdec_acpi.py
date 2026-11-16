@@ -32,7 +32,7 @@ def nvdec_ranges():
     text = header.read_text().split("#define T214_NVDEC_RESOURCES(X)", 1)[1]
     text = text.split("#define T214_NVDEC_RESOURCE_COUNT", 1)[0]
     rows = re.findall(r"X\((\w+),\s*(0x[0-9A-Fa-f]+),\s*(0x[0-9A-Fa-f]+),\s*([01])\)", text)
-    if len(rows) != 9:
+    if len(rows) != 11:
         raise ValueError("Unexpected NVDEC resource contract")
     return [(name, int(base, 16), int(size, 16), int(writable))
             for name, base, size, writable in rows]
