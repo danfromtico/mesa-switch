@@ -1,24 +1,27 @@
 /* SPDX-License-Identifier: MIT
  *
- * Windows kernel bridge for the T210 NVDEC H.264 backend.  This is the
- * bring-up transport used by the standalone acceptance tool; it is not a
- * WDDM video allocation contract.  Only 1280x720, 8-bit 4:2:0 progressive
- * H.264 is admitted.
+ * Retained Windows NVDEC H.264 backend for coexisting transport integration.
+ * Parent-owned register/clock interfaces are required; production DMA and
+ * WDDM video allocation wiring remains incomplete. Only 1280x720, 8-bit 4:2:0
+ * progressive H.264 is admitted. The replacement probe cannot start it.
  */
 #ifndef TGD3D_NVDEC_BACKEND_H
 #define TGD3D_NVDEC_BACKEND_H
 
 #include <ntddk.h>
 #include "../../src/nouveau/nvdec/nvdec.h"
+#include "../platform/t214_nvdec.h"
 
 struct tg_nvdec_win;
 
-NTSTATUS TgNvdecCreate(volatile UINT32 *nvdec_regs,
-                                    volatile UINT32 *host1x_regs,
-                                    volatile UINT32 *pmc_regs,
-                                    volatile UINT32 *car_regs,
-                                    volatile UINT32 *mc_regs,
-                                    struct tg_nvdec_win **result);
+/* The parent retains its translated register views, actual clock lease and
+ * channel/syncpoint reservations until Destroy succeeds. Raw aperture
+ * pointers from the retired replacement probe are not an ownership contract.
+ * Production DMA/transport wiring remains required before advertising video. */
+NTSTATUS TgNvdecCreate(const struct tg_nvdec_platform_io *io,
+                       const struct tg_nvdec_platform_owner *owner,
+                       UINT32 channel, UINT32 syncpt,
+                       struct tg_nvdec_win **result);
 NTSTATUS TgNvdecDestroy(struct tg_nvdec_win *win);
 
 BOOLEAN TgNvdecFirmwareValid(const void *data, SIZE_T size,

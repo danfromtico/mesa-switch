@@ -1,253 +1,239 @@
-/* SPDX-License-Identifier: MIT
- *
- * Host model tests for T210 NVDEC power/clock/reset and Host1x channel
- * programming.  The model only checks register sequencing and the real
- * syncpoint wait path; it is not a hardware decode result.
- */
+/* SPDX-License-Identifier: MIT */
+/* CPU-only ownership/failure model, never proof of hardware DMA or clocks. */
 #include "t214_nvdec.h"
-
 #include <stdio.h>
 #include <string.h>
 
 static int failures;
-#define CHECK(cond) do { \
-    if (!(cond)) { \
-        fprintf(stderr, "FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond); \
-        failures++; \
-    } \
-} while (0)
+#define CHECK(c) do { if (!(c)) { \
+    fprintf(stderr, "FAIL %s:%d: %s\n", __FILE__, __LINE__, #c); ++failures; \
+} } while (0)
 
-static struct pmodel m;
+#define VIDEO_POWER (3u << 25)
+#define VIDEO_CLOCK (3u << 2)
+#define NVDEC_FLUSH (1u << 5)
+#define CHANNEL 11u
+#define CH_BASE (CHANNEL * 0x4000u)
+#define SYNCPT 31u
+#define SYNC_OFFSET (0x2100u + 0xf80u + SYNCPT * 4u)
 
-struct pmodel {
-    uint32_t pmc[0x1000 / 4];
-    uint32_t car[0x1000 / 4];
-    uint32_t mc[0x1000 / 4];
-    uint32_t host1x[0x40000 / 4];
-    uint32_t nvdec[0x40000 / 4];
+static struct model {
+    uint32_t pmc[0x1000/4], car[0x1000/4], mc[0x1000/4];
+    uint32_t host[0x40000/4], nvdec[0x40000/4];
     uint32_t *push;
-    uint32_t push_size;
-    uint32_t reset_set, reset_clr;
-    uint32_t mbist[4];
-    unsigned mbist_count;
-    bool hang;
-    bool mc_hang;
-    bool power_hang;
-    bool submit_seen;
-    uint32_t submit_words;
-    uint64_t submit_bus;
-};
+    unsigned writes, pmc_writes, host_writes, mbist_writes, global_clock_writes;
+    unsigned acquire_calls, release_calls, status_reads;
+    bool held, acquire_fail, release_fail, source_fail, gate_clear_fail;
+    bool reset_fail, mc_hang, mc_pulse, submit_hang, get_reset_fail;
+} m;
 
-static uint32_t *regs(struct pmodel *m, enum tg_nvdec_aperture ap)
+static uint32_t *regs(enum tg_nvdec_aperture ap)
 {
     switch (ap) {
-    case TG_NVDEC_AP_NVDEC: return m->nvdec;
-    case TG_NVDEC_AP_HOST1X: return m->host1x;
-    case TG_NVDEC_AP_PMC: return m->pmc;
-    case TG_NVDEC_AP_CAR: return m->car;
-    case TG_NVDEC_AP_MC: return m->mc;
+    case TG_NVDEC_AP_NVDEC: return m.nvdec;
+    case TG_NVDEC_AP_HOST1X: return m.host;
+    case TG_NVDEC_AP_PMC: return m.pmc;
+    case TG_NVDEC_AP_CAR: return m.car;
+    case TG_NVDEC_AP_MC: return m.mc;
     }
     return NULL;
 }
 
-static uint32_t model_read(void *ctx, enum tg_nvdec_aperture ap, uint32_t offset)
+static uint32_t model_read(void *ctx, enum tg_nvdec_aperture ap, uint32_t off)
 {
-    struct pmodel *m = ctx;
-    uint32_t *r = regs(m, ap);
-    if (!r || offset >= (ap == TG_NVDEC_AP_HOST1X ? 0x40000u :
-                         ap == TG_NVDEC_AP_NVDEC ? 0x40000u : 0x1000u))
-        return 0;
-    return r[offset / 4];
+    CHECK(ctx == &m);
+    if (ap == TG_NVDEC_AP_HOST1X) CHECK(m.held);
+    if (ap == TG_NVDEC_AP_MC && off == 0x974) {
+        ++m.status_reads;
+        if (m.mc_pulse) return m.status_reads % 4 ? NVDEC_FLUSH : 0;
+    }
+    uint32_t *r = regs(ap);
+    CHECK(r && off < (ap <= TG_NVDEC_AP_HOST1X ? 0x40000u : 0x1000u));
+    return r ? r[off/4] : UINT32_MAX;
 }
 
-static void model_write(void *ctx, enum tg_nvdec_aperture ap, uint32_t offset,
-                        uint32_t value)
+static void model_write(void *ctx, enum tg_nvdec_aperture ap, uint32_t off, uint32_t v)
 {
-    struct pmodel *m = ctx;
-    uint32_t *r = regs(m, ap);
-    if (!r)
-        return;
-    r[offset / 4] = value;
-    if (ap == TG_NVDEC_AP_PMC && offset == 0x30) {
-        if (m->power_hang) return;
-        if (value & 0x100u) {
-            m->pmc[0x30 / 4] &= ~0x100u;
-            const uint32_t id = value & 0x1fu;
-            if (m->pmc[0x38 / 4] & (1u << id))
-                m->pmc[0x38 / 4] &= ~(1u << id);
-            else
-                m->pmc[0x38 / 4] |= 1u << id;
-        }
-    } else if (ap == TG_NVDEC_AP_CAR && offset == 0x320) {
-        m->car[0x010 / 4] |= value;
-    } else if (ap == TG_NVDEC_AP_CAR && offset == 0x29c) {
-        m->car[0x298 / 4] |= value;
-    } else if (ap == TG_NVDEC_AP_CAR && offset == 0x2a0) {
-        m->car[0x298 / 4] &= ~value;
-    } else if (ap == TG_NVDEC_AP_CAR && offset == 0x2a8) {
-        m->reset_set |= value;
-        m->car[0x2a4 / 4] |= value;
-    } else if (ap == TG_NVDEC_AP_CAR && offset == 0x2ac) {
-        m->reset_clr |= value;
-        m->car[0x2a4 / 4] &= ~value;
-    } else if (ap == TG_NVDEC_AP_MC && offset == 0x970) {
-        if (!m->mc_hang) m->mc[0x974 / 4] = value;
-    } else if (ap == TG_NVDEC_AP_HOST1X && offset == 0x21b0) {
-        for (unsigned ch = 0; ch < 12; ++ch)
-            if (value & (1u << ch)) m->host1x[ch * 0x4000 / 4] |= 1u << 11;
-    } else if (ap == TG_NVDEC_AP_CAR && offset == 0x554) {
-        if (m->mbist_count < 4)
-            m->mbist[m->mbist_count++] = value;
-    } else if (ap == TG_NVDEC_AP_HOST1X && (offset & 0x3fffu) == 0x18u &&
-               value == 16u && m->push) {
-        m->submit_seen = true;
-        m->submit_words = m->push[1] & 0xffffu;
-        m->submit_bus = m->push[2];
-        if (!m->hang) {
-            const uint32_t ch = offset / 0x4000u;
-            const uint32_t syncpt = 31u;
-            (void)ch;
-            m->host1x[(0x2100u + 0xf80u + syncpt * 4u) / 4u] = 1u;
-        }
+    CHECK(ctx == &m); ++m.writes;
+    uint32_t *r = regs(ap);
+    CHECK(r != NULL);
+    if (!r) return;
+    if (ap == TG_NVDEC_AP_PMC) { ++m.pmc_writes; CHECK(false); }
+    if (ap == TG_NVDEC_AP_CAR && off == 0x554) { ++m.mbist_writes; CHECK(false); }
+    if (ap == TG_NVDEC_AP_CAR && (off == 0x010 || off == 0x320 || off == 0x324)) {
+        ++m.global_clock_writes; CHECK(false);
+    }
+    if (ap == TG_NVDEC_AP_CAR && off == 0x698 && m.source_fail) return;
+    if (ap == TG_NVDEC_AP_HOST1X) {
+        ++m.host_writes; CHECK(m.held); CHECK(off != SYNC_OFFSET);
+    }
+    r[off/4] = v;
+    if (ap == TG_NVDEC_AP_CAR && off == 0x29c) m.car[0x298/4] |= v;
+    if (ap == TG_NVDEC_AP_CAR && off == 0x2a0 && !m.gate_clear_fail) m.car[0x298/4] &= ~v;
+    if (ap == TG_NVDEC_AP_CAR && off == 0x2a8 && !m.reset_fail) m.car[0x2a4/4] |= v;
+    if (ap == TG_NVDEC_AP_CAR && off == 0x2ac) m.car[0x2a4/4] &= ~v;
+    if (ap == TG_NVDEC_AP_MC && off == 0x970 && !m.mc_hang) m.mc[0x974/4] = v;
+    if (ap == TG_NVDEC_AP_HOST1X && off == 0x21b0 && (v & (1u << CHANNEL)))
+        m.host[CH_BASE/4] |= 1u << 11;
+    if (ap == TG_NVDEC_AP_HOST1X && off == CH_BASE + 0x24 &&
+        (v & 7u) == 7u && !m.get_reset_fail)
+        m.host[(CH_BASE+0x1c)/4] = m.host[(CH_BASE+0x18)/4];
+    if (ap == TG_NVDEC_AP_HOST1X && off == CH_BASE + 0x18 && v == 16u) {
+        CHECK(m.push && m.push[3] == 0x20000000u);
+        if (!m.submit_hang) ++m.host[SYNC_OFFSET/4];
     }
 }
 
-static void model_delay(void *ctx, uint32_t us)
+static void model_delay(void *ctx, uint32_t us) { CHECK(ctx == &m && us <= 100u); }
+static bool acquire_clock(void *ctx)
 {
-    (void)ctx;
-    (void)us;
+    CHECK(ctx == &m && !m.held); ++m.acquire_calls;
+    /* Include failure after the provider took a reference. */
+    m.held = true;
+    return !m.acquire_fail;
 }
-
-static const struct tg_nvdec_platform_io model_io = {
-    .ctx = &m,
-    .read32 = model_read,
-    .write32 = model_write,
-    .delay_us = model_delay,
+static bool release_clock(void *ctx)
+{
+    CHECK(ctx == &m && m.held); ++m.release_calls;
+    CHECK(!(m.car[0x298/4] & (1u << 2)));
+    CHECK(m.car[0x2a4/4] & (1u << 2));
+    if (m.release_fail) return false;
+    m.held = false;
+    return true;
+}
+static const struct tg_nvdec_platform_io io = {&m, model_read, model_write, model_delay};
+static const struct tg_nvdec_platform_owner owner = {
+    &m, 0x00012127u, 0x48005504u, acquire_clock, release_clock
 };
-
-static void test_power_and_submit(void)
+static void prepare(void)
 {
-    struct tg_nvdec_platform p;
-    uint32_t gather[8] = { 0 };
-    uint32_t push[16 * 1024 + 2] = { 0 };
-    uint32_t expected = 0, observed = 0;
-    enum tg_nvdec_platform_result r;
-
     memset(&m, 0, sizeof(m));
-    m.push = push;
-    m.push_size = 16u * 1024u;
-    r = tg_nvdec_platform_init(&model_io, &p, 11, 31);
-    CHECK(r == TG_NVDEC_PLATFORM_OK);
-    CHECK(p.powered && p.nvdec_clock && p.host1x_clock);
-    CHECK(m.pmc[0x38 / 4] & (1u << 25));
-    CHECK(m.car[0x298 / 4] & (1u << 2));
-    CHECK((m.car[0x010 / 4] & (1u << 28)) != 0);
-    CHECK((m.car[0x698 / 4] & 0xe0000000u) == (4u << 29));
-    CHECK(m.reset_set & (1u << 2));
-    CHECK(m.reset_clr & (1u << 2));
-    CHECK(m.mbist_count == 2);
-    CHECK((m.mbist[0] & ((1u << 9) | (1u << 31))) == ((1u << 9) | (1u << 31)));
-    CHECK(m.mbist[1] == 0);
-
-    gather[0] = 0x10100002u;
-    gather[1] = 0x80u;
-    gather[2] = 3u;
-    gather[3] = 0x20000001u;
-    gather[4] = 31u | (1u << 8);
-    r = tg_nvdec_host1x_submit(&model_io, &p, gather, 5, 0x90000000ull,
-                               push, 0x80000000ull, m.push_size,
-                               100, &expected, &observed);
-    CHECK(r == TG_NVDEC_PLATFORM_OK);
-    CHECK(expected == 1 && observed == 1);
-    CHECK(m.submit_seen);
-    CHECK(m.submit_words == 5);
-    CHECK(m.submit_bus == 0x90000000ull);
-    CHECK(push[0] == 0x3c00u);
-    CHECK(push[1] == (0x60000000u | 5u));
-    CHECK(push[3] == 0x20000000u);
-    CHECK(push[(m.push_size / 4)] == 0x50000000u);
-
-    /* Timeout must stop the channel and report the observed value. */
-    m.hang = true;
-    m.submit_seen = false;
-    r = tg_nvdec_host1x_submit(&model_io, &p, gather, 5, 0x90000000ull,
-                               push, 0x80000000ull, m.push_size,
-                               2, &expected, &observed);
-    CHECK(r == TG_NVDEC_PLATFORM_TIMEOUT);
-    CHECK(observed == 1);
-    CHECK(m.host1x[(11u * 0x4000u + 0x24u) / 4u] == 1u);
-
-    /* Addresses above 4 GiB are rejected before touching the channel. */
-    r = tg_nvdec_host1x_submit(&model_io, &p, gather, 5, 0x190000000ull,
-                               push, 0x80000000ull, m.push_size,
-                               100, &expected, &observed);
-    CHECK(r == TG_NVDEC_PLATFORM_ARGUMENT);
-    r = tg_nvdec_host1x_submit(&model_io, &p, gather, 5, 0x90000000ull,
-                               push, 0x180000000ull, m.push_size,
-                               100, &expected, &observed);
-    CHECK(r == TG_NVDEC_PLATFORM_ARGUMENT);
-    CHECK(tg_nvdec_host1x_submit(NULL, &p, gather, 5, 0, push, 0x80000000ull,
-                                 m.push_size, 1, &expected, &observed) ==
-          TG_NVDEC_PLATFORM_ARGUMENT);
-
-    /* Another client changes a shared clock bit after our initial snapshot. */
-    m.car[0x298 / 4] |= 1u << 9;
-    r = tg_nvdec_platform_shutdown(&model_io, &p);
-    CHECK(r == TG_NVDEC_PLATFORM_OK);
-    CHECK(!(m.pmc[0x38 / 4] & (1u << 25)));
-    CHECK(!(m.car[0x298 / 4] & (1u << 2)));
-    CHECK(m.car[0x298 / 4] & (1u << 9));
-    CHECK(m.car[0x698 / 4] == 0);
-    CHECK(!p.powered && !p.nvdec_clock);
+    /* Power/CAR values from the resource preflight. Clamp-clear and empty
+     * Host1x are model prerequisites, not yet observed on the native board. */
+    m.pmc[0x38/4] = 0x3ffecf4d;
+    m.car[0x298/4] = 0x342;
+    m.car[0x2a4/4] = 0x0fe9d09d;
+    m.car[0x698/4] = 0xe0000000;
+    m.car[0x69c/4] = 0xe0000000;
+    m.mc[0x970/4] = m.mc[0x974/4] = 4;
+    m.host[CH_BASE/4] = 1u << 11;
 }
-
-static void test_quiesce_failures(void)
+static enum tg_nvdec_platform_result start(struct tg_nvdec_platform *p)
+{ return tg_nvdec_platform_init(&io, p, CHANNEL, SYNCPT, &owner); }
+static void retained_boot_state(void)
 {
-    struct tg_nvdec_platform p;
-    memset(&m, 0, sizeof(m));
-    CHECK(tg_nvdec_platform_init(&model_io, &p, 11, 31) == TG_NVDEC_PLATFORM_OK);
-    m.mc_hang = true;
-    CHECK(tg_nvdec_platform_quiesce(&model_io, &p) == TG_NVDEC_PLATFORM_TIMEOUT);
-    CHECK(p.powered && !p.quiesced);
-    CHECK(tg_nvdec_platform_shutdown(&model_io, &p) == TG_NVDEC_PLATFORM_TIMEOUT);
-    CHECK(m.pmc[0x38 / 4] & (1u << 25));
-    m.mc_hang = false;
-    CHECK(tg_nvdec_platform_shutdown(&model_io, &p) == TG_NVDEC_PLATFORM_OK);
-    CHECK(!p.powered);
-
-    memset(&m, 0, sizeof(m));
-    m.power_hang = true;
-    CHECK(tg_nvdec_platform_init(&model_io, &p, 11, 31) == TG_NVDEC_PLATFORM_POWER);
-    CHECK(p.power_transition);
-    CHECK(tg_nvdec_platform_shutdown(&model_io, &p) == TG_NVDEC_PLATFORM_POWER);
-    CHECK(p.power_transition);
-    /* A delayed response confirms the original command did not power on. */
-    m.pmc[0x30 / 4] = 0;
-    m.power_hang = false;
-    CHECK(tg_nvdec_platform_shutdown(&model_io, &p) == TG_NVDEC_PLATFORM_OK);
-    CHECK(!p.powered && !p.power_transition);
-    CHECK(!(m.pmc[0x38 / 4] & (1u << 25)));
+    CHECK((m.pmc[0x38/4] & VIDEO_POWER) == VIDEO_POWER);
+    CHECK(!(m.pmc[0x2c/4] & VIDEO_POWER));
+    CHECK(!(m.car[0x298/4] & VIDEO_CLOCK));
+    CHECK((m.car[0x2a4/4] & VIDEO_CLOCK) == VIDEO_CLOCK);
+    CHECK(m.car[0x698/4] == 0xe0000000 && m.car[0x69c/4] == 0xe0000000);
+    CHECK(!m.pmc_writes && !m.mbist_writes && !m.global_clock_writes);
 }
-
-static void test_arguments(void)
+static void test_inherited_and_submit(void)
 {
-    struct tg_nvdec_platform p;
-    CHECK(tg_nvdec_platform_init(NULL, &p, 0, 0) == TG_NVDEC_PLATFORM_ARGUMENT);
-    CHECK(tg_nvdec_platform_init(&model_io, NULL, 0, 0) == TG_NVDEC_PLATFORM_ARGUMENT);
-    CHECK(tg_nvdec_platform_init(&model_io, &p, 12, 0) == TG_NVDEC_PLATFORM_ARGUMENT);
-    CHECK(tg_nvdec_platform_init(&model_io, &p, 0, 192) == TG_NVDEC_PLATFORM_ARGUMENT);
-    CHECK(tg_nvdec_platform_shutdown(NULL, &p) == TG_NVDEC_PLATFORM_ARGUMENT);
+    struct tg_nvdec_platform p = {0};
+    uint32_t gather[8] = {0}, push[16 * 1024 + 2] = {0}, expected = 0, observed = 0;
+    prepare(); m.push = push;
+    CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
+    CHECK(p.active && p.nvdec_clock && p.host1x_clock && p.host1x_lease);
+    CHECK(m.car[0x298/4] & (1u << 2));
+    CHECK(!(m.car[0x2a4/4] & (1u << 2)) && (m.car[0x2a4/4] & (1u << 3)));
+    const unsigned writes = m.writes;
+    CHECK(start(&p) == TG_NVDEC_PLATFORM_OWNERSHIP && m.writes == writes && m.acquire_calls == 1);
+    CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
+          push, 0x80000000, 16u * 1024u, 100, &expected, &observed) == TG_NVDEC_PLATFORM_OK);
+    CHECK(expected == 1 && observed == 1 && push[0] == 0x3c00 && push[1] == 0x60000005);
+    CHECK(push[3] == 0x20000000 && push[4096] == 0x50000000);
+    m.submit_hang = true;
+    CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
+          push, 0x80000000, 16u * 1024u, 2, &expected, &observed) == TG_NVDEC_PLATFORM_TIMEOUT);
+    CHECK(observed == 1 && m.host[(CH_BASE+0x24)/4] == 1);
+    CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x190000000ULL,
+          push, 0x80000000, 16u * 1024u, 2, &expected, &observed) == TG_NVDEC_PLATFORM_ARGUMENT);
+    CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
+          push, 0x180000000ULL, 16u * 1024u, 2, &expected, &observed) == TG_NVDEC_PLATFORM_ARGUMENT);
+    /* Independent clients changed unrelated bits after our snapshot. */
+    m.car[0x298/4] |= 1u << 15; m.mc[0x970/4] |= 1u << 12;
+    CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK);
+    CHECK(!p.captured && !p.active && !m.held && m.release_calls == 1);
+    CHECK(m.car[0x298/4] & (1u << 15)); CHECK(m.mc[0x970/4] == (4 | (1u << 12)));
+    retained_boot_state(); CHECK(m.status_reads >= 5);
+    const unsigned stopped_writes = m.writes;
+    CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK && m.writes == stopped_writes);
+    /* A retired timed-out ring must not prevent the same reserved channel
+     * from being acquired for a later decoder session. */
+    CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
+    CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK);
+    retained_boot_state();
 }
+static void test_refuse_foreign_or_unknown_state(void)
+{
+    for (unsigned bad = 0; bad < 12; ++bad) {
+        struct tg_nvdec_platform p = {0}; prepare();
+        if (bad == 0) m.pmc[0x38/4] &= ~(1u << 25);
+        if (bad == 1) m.pmc[0x38/4] &= ~(1u << 26);
+        if (bad == 2) m.pmc[0x2c/4] = 1u << 25;
+        if (bad == 3) m.pmc[0x2c/4] = 1u << 26;
+        if (bad == 4) m.pmc[0x30/4] = 1u << 8;
+        if (bad == 5) m.car[0x298/4] |= 1u << 2;
+        if (bad == 6) m.car[0x298/4] |= 1u << 3;
+        if (bad == 7) m.car[0x2a4/4] &= ~(1u << 2);
+        if (bad == 8) m.car[0x2a4/4] &= ~(1u << 3);
+        if (bad == 9) m.car[0x698/4] = UINT32_MAX;
+        if (bad == 10) m.host[CH_BASE/4] = 0;
+        if (bad == 11) m.host[(CH_BASE+0x18)/4] = 4;
+        CHECK(start(&p) != TG_NVDEC_PLATFORM_OK);
+        CHECK(!m.writes && !p.active);
+        CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK && !m.held);
+        CHECK(m.acquire_calls == (bad >= 10 ? 1u : 0u));
+    }
+    struct tg_nvdec_platform p = {0}; struct tg_nvdec_platform_owner invalid = owner;
+    prepare(); invalid.hidrev = 0x2110;
+    CHECK(tg_nvdec_platform_init(&io, &p, CHANNEL, SYNCPT, &invalid) == TG_NVDEC_PLATFORM_UNSUPPORTED);
+    invalid = owner; invalid.pllp_base = 0;
+    CHECK(tg_nvdec_platform_init(&io, &p, CHANNEL, SYNCPT, &invalid) == TG_NVDEC_PLATFORM_CLOCK);
+    invalid = owner; invalid.acquire_host1x = NULL;
+    CHECK(tg_nvdec_platform_init(&io, &p, CHANNEL, SYNCPT, &invalid) == TG_NVDEC_PLATFORM_ARGUMENT);
+    CHECK(!m.writes && !m.acquire_calls);
+}
+static void test_failed_cleanup_retains_ownership(void)
+{
+    struct tg_nvdec_platform p = {0};
+    prepare(); m.acquire_fail = true; m.release_fail = true;
+    CHECK(start(&p) == TG_NVDEC_PLATFORM_CLOCK && p.host1x_lease && m.held && !m.writes);
+    CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_CLOCK && p.captured);
+    m.release_fail = false;
+    CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK && !p.captured && !m.held);
+    retained_boot_state();
 
+    prepare(); m.source_fail = true;
+    CHECK(start(&p) == TG_NVDEC_PLATFORM_CLOCK && p.nvdec_touched && m.held);
+    m.source_fail = false;
+    CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK); retained_boot_state();
+
+    for (unsigned fail = 0; fail < 6; ++fail) {
+        prepare(); CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
+        if (fail == 0) m.mc_hang = true;
+        if (fail == 1) m.mc_pulse = true;
+        if (fail == 2) m.reset_fail = true;
+        if (fail == 3) m.gate_clear_fail = true;
+        if (fail == 4) m.release_fail = true;
+        if (fail == 5) { m.get_reset_fail = true; m.host[(CH_BASE+0x1c)/4] = 8; }
+        CHECK(tg_nvdec_platform_shutdown(&io, &p) != TG_NVDEC_PLATFORM_OK);
+        CHECK(p.captured && p.host1x_lease && m.held);
+        CHECK(m.release_calls == (fail == 4 ? 1u : 0u));
+        CHECK(!m.pmc_writes && !m.mbist_writes && !m.global_clock_writes);
+        m.mc_hang = m.mc_pulse = m.reset_fail = m.gate_clear_fail = m.release_fail = m.get_reset_fail = false;
+        CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK && !m.held);
+        retained_boot_state();
+    }
+}
 int main(void)
 {
-    test_power_and_submit();
-    test_arguments();
-    test_quiesce_failures();
-    if (failures) {
-        fprintf(stderr, "T210 NVDEC platform model: %d failure(s)\n", failures);
-        return 1;
-    }
-    printf("T210 NVDEC power/clock/reset and Host1x syncpoint model: PASS (model only)\n");
+    test_inherited_and_submit();
+    test_refuse_foreign_or_unknown_state();
+    test_failed_cleanup_retains_ownership();
+    if (failures) { fprintf(stderr, "%d failure(s)\n", failures); return 1; }
+    puts("PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)");
     return 0;
 }

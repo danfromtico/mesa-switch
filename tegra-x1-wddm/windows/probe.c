@@ -63,16 +63,7 @@ EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL GpuControl;
 EVT_WDF_INTERRUPT_ISR GpuInterrupt;
 EVT_WDF_DPC GpuInterruptDpc;
 
-static BOOLEAN GpuNvdecMap(GPU_DEVICE *d)
-{
-    UNREFERENCED_PARAMETER(d);
-    /* The legacy probe replaces GPU0 and never received the NVDEC/Host1x,
-     * shared clock or SMMU resources through PnP. Do not resurrect its raw
-     * MmMapIoSpace route. The render KMD now owns optional resource discovery;
-     * decode remains unavailable until its execution/clock/DMA contract is
-     * connected. The reusable firmware/codec core stays separate. */
-    return FALSE;
-}
+
 
 static NTSTATUS GpuNvdecUnmap(GPU_DEVICE *d)
 {
@@ -161,15 +152,10 @@ static void GpuNvdecControl(WDFDEVICE device, WDFREQUEST request, ULONG code)
             goto done;
         }
         if (!d->nvdec) {
-            NTSTATUS created = STATUS_DEVICE_NOT_READY;
-            if (GpuNvdecMap(d))
-                created = TgNvdecCreate(d->nvdec_regs, d->host1x_regs,
-                                         d->pmc_regs, d->car_regs, d->mc_regs, &d->nvdec);
-            if (!NT_SUCCESS(created)) {
-                res->result = (UINT32)created;
-                status = STATUS_SUCCESS;
-                goto done;
-            }
+            res->result = (UINT32)STATUS_NOT_SUPPORTED;
+            NvdecCopyError(res->error, "replacement probe has no coexisting resource/clock owner");
+            status = STATUS_SUCCESS;
+            goto done;
         }
         res->result = (UINT32)TgNvdecLoadFirmware(d->nvdec,
             (const UINT8 *)in + sizeof(*req), req->size, req->sha256);

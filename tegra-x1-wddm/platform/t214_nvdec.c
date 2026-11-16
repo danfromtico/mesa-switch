@@ -1,39 +1,39 @@
 /* SPDX-License-Identifier: MIT
  *
- * Tegra210/T210B01 NVDEC power, clock, reset and Host1x submission.
+ * T210B01 inherited NVDEC power, clock, reset and Host1x submission.
  *
  * Register contract:
- *  - PMC powergate id 25, PWRGATE_TOGGLE 0x30, PWRGATE_STATUS 0x38,
- *    REMOVE_CLAMPING 0x34 (Linux drivers/soc/tegra/pmc.c, T210 table).
+ *  - PMC NVDEC/NVJPG ids 25/26, CLAMP_STATUS 0x2c, PWRGATE_TOGGLE 0x30,
+ *    PWRGATE_STATUS 0x38. This path only reads these inherited states.
  *  - CAR CLK_OUT_ENB_Y 0x298 bit 2, CLK_SOURCE_NVDEC 0x698 mux PLLP (value
  *    4 in mux_pllc2_c_c3_pllp_plla1_clkm), RST_DEV_Y_SET/CLR 0x2a8/0x2ac.
  *    Linux v6.8 drivers/clk/tegra/{clk.h,clk-tegra-periph.c}.
  *  - T210 Host1x05: channel registers at 0x4000*channel, sync registers at
  *    0x2100, SYNCPT(id) at 0x2100+0xf80+4*id.  Linux drivers/gpu/host1x.
- * The MBIST workaround is the T210 generic one at CAR 0x554 bits 9/31.
+ * Noble powergate-t21x.c skips the SLCG/MBIST workaround on T210B01 and
+ * retains a reference for already-powered partitions, including NVJPG.
  */
 #include "t214_nvdec.h"
 
 #include <string.h>
 
 #define PMC_PWRGATE_TOGGLE    0x30u
-#define PMC_REMOVE_CLAMPING   0x34u
+#define PMC_CLAMP_STATUS      0x2cu
 #define PMC_PWRGATE_STATUS    0x38u
 #define PMC_TOGGLE_START      (1u << 8)
 #define PMC_NVDEC             25u
+#define PMC_NVJPG             26u
+#define PMC_VIDEO_BITS        ((1u << PMC_NVDEC) | (1u << PMC_NVJPG))
 
-#define CAR_CLK_OUT_ENB_L     0x010u
 #define CAR_CLK_OUT_ENB_Y     0x298u
-#define CAR_CLK_OUT_ENB_L_SET 0x320u
 #define CAR_CLK_OUT_ENB_Y_SET 0x29cu
 #define CAR_CLK_OUT_ENB_Y_CLR 0x2a0u
 #define CAR_RST_DEV_Y_SET     0x2a8u
 #define CAR_RST_DEV_Y_CLR     0x2acu
 #define CAR_RST_DEV_Y         0x2a4u
 #define CAR_CLK_SOURCE_NVDEC  0x698u
-#define CAR_LVL2_CLK_GATE_OVRE 0x554u
-#define CAR_HOST1X_BIT        (1u << 28)
 #define CAR_NVDEC_BIT         (1u << 2)
+#define CAR_NVJPG_BIT         (1u << 3)
 #define CAR_NVDEC_MUX_PLLP    (4u << 29)
 #define CAR_NVDEC_MUX_MASK    0xe00000ffu
 
@@ -48,6 +48,7 @@
 #define MC_NVDEC_BIT         (1u << 5)
 #define HOST1X_CHANNEL_DMASTART 0x14u
 #define HOST1X_CHANNEL_DMAPUT   0x18u
+#define HOST1X_CHANNEL_DMAGET   0x1cu
 #define HOST1X_CHANNEL_DMAEND   0x20u
 #define HOST1X_CHANNEL_DMACTRL  0x24u
 #define HOST1X_CHANNEL_CHANNELCTRL 0x98u
@@ -116,138 +117,187 @@ void tg_nvdec_platform_zero(struct tg_nvdec_platform *p)
         memset(p, 0, sizeof(*p));
 }
 
-enum tg_nvdec_platform_result tg_nvdec_platform_init(
-    const struct tg_nvdec_platform_io *io, struct tg_nvdec_platform *p,
-    uint32_t channel, uint32_t syncpt)
+static bool valid_io(const struct tg_nvdec_platform_io *io)
 {
-    uint32_t status, gate, source;
+    return io && io->read32 && io->write32 && io->delay_us;
+}
 
-    if (!io || !p || !io->read32 || !io->write32 || !io->delay_us)
-        return TG_NVDEC_PLATFORM_ARGUMENT;
-    if (channel >= 12 || syncpt >= 192)
-        return TG_NVDEC_PLATFORM_ARGUMENT;
-    tg_nvdec_platform_zero(p);
-    p->channel = channel;
-    p->syncpt = syncpt;
+/* The caller serializes this shared MC word against graphics reset/power
+ * transitions. Only NVDEC's client bit may change. */
+static bool set_mc_flush(const struct tg_nvdec_platform_io *io, bool set)
+{
+    uint32_t value = r32(io, TG_NVDEC_AP_MC, MC_FLUSH);
+    if (value == UINT32_MAX)
+        return false;
+    value = (value & ~MC_NVDEC_BIT) | (set ? MC_NVDEC_BIT : 0);
+    w32(io, TG_NVDEC_AP_MC, MC_FLUSH, value);
+    value = r32(io, TG_NVDEC_AP_MC, MC_FLUSH);
+    return value != UINT32_MAX && !!(value & MC_NVDEC_BIT) == set;
+}
 
-    /* Snapshot the state we are allowed to restore. */
-    p->saved_pmc_status = r32(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_STATUS);
-    /* An already powered partition belongs to another owner. */
-    if (p->saved_pmc_status == UINT32_MAX ||
-        (p->saved_pmc_status & (1u << PMC_NVDEC)))
-        return TG_NVDEC_PLATFORM_POWER;
-    p->saved_mc_flush = r32(io, TG_NVDEC_AP_MC, MC_FLUSH);
-    if (p->saved_mc_flush == UINT32_MAX)
-        return TG_NVDEC_PLATFORM_ARGUMENT;
-    p->saved_gate_y = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y);
-    p->saved_gate_l = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_L);
-    source = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC);
-    p->saved_source = source;
-    p->source_saved = true;
-
-    /* Legacy gate handling: production integration must use the clock owner's
-     * lease. Do not reset the shared Host1x domain here. */
-    if (!(p->saved_gate_l & CAR_HOST1X_BIT)) {
-        w32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_L_SET, CAR_HOST1X_BIT);
+static bool wait_mc_drained(const struct tg_nvdec_platform_io *io)
+{
+    uint32_t consecutive = 0;
+    /* Require stable acknowledgement, following the existing GPU MC drain
+     * policy. A single transient assertion cannot retire DMA backing. */
+    for (uint32_t us = 0; us <= 100000u; us += 10u) {
+        const uint32_t value = r32(io, TG_NVDEC_AP_MC, MC_FLUSH_STATUS);
+        if (value == UINT32_MAX)
+            return false;
+        consecutive = value & MC_NVDEC_BIT ? consecutive + 1u : 0u;
+        if (consecutive == 5u)
+            return true;
         io->delay_us(io->ctx, 10);
     }
+    return false;
+}
+
+enum tg_nvdec_platform_result tg_nvdec_platform_init(
+    const struct tg_nvdec_platform_io *io, struct tg_nvdec_platform *p,
+    uint32_t channel, uint32_t syncpt,
+    const struct tg_nvdec_platform_owner *owner)
+{
+    uint32_t power, clamp, toggle, gate, reset, source, flush, value, get, put;
+    const uint32_t video_clocks = CAR_NVDEC_BIT | CAR_NVJPG_BIT;
+
+    if (!valid_io(io) || !p || !owner || !owner->acquire_host1x ||
+        !owner->release_host1x || channel >= 12 || syncpt >= 192)
+        return TG_NVDEC_PLATFORM_ARGUMENT;
+    if (p->captured || p->host1x_lease || p->nvdec_touched)
+        return TG_NVDEC_PLATFORM_OWNERSHIP;
+    if ((owner->hidrev & 0xfff0u) != 0x2120u)
+        return TG_NVDEC_PLATFORM_UNSUPPORTED;
+    if ((owner->pllp_base & ((1u << 31) | (1u << 30) | (1u << 27))) !=
+        ((1u << 30) | (1u << 27)))
+        return TG_NVDEC_PLATFORM_CLOCK;
+
+    /* Already powered is not evidence of a foreign owner. Admit only a
+     * powered, unclamped, reset and clock-gated firmware handoff, with both
+     * NVDEC and its NVJPG dependency retained. Other states require their
+     * actual owner; do not toggle PMC or force resets to manufacture them. */
+    power = r32(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_STATUS);
+    clamp = r32(io, TG_NVDEC_AP_PMC, PMC_CLAMP_STATUS);
+    toggle = r32(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_TOGGLE);
+    if (power == UINT32_MAX || clamp == UINT32_MAX || toggle == UINT32_MAX ||
+        (power & PMC_VIDEO_BITS) != PMC_VIDEO_BITS ||
+        (clamp & PMC_VIDEO_BITS) || (toggle & PMC_TOGGLE_START))
+        return TG_NVDEC_PLATFORM_POWER;
+    gate = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y);
+    reset = r32(io, TG_NVDEC_AP_CAR, CAR_RST_DEV_Y);
+    source = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC);
+    flush = r32(io, TG_NVDEC_AP_MC, MC_FLUSH);
+    if (gate == UINT32_MAX || reset == UINT32_MAX || source == UINT32_MAX ||
+        flush == UINT32_MAX)
+        return TG_NVDEC_PLATFORM_ARGUMENT;
+    if ((gate & video_clocks) || (reset & video_clocks) != video_clocks)
+        return TG_NVDEC_PLATFORM_OWNERSHIP;
+
+    p->owner = *owner;
+    p->channel = channel;
+    p->syncpt = syncpt;
+    p->saved_pmc_status = power;
+    p->saved_clamp_status = clamp;
+    p->saved_gate_y = gate;
+    p->saved_reset_y = reset;
+    p->saved_source = source;
+    p->saved_mc_flush = flush;
+    p->captured = true;
+    /* A failed provider request can have taken a reference. Its idempotent
+     * release must finish before we discard the callback/context. */
+    p->host1x_lease = true;
+    if (!owner->acquire_host1x(owner->ctx))
+        return TG_NVDEC_PLATFORM_CLOCK;
     p->host1x_clock = true;
 
-    /* Assert NVDEC reset before changing its clock or power. */
-    w32(io, TG_NVDEC_AP_CAR, CAR_RST_DEV_Y_SET, CAR_NVDEC_BIT);
-    io->delay_us(io->ctx, 10);
-
-    status = r32(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_STATUS);
-    if (!(status & (1u << PMC_NVDEC))) {
-        if (!poll_bit(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_TOGGLE,
-                      PMC_TOGGLE_START, false, 100))
-            return TG_NVDEC_PLATFORM_POWER;
-        p->power_transition = true;
-        w32(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_TOGGLE,
-            PMC_TOGGLE_START | PMC_NVDEC);
-        if (!poll_bit(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_STATUS,
-                      1u << PMC_NVDEC, true, 100))
-            goto fail_power;
-    }
-    p->powered = true;
-    p->power_transition = false;
-    io->delay_us(io->ctx, 10);
-
-    /* PLLP/1 is always available and below the NVDEC limit. */
-    w32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC,
-        (source & ~CAR_NVDEC_MUX_MASK) | CAR_NVDEC_MUX_PLLP);
-    gate = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y);
-    if (!(gate & CAR_NVDEC_BIT))
-        w32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y_SET, CAR_NVDEC_BIT);
-    p->nvdec_clock = true;
-    io->delay_us(io->ctx, 10);
-
-    w32(io, TG_NVDEC_AP_PMC, PMC_REMOVE_CLAMPING, 1u << PMC_NVDEC);
-    io->delay_us(io->ctx, 10);
-    w32(io, TG_NVDEC_AP_MC, MC_FLUSH,
-        r32(io, TG_NVDEC_AP_MC, MC_FLUSH) & ~MC_NVDEC_BIT);
-    w32(io, TG_NVDEC_AP_CAR, CAR_RST_DEV_Y_CLR, CAR_NVDEC_BIT);
-    io->delay_us(io->ctx, 10);
-
-    /* T210 MBIST workaround for the NVDEC partition. */
-    {
-        const uint32_t v = r32(io, TG_NVDEC_AP_CAR, CAR_LVL2_CLK_GATE_OVRE);
-        w32(io, TG_NVDEC_AP_CAR, CAR_LVL2_CLK_GATE_OVRE,
-            v | (1u << 9) | (1u << 31));
-        io->delay_us(io->ctx, 1);
-        w32(io, TG_NVDEC_AP_CAR, CAR_LVL2_CLK_GATE_OVRE, v);
-        io->delay_us(io->ctx, 1);
-    }
-
-    /* Leave the channel stopped until the first gather. */
+    value = r32(io, TG_NVDEC_AP_HOST1X, channel_base(p));
+    get = r32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMAGET);
+    put = r32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMAPUT);
+    if (value == UINT32_MAX || get == UINT32_MAX || put == UINT32_MAX ||
+        !(value & HOST1X_CFEMPTY) || get != put)
+        return TG_NVDEC_PLATFORM_OWNERSHIP;
     channel_stop(io, p);
     p->channel_started = true;
-    return TG_NVDEC_PLATFORM_OK;
 
-fail_power:
-    /* Keep ownership of an unacknowledged power command. Retrying the toggle
-     * here can turn an already-off partition back on during cleanup. */
-    return TG_NVDEC_PLATFORM_POWER;
+    /* Reset was asserted by the handoff and remains asserted while changing
+     * the local source/gate. Host1x reset and CAR L are never programmed here. */
+    p->nvdec_touched = true;
+    w32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC,
+        (source & ~CAR_NVDEC_MUX_MASK) | CAR_NVDEC_MUX_PLLP);
+    value = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC);
+    if (value == UINT32_MAX || (value & CAR_NVDEC_MUX_MASK) != CAR_NVDEC_MUX_PLLP)
+        return TG_NVDEC_PLATFORM_CLOCK;
+    w32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y_SET, CAR_NVDEC_BIT);
+    p->nvdec_clock = true;
+    if (!poll_bit(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y, CAR_NVDEC_BIT, true, 100))
+        return TG_NVDEC_PLATFORM_CLOCK;
+    io->delay_us(io->ctx, 10);
+    if (!set_mc_flush(io, false))
+        return TG_NVDEC_PLATFORM_RESET;
+    w32(io, TG_NVDEC_AP_CAR, CAR_RST_DEV_Y_CLR, CAR_NVDEC_BIT);
+    if (!poll_bit(io, TG_NVDEC_AP_CAR, CAR_RST_DEV_Y, CAR_NVDEC_BIT, false, 100))
+        return TG_NVDEC_PLATFORM_RESET;
+    io->delay_us(io->ctx, 10);
+    /* T210B01 has no T210 SLCG/MBIST workaround. NVJPG is only a retained
+     * power dependency here, not an engine whose reset/clock we may change. */
+    p->active = true;
+    return TG_NVDEC_PLATFORM_OK;
 }
 
 enum tg_nvdec_platform_result tg_nvdec_platform_shutdown(
     const struct tg_nvdec_platform_io *io, struct tg_nvdec_platform *p)
 {
-    if (!io || !p)
+    enum tg_nvdec_platform_result result;
+    uint32_t value;
+    if (!valid_io(io) || !p)
         return TG_NVDEC_PLATFORM_ARGUMENT;
-    if (p->power_transition) {
-        uint32_t state;
-        if (!poll_bit(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_TOGGLE,
-                      PMC_TOGGLE_START, false, 100))
-            return TG_NVDEC_PLATFORM_POWER;
-        state = r32(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_STATUS);
-        if (state == UINT32_MAX)
-            return TG_NVDEC_PLATFORM_POWER;
-        p->powered = (state & (1u << PMC_NVDEC)) != 0;
-        p->power_transition = false;
-    }
-    if (!p->powered)
-        return TG_NVDEC_PLATFORM_OK;
-
-    if (tg_nvdec_platform_quiesce(io, p) != TG_NVDEC_PLATFORM_OK)
-        return TG_NVDEC_PLATFORM_TIMEOUT;
-    w32(io, TG_NVDEC_AP_CAR,
-        (p->saved_gate_y & CAR_NVDEC_BIT) ? CAR_CLK_OUT_ENB_Y_SET : CAR_CLK_OUT_ENB_Y_CLR,
-        CAR_NVDEC_BIT);
-    p->nvdec_clock = false;
-    io->delay_us(io->ctx, 10);
-    w32(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_TOGGLE,
-        PMC_TOGGLE_START | PMC_NVDEC);
-    if (!poll_bit(io, TG_NVDEC_AP_PMC, PMC_PWRGATE_STATUS,
-                  1u << PMC_NVDEC, false, 100))
-        return TG_NVDEC_PLATFORM_POWER;
-    if (p->source_saved)
+    if (p->nvdec_touched) {
+        result = tg_nvdec_platform_quiesce(io, p);
+        if (result != TG_NVDEC_PLATFORM_OK)
+            return result;
+        w32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y_CLR, CAR_NVDEC_BIT);
+        if (!poll_bit(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y, CAR_NVDEC_BIT, false, 100))
+            return TG_NVDEC_PLATFORM_CLOCK;
+        p->nvdec_clock = false;
         w32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC, p->saved_source);
-    w32(io, TG_NVDEC_AP_MC, MC_FLUSH,
-        (r32(io, TG_NVDEC_AP_MC, MC_FLUSH) & ~MC_NVDEC_BIT) |
-        (p->saved_mc_flush & MC_NVDEC_BIT));
-    p->powered = false;
-    p->channel_started = false;
+        value = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC);
+        if (value == UINT32_MAX ||
+            (value & CAR_NVDEC_MUX_MASK) != (p->saved_source & CAR_NVDEC_MUX_MASK))
+            return TG_NVDEC_PLATFORM_CLOCK;
+        if (!set_mc_flush(io, (p->saved_mc_flush & MC_NVDEC_BIT) != 0))
+            return TG_NVDEC_PLATFORM_RESET;
+        /* Reset remains asserted, matching the admitted initial state.
+         * Never turn off either inherited partition or restore whole banks. */
+        p->nvdec_touched = false;
+        p->active = false;
+    }
+    if (p->channel_started) {
+        /* A timed-out ring can leave GET behind PUT even after teardown.
+         * With DMA stopped and quiescence proved, clear its backing addresses
+         * and initialize GET from the empty PUT before releasing the lease.
+         * This is channel retirement, not a submission or syncpoint signal. */
+        if (!p->quiesced || !p->host1x_clock)
+            return TG_NVDEC_PLATFORM_OWNERSHIP;
+        channel_stop(io, p);
+        w32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMAPUT, 0);
+        w32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMASTART, 0);
+        w32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMAEND, 0);
+        w32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMACTRL,
+            HOST1X_DMACTRL_STOP | HOST1X_DMACTRL_GETRST | HOST1X_DMACTRL_INITGET);
+        w32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMACTRL,
+            HOST1X_DMACTRL_STOP);
+        value = r32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMACTRL);
+        if (value == UINT32_MAX || !(value & HOST1X_DMACTRL_STOP) ||
+            r32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMAPUT) != 0 ||
+            r32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMAGET) != 0)
+            return TG_NVDEC_PLATFORM_SUBMIT;
+        p->channel_started = false;
+    }
+    if (p->host1x_lease) {
+        if (!p->owner.release_host1x || !p->owner.release_host1x(p->owner.ctx))
+            return TG_NVDEC_PLATFORM_CLOCK;
+        p->host1x_lease = false;
+    }
+    tg_nvdec_platform_zero(p);
     return TG_NVDEC_PLATFORM_OK;
 }
 
@@ -261,9 +311,9 @@ enum tg_nvdec_platform_result tg_nvdec_platform_quiesce(
     const struct tg_nvdec_platform_io *io, struct tg_nvdec_platform *p)
 {
     uint32_t stop;
-    if (!io || !p || !io->read32 || !io->write32 || !io->delay_us || p->channel >= 12)
+    if (!valid_io(io) || !p || p->channel >= 12)
         return TG_NVDEC_PLATFORM_ARGUMENT;
-    if (!p->powered || p->quiesced)
+    if (!p->nvdec_touched || p->quiesced)
         return TG_NVDEC_PLATFORM_OK;
     if (p->channel_started) {
         stop = r32(io, TG_NVDEC_AP_HOST1X, HOST1X_CMDPROC_STOP);
@@ -276,9 +326,9 @@ enum tg_nvdec_platform_result tg_nvdec_platform_quiesce(
     w32(io, TG_NVDEC_AP_CAR, CAR_RST_DEV_Y_SET, CAR_NVDEC_BIT);
     if (!poll_bit(io, TG_NVDEC_AP_CAR, CAR_RST_DEV_Y, CAR_NVDEC_BIT, true, 100))
         return TG_NVDEC_PLATFORM_RESET;
-    w32(io, TG_NVDEC_AP_MC, MC_FLUSH,
-        r32(io, TG_NVDEC_AP_MC, MC_FLUSH) | MC_NVDEC_BIT);
-    if (!poll_bit(io, TG_NVDEC_AP_MC, MC_FLUSH_STATUS, MC_NVDEC_BIT, true, 100) ||
+    if (!set_mc_flush(io, true))
+        return TG_NVDEC_PLATFORM_RESET;
+    if (!wait_mc_drained(io) ||
         (p->channel_started &&
          !poll_bit(io, TG_NVDEC_AP_HOST1X, channel_base(p), HOST1X_CFEMPTY, true, 100)))
         return TG_NVDEC_PLATFORM_TIMEOUT;
@@ -299,14 +349,14 @@ enum tg_nvdec_platform_result tg_nvdec_host1x_submit(
     uint32_t elapsed = 0;
     const uint32_t step = 10;
 
-    if (!io || !p || !gather || !words || words > 0xffffu || !push ||
+    if (!valid_io(io) || !p || !gather || !words || words > 0xffffu || !push ||
         push_size < 16u || (push_size & 3u) || (gather_bus & 3u) ||
         (push_bus & 15u) || (gather_bus >> 32) || (push_bus >> 32) ||
         (uint64_t)words * 4u > UINT64_C(0x100000000) - gather_bus ||
         (uint64_t)push_size + 4u > UINT64_C(0x100000000) - push_bus ||
         !expected || !observed)
         return TG_NVDEC_PLATFORM_ARGUMENT;
-    if (!p->powered || !p->nvdec_clock || p->quiesced ||
+    if (!p->active || !p->host1x_clock || !p->nvdec_clock || p->quiesced ||
         p->channel >= 12 || p->syncpt >= 192 || !timeout_ms || timeout_ms > 5000u)
         return TG_NVDEC_PLATFORM_ARGUMENT;
 

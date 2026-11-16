@@ -5,12 +5,9 @@
 #include <ntddk.h>
 
 struct tg_nvdec_win {
-    volatile UINT32 *nvdec;
-    volatile UINT32 *host1x;
-    volatile UINT32 *pmc;
-    volatile UINT32 *car;
-    volatile UINT32 *mc;
     struct tg_nvdec_platform_io pio;
+    struct tg_nvdec_platform_owner owner;
+    UINT32 channel, syncpt;
     struct tg_nvdec_platform platform;
     struct tg_nvdec_hal hal;
     struct tg_nvdec engine;
@@ -24,13 +21,13 @@ struct tg_nvdec_win {
 static UINT32 win_read32(void *ctx, UINT32 offset)
 {
     struct tg_nvdec_win *w = ctx;
-    return READ_REGISTER_ULONG((PULONG)w->nvdec + offset / 4u);
+    return w->pio.read32(w->pio.ctx, TG_NVDEC_AP_NVDEC, offset);
 }
 
 static void win_write32(void *ctx, UINT32 offset, UINT32 value)
 {
     struct tg_nvdec_win *w = ctx;
-    WRITE_REGISTER_ULONG((PULONG)w->nvdec + offset / 4u, value);
+    w->pio.write32(w->pio.ctx, TG_NVDEC_AP_NVDEC, offset, value);
 }
 
 static void win_delay(void *ctx, UINT32 us)
@@ -73,38 +70,6 @@ static void win_dma_free(void *ctx, struct tg_nvdec_dma *dma)
     RtlZeroMemory(dma, sizeof(*dma));
 }
 
-static UINT32 pio_read32(void *ctx, enum tg_nvdec_aperture ap, UINT32 offset)
-{
-    struct tg_nvdec_win *w = ctx;
-    switch (ap) {
-    case TG_NVDEC_AP_NVDEC: return READ_REGISTER_ULONG((PULONG)w->nvdec + offset / 4u);
-    case TG_NVDEC_AP_HOST1X: return READ_REGISTER_ULONG((PULONG)w->host1x + offset / 4u);
-    case TG_NVDEC_AP_PMC: return READ_REGISTER_ULONG((PULONG)w->pmc + offset / 4u);
-    case TG_NVDEC_AP_CAR: return READ_REGISTER_ULONG((PULONG)w->car + offset / 4u);
-    case TG_NVDEC_AP_MC: return READ_REGISTER_ULONG((PULONG)w->mc + offset / 4u);
-    }
-    return 0;
-}
-
-static void pio_write32(void *ctx, enum tg_nvdec_aperture ap, UINT32 offset,
-                        UINT32 value)
-{
-    struct tg_nvdec_win *w = ctx;
-    switch (ap) {
-    case TG_NVDEC_AP_NVDEC: WRITE_REGISTER_ULONG((PULONG)w->nvdec + offset / 4u, value); break;
-    case TG_NVDEC_AP_HOST1X: WRITE_REGISTER_ULONG((PULONG)w->host1x + offset / 4u, value); break;
-    case TG_NVDEC_AP_PMC: WRITE_REGISTER_ULONG((PULONG)w->pmc + offset / 4u, value); break;
-    case TG_NVDEC_AP_CAR: WRITE_REGISTER_ULONG((PULONG)w->car + offset / 4u, value); break;
-    case TG_NVDEC_AP_MC: WRITE_REGISTER_ULONG((PULONG)w->mc + offset / 4u, value); break;
-    }
-}
-
-static void pio_delay(void *ctx, UINT32 us)
-{
-    UNREFERENCED_PARAMETER(ctx);
-    KeStallExecutionProcessor(us);
-}
-
 static enum tg_nvdec_result win_submit(void *ctx, const struct tg_nvdec_dma *gather,
                                        UINT32 words, UINT32 syncpt_id,
                                        UINT32 timeout_ms, UINT32 *expected,
@@ -113,6 +78,8 @@ static enum tg_nvdec_result win_submit(void *ctx, const struct tg_nvdec_dma *gat
     struct tg_nvdec_win *w = ctx;
     enum tg_nvdec_platform_result r;
 
+    if (syncpt_id != w->syncpt)
+        return TG_NVDEC_ERR_ARGUMENT;
     r = tg_nvdec_host1x_submit(&w->pio, &w->platform, gather->cpu, words,
                                gather->bus, w->push.cpu, w->push.bus,
                                64u * 1024u, timeout_ms,
@@ -146,32 +113,26 @@ NTSTATUS TgNvdecReleaseSurfaces(struct tg_nvdec_win *w)
     return STATUS_SUCCESS;
 }
 
-NTSTATUS TgNvdecCreate(volatile UINT32 *nvdec_regs,
-                                   volatile UINT32 *host1x_regs,
-                                   volatile UINT32 *pmc_regs,
-                                   volatile UINT32 *car_regs,
-                                   volatile UINT32 *mc_regs,
-                                   struct tg_nvdec_win **result)
+NTSTATUS TgNvdecCreate(const struct tg_nvdec_platform_io *io,
+                       const struct tg_nvdec_platform_owner *owner,
+                       UINT32 channel, UINT32 syncpt,
+                       struct tg_nvdec_win **result)
 {
     struct tg_nvdec_win *w;
 
-    if (!result || *result || !nvdec_regs || !host1x_regs ||
-        !pmc_regs || !car_regs || !mc_regs)
+    if (!result || *result || !io || !io->read32 || !io->write32 || !io->delay_us ||
+        !owner || !owner->acquire_host1x || !owner->release_host1x ||
+        channel >= 12 || syncpt >= 192)
         return STATUS_INVALID_PARAMETER;
     w = ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(*w), 'cvdN');
     if (!w)
         return STATUS_INSUFFICIENT_RESOURCES;
     RtlZeroMemory(w, sizeof(*w));
-    w->nvdec = nvdec_regs;
-    w->host1x = host1x_regs;
-    w->pmc = pmc_regs;
-    w->car = car_regs;
-    w->mc = mc_regs;
+    w->pio = *io;
+    w->owner = *owner;
+    w->channel = channel;
+    w->syncpt = syncpt;
     *result = w;
-    w->pio.ctx = w;
-    w->pio.read32 = pio_read32;
-    w->pio.write32 = pio_write32;
-    w->pio.delay_us = pio_delay;
     w->hal.ctx = w;
     w->hal.read32 = win_read32;
     w->hal.write32 = win_write32;
@@ -180,9 +141,9 @@ NTSTATUS TgNvdecCreate(volatile UINT32 *nvdec_regs,
     w->hal.dma_free = win_dma_free;
     w->hal.submit = win_submit;
     w->hal.cancel = win_cancel;
-    tg_nvdec_init(&w->engine, &w->hal, 31);
+    tg_nvdec_init(&w->engine, &w->hal, w->syncpt);
 
-    if (tg_nvdec_platform_init(&w->pio, &w->platform, 11, 31) !=
+    if (tg_nvdec_platform_init(&w->pio, &w->platform, w->channel, w->syncpt, &w->owner) !=
         TG_NVDEC_PLATFORM_OK)
         goto fail;
     if (!win_dma_alloc(w, 64u * 1024u + 16u, &w->push))
@@ -263,12 +224,12 @@ NTSTATUS TgNvdecLoadFirmware(struct tg_nvdec_win *w, const void *data,
     if (w->platform.quiesced &&
         tg_nvdec_platform_shutdown(&w->pio, &w->platform) != TG_NVDEC_PLATFORM_OK)
         return STATUS_DEVICE_BUSY;
-    if (!w->platform.powered &&
-        tg_nvdec_platform_init(&w->pio, &w->platform, 11, 31) != TG_NVDEC_PLATFORM_OK)
+    if (!w->platform.active &&
+        tg_nvdec_platform_init(&w->pio, &w->platform, w->channel, w->syncpt, &w->owner) != TG_NVDEC_PLATFORM_OK)
         return STATUS_DEVICE_NOT_READY;
     if (!w->push.cpu && !win_dma_alloc(w, 64u * 1024u + 16u, &w->push))
         return STATUS_INSUFFICIENT_RESOURCES;
-    tg_nvdec_init(&w->engine, &w->hal, 31);
+    tg_nvdec_init(&w->engine, &w->hal, w->syncpt);
     r = tg_nvdec_load_firmware(&w->engine, data, size, expected_sha256);
     if (r != TG_NVDEC_OK)
         return map_result(r);
@@ -381,7 +342,7 @@ NTSTATUS TgNvdecReset(struct tg_nvdec_win *w)
     if (tg_nvdec_close(&w->engine) != TG_NVDEC_OK ||
         tg_nvdec_platform_shutdown(&w->pio, &w->platform) != TG_NVDEC_PLATFORM_OK)
         return STATUS_DEVICE_BUSY;
-    tg_nvdec_init(&w->engine, &w->hal, 31);
+    tg_nvdec_init(&w->engine, &w->hal, w->syncpt);
     release_surfaces(w);
     w->width = w->height = w->pitch = w->aligned_height = w->frame_size = 0;
     return STATUS_SUCCESS;
