@@ -520,10 +520,13 @@ static HRESULT modernPresentStatus;
 
 static void presentation13_contracts()
 {
+   for (UINT revision : {13u, 14u})
    for (UINT angle = D3DDDI_ROTATION_IDENTITY; angle <= D3DDDI_ROTATION_270; ++angle)
    for (UINT failure = 0; failure < 6; ++failure) {
       Adapter adapter; Device dev;
       init(&dev, &adapter, 0);
+      dev.interfaceVersion = revision == 14 ? D3DWDDM2_0_DDI_INTERFACE_VERSION :
+                                            D3DWDDM1_3_DDI_INTERFACE_VERSION;
       const bool quarter = angle == D3DDDI_ROTATION_90 || angle == D3DDDI_ROTATION_270;
       tg_gpu_primary_allocation_request primary = {
          {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_DISPLAY_PRIMARY, 3686400},
@@ -555,6 +558,8 @@ static void presentation13_contracts()
 
       DXGI1_3_DDI_BASE_FUNCTIONS dxgi = {};
       dxgi_fill_presentation13(&dxgi);
+      DXGI1_4_DDI_BASE_FUNCTIONS dxgi14 = {};
+      dxgi_fill_presentation14(&dxgi14);
       CHECK(!dxgi.pfnReserved1 && !dxgi.pfnReserved2);
       DXGI_DDI_ARG_GETMULTIPLANEOVERLAYCAPS caps = {};
       caps.hDevice = (DXGI_DDI_HDEVICE)&dev;
@@ -585,6 +590,20 @@ static void presentation13_contracts()
                present->pDXGIContext == (void *)0xdeadbeef && !present->BroadcastContextCount);
          CHECK(present->AllocationInfoCount == 1 && !present->AllocationInfo[0].SubResourceIndex);
          CHECK(present->AllocationInfo[0].PresentAllocation == (presentPlaneEnabled ? 0x60u : 0u));
+         presentOrder.push_back(4);
+         return modernPresentStatus;
+      };
+      callbacks.pfnPresentMultiplaneOverlay1Cb = [](HANDLE device,
+            const DXGIDDICB_PRESENT_MULTIPLANE_OVERLAY1 *present) -> HRESULT {
+         CHECK(GetCurrentThreadId() == presentThread);
+         CHECK(device == rt_device(0) && present->pDXGIContext == (void *)0xdeadbeef);
+         CHECK(present->PresentPlaneCount == 1 && present->ppPresentPlanes);
+         const auto *info = present->ppPresentPlanes[0];
+         CHECK(info && info->ContextCount == 1 && info->pContextList && info->pAllocationList);
+         CHECK(info->pContextList[0] == (HANDLE)0x300 &&
+               info->pAllocationList[0] == (presentPlaneEnabled ? 0x60u : 0u));
+         CHECK(!info->DriverPrivateDataSize && !info->pDriverPrivateData &&
+               !info->SyncIntervalOverrideValid && !info->SyncIntervalOverride);
          presentOrder.push_back(4);
          return modernPresentStatus;
       };
@@ -640,6 +659,30 @@ static void presentation13_contracts()
       present.hDevice = (DXGI_DDI_HDEVICE)&dev; present.pDXGIContext = (void *)0xdeadbeef;
       present.Flags.Flip = 1; present.FlipInterval = DXGI_DDI_FLIP_INTERVAL_ONE;
       present.PresentPlaneCount = 1; present.pPresentPlanes = &plane;
+      D3DDDI_COLOR_SPACE_TYPE colorSpace = D3DDDI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
+      UINT colorKey = 0;
+      auto doPresent = [&]() -> HRESULT {
+         if (revision == 13) return dxgi.pfnPresentMultiplaneOverlay(&present);
+         DXGI_DDI_PRESENT_MULTIPLANE_OVERLAY1 plane1 = {};
+         plane1.LayerIndex = plane.LayerIndex; plane1.Enabled = plane.Enabled;
+         plane1.hResource = plane.hResource; plane1.SubResourceIndex = plane.SubResourceIndex;
+         const auto &in = plane.PlaneAttributes;
+         auto &a = plane1.PlaneAttributes;
+         a.Flags = in.Flags; a.SrcRect = in.SrcRect; a.DstRect = in.DstRect; a.ClipRect = in.ClipRect;
+         a.Rotation = in.Rotation; a.Blend = in.Blend; a.DirtyRectCount = in.DirtyRectCount;
+         a.pDirtyRects = in.pDirtyRects; a.VideoFrameFormat = in.VideoFrameFormat;
+         a.StereoFormat = in.StereoFormat; a.StereoFlipMode = in.StereoFlipMode;
+         a.ColorSpace = colorSpace; a.ColorKey = colorKey;
+         const auto unchanged = plane1;
+         DXGI_DDI_ARG_PRESENTMULTIPLANEOVERLAY1 arg = {};
+         arg.hDevice = present.hDevice; arg.pDXGIContext = present.pDXGIContext;
+         arg.VidPnSourceId = present.VidPnSourceId; arg.Flags = present.Flags;
+         arg.FlipInterval = present.FlipInterval; arg.PresentPlaneCount = present.PresentPlaneCount;
+         arg.pPresentPlanes = &plane1;
+         const HRESULT result = dxgi14.pfnPresentMultiplaneOverlay1(&arg);
+         CHECK(!std::memcmp(&plane1, &unchanged, sizeof(plane1)));
+         return result;
+      };
       const auto good = plane;
       for (unsigned bad = 0; bad < 7; ++bad) {
          plane = good;
@@ -652,17 +695,42 @@ static void presentation13_contracts()
          case 5: plane.PlaneAttributes.Rotation = DXGI_DDI_MODE_ROTATION_UNSPECIFIED; break;
          case 6: plane.hResource = 0; break;
          }
-         CHECK(dxgi.pfnPresentMultiplaneOverlay(&present) == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+         CHECK(doPresent() == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
       }
       plane = good;
       present.FlipInterval = DXGI_DDI_FLIP_INTERVAL_IMMEDIATE;
-      CHECK(dxgi.pfnPresentMultiplaneOverlay(&present) == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+      CHECK(doPresent() == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
       present.FlipInterval = DXGI_DDI_FLIP_INTERVAL_ONE;
       present.Flags.AllowTearing = 1;
-      CHECK(dxgi.pfnPresentMultiplaneOverlay(&present) == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+      CHECK(doPresent() == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
       present.Flags.AllowTearing = 0;
+      if (revision == 14) {
+         colorSpace = D3DDDI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
+         CHECK(doPresent() == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+         colorSpace = D3DDDI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
+         colorKey = 1;
+         CHECK(doPresent() == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+         colorKey = 0;
+         dev.interfaceVersion = D3DWDDM1_3_DDI_INTERFACE_VERSION;
+         CHECK(doPresent() == DXGI_ERROR_UNSUPPORTED && presentOrder.empty());
+         dev.interfaceVersion = D3DWDDM2_0_DDI_INTERFACE_VERSION;
+         DXGI_DDI_ARG_CHECKMULTIPLANEOVERLAYCOLORSPACESUPPORT color = {};
+         color.hDevice = present.hDevice; color.Format = DXGI_FORMAT_B8G8R8X8_UNORM;
+         color.ColorSpace = colorSpace;
+         CHECK(dxgi14.pfnCheckMultiplaneOverlayColorSpaceSupport(&color) == S_OK && color.Supported);
+         color.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+         CHECK(dxgi14.pfnCheckMultiplaneOverlayColorSpaceSupport(&color) == S_OK && color.Supported);
+         color.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+         CHECK(dxgi14.pfnCheckMultiplaneOverlayColorSpaceSupport(&color) == S_OK && !color.Supported);
+         color.Supported = TRUE; color.VidPnSourceId = 1;
+         CHECK(dxgi14.pfnCheckMultiplaneOverlayColorSpaceSupport(&color) == E_INVALIDARG && !color.Supported);
+      }
+      // Dirty hints must not reject an otherwise valid full-plane scanout.
+      // Invalid address intentionally proves the driver never reads the hint.
+      plane.PlaneAttributes.DirtyRectCount = 1;
+      plane.PlaneAttributes.pDirtyRects = (RECT *)(uintptr_t)1;
       dev.cmd = (VkCommandBuffer)0x19; dev.cmdHasWork = true;
-      const HRESULT result = dxgi.pfnPresentMultiplaneOverlay(&present);
+      const HRESULT result = doPresent();
       const std::vector<unsigned> expected = failure == 1 ? std::vector<unsigned>{1} :
          failure == 2 ? std::vector<unsigned>{1, 2} :
          failure == 3 || failure == 5 ? std::vector<unsigned>{1, 2, 3} :
@@ -672,7 +740,7 @@ static void presentation13_contracts()
       if (!failure) {
          presentOrder.clear(); presentPlaneEnabled = false;
          plane.Enabled = FALSE; plane.hResource = 0;
-         CHECK(dxgi.pfnPresentMultiplaneOverlay(&present) == S_OK && presentOrder == std::vector<unsigned>{4});
+         CHECK(doPresent() == S_OK && presentOrder == std::vector<unsigned>{4});
          CHECK(dev.submitted == 1 && dev.gated == 1 && dev.completed() == 0);
       }
       // Only simulated commands exist in this fixture; no backing is in flight.
@@ -680,7 +748,7 @@ static void presentation13_contracts()
       CHECK(runtime_destroy(res.storage.runtime) == S_OK);
       runtime_device_destroy(&dev);
    }
-   std::puts("PASS: MPO four rotations validate exact layouts; runtime signal -> Vulkan wait/submit -> runtime GPU wait -> same-thread Present callback; no CPU completion or early retirement (CPU control)");
+   std::puts("PASS: DXGI1.3 MPO and 1.4 MPO1, four rotations, SDR/plane checks, disabled-plane context, opaque token and dirty hints; signal -> Vulkan submit -> GPU wait -> same-thread callback; six failure paths, no fake completion or early retirement (CPU control)");
 
    Adapter adapter; Device dev;
    init(&dev, &adapter, 0);

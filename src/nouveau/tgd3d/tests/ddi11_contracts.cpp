@@ -18,8 +18,122 @@ template<typename T> struct Storage {
    T *object() { return reinterpret_cast<T *>(bytes); }
 };
 
+static void ddi20_contracts()
+{
+   Device dev;
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
+   D3D10DDI_HDEVICE h = {&dev};
+   struct { uint64_t before; D3DWDDM2_0DDI_DEVICEFUNCS table; uint64_t after; } guarded = {};
+   guarded.before = guarded.after = UINT64_C(0x87654321abcdef09);
+   device_fill_table20(&guarded.table);
+   auto &t = guarded.table;
+   CHECK(guarded.before == guarded.after && guarded.before == UINT64_C(0x87654321abcdef09));
+   CHECK(t.pfnDraw && t.pfnCreateResource && t.pfnCreateShaderResourceView &&
+         t.pfnCreateRenderTargetView && t.pfnCreateQuery && t.pfnFlush && t.pfnRelocateDeviceFuncs);
+   CHECK(!t.pfnSetHardwareProtection && !t.pfnGetResourceLayout && !t.pfnDispatch);
+   t.pfnRelocateDeviceFuncs(h, &t);
+
+   struct { uint64_t before; DXGI1_4_DDI_BASE_FUNCTIONS table; uint64_t after; } dxgi = {};
+   dxgi.before = dxgi.after = UINT64_C(0x87654321abcdef09);
+   dxgi_fill_presentation14(&dxgi.table);
+   CHECK(dxgi.before == dxgi.after && dxgi.before == UINT64_C(0x87654321abcdef09));
+   CHECK(dxgi.table.pfnPresent && dxgi.table.pfnPresent1 && dxgi.table.pfnPresentMultiplaneOverlay &&
+         dxgi.table.pfnPresentMultiplaneOverlay1 && dxgi.table.pfnCheckMultiplaneOverlayColorSpaceSupport &&
+         dxgi.table.pfnOfferResources && dxgi.table.pfnReclaimResources);
+   CHECK(!dxgi.table.pfnReserved1 && !dxgi.table.pfnReserved2 && !dxgi.table.pfnTrimResidencySet);
+   // Exact slot read by the matched native D3D11 runtime. No shifted 1.3 table.
+   static_assert(offsetof(DXGI1_4_DDI_BASE_FUNCTIONS, pfnPresentMultiplaneOverlay1) == 20 * sizeof(void *));
+   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, DriverPrivateDataSize) == 24);
+   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, pDriverPrivateData) == 32);
+   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, SyncIntervalOverrideValid) == 40);
+
+   // Test actual constructors, including array/mip mapping, rather than only
+   // pointer presence. Vulkan views are lazy; no physical device is involved.
+   Resource res;
+   res.dev = &dev; res.kind = ResKind::Image; res.dim = D3D10DDIRESOURCE_TEXTURE2D;
+   res.imageType = VK_IMAGE_TYPE_2D; res.width = 32; res.height = 16;
+   res.mips = 3; res.arraySize = 4; res.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+   res.aspects = VK_IMAGE_ASPECT_COLOR_BIT;
+   Storage<View> srv, rtv;
+   D3DWDDM2_0DDIARG_CREATESHADERRESOURCEVIEW sd = {};
+   sd.hDrvResource = {&res}; sd.Format = res.format; sd.ResourceDimension = res.dim;
+   sd.Tex2D = {1, 2, 2, 2, 0};
+   errors = 0;
+   CHECK(t.pfnCalcPrivateShaderResourceViewSize(h, &sd) == sizeof(View));
+   t.pfnCreateShaderResourceView(h, &sd, {srv.object()}, {});
+   CHECK(!errors && srv.object()->res == &res && srv.object()->width == 16 && srv.object()->height == 8);
+   const auto sr = srv.object()->info.subresourceRange;
+   CHECK(sr.baseMipLevel == 1 && sr.levelCount == 2 && sr.baseArrayLayer == 2 && sr.layerCount == 2);
+   t.pfnDestroyShaderResourceView(h, {srv.object()});
+   sd.Tex2D.PlaneSlice = 1;
+   t.pfnCreateShaderResourceView(h, &sd, {srv.object()}, {});
+   CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED && !res.views);
+
+   D3DWDDM2_0DDIARG_CREATERENDERTARGETVIEW rd = {};
+   rd.hDrvResource = {&res}; rd.Format = res.format; rd.ResourceDimension = res.dim;
+   rd.Tex2D = {2, 1, 2, 0}; errors = 0;
+   CHECK(t.pfnCalcPrivateRenderTargetViewSize(h, &rd) == sizeof(View));
+   t.pfnCreateRenderTargetView(h, &rd, {rtv.object()}, {});
+   CHECK(!errors && rtv.object()->width == 8 && rtv.object()->height == 4);
+   const auto rr = rtv.object()->info.subresourceRange;
+   CHECK(rr.baseMipLevel == 2 && rr.levelCount == 1 && rr.baseArrayLayer == 1 && rr.layerCount == 2);
+   t.pfnDestroyRenderTargetView(h, {rtv.object()});
+   rd.Tex2D.PlaneSlice = 1;
+   t.pfnCreateRenderTargetView(h, &rd, {rtv.object()}, {});
+   CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED && !res.views);
+
+   Storage<RasterizerState> raster;
+   D3DWDDM2_0DDI_RASTERIZER_DESC rasterDesc = {};
+   rasterDesc.ForcedSampleCount = 1; rasterDesc.ScissorEnable = TRUE; errors = 0;
+   CHECK(t.pfnCalcPrivateRasterizerStateSize(h, &rasterDesc) == sizeof(RasterizerState));
+   t.pfnCreateRasterizerState(h, &rasterDesc, {raster.object()}, {});
+   CHECK(!errors && raster.object()->desc.ScissorEnable);
+   t.pfnDestroyRasterizerState(h, {raster.object()});
+   rasterDesc.ConservativeRasterizationMode = D3DWDDM2_0DDI_CONSERVATIVE_RASTERIZATION_ON;
+   t.pfnCreateRasterizerState(h, &rasterDesc, {raster.object()}, {});
+   CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED);
+
+   Storage<Query> query;
+   D3DWDDM2_0DDIARG_CREATEQUERY qd = {D3D10DDI_QUERY_EVENT, 0, D3DWDDM2_0DDI_CONTEXTTYPE_3D};
+   errors = 0;
+   CHECK(t.pfnCalcPrivateQuerySize(h, &qd) == sizeof(Query));
+   t.pfnCreateQuery(h, &qd, {query.object()}, {});
+   CHECK(!errors && query.object()->type == D3D10DDI_QUERY_EVENT && query.object()->seq == 0);
+   t.pfnDestroyQuery(h, {query.object()});
+   qd.ContextType = D3DWDDM2_0DDI_CONTEXTTYPE_COMPUTE;
+   t.pfnCreateQuery(h, &qd, {query.object()}, {});
+   CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED);
+   errors = 0;
+   CHECK(!t.pfnFlush(h, D3DWDDM2_0DDI_CONTEXTTYPE_VIDEO, 0));
+   CHECK(errors == 1 && error == E_INVALIDARG);
+
+   D3D10DDI_MIPINFO mip = {256, 1, 1, 256, 1, 1};
+   D3D11DDIARG_CREATERESOURCE desc = {};
+   desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_BUFFER;
+   desc.BindFlags = D3D10_DDI_BIND_CONSTANT_BUFFER;
+   desc.SampleDesc.Count = desc.MipLevels = desc.ArraySize = 1;
+   unsigned char input[256], backing[512];
+   for (unsigned i = 0; i < sizeof(input); ++i) input[i] = (i * 7 + 3) & 255;
+   D3D10_DDIARG_SUBRESOURCE_UP initial = {input, sizeof(input), sizeof(input)};
+   desc.pInitialDataUP = &initial;
+   Chunk chunk; chunk.cpu = backing; chunk.size = sizeof(backing); chunk.buffer = (VkBuffer)(uintptr_t)0x200;
+   dev.currentChunk = &chunk;
+   Storage<Resource> buffer;
+   errors = 0;
+   t.pfnCreateResource(h, &desc, {buffer.object()}, {});
+   CHECK(!errors && chunk.live == 1 && !std::memcmp(backing, input, sizeof(input)));
+   t.pfnDestroyResource(h, {buffer.object()});
+   for (auto layout : {D3DWDDM2_0DDI_TL_ROW_MAJOR, D3DWDDM2_0DDI_TL_STANDARD_SWIZZLE_64K_TILE}) {
+      desc.TextureLayout = layout; errors = 0;
+      t.pfnCreateResource(h, &desc, {buffer.object()}, {});
+      CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED && !chunk.live);
+   }
+   std::puts("PASS: typed WDDM2.0/DXGI1.4 boundaries, real view mip/array constructors, raster/query adapters and layout-tail rejection; modern tables remain unadvertised (CPU control)");
+}
+
 void ddi11_contracts()
 {
+   ddi20_contracts();
    Device dev;
    dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
    D3D10DDI_HDEVICE h = {&dev};

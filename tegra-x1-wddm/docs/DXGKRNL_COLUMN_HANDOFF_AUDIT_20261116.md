@@ -1,5 +1,12 @@
 # dxgkrnl普通桌面旋转交接核对
 
+## 后续匹配运行时 — 2026-11-16 05:06 UTC
+
+已继续核对实机 dwmcore/d3d11/dxgi。DWM 的单平面 Present→MPO 转换另检查 DXGI1.4
+`PresentMultiplaneOverlay1` 入口；这与旧 UMD 已经到达 KMD MPO3 并不矛盾。
+版本、RVA、契约差异、代码和原生 ARM64 控制结果见
+[UMD MPO1 核对](UMD_MPO1_CONTRACT_20261116.md)。现代入口仍未协商，不宣称列扫描通过。
+
 ## 后续结论修正 — 2026-11-16 UMD 工作轮
 
 PresentId=241 已可追溯到 `panel_scanout.c::set_primary_mpo`：其他普通主表面入口将

@@ -112,6 +112,19 @@ static void init(Device &dev, Adapter &adapter)
       Copy c; c.srcImage = object<Image>(src); c.dstImage = object<Image>(dst);
       c.image = *r; c.barrier = barriers; copies.push_back(c);
    };
+   dev.vk.CmdBlitImage = [](VkCommandBuffer, VkImage src, VkImageLayout sl, VkImage dst,
+                           VkImageLayout dl, UINT count, const VkImageBlit *b, VkFilter filter) {
+      CHECK(src != dst && sl == VK_IMAGE_LAYOUT_GENERAL && dl == sl && count == 1);
+      CHECK(filter == VK_FILTER_NEAREST && b->srcOffsets[1].x - b->srcOffsets[0].x ==
+            b->dstOffsets[1].x - b->dstOffsets[0].x && b->srcOffsets[1].y - b->srcOffsets[0].y ==
+            b->dstOffsets[1].y - b->dstOffsets[0].y);
+      Copy c; c.srcImage = object<Image>(src); c.dstImage = object<Image>(dst);
+      c.image.srcSubresource = b->srcSubresource; c.image.dstSubresource = b->dstSubresource;
+      c.image.srcOffset = b->srcOffsets[0]; c.image.dstOffset = b->dstOffsets[0];
+      c.image.extent = {(UINT)(b->srcOffsets[1].x - b->srcOffsets[0].x),
+                         (UINT)(b->srcOffsets[1].y - b->srcOffsets[0].y), 1};
+      c.barrier = barriers; copies.push_back(c);
+   };
 }
 
 static void execute(Device &dev)
@@ -175,6 +188,53 @@ static void image_copy(UINT depth, UINT sx, UINT sy, UINT dx, UINT dy)
       CHECK(errors == 1 && error == (stage == 4 ? D3DDDIERR_DEVICEREMOVED : E_OUTOFMEMORY));
       CHECK(copies.empty() && images == 1 && memories == 1 && image->bytes == expected);
       CHECK(dev.deferred.empty());
+   }
+   storage_destroy(&dev, r.storage, true); CHECK(!images && !memories && !waits);
+}
+
+static void dxgi_self_blt(UINT sx, UINT sy, UINT dx, UINT dy)
+{
+   Adapter adapter; Device dev; init(dev, adapter);
+   DXGI1_4_DDI_BASE_FUNCTIONS t; dxgi_fill_presentation14(&t);
+   Resource r; r.dev = &dev; r.kind = ResKind::Image; r.dim = D3D10DDIRESOURCE_TEXTURE2D;
+   r.width = 13; r.height = 9; r.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+   r.vkFormat = VK_FORMAT_B8G8R8A8_UNORM; r.aspects = VK_IMAGE_ASPECT_COLOR_BIT;
+   CHECK(image_create(&dev, &r) == S_OK);
+   auto image = object<Image>(r.storage.image); fill(image->bytes);
+   auto expected = image->bytes; const auto original = expected;
+   for (UINT y = 0; y < 5; ++y) for (UINT x = 0; x < 8; ++x) for (UINT c = 0; c < 4; ++c)
+      expected[((dy + y) * 13 + dx + x) * 4 + c] = original[((sy + y) * 13 + sx + x) * 4 + c];
+   DXGI_DDI_ARG_BLT1 args = {};
+   args.hDevice = (DXGI_DDI_HDEVICE)&dev; args.hSrcResource = args.hDstResource = (DXGI_DDI_HRESOURCE)&r;
+   args.SrcLeft = sx; args.SrcTop = sy; args.SrcRight = sx + 8; args.SrcBottom = sy + 5;
+   args.DstLeft = dx; args.DstTop = dy; args.DstRight = dx + 8; args.DstBottom = dy + 5;
+   args.Rotate = DXGI_DDI_MODE_ROTATION_IDENTITY;
+   CHECK(t.pfnBlt1(&args) == S_OK);
+   CHECK(copies.size() == 2 && images == 2 && memories == 2 && dev.deferred.size() == 2);
+   retire(&dev); CHECK(images == 2 && memories == 2);
+   execute(dev); CHECK(image->bytes == expected && images == 1 && memories == 1);
+   // Fail after the source snapshot has already been recorded, at rotated
+   // Blt pipeline allocation. The target must remain intact and the scratch
+   // must survive until that first copy completes, despite the returned OOM.
+   r.bind = D3D10_DDI_BIND_RENDER_TARGET;
+   args.Rotate = DXGI_DDI_MODE_ROTATION_ROTATE180;
+   dev.vk.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *,
+                                   const VkAllocationCallbacks *, VkPipelineLayout *) {
+      return VK_ERROR_OUT_OF_HOST_MEMORY;
+   };
+   CHECK(t.pfnBlt1(&args) == E_OUTOFMEMORY);
+   CHECK(errors == 1 && error == E_OUTOFMEMORY && SUCCEEDED(dev.lost));
+   errors = 0; // the injected failure was reported; execution below checks retirement
+   CHECK(copies.size() == 1 && images == 2 && memories == 2 && image->bytes == expected);
+   retire(&dev); CHECK(images == 2 && memories == 2);
+   execute(dev); CHECK(images == 1 && memories == 1 && image->bytes == expected);
+   args.Rotate = DXGI_DDI_MODE_ROTATION_IDENTITY; r.bind = 0;
+   for (UINT stage : {1u, 2u, 3u, 4u}) {
+      failStage = stage; errors = 0;
+      if (stage == 4) dev.cmd = VK_NULL_HANDLE;
+      const HRESULT hr = t.pfnBlt1(&args);
+      CHECK(FAILED(hr) && (stage == 4 || hr == E_OUTOFMEMORY));
+      CHECK(copies.empty() && images == 1 && memories == 1 && image->bytes == expected && dev.deferred.empty());
    }
    storage_destroy(&dev, r.storage, true); CHECK(!images && !memories && !waits);
 }
@@ -260,6 +320,7 @@ static void discard_hint()
 
 void overlap_contracts()
 {
+   dxgi_self_blt(1, 1, 3, 2); dxgi_self_blt(3, 2, 1, 1);
    buffer_copy(4, 12); buffer_copy(12, 4);
    image_copy(1, 1, 1, 3, 2); image_copy(1, 3, 2, 1, 1); image_copy(3, 1, 1, 3, 2);
    staging_copy(); buffer_scratch_failures(); discard_hint();

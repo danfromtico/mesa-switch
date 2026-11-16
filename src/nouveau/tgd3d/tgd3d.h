@@ -455,6 +455,7 @@ void device_fill_table(D3D10DDI_DEVICEFUNCS *table);
  * device and DXGI operations have been implemented and checked. */
 void device_fill_table11(D3D11_1DDI_DEVICEFUNCS *table);
 void device_fill_table13(D3DWDDM1_3DDI_DEVICEFUNCS *table);
+void device_fill_table20(D3DWDDM2_0DDI_DEVICEFUNCS *table);
 SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER, const D3D10DDIARG_CALCPRIVATEDEVICESIZE *);
 HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER, D3D10DDIARG_CREATEDEVICE *);
 
@@ -530,6 +531,7 @@ void dxgi_fill_table(DXGI1_1_DDI_BASE_FUNCTIONS *table, bool has_resolve);
 /* Presentation portion of the newer negotiated table. Device registration
  * must not expose this table until its remaining required DDIs are supplied. */
 void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
+void dxgi_fill_presentation14(DXGI1_4_DDI_BASE_FUNCTIONS *table);
 void dxgi_fill_residency13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
 bool direct_flip_compatible(Device *dev, const Resource *source, const Resource *target);
 HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args, const RECT *source = nullptr);

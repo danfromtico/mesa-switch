@@ -5,6 +5,7 @@
  * Do not cast device tables or copy descriptors with different union layouts.
  */
 #include "tgd3d.h"
+#include <type_traits>
 
 namespace tgd3d {
 
@@ -64,6 +65,19 @@ static void APIENTRY CreateResource(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATE
    legacy().pfnCreateResource(h, &desc, resource, rt);
 }
 
+static void APIENTRY CreateResource20(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATERESOURCE *in,
+                                      D3D10DDI_HRESOURCE resource, D3D10DDI_HRTRESOURCE rt)
+{
+   if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   /* A caller-selected standard swizzle or CPU-visible default texture is a
+    * separate contract. Never silently import it as our private NVK layout.
+    * UNDEFINED lets this driver choose the layout, including linear primaries. */
+   if (in->TextureLayout != D3DWDDM2_0DDI_TL_UNDEFINED) {
+      TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
+   }
+   CreateResource(h, in, resource, rt);
+}
+
 static SIZE_T APIENTRY SrvSize(D3D10DDI_HDEVICE, const D3D11DDIARG_CREATESHADERRESOURCEVIEW *)
 {
    return sizeof(View);
@@ -92,6 +106,59 @@ static void APIENTRY CreateSrv(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATESHADE
    default: TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
    }
    legacy().pfnCreateShaderResourceView(h, &desc, view, rt);
+}
+
+static SIZE_T APIENTRY SrvSize20(D3D10DDI_HDEVICE, const D3DWDDM2_0DDIARG_CREATESHADERRESOURCEVIEW *)
+{
+   return sizeof(View);
+}
+
+static void APIENTRY CreateSrv20(D3D10DDI_HDEVICE h, const D3DWDDM2_0DDIARG_CREATESHADERRESOURCEVIEW *in,
+                                 D3D10DDI_HSHADERRESOURCEVIEW view, D3D10DDI_HRTSHADERRESOURCEVIEW rt)
+{
+   if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   D3D11DDIARG_CREATESHADERRESOURCEVIEW desc = {};
+   desc.hDrvResource = in->hDrvResource; desc.Format = in->Format;
+   desc.ResourceDimension = in->ResourceDimension;
+   switch (in->ResourceDimension) {
+   case D3D10DDIRESOURCE_BUFFER: desc.Buffer = in->Buffer; break;
+   case D3D10DDIRESOURCE_TEXTURE1D: desc.Tex1D = in->Tex1D; break;
+   case D3D10DDIRESOURCE_TEXTURE2D:
+      if (in->Tex2D.PlaneSlice) { TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return; }
+      desc.Tex2D = {in->Tex2D.MostDetailedMip, in->Tex2D.FirstArraySlice,
+                     in->Tex2D.MipLevels, in->Tex2D.ArraySize};
+      break;
+   case D3D10DDIRESOURCE_TEXTURE3D: desc.Tex3D = in->Tex3D; break;
+   case D3D10DDIRESOURCE_TEXTURECUBE: desc.TexCube = in->TexCube; break;
+   default: TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
+   }
+   CreateSrv(h, &desc, view, rt);
+}
+
+static SIZE_T APIENTRY RtvSize20(D3D10DDI_HDEVICE, const D3DWDDM2_0DDIARG_CREATERENDERTARGETVIEW *)
+{
+   return sizeof(View);
+}
+
+static void APIENTRY CreateRtv20(D3D10DDI_HDEVICE h, const D3DWDDM2_0DDIARG_CREATERENDERTARGETVIEW *in,
+                                 D3D10DDI_HRENDERTARGETVIEW view, D3D10DDI_HRTRENDERTARGETVIEW rt)
+{
+   if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   D3D10DDIARG_CREATERENDERTARGETVIEW desc = {};
+   desc.hDrvResource = in->hDrvResource; desc.Format = in->Format;
+   desc.ResourceDimension = in->ResourceDimension;
+   switch (in->ResourceDimension) {
+   case D3D10DDIRESOURCE_BUFFER: desc.Buffer = in->Buffer; break;
+   case D3D10DDIRESOURCE_TEXTURE1D: desc.Tex1D = in->Tex1D; break;
+   case D3D10DDIRESOURCE_TEXTURE2D:
+      if (in->Tex2D.PlaneSlice) { TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return; }
+      desc.Tex2D = {in->Tex2D.MipSlice, in->Tex2D.FirstArraySlice, in->Tex2D.ArraySize};
+      break;
+   case D3D10DDIRESOURCE_TEXTURE3D: desc.Tex3D = in->Tex3D; break;
+   case D3D10DDIRESOURCE_TEXTURECUBE: desc.TexCube = in->TexCube; break;
+   default: TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
+   }
+   legacy().pfnCreateRenderTargetView(h, &desc, view, rt);
 }
 
 static SIZE_T APIENTRY DsvSize(D3D10DDI_HDEVICE, const D3D11DDIARG_CREATEDEPTHSTENCILVIEW *)
@@ -169,6 +236,41 @@ static void APIENTRY CreateRasterizer(D3D10DDI_HDEVICE h, const D3D11_1_DDI_RAST
       in->DepthBias, in->DepthBiasClamp, in->SlopeScaledDepthBias, in->DepthClipEnable,
       in->ScissorEnable, in->MultisampleEnable, in->AntialiasedLineEnable};
    legacy().pfnCreateRasterizerState(h, &desc, handle, rt);
+}
+
+static SIZE_T APIENTRY RasterizerSize20(D3D10DDI_HDEVICE, const D3DWDDM2_0DDI_RASTERIZER_DESC *)
+{
+   return sizeof(RasterizerState);
+}
+
+static void APIENTRY CreateRasterizer20(D3D10DDI_HDEVICE h, const D3DWDDM2_0DDI_RASTERIZER_DESC *in,
+                                        D3D10DDI_HRASTERIZERSTATE handle, D3D10DDI_HRTRASTERIZERSTATE rt)
+{
+   if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   if (in->ConservativeRasterizationMode != D3DWDDM2_0DDI_CONSERVATIVE_RASTERIZATION_OFF) {
+      TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
+   }
+   D3D11_1_DDI_RASTERIZER_DESC desc = {in->FillMode, in->CullMode, in->FrontCounterClockwise,
+      in->DepthBias, in->DepthBiasClamp, in->SlopeScaledDepthBias, in->DepthClipEnable,
+      in->ScissorEnable, in->MultisampleEnable, in->AntialiasedLineEnable, in->ForcedSampleCount};
+   CreateRasterizer(h, &desc, handle, rt);
+}
+
+static SIZE_T APIENTRY QuerySize20(D3D10DDI_HDEVICE, const D3DWDDM2_0DDIARG_CREATEQUERY *)
+{
+   return sizeof(Query);
+}
+
+static void APIENTRY CreateQuery20(D3D10DDI_HDEVICE h, const D3DWDDM2_0DDIARG_CREATEQUERY *in,
+                                   D3D10DDI_HQUERY query, D3D10DDI_HRTQUERY rt)
+{
+   if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   if (in->ContextType != D3DWDDM2_0DDI_CONTEXTTYPE_ALL &&
+       in->ContextType != D3DWDDM2_0DDI_CONTEXTTYPE_3D) {
+      TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
+   }
+   D3D10DDIARG_CREATEQUERY desc = {in->Query, in->MiscFlags};
+   legacy().pfnCreateQuery(h, &desc, query, rt);
 }
 
 struct Signatures {
@@ -283,6 +385,16 @@ static BOOL APIENTRY Flush(D3D10DDI_HDEVICE h, UINT flags)
    return SUCCEEDED(dev->lost);
 }
 
+static BOOL APIENTRY Flush(D3D10DDI_HDEVICE h, UINT contextType, UINT flags)
+{
+   /* Copies and draws share the real graphics queue. No compute/video queue
+    * is exposed by this immediate D3D10 pipeline. */
+   if (contextType & ~(D3DWDDM2_0DDI_CONTEXTTYPE_3D | D3DWDDM2_0DDI_CONTEXTTYPE_COPY)) {
+      TG_ERROR(D(h), E_INVALIDARG); return FALSE;
+   }
+   return Flush(h, flags);
+}
+
 static void APIENTRY Discard(D3D10DDI_HDEVICE h, D3D11DDI_HANDLETYPE type,
                              void *handle, const D3D10_DDI_RECT *rects, UINT count)
 {
@@ -320,6 +432,7 @@ static void APIENTRY Discard(D3D10DDI_HDEVICE h, D3D11DDI_HANDLETYPE type,
 
 static void APIENTRY Relocate(D3D10DDI_HDEVICE, D3D11_1DDI_DEVICEFUNCS *) {}
 static void APIENTRY Relocate(D3D10DDI_HDEVICE, D3DWDDM1_3DDI_DEVICEFUNCS *) {}
+static void APIENTRY Relocate(D3D10DDI_HDEVICE, D3DWDDM2_0DDI_DEVICEFUNCS *) {}
 
 static void APIENTRY Multisample13(D3D10DDI_HDEVICE h, DXGI_FORMAT format,
                                    UINT samples, UINT flags, UINT *levels)
@@ -397,8 +510,6 @@ static void common_table(Table *table)
    SAME(pfnOpenResource);
    SAME(pfnDestroyResource);
    SAME(pfnDestroyShaderResourceView);
-   SAME(pfnCalcPrivateRenderTargetViewSize);
-   SAME(pfnCreateRenderTargetView);
    SAME(pfnDestroyRenderTargetView);
    SAME(pfnDestroyDepthStencilView);
    SAME(pfnCalcPrivateElementLayoutSize);
@@ -413,8 +524,6 @@ static void common_table(Table *table)
    SAME(pfnCalcPrivateSamplerSize);
    SAME(pfnCreateSampler);
    SAME(pfnDestroySampler);
-   SAME(pfnCalcPrivateQuerySize);
-   SAME(pfnCreateQuery);
    SAME(pfnDestroyQuery);
    SAME(pfnCheckFormatSupport);
    SAME(pfnCheckCounterInfo);
@@ -423,15 +532,10 @@ static void common_table(Table *table)
    SAME(pfnSetTextFilterSize);
 #undef SAME
    table->pfnCalcPrivateResourceSize = ResourceSize;
-   table->pfnCreateResource = CreateResource;
-   table->pfnCalcPrivateShaderResourceViewSize = SrvSize;
-   table->pfnCreateShaderResourceView = CreateSrv;
    table->pfnCalcPrivateDepthStencilViewSize = DsvSize;
    table->pfnCreateDepthStencilView = CreateDsv;
    table->pfnCalcPrivateBlendStateSize = BlendSize;
    table->pfnCreateBlendState = CreateBlend;
-   table->pfnCalcPrivateRasterizerStateSize = RasterizerSize;
-   table->pfnCreateRasterizerState = CreateRasterizer;
    table->pfnCalcPrivateShaderSize = ShaderSize;
    table->pfnCreateVertexShader = CreateVertex;
    table->pfnCreateGeometryShader = CreateGeometry;
@@ -456,6 +560,27 @@ static void common_table(Table *table)
    table->pfnDynamicConstantBufferMapNoOverwrite = old.pfnResourceMap;
    table->pfnDrawInstancedIndirect = DrawIndirect11;
    table->pfnDrawIndexedInstancedIndirect = DrawIndexedIndirect11;
+   if constexpr (std::is_same_v<Table, D3DWDDM2_0DDI_DEVICEFUNCS>) {
+      table->pfnCreateResource = CreateResource20;
+      table->pfnCalcPrivateShaderResourceViewSize = SrvSize20;
+      table->pfnCreateShaderResourceView = CreateSrv20;
+      table->pfnCalcPrivateRenderTargetViewSize = RtvSize20;
+      table->pfnCreateRenderTargetView = CreateRtv20;
+      table->pfnCalcPrivateRasterizerStateSize = RasterizerSize20;
+      table->pfnCreateRasterizerState = CreateRasterizer20;
+      table->pfnCalcPrivateQuerySize = QuerySize20;
+      table->pfnCreateQuery = CreateQuery20;
+   } else {
+      table->pfnCreateResource = CreateResource;
+      table->pfnCalcPrivateShaderResourceViewSize = SrvSize;
+      table->pfnCreateShaderResourceView = CreateSrv;
+      table->pfnCalcPrivateRenderTargetViewSize = old.pfnCalcPrivateRenderTargetViewSize;
+      table->pfnCreateRenderTargetView = old.pfnCreateRenderTargetView;
+      table->pfnCalcPrivateRasterizerStateSize = RasterizerSize;
+      table->pfnCreateRasterizerState = CreateRasterizer;
+      table->pfnCalcPrivateQuerySize = old.pfnCalcPrivateQuerySize;
+      table->pfnCreateQuery = old.pfnCreateQuery;
+   }
 }
 
 void device_fill_table11(D3D11_1DDI_DEVICEFUNCS *table)
@@ -471,6 +596,15 @@ void device_fill_table13(D3DWDDM1_3DDI_DEVICEFUNCS *table)
     * the shorter 11.1 table. Optional tiled/marker entries remain null. */
    common_table(table);
    table->pfnCheckMultisampleQualityLevels = Multisample13;
+}
+
+void device_fill_table20(D3DWDDM2_0DDI_DEVICEFUNCS *table)
+{
+   common_table(table);
+   table->pfnCheckMultisampleQualityLevels = Multisample13;
+   /* Unadvertised preparation, paired with DXGI1.4. Do not copy a 1.3 table:
+    * Flush, query, view and rasterizer descriptors have changed signatures.
+    * Optional hardware protection/default texture layouts remain unavailable. */
 }
 
 } // namespace tgd3d

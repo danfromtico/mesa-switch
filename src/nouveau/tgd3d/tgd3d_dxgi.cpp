@@ -170,13 +170,20 @@ static bool mpo_plane(Device *dev, const DXGI_DDI_PRESENT_MULTIPLANE_OVERLAY &pl
        a.Blend != DXGI_DDI_MULTIPLANE_OVERLAY_BLEND_OPAQUE ||
        a.VideoFrameFormat != DXGI_DDI_MULIIPLANE_OVERLAY_VIDEO_FRAME_FORMAT_PROGRESSIVE ||
        a.YCbCrFlags || a.StereoFormat != DXGI_DDI_MULTIPLANE_OVERLAY_STEREO_FORMAT_MONO ||
-       a.StereoFlipMode != DXGI_DDI_MULTIPLANE_OVERLAY_STEREO_FLIP_NONE ||
-       (a.DirtyRectCount && !a.pDirtyRects))
+       a.StereoFlipMode != DXGI_DDI_MULTIPLANE_OVERLAY_STEREO_FLIP_NONE)
       return false;
-   for (UINT i = 0; i < a.DirtyRectCount; ++i)
-      if (!inside(a.pDirtyRects[i], res->width, res->height))
-         return false;
+   /* Dirty rectangles are only an optimization. The complete allocation is
+    * scanned out; do not dereference or reject a plane because of this hint.
+    * The runtime's token retains the original rectangles without alteration. */
    return true;
+}
+
+static bool mpo_flags(const DXGI_DDI_PRESENT_FLAGS &flags, DXGI_DDI_FLIP_INTERVAL_TYPE interval)
+{
+   return flags.Flip && !flags.Blt && !flags.PreferRight && !flags.TemporaryMono &&
+          !flags.AllowTearing && !flags.AllowFlexibleRefresh && !flags.NoScanoutTransform &&
+          !flags.Reserved && interval >= DXGI_DDI_FLIP_INTERVAL_ONE &&
+          interval <= DXGI_DDI_FLIP_INTERVAL_FOUR;
 }
 
 static HRESULT APIENTRY PresentMultiplaneOverlay(DXGI_DDI_ARG_PRESENTMULTIPLANEOVERLAY *args)
@@ -190,11 +197,7 @@ static HRESULT APIENTRY PresentMultiplaneOverlay(DXGI_DDI_ARG_PRESENTMULTIPLANEO
    const auto &plane = args->pPresentPlanes[0];
    /* This callback version cannot override interval zero. Immediate/tearing
     * and independent flip are not advertised by the paired display driver. */
-   if (!args->Flags.Flip || args->Flags.Blt || args->Flags.PreferRight ||
-       args->Flags.TemporaryMono || args->Flags.AllowTearing || args->Flags.AllowFlexibleRefresh ||
-       args->Flags.NoScanoutTransform || args->Flags.Reserved ||
-       args->FlipInterval < DXGI_DDI_FLIP_INTERVAL_ONE ||
-       args->FlipInterval > DXGI_DDI_FLIP_INTERVAL_FOUR || !mpo_plane(dev, plane) ||
+   if (!mpo_flags(args->Flags, args->FlipInterval) || !mpo_plane(dev, plane) ||
        !dev->hContext || !dev->dxgi || !dev->dxgi->pfnPresentMultiplaneOverlayCb)
       return DXGI_ERROR_UNSUPPORTED;
    HRESULT hr = flush(dev, true);
@@ -211,6 +214,82 @@ static HRESULT APIENTRY PresentMultiplaneOverlay(DXGI_DDI_ARG_PRESENTMULTIPLANEO
    /* The token carries rotation and the plane attributes unchanged. No blit,
     * CPU fence wait or synthetic completion belongs in this handoff. */
    return present_result(dev, dev->dxgi->pfnPresentMultiplaneOverlayCb(dev->hRTDevice.handle, &present));
+}
+
+static bool mpo_plane1(Device *dev, const DXGI_DDI_PRESENT_MULTIPLANE_OVERLAY1 &plane)
+{
+   /* The 1.4 attributes replaced YCbCrFlags with ColorSpace and added tails.
+    * Convert named fields; the two structure layouts are not interchangeable. */
+   if (plane.Enabled && (plane.PlaneAttributes.ColorSpace != D3DDDI_COLOR_SPACE_RGB_FULL_G22_NONE_P709 ||
+                         plane.PlaneAttributes.ColorKey))
+      return false;
+   DXGI_DDI_PRESENT_MULTIPLANE_OVERLAY old = {};
+   old.LayerIndex = plane.LayerIndex;
+   old.Enabled = plane.Enabled;
+   if (!plane.Enabled) return mpo_plane(dev, old);
+   old.hResource = plane.hResource;
+   old.SubResourceIndex = plane.SubResourceIndex;
+   const auto &a = plane.PlaneAttributes;
+   old.PlaneAttributes.Flags = a.Flags;
+   old.PlaneAttributes.SrcRect = a.SrcRect;
+   old.PlaneAttributes.DstRect = a.DstRect;
+   old.PlaneAttributes.ClipRect = a.ClipRect;
+   old.PlaneAttributes.Rotation = a.Rotation;
+   old.PlaneAttributes.Blend = a.Blend;
+   old.PlaneAttributes.VideoFrameFormat = a.VideoFrameFormat;
+   old.PlaneAttributes.StereoFormat = a.StereoFormat;
+   old.PlaneAttributes.StereoFlipMode = a.StereoFlipMode;
+   return mpo_plane(dev, old);
+}
+
+static HRESULT APIENTRY PresentMultiplaneOverlay1(DXGI_DDI_ARG_PRESENTMULTIPLANEOVERLAY1 *args)
+{
+   if (!args || !args->hDevice || args->VidPnSourceId ||
+       args->PresentPlaneCount != 1 || !args->pPresentPlanes)
+      return E_INVALIDARG;
+   Device *dev = DD(args->hDevice);
+   if (FAILED(dev->lost)) return dev->lost;
+   const auto &plane = args->pPresentPlanes[0];
+   if (dev->interfaceVersion < D3DWDDM2_0_DDI_INTERFACE_VERSION ||
+       !mpo_flags(args->Flags, args->FlipInterval) || !mpo_plane1(dev, plane) ||
+       !dev->hContext || !dev->dxgi || !dev->dxgi->pfnPresentMultiplaneOverlay1Cb)
+      return DXGI_ERROR_UNSUPPORTED;
+   HRESULT hr = flush(dev, true);
+   if (FAILED(hr) || FAILED(dev->lost)) return FAILED(hr) ? hr : dev->lost;
+
+   HANDLE context = dev->hContext;
+   D3DKMT_HANDLE allocation = plane.Enabled ?
+      runtime_allocation(DR(plane.hResource)->storage.runtime) : 0;
+   DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO info = {};
+   info.ContextCount = 1;
+   info.pContextList = &context;
+   info.pAllocationList = &allocation;
+   /* WDDM2.0/2.1 callbacks consume the prefix through pDriverPrivateData.
+    * The matching 22621 runtime's PreWDDM2_2 entry reads these same offsets.
+    * Do not depend on the later SyncIntervalOverride tail: intervals 1..4
+    * are preserved in the opaque token, and interval zero is not admitted. */
+   DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO *planes[] = {&info};
+   DXGIDDICB_PRESENT_MULTIPLANE_OVERLAY1 present = {};
+   present.pDXGIContext = args->pDXGIContext;
+   present.PresentPlaneCount = 1;
+   present.ppPresentPlanes = planes;
+   /* Submit -> runtime GPU wait -> same-thread callback. Neither the shared
+    * allocation nor its rendering fence is retired by accepting the Present.
+    * Keep the context even for a disabled plane: runtime needs it to submit
+    * the disable operation when no enabled allocation supplies a context. */
+   return present_result(dev, dev->dxgi->pfnPresentMultiplaneOverlay1Cb(dev->hRTDevice.handle, &present));
+}
+
+static HRESULT APIENTRY CheckMultiplaneOverlayColorSpaceSupport(
+   DXGI_DDI_ARG_CHECKMULTIPLANEOVERLAYCOLORSPACESUPPORT *args)
+{
+   if (!args) return E_INVALIDARG;
+   args->Supported = FALSE;
+   if (!args->hDevice || args->VidPnSourceId) return E_INVALIDARG;
+   if (FAILED(DD(args->hDevice)->lost)) return DD(args->hDevice)->lost;
+   args->Supported = args->ColorSpace == D3DDDI_COLOR_SPACE_RGB_FULL_G22_NONE_P709 &&
+      (args->Format == DXGI_FORMAT_B8G8R8A8_UNORM || args->Format == DXGI_FORMAT_B8G8R8X8_UNORM);
+   return S_OK;
 }
 
 static HRESULT APIENTRY GetMultiplaneOverlayCaps(DXGI_DDI_ARG_GETMULTIPLANEOVERLAYCAPS *args)
@@ -268,6 +347,26 @@ void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table)
    table->pfnGetMultiplaneOverlayGroupCaps = GetMultiplaneOverlayGroupCaps;
    table->pfnCheckPresentDurationSupport = CheckPresentDurationSupport;
    table->pfnReserved1 = table->pfnReserved2 = nullptr;
+}
+
+void dxgi_fill_presentation14(DXGI1_4_DDI_BASE_FUNCTIONS *table)
+{
+   *table = {};
+   DXGI1_3_DDI_BASE_FUNCTIONS old = {};
+   dxgi_fill_presentation13(&old);
+#define SAME(name) table->name = old.name
+   SAME(pfnPresent); SAME(pfnGetGammaCaps); SAME(pfnSetDisplayMode);
+   SAME(pfnSetResourcePriority); SAME(pfnQueryResourceResidency);
+   SAME(pfnRotateResourceIdentities); SAME(pfnBlt); SAME(pfnResolveSharedResource);
+   SAME(pfnBlt1); SAME(pfnOfferResources); SAME(pfnReclaimResources);
+   SAME(pfnGetMultiplaneOverlayCaps); SAME(pfnGetMultiplaneOverlayGroupCaps);
+   SAME(pfnPresentMultiplaneOverlay); SAME(pfnPresent1); SAME(pfnCheckPresentDurationSupport);
+#undef SAME
+   table->pfnPresentMultiplaneOverlay1 = PresentMultiplaneOverlay1;
+   table->pfnCheckMultiplaneOverlayColorSpaceSupport = CheckMultiplaneOverlayColorSpaceSupport;
+   /* Still unadvertised: finish WDDM2 device/capability/residency negotiation
+    * before enabling this table. A 1.3 table cannot supply the 1.4 MPO1 slot
+    * tested by DWM's D3D11 runtime for single-plane MPO3 conversion. */
 }
 
 static HRESULT APIENTRY GetGammaCaps(DXGI_DDI_ARG_GET_GAMMA_CONTROL_CAPS *args)
@@ -442,8 +541,6 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
                                            src->mipHeight(args->SrcSubresource % src->mips)) ||
                        source->left == source->right || source->top == source->bottom))
       hr = E_INVALIDARG;
-   else if (src->storage.image == dst->storage.image)
-      hr = DXGI_ERROR_UNSUPPORTED;
    else if (args->Flags.Resolve || args->Flags.Reserved)
       hr = DXGI_ERROR_UNSUPPORTED;
    else if (args->Rotate != DXGI_DDI_MODE_ROTATION_IDENTITY &&
@@ -454,6 +551,52 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
    else if ((src->aspects | dst->aspects) != VK_IMAGE_ASPECT_COLOR_BIT)
       hr = DXGI_ERROR_UNSUPPORTED;
    if (SUCCEEDED(hr)) {
+      if (src->storage.image == dst->storage.image) {
+         /* Blt1 also permits a same-surface copy. Snapshot the complete source
+          * rectangle before any destination write, including scaled/rotated
+          * copies. ResourceCopyRegion's overlap handling alone does not cover
+          * this DXGI entry point. This is not the display rotation policy. */
+         const FormatInfo *format = format_info(src->format);
+         if (src->imageType != VK_IMAGE_TYPE_2D || dst->imageType != VK_IMAGE_TYPE_2D ||
+             !src->storage.image || !format || (format->flags & FMT_BC) ||
+             runtime_is_offered(resource_runtime(src)) || runtime_is_offered(resource_runtime(dst)))
+            return DXGI_ERROR_UNSUPPORTED;
+         const UINT mip = args->SrcSubresource % src->mips;
+         const RECT region = source ? *source :
+            RECT{0, 0, (LONG)src->mipWidth(mip), (LONG)src->mipHeight(mip)};
+         Resource saved;
+         saved.dev = dev; saved.kind = ResKind::Image; saved.dim = D3D10DDIRESOURCE_TEXTURE2D;
+         saved.format = src->format; saved.vkFormat = src->vkFormat;
+         saved.aspects = VK_IMAGE_ASPECT_COLOR_BIT;
+         saved.width = region.right - region.left; saved.height = region.bottom - region.top;
+         saved.bind = D3D10_DDI_BIND_SHADER_RESOURCE;
+         hr = image_create(dev, &saved);
+         if (FAILED(hr)) return hr;
+         VkCommandBuffer cmd = cmd_begin(dev);
+         if (cmd) {
+            image_use(dev, src->storage, false);
+            barrier_for_read(dev, src->storage.writeSerial);
+            image_use(dev, saved.storage, true);
+            VkImageCopy copy = {};
+            copy.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, mip, args->SrcSubresource / src->mips, 1};
+            copy.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            copy.srcOffset = {region.left, region.top, 0};
+            copy.extent = {saved.width, saved.height, 1};
+            dev->vk.CmdCopyImage(dev->cmd, src->storage.image, VK_IMAGE_LAYOUT_GENERAL,
+                                 saved.storage.image, VK_IMAGE_LAYOUT_GENERAL, 1, &copy);
+            dev->stats.copyBytes += (uint64_t)saved.width * saved.height * format->bytes;
+            DXGI_DDI_ARG_BLT next = *args;
+            next.hSrcResource = (DXGI_DDI_HRESOURCE)&saved;
+            next.SrcSubresource = 0;
+            hr = blt(&next, nullptr);
+         } else {
+            hr = FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
+         }
+         /* On any later failure, the saved source may already be in flight.
+          * Its image/views/memory follow the recorded GPU sequence as usual. */
+         storage_destroy(dev, saved.storage, false);
+         return hr;
+      }
       if (args->Rotate >= DXGI_DDI_MODE_ROTATION_ROTATE90) {
          hr = rotated_blit(dev, args, source);
          trace(TGD3D_TRACE_BLT, hr, args->Flags.Value, args->Rotate);
