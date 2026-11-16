@@ -38,6 +38,11 @@ struct State {
    UINT offers = 0, reclaims = 0, deallocations = 0, pagingWaits = 0, renderWaits = 0;
    UINT locks = 0, unlocks = 0, unmaps = 0, kinds = 0, errors = 0;
    UINT residents = 0, evictions = 0;
+   UINT residencyAttempts = 0, finalResidencyAttempts = 0;
+   std::vector<uint64_t> residencyTrims;
+   size_t nextResidencyTrim = 0;
+   bool failResidency = false;
+   uint64_t evictionBudget = 0;
    uint64_t paging = 0, nextPaging = 0, render = 0;
    bool failPaging = false;
    UINT discard = 0;
@@ -90,7 +95,13 @@ void init(Device *dev, Adapter *adapter)
    cb.pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *a) -> HRESULT {
       CHECK(a->hPagingQueue == 0x40 && a->NumAllocations == 1 && s.allocations.count(a->AllocationList[0]));
       auto &allocation = s.allocations.at(a->AllocationList[0]);
-      CHECK(!allocation.resident); allocation.resident = true; ++s.residents;
+      CHECK(!allocation.resident && !a->Flags.MustSucceed && !a->Flags.Reserved);
+      ++s.residencyAttempts; s.finalResidencyAttempts += a->Flags.CantTrimFurther;
+      if (s.failResidency || s.nextResidencyTrim < s.residencyTrims.size()) {
+         a->NumBytesToTrim = s.failResidency ? 4096 : s.residencyTrims[s.nextResidencyTrim++];
+         return E_OUTOFMEMORY; // atomic failure: no residency reference acquired
+      }
+      allocation.resident = true; ++s.residents;
       a->PagingFenceValue = ++s.nextPaging; return E_PENDING;
    };
    cb.pfnEvictCb = [](HANDLE d, D3DDDICB_EVICT *a) -> HRESULT {
@@ -98,7 +109,8 @@ void init(Device *dev, Adapter *adapter)
       auto &allocation = s.allocations.at(a->AllocationList[0]);
       CHECK(allocation.resident && !allocation.offered);
       if (FAILED(s.evictResult)) return s.evictResult;
-      allocation.resident = false; ++s.evictions; return S_OK;
+      allocation.resident = false; ++s.evictions;
+      a->NumBytesToTrim = s.evictionBudget; return S_OK;
    };
    cb.pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE,
       const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) -> HRESULT {
@@ -253,8 +265,8 @@ static void trim_contracts()
    CHECK(dxgi.pfnTrimResidencySet(&trim) == S_OK && s.evictions == 2);
    // A failed paging wait may be retried without incrementing MakeResident's refcount twice.
    s.failPaging = true;
-   CHECK(runtime_make_resident(resource_runtime(res[1])) == E_FAIL && s.residents == 5);
-   CHECK(runtime_make_resident(resource_runtime(res[1])) == S_OK && s.residents == 5 && s.render == 3);
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[1])) == E_FAIL && s.residents == 5);
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[1])) == S_OK && s.residents == 5 && s.render == 3);
    // Eviction failure keeps residency and contents; an idle retry can succeed.
    s.evictResult = E_OUTOFMEMORY;
    CHECK(dxgi.pfnTrimResidencySet(&trim) == E_OUTOFMEMORY && s.evictions == 2);
@@ -275,6 +287,65 @@ static void trim_contracts()
    CHECK(dev.freePools.empty() && dev.freeCommands.empty());
    cmd_destroy(&dev); runtime_device_destroy(&dev);
    std::puts("PASS: periodic/budget Trim evicts only completed idle backing, preserves scanout and in-flight memory, restores paging before GPU use, balances retry references and handles destroy-before-submit (CPU control)");
+}
+
+static void budget_failure_contracts()
+{
+   Adapter adapter; Device dev; init(&dev, &adapter);
+   D3D11_1DDI_DEVICEFUNCS table = {}; device_fill_table11(&table);
+   alignas(Resource) BYTE storage[6][sizeof(Resource)];
+   Resource *res[6];
+   D3D10DDI_MIPINFO mip = {256,1,1,256,1,1};
+   D3D11DDIARG_CREATERESOURCE desc = {};
+   desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_BUFFER;
+   desc.Usage = D3D10_DDI_USAGE_DYNAMIC; desc.BindFlags = D3D10_DDI_BIND_VERTEX_BUFFER;
+   desc.MipLevels = desc.ArraySize = desc.SampleDesc.Count = 1;
+   for (UINT i = 0; i < 6; ++i) {
+      res[i] = reinterpret_cast<Resource *>(storage[i]);
+      table.pfnCreateResource({&dev}, &desc, {res[i]}, {h<HANDLE>(i+1)});
+   }
+   CHECK(!s.errors && s.residents == 6);
+   auto resident = [&](UINT i) { return s.allocations.at(runtime_allocation(resource_runtime(res[i]))).resident; };
+   dev.submitted = 1; res[3]->sliceLastUse = 1; // GPU has not completed this batch
+   res[4]->bufferMapped = true; res[5]->primary = true;
+   uint64_t bytes = 0;
+   CHECK(runtime_evict(resource_runtime(res[0]), &bytes) == S_OK && bytes == 4096);
+   // The budget changes between attempts: each failure must trigger a fresh
+   // trim, without evicting the target, mapped, in-flight or scanout resources.
+   s.residencyTrims = {4096, 4096};
+   UINT attempts = s.residencyAttempts;
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[0])) == S_OK);
+   CHECK(s.residencyAttempts == attempts + 3 && s.evictions == 3 && !s.finalResidencyAttempts);
+   CHECK(resident(0) && !resident(1) && !resident(2) && resident(3) && resident(4) && resident(5));
+   // No eligible backing remains. One final CantTrimFurther request fails
+   // cleanly; there is no endless retry or forced MustSucceed allocation.
+   res[0]->sliceLastUse = 1; s.failResidency = true; attempts = s.residencyAttempts;
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[1])) == E_OUTOFMEMORY);
+   CHECK(s.residencyAttempts == attempts + 2 && s.finalResidencyAttempts == 1 && !resident(1));
+   CHECK(!s.renderWaits && !s.render && !s.errors && s.order.empty());
+   // A paging wait retry still reuses the one successful residency reference.
+   s.failResidency = false; s.failPaging = true; attempts = s.residencyAttempts;
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[1])) == E_FAIL);
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[1])) == S_OK);
+   CHECK(s.residencyAttempts == attempts + 1);
+   // A zero trim estimate exhausts idle backing instead of treating zero as
+   // successful residency. Keep the render fence and protected objects intact.
+   res[4]->bufferMapped = false; s.residencyTrims = {0}; s.nextResidencyTrim = 0;
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[2])) == S_OK);
+   CHECK(!resident(1) && !resident(4) && resident(0) && resident(2) && resident(3) && resident(5));
+   CHECK(!s.renderWaits && !s.render && s.order.empty());
+   // Evict's updated budget can require more than the first allocation.
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[1])) == S_OK);
+   CHECK(runtime_make_resident(&dev, resource_runtime(res[4])) == S_OK);
+   s.evictionBudget = 8192;
+   uint64_t released = 0;
+   CHECK(trim_residency_for_allocation(&dev, resource_runtime(res[2]), 4096, &released) == S_OK);
+   CHECK(released == 8192 && !resident(1) && !resident(4) && resident(2));
+   s.evictionBudget = 0; s.render = dev.submitted;
+   for (auto *r : res) { r->primary = false; table.pfnDestroyResource({&dev}, {r}); }
+   CHECK(!dev.resources && s.allocations.empty() && s.memory.empty() && !s.errors && !s.renderWaits);
+   cmd_destroy(&dev); runtime_device_destroy(&dev);
+   std::puts("PASS: MakeResident budget failures trim/retry, follow changing estimates, preserve protected backing, terminate irreducible OOM and balance paging references (CPU control)");
 }
 }
 
@@ -356,5 +427,6 @@ void offer_contracts()
    CHECK(dev.chunks.empty()); cmd_destroy(&dev); runtime_device_destroy(&dev);
    std::puts("PASS: runtime-owned private image/buffer backing, optimal PTE kind, distinct buffers, GPU-gated Offer, deduplication, paging-retry Reclaim, stale CPU remapping and real render retirement (CPU control)");
    trim_contracts();
+   budget_failure_contracts();
 #endif
 }

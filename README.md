@@ -7,6 +7,14 @@ Nintendo Switch Lite (HDH-001).
 The long-term goal is a complete native Vulkan implementation, verified
 with version-appropriate VK-GL-CTS coverage and physical GM20B tests.
 Windows desktop GPU acceleration is the current development milestone.
+
+**Current checkpoint (2026-11-16):** the WDDM2.0 UMD admission candidate failed
+before any landscape switch. The device has been restored to the preceding
+5b66bbec UMD with the retained KMD, ICD and platform settings; column scan is
+not accepted. Modern admission is withheld while its contracts are repaired.
+[Current handoff and evidence](tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)
+supersede the historical package milestones below.
+
 Active development uses the default
 [tgd3d-vulkan branch](https://github.com/ruje0504-2/mesa-switch-woa/tree/tgd3d-vulkan):
 **DWM → tgd3d → Vulkan/NVK → KMD → GM20B**. The native D3D WDDM UMD

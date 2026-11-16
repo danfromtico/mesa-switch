@@ -20,13 +20,13 @@ static void adapter_caps_contracts()
    D3D10_2DDI_ADAPTERFUNCS functions = {};
    adapter_fill_queries(&functions);
    UINT count = 0;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 3);
    UINT64 versions[5] = {0xfeed, 0, 0, 0, 0xbeef}; count = 1;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 4);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 3);
    CHECK(versions[0] == 0xfeed && versions[4] == 0xbeef);
    CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == S_OK);
    CHECK(versions[0] == D3D10_0_DDI_SUPPORTED && versions[2] == D3D10_0_7_DDI_SUPPORTED &&
-         versions[3] == D3DWDDM2_0_DDI_SUPPORTED && versions[4] == 0xbeef);
+         versions[3] == 0 && versions[4] == 0xbeef);
    CHECK(functions.pfnGetSupportedVersions(h, nullptr, versions) == E_INVALIDARG);
    struct { UINT before, caps, after; } out = {0xdeadbeef, 0xffffffff, 0xbeefdead};
    D3D10_2DDIARG_GETCAPS query = {D3D11DDICAPS_3DPIPELINESUPPORT, nullptr, &out.caps, sizeof(out.caps)};

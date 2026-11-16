@@ -411,9 +411,13 @@ static HRESULT create_owner(Device *dev, D3D10DDI_HRTRESOURCE runtime, RuntimeRe
    return S_OK;
 }
 
-HRESULT runtime_make_resident(RuntimeResource *p)
+HRESULT runtime_make_resident(Device *dev, RuntimeResource *p)
 {
    if (!p) return S_OK; // internal Vulkan memory has its own owner
+   if (!dev || p->device != dev->hRTDevice.handle || p->queue != dev->pagingQueue)
+      return E_INVALIDARG;
+   bool final_attempt = false;
+retry:
    AcquireSRWLockExclusive(&p->lock);
    HRESULT hr = S_OK;
    if (p->dead || !p->memory.allocation || p->offered) hr = DXGI_ERROR_INVALID_CALL;
@@ -423,8 +427,26 @@ HRESULT runtime_make_resident(RuntimeResource *p)
          resident.hPagingQueue = p->queue;
          resident.NumAllocations = 1;
          resident.AllocationList = &p->memory.allocation;
+         resident.Flags.CantTrimFurther = final_attempt;
          hr = p->callbacks.pfnMakeResidentCb(p->device, &resident);
          rt_trace(p, 2, hr, resident.PagingFenceValue);
+         if (hr == E_OUTOFMEMORY && !final_attempt) {
+            /* MakeResident is atomic on failure: no residency reference was
+             * acquired. Drop the owner lock before walking other resources
+             * (or retiring completed caches), then retry only after trimming.
+             * The adapter's 512 MiB ceiling is not this process's VidMm budget.
+             */
+            const uint64_t requested = resident.NumBytesToTrim;
+            ReleaseSRWLockExclusive(&p->lock);
+            uint64_t released = 0;
+            hr = trim_residency_for_allocation(dev, p, requested, &released);
+            if (FAILED(hr)) return hr;
+            final_attempt = released == 0;
+            /* Never force MustSucceed for an ordinary resource creation.
+             * An irreducible failure propagates to the caller; no GPU work
+             * may reference that backing until residency really succeeds. */
+            goto retry;
+         }
          if (SUCCEEDED(hr) || hr == E_PENDING) {
             p->residency_requested = true;
             p->residency_fence = resident.PagingFenceValue;
@@ -440,9 +462,10 @@ HRESULT runtime_make_resident(RuntimeResource *p)
    return hr;
 }
 
-HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes)
+HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes, uint64_t *remaining_budget)
 {
    *bytes = 0;
+   if (remaining_budget) *remaining_budget = 0;
    if (!p) return S_OK;
    AcquireSRWLockExclusive(&p->lock);
    HRESULT hr = S_OK;
@@ -459,6 +482,7 @@ HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes)
             p->resident = p->residency_requested = false;
             p->residency_fence = 0;
             *bytes = p->memory.size;
+            if (remaining_budget) *remaining_budget = evict.NumBytesToTrim;
          }
       }
    }
@@ -466,9 +490,9 @@ HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes)
    return hr;
 }
 
-static HRESULT make_ready(RuntimeResource *p, uint64_t bytes)
+static HRESULT make_ready(Device *dev, RuntimeResource *p, uint64_t bytes)
 {
-   HRESULT hr = runtime_make_resident(p);
+   HRESULT hr = runtime_make_resident(dev, p);
    if (FAILED(hr))
       return hr;
    p->memory.version = WSI_WIN32_MEMORY_VERSION;
@@ -510,7 +534,7 @@ HRESULT runtime_private_create(Device *dev, D3D10DDI_HRTRESOURCE resource,
    if (SUCCEEDED(hr)) {
       p->memory.allocation = info.hAllocation;
       p->associated = info.hAllocation != 0;
-      hr = make_ready(p, bytes);
+      hr = make_ready(dev, p, bytes);
    }
    if (FAILED(hr)) { runtime_destroy(p); return hr; }
    *out = p;
@@ -823,7 +847,7 @@ HRESULT runtime_shared_tiled_create(Device *dev, const Resource *res,
    if (SUCCEEDED(hr)) {
       p->memory.allocation = info.hAllocation;
       p->associated = info.hAllocation != 0;
-      hr = make_ready(p, request.bytes);
+      hr = make_ready(dev, p, request.bytes);
    }
    if (FAILED(hr)) { runtime_destroy(p); return hr; }
    *out = p;
@@ -880,7 +904,7 @@ HRESULT runtime_shared_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *des
    }
    p->associated = true;
    p->memory.allocation = info.hAllocation;
-   hr = make_ready(p, request.Buffer.bytes);
+   hr = make_ready(dev, p, request.Buffer.bytes);
    if (FAILED(hr)) {
       runtime_destroy(p);
       return hr;
@@ -936,7 +960,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
       if (primary)
          p->primary_layout = a;
       p->memory.allocation = info.hAllocation;
-      hr = make_ready(p, a.Buffer.bytes);
+      hr = make_ready(dev, p, a.Buffer.bytes);
       if (FAILED(hr)) {
          runtime_destroy(p);
          return hr;
@@ -965,7 +989,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
       if (FAILED(hr)) return hr;
       p->associated = true; p->tiled_shared = true; p->tiled_layout = metadata;
       p->memory.allocation = info.hAllocation;
-      hr = make_ready(p, expected.bytes);
+      hr = make_ready(dev, p, expected.bytes);
       if (FAILED(hr)) { runtime_destroy(p); return hr; }
       *description = metadata.description; *out = p;
       return S_OK;
@@ -1002,7 +1026,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
     * the producer's handles are never used. */
    p->associated = true;
    p->memory.allocation = info.hAllocation;
-   hr = make_ready(p, expected.Buffer.bytes);
+   hr = make_ready(dev, p, expected.Buffer.bytes);
    if (FAILED(hr)) {
       runtime_destroy(p);
       return hr;
@@ -1076,7 +1100,7 @@ HRESULT runtime_primary_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    }
    p->associated = true;
    p->memory.allocation = info.hAllocation;
-   hr = make_ready(p, request.Buffer.bytes);
+   hr = make_ready(dev, p, request.Buffer.bytes);
    if (FAILED(hr)) {
       runtime_destroy(p);
       return hr;

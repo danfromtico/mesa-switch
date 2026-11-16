@@ -188,7 +188,7 @@ void slice_release(Device *dev, Slice slice, uint64_t lastUse)
    if (!slice)
       return;
    if (lastUse > dev->submitted && SUCCEEDED(dev->lost) &&
-       FAILED(runtime_make_resident(slice.chunk->runtime)))
+       FAILED(runtime_make_resident(dev, slice.chunk->runtime)))
       TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
    if (lastUse && !sequence_done(dev, lastUse)) {
       dev->deferredSlices.push_back({slice, lastUse});

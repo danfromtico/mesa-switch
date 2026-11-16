@@ -93,7 +93,7 @@ HRESULT prepare_resource_residency(Device *dev)
 {
    for (Resource *res = dev->resources; res; res = res->next) {
       if (resource_last_use(res) <= dev->submitted) continue;
-      HRESULT hr = runtime_make_resident(resource_runtime(res));
+      HRESULT hr = runtime_make_resident(dev, resource_runtime(res));
       if (FAILED(hr)) return hr;
    }
    return S_OK;
@@ -113,6 +113,35 @@ HRESULT trim_memory(Device *dev)
       dev->freeCommands.clear();
    }
    return dev->lost;
+}
+
+HRESULT trim_residency_for_allocation(Device *dev, RuntimeResource *exclude,
+                                     uint64_t requested, uint64_t *released)
+{
+   *released = 0;
+   HRESULT hr = trim_memory(dev);
+   if (FAILED(hr)) return hr;
+   const uint64_t done = dev->completed();
+   if (FAILED(dev->lost)) return dev->lost;
+   /* A zero estimate does not mean unlimited budget. Exhaust eligible idle
+    * backing before the single CantTrimFurther attempt. No render wait or
+    * submission occurs here, including on resource-create/DDI callback paths.
+    */
+   const bool exhaust = requested == 0;
+   for (Resource *res = dev->resources; res; res = res->next) {
+      RuntimeResource *owner = resource_runtime(res);
+      if (!owner || owner == exclude || res->primary || resource_last_use(res) > done) continue;
+      bool mapped = res->bufferMapped;
+      for (const auto &map : res->maps) mapped |= map.mapped;
+      if (mapped) continue;
+      uint64_t bytes = 0, remaining = 0;
+      hr = runtime_evict(owner, &bytes, &remaining);
+      if (FAILED(hr)) return residency_result(dev, hr);
+      *released += bytes;
+      requested = std::max(requested - std::min(requested, bytes), remaining);
+      if (!exhaust && !requested) break;
+   }
+   return S_OK;
 }
 
 HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args)
@@ -137,10 +166,10 @@ HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args)
       for (const auto &map : res->maps) mapped |= map.mapped;
       if (mapped || use > done || res->primary) continue;
       if (!(args->TrimFlags.PeriodicTrim && use <= cutoff) && !budget) continue;
-      uint64_t bytes = 0;
-      hr = runtime_evict(resource_runtime(res), &bytes);
+      uint64_t bytes = 0, remaining = 0;
+      hr = runtime_evict(resource_runtime(res), &bytes, &remaining);
       if (FAILED(hr)) return residency_result(dev, hr);
-      budget -= std::min(budget, bytes);
+      budget = std::max(budget - std::min(budget, bytes), remaining);
    }
    /* Live/in-flight and scanout backing can exceed a requested trim amount.
     * Preserve it; never pretend that a render fence completed to meet budget. */

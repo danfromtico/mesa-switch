@@ -573,8 +573,10 @@ HRESULT runtime_private_create(Device *dev, D3D10DDI_HRTRESOURCE resource,
                                 uint64_t bytes, RuntimeResource **out);
 bool runtime_requires_resource_lifetime(const RuntimeResource *resource);
 bool runtime_is_offered(const RuntimeResource *resource);
-HRESULT runtime_make_resident(RuntimeResource *resource);
-HRESULT runtime_evict(RuntimeResource *resource, uint64_t *bytes);
+HRESULT runtime_make_resident(Device *dev, RuntimeResource *resource);
+HRESULT runtime_evict(RuntimeResource *resource, uint64_t *bytes, uint64_t *remaining_budget = nullptr);
+HRESULT trim_residency_for_allocation(Device *dev, RuntimeResource *exclude,
+                                     uint64_t requested, uint64_t *released);
 HRESULT runtime_offer(Device *dev, RuntimeResource *const *resources, UINT count,
                        D3DDDI_OFFER_PRIORITY priority);
 HRESULT runtime_reclaim(Device *dev, RuntimeResource *const *resources, UINT count, BOOL *discarded);

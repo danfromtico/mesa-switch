@@ -4,9 +4,12 @@
 `tgd3d`，DLL 为 `TegraGpuD3DVk.dll`；Zink 的 `TegraGpuD3D.dll` 和注册入口
 保持独立。构建开启不等于 Windows 已切换到这个 UMD。
 
-当前源码可协商 **WDDM2.0 UMD／DXGI1.4 MPO1**，保留既有D3D10管线级别；这与KMD的
-WDDM2.6版本是不同接口。新路径使用类型匹配的核心层上下文创建、共享数组和驻留缩减。
-当前实机仍加载5b66bbec UMD，双向GPU Fence开启，登录约5秒后启用；新接口候选尚待安装。
+**WDDM2.0 UMD／DXGI1.4 MPO1 候选本轮实机失败，已撤下默认接口声明。** 新实现保留供修正和
+控制验证；KMD仍为WDDM2.6，不能将两个版本号混为一谈。`0b9b7044`候选在切换方向之前即黑屏、
+鼠标时隐时现，DWM重建。06:31 UTC已核对恢复5b66bbec UMD、Code0和原ICD／KMD，清理候选工具。
+双向GPU Fence、登录约5秒后启用及平台设置保持。恢复实屏尚未另行验收。
+静态审计已修正MakeResident超预算后缺少裁减／重试的问题，ARM64/x64构建及本地CPU控制通过；
+此补丁未安装，尚不能认定为黑屏根因。详见[上下文／驻留审计](../../../tegra-x1-wddm/docs/WDDM2_CONTEXT_RESIDENCY_AUDIT_20261116.md)。
 这不是新Feature Level或完整D3D10一致性认证，MSAA、buffer RTV、UAV／视频仍有缺口。
 Tegra DC列扫描和vkcube仍待验收，设备与产物的最新状态以
 [交接记录](../../../tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)为准。

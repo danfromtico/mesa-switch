@@ -230,7 +230,7 @@ void storage_destroy(Device *dev, ImageStorage &storage, bool immediate)
 {
    const uint64_t seq = immediate ? 0 : storage.lastUse;
    if (seq > dev->submitted && SUCCEEDED(dev->lost) &&
-       FAILED(runtime_make_resident(storage.runtime)))
+       FAILED(runtime_make_resident(dev, storage.runtime)))
       TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
    /* Rotation leaves cached views in other logical resources. Retire all
     * views of this backing before its image, including already-deferred ones. */
