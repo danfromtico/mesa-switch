@@ -226,6 +226,7 @@ struct tg_nvdec {
     /* Decoder-session state. Reference motion/history data must not move
      * with per-picture bitstream size or command-arena growth. */
     struct tg_nvdec_dma scratch;
+    uint32_t scratch_coded_width, scratch_coded_height;
     size_t arena_used;
 
     uint32_t fw_version;

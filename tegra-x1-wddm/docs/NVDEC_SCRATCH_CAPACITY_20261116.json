@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-16T20:09:17.052544+00:00",
+  "state": "Progressive H264 scratch capacity corrected locally; no native decode performed",
+  "source": {
+    "base": "45df367b110b287a29c956ca1903d04d905e57ac",
+    "files": {
+      "src/nouveau/nvdec/nvdec.h": "f7a8dcf3fbeaec80b04031d40db1477b91b764c56becd86d387848813654cf47",
+      "src/nouveau/nvdec/nvdec_engine.c": "50c921f591579713244e07c9b8f227b5fc925aaf61b48911aabd4fce1287f824",
+      "src/nouveau/nvdec/nvdec_fw.c": "56b90823837f75b3d4ac395460c513b03222b054e96d2cba2585b50a7e3d5a29",
+      "tegra-x1-wddm/tests/test_nvdec.c": "700997d449a4754ec3d83a2123fe5ea8ff172260350d52018189c4573dc70c98"
+    },
+    "code_patch_sha256": "332719bbbbe53497e1958665e77edf713638db46b8841b645a04c3a3b9650213"
+  },
+  "problem": {
+    "prior_coloc_bytes": 524288,
+    "admitted_indices": "CurrColIdx and DPB col_idx directly use surface slots0..16, including sparse indices.",
+    "progressive_720p": {
+      "coded_width": 1280,
+      "coded_height": 720,
+      "width_mbs": 80,
+      "height_mbs": 45,
+      "coloc_stride_bytes": 235520,
+      "coloc_slots": 17,
+      "coloc_bytes": 4003840,
+      "history_bytes": 61440,
+      "mbhist_bytes": 8448,
+      "total_workspace_bytes": 4073728
+    },
+    "consequence": "The prior fixed coloc capacity does not cover admitted720p indices. Slot2 onward can overlap the following history region under the pinned NVK layout; this is a local contract finding, not a reproduced native fault.",
+    "native_observed": false
+  },
+  "changes": [
+    "Derive progressive coloc stride from coded macroblock dimensions and allocate all17 admitted surface indices, independent of the current DPB count. Derive history and macroblock-history extents from coded width.",
+    "Keep command methods and picture-config sizes consistent with the allocated workspace; preserve256-byte method alignment and512-byte history sizing.",
+    "Retain the workspace throughout the decoder session and command-arena changes. Reject changed coded geometry before any allocation/submit until an explicit safe close/reset clears the layout.",
+    "A failed cancel keeps workspace and its geometry; only successful quiescence permits retirement and later reuse with another geometry.",
+    "No additional profile, resolution capability, DDI or hardware path is enabled. Existing frontend remains720p-only."
+  ],
+  "reference": {
+    "repo": "https://gitlab.freedesktop.org/mesa/mesa",
+    "mirror": "https://chromium.googlesource.com/external/gitlab.freedesktop.org/mesa/mesa",
+    "commit": "684c1b339bddbed6f11af93161da1c1bba77edb1",
+    "path": "src/nouveau/vulkan/rust/video/decode/h264.rs",
+    "url": "https://chromium.googlesource.com/external/gitlab.freedesktop.org/mesa/mesa/+/684c1b339bddbed6f11af93161da1c1bba77edb1/src/nouveau/vulkan/rust/video/decode/h264.rs?format=TEXT",
+    "sha256": "d89059e1db123a320f2133df3010893f0ef19befdbfded97d0999866416535f1",
+    "license": "MIT; Copyright 2024 Collabora, Ltd and Red Hat, Inc.",
+    "scope": "Progressive H264 opaque workspace sizing; native B01 firmware execution remains unvalidated."
+  },
+  "license": "MIT; retained upstream copyright for the sizing adaptation. No merge from main or whole upstream implementation.",
+  "validation": {
+    "red": {
+      "build_exit": 0,
+      "run_exit": 1,
+      "failures": 7,
+      "test_sha256": "700997d449a4754ec3d83a2123fe5ea8ff172260350d52018189c4573dc70c98",
+      "log_sha256": "69e27257f568b14e4e16abe1e17a2fcfa3a3d8a3dd501e55af8460ae8211e7db",
+      "source_engine_sha256": "ae1a1f6c297cffb308a0e388d4de127f8ee9daef90f696e5f47663d7f8fefc01"
+    },
+    "green": {
+      "build_exit": 0,
+      "run_exit": 0,
+      "sanitizers": [
+        "ASan",
+        "UBSan"
+      ],
+      "exe_sha256": "fa6c5a87e02c68c79545ce18357cedc1e48bb134aa60399079fc7e54ee2ce7ed",
+      "log_sha256": "f7fc0944928da2855f1be50fc99a48f4cf7d07d74a2c279ac4edf59b0e1185df",
+      "source_sha256": {
+        "src/nouveau/nvdec/nvdec.h": "f7a8dcf3fbeaec80b04031d40db1477b91b764c56becd86d387848813654cf47",
+        "src/nouveau/nvdec/nvdec_engine.c": "50c921f591579713244e07c9b8f227b5fc925aaf61b48911aabd4fce1287f824",
+        "src/nouveau/nvdec/nvdec_fw.c": "56b90823837f75b3d4ac395460c513b03222b054e96d2cba2585b50a7e3d5a29",
+        "tegra-x1-wddm/tests/test_nvdec.c": "700997d449a4754ec3d83a2123fe5ea8ff172260350d52018189c4573dc70c98"
+      },
+      "coverage": [
+        "720p highest surface index16 with16reference entries and exact method-buffer extents",
+        "coded geometry change rejected before new allocation/submit",
+        "failed close retains workspace; explicit successful close allows640x360 visible/640x368 coded geometry",
+        "existing variable bitstream arena, allocation failure, firmware-address, status, timeout and failed-cancel retention controls"
+      ]
+    },
+    "arm64_objects": [
+      {
+        "source": "src/nouveau/nvdec/nvdec_sha256.c",
+        "exit": 0,
+        "source_sha256": "af82ac4dc6d08514b583916c2df8ccb44867ea5956f965d65584fe84f49ce96a",
+        "object_sha256": "4fa687be28d3305d43bcb67b88caca0fd6e0cce7b283eff7b6d2ada94dac78a0"
+      },
+      {
+        "source": "src/nouveau/nvdec/nvdec_fw.c",
+        "exit": 0,
+        "source_sha256": "56b90823837f75b3d4ac395460c513b03222b054e96d2cba2585b50a7e3d5a29",
+        "object_sha256": "81cd920610c00ce9e4458ce8e6706891f92ab09cdd268ca50081134032db4949"
+      },
+      {
+        "source": "src/nouveau/nvdec/nvdec_h264.c",
+        "exit": 0,
+        "source_sha256": "ca82c68e101fb61dc68bcfc440cdf73687aad0a895b58eac90809fa3ec18125b",
+        "object_sha256": "8d7f0f747ab426a4e822a83371ab319239fd3203d36cf53dc00b1306d381c3c3"
+      },
+      {
+        "source": "src/nouveau/nvdec/nvdec_engine.c",
+        "exit": 0,
+        "source_sha256": "50c921f591579713244e07c9b8f227b5fc925aaf61b48911aabd4fce1287f824",
+        "object_sha256": "c06f3929aef491ccdcd5757df79ef2f1f3a5e91d09ea6251e01cc75e4d8eda2f"
+      },
+      {
+        "source": "tegra-x1-wddm/windows/nvdec_backend.c",
+        "exit": 0,
+        "source_sha256": "1707e8ab134d5261e4d8b4aa99ba59b06ecc4bf690c0406d6a08efb8ccf725d1",
+        "object_sha256": "f2048f99aa3d14e9c09c9eb71fc5095c457bc30dba3e85bf0c1fd8dbcd203ef9"
+      },
+      {
+        "source": "tegra-x1-wddm/windows/probe.c",
+        "exit": 0,
+        "source_sha256": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
+        "object_sha256": "7aa77b32a74e74b3927f53d4e7299de9724cb252dd106cbc0c574d609b6580af"
+      }
+    ],
+    "scope": "Model-only controls and six real-WDK ARM64 objects /W4 /WX. No native firmware execution, decoded pixels or complete driver package is claimed."
+  },
+  "review": {
+    "status": "Pending Gemini4 Carbon High",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "retry_performed": false
+  },
+  "native": {
+    "device_commands_executed": false,
+    "installed": false,
+    "baseline_promoted": false,
+    "last_verified_baseline": "2026-11-16T18:12:24.0060013Z; E95/5b/95b restored with original ACPI",
+    "connection_record": "NVDEC_TRACKED_DMA_20261116.json"
+  },
+  "remaining": [
+    "Match the firmware selection and contract to B01/Noble, then verify real DMA route, power/clock ownership and firmware boot.",
+    "Connect coexisting kernel transport and real video-runtime path; CPU callbacks do not prove availability.",
+    "720p hardware output/reference checks, NV12/CSC/window chain and safe shutdown;1080p only afterward."
+  ]
+}

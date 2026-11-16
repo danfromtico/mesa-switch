@@ -362,6 +362,7 @@ enum tg_nvdec_result tg_nvdec_close(struct tg_nvdec *nvdec)
     }
     memset(&nvdec->arena, 0, sizeof(nvdec->arena));
     memset(&nvdec->scratch, 0, sizeof(nvdec->scratch));
+    nvdec->scratch_coded_width = nvdec->scratch_coded_height = 0;
     memset(&nvdec->firmware, 0, sizeof(nvdec->firmware));
     nvdec->arena_used = 0;
     nvdec->picture_index = 0;

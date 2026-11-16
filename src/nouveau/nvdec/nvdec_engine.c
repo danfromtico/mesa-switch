@@ -1,4 +1,5 @@
 /* SPDX-License-Identifier: MIT
+ * Copyright © 2024 Collabora, Ltd and Red Hat, Inc. (workspace sizing)
  *
  * NVDEC job submission, completion, timeout and cancellation.
  *
@@ -16,10 +17,6 @@
 
 #define NVDEC_CMD_BYTES      4096u
 #define NVDEC_STATUS_BYTES   4096u
-#define NVDEC_COLOC_BYTES    (512u * 1024u)
-#define NVDEC_HISTORY_BYTES  (256u * 1024u)
-#define NVDEC_MBHIST_BYTES   (32u * 1024u)
-#define NVDEC_SCRATCH_BYTES  (NVDEC_COLOC_BYTES + NVDEC_HISTORY_BYTES + NVDEC_MBHIST_BYTES)
 #define NVDEC_ARENA_OVERHEAD (NVDEC_CMD_BYTES + NVDEC_STATUS_BYTES + \
                               64u * 1024u)
 #define NVDEC_SUBMIT_TIMEOUT_MS 2000u
@@ -62,21 +59,36 @@ static uint64_t arena_bus(struct tg_nvdec *nvdec, const void *cpu)
                                         (const uint8_t *)nvdec->arena.cpu);
 }
 
-static bool scratch_reserve(struct tg_nvdec *nvdec)
+/* Progressive H.264 sizing follows Mesa NVK h264.rs at
+ * 684c1b339bddbed6f11af93161da1c1bba77edb1 (MIT). This decoder uses the
+ * surface index directly for CurrColIdx/col_idx, including sparse slots,
+ * so reserve all 17 indices rather than the current reference count.
+ * validate_pic has bounded both nonzero coded dimensions to 4096. */
+static void scratch_sizes(const struct tg_nvdec_h264_pic *pic,
+                          uint32_t *coloc, uint32_t *history, uint32_t *mbhist)
+{
+    uint32_t width_mbs = pic->coded_width / 16u;
+    uint32_t height_mbs = pic->coded_height / 16u;
+    size_t stride = align_up(align_up(height_mbs, 2u) * width_mbs * 64u - 63u,
+                             256u);
+    *coloc = (uint32_t)stride * TG_NVDEC_MAX_SURFACES;
+    *history = (uint32_t)align_up(width_mbs * 0x300u, 512u);
+    *mbhist = (uint32_t)align_up(width_mbs * 104u, 256u);
+}
+
+static bool scratch_reserve(struct tg_nvdec *nvdec, size_t bytes)
 {
     struct tg_nvdec_dma dma = {0};
 
     if (nvdec->scratch.cpu)
-        return true;
-    if (!nvdec->hal->dma_alloc(nvdec->hal->ctx, NVDEC_SCRATCH_BYTES, &dma))
+        return nvdec->scratch.size >= bytes;
+    if (!nvdec->hal->dma_alloc(nvdec->hal->ctx, bytes, &dma))
         return false;
-    if (!dma.cpu || dma.size < NVDEC_SCRATCH_BYTES) {
+    if (!dma.cpu || dma.size < bytes) {
         nvdec->hal->dma_free(nvdec->hal->ctx, &dma);
         return false;
     }
-    /* These sizes retain the selected upstream decoder's admission scope.
-     * This fixes lifetime, not the unverified maximum DPB capacity. */
-    memset(dma.cpu, 0, NVDEC_SCRATCH_BYTES);
+    memset(dma.cpu, 0, bytes);
     if (nvdec->hal->dma_sync)
         nvdec->hal->dma_sync(nvdec->hal->ctx, &dma, true);
     nvdec->scratch = dma;
@@ -166,6 +178,7 @@ enum tg_nvdec_result tg_nvdec_submit_h264(struct tg_nvdec *nvdec,
     void *config, *slice_offsets, *status_buf;
     uint8_t *bitstream;
     size_t need, config_size;
+    uint32_t coloc_bytes, history_bytes, mbhist_bytes;
     uint32_t words, observed = 0, syncpt_value = 0;
     enum tg_nvdec_result r;
 
@@ -186,6 +199,11 @@ enum tg_nvdec_result tg_nvdec_submit_h264(struct tg_nvdec *nvdec,
         return tg_nvdec_set_error(nvdec, r, "H.264 picture parameters are invalid");
     if ((r = validate_slices(job)) != TG_NVDEC_OK)
         return tg_nvdec_set_error(nvdec, r, "slice data or offsets are invalid");
+    if (nvdec->scratch.cpu &&
+        (nvdec->scratch_coded_width != job->pic.coded_width ||
+         nvdec->scratch_coded_height != job->pic.coded_height))
+        return tg_nvdec_set_error(nvdec, TG_NVDEC_ERR_STATE,
+                                  "coded size change requires decoder reset");
     if (job->bitstream_size > 64u * 1024u * 1024u)
         return tg_nvdec_set_error(nvdec, TG_NVDEC_ERR_SLICE,
                                   "bitstream is larger than the 64 MiB limit");
@@ -196,9 +214,12 @@ enum tg_nvdec_result tg_nvdec_submit_h264(struct tg_nvdec *nvdec,
     if (!arena_reserve(nvdec, need))
         return tg_nvdec_set_error(nvdec, TG_NVDEC_ERR_NO_MEMORY,
                                   "cannot allocate the NVDEC command arena");
-    if (!scratch_reserve(nvdec))
+    scratch_sizes(&job->pic, &coloc_bytes, &history_bytes, &mbhist_bytes);
+    if (!scratch_reserve(nvdec, (size_t)coloc_bytes + history_bytes + mbhist_bytes))
         return tg_nvdec_set_error(nvdec, TG_NVDEC_ERR_NO_MEMORY,
                                   "cannot allocate the NVDEC session workspace");
+    nvdec->scratch_coded_width = job->pic.coded_width;
+    nvdec->scratch_coded_height = job->pic.coded_height;
     nvdec->arena_used = 0;
 
     cmd = arena_take(nvdec, NVDEC_CMD_BYTES, 256);
@@ -213,8 +234,8 @@ enum tg_nvdec_result tg_nvdec_submit_h264(struct tg_nvdec *nvdec,
     if (!tg_nvdec_build_pic_config(config, config_size, &job->pic,
                                    (uint32_t)job->bitstream_size,
                                    job->slice_count,
-                                   NVDEC_HISTORY_BYTES / 256u,
-                                   NVDEC_MBHIST_BYTES))
+                                   history_bytes / 256u,
+                                   mbhist_bytes))
         return tg_nvdec_set_error(nvdec, TG_NVDEC_ERR_ARGUMENT,
                                   "NVIDIA H.264 picture setup rejected the picture");
     memcpy(bitstream, job->bitstream, job->bitstream_size);
@@ -226,13 +247,13 @@ enum tg_nvdec_result tg_nvdec_submit_h264(struct tg_nvdec *nvdec,
     bufs.bitstream = arena_bus(nvdec, bitstream);
     bufs.slice_offsets = arena_bus(nvdec, slice_offsets);
     bufs.coloc = nvdec->scratch.bus;
-    bufs.history = nvdec->scratch.bus + NVDEC_COLOC_BYTES;
-    bufs.mbhist = bufs.history + NVDEC_HISTORY_BYTES;
+    bufs.history = nvdec->scratch.bus + coloc_bytes;
+    bufs.mbhist = bufs.history + history_bytes;
     bufs.status = arena_bus(nvdec, status_buf);
     bufs.stream_len = (uint32_t)job->bitstream_size;
     bufs.slice_count = job->slice_count;
-    bufs.history_size_256 = NVDEC_HISTORY_BYTES / 256u;
-    bufs.mbhist_size = NVDEC_MBHIST_BYTES;
+    bufs.history_size_256 = history_bytes / 256u;
+    bufs.mbhist_size = mbhist_bytes;
     bufs.picture_index = nvdec->picture_index;
     bufs.syncpt_id = nvdec->syncpt_id;
     for (uint32_t i = 0; i < TG_NVDEC_MAX_SURFACES; i++) {

@@ -667,6 +667,86 @@ static int test_bad_firmware_paths(void)
     return 0;
 }
 
+static int test_workspace_capacity(const char *fw_path)
+{
+    struct model *m = model_new();
+    struct tg_nvdec nvdec;
+    struct tg_nvdec_hal hal = model_hal;
+    struct tg_nvdec_h264_job job;
+    struct tg_nvdec_status status;
+    struct tg_nvdec_surface surfaces[TG_NVDEC_MAX_SURFACES];
+    uint8_t bits[64], sha[32];
+    uint32_t offsets[2];
+    size_t size = 0;
+    uint8_t *fw = read_file(fw_path, &size);
+
+    CHECK(m && fw);
+    if (!m || !fw) {
+        if (m) model_free(m);
+        free(fw);
+        return 1;
+    }
+    hal.ctx = m;
+    tg_nvdec_init(&nvdec, &hal, 7);
+    tg_nvdec_sha256(fw, size, sha);
+    CHECK(tg_nvdec_load_firmware(&nvdec, fw, size, sha) == TG_NVDEC_OK);
+    CHECK(tg_nvdec_boot(&nvdec) == TG_NVDEC_OK);
+    make_job(&job, bits, offsets, surfaces);
+    job.pic.width = job.pic.coded_width = 1280;
+    job.pic.height = job.pic.coded_height = 720;
+    job.pic.pitch_luma = job.pic.pitch_chroma = 1280;
+    job.pic.curr_slot = 16;
+    job.pic.dpb_count = 16;
+    for (uint32_t i = 0; i < TG_NVDEC_MAX_SURFACES; i++) {
+        job.surfaces[i].valid = true;
+        job.surfaces[i].slot = i;
+        job.surfaces[i].luma_bus = 0x90000000ull + i * 0x200000ull;
+        job.surfaces[i].chroma_bus = job.surfaces[i].luma_bus + 0x100000u;
+        if (i < 16) job.pic.dpb[i].slot = i;
+    }
+    CHECK(tg_nvdec_submit_h264(&nvdec, &job, &status) == TG_NVDEC_OK);
+    CHECK(status.mbs_correctly_decoded == 3600);
+    /* Pinned upstream progressive H.264 layout: 80 x 45 macroblocks,
+     * even-height coloc stride 235520 bytes, all indices 0..16 admitted.
+     * Independent expected extents catch the former fixed 512KiB overlap.
+     * This checks method-address/layout logic, not firmware execution. */
+    CHECK(m->scratch_bus[1] - m->scratch_bus[0] == 4003840u);
+    CHECK(m->scratch_bus[2] - m->scratch_bus[1] == 61440u);
+    CHECK(nvdec.scratch.size == 4073728u);
+    CHECK((uint64_t)m->scratch_bus[2] + 8448u ==
+          nvdec.scratch.bus + nvdec.scratch.size);
+    {
+        uint64_t submits = nvdec.stats.submits;
+        uint32_t frees = m->frees;
+        size_t used = m->mem_used;
+        struct tg_nvdec_dma saved = nvdec.scratch;
+        /* Changing the geometry would reinterpret retained reference-MV
+         * strides. Require an explicit close/reset before another size. */
+        job.pic.width = job.pic.coded_width = 1264;
+        CHECK(tg_nvdec_submit_h264(&nvdec, &job, &status) == TG_NVDEC_ERR_STATE);
+        CHECK(nvdec.stats.submits == submits && m->mem_used == used && m->frees == frees);
+        CHECK(nvdec.scratch.cpu == saved.cpu && nvdec.scratch.bus == saved.bus);
+        job.pic.width = job.pic.coded_width = 1280;
+        CHECK(tg_nvdec_submit_h264(&nvdec, &job, &status) == TG_NVDEC_OK);
+        m->fail_cancel = true;
+        CHECK(tg_nvdec_close(&nvdec) == TG_NVDEC_ERR_SUBMIT);
+        CHECK(nvdec.scratch.cpu == saved.cpu && m->frees == frees);
+        m->fail_cancel = false;
+    }
+    CHECK(tg_nvdec_close(&nvdec) == TG_NVDEC_OK);
+    CHECK(tg_nvdec_load_firmware(&nvdec, fw, size, sha) == TG_NVDEC_OK);
+    CHECK(tg_nvdec_boot(&nvdec) == TG_NVDEC_OK);
+    job.pic.width = job.pic.coded_width = 640;
+    job.pic.height = 360;
+    job.pic.coded_height = 368;
+    CHECK(tg_nvdec_submit_h264(&nvdec, &job, &status) == TG_NVDEC_OK);
+    CHECK(nvdec.scratch.size == 1079552u);
+    CHECK(tg_nvdec_close(&nvdec) == TG_NVDEC_OK);
+    free(fw);
+    model_free(m);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     if (argc != 2) {
@@ -677,6 +757,7 @@ int main(int argc, char **argv)
     test_firmware(argv[1]);
     test_boot_timeout(argv[1]);
     test_submit(argv[1]);
+    test_workspace_capacity(argv[1]);
     test_bad_firmware_paths();
     if (failures) {
         fprintf(stderr, "NVDEC host model: %d failure(s)\n", failures);
