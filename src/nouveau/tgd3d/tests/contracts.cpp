@@ -1615,6 +1615,7 @@ static void presentation_rotation_contract()
 }
 
 void runtime_contracts();
+void runtime_queue_contracts();
 void resource_creation_contracts();
 void shader_cache_contracts(bool child);
 
@@ -1703,6 +1704,7 @@ int main(int argc, char **argv)
       "clip(sum.a-threshold); return sum;}", "tgd3d-loop.spv");
    presentation_rotation_contract();
    runtime_contracts();
+   runtime_queue_contracts();
    resource_creation_contracts();
    offer_contracts();
    shader_cache_contracts(false);

@@ -356,6 +356,11 @@ win_import_wsi_memory(struct nvkmd_dev *dev, struct vk_object_base *log,
    if (!wsi_win32_memory_copy(&owner, memory))
       return vk_error(log, VK_ERROR_INVALID_EXTERNAL_HANDLE);
    memory = &owner;
+   const struct wsi_win32_runtime *runtime = &nvkmd_windows_dev(dev)->runtime;
+   if ((memory->version == WSI_WIN32_MEMORY_RUNTIME_VERSION &&
+        (!runtime->version || memory->runtime_device != runtime->device_cookie)) ||
+       (memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION && runtime->version))
+      return vk_error(log, VK_ERROR_INVALID_EXTERNAL_HANDLE);
    if (
        !memory->allocation || memory->adapter_luid != luid ||
        !size || size > memory->size || (memory->size & (TG_KMT_PAGE_SIZE - 1)) ||
@@ -389,7 +394,21 @@ uint32_t
 nvkmd_windows_written_allocation(struct nvkmd_mem *base)
 {
    const struct nvkmd_windows_mem *mem = container_of(base, struct nvkmd_windows_mem, base);
-   return mem->alias.allocation;
+   return mem->wsi.version == WSI_WIN32_MEMORY_RUNTIME_VERSION ? mem->wsi.allocation : mem->alias.allocation;
+}
+
+VkResult
+nvkmd_windows_set_runtime(struct nvkmd_dev *base, const struct wsi_win32_runtime *runtime)
+{
+   struct nvkmd_windows_dev *dev = nvkmd_windows_dev(base);
+   if (dev->runtime.version || !runtime || runtime->version != WSI_WIN32_RUNTIME_VERSION ||
+       !runtime->context || !runtime->device_cookie || !runtime->create_context ||
+       !runtime->destroy_context || !runtime->submit || !runtime->gpu_sync ||
+       !runtime->create_fence || !runtime->retain_fence || !runtime->release_fence ||
+       !runtime->wait_cpu || !runtime->signal_cpu || !runtime->quiesce)
+      return VK_ERROR_INITIALIZATION_FAILED;
+   dev->runtime = *runtime;
+   return VK_SUCCESS;
 }
 
 VkResult

@@ -136,6 +136,36 @@ int main(void)
       win_destroy_device(base);
       CHECK(!seen.refs && !seen.aliases);
    }
+   /* Runtime-owned submission must use the original allocation, without
+    * calling ShareObjects or reopening an NT resource on the allocator. */
+   for (unsigned mode = 0; mode < 4; ++mode) {
+      memset(&seen, 0, sizeof(seen));
+      struct nvkmd_dev *base = NULL;
+      CHECK(win_create_device(&pdev.base, NULL, &base) == VK_SUCCESS);
+      struct nvkmd_windows_dev *dev = nvkmd_windows_dev(base);
+      dev->runtime.version = mode == 1 ? 0 : WSI_WIN32_RUNTIME_VERSION;
+      dev->runtime.device_cookie = &seen;
+      struct wsi_win32_memory owner = {
+         .version = WSI_WIN32_MEMORY_RUNTIME_VERSION,
+         .allocation = 60, .adapter_luid = 0x55, .size = sizeof(backing),
+         .context = &seen.refs, .retain = retain, .release = release,
+         .map_gpu = map_gpu, .free_gpu = free_gpu, .map_cpu = map_cpu, .unmap_cpu = unmap_cpu,
+         .runtime_device = mode == 2 ? (void *)&pdev : (void *)&seen,
+      };
+      if (mode == 3) owner.kernel_resource = 90;
+      struct nvkmd_mem *memory = NULL;
+      VkResult result = nvkmd_dev_import_wsi_win32_memory(base, NULL, &owner, sizeof(backing),
+                                                        4096, 0xfe, NVKMD_MEM_CAN_MAP, &memory);
+      if (mode) CHECK(result == VK_ERROR_INVALID_EXTERNAL_HANDLE && !memory && !seen.refs);
+      else {
+         CHECK(result == VK_SUCCESS && nvkmd_windows_written_allocation(memory) == 60);
+         CHECK(seen.refs == 2 && seen.maps == 1);
+         nvkmd_mem_unref(memory);
+      }
+      CHECK(!seen.opens && !seen.aliases && !seen.refs);
+      win_destroy_device(base);
+   }
    puts("PASS: production NVK owner import v1/v2, alias acknowledgement, mapping failures, retained failed cleanup and device teardown (KMT mocked, no GPU)");
+   puts("PASS: runtime owner v3 uses same-device allocation without NT export; absent/foreign transport and mixed ownership rejected (CPU control)");
    return 0;
 }

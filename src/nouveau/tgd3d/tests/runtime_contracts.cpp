@@ -991,6 +991,11 @@ static void displayable_owner_contract()
    wsi_win32_memory copied;
    CHECK(wsi_win32_memory_copy(&copied, reinterpret_cast<wsi_win32_memory *>(guard + 4096 - prefix)) &&
          copied.allocation == 99 && !copied.kernel_resource && !copied.reserved);
+   constexpr size_t v2_size = offsetof(wsi_win32_memory, runtime_device);
+   old.version = WSI_WIN32_MEMORY_DISPLAYABLE_VERSION; old.kernel_resource = 91;
+   memcpy(guard + 4096 - v2_size, &old, v2_size);
+   CHECK(wsi_win32_memory_copy(&copied, reinterpret_cast<wsi_win32_memory *>(guard + 4096 - v2_size)) &&
+         copied.allocation == 99 && copied.kernel_resource == 91 && !copied.runtime_device);
    CHECK(VirtualFree(guard, 0, MEM_RELEASE));
 
    Adapter adapter; Device producer, consumer;
@@ -1050,8 +1055,33 @@ static void displayable_owner_contract()
    CHECK(runtime_bind_image(&consumer, c, (VkImage)2, &memory, &written) == S_OK && written == 0x161);
    consumer.vk.FreeMemory(consumer.vkdev, memory, nullptr);
    CHECK(runtime_destroy(c) == S_OK && runtime_destroy(p) == S_OK);
+   producer.runtimeQueueAccepted = true;
+   producer.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
+      HRESULT hr = displayableAllocateBase(h, a); a->hKMResource = 0; return hr;
+   };
+   producer.vk.AllocateMemory = [](VkDevice device, const VkMemoryAllocateInfo *a,
+                                  const VkAllocationCallbacks *callbacks, VkDeviceMemory *memory) -> VkResult {
+      const auto *info = static_cast<const wsi_memory_allocate_info *>(a->pNext);
+      CHECK(info->win32_memory->version == WSI_WIN32_MEMORY_RUNTIME_VERSION &&
+            !info->win32_memory->kernel_resource && info->win32_memory->runtime_device == rt_device(0));
+      VkResult result = displayableImportBase(device, a, callbacks, memory);
+      if (result == VK_SUCCESS && displayableReply)
+         *info->win32_written_allocation = info->win32_memory->allocation + (displayableReply == 1 ? 0 : 1);
+      return result;
+   };
+   CHECK(runtime_shared_create(&producer, &desc, {rt_resource(0)}, &p, &pitch) == S_OK);
+   for (displayableReply = 0; displayableReply <= 2; ++displayableReply) {
+      HRESULT hr = runtime_bind_image(&producer, p, (VkImage)1, &memory, &written);
+      if (displayableReply == 1) {
+         CHECK(hr == S_OK && written == 0x60 && memory);
+         producer.vk.FreeMemory(producer.vkdev, memory, nullptr);
+      } else CHECK(hr == DXGI_ERROR_UNSUPPORTED && !written && !memory && !owners[0]);
+   }
+   CHECK(runtime_destroy(p) == S_OK);
+   producer.runtimeQueueAccepted = false;
+   displayableReply = 1;
    runtime_device_destroy(&consumer); runtime_device_destroy(&producer);
-   std::puts("PASS: guarded v1 ABI, v2 displayable owner handshake, foreign/ignored acknowledgement rejection, shared reopen and residency protection");
+   std::puts("PASS: guarded v1/v2 ABI, v2 alias/v3 runtime owner handshake without kernel-resource export, foreign/ignored acknowledgement rejection, shared reopen and residency protection");
 }
 
 void runtime_contracts()

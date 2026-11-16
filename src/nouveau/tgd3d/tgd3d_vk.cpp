@@ -312,7 +312,8 @@ HRESULT VulkanAdapter::open(uint64_t luid)
 
 #undef FAIL
 
-VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue *queue) const
+VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue *queue,
+                                     const wsi_win32_runtime *runtime) const
 {
    FeatureChain have, want;
    have.link(caps.instanceDivisor, caps.formatA4B4G4R4);
@@ -374,6 +375,12 @@ VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue
    queue_info.pQueuePriorities = &priority;
    VkDeviceCreateInfo info = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
    info.pNext = &want.core;
+   bool accepted = false;
+   wsi_win32_runtime_device_info owner = {VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_DEVICE_INFO_MESA};
+   if (runtime) {
+      owner.pNext = info.pNext; owner.runtime = runtime; owner.accepted = &accepted;
+      info.pNext = &owner;
+   }
    info.queueCreateInfoCount = 1;
    info.pQueueCreateInfos = &queue_info;
    info.enabledExtensionCount = (uint32_t)extensions.size();
@@ -389,6 +396,8 @@ VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue
    TGD3D_VK_OPTIONAL_DEVICE_FUNCS(X)
 #undef X
    if (nvk && !api->ImportSemaphoreWin32HandleKHR)
+      result = VK_ERROR_INITIALIZATION_FAILED;
+   if (runtime && !accepted)
       result = VK_ERROR_INITIALIZATION_FAILED;
    if (result != VK_SUCCESS) {
       if (api->DestroyDevice)

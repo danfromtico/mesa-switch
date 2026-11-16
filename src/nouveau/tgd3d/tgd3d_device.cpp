@@ -62,10 +62,17 @@ static void APIENTRY CheckMultisampleQualityLevels(D3D10DDI_HDEVICE, DXGI_FORMAT
    *levels = samples == 1 ? 1 : 0;      /* multisampling is not implemented */
 }
 
-static void device_teardown(Device *dev)
+static bool device_teardown(Device *dev)
 {
+   if (dev->runtimeQueue) {
+      if (dev->vkdev && dev->fence && dev->cmdPool) flush(dev, false);
+      if (FAILED(runtime_queue_quiesce(dev))) {
+         trace_message("runtime context teardown failed; retaining GPU objects until process cleanup");
+         return false;
+      }
+   }
    if (dev->vkdev) {
-      if (dev->fence && dev->cmdPool) {
+      if (!dev->runtimeQueue && dev->fence && dev->cmdPool) {
          flush(dev, false);
          if (SUCCEEDED(dev->lost) && dev->submitted) {
             if (FAILED(wait_sequence(dev, dev->submitted, TGD3D_WAIT_DESTROY)))
@@ -85,15 +92,16 @@ static void device_teardown(Device *dev)
       dev->vk.DestroyDevice(dev->vkdev, nullptr);
       dev->vkdev = VK_NULL_HANDLE;
    }
+   runtime_queue_finish(dev);
    runtime_device_destroy(dev);
+   return true;
 }
 
 static void APIENTRY DestroyDevice(D3D10DDI_HDEVICE hDevice)
 {
    Device *dev = D(hDevice);
    trace(TGD3D_TRACE_DESTROY_DEVICE, dev->lost, dev->submitted, dev->completed());
-   device_teardown(dev);
-   dev->~Device();
+   if (device_teardown(dev)) dev->~Device();
 }
 
 void device_fill_table(D3D10DDI_DEVICEFUNCS *table)
@@ -173,9 +181,14 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    if (SUCCEEDED(hr)) {
       stage = 2;
       trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
-      const VkResult result = adapter->vk.createDevice(&dev->vkdev, &dev->vk, &dev->queue);
-      hr = result == VK_SUCCESS ? S_OK :
-           result == VK_ERROR_OUT_OF_HOST_MEMORY ? E_OUTOFMEMORY : DXGI_ERROR_UNSUPPORTED;
+      if (modern && dev->nvk) hr = runtime_queue_prepare(dev, &dev->runtimeTransport);
+      if (SUCCEEDED(hr)) {
+         const VkResult result = adapter->vk.createDevice(&dev->vkdev, &dev->vk, &dev->queue,
+            dev->runtimeQueue ? &dev->runtimeTransport : nullptr);
+         hr = result == VK_SUCCESS ? S_OK :
+              result == VK_ERROR_OUT_OF_HOST_MEMORY ? E_OUTOFMEMORY : DXGI_ERROR_UNSUPPORTED;
+         dev->runtimeQueueAccepted = dev->runtimeQueue && SUCCEEDED(hr);
+      }
       trace(TGD3D_TRACE_DEVICE_STAGE, hr, stage, identity);
    }
    if (SUCCEEDED(hr)) {
@@ -198,8 +211,7 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    }
    if (FAILED(hr)) {
       trace(TGD3D_TRACE_CREATE_DEVICE, hr, args->Interface, stage);
-      device_teardown(dev);
-      dev->~Device();
+      if (device_teardown(dev)) dev->~Device();
       return hr;
    }
    /* This consumer requests Vulkan 1.3 and does not enable maintenance5.

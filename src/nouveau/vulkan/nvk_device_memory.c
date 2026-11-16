@@ -299,7 +299,7 @@ nvk_allocate_memory(VkDevice device,
 #endif
    if (is_wsi_win32_import) {
 #ifdef _WIN32
-      if (wsi_info->win32_memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION &&
+      if (wsi_info->win32_memory->version >= WSI_WIN32_MEMORY_DISPLAYABLE_VERSION &&
           !wsi_info->win32_written_allocation) {
          result = vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
          goto fail_alloc;
@@ -458,7 +458,7 @@ nvk_allocate_memory(VkDevice device,
 #ifdef _WIN32
    if (is_wsi_win32_import && wsi_info->win32_imported)
       *wsi_info->win32_imported = true;
-   if (is_wsi_win32_import && wsi_info->win32_memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION)
+   if (is_wsi_win32_import && wsi_info->win32_memory->version >= WSI_WIN32_MEMORY_DISPLAYABLE_VERSION)
       *wsi_info->win32_written_allocation = nvkmd_windows_written_allocation(mem->mem);
 #endif
 

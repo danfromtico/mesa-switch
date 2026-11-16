@@ -99,7 +99,17 @@ HRESULT sync_create(Device *dev)
       create.Info.Flags.Shared = 1;
       create.Info.Flags.NtSecuritySharing = 1;
       create.Info.MonitoredFence.EngineAffinity = 1;
-      HRESULT hr = dev->kt.pfnCreateSynchronizationObject2Cb(dev->hRTDevice.handle, &create);
+      HRESULT hr;
+      if (dev->runtimeQueueAccepted) {
+         VkResult result = dev->runtimeTransport.create_fence(dev->runtimeTransport.context, 0,
+            &dev->runtimeFenceOwners[i]);
+         hr = result == VK_SUCCESS ? S_OK : result == VK_ERROR_OUT_OF_HOST_MEMORY ? E_OUTOFMEMORY : E_FAIL;
+         create.hSyncObject = dev->runtimeFenceOwners[i].handle;
+         create.Info.MonitoredFence.FenceValueCPUVirtualAddress =
+            const_cast<UINT64 *>(dev->runtimeFenceOwners[i].value);
+      } else {
+         hr = dev->kt.pfnCreateSynchronizationObject2Cb(dev->hRTDevice.handle, &create);
+      }
       D3DKMT_HANDLE &object = i ? dev->runtimeIngress : dev->runtimeFence;
       object = create.hSyncObject;
       trace(TGD3D_TRACE_RUNTIME_CONTEXT, hr, 3, object != 0);
@@ -120,6 +130,11 @@ HRESULT sync_create(Device *dev)
       import.semaphore = i ? dev->ingress : dev->fence;
       import.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT;
       import.handle = handle;
+      wsi_win32_runtime_fence_import owner = {VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA};
+      if (dev->runtimeQueueAccepted) {
+         owner.version = 1; owner.device_cookie = dev->hRTDevice.handle;
+         owner.fence_token = dev->runtimeFenceOwners[i].token; import.pNext = &owner;
+      }
       VkResult result = dev->vk.ImportSemaphoreWin32HandleKHR(dev->vkdev, &import);
       CloseHandle(handle);
       if (result != VK_SUCCESS)
@@ -140,7 +155,13 @@ void sync_destroy(Device *dev)
       dev->vk.DestroySemaphore(dev->vkdev, dev->fence, nullptr);
    dev->ingress = dev->fence = VK_NULL_HANDLE;
    dev->runtimeFenceValue = nullptr;
-   for (D3DKMT_HANDLE object : {dev->runtimeIngress, dev->runtimeFence}) {
+   for (unsigned i = 0; i < 2; ++i) {
+      if (dev->runtimeFenceOwners[i].token) {
+         dev->runtimeTransport.release_fence(dev->runtimeTransport.context, dev->runtimeFenceOwners[i].token);
+         dev->runtimeFenceOwners[i] = {};
+         continue;
+      }
+      D3DKMT_HANDLE object = i ? dev->runtimeIngress : dev->runtimeFence;
       if (object && dev->kt.pfnDestroySynchronizationObjectCb) {
          D3DDDICB_DESTROYSYNCHRONIZATIONOBJECT destroy = {};
          destroy.hSyncObject = object;

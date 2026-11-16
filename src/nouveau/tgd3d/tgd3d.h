@@ -18,6 +18,7 @@
 #include "tgd3d_vk.h"
 #include "tgd3d_trace.h"
 #include "nouveau/vulkan/nvkmd/windows/adapter_abi.h"
+#include "vulkan/util/vk_wsi_win32_runtime.h"
 
 #include <deque>
 #include <new>
@@ -30,6 +31,7 @@ struct Resource;
 struct View;
 struct Shader;
 struct RuntimeResource;
+struct RuntimeQueueState;
 
 /* ------------------------------------------------------------------ */
 /* Adapter                                                             */
@@ -365,6 +367,10 @@ struct Device {
    VkDeviceApi vk;
    const VulkanCaps *caps = nullptr;
    bool nvk = false;
+   RuntimeQueueState *runtimeQueue = nullptr;
+   wsi_win32_runtime runtimeTransport = {};
+   bool runtimeQueueAccepted = false;
+   wsi_win32_runtime_fence runtimeFenceOwners[2] = {};
    bool hasA8 = false;                  /* VK_FORMAT_A8_UNORM is usable */
    VkCommandPool cmdPool = VK_NULL_HANDLE;
    VkCommandBuffer cmd = VK_NULL_HANDLE;
@@ -596,6 +602,9 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
 /* Releases GPU mappings, then the runtime allocation. The caller has already
  * destroyed every Vulkan object that referenced the backing. */
 HRESULT runtime_destroy(RuntimeResource *resource);
+HRESULT runtime_queue_prepare(Device *dev, wsi_win32_runtime *transport);
+HRESULT runtime_queue_quiesce(Device *dev);
+HRESULT runtime_queue_finish(Device *dev);
 HRESULT runtime_set_display_mode(RuntimeResource *resource, Device *dev, UINT subresource);
 bool runtime_is_primary(const RuntimeResource *resource);
 bool runtime_is_displayable(const RuntimeResource *resource);

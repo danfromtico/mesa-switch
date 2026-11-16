@@ -7,12 +7,17 @@
 #include "util/u_math.h"
 #include "vk_log.h"
 #include "vk_sync_binary.h"
+#include "vk_semaphore.h"
+#include "vk_common_entrypoints.h"
+#include "vk_internal_exts.h"
+#include "nvk_entrypoints.h"
 
 struct windows_sync {
    struct vk_sync base;
    struct tg_kmt_fence fence;
    HANDLE export_handle;
    bool export_inherit;
+   struct wsi_win32_runtime_fence runtime_fence;
 };
 
 struct windows_ctx {
@@ -20,7 +25,23 @@ struct windows_ctx {
    uint32_t context;
    struct tg_kmt_fence idle;
    uint64_t idle_value;
+   void *runtime_context;
+   struct wsi_win32_runtime_fence runtime_idle;
 };
+
+static const struct wsi_win32_runtime *
+ctx_runtime(struct nvkmd_dev *dev)
+{
+   const struct wsi_win32_runtime *runtime = &nvkmd_windows_dev(dev)->runtime;
+   return runtime->version ? runtime : NULL;
+}
+
+static const struct wsi_win32_runtime *
+sync_runtime(struct vk_device *device)
+{
+   struct nvk_device *nvk = container_of(device, struct nvk_device, vk);
+   return ctx_runtime(nvk->nvkmd);
+}
 
 static struct tg_kmt_device *
 sync_device(struct vk_device *device)
@@ -39,6 +60,14 @@ sync_fence(struct vk_sync *sync)
 static VkResult
 win_sync_init(struct vk_device *device, struct vk_sync *sync, uint64_t initial)
 {
+   const struct wsi_win32_runtime *runtime = sync_runtime(device);
+   if (runtime) {
+      struct windows_sync *win = container_of(sync, struct windows_sync, base);
+      VkResult result = runtime->create_fence(runtime->context, initial, &win->runtime_fence);
+      if (result == VK_SUCCESS)
+         win->fence = (struct tg_kmt_fence){win->runtime_fence.handle, win->runtime_fence.value};
+      return result;
+   }
    LONG status = sync->flags & VK_SYNC_IS_SHAREABLE ?
       tg_kmt_create_shared_fence(sync_device(device), initial, sync_fence(sync)) :
       tg_kmt_create_fence(sync_device(device), initial, sync_fence(sync));
@@ -55,13 +84,22 @@ win_sync_finish(struct vk_device *device, struct vk_sync *sync)
       CloseHandle(win->export_handle);
       win->export_handle = NULL;
    }
-   tg_kmt_destroy_fence(sync_fence(sync));
+   const struct wsi_win32_runtime *runtime = sync_runtime(device);
+   if (win->runtime_fence.token) {
+      runtime->release_fence(runtime->context, win->runtime_fence.token);
+      win->runtime_fence = (struct wsi_win32_runtime_fence){0};
+      win->fence = (struct tg_kmt_fence){0};
+   } else {
+      tg_kmt_destroy_fence(sync_fence(sync));
+   }
 }
 
 static VkResult
 win_sync_import(struct vk_device *device, struct vk_sync *sync,
                  void *handle, const wchar_t *name)
 {
+   if (sync_runtime(device))
+      return vk_error(device, VK_ERROR_INVALID_EXTERNAL_HANDLE);
    struct tg_kmt_fence imported;
    LONG status = tg_kmt_import_fence(sync_device(device), handle, name, &imported);
    if (status < 0)
@@ -114,6 +152,11 @@ win_sync_export_params(struct vk_device *device, struct vk_sync *sync,
 static VkResult
 win_sync_signal(struct vk_device *device, struct vk_sync *sync, uint64_t value)
 {
+   const struct wsi_win32_runtime *runtime = sync_runtime(device);
+   if (runtime) {
+      struct windows_sync *win = container_of(sync, struct windows_sync, base);
+      return runtime->signal_cpu(runtime->context, win->runtime_fence.token, value);
+   }
    LONG status = tg_kmt_signal_cpu(sync_device(device), sync_fence(sync)->handle, value);
    return nvkmd_windows_status(&device->base, "CPU signal monitored fence", status,
                                VK_ERROR_DEVICE_LOST);
@@ -124,6 +167,8 @@ win_sync_value(struct vk_device *device, struct vk_sync *sync, uint64_t *value)
 {
    (void)device;
    *value = p_atomic_read(sync_fence(sync)->value);
+   if (sync_runtime(device) && *value == UINT64_MAX)
+      return VK_ERROR_DEVICE_LOST;
    return VK_SUCCESS;
 }
 
@@ -133,6 +178,17 @@ win_sync_wait(struct vk_device *device, struct vk_sync *sync, uint64_t value,
 {
    assert(!(flags & VK_SYNC_WAIT_PENDING));
    struct tg_kmt_fence *fence = sync_fence(sync);
+   const struct wsi_win32_runtime *runtime = sync_runtime(device);
+   if (runtime) {
+      DWORD timeout = INFINITE;
+      if (deadline != OS_TIMEOUT_INFINITE) {
+         uint64_t now = os_time_get_nano();
+         uint64_t remaining = deadline > now ? deadline - now : 0;
+         timeout = MIN2(remaining / 1000000 + (remaining % 1000000 != 0), INFINITE - 1);
+      }
+      struct windows_sync *win = container_of(sync, struct windows_sync, base);
+      return runtime->wait_cpu(runtime->context, win->runtime_fence.token, value, timeout);
+   }
    while (p_atomic_read(fence->value) < value) {
       DWORD timeout = INFINITE;
       if (deadline != OS_TIMEOUT_INFINITE) {
@@ -149,6 +205,34 @@ win_sync_wait(struct vk_device *device, struct vk_sync *sync, uint64_t value,
          return nvkmd_windows_status(&device->base, "CPU wait monitored fence", status,
                                      VK_ERROR_DEVICE_LOST);
    }
+   return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+nvk_ImportSemaphoreWin32HandleKHR(VkDevice device, const VkImportSemaphoreWin32HandleInfoKHR *info)
+{
+   VK_FROM_HANDLE(nvk_device, dev, device);
+   const struct wsi_win32_runtime *runtime = sync_runtime(&dev->vk);
+   if (!runtime) return vk_common_ImportSemaphoreWin32HandleKHR(device, info);
+   const struct wsi_win32_runtime_fence_import *import =
+      vk_find_struct_const(info->pNext, WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA);
+   VK_FROM_HANDLE(vk_semaphore, semaphore, info->semaphore);
+   if (!import || import->version != 1 || import->device_cookie != runtime->device_cookie ||
+       !import->fence_token || info->flags || info->name ||
+       info->handleType != VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT ||
+       !semaphore || semaphore->base.device != &dev->vk ||
+       semaphore->type != VK_SEMAPHORE_TYPE_TIMELINE || semaphore->temporary ||
+       semaphore->permanent.type != &nvkmd_windows_sync_type)
+      return vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+   struct wsi_win32_runtime_fence fence = {0};
+   VkResult result = runtime->retain_fence(runtime->context, import->fence_token, &fence);
+   if (result != VK_SUCCESS) return result;
+   /* Import the frontend's already-owned reference. Do not reopen it on the
+    * unrelated KMT allocator device: GPU waits validate the context device. */
+   struct windows_sync *win = container_of(&semaphore->permanent, struct windows_sync, base);
+   win_sync_finish(&dev->vk, &win->base);
+   win->runtime_fence = fence;
+   win->fence = (struct tg_kmt_fence){fence.handle, fence.value};
    return VK_SUCCESS;
 }
 
@@ -188,6 +272,13 @@ win_ctx_wait(struct nvkmd_ctx *base, struct vk_object_base *log,
       struct tg_kmt_fence *fence = queue_fence(waits[i].sync, &value);
       if (!fence)
          return vk_error(log, VK_ERROR_FEATURE_NOT_PRESENT);
+      const struct wsi_win32_runtime *runtime = ctx_runtime(base->dev);
+      if (runtime) {
+         VkResult result = runtime->gpu_sync(runtime->context, ctx->runtime_context,
+                                            false, 1, &fence->handle, &value);
+         if (result != VK_SUCCESS) return result;
+         continue;
+      }
       LONG status = tg_kmt_wait_gpu(ctx->context, 1, &fence->handle, &value);
       if (status < 0)
          return nvkmd_windows_status(log, "GPU wait monitored fence", status,
@@ -206,6 +297,13 @@ win_ctx_signal(struct nvkmd_ctx *base, struct vk_object_base *log,
       struct tg_kmt_fence *fence = queue_fence(signals[i].sync, &value);
       if (!fence)
          return vk_error(log, VK_ERROR_FEATURE_NOT_PRESENT);
+      const struct wsi_win32_runtime *runtime = ctx_runtime(base->dev);
+      if (runtime) {
+         VkResult result = runtime->gpu_sync(runtime->context, ctx->runtime_context,
+                                            true, 1, &fence->handle, &value);
+         if (result != VK_SUCCESS) return result;
+         continue;
+      }
       LONG status = tg_kmt_signal_gpu(ctx->context, 1, &fence->handle, &value);
       if (status < 0)
          return nvkmd_windows_status(log, "GPU signal monitored fence", status,
@@ -236,12 +334,18 @@ win_ctx_exec(struct nvkmd_ctx *base, struct vk_object_base *log,
          void *cpu = NULL;
          result = nvkmd_mem_map(mem, log, NVKMD_MEM_MAP_RD, NULL, &cpu);
          if (result == VK_SUCCESS) {
-            LONG status = tg_kmt_submit_primaries(ctx->context, exec->addr,
-               (const uint8_t *)cpu + offset, exec->size_B,
-               exec->written_count, exec->written_allocations);
+            const struct wsi_win32_runtime *runtime = ctx_runtime(base->dev);
+            if (runtime) {
+               result = runtime->submit(runtime->context, ctx->runtime_context, exec->addr,
+                  (const uint8_t *)cpu + offset, exec->size_B, exec->written_count, exec->written_allocations);
+            } else {
+               LONG status = tg_kmt_submit_primaries(ctx->context, exec->addr,
+                  (const uint8_t *)cpu + offset, exec->size_B,
+                  exec->written_count, exec->written_allocations);
+               result = nvkmd_windows_status(log, "D3DKMTSubmitCommand", status,
+                                             VK_ERROR_DEVICE_LOST);
+            }
             nvkmd_mem_unmap(mem, 0);
-            result = nvkmd_windows_status(log, "D3DKMTSubmitCommand", status,
-                                          VK_ERROR_DEVICE_LOST);
          }
       }
       nvkmd_mem_unref(mem);
@@ -283,6 +387,14 @@ win_ctx_sync(struct nvkmd_ctx *base, struct vk_object_base *log)
 {
    struct windows_ctx *ctx = container_of(base, struct windows_ctx, base);
    uint64_t value = ++ctx->idle_value;
+   const struct wsi_win32_runtime *runtime = ctx_runtime(base->dev);
+   if (runtime) {
+      VkResult result = runtime->gpu_sync(runtime->context, ctx->runtime_context,
+                                         true, 1, &ctx->runtime_idle.handle, &value);
+      if (result == VK_SUCCESS)
+         result = runtime->wait_cpu(runtime->context, ctx->runtime_idle.token, value, INFINITE);
+      return result;
+   }
    LONG status = tg_kmt_signal_gpu(ctx->context, 1, &ctx->idle.handle, &value);
    if (status >= 0)
       status = tg_kmt_wait_fences(&nvkmd_windows_dev(base->dev)->kmt, 1,
@@ -295,6 +407,13 @@ static void
 win_destroy_ctx(struct nvkmd_ctx *base)
 {
    struct windows_ctx *ctx = container_of(base, struct windows_ctx, base);
+   const struct wsi_win32_runtime *runtime = ctx_runtime(base->dev);
+   if (runtime) {
+      runtime->destroy_context(runtime->context, ctx->runtime_context);
+      runtime->release_fence(runtime->context, ctx->runtime_idle.token);
+      free(ctx);
+      return;
+   }
    tg_kmt_destroy_context(ctx->context);
    tg_kmt_destroy_fence(&ctx->idle);
    free(ctx);
@@ -314,10 +433,25 @@ VkResult
 nvkmd_windows_create_ctx(struct nvkmd_dev *dev, struct vk_object_base *log,
                          enum nvkmd_engines engines, struct nvkmd_ctx **out)
 {
-   (void)engines;
    struct windows_ctx *ctx = calloc(1, sizeof(*ctx));
    if (!ctx)
       return vk_error(log, VK_ERROR_OUT_OF_HOST_MEMORY);
+   const struct wsi_win32_runtime *runtime = ctx_runtime(dev);
+   if (runtime) {
+      uint32_t types = 0;
+      if (engines & (NVKMD_ENGINE_3D | NVKMD_ENGINE_2D)) types |= WSI_WIN32_RUNTIME_3D;
+      if (engines & NVKMD_ENGINE_COMPUTE) types |= WSI_WIN32_RUNTIME_COMPUTE;
+      if (engines & (NVKMD_ENGINE_COPY | NVKMD_ENGINE_M2MF | NVKMD_ENGINE_BIND)) types |= WSI_WIN32_RUNTIME_COPY;
+      VkResult result = runtime->create_context(runtime->context, types, &ctx->runtime_context);
+      if (result == VK_SUCCESS) result = runtime->create_fence(runtime->context, 0, &ctx->runtime_idle);
+      if (result != VK_SUCCESS) {
+         if (ctx->runtime_context) runtime->destroy_context(runtime->context, ctx->runtime_context);
+         free(ctx); return result;
+      }
+      ctx->base = (struct nvkmd_ctx){.ops = &win_ctx_ops, .dev = dev};
+      *out = &ctx->base;
+      return VK_SUCCESS;
+   }
    struct tg_kmt_device *kmt = &nvkmd_windows_dev(dev)->kmt;
    LONG status = tg_kmt_create_context(kmt, &ctx->context);
    if (status >= 0)

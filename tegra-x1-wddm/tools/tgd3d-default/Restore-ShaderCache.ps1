@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# Restore the prior UMD registration; leave the KMD, ICD and power untouched.
+# Restore the prior UMD/ICD registration; leave the KMD and power untouched.
 [CmdletBinding()]
 param([switch]$Restart)
 . (Join-Path $PSScriptRoot 'Common.ps1')
@@ -18,6 +18,6 @@ try{
 }finally{$key.Dispose()}
 Set-ItemProperty $settings Directory $b.PreviousDirectory
 Register-ScheduledTask Tgd3dDefaultEnable -Xml ([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'cache-prior-task.xml'))) -Force|Out-Null
-$r=@{Utc=[DateTime]::UtcNow.ToString('o');Directory=$b.PreviousDirectory;KernelChanged=$false;IcdChanged=$false;OsRebootRequested=[bool]$Restart}
+$r=@{Utc=[DateTime]::UtcNow.ToString('o');Directory=$b.PreviousDirectory;KernelChanged=$false;IcdChanged=($b.PSObject.Properties.Name -contains 'PairedIcdChanged' -and $b.PairedIcdChanged);OsRebootRequested=[bool]$Restart}
 Save-Json (Join-Path $PSScriptRoot 'cache-restore.json') $r;$r|ConvertTo-Json
 if($Restart){& shutdown.exe /r /t 10;if($LASTEXITCODE){throw 'Planned restore restart was not accepted'}}

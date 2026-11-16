@@ -38,6 +38,10 @@ enum tgd3d_trace_event {
    TGD3D_TRACE_RED_PRIMARY,        /* diagnostic: arg0 phase << 32 | allocation; arg1 extent (0), wait target sequence (1) */
    TGD3D_TRACE_ERROR = 20,         /* tgd3d_trace_error */
    TGD3D_TRACE_MESSAGE = 21,       /* tgd3d_trace_message */
+   /* arg0 operation << 32 | types/count, arg1 context identity or command bytes.
+    * 1 create context, 2 destroy, 3 actual submit, 4 GPU wait, 5 GPU signal.
+    * E_PENDING is entry; a successful return is admission, not GPU completion. */
+   TGD3D_TRACE_RUNTIME_TRANSPORT = 22,
    TGD3D_TRACE_TIMING = 30,        /* tgd3d_trace_timing */
 };
 

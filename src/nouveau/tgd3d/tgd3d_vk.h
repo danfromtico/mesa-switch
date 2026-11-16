@@ -1,9 +1,8 @@
 /* SPDX-License-Identifier: MIT
  *
  * Vulkan entry points used by the native D3D10 UMD. The UMD talks to the
- * Vulkan driver through the public API only; two Mesa-internal chained
- * structures (runtime-owned WDDM memory, explicit linear pitch) and one
- * NVK instance structure are the entire private surface.
+ * Vulkan driver through its API and paired Mesa-internal structures for
+ * runtime-owned memory, queue/fence transport, pitch and embedded admission.
  */
 #ifndef TGD3D_VK_H
 #define TGD3D_VK_H
@@ -17,6 +16,7 @@
 #include <windows.h>
 #include <vulkan/vulkan.h>
 #include <stdint.h>
+#include "vulkan/util/vk_wsi_win32_runtime.h"
 
 struct disk_cache;
 
@@ -237,7 +237,8 @@ struct VulkanAdapter {
     * adapter LUID. Fails closed when a required capability is missing. */
    HRESULT open(uint64_t luid);
    void close();
-   VkResult createDevice(VkDevice *device, VkDeviceApi *api, VkQueue *queue) const;
+   VkResult createDevice(VkDevice *device, VkDeviceApi *api, VkQueue *queue,
+                         const struct wsi_win32_runtime *runtime = nullptr) const;
    uint32_t findMemoryType(uint32_t typeBits, VkMemoryPropertyFlags required) const;
 };
 

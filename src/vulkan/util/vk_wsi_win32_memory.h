@@ -26,6 +26,7 @@
  */
 #define WSI_WIN32_MEMORY_VERSION 1u
 #define WSI_WIN32_MEMORY_DISPLAYABLE_VERSION 2u
+#define WSI_WIN32_MEMORY_RUNTIME_VERSION 3u
 struct wsi_win32_memory {
    uint32_t version;
    uint32_t allocation;
@@ -47,6 +48,9 @@ struct wsi_win32_memory {
     * an importing-device write reference and positive acknowledgement. */
    uint32_t kernel_resource;
    uint32_t reserved;
+   /* Version 3: writes use a context on this runtime device, without
+    * exporting/reopening the allocation. kernel_resource must be zero. */
+   void *runtime_device;
 };
 
 static inline bool
@@ -54,11 +58,16 @@ wsi_win32_memory_copy(struct wsi_win32_memory *dst, const struct wsi_win32_memor
 {
    memset(dst, 0, sizeof(*dst));
    if (!src || (src->version != WSI_WIN32_MEMORY_VERSION &&
-                src->version != WSI_WIN32_MEMORY_DISPLAYABLE_VERSION))
+                src->version != WSI_WIN32_MEMORY_DISPLAYABLE_VERSION &&
+                src->version != WSI_WIN32_MEMORY_RUNTIME_VERSION))
       return false;
    /* Old UMDs provide only the v1 prefix. Do not read the new tail. */
    memcpy(dst, src, src->version == WSI_WIN32_MEMORY_VERSION ?
-          offsetof(struct wsi_win32_memory, kernel_resource) : sizeof(*dst));
+          offsetof(struct wsi_win32_memory, kernel_resource) :
+          src->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION ?
+          offsetof(struct wsi_win32_memory, runtime_device) : sizeof(*dst));
+   if (src->version == WSI_WIN32_MEMORY_RUNTIME_VERSION)
+      return dst->runtime_device && !dst->kernel_resource && !dst->reserved;
    return src->version == WSI_WIN32_MEMORY_VERSION ||
           (dst->kernel_resource && !dst->reserved);
 }

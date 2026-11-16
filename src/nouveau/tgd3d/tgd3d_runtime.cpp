@@ -319,6 +319,7 @@ void runtime_copy_callbacks(D3DDDI_DEVICECALLBACKS *out, const D3DDDI_DEVICECALL
    COPY(pfnMakeResidentCb);
    COPY(pfnEvictCb);
    COPY(pfnWaitForSynchronizationObjectFromCpuCb);
+   COPY(pfnSignalSynchronizationObjectFromCpuCb);
    COPY(pfnWaitForSynchronizationObjectFromGpuCb);
    COPY(pfnSignalSynchronizationObjectFromGpuCb);
    COPY(pfnCreatePagingQueueCb);
@@ -328,6 +329,7 @@ void runtime_copy_callbacks(D3DDDI_DEVICECALLBACKS *out, const D3DDDI_DEVICECALL
    COPY(pfnMapGpuVirtualAddressCb);
    COPY(pfnFreeGpuVirtualAddressCb);
    COPY(pfnCreateContextVirtualCb);
+   COPY(pfnSubmitCommandCb);
    COPY(pfnOfferAllocationsCb);
    COPY(pfnReclaimAllocations2Cb);
 #undef COPY
@@ -502,14 +504,16 @@ HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes, uint64_t *remaining_b
 static HRESULT make_ready(Device *dev, RuntimeResource *p, uint64_t bytes,
                           uint32_t kernel_resource = 0, bool displayable = false)
 {
-   if (displayable && (!dev->nvk || !kernel_resource ||
+   if (displayable && (!dev->nvk || (!dev->runtimeQueueAccepted && !kernel_resource) ||
        dev->interfaceVersion != D3DWDDM2_0_DDI_INTERFACE_VERSION))
       return DXGI_ERROR_UNSUPPORTED;
    HRESULT hr = runtime_make_resident(dev, p);
    if (FAILED(hr))
       return hr;
-   p->memory.version = displayable ? WSI_WIN32_MEMORY_DISPLAYABLE_VERSION : WSI_WIN32_MEMORY_VERSION;
-   p->memory.kernel_resource = kernel_resource;
+   p->memory.version = displayable ? (dev->runtimeQueueAccepted ? WSI_WIN32_MEMORY_RUNTIME_VERSION :
+      WSI_WIN32_MEMORY_DISPLAYABLE_VERSION) : WSI_WIN32_MEMORY_VERSION;
+   p->memory.kernel_resource = p->memory.version == WSI_WIN32_MEMORY_RUNTIME_VERSION ? 0 : kernel_resource;
+   p->memory.runtime_device = p->memory.version == WSI_WIN32_MEMORY_RUNTIME_VERSION ? dev->hRTDevice.handle : nullptr;
    p->memory.size = bytes;
    p->memory.context = p;
    p->memory.retain = owner_retain;
@@ -1178,7 +1182,8 @@ HRESULT runtime_set_display_mode(RuntimeResource *p, Device *dev, UINT subresour
 bool runtime_is_primary(const RuntimeResource *p) { return p && p->primary; }
 bool runtime_is_displayable(const RuntimeResource *p)
 {
-   return p && p->memory.version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION;
+   return p && (p->memory.version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION ||
+                p->memory.version == WSI_WIN32_MEMORY_RUNTIME_VERSION);
 }
 bool runtime_primary_compatible(const RuntimeResource *source, const RuntimeResource *target)
 {
@@ -1264,8 +1269,10 @@ static HRESULT allocate_import(Device *dev, RuntimeResource *p, const VkMemoryRe
          FAILED(p->error) ? p->error : resource_result(result);
    /* An ICD that ignored the owner structure would have allocated unrelated
     * memory: the image would render, and nobody else would ever see it. */
+   const bool valid_write = p->memory.version == WSI_WIN32_MEMORY_RUNTIME_VERSION ?
+      imported_write_allocation == p->memory.allocation : imported_write_allocation != p->memory.allocation;
    HRESULT hr = imported && (!runtime_is_displayable(p) ||
-      (imported_write_allocation && imported_write_allocation != p->memory.allocation)) ?
+      (imported_write_allocation && valid_write)) ?
       S_OK : DXGI_ERROR_UNSUPPORTED;
    if (FAILED(hr)) {
       dev->vk.FreeMemory(dev->vkdev, *memory, nullptr);

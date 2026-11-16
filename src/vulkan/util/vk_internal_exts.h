@@ -118,8 +118,28 @@ struct wsi_win32_written_primaries {
    uint32_t count;
    uint32_t allocations[WSI_WIN32_MAX_WRITTEN_PRIMARIES];
 };
-#define VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA (VkStructureType)1000001006
+#define VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA (VkStructureType)1000001007
 #define VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA_cast struct wsi_win32_written_primaries
+
+struct wsi_win32_runtime;
+struct wsi_win32_runtime_device_info {
+   VkStructureType sType;
+   const void *pNext;
+   const struct wsi_win32_runtime *runtime;
+   bool *accepted;
+};
+#define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_DEVICE_INFO_MESA (VkStructureType)1000001008
+#define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_DEVICE_INFO_MESA_cast struct wsi_win32_runtime_device_info
+
+struct wsi_win32_runtime_fence_import {
+   VkStructureType sType;
+   const void *pNext;
+   uint32_t version;
+   void *device_cookie;
+   void *fence_token;
+};
+#define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA (VkStructureType)1000001009
+#define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA_cast struct wsi_win32_runtime_fence_import
 #endif
 
 /* Chained to VkInstanceCreateInfo by an in-tree Windows user-mode driver that

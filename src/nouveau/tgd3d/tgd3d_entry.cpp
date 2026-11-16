@@ -16,10 +16,9 @@ static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter)
    return S_OK;
 }
 
-/* Retain the D3D10 entry points. The 57a0845c modern trial reached real
- * context/resource creation but still failed native admission. Keep its
- * resource repairs and typed implementation; withhold ordinary negotiation
- * until the remaining resource/residency failures are resolved. */
+/* Keep the accepted legacy negotiation. The paired runtime-context candidate
+ * was withdrawn after a native black-screen report before rotation. Preserve
+ * its reusable implementation, but do not make it a column-scan prerequisite. */
 static const UINT64 supported_versions[] = {
    D3D10_0_DDI_SUPPORTED,
    D3D10_0_x_DDI_SUPPORTED,

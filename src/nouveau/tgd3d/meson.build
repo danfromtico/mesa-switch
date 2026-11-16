@@ -24,6 +24,7 @@ tgd3d_files = files(
   'tgd3d_query.cpp',
   'tgd3d_resource.cpp',
   'tgd3d_runtime.cpp',
+  'tgd3d_runtime_queue.cpp',
   'tgd3d_shader.cpp',
   'tgd3d_shader_cache.cpp',
   'tgd3d_state.cpp',

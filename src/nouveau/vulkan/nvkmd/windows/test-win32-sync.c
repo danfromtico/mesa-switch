@@ -8,6 +8,8 @@
 #include "vk_physical_device.h"
 #include "vk_semaphore.h"
 #include "vk_sync_binary.h"
+#include "vk_internal_exts.h"
+#include "nvk_entrypoints.h"
 #include "util/os_time.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +23,168 @@ static unsigned contexts, gpu_waits, gpu_signals;
 static uint64_t *exported_value;
 static bool fail_import;
 static HANDLE retained_export;
+
+static struct {
+   DWORD thread;
+   unsigned next, context_refs, submits, waits, signals, cpu_waits;
+   bool fail_submit;
+   struct { unsigned refs; uint64_t value; } fences[16];
+} rt;
+
+static void runtime_call(void *state)
+{
+   CHECK(state == &rt && GetCurrentThreadId() == rt.thread);
+}
+
+static VkResult runtime_create_context(void *state, uint32_t types, void **context)
+{
+   runtime_call(state); CHECK(types == (WSI_WIN32_RUNTIME_3D | WSI_WIN32_RUNTIME_COPY));
+   CHECK(!rt.context_refs); ++rt.context_refs; *context = &rt.context_refs; return VK_SUCCESS;
+}
+
+static VkResult runtime_destroy_context(void *state, void *context)
+{
+   runtime_call(state); CHECK(context == &rt.context_refs && rt.context_refs == 1);
+   --rt.context_refs; return VK_SUCCESS;
+}
+
+static VkResult runtime_create_fence(void *state, uint64_t initial, struct wsi_win32_runtime_fence *out)
+{
+   runtime_call(state); unsigned id = ++rt.next; CHECK(id < ARRAY_SIZE(rt.fences));
+   rt.fences[id].refs = 1; rt.fences[id].value = initial;
+   *out = (struct wsi_win32_runtime_fence){&rt.fences[id], 500 + id, &rt.fences[id].value};
+   return VK_SUCCESS;
+}
+
+static VkResult runtime_retain(void *state, void *token, struct wsi_win32_runtime_fence *out)
+{
+   runtime_call(state);
+   for (unsigned i = 1; i <= rt.next; ++i) {
+      if (token != &rt.fences[i] || !rt.fences[i].refs) continue;
+      ++rt.fences[i].refs;
+      *out = (struct wsi_win32_runtime_fence){token, 500 + i, &rt.fences[i].value};
+      return VK_SUCCESS;
+   }
+   return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+}
+
+static void runtime_release(void *state, void *token)
+{
+   runtime_call(state);
+   for (unsigned i = 1; i <= rt.next; ++i) {
+      if (token != &rt.fences[i]) continue;
+      CHECK(rt.fences[i].refs); --rt.fences[i].refs; return;
+   }
+   CHECK(false);
+}
+
+static VkResult runtime_gpu_sync(void *state, void *context, bool signal, uint32_t count,
+                                const uint32_t *handles, const uint64_t *points)
+{
+   runtime_call(state); CHECK(context == &rt.context_refs && rt.context_refs && count == 1);
+   CHECK(handles[0] > 500 && handles[0] <= 500 + rt.next && rt.fences[handles[0] - 500].refs);
+   CHECK(points[0] == (signal ? 11 : 7));
+   if (signal) ++rt.signals; else ++rt.waits;
+   return VK_SUCCESS; /* Enqueued GPU work is deliberately not completed. */
+}
+
+static VkResult runtime_wait_cpu(void *state, void *token, uint64_t value, uint32_t timeout)
+{
+   runtime_call(state); CHECK(token == &rt.fences[1] && value == 11 && timeout && timeout <= 50);
+   ++rt.cpu_waits; return VK_TIMEOUT;
+}
+
+static VkResult runtime_signal_cpu(void *state, void *token, uint64_t value)
+{
+   runtime_call(state); CHECK(false); return VK_ERROR_DEVICE_LOST;
+}
+
+static const uint32_t runtime_words[] = {0xfeed, 0x12345678, 0x00998877, 0x42, 0x10};
+static VkResult runtime_submit(void *state, void *context, uint64_t address, const void *words,
+                              uint32_t bytes, uint32_t count, const uint32_t *written)
+{
+   runtime_call(state); CHECK(context == &rt.context_refs && address == 0x100004 && bytes == 16);
+   CHECK(!memcmp(words, runtime_words + 1, bytes) && count == 2 && written[0] == 60 && written[1] == 61);
+   ++rt.submits; return rt.fail_submit ? VK_ERROR_DEVICE_LOST : VK_SUCCESS;
+}
+
+static VkResult runtime_map(struct nvkmd_mem *mem, struct vk_object_base *log,
+                           enum nvkmd_mem_map_flags flags, void *fixed, void **out)
+{
+   CHECK(!fixed && flags == NVKMD_MEM_MAP_RDWR); *out = (void *)runtime_words; return VK_SUCCESS;
+}
+static void runtime_unmap(struct nvkmd_mem *mem, enum nvkmd_mem_map_flags flags, void *map)
+{
+   CHECK(map == runtime_words);
+}
+
+static void runtime_contract(struct nvk_device *nvk, struct nvkmd_windows_dev *kmd)
+{
+   struct nvkmd_pdev pdev = {0};
+   kmd->base.pdev = &pdev;
+   rt.thread = GetCurrentThreadId();
+   kmd->runtime = (struct wsi_win32_runtime){WSI_WIN32_RUNTIME_VERSION, &rt, &rt,
+      runtime_create_context, runtime_destroy_context, runtime_submit, runtime_gpu_sync,
+      runtime_create_fence, runtime_retain, runtime_release, runtime_wait_cpu, runtime_signal_cpu};
+   VkDevice device = vk_device_to_handle(&nvk->vk);
+   struct wsi_win32_runtime_fence owner;
+   CHECK(runtime_create_fence(&rt, 3, &owner) == VK_SUCCESS);
+   VkSemaphoreTypeCreateInfo type = {.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
+      .semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE, .initialValue = 5};
+   VkSemaphoreCreateInfo info = {.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = &type};
+   VkSemaphore sem;
+   CHECK(vk_common_CreateSemaphore(device, &info, NULL, &sem) == VK_SUCCESS);
+   struct wsi_win32_runtime_fence_import imported = {
+      .sType = VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA,
+      .version = 1, .device_cookie = &rt, .fence_token = owner.token};
+   VkImportSemaphoreWin32HandleInfoKHR import = {
+      .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR,
+      .pNext = &imported, .semaphore = sem, .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT};
+   struct vk_sync *sync = &vk_semaphore_from_handle(sem)->permanent;
+   for (unsigned bad = 0; bad < 3; ++bad) {
+      import.pNext = bad == 0 ? NULL : &imported;
+      imported.device_cookie = bad == 1 ? (void *)kmd : (void *)&rt;
+      imported.fence_token = bad == 2 ? kmd : owner.token;
+      CHECK(nvk_ImportSemaphoreWin32HandleKHR(device, &import) == VK_ERROR_INVALID_EXTERNAL_HANDLE);
+      uint64_t value; CHECK(vk_sync_get_value(&nvk->vk, sync, &value) == VK_SUCCESS && value == 5);
+   }
+   imported.fence_token = owner.token;
+   CHECK(nvk_ImportSemaphoreWin32HandleKHR(device, &import) == VK_SUCCESS);
+   CHECK(rt.fences[1].refs == 2 && !rt.fences[2].refs);
+   runtime_release(&rt, owner.token); CHECK(rt.fences[1].refs == 1);
+   struct nvkmd_ctx *ctx;
+   CHECK(nvkmd_windows_create_ctx(&kmd->base, &nvk->vk.base,
+         NVKMD_ENGINE_3D | NVKMD_ENGINE_COPY, &ctx) == VK_SUCCESS);
+   struct vk_sync_wait wait = {.sync = sync, .wait_value = 7};
+   struct vk_sync_signal signal = {.sync = sync, .signal_value = 11};
+   CHECK(nvkmd_ctx_wait(ctx, &nvk->vk.base, 1, &wait) == VK_SUCCESS);
+   CHECK(nvkmd_ctx_signal(ctx, &nvk->vk.base, 1, &signal) == VK_SUCCESS);
+   CHECK(rt.waits == 1 && rt.signals == 1 && !rt.cpu_waits && rt.fences[1].value == 3);
+   CHECK(vk_sync_wait(&nvk->vk, sync, 11, VK_SYNC_WAIT_COMPLETE,
+         os_time_get_absolute_timeout(50000000)) == VK_TIMEOUT && rt.cpu_waits == 1);
+   rt.fences[1].value = UINT64_MAX;
+   uint64_t value; CHECK(vk_sync_get_value(&nvk->vk, sync, &value) == VK_ERROR_DEVICE_LOST);
+   rt.fences[1].value = 3;
+
+   simple_mtx_init(&kmd->base.mems_mutex, mtx_plain); list_inithead(&kmd->base.mems);
+   const struct nvkmd_mem_ops ops = {.map = runtime_map, .unmap = runtime_unmap};
+   struct nvkmd_mem mem;
+   nvkmd_mem_init(&kmd->base, &mem, &ops, NVKMD_MEM_CAN_MAP, sizeof(runtime_words), 4);
+   struct nvkmd_va va = {.addr = 0x100000, .size_B = sizeof(runtime_words)}; mem.va = &va;
+   list_addtail(&mem.link, &kmd->base.mems);
+   const uint32_t written[] = {60, 61};
+   struct nvkmd_ctx_exec exec = {.addr = 0x100004, .size_B = 16, .written_count = 2,
+      .written_allocations = written};
+   CHECK(nvkmd_ctx_exec(ctx, &nvk->vk.base, 1, &exec) == VK_SUCCESS);
+   rt.fail_submit = true;
+   CHECK(nvkmd_ctx_exec(ctx, &nvk->vk.base, 1, &exec) == VK_ERROR_DEVICE_LOST);
+   CHECK(rt.submits == 2 && mem.refcnt == 1 && !mem.map_cnt);
+   list_del(&mem.link); simple_mtx_destroy(&mem.map_mutex); simple_mtx_destroy(&kmd->base.mems_mutex);
+   nvkmd_ctx_destroy(ctx); vk_common_DestroySemaphore(device, sem, NULL);
+   CHECK(!rt.context_refs && !live && !contexts && gpu_waits == 1 && gpu_signals == 1);
+   for (unsigned i = 1; i <= rt.next; ++i) CHECK(!rt.fences[i].refs);
+   puts("PASS: actual NVK runtime transport, caller thread, retained same-device fences, real payload/write-list forwarding, no allocator KMT fallback, failure/timeout propagation (CPU callbacks; no GPU)");
+}
 
 VkResult
 nvkmd_windows_status(struct vk_object_base *log, const char *operation, LONG status, VkResult failure)
@@ -259,6 +423,7 @@ int main(void)
    CHECK(GetHandleInformation(first, &flags) && !(flags & HANDLE_FLAG_INHERIT));
    vk_common_DestroySemaphore(device, b, NULL);
    CHECK(GetHandleInformation(first, &flags) && CloseHandle(first) && !live);
+   runtime_contract(nvk, &kmd);
    vk_object_base_finish(&nvk->vk.base);
    vk_object_base_finish(&physical.base);
    free(nvk);
