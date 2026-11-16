@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: MIT
  * Typed adapters for the modern device table's existing D3D10 pipeline.
- * This table is not advertised yet: resource offer/reclaim and
- * remaining modern operations must be completed before device negotiation.
+ * WDDM2.0 pairs its typed table with DXGI1.4 and the D3D10 pipeline level.
  * Do not cast device tables or copy descriptors with different union layouts.
  */
 #include "tgd3d.h"
@@ -607,7 +606,7 @@ void device_fill_table20(D3DWDDM2_0DDI_DEVICEFUNCS *table)
 {
    common_table(table);
    table->pfnCheckMultisampleQualityLevels = Multisample13;
-   /* Unadvertised preparation, paired with DXGI1.4. Do not copy a 1.3 table:
+   /* Paired with DXGI1.4. Do not copy a 1.3 table:
     * Flush, query, view and rasterizer descriptors have changed signatures.
     * Optional hardware protection/default texture layouts remain unavailable. */
 }

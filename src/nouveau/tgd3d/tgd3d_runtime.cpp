@@ -327,34 +327,50 @@ void runtime_copy_callbacks(D3DDDI_DEVICECALLBACKS *out, const D3DDDI_DEVICECALL
 HRESULT runtime_device_create(Device *dev)
 {
    const auto &cb = dev->kt;
-   if (!cb.pfnCreateContextVirtualCb || !cb.pfnDestroyContextCb || !cb.pfnAllocateCb ||
+   const bool modern = dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION;
+   if (!(modern ? dev->createContextVirtual != nullptr : cb.pfnCreateContextVirtualCb != nullptr) ||
+       !cb.pfnDestroyContextCb || !cb.pfnAllocateCb ||
        !cb.pfnDeallocateCb || !cb.pfnCreatePagingQueueCb || !cb.pfnDestroyPagingQueueCb ||
        !cb.pfnMakeResidentCb || !cb.pfnMapGpuVirtualAddressCb || !cb.pfnFreeGpuVirtualAddressCb ||
        !cb.pfnWaitForSynchronizationObjectFromCpuCb || !cb.pfnLock2Cb || !cb.pfnUnlock2Cb)
       return DXGI_ERROR_UNSUPPORTED;
    /* NVK's kernel context is invisible to the D3D runtime. The runtime
     * needs a context of its own for implicit synchronization and Present. */
-   D3DDDICB_CREATECONTEXTVIRTUAL context = {};
-   context.EngineAffinity = 1;
-   HRESULT hr = cb.pfnCreateContextVirtualCb(dev->hRTDevice.handle, &context);
-   if (SUCCEEDED(hr) && !context.hContext)
+   HRESULT hr;
+   HANDLE handle = nullptr;
+   if (modern) {
+      D3DWDDM2_0DDICB_CREATECONTEXTVIRTUAL context = {};
+      context.EngineAffinity = 1;
+      context.ContextTypeFlags = D3DWDDM2_0DDI_CONTEXTTYPE_3D | D3DWDDM2_0DDI_CONTEXTTYPE_COPY;
+      hr = dev->createContextVirtual(dev->hRTCoreLayer, &context);
+      handle = context.hContext;
+   } else {
+      D3DDDICB_CREATECONTEXTVIRTUAL context = {};
+      context.EngineAffinity = 1;
+      hr = cb.pfnCreateContextVirtualCb(dev->hRTDevice.handle, &context);
+      handle = context.hContext;
+   }
+   if (SUCCEEDED(hr) && !handle)
       hr = E_FAIL;
    trace(TGD3D_TRACE_RUNTIME_CONTEXT, hr, 1, 0);
    if (FAILED(hr))
       return hr;
-   dev->hContext = context.hContext;
+   dev->hContext = handle;
 
    D3DDDICB_CREATEPAGINGQUEUE queue = {};
    queue.Priority = D3DDDI_PAGINGQUEUE_PRIORITY_NORMAL;
    hr = cb.pfnCreatePagingQueueCb(dev->hRTDevice.handle, &queue);
-   if (SUCCEEDED(hr) && (!queue.hPagingQueue || !queue.hSyncObject))
-      hr = E_FAIL;
+   if (SUCCEEDED(hr)) {
+      /* Retain each successfully returned handle for CreateDevice's unwind,
+       * even if the callback returned an incomplete success payload. */
+      dev->pagingQueue = queue.hPagingQueue;
+      dev->pagingFence = queue.hSyncObject;
+      dev->pagingFenceValue = static_cast<const volatile UINT64 *>(queue.FenceValueCPUVirtualAddress);
+      if (!queue.hPagingQueue || !queue.hSyncObject) hr = E_FAIL;
+   }
    trace(TGD3D_TRACE_RUNTIME_CONTEXT, hr, 2, queue.hPagingQueue);
    if (FAILED(hr))
       return hr;
-   dev->pagingQueue = queue.hPagingQueue;
-   dev->pagingFence = queue.hSyncObject;
-   dev->pagingFenceValue = static_cast<const volatile UINT64 *>(queue.FenceValueCPUVirtualAddress);
    return S_OK;
 }
 

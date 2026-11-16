@@ -351,6 +351,7 @@ struct Device {
    D3D10DDI_HRTCORELAYER hRTCoreLayer = {};
    D3DDDI_DEVICECALLBACKS kt = {};
    D3D10DDI_CORELAYER_DEVICECALLBACKS um = {};
+   PFND3DWDDM2_0DDI_CREATECONTEXTVIRTUAL_CB createContextVirtual = nullptr;
    const DXGI_DDI_BASE_CALLBACKS *dxgi = nullptr;
    HANDLE hContext = nullptr;           /* runtime-registered context: sync signals and Present */
    UINT interfaceVersion = 0;
@@ -537,8 +538,7 @@ void query_pass_end(Device *dev, VkCommandBuffer cmd);
 
 /* tgd3d_dxgi.cpp */
 void dxgi_fill_table(DXGI1_1_DDI_BASE_FUNCTIONS *table, bool has_resolve);
-/* Presentation portion of the newer negotiated table. Device registration
- * must not expose this table until its remaining required DDIs are supplied. */
+/* Versioned presentation tables, paired with the matching device ABI. */
 void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
 void dxgi_fill_presentation14(DXGI1_4_DDI_BASE_FUNCTIONS *table);
 void dxgi_fill_residency13(DXGI1_3_DDI_BASE_FUNCTIONS *table);

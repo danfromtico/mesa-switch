@@ -6,7 +6,8 @@ param([Parameter(Mandatory=$true)][string]$CandidateDirectory,[switch]$Restart)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 $payload=[IO.File]::ReadAllText((Join-Path $CandidateDirectory 'update.json'))|ConvertFrom-Json
 $scope=if($payload.PSObject.Properties.Name -contains 'change_scope'){[string]$payload.change_scope}else{'shader-cache'}
-if($scope -notin @('shader-cache','resource-teardown','copy-lifetime')){throw 'Unsupported UMD-only update scope'}
+if($scope -notin @('shader-cache','resource-teardown','copy-lifetime','modern-ddi')){throw 'Unsupported UMD-only update scope'}
+if($scope -eq 'modern-ddi' -and !$payload.modern_ddi_advertised){throw 'Modern DDI update needs an explicit interface declaration'}
 $settings='HKLM:\SYSTEM\CurrentControlSet\Services\tegragpurender\Tgd3dDefault'
 $previous=[string](Get-ItemProperty $settings).Directory
 if($previous -ne $payload.expected_directory){throw 'Active package changed; inspect before updating'}
@@ -62,11 +63,13 @@ $m|Add-Member -NotePropertyName shader_cache -NotePropertyValue $payload.cache -
 $m|Add-Member -NotePropertyName umd_frozen_base -NotePropertyValue $payload.frozen_base -Force
 $m|Add-Member -NotePropertyName umd_patch_commits -NotePropertyValue $payload.patches -Force
 $m|Add-Member -NotePropertyName umd_update_scope -NotePropertyValue $scope -Force
+if($scope -eq 'modern-ddi'){$m|Add-Member -NotePropertyName modern_ddi_advertised -NotePropertyValue $true -Force}
 $m.umd_source=$payload.frozen_base
 if($payload.source_identity){$m|Add-Member -NotePropertyName umd_source_identity -NotePropertyValue $payload.source_identity -Force}
 $m.scope=switch($scope){
     'resource-teardown' {'.158 retained KMD/ICD with tgd3d DestroyResource error-contract fix; logon start; native stability acceptance pending'}
     'copy-lifetime' {'.158 retained KMD/ICD with tgd3d overlap-copy, view bounds and lifetime fixes; modern DDI tables remain unadvertised; logon start; native stability acceptance pending'}
+    'modern-ddi' {'.158 retained KMD/ICD with typed WDDM2.0/DXGI1.4 MPO1 and D3D10 pipeline; logon start; native interface and column scan acceptance pending'}
     default {'.158 existing KMD/ICD with cache-only tgd3d UMD; logon start; cache performance acceptance pending'}
 }
 Save-Json ($dest+'\trial-components.json') $m

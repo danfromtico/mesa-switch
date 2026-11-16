@@ -103,20 +103,24 @@ void APIENTRY ClearView11(D3D10DDI_HDEVICE h, D3D11DDI_HANDLETYPE type, void *ha
    Device *dev = D(h);
    if (!dev || FAILED(dev->lost)) return;
    RemovalOnlyErrorScope errors(dev);
-   /* The current bridge covers texture-2D RTVs (including cube slices).
-    * UAV/video/buffer views need their own implementations before admission;
-    * this DDI excludes 3-D textures. Never silently skip an unsupported clear. */
-   if (type != D3D10DDI_HT_RENDERTARGETVIEW) { TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED); return; }
+   /* Clear the resource types this pipeline creates. UAV/video/buffer RTVs
+    * are not exposed, and ClearView excludes 3-D textures. */
+   const bool depth = type == D3D10DDI_HT_DEPTHSTENCILVIEW;
+   if (!depth && type != D3D10DDI_HT_RENDERTARGETVIEW) { TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED); return; }
    View *view = static_cast<View *>(handle);
    if (!view || view->dev != dev || !view->res || view->res->dev != dev ||
-       view->type != ViewType::RTV || !color) { TG_ERROR(dev, E_INVALIDARG); return; }
-   if (view->res->kind != ResKind::Image || view->res->imageType != VK_IMAGE_TYPE_2D ||
+       view->type != (depth ? ViewType::DSV : ViewType::RTV) || !color) { TG_ERROR(dev, E_INVALIDARG); return; }
+   const auto aspect = depth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+   if (view->res->kind != ResKind::Image || view->res->imageType == VK_IMAGE_TYPE_3D ||
        !view->res->storage.image || !view->width || !view->height || !view->layers ||
-       view->info.subresourceRange.aspectMask != VK_IMAGE_ASPECT_COLOR_BIT) {
+       view->info.subresourceRange.aspectMask != aspect ||
+       (depth && (view->res->aspects & VK_IMAGE_ASPECT_STENCIL_BIT))) {
       TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED); return;
    }
    VkClearValue value = {};
-   if (!color_value(*view, color, &value)) { TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED); return; }
+   if (depth) {
+      value.depthStencil.depth = std::isnan(color[0]) ? 0.0f : std::fmin(std::fmax(color[0], 0.0f), 1.0f);
+   } else if (!color_value(*view, color, &value)) { TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED); return; }
    bool any = !rects;
    for (UINT i = 0; rects && i < count; ++i) {
       if (rects[i].left > rects[i].right || rects[i].top > rects[i].bottom) {
@@ -141,14 +145,17 @@ void APIENTRY ClearView11(D3D10DDI_HDEVICE h, D3D11DDI_HANDLETYPE type, void *ha
    VkRenderingInfo rendering = {VK_STRUCTURE_TYPE_RENDERING_INFO};
    rendering.renderArea = {{0, 0}, {view->width, view->height}};
    rendering.layerCount = view->layers;
-   rendering.colorAttachmentCount = 1;
-   rendering.pColorAttachments = &attachment;
+   if (depth) rendering.pDepthAttachment = &attachment;
+   else {
+      rendering.colorAttachmentCount = 1;
+      rendering.pColorAttachments = &attachment;
+   }
    dev->vk.CmdBeginRendering(cmd, &rendering);
    ++dev->stats.renderPasses;
    /* A bounded batch avoids allocating proportional to the runtime rectangle
     * count. Clears ignore draw predication and do not contribute occlusion. */
    VkClearAttachment clear = {};
-   clear.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+   clear.aspectMask = aspect;
    clear.clearValue = value;
    VkClearRect batch[32];
    UINT used = 0;

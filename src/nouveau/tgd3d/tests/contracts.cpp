@@ -315,6 +315,63 @@ static void clear_view_contract()
    std::puts("PASS: ClearView clips rectangles/all array slices, preserves outside pixels in command encoding, batches boundedly, converts integer/alpha formats, and retains in-flight backing (CPU only)");
 }
 
+static void clear_view_dimensions_contract()
+{
+   static bool depth;
+   static UINT height, begins, rectangles;
+   static VkImageViewType viewType;
+   for (UINT variant = 0; variant < 3; ++variant) {
+      Adapter adapter; reset(); Device dev = make_device(&adapter);
+      depth = variant != 0; height = variant == 2 ? 3 : 1; begins = rectangles = 0;
+      viewType = height == 1 ? VK_IMAGE_VIEW_TYPE_1D_ARRAY : VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+      D3DWDDM2_0DDI_DEVICEFUNCS table = {}; device_fill_table20(&table);
+      dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *info,
+                                 const VkAllocationCallbacks *, VkImageView *out) {
+         CHECK(info->viewType == viewType && info->subresourceRange.layerCount == 2);
+         *out = handle<VkImageView>(0x410); return VK_SUCCESS;
+      };
+      dev.vk.CmdBeginRendering = [](VkCommandBuffer, const VkRenderingInfo *info) {
+         CHECK(info->layerCount == 2 && info->renderArea.extent.width == 13 && info->renderArea.extent.height == height);
+         const auto *a = depth ? info->pDepthAttachment : info->pColorAttachments;
+         CHECK(a && !info->pStencilAttachment && info->colorAttachmentCount == (depth ? 0u : 1u));
+         CHECK(a->loadOp == (begins ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD));
+         CHECK(a->storeOp == VK_ATTACHMENT_STORE_OP_STORE);
+         if (depth) CHECK(a->clearValue.depthStencil.depth == (begins ? 0.0f : 1.0f));
+         ++begins;
+      };
+      dev.vk.CmdClearAttachments = [](VkCommandBuffer, UINT count, const VkClearAttachment *a,
+                                     UINT n, const VkClearRect *r) {
+         CHECK(count == 1 && n == 1 && a->aspectMask == (depth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT));
+         CHECK(r->rect.offset.x == 1 && r->rect.offset.y == 0 && r->rect.extent.width == 7 &&
+               r->rect.extent.height == height && r->layerCount == 2);
+         if (depth) CHECK(a->clearValue.depthStencil.depth == 1.0f);
+         ++rectangles;
+      };
+      Resource res; res.dev = &dev; res.kind = ResKind::Image;
+      res.imageType = height == 1 ? VK_IMAGE_TYPE_1D : VK_IMAGE_TYPE_2D;
+      res.aspects = depth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+      res.storage.image = handle<VkImage>(0x420); res.storage.aspects = res.aspects;
+      View view; view.dev = &dev; view.res = &res; view.type = depth ? ViewType::DSV : ViewType::RTV;
+      view.width = 13; view.height = height; view.layers = 2;
+      view.format = depth ? DXGI_FORMAT_D32_FLOAT : DXGI_FORMAT_R8G8B8A8_UNORM;
+      view.info = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO}; view.info.viewType = viewType;
+      view.info.format = depth ? VK_FORMAT_D32_SFLOAT : VK_FORMAT_R8G8B8A8_UNORM;
+      view.info.subresourceRange = {res.aspects, 0, 1, 0, 2}; dev.views.push_back(&view);
+      FLOAT color[4] = {std::numeric_limits<float>::infinity(), .25f, .5f, .75f};
+      RECT rect = {1,0,8,4};
+      const auto type = depth ? D3D10DDI_HT_DEPTHSTENCILVIEW : D3D10DDI_HT_RENDERTARGETVIEW;
+      table.pfnClearView({&dev}, type, &view, color, &rect, 1);
+      color[0] = std::numeric_limits<float>::quiet_NaN();
+      table.pfnClearView({&dev}, type, &view, color, nullptr, 0);
+      CHECK(begins == 2 && rectangles == 1 && !setErrorCalls && !cpuWaits && !cpuSignals);
+      CHECK(flush(&dev, false) == S_OK);
+      storage_destroy(&dev, res.storage, false); CHECK(!viewsDestroyed);
+      completedValue = dev.submitted; retire(&dev); CHECK(viewsDestroyed == 1);
+      cmd_destroy(&dev); dev.views.clear();
+   }
+   std::puts("PASS: ClearView handles 1D color/array and depth-only 1D/2D views, clipped rectangles, depth NaN/INF conversion and GPU-gated retirement (CPU control)");
+}
+
 static void submission_contract()
 {
    Adapter adapter;
@@ -1527,11 +1584,14 @@ static void export_dxbc(const char *inputPath, const char *outputPath)
 }
 
 void ddi11_contracts();
+void device_contracts();
 void overlap_contracts();
 void offer_contracts();
 
 int main(int argc, char **argv)
 {
+   device_contracts();
+   clear_view_dimensions_contract();
    if (argc == 4 && !strcmp(argv[1], "--export-dxbc")) {
       export_dxbc(argv[2], argv[3]);
       return 0;

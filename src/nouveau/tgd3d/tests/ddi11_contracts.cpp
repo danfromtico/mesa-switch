@@ -20,12 +20,13 @@ static void adapter_caps_contracts()
    D3D10_2DDI_ADAPTERFUNCS functions = {};
    adapter_fill_queries(&functions);
    UINT count = 0;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 3);
-   UINT64 versions[4] = {0xfeed, 0, 0, 0xbeef}; count = 1;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 3);
-   CHECK(versions[0] == 0xfeed && versions[3] == 0xbeef);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+   UINT64 versions[5] = {0xfeed, 0, 0, 0, 0xbeef}; count = 1;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 4);
+   CHECK(versions[0] == 0xfeed && versions[4] == 0xbeef);
    CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == S_OK);
-   CHECK(versions[0] == D3D10_0_DDI_SUPPORTED && versions[2] == D3D10_0_7_DDI_SUPPORTED && versions[3] == 0xbeef);
+   CHECK(versions[0] == D3D10_0_DDI_SUPPORTED && versions[2] == D3D10_0_7_DDI_SUPPORTED &&
+         versions[3] == D3DWDDM2_0_DDI_SUPPORTED && versions[4] == 0xbeef);
    CHECK(functions.pfnGetSupportedVersions(h, nullptr, versions) == E_INVALIDARG);
    struct { UINT before, caps, after; } out = {0xdeadbeef, 0xffffffff, 0xbeefdead};
    D3D10_2DDIARG_GETCAPS query = {D3D11DDICAPS_3DPIPELINESUPPORT, nullptr, &out.caps, sizeof(out.caps)};
@@ -173,7 +174,7 @@ static void ddi20_contracts()
       t.pfnCreateResource(h, &desc, {buffer.object()}, {});
       CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED && !chunk.live);
    }
-   std::puts("PASS: typed WDDM2.0/DXGI1.4 boundaries, real view mip/array constructors, raster/query adapters and layout-tail rejection; modern tables remain unadvertised (CPU control)");
+   std::puts("PASS: typed WDDM2.0/DXGI1.4 boundaries, real view mip/array constructors, raster/query adapters and layout-tail rejection (CPU control)");
 }
 
 void ddi11_contracts()

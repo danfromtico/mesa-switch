@@ -16,12 +16,13 @@ static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter)
    return S_OK;
 }
 
-/* Only what is implemented is listed: the Direct3D 10.0 interface in its
- * three revisions. Direct3D 10.1 and 11 device tables are not provided. */
+/* Preserve the D3D10 entry points. WDDM2.0 supplies the typed modern table
+ * and DXGI1.4 MPO1 while GetCaps keeps the same D3D10 pipeline level. */
 static const UINT64 supported_versions[] = {
    D3D10_0_DDI_SUPPORTED,
    D3D10_0_x_DDI_SUPPORTED,
    D3D10_0_7_DDI_SUPPORTED,
+   D3DWDDM2_0_DDI_SUPPORTED,
 };
 
 static HRESULT APIENTRY GetSupportedVersions(D3D10DDI_HADAPTER, UINT32 *count, UINT64 *versions)

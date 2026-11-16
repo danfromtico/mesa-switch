@@ -4,8 +4,18 @@
 `tgd3d`，DLL 为 `TegraGpuD3DVk.dll`；Zink 的 `TegraGpuD3D.dll` 和注册入口
 保持独立。构建开启不等于 Windows 已切换到这个 UMD。
 
-实现路径是 **D3D10 WDDM DDI → Vulkan → NVK → GM20B**，不链接 Gallium、
+当前源码可协商 **WDDM2.0 UMD／DXGI1.4 MPO1**，保留既有D3D10管线级别；这与KMD的
+WDDM2.6版本是不同接口。新路径使用类型匹配的核心层上下文创建、共享数组和驻留缩减。
+当前实机仍加载5b66bbec UMD，双向GPU Fence开启，登录约5秒后启用；新接口候选尚待安装。
+这不是新Feature Level或完整D3D10一致性认证，MSAA、buffer RTV、UAV／视频仍有缺口。
+Tegra DC列扫描和vkcube仍待验收，设备与产物的最新状态以
+[交接记录](../../../tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)为准。
+
+实现路径是 **D3D runtime → WDDM UMD DDI → Vulkan → NVK → GM20B**，不链接 Gallium、
 Zink 或软件光栅器。它不是应用侧 DXVK，也不是完整 D3D10/Vulkan 一致性认证。
+
+## 早期诊断记录（2026-11-13，非当前设备状态）
+
 已确认 DWM 使用本后端。此前测试组合为冻结 `.158`、`fcc53bf1` CPU同步UMD和
 `7c677212` ICD，当时登录后自动启用。该组合通过了一轮五分钟实屏交互，用户随后多次
 尝试天气与浏览器也正常；但之后文件夹卡住、Explorer自动重启，再次开文件夹仍
@@ -28,7 +38,7 @@ Zink 或软件光栅器。它不是应用侧 DXVK，也不是完整 D3D10/Vulkan
 静止桌面按需提交，不以持续空转制造“60帧”。
 详见[实机记录](../../../tegra-x1-wddm/docs/TGD3D_NATIVE_20261113.md)。
 
-## 本轮修正
+## 早期修正
 
 最新诊断改动补齐设备创建的五个阶段、DXBC/SPIR-V前端与NVK/NAK后端、三段
 跨队列提交以及CPU Fence等待的进入记录。进入状态为`E_PENDING`，不能当作

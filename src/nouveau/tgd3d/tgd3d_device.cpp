@@ -105,34 +105,61 @@ void device_fill_table(D3D10DDI_DEVICEFUNCS *table)
    table->pfnDestroyDevice = DestroyDevice;
 }
 
-SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER, const D3D10DDIARG_CALCPRIVATEDEVICESIZE *)
+static bool device_interface(UINT interfaceVersion, UINT version, UINT flags)
 {
-   return sizeof(Device);
+   switch (interfaceVersion) {
+   case D3D10_0_DDI_INTERFACE_VERSION:
+   case D3D10_0_x_DDI_INTERFACE_VERSION:
+   case D3D10_0_7_DDI_INTERFACE_VERSION:
+      return true; // retain the accepted legacy negotiation
+   case D3DWDDM2_0_DDI_INTERFACE_VERSION:
+      return HIWORD(version) >= D3DWDDM2_0_DDI_BUILD_VERSION &&
+         D3D11DDI_EXTRACT_3DPIPELINELEVEL_FROM_FLAGS(flags) == D3D11DDI_3DPIPELINELEVEL_10_0;
+   default:
+      return false;
+   }
+}
+
+static HRESULT APIENTRY RetrieveSubObject(D3D10DDI_HDEVICE, UINT32, SIZE_T, void *, SIZE_T, void *)
+{
+   /* No video device is implemented by this renderer yet. Do not publish an
+    * empty video table or touch device state from this free-threaded entry. */
+   return E_NOINTERFACE;
+}
+
+SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER,
+                                     const D3D10DDIARG_CALCPRIVATEDEVICESIZE *args)
+{
+   return args && device_interface(args->Interface, args->Version, args->Flags) ? sizeof(Device) : 0;
 }
 
 HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVICE *args)
 {
    if (!hAdapter.pDrvPrivate || !args || !args->hDrvDevice.pDrvPrivate ||
-       !args->pKTCallbacks || !args->pUMCallbacks)
+       !args->pKTCallbacks || !args->pUMCallbacks || !args->pDeviceFuncs ||
+       !args->DXGIBaseDDI.pDXGIDDIBaseFunctions)
       return E_INVALIDARG;
    Adapter *adapter = A(hAdapter);
-   switch (args->Interface) {
-   case D3D10_0_DDI_INTERFACE_VERSION:
-   case D3D10_0_x_DDI_INTERFACE_VERSION:
-   case D3D10_0_7_DDI_INTERFACE_VERSION:
-      break;
-   default:
-      trace(TGD3D_TRACE_CREATE_DEVICE, E_FAIL, args->Interface, 0);
-      return E_FAIL;
+   if (!device_interface(args->Interface, args->Version, args->Flags)) {
+      trace(TGD3D_TRACE_CREATE_DEVICE, DXGI_ERROR_UNSUPPORTED, args->Interface, args->Flags);
+      return DXGI_ERROR_UNSUPPORTED;
    }
+   const bool modern = args->Interface == D3DWDDM2_0_DDI_INTERFACE_VERSION;
+   if (modern && (!args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb ||
+                  !args->pKTCallbacks->pfnEvictCb)) return DXGI_ERROR_UNSUPPORTED;
    Device *dev = new (args->hDrvDevice.pDrvPrivate) Device();
    dev->adapter = adapter;
    dev->hRTDevice = args->hRTDevice;
    dev->hRTCoreLayer = args->hRTCoreLayer;
    runtime_copy_callbacks(&dev->kt, args->pKTCallbacks);
-   /* SetError is the only core-layer callback used by this implementation.
-    * Do not copy unused fields whose signatures change in newer tables. */
-   dev->um.pfnSetErrorCb = args->pUMCallbacks->pfnSetErrorCb;
+   /* Read fields through the negotiated type; do not copy a callback table
+    * using the current SDK's size or cast the two context-create signatures. */
+   if (modern) {
+      dev->um.pfnSetErrorCb = args->pWDDM2_0UMCallbacks->pfnSetErrorCb;
+      dev->createContextVirtual = args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb;
+   } else {
+      dev->um.pfnSetErrorCb = args->pUMCallbacks->pfnSetErrorCb;
+   }
    dev->dxgi = args->DXGIBaseDDI.pDXGIBaseCallbacks;
    dev->interfaceVersion = args->Interface;
    dev->caps = &adapter->vk.caps;
@@ -179,17 +206,22 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
     * A 1.4-capable physical device alone does not enable native A8 usage. */
    dev->hasA8 = false;
 
-   D3D10DDI_DEVICEFUNCS *table = args->pDeviceFuncs;
-   resource_fill_table(table);
-   state_fill_table(table);
-   shader_fill_table(table);
-   draw_fill_table(table);
-   query_fill_table(table);
-   device_fill_table(table);
-   /* The Windows 7 interface revisions pass the DXGI 1.1 table, which adds
-    * the shared-surface resolve notification. */
-   dxgi_fill_table(args->DXGIBaseDDI.pDXGIDDIBaseFunctions2,
-                   IS_DXGI1_1_BASE_FUNCTIONS(args->Interface, args->Version));
+   if (modern) {
+      device_fill_table20(args->pWDDM2_0DeviceFuncs);
+      dxgi_fill_presentation14(args->DXGIBaseDDI.pDXGIDDIBaseFunctions5);
+      if (args->ppfnRetrieveSubObject) *args->ppfnRetrieveSubObject = RetrieveSubObject;
+   } else {
+      D3D10DDI_DEVICEFUNCS *table = args->pDeviceFuncs;
+      resource_fill_table(table);
+      state_fill_table(table);
+      shader_fill_table(table);
+      draw_fill_table(table);
+      query_fill_table(table);
+      device_fill_table(table);
+      /* The Windows 7 revisions pass DXGI1.1, adding shared-surface resolve. */
+      dxgi_fill_table(args->DXGIBaseDDI.pDXGIDDIBaseFunctions2,
+                      IS_DXGI1_1_BASE_FUNCTIONS(args->Interface, args->Version));
+   }
    trace(TGD3D_TRACE_CREATE_DEVICE, S_OK, args->Interface, 0);
    return S_OK;
 }

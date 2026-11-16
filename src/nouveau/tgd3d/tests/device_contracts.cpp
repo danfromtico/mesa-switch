@@ -1,0 +1,164 @@
+/* SPDX-License-Identifier: MIT
+ * Exercise the production device constructor/destructor and negotiated tables.
+ * Vulkan/runtime substitutes only: no physical device or display is opened.
+ */
+#include "tgd3d.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <type_traits>
+
+using namespace tgd3d;
+#define CHECK(x) do { if (!(x)) { std::fprintf(stderr, "%s:%u: %s\n", __FILE__, __LINE__, #x); std::exit(1); } } while (0)
+namespace {
+template<typename T> T H(uintptr_t v) { return (T)v; }
+template<typename T> struct Stub;
+template<typename R, typename... A> struct Stub<R(VKAPI_PTR *)(A...)> {
+   static R VKAPI_CALL call(A...) { if constexpr (!std::is_void_v<R>) return R{}; }
+};
+static struct {
+   UINT failure, coreCreates, ktCreates, contexts, queues, devices, objects, errors;
+   UINT deadContexts, deadQueues, deadDevices, deadObjects;
+   bool modern;
+   UINT64 paging;
+} s;
+static VkDeviceApi api;
+
+static void init(Adapter *adapter, D3DDDI_DEVICECALLBACKS *kt,
+                  D3DWDDM2_0DDI_CORELAYER_DEVICECALLBACKS *core)
+{
+   adapter->vk.caps.cbSlots = D3D_CB_SLOTS;
+   adapter->vk.vk.GetPhysicalDeviceFeatures2 = [](VkPhysicalDevice, VkPhysicalDeviceFeatures2 *) {};
+   adapter->vk.vk.CreateDevice = [](VkPhysicalDevice, const VkDeviceCreateInfo *,
+                                   const VkAllocationCallbacks *, VkDevice *out) {
+      if (s.failure == 5) return VK_ERROR_OUT_OF_HOST_MEMORY;
+      *out = H<VkDevice>(0x100); ++s.devices; return VK_SUCCESS;
+   };
+   adapter->vk.vk.GetDeviceProcAddr = [](VkDevice, const char *name) -> PFN_vkVoidFunction {
+#define X(n) if (!std::strcmp(name, "vk" #n)) return reinterpret_cast<PFN_vkVoidFunction>(api.n);
+      TGD3D_VK_DEVICE_FUNCS(X)
+      TGD3D_VK_OPTIONAL_DEVICE_FUNCS(X)
+#undef X
+      return nullptr;
+   };
+#define X(n) api.n = Stub<PFN_vk##n>::call;
+   TGD3D_VK_DEVICE_FUNCS(X)
+   TGD3D_VK_OPTIONAL_DEVICE_FUNCS(X)
+#undef X
+   api.DestroyDevice = [](VkDevice d, const VkAllocationCallbacks *) {
+      CHECK(d == H<VkDevice>(0x100)); ++s.deadDevices;
+   };
+   api.GetDeviceQueue = [](VkDevice, UINT, UINT, VkQueue *out) { *out = H<VkQueue>(0x200); };
+   api.CreateSemaphore = [](VkDevice, const VkSemaphoreCreateInfo *, const VkAllocationCallbacks *, VkSemaphore *out) {
+      if (s.failure == 6) return VK_ERROR_OUT_OF_HOST_MEMORY;
+      *out = H<VkSemaphore>(++s.objects); return VK_SUCCESS;
+   };
+   api.CreateCommandPool = [](VkDevice, const VkCommandPoolCreateInfo *, const VkAllocationCallbacks *, VkCommandPool *out) {
+      if (s.failure == 7) return VK_ERROR_OUT_OF_HOST_MEMORY;
+      *out = H<VkCommandPool>(++s.objects); return VK_SUCCESS;
+   };
+   api.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *, const VkAllocationCallbacks *, VkDescriptorSetLayout *out) {
+      if (s.failure == 8 && s.objects == 3) return VK_ERROR_OUT_OF_HOST_MEMORY;
+      *out = H<VkDescriptorSetLayout>(++s.objects); return VK_SUCCESS;
+   };
+   api.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *, const VkAllocationCallbacks *, VkPipelineLayout *out) {
+      *out = H<VkPipelineLayout>(++s.objects); return VK_SUCCESS;
+   };
+   api.CreateSampler = [](VkDevice, const VkSamplerCreateInfo *, const VkAllocationCallbacks *, VkSampler *out) {
+      *out = H<VkSampler>(++s.objects); return VK_SUCCESS;
+   };
+#define DESTROY(n, type) api.n = [](VkDevice, type object, const VkAllocationCallbacks *) { if (object) ++s.deadObjects; }
+   DESTROY(DestroySemaphore, VkSemaphore);
+   DESTROY(DestroyCommandPool, VkCommandPool);
+   DESTROY(DestroyDescriptorSetLayout, VkDescriptorSetLayout);
+   DESTROY(DestroyPipelineLayout, VkPipelineLayout);
+   DESTROY(DestroySampler, VkSampler);
+#undef DESTROY
+   api.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, UINT64 *out) { *out = 0; return VK_SUCCESS; };
+   core->pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT) { ++s.errors; };
+   core->pfnCreateContextVirtualCb = [](D3D10DDI_HRTCORELAYER h,
+                                       D3DWDDM2_0DDICB_CREATECONTEXTVIRTUAL *c) -> HRESULT {
+      CHECK(s.modern && h.handle == H<HANDLE>(0x300) && !c->NodeOrdinal && c->EngineAffinity == 1);
+      CHECK(c->ContextTypeFlags == (D3DWDDM2_0DDI_CONTEXTTYPE_3D | D3DWDDM2_0DDI_CONTEXTTYPE_COPY));
+      CHECK(!c->Flags.Value && !c->PrivateDriverDataSize && !c->pPrivateDriverData);
+      ++s.coreCreates;
+      if (s.failure == 1) return E_OUTOFMEMORY;
+      if (s.failure != 2) { c->hContext = H<HANDLE>(0x400); ++s.contexts; }
+      return S_OK;
+   };
+   kt->pfnCreateContextVirtualCb = [](HANDLE h, D3DDDICB_CREATECONTEXTVIRTUAL *c) -> HRESULT {
+      CHECK(!s.modern && h == H<HANDLE>(0x500));
+      c->hContext = H<HANDLE>(0x400); ++s.ktCreates; ++s.contexts; return S_OK;
+   };
+   kt->pfnDestroyContextCb = [](HANDLE h, const D3DDDICB_DESTROYCONTEXT *c) -> HRESULT {
+      CHECK(h == H<HANDLE>(0x500) && c->hContext == H<HANDLE>(0x400)); ++s.deadContexts; return S_OK;
+   };
+   kt->pfnCreatePagingQueueCb = [](HANDLE h, D3DDDICB_CREATEPAGINGQUEUE *q) -> HRESULT {
+      CHECK(h == H<HANDLE>(0x500) && q->Priority == D3DDDI_PAGINGQUEUE_PRIORITY_NORMAL);
+      if (s.failure == 3) return E_OUTOFMEMORY;
+      q->hPagingQueue = 0x600; ++s.queues;
+      if (s.failure != 4) q->hSyncObject = 0x601;
+      q->FenceValueCPUVirtualAddress = &s.paging; return S_OK;
+   };
+   kt->pfnDestroyPagingQueueCb = [](HANDLE h, const D3DDDI_DESTROYPAGINGQUEUE *q) -> HRESULT {
+      CHECK(h == H<HANDLE>(0x500) && q->hPagingQueue == 0x600); ++s.deadQueues; return S_OK;
+   };
+   kt->pfnAllocateCb = [](HANDLE, D3DDDICB_ALLOCATE *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnDeallocateCb = [](HANDLE, const D3DDDICB_DEALLOCATE *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnEvictCb = [](HANDLE, D3DDDICB_EVICT *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnMapGpuVirtualAddressCb = [](HANDLE, D3DDDI_MAPGPUVIRTUALADDRESS *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnFreeGpuVirtualAddressCb = [](HANDLE, const D3DDDICB_FREEGPUVIRTUALADDRESS *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE, const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnLock2Cb = [](HANDLE, D3DDDICB_LOCK2 *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnUnlock2Cb = [](HANDLE, const D3DDDICB_UNLOCK2 *) -> HRESULT { CHECK(false); return E_FAIL; };
+}
+}
+
+void device_contracts()
+{
+   for (UINT failure = 0; failure <= 8; ++failure) {
+      Adapter adapter; D3DDDI_DEVICECALLBACKS kt = {};
+      D3DWDDM2_0DDI_CORELAYER_DEVICECALLBACKS core = {};
+      s = {}; s.failure = failure; s.modern = true; init(&adapter, &kt, &core);
+      struct { UINT64 before; D3DWDDM2_0DDI_DEVICEFUNCS table; UINT64 after; } table = {};
+      struct { UINT64 before; DXGI1_4_DDI_BASE_FUNCTIONS table; UINT64 after; } dxgi = {};
+      table.before = table.after = dxgi.before = dxgi.after = UINT64_C(0x123456789abcdef0);
+      alignas(Device) BYTE storage[sizeof(Device)]; std::memset(storage, 0xab, sizeof(storage));
+      PFND3D10DDI_RETRIEVESUBOBJECT subobject = nullptr;
+      D3D10DDIARG_CREATEDEVICE args = {};
+      args.hDrvDevice = {storage}; args.hRTDevice = {H<HANDLE>(0x500)}; args.hRTCoreLayer = {H<HANDLE>(0x300)};
+      args.Interface = D3DWDDM2_0_DDI_INTERFACE_VERSION; args.Version = D3DWDDM2_0_DDI_BUILD_VERSION << 16;
+      args.pKTCallbacks = &kt; args.pWDDM2_0UMCallbacks = &core; args.pWDDM2_0DeviceFuncs = &table.table;
+      args.DXGIBaseDDI.pDXGIDDIBaseFunctions5 = &dxgi.table; args.ppfnRetrieveSubObject = &subobject;
+      D3D10DDIARG_CALCPRIVATEDEVICESIZE size = {args.Interface, args.Version, 0};
+      CHECK(CalcPrivateDeviceSize({&adapter}, &size) == sizeof(Device));
+      if (!failure) {
+         size.Flags = 2 << D3D11DDI_CREATEDEVICE_FLAG_3DPIPELINESUPPORT_SHIFT;
+         CHECK(!CalcPrivateDeviceSize({&adapter}, &size)); args.Flags = size.Flags;
+         CHECK(CreateDevice({&adapter}, &args) == DXGI_ERROR_UNSUPPORTED && storage[0] == 0xab && !s.coreCreates);
+         args.Flags = 0; args.Version -= 0x10000;
+         CHECK(CreateDevice({&adapter}, &args) == DXGI_ERROR_UNSUPPORTED && !s.coreCreates);
+         args.Version += 0x10000;
+         auto cb = core.pfnCreateContextVirtualCb; core.pfnCreateContextVirtualCb = nullptr;
+         CHECK(CreateDevice({&adapter}, &args) == DXGI_ERROR_UNSUPPORTED && !s.ktCreates);
+         core.pfnCreateContextVirtualCb = cb;
+      }
+      HRESULT hr = CreateDevice({&adapter}, &args);
+      CHECK((SUCCEEDED(hr) == !failure) && s.coreCreates == 1 && !s.ktCreates);
+      if (!failure) {
+         auto *dev = reinterpret_cast<Device *>(storage);
+         CHECK(dev->hContext == H<HANDLE>(0x400) && dev->createContextVirtual == core.pfnCreateContextVirtualCb);
+         CHECK(table.table.pfnDestroyDevice && table.table.pfnFlush && table.table.pfnCreateQuery);
+         CHECK(dxgi.table.pfnPresentMultiplaneOverlay1 && dxgi.table.pfnTrimResidencySet && subobject);
+         BYTE output[16]; std::memset(output, 0xcc, sizeof(output));
+         CHECK(subobject(args.hDrvDevice, D3DWDDM2_0DDI_VIDEO_FUNCTIONS, 0, nullptr, sizeof(output), output) == E_NOINTERFACE);
+         CHECK(output[0] == 0xcc && output[15] == 0xcc);
+         table.table.pfnDestroyDevice(args.hDrvDevice);
+      } else CHECK(!table.table.pfnDraw && !dxgi.table.pfnPresent && !subobject);
+      CHECK(table.before == table.after && table.before == dxgi.before && dxgi.before == dxgi.after);
+      CHECK(s.contexts == s.deadContexts && s.queues == s.deadQueues && s.devices == s.deadDevices &&
+            s.objects == s.deadObjects && !s.errors);
+   }
+   std::puts("PASS: full WDDM2 device creation pairs typed core context/3D+copy flags with DXGI1.4 MPO1; no legacy callback, higher-FL or old-build admission; eight failures unwind and leave tables untouched (CPU control)");
+}
