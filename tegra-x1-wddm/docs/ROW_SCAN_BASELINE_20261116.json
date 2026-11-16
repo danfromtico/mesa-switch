@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-11-16T14:02:09.076862+00:00",
+  "branch": "tgd3d-vulkan",
+  "decision": "User-selected current driver/power/90-degree row-scan development baseline",
+  "display_default": {
+    "logical_width": 1280,
+    "logical_height": 720,
+    "windows_angle": 90,
+    "physical_width": 720,
+    "physical_height": 1280,
+    "scan": "row",
+    "gpu_prerotation": "existing implementation reused",
+    "persisted_registry_orientation": 1,
+    "one_user_requested_reboot_verified": true
+  },
+  "gpu_source": {
+    "KMD": {
+      "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+      "emc_diff_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852"
+    },
+    "UMD": {
+      "commit": "c1f25986eee51c0ee01088c3ecb3c9508dea2479"
+    },
+    "ICD": {
+      "commit": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f"
+    }
+  },
+  "baseline_files": [
+    {
+      "name": "switchpwrbtn.sys",
+      "bytes": 32264,
+      "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+    },
+    {
+      "name": "tegragpurender.sys",
+      "bytes": 204808,
+      "sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e"
+    },
+    {
+      "name": "woa-lite-home.ini",
+      "bytes": 138,
+      "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+    },
+    {
+      "name": "acpitabl.dat",
+      "bytes": 4848,
+      "sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
+    },
+    {
+      "name": "switchbattery.sys",
+      "bytes": 42440,
+      "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+    },
+    {
+      "name": "Pacecar.Switch.exe",
+      "bytes": 1517568,
+      "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+    },
+    {
+      "name": "bl33.bin",
+      "bytes": 921600,
+      "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+    },
+    {
+      "name": "libvulkan_nouveau.dll",
+      "bytes": 17652224,
+      "sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+    },
+    {
+      "name": "switchfan.sys",
+      "bytes": 98832,
+      "sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+    },
+    {
+      "name": "TegraGpuD3DVk.dll",
+      "bytes": 3274240,
+      "sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a"
+    },
+    {
+      "name": "SwitchPowerTray.exe",
+      "bytes": 60416,
+      "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+    }
+  ],
+  "power_policy": {
+    "Handheld": 1,
+    "fan_mode": 1,
+    "charge_limit_center": 85,
+    "charge_band": [
+      80,
+      90
+    ],
+    "emc_rates_khz": [
+      204000,
+      1331200,
+      1600000,
+      2500000
+    ],
+    "emc_errors": [
+      0,
+      0
+    ],
+    "cpu_policy_khz": [
+      102000,
+      1581000
+    ],
+    "gpu_policy_khz": [
+      76800,
+      537600
+    ],
+    "default_logon_delay": "PT5S",
+    "existing_dynamic_gpu_budget_mib": 512,
+    "SC7": "off"
+  },
+  "normal_observations": [
+    {
+      "case": "entry90",
+      "angle": 90,
+      "begin_utc": "2026-11-16T13:26:44.7701258Z",
+      "end_utc": "2026-11-16T13:26:51.0513764Z",
+      "mode": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "row_scanout": {
+        "width": 720,
+        "height": 1280,
+        "pitch": 2880,
+        "rotation": 0
+      },
+      "pattern_elapsed_ms": null,
+      "boot_unchanged": true,
+      "dwm_unchanged": true,
+      "host_stream_sha256": "9e83c659b2beae8de004db0fd8db0c3fb3ab06c4108cb98ca10ae0b5bfbc47da",
+      "software_checks_passed": true
+    },
+    {
+      "case": "turn270",
+      "angle": 270,
+      "begin_utc": "2026-11-16T13:50:30.8584574Z",
+      "end_utc": "2026-11-16T13:50:58.4365832Z",
+      "mode": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 3,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "row_scanout": {
+        "width": 720,
+        "height": 1280,
+        "pitch": 2880,
+        "rotation": 0
+      },
+      "pattern_elapsed_ms": 20234,
+      "boot_unchanged": true,
+      "dwm_unchanged": true,
+      "host_stream_sha256": "96a60aac7262f06235565208745f1339ee5ec42ff4a7ba7de48f8fae9d2b9e19",
+      "software_checks_passed": true
+    },
+    {
+      "case": "return90-from270",
+      "angle": 90,
+      "begin_utc": "2026-11-16T13:52:04.1533967Z",
+      "end_utc": "2026-11-16T13:52:31.4502748Z",
+      "mode": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "row_scanout": {
+        "width": 720,
+        "height": 1280,
+        "pitch": 2880,
+        "rotation": 0
+      },
+      "pattern_elapsed_ms": 20187,
+      "boot_unchanged": true,
+      "dwm_unchanged": true,
+      "host_stream_sha256": "75d355f623f8deb0e1ae65e30181158f45d660371c4e5ecac0687f7913531ecd",
+      "software_checks_passed": true
+    },
+    {
+      "case": "turn180",
+      "angle": 180,
+      "begin_utc": "2026-11-16T13:53:20.6211595Z",
+      "end_utc": "2026-11-16T13:53:48.6367815Z",
+      "mode": {
+        "width": 720,
+        "height": 1280,
+        "orientation": 2,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "row_scanout": {
+        "width": 720,
+        "height": 1280,
+        "pitch": 2880,
+        "rotation": 0
+      },
+      "pattern_elapsed_ms": 20234,
+      "boot_unchanged": true,
+      "dwm_unchanged": true,
+      "host_stream_sha256": "25f6416ca6d12884f7dec7e1b76853e0cb979b98ad22c6f3fed63ee2e6c59f8e",
+      "software_checks_passed": true
+    }
+  ],
+  "physical_feedback": {
+    "user": "嗯，都正常的画面",
+    "scope": "Observed90/270/180 pictures; feedback preceded the failed final return90, so it does not validate that return"
+  },
+  "known_failure": {
+    "case": "return90-from180",
+    "state": "Abnormal Windows reboot confirmed; user requested no further investigation",
+    "dispatch_utc": "2026-11-16T13:54:22.8086600Z",
+    "boot_before": "2026-11-16T13:37:51.5364340Z",
+    "boot_after": "2026-11-16T13:54:51.6448820Z",
+    "driver_changed": false,
+    "reboot_requested_by_agent_for_this_case": false,
+    "child_case_receipt_missing": true,
+    "no_trace_end": true,
+    "host_stream_sha256": "3f95e690e7d82ae874dbd46b3fd6f9688a989aa571a8e309aada4e04fe03a1e5",
+    "root_cause": "Not established; retained trace does not prove complete fault coverage"
+  },
+  "last_postfailure_readback": {
+    "utc": "2026-11-16T14:04:39.0400022Z",
+    "device_codes": [
+      0
+    ],
+    "default_task": "Ready",
+    "dwm": [
+      {
+        "Id": 1276,
+        "Start": "2026-11-16T13:55:27.1864947Z"
+      }
+    ],
+    "scope": "Cleanup receipt only; no new mode operation or physical acceptance"
+  },
+  "not_accepted": [
+    "DC column scan",
+    "All direction-transition stability",
+    "0-degree fresh pattern acceptance",
+    "Complete window interaction sequence",
+    "Native Win32 vkcube",
+    "Long-term stability"
+  ],
+  "review": "Gemini4 Carbon High pending until2026-11-20T23:53:18Z; no independent approval",
+  "user_stop": "Do not continue fault investigation or repeat direction tests; document and update GitHub only",
+  "cleanup": {
+    "native_files_archived_and_hash_checked": 190,
+    "receipt": {
+      "Dwm": [
+        {
+          "Id": 1276,
+          "Start": "2026-11-16T13:55:27.1864947Z"
+        }
+      ],
+      "RebootRequested": false,
+      "ModeChanged": false,
+      "RemovedTasks": [
+        "Tgd3dRowPostbootRead_20261116",
+        "Tgd3d-turn270-20261116",
+        "Tgd3d-return90-from270-20261116",
+        "Tgd3d-turn180-20261116"
+      ],
+      "RootAbsent": true,
+      "Utc": "2026-11-16T14:04:39.0400022Z",
+      "Phase": "Cleaned",
+      "DriverChanged": false,
+      "ArchivedFileCount": 190,
+      "Code": [
+        0
+      ],
+      "DefaultTask": "Ready"
+    },
+    "receipt_sha256": "8a441e3ebdc68a5e3f3d5653917263ce3d8bceabd8f4064ee56d9ff1e176477b",
+    "native_trace_root_removed": true,
+    "user_requested_no_further_testing": true
+  },
+  "initial_postfailure_readback": {
+    "utc": "2026-11-16T13:56:23.6114015Z",
+    "default_task": "Running",
+    "device_codes": [
+      43
+    ],
+    "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
+  }
+}
