@@ -11,7 +11,8 @@ Windows desktop GPU acceleration is the current development milestone.
 **Current checkpoint (2026-11-16):** the WDDM2.0 UMD admission candidate failed
 before any landscape switch. The device has been restored to the preceding
 5b66bbec UMD with the retained KMD, ICD and platform settings; column scan is
-not accepted. Modern admission is withheld while its contracts are repaired.
+not accepted. A new candidate fixes legal linear-buffer admission and resource
+error contracts; modern admission is being revalidated before acceptance.
 [Current handoff and evidence](tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)
 supersede the historical package milestones below.
 

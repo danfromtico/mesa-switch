@@ -20,13 +20,13 @@ static void adapter_caps_contracts()
    D3D10_2DDI_ADAPTERFUNCS functions = {};
    adapter_fill_queries(&functions);
    UINT count = 0;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 3);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
    UINT64 versions[5] = {0xfeed, 0, 0, 0, 0xbeef}; count = 1;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 3);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 4);
    CHECK(versions[0] == 0xfeed && versions[4] == 0xbeef);
    CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == S_OK);
    CHECK(versions[0] == D3D10_0_DDI_SUPPORTED && versions[2] == D3D10_0_7_DDI_SUPPORTED &&
-         versions[3] == 0 && versions[4] == 0xbeef);
+         versions[3] == D3DWDDM2_0_DDI_SUPPORTED && versions[4] == 0xbeef);
    CHECK(functions.pfnGetSupportedVersions(h, nullptr, versions) == E_INVALIDARG);
    struct { UINT before, caps, after; } out = {0xdeadbeef, 0xffffffff, 0xbeefdead};
    D3D10_2DDIARG_GETCAPS query = {D3D11DDICAPS_3DPIPELINESUPPORT, nullptr, &out.caps, sizeof(out.caps)};
@@ -169,12 +169,35 @@ static void ddi20_contracts()
    t.pfnCreateResource(h, &desc, {buffer.object()}, {});
    CHECK(!errors && chunk.live == 1 && !std::memcmp(backing, input, sizeof(input)));
    t.pfnDestroyResource(h, {buffer.object()});
-   for (auto layout : {D3DWDDM2_0DDI_TL_ROW_MAJOR, D3DWDDM2_0DDI_TL_STANDARD_SWIZZLE_64K_TILE}) {
-      desc.TextureLayout = layout; errors = 0;
+   // Match 22621's actual buffer descriptor: CPU access implies ROW_MAJOR.
+   // Exercise default, dynamic and staging buffers through the real entry.
+   desc.TextureLayout = D3DWDDM2_0DDI_TL_ROW_MAJOR;
+   for (UINT usage : {D3D10_DDI_USAGE_DEFAULT, D3D10_DDI_USAGE_DYNAMIC, D3D10_DDI_USAGE_STAGING}) {
+      desc.Usage = usage; desc.MapFlags = D3D10_DDI_CPU_ACCESS_WRITE;
+      errors = 0; std::memset(backing, 0, sizeof(backing));
       t.pfnCreateResource(h, &desc, {buffer.object()}, {});
-      CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED && !chunk.live);
+      CHECK(!errors && chunk.live == 1 && buffer.object()->kind == ResKind::Buffer);
+      CHECK(!std::memcmp(backing, input, sizeof(input)));
+      t.pfnDestroyResource(h, {buffer.object()});
    }
-   std::puts("PASS: typed WDDM2.0/DXGI1.4 boundaries, real view mip/array constructors, raster/query adapters and layout-tail rejection (CPU control)");
+   // Existing staging storage is linear too, including padded rows.
+   mip = {3, 2, 1, 3, 2, 1}; desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D;
+   desc.Usage = D3D10_DDI_USAGE_STAGING; desc.BindFlags = 0;
+   desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+   initial.SysMemPitch = 20; initial.SysMemSlicePitch = 40; errors = 0;
+   t.pfnCreateResource(h, &desc, {buffer.object()}, {});
+   CHECK(!errors && buffer.object()->kind == ResKind::Staging && chunk.live == 1);
+   const auto &rows = buffer.object()->layout[0];
+   CHECK(rows.rowPitch >= 12 && !std::memcmp(buffer.object()->slice.cpu(), input, 12));
+   CHECK(!std::memcmp(buffer.object()->slice.cpu() + rows.rowPitch, input + 20, 12));
+   t.pfnDestroyResource(h, {buffer.object()});
+   desc.Usage = D3D10_DDI_USAGE_DEFAULT;
+   for (auto layout : {D3DWDDM2_0DDI_TL_ROW_MAJOR, D3DWDDM2_0DDI_TL_STANDARD_SWIZZLE_64K_TILE}) {
+      desc.TextureLayout = layout; errors = 0; dev.lost = S_OK; // independent negative fixture
+      t.pfnCreateResource(h, &desc, {buffer.object()}, {});
+      CHECK(errors == 1 && error == D3DDDIERR_DEVICEREMOVED && !chunk.live && !dev.resources);
+   }
+   std::puts("PASS: typed WDDM2.0/DXGI1.4 boundaries, real views, ROW_MAJOR buffers/padded staging and unsupported texture-layout rejection (CPU control)");
 }
 
 void ddi11_contracts()
@@ -295,7 +318,8 @@ void ddi11_contracts()
    for (const auto &stage : dev.stage) CHECK(!stage.cb[2]);
    desc->ByteStride = 4; errors = 0;
    t.pfnCreateResource(h, desc, {resource.object()}, {});
-   CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED && !chunk.live);
+   CHECK(errors == 1 && error == D3DDDIERR_DEVICEREMOVED && !chunk.live && !dev.resources);
+   dev.lost = S_OK; // subsequent view fixtures model a separate healthy device
    CHECK(VirtualFree(page, 0, MEM_RELEASE));
 
    Resource image; image.dev = &dev; image.kind = ResKind::Image;

@@ -58,7 +58,8 @@ static void APIENTRY CreateResource(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATE
 {
    D3D10DDIARG_CREATERESOURCE desc = {};
    if (!resource_desc(in, &desc)) {
-      TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED);
+      resource_creation_error(D(h), DXGI_ERROR_UNSUPPORTED,
+         in && (in->BindFlags & D3D10_DDI_BIND_PRESENT) ? in->pPrimaryDesc : nullptr);
       return;
    }
    legacy().pfnCreateResource(h, &desc, resource, rt);
@@ -67,12 +68,19 @@ static void APIENTRY CreateResource(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATE
 static void APIENTRY CreateResource20(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATERESOURCE *in,
                                       D3D10DDI_HRESOURCE resource, D3D10DDI_HRTRESOURCE rt)
 {
-   if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
-   /* A caller-selected standard swizzle or CPU-visible default texture is a
-    * separate contract. Never silently import it as our private NVK layout.
-    * UNDEFINED lets this driver choose the layout, including linear primaries. */
-   if (in->TextureLayout != D3DWDDM2_0DDI_TL_UNDEFINED) {
-      TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
+   if (!in) { resource_creation_error(D(h), E_INVALIDARG); return; }
+   /* The runtime sets ROW_MAJOR on CPU-accessible buffers even when optional
+    * default-texture mapping is not advertised. Buffers and private staging
+    * textures already use linear Slice storage. Optimal/default textures and
+    * explicit swizzles are separate contracts; do not reinterpret them here. */
+   const bool linear = in->ResourceDimension == D3D10DDIRESOURCE_BUFFER ||
+      (in->Usage == D3D10_DDI_USAGE_STAGING && !in->pPrimaryDesc &&
+       !(in->MiscFlags & D3D10_DDI_RESOURCE_MISC_SHARED));
+   if (in->TextureLayout != D3DWDDM2_0DDI_TL_UNDEFINED &&
+       !(linear && in->TextureLayout == D3DWDDM2_0DDI_TL_ROW_MAJOR)) {
+      resource_creation_error(D(h), DXGI_ERROR_UNSUPPORTED,
+         (in->BindFlags & D3D10_DDI_BIND_PRESENT) ? in->pPrimaryDesc : nullptr);
+      return;
    }
    CreateResource(h, in, resource, rt);
 }

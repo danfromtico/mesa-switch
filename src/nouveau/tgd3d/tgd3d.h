@@ -502,6 +502,7 @@ void upload_trim(Device *dev);
 /* tgd3d_resource.cpp */
 HRESULT resource_result(VkResult result);
 void resource_fill_table(D3D10DDI_DEVICEFUNCS *table);
+void resource_creation_error(Device *dev, HRESULT hr, DXGI_DDI_PRIMARY_DESC *primary = nullptr);
 VkImageView view_get(View *view, bool arrayed = false);
 VkBufferView view_get_buffer(View *view);
 void create_depth_stencil_view(Device *dev, const D3D10DDIARG_CREATEDEPTHSTENCILVIEW *args,

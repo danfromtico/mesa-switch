@@ -16,13 +16,14 @@ static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter)
    return S_OK;
 }
 
-/* Keep the working D3D10 admission. The WDDM2.0/DXGI1.4 table remains under
- * control tests after the 0b9b7044 native trial failed before any mode switch.
- * Do not automatically expose that path in subsequent ordinary builds. */
+/* Retain the D3D10 entry points. WDDM2.0 admission now accepts the runtime's
+ * ROW_MAJOR CPU buffers and uses resource-creation DDI errors. Its native
+ * validation is separate from compilation and CPU contract controls. */
 static const UINT64 supported_versions[] = {
    D3D10_0_DDI_SUPPORTED,
    D3D10_0_x_DDI_SUPPORTED,
    D3D10_0_7_DDI_SUPPORTED,
+   D3DWDDM2_0_DDI_SUPPORTED,
 };
 
 static HRESULT APIENTRY GetSupportedVersions(D3D10DDI_HADAPTER, UINT32 *count, UINT64 *versions)

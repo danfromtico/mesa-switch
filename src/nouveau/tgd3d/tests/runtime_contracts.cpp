@@ -329,8 +329,8 @@ static void primary_creation_contract()
       alignas(Resource) unsigned char storage[sizeof(Resource)];
       D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
       table.pfnCreateResource({&dev}, &desc, {storage}, {rt_resource(0)});
-      CHECK(primaryError == DXGI_ERROR_UNSUPPORTED && SUCCEEDED(dev.lost));
-      CHECK(primary.DriverFlags == 0);
+      CHECK(primaryError == DXGI_DDI_ERR_UNSUPPORTED && SUCCEEDED(dev.lost));
+      CHECK(primary.DriverFlags == DXGI_DDI_PRIMARY_DRIVER_FLAG_NO_SCANOUT && !dev.resources);
       runtime_device_destroy(&dev);
    }
    std::puts("PASS: invalid rotated primary extents are rejected before allocation (CPU control)");
@@ -896,10 +896,12 @@ static void shared_tiled_contracts()
          tiledMetadata[offset] ^= 0x80;
       }
       for (unsigned failure = 0; failure < 2; ++failure) {
+         consumer.lost = S_OK; // independent CPU error-injection case
          tiledErrors = 0; tiledMismatch = failure == 0; tiledFailBind = failure == 1;
          table.pfnOpenResource({&consumer}, &open, {c}, {rt_resource(1)});
          CHECK(tiledErrors == 1 && !owners[1] && tiledImages == 1 && !tiledMapped[1]);
-         CHECK(tiledError == (failure == 0 ? DXGI_ERROR_UNSUPPORTED : E_OUTOFMEMORY));
+         CHECK(tiledError == (failure == 0 ? D3DDDIERR_DEVICEREMOVED : E_OUTOFMEMORY));
+         CHECK(FAILED(consumer.lost) == (failure == 0));
       }
       tiledMismatch = tiledFailBind = false; tiledErrors = 0;
       for (size_t i = 0; i < sizeof(bytes); ++i) bytes[i] = (BYTE)(i * 29 + i / 17);

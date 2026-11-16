@@ -413,7 +413,30 @@ static void resource_untrack(Device *dev, Resource *res)
    }
 }
 
-static void resource_fail(Device *dev, Resource *res, HRESULT hr)
+void resource_creation_error(Device *dev, HRESULT hr, DXGI_DDI_PRIMARY_DESC *primary)
+{
+   if (FAILED(dev->lost)) hr = dev->lost;
+   if (hr == D3DDDIERR_OUTOFVIDEOMEMORY) hr = E_OUTOFMEMORY;
+   if (primary && (hr == DXGI_ERROR_UNSUPPORTED || hr == DXGI_DDI_ERR_UNSUPPORTED)) {
+      /* This is the DDI scanout opt-out, not DXGI_ERROR_UNSUPPORTED from the
+       * public API. The latter is a critical runtime error, not a fallback.
+       * Only a failed primary creation can request the DXGI proxy path. */
+      primary->DriverFlags = DXGI_DDI_PRIMARY_DRIVER_FLAG_NO_SCANOUT;
+      TG_ERROR(dev, DXGI_DDI_ERR_UNSUPPORTED);
+   } else if (hr == E_OUTOFMEMORY) {
+      TG_ERROR(dev, hr);
+   } else {
+      /* Ordinary Create/OpenResource permits OOM and device removal. An
+       * unsupported/invalid internal request cannot become a successful
+       * resource or a fake OOM; retain its original reason in the trace and
+       * report that this device cannot continue through the allowed DDI code. */
+      RemovalOnlyErrorScope scope(dev);
+      TG_ERROR(dev, hr);
+   }
+}
+
+static void resource_fail(Device *dev, Resource *res, HRESULT hr,
+                          DXGI_DDI_PRIMARY_DESC *primary = nullptr)
 {
    /* Earlier initial-data uploads can already reference this backing when
     * a later subresource fails. Complete them before runtime-owned teardown. */
@@ -427,13 +450,7 @@ static void resource_fail(Device *dev, Resource *res, HRESULT hr)
       storage_destroy(dev, res->storage, true);
    resource_untrack(dev, res);
    res->~Resource();
-   /* Create/OpenResource accept E_OUTOFMEMORY, not the legacy video-memory
-    * error. Preserve removal discovered while unwinding initial uploads. */
-   if (FAILED(dev->lost))
-      hr = dev->lost;
-   else if (hr == D3DDDIERR_OUTOFVIDEOMEMORY)
-      hr = E_OUTOFMEMORY;
-   TG_ERROR(dev, hr);
+   resource_creation_error(dev, hr, primary);
 }
 
 static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *desc,
@@ -548,7 +565,8 @@ static void APIENTRY CreateResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_
    trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 0, (uintptr_t)res);
    HRESULT hr = create_resource(dev, desc, res);
    if (FAILED(hr))
-      resource_fail(dev, res, hr);
+      resource_fail(dev, res, hr,
+         (desc->BindFlags & D3D10_DDI_BIND_PRESENT) ? desc->pPrimaryDesc : nullptr);
    trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 0, (uintptr_t)res);
 }
 

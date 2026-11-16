@@ -105,7 +105,8 @@ void resource_creation_contracts()
    for (unsigned kind = 0; kind < 4; ++kind) {
       const bool buffer = kind == 1 || kind == 2;
       for (unsigned step = 1; step <= (kind ? 4u : 3u); ++step) {
-         for (VkResult error : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY, VK_ERROR_MEMORY_MAP_FAILED}) {
+         for (VkResult error : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY,
+                               VK_ERROR_MEMORY_MAP_FAILED, VK_ERROR_FORMAT_NOT_SUPPORTED, VK_ERROR_UNKNOWN}) {
             if (error == VK_ERROR_MEMORY_MAP_FAILED && step != 4) continue;
             Adapter adapter; Device dev; init(&dev, &adapter);
             failureStep = step; failureResult = error;
@@ -120,7 +121,11 @@ void resource_creation_contracts()
             alignas(Resource) unsigned char storage[sizeof(Resource)];
             D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
             table.pfnCreateResource({&dev}, &desc, {storage}, {});
-            CHECK(reported == E_OUTOFMEMORY && notifications == 1 && SUCCEEDED(dev.lost));
+            const bool recoverable = error == VK_ERROR_OUT_OF_HOST_MEMORY ||
+               error == VK_ERROR_OUT_OF_DEVICE_MEMORY || error == VK_ERROR_MEMORY_MAP_FAILED;
+            CHECK(reported == (recoverable ? E_OUTOFMEMORY : D3DDDIERR_DEVICEREMOVED) && notifications == 1);
+            CHECK(SUCCEEDED(dev.lost) == recoverable);
+            CHECK(!dev.resources);
             CHECK(!liveImages && !liveBuffers && !liveMemory && dev.chunks.empty() && !dev.currentChunk);
             /* A removed device rejects another create before allocation. */
             const unsigned previous = calls;

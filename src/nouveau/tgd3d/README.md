@@ -4,7 +4,9 @@
 `tgd3d`，DLL 为 `TegraGpuD3DVk.dll`；Zink 的 `TegraGpuD3D.dll` 和注册入口
 保持独立。构建开启不等于 Windows 已切换到这个 UMD。
 
-**WDDM2.0 UMD／DXGI1.4 MPO1 候选本轮实机失败，已撤下默认接口声明。** 新实现保留供修正和
+**上一轮WDDM2.0 UMD／DXGI1.4 MPO1候选实机失败。** 本轮修正runtime合法ROW_MAJOR缓冲区
+误拒绝及资源创建DDI错误码，新候选恢复接口声明，原生验证仍待完成；详见
+[资源入口修正](../../../tegra-x1-wddm/docs/UMD_LINEAR_RESOURCE_ADMISSION_20261116.md)。新实现保留供修正和
 控制验证；KMD仍为WDDM2.6，不能将两个版本号混为一谈。`0b9b7044`候选在切换方向之前即黑屏、
 鼠标时隐时现，DWM重建。06:31 UTC已核对恢复5b66bbec UMD、Code0和原ICD／KMD，清理候选工具。
 双向GPU Fence、登录约5秒后启用及平台设置保持。恢复实屏尚未另行验收。

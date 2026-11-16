@@ -1,4 +1,12 @@
-# 当前进度 — 2026-11-16 WDDM2.0试验失败，已恢复
+# 当前进度 — 2026-11-16 现代资源入口修正
+
+匹配runtime源码路径确认：CPU可访问buffer的TextureLayout由runtime自动设ROW_MAJOR，旧适配器
+错误拒绝；资源失败还混用了API与DDI错误。已修正线性buffer/staging接纳及Create/Open错误边界，
+新候选恢复现代接口声明，下一步原生验证。详见[资源入口记录](UMD_LINEAR_RESOURCE_ADMISSION_20261116.md)。
+最终候选状态见OUT `modern-resource-audit-20261116/checkpoint.json`；未据此宣称黑屏或列扫描通过。
+设备截至上一轮核对仍为5b/E95/95b，双向Fence和当前平台配置保留。VPS补充审计未登录，Gemini待额度恢复。
+
+## 前一轮 — 2026-11-16 WDDM2.0试验失败，已恢复
 
 `0b9b7044`启用现代接口的UMD `d17ff16d431cc93ac5a51d3d4384fba681540b43d197c2347b36a87200c4ed14`
 在切换方向前黑屏、鼠标时隐时现；DWM由PID1416重建为1496。本轮未开始横屏测试，不能归因为列扫描。
