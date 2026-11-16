@@ -1029,6 +1029,20 @@
       "controls": "Missing/partial/malformed resources, each map failure, null-success map, retained failed unmaps, snapshot and legacy/extended query guards/alias forms pass CPU controls; release masking regression red-before/green-after; real-WDK ARM64 objects and full render package build",
       "pairing": "Candidate KMD+extended ACPI must be installed/restored as a pair; baseline E95 alone rejects the additional resource descriptors"
     },
-    "native_decode_accepted": false
-  }
+    "native_decode_accepted": false,
+    "resource_native_result": {
+      "record": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
+      "date": "2026-11-16",
+      "resources_mapped": 9,
+      "snapshot_valid": false,
+      "smmu_config": "ffffffff",
+      "actmon_candidate_error": -3,
+      "actmon_restored_error": 0,
+      "baseline_restored": true,
+      "cleanup_complete": true,
+      "candidate_promoted": false
+    }
+  },
+  "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",
+  "deferred_load_stability": "LOAD_STABILITY_FOLLOWUP_20261116.json; weather/browser/vkpeak-exit grouped as user-suspected common cause, unconfirmed"
 }

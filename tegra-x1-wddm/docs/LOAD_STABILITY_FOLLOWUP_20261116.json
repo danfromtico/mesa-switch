@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "status": "deferred_by_user",
+  "recorded_utc": "2026-11-16T17:47:38.683881+00:00",
+  "user_report": {
+    "message": "同时打开vkpek与cpuz，关闭vkpeak时，没插电",
+    "workload": "vkpeak and CPU-Z concurrently; CPU-Z mode unknown",
+    "trigger": "Closing vkpeak",
+    "power": "battery, not plugged in",
+    "blue_screen": "Not specified",
+    "incident_time": "Not specified"
+  },
+  "additional_observations": [
+    "External power may improve it according to user; correlation only",
+    "User cautions it may not be GPU-specific"
+  ],
+  "evidence": {
+    "fresh_inventory_utc": "2026-11-16T17:42:49.6412023Z",
+    "components": "Installed E95 KMD,5b UMD,95b ICD,platform drivers and original ACPI matched current baseline hashes",
+    "dwm_pid": 1308,
+    "dwm_started_utc": "2026-11-16T17:34:36.3531494Z",
+    "code": 0,
+    "current_power": "AC online84%; reported failure was on battery",
+    "kernel_power_41": [
+      {
+        "utc": "2026-11-16T17:33:00.1218415Z",
+        "record_id": 55371,
+        "bugcheck_code": 0,
+        "power_button_timestamp": 0
+      },
+      {
+        "utc": "2026-11-16T17:25:33.4373373Z",
+        "record_id": 55300,
+        "bugcheck_code": 0,
+        "power_button_timestamp": 0
+      },
+      {
+        "utc": "2026-11-16T17:21:02.9571458Z",
+        "record_id": 55230,
+        "bugcheck_code": 0,
+        "power_button_timestamp": 0
+      }
+    ],
+    "dump_search": "No new Minidump/LiveKernelReports dmp since17:00Z; no memory dump returned",
+    "root_cause": "Unknown; Event41 with zero bugcheck cannot identify GPU,TDR,CPU,EMC or supply cause",
+    "explicit_os_restart": "17:17:09Z User32/RuntimeBroker restart request recorded separately from later unclean boots"
+  },
+  "preserved_local_evidence": "mesa-switch-woa-tgd3d-vulkan-out/load-stability-20261116",
+  "future_focus": [
+    "vkpeak close/termination with GPU work in flight",
+    "Submission,synchronization,preemption and TDR teardown",
+    "CPU/GPU/EMC transitions and shared power under load release"
+  ],
+  "reproduced_by_agent": false,
+  "driver_or_policy_modified": false,
+  "blocks_decode_phase": false,
+  "do_not_replay_without_resuming_task": true,
+  "group": "Desktop/app load transition freezes or unexpected restarts",
+  "related_user_reported_triggers": [
+    {
+      "trigger": "Open bottom-left Windows weather/widgets",
+      "power": "Not specified",
+      "agent_reproduced": false
+    },
+    {
+      "trigger": "Open browser",
+      "power": "Not specified",
+      "agent_reproduced": false
+    },
+    {
+      "trigger": "Close vkpeak while CPU-Z is also running",
+      "power": "Battery",
+      "agent_reproduced": false
+    }
+  ],
+  "common_cause": "User suspects a shared cause; hypothesis only, not established",
+  "exclude_from_group": [
+    "Explicit Windows restart requests",
+    "Cancelled180-to90 direction-return investigation",
+    "Mere SSH disconnect without reboot evidence"
+  ]
+}

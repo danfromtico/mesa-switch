@@ -171,13 +171,17 @@
       "acpi_sha256": "6b058b409beda750473fa61430cb5196c6191d3801167d7f3c13846077fdcf49",
       "query_tool_sha256": "5015d34e22878b225b58dcfb29fd484161f4412aec9d46ed99adb9371dda8a5d",
       "scope": "Optional resources plus immutable always-on state snapshot only; no NVDEC power-up, firmware, DMA, node or capability enabled",
-      "catalog_generated": false,
-      "windows_signature_verified": false,
+      "catalog_generated": true,
+      "windows_signature_verified": true,
       "native_installed": false,
       "signature_verified_local": true,
       "review": "Pending Gemini4 Carbon High; not before2026-11-20T23:53:18Z",
       "controls": "Missing/partial/malformed resources, each map failure, null-success map, retained failed unmaps, snapshot and legacy/extended query guards/alias forms pass CPU controls; release masking regression red-before/green-after; real-WDK ARM64 objects and full render package build",
-      "pairing": "Candidate KMD+extended ACPI must be installed/restored as a pair; baseline E95 alone rejects the additional resource descriptors"
+      "pairing": "Candidate KMD+extended ACPI must be installed/restored as a pair; baseline E95 alone rejects the additional resource descriptors",
+      "native_trial_completed": true,
+      "currently_installed": false,
+      "candidate_promoted": false,
+      "result": "All9resources mapped; globalSMMU read invalid; ACTMON readback difference unresolved; original pair restored and temporary files cleaned. No native decode."
     },
     "native_decode_executed": false,
     "physical_video_verified": false,
@@ -198,5 +202,6 @@
     "Real720p H.264 NVDEC execution and output-reference comparison",
     "Complete D3D11VA/NV12/GPU CSC/window presentation with real completion and safe retirement",
     "1080p integration and native acceptance after720p"
-  ]
+  ],
+  "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json"
 }
