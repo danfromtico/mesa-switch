@@ -85,7 +85,54 @@ Mac保留的失败轮实时流SHA256：
 本轮未改变KMD／UMD／ICD代码或平台电源策略，没有重建预旋转或呈现链。
 Gemini4 Carbon High仍待2026-11-20T23:53:18Z额度恢复，未声称独立审查通过。
 DXVK／SC7与NVDEC／D3D11VA交付继续独立保留；本次未整合。
-用户要求结束本轮排查，后续工作等待另行安排。
+用户要求结束本轮切向排查；随后允许继续本地工作，并单独要求把原生vkcube候选放到桌面。
+180°→90°异常仍未解决，不因后续构建或上传改为通过。
 
 本地完整证据：OUT `row-switch-evidence-20261116/`，含主机实时流、正常轮收据、
 用户指定基线、计划重启、异常重启、原生归档及清理收据。所有时刻均按UTC记录。
+
+## 原生vkcube本地构建与桌面暂存
+
+用户接管Switch测试Win Box64，主聊天改做本地工作；其后单独授权桌面上传。
+14:23:56 UTC完成暂存，没有启动vkcube、改变驱动、电源、方向或请求重启。
+用户的“不用校验”到达时，解包命令已发出；收取其已有回执后没有追加设备检查。
+当前仍由用户使用实机，上传授权不等于交回测试权限。
+
+桌面目录：`C:\Users\ruje\Desktop\vkcube-native-arm64-20261116-142245`。
+包内`vkcube-320x240.lnk`参数为`--width 320 --height 240 --gpu_number 0 --present_mode 2`。
+本地输出和收据位于OUT `fixed90-wsi-20261116/`。
+
+| 来源 | 未修改的固定提交 |
+|---|---|
+| Vulkan-Tools v1.4.354 | `ec6931a360d89d08f1c7578fa43958fb3829b10a` |
+| Vulkan-Loader v1.4.354 | `92f42301839b406b7d47d92b279db8f8744d8dcf` |
+| Vulkan-Headers v1.4.354 | `01393c3df0e5285b54ee6527466513f9e614be94` |
+| 已有`nvk-windows-check`与构建工具 | 本仓库`6fe28b2c369b65daae23e582069d3dc289ac14eb`，相关源码无差异 |
+
+| 候选文件 | 字节数 | 完整SHA256 |
+|---|---:|---|
+| vkcube.exe | 599040 | `7474369ec0c723b6aba05b9a6e87a778c251c7375ad77f1cd90cc2739a50688f` |
+| vulkan-1.dll | 692736 | `8b87b317a88d50491f695b97c4ac2ff3c85e944ea0a306213cae871fe48b806e` |
+| nvk-windows-check.exe | 63488 | `0d6c14827260eb6987d9cee20adb06f5f84d3d2e9b55e2d76d7202db092991bf` |
+
+`vulkan_core.h`与本仓库1.4.354头文件相同，SHA256为
+`55c06a17793bb1a9d752aa0906116fff9d1fb74f5dd3896777b92f124c9637aa`。
+包内manifest的SHA256为`6c50c060e0408d9f1f7aa5d2a41549a3ec43da02b905cae8139435ff01f3208c`。
+许可证、源码输入哈希和实际构建命令随包保留。旧来源不明的Dev Build loader
+`903719814032af3670373c7a82273917d80624d4ff0e50c3cbc3d72ae42b783a`仅保留历史用途，未放入本包。
+
+本地已完成ARM64交叉构建、cube／loader的PE架构及依赖检查、loader所需Win32／swapchain导出检查。
+Loader采用上游ARM64 GAS跳板，未关闭汇编支持；身份工具使用原源码，以`-Wall -Wextra -Werror`构建。
+Cube仍请求Vulkan1.0，所选路径需`VK_KHR_surface`、`VK_KHR_win32_surface`和`VK_KHR_swapchain`；
+静态源码核对不替代真实loader发现、扩展枚举及原生NVK LUID核对。
+该loader仅是应用目录内的构建候选，未安装到System32，也未修改已有ICD注册。
+
+接管前14:15:38 UTC的最后只读回执显示Code0、默认任务Ready、DWM1276实际加载5b UMD／95b ICD，
+三组件完整哈希与基线一致。该次没有重新读取方向或验收实屏，不能当作接管后的当前状态。
+
+后续须在用户明确交回设备后读取实际状态，再用已有`Exercise-DesktopWindow.ps1`
+显式指定`-DurationSeconds 40 -FullInteraction`完成必要桌面交互；不使用其360秒默认值。
+然后核对同一原生LUID的小窗口vkcube、移动／缩放／遮挡／恢复、实际画面、帧节拍和至少五分钟运行。
+保留实际swapchain重建和设备错误证据，不以存活时间或成功退出代替呈现通过。
+上述运行项均未验收；本轮没有GPU源码变化，不提升或替换既定工作基线。
+Gemini4 Carbon High仍待2026-11-20T23:53:18Z恢复，不声称独立审查通过。

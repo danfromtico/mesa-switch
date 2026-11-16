@@ -267,7 +267,7 @@
     "Long-term stability"
   ],
   "review": "Gemini4 Carbon High pending until2026-11-20T23:53:18Z; no independent approval",
-  "user_stop": "Do not continue fault investigation or repeat direction tests; document and update GitHub only",
+  "user_stop": "180-to90 fault investigation and repeated direction tests remain stopped. Later instructions allow local work and one Desktop upload only; current device use belongs to user for Switch Win Box64 testing.",
   "cleanup": {
     "native_files_archived_and_hash_checked": 190,
     "receipt": {
@@ -306,5 +306,135 @@
       43
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
+  },
+  "updated_utc": "2026-11-16T14:26:14.614761+00:00",
+  "device_access": {
+    "owner": "user",
+    "purpose": "Switch Win Box64 testing",
+    "main_local_work_allowed": true,
+    "main_native_access": "Suspended until explicit device return; Desktop upload exception completed",
+    "user_instructions": [
+      "你先做本地吧，我要测试switch win box64",
+      "你先传进去",
+      "放桌面",
+      "不用校验"
+    ],
+    "additional_checks_after_last_instruction": false
+  },
+  "last_readback_before_user_box64_hold": {
+    "utc": "2026-11-16T14:15:38.3503583Z",
+    "boot": "2026-11-16T13:54:51.6476840Z",
+    "device_codes": [
+      0
+    ],
+    "default_task": "Ready",
+    "dwm": [
+      {
+        "Modules": [
+          {
+            "ModuleName": "TegraGpuD3DVk.dll",
+            "FileName": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll"
+          },
+          {
+            "ModuleName": "libvulkan_nouveau.dll",
+            "FileName": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+          }
+        ],
+        "Id": 1276,
+        "Start": "2026-11-16T13:55:27.1864947Z"
+      }
+    ],
+    "files": [
+      {
+        "Sha256": "E95287CBEB1D2C325BAACB9685AFFD1D24783B22ECADC1801BA1DFFCFE7CC25E",
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys"
+      },
+      {
+        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll"
+      },
+      {
+        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+      }
+    ],
+    "orientation_rechecked": false,
+    "physical_acceptance": false,
+    "scope": "Read-only state before user hold; not current device state during user testing"
+  },
+  "local_vkcube_candidate": {
+    "upstream": {
+      "Vulkan-Tools": {
+        "url": "https://github.com/KhronosGroup/Vulkan-Tools",
+        "tag": "v1.4.354",
+        "commit": "ec6931a360d89d08f1c7578fa43958fb3829b10a",
+        "clean": true
+      },
+      "Vulkan-Loader": {
+        "url": "https://github.com/KhronosGroup/Vulkan-Loader",
+        "tag": "v1.4.354",
+        "commit": "92f42301839b406b7d47d92b279db8f8744d8dcf",
+        "clean": true
+      },
+      "Vulkan-Headers": {
+        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
+        "tag": "v1.4.354",
+        "commit": "01393c3df0e5285b54ee6527466513f9e614be94",
+        "clean": true
+      }
+    },
+    "helper_source_commit": "6fe28b2c369b65daae23e582069d3dc289ac14eb",
+    "helper_source_modified": false,
+    "gpu_source_modified": false,
+    "files": {
+      "vkcube.exe": {
+        "bytes": 599040,
+        "sha256": "7474369ec0c723b6aba05b9a6e87a778c251c7375ad77f1cd90cc2739a50688f"
+      },
+      "nvk-windows-check.exe": {
+        "bytes": 63488,
+        "sha256": "0d6c14827260eb6987d9cee20adb06f5f84d3d2e9b55e2d76d7202db092991bf"
+      },
+      "vulkan-1.dll": {
+        "bytes": 692736,
+        "sha256": "8b87b317a88d50491f695b97c4ac2ff3c85e944ea0a306213cae871fe48b806e"
+      }
+    },
+    "vulkan_core_h_sha256": "55c06a17793bb1a9d752aa0906116fff9d1fb74f5dd3896777b92f124c9637aa",
+    "headers_identical_to_mesa": true,
+    "loader_assembly": "Upstream ARM64 GAS unknown-extension trampoline compiled; no disabled assembly fallback",
+    "local_checks": [
+      "ARM64 PE for cube and loader",
+      "Cube Windows GUI and dynamically loaded Vulkan loader",
+      "Loader required Win32/swapchain exports present",
+      "Unmodified pinned upstream sources",
+      "Identity utility built with -Wall -Wextra -Werror"
+    ],
+    "desktop_directory": "C:\\Users\\ruje\\Desktop\\vkcube-native-arm64-20261116-142245",
+    "staged_utc": "2026-11-16T14:23:56.2240108Z",
+    "shortcut": "C:\\Users\\ruje\\Desktop\\vkcube-native-arm64-20261116-142245\\vkcube-320x240.lnk",
+    "arguments": "--width 320 --height 240 --gpu_number 0 --present_mode 2",
+    "package_manifest_sha256": "6c50c060e0408d9f1f7aa5d2a41549a3ec43da02b905cae8139435ff01f3208c",
+    "archive_sha256": "64c8f91290ab96a4c58edce3be8c94333b317ffc1ea08032c94514093f5caf4e",
+    "uploaded_archive_removed": true,
+    "native_executed_by_agent": false,
+    "gpu_acceptance": false,
+    "driver_changed": false,
+    "display_changed": false,
+    "reboot_requested": false,
+    "baseline_replaced": false,
+    "native_pending": [
+      "native loader discovery and current LUID",
+      "40-second ordinary window interaction",
+      "short small-window cube presentation",
+      "move/resize/occlusion/recovery",
+      "actual display and frame cadence",
+      "at least five minutes cube rendering"
+    ],
+    "ordinary_desktop_seconds": 40,
+    "ordinary_desktop_five_minutes": false,
+    "offscreen_gpu_test": false,
+    "existing_review_status": "No driver or helper source changes. Existing pending Gemini review remains pending until 2026-11-20T23:53:18Z; upstream binaries not independently approved",
+    "evidence_directory": "OUT/fixed90-wsi-20261116"
   }
 }
