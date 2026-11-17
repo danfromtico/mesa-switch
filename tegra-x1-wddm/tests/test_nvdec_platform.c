@@ -83,6 +83,11 @@ static void model_write(void *ctx, enum tg_nvdec_aperture ap, uint32_t off, uint
         (v & 7u) == 7u && !m.get_reset_fail)
         m.host[(CH_BASE+0x1c)/4] = m.host[(CH_BASE+0x18)/4];
     if (ap == TG_NVDEC_AP_HOST1X && off == CH_BASE + 0x18 && v == 16u) {
+        uint64_t start = m.host[(CH_BASE+0x14)/4];
+        uint64_t end = m.host[(CH_BASE+0x20)/4];
+        /* DMASTART/END delimit physical addresses; PUT is a ring offset.
+         * An invalid physical span cannot fetch this published gather. */
+        if (end <= start || start + v > end) { CHECK(false); return; }
         CHECK(m.push && m.push[3] == 0x20000000u);
         if (!m.submit_hang) ++m.host[SYNC_OFFSET/4];
     }
@@ -152,6 +157,7 @@ static void test_inherited_and_submit(void)
     CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
           push, 0x80000000, 16u * 1024u, 100, &expected, &observed) == TG_NVDEC_PLATFORM_OK);
     CHECK(expected == 1 && observed == 1 && push[0] == 0x3c00 && push[1] == 0x60000005);
+    CHECK(m.host[(CH_BASE+0x20)/4] == 0x80004004u);
     CHECK(push[3] == 0x20000000 && push[4096] == 0x50000000);
     m.submit_hang = true;
     CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
@@ -206,6 +212,24 @@ static void test_refuse_foreign_or_unknown_state(void)
     invalid = owner; invalid.acquire_host1x = NULL;
     CHECK(tg_nvdec_platform_init(&io, &p, CHANNEL, SYNCPT, &invalid) == TG_NVDEC_PLATFORM_ARGUMENT);
     CHECK(!m.writes && !m.acquire_calls);
+}
+static void test_push_address_boundary(void)
+{
+    struct tg_nvdec_platform p = {0};
+    uint32_t gather[8] = {0}, push[16] = {0}, expected = 0, observed = 0;
+    prepare(); m.push = push;
+    CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
+    unsigned writes = m.writes;
+    /* The exclusive end itself is a32-bit register. Exactly2^32 must not
+     * wrap to zero even though every allocated data byte would fit. */
+    CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
+          push, 0xffffffe0u, 28, 1, &expected, &observed) == TG_NVDEC_PLATFORM_ARGUMENT);
+    CHECK(m.writes == writes && !expected && !observed);
+    CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
+          push, 0xffffffe0u, 24, 1, &expected, &observed) == TG_NVDEC_PLATFORM_OK);
+    CHECK(m.host[(CH_BASE+0x14)/4] == 0xffffffe0u && m.host[(CH_BASE+0x20)/4] == 0xfffffffcu);
+    CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK);
+    retained_boot_state();
 }
 static void test_failed_cleanup_retains_ownership(void)
 {
@@ -295,6 +319,7 @@ static void test_clock_admission(void)
 int main(void)
 {
     test_inherited_and_submit();
+    test_push_address_boundary();
     test_refuse_foreign_or_unknown_state();
     test_failed_cleanup_retains_ownership();
     test_direct_route_is_not_assumed();
