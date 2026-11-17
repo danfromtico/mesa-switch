@@ -47,6 +47,10 @@ CHECK_OFFSET(redundant_pic_cnt_present_flag);
 CHECK_OFFSET(Reserved8BitsB);
 _Static_assert(sizeof(tgd3d_dxva_pic_h264) ==
                offsetof(DXVA_PicParams_H264, slice_group_change_rate_minus1), "picture prefix");
+_Static_assert(sizeof(tgd3d_dxva_pic_h264_buffer) == sizeof(DXVA_PicParams_H264),
+               "complete picture parameters");
+_Static_assert(offsetof(tgd3d_dxva_pic_h264_buffer, SliceGroupMap) ==
+               offsetof(DXVA_PicParams_H264, SliceGroupMap), "slice group map");
 _Static_assert(sizeof(tgd3d_dxva_pic_entry) == sizeof(DXVA_PicEntry_H264), "picture entry");
 _Static_assert(sizeof(tgd3d_dxva_slice_h264_short) == sizeof(DXVA_Slice_H264_Short), "short slice");
 _Static_assert(offsetof(tgd3d_dxva_slice_h264_short, wBadSliceChopping) ==

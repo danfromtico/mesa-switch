@@ -3,7 +3,7 @@
  * Minimal, layout-stable mirror of the DXVA H.264 decode structures that the
  * D3D11VA DDI receives.  The WDK dxva.h is avoided here because it conflicts
  * with the D3D10/11 UMD headers in C++; only the fields the NVDEC mapping
- * needs are declared, with the exact Microsoft ABI layout and sizes.
+ * needs and the full public picture-buffer footprint are declared.
  */
 #ifndef TGD3D_DXVA_H264_H
 #define TGD3D_DXVA_H264_H
@@ -78,6 +78,14 @@ typedef struct tgd3d_dxva_pic_h264 {
     uint8_t redundant_pic_cnt_present_flag;
     uint8_t Reserved8BitsB;
 } tgd3d_dxva_pic_h264;
+
+/* The application can submit the complete DXVA_PicParams_H264 even when
+ * the active PPS contains no slice groups. */
+typedef struct tgd3d_dxva_pic_h264_buffer {
+    tgd3d_dxva_pic_h264 picture;
+    uint16_t slice_group_change_rate_minus1;
+    uint8_t SliceGroupMap[810];
+} tgd3d_dxva_pic_h264_buffer;
 
 #pragma pack(push, 1)
 typedef struct tgd3d_dxva_slice_h264_short {

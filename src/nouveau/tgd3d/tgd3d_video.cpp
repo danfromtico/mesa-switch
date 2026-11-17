@@ -354,7 +354,10 @@ static HRESULT collect_buffers(
             return FAILED(dec->dev->lost) ? dec->dev->lost : E_INVALIDARG;
         switch (b->BufferType) {
         case D3D11_1DDI_VIDEO_DECODER_BUFFER_PICTURE_PARAMETERS:
-            if (dec->have_pic || b->DataSize != sizeof(tgd3d_dxva_pic_h264))
+            /* The mapper consumes only the prefix and rejects slice groups.
+             * A decoder may supply the public map storage after that prefix. */
+            if (dec->have_pic || b->DataSize < sizeof(dec->dxva_pic) ||
+                b->DataSize > sizeof(tgd3d_dxva_pic_h264_buffer))
                 return E_INVALIDARG;
             memcpy(&dec->dxva_pic, p, sizeof(dec->dxva_pic));
             dec->have_pic = true;
@@ -648,7 +651,7 @@ static VOID APIENTRY GetVideoDecoderBufferInfo(D3D10DDI_HDEVICE hDevice,
     *info = {};
     if (index >= 4 || !video_device_supported(D(hDevice)) || !decoder_desc_supported(desc))
         return;
-    static const UINT sizes[4] = {sizeof(tgd3d_dxva_pic_h264), sizeof(tgd3d_dxva_qmatrix_h264),
+    static const UINT sizes[4] = {sizeof(tgd3d_dxva_pic_h264_buffer), sizeof(tgd3d_dxva_qmatrix_h264),
         TG_NVDEC_MAX_SLICES * sizeof(tgd3d_dxva_slice_h264_short), bitstream_capacity};
     info->Type = types[index];
     info->Size = sizes[index];

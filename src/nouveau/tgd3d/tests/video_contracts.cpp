@@ -229,6 +229,8 @@ void decode_frame(unsigned fault, bool release_target_early)
       D3D11_1DDI_VIDEO_DECODER_BUFFER_INFO info = {};
       video.pfnGetVideoDecoderBufferInfo({&dev}, &args.Desc, i, &info);
       CHECK(info.Size && info.Usage == D3D11_1DDI_VIDEO_USAGE_PLAYBACK_NORMAL);
+      if (i == 0) CHECK(info.Type == D3D11_1DDI_VIDEO_DECODER_BUFFER_PICTURE_PARAMETERS &&
+                        info.Size == sizeof(tgd3d_dxva_pic_h264_buffer));
    }
    D3D11_1DDI_DEVICEFUNCS functions = {}; device_fill_table11(&functions);
    D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = mip.PhysicalWidth = 1280;
@@ -250,15 +252,17 @@ void decode_frame(unsigned fault, bool release_target_early)
    CHECK(res->slice.chunk->live == 2 && res->slice.chunk->videoWrites == 1);
    CHECK(video.pfnVideoDecoderBeginFrame({&dev}, decode, &begin) == E_INVALIDARG);
    slice_unmap(&dev, res->slice); CHECK(res->slice.cpu());
-   tgd3d_dxva_pic_h264 pic = {}; pic.wFrameWidthInMbsMinus1 = 79; pic.wFrameHeightInMbsMinus1 = 44;
+   tgd3d_dxva_pic_h264_buffer picture_buffer = {};
+   auto &pic = picture_buffer.picture;
+   pic.wFrameWidthInMbsMinus1 = 79; pic.wFrameHeightInMbsMinus1 = 44;
    pic.CurrPic.bPicEntry = 2; pic.wBitFields = 0x1050;
    std::memset(pic.RefFrameList, 0xff, sizeof(pic.RefFrameList));
    tgd3d_dxva_qmatrix_h264 matrix; std::memset(&matrix, 16, sizeof(matrix));
    const uint8_t stream[] = {0,0,1,0x65,0xaa};
    tgd3d_dxva_slice_h264_short slice = {0, sizeof(stream), 0};
    Resource buffers[4]; Chunk chunks[4];
-   const void *data[] = {&pic,&matrix,&slice,stream};
-   UINT lengths[] = {sizeof(pic),sizeof(matrix),sizeof(slice),sizeof(stream)};
+   const void *data[] = {&picture_buffer,&matrix,&slice,stream};
+   UINT lengths[] = {sizeof(picture_buffer),sizeof(matrix),sizeof(slice),sizeof(stream)};
    const D3D11_1DDI_VIDEO_DECODER_BUFFER_TYPE types[] = {
       D3D11_1DDI_VIDEO_DECODER_BUFFER_PICTURE_PARAMETERS,
       D3D11_1DDI_VIDEO_DECODER_BUFFER_INVERSE_QUANTIZATION_MATRIX,
@@ -270,8 +274,10 @@ void decode_frame(unsigned fault, bool release_target_early)
       input[i].hResource = {&buffers[i]}; input[i].BufferType = types[i]; input[i].DataSize = lengths[i];
    }
    if (fault == 1) input[2].DataSize--;
+   if (fault == 4) input[0].DataSize = sizeof(pic) - 1;
+   if (!fault && release_target_early) input[0].DataSize = sizeof(pic);
    HRESULT submitted = video.pfnVideoDecoderSubmitBuffers({&dev}, decode, 4, input);
-   CHECK((fault == 1) == FAILED(submitted));
+   CHECK((fault == 1 || fault == 4) == FAILED(submitted));
    if (fault == 2) { // a later invalid submission poisons already-complete inputs
       CHECK(FAILED(video.pfnVideoDecoderSubmitBuffers({&dev}, decode, 1, input)));
    }
@@ -282,7 +288,7 @@ void decode_frame(unsigned fault, bool release_target_early)
       CHECK(state.memories == 1 && state.buffers == 1);
    }
    video.pfnVideoDecoderEndFrame({&dev}, decode);
-   CHECK(state.decodes == (fault == 1 || fault == 2 ? 0u : 1u));
+   CHECK(state.decodes == (fault == 0 || fault == 3 ? 1u : 0u));
    CHECK(state.notifications == (fault ? 1u : 0u));
    if (!release_target_early) {
       CHECK(!res->slice.chunk->videoWrites && res->slice.chunk->live == 1);
@@ -304,5 +310,6 @@ void video_contracts()
    nv12_copy_planes();
    decode_frame(0, false); decode_frame(0, true);
    decode_frame(1, false); decode_frame(2, false); decode_frame(3, false);
+   decode_frame(4, false);
    std::puts("PASS: video KMT cleanup failures retain ownership; bounded DXVA buffers, frame errors and NV12 array backing survive view/resource release (CPU substitutes only)");
 }
