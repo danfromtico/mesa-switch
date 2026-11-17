@@ -193,14 +193,18 @@ void start(void)
     CHECK(text_equal(check_host_failure(&ddi,TgNvdecHostChannelFifo,11),
         "Host1x check=00000003 index=0000000b a=00000000 b=01020304 c=05060708 d=00000001 e=90000000 f=90004004 pll=48115408 src=80000003 uv=000bd358"));
     CHECK(adapter.Video.HostValue[4]==0x90000000u && adapter.Video.HostValue[5]==0x90004004u);
-    channel[0]=1u<<11;channel[0x18/4]=channel[0x1c/4]=channel[0x24/4]=0;
-    channel=nvregs[TgNvdecHost1x]+11u*0x4000u/4u;
-    channel[0x18/4]=0x100u;channel[0x1c/4]=0x80u;channel[0x24/4]=5;
-    check_host_failure(&ddi,TgNvdecHostChannelPointers,11);
-    CHECK(adapter.Video.HostValue[1]==0x100u && adapter.Video.HostValue[2]==0x80u && adapter.Video.HostValue[3]==5);
+    channel[0]=1u<<11;channel[0x18/4]=channel[0x1c/4]=0;
+    const ULONG bad_ctrl[]={0u,5u,MAXULONG};
+    for (UINT i=0;i<RTL_NUMBER_OF(bad_ctrl);++i) {
+        channel[0x24/4]=bad_ctrl[i];
+        check_host_failure(&ddi,TgNvdecHostChannelDmaState,11);
+        CHECK(!adapter.Video.HostValue[1] && !adapter.Video.HostValue[2] && adapter.Video.HostValue[3]==bad_ctrl[i]);
+    }
     CHECK(adapter.Video.HostValue[4]==0x90000000u && adapter.Video.HostValue[5]==0x90004004u);
-    channel[0x18/4]=channel[0x1c/4]=channel[0x24/4]=0;
-    channel[0x14/4]=channel[0x20/4]=0;
+    /* The actual native stopped first-use state must reach the backend,
+     * which separately verifies reset/gated engines and initializes its ring. */
+    channel[0x18/4]=0;channel[0x1c/4]=0x00121010u;channel[0x24/4]=1;
+    channel[0x14/4]=0x108e00a8u;channel[0x20/4]=0xa800a800u;
     ULONG *irq=&nvregs[TgNvdecHost1x][(0x2100u+0xf20u+4u*(191u/32u))/4u];
     *irq=1u<<31;check_host_failure(&ddi,TgNvdecHostSyncpointIrq,191);CHECK(adapter.Video.HostValue[0]==*irq);*irq=0;
     CHECK(!adapter.Video.HostValue[4] && !adapter.Video.HostValue[5]);
@@ -214,6 +218,7 @@ void start(void)
     adapter.Resources.DisplayRegisters=NULL;check_host_failure(&ddi,TgNvdecHostNoDisplay,0);adapter.Resources.DisplayRegisters=display;
     prepare_load();CHECK(call(&ddi,first)==0 && h->result==0 && h->session && held && creates==1);
     CHECK(!adapter.Video.HostCheck); /* Successful admission clears stale evidence. */
+    CHECK(channel[0x1c/4]==0x00121010u && channel[0x14/4]==0x108e00a8u && channel[0x20/4]==0xa800a800u);
     UINT64 session=h->session;CHECK(first->VideoReferences==1);
     make(TG_NVDEC_ESCAPE_CLOSE,0,0,session);CHECK(call(&ddi,second)==0 && h->result==STATUS_INVALID_HANDLE && held);
     make(TG_NVDEC_ESCAPE_CLOSE,0,0,session+1);CHECK(call(&ddi,first)==0 && h->result==STATUS_INVALID_HANDLE && held);

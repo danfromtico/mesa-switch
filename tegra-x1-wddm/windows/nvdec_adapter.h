@@ -14,7 +14,8 @@ enum TG_NVDEC_HOST_CHECK {
     TgNvdecHostSyncpointIrq,
     TgNvdecHostSyncpointValue,
     TgNvdecHostSyncpointChanged,
-    TgNvdecHostClockChanged
+    TgNvdecHostClockChanged,
+    TgNvdecHostChannelDmaState
 };
 typedef struct _TG_NVDEC_ADAPTER {
     KMUTEX Gate; /* lifecycle; always before Queue.DispatchGate */

@@ -24,6 +24,7 @@ static struct model {
     uint32_t push_bytes;
     unsigned writes, pmc_writes, host_writes, mbist_writes, global_clock_writes;
     unsigned acquire_calls, release_calls, status_reads;
+    uint32_t drop_host_write;
     bool held, acquire_fail, release_fail, source_fail, gate_clear_fail;
     bool reset_fail, mc_hang, mc_pulse, submit_hang, get_reset_fail;
 } m;
@@ -71,6 +72,7 @@ static void model_write(void *ctx, enum tg_nvdec_aperture ap, uint32_t off, uint
         else if (off == 0x21b0) CHECK(v == (1u << CHANNEL));
         else CHECK(off == CH_BASE+0x14u || off == CH_BASE+0x18u ||
                    off == CH_BASE+0x20u || off == CH_BASE+0x24u || off == CH_BASE+0x98u);
+        if (off == m.drop_host_write) return;
     }
     r[off/4] = v;
     if (ap == TG_NVDEC_AP_CAR && off == 0x29c) m.car[0x298/4] |= v;
@@ -120,8 +122,8 @@ static const struct tg_nvdec_platform_owner owner = {
 static void prepare(void)
 {
     memset(&m, 0, sizeof(m));
-    /* Power/CAR values from the resource preflight. Clamp-clear and empty
-     * Host1x are model prerequisites, not yet observed on the native board. */
+    /* Power/CAR from resource preflight and STOP/CFEMPTY from native admission.
+     * These model values do not establish that a new ring executes on hardware. */
     m.pmc[0x38/4] = 0x3ffecf4d;
     m.car[0x298/4] = 0x342;
     m.car[0x2a4/4] = 0x0fe9d09d;
@@ -129,6 +131,7 @@ static void prepare(void)
     m.car[0x69c/4] = 0xe0000000;
     m.mc[0x970/4] = m.mc[0x974/4] = 4;
     m.host[CH_BASE/4] = 1u << 11;
+    m.host[(CH_BASE+0x24)/4] = 1u;
 }
 static enum tg_nvdec_platform_result start(struct tg_nvdec_platform *p)
 { return tg_nvdec_platform_init(&io, p, CHANNEL, SYNCPT, &owner); }
@@ -146,11 +149,18 @@ static void test_inherited_and_submit(void)
     struct tg_nvdec_platform p = {0};
     uint32_t gather[8] = {0}, push[16 * 1024 + 2] = {0}, expected = 0, observed = 0;
     prepare(); m.push = push; m.push_bytes = 16u * 1024u + 4u;
+    /* Actual first-use snapshot: no software queue exists yet. The stopped
+     * channel's old pointers are not completion evidence for our new ring. */
+    m.host[(CH_BASE+0x14)/4] = 0x108e00a8u;
+    m.host[(CH_BASE+0x18)/4] = 0;
+    m.host[(CH_BASE+0x1c)/4] = 0x00121010u;
+    m.host[(CH_BASE+0x20)/4] = 0xa800a800u;
     /* Preserve the unrelated stopped channel observed on the native board. */
     m.host[0]=0x80100840u; m.host[0x18/4]=0; m.host[0x1c/4]=0x21d84cf0u; m.host[0x24/4]=1;
     m.host[0x21ac/4]=1u; /* another channel's command-processor stop bit */
     CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
     CHECK(p.active && p.nvdec_clock && p.host1x_clock && p.host1x_lease);
+    CHECK(m.host[(CH_BASE+0x1c)/4] == 0x00121010u && !m.host[SYNC_OFFSET/4]);
     CHECK(m.car[0x298/4] & (1u << 2));
     CHECK(m.car[0x698/4] == 0x80000002u); /* PLLP OUT0 / 2 */
     CHECK(!(m.car[0x2a4/4] & (1u << 2)) && (m.car[0x2a4/4] & (1u << 3)));
@@ -187,7 +197,7 @@ static void test_inherited_and_submit(void)
 }
 static void test_refuse_foreign_or_unknown_state(void)
 {
-    for (unsigned bad = 0; bad < 12; ++bad) {
+    for (unsigned bad = 0; bad < 15; ++bad) {
         struct tg_nvdec_platform p = {0}; prepare();
         if (bad == 0) m.pmc[0x38/4] &= ~(1u << 25);
         if (bad == 1) m.pmc[0x38/4] &= ~(1u << 26);
@@ -200,7 +210,10 @@ static void test_refuse_foreign_or_unknown_state(void)
         if (bad == 8) m.car[0x2a4/4] &= ~(1u << 3);
         if (bad == 9) m.car[0x698/4] = UINT32_MAX;
         if (bad == 10) m.host[CH_BASE/4] = 0;
-        if (bad == 11) m.host[(CH_BASE+0x18)/4] = 4;
+        if (bad == 11) m.host[(CH_BASE+0x24)/4] = 0; /* running, even GET==PUT */
+        if (bad == 12) m.host[(CH_BASE+0x24)/4] = UINT32_MAX;
+        if (bad == 13) m.host[(CH_BASE+0x24)/4] = 5; /* init in progress */
+        if (bad == 14) m.host[CH_BASE/4] = UINT32_MAX;
         CHECK(start(&p) != TG_NVDEC_PLATFORM_OK);
         CHECK(!m.writes && !p.active);
         CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK && !m.held);
@@ -214,6 +227,31 @@ static void test_refuse_foreign_or_unknown_state(void)
     invalid = owner; invalid.acquire_host1x = NULL;
     CHECK(tg_nvdec_platform_init(&io, &p, CHANNEL, SYNCPT, &invalid) == TG_NVDEC_PLATFORM_ARGUMENT);
     CHECK(!m.writes && !m.acquire_calls);
+}
+static void test_fresh_ring_readback_failure(void)
+{
+    const uint32_t dropped[] = {0, CH_BASE+0x14u, CH_BASE+0x20u};
+    for (unsigned fail = 0; fail < sizeof(dropped)/sizeof(dropped[0]); ++fail) {
+        struct tg_nvdec_platform p = {0};
+        uint32_t gather[8] = {0}, push[16] = {0}, expected = 123, observed = 456;
+        prepare(); m.push = push; m.push_bytes = sizeof(push);
+        m.host[(CH_BASE+0x1c)/4] = 0x00121010u;
+        CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
+        m.get_reset_fail = fail == 0;
+        m.drop_host_write = dropped[fail];
+        CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000u,
+              push, 0x80000000u, 16u, 2, &expected, &observed) == TG_NVDEC_PLATFORM_SUBMIT);
+        CHECK((m.host[(CH_BASE+0x24)/4] & 1u) && !m.host[(CH_BASE+0x18)/4]);
+        CHECK(!m.host[SYNC_OFFSET/4] && expected == 123 && observed == 456);
+        CHECK(p.active && p.host1x_lease && m.held && !m.release_calls);
+        m.get_reset_fail = false; m.drop_host_write = 0;
+        m.mc_hang = true;
+        CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_TIMEOUT);
+        CHECK(p.captured && p.host1x_lease && m.held && !m.release_calls);
+        m.mc_hang = false;
+        CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK);
+        retained_boot_state();
+    }
 }
 static void test_push_address_boundary(void)
 {
@@ -324,6 +362,7 @@ int main(void)
 {
     test_inherited_and_submit();
     test_push_address_boundary();
+    test_fresh_ring_readback_failure();
     test_refuse_foreign_or_unknown_state();
     test_failed_cleanup_retains_ownership();
     test_direct_route_is_not_assumed();

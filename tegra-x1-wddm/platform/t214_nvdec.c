@@ -201,7 +201,7 @@ enum tg_nvdec_platform_result tg_nvdec_platform_init(
     uint32_t channel, uint32_t syncpt,
     const struct tg_nvdec_platform_owner *owner)
 {
-    uint32_t power, clamp, toggle, gate, reset, source, flush, value, get, put;
+    uint32_t power, clamp, toggle, gate, reset, source, flush, value, ctrl;
     const uint32_t video_clocks = CAR_NVDEC_BIT | CAR_NVJPG_BIT;
 
     if (!valid_io(io) || !p || !owner || !owner->acquire_host1x ||
@@ -254,10 +254,14 @@ enum tg_nvdec_platform_result tg_nvdec_platform_init(
     p->host1x_clock = true;
 
     value = r32(io, TG_NVDEC_AP_HOST1X, channel_base(p));
-    get = r32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMAGET);
-    put = r32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMAPUT);
-    if (value == UINT32_MAX || get == UINT32_MAX || put == UINT32_MAX ||
-        !(value & HOST1X_CFEMPTY) || get != put)
+    ctrl = r32(io, TG_NVDEC_AP_HOST1X, channel_base(p) + HOST1X_CHANNEL_DMACTRL);
+    /* The caller has exclusively reserved a fresh software channel; the
+     * video engines above are still reset/gated. Require stopped DMA and an
+     * empty FIFO, not equality of inherited pointers to an unknown old ring.
+     * First submit programs and verifies our ring before starting DMA. This
+     * admission never retires a previous submission or signals completion. */
+    if (value == UINT32_MAX || ctrl == UINT32_MAX ||
+        !(value & HOST1X_CFEMPTY) || (ctrl & 7u) != HOST1X_DMACTRL_STOP)
         return TG_NVDEC_PLATFORM_OWNERSHIP;
     channel_stop(io, p);
     p->channel_started = true;
@@ -432,6 +436,13 @@ enum tg_nvdec_platform_result tg_nvdec_host1x_submit(
         push_size + 4u);
     w32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMACTRL,
         HOST1X_DMACTRL_STOP | HOST1X_DMACTRL_GETRST | HOST1X_DMACTRL_INITGET);
+    value = r32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMACTRL);
+    if (value == UINT32_MAX || !(value & HOST1X_DMACTRL_STOP) ||
+        r32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMASTART) != (uint32_t)push_bus ||
+        r32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMAEND) != push_size + 4u ||
+        r32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMAPUT) != 0 ||
+        r32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMAGET) != 0)
+        return TG_NVDEC_PLATFORM_SUBMIT;
     value = r32(io, TG_NVDEC_AP_HOST1X, HOST1X_CMDPROC_STOP);
     if (value == UINT32_MAX)
         return TG_NVDEC_PLATFORM_SUBMIT;

@@ -167,7 +167,7 @@ NTSTATUS TgNvdecAdapterStop(TG_GPU_ADAPTER *a)
 }
 
 /* This miniport owns the assigned Host1x aperture and exposes one decoder.
- * Refuse firmware activity, display syncpoints and an existing threshold IRQ
+ * Refuse active DMA/FIFO state, display syncpoints and an existing threshold IRQ
  * owner. A stable counter is only a preflight, never completion evidence. */
 static BOOLEAN host_reject(TG_GPU_ADAPTER *a, ULONG check, ULONG index,
                            ULONG v0, ULONG v1, ULONG v2, ULONG v3)
@@ -176,10 +176,10 @@ static BOOLEAN host_reject(TG_GPU_ADAPTER *a, ULONG check, ULONG index,
     a->Video.HostValue[0]=v0; a->Video.HostValue[1]=v1;
     a->Video.HostValue[2]=v2; a->Video.HostValue[3]=v3;
     a->Video.HostValue[4]=a->Video.HostValue[5]=0;
-    if (check==TgNvdecHostChannelFifo || check==TgNvdecHostChannelPointers) {
-        /* An unequal stopped GET/PUT pair does not identify the configured
-         * ring. Capture its address bounds before considering any handoff
-         * change; do not initialize/reset GET merely to pass admission. */
+    if (check==TgNvdecHostChannelFifo || check==TgNvdecHostChannelPointers ||
+        check==TgNvdecHostChannelDmaState) {
+        /* Read-only inherited ring evidence. The ownership guard never
+         * resets a channel or treats these values as completed work. */
         ULONG base=index*0x4000u;
         a->Video.HostValue[4]=read32(a,TG_NVDEC_AP_HOST1X,base+0x14u);
         a->Video.HostValue[5]=read32(a,TG_NVDEC_AP_HOST1X,base+0x20u);
@@ -193,9 +193,12 @@ static BOOLEAN host_idle(TG_GPU_ADAPTER *a)
     ULONG dc=READ_REGISTER_ULONG((PULONG)((PUCHAR)a->Resources.DisplayRegisters+4u*0x028u));
     if (dc==MAXULONG || ((dc&(1u<<8)) && (dc&255u)==VIDEO_SYNCPOINT))
         return host_reject(a,TgNvdecHostDisplaySyncpoint,0x028u,dc,0,0,0);
-    /* This decoder reserves channel11. A stopped foreign channel can retain
-     * different GET/PUT values; its state is not this channel's admission
-     * contract. Never reset or rewrite another channel to make it pass. */
+    /* This adapter has device-exclusive PnP ownership and reserves channel11
+     * for its single decoder under Video.Gate/DispatchGate. No software queue
+     * exists at create time. Require STOP and an empty FIFO; the backend also
+     * requires reset/gated video engines before it can initialize a new ring.
+     * Inherited GET/PUT equality is not the fresh-channel ownership contract.
+     * Other channels and display syncpoints are never initialized here. */
     {
         const ULONG channel=VIDEO_CHANNEL;
         ULONG off=channel*0x4000u, status=read32(a,TG_NVDEC_AP_HOST1X,off);
@@ -209,9 +212,9 @@ static BOOLEAN host_idle(TG_GPU_ADAPTER *a)
         }
         ULONG put=read32(a,TG_NVDEC_AP_HOST1X,off+0x18u);
         ULONG get=read32(a,TG_NVDEC_AP_HOST1X,off+0x1cu);
-        if (put!=get)
-            return host_reject(a,TgNvdecHostChannelPointers,channel,status,put,get,
-                read32(a,TG_NVDEC_AP_HOST1X,off+0x24u));
+        ULONG ctrl=read32(a,TG_NVDEC_AP_HOST1X,off+0x24u);
+        if (ctrl==MAXULONG || (ctrl&7u)!=1u)
+            return host_reject(a,TgNvdecHostChannelDmaState,channel,status,put,get,ctrl);
     }
     ULONG irq=read32(a,TG_NVDEC_AP_HOST1X,0x2100u+0xf20u+4u*(VIDEO_SYNCPOINT/32u));
     if (irq&(1u<<(VIDEO_SYNCPOINT%32u)))
