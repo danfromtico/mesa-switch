@@ -184,7 +184,11 @@ static BOOLEAN host_idle(TG_GPU_ADAPTER *a)
     ULONG dc=READ_REGISTER_ULONG((PULONG)((PUCHAR)a->Resources.DisplayRegisters+4u*0x028u));
     if (dc==MAXULONG || ((dc&(1u<<8)) && (dc&255u)==VIDEO_SYNCPOINT))
         return host_reject(a,TgNvdecHostDisplaySyncpoint,0x028u,dc,0,0,0);
-    for (ULONG channel=0;channel<12u;++channel) {
+    /* This decoder reserves channel11. A stopped foreign channel can retain
+     * different GET/PUT values; its state is not this channel's admission
+     * contract. Never reset or rewrite another channel to make it pass. */
+    {
+        const ULONG channel=VIDEO_CHANNEL;
         ULONG off=channel*0x4000u, status=read32(a,TG_NVDEC_AP_HOST1X,off);
         if (status==MAXULONG || !(status&(1u<<11))) {
             /* Read-only evidence on rejection; do not reset a channel or

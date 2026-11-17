@@ -66,6 +66,10 @@ static void model_write(void *ctx, enum tg_nvdec_aperture ap, uint32_t off, uint
     if (ap == TG_NVDEC_AP_CAR && off == 0x698 && m.source_fail) return;
     if (ap == TG_NVDEC_AP_HOST1X) {
         ++m.host_writes; CHECK(m.held); CHECK(off != SYNC_OFFSET);
+        if (off == 0x21ac) CHECK(!((r[off/4] ^ v) & ~(1u << CHANNEL)));
+        else if (off == 0x21b0) CHECK(v == (1u << CHANNEL));
+        else CHECK(off == CH_BASE+0x14u || off == CH_BASE+0x18u ||
+                   off == CH_BASE+0x20u || off == CH_BASE+0x24u || off == CH_BASE+0x98u);
     }
     r[off/4] = v;
     if (ap == TG_NVDEC_AP_CAR && off == 0x29c) m.car[0x298/4] |= v;
@@ -135,6 +139,9 @@ static void test_inherited_and_submit(void)
     struct tg_nvdec_platform p = {0};
     uint32_t gather[8] = {0}, push[16 * 1024 + 2] = {0}, expected = 0, observed = 0;
     prepare(); m.push = push;
+    /* Preserve the unrelated stopped channel observed on the native board. */
+    m.host[0]=0x80100840u; m.host[0x18/4]=0; m.host[0x1c/4]=0x21d84cf0u; m.host[0x24/4]=1;
+    m.host[0x21ac/4]=1u; /* another channel's command-processor stop bit */
     CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
     CHECK(p.active && p.nvdec_clock && p.host1x_clock && p.host1x_lease);
     CHECK(m.car[0x298/4] & (1u << 2));
@@ -166,6 +173,8 @@ static void test_inherited_and_submit(void)
      * from being acquired for a later decoder session. */
     CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
     CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK);
+    CHECK(m.host[0]==0x80100840u && !m.host[0x18/4] && m.host[0x1c/4]==0x21d84cf0u && m.host[0x24/4]==1);
+    CHECK(m.host[0x21ac/4] & 1u);
     retained_boot_state();
 }
 static void test_refuse_foreign_or_unknown_state(void)

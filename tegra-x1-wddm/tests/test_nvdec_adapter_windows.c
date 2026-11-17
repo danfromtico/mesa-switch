@@ -180,10 +180,17 @@ void start(void)
     core_floor_uv=637500u;prepare_load();
     CHECK(call(&ddi,first)==0 && h->result==STATUS_DEVICE_NOT_READY && !held && !creates && !first->VideoReferences);
     core_floor_uv=775000u;
-    ULONG *channel=nvregs[TgNvdecHost1x]+2u*0x4000u/4u;
+    /* Native channel0 snapshot: FIFO empty, stopped, unequal GET/PUT.
+     * It must not block or be rewritten by the channel11 decoder. */
+    ULONG *foreign=nvregs[TgNvdecHost1x];
+    foreign[0]=0x80100840u;foreign[0x18/4]=0;foreign[0x1c/4]=0x21d84cf0u;foreign[0x24/4]=1;
+    /* An unrelated active channel also stays outside this reservation. */
+    ULONG *active=nvregs[TgNvdecHost1x]+0x4000u/4u;
+    active[0]=0;active[0x18/4]=0x200u;active[0x1c/4]=0x100u;active[0x24/4]=0;
+    ULONG *channel=nvregs[TgNvdecHost1x]+11u*0x4000u/4u;
     channel[0]=0;channel[0x18/4]=0x01020304u;channel[0x1c/4]=0x05060708u;channel[0x24/4]=1;
-    CHECK(text_equal(check_host_failure(&ddi,TgNvdecHostChannelFifo,2),
-        "Host1x ownership check=00000003 index=00000002 a=00000000 b=01020304 c=05060708 d=00000001 pllp=48115408 src=80000003 floor=000bd358"));
+    CHECK(text_equal(check_host_failure(&ddi,TgNvdecHostChannelFifo,11),
+        "Host1x ownership check=00000003 index=0000000b a=00000000 b=01020304 c=05060708 d=00000001 pllp=48115408 src=80000003 floor=000bd358"));
     channel[0]=1u<<11;channel[0x18/4]=channel[0x1c/4]=channel[0x24/4]=0;
     channel=nvregs[TgNvdecHost1x]+11u*0x4000u/4u;
     channel[0x18/4]=0x100u;channel[0x1c/4]=0x80u;channel[0x24/4]=5;
@@ -222,6 +229,8 @@ void start(void)
     fail_release=FALSE;CHECK(TgGpuDdiDestroyDevice(first)==0 && !held && destroys==1 && !adapter.Video.Device);
     prepare_load();CHECK(call(&ddi,second)==0 && h->result==0 && h->session!=session && held);
     CHECK(TgGpuDdiDestroyDevice(second)==0 && !held && destroys==2 && !process.Devices && !pool_live);
+    CHECK(foreign[0]==0x80100840u && !foreign[0x18/4] && foreign[0x1c/4]==0x21d84cf0u && foreign[0x24/4]==1);
+    CHECK(!active[0] && active[0x18/4]==0x200u && active[0x1c/4]==0x100u && !active[0x24/4]);
     CHECK(acquires==3+host_rejections && releases==4+host_rejections);
     ULONG written;const char ok[]="PASS: NVDEC escape ownership, packet bounds, retained stop failures and lock order (CPU only)\n";
     WriteFile(GetStdHandle((ULONG)-11),ok,sizeof(ok)-1,&written,NULL);ExitProcess(0);
