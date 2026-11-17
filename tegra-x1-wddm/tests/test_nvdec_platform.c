@@ -258,18 +258,21 @@ static void test_direct_route_is_not_assumed(void)
 }
 static void test_clock_admission(void)
 {
-    CHECK(tg_nvdec_platform_clocks_supported(0x48115408u,0x60000006u));
-    CHECK(tg_nvdec_platform_clocks_supported(0x48115408u,0x80000000u));
-    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0x60000005u));
+    CHECK(tg_nvdec_platform_clocks_supported(0x48115408u,0x80000006u));
+    CHECK(tg_nvdec_platform_clocks_supported(0x48115408u,0x80000008u));
+    CHECK(tg_nvdec_platform_clocks_supported(0x48115408u,0xa0000000u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0x80000005u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0x80000000u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0x60000006u));
     CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0xe0000000u));
-    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0x60000106u));
-    CHECK(!tg_nvdec_platform_clocks_supported(UINT32_MAX,0x60000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0x80000106u));
+    CHECK(!tg_nvdec_platform_clocks_supported(UINT32_MAX,0x80000006u));
     CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,UINT32_MAX));
-    CHECK(!tg_nvdec_platform_clocks_supported(0x40115408u,0x60000006u));
-    CHECK(!tg_nvdec_platform_clocks_supported(0xc8115408u,0x60000006u));
-    CHECK(tg_nvdec_platform_clocks_supported(0x58005508u,0x60000006u));
-    CHECK(!tg_nvdec_platform_clocks_supported(0x58005408u,0x60000006u));
-    CHECK(!tg_nvdec_platform_clocks_supported(0x58005500u,0x60000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x40115408u,0x80000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0xc8115408u,0x80000006u));
+    CHECK(tg_nvdec_platform_clocks_supported(0x58005508u,0x80000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x58005408u,0x80000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x58005500u,0x80000006u));
 }
 int main(void)
 {

@@ -149,7 +149,7 @@ void start(void)
     for(UINT i=0;i<TgNvdecApertureCount;++i)adapter.Resources.NvdecMapping[i]=nvregs[i];
     adapter.Resources.Mapping[TgGpuHidrev]=&hidrev;adapter.Resources.Mapping[TgGpuMcFlush]=mc;
     adapter.Resources.DisplayRegisters=display;hidrev=0x12127;
-    nvregs[TgNvdecHostSource][0]=0x60000006;
+    nvregs[TgNvdecHostSource][0]=0x80000008; /* captured Noble rate81.6MHz, PLLP/5 */
     for(UINT c=0;c<12;++c)nvregs[TgNvdecHost1x][c*0x4000/4]=1u<<11;
     prepare_load();h->input_bytes=MAXULONG;CHECK(call(&ddi,first)==STATUS_INVALID_PARAMETER && !acquires);
     prepare_load();fail_pool=TRUE;CHECK(call(&ddi,first)==STATUS_NO_MEMORY && first->VideoReferences==0);fail_pool=FALSE;

@@ -152,8 +152,10 @@ bool tg_nvdec_platform_clocks_supported(uint32_t pllp, uint32_t source)
         if (!m || 38400u * n != 408000u * m) return false;
     }
     switch (source >> 29) {
-    case 3: return (source & 255u) >= 6u; /* PLLP/(divider+2)*2 <=102MHz */
-    case 4: return true; /* CLK_M <=38.4MHz, even before its local divider */
+    /* T210 selects tegra_clk_host1x_9, whose sparse mux table maps PLLP to4
+     * and CLK_M to5. Value3 is PLLC4_OUT2, outside this owner's contract. */
+    case 4: return (source & 255u) >= 6u; /* PLLP/(divider+2)*2 <=102MHz */
+    case 5: return true; /* CLK_M <=38.4MHz, even before its local divider */
     default: return false; /* no ownership claim over another PLL */
     }
 }
