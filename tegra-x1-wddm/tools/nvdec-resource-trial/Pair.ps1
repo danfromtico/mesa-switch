@@ -2,7 +2,7 @@
 # Bounded resource-only KMD/ACPI trial. The installed activation implementation
 # and exact original userspace registration are retained. No NVDEC DMA starts.
 param([Parameter(Mandatory=$true)]
- [ValidateSet('Prepare','StageCandidate','SelectCandidate','FinishCandidate','Recover','SelectBaseline','FinishBaseline','Inspect')]
+ [ValidateSet('Prepare','StagePackage','StageCandidate','SelectCandidate','FinishCandidate','Recover','SelectBaseline','FinishBaseline','Inspect')]
  [string]$Action)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -43,6 +43,55 @@ function Assert-RetainedFiles([switch]$Baseline) {
   if(!$Baseline -and $entry.Name -in @("$env:windir\System32\drivers\tegragpurender.sys","$env:windir\System32\acpitabl.dat")){continue}
   Assert-File $entry.Name $entry.Value
  }
+}
+function Find-StagedCandidate {
+ # Identify contents first. SetupAPI resolves registered INF names; it is not
+ # a content search and must not be given an arbitrary source-package INF.
+ $verified=Read-Json (Join-Path $root 'signature-result.json')
+ $members=@($verified.Files|Where-Object Directory -eq 'package')
+ if($members.Count -ne 13){throw 'Expected the complete verified candidate package'}
+ $matches=@(foreach($dir in Get-ChildItem "$env:windir\System32\DriverStore\FileRepository" -Directory -Filter 'tegragpurender.inf_arm64_*'){
+  $sys=Join-Path $dir.FullName 'tegragpurender.sys'
+  if(!(Test-Path -LiteralPath $sys)){continue}
+  $actual=File-Record $sys
+  if($actual.Length -eq $config.CandidateKmd.Length -and $actual.Sha256 -eq $config.CandidateKmd.Sha256){$dir.FullName}
+ })
+ if(!$matches.Count){return $null}
+ if($matches.Count -ne 1){throw 'Candidate driver-store identity is ambiguous'}
+ $directory=$matches[0]
+ $files=@(foreach($f in $members){
+  $path=Join-Path $directory $f.Name
+  Assert-File $path @{Length=$f.Bytes;Sha256=$f.Sha256}
+  @{Name=$f.Name;Length=$f.Bytes;Sha256=$f.Sha256}
+ })
+ if(!('NvdecPairStoreApi' -as [type])){Add-Type @'
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+public static class NvdecPairStoreApi {
+ [DllImport("setupapi.dll",CharSet=CharSet.Unicode,SetLastError=true)]
+ [return:MarshalAs(UnmanagedType.Bool)] public static extern bool SetupGetInfPublishedNameW(string path,StringBuilder value,uint size,out uint required);
+ [DllImport("setupapi.dll",CharSet=CharSet.Unicode,SetLastError=true)]
+ [return:MarshalAs(UnmanagedType.Bool)] public static extern bool SetupGetInfDriverStoreLocationW(string path,IntPtr platform,IntPtr locale,StringBuilder value,uint size,out uint required);
+}
+'@}
+ $inf=Join-Path $directory 'tegragpurender.inf'
+ $published=[Text.StringBuilder]::new(260);[uint32]$needed=0
+ if(![NvdecPairStoreApi]::SetupGetInfPublishedNameW($inf,$published,260,[ref]$needed)){throw ('Published INF query failed: '+[Runtime.InteropServices.Marshal]::GetLastWin32Error())}
+ $name=$published.ToString()
+ # This machine's22621 SetupAPI returns a basename. Also accept the fully
+ # qualified system-INF name described by the public API, never another path.
+ $leaf=[IO.Path]::GetFileName($name)
+ if($leaf -notmatch '^oem[0-9]+\.inf$'){throw 'Unexpected published INF name'}
+ $systemInf=Join-Path "$env:windir\INF" $leaf
+ if($name -ne $leaf -and [IO.Path]::GetFullPath($name) -ne [IO.Path]::GetFullPath($systemInf)){throw 'Published INF is outside the system INF directory'}
+ Assert-File $systemInf (File-Record $inf)
+ $resolved=[Text.StringBuilder]::new(260)
+ # Both reserved arguments are native NULL pointers. A PowerShell null bound
+ # to a managed string can become an empty string, which this API rejects.
+ if(![NvdecPairStoreApi]::SetupGetInfDriverStoreLocationW($systemInf,[IntPtr]::Zero,[IntPtr]::Zero,$resolved,260,[ref]$needed)){throw ('Driver-store query failed: '+[Runtime.InteropServices.Marshal]::GetLastWin32Error())}
+ if([IO.Path]::GetFullPath($resolved.ToString()) -ne [IO.Path]::GetFullPath($inf)){throw 'Published and driver-store INF identities differ'}
+ @{Directory=$directory;PublishedInf=$systemInf;Files=$files}
 }
 function Assert-Power {
  Add-Type -AssemblyName System.Windows.Forms
@@ -203,13 +252,39 @@ try {
   if($check.kmd.'tegragpurender.sys'.Sha256 -ne $config.CandidateKmd.Sha256){throw 'Candidate activation package differs'}
   $state.Phase='Prepared';$state.End=[DateTime]::UtcNow.ToString('o');Save-State $state
  }
+ elseif($Action -eq 'StagePackage') {
+  if(!$state -or $state.Phase -ne 'Prepared' -or $state.PackageStaged){throw 'Expected a prepared pair without a completed staging action'}
+  Assert-RetainedFiles -Baseline;Assert-Power
+  if((Device-Property 'ProblemCode') -ne 0){throw 'Baseline is not active'}
+  $receipt=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o');Reused=$false;ImportRequested=$false}
+  $staged=Find-StagedCandidate
+  if($staged){$receipt.Reused=$true}else{
+   # Publish intent before the external operation. A timeout must be inspected,
+   # not treated as permission to import again. This action never changes ACPI,
+   # closes native startup, selects a KMD or requests a restart.
+   $state.Phase='StagingPackage';Save-State $state
+   $receipt.ImportRequested=$true
+   Write-ActivationJson (Join-Path $root 'candidate-staging.json') $receipt
+   $output=& pnputil.exe /add-driver (Join-Path $root 'package\tegragpurender.inf');$exit=$LASTEXITCODE
+   $receipt.Exit=$exit;$receipt.Output=($output -join "`n")
+   Write-ActivationJson (Join-Path $root 'candidate-staging.json') $receipt
+   if($exit){throw ('Candidate package import failed: '+$exit)}
+   $staged=Find-StagedCandidate
+   if(!$staged){throw 'Imported candidate is not registered in the driver store'}
+  }
+  $receipt.Package=$staged;$receipt.End=[DateTime]::UtcNow.ToString('o')
+  Write-ActivationJson (Join-Path $root 'candidate-staging.json') $receipt
+  $state.Phase='Prepared';$state.PackageStaged=$true;Save-State $state
+ }
  elseif($Action -eq 'StageCandidate') {
   if(!$state -or $state.Phase -ne 'Prepared'){throw 'Expected a prepared, never-staged pair'}
   Assert-RetainedFiles -Baseline;Assert-Power
   $backup=Read-Json (Join-Path $root 'pair-backup.json')
   if((Read-Boot) -ne $backup.Boot -or (Device-Property 'ProblemCode') -ne 0){throw 'Prepared native state changed'}
-  & pnputil.exe /add-driver (Join-Path $root 'package\tegragpurender.inf')|Out-File (Join-Path $root 'candidate-staged.log')
-  if($LASTEXITCODE){throw 'Candidate driver-store staging failed'}
+  if(!$state.PackageStaged){throw 'StagePackage must finish before changing the boot table'}
+  $receipt=Read-Json (Join-Path $root 'candidate-staging.json')
+  $staged=Find-StagedCandidate
+  if(!$staged -or $staged.Directory -ne $receipt.Package.Directory -or $staged.PublishedInf -ne $receipt.Package.PublishedInf){throw 'Previously verified candidate staging changed'}
   $state.Phase='ClosingGate';Save-State $state
   Close-Gate
   Durable-Copy (Join-Path $root 'candidate-acpi.dat') "$env:windir\System32\acpitabl.dat"
@@ -278,7 +353,7 @@ try {
   $state.Query=$query;$state.Phase='CandidateObserved';$state.End=[DateTime]::UtcNow.ToString('o');Save-State $state
  }
  elseif($Action -eq 'Recover') {
-  if(!$state -or $state.Phase -in @('Prepared','Preparing','BaselineRebootRequested','SelectingBaseline','BaselineActivationRequested','Restored')){throw 'No eligible new recovery request'}
+  if(!$state -or $state.Phase -in @('Prepared','Preparing','StagingPackage','BaselineRebootRequested','SelectingBaseline','BaselineActivationRequested','Restored')){throw 'No eligible new recovery request'}
   $state.Phase='ClosingForRecovery';Save-State $state
   Close-Gate
   Durable-Copy (Join-Path $root 'baseline-acpi.dat') "$env:windir\System32\acpitabl.dat"
@@ -289,6 +364,7 @@ try {
  elseif($Action -eq 'SelectBaseline') {
   if(!$state -or $state.Phase -ne 'BaselineRebootRequested' -or (Read-Boot) -eq $state.Boot){throw 'Expected completed recovery ACPI boot'}
   Assert-Closed;Assert-File "$env:windir\System32\acpitabl.dat" $config.BaselineAcpi
+  Assert-LoadedDsdt (Read-LoadedDsdt (Join-Path $root 'loaded-before-baseline-selection.dat')) $config.BaselineAcpi
   $state.Phase='SelectingBaseline';Save-State $state
   Select-Package (Join-Path $root 'baseline-kmd') $config.BaselineKmd (Join-Path $root 'baseline-selection.json')
   $backup=Read-Json (Join-Path $root 'pair-backup.json');Restore-Registration $backup

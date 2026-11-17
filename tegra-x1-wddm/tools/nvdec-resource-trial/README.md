@@ -12,9 +12,17 @@ continuing:
 1. `Prepare` checks all baseline files and the loaded DSDT, captures the
    task/registration/power backup, and builds a separate activation directory
    from the installed files.
-2. `StageCandidate` stages the signed package, closes native startup, writes the
-   paired ACPI table and requests one restart.
-3. After the restart, `SelectCandidate` saves the loaded DSDT, GPU presence and
+2. `StagePackage` locates an already registered candidate by exact SYS identity,
+   checks all thirteen signed package members and verifies the published INF
+   and driver-store INF using public SetupAPI calls. It reuses a matching
+   package. If none exists, it records import intent, invokes `pnputil` without
+   `/install`, and verifies the registered contents afterward. It never changes
+   the boot table or activation task and never restarts Windows. If observation
+   expires during import, inspect the state/store before taking another action.
+3. `StageCandidate` requires the completed staging receipt and rechecks the
+   registered package. It performs no import: it closes native startup, writes
+   the paired ACPI table and requests one restart.
+4. After the restart, `SelectCandidate` saves the loaded DSDT, GPU presence and
    inherited power/EMC status before checking the closed gate. The loaded table
    must match the candidate, and the GPU must be present. Closed-gate EMC needs
    fresh rate/enumeration and valid ACTMON, with no enumeration/ACTMON/QoS or
@@ -26,16 +34,16 @@ continuing:
    Failed/missing platform status stops at
    `CandidatePlatformRejected`; recover the original pair rather than retrying
    selection. `Inspect` observes progress; it never retries activation.
-4. Once activation completes, `FinishCandidate` checks the loaded table again
+5. Once activation completes, `FinishCandidate` checks the loaded table again
    and requires full dynamic EMC/QoS readiness with all error fields zero
    before running the bounded resource query. Failure records
    `CandidatePlatformRejectedAfterActivation` and requires recovery. A
    successful query does not prove DMA or decode. Inspect its register validity
    and resource status before proceeding.
-5. `Recover` closes native startup, restores the original ACPI table and requests
-   one restart. After that boot, `SelectBaseline` restores the original KMD,
-   registration and task. `FinishBaseline` verifies the original file set and
-   loaded DSDT.
+6. `Recover` closes native startup, restores the original ACPI table and requests
+   one restart. After that boot, `SelectBaseline` verifies the loaded original
+   DSDT before restoring the KMD, registration and task. `FinishBaseline`
+   verifies the original file set and loaded DSDT.
 
 SSH observation timeouts do not authorize repeating an action. Interrupted or
 unexpected states require reading the durable state, selection receipts and
@@ -54,3 +62,12 @@ The loaded table comes from the public `GetSystemFirmwareTable` API (the first
 DSDT); a disk-file hash alone does not establish which table Windows loaded.
 Its pure PowerShell control exercises the actual selection and finish branches
 with native operations replaced; it does not prove hardware behavior.
+
+A later combined import/table-change boot loaded a4568-byte DSDT without GPU0,
+despite the expected candidate file on disk. The same candidate table had
+loaded in the ACPI-only control. Import and boot-table handoff are now separate
+actions so a verified existing package can be reused without repeating import.
+That sequencing change does not establish why the earlier override was absent;
+the loaded-table guard remains mandatory. Staging receipts use the existing
+durable JSON writer instead of relying on a redirected text log, which was
+all NUL bytes after the failed boot.
