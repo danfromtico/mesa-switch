@@ -23,16 +23,25 @@ static const D3D10DDI_DEVICEFUNCS &legacy()
    return functions;
 }
 
-static bool resource_desc(const D3D11DDIARG_CREATERESOURCE *in, D3D10DDIARG_CREATERESOURCE *out)
+static bool resource_desc(Device *dev, const D3D11DDIARG_CREATERESOURCE *in,
+                          D3D10DDIARG_CREATERESOURCE *out)
 {
-   if (!in || !in->pMipInfoList || in->ByteStride ||
+   if (!in || !in->pMipInfoList ||
        (in->BindFlags & (D3D11_DDI_BIND_UNORDERED_ACCESS |
                         D3D11_DDI_BIND_VIDEO_ENCODER)) ||
        (in->MiscFlags & (D3D11_DDI_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS |
                         D3D11_DDI_RESOURCE_MISC_BUFFER_STRUCTURED)))
       return false;
-   if ((in->BindFlags & D3D11_DDI_BIND_DECODER) && in->Format != DXGI_FORMAT_NV12)
+   if (in->ResourceDimension == D3D10DDIRESOURCE_BUFFER && (in->BindFlags & D3D11_DDI_BIND_DECODER)) {
+      /* Runtime-created decoder inputs are opaque byte buffers. The type of
+       * each occupied byte range is supplied to VideoDecoderSubmitBuffers. */
+      if (!video_device_supported(dev) || in->BindFlags != D3D11_DDI_BIND_DECODER ||
+          in->Format != DXGI_FORMAT_UNKNOWN || in->Usage != D3D10_DDI_USAGE_DYNAMIC ||
+          in->MapFlags != D3D10_DDI_CPU_ACCESS_WRITE || in->MiscFlags || in->pPrimaryDesc)
+         return false;
+   } else if (in->ByteStride || ((in->BindFlags & D3D11_DDI_BIND_DECODER) && in->Format != DXGI_FORMAT_NV12)) {
       return false;
+   }
    /* The 11.1 producer does not provide the WDDM2 TextureLayout tail. Only
     * access fields belonging to the negotiated descriptor revision. */
    out->pMipInfoList = in->pMipInfoList;
@@ -59,7 +68,7 @@ static void APIENTRY CreateResource(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATE
                                     D3D10DDI_HRESOURCE resource, D3D10DDI_HRTRESOURCE rt)
 {
    D3D10DDIARG_CREATERESOURCE desc = {};
-   if (!resource_desc(in, &desc)) {
+   if (!resource_desc(D(h), in, &desc)) {
       resource_creation_error(D(h), DXGI_ERROR_UNSUPPORTED,
          in && (in->BindFlags & D3D10_DDI_BIND_PRESENT) ? in->pPrimaryDesc : nullptr);
       return;

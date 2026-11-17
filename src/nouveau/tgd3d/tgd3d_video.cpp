@@ -186,7 +186,8 @@ void video_adapter_init(Adapter *adapter)
 static bool resource_cpu(Resource *res, uint32_t offset, uint32_t size,
                          const uint8_t **out, uint32_t *stride)
 {
-    if (!res || !res->slice || res->bufferMapped || res->kind != ResKind::Buffer)
+    if (!res || !res->slice || res->bufferMapped || res->kind != ResKind::Buffer ||
+        res->bind != D3D11_DDI_BIND_DECODER)
         return false;
     if (offset > res->size || size > res->size - offset)
         return false;
@@ -721,7 +722,9 @@ static VOID APIENTRY GetVideoDecoderBufferInfo(D3D10DDI_HDEVICE hDevice,
         TG_NVDEC_MAX_SLICES * sizeof(tgd3d_dxva_slice_h264_short), bitstream_capacity};
     info->Type = types[index];
     info->Size = sizes[index];
-    info->Usage = D3D11_1DDI_VIDEO_USAGE_PLAYBACK_NORMAL;
+    /* The native D3D11 runtime uses this field as D3D11_BUFFER_DESC::Usage
+     * for the CPU-writable input returned by GetDecoderBuffer. */
+    info->Usage = D3D10_DDI_USAGE_DYNAMIC;
 }
 
 void video_fill_table(D3D11_1DDI_VIDEODEVICEFUNCS *table)

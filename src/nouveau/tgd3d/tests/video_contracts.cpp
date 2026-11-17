@@ -170,6 +170,40 @@ void processor_enumeration()
    CHECK(!state.opens && !state.devices && !state.notifications);
 }
 
+void decoder_input_buffers()
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) {};
+   D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
+   D3D11_1DDI_DEVICEFUNCS ddi; device_fill_table11(&ddi);
+   const auto decoder = decoder_args(dev, video);
+   for (UINT i = 0; i < 4; ++i) {
+      D3D11_1DDI_VIDEO_DECODER_BUFFER_INFO info = {};
+      video.pfnGetVideoDecoderBufferInfo({&dev}, &decoder.Desc, i, &info);
+      D3D10DDI_MIPINFO mip = {};
+      mip.TexelWidth = mip.PhysicalWidth = info.Size;
+      mip.TexelHeight = mip.PhysicalHeight = mip.TexelDepth = mip.PhysicalDepth = 1;
+      D3D11DDIARG_CREATERESOURCE desc = {};
+      desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_BUFFER;
+      desc.Usage = info.Usage; desc.MapFlags = D3D10_DDI_CPU_ACCESS_WRITE;
+      desc.BindFlags = D3D11_DDI_BIND_DECODER; desc.DecoderBufferType = info.Type;
+      desc.MipLevels = desc.ArraySize = desc.SampleDesc.Count = 1;
+      alignas(Resource) uint8_t storage[sizeof(Resource)];
+      D3D10DDI_HRESOURCE h = {storage};
+      ddi.pfnCreateResource({&dev}, &desc, h, {(HANDLE)1});
+      CHECK(!state.notifications);
+      D3D10DDI_MAPPED_SUBRESOURCE mapped = {};
+      ddi.pfnDynamicResourceMapDiscard({&dev}, h, 0, D3D10_DDI_MAP_WRITE_DISCARD, 0, &mapped);
+      CHECK(!state.notifications && mapped.pData && mapped.RowPitch == info.Size);
+      std::memset(mapped.pData, 0x19, info.Size);
+      ddi.pfnDynamicResourceUnmap({&dev}, h, 0);
+      ddi.pfnDestroyResource({&dev}, h);
+      CHECK(!state.notifications);
+   }
+   upload_destroy(&dev);
+   CHECK(!state.buffers && !state.memories);
+}
+
 void nv12_copy_planes()
 {
    Device dev; Adapter adapter; init(dev, adapter);
@@ -272,7 +306,7 @@ void decode_frame(unsigned fault, bool release_target_early)
    for (UINT i = 0; i < 4; ++i) {
       D3D11_1DDI_VIDEO_DECODER_BUFFER_INFO info = {};
       video.pfnGetVideoDecoderBufferInfo({&dev}, &args.Desc, i, &info);
-      CHECK(info.Size && info.Usage == D3D11_1DDI_VIDEO_USAGE_PLAYBACK_NORMAL);
+      CHECK(info.Size && info.Usage == D3D10_DDI_USAGE_DYNAMIC);
       if (i == 0) CHECK(info.Type == D3D11_1DDI_VIDEO_DECODER_BUFFER_PICTURE_PARAMETERS &&
                         info.Size == sizeof(tgd3d_dxva_pic_h264_buffer));
    }
@@ -315,6 +349,7 @@ void decode_frame(unsigned fault, bool release_target_early)
    for (UINT i=0;i<4;++i) {
       chunks[i].cpu = (uint8_t *)data[i]; chunks[i].size = lengths[i];
       buffers[i].dev = &dev; buffers[i].size = lengths[i]; buffers[i].slice = {&chunks[i],0,lengths[i]};
+      buffers[i].bind = D3D11_DDI_BIND_DECODER;
       input[i].hResource = {&buffers[i]}; input[i].BufferType = types[i]; input[i].DataSize = lengths[i];
    }
    if (fault == 1) input[2].DataSize--;
@@ -350,6 +385,7 @@ void decode_frame(unsigned fault, bool release_target_early)
 void video_contracts()
 {
    processor_enumeration();
+   decoder_input_buffers();
    retained_cleanup();
    nv12_copy_planes();
    nv12_clear_output_view();
