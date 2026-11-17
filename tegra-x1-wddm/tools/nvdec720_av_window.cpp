@@ -11,6 +11,7 @@
 #include <dwmapi.h>
 #include <evntprov.h>
 #include <evntrace.h>
+#include <io.h>
 #include <algorithm>
 #include <cstddef>
 #include <cmath>
@@ -250,8 +251,10 @@ public:
          c->Draw(3,0);
          if (first) journal.mark("RETURN","DrawCSC");
          c->OMSetRenderTargets(0,nullptr,nullptr);views[0]=views[1]=nullptr;c->PSSetShaderResources(0,2,views);
+         if (check_first) journal.mark("CALL","CopyFirstBackBuffer");
          if (last || check_first) c->CopyResource(readback.p,back.p);
          if (check_first) {
+            journal.mark("RETURN","CopyFirstBackBuffer");
             journal.mark("CALL","FlushFirstDrawAndCopy");
             c->Flush();
             journal.mark("RETURN","FlushFirstDrawAndCopy");
@@ -297,6 +300,8 @@ public:
             }
             ok=std::fwrite(row,1,sizeof(row),file)==sizeof(row);
          }
+         if (ok && index==0)
+            ok=std::fflush(file)==0 && _commit(_fileno(file))==0;
          ok=std::fclose(file)==0 && ok;check(ok,"write preview capture");
       }
       mapping.finish();
