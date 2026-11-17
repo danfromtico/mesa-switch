@@ -39,10 +39,13 @@ static unsigned shaderBackendCalls;
 /* Fault injection surrounds the actual production submission path. */
 static bool failNextNew, countNewAfterSubmit;
 static unsigned newAfterSubmit;
+static bool countTextureAllocations;
+static unsigned textureAllocations;
 void *operator new(size_t bytes)
 {
    if (failNextNew) { failNextNew = false; throw std::bad_alloc(); }
    if (countNewAfterSubmit) ++newAfterSubmit;
+   if (countTextureAllocations) ++textureAllocations;
    if (void *p = std::malloc(bytes ? bytes : 1)) return p;
    throw std::bad_alloc();
 }
@@ -821,7 +824,11 @@ static void descriptor_contract()
    table.pfnDraw({&dev}, 3, 0);
    CHECK(updates == 1 && cbBindings == std::vector<uint32_t>({13,27,41}));
    CHECK(cbOffsets[0] == 0 && cbOffsets[1] == 256 && cbOffsets[2] == 512);
-   table.pfnDraw({&dev}, 3, 0); CHECK(updates == 1);
+   textureAllocations = 0; countTextureAllocations = true;
+   table.pfnDraw({&dev}, 3, 0);
+   countTextureAllocations = false;
+   std::printf("Steady descriptor draw allocations: %u\n", textureAllocations);
+   CHECK(updates == 1 && textureAllocations == 0);
    cb[0].slice.offset = 768; dev.stage[0].cbDirty = 1 << 13;
    table.pfnDraw({&dev}, 3, 0);
    CHECK(updates == 2 && cbOffsets[0] == 768 && cbOffsets[1] == 256 && cbOffsets[2] == 512);

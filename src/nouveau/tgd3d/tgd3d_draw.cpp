@@ -186,13 +186,20 @@ static bool bind_textures(Device *dev, VkCommandBuffer cmd)
          any |= (shader->srvMask[word] & ~shader->srvBufferMask[word]) != 0;
       any_buffers |= shader->usesTexelBuffers;
    }
+   const bool textures_dirty = any && (dev->dirty & DIRTY_TEXTURES);
+   const bool buffers_dirty = any_buffers && (dev->dirty & DIRTY_TEXEL_BUFFERS);
+   if (!textures_dirty && !buffers_dirty)
+      return true;
+
    std::vector<VkWriteDescriptorSet> writes;
    std::vector<VkDescriptorImageInfo> images;
    std::vector<VkBufferView> buffers;
-   images.reserve(STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
-   buffers.reserve(STAGE_COUNT * D3D_SRV_SLOTS);
+   if (textures_dirty)
+      images.reserve(STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
+   if (buffers_dirty)
+      buffers.reserve(STAGE_COUNT * D3D_SRV_SLOTS);
 
-   if (any && (dev->dirty & DIRTY_TEXTURES)) {
+   if (textures_dirty) {
       VkDescriptorSet set = descriptor_set_alloc(dev, SET_TEX);
       if (!set)
          return false;
@@ -244,7 +251,7 @@ static bool bind_textures(Device *dev, VkCommandBuffer cmd)
       dev->textureSet = set;
    }
 
-   if (any_buffers && (dev->dirty & DIRTY_TEXEL_BUFFERS)) {
+   if (buffers_dirty) {
       VkDescriptorSet set = descriptor_set_alloc(dev, SET_TBUF);
       if (!set)
          return false;
