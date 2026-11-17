@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: MIT
  * Optional Windows telemetry for an actually created Mesa device/screen.
- * A local read-only observer can distinguish Vulkan/Zink without DLL injection
+ * Kind 1 is native Vulkan, 2 is Zink, 3 is the tgd3d D3D10/11 frontend.
+ * A local read-only observer can distinguish these without DLL injection
  * or inferring Zink from the presence of a multi-driver opengl32.dll.
  * No rendering, synchronization, clock or device policy depends on this marker.
  */

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "nvk_device.h"
+#include <string.h>
 
 #include "nvk_cmd_buffer.h"
 #include "nvk_entrypoints.h"
@@ -562,7 +563,14 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
          goto fail_mem_cache;
    }
 
-   util_graphics_api_marker_open(&dev->graphics_api_marker, 1); /* active Vulkan device */
+   /* The matched tgd3d frontend opts into the private embedded instance and
+    * identifies its engine at instance creation. A merely loaded UMD DLL
+    * cannot identify which frontend owns this successfully created device. */
+   const struct nvk_instance *instance = nvk_physical_device_instance(pdev);
+   const bool tgd3d_frontend = instance->allow_embedded_gm20b &&
+      instance->vk.app_info.engine_name &&
+      strcmp(instance->vk.app_info.engine_name, "tgd3d") == 0;
+   util_graphics_api_marker_open(&dev->graphics_api_marker, tgd3d_frontend ? 3 : 1);
    *pDevice = nvk_device_to_handle(dev);
 #ifdef _WIN32
    if (runtime_info) *runtime_info->accepted = true;
