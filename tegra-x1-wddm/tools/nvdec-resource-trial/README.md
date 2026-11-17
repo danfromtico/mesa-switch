@@ -89,7 +89,16 @@ continuing:
    expires during import, inspect the state/store before taking another action.
 3. `StageCandidate` requires the completed staging receipt and rechecks the
    registered package. It performs no import: it closes native startup, writes
-   the paired ACPI table and requests one restart.
+   the paired ACPI table and requests one restart. Before requesting that boot,
+   `Commit-BootTable` flushes the file, resolves and flushes its actual volume,
+   then requires an exact SHA256/length match from a bounded unbuffered read.
+   `boot-table-candidate.json` records copy, volume flush, readback and failure
+   boundaries. An existing receipt cannot be silently retried. `Recover` uses
+   the same contract with `boot-table-baseline.json`. Any I/O failure or mismatch
+   prevents the restart request. This strengthens the observable handoff; it
+   does not prove that winload subsequently reads or accepts the table, nor
+   establish the cause of the previously observed old-table boot. Loaded-DSDT
+   and device checks after the boot remain mandatory.
 4. After the restart, `SelectCandidate` saves the loaded DSDT, GPU presence and
    inherited power/EMC status before checking the closed gate. The loaded table
    must match the candidate, and the GPU must be present. Closed-gate EMC needs
@@ -128,6 +137,15 @@ selection and checks active EMC during baseline preparation. Fan33's matching
 source distinguishes the closed-gate handoff from active GPU operation.
 The loaded table comes from the public `GetSystemFirmwareTable` API (the first
 DSDT); a disk-file hash alone does not establish which table Windows loaded.
+
+The volume operation uses the documented administrative
+[FlushFileBuffers](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers)
+contract. Unbuffered reads use an allocation-aligned buffer and64KiB request
+multiples, bounded to1MiB, and require the actual file byte count. This has been
+checked on the target storage; an unsupported alignment fails the handoff.
+`tests/Test-BootTable.ps1` replaces native effects and checks that candidate and
+recovery reboots cannot follow a failed or interrupted commit. Those controls
+are not hardware durability or boot acceptance evidence.
 Its pure PowerShell control exercises the actual selection and finish branches
 with native operations replaced; it does not prove hardware behavior.
 

@@ -31,6 +31,79 @@ function Durable-Copy([string]$From,[string]$To){
  try{$f.Flush($true)}finally{$f.Dispose()}
  Assert-File $To (File-Record $From)
 }
+function Initialize-BootTableIo {
+ if('NvdecBootTableIo' -as [type]){return}
+ Add-Type @'
+using System;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
+using Microsoft.Win32.SafeHandles;
+public static class NvdecBootTableIo {
+ [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)]
+ static extern bool GetVolumePathNameW(string path,StringBuilder volume,uint size);
+ [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)]
+ static extern bool GetVolumeNameForVolumeMountPointW(string path,StringBuilder volume,uint size);
+ [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)]
+ static extern SafeFileHandle CreateFileW(string path,uint access,uint share,IntPtr security,uint disposition,uint flags,IntPtr template);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool FlushFileBuffers(SafeFileHandle file);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetFileSizeEx(SafeFileHandle file,out long size);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool ReadFile(SafeFileHandle file,IntPtr buffer,uint size,out uint read,IntPtr overlapped);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern IntPtr VirtualAlloc(IntPtr address,UIntPtr size,uint allocation,uint protection);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool VirtualFree(IntPtr address,UIntPtr size,uint type);
+ public static string FlushVolume(string path) {
+  StringBuilder mount=new StringBuilder(1024), volume=new StringBuilder(1024);
+  if(!GetVolumePathNameW(path,mount,1024) || !GetVolumeNameForVolumeMountPointW(mount.ToString(),volume,1024))
+   throw new Win32Exception(Marshal.GetLastWin32Error());
+  string name=volume.ToString().TrimEnd('\\');
+  using(SafeFileHandle h=CreateFileW(name,0x40000000,3,IntPtr.Zero,3,0,IntPtr.Zero)) {
+   if(h.IsInvalid || !FlushFileBuffers(h))throw new Win32Exception(Marshal.GetLastWin32Error());
+  }
+  return name;
+ }
+ public static byte[] ReadUnbuffered(string path) {
+  using(SafeFileHandle h=CreateFileW(path,0x80000000,1,IntPtr.Zero,3,0x20000000,IntPtr.Zero)) {
+   if(h.IsInvalid)throw new Win32Exception(Marshal.GetLastWin32Error());
+   long size;if(!GetFileSizeEx(h,out size))throw new Win32Exception(Marshal.GetLastWin32Error());
+   if(size<36 || size>1048576)throw new IOException("Boot table size is outside the bounded read");
+   // VirtualAlloc is allocation-granularity aligned. The request is a64KiB
+   // multiple; the actual returned byte count must still equal the file size.
+   uint aligned=(uint)((size+65535)&~65535L);
+   IntPtr buffer=VirtualAlloc(IntPtr.Zero,(UIntPtr)aligned,0x3000,4);
+   if(buffer==IntPtr.Zero)throw new Win32Exception(Marshal.GetLastWin32Error());
+   try {
+    uint read;if(!ReadFile(h,buffer,aligned,out read,IntPtr.Zero))throw new Win32Exception(Marshal.GetLastWin32Error());
+    if(read!=size)throw new IOException("Short unbuffered boot-table read");
+    byte[] result=new byte[(int)size];Marshal.Copy(buffer,result,0,result.Length);return result;
+   } finally {
+    if(!VirtualFree(buffer,UIntPtr.Zero,0x8000))throw new Win32Exception(Marshal.GetLastWin32Error());
+   }
+  }
+ }
+}
+'@
+}
+function Commit-BootTable([string]$From,[string]$ReceiptName) {
+ $to="$env:windir\System32\acpitabl.dat";$receipt=Join-Path $root $ReceiptName
+ if(Test-Path $receipt){throw 'Boot-table commit already attempted; inspect its receipt'}
+ $r=[ordered]@{Begin=[DateTime]::UtcNow.ToString('o');Phase='Copying';Source=File-Record $From;RestartRequested=$false}
+ Write-ActivationJson $receipt $r
+ try {
+  Durable-Copy $From $to
+  Initialize-BootTableIo
+  $r.Phase='FlushingVolume';Write-ActivationJson $receipt $r
+  $r.Volume=[NvdecBootTableIo]::FlushVolume($to)
+  $r.Phase='ReadingUnbuffered';Write-ActivationJson $receipt $r
+  $bytes=[NvdecBootTableIo]::ReadUnbuffered($to)
+  $sha=[Security.Cryptography.SHA256]::Create()
+  try{$hash=([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()}finally{$sha.Dispose()}
+  $r.Unbuffered=@{Length=$bytes.Length;Sha256=$hash}
+  if($bytes.Length -ne $r.Source.Length -or $hash -ne $r.Source.Sha256){throw 'Unbuffered boot-table identity differs'}
+  $r.Phase='Committed'
+ } catch {$r.Phase='Failed';$r.Error=$_.Exception.Message;throw}
+ finally {$r.End=[DateTime]::UtcNow.ToString('o');Write-ActivationJson $receipt $r}
+}
 function Task-Root {$s=New-Object -ComObject Schedule.Service;$s.Connect();$s.GetFolder('\')}
 function Read-Boot { (Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o') }
 function Same-Boot([string]$A,[string]$B) {
@@ -304,7 +377,7 @@ try {
   if($config.Provider){Assert-ProviderStaged}
   $state.Phase='ClosingGate';Save-State $state
   Close-Gate
-  Durable-Copy (Join-Path $root 'candidate-acpi.dat') "$env:windir\System32\acpitabl.dat"
+  Commit-BootTable (Join-Path $root 'candidate-acpi.dat') 'boot-table-candidate.json'
   $state.Phase='CandidateRebootRequested';$state.Boot=Read-Boot;$state.RestartRequested=$true;Save-State $state
   & shutdown.exe /r /t 10 /d p:0:0 /c 'Load NVDEC optional resources with native start closed'
   if($LASTEXITCODE){throw 'Planned restart was rejected'}
@@ -375,7 +448,7 @@ try {
   if(!$state -or $state.Phase -in @('Prepared','Preparing','StagingPackage','StagingProvider','BaselineRebootRequested','SelectingBaseline','BaselineActivationRequested','Restored')){throw 'No eligible new recovery request'}
   $state.Phase='ClosingForRecovery';Save-State $state
   Close-Gate
-  Durable-Copy (Join-Path $root 'baseline-acpi.dat') "$env:windir\System32\acpitabl.dat"
+  Commit-BootTable (Join-Path $root 'baseline-acpi.dat') 'boot-table-baseline.json'
   $state.Phase='BaselineRebootRequested';$state.Boot=Read-Boot;$state.RestartRequested=$true;Save-State $state
   & shutdown.exe /r /t 10 /d p:0:0 /c 'Restore the retained E95 and original ACPI pair'
   if($LASTEXITCODE){throw 'Recovery restart was rejected'}
