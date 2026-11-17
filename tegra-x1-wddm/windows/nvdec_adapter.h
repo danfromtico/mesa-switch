@@ -12,7 +12,7 @@ typedef struct _TG_NVDEC_ADAPTER {
     TG_HOST1X_CLOCK_LEASE *Clock;
     TG_GPU_DEVICE *Device; /* actual Engine.Devices reference */
     UINT64 Generation, Session;
-    ULONG HostSource, PllpBase;
+    ULONG HostSource, PllpBase, CoreBootFloorUv;
     const char *Operation; /* static diagnostic label, never a borrowed buffer */
     volatile LONG Closing;
     NTSTATUS IoStatus;

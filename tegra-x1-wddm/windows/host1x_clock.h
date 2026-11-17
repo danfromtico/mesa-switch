@@ -17,7 +17,8 @@ _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS TgHost1xClockAcquire(TG_GPU_PLATFORM *Platform,
     TG_HOST1X_QUIESCE Quiesce, PVOID Context, TG_HOST1X_CLOCK_LEASE **Lease,
     const char **Stage);
-BOOLEAN TgHost1xClockHeld(TG_HOST1X_CLOCK_LEASE *Lease, ULONG *PllpBase);
+BOOLEAN TgHost1xClockHeld(TG_HOST1X_CLOCK_LEASE *Lease, ULONG *PllpBase,
+                        ULONG *CoreBootFloorUv);
 /* Stop owned hardware first. Do not hold a lock needed by Quiesce while
  * waiting here. A timeout keeps *Lease and all callback objects alive.
  * A failed Quiesce result keeps the completed request as an ownership/error

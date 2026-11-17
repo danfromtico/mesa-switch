@@ -3,7 +3,7 @@
 #define TG_HOST1X_CLOCK_ABI_H
 #include <ntddk.h>
 
-#define TG_HOST1X_CLOCK_ABI 0x00010001u
+#define TG_HOST1X_CLOCK_ABI 0x00010002u
 #define TG_HOST1X_IOCTL_CLOCK_HOLD 0x00222414u
 
 /* Kernel-only, paired KMD/SwitchFan protocol. This is a pending power-managed
@@ -29,7 +29,15 @@ typedef struct _TG_HOST1X_CLOCK_REQUEST {
     NTSTATUS ReadyStatus, QuiesceStatus;
     ULONG GateL, ResetL, PllpBase;
     ULONG Reserved;
+    /* Existing core owner's retained boot floor and live readback, obtained
+     * with SetVote=0. These are not a voltage vote or invented ownership. */
+    ULONG CoreBootFloorUv, CoreAppliedUv;
 } TG_HOST1X_CLOCK_REQUEST;
 
-_Static_assert(sizeof(TG_HOST1X_CLOCK_REQUEST) == 56, "kernel clock request ABI");
+_Static_assert(sizeof(TG_HOST1X_CLOCK_REQUEST) == 64, "kernel clock request ABI");
+static __inline BOOLEAN TgHost1xCoreFloorValid(ULONG floor, ULONG applied)
+{
+    return floor >= 600000u && floor <= 1050000u && applied >= floor &&
+           applied <= 1050000u && !(floor % 12500u) && !(applied % 12500u);
+}
 #endif

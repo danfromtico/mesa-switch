@@ -18,7 +18,8 @@
 #include "../windows/host1x_clock.h"
 
 enum { LeaseReady, LeaseNoReady, LeaseOldProvider, LeaseStopBeforeAdmission,
-       LeasePendingReady, LeaseBadGate };
+       LeasePendingReady, LeaseBadGate, LeaseNoCoreFloor, LeaseCoreUndervolt,
+       LeaseCoreUnaligned, LeaseBadVersion };
 static struct {
     UINT mode, quiesces;
     NTSTATUS quiesce_status;
@@ -105,8 +106,13 @@ static NTSTATUS FASTCALL ClockCall(PDEVICE_OBJECT device, PIRP irp)
         op->PllpBase = 0x48115508u;
         op->GateL = 1u << 28; op->ResetL = 0;
         op->ReadyStatus = STATUS_SUCCESS;
+        op->CoreBootFloorUv = op->CoreAppliedUv = 775000u;
         if (clock_model.mode == LeasePendingReady) op->ReadyStatus = STATUS_PENDING;
         if (clock_model.mode == LeaseBadGate) op->GateL = 0;
+        if (clock_model.mode == LeaseNoCoreFloor) op->CoreBootFloorUv = 0;
+        if (clock_model.mode == LeaseCoreUndervolt) op->CoreAppliedUv = 650000u;
+        if (clock_model.mode == LeaseCoreUnaligned) op->CoreBootFloorUv = 774999u;
+        if (clock_model.mode == LeaseBadVersion) op->Version = 0x00010001u;
         SetEvent(op->Ready, IO_NO_INCREMENT, FALSE);
     }
     if (clock_model.mode == LeaseStopBeforeAdmission) FinishLease();
@@ -139,7 +145,7 @@ void start(void)
 {
     TG_HOST1X_CLOCK_LEASE *lease = NULL;
     const char *stage = NULL;
-    ULONG pllp = 0, written;
+    ULONG pllp = 0, core_floor = 0, written;
     ClockSetup();
     CHECK(TgHost1xClockAcquire(&platform, NULL, &clock_model, &lease, &stage) == STATUS_INVALID_PARAMETER);
     model.open = STATUS_DEVICE_NOT_READY;
@@ -156,25 +162,25 @@ void start(void)
     ClockSetup(); clock_model.mode = LeaseOldProvider;
     CHECK(TgHost1xClockAcquire(&platform, ConsumerQuiesce, &clock_model, &lease, &stage) == STATUS_INVALID_DEVICE_REQUEST);
     CHECK(StageIs(stage,"Host1x IRP completed before admission"));
-    CHECK(lease && !TgHost1xClockHeld(lease, NULL) && !clock_model.quiesces);
+    CHECK(lease && !TgHost1xClockHeld(lease, NULL, NULL) && !clock_model.quiesces);
     CHECK(TgHost1xClockRelease(&lease) == STATUS_SUCCESS && !lease); NoClockObjects();
 
-    for (UINT bad = LeasePendingReady; bad <= LeaseBadGate; ++bad) {
+    for (UINT bad = LeasePendingReady; bad <= LeaseBadVersion; ++bad) {
         ClockSetup(); clock_model.mode = bad;
         CHECK(TgHost1xClockAcquire(&platform, ConsumerQuiesce, &clock_model, &lease, &stage) == STATUS_DEVICE_PROTOCOL_ERROR);
-        CHECK(!TgHost1xClockHeld(lease, NULL));
+        CHECK(!TgHost1xClockHeld(lease, NULL, NULL));
         CHECK(TgHost1xClockRelease(&lease) == STATUS_SUCCESS && !lease && !clock_model.quiesces);
         NoClockObjects();
     }
 
     ClockSetup(); clock_model.mode = LeaseStopBeforeAdmission;
     CHECK(TgHost1xClockAcquire(&platform, ConsumerQuiesce, &clock_model, &lease, &stage) == STATUS_CANCELLED);
-    CHECK(!clock_model.quiesces && !TgHost1xClockHeld(lease, NULL));
+    CHECK(!clock_model.quiesces && !TgHost1xClockHeld(lease, NULL, NULL));
     CHECK(TgHost1xClockRelease(&lease) == STATUS_SUCCESS && !lease); NoClockObjects();
 
     ClockSetup();
     CHECK(TgHost1xClockAcquire(&platform, ConsumerQuiesce, &clock_model, &lease, &stage) == STATUS_SUCCESS);
-    CHECK(TgHost1xClockHeld(lease, &pllp) && pllp == 0x48115508u);
+    CHECK(TgHost1xClockHeld(lease, &pllp, &core_floor) && pllp == 0x48115508u && core_floor == 775000u);
     CHECK(model.live_pool == 1 && model.live_irps == 1 && model.owner_refs == 1);
     CHECK(TgHost1xClockRelease(&lease) == STATUS_SUCCESS && !lease && clock_model.quiesces == 1);
     NoClockObjects();
@@ -182,14 +188,14 @@ void start(void)
     ClockSetup(); clock_model.mode = LeaseNoReady; clock_model.defer_cancel = TRUE;
     CHECK(TgHost1xClockAcquire(&platform, ConsumerQuiesce, &clock_model, &lease, &stage) == STATUS_IO_TIMEOUT);
     CHECK(lease && model.live_pool == 1 && model.live_irps == 1);
-    CHECK(TgHost1xClockRelease(&lease) == STATUS_IO_TIMEOUT && lease && !TgHost1xClockHeld(lease, NULL));
+    CHECK(TgHost1xClockRelease(&lease) == STATUS_IO_TIMEOUT && lease && !TgHost1xClockHeld(lease, NULL, NULL));
     FinishLease();
     CHECK(!clock_model.quiesces); /* hardware was never admitted */
     CHECK(TgHost1xClockRelease(&lease) == STATUS_SUCCESS && !lease); NoClockObjects();
 
     ClockSetup(); clock_model.defer_cancel = TRUE;
     CHECK(TgHost1xClockAcquire(&platform, ConsumerQuiesce, &clock_model, &lease, &stage) == STATUS_SUCCESS);
-    CHECK(TgHost1xClockRelease(&lease) == STATUS_IO_TIMEOUT && lease && !TgHost1xClockHeld(lease, NULL));
+    CHECK(TgHost1xClockRelease(&lease) == STATUS_IO_TIMEOUT && lease && !TgHost1xClockHeld(lease, NULL, NULL));
     FinishLease();
     CHECK(clock_model.quiesces == 1);
     CHECK(TgHost1xClockRelease(&lease) == STATUS_SUCCESS && !lease); NoClockObjects();
@@ -197,7 +203,7 @@ void start(void)
     ClockSetup(); clock_model.quiesce_status = STATUS_DEVICE_BUSY;
     CHECK(TgHost1xClockAcquire(&platform, ConsumerQuiesce, &clock_model, &lease, &stage) == STATUS_SUCCESS);
     FinishLease(); /* provider power-down before the explicit release */
-    CHECK(!TgHost1xClockHeld(lease, NULL) && clock_model.quiesces == 1);
+    CHECK(!TgHost1xClockHeld(lease, NULL, NULL) && clock_model.quiesces == 1);
     CHECK(TgHost1xClockRelease(&lease) == STATUS_DEVICE_BUSY && lease);
     CHECK(model.live_pool == 1 && model.live_irps == 1 && model.file_refs == 1);
     clock_model.quiesce_status = STATUS_SUCCESS;

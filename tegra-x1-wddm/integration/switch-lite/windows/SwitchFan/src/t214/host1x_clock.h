@@ -37,6 +37,59 @@ static VOID SwHost1xFailure(ULONG stage, NTSTATUS status)
     SwFanTrace(L"Host1xFailureStatus", (ULONG)status);
 }
 
+static NTSTATUS SwHost1xReadCoreFloor(WDFDEVICE device,
+                                     TG_HOST1X_CLOCK_REQUEST *op)
+{
+    WDFIOTARGET target;
+    WDFMEMORY memory;
+    WDF_OBJECT_ATTRIBUTES attributes;
+    WDF_IO_TARGET_OPEN_PARAMS open;
+    WDF_MEMORY_DESCRIPTOR buffer;
+    WDF_REQUEST_SEND_OPTIONS options;
+    SWCORE_VOTE *query;
+    ULONG_PTR bytes = 0;
+    NTSTATUS status;
+    DECLARE_CONST_UNICODE_STRING(name, SWCORE_DEVICE_NAME);
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = device;
+    status = WdfIoTargetCreate(device, &attributes, &target);
+    if (!NT_SUCCESS(status)) return status;
+    WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(&open, &name,
+                                               GENERIC_READ | GENERIC_WRITE);
+    open.ShareAccess = FILE_SHARE_READ | FILE_SHARE_WRITE;
+    status = WdfIoTargetOpen(target, &open);
+    if (!NT_SUCCESS(status)) { WdfObjectDelete(target); return status; }
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = target;
+    status = WdfMemoryCreate(&attributes, NonPagedPoolNx, 0x63485653u,
+                            sizeof(*query), &memory, (PVOID *)&query);
+    if (NT_SUCCESS(status)) {
+        RtlZeroMemory(query, sizeof(*query));
+        query->Version = SWCORE_VOTE_VERSION;
+        /* Query only: never clear EMC's vote or open the PMIC/SPB directly.
+         * The existing owner clamps all future EMC writes to BootFloorUv.
+         * WDF memory retains the buffer if a timed request is still retiring. */
+        WDF_MEMORY_DESCRIPTOR_INIT_HANDLE(&buffer, memory, NULL);
+        WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_TIMEOUT);
+        options.Timeout = WDF_REL_TIMEOUT_IN_MS(500);
+        status = WdfIoTargetSendIoctlSynchronously(target, NULL,
+            IOCTL_SWCORE_EMC_VOTE, &buffer, &buffer, &options, &bytes);
+        if (status == STATUS_SUCCESS) {
+            if (bytes != sizeof(*query) || query->Version != SWCORE_VOTE_VERSION ||
+                query->SetVote || query->MinimumUv || query->VoteUv > query->AppliedUv ||
+                !TgHost1xCoreFloorValid(query->BootFloorUv,query->AppliedUv))
+                status = STATUS_DEVICE_PROTOCOL_ERROR;
+            else {
+                op->CoreBootFloorUv = query->BootFloorUv;
+                op->CoreAppliedUv = query->AppliedUv;
+            }
+        } else if (NT_SUCCESS(status)) status = STATUS_DEVICE_PROTOCOL_ERROR;
+    }
+    WdfIoTargetClose(target);
+    WdfObjectDelete(target);
+    return status;
+}
+
 static VOID SwHost1xDropClaim(WDFDEVICE device, WDFREQUEST request, NTSTATUS quiesce)
 {
     SW_HOST1X_PROVIDER *p = SwHost1xProvider(device);
@@ -129,7 +182,8 @@ static VOID SwHost1xAcquire(WDFQUEUE queue, WDFREQUEST request,
     status = WdfRequestRetrieveOutputBuffer(request, sizeof(copy), (PVOID *)&op, NULL);
     if (!NT_SUCCESS(status)) { SwHost1xFailure(4, status); WdfRequestComplete(request, status); return; }
     if (copy.Version != TG_HOST1X_CLOCK_ABI || copy.Size != sizeof(copy) ||
-        copy.Reserved || !copy.Ready || !copy.Quiesce) {
+        copy.Reserved || copy.CoreBootFloorUv || copy.CoreAppliedUv ||
+        !copy.Ready || !copy.Quiesce) {
         SwHost1xFailure(5, STATUS_INVALID_PARAMETER);
         WdfRequestComplete(request, STATUS_INVALID_PARAMETER); return;
     }
@@ -156,6 +210,9 @@ static VOID SwHost1xAcquire(WDFQUEUE queue, WDFREQUEST request,
             ((1u << 30) | (1u << 27))) {
         status = STATUS_DEVICE_NOT_READY; goto fail;
     }
+    failure_stage = 13;
+    status = SwHost1xReadCoreFloor(device, op);
+    if (status != STATUS_SUCCESS) goto fail;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, SW_HOST1X_REQUEST);
     failure_stage = 9;
     status = WdfObjectAllocateContext(request, &attributes, (PVOID *)&c);

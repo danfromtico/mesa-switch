@@ -83,9 +83,11 @@ void tg_nvdec_platform_zero(struct tg_nvdec_platform *p);
  * explicitly untranslated route; do not disable somebody else's SMMU map.
  * This check is not an allocation or evidence of successful device DMA. */
 bool tg_nvdec_platform_direct_dma(const struct tg_nvdec_platform_io *io);
-/* Fixed408MHz PLLP and an inherited Host1x source no faster than102MHz.
- * This fits the lowest normal/SLT B01 core-voltage points; no clock writes. */
-bool tg_nvdec_platform_clocks_supported(uint32_t pllp_base, uint32_t host_source);
+/* Fixed408MHz PLLP and inherited Host1x <=204MHz. The existing core owner
+ * must retain at least650mV for rates above102MHz;637.5mV covers lower rates.
+ * This intersects normal/SLT B01 limits and keeps NVDEC at204MHz. No writes. */
+bool tg_nvdec_platform_clocks_supported(uint32_t pllp_base, uint32_t host_source,
+                                      uint32_t core_boot_floor_uv);
 /* p must be freshly zeroed or successfully shut down. The caller holds the
  * adapter's lifecycle/MC lock and reserves channel/syncpt until shutdown
  * succeeds. A failed init may retain ownership: call shutdown, never zero it.

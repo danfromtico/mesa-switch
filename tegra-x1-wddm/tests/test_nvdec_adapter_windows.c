@@ -64,8 +64,9 @@ NTSTATUS TgHost1xClockAcquire(TG_GPU_PLATFORM *p,TG_HOST1X_QUIESCE q,PVOID ctx,T
     *stage="fixture Host1x lease admitted";
     held=TRUE;quiesce=q;quiesce_context=ctx;*out=(TG_HOST1X_CLOCK_LEASE *)&held;return STATUS_SUCCESS;
 }
-BOOLEAN TgHost1xClockHeld(TG_HOST1X_CLOCK_LEASE *p,ULONG *pllp)
-{ if(!p || !held)return FALSE;if(pllp)*pllp=0x48115408u;return TRUE; }
+static ULONG core_floor_uv=775000u;
+BOOLEAN TgHost1xClockHeld(TG_HOST1X_CLOCK_LEASE *p,ULONG *pllp,ULONG *core_floor)
+{ if(!p || !held)return FALSE;if(pllp)*pllp=0x48115408u;if(core_floor)*core_floor=core_floor_uv;return TRUE; }
 NTSTATUS TgHost1xClockRelease(TG_HOST1X_CLOCK_LEASE **p)
 {
     if(!*p)return STATUS_SUCCESS;
@@ -150,10 +151,13 @@ void start(void)
     for(UINT i=0;i<TgNvdecApertureCount;++i)adapter.Resources.NvdecMapping[i]=nvregs[i];
     adapter.Resources.Mapping[TgGpuHidrev]=&hidrev;adapter.Resources.Mapping[TgGpuMcFlush]=mc;
     adapter.Resources.DisplayRegisters=display;hidrev=0x12127;
-    nvregs[TgNvdecHostSource][0]=0x80000008; /* captured Noble rate81.6MHz, PLLP/5 */
+    nvregs[TgNvdecHostSource][0]=0x80000003; /* Windows readback:163.2MHz */
     for(UINT c=0;c<12;++c)nvregs[TgNvdecHost1x][c*0x4000/4]=1u<<11;
     prepare_load();h->input_bytes=MAXULONG;CHECK(call(&ddi,first)==STATUS_INVALID_PARAMETER && !acquires);
     prepare_load();fail_pool=TRUE;CHECK(call(&ddi,first)==STATUS_NO_MEMORY && first->VideoReferences==0);fail_pool=FALSE;
+    core_floor_uv=637500u;prepare_load();
+    CHECK(call(&ddi,first)==0 && h->result==STATUS_DEVICE_NOT_READY && !held && !creates && !first->VideoReferences);
+    core_floor_uv=775000u;
     prepare_load();CHECK(call(&ddi,first)==0 && h->result==0 && h->session && held && creates==1);
     UINT64 session=h->session;CHECK(first->VideoReferences==1);
     make(TG_NVDEC_ESCAPE_CLOSE,0,0,session);CHECK(call(&ddi,second)==0 && h->result==STATUS_INVALID_HANDLE && held);
@@ -175,7 +179,7 @@ void start(void)
     fail_release=FALSE;CHECK(TgGpuDdiDestroyDevice(first)==0 && !held && destroys==1 && !adapter.Video.Device);
     prepare_load();CHECK(call(&ddi,second)==0 && h->result==0 && h->session!=session && held);
     CHECK(TgGpuDdiDestroyDevice(second)==0 && !held && destroys==2 && !process.Devices && !pool_live);
-    CHECK(acquires==2 && releases==3);
+    CHECK(acquires==3 && releases==4);
     ULONG written;const char ok[]="PASS: NVDEC escape ownership, packet bounds, retained stop failures and lock order (CPU only)\n";
     WriteFile(GetStdHandle((ULONG)-11),ok,sizeof(ok)-1,&written,NULL);ExitProcess(0);
 }

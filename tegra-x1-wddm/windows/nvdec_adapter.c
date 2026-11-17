@@ -102,7 +102,7 @@ static bool clock_live(void *ctx)
 {
     TG_GPU_ADAPTER *a=ctx;
     return !InterlockedCompareExchange(&a->Video.Closing,0,0) &&
-        a->Video.IoStatus==STATUS_SUCCESS && TgHost1xClockHeld(a->Video.Clock,NULL) &&
+        a->Video.IoStatus==STATUS_SUCCESS && TgHost1xClockHeld(a->Video.Clock,NULL,NULL) &&
         read32(a,TG_NVDEC_AP_CAR,0x180u)==a->Video.HostSource;
 }
 static bool clock_acquire(void *ctx) { return clock_live(ctx); }
@@ -193,7 +193,7 @@ static NTSTATUS create_locked(TG_GPU_ADAPTER *a, TG_GPU_DEVICE *device)
     NTSTATUS status;
     if (v->Device || v->Backend || v->Clock) return STATUS_DEVICE_BUSY;
     v->Operation="assigned resources";
-    v->HostSource=v->PllpBase=0;
+    v->HostSource=v->PllpBase=v->CoreBootFloorUv=0;
     for (UINT i=0;i<TgNvdecApertureCount;++i)
         if (!a->Resources.NvdecMapping[i]) return STATUS_DEVICE_NOT_READY;
     if (!a->Resources.Mapping[TgGpuHidrev] || !a->Resources.Mapping[TgGpuMcFlush]) return STATUS_DEVICE_NOT_READY;
@@ -211,9 +211,9 @@ static NTSTATUS create_locked(TG_GPU_ADAPTER *a, TG_GPU_DEVICE *device)
         ULONG pllp=0;
         v->HostSource=read32(a,TG_NVDEC_AP_CAR,0x180u);
         v->Operation="inherited clock route";
-        BOOLEAN live=TgHost1xClockHeld(v->Clock,&pllp);
+        BOOLEAN live=TgHost1xClockHeld(v->Clock,&pllp,&v->CoreBootFloorUv);
         v->PllpBase=pllp;
-        if (!live || !tg_nvdec_platform_clocks_supported(pllp,v->HostSource)) status=STATUS_DEVICE_NOT_READY;
+        if (!live || !tg_nvdec_platform_clocks_supported(pllp,v->HostSource,v->CoreBootFloorUv)) status=STATUS_DEVICE_NOT_READY;
         else {
             v->Operation="Host1x ownership";
             if (!host_idle(a)) status=STATUS_DEVICE_NOT_READY;
@@ -239,11 +239,12 @@ static void error_text(TG_GPU_ADAPTER *a, char *out)
         ": ",TgNvdecLastError(a->Video.Backend),"; PLLP=0x"};
     for (UINT p=0;p<RTL_NUMBER_OF(parts);++p)
         for (UINT i=0;parts[p][i] && n<104u;++i) out[n++]=parts[p][i];
-    ULONG values[]={a->Video.PllpBase,a->Video.HostSource};
-    for (UINT i=0;i<2;++i) {
-        if (i) { const char label[]=" HostSource=0x";
-            for (UINT j=0;j<sizeof(label)-1;++j) out[n++]=label[j]; }
-        for (int shift=28;shift>=0;shift-=4) out[n++]="0123456789abcdef"[(values[i]>>shift)&15u];
+    ULONG values[]={a->Video.PllpBase,a->Video.HostSource,a->Video.CoreBootFloorUv};
+    const char *labels[]={""," HostSource=0x"," CoreFloorUv=0x"};
+    for (UINT i=0;i<RTL_NUMBER_OF(values);++i) {
+        for (UINT j=0;labels[i][j] && n<TG_NVDEC_ERROR_SIZE-1u;++j) out[n++]=labels[i][j];
+        for (int shift=28;shift>=0 && n<TG_NVDEC_ERROR_SIZE-1u;shift-=4)
+            out[n++]="0123456789abcdef"[(values[i]>>shift)&15u];
     }
     out[n]=0;
 }

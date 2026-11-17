@@ -139,10 +139,12 @@ bool tg_nvdec_platform_direct_dma(const struct tg_nvdec_platform_io *io)
     return !((hc | dec) & (1u << 31));
 }
 
-bool tg_nvdec_platform_clocks_supported(uint32_t pllp, uint32_t source)
+bool tg_nvdec_platform_clocks_supported(uint32_t pllp, uint32_t source,
+                                      uint32_t core_boot_floor_uv)
 {
     const uint32_t enabled_locked = (1u << 30) | (1u << 27);
-    if (pllp == UINT32_MAX || source == UINT32_MAX ||
+    if (core_boot_floor_uv < 637500u || core_boot_floor_uv > 1050000u ||
+        core_boot_floor_uv % 12500u || pllp == UINT32_MAX || source == UINT32_MAX ||
         (pllp & (enabled_locked | (1u << 31))) != enabled_locked ||
         (source & ~0xe00000ffu)) return false;
     /* PLLP without OVERRIDE uses its fixed hardware rate. With OVERRIDE,
@@ -154,7 +156,11 @@ bool tg_nvdec_platform_clocks_supported(uint32_t pllp, uint32_t source)
     switch (source >> 29) {
     /* T210 selects tegra_clk_host1x_9, whose sparse mux table maps PLLP to4
      * and CLK_M to5. Value3 is PLLC4_OUT2, outside this owner's contract. */
-    case 4: return (source & 255u) >= 6u; /* PLLP/(divider+2)*2 <=102MHz */
+    case 4:
+        /* Normal B01 process0 admits204MHz at650mV; SLT process0 at625mV.
+         * Use their intersection, rather than the temporary EMC voltage.
+         * DIV=3 observed on Windows is163.2MHz; keep that inherited rate. */
+        return (source & 255u) >= (core_boot_floor_uv >= 650000u ? 2u : 6u);
     case 5: return true; /* CLK_M <=38.4MHz, even before its local divider */
     default: return false; /* no ownership claim over another PLL */
     }

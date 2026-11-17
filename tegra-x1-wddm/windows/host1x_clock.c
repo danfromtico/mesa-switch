@@ -132,6 +132,7 @@ NTSTATUS TgHost1xClockAcquire(TG_GPU_PLATFORM *platform,
     if (c->Op.Version != TG_HOST1X_CLOCK_ABI || c->Op.Size != sizeof(c->Op) ||
         c->Op.Reserved || c->Op.Ready != &c->Ready ||
         c->Op.Quiesce != clock_quiesce || c->Op.Context != c ||
+        !TgHost1xCoreFloorValid(c->Op.CoreBootFloorUv,c->Op.CoreAppliedUv) ||
         c->Op.GateL == MAXULONG || c->Op.ResetL == MAXULONG || c->Op.PllpBase == MAXULONG ||
         !(c->Op.GateL & (1u << 28)) || (c->Op.ResetL & (1u << 28)) ||
         (c->Op.PllpBase & ((1u << 31) | (1u << 30) | (1u << 27))) !=
@@ -148,11 +149,12 @@ fail_refs:
     return status;
 }
 
-BOOLEAN TgHost1xClockHeld(TG_HOST1X_CLOCK_LEASE *c, ULONG *pllp)
+BOOLEAN TgHost1xClockHeld(TG_HOST1X_CLOCK_LEASE *c, ULONG *pllp, ULONG *core_floor)
 {
     if (!c || InterlockedCompareExchange(&c->ReleaseRequested, 0, 0) ||
         InterlockedCompareExchange(&c->State, 0, 0) != ClockAdmitted) return FALSE;
     if (pllp) *pllp = c->Op.PllpBase;
+    if (core_floor) *core_floor = c->Op.CoreBootFloorUv;
     return TRUE;
 }
 
