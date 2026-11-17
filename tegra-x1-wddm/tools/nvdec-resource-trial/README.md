@@ -6,6 +6,27 @@ Windows SignTool, and copies the exact installed activation files. The script
 retains the original UMD/ICD registration, power policy and five-second logon
 task. It must run from a protected trial directory as administrator.
 
+When `pair-config.json` includes `Provider`, the same trial also carries the
+clock-provider SYS/INF/CAT and its exact original package. All32 package files
+must pass signature/catalog membership checks. After `Prepare`, run both
+`StagePackage` and `StageProviderPackage`; neither action installs a driver or
+restarts Windows. The latter can reconcile an interrupted observation only
+when a durable zero-exit receipt and the complete registered package exist.
+
+After `StageCandidate` has loaded the candidate DSDT with native GPU startup
+closed, run `SelectProvider` before `SelectCandidate`. Provider replacement is
+rejected while the GPU is active or the loaded table differs. If the public
+installer explicitly reports that a restart is required, `ProviderRestart`
+can request it once; rerun `SelectProvider` after that boot to verify the
+result without installing again. `FinishCandidate` still only queries resource
+state. The bounded decoder program is a separate, explicit subsequent action.
+
+Recovery is symmetric: `Recover` loads the original DSDT with GPU startup
+closed, then `SelectOriginalProvider` restores the original clock provider
+before `SelectBaseline` can activate the original KMD. The same recorded-restart
+rule applies when required. Failed selection, pending import or unknown binary
+identity must be inspected; they never authorize a repeated install.
+
 The main chat drives these separate actions and reads each saved result before
 continuing:
 

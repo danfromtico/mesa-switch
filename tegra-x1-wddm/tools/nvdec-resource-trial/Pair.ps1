@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
-# Bounded resource-only KMD/ACPI trial. The installed activation implementation
-# and exact original userspace registration are retained. No NVDEC DMA starts.
+# Bounded KMD/ACPI trial with an optional paired clock provider. This controller
+# does not submit decode work. Retain the installed activation/userspace pair.
 param([Parameter(Mandatory=$true)]
- [ValidateSet('Prepare','StagePackage','StageCandidate','SelectCandidate','FinishCandidate','Recover','SelectBaseline','FinishBaseline','Inspect')]
+ [ValidateSet('Prepare','StagePackage','StageProviderPackage','StageCandidate','SelectProvider','ProviderRestart','SelectCandidate','FinishCandidate','Recover','SelectOriginalProvider','SelectBaseline','FinishBaseline','Inspect')]
  [string]$Action)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -14,6 +14,7 @@ $device='ACPI\SWOA0F01\0'
 $service='HKLM:\SYSTEM\CurrentControlSet\Services\tegragpurender'
 $statePath=Join-Path $root 'pair-state.json'
 . (Join-Path $active 'Activation-State.ps1')
+if($config.Provider){. (Join-Path $root 'Provider.ps1')}
 $lock=Enter-ActivationStateLock $statePath
 function Read-Json([string]$Path){[IO.File]::ReadAllText($Path)|ConvertFrom-Json}
 function Save-State($Value){
@@ -35,12 +36,18 @@ function Read-Boot { (Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUn
 function Assert-Input {
  foreach($entry in $config.InputFiles.PSObject.Properties){Assert-File (Join-Path $root $entry.Name) $entry.Value}
  $verified=Read-Json (Join-Path $root 'signature-result.json')
- if($verified.Phase -ne 'Verified' -or @($verified.Files).Count -ne 26 -or @($verified.Files|Where-Object Exit -ne 0).Count){throw 'Both complete signed packages require native verification'}
+ $count=if($config.Provider){32}else{26}
+ if($verified.Phase -ne 'Verified' -or @($verified.Files).Count -ne $count -or @($verified.Files|Where-Object Exit -ne 0).Count){throw 'All complete signed packages require native verification'}
  foreach($f in $verified.Files){Assert-File (Join-Path $root ($f.Directory+'\'+$f.Name)) @{Length=$f.Bytes;Sha256=$f.Sha256}}
 }
 function Assert-RetainedFiles([switch]$Baseline) {
  foreach($entry in $config.BaselineFiles.PSObject.Properties){
   if(!$Baseline -and $entry.Name -in @("$env:windir\System32\drivers\tegragpurender.sys","$env:windir\System32\acpitabl.dat")){continue}
+  if(!$Baseline -and $config.Provider -and $entry.Name -eq "$env:windir\System32\drivers\switchfan.sys"){
+   $actual=File-Record $entry.Name
+   if($actual.Sha256 -ne $config.Provider.Candidate.Sha256 -and $actual.Sha256 -ne $config.Provider.Baseline.Sha256){throw 'Unknown provider component'}
+   continue
+  }
   Assert-File $entry.Name $entry.Value
  }
 }
@@ -234,6 +241,7 @@ try {
   $backup=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o');Boot=Read-Boot;Directory=$active;TaskXml=$task.Xml;Registration=$registration;User=$recovery.User}
   $backup.Power=& (Join-Path $root 'Power-State.ps1');$backup.Fan=& (Join-Path $root 'Power-State.ps1') -FanOnly;$backup.Emc=& (Join-Path $root 'Power-State.ps1') -EmcOnly
   if($backup.Power.Power.PowerMode -ne 1 -or $backup.Power.Battery.LimitCenter -ne 85 -or $backup.Fan.Fan.Mode -ne 1){throw 'Handheld85/fan policy differs'}
+  if($config.Provider -and (!$backup.Power.Power.CpuDfllActive -or $backup.Power.Power.CpuLastError -ne 0 -or $backup.Power.Power.GpuPolicyMode -ne 1)){throw 'Paired provider trial requires the active Handheld baseline'}
   Assert-EmcReady $backup.Emc
   Write-ActivationJson (Join-Path $root 'pair-backup.json') $backup
   $state=[ordered]@{Phase='Preparing';Begin=$backup.Utc;Boot=$backup.Boot;RestartRequested=$false};Save-State $state
@@ -244,7 +252,8 @@ try {
   Durable-Copy (Join-Path $root 'candidate-acpi.dat') (Join-Path $candidate 'display158.aml')
   $original.helpers.'display158.aml'=File-Record (Join-Path $candidate 'display158.aml');$original.files.'display158.aml'=$original.helpers.'display158.aml'
   $original.kmd_source=$config.CandidateSource
-  $original|Add-Member NoteProperty nvdec_resource_scope 'Startup resource snapshot only; decode unavailable' -Force
+  $scope=if($config.Provider){'Coexisting decoder candidate; native decode acceptance pending'}else{'Startup resource snapshot only; decode unavailable'}
+  $original|Add-Member NoteProperty nvdec_resource_scope $scope -Force
   Write-ActivationJson (Join-Path $candidate 'trial-components.json') $original
   & icacls.exe $candidate /inheritance:r /grant:r '*S-1-5-18:(OI)(CI)(F)' '*S-1-5-32-544:(OI)(CI)(F)' '*S-1-5-32-545:(OI)(CI)(RX)' /Q|Out-Null
   if($LASTEXITCODE){throw 'Candidate ACL failed'}
@@ -285,6 +294,7 @@ try {
   $receipt=Read-Json (Join-Path $root 'candidate-staging.json')
   $staged=Find-StagedCandidate
   if(!$staged -or $staged.Directory -ne $receipt.Package.Directory -or $staged.PublishedInf -ne $receipt.Package.PublishedInf){throw 'Previously verified candidate staging changed'}
+  if($config.Provider){Assert-ProviderStaged}
   $state.Phase='ClosingGate';Save-State $state
   Close-Gate
   Durable-Copy (Join-Path $root 'candidate-acpi.dat') "$env:windir\System32\acpitabl.dat"
@@ -294,6 +304,7 @@ try {
  }
  elseif($Action -eq 'SelectCandidate') {
   if(!$state -or $state.Phase -ne 'CandidateRebootRequested' -or (Read-Boot) -eq $state.Boot){throw 'Expected the completed candidate ACPI boot'}
+  if($config.Provider){Assert-ProviderSelected 'Candidate'}
   Assert-RetainedFiles;Assert-Power
   Assert-File "$env:windir\System32\acpitabl.dat" $config.CandidateAcpi
   # Capture the inherited platform state before the new KMD can read its
@@ -332,6 +343,7 @@ try {
   $a=Read-Json (Join-Path $candidate 'default-state.json')
   if($a.Status -ne 'Enabled' -or (Test-Path (Join-Path $candidate 'default-attempt.json')) -or (Device-Property 'ProblemCode') -ne 0){throw 'Candidate activation has not completed'}
   Assert-RetainedFiles;Assert-File "$env:windir\System32\drivers\tegragpurender.sys" $config.CandidateKmd;Assert-File "$env:windir\System32\acpitabl.dat" $config.CandidateAcpi
+  if($config.Provider){Assert-ProviderSelected 'Candidate'}
   $after=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o')}
   try {
    $after.LoadedDsdt=Read-LoadedDsdt (Join-Path $root 'loaded-active-dsdt.dat')
@@ -353,7 +365,7 @@ try {
   $state.Query=$query;$state.Phase='CandidateObserved';$state.End=[DateTime]::UtcNow.ToString('o');Save-State $state
  }
  elseif($Action -eq 'Recover') {
-  if(!$state -or $state.Phase -in @('Prepared','Preparing','StagingPackage','BaselineRebootRequested','SelectingBaseline','BaselineActivationRequested','Restored')){throw 'No eligible new recovery request'}
+  if(!$state -or $state.Phase -in @('Prepared','Preparing','StagingPackage','StagingProvider','BaselineRebootRequested','SelectingBaseline','BaselineActivationRequested','Restored')){throw 'No eligible new recovery request'}
   $state.Phase='ClosingForRecovery';Save-State $state
   Close-Gate
   Durable-Copy (Join-Path $root 'baseline-acpi.dat') "$env:windir\System32\acpitabl.dat"
@@ -365,6 +377,7 @@ try {
   if(!$state -or $state.Phase -ne 'BaselineRebootRequested' -or (Read-Boot) -eq $state.Boot){throw 'Expected completed recovery ACPI boot'}
   Assert-Closed;Assert-File "$env:windir\System32\acpitabl.dat" $config.BaselineAcpi
   Assert-LoadedDsdt (Read-LoadedDsdt (Join-Path $root 'loaded-before-baseline-selection.dat')) $config.BaselineAcpi
+  if($config.Provider){Assert-ProviderSelected 'Baseline'}
   $state.Phase='SelectingBaseline';Save-State $state
   Select-Package (Join-Path $root 'baseline-kmd') $config.BaselineKmd (Join-Path $root 'baseline-selection.json')
   $backup=Read-Json (Join-Path $root 'pair-backup.json');Restore-Registration $backup
@@ -379,6 +392,10 @@ try {
   Assert-RetainedFiles -Baseline
   Assert-LoadedDsdt (Read-LoadedDsdt (Join-Path $root 'loaded-restored-dsdt.dat')) $config.BaselineAcpi
   $state.Phase='Restored';$state.End=[DateTime]::UtcNow.ToString('o');Save-State $state
+ }
+ elseif($Action -in @('StageProviderPackage','SelectProvider','SelectOriginalProvider','ProviderRestart')) {
+  if(!$config.Provider){throw 'No paired provider in this candidate'}
+  Invoke-ProviderAction $Action
  }
  $state|ConvertTo-Json -Depth 12 -Compress
 }catch{
