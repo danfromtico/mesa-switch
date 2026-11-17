@@ -138,15 +138,6 @@ NTSTATUS APIENTRY TgGpuDdiCreateDevice(HANDLE adapter, DXGKARG_CREATEDEVICE *a)
     InsertTailList(&e->Devices,&d->Link); KeReleaseSpinLock(&e->Lock,irql);
     a->hDevice=d; return STATUS_SUCCESS;
 }
-NTSTATUS APIENTRY TgGpuDdiDestroyDevice(HANDLE device)
-{
-    TG_GPU_DEVICE *d=device; TG_GPU_CONTEXT_ENGINE *e; KIRQL irql;
-    if (!d) return STATUS_INVALID_PARAMETER;
-    e=d->Engine; KeAcquireSpinLock(&e->Lock,&irql);
-    if (d->Contexts || d->OpenAllocations) { KeReleaseSpinLock(&e->Lock,irql); return STATUS_DEVICE_BUSY; }
-    RemoveEntryList(&d->Link); if (d->Process) --d->Process->Devices;
-    KeReleaseSpinLock(&e->Lock,irql); ExFreePoolWithTag(d,TAG); return STATUS_SUCCESS;
-}
 NTSTATUS APIENTRY TgGpuDdiCreateContext(HANDLE device, DXGKARG_CREATECONTEXT *a)
 {
     TG_GPU_DEVICE *d=device; TG_GPU_CONTEXT_ENGINE *e; TG_GPU_CONTEXT *c;
@@ -161,7 +152,7 @@ NTSTATUS APIENTRY TgGpuDdiCreateContext(HANDLE device, DXGKARG_CREATECONTEXT *a)
     e=d->Engine; c=object(sizeof(*c)); if (!c) return STATUS_NO_MEMORY;
     c->Device=d; c->Runtime=a->hContext; c->Flags=a->Flags; c->RootStatus=STATUS_DEVICE_NOT_READY;
     KeAcquireSpinLock(&e->Lock,&irql);
-    if (e->Stopping) { KeReleaseSpinLock(&e->Lock,irql); ExFreePoolWithTag(c,TAG); return STATUS_DEVICE_NOT_READY; }
+    if (e->Stopping || d->Closing) { KeReleaseSpinLock(&e->Lock,irql); ExFreePoolWithTag(c,TAG); return STATUS_DEVICE_NOT_READY; }
     ++d->Contexts;++e->Creating; /* reserve the parent while allocation may sleep */
     if(d->Process) {
         if(!++e->ContextSerial)++e->ContextSerial;

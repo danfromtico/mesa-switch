@@ -27,6 +27,10 @@ NTSTATUS TgNvdecCreate(const DXGKRNL_INTERFACE *dxgk,
                        struct tg_nvdec_win **result);
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS TgNvdecDestroy(struct tg_nvdec_win *win);
+/* Provider stop: stop actual DMA without freeing allocations or requesting
+ * a new clock lease. Caller holds the shared hardware/MC gate. */
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS TgNvdecQuiesce(struct tg_nvdec_win *win);
 
 BOOLEAN TgNvdecFirmwareValid(const void *data, SIZE_T size,
                              const UINT8 expected_sha256[TG_NVDEC_SHA256_SIZE]);

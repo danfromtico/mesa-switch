@@ -35,6 +35,7 @@
 #define CAR_NVDEC_BIT         (1u << 2)
 #define CAR_NVJPG_BIT         (1u << 3)
 #define CAR_NVDEC_MUX_PLLP    (4u << 29)
+#define CAR_NVDEC_SOURCE      (CAR_NVDEC_MUX_PLLP | 2u) /* U7.1:408MHz ->204MHz */
 #define CAR_NVDEC_MUX_MASK    0xe00000ffu
 
 #define HOST1X_CHANNEL_STRIDE 0x4000u
@@ -138,6 +139,25 @@ bool tg_nvdec_platform_direct_dma(const struct tg_nvdec_platform_io *io)
     return !((hc | dec) & (1u << 31));
 }
 
+bool tg_nvdec_platform_clocks_supported(uint32_t pllp, uint32_t source)
+{
+    const uint32_t enabled_locked = (1u << 30) | (1u << 27);
+    if (pllp == UINT32_MAX || source == UINT32_MAX ||
+        (pllp & (enabled_locked | (1u << 31))) != enabled_locked ||
+        (source & ~0xe00000ffu)) return false;
+    /* PLLP without OVERRIDE uses its fixed hardware rate. With OVERRIDE,
+     * OUT0 is the VCO; DIVP applies to OUT2, not this parent. */
+    if (pllp & (1u << 28)) {
+        const uint32_t m = pllp & 31u, n = (pllp >> 8) & 1023u;
+        if (!m || 38400u * n != 408000u * m) return false;
+    }
+    switch (source >> 29) {
+    case 3: return (source & 255u) >= 6u; /* PLLP/(divider+2)*2 <=102MHz */
+    case 4: return true; /* CLK_M <=38.4MHz, even before its local divider */
+    default: return false; /* no ownership claim over another PLL */
+    }
+}
+
 /* The caller serializes this shared MC word against graphics reset/power
  * transitions. Only NVDEC's client bit may change. */
 static bool set_mc_flush(const struct tg_nvdec_platform_io *io, bool set)
@@ -238,9 +258,9 @@ enum tg_nvdec_platform_result tg_nvdec_platform_init(
      * the local source/gate. Host1x reset and CAR L are never programmed here. */
     p->nvdec_touched = true;
     w32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC,
-        (source & ~CAR_NVDEC_MUX_MASK) | CAR_NVDEC_MUX_PLLP);
+        (source & ~CAR_NVDEC_MUX_MASK) | CAR_NVDEC_SOURCE);
     value = r32(io, TG_NVDEC_AP_CAR, CAR_CLK_SOURCE_NVDEC);
-    if (value == UINT32_MAX || (value & CAR_NVDEC_MUX_MASK) != CAR_NVDEC_MUX_PLLP)
+    if (value == UINT32_MAX || (value & CAR_NVDEC_MUX_MASK) != CAR_NVDEC_SOURCE)
         return TG_NVDEC_PLATFORM_CLOCK;
     w32(io, TG_NVDEC_AP_CAR, CAR_CLK_OUT_ENB_Y_SET, CAR_NVDEC_BIT);
     p->nvdec_clock = true;

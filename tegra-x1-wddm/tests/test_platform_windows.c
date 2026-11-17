@@ -257,6 +257,7 @@ static void Setup(void)
     model.bytes=sizeof(struct tg_gpu_pmic_request);model.address=0x33;model.temp=42;
     model.enable=0x55;model.voltage=80;
 }
+#ifndef TG_PLATFORM_FIXTURE_ONLY
 void start(void)
 {
     static const char pass[]="PASS: WDM HandleLock + IoSetCompletionRoutineEx unload-safe async IRP bridge, PnP QueryRemove/RemoveComplete reconnect and rail abandon\r\n";
@@ -276,6 +277,15 @@ void start(void)
     CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_ACCESS_DENIED && !platform.Bridge && !platform.Resources && !model.owner_refs);
     model.open=STATUS_SUCCESS;CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_SUCCESS);
     CHECK(platform.Resources==&resources && platform.IoStatus==STATUS_SUCCESS && model.pnp_regs==1 && model.owner_refs==1);
+    {
+        PFILE_OBJECT file = NULL; PDEVICE_OBJECT owner = NULL;
+        LONG files = model.file_refs, owners = model.owner_refs;
+        CHECK(TgGpuReferencePlatformBridge(&platform,&file,&owner)==STATUS_SUCCESS);
+        CHECK(file==&fake_file && owner==&fake_owner_device &&
+              model.file_refs==files+1 && model.owner_refs==owners+1);
+        (VOID)DerefObj(file); (VOID)DerefObj(owner);
+        CHECK(model.file_refs==files && model.owner_refs==owners);
+    }
     CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_INVALID_PARAMETER);
     CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_SUCCESS && address==0x33 && model.safe_completions==3);
     io=TgGpuPlatformIo(&platform);CHECK(io.context==&platform);
@@ -360,3 +370,4 @@ void start(void)
     CHECK(!model.live_pool && !model.live_irps && !model.file_refs && !model.owner_refs);
     CHECK(WriteFile(GetStdHandle((ULONG)-11),pass,sizeof(pass)-1,&written,NULL));ExitProcess(0);
 }
+#endif

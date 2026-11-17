@@ -59,7 +59,8 @@
     X(NvdecAsid, 0x70019AB4, 0x00000004, 0) \
     X(NvjpgAsid, 0x70019AC0, 0x00000004, 0) \
     X(SmmuEn01,  0x70019228, 0x00000008, 0) \
-    X(SmmuEn3,   0x70019234, 0x00000004, 0)
-#define T214_NVDEC_RESOURCE_COUNT 11
+    X(SmmuEn3,   0x70019234, 0x00000004, 0) \
+    X(HostSource,0x60006180, 0x00000004, 0)
+#define T214_NVDEC_RESOURCE_COUNT 12
 
 #endif

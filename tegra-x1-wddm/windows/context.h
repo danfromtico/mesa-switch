@@ -34,6 +34,8 @@ struct _TG_GPU_DEVICE {
     HANDLE Runtime;
     UINT Contexts;
     UINT OpenAllocations;
+    UINT VideoReferences;
+    BOOLEAN Closing;
 };
 struct _TG_GPU_CONTEXT {
     LIST_ENTRY Link;
@@ -60,6 +62,8 @@ struct _TG_GPU_CONTEXT_ENGINE {
     TG_GPU_CONTEXT_WORK *Notification;
     PVOID QueueOwner;
     PVOID HardwareOwner;
+    PVOID VideoOwner;
+    NTSTATUS (*VideoCloseDevice)(PVOID Owner, TG_GPU_DEVICE *Device);
     TG_GPU_PRIVATE_MEMORY Commands;
     TG_GPU_GRAPHICS_TEMPLATE Graphics;
     UINT GraphicsGeneration,ContextSerial;
@@ -104,6 +108,10 @@ struct _TG_GPU_CONTEXT_WORK {
     BOOLEAN TraceObservedValid,TraceObservedCpu,TraceMcValid,TraceGrValid;
 };
 
+/* Validate driver handles by list membership before dereferencing. A video
+ * operation/session retains the actual device until its last DMA is retired. */
+NTSTATUS TgGpuReferenceVideoDevice(TG_GPU_CONTEXT_ENGINE *, HANDLE, TG_GPU_DEVICE **);
+void TgGpuDereferenceVideoDevice(TG_GPU_DEVICE *);
 NTSTATUS TgGpuInitializeContextEngine(TG_GPU_CONTEXT_ENGINE *, const DXGKRNL_INTERFACE *,
                                      TG_GPU_TABLE_SEGMENT *);
 /* Install the trusted cold backend's immutable golden copy once. Submission

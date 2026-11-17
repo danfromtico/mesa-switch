@@ -22,7 +22,8 @@ from build_display_acpi import (
 # Reviewed installed table. Its four dynamic _CRS methods are UAR2 (CRS3),
 # SDM1/SDM4 (GCRS) and BAT0 (GPIO/I2C buffers only). SIO0's SCAR fields touch
 # offsets008/014/1a0/308/30c/328/32c/358/360/3f0/430/434/440/444, not the new
-# Y-bank words. A different table needs renewed ownership review, not a bypass.
+# Y-bank words or the read-only Host1x source at0x180. A different table needs
+# renewed ownership review, not a bypass.
 REVIEWED_BASELINE = "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
 DYNAMIC_MEMORY = [(0x70006040, 0x40), (0x700B0000, 0x200), (0x700B0600, 0x200)]
 
@@ -32,7 +33,7 @@ def nvdec_ranges():
     text = header.read_text().split("#define T214_NVDEC_RESOURCES(X)", 1)[1]
     text = text.split("#define T214_NVDEC_RESOURCE_COUNT", 1)[0]
     rows = re.findall(r"X\((\w+),\s*(0x[0-9A-Fa-f]+),\s*(0x[0-9A-Fa-f]+),\s*([01])\)", text)
-    if len(rows) != 11:
+    if len(rows) != 12 or rows[-1] != ("HostSource", "0x60006180", "0x00000004", "0"):
         raise ValueError("Unexpected NVDEC resource contract")
     return [(name, int(base, 16), int(size, 16), int(writable))
             for name, base, size, writable in rows]

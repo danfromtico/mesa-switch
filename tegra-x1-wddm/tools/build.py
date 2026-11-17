@@ -259,20 +259,23 @@ flags = ["--target=aarch64-pc-windows-msvc", "/nologo", "/c", "/kernel",
          f"/I{windows_abi}", *[f"/I{p}" for p in mesa_includes],
          *[f"/imsvc{p}" for p in includes]]
 objects = []
-for source in [*core, power, clock, root / "platform/t214_dc.c", root / "windows/resources.c",
+for source in [*core, power, clock, *nvdec_core, root / "platform/t214_nvdec.c",
+               root / "windows/nvdec_backend.c", root / "windows/nvdec_adapter.c",
+               root / "platform/t214_dc.c", root / "windows/resources.c",
                root / "windows/panel.c", root / "windows/panel_vidpn.c",
                root / "windows/panel_scanout.c",
                root / "windows/private_memory.c", root / "windows/nvdec_memory.c", root / "windows/paging.c",
                root / "windows/table_segment.c", root / "windows/root_table.c",
                root / "windows/paging_buffer.c",root / "windows/paging_dispatch.c",
                root / "windows/paging_submit.c",root / "windows/context.c",
+               root / "windows/device_lifetime.c",
                root / "windows/internal_va.c", root / "windows/submit_worker.c",
                root / "windows/graphics.c",root / "windows/hardware.c",
                root / "windows/work_queue.c", root / "windows/allocation.c",
                root / "windows/query.c", root / "windows/adapter.c",
                root / "windows/submit_ddi.c",root / "windows/present.c",root / "windows/command_snapshot.c",root / "windows/recovery.c",
                root / "windows/diagnostic_events.c",
-               root / "windows/platform_io.c",root / "windows/dvfs.c",root / "windows/worker.c",
+               root / "windows/platform_io.c",root / "windows/host1x_clock.c",root / "windows/dvfs.c",root / "windows/worker.c",
                root / "windows/platform_adapter.c",root / "windows/gr_firmware_io.c",
                root / "windows/reset_backend.c",root / "windows/adapter_reset.c"]:
     obj = args.out / (source.stem + ".obj")
@@ -290,7 +293,7 @@ if args.windows_tests:
     # The SDK header NuGet does not ship import libraries. Use the same LLVM
     # import-library construction as the existing performance tool.
     exports = args.out / "paging-kernel32.def"
-    exports.write_text("LIBRARY kernel32.dll\nEXPORTS\nExitProcess\nGetStdHandle\nWriteFile\n")
+    exports.write_text("LIBRARY kernel32.dll\nEXPORTS\nExitProcess\nGetStdHandle\nWriteFile\nGetProcessHeap\nHeapAlloc\nHeapFree\n")
     sdk_lib = args.out / "paging-kernel32.lib"
     subprocess.run([args.dlltool, "-m", "arm64", "-d", str(exports), "-l", str(sdk_lib)], check=True)
     subprocess.run([args.link, "/nologo", "/machine:arm64", "/subsystem:console,10.0",
@@ -310,13 +313,24 @@ if args.windows_tests:
                     f"/out:{args.out / 'test-nvdec-memory.exe'}", str(nvdec_memory_test),
                     str(args.out / "nvdec_memory.obj"), str(args.out / "private_memory.obj"),
                     str(sdk_lib)], check=True)
+    nvdec_adapter_test = args.out / "test_nvdec_adapter_windows.obj"
+    subprocess.run([args.clang_cl, *flags, "/clang:-funwind-tables", f"/Fo{nvdec_adapter_test}", "--",
+                    str(root / "tests/test_nvdec_adapter_windows.c")], check=True)
+    subprocess.run([args.link, "/nologo", "/machine:arm64", "/subsystem:console,10.0",
+                    "/entry:start", "/include:_load_config_used", "/nodefaultlib", "/release", "/opt:ref", "/timestamp:0",
+                    f"/out:{args.out / 'test-nvdec-adapter.exe'}", str(nvdec_adapter_test),
+                    str(args.out / "nvdec_adapter.obj"), str(args.out / "device_lifetime.obj"),
+                    str(args.out / "t214_nvdec.obj"), str(sdk_lib)], check=True)
     context_test = args.out / "test_context_windows.obj"
+    inactive_video = args.out / "nvdec_inactive_fixture.obj"
+    subprocess.run([args.clang_cl, *flags, "/clang:-funwind-tables", f"/Fo{inactive_video}", "--",
+                    str(root / "tests/nvdec_inactive_fixture.c")], check=True)
     subprocess.run([args.clang_cl, *flags, "/clang:-funwind-tables", f"/Fo{context_test}", "--",
                     str(root / "tests/test_context_windows.c")], check=True)
     subprocess.run([args.link, "/nologo", "/machine:arm64", "/subsystem:console,10.0",
                     "/entry:start", "/include:_load_config_used", "/nodefaultlib", "/release", "/opt:ref", "/timestamp:0",
                     f"/out:{args.out / 'test-context.exe'}", str(context_test),
-                    str(library), str(sdk_lib)], check=True)
+                    str(inactive_video), str(library), str(sdk_lib)], check=True)
     timings_test = args.out / "test_panel_timings_windows.obj"
     subprocess.run([args.clang_cl, *flags, "/clang:-funwind-tables", f"/Fo{timings_test}", "--",
                     str(root / "tests/test_panel_timings_windows.c")], check=True)
@@ -351,6 +365,14 @@ if args.windows_tests:
                     "/include:_load_config_used","/nodefaultlib","/release","/opt:ref","/timestamp:0",
                     f"/out:{args.out / 'test-platform.exe'}",str(platform_test),
                     str(args.out / "platform_io.obj"),str(sdk_lib)],check=True)
+    clock_test=args.out / "test_host1x_clock_windows.obj"
+    subprocess.run([args.clang_cl,*flags,"/clang:-funwind-tables",
+                    "-Wno-unused-function","-Wno-unused-variable","-Wno-unused-but-set-global",
+                    f"/Fo{clock_test}","--",str(root / "tests/test_host1x_clock_windows.c")],check=True)
+    subprocess.run([args.link,"/nologo","/machine:arm64","/subsystem:console,10.0","/entry:start",
+                    "/include:_load_config_used","/nodefaultlib","/release","/opt:ref","/timestamp:0",
+                    f"/out:{args.out / 'test-host1x-clock.exe'}",str(clock_test),
+                    str(args.out / "host1x_clock.obj"),str(sdk_lib)],check=True)
     worker_test=args.out / "test_worker_windows.obj"
     subprocess.run([args.clang_cl,*flags,"/clang:-funwind-tables",f"/Fo{worker_test}","--",
                     str(root / "tests/test_worker_windows.c")],check=True)
@@ -474,14 +496,6 @@ if args.probe:
                             str(root / "windows/diagnostic_backend.c")], check=True)
             libs.append(diagnostic)
             libs.append(library)
-            for source in [nvdec_dir / "nvdec_sha256.c", nvdec_dir / "nvdec_fw.c",
-                           nvdec_dir / "nvdec_h264.c", nvdec_dir / "nvdec_engine.c",
-                           root / "platform/t214_nvdec.c",
-                           root / "windows/nvdec_backend.c"]:
-                nvobj = args.out / ("nvdec-" + source.stem + ".obj")
-                subprocess.run([args.clang_cl, *kflags, f"/I{nvdec_dir}",
-                                f"/Fo{nvobj}", "--", str(source)], check=True)
-                libs.append(nvobj)
             copy_firmware(dest)
         subprocess.run([args.link, "/nologo", "/driver", "/subsystem:native,10.0", "/machine:arm64",
                         "/entry:FxDriverEntry", "/nodefaultlib", "/release", "/opt:ref", "/opt:icf",

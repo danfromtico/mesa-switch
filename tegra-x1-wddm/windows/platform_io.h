@@ -27,6 +27,9 @@ NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
 /* Optional capability/telemetry request: does not latch IoStatus when an older
  * SwitchFan build returns STATUS_INVALID_PARAMETER or STATUS_NOT_SUPPORTED. */
 NTSTATUS TgGpuPlatformTryRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
+/* Optional long-lived kernel request. Returns referenced real objects; the
+ * caller releases both references. Failure does not poison display IoStatus. */
+NTSTATUS TgGpuReferencePlatformBridge(TG_GPU_PLATFORM *,PFILE_OBJECT *,PDEVICE_OBJECT *);
 NTSTATUS TgGpuPlatformPreflight(TG_GPU_PLATFORM *,UCHAR *PmicAddress);
 VOID TgGpuPlatformAbandonRail(TG_GPU_PLATFORM *,UCHAR PmicAddress);
 struct tg_gpu_power_io TgGpuPlatformIo(TG_GPU_PLATFORM *);

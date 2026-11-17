@@ -40,6 +40,8 @@ NTSTATUS APIENTRY TgGpuDdiStopDevice(PVOID context)
         a->Engine.Stopping=TRUE;a->Engine.AdapterIdentityReady=FALSE;
         KeReleaseSpinLock(&a->Engine.Lock,irql);
     }
+    status=TgNvdecAdapterStop(a);
+    if(status!=STATUS_SUCCESS)return status;
     status=TgGpuStopWorker(&a->Worker);
     if(!NT_SUCCESS(status))return status;
     if(a->QueueReady) {

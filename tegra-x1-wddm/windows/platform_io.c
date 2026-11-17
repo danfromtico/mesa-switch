@@ -149,6 +149,26 @@ NTSTATUS TgGpuOpenPlatform(TG_GPU_PLATFORM *p,const TG_GPU_RESOURCES *resources)
 static bool read_pmic(void *context,UINT8 address,UINT8 reg,UINT8 *value);
 static UINT32 read32(void *context,UINT32 address);
 
+NTSTATUS TgGpuReferencePlatformBridge(TG_GPU_PLATFORM *p,PFILE_OBJECT *file,
+                                     PDEVICE_OBJECT *owner)
+{
+    KIRQL irql;
+    NTSTATUS status;
+    PAGED_CODE();
+    if (!p || !file || !owner || !p->Initialized || !p->Resources)
+        return STATUS_INVALID_PARAMETER;
+    *file = NULL; *owner = NULL;
+    status = open_bridge_internal(p);
+    if (!NT_SUCCESS(status)) return status;
+    KeAcquireSpinLock(&p->HandleLock,&irql);
+    if (!p->Closing && !p->QueryRemove && p->Bridge && p->FileObject && p->OwnerDevice) {
+        *file = p->FileObject; *owner = p->OwnerDevice;
+        ObfReferenceObject(*file); ObfReferenceObject(*owner);
+    }
+    KeReleaseSpinLock(&p->HandleLock,irql);
+    return *file ? STATUS_SUCCESS : STATUS_DEVICE_NOT_READY;
+}
+
 VOID TgGpuPlatformAbandonRail(TG_GPU_PLATFORM *p,UCHAR address)
 {
     UINT8 enable=0,voltage=0;UINT32 reset,clamp;

@@ -68,7 +68,8 @@ static enum tg_nvdec_result win_submit(void *ctx, const struct tg_nvdec_dma *gat
     struct tg_nvdec_win *w = ctx;
     enum tg_nvdec_platform_result r;
 
-    if (syncpt_id != w->syncpt || !tg_nvdec_platform_direct_dma(&w->pio))
+    if (syncpt_id != w->syncpt || !w->owner.host1x_live(w->owner.ctx) ||
+        !tg_nvdec_platform_direct_dma(&w->pio))
         return TG_NVDEC_ERR_ARGUMENT;
     r = tg_nvdec_host1x_submit(&w->pio, &w->platform, gather->cpu, words,
                                gather->bus, w->push.cpu, w->push.bus,
@@ -113,7 +114,7 @@ NTSTATUS TgNvdecCreate(const DXGKRNL_INTERFACE *dxgk,
     NTSTATUS status;
 
     if (!dxgk || !result || *result || !io || !io->read32 || !io->write32 || !io->delay_us ||
-        !owner || !owner->acquire_host1x || !owner->release_host1x ||
+        !owner || !owner->acquire_host1x || !owner->release_host1x || !owner->host1x_live ||
         channel >= 12 || syncpt >= 192)
         return STATUS_INVALID_PARAMETER;
     if (!tg_nvdec_platform_direct_dma(io)) return STATUS_NOT_SUPPORTED;
@@ -153,6 +154,18 @@ fail:
         return STATUS_DEVICE_BUSY; /* caller retains object and MMIO ownership */
     *result = NULL;
     return STATUS_DEVICE_NOT_READY;
+}
+
+NTSTATUS TgNvdecQuiesce(struct tg_nvdec_win *w)
+{
+    if (!w) return STATUS_SUCCESS;
+    /* Also covers initialized-but-not-booted hardware, which the codec's
+     * in_flight/booted flags alone do not prove quiescent. */
+    if (tg_nvdec_platform_quiesce(&w->pio, &w->platform) != TG_NVDEC_PLATFORM_OK)
+        return STATUS_DEVICE_BUSY;
+    if (tg_nvdec_cancel(&w->engine) != TG_NVDEC_OK) return STATUS_DEVICE_BUSY;
+    w->firmware_ready = FALSE;
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS TgNvdecDestroy(struct tg_nvdec_win *w)
@@ -217,6 +230,7 @@ NTSTATUS TgNvdecLoadFirmware(struct tg_nvdec_win *w, const void *data,
 
     if (!w || !TgNvdecFirmwareValid(data, size, expected_sha256))
         return STATUS_INVALID_PARAMETER;
+    if (!w->owner.host1x_live(w->owner.ctx)) return STATUS_DEVICE_NOT_READY;
     w->firmware_ready = FALSE;
     if (tg_nvdec_close(&w->engine) != TG_NVDEC_OK)
         return STATUS_DEVICE_BUSY;

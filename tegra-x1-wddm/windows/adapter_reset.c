@@ -10,6 +10,8 @@ NTSTATUS APIENTRY TgGpuDdiResetFromTimeout(HANDLE adapter)
     if(!a || !a->EngineReady || (a->State!=TgGpuAdapterReady && a->State!=TgGpuAdapterResetting))
         return STATUS_INVALID_DEVICE_STATE;
     a->State=TgGpuAdapterResetting;
+    status=TgNvdecAdapterStop(a);
+    if(status!=STATUS_SUCCESS)return status;
     status=TgGpuResetBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
     a->QueueReady=a->Queue.Engine==&a->Engine;return status;
 }

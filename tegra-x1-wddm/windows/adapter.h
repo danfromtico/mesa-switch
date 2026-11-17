@@ -8,6 +8,7 @@
 #include "platform_io.h"
 #include "worker.h"
 #include "panel.h"
+#include "nvdec_adapter.h"
 
 /* DWM and shell processes share this VidMm-managed page-table segment.
  * The initial 16-table (2 MiB) pool fills during desktop device creation;
@@ -29,6 +30,7 @@ typedef struct _TG_GPU_ADAPTER {
     TG_GPU_PLATFORM Platform;
     TG_GPU_WORKER Worker;
     TG_GPU_PANEL Panel;
+    TG_NVDEC_ADAPTER Video;
     enum tg_gpu_adapter_state State;
     BOOLEAN EngineReady,QueueReady;
 } TG_GPU_ADAPTER;

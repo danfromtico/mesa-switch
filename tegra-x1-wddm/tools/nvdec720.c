@@ -2,10 +2,8 @@
  *
  * Standalone Windows ARM64 acceptance tool for the stage-1 T210 NVDEC
  * H.264 backend.  It is intentionally limited to 1280x720, 8-bit, 4:2:0
- * progressive H.264. This retained client uses the delivery's TegraGpuProbe
- * protocol. Raw-MMIO probe mapping is now disabled; production acceptance
- * needs the coexisting render-KMD transport. It never falls back to software
- * or treats a successful CreateFile/IOCTL as a decoded frame.
+ * progressive H.264. A real KMT device on the native NVK adapter owns the
+ * coexisting decoder session. No software decoding fallback is used.
  */
 #include <windows.h>
 #include <stdio.h>
@@ -14,6 +12,7 @@
 
 #include "nvdec_control.h"
 #include "nvdec_parse.h"
+#include "nvdec_native.h"
 
 #define STAGE1_MAX_WIDTH  1280u
 #define STAGE1_MAX_HEIGHT 720u
@@ -29,7 +28,7 @@ static void usage(const char *argv0)
 {
     fprintf(stderr,
         "usage: %s --firmware <nvdec.bin> --input <stream.h264> "
-        "--reference <hashes.txt> [--device <path>] [--dump <dir>]\n"
+        "--reference <hashes.txt> [--dump <dir>]\n"
         "reference lines are: <display-index> <sha256-of-planar-YUV420p>\n"
         "stage 1 accepts only 1280x720 8-bit 4:2:0 progressive H.264\n", argv0);
 }
@@ -168,7 +167,6 @@ static void print_hash(const uint8_t h[TG_NVDEC_SHA256_SIZE])
 int main(int argc, char **argv)
 {
     const char *firmware_path = NULL, *input_path = NULL, *reference_path = NULL;
-    const char *device_path = "\\\\.\\TegraGpuProbe";
     const char *dump_dir = NULL;
     uint8_t *firmware = NULL, *stream = NULL, *slice = NULL;
     uint8_t reference[64][TG_NVDEC_SHA256_SIZE];
@@ -177,11 +175,11 @@ int main(int argc, char **argv)
     struct hash_record records[MAX_FRAMES];
     char err[200] = {0};
     size_t firmware_size = 0, stream_size = 0, reference_count = 0;
-    uint32_t frame_count, i;
+    uint32_t frame_count = 0, i;
     uint32_t pitch = 0, aligned_height = 0, frame_size = 0;
-    HANDLE device = INVALID_HANDLE_VALUE;
+    struct tg_nvdec_native device = {0};
     uint8_t fw_sha[TG_NVDEC_SHA256_SIZE];
-    DWORD bytes = 0;
+    LONG transport_status = 0;
     int exit_code = 0;
 
     for (i = 1; i < (uint32_t)argc; i++) {
@@ -191,8 +189,6 @@ int main(int argc, char **argv)
             input_path = argv[++i];
         else if (!strcmp(argv[i], "--reference") && i + 1 < (uint32_t)argc)
             reference_path = argv[++i];
-        else if (!strcmp(argv[i], "--device") && i + 1 < (uint32_t)argc)
-            device_path = argv[++i];
         else if (!strcmp(argv[i], "--dump") && i + 1 < (uint32_t)argc)
             dump_dir = argv[++i];
         else {
@@ -272,15 +268,19 @@ int main(int argc, char **argv)
     print_hash(fw_sha);
     printf("\n");
 
-    device = CreateFileA(device_path, GENERIC_READ | GENERIC_WRITE,
-                         FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
-                         FILE_ATTRIBUTE_NORMAL, NULL);
-    if (device == INVALID_HANDLE_VALUE) {
-        fprintf(stderr, "HARDWARE_PENDING: cannot open %s (error %lu). "
-                "The administrator-only TegraGpuProbe device is required.\n",
-                device_path, (unsigned long)GetLastError());
+    struct tg_kmt_scan scan = {0};
+    transport_status = tg_gpu_kmt_scan_system(&scan);
+    if (transport_status != 0 || scan.matched != 1 || scan.native_ready != 1) {
+        fprintf(stderr, "HARDWARE_PENDING: native adapter scan status=0x%08lx matched=%u ready=%u\n",
+                (unsigned long)transport_status, scan.matched, scan.native_ready);
         exit_code = 5;
         goto out;
+    }
+    printf("native NVK LUID=%08x%08x\n", (uint32_t)scan.first_ready.luid_high, scan.first_ready.luid_low);
+    transport_status = tg_nvdec_native_open(&device, &scan.first_ready);
+    if (transport_status != 0) {
+        fprintf(stderr, "native KMT device open failed: 0x%08lx\n", (unsigned long)transport_status);
+        exit_code = 5; goto out;
     }
 
     {
@@ -297,9 +297,10 @@ int main(int argc, char **argv)
         memcpy(req->sha256, fw_sha, sizeof(fw_sha));
         memcpy((uint8_t *)req + sizeof(*req), firmware, firmware_size);
         memset(&res, 0, sizeof(res));
-        if (!DeviceIoControl(device, TG_GPU_IOCTL_NVDEC_LOAD, req,
-                             (DWORD)in_size, &res, sizeof(res), &bytes, NULL)) {
-            fprintf(stderr, "NVDEC_LOAD IOCTL failed: %lu\n", (unsigned long)GetLastError());
+        transport_status = tg_nvdec_native_call(&device, TG_NVDEC_ESCAPE_LOAD, req,
+                                                (uint32_t)in_size, &res, sizeof(res));
+        if (transport_status != 0) {
+            fprintf(stderr, "NVDEC_LOAD failed: 0x%08lx %s\n", (unsigned long)transport_status, res.error);
             free(req);
             exit_code = 5;
             goto out;
@@ -321,8 +322,9 @@ int main(int argc, char **argv)
         req.width = info.coded_width;
         req.height = info.coded_height;
         memset(&res, 0, sizeof(res));
-        if (!DeviceIoControl(device, TG_GPU_IOCTL_NVDEC_CONFIGURE, &req,
-                             sizeof(req), &res, sizeof(res), &bytes, NULL) ||
+        transport_status = tg_nvdec_native_call(&device, TG_NVDEC_ESCAPE_CONFIGURE, &req,
+                                                sizeof(req), &res, sizeof(res));
+        if (transport_status != 0 ||
             res.result != 0) {
             fprintf(stderr, "NVDEC_CONFIGURE failed: 0x%08x %s\n",
                     res.result, res.error);
@@ -370,10 +372,11 @@ int main(int argc, char **argv)
         memcpy((uint8_t *)req + sizeof(*req) + f->bitstream_size,
                f->slice_offsets, offsets_size);
 
-        if (!DeviceIoControl(device, TG_GPU_IOCTL_NVDEC_DECODE, req,
-                             (DWORD)in_size, out, (DWORD)out_size, &bytes, NULL)) {
-            fprintf(stderr, "frame %u NVDEC_DECODE IOCTL failed: %lu\n", i,
-                    (unsigned long)GetLastError());
+        transport_status = tg_nvdec_native_call(&device, TG_NVDEC_ESCAPE_DECODE, req,
+                                                (uint32_t)in_size, out, (uint32_t)out_size);
+        if (transport_status != 0) {
+            fprintf(stderr, "frame %u NVDEC_DECODE failed: 0x%08lx\n", i,
+                    (unsigned long)transport_status);
             free(req);
             free(out);
             exit_code = 5;
@@ -440,12 +443,16 @@ int main(int argc, char **argv)
             goto out;
         }
     }
-    printf("NVDEC=used (real Host1x syncpoint per frame)\n");
-    printf("RESULT=PASS all %u frames matched the software reference\n", frame_count);
-
 out:
-    if (device != INVALID_HANDLE_VALUE)
-        CloseHandle(device);
+    transport_status = tg_nvdec_native_close(&device);
+    if (transport_status != 0) {
+        fprintf(stderr, "NVDEC close failed: 0x%08lx; cleanup not accepted\n", (unsigned long)transport_status);
+        exit_code = 8;
+    }
+    if (!exit_code) {
+        printf("NVDEC=used (real Host1x syncpoint per frame)\n");
+        printf("RESULT=PASS all %u frames matched the software reference; session retired\n", frame_count);
+    }
     free(firmware);
     free(stream);
     free(slice);

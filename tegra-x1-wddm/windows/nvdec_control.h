@@ -1,9 +1,9 @@
 /* SPDX-License-Identifier: MIT
  *
- * Private bring-up ABI between the SwitchWOA NVDEC acceptance tool and the
- * TegraGpuProbe kernel driver.  This is not a WDDM/UMD contract and must not
- * be advertised as D3D11VA support.  Only 1280x720 8-bit 4:2:0 progressive
- * H.264 is accepted by the current backend.
+ * Shared bring-up payloads, now carried by the coexisting KMD's versioned
+ * nvdec_escape_abi.h transport. The historical probe IOCTL numbers remain
+ * for the archived client only. This is not a D3D11VA capability declaration.
+ * Only 1280x720 8-bit 4:2:0 progressive H.264 is accepted by this backend.
  */
 #ifndef TGD3D_NVDEC_CONTROL_H
 #define TGD3D_NVDEC_CONTROL_H

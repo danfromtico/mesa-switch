@@ -61,6 +61,7 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
     }
     *sources=*children=1;
 #endif
+    if(status==STATUS_SUCCESS)TgNvdecAdapterInitialize(a);
     return status;
 }
 
@@ -75,7 +76,9 @@ static NTSTATUS set_power(PVOID context,ULONG uid,DEVICE_POWER_STATE state,POWER
     }
     if (a->State!=TgGpuAdapterReady && a->State!=TgGpuAdapterSuspended) return STATUS_SUCCESS;
     if (a->State==TgGpuAdapterSuspended && a->Hardware.Isolated) return STATUS_SUCCESS;
-    NTSTATUS status=TgGpuSuspendBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
+    NTSTATUS status=TgNvdecAdapterStop(a);
+    if(status!=STATUS_SUCCESS)return status;
+    status=TgGpuSuspendBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
     if (a->Engine.Resetting) {
         a->State=TgGpuAdapterSuspended;
         a->QueueReady=a->Queue.Engine==&a->Engine;
@@ -216,6 +219,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
 #else
     d.DxgkDdiQueryCurrentFence=NULL; /* MCDM uses scheduler fence notifications. */
 #endif
+    TgNvdecRegisterEscape(&d); /* preserve the existing panel escape */
     NTSTATUS status=DxgkInitialize(object,path,&d);
     if(!NT_SUCCESS(status)){TgGpuSetPlatformDriverObject(NULL);TgGpuTraceShutdown();}
     record_status(L"InitializeStatus",status);

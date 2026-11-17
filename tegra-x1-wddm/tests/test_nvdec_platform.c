@@ -101,9 +101,10 @@ static bool release_clock(void *ctx)
     m.held = false;
     return true;
 }
+static bool clock_live(void *ctx) { CHECK(ctx == &m); return m.held; }
 static const struct tg_nvdec_platform_io io = {&m, model_read, model_write, model_delay};
 static const struct tg_nvdec_platform_owner owner = {
-    &m, 0x00012127u, 0x48005504u, acquire_clock, release_clock
+    &m, 0x00012127u, 0x48005504u, acquire_clock, release_clock, clock_live
 };
 static void prepare(void)
 {
@@ -137,6 +138,7 @@ static void test_inherited_and_submit(void)
     CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
     CHECK(p.active && p.nvdec_clock && p.host1x_clock && p.host1x_lease);
     CHECK(m.car[0x298/4] & (1u << 2));
+    CHECK(m.car[0x698/4] == 0x80000002u); /* PLLP OUT0 / 2 */
     CHECK(!(m.car[0x2a4/4] & (1u << 2)) && (m.car[0x2a4/4] & (1u << 3)));
     const unsigned writes = m.writes;
     CHECK(start(&p) == TG_NVDEC_PLATFORM_OWNERSHIP && m.writes == writes && m.acquire_calls == 1);
@@ -254,12 +256,28 @@ static void test_direct_route_is_not_assumed(void)
     CHECK(tg_nvdec_platform_direct_dma(&io) && !m.writes);
     CHECK(!tg_nvdec_platform_direct_dma(NULL));
 }
+static void test_clock_admission(void)
+{
+    CHECK(tg_nvdec_platform_clocks_supported(0x48115408u,0x60000006u));
+    CHECK(tg_nvdec_platform_clocks_supported(0x48115408u,0x80000000u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0x60000005u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0xe0000000u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,0x60000106u));
+    CHECK(!tg_nvdec_platform_clocks_supported(UINT32_MAX,0x60000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x48115408u,UINT32_MAX));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x40115408u,0x60000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0xc8115408u,0x60000006u));
+    CHECK(tg_nvdec_platform_clocks_supported(0x58005508u,0x60000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x58005408u,0x60000006u));
+    CHECK(!tg_nvdec_platform_clocks_supported(0x58005500u,0x60000006u));
+}
 int main(void)
 {
     test_inherited_and_submit();
     test_refuse_foreign_or_unknown_state();
     test_failed_cleanup_retains_ownership();
     test_direct_route_is_not_assumed();
+    test_clock_admission();
     if (failures) { fprintf(stderr, "%d failure(s)\n", failures); return 1; }
     puts("PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)");
     return 0;

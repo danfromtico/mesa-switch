@@ -42,6 +42,7 @@ struct tg_nvdec_platform_owner {
      * consumer's clock. Both callbacks are serialized by the parent owner. */
     bool (*acquire_host1x)(void *ctx);
     bool (*release_host1x)(void *ctx);
+    bool (*host1x_live)(void *ctx); /* production admission; no provider I/O */
 };
 
 enum tg_nvdec_platform_result {
@@ -82,6 +83,9 @@ void tg_nvdec_platform_zero(struct tg_nvdec_platform *p);
  * explicitly untranslated route; do not disable somebody else's SMMU map.
  * This check is not an allocation or evidence of successful device DMA. */
 bool tg_nvdec_platform_direct_dma(const struct tg_nvdec_platform_io *io);
+/* Fixed408MHz PLLP and an inherited Host1x source no faster than102MHz.
+ * This fits the lowest normal/SLT B01 core-voltage points; no clock writes. */
+bool tg_nvdec_platform_clocks_supported(uint32_t pllp_base, uint32_t host_source);
 /* p must be freshly zeroed or successfully shut down. The caller holds the
  * adapter's lifecycle/MC lock and reserves channel/syncpt until shutdown
  * succeeds. A failed init may retain ownership: call shutdown, never zero it.
