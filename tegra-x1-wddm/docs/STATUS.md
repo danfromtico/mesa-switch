@@ -1,17 +1,20 @@
 # GPU status
 
-Current status,2026-11-17: fixed90-degree row-scan DWM and native Win32 vkcube
-retain their accepted scope. The latest candidate boot loaded the old4568-byte
-DSDT instead of the verified4993-byte disk table. GPU was absent with startup
-closed; the signed channel-scoped KMD/provider were only staged, never selected
-or executed. No decode ran. The exact loader ignores optional-table load errors,
-but the failed live branch/I/O result remains unknown. Original11-file display
-and power identities, loaded images,90-degree configuration and cleanup are
-verified. No driver package was reinstalled for recovery.720p/1080p remain open.
-See [the boot-table recurrence](NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json) and
-[the retained channel correction](NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json).
-Validated modules continue from the verified combination; actual failures require
-recovery. Entries below are historical snapshots with superseded priorities.
+Current status,2026-11-17: the corrected374b KMD is retained with the045 clock
+provider,9eb resource table and original5b/95b userspace. Incremental replacement
+reuses unchanged components and keeps the original UMD/ICD registration. DWM,
+all11 identities,90-degree configuration and retained power policy are verified.
+The previous native LOAD stops at channel11 ownership: GET/PUT differ and the
+captured START/END are nonzero. No firmware/DMA or frames ran. The absolute-END
+assumption in58dc was disproved by the later NVIDIA upstream fix0e43b8da and
+corrected in374b; its submit path was never exercised on this board. The unchanged
+ownership failure was not rerun after correction.720p/1080p remain unaccepted.
+See [current repair and identities](NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json),
+[native ring evidence and correction](NVDEC_INCREMENTAL_POINTER_NATIVE_20261117.json),
+and [the earlier retained combination](NVDEC_RETAINED_CHANNEL_NATIVE_20261117.json).
+Archived observation files were cleaned; active deployment and recovery inputs
+remain required. Main review only, no external review. Fixed90-degree DWM and
+vkcube retain their original accepted scope. Entries below are historical.
 
 **Owner priority update:** repair the current pre-logon reboot first; then complete shader caching and measured ~60 Hz VBlank/presentation pacing before hardware rotation. Idle desktops should submit on demand. The owner explicitly requires native startup to stay enabled and authorizes deploying the next reviewed fix directly for their tests. The SD is currently mounted for offline diagnosis.
 
