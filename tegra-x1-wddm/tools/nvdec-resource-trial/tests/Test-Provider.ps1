@@ -13,31 +13,28 @@ if($errors.Count){throw ($errors|Out-String)}
 $same=@($pairAst.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Same-Boot'},$true))
 if($same.Count -ne 1){throw 'Missing boot comparator'}
 . ([scriptblock]::Create($same[0].Extent.Text))
-Add-Type @'
-using System;
-public static class NvdecProviderDriverApi {
- public static int Calls;
- public static bool Result=true, Reboot=false;
- public static bool Update(IntPtr p,string id,string inf,uint flags,out bool reboot) {
-  if(p!=IntPtr.Zero || id!="ACPI\\SWOA0402" || flags!=5) throw new Exception("MODEL_ARGUMENT");
-  ++Calls; reboot=Reboot;return Result;
- }
+function Defer-ProviderInstall($Directory) {
+ $script:Calls++
+ if($script:HelperThrows){throw 'MODEL_HELPER_FAILURE'}
+ @{Exit=$script:HelperExit;Output=$script:HelperOutput}
 }
-'@
 function Assert($condition,[string]$why){if(!$condition){throw $why}}
 function Assert-RetainedFiles {}
 function Assert-Power {}
 function Assert-Closed {if(!$script:Closed){throw 'MODEL_GATE'}}
 function Read-Boot {$script:Boot}
 function Device-Property($Name){0}
-function Provider-Property($Name){0}
+function Provider-Property($Name){if($Name -eq 'DriverInfPath'){'oem1.inf'}else{0}}
 function Join-Path($Path,$Child){$Child}
 function Write-ActivationJson($Path,$Value){$script:Saved[$Path]=$Value}
 function Save-State($Value){$script:Phases+=@($Value.Phase)}
 function Test-Path($Path){$script:Saved.ContainsKey($Path)}
 function Read-Json($Path){if(!$script:Saved.ContainsKey($Path)){throw 'MODEL_MISSING_RECEIPT'};$script:Saved[$Path]}
 function File-Record($Path){$script:File}
-function Assert-File($Path,$Expected){Assert ($script:File.Sha256 -eq $Expected.Sha256) 'MODEL_FILE'}
+function Assert-File($Path,$Expected){
+ if($Path -like '*\INF\*'){Assert $script:RegistrationValid 'MODEL_INF'}
+ else{Assert ($script:File.Sha256 -eq $Expected.Sha256) 'MODEL_FILE'}
+}
 function Read-LoadedDsdt($Path){$script:Loaded}
 function Assert-LoadedDsdt($Actual,$Expected){Assert ($Actual -eq $Expected) 'MODEL_TABLE'}
 function Known-Store {@{Directory='store';PublishedInf='oem0.inf'}}
@@ -51,7 +48,9 @@ function Reset {
  $script:Saved=@{};$script:Phases=@();$script:Exists=$false;$script:Imported=$false
  $script:Imports=0;$script:ImportExit=0;$script:Restarts=0;$script:Closed=$true;$script:Boot='2026-11-17T00:01:00Z'
  $script:File=@{Sha256='old';Length=10};$script:Loaded='new-table'
- [NvdecProviderDriverApi]::Calls=0;[NvdecProviderDriverApi]::Result=$true;[NvdecProviderDriverApi]::Reboot=$false
+ $script:Calls=0;$script:HelperExit=0;$script:HelperThrows=$false
+ $script:RegistrationValid=$true
+ $script:HelperOutput='RESULT=STAGED_FOR_REBOOT live driver identity is not verified'
 }
 $root='model';$config=@{CandidateAcpi='new-table';BaselineAcpi='old-table';Provider=@{Candidate=@{Sha256='new';Length=20};Baseline=@{Sha256='old';Length=10}}}
 foreach($case in @('reuse','import','failed','incomplete','reconcile')){
@@ -63,23 +62,29 @@ foreach($case in @('reuse','import','failed','incomplete','reconcile')){
   $script:Exists=$true
  }
  $failure=$null;try{Invoke-ProviderAction 'StageProviderPackage'}catch{$failure=$_.Exception.Message}
- Assert ([NvdecProviderDriverApi]::Calls -eq 0 -and !$script:Restarts) 'Staging selected a driver or restarted'
+ Assert ($script:Calls -eq 0 -and !$script:Restarts) 'Staging selected a driver or restarted'
  if($case -in @('failed','incomplete')){Assert ($failure -and !$state.ProviderStaged) 'Failed import was accepted'}
  else{Assert (!$failure -and $state.ProviderStaged) ('Staging failed: '+$failure)}
  Assert ($script:Imports -eq [int]($case -in @('import','failed'))) 'Import was repeated or skipped'
 }
-foreach($case in @('wrong-table','open-gate','select','reboot','failed')){
+foreach($case in @('wrong-table','open-gate','select','reboot','failed','missing-result','helper-exception','interrupted')){
  Reset;$state=[ordered]@{Phase='CandidateRebootRequested';Boot='2026-11-17T00:00:00Z';ProviderStaged=$true}
  $script:Exists=$true;$script:Saved['provider-staging.json']=@{Package=Known-Store}
  if($case -eq 'wrong-table'){$script:Loaded='fallback-table'}
  if($case -eq 'open-gate'){$script:Closed=$false}
  if($case -eq 'select'){$script:File=$config.Provider.Candidate} # already-selected identity: no new call
- if($case -eq 'reboot') {[NvdecProviderDriverApi]::Reboot=$true}
- if($case -eq 'failed') {[NvdecProviderDriverApi]::Result=$false}
+ if($case -eq 'failed') {$script:HelperExit=1}
+ if($case -eq 'missing-result') {$script:HelperOutput=''}
+ if($case -eq 'helper-exception') {$script:HelperThrows=$true}
+ if($case -eq 'interrupted') {$script:Saved['provider-candidate-selection.json']=@{Phase='Selecting'}}
  $failure=$null;try{Invoke-ProviderSelection 'Candidate'}catch{$failure=$_.Exception.Message}
- if($case -in @('wrong-table','open-gate')){Assert ($failure -and [NvdecProviderDriverApi]::Calls -eq 0) 'Gate/table failure reached selection'}
- elseif($case -eq 'select'){Assert (!$failure -and [NvdecProviderDriverApi]::Calls -eq 0) 'Identical provider was unnecessarily selected'}
- elseif($case -eq 'failed'){Assert ($failure -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'Failed') 'Selection error was swallowed'}
+ if($case -in @('wrong-table','open-gate','interrupted')){Assert ($failure -and $script:Calls -eq 0) 'Gate/table/incomplete selection reached installer'}
+ elseif($case -eq 'select'){Assert (!$failure -and $script:Calls -eq 0) 'Identical provider was unnecessarily selected'}
+ elseif($case -in @('failed','missing-result','helper-exception')){
+  Assert ($failure -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'Failed') 'Selection error was swallowed'
+  $again=$null;try{Invoke-ProviderSelection 'Candidate'}catch{$again=$_.Exception.Message}
+  Assert ($again -and $script:Calls -eq 1) 'Failed installer was repeated'
+ }
  else{
   Assert ($failure -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'RebootRequired') 'Required restart was hidden'
   Invoke-ProviderAction 'ProviderRestart';Assert ($script:Restarts -eq 1) 'Missing required restart'
@@ -89,11 +94,15 @@ foreach($case in @('wrong-table','open-gate','select','reboot','failed')){
   $early=$null;try{Invoke-ProviderSelection 'Candidate'}catch{$early=$_.Exception.Message}
   Assert ($early -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'RebootRequired') 'CIM jitter was treated as the required reboot'
   $script:Boot='2026-11-17T00:02:00Z';$script:File=$config.Provider.Candidate
+  $script:RegistrationValid=$false;$wrongInf=$null
+  try{Invoke-ProviderSelection 'Candidate'}catch{$wrongInf=$_.Exception.Message}
+  Assert ($wrongInf -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'RebootRequired' -and $script:Calls -eq 1) 'Mixed INF/SYS identity was accepted'
+  $script:RegistrationValid=$true
   Invoke-ProviderSelection 'Candidate'
-  Assert ([NvdecProviderDriverApi]::Calls -eq 1 -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'SelectedAfterBoot') 'Selection repeated after required restart'
+  Assert ($script:Calls -eq 1 -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'SelectedAfterBoot') 'Selection repeated after required restart'
  }
 }
 Reset;$state=[ordered]@{Phase='BaselineRebootRequested';Boot='2026-11-17T00:00:00Z'};$script:Loaded='old-table'
 Invoke-ProviderSelection 'Baseline'
-Assert ([NvdecProviderDriverApi]::Calls -eq 0) 'Original provider was unnecessarily reinstalled'
-'PASS: provider staging, incomplete-operation guards, loaded-table gating and bounded recovery restart (CPU only)'
+Assert ($script:Calls -eq 0) 'Original provider was unnecessarily reinstalled'
+'PASS: provider staging, deferred replacement, failed/incomplete-operation guards, loaded-table gating and bounded recovery restart (CPU only)'

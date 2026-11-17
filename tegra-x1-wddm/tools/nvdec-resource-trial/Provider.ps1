@@ -4,9 +4,16 @@
 function Provider-Property([string]$Name) {
  (Get-PnpDeviceProperty -InstanceId 'ACPI\SWOA0402\0' -KeyName ('DEVPKEY_Device_'+$Name)).Data
 }
-function Assert-ProviderSelected([ValidateSet('Candidate','Baseline')][string]$Which) {
+function Assert-ProviderPackageIdentity([ValidateSet('Candidate','Baseline')][string]$Which) {
  Assert-File "$env:windir\System32\drivers\switchfan.sys" $config.Provider.$Which
+ $inf=[string](Provider-Property 'DriverInfPath')
+ if($inf -notmatch '^oem[0-9]+\.inf$'){throw 'Unexpected selected provider INF'}
+ $directory=if($Which -eq 'Candidate'){'provider'}else{'baseline-fan'}
+ Assert-File "$env:windir\INF\$inf" (File-Record (Join-Path $root ($directory+'\switchfan.inf')))
  if((Provider-Property 'ProblemCode') -ne 0){throw 'Clock provider is not started'}
+}
+function Assert-ProviderSelected([ValidateSet('Candidate','Baseline')][string]$Which) {
+ Assert-ProviderPackageIdentity $Which
  if($Which -eq 'Candidate') {
   $r=Read-Json (Join-Path $root 'provider-candidate-selection.json')
   if($r.Phase -notin @('Selected','SelectedAfterBoot')){throw 'Candidate provider selection is incomplete'}
@@ -48,6 +55,17 @@ function Assert-ProviderStaged {
  $receipt=Read-Json (Join-Path $root 'provider-staging.json');$actual=Find-ProviderStore
  if(!$actual -or $actual.Directory -ne $receipt.Package.Directory -or $actual.PublishedInf -ne $receipt.Package.PublishedInf){throw 'Provider staging identity changed'}
 }
+function Defer-ProviderInstall([string]$Directory) {
+ # An unexpected reboot interrupted the live provider selection; the last
+ # complete SetupAPI entry was Restarting Devices. Select the signed package with
+ # public deferred-install flags; never hot-remove the power/clock provider.
+ $expected=$config.InputFiles.'defer-provider.exe'
+ if(!$expected){throw 'A hashed deferred-install helper is required'}
+ $tool=Join-Path $root 'defer-provider.exe';Assert-File $tool $expected
+ $output=& $tool --defer (Join-Path $Directory 'switchfan.inf')
+ $exit=$LASTEXITCODE
+ @{Exit=$exit;Output=$output -join "`n"}
+}
 function Invoke-ProviderSelection([ValidateSet('Candidate','Baseline')][string]$Which) {
  Assert-Closed;Assert-Power
  $expectedPhase=if($Which -eq 'Candidate'){'CandidateRebootRequested'}else{'BaselineRebootRequested'}
@@ -58,8 +76,7 @@ function Invoke-ProviderSelection([ValidateSet('Candidate','Baseline')][string]$
  if(Test-Path $receipt) {
   $r=Read-Json $receipt
   if($r.Phase -eq 'RebootRequired' -and $r.RestartRequested -and !(Same-Boot (Read-Boot) $r.Boot)) {
-   Assert-File "$env:windir\System32\drivers\switchfan.sys" $expected
-   if((Provider-Property 'ProblemCode') -ne 0){throw 'Provider did not start after the required boot'}
+   Assert-ProviderPackageIdentity $Which
    $r.Phase='SelectedAfterBoot';Write-ActivationJson $receipt $r
   } elseif($r.Phase -notin @('Selected','SelectedAfterBoot')){throw 'Provider selection was already attempted; inspect its receipt'}
   Assert-ProviderSelected $Which;return
@@ -69,22 +86,21 @@ function Invoke-ProviderSelection([ValidateSet('Candidate','Baseline')][string]$
  $r=[ordered]@{Begin=[DateTime]::UtcNow.ToString('o');Boot=Read-Boot;Target=$expected;Phase='Selecting';RestartRequested=$false;RebootRequired=$false;Before=File-Record "$env:windir\System32\drivers\switchfan.sys"}
  Write-ActivationJson $receipt $r
  if($r.Before.Sha256 -eq $expected.Sha256 -and (Provider-Property 'ProblemCode') -eq 0) {
+  Assert-ProviderPackageIdentity $Which
   $r.Phase='Selected';$r.Reused=$true;Write-ActivationJson $receipt $r;return
  }
- if(!('NvdecProviderDriverApi' -as [type])){Add-Type @'
-using System;
-using System.Runtime.InteropServices;
-public static class NvdecProviderDriverApi {
- [DllImport("newdev.dll",EntryPoint="UpdateDriverForPlugAndPlayDevicesW",CharSet=CharSet.Unicode,SetLastError=true)]
- [return:MarshalAs(UnmanagedType.Bool)] public static extern bool Update(IntPtr p,string id,string inf,uint flags,out bool reboot);
-}
-'@}
- $reboot=$false;$ok=[NvdecProviderDriverApi]::Update([IntPtr]::Zero,'ACPI\SWOA0402',(Join-Path $directory 'switchfan.inf'),5,[ref]$reboot)
- $r.ErrorCode=if($ok){0}else{[Runtime.InteropServices.Marshal]::GetLastWin32Error()}
- $r.RebootRequired=$reboot;$r.Phase=if(!$ok){'Failed'}elseif($reboot){'RebootRequired'}else{'Selected'}
+ try {
+  $deferred=Defer-ProviderInstall $directory
+  $r.ErrorCode=$deferred.Exit;$r.Output=$deferred.Output
+  $ok=$deferred.Exit -eq 0 -and $deferred.Output -match '(?m)^RESULT=STAGED_FOR_REBOOT live driver identity is not verified\r?$'
+ } catch {
+  $r.ErrorCode=-1;$r.Error=$_.Exception.Message;$ok=$false
+ }
+ # A disk hash/Code0 cannot prove that the live image was replaced. Every
+ # changed package needs a recorded boot before it can become Selected.
+ $r.RebootRequired=$ok;$r.Phase=if($ok){'RebootRequired'}else{'Failed'}
  $r.Actual=File-Record "$env:windir\System32\drivers\switchfan.sys";$r.Code=Provider-Property 'ProblemCode';$r.End=[DateTime]::UtcNow.ToString('o');Write-ActivationJson $receipt $r
- if(!$ok -or $reboot){throw ('Provider selection requires inspection: '+$r.Phase+'/'+$r.ErrorCode)}
- Assert-ProviderSelected $Which;Assert-Closed
+ throw ('Provider selection requires inspection: '+$r.Phase+'/'+$r.ErrorCode)
 }
 function Invoke-ProviderAction([string]$Operation) {
  if($Operation -eq 'StageProviderPackage') {

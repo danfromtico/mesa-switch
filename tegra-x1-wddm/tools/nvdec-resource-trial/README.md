@@ -15,10 +15,13 @@ when a durable zero-exit receipt and the complete registered package exist.
 
 After `StageCandidate` has loaded the candidate DSDT with native GPU startup
 closed, run `SelectProvider` before `SelectCandidate`. Provider replacement is
-rejected while the GPU is active or the loaded table differs. If the public
-installer explicitly reports that a restart is required, `ProviderRestart`
-can request it once; rerun `SelectProvider` after that boot to verify the
-result without installing again. `FinishCandidate` still only queries resource
+rejected while the GPU is active or the loaded table differs. Changed providers
+use the ARM64 `defer-provider.exe` built from `../defer_provider.c`; its length
+and SHA256 must be in `InputFiles`. It selects the exact compatible signed INF
+with public SetupAPI `DI_DONOTCALLCONFIGMG | DI_NEEDREBOOT` flags. Every changed
+provider requires a boot; a successful copy and Code0 do not verify the loaded
+image. `ProviderRestart` can request that boot once; rerun `SelectProvider`
+afterward to verify the result without installing again. `FinishCandidate` still only queries resource
 state. The bounded decoder program is a separate, explicit subsequent action.
 
 Recovery is symmetric: `Recover` loads the original DSDT with GPU startup
@@ -26,6 +29,20 @@ closed, then `SelectOriginalProvider` restores the original clock provider
 before `SelectBaseline` can activate the original KMD. The same recorded-restart
 rule applies when required. Failed selection, pending import or unknown binary
 identity must be inspected; they never authorize a repeated install.
+
+The earlier live `UpdateDriverForPlugAndPlayDevices` provider replacement
+remained incomplete across an unexpected reboot. The last complete SetupAPI
+entry was `Restarting Devices`.
+The candidate KMD was not selected and no decoder submission occurred. The
+live replacement route is removed; neither the helper's success nor a later
+recovery establishes the cause of that reboot. The deferred-install contract
+is documented by Microsoft under
+[SP_DEVINSTALL_PARAMS](https://learn.microsoft.com/en-us/windows/win32/api/setupapi/ns-setupapi-sp_devinstall_params_a)
+and [SetupDiInstallDevice](https://learn.microsoft.com/en-us/windows/win32/api/setupapi/nf-setupapi-setupdiinstalldevice).
+The application calls `SetupDiCallClassInstaller`, not the lower default
+handler directly. Inspect mode only constructs an in-memory selection.
+For LLVM-MinGW, build the helper with
+`aarch64-w64-mingw32-clang -std=c11 -O2 -Wall -Wextra -Werror -municode ../defer_provider.c -lsetupapi -o defer-provider.exe`.
 
 The main chat drives these separate actions and reads each saved result before
 continuing:
