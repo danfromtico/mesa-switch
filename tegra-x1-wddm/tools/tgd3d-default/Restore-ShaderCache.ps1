@@ -5,9 +5,10 @@ param([switch]$Restart)
 . (Join-Path $PSScriptRoot 'Common.ps1')
 Require-Administrator
 $b=Read-Json (Join-Path $PSScriptRoot 'cache-update-backup.json')
-Check-File ($b.PreviousDirectory+'\app\TegraGpuD3DVk.dll') @{Length=(Get-Item ($b.PreviousDirectory+'\app\TegraGpuD3DVk.dll')).Length;Sha256=$b.PreviousUmd}
+$userspace=if($b.PreviousUserspaceDirectory){[string]$b.PreviousUserspaceDirectory}else{[string]$b.PreviousDirectory}
+Check-File ($userspace+'\app\TegraGpuD3DVk.dll') @{Length=(Get-Item ($userspace+'\app\TegraGpuD3DVk.dll')).Length;Sha256=$b.PreviousUmd}
 if((File-Hash "$env:windir\System32\drivers\tegragpurender.sys") -ne $b.Kernel -or
-   (File-Hash ($b.PreviousDirectory+'\app\libvulkan_nouveau.dll')) -ne $b.PreviousIcd){throw 'Baseline changed; inspect before restoring'}
+   (File-Hash ($userspace+'\app\libvulkan_nouveau.dll')) -ne $b.PreviousIcd){throw 'Baseline changed; inspect before restoring'}
 $settings='HKLM:\SYSTEM\CurrentControlSet\Services\tegragpurender\Tgd3dDefault'
 $active=[string](Get-ItemProperty $settings).Directory
 if($active -ne $b.Directory -and $active -ne $b.PreviousDirectory){throw 'A different update owns the startup configuration'}
