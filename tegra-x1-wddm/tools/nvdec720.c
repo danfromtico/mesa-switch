@@ -385,11 +385,14 @@ int main(int argc, char **argv)
              * delivery/protocol failure leaves the calloc'd response zero. */
             fprintf(stderr,
                     "frame %u NVDEC_DECODE failed: 0x%08lx response_v=%u "
-                    "result=0x%08x sync=%u/%u bytes=%u detail=%.*s "
+                    "result=0x%08x sync=%u/%u bytes=%u mbs=%u/%u "
+                    "mb_errors=%u error=0x%08x slice_error=0x%08x cycles=%u detail=%.*s "
                     "request=%u response=%u bitstream=%u slices=%u slot=%u\n",
                     i, (unsigned long)transport_status, res->version,
                     res->result, res->expected_syncpoint, res->observed_syncpoint,
-                    res->bytes_written, (int)sizeof(res->error), res->error,
+                    res->bytes_written, res->mbs_correctly_decoded, expected_mbs,
+                    res->mbs_in_error, res->error_status, res->slice_header_error_code,
+                    res->cycles, (int)sizeof(res->error), res->error,
                     (uint32_t)in_size, (uint32_t)out_size, f->bitstream_size,
                     f->slice_count, f->pic.curr_slot);
             free(req);
