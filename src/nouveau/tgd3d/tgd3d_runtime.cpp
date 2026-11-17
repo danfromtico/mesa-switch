@@ -43,7 +43,7 @@ static constexpr uint32_t shared_magic = 0x52534754; /* TGSR */
 
 struct Mapping {
    uint64_t address, size;
-   bool freed;
+   bool freed, free_failed;
    Mapping *next;
 };
 
@@ -148,11 +148,18 @@ static VkResult owner_free_gpu(void *context, uint64_t address, uint64_t bytes)
    HRESULT hr = S_OK;
    /* Deallocating the runtime resource already released its addresses, and
     * they may have been handed out again. Never free a stale range. */
-   if ((!mapping || !mapping->freed) && !p->dead)
-      hr = free_address(p, address, bytes);
-   if (FAILED(hr))
+   if ((!mapping || !mapping->freed) && !p->dead) {
+      /* A failed release has an unconfirmed outcome. Do not replay its VA:
+       * successful resource deallocation will release all remaining mappings. */
+      hr = mapping && mapping->free_failed ? p->cleanup_error : free_address(p, address, bytes);
+   } else if (mapping && !mapping->freed) {
+      hr = FAILED(p->cleanup_error) ? p->cleanup_error : D3DDDIERR_DEVICEREMOVED;
+   }
+   if (FAILED(hr)) {
       p->cleanup_error = hr;
-   if (mapping) {
+      if (mapping) mapping->free_failed = true;
+   }
+   if (mapping && SUCCEEDED(hr)) {
       *link = mapping->next;
       free(mapping);
    }
@@ -264,11 +271,11 @@ HRESULT runtime_destroy(RuntimeResource *p)
    /* Order matters: release this device's GPU addresses, drop the CPU lock,
     * and only then return the allocation to the runtime. */
    for (Mapping *mapping = p->mappings; mapping; mapping = mapping->next) {
-      if (!mapping->freed) {
+      if (!mapping->freed && !mapping->free_failed) {
          HRESULT next = free_address(p, mapping->address, mapping->size);
-         if (SUCCEEDED(hr))
-            hr = next;
-         mapping->freed = true;
+         if (SUCCEEDED(hr)) hr = next;
+         mapping->freed = SUCCEEDED(next);
+         mapping->free_failed = FAILED(next);
       }
    }
    if (p->cpu_locked) {
@@ -277,8 +284,10 @@ HRESULT runtime_destroy(RuntimeResource *p)
       HRESULT next = rt_trace(p, 8, p->callbacks.pfnUnlock2Cb(p->device, &unlock));
       if (SUCCEEDED(hr))
          hr = next;
-      p->cpu_locked = false;
-      p->cpu = nullptr;
+      if (SUCCEEDED(next)) {
+         p->cpu_locked = false;
+         p->cpu = nullptr;
+      }
    }
    if (p->associated) {
       D3DDDICB_DEALLOCATE deallocate = {};
@@ -292,12 +301,31 @@ HRESULT runtime_destroy(RuntimeResource *p)
       HRESULT next = rt_trace(p, 6, p->callbacks.pfnDeallocateCb(p->device, &deallocate));
       if (SUCCEEDED(hr))
          hr = next;
-      p->memory.allocation = 0;
-      p->associated = false;
+      if (SUCCEEDED(next)) {
+         p->memory.allocation = 0;
+         p->associated = false;
+         p->cpu_locked = false;
+         p->cpu = nullptr;
+         /* DeallocateCb success releases the allocation's outstanding GPU
+          * addresses, including a VA whose separate free failed. */
+         for (Mapping *mapping = p->mappings; mapping; mapping = mapping->next)
+            mapping->freed = true;
+      }
    }
+   if (FAILED(hr)) p->cleanup_error = hr;
    ReleaseSRWLockExclusive(&p->lock);
+   /* Consume this owner's reference even on failure. Existing ICD imports
+    * retain the metadata independently; releasing its last reference frees
+    * only host records, never the allocation or a GPU mapping. No deferred
+    * callback may reuse this resource's runtime handle after DDI teardown. */
    owner_release(p);
    return hr;
+}
+
+static HRESULT cleanup_failed_create(RuntimeResource *p, HRESULT cause)
+{
+   const HRESULT cleanup = runtime_destroy(p);
+   return FAILED(cleanup) ? D3DDDIERR_DEVICEREMOVED : cause;
 }
 
 void runtime_copy_callbacks(D3DDDI_DEVICECALLBACKS *out, const D3DDDI_DEVICECALLBACKS *in)
@@ -554,7 +582,7 @@ HRESULT runtime_private_create(Device *dev, D3D10DDI_HRTRESOURCE resource,
       p->associated = info.hAllocation != 0;
       hr = make_ready(dev, p, bytes, allocate.hKMResource);
    }
-   if (FAILED(hr)) { runtime_destroy(p); return hr; }
+   if (FAILED(hr)) { return cleanup_failed_create(p, hr); }
    *out = p;
    return S_OK;
 }
@@ -860,7 +888,7 @@ HRESULT runtime_shared_tiled_create(Device *dev, const Resource *res,
    if (FAILED(hr)) return hr;
    p->tiled_shared = true; p->tiled_layout = m;
    hr = runtime_shared_tiled_check(dev, p, image, requirements);
-   if (FAILED(hr)) { runtime_destroy(p); return hr; }
+   if (FAILED(hr)) { return cleanup_failed_create(p, hr); }
    tg_gpu_allocation_request request = {TG_GPU_ALLOCATION_ABI, TG_GPU_ALLOCATION_CPU_VISIBLE,
       m.storage.allocation_bytes};
    D3DDDI_ALLOCATIONINFO2 info = {};
@@ -875,7 +903,7 @@ HRESULT runtime_shared_tiled_create(Device *dev, const Resource *res,
       p->associated = info.hAllocation != 0;
       hr = make_ready(dev, p, request.bytes, allocate.hKMResource, displayable);
    }
-   if (FAILED(hr)) { runtime_destroy(p); return hr; }
+   if (FAILED(hr)) { return cleanup_failed_create(p, hr); }
    *out = p;
    return S_OK;
 }
@@ -928,15 +956,13 @@ HRESULT runtime_shared_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *des
    hr = p->callbacks.pfnAllocateCb(p->device, &allocate);
    rt_trace(p, 1, hr, request.Buffer.bytes);
    if (FAILED(hr)) {
-      runtime_destroy(p);
-      return hr;
+      return cleanup_failed_create(p, hr);
    }
    p->associated = true;
    p->memory.allocation = info.hAllocation;
    hr = make_ready(dev, p, request.Buffer.bytes, allocate.hKMResource, displayable);
    if (FAILED(hr)) {
-      runtime_destroy(p);
-      return hr;
+      return cleanup_failed_create(p, hr);
    }
    *pitch = request.Pitch;
    *out = p;
@@ -992,8 +1018,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
       hr = make_ready(dev, p, a.Buffer.bytes, args->hKMResource.handle,
          primary && dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION);
       if (FAILED(hr)) {
-         runtime_destroy(p);
-         return hr;
+         return cleanup_failed_create(p, hr);
       }
       const UINT bind = D3D10_DDI_BIND_SHADER_RESOURCE | D3D10_DDI_BIND_RENDER_TARGET |
                         (primary ? D3D10_DDI_BIND_PRESENT : 0);
@@ -1020,7 +1045,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
       p->associated = true; p->tiled_shared = true; p->tiled_layout = metadata;
       p->memory.allocation = info.hAllocation;
       hr = make_ready(dev, p, expected.bytes, args->hKMResource.handle, metadata.version == 4);
-      if (FAILED(hr)) { runtime_destroy(p); return hr; }
+      if (FAILED(hr)) { return cleanup_failed_create(p, hr); }
       *description = metadata.description; *out = p;
       return S_OK;
    }
@@ -1060,8 +1085,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
    p->memory.allocation = info.hAllocation;
    hr = make_ready(dev, p, expected.Buffer.bytes, args->hKMResource.handle, metadata.version == 3);
    if (FAILED(hr)) {
-      runtime_destroy(p);
-      return hr;
+      return cleanup_failed_create(p, hr);
    }
    *description = metadata.description;
    *out = p;
@@ -1127,16 +1151,14 @@ HRESULT runtime_primary_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    hr = p->callbacks.pfnAllocateCb(p->device, &allocate);
    rt_trace(p, 1, hr, request.Buffer.bytes);
    if (FAILED(hr)) {
-      runtime_destroy(p);
-      return hr;
+      return cleanup_failed_create(p, hr);
    }
    p->associated = true;
    p->memory.allocation = info.hAllocation;
    hr = make_ready(dev, p, request.Buffer.bytes, allocate.hKMResource,
       dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION);
    if (FAILED(hr)) {
-      runtime_destroy(p);
-      return hr;
+      return cleanup_failed_create(p, hr);
    }
    *out_width = width;
    *out_height = height;

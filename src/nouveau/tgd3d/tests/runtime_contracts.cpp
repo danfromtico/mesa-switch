@@ -1084,6 +1084,88 @@ static void displayable_owner_contract()
    std::puts("PASS: guarded v1/v2 ABI, v2 alias/v3 runtime owner handshake without kernel-resource export, foreign/ignored acknowledgement rejection, shared reopen and residency protection");
 }
 
+static unsigned cleanupMode, cleanupFreeCalls, cleanupUnlockCalls, cleanupDeallocCalls;
+static bool cleanupDeallocationFails;
+static void failed_cleanup_ownership_contract()
+{
+   for (unsigned scenario = 0; scenario < 6; ++scenario) {
+      cleanupMode = scenario / 2; cleanupDeallocationFails = scenario % 2;
+      Adapter adapter; Device dev; ignoreImport = false; pagingValues[0] = 0;
+      init(&dev, &adapter, 0);
+      cleanupFreeCalls = cleanupUnlockCalls = cleanupDeallocCalls = 0;
+      dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE h, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) -> HRESULT {
+         CHECK(h == rt_device(0) && a->BaseAddress == 0x100000 && a->Size == sizeof(bytes));
+         ++cleanupFreeCalls; return cleanupMode == 0 ? E_FAIL : S_OK;
+      };
+      dev.kt.pfnUnlock2Cb = [](HANDLE h, const D3DDDICB_UNLOCK2 *a) -> HRESULT {
+         CHECK(h == rt_device(0) && a->hAllocation == 0x60);
+         ++cleanupUnlockCalls;
+         return cleanupMode == 1 && cleanupUnlockCalls == 1 ? E_FAIL : S_OK;
+      };
+      dev.kt.pfnDeallocateCb = [](HANDLE h, const D3DDDICB_DEALLOCATE *a) -> HRESULT {
+         CHECK(h == rt_device(0) && a->hResource == rt_resource(0));
+         CHECK(!a->NumAllocations && !a->HandleList);
+         ++cleanupDeallocCalls; return cleanupDeallocationFails ? E_FAIL : S_OK;
+      };
+      D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = 65; mip.TexelHeight = 17; mip.TexelDepth = 1;
+      D3D10DDIARG_CREATERESOURCE desc = {}; desc.pMipInfoList = &mip;
+      desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D; desc.Usage = D3D10_DDI_USAGE_DEFAULT;
+      desc.BindFlags = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_SHADER_RESOURCE;
+      desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; desc.SampleDesc.Count = desc.MipLevels = desc.ArraySize = 1;
+      desc.MiscFlags = D3D10_DDI_RESOURCE_MISC_SHARED;
+      RuntimeResource *resource = nullptr; UINT pitch = 0; VkDeviceMemory memory;
+      CHECK(runtime_shared_create(&dev, &desc, {rt_resource(0)}, &resource, &pitch) == S_OK);
+      CHECK(runtime_bind_image(&dev, resource, (VkImage)1, &memory) == S_OK);
+      const auto *owner = owners[0]; CHECK(owner && owner->allocation == 0x60);
+      /* Keep the import's separate reference while inspecting cleanup. There
+       * is no in-flight GPU or DDI return here; runtime handles stay valid. */
+      VkResult freed = owner->free_gpu(owner->context, 0x100000, sizeof(bytes));
+      CHECK((freed == VK_SUCCESS) == (cleanupMode != 0));
+      if (cleanupMode == 0) {
+         CHECK(owner->free_gpu(owner->context, 0x100000, sizeof(bytes)) != VK_SUCCESS);
+         CHECK(cleanupFreeCalls == 1); /* no replay of unconfirmed VA release */
+      }
+      const HRESULT destroyed = runtime_destroy(resource); /* consumes owner ref */
+      CHECK(FAILED(destroyed) == (cleanupMode != 2 || cleanupDeallocationFails));
+      CHECK(owner->allocation == (cleanupDeallocationFails ? 0x60u : 0u));
+      CHECK(cleanupDeallocCalls == 1 && cleanupFreeCalls == 1 && cleanupUnlockCalls == 1);
+      void *cpu = nullptr;
+      CHECK(owner->map_cpu(owner->context, &cpu) == VK_ERROR_DEVICE_LOST);
+      /* ICD imports retain their own reference, not a Resource pointer. Late
+       * cleanup must never replay VA or runtime callbacks after destruction. */
+      const VkResult lateFree = owner->free_gpu(owner->context, 0x100000, sizeof(bytes));
+      CHECK((lateFree != VK_SUCCESS) == (cleanupMode == 0 && cleanupDeallocationFails));
+      owner->release(owner->context); owners[0] = nullptr;
+      CHECK(cleanupDeallocCalls == 1 && cleanupFreeCalls == 1 && cleanupUnlockCalls == 1);
+      runtime_device_destroy(&dev);
+   }
+   /* A creation failure is recoverable only if its acquired allocation was
+    * cleaned up. No callback may be replayed after the creation DDI returns. */
+   for (bool failCleanup : {false, true}) {
+      Adapter adapter; Device dev; init(&dev, &adapter, 0);
+      cleanupMode = failCleanup; cleanupDeallocCalls = 0;
+      dev.kt.pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *) -> HRESULT {
+         return D3DDDIERR_OUTOFVIDEOMEMORY;
+      };
+      dev.kt.pfnDeallocateCb = [](HANDLE h, const D3DDDICB_DEALLOCATE *a) -> HRESULT {
+         CHECK(h == rt_device(0) && a->hResource == rt_resource(0));
+         ++cleanupDeallocCalls; return cleanupMode ? E_FAIL : S_OK;
+      };
+      D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = 65; mip.TexelHeight = 17; mip.TexelDepth = 1;
+      D3D10DDIARG_CREATERESOURCE desc = {}; desc.pMipInfoList = &mip;
+      desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D; desc.Usage = D3D10_DDI_USAGE_DEFAULT;
+      desc.BindFlags = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_SHADER_RESOURCE;
+      desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; desc.SampleDesc.Count = desc.MipLevels = desc.ArraySize = 1;
+      desc.MiscFlags = D3D10_DDI_RESOURCE_MISC_SHARED;
+      RuntimeResource *resource = nullptr; UINT pitch = 0;
+      CHECK(runtime_shared_create(&dev, &desc, {rt_resource(0)}, &resource, &pitch) ==
+            (failCleanup ? D3DDDIERR_DEVICEREMOVED : D3DDDIERR_OUTOFVIDEOMEMORY));
+      CHECK(!resource && cleanupDeallocCalls == 1);
+      runtime_device_destroy(&dev);
+   }
+   std::puts("PASS: failed VA free not replayed; failed deallocation keeps allocation identity for retained imports; late cleanup never replays runtime callbacks; successful resource deallocation closes remaining mappings; creation cleanup failure overrides recoverable OOM (CPU control)");
+}
+
 void runtime_contracts()
 {
    Adapter adapter; Device producer, consumer; init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
@@ -1209,4 +1291,5 @@ void runtime_contracts()
    shared_tiled_contracts();
    removed_paging_fence_contract();
    displayable_owner_contract();
+   failed_cleanup_ownership_contract();
 }
