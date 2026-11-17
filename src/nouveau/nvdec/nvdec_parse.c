@@ -128,6 +128,10 @@ static bool next_nal(const uint8_t *data, size_t size, size_t *pos,
             break;
         i++;
     }
+    /* No following start code: the remaining one or two bytes still belong
+     * to this NAL. They can contain CABAC payload, not disposable padding. */
+    if (size - i < 3)
+        i = size;
     *nal = data + payload;
     *nal_size = i - payload;
     *pos = i;

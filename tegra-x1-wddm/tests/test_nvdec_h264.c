@@ -362,6 +362,20 @@ static void test_parser(const char *path)
     CHECK(info.has_b_frame);
     CHECK(info.slice_data_bytes > 0 && info.slice_data_bytes <= size + 6 * 16);
 
+    /* The final slice has no following start code. Preserve its entire
+     * payload, including the last bytes before EOF, ahead of our EOS marker. */
+    size_t last_payload = 0;
+    for (size_t n=size;n>=3;--n) {
+        if (!data[n-3] && !data[n-2] && data[n-1]==1) { last_payload=n;break; }
+    }
+    CHECK(last_payload && count);
+    if (last_payload && count) {
+        const struct tg_nvdec_parsed_frame *last=&frames[count-1];
+        CHECK(last->slice_count==1);
+        CHECK(last->bitstream_size==3u+size-last_payload+16u);
+        CHECK(!memcmp(slice+last->bitstream_offset+3u,data+last_payload,size-last_payload));
+    }
+
     CHECK(frames[0].idr && frames[0].reference && frames[0].slice_count == 1);
     CHECK(frames[0].pic.curr_slot == 0);
     CHECK(frames[0].pic.curr_top_poc == 0);
