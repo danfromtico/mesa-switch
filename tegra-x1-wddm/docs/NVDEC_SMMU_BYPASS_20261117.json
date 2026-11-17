@@ -1,0 +1,274 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T04:17:15.842911+00:00",
+  "state": "SWGROUP bypass predicate corrected locally; no new driver installed, no native DMA or decode validation",
+  "source": {
+    "base_commit": "6affe7878d4e618f2b44b2640ddcecf706a199ee",
+    "patch_sha256": "125018e586714731fc3b6668b778c8ebeeea570d2a5986a65a1797d8ded4e75d",
+    "files": {
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_abi.h": "4dc45cc8e525577f3684c2b96c42b4bbd6ad353f1bb054a83cc81a448ae95e39",
+      "tegra-x1-wddm/platform/t214_nvdec.c": "179800aa2a1d62b9be1f0f728ec459f59a9eee63608bdedfe139f3891895aecc",
+      "tegra-x1-wddm/windows/resources.c": "0e027ec91ddb56d73ad45c739e0834ad0481ab5bf06e45ef4c4de6392d43f69f",
+      "tegra-x1-wddm/tests/test_nvdec_platform.c": "12e00454707677ebeb83466dfb1e83b0c9b98260724b73b420629acc398f8e11",
+      "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "4dea4e6a5150b6511253cd4c02505239163f5cc0a7d6908bc919fec790c049a4"
+    },
+    "commit": "659b8c324d893e6eac90e6feeb105d8bc62d4690"
+  },
+  "problem": "The direct-DMA predicate incorrectly required every client translation-enable bit to be clear and treated all-ones enable words as failed reads. This rejected the observed clear HC/NVDEC ASID_ENABLE groups.",
+  "contract": {
+    "atf_revision": "85081cab2050051ea6e93206ef0f80bc0676e613",
+    "atf_reference": [
+      {
+        "path": "plat/nvidia/tegra/drivers/memctrl/memctrl_v1.c",
+        "url": "https://raw.githubusercontent.com/LineageOS/android_hardware_nintendo_arm-trusted-firmware/85081cab2050051ea6e93206ef0f80bc0676e613/plat/nvidia/tegra/drivers/memctrl/memctrl_v1.c",
+        "sha256": "31896a9209ed36a552d56b207b4308584ab7449acd5eb2bfcfc832eed1ebd8a8"
+      },
+      {
+        "path": "plat/nvidia/tegra/include/drivers/memctrl_v1.h",
+        "url": "https://raw.githubusercontent.com/LineageOS/android_hardware_nintendo_arm-trusted-firmware/85081cab2050051ea6e93206ef0f80bc0676e613/plat/nvidia/tegra/include/drivers/memctrl_v1.h",
+        "sha256": "5f7f5defea0ed0dcbb94c5a64a4ec0de7b6b6331026ef108b201c10f4287fbc2"
+      },
+      {
+        "path": "plat/nvidia/tegra/drivers/smmu/smmu.c",
+        "url": "https://raw.githubusercontent.com/LineageOS/android_hardware_nintendo_arm-trusted-firmware/85081cab2050051ea6e93206ef0f80bc0676e613/plat/nvidia/tegra/drivers/smmu/smmu.c",
+        "sha256": "d647b4dfd5db31d25a16e60f08d74d1ea9b6e88448d838408db8ecfea939e76d"
+      },
+      {
+        "path": "plat/nvidia/tegra/include/t210/tegra_def.h",
+        "url": "https://raw.githubusercontent.com/LineageOS/android_hardware_nintendo_arm-trusted-firmware/85081cab2050051ea6e93206ef0f80bc0676e613/plat/nvidia/tegra/include/t210/tegra_def.h",
+        "sha256": "1f4bbaff4c08c38ea7cbdc13211b248dcdfee82e0234a27ed3e6499c897e5694"
+      },
+      {
+        "path": "plat/nvidia/tegra/soc/t210/plat_setup.c",
+        "url": "https://raw.githubusercontent.com/LineageOS/android_hardware_nintendo_arm-trusted-firmware/85081cab2050051ea6e93206ef0f80bc0676e613/plat/nvidia/tegra/soc/t210/plat_setup.c",
+        "sha256": "ac5a2babab7ed542832b5ee78be2f1f6972d673418a405f2414e54bf133d26ae"
+      },
+      {
+        "path": "plat/nvidia/tegra/soc/t210/plat_sip_calls.c",
+        "url": "https://raw.githubusercontent.com/LineageOS/android_hardware_nintendo_arm-trusted-firmware/85081cab2050051ea6e93206ef0f80bc0676e613/plat/nvidia/tegra/soc/t210/plat_sip_calls.c",
+        "sha256": "f0962a075e6340304e364ffd303ed38d784354c7814aa22215fe7186bfd12989"
+      },
+      {
+        "path": "plat/nvidia/tegra/soc/t210/platform_t210.mk",
+        "url": "https://raw.githubusercontent.com/LineageOS/android_hardware_nintendo_arm-trusted-firmware/85081cab2050051ea6e93206ef0f80bc0676e613/plat/nvidia/tegra/soc/t210/platform_t210.mk",
+        "sha256": "ff386d3d065e0a6fa4920209c1e0028fe33b297a4c76f8ea76e198efb56a5a91"
+      }
+    ],
+    "installed_bl31": {
+      "bytes": 49755,
+      "sha256": "c2d048aaba276b2bc8d4b3f565f89d765a9851a522ced0985e551558c7c9e104",
+      "read_utc": "2026-11-17T04:11:35.6657471Z",
+      "scope": "Installed boot file, matching the documented lite-entry-r8 image. Not a secure runtime measurement or execution trace."
+    },
+    "binary_evidence": {
+      "function_file_offset": "0x7524",
+      "call_file_offset": "0x1f4c",
+      "translation_enable_writes": {
+        "0x70019228": "0xffffffff",
+        "0x7001922c": "0xffffffff",
+        "0x70019230": "0xffffffff",
+        "0x70019234": "0xffffffff",
+        "0x70019b98": "0xffffffff"
+      },
+      "global_config_write": {
+        "address": "0x70019010",
+        "value": "0x00000001"
+      },
+      "disassembly_sha256": "e6e6f3ac2abbecdef43343aa83ea560d0fcff3aa8af8f3107ae2a8bdd317cb2c",
+      "disassembly_container_roundtrip_matches": true,
+      "scope": "Static disassembly of the exact retrieved file; consistent with the prior native enable-word snapshot, not proof of executing this branch."
+    },
+    "noble_reference": {
+      "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-4.9/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/iommu/tegra-smmu.c",
+      "sha256": "c01b9c66594688759a5f65c4c186c6456750e50aeeb91ef183bf253b8f1c25ac",
+      "license": "GPL-2.0 reference only; no source copied"
+    },
+    "noble_header_references": [
+      {
+        "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-4.9/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/iommu/tegra-smmu.h",
+        "sha256": "f663023288f5aa3492165d1cb744d8e4dd9128bcea15cb84683ba6e26384c4ab"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-4.9/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/iommu/of_tegra-smmu.c",
+        "sha256": "eb6099341a30505f5599dbe00cbd6ec22721a16609f1dd8b02b9a8caad951278"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-4.9/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/iommu/of_tegra-smmu.h",
+        "sha256": "4b7a5a6ed95eba8e2ac06824e4f8d9e7fa07b80da2d1bb27f594a8bf7e239037"
+      }
+    ],
+    "noble_behavior": "__smmu_client_set_hwgrp_default() turns off the final group through its ASID register alone. SMMU_ASID_ENABLE is bit31; ASID indices use the remaining defined fields.",
+    "upstream_explanation": "https://lists.openwall.net/linux-kernel/2026/10/16/631",
+    "upstream_scope": "NVIDIA-authored Tegra210 display handover proposal explicitly describes bypass with ASID_ENABLE clear while per-client enables remain set. Used as hardware-contract corroboration, not as an installed Linux patch.",
+    "licenses": "ATF files retain BSD-3-Clause; Noble/Linux/Hekate consulted as GPL references. No implementation copied into the MIT driver.",
+    "global_config": "The cause of the native 0xffffffff CONFIG readback remains unresolved. No value or permission result is substituted; the resource snapshot still reports REGS_INVALID and leaves BOOT_REGS_VALID clear.",
+    "no_smmu_writes": true
+  },
+  "changes": [
+    "Live H.264 routing requires clear, non-all-ones HC and NVDEC ASID_ENABLE readbacks; per-client enable words no longer create a false rejection.",
+    "An enabled group remains rejected even when per-client enables are clear. NVJPG remains a power dependency and is not a DMA client of this H.264 backend.",
+    "The resource snapshot preserves raw enable words and derives its three-group route flag from group ASID_ENABLE. Invalid ASID or MC flush readbacks still reject client validity.",
+    "Private ABI layouts and versions remain unchanged; comments define the existing flag scope. Adapter-start snapshots remain separate from live ownership and completion."
+  ],
+  "validation": {
+    "cpu_only": true,
+    "commands_sha256": "cb4b78e1573a84b9776a94b5ef54c8935379ada82affa8d17fbd9544e34d27c7",
+    "all_commands_exit_zero": true,
+    "host_model": {
+      "sanitizers": [
+        "ASan",
+        "UBSan"
+      ],
+      "executable_sha256": "898263cdfa134ea2ada0adb11ede3a1b6e749396c0be7065c1fed62cf47aa67f",
+      "log_sha256": "5990b8634365d246afee89ca923d6b180bcfc5644ccedbf94c9e4460342c5b5c"
+    },
+    "windows_resource_model": {
+      "environment": "x64 WDK fixture under Wine",
+      "executable_sha256": "623cb80f061f3f4f1d31e9c6705a518ff77c00f8146225a49a70856a02244b2e",
+      "log_sha256": "ea47fb993478c279af9a9d345248493b97faed15b66e36541f56e244f64384fb"
+    },
+    "arm64_objects": {
+      "t214_nvdec-arm64.obj": "bf7388f773fdbbccf73fccd7e5cb314c2f300f21079dc921ad0f1fca1c2ea430",
+      "resources-arm64.obj": "8578b846a76add9537c3f80622285b159f648b68ae7481311410ea3daec9a4ad",
+      "resource-only-arm64.obj": "c5b40fa1bbb09133a433104c86be2f55fa6ecc082132bbf07bf606e6d40e1c57"
+    },
+    "coverage": [
+      "ATF-style all-ones enable words with disabled groups",
+      "Enabled HC/NVDEC reject with both zero and all-ones client words",
+      "Unavailable group and MC flush readbacks reject",
+      "Unresolved global readback preserved without BOOT_REGS_VALID",
+      "Optional mapping ownership and failed-unmap cleanup",
+      "Inherited power and real-completion model controls retained"
+    ],
+    "native_corrected_query": false,
+    "native_dma": false,
+    "native_decode": false,
+    "full_new_package_built": false
+  },
+  "native_observation": {
+    "utc": "2026-11-17T04:14:51.7523303Z",
+    "boot_utc": "2026-11-17T04:06:00.1285950Z",
+    "code": 0,
+    "all_11_baseline_file_hashes_match": true,
+    "baseline_files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 204808,
+        "sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4848,
+        "sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17652224,
+        "sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 98832,
+        "sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3274240,
+        "sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "dwm": {
+      "pid": 1384,
+      "start_utc": "2026-11-17T04:06:32.8818733Z",
+      "loaded_modules": [
+        "TegraGpuD3DVk.dll",
+        "libvulkan_nouveau.dll"
+      ]
+    },
+    "runtime_power": {
+      "power_mode": 7,
+      "cpu_dfll_active": 0,
+      "cpu_last_error": "0xc0000483",
+      "gpu_policy_min_khz": 460800,
+      "gpu_policy_max_khz": 460800,
+      "emc": {
+        "Version": 1,
+        "Flags": 327,
+        "ActualKhz": 2500000,
+        "BootKhz": 2500000,
+        "SampleAgeMs": 31,
+        "LastError": 0,
+        "EnumerationError": 0,
+        "RateCount": 4,
+        "RatesKhz": [
+          204000,
+          1331200,
+          1600000,
+          2500000
+        ],
+        "ActmonError": 0,
+        "AverageActiveKhz": 43412,
+        "RawActiveKhz": 37580,
+        "TargetKhz": 1600000,
+        "DisplayFloorKhz": 38304,
+        "QosError": 0,
+        "TransitionCount": 11
+      },
+      "fan_mode": 1,
+      "charge_limit_center": 85,
+      "external_power": "Online"
+    },
+    "power_scope": "Current boot reports fixed recovery mode7 with DFLL inactive/error0xc0000483, despite unchanged baseline files. Do not label this a healthy Handheld runtime or a regression from this uninstalled patch. No latch, profile or frequency was changed; cause remains unassigned.",
+    "restart_requested_this_round": false,
+    "driver_or_boot_file_written": false,
+    "uploaded_files": 0,
+    "temporary_native_tasks": 0,
+    "new_screen_acceptance": false
+  },
+  "review": {
+    "status": "pending",
+    "required_model": "Antigravity CLI Gemini4 Carbon High",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "reason": "Previously observed quota exhaustion; no repeated request before recovery",
+    "patch_sha256": "125018e586714731fc3b6668b778c8ebeeea570d2a5986a65a1797d8ded4e75d",
+    "coverage": "Five changed source/test files; source hashes frozen below",
+    "passed": false
+  },
+  "installed_baseline_promoted": false,
+  "remaining": [
+    "Resolve current power-runtime readiness before a hardware candidate; preserve original files and mode policy.",
+    "Connect real Host1x clock ownership, channel/syncpoint reservation and serialized coexisting KMD transport.",
+    "Execute real firmware/DMA, then720p H.264 NV12/D3D11VA/window acceptance, followed by1080p.",
+    "2K/4K implementation remains separate and untested."
+  ]
+}
