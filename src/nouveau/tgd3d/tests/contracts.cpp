@@ -65,9 +65,8 @@ void operator delete(void *p) noexcept
 
 void operator delete(void *p, size_t) noexcept { ::operator delete(p); }
 
-static Device make_device(Adapter *adapter)
+static void init_device(Device &dev, Adapter *adapter)
 {
-   Device dev;
    dev.adapter = adapter;
    adapter->vk.caps.cbSlots = D3D_CB_SLOTS;
    adapter->vk.caps.geometryShader = true;
@@ -149,7 +148,13 @@ static Device make_device(Adapter *adapter)
    };
    dev.vk.DestroyImage = [](VkDevice, VkImage, const VkAllocationCallbacks *) { events.push_back(5); };
    dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) { events.push_back(6); };
-   return dev;
+}
+
+static void reset_device(Device &dev, Adapter *adapter)
+{
+   dev.~Device();
+   new (&dev) Device;
+   init_device(dev, adapter);
 }
 
 static void reset()
@@ -162,7 +167,7 @@ static void reset()
 
 static void displayable_write_batches()
 {
-   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    Resource resources[33]; View views[33];
    dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *info,
                               const VkAllocationCallbacks *, VkImageView *out) -> VkResult {
@@ -185,7 +190,7 @@ static void displayable_write_batches()
    }
    /* Read-only use is absent; identity moves preserve the backing's handle;
     * repeated writes are deduplicated without changing the GPU fence. */
-   reset(); dev = make_device(&adapter);
+   reset(); reset_device(dev, &adapter);
    ImageStorage image; image.image = handle<VkImage>(0x6000); image.layoutReady = true;
    image.writtenAllocation = 500;
    CHECK(cmd_begin(&dev)); image_use(&dev, image, false);
@@ -202,7 +207,7 @@ static void shared_ownership_contract()
 {
    static std::vector<VkImageMemoryBarrier2> transitions;
    for (bool imported : {false, true}) {
-      Adapter adapter; reset(); Device dev = make_device(&adapter);
+      Adapter adapter; reset(); Device dev; init_device(dev, &adapter);
       adapter.vk.caps.queueFamily = 2; transitions.clear();
       dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer cmd, const VkDependencyInfo *info) {
          CHECK(cmd);
@@ -240,7 +245,7 @@ static void shared_ownership_contract()
       completedValue = dev.submitted; retire(&dev); cmd_destroy(&dev);
    }
    for (UINT failure : {1u, 2u, 3u}) {
-      Adapter adapter; reset(); Device dev = make_device(&adapter); failAt = failure;
+      Adapter adapter; reset(); Device dev; init_device(dev, &adapter); failAt = failure;
       ImageStorage image; image.image = handle<VkImage>(0x124);
       image.externalShared = image.layoutReady = true;
       image_use(&dev, image, true);
@@ -256,7 +261,7 @@ static void shared_ownership_contract()
 
 static void clear_view_contract()
 {
-   Adapter adapter; reset(); Device dev = make_device(&adapter);
+   Adapter adapter; reset(); Device dev; init_device(dev, &adapter);
    D3D11_1DDI_DEVICEFUNCS table = {}; device_fill_table11(&table);
    static struct {
       unsigned begins, ends, batches, views;
@@ -366,7 +371,7 @@ static void clear_view_contract()
    completedValue = dev.recordingSeq(); retire(&dev); CHECK(viewsDestroyed == seen.views);
    cmd_destroy(&dev); dev.views.clear();
 
-   reset(); dev = make_device(&adapter); res.dev = &dev;
+   reset(); reset_device(dev, &adapter); res.dev = &dev;
    res.storage.image = handle<VkImage>(0x800); view.dev = &dev;
    const RECT invalid[] = {{0, 0, 5, 5}, {9, 0, 3, 4}};
    clear(color, invalid, 2);
@@ -381,7 +386,7 @@ static void clear_view_dimensions_contract()
    static UINT height, begins, rectangles;
    static VkImageViewType viewType;
    for (UINT variant = 0; variant < 3; ++variant) {
-      Adapter adapter; reset(); Device dev = make_device(&adapter);
+      Adapter adapter; reset(); Device dev; init_device(dev, &adapter);
       depth = variant != 0; height = variant == 2 ? 3 : 1; begins = rectangles = 0;
       viewType = height == 1 ? VK_IMAGE_VIEW_TYPE_1D_ARRAY : VK_IMAGE_VIEW_TYPE_2D_ARRAY;
       D3DWDDM2_0DDI_DEVICEFUNCS table = {}; device_fill_table20(&table);
@@ -436,7 +441,7 @@ static void submission_record_contract()
 {
 #ifndef TGD3D_CPU_SYNC_CONTROL
    for (unsigned fail = 0; fail < 2; ++fail) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
       CHECK(cmd_begin(&dev));
       dev.framePools.push_back(handle<VkDescriptorPool>(200));
       dev.vk.EndCommandBuffer = [](VkCommandBuffer) {
@@ -479,10 +484,107 @@ static void submission_record_contract()
 #endif
 }
 
+static void recycle_failure_contract()
+{
+   static unsigned mode, commands, pools, destroyed, freed;
+   for (mode = 0; mode < 6; ++mode) {
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
+      dev.cmdPool = handle<VkCommandPool>(8);
+      const auto cmd = handle<VkCommandBuffer>(9);
+      dev.submitted = 7;
+      dev.submittedCommands.push_back({cmd, 7, {handle<VkDescriptorPool>(10),
+                                                handle<VkDescriptorPool>(11)}});
+      commands = pools = destroyed = freed = 0;
+      dev.vk.ResetCommandBuffer = [](VkCommandBuffer, VkCommandBufferResetFlags) {
+         ++commands;
+         return mode == 1 ? VK_ERROR_OUT_OF_HOST_MEMORY : VK_SUCCESS;
+      };
+      dev.vk.ResetDescriptorPool = [](VkDevice, VkDescriptorPool, VkDescriptorPoolResetFlags) {
+         ++pools;
+         if (mode == 4 && pools == 2) failNextNew = true;
+         if (mode == 5 && pools == 2) return VK_ERROR_DEVICE_LOST;
+         return mode == pools + 1 ? VK_ERROR_OUT_OF_DEVICE_MEMORY : VK_SUCCESS;
+      };
+      dev.vk.FreeCommandBuffers = [](VkDevice, VkCommandPool, uint32_t count, const VkCommandBuffer *buffers) {
+         CHECK(count == 1 && buffers[0] == handle<VkCommandBuffer>(9)); ++freed;
+      };
+      dev.vk.DestroyDescriptorPool = [](VkDevice, VkDescriptorPool, const VkAllocationCallbacks *) {
+         ++destroyed;
+      };
+      completedValue = 6; retire(&dev);
+      CHECK(!commands && !pools && !dev.submittedCommands.empty());
+      completedValue = 7; retire(&dev);
+      CHECK(!failNextNew);
+      if (mode > 0 && mode < 4) {
+         CHECK(SUCCEEDED(dev.lost) && dev.submittedCommands.empty());
+         CHECK(dev.freeCommands.empty() && dev.freePools.empty() && freed == 1 && destroyed == 2);
+         CHECK(commands == 1 && pools == mode - 1);
+      } else if (mode == 5) {
+         CHECK(FAILED(dev.lost) && dev.freeCommands.empty() && dev.freePools.empty());
+         CHECK(dev.submittedCommands.size() == 1 && dev.submittedCommands.front().pools.size() == 2);
+         CHECK(!freed && !destroyed && commands == 1 && pools == 2);
+      } else {
+         CHECK(SUCCEEDED(dev.lost) && dev.submittedCommands.empty());
+         CHECK(dev.freeCommands.size() == 1 && dev.freeCommands[0] == cmd);
+         CHECK(dev.freePools.size() == (mode == 4 ? 0u : 2u));
+      }
+      const unsigned previous = pools;
+      retire(&dev, true);
+      CHECK(commands == 1 && pools == previous);
+      cmd_destroy(&dev);
+      CHECK(destroyed == 2);
+   }
+   std::puts("PASS: fence-gated resets, atomic publication to reuse caches and exactly-once pool disposal");
+}
+
+static void ambiguous_submit_idle_contract()
+{
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
+   dev.nvk = true; dev.submitted = 7; dev.uncertainSubmit = true;
+   dev.vk.DeviceWaitIdle = [](VkDevice) {return VK_SUCCESS;};
+   CHECK(!cleanup_idle(&dev)); /* missing native completion evidence */
+   uint64_t observed = 7; dev.runtimeFenceValue = &observed;
+   CHECK(!cleanup_idle(&dev));
+   observed = UINT64_MAX;
+   CHECK(!cleanup_idle(&dev));
+   observed = 8;
+   CHECK(cleanup_idle(&dev));
+   std::puts("PASS: a potentially partial native submit requires real non-removal progress beyond the previously committed value");
+}
+
+static void final_quiesce_contract()
+{
+   static unsigned idleCalls, destroys;
+   reset(); Adapter adapter;
+   Device *dev = new Device();
+   init_device(*dev, &adapter);
+   dev->nvk = true; dev->submitted = 3; dev->cmdPool = handle<VkCommandPool>(8);
+   dev->lost = DXGI_ERROR_DEVICE_REMOVED;
+   dev->submittedCommands.push_back({handle<VkCommandBuffer>(9), 3, {handle<VkDescriptorPool>(10)}});
+   defer(dev, DeferredType::ImageView, 11, 3);
+   idleCalls = destroys = 0;
+   dev->vk.DeviceWaitIdle = [](VkDevice) {++idleCalls; return VK_ERROR_OUT_OF_DEVICE_MEMORY;};
+   dev->vk.DestroyDescriptorPool = [](VkDevice, VkDescriptorPool, const VkAllocationCallbacks *) {++destroys;};
+   dev->vk.DestroyCommandPool = [](VkDevice, VkCommandPool, const VkAllocationCallbacks *) {++destroys;};
+   dev->vk.DestroyDevice = [](VkDevice, const VkAllocationCallbacks *) {++destroys;};
+   D3D10DDI_DEVICEFUNCS table = {}; device_fill_table(&table);
+   DeviceSlot slot{dev};
+   table.pfnDestroyDevice({&slot});
+   CHECK(!slot.state && adapter.undrainedDevices == dev && idleCalls == 1 && !destroys);
+   CHECK(dev->submittedCommands.size() == 1 && !dev->deferred.empty() && !viewsDestroyed);
+   Device replacement; slot.state = &replacement;
+   CHECK(adapter.undrainedDevices->vkdev == handle<VkDevice>(1) && D({&slot}) == &replacement);
+   /* Only the test owns this substitute. No GPU was launched; no production
+    * retry is permitted after the device DDI ends. */
+   adapter.undrainedDevices = nullptr;
+   delete dev;
+   std::puts("PASS: inconclusive final idle keeps independent device/adapter ownership; no forced retirement or stale runtime-private slot");
+}
+
 static void submission_contract()
 {
    Adapter adapter;
-   reset(); Device dev = make_device(&adapter);
+   reset(); Device dev; init_device(dev, &adapter);
 #ifdef TGD3D_CPU_SYNC_CONTROL
    dev.nvk = true;
    dev.vk.CreateSemaphore = [](VkDevice, const VkSemaphoreCreateInfo *info,
@@ -502,7 +604,7 @@ static void submission_contract()
    CHECK(events == std::vector<unsigned>({2,2,2,2}));
    CHECK(SUCCEEDED(flush(&dev, true)) && cpuWaits == 1 && completedValue == 4);
    CHECK(dev.submittedCommands.empty() && !cpuSignals && !signals && !gates);
-   reset(); dev = make_device(&adapter); failAt = 2;
+   reset(); reset_device(dev, &adapter); failAt = 2;
    D3D10DDI_DEVICEFUNCS devTable = {}; device_fill_table(&devTable);
    CHECK(cmd_begin(&dev)); devTable.pfnFlush({&dev});
    CHECK(setErrorCalls == 1 && lastError == D3DDDIERR_DEVICEREMOVED);
@@ -520,7 +622,7 @@ static void submission_contract()
    CHECK(dev.submittedCommands.empty());
    D3D10DDI_DEVICEFUNCS devTable = {}; device_fill_table(&devTable);
    for (unsigned failure = 1; failure <= 3; failure++) {
-      reset(); dev = make_device(&adapter); failAt = failure;
+      reset(); reset_device(dev, &adapter); failAt = failure;
       CHECK(cmd_begin(&dev)); devTable.pfnFlush({&dev});
       CHECK(setErrorCalls == 1 && lastError == D3DDDIERR_DEVICEREMOVED);
       CHECK(FAILED(dev.lost) && !cpuSignals);
@@ -536,7 +638,7 @@ static void submission_contract()
 
 static void nonblocking_map()
 {
-   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
    Chunk chunk; uint8_t bytes[64] = {}; chunk.cpu = bytes;
    Resource res; res.dev = &dev; res.size = sizeof(bytes); res.slice = {&chunk, 0, sizeof(bytes)};
@@ -557,7 +659,7 @@ static void incomplete_fence_keeps_resources()
 {
    Adapter adapter;
    for (VkResult result : {VK_TIMEOUT, VK_ERROR_DEVICE_LOST}) {
-      reset(); Device dev = make_device(&adapter);
+      reset(); Device dev; init_device(dev, &adapter);
       CHECK(cmd_begin(&dev)); CHECK(SUCCEEDED(flush(&dev, false)));
       defer(&dev, DeferredType::ImageView, 0x500, 1);
       if (result == VK_ERROR_DEVICE_LOST) {
@@ -588,7 +690,7 @@ static void removed_fence_never_completes()
 {
    Adapter adapter;
    for (unsigned mode = 0; mode < 3; ++mode) {
-      reset(); Device dev = make_device(&adapter);
+      reset(); Device dev; init_device(dev, &adapter);
       CHECK(cmd_begin(&dev));
       if (mode) CHECK(flush(&dev, false) == S_OK);
       defer(&dev, DeferredType::ImageView, 0x500, 1);
@@ -638,7 +740,7 @@ static void completion_failure_propagates()
    /* Active submission through flush(false): bidirectional GPU fence bridge
     * completes before retirement's completion sample reports device loss. */
    {
-      reset(); Device dev = make_device(&adapter);
+      reset(); Device dev; init_device(dev, &adapter);
       CHECK(cmd_begin(&dev));
       defer(&dev, DeferredType::ImageView, 0x500, 1);
       completionReads = 0; completionFailureRead = 1;
@@ -665,7 +767,7 @@ static void completion_failure_propagates()
 #endif
    D3D10DDI_DEVICEFUNCS devTable = {}; device_fill_table(&devTable);
    for (unsigned failRead = 1; failRead <= flushReads; ++failRead) {
-      reset(); Device dev = make_device(&adapter);
+      reset(); Device dev; init_device(dev, &adapter);
       for (unsigned s = 0; s < 3; ++s) {
          CHECK(cmd_begin(&dev)); CHECK(flush(&dev, false) == S_OK);
       }
@@ -688,7 +790,7 @@ static void completion_failure_propagates()
    /* wait_sequence: seq == 0 early-return trap, initial wait sample, post-wait
     * timing sample, and retirement after an already-completed sequence. */
    for (unsigned mode = 0; mode < 4; ++mode) {
-      reset(); Device dev = make_device(&adapter);
+      reset(); Device dev; init_device(dev, &adapter);
       if (mode) {
          CHECK(cmd_begin(&dev)); CHECK(flush(&dev, false) == S_OK);
       }
@@ -710,7 +812,7 @@ static void completion_failure_propagates()
     * report D3DDDIERR_DEVICEREMOVED rather than leaking OOM or S_OK. */
    for (VkResult failure : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY,
                             VK_ERROR_UNKNOWN, VK_ERROR_DEVICE_LOST}) {
-      reset(); Device dev = make_device(&adapter);
+      reset(); Device dev; init_device(dev, &adapter);
       clearViewFailure = failure;
       dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *,
                                   const VkAllocationCallbacks *, VkImageView *out) {
@@ -733,12 +835,12 @@ static void device_error_contract()
    Adapter adapter;
    for (HRESULT error : {DXGI_ERROR_DEVICE_REMOVED, DXGI_ERROR_DEVICE_RESET,
                          D3DDDIERR_DEVICEREMOVED}) {
-      reset(); Device dev = make_device(&adapter);
+      reset(); Device dev; init_device(dev, &adapter);
       TG_ERROR(&dev, error);
       CHECK(dev.lost == error && lastError == D3DDDIERR_DEVICEREMOVED);
       CHECK(!cmd_begin(&dev) && FAILED(flush(&dev, true)) && !submissions);
    }
-   reset(); Device dev = make_device(&adapter);
+   reset(); Device dev; init_device(dev, &adapter);
    TG_ERROR(&dev, E_INVALIDARG);
    CHECK(lastError == E_INVALIDARG && SUCCEEDED(dev.lost));
    std::puts("PASS: device loss uses the D3D DDI callback code and blocks new submissions");
@@ -746,7 +848,7 @@ static void device_error_contract()
 
 static void rotated_views()
 {
-   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    Resource a, b; a.dev = b.dev = &dev;
    a.kind = b.kind = ResKind::Image;
    a.storage.image = handle<VkImage>(10); b.storage.image = handle<VkImage>(11);
@@ -779,7 +881,7 @@ static void rotated_views()
 
 static void descriptor_contract()
 {
-   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    dev.vk.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *info,
                                         const VkAllocationCallbacks *, VkDescriptorSetLayout *out) {
       CHECK(!(info->flags & VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR));
@@ -858,7 +960,7 @@ static unsigned scratchImages, scratchBuffers, scratchCalls;
 static void descriptor_scratch_contract()
 {
    for (unsigned mode = 0; mode < 3; ++mode) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
       dev.defaultSampler = handle<VkSampler>(777);
       dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
                                       const VkAllocationCallbacks *, VkDescriptorPool *out) {
@@ -950,7 +1052,7 @@ static void draw_error_contract()
    for (unsigned where = 0; where < 3; where++)
    for (VkResult failure : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY,
                             VK_ERROR_DEVICE_LOST}) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
       drawFailure = failure; drawFailureAt = where;
       poolCreates = setAllocates = imageViews = drawCalls = 0;
       dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
@@ -1001,7 +1103,7 @@ static void draw_error_contract()
       draw();
       CHECK(setErrorCalls == 1 && !drawCalls && poolCreates + setAllocates + imageViews == 1);
    }
-   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    /* A no-op Draw must leave the ordinary allocation error contract intact. */
    table.pfnDraw({&dev}, 0, 0);
    dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
@@ -1014,7 +1116,7 @@ static void draw_error_contract()
    CHECK(lastError == D3DDDIERR_DEVICEREMOVED && dev.lost == D3DDDIERR_DEVICEREMOVED);
    table.pfnDrawAuto({&dev}); CHECK(setErrorCalls == 1);
    for (VkResult full : {VK_ERROR_OUT_OF_POOL_MEMORY, VK_ERROR_FRAGMENTED_POOL}) {
-      reset(); Adapter a; Device d = make_device(&a);
+      reset(); Adapter a; Device d; init_device(d, &a);
       drawFailure = full; poolCreates = setAllocates = 0;
       d.framePools.push_back(handle<VkDescriptorPool>(200));
       d.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
@@ -1049,7 +1151,7 @@ static void indirect_draw_contract()
 {
    D3DWDDM1_3DDI_DEVICEFUNCS t; device_fill_table13(&t);
    for (bool indexed : {false, true}) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
       Shader vs; Resource target; View view; draw_fixture(dev, vs, target, view);
       Chunk chunk; chunk.buffer = handle<VkBuffer>(500); chunk.size = 512; chunk.live = 1;
       Resource args; args.dev = &dev; args.size = 64; args.slice = {&chunk, 256, 64};
@@ -1079,7 +1181,7 @@ static void indirect_draw_contract()
       retire(&dev); CHECK(!chunk.live && dev.deferredSlices.empty() && !cpuWaits);
    }
    for (unsigned invalid = 0; invalid < 8; ++invalid) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
       Shader vs; Resource target; View view; draw_fixture(dev, vs, target, view);
       Chunk chunk; chunk.buffer = handle<VkBuffer>(500);
       Resource args; args.dev = &dev; args.size = 64; args.slice = {&chunk, 0, 64};
@@ -1105,7 +1207,7 @@ static void indirect_draw_contract()
 
 static void readonly_depth_contract()
 {
-   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    D3DWDDM1_3DDI_DEVICEFUNCS t; device_fill_table13(&t);
    Shader vs; Resource target; View view; draw_fixture(dev, vs, target, view);
    Resource depth; depth.dev = &dev; depth.kind = ResKind::Image;
@@ -1164,7 +1266,7 @@ static void empty_box_contract()
    };
    D3D10DDI_DEVICEFUNCS table = {}; resource_fill_table(&table);
    for (const auto &kind : kinds) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
       regionCopies = 0;
       dev.submitted = dev.gated = 1; /* Existing work must remain untouched by a no-op. */
       dev.vk.CmdCopyImage = [](VkCommandBuffer, VkImage, VkImageLayout, VkImage, VkImageLayout,
@@ -1230,7 +1332,7 @@ static uint32_t read32(const BYTE *p) { uint32_t v; memcpy(&v, p, 4); return v; 
 
 static void query_contract()
 {
-   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    D3D10DDI_DEVICEFUNCS table = {}; query_fill_table(&table);
    dev.vk.CreateQueryPool = [](VkDevice, const VkQueryPoolCreateInfo *,
                                const VkAllocationCallbacks *, VkQueryPool *out) {
@@ -1304,7 +1406,7 @@ static void query_failure_contract()
    D3D10DDIARG_CREATEQUERY desc = {}; desc.Query = D3D10DDI_QUERY_OCCLUSION;
    alignas(Query) BYTE storage[sizeof(Query)];
    for (VkResult failure : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY, VK_ERROR_UNKNOWN}) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter); query_backend(dev);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter); query_backend(dev);
       queryFailPoolCall = 1; queryPoolFailure = failure;
       table.pfnCreateQuery({&dev}, &desc, {storage}, {});
       const bool oom = failure != VK_ERROR_UNKNOWN;
@@ -1320,7 +1422,7 @@ static void query_failure_contract()
    }
    for (D3D10DDI_QUERY type : {D3D10DDI_QUERY_STREAMOUTPUTSTATS, D3D10DDI_QUERY_TIMESTAMP,
                               D3D10DDI_QUERY_PIPELINESTATS}) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter); query_backend(dev);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter); query_backend(dev);
       desc.Query = type;
       table.pfnCreateQuery({&dev}, &desc, {storage}, {});
       CHECK(lastError == D3DDDIERR_DEVICEREMOVED && FAILED(dev.lost) && !queryPoolCalls);
@@ -1328,7 +1430,7 @@ static void query_failure_contract()
    /* Pool replacement during Begin, timestamp End, and pass rollover must
     * keep old GPU ownership while stopping the failed command stream. */
    for (unsigned mode = 0; mode < 3; mode++) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter); query_backend(dev);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter); query_backend(dev);
       adapter.vk.caps.timestampValidBits = 64;
       desc.Query = mode == 1 ? D3D10DDI_QUERY_TIMESTAMP : D3D10DDI_QUERY_OCCLUSION;
       table.pfnCreateQuery({&dev}, &desc, {storage}, {});
@@ -1368,7 +1470,7 @@ static void query_failure_contract()
       retire(&dev, true); /* fixture teardown: no GPU was ever executed */
    }
    for (VkResult result : {VK_NOT_READY, VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_DEVICE_LOST}) {
-      reset(); Adapter adapter; Device dev = make_device(&adapter); query_backend(dev);
+      reset(); Adapter adapter; Device dev; init_device(dev, &adapter); query_backend(dev);
       desc.Query = D3D10DDI_QUERY_OCCLUSION;
       table.pfnCreateQuery({&dev}, &desc, {storage}, {});
       table.pfnQueryBegin({&dev}, {storage});
@@ -1384,7 +1486,7 @@ static void query_failure_contract()
       table.pfnDestroyQuery({&dev}, {storage}); retire(&dev, true);
    }
    /* Completion failure must not be overwritten by WASSTILLDRAWING. */
-   reset(); Adapter adapter; Device dev = make_device(&adapter); query_backend(dev);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter); query_backend(dev);
    desc.Query = D3D10DDI_QUERY_EVENT;
    table.pfnCreateQuery({&dev}, &desc, {storage}, {});
    CHECK(cmd_draw(&dev)); table.pfnQueryEnd({&dev}, {storage});
@@ -1396,7 +1498,7 @@ static void query_failure_contract()
    table.pfnDestroyQuery({&dev}, {storage}); retire(&dev, true);
 
    /* Timestamp recording also reaches the command-buffer allocator. */
-   reset(); Adapter timestampAdapter; Device timestampDev = make_device(&timestampAdapter);
+   reset(); Adapter timestampAdapter; Device timestampDev; init_device(timestampDev, &timestampAdapter);
    query_backend(timestampDev); timestampAdapter.vk.caps.timestampValidBits = 64;
    desc.Query = D3D10DDI_QUERY_TIMESTAMP;
    table.pfnCreateQuery({&timestampDev}, &desc, {storage}, {});
@@ -1415,7 +1517,7 @@ static void query_failure_contract()
 static void shader_contract(const BYTE *dxbc, bool vertex, const char *outputPath,
                             bool sampled = false, bool exportOnly = false)
 {
-   reset(); Adapter adapter; Device dev = make_device(&adapter);
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    shaderOutput = outputPath;
    dev.vk.CreateShadersEXT = [](VkDevice, uint32_t count, const VkShaderCreateInfoEXT *info,
                                const VkAllocationCallbacks *, VkShaderEXT *out) {
@@ -1533,7 +1635,7 @@ static void sampled_shader_contract(const char *source, const char *outputPath)
 static void presentation_rotation_contract()
 {
 #ifdef TGD3D_RED_PRIMARY_CONTROL
-   Adapter adapter; reset(); Device dev = make_device(&adapter);
+   Adapter adapter; reset(); Device dev; init_device(dev, &adapter);
    static unsigned clears, redViews;
    clears = redViews = 0;
    dev.vk.CreateShadersEXT = [](VkDevice, UINT, const VkShaderCreateInfoEXT *,
@@ -1593,7 +1695,7 @@ static void presentation_rotation_contract()
    storage_destroy(&dev, dst.storage, true); cmd_destroy(&dev);
    std::puts("PASS: diagnostic portrait red clear, no rotation shader/source sampling/draw, real wait before modeset (CPU control; not display acceptance)");
 #else
-   Adapter adapter; reset(); Device dev = make_device(&adapter);
+   Adapter adapter; reset(); Device dev; init_device(dev, &adapter);
    for (UINT i = 0; i < SET_COUNT; ++i) dev.setLayouts[i] = handle<VkDescriptorSetLayout>(0x10+i);
    dev.pipelineLayout = handle<VkPipelineLayout>(0x20);
    dev.defaultSampler = handle<VkSampler>(0x30);
@@ -1754,7 +1856,7 @@ static void presentation_rotation_contract()
    CHECK(viewsDestroyed == 2);
    blit_destroy(&dev); cmd_destroy(&dev);
 
-   reset(); dev = make_device(&adapter);
+   reset(); reset_device(dev, &adapter);
    dev.vk.CreateShadersEXT = [](VkDevice, UINT, const VkShaderCreateInfoEXT *,
                                const VkAllocationCallbacks *, VkShaderEXT *) { return VK_ERROR_OUT_OF_DEVICE_MEMORY; };
    src.dev = dst.dev = &dev; src.storage.image = handle<VkImage>(1); dst.storage.image = handle<VkImage>(2);
@@ -1829,6 +1931,9 @@ int main(int argc, char **argv)
       return 0;
    }
    submission_record_contract();
+   recycle_failure_contract();
+   ambiguous_submit_idle_contract();
+   final_quiesce_contract();
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();
    completion_failure_propagates(); removed_fence_never_completes(); displayable_write_batches();
    shared_ownership_contract();

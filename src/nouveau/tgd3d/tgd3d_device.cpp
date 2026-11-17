@@ -84,15 +84,17 @@ static bool device_teardown(Device *dev)
       if (!dev->runtimeQueue && dev->fence && dev->cmdPool) {
          flush(dev, false);
          if (SUCCEEDED(dev->lost) && dev->submitted) {
-            if (FAILED(wait_sequence(dev, dev->submitted, TGD3D_WAIT_DESTROY)))
-               dev->vk.DeviceWaitIdle(dev->vkdev);
+            if (FAILED(wait_sequence(dev, dev->submitted, TGD3D_WAIT_DESTROY)) &&
+                !cleanup_idle(dev))
+               return false;
          } else {
-            dev->vk.DeviceWaitIdle(dev->vkdev);
+            if (!cleanup_idle(dev)) return false;
          }
          retire(dev);
       }
       /* The device is idle: release everything still deferred. */
       retire(dev, true);
+      release_parked_images(dev);
       blit_destroy(dev);
       device_layouts_destroy(dev);
       cmd_destroy(dev);
@@ -106,11 +108,31 @@ static bool device_teardown(Device *dev)
    return true;
 }
 
+static void release_device(DeviceSlot *slot)
+{
+   Device *dev = slot->state;
+   if (device_teardown(dev)) {
+      delete dev;
+   } else {
+      /* No work may subsequently be submitted through this runtime slot.
+       * Keep the real ICD children and their host owners alive on this
+       * terminal path. CloseAdapter must also keep their parent alive. */
+      Adapter *adapter = dev->adapter;
+      seal_runtime_owners(dev);
+      AcquireSRWLockExclusive(&adapter->teardownLock);
+      dev->nextUndrained = adapter->undrainedDevices;
+      adapter->undrainedDevices = dev;
+      ReleaseSRWLockExclusive(&adapter->teardownLock);
+      trace_message("GPU quiescence unconfirmed at final teardown; retaining device until process exit");
+   }
+   slot->state = nullptr;
+}
+
 static void APIENTRY DestroyDevice(D3D10DDI_HDEVICE hDevice)
 {
    Device *dev = D(hDevice);
    trace(TGD3D_TRACE_DESTROY_DEVICE, dev->lost, dev->submitted, dev->completed());
-   if (device_teardown(dev)) dev->~Device();
+   release_device(static_cast<DeviceSlot *>(hDevice.pDrvPrivate));
 }
 
 void device_fill_table(D3D10DDI_DEVICEFUNCS *table)
@@ -161,7 +183,7 @@ SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER h,
    if (!args || !device_interface(args->Interface, args->Version, args->Flags)) return 0;
    if (args->Interface == D3D11_1_DDI_INTERFACE_VERSION &&
        (!h.pDrvPrivate || !A(h)->videoEnabled)) return 0;
-   return sizeof(Device);
+   return sizeof(DeviceSlot);
 }
 
 HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVICE *args)
@@ -180,7 +202,13 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    const bool modern = args->Interface == D3DWDDM2_0_DDI_INTERFACE_VERSION;
    if (modern && (!args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb ||
                   !args->pKTCallbacks->pfnEvictCb)) return DXGI_ERROR_UNSUPPORTED;
-   Device *dev = new (args->hDrvDevice.pDrvPrivate) Device();
+   auto *slot = new (args->hDrvDevice.pDrvPrivate) DeviceSlot{};
+   try {
+      slot->state = new Device();
+   } catch (const std::bad_alloc &) {
+      return E_OUTOFMEMORY;
+   }
+   Device *dev = slot->state;
    dev->adapter = adapter;
    dev->hRTDevice = args->hRTDevice;
    dev->hRTCoreLayer = args->hRTCoreLayer;
@@ -238,7 +266,7 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    }
    if (FAILED(hr)) {
       trace(TGD3D_TRACE_CREATE_DEVICE, hr, args->Interface, stage);
-      if (device_teardown(dev)) dev->~Device();
+      release_device(slot);
       return hr;
    }
    /* This consumer requests Vulkan 1.3 and does not enable maintenance5.

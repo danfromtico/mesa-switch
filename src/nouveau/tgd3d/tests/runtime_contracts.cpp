@@ -1084,6 +1084,85 @@ static void displayable_owner_contract()
    std::puts("PASS: guarded v1/v2 ABI, v2 alias/v3 runtime owner handshake without kernel-resource export, foreign/ignored acknowledgement rejection, shared reopen and residency protection");
 }
 
+static void pending_destroy_contract()
+{
+   static unsigned mode, images, vaFrees, releases, idleCalls;
+   static uint64_t fenceValue;
+   for (mode = 0; mode < 5; ++mode) {
+      Adapter adapter; Device dev; init(&dev, &adapter, 0);
+      ignoreImport = false; pagingValues[0] = 0;
+      images = vaFrees = releases = idleCalls = 0;
+      dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE, const D3DDDICB_FREEGPUVIRTUALADDRESS *) -> HRESULT {
+         ++vaFrees; return S_OK;
+      };
+      dev.kt.pfnDeallocate2Cb = [](HANDLE device, const D3DDDICB_DEALLOCATE2 *args) -> HRESULT {
+         CHECK(device == rt_device(0) && args->hResource == rt_resource(0));
+         CHECK(!args->Flags.Value && !args->NumAllocations && !args->HandleList);
+         ++releases; return mode == 3 ? E_FAIL : S_OK;
+      };
+      if (mode == 4) dev.kt.pfnDeallocate2Cb = nullptr;
+      dev.kt.pfnDeallocateCb = [](HANDLE device, const D3DDDICB_DEALLOCATE *args) -> HRESULT {
+         CHECK(device == rt_device(0) && args->hResource == rt_resource(0));
+         ++releases; return S_OK;
+      };
+      D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = 65; mip.TexelHeight = 17; mip.TexelDepth = 1;
+      D3D10DDIARG_CREATERESOURCE desc = {}; desc.pMipInfoList = &mip;
+      desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D; desc.Usage = D3D10_DDI_USAGE_DEFAULT;
+      desc.BindFlags = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_SHADER_RESOURCE;
+      desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; desc.SampleDesc.Count = desc.MipLevels = desc.ArraySize = 1;
+      desc.MiscFlags = D3D10_DDI_RESOURCE_MISC_SHARED;
+      alignas(Resource) unsigned char privateBytes[sizeof(Resource)];
+      auto *res = new (privateBytes) Resource;
+      res->dev = &dev; res->kind = ResKind::Image; dev.resources = res;
+      UINT pitch;
+      auto &store = res->storage; store.image = (VkImage)1;
+      CHECK(runtime_shared_create(&dev, &desc, {rt_resource(0)}, &store.runtime, &pitch) == S_OK);
+      CHECK(runtime_bind_image(&dev, store.runtime, store.image, &store.memory) == S_OK);
+      CHECK(owners[0] && dev.runtimeOwners);
+      store.lastUse = dev.submitted = 7; dev.fence = (VkSemaphore)1;
+      fenceValue = 6; dev.runtimeFenceValue = &fenceValue;
+      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *value) {
+         *value = 6; return VK_SUCCESS;
+      };
+      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) {
+         return VK_ERROR_OUT_OF_HOST_MEMORY;
+      };
+      dev.vk.DeviceWaitIdle = [](VkDevice) {
+         ++idleCalls;
+         if (mode == 0) { fenceValue = 7; return VK_SUCCESS; }
+         if (mode == 2) { fenceValue = UINT64_MAX; return VK_SUCCESS; }
+         return mode == 3 ? VK_ERROR_DEVICE_LOST : VK_ERROR_OUT_OF_HOST_MEMORY;
+      };
+      dev.vk.DestroyImage = [](VkDevice, VkImage image, const VkAllocationCallbacks *) {
+         CHECK(image == (VkImage)1); ++images;
+      };
+      dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) {
+         const auto *p = owners[0]; CHECK(p);
+         VkResult hr = p->free_gpu(p->context, 0x100000, sizeof(bytes));
+         CHECK((hr != VK_SUCCESS) == (mode == 3));
+         p->release(p->context); owners[0] = nullptr;
+      };
+      D3D10DDI_DEVICEFUNCS table = {};
+      resource_fill_table(&table);
+      table.pfnDestroyResource({&dev}, {privateBytes});
+      std::memset(privateBytes, 0x5a, sizeof(privateBytes)); /* runtime can reuse this slot now */
+      CHECK(FAILED(dev.lost) && idleCalls == 1 && releases == 1 && !dev.resources && !dev.runtimeOwners);
+      CHECK(images == (mode == 0) && vaFrees == (mode == 0));
+      CHECK(bool(dev.parkedImages) == (mode != 0));
+      if (mode != 0) {
+         CHECK(owners[0] && owners[0]->allocation == (mode == 3 ? 0x60u : 0u));
+         void *ptr = nullptr;
+         CHECK(owners[0]->map_cpu(owners[0]->context, &ptr) == VK_ERROR_DEVICE_LOST);
+         dev.vk.DeviceWaitIdle = [](VkDevice) {fenceValue = 7; return VK_SUCCESS;};
+         CHECK(cleanup_idle(&dev));
+         release_parked_images(&dev);
+         CHECK(images == 1 && !owners[0] && !dev.parkedImages && releases == 1 && !vaFrees);
+      }
+      runtime_device_destroy(&dev);
+   }
+   std::puts("PASS: failed resource wait checks idle, keeps GPU objects on ambiguity, hands off backing only on the original DDI and never replays a late callback");
+}
+
 static unsigned cleanupMode, cleanupFreeCalls, cleanupUnlockCalls, cleanupDeallocCalls;
 static bool cleanupDeallocationFails;
 static void failed_cleanup_ownership_contract()
@@ -1292,4 +1371,5 @@ void runtime_contracts()
    removed_paging_fence_contract();
    displayable_owner_contract();
    failed_cleanup_ownership_contract();
+   pending_destroy_contract();
 }

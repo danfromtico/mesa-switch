@@ -11,8 +11,22 @@ using namespace tgd3d;
 static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter)
 {
    Adapter *adapter = static_cast<Adapter *>(hAdapter.pDrvPrivate);
+   if (adapter->undrainedDevices) {
+      /* The DDI handles end here. These independently owned devices still
+       * have ICD children. Never destroy their instance or unload the ICD
+       * behind them. No callback is scheduled from this process-lifetime list. */
+      static SRWLOCK lock = SRWLOCK_INIT;
+      static Adapter *retained;
+      AcquireSRWLockExclusive(&lock);
+      adapter->nextUndrained = retained;
+      retained = adapter;
+      ReleaseSRWLockExclusive(&lock);
+      return S_OK;
+   }
+   HMODULE module = adapter->umdReference;
    adapter->vk.close();
    delete adapter;
+   if (module) FreeLibrary(module); /* the caller still holds its own UMD reference */
    return S_OK;
 }
 
@@ -130,6 +144,15 @@ static HRESULT open_adapter(D3D10DDIARG_OPENADAPTER *args)
       trace_message(adapter->vk.failure);
       delete adapter;
       return hr;
+   }
+   /* A later failed final GPU wait can outlive the DDI device/adapter.
+    * Acquire a counted module reference while failure can still unwind. */
+   if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+                           reinterpret_cast<LPCWSTR>(&CloseAdapter), &adapter->umdReference)) {
+      const HRESULT error = HRESULT_FROM_WIN32(GetLastError());
+      adapter->vk.close();
+      delete adapter;
+      return error;
    }
    video_adapter_init(adapter);
    args->hAdapter.pDrvPrivate = adapter;

@@ -514,13 +514,42 @@ void retire(Device *dev, bool force)
    const uint64_t done = force ? UINT64_MAX : dev->completed();
    if (!force && FAILED(dev->lost))
       return;
-   while (!dev->submittedCommands.empty() && dev->submittedCommands.front().seq <= done) {
+   /* Final teardown destroys the command pool and the submitted descriptor
+    * pools directly in cmd_destroy. Only reset objects for actual reuse. */
+   while (!force && !dev->submittedCommands.empty() && dev->submittedCommands.front().seq <= done) {
       SubmittedCommands &submitted = dev->submittedCommands.front();
-      dev->vk.ResetCommandBuffer(submitted.cmd, 0);
-      dev->freeCommands.push_back(submitted.cmd);
+      VkResult reset = dev->vk.ResetCommandBuffer(submitted.cmd, 0);
       for (auto pool : submitted.pools) {
-         dev->vk.ResetDescriptorPool(dev->vkdev, pool, 0);
-         dev->freePools.push_back(pool);
+         if (reset != VK_SUCCESS) break;
+         reset = dev->vk.ResetDescriptorPool(dev->vkdev, pool, 0);
+      }
+      if (reset == VK_ERROR_OUT_OF_HOST_MEMORY || reset == VK_ERROR_OUT_OF_DEVICE_MEMORY) {
+         /* Completion already established ownership. Losing an optional
+          * reuse cache to memory pressure does not invalidate completed work. */
+         dev->vk.FreeCommandBuffers(dev->vkdev, dev->cmdPool, 1, &submitted.cmd);
+         for (auto pool : submitted.pools)
+            dev->vk.DestroyDescriptorPool(dev->vkdev, pool, nullptr);
+         dev->submittedCommands.pop_front();
+         continue;
+      }
+      if (reset != VK_SUCCESS) {
+         TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
+         return;
+      }
+      /* Keep the submission record as owner until every reset succeeds.
+       * Cache growth is optional. Under host-memory pressure release the
+       * already completed objects instead of throwing through the DDI. */
+      try {
+         dev->freePools.insert(dev->freePools.end(), submitted.pools.begin(),
+                               submitted.pools.end());
+      } catch (const std::bad_alloc &) {
+         for (auto pool : submitted.pools)
+            dev->vk.DestroyDescriptorPool(dev->vkdev, pool, nullptr);
+      }
+      try {
+         dev->freeCommands.push_back(submitted.cmd);
+      } catch (const std::bad_alloc &) {
+         dev->vk.FreeCommandBuffers(dev->vkdev, dev->cmdPool, 1, &submitted.cmd);
       }
       dev->submittedCommands.pop_front();
    }
@@ -576,14 +605,38 @@ static HRESULT wait_cpu(Device *dev, uint64_t seq, tgd3d_wait_reason reason)
    const uint64_t qpc[4] = {begin, end, 0, 0};
    const uint64_t value[6] = {(uint64_t)reason, seq, (uint32_t)result, 0, 0, 0};
    const uint64_t after = result == VK_SUCCESS ? dev->completed() : completed;
-   trace_timing(TGD3D_TIMING_CPU_WAIT, result == VK_SUCCESS ? S_OK : E_FAIL, dev->submitted,
+   const bool reached = result == VK_SUCCESS && SUCCEEDED(dev->lost) && after >= seq;
+   trace_timing(TGD3D_TIMING_CPU_WAIT, reached ? S_OK : E_FAIL, dev->submitted,
                 after, qpc, value);
-   if (result != VK_SUCCESS) {
-      TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
-      return DXGI_ERROR_DEVICE_REMOVED;
+   if (!reached) {
+      if (SUCCEEDED(dev->lost))
+         TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
+      return dev->lost;
    }
    /* The completion sample used by timing can itself report device loss. */
    return dev->lost;
+}
+
+bool cleanup_idle(Device *dev)
+{
+   const VkResult result = dev->vk.DeviceWaitIdle(dev->vkdev);
+   const uint64_t render = dev->runtimeFenceValue ? *dev->runtimeFenceValue : 0;
+   const bool fenceProvesIdle = dev->runtimeFenceValue ?
+      render != UINT64_MAX && (dev->uncertainSubmit ? render > dev->submitted : render >= dev->submitted) :
+      !dev->uncertainSubmit || !dev->nvk;
+   if (result == VK_SUCCESS && fenceProvesIdle)
+      return true;
+
+   if (SUCCEEDED(dev->lost))
+      TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
+   /* A local removal notification does not isolate the independent NVK
+    * context. The runtime-owned queue, when negotiated, has an explicit
+    * context destruction operation with its own checked result. */
+   if (dev->runtimeQueue)
+      return SUCCEEDED(runtime_queue_quiesce(dev));
+   /* The optional external-host Vulkan control uses its provider's public
+    * lost-device lifetime rules, rather than NVK's KMT fence status. */
+   return !dev->nvk && result == VK_ERROR_DEVICE_LOST;
 }
 
 HRESULT wait_sequence(Device *dev, uint64_t seq, tgd3d_wait_reason reason)
@@ -734,6 +787,7 @@ static HRESULT flush_recorded(Device *dev, bool waitForSpace)
       if (result != VK_SUCCESS) {
          /* No wait is queued for a failed submission. Never fabricate GPU
           * completion on the CPU: older submissions can still own memory. */
+         dev->uncertainSubmit = true;
          TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
          return dev->lost;
       }

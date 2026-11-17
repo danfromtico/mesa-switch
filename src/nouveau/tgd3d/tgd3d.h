@@ -35,10 +35,18 @@ struct RuntimeResource;
 struct RuntimeQueueState;
 struct VideoSession;
 
+/* The runtime owns only this slot. GPU state can outlive a failed final
+ * quiesce, while the runtime can immediately reuse its private DDI bytes. */
+struct DeviceSlot { Device *state; };
+
 /* ------------------------------------------------------------------ */
 /* Adapter                                                             */
 
 struct Adapter {
+   SRWLOCK teardownLock = SRWLOCK_INIT;
+   Device *undrainedDevices = nullptr;
+   Adapter *nextUndrained = nullptr;
+   HMODULE umdReference = nullptr;
    HANDLE hRTAdapter = nullptr;
    const D3DDDI_ADAPTERCALLBACKS *callbacks = nullptr;
    tg_gpu_adapter_info info = {};
@@ -354,7 +362,14 @@ struct FrameStats {
    uint64_t backpressureNs = 0;
 };
 
-struct Device {
+struct Device : DeviceSlot {
+   Device() : DeviceSlot{this} {}
+   Device(const Device &) = delete;
+   Device &operator=(const Device &) = delete;
+   Device *nextUndrained = nullptr;
+   RuntimeResource *parkedImages = nullptr;
+   SRWLOCK runtimeOwnersLock = SRWLOCK_INIT;
+   RuntimeResource *runtimeOwners = nullptr;
    Adapter *adapter = nullptr;
    D3D10DDI_HRTDEVICE hRTDevice = {};
    D3D10DDI_HRTCORELAYER hRTCoreLayer = {};
@@ -403,6 +418,7 @@ struct Device {
    VkSemaphore ingress = VK_NULL_HANDLE;
    D3DKMT_HANDLE runtimeIngress = 0;
    uint64_t submitted = 0;
+   bool uncertainSubmit = false; /* a failed QueueSubmit2 may have issued work */
    uint64_t gated = 0;
    D3DKMT_HANDLE runtimeFence = 0;
    const volatile UINT64 *runtimeFenceValue = nullptr;
@@ -472,7 +488,8 @@ struct RemovalOnlyErrorScope {
    RemovalOnlyErrorScope &operator=(const RemovalOnlyErrorScope &) = delete;
 };
 
-static inline Device *D(D3D10DDI_HDEVICE h) { return static_cast<Device *>(h.pDrvPrivate); }
+static inline Device *D(D3D10DDI_HDEVICE h) { return static_cast<DeviceSlot *>(h.pDrvPrivate)->state; }
+static inline Device *DD(DXGI_DDI_HDEVICE h) { return reinterpret_cast<DeviceSlot *>(h)->state; }
 static inline Resource *R(D3D10DDI_HRESOURCE h) { return static_cast<Resource *>(h.pDrvPrivate); }
 static inline bool runtime_private_allocations(const Device *dev)
 {
@@ -497,6 +514,7 @@ void end_rendering(Device *dev);
 HRESULT flush(Device *dev, bool waitForSpace);
 void command_barrier(Device *dev);
 HRESULT wait_sequence(Device *dev, uint64_t seq, tgd3d_wait_reason reason);
+bool cleanup_idle(Device *dev);
 bool sequence_done(Device *dev, uint64_t seq);
 void retire(Device *dev, bool force = false);
 HRESULT sync_create(Device *dev);
@@ -623,6 +641,9 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
 /* Releases GPU mappings, then the runtime allocation. The caller has already
  * destroyed every Vulkan object that referenced the backing. */
 HRESULT runtime_destroy(RuntimeResource *resource);
+void park_image(Device *dev, ImageStorage &storage);
+void release_parked_images(Device *dev);
+void seal_runtime_owners(Device *dev);
 HRESULT runtime_queue_prepare(Device *dev, wsi_win32_runtime *transport);
 HRESULT runtime_queue_quiesce(Device *dev);
 HRESULT runtime_queue_finish(Device *dev);

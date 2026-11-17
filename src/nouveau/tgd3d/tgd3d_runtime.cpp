@@ -66,6 +66,12 @@ struct RuntimeResource {
    tg_gpu_primary_allocation_request primary_layout;
    void *cpu;
    Mapping *mappings;
+   RuntimeResource *next_owner, **owner_link;
+   Device *owner_device;
+   RuntimeResource *next_parked;
+   VkImage parked_image;
+   VkDeviceMemory parked_memory;
+   VkImageView parked_blit_views[4];
 };
 
 /* arg0: stage in the high half, allocation handle in the low half. */
@@ -261,16 +267,30 @@ static void owner_unmap_cpu(void *context)
    (void)context;
 }
 
-HRESULT runtime_destroy(RuntimeResource *p)
+static void unlink_owner(RuntimeResource *p)
 {
-   if (!p)
-      return S_OK;
+   AcquireSRWLockExclusive(&p->owner_device->runtimeOwnersLock);
+   *p->owner_link = p->next_owner;
+   if (p->next_owner) p->next_owner->owner_link = p->owner_link;
+   p->owner_link = nullptr;
+   p->next_owner = nullptr;
+   ReleaseSRWLockExclusive(&p->owner_device->runtimeOwnersLock);
+   p->owner_device = nullptr;
+}
+
+/* End access to the DDI handle here, on the callback thread. In the
+ * unconfirmed case let VidMm retire the allocation and its GPUVAs against
+ * already queued work. An explicit FreeGpuVirtualAddress would instead make
+ * a live VA available for reuse before the queued accesses have finished. */
+static HRESULT end_owner(RuntimeResource *p, bool pending)
+{
+   unlink_owner(p);
    AcquireSRWLockExclusive(&p->lock);
    HRESULT hr = p->cleanup_error;
    p->dead = true;
    /* Order matters: release this device's GPU addresses, drop the CPU lock,
     * and only then return the allocation to the runtime. */
-   for (Mapping *mapping = p->mappings; mapping; mapping = mapping->next) {
+   for (Mapping *mapping = pending ? nullptr : p->mappings; mapping; mapping = mapping->next) {
       if (!mapping->freed && !mapping->free_failed) {
          HRESULT next = free_address(p, mapping->address, mapping->size);
          if (SUCCEEDED(hr)) hr = next;
@@ -298,7 +318,18 @@ HRESULT runtime_destroy(RuntimeResource *p)
       } else {
          deallocate.hResource = p->runtime_resource;
       }
-      HRESULT next = rt_trace(p, 6, p->callbacks.pfnDeallocateCb(p->device, &deallocate));
+      HRESULT next;
+      if (pending && p->callbacks.pfnDeallocate2Cb) {
+         D3DDDICB_DEALLOCATE2 guarded = {};
+         guarded.hResource = deallocate.hResource;
+         guarded.NumAllocations = deallocate.NumAllocations;
+         guarded.HandleList = deallocate.HandleList;
+         /* AssumeNotInUse stays clear. This handoff does not signal a fence. */
+         next = p->callbacks.pfnDeallocate2Cb(p->device, &guarded);
+      } else {
+         next = p->callbacks.pfnDeallocateCb(p->device, &deallocate);
+      }
+      next = rt_trace(p, 6, next);
       if (SUCCEEDED(hr))
          hr = next;
       if (SUCCEEDED(next)) {
@@ -313,13 +344,83 @@ HRESULT runtime_destroy(RuntimeResource *p)
       }
    }
    if (FAILED(hr)) p->cleanup_error = hr;
+   p->runtime_resource = nullptr;
+   p->device = nullptr;
    ReleaseSRWLockExclusive(&p->lock);
+   return hr;
+}
+
+HRESULT runtime_destroy(RuntimeResource *p)
+{
+   if (!p) return S_OK;
+   HRESULT hr = end_owner(p, false);
    /* Consume this owner's reference even on failure. Existing ICD imports
     * retain the metadata independently; releasing its last reference frees
     * only host records, never the allocation or a GPU mapping. No deferred
     * callback may reuse this resource's runtime handle after DDI teardown. */
    owner_release(p);
    return hr;
+}
+
+/* Stop ICD callbacks from using a runtime handle after its DDI lifetime.
+ * Leave existing mappings and allocations to Windows device/process cleanup
+ * if their owner cannot safely release them. */
+static void revoke_owner(RuntimeResource *p)
+{
+   unlink_owner(p);
+   AcquireSRWLockExclusive(&p->lock);
+   p->dead = true;
+   p->cleanup_error = D3DDDIERR_DEVICEREMOVED;
+   p->runtime_resource = p->device = nullptr;
+   ReleaseSRWLockExclusive(&p->lock);
+}
+
+void park_image(Device *dev, ImageStorage &storage)
+{
+   auto *p = storage.runtime;
+   p->parked_image = storage.image;
+   p->parked_memory = storage.memory;
+   for (unsigned i = 0; i < ARRAYSIZE(storage.blitViews); ++i)
+      p->parked_blit_views[i] = storage.blitViews[i].handle;
+   p->next_parked = dev->parkedImages;
+   dev->parkedImages = p; /* takes the original owner reference */
+   storage = {};
+#ifdef TGD3D_GENERIC_VULKAN
+   /* The standalone loader control can lend a Lock2 CPU address to a
+    * foreign provider. VidMm cannot track that provider's host reads.
+    * Preserve that loan on an inconclusive wait; do not unlock it, replay
+    * its DDI callbacks or block the DDI retrying a failed wait. */
+   if (!dev->nvk && p->parked_memory && p->cpu_locked) {
+      revoke_owner(p);
+      return;
+   }
+#endif
+   const HRESULT hr = end_owner(p, true);
+   if (FAILED(hr)) TG_ERROR(dev, D3DDDIERR_DEVICEREMOVED);
+}
+
+void release_parked_images(Device *dev)
+{
+   while (auto *p = dev->parkedImages) {
+      dev->parkedImages = p->next_parked;
+      ImageStorage storage;
+      storage.image = p->parked_image;
+      storage.memory = p->parked_memory;
+      for (unsigned i = 0; i < ARRAYSIZE(storage.blitViews); ++i)
+         storage.blitViews[i].handle = p->parked_blit_views[i];
+      storage_destroy(dev, storage, true);
+      owner_release(p);
+   }
+}
+
+void seal_runtime_owners(Device *dev)
+{
+   /* DestroyDevice is the last legal DDI for the device callbacks. In this
+    * terminal state even video/context isolation can have failed. Revoke
+    * future access, retaining backing and references for OS device/process
+    * teardown. In particular do not explicitly free VAs or unlock memory. */
+   while (auto *p = dev->runtimeOwners)
+      revoke_owner(p);
 }
 
 static HRESULT cleanup_failed_create(RuntimeResource *p, HRESULT cause)
@@ -337,6 +438,7 @@ void runtime_copy_callbacks(D3DDDI_DEVICECALLBACKS *out, const D3DDDI_DEVICECALL
 #define COPY(name) out->name = in->name
    COPY(pfnAllocateCb);
    COPY(pfnDeallocateCb);
+   COPY(pfnDeallocate2Cb);
    COPY(pfnSetPriorityCb);
    COPY(pfnQueryResidencyCb);
    COPY(pfnSetDisplayModeCb);
@@ -446,6 +548,13 @@ static HRESULT create_owner(Device *dev, D3D10DDI_HRTRESOURCE runtime, RuntimeRe
    p->fence_value = dev->pagingFenceValue;
    p->memory.adapter_luid = dev->adapter->luid;
    InitializeSRWLock(&p->lock);
+   p->owner_device = dev;
+   AcquireSRWLockExclusive(&dev->runtimeOwnersLock);
+   p->next_owner = dev->runtimeOwners;
+   p->owner_link = &dev->runtimeOwners;
+   if (p->next_owner) p->next_owner->owner_link = &p->next_owner;
+   dev->runtimeOwners = p;
+   ReleaseSRWLockExclusive(&dev->runtimeOwnersLock);
    *out = p;
    return S_OK;
 }

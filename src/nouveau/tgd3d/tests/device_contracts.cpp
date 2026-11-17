@@ -128,7 +128,7 @@ void device_contracts()
       table.before = table.after = 0x12345678;
       constexpr size_t dxgi_size = sizeof(DXGI1_2_DDI_BASE_FUNCTIONS);
       alignas(DXGI1_2_DDI_BASE_FUNCTIONS) BYTE dxgi[dxgi_size + 16]; std::memset(dxgi, 0xcc, sizeof(dxgi));
-      alignas(Device) BYTE storage[sizeof(Device)]; std::memset(storage, 0xab, sizeof(storage));
+      alignas(DeviceSlot) BYTE storage[sizeof(DeviceSlot)]; std::memset(storage, 0xab, sizeof(storage));
       PFND3D10DDI_RETRIEVESUBOBJECT retrieve = nullptr;
       D3D10DDIARG_CREATEDEVICE args = {};
       args.hDrvDevice = {storage}; args.hRTDevice = {H<HANDLE>(0x500)}; args.hRTCoreLayer = {H<HANDLE>(0x300)};
@@ -140,7 +140,7 @@ void device_contracts()
       CHECK(!CalcPrivateDeviceSize({&adapter}, &size));
       CHECK(CreateDevice({&adapter}, &args) == DXGI_ERROR_UNSUPPORTED && !s.ktCreates);
       adapter.videoEnabled = true; adapter.videoFirmware.resize(128000);
-      CHECK(CalcPrivateDeviceSize({&adapter}, &size) == sizeof(Device));
+      CHECK(CalcPrivateDeviceSize({&adapter}, &size) == sizeof(DeviceSlot));
       CHECK(CreateDevice({&adapter}, &args) == S_OK && s.ktCreates == 1 && !s.coreCreates && retrieve);
       for (unsigned i=0;i<8;++i) CHECK(dxgi[i] == 0xcc && dxgi[dxgi_size+8+i] == 0xcc);
       CHECK(!args.DXGIBaseDDI.pDXGIDDIBaseFunctions3->pfnPresentMultiplaneOverlay);
@@ -170,7 +170,7 @@ void device_contracts()
       struct { UINT64 before; D3DWDDM2_0DDI_DEVICEFUNCS table; UINT64 after; } table = {};
       struct { UINT64 before; DXGI1_4_DDI_BASE_FUNCTIONS table; UINT64 after; } dxgi = {};
       table.before = table.after = dxgi.before = dxgi.after = UINT64_C(0x123456789abcdef0);
-      alignas(Device) BYTE storage[sizeof(Device)]; std::memset(storage, 0xab, sizeof(storage));
+      alignas(DeviceSlot) BYTE storage[sizeof(DeviceSlot)]; std::memset(storage, 0xab, sizeof(storage));
       PFND3D10DDI_RETRIEVESUBOBJECT subobject = nullptr;
       D3D10DDIARG_CREATEDEVICE args = {};
       args.hDrvDevice = {storage}; args.hRTDevice = {H<HANDLE>(0x500)}; args.hRTCoreLayer = {H<HANDLE>(0x300)};
@@ -178,7 +178,7 @@ void device_contracts()
       args.pKTCallbacks = &kt; args.pWDDM2_0UMCallbacks = &core; args.pWDDM2_0DeviceFuncs = &table.table;
       args.DXGIBaseDDI.pDXGIDDIBaseFunctions5 = &dxgi.table; args.ppfnRetrieveSubObject = &subobject;
       D3D10DDIARG_CALCPRIVATEDEVICESIZE size = {args.Interface, args.Version, 0};
-      CHECK(CalcPrivateDeviceSize({&adapter}, &size) == sizeof(Device));
+      CHECK(CalcPrivateDeviceSize({&adapter}, &size) == sizeof(DeviceSlot));
       if (!failure) {
          size.Flags = 2 << D3D11DDI_CREATEDEVICE_FLAG_3DPIPELINESUPPORT_SHIFT;
          CHECK(!CalcPrivateDeviceSize({&adapter}, &size)); args.Flags = size.Flags;
@@ -193,7 +193,7 @@ void device_contracts()
       HRESULT hr = CreateDevice({&adapter}, &args);
       CHECK((SUCCEEDED(hr) == !failure) && s.coreCreates == 1 && !s.ktCreates);
       if (!failure) {
-         auto *dev = reinterpret_cast<Device *>(storage);
+         auto *dev = D(args.hDrvDevice);
          CHECK(dev->hContext == H<HANDLE>(0x400) && dev->createContextVirtual == core.pfnCreateContextVirtualCb);
          CHECK(table.table.pfnDestroyDevice && table.table.pfnFlush && table.table.pfnCreateQuery);
          CHECK(dxgi.table.pfnPresentMultiplaneOverlay1 && dxgi.table.pfnTrimResidencySet && subobject);

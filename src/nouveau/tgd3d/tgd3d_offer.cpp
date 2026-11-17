@@ -40,7 +40,7 @@ static HRESULT APIENTRY OfferResources(DXGI_DDI_ARG_OFFERRESOURCES *args)
 {
    if (!args || !args->hDevice || args->Priority < D3DDDI_OFFER_PRIORITY_LOW ||
        args->Priority > D3DDDI_OFFER_PRIORITY_HIGH) return E_INVALIDARG;
-   auto *dev = reinterpret_cast<Device *>(args->hDevice);
+   auto *dev = DD(args->hDevice);
    if (FAILED(dev->lost)) return dev->lost;
    if (!args->Resources) return S_OK;
    if (!dev->nvk || !dev->kt.pfnOfferAllocationsCb) return DXGI_ERROR_UNSUPPORTED;
@@ -66,7 +66,7 @@ static HRESULT APIENTRY OfferResources(DXGI_DDI_ARG_OFFERRESOURCES *args)
 static HRESULT APIENTRY ReclaimResources(DXGI_DDI_ARG_RECLAIMRESOURCES *args)
 {
    if (!args || !args->hDevice) return E_INVALIDARG;
-   auto *dev = reinterpret_cast<Device *>(args->hDevice);
+   auto *dev = DD(args->hDevice);
    if (FAILED(dev->lost)) return dev->lost;
    if (!args->Resources) return S_OK;
    if (!dev->nvk) return DXGI_ERROR_UNSUPPORTED;
@@ -157,7 +157,7 @@ HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args)
 {
    if (!args || !args->hDevice || args->TrimFlags.Reserved ||
        (args->TrimFlags.PeriodicTrim && args->TrimFlags.RestartPeriodicTrim)) return E_INVALIDARG;
-   auto *dev = reinterpret_cast<Device *>(args->hDevice);
+   auto *dev = DD(args->hDevice);
    if (FAILED(dev->lost)) return dev->lost;
    /* Use the runtime's serialized DDI entry. Do not dispatch allocation
     * callbacks or access this list from a driver-created worker thread. */

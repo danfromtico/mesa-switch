@@ -11,7 +11,6 @@
 
 namespace tgd3d {
 
-static inline Device *DD(DXGI_DDI_HDEVICE h) { return reinterpret_cast<Device *>(h); }
 static inline Resource *DR(DXGI_DDI_HRESOURCE h) { return reinterpret_cast<Resource *>(h); }
 static HRESULT APIENTRY Blt1(DXGI_DDI_ARG_BLT1 *args);
 

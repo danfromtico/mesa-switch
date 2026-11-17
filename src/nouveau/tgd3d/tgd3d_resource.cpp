@@ -238,36 +238,35 @@ void storage_destroy(Device *dev, ImageStorage &storage, bool immediate)
       TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
    /* Rotation leaves cached views in other logical resources. Retire all
     * views of this backing before its image, including already-deferred ones. */
-   std::vector<uint64_t> views;
+   const bool ready = immediate || sequence_done(dev, seq);
+   for (auto it = dev->deferred.begin(); it != dev->deferred.end();) {
+      if (!storage.image || it->type != DeferredType::ImageView || it->image != storage.image) {
+         ++it;
+      } else if (ready) {
+         dev->vk.DestroyImageView(dev->vkdev, (VkImageView)it->handle, nullptr);
+         it = dev->deferred.erase(it);
+      } else {
+         it->seq = seq;
+         ++it;
+      }
+   }
+   auto retire_view = [&](VkImageView handle) {
+      if (ready) dev->vk.DestroyImageView(dev->vkdev, handle, nullptr);
+      else defer(dev, DeferredType::ImageView, (uint64_t)handle, seq, storage.image);
+   };
    for (auto &view : storage.blitViews) {
-      if (view.handle)
-         views.push_back((uint64_t)view.handle);
+      if (view.handle) retire_view(view.handle);
       view = {};
    }
    for (View *view : dev->views) {
       for (auto &entry : view->cache) {
          if (entry.view && entry.image == storage.image) {
-            views.push_back((uint64_t)entry.view);
+            retire_view(entry.view);
             entry = {};
          }
       }
    }
-   for (size_t i = 0; i < dev->deferred.size();) {
-      const Deferred &d = dev->deferred[i];
-      if (d.type == DeferredType::ImageView && d.image == storage.image) {
-         views.push_back(d.handle);
-         dev->deferred.erase(dev->deferred.begin() + i);
-      } else {
-         i++;
-      }
-   }
-   for (uint64_t view : views) {
-      if (immediate || sequence_done(dev, seq))
-         dev->vk.DestroyImageView(dev->vkdev, (VkImageView)view, nullptr);
-      else
-         defer(dev, DeferredType::ImageView, view, seq, storage.image);
-   }
-   if (immediate || sequence_done(dev, seq)) {
+   if (ready) {
       /* The image and its memory go first: freeing the memory is what
        * releases this device's GPU mapping of a runtime allocation. */
       if (storage.image)
@@ -439,19 +438,33 @@ void resource_creation_error(Device *dev, HRESULT hr, DXGI_DDI_PRIMARY_DESC *pri
    }
 }
 
+static void retire_resource_image(Device *dev, ImageStorage &storage)
+{
+   const bool runtime_lifetime = runtime_requires_resource_lifetime(storage.runtime);
+   if (runtime_lifetime && !sequence_done(dev, storage.lastUse)) {
+      end_rendering(dev);
+      if (FAILED(wait_sequence(dev, storage.lastUse, TGD3D_WAIT_DESTROY))) {
+         /* An unsubmitted recording can contain this image. Never submit
+          * it after the resource's synchronous destruction has unwound. */
+         if (SUCCEEDED(dev->lost)) TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
+         if (cleanup_idle(dev)) {
+            storage_destroy(dev, storage, true);
+            return;
+         }
+         park_image(dev, storage);
+         return;
+      }
+   }
+   storage_destroy(dev, storage, runtime_lifetime);
+}
+
 static void resource_fail(Device *dev, Resource *res, HRESULT hr,
                           DXGI_DDI_PRIMARY_DESC *primary = nullptr)
 {
-   /* Earlier initial-data uploads can already reference this backing when
-    * a later subresource fails. Complete them before runtime-owned teardown. */
-   if (res->storage.lastUse && !sequence_done(dev, res->storage.lastUse)) {
-      if (FAILED(wait_sequence(dev, res->storage.lastUse, TGD3D_WAIT_DESTROY)))
-         dev->vk.DeviceWaitIdle(dev->vkdev);
-   }
    if (res->slice)
-      slice_release(dev, res->slice, 0);
+      slice_release(dev, res->slice, std::max(res->sliceLastUse, res->sliceLastWrite));
    if (res->storage.image || res->storage.runtime)
-      storage_destroy(dev, res->storage, true);
+      retire_resource_image(dev, res->storage);
    resource_untrack(dev, res);
    res->~Resource();
    resource_creation_error(dev, hr, primary);
@@ -693,21 +706,8 @@ static void APIENTRY DestroyResource(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURC
    if (res->slice)
       slice_release(dev, res->slice, res->sliceLastUse > res->sliceLastWrite ?
                                         res->sliceLastUse : res->sliceLastWrite);
-   if (res->storage.image) {
-      const bool runtime_lifetime = runtime_requires_resource_lifetime(res->storage.runtime);
-      if (runtime_lifetime && !sequence_done(dev, res->storage.lastUse)) {
-         /* The allocation returns to the runtime inside this call, so the
-          * GPU must be done with it first. This is the one synchronous
-          * wait on teardown; private images are released by sequence. */
-         end_rendering(dev);
-         HRESULT hr = wait_sequence(dev, res->storage.lastUse, TGD3D_WAIT_DESTROY);
-         if (FAILED(hr)) {
-            dev->vk.DeviceWaitIdle(dev->vkdev);
-            TG_ERROR(dev, hr);
-         }
-      }
-      storage_destroy(dev, res->storage, runtime_lifetime);
-   }
+   if (res->storage.image || res->storage.runtime)
+      retire_resource_image(dev, res->storage);
    resource_untrack(dev, res);
    res->~Resource();
 }
