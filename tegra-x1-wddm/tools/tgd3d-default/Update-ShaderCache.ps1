@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: MIT
-# Stage a UMD fix or an explicitly paired runtime-transport ICD beside the active package. Activation is on reboot;
-# never replace a mapped DLL or restart a running GPU device here.
+# Stage a UMD fix or a paired UMD/ICD beside the active package for the next boot.
 [CmdletBinding()]
 param([Parameter(Mandatory=$true)][string]$CandidateDirectory,[switch]$Restart)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 $payload=[IO.File]::ReadAllText((Join-Path $CandidateDirectory 'update.json'))|ConvertFrom-Json
 $scope=if($payload.PSObject.Properties.Name -contains 'change_scope'){[string]$payload.change_scope}else{'shader-cache'}
-if($scope -notin @('shader-cache','resource-teardown','copy-lifetime','modern-ddi','runtime-submit','video-ddi')){throw 'Unsupported update scope'}
-$paired=$scope -eq 'runtime-submit'
-$video=$scope -eq 'video-ddi'
+if($scope -notin @('shader-cache','resource-teardown','copy-lifetime','modern-ddi','runtime-submit','video-ddi','present-ownership')){throw 'Unsupported update scope'}
+$paired=$scope -in @('runtime-submit','present-ownership')
+$video=$scope -in @('video-ddi','present-ownership')
+if($scope -eq 'present-ownership' -and !$payload.gpu_prerotation){throw 'The presentation update requires the retained fixed landscape configuration'}
 if($video -and ($payload.video_validation_environment -ne 'TGD3D_VIDEO_VALIDATE=1' -or
    !$payload.preserve_display_power -or $payload.modern_ddi_advertised)){throw 'Expected controlled video opt-in with the retained desktop interface'}
 if($scope -in @('modern-ddi','runtime-submit') -and !$payload.modern_ddi_advertised){throw 'Modern DDI update needs an explicit interface declaration'}
@@ -99,6 +99,7 @@ $m.scope=switch($scope){
     'modern-ddi' {'.158 retained KMD/ICD with typed WDDM2.0/DXGI1.4 MPO1 and D3D10 pipeline; logon start; native interface and column scan acceptance pending'}
     'runtime-submit' {'.158 retained KMD with paired tgd3d/NVK runtime-owned command and fence transport; native runtime and column scan acceptance pending'}
     'video-ddi' {'Retained NVDEC KMD/ICD/display/power with process-opt-in D3D11.1 video/NV12 UMD; native720p D3D11VA and window acceptance pending'}
+    'present-ownership' {'Paired presentation and ownership fixes with the retained fixed landscape, power policy, NVDEC KMD and process-opt-in video interface'}
     default {'.158 existing KMD/ICD with cache-only tgd3d UMD; logon start; cache performance acceptance pending'}
 }
 Save-Json ($dest+'\trial-components.json') $m
