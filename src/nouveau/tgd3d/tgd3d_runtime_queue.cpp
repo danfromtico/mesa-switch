@@ -115,12 +115,23 @@ static VkResult create_context(void *opaque, uint32_t types, void **token)
    if (state->finishing) return VK_ERROR_DEVICE_LOST;
    auto *c = new (std::nothrow) RuntimeSubmitContext;
    if (!c) return VK_ERROR_OUT_OF_HOST_MEMORY;
-   D3DWDDM2_0DDICB_CREATECONTEXTVIRTUAL args = {};
-   args.EngineAffinity = 1; args.ContextTypeFlags = types;
    trace(TGD3D_TRACE_RUNTIME_TRANSPORT, E_PENDING, (UINT64_C(1) << 32) | types, 0);
-   HRESULT hr = state->device->createContextVirtual(state->device->hRTCoreLayer, &args);
-   trace(TGD3D_TRACE_RUNTIME_TRANSPORT, hr, (UINT64_C(1) << 32) | types, reinterpret_cast<uintptr_t>(args.hContext));
-   c->handle = args.hContext;
+   Device *dev = state->device;
+   HRESULT hr;
+   if (dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION) {
+      // The 11.1 device uses the public kernel callback on the runtime device.
+      // GM20B routes graphics, compute and copies to node 0, engine mask 1.
+      D3DDDICB_CREATECONTEXTVIRTUAL args = {};
+      args.EngineAffinity = 1;
+      hr = dev->kt.pfnCreateContextVirtualCb(dev->hRTDevice.handle, &args);
+      c->handle = args.hContext;
+   } else {
+      D3DWDDM2_0DDICB_CREATECONTEXTVIRTUAL args = {};
+      args.EngineAffinity = 1; args.ContextTypeFlags = types;
+      hr = dev->createContextVirtual(dev->hRTCoreLayer, &args);
+      c->handle = args.hContext;
+   }
+   trace(TGD3D_TRACE_RUNTIME_TRANSPORT, hr, (UINT64_C(1) << 32) | types, reinterpret_cast<uintptr_t>(c->handle));
    if (!c->handle) { delete c; return FAILED(hr) ? result(hr) : VK_ERROR_INITIALIZATION_FAILED; }
    AcquireSRWLockExclusive(&state->lock);
    bool duplicate = c->handle == state->device->hContext;
@@ -372,8 +383,11 @@ HRESULT runtime_queue_prepare(Device *dev, wsi_win32_runtime *out)
    *out = {};
    if (dev->runtimeQueue) return DXGI_ERROR_INVALID_CALL;
    const auto &cb = dev->kt;
-   if (!dev->nvk || dev->interfaceVersion != D3DWDDM2_0_DDI_INTERFACE_VERSION ||
-       !dev->hRTDevice.handle || !dev->hRTCoreLayer.handle || !dev->createContextVirtual ||
+   const bool core_context = dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION &&
+                             dev->hRTCoreLayer.handle && dev->createContextVirtual;
+   const bool video_context = dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION &&
+                              cb.pfnCreateContextVirtualCb;
+   if (!dev->nvk || !dev->hRTDevice.handle || (!core_context && !video_context) ||
        !cb.pfnDestroyContextCb || !cb.pfnSubmitCommandCb ||
        !cb.pfnCreateSynchronizationObject2Cb || !cb.pfnDestroySynchronizationObjectCb ||
        !cb.pfnWaitForSynchronizationObjectFromGpuCb || !cb.pfnSignalSynchronizationObjectFromGpuCb ||

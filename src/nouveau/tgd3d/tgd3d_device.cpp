@@ -199,6 +199,10 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    }
    const bool video = args->Interface == D3D11_1_DDI_INTERFACE_VERSION;
    if (video && (!adapter->videoEnabled || !args->ppfnRetrieveSubObject)) return DXGI_ERROR_UNSUPPORTED;
+   wchar_t window_opt_in[2] = {};
+   const bool video_window = video &&
+      GetEnvironmentVariableW(L"TGD3D_VIDEO_WINDOW_VALIDATE", window_opt_in, 2) == 1 &&
+      window_opt_in[0] == L'1';
    const bool modern = args->Interface == D3DWDDM2_0_DDI_INTERFACE_VERSION;
    if (modern && (!args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb ||
                   !args->pKTCallbacks->pfnEvictCb)) return DXGI_ERROR_UNSUPPORTED;
@@ -236,7 +240,13 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    if (SUCCEEDED(hr)) {
       stage = 2;
       trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
-      if (modern && dev->nvk) hr = runtime_queue_prepare(dev, &dev->runtimeTransport);
+      if ((modern && dev->nvk) || video_window)
+         hr = runtime_queue_prepare(dev, &dev->runtimeTransport);
+      if (video_window) {
+         const unsigned callbacks = (dev->kt.pfnCreateContextVirtualCb ? 1u : 0u) |
+                                    (dev->kt.pfnSubmitCommandCb ? 2u : 0u);
+         trace(TGD3D_TRACE_RUNTIME_TRANSPORT, hr, (UINT64_C(6) << 32) | args->Interface, callbacks);
+      }
       if (SUCCEEDED(hr)) {
          const VkResult result = adapter->vk.createDevice(&dev->vkdev, &dev->vk, &dev->queue,
             dev->runtimeQueue ? &dev->runtimeTransport : nullptr);

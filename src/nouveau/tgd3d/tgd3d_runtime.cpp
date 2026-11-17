@@ -641,9 +641,13 @@ HRESULT runtime_evict(RuntimeResource *p, uint64_t *bytes, uint64_t *remaining_b
 static HRESULT make_ready(Device *dev, RuntimeResource *p, uint64_t bytes,
                           uint32_t kernel_resource = 0, bool displayable = false)
 {
-   if (displayable && (!dev->nvk || (!dev->runtimeQueueAccepted && !kernel_resource) ||
-       dev->interfaceVersion != D3DWDDM2_0_DDI_INTERFACE_VERSION))
-      return DXGI_ERROR_UNSUPPORTED;
+   if (displayable) {
+      const bool wddm2 = dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION;
+      const bool video = dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION;
+      const bool same_device = dev->runtimeQueueAccepted && (video || wddm2);
+      if (!dev->nvk || (!same_device && !(wddm2 && kernel_resource)))
+         return DXGI_ERROR_UNSUPPORTED;
+   }
    HRESULT hr = runtime_make_resident(dev, p);
    if (FAILED(hr))
       return hr;

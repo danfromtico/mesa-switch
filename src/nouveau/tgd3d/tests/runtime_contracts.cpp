@@ -1080,6 +1080,14 @@ static void displayable_owner_contract()
    CHECK(runtime_destroy(p) == S_OK);
    producer.runtimeQueueAccepted = false;
    displayableReply = 1;
+   producer.interfaceVersion = D3D11_1_DDI_INTERFACE_VERSION;
+   CHECK(runtime_shared_create(&producer, &desc, {rt_resource(0)}, &p, &pitch) == DXGI_ERROR_UNSUPPORTED && !p);
+   producer.runtimeQueueAccepted = true;
+   CHECK(runtime_shared_create(&producer, &desc, {rt_resource(0)}, &p, &pitch) == S_OK);
+   CHECK(runtime_bind_image(&producer, p, (VkImage)1, &memory, &written) == S_OK && written == 0x60);
+   producer.vk.FreeMemory(producer.vkdev, memory, nullptr);
+   CHECK(runtime_destroy(p) == S_OK);
+   producer.runtimeQueueAccepted = false;
    runtime_device_destroy(&consumer); runtime_device_destroy(&producer);
    std::puts("PASS: guarded v1/v2 ABI, v2 alias/v3 runtime owner handshake without kernel-resource export, foreign/ignored acknowledgement rejection, shared reopen and residency protection");
 }

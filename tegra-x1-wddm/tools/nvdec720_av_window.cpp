@@ -82,8 +82,8 @@ public:
    }
 };
 
-// Each provider is restricted to this process. Kernel work attributed to
-// DWM or a scheduler thread is outside this capture.
+// Request the client PID for each provider. DxgKrnl can also emit events
+// under other process identities. Attribute its records by their event headers.
 class VideoTrace {
    struct Storage {
       EVENT_TRACE_PROPERTIES properties;
@@ -476,8 +476,32 @@ static void check_pixels(const AVFrame &frame, const uint8_t *expected, unsigned
 
 enum class Mode { Present, PrepareOnly, DecodeOnly };
 
+static void require_loaded_umd(const wchar_t *expected,const Journal &journal)
+{
+   if (!expected) return;
+   HMODULE module=GetModuleHandleW(L"TegraGpuD3DVk.dll");
+   check(module!=nullptr,"locate loaded Tegra UMD");
+   std::vector<wchar_t> path(32768);
+   DWORD length=GetModuleFileNameW(module,path.data(),static_cast<DWORD>(path.size()));
+   check(length && length<path.size(),"read loaded UMD path");
+   std::unique_ptr<FILE,decltype(&std::fclose)> file(_wfopen(path.data(),L"rb"),std::fclose);
+   check(file && !std::fseek(file.get(),0,SEEK_END),"open loaded UMD file");
+   const long size=std::ftell(file.get());
+   check(size>0 && !std::fseek(file.get(),0,SEEK_SET),"measure loaded UMD file");
+   std::vector<uint8_t> data(static_cast<size_t>(size));
+   check(std::fread(data.data(),1,data.size(),file.get())==data.size(),"read loaded UMD file");
+   uint8_t hash[32];tg_nvdec_sha256(data.data(),data.size(),hash);
+   const wchar_t digits[]=L"0123456789abcdef";
+   wchar_t hex[65]={};
+   for (size_t i=0;i<sizeof(hash);++i) {hex[2*i]=digits[hash[i]>>4];hex[2*i+1]=digits[hash[i]&15];}
+   std::printf("LOADED_UMD sha256=%ls path=%ls\n",hex,path.data());
+   check(!_wcsicmp(hex,expected),"loaded UMD differs from requested candidate");
+   journal.mark("VERIFIED","LoadedCandidateUMD");
+}
+
 static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,const wchar_t *capture,
-                Mode mode, const Journal &journal,VideoTrace &trace,const wchar_t *first_frame_capture)
+                Mode mode, const Journal &journal,VideoTrace &trace,const wchar_t *first_frame_capture,
+                const wchar_t *expected_umd)
 {
    Com<IDXGIFactory1> enumeration;
    journal.invoke("CreateDXGIFactory1",[&]{return CreateDXGIFactory1(__uuidof(IDXGIFactory1),(void **)enumeration.put());});
@@ -494,6 +518,7 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
       return av_hwdevice_ctx_create(&device.p,AV_HWDEVICE_TYPE_D3D11VA,device_index.c_str(),nullptr,0);
    }),"Create D3D11VA device");
    auto *hw=static_cast<AVD3D11VADeviceContext *>(reinterpret_cast<AVHWDeviceContext *>(device->data)->hwctx);
+   require_loaded_umd(expected_umd,journal);
    Com<IDXGIDevice> dxgi;Com<IDXGIAdapter> adapter;DXGI_ADAPTER_DESC actual={};
    require(hw->device->QueryInterface(__uuidof(IDXGIDevice),(void **)dxgi.put()),"Query decode DXGI device");
    require(dxgi->GetAdapter(adapter.put()),"Get decode adapter");
@@ -608,6 +633,12 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
 int wmain(int argc,wchar_t **argv)
 {
    SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
+   const wchar_t *expected_umd=nullptr;
+   if (argc>=3 && std::wcscmp(argv[argc-2],L"--require-umd")==0) {
+      expected_umd=argv[argc-1];
+      if (std::wcslen(expected_umd)!=64 || std::wcsspn(expected_umd,L"0123456789abcdefABCDEF")!=64) return 2;
+      argc-=2;
+   }
    const bool trace_requested=argc>=2 && std::wcscmp(argv[argc-1],L"--trace")==0;
    if (trace_requested) --argc;
    const bool check_first=argc>=2 && std::wcscmp(argv[argc-1],L"--check-first-submit")==0;
@@ -618,7 +649,7 @@ int wmain(int argc,wchar_t **argv)
       argc-=2;
    }
    if ((argc!=4 && argc!=5) || ((check_first || trace_requested) && !evidence)) {
-      std::fprintf(stderr,"usage: nvdec720-av-window <native-luid-hex> <sample.mp4> <reference.sha256> [last-frame.ppm | --prepare-only | --decode-only] [--evidence new-directory [--check-first-submit] [--trace]]\n");
+      std::fprintf(stderr,"usage: nvdec720-av-window <native-luid-hex> <sample.mp4> <reference.sha256> [last-frame.ppm | --prepare-only | --decode-only] [--evidence new-directory [--check-first-submit] [--trace]] [--require-umd sha256]\n");
       return 2;
    }
    Mode mode=Mode::Present;
@@ -636,6 +667,8 @@ int wmain(int argc,wchar_t **argv)
             check(_wfreopen((dir+L"\\stderr.txt").c_str(),L"wb",stderr)!=nullptr,"open evidence stderr");
             check(_wfreopen((dir+L"\\stdout.txt").c_str(),L"wb",stdout)!=nullptr,"open evidence stdout");
             check(SetEnvironmentVariableW(L"TGD3D_VIDEO_VALIDATE",L"1"),"enable process-local video validation");
+            if (mode!=Mode::DecodeOnly)
+               check(SetEnvironmentVariableW(L"TGD3D_VIDEO_WINDOW_VALIDATE",L"1"),"request same-device window submission");
          }
          std::setvbuf(stdout,nullptr,_IONBF,0);
          std::setvbuf(stderr,nullptr,_IONBF,0);
@@ -650,7 +683,7 @@ int wmain(int argc,wchar_t **argv)
          }
          const std::wstring first_image=check_first?std::wstring(evidence)+L"\\first-frame.ppm":L"";
          run(wanted,argv[2],argv[3],argc==5 && mode==Mode::Present?argv[4]:nullptr,
-             mode,journal,trace,check_first?first_image.c_str():nullptr);
+             mode,journal,trace,check_first?first_image.c_str():nullptr,expected_umd);
          trace.finish();
          journal.mark("EXIT","RunAndRelease",S_OK);
          return 0;

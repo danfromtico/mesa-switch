@@ -40,6 +40,8 @@ enum tgd3d_trace_event {
    TGD3D_TRACE_MESSAGE = 21,       /* tgd3d_trace_message */
    /* arg0 operation << 32 | types/count, arg1 context identity or command bytes.
     * 1 create context, 2 destroy, 3 actual submit, 4 GPU wait, 5 GPU signal.
+    * 6 video window queue admission: low arg0 is the negotiated interface,
+    * arg1 bits 0 and 1 report the public virtual-context and submit callbacks.
     * E_PENDING is entry; a successful return is admission, not GPU completion. */
    TGD3D_TRACE_RUNTIME_TRANSPORT = 22,
    TGD3D_TRACE_VIDEO = 23,         /* arg0 operation, arg1 real session or sync target/observed */
