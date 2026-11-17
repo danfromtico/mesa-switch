@@ -304,11 +304,11 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-17T20:32:48.6278976Z",
+  "updated_utc": "2026-11-17T20:42:50.4671539Z",
   "device_access": {
-    "updated_utc": "2026-11-17T20:32:48.6278976Z",
+    "updated_utc": "2026-11-17T20:42:50.4671539Z",
     "owner": "main",
-    "purpose": "Single controlled desktop and video validation on the selected baseline",
+    "purpose": "Observation closed. The selected five-patch desktop package and incident evidence remain in place.",
     "main_local_work_allowed": true,
     "main_native_access": "Exclusive for this observation",
     "current_recovery_record": "TGD3D_PRESENT_BASELINE_20261117.json"
@@ -993,7 +993,7 @@
   },
   "decode_integration": {
     "updated_utc": "2026-11-17T20:32:48.6278976Z",
-    "state": "The native NVDEC backend and the six-frame synchronous D3D11VA readback passed on their recorded component sets. The active desktop now uses the integrated presentation pair.",
+    "state": "The selected five-patch pair remained loaded after a second, unexpected boot during the ordinary-window trial. Desktop interaction and decoded-window acceptance on this pair are incomplete. Previous D3D11VA decode/readback evidence retains its original UMD and ICD identities.",
     "active_sequence": [
       "720p H.264 decode and decoded window",
       "1080p, 2K and 4K joint acceptance later"
@@ -1254,8 +1254,8 @@
     ],
     "installed_development_combination": {
       "classification": "Selected active development baseline with five presentation, descriptor and ownership fixes.",
-      "observed_utc": "2026-11-17T20:32:48.6278976Z",
-      "boot": "2026-11-17T20:31:05.3544980Z",
+      "observed_utc": "2026-11-17T20:38:45.5861209Z",
+      "boot": "2026-11-17T20:34:18.7492440Z",
       "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
       "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app",
       "kmd": {
@@ -1341,7 +1341,7 @@
       ],
       "external_review_performed": false,
       "source_record": "TGD3D_PRESENT_BASELINE_20261117.json",
-      "platform_file_evidence": "Retained platform identities from the preceding native readback. Both userspace identities and the kernel were read on this boot."
+      "platform_file_evidence": "All eleven installed file identities checked after the unexpected restart; see TGD3D_PRESENT_BASELINE_20261117.json"
     },
     "review": {
       "external_review_required": false,
@@ -1405,8 +1405,8 @@
   },
   "installed_development_combination": {
     "classification": "Selected active development baseline with five presentation, descriptor and ownership fixes.",
-    "observed_utc": "2026-11-17T20:32:48.6278976Z",
-    "boot": "2026-11-17T20:31:05.3544980Z",
+    "observed_utc": "2026-11-17T20:38:45.5861209Z",
+    "boot": "2026-11-17T20:34:18.7492440Z",
     "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
     "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app",
     "kmd": {
@@ -1492,7 +1492,7 @@
     ],
     "external_review_performed": false,
     "source_record": "TGD3D_PRESENT_BASELINE_20261117.json",
-    "platform_file_evidence": "Retained platform identities from the preceding native readback. Both userspace identities and the kernel were read on this boot."
+    "platform_file_evidence": "All eleven installed file identities checked after the unexpected restart; see TGD3D_PRESENT_BASELINE_20261117.json"
   },
   "original_fixed90_acceptance_identity": {
     "baseline_files": [
@@ -1574,6 +1574,10 @@
     "umd_sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
     "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
     "patch_count": 5,
-    "selected": true
+    "selected": true,
+    "incident_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "ordinary_desktop_observation": "interrupted",
+    "post_restart_pair_confirmed": true,
+    "record_sha256": "b0bc90db8ea336b6b3718e283137a8bd381c9dcb0d0e2d4c1616fc717ec790ec"
   }
 }

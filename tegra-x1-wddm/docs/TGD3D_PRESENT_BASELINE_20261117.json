@@ -1,7 +1,7 @@
 {
   "branch": "tgd3d-vulkan",
   "status": "selected active development baseline",
-  "observed_utc": "2026-11-17T20:32:48.6278976Z",
+  "observed_utc": "2026-11-17T20:38:45.5861209Z",
   "components": {
     "kmd": {
       "Length": 243720,
@@ -89,7 +89,28 @@
   "configuration": {
     "desktop_policy": "Fixed handheld 90 degrees, 1280x720 with row scan on the 720x1280 panel",
     "platform_policy": "Retained Handheld, DFLL, EMC, fan, 85 percent charge limit and delayed logon enable",
-    "video_opt_in": "TGD3D_VIDEO_VALIDATE, process scope"
+    "video_opt_in": "TGD3D_VIDEO_VALIDATE, process scope",
+    "post_incident_readback": {
+      "utc": "2026-11-17T20:39:19.6798718Z",
+      "handheld_mode": 1,
+      "cpu_dfll": 1,
+      "gpu_policy_min_khz": 76800,
+      "gpu_policy_max_khz": 537600,
+      "emc_last_error": 0,
+      "emc_actmon_error": 0,
+      "emc_qos_error": 0,
+      "fan_mode": 1,
+      "charge_limit_percent": 85,
+      "display_controller_readback": [
+        {
+          "CurrentHorizontalResolution": 720,
+          "CurrentVerticalResolution": 1280,
+          "ConfigManagerErrorCode": 0
+        }
+      ],
+      "display_scope": "Controller mode only. Several saved display configurations exist. The active desktop angle and physical image were not rechecked after the restart.",
+      "global_video_opt_in": false
+    }
   },
   "evidence": {
     "patch_controls_and_candidate_wsi": "TGD3D_PRESENT_OWNERSHIP_20261117.json",
@@ -99,11 +120,135 @@
   "operational_policy": "Keep this package selected during subsequent observations. Preserve diagnostic evidence on anomalies.",
   "validation": {
     "actual_dwm_pair_loaded": true,
-    "ordinary_window_result": "Pending observation",
-    "six_frame_decode_on_this_pair": "Pending observation",
-    "gpu_csc_and_decoded_window": "Pending observation",
+    "ordinary_window_result": "Interrupted by unexpected restart. No passing ordinary-window observation on this pair.",
+    "six_frame_decode_on_this_pair": "Not run after the desktop observation was interrupted.",
+    "gpu_csc_and_decoded_window": "Not run on this pair.",
     "physical_screen_on_this_pair": "Unobserved",
     "unexpected_reboot_root_cause": "Unresolved",
     "external_review": false
+  },
+  "retained_after_restart": {
+    "boot_utc": "2026-11-17T20:34:18.7492440Z",
+    "dwm_pid": 1388,
+    "problem_code": 0,
+    "dwm_module_sha256": {
+      "TegraGpuD3DVk.dll": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "all11_checked_utc": "2026-11-17T20:38:45.5861209Z",
+    "files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 243720,
+        "sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4993,
+        "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17656776,
+        "sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 104456,
+        "sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3334600,
+        "sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "restore_script_sha256": "5d5552b29e1b899233a4b0709f9a08c19395ea63a73fe0c0d279ed947520bdff",
+    "prior_task_snapshot_sha256": "d22d6e0ca6602adf5664fca2471ff290132ccbf184b41449e5065b4338dc0b0e"
+  },
+  "ordinary_desktop_trial": {
+    "attempt_utc": "2026-11-17T20:33:46.4994459Z",
+    "on_boot": "2026-11-17T20:31:05.3544980Z",
+    "prior_dwm_pid": 1404,
+    "dispatch_accepted": true,
+    "last_saved_phase": "Launching",
+    "window_ready_recorded": false,
+    "window_exit_recorded": false,
+    "interactive_workload_execution": "Unconfirmed. No window-ready, move or exit receipt was recovered.",
+    "result": "An unexpected system restart interrupted observation after the scheduled task was dispatched. Its cause is unresolved.",
+    "event_records": [
+      {
+        "id": 1074,
+        "record_id": 60435,
+        "logged_utc": "2026-11-17T20:30:28.0930170Z",
+        "provider": "User32",
+        "bugcheck_code": null
+      },
+      {
+        "id": 6008,
+        "record_id": 60534,
+        "logged_utc": "2026-11-17T20:35:18.5248967Z",
+        "provider": "EventLog",
+        "bugcheck_code": null
+      },
+      {
+        "id": 41,
+        "record_id": 60543,
+        "logged_utc": "2026-11-17T20:31:43.3207143Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "bugcheck_code": 0
+      }
+    ],
+    "event_time_note": "System time changes across boot. Use event record ordering and independent OS boot readbacks to separate the planned activation from the later unexpected restart.",
+    "new_dump_count": 0,
+    "matching_wer_count": 0,
+    "scheduler_operational_log_enabled": false,
+    "etl_bytes": 131072,
+    "etl_sha256": "064418ba7f460ec8d1b8d75e262b892b39cac2fe861bcc9e2f8b42e2bdca6606",
+    "trace_export_exit": 1,
+    "matched_tgd3d_events": 0,
+    "trace_diagnostic": "ProcessTrace=0 matched=0 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "archive_sha256": "af2bbc477aa03586d80e268118c4ce5a96d508705e076255a386cc4573c37d05",
+    "archive_bytes": 4592,
+    "archived_file_count": 8
+  },
+  "observation_cleanup": {
+    "utc": "2026-11-17T20:42:50.4671539Z",
+    "removed_uploads_or_probe_inputs": 6,
+    "remaining_test_tasks": 0,
+    "remaining_test_traces": 0,
+    "retained_device_incident_archive": true,
+    "retained_device_receipt": true,
+    "rollback_performed": false
   }
 }

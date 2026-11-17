@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T20:32:48.6278976Z",
+  "updated_utc": "2026-11-17T20:42:50.4671539Z",
   "state": "Six frames of native 720p D3D11VA H.264 decoded with byte-exact NV12 output in the synchronous libavcodec client. MF Source Reader and window presentation are unaccepted. The controlled UMD is installed, with an active 90-degree desktop after a window-trial restart.",
   "installed_baseline_changed": true,
   "resolution_roadmap": {
@@ -657,8 +657,8 @@
   ],
   "installed_development_combination": {
     "classification": "Selected active development baseline with five presentation, descriptor and ownership fixes.",
-    "observed_utc": "2026-11-17T20:32:48.6278976Z",
-    "boot": "2026-11-17T20:31:05.3544980Z",
+    "observed_utc": "2026-11-17T20:38:45.5861209Z",
+    "boot": "2026-11-17T20:34:18.7492440Z",
     "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
     "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app",
     "kmd": {
@@ -744,7 +744,7 @@
     ],
     "external_review_performed": false,
     "source_record": "TGD3D_PRESENT_BASELINE_20261117.json",
-    "platform_file_evidence": "Retained platform identities from the preceding native readback. Both userspace identities and the kernel were read on this boot."
+    "platform_file_evidence": "All eleven installed file identities checked after the unexpected restart; see TGD3D_PRESENT_BASELINE_20261117.json"
   },
   "native_decode_accepted": true,
   "retained_channel_round": "NVDEC_RETAINED_CHANNEL_NATIVE_20261117.json",
@@ -755,7 +755,7 @@
     "5f9ab480e5c2ded25220964170f9b09e056ab253",
     "374b9ee5624cd1aea063398fd413fe3c73ff6501"
   ],
-  "promotion_scope": "The five integrated presentation and ownership fixes are the active desktop development baseline. Six-frame D3D11VA decode/readback was verified on the previous recorded pair. Video presentation on this pair is being tested.",
+  "promotion_scope": "Five presentation and ownership fixes selected as the current desktop baseline. The selected five-patch pair remained loaded after a second, unexpected boot during the ordinary-window trial. Desktop interaction and decoded-window acceptance on this pair are incomplete.",
   "acceptance_scope": {
     "native_backend_720p_fixture_accepted": true,
     "d3d11va_accepted": true,
@@ -790,7 +790,9 @@
     "native_candidate_icd_presents": 120,
     "native_dwm_candidate_umd": false,
     "live_dwm_pair": true,
-    "baseline_record": "TGD3D_PRESENT_BASELINE_20261117.json"
+    "baseline_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "ordinary_window_passed": false,
+    "incident_record": "TGD3D_PRESENT_BASELINE_20261117.json"
   },
   "selected_presentation_baseline": {
     "record": "TGD3D_PRESENT_BASELINE_20261117.json",
@@ -799,6 +801,10 @@
     "umd_sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
     "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
     "patch_count": 5,
-    "selected": true
+    "selected": true,
+    "incident_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "ordinary_desktop_observation": "interrupted",
+    "post_restart_pair_confirmed": true,
+    "record_sha256": "b0bc90db8ea336b6b3718e283137a8bd381c9dcb0d0e2d4c1616fc717ec790ec"
   }
 }
