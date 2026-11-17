@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T02:01:30.793685+00:00",
-  "state": "EMC lifecycle guard corrected; candidate ACPI loaded/enumerated in bounded native control; original baseline restored. Client-route KMD query and720p/1080p full decode remain unvalidated.",
+  "updated_utc": "2026-11-17T03:19:42.803057+00:00",
+  "state": "Real client-route query reached after verified staging reuse;11resources mapped, SMMU read visibility/route predicate unresolved. Original90display/power restored;720p/1080p decode incomplete.",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
     "user_instruction": "先做720 1080吧，2k 4k记为待定，有实现未检测",
@@ -331,6 +331,30 @@
       "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "da25c261bfc70c671258a57c4952aad984ada8e49c6b1286c0013be061f83472",
       "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-EmcGuard.ps1": "7f7bf63087415e7c304ae0c286b55bdcd626938bfb07050299aa50453ada04b8",
       "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "eed15b9a31b9154e8ee81b9f18dc9284ddb464f26ec16030ed54a341a2be5a6e"
+    }
+  },
+  "client_route_query_result": {
+    "record": "NVDEC_CLIENT_QUERY_20261117.json",
+    "controller_commit": "1e2ecbc2c478593c416c9ac653d087a79aff4f9b",
+    "native_query_reached": true,
+    "mapped_optional_resources": 11,
+    "native_luid": "00000000000a9805",
+    "smmu_config_and_client_enables": "ffffffff",
+    "client_flags": 0,
+    "dma_route_proven": false,
+    "candidate_promoted": false,
+    "baseline_restored": true,
+    "native_cleanup_complete": true,
+    "native_decode_accepted": false
+  },
+  "staging_controller": {
+    "record": "NVDEC_STAGING_REUSE_20261117.json",
+    "commit": "1e2ecbc2c478593c416c9ac653d087a79aff4f9b",
+    "native_trial_controller_sha256": "7a25d1ccdac42abf148a8ac277450314680d057d642c77e8eb4cc06672c3b6e6",
+    "final_source_files": {
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "eb06841925419d0ae3e5f400ace3582a9c57e210d617c01be31b0e8d6447f8cb",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "cc1c2adcd91fcc7c191eeca8a02e5021636d8e1e30c19f9bbad568a6504b8028",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Staging.ps1": "d359efe35e92b66ad1769b807b647a8157658e92744a960c7ad751e796c2269d"
     }
   }
 }

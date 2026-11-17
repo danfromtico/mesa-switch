@@ -305,15 +305,15 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-17T02:01:30.793685+00:00",
+  "updated_utc": "2026-11-17T03:19:42.803057+00:00",
   "device_access": {
-    "updated_utc": "2026-11-17T01:59:16.2407501Z",
+    "updated_utc": "2026-11-17T03:17:50.4327624Z",
     "owner": "user",
-    "purpose": "ACPI observation complete; original90display/power restored and temporary native artifacts removed",
+    "purpose": "Client query complete; original90display/power restored, candidate package and both temporary roots removed",
     "main_local_work_allowed": true,
-    "main_native_access": "No active native operation or watcher. Further authorized decode work must recheck actual state and device ownership.",
+    "main_native_access": "No active native trial or watcher. Continue local SMMU contract analysis; recheck current state and ownership before any later native work.",
     "latest_authorization": "User asked for autonomous continuation while asleep, later confirmed connectivity available; earlier cube-only/local-only restrictions are historical.",
-    "current_recovery_record": "NVDEC_ACPI_ENUMERATION_NATIVE_20261117.json"
+    "current_recovery_record": "NVDEC_CLIENT_QUERY_20261117.json"
   },
   "last_readback_before_user_box64_hold": {
     "utc": "2026-11-16T14:15:38.3503583Z",
@@ -994,8 +994,8 @@
     }
   },
   "decode_integration": {
-    "updated_utc": "2026-11-17T02:01:30.793685+00:00",
-    "state": "Original row-scan baseline restored after ACPI-only enumeration control; no native decode acceptance.",
+    "updated_utc": "2026-11-17T03:19:42.803057+00:00",
+    "state": "Real query reached;11resources mapped but DMA route not proven. Original baseline restored;720p/1080p not accepted.",
     "active_sequence": [
       "720p H.264",
       "1080p H.264 after720 acceptance"
@@ -1097,6 +1097,20 @@
       "baseline_restored": true,
       "temporary_files_removed": true,
       "historical_failure_root_cause": "unresolved; not reproduced in this ACPI-only boot"
+    },
+    "client_route_query_result": {
+      "record": "NVDEC_CLIENT_QUERY_20261117.json",
+      "controller_commit": "1e2ecbc2c478593c416c9ac653d087a79aff4f9b",
+      "native_query_reached": true,
+      "mapped_optional_resources": 11,
+      "native_luid": "00000000000a9805",
+      "smmu_config_and_client_enables": "ffffffff",
+      "client_flags": 0,
+      "dma_route_proven": false,
+      "candidate_promoted": false,
+      "baseline_restored": true,
+      "native_cleanup_complete": true,
+      "native_decode_accepted": false
     }
   },
   "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",
