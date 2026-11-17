@@ -13,6 +13,7 @@
 #include <evntrace.h>
 #include <io.h>
 #include <algorithm>
+#include <initializer_list>
 #include <cstddef>
 #include <cmath>
 #include <cstdlib>
@@ -33,6 +34,9 @@ extern "C" {
 #ifndef EVENT_FILTER_TYPE_PID
 // The Windows SDK defines this scope filter in evntprov.h.
 #define EVENT_FILTER_TYPE_PID 0x80000004u
+#endif
+#ifndef EVENT_FILTER_TYPE_EVENT_ID
+#define EVENT_FILTER_TYPE_EVENT_ID 0x80000200u
 #endif
 
 // Save the entry and return of public calls even if buffered output is lost.
@@ -78,7 +82,8 @@ public:
    }
 };
 
-// Limit the driver provider to this already-running acceptance process.
+// Each provider is restricted to this process. Kernel work attributed to
+// DWM or a scheduler thread is outside this capture.
 class VideoTrace {
    struct Storage {
       EVENT_TRACE_PROPERTIES properties;
@@ -86,8 +91,22 @@ class VideoTrace {
       wchar_t file[1024];
    } storage = {};
    TRACEHANDLE handle = 0;
+   HANDLE stop_flush = nullptr, flusher = nullptr;
+   ULONG flush_status = ERROR_SUCCESS;
+
+   ULONG flush_buffers() {
+      return ControlTraceW(handle,nullptr,&storage.properties,EVENT_TRACE_CONTROL_FLUSH);
+   }
+   static DWORD WINAPI flush_during_present(void *arg) {
+      auto &trace=*static_cast<VideoTrace *>(arg);
+      while (WaitForSingleObject(trace.stop_flush,40)==WAIT_TIMEOUT) {
+         trace.flush_status=trace.flush_buffers();
+         if (trace.flush_status!=ERROR_SUCCESS) break;
+      }
+      return 0;
+   }
 public:
-   void start(const wchar_t *directory) {
+   void start(const wchar_t *directory,bool window_present) {
       auto &p=storage.properties;
       wchar_t name[64];
       DWORD pid=GetCurrentProcessId();
@@ -98,7 +117,7 @@ public:
       p.Wnode.BufferSize=sizeof(storage);
       p.Wnode.Flags=WNODE_FLAG_TRACED_GUID;
       p.Wnode.ClientContext=1; // QPC timestamps
-      p.BufferSize=64; p.MinimumBuffers=4; p.MaximumBuffers=16; p.FlushTimer=1;
+      p.BufferSize=window_present?8:64; p.MinimumBuffers=4; p.MaximumBuffers=32; p.FlushTimer=1;
       p.LogFileMode=EVENT_TRACE_FILE_MODE_SEQUENTIAL; p.MaximumFileSize=8;
       p.LoggerNameOffset=offsetof(Storage,session);
       p.LogFileNameOffset=offsetof(Storage,file);
@@ -106,31 +125,71 @@ public:
       ULONG status=StartTraceW(&created,name,&p);
       require(HRESULT_FROM_WIN32(status),"Start video ETW");
       handle=created;
-      EVENT_FILTER_DESCRIPTOR filter={};
-      filter.Ptr=reinterpret_cast<ULONG_PTR>(&pid);
-      filter.Size=sizeof(pid);
-      filter.Type=EVENT_FILTER_TYPE_PID;
+      EVENT_FILTER_DESCRIPTOR filters[2]={};
+      filters[0].Ptr=reinterpret_cast<ULONG_PTR>(&pid);
+      filters[0].Size=sizeof(pid);
+      filters[0].Type=EVENT_FILTER_TYPE_PID;
       ENABLE_TRACE_PARAMETERS params={};
       params.Version=ENABLE_TRACE_PARAMETERS_VERSION_2;
-      params.EnableFilterDesc=&filter;
+      params.EnableFilterDesc=filters;
       params.FilterDescCount=1;
       const GUID provider=TGD3D_TRACE_GUID_INIT;
       status=EnableTraceEx2(handle,&provider,EVENT_CONTROL_CODE_ENABLE_PROVIDER,
                             TRACE_LEVEL_INFORMATION,1,0,0,&params);
       require(HRESULT_FROM_WIN32(status),"Enable video ETW for current PID");
+      if (window_present) {
+         auto enable=[&](const GUID &guid,ULONGLONG keywords,std::initializer_list<USHORT> ids,const char *name) {
+            // Public EVENT_FILTER_EVENT_ID header followed by the selected IDs.
+            struct EventIds { BOOLEAN include; UCHAR reserved; USHORT count,values[16]; };
+            static_assert(offsetof(EventIds,values)==4);
+            EventIds list={TRUE,0,0,{}};
+            check(ids.size()<=ARRAYSIZE(list.values),"presentation event ID count");
+            list.count=static_cast<USHORT>(ids.size());
+            std::copy(ids.begin(),ids.end(),list.values);
+            filters[1].Type=EVENT_FILTER_TYPE_EVENT_ID;
+            filters[1].Ptr=reinterpret_cast<ULONG_PTR>(&list);
+            filters[1].Size=static_cast<ULONG>(offsetof(EventIds,values)+ids.size()*sizeof(USHORT));
+            params.FilterDescCount=2;
+            require(HRESULT_FROM_WIN32(EnableTraceEx2(handle,&guid,EVENT_CONTROL_CODE_ENABLE_PROVIDER,
+                    TRACE_LEVEL_VERBOSE,keywords,0,0,&params)),name);
+         };
+         const GUID dxgi={0xca11c036,0x0102,0x4a2d,{0xa6,0xad,0xf0,0x3c,0xfe,0xd5,0xd3,0xc9}};
+         const GUID dxgkrnl={0x802ec45a,0x1e99,0x4b83,{0x99,0x20,0x87,0xc9,0x82,0x77,0xba,0x9d}};
+         enable(dxgi,0x4000000000000002ull,{42,43,178,179},"Enable DXGI Present events");
+         enable(dxgkrnl,1,{166,168,171,172,173,184,215,252,266,294,295,501},"Enable DxgKrnl present and sync events");
+      }
       std::printf("TRACE pid=%lu session=%ls\n",pid,name);
+   }
+   void begin_first_present(const Journal &journal) {
+      if (!handle) return;
+      journal.invoke("FlushTraceBeforePresent",[&]{return HRESULT_FROM_WIN32(flush_buffers());});
+      stop_flush=CreateEventW(nullptr,TRUE,FALSE,nullptr);
+      check(stop_flush!=nullptr,"create ETW flush stop event");
+      flusher=CreateThread(nullptr,0,flush_during_present,this,0,nullptr);
+      check(flusher!=nullptr,"start first-Present ETW flusher");
+   }
+   void end_first_present() {
+      if (flusher) {
+         SetEvent(stop_flush);
+         WaitForSingleObject(flusher,INFINITE);
+         CloseHandle(flusher);flusher=nullptr;
+      }
+      if (stop_flush) { CloseHandle(stop_flush);stop_flush=nullptr; }
    }
    void finish() {
       if (!handle) return;
+      end_first_present();
       auto &p=storage.properties;
       const ULONG status=ControlTraceW(handle,nullptr,&p,EVENT_TRACE_CONTROL_STOP);
       require(HRESULT_FROM_WIN32(status),"Stop video ETW");
       handle=0;
+      require(HRESULT_FROM_WIN32(flush_status),"First-Present ETW flush status");
       std::printf("TRACE_DONE events_lost=%lu log_buffers_lost=%lu buffers_written=%lu\n",
                   p.EventsLost,p.LogBuffersLost,p.BuffersWritten);
       check(!p.EventsLost && !p.LogBuffersLost && p.BuffersWritten,"complete video ETW");
    }
    ~VideoTrace() {
+      end_first_present();
       if (handle) ControlTraceW(handle,nullptr,&storage.properties,EVENT_TRACE_CONTROL_STOP);
    }
    VideoTrace()=default;
@@ -153,7 +212,7 @@ class Preview {
       HWND handle = nullptr;
       ~Window() { if (handle && IsWindow(handle)) DestroyWindow(handle); }
    } window;
-   Com<IDXGISwapChain> swap;
+   Com<IDXGISwapChain1> swap;
    Com<ID3D11Texture2D> back, y_plane, uv_plane, readback;
    Com<ID3D11ShaderResourceView> y_view, uv_view;
    Com<ID3D11RenderTargetView> target;
@@ -165,6 +224,7 @@ class Preview {
    tgd3d_csc_push transform = {};
 
    const Journal &journal;
+   VideoTrace &trace;
    const wchar_t *first_frame_capture;
 
    void texture(ID3D11Device *device, UINT w, UINT h, DXGI_FORMAT format, UINT bind,
@@ -182,8 +242,9 @@ class Preview {
       check(IsWindow(window.handle),"preview window closed");
    }
 public:
-   Preview(const Journal &j,const wchar_t *first_capture):journal(j),first_frame_capture(first_capture) {}
-   void start(IDXGIFactory *factory, ID3D11Device *device) {
+   Preview(const Journal &j,VideoTrace &t,const wchar_t *first_capture):
+      journal(j),trace(t),first_frame_capture(first_capture) {}
+   void start(IDXGIFactory2 *factory, ID3D11Device *device) {
       journal.mark("CALL","CreatePreviewWindow");
       WNDCLASSW wc={}; wc.lpfnWndProc=DefWindowProcW;wc.hInstance=GetModuleHandleW(nullptr);
       wc.lpszClassName=L"Nvdec720Preview";wc.hCursor=LoadCursorW(nullptr,MAKEINTRESOURCEW(32512));
@@ -194,17 +255,26 @@ public:
                                    rect.right-rect.left,rect.bottom-rect.top,nullptr,nullptr,wc.hInstance,nullptr);
       check(window.handle!=nullptr,"create preview window");
       journal.mark("RETURN","CreatePreviewWindow");
-      DXGI_SWAP_CHAIN_DESC sd={};sd.BufferDesc.Width=width;sd.BufferDesc.Height=height;
-      sd.BufferDesc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;sd.SampleDesc.Count=1;
-      sd.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;sd.BufferCount=1;sd.OutputWindow=window.handle;
-      sd.Windowed=TRUE;sd.SwapEffect=DXGI_SWAP_EFFECT_DISCARD;
-      journal.invoke("CreateSwapChain",[&]{return factory->CreateSwapChain(device,&sd,swap.put());});
+      DXGI_SWAP_CHAIN_DESC1 sd={};
+      sd.Width=width; sd.Height=height; sd.Format=DXGI_FORMAT_B8G8R8A8_UNORM;
+      sd.SampleDesc.Count=1; sd.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;
+      sd.BufferCount=2; sd.Scaling=DXGI_SCALING_STRETCH;
+      sd.SwapEffect=DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; sd.AlphaMode=DXGI_ALPHA_MODE_IGNORE;
+      journal.invoke("CreateSwapChainForHwnd",[&]{
+         return factory->CreateSwapChainForHwnd(device,window.handle,&sd,nullptr,nullptr,swap.put());
+      });
+      DXGI_SWAP_CHAIN_DESC1 actual={};
+      journal.invoke("GetWindowSwapChainDesc",[&]{return swap->GetDesc1(&actual);});
+      check(actual.Width==width && actual.Height==height && actual.Format==sd.Format &&
+            actual.BufferCount==sd.BufferCount && actual.SwapEffect==sd.SwapEffect &&
+            actual.SampleDesc.Count==1 && !actual.SampleDesc.Quality,"window swapchain description");
+      journal.mark("VERIFIED","TwoBufferFlipSequential");
       journal.invoke("MakeWindowAssociation",[&]{return factory->MakeWindowAssociation(window.handle,DXGI_MWA_NO_ALT_ENTER);});
       journal.invoke("GetBackBuffer",[&]{return swap->GetBuffer(0,__uuidof(ID3D11Texture2D),(void **)back.put());});
       journal.invoke("CreateRenderTargetView",[&]{return device->CreateRenderTargetView(back.p,nullptr,target.put());});
       texture(device,1280,720,DXGI_FORMAT_R8_UNORM,D3D11_BIND_SHADER_RESOURCE,y_plane,"CreateLumaTexture");
       texture(device,640,360,DXGI_FORMAT_R8G8_UNORM,D3D11_BIND_SHADER_RESOURCE,uv_plane,"CreateChromaTexture");
-      texture(device,width,height,sd.BufferDesc.Format,0,readback,"CreateReadbackTexture");
+      texture(device,width,height,sd.Format,0,readback,"CreateReadbackTexture");
       journal.invoke("CreateLumaView",[&]{return device->CreateShaderResourceView(y_plane.p,nullptr,y_view.put());});
       journal.invoke("CreateChromaView",[&]{return device->CreateShaderResourceView(uv_plane.p,nullptr,uv_view.put());});
       journal.invoke("CreateVertexShader",[&]{return device->CreateVertexShader(nvdec720_preview_vs,
@@ -261,7 +331,9 @@ public:
          }
       }
       if (check_first) verify_frame(hw,y,y_pitch,uv,uv_pitch,index,first_frame_capture);
+      if (first) trace.begin_first_present(journal);
       const HRESULT presented=journal.invoke("Present",[&]{return swap->Present(1,0);});
+      if (first) trace.end_first_present();
       check(presented==S_OK,"preview did not present");
       if (last) verify_frame(hw,y,y_pitch,uv,uv_pitch,index,capture);
    }
@@ -405,7 +477,7 @@ static void check_pixels(const AVFrame &frame, const uint8_t *expected, unsigned
 enum class Mode { Present, PrepareOnly, DecodeOnly };
 
 static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,const wchar_t *capture,
-                Mode mode, const Journal &journal,const wchar_t *first_frame_capture)
+                Mode mode, const Journal &journal,VideoTrace &trace,const wchar_t *first_frame_capture)
 {
    Com<IDXGIFactory1> enumeration;
    journal.invoke("CreateDXGIFactory1",[&]{return CreateDXGIFactory1(__uuidof(IDXGIFactory1),(void **)enumeration.put());});
@@ -432,9 +504,9 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
    std::unique_ptr<Preview> preview;
    if (mode!=Mode::DecodeOnly) {
       // FFmpeg opens the adapter by ordinal through its own DXGI factory.
-      Com<IDXGIFactory> device_factory;
+      Com<IDXGIFactory2> device_factory;
       journal.invoke("GetDecodeAdapterFactory",[&]{
-         return adapter->GetParent(__uuidof(IDXGIFactory),(void **)device_factory.put());
+         return adapter->GetParent(__uuidof(IDXGIFactory2),(void **)device_factory.put());
       });
       if (first_frame_capture || mode==Mode::PrepareOnly) {
          Com<IUnknown> enumerator_id, device_factory_id;
@@ -442,7 +514,7 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
          require(device_factory->QueryInterface(IID_IUnknown,(void **)device_factory_id.put()),"Identify device factory");
          journal.mark(enumerator_id.p==device_factory_id.p?"SAME":"DISTINCT","DXGIFactories");
       }
-      preview=std::make_unique<Preview>(journal,first_frame_capture);
+      preview=std::make_unique<Preview>(journal,trace,first_frame_capture);
       preview->start(device_factory.p,hw->device);
    }
    if (mode==Mode::PrepareOnly) {
@@ -573,12 +645,12 @@ int wmain(int argc,wchar_t **argv)
          VideoTrace trace;
          if (trace_requested) {
             journal.mark("CALL","TraceCurrentProcess");
-            trace.start(evidence);
+            trace.start(evidence,mode==Mode::Present);
             journal.mark("RETURN","TraceCurrentProcess");
          }
          const std::wstring first_image=check_first?std::wstring(evidence)+L"\\first-frame.ppm":L"";
          run(wanted,argv[2],argv[3],argc==5 && mode==Mode::Present?argv[4]:nullptr,
-             mode,journal,check_first?first_image.c_str():nullptr);
+             mode,journal,trace,check_first?first_image.c_str():nullptr);
          trace.finish();
          journal.mark("EXIT","RunAndRelease",S_OK);
          return 0;
