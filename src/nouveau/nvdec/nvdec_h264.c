@@ -156,6 +156,65 @@ size_t tg_nvdec_build_pic_config(void *out, size_t bytes,
     return sizeof(*c);
 }
 
+bool tg_nvdec_nv12_storage_layout(uint32_t pitch, uint32_t height,
+                                 struct tg_nvdec_nv12_storage *layout)
+{
+    if (!layout || !pitch || (pitch & 63u) || !height || (height & 15u))
+        return false;
+    const uint64_t luma = (uint64_t)pitch * height;
+    const uint64_t chroma = (uint64_t)pitch * ((height / 2u + 15u) & ~15u);
+    if (chroma > SIZE_MAX || luma > SIZE_MAX - chroma)
+        return false;
+    *layout = (struct tg_nvdec_nv12_storage){
+        (size_t)luma, (size_t)(luma + (uint64_t)pitch * (height / 2u)),
+        (size_t)(luma + chroma)
+    };
+    return true;
+}
+
+static void readback_tbl_plane(uint8_t *dst, const uint8_t *src,
+                               uint32_t pitch, uint32_t rows)
+{
+    /* TegraColor GOB byte ordering is also documented by NIL's tiling.rs
+     * and CopyGOBTegra (MIT). A tile is64 bytes wide and16 rows high. Copy
+     * its16-byte atoms; no alignment assumption is made for the destination. */
+    for (uint32_t tile_y = 0; tile_y < rows; tile_y += 16u) {
+        const uint32_t count = rows - tile_y < 16u ? rows - tile_y : 16u;
+        for (uint32_t tile_x = 0; tile_x < pitch; tile_x += 64u) {
+            const uint8_t *tile = src + (size_t)tile_y * pitch +
+                                   (size_t)tile_x * 16u;
+            for (uint32_t y = 0; y < count; ++y) {
+                uint8_t *line = dst + (size_t)(tile_y + y) * pitch + tile_x;
+                const size_t row = (y / 8u) * 512u + ((y & 7u) / 2u) * 64u +
+                                    (y & 1u) * 16u;
+                memcpy(line +  0u, tile + row +   0u, 16u);
+                memcpy(line + 16u, tile + row +  32u, 16u);
+                memcpy(line + 32u, tile + row + 256u, 16u);
+                memcpy(line + 48u, tile + row + 288u, 16u);
+            }
+        }
+    }
+}
+
+bool tg_nvdec_nv12_readback(void *dst, size_t dst_size,
+                           const void *src, size_t src_size,
+                           uint32_t pitch, uint32_t height)
+{
+    struct tg_nvdec_nv12_storage layout;
+    if (!dst || !src || !tg_nvdec_nv12_storage_layout(pitch, height, &layout) ||
+        dst_size < layout.linear_bytes || src_size < layout.tiled_bytes)
+        return false;
+    const uintptr_t d = (uintptr_t)dst, s = (uintptr_t)src;
+    if (layout.linear_bytes > UINTPTR_MAX - d || layout.tiled_bytes > UINTPTR_MAX - s ||
+        (d < s + layout.tiled_bytes && s < d + layout.linear_bytes))
+        return false;
+    readback_tbl_plane(dst, src, pitch, height);
+    readback_tbl_plane((uint8_t *)dst + layout.chroma_offset,
+                       (const uint8_t *)src + layout.chroma_offset,
+                       pitch, height / 2u);
+    return true;
+}
+
 size_t tg_nvdec_build_h264_cmd(uint32_t *out, size_t words,
                                const struct tg_nvdec_cmd_buffers *bufs)
 {

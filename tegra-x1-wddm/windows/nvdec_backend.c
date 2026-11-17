@@ -259,7 +259,7 @@ NTSTATUS TgNvdecConfigure(struct tg_nvdec_win *w, UINT32 width, UINT32 height,
                           UINT32 *frame_size)
 {
     UINT32 i, p, ah;
-    SIZE_T bytes;
+    struct tg_nvdec_nv12_storage layout;
 
     if (!w || !pitch || !aligned_height || !frame_size)
         return STATUS_INVALID_PARAMETER;
@@ -272,14 +272,14 @@ NTSTATUS TgNvdecConfigure(struct tg_nvdec_win *w, UINT32 width, UINT32 height,
     ah = (height + 15u) & ~15u;
     if (p < width || ah < height)
         return STATUS_INVALID_PARAMETER;
-    bytes = (SIZE_T)p * ah * 3u / 2u;
-    if (!bytes)
+    if (!tg_nvdec_nv12_storage_layout(p, ah, &layout) ||
+        layout.linear_bytes > MAXULONG)
         return STATUS_INVALID_PARAMETER;
 
     NTSTATUS released = release_surfaces(w);
     if (!NT_SUCCESS(released)) return released;
     for (i = 0; i < TG_NVDEC_MAX_SURFACES; i++) {
-        if (!win_dma_alloc(w, bytes, &w->surfaces[i])) {
+        if (!win_dma_alloc(w, layout.tiled_bytes, &w->surfaces[i])) {
             (VOID)release_surfaces(w);
             return STATUS_INSUFFICIENT_RESOURCES;
         }
@@ -288,11 +288,11 @@ NTSTATUS TgNvdecConfigure(struct tg_nvdec_win *w, UINT32 width, UINT32 height,
     w->height = height;
     w->pitch = p;
     w->aligned_height = ah;
-    w->frame_size = (UINT32)bytes;
+    w->frame_size = (UINT32)layout.linear_bytes;
     w->surfaces_ready = TRUE;
     *pitch = p;
     *aligned_height = ah;
-    *frame_size = (UINT32)bytes;
+    *frame_size = w->frame_size;
     return STATUS_SUCCESS;
 }
 
@@ -345,7 +345,14 @@ NTSTATUS TgNvdecDecode(struct tg_nvdec_win *w,
     *observed = w->engine.stats.last_observed;
     if (r != TG_NVDEC_OK)
         return map_result(r);
-    RtlCopyMemory(output, w->surfaces[slot].cpu, w->frame_size);
+    /* The engine wrote TBL, not pitch-linear NV12. Completion was verified
+     * above; retain the surface and clock lease throughout the readback. */
+    if (!tg_nvdec_nv12_readback(output, output_size, w->surfaces[slot].cpu,
+                               w->surfaces[slot].size, w->pitch, w->aligned_height)) {
+        (VOID)tg_nvdec_set_error(&w->engine, TG_NVDEC_ERR_SURFACE,
+                                 "NV12 block-linear readback bounds are invalid");
+        return STATUS_INVALID_PARAMETER;
+    }
     return STATUS_SUCCESS;
 }
 

@@ -293,6 +293,22 @@ size_t tg_nvdec_build_pic_config(void *out, size_t bytes,
  * them include the large NVIDIA header. */
 size_t tg_nvdec_pic_config_size(void);
 
+/* NVDEC's Tegra block-linear NV12 uses two64x8-byte GOBs per tile. Each
+ * plane is independently padded to16 rows. The private readback interface
+ * remains pitch-linear NV12; these are storage/copy helpers, not decoding
+ * or completion signals. height is the macroblock-aligned luma height. */
+struct tg_nvdec_nv12_storage {
+    size_t chroma_offset;
+    size_t linear_bytes;
+    size_t tiled_bytes;
+};
+bool tg_nvdec_nv12_storage_layout(uint32_t pitch, uint32_t height,
+                                 struct tg_nvdec_nv12_storage *layout);
+/* Call only after real device completion; source/destination must not overlap. */
+bool tg_nvdec_nv12_readback(void *dst, size_t dst_size,
+                           const void *src, size_t src_size,
+                           uint32_t pitch, uint32_t height);
+
 /* SHA-256 of one buffer.  Used to pin the firmware blob before it is parsed
  * and executed. */
 void tg_nvdec_sha256(const void *data, size_t size, uint8_t out[TG_NVDEC_SHA256_SIZE]);

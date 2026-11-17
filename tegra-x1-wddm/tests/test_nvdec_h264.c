@@ -259,6 +259,62 @@ static void test_command(void)
     }
 }
 
+/* Independent byte-coordinate reference for Tegra's16Bx2 sectors, two
+ * GOBs high. This is a layout fixture, never an NVDEC completion substitute. */
+static size_t tbl_address(uint32_t pitch, uint32_t x, uint32_t y)
+{
+    return (size_t)(y / 16u) * pitch * 16u + (size_t)(x / 64u) * 1024u +
+           ((y & 8u) << 6) + ((x & 32u) << 3) + ((y & 6u) << 5) +
+           ((x & 16u) << 1) + ((y & 1u) << 4) + (x & 15u);
+}
+
+static void test_nv12_layout(void)
+{
+    struct tg_nvdec_nv12_storage l;
+    CHECK(tbl_address(1280,0,0)==0 && tbl_address(1280,16,0)==32);
+    CHECK(tbl_address(1280,32,0)==256 && tbl_address(1280,0,1)==16);
+    CHECK(tbl_address(1280,0,8)==512 && tbl_address(1280,64,0)==1024);
+    CHECK(tbl_address(1280,0,16)==20480 && tbl_address(1280,1279,359)==470527);
+    CHECK(tg_nvdec_nv12_storage_layout(1280,720,&l));
+    CHECK(l.chroma_offset==921600 && l.linear_bytes==1382400 && l.tiled_bytes==1392640);
+    CHECK(l.chroma_offset+tbl_address(1280,1279,359) >= l.linear_bytes);
+    CHECK(!tg_nvdec_nv12_storage_layout(0,720,&l));
+    CHECK(!tg_nvdec_nv12_storage_layout(1279,720,&l));
+    CHECK(!tg_nvdec_nv12_storage_layout(1280,719,&l));
+    CHECK(!tg_nvdec_nv12_storage_layout(1280,720,NULL));
+    CHECK(!tg_nvdec_nv12_storage_layout(0xffffffc0u,0xfffffff0u,&l));
+    const uint32_t cases[][2]={{64,16},{256,32},{768,368},{1280,720}};
+    for (size_t c=0;c<sizeof(cases)/sizeof(cases[0]);++c) {
+        const uint32_t pitch=cases[c][0], height=cases[c][1];
+        CHECK(tg_nvdec_nv12_storage_layout(pitch,height,&l));
+        uint8_t *source=malloc(l.tiled_bytes+2), *dest=malloc(l.linear_bytes+2);
+        uint8_t *reference=malloc(l.linear_bytes);
+        CHECK(source && dest && reference);
+        if (!source || !dest || !reference) { free(source);free(dest);free(reference);continue; }
+        memset(source,0xcd,l.tiled_bytes+2);memset(dest,0xa5,l.linear_bytes+2);
+        for (uint32_t plane=0;plane<2;++plane) {
+            const uint32_t rows=plane?height/2u:height;
+            const size_t offset=plane?l.chroma_offset:0;
+            for (uint32_t y=0;y<rows;++y) for (uint32_t x=0;x<pitch;++x) {
+                const uint8_t value=(uint8_t)(x*17u+y*29u+(x/32u)*43u+(y/16u)*71u+plane*113u);
+                reference[offset+(size_t)y*pitch+x]=value;
+                source[1+offset+tbl_address(pitch,x,y)]=value;
+            }
+        }
+        /* The former direct linear memcpy cannot represent this surface. */
+        CHECK(memcmp(reference,source+1,l.linear_bytes)!=0);
+        CHECK(!tg_nvdec_nv12_readback(dest+1,l.linear_bytes-1,source+1,l.tiled_bytes,pitch,height));
+        CHECK(!tg_nvdec_nv12_readback(dest+1,l.linear_bytes,source+1,l.tiled_bytes-1,pitch,height));
+        CHECK(dest[1]==0xa5 && dest[l.linear_bytes]==0xa5);
+        CHECK(!tg_nvdec_nv12_readback(source+1,l.linear_bytes,source+1,l.tiled_bytes,pitch,height));
+        CHECK(tg_nvdec_nv12_readback(dest+1,l.linear_bytes,source+1,l.tiled_bytes,pitch,height));
+        CHECK(!memcmp(dest+1,reference,l.linear_bytes));
+        CHECK(dest[0]==0xa5 && dest[l.linear_bytes+1]==0xa5);
+        CHECK(source[0]==0xcd && source[l.tiled_bytes+1]==0xcd);
+        free(source);free(dest);free(reference);
+    }
+}
+
 static void test_parser(const char *path)
 {
     char tiny[3] = {'L', 'x', 'R'};
@@ -395,6 +451,7 @@ int main(int argc, char **argv)
     }
     test_config();
     test_command();
+    test_nv12_layout();
     test_parser(argv[1]);
     if (failures) {
         fprintf(stderr, "NVDEC H.264 control: %d failure(s)\n", failures);
