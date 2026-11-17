@@ -1,0 +1,182 @@
+{
+  "observed_utc": "2026-11-17T21:30:17.1188020Z",
+  "branch": "tgd3d-vulkan",
+  "baseline_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+  "installed_sha256": {
+    "kmd": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+    "umd": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+    "icd": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+  },
+  "kmd_final_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+  "kmd_inputs": "Frozen source-r2 with the additional platform inputs identified in the baseline record.",
+  "umd_icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+  "client": {
+    "source": "02d6fa27aca6b027f49fc6c0e051f1fd4dd376f8",
+    "source_file": "tegra-x1-wddm/tools/nvdec720_av_window.cpp",
+    "source_sha256": "9d335bcf0227073b8b9e851522cae043e2dabd376b4c8bd89380e644fd74a50d",
+    "arm64_sha256": "c9bcd48f6cb1fc2af36af365748e226c7b72c42859e52294624f7c3b9dfde483",
+    "bytes": 2937344,
+    "ffmpeg_commit": "894da5ca7d742e4429ffb2af534fcda0103ef593",
+    "mode": "Real Win32 D3D11VA preview with first-frame staging readback before Present(1, 0)",
+    "external_review_performed": false
+  },
+  "fixture": {
+    "input_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "input": "H.264 Main level 3.1",
+    "dimensions": [
+      1280,
+      720
+    ],
+    "input_frames": 6,
+    "frame_rate": "60/1",
+    "media_seconds": 0.1,
+    "reference_sha256": "c3c1754f557d7375ed660034ef62b0e1d966b7ed7626662802c1609aba886179",
+    "reference_format": "FFmpeg software H.264 decode, canonical I420",
+    "rgb_reference": "BT.601 limited range, point sample at source (2x+1, 2y+1), independently evaluated in double precision."
+  },
+  "prior_six_frame_decode": {
+    "record": "NVDEC_720_WINDOW_BOUNDARY_20261117.json",
+    "same_component_hashes": true,
+    "frames": 6,
+    "bytes_compared": 8294400,
+    "decode_loop_ms": 860
+  },
+  "native": {
+    "run_boot_utc": "2026-11-17T21:07:29.4678150Z",
+    "dwm_pid": 1376,
+    "adapter_luid": "000000000007ff7c",
+    "session": 1,
+    "dispatch_utc": "2026-11-17T21:24:29.8257195Z",
+    "instance": "{C0AB9996-5ED2-49F0-A1E5-DA39DD4778FD}",
+    "pid": 4268,
+    "process_creation_filetime": 134394242698594592,
+    "application_journal_ms": 1500,
+    "scope": "Time between first and final persisted application markers.",
+    "present_entries": 1,
+    "present_returns": 0,
+    "successful_present_returns": 0,
+    "nv12_frames_verified": 1,
+    "completed_window_and_gpu": false,
+    "decoder_close_returned": false,
+    "first_decoded_i420_sha256": "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+    "nvdec_target_observed": [
+      [
+        621289859,
+        621289859
+      ],
+      [
+        621289860,
+        621289860
+      ]
+    ],
+    "scope_of_syncpoints": "Only successful video completion receipts in the recovered trace.",
+    "journal_checkpoints": [
+      "1024328 4424 CALL DrawCSC 00000000",
+      "1024328 4424 RETURN DrawCSC 00000000",
+      "1024359 4424 CALL CopyFirstBackBuffer 00000000",
+      "1024359 4424 RETURN CopyFirstBackBuffer 00000000",
+      "1024375 4424 CALL FlushFirstDrawAndCopy 00000000",
+      "1024390 4424 RETURN FlushFirstDrawAndCopy 00000000",
+      "1024390 4424 CALL MapFirstRenderedFrame 00000000",
+      "1024421 4424 RETURN MapFirstRenderedFrame 00000000",
+      "1024468 4424 VERIFIED FirstRenderedFrame 00000000",
+      "1024468 4424 CALL Present 00000000"
+    ],
+    "last_journal": "1024468 4424 CALL Present 00000000"
+  },
+  "gpu_csc_backbuffer": {
+    "first": {
+      "rendered_back_buffer": [
+        640,
+        360
+      ],
+      "pixels": 230400,
+      "components": 691200,
+      "gpu_ppm_sha256": "7d300743cf457afaaeeab0a5398315bfdb38faf5c772ed033fbb49b15fd291fc",
+      "software_ppm_sha256": "148dce2216377c23e72d5c763553d55257f5a86500285442036d211ef50d9977",
+      "component_absolute_error": {
+        "0": 655133,
+        "1": 36067
+      },
+      "pixel_maximum_absolute_error": {
+        "0": 194356,
+        "1": 36044
+      },
+      "worst": 1,
+      "tolerance": 2,
+      "pixels_above_tolerance": 0
+    }
+  },
+  "trace": {
+    "pid_scope": "Application tgd3d provider",
+    "records": 154,
+    "export_summary": "ProcessTrace=0 matched=154 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "partial": true,
+    "submit_phase_events": 0,
+    "last_provider_event": {
+      "id": 17,
+      "status": "00000000",
+      "arg0": 0
+    },
+    "etl_sha256": "192b49d1cbb1686d05817dfeb77f3dff8ae84eebd0388ce891e4e3176abd8c7f",
+    "events_sha256": "610e6facb87afff81b61c6264a2ebd61fe33876b965e2544fadb215d350beef6",
+    "journal_sha256": "a70f585bf9f16349194c54c34767f1709d2b55df1a666fc7c3c8504b3e277a1b"
+  },
+  "system": {
+    "unexpected_new_boot": true,
+    "after_boot_utc": "2026-11-17T21:24:52.0830670Z",
+    "dwm_pid": 1364,
+    "pnp_problem_code": 0,
+    "active_dwm_modules": {
+      "TegraGpuD3DVk.dll": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "handheld_mode": 1,
+    "cpu_dfll": 1,
+    "emc_last_error": 0,
+    "fan_mode": 1,
+    "charge_limit_percent": 85,
+    "runtime_images": [
+      {
+        "sha256": "C0A20E80493B245D95D64185C363B090DD00D33B2FA8E690DCA59AE1D2B4CAC0",
+        "name": "dxgi.dll",
+        "bytes": 1791792,
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      },
+      {
+        "sha256": "CCC352F7097D0320368000DBE9FF92772D8FC909185D95C8A0753CB8F115F880",
+        "name": "d3d11.dll",
+        "bytes": 4932192,
+        "version": "10.0.22621.2715 (WinBuild.160101.0800)"
+      }
+    ],
+    "selected_policy": "Fixed 90-degree row scan. Physical image was not observed in this run.",
+    "kernel_power_41_record": 60776,
+    "bugcheck_code": 0,
+    "unexpected_shutdown_6008_record": 60767,
+    "dumps_since_preflight": []
+  },
+  "cleanup": {
+    "verified_archive_sha256": "e3ee88f03b35757055afbee6450799efc41033fc01d102b48775c28a3f6e57d0",
+    "archive_bytes": 65103,
+    "files": 11,
+    "tasks_remaining": [],
+    "own_active_traces": 0,
+    "input_files_remaining": [],
+    "archive_retained": true,
+    "journal_retained": true
+  },
+  "acceptance": {
+    "first_gpu_csc_pixels": true,
+    "decoded_window_present_returned": false,
+    "six_frame_present_and_retirement": false,
+    "physical_screen_observed": false,
+    "phase_complete": false,
+    "deferred_joint_acceptance": [
+      "1080p",
+      "2K",
+      "4K"
+    ]
+  },
+  "interpretation": "Blocking staging Map and the full first image establish GPU completion of the color conversion and copy. The write-through journal ends inside the first API Present. The partial UMD ETL does not identify a failing DXGI, KMT or KMD call or the cause of the reboot."
+}

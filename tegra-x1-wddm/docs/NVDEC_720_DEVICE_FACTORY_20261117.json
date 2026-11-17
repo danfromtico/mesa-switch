@@ -1,0 +1,185 @@
+{
+  "observed_utc": "2026-11-17T22:07:47.6115226Z",
+  "branch": "tgd3d-vulkan",
+  "baseline_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+  "installed_sha256": {
+    "kmd": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+    "umd": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+    "icd": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+  },
+  "kmd_final_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+  "kmd_inputs": "Frozen source-r2 with the additional platform inputs identified in the baseline record.",
+  "umd_icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+  "client": {
+    "source": "72e226c51b382243a4428c25696d3a751366c8d8",
+    "source_file": "tegra-x1-wddm/tools/nvdec720_av_window.cpp",
+    "source_sha256": "ea6fbfb720d968a1626f8828d649fd50c98ea05e0b9de1833304f59064b8fe4b",
+    "arm64_sha256": "30ae972532e6e0d1f0672891439382c6a3da1984adc17076a144c12fe690f73b",
+    "bytes": 2938368,
+    "ffmpeg_commit": "894da5ca7d742e4429ffb2af534fcda0103ef593",
+    "mode": "Real Win32 D3D11VA preview with first-frame staging readback before Present(1, 0)",
+    "external_review_performed": false
+  },
+  "fixture": {
+    "input_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "input": "H.264 Main level 3.1",
+    "dimensions": [
+      1280,
+      720
+    ],
+    "input_frames": 6,
+    "frame_rate": "60/1",
+    "media_seconds": 0.1,
+    "reference_sha256": "c3c1754f557d7375ed660034ef62b0e1d966b7ed7626662802c1609aba886179",
+    "reference_format": "FFmpeg software H.264 decode, canonical I420",
+    "rgb_reference": "BT.601 limited range, point sample at source (2x+1, 2y+1), independently evaluated in double precision."
+  },
+  "prior_six_frame_decode": {
+    "record": "NVDEC_720_WINDOW_BOUNDARY_20261117.json",
+    "same_component_hashes": true,
+    "frames": 6,
+    "bytes_compared": 8294400,
+    "decode_loop_ms": 860
+  },
+  "native": {
+    "run_boot_utc": "2026-11-17T21:24:52.0896910Z",
+    "dwm_pid": 1364,
+    "adapter_luid": "0000000000080654",
+    "session": 1,
+    "dispatch_utc": "2026-11-17T21:59:19.3536208Z",
+    "instance": "{43D0FCAC-6A43-4F6A-A7F0-D74BA222C54D}",
+    "pid": 5956,
+    "process_creation_filetime": 134394263593042528,
+    "application_journal_ms": 2656,
+    "scope": "Time between first and final persisted application markers.",
+    "present_entries": 1,
+    "present_returns": 0,
+    "successful_present_returns": 0,
+    "nv12_frames_verified": 1,
+    "completed_window_and_gpu": false,
+    "decoder_close_returned": false,
+    "first_decoded_i420_sha256": "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+    "nvdec_target_observed": [],
+    "scope_of_syncpoints": "Only successful video completion receipts in the recovered trace.",
+    "journal_checkpoints": [
+      "2071265 4544 CALL GetDecodeAdapterFactory 00000000",
+      "2071359 4544 RETURN GetDecodeAdapterFactory 00000000",
+      "2071484 4544 DISTINCT DXGIFactories 00000000",
+      "2072593 4544 CALL DrawCSC 00000000",
+      "2072609 4544 RETURN DrawCSC 00000000",
+      "2072625 4544 CALL CopyFirstBackBuffer 00000000",
+      "2072625 4544 RETURN CopyFirstBackBuffer 00000000",
+      "2072625 4544 CALL FlushFirstDrawAndCopy 00000000",
+      "2072640 4544 RETURN FlushFirstDrawAndCopy 00000000",
+      "2072656 4544 CALL MapFirstRenderedFrame 00000000",
+      "2072656 4544 RETURN MapFirstRenderedFrame 00000000",
+      "2072750 4544 VERIFIED FirstRenderedFrame 00000000",
+      "2072765 4544 CALL Present 00000000"
+    ],
+    "last_journal": "2072765 4544 CALL Present 00000000"
+  },
+  "gpu_csc_backbuffer": {
+    "first": {
+      "rendered_back_buffer": [
+        640,
+        360
+      ],
+      "pixels": 230400,
+      "components": 691200,
+      "gpu_ppm_sha256": "7d300743cf457afaaeeab0a5398315bfdb38faf5c772ed033fbb49b15fd291fc",
+      "software_ppm_sha256": "148dce2216377c23e72d5c763553d55257f5a86500285442036d211ef50d9977",
+      "component_absolute_error": {
+        "0": 655133,
+        "1": 36067
+      },
+      "pixel_maximum_absolute_error": {
+        "0": 194356,
+        "1": 36044
+      },
+      "worst": 1,
+      "tolerance": 2,
+      "pixels_above_tolerance": 0
+    }
+  },
+  "trace": {
+    "pid_scope": "Application tgd3d provider",
+    "records": 90,
+    "export_summary": "ProcessTrace=0 matched=90 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "partial": true,
+    "submit_phase_events": 0,
+    "last_provider_event": {
+      "id": 17,
+      "status": "00000000",
+      "arg0": 0
+    },
+    "etl_sha256": "eab5057342f8ca4ff07acec5806262b6db29001c748d594d32c52f97ece1f752",
+    "events_sha256": "295c55b9f0456a11391c4299c1f76e8d69a91422d4a492b5a59b3087be697099",
+    "journal_sha256": "0f6483a4b50d4727dbe451f73321b3202720cbfd413fd06253c3958c7b1e1cd6"
+  },
+  "system": {
+    "unexpected_new_boot": true,
+    "after_boot_utc": "2026-11-17T21:59:53.7074800Z",
+    "dwm_pid": 1216,
+    "pnp_problem_code": 0,
+    "active_dwm_modules": {
+      "TegraGpuD3DVk.dll": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "handheld_mode": 1,
+    "cpu_dfll": 1,
+    "emc_last_error": 0,
+    "fan_mode": 1,
+    "charge_limit_percent": 85,
+    "runtime_images": [
+      {
+        "sha256": "C0A20E80493B245D95D64185C363B090DD00D33B2FA8E690DCA59AE1D2B4CAC0",
+        "name": "dxgi.dll",
+        "bytes": 1791792,
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      },
+      {
+        "sha256": "CCC352F7097D0320368000DBE9FF92772D8FC909185D95C8A0753CB8F115F880",
+        "name": "d3d11.dll",
+        "bytes": 4932192,
+        "version": "10.0.22621.2715 (WinBuild.160101.0800)"
+      }
+    ],
+    "selected_policy": "Fixed 90-degree row scan. Physical image was not observed in this run.",
+    "kernel_power_41_record": 60854,
+    "bugcheck_code": 0,
+    "unexpected_shutdown_6008_record": 60845,
+    "dumps_since_preflight": []
+  },
+  "cleanup": {
+    "verified_archive_sha256": "2979259c8eeaaba9ce187a4d206f2b55ffd4c68aa5488d162ceef8624c8065dc",
+    "archive_bytes": 63484,
+    "files": 11,
+    "tasks_remaining": [],
+    "own_active_traces": 0,
+    "input_files_remaining": [],
+    "archive_retained": true,
+    "journal_retained": true
+  },
+  "acceptance": {
+    "first_gpu_csc_pixels": true,
+    "decoded_window_present_returned": false,
+    "six_frame_present_and_retirement": false,
+    "physical_screen_observed": false,
+    "phase_complete": false,
+    "deferred_joint_acceptance": [
+      "1080p",
+      "2K",
+      "4K"
+    ]
+  },
+  "comparison": {
+    "previous_record": "NVDEC_720_FIRST_SUBMIT_20261117.json",
+    "previous_sha256": "dedace36cbeaaa389d24e8be6ad3641f6ec19e71da25591ca2fde78d7a7e4881",
+    "enumeration_and_device_factories_distinct": true,
+    "factory_used": "Public IDXGIAdapter::GetParent on the adapter of the actual D3D11VA device.",
+    "documentation": "https://learn.microsoft.com/en-us/windows/win32/direct3dgetstarted/work-with-dxgi",
+    "swap_model": "640x360 BGRA8, one buffer, windowed DXGI_SWAP_EFFECT_DISCARD, Present(1,0).",
+    "first_gpu_back_buffer_sha256_reproduced": true
+  },
+  "interpretation": "Correct factory ownership is established on the device. With this change the first rendered image still matches and Present still has no recorded return before the unexpected boot. The partial ETL identifies neither an internal presentation call nor a cause of the reboot. The prior six-frame NVDEC session remains a separate successful observation."
+}

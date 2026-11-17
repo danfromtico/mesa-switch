@@ -1,6 +1,8 @@
 # GPU status
 
-The selected de8bb90b / 45683c21 / e563a81d combination passed six frames of native 720p H.264 D3D11VA decoding and NV12 readback. All NVDEC syncpoints reached their targets, and the visible pixels of every frame matched the independent software decode. Interactive swapchain, shader and texture preparation also passed. During the complete window run the first draw returned and the machine restarted during the first Present. A separate unexpected boot preceded upload of the client. GPU CSC output and decoded-window presentation remain open. [Native frame hashes, signed component identities and first-Present evidence](NVDEC_720_WINDOW_BOUNDARY_20261117.json)
+On the selected de8bb90b KMD, 45683c21 UMD and e563a81d ICD, native D3D11VA/NVDEC decoded six 720p H.264 frames with byte-exact NV12 output and retired the decode session. The decode loop took 860 ms. [Six-frame record](NVDEC_720_WINDOW_BOUNDARY_20261117.json)
+
+Two interactive previews produced the same 640×360 first frame through the native D3D11 pixel shader. All 230,400 pixels were within one 8-bit level per RGB channel of an independent reference. The latest run created the swapchain with the factory of the actual decoder device. It entered its first windowed Present and the system restarted without a recorded return. The five-patch package remains selected. Decoded-window composition, physical display and the normal closure of this window path are pending. [GPU readback](NVDEC_720_FIRST_SUBMIT_20261117.json) · [DXGI factory correction and incident](NVDEC_720_DEVICE_FACTORY_20261117.json)
 
 Earlier observations follow.
 

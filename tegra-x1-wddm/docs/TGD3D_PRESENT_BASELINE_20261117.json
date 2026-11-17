@@ -117,12 +117,12 @@
     "earlier_720p_decode": "NVDEC_D3D11VA_720_20261117.json",
     "gpu_execution_of_injected_failures": false
   },
-  "operational_policy": "Keep this package selected during subsequent observations. Preserve diagnostic evidence on anomalies.",
+  "operational_policy": "The selected five-patch package is the active development baseline. Retain it and the incident evidence after interruptions.",
   "validation": {
     "actual_dwm_pair_loaded": true,
     "ordinary_window_result": "Interrupted by unexpected restart. No passing ordinary-window observation on this pair.",
     "six_frame_decode_on_this_pair": "Accepted: 6 native D3D11VA/NVDEC frames with matching syncpoints and canonical NV12 pixel hashes.",
-    "gpu_csc_and_decoded_window": "First Draw returned. The window run restarted during the first Present. GPU CSC pixels and first Present completion are unverified.",
+    "gpu_csc_and_decoded_window": "First-frame GPU conversion and staging readback verified twice. All 230400 pixels were within one 8-bit level per channel. The corrected device-factory run was interrupted in the first windowed Present.",
     "physical_screen_on_this_pair": "Unobserved",
     "unexpected_reboot_root_cause": "Unresolved",
     "external_review": false
@@ -252,11 +252,21 @@
     "rollback_performed": false
   },
   "latest_video_observation": {
-    "record": "NVDEC_720_WINDOW_BOUNDARY_20261117.json",
-    "record_sha256": "9f39ef8949e9c3f645645724a2818aca6bc7ae24bd85e7be238695281dde3871",
-    "last_confirmed_boot_utc": "2026-11-17T21:07:29.4678150Z",
-    "dwm_pid": 1376,
+    "record": "NVDEC_720_DEVICE_FACTORY_20261117.json",
+    "record_sha256": "1860235ff1a6bffa2165249a868b73a94f8f62a99e26252dca68778d5e86b56b",
+    "first_readback_record": "NVDEC_720_FIRST_SUBMIT_20261117.json",
+    "first_readback_record_sha256": "dedace36cbeaaa389d24e8be6ad3641f6ec19e71da25591ca2fde78d7a7e4881",
+    "last_confirmed_boot_utc": "2026-11-17T21:59:53.7074800Z",
+    "dwm_pid": 1216,
     "decode_and_readback_accepted": true,
-    "first_present_completed": false
+    "first_gpu_csc_pixels_accepted": true,
+    "first_gpu_frame_size": [
+      640,
+      360
+    ],
+    "rgb_max_abs_error": 1,
+    "accepted_first_gpu_frames_per_window_run": 1,
+    "first_present_completed": false,
+    "physical_window_accepted": false
   }
 }
