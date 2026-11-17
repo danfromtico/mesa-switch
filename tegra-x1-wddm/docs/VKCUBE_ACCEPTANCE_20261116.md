@@ -7,7 +7,7 @@ Win32 `vkcube`小窗口、移动／缩放／放大、遮挡恢复和至少五分
 
 ## 组件与路径
 
-KMD／UMD／ICD完整SHA256与[固定90°基线](ROW_SCAN_BASELINE_20261116.json)一致：
+下表为 2026-11-16 这次五分钟验收实际使用的组件。机读表在 `original_fixed90_acceptance_identity` 保留了同一组完整身份。[固定 90° 版本表](ROW_SCAN_BASELINE_20261116.json)
 
 | 组件 | SHA256 |
 |---|---|

@@ -1,0 +1,109 @@
+{
+  "branch": "tgd3d-vulkan",
+  "status": "selected active development baseline",
+  "observed_utc": "2026-11-17T20:32:48.6278976Z",
+  "components": {
+    "kmd": {
+      "Length": 243720,
+      "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+    },
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "umd": {
+      "Length": 3334600,
+      "Sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
+    },
+    "icd": {
+      "Length": 17656776,
+      "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "umd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    }
+  },
+  "five_patches": [
+    {
+      "number": 1,
+      "component": "UMD",
+      "commit": "51743c0227d813ae931933f38dc95d2afe0ba6f8",
+      "patch_sha256": "6c0d139dfaac6f1b01d02041bb65c302c509f06e790208bab578bcae695e5e76",
+      "change": "Allocate the submission record before calling either queue. Preserve the command and pools if host allocation fails.",
+      "windows_arm64_control": "Injected allocation failure before submission and allocation-free publication after queue acceptance."
+    },
+    {
+      "number": 2,
+      "component": "UMD",
+      "commit": "8e0db6e444f09e466c42dbaccf8dfd5120536a1c",
+      "patch_sha256": "ba91dc976a6cfaf286d078797844f47688b2e1417073b3a10c575ef075c06b78",
+      "change": "Skip descriptor update scratch allocation when the relevant bindings are clean.",
+      "windows_arm64_control": "Clean draw reports zero C++ scratch allocations."
+    },
+    {
+      "number": 3,
+      "component": "UMD",
+      "commit": "ff8fa879cc81a24e62850e9aebed272157bc2004",
+      "patch_sha256": "8900d6ad047327a548d3497ea6a2bf5c51d8981eaf54479ea45e617dbd5edb62",
+      "change": "Reuse immediate-context host scratch for dirty descriptors while allocating fresh GPU descriptor sets.",
+      "windows_arm64_control": "Eight updates in each of three descriptor mixes report zero scratch allocations after warm-up."
+    },
+    {
+      "number": 4,
+      "component": "ICD",
+      "commit": "6599df9b39d3cbb7d6cb8fe5a64a9cc2d646167c",
+      "patch_sha256": "ecd4474a602bf4d7278f9a9730424c56a26f6c4fd8793053cc7f3e43bc5c6ed3",
+      "change": "Report the D3D12 removal sentinel on imported fences. Preserve the full direct Vulkan timeline value range.",
+      "windows_arm64_control": "Win32 Vulkan entrypoint controls cover import, re-import, wait, timeout and a simulated removed device. The signed ICD also passed 120 native Win32 Presents."
+    },
+    {
+      "number": 5,
+      "component": "UMD",
+      "commit": "3ebd7e00a4e922661f0d7fe7fe798c20d52c1f40",
+      "patch_sha256": "cf8641c21bc9bd8e127e850b5d957cf3759394828c4a3d3912643060c097c166",
+      "change": "Preserve failed VA, CPU lock and allocation cleanup state and report failed creation unwind.",
+      "windows_arm64_control": "Tracked VA release failure, failed deallocation and late cleanup validated with runtime callback substitutes."
+    }
+  ],
+  "supporting_frontend_marker_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+  "staging_helper_commit": "4f26ceb92fab58c4a25a5fb73745ea79879445d5",
+  "package": {
+    "previous_umd_sha256": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928",
+    "previous_icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff",
+    "planned_restart_utc": "2026-11-17T20:30:27.9055142Z",
+    "boot_utc": "2026-11-17T20:31:05.3544980Z",
+    "dwm_pid": 1404,
+    "dwm_session": 1,
+    "pnp_problem_code": 0,
+    "loaded_dwm_modules": {
+      "TegraGpuD3DVk.dll": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "restore_inputs_preserved": true
+  },
+  "configuration": {
+    "desktop_policy": "Fixed handheld 90 degrees, 1280x720 with row scan on the 720x1280 panel",
+    "platform_policy": "Retained Handheld, DFLL, EMC, fan, 85 percent charge limit and delayed logon enable",
+    "video_opt_in": "TGD3D_VIDEO_VALIDATE, process scope"
+  },
+  "evidence": {
+    "patch_controls_and_candidate_wsi": "TGD3D_PRESENT_OWNERSHIP_20261117.json",
+    "earlier_720p_decode": "NVDEC_D3D11VA_720_20261117.json",
+    "gpu_execution_of_injected_failures": false
+  },
+  "operational_policy": "Keep this package selected during subsequent observations. Preserve diagnostic evidence on anomalies.",
+  "validation": {
+    "actual_dwm_pair_loaded": true,
+    "ordinary_window_result": "Pending observation",
+    "six_frame_decode_on_this_pair": "Pending observation",
+    "gpu_csc_and_decoded_window": "Pending observation",
+    "physical_screen_on_this_pair": "Unobserved",
+    "unexpected_reboot_root_cause": "Unresolved",
+    "external_review": false
+  }
+}

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "recorded_utc": "2026-11-16T14:02:09.076862+00:00",
   "branch": "tgd3d-vulkan",
-  "decision": "User-selected current driver/power/90-degree row-scan development baseline",
+  "decision": "Active 90-degree row-scan and power development baseline with the five presentation fixes.",
   "display_default": {
     "logical_width": 1280,
     "logical_height": 720,
@@ -16,15 +16,13 @@
   },
   "gpu_source": {
     "KMD": {
-      "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
-      "emc_diff_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852"
+      "input": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json"
     },
     "UMD": {
-      "commit": "c1f25986eee51c0ee01088c3ecb3c9508dea2479"
+      "commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4"
     },
     "ICD": {
-      "commit": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
-      "scope": "Recorded c0-based working-tree build; use full binary SHA256, not a clean-commit assumption."
+      "commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4"
     }
   },
   "baseline_files": [
@@ -35,8 +33,8 @@
     },
     {
       "name": "tegragpurender.sys",
-      "bytes": 204808,
-      "sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e"
+      "bytes": 243720,
+      "sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
     },
     {
       "name": "woa-lite-home.ini",
@@ -45,8 +43,8 @@
     },
     {
       "name": "acpitabl.dat",
-      "bytes": 4848,
-      "sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
+      "bytes": 4993,
+      "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
     },
     {
       "name": "switchbattery.sys",
@@ -65,18 +63,18 @@
     },
     {
       "name": "libvulkan_nouveau.dll",
-      "bytes": 17652224,
-      "sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+      "bytes": 17656776,
+      "sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
     },
     {
       "name": "switchfan.sys",
-      "bytes": 98832,
-      "sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+      "bytes": 104456,
+      "sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
     },
     {
       "name": "TegraGpuD3DVk.dll",
-      "bytes": 3274240,
-      "sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a"
+      "bytes": 3334600,
+      "sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
     },
     {
       "name": "SwitchPowerTray.exe",
@@ -306,15 +304,14 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-17T17:48:29.5450388Z",
+  "updated_utc": "2026-11-17T20:32:48.6278976Z",
   "device_access": {
-    "updated_utc": "2026-11-17T03:17:50.4327624Z",
-    "owner": "user",
-    "purpose": "Client query complete; original90display/power restored, candidate package and both temporary roots removed",
+    "updated_utc": "2026-11-17T20:32:48.6278976Z",
+    "owner": "main",
+    "purpose": "Single controlled desktop and video validation on the selected baseline",
     "main_local_work_allowed": true,
-    "main_native_access": "No active native trial or watcher. Continue local SMMU contract analysis; recheck current state and ownership before any later native work.",
-    "latest_authorization": "User asked for autonomous continuation while asleep, later confirmed connectivity available; earlier cube-only/local-only restrictions are historical.",
-    "current_recovery_record": "NVDEC_CLIENT_QUERY_20261117.json"
+    "main_native_access": "Exclusive for this observation",
+    "current_recovery_record": "TGD3D_PRESENT_BASELINE_20261117.json"
   },
   "last_readback_before_user_box64_hold": {
     "utc": "2026-11-16T14:15:38.3503583Z",
@@ -995,11 +992,11 @@
     }
   },
   "decode_integration": {
-    "updated_utc": "2026-11-17T17:48:29.5450388Z",
-    "state": "Real native KMT/NVDEC720p H.264 backend accepted for the six-frame fixture: all six completed through Host1x syncpoint191 and match software reference byte-for-byte. The de8 KMD/045 provider/9eb table and original5b/95b userspace remain installed. D3D11VA and window presentation remain incomplete.1080p/2K/4K acceptance is deferred together.",
+    "updated_utc": "2026-11-17T20:32:48.6278976Z",
+    "state": "The native NVDEC backend and the six-frame synchronous D3D11VA readback passed on their recorded component sets. The active desktop now uses the integrated presentation pair.",
     "active_sequence": [
-      "720p H.264",
-      "1080p H.264 after720 acceptance"
+      "720p H.264 decode and decoded window",
+      "1080p, 2K and 4K joint acceptance later"
     ],
     "2k_4k": "Independent implementation exists; untested; integration undecided",
     "external_source_head": "280440f3fc8dbcd00e9afc0152820bf1bd1eafb4",
@@ -1256,11 +1253,11 @@
       }
     ],
     "installed_development_combination": {
-      "classification": "retained development baseline; native720p backend module accepted, full video path unaccepted",
-      "observed_utc": "2026-11-17T17:34:12.8670683Z",
-      "boot": "2026-11-17T17:12:56.5106640Z",
-      "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\activation",
-      "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app",
+      "classification": "Selected active development baseline with five presentation, descriptor and ownership fixes.",
+      "observed_utc": "2026-11-17T20:32:48.6278976Z",
+      "boot": "2026-11-17T20:31:05.3544980Z",
+      "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
+      "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app",
       "kmd": {
         "Length": 243720,
         "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
@@ -1276,84 +1273,75 @@
         "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
       },
       "umd": {
-        "Length": 3274240,
-        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A"
+        "Length": 3334600,
+        "Sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
       },
-      "umd_source": "c1f25986eee51c0ee01088c3ecb3c9508dea2479",
+      "umd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
       "icd": {
-        "Length": 17652224,
-        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
+        "Length": 17656776,
+        "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
       },
-      "icd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f-based dirty frozen build; not clean current HEAD",
+      "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
       "all11_files": [
         {
           "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
-          "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
-          "Matches": true,
-          "Length": 32264
+          "Length": 32264,
+          "Sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
         },
         {
           "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
-          "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
-          "Matches": true,
-          "Length": 243720
+          "Length": 243720,
+          "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
         },
         {
           "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
-          "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
-          "Matches": true,
-          "Length": 138
+          "Length": 138,
+          "Sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
         },
         {
           "Path": "C:\\Windows\\System32\\acpitabl.dat",
-          "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
-          "Matches": true,
-          "Length": 4993
+          "Length": 4993,
+          "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
         },
         {
           "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
-          "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
-          "Matches": true,
-          "Length": 42440
+          "Length": 42440,
+          "Sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
         },
         {
           "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
-          "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
-          "Matches": true,
-          "Length": 1517568
+          "Length": 1517568,
+          "Sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
         },
         {
           "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
-          "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
-          "Matches": true,
-          "Length": 921600
+          "Length": 921600,
+          "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
         },
         {
-          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
-          "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
-          "Matches": true,
-          "Length": 17652224
+          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app\\libvulkan_nouveau.dll",
+          "Length": 17656776,
+          "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
         },
         {
           "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
-          "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
-          "Matches": true,
-          "Length": 104456
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
         },
         {
-          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
-          "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
-          "Matches": true,
-          "Length": 3274240
+          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app\\TegraGpuD3DVk.dll",
+          "Length": 3334600,
+          "Sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
         },
         {
           "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
-          "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
-          "Matches": true,
-          "Length": 60416
+          "Length": 60416,
+          "Sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
         }
       ],
-      "external_review_performed": false
+      "external_review_performed": false,
+      "source_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+      "platform_file_evidence": "Retained platform identities from the preceding native readback. Both userspace identities and the kernel were read on this boot."
     },
     "review": {
       "external_review_required": false,
@@ -1374,13 +1362,17 @@
       "374b9ee5624cd1aea063398fd413fe3c73ff6501"
     ],
     "promotion_scope": "Validated deployment/current display-power combination is retained for development. Full decoder acceptance remains false.",
-    "native_decode_accepted_scope": "Six-frame native KMT backend fixture only",
-    "baseline_promoted_scope": "Native decode backend module only; full video acceptance incomplete",
+    "native_decode_accepted_scope": "Six-frame NVDEC backend and controlled 17-surface D3D11VA readback. Exact prior component identities are retained in NVDEC_D3D11VA_720_20261117.json.",
+    "baseline_promoted_scope": "Five presentation and ownership fixes selected on the active 90-degree desktop.",
     "acceptance_scope": {
       "native_backend_720p_fixture_accepted": true,
+      "d3d11va_accepted": true,
+      "accepted_client_scope": "Synchronous libavcodec with the 17 surfaces provided by avcodec_get_hw_frames_parameters. Process-local video validation opt-in.",
       "frames": 6,
-      "d3d11va_accepted": false,
+      "decoded_nv12_byte_exact": true,
+      "media_foundation_source_reader_accepted": false,
       "window_presentation_accepted": false,
+      "gpu_csc_pixels_accepted": false,
       "full_decode_stage_complete": false,
       "public_video_enabled": false,
       "new_physical_screen_acceptance": false,
@@ -1388,9 +1380,7 @@
         "1080p",
         "2K",
         "4K"
-      ],
-      "higher_resolution_scope": "External implementation preserved; not integrated or hardware-accepted here",
-      "stability_scope": "Single six-frame successful run,1.5781264s including setup/cleanup; not FPS or long-duration stability"
+      ]
     }
   },
   "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",
@@ -1414,11 +1404,11 @@
     "additional_checks_after_last_instruction": false
   },
   "installed_development_combination": {
-    "classification": "retained development baseline; native720p backend module accepted, full video path unaccepted",
-    "observed_utc": "2026-11-17T17:34:12.8670683Z",
-    "boot": "2026-11-17T17:12:56.5106640Z",
-    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\activation",
-    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app",
+    "classification": "Selected active development baseline with five presentation, descriptor and ownership fixes.",
+    "observed_utc": "2026-11-17T20:32:48.6278976Z",
+    "boot": "2026-11-17T20:31:05.3544980Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app",
     "kmd": {
       "Length": 243720,
       "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
@@ -1434,83 +1424,156 @@
       "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
     },
     "umd": {
-      "Length": 3274240,
-      "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A"
+      "Length": 3334600,
+      "Sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
     },
-    "umd_source": "c1f25986eee51c0ee01088c3ecb3c9508dea2479",
+    "umd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
     "icd": {
-      "Length": 17652224,
-      "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
+      "Length": 17656776,
+      "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
     },
-    "icd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f-based dirty frozen build; not clean current HEAD",
+    "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
     "all11_files": [
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
-        "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
-        "Matches": true,
-        "Length": 32264
+        "Length": 32264,
+        "Sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
-        "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
-        "Matches": true,
-        "Length": 243720
+        "Length": 243720,
+        "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
       },
       {
         "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
-        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
-        "Matches": true,
-        "Length": 138
+        "Length": 138,
+        "Sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
       },
       {
         "Path": "C:\\Windows\\System32\\acpitabl.dat",
-        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
-        "Matches": true,
-        "Length": 4993
+        "Length": 4993,
+        "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
-        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
-        "Matches": true,
-        "Length": 42440
+        "Length": 42440,
+        "Sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
       },
       {
         "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
-        "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
-        "Matches": true,
-        "Length": 1517568
+        "Length": 1517568,
+        "Sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
       },
       {
         "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
-        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
-        "Matches": true,
-        "Length": 921600
+        "Length": 921600,
+        "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
       },
       {
-        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
-        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
-        "Matches": true,
-        "Length": 17652224
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app\\libvulkan_nouveau.dll",
+        "Length": 17656776,
+        "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
-        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
-        "Matches": true,
-        "Length": 104456
+        "Length": 104456,
+        "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
       },
       {
-        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
-        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
-        "Matches": true,
-        "Length": 3274240
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app\\TegraGpuD3DVk.dll",
+        "Length": 3334600,
+        "Sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
       },
       {
         "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
-        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
-        "Matches": true,
-        "Length": 60416
+        "Length": 60416,
+        "Sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
       }
     ],
-    "external_review_performed": false
+    "external_review_performed": false,
+    "source_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "platform_file_evidence": "Retained platform identities from the preceding native readback. Both userspace identities and the kernel were read on this boot."
+  },
+  "original_fixed90_acceptance_identity": {
+    "baseline_files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 204808,
+        "sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4848,
+        "sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17652224,
+        "sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 98832,
+        "sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3274240,
+        "sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "gpu_source": {
+      "KMD": {
+        "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+        "emc_diff_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852"
+      },
+      "UMD": {
+        "commit": "c1f25986eee51c0ee01088c3ecb3c9508dea2479"
+      },
+      "ICD": {
+        "commit": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+        "scope": "Recorded c0-based working-tree build; use full binary SHA256, not a clean-commit assumption."
+      }
+    },
+    "scope": "Component identities for the November 16 fixed-angle, physical screen and five-minute vkcube acceptance."
+  },
+  "selected_presentation_baseline": {
+    "record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "kmd_sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+    "umd_sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "patch_count": 5,
+    "selected": true
   }
 }
