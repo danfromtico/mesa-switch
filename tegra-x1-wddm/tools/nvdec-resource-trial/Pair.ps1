@@ -48,6 +48,17 @@ function Assert-Power {
  Add-Type -AssemblyName System.Windows.Forms
  if([string][Windows.Forms.SystemInformation]::PowerStatus.PowerLineStatus -ne 'Online'){throw 'External power is not online'}
 }
+function Assert-EmcReady($Snapshot) {
+ $emc=$Snapshot.Emc
+ if($null -eq $emc -or $emc.Version -ne 1){throw 'EMC status missing or unsupported'}
+ foreach($name in @('LastError','EnumerationError','ActmonError','QosError')){
+  if($null -eq $emc.$name -or [long]$emc.$name -ne 0){throw ('EMC status is not ready: '+$name+'='+$emc.$name)}
+ }
+ # SWFAN_EMC_STATUS v1: identified/rate/enumerated/dynamic/QoS/ACTMON.
+ # Reject mailbox/transition faults; preserve unrelated newer status bits.
+ if($null -eq $emc.Flags -or ([uint32]$emc.Flags -band 0x6f) -ne 0x6f -or
+    ([uint32]$emc.Flags -band 0x90) -ne 0){throw 'EMC dynamic status or fault flags differ'}
+}
 function Close-Gate {
  $folder=Task-Root;$task=$folder.GetTask('Tgd3dDefaultEnable')
  if($task.State -in @(2,4)){throw 'Existing activation is still running or queued'}
@@ -135,6 +146,7 @@ try {
   $backup=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o');Boot=Read-Boot;Directory=$active;TaskXml=$task.Xml;Registration=$registration;User=$recovery.User}
   $backup.Power=& (Join-Path $root 'Power-State.ps1');$backup.Fan=& (Join-Path $root 'Power-State.ps1') -FanOnly;$backup.Emc=& (Join-Path $root 'Power-State.ps1') -EmcOnly
   if($backup.Power.Power.PowerMode -ne 1 -or $backup.Power.Battery.LimitCenter -ne 85 -or $backup.Fan.Fan.Mode -ne 1){throw 'Handheld85/fan policy differs'}
+  Assert-EmcReady $backup.Emc
   Write-ActivationJson (Join-Path $root 'pair-backup.json') $backup
   $state=[ordered]@{Phase='Preparing';Begin=$backup.Utc;Boot=$backup.Boot;RestartRequested=$false};Save-State $state
   foreach($entry in $original.files.PSObject.Properties){Durable-Copy (Join-Path $active $entry.Name) (Join-Path $candidate $entry.Name)}
@@ -173,10 +185,17 @@ try {
   # Capture the inherited platform state before the new KMD can read its
   # optional resources. This separates an earlier boot/ACTMON failure from
   # a candidate activation regression; the snapshot does not set policy.
-  Write-ActivationJson (Join-Path $root 'before-candidate-selection.json') @{
-   Utc=[DateTime]::UtcNow.ToString('o');Code=Device-Property 'ProblemCode'
-   Power=(& (Join-Path $root 'Power-State.ps1'))
-   Emc=(& (Join-Path $root 'Power-State.ps1') -EmcOnly)
+  $before=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o');Code=Device-Property 'ProblemCode'}
+  try {
+   $before.Power=& (Join-Path $root 'Power-State.ps1')
+   $before.Emc=& (Join-Path $root 'Power-State.ps1') -EmcOnly
+   Write-ActivationJson (Join-Path $root 'before-candidate-selection.json') $before
+   Assert-EmcReady $before.Emc
+  } catch {
+   $before.Error=$_.Exception.Message
+   Write-ActivationJson (Join-Path $root 'before-candidate-selection.json') $before
+   $state.Phase='CandidatePlatformRejected';$state.PlatformError=$before.Error;Save-State $state
+   throw
   }
   $state.Phase='SelectingCandidate';Save-State $state
   Select-Package (Join-Path $root 'package') $config.CandidateKmd (Join-Path $root 'candidate-selection.json')

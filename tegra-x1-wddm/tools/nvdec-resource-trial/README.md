@@ -14,8 +14,11 @@ continuing:
 2. `StageCandidate` stages the signed package, closes native startup, writes the
    paired ACPI table and requests one restart.
 3. After the restart, `SelectCandidate` verifies the closed gate, saves the
-   inherited power/EMC status, selects the KMD and starts the retained activation
-   task. `Inspect` observes progress; it never retries activation.
+   inherited power/EMC status and requires valid dynamic EMC with no reported
+   errors or mailbox/transition faults before selecting the KMD and starting
+   the retained activation task. Failed/missing platform status stops at
+   `CandidatePlatformRejected`; recover the original pair rather than retrying
+   selection. `Inspect` observes progress; it never retries activation.
 4. Once activation completes, `FinishCandidate` runs the bounded resource
    query. A successful query is not a successful DMA or decode test. Inspect its
    register validity and resource status before proceeding.
@@ -33,3 +36,7 @@ The first native run on 2026-11-16 used the archived controller hash in
 the pre-selection EMC state and a timestamp/action on every state update. That
 instrumentation was added after an unresolved ACTMON readback difference; it
 does not retrospectively fill the missing observation in the first run.
+The current controller also rejects that known failure before candidate
+selection and checks EMC during baseline preparation. Its pure PowerShell
+control exercises the actual selection branch with all native operations
+replaced by explicit test functions; it does not prove hardware behavior.
