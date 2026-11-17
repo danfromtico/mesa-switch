@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T20:42:50.4671539Z",
+  "updated_utc": "2026-11-17T21:17:14.7475883Z",
   "state": "Six frames of native 720p D3D11VA H.264 decoded with byte-exact NV12 output in the synchronous libavcodec client. MF Source Reader and window presentation are unaccepted. The controlled UMD is installed, with an active 90-degree desktop after a window-trial restart.",
   "installed_baseline_changed": true,
   "resolution_roadmap": {
@@ -377,7 +377,7 @@
     "native_decode_accepted": false,
     "baseline_promoted": false
   },
-  "latest_native_round": "NVDEC_D3D11VA_720_20261117.json",
+  "latest_native_round": "NVDEC_720_WINDOW_BOUNDARY_20261117.json",
   "historical_committed_sources": [
     {
       "commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
@@ -657,8 +657,8 @@
   ],
   "installed_development_combination": {
     "classification": "Selected active development baseline with five presentation, descriptor and ownership fixes.",
-    "observed_utc": "2026-11-17T20:38:45.5861209Z",
-    "boot": "2026-11-17T20:34:18.7492440Z",
+    "observed_utc": "2026-11-17T21:13:35.5466349Z",
+    "boot": "2026-11-17T21:07:29.4678150Z",
     "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
     "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app",
     "kmd": {
@@ -744,7 +744,7 @@
     ],
     "external_review_performed": false,
     "source_record": "TGD3D_PRESENT_BASELINE_20261117.json",
-    "platform_file_evidence": "All eleven installed file identities checked after the unexpected restart; see TGD3D_PRESENT_BASELINE_20261117.json"
+    "platform_file_evidence": "All eleven identities checked at 20:38 UTC. The kernel and both DWM modules were rechecked after the window attempt; see NVDEC_720_WINDOW_BOUNDARY_20261117.json"
   },
   "native_decode_accepted": true,
   "retained_channel_round": "NVDEC_RETAINED_CHANNEL_NATIVE_20261117.json",
@@ -755,11 +755,11 @@
     "5f9ab480e5c2ded25220964170f9b09e056ab253",
     "374b9ee5624cd1aea063398fd413fe3c73ff6501"
   ],
-  "promotion_scope": "Five presentation and ownership fixes selected as the current desktop baseline. The selected five-patch pair remained loaded after a second, unexpected boot during the ordinary-window trial. Desktop interaction and decoded-window acceptance on this pair are incomplete.",
+  "promotion_scope": "Selected five-patch desktop baseline plus the verified 720p native D3D11VA decode/readback module. GPU CSC and decoded-window presentation remain open.",
   "acceptance_scope": {
     "native_backend_720p_fixture_accepted": true,
     "d3d11va_accepted": true,
-    "accepted_client_scope": "Synchronous libavcodec with the 17 surfaces provided by avcodec_get_hw_frames_parameters. Process-local video validation opt-in.",
+    "accepted_client_scope": "Synchronous libavcodec, 17 runtime surfaces, process-local video opt-in on selected five-patch baseline.",
     "frames": 6,
     "decoded_nv12_byte_exact": true,
     "media_foundation_source_reader_accepted": false,
@@ -774,7 +774,7 @@
       "4K"
     ]
   },
-  "native_decode_accepted_scope": "Six native KMT backend frames and six synchronous libavcodec D3D11VA/NV12 frames.",
+  "native_decode_accepted_scope": "Six D3D11VA/NVDEC 720p frames and their visible NV12 pixels verified on the selected 45683c21/e563a81d pair; the interactive preview stopped during first Present.",
   "current_umd_source": {
     "commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
     "signed_sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
@@ -805,6 +805,15 @@
     "incident_record": "TGD3D_PRESENT_BASELINE_20261117.json",
     "ordinary_desktop_observation": "interrupted",
     "post_restart_pair_confirmed": true,
-    "record_sha256": "b0bc90db8ea336b6b3718e283137a8bd381c9dcb0d0e2d4c1616fc717ec790ec"
+    "record_sha256": "5adb2a93bc5f3232f2520caa45782797fe5b5b1eaf8f176895949e2c0ecf387c",
+    "latest_video_observation": "NVDEC_720_WINDOW_BOUNDARY_20261117.json"
+  },
+  "latest_video_window_observation": {
+    "record": "NVDEC_720_WINDOW_BOUNDARY_20261117.json",
+    "record_sha256": "9f39ef8949e9c3f645645724a2818aca6bc7ae24bd85e7be238695281dde3871",
+    "last_confirmed_boot_utc": "2026-11-17T21:07:29.4678150Z",
+    "dwm_pid": 1376,
+    "decode_and_readback_accepted": true,
+    "first_present_completed": false
   }
 }

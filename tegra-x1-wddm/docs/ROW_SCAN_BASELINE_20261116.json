@@ -304,11 +304,11 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-17T20:42:50.4671539Z",
+  "updated_utc": "2026-11-17T21:17:14.7475883Z",
   "device_access": {
-    "updated_utc": "2026-11-17T20:42:50.4671539Z",
+    "updated_utc": "2026-11-17T21:17:14.7475883Z",
     "owner": "main",
-    "purpose": "Observation closed. The selected five-patch desktop package and incident evidence remain in place.",
+    "purpose": "Window observation stopped after restart. Keep the selected package and archived evidence.",
     "main_local_work_allowed": true,
     "main_native_access": "Exclusive for this observation",
     "current_recovery_record": "TGD3D_PRESENT_BASELINE_20261117.json"
@@ -992,8 +992,8 @@
     }
   },
   "decode_integration": {
-    "updated_utc": "2026-11-17T20:32:48.6278976Z",
-    "state": "The selected five-patch pair remained loaded after a second, unexpected boot during the ordinary-window trial. Desktop interaction and decoded-window acceptance on this pair are incomplete. Previous D3D11VA decode/readback evidence retains its original UMD and ICD identities.",
+    "updated_utc": "2026-11-17T21:17:14.7475883Z",
+    "state": "Six D3D11VA/NVDEC 720p frames and their visible NV12 pixels verified on the selected 45683c21/e563a81d pair; the interactive preview stopped during first Present.",
     "active_sequence": [
       "720p H.264 decode and decoded window",
       "1080p, 2K and 4K joint acceptance later"
@@ -1254,8 +1254,8 @@
     ],
     "installed_development_combination": {
       "classification": "Selected active development baseline with five presentation, descriptor and ownership fixes.",
-      "observed_utc": "2026-11-17T20:38:45.5861209Z",
-      "boot": "2026-11-17T20:34:18.7492440Z",
+      "observed_utc": "2026-11-17T21:13:35.5466349Z",
+      "boot": "2026-11-17T21:07:29.4678150Z",
       "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
       "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app",
       "kmd": {
@@ -1341,7 +1341,7 @@
       ],
       "external_review_performed": false,
       "source_record": "TGD3D_PRESENT_BASELINE_20261117.json",
-      "platform_file_evidence": "All eleven installed file identities checked after the unexpected restart; see TGD3D_PRESENT_BASELINE_20261117.json"
+      "platform_file_evidence": "All eleven identities checked at 20:38 UTC. The kernel and both DWM modules were rechecked after the window attempt; see NVDEC_720_WINDOW_BOUNDARY_20261117.json"
     },
     "review": {
       "external_review_required": false,
@@ -1362,12 +1362,12 @@
       "374b9ee5624cd1aea063398fd413fe3c73ff6501"
     ],
     "promotion_scope": "Validated deployment/current display-power combination is retained for development. Full decoder acceptance remains false.",
-    "native_decode_accepted_scope": "Six-frame NVDEC backend and controlled 17-surface D3D11VA readback. Exact prior component identities are retained in NVDEC_D3D11VA_720_20261117.json.",
+    "native_decode_accepted_scope": "Six D3D11VA/NVDEC 720p frames and their visible NV12 pixels verified on the selected 45683c21/e563a81d pair; the interactive preview stopped during first Present.",
     "baseline_promoted_scope": "Five presentation and ownership fixes selected on the active 90-degree desktop.",
     "acceptance_scope": {
       "native_backend_720p_fixture_accepted": true,
       "d3d11va_accepted": true,
-      "accepted_client_scope": "Synchronous libavcodec with the 17 surfaces provided by avcodec_get_hw_frames_parameters. Process-local video validation opt-in.",
+      "accepted_client_scope": "Synchronous libavcodec, 17 runtime surfaces, process-local video opt-in on selected five-patch baseline.",
       "frames": 6,
       "decoded_nv12_byte_exact": true,
       "media_foundation_source_reader_accepted": false,
@@ -1405,8 +1405,8 @@
   },
   "installed_development_combination": {
     "classification": "Selected active development baseline with five presentation, descriptor and ownership fixes.",
-    "observed_utc": "2026-11-17T20:38:45.5861209Z",
-    "boot": "2026-11-17T20:34:18.7492440Z",
+    "observed_utc": "2026-11-17T21:13:35.5466349Z",
+    "boot": "2026-11-17T21:07:29.4678150Z",
     "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
     "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954\\app",
     "kmd": {
@@ -1492,7 +1492,7 @@
     ],
     "external_review_performed": false,
     "source_record": "TGD3D_PRESENT_BASELINE_20261117.json",
-    "platform_file_evidence": "All eleven installed file identities checked after the unexpected restart; see TGD3D_PRESENT_BASELINE_20261117.json"
+    "platform_file_evidence": "All eleven identities checked at 20:38 UTC. The kernel and both DWM modules were rechecked after the window attempt; see NVDEC_720_WINDOW_BOUNDARY_20261117.json"
   },
   "original_fixed90_acceptance_identity": {
     "baseline_files": [
@@ -1578,6 +1578,15 @@
     "incident_record": "TGD3D_PRESENT_BASELINE_20261117.json",
     "ordinary_desktop_observation": "interrupted",
     "post_restart_pair_confirmed": true,
-    "record_sha256": "b0bc90db8ea336b6b3718e283137a8bd381c9dcb0d0e2d4c1616fc717ec790ec"
+    "record_sha256": "5adb2a93bc5f3232f2520caa45782797fe5b5b1eaf8f176895949e2c0ecf387c",
+    "latest_video_observation": "NVDEC_720_WINDOW_BOUNDARY_20261117.json"
+  },
+  "latest_video_window_observation": {
+    "record": "NVDEC_720_WINDOW_BOUNDARY_20261117.json",
+    "record_sha256": "9f39ef8949e9c3f645645724a2818aca6bc7ae24bd85e7be238695281dde3871",
+    "last_confirmed_boot_utc": "2026-11-17T21:07:29.4678150Z",
+    "dwm_pid": 1376,
+    "decode_and_readback_accepted": true,
+    "first_present_completed": false
   }
 }

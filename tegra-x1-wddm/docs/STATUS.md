@@ -1,5 +1,9 @@
 # GPU status
 
+The selected de8bb90b / 45683c21 / e563a81d combination passed six frames of native 720p H.264 D3D11VA decoding and NV12 readback. All NVDEC syncpoints reached their targets, and the visible pixels of every frame matched the independent software decode. Interactive swapchain, shader and texture preparation also passed. During the complete window run the first draw returned and the machine restarted during the first Present. A separate unexpected boot preceded upload of the client. GPU CSC output and decoded-window presentation remain open. [Native frame hashes, signed component identities and first-Present evidence](NVDEC_720_WINDOW_BOUNDARY_20261117.json)
+
+Earlier observations follow.
+
 The active desktop baseline contains all five presentation and ownership patches. After one planned boot, DWM loaded the signed 45683c21 UMD and e563a81d ICD on the de8bb90b KMD. Keep this package selected during subsequent observations. The preceding window and decode results below retain their original component identities. [Active baseline, exact hashes and five patches](TGD3D_PRESENT_BASELINE_20261117.json)
 
 An unexpected restart interrupted the subsequent ordinary-window trial after task dispatch. Window readiness and exit were unobserved. The partial trace yielded zero tgd3d events, and no matching dump was found. DWM loaded the same pair on the next boot, and all eleven installed files matched. The decoded preview was not launched. [Incident and retained baseline](TGD3D_PRESENT_BASELINE_20261117.json)

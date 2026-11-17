@@ -1,7 +1,7 @@
 {
   "branch": "tgd3d-vulkan",
   "status": "selected active development baseline",
-  "observed_utc": "2026-11-17T20:38:45.5861209Z",
+  "observed_utc": "2026-11-17T21:13:35.5466349Z",
   "components": {
     "kmd": {
       "Length": 243720,
@@ -121,8 +121,8 @@
   "validation": {
     "actual_dwm_pair_loaded": true,
     "ordinary_window_result": "Interrupted by unexpected restart. No passing ordinary-window observation on this pair.",
-    "six_frame_decode_on_this_pair": "Not run after the desktop observation was interrupted.",
-    "gpu_csc_and_decoded_window": "Not run on this pair.",
+    "six_frame_decode_on_this_pair": "Accepted: 6 native D3D11VA/NVDEC frames with matching syncpoints and canonical NV12 pixel hashes.",
+    "gpu_csc_and_decoded_window": "First Draw returned. The window run restarted during the first Present. GPU CSC pixels and first Present completion are unverified.",
     "physical_screen_on_this_pair": "Unobserved",
     "unexpected_reboot_root_cause": "Unresolved",
     "external_review": false
@@ -250,5 +250,13 @@
     "retained_device_incident_archive": true,
     "retained_device_receipt": true,
     "rollback_performed": false
+  },
+  "latest_video_observation": {
+    "record": "NVDEC_720_WINDOW_BOUNDARY_20261117.json",
+    "record_sha256": "9f39ef8949e9c3f645645724a2818aca6bc7ae24bd85e7be238695281dde3871",
+    "last_confirmed_boot_utc": "2026-11-17T21:07:29.4678150Z",
+    "dwm_pid": 1376,
+    "decode_and_readback_accepted": true,
+    "first_present_completed": false
   }
 }
