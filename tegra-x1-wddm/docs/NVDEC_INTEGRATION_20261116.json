@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T11:58:28.8182205Z",
-  "state": "Native core-floor query and163.2MHz clock admission passed at1050000uV. Host1x ownership preflight rejected before backend/firmware/DMA;0frames. Original90-degree display/power baseline restored and cleaned. Exact-predicate diagnostic KMD built locally, not installed;720p/1080p acceptance open.",
+  "updated_utc": "2026-11-17T12:54:52.0938592Z",
+  "state": "Native snapshot identified unrelated channel0 GET/PUT inequality as the rejection before reserved channel11 was checked. FIFO empty and DMASTOP were observed; no completion is inferred. Firmware/DMA never started;0frames. Original90-degree display/power baseline restored and cleaned. A channel-scoped KMD correction passes ARM64 and regression controls; native validation pending.",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
     "active_sequence": [
@@ -193,8 +193,8 @@
     "clock_native_result": "NVDEC_CLOCK_NATIVE_20261117.json"
   },
   "remaining": [
-    "Sign the0a0a1670 diagnostic KMD, paired with the unchanged0453418e ABI2 provider and9eb6a7e1 resource table. Capture the first failed Host1x condition and raw register values in one bounded native720 call.",
-    "Resolve the demonstrated ownership contract without clearing shared channels or inventing syncpoint completion. Complete real firmware/DMA/output and retirement, then D3D11VA/NV12/window presentation.",
+    "Sign and test the2aa4aba4 channel-scoped KMD with the unchanged0453418e ABI2 provider and9eb6a7e1 resource table. Verify channel11 itself and retain its strict predicates and syncpoint/DC conflicts.",
+    "Continue real firmware/DMA/output and retirement, then D3D11VA/NV12/window presentation. Do not reset unrelated channels or infer hardware completion from FIFO/DMASTOP state.",
     "Accept720p before1080p;2K/4K remain independent implementation, untested and undecided. Preserve fixed90 display/power and deferred stability boundaries."
   ],
   "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
@@ -229,15 +229,15 @@
     "public_windows_redistribution_confirmed": false
   },
   "current_committed_source": {
-    "commit": "0a0a167003bc6e7f827549167d447d324550f650",
-    "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+    "commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+    "source_manifest_sha256": "beccfcbdcc752d1c42fd12aebccded9004714762d6028ceeb884ab7262a91aca",
     "changed_files": {
-      "tegra-x1-wddm/windows/nvdec_adapter.c": "6540b13d594d5eca45f41f1e142498f7261345d39d97eab919476054c9f9c996",
-      "tegra-x1-wddm/windows/nvdec_adapter.h": "9c1fe120ff270f1ce6acf1518e44fada80e24274864f094e6e6f46caed4a23c4",
-      "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "1e2bc785e91358e231e32f0f12257778d6828e6c59f42236ef5a3bfd0e2ddaa9"
+      "tegra-x1-wddm/windows/nvdec_adapter.c": "686dd2085276085ae3f65b9e40e8e152e55b3ddd8f3624f047dc60dd97e52ebb",
+      "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "21ec9fbbe3b9c75497de1a0c464195a6f8345fd9b596ae29e1b51f9de53569af",
+      "tegra-x1-wddm/tests/test_nvdec_platform.c": "199fcabd64e675b3aca76c2c51befa6fd7540ffecdc654d5fccfda50124bbb80"
     },
-    "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
-    "scope": "Local frozen diagnostic KMD; not installed or accepted."
+    "base_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+    "scope": "Local frozen channel-scoped KMD; not installed or accepted."
   },
   "client_route_native_result": {
     "record": "NVDEC_CLIENT_ROUTE_NATIVE_20261117.json",
@@ -321,12 +321,12 @@
     "review": "main-agent self-review; real decoder DMA still untested"
   },
   "temporary_candidate_components_restored": true,
-  "latest_native_result": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+  "latest_native_result": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
   "review": {
     "mode": "main-agent self-review",
     "external_review_required": false,
     "external_review_performed": false,
-    "scope": "Real core-query/clock result, native failure boundary, loaded-image recovery; bounded failure-only reads,8 host preflight faults, retirement and stale-evidence controls. New diagnostic KMD native execution pending."
+    "scope": "Native channel0 snapshot and per-channel isolation contract; selected-channel rejection, foreign-channel preservation, shared-bit isolation, failure retirement, old-driver regression and ARM64 build. New channel-scoped KMD native execution pending."
   },
   "coexisting_transport": {
     "adapter_transport": "259c825dec8421d34d5e08e33b9d109d9cd89770",
@@ -339,12 +339,17 @@
     "build_full_dirty_worktree": false
   },
   "next_local_candidate": {
-    "source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
-    "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
-    "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+    "source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+    "base_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+    "source_manifest_sha256": "beccfcbdcc752d1c42fd12aebccded9004714762d6028ceeb884ab7262a91aca",
+    "changed_source_sha256": {
+      "windows/nvdec_adapter.c": "686dd2085276085ae3f65b9e40e8e152e55b3ddd8f3624f047dc60dd97e52ebb",
+      "tests/test_nvdec_adapter_windows.c": "21ec9fbbe3b9c75497de1a0c464195a6f8345fd9b596ae29e1b51f9de53569af",
+      "tests/test_nvdec_platform.c": "199fcabd64e675b3aca76c2c51befa6fd7540ffecdc654d5fccfda50124bbb80"
+    },
     "unsigned_kmd": {
-      "Length": 239616,
-      "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
+      "Length": 239104,
+      "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
     },
     "reuse_provider": {
       "Length": 104456,
@@ -353,8 +358,7 @@
     "clock_abi": "0x00010002",
     "signed_kmd": false,
     "native_tested": false,
-    "admission_predicates_changed": false,
-    "modern_umd_interfaces_changed": false,
+    "purpose": "Only reserved channel11 participates in decoder channel admission. Keep selected-channel checks, DC/syncpoint conflicts, clock lease and retirement. Other channels are not reset or modified.",
     "arm64_build_exit": 0,
     "controls": [
       {
@@ -382,23 +386,25 @@
         "exit": 0
       }
     ],
-    "main_self_review": "Read-only failure snapshots retain register evidence across real release; bounded error output and next-request reset;8 preflight fault controls plus existing retirement/ownership checks.",
-    "failure_field_map": {
-      "1": "No assigned DC register view; no register values read.",
-      "2": "Index=DC word0x28; a=DC syncpoint-vsync register.",
-      "3": "Index=channel; a=FIFO status,b=DMA PUT,c=DMA GET,d=DMA CTRL, read before lease release.",
-      "4": "Index=channel; same fields as3; PUT/GET differ.",
-      "5": "Index=syncpoint191; a=threshold IRQ enable word.",
-      "6": "Index=syncpoint191; a=unreadable first counter value.",
-      "7": "Index=syncpoint191; a=first,b=second counter across50ms.",
-      "8": "Index=CAR offset0x180; a=post-rejection source,b=I/O status,c=closing flag."
+    "old_driver_regression": {
+      "exit": 153,
+      "expected_assertion": 153,
+      "description": "New foreign-channel fixture rejects under the old whole-host scan, then passes with the reserved-channel scope."
     },
-    "field_encoding": "All numeric error fields are eight hexadecimal digits; unused fields are zero, not additional register reads. Source/floor/PLLP preserve the admitted request values.",
-    "reference": "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/hw_host1x05_channel.h",
-    "license_scope": "GPL register definitions consulted as hardware facts; no implementation copied."
+    "platform_asan_ubsan": {
+      "exit": 0,
+      "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+      "stderr": ""
+    },
+    "references": [
+      "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/channel.c",
+      "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/cdma_hw.c"
+    ],
+    "license_scope": "GPL references inspected for per-channel allocation and register isolation; no implementation copied. CPU syncpoint increments/NOP timeout recovery are not used.",
+    "main_self_review": "Selected channel11 predicate unchanged; callback/clock ABI unchanged; foreign-channel and unrelated shared-bit preservation checked through initialization, successful submit, timeout, shutdown and reacquisition."
   },
   "loaded_provider_identity": {
-    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
     "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
     "native_loaded_mismatch_proven": true,
     "candidate_provider_loaded_verified": true,
@@ -416,7 +422,7 @@
     "cleanup_complete": true
   },
   "core_floor_native_result": {
-    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
     "core_owner_query_passed": true,
     "core_floor_uv": 1050000,
     "clock_admission_passed": true,
@@ -433,7 +439,7 @@
     "native_decode_accepted": false,
     "baseline_promoted": false
   },
-  "latest_native_round": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+  "latest_native_round": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
   "historical_committed_sources": [
     {
       "commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
@@ -517,6 +523,17 @@
         "tegra-x1-wddm/windows/resources.h": "969a69a00ce276f7ffa427c616b536b2379b5c358138885b4ed229b532b614df"
       },
       "native_build_scope": "Native KMD uses the frozen c0/EMC/resource/client/transplant snapshot; this current source list is not a claim that the full development tree was installed"
+    },
+    {
+      "commit": "0a0a167003bc6e7f827549167d447d324550f650",
+      "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+      "changed_files": {
+        "tegra-x1-wddm/windows/nvdec_adapter.c": "6540b13d594d5eca45f41f1e142498f7261345d39d97eab919476054c9f9c996",
+        "tegra-x1-wddm/windows/nvdec_adapter.h": "9c1fe120ff270f1ce6acf1518e44fada80e24274864f094e6e6f46caed4a23c4",
+        "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "1e2bc785e91358e231e32f0f12257778d6828e6c59f42236ef5a3bfd0e2ddaa9"
+      },
+      "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+      "scope": "Local frozen diagnostic KMD; not installed or accepted."
     }
   ],
   "historical_controller_sources": [
@@ -530,5 +547,27 @@
         "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512"
       }
     }
-  ]
+  ],
+  "loaded_provider_identity_history": [
+    {
+      "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+      "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+      "native_loaded_mismatch_proven": true,
+      "candidate_provider_loaded_verified": true,
+      "restored_provider_and_kmd_loaded_verified": true,
+      "new_controller_complete_candidate_round_pending": false,
+      "native_decode_accepted": false,
+      "baseline_promoted": false
+    }
+  ],
+  "channel_scope_native_result": {
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "failed_check": 4,
+    "failed_channel": 0,
+    "reserved_channel": 11,
+    "selected_channel_state_observed": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  }
 }

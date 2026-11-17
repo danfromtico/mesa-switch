@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T11:58:28.8182205Z",
-  "status": "Native core-floor query and163.2MHz clock admission passed at1050000uV. Host1x ownership preflight rejected before backend/firmware/DMA;0frames. Original90-degree display/power baseline restored and cleaned. Exact-predicate diagnostic KMD built locally, not installed;720p/1080p acceptance open.",
-  "mesa_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+  "updated_utc": "2026-11-17T12:54:52.0938592Z",
+  "status": "Native snapshot identified unrelated channel0 GET/PUT inequality as the rejection before reserved channel11 was checked. FIFO empty and DMASTOP were observed; no completion is inferred. Firmware/DMA never started;0frames. Original90-degree display/power baseline restored and cleaned. A channel-scoped KMD correction passes ARM64 and regression controls; native validation pending.",
+  "mesa_source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
   "switchfan_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
   "changes": [
     "Real KMT-device-owned decoder session in the coexisting render miniport; previous display escape preserved",
@@ -13,10 +13,10 @@
     "Existing H264 codec/parser reused; acceptance client now uses the native adapter and verifies NV12 frame hashes and session retirement"
   ],
   "candidate_components": {
-    "scope": "Local diagnostic candidate; unsigned KMD, unchanged paired ABI2 provider. Not installed.",
+    "scope": "Local channel-scoped candidate; unsigned KMD, unchanged paired ABI2 provider. Not installed.",
     "unsigned_kmd": {
-      "Length": 239616,
-      "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
+      "Length": 239104,
+      "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
     },
     "reuse_signed_provider": {
       "Length": 104456,
@@ -28,20 +28,20 @@
     }
   },
   "native_kmd_source": {
-    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
-    "tested_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "tested_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
     "frozen_inputs": {
-      "bytes": 1520,
-      "sha256": "b3494469db916a49fb76e984d0a7ecface17f8a9287f9d9cd82afe30e0583382"
+      "bytes": 599,
+      "sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87"
     },
     "signed_kmd": {
-      "Length": 241672,
-      "Sha256": "252e8162a54fa26d7f961523ff112cc436c9032cb56da00ac70ae18166e8662a"
+      "Length": 242688,
+      "Sha256": "bc74bba77b247f8eae9a5285df1d2534bb2e9f3e1c12e44051f408a61b3d30bc"
     },
     "full_development_worktree_built_for_installation": false
   },
   "installed_baseline": {
-    "last_authenticated_read_utc": "2026-11-17T11:58:28.8182205Z",
+    "last_authenticated_read_utc": "2026-11-17T12:54:52.0938592Z",
     "changed_this_round": true,
     "kmd_sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e",
     "umd_sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a",
@@ -49,10 +49,10 @@
     "restored": true,
     "current_display": "90-degree1280x720 logical,720x1280 row scan",
     "current_power": "Handheld/DFLL active; dynamic GPU and EMC; errors0",
-    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json"
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json"
   },
   "validation": {
-    "native_record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "native_record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
     "next_candidate_arm64_build_exit": 0,
     "next_candidate_cpu_controls": [
       {
@@ -80,6 +80,16 @@
         "exit": 0
       }
     ],
+    "old_driver_regression": {
+      "exit": 153,
+      "expected_assertion": 153,
+      "description": "New foreign-channel fixture rejects under the old whole-host scan, then passes with the reserved-channel scope."
+    },
+    "platform_asan_ubsan": {
+      "exit": 0,
+      "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+      "stderr": ""
+    },
     "native_decode_accepted": false
   },
   "clock_policy": {
@@ -107,14 +117,14 @@
     "mode": "main-agent self-review",
     "external_review_required": false,
     "external_review_performed": false,
-    "scope": "Real core-query/clock result, native failure boundary, loaded-image recovery; bounded failure-only reads,8 host preflight faults, retirement and stale-evidence controls. New diagnostic KMD native execution pending."
+    "scope": "Native channel0 snapshot and per-channel isolation contract; selected-channel rejection, foreign-channel preservation, shared-bit isolation, failure retirement, old-driver regression and ARM64 build. New channel-scoped KMD native execution pending."
   },
   "remaining": [
-    "Sign the0a0a1670 diagnostic KMD, paired with the unchanged0453418e ABI2 provider and9eb6a7e1 resource table. Capture the first failed Host1x condition and raw register values in one bounded native720 call.",
-    "Resolve the demonstrated ownership contract without clearing shared channels or inventing syncpoint completion. Complete real firmware/DMA/output and retirement, then D3D11VA/NV12/window presentation.",
+    "Sign and test the2aa4aba4 channel-scoped KMD with the unchanged0453418e ABI2 provider and9eb6a7e1 resource table. Verify channel11 itself and retain its strict predicates and syncpoint/DC conflicts.",
+    "Continue real firmware/DMA/output and retirement, then D3D11VA/NV12/window presentation. Do not reset unrelated channels or infer hardware completion from FIFO/DMASTOP state.",
     "Accept720p before1080p;2K/4K remain independent implementation, untested and undecided. Preserve fixed90 display/power and deferred stability boundaries."
   ],
-  "latest_native_round": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+  "latest_native_round": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
   "superseded_local_candidate_components": {
     "unsigned_tegragpurender.sys": {
       "bytes": 236544,
@@ -134,12 +144,17 @@
     }
   },
   "next_local_candidate": {
-    "source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
-    "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
-    "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+    "source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+    "base_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+    "source_manifest_sha256": "beccfcbdcc752d1c42fd12aebccded9004714762d6028ceeb884ab7262a91aca",
+    "changed_source_sha256": {
+      "windows/nvdec_adapter.c": "686dd2085276085ae3f65b9e40e8e152e55b3ddd8f3624f047dc60dd97e52ebb",
+      "tests/test_nvdec_adapter_windows.c": "21ec9fbbe3b9c75497de1a0c464195a6f8345fd9b596ae29e1b51f9de53569af",
+      "tests/test_nvdec_platform.c": "199fcabd64e675b3aca76c2c51befa6fd7540ffecdc654d5fccfda50124bbb80"
+    },
     "unsigned_kmd": {
-      "Length": 239616,
-      "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
+      "Length": 239104,
+      "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
     },
     "reuse_provider": {
       "Length": 104456,
@@ -148,8 +163,7 @@
     "clock_abi": "0x00010002",
     "signed_kmd": false,
     "native_tested": false,
-    "admission_predicates_changed": false,
-    "modern_umd_interfaces_changed": false,
+    "purpose": "Only reserved channel11 participates in decoder channel admission. Keep selected-channel checks, DC/syncpoint conflicts, clock lease and retirement. Other channels are not reset or modified.",
     "arm64_build_exit": 0,
     "controls": [
       {
@@ -177,24 +191,26 @@
         "exit": 0
       }
     ],
-    "main_self_review": "Read-only failure snapshots retain register evidence across real release; bounded error output and next-request reset;8 preflight fault controls plus existing retirement/ownership checks.",
-    "failure_field_map": {
-      "1": "No assigned DC register view; no register values read.",
-      "2": "Index=DC word0x28; a=DC syncpoint-vsync register.",
-      "3": "Index=channel; a=FIFO status,b=DMA PUT,c=DMA GET,d=DMA CTRL, read before lease release.",
-      "4": "Index=channel; same fields as3; PUT/GET differ.",
-      "5": "Index=syncpoint191; a=threshold IRQ enable word.",
-      "6": "Index=syncpoint191; a=unreadable first counter value.",
-      "7": "Index=syncpoint191; a=first,b=second counter across50ms.",
-      "8": "Index=CAR offset0x180; a=post-rejection source,b=I/O status,c=closing flag."
+    "old_driver_regression": {
+      "exit": 153,
+      "expected_assertion": 153,
+      "description": "New foreign-channel fixture rejects under the old whole-host scan, then passes with the reserved-channel scope."
     },
-    "field_encoding": "All numeric error fields are eight hexadecimal digits; unused fields are zero, not additional register reads. Source/floor/PLLP preserve the admitted request values.",
-    "reference": "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/hw_host1x05_channel.h",
-    "license_scope": "GPL register definitions consulted as hardware facts; no implementation copied."
+    "platform_asan_ubsan": {
+      "exit": 0,
+      "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+      "stderr": ""
+    },
+    "references": [
+      "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/channel.c",
+      "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/cdma_hw.c"
+    ],
+    "license_scope": "GPL references inspected for per-channel allocation and register isolation; no implementation copied. CPU syncpoint increments/NOP timeout recovery are not used.",
+    "main_self_review": "Selected channel11 predicate unchanged; callback/clock ABI unchanged; foreign-channel and unrelated shared-bit preservation checked through initialization, successful submit, timeout, shutdown and reacquisition."
   },
-  "latest_native_result": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+  "latest_native_result": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
   "loaded_provider_identity": {
-    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
     "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
     "native_loaded_mismatch_proven": true,
     "candidate_provider_loaded_verified": true,
@@ -212,7 +228,7 @@
     "cleanup_complete": true
   },
   "core_floor_native_result": {
-    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
     "core_owner_query_passed": true,
     "core_floor_uv": 1050000,
     "clock_admission_passed": true,
@@ -281,6 +297,91 @@
         "d3d11va_nv12_presentation": false,
         "native_provider_replacement": "Deferred install and planned boot verified in both directions"
       }
+    },
+    {
+      "mesa_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+      "switchfan_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
+      "candidate_components": {
+        "scope": "Local diagnostic candidate; unsigned KMD, unchanged paired ABI2 provider. Not installed.",
+        "unsigned_kmd": {
+          "Length": 239616,
+          "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
+        },
+        "reuse_signed_provider": {
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        },
+        "candidate_acpi": {
+          "Length": 4993,
+          "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        }
+      },
+      "native_kmd_source": {
+        "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+        "tested_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+        "frozen_inputs": {
+          "bytes": 1520,
+          "sha256": "b3494469db916a49fb76e984d0a7ecface17f8a9287f9d9cd82afe30e0583382"
+        },
+        "signed_kmd": {
+          "Length": 241672,
+          "Sha256": "252e8162a54fa26d7f961523ff112cc436c9032cb56da00ac70ae18166e8662a"
+        },
+        "full_development_worktree_built_for_installation": false
+      },
+      "validation": {
+        "native_record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+        "next_candidate_arm64_build_exit": 0,
+        "next_candidate_cpu_controls": [
+          {
+            "name": "adapter-nvdec_adapter",
+            "exit": 0
+          },
+          {
+            "name": "adapter-device_lifetime",
+            "exit": 0
+          },
+          {
+            "name": "adapter-t214_nvdec",
+            "exit": 0
+          },
+          {
+            "name": "adapter-test_nvdec_adapter_windows",
+            "exit": 0
+          },
+          {
+            "name": "adapter-link",
+            "exit": 0
+          },
+          {
+            "name": "adapter-run",
+            "exit": 0
+          }
+        ],
+        "native_decode_accepted": false
+      }
     }
-  ]
+  ],
+  "loaded_provider_identity_history": [
+    {
+      "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+      "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+      "native_loaded_mismatch_proven": true,
+      "candidate_provider_loaded_verified": true,
+      "restored_provider_and_kmd_loaded_verified": true,
+      "new_controller_complete_candidate_round_pending": false,
+      "native_decode_accepted": false,
+      "baseline_promoted": false
+    }
+  ],
+  "channel_scope_native_result": {
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "failed_check": 4,
+    "failed_channel": 0,
+    "reserved_channel": 11,
+    "selected_channel_state_observed": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  }
 }

@@ -306,7 +306,7 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-17T11:58:28.8182205Z",
+  "updated_utc": "2026-11-17T12:54:52.0938592Z",
   "device_access": {
     "updated_utc": "2026-11-17T03:17:50.4327624Z",
     "owner": "user",
@@ -995,8 +995,8 @@
     }
   },
   "decode_integration": {
-    "updated_utc": "2026-11-17T11:58:28.8182205Z",
-    "state": "Native core-floor query and163.2MHz clock admission passed at1050000uV. Host1x ownership preflight rejected before backend/firmware/DMA;0frames. Original90-degree display/power baseline restored and cleaned. Exact-predicate diagnostic KMD built locally, not installed;720p/1080p acceptance open.",
+    "updated_utc": "2026-11-17T12:54:52.0938592Z",
+    "state": "Native snapshot identified unrelated channel0 GET/PUT inequality as the rejection before reserved channel11 was checked. FIFO empty and DMASTOP were observed; no completion is inferred. Firmware/DMA never started;0frames. Original90-degree display/power baseline restored and cleaned. A channel-scoped KMD correction passes ARM64 and regression controls; native validation pending.",
     "active_sequence": [
       "720p H.264",
       "1080p H.264 after720 acceptance"
@@ -1114,9 +1114,9 @@
       "native_decode_accepted": false
     },
     "record": "NVDEC_INTEGRATION_20261116.json",
-    "latest_native_result": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "latest_native_result": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
     "baseline_promoted": false,
-    "baseline_restored_and_cleanup_verified_utc": "2026-11-17T11:58:28.8182205Z",
+    "baseline_restored_and_cleanup_verified_utc": "2026-11-17T12:54:52.0938592Z",
     "display_scope": "Current/saved90-degree row-scan configuration read back; no new physical-screen acceptance",
     "loaded_provider_verification": {
       "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
@@ -1124,12 +1124,17 @@
       "native_decode_accepted": false
     },
     "next_local_candidate": {
-      "source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
-      "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
-      "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+      "source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+      "base_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+      "source_manifest_sha256": "beccfcbdcc752d1c42fd12aebccded9004714762d6028ceeb884ab7262a91aca",
+      "changed_source_sha256": {
+        "windows/nvdec_adapter.c": "686dd2085276085ae3f65b9e40e8e152e55b3ddd8f3624f047dc60dd97e52ebb",
+        "tests/test_nvdec_adapter_windows.c": "21ec9fbbe3b9c75497de1a0c464195a6f8345fd9b596ae29e1b51f9de53569af",
+        "tests/test_nvdec_platform.c": "199fcabd64e675b3aca76c2c51befa6fd7540ffecdc654d5fccfda50124bbb80"
+      },
       "unsigned_kmd": {
-        "Length": 239616,
-        "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
+        "Length": 239104,
+        "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
       },
       "reuse_provider": {
         "Length": 104456,
@@ -1138,8 +1143,7 @@
       "clock_abi": "0x00010002",
       "signed_kmd": false,
       "native_tested": false,
-      "admission_predicates_changed": false,
-      "modern_umd_interfaces_changed": false,
+      "purpose": "Only reserved channel11 participates in decoder channel admission. Keep selected-channel checks, DC/syncpoint conflicts, clock lease and retirement. Other channels are not reset or modified.",
       "arm64_build_exit": 0,
       "controls": [
         {
@@ -1167,23 +1171,25 @@
           "exit": 0
         }
       ],
-      "main_self_review": "Read-only failure snapshots retain register evidence across real release; bounded error output and next-request reset;8 preflight fault controls plus existing retirement/ownership checks.",
-      "failure_field_map": {
-        "1": "No assigned DC register view; no register values read.",
-        "2": "Index=DC word0x28; a=DC syncpoint-vsync register.",
-        "3": "Index=channel; a=FIFO status,b=DMA PUT,c=DMA GET,d=DMA CTRL, read before lease release.",
-        "4": "Index=channel; same fields as3; PUT/GET differ.",
-        "5": "Index=syncpoint191; a=threshold IRQ enable word.",
-        "6": "Index=syncpoint191; a=unreadable first counter value.",
-        "7": "Index=syncpoint191; a=first,b=second counter across50ms.",
-        "8": "Index=CAR offset0x180; a=post-rejection source,b=I/O status,c=closing flag."
+      "old_driver_regression": {
+        "exit": 153,
+        "expected_assertion": 153,
+        "description": "New foreign-channel fixture rejects under the old whole-host scan, then passes with the reserved-channel scope."
       },
-      "field_encoding": "All numeric error fields are eight hexadecimal digits; unused fields are zero, not additional register reads. Source/floor/PLLP preserve the admitted request values.",
-      "reference": "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/hw_host1x05_channel.h",
-      "license_scope": "GPL register definitions consulted as hardware facts; no implementation copied."
+      "platform_asan_ubsan": {
+        "exit": 0,
+        "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+        "stderr": ""
+      },
+      "references": [
+        "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/channel.c",
+        "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/cdma_hw.c"
+      ],
+      "license_scope": "GPL references inspected for per-channel allocation and register isolation; no implementation copied. CPU syncpoint increments/NOP timeout recovery are not used.",
+      "main_self_review": "Selected channel11 predicate unchanged; callback/clock ABI unchanged; foreign-channel and unrelated shared-bit preservation checked through initialization, successful submit, timeout, shutdown and reacquisition."
     },
     "loaded_provider_identity": {
-      "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+      "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
       "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
       "native_loaded_mismatch_proven": true,
       "candidate_provider_loaded_verified": true,
@@ -1191,7 +1197,19 @@
       "new_controller_complete_candidate_round_pending": false,
       "native_decode_accepted": false,
       "baseline_promoted": false
-    }
+    },
+    "loaded_provider_identity_history": [
+      {
+        "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+        "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+        "native_loaded_mismatch_proven": true,
+        "candidate_provider_loaded_verified": true,
+        "restored_provider_and_kmd_loaded_verified": true,
+        "new_controller_complete_candidate_round_pending": false,
+        "native_decode_accepted": false,
+        "baseline_promoted": false
+      }
+    ]
   },
   "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",
   "deferred_load_stability": "LOAD_STABILITY_FOLLOWUP_20261116.json; weather/browser/vkpeak-exit grouped as user-suspected common cause, unconfirmed",

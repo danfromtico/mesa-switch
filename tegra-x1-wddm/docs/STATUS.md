@@ -1,15 +1,15 @@
 # GPU status
 
 Current status,2026-11-17: fixed90-degree row-scan DWM and native Win32 vkcube
-retain their completed acceptance. The real core-owner query returned1050000uV
-and admitted the inherited163.2MHz Host1x clock. The next ownership preflight
-rejected before backend/firmware/DMA;0frames. Its exact failing condition was
-not captured. A KMD-only diagnostic now preserves the condition, channel and
-raw values without changing admission, and passes ARM64/CPU controls; native
-execution is pending. The original11-file display/power baseline is restored
-and temporary packages, tasks, files and diagnostic values are cleaned.
-720p/1080p acceptance remains open. See
-[the native ownership record](NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json)
+retain their completed acceptance. The native rejection is now identified:
+the whole-host preflight compared channel0 GET/PUT even though this decoder
+reserves channel11. Channel0 was FIFO-empty and DMA-stopped, with PUT0 and
+GET0x21d84cf0. This is not foreign-work completion evidence. Firmware/DMA never
+started;0frames. The scoped correction preserves channel11 and syncpoint/DC
+checks, passes ARM64 and regression controls, and remains uninstalled. The
+original11-file display/power baseline is restored and temporary packages,
+tasks, files and diagnostic values are cleaned.720p/1080p acceptance remains
+open. See [the channel-scope record](NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json)
 and [the baseline](ROW_SCAN_BASELINE_20261116.md). Entries below are historical
 snapshots; their startup/rotation priorities and component sets are superseded.
 
