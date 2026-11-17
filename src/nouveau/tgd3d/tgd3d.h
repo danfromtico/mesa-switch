@@ -21,6 +21,7 @@
 #include "vulkan/util/vk_wsi_win32_runtime.h"
 
 #include <deque>
+#include <list>
 #include <new>
 #include <vector>
 
@@ -383,7 +384,7 @@ struct Device {
    bool cmdHasWork = false;
    bool rendering = false;
    std::vector<VkCommandBuffer> freeCommands;
-   std::deque<SubmittedCommands> submittedCommands;
+   std::list<SubmittedCommands> submittedCommands;
    std::vector<VkDescriptorPool> framePools, freePools;
    VkDescriptorSetLayout setLayouts[SET_COUNT] = {};
    VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;

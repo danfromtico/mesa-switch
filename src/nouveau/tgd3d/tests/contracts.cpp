@@ -36,6 +36,17 @@ static unsigned shaderAllocationFrees;
 static VkResult shaderFailure;
 static unsigned shaderBackendCalls;
 
+/* Fault injection surrounds the actual production submission path. */
+static bool failNextNew, countNewAfterSubmit;
+static unsigned newAfterSubmit;
+void *operator new(size_t bytes)
+{
+   if (failNextNew) { failNextNew = false; throw std::bad_alloc(); }
+   if (countNewAfterSubmit) ++newAfterSubmit;
+   if (void *p = std::malloc(bytes ? bytes : 1)) return p;
+   throw std::bad_alloc();
+}
+
 /* Observe the real vector deallocations of a failed CreateShader. Do not
  * inspect its private storage after its C++ lifetime has ended. */
 void operator delete(void *p) noexcept
@@ -416,6 +427,53 @@ static void clear_view_dimensions_contract()
       cmd_destroy(&dev); dev.views.clear();
    }
    std::puts("PASS: ClearView handles 1D color/array and depth-only 1D/2D views, clipped rectangles, depth NaN/INF conversion and GPU-gated retirement (CPU control)");
+}
+
+static void submission_record_contract()
+{
+#ifndef TGD3D_CPU_SYNC_CONTROL
+   for (unsigned fail = 0; fail < 2; ++fail) {
+      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      CHECK(cmd_begin(&dev));
+      dev.framePools.push_back(handle<VkDescriptorPool>(200));
+      dev.vk.EndCommandBuffer = [](VkCommandBuffer) {
+         return VK_SUCCESS;
+      };
+      dev.kt.pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE,
+            const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *) -> HRESULT {
+         ++signals; return S_OK;
+      };
+      dev.vk.QueueSubmit2 = [](VkQueue, uint32_t, const VkSubmitInfo2 *, VkFence) {
+         ++submissions; countNewAfterSubmit = true; return VK_SUCCESS;
+      };
+      dev.kt.pfnWaitForSynchronizationObjectFromGpuCb = [](HANDLE,
+            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *) -> HRESULT {
+         countNewAfterSubmit = false; ++gates; return S_OK;
+      };
+      if (fail) dev.vk.EndCommandBuffer = [](VkCommandBuffer) {
+         failNextNew = true; return VK_SUCCESS;
+      };
+      newAfterSubmit = 0;
+      HRESULT hr = E_FAIL; bool escaped = false;
+      try { hr = flush(&dev, false); }
+      catch (const std::bad_alloc &) { escaped = true; }
+      failNextNew = countNewAfterSubmit = false;
+      CHECK(!escaped && !newAfterSubmit);
+      if (fail) {
+         CHECK(FAILED(hr) && FAILED(dev.lost) && !signals && !submissions && !gates);
+         CHECK(!dev.submitted && dev.submittedCommands.empty());
+         CHECK(dev.cmd && dev.framePools.size() == 1);
+      } else {
+         CHECK(hr == S_OK && signals == 1 && submissions == 1 && gates == 1);
+         CHECK(dev.submitted == 1 && dev.submittedCommands.size() == 1);
+         CHECK(!dev.cmd && dev.framePools.empty());
+         CHECK(dev.submittedCommands.front().pools.size() == 1);
+         CHECK(dev.submittedCommands.front().pools[0] == handle<VkDescriptorPool>(200));
+      }
+      cmd_destroy(&dev);
+   }
+   std::puts("PASS: submission ownership allocates before callbacks; publication after GPU acceptance cannot allocate (CPU control)");
+#endif
 }
 
 static void submission_contract()
@@ -1678,6 +1736,7 @@ int main(int argc, char **argv)
       shader_cache_contracts(true);
       return 0;
    }
+   submission_record_contract();
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();
    completion_failure_propagates(); removed_fence_never_completes(); displayable_write_batches();
    shared_ownership_contract();

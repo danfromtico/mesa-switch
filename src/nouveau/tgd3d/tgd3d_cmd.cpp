@@ -670,6 +670,17 @@ static HRESULT flush_recorded(Device *dev, bool waitForSpace)
          TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
          return dev->lost;
       }
+      /* Allocate a detached ownership record before either queue callback.
+       * Once QueueSubmit2 succeeds, publishing the command and its pools must
+       * not allocate or throw. Keep this record invisible to retire() until
+       * submission succeeds; early returns leave framePools owned by dev. */
+      std::list<SubmittedCommands> pending;
+      try {
+         pending.emplace_back();
+      } catch (const std::bad_alloc &) {
+         TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
+         return dev->lost;
+      }
       const uint64_t value = dev->submitted + 1;
       VkSemaphoreSubmitInfo waits[2] = {};
       uint32_t waitCount = 0;
@@ -726,11 +737,13 @@ static HRESULT flush_recorded(Device *dev, bool waitForSpace)
          TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
          return dev->lost;
       }
-      SubmittedCommands done = {dev->cmd, value, {}};
+      SubmittedCommands &done = pending.front();
+      done.cmd = dev->cmd;
+      done.seq = value;
       dev->sharedImages.clear();
       dev->writtenCount = 0;
       done.pools.swap(dev->framePools);
-      dev->submittedCommands.push_back(done);
+      dev->submittedCommands.splice(dev->submittedCommands.end(), pending);
       dev->cmd = VK_NULL_HANDLE;
       dev->cmdHasWork = false;
       dev->submitted = value;
