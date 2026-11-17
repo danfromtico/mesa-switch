@@ -15,6 +15,7 @@
 #include "../vulkan/nvkmd/windows/nvdec_abi.h"
 
 #include "tgd3d_dxva_h264.h"
+#include <algorithm>
 #include <string.h>
 #include <vector>
 
@@ -543,6 +544,71 @@ static VOID APIENTRY DestroyVideoDecoderOutputView(
     OutputView *view = static_cast<OutputView *>(hView.pDrvPrivate);
     if (view)
         view->~OutputView();
+}
+
+/* A video view uses logical luma coordinates and unnormalized Y, Cb, Cr. */
+static uint8_t video_uint8(FLOAT value)
+{
+    if (!(value > 0.0f)) return 0;  /* includes NaN */
+    return value >= 255.0f ? 255 : static_cast<uint8_t>(value);
+}
+
+static RECT clip_video_rect(const RECT &r, const SubLayout &l)
+{
+    return {std::max<LONG>(0, r.left), std::max<LONG>(0, r.top),
+            std::min<LONG>(l.width, r.right), std::min<LONG>(l.height, r.bottom)};
+}
+
+HRESULT video_clear_output_view(Device *dev, void *handle, const FLOAT color[4],
+                                const D3D10_DDI_RECT *rects, UINT count)
+{
+    const auto *view = static_cast<const OutputView *>(handle);
+    if (!view || view->dev != dev || !view->res || !color) return E_INVALIDARG;
+    Resource *res = view->res;
+    const UINT index = view->first_array;
+    if (res->dev != dev || res->format != DXGI_FORMAT_NV12 || res->kind != ResKind::Staging ||
+        !res->slice || index >= res->layout.size() || index >= res->maps.size())
+        return E_INVALIDARG;
+    const SubLayout &l = res->layout[index];
+    if (!l.width || !l.height || ((l.width | l.height) & 1u) || l.rowPitch < l.width ||
+        uint64_t(l.height) + l.height / 2 > l.depthPitch / l.rowPitch ||
+        l.offset > res->slice.size || l.depthPitch > res->slice.size - l.offset)
+        return E_INVALIDARG;
+    RECT full = {0, 0, LONG(l.width), LONG(l.height)};
+    if (!rects) { rects = &full; count = 1; }
+    bool any = false;
+    for (UINT i = 0; i < count; ++i) {
+        if (rects[i].left > rects[i].right || rects[i].top > rects[i].bottom) return E_INVALIDARG;
+        const RECT r = clip_video_rect(rects[i], l);
+        if (r.left >= r.right || r.top >= r.bottom) continue;
+        if ((r.left | r.top | r.right | r.bottom) & 1) return E_INVALIDARG;
+        any = true;
+    }
+    if (!any) return S_OK;
+    if (res->maps[index].mapped || res->slice.chunk->videoWrites) return E_INVALIDARG;
+    HRESULT hr = wait_sequence(dev, std::max(res->sliceLastUse, res->sliceLastWrite), TGD3D_WAIT_READBACK);
+    if (SUCCEEDED(hr)) hr = slice_map(dev, res->slice);
+    if (FAILED(hr)) return hr;
+    const uint8_t y = video_uint8(color[0]), cb = video_uint8(color[1]), cr = video_uint8(color[2]);
+    uint8_t *luma = res->slice.cpu() + l.offset;
+    uint8_t *chroma = luma + size_t(l.rowPitch) * l.height;
+    for (UINT i = 0; i < count; ++i) {
+        const RECT r = clip_video_rect(rects[i], l);
+        if (r.left >= r.right || r.top >= r.bottom) continue;
+        const size_t width = r.right - r.left;
+        for (LONG row = r.top; row < r.bottom; ++row)
+            memset(luma + size_t(row) * l.rowPitch + r.left, y, width);
+        for (LONG row = r.top / 2; row < r.bottom / 2; ++row) {
+            uint8_t *uv = chroma + size_t(row) * l.rowPitch + r.left;
+            if (cb == cr) memset(uv, cb, width);
+            else for (size_t x = 0; x < width; x += 2) {
+                uv[x] = cb;
+                uv[x + 1] = cr;
+            }
+        }
+    }
+    trace(TGD3D_TRACE_VIDEO, S_OK, 13, (uint64_t(index) << 32) | count);
+    return S_OK;
 }
 
 /* ------------------------------------------------------------------ */

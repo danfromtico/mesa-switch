@@ -557,6 +557,8 @@ void query_pass_end(Device *dev, VkCommandBuffer cmd);
 void dxgi_fill_table(DXGI1_1_DDI_BASE_FUNCTIONS *table, bool has_resolve);
 /* Video integration is not advertised until its runtime/resources are ready. */
 void video_fill_table(D3D11_1DDI_VIDEODEVICEFUNCS *table);
+HRESULT video_clear_output_view(Device *dev, void *handle, const FLOAT color[4],
+                               const D3D10_DDI_RECT *rects, UINT count);
 void video_adapter_init(Adapter *adapter);
 bool video_device_supported(const Device *dev);
 bool video_device_destroy(Device *dev);

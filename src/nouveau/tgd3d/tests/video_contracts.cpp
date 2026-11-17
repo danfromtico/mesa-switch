@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 
 using namespace tgd3d;
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr, "%s:%u: %s\n", __FILE__, __LINE__, #x); std::exit(1); } } while (0)
@@ -216,6 +217,49 @@ void nv12_copy_planes()
    CHECK(state.notifications==2 && target==expected);
 }
 
+void nv12_clear_output_view()
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
+   D3D11_1DDI_DEVICEFUNCS ddi; device_fill_table11(&ddi);
+   std::vector<uint8_t> bytes(328, 0xa5), expected = bytes;
+   Chunk chunk; chunk.cpu = bytes.data(); chunk.size = bytes.size();
+   Resource res; res.dev = &dev; res.kind = ResKind::Staging; res.bind = D3D11_DDI_BIND_DECODER;
+   res.format = DXGI_FORMAT_NV12; res.width = res.height = 8; res.arraySize = 2;
+   res.slice = {&chunk, 8, 312}; res.layout = {{0,12,144,8,8,1}, {160,12,144,8,8,1}};
+   res.maps.resize(2);
+   D3D11_1DDIARG_CREATEVIDEODECODEROUTPUTVIEW desc = {{&res}, h264, 0, 1, 1};
+   std::vector<uint8_t> storage(video.pfnCalcPrivateVideoDecoderOutputViewSize({&dev}, &desc));
+   D3D11_1DDI_HVIDEODECODEROUTPUTVIEW view = {storage.data()};
+   CHECK(video.pfnCreateVideoDecoderOutputView({&dev}, &desc, view, {}) == S_OK);
+   auto clear = [&](const float color[4], const RECT *rects, UINT count) {
+      ddi.pfnClearView({&dev}, D3D11_1DDI_HT_VIDEODECODEROUTPUTVIEW, view.pDrvPrivate, color, rects, count);
+   };
+   const float full[4] = {16.9f, 128, 128, 0};
+   clear(full, nullptr, 0);
+   const size_t plane = 8 + 160;
+   for (unsigned y = 0; y < 12; ++y)
+      std::memset(expected.data() + plane + y*12, y < 8 ? 16 : 128, 8);
+   CHECK(!state.notifications && bytes == expected);
+   const float color[4] = {std::numeric_limits<float>::quiet_NaN(), 240.75f,
+                           std::numeric_limits<float>::infinity(), 0};
+   const RECT rects[] = {{-2,2,4,6},{4,0,4,8}};
+   clear(color, rects, 2);
+   for (unsigned y = 2; y < 6; ++y) std::memset(expected.data() + plane + y*12, 0, 4);
+   for (unsigned y = 9; y < 11; ++y) {
+      uint8_t *uv = expected.data() + plane + y*12;
+      uv[0] = uv[2] = 240; uv[1] = uv[3] = 255;
+   }
+   CHECK(!state.notifications && bytes == expected);
+   const RECT invalid[] = {{0,0,8,8},{1,0,6,2}};
+   clear(full, invalid, 2);
+   CHECK(state.notifications == 1 && bytes == expected);
+   dev.lost = S_OK; chunk.videoWrites = 1;
+   clear(full, nullptr, 0);
+   CHECK(state.notifications == 2 && bytes == expected);
+   video.pfnDestroyVideoDecoderOutputView({&dev}, view);
+}
+
 void decode_frame(unsigned fault, bool release_target_early)
 {
    Device dev; Adapter adapter; init(dev, adapter);
@@ -308,6 +352,7 @@ void video_contracts()
    processor_enumeration();
    retained_cleanup();
    nv12_copy_planes();
+   nv12_clear_output_view();
    decode_frame(0, false); decode_frame(0, true);
    decode_frame(1, false); decode_frame(2, false); decode_frame(3, false);
    decode_frame(4, false);

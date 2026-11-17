@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: MIT
- * ClearView for the texture render-target views this driver creates.
+ * ClearView for the texture and video output views this driver creates.
  * Rectangles apply to every slice of the view and preserve all other pixels.
  */
 #include "tgd3d.h"
@@ -103,8 +103,11 @@ void APIENTRY ClearView11(D3D10DDI_HDEVICE h, D3D11DDI_HANDLETYPE type, void *ha
    Device *dev = D(h);
    if (!dev || FAILED(dev->lost)) return;
    RemovalOnlyErrorScope errors(dev);
-   /* Clear the resource types this pipeline creates. UAV/video/buffer RTVs
-    * are not exposed, and ClearView excludes 3-D textures. */
+   if (type == D3D11_1DDI_HT_VIDEODECODEROUTPUTVIEW) {
+      HRESULT hr = video_clear_output_view(dev, handle, color, rects, count);
+      if (FAILED(hr)) TG_ERROR(dev, hr);
+      return;
+   }
    const bool depth = type == D3D10DDI_HT_DEPTHSTENCILVIEW;
    if (!depth && type != D3D10DDI_HT_RENDERTARGETVIEW) { TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED); return; }
    View *view = static_cast<View *>(handle);
