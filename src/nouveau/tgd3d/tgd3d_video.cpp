@@ -550,6 +550,44 @@ static VOID APIENTRY GetVideoDecoderProfileCount(D3D10DDI_HDEVICE hDevice, UINT 
     if (count) *count = video_device_supported(D(hDevice)) ? 1u : 0u;
 }
 
+/* The 11.1 runtime checks processor capabilities while obtaining the video
+ * device. Every description has the same empty set until processing is
+ * implemented, so the runtime-owned enumerator needs no driver storage. */
+static SIZE_T APIENTRY CalcPrivateVideoProcessorEnumSize(
+    D3D10DDI_HDEVICE, const D3D11_1DDIARG_CREATEVIDEOPROCESSORENUM *)
+{
+    return 0;
+}
+
+static HRESULT APIENTRY CreateVideoProcessorEnum(D3D10DDI_HDEVICE device,
+    const D3D11_1DDIARG_CREATEVIDEOPROCESSORENUM *args,
+    D3D11_1DDI_HVIDEOPROCESSORENUM, D3D11_1DDI_HRTVIDEOPROCESSORENUM)
+{
+    if (!args || !video_device_supported(D(device))) return E_INVALIDARG;
+    trace(TGD3D_TRACE_VIDEO, S_OK, 11,
+          (uint64_t(args->Desc.InputWidth) << 32) | args->Desc.InputHeight);
+    return S_OK;
+}
+
+static VOID APIENTRY DestroyVideoProcessorEnum(D3D10DDI_HDEVICE, D3D11_1DDI_HVIDEOPROCESSORENUM)
+{
+}
+
+static VOID APIENTRY GetVideoProcessorCaps(D3D10DDI_HDEVICE, D3D11_1DDI_HVIDEOPROCESSORENUM,
+                                          D3D11_1DDI_VIDEO_PROCESSOR_CAPS *caps)
+{
+    if (caps) {
+        *caps = {};
+        trace(TGD3D_TRACE_VIDEO, S_OK, 12, 0);
+    }
+}
+
+static VOID APIENTRY CheckVideoProcessorFormat(D3D10DDI_HDEVICE, D3D11_1DDI_HVIDEOPROCESSORENUM,
+                                              DXGI_FORMAT, UINT *flags)
+{
+    if (flags) *flags = 0;
+}
+
 static VOID APIENTRY GetVideoDecoderProfile(D3D10DDI_HDEVICE hDevice, UINT index, GUID *profile)
 {
     if (!profile)
@@ -639,8 +677,11 @@ void video_fill_table(D3D11_1DDI_VIDEODEVICEFUNCS *table)
     table->pfnCalcPrivateVideoDecoderOutputViewSize = CalcPrivateVideoDecoderOutputViewSize;
     table->pfnCreateVideoDecoderOutputView = CreateVideoDecoderOutputView;
     table->pfnDestroyVideoDecoderOutputView = DestroyVideoDecoderOutputView;
-    /* Video processor, crypto and capture DDIs are deliberately absent until
-     * the GPU CSC pipeline and encrypted-content paths are implemented. */
+    table->pfnCalcPrivateVideoProcessorEnumSize = CalcPrivateVideoProcessorEnumSize;
+    table->pfnCreateVideoProcessorEnum = CreateVideoProcessorEnum;
+    table->pfnDestroyVideoProcessorEnum = DestroyVideoProcessorEnum;
+    table->pfnGetVideoProcessorCaps = GetVideoProcessorCaps;
+    table->pfnCheckVideoProcessorFormat = CheckVideoProcessorFormat;
 }
 
 } // namespace tgd3d

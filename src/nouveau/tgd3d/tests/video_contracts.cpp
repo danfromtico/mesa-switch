@@ -147,6 +147,28 @@ void retained_cleanup()
    CHECK(!state.notifications);
 }
 
+void processor_enumeration()
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
+   D3D11_1DDIARG_CREATEVIDEOPROCESSORENUM args = {};
+   args.Desc.InputWidth = args.Desc.OutputWidth = 720;
+   args.Desc.InputHeight = args.Desc.OutputHeight = 480;
+   CHECK(video.pfnCalcPrivateVideoProcessorEnumSize && video.pfnCreateVideoProcessorEnum &&
+         video.pfnGetVideoProcessorCaps && video.pfnCheckVideoProcessorFormat && video.pfnDestroyVideoProcessorEnum);
+   CHECK(video.pfnCalcPrivateVideoProcessorEnumSize({&dev}, &args) == 0);
+   CHECK(video.pfnCreateVideoProcessorEnum({&dev}, &args, {}, {}) == S_OK);
+   D3D11_1DDI_VIDEO_PROCESSOR_CAPS caps, empty = {};
+   std::memset(&caps, 0xff, sizeof(caps));
+   video.pfnGetVideoProcessorCaps({&dev}, {}, &caps);
+   CHECK(!std::memcmp(&caps, &empty, sizeof(caps)));
+   UINT format = ~0u;
+   video.pfnCheckVideoProcessorFormat({&dev}, {}, DXGI_FORMAT_NV12, &format);
+   CHECK(!format && !video.pfnVideoProcessorBlt && !video.pfnVideoProcessorSetStreamRotation);
+   video.pfnDestroyVideoProcessorEnum({&dev}, {});
+   CHECK(!state.opens && !state.devices && !state.notifications);
+}
+
 void nv12_copy_planes()
 {
    Device dev; Adapter adapter; init(dev, adapter);
@@ -277,6 +299,7 @@ void decode_frame(unsigned fault, bool release_target_early)
 
 void video_contracts()
 {
+   processor_enumeration();
    retained_cleanup();
    nv12_copy_planes();
    decode_frame(0, false); decode_frame(0, true);
