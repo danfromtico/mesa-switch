@@ -683,7 +683,12 @@ static HRESULT flush_recorded(Device *dev, bool waitForSpace)
          return dev->lost;
       /* Restore evicted backing before either queue can execute this batch.
        * Paging completion is independent of, and cannot advance, the render fence. */
-      if (FAILED(prepare_resource_residency(dev))) {
+      const bool timing = trace_timing_enabled();
+      ResidencyScan scan;
+      const uint64_t scanBegin = timing ? qpc_now() : 0;
+      const HRESULT residency = prepare_resource_residency(dev, timing ? &scan : nullptr);
+      const uint64_t scanEnd = timing ? qpc_now() : 0;
+      if (FAILED(residency)) {
          TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
          return dev->lost;
       }
@@ -718,7 +723,7 @@ static HRESULT flush_recorded(Device *dev, bool waitForSpace)
       dependency.memoryBarrierCount = 1;
       dependency.pMemoryBarriers = &host;
       dev->vk.CmdPipelineBarrier2(dev->cmd, &dependency);
-      const uint64_t submit_begin = trace_timing_enabled() ? qpc_now() : 0;
+      const uint64_t submit_begin = timing ? qpc_now() : 0;
       if (dev->vk.EndCommandBuffer(dev->cmd) != VK_SUCCESS) {
          TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
          return dev->lost;
@@ -784,6 +789,13 @@ static HRESULT flush_recorded(Device *dev, bool waitForSpace)
       trace(TGD3D_TRACE_SUBMIT_PHASE, E_PENDING, 2, value);
       VkResult result = dev->vk.QueueSubmit2(dev->queue, 1, &submit, VK_NULL_HANDLE);
       trace(TGD3D_TRACE_SUBMIT_PHASE, result == VK_SUCCESS ? S_OK : E_FAIL, 2, value);
+      if (timing) {
+         const uint64_t qpc[4] = {scanBegin, scanEnd, 0, 0};
+         const uint64_t counts[6] = {scan.scanned, scan.used, (uintptr_t)dev, (uint32_t)result,
+                                     scan.makeResidentTicks, 0};
+         trace_timing(TGD3D_TIMING_RESIDENCY_SCAN, result == VK_SUCCESS ? S_OK : E_FAIL,
+                      value, 0, qpc, counts);
+      }
       if (result != VK_SUCCESS) {
          /* No wait is queued for a failed submission. Never fabricate GPU
           * completion on the CPU: older submissions can still own memory. */

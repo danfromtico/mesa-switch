@@ -151,6 +151,16 @@ static void WINAPI record(EVENT_RECORD *event)
       std::printf("],\"value\":[");
       for (unsigned i = 0; i < 6; i++) std::printf("%s%llu", i ? "," : "", (unsigned long long)p.value[i]);
       std::putchar(']');
+      if (p.kind == TGD3D_TIMING_RESIDENCY_SCAN && p.qpc_frequency && p.qpc[1] >= p.qpc[0]) {
+         const uint64_t elapsed = p.qpc[1] - p.qpc[0];
+         const double usPerTick = 1e6 / (double)p.qpc_frequency;
+         std::printf(",\"scanned\":%llu,\"used\":%llu,\"residency_us\":%.3f,\"device\":\"%llx\",\"vk_result\":%d",
+                     (unsigned long long)p.value[0], (unsigned long long)p.value[1], elapsed * usPerTick,
+                     (unsigned long long)p.value[2], (int32_t)p.value[3]);
+         if (p.value[4] <= elapsed)
+            std::printf(",\"make_resident_us\":%.3f,\"walk_us\":%.3f",
+                        p.value[4] * usPerTick, (elapsed - p.value[4]) * usPerTick);
+      }
    } else {
       tgd3d_trace_data p;
       if (!payload(event, &p)) { ++invalid; return; }

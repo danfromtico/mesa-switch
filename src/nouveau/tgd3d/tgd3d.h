@@ -595,7 +595,12 @@ void dxgi_fill_residency12(DXGI1_2_DDI_BASE_FUNCTIONS *table);
 HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args);
 HRESULT trim_memory(Device *dev);
 uint64_t resource_last_use(const Resource *res);
-HRESULT prepare_resource_residency(Device *dev);
+struct ResidencyScan {
+   uint64_t scanned = 0;
+   uint64_t used = 0;
+   uint64_t makeResidentTicks = 0;
+};
+HRESULT prepare_resource_residency(Device *dev, ResidencyScan *scan = nullptr);
 bool direct_flip_compatible(Device *dev, const Resource *source, const Resource *target);
 HRESULT rotated_blit(Device *dev, const DXGI_DDI_ARG_BLT *args, const RECT *source = nullptr);
 void blit_destroy(Device *dev);

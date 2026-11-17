@@ -537,6 +537,26 @@ static void recycle_failure_contract()
    std::puts("PASS: fence-gated resets, atomic publication to reuse caches and exactly-once pool disposal");
 }
 
+static void residency_scan_contract()
+{
+   Device dev;
+   dev.submitted = 8;
+   Resource image, buffer, staging, idle;
+   image.kind = ResKind::Image; image.storage.lastUse = 9;
+   buffer.sliceLastUse = 8; buffer.sliceLastWrite = 9;
+   staging.kind = ResKind::Staging; staging.sliceLastUse = 7;
+   idle.sliceLastWrite = 8;
+   dev.resources = &image; image.next = &buffer; buffer.next = &staging; staging.next = &idle;
+   ResidencyScan scan;
+   CHECK(prepare_resource_residency(&dev, &scan) == S_OK && scan.scanned == 4 && scan.used == 2);
+   CHECK(prepare_resource_residency(&dev) == S_OK);
+   dev.submitted = 9; scan = {};
+   CHECK(prepare_resource_residency(&dev, &scan) == S_OK && scan.scanned == 4 && !scan.used);
+   dev.resources = nullptr; scan = {};
+   CHECK(prepare_resource_residency(&dev, &scan) == S_OK && !scan.scanned && !scan.used);
+   std::puts("PASS: residency scan counts visited DDI resources and current-sequence uses");
+}
+
 static void ambiguous_submit_idle_contract()
 {
    reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
@@ -1932,6 +1952,7 @@ int main(int argc, char **argv)
    }
    submission_record_contract();
    recycle_failure_contract();
+   residency_scan_contract();
    ambiguous_submit_idle_contract();
    final_quiesce_contract();
    submission_contract(); nonblocking_map(); incomplete_fence_keeps_resources();

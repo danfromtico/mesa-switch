@@ -97,14 +97,30 @@ uint64_t resource_last_use(const Resource *res)
       std::max(res->sliceLastUse, res->sliceLastWrite);
 }
 
-HRESULT prepare_resource_residency(Device *dev)
+template<bool count>
+static HRESULT prepare_residency(Device *dev, ResidencyScan *scan)
 {
    for (Resource *res = dev->resources; res; res = res->next) {
+      if constexpr (count) ++scan->scanned;
       if (resource_last_use(res) <= dev->submitted) continue;
+      uint64_t enter;
+      if constexpr (count) {
+         ++scan->used;
+         enter = qpc_now();
+      }
       HRESULT hr = runtime_make_resident(dev, resource_runtime(res));
+      if constexpr (count) scan->makeResidentTicks += qpc_now() - enter;
       if (FAILED(hr)) return hr;
    }
    return S_OK;
+}
+
+HRESULT prepare_resource_residency(Device *dev, ResidencyScan *scan)
+{
+   if (!scan)
+      return prepare_residency<false>(dev, nullptr);
+   *scan = {};
+   return prepare_residency<true>(dev, scan);
 }
 
 HRESULT trim_memory(Device *dev)

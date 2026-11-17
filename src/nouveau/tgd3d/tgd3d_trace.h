@@ -57,6 +57,12 @@ enum tgd3d_timing_kind {
    TGD3D_TIMING_CPU_WAIT = 3,
    /* Same fields, end is zero and result is E_PENDING. */
    TGD3D_TIMING_CPU_WAIT_BEGIN = 4,
+   /* One record per QueueSubmit2 call. qpc: residency preparation enter/return.
+    * value: resource-list nodes scanned, nodes used by this recording, Device
+    * identity, VkResult (signed low 32 bits), accumulated make-resident ticks.
+    * The outer interval includes any paging waits.
+    * completed is unused. sequence is the attempted render timeline value. */
+   TGD3D_TIMING_RESIDENCY_SCAN = 5,
 };
 
 enum tgd3d_wait_reason {
