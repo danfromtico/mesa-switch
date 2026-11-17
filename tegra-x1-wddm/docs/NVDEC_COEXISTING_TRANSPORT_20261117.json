@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T12:54:52.0938592Z",
-  "status": "Native snapshot identified unrelated channel0 GET/PUT inequality as the rejection before reserved channel11 was checked. FIFO empty and DMASTOP were observed; no completion is inferred. Firmware/DMA never started;0frames. Original90-degree display/power baseline restored and cleaned. A channel-scoped KMD correction passes ARM64 and regression controls; native validation pending.",
+  "updated_utc": "2026-11-17T13:20:26.4960102Z",
+  "status": "Candidate ACPI boot loaded the4568-byte74070d7c table instead of the4993-byte9eb6a7e1 file. GPU was absent with native startup closed. The signed2aa4aba4 KMD and0453418e provider were staged only; neither was selected or executed and no decode request ran. Original11-file90-degree display/power baseline restored; temporary packages/tasks/files cleaned. Channel-scoped KMD native validation and720p/1080p acceptance remain open.",
   "mesa_source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
   "switchfan_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
   "changes": [
@@ -13,7 +13,7 @@
     "Existing H264 codec/parser reused; acceptance client now uses the native adapter and verifies NV12 frame hashes and session retirement"
   ],
   "candidate_components": {
-    "scope": "Local channel-scoped candidate; unsigned KMD, unchanged paired ABI2 provider. Not installed.",
+    "scope": "Signed channel-scoped candidate; staged only and cleaned after ACPI boot prerequisite failure. No new KMD/provider activation.",
     "unsigned_kmd": {
       "Length": 239104,
       "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
@@ -25,6 +25,14 @@
     "candidate_acpi": {
       "Length": 4993,
       "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "signed_kmd": {
+      "Length": 242184,
+      "Sha256": "bbf65e41b617aaed846f94a8ad6de06a6de6fca19a35d983795d0280b52f1d98"
+    },
+    "signed_kmd_catalog": {
+      "Length": 8332,
+      "Sha256": "0b748f4d34aba1b35bdbf8c95333bce7ab643dc2ccd237e293255b2b7fc255e3"
     }
   },
   "native_kmd_source": {
@@ -41,7 +49,7 @@
     "full_development_worktree_built_for_installation": false
   },
   "installed_baseline": {
-    "last_authenticated_read_utc": "2026-11-17T12:54:52.0938592Z",
+    "last_authenticated_read_utc": "2026-11-17T13:20:26.4960102Z",
     "changed_this_round": true,
     "kmd_sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e",
     "umd_sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a",
@@ -49,7 +57,12 @@
     "restored": true,
     "current_display": "90-degree1280x720 logical,720x1280 row scan",
     "current_power": "Handheld/DFLL active; dynamic GPU and EMC; errors0",
-    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json"
+    "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+    "driver_packages_changed_this_round": false,
+    "temporary_changes": [
+      "ACPI table",
+      "native startup gate"
+    ]
   },
   "validation": {
     "native_record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
@@ -117,14 +130,14 @@
     "mode": "main-agent self-review",
     "external_review_required": false,
     "external_review_performed": false,
-    "scope": "Native channel0 snapshot and per-channel isolation contract; selected-channel rejection, foreign-channel preservation, shared-bit isolation, failure retirement, old-driver regression and ARM64 build. New channel-scoped KMD native execution pending."
+    "scope": "Exact loaded/disk table and native activation boundary; restoration identities, bounded loader disassembly with PDB-age limitation, archive and cleanup. No new driver code."
   },
   "remaining": [
-    "Sign and test the2aa4aba4 channel-scoped KMD with the unchanged0453418e ABI2 provider and9eb6a7e1 resource table. Verify channel11 itself and retain its strict predicates and syncpoint/DC conflicts.",
-    "Continue real firmware/DMA/output and retirement, then D3D11VA/NV12/window presentation. Do not reset unrelated channels or infer hardware completion from FIFO/DMASTOP state.",
-    "Accept720p before1080p;2K/4K remain independent implementation, untested and undecided. Preserve fixed90 display/power and deferred stability boundaries."
+    "Resolve the optional ACPI override failure before another decoder trial. The matching loader ignores the optional-table function return; post-boot disk bytes and BCD do not identify its live branch or I/O result. Retain the exact failed loaded table and avoid unchanged trial replay without new analysis or correction.",
+    "Keep the signed2aa4aba4 KMD, unchanged0453418e provider and existing controls. No decoder or modern UMD expansion is justified by this pre-activation failure. Once boot prerequisites hold, validate reserved channel11, true firmware/DMA completion and safe resource retirement.",
+    "Complete720p H.264 through D3D11VA/NV12/window presentation before1080p. 2K/4K remain independent implementation, untested and undecided. Preserve90-degree display/power and deferred stability boundaries."
   ],
-  "latest_native_round": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+  "latest_native_round": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
   "superseded_local_candidate_components": {
     "unsigned_tegragpurender.sys": {
       "bytes": 236544,
@@ -161,7 +174,7 @@
       "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
     },
     "clock_abi": "0x00010002",
-    "signed_kmd": false,
+    "signed_kmd": true,
     "native_tested": false,
     "purpose": "Only reserved channel11 participates in decoder channel admission. Keep selected-channel checks, DC/syncpoint conflicts, clock lease and retirement. Other channels are not reset or modified.",
     "arm64_build_exit": 0,
@@ -206,9 +219,23 @@
       "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/cdma_hw.c"
     ],
     "license_scope": "GPL references inspected for per-channel allocation and register isolation; no implementation copied. CPU syncpoint increments/NOP timeout recovery are not used.",
-    "main_self_review": "Selected channel11 predicate unchanged; callback/clock ABI unchanged; foreign-channel and unrelated shared-bit preservation checked through initialization, successful submit, timeout, shutdown and reacquisition."
+    "main_self_review": "Selected channel11 predicate unchanged; callback/clock ABI unchanged; foreign-channel and unrelated shared-bit preservation checked through initialization, successful submit, timeout, shutdown and reacquisition.",
+    "signed_kmd_component": {
+      "Length": 242184,
+      "Sha256": "bbf65e41b617aaed846f94a8ad6de06a6de6fca19a35d983795d0280b52f1d98"
+    },
+    "native_boot_attempt": {
+      "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+      "loaded_dsdt_matches_disk": false,
+      "gpu_present": false,
+      "candidate_kmd_activated": false,
+      "candidate_provider_activated": false,
+      "native_decode_request": false,
+      "baseline_restored": true,
+      "cleanup_complete": true
+    }
   },
-  "latest_native_result": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+  "latest_native_result": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
   "loaded_provider_identity": {
     "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
     "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
@@ -383,5 +410,16 @@
     "native_decode_accepted": false,
     "baseline_restored": true,
     "cleanup_complete": true
-  }
+  },
+  "acpi_override_recurrence": {
+    "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+    "loaded_dsdt_matches_disk": false,
+    "gpu_present": false,
+    "candidate_kmd_activated": false,
+    "candidate_provider_activated": false,
+    "native_decode_request": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "incremental_baseline_policy": "Continue from a verified component combination after each completed module passes necessary native checks. An expected fail-closed optional decode preflight alone does not require reinstalling the original combination when display/power remain verified. Restore on an actual display, enumeration, power, ownership or lifecycle failure. An unexecuted candidate is not an installed baseline."
 }

@@ -1,17 +1,17 @@
 # GPU status
 
 Current status,2026-11-17: fixed90-degree row-scan DWM and native Win32 vkcube
-retain their completed acceptance. The native rejection is now identified:
-the whole-host preflight compared channel0 GET/PUT even though this decoder
-reserves channel11. Channel0 was FIFO-empty and DMA-stopped, with PUT0 and
-GET0x21d84cf0. This is not foreign-work completion evidence. Firmware/DMA never
-started;0frames. The scoped correction preserves channel11 and syncpoint/DC
-checks, passes ARM64 and regression controls, and remains uninstalled. The
-original11-file display/power baseline is restored and temporary packages,
-tasks, files and diagnostic values are cleaned.720p/1080p acceptance remains
-open. See [the channel-scope record](NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json)
-and [the baseline](ROW_SCAN_BASELINE_20261116.md). Entries below are historical
-snapshots; their startup/rotation priorities and component sets are superseded.
+retain their accepted scope. The latest candidate boot loaded the old4568-byte
+DSDT instead of the verified4993-byte disk table. GPU was absent with startup
+closed; the signed channel-scoped KMD/provider were only staged, never selected
+or executed. No decode ran. The exact loader ignores optional-table load errors,
+but the failed live branch/I/O result remains unknown. Original11-file display
+and power identities, loaded images,90-degree configuration and cleanup are
+verified. No driver package was reinstalled for recovery.720p/1080p remain open.
+See [the boot-table recurrence](NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json) and
+[the retained channel correction](NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json).
+Validated modules continue from the verified combination; actual failures require
+recovery. Entries below are historical snapshots with superseded priorities.
 
 **Owner priority update:** repair the current pre-logon reboot first; then complete shader caching and measured ~60 Hz VBlank/presentation pacing before hardware rotation. Idle desktops should submit on demand. The owner explicitly requires native startup to stay enabled and authorizes deploying the next reviewed fix directly for their tests. The SD is currently mounted for offline diagnosis.
 
