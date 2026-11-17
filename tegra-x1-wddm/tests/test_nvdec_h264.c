@@ -244,8 +244,19 @@ static void test_command(void)
     b.slice_count = 0;
     CHECK(tg_nvdec_build_h264_cmd(cmd, 256, &b) == 0);
     b.slice_count = 2;
-    b.syncpt_id = 32;
-    CHECK(tg_nvdec_build_h264_cmd(cmd, 256, &b) == 0);
+    /* T210 has192 counters with an8-bit UCLASS index. In particular the
+     * production reservation191 must survive encoding without truncation. */
+    const uint32_t valid_syncpts[] = {0u,31u,32u,191u};
+    for (size_t s=0;s<sizeof(valid_syncpts)/sizeof(valid_syncpts[0]);++s) {
+        b.syncpt_id=valid_syncpts[s];
+        CHECK(tg_nvdec_build_h264_cmd(cmd, 256, &b) == n);
+        CHECK(cmd[n-2] == 0x20000001u && cmd[n-1] == (0x100u|valid_syncpts[s]));
+    }
+    const uint32_t invalid_syncpts[] = {192u,255u,256u,UINT32_MAX};
+    for (size_t s=0;s<sizeof(invalid_syncpts)/sizeof(invalid_syncpts[0]);++s) {
+        b.syncpt_id=invalid_syncpts[s];
+        CHECK(tg_nvdec_build_h264_cmd(cmd, 256, &b) == 0);
+    }
 }
 
 static void test_parser(const char *path)

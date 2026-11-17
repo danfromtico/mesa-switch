@@ -166,7 +166,10 @@ size_t tg_nvdec_build_h264_cmd(uint32_t *out, size_t words,
         !bufs->slice_offsets || !bufs->coloc || !bufs->history ||
         !bufs->mbhist || !bufs->status || !bufs->stream_len ||
         !bufs->slice_count || bufs->slice_count > TG_NVDEC_MAX_SLICES ||
-        bufs->syncpt_id > 31u)
+        /* T210 Host1x05 has192 counters; UCLASS INCR_SYNCPT carries an8-bit
+         * index below the condition byte. The earlier32-counter limit
+         * rejected the adapter's reserved counter191 before submission. */
+        bufs->syncpt_id >= 192u)
         return 0;
     if (!method_address_valid(bufs->config) ||
         !method_address_valid(bufs->bitstream) ||
