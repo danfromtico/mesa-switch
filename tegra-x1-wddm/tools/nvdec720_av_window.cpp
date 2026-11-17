@@ -382,26 +382,43 @@ public:
    }
    void finish(AVD3D11VADeviceContext *hw) {
       auto *c=hw->device_context;
-      { ContextLock lock(hw);c->End(completion.p);c->Flush(); }
+      {
+         ContextLock lock(hw);
+         journal.mark("CALL","EndPreviewGPUEvent");
+         c->End(completion.p);
+         journal.mark("RETURN","EndPreviewGPUEvent");
+         journal.mark("CALL","FlushPreviewGPUEvent");
+         c->Flush();
+         journal.mark("RETURN","FlushPreviewGPUEvent");
+      }
       const ULONGLONG start=GetTickCount64();BOOL done=FALSE;
+      journal.mark("CALL","WaitPreviewGPUEvent");
       while (!done) {
          HRESULT hr;
          { ContextLock lock(hw);hr=c->GetData(completion.p,&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH); }
          if (FAILED(hr)) require(hr,"Preview completion query");
+         check(hr==S_OK || hr==S_FALSE,"unexpected preview query status");
          check(GetTickCount64()-start<10000,"preview completion timeout");
          if (hr==S_FALSE || !done) { done=FALSE;pump();Sleep(1); }
       }
-      require(DwmFlush(),"DWM flush after decoded preview");
+      journal.mark("VERIFIED","PreviewGPUEvent");
+      journal.invoke("DwmFlush",[&]{return DwmFlush();});
       DWORD cloaked=0;
-      require(DwmGetWindowAttribute(window.handle,DWMWA_CLOAKED,&cloaked,sizeof(cloaked)),"Get preview window state");
+      journal.invoke("GetPreviewWindowCloaking",[&]{
+         return DwmGetWindowAttribute(window.handle,DWMWA_CLOAKED,&cloaked,sizeof(cloaked));
+      });
       check(IsWindowVisible(window.handle) && !cloaked,"preview window not visible");
+      journal.mark("VERIFIED","VisibleUncloakedWindow");
+      journal.mark("CALL","FinalFrameHold");
       const ULONGLONG visible=GetTickCount64();
       while (GetTickCount64()-visible<2000) {pump();Sleep(10);}
+      const ULONGLONG held=GetTickCount64()-visible;
+      journal.mark("RETURN","FinalFrameHold");
       ContextLock lock(hw);
       c->PSSetShader(nullptr,nullptr,0);c->VSSetShader(nullptr,nullptr,0);
       ID3D11Buffer *none=nullptr;c->PSSetConstantBuffers(0,1,&none);c->RSSetState(nullptr);
       journal.mark("COMPLETE","PresentedAndRetired");
-      std::printf("PREVIEW_COMPLETE gpu_event=1 last_frame_hold_ms=%llu\n",GetTickCount64()-visible);
+      std::printf("PREVIEW_COMPLETE gpu_event=1 last_frame_hold_ms=%llu\n",held);
    }
 };
 
@@ -578,7 +595,10 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
    unsigned frames=0;int64_t last=AV_NOPTS_VALUE;const ULONGLONG start=GetTickCount64();
    auto receive=[&](bool flushing) {
       for (;;) {
+         const bool after_last=frames==6;
+         if (after_last) journal.mark("CALL","ReceiveAfterLastFrame");
          int ret=avcodec_receive_frame(decoder.p,frame.p);
+         if (after_last) journal.mark("RETURN","ReceiveAfterLastFrame",static_cast<HRESULT>(ret));
          if (ret==AVERROR_EOF) return;
          if (ret==AVERROR(EAGAIN)) {check(!flushing,"unexpected EAGAIN while draining");return;}
          av_check(ret,"Receive decoded frame");
@@ -609,7 +629,10 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
          if (preview)
             preview->draw(hw,cpu->data[0],cpu->linesize[0],cpu->data[1],cpu->linesize[1],frames,
                           frames==5 ? capture : nullptr);
-         ++frames;av_frame_unref(cpu.p);av_frame_unref(frame.p);
+         ++frames;
+         if (frames==6) journal.mark("CALL","ReleaseLastFrameRefs");
+         av_frame_unref(cpu.p);av_frame_unref(frame.p);
+         if (frames==6) journal.mark("RETURN","ReleaseLastFrameRefs");
       }
    };
    for (;;) {
@@ -619,13 +642,24 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
       if (packet->stream_index==stream) {av_check(avcodec_send_packet(decoder.p,packet.p),"Submit packet");receive(false);}
       av_packet_unref(packet.p);
    }
-   av_check(avcodec_send_packet(decoder.p,nullptr),"Drain decoder");receive(true);
+   av_check(journal.av_call("DrainDecoder",[&]{return avcodec_send_packet(decoder.p,nullptr);}),"Drain decoder");
+   receive(true);
    check(frames==6,"incomplete decoded sequence");
-   if (preview) { preview->finish(hw);preview.reset(); }
+   journal.mark("COMPLETE","DecodedSequence");
+   // After drain, every decoder surface has been read back. The shader uses
+   // separate uploaded textures. The retained AVHWDeviceContext and preview
+   // own the graphics resources through the GPU event and compositor flush.
    journal.mark("CALL","CloseDecoder");
    avcodec_free_context(&decoder.p);
    journal.mark("RETURN","CloseDecoder");
-   require(hw->device->GetDeviceRemovedReason(),"Final device status");
+   if (preview) {
+      journal.invoke("DeviceAfterDecoderClose",[&]{return hw->device->GetDeviceRemovedReason();});
+      preview->finish(hw);
+      journal.mark("CALL","ReleasePreview");
+      preview.reset();
+      journal.mark("RETURN","ReleasePreview");
+   }
+   journal.invoke("FinalDeviceStatus",[&]{return hw->device->GetDeviceRemovedReason();});
    std::printf("DECODED_FRAMES=%u WINDOW_FRAMES=%u elapsed_ms=%llu\n",frames,
                mode==Mode::Present?frames:0,GetTickCount64()-start);
 }
