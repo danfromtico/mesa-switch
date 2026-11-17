@@ -175,6 +175,15 @@ static BOOLEAN host_reject(TG_GPU_ADAPTER *a, ULONG check, ULONG index,
     a->Video.HostCheck=check; a->Video.HostIndex=index;
     a->Video.HostValue[0]=v0; a->Video.HostValue[1]=v1;
     a->Video.HostValue[2]=v2; a->Video.HostValue[3]=v3;
+    a->Video.HostValue[4]=a->Video.HostValue[5]=0;
+    if (check==TgNvdecHostChannelFifo || check==TgNvdecHostChannelPointers) {
+        /* An unequal stopped GET/PUT pair does not identify the configured
+         * ring. Capture its address bounds before considering any handoff
+         * change; do not initialize/reset GET merely to pass admission. */
+        ULONG base=index*0x4000u;
+        a->Video.HostValue[4]=read32(a,TG_NVDEC_AP_HOST1X,base+0x14u);
+        a->Video.HostValue[5]=read32(a,TG_NVDEC_AP_HOST1X,base+0x20u);
+    }
     return FALSE;
 }
 static BOOLEAN host_idle(TG_GPU_ADAPTER *a)
@@ -269,12 +278,13 @@ static void error_text(TG_GPU_ADAPTER *a, char *out)
 {
     UINT n=0;
     if (a->Video.HostCheck) {
-        const char prefix[]="Host1x ownership";
+        const char prefix[]="Host1x";
         for (UINT i=0;i<sizeof(prefix)-1;++i) out[n++]=prefix[i];
         const ULONG values[]={a->Video.HostCheck,a->Video.HostIndex,
             a->Video.HostValue[0],a->Video.HostValue[1],a->Video.HostValue[2],a->Video.HostValue[3],
+            a->Video.HostValue[4],a->Video.HostValue[5],
             a->Video.PllpBase,a->Video.HostSource,a->Video.CoreBootFloorUv};
-        const char *labels[]={" check="," index="," a="," b="," c="," d="," pllp="," src="," floor="};
+        const char *labels[]={" check="," index="," a="," b="," c="," d="," e="," f="," pll="," src="," uv="};
         for (UINT i=0;i<RTL_NUMBER_OF(values);++i) {
             for (UINT j=0;labels[i][j] && n<TG_NVDEC_ERROR_SIZE-1u;++j) out[n++]=labels[i][j];
             for (int shift=28;shift>=0 && n<TG_NVDEC_ERROR_SIZE-1u;shift-=4)

@@ -25,7 +25,8 @@ typedef struct _TG_NVDEC_ADAPTER {
     ULONG HostSource, PllpBase, CoreBootFloorUv;
     /* Failure-only register evidence, captured before releasing the lease.
      * Internal storage; the existing bounded error string carries the values. */
-    ULONG HostCheck, HostIndex, HostValue[4];
+    /* Slots4/5 capture DMASTART/END only for a channel rejection. */
+    ULONG HostCheck, HostIndex, HostValue[6];
     const char *Operation; /* static diagnostic label, never a borrowed buffer */
     volatile LONG Closing;
     NTSTATUS IoStatus;
