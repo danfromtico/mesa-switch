@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T07:40:15.349806+00:00",
-  "state": "Original display/power baseline restored and native trial cleaned; decode not executed; candidate not promoted",
+  "updated_utc": "2026-11-17T08:53:11.167757+00:00",
+  "state": "Real KMT clock-acquisition failure; original display/power baseline restored and cleaned;720p/1080p not accepted",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
     "active_sequence": [
@@ -119,7 +119,7 @@
     },
     "source_set_sha256": "bd508394ce2a4c6376f0ae9863d212d7594339ad872848679ee47782dcef4103",
     "source_snapshot_scope": "Initial selected720p import snapshot, not the current source tree. Later per-module records and current_committed_source supersede hashes for changed files.",
-    "decode_transport_scope": "Adapter-owned native KMT client/service connected in source and built; no actual clock lease or decoder command executed on hardware"
+    "decode_transport_scope": "Real native KMT adapter/device/LOAD escape reached; Host1x acquisition rejected before firmware or DMA"
   },
   "licenses": {
     "new_code_spdx": "MIT",
@@ -189,13 +189,14 @@
     "gemini_independent_review": {
       "status": "not performed",
       "required": false
-    }
+    },
+    "clock_native_result": "NVDEC_CLOCK_NATIVE_20261117.json"
   },
   "remaining": [
-    "Validate the corrected deferred provider transition before any new candidate activation",
-    "Verify real clock lease, firmware boot, DMA route and short720p H264 output with actual completion",
-    "Connect ordinary D3D11VA runtime and NV12 presentation; no video capability advertisement yet",
-    "After720p acceptance validate1080p;2K/4K retained independently and untested"
+    "Sign one paired diagnostic KMD/provider candidate and collect the exact failing clock call once using the verified deferred installer",
+    "Fix the demonstrated clock contract failure without synthesizing ownership or success",
+    "Execute real firmware boot, DMA and720p H264 output; then ordinary D3D11VA/NV12/window presentation",
+    "After720p acceptance validate1080p;2K/4K remain independently retained and untested"
   ],
   "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
   "client_route_candidate": {
@@ -229,7 +230,7 @@
     "public_windows_redistribution_confirmed": false
   },
   "current_committed_source": {
-    "commit": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+    "commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
     "files": {
       "src/nouveau/nvdec/nvdec.h": "f7a8dcf3fbeaec80b04031d40db1477b91b764c56becd86d387848813654cf47",
       "src/nouveau/nvdec/nvdec_engine.c": "50c921f591579713244e07c9b8f227b5fc925aaf61b48911aabd4fce1287f824",
@@ -256,16 +257,16 @@
       "src/nouveau/vulkan/nvkmd/windows/nvdec_escape_abi.h": "75bb8efd6e74f659682da51abe72e993249dfec9017abdb4abeb9121f0beeca0",
       "src/nouveau/vulkan/nvkmd/windows/nvdec_native.c": "b9105ad1d5d03eb88baf34465cd481d26907ec7d74688f8b153becbb56172361",
       "src/nouveau/vulkan/nvkmd/windows/nvdec_native.h": "163108e9fb172e7e306648d88f7f019ae8d1fc31953360391084f32621e5d954",
-      "tegra-x1-wddm/integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "2212768024f1c924699eb9bd55af674ef4bfa5c9be91b732ec0fa9d571e7cbfc",
+      "tegra-x1-wddm/integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "6d82831007dc510eadba089ac22232ee1aa7718f65a6b67009ff3698906e65d8",
       "tegra-x1-wddm/platform/t214_nvdec.c": "38a5b726bbe2f20e692458f54c7fa0ebdffcc99eb5b58c0807edf119418ec908",
       "tegra-x1-wddm/platform/t214_nvdec.h": "b308f5db5384b1b2f08dddb3434b71e4dd95b9754f5148dc2a80bf51b0cd3764",
       "tegra-x1-wddm/platform/t214_resources.h": "ee3674a3ff12965ee66e11cf0e5149f6c51e17d4f02ebc17786eafbd83a8faa1",
       "tegra-x1-wddm/tests/nvdec_inactive_fixture.c": "363426c25595f75862c93f8ab2efa7bc388f1e3463244c6d4e7b9e22cedb9c98",
       "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "4dea4e6a5150b6511253cd4c02505239163f5cc0a7d6908bc919fec790c049a4",
       "tegra-x1-wddm/tests/test_context_windows.c": "2bbe82ae7bdc7d71d1d8624653cfe6b932bf401300533dcb6f0306f1afb29476",
-      "tegra-x1-wddm/tests/test_host1x_clock_windows.c": "ec8ed647b6911601adc386d4b5b7b6aba948ae739f870d9b435cba5978171356",
+      "tegra-x1-wddm/tests/test_host1x_clock_windows.c": "c7e910535b3f7affb35815f6c406f7e8cc13fcb3b459b32102b2b90485f7f940",
       "tegra-x1-wddm/tests/test_nvdec.c": "700997d449a4754ec3d83a2123fe5ea8ff172260350d52018189c4573dc70c98",
-      "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "9541eb6cbcc5d9f1b44b2cb43fe2a8fc5888a4a8e9f50678c50650cee09a3d96",
+      "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "8648aba14994c95068351c441536002a917e2f063b948ad10224c0b712e7d40a",
       "tegra-x1-wddm/tests/test_nvdec_h264.c": "d508104db872875d286ede06160e90ad2a7940398fa22c6d49f24498a5e72e8d",
       "tegra-x1-wddm/tests/test_nvdec_memory_windows.c": "bea37e848bcc3b470fc7cbb78d211939d6416a86a868b329bfc6d36c64883928",
       "tegra-x1-wddm/tests/test_nvdec_native.c": "d1053ae13299bee7182d0e3f73e6282535ac118ab3142ad87b7be4590e096ffe",
@@ -291,10 +292,10 @@
       "tegra-x1-wddm/windows/context.c": "036eb0c379a9806154645bb79732bfa160b7a3bdb79bca523ea32a0134371029",
       "tegra-x1-wddm/windows/context.h": "64de0c40c96a5d2b47f82ebce3b72da2666e1dfc3d332fc716f0acfb66b98817",
       "tegra-x1-wddm/windows/device_lifetime.c": "c3db788f4bd1144e7c0a6e9c5d7b19e30057d081c97926d154a97e8862d50261",
-      "tegra-x1-wddm/windows/host1x_clock.c": "c930270c78a60cff4ba0e1ebc374ac674b517c165ac765aada779ee0ab0bd0f3",
-      "tegra-x1-wddm/windows/host1x_clock.h": "13bfbb8ace597b26767cae6e7d50c336659840e02d103c7de6a6691fd5b42c21",
+      "tegra-x1-wddm/windows/host1x_clock.c": "f06c780446a281642f447b26af6491adc1bf10fa5dc990cbbe013fb6d6c1144a",
+      "tegra-x1-wddm/windows/host1x_clock.h": "953fa066315c5c7160a8c9ca43406c5db8c300477050dac5b487a70800b1e347",
       "tegra-x1-wddm/windows/host1x_clock_abi.h": "dc95b991fa8de7de4d505f30eb84ada3c7788e093b10214ad121d66fe6247a52",
-      "tegra-x1-wddm/windows/nvdec_adapter.c": "df97adb94c4cde0f2a8e236ffc1fbb60577781ad4de82535c0bcce602c8489b6",
+      "tegra-x1-wddm/windows/nvdec_adapter.c": "f09c71b15564599c61f3591c3169574d9a8a77bf7d568df10727c485da078601",
       "tegra-x1-wddm/windows/nvdec_adapter.h": "6071a36e26e3a340a9358cd6be1812a418cca2a3d0ee9bd3ea32abead5e428a8",
       "tegra-x1-wddm/windows/nvdec_backend.c": "cfe3b1d37b494383f97534a178c8f35166dac56b486d7984195ca1e362d26929",
       "tegra-x1-wddm/windows/nvdec_backend.h": "a387b3f7c064c549ca6e846f46e99f7adda679376f8bf00766e3021a3c43dacf",
@@ -392,7 +393,7 @@
     "review": "main-agent self-review; real decoder DMA still untested"
   },
   "temporary_candidate_components_restored": true,
-  "latest_native_result": "NVDEC_PROVIDER_RECOVERY_20261117.json",
+  "latest_native_result": "NVDEC_CLOCK_NATIVE_20261117.json",
   "review": {
     "mode": "main-agent self-review",
     "external_review_required": false,
@@ -407,5 +408,42 @@
     "windowsdrivers_hook": "7ecce6c083df1f33def014445f3cacd1c3301095",
     "frozen_native_manifest_sha256": "fffbae91a62453c121377070bec5716acfe7d28c0bea636f30e24ae5ed55c59e",
     "build_full_dirty_worktree": false
+  },
+  "next_local_candidate": {
+    "source_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+    "components": {
+      "unsigned_kmd": {
+        "bytes": 237568,
+        "sha256": "59308faf36c15386230605f17f184134841cc910b4acfbe08b67d859b617b6b3"
+      },
+      "unsigned_provider": {
+        "bytes": 100352,
+        "sha256": "98c7408526b5b53afb00216941b43d03bbf3ee71022340db57876576019de6e5"
+      }
+    },
+    "source_manifest_sha256": "304853fdafed4313cbe0bd36104dfb2b892db8b4f8aae242ea85f65a2827c142",
+    "signed": false,
+    "installed": false,
+    "purpose": "Preserve failed consumer API boundary and exact failed provider WDF step/status; no completion, clock or ownership semantics changed",
+    "provider_registry_stage_map": {
+      "1": "WdfRequestForwardToIoQueue",
+      "2": "input/output lengths",
+      "3": "WdfRequestRetrieveInputBuffer",
+      "4": "WdfRequestRetrieveOutputBuffer",
+      "5": "request ABI and callbacks",
+      "6": "provider availability",
+      "7": "exclusive clock claim",
+      "8": "inherited clock registers",
+      "9": "WdfObjectAllocateContext",
+      "10": "IoAllocateWorkItem",
+      "11": "WdfDeviceStopIdle",
+      "12": "WdfRequestMarkCancelableEx"
+    },
+    "provider_diagnostic_scope": "Reset at provider creation; failed kernel requests only, using existing passive registry trace; no kernel pointers recorded",
+    "validation": {
+      "full_arm64_kmd_build": 0,
+      "arm64_provider_build": 0,
+      "clock_lifetime_and_adapter_controls": true
+    }
   }
 }

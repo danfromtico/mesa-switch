@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T07:39:08.211678+00:00",
-  "status": "Original display/power baseline restored and native trial cleaned; decode not executed; candidate not promoted",
-  "mesa_source_commit": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+  "updated_utc": "2026-11-17T08:53:11.167757+00:00",
+  "status": "Real KMT clock-acquisition failure; original display/power baseline restored and cleaned;720p/1080p not accepted",
+  "mesa_source_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
   "switchfan_hook_commit": "7ecce6c083df1f33def014445f3cacd1c3301095",
   "changes": [
     "Real KMT-device-owned decoder session in the coexisting render miniport; previous display escape preserved",
@@ -43,7 +43,7 @@
     "host_mux_patch_commit": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5"
   },
   "installed_baseline": {
-    "last_authenticated_read_utc": "2026-11-17T07:36:35.3452358Z",
+    "last_authenticated_read_utc": "2026-11-17T08:41:52.2909514Z",
     "changed_this_round": true,
     "kmd_sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e",
     "umd_sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a",
@@ -63,12 +63,12 @@
     "cpu_resource_mapping_and_cleanup": "passed",
     "asan_ubsan_platform_control": "passed",
     "acpi_unchanged_other_devices_and_gpu_nonresource_aml": true,
-    "native_install": "Candidate ACPI loaded and provider files changed; provider installer did not return; KMD never selected; original baseline restored",
-    "native_host1x_clock_lease": false,
+    "native_install": "Paired provider/KMD activated via deferred installation; original baseline restored",
+    "native_host1x_clock_lease": "failed0xc0000010 before firmware/DMA",
     "native_firmware_boot": false,
     "native_720p_h264": false,
     "d3d11va_nv12_presentation": false,
-    "native_provider_replacement": "live replacement interrupted; original restored with deferred public SetupAPI"
+    "native_provider_replacement": "Deferred install and planned boot verified in both directions"
   },
   "clock_policy": {
     "candidate_nvdec_hz": 204000000,
@@ -98,12 +98,12 @@
     "scope": "Main-agent source review, ARM64 builds, CPU controls and bounded installation/recovery; native decode remains untested"
   },
   "remaining": [
-    "Validate the corrected deferred provider transition before any new candidate activation",
-    "Verify real clock lease, firmware boot, DMA route and short720p H264 output with actual completion",
-    "Connect ordinary D3D11VA runtime and NV12 presentation; no video capability advertisement yet",
-    "After720p acceptance validate1080p;2K/4K retained independently and untested"
+    "Sign one paired diagnostic KMD/provider candidate and collect the exact failing clock call once using the verified deferred installer",
+    "Fix the demonstrated clock contract failure without synthesizing ownership or success",
+    "Execute real firmware boot, DMA and720p H264 output; then ordinary D3D11VA/NV12/window presentation",
+    "After720p acceptance validate1080p;2K/4K remain independently retained and untested"
   ],
-  "latest_native_round": "NVDEC_PROVIDER_RECOVERY_20261117.json",
+  "latest_native_round": "NVDEC_CLOCK_NATIVE_20261117.json",
   "superseded_local_candidate_components": {
     "unsigned_tegragpurender.sys": {
       "bytes": 236544,
@@ -120,6 +120,43 @@
     "nvdec720-native.exe": {
       "bytes": 94208,
       "sha256": "664b20449aecd55929a2b85a5d41c0b2ec79b8ff8cebba2e79d07c51e0e5d83c"
+    }
+  },
+  "next_local_candidate": {
+    "source_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+    "components": {
+      "unsigned_kmd": {
+        "bytes": 237568,
+        "sha256": "59308faf36c15386230605f17f184134841cc910b4acfbe08b67d859b617b6b3"
+      },
+      "unsigned_provider": {
+        "bytes": 100352,
+        "sha256": "98c7408526b5b53afb00216941b43d03bbf3ee71022340db57876576019de6e5"
+      }
+    },
+    "source_manifest_sha256": "304853fdafed4313cbe0bd36104dfb2b892db8b4f8aae242ea85f65a2827c142",
+    "signed": false,
+    "installed": false,
+    "purpose": "Preserve failed consumer API boundary and exact failed provider WDF step/status; no completion, clock or ownership semantics changed",
+    "provider_registry_stage_map": {
+      "1": "WdfRequestForwardToIoQueue",
+      "2": "input/output lengths",
+      "3": "WdfRequestRetrieveInputBuffer",
+      "4": "WdfRequestRetrieveOutputBuffer",
+      "5": "request ABI and callbacks",
+      "6": "provider availability",
+      "7": "exclusive clock claim",
+      "8": "inherited clock registers",
+      "9": "WdfObjectAllocateContext",
+      "10": "IoAllocateWorkItem",
+      "11": "WdfDeviceStopIdle",
+      "12": "WdfRequestMarkCancelableEx"
+    },
+    "provider_diagnostic_scope": "Reset at provider creation; failed kernel requests only, using existing passive registry trace; no kernel pointers recorded",
+    "validation": {
+      "full_arm64_kmd_build": 0,
+      "arm64_provider_build": 0,
+      "clock_lifetime_and_adapter_controls": true
     }
   }
 }
