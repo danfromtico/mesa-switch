@@ -1,5 +1,7 @@
 # GPU status
 
+The presentation and resource ownership fixes are integrated on the controlled video branch. The ARM64 tgd3d and NVK synchronization contract suites passed on the Switch. A 320×240 Win32 cube selected the signed candidate NVK by driver UUID and adapter LUID and completed 120 successful Presents in an 8.19-second process run. DWM retained its installed 3a8ed9ff UMD and 95b97df4 ICD throughout. The candidate UMD still needs ordinary DWM validation. [Integrated commits, build identities and window results](TGD3D_PRESENT_OWNERSHIP_20261117.json)
+
 On November 17, 2026 the Switch decoded six 1280×720 H.264 frames through the Windows D3D11VA runtime and native NVDEC. The synchronous libavcodec client used the codec-provided 17-surface pool. All six Host1x targets completed, the session closed, and all 8,294,400 NV12 bytes matched an independent software decode. The observed run lasted 4.374 seconds including fixture setup and cleanup. [D3D11VA acceptance and component identities](NVDEC_D3D11VA_720_20261117.json)
 
 Media Foundation Source Reader initialized the decoder and its buffers, then failed in its first EndFrame. A separate GPU color conversion and window trial ended in an unexpected system restart. The partial trace includes two native decode completions and preview resource creation. The CSC output, first Present and physical window remain unverified. [Native runs and recovery](NVDEC_D3D11VA_720_20261117.json)
