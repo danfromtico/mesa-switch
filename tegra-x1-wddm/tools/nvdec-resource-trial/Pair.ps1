@@ -48,16 +48,54 @@ function Assert-Power {
  Add-Type -AssemblyName System.Windows.Forms
  if([string][Windows.Forms.SystemInformation]::PowerStatus.PowerLineStatus -ne 'Online'){throw 'External power is not online'}
 }
-function Assert-EmcReady($Snapshot) {
+function Read-LoadedDsdt([string]$Path) {
+ if(!('NvdecPairFirmwareApi' -as [type])){Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class NvdecPairFirmwareApi {
+ [DllImport("kernel32.dll",SetLastError=true)]
+ public static extern uint GetSystemFirmwareTable(uint provider,uint table,byte[] buffer,uint size);
+}
+'@}
+ # Public API: ACPI provider, reversed DSDT table ID. This returns the first
+ # loaded DSDT, not the override file waiting on disk for the next boot.
+ $length=[NvdecPairFirmwareApi]::GetSystemFirmwareTable(0x41435049,0x54445344,$null,0)
+ if($length -lt 36 -or $length -gt 1048576){throw ('Loaded DSDT size/error: '+$length+'/'+[Runtime.InteropServices.Marshal]::GetLastWin32Error())}
+ $bytes=[byte[]]::new($length)
+ if([NvdecPairFirmwareApi]::GetSystemFirmwareTable(0x41435049,0x54445344,$bytes,$length) -ne $length){throw 'Loaded DSDT size changed'}
+ $f=[IO.FileStream]::new($Path,[IO.FileMode]::Create,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+ try{$f.Write($bytes,0,$bytes.Length);$f.Flush($true)}finally{$f.Dispose()}
+ $checksum=0;foreach($b in $bytes){$checksum=($checksum+$b) -band 255}
+ if([Text.Encoding]::ASCII.GetString($bytes,0,4) -ne 'DSDT' -or [BitConverter]::ToUInt32($bytes,4) -ne $length -or $checksum){throw 'Loaded DSDT header/checksum differs; raw observation retained'}
+ File-Record $Path
+}
+function Assert-LoadedDsdt($Actual,$Expected) {
+ if($null -eq $Actual -or $Actual.Length -ne $Expected.Length -or $Actual.Sha256 -ne $Expected.Sha256){throw 'Loaded DSDT differs from the intended table; disk identity alone is insufficient'}
+}
+function Assert-EmcReady($Snapshot,[ValidateSet('Active','ClosedGate')][string]$Phase='Active') {
  $emc=$Snapshot.Emc
  if($null -eq $emc -or $emc.Version -ne 1){throw 'EMC status missing or unsupported'}
- foreach($name in @('LastError','EnumerationError','ActmonError','QosError')){
+ foreach($name in @('EnumerationError','ActmonError','QosError')){
   if($null -eq $emc.$name -or [long]$emc.$name -ne 0){throw ('EMC status is not ready: '+$name+'='+$emc.$name)}
  }
- # SWFAN_EMC_STATUS v1: identified/rate/enumerated/dynamic/QoS/ACTMON.
+ # Fan33 cannot enable dynamic EMC/QoS until the GPU's live counter and
+ # voltage-floor handshake are present. Still require working ACTMON and
+ # fresh, enumerated rate telemetry before selecting the resource candidate.
+ $required=if($Phase -eq 'ClosedGate'){0x47}else{0x6f}
  # Reject mailbox/transition faults; preserve unrelated newer status bits.
- if($null -eq $emc.Flags -or ([uint32]$emc.Flags -band 0x6f) -ne 0x6f -or
-    ([uint32]$emc.Flags -band 0x90) -ne 0){throw 'EMC dynamic status or fault flags differ'}
+ if($null -eq $emc.Flags -or ([uint32]$emc.Flags -band $required) -ne $required -or
+    ([uint32]$emc.Flags -band 0x90) -ne 0){throw ('EMC '+$Phase+' status or fault flags differ')}
+ if($null -eq $emc.SampleAgeMs -or [long]$emc.SampleAgeMs -lt 0 -or [long]$emc.SampleAgeMs -gt 6000 -or
+    $null -eq $emc.ActualKhz -or [long]$emc.ActualKhz -le 0){throw 'EMC rate telemetry is stale or absent'}
+ # SwEmcNotReady can represent pending CPU/core/GPU floor providers. It is
+ # not a healthy active state. Permit it only in an untransitioned, high-rate
+ # cold handoff; FinishCandidate must require full readiness before querying
+ # the candidate. Never excuse an ACTMON, enumeration, QoS or latched fault.
+ $pending=$Phase -eq 'ClosedGate' -and $emc.LastError -eq -6 -and
+          $emc.ActualKhz -gt 1600000 -and $emc.ActualKhz -eq $emc.BootKhz -and
+          $null -ne $emc.TransitionCount -and $emc.TransitionCount -eq 0 -and
+          ([uint32]$emc.Flags -band 0x28) -eq 0
+ if($null -eq $emc.LastError -or ([long]$emc.LastError -ne 0 -and !$pending)){throw ('EMC '+$Phase+' LastError='+$emc.LastError)}
 }
 function Close-Gate {
  $folder=Task-Root;$task=$folder.GetTask('Tgd3dDefaultEnable')
@@ -124,6 +162,7 @@ try {
  if($Action -eq 'Prepare') {
   if($state -or (Test-Path $candidate)){throw 'Preparation already attempted; inspect it'}
   Assert-RetainedFiles -Baseline;Assert-Power
+  Assert-LoadedDsdt (Read-LoadedDsdt (Join-Path $root 'loaded-prepare-dsdt.dat')) $config.BaselineAcpi
   if((Device-Property 'ProblemCode') -ne 0 -or [string](Get-ItemProperty ($service+'\Tgd3dDefault')).Directory -ne $active){throw 'Current baseline is not active'}
   $folder=Task-Root;$task=$folder.GetTask('Tgd3dDefaultEnable')
   if(!$task.Enabled -or $task.State -ne 3){throw 'Default activation is not settled'}
@@ -180,17 +219,23 @@ try {
  }
  elseif($Action -eq 'SelectCandidate') {
   if(!$state -or $state.Phase -ne 'CandidateRebootRequested' -or (Read-Boot) -eq $state.Boot){throw 'Expected the completed candidate ACPI boot'}
-  Assert-RetainedFiles;Assert-Power;Assert-Closed
+  Assert-RetainedFiles;Assert-Power
   Assert-File "$env:windir\System32\acpitabl.dat" $config.CandidateAcpi
   # Capture the inherited platform state before the new KMD can read its
   # optional resources. This separates an earlier boot/ACTMON failure from
   # a candidate activation regression; the snapshot does not set policy.
-  $before=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o');Code=Device-Property 'ProblemCode'}
+  $before=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o')}
   try {
+   $before.LoadedDsdt=Read-LoadedDsdt (Join-Path $root 'loaded-candidate-dsdt.dat')
+   $before.Present=@(Get-PnpDevice -PresentOnly -InstanceId $device -ErrorAction SilentlyContinue).Count -eq 1
+   $before.Code=Device-Property 'ProblemCode'
    $before.Power=& (Join-Path $root 'Power-State.ps1')
    $before.Emc=& (Join-Path $root 'Power-State.ps1') -EmcOnly
    Write-ActivationJson (Join-Path $root 'before-candidate-selection.json') $before
-   Assert-EmcReady $before.Emc
+   Assert-LoadedDsdt $before.LoadedDsdt $config.CandidateAcpi
+   if(!$before.Present){throw 'GPU device is absent in this boot'}
+   Assert-Closed
+   Assert-EmcReady $before.Emc -Phase ClosedGate
   } catch {
    $before.Error=$_.Exception.Message
    Write-ActivationJson (Join-Path $root 'before-candidate-selection.json') $before
@@ -212,6 +257,19 @@ try {
   $a=Read-Json (Join-Path $candidate 'default-state.json')
   if($a.Status -ne 'Enabled' -or (Test-Path (Join-Path $candidate 'default-attempt.json')) -or (Device-Property 'ProblemCode') -ne 0){throw 'Candidate activation has not completed'}
   Assert-RetainedFiles;Assert-File "$env:windir\System32\drivers\tegragpurender.sys" $config.CandidateKmd;Assert-File "$env:windir\System32\acpitabl.dat" $config.CandidateAcpi
+  $after=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o')}
+  try {
+   $after.LoadedDsdt=Read-LoadedDsdt (Join-Path $root 'loaded-active-dsdt.dat')
+   $after.Emc=& (Join-Path $root 'Power-State.ps1') -EmcOnly
+   Write-ActivationJson (Join-Path $root 'after-candidate-activation.json') $after
+   Assert-LoadedDsdt $after.LoadedDsdt $config.CandidateAcpi
+   Assert-EmcReady $after.Emc
+  } catch {
+   $after.Error=$_.Exception.Message
+   Write-ActivationJson (Join-Path $root 'after-candidate-activation.json') $after
+   $state.Phase='CandidatePlatformRejectedAfterActivation';$state.PlatformError=$after.Error;Save-State $state
+   throw
+  }
   $result=& (Join-Path $root 'nvdec-resource-query.exe');$exit=$LASTEXITCODE
   [IO.File]::WriteAllText((Join-Path $root 'resource-query.txt'),($result -join "`n"),[Text.UTF8Encoding]::new($false))
   if($exit){throw ('Resource query failed: '+$exit)}
@@ -243,6 +301,7 @@ try {
   $a=Read-Json (Join-Path $active 'default-state.json')
   if($a.Status -ne 'Enabled' -or (Test-Path (Join-Path $active 'default-attempt.json')) -or (Device-Property 'ProblemCode') -ne 0){throw 'Baseline activation has not completed'}
   Assert-RetainedFiles -Baseline
+  Assert-LoadedDsdt (Read-LoadedDsdt (Join-Path $root 'loaded-restored-dsdt.dat')) $config.BaselineAcpi
   $state.Phase='Restored';$state.End=[DateTime]::UtcNow.ToString('o');Save-State $state
  }
  $state|ConvertTo-Json -Depth 12 -Compress

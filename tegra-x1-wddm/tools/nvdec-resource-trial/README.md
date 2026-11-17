@@ -9,22 +9,33 @@ task. It must run from a protected trial directory as administrator.
 The main chat drives these separate actions and reads each saved result before
 continuing:
 
-1. `Prepare` checks all baseline files, captures the task/registration/power
-   backup, and builds a separate activation directory from the installed files.
+1. `Prepare` checks all baseline files and the loaded DSDT, captures the
+   task/registration/power backup, and builds a separate activation directory
+   from the installed files.
 2. `StageCandidate` stages the signed package, closes native startup, writes the
    paired ACPI table and requests one restart.
-3. After the restart, `SelectCandidate` verifies the closed gate, saves the
-   inherited power/EMC status and requires valid dynamic EMC with no reported
-   errors or mailbox/transition faults before selecting the KMD and starting
-   the retained activation task. Failed/missing platform status stops at
+3. After the restart, `SelectCandidate` saves the loaded DSDT, GPU presence and
+   inherited power/EMC status before checking the closed gate. The loaded table
+   must match the candidate, and the GPU must be present. Closed-gate EMC needs
+   fresh rate/enumeration and valid ACTMON, with no enumeration/ACTMON/QoS or
+   latched mailbox/transition faults. Dynamic/QoS flags depend on the GPU's
+   handshake and are not required yet. `SwEmcNotReady` is permitted only at the
+   unchanged high boot rate, with zero transitions and neither dynamic nor QoS
+   enabled; it remains a pending floor-provider state, not active readiness.
+   Only then may the controller select the KMD and start the retained task.
+   Failed/missing platform status stops at
    `CandidatePlatformRejected`; recover the original pair rather than retrying
    selection. `Inspect` observes progress; it never retries activation.
-4. Once activation completes, `FinishCandidate` runs the bounded resource
-   query. A successful query is not a successful DMA or decode test. Inspect its
-   register validity and resource status before proceeding.
+4. Once activation completes, `FinishCandidate` checks the loaded table again
+   and requires full dynamic EMC/QoS readiness with all error fields zero
+   before running the bounded resource query. Failure records
+   `CandidatePlatformRejectedAfterActivation` and requires recovery. A
+   successful query does not prove DMA or decode. Inspect its register validity
+   and resource status before proceeding.
 5. `Recover` closes native startup, restores the original ACPI table and requests
    one restart. After that boot, `SelectBaseline` restores the original KMD,
-   registration and task. `FinishBaseline` verifies the original file set.
+   registration and task. `FinishBaseline` verifies the original file set and
+   loaded DSDT.
 
 SSH observation timeouts do not authorize repeating an action. Interrupted or
 unexpected states require reading the durable state, selection receipts and
@@ -37,6 +48,9 @@ the pre-selection EMC state and a timestamp/action on every state update. That
 instrumentation was added after an unresolved ACTMON readback difference; it
 does not retrospectively fill the missing observation in the first run.
 The current controller also rejects that known failure before candidate
-selection and checks EMC during baseline preparation. Its pure PowerShell
-control exercises the actual selection branch with all native operations
-replaced by explicit test functions; it does not prove hardware behavior.
+selection and checks active EMC during baseline preparation. Fan33's matching
+source distinguishes the closed-gate handoff from active GPU operation.
+The loaded table comes from the public `GetSystemFirmwareTable` API (the first
+DSDT); a disk-file hash alone does not establish which table Windows loaded.
+Its pure PowerShell control exercises the actual selection and finish branches
+with native operations replaced; it does not prove hardware behavior.
