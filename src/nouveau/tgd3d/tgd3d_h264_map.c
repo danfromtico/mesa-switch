@@ -176,7 +176,13 @@ enum tgd3d_h264_map_result tgd3d_h264_map_dxva(
         set_err(err, err_size, "picture and scaling matrix buffers are required");
         return TGD3D_H264_MAP_BUFFER;
     }
-    if (p->num_ref_frames > TG_NVDEC_MAX_DPB || p->ContinuationFlag ||
+    /* Off-host VLD needs the fields following ContinuationFlag. A zero flag
+     * permits a host-parsed picture to omit them or leave them undefined. */
+    if (p->ContinuationFlag != 1) {
+        set_err(err, err_size, "DXVA off-host picture parameters are absent");
+        return TGD3D_H264_MAP_UNSUPPORTED;
+    }
+    if (p->num_ref_frames > TG_NVDEC_MAX_DPB ||
         p->num_slice_groups_minus1 || p->residual_colour_transform_flag ||
         p->sp_for_switch_flag || tgd3d_dxva_entry_flag(&p->CurrPic)) {
         set_err(err, err_size, "unsupported DXVA picture configuration");

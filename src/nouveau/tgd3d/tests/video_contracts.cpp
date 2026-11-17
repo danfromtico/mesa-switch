@@ -333,6 +333,7 @@ void decode_frame(unsigned fault, bool release_target_early)
    tgd3d_dxva_pic_h264_buffer picture_buffer = {};
    auto &pic = picture_buffer.picture;
    pic.wFrameWidthInMbsMinus1 = 79; pic.wFrameHeightInMbsMinus1 = 44;
+   pic.ContinuationFlag = 1;
    pic.CurrPic.bPicEntry = 2; pic.wBitFields = 0x1050;
    std::memset(pic.RefFrameList, 0xff, sizeof(pic.RefFrameList));
    tgd3d_dxva_qmatrix_h264 matrix; std::memset(&matrix, 16, sizeof(matrix));

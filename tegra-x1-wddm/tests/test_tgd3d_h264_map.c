@@ -183,6 +183,9 @@ static void test_dxva_boundary(void)
     p.num_ref_frames = 16; /* SPS maximum; IDR has zero active entries */
     memset(p.RefFrameList, 0xff, sizeof(p.RefFrameList));
     CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, error, sizeof(error)) ==
+          TGD3D_H264_MAP_UNSUPPORTED);
+    p.ContinuationFlag = 1;
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, error, sizeof(error)) ==
           TGD3D_H264_MAP_OK);
     CHECK(out.dpb_count == 0 && out.curr_slot == 16 && out.ref_pic_flag);
     CHECK(out.scaling4x4[0][0] == 16);
