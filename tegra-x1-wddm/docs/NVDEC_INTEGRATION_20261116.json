@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T01:12:05.128714+00:00",
-  "state": "720p integration groundwork; no native NVDEC/D3D11VA acceptance",
+  "updated_utc": "2026-11-17T02:01:30.793685+00:00",
+  "state": "EMC lifecycle guard corrected; candidate ACPI loaded/enumerated in bounded native control; original baseline restored. Client-route KMD query and720p/1080p full decode remain unvalidated.",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
     "user_instruction": "先做720 1080吧，2k 4k记为待定，有实现未检测",
@@ -305,9 +305,32 @@
     "candidate_promoted": false
   },
   "emc_preselection_guard": {
-    "record": "NVDEC_EMC_GUARD_20261117.json",
-    "commit": "b7b98c3bed1598f50da68c52511d58df5d5e8975",
-    "pure_powershell_controls_passed": 10,
-    "native_bad_state_guard_exercised": false
+    "record": "NVDEC_ACPI_HANDOFF_20261117.json",
+    "commit": "648c72d075d75412209bcc17799def8bf39bb46b",
+    "selection_controls": 26,
+    "post_activation_controls": 5,
+    "native_operations_in_controls_replaced": true,
+    "native_closed_baseline_pending_state_observed": true,
+    "native_bad_state_guard_exercised": false,
+    "review_pending": true
+  },
+  "acpi_only_native_result": {
+    "record": "NVDEC_ACPI_ENUMERATION_NATIVE_20261117.json",
+    "candidate_table_loaded": true,
+    "gpu_present_with_closed_gate": true,
+    "actmon_error": 0,
+    "candidate_kmd_activated": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "temporary_files_removed": true,
+    "historical_failure_root_cause": "unresolved; not reproduced in this ACPI-only boot"
+  },
+  "controller_source": {
+    "commit": "648c72d075d75412209bcc17799def8bf39bb46b",
+    "files": {
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "da25c261bfc70c671258a57c4952aad984ada8e49c6b1286c0013be061f83472",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-EmcGuard.ps1": "7f7bf63087415e7c304ae0c286b55bdcd626938bfb07050299aa50453ada04b8",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "eed15b9a31b9154e8ee81b9f18dc9284ddb464f26ec16030ed54a341a2be5a6e"
+    }
   }
 }

@@ -305,24 +305,15 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-16T19:22:01.948446+00:00",
+  "updated_utc": "2026-11-17T02:01:30.793685+00:00",
   "device_access": {
+    "updated_utc": "2026-11-17T01:59:16.2407501Z",
     "owner": "user",
-    "purpose": "Native cube acceptance completed; device returned to user",
+    "purpose": "ACPI observation complete; original90display/power restored and temporary native artifacts removed",
     "main_local_work_allowed": true,
-    "main_native_access": "No further native tests planned; continue local decode integration",
-    "user_instructions": [
-      "你先做本地吧，我要测试switch win box64",
-      "你先传进去",
-      "放桌面",
-      "不用校验",
-      "你补进去我来打开就行，连着ssh似乎容易重启",
-      "交回 Switch，继续 vkcube 验收",
-      "刚才已经5分钟了，并且我移动 放大都正常",
-      "所以只要测一个橙色遮挡就可以记为完成",
-      "正常的，继续吧"
-    ],
-    "additional_checks_after_last_instruction": false
+    "main_native_access": "No active native operation or watcher. Further authorized decode work must recheck actual state and device ownership.",
+    "latest_authorization": "User asked for autonomous continuation while asleep, later confirmed connectivity available; earlier cube-only/local-only restrictions are historical.",
+    "current_recovery_record": "NVDEC_ACPI_ENUMERATION_NATIVE_20261117.json"
   },
   "last_readback_before_user_box64_hold": {
     "utc": "2026-11-16T14:15:38.3503583Z",
@@ -1003,8 +994,8 @@
     }
   },
   "decode_integration": {
-    "updated_utc": "2026-11-17T01:12:05.128714+00:00",
-    "state": "Local candidate only; installed display/power baseline unchanged",
+    "updated_utc": "2026-11-17T02:01:30.793685+00:00",
+    "state": "Original row-scan baseline restored after ACPI-only enumeration control; no native decode acceptance.",
     "active_sequence": [
       "720p H.264",
       "1080p H.264 after720 acceptance"
@@ -1087,12 +1078,45 @@
       "candidate_promoted": false
     },
     "emc_preselection_guard": {
-      "record": "NVDEC_EMC_GUARD_20261117.json",
-      "commit": "b7b98c3bed1598f50da68c52511d58df5d5e8975",
-      "pure_powershell_controls_passed": 10,
-      "native_bad_state_guard_exercised": false
+      "record": "NVDEC_ACPI_HANDOFF_20261117.json",
+      "commit": "648c72d075d75412209bcc17799def8bf39bb46b",
+      "selection_controls": 26,
+      "post_activation_controls": 5,
+      "native_operations_in_controls_replaced": true,
+      "native_closed_baseline_pending_state_observed": true,
+      "native_bad_state_guard_exercised": false,
+      "review_pending": true
+    },
+    "acpi_only_native_result": {
+      "record": "NVDEC_ACPI_ENUMERATION_NATIVE_20261117.json",
+      "candidate_table_loaded": true,
+      "gpu_present_with_closed_gate": true,
+      "actmon_error": 0,
+      "candidate_kmd_activated": false,
+      "native_decode_accepted": false,
+      "baseline_restored": true,
+      "temporary_files_removed": true,
+      "historical_failure_root_cause": "unresolved; not reproduced in this ACPI-only boot"
     }
   },
   "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",
-  "deferred_load_stability": "LOAD_STABILITY_FOLLOWUP_20261116.json; weather/browser/vkpeak-exit grouped as user-suspected common cause, unconfirmed"
+  "deferred_load_stability": "LOAD_STABILITY_FOLLOWUP_20261116.json; weather/browser/vkpeak-exit grouped as user-suspected common cause, unconfirmed",
+  "device_access_after_cube_acceptance": {
+    "owner": "user",
+    "purpose": "Native cube acceptance completed; device returned to user",
+    "main_local_work_allowed": true,
+    "main_native_access": "No further native tests planned; continue local decode integration",
+    "user_instructions": [
+      "你先做本地吧，我要测试switch win box64",
+      "你先传进去",
+      "放桌面",
+      "不用校验",
+      "你补进去我来打开就行，连着ssh似乎容易重启",
+      "交回 Switch，继续 vkcube 验收",
+      "刚才已经5分钟了，并且我移动 放大都正常",
+      "所以只要测一个橙色遮挡就可以记为完成",
+      "正常的，继续吧"
+    ],
+    "additional_checks_after_last_instruction": false
+  }
 }
