@@ -164,6 +164,7 @@ class Preview {
    tgd3d_csc_push transform = {};
 
    const Journal &journal;
+   const wchar_t *first_frame_capture;
 
    void texture(ID3D11Device *device, UINT w, UINT h, DXGI_FORMAT format, UINT bind,
                 Com<ID3D11Texture2D> &out, const char *name) {
@@ -180,7 +181,7 @@ class Preview {
       check(IsWindow(window.handle),"preview window closed");
    }
 public:
-   explicit Preview(const Journal &j):journal(j) {}
+   Preview(const Journal &j,const wchar_t *first_capture):journal(j),first_frame_capture(first_capture) {}
    void start(IDXGIFactory1 *factory, ID3D11Device *device) {
       journal.mark("CALL","CreatePreviewWindow");
       WNDCLASSW wc={}; wc.lpfnWndProc=DefWindowProcW;wc.hInstance=GetModuleHandleW(nullptr);
@@ -227,6 +228,7 @@ public:
    void draw(AVD3D11VADeviceContext *hw, const uint8_t *y, UINT y_pitch, const uint8_t *uv, UINT uv_pitch,
              unsigned index, const wchar_t *capture) {
       const bool first=index==0, last=index==5;
+      const bool check_first=first && first_frame_capture;
       if (first) { ShowWindow(window.handle,SW_SHOWNORMAL);UpdateWindow(window.handle); }
       pump();
       auto *c=hw->device_context;
@@ -248,14 +250,25 @@ public:
          c->Draw(3,0);
          if (first) journal.mark("RETURN","DrawCSC");
          c->OMSetRenderTargets(0,nullptr,nullptr);views[0]=views[1]=nullptr;c->PSSetShaderResources(0,2,views);
-         if (last) c->CopyResource(readback.p,back.p);
+         if (last || check_first) c->CopyResource(readback.p,back.p);
+         if (check_first) {
+            journal.mark("CALL","FlushFirstDrawAndCopy");
+            c->Flush();
+            journal.mark("RETURN","FlushFirstDrawAndCopy");
+         }
       }
+      if (check_first) verify_frame(hw,y,y_pitch,uv,uv_pitch,index,first_frame_capture);
       const HRESULT presented=journal.invoke("Present",[&]{return swap->Present(1,0);});
       check(presented==S_OK,"preview did not present");
-      if (!last) return;
+      if (last) verify_frame(hw,y,y_pitch,uv,uv_pitch,index,capture);
+   }
+   void verify_frame(AVD3D11VADeviceContext *hw,const uint8_t *y,UINT y_pitch,const uint8_t *uv,
+                     UINT uv_pitch,unsigned index,const wchar_t *capture) {
       ContextLock lock(hw);
-      journal.mark("CALL","MapLastRenderedFrame");
-      D3D11_MAPPED_SUBRESOURCE result={};require(c->Map(readback.p,0,D3D11_MAP_READ,0,&result),"Map rendered BGRA");
+      auto *c=hw->device_context;
+      D3D11_MAPPED_SUBRESOURCE result={};
+      journal.invoke(index==0?"MapFirstRenderedFrame":"MapLastRenderedFrame",
+                     [&]{return c->Map(readback.p,0,D3D11_MAP_READ,0,&result);});
       Mapping mapping{c,readback.p};check(result.pData && result.RowPitch>=width*4,"BGRA row pitch");
       unsigned worst=0;
       for (UINT row=0;row<5;++row) for (UINT col=0;col<7;++col) {
@@ -272,7 +285,6 @@ public:
          }
       }
       std::printf("CSC_FRAME index=%u points=35 max_rgb_error=%u\n",index,worst);
-      check(worst<=2,"GPU CSC pixel mismatch");
       if (capture) {
          FILE *file=_wfopen(capture,L"wb");
          check(file!=nullptr,"open preview capture");
@@ -288,7 +300,8 @@ public:
          ok=std::fclose(file)==0 && ok;check(ok,"write preview capture");
       }
       mapping.finish();
-      journal.mark("VERIFIED","LastRenderedFrame");
+      check(worst<=2,"GPU CSC pixel mismatch");
+      journal.mark("VERIFIED",index==0?"FirstRenderedFrame":"LastRenderedFrame");
    }
    void finish(AVD3D11VADeviceContext *hw) {
       auto *c=hw->device_context;
@@ -387,7 +400,7 @@ static void check_pixels(const AVFrame &frame, const uint8_t *expected, unsigned
 enum class Mode { Present, PrepareOnly, DecodeOnly };
 
 static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,const wchar_t *capture,
-                Mode mode, const Journal &journal)
+                Mode mode, const Journal &journal,const wchar_t *first_frame_capture)
 {
    Com<IDXGIFactory1> factory;
    journal.invoke("CreateDXGIFactory1",[&]{return CreateDXGIFactory1(__uuidof(IDXGIFactory1),(void **)factory.put());});
@@ -413,7 +426,7 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
    check(hw->lock && hw->unlock && hw->device_context,"D3D11VA context lock");
    std::unique_ptr<Preview> preview;
    if (mode!=Mode::DecodeOnly) {
-      preview=std::make_unique<Preview>(journal);
+      preview=std::make_unique<Preview>(journal,first_frame_capture);
       preview->start(factory.p,hw->device);
    }
    if (mode==Mode::PrepareOnly) {
@@ -509,18 +522,21 @@ int wmain(int argc,wchar_t **argv)
    SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
    const bool trace_requested=argc>=2 && std::wcscmp(argv[argc-1],L"--trace")==0;
    if (trace_requested) --argc;
+   const bool check_first=argc>=2 && std::wcscmp(argv[argc-1],L"--check-first-submit")==0;
+   if (check_first) --argc;
    const wchar_t *evidence=nullptr;
    if (argc>=3 && std::wcscmp(argv[argc-2],L"--evidence")==0) {
       evidence=argv[argc-1];
       argc-=2;
    }
-   if ((argc!=4 && argc!=5) || (trace_requested && !evidence)) {
-      std::fprintf(stderr,"usage: nvdec720-av-window <native-luid-hex> <sample.mp4> <reference.sha256> [last-frame.ppm | --prepare-only | --decode-only] [--evidence new-directory [--trace]]\n");
+   if ((argc!=4 && argc!=5) || ((check_first || trace_requested) && !evidence)) {
+      std::fprintf(stderr,"usage: nvdec720-av-window <native-luid-hex> <sample.mp4> <reference.sha256> [last-frame.ppm | --prepare-only | --decode-only] [--evidence new-directory [--check-first-submit] [--trace]]\n");
       return 2;
    }
    Mode mode=Mode::Present;
    if (argc==5 && std::wcscmp(argv[4],L"--prepare-only")==0) mode=Mode::PrepareOnly;
    if (argc==5 && std::wcscmp(argv[4],L"--decode-only")==0) mode=Mode::DecodeOnly;
+   if (check_first && mode!=Mode::Present) return 2;
    wchar_t *end=nullptr;const uint64_t wanted=std::wcstoull(argv[1],&end,16);
    if (!wanted || !end || *end || std::wcslen(argv[1])!=16) return 2;
    try {
@@ -544,7 +560,9 @@ int wmain(int argc,wchar_t **argv)
             trace.start(evidence);
             journal.mark("RETURN","TraceCurrentProcess");
          }
-         run(wanted,argv[2],argv[3],argc==5 && mode==Mode::Present?argv[4]:nullptr,mode,journal);
+         const std::wstring first_image=check_first?std::wstring(evidence)+L"\\first-frame.ppm":L"";
+         run(wanted,argv[2],argv[3],argc==5 && mode==Mode::Present?argv[4]:nullptr,
+             mode,journal,check_first?first_image.c_str():nullptr);
          trace.finish();
          journal.mark("EXIT","RunAndRelease",S_OK);
          return 0;
