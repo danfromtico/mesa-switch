@@ -1,0 +1,2031 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T17:48:29.5450388Z",
+  "branch": "tgd3d-vulkan",
+  "status": "Real native KMT/NVDEC720p H.264 backend accepted for the six-frame fixture: all six completed through Host1x syncpoint191 and match software reference byte-for-byte. The de8 KMD/045 provider/9eb table and original5b/95b userspace remain installed. D3D11VA and window presentation remain incomplete.1080p/2K/4K acceptance is deferred together.",
+  "acceptance_scope": {
+    "native_backend_720p_fixture_accepted": true,
+    "frames": 6,
+    "d3d11va_accepted": false,
+    "window_presentation_accepted": false,
+    "full_decode_stage_complete": false,
+    "public_video_enabled": false,
+    "new_physical_screen_acceptance": false,
+    "deferred_joint_acceptance": [
+      "1080p",
+      "2K",
+      "4K"
+    ],
+    "higher_resolution_scope": "External implementation preserved; not integrated or hardware-accepted here",
+    "stability_scope": "Single six-frame successful run,1.5781264s including setup/cleanup; not FPS or long-duration stability"
+  },
+  "installed_development_combination": {
+    "classification": "retained development baseline; native720p backend module accepted, full video path unaccepted",
+    "observed_utc": "2026-11-17T17:34:12.8670683Z",
+    "boot": "2026-11-17T17:12:56.5106640Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\activation",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app",
+    "kmd": {
+      "Length": 243720,
+      "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+    },
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "umd": {
+      "Length": 3274240,
+      "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A"
+    },
+    "umd_source": "c1f25986eee51c0ee01088c3ecb3c9508dea2479",
+    "icd": {
+      "Length": 17652224,
+      "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
+    },
+    "icd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f-based dirty frozen build; not clean current HEAD",
+    "all11_files": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
+        "Matches": true,
+        "Length": 32264
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
+        "Matches": true,
+        "Length": 243720
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+        "Matches": true,
+        "Length": 138
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Matches": true,
+        "Length": 4993
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+        "Matches": true,
+        "Length": 42440
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
+        "Matches": true,
+        "Length": 1517568
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+        "Matches": true,
+        "Length": 921600
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
+        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+        "Matches": true,
+        "Length": 17652224
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+        "Matches": true,
+        "Length": 104456
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+        "Matches": true,
+        "Length": 3274240
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+        "Matches": true,
+        "Length": 60416
+      }
+    ],
+    "external_review_performed": false
+  },
+  "source": {
+    "base_snapshot": "syncpoint-range-20261117/source",
+    "base_manifest_sha256": "3bf862e1c67141695676f062f3c8cedb4a5b76ee338eead6860f76c6a6c7f7ec",
+    "commit": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "files": {
+      "src/nouveau/nvdec/nvdec.h": "e39269a62840eb045c3eb7889c4b7b49fa5a5f86204a177bf43d1fe948b75972",
+      "src/nouveau/nvdec/nvdec_h264.c": "b53e051aef8e7d7e2527a3dee5ed5b44d436cd0a434fc92dcf28f988640b280e",
+      "tegra-x1-wddm/windows/nvdec_backend.c": "68b52f56c63cec8d32070a27567dac783702b6a71556c893be76fa9834dc2d86",
+      "tegra-x1-wddm/tests/test_nvdec_h264.c": "b59caaa9b587aafc047b539a237f46f586e78af5e3c45e1292ef699a1e36d0e5"
+    },
+    "scope": "Allocate both TBL NV12 planes padded independently to16 rows; convert completed hardware output into the unchanged linear readback ABI. No software H264 decode, new completion source or UMD/ICD ABI.",
+    "snapshot": "surface-layout-20261117/source-r2",
+    "failed_initial_build": "kmd-result.json; stale return-variable name corrected before any installation"
+  },
+  "parser_client_build": {
+    "command": [
+      "/Users/rujian/.local/share/mesa-switch-woa-build/toolchain/llvm-mingw-20261104-ucrt-macos-universal/bin/aarch64-w64-mingw32-clang",
+      "-Wno-unknown-pragmas",
+      "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/src/nouveau/headers",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wno-pragma-pack",
+      "-Wno-microsoft-anon-tag",
+      "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/coexisting-transport-20261117/headers",
+      "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/src/nouveau/vulkan/nvkmd/windows",
+      "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/src/nouveau/nvdec",
+      "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/tegra-x1-wddm/windows",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/tegra-x1-wddm/tools/nvdec720.c",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/src/nouveau/nvdec/nvdec_parse.c",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/src/nouveau/nvdec/nvdec_h264.c",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/src/nouveau/nvdec/nvdec_sha256.c",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/src/nouveau/vulkan/nvkmd/windows/nvdec_native.c",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/source/src/nouveau/vulkan/nvkmd/windows/kmt.c",
+      "-lgdi32",
+      "-o",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/nvdec720-inputfix.exe",
+      "-fms-extensions",
+      "-Wno-unknown-pragmas",
+      "-DTG_NVDEC_NATIVE_TRACE=1"
+    ],
+    "exit": 0,
+    "source_commit": "38830972d45de02d4c7e39096bf24349e0dceecd",
+    "base_client_manifest_sha256": "1e8a20778db227bb950d992870bb346c8ab8f154155b2de16974be222dfc4edf",
+    "retained_trace_source": "30fabbae0f4ff789b032e8d76dd1f42f20d6811d",
+    "changed_input_hashes": {
+      "src/nouveau/nvdec/nvdec_parse.c": "a95bbf679e864225d1e2f66123e5a9c627833ac21f4a89958f24074c8039053b",
+      "tegra-x1-wddm/tools/nvdec720.c": "39661d6fcd157017daf101649b49d3e1644056f1916e37be2b45cbfe0ab2668e"
+    },
+    "stdout": "",
+    "stderr": "",
+    "bytes": 95232,
+    "sha256": "d2c5180cdd9771837231e0a37312e2d3921a0665408159db71a4720d427ed23e"
+  },
+  "repairs": [
+    {
+      "commit": "88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70",
+      "scope": "Initialize exclusive reserved channel from STOP/CFEMPTY; do not confuse stale inherited pointers with retirement of owned work",
+      "record": "NVDEC_FRESH_CHANNEL_NATIVE_20261117.json"
+    },
+    {
+      "commit": "e99bdb073af6c88ef8dd0688fbad0a75fa027c21",
+      "scope": "T210 command builder accepts syncpoint indices0..191; reserved index191 remains unchanged",
+      "record": "NVDEC_SYNCPOINT_RANGE_NATIVE_20261117.json"
+    },
+    {
+      "commit": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+      "scope": "Pad luma/chroma TBL planes independently; detile only after real hardware completion; keep DPB tiled"
+    },
+    {
+      "commit": "449614a79e6223838b6101096710b1e227483f35",
+      "scope": "Preserve last two bytes of final AnnexB NAL at EOF"
+    },
+    {
+      "commit": "9c95df1a8d3593fdccadecb3b08f8f315a1b18a8",
+      "scope": "Infer flat16 scaling when matrices absent; explicit custom matrices remain rejected"
+    }
+  ],
+  "layout_contract": {
+    "nvdec_format": {
+      "tileFormat": 0,
+      "meaning": "Tegra block-linear, two64x8-byte GOBs per64x16-byte tile",
+      "output_memory_layout": 0,
+      "output_format": "NV12; this field is not a pitch-linear selector"
+    },
+    "references": {
+      "nvidia_vaapi_commit": "49a56d392a21ef3ff9ed848b6b98293572d14eba",
+      "archive_sha256": "a4084abb9e43cc36cded4f0039e0c08f850e4a4ce70295f715971f548cd99862",
+      "verified_git_blobs": 19,
+      "vic_source": "engines/vic.cpp: NV12 input DRM_FORMAT_MOD_NVIDIA_16BX2_BLOCK_TWO_GOB / SlotBlkHeight1",
+      "nil_copy_sha256": "f5a0bf467e1c0e3a28623d5b6e5399d0ec57e8d99f91057b0a3af0c6c75be5d6",
+      "nil_tiling_sha256": "82ca5d362c110f4341741d5e30115e9477572b11a331f926455bd340455bfe83",
+      "nil_scope": "TegraColor/CopyGOBTegra; not FermiColor or TuringColor2D",
+      "ffmpeg_hwcontext_url": "https://ffmpeg.org/pipermail/ffmpeg-devel/2024-May/328555.html",
+      "ffmpeg_page_sha256": "6cda7d75131ffc3e4c9f7e5bb87b2c8ddf266bf308cbc6b7fea9fe7a88dafe14",
+      "license_scope": "NVIDIA/vaapi and Mesa/NIL MIT references; FFmpeg GPL patch consulted for hardware facts only, no GPL implementation copied."
+    },
+    "native720_storage": {
+      "pitch": 1280,
+      "luma_rows": 720,
+      "uv_visible_rows": 360,
+      "uv_storage_rows": 368,
+      "chroma_offset": 921600,
+      "linear_interface_bytes": 1382400,
+      "required_tiled_bytes": 1392640,
+      "last_visible_uv_byte_offset": 1392127,
+      "old_page_rounded_allocation": 1384448
+    },
+    "correction": "Allocate independent padded planes; detile after verified hardware completion into the existing linear NV12 response. Preserve tiled DPB surfaces and all ownership/retirement semantics. No software H264 decoder or completion writes.",
+    "test_scope": "Address/plane bounds, independent byte-coordinate fixture and ASan/UBSan; no hardware decode yet",
+    "native_precaution": "36eecba55 candidate remains active; no native decoder request after discovering the layout mismatch. New corrected package pending."
+  },
+  "scaling_reference": {
+    "url": "https://raw.githubusercontent.com/FFmpeg/FFmpeg/b08d7969c550a804a59511c7b83f2dd8cc0499b8/libavcodec/h264_ps.c",
+    "commit": "b08d7969c550a804a59511c7b83f2dd8cc0499b8",
+    "tag": "n7.1",
+    "sha256": "fa7b8be70c692bfeb86f7e14e2b0509d70ac5e9984f5a1b576a1fadba3955a2f",
+    "bytes": 32691,
+    "scope": "Primary reference for absent-matrix default scaling value16; consulted behavior, no implementation copied. Native6-frame output compared against FFmpeg software reference."
+  },
+  "validation": {
+    "layout_asan_ubsan": {
+      "command": [
+        "/usr/bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unknown-pragmas",
+        "-fsanitize=address,undefined",
+        "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec",
+        "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/headers",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_h264.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_parse.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_sha256.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/tests/test_nvdec_h264.c",
+        "-o",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/surface-layout-20261117/h264-layout"
+      ],
+      "compile_exit": 0,
+      "run": [
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/surface-layout-20261117/h264-layout",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/fresh-channel-native-20261117/native-input/sample720.h264"
+      ],
+      "exit": 0,
+      "stdout": "NVDEC H.264 config/method/parser: PASS (control only, no hardware)\n",
+      "stderr": ""
+    },
+    "eof_control": {
+      "command": [
+        "/usr/bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unknown-pragmas",
+        "-fsanitize=address,undefined",
+        "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec",
+        "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/headers",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_h264.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_parse.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_sha256.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/tests/test_nvdec_h264.c",
+        "-o",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/eof-green"
+      ],
+      "compile_exit": 0,
+      "run": [
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/eof-green",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/fresh-channel-native-20261117/native-input/sample720.h264"
+      ],
+      "exit": 0,
+      "stdout": "NVDEC H.264 config/method/parser: PASS (control only, no hardware)\n",
+      "stderr": ""
+    },
+    "flat_matrix_control": {
+      "command": [
+        "/usr/bin/clang",
+        "-std=c11",
+        "-O1",
+        "-g",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unknown-pragmas",
+        "-fsanitize=address,undefined",
+        "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec",
+        "-I/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/headers",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_h264.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_parse.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/src/nouveau/nvdec/nvdec_sha256.c",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/tests/test_nvdec_h264.c",
+        "-o",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/flat-green"
+      ],
+      "compile_exit": 0,
+      "run": [
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/parser-inputs-20261117/flat-green",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/fresh-channel-native-20261117/native-input/sample720.h264"
+      ],
+      "exit": 0,
+      "stdout": "NVDEC H.264 config/method/parser: PASS (control only, no hardware)\n",
+      "stderr": ""
+    },
+    "arm64_kmd_build_exit": 0,
+    "initial_arm64_build_failure": "Undeclared frame-size variable corrected before final4dd build; faulty initial build never installed",
+    "signed_kmd": {
+      "Length": 243720,
+      "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+    },
+    "unsigned_kmd": {
+      "Length": 240640,
+      "Sha256": "8974cdea0a007a0d4bf5bf2483c0ac44da97227d6b72791c20318824f2b426c8"
+    },
+    "signed_catalog": {
+      "Length": 8392,
+      "Sha256": "8ddc554442a4dfc1a5189dca22baa6fa90015f51be101ab91ce04c6eddb528ba"
+    },
+    "signatures": {
+      "Begin": "2026-11-17T17:08:44.1845265Z",
+      "ToolSha256": "29955332740F64DB0D2CD67D787FEF0DDC0A77525337F966E34E77D8D9A6002E",
+      "DriversInstalled": false,
+      "RestartRequested": false,
+      "Phase": "Verified",
+      "End": "2026-11-17T17:08:47.9188980Z",
+      "CurrentNativeMembers": 13,
+      "ReusedNativeMembers": 19,
+      "ReusedSourceReceipt": {
+        "Length": 12955,
+        "Sha256": "03be3a6d3f4467e24719807f4131cbc5ae7c190bd4665f07bf88460edd8548c0"
+      },
+      "ReusedSourceChainSha256": "3a7d071de8bf052a8766f7a4b69b72a2da7447fb3620af4f9ba145193d0f70d6"
+    },
+    "signature_receipt_identity": {
+      "Length": 12955,
+      "Sha256": "7d262a08e3a93cf6e43352dab33dfeec8fb62573a17667a04152f76a6195dba0"
+    }
+  },
+  "input": {
+    "nvdec.bin": {
+      "Length": 128000,
+      "Sha256": "7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909"
+    },
+    "sample720.h264": {
+      "Length": 82089,
+      "Sha256": "64d0a9c53feb4c601cbac7468f3ee0277ca785e253f69b6d18ee6a8f35cc78e4"
+    },
+    "sample720.sha256": {
+      "Length": 402,
+      "Sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5"
+    },
+    "nvdec720-native.exe": {
+      "Sha256": "D2C5180CDD9771837231E0A37312E2D3921A0665408159DB71A4720D427ED23E",
+      "Length": 95232
+    }
+  },
+  "sample": {
+    "width": 1280,
+    "height": 720,
+    "profile": 77,
+    "level": 31,
+    "refs": 2,
+    "frame_count": 6
+  },
+  "first_native_run": {
+    "Begin": "2026-11-17T17:20:42.2733083Z",
+    "Boot": "2026-11-17T17:12:56.5106640Z",
+    "Phase": "Exited",
+    "PowerBefore": {
+      "Utc": "2026-11-17T17:20:42.0233087Z",
+      "Power": {
+        "Version": 2,
+        "IsLite": 1,
+        "CpuConfigured": 1,
+        "PowerMode": 1,
+        "CpuTargetKhz": 1581000,
+        "CpuActualKhz": 1568250,
+        "CpuBootKhz": 998400,
+        "CpuMv": 895,
+        "RamActualKhz": 2500000,
+        "GpuPolicyMode": 1,
+        "GpuPolicyMinKhz": 76800,
+        "GpuPolicyMaxKhz": 537600,
+        "GpuReportedKhz": 76800,
+        "GpuReportedUv": 630000,
+        "GpuStatusWord": 43591169,
+        "TempC": 38,
+        "TempValid": 1,
+        "FanDuty": 51,
+        "Flags": 20,
+        "CpuPolicyMinKhz": 102000,
+        "CpuPolicyMaxKhz": 1581000,
+        "CpuRequestedMaxKhz": 1581000,
+        "GpuRequestedMaxKhz": 537600,
+        "CpuSpeedo": 1630,
+        "CpuProcessId": 0,
+        "CpuDfllAvailable": 1,
+        "CpuDfllActive": 1,
+        "CpuLastError": 0,
+        "CpuLoadPermille": 954,
+        "GpuSampleAgeMs": 203,
+        "SocTempC": 38,
+        "BoardTempC": 37,
+        "TempSampleAgeMs": 937
+      },
+      "Battery": {
+        "Version": 1,
+        "LimitCenter": 85,
+        "BandMin": 80,
+        "BandMax": 90,
+        "CapacityPercent": 89,
+        "VoltageMv": 3881,
+        "Reg00InputSrc": 2,
+        "Reg01PwrOn": 16,
+        "Reg08SysStat": 108,
+        "LastApplyStatus": 0,
+        "Flags": 13
+      }
+    },
+    "EmcBefore": {
+      "Utc": "2026-11-17T17:20:42.0858087Z",
+      "Emc": {
+        "Version": 1,
+        "Flags": 367,
+        "ActualKhz": 2500000,
+        "BootKhz": 2500000,
+        "SampleAgeMs": 187,
+        "LastError": 0,
+        "EnumerationError": 0,
+        "RateCount": 4,
+        "RatesKhz": [
+          204000,
+          1331200,
+          1600000,
+          2500000
+        ],
+        "ActmonError": 0,
+        "AverageActiveKhz": 45904,
+        "RawActiveKhz": 14899,
+        "TargetKhz": 2500000,
+        "DisplayFloorKhz": 38304,
+        "QosError": 0,
+        "TransitionCount": 336
+      }
+    },
+    "DwmBefore": [
+      {
+        "Modules": [
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+        ],
+        "Id": 1348,
+        "Start": "2026-11-17T17:13:30.9960865Z"
+      }
+    ],
+    "LuidSnapshot": "00000000000be7e3",
+    "RestartRequested": false,
+    "ProviderDiagnosticsBefore": {
+      "Stage": 0,
+      "Status": 0,
+      "StatusPresent": true,
+      "StagePresent": true
+    },
+    "WrapperProcessId": 7132,
+    "Exit": 5,
+    "End": "2026-11-17T17:20:45.1326880Z",
+    "ProviderFailure": {
+      "Stage": 0,
+      "Status": 0,
+      "StatusPresent": true,
+      "StagePresent": true
+    },
+    "Stdout": "NVDEC stage-1 tool: 1280x720 coded 1280x720 profile 77 level 31 refs 2 frames 6\r\nfirmware: 128000 bytes sha256 7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909\r\nnative NVK LUID=00000000000be7e3\r\nfirmware loaded, Falcon booted\r\nsurfaces: pitch 1280 aligned height 720 frame 1382400 bytes\r\nframe 0 slot 0 poc 0 slices 1 sync 654844323/654844323 mbs 3600 sha256 17a50eabb330e8c16dadba8596f498de84de626af6f6eb179d3cf238fa173f90\r\nframe 1 slot 1 poc 2 slices 1 sync 654844324/654844324 mbs 3600 sha256 5a2030175f14524c5c3a7ac179e2033e89892ea37b8c4878698ac8fc12983f56\r\nframe 2 slot 2 poc 4 slices 1 sync 654844325/654844325 mbs 3600 sha256 91228102e7dbf5016ceeec64483e50900727dfa0f8f3bff365a72c85f6e51fba\r\nframe 3 slot 3 poc 8 slices 1 sync 654844326/654844326 mbs 3600 sha256 4f921ec7f0a995ed8e95f612a1dd1fe4a36b07a0cdcb7dcce9762aa2c887f2be\r\nframe 4 slot 4 poc 6 slices 1 sync 654844327/654844327 mbs 3600 sha256 b347083f02accd1c9d5d1125645e9858039fbab0e5c65169771bb86716e9b0cd\r\n",
+    "Stderr": "NVDEC_CALL OpenAdapterFromLuid\r\nNVDEC_RETURN OpenAdapterFromLuid 0x00000000\r\nNVDEC_CALL CreateDevice\r\nNVDEC_RETURN CreateDevice 0x00000000\r\nNVDEC_CALL Escape command=1 session=0\r\nNVDEC_RETURN Escape command=1 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=2 session=1\r\nNVDEC_RETURN Escape command=2 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=1\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=1\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=1\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=1\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=1\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=1\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0xc000009c\r\nframe 5 NVDEC_DECODE failed: 0xc000009c response_v=1 result=0xc000009c sync=654844328/654844328 bytes=0 detail=H.264 submission: NVDEC completed with a decode error; PLLP=0x48115408 HostSource=0x80000003 CoreFloorUv=0x00100590 request=11161 response=1382620 bitstream=10481 slices=1 slot=5\r\nNVDEC_CALL Escape command=5 session=1\r\nNVDEC_RETURN Escape command=5 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL DestroyDevice\r\nNVDEC_RETURN DestroyDevice 0x00000000\r\n"
+  },
+  "first_run_interpretation": "Five frames completed but quantization was wrong; final frame reported hardware decode error. Default matrices and missing EOF bytes corrected in client only; no intervening driver install or restart.",
+  "successful_native_run": {
+    "Begin": "2026-11-17T17:32:07.6014386Z",
+    "Boot": "2026-11-17T17:12:56.5106640Z",
+    "Phase": "Exited",
+    "PowerBefore": {
+      "Utc": "2026-11-17T17:32:07.1951903Z",
+      "Power": {
+        "Version": 2,
+        "IsLite": 1,
+        "CpuConfigured": 1,
+        "PowerMode": 1,
+        "CpuTargetKhz": 714000,
+        "CpuActualKhz": 714796,
+        "CpuBootKhz": 998400,
+        "CpuMv": 615,
+        "RamActualKhz": 1331200,
+        "GpuPolicyMode": 1,
+        "GpuPolicyMinKhz": 76800,
+        "GpuPolicyMaxKhz": 537600,
+        "GpuReportedKhz": 76800,
+        "GpuReportedUv": 590000,
+        "GpuStatusWord": 208348417,
+        "TempC": 37,
+        "TempValid": 1,
+        "FanDuty": 51,
+        "Flags": 20,
+        "CpuPolicyMinKhz": 102000,
+        "CpuPolicyMaxKhz": 1581000,
+        "CpuRequestedMaxKhz": 1581000,
+        "GpuRequestedMaxKhz": 537600,
+        "CpuSpeedo": 1630,
+        "CpuProcessId": 0,
+        "CpuDfllAvailable": 1,
+        "CpuDfllActive": 1,
+        "CpuLastError": 0,
+        "CpuLoadPermille": 375,
+        "GpuSampleAgeMs": 312,
+        "SocTempC": 37,
+        "BoardTempC": 36,
+        "TempSampleAgeMs": 1140
+      },
+      "Battery": {
+        "Version": 1,
+        "LimitCenter": 85,
+        "BandMin": 80,
+        "BandMax": 90,
+        "CapacityPercent": 89,
+        "VoltageMv": 3828,
+        "Reg00InputSrc": 2,
+        "Reg01PwrOn": 0,
+        "Reg08SysStat": 68,
+        "LastApplyStatus": 0,
+        "Flags": 7
+      }
+    },
+    "EmcBefore": {
+      "Utc": "2026-11-17T17:32:07.2889437Z",
+      "Emc": {
+        "Version": 1,
+        "Flags": 367,
+        "ActualKhz": 1600000,
+        "BootKhz": 2500000,
+        "SampleAgeMs": 15,
+        "LastError": 0,
+        "EnumerationError": 0,
+        "RateCount": 4,
+        "RatesKhz": [
+          204000,
+          1331200,
+          1600000,
+          2500000
+        ],
+        "ActmonError": 0,
+        "AverageActiveKhz": 43758,
+        "RawActiveKhz": 47462,
+        "TargetKhz": 1600000,
+        "DisplayFloorKhz": 38304,
+        "QosError": 0,
+        "TransitionCount": 1806
+      }
+    },
+    "DwmBefore": [
+      {
+        "Modules": [
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+        ],
+        "Id": 1348,
+        "Start": "2026-11-17T17:13:30.9960865Z"
+      }
+    ],
+    "LuidSnapshot": "00000000000be7e3",
+    "RestartRequested": false,
+    "ProviderDiagnosticsBefore": {
+      "Stage": 0,
+      "Status": 0,
+      "StatusPresent": true,
+      "StagePresent": true
+    },
+    "ParserRepairTool": {
+      "Sha256": "d2c5180cdd9771837231e0a37312e2d3921a0665408159db71a4720d427ed23e",
+      "SourceCommit": "38830972d45de02d4c7e39096bf24349e0dceecd",
+      "Length": 95232
+    },
+    "WrapperProcessId": 1448,
+    "Exit": 0,
+    "End": "2026-11-17T17:32:09.1795650Z",
+    "ProviderFailure": {
+      "Stage": 0,
+      "Status": 0,
+      "StatusPresent": true,
+      "StagePresent": true
+    },
+    "Stdout": "NVDEC stage-1 tool: 1280x720 coded 1280x720 profile 77 level 31 refs 2 frames 6\r\nfirmware: 128000 bytes sha256 7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909\r\nnative NVK LUID=00000000000be7e3\r\nfirmware loaded, Falcon booted\r\nsurfaces: pitch 1280 aligned height 720 frame 1382400 bytes\r\nframe 0 slot 0 poc 0 slices 1 sync 654844329/654844329 mbs 3600 sha256 1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4\r\nframe 1 slot 1 poc 2 slices 1 sync 654844330/654844330 mbs 3600 sha256 37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac\r\nframe 2 slot 2 poc 4 slices 1 sync 654844331/654844331 mbs 3600 sha256 504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2\r\nframe 3 slot 3 poc 8 slices 1 sync 654844332/654844332 mbs 3600 sha256 a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2\r\nframe 4 slot 4 poc 6 slices 1 sync 654844333/654844333 mbs 3600 sha256 ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8\r\nframe 5 slot 5 poc 10 slices 1 sync 654844334/654844334 mbs 3600 sha256 f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277\r\nNVDEC=used (real Host1x syncpoint per frame)\r\nRESULT=PASS all 6 frames matched the software reference; session retired\r\n",
+    "Stderr": "NVDEC_CALL OpenAdapterFromLuid\r\nNVDEC_RETURN OpenAdapterFromLuid 0x00000000\r\nNVDEC_CALL CreateDevice\r\nNVDEC_RETURN CreateDevice 0x00000000\r\nNVDEC_CALL Escape command=1 session=0\r\nNVDEC_RETURN Escape command=1 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=2 session=2\r\nNVDEC_RETURN Escape command=2 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=2\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=2\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=2\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=2\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=2\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=3 session=2\r\nNVDEC_RETURN Escape command=3 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL Escape command=5 session=2\r\nNVDEC_RETURN Escape command=5 delivery=0x00000000 result=0x00000000\r\nNVDEC_CALL DestroyDevice\r\nNVDEC_RETURN DestroyDevice 0x00000000\r\n"
+  },
+  "frames": [
+    {
+      "decode_index": 0,
+      "slot": 0,
+      "poc": 0,
+      "slices": 1,
+      "sync_expected": 654844329,
+      "sync_observed": 654844329,
+      "mbs_decoded": 3600,
+      "i420_sha256": "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4"
+    },
+    {
+      "decode_index": 1,
+      "slot": 1,
+      "poc": 2,
+      "slices": 1,
+      "sync_expected": 654844330,
+      "sync_observed": 654844330,
+      "mbs_decoded": 3600,
+      "i420_sha256": "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac"
+    },
+    {
+      "decode_index": 2,
+      "slot": 2,
+      "poc": 4,
+      "slices": 1,
+      "sync_expected": 654844331,
+      "sync_observed": 654844331,
+      "mbs_decoded": 3600,
+      "i420_sha256": "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2"
+    },
+    {
+      "decode_index": 3,
+      "slot": 3,
+      "poc": 8,
+      "slices": 1,
+      "sync_expected": 654844332,
+      "sync_observed": 654844332,
+      "mbs_decoded": 3600,
+      "i420_sha256": "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2"
+    },
+    {
+      "decode_index": 4,
+      "slot": 4,
+      "poc": 6,
+      "slices": 1,
+      "sync_expected": 654844333,
+      "sync_observed": 654844333,
+      "mbs_decoded": 3600,
+      "i420_sha256": "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8"
+    },
+    {
+      "decode_index": 5,
+      "slot": 5,
+      "poc": 10,
+      "slices": 1,
+      "sync_expected": 654844334,
+      "sync_observed": 654844334,
+      "mbs_decoded": 3600,
+      "i420_sha256": "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+    }
+  ],
+  "nv12_byte_comparison": {
+    "layout": "NV12,1280x720,pitch1280,UV offset921600",
+    "software_reference_sha256": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+    "all_frames_byte_exact": true,
+    "frames": [
+      {
+        "name": "nvdec_poc0_0.nv12",
+        "poc": 0,
+        "bytes": 1382400,
+        "sha256": "ea284b1304d223f09b082206d5cb2228448c132d47cf4e967333792c9ac4c66b",
+        "byte_exact_reference": true
+      },
+      {
+        "name": "nvdec_poc10_5.nv12",
+        "poc": 10,
+        "bytes": 1382400,
+        "sha256": "b7a7465358fba2f2f593777fc2471393c2fbc8bdea5c456eae6c574a66a80c64",
+        "byte_exact_reference": true
+      },
+      {
+        "name": "nvdec_poc2_1.nv12",
+        "poc": 2,
+        "bytes": 1382400,
+        "sha256": "c33785f08f120f71a7d14d704771cf4c16ba8be94523b38165ed12208894d0d6",
+        "byte_exact_reference": true
+      },
+      {
+        "name": "nvdec_poc4_2.nv12",
+        "poc": 4,
+        "bytes": 1382400,
+        "sha256": "6678800318924a76ccf3d235f3c24f70e1dc82cf98ea9228ceeb01b07b041b11",
+        "byte_exact_reference": true
+      },
+      {
+        "name": "nvdec_poc6_4.nv12",
+        "poc": 6,
+        "bytes": 1382400,
+        "sha256": "1668b84351940ca9858c11d8fc7784ea0d1f0a16c3f7418e2dbcef67ac50511b",
+        "byte_exact_reference": true
+      },
+      {
+        "name": "nvdec_poc8_3.nv12",
+        "poc": 8,
+        "bytes": 1382400,
+        "sha256": "4d7a089ab602cc9f582ed275d0a2cbcd2b7172248bb54c230fa4005e33c227b2",
+        "byte_exact_reference": true
+      }
+    ]
+  },
+  "software_reference": {
+    "command": [
+      "/opt/homebrew/bin/ffmpeg",
+      "-v",
+      "error",
+      "-i",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/surface-layout-native-20261117/native-input/sample720.h264",
+      "-pix_fmt",
+      "nv12",
+      "-f",
+      "rawvideo",
+      "pipe:1"
+    ],
+    "bytes": 8294400,
+    "frames": [
+      {
+        "frame": 0,
+        "sha256": "ea284b1304d223f09b082206d5cb2228448c132d47cf4e967333792c9ac4c66b"
+      },
+      {
+        "frame": 1,
+        "sha256": "c33785f08f120f71a7d14d704771cf4c16ba8be94523b38165ed12208894d0d6"
+      },
+      {
+        "frame": 2,
+        "sha256": "6678800318924a76ccf3d235f3c24f70e1dc82cf98ea9228ceeb01b07b041b11"
+      },
+      {
+        "frame": 3,
+        "sha256": "1668b84351940ca9858c11d8fc7784ea0d1f0a16c3f7418e2dbcef67ac50511b"
+      },
+      {
+        "frame": 4,
+        "sha256": "4d7a089ab602cc9f582ed275d0a2cbcd2b7172248bb54c230fa4005e33c227b2"
+      },
+      {
+        "frame": 5,
+        "sha256": "b7a7465358fba2f2f593777fc2471393c2fbc8bdea5c456eae6c574a66a80c64"
+      }
+    ]
+  },
+  "i420_reference_check": {
+    "frames": [
+      {
+        "frame": 0,
+        "i420_sha256": "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+        "matches_supplied_reference": true
+      },
+      {
+        "frame": 1,
+        "i420_sha256": "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+        "matches_supplied_reference": true
+      },
+      {
+        "frame": 2,
+        "i420_sha256": "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+        "matches_supplied_reference": true
+      },
+      {
+        "frame": 3,
+        "i420_sha256": "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+        "matches_supplied_reference": true
+      },
+      {
+        "frame": 4,
+        "i420_sha256": "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+        "matches_supplied_reference": true
+      },
+      {
+        "frame": 5,
+        "i420_sha256": "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277",
+        "matches_supplied_reference": true
+      }
+    ],
+    "last_nal_bytes": 10464,
+    "last_two_bytes_lost_by_old_parser": "c12b"
+  },
+  "completion": "Actual Host1x syncpoint target observed for all6 frames; CLOSE and DestroyDevice each0; no CPU increments or synthetic completion",
+  "loaded_images": {
+    "Begin": "2026-11-17T17:20:00.2264409Z",
+    "Boot": "2026-11-17T17:12:56.5106640Z",
+    "Phase": "Verified",
+    "Pid": 1060,
+    "Exit": 0,
+    "Stderr": "StopTrace=0 events_lost=0 buffers_lost=0 session=NvdecImageIdentity-1060\r\nProcessTrace=0 CloseTrace=0 matches=4 property_errors=0\r\n",
+    "Images": [
+      {
+        "image": "switchfan.sys",
+        "checksum": 149807,
+        "timestamp": 0,
+        "image_size": 126976,
+        "pid": 0,
+        "opcode": 3
+      },
+      {
+        "image": "tegragpurender.sys",
+        "checksum": 250235,
+        "timestamp": 0,
+        "image_size": 266240,
+        "pid": 0,
+        "opcode": 3
+      },
+      {
+        "image": "switchfan.sys",
+        "checksum": 149807,
+        "timestamp": 0,
+        "image_size": 126976,
+        "pid": 0,
+        "opcode": 4
+      },
+      {
+        "image": "tegragpurender.sys",
+        "checksum": 250235,
+        "timestamp": 0,
+        "image_size": 266240,
+        "pid": 0,
+        "opcode": 4
+      }
+    ],
+    "Etl": {
+      "Sha256": "AED79984C8954E45733E80C583A29A8313969DF14F933428AF2B3E901F786779",
+      "Length": 2424832
+    },
+    "End": "2026-11-17T17:20:02.8514424Z"
+  },
+  "resource_snapshot": {
+    "scope": "adapter-start resource snapshot; not live DMA readiness",
+    "decode_tested": false,
+    "adapters": [
+      {
+        "luid": "00000000000be7e3",
+        "query_status": "00000000",
+        "snapshot_available": true,
+        "version": 65537,
+        "size": 64,
+        "flags": 3,
+        "resource_mask": 4095,
+        "resource_status": 4,
+        "map_status": "00000000",
+        "hidrev": "00012127",
+        "powergate_status": "3ffecf4d",
+        "clock_y": "00000342",
+        "reset_y": "0fe9d09d",
+        "nvdec_clock_source": "e0000000",
+        "nvjpg_clock_source": "e0000000",
+        "smmu_config": "ffffffff",
+        "smmu_host1x_asid": "00000000",
+        "smmu_nvdec_asid": "00000000",
+        "smmu_nvjpg_asid": "00000000",
+        "clients_available": true,
+        "client_flags": 3,
+        "smmu_translation_enable0": "ffffffff",
+        "smmu_translation_enable1": "ffffffff",
+        "smmu_translation_enable3": "ffffffff",
+        "mc_flush": "00000000",
+        "mc_flush_status": "00000004",
+        "pmc_clamp_status": "00000000",
+        "pmc_toggle": "0000000b"
+      }
+    ],
+    "enumerate_status": "00000000",
+    "close_status": "00000000",
+    "matching_adapters": 1,
+    "supported_queries": 1
+  },
+  "activation": {
+    "Utc": "2026-11-17T17:17:35.2807779Z",
+    "Status": "Enabled",
+    "SyncMode": "gpu-bridge",
+    "Version": "0.1.0.158",
+    "PhysicalPanelVerified": false,
+    "OsRebootRequested": false,
+    "End": "2026-11-17T17:18:10.3986590Z"
+  },
+  "health": {
+    "Utc": "2026-11-17T17:34:12.8670683Z",
+    "Boot": "2026-11-17T17:12:56.5106640Z",
+    "Code": 0,
+    "Power": {
+      "Utc": "2026-11-17T17:34:17.1170700Z",
+      "Power": {
+        "Version": 2,
+        "IsLite": 1,
+        "CpuConfigured": 1,
+        "PowerMode": 1,
+        "CpuTargetKhz": 714000,
+        "CpuActualKhz": 714796,
+        "CpuBootKhz": 998400,
+        "CpuMv": 615,
+        "RamActualKhz": 1600000,
+        "GpuPolicyMode": 1,
+        "GpuPolicyMinKhz": 76800,
+        "GpuPolicyMaxKhz": 537600,
+        "GpuReportedKhz": 76800,
+        "GpuReportedUv": 590000,
+        "GpuStatusWord": 237774081,
+        "TempC": 37,
+        "TempValid": 1,
+        "FanDuty": 51,
+        "Flags": 20,
+        "CpuPolicyMinKhz": 102000,
+        "CpuPolicyMaxKhz": 1581000,
+        "CpuRequestedMaxKhz": 1581000,
+        "GpuRequestedMaxKhz": 537600,
+        "CpuSpeedo": 1630,
+        "CpuProcessId": 0,
+        "CpuDfllAvailable": 1,
+        "CpuDfllActive": 1,
+        "CpuLastError": 0,
+        "CpuLoadPermille": 411,
+        "GpuSampleAgeMs": 140,
+        "SocTempC": 37,
+        "BoardTempC": 36,
+        "TempSampleAgeMs": 390
+      },
+      "Battery": {
+        "Version": 1,
+        "LimitCenter": 85,
+        "BandMin": 80,
+        "BandMax": 90,
+        "CapacityPercent": 89,
+        "VoltageMv": 3829,
+        "Reg00InputSrc": 2,
+        "Reg01PwrOn": 0,
+        "Reg08SysStat": 68,
+        "LastApplyStatus": 0,
+        "Flags": 7
+      }
+    },
+    "Emc": {
+      "Utc": "2026-11-17T17:34:17.2108175Z",
+      "Emc": {
+        "Version": 1,
+        "Flags": 367,
+        "ActualKhz": 1331200,
+        "BootKhz": 2500000,
+        "SampleAgeMs": 46,
+        "LastError": 0,
+        "EnumerationError": 0,
+        "RateCount": 4,
+        "RatesKhz": [
+          204000,
+          1331200,
+          1600000,
+          2500000
+        ],
+        "ActmonError": 0,
+        "AverageActiveKhz": 39203,
+        "RawActiveKhz": 51353,
+        "TargetKhz": 1331200,
+        "DisplayFloorKhz": 38304,
+        "QosError": 0,
+        "TransitionCount": 2075
+      }
+    },
+    "Fan": {
+      "Utc": "2026-11-17T17:34:17.2420661Z",
+      "Fan": {
+        "Version": 1,
+        "Mode": 1,
+        "Duty": 51,
+        "TargetPwm": 51,
+        "Flags": 1,
+        "SampleAgeMs": 703,
+        "FilteredTempMc": 37100
+      }
+    },
+    "Dwm": [
+      {
+        "Modules": [
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+        ],
+        "Id": 1348,
+        "Start": "2026-11-17T17:13:30.9960865Z"
+      }
+    ],
+    "Files": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
+        "Length": 243720
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+        "Length": 104456
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Length": 4993
+      }
+    ],
+    "Processes": [],
+    "DecodeRequestAttempted": true,
+    "FrameFiles": [
+      {
+        "Name": "nvdec_poc0_0.nv12",
+        "Length": 1382400
+      },
+      {
+        "Name": "nvdec_poc10_5.nv12",
+        "Length": 1382400
+      },
+      {
+        "Name": "nvdec_poc2_1.nv12",
+        "Length": 1382400
+      },
+      {
+        "Name": "nvdec_poc4_2.nv12",
+        "Length": 1382400
+      },
+      {
+        "Name": "nvdec_poc6_4.nv12",
+        "Length": 1382400
+      },
+      {
+        "Name": "nvdec_poc8_3.nv12",
+        "Length": 1382400
+      }
+    ],
+    "RetainedFileIdentities": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
+        "Matches": true,
+        "Length": 32264
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
+        "Matches": true,
+        "Length": 243720
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+        "Matches": true,
+        "Length": 138
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Matches": true,
+        "Length": 4993
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+        "Matches": true,
+        "Length": 42440
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
+        "Matches": true,
+        "Length": 1517568
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+        "Matches": true,
+        "Length": 921600
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
+        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+        "Matches": true,
+        "Length": 17652224
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+        "Matches": true,
+        "Length": 104456
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+        "Matches": true,
+        "Length": 3274240
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+        "Matches": true,
+        "Length": 60416
+      }
+    ],
+    "All11Match": true,
+    "Activation": {
+      "Utc": "2026-11-17T17:17:35.2807779Z",
+      "Status": "Enabled",
+      "SyncMode": "gpu-bridge",
+      "Version": "0.1.0.158",
+      "PhysicalPanelVerified": false,
+      "OsRebootRequested": false,
+      "End": "2026-11-17T17:18:10.3986590Z"
+    }
+  },
+  "display_configuration": {
+    "operation": "show",
+    "session": 1,
+    "console_session": 1,
+    "desktop": "Default",
+    "input_desktop": "Default",
+    "input_desktop_error": 0,
+    "changed": false,
+    "status": 0,
+    "source_name": "\\\\.\\DISPLAY3",
+    "monitor_path": "\\\\?\\DISPLAY#Default_Monitor#3&1ef10c3b&0&UID0#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}",
+    "adapter_device_id": "ACPI\\VEN_SWOA&DEV_0F01",
+    "utc": "2026-11-17T17:46:03Z",
+    "system_dpi": 96,
+    "current": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "registry": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "source_mode": {
+      "width": 720,
+      "height": 1280
+    },
+    "target_signal": {
+      "width": 720,
+      "height": 1280
+    },
+    "path_rotation": 2
+  },
+  "incremental_reuse": {
+    "initial_upload": {
+      "created_utc": "2026-11-17T17:04:35.029016+00:00",
+      "signed_kmd": {
+        "Length": 243720,
+        "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+      },
+      "unsigned_kmd": {
+        "Length": 240640,
+        "Sha256": "8974cdea0a007a0d4bf5bf2483c0ac44da97227d6b72791c20318824f2b426c8"
+      },
+      "archive": {
+        "Length": 133973,
+        "Sha256": "2d8e6a0ad32a8bfd0cb3841c108049a5544595bb40b109bc4bc9fad485db466a"
+      },
+      "delta_files": [
+        "pair-config.json",
+        "package\\tegragpurender.inf",
+        "package\\tegragpurender.sys",
+        "input.json"
+      ],
+      "reused_on_device_files": 43,
+      "kmd_pe": {
+        "checksum": 250235,
+        "timestamp": 0,
+        "image_size": 266240
+      }
+    },
+    "provider_staging": {
+      "Utc": "2026-11-17T17:10:34.5751491Z",
+      "ImportRequested": false,
+      "Reused": true,
+      "Package": {
+        "PublishedInf": "C:\\Windows\\INF\\oem2.inf",
+        "Directory": "C:\\Windows\\System32\\DriverStore\\FileRepository\\switchfan.inf_arm64_9b417a6a7a6f6c4e"
+      },
+      "End": "2026-11-17T17:10:35.5751515Z"
+    },
+    "boot_table": {
+      "Begin": "2026-11-17T17:12:09.8720273Z",
+      "Phase": "Committed",
+      "Source": {
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Length": 4993
+      },
+      "Reused": true,
+      "RestartRequested": false,
+      "Before": {
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Length": 4993
+      },
+      "Volume": "\\\\?\\Volume{7db70fc4-0000-0000-0000-00d9b8000000}",
+      "Unbuffered": {
+        "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849",
+        "Length": 4993
+      },
+      "End": "2026-11-17T17:12:13.7001492Z"
+    },
+    "planned_restarts_this_layout_round": 1,
+    "restarts_for_parser_repair": 0,
+    "provider_extra_restarts": 0,
+    "original_whole_combination_restored": false
+  },
+  "immediate_recovery": {
+    "kmd": {
+      "Length": 242696,
+      "Sha256": "36eecba55f989dc8880cbf2b225a3f650e4f8dc1d56117cea325bfd36ff25da4"
+    },
+    "activation": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-syncpoint-range-20261117\\activation",
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "prepared_recovery": {
+      "Files": [
+        {
+          "Sha256": "594A6CEED45AEFD6C92B9E9089BAE2BCEE8DB5730FA9CFFAEBE443EB8655A772",
+          "Name": "rollback\\nv_acr_ucode_prod.bin",
+          "Matches": true,
+          "Length": 19200
+        },
+        {
+          "Sha256": "BF490B3816830CD1D2DB79113BB24A9E384094ED742C83815985D7ED9BA3280D",
+          "Name": "rollback\\tegragpuno3d.dll",
+          "Matches": true,
+          "Length": 2048
+        },
+        {
+          "Sha256": "8BB7CF4C0BB8B2DCC4EF617C0D210C0BCEBC34E4F710E89728E439380E318971",
+          "Name": "user-display.bin",
+          "Matches": true,
+          "Length": 1192
+        },
+        {
+          "Sha256": "0CCA8B6FB18BDC660AD65970F54EC9DD5C51AE9D9AB68244B1C4DC017F6248FC",
+          "Name": "rollback\\fecs_sig.bin",
+          "Matches": true,
+          "Length": 108
+        },
+        {
+          "Sha256": "04E7DE1C0CAC0725D3A35852F8BBC2DB7E1DF2E69C65467CDF1DA23BFED094E7",
+          "Name": "rollback\\tegragpurender.inf",
+          "Matches": true,
+          "Length": 1558
+        },
+        {
+          "Sha256": "6B5A3CE1F2FD1381B8AED500E0D034561A8B3054E7702E8447E12FCDE7978253",
+          "Name": "rollback\\fecs.bin",
+          "Matches": true,
+          "Length": 528
+        },
+        {
+          "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+          "Name": "rollback\\acpitabl.dat",
+          "Matches": true,
+          "Length": 4993
+        },
+        {
+          "Sha256": "36EECBA55F989DC8880CBF2B225A3F650E4F8DC1D56117CEA325BFD36FF25DA4",
+          "Name": "rollback\\tegragpurender.sys",
+          "Matches": true,
+          "Length": 242696
+        },
+        {
+          "Sha256": "DE3AAB7BF47484CE8B8CF4F66DE551E43F06D8F3DB177BF9E5AAF1B653A5C132",
+          "Name": "rollback\\pmu_sig.bin",
+          "Matches": true,
+          "Length": 76
+        },
+        {
+          "Sha256": "E76B29528F63AB09CE85E91767C8A3FA5DC6A4704C7CA0EFB1FAF095F1FAF76B",
+          "Name": "rollback\\gpmu_ucode_desc.bin",
+          "Matches": true,
+          "Length": 652
+        },
+        {
+          "Sha256": "97BDA367D2B2CFFA98B8084DAE7803233474E439D1BDF6EDC4029B405695F7BA",
+          "Name": "rollback\\gpccs.bin",
+          "Matches": true,
+          "Length": 528
+        },
+        {
+          "Sha256": "364CF184D6F3AE0130AE449748E688D76BBA3E33DE2704CA536A5144751F12E1",
+          "Name": "rollback\\pmu_bl.bin",
+          "Matches": true,
+          "Length": 1280
+        },
+        {
+          "Sha256": "1E14AF6FB9760CFB37C95199BBBB2C01F51BA1AD6B56104A27BEAC137368E699",
+          "Name": "rollback\\gpmu_ucode_image.bin",
+          "Matches": true,
+          "Length": 47872
+        },
+        {
+          "Sha256": "3F319EE6991CFDEC78243A5F800B4E8328C6488212213ABDF677651AEBE3824E",
+          "Name": "rollback\\tegragpurender.cat",
+          "Matches": true,
+          "Length": 8394
+        },
+        {
+          "Sha256": "5B285E5DE99B935C2619E54B1656B8A2F271BA845E80952FAADFD09960D6EEA3",
+          "Name": "rollback\\NETB_img.bin",
+          "Matches": true,
+          "Length": 70502
+        }
+      ],
+      "CurrentInf": "oem7.inf",
+      "ProviderStaging": {
+        "Utc": "2026-11-17T17:10:34.5751491Z",
+        "ImportRequested": false,
+        "Reused": true,
+        "Package": {
+          "PublishedInf": "C:\\Windows\\INF\\oem2.inf",
+          "Directory": "C:\\Windows\\System32\\DriverStore\\FileRepository\\switchfan.inf_arm64_9b417a6a7a6f6c4e"
+        },
+        "End": "2026-11-17T17:10:35.5751515Z"
+      },
+      "Recovery": {
+        "Version": "0.1.0.158",
+        "RecoveryTarget": "0.1.0.158-gated",
+        "InstanceId": "ACPI\\SWOA0F01\\0",
+        "User": "DESKTOP-5RCUK3G\\ruje",
+        "OriginalOem": "oem7.inf",
+        "Files": {
+          "rollback\\nv_acr_ucode_prod.bin": {
+            "Sha256": "594A6CEED45AEFD6C92B9E9089BAE2BCEE8DB5730FA9CFFAEBE443EB8655A772",
+            "Length": 19200
+          },
+          "rollback\\tegragpuno3d.dll": {
+            "Sha256": "BF490B3816830CD1D2DB79113BB24A9E384094ED742C83815985D7ED9BA3280D",
+            "Length": 2048
+          },
+          "user-display.bin": {
+            "Sha256": "8bb7cf4c0bb8b2dcc4ef617c0d210c0bcebc34e4f710e89728e439380e318971",
+            "Length": 1192
+          },
+          "rollback\\fecs_sig.bin": {
+            "Sha256": "0CCA8B6FB18BDC660AD65970F54EC9DD5C51AE9D9AB68244B1C4DC017F6248FC",
+            "Length": 108
+          },
+          "rollback\\tegragpurender.inf": {
+            "Sha256": "04E7DE1C0CAC0725D3A35852F8BBC2DB7E1DF2E69C65467CDF1DA23BFED094E7",
+            "Length": 1558
+          },
+          "rollback\\fecs.bin": {
+            "Sha256": "6B5A3CE1F2FD1381B8AED500E0D034561A8B3054E7702E8447E12FCDE7978253",
+            "Length": 528
+          },
+          "rollback\\acpitabl.dat": {
+            "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+            "Length": 4993
+          },
+          "rollback\\tegragpurender.sys": {
+            "Sha256": "36EECBA55F989DC8880CBF2B225A3F650E4F8DC1D56117CEA325BFD36FF25DA4",
+            "Length": 242696
+          },
+          "rollback\\pmu_sig.bin": {
+            "Sha256": "DE3AAB7BF47484CE8B8CF4F66DE551E43F06D8F3DB177BF9E5AAF1B653A5C132",
+            "Length": 76
+          },
+          "rollback\\gpmu_ucode_desc.bin": {
+            "Sha256": "E76B29528F63AB09CE85E91767C8A3FA5DC6A4704C7CA0EFB1FAF095F1FAF76B",
+            "Length": 652
+          },
+          "rollback\\gpccs.bin": {
+            "Sha256": "97BDA367D2B2CFFA98B8084DAE7803233474E439D1BDF6EDC4029B405695F7BA",
+            "Length": 528
+          },
+          "rollback\\pmu_bl.bin": {
+            "Sha256": "364CF184D6F3AE0130AE449748E688D76BBA3E33DE2704CA536A5144751F12E1",
+            "Length": 1280
+          },
+          "rollback\\gpmu_ucode_image.bin": {
+            "Sha256": "1E14AF6FB9760CFB37C95199BBBB2C01F51BA1AD6B56104A27BEAC137368E699",
+            "Length": 47872
+          },
+          "rollback\\tegragpurender.cat": {
+            "Sha256": "3F319EE6991CFDEC78243A5F800B4E8328C6488212213ABDF677651AEBE3824E",
+            "Length": 8394
+          },
+          "rollback\\NETB_img.bin": {
+            "Sha256": "5B285E5DE99B935C2619E54B1656B8A2F271BA845E80952FAADFD09960D6EEA3",
+            "Length": 70502
+          }
+        },
+        "Inf": "rollback\\tegragpurender.inf",
+        "Utc": "2026-11-17T17:10:24.0907731Z"
+      },
+      "Code": 0,
+      "State": {
+        "Phase": "Prepared",
+        "Begin": "2026-11-17T17:10:14.1532741Z",
+        "Boot": "2026-11-17T16:41:34.2285850Z",
+        "RestartRequested": false,
+        "Updated": "2026-11-17T17:10:35.6064036Z",
+        "LastAction": "StageProviderPackage",
+        "End": "2026-11-17T17:10:27.6845230Z",
+        "PackageStaged": true,
+        "ProviderStaged": true
+      },
+      "Utc": "2026-11-17T17:11:09.4501466Z"
+    }
+  },
+  "evidence_archive": {
+    "archive": {
+      "Length": 1763637,
+      "Sha256": "4b68930efaeaa3776394cd602e6a7073382b635ddd2f560c52f6de6c74675d47"
+    },
+    "members_verified": 55,
+    "all_members_match": true,
+    "files": [
+      {
+        "Sha256": "7F0730BFD739D55330162802E7E42565881F42F31A2D120793403E9707DB567F",
+        "Name": "after-candidate-activation.json",
+        "Length": 1434
+      },
+      {
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Name": "baseline-acpi.dat",
+        "Length": 4993
+      },
+      {
+        "Sha256": "C1D92827759E524E107A60B60E183D2CD248B12E91983370395EB40B6FB866D7",
+        "Name": "before-candidate-selection.json",
+        "Length": 4091
+      },
+      {
+        "Sha256": "FEC4B21D6B68F2412EC5BD0079C1E56086B7AA1587F608EE07FF268AB884FC43",
+        "Name": "boot-table-candidate.json",
+        "Length": 781
+      },
+      {
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Name": "candidate-acpi.dat",
+        "Length": 4993
+      },
+      {
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+        "Name": "candidate-display-state.err",
+        "Length": 0
+      },
+      {
+        "Sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+        "Name": "candidate-display-state.exit",
+        "Length": 3
+      },
+      {
+        "Sha256": "5AFA4B5E9CEF487819E30685C1E01A8848F071E878A8BC29F479D5D61549E2F5",
+        "Name": "candidate-display-state.json",
+        "Length": 708
+      },
+      {
+        "Sha256": "87C67235005300832DFECF4DF0A5865C7F69A0644D68F052EEE0745D055C231A",
+        "Name": "candidate-health-after-inputfix.json",
+        "Length": 4795
+      },
+      {
+        "Sha256": "A431F3C83D05C81C28620C0E905FE89EAF5A682A9BF4522DD165C6A8B7CFF4C7",
+        "Name": "candidate-health-before.json",
+        "Length": 4527
+      },
+      {
+        "Sha256": "DD56037BB4FE70C116618E968B0780589CFC2B045B3E2C7511C02637745F5E2C",
+        "Name": "candidate-health.json",
+        "Length": 4748
+      },
+      {
+        "Sha256": "AED79984C8954E45733E80C583A29A8313969DF14F933428AF2B3E901F786779",
+        "Name": "candidate-loaded-images.etl",
+        "Length": 2424832
+      },
+      {
+        "Sha256": "6A51D710517741545E63D862980CE2D7C01FF0D72089DE5D0CD61F19FDB6B686",
+        "Name": "candidate-loaded-images.json",
+        "Length": 816
+      },
+      {
+        "Sha256": "D51BA093B35A7A40D2BBD30845DFF08EFD14A55D22FC811862C7B5177D41B896",
+        "Name": "candidate-selection.json",
+        "Length": 715
+      },
+      {
+        "Sha256": "5FA56271B975AF60BEF8A42B589B44CC4A8C87EAC8EE5FEC6C057A63FFD0679D",
+        "Name": "candidate-staging.json",
+        "Length": 4774
+      },
+      {
+        "Sha256": "9D59EE3CC37DBAD8D3FE6B0A236FA24448A35845C7B743C4FD29F4AA3D0E0AA4",
+        "Name": "catalog-package.json",
+        "Length": 657
+      },
+      {
+        "Sha256": "31E2F24D667265ACC6A02431622801EB861758782B0DC11DC7FF9E8103E027D4",
+        "Name": "input.json",
+        "Length": 7180
+      },
+      {
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Name": "loaded-active-dsdt.dat",
+        "Length": 4993
+      },
+      {
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Name": "loaded-candidate-dsdt.dat",
+        "Length": 4993
+      },
+      {
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Name": "loaded-prepare-dsdt.dat",
+        "Length": 4993
+      },
+      {
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Name": "loaded-provider-Candidate.dat",
+        "Length": 4993
+      },
+      {
+        "Sha256": "32D0DAD6B02D90CDB57B77A7DADE005CB52C15309A0CBDD07A454F3ED8F3ACE5",
+        "Name": "native720-inputfix-observed.cmd",
+        "Length": 800
+      },
+      {
+        "Sha256": "A49563D04A56E1F470CABCF8A3D1017813F8A13211632E5FB087825EF1B4EEA0",
+        "Name": "native720-inputfix-run.json",
+        "Length": 8572
+      },
+      {
+        "Sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+        "Name": "native720-inputfix.exit",
+        "Length": 3
+      },
+      {
+        "Sha256": "442B2B7E576A6BF431FB738208135A2A5480089A725D9B857771B2357FB3B9DE",
+        "Name": "native720-inputfix.stderr",
+        "Length": 1177
+      },
+      {
+        "Sha256": "8F5969C587F6ED2ACB4A90E6ED5F09DB963F9C0E889DBC97B4CB88A8675C1A25",
+        "Name": "native720-inputfix.stdout",
+        "Length": 1247
+      },
+      {
+        "Sha256": "6FBE932E47F2ED1FDD35CD076AC2942E8CC688FEE3DFCF33930732F6009635FD",
+        "Name": "native720-observed.cmd",
+        "Length": 744
+      },
+      {
+        "Sha256": "882613E77AF4A903CA70766B8405E8E0CB3B53B68EEBD1347A0CD787B85453C0",
+        "Name": "native720-run.json",
+        "Length": 8300
+      },
+      {
+        "Sha256": "7FB2AAEAF3EEF66B52DB104118C30F62899F5F0DF520350A94A8FCB843C0DFDF",
+        "Name": "native720.exit",
+        "Length": 3
+      },
+      {
+        "Sha256": "85A0D382DFC8F9A567C6323F24F47D1BAFB6D2C36F9F6E6329722C2CDBB92CE1",
+        "Name": "native720.stderr",
+        "Length": 1468
+      },
+      {
+        "Sha256": "B02A5DADBB7DFEAB480FC78982DFB3F7250C7052D54546825456F3999C49B9C9",
+        "Name": "native720.stdout",
+        "Length": 989
+      },
+      {
+        "Sha256": "D2C5180CDD9771837231E0A37312E2D3921A0665408159DB71A4720D427ED23E",
+        "Name": "nvdec720-inputfix.exe",
+        "Length": 95232
+      },
+      {
+        "Sha256": "A4E309DB5EC1CB2741DF4912933C8446F0EDCD0BBACF72B8D61FECEE48FD0759",
+        "Name": "nvdec720-native.exe",
+        "Length": 95232
+      },
+      {
+        "Sha256": "1E20A7B46FF4E5F54CE1581B40C6FBD756783955CBEE3CB28DF4BE81DFBE68E6",
+        "Name": "pair-backup.json",
+        "Length": 7582
+      },
+      {
+        "Sha256": "6CEB4F8ED56C5A4C4C6CA03723A8A886894FF4B6BD9FC71498E6AC0CA0FA6D7B",
+        "Name": "pair-config.json",
+        "Length": 11611
+      },
+      {
+        "Sha256": "2F0BD25B658CFD9EF1BB83213320EE68139AFC15B177051895FC78F473DD731B",
+        "Name": "pair-state.json",
+        "Length": 2823
+      },
+      {
+        "Sha256": "F995E1CCDCF37D3CCD1F394AE1B70B7E25B54CB78BB6D0E4DA09102936D6E360",
+        "Name": "provider-candidate-selection.json",
+        "Length": 557
+      },
+      {
+        "Sha256": "9EC841AD4F053FF892006EF09262FEF0C67EAAA318277FEAF80A60A843213729",
+        "Name": "provider-loaded-candidate-9aa99b75ffc14d1992a803727da45df7.etl",
+        "Length": 2097152
+      },
+      {
+        "Sha256": "EEADD5A6E0F1CB54E6989C5B211C3AA680A259FD2FB03A8DCC2FC7B5A2272E71",
+        "Name": "provider-loaded-candidate.json",
+        "Length": 3353
+      },
+      {
+        "Sha256": "189F334E0A946AA464F1D8ABF26340F16AE0D32140F94F0EC8BE60872DF012BE",
+        "Name": "provider-staging.json",
+        "Length": 380
+      },
+      {
+        "Sha256": "F752727BAECB6EFD1F20482484DED2ED6DE8B5049090EEBF28E1C1D2F3E230C2",
+        "Name": "Read-CandidateDisplay.cmd",
+        "Length": 456
+      },
+      {
+        "Sha256": "FA02529AE7BFF8BA1159079D8D7B7D5103E399F9C29C022E99E06E9747C84F54",
+        "Name": "resource-query.txt",
+        "Length": 913
+      },
+      {
+        "Sha256": "2EA396925F014842393DB33C2652F5AC4170BF32EFC73C34BBEA1C0178BA219C",
+        "Name": "signature-new-package.json",
+        "Length": 2403
+      },
+      {
+        "Sha256": "7D262A08E3A93CF6E43352DAB33DFEEC8FB62573A17667A04152F76A6195DBA0",
+        "Name": "signature-result.json",
+        "Length": 12955
+      },
+      {
+        "Sha256": "0FB880F08D752163A8C315EB7468A18224E8617F4FBD972B7A48185E4BFD8192",
+        "Name": "decoded-frames\\nvdec_poc0_0.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "D8554C79B636C6DAFB1D91EB666BC584F22F6C90AC4C71D1C82F29A7FBBE4792",
+        "Name": "decoded-frames\\nvdec_poc2_1.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "15CDBDEB13BF7772F605A8B934BFC14D7C1EFC2E422D3FAF98B10F14F018E653",
+        "Name": "decoded-frames\\nvdec_poc4_2.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "3771FC7F35EB5321F15AEC2E24D95E3AA6E6B5D3E2B7682A35F39126A84A8B63",
+        "Name": "decoded-frames\\nvdec_poc6_4.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "219501D4126405821373D642A668647BD5F03B3EBCEA7B48CBA690D220C5713F",
+        "Name": "decoded-frames\\nvdec_poc8_3.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "EA284B1304D223F09B082206D5CB2228448C132D47CF4E967333792C9AC4C66B",
+        "Name": "decoded-inputfix-frames\\nvdec_poc0_0.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "B7A7465358FBA2F2F593777FC2471393C2FBC8BDEA5C456EAE6C574A66A80C64",
+        "Name": "decoded-inputfix-frames\\nvdec_poc10_5.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "C33785F08F120F71A7D14D704771CF4C16BA8BE94523B38165ED12208894D0D6",
+        "Name": "decoded-inputfix-frames\\nvdec_poc2_1.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "6678800318924A76CCF3D235F3C24F70E1DC82CF98EA9228CEEB01B07B041B11",
+        "Name": "decoded-inputfix-frames\\nvdec_poc4_2.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "1668B84351940CA9858C11D8FC7784EA0D1F0A16C3F7418E2DBCEF67AC50511B",
+        "Name": "decoded-inputfix-frames\\nvdec_poc6_4.nv12",
+        "Length": 1382400
+      },
+      {
+        "Sha256": "4D7A089AB602CC9F582ED275D0A2CBCD2B7172248BB54C230FA4005E33C227B2",
+        "Name": "decoded-inputfix-frames\\nvdec_poc8_3.nv12",
+        "Length": 1382400
+      }
+    ]
+  },
+  "observation_cleanup": {
+    "Begin": "2026-11-17T17:47:45.4356671Z",
+    "Boot": "2026-11-17T17:12:56.5106640Z",
+    "Phase": "Verified",
+    "Files": [
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\candidate-display-state.err",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+          "Length": 0
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\candidate-display-state.exit",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+          "Length": 3
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\candidate-loaded-images.etl",
+        "Kind": "ArchivedTrace",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "AED79984C8954E45733E80C583A29A8313969DF14F933428AF2B3E901F786779",
+          "Length": 2424832
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\native720-inputfix-observed.cmd",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "32D0DAD6B02D90CDB57B77A7DADE005CB52C15309A0CBDD07A454F3ED8F3ACE5",
+          "Length": 800
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\native720-inputfix.exit",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "13BF7B3039C63BF5A50491FA3CFD8EB4E699D1BA1436315AEF9CBE5711530354",
+          "Length": 3
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\native720-inputfix.stderr",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "442B2B7E576A6BF431FB738208135A2A5480089A725D9B857771B2357FB3B9DE",
+          "Length": 1177
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\native720-inputfix.stdout",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "8F5969C587F6ED2ACB4A90E6ED5F09DB963F9C0E889DBC97B4CB88A8675C1A25",
+          "Length": 1247
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\native720-observed.cmd",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "6FBE932E47F2ED1FDD35CD076AC2942E8CC688FEE3DFCF33930732F6009635FD",
+          "Length": 744
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\native720.exit",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "7FB2AAEAF3EEF66B52DB104118C30F62899F5F0DF520350A94A8FCB843C0DFDF",
+          "Length": 3
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\native720.stderr",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "85A0D382DFC8F9A567C6323F24F47D1BAFB6D2C36F9F6E6329722C2CDBB92CE1",
+          "Length": 1468
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\native720.stdout",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "B02A5DADBB7DFEAB480FC78982DFB3F7250C7052D54546825456F3999C49B9C9",
+          "Length": 989
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\provider-loaded-candidate-9aa99b75ffc14d1992a803727da45df7.etl",
+        "Kind": "ArchivedTrace",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "9EC841AD4F053FF892006EF09262FEF0C67EAAA318277FEAF80A60A843213729",
+          "Length": 2097152
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\Read-CandidateDisplay.cmd",
+        "Kind": "ArchivedObservation",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "F752727BAECB6EFD1F20482484DED2ED6DE8B5049090EEBF28E1C1D2F3E230C2",
+          "Length": 456
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-frames\\nvdec_poc0_0.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "0FB880F08D752163A8C315EB7468A18224E8617F4FBD972B7A48185E4BFD8192",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-frames\\nvdec_poc2_1.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "D8554C79B636C6DAFB1D91EB666BC584F22F6C90AC4C71D1C82F29A7FBBE4792",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-frames\\nvdec_poc4_2.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "15CDBDEB13BF7772F605A8B934BFC14D7C1EFC2E422D3FAF98B10F14F018E653",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-frames\\nvdec_poc6_4.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "3771FC7F35EB5321F15AEC2E24D95E3AA6E6B5D3E2B7682A35F39126A84A8B63",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-frames\\nvdec_poc8_3.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "219501D4126405821373D642A668647BD5F03B3EBCEA7B48CBA690D220C5713F",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-inputfix-frames\\nvdec_poc0_0.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "EA284B1304D223F09B082206D5CB2228448C132D47CF4E967333792C9AC4C66B",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-inputfix-frames\\nvdec_poc10_5.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "B7A7465358FBA2F2F593777FC2471393C2FBC8BDEA5C456EAE6C574A66A80C64",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-inputfix-frames\\nvdec_poc2_1.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "C33785F08F120F71A7D14D704771CF4C16BA8BE94523B38165ED12208894D0D6",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-inputfix-frames\\nvdec_poc4_2.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "6678800318924A76CCF3D235F3C24F70E1DC82CF98EA9228CEEB01B07B041B11",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-inputfix-frames\\nvdec_poc6_4.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "1668B84351940CA9858C11D8FC7784EA0D1F0A16C3F7418E2DBCEF67AC50511B",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-inputfix-frames\\nvdec_poc8_3.nv12",
+        "Kind": "ArchivedFrame",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "4D7A089AB602CC9F582ED275D0A2CBCD2B7172248BB54C230FA4005E33C227B2",
+          "Length": 1382400
+        }
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\candidate-evidence.zip",
+        "Kind": "DownloadedArchive",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "4B68930EFAEAA3776394CD602E6A7073382B635DDD2F560C52F6DE6C74675D47",
+          "Length": 1763637
+        }
+      },
+      {
+        "Path": "C:\\Users\\ruje\\nvdec-surface-layout-20261117-delta.zip",
+        "Kind": "ConsumedUpload",
+        "Removed": true,
+        "Identity": {
+          "Sha256": "2D8E6A0AD32A8BFD0CB3841C108049A5544595BB40B109BC4BC9FAD485DB466A",
+          "Length": 133973
+        }
+      }
+    ],
+    "Tasks": [
+      {
+        "Name": "NvdecSurfaceLayoutCandidateDisplay20261117",
+        "Absent": true
+      }
+    ],
+    "EmptyDirectories": [
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-frames",
+        "Absent": true
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\decoded-inputfix-frames",
+        "Absent": true
+      }
+    ],
+    "DriversChanged": false,
+    "RestartRequested": false,
+    "ActivationAndRecoveryRetained": true,
+    "TraceCloseEvidence": "Exact native StopTrace=0 receipts, no event/buffer loss, and observer process absence; no global ETW-session inventory claimed",
+    "CodeAfter": 0,
+    "End": "2026-11-17T17:47:48.3262955Z"
+  },
+  "validator_promotion": {
+    "Begin": "2026-11-17T17:48:28.8262960Z",
+    "Phase": "Verified",
+    "Previous": {
+      "Sha256": "A4E309DB5EC1CB2741DF4912933C8446F0EDCD0BBACF72B8D61FECEE48FD0759",
+      "Length": 95232
+    },
+    "Accepted": {
+      "Sha256": "D2C5180CDD9771837231E0A37312E2D3921A0665408159DB71A4720D427ED23E",
+      "Length": 95232
+    },
+    "SourceCommit": "38830972d45de02d4c7e39096bf24349e0dceecd",
+    "DriverChanged": false,
+    "RestartRequested": false,
+    "PreviousInputsArchived": true,
+    "Config": {
+      "Sha256": "950BA282FACBC1F6838992C51DDFD46FAF726B1FA1B0F13549FFF7408F8E1CA3",
+      "Length": 23524
+    },
+    "Input": {
+      "Sha256": "AE8217311CB2785A3C47249145BC4F68F2C17A168928870D12FB73495BAC503C",
+      "Length": 14525
+    },
+    "DuplicateRemoved": true,
+    "End": "2026-11-17T17:48:29.5450388Z"
+  },
+  "cleanup_scope": "26 archived observation files,11 raw frame outputs among them, two output directories and observation task cleared. Accepted validator retained under canonical name; duplicate removed. Active deployment, firmware and recovery inputs retained for next stage.",
+  "review": {
+    "external_review_required": false,
+    "external_review_performed": false,
+    "mode": "main source/contract review, ASAN/UBSAN controls, ARM64 builds and native pixel verification"
+  },
+  "remaining": [
+    "Connect existing D3D11VA DDIs to the proven same-LUID KMT transport; replace historical exclusive-probe dependency.",
+    "Verify real runtime video table and buffer contracts, implement valid NV12 resources and GPU conversion/window presentation without broad modern-interface expansion.",
+    "Complete720p video-frame presentation and safe stop/close; no repeat of accepted fixed90/vkcube unless a new regression requires it.",
+    "1080p,2K,4K are jointly deferred. General load/browser/weather and180-to90 reboot investigations remain separate; no cause assigned from this decoder run."
+  ]
+}

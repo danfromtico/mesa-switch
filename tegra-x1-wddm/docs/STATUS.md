@@ -1,20 +1,17 @@
 # GPU status
 
-Current status,2026-11-17: the corrected374b KMD is retained with the045 clock
-provider,9eb resource table and original5b/95b userspace. Incremental replacement
-reuses unchanged components and keeps the original UMD/ICD registration. DWM,
-all11 identities,90-degree configuration and retained power policy are verified.
-The previous native LOAD stops at channel11 ownership: GET/PUT differ and the
-captured START/END are nonzero. No firmware/DMA or frames ran. The absolute-END
-assumption in58dc was disproved by the later NVIDIA upstream fix0e43b8da and
-corrected in374b; its submit path was never exercised on this board. The unchanged
-ownership failure was not rerun after correction.720p/1080p remain unaccepted.
-See [current repair and identities](NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json),
-[native ring evidence and correction](NVDEC_INCREMENTAL_POINTER_NATIVE_20261117.json),
-and [the earlier retained combination](NVDEC_RETAINED_CHANNEL_NATIVE_20261117.json).
-Archived observation files were cleaned; active deployment and recovery inputs
-remain required. Main review only, no external review. Fixed90-degree DWM and
-vkcube retain their original accepted scope. Entries below are historical.
+Current status,2026-11-17: native720p H.264 KMT/NVDEC backend passed the six-frame
+fixture with real Host1x completion and byte-exact NV12 software-reference comparison.
+CLOSE and DestroyDevice both succeeded. The retained combination is de8 KMD,
+045 clock provider,9eb resource table and original5b/95b userspace. DWM,all11
+identities,fixed90-degree configuration and power policy were verified. Parser
+EOF/default-matrix repairs needed only a validator replacement,no driver reinstall
+or restart. The1.578-second request interval is not a performance/stability claim.
+D3D11VA and window presentation remain incomplete.1080p/2K/4K acceptance is
+deferred together. See [native backend results,identities and cleanup](NVDEC_720_NATIVE_BACKEND_20261117.json).
+Archived observation files/tasks were cleaned; active and recovery inputs remain.
+Main review only,no external review. Original fixed90/vkcube acceptance is unchanged.
+Entries below are historical.
 
 **Owner priority update:** repair the current pre-logon reboot first; then complete shader caching and measured ~60 Hz VBlank/presentation pacing before hardware rotation. Idle desktops should submit on demand. The owner explicitly requires native startup to stay enabled and authorizes deploying the next reviewed fix directly for their tests. The SD is currently mounted for offline diagnosis.
 
