@@ -6,6 +6,12 @@
 #include <d3dkmthk.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef TG_NVDEC_NATIVE_TRACE
+#include <stdio.h>
+#define TRACE(...) do { fprintf(stderr,__VA_ARGS__); fflush(stderr); } while (0)
+#else
+#define TRACE(...) ((void)0)
+#endif
 
 LONG tg_nvdec_native_open(struct tg_nvdec_native *c, const struct tg_gpu_adapter_info *i)
 {
@@ -14,11 +20,15 @@ LONG tg_nvdec_native_open(struct tg_nvdec_native *c, const struct tg_gpu_adapter
        (i->flags&(TG_GPU_ADAPTER_LUID_VALID|TG_GPU_ADAPTER_NATIVE_SUBMIT))!=
           (TG_GPU_ADAPTER_LUID_VALID|TG_GPU_ADAPTER_NATIVE_SUBMIT)) return STATUS_INVALID_PARAMETER;
    D3DKMT_OPENADAPTERFROMLUID a={.AdapterLuid={.LowPart=i->luid_low,.HighPart=i->luid_high}};
+   TRACE("NVDEC_CALL OpenAdapterFromLuid\n");
    LONG status=D3DKMTOpenAdapterFromLuid(&a);
+   TRACE("NVDEC_RETURN OpenAdapterFromLuid 0x%08lx\n",(unsigned long)status);
    if (status!=STATUS_SUCCESS) return status;
    c->adapter=a.hAdapter;
    D3DKMT_CREATEDEVICE d={.hAdapter=c->adapter};
+   TRACE("NVDEC_CALL CreateDevice\n");
    status=D3DKMTCreateDevice(&d);
+   TRACE("NVDEC_RETURN CreateDevice 0x%08lx\n",(unsigned long)status);
    if (status==STATUS_SUCCESS) c->device=d.hDevice;
    else {
       LONG cleanup=tg_nvdec_native_close(c);
@@ -41,7 +51,9 @@ LONG tg_nvdec_native_call(struct tg_nvdec_native *c,uint32_t command,
    if (input_size) memcpy(h+1,input,input_size);
    D3DKMT_ESCAPE e={.hAdapter=c->adapter,.hDevice=c->device,.Type=D3DKMT_ESCAPE_DRIVERPRIVATE,
       .Flags={.HardwareAccess=1},.pPrivateDriverData=h,.PrivateDriverDataSize=h->size};
+   TRACE("NVDEC_CALL Escape command=%u session=%llu\n",command,(unsigned long long)c->session);
    LONG status=D3DKMTEscape(&e);
+   TRACE("NVDEC_RETURN Escape command=%u delivery=0x%08lx result=0x%08lx\n",command,(unsigned long)status,(unsigned long)(uint32_t)h->result);
    if (status==STATUS_SUCCESS) {
       if (h->magic!=TG_NVDEC_ESCAPE_MAGIC || h->version!=TG_NVDEC_ESCAPE_VERSION ||
           h->size!=sizeof(*h)+payload || h->command!=command || h->reserved ||
@@ -66,7 +78,9 @@ LONG tg_nvdec_native_close(struct tg_nvdec_native *c)
       status=tg_nvdec_native_call(c,TG_NVDEC_ESCAPE_CLOSE,NULL,0,NULL,0);
    if (c->device) {
       const D3DKMT_DESTROYDEVICE d={.hDevice=c->device};
+      TRACE("NVDEC_CALL DestroyDevice\n");
       LONG next=D3DKMTDestroyDevice(&d);
+      TRACE("NVDEC_RETURN DestroyDevice 0x%08lx\n",(unsigned long)next);
       if (next==STATUS_SUCCESS) c->device=0,c->session=0;
       else status=next;
    }

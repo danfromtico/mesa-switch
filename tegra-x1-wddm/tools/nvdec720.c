@@ -166,6 +166,10 @@ static void print_hash(const uint8_t h[TG_NVDEC_SHA256_SIZE])
 
 int main(int argc, char **argv)
 {
+    /* Preserve the last actual API boundary if the first native call hangs
+     * or Windows stops before normal CRT teardown can flush redirected I/O. */
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
     const char *firmware_path = NULL, *input_path = NULL, *reference_path = NULL;
     const char *dump_dir = NULL;
     uint8_t *firmware = NULL, *stream = NULL, *slice = NULL;
