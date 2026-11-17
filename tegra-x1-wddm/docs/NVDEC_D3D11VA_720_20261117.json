@@ -1,0 +1,428 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T19:48:51.0271117Z",
+  "branch": "tgd3d-vulkan",
+  "acceptance_scope": {
+    "native_backend_720p_fixture_accepted": true,
+    "d3d11va_accepted": true,
+    "accepted_client_scope": "Synchronous libavcodec with the 17 surfaces provided by avcodec_get_hw_frames_parameters. Process-local video validation opt-in.",
+    "frames": 6,
+    "decoded_nv12_byte_exact": true,
+    "media_foundation_source_reader_accepted": false,
+    "window_presentation_accepted": false,
+    "gpu_csc_pixels_accepted": false,
+    "full_decode_stage_complete": false,
+    "public_video_enabled": false,
+    "new_physical_screen_acceptance": false,
+    "deferred_joint_acceptance": [
+      "1080p",
+      "2K",
+      "4K"
+    ]
+  },
+  "installed_components": {
+    "kmd": {
+      "Length": 243720,
+      "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+    },
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "umd": {
+      "Length": 3337672,
+      "Sha256": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928"
+    },
+    "umd_source": "0a46a5f5618e45593d54893ce7db88a6beeb8664",
+    "icd": {
+      "Length": 17652224,
+      "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
+    },
+    "icd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f-based dirty frozen build; not clean current HEAD",
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    }
+  },
+  "observed_installed_files": [
+    {
+      "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
+      "Name": "switchpwrbtn.sys",
+      "Length": 32264
+    },
+    {
+      "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
+      "Name": "tegragpurender.sys",
+      "Length": 243720
+    },
+    {
+      "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+      "Name": "woa-lite-home.ini",
+      "Length": 138
+    },
+    {
+      "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+      "Name": "acpitabl.dat",
+      "Length": 4993
+    },
+    {
+      "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+      "Name": "switchbattery.sys",
+      "Length": 42440
+    },
+    {
+      "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
+      "Name": "Pacecar.Switch.exe",
+      "Length": 1517568
+    },
+    {
+      "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+      "Name": "bl33.bin",
+      "Length": 921600
+    },
+    {
+      "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+      "Name": "libvulkan_nouveau.dll",
+      "Length": 17652224
+    },
+    {
+      "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+      "Name": "switchfan.sys",
+      "Length": 104456
+    },
+    {
+      "Sha256": "3A8ED9FF68B5E59E23C975FCBB20695E4E7C3E79EE9EBF3B2722541109897928",
+      "Name": "TegraGpuD3DVk.dll",
+      "Length": 3337672
+    },
+    {
+      "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+      "Name": "SwitchPowerTray.exe",
+      "Length": 60416
+    }
+  ],
+  "development_candidates": [
+    {
+      "umd_source": "19d6001915fd4a4943ea30f3d673f08035bbfcd1",
+      "signed_umd": "f85d753d7b98473de46c4572b042cfc357a575849c137ed146e81012f4c5b194",
+      "result": "Video DDI retrieval returned. Video-device query terminated the fixture process with C0000005 before hardware submission."
+    },
+    {
+      "umd_source": "cf4128e3f4f1599c7404560ea22880f98d3493ba",
+      "signed_umd": "18a495458a8158ef4bd01acace47940a150ae9c382513cc52a21d9fa2e768bcb",
+      "result": "The real runtime queried a 720x480 processor enumerator and received zero processor capabilities. The video-device interface and one H.264 profile became available. The MF first read reached unsupported ClearView. Direct CreateVideoDecoder returned 8000FFFF and device status remained 0."
+    },
+    {
+      "umd_source": "0a46a5f5618e45593d54893ce7db88a6beeb8664",
+      "signed_umd": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928",
+      "repairs": [
+        "1eb10500f9a477039f2caf5db4612e2479d59781",
+        "cce2d3fc8b4b6556a0190bd25eb706154d3eff8e",
+        "0a46a5f5618e45593d54893ce7db88a6beeb8664"
+      ],
+      "result": "The native runtime cleared all ten MF decoder views and created four typed input buffers. LOAD and CONFIGURE returned success. The synchronous libavcodec client completed six hardware decodes."
+    }
+  ],
+  "umd_build": {
+    "source": "0a46a5f5618e45593d54893ce7db88a6beeb8664",
+    "unsigned": {
+      "Length": 3334656,
+      "Sha256": "877b662c4785fdb3cc174b6b9d579c038e3f24fbe87a4fa4d8eb43e52bfbe9d8"
+    },
+    "signed": {
+      "Length": 3337672,
+      "Sha256": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928"
+    },
+    "arm64_control": {
+      "Length": 3897344,
+      "Sha256": "db88f568a1c4f23e9266d738716a0953d3f9fa9425b36b2fb17002a9c0a37f7d"
+    },
+    "native_signature_exit": 0,
+    "native_cpu_control_exit": 0,
+    "source_identity": {
+      "source_commit": "0a46a5f5618e45593d54893ce7db88a6beeb8664",
+      "base": "cf4128e3f4f1599c7404560ea22880f98d3493ba",
+      "files": {
+        "src/nouveau/tgd3d/tests/video_contracts.cpp": "0dff44eeb35831ac85e6e0c31b3b95074fef87800cf0eef5089f02f1b2926cb8",
+        "src/nouveau/tgd3d/tgd3d.h": "8d3513128ae25bbc35838e5a11a403f87cdfadcccb11054fbf1709e3fc14773e",
+        "src/nouveau/tgd3d/tgd3d_clear.cpp": "3887424f7ff2851604cdff6a5625d644d145083a0cf27fa44a20ed97d4f62d1c",
+        "src/nouveau/tgd3d/tgd3d_ddi11.cpp": "8549b5a749e760449fa7b652cfce7c14c0b1b15c683589286aeb6b63a78ce26a",
+        "src/nouveau/tgd3d/tgd3d_h264_map.c": "47227e6bd44bd18697d36b9f910362b878430d5b8da33f083897080c3d671b2f",
+        "src/nouveau/tgd3d/tgd3d_video.cpp": "bf63386a76ca0375dc8bc7cc944547d427c040841f47df78bbaa23893064c857",
+        "tegra-x1-wddm/tests/test_tgd3d_h264_map.c": "bf2a84f46cc1e3157ce3f7cca5f9d9c0ba15e9844088432feecc9e27fc7a0f43"
+      },
+      "wrap_revision": "bf14419e5fa7eacb817b7b632f03cb61d61bbad7",
+      "reused_dependency_files": 273,
+      "dependency_content_sha256": "4d5f053b63972a64863019369c931b7cca23981e57e21d14d18271df27263dfe",
+      "source_kind": "git archive, existing shader-translator dependency from preceding frozen build"
+    },
+    "external_review_performed": false
+  },
+  "runtime_contract": {
+    "d3d11_version": "10.0.22621.2715",
+    "d3d11_sha256": "ccc352f7097d0320368000dbe9ff92772d8fc909185d95c8a0753cb8f115f880",
+    "codeview_guid": "4DD64C1C-37D9-00CB-45AF-89C52B2A1534",
+    "codeview_age": 1,
+    "pdb_sha256": "da4d2c31a30feb29311d9545198379374c1c545182bd3a4bc02e7d6dc49f30ab",
+    "pdb_dbi_age": 1,
+    "pdb_info_stream_age": 2,
+    "observation": "CDecodeContext validates buffer Usage as DYNAMIC or STAGING in the matched ARM64 runtime. CDecodeBuffer passes that value to CreateBuffer. This differs from the enumeration cited by the DDI member reference. The selected path uses DYNAMIC with CPU write access.",
+    "sources": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/ns-d3d10umddi-d3d11_1ddi_video_decoder_buffer_info",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/nc-d3d10umddi-pfnd3d11_1ddi_clearview",
+      "https://www.microsoft.com/en-us/download/details.aspx?id=11323"
+    ],
+    "h264_spec_sha256": "13d9cc9075f6488f6899bb5b9fc393a07d7affc71c125cc5ddbc706f9786e1e7"
+  },
+  "fixture": {
+    "sample_mp4_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "dimensions": [
+      1280,
+      720
+    ],
+    "profile": "H.264 Main, level 3.1",
+    "frames": 6,
+    "media_duration_seconds": 0.1,
+    "media_rate": "60/1",
+    "upstream_client": "https://github.com/FFmpeg/FFmpeg/blob/894da5ca7d742e4429ffb2af534fcda0103ef593/doc/examples/hw_decode.c",
+    "ffmpeg_commit": "894da5ca7d742e4429ffb2af534fcda0103ef593",
+    "ffmpeg_version": "n8.0.1",
+    "upstream_example_sha256": "7794d07a1fbff98fd7d1c605c04fd05e967fa7a9fcb521fa62e0cc9043b034d6",
+    "example_license": "MIT; libavcodec/libavutil/libavformat use their upstream licenses. No linked executable or firmware blob is published in this set.",
+    "source_patch": "tegra-x1-wddm/tools/nvdec720-ffmpeg-hw-decode.patch",
+    "source_patch_sha256": "fcb719c43875359864c3c23c4d6beb1b93a87b369f898dc7001fa9f05e2ba300",
+    "accepted_patched_source_sha256": "7fe570c93932d27b0408c0c26b33acf7dec62e068e7523866e2494542658e1f5",
+    "accepted_arm64_sha256": "f3978e74eda2993025683d5c28ccf6184b27383d5f7a0317500ea1333d987d52",
+    "accepted_arm64_bytes": 2486784,
+    "pool_selection": "Use the codec-provided public hardware frame parameters with synchronous delivery. Each output must be AV_PIX_FMT_D3D11 and a successful native transfer must produce NV12."
+  },
+  "decode": {
+    "begin_utc": "2026-11-17T19:31:30.9025983Z",
+    "end_utc": "2026-11-17T19:31:35.2767504Z",
+    "observation_interval_seconds": 4.374152,
+    "media_pts": [
+      0,
+      256,
+      512,
+      768,
+      1024,
+      1280
+    ],
+    "surface_indices": [
+      16,
+      15,
+      14,
+      15,
+      16,
+      13
+    ],
+    "adapter_luid": "00000000000838fd",
+    "pid": 6016,
+    "process_creation_filetime": 134394174930177376,
+    "exit": 0,
+    "errors": 0,
+    "native_completions": [
+      {
+        "target": 654909825,
+        "observed": 654909825,
+        "status": "00000000"
+      },
+      {
+        "target": 654909826,
+        "observed": 654909826,
+        "status": "00000000"
+      },
+      {
+        "target": 654909827,
+        "observed": 654909827,
+        "status": "00000000"
+      },
+      {
+        "target": 654909828,
+        "observed": 654909828,
+        "status": "00000000"
+      },
+      {
+        "target": 654909829,
+        "observed": 654909829,
+        "status": "00000000"
+      },
+      {
+        "target": 654909830,
+        "observed": 654909830,
+        "status": "00000000"
+      }
+    ],
+    "close_session_and_device_result": "00000000",
+    "native_nv12_bytes": 8294400,
+    "native_nv12_sha256": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+    "software_reference_sha256": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+    "comparison": "Independent software decoding of the same MP4 produced an identical NV12 byte stream in display order.",
+    "per_frame_comparison": [
+      {
+        "display_index": 0,
+        "bytes": 1382400,
+        "native_sha256": "ea284b1304d223f09b082206d5cb2228448c132d47cf4e967333792c9ac4c66b",
+        "software_sha256": "ea284b1304d223f09b082206d5cb2228448c132d47cf4e967333792c9ac4c66b",
+        "equal": true
+      },
+      {
+        "display_index": 1,
+        "bytes": 1382400,
+        "native_sha256": "c33785f08f120f71a7d14d704771cf4c16ba8be94523b38165ed12208894d0d6",
+        "software_sha256": "c33785f08f120f71a7d14d704771cf4c16ba8be94523b38165ed12208894d0d6",
+        "equal": true
+      },
+      {
+        "display_index": 2,
+        "bytes": 1382400,
+        "native_sha256": "6678800318924a76ccf3d235f3c24f70e1dc82cf98ea9228ceeb01b07b041b11",
+        "software_sha256": "6678800318924a76ccf3d235f3c24f70e1dc82cf98ea9228ceeb01b07b041b11",
+        "equal": true
+      },
+      {
+        "display_index": 3,
+        "bytes": 1382400,
+        "native_sha256": "1668b84351940ca9858c11d8fc7784ea0d1f0a16c3f7418e2dbcef67ac50511b",
+        "software_sha256": "1668b84351940ca9858c11d8fc7784ea0d1f0a16c3f7418e2dbcef67ac50511b",
+        "equal": true
+      },
+      {
+        "display_index": 4,
+        "bytes": 1382400,
+        "native_sha256": "4d7a089ab602cc9f582ed275d0a2cbcd2b7172248bb54c230fa4005e33c227b2",
+        "software_sha256": "4d7a089ab602cc9f582ed275d0a2cbcd2b7172248bb54c230fa4005e33c227b2",
+        "equal": true
+      },
+      {
+        "display_index": 5,
+        "bytes": 1382400,
+        "native_sha256": "b7a7465358fba2f2f593777fc2471393c2fbc8bdea5c456eae6c574a66a80c64",
+        "software_sha256": "b7a7465358fba2f2f593777fc2471393c2fbc8bdea5c456eae6c574a66a80c64",
+        "equal": true
+      }
+    ],
+    "trace_sha256": "7f461c6d2a188132af2d6c67fb5cf00b1de470947c74e972289e7ffc165092d6",
+    "trace_export": "ProcessTrace=0 matched=740 invalid=0 events_lost=0 buffers_lost=0 end_time=134394174948004252 buffers_written=11",
+    "dwm_before": 1484,
+    "dwm_after": 1484,
+    "problem_code_after": 0
+  },
+  "media_foundation": {
+    "trace_sha256": "a3309961409646f409a2be31da1cf166a22a92b804025bda6742bb1f22f6b42e",
+    "trace_export": "ProcessTrace=0 matched=1080 invalid=0 events_lost=0 buffers_lost=0 end_time=134394174571248852 buffers_written=14",
+    "cleared_array_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "native_load_and_configure": "00000000",
+    "first_error": "E_INVALIDARG at tgd3d_video.cpp line 504 in the frozen source, as EndFrame reported its failure. No DECODE command was observed. The inner rejection has not been identified.",
+    "sample": "A DXGI NV12 sample was returned. The device then reported 887A0020 before pixels could be validated.",
+    "accepted": false
+  },
+  "larger_surface_pools": {
+    "status": "Deferred application compatibility",
+    "observation": "The default libavcodec allocator requests three extra output surfaces beyond the codec pool. The controlled UMD supports up to 17 surfaces. The 20-surface allocation failed on the previous controlled pair."
+  },
+  "window_attempt": {
+    "fixture_sha256": "a9b43bb6f093dfa0bc22a11b767805be7564c90124be38b44a03442680a8377b",
+    "fixture_source_sha256": "be0a83a36ee2a963ebe5356f455363905ee1719e9527f3e0fe491dee31edb26c",
+    "test_design": "Same native D3D11VA device, checked NV12 readback, plane upload, GPU CSC and a windowed DXGI swap chain.",
+    "outcome": "Unexpected system restart during the window trial. The fixture log persisted the first matching NV12 hash. The recovered partial ETL contains two native decode completions and returns for preview resource creation. The first CSC draw, pixel comparison and Present result were not established.",
+    "partial_etl_sha256": "22004ef282d868be23e5eca2d928804165b1b02fb8aa8290f79331734d7920df",
+    "partial_etl_bytes": 655360,
+    "etw_app_events": 133,
+    "partial_etl_export": "ProcessTrace=0 matched=461 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "unfinalized": true,
+    "native_decodes_in_partial_trace": 2,
+    "boot_before": "2026-11-17T19:28:21.4286160Z",
+    "boot_after": "2026-11-17T19:38:13.0446880Z",
+    "planned_restart_during_trial": false,
+    "system_events": [
+      41,
+      6008
+    ],
+    "bugcheck_code": 0,
+    "crash_dump_found": false,
+    "connected_standby_in_progress": true,
+    "long_power_button_press_detected": false,
+    "root_cause_established": false,
+    "replayed_after_restart": false
+  },
+  "recovered_desktop": {
+    "observed_utc": "2026-11-17T19:42:58.1854412Z",
+    "dwm_pid": 1372,
+    "dwm_loaded_sha256": [
+      "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928",
+      "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+    ],
+    "native_adapter_code": 0,
+    "activation_task": "Ready",
+    "activation_exit": 0,
+    "desktop": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "saved_desktop": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "target_signal": {
+      "width": 720,
+      "height": 1280
+    },
+    "display_query_changed_settings": false,
+    "handheld_mode": 1,
+    "cpu_dfll": 1,
+    "gpu_policy_khz": [
+      76800,
+      537600
+    ],
+    "emc_error": 0,
+    "fan_mode": 1,
+    "charge_limit": 85,
+    "global_video_opt_in": false,
+    "previous_umd_sha256": "18a495458a8158ef4bd01acace47940a150ae9c382513cc52a21d9fa2e768bcb",
+    "previous_icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff",
+    "restore_script_sha256": "5d5552b29e1b899233a4b0709f9a08c19395ea63a73fe0c0d279ed947520bdff",
+    "previous_task_snapshot_sha256": "bd0bd7a34eb7be32bc1389a0af18dd545bae000b2114b44ad017c9ecd4a93424",
+    "recovery_files_present": true,
+    "external_review_performed": false
+  },
+  "cleanup": {
+    "archive_sha256": "055733c2012dd1b652e382718c6685a5d52d576faec57b0135ebef637e9aa233",
+    "archived_entries": 101,
+    "local_archive_verified": true,
+    "removed_files": 89,
+    "empty_directories_removed": 8,
+    "fixture_tasks": [],
+    "observers": [],
+    "window_trace_active": false,
+    "cleanup_restart_requested": false,
+    "retained": "Active startup and rollback packages, staged signed component/source receipts. No system dump settings changed."
+  }
+}

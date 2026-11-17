@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T17:48:29.5450388Z",
-  "state": "Real native KMT/NVDEC720p H.264 backend accepted for the six-frame fixture: all six completed through Host1x syncpoint191 and match software reference byte-for-byte. The de8 KMD/045 provider/9eb table and original5b/95b userspace remain installed. D3D11VA and window presentation remain incomplete.1080p/2K/4K acceptance is deferred together.",
+  "updated_utc": "2026-11-17T19:48:51.0271117Z",
+  "state": "Six frames of native 720p D3D11VA H.264 decoded with byte-exact NV12 output in the synchronous libavcodec client. MF Source Reader and window presentation are unaccepted. The controlled UMD is installed, with an active 90-degree desktop after a window-trial restart.",
   "installed_baseline_changed": true,
   "resolution_roadmap": {
     "current": "720p H.264 full D3D11VA/window chain",
@@ -189,10 +189,10 @@
     "clock_native_result": "NVDEC_CLOCK_NATIVE_20261117.json"
   },
   "remaining": [
-    "Connect existing D3D11VA DDIs to the proven same-LUID KMT transport; replace historical exclusive-probe dependency.",
-    "Verify real runtime video table and buffer contracts, implement valid NV12 resources and GPU conversion/window presentation without broad modern-interface expansion.",
-    "Complete720p video-frame presentation and safe stop/close; no repeat of accepted fixed90/vkcube unless a new regression requires it.",
-    "1080p,2K,4K are jointly deferred. General load/browser/weather and180-to90 reboot investigations remain separate; no cause assigned from this decoder run."
+    "Identify the first failed MF decoder input or EndFrame condition on the accepted 720p source.",
+    "Localize the interruption after the window preview resource creations. Validate GPU CSC pixels, a returned window presentation, the physical image and closure on a single identified pair.",
+    "Keep broader output-pool compatibility separate from the verified 17-surface synchronous client.",
+    "1080p, 2K and 4K remain deferred for joint acceptance."
   ],
   "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
   "client_route_candidate": {
@@ -324,7 +324,7 @@
     "review": "main-agent self-review; real decoder DMA still untested"
   },
   "temporary_candidate_components_restored": false,
-  "latest_native_result": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+  "latest_native_result": "NVDEC_D3D11VA_720_20261117.json",
   "review": {
     "external_review_required": false,
     "external_review_performed": false,
@@ -377,7 +377,7 @@
     "native_decode_accepted": false,
     "baseline_promoted": false
   },
-  "latest_native_round": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+  "latest_native_round": "NVDEC_D3D11VA_720_20261117.json",
   "historical_committed_sources": [
     {
       "commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
@@ -656,11 +656,11 @@
     }
   ],
   "installed_development_combination": {
-    "classification": "retained development baseline; native720p backend module accepted, full video path unaccepted",
-    "observed_utc": "2026-11-17T17:34:12.8670683Z",
-    "boot": "2026-11-17T17:12:56.5106640Z",
-    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\activation",
-    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app",
+    "classification": "Installed controlled D3D11VA candidate. The six-frame hardware decode and readback module passed. Full video/window and general application qualification are open.",
+    "observed_utc": "2026-11-17T19:48:51.0271117Z",
+    "boot": "2026-11-17T19:38:13.0446880Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-3a8ed9ff-20261118-032644",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-3a8ed9ff-20261118-032644",
     "kmd": {
       "Length": 243720,
       "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
@@ -676,10 +676,10 @@
       "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
     },
     "umd": {
-      "Length": 3274240,
-      "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A"
+      "Length": 3337672,
+      "Sha256": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928"
     },
-    "umd_source": "c1f25986eee51c0ee01088c3ecb3c9508dea2479",
+    "umd_source": "0a46a5f5618e45593d54893ce7db88a6beeb8664",
     "icd": {
       "Length": 17652224,
       "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
@@ -688,69 +688,58 @@
     "all11_files": [
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
-        "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
-        "Matches": true,
-        "Length": 32264
+        "Length": 32264,
+        "Sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
-        "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
-        "Matches": true,
-        "Length": 243720
+        "Length": 243720,
+        "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
       },
       {
         "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
-        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
-        "Matches": true,
-        "Length": 138
+        "Length": 138,
+        "Sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
       },
       {
         "Path": "C:\\Windows\\System32\\acpitabl.dat",
-        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
-        "Matches": true,
-        "Length": 4993
+        "Length": 4993,
+        "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
-        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
-        "Matches": true,
-        "Length": 42440
+        "Length": 42440,
+        "Sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
       },
       {
         "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
-        "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
-        "Matches": true,
-        "Length": 1517568
+        "Length": 1517568,
+        "Sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
       },
       {
         "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
-        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
-        "Matches": true,
-        "Length": 921600
+        "Length": 921600,
+        "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
       },
       {
-        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
-        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
-        "Matches": true,
-        "Length": 17652224
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-3a8ed9ff-20261118-032644\\app\\libvulkan_nouveau.dll",
+        "Length": 17652224,
+        "Sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
-        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
-        "Matches": true,
-        "Length": 104456
+        "Length": 104456,
+        "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
       },
       {
-        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
-        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
-        "Matches": true,
-        "Length": 3274240
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-3a8ed9ff-20261118-032644\\app\\TegraGpuD3DVk.dll",
+        "Length": 3337672,
+        "Sha256": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928"
       },
       {
         "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
-        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
-        "Matches": true,
-        "Length": 60416
+        "Length": 60416,
+        "Sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
       }
     ],
     "external_review_performed": false
@@ -764,12 +753,16 @@
     "5f9ab480e5c2ded25220964170f9b09e056ab253",
     "374b9ee5624cd1aea063398fd413fe3c73ff6501"
   ],
-  "promotion_scope": "Validated deployment/current display-power combination is retained for development. Full decoder acceptance remains false.",
+  "promotion_scope": "Native backend plus the 17-surface synchronous D3D11VA decode/readback path for the six-frame fixture. Desktop baseline promotion and ordinary application/video presentation remain open.",
   "acceptance_scope": {
     "native_backend_720p_fixture_accepted": true,
+    "d3d11va_accepted": true,
+    "accepted_client_scope": "Synchronous libavcodec with the 17 surfaces provided by avcodec_get_hw_frames_parameters. Process-local video validation opt-in.",
     "frames": 6,
-    "d3d11va_accepted": false,
+    "decoded_nv12_byte_exact": true,
+    "media_foundation_source_reader_accepted": false,
     "window_presentation_accepted": false,
+    "gpu_csc_pixels_accepted": false,
     "full_decode_stage_complete": false,
     "public_video_enabled": false,
     "new_physical_screen_acceptance": false,
@@ -777,9 +770,12 @@
       "1080p",
       "2K",
       "4K"
-    ],
-    "higher_resolution_scope": "External implementation preserved; not integrated or hardware-accepted here",
-    "stability_scope": "Single six-frame successful run,1.5781264s including setup/cleanup; not FPS or long-duration stability"
+    ]
   },
-  "native_decode_accepted_scope": "Six-frame native KMT backend fixture only; D3D11VA/window incomplete"
+  "native_decode_accepted_scope": "Six native KMT backend frames and six synchronous libavcodec D3D11VA/NV12 frames.",
+  "current_umd_source": {
+    "commit": "0a46a5f5618e45593d54893ce7db88a6beeb8664",
+    "signed_sha256": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928",
+    "record": "NVDEC_D3D11VA_720_20261117.json"
+  }
 }

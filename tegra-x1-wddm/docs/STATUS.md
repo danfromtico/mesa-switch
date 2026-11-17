@@ -1,16 +1,11 @@
 # GPU status
 
-Current status,2026-11-17: native720p H.264 KMT/NVDEC backend passed the six-frame
-fixture with real Host1x completion and byte-exact NV12 software-reference comparison.
-CLOSE and DestroyDevice both succeeded. The retained combination is de8 KMD,
-045 clock provider,9eb resource table and original5b/95b userspace. DWM,all11
-identities,fixed90-degree configuration and power policy were verified. Parser
-EOF/default-matrix repairs needed only a validator replacement,no driver reinstall
-or restart. The1.578-second request interval is not a performance/stability claim.
-D3D11VA and window presentation remain incomplete.1080p/2K/4K acceptance is
-deferred together. See [native backend results,identities and cleanup](NVDEC_720_NATIVE_BACKEND_20261117.json).
-Archived observation files/tasks were cleaned; active and recovery inputs remain.
-Main review only,no external review. Original fixed90/vkcube acceptance is unchanged.
+On November 17, 2026 the Switch decoded six 1280×720 H.264 frames through the Windows D3D11VA runtime and native NVDEC. The synchronous libavcodec client used the codec-provided 17-surface pool. All six Host1x targets completed, the session closed, and all 8,294,400 NV12 bytes matched an independent software decode. The observed run lasted 4.374 seconds including fixture setup and cleanup. [D3D11VA acceptance and component identities](NVDEC_D3D11VA_720_20261117.json)
+
+Media Foundation Source Reader initialized the decoder and its buffers, then failed in its first EndFrame. A separate GPU color conversion and window trial ended in an unexpected system restart. The partial trace includes two native decode completions and preview resource creation. The CSC output, first Present and physical window remain unverified. [Native runs and recovery](NVDEC_D3D11VA_720_20261117.json)
+
+The recovered desktop uses the controlled 3a8ed9ff UMD, de8 KMD and 95b ICD. Interactive desktop settings show 1280×720 at 90°, with a 720×1280 panel signal. The Handheld policy and 85% charge limit are active. Video remains process opt-in. The completed fixed-desktop and vkcube records still apply to their original combination. Higher resolutions await joint acceptance. [Integration version table](NVDEC_INTEGRATION_20261116.json)
+
 Entries below are historical.
 
 **Owner priority update:** repair the current pre-logon reboot first; then complete shader caching and measured ~60 Hz VBlank/presentation pacing before hardware rotation. Idle desktops should submit on demand. The owner explicitly requires native startup to stay enabled and authorizes deploying the next reviewed fix directly for their tests. The SD is currently mounted for offline diagnosis.

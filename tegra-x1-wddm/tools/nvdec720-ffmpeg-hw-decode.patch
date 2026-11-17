@@ -1,0 +1,113 @@
+--- a/doc/examples/hw_decode.c
++++ b/doc/examples/hw_decode.c
+@@ -45,17 +45,19 @@
+ static AVBufferRef *hw_device_ctx = NULL;
+ static enum AVPixelFormat hw_pix_fmt;
+ static FILE *output_file = NULL;
++static unsigned frames;
+
+ static int hw_decoder_init(AVCodecContext *ctx, const enum AVHWDeviceType type)
+ {
+     int err = 0;
+
+     if ((err = av_hwdevice_ctx_create(&hw_device_ctx, type,
+-                                      NULL, NULL, 0)) < 0) {
++                                      "0", NULL, 0)) < 0) {
+         fprintf(stderr, "Failed to create specified HW device.\n");
+         return err;
+     }
+     ctx->hw_device_ctx = av_buffer_ref(hw_device_ctx);
++    if (!ctx->hw_device_ctx) return AVERROR(ENOMEM);
+
+     return err;
+ }
+@@ -66,8 +68,19 @@
+     const enum AVPixelFormat *p;
+
+     for (p = pix_fmts; *p != -1; p++) {
+-        if (*p == hw_pix_fmt)
++        if (*p == hw_pix_fmt) {
++            AVBufferRef *pool = NULL;
++            int ret = avcodec_get_hw_frames_parameters(ctx, ctx->hw_device_ctx, *p, &pool);
++            if (ret < 0) return AV_PIX_FMT_NONE;
++            AVHWFramesContext *desc = (AVHWFramesContext *)pool->data;
++            fprintf(stdout, "POOL count=%d width=%d height=%d format=%s\n",
++                    desc->initial_pool_size, desc->width, desc->height, av_get_pix_fmt_name(desc->sw_format));
++            ret = av_hwframe_ctx_init(pool);
++            if (ret < 0) { av_buffer_unref(&pool); return AV_PIX_FMT_NONE; }
++            av_buffer_unref(&ctx->hw_frames_ctx);
++            ctx->hw_frames_ctx = pool;
+             return *p;
++        }
+     }
+
+     fprintf(stderr, "Failed to get HW surface format.\n");
+@@ -105,6 +118,10 @@
+             goto fail;
+         }
+
++        if (frame->format != AV_PIX_FMT_D3D11 || frame->format != hw_pix_fmt || !frame->hw_frames_ctx) {
++            fprintf(stderr, "No D3D11 frame from the decoder\n");
++            ret = AVERROR(EINVAL); goto fail;
++        }
+         if (frame->format == hw_pix_fmt) {
+             /* retrieve data from GPU to CPU */
+             if ((ret = av_hwframe_transfer_data(sw_frame, frame, 0)) < 0) {
+@@ -132,7 +149,10 @@
+             goto fail;
+         }
+
+-        if ((ret = fwrite(buffer, 1, size, output_file)) < 0) {
++        if (tmp_frame->format != AV_PIX_FMT_NV12 || tmp_frame->width != 1280 || tmp_frame->height != 720 || size != 1382400) { ret = AVERROR(EINVAL); goto fail; }
++        fprintf(stdout, "FRAME index=%u subresource=%zu pts=%lld bytes=%d\n", frames++, (size_t)frame->data[1], (long long)frame->pts, size);
++        if (fwrite(buffer, 1, size, output_file) != (size_t)size) {
++            ret = AVERROR(EIO);
+             fprintf(stderr, "Failed to dump raw data.\n");
+             goto fail;
+         }
+@@ -162,6 +182,8 @@
+         return -1;
+     }
+
++    setvbuf(stdout, NULL, _IONBF, 0);
++    av_log_set_level(AV_LOG_VERBOSE);
+     type = av_hwdevice_find_type_by_name(argv[1]);
+     if (type == AV_HWDEVICE_TYPE_NONE) {
+         fprintf(stderr, "Device type %s is not supported.\n", argv[1]);
+@@ -218,6 +240,7 @@
+     if (avcodec_parameters_to_context(decoder_ctx, video->codecpar) < 0)
+         return -1;
+
++    decoder_ctx->thread_count = 1;
+     decoder_ctx->get_format  = get_hw_format;
+
+     if (hw_decoder_init(decoder_ctx, type) < 0)
+@@ -230,6 +253,7 @@
+
+     /* open the file to dump raw data */
+     output_file = fopen(argv[3], "w+b");
++    if (!output_file) return 2;
+
+     /* actual decoding and dump the raw data */
+     while (ret >= 0) {
+@@ -243,14 +267,14 @@
+     }
+
+     /* flush the decoder */
+-    ret = decode_write(decoder_ctx, NULL);
+-
+-    if (output_file)
+-        fclose(output_file);
++    if (ret == AVERROR_EOF) ret = decode_write(decoder_ctx, NULL);
++
++    if (fclose(output_file) != 0) ret = AVERROR(EIO);
+     av_packet_free(&packet);
+     avcodec_free_context(&decoder_ctx);
+     avformat_close_input(&input_ctx);
+     av_buffer_unref(&hw_device_ctx);
+
+-    return 0;
+-}
++    fprintf(stdout, "COMPLETE frames=%u result=%d\n", frames, ret);
++    return ret < 0 || frames != 6 ? 4 : 0;
++}
