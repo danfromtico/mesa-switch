@@ -1,16 +1,16 @@
 # GPU status
 
 Current status,2026-11-17: fixed90-degree row-scan DWM and native Win32 vkcube
-retain their completed acceptance. Native ETW proved that a deferred provider
-replacement can leave the previous image loaded after the disk SYS and INF
-already match the target. The controller now checks loaded PE identity and
-permits one evidence-backed reconciliation boot. The original11-file baseline,
-loaded provider/KMD,90-degree configuration and power policy are restored;
-temporary packages, tasks, files and diagnostics are cleaned. The prior KMT
-LOAD failure occurred before admission and firmware/DMA, but its new-provider
-execution was not proven.720p/1080p decode acceptance remains open. See
-[the loaded-image record](NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json) and
-[the baseline](ROW_SCAN_BASELINE_20261116.md). Entries below are historical
+retain their completed acceptance. After actual provider image verification,
+the native NVDEC request acquired the Host1x lease and then rejected its
+inherited163.2MHz rate against the prior102MHz bound. No firmware/DMA/frames
+executed. The paired core-floor correction reads the existing core owner's
+retained minimum, preserves voltage/shared clocks and passes ARM64 builds and
+CPU controls; native validation remains pending. Original11-file baseline,
+90-degree configuration, DWM and power policy are restored; temporary packages,
+tasks, files and diagnostics are removed.720p/1080p decode acceptance remains
+open. See [the current native record](NVDEC_CORE_CLOCK_NATIVE_20261117.json)
+and [the baseline](ROW_SCAN_BASELINE_20261116.md). Entries below are historical
 snapshots; their startup/rotation priorities and component sets are superseded.
 
 **Owner priority update:** repair the current pre-logon reboot first; then complete shader caching and measured ~60 Hz VBlank/presentation pacing before hardware rotation. Idle desktops should submit on demand. The owner explicitly requires native startup to stay enabled and authorizes deploying the next reviewed fix directly for their tests. The SD is currently mounted for offline diagnosis.

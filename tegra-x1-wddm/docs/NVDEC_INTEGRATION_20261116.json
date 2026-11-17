@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T09:50:29.6964673Z",
-  "state": "Loaded/disk provider mismatch proven; original90-degree display/power baseline restored and cleaned;720p/1080p not accepted",
+  "updated_utc": "2026-11-17T11:01:35.6551590Z",
+  "state": "Verified loaded provider admitted the real Host1x lease. The inherited163.2MHz route exceeded the prior102MHz predicate. No firmware/DMA/frames executed. Original baseline restored and cleaned; core-floor correction built locally, native acceptance pending.",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
     "active_sequence": [
@@ -193,9 +193,9 @@
     "clock_native_result": "NVDEC_CLOCK_NATIVE_20261117.json"
   },
   "remaining": [
-    "Prepare the existing paired diagnostic candidate with controller948bd0c8 and the hashed image-rundown helper; verify the actually loaded provider before one real LOAD call.",
-    "Resolve only the next demonstrated failure, then complete720p H.264 hardware decode and D3D11VA/NV12/window presentation, followed by1080p.",
-    "Keep2K/4K as existing independent implementation, untested and undecided; retain fixed90 display/power baseline."
+    "Sign and stage the paired ab2a23a9 KMD/provider candidate, verify the actually loaded provider and query the existing core owner, then perform one bounded native720 H.264 call.",
+    "Complete real NVDEC firmware/DMA/output and retirement before wiring the selected D3D11VA/NV12/window path; capture actual video DDI negotiation before extending an interface.",
+    "Accept720p before1080p.2K/4K remain existing independent implementation, untested and undecided. Retain fixed90 display and power policy."
   ],
   "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
   "client_route_candidate": {
@@ -392,11 +392,12 @@
     "review": "main-agent self-review; real decoder DMA still untested"
   },
   "temporary_candidate_components_restored": true,
-  "latest_native_result": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
+  "latest_native_result": "NVDEC_CORE_CLOCK_NATIVE_20261117.json",
   "review": {
     "mode": "main-agent self-review",
     "external_review_required": false,
-    "external_review_performed": false
+    "external_review_performed": false,
+    "scope": "Core-owner read-only contract, WDF buffer lifetime, paired ABI, voltage/rate intersection, CPU failure paths and ARM64 builds. New candidate native query/decode remains pending."
   },
   "coexisting_transport": {
     "adapter_transport": "259c825dec8421d34d5e08e33b9d109d9cd89770",
@@ -409,40 +410,99 @@
     "build_full_dirty_worktree": false
   },
   "next_local_candidate": {
-    "source_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+    "source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+    "provider_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
+    "base_diagnostic_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json",
+    "frozen_source_inputs": {
+      "bytes": 1520,
+      "sha256": "b3494469db916a49fb76e984d0a7ecface17f8a9287f9d9cd82afe30e0583382"
+    },
+    "base_manifest_sha256": "304853fdafed4313cbe0bd36104dfb2b892db8b4f8aae242ea85f65a2827c142",
+    "changed_source_sha256": {
+      "windows/host1x_clock_abi.h": "340aff08f431b08213ca547ccfd05addca3fbba9d4127d29365876c5a5a4b345",
+      "windows/host1x_clock.h": "f9703a7a9c906232be7d6b3ca41dc16763f8196945822ff63b93d730d4e80790",
+      "windows/host1x_clock.c": "e1c6a9f53ddf4706f437f410c4de34d96a07bb7b0508f87803ace8811c345a27",
+      "windows/nvdec_adapter.c": "6a1c8a7e1d7520235f3aeb4e13fa2ef68e60a141fd6c9bc90fc1cb47ecd915f8",
+      "windows/nvdec_adapter.h": "a0f05bd07f0d4c4675a24e444901157950e992ef0879d0161eba44419f8d61e1",
+      "platform/t214_nvdec.c": "88fd063cd082d06441726ad81c57bf10f15afb578778b06c7947c2cbf60214ed",
+      "platform/t214_nvdec.h": "654e52c611a519a692e052a3bd9998718774afdcdee7386c4f32cc2c6c706f26",
+      "integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "49bb2e197d61e53a9ad0627b288cc3d61d161a2a03e9d91ce7db97ed88998574",
+      "tests/test_host1x_clock_windows.c": "a9bc00ffaa4e936e801f82a63feec949d403f60966e320d12c2e9da5c81fdd66",
+      "tests/test_nvdec_adapter_windows.c": "81141862101ea238caa23f978b3188c8aaacf8fc9605bc5ec3a6dea55e3bacda",
+      "tests/test_nvdec_platform.c": "de7b1d234d91c99d02a866810d24f43120ca02a82acd2e957663e51845ef24a9"
+    },
+    "provider_hook_sha256": "126086e2347d74eed734ddc65d99adf96b0482a13e33fbda6262d319ccebf16f",
     "components": {
       "unsigned_kmd": {
-        "bytes": 237568,
-        "sha256": "59308faf36c15386230605f17f184134841cc910b4acfbe08b67d859b617b6b3"
+        "bytes": 238592,
+        "sha256": "7f3e55e9e6a670b967d92e60d3c6bcf862c20ffcc7e988185b5825ac7b6a5d29"
       },
       "unsigned_provider": {
-        "bytes": 100352,
-        "sha256": "98c7408526b5b53afb00216941b43d03bbf3ee71022340db57876576019de6e5"
+        "bytes": 101376,
+        "sha256": "49fdbb366993c332f23a576e296c514bd2d65e6062ac796e5f8b7ff33b74f0aa"
       }
     },
-    "source_manifest_sha256": "304853fdafed4313cbe0bd36104dfb2b892db8b4f8aae242ea85f65a2827c142",
+    "private_clock_abi": {
+      "version": "0x00010002",
+      "bytes": 64,
+      "paired_kernels_required": true
+    },
+    "core_owner_source": "WindowsDrivers06614ee6b9bbe80682f3f45e2c84a5cdd9f69133; retained installed SwitchPowerButton",
+    "core_owner_sys_sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787",
+    "query": "Kernel-only IOCTL_SWCORE_EMC_VOTE with SetVote=0 and MinimumUv=0. Read BootFloorUv/AppliedUv; do not clear the EMC vote. WDF-owned memory and a500ms request timeout preserve request buffer lifetime.",
+    "clock_rule": "Retained core floor>=637500uV for Host1x<=102MHz;>=650000uV for inherited Host1x<=204MHz. Keep NVDEC204MHz. Reject unknown/invalid floors, clock routes or an undersupplied rail.",
+    "power_voltage_or_shared_clock_writes_added": false,
     "signed": false,
     "installed": false,
-    "purpose": "Preserve failed consumer API boundary and exact failed provider WDF step/status; no completion, clock or ownership semantics changed",
-    "provider_registry_stage_map": {
-      "1": "WdfRequestForwardToIoQueue",
-      "2": "input/output lengths",
-      "3": "WdfRequestRetrieveInputBuffer",
-      "4": "WdfRequestRetrieveOutputBuffer",
-      "5": "request ABI and callbacks",
-      "6": "provider availability",
-      "7": "exclusive clock claim",
-      "8": "inherited clock registers",
-      "9": "WdfObjectAllocateContext",
-      "10": "IoAllocateWorkItem",
-      "11": "WdfDeviceStopIdle",
-      "12": "WdfRequestMarkCancelableEx"
-    },
-    "provider_diagnostic_scope": "Reset at provider creation; failed kernel requests only, using existing passive registry trace; no kernel pointers recorded",
+    "native_tested": false,
+    "promoted": false,
     "validation": {
-      "full_arm64_kmd_build": 0,
-      "arm64_provider_build": 0,
-      "clock_lifetime_and_adapter_controls": true
+      "arm64_kmd_build_exit": 0,
+      "arm64_provider_build_exit": 0,
+      "cpu_controls": [
+        {
+          "name": "host1x_clock-compile",
+          "exit": 0
+        },
+        {
+          "name": "test_host1x_clock_windows-compile",
+          "exit": 0
+        },
+        {
+          "name": "clock-link",
+          "exit": 0
+        },
+        {
+          "name": "clock-run",
+          "exit": 0
+        },
+        {
+          "name": "adapter-nvdec_adapter",
+          "exit": 0
+        },
+        {
+          "name": "adapter-device_lifetime",
+          "exit": 0
+        },
+        {
+          "name": "adapter-t214_nvdec",
+          "exit": 0
+        },
+        {
+          "name": "adapter-test_nvdec_adapter_windows",
+          "exit": 0
+        },
+        {
+          "name": "adapter-link",
+          "exit": 0
+        },
+        {
+          "name": "adapter-run",
+          "exit": 0
+        }
+      ],
+      "platform_asan_ubsan": "passed; CPU model only",
+      "frozen_and_worktree_changed_inputs_match": true
     }
   },
   "loaded_provider_identity": {
@@ -452,5 +512,13 @@
     "new_controller_complete_candidate_round_pending": true,
     "native_decode_accepted": false,
     "baseline_promoted": false
+  },
+  "core_clock_native": {
+    "record": "NVDEC_CORE_CLOCK_NATIVE_20261117.json",
+    "clock_lease_admitted": true,
+    "load_result": "0xc00000a3",
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
   }
 }
