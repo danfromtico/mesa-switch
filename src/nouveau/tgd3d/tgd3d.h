@@ -386,6 +386,11 @@ struct Device {
    std::vector<VkCommandBuffer> freeCommands;
    std::list<SubmittedCommands> submittedCommands;
    std::vector<VkDescriptorPool> framePools, freePools;
+   /* Immediate-context host scratch only. Descriptor sets/pools retain their
+    * existing per-submission ownership; none of these arrays is GPU backing. */
+   std::vector<VkWriteDescriptorSet> descriptorWrites;
+   std::vector<VkDescriptorImageInfo> descriptorImages;
+   std::vector<VkBufferView> descriptorBuffers;
    VkDescriptorSetLayout setLayouts[SET_COUNT] = {};
    VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
    VkShaderEXT blitVertex[4] = {}, blitFragment = VK_NULL_HANDLE;

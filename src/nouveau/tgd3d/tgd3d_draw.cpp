@@ -191,13 +191,23 @@ static bool bind_textures(Device *dev, VkCommandBuffer cmd)
    if (!textures_dirty && !buffers_dirty)
       return true;
 
-   std::vector<VkWriteDescriptorSet> writes;
-   std::vector<VkDescriptorImageInfo> images;
-   std::vector<VkBufferView> buffers;
-   if (textures_dirty)
-      images.reserve(STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
-   if (buffers_dirty)
-      buffers.reserve(STAGE_COUNT * D3D_SRV_SLOTS);
+   auto &writes = dev->descriptorWrites;
+   auto &images = dev->descriptorImages;
+   auto &buffers = dev->descriptorBuffers;
+   writes.clear(); images.clear(); buffers.clear();
+   /* Reserve the bounded D3D slot maximum before publishing any pointers
+    * into these arrays. Reuse only host update arguments, never an in-flight
+    * descriptor set. Vulkan consumes them during UpdateDescriptorSets. */
+   try {
+      writes.reserve(STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
+      if (textures_dirty)
+         images.reserve(STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
+      if (buffers_dirty)
+         buffers.reserve(STAGE_COUNT * D3D_SRV_SLOTS);
+   } catch (const std::bad_alloc &) {
+      TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
+      return false;
+   }
 
    if (textures_dirty) {
       VkDescriptorSet set = descriptor_set_alloc(dev, SET_TEX);

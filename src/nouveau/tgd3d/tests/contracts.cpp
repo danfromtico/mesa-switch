@@ -854,6 +854,91 @@ static void descriptor_contract()
    std::puts("PASS: all 42 constant-buffer slots; immutable full snapshots after one-slot changes");
 }
 
+static unsigned scratchImages, scratchBuffers, scratchCalls;
+static void descriptor_scratch_contract()
+{
+   for (unsigned mode = 0; mode < 3; ++mode) {
+      reset(); Adapter adapter; Device dev = make_device(&adapter);
+      dev.defaultSampler = handle<VkSampler>(777);
+      dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
+                                      const VkAllocationCallbacks *, VkDescriptorPool *out) {
+         *out = handle<VkDescriptorPool>(200); return VK_SUCCESS;
+      };
+      dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
+         *out = handle<VkDescriptorSet>(300 + descriptorSets++); return VK_SUCCESS;
+      };
+      dev.vk.UpdateDescriptorSets = [](VkDevice, uint32_t count, const VkWriteDescriptorSet *writes,
+                                      uint32_t, const VkCopyDescriptorSet *) {
+         ++scratchCalls;
+         const bool texel = writes[0].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+         CHECK(count == (texel ? scratchBuffers : scratchImages));
+         bool seen[STAGE_COUNT * SET1_STRIDE] = {};
+         for (unsigned i = 0; i < count; ++i) {
+            const auto &w = writes[i];
+            CHECK(w.descriptorCount == 1 && w.dstArrayElement == 0);
+            CHECK(w.dstBinding < STAGE_COUNT * SET1_STRIDE && !seen[w.dstBinding]);
+            seen[w.dstBinding] = true;
+            if (texel) {
+               CHECK(w.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER);
+               CHECK(w.pTexelBufferView && *w.pTexelBufferView == VK_NULL_HANDLE);
+            } else if (w.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLER) {
+               CHECK(w.pImageInfo && w.pImageInfo->sampler == handle<VkSampler>(777));
+            } else {
+               CHECK(w.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE && w.pImageInfo);
+               CHECK(!w.pImageInfo->imageView && w.pImageInfo->imageLayout == VK_IMAGE_LAYOUT_GENERAL);
+            }
+         }
+      };
+      Shader shaders[STAGE_COUNT];
+      for (unsigned i = 0; i < STAGE_COUNT; ++i) {
+         shaders[i].dev = &dev; shaders[i].stage = (Stage)i;
+         shaders[i].variants.push_back({0, handle<VkShaderEXT>(600 + i)});
+         shaders[i].samplerMask = mode == 1 ? 0 : 0xffffu;
+         shaders[i].usesTexelBuffers = mode != 0;
+         for (unsigned w = 0; w < 4; ++w) {
+            shaders[i].srvMask[w] = UINT32_MAX;
+            shaders[i].srvBufferMask[w] = mode == 0 ? 0 : mode == 1 ? UINT32_MAX : 0xaaaaaaaau;
+         }
+         dev.stage[i].shader = &shaders[i];
+      }
+      scratchImages = mode == 1 ? 0 : STAGE_COUNT * (D3D_SAMPLER_SLOTS + (mode == 0 ? 128 : 64));
+      scratchBuffers = mode == 0 ? 0 : STAGE_COUNT * (mode == 1 ? 128 : 64);
+      Resource target; target.dev = &dev; target.kind = ResKind::Image;
+      target.storage.image = handle<VkImage>(700); target.storage.layoutReady = true;
+      View view; view.dev = &dev; view.res = &target; view.type = ViewType::RTV;
+      view.width = view.height = 32; view.layers = 1;
+      view.cache[0] = {target.storage.image, handle<VkImageView>(701), false};
+      dev.rtv[0] = &view; dev.viewportCount = 1; dev.viewports[0].Width = dev.viewports[0].Height = 32;
+      D3D10DDI_DEVICEFUNCS table = {}; draw_fill_table(&table);
+      scratchCalls = 0;
+      table.pfnDraw({&dev}, 3, 0); CHECK(SUCCEEDED(dev.lost));
+      const unsigned batches = mode == 2 ? 2 : 1;
+      CHECK(scratchCalls == batches);
+      textureAllocations = 0; countTextureAllocations = true;
+      for (unsigned repeat = 0; repeat < 8; ++repeat) {
+         dev.dirty |= DIRTY_TEXTURES | DIRTY_TEXEL_BUFFERS;
+         table.pfnDraw({&dev}, 3, 0);
+      }
+      countTextureAllocations = false;
+      std::printf("Repeated dirty descriptor mode %u: %u allocations\n", mode, textureAllocations);
+      CHECK(!textureAllocations && scratchCalls == batches * 9 && SUCCEEDED(dev.lost));
+      CHECK(descriptorSets == batches * 9); /* still fresh GPU sets per update */
+      /* Failure before first scratch allocation must not escape the DDI or
+       * issue a descriptor update/draw, and must report removal. */
+      std::vector<VkWriteDescriptorSet>().swap(dev.descriptorWrites);
+      dev.dirty |= DIRTY_TEXTURES | DIRTY_TEXEL_BUFFERS;
+      const unsigned priorCalls = scratchCalls, priorSets = descriptorSets;
+      failNextNew = true; bool escaped = false;
+      try { table.pfnDraw({&dev}, 3, 0); }
+      catch (const std::bad_alloc &) { escaped = true; }
+      failNextNew = false;
+      CHECK(!escaped && FAILED(dev.lost) && scratchCalls == priorCalls && descriptorSets == priorSets);
+      CHECK(lastError == D3DDDIERR_DEVICEREMOVED);
+      cmd_destroy(&dev);
+   }
+   std::puts("PASS: bounded scratch reuse for full image, texel and mixed descriptors; payloads and new set ownership preserved; allocation failure contained (CPU control)");
+}
+
 static VkResult drawFailure;
 static unsigned drawFailureAt, poolCreates, setAllocates, imageViews, drawCalls;
 
@@ -1751,7 +1836,7 @@ int main(int argc, char **argv)
    overlap_contracts();
    clear_view_contract();
    device_error_contract();
-   rotated_views(); descriptor_contract(); draw_error_contract(); empty_box_contract();
+   rotated_views(); descriptor_contract(); descriptor_scratch_contract(); draw_error_contract(); empty_box_contract();
    indirect_draw_contract(); readonly_depth_contract();
    query_contract();
    query_failure_contract();
