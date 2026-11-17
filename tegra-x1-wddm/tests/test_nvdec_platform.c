@@ -232,18 +232,27 @@ static void test_direct_route_is_not_assumed(void)
 {
     prepare();
     CHECK(tg_nvdec_platform_direct_dma(&io));
-    const uint32_t offsets[] = {0x228, 0x228, 0x22c, 0x234, 0x234, 0x250, 0xab4};
-    const uint32_t bits[] = {22, 23, 22, 24, 25, 31, 31};
-    for (unsigned i = 0; i < sizeof(bits)/sizeof(bits[0]); ++i) {
-        m.mc[offsets[i]/4] = 1u << bits[i];
-        CHECK(!tg_nvdec_platform_direct_dma(&io));
-        m.mc[offsets[i]/4] = UINT32_MAX;
-        CHECK(!tg_nvdec_platform_direct_dma(&io));
-        m.mc[offsets[i]/4] = 0;
+    /* T210 ATF enables every client; an unassigned SWGROUP still bypasses.
+     * Match the real boot snapshot without pretending CONFIG was readable. */
+    m.mc[0x10/4] = m.mc[0x228/4] = m.mc[0x22c/4] = m.mc[0x234/4] = UINT32_MAX;
+    CHECK(tg_nvdec_platform_direct_dma(&io));
+    const uint32_t offsets[] = {0x250, 0xab4};
+    for (unsigned enabled = 0; enabled < 2; ++enabled) {
+        m.mc[0x228/4] = m.mc[0x22c/4] = m.mc[0x234/4] = enabled ? UINT32_MAX : 0;
+        for (unsigned i = 0; i < sizeof(offsets)/sizeof(offsets[0]); ++i) {
+            m.mc[offsets[i]/4] = 0x01020304; /* saved ASIDs, enable clear */
+            CHECK(tg_nvdec_platform_direct_dma(&io));
+            m.mc[offsets[i]/4] |= 1u << 31;
+            CHECK(!tg_nvdec_platform_direct_dma(&io));
+            m.mc[offsets[i]/4] = UINT32_MAX;
+            CHECK(!tg_nvdec_platform_direct_dma(&io));
+            m.mc[offsets[i]/4] = 0;
+        }
     }
     /* NVJPG does not execute DMA for H.264. Its dependency is power-only. */
     m.mc[0x234/4] = 3u << 30; m.mc[0xac0/4] = 1u << 31;
     CHECK(tg_nvdec_platform_direct_dma(&io) && !m.writes);
+    CHECK(!tg_nvdec_platform_direct_dma(NULL));
 }
 int main(void)
 {

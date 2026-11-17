@@ -33,7 +33,10 @@ struct tg_nvdec_resource_info {
 #define TG_NVDEC_CLIENT_REGS_VALID 1u
 #define TG_NVDEC_CLIENT_TRANSLATION_DISABLED 2u
 
-/* Separate, append-only trailer: a readable client route must not be confused
+/* REGS_VALID covers the group ASIDs and MC flush readback. Translation-enable
+ * words may legitimately be all ones and remain raw observations.
+ * TRANSLATION_DISABLED means HC, NVDEC and NVJPG ASID_ENABLE are all clear.
+ * Separate, append-only trailer: a readable client route must not be confused
  * with a readable global SMMU_CONFIG (which may be secure-world-only). A clear
  * route is a prerequisite for the direct-address path, not DMA completion or
  * decode support. These are boot observations, not a live ownership lease. */

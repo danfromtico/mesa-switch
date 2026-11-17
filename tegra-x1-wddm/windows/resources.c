@@ -83,21 +83,16 @@ static VOID map_nvdec_resources(const DXGKRNL_INTERFACE *Dxgk,
     c->smmu_translation_enable3 = READ_REGISTER_ULONG((PULONG)r->NvdecMapping[TgNvdecSmmuEn3]);
     c->mc_flush = READ_REGISTER_ULONG((PULONG)r->Mapping[TgGpuMcFlush]);
     c->mc_flush_status = READ_REGISTER_ULONG((PULONG)r->Mapping[TgGpuMcFlush] + 1);
-    if (c->smmu_translation_enable0 != MAXULONG &&
-        c->smmu_translation_enable1 != MAXULONG &&
-        c->smmu_translation_enable3 != MAXULONG &&
-        c->mc_flush != MAXULONG && c->mc_flush_status != MAXULONG &&
+    if (c->mc_flush != MAXULONG && c->mc_flush_status != MAXULONG &&
         s->smmu_host1x_asid != MAXULONG && s->smmu_nvdec_asid != MAXULONG &&
         s->smmu_nvjpg_asid != MAXULONG) {
         c->flags = TG_NVDEC_CLIENT_REGS_VALID;
-        /* T210 HC read clients 0x16/0x17, HC write 0x36,
-         * NVDEC read/write 0x78/0x79, NVJPG read/write 0x7e/0x7f.
-         * Both the per-client enables and group ASID_ENABLE must be clear.
-         * Never write them to bypass an existing owner or address space. */
-        if (!(c->smmu_translation_enable0 & (3u << 22)) &&
-            !(c->smmu_translation_enable1 & (1u << 22)) &&
-            !(c->smmu_translation_enable3 & ((3u << 24) | (3u << 30))) &&
-            !((s->smmu_host1x_asid | s->smmu_nvdec_asid |
+        /* ASID_ENABLE gates each SWGROUP even when all per-client enables
+         * are set (the T210 ATF boot policy). Preserve those raw words;
+         * all ones is a legitimate value, not evidence of a failed read.
+         * This snapshot covers all three groups; live H.264 DMA checks
+         * only HC/NVDEC. Never write SMMU state to obtain bypass. */
+        if (!((s->smmu_host1x_asid | s->smmu_nvdec_asid |
                s->smmu_nvjpg_asid) & (1u << 31)))
             c->flags |= TG_NVDEC_CLIENT_TRANSLATION_DISABLED;
     }

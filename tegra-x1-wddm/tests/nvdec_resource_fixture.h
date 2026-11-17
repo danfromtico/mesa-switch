@@ -173,29 +173,44 @@ static void TestNvdecResources(void)
     CHECK(r.NvdecInfo.flags == (TG_NVDEC_QUERY_RESOURCES_VALID | TG_NVDEC_QUERY_MAPPED));
     CHECK(TgGpuReleaseResources(&dxgk, &r) == STATUS_SUCCESS && !nvdec_live && !resource_live);
 
-    /* Real preflight returned an unreadable global SMMU_CONFIG. Client-state
-     * reporting remains independent; no global-register value is invented. */
-    for (UINT blocked = 0; blocked < 12; ++blocked) {
+    /* Global CONFIG readback remains unresolved. A clear group ASID_ENABLE
+     * still bypasses when ATF leaves all per-client enables set. Neither the
+     * raw global value nor an unavailable group readback may be invented. */
+    for (UINT scenario = 0; scenario < 17; ++scenario) {
         NvdecResourceList(TgNvdecApertureCount, FALSE);
         nvdec_words[TgNvdecSmmu][0] = MAXULONG;
         nvdec_words[TgNvdecHcAsid][0] = 0;
         nvdec_words[TgNvdecNvdecAsid][0] = 0;
         nvdec_words[TgNvdecNvjpgAsid][0] = 0;
-        if (blocked == 1) nvdec_words[TgNvdecSmmuEn01][0] = 1u << 22;
-        if (blocked == 2) nvdec_words[TgNvdecSmmuEn01][0] = 1u << 23;
-        if (blocked == 3) nvdec_words[TgNvdecSmmuEn01][1] = 1u << 22;
-        if (blocked == 4) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 24;
-        if (blocked == 5) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 25;
-        if (blocked == 6) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 30;
-        if (blocked == 7) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 31;
-        if (blocked >= 8 && blocked <= 10)
-            nvdec_words[TgNvdecHcAsid + blocked - 8][0] = 1u << 31;
-        if (blocked == 11) nvdec_words[TgNvdecSmmuEn3][0] = MAXULONG;
+        if (scenario == 1) nvdec_words[TgNvdecSmmuEn01][0] = 1u << 22;
+        if (scenario == 2) nvdec_words[TgNvdecSmmuEn01][0] = 1u << 23;
+        if (scenario == 3) nvdec_words[TgNvdecSmmuEn01][1] = 1u << 22;
+        if (scenario == 4) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 24;
+        if (scenario == 5) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 25;
+        if (scenario == 6) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 30;
+        if (scenario == 7) nvdec_words[TgNvdecSmmuEn3][0] = 1u << 31;
+        if (scenario >= 8 && scenario <= 10)
+            nvdec_words[TgNvdecHcAsid + scenario - 8][0] = 1u << 31;
+        if (scenario == 11) {
+            nvdec_words[TgNvdecSmmuEn01][0] = MAXULONG;
+            nvdec_words[TgNvdecSmmuEn01][1] = MAXULONG;
+            nvdec_words[TgNvdecSmmuEn3][0] = MAXULONG;
+        }
+        if (scenario >= 12 && scenario <= 14)
+            nvdec_words[TgNvdecHcAsid + scenario - 12][0] = MAXULONG;
+        if (scenario == 15) nvdec_mc_flush[0] = MAXULONG;
+        if (scenario == 16) nvdec_mc_flush[1] = MAXULONG;
         CHECK(TgGpuAcquireResources(&dxgk, &r) == STATUS_SUCCESS);
         CHECK(r.NvdecInfo.status == TG_NVDEC_RESOURCES_REGS_INVALID);
-        CHECK(r.NvdecClients.flags == (blocked == 11 ? 0 :
-            TG_NVDEC_CLIENT_REGS_VALID | (blocked ? 0 : TG_NVDEC_CLIENT_TRANSLATION_DISABLED)));
+        CHECK(r.NvdecClients.flags == (scenario >= 12 ? 0 :
+            TG_NVDEC_CLIENT_REGS_VALID | ((scenario >= 8 && scenario <= 10) ?
+                0 : TG_NVDEC_CLIENT_TRANSLATION_DISABLED)));
         CHECK(r.NvdecInfo.smmu_config == MAXULONG);
+        CHECK(!(r.NvdecInfo.flags & TG_NVDEC_QUERY_BOOT_REGS_VALID));
+        if (scenario == 11)
+            CHECK(r.NvdecClients.smmu_translation_enable0 == MAXULONG &&
+                  r.NvdecClients.smmu_translation_enable1 == MAXULONG &&
+                  r.NvdecClients.smmu_translation_enable3 == MAXULONG);
         CHECK(TgGpuReleaseResources(&dxgk, &r) == STATUS_SUCCESS && !nvdec_live && !resource_live);
     }
 }
