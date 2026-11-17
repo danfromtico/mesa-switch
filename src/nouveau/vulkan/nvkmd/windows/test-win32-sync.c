@@ -22,6 +22,7 @@ static unsigned next_id, live, shared_creates, exports, waits;
 static unsigned contexts, gpu_waits, gpu_signals;
 static uint64_t *exported_value;
 static bool fail_import;
+static unsigned removal_wait_mode;
 static HANDLE retained_export;
 
 static struct {
@@ -312,6 +313,10 @@ tg_kmt_wait_fences(const struct tg_kmt_device *dev, uint32_t count,
    CHECK(dev->handle == 7 && count == 1 && !any && timeout && timeout != INFINITE);
    CHECK(handles[0] && points[0] == 99);
    waits++;
+   if (removal_wait_mode) {
+      *payloads[handles[0]] = removal_wait_mode == 1 ? UINT64_MAX : points[0];
+      return 0; /* A successful OS wait can accompany the removal sentinel. */
+   }
    Sleep(timeout);
    return TG_KMT_TIMEOUT;
 }
@@ -390,11 +395,16 @@ int main(void)
       .semaphore = b, .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT, .handle = second,
    };
    fail_import = true;
-   CHECK(vk_common_ImportSemaphoreWin32HandleKHR(device, &import) == VK_ERROR_INVALID_EXTERNAL_HANDLE);
+   CHECK(nvk_ImportSemaphoreWin32HandleKHR(device, &import) == VK_ERROR_INVALID_EXTERNAL_HANDLE);
    uint64_t value;
    CHECK(vk_sync_get_value(&nvk->vk, sync_b, &value) == VK_SUCCESS && value == 33);
+   /* A private Vulkan timeline keeps its full value domain. */
+   *payloads[next_id] = UINT64_MAX;
+   CHECK(vk_sync_get_value(&nvk->vk, sync_b, &value) == VK_SUCCESS && value == UINT64_MAX);
+   CHECK(vk_sync_wait(&nvk->vk, sync_b, UINT64_MAX, VK_SYNC_WAIT_COMPLETE, 0) == VK_SUCCESS);
+   *payloads[next_id] = 33;
    fail_import = false;
-   CHECK(vk_common_ImportSemaphoreWin32HandleKHR(device, &import) == VK_SUCCESS);
+   CHECK(nvk_ImportSemaphoreWin32HandleKHR(device, &import) == VK_SUCCESS);
    CHECK(GetHandleInformation(second, &flags) && CloseHandle(second));
    CHECK(vk_sync_signal(&nvk->vk, sync_a, 47) == VK_SUCCESS);
    CHECK(vk_sync_get_value(&nvk->vk, sync_b, &value) == VK_SUCCESS && value == 47);
@@ -415,12 +425,42 @@ int main(void)
    vk_common_DestroySemaphore(device, a, NULL);
    CHECK(!GetHandleInformation(retained_export, &flags));
    CHECK(vk_sync_get_value(&nvk->vk, sync_b, &value) == VK_SUCCESS && value == 61);
+   /* Direct KMT imports must reject removal just like runtime-owned imports.
+    * No CPU signal is used to manufacture completion in the production path. */
+   *exported_value = UINT64_MAX;
+   CHECK(vk_sync_get_value(&nvk->vk, sync_b, &value) == VK_ERROR_DEVICE_LOST);
+   CHECK(vk_sync_wait(&nvk->vk, sync_b, 99, VK_SYNC_WAIT_COMPLETE,
+         os_time_get_absolute_timeout(50000000)) == VK_ERROR_DEVICE_LOST && !waits);
+   *exported_value = 61; removal_wait_mode = 1;
+   CHECK(vk_sync_wait(&nvk->vk, sync_b, 99, VK_SYNC_WAIT_COMPLETE,
+         os_time_get_absolute_timeout(50000000)) == VK_ERROR_DEVICE_LOST && waits == 1);
+   *exported_value = 61; removal_wait_mode = 2;
+   CHECK(vk_sync_wait(&nvk->vk, sync_b, 99, VK_SYNC_WAIT_COMPLETE,
+         os_time_get_absolute_timeout(50000000)) == VK_SUCCESS && waits == 2);
+   CHECK(*exported_value == 99);
+   *exported_value = 61; removal_wait_mode = 0; waits = 0;
    CHECK(vk_sync_wait(&nvk->vk, sync_b, 99, VK_SYNC_WAIT_COMPLETE,
                       os_time_get_absolute_timeout(50000000)) == VK_TIMEOUT);
    CHECK(waits == 1);
    get.semaphore = b;
    CHECK(vk_common_GetSemaphoreWin32HandleKHR(device, &get, &first) == VK_SUCCESS);
    CHECK(GetHandleInformation(first, &flags) && !(flags & HANDLE_FLAG_INHERIT));
+   /* Successful payload replacement changes the sentinel contract; failed
+    * replacement must preserve the old contract and payload. */
+   VkImportSemaphoreWin32HandleInfoKHR replacement = import;
+   replacement.handle = first;
+   replacement.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+   CHECK(nvk_ImportSemaphoreWin32HandleKHR(device, &replacement) == VK_SUCCESS);
+   *exported_value = UINT64_MAX;
+   CHECK(vk_sync_get_value(&nvk->vk, sync_b, &value) == VK_SUCCESS && value == UINT64_MAX);
+   replacement.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT;
+   fail_import = true;
+   CHECK(nvk_ImportSemaphoreWin32HandleKHR(device, &replacement) == VK_ERROR_INVALID_EXTERNAL_HANDLE);
+   CHECK(vk_sync_get_value(&nvk->vk, sync_b, &value) == VK_SUCCESS && value == UINT64_MAX);
+   fail_import = false;
+   CHECK(nvk_ImportSemaphoreWin32HandleKHR(device, &replacement) == VK_SUCCESS);
+   CHECK(vk_sync_get_value(&nvk->vk, sync_b, &value) == VK_ERROR_DEVICE_LOST);
+   *exported_value = 61;
    vk_common_DestroySemaphore(device, b, NULL);
    CHECK(GetHandleInformation(first, &flags) && CloseHandle(first) && !live);
    runtime_contract(nvk, &kmd);

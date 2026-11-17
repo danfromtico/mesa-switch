@@ -17,6 +17,7 @@ struct windows_sync {
    struct tg_kmt_fence fence;
    HANDLE export_handle;
    bool export_inherit;
+   bool d3d12_fence; /* UINT64_MAX is removal only for this external contract. */
    struct wsi_win32_runtime_fence runtime_fence;
 };
 
@@ -84,6 +85,7 @@ win_sync_finish(struct vk_device *device, struct vk_sync *sync)
       CloseHandle(win->export_handle);
       win->export_handle = NULL;
    }
+   win->d3d12_fence = false;
    const struct wsi_win32_runtime *runtime = sync_runtime(device);
    if (win->runtime_fence.token) {
       runtime->release_fence(runtime->context, win->runtime_fence.token);
@@ -167,7 +169,8 @@ win_sync_value(struct vk_device *device, struct vk_sync *sync, uint64_t *value)
 {
    (void)device;
    *value = p_atomic_read(sync_fence(sync)->value);
-   if (sync_runtime(device) && *value == UINT64_MAX)
+   const struct windows_sync *win = container_of(sync, struct windows_sync, base);
+   if ((sync_runtime(device) || win->d3d12_fence) && *value == UINT64_MAX)
       return VK_ERROR_DEVICE_LOST;
    return VK_SUCCESS;
 }
@@ -179,6 +182,13 @@ win_sync_wait(struct vk_device *device, struct vk_sync *sync, uint64_t value,
    assert(!(flags & VK_SYNC_WAIT_PENDING));
    struct tg_kmt_fence *fence = sync_fence(sync);
    const struct wsi_win32_runtime *runtime = sync_runtime(device);
+   const struct windows_sync *win = container_of(sync, struct windows_sync, base);
+   const bool removal_sentinel = runtime || win->d3d12_fence;
+   /* D3D12 fence imports (including tgd3d's runtime fences) use all ones
+    * for device removal. Ordinary Vulkan timelines retain the full uint64
+    * value domain; a maximum value alone must not remove those devices. */
+   if (removal_sentinel && p_atomic_read(fence->value) == UINT64_MAX)
+      return VK_ERROR_DEVICE_LOST;
    if (runtime) {
       DWORD timeout = INFINITE;
       if (deadline != OS_TIMEOUT_INFINITE) {
@@ -187,9 +197,17 @@ win_sync_wait(struct vk_device *device, struct vk_sync *sync, uint64_t value,
          timeout = MIN2(remaining / 1000000 + (remaining % 1000000 != 0), INFINITE - 1);
       }
       struct windows_sync *win = container_of(sync, struct windows_sync, base);
-      return runtime->wait_cpu(runtime->context, win->runtime_fence.token, value, timeout);
+      VkResult result = runtime->wait_cpu(runtime->context, win->runtime_fence.token, value, timeout);
+      if (result == VK_SUCCESS && p_atomic_read(fence->value) == UINT64_MAX)
+         return VK_ERROR_DEVICE_LOST;
+      return result;
    }
-   while (p_atomic_read(fence->value) < value) {
+   for (;;) {
+      const uint64_t completed = p_atomic_read(fence->value);
+      if (removal_sentinel && completed == UINT64_MAX)
+         return VK_ERROR_DEVICE_LOST;
+      if (completed >= value)
+         return VK_SUCCESS;
       DWORD timeout = INFINITE;
       if (deadline != OS_TIMEOUT_INFINITE) {
          uint64_t now = os_time_get_nano();
@@ -205,7 +223,6 @@ win_sync_wait(struct vk_device *device, struct vk_sync *sync, uint64_t value,
          return nvkmd_windows_status(&device->base, "CPU wait monitored fence", status,
                                      VK_ERROR_DEVICE_LOST);
    }
-   return VK_SUCCESS;
 }
 
 VKAPI_ATTR VkResult VKAPI_CALL
@@ -213,7 +230,18 @@ nvk_ImportSemaphoreWin32HandleKHR(VkDevice device, const VkImportSemaphoreWin32H
 {
    VK_FROM_HANDLE(nvk_device, dev, device);
    const struct wsi_win32_runtime *runtime = sync_runtime(&dev->vk);
-   if (!runtime) return vk_common_ImportSemaphoreWin32HandleKHR(device, info);
+   if (!runtime) {
+      VkResult result = vk_common_ImportSemaphoreWin32HandleKHR(device, info);
+      if (result == VK_SUCCESS) {
+         VK_FROM_HANDLE(vk_semaphore, semaphore, info->semaphore);
+         struct vk_sync *sync = vk_semaphore_get_active_sync(semaphore);
+         if (sync->type == &nvkmd_windows_sync_type) {
+            struct windows_sync *win = container_of(sync, struct windows_sync, base);
+            win->d3d12_fence = info->handleType == VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT;
+         }
+      }
+      return result;
+   }
    const struct wsi_win32_runtime_fence_import *import =
       vk_find_struct_const(info->pNext, WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA);
    VK_FROM_HANDLE(vk_semaphore, semaphore, info->semaphore);
