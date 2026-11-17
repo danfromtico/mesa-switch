@@ -6,6 +6,16 @@
 #include "nvdec_backend.h"
 
 struct _TG_GPU_ADAPTER;
+enum TG_NVDEC_HOST_CHECK {
+    TgNvdecHostNoDisplay = 1,
+    TgNvdecHostDisplaySyncpoint,
+    TgNvdecHostChannelFifo,
+    TgNvdecHostChannelPointers,
+    TgNvdecHostSyncpointIrq,
+    TgNvdecHostSyncpointValue,
+    TgNvdecHostSyncpointChanged,
+    TgNvdecHostClockChanged
+};
 typedef struct _TG_NVDEC_ADAPTER {
     KMUTEX Gate; /* lifecycle; always before Queue.DispatchGate */
     struct tg_nvdec_win *Backend;
@@ -13,6 +23,9 @@ typedef struct _TG_NVDEC_ADAPTER {
     TG_GPU_DEVICE *Device; /* actual Engine.Devices reference */
     UINT64 Generation, Session;
     ULONG HostSource, PllpBase, CoreBootFloorUv;
+    /* Failure-only register evidence, captured before releasing the lease.
+     * Internal storage; the existing bounded error string carries the values. */
+    ULONG HostCheck, HostIndex, HostValue[4];
     const char *Operation; /* static diagnostic label, never a borrowed buffer */
     volatile LONG Closing;
     NTSTATUS IoStatus;

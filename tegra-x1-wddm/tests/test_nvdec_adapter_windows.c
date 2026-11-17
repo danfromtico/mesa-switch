@@ -28,6 +28,9 @@ static PVOID quiesce_context;
 static struct tg_nvdec_platform_owner saved_owner;
 static _Alignas(8) UCHAR packet[132000];
 static ULONG nvregs[TgNvdecApertureCount][0x40000/4], display[0x4000/4], mc[2], hidrev;
+static BOOLEAN change_counter, change_source;
+static UINT host_rejections;
+#define TEST_SYNCPT_OFFSET (0x2100u+0xf80u+4u*191u)
 static int backend_object;
 static KIRQL level;
 static PVOID NTAPI alloc(POOL_FLAGS f,SIZE_T n,ULONG tag)
@@ -48,7 +51,12 @@ static LONG NTAPI release_mutex(PRKMUTEX m,BOOLEAN w)
 static KIRQL NTAPI lock_spin(PKSPIN_LOCK p) { CHECK(!*p && !level);*p=1;level=DISPATCH_LEVEL;return PASSIVE_LEVEL; }
 static VOID NTAPI unlock_spin(PKSPIN_LOCK p,KIRQL old) { CHECK(*p && !old);*p=0;level=old; }
 static NTSTATUS NTAPI delay(KPROCESSOR_MODE m,BOOLEAN a,PLARGE_INTEGER t)
-{ CHECK(m==KernelMode && !a && t->QuadPart==-500000);return STATUS_SUCCESS; }
+{
+    CHECK(m==KernelMode && !a && t->QuadPart==-500000);
+    if(change_counter)++nvregs[TgNvdecHost1x][TEST_SYNCPT_OFFSET/4];
+    if(change_source)nvregs[TgNvdecHostSource][0]=0x80000008u;
+    return STATUS_SUCCESS;
+}
 static VOID NTAPI stall(ULONG n) { CHECK(n<=50); }
 VOID (NTAPI *const __imp_KeInitializeMutex)(PRKMUTEX,ULONG)=init_mutex;
 NTSTATUS (NTAPI *const __imp_KeWaitForSingleObject)(PVOID,KWAIT_REASON,KPROCESSOR_MODE,BOOLEAN,PLARGE_INTEGER)=wait_object;
@@ -137,6 +145,20 @@ static TG_GPU_DEVICE *device(void)
     d->Engine=&adapter.Engine;d->Process=&process;++process.Devices;
     InsertTailList(&adapter.Engine.Devices,&d->Link);return d;
 }
+static const char *check_host_failure(DRIVER_INITIALIZATION_DATA *ddi,ULONG check,ULONG index)
+{
+    prepare_load();
+    struct tg_nvdec_escape *h=(void *)packet;
+    CHECK(call(ddi,first)==0 && h->result==STATUS_DEVICE_NOT_READY);
+    CHECK(adapter.Video.HostCheck==check && adapter.Video.HostIndex==index);
+    CHECK(!held && !creates && !first->VideoReferences && !adapter.Video.Device && !adapter.Video.Clock);
+    CHECK(pool_live==2);++host_rejections;
+    const struct tg_nvdec_load_result *r=(void *)(h+1);
+    CHECK(r->error[TG_NVDEC_ERROR_SIZE-1u]==0);
+    return r->error;
+}
+static BOOLEAN text_equal(const char *a,const char *b)
+{ while(*a && *a==*b){++a;++b;}return *a==*b; }
 void start(void)
 {
     DRIVER_INITIALIZATION_DATA ddi={0};
@@ -158,7 +180,28 @@ void start(void)
     core_floor_uv=637500u;prepare_load();
     CHECK(call(&ddi,first)==0 && h->result==STATUS_DEVICE_NOT_READY && !held && !creates && !first->VideoReferences);
     core_floor_uv=775000u;
+    ULONG *channel=nvregs[TgNvdecHost1x]+2u*0x4000u/4u;
+    channel[0]=0;channel[0x18/4]=0x01020304u;channel[0x1c/4]=0x05060708u;channel[0x24/4]=1;
+    CHECK(text_equal(check_host_failure(&ddi,TgNvdecHostChannelFifo,2),
+        "Host1x ownership check=00000003 index=00000002 a=00000000 b=01020304 c=05060708 d=00000001 pllp=48115408 src=80000003 floor=000bd358"));
+    channel[0]=1u<<11;channel[0x18/4]=channel[0x1c/4]=channel[0x24/4]=0;
+    channel=nvregs[TgNvdecHost1x]+11u*0x4000u/4u;
+    channel[0x18/4]=0x100u;channel[0x1c/4]=0x80u;channel[0x24/4]=5;
+    check_host_failure(&ddi,TgNvdecHostChannelPointers,11);
+    CHECK(adapter.Video.HostValue[1]==0x100u && adapter.Video.HostValue[2]==0x80u && adapter.Video.HostValue[3]==5);
+    channel[0x18/4]=channel[0x1c/4]=channel[0x24/4]=0;
+    ULONG *irq=&nvregs[TgNvdecHost1x][(0x2100u+0xf20u+4u*(191u/32u))/4u];
+    *irq=1u<<31;check_host_failure(&ddi,TgNvdecHostSyncpointIrq,191);CHECK(adapter.Video.HostValue[0]==*irq);*irq=0;
+    ULONG *counter=&nvregs[TgNvdecHost1x][TEST_SYNCPT_OFFSET/4];
+    *counter=MAXULONG;check_host_failure(&ddi,TgNvdecHostSyncpointValue,191);*counter=7;
+    change_counter=TRUE;check_host_failure(&ddi,TgNvdecHostSyncpointChanged,191);
+    CHECK(adapter.Video.HostValue[0]==7 && adapter.Video.HostValue[1]==8);change_counter=FALSE;
+    change_source=TRUE;check_host_failure(&ddi,TgNvdecHostClockChanged,0x180u);
+    CHECK(adapter.Video.HostValue[0]==0x80000008u);change_source=FALSE;nvregs[TgNvdecHostSource][0]=0x80000003u;
+    display[0x028]=(1u<<8)|191u;check_host_failure(&ddi,TgNvdecHostDisplaySyncpoint,0x028u);display[0x028]=0;
+    adapter.Resources.DisplayRegisters=NULL;check_host_failure(&ddi,TgNvdecHostNoDisplay,0);adapter.Resources.DisplayRegisters=display;
     prepare_load();CHECK(call(&ddi,first)==0 && h->result==0 && h->session && held && creates==1);
+    CHECK(!adapter.Video.HostCheck); /* Successful admission clears stale evidence. */
     UINT64 session=h->session;CHECK(first->VideoReferences==1);
     make(TG_NVDEC_ESCAPE_CLOSE,0,0,session);CHECK(call(&ddi,second)==0 && h->result==STATUS_INVALID_HANDLE && held);
     make(TG_NVDEC_ESCAPE_CLOSE,0,0,session+1);CHECK(call(&ddi,first)==0 && h->result==STATUS_INVALID_HANDLE && held);
@@ -179,7 +222,7 @@ void start(void)
     fail_release=FALSE;CHECK(TgGpuDdiDestroyDevice(first)==0 && !held && destroys==1 && !adapter.Video.Device);
     prepare_load();CHECK(call(&ddi,second)==0 && h->result==0 && h->session!=session && held);
     CHECK(TgGpuDdiDestroyDevice(second)==0 && !held && destroys==2 && !process.Devices && !pool_live);
-    CHECK(acquires==3 && releases==4);
+    CHECK(acquires==3+host_rejections && releases==4+host_rejections);
     ULONG written;const char ok[]="PASS: NVDEC escape ownership, packet bounds, retained stop failures and lock order (CPU only)\n";
     WriteFile(GetStdHandle((ULONG)-11),ok,sizeof(ok)-1,&written,NULL);ExitProcess(0);
 }

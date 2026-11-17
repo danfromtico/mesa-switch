@@ -169,23 +169,52 @@ NTSTATUS TgNvdecAdapterStop(TG_GPU_ADAPTER *a)
 /* This miniport owns the assigned Host1x aperture and exposes one decoder.
  * Refuse firmware activity, display syncpoints and an existing threshold IRQ
  * owner. A stable counter is only a preflight, never completion evidence. */
+static BOOLEAN host_reject(TG_GPU_ADAPTER *a, ULONG check, ULONG index,
+                           ULONG v0, ULONG v1, ULONG v2, ULONG v3)
+{
+    a->Video.HostCheck=check; a->Video.HostIndex=index;
+    a->Video.HostValue[0]=v0; a->Video.HostValue[1]=v1;
+    a->Video.HostValue[2]=v2; a->Video.HostValue[3]=v3;
+    return FALSE;
+}
 static BOOLEAN host_idle(TG_GPU_ADAPTER *a)
 {
-    if (!a->Resources.DisplayRegisters) return FALSE;
+    if (!a->Resources.DisplayRegisters)
+        return host_reject(a,TgNvdecHostNoDisplay,0,0,0,0,0);
     ULONG dc=READ_REGISTER_ULONG((PULONG)((PUCHAR)a->Resources.DisplayRegisters+4u*0x028u));
-    if (dc==MAXULONG || ((dc&(1u<<8)) && (dc&255u)==VIDEO_SYNCPOINT)) return FALSE;
+    if (dc==MAXULONG || ((dc&(1u<<8)) && (dc&255u)==VIDEO_SYNCPOINT))
+        return host_reject(a,TgNvdecHostDisplaySyncpoint,0x028u,dc,0,0,0);
     for (ULONG channel=0;channel<12u;++channel) {
         ULONG off=channel*0x4000u, status=read32(a,TG_NVDEC_AP_HOST1X,off);
-        if (status==MAXULONG || !(status&(1u<<11)) ||
-            read32(a,TG_NVDEC_AP_HOST1X,off+0x18u)!=read32(a,TG_NVDEC_AP_HOST1X,off+0x1cu)) return FALSE;
+        if (status==MAXULONG || !(status&(1u<<11))) {
+            /* Read-only evidence on rejection; do not reset a channel or
+             * change its admission predicate to manufacture ownership. */
+            ULONG put=read32(a,TG_NVDEC_AP_HOST1X,off+0x18u);
+            ULONG get=read32(a,TG_NVDEC_AP_HOST1X,off+0x1cu);
+            ULONG ctrl=read32(a,TG_NVDEC_AP_HOST1X,off+0x24u);
+            return host_reject(a,TgNvdecHostChannelFifo,channel,status,put,get,ctrl);
+        }
+        ULONG put=read32(a,TG_NVDEC_AP_HOST1X,off+0x18u);
+        ULONG get=read32(a,TG_NVDEC_AP_HOST1X,off+0x1cu);
+        if (put!=get)
+            return host_reject(a,TgNvdecHostChannelPointers,channel,status,put,get,
+                read32(a,TG_NVDEC_AP_HOST1X,off+0x24u));
     }
     ULONG irq=read32(a,TG_NVDEC_AP_HOST1X,0x2100u+0xf20u+4u*(VIDEO_SYNCPOINT/32u));
-    if (irq&(1u<<(VIDEO_SYNCPOINT%32u))) return FALSE;
+    if (irq&(1u<<(VIDEO_SYNCPOINT%32u)))
+        return host_reject(a,TgNvdecHostSyncpointIrq,VIDEO_SYNCPOINT,irq,0,0,0);
     ULONG first=read32(a,TG_NVDEC_AP_HOST1X,SYNCPOINT_OFFSET);
-    if (first==MAXULONG) return FALSE;
+    if (first==MAXULONG)
+        return host_reject(a,TgNvdecHostSyncpointValue,VIDEO_SYNCPOINT,first,0,0,0);
     LARGE_INTEGER wait; wait.QuadPart=-500000; /* 50ms, passive wait */
     (VOID)KeDelayExecutionThread(KernelMode,FALSE,&wait);
-    return first==read32(a,TG_NVDEC_AP_HOST1X,SYNCPOINT_OFFSET) && clock_live(a);
+    ULONG last=read32(a,TG_NVDEC_AP_HOST1X,SYNCPOINT_OFFSET);
+    if (first!=last)
+        return host_reject(a,TgNvdecHostSyncpointChanged,VIDEO_SYNCPOINT,first,last,0,0);
+    if (!clock_live(a))
+        return host_reject(a,TgNvdecHostClockChanged,0x180u,
+            read32(a,TG_NVDEC_AP_CAR,0x180u),a->Video.IoStatus,a->Video.Closing,0);
+    return TRUE;
 }
 static NTSTATUS create_locked(TG_GPU_ADAPTER *a, TG_GPU_DEVICE *device)
 {
@@ -235,6 +264,20 @@ static NTSTATUS create_locked(TG_GPU_ADAPTER *a, TG_GPU_DEVICE *device)
 static void error_text(TG_GPU_ADAPTER *a, char *out)
 {
     UINT n=0;
+    if (a->Video.HostCheck) {
+        const char prefix[]="Host1x ownership";
+        for (UINT i=0;i<sizeof(prefix)-1;++i) out[n++]=prefix[i];
+        const ULONG values[]={a->Video.HostCheck,a->Video.HostIndex,
+            a->Video.HostValue[0],a->Video.HostValue[1],a->Video.HostValue[2],a->Video.HostValue[3],
+            a->Video.PllpBase,a->Video.HostSource,a->Video.CoreBootFloorUv};
+        const char *labels[]={" check="," index="," a="," b="," c="," d="," pllp="," src="," floor="};
+        for (UINT i=0;i<RTL_NUMBER_OF(values);++i) {
+            for (UINT j=0;labels[i][j] && n<TG_NVDEC_ERROR_SIZE-1u;++j) out[n++]=labels[i][j];
+            for (int shift=28;shift>=0 && n<TG_NVDEC_ERROR_SIZE-1u;shift-=4)
+                out[n++]="0123456789abcdef"[(values[i]>>shift)&15u];
+        }
+        out[n]=0; return;
+    }
     const char *parts[]={a->Video.Operation?a->Video.Operation:"no session",
         ": ",TgNvdecLastError(a->Video.Backend),"; PLLP=0x"};
     for (UINT p=0;p<RTL_NUMBER_OF(parts);++p)
@@ -253,6 +296,7 @@ static NTSTATUS execute(TG_GPU_ADAPTER *a, TG_GPU_DEVICE *device,
 {
     TG_NVDEC_ADAPTER *v=&a->Video;
     NTSTATUS status;
+    v->HostCheck=0; /* A new request must not report an earlier rejection. */
     if (h->command==TG_NVDEC_ESCAPE_LOAD) {
         if (h->session || h->input_bytes<sizeof(struct tg_nvdec_load_request) ||
             h->output_bytes!=sizeof(struct tg_nvdec_load_result)) return STATUS_INVALID_PARAMETER;
