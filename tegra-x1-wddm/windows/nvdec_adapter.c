@@ -206,7 +206,7 @@ static NTSTATUS create_locked(TG_GPU_ADAPTER *a, TG_GPU_DEVICE *device)
     v->Session=v->Generation; v->IoStatus=STATUS_SUCCESS;
     InterlockedExchange(&v->Closing,0);
     v->Operation="Host1x clock lease";
-    status=TgHost1xClockAcquire(&a->Platform,clock_quiesce,a,&v->Clock);
+    status=TgHost1xClockAcquire(&a->Platform,clock_quiesce,a,&v->Clock,&v->Operation);
     if (status==STATUS_SUCCESS) {
         ULONG pllp=0;
         v->HostSource=read32(a,TG_NVDEC_AP_CAR,0x180u);

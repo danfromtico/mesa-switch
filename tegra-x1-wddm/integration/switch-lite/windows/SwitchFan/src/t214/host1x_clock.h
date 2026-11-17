@@ -29,6 +29,14 @@ typedef struct _SW_HOST1X_REQUEST {
 } SW_HOST1X_REQUEST;
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(SW_HOST1X_REQUEST, SwHost1xRequest)
 
+/* Only failed kernel requests are recorded, using the provider's existing
+ * passive diagnostic sink. Preserve the actual status and ownership path. */
+static VOID SwHost1xFailure(ULONG stage, NTSTATUS status)
+{
+    SwFanTrace(L"Host1xFailureStage", stage);
+    SwFanTrace(L"Host1xFailureStatus", (ULONG)status);
+}
+
 static VOID SwHost1xDropClaim(WDFDEVICE device, WDFREQUEST request, NTSTATUS quiesce)
 {
     SW_HOST1X_PROVIDER *p = SwHost1xProvider(device);
@@ -104,6 +112,7 @@ static VOID SwHost1xAcquire(WDFQUEUE queue, WDFREQUEST request,
     TG_HOST1X_CLOCK_REQUEST *in, *op = NULL, copy;
     WDF_OBJECT_ATTRIBUTES attributes;
     NTSTATUS status;
+    ULONG failure_stage = 2;
     KIRQL irql;
     BOOLEAN claimed = FALSE;
     if (code != TG_HOST1X_IOCTL_CLOCK_HOLD ||
@@ -111,20 +120,23 @@ static VOID SwHost1xAcquire(WDFQUEUE queue, WDFREQUEST request,
         WdfRequestComplete(request, STATUS_ACCESS_DENIED); return;
     }
     if (in_bytes != sizeof(copy) || out_bytes != sizeof(copy)) {
+        SwHost1xFailure(2, STATUS_INFO_LENGTH_MISMATCH);
         WdfRequestComplete(request, STATUS_INFO_LENGTH_MISMATCH); return;
     }
     status = WdfRequestRetrieveInputBuffer(request, sizeof(copy), (PVOID *)&in, NULL);
-    if (!NT_SUCCESS(status)) { WdfRequestComplete(request, status); return; }
+    if (!NT_SUCCESS(status)) { SwHost1xFailure(3, status); WdfRequestComplete(request, status); return; }
     copy = *in;
     status = WdfRequestRetrieveOutputBuffer(request, sizeof(copy), (PVOID *)&op, NULL);
-    if (!NT_SUCCESS(status)) { WdfRequestComplete(request, status); return; }
+    if (!NT_SUCCESS(status)) { SwHost1xFailure(4, status); WdfRequestComplete(request, status); return; }
     if (copy.Version != TG_HOST1X_CLOCK_ABI || copy.Size != sizeof(copy) ||
         copy.Reserved || !copy.Ready || !copy.Quiesce) {
+        SwHost1xFailure(5, STATUS_INVALID_PARAMETER);
         WdfRequestComplete(request, STATUS_INVALID_PARAMETER); return;
     }
     *op = copy;
     op->ReadyStatus = STATUS_DEVICE_NOT_READY;
     op->QuiesceStatus = STATUS_SUCCESS; /* no work admitted yet */
+    failure_stage = 6;
     if (!dev->IsLite || dev->Stopping || !dev->CpuConfigured || !dev->Car) {
         status = STATUS_DEVICE_NOT_READY; goto fail;
     }
@@ -132,7 +144,9 @@ static VOID SwHost1xAcquire(WDFQUEUE queue, WDFREQUEST request,
     if (!p->Held && !p->Faulted) { p->Held = request; claimed = TRUE; }
     status = p->Faulted ? STATUS_DEVICE_NOT_READY : STATUS_DEVICE_BUSY;
     KeReleaseSpinLock(&p->Lock, irql);
+    failure_stage = 7;
     if (!claimed) goto fail;
+    failure_stage = 8;
     op->GateL = SwCpuRead(dev, 0x10);
     op->ResetL = SwCpuRead(dev, 0x04);
     op->PllpBase = SwCpuRead(dev, 0xa0);
@@ -143,14 +157,17 @@ static VOID SwHost1xAcquire(WDFQUEUE queue, WDFREQUEST request,
         status = STATUS_DEVICE_NOT_READY; goto fail;
     }
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, SW_HOST1X_REQUEST);
+    failure_stage = 9;
     status = WdfObjectAllocateContext(request, &attributes, (PVOID *)&c);
     if (!NT_SUCCESS(status)) goto fail;
     c->Device = device; c->Request = request; c->Op = op;
     KeInitializeEvent(&c->Published, NotificationEvent, FALSE);
+    failure_stage = 10;
     c->Work = IoAllocateWorkItem(WdfDeviceWdmGetDeviceObject(device));
     if (!c->Work) { status = STATUS_INSUFFICIENT_RESOURCES; goto fail; }
     /* Already dispatched from a power-managed queue: never wait for D0 here.
      * The explicit reference covers S0 idle; EvtIoStop handles Sx/DFx. */
+    failure_stage = 11;
     status = WdfDeviceStopIdle(device, FALSE);
     c->PowerReference = NT_SUCCESS(status);
     /* KMDF before1.33 may return PENDING while a system-managed idle device
@@ -163,6 +180,7 @@ static VOID SwHost1xAcquire(WDFQUEUE queue, WDFREQUEST request,
     }
     WdfObjectReference(device);
     WdfObjectReference(request);
+    failure_stage = 12;
     status = WdfRequestMarkCancelableEx(request, SwHost1xCancel);
     if (!NT_SUCCESS(status)) {
         WdfObjectDereference(request); WdfObjectDereference(device); goto fail;
@@ -174,6 +192,7 @@ static VOID SwHost1xAcquire(WDFQUEUE queue, WDFREQUEST request,
     WdfObjectDereference(request);
     return; /* hold the real request and its power reference */
 fail:
+    SwHost1xFailure(failure_stage, status);
     if (c && c->PowerReference) WdfDeviceResumeIdle(device);
     if (c && c->Work) IoFreeWorkItem(c->Work);
     if (claimed) SwHost1xDropClaim(device, request, STATUS_SUCCESS); /* no work admitted */
@@ -192,6 +211,8 @@ static NTSTATUS SwFanHost1xCreateQueue(WDFDEVICE device)
     status = WdfObjectAllocateContext(device, &attributes, (PVOID *)&p);
     if (!NT_SUCCESS(status)) return status;
     KeInitializeSpinLock(&p->Lock);
+    SwFanTrace(L"Host1xFailureStage", 0);
+    SwFanTrace(L"Host1xFailureStatus", 0);
     WDF_IO_QUEUE_CONFIG_INIT(&config, WdfIoQueueDispatchParallel);
     config.PowerManaged = WdfTrue;
     config.EvtIoDeviceControl = SwHost1xAcquire;
@@ -206,6 +227,10 @@ static VOID SwFanHost1xDispatch(WDFDEVICE device, WDFREQUEST request)
 {
     SW_HOST1X_PROVIDER *p = SwHost1xProvider(device);
     NTSTATUS status = WdfRequestForwardToIoQueue(request, p->Queue);
-    if (!NT_SUCCESS(status)) WdfRequestComplete(request, status);
+    if (!NT_SUCCESS(status)) {
+        if (WdfRequestGetRequestorMode(request) == KernelMode)
+            SwHost1xFailure(1, status);
+        WdfRequestComplete(request, status);
+    }
 }
 #endif

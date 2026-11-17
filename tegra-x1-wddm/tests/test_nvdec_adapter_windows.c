@@ -58,9 +58,10 @@ VOID (NTAPI *const __imp_KeReleaseSpinLock)(PKSPIN_LOCK,KIRQL)=unlock_spin;
 NTSTATUS (NTAPI *const __imp_KeDelayExecutionThread)(KPROCESSOR_MODE,BOOLEAN,PLARGE_INTEGER)=delay;
 VOID (NTAPI *const __imp_KeStallExecutionProcessor)(ULONG)=stall;
 
-NTSTATUS TgHost1xClockAcquire(TG_GPU_PLATFORM *p,TG_HOST1X_QUIESCE q,PVOID ctx,TG_HOST1X_CLOCK_LEASE **out)
+NTSTATUS TgHost1xClockAcquire(TG_GPU_PLATFORM *p,TG_HOST1X_QUIESCE q,PVOID ctx,TG_HOST1X_CLOCK_LEASE **out,const char **stage)
 {
-    CHECK(p==&adapter.Platform && !held && !*out);++acquires;
+    CHECK(p==&adapter.Platform && !held && !*out && stage && *stage);++acquires;
+    *stage="fixture Host1x lease admitted";
     held=TRUE;quiesce=q;quiesce_context=ctx;*out=(TG_HOST1X_CLOCK_LEASE *)&held;return STATUS_SUCCESS;
 }
 BOOLEAN TgHost1xClockHeld(TG_HOST1X_CLOCK_LEASE *p,ULONG *pllp)
