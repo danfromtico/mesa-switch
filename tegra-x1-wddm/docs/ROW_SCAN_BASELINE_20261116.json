@@ -1003,7 +1003,7 @@
     }
   },
   "decode_integration": {
-    "updated_utc": "2026-11-16T20:13:19.050488+00:00",
+    "updated_utc": "2026-11-17T01:12:05.128714+00:00",
     "state": "Local candidate only; installed display/power baseline unchanged",
     "active_sequence": [
       "720p H.264",
@@ -1073,6 +1073,24 @@
       "matches_upstream": true,
       "native_tested": false,
       "public_windows_redistribution_confirmed": false
+    },
+    "client_route_native_result": {
+      "record": "NVDEC_CLIENT_ROUTE_NATIVE_20261117.json",
+      "acpi_file_staged": true,
+      "loaded_candidate_dsdt_verified": false,
+      "candidate_kmd_selected": false,
+      "client_route_measured": false,
+      "gpu_node_present_in_failed_boot": false,
+      "baseline_restored": true,
+      "cleanup_complete": true,
+      "native_decode_accepted": false,
+      "candidate_promoted": false
+    },
+    "emc_preselection_guard": {
+      "record": "NVDEC_EMC_GUARD_20261117.json",
+      "commit": "b7b98c3bed1598f50da68c52511d58df5d5e8975",
+      "pure_powershell_controls_passed": 10,
+      "native_bad_state_guard_exercised": false
     }
   },
   "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",

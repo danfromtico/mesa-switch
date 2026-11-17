@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-16T20:13:19.050488+00:00",
+  "updated_utc": "2026-11-17T01:12:05.128714+00:00",
   "state": "720p integration groundwork; no native NVDEC/D3D11VA acceptance",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
@@ -291,5 +291,23 @@
       "tegra-x1-wddm/windows/resources.h": "969a69a00ce276f7ffa427c616b536b2379b5c358138885b4ed229b532b614df"
     },
     "scope": "Committed source at cb09aaea including tracked DMA and workspace corrections. Inherited uncommitted display/power changes are preserved separately; this is not an installed package."
+  },
+  "client_route_native_result": {
+    "record": "NVDEC_CLIENT_ROUTE_NATIVE_20261117.json",
+    "acpi_file_staged": true,
+    "loaded_candidate_dsdt_verified": false,
+    "candidate_kmd_selected": false,
+    "client_route_measured": false,
+    "gpu_node_present_in_failed_boot": false,
+    "baseline_restored": true,
+    "cleanup_complete": true,
+    "native_decode_accepted": false,
+    "candidate_promoted": false
+  },
+  "emc_preselection_guard": {
+    "record": "NVDEC_EMC_GUARD_20261117.json",
+    "commit": "b7b98c3bed1598f50da68c52511d58df5d5e8975",
+    "pure_powershell_controls_passed": 10,
+    "native_bad_state_guard_exercised": false
   }
 }
