@@ -55,6 +55,22 @@ function Reset {
  $script:LiveMatches=$true
  $script:HelperOutput='RESULT=STAGED_FOR_REBOOT live driver identity is not verified'
 }
+foreach($case in @('corrected','unchanged-tool','running','mismatch','not-ended','not-loss','unknown-exit','missing-tool','wrong-target','other-boot','second-replacement')) {
+ $boot='2026-11-17T10:05:30Z';$target=@{Sha256='candidate'};$tool=@{Sha256='new-observer'}
+ $prior=@{Boot=$boot;Phase='Failed';Exit=5;Target=$target;Tool=@{Sha256='old-observer'};Stderr="StopTrace=0 events_lost=17 buffers_lost=0 session=NvdecImageIdentity-988`r`n"}
+ if($case -eq 'unchanged-tool'){$prior.Tool=$tool}
+ if($case -eq 'running'){$prior.Phase='Running'}
+ if($case -eq 'mismatch'){$prior.Phase='Mismatch'}
+ if($case -eq 'not-ended'){$prior.Stderr='StopTrace=5 events_lost=17 buffers_lost=0 session=NvdecImageIdentity-988'}
+ if($case -eq 'not-loss'){$prior.Stderr='StopTrace=0 events_lost=0 buffers_lost=0 session=NvdecImageIdentity-988'}
+ if($case -eq 'unknown-exit'){$prior.Exit=$null}
+ if($case -eq 'missing-tool'){$prior.Tool=@{}}
+ if($case -eq 'wrong-target'){$prior.Target=@{Sha256='other'}}
+ if($case -eq 'other-boot'){$prior.Boot='2026-11-17T10:00:00Z'}
+ $history=@($prior);if($case -eq 'second-replacement'){$history+=@($prior.Clone())}
+ $allowed=Test-ProviderTraceReplacement $history $boot $target $tool
+ Assert ([bool]$allowed -eq ($case -eq 'corrected')) ('Unsafe trace replacement eligibility: '+$case)
+}
 $root='model';$config=@{CandidateAcpi='new-table';BaselineAcpi='old-table';Provider=@{Candidate=@{Sha256='new';Length=20};Baseline=@{Sha256='old';Length=10}}}
 foreach($case in @('reuse','import','failed','incomplete','reconcile')){
  Reset;$state=[ordered]@{Phase='Prepared';ProviderStaged=$false}

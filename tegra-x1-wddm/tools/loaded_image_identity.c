@@ -66,7 +66,10 @@ int wmain(int argc, WCHAR **argv)
     p->Wnode.BufferSize=capacity; p->Wnode.Flags=WNODE_FLAG_TRACED_GUID;
     p->Wnode.ClientContext=1;
     if (FAILED(CoCreateGuid(&p->Wnode.Guid))) {free(p);return 3;}
-    p->BufferSize=64; p->MinimumBuffers=4; p->MaximumBuffers=16;
+    /* Image rundown is a burst, before the file writer can drain the pool.
+     * The native first-boot capture lost17 events with at most1 MiB. Reserve
+     * 2 MiB up front and cap expansion at4 MiB; loss still fails verification. */
+    p->BufferSize=64; p->MinimumBuffers=32; p->MaximumBuffers=64;
     p->MaximumFileSize=8;
     p->LogFileMode=EVENT_TRACE_FILE_MODE_SEQUENTIAL|EVENT_TRACE_SYSTEM_LOGGER_MODE;
     p->EnableFlags=EVENT_TRACE_FLAG_IMAGE_LOAD|EVENT_TRACE_FLAG_NO_SYSCONFIG;

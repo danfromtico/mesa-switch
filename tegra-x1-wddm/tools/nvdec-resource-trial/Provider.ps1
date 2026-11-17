@@ -32,6 +32,18 @@ function Get-ProviderLoadedObservation([string]$Which) {
  if(Test-Path $path){$h=Read-Json $path;if(@($h.Observations).Count){return @($h.Observations)[-1]}}
  return $null
 }
+function Test-ProviderTraceReplacement($History,[string]$Boot,$Target,$Tool) {
+ # One corrected observer may replace a completed, loss-only trace in this
+ # boot. Its executable must change; driver identity and boot must not.
+ # Running/unknown traces and actual image mismatches are never retryable.
+ $same=@($History|Where-Object {Same-Boot $_.Boot $Boot})
+ if($same.Count -ne 1){return $false}
+ $last=$same[0]
+ return $last.Phase -eq 'Failed' -and $last.Exit -eq 5 -and
+  $last.Target.Sha256 -eq $Target.Sha256 -and $last.Tool.Sha256 -and
+  $last.Tool.Sha256 -ne $Tool.Sha256 -and
+  $last.Stderr -match '(?m)^StopTrace=0 events_lost=[1-9][0-9]* buffers_lost=0 session=NvdecImageIdentity-[0-9]+\r?$'
+}
 function Assert-ProviderLoadedImage([ValidateSet('Candidate','Baseline')][string]$Which) {
  # Deferred copying can finish after the old image has already loaded. A disk
  # hash, selected INF and one boot therefore do not establish the live image.
@@ -42,8 +54,8 @@ function Assert-ProviderLoadedImage([ValidateSet('Candidate','Baseline')][string
  $history=@();if(Test-Path $path){$history=@((Read-Json $path).Observations)}
  $last=Get-ProviderLoadedObservation $Which
  if($last -and (Same-Boot $last.Boot $boot)) {
-  if($last.Phase -ne 'Verified' -or $last.Target.Sha256 -ne $config.Provider.$Which.Sha256 -or $last.Tool.Sha256 -ne $expected.Sha256){throw ('Loaded provider observation is incomplete or mismatched: '+$path)}
-  return
+  if($last.Phase -eq 'Verified' -and $last.Target.Sha256 -eq $config.Provider.$Which.Sha256 -and $last.Tool.Sha256 -eq $expected.Sha256){return}
+  if(!(Test-ProviderTraceReplacement $history $boot $config.Provider.$Which $expected)){throw ('Loaded provider observation is incomplete or mismatched: '+$path)}
  }
  $directory=if($Which -eq 'Candidate'){'provider'}else{'baseline-fan'}
  $other=if($Which -eq 'Candidate'){'baseline-fan'}else{'provider'}

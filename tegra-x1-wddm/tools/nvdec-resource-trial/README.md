@@ -35,7 +35,12 @@ The paired images must be distinguishable by these fields.
 `provider-loaded-{candidate,baseline}.json` retains observations per boot.
 Missing events, lost events, helper failure or an unknown image stop selection.
 An interrupted observation must be inspected rather than rerun in the same
-boot. Only a recorded mismatch with the known other package permits the
+boot. A completed capture with event loss may be replaced once in that boot
+only by a different, hashed observer executable and an unchanged driver target;
+the failed receipt remains in history. The initial1 MiB buffer cap lost17 events
+on a native first-boot rundown. The helper now reserves2 MiB and caps expansion
+at4 MiB, while still rejecting any event loss. No trace failure authorizes a boot.
+Only a recorded mismatch with the known other package permits the
 explicit `ProviderLoadRestart` action, once, with GPU startup closed. It does
 not reinstall a driver. Rerun the appropriate provider selection after that
 boot; a persistent mismatch cannot trigger another reconciliation restart.
