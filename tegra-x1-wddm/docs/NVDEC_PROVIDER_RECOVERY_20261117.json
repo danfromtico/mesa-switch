@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T07:39:08.211678+00:00",
+  "status": "Original display/power baseline restored and native trial cleaned; decode not executed; candidate not promoted",
+  "source": {
+    "adapter_transport": "259c825dec8421d34d5e08e33b9d109d9cd89770",
+    "host_mux": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5",
+    "client_trace": "30fabbae0f4ff789b032e8d76dd1f42f20d6811d",
+    "executed_trial_controller": "f0f1f02c7ccd2bbd8340be60178cdf1ed9983650",
+    "deferred_installer_and_controller": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+    "windowsdrivers_hook": "7ecce6c083df1f33def014445f3cacd1c3301095",
+    "frozen_native_manifest_sha256": "fffbae91a62453c121377070bec5716acfe7d28c0bea636f30e24ae5ed55c59e",
+    "build_full_dirty_worktree": false
+  },
+  "candidate_components": {
+    "signed_kmd": {
+      "bytes": 239616,
+      "sha256": "372ec2a93c23b9744ad256bb2e7c10f70f91043272bee209bc56e31f0ea8669f"
+    },
+    "signed_switchfan": {
+      "bytes": 102400,
+      "sha256": "9e2d4826af07a82d083aca6178608d71e983dd5295a1a2175ff38e555a2df7c7"
+    },
+    "candidate_acpi": {
+      "bytes": 4993,
+      "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "native_acceptance_client": {
+      "bytes": 95232,
+      "sha256": "56c7edfeeb89758cf2758dbc7a6230eebe19d25c47e2d11d9f1d8b6fae9ae006"
+    },
+    "deferred_installer": {
+      "bytes": 72192,
+      "sha256": "74fa43ecf99194729a04293154679328eeba881c3aed90f26f989a24da378669"
+    }
+  },
+  "native_execution": {
+    "verified_catalog_members": 32,
+    "candidate_acpi_loaded": true,
+    "candidate_kmd_selected": false,
+    "candidate_provider_replacement_returned": false,
+    "host1x_clock_lease_called": false,
+    "firmware_boot_called": false,
+    "decode_frames": 0,
+    "d3d11va_presented_frames": 0,
+    "candidate_acpi_declared_resource_count": 12
+  },
+  "failure": {
+    "classification": "incomplete live SwitchFan replacement followed by unexpected reboot",
+    "public_call": "UpdateDriverForPlugAndPlayDevicesW(ACPI\\SWOA0402, candidate INF, force|noninteractive, non-NULL reboot result)",
+    "selection_begin_utc": "2026-11-17T06:59:13.6455666Z",
+    "last_complete_setupapi_entry": "Restarting Devices",
+    "receipt_phase_after_boot": "Selecting",
+    "receipt_restart_requested": false,
+    "before_boot_cim": "2026-11-17T06:47:23.9527220Z",
+    "after_boot_cim": "2026-11-17T06:59:35.5218770Z",
+    "reboot_evidence": [
+      "new Kernel-General12 record",
+      "uptime772328ms at07:12:26Z",
+      "new DWM process1404 start07:00:11Z"
+    ],
+    "minidump_found": false,
+    "memory_dump_found": false,
+    "bugcheck1001_observed": false,
+    "root_cause": "unresolved; exact failing callback not established",
+    "timing_limit": "Pre-network event clocks differ from later CIM/uptime readings; do not infer millisecond call timing from them",
+    "scope": "No candidate KMD activation or decoder command. Separate from deferred application/load and180-to90 faults."
+  },
+  "recovery": {
+    "method": "SetupDiCallClassInstaller(DIF_INSTALLDEVICE); DI_DONOTCALLCONFIGMG|DI_NEEDREBOOT",
+    "deferred_install_begin_utc": "2026-11-17T07:26:24.0389792Z",
+    "deferred_install_exit": 0,
+    "planned_recovery_boot": "2026-11-17T07:27:19.0531450Z",
+    "restored_utc": "2026-11-17T07:31:25.8907072Z",
+    "loaded_dsdt": {
+      "bytes": 4848,
+      "sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
+    },
+    "provider_inf": "oem131.inf",
+    "provider_inf_sha256": "9c7f7734b39dc088553b56aaf394bd5dc3f43fc7e7e97882c1109b24f0b990f1",
+    "gpu_problem_code": 0,
+    "task": {
+      "State": 3,
+      "Result": 0,
+      "Delay": "PT5S",
+      "Enabled": true
+    },
+    "dwm": {
+      "pid": 1424,
+      "process_start_utc": "2026-11-17T07:27:51.5275556Z",
+      "loaded_modules": [
+        "TegraGpuD3DVk.dll",
+        "libvulkan_nouveau.dll"
+      ]
+    },
+    "display": {
+      "current": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "registry": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "source_mode": {
+        "width": 720,
+        "height": 1280
+      },
+      "target_signal": {
+        "width": 720,
+        "height": 1280
+      },
+      "path_rotation": 2,
+      "changed": false
+    },
+    "power": {
+      "mode": 1,
+      "dfll_active": 1,
+      "cpu_error": 0,
+      "cpu_policy_khz": [
+        102000,
+        1581000
+      ],
+      "gpu_policy_khz": [
+        76800,
+        537600
+      ],
+      "emc": {
+        "Version": 1,
+        "Flags": 367,
+        "ActualKhz": 1331200,
+        "BootKhz": 2500000,
+        "SampleAgeMs": 62,
+        "LastError": 0,
+        "EnumerationError": 0,
+        "RateCount": 4,
+        "RatesKhz": [
+          204000,
+          1331200,
+          1600000,
+          2500000
+        ],
+        "ActmonError": 0,
+        "AverageActiveKhz": 44157,
+        "RawActiveKhz": 46643,
+        "TargetKhz": 1331200,
+        "DisplayFloorKhz": 38304,
+        "QosError": 0,
+        "TransitionCount": 635
+      },
+      "fan_mode": 1,
+      "charge_limit": 85
+    },
+    "component_sources": {
+      "KMD": {
+        "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+        "emc_diff_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852"
+      },
+      "UMD": {
+        "commit": "c1f25986eee51c0ee01088c3ecb3c9508dea2479"
+      },
+      "ICD": {
+        "commit": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+        "build_scope": "Recorded c0-based build with documented worktree changes; use full binary SHA256 to identify this artifact"
+      }
+    },
+    "files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 204808,
+        "sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4848,
+        "sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17652224,
+        "sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 98832,
+        "sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3274240,
+        "sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "candidate_packages_removed": [
+      "oem0.inf",
+      "oem2.inf"
+    ],
+    "temporary_tasks": 0,
+    "trial_roots_and_archive_removed": true,
+    "cleanup_receipt_removed": true,
+    "last_read_utc": "2026-11-17T07:36:35.3452358Z",
+    "new_physical_screen_acceptance": false
+  },
+  "previous_power_fault": {
+    "present_before_candidate_install": true,
+    "error": "0xc0000483",
+    "runtime_recovered_with_existing_mode7_then_mode1_api_at": "2026-11-17T06:07:33.8487190Z",
+    "root_cause_fixed": false
+  },
+  "validation": {
+    "arm64_deferred_helper_build": "passed",
+    "native_inspect": "exact original INF selected in memory; no install",
+    "native_original_provider_deferred_install": "passed; original package verified after planned boot",
+    "provider_controller_failure_and_restart_controls": "passed on Windows with native operations substituted",
+    "mixed_inf_sys_control": "rejected; no installer repeat",
+    "next_candidate_deferred_install": "not executed",
+    "decoder_acceptance": "not executed"
+  },
+  "review": {
+    "mode": "main-agent self-review",
+    "external_review_required": false,
+    "external_review_performed": false
+  },
+  "remaining": [
+    "Validate the corrected deferred provider transition before any new candidate activation",
+    "Verify real clock lease, firmware boot, DMA route and short720p H264 output with actual completion",
+    "Connect ordinary D3D11VA runtime and NV12 presentation; no video capability advertisement yet",
+    "After720p acceptance validate1080p;2K/4K retained independently and untested"
+  ],
+  "evidence": {
+    "provider-fault.json": "525ecf63979e5709807b020f9feb1950b0abfd87e50c79f4cd593a62a448baa3",
+    "provider-timeline.json": "b4e51838bb0ead97d8b80b3bda3e775e7e6cd630232a3bc71627f06ae1f49224",
+    "setupapi-bounded-tail.txt": "b6f1589fda252bce2d3817ea498629e4069f8f62f0fc8e4fd0d4c3a45eb5c10f",
+    "defer-recovery.json": "3af1c0f2c46adc1583af0856703aa0ac183e92807336f948ba90954a450189bb",
+    "restored-state-2.json": "34a7601c85a54c725b795b5338b61b54bf6be5bcb06734d77039b2ae2dc915c9",
+    "restored-display.json": "1621b4972706ef80e669f59f625bc69926113a11f6431af49498fee530eea656",
+    "native-cleanup.json": "0e49fb632125b525bc32057d0acee94f5715aa9a0f76248c809e11eddc1bf330",
+    "final-native-cleanup.json": "f9ae94adae7abccdba2274af230e50314ce189d948cbae26c017d6e1916627ae",
+    "deferred-provider-control-verified.stdout": "e1fe8ace3cb533ffbdb72027d44ab5713d9c7aa0eb395f6c018f3ced0276d58f",
+    "native-source-manifest.json": "fffbae91a62453c121377070bec5716acfe7d28c0bea636f30e24ae5ed55c59e"
+  }
+}

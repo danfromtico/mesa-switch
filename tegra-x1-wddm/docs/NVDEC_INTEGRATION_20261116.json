@@ -1,10 +1,9 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T04:18:52.736065+00:00",
-  "state": "SWGROUP bypass predicate corrected using pinned Noble/ATF sources and the exact installed BL31 image. CPU controls/ARM64 objects passed; no new native package or decode run. Current original files match, but power runtime reports fixed recovery mode7/DFLL error.",
+  "updated_utc": "2026-11-17T07:40:15.349806+00:00",
+  "state": "Original display/power baseline restored and native trial cleaned; decode not executed; candidate not promoted",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
-    "user_instruction": "先做720 1080吧，2k 4k记为待定，有实现未检测",
     "active_sequence": [
       "720p H.264",
       "1080p H.264 after720 acceptance"
@@ -65,7 +64,7 @@
     ],
     "runtime_video_table_advertised": false,
     "legacy_probe_raw_mapping_enabled": false,
-    "decode_transport_connected": false,
+    "decode_transport_connected": true,
     "sc7_enabled": false,
     "full_diff_source_parent": "da1bda2bb0fc5c825f298c8f35a37ac737bf5d30",
     "source_sha256": {
@@ -119,7 +118,8 @@
       "tegra-x1-wddm/tests/test_context_windows.c": "b744d20bc27301a9fd1c4ca74d9a00d34a116079e39009d88c1d9346e205df74"
     },
     "source_set_sha256": "bd508394ce2a4c6376f0ae9863d212d7594339ad872848679ee47782dcef4103",
-    "source_snapshot_scope": "Initial selected720p import snapshot, not the current source tree. Later per-module records and current_committed_source supersede hashes for changed files."
+    "source_snapshot_scope": "Initial selected720p import snapshot, not the current source tree. Later per-module records and current_committed_source supersede hashes for changed files.",
+    "decode_transport_scope": "Adapter-owned native KMT client/service connected in source and built; no actual clock lease or decoder command executed on hardware"
   },
   "licenses": {
     "new_code_spdx": "MIT",
@@ -176,7 +176,7 @@
       "windows_signature_verified": true,
       "native_installed": false,
       "signature_verified_local": true,
-      "review": "Pending Gemini4 Carbon High; not before2026-11-20T23:53:18Z",
+      "review": "Main-agent self-review; no external review requirement",
       "controls": "Missing/partial/malformed resources, each map failure, null-success map, retained failed unmaps, snapshot and legacy/extended query guards/alias forms pass CPU controls; release masking regression red-before/green-after; real-WDK ARM64 objects and full render package build",
       "pairing": "Candidate KMD+extended ACPI must be installed/restored as a pair; baseline E95 alone rejects the additional resource descriptors",
       "native_trial_completed": true,
@@ -187,23 +187,15 @@
     "native_decode_executed": false,
     "physical_video_verified": false,
     "gemini_independent_review": {
-      "status": "pending Gemini4 Carbon High quota",
-      "not_before_utc": "2026-11-20T23:53:18Z"
+      "status": "not performed",
+      "required": false
     }
   },
   "remaining": [
-    "Before the next hardware candidate, resolve current fixed recovery mode7/DFLL0xc0000483 readiness without forcing profiles or clearing the latch.",
-    "Installed baseline ACPI lacks NVDEC resources; the prior ed09+827b combination proved actual11resource mapping. Corrected SWGROUP predicate not yet executed as an installed module; global CONFIG visibility remains unresolved.",
-    "Production NVDEC transport must coexist with the installed DWM driver",
-    "Real Host1x clock ownership, channel/syncpoint reservation and live ASID route rechecks must be connected to the coexisting transport.",
-    "Native verification of the corrected geometry/slot workspace and decoder error recovery",
-    "NV12 resources, output synchronization, video DDIs and GPU CSC incomplete",
-    "D3D11.1 video-table retrieval and real runtime calls remain unvalidated; keep negotiation unchanged",
-    "B01 inherited-idle power code exists locally; actual clock owner/provider and lifecycle must still be connected",
-    "Current WDDM KMD supports only node0; video execution requires a real coexisting transport/ownership contract, not the replacement probe",
-    "Real720p H.264 NVDEC execution and output-reference comparison",
-    "Complete D3D11VA/NV12/GPU CSC/window presentation with real completion and safe retirement",
-    "1080p integration and native acceptance after720p"
+    "Validate the corrected deferred provider transition before any new candidate activation",
+    "Verify real clock lease, firmware boot, DMA route and short720p H264 output with actual completion",
+    "Connect ordinary D3D11VA runtime and NV12 presentation; no video capability advertisement yet",
+    "After720p acceptance validate1080p;2K/4K retained independently and untested"
   ],
   "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
   "client_route_candidate": {
@@ -237,7 +229,7 @@
     "public_windows_redistribution_confirmed": false
   },
   "current_committed_source": {
-    "commit": "659b8c324d893e6eac90e6feeb105d8bc62d4690",
+    "commit": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
     "files": {
       "src/nouveau/nvdec/nvdec.h": "f7a8dcf3fbeaec80b04031d40db1477b91b764c56becd86d387848813654cf47",
       "src/nouveau/nvdec/nvdec_engine.c": "50c921f591579713244e07c9b8f227b5fc925aaf61b48911aabd4fce1287f824",
@@ -261,37 +253,63 @@
       "src/nouveau/vulkan/nvkmd/windows/build_icd.py": "60fa861535412f9f01b93f16b45012888854f9de6a715690158e247e0a9c1c0a",
       "src/nouveau/vulkan/nvkmd/windows/nvdec_abi.h": "4dc45cc8e525577f3684c2b96c42b4bbd6ad353f1bb054a83cc81a448ae95e39",
       "src/nouveau/vulkan/nvkmd/windows/nvdec_check.c": "aa96a24c60d15223ad9f7cfebfb53a857c2f9abcb2caf0113abfd2a112b3480a",
-      "tegra-x1-wddm/platform/t214_nvdec.c": "179800aa2a1d62b9be1f0f728ec459f59a9eee63608bdedfe139f3891895aecc",
-      "tegra-x1-wddm/platform/t214_nvdec.h": "66ea8660005160222f0d9520f9168cc0ea0691ac420d8febd1d0445da3325ca9",
-      "tegra-x1-wddm/platform/t214_resources.h": "2f96a36033f2b654e2a765dc2860b5c85cf14a8414b6d9845ad399034f2e35ae",
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_escape_abi.h": "75bb8efd6e74f659682da51abe72e993249dfec9017abdb4abeb9121f0beeca0",
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_native.c": "b9105ad1d5d03eb88baf34465cd481d26907ec7d74688f8b153becbb56172361",
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_native.h": "163108e9fb172e7e306648d88f7f019ae8d1fc31953360391084f32621e5d954",
+      "tegra-x1-wddm/integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "2212768024f1c924699eb9bd55af674ef4bfa5c9be91b732ec0fa9d571e7cbfc",
+      "tegra-x1-wddm/platform/t214_nvdec.c": "38a5b726bbe2f20e692458f54c7fa0ebdffcc99eb5b58c0807edf119418ec908",
+      "tegra-x1-wddm/platform/t214_nvdec.h": "b308f5db5384b1b2f08dddb3434b71e4dd95b9754f5148dc2a80bf51b0cd3764",
+      "tegra-x1-wddm/platform/t214_resources.h": "ee3674a3ff12965ee66e11cf0e5149f6c51e17d4f02ebc17786eafbd83a8faa1",
+      "tegra-x1-wddm/tests/nvdec_inactive_fixture.c": "363426c25595f75862c93f8ab2efa7bc388f1e3463244c6d4e7b9e22cedb9c98",
       "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "4dea4e6a5150b6511253cd4c02505239163f5cc0a7d6908bc919fec790c049a4",
       "tegra-x1-wddm/tests/test_context_windows.c": "2bbe82ae7bdc7d71d1d8624653cfe6b932bf401300533dcb6f0306f1afb29476",
+      "tegra-x1-wddm/tests/test_host1x_clock_windows.c": "ec8ed647b6911601adc386d4b5b7b6aba948ae739f870d9b435cba5978171356",
       "tegra-x1-wddm/tests/test_nvdec.c": "700997d449a4754ec3d83a2123fe5ea8ff172260350d52018189c4573dc70c98",
+      "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "9541eb6cbcc5d9f1b44b2cb43fe2a8fc5888a4a8e9f50678c50650cee09a3d96",
       "tegra-x1-wddm/tests/test_nvdec_h264.c": "d508104db872875d286ede06160e90ad2a7940398fa22c6d49f24498a5e72e8d",
       "tegra-x1-wddm/tests/test_nvdec_memory_windows.c": "bea37e848bcc3b470fc7cbb78d211939d6416a86a868b329bfc6d36c64883928",
-      "tegra-x1-wddm/tests/test_nvdec_platform.c": "12e00454707677ebeb83466dfb1e83b0c9b98260724b73b420629acc398f8e11",
+      "tegra-x1-wddm/tests/test_nvdec_native.c": "d1053ae13299bee7182d0e3f73e6282535ac118ab3142ad87b7be4590e096ffe",
+      "tegra-x1-wddm/tests/test_nvdec_platform.c": "63c71e9ff6f63db15ee0eb05461408a9ccd6138462ffb4a7086225628dc039c6",
       "tegra-x1-wddm/tests/test_paging_windows.c": "4208a031ba96925a7a5fb1906b910cc5baa9c154879d3442339eb97e0bd09ad1",
+      "tegra-x1-wddm/tests/test_platform_windows.c": "1ac5e371c1d0d7e7a5c12a39d8082bb8e54aa3f9148d14a2f80ab7acb1370b5f",
       "tegra-x1-wddm/tests/test_tgd3d_csc.c": "9313bb4d88a42b6e6c5517aa9a63cad71a367ffe2408b8a930bee51fcba7eada",
       "tegra-x1-wddm/tests/test_tgd3d_dxva_abi.c": "08b1dedc79499d32fd5c75bc1b568251715b060c17872d635976058fa92740ee",
       "tegra-x1-wddm/tests/test_tgd3d_h264_map.c": "4457b66b6d4c0cfc8566b653e92d28db65395de42a469e7b954432a9a9f39ece",
-      "tegra-x1-wddm/tools/build.py": "bca298f23cf6e4ccdf9ff89b4a24a8c5ea28c01cfa3b9c699f5957d6df5c033c",
-      "tegra-x1-wddm/tools/build_nvdec_acpi.py": "f6d69d066d06353dd73291473b2e1cd1175fb1a26de8d9251856d4af992ffd9b",
+      "tegra-x1-wddm/tools/build.py": "2bf2083e3a4c1777b3f421b200795ec4dc1f9b4f3add026f7ee1c68d18bb9d8d",
+      "tegra-x1-wddm/tools/build_nvdec_acpi.py": "a1b58fd98ce7eee385934e10e6e5e856485d280cb2d76e344d143553db42b7ba",
       "tegra-x1-wddm/tools/build_tgd3d.py": "86156fb18bdcf1fd323f8c2d31e1724ab5b07ae17fc78039c64c72179fea8183",
+      "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
       "tegra-x1-wddm/tools/mf_dxgi_probe.c": "07ffa45ea603bda19e4ce4cc015cc056433f4c88b801420ac42b299a7c34e14b",
-      "tegra-x1-wddm/tools/nvdec720.c": "8c78df2036379e9474589024567f2affb92f6ac196390336bfb27b52fa2bd49b",
-      "tegra-x1-wddm/windows/adapter.c": "c9e3527a93e8f75d38b54a90ef197bd16fd9b1e43cdd813b7143369cc4e518f3",
-      "tegra-x1-wddm/windows/context.h": "dfc16d1228b299c6cc2c6bc1138b0fb127ec1ae7446c04c74be82f82fa7c0e73",
-      "tegra-x1-wddm/windows/nvdec_backend.c": "1707e8ab134d5261e4d8b4aa99ba59b06ecc4bf690c0406d6a08efb8ccf725d1",
-      "tegra-x1-wddm/windows/nvdec_backend.h": "7cc78743f44eb22bc886860195e5c9b4b6a558c91800db74a69d64b5248e2b01",
-      "tegra-x1-wddm/windows/nvdec_control.h": "a3f65f3c8527a27c2bc7e645b459f8bfe3dff466831cc29f03959bbb805b8425",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "8b9819039fbd90018b3ae5759655da76474ec7619c1c02109dbd891adf8579a2",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "cfeb427fbbf98a457e0fe949d2617e38cfda58b0fb549836559d835b75a8ee69",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "d8c27baf570ab2e139c02e409aa2d207355890f24cf0a7e684ca0998e4e799b4",
+      "tegra-x1-wddm/tools/nvdec720.c": "1e4b72cfd55fbc1acc3d069779d22474e349b1b8698c5ccebe1e044862659aa8",
+      "tegra-x1-wddm/windows/adapter.c": "17f8df5e15d93e7d8dfe4bf21db6f32d7d7476f83017857ba723a8f5b26f1950",
+      "tegra-x1-wddm/windows/adapter.h": "97183f5833df6bce5f5e918b960a1fcc932b98c3d724929023b6e275da5583ba",
+      "tegra-x1-wddm/windows/adapter_reset.c": "71bb152704be995d5cd685638139080789bb8a9b9fe7429a8d01078dd7188b9f",
+      "tegra-x1-wddm/windows/context.c": "036eb0c379a9806154645bb79732bfa160b7a3bdb79bca523ea32a0134371029",
+      "tegra-x1-wddm/windows/context.h": "64de0c40c96a5d2b47f82ebce3b72da2666e1dfc3d332fc716f0acfb66b98817",
+      "tegra-x1-wddm/windows/device_lifetime.c": "c3db788f4bd1144e7c0a6e9c5d7b19e30057d081c97926d154a97e8862d50261",
+      "tegra-x1-wddm/windows/host1x_clock.c": "c930270c78a60cff4ba0e1ebc374ac674b517c165ac765aada779ee0ab0bd0f3",
+      "tegra-x1-wddm/windows/host1x_clock.h": "13bfbb8ace597b26767cae6e7d50c336659840e02d103c7de6a6691fd5b42c21",
+      "tegra-x1-wddm/windows/host1x_clock_abi.h": "dc95b991fa8de7de4d505f30eb84ada3c7788e093b10214ad121d66fe6247a52",
+      "tegra-x1-wddm/windows/nvdec_adapter.c": "df97adb94c4cde0f2a8e236ffc1fbb60577781ad4de82535c0bcce602c8489b6",
+      "tegra-x1-wddm/windows/nvdec_adapter.h": "6071a36e26e3a340a9358cd6be1812a418cca2a3d0ee9bd3ea32abead5e428a8",
+      "tegra-x1-wddm/windows/nvdec_backend.c": "cfe3b1d37b494383f97534a178c8f35166dac56b486d7984195ca1e362d26929",
+      "tegra-x1-wddm/windows/nvdec_backend.h": "a387b3f7c064c549ca6e846f46e99f7adda679376f8bf00766e3021a3c43dacf",
+      "tegra-x1-wddm/windows/nvdec_control.h": "df1c63a19af5f603a408738073646cc278f16f02f94fc6c36a73b495e5ec56fb",
       "tegra-x1-wddm/windows/nvdec_memory.c": "dfecd1c7ba8558a7a07237dfe70901f065be352d3f9c65dc8d37fe669deab550",
       "tegra-x1-wddm/windows/nvdec_memory.h": "8388db8a467397573838df44a8b6f3954adc98480f8b76a1208ad99371256ea2",
+      "tegra-x1-wddm/windows/platform_io.c": "fa91f53d75ac9099d7c62a324a672da49187df8f3925df7feb2a92821a4b6007",
+      "tegra-x1-wddm/windows/platform_io.h": "c7d18c04f69d99b39ed5fbf9c0f2ae5f945ca89290e1b5675ac382b896d14305",
       "tegra-x1-wddm/windows/probe.c": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
       "tegra-x1-wddm/windows/query.c": "db7b45113a2b10cf39c019152397756983f7313d7026e0a66e533ad228973050",
+      "tegra-x1-wddm/windows/render_miniport.c": "1292de03cbac65390c68627b47c76bbbb9b55eff72e72bcf9218d6c10378f202",
       "tegra-x1-wddm/windows/resources.c": "0e027ec91ddb56d73ad45c739e0834ad0481ab5bf06e45ef4c4de6392d43f69f",
       "tegra-x1-wddm/windows/resources.h": "969a69a00ce276f7ffa427c616b536b2379b5c358138885b4ed229b532b614df"
     },
-    "scope": "Selected committed NVDEC integration files, including resource, tracked DMA, scratch and SWGROUP fixes. Inherited uncommitted display/power changes remain separate. This is not an installed driver package."
+    "native_build_scope": "Native KMD uses the frozen c0/EMC/resource/client/transplant snapshot; this current source list is not a claim that the full development tree was installed"
   },
   "client_route_native_result": {
     "record": "NVDEC_CLIENT_ROUTE_NATIVE_20261117.json",
@@ -313,7 +331,7 @@
     "native_operations_in_controls_replaced": true,
     "native_closed_baseline_pending_state_observed": true,
     "native_bad_state_guard_exercised": false,
-    "review_pending": true
+    "review_pending": false
   },
   "acpi_only_native_result": {
     "record": "NVDEC_ACPI_ENUMERATION_NATIVE_20261117.json",
@@ -327,11 +345,13 @@
     "historical_failure_root_cause": "unresolved; not reproduced in this ACPI-only boot"
   },
   "controller_source": {
-    "commit": "648c72d075d75412209bcc17799def8bf39bb46b",
+    "commit": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
     "files": {
-      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "da25c261bfc70c671258a57c4952aad984ada8e49c6b1286c0013be061f83472",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-EmcGuard.ps1": "7f7bf63087415e7c304ae0c286b55bdcd626938bfb07050299aa50453ada04b8",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "eed15b9a31b9154e8ee81b9f18dc9284ddb464f26ec16030ed54a341a2be5a6e"
+      "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "8b9819039fbd90018b3ae5759655da76474ec7619c1c02109dbd891adf8579a2",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "cfeb427fbbf98a457e0fe949d2617e38cfda58b0fb549836559d835b75a8ee69",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "d8c27baf570ab2e139c02e409aa2d207355890f24cf0a7e684ca0998e4e799b4",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512"
     }
   },
   "client_route_query_result": {
@@ -369,6 +389,23 @@
       "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "4dea4e6a5150b6511253cd4c02505239163f5cc0a7d6908bc919fec790c049a4"
     },
     "installed": false,
-    "review": "pending"
+    "review": "main-agent self-review; real decoder DMA still untested"
+  },
+  "temporary_candidate_components_restored": true,
+  "latest_native_result": "NVDEC_PROVIDER_RECOVERY_20261117.json",
+  "review": {
+    "mode": "main-agent self-review",
+    "external_review_required": false,
+    "external_review_performed": false
+  },
+  "coexisting_transport": {
+    "adapter_transport": "259c825dec8421d34d5e08e33b9d109d9cd89770",
+    "host_mux": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5",
+    "client_trace": "30fabbae0f4ff789b032e8d76dd1f42f20d6811d",
+    "executed_trial_controller": "f0f1f02c7ccd2bbd8340be60178cdf1ed9983650",
+    "deferred_installer_and_controller": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+    "windowsdrivers_hook": "7ecce6c083df1f33def014445f3cacd1c3301095",
+    "frozen_native_manifest_sha256": "fffbae91a62453c121377070bec5716acfe7d28c0bea636f30e24ae5ed55c59e",
+    "build_full_dirty_worktree": false
   }
 }

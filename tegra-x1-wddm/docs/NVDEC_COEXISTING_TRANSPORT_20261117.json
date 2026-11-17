@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T05:59:30.865031+00:00",
-  "status": "local candidate; native decode not tested; not a baseline promotion",
-  "mesa_source_commit": "259c825dec8421d34d5e08e33b9d109d9cd89770",
+  "updated_utc": "2026-11-17T07:39:08.211678+00:00",
+  "status": "Original display/power baseline restored and native trial cleaned; decode not executed; candidate not promoted",
+  "mesa_source_commit": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
   "switchfan_hook_commit": "7ecce6c083df1f33def014445f3cacd1c3301095",
   "changes": [
     "Real KMT-device-owned decoder session in the coexisting render miniport; previous display escape preserved",
@@ -13,36 +13,44 @@
     "Existing H264 codec/parser reused; acceptance client now uses the native adapter and verifies NV12 frame hashes and session retirement"
   ],
   "candidate_components": {
-    "unsigned_tegragpurender.sys": {
-      "bytes": 236544,
-      "sha256": "acecedf6234b41127e7fa232b8013e7b0f63b2c8ec9e6a606c53c83f47fbec04"
+    "signed_kmd": {
+      "bytes": 239616,
+      "sha256": "372ec2a93c23b9744ad256bb2e7c10f70f91043272bee209bc56e31f0ea8669f"
     },
-    "unsigned_switchfan.sys": {
-      "bytes": 99328,
-      "sha256": "a51cc07b3ec5a174b70ad143f59ae503d944d511b3518ef194c80c9417dd0666"
+    "signed_switchfan": {
+      "bytes": 102400,
+      "sha256": "9e2d4826af07a82d083aca6178608d71e983dd5295a1a2175ff38e555a2df7c7"
     },
-    "candidate_acpi.dat": {
+    "candidate_acpi": {
       "bytes": 4993,
       "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
     },
-    "nvdec720-native.exe": {
-      "bytes": 94208,
-      "sha256": "664b20449aecd55929a2b85a5d41c0b2ec79b8ff8cebba2e79d07c51e0e5d83c"
+    "native_acceptance_client": {
+      "bytes": 95232,
+      "sha256": "56c7edfeeb89758cf2758dbc7a6230eebe19d25c47e2d11d9f1d8b6fae9ae006"
+    },
+    "deferred_installer": {
+      "bytes": 72192,
+      "sha256": "74fa43ecf99194729a04293154679328eeba881c3aed90f26f989a24da378669"
     }
   },
   "native_kmd_source": {
     "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
     "emc_patch_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
     "resource_client_seed": "client-route/source-inputs.json",
-    "selected_transplant_manifest_sha256": "2d59fd9345a60db0cad6a1374576360feb69ccd73beaab8e4b8e34f481fb8e4a",
-    "full_development_worktree_built_for_installation": false
+    "selected_transplant_manifest_sha256": "03834c302a01249163527c18b862f8130935226b0cb8e54cb8b2a7ae1cfe40f1",
+    "full_development_worktree_built_for_installation": false,
+    "host_mux_patch_commit": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5"
   },
   "installed_baseline": {
-    "last_authenticated_read_utc": "2026-11-17T04:14:51.7523303Z",
-    "changed_this_round": false,
+    "last_authenticated_read_utc": "2026-11-17T07:36:35.3452358Z",
+    "changed_this_round": true,
     "kmd_sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e",
     "umd_sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a",
-    "icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+    "icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff",
+    "restored": true,
+    "current_display": "90-degree1280x720 logical,720x1280 row scan",
+    "current_power": "Handheld/DFLL active; dynamic GPU and EMC; errors0"
   },
   "validation": {
     "arm64_full_kmd_build": "passed",
@@ -55,11 +63,12 @@
     "cpu_resource_mapping_and_cleanup": "passed",
     "asan_ubsan_platform_control": "passed",
     "acpi_unchanged_other_devices_and_gpu_nonresource_aml": true,
-    "native_install": false,
+    "native_install": "Candidate ACPI loaded and provider files changed; provider installer did not return; KMD never selected; original baseline restored",
     "native_host1x_clock_lease": false,
     "native_firmware_boot": false,
     "native_720p_h264": false,
-    "d3d11va_nv12_presentation": false
+    "d3d11va_nv12_presentation": false,
+    "native_provider_replacement": "live replacement interrupted; original restored with deferred public SetupAPI"
   },
   "clock_policy": {
     "candidate_nvdec_hz": 204000000,
@@ -86,13 +95,31 @@
     "mode": "main-agent self-review",
     "external_review_required": false,
     "external_review_performed": false,
-    "scope": "local source, object builds and CPU controls; native behavior pending"
+    "scope": "Main-agent source review, ARM64 builds, CPU controls and bounded installation/recovery; native decode remains untested"
   },
   "remaining": [
-    "Verify current device ownership and actual power runtime before staging; the last live observation was recovery mode7 with CPU error0xc0000483",
-    "Freeze/sign one coordinated KMD/SwitchFan/ACPI/client set and preserve exact baseline recovery",
-    "Perform actual clock lease, firmware boot and short720p H264 decode with pixel and completion evidence",
-    "Connect ordinary D3D11VA runtime firmware/input ownership and NV12 presentation; current legacy UMD probe path is not production ready",
-    "After720p acceptance, validate1080p;2K/4K remain independently retained and untested"
-  ]
+    "Validate the corrected deferred provider transition before any new candidate activation",
+    "Verify real clock lease, firmware boot, DMA route and short720p H264 output with actual completion",
+    "Connect ordinary D3D11VA runtime and NV12 presentation; no video capability advertisement yet",
+    "After720p acceptance validate1080p;2K/4K retained independently and untested"
+  ],
+  "latest_native_round": "NVDEC_PROVIDER_RECOVERY_20261117.json",
+  "superseded_local_candidate_components": {
+    "unsigned_tegragpurender.sys": {
+      "bytes": 236544,
+      "sha256": "acecedf6234b41127e7fa232b8013e7b0f63b2c8ec9e6a606c53c83f47fbec04"
+    },
+    "unsigned_switchfan.sys": {
+      "bytes": 99328,
+      "sha256": "a51cc07b3ec5a174b70ad143f59ae503d944d511b3518ef194c80c9417dd0666"
+    },
+    "candidate_acpi.dat": {
+      "bytes": 4993,
+      "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "nvdec720-native.exe": {
+      "bytes": 94208,
+      "sha256": "664b20449aecd55929a2b85a5d41c0b2ec79b8ff8cebba2e79d07c51e0e5d83c"
+    }
+  }
 }
