@@ -6,6 +6,9 @@ if(!$PairSource){$PairSource=Get-Content (Join-Path $PSScriptRoot '..\Pair.ps1')
 $tokens=$null;$errors=$null
 $ast=[Management.Automation.Language.Parser]::ParseInput($PairSource,[ref]$tokens,[ref]$errors)
 if($errors.Count){throw ($errors|Out-String)}
+$same=@($ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Same-Boot'},$true))
+if($same.Count -ne 1){throw 'Missing boot comparator'}
+. ([scriptblock]::Create($same[0].Extent.Text))
 function Branch([string]$Name){
  $found=@(foreach($n in $ast.FindAll({param($n) $n -is [Management.Automation.Language.IfStatementAst]},$true)){
   foreach($c in $n.Clauses){if($c.Item1.Extent.Text -eq ('$Action -eq '+"'"+$Name+"'")){$c.Item2}}
@@ -63,9 +66,9 @@ foreach($case in $cases){
  }
 }
 
-function Read-Boot {'same-boot'}
+function Read-Boot {'2026-11-17T00:01:00Z'}
 function Read-Json($Path){
- if($Path -eq 'pair-backup.json'){@{Boot='same-boot'}}
+ if($Path -eq 'pair-backup.json'){@{Boot='2026-11-17T00:01:00Z'}}
  elseif($Path -eq 'candidate-staging.json'){@{Package=Known-Package}}
  else{throw 'Unexpected model read'}
 }
@@ -105,7 +108,7 @@ function Read-LoadedDsdt($Path){$script:Loaded}
 function Select-Package($Directory,$Expected,$Receipt){$script:Selections++;throw 'MODEL_SELECTED_BASELINE'}
 $baseline=Branch 'SelectBaseline';$config=@{BaselineAcpi=@{Length=4848;Sha256='baseline'};BaselineKmd=@{}}
 foreach($valid in @($true,$false)){
- $state=[ordered]@{Phase='BaselineRebootRequested';Boot='previous-boot'}
+ $state=[ordered]@{Phase='BaselineRebootRequested';Boot='2026-11-17T00:00:00Z'}
  $script:Selections=0;$script:Loaded=@{Length=4848;Sha256=if($valid){'baseline'}else{'fallback'}}
  $errorText=$null;try{& $baseline}catch{$errorText=$_.Exception.Message}
  Assert ($script:Selections -eq [int]$valid) 'Restoration did not respect the loaded-table identity'
@@ -124,3 +127,6 @@ foreach($phase in @('StagingPackage','CandidateObserved')){
  }
 }
 Write-Output 'PASS: 6 package, 5 boot-handoff, 2 restoration and 2 recovery controls; native operations replaced'
+
+Assert (Same-Boot '2026-11-17T06:47:23.9484490Z' '2026-11-17T06:47:23.9527220Z') 'Observed same-boot drift was rejected'
+Assert (!(Same-Boot '2026-11-17T06:47:23Z' '2026-11-17T06:48:23Z')) 'Distinct boot was accepted as the same boot'

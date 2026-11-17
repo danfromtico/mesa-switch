@@ -52,12 +52,12 @@ function Invoke-ProviderSelection([ValidateSet('Candidate','Baseline')][string]$
  Assert-Closed;Assert-Power
  $expectedPhase=if($Which -eq 'Candidate'){'CandidateRebootRequested'}else{'BaselineRebootRequested'}
  $acpi=if($Which -eq 'Candidate'){$config.CandidateAcpi}else{$config.BaselineAcpi}
- if(!$state -or $state.Phase -ne $expectedPhase -or (Read-Boot) -eq $state.Boot){throw 'Provider selection requires the completed gated boot'}
+ if(!$state -or $state.Phase -ne $expectedPhase -or (Same-Boot (Read-Boot) $state.Boot)){throw 'Provider selection requires the completed gated boot'}
  Assert-LoadedDsdt (Read-LoadedDsdt (Join-Path $root ('loaded-provider-'+$Which+'.dat'))) $acpi
  $receipt=Join-Path $root ('provider-'+$Which.ToLowerInvariant()+'-selection.json');$expected=$config.Provider.$Which
  if(Test-Path $receipt) {
   $r=Read-Json $receipt
-  if($r.Phase -eq 'RebootRequired' -and $r.RestartRequested -and (Read-Boot) -ne $r.Boot) {
+  if($r.Phase -eq 'RebootRequired' -and $r.RestartRequested -and !(Same-Boot (Read-Boot) $r.Boot)) {
    Assert-File "$env:windir\System32\drivers\switchfan.sys" $expected
    if((Provider-Property 'ProblemCode') -ne 0){throw 'Provider did not start after the required boot'}
    $r.Phase='SelectedAfterBoot';Write-ActivationJson $receipt $r
@@ -117,7 +117,7 @@ function Invoke-ProviderAction([string]$Operation) {
   Assert-Closed;Assert-Power
   $which=if($state.Phase -eq 'CandidateRebootRequested'){'candidate'}elseif($state.Phase -eq 'BaselineRebootRequested'){'baseline'}else{throw 'Unexpected provider-restart phase'}
   $path=Join-Path $root ('provider-'+$which+'-selection.json');$r=Read-Json $path
-  if($r.Phase -ne 'RebootRequired' -or !$r.RebootRequired -or $r.RestartRequested -or (Read-Boot) -ne $r.Boot){throw 'No new provider restart is eligible'}
+  if($r.Phase -ne 'RebootRequired' -or !$r.RebootRequired -or $r.RestartRequested -or !(Same-Boot (Read-Boot) $r.Boot)){throw 'No new provider restart is eligible'}
   $r.RestartRequested=$true;Write-ActivationJson $path $r
   & shutdown.exe /r /t 10 /d p:0:0 /c 'Complete the recorded clock-provider package transition'
   if($LASTEXITCODE){throw 'Provider restart was rejected'}

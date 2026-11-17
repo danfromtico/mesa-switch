@@ -33,6 +33,13 @@ function Durable-Copy([string]$From,[string]$To){
 }
 function Task-Root {$s=New-Object -ComObject Schedule.Service;$s.Connect();$s.GetFolder('\')}
 function Read-Boot { (Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o') }
+function Same-Boot([string]$A,[string]$B) {
+ if(!$A -or !$B){throw 'Missing boot identity'}
+ # CIM boot timestamps on this system vary by milliseconds in one boot.
+ # Match the existing activation/recovery tolerance; a policy change is not
+ # permission to call the installer or request another reboot again.
+ [Math]::Abs(([DateTime]::Parse($A)-[DateTime]::Parse($B)).TotalSeconds) -le 2
+}
 function Assert-Input {
  foreach($entry in $config.InputFiles.PSObject.Properties){Assert-File (Join-Path $root $entry.Name) $entry.Value}
  $verified=Read-Json (Join-Path $root 'signature-result.json')
@@ -289,7 +296,7 @@ try {
   if(!$state -or $state.Phase -ne 'Prepared'){throw 'Expected a prepared, never-staged pair'}
   Assert-RetainedFiles -Baseline;Assert-Power
   $backup=Read-Json (Join-Path $root 'pair-backup.json')
-  if((Read-Boot) -ne $backup.Boot -or (Device-Property 'ProblemCode') -ne 0){throw 'Prepared native state changed'}
+  if(!(Same-Boot (Read-Boot) $backup.Boot) -or (Device-Property 'ProblemCode') -ne 0){throw 'Prepared native state changed'}
   if(!$state.PackageStaged){throw 'StagePackage must finish before changing the boot table'}
   $receipt=Read-Json (Join-Path $root 'candidate-staging.json')
   $staged=Find-StagedCandidate
@@ -303,7 +310,7 @@ try {
   if($LASTEXITCODE){throw 'Planned restart was rejected'}
  }
  elseif($Action -eq 'SelectCandidate') {
-  if(!$state -or $state.Phase -ne 'CandidateRebootRequested' -or (Read-Boot) -eq $state.Boot){throw 'Expected the completed candidate ACPI boot'}
+  if(!$state -or $state.Phase -ne 'CandidateRebootRequested' -or (Same-Boot (Read-Boot) $state.Boot)){throw 'Expected the completed candidate ACPI boot'}
   if($config.Provider){Assert-ProviderSelected 'Candidate'}
   Assert-RetainedFiles;Assert-Power
   Assert-File "$env:windir\System32\acpitabl.dat" $config.CandidateAcpi
@@ -339,7 +346,7 @@ try {
   $null=(Task-Root).GetTask('Tgd3dDefaultEnable').Run($null)
  }
  elseif($Action -eq 'FinishCandidate') {
-  if(!$state -or $state.Phase -ne 'CandidateActivationRequested' -or (Read-Boot) -ne $state.ActivationBoot){throw 'Unexpected activation state or boot'}
+  if(!$state -or $state.Phase -ne 'CandidateActivationRequested' -or !(Same-Boot (Read-Boot) $state.ActivationBoot)){throw 'Unexpected activation state or boot'}
   $a=Read-Json (Join-Path $candidate 'default-state.json')
   if($a.Status -ne 'Enabled' -or (Test-Path (Join-Path $candidate 'default-attempt.json')) -or (Device-Property 'ProblemCode') -ne 0){throw 'Candidate activation has not completed'}
   Assert-RetainedFiles;Assert-File "$env:windir\System32\drivers\tegragpurender.sys" $config.CandidateKmd;Assert-File "$env:windir\System32\acpitabl.dat" $config.CandidateAcpi
@@ -374,7 +381,7 @@ try {
   if($LASTEXITCODE){throw 'Recovery restart was rejected'}
  }
  elseif($Action -eq 'SelectBaseline') {
-  if(!$state -or $state.Phase -ne 'BaselineRebootRequested' -or (Read-Boot) -eq $state.Boot){throw 'Expected completed recovery ACPI boot'}
+  if(!$state -or $state.Phase -ne 'BaselineRebootRequested' -or (Same-Boot (Read-Boot) $state.Boot)){throw 'Expected completed recovery ACPI boot'}
   Assert-Closed;Assert-File "$env:windir\System32\acpitabl.dat" $config.BaselineAcpi
   Assert-LoadedDsdt (Read-LoadedDsdt (Join-Path $root 'loaded-before-baseline-selection.dat')) $config.BaselineAcpi
   if($config.Provider){Assert-ProviderSelected 'Baseline'}
@@ -386,7 +393,7 @@ try {
   $null=(Task-Root).GetTask('Tgd3dDefaultEnable').Run($null)
  }
  elseif($Action -eq 'FinishBaseline') {
-  if(!$state -or $state.Phase -ne 'BaselineActivationRequested' -or (Read-Boot) -ne $state.ActivationBoot){throw 'Unexpected recovery activation state'}
+  if(!$state -or $state.Phase -ne 'BaselineActivationRequested' -or !(Same-Boot (Read-Boot) $state.ActivationBoot)){throw 'Unexpected recovery activation state'}
   $a=Read-Json (Join-Path $active 'default-state.json')
   if($a.Status -ne 'Enabled' -or (Test-Path (Join-Path $active 'default-attempt.json')) -or (Device-Property 'ProblemCode') -ne 0){throw 'Baseline activation has not completed'}
   Assert-RetainedFiles -Baseline

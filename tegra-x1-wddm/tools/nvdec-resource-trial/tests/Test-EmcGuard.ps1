@@ -6,8 +6,8 @@ if(!$PairSource){$PairSource=Get-Content (Join-Path $PSScriptRoot '..\Pair.ps1')
 $tokens=$null;$errors=$null
 $ast=[Management.Automation.Language.Parser]::ParseInput($PairSource,[ref]$tokens,[ref]$errors)
 if($errors.Count){throw ($errors|Out-String)}
-$functions=@($ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -in @('Assert-EmcReady','Assert-LoadedDsdt')},$true))
-if($functions.Count -ne 2){throw 'Missing EMC/loaded-table gates'}
+$functions=@($ast.FindAll({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -in @('Assert-EmcReady','Assert-LoadedDsdt','Same-Boot')},$true))
+if($functions.Count -ne 3){throw 'Missing EMC/loaded-table gates'}
 foreach($f in $functions){. ([scriptblock]::Create($f.Extent.Text))}
 $branches=@(foreach($n in $ast.FindAll({param($n) $n -is [Management.Automation.Language.IfStatementAst]},$true)){
  foreach($clause in $n.Clauses){if($clause.Item1.Extent.Text -match '^\$Action\s+-eq\s+''SelectCandidate''$'){$clause.Item2}}
@@ -18,7 +18,7 @@ $selection=[scriptblock]::Create($text.Substring(1,$text.Length-2))
 
 # These replace every command reached before Select-Package. Selection itself
 # throws a sentinel, so later native activation code can never execute here.
-function Read-Boot {'after'}
+function Read-Boot {'2026-11-17T00:01:00Z'}
 function Device-Property([string]$Name){43}
 function Assert-RetainedFiles {}
 function Assert-Power {}
@@ -78,7 +78,7 @@ foreach($case in $cases){
   'absent-device' {$script:Present=$false}
  }
  $script:Selections=0;$script:Snapshots=@{};$script:SavedPhases=@()
- $state=[ordered]@{Phase='CandidateRebootRequested';Boot='before'}
+ $state=[ordered]@{Phase='CandidateRebootRequested';Boot='2026-11-17T00:00:00Z'}
  $message=$null
  try{& $selection}catch{$message=$_.Exception.Message}
  Assert ($null -ne $message) ($case+': expected a rejection or selection sentinel')
@@ -117,7 +117,7 @@ foreach($case in $afterCases){
   'wrong-table' {$script:LoadedDsdt.Sha256='firmware-fallback'}
  }
  $script:Queries=0;$script:Snapshots=@{};$script:SavedPhases=@()
- $state=[ordered]@{Phase='CandidateActivationRequested';ActivationBoot='after'}
+ $state=[ordered]@{Phase='CandidateActivationRequested';ActivationBoot='2026-11-17T00:01:00Z'}
  $message=$null;try{& $finish}catch{$message=$_.Exception.Message}
  Assert ($script:Snapshots.ContainsKey('after-candidate-activation.json')) ($case+': missing active observation')
  if($case -eq 'healthy'){
