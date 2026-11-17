@@ -21,6 +21,7 @@ static struct model {
     uint32_t pmc[0x1000/4], car[0x1000/4], mc[0x1000/4];
     uint32_t host[0x40000/4], nvdec[0x40000/4];
     uint32_t *push;
+    uint32_t push_bytes;
     unsigned writes, pmc_writes, host_writes, mbist_writes, global_clock_writes;
     unsigned acquire_calls, release_calls, status_reads;
     bool held, acquire_fail, release_fail, source_fail, gate_clear_fail;
@@ -85,9 +86,10 @@ static void model_write(void *ctx, enum tg_nvdec_aperture ap, uint32_t off, uint
     if (ap == TG_NVDEC_AP_HOST1X && off == CH_BASE + 0x18 && v == 16u) {
         uint64_t start = m.host[(CH_BASE+0x14)/4];
         uint64_t end = m.host[(CH_BASE+0x20)/4];
-        /* DMASTART/END delimit physical addresses; PUT is a ring offset.
-         * An invalid physical span cannot fetch this published gather. */
-        if (end <= start || start + v > end) { CHECK(false); return; }
+        /* END bounds the offset/prefetch space, not an absolute address.
+         * The modeled allocation must cover it before completion is modeled. */
+        if (end < v || end > m.push_bytes ||
+            start + end > UINT64_C(0x100000000)) { CHECK(false); return; }
         CHECK(m.push && m.push[3] == 0x20000000u);
         if (!m.submit_hang) ++m.host[SYNC_OFFSET/4];
     }
@@ -143,7 +145,7 @@ static void test_inherited_and_submit(void)
 {
     struct tg_nvdec_platform p = {0};
     uint32_t gather[8] = {0}, push[16 * 1024 + 2] = {0}, expected = 0, observed = 0;
-    prepare(); m.push = push;
+    prepare(); m.push = push; m.push_bytes = 16u * 1024u + 4u;
     /* Preserve the unrelated stopped channel observed on the native board. */
     m.host[0]=0x80100840u; m.host[0x18/4]=0; m.host[0x1c/4]=0x21d84cf0u; m.host[0x24/4]=1;
     m.host[0x21ac/4]=1u; /* another channel's command-processor stop bit */
@@ -157,7 +159,7 @@ static void test_inherited_and_submit(void)
     CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
           push, 0x80000000, 16u * 1024u, 100, &expected, &observed) == TG_NVDEC_PLATFORM_OK);
     CHECK(expected == 1 && observed == 1 && push[0] == 0x3c00 && push[1] == 0x60000005);
-    CHECK(m.host[(CH_BASE+0x20)/4] == 0x80004004u);
+    CHECK(m.host[(CH_BASE+0x20)/4] == 0x4004u);
     CHECK(push[3] == 0x20000000 && push[4096] == 0x50000000);
     m.submit_hang = true;
     CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
@@ -217,17 +219,19 @@ static void test_push_address_boundary(void)
 {
     struct tg_nvdec_platform p = {0};
     uint32_t gather[8] = {0}, push[16] = {0}, expected = 0, observed = 0;
-    prepare(); m.push = push;
+    prepare(); m.push = push; m.push_bytes = sizeof(push);
     CHECK(start(&p) == TG_NVDEC_PLATFORM_OK);
     unsigned writes = m.writes;
-    /* The exclusive end itself is a32-bit register. Exactly2^32 must not
-     * wrap to zero even though every allocated data byte would fit. */
+    /* The physical span may end exactly at2^32, but not cross it. END
+     * itself is the small relative offset and must not wrap to zero. */
     CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
-          push, 0xffffffe0u, 28, 1, &expected, &observed) == TG_NVDEC_PLATFORM_ARGUMENT);
+          push, 0xffffffe0u, 32, 1, &expected, &observed) == TG_NVDEC_PLATFORM_ARGUMENT);
+    CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
+          push, 0, 0xfffffffcu, 1, &expected, &observed) == TG_NVDEC_PLATFORM_ARGUMENT);
     CHECK(m.writes == writes && !expected && !observed);
     CHECK(tg_nvdec_host1x_submit(&io, &p, gather, 5, 0x90000000,
-          push, 0xffffffe0u, 24, 1, &expected, &observed) == TG_NVDEC_PLATFORM_OK);
-    CHECK(m.host[(CH_BASE+0x14)/4] == 0xffffffe0u && m.host[(CH_BASE+0x20)/4] == 0xfffffffcu);
+          push, 0xffffffe0u, 28, 1, &expected, &observed) == TG_NVDEC_PLATFORM_OK);
+    CHECK(m.host[(CH_BASE+0x14)/4] == 0xffffffe0u && m.host[(CH_BASE+0x20)/4] == 32u);
     CHECK(tg_nvdec_platform_shutdown(&io, &p) == TG_NVDEC_PLATFORM_OK);
     retained_boot_state();
 }

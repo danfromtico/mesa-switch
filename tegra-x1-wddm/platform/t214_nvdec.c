@@ -397,7 +397,8 @@ enum tg_nvdec_platform_result tg_nvdec_host1x_submit(
         push_size < 16u || (push_size & 3u) || (gather_bus & 3u) ||
         (push_bus & 15u) || (gather_bus >> 32) || (push_bus >> 32) ||
         (uint64_t)words * 4u > UINT64_C(0x100000000) - gather_bus ||
-        (uint64_t)push_size + 4u > UINT64_C(0xffffffff) - push_bus ||
+        (uint64_t)push_size + 4u > UINT32_MAX ||
+        (uint64_t)push_size + 4u > UINT64_C(0x100000000) - push_bus ||
         !expected || !observed)
         return TG_NVDEC_PLATFORM_ARGUMENT;
     if (!p->active || !p->host1x_clock || !p->nvdec_clock || p->quiesced ||
@@ -423,10 +424,12 @@ enum tg_nvdec_platform_result tg_nvdec_host1x_submit(
     w32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMASTART,
         (uint32_t)push_bus);
     w32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMAPUT, 0);
-    /* Host1x05 START/END are physical addresses; PUT/GET are ring offsets.
-     * END includes the wrap word and must itself fit the32-bit register. */
+    /* DMAEND is relative to DMASTART, including the wrap word. The old
+     * upstream absolute-address interpretation was corrected by Linux
+     * 0e43b8da154a95f4369da4068a43ad9d700f4cea; it could permit prefetch
+     * beyond the mapped push buffer. */
     w32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMAEND,
-        (uint32_t)(push_bus + push_size + 4u));
+        push_size + 4u);
     w32(io, TG_NVDEC_AP_HOST1X, base + HOST1X_CHANNEL_DMACTRL,
         HOST1X_DMACTRL_STOP | HOST1X_DMACTRL_GETRST | HOST1X_DMACTRL_INITGET);
     value = r32(io, TG_NVDEC_AP_HOST1X, HOST1X_CMDPROC_STOP);
