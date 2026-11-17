@@ -32,9 +32,11 @@ function Test-Path($Path){$script:Saved.ContainsKey($Path)}
 function Read-Json($Path){if(!$script:Saved.ContainsKey($Path)){throw 'MODEL_MISSING_RECEIPT'};$script:Saved[$Path]}
 function File-Record($Path){$script:File}
 function Assert-File($Path,$Expected){
- if($Path -like '*\INF\*'){Assert $script:RegistrationValid 'MODEL_INF'}
+ if($Path -like '*acpitabl.dat'){Assert ($script:Loaded -eq $Expected) 'MODEL_DISK_TABLE'}
+ elseif($Path -like '*\INF\*'){Assert $script:RegistrationValid 'MODEL_INF'}
  else{Assert ($script:File.Sha256 -eq $Expected.Sha256) 'MODEL_FILE'}
 }
+function Assert-ProviderLoadedImage($Which){Assert $script:LiveMatches 'MODEL_LOADED_IMAGE'}
 function Read-LoadedDsdt($Path){$script:Loaded}
 function Assert-LoadedDsdt($Actual,$Expected){Assert ($Actual -eq $Expected) 'MODEL_TABLE'}
 function Known-Store {@{Directory='store';PublishedInf='oem0.inf'}}
@@ -50,6 +52,7 @@ function Reset {
  $script:File=@{Sha256='old';Length=10};$script:Loaded='new-table'
  $script:Calls=0;$script:HelperExit=0;$script:HelperThrows=$false
  $script:RegistrationValid=$true
+ $script:LiveMatches=$true
  $script:HelperOutput='RESULT=STAGED_FOR_REBOOT live driver identity is not verified'
 }
 $root='model';$config=@{CandidateAcpi='new-table';BaselineAcpi='old-table';Provider=@{Candidate=@{Sha256='new';Length=20};Baseline=@{Sha256='old';Length=10}}}
@@ -98,11 +101,34 @@ foreach($case in @('wrong-table','open-gate','select','reboot','failed','missing
   try{Invoke-ProviderSelection 'Candidate'}catch{$wrongInf=$_.Exception.Message}
   Assert ($wrongInf -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'RebootRequired' -and $script:Calls -eq 1) 'Mixed INF/SYS identity was accepted'
   $script:RegistrationValid=$true
+  $script:LiveMatches=$false;$wrongLive=$null
+  try{Invoke-ProviderSelection 'Candidate'}catch{$wrongLive=$_.Exception.Message}
+  Assert ($wrongLive -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'RebootRequired' -and $script:Calls -eq 1) 'Disk identity without loaded-image identity was accepted'
+  $script:Saved['provider-loaded-candidate.json']=@{Observations=@(@{Boot=$script:Boot;Phase='Mismatch';MatchesOther=$true;Target=$config.Provider.Candidate})}
+  Invoke-ProviderAction 'ProviderLoadRestart'
+  Assert ($script:Restarts -eq 2 -and $script:Calls -eq 1) 'Known loaded-image mismatch did not get exactly one reconciliation boot'
+  $duplicate=$null;try{Invoke-ProviderAction 'ProviderLoadRestart'}catch{$duplicate=$_.Exception.Message}
+  Assert ($duplicate -and $script:Restarts -eq 2) 'Loaded-image reconciliation boot repeated'
+  $script:Boot='2026-11-17T00:03:00Z';$script:LiveMatches=$true
   Invoke-ProviderSelection 'Candidate'
   Assert ($script:Calls -eq 1 -and $script:Saved['provider-candidate-selection.json'].Phase -eq 'SelectedAfterBoot') 'Selection repeated after required restart'
  }
 }
+foreach($case in @('missing','stale','unknown','wrong-target','unrebooted','wrong-disk')) {
+ Reset;$state=[ordered]@{Phase='CandidateRebootRequested';Boot='2026-11-17T00:00:00Z'}
+ $script:File=$config.Provider.Candidate;$script:Boot='2026-11-17T00:02:00Z'
+ $script:Saved['provider-candidate-selection.json']=@{Phase='RebootRequired';RestartRequested=$true;Boot='2026-11-17T00:01:00Z'}
+ $ob=@{Boot=$script:Boot;Phase='Mismatch';MatchesOther=$true;Target=$config.Provider.Candidate}
+ if($case -eq 'stale'){$ob.Boot='2026-11-17T00:01:00Z'}
+ if($case -eq 'unknown'){$ob.MatchesOther=$false}
+ if($case -eq 'wrong-target'){$ob.Target=$config.Provider.Baseline}
+ if($case -eq 'unrebooted'){$script:Boot='2026-11-17T00:01:00Z'}
+ if($case -eq 'wrong-disk'){$script:File=$config.Provider.Baseline}
+ if($case -ne 'missing'){$script:Saved['provider-loaded-candidate.json']=@{Observations=@($ob)}}
+ $bad=$null;try{Invoke-ProviderAction 'ProviderLoadRestart'}catch{$bad=$_.Exception.Message}
+ Assert ($bad -and !$script:Restarts -and !$script:Calls) ('Unproven loaded-image restart permitted: '+$case)
+}
 Reset;$state=[ordered]@{Phase='BaselineRebootRequested';Boot='2026-11-17T00:00:00Z'};$script:Loaded='old-table'
 Invoke-ProviderSelection 'Baseline'
 Assert ($script:Calls -eq 0) 'Original provider was unnecessarily reinstalled'
-'PASS: provider staging, deferred replacement, failed/incomplete-operation guards, loaded-table gating and bounded recovery restart (CPU only)'
+'PASS: provider staging, deferred replacement, loaded-image gating, known-mismatch recovery and duplicate/unknown restart rejection (CPU only)'

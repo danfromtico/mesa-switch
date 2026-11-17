@@ -21,7 +21,32 @@ and SHA256 must be in `InputFiles`. It selects the exact compatible signed INF
 with public SetupAPI `DI_DONOTCALLCONFIGMG | DI_NEEDREBOOT` flags. Every changed
 provider requires a boot; a successful copy and Code0 do not verify the loaded
 image. `ProviderRestart` can request that boot once; rerun `SelectProvider`
-afterward to verify the result without installing again. `FinishCandidate` still only queries resource
+afterward to verify the result without installing again. The native
+2026-11-17 round demonstrated that this first boot can still run the previous
+image even though the disk SYS and selected INF already match the target.
+Both candidate selection and recovery now require `loaded-image-identity.exe`
+from `../loaded_image_identity.c`, with its complete length/SHA256 in
+`InputFiles`. It records a short, uniquely named system-logger session containing only
+image events, stops it, and reads the public ETW/TDH image rundown. The loaded
+provider's PE checksum, timestamp and image size must match the independently
+hashed package; these fields are not a cryptographic hash of kernel memory.
+The paired images must be distinguishable by these fields.
+
+`provider-loaded-{candidate,baseline}.json` retains observations per boot.
+Missing events, lost events, helper failure or an unknown image stop selection.
+An interrupted observation must be inspected rather than rerun in the same
+boot. Only a recorded mismatch with the known other package permits the
+explicit `ProviderLoadRestart` action, once, with GPU startup closed. It does
+not reinstall a driver. Rerun the appropriate provider selection after that
+boot; a persistent mismatch cannot trigger another reconciliation restart.
+The image checker uses Microsoft's [image rundown schema](https://learn.microsoft.com/en-us/windows/win32/etw/image-load)
+and [system logger flags](https://learn.microsoft.com/en-us/windows/win32/etw/event-trace-properties).
+Build with LLVM-MinGW:
+`aarch64-w64-mingw32-clang -std=c11 -O2 -Wall -Wextra -Werror -static -municode ../loaded_image_identity.c -ladvapi32 -ltdh -lole32 -o loaded-image-identity.exe`.
+Archive the small identity receipts and remove the temporary ETL files with
+the trial directory after recovery.
+
+`FinishCandidate` still only queries resource
 state. The bounded decoder program is a separate, explicit subsequent action.
 
 Recovery is symmetric: `Recover` loads the original DSDT with GPU startup

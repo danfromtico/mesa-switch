@@ -2,7 +2,7 @@
 # Bounded KMD/ACPI trial with an optional paired clock provider. This controller
 # does not submit decode work. Retain the installed activation/userspace pair.
 param([Parameter(Mandatory=$true)]
- [ValidateSet('Prepare','StagePackage','StageProviderPackage','StageCandidate','SelectProvider','ProviderRestart','SelectCandidate','FinishCandidate','Recover','SelectOriginalProvider','SelectBaseline','FinishBaseline','Inspect')]
+ [ValidateSet('Prepare','StagePackage','StageProviderPackage','StageCandidate','SelectProvider','ProviderRestart','ProviderLoadRestart','SelectCandidate','FinishCandidate','Recover','SelectOriginalProvider','SelectBaseline','FinishBaseline','Inspect')]
  [string]$Action)
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
@@ -400,7 +400,7 @@ try {
   Assert-LoadedDsdt (Read-LoadedDsdt (Join-Path $root 'loaded-restored-dsdt.dat')) $config.BaselineAcpi
   $state.Phase='Restored';$state.End=[DateTime]::UtcNow.ToString('o');Save-State $state
  }
- elseif($Action -in @('StageProviderPackage','SelectProvider','SelectOriginalProvider','ProviderRestart')) {
+ elseif($Action -in @('StageProviderPackage','SelectProvider','SelectOriginalProvider','ProviderRestart','ProviderLoadRestart')) {
   if(!$config.Provider){throw 'No paired provider in this candidate'}
   Invoke-ProviderAction $Action
  }

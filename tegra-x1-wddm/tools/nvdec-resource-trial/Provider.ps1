@@ -14,9 +14,69 @@ function Assert-ProviderPackageIdentity([ValidateSet('Candidate','Baseline')][st
 }
 function Assert-ProviderSelected([ValidateSet('Candidate','Baseline')][string]$Which) {
  Assert-ProviderPackageIdentity $Which
+ Assert-ProviderLoadedImage $Which
  if($Which -eq 'Candidate') {
   $r=Read-Json (Join-Path $root 'provider-candidate-selection.json')
   if($r.Phase -notin @('Selected','SelectedAfterBoot')){throw 'Candidate provider selection is incomplete'}
+ }
+}
+function Read-ProviderPeIdentity([string]$Path) {
+ $b=[IO.File]::ReadAllBytes($Path)
+ if($b.Length -lt 256 -or [BitConverter]::ToUInt16($b,0) -ne 0x5a4d){throw 'Invalid provider PE header'}
+ [long]$pe=[BitConverter]::ToUInt32($b,60)
+ if($pe -gt $b.Length-112 -or [BitConverter]::ToUInt32($b,$pe) -ne 0x4550 -or [BitConverter]::ToUInt16($b,$pe+4) -ne 0xaa64 -or [BitConverter]::ToUInt16($b,$pe+24) -ne 0x20b){throw 'Provider must be an ARM64 PE32+ image'}
+ @{checksum=[BitConverter]::ToUInt32($b,$pe+88);timestamp=[BitConverter]::ToUInt32($b,$pe+8);image_size=[BitConverter]::ToUInt32($b,$pe+80)}
+}
+function Get-ProviderLoadedObservation([string]$Which) {
+ $path=Join-Path $root ('provider-loaded-'+$Which.ToLowerInvariant()+'.json')
+ if(Test-Path $path){$h=Read-Json $path;if(@($h.Observations).Count){return @($h.Observations)[-1]}}
+ return $null
+}
+function Assert-ProviderLoadedImage([ValidateSet('Candidate','Baseline')][string]$Which) {
+ # Deferred copying can finish after the old image has already loaded. A disk
+ # hash, selected INF and one boot therefore do not establish the live image.
+ $tool=Join-Path $root 'loaded-image-identity.exe';$expected=$config.InputFiles.'loaded-image-identity.exe'
+ if(!$expected){throw 'A hashed ETW image-rundown helper is required'}
+ Assert-File $tool $expected
+ $path=Join-Path $root ('provider-loaded-'+$Which.ToLowerInvariant()+'.json');$boot=Read-Boot
+ $history=@();if(Test-Path $path){$history=@((Read-Json $path).Observations)}
+ $last=Get-ProviderLoadedObservation $Which
+ if($last -and (Same-Boot $last.Boot $boot)) {
+  if($last.Phase -ne 'Verified' -or $last.Target.Sha256 -ne $config.Provider.$Which.Sha256 -or $last.Tool.Sha256 -ne $expected.Sha256){throw ('Loaded provider observation is incomplete or mismatched: '+$path)}
+  return
+ }
+ $directory=if($Which -eq 'Candidate'){'provider'}else{'baseline-fan'}
+ $other=if($Which -eq 'Candidate'){'baseline-fan'}else{'provider'}
+ $want=Read-ProviderPeIdentity (Join-Path $root ($directory+'\switchfan.sys'))
+ $alternate=Read-ProviderPeIdentity (Join-Path $root ($other+'\switchfan.sys'))
+ if($want.checksum -eq $alternate.checksum -and $want.timestamp -eq $alternate.timestamp -and $want.image_size -eq $alternate.image_size){throw 'Paired images cannot be distinguished by ETW PE identity'}
+ $etl=Join-Path $root ('provider-loaded-'+$Which.ToLowerInvariant()+'-'+[Guid]::NewGuid().ToString('N')+'.etl')
+ $r=[ordered]@{Begin=[DateTime]::UtcNow.ToString('o');Boot=$boot;Phase='Running';Target=$config.Provider.$Which;ExpectedPe=$want;Tool=$expected;Etl=$etl;MatchesOther=$false}
+ $history+=@($r);Write-ActivationJson $path @{Observations=$history}
+ $process=[Diagnostics.Process]::new()
+ try {
+  $process.StartInfo.FileName=$tool;$process.StartInfo.Arguments='"'+$etl+'"'
+  $process.StartInfo.UseShellExecute=$false;$process.StartInfo.CreateNoWindow=$true
+  $process.StartInfo.RedirectStandardOutput=$true;$process.StartInfo.RedirectStandardError=$true
+  $null=$process.Start();$r.ProcessId=$process.Id;Write-ActivationJson $path @{Observations=$history}
+  $stdout=$process.StandardOutput.ReadToEndAsync();$stderr=$process.StandardError.ReadToEndAsync()
+  if(!$process.WaitForExit(20000)){$r.Phase='ObservationExpired';throw 'Image rundown still running; inspect process and session before any retry'}
+  $r.Exit=$process.ExitCode;$r.Stdout=$stdout.Result;$r.Stderr=$stderr.Result
+  if($r.Exit){throw ('Image rundown failed: '+$r.Exit)}
+  $rows=@($r.Stdout -split '\r?\n'|Where-Object {$_}|ForEach-Object {$_|ConvertFrom-Json}|Where-Object image -eq 'switchfan.sys')
+  if(!$rows.Count -or @($rows|Where-Object {$_.pid -ne 0 -or $_.opcode -notin @(3,4)}).Count){throw 'Missing or ambiguous kernel provider image rundown'}
+  $r.Images=$rows
+  $different=@($rows|Where-Object {$_.checksum -ne $want.checksum -or $_.timestamp -ne $want.timestamp -or $_.image_size -ne $want.image_size})
+  $r.MatchesOther=@($rows|Where-Object {$_.checksum -ne $alternate.checksum -or $_.timestamp -ne $alternate.timestamp -or $_.image_size -ne $alternate.image_size}).Count -eq 0
+  $r.EtlFile=File-Record $etl
+  if(!(Same-Boot (Read-Boot) $boot)){throw 'Boot changed during image rundown'}
+  if($different.Count){$r.Phase='Mismatch';throw 'Disk provider and loaded image differ; no decode or baseline promotion permitted'}
+  $r.Phase='Verified'
+ } catch {
+  if($r.Phase -eq 'Running'){$r.Phase='Failed'}
+  $r.Error=$_.Exception.Message;throw
+ } finally {
+  $process.Dispose();$r.End=[DateTime]::UtcNow.ToString('o');Write-ActivationJson $path @{Observations=$history}
  }
 }
 function Find-ProviderStore {
@@ -77,6 +137,7 @@ function Invoke-ProviderSelection([ValidateSet('Candidate','Baseline')][string]$
   $r=Read-Json $receipt
   if($r.Phase -eq 'RebootRequired' -and $r.RestartRequested -and !(Same-Boot (Read-Boot) $r.Boot)) {
    Assert-ProviderPackageIdentity $Which
+   Assert-ProviderLoadedImage $Which
    $r.Phase='SelectedAfterBoot';Write-ActivationJson $receipt $r
   } elseif($r.Phase -notin @('Selected','SelectedAfterBoot')){throw 'Provider selection was already attempted; inspect its receipt'}
   Assert-ProviderSelected $Which;return
@@ -87,6 +148,7 @@ function Invoke-ProviderSelection([ValidateSet('Candidate','Baseline')][string]$
  Write-ActivationJson $receipt $r
  if($r.Before.Sha256 -eq $expected.Sha256 -and (Provider-Property 'ProblemCode') -eq 0) {
   Assert-ProviderPackageIdentity $Which
+  Assert-ProviderLoadedImage $Which
   $r.Phase='Selected';$r.Reused=$true;Write-ActivationJson $receipt $r;return
  }
  try {
@@ -137,5 +199,23 @@ function Invoke-ProviderAction([string]$Operation) {
   $r.RestartRequested=$true;Write-ActivationJson $path $r
   & shutdown.exe /r /t 10 /d p:0:0 /c 'Complete the recorded clock-provider package transition'
   if($LASTEXITCODE){throw 'Provider restart was rejected'}
+ } elseif($Operation -eq 'ProviderLoadRestart') {
+  # A second boot is eligible only after a successful deferred install, an
+  # actual first boot, and ETW proof that the known other image remains loaded.
+  # Never repeat installation or infer this transition from an SSH timeout.
+  Assert-Closed;Assert-Power
+  $which=if($state.Phase -eq 'CandidateRebootRequested'){'Candidate'}elseif($state.Phase -eq 'BaselineRebootRequested'){'Baseline'}else{throw 'Unexpected loaded-image recovery phase'}
+  $selection=Read-Json (Join-Path $root ('provider-'+$which.ToLowerInvariant()+'-selection.json'))
+  $observed=Get-ProviderLoadedObservation $which;$boot=Read-Boot
+  if($selection.Phase -ne 'RebootRequired' -or !$selection.RestartRequested -or (Same-Boot $boot $selection.Boot)){throw 'No completed deferred-install boot to reconcile'}
+  if(!$observed -or $observed.Phase -ne 'Mismatch' -or !$observed.MatchesOther -or !(Same-Boot $boot $observed.Boot) -or $observed.Target.Sha256 -ne $config.Provider.$which.Sha256){throw 'No current known-image mismatch proves another boot is needed'}
+  Assert-ProviderPackageIdentity $which
+  $acpi=if($which -eq 'Candidate'){$config.CandidateAcpi}else{$config.BaselineAcpi}
+  Assert-File "$env:windir\System32\acpitabl.dat" $acpi
+  $receipt=Join-Path $root ('provider-'+$which.ToLowerInvariant()+'-load-restart.json')
+  if(Test-Path $receipt){throw 'Loaded-image reconciliation boot already requested; inspect, do not repeat'}
+  Write-ActivationJson $receipt @{Utc=[DateTime]::UtcNow.ToString('o');Boot=$boot;Observation=$observed;RestartRequested=$true;DriversInstalled=$false}
+  & shutdown.exe /r /t 10 /d p:0:0 /c 'Complete provider image replacement verified by ETW'
+  if($LASTEXITCODE){throw 'Loaded-image recovery restart rejected'}
  } else {throw 'Unknown provider action'}
 }
