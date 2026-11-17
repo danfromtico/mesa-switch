@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T11:01:35.6551590Z",
-  "state": "Verified loaded provider admitted the real Host1x lease. The inherited163.2MHz route exceeded the prior102MHz predicate. No firmware/DMA/frames executed. Original baseline restored and cleaned; core-floor correction built locally, native acceptance pending.",
+  "updated_utc": "2026-11-17T11:58:28.8182205Z",
+  "state": "Native core-floor query and163.2MHz clock admission passed at1050000uV. Host1x ownership preflight rejected before backend/firmware/DMA;0frames. Original90-degree display/power baseline restored and cleaned. Exact-predicate diagnostic KMD built locally, not installed;720p/1080p acceptance open.",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
     "active_sequence": [
@@ -193,9 +193,9 @@
     "clock_native_result": "NVDEC_CLOCK_NATIVE_20261117.json"
   },
   "remaining": [
-    "Sign and stage the paired ab2a23a9 KMD/provider candidate, verify the actually loaded provider and query the existing core owner, then perform one bounded native720 H.264 call.",
-    "Complete real NVDEC firmware/DMA/output and retirement before wiring the selected D3D11VA/NV12/window path; capture actual video DDI negotiation before extending an interface.",
-    "Accept720p before1080p.2K/4K remain existing independent implementation, untested and undecided. Retain fixed90 display and power policy."
+    "Sign the0a0a1670 diagnostic KMD, paired with the unchanged0453418e ABI2 provider and9eb6a7e1 resource table. Capture the first failed Host1x condition and raw register values in one bounded native720 call.",
+    "Resolve the demonstrated ownership contract without clearing shared channels or inventing syncpoint completion. Complete real firmware/DMA/output and retirement, then D3D11VA/NV12/window presentation.",
+    "Accept720p before1080p;2K/4K remain independent implementation, untested and undecided. Preserve fixed90 display/power and deferred stability boundaries."
   ],
   "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
   "client_route_candidate": {
@@ -229,87 +229,15 @@
     "public_windows_redistribution_confirmed": false
   },
   "current_committed_source": {
-    "commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
-    "files": {
-      "src/nouveau/nvdec/nvdec.h": "f7a8dcf3fbeaec80b04031d40db1477b91b764c56becd86d387848813654cf47",
-      "src/nouveau/nvdec/nvdec_engine.c": "50c921f591579713244e07c9b8f227b5fc925aaf61b48911aabd4fce1287f824",
-      "src/nouveau/nvdec/nvdec_fw.c": "56b90823837f75b3d4ac395460c513b03222b054e96d2cba2585b50a7e3d5a29",
-      "src/nouveau/nvdec/nvdec_h264.c": "ca82c68e101fb61dc68bcfc440cdf73687aad0a895b58eac90809fa3ec18125b",
-      "src/nouveau/nvdec/nvdec_parse.c": "655c3390dc9fc3f93a6fe788376edb865f186620e4a285ce5893ea2cde248754",
-      "src/nouveau/nvdec/nvdec_parse.h": "7411d3fd106b912b00218aee548facf9d715b671b05cd35a4bb36dd1c5cc880c",
-      "src/nouveau/nvdec/nvdec_sha256.c": "af82ac4dc6d08514b583916c2df8ccb44867ea5956f965d65584fe84f49ce96a",
-      "src/nouveau/tgd3d/meson.build": "33da05fac1f1539a60b1bcee0d22ce8641512db8ba7d824b04d61f60402a595c",
-      "src/nouveau/tgd3d/shaders/generate.py": "388344104e3f68c739b6e9dccfe12cbe399c3ba8254cb2370f5cd6cba9f116b1",
-      "src/nouveau/tgd3d/shaders/nv12.frag": "ff511f1661e15bd38e5033186dcf8e2c2ee47ca309ac6c1f3674606a61d789f2",
-      "src/nouveau/tgd3d/shaders/nv12.vert": "a7a5c28e5a2ebcaf76796a0fbf8eac3013109864ab8d70164cbbbc435b8c51aa",
-      "src/nouveau/tgd3d/shaders/nv12_spv.h": "422e75503a779eeba14e3c2f43a1a9da9f9e83e1d47df42c8a4fa529709c1e3f",
-      "src/nouveau/tgd3d/tgd3d.h": "c59e968149f2e53541c0ee4697e24452c4b22d4f4aea26e38afecba3d1a5629f",
-      "src/nouveau/tgd3d/tgd3d_csc.c": "a3eca105f10a5062444d4e78542e07a8b42ead45026768f9035ad6bc87b2945a",
-      "src/nouveau/tgd3d/tgd3d_csc.h": "fa506044275d4d5d0439cf821a990e0dcacd75e412f7b87340960a97daa3d3d5",
-      "src/nouveau/tgd3d/tgd3d_dxva_h264.h": "05448b41b26ed64fe1788806479a0f8ec07e3de637f2da28fdb361d96cd7b4bb",
-      "src/nouveau/tgd3d/tgd3d_h264_map.c": "8fdfa325e5e2da44b0c28b2b2e3d02d484c34451a88871d9b93a6cc8ab41039f",
-      "src/nouveau/tgd3d/tgd3d_h264_map.h": "91bb2ab585d86fd9e4495b31b9e59e01d9ac49708389cc10cfe931d421b48797",
-      "src/nouveau/tgd3d/tgd3d_video.cpp": "b03a6bfee9d83d56c3bc6d5210df42c330715648b34492a300a4bf9370b01aed",
-      "src/nouveau/vulkan/nvkmd/windows/build_icd.py": "60fa861535412f9f01b93f16b45012888854f9de6a715690158e247e0a9c1c0a",
-      "src/nouveau/vulkan/nvkmd/windows/nvdec_abi.h": "4dc45cc8e525577f3684c2b96c42b4bbd6ad353f1bb054a83cc81a448ae95e39",
-      "src/nouveau/vulkan/nvkmd/windows/nvdec_check.c": "aa96a24c60d15223ad9f7cfebfb53a857c2f9abcb2caf0113abfd2a112b3480a",
-      "src/nouveau/vulkan/nvkmd/windows/nvdec_escape_abi.h": "75bb8efd6e74f659682da51abe72e993249dfec9017abdb4abeb9121f0beeca0",
-      "src/nouveau/vulkan/nvkmd/windows/nvdec_native.c": "b9105ad1d5d03eb88baf34465cd481d26907ec7d74688f8b153becbb56172361",
-      "src/nouveau/vulkan/nvkmd/windows/nvdec_native.h": "163108e9fb172e7e306648d88f7f019ae8d1fc31953360391084f32621e5d954",
-      "tegra-x1-wddm/integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "6d82831007dc510eadba089ac22232ee1aa7718f65a6b67009ff3698906e65d8",
-      "tegra-x1-wddm/platform/t214_nvdec.c": "38a5b726bbe2f20e692458f54c7fa0ebdffcc99eb5b58c0807edf119418ec908",
-      "tegra-x1-wddm/platform/t214_nvdec.h": "b308f5db5384b1b2f08dddb3434b71e4dd95b9754f5148dc2a80bf51b0cd3764",
-      "tegra-x1-wddm/platform/t214_resources.h": "ee3674a3ff12965ee66e11cf0e5149f6c51e17d4f02ebc17786eafbd83a8faa1",
-      "tegra-x1-wddm/tests/nvdec_inactive_fixture.c": "363426c25595f75862c93f8ab2efa7bc388f1e3463244c6d4e7b9e22cedb9c98",
-      "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "4dea4e6a5150b6511253cd4c02505239163f5cc0a7d6908bc919fec790c049a4",
-      "tegra-x1-wddm/tests/test_context_windows.c": "2bbe82ae7bdc7d71d1d8624653cfe6b932bf401300533dcb6f0306f1afb29476",
-      "tegra-x1-wddm/tests/test_host1x_clock_windows.c": "c7e910535b3f7affb35815f6c406f7e8cc13fcb3b459b32102b2b90485f7f940",
-      "tegra-x1-wddm/tests/test_nvdec.c": "700997d449a4754ec3d83a2123fe5ea8ff172260350d52018189c4573dc70c98",
-      "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "8648aba14994c95068351c441536002a917e2f063b948ad10224c0b712e7d40a",
-      "tegra-x1-wddm/tests/test_nvdec_h264.c": "d508104db872875d286ede06160e90ad2a7940398fa22c6d49f24498a5e72e8d",
-      "tegra-x1-wddm/tests/test_nvdec_memory_windows.c": "bea37e848bcc3b470fc7cbb78d211939d6416a86a868b329bfc6d36c64883928",
-      "tegra-x1-wddm/tests/test_nvdec_native.c": "d1053ae13299bee7182d0e3f73e6282535ac118ab3142ad87b7be4590e096ffe",
-      "tegra-x1-wddm/tests/test_nvdec_platform.c": "63c71e9ff6f63db15ee0eb05461408a9ccd6138462ffb4a7086225628dc039c6",
-      "tegra-x1-wddm/tests/test_paging_windows.c": "4208a031ba96925a7a5fb1906b910cc5baa9c154879d3442339eb97e0bd09ad1",
-      "tegra-x1-wddm/tests/test_platform_windows.c": "1ac5e371c1d0d7e7a5c12a39d8082bb8e54aa3f9148d14a2f80ab7acb1370b5f",
-      "tegra-x1-wddm/tests/test_tgd3d_csc.c": "9313bb4d88a42b6e6c5517aa9a63cad71a367ffe2408b8a930bee51fcba7eada",
-      "tegra-x1-wddm/tests/test_tgd3d_dxva_abi.c": "08b1dedc79499d32fd5c75bc1b568251715b060c17872d635976058fa92740ee",
-      "tegra-x1-wddm/tests/test_tgd3d_h264_map.c": "4457b66b6d4c0cfc8566b653e92d28db65395de42a469e7b954432a9a9f39ece",
-      "tegra-x1-wddm/tools/build.py": "2bf2083e3a4c1777b3f421b200795ec4dc1f9b4f3add026f7ee1c68d18bb9d8d",
-      "tegra-x1-wddm/tools/build_nvdec_acpi.py": "a1b58fd98ce7eee385934e10e6e5e856485d280cb2d76e344d143553db42b7ba",
-      "tegra-x1-wddm/tools/build_tgd3d.py": "86156fb18bdcf1fd323f8c2d31e1724ab5b07ae17fc78039c64c72179fea8183",
-      "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
-      "tegra-x1-wddm/tools/mf_dxgi_probe.c": "07ffa45ea603bda19e4ce4cc015cc056433f4c88b801420ac42b299a7c34e14b",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "8b9819039fbd90018b3ae5759655da76474ec7619c1c02109dbd891adf8579a2",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "cfeb427fbbf98a457e0fe949d2617e38cfda58b0fb549836559d835b75a8ee69",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "d8c27baf570ab2e139c02e409aa2d207355890f24cf0a7e684ca0998e4e799b4",
-      "tegra-x1-wddm/tools/nvdec720.c": "1e4b72cfd55fbc1acc3d069779d22474e349b1b8698c5ccebe1e044862659aa8",
-      "tegra-x1-wddm/windows/adapter.c": "17f8df5e15d93e7d8dfe4bf21db6f32d7d7476f83017857ba723a8f5b26f1950",
-      "tegra-x1-wddm/windows/adapter.h": "97183f5833df6bce5f5e918b960a1fcc932b98c3d724929023b6e275da5583ba",
-      "tegra-x1-wddm/windows/adapter_reset.c": "71bb152704be995d5cd685638139080789bb8a9b9fe7429a8d01078dd7188b9f",
-      "tegra-x1-wddm/windows/context.c": "036eb0c379a9806154645bb79732bfa160b7a3bdb79bca523ea32a0134371029",
-      "tegra-x1-wddm/windows/context.h": "64de0c40c96a5d2b47f82ebce3b72da2666e1dfc3d332fc716f0acfb66b98817",
-      "tegra-x1-wddm/windows/device_lifetime.c": "c3db788f4bd1144e7c0a6e9c5d7b19e30057d081c97926d154a97e8862d50261",
-      "tegra-x1-wddm/windows/host1x_clock.c": "f06c780446a281642f447b26af6491adc1bf10fa5dc990cbbe013fb6d6c1144a",
-      "tegra-x1-wddm/windows/host1x_clock.h": "953fa066315c5c7160a8c9ca43406c5db8c300477050dac5b487a70800b1e347",
-      "tegra-x1-wddm/windows/host1x_clock_abi.h": "dc95b991fa8de7de4d505f30eb84ada3c7788e093b10214ad121d66fe6247a52",
-      "tegra-x1-wddm/windows/nvdec_adapter.c": "f09c71b15564599c61f3591c3169574d9a8a77bf7d568df10727c485da078601",
-      "tegra-x1-wddm/windows/nvdec_adapter.h": "6071a36e26e3a340a9358cd6be1812a418cca2a3d0ee9bd3ea32abead5e428a8",
-      "tegra-x1-wddm/windows/nvdec_backend.c": "cfe3b1d37b494383f97534a178c8f35166dac56b486d7984195ca1e362d26929",
-      "tegra-x1-wddm/windows/nvdec_backend.h": "a387b3f7c064c549ca6e846f46e99f7adda679376f8bf00766e3021a3c43dacf",
-      "tegra-x1-wddm/windows/nvdec_control.h": "df1c63a19af5f603a408738073646cc278f16f02f94fc6c36a73b495e5ec56fb",
-      "tegra-x1-wddm/windows/nvdec_memory.c": "dfecd1c7ba8558a7a07237dfe70901f065be352d3f9c65dc8d37fe669deab550",
-      "tegra-x1-wddm/windows/nvdec_memory.h": "8388db8a467397573838df44a8b6f3954adc98480f8b76a1208ad99371256ea2",
-      "tegra-x1-wddm/windows/platform_io.c": "fa91f53d75ac9099d7c62a324a672da49187df8f3925df7feb2a92821a4b6007",
-      "tegra-x1-wddm/windows/platform_io.h": "c7d18c04f69d99b39ed5fbf9c0f2ae5f945ca89290e1b5675ac382b896d14305",
-      "tegra-x1-wddm/windows/probe.c": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
-      "tegra-x1-wddm/windows/query.c": "db7b45113a2b10cf39c019152397756983f7313d7026e0a66e533ad228973050",
-      "tegra-x1-wddm/windows/render_miniport.c": "1292de03cbac65390c68627b47c76bbbb9b55eff72e72bcf9218d6c10378f202",
-      "tegra-x1-wddm/windows/resources.c": "0e027ec91ddb56d73ad45c739e0834ad0481ab5bf06e45ef4c4de6392d43f69f",
-      "tegra-x1-wddm/windows/resources.h": "969a69a00ce276f7ffa427c616b536b2379b5c358138885b4ed229b532b614df"
+    "commit": "0a0a167003bc6e7f827549167d447d324550f650",
+    "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+    "changed_files": {
+      "tegra-x1-wddm/windows/nvdec_adapter.c": "6540b13d594d5eca45f41f1e142498f7261345d39d97eab919476054c9f9c996",
+      "tegra-x1-wddm/windows/nvdec_adapter.h": "9c1fe120ff270f1ce6acf1518e44fada80e24274864f094e6e6f46caed4a23c4",
+      "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "1e2bc785e91358e231e32f0f12257778d6828e6c59f42236ef5a3bfd0e2ddaa9"
     },
-    "native_build_scope": "Native KMD uses the frozen c0/EMC/resource/client/transplant snapshot; this current source list is not a claim that the full development tree was installed"
+    "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+    "scope": "Local frozen diagnostic KMD; not installed or accepted."
   },
   "client_route_native_result": {
     "record": "NVDEC_CLIENT_ROUTE_NATIVE_20261117.json",
@@ -345,13 +273,14 @@
     "historical_failure_root_cause": "unresolved; not reproduced in this ACPI-only boot"
   },
   "controller_source": {
-    "commit": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+    "commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
     "files": {
       "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "8b9819039fbd90018b3ae5759655da76474ec7619c1c02109dbd891adf8579a2",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "cfeb427fbbf98a457e0fe949d2617e38cfda58b0fb549836559d835b75a8ee69",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "d8c27baf570ab2e139c02e409aa2d207355890f24cf0a7e684ca0998e4e799b4",
-      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512"
+      "tegra-x1-wddm/tools/loaded_image_identity.c": "df59ea77fc42122101be16fb1cbc41c0483795cdefe430ee38b77f7edcd29f05",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "9cb757f01e4c9d93f57e55cc21ff6d832b51e4458b121e8d3ef92d80da9015e9",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "4b65787c2c9f4e806e8dade59cf9465fee9cec0b684a1dbc555bcfb05091bb6c",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "edb28c030ad293b328987e164551ba1fe86bfabb2fc955d3b6333d2da6f6e2e0",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "3c90af299ab8c1f221bbefbdd5806ecef5add232e713c56f532e162566d793d6"
     }
   },
   "client_route_query_result": {
@@ -392,12 +321,12 @@
     "review": "main-agent self-review; real decoder DMA still untested"
   },
   "temporary_candidate_components_restored": true,
-  "latest_native_result": "NVDEC_CORE_CLOCK_NATIVE_20261117.json",
+  "latest_native_result": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
   "review": {
     "mode": "main-agent self-review",
     "external_review_required": false,
     "external_review_performed": false,
-    "scope": "Core-owner read-only contract, WDF buffer lifetime, paired ABI, voltage/rate intersection, CPU failure paths and ARM64 builds. New candidate native query/decode remains pending."
+    "scope": "Real core-query/clock result, native failure boundary, loaded-image recovery; bounded failure-only reads,8 host preflight faults, retirement and stale-evidence controls. New diagnostic KMD native execution pending."
   },
   "coexisting_transport": {
     "adapter_transport": "259c825dec8421d34d5e08e33b9d109d9cd89770",
@@ -410,106 +339,71 @@
     "build_full_dirty_worktree": false
   },
   "next_local_candidate": {
-    "source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
-    "provider_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
-    "base_diagnostic_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json",
-    "frozen_source_inputs": {
-      "bytes": 1520,
-      "sha256": "b3494469db916a49fb76e984d0a7ecface17f8a9287f9d9cd82afe30e0583382"
+    "source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+    "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+    "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+    "unsigned_kmd": {
+      "Length": 239616,
+      "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
     },
-    "base_manifest_sha256": "304853fdafed4313cbe0bd36104dfb2b892db8b4f8aae242ea85f65a2827c142",
-    "changed_source_sha256": {
-      "windows/host1x_clock_abi.h": "340aff08f431b08213ca547ccfd05addca3fbba9d4127d29365876c5a5a4b345",
-      "windows/host1x_clock.h": "f9703a7a9c906232be7d6b3ca41dc16763f8196945822ff63b93d730d4e80790",
-      "windows/host1x_clock.c": "e1c6a9f53ddf4706f437f410c4de34d96a07bb7b0508f87803ace8811c345a27",
-      "windows/nvdec_adapter.c": "6a1c8a7e1d7520235f3aeb4e13fa2ef68e60a141fd6c9bc90fc1cb47ecd915f8",
-      "windows/nvdec_adapter.h": "a0f05bd07f0d4c4675a24e444901157950e992ef0879d0161eba44419f8d61e1",
-      "platform/t214_nvdec.c": "88fd063cd082d06441726ad81c57bf10f15afb578778b06c7947c2cbf60214ed",
-      "platform/t214_nvdec.h": "654e52c611a519a692e052a3bd9998718774afdcdee7386c4f32cc2c6c706f26",
-      "integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "49bb2e197d61e53a9ad0627b288cc3d61d161a2a03e9d91ce7db97ed88998574",
-      "tests/test_host1x_clock_windows.c": "a9bc00ffaa4e936e801f82a63feec949d403f60966e320d12c2e9da5c81fdd66",
-      "tests/test_nvdec_adapter_windows.c": "81141862101ea238caa23f978b3188c8aaacf8fc9605bc5ec3a6dea55e3bacda",
-      "tests/test_nvdec_platform.c": "de7b1d234d91c99d02a866810d24f43120ca02a82acd2e957663e51845ef24a9"
+    "reuse_provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
     },
-    "provider_hook_sha256": "126086e2347d74eed734ddc65d99adf96b0482a13e33fbda6262d319ccebf16f",
-    "components": {
-      "unsigned_kmd": {
-        "bytes": 238592,
-        "sha256": "7f3e55e9e6a670b967d92e60d3c6bcf862c20ffcc7e988185b5825ac7b6a5d29"
-      },
-      "unsigned_provider": {
-        "bytes": 101376,
-        "sha256": "49fdbb366993c332f23a576e296c514bd2d65e6062ac796e5f8b7ff33b74f0aa"
-      }
-    },
-    "private_clock_abi": {
-      "version": "0x00010002",
-      "bytes": 64,
-      "paired_kernels_required": true
-    },
-    "core_owner_source": "WindowsDrivers06614ee6b9bbe80682f3f45e2c84a5cdd9f69133; retained installed SwitchPowerButton",
-    "core_owner_sys_sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787",
-    "query": "Kernel-only IOCTL_SWCORE_EMC_VOTE with SetVote=0 and MinimumUv=0. Read BootFloorUv/AppliedUv; do not clear the EMC vote. WDF-owned memory and a500ms request timeout preserve request buffer lifetime.",
-    "clock_rule": "Retained core floor>=637500uV for Host1x<=102MHz;>=650000uV for inherited Host1x<=204MHz. Keep NVDEC204MHz. Reject unknown/invalid floors, clock routes or an undersupplied rail.",
-    "power_voltage_or_shared_clock_writes_added": false,
-    "signed": false,
-    "installed": false,
+    "clock_abi": "0x00010002",
+    "signed_kmd": false,
     "native_tested": false,
-    "promoted": false,
-    "validation": {
-      "arm64_kmd_build_exit": 0,
-      "arm64_provider_build_exit": 0,
-      "cpu_controls": [
-        {
-          "name": "host1x_clock-compile",
-          "exit": 0
-        },
-        {
-          "name": "test_host1x_clock_windows-compile",
-          "exit": 0
-        },
-        {
-          "name": "clock-link",
-          "exit": 0
-        },
-        {
-          "name": "clock-run",
-          "exit": 0
-        },
-        {
-          "name": "adapter-nvdec_adapter",
-          "exit": 0
-        },
-        {
-          "name": "adapter-device_lifetime",
-          "exit": 0
-        },
-        {
-          "name": "adapter-t214_nvdec",
-          "exit": 0
-        },
-        {
-          "name": "adapter-test_nvdec_adapter_windows",
-          "exit": 0
-        },
-        {
-          "name": "adapter-link",
-          "exit": 0
-        },
-        {
-          "name": "adapter-run",
-          "exit": 0
-        }
-      ],
-      "platform_asan_ubsan": "passed; CPU model only",
-      "frozen_and_worktree_changed_inputs_match": true
-    }
+    "admission_predicates_changed": false,
+    "modern_umd_interfaces_changed": false,
+    "arm64_build_exit": 0,
+    "controls": [
+      {
+        "name": "adapter-nvdec_adapter",
+        "exit": 0
+      },
+      {
+        "name": "adapter-device_lifetime",
+        "exit": 0
+      },
+      {
+        "name": "adapter-t214_nvdec",
+        "exit": 0
+      },
+      {
+        "name": "adapter-test_nvdec_adapter_windows",
+        "exit": 0
+      },
+      {
+        "name": "adapter-link",
+        "exit": 0
+      },
+      {
+        "name": "adapter-run",
+        "exit": 0
+      }
+    ],
+    "main_self_review": "Read-only failure snapshots retain register evidence across real release; bounded error output and next-request reset;8 preflight fault controls plus existing retirement/ownership checks.",
+    "failure_field_map": {
+      "1": "No assigned DC register view; no register values read.",
+      "2": "Index=DC word0x28; a=DC syncpoint-vsync register.",
+      "3": "Index=channel; a=FIFO status,b=DMA PUT,c=DMA GET,d=DMA CTRL, read before lease release.",
+      "4": "Index=channel; same fields as3; PUT/GET differ.",
+      "5": "Index=syncpoint191; a=threshold IRQ enable word.",
+      "6": "Index=syncpoint191; a=unreadable first counter value.",
+      "7": "Index=syncpoint191; a=first,b=second counter across50ms.",
+      "8": "Index=CAR offset0x180; a=post-rejection source,b=I/O status,c=closing flag."
+    },
+    "field_encoding": "All numeric error fields are eight hexadecimal digits; unused fields are zero, not additional register reads. Source/floor/PLLP preserve the admitted request values.",
+    "reference": "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/hw_host1x05_channel.h",
+    "license_scope": "GPL register definitions consulted as hardware facts; no implementation copied."
   },
   "loaded_provider_identity": {
-    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
-    "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
     "native_loaded_mismatch_proven": true,
-    "new_controller_complete_candidate_round_pending": true,
+    "candidate_provider_loaded_verified": true,
+    "restored_provider_and_kmd_loaded_verified": true,
+    "new_controller_complete_candidate_round_pending": false,
     "native_decode_accepted": false,
     "baseline_promoted": false
   },
@@ -520,5 +414,121 @@
     "native_decode_accepted": false,
     "baseline_restored": true,
     "cleanup_complete": true
-  }
+  },
+  "core_floor_native_result": {
+    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "core_owner_query_passed": true,
+    "core_floor_uv": 1050000,
+    "clock_admission_passed": true,
+    "host_ownership_accepted": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "historical_loaded_provider_identity": {
+    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
+    "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+    "native_loaded_mismatch_proven": true,
+    "new_controller_complete_candidate_round_pending": true,
+    "native_decode_accepted": false,
+    "baseline_promoted": false
+  },
+  "latest_native_round": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+  "historical_committed_sources": [
+    {
+      "commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+      "files": {
+        "src/nouveau/nvdec/nvdec.h": "f7a8dcf3fbeaec80b04031d40db1477b91b764c56becd86d387848813654cf47",
+        "src/nouveau/nvdec/nvdec_engine.c": "50c921f591579713244e07c9b8f227b5fc925aaf61b48911aabd4fce1287f824",
+        "src/nouveau/nvdec/nvdec_fw.c": "56b90823837f75b3d4ac395460c513b03222b054e96d2cba2585b50a7e3d5a29",
+        "src/nouveau/nvdec/nvdec_h264.c": "ca82c68e101fb61dc68bcfc440cdf73687aad0a895b58eac90809fa3ec18125b",
+        "src/nouveau/nvdec/nvdec_parse.c": "655c3390dc9fc3f93a6fe788376edb865f186620e4a285ce5893ea2cde248754",
+        "src/nouveau/nvdec/nvdec_parse.h": "7411d3fd106b912b00218aee548facf9d715b671b05cd35a4bb36dd1c5cc880c",
+        "src/nouveau/nvdec/nvdec_sha256.c": "af82ac4dc6d08514b583916c2df8ccb44867ea5956f965d65584fe84f49ce96a",
+        "src/nouveau/tgd3d/meson.build": "33da05fac1f1539a60b1bcee0d22ce8641512db8ba7d824b04d61f60402a595c",
+        "src/nouveau/tgd3d/shaders/generate.py": "388344104e3f68c739b6e9dccfe12cbe399c3ba8254cb2370f5cd6cba9f116b1",
+        "src/nouveau/tgd3d/shaders/nv12.frag": "ff511f1661e15bd38e5033186dcf8e2c2ee47ca309ac6c1f3674606a61d789f2",
+        "src/nouveau/tgd3d/shaders/nv12.vert": "a7a5c28e5a2ebcaf76796a0fbf8eac3013109864ab8d70164cbbbc435b8c51aa",
+        "src/nouveau/tgd3d/shaders/nv12_spv.h": "422e75503a779eeba14e3c2f43a1a9da9f9e83e1d47df42c8a4fa529709c1e3f",
+        "src/nouveau/tgd3d/tgd3d.h": "c59e968149f2e53541c0ee4697e24452c4b22d4f4aea26e38afecba3d1a5629f",
+        "src/nouveau/tgd3d/tgd3d_csc.c": "a3eca105f10a5062444d4e78542e07a8b42ead45026768f9035ad6bc87b2945a",
+        "src/nouveau/tgd3d/tgd3d_csc.h": "fa506044275d4d5d0439cf821a990e0dcacd75e412f7b87340960a97daa3d3d5",
+        "src/nouveau/tgd3d/tgd3d_dxva_h264.h": "05448b41b26ed64fe1788806479a0f8ec07e3de637f2da28fdb361d96cd7b4bb",
+        "src/nouveau/tgd3d/tgd3d_h264_map.c": "8fdfa325e5e2da44b0c28b2b2e3d02d484c34451a88871d9b93a6cc8ab41039f",
+        "src/nouveau/tgd3d/tgd3d_h264_map.h": "91bb2ab585d86fd9e4495b31b9e59e01d9ac49708389cc10cfe931d421b48797",
+        "src/nouveau/tgd3d/tgd3d_video.cpp": "b03a6bfee9d83d56c3bc6d5210df42c330715648b34492a300a4bf9370b01aed",
+        "src/nouveau/vulkan/nvkmd/windows/build_icd.py": "60fa861535412f9f01b93f16b45012888854f9de6a715690158e247e0a9c1c0a",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_abi.h": "4dc45cc8e525577f3684c2b96c42b4bbd6ad353f1bb054a83cc81a448ae95e39",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_check.c": "aa96a24c60d15223ad9f7cfebfb53a857c2f9abcb2caf0113abfd2a112b3480a",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_escape_abi.h": "75bb8efd6e74f659682da51abe72e993249dfec9017abdb4abeb9121f0beeca0",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_native.c": "b9105ad1d5d03eb88baf34465cd481d26907ec7d74688f8b153becbb56172361",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_native.h": "163108e9fb172e7e306648d88f7f019ae8d1fc31953360391084f32621e5d954",
+        "tegra-x1-wddm/integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "6d82831007dc510eadba089ac22232ee1aa7718f65a6b67009ff3698906e65d8",
+        "tegra-x1-wddm/platform/t214_nvdec.c": "38a5b726bbe2f20e692458f54c7fa0ebdffcc99eb5b58c0807edf119418ec908",
+        "tegra-x1-wddm/platform/t214_nvdec.h": "b308f5db5384b1b2f08dddb3434b71e4dd95b9754f5148dc2a80bf51b0cd3764",
+        "tegra-x1-wddm/platform/t214_resources.h": "ee3674a3ff12965ee66e11cf0e5149f6c51e17d4f02ebc17786eafbd83a8faa1",
+        "tegra-x1-wddm/tests/nvdec_inactive_fixture.c": "363426c25595f75862c93f8ab2efa7bc388f1e3463244c6d4e7b9e22cedb9c98",
+        "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "4dea4e6a5150b6511253cd4c02505239163f5cc0a7d6908bc919fec790c049a4",
+        "tegra-x1-wddm/tests/test_context_windows.c": "2bbe82ae7bdc7d71d1d8624653cfe6b932bf401300533dcb6f0306f1afb29476",
+        "tegra-x1-wddm/tests/test_host1x_clock_windows.c": "c7e910535b3f7affb35815f6c406f7e8cc13fcb3b459b32102b2b90485f7f940",
+        "tegra-x1-wddm/tests/test_nvdec.c": "700997d449a4754ec3d83a2123fe5ea8ff172260350d52018189c4573dc70c98",
+        "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "8648aba14994c95068351c441536002a917e2f063b948ad10224c0b712e7d40a",
+        "tegra-x1-wddm/tests/test_nvdec_h264.c": "d508104db872875d286ede06160e90ad2a7940398fa22c6d49f24498a5e72e8d",
+        "tegra-x1-wddm/tests/test_nvdec_memory_windows.c": "bea37e848bcc3b470fc7cbb78d211939d6416a86a868b329bfc6d36c64883928",
+        "tegra-x1-wddm/tests/test_nvdec_native.c": "d1053ae13299bee7182d0e3f73e6282535ac118ab3142ad87b7be4590e096ffe",
+        "tegra-x1-wddm/tests/test_nvdec_platform.c": "63c71e9ff6f63db15ee0eb05461408a9ccd6138462ffb4a7086225628dc039c6",
+        "tegra-x1-wddm/tests/test_paging_windows.c": "4208a031ba96925a7a5fb1906b910cc5baa9c154879d3442339eb97e0bd09ad1",
+        "tegra-x1-wddm/tests/test_platform_windows.c": "1ac5e371c1d0d7e7a5c12a39d8082bb8e54aa3f9148d14a2f80ab7acb1370b5f",
+        "tegra-x1-wddm/tests/test_tgd3d_csc.c": "9313bb4d88a42b6e6c5517aa9a63cad71a367ffe2408b8a930bee51fcba7eada",
+        "tegra-x1-wddm/tests/test_tgd3d_dxva_abi.c": "08b1dedc79499d32fd5c75bc1b568251715b060c17872d635976058fa92740ee",
+        "tegra-x1-wddm/tests/test_tgd3d_h264_map.c": "4457b66b6d4c0cfc8566b653e92d28db65395de42a469e7b954432a9a9f39ece",
+        "tegra-x1-wddm/tools/build.py": "2bf2083e3a4c1777b3f421b200795ec4dc1f9b4f3add026f7ee1c68d18bb9d8d",
+        "tegra-x1-wddm/tools/build_nvdec_acpi.py": "a1b58fd98ce7eee385934e10e6e5e856485d280cb2d76e344d143553db42b7ba",
+        "tegra-x1-wddm/tools/build_tgd3d.py": "86156fb18bdcf1fd323f8c2d31e1724ab5b07ae17fc78039c64c72179fea8183",
+        "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
+        "tegra-x1-wddm/tools/mf_dxgi_probe.c": "07ffa45ea603bda19e4ce4cc015cc056433f4c88b801420ac42b299a7c34e14b",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "8b9819039fbd90018b3ae5759655da76474ec7619c1c02109dbd891adf8579a2",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "cfeb427fbbf98a457e0fe949d2617e38cfda58b0fb549836559d835b75a8ee69",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "d8c27baf570ab2e139c02e409aa2d207355890f24cf0a7e684ca0998e4e799b4",
+        "tegra-x1-wddm/tools/nvdec720.c": "1e4b72cfd55fbc1acc3d069779d22474e349b1b8698c5ccebe1e044862659aa8",
+        "tegra-x1-wddm/windows/adapter.c": "17f8df5e15d93e7d8dfe4bf21db6f32d7d7476f83017857ba723a8f5b26f1950",
+        "tegra-x1-wddm/windows/adapter.h": "97183f5833df6bce5f5e918b960a1fcc932b98c3d724929023b6e275da5583ba",
+        "tegra-x1-wddm/windows/adapter_reset.c": "71bb152704be995d5cd685638139080789bb8a9b9fe7429a8d01078dd7188b9f",
+        "tegra-x1-wddm/windows/context.c": "036eb0c379a9806154645bb79732bfa160b7a3bdb79bca523ea32a0134371029",
+        "tegra-x1-wddm/windows/context.h": "64de0c40c96a5d2b47f82ebce3b72da2666e1dfc3d332fc716f0acfb66b98817",
+        "tegra-x1-wddm/windows/device_lifetime.c": "c3db788f4bd1144e7c0a6e9c5d7b19e30057d081c97926d154a97e8862d50261",
+        "tegra-x1-wddm/windows/host1x_clock.c": "f06c780446a281642f447b26af6491adc1bf10fa5dc990cbbe013fb6d6c1144a",
+        "tegra-x1-wddm/windows/host1x_clock.h": "953fa066315c5c7160a8c9ca43406c5db8c300477050dac5b487a70800b1e347",
+        "tegra-x1-wddm/windows/host1x_clock_abi.h": "dc95b991fa8de7de4d505f30eb84ada3c7788e093b10214ad121d66fe6247a52",
+        "tegra-x1-wddm/windows/nvdec_adapter.c": "f09c71b15564599c61f3591c3169574d9a8a77bf7d568df10727c485da078601",
+        "tegra-x1-wddm/windows/nvdec_adapter.h": "6071a36e26e3a340a9358cd6be1812a418cca2a3d0ee9bd3ea32abead5e428a8",
+        "tegra-x1-wddm/windows/nvdec_backend.c": "cfe3b1d37b494383f97534a178c8f35166dac56b486d7984195ca1e362d26929",
+        "tegra-x1-wddm/windows/nvdec_backend.h": "a387b3f7c064c549ca6e846f46e99f7adda679376f8bf00766e3021a3c43dacf",
+        "tegra-x1-wddm/windows/nvdec_control.h": "df1c63a19af5f603a408738073646cc278f16f02f94fc6c36a73b495e5ec56fb",
+        "tegra-x1-wddm/windows/nvdec_memory.c": "dfecd1c7ba8558a7a07237dfe70901f065be352d3f9c65dc8d37fe669deab550",
+        "tegra-x1-wddm/windows/nvdec_memory.h": "8388db8a467397573838df44a8b6f3954adc98480f8b76a1208ad99371256ea2",
+        "tegra-x1-wddm/windows/platform_io.c": "fa91f53d75ac9099d7c62a324a672da49187df8f3925df7feb2a92821a4b6007",
+        "tegra-x1-wddm/windows/platform_io.h": "c7d18c04f69d99b39ed5fbf9c0f2ae5f945ca89290e1b5675ac382b896d14305",
+        "tegra-x1-wddm/windows/probe.c": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
+        "tegra-x1-wddm/windows/query.c": "db7b45113a2b10cf39c019152397756983f7313d7026e0a66e533ad228973050",
+        "tegra-x1-wddm/windows/render_miniport.c": "1292de03cbac65390c68627b47c76bbbb9b55eff72e72bcf9218d6c10378f202",
+        "tegra-x1-wddm/windows/resources.c": "0e027ec91ddb56d73ad45c739e0834ad0481ab5bf06e45ef4c4de6392d43f69f",
+        "tegra-x1-wddm/windows/resources.h": "969a69a00ce276f7ffa427c616b536b2379b5c358138885b4ed229b532b614df"
+      },
+      "native_build_scope": "Native KMD uses the frozen c0/EMC/resource/client/transplant snapshot; this current source list is not a claim that the full development tree was installed"
+    }
+  ],
+  "historical_controller_sources": [
+    {
+      "commit": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+      "files": {
+        "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "8b9819039fbd90018b3ae5759655da76474ec7619c1c02109dbd891adf8579a2",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "cfeb427fbbf98a457e0fe949d2617e38cfda58b0fb549836559d835b75a8ee69",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "d8c27baf570ab2e139c02e409aa2d207355890f24cf0a7e684ca0998e4e799b4",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512"
+      }
+    }
+  ]
 }

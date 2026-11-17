@@ -1,15 +1,15 @@
 # GPU status
 
 Current status,2026-11-17: fixed90-degree row-scan DWM and native Win32 vkcube
-retain their completed acceptance. After actual provider image verification,
-the native NVDEC request acquired the Host1x lease and then rejected its
-inherited163.2MHz rate against the prior102MHz bound. No firmware/DMA/frames
-executed. The paired core-floor correction reads the existing core owner's
-retained minimum, preserves voltage/shared clocks and passes ARM64 builds and
-CPU controls; native validation remains pending. Original11-file baseline,
-90-degree configuration, DWM and power policy are restored; temporary packages,
-tasks, files and diagnostics are removed.720p/1080p decode acceptance remains
-open. See [the current native record](NVDEC_CORE_CLOCK_NATIVE_20261117.json)
+retain their completed acceptance. The real core-owner query returned1050000uV
+and admitted the inherited163.2MHz Host1x clock. The next ownership preflight
+rejected before backend/firmware/DMA;0frames. Its exact failing condition was
+not captured. A KMD-only diagnostic now preserves the condition, channel and
+raw values without changing admission, and passes ARM64/CPU controls; native
+execution is pending. The original11-file display/power baseline is restored
+and temporary packages, tasks, files and diagnostic values are cleaned.
+720p/1080p acceptance remains open. See
+[the native ownership record](NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json)
 and [the baseline](ROW_SCAN_BASELINE_20261116.md). Entries below are historical
 snapshots; their startup/rotation priorities and component sets are superseded.
 

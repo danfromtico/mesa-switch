@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T11:01:35.6551590Z",
-  "status": "Verified loaded provider admitted the real Host1x lease. The inherited163.2MHz route exceeded the prior102MHz predicate. No firmware/DMA/frames executed. Original baseline restored and cleaned; core-floor correction built locally, native acceptance pending.",
-  "mesa_source_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
-  "switchfan_hook_commit": "7ecce6c083df1f33def014445f3cacd1c3301095",
+  "updated_utc": "2026-11-17T11:58:28.8182205Z",
+  "status": "Native core-floor query and163.2MHz clock admission passed at1050000uV. Host1x ownership preflight rejected before backend/firmware/DMA;0frames. Original90-degree display/power baseline restored and cleaned. Exact-predicate diagnostic KMD built locally, not installed;720p/1080p acceptance open.",
+  "mesa_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+  "switchfan_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
   "changes": [
     "Real KMT-device-owned decoder session in the coexisting render miniport; previous display escape preserved",
     "Pending kernel Host1x clock request with actual power reference and passive quiesce callback",
@@ -13,62 +13,74 @@
     "Existing H264 codec/parser reused; acceptance client now uses the native adapter and verifies NV12 frame hashes and session retirement"
   ],
   "candidate_components": {
-    "signed_kmd": {
-      "bytes": 239616,
-      "sha256": "372ec2a93c23b9744ad256bb2e7c10f70f91043272bee209bc56e31f0ea8669f"
+    "scope": "Local diagnostic candidate; unsigned KMD, unchanged paired ABI2 provider. Not installed.",
+    "unsigned_kmd": {
+      "Length": 239616,
+      "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
     },
-    "signed_switchfan": {
-      "bytes": 102400,
-      "sha256": "9e2d4826af07a82d083aca6178608d71e983dd5295a1a2175ff38e555a2df7c7"
+    "reuse_signed_provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
     },
     "candidate_acpi": {
-      "bytes": 4993,
-      "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
-    },
-    "native_acceptance_client": {
-      "bytes": 95232,
-      "sha256": "56c7edfeeb89758cf2758dbc7a6230eebe19d25c47e2d11d9f1d8b6fae9ae006"
-    },
-    "deferred_installer": {
-      "bytes": 72192,
-      "sha256": "74fa43ecf99194729a04293154679328eeba881c3aed90f26f989a24da378669"
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
     }
   },
   "native_kmd_source": {
-    "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
-    "emc_patch_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
-    "resource_client_seed": "client-route/source-inputs.json",
-    "selected_transplant_manifest_sha256": "03834c302a01249163527c18b862f8130935226b0cb8e54cb8b2a7ae1cfe40f1",
-    "full_development_worktree_built_for_installation": false,
-    "host_mux_patch_commit": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5"
+    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "tested_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+    "frozen_inputs": {
+      "bytes": 1520,
+      "sha256": "b3494469db916a49fb76e984d0a7ecface17f8a9287f9d9cd82afe30e0583382"
+    },
+    "signed_kmd": {
+      "Length": 241672,
+      "Sha256": "252e8162a54fa26d7f961523ff112cc436c9032cb56da00ac70ae18166e8662a"
+    },
+    "full_development_worktree_built_for_installation": false
   },
   "installed_baseline": {
-    "last_authenticated_read_utc": "2026-11-17T08:41:52.2909514Z",
+    "last_authenticated_read_utc": "2026-11-17T11:58:28.8182205Z",
     "changed_this_round": true,
     "kmd_sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e",
     "umd_sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a",
     "icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff",
     "restored": true,
     "current_display": "90-degree1280x720 logical,720x1280 row scan",
-    "current_power": "Handheld/DFLL active; dynamic GPU and EMC; errors0"
+    "current_power": "Handheld/DFLL active; dynamic GPU and EMC; errors0",
+    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json"
   },
   "validation": {
-    "arm64_full_kmd_build": "passed",
-    "arm64_switchfan_build": "passed",
-    "arm64_acceptance_client_build": "passed",
-    "arm64_adapter_control_link": "passed",
-    "cpu_adapter_ownership_and_stop_failures": "passed",
-    "cpu_native_packet_protocol_and_cleanup_failures": "passed",
-    "cpu_gpu_context_queue_regression": "passed",
-    "cpu_resource_mapping_and_cleanup": "passed",
-    "asan_ubsan_platform_control": "passed",
-    "acpi_unchanged_other_devices_and_gpu_nonresource_aml": true,
-    "native_install": "Paired provider/KMD activated via deferred installation; original baseline restored",
-    "native_host1x_clock_lease": "failed0xc0000010 before firmware/DMA",
-    "native_firmware_boot": false,
-    "native_720p_h264": false,
-    "d3d11va_nv12_presentation": false,
-    "native_provider_replacement": "Deferred install and planned boot verified in both directions"
+    "native_record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "next_candidate_arm64_build_exit": 0,
+    "next_candidate_cpu_controls": [
+      {
+        "name": "adapter-nvdec_adapter",
+        "exit": 0
+      },
+      {
+        "name": "adapter-device_lifetime",
+        "exit": 0
+      },
+      {
+        "name": "adapter-t214_nvdec",
+        "exit": 0
+      },
+      {
+        "name": "adapter-test_nvdec_adapter_windows",
+        "exit": 0
+      },
+      {
+        "name": "adapter-link",
+        "exit": 0
+      },
+      {
+        "name": "adapter-run",
+        "exit": 0
+      }
+    ],
+    "native_decode_accepted": false
   },
   "clock_policy": {
     "candidate_nvdec_hz": 204000000,
@@ -95,14 +107,14 @@
     "mode": "main-agent self-review",
     "external_review_required": false,
     "external_review_performed": false,
-    "scope": "Core-owner read-only contract, WDF buffer lifetime, paired ABI, voltage/rate intersection, CPU failure paths and ARM64 builds. New candidate native query/decode remains pending."
+    "scope": "Real core-query/clock result, native failure boundary, loaded-image recovery; bounded failure-only reads,8 host preflight faults, retirement and stale-evidence controls. New diagnostic KMD native execution pending."
   },
   "remaining": [
-    "Sign and stage the paired ab2a23a9 KMD/provider candidate, verify the actually loaded provider and query the existing core owner, then perform one bounded native720 H.264 call.",
-    "Complete real NVDEC firmware/DMA/output and retirement before wiring the selected D3D11VA/NV12/window path; capture actual video DDI negotiation before extending an interface.",
-    "Accept720p before1080p.2K/4K remain existing independent implementation, untested and undecided. Retain fixed90 display and power policy."
+    "Sign the0a0a1670 diagnostic KMD, paired with the unchanged0453418e ABI2 provider and9eb6a7e1 resource table. Capture the first failed Host1x condition and raw register values in one bounded native720 call.",
+    "Resolve the demonstrated ownership contract without clearing shared channels or inventing syncpoint completion. Complete real firmware/DMA/output and retirement, then D3D11VA/NV12/window presentation.",
+    "Accept720p before1080p;2K/4K remain independent implementation, untested and undecided. Preserve fixed90 display/power and deferred stability boundaries."
   ],
-  "latest_native_round": "NVDEC_CLOCK_NATIVE_20261117.json",
+  "latest_native_round": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
   "superseded_local_candidate_components": {
     "unsigned_tegragpurender.sys": {
       "bytes": 236544,
@@ -122,107 +134,72 @@
     }
   },
   "next_local_candidate": {
-    "source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
-    "provider_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
-    "base_diagnostic_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json",
-    "frozen_source_inputs": {
-      "bytes": 1520,
-      "sha256": "b3494469db916a49fb76e984d0a7ecface17f8a9287f9d9cd82afe30e0583382"
+    "source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+    "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+    "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+    "unsigned_kmd": {
+      "Length": 239616,
+      "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
     },
-    "base_manifest_sha256": "304853fdafed4313cbe0bd36104dfb2b892db8b4f8aae242ea85f65a2827c142",
-    "changed_source_sha256": {
-      "windows/host1x_clock_abi.h": "340aff08f431b08213ca547ccfd05addca3fbba9d4127d29365876c5a5a4b345",
-      "windows/host1x_clock.h": "f9703a7a9c906232be7d6b3ca41dc16763f8196945822ff63b93d730d4e80790",
-      "windows/host1x_clock.c": "e1c6a9f53ddf4706f437f410c4de34d96a07bb7b0508f87803ace8811c345a27",
-      "windows/nvdec_adapter.c": "6a1c8a7e1d7520235f3aeb4e13fa2ef68e60a141fd6c9bc90fc1cb47ecd915f8",
-      "windows/nvdec_adapter.h": "a0f05bd07f0d4c4675a24e444901157950e992ef0879d0161eba44419f8d61e1",
-      "platform/t214_nvdec.c": "88fd063cd082d06441726ad81c57bf10f15afb578778b06c7947c2cbf60214ed",
-      "platform/t214_nvdec.h": "654e52c611a519a692e052a3bd9998718774afdcdee7386c4f32cc2c6c706f26",
-      "integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "49bb2e197d61e53a9ad0627b288cc3d61d161a2a03e9d91ce7db97ed88998574",
-      "tests/test_host1x_clock_windows.c": "a9bc00ffaa4e936e801f82a63feec949d403f60966e320d12c2e9da5c81fdd66",
-      "tests/test_nvdec_adapter_windows.c": "81141862101ea238caa23f978b3188c8aaacf8fc9605bc5ec3a6dea55e3bacda",
-      "tests/test_nvdec_platform.c": "de7b1d234d91c99d02a866810d24f43120ca02a82acd2e957663e51845ef24a9"
+    "reuse_provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
     },
-    "provider_hook_sha256": "126086e2347d74eed734ddc65d99adf96b0482a13e33fbda6262d319ccebf16f",
-    "components": {
-      "unsigned_kmd": {
-        "bytes": 238592,
-        "sha256": "7f3e55e9e6a670b967d92e60d3c6bcf862c20ffcc7e988185b5825ac7b6a5d29"
-      },
-      "unsigned_provider": {
-        "bytes": 101376,
-        "sha256": "49fdbb366993c332f23a576e296c514bd2d65e6062ac796e5f8b7ff33b74f0aa"
-      }
-    },
-    "private_clock_abi": {
-      "version": "0x00010002",
-      "bytes": 64,
-      "paired_kernels_required": true
-    },
-    "core_owner_source": "WindowsDrivers06614ee6b9bbe80682f3f45e2c84a5cdd9f69133; retained installed SwitchPowerButton",
-    "core_owner_sys_sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787",
-    "query": "Kernel-only IOCTL_SWCORE_EMC_VOTE with SetVote=0 and MinimumUv=0. Read BootFloorUv/AppliedUv; do not clear the EMC vote. WDF-owned memory and a500ms request timeout preserve request buffer lifetime.",
-    "clock_rule": "Retained core floor>=637500uV for Host1x<=102MHz;>=650000uV for inherited Host1x<=204MHz. Keep NVDEC204MHz. Reject unknown/invalid floors, clock routes or an undersupplied rail.",
-    "power_voltage_or_shared_clock_writes_added": false,
-    "signed": false,
-    "installed": false,
+    "clock_abi": "0x00010002",
+    "signed_kmd": false,
     "native_tested": false,
-    "promoted": false,
-    "validation": {
-      "arm64_kmd_build_exit": 0,
-      "arm64_provider_build_exit": 0,
-      "cpu_controls": [
-        {
-          "name": "host1x_clock-compile",
-          "exit": 0
-        },
-        {
-          "name": "test_host1x_clock_windows-compile",
-          "exit": 0
-        },
-        {
-          "name": "clock-link",
-          "exit": 0
-        },
-        {
-          "name": "clock-run",
-          "exit": 0
-        },
-        {
-          "name": "adapter-nvdec_adapter",
-          "exit": 0
-        },
-        {
-          "name": "adapter-device_lifetime",
-          "exit": 0
-        },
-        {
-          "name": "adapter-t214_nvdec",
-          "exit": 0
-        },
-        {
-          "name": "adapter-test_nvdec_adapter_windows",
-          "exit": 0
-        },
-        {
-          "name": "adapter-link",
-          "exit": 0
-        },
-        {
-          "name": "adapter-run",
-          "exit": 0
-        }
-      ],
-      "platform_asan_ubsan": "passed; CPU model only",
-      "frozen_and_worktree_changed_inputs_match": true
-    }
+    "admission_predicates_changed": false,
+    "modern_umd_interfaces_changed": false,
+    "arm64_build_exit": 0,
+    "controls": [
+      {
+        "name": "adapter-nvdec_adapter",
+        "exit": 0
+      },
+      {
+        "name": "adapter-device_lifetime",
+        "exit": 0
+      },
+      {
+        "name": "adapter-t214_nvdec",
+        "exit": 0
+      },
+      {
+        "name": "adapter-test_nvdec_adapter_windows",
+        "exit": 0
+      },
+      {
+        "name": "adapter-link",
+        "exit": 0
+      },
+      {
+        "name": "adapter-run",
+        "exit": 0
+      }
+    ],
+    "main_self_review": "Read-only failure snapshots retain register evidence across real release; bounded error output and next-request reset;8 preflight fault controls plus existing retirement/ownership checks.",
+    "failure_field_map": {
+      "1": "No assigned DC register view; no register values read.",
+      "2": "Index=DC word0x28; a=DC syncpoint-vsync register.",
+      "3": "Index=channel; a=FIFO status,b=DMA PUT,c=DMA GET,d=DMA CTRL, read before lease release.",
+      "4": "Index=channel; same fields as3; PUT/GET differ.",
+      "5": "Index=syncpoint191; a=threshold IRQ enable word.",
+      "6": "Index=syncpoint191; a=unreadable first counter value.",
+      "7": "Index=syncpoint191; a=first,b=second counter across50ms.",
+      "8": "Index=CAR offset0x180; a=post-rejection source,b=I/O status,c=closing flag."
+    },
+    "field_encoding": "All numeric error fields are eight hexadecimal digits; unused fields are zero, not additional register reads. Source/floor/PLLP preserve the admitted request values.",
+    "reference": "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/hw_host1x05_channel.h",
+    "license_scope": "GPL register definitions consulted as hardware facts; no implementation copied."
   },
-  "latest_native_result": "NVDEC_CORE_CLOCK_NATIVE_20261117.json",
+  "latest_native_result": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
   "loaded_provider_identity": {
-    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
-    "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
     "native_loaded_mismatch_proven": true,
-    "new_controller_complete_candidate_round_pending": true,
+    "candidate_provider_loaded_verified": true,
+    "restored_provider_and_kmd_loaded_verified": true,
+    "new_controller_complete_candidate_round_pending": false,
     "native_decode_accepted": false,
     "baseline_promoted": false
   },
@@ -233,5 +210,77 @@
     "native_decode_accepted": false,
     "baseline_restored": true,
     "cleanup_complete": true
-  }
+  },
+  "core_floor_native_result": {
+    "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+    "core_owner_query_passed": true,
+    "core_floor_uv": 1050000,
+    "clock_admission_passed": true,
+    "host_ownership_accepted": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "historical_loaded_provider_identity": {
+    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
+    "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+    "native_loaded_mismatch_proven": true,
+    "new_controller_complete_candidate_round_pending": true,
+    "native_decode_accepted": false,
+    "baseline_promoted": false
+  },
+  "historical_transport_snapshots": [
+    {
+      "mesa_source_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+      "switchfan_hook_commit": "7ecce6c083df1f33def014445f3cacd1c3301095",
+      "candidate_components": {
+        "signed_kmd": {
+          "bytes": 239616,
+          "sha256": "372ec2a93c23b9744ad256bb2e7c10f70f91043272bee209bc56e31f0ea8669f"
+        },
+        "signed_switchfan": {
+          "bytes": 102400,
+          "sha256": "9e2d4826af07a82d083aca6178608d71e983dd5295a1a2175ff38e555a2df7c7"
+        },
+        "candidate_acpi": {
+          "bytes": 4993,
+          "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        },
+        "native_acceptance_client": {
+          "bytes": 95232,
+          "sha256": "56c7edfeeb89758cf2758dbc7a6230eebe19d25c47e2d11d9f1d8b6fae9ae006"
+        },
+        "deferred_installer": {
+          "bytes": 72192,
+          "sha256": "74fa43ecf99194729a04293154679328eeba881c3aed90f26f989a24da378669"
+        }
+      },
+      "native_kmd_source": {
+        "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+        "emc_patch_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
+        "resource_client_seed": "client-route/source-inputs.json",
+        "selected_transplant_manifest_sha256": "03834c302a01249163527c18b862f8130935226b0cb8e54cb8b2a7ae1cfe40f1",
+        "full_development_worktree_built_for_installation": false,
+        "host_mux_patch_commit": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5"
+      },
+      "validation": {
+        "arm64_full_kmd_build": "passed",
+        "arm64_switchfan_build": "passed",
+        "arm64_acceptance_client_build": "passed",
+        "arm64_adapter_control_link": "passed",
+        "cpu_adapter_ownership_and_stop_failures": "passed",
+        "cpu_native_packet_protocol_and_cleanup_failures": "passed",
+        "cpu_gpu_context_queue_regression": "passed",
+        "cpu_resource_mapping_and_cleanup": "passed",
+        "asan_ubsan_platform_control": "passed",
+        "acpi_unchanged_other_devices_and_gpu_nonresource_aml": true,
+        "native_install": "Paired provider/KMD activated via deferred installation; original baseline restored",
+        "native_host1x_clock_lease": "failed0xc0000010 before firmware/DMA",
+        "native_firmware_boot": false,
+        "native_720p_h264": false,
+        "d3d11va_nv12_presentation": false,
+        "native_provider_replacement": "Deferred install and planned boot verified in both directions"
+      }
+    }
+  ]
 }
