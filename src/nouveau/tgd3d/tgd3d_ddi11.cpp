@@ -26,10 +26,12 @@ static const D3D10DDI_DEVICEFUNCS &legacy()
 static bool resource_desc(const D3D11DDIARG_CREATERESOURCE *in, D3D10DDIARG_CREATERESOURCE *out)
 {
    if (!in || !in->pMipInfoList || in->ByteStride ||
-       (in->BindFlags & (D3D11_DDI_BIND_UNORDERED_ACCESS | D3D11_DDI_BIND_DECODER |
+       (in->BindFlags & (D3D11_DDI_BIND_UNORDERED_ACCESS |
                         D3D11_DDI_BIND_VIDEO_ENCODER)) ||
        (in->MiscFlags & (D3D11_DDI_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS |
                         D3D11_DDI_RESOURCE_MISC_BUFFER_STRUCTURED)))
+      return false;
+   if ((in->BindFlags & D3D11_DDI_BIND_DECODER) && in->Format != DXGI_FORMAT_NV12)
       return false;
    /* The 11.1 producer does not provide the WDDM2 TextureLayout tail. Only
     * access fields belonging to the negotiated descriptor revision. */

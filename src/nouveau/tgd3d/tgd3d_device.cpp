@@ -33,6 +33,11 @@ static void APIENTRY CheckFormatSupport(D3D10DDI_HDEVICE hDevice, DXGI_FORMAT fo
    Device *dev = D(hDevice);
    const FormatInfo *info = format_info(format);
    *out = 0;
+   if (format == DXGI_FORMAT_NV12) {
+      *out = video_device_supported(dev) ? D3D11_1DDI_FORMAT_SUPPORT_DECODER_OUTPUT :
+                                          D3D10_DDI_FORMAT_SUPPORT_NOT_SUPPORTED;
+      return;
+   }
    if (!info || ((info->flags & FMT_BC) && !dev->caps->textureCompressionBC)) {
       *out = D3D10_DDI_FORMAT_SUPPORT_NOT_SUPPORTED;
       return;
@@ -64,6 +69,10 @@ static void APIENTRY CheckMultisampleQualityLevels(D3D10DDI_HDEVICE, DXGI_FORMAT
 
 static bool device_teardown(Device *dev)
 {
+   if (!video_device_destroy(dev)) {
+      trace_message("video session cleanup failed; retaining device state for process cleanup");
+      return false;
+   }
    if (dev->runtimeQueue) {
       if (dev->vkdev && dev->fence && dev->cmdPool) flush(dev, false);
       if (FAILED(runtime_queue_quiesce(dev))) {
@@ -120,6 +129,8 @@ static bool device_interface(UINT interfaceVersion, UINT version, UINT flags)
    case D3D10_0_x_DDI_INTERFACE_VERSION:
    case D3D10_0_7_DDI_INTERFACE_VERSION:
       return true; // retain the accepted legacy negotiation
+   case D3D11_1_DDI_INTERFACE_VERSION:
+      return D3D11DDI_EXTRACT_3DPIPELINELEVEL_FROM_FLAGS(flags) == D3D11DDI_3DPIPELINELEVEL_10_0;
    case D3DWDDM2_0_DDI_INTERFACE_VERSION:
       return HIWORD(version) >= D3DWDDM2_0_DDI_BUILD_VERSION &&
          D3D11DDI_EXTRACT_3DPIPELINELEVEL_FROM_FLAGS(flags) == D3D11DDI_3DPIPELINELEVEL_10_0;
@@ -128,17 +139,29 @@ static bool device_interface(UINT interfaceVersion, UINT version, UINT flags)
    }
 }
 
-static HRESULT APIENTRY RetrieveSubObject(D3D10DDI_HDEVICE, UINT32, SIZE_T, void *, SIZE_T, void *)
+static HRESULT APIENTRY RetrieveSubObject(D3D10DDI_HDEVICE hDevice, UINT32 id,
+                                          SIZE_T size, void *params, SIZE_T out_size, void *out)
 {
-   /* No video device is implemented by this renderer yet. Do not publish an
-    * empty video table or touch device state from this free-threaded entry. */
-   return E_NOINTERFACE;
+   /* This entry is free-threaded: read immutable negotiation state and fill
+    * only public ABI buffers. No runtime callbacks or hardware operations. */
+   if (id != D3D11_1DDI_VIDEO_FUNCTIONS || !video_device_supported(D(hDevice))) return E_NOINTERFACE;
+   if (size != sizeof(D3D11_1DDI_VIDEO_INPUT) || out_size != sizeof(D3D11_1DDI_VIDEO_OUTPUT) ||
+       !params || !out) return E_INVALIDARG;
+   auto *input = static_cast<D3D11_1DDI_VIDEO_INPUT *>(params);
+   if (!input->p11VideoDeviceFuncs || (input->Relocate != FALSE && input->Relocate != TRUE)) return E_INVALIDARG;
+   video_fill_table(input->p11VideoDeviceFuncs);
+   static_cast<D3D11_1DDI_VIDEO_OUTPUT *>(out)->Reserved = 0;
+   trace(TGD3D_TRACE_VIDEO, S_OK, 10, uint64_t(size) << 32 | out_size);
+   return S_OK;
 }
 
-SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER,
+SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER h,
                                      const D3D10DDIARG_CALCPRIVATEDEVICESIZE *args)
 {
-   return args && device_interface(args->Interface, args->Version, args->Flags) ? sizeof(Device) : 0;
+   if (!args || !device_interface(args->Interface, args->Version, args->Flags)) return 0;
+   if (args->Interface == D3D11_1_DDI_INTERFACE_VERSION &&
+       (!h.pDrvPrivate || !A(h)->videoEnabled)) return 0;
+   return sizeof(Device);
 }
 
 HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVICE *args)
@@ -152,6 +175,8 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
       trace(TGD3D_TRACE_CREATE_DEVICE, DXGI_ERROR_UNSUPPORTED, args->Interface, args->Flags);
       return DXGI_ERROR_UNSUPPORTED;
    }
+   const bool video = args->Interface == D3D11_1_DDI_INTERFACE_VERSION;
+   if (video && (!adapter->videoEnabled || !args->ppfnRetrieveSubObject)) return DXGI_ERROR_UNSUPPORTED;
    const bool modern = args->Interface == D3DWDDM2_0_DDI_INTERFACE_VERSION;
    if (modern && (!args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb ||
                   !args->pKTCallbacks->pfnEvictCb)) return DXGI_ERROR_UNSUPPORTED;
@@ -165,6 +190,8 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    if (modern) {
       dev->um.pfnSetErrorCb = args->pWDDM2_0UMCallbacks->pfnSetErrorCb;
       dev->createContextVirtual = args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb;
+   } else if (video) {
+      dev->um.pfnSetErrorCb = args->p11UMCallbacks->pfnSetErrorCb;
    } else {
       dev->um.pfnSetErrorCb = args->pUMCallbacks->pfnSetErrorCb;
    }
@@ -218,7 +245,12 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
     * A 1.4-capable physical device alone does not enable native A8 usage. */
    dev->hasA8 = false;
 
-   if (modern) {
+   if (video) {
+      device_fill_table11(args->p11_1DeviceFuncs);
+      dxgi_fill_presentation12(args->DXGIBaseDDI.pDXGIDDIBaseFunctions3,
+                              IS_DXGI_MULTIPLANE_OVERLAY_FUNCTIONS(args->Interface, args->Version));
+      *args->ppfnRetrieveSubObject = RetrieveSubObject;
+   } else if (modern) {
       device_fill_table20(args->pWDDM2_0DeviceFuncs);
       dxgi_fill_presentation14(args->DXGIBaseDDI.pDXGIDDIBaseFunctions5);
       if (args->ppfnRetrieveSubObject) *args->ppfnRetrieveSubObject = RetrieveSubObject;

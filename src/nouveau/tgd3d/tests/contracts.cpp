@@ -1663,10 +1663,12 @@ void ddi11_contracts();
 void device_contracts();
 void overlap_contracts();
 void offer_contracts();
+void video_contracts();
 
 int main(int argc, char **argv)
 {
    device_contracts();
+   video_contracts();
    clear_view_dimensions_contract();
    if (argc == 4 && !strcmp(argv[1], "--export-dxbc")) {
       export_dxbc(argv[2], argv[3]);

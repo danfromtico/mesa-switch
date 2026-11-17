@@ -32,6 +32,7 @@ struct View;
 struct Shader;
 struct RuntimeResource;
 struct RuntimeQueueState;
+struct VideoSession;
 
 /* ------------------------------------------------------------------ */
 /* Adapter                                                             */
@@ -41,6 +42,8 @@ struct Adapter {
    const D3DDDI_ADAPTERCALLBACKS *callbacks = nullptr;
    tg_gpu_adapter_info info = {};
    uint64_t luid = 0;
+   bool videoEnabled = false;
+   std::vector<uint8_t> videoFirmware;
    VulkanAdapter vk;
 };
 void adapter_fill_queries(D3D10_2DDI_ADAPTERFUNCS *table);
@@ -59,6 +62,7 @@ enum FormatFlags : uint16_t {
    FMT_ALPHA_ONE = 1 << 7,     /* X8: alpha reads one and is never written */
    FMT_R_AS_ALPHA = 1 << 8,    /* A8 stored as R8 when VK_FORMAT_A8_UNORM is absent */
    FMT_NO_VIEW = 1 << 9,       /* creation only (XR_BIAS) */
+   FMT_NV12 = 1 << 10,        /* linear Y plus interleaved UV; no ordinary image view */
 };
 
 struct FormatInfo {
@@ -89,6 +93,7 @@ struct Chunk {
    VkDeviceSize size = 0;
    VkDeviceSize used = 0;
    uint32_t live = 0;       /* slices held by a resource or by unfinished GPU work */
+   uint32_t videoWrites = 0; /* decoder Begin/End holds CPU mapping and residency */
    bool dedicated = false;
 };
 
@@ -360,6 +365,7 @@ struct Device {
    UINT interfaceVersion = 0;
    HRESULT lost = S_OK;
    bool removalOnlyErrors = false; /* Draw and DestroyResource DDI error contract. */
+   VideoSession *videoSessions = nullptr; /* includes failed closes retained for retry */
 
    /* Vulkan */
    VkDevice vkdev = VK_NULL_HANDLE;
@@ -551,10 +557,15 @@ void query_pass_end(Device *dev, VkCommandBuffer cmd);
 void dxgi_fill_table(DXGI1_1_DDI_BASE_FUNCTIONS *table, bool has_resolve);
 /* Video integration is not advertised until its runtime/resources are ready. */
 void video_fill_table(D3D11_1DDI_VIDEODEVICEFUNCS *table);
+void video_adapter_init(Adapter *adapter);
+bool video_device_supported(const Device *dev);
+bool video_device_destroy(Device *dev);
 /* Versioned presentation tables, paired with the matching device ABI. */
 void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
+void dxgi_fill_presentation12(DXGI1_2_DDI_BASE_FUNCTIONS *table, bool has_mpo);
 void dxgi_fill_presentation14(DXGI1_4_DDI_BASE_FUNCTIONS *table);
 void dxgi_fill_residency13(DXGI1_3_DDI_BASE_FUNCTIONS *table);
+void dxgi_fill_residency12(DXGI1_2_DDI_BASE_FUNCTIONS *table);
 HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args);
 HRESULT trim_memory(Device *dev);
 uint64_t resource_last_use(const Resource *res);

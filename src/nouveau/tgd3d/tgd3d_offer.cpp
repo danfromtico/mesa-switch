@@ -20,7 +20,8 @@ static HRESULT owners(Device *dev, const DXGI_DDI_HRESOURCE *resources, UINT cou
    if (count && !resources) return E_INVALIDARG;
    for (UINT i = 0; i < count; ++i) {
       const auto *res = reinterpret_cast<const Resource *>(resources[i]);
-      if (!res || res->dev != dev || res->usage == D3D10_DDI_USAGE_IMMUTABLE || res->bufferMapped)
+      if (!res || res->dev != dev || res->usage == D3D10_DDI_USAGE_IMMUTABLE || res->bufferMapped ||
+          (res->slice && res->slice.chunk->videoWrites))
          return E_INVALIDARG;
       for (const auto &map : res->maps) if (map.mapped) return E_INVALIDARG;
       /* Offering shared resources requires keyed-mutex ownership. The current
@@ -84,6 +85,12 @@ void dxgi_fill_residency13(DXGI1_3_DDI_BASE_FUNCTIONS *table)
    table->pfnReclaimResources = ReclaimResources;
 }
 
+void dxgi_fill_residency12(DXGI1_2_DDI_BASE_FUNCTIONS *table)
+{
+   table->pfnOfferResources = OfferResources;
+   table->pfnReclaimResources = ReclaimResources;
+}
+
 uint64_t resource_last_use(const Resource *res)
 {
    return res->kind == ResKind::Image ? res->storage.lastUse :
@@ -133,7 +140,7 @@ HRESULT trim_residency_for_allocation(Device *dev, RuntimeResource *exclude,
       RuntimeResource *owner = resource_runtime(res);
       if (!owner || owner == exclude || res->primary || runtime_is_displayable(owner) ||
           resource_last_use(res) > done) continue;
-      bool mapped = res->bufferMapped;
+      bool mapped = res->bufferMapped || (res->slice && res->slice.chunk->videoWrites);
       for (const auto &map : res->maps) mapped |= map.mapped;
       if (mapped) continue;
       uint64_t bytes = 0, remaining = 0;
@@ -164,7 +171,7 @@ HRESULT APIENTRY TrimResidencySet(DXGI_DDI_ARG_TRIMRESIDENCYSET *args)
    uint64_t budget = args->TrimFlags.TrimToBudget ? args->NumBytesToTrim : 0;
    for (Resource *res = dev->resources; res; res = res->next) {
       const uint64_t use = resource_last_use(res);
-      bool mapped = res->bufferMapped;
+      bool mapped = res->bufferMapped || (res->slice && res->slice.chunk->videoWrites);
       for (const auto &map : res->maps) mapped |= map.mapped;
       if (mapped || use > done || res->primary || runtime_is_displayable(resource_runtime(res))) continue;
       if (!(args->TrimFlags.PeriodicTrim && use <= cutoff) && !budget) continue;

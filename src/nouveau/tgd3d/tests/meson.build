@@ -3,7 +3,7 @@
 # This executable never creates a real Vulkan or WDDM device.
 tgd3d_contracts = executable(
   'tgd3d-contracts',
-  ['contracts.cpp', 'runtime_contracts.cpp', 'runtime_queue_contracts.cpp', 'resource_contracts.cpp', 'shader_cache_contracts.cpp', 'ddi11_contracts.cpp', 'device_contracts.cpp', 'offer_contracts.cpp', 'overlap_contracts.cpp', tgd3d_files],
+  ['contracts.cpp', 'runtime_contracts.cpp', 'runtime_queue_contracts.cpp', 'resource_contracts.cpp', 'shader_cache_contracts.cpp', 'ddi11_contracts.cpp', 'device_contracts.cpp', 'offer_contracts.cpp', 'overlap_contracts.cpp', 'video_contracts.cpp', tgd3d_files],
   include_directories : tgd3d_inc + [include_directories('..')],
   cpp_args : tgd3d_args,
   dependencies : tgd3d_deps,

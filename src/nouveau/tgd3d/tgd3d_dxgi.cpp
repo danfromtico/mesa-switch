@@ -325,6 +325,30 @@ static HRESULT APIENTRY CheckPresentDurationSupport(DXGI_DDI_ARG_CHECKPRESENTDUR
    return S_OK;
 }
 
+void dxgi_fill_presentation12(DXGI1_2_DDI_BASE_FUNCTIONS *table, bool has_mpo)
+{
+   DXGI1_1_DDI_BASE_FUNCTIONS old = {};
+   dxgi_fill_table(&old, true);
+   table->pfnPresent = old.pfnPresent;
+   table->pfnGetGammaCaps = old.pfnGetGammaCaps;
+   table->pfnSetDisplayMode = old.pfnSetDisplayMode;
+   table->pfnSetResourcePriority = old.pfnSetResourcePriority;
+   table->pfnQueryResourceResidency = old.pfnQueryResourceResidency;
+   table->pfnRotateResourceIdentities = old.pfnRotateResourceIdentities;
+   table->pfnBlt = old.pfnBlt;
+   table->pfnResolveSharedResource = old.pfnResolveSharedResource;
+   table->pfnBlt1 = Blt1;
+   dxgi_fill_residency12(table);
+   /* Older Win8 revisions can lack the MPO tail. Follow the negotiated
+    * macro, not the build number alone. Video opt-in claims no overlays. */
+   if (has_mpo) {
+      table->pfnGetMultiplaneOverlayCaps = nullptr;
+      table->pfnGetMultiplaneOverlayFilterRange = nullptr;
+      table->pfnCheckMultiplaneOverlaySupport = nullptr;
+      table->pfnPresentMultiplaneOverlay = nullptr;
+   }
+}
+
 void dxgi_fill_presentation13(DXGI1_3_DDI_BASE_FUNCTIONS *table)
 {
    *table = {};

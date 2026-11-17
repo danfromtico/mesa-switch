@@ -42,6 +42,7 @@ static uint32_t row_bytes(const FormatInfo *info, uint32_t width)
 
 static uint32_t row_count(const FormatInfo *info, uint32_t height)
 {
+   if (info->flags & FMT_NV12) return height + height / 2;
    const uint32_t block = block_dim(info);
    return (height + block - 1) / block;
 }
@@ -491,6 +492,33 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    const FormatInfo *info = format_info(res->format);
    if (!info)
       return DXGI_ERROR_UNSUPPORTED;
+   if (info->flags & FMT_NV12) {
+      /* NVDEC's real tiled DPB is owned by the KMD. The public output is a
+       * distinct linear NV12 allocation populated only after completion.
+       * Array slices have independent Y/UV extents and retain normal WDDM
+       * backing, CPU map, copy and retirement ownership. */
+      if (!video_device_supported(dev) || res->dim != D3D10DDIRESOURCE_TEXTURE2D ||
+          res->mips != 1 || res->arraySize > 17 || res->width != 1280 || res->height != 720 ||
+          res->depth != 1 || res->misc || desc->pPrimaryDesc || desc->SampleDesc.Quality ||
+          (res->usage == D3D10_DDI_USAGE_STAGING ? res->bind != 0 :
+           res->usage != D3D10_DDI_USAGE_DEFAULT || res->bind != D3D11_DDI_BIND_DECODER || res->mapFlags))
+         return DXGI_ERROR_UNSUPPORTED;
+      res->kind = ResKind::Staging;
+      res->maps.resize(res->arraySize);
+      staging_layout(res, info);
+      hr = resource_slice_alloc(res, &res->slice);
+      if (FAILED(hr)) return hr;
+      for (UINT sub = 0; desc->pInitialDataUP && sub < res->arraySize; ++sub) {
+         const auto &up = desc->pInitialDataUP[sub];
+         if (!up.pSysMem) continue;
+         if (up.SysMemPitch < res->width) return E_INVALIDARG;
+         const auto &l = res->layout[sub];
+         copy_rows(res->slice.cpu() + l.offset, l.rowPitch,
+                   static_cast<const uint8_t *>(up.pSysMem), up.SysMemPitch,
+                   res->width, res->height * 3 / 2);
+      }
+      return S_OK;
+   }
    res->imageType = res->dim == D3D10DDIRESOURCE_TEXTURE1D ? VK_IMAGE_TYPE_1D :
                     res->dim == D3D10DDIRESOURCE_TEXTURE3D ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D;
    res->cube = res->dim == D3D10DDIRESOURCE_TEXTURECUBE;
@@ -1282,6 +1310,20 @@ static void APIENTRY ResourceUpdateSubresourceUP(D3D10DDI_HDEVICE hDevice, D3D10
          return;
       }
       const uint32_t block = block_dim(info);
+      if (info->flags & FMT_NV12) {
+         if (res->slice.chunk->videoWrites || box->front || box->back != 1 ||
+             ((box->left | box->top | box->right | box->bottom) & 1) ||
+             row_pitch < (UINT)(box->right - box->left)) {
+            TG_ERROR(dev, E_INVALIDARG); return;
+         }
+         const uint32_t width = box->right - box->left, height = box->bottom - box->top;
+         uint8_t *target = res->slice.cpu() + l.offset;
+         copy_rows(target + (size_t)box->top * l.rowPitch + box->left, l.rowPitch,
+                   static_cast<const uint8_t *>(data), row_pitch, width, height);
+         copy_rows(target + (size_t)(l.height + box->top / 2) * l.rowPitch + box->left, l.rowPitch,
+                   static_cast<const uint8_t *>(data) + (size_t)row_pitch * height, row_pitch, width, height / 2);
+         return;
+      }
       for (LONG z = box->front; z < box->back; z++)
          copy_rows(res->slice.cpu() + l.offset + (size_t)z * l.depthPitch +
                       (size_t)(box->top / block) * l.rowPitch + (size_t)(box->left / block) * info->bytes,
@@ -1416,6 +1458,10 @@ static bool copy_region(Device *dev, Resource *dst, UINT dst_sub, UINT dx, UINT 
    }
 
    if (dst->kind == ResKind::Staging && src->kind == ResKind::Staging) {
+      if ((src->slice && src->slice.chunk->videoWrites) ||
+          (dst->slice && dst->slice.chunk->videoWrites)) {
+         TG_ERROR(dev, E_INVALIDARG); return false;
+      }
       /* Both sides are host memory; order the copy after the GPU. */
       hr = wait_sequence(dev, src->sliceLastWrite, TGD3D_WAIT_READBACK);
       if (SUCCEEDED(hr))
@@ -1429,6 +1475,33 @@ static bool copy_region(Device *dev, Resource *dst, UINT dst_sub, UINT dx, UINT 
          return false;
       }
       const SubLayout &sl = src->layout[src_sub], &dl = dst->layout[dst_sub];
+      if ((info->flags & FMT_NV12) || dst->format == DXGI_FORMAT_NV12) {
+         if (src->format != DXGI_FORMAT_NV12 || dst->format != DXGI_FORMAT_NV12 ||
+             ((box->left | box->top | dx | dy | extent.width | extent.height) & 1u) ||
+             box->front || dz || extent.depth != 1) {
+            TG_ERROR(dev, E_INVALIDARG); return false;
+         }
+         const uint8_t *y = src->slice.cpu() + sl.offset + (size_t)box->top * sl.rowPitch + box->left;
+         const uint8_t *uv = src->slice.cpu() + sl.offset + (size_t)(sl.height + box->top / 2) * sl.rowPitch + box->left;
+         uint32_t source_pitch = sl.rowPitch;
+         uint8_t *saved = nullptr;
+         if (overlap) {
+            const size_t ybytes = (size_t)extent.width * extent.height;
+            saved = new (std::nothrow) uint8_t[ybytes + ybytes / 2];
+            if (!saved) { TG_ERROR(dev, E_OUTOFMEMORY); return false; }
+            copy_rows(saved, extent.width, y, sl.rowPitch, extent.width, extent.height);
+            copy_rows(saved + ybytes, extent.width, uv, sl.rowPitch, extent.width, extent.height / 2);
+            y = saved; uv = saved + ybytes; source_pitch = extent.width;
+         }
+         uint8_t *target = dst->slice.cpu() + dl.offset;
+         copy_rows(target + (size_t)dy * dl.rowPitch + dx, dl.rowPitch,
+                   y, source_pitch, extent.width, extent.height);
+         copy_rows(target + (size_t)(dl.height + dy / 2) * dl.rowPitch + dx, dl.rowPitch,
+                   uv, source_pitch, extent.width, extent.height / 2);
+         delete[] saved;
+         dev->stats.copyBytes += (uint64_t)extent.width * extent.height * 3 / 2;
+         return true;
+      }
       const uint32_t block = block_dim(info);
       const uint32_t bytes = row_bytes(info, extent.width), rows = row_count(info, extent.height);
       uint8_t *saved = nullptr;

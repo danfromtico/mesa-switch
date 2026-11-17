@@ -25,16 +25,20 @@ static const UINT64 supported_versions[] = {
    D3D10_0_7_DDI_SUPPORTED,
 };
 
-static HRESULT APIENTRY GetSupportedVersions(D3D10DDI_HADAPTER, UINT32 *count, UINT64 *versions)
+static HRESULT APIENTRY GetSupportedVersions(D3D10DDI_HADAPTER h, UINT32 *count, UINT64 *versions)
 {
-   if (!count) return E_INVALIDARG;
-   const UINT32 available = sizeof(supported_versions) / sizeof(supported_versions[0]);
+   if (!h.pDrvPrivate || !count) return E_INVALIDARG;
+   const auto *adapter = static_cast<const Adapter *>(h.pDrvPrivate);
+   const UINT32 legacy_count = sizeof(supported_versions) / sizeof(supported_versions[0]);
+   const UINT32 available = legacy_count + (adapter->videoEnabled ? 1 : 0);
    const UINT32 capacity = *count;
    *count = available;
    if (versions && capacity < available)
       return E_OUTOFMEMORY;
-   if (versions)
+   if (versions) {
       memcpy(versions, supported_versions, sizeof(supported_versions));
+      if (adapter->videoEnabled) versions[legacy_count] = D3D11_1_DDI_SUPPORTED;
+   }
    return S_OK;
 }
 
@@ -127,6 +131,7 @@ static HRESULT open_adapter(D3D10DDIARG_OPENADAPTER *args)
       delete adapter;
       return hr;
    }
+   video_adapter_init(adapter);
    args->hAdapter.pDrvPrivate = adapter;
    args->pAdapterFuncs->pfnCalcPrivateDeviceSize = CalcPrivateDeviceSize;
    args->pAdapterFuncs->pfnCreateDevice = CreateDevice;

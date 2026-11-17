@@ -28,6 +28,13 @@ static void adapter_caps_contracts()
    CHECK(versions[0] == D3D10_0_DDI_SUPPORTED && versions[2] == D3D10_0_7_DDI_SUPPORTED &&
          versions[3] == 0 && versions[4] == 0xbeef);
    CHECK(functions.pfnGetSupportedVersions(h, nullptr, versions) == E_INVALIDARG);
+   adapter.videoEnabled = true;
+   count = 3; versions[3] = 0xfeed;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 4);
+   CHECK(versions[3] == 0xfeed);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == S_OK &&
+         versions[3] == D3D11_1_DDI_SUPPORTED && versions[4] == 0xbeef);
+   adapter.videoEnabled = false;
    struct { UINT before, caps, after; } out = {0xdeadbeef, 0xffffffff, 0xbeefdead};
    D3D10_2DDIARG_GETCAPS query = {D3D11DDICAPS_3DPIPELINESUPPORT, nullptr, &out.caps, sizeof(out.caps)};
    CHECK(functions.pfnGetCaps(h, &query) == S_OK && out.caps == 1);

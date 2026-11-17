@@ -126,7 +126,7 @@ HRESULT slice_map(Device *dev, Slice slice)
 
 void slice_unmap(Device *dev, Slice slice)
 {
-   if (slice && slice.chunk->cpu) {
+   if (slice && slice.chunk->cpu && !slice.chunk->videoWrites) {
       dev->vk.UnmapMemory(dev->vkdev, slice.chunk->memory);
       slice.chunk->cpu = nullptr;
    }

@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 #define WIN32_NO_STATUS
 #include "nvdec_native.h"
+#include <winternl.h>
 #undef WIN32_NO_STATUS
 #include <ntstatus.h>
 #include <d3dkmthk.h>

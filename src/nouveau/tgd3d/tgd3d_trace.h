@@ -42,6 +42,7 @@ enum tgd3d_trace_event {
     * 1 create context, 2 destroy, 3 actual submit, 4 GPU wait, 5 GPU signal.
     * E_PENDING is entry; a successful return is admission, not GPU completion. */
    TGD3D_TRACE_RUNTIME_TRANSPORT = 22,
+   TGD3D_TRACE_VIDEO = 23,         /* arg0 operation, arg1 real session or sync target/observed */
    TGD3D_TRACE_TIMING = 30,        /* tgd3d_trace_timing */
 };
 
