@@ -378,15 +378,25 @@ int main(int argc, char **argv)
 
         transport_status = tg_nvdec_native_call(&device, TG_NVDEC_ESCAPE_DECODE, req,
                                                 (uint32_t)in_size, out, (uint32_t)out_size);
+        res = (struct tg_nvdec_decode_result *)out;
         if (transport_status != 0) {
-            fprintf(stderr, "frame %u NVDEC_DECODE failed: 0x%08lx\n", i,
-                    (unsigned long)transport_status);
+            /* A delivered escape can fail inside the driver and still carry
+             * its diagnostic response. Keep that evidence before CLOSE. A
+             * delivery/protocol failure leaves the calloc'd response zero. */
+            fprintf(stderr,
+                    "frame %u NVDEC_DECODE failed: 0x%08lx response_v=%u "
+                    "result=0x%08x sync=%u/%u bytes=%u detail=%.*s "
+                    "request=%u response=%u bitstream=%u slices=%u slot=%u\n",
+                    i, (unsigned long)transport_status, res->version,
+                    res->result, res->expected_syncpoint, res->observed_syncpoint,
+                    res->bytes_written, (int)sizeof(res->error), res->error,
+                    (uint32_t)in_size, (uint32_t)out_size, f->bitstream_size,
+                    f->slice_count, f->pic.curr_slot);
             free(req);
             free(out);
             exit_code = 5;
             goto out;
         }
-        res = (struct tg_nvdec_decode_result *)out;
         if (res->result != 0 || res->error_status || res->mbs_in_error ||
             res->mbs_correctly_decoded != expected_mbs ||
             res->expected_syncpoint != res->observed_syncpoint ||
