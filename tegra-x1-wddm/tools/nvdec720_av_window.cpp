@@ -183,7 +183,7 @@ class Preview {
    }
 public:
    Preview(const Journal &j,const wchar_t *first_capture):journal(j),first_frame_capture(first_capture) {}
-   void start(IDXGIFactory1 *factory, ID3D11Device *device) {
+   void start(IDXGIFactory *factory, ID3D11Device *device) {
       journal.mark("CALL","CreatePreviewWindow");
       WNDCLASSW wc={}; wc.lpfnWndProc=DefWindowProcW;wc.hInstance=GetModuleHandleW(nullptr);
       wc.lpszClassName=L"Nvdec720Preview";wc.hCursor=LoadCursorW(nullptr,MAKEINTRESOURCEW(32512));
@@ -407,12 +407,12 @@ enum class Mode { Present, PrepareOnly, DecodeOnly };
 static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,const wchar_t *capture,
                 Mode mode, const Journal &journal,const wchar_t *first_frame_capture)
 {
-   Com<IDXGIFactory1> factory;
-   journal.invoke("CreateDXGIFactory1",[&]{return CreateDXGIFactory1(__uuidof(IDXGIFactory1),(void **)factory.put());});
+   Com<IDXGIFactory1> enumeration;
+   journal.invoke("CreateDXGIFactory1",[&]{return CreateDXGIFactory1(__uuidof(IDXGIFactory1),(void **)enumeration.put());});
    UINT ordinal=0;
    for (;;++ordinal) {
       Com<IDXGIAdapter1> adapter;
-      require(factory->EnumAdapters1(ordinal,adapter.put()),"Find native adapter");
+      require(enumeration->EnumAdapters1(ordinal,adapter.put()),"Find native adapter");
       DXGI_ADAPTER_DESC1 d={};require(adapter->GetDesc1(&d),"Describe adapter");
       if (!(d.Flags&DXGI_ADAPTER_FLAG_SOFTWARE) && luid_value(d.AdapterLuid)==wanted) break;
    }
@@ -431,8 +431,19 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
    check(hw->lock && hw->unlock && hw->device_context,"D3D11VA context lock");
    std::unique_ptr<Preview> preview;
    if (mode!=Mode::DecodeOnly) {
+      // FFmpeg opens the adapter by ordinal through its own DXGI factory.
+      Com<IDXGIFactory> device_factory;
+      journal.invoke("GetDecodeAdapterFactory",[&]{
+         return adapter->GetParent(__uuidof(IDXGIFactory),(void **)device_factory.put());
+      });
+      if (first_frame_capture || mode==Mode::PrepareOnly) {
+         Com<IUnknown> enumerator_id, device_factory_id;
+         require(enumeration->QueryInterface(IID_IUnknown,(void **)enumerator_id.put()),"Identify enumeration factory");
+         require(device_factory->QueryInterface(IID_IUnknown,(void **)device_factory_id.put()),"Identify device factory");
+         journal.mark(enumerator_id.p==device_factory_id.p?"SAME":"DISTINCT","DXGIFactories");
+      }
       preview=std::make_unique<Preview>(journal,first_frame_capture);
-      preview->start(factory.p,hw->device);
+      preview->start(device_factory.p,hw->device);
    }
    if (mode==Mode::PrepareOnly) {
       preview.reset();
