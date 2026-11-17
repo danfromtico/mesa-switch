@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T05:59:30.865031+00:00",
+  "status": "local candidate; native decode not tested; not a baseline promotion",
+  "mesa_source_commit": "259c825dec8421d34d5e08e33b9d109d9cd89770",
+  "switchfan_hook_commit": "7ecce6c083df1f33def014445f3cacd1c3301095",
+  "changes": [
+    "Real KMT-device-owned decoder session in the coexisting render miniport; previous display escape preserved",
+    "Pending kernel Host1x clock request with actual power reference and passive quiesce callback",
+    "Session stop and retained failures linked to device destruction, adapter stop, power transition and TDR",
+    "Private lifetime gate followed by existing hardware/MC gate; clock-release wait drops the hardware gate to allow quiesce",
+    "Assigned read-only Host1x clock source appended as optional resource12; no global Host1x/PLLP/SMMU writes",
+    "Existing H264 codec/parser reused; acceptance client now uses the native adapter and verifies NV12 frame hashes and session retirement"
+  ],
+  "candidate_components": {
+    "unsigned_tegragpurender.sys": {
+      "bytes": 236544,
+      "sha256": "acecedf6234b41127e7fa232b8013e7b0f63b2c8ec9e6a606c53c83f47fbec04"
+    },
+    "unsigned_switchfan.sys": {
+      "bytes": 99328,
+      "sha256": "a51cc07b3ec5a174b70ad143f59ae503d944d511b3518ef194c80c9417dd0666"
+    },
+    "candidate_acpi.dat": {
+      "bytes": 4993,
+      "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "nvdec720-native.exe": {
+      "bytes": 94208,
+      "sha256": "664b20449aecd55929a2b85a5d41c0b2ec79b8ff8cebba2e79d07c51e0e5d83c"
+    }
+  },
+  "native_kmd_source": {
+    "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+    "emc_patch_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
+    "resource_client_seed": "client-route/source-inputs.json",
+    "selected_transplant_manifest_sha256": "2d59fd9345a60db0cad6a1374576360feb69ccd73beaab8e4b8e34f481fb8e4a",
+    "full_development_worktree_built_for_installation": false
+  },
+  "installed_baseline": {
+    "last_authenticated_read_utc": "2026-11-17T04:14:51.7523303Z",
+    "changed_this_round": false,
+    "kmd_sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e",
+    "umd_sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a",
+    "icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+  },
+  "validation": {
+    "arm64_full_kmd_build": "passed",
+    "arm64_switchfan_build": "passed",
+    "arm64_acceptance_client_build": "passed",
+    "arm64_adapter_control_link": "passed",
+    "cpu_adapter_ownership_and_stop_failures": "passed",
+    "cpu_native_packet_protocol_and_cleanup_failures": "passed",
+    "cpu_gpu_context_queue_regression": "passed",
+    "cpu_resource_mapping_and_cleanup": "passed",
+    "asan_ubsan_platform_control": "passed",
+    "acpi_unchanged_other_devices_and_gpu_nonresource_aml": true,
+    "native_install": false,
+    "native_host1x_clock_lease": false,
+    "native_firmware_boot": false,
+    "native_720p_h264": false,
+    "d3d11va_nv12_presentation": false
+  },
+  "clock_policy": {
+    "candidate_nvdec_hz": 204000000,
+    "parent": "inherited locked PLLP408MHz divided by2",
+    "host1x": "inherited only; admit PLLP no faster than102MHz or CLK_M; no rate writes",
+    "gpu_emc_policy_changed": false,
+    "final_performance_policy": false
+  },
+  "noble_evidence": {
+    "capture_date": "2026-11-14",
+    "kernel": "4.9.140-l4t #5 Sep26 2024",
+    "nvdec_boot_parameter": "nvdec_enabled=0",
+    "nvdec_configured_hz": 480000000,
+    "nvdec_parent": "pll_c3",
+    "nvdec_enable_count": 0,
+    "host1x_hz": 81600000,
+    "vdd_core_mv": 775,
+    "active_decode_proved": false,
+    "reference_source_commit": "2d0059fd3167a8df756de2aa0489d4aa70a9fc15",
+    "reference_binary_match_verified": false,
+    "license_scope": "GPL references inspected for register/voltage contracts; no GPL implementation copied into MIT sources"
+  },
+  "review": {
+    "mode": "main-agent self-review",
+    "external_review_required": false,
+    "external_review_performed": false,
+    "scope": "local source, object builds and CPU controls; native behavior pending"
+  },
+  "remaining": [
+    "Verify current device ownership and actual power runtime before staging; the last live observation was recovery mode7 with CPU error0xc0000483",
+    "Freeze/sign one coordinated KMD/SwitchFan/ACPI/client set and preserve exact baseline recovery",
+    "Perform actual clock lease, firmware boot and short720p H264 decode with pixel and completion evidence",
+    "Connect ordinary D3D11VA runtime firmware/input ownership and NV12 presentation; current legacy UMD probe path is not production ready",
+    "After720p acceptance, validate1080p;2K/4K remain independently retained and untested"
+  ]
+}
