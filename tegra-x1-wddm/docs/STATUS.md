@@ -1,11 +1,16 @@
 # GPU status
 
 Current status,2026-11-17: fixed90-degree row-scan DWM and native Win32 vkcube
-retain their completed acceptance. The NVDEC candidate reached the real KMT
-device and LOAD escape, then failed Host1x clock acquisition before firmware
-or DMA. The original11-file display/power baseline has been restored and the
-trial cleaned. See [the current native record](NVDEC_CLOCK_NATIVE_20261117.json)
-and [the baseline](ROW_SCAN_BASELINE_20261116.md). Entries below are historical
+retain their completed acceptance. Native ETW proved that a deferred provider
+replacement can leave the previous image loaded after the disk SYS and INF
+already match the target. The controller now checks loaded PE identity and
+permits one evidence-backed reconciliation boot. The original11-file baseline,
+loaded provider/KMD,90-degree configuration and power policy are restored;
+temporary packages, tasks, files and diagnostics are cleaned. The prior KMT
+LOAD failure occurred before admission and firmware/DMA, but its new-provider
+execution was not proven.720p/1080p decode acceptance remains open. See
+[the loaded-image record](NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json) and
+[the baseline](ROW_SCAN_BASELINE_20261116.md). Entries below are historical
 snapshots; their startup/rotation priorities and component sets are superseded.
 
 **Owner priority update:** repair the current pre-logon reboot first; then complete shader caching and measured ~60 Hz VBlank/presentation pacing before hardware rotation. Idle desktops should submit on demand. The owner explicitly requires native startup to stay enabled and authorizes deploying the next reviewed fix directly for their tests. The SD is currently mounted for offline diagnosis.

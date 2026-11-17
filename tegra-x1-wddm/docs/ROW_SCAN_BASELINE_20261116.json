@@ -23,7 +23,8 @@
       "commit": "c1f25986eee51c0ee01088c3ecb3c9508dea2479"
     },
     "ICD": {
-      "commit": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f"
+      "commit": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+      "scope": "Recorded c0-based working-tree build; use full binary SHA256, not a clean-commit assumption."
     }
   },
   "baseline_files": [
@@ -264,7 +265,7 @@
     "0-degree fresh pattern acceptance",
     "Long-term stability"
   ],
-  "review": "Gemini4 Carbon High pending until2026-11-20T23:53:18Z; no independent approval",
+  "review": "Current integration changes: main-agent source review. Historical independent review was not completed; external review is not a current requirement.",
   "user_stop": "180-to90 investigation/replay remains stopped. User returned device for vkcube acceptance; completed without direction/driver/power changes. Continue authorized decode integration locally.",
   "cleanup": {
     "native_files_archived_and_hash_checked": 190,
@@ -305,7 +306,7 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-17T08:53:11.167757+00:00",
+  "updated_utc": "2026-11-17T09:50:29.6964673Z",
   "device_access": {
     "updated_utc": "2026-11-17T03:17:50.4327624Z",
     "owner": "user",
@@ -994,8 +995,8 @@
     }
   },
   "decode_integration": {
-    "updated_utc": "2026-11-17T08:53:11.167757+00:00",
-    "state": "Real KMT clock-acquisition failure; original display/power baseline restored and cleaned;720p/1080p not accepted",
+    "updated_utc": "2026-11-17T09:50:29.6964673Z",
+    "state": "Loaded/disk provider mismatch proven; original90-degree display/power baseline restored and cleaned;720p/1080p not accepted",
     "active_sequence": [
       "720p H.264",
       "1080p H.264 after720 acceptance"
@@ -1113,10 +1114,15 @@
       "native_decode_accepted": false
     },
     "record": "NVDEC_INTEGRATION_20261116.json",
-    "latest_native_result": "NVDEC_CLOCK_NATIVE_20261117.json",
+    "latest_native_result": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
     "baseline_promoted": false,
-    "baseline_restored_and_cleanup_verified_utc": "2026-11-17T08:41:52.2909514Z",
-    "display_scope": "Current/saved90-degree row-scan configuration read back; no new physical-screen acceptance"
+    "baseline_restored_and_cleanup_verified_utc": "2026-11-17T09:50:29.6964673Z",
+    "display_scope": "Current/saved90-degree row-scan configuration read back; no new physical-screen acceptance",
+    "loaded_provider_verification": {
+      "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+      "baseline_provider_and_kmd_pe_verified": true,
+      "native_decode_accepted": false
+    }
   },
   "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",
   "deferred_load_stability": "LOAD_STABILITY_FOLLOWUP_20261116.json; weather/browser/vkpeak-exit grouped as user-suspected common cause, unconfirmed",

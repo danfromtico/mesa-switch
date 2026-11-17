@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-17T08:53:11.167757+00:00",
-  "state": "Real KMT clock-acquisition failure; original display/power baseline restored and cleaned;720p/1080p not accepted",
+  "updated_utc": "2026-11-17T09:50:29.6964673Z",
+  "state": "Loaded/disk provider mismatch proven; original90-degree display/power baseline restored and cleaned;720p/1080p not accepted",
   "installed_baseline_changed": false,
   "resolution_roadmap": {
     "active_sequence": [
@@ -193,10 +193,9 @@
     "clock_native_result": "NVDEC_CLOCK_NATIVE_20261117.json"
   },
   "remaining": [
-    "Sign one paired diagnostic KMD/provider candidate and collect the exact failing clock call once using the verified deferred installer",
-    "Fix the demonstrated clock contract failure without synthesizing ownership or success",
-    "Execute real firmware boot, DMA and720p H264 output; then ordinary D3D11VA/NV12/window presentation",
-    "After720p acceptance validate1080p;2K/4K remain independently retained and untested"
+    "Prepare the existing paired diagnostic candidate with controller948bd0c8 and the hashed image-rundown helper; verify the actually loaded provider before one real LOAD call.",
+    "Resolve only the next demonstrated failure, then complete720p H.264 hardware decode and D3D11VA/NV12/window presentation, followed by1080p.",
+    "Keep2K/4K as existing independent implementation, untested and undecided; retain fixed90 display/power baseline."
   ],
   "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
   "client_route_candidate": {
@@ -393,7 +392,7 @@
     "review": "main-agent self-review; real decoder DMA still untested"
   },
   "temporary_candidate_components_restored": true,
-  "latest_native_result": "NVDEC_CLOCK_NATIVE_20261117.json",
+  "latest_native_result": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
   "review": {
     "mode": "main-agent self-review",
     "external_review_required": false,
@@ -445,5 +444,13 @@
       "arm64_provider_build": 0,
       "clock_lifetime_and_adapter_controls": true
     }
+  },
+  "loaded_provider_identity": {
+    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
+    "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+    "native_loaded_mismatch_proven": true,
+    "new_controller_complete_candidate_round_pending": true,
+    "native_decode_accepted": false,
+    "baseline_promoted": false
   }
 }

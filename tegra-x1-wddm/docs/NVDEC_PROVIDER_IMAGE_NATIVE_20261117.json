@@ -1,0 +1,565 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T09:50:29.6964673Z",
+  "status": "Loaded/disk provider mismatch proven during recovery; original baseline restored;720p/1080p decoding remains unaccepted",
+  "branch": "tgd3d-vulkan",
+  "controller_source": {
+    "commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+    "files": {
+      "tools/loaded_image_identity.c": {
+        "bytes": 4646,
+        "sha256": "7dcfa6d51e7636b19a52c1045baf98f9ae68031aff2a1d9573e7ba0e8827bf03"
+      },
+      "tools/nvdec-resource-trial/Pair.ps1": {
+        "bytes": 29675,
+        "sha256": "9cb757f01e4c9d93f57e55cc21ff6d832b51e4458b121e8d3ef92d80da9015e9"
+      },
+      "tools/nvdec-resource-trial/Provider.ps1": {
+        "bytes": 16148,
+        "sha256": "347a5eace6272f87c002277cf151d8ed1107eef5643ff03bd8f0581afd99e77c"
+      },
+      "tools/nvdec-resource-trial/tests/Test-Provider.ps1": {
+        "bytes": 9686,
+        "sha256": "064542c296f098d6b8863621d9ecdcae0fe89def31fa9dfd7b0186905b371eaa"
+      },
+      "tools/nvdec-resource-trial/README.md": {
+        "bytes": 9262,
+        "sha256": "3f6260626ae513f2334f72aa3ba2481ada714fe867623cc7d897ec4f626d1f77"
+      }
+    }
+  },
+  "diagnostic_candidate": {
+    "mesa_diagnostic_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+    "provider_hook_commit": "7ecce6c083df1f33def014445f3cacd1c3301095",
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json",
+    "provider_source": "WindowsDrivers7ecce6c083df1f33def014445f3cacd1c3301095 with Mesa2711362bf4983f9adaa63f267842a5c29c0087f9 Host1x lease diagnostics",
+    "frozen_source_manifest": {
+      "bytes": 1006,
+      "sha256": "304853fdafed4313cbe0bd36104dfb2b892db8b4f8aae242ea85f65a2827c142"
+    },
+    "signed_kmd": {
+      "Length": 240648,
+      "Sha256": "250bf330e40f6c340baaea482791c7d42bcdbed62ad8dfde505b55f4e021b6fd"
+    },
+    "signed_provider": {
+      "Length": 103432,
+      "Sha256": "8a2d4e953e1fb2e9daaaaa11581b470b26c435db5e30bc03b43f9027b3cc798a"
+    },
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "signed_catalogs": {
+      "package": {
+        "Length": 8392,
+        "Sha256": "bca39b9051e9c8e9257c1bbff2a5685f80ee1f60e76540ef4d565884a16b9d18"
+      },
+      "provider": {
+        "Length": 4102,
+        "Sha256": "65edd1f54954c9bf125bfee4868855d4d4d5b991453dde38bc8f0d2de834f7fb"
+      }
+    },
+    "native_program": {
+      "Length": 95232,
+      "Sha256": "56c7edfeeb89758cf2758dbc7a6230eebe19d25c47e2d11d9f1d8b6fae9ae006"
+    },
+    "firmware": {
+      "Length": 128000,
+      "Sha256": "7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909"
+    },
+    "firmware_record": "NVDEC_FIRMWARE_PROVENANCE_20261116.json",
+    "sample": {
+      "sample720.h264": {
+        "Length": 82089,
+        "Sha256": "64d0a9c53feb4c601cbac7468f3ee0277ca785e253f69b6d18ee6a8f35cc78e4"
+      },
+      "sample720.sha256": {
+        "Length": 402,
+        "Sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5"
+      }
+    },
+    "umd_icd_changed": false,
+    "signature_members_verified": 32,
+    "promoted": false
+  },
+  "native_attempt": {
+    "begin": "2026-11-17T09:26:20.8844080Z",
+    "end": "2026-11-17T09:26:22.4312819Z",
+    "boot": "2026-11-17T09:17:54.3501180Z",
+    "luid": "00000000000a4c39",
+    "exit": 5,
+    "exit_observation": "cmd producer wrote native720.exit after the executable returned; not PowerShell Process.ExitCode",
+    "adapter_open": "0x00000000",
+    "device_create": "0x00000000",
+    "escape_delivery": "0x00000000",
+    "load_result": "0xc0000010",
+    "consumer_boundary": "Host1x IRP completed before admission",
+    "provider_diagnostics_before": {
+      "Stage": null,
+      "Status": null,
+      "StatusPresent": false,
+      "StagePresent": false
+    },
+    "provider_diagnostics_after": {
+      "Stage": null,
+      "Status": null,
+      "StatusPresent": false,
+      "StagePresent": false
+    },
+    "provider_handler_reached_proven": false,
+    "provider_loaded_image_captured_in_decode_boot": false,
+    "firmware_started": false,
+    "frames": 0,
+    "dma_submitted": false,
+    "stderr": "NVDEC_CALL OpenAdapterFromLuid\r\nNVDEC_RETURN OpenAdapterFromLuid 0x00000000\r\nNVDEC_CALL CreateDevice\r\nNVDEC_RETURN CreateDevice 0x00000000\r\nNVDEC_CALL Escape command=1 session=0\r\nNVDEC_RETURN Escape command=1 delivery=0x00000000 result=0xc0000010\r\nNVDEC_LOAD failed: 0xc0000010 Host1x IRP completed before admission: NVDEC backend is absent; PLLP=0x00000000 HostSource=0x00000000\r\nNVDEC_CALL DestroyDevice\r\nNVDEC_RETURN DestroyDevice 0x00000000\r\n",
+    "dwm_before": [
+      {
+        "Modules": [
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+        ],
+        "Id": 1408,
+        "Start": "2026-11-17T09:18:26.8969233Z"
+      }
+    ],
+    "dwm_after_failure": [
+      {
+        "Modules": [
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+        ],
+        "Id": 1408,
+        "Start": "2026-11-17T09:18:26.8969233Z"
+      }
+    ],
+    "boot_continued_after_failure": true
+  },
+  "confirmed_installation_gap": {
+    "recovery_boot": "2026-11-17T09:35:04.7315840Z",
+    "disk_target": {
+      "timestamp": 0,
+      "checksum": 163480,
+      "image_size": 122880,
+      "sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+    },
+    "loaded_pe_matches_candidate": {
+      "checksum": 130754,
+      "timestamp": 0,
+      "image_size": 126976
+    },
+    "corresponding_candidate_sha256": "8a2d4e953e1fb2e9daaaaa11581b470b26c435db5e30bc03b43f9027b3cc798a",
+    "events": [
+      {
+        "image": "switchfan.sys",
+        "checksum": 130754,
+        "timestamp": 0,
+        "image_size": 126976,
+        "pid": 0,
+        "opcode": 3
+      },
+      {
+        "image": "switchfan.sys",
+        "checksum": 130754,
+        "timestamp": 0,
+        "image_size": 126976,
+        "pid": 0,
+        "opcode": 4
+      }
+    ],
+    "event_loss": 0,
+    "scope": "Loaded PE checksum/size/timestamp identity, not a cryptographic hash of kernel memory",
+    "subsequent_boot": "2026-11-17T09:39:29.7173720Z",
+    "subsequent_loaded_pe_matches_baseline": {
+      "image_size": 122880,
+      "timestamp": 0,
+      "checksum": 163480
+    },
+    "new_driver_install_on_reconciliation_boot": false,
+    "cause_limit": "Disk/live mismatch is directly proven in the recovery direction. Missing diagnostic fields in the earlier decode boot are consistent with the same sequencing gap, but no image rundown was captured then; the exact provider/WDF failure is not yet proven."
+  },
+  "changes": [
+    "Use public ETW image DCStart/DCEnd and TDH to verify the loaded provider against the hashed package before selection or recovery is accepted.",
+    "Retain per-boot observations; reject missing/lost/unknown events and ambiguous PE identities. Do not repeat an interrupted query in the same boot.",
+    "Allow one explicit reconciliation boot only after a completed deferred-install boot and a current mismatch matching the known other package; never reinstall or loop on SSH failure.",
+    "Preserve all clock, power-reference, quiesce, GPU synchronization and decode semantics. No new UMD capability is exposed."
+  ],
+  "validation": {
+    "arm64_helper": {
+      "bytes": 66560,
+      "sha256": "0dd713bf0665d9a84ea60709fe4ea6275a25333188fbff81c07d75d81f2783a2"
+    },
+    "build": "LLVM-MinGW ARM64 -std=c11 -O2 -Wall -Wextra -Werror -static -municode; advapi32/tdh/ole32",
+    "provider_controls": "PASS: provider staging, deferred replacement, loaded-image gating, known-mismatch recovery and duplicate/unknown restart rejection (CPU only)",
+    "provider_control_source_hashes": {
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "347a5eace6272f87c002277cf151d8ed1107eef5643ff03bd8f0581afd99e77c",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "9cb757f01e4c9d93f57e55cc21ff6d832b51e4458b121e8d3ef92d80da9015e9",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "064542c296f098d6b8863621d9ecdcae0fe89def31fa9dfd7b0186905b371eaa"
+    },
+    "control_scope": "PowerShell orchestration with substituted native operations; no hardware proof from the controls.",
+    "native_provider_verifier": {
+      "Scope": "Actual read-only ETW/PE provider check and same-boot receipt reuse; no installer or reboot",
+      "Observation": {
+        "Begin": "2026-11-17T09:44:59.9048759Z",
+        "Boot": "2026-11-17T09:39:29.7173720Z",
+        "Phase": "Verified",
+        "Target": {
+          "Length": 98832,
+          "Sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+        },
+        "ExpectedPe": {
+          "image_size": 122880,
+          "timestamp": 0,
+          "checksum": 163480
+        },
+        "Tool": {
+          "Length": 66560,
+          "Sha256": "0dd713bf0665d9a84ea60709fe4ea6275a25333188fbff81c07d75d81f2783a2"
+        },
+        "Etl": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-clock-boundary-20261117\\provider-loaded-baseline-3cb7b63073654d1885cfb8d99069fafd.etl",
+        "MatchesOther": false,
+        "ProcessId": 6788,
+        "Exit": 0,
+        "Stdout": "{\"image\":\"switchfan.sys\",\"checksum\":163480,\"timestamp\":0,\"image_size\":122880,\"pid\":0,\"opcode\":3}\r\n{\"image\":\"tegragpurender.sys\",\"checksum\":216523,\"timestamp\":0,\"image_size\":225280,\"pid\":0,\"opcode\":3}\r\n{\"image\":\"switchfan.sys\",\"checksum\":163480,\"timestamp\":0,\"image_size\":122880,\"pid\":0,\"opcode\":4}\r\n{\"image\":\"tegragpurender.sys\",\"checksum\":216523,\"timestamp\":0,\"image_size\":225280,\"pid\":0,\"opcode\":4}\r\n",
+        "Stderr": "StopTrace=0 events_lost=0 buffers_lost=0 session=NvdecImageIdentity-6788\r\nProcessTrace=0 CloseTrace=0 matches=4 property_errors=0\r\n",
+        "Images": [
+          {
+            "image": "switchfan.sys",
+            "checksum": 163480,
+            "timestamp": 0,
+            "image_size": 122880,
+            "pid": 0,
+            "opcode": 3
+          },
+          {
+            "image": "switchfan.sys",
+            "checksum": 163480,
+            "timestamp": 0,
+            "image_size": 122880,
+            "pid": 0,
+            "opcode": 4
+          }
+        ],
+        "EtlFile": {
+          "Sha256": "96A3F7A9D1CE52983AA56EA02920393356D947D9299253D26A9E3C31DAC91BE8",
+          "Length": 2162688
+        },
+        "End": "2026-11-17T09:45:02.6861251Z"
+      },
+      "Utc": "2026-11-17T09:45:03.0611229Z",
+      "SourceSha256": "347a5eace6272f87c002277cf151d8ed1107eef5643ff03bd8f0581afd99e77c"
+    },
+    "native_reconciliation_scope": "A bounded manual recovery script exercised the demonstrated extra-boot recovery. The new ProviderLoadRestart branch passed CPU controls; its next complete candidate installation remains pending.",
+    "review": {
+      "mode": "main-agent source review",
+      "external_review_required": false,
+      "external_review_performed": false
+    }
+  },
+  "boots": {
+    "planned_observed": [
+      "2026-11-17T09:14:09.4235380Z",
+      "2026-11-17T09:17:54.3501180Z",
+      "2026-11-17T09:28:11.2488380Z",
+      "2026-11-17T09:35:04.7315840Z",
+      "2026-11-17T09:39:29.7173720Z"
+    ],
+    "unexpected_observed": 0,
+    "extra_recovery_reason": "Actual ETW loaded/disk identity mismatch; no retry inferred from connection errors."
+  },
+  "recovery": {
+    "utc": "2026-11-17T09:49:08.7745911Z",
+    "boot": "2026-11-17T09:39:29.7209230Z",
+    "code": 0,
+    "active": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524",
+    "task": {
+      "State": 3,
+      "Result": 0,
+      "Delay": "PT5S",
+      "Enabled": true
+    },
+    "components": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
+        "Length": 32264
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Sha256": "E95287CBEB1D2C325BAACB9685AFFD1D24783B22ECADC1801BA1DFFCFE7CC25E",
+        "Length": 204808
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+        "Length": 138
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Sha256": "0502BD0AED0AA3E236D24B0977D389BF04C64D777BA94CAD4C5C27A188B9E438",
+        "Length": 4848
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+        "Length": 42440
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
+        "Length": 1517568
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+        "Length": 921600
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
+        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+        "Length": 17652224
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Sha256": "639A28DE7C9D2DA157E8B47E88A8DDD7400651C352D3C4CA3C403BAE52AF7437",
+        "Length": 98832
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+        "Length": 3274240
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+        "Length": 60416
+      }
+    ],
+    "display": {
+      "current": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "registry": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "source_mode": {
+        "width": 720,
+        "height": 1280
+      },
+      "target_signal": {
+        "width": 720,
+        "height": 1280
+      },
+      "path_rotation": 2,
+      "changed": false
+    },
+    "dwm": [
+      {
+        "Modules": [
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+          "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+        ],
+        "Id": 1392,
+        "Start": "2026-11-17T09:40:02.7127033Z"
+      }
+    ],
+    "power": {
+      "Utc": "2026-11-17T09:49:08.3683446Z",
+      "Power": {
+        "Version": 2,
+        "IsLite": 1,
+        "CpuConfigured": 1,
+        "PowerMode": 1,
+        "CpuTargetKhz": 816000,
+        "CpuActualKhz": 805341,
+        "CpuBootKhz": 998400,
+        "CpuMv": 615,
+        "RamActualKhz": 1331200,
+        "GpuPolicyMode": 1,
+        "GpuPolicyMinKhz": 76800,
+        "GpuPolicyMaxKhz": 537600,
+        "GpuReportedKhz": 537600,
+        "GpuReportedUv": 590000,
+        "GpuStatusWord": 103229209,
+        "TempC": 39,
+        "TempValid": 1,
+        "FanDuty": 51,
+        "Flags": 20,
+        "CpuPolicyMinKhz": 102000,
+        "CpuPolicyMaxKhz": 1581000,
+        "CpuRequestedMaxKhz": 1581000,
+        "GpuRequestedMaxKhz": 537600,
+        "CpuSpeedo": 1630,
+        "CpuProcessId": 0,
+        "CpuDfllAvailable": 1,
+        "CpuDfllActive": 1,
+        "CpuLastError": 0,
+        "CpuLoadPermille": 437,
+        "GpuSampleAgeMs": 203,
+        "SocTempC": 39,
+        "BoardTempC": 38,
+        "TempSampleAgeMs": 1531
+      },
+      "Battery": {
+        "Version": 1,
+        "LimitCenter": 85,
+        "BandMin": 80,
+        "BandMax": 90,
+        "CapacityPercent": 89,
+        "VoltageMv": 3847,
+        "Reg00InputSrc": 2,
+        "Reg01PwrOn": 0,
+        "Reg08SysStat": 68,
+        "LastApplyStatus": 0,
+        "Flags": 7
+      }
+    },
+    "emc": {
+      "Utc": "2026-11-17T09:49:08.5714707Z",
+      "Emc": {
+        "Version": 1,
+        "Flags": 367,
+        "ActualKhz": 1331200,
+        "BootKhz": 2500000,
+        "SampleAgeMs": 109,
+        "LastError": 0,
+        "EnumerationError": 0,
+        "RateCount": 4,
+        "RatesKhz": [
+          204000,
+          1331200,
+          1600000,
+          2500000
+        ],
+        "ActmonError": 0,
+        "AverageActiveKhz": 43354,
+        "RawActiveKhz": 52940,
+        "TargetKhz": 1331200,
+        "DisplayFloorKhz": 38304,
+        "QosError": 0,
+        "TransitionCount": 758
+      }
+    },
+    "fan": {
+      "Utc": "2026-11-17T09:49:08.6027206Z",
+      "Fan": {
+        "Version": 1,
+        "Mode": 1,
+        "Duty": 51,
+        "TargetPwm": 21,
+        "Flags": 1,
+        "SampleAgeMs": 1874,
+        "FilteredTempMc": 40119
+      }
+    },
+    "candidate_packages_removed": [
+      "oem0.inf",
+      "oem2.inf"
+    ],
+    "temporary_tasks": 0,
+    "paths_removed": [
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-clock-boundary-20261117",
+        "Absent": true
+      },
+      {
+        "Path": "C:\\Users\\ruje\\nvdec-clock-boundary-20261117.zip",
+        "Absent": true
+      }
+    ],
+    "diagnostic_values_removed": {
+      "Host1xFailureStage": 0,
+      "Host1xFailureStatus": 0
+    },
+    "physical_screen_acceptance_added": false,
+    "cleanup_receipt_removal_pending": false,
+    "final_cleanup": {
+      "ReceiptAbsent": true,
+      "Dwm": [
+        {
+          "Id": 1392,
+          "Start": "2026-11-17T09:40:02.7127033Z"
+        }
+      ],
+      "Utc": "2026-11-17T09:50:29.6964673Z",
+      "Boot": "2026-11-17T09:39:29.7209230Z",
+      "Code": 0
+    }
+  },
+  "evidence": {
+    "archive": {
+      "bytes": 950092,
+      "sha256": "c112ac57f325ff6b66d9ada8c31c2a2f401b5fb731d3a34df13fcad3afac6fa1",
+      "verified_members": 41
+    },
+    "location": "Private local native-evidence.zip and recovery-receipts; no firmware or ETL binary committed",
+    "key_files": {
+      "native720-first-call.stdout": {
+        "bytes": 2683,
+        "sha256": "3fadda125e003b94d125b8e32bbf880697ef5286c25678b9b9bf252002a583e3"
+      },
+      "decode-failure.stdout": {
+        "bytes": 50337,
+        "sha256": "191ea8549af9f38be4d373632e6385932c3a04cd4f6ce915b18dfa18d0ecc0bd"
+      },
+      "provider-load-mismatch.json": {
+        "bytes": 964,
+        "sha256": "e1419f5fb49a7b3313191425b28b9d66d36b66fb7028f0506cf1141795c43bd1"
+      },
+      "loaded-images-after-original-boot.stdout": {
+        "bytes": 196,
+        "sha256": "e7933182a58ca8ff1c6c5608711ac4ec5ede25417055b5d6707eb75c48d7fc2c"
+      },
+      "loaded-images-final-original.stdout": {
+        "bytes": 196,
+        "sha256": "bc848dc3f65ff35936ee59e70a8d8c33d40aa0db91ea243d39f5ad98db8b95dd"
+      },
+      "provider-image-native.stdout": {
+        "bytes": 1763,
+        "sha256": "ae5f10f80fc0946aa8bcd85d5207953eda7b031593917923fe16015da2539b9d"
+      },
+      "native-cleanup.stdout": {
+        "bytes": 3983,
+        "sha256": "dae1f54f7d2a0ff5d8c45f56f952c492014a7d16cf352be11c80fb6792a2841d"
+      },
+      "final-native-cleanup.stdout": {
+        "bytes": 167,
+        "sha256": "ea4e7dce8a5516d30793a58f1a883ba7309cd9ee44eda6d9aca26cc72cd4f2a8"
+      }
+    }
+  },
+  "next": [
+    "Prepare the existing paired diagnostic candidate with controller948bd0c8 and the hashed image-rundown helper; verify the actually loaded provider before one real LOAD call.",
+    "Resolve only the next demonstrated failure, then complete720p H.264 hardware decode and D3D11VA/NV12/window presentation, followed by1080p.",
+    "Keep2K/4K as existing independent implementation, untested and undecided; retain fixed90 display/power baseline."
+  ],
+  "baseline_source": {
+    "KMD": {
+      "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+      "emc_diff_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852"
+    },
+    "UMD": {
+      "commit": "c1f25986eee51c0ee01088c3ecb3c9508dea2479"
+    },
+    "ICD": {
+      "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+      "scope": "Recorded c0-based working-tree build; not asserted to be a clean commit build. Full installed ICD SHA256 is authoritative."
+    },
+    "platform_components": "Retained original signed packages; component hashes in recovery.components and historical baseline records."
+  }
+}

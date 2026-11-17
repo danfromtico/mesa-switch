@@ -381,5 +381,11 @@
     "native-cleanup.json": "92179b230e89d12762fd0cdaefda22100d2b0ac055b2f2b2c0aa44967fa889f6",
     "final-native-cleanup.json": "50bf3f999fd0e09dd959d515e8801df24daac85ce861b7118656d13097c6c557",
     "system-identity.json": "426eed9d5675974d35368d7a26a638744b86354a0e8695ce9dee32b999081d42"
+  },
+  "interpretation_update": {
+    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
+    "utc": "2026-11-17T09:50:29.6964673Z",
+    "finding": "Subsequent native ETW proved deferred provider disk/live image mismatch. This earlier round did not capture the provider loaded image in the decode boot; the0xc0000010 result does not prove a failure inside the newly built provider.",
+    "next": "Verify actual loaded candidate image before another LOAD call; retain the original return/status and recovery evidence."
   }
 }
