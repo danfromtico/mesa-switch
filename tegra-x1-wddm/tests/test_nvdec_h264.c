@@ -392,6 +392,12 @@ static void test_parser(const char *path)
     CHECK(!tg_nvdec_stage1_supported(3840, 2160, 3840, 2160, 1, 8));
     CHECK(!tg_nvdec_stage1_supported(1280, 720, 1280, 720, 2, 8));
     for (i = 0; i < count; i++) {
+        bool flat4 = true, flat8 = true;
+        for (unsigned list=0;list<6;++list) for (unsigned k=0;k<16;++k)
+            if (frames[i].pic.scaling4x4[list][k]!=16) flat4=false;
+        for (unsigned list=0;list<2;++list) for (unsigned k=0;k<64;++k)
+            if (frames[i].pic.scaling8x8[list][k]!=16) flat8=false;
+        CHECK(flat4 && flat8); /* Main profile, no explicit scaling matrices. */
         CHECK(frames[i].slice_offsets[0] == 0);
         CHECK(frames[i].slice_offsets[frames[i].slice_count] == frames[i].bitstream_size);
         CHECK(frames[i].bitstream_offset + frames[i].bitstream_size <= info.slice_data_bytes);

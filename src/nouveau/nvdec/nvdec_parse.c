@@ -138,32 +138,13 @@ static bool next_nal(const uint8_t *data, size_t size, size_t *pos,
     return *nal_size > 0;
 }
 
-static void default_scaling(uint8_t s4[6][16], uint8_t s8[2][64])
+static void flat_scaling(uint8_t s4[6][16], uint8_t s8[2][64])
 {
-    static const uint8_t i4[16] = {
-        6, 13, 13, 20, 20, 20, 28, 28, 28, 28, 32, 32, 32, 32, 36, 36,
-    };
-    static const uint8_t p4[16] = {
-        10, 14, 14, 20, 20, 20, 24, 24, 24, 24, 27, 27, 27, 27, 30, 30,
-    };
-    static const uint8_t i8[64] = {
-        6, 10, 10, 13, 11, 13, 16, 16, 18, 18, 18, 23, 23, 23, 25, 25,
-        25, 25, 27, 27, 27, 27, 29, 29, 29, 29, 30, 30, 30, 30, 32, 32,
-        32, 32, 33, 33, 33, 33, 34, 34, 34, 34, 35, 35, 35, 35, 36, 36,
-        36, 36, 37, 37, 37, 37, 38, 38, 38, 38, 39, 39, 39, 39, 40, 40,
-    };
-    static const uint8_t p8[64] = {
-        9, 13, 13, 15, 13, 15, 17, 17, 19, 19, 19, 21, 21, 21, 22, 22,
-        22, 22, 24, 24, 24, 24, 25, 25, 25, 25, 26, 26, 26, 26, 27, 27,
-        27, 27, 28, 28, 28, 28, 29, 29, 29, 29, 30, 30, 30, 30, 31, 31,
-        31, 31, 32, 32, 32, 32, 33, 33, 33, 33, 34, 34, 34, 34, 35, 35,
-    };
-    unsigned i;
-
-    for (i = 0; i < 6; i++)
-        memcpy(s4[i], i < 3 ? i4 : p4, 16);
-    memcpy(s8[0], i8, 64);
-    memcpy(s8[1], p8, 64);
+    /* Explicit scaling matrices are rejected below. All admitted SPS/PPS
+     * paths therefore infer flat16 lists. The JVT defaults for a signalled
+     * list's useDefault flag are a different case, not the absent matrix. */
+    memset(s4, 16, 6u * 16u);
+    memset(s8, 16, 2u * 64u);
 }
 
 static bool parse_sps(const uint8_t *nal, size_t bytes, struct tg_nvdec_sps *sps)
@@ -176,7 +157,7 @@ static bool parse_sps(const uint8_t *nal, size_t bytes, struct tg_nvdec_sps *sps
     if (bytes < 4)
         return false;
     memset(sps, 0, sizeof(*sps));
-    default_scaling(sps->scaling4x4, sps->scaling8x8);
+    flat_scaling(sps->scaling4x4, sps->scaling8x8);
     sps->profile_idc = nal[1];
     sps->level_idc = nal[3];
     n = rbsp_from_nal(nal + 4, bytes - 4, rbsp, sizeof(rbsp));
@@ -265,7 +246,7 @@ static bool parse_pps(const uint8_t *nal, size_t bytes, struct tg_nvdec_pps *pps
     if (bytes < 2)
         return false;
     memset(pps, 0, sizeof(*pps));
-    default_scaling(pps->scaling4x4, pps->scaling8x8);
+    flat_scaling(pps->scaling4x4, pps->scaling8x8);
     n = rbsp_from_nal(nal + 1, bytes - 1, rbsp, sizeof(rbsp));
     br_init(&b, rbsp, n);
 
