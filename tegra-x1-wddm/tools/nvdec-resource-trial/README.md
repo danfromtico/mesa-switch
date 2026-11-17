@@ -6,6 +6,20 @@ Windows SignTool, and copies the exact installed activation files. The script
 retains the original UMD/ICD registration, power policy and five-second logon
 task. It must run from a protected trial directory as administrator.
 
+An incremental KMD candidate can use the currently verified activation as its
+baseline. If that activation retains userspace at an earlier protected path,
+`BaselineUserspaceDirectory` names it explicitly; the registered UMD must match
+both `BaselineFiles` and the copied activation manifest. Registration is kept
+at that path. Identical baseline/candidate provider SYS identities can be reused,
+but still require the actual loaded PE identity. Equal PE fields for different
+file hashes remain ambiguous and rejected. A reused provider cannot justify a
+known-other-image reboot. An identical ACPI file is not rewritten; volume flush,
+unbuffered identity and post-boot loaded-table checks still apply.
+The new activation's embedded rollback KMD, ACPI and INF metadata are rebuilt
+from that current baseline, so cloning an activation cannot silently keep an
+older recovery target. Its existing display-preference artifact is retained
+and must be checked against the current90-degree mode before use.
+
 When `pair-config.json` includes `Provider`, the same trial also carries the
 clock-provider SYS/INF/CAT and its exact original package. All32 package files
 must pass signature/catalog membership checks. After `Prepare`, run both

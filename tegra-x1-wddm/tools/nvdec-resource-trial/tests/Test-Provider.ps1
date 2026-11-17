@@ -55,6 +55,14 @@ function Reset {
  $script:LiveMatches=$true
  $script:HelperOutput='RESULT=STAGED_FOR_REBOOT live driver identity is not verified'
 }
+foreach($case in @('same','different-hash','different-length','empty','malformed')){
+ $a=@{Length=104456;Sha256=('a'*64)};$b=$a.Clone()
+ if($case -eq 'different-hash'){$b.Sha256='b'*64}
+ if($case -eq 'different-length'){$b.Length++}
+ if($case -eq 'empty'){$a=@{};$b=@{}}
+ if($case -eq 'malformed'){$a.Sha256=$b.Sha256='short'}
+ Assert ((Test-ProviderSameBinary $a $b) -eq ($case -eq 'same')) ('Provider byte identity reuse differs: '+$case)
+}
 foreach($case in @('corrected','unchanged-tool','running','mismatch','not-ended','not-loss','unknown-exit','missing-tool','wrong-target','other-boot','second-replacement')) {
  $boot='2026-11-17T10:05:30Z';$target=@{Sha256='candidate'};$tool=@{Sha256='new-observer'}
  $prior=@{Boot=$boot;Phase='Failed';Exit=5;Target=$target;Tool=@{Sha256='old-observer'};Stderr="StopTrace=0 events_lost=17 buffers_lost=0 session=NvdecImageIdentity-988`r`n"}

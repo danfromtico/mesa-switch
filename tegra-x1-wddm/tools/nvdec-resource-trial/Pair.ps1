@@ -87,10 +87,14 @@ public static class NvdecBootTableIo {
 function Commit-BootTable([string]$From,[string]$ReceiptName) {
  $to="$env:windir\System32\acpitabl.dat";$receipt=Join-Path $root $ReceiptName
  if(Test-Path $receipt){throw 'Boot-table commit already attempted; inspect its receipt'}
- $r=[ordered]@{Begin=[DateTime]::UtcNow.ToString('o');Phase='Copying';Source=File-Record $From;RestartRequested=$false}
+ $r=[ordered]@{Begin=[DateTime]::UtcNow.ToString('o');Phase='CheckingFile';Source=File-Record $From;Reused=$false;RestartRequested=$false}
  Write-ActivationJson $receipt $r
  try {
-  Durable-Copy $From $to
+  if(Test-Path $to){
+   $r.Before=File-Record $to
+   $r.Reused=$r.Before.Length -eq $r.Source.Length -and $r.Before.Sha256 -eq $r.Source.Sha256
+  }
+  if(!$r.Reused){$r.Phase='Copying';Write-ActivationJson $receipt $r;Durable-Copy $From $to}
   Initialize-BootTableIo
   $r.Phase='FlushingVolume';Write-ActivationJson $receipt $r
   $r.Volume=[NvdecBootTableIo]::FlushVolume($to)
@@ -105,6 +109,41 @@ function Commit-BootTable([string]$From,[string]$ReceiptName) {
  finally {$r.End=[DateTime]::UtcNow.ToString('o');Write-ActivationJson $receipt $r}
 }
 function Task-Root {$s=New-Object -ComObject Schedule.Service;$s.Connect();$s.GetFolder('\')}
+function Assert-UserspaceRegistration($Registration,$Manifest) {
+ # A validated KMD activation can retain UMD/ICD at the earlier protected
+ # path. Bind that explicit path to the same bytes in the activation package;
+ # do not move or reload userspace merely to advance the KMD baseline.
+ $directory=if($config.BaselineUserspaceDirectory){$config.BaselineUserspaceDirectory}else{$active}
+ $relative='app\TegraGpuD3DVk.dll';$path=Join-Path $directory $relative
+ if($Registration.Umd.Count -ne 4 -or $Registration.Umd[1] -ne $path -or $Registration.Umd[2] -ne $path){throw 'Userspace registration differs'}
+ $want=$Manifest.files.$relative;$retained=$config.BaselineFiles.$path
+ if(!$want -or !$retained -or $want.Length -ne $retained.Length -or $want.Sha256 -ne $retained.Sha256){throw 'Userspace path is not bound to the retained package identity'}
+ Assert-File $path $want
+}
+function Prepare-CandidateRecovery($Recovery) {
+ # Rebase the candidate's embedded rollback onto the actual current pair.
+ # Its older activation may itself have been copied from an earlier baseline.
+ Assert-File (Join-Path $root 'baseline-kmd\tegragpurender.sys') $config.BaselineKmd
+ Assert-File (Join-Path $root 'baseline-acpi.dat') $config.BaselineAcpi
+ $files=[ordered]@{}
+ foreach($entry in $Recovery.Files.PSObject.Properties){
+  $name=$entry.Name.Replace('\\','\')
+  if($files.Contains($name)){throw 'Duplicate recovery path'}
+  $files[$name]=$entry.Value
+ }
+ foreach($f in Get-ChildItem (Join-Path $root 'baseline-kmd') -File){
+  $name='rollback\'+$f.Name;Durable-Copy $f.FullName (Join-Path $candidate $name)
+  $files[$name]=File-Record $f.FullName
+ }
+ $table=Join-Path $root 'baseline-acpi.dat'
+ Durable-Copy $table (Join-Path $candidate 'rollback\acpitabl.dat')
+ $files['rollback\acpitabl.dat']=File-Record $table
+ $inf=[string](Device-Property 'DriverInfPath')
+ if($inf -notmatch '^oem[0-9]+\.inf$'){throw 'Current recovery INF is not registered'}
+ $Recovery.Files=[pscustomobject]$files;$Recovery.OriginalOem=$inf
+ $Recovery.Utc=[DateTime]::UtcNow.ToString('o')
+ Write-ActivationJson (Join-Path $candidate 'recovery.json') $Recovery
+}
 function Read-Boot { (Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o') }
 function Same-Boot([string]$A,[string]$B) {
  if(!$A -or !$B){throw 'Missing boot identity'}
@@ -317,7 +356,7 @@ try {
   foreach($entry in $recovery.Files.PSObject.Properties){Assert-File (Join-Path $active $entry.Name) $entry.Value}
   $subkey='SYSTEM\CurrentControlSet\Control\Class\'+(Device-Property 'Driver');$k=[Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($subkey)
   try{$registration=@{Subkey=$subkey;Umd=@($k.GetValue('UserModeDriverName'));Icd=$k.GetValue('VulkanDriverName')}}finally{$k.Dispose()}
-  if($registration.Umd.Count -ne 4 -or $registration.Umd[1] -ne (Join-Path $active 'app\TegraGpuD3DVk.dll') -or $registration.Umd[2] -ne $registration.Umd[1]){throw 'Userspace registration differs'}
+  Assert-UserspaceRegistration $registration $original
   $backup=[ordered]@{Utc=[DateTime]::UtcNow.ToString('o');Boot=Read-Boot;Directory=$active;TaskXml=$task.Xml;Registration=$registration;User=$recovery.User}
   $backup.Power=& (Join-Path $root 'Power-State.ps1');$backup.Fan=& (Join-Path $root 'Power-State.ps1') -FanOnly;$backup.Emc=& (Join-Path $root 'Power-State.ps1') -EmcOnly
   if($backup.Power.Power.PowerMode -ne 1 -or $backup.Power.Battery.LimitCenter -ne 85 -or $backup.Fan.Fan.Mode -ne 1){throw 'Handheld85/fan policy differs'}
@@ -328,6 +367,7 @@ try {
   foreach($entry in $original.files.PSObject.Properties){Durable-Copy (Join-Path $active $entry.Name) (Join-Path $candidate $entry.Name)}
   foreach($entry in $recovery.Files.PSObject.Properties){Durable-Copy (Join-Path $active $entry.Name) (Join-Path $candidate $entry.Name)}
   foreach($name in @('recovery.json','icd-registration.json')){Durable-Copy (Join-Path $active $name) (Join-Path $candidate $name)}
+  Prepare-CandidateRecovery $recovery
   foreach($f in Get-ChildItem (Join-Path $root 'package') -File){Durable-Copy $f.FullName (Join-Path $candidate ('package\'+$f.Name));$record=File-Record $f.FullName;$original.kmd.($f.Name)=$record;$original.files.('package\'+$f.Name)=$record}
   Durable-Copy (Join-Path $root 'candidate-acpi.dat') (Join-Path $candidate 'display158.aml')
   $original.helpers.'display158.aml'=File-Record (Join-Path $candidate 'display158.aml');$original.files.'display158.aml'=$original.helpers.'display158.aml'

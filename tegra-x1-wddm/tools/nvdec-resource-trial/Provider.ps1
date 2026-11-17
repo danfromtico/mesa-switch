@@ -27,6 +27,10 @@ function Read-ProviderPeIdentity([string]$Path) {
  if($pe -gt $b.Length-112 -or [BitConverter]::ToUInt32($b,$pe) -ne 0x4550 -or [BitConverter]::ToUInt16($b,$pe+4) -ne 0xaa64 -or [BitConverter]::ToUInt16($b,$pe+24) -ne 0x20b){throw 'Provider must be an ARM64 PE32+ image'}
  @{checksum=[BitConverter]::ToUInt32($b,$pe+88);timestamp=[BitConverter]::ToUInt32($b,$pe+8);image_size=[BitConverter]::ToUInt32($b,$pe+80)}
 }
+function Test-ProviderSameBinary($A,$B) {
+ return $A.Length -gt 0 -and $A.Length -eq $B.Length -and
+        $A.Sha256 -match '^[0-9a-fA-F]{64}$' -and $A.Sha256 -eq $B.Sha256
+}
 function Get-ProviderLoadedObservation([string]$Which) {
  $path=Join-Path $root ('provider-loaded-'+$Which.ToLowerInvariant()+'.json')
  if(Test-Path $path){$h=Read-Json $path;if(@($h.Observations).Count){return @($h.Observations)[-1]}}
@@ -61,7 +65,8 @@ function Assert-ProviderLoadedImage([ValidateSet('Candidate','Baseline')][string
  $other=if($Which -eq 'Candidate'){'baseline-fan'}else{'provider'}
  $want=Read-ProviderPeIdentity (Join-Path $root ($directory+'\switchfan.sys'))
  $alternate=Read-ProviderPeIdentity (Join-Path $root ($other+'\switchfan.sys'))
- if($want.checksum -eq $alternate.checksum -and $want.timestamp -eq $alternate.timestamp -and $want.image_size -eq $alternate.image_size){throw 'Paired images cannot be distinguished by ETW PE identity'}
+ $sameBinary=Test-ProviderSameBinary $config.Provider.Candidate $config.Provider.Baseline
+ if(!$sameBinary -and $want.checksum -eq $alternate.checksum -and $want.timestamp -eq $alternate.timestamp -and $want.image_size -eq $alternate.image_size){throw 'Paired images cannot be distinguished by ETW PE identity'}
  $etl=Join-Path $root ('provider-loaded-'+$Which.ToLowerInvariant()+'-'+[Guid]::NewGuid().ToString('N')+'.etl')
  $r=[ordered]@{Begin=[DateTime]::UtcNow.ToString('o');Boot=$boot;Phase='Running';Target=$config.Provider.$Which;ExpectedPe=$want;Tool=$expected;Etl=$etl;MatchesOther=$false}
  $history+=@($r);Write-ActivationJson $path @{Observations=$history}
@@ -79,7 +84,7 @@ function Assert-ProviderLoadedImage([ValidateSet('Candidate','Baseline')][string
   if(!$rows.Count -or @($rows|Where-Object {$_.pid -ne 0 -or $_.opcode -notin @(3,4)}).Count){throw 'Missing or ambiguous kernel provider image rundown'}
   $r.Images=$rows
   $different=@($rows|Where-Object {$_.checksum -ne $want.checksum -or $_.timestamp -ne $want.timestamp -or $_.image_size -ne $want.image_size})
-  $r.MatchesOther=@($rows|Where-Object {$_.checksum -ne $alternate.checksum -or $_.timestamp -ne $alternate.timestamp -or $_.image_size -ne $alternate.image_size}).Count -eq 0
+  $r.MatchesOther=!$sameBinary -and @($rows|Where-Object {$_.checksum -ne $alternate.checksum -or $_.timestamp -ne $alternate.timestamp -or $_.image_size -ne $alternate.image_size}).Count -eq 0
   $r.EtlFile=File-Record $etl
   if(!(Same-Boot (Read-Boot) $boot)){throw 'Boot changed during image rundown'}
   if($different.Count){$r.Phase='Mismatch';throw 'Disk provider and loaded image differ; no decode or baseline promotion permitted'}

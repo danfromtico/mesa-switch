@@ -44,7 +44,7 @@ function Assert-Power {}
 function Device-Property($Name){0}
 function Join-Path($Path,$Child){$Child}
 function File-Record($Path){$expected}
-function Test-Path($Path){$script:ExistingReceipt}
+function Test-Path($Path){if($Path -like '*acpitabl.dat'){$script:SameTable}else{$script:ExistingReceipt}}
 function Durable-Copy($From,$To){$script:Copies++;if($script:CopyFails){throw 'MODEL_COPY'}}
 function Write-ActivationJson($Path,$Value){$script:Receipt=$Value;$script:ReceiptPhases+=@($Value.Phase)}
 function Save-State($Value){$script:StatePhases+=@($Value.Phase)}
@@ -64,20 +64,23 @@ function shutdown.exe {
 $root='MODEL_ROOT';$config=@{}
 foreach($action in @('StageCandidate','Recover')){
  $branch=Branch $action
- foreach($case in @('copy-failure','flush-failure','read-failure','mismatch','existing-receipt','success')){
+ foreach($case in @('copy-failure','flush-failure','read-failure','mismatch','existing-receipt','success','same-table')){
   $script:Copies=0;$script:Gates=0;$script:Restarts=0;$script:Receipt=$null
   $script:ReceiptPhases=@();$script:StatePhases=@()
-  $script:CopyFails=$case -eq 'copy-failure';$script:ExistingReceipt=$case -eq 'existing-receipt'
+  $script:SameTable=$case -eq 'same-table'
+  $script:CopyFails=$case -in @('copy-failure','same-table');$script:ExistingReceipt=$case -eq 'existing-receipt'
   [NvdecBootTableIo]::Mode=switch($case){'flush-failure'{1};'read-failure'{2};'mismatch'{3};default{0}}
   [NvdecBootTableIo]::Flushes=0;[NvdecBootTableIo]::Reads=0
   $state=[ordered]@{Phase=if($action -eq 'StageCandidate'){'Prepared'}else{'CandidateObserved'};PackageStaged=$true}
   $errorText=$null;try{& $branch}catch{$errorText=$_.Exception.Message}
   $label=$action+'/'+$case
   Assert ($script:Gates -eq 1) ($label+': startup gate was not closed')
-  if($case -eq 'success'){
+  if($case -in @('success','same-table')){
    Assert (!$errorText -and $script:Restarts -eq 1) ($label+': valid commit did not reach one restart: '+$errorText)
    Assert ($script:Receipt.Unbuffered.Sha256 -eq $digest) ($label+': readback identity missing')
-   Assert ($script:ReceiptPhases -join ',' -eq 'Copying,FlushingVolume,ReadingUnbuffered,Committed') ($label+': commit phase order differs')
+   $phases=if($script:SameTable){'CheckingFile,FlushingVolume,ReadingUnbuffered,Committed'}else{'CheckingFile,Copying,FlushingVolume,ReadingUnbuffered,Committed'}
+   Assert ($script:ReceiptPhases -join ',' -eq $phases) ($label+': commit phase order differs')
+   Assert ($script:Copies -eq [int](!$script:SameTable) -and $script:Receipt.Reused -eq $script:SameTable) ($label+': identical table was rewritten or wrong table reused')
   }else{
    Assert ($errorText -and $script:Restarts -eq 0) ($label+': failed commit reached restart')
    Assert (!$state.RestartRequested) ($label+': failed commit marked restart requested')
