@@ -1,5 +1,5 @@
 {
-  "status": "Objective 5 in progress. The application NVK shader-cache path fix passed three GPU architectures and the registered application entry points, including the ARM64EC D3D9 package. Persistence of the selected application ICDs and Pacecar configuration was checked after an unexpected restart. Separate restart and platform work continues.",
+  "status": "Objective 5 in progress. The installed MAX77620 power-button and PMIC RTC updates passed scoped physical qualification. Device-level suspend, connected Bluetooth traffic and the remaining graphics and load cases are open.",
   "order": [
     "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
     "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
@@ -837,10 +837,10 @@
       "FTM4 touch parser and HID reports",
       "existing DFLL, PMIC concurrency, EMC governor and display QoS models"
     ],
-    "binding_note": "The initial inventory identifies the earlier I2C 1.0.0.5 and RTC 1.0.0.3 images. All three controllers now bind I2C 1.0.0.7 after a planned Windows restart. The RTC remains on its verified November 7 build.",
+    "binding_note": "The inventory records the earlier I2C 1.0.0.5, RTC 1.0.0.3 and power-button 1.0.0.7. Current physical selections are I2C 1.0.0.7, RTC 1.0.0.4 and power-button 1.0.0.8.",
     "pending": [
       "Bluetooth transport with a connected peer",
-      "RTC/GPIO runtime behavior and sleep/resume of the bound controllers",
+      "GPIO and device-level suspend/resume, physical button wake and RTC resume",
       "Performance under the active CPU/GPU/EMC and NVDEC scheduling choices",
       "DXVK, Pacecar, and the scoped Mesa code review"
     ],
@@ -1471,6 +1471,84 @@
           }
         ]
       }
+    },
+    "pmic_button_and_clock": {
+      "utc": "2026-11-18T20:42:20.0780236Z",
+      "boot": "2026-11-18T20:39:29.8023230Z",
+      "drivers": {
+        "switchrtc": {
+          "version": "1.0.0.4",
+          "sha256": "169164193d731756791d476894c67751c87ceef27d5c14b7aa3a47b9556de797",
+          "package_sha256": {
+            "switchrtc.sys": "169164193d731756791d476894c67751c87ceef27d5c14b7aa3a47b9556de797",
+            "switchrtc.inf": "47af38fc654da719d1841c349dfa2704219a459615662eb879edeab89d9aee78",
+            "switchrtc.cat": "03aeeac0f696cd7f0d4f2cec50555348f0a37658c5cc1aa53a3772860106816e"
+          },
+          "source": "25cdc25a6948021ac21189ffe8172d8cfa69eb3c",
+          "path": "drivers/SwitchRtc/tests/physical-offset-20261118.json",
+          "physical_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/25cdc25a6948021ac21189ffe8172d8cfa69eb3c/drivers/SwitchRtc/tests/physical-offset-20261118.json",
+          "record_sha256": "501fd8e181af9cb6edafaf87d1a2a941a613c2e0b64369b30f4895d846b4b723",
+          "previous_sha256": "b9e7849cc71af7a7762a5b40a5cb29ca4410c5b156936ce6747fd29f2470d1b2",
+          "independent_review": "Pending separate Gemini review.",
+          "scope": "Physical selection 1.0.0.4 -> 1.0.0.3 -> 1.0.0.4, retained across two ordinary restarts. PMIC calendar read, system-time callback and naturally learned offset verified. Negative offset rounding covered by ARM64 controls."
+        },
+        "switchpwrbtn": {
+          "version": "1.0.0.8",
+          "sha256": "879550e4eb292619f45de86eb458fc94f07149ca3de95bc88369166fcd64914e",
+          "package_sha256": {
+            "switchpwrbtn.cat": "73019cb732881a144a375f93894134ba4f3ab3218e80aa9c26915e90272cafdb",
+            "switchpwrbtn.sys": "879550e4eb292619f45de86eb458fc94f07149ca3de95bc88369166fcd64914e",
+            "switchpwrbtn.inf": "7910afdcc5c93fba450df747fc1953df1b539af49dda75c2e4a47b9b043aa217"
+          },
+          "source": "25cdc25a6948021ac21189ffe8172d8cfa69eb3c",
+          "path": "drivers/SwitchPowerButton/tests/physical-poll-20261118.json",
+          "physical_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/25cdc25a6948021ac21189ffe8172d8cfa69eb3c/drivers/SwitchPowerButton/tests/physical-poll-20261118.json",
+          "record_sha256": "b5121547dc621434122dbc40ea77f9ca557202ae2514f70b70360ff877b67168",
+          "previous_sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787",
+          "independent_review": "Switch Power is under the user-directed main-chat review.",
+          "scope": "Physical 1.0.0.8 at orderly restart, MAX77620 startup reads, increasing hardware polls, two VHF System Control nodes and working power scheduling. Lost-edge handling after an I2C level-read error covered by ARM64 controls."
+        }
+      },
+      "controls": {
+        "platform": "Windows ARM64 on Switch with substituted I/O",
+        "previous": 15,
+        "candidate": 27,
+        "total": 27
+      },
+      "physical_button": {
+        "first_poll": 1200,
+        "last_poll": 1400,
+        "boot_irq_read_status": 0,
+        "direct_hid_press": false,
+        "system_wake_observed": false
+      },
+      "physical_rtc": {
+        "selection": [
+          "1.0.0.4",
+          "1.0.0.3",
+          "1.0.0.4"
+        ],
+        "naturally_learned_offsets_seconds": [
+          1,
+          0
+        ]
+      },
+      "daily_graphics_and_power": {
+        "kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "dwm_modules": {
+          "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+          "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+        },
+        "Handheld": true,
+        "emc_last_error": 0,
+        "i2c": {
+          "timeouts": 0,
+          "nacks": 0,
+          "errors": 0,
+          "version": 7
+        }
+      },
+      "abnormal_reset_attribution": "These ordinary restarts do not identify the cause of the separate load-related resets."
     }
   },
   "local_control_receipts": {
