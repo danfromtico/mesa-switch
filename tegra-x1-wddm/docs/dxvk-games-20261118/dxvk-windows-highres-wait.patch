@@ -1,0 +1,81 @@
+--- a/src/util/util_sleep.cpp
++++ b/src/util/util_sleep.cpp
+@@ -1,4 +1,6 @@
+ #include "util_sleep.h"
++
++#include <algorithm>
+ #include "util_string.h"
+ 
+ #include "./log/log.h"
+@@ -6,6 +8,44 @@
+ using namespace std::chrono_literals;
+ 
+ namespace dxvk {
++
++#ifdef _WIN32
++  namespace {
++    class HighResolutionTimer {
++    public:
++      HighResolutionTimer()
++      : m_timer(::CreateWaitableTimerExW(nullptr, nullptr,
++          CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_MODIFY_STATE | SYNCHRONIZE)) { }
++
++      ~HighResolutionTimer() {
++        if (m_timer)
++          ::CloseHandle(m_timer);
++      }
++
++      bool available() const { return m_timer != nullptr; }
++
++      bool wait(int64_t ticks) {
++        if (!m_timer)
++          return false;
++
++        LARGE_INTEGER due;
++        due.QuadPart = -ticks;
++        if (::SetWaitableTimerEx(m_timer, &due, 0, nullptr, nullptr, nullptr, 0)
++         && ::WaitForSingleObject(m_timer, INFINITE) == WAIT_OBJECT_0)
++          return true;
++
++        ::CloseHandle(m_timer);
++        m_timer = nullptr;
++        return false;
++      }
++
++    private:
++      HANDLE m_timer;
++    };
++
++    thread_local HighResolutionTimer threadTimer;
++  }
++#endif
+ 
+   Sleep Sleep::s_instance;
+ 
+@@ -80,8 +120,14 @@
+     // on Windows is highly inaccurate and inconsistent.
+     TimerDuration sleepThreshold = m_sleepThreshold;
+ 
+-    if (m_sleepGranularity != TimerDuration::zero())
+-      sleepThreshold += duration / 6;
++    if (m_sleepGranularity != TimerDuration::zero()) {
++      auto margin = duration / 6;
++#ifdef _WIN32
++      if (threadTimer.available())
++        margin = std::min(margin, m_sleepGranularity);
++#endif
++      sleepThreshold += margin;
++    }
+ 
+     TimerDuration remaining = duration;
+     TimePoint t1 = t0;
+@@ -109,6 +155,9 @@
+ 
+   void Sleep::systemSleep(TimerDuration duration) {
+ #ifdef _WIN32
++    if (threadTimer.wait(duration.count()))
++      return;
++
+     if (NtDelayExecution) {
+       LARGE_INTEGER ticks;
+       ticks.QuadPart = -duration.count();

@@ -510,5 +510,679 @@
     "larger_p95_absolute_period_error": 8,
     "decision": "Retain the existing game limiter. The bounded-spin candidate reduced measured thread CPU in every setting, but several timing tails worsened. On ARM64EC at 8 Hz, P95 absolute period error increased from 3.7164 ms to 90.2586 ms across the two short runs.",
     "accounting": "GetThreadTimes has finite accounting granularity. One x64 group reported zero charged time despite nonzero thread-cycle counts. No system-wide CPU or power saving is inferred."
+  },
+  "high_resolution_timer_trial": {
+    "candidate_change": "Use a high-resolution waitable timer owned by the calling thread. After a confirmed timer creation, cap the extra spin margin at one timer quantum. If the Windows timer cannot be created or a wait fails, use the original system wait path.",
+    "measurement_method": "Two counterbalanced pairs per architecture. Three warm-ups for each cap precede the local QPC samples. Thread CPU is kernel plus user time from GetThreadTimes, as a percentage of one logical processor. P95 is the absolute distance from the requested interval. No graphics context or game was created by the timing program.",
+    "probe_logging": "The two timing builds increment one per-thread test counter after each completed blocking wait. The production patch excludes these counters. Waits inside the spin loop are not instrumented.",
+    "probe_source_sha256": "a02bfb1858d9d8725ac75210689258efa1945dbead80fcf81465ee639c3ec223",
+    "time_source_frequency_hz": 19200000,
+    "windows_boot_utc": "2026-11-18T19:07:27.5697220Z",
+    "power_before": {
+      "cpu_khz": 1211250,
+      "cpu_error": 0,
+      "external": true,
+      "soc_c": 38,
+      "emc_khz": 1600000,
+      "mode": 1,
+      "board_c": 37,
+      "battery_pct": 79
+    },
+    "power_after": {
+      "cpu_khz": 815800,
+      "cpu_error": 0,
+      "external": true,
+      "soc_c": 38,
+      "emc_khz": 1600000,
+      "mode": 1,
+      "board_c": 37,
+      "battery_pct": 80
+    },
+    "comparisons": [
+      {
+        "architecture": "arm64",
+        "target_fps": 8,
+        "reference": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 18.76,
+          "interval_rate_hz": 8.0041,
+          "p95_absolute_period_error_ms": 1.9861,
+          "p99_interval_ms": 126.8754,
+          "maximum_absolute_period_error_ms": 2.5266
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 0.0,
+          "interval_rate_hz": 7.9956,
+          "p95_absolute_period_error_ms": 1.3675,
+          "p99_interval_ms": 126.7416,
+          "maximum_absolute_period_error_ms": 1.8391
+        },
+        "one_core_percentage_points_saved": 18.76,
+        "p95_absolute_error_change_ms": -0.6186
+      },
+      {
+        "architecture": "arm64",
+        "target_fps": 15,
+        "reference": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 19.36,
+          "interval_rate_hz": 15.0187,
+          "p95_absolute_period_error_ms": 4.853,
+          "p99_interval_ms": 71.6101,
+          "maximum_absolute_period_error_ms": 5.4566
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 3.549,
+          "interval_rate_hz": 15.1443,
+          "p95_absolute_period_error_ms": 12.5343,
+          "p99_interval_ms": 77.4193,
+          "maximum_absolute_period_error_ms": 16.7081
+        },
+        "one_core_percentage_points_saved": 15.811,
+        "p95_absolute_error_change_ms": 7.6813
+      },
+      {
+        "architecture": "arm64",
+        "target_fps": 60,
+        "reference": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 27.91,
+          "interval_rate_hz": 60.0177,
+          "p95_absolute_period_error_ms": 0.5381,
+          "p99_interval_ms": 17.3963,
+          "maximum_absolute_period_error_ms": 1.2628
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 14.454,
+          "interval_rate_hz": 59.7723,
+          "p95_absolute_period_error_ms": 0.303,
+          "p99_interval_ms": 18.1955,
+          "maximum_absolute_period_error_ms": 6.1499
+        },
+        "one_core_percentage_points_saved": 13.456,
+        "p95_absolute_error_change_ms": -0.2351
+      },
+      {
+        "architecture": "x86",
+        "target_fps": 8,
+        "reference": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 16.666,
+          "interval_rate_hz": 7.9997,
+          "p95_absolute_period_error_ms": 2.0791,
+          "p99_interval_ms": 127.0167,
+          "maximum_absolute_period_error_ms": 2.1758
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 5.209,
+          "interval_rate_hz": 8.0005,
+          "p95_absolute_period_error_ms": 8.1769,
+          "p99_interval_ms": 132.4694,
+          "maximum_absolute_period_error_ms": 9.6479
+        },
+        "one_core_percentage_points_saved": 11.457,
+        "p95_absolute_error_change_ms": 6.0978
+      },
+      {
+        "architecture": "x86",
+        "target_fps": 15,
+        "reference": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 20.978,
+          "interval_rate_hz": 15.3438,
+          "p95_absolute_period_error_ms": 1.6775,
+          "p99_interval_ms": 67.6035,
+          "maximum_absolute_period_error_ms": 48.9502
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 3.628,
+          "interval_rate_hz": 15.4785,
+          "p95_absolute_period_error_ms": 2.1646,
+          "p99_interval_ms": 66.9043,
+          "maximum_absolute_period_error_ms": 43.8102
+        },
+        "one_core_percentage_points_saved": 17.35,
+        "p95_absolute_error_change_ms": 0.4871
+      },
+      {
+        "architecture": "x86",
+        "target_fps": 60,
+        "reference": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 29.019,
+          "interval_rate_hz": 60.0025,
+          "p95_absolute_period_error_ms": 0.2766,
+          "p99_interval_ms": 17.0406,
+          "maximum_absolute_period_error_ms": 0.8452
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 11.131,
+          "interval_rate_hz": 59.8397,
+          "p95_absolute_period_error_ms": 0.6563,
+          "p99_interval_ms": 18.1886,
+          "maximum_absolute_period_error_ms": 3.7453
+        },
+        "one_core_percentage_points_saved": 17.888,
+        "p95_absolute_error_change_ms": 0.3797
+      },
+      {
+        "architecture": "x64",
+        "target_fps": 8,
+        "reference": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 11.983,
+          "interval_rate_hz": 8.0027,
+          "p95_absolute_period_error_ms": 1.227,
+          "p99_interval_ms": 126.3031,
+          "maximum_absolute_period_error_ms": 1.3195
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 0.0,
+          "interval_rate_hz": 8.0005,
+          "p95_absolute_period_error_ms": 0.1921,
+          "p99_interval_ms": 125.2077,
+          "maximum_absolute_period_error_ms": 0.2286
+        },
+        "one_core_percentage_points_saved": 11.983,
+        "p95_absolute_error_change_ms": -1.0349
+      },
+      {
+        "architecture": "x64",
+        "target_fps": 15,
+        "reference": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 17.316,
+          "interval_rate_hz": 15.2863,
+          "p95_absolute_period_error_ms": 1.6354,
+          "p99_interval_ms": 67.162,
+          "maximum_absolute_period_error_ms": 27.8999
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 4.302,
+          "interval_rate_hz": 15.7338,
+          "p95_absolute_period_error_ms": 4.8935,
+          "p99_interval_ms": 67.9491,
+          "maximum_absolute_period_error_ms": 66.2577
+        },
+        "one_core_percentage_points_saved": 13.014,
+        "p95_absolute_error_change_ms": 3.2581
+      },
+      {
+        "architecture": "x64",
+        "target_fps": 60,
+        "reference": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 30.144,
+          "interval_rate_hz": 60.0194,
+          "p95_absolute_period_error_ms": 0.125,
+          "p99_interval_ms": 16.8838,
+          "maximum_absolute_period_error_ms": 0.5185
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 13.395,
+          "interval_rate_hz": 60.0081,
+          "p95_absolute_period_error_ms": 0.5205,
+          "p99_interval_ms": 17.203,
+          "maximum_absolute_period_error_ms": 0.5906
+        },
+        "one_core_percentage_points_saved": 16.749,
+        "p95_absolute_error_change_ms": 0.3955
+      },
+      {
+        "architecture": "arm64ec",
+        "target_fps": 8,
+        "reference": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 21.874,
+          "interval_rate_hz": 7.9996,
+          "p95_absolute_period_error_ms": 1.8461,
+          "p99_interval_ms": 126.9334,
+          "maximum_absolute_period_error_ms": 2.1431
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 4.689,
+          "interval_rate_hz": 8.0023,
+          "p95_absolute_period_error_ms": 1.2307,
+          "p99_interval_ms": 126.1201,
+          "maximum_absolute_period_error_ms": 1.7365
+        },
+        "one_core_percentage_points_saved": 17.185,
+        "p95_absolute_error_change_ms": -0.6154
+      },
+      {
+        "architecture": "arm64ec",
+        "target_fps": 15,
+        "reference": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 20.504,
+          "interval_rate_hz": 14.9971,
+          "p95_absolute_period_error_ms": 4.1937,
+          "p99_interval_ms": 80.117,
+          "maximum_absolute_period_error_ms": 19.993
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 2.384,
+          "interval_rate_hz": 15.2584,
+          "p95_absolute_period_error_ms": 10.1511,
+          "p99_interval_ms": 72.8188,
+          "maximum_absolute_period_error_ms": 31.1953
+        },
+        "one_core_percentage_points_saved": 18.12,
+        "p95_absolute_error_change_ms": 5.9574
+      },
+      {
+        "architecture": "arm64ec",
+        "target_fps": 60,
+        "reference": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 25.685,
+          "interval_rate_hz": 60.0352,
+          "p95_absolute_period_error_ms": 0.3319,
+          "p99_interval_ms": 17.0783,
+          "maximum_absolute_period_error_ms": 0.7067
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 17.867,
+          "interval_rate_hz": 60.0319,
+          "p95_absolute_period_error_ms": 0.261,
+          "p99_interval_ms": 17.4674,
+          "maximum_absolute_period_error_ms": 3.6545
+        },
+        "one_core_percentage_points_saved": 7.818,
+        "p95_absolute_error_change_ms": -0.0709
+      }
+    ],
+    "images": {
+      "arm64-reference": {
+        "bytes": 738824,
+        "unsigned": "d9a856af5452850a0a2999d08ede4927c99c2c9582ac45a27794aacc50a8574e",
+        "sha256": "508f9b21f67981965737b0595ed914bfbc1f40e6a473973df032664cd7ef2818",
+        "architecture_target": "aarch64",
+        "machine": "0xaa64",
+        "instrumented_source_sha256": "3c7778aa07c390462bd8d2711ed6926ea52f7496ee88faa789ec1c3143f778d3"
+      },
+      "arm64-candidate": {
+        "bytes": 740872,
+        "unsigned": "5f6a6e5b33f06663f3382138ed69665f6c331d0e9e6b087d9cb9bb6cf04f8fa3",
+        "sha256": "45de4880a6fa699d6e69ba66c1e55235683e966711cc5880d7f3728eef24bcf5",
+        "architecture_target": "aarch64",
+        "machine": "0xaa64",
+        "instrumented_source_sha256": "3d41855a04afdfd80c2acbfa60fc79954737262da6d8a00115464727c9aaafa8"
+      },
+      "x86-reference": {
+        "bytes": 859656,
+        "unsigned": "352d991467cbb4d7ced1ca58c0bd525d91efc4cf7412738f09c07954afa050b0",
+        "sha256": "bcdb21f8e38cfebe5232e0fe0edc049a668375b319af27d4806cfa329291d6a6",
+        "architecture_target": "i686",
+        "machine": "0x14c",
+        "instrumented_source_sha256": "3c7778aa07c390462bd8d2711ed6926ea52f7496ee88faa789ec1c3143f778d3"
+      },
+      "x86-candidate": {
+        "bytes": 862216,
+        "unsigned": "7be53e56c98b514a63cb5338b6b05543194f0f3c523dcc4122d6e851b2a8ec7a",
+        "sha256": "6a230a271cb9736f5841afb29ac14b235089db525dedb0e846d36bba9ea6bd23",
+        "architecture_target": "i686",
+        "machine": "0x14c",
+        "instrumented_source_sha256": "3d41855a04afdfd80c2acbfa60fc79954737262da6d8a00115464727c9aaafa8"
+      },
+      "x64-reference": {
+        "bytes": 800776,
+        "unsigned": "af8abf37d5860b447877d531ab3fab0eaa4b37c608e7035933f3f0937ceed7e2",
+        "sha256": "74232918ef062a7b87f4cb91eea5a1b025a795df87ae92c1a30f815cb07d0fae",
+        "architecture_target": "x86_64",
+        "machine": "0x8664",
+        "instrumented_source_sha256": "3c7778aa07c390462bd8d2711ed6926ea52f7496ee88faa789ec1c3143f778d3"
+      },
+      "x64-candidate": {
+        "bytes": 802312,
+        "unsigned": "13979aea3e37e38941b56c5b96a206a6d90c3f73f4322b5ffc6e4b6de4f5925f",
+        "sha256": "fee98ec3f5f681eaa045c3055351eb0eebd768ed8f100b63c0743b5b0a9c1537",
+        "architecture_target": "x86_64",
+        "machine": "0x8664",
+        "instrumented_source_sha256": "3d41855a04afdfd80c2acbfa60fc79954737262da6d8a00115464727c9aaafa8"
+      },
+      "arm64ec-reference": {
+        "bytes": 826888,
+        "unsigned": "e62b8c075c2035c5e141f21f9ae683da62cdb532df92a2737877374689997373",
+        "sha256": "900870a17b278774ba0ad935b717377e0b42ad84d19c88359e1057e70853ee48",
+        "architecture_target": "arm64ec",
+        "machine": "0x8664",
+        "instrumented_source_sha256": "3c7778aa07c390462bd8d2711ed6926ea52f7496ee88faa789ec1c3143f778d3"
+      },
+      "arm64ec-candidate": {
+        "bytes": 831496,
+        "unsigned": "56d6e254fb07890a1b27731b0be08f8d9a83abbc7c41164468120ca0eff5867b",
+        "sha256": "957711d33893047482cfac932c94546267001138c608a58a0fbd7bbc9657a9a8",
+        "architecture_target": "arm64ec",
+        "machine": "0x8664",
+        "instrumented_source_sha256": "3d41855a04afdfd80c2acbfa60fc79954737262da6d8a00115464727c9aaafa8"
+      }
+    },
+    "trial_receipt_sha256": "b09b11c1743ceb6b3ec8c15ac53ac4c825cd3a10a329b3d4b50bf73d312621e3",
+    "observed_tradeoff": {
+      "comparisons": 12,
+      "lower_thread_cpu_share": 12,
+      "larger_p95_absolute_period_error": 7
+    },
+    "completed_blocking_waits_by_api_including_warmup": {
+      "arm64-1-reference": {
+        "15": {
+          "nt_delay": 22,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "arm64-2-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "arm64-3-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "arm64-4-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "x86-1-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "x86-2-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "x86-3-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "x86-4-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "x64-1-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "x64-2-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 20,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "x64-3-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "x64-4-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "arm64ec-1-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "arm64ec-2-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "arm64ec-3-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "arm64ec-4-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      }
+    },
+    "individual_runs": {
+      "path": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-highres-frame-limiter-timings.csv",
+      "sha256": "5ea78322d930a7c57b3615a0abc6f2a7bbd43c871f6ac3c75d342ac09f2f9dde"
+    },
+    "source_diff": {
+      "path": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-windows-highres-wait.patch",
+      "sha256": "488a7a28e78492250af99e91260fb7ebe1f0800912c0a1875d78993ed47e4a68"
+    },
+    "selected_game_dll": false,
+    "decision": "The waitable-timer calls completed on all four architectures. Thread CPU usage fell in all twelve comparisons. At 15 Hz the P95 absolute period error increased on each architecture. Keep the original game runtime while investigating application frame pacing."
   }
 }
