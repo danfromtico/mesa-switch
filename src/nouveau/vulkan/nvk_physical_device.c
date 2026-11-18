@@ -1546,23 +1546,6 @@ nvk_create_physical_device_from_nvkmd(struct nvk_instance *instance,
       goto fail_nvkmd;
    }
 
-#ifndef __SWITCH__
-   if (!nvk_is_conformant(&nvkmd->dev_info) &&
-       !(instance->allow_embedded_gm20b && nvkmd->dev_info.chipset == 0x12e) &&
-       !debug_get_bool_option("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", false)) {
-#ifdef NDEBUG
-      result = VK_ERROR_INCOMPATIBLE_DRIVER;
-#else
-      result = vk_errorf(instance, VK_ERROR_INCOMPATIBLE_DRIVER,
-                         "WARNING: NVK is not well-tested on %s, pass "
-                         "NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1 "
-                         "if you know what you're doing.",
-                         nvkmd->dev_info.device_name);
-#endif
-      goto fail_nvkmd;
-   }
-#endif
-
    if (!nvk_is_conformant(&nvkmd->dev_info))
       vk_warn_non_conformant_implementation("NVK");
 
