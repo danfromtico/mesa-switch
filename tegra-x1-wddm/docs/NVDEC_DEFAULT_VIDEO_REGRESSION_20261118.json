@@ -10,7 +10,17 @@
     "firmware": "7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909",
     "changed_production_translation_unit": "src/nouveau/tgd3d/tgd3d_video.cpp",
     "reference_source_sha256": "722fbc9b718bc5c71be9c46812beffebcfa03c801219646d27dbfef1b7271ce8",
-    "candidate_source_sha256": "db687c651643a8223e97c47af2442e5c8393a0981d1459e47f5b342146c27d10"
+    "candidate_source_sha256": "db687c651643a8223e97c47af2442e5c8393a0981d1459e47f5b342146c27d10",
+    "arm64_umd_object_comparison": {
+      "object_count": 25,
+      "changed": [
+        {
+          "name": "tgd3d_video.cpp.obj",
+          "before": "d264c879db316025d70bc8fa8381d48cdab9aee2a4736febd67bb9e1ccfa87d4",
+          "after": "ffbcac1bdcee75ca701a7ac8868980242996625ae34e49716562e61533eb1b85"
+        }
+      ]
+    }
   },
   "source_changes": {
     "runtime": "Remove the process-environment early return from video_adapter_init. The existing adapter callback, GM20B NVDEC resources and client checks, and 128000-byte firmware verification then run for eligible processes. An eligible adapter offers the D3D11.1 interface through GetSupportedVersions.",
@@ -28,7 +38,8 @@
       "src/nouveau/tgd3d/tgd3d_device.cpp:245",
       "src/nouveau/tgd3d/tests/runtime_contracts.cpp:1097",
       "tegra-x1-wddm/windows/query.c:145",
-      "tegra-x1-wddm/tools/nvdec720_av_window.cpp:600"
+      "tegra-x1-wddm/tools/nvdec720_av_window.cpp:600",
+      "src/nouveau/tgd3d/tgd3d_runtime.cpp:646"
     ]
   },
   "previous_umd_restart": {
@@ -160,7 +171,12 @@
       "decoder_packets_submitted_confirmed": false,
       "connection_observation": "The host lost transport. A postincident OS boot ID is required to distinguish reset, hang and lost networking.",
       "registered_umd_vs_client": "The candidate was verified in DWM and the registered file. Its test process lost transport before the loaded-module proof returned.",
-      "uncontrolled": "Separate boots, background scheduling, temperature and instantaneous clocks. One paired completion provides no failure-rate estimate."
+      "uncontrolled": "Separate boots, background scheduling, temperature and instantaneous clocks. One paired completion provides no failure-rate estimate.",
+      "last_postincident_ssh_attempt_utc": "2026-11-18T14:23:50.828685+00:00",
+      "postincident_os_boot_verified": false,
+      "device_umd_before_workload": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+      "accepted_reference_umd": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+      "diagnosis": "A longer post-disconnect interval on the LAN remained unavailable. The workload checkpoint is host-persisted. Postincident OS state and physical restoration of the reference package remain unverified."
     }
   },
   "older_controls": {
@@ -219,7 +235,15 @@
       "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json",
       "tegra-x1-wddm/docs/NVDEC_720_COMPOSITOR_OPEN_20261117.json",
       "tegra-x1-wddm/docs/KMD_FENCE_POLL_20261118.json"
-    ]
+    ],
+    "prior_watchdog_dumps": {
+      "last_dump_utc": "2026-11-11T18:04:24Z",
+      "last_dump_sha256": "322ba5f3a7b22649d7592740d5ec97ae61fcf7619691003c686488cd343a522c",
+      "code": "0x141",
+      "classification": "Prior Windows video-engine-timeout live dump; parameter 2 falls in tegragpurender.sys. It predates all the current boots. The current event 41 records contain bugcheck zero and there is no matching new dump.",
+      "debugger_log_sha256": "a5c325c6eeafc364067a32d0ae3246f51933d8062e693821872c2a31f916a55d",
+      "microsoft_reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x141---video-engine-timeout-detected"
+    }
   },
   "decision": "The original opt-in removal remains a candidate. The previously accepted baseline corresponds to the reference UMD. The latest retained failure boundary precedes the H.264 file-open call in the fixture; the underlying reset mechanism and the link to all previous incidents remain open."
 }
