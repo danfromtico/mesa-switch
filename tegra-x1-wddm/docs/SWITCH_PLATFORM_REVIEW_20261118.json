@@ -1,5 +1,5 @@
 {
-  "status": "Objective 5 in progress. Physical paging CPU timing, five game frame-time histories, the bound battery, I2C and RTC images, and EMC provider handoff controls are recorded.",
+  "status": "Objective 5 in progress. Native audio stream timing and explicit PCM capture passed on the selected 1.0.0.10 package.",
   "order": [
     "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
     "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
@@ -652,7 +652,6 @@
     ],
     "binding_note": "Three I2C instances bind the November 6 version 1.0.0.5 package. The RTC binds the November 7 build of 1.0.0.3. Fresh ARM64 links reproduce both installed payloads after normalizing the Authenticode fields.",
     "pending": [
-      "Audio playback and buffer timing",
       "Bluetooth transport with a connected peer",
       "RTC, GPIO, I2C error handling and sleep/resume on the bound versions",
       "Performance under the active CPU/GPU/EMC and NVDEC scheduling choices",
@@ -1133,12 +1132,11 @@
     "new_interactive_readback_verified": false
   },
   "audio": {
-    "installed_version": "1.0.0.9",
+    "installed_version": "1.0.0.10",
     "candidate_version": "1.0.0.10",
-    "source_last_audio_change": "cbad18d599ca426babc767fa3a3d8592c4a86180",
-    "installed_signed_sha256": "05fd4e2c9dd22d340942d26edfb5e1a83639fe4fff02d14b9a3bf5e95b86aeff",
+    "source_last_audio_change": "32b7d18807e7fbaa7cf999d1b50c954d0e39e7b1",
+    "installed_signed_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
     "fresh_reference_unsigned_sha256": "9d7db17a2412a5d9f49fb44691b0dda954640e07609cf5892aed0629238ea6e8",
-    "fresh_reference_matches_installed_signed_payload": true,
     "compared_payload_bytes": 29172,
     "candidate_unsigned_sha256": "d8f8878c3f31f61fa7a236cca5b940d5360dd071faf3b7f685793c0e96921b65",
     "signed_candidate_sys_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
@@ -1210,8 +1208,69 @@
       "repeated RUN and pause/resume",
       "stop"
     ],
-    "test_scope": "The host executes the production state transition with substituted clock, waits, registers and tracing. Values in requested_sleep_ms are requested waits. Native playback, onset latency and audio quality are still pending.",
-    "control_sha256": "902a052bebe067c85df2437bd7be345c4059fef63fba03b59fa93aa6dca4fbc4"
+    "test_scope": "The original host state-transition controls and ordinary_start / explicit_check rows use substituted waits. Native WASAPI timing, prefilled PCM and the expired request are recorded in native_start_timing.",
+    "control_sha256": "902a052bebe067c85df2437bd7be345c4059fef63fba03b59fa93aa6dca4fbc4",
+    "previous_installed_image": {
+      "version": "1.0.0.9",
+      "signed_sha256": "05fd4e2c9dd22d340942d26edfb5e1a83639fe4fff02d14b9a3bf5e95b86aeff",
+      "fresh_reference_unsigned_sha256": "9d7db17a2412a5d9f49fb44691b0dda954640e07609cf5892aed0629238ea6e8",
+      "fresh_reference_matches_original_installed_payload": true,
+      "compared_payload_bytes": 29172
+    },
+    "native_start_timing": {
+      "hardware_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/a8677617316d4cc11e5e6db609fe0d446a72aa8e/drivers/SwitchAudio/tests/physical-start-20261118.json",
+      "hardware_record_sha256": "ab11179542db2e3ced43369894430f020fbc42b858f8ec27e1b2075a517fe8fa",
+      "accepted_source_commit": "a8677617316d4cc11e5e6db609fe0d446a72aa8e",
+      "runtime_source_commit": "32b7d18807e7fbaa7cf999d1b50c954d0e39e7b1",
+      "previous_version": "1.0.0.9",
+      "selected_version": "1.0.0.10",
+      "previous_signed_sha256": "05fd4e2c9dd22d340942d26edfb5e1a83639fe4fff02d14b9a3bf5e95b86aeff",
+      "selected_signed_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+      "selected_inf_sha256": "27a30c89250f6019b1328ecdfc14114e4a48c6c4d1555020e17d41f6adbf8962",
+      "selected_catalog_sha256": "7b0d5987d1972a2cc0e5af17665c07aec904f64298196ea9c660c31ae35daa92",
+      "package_recovery_available": true,
+      "status_package_version_verified": true,
+      "previous_start_ms": {
+        "min": 107.652,
+        "median": 121.866,
+        "max": 127.496
+      },
+      "selected_start_ms": {
+        "min": 4.627,
+        "median": 7.482,
+        "max": 21.879
+      },
+      "ordinary_start_median_reduction_ms": 114.384,
+      "previous_init_plus_start_median_ms": 139.823,
+      "selected_init_plus_start_median_ms": 42.292,
+      "hardware_cases": {
+        "silent_cycles_per_version": 7,
+        "clock_advanced_in_all": true,
+        "shared_signal_stop_nonzero": 2518,
+        "shared_signal_100ms_nonzero": 0,
+        "exclusive_prefilled_100ms_nonzero": 16384,
+        "exclusive_prefilled_100ms_peak": 32,
+        "expired_request_ignored": true,
+        "diagnostic_request_restored": true
+      },
+      "prior_to_measured_candidate_boot": {
+        "stage": "After selection, before candidate measurements",
+        "recorded_planned_reboot_request": false,
+        "event41": [
+          {
+            "record": 66568,
+            "bugcheck_code": "0",
+            "long_power_button": "false"
+          }
+        ],
+        "event6008": [
+          66559
+        ],
+        "conclusion": "Windows requested a restart when selecting the driver. The controller could not connect to issue its planned restart; the device subsequently recorded an unexpected shutdown. The cause is open. The candidate workload measurements came from the next boot."
+      },
+      "scope": "Ordinary stream startup, progressing device clock, digital PCM transport and explicit diagnostic capture. Acoustic quality was not measured. The unplanned reboot after PnP selection is tracked independently.",
+      "independent_review": "Main review and physical measurement completed. Separate Gemini review of the audio change remains pending."
+    }
   },
   "platform_driver_link": {
     "package": "https://www.nuget.org/packages/Microsoft.Windows.WDK.ARM64/10.0.26100.2454",
@@ -1297,7 +1356,7 @@
           "member_checks": 2
         }
       },
-      "scope": "PnP import, catalog and image checks in Windows PE ARM64. The physical Switch graphics driver store is recorded in EMC_VOTE_DELIVERY_20261118.json. Wi-Fi and audio operational trials are pending."
+      "scope": "Windows PE ARM64 import and catalog checks cover graphics, Wi-Fi and audio. The physical Switch selected the audio candidate and completed ordinary and explicit diagnostic tests. Wi-Fi operational trials remain open."
     }
   },
   "game_frame_and_power": {
@@ -1627,5 +1686,17 @@
     "record": "EMC_VOTE_DELIVERY_20261118.json",
     "result": "Both the baseline and candidate KMD reached six software-reference frame checks and the client success return, followed by an unplanned restart before durable parent exit. The candidate occurrence used external power with client ETW off.",
     "restored_kmd_desktop_observation": "A later unplanned reboot also occurred with the accepted KMD after dispatch of a desktop check with no video or game. Its last operation is unknown."
+  },
+  "last_audio_hardware_state": {
+    "utc": "2026-11-18T17:37:39.9755770Z",
+    "boot": "2026-11-18T17:34:48.7725220Z",
+    "dwm": [
+      1360
+    ],
+    "gpu_code": 0,
+    "audio_code": 0,
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "audio_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+    "power_mode": 1
   }
 }
