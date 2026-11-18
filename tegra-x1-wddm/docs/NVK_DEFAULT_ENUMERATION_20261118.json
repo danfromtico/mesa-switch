@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "status": "Accepted application NVK baseline",
+  "device": "Switch Lite / Windows ARM64 / GM20B",
+  "promoted_utc": "2026-11-18T07:22:58.8512973Z",
+  "scope": "Native Vulkan device enumeration and offscreen drawing from Windows applications. The embedded desktop UMD and ICD have a separate acceptance record.",
+  "source": {
+    "application_icd_commit": "3dc62b5a5a6dc51f42ad0c51bd9bfc5fc4b8e34d",
+    "application_icd_tag": "nvk-application-baseline-20261118",
+    "tgd3d_vulkan_gate_commit": "c719b72f05bdee00ca51a7f498f3bca60c747043",
+    "previous_integrated_build": "7cb5c8bfa54fd59b75526802f926f744252aaa1e",
+    "changed_icd_translation_unit": "src/nouveau/vulkan/nvk_physical_device.c",
+    "translation_unit_sha256": "e4acb6a8615129f90e0eef5c5d351310ab7e9fc075c1abefa46550570fadcf86",
+    "build_recipe": "src/nouveau/vulkan/nvkmd/windows/build_icd.py",
+    "draw_test": "tegra-x1-wddm/tools/vk_offscreen/triangle.c"
+  },
+  "baseline_environment": {
+    "device_opt_in": null,
+    "VK_DRIVER_FILES": null,
+    "VK_ICD_FILENAMES": null,
+    "gpu_kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+    "handheld_mode": 1,
+    "charging_limit_percent": 85
+  },
+  "previous_x86_control": {
+    "signed_sha256": "9413c7ffd28b70bdd0f3b0851c7dd6bb8330bd90cf9bae64eaf34291f4a57480",
+    "kmt_luid": "000000000007a71f",
+    "without_opt_in": {
+      "physical_devices": 0,
+      "exit": 10
+    },
+    "with_opt_in": {
+      "physical_devices": 1,
+      "matching_luid": true,
+      "exit": 0
+    }
+  },
+  "architectures": {
+    "x86": {
+      "pe_machine": "0x014c",
+      "bytes": 18599440,
+      "signed_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "unsigned_sha256": "b464764d3f649558f477b80fa0a3b9b6ab919eeabc0fd6a4c8c2d74684cfb856",
+      "shader_cache_build_id": "d4b2467a524d334034d779b8ff8af342ca62a13d68ac024fb6e1f4859aa43142",
+      "triangle_exe_sha256": "6efd2a2b0dc3716a4769fff6a2619b04373032ca2bd4a21a60024be0ba737d1e",
+      "probe_exe_sha256": "1ce119bd6ac036a356000ce38d52c453bb38e970c23d6383fa4772a3fdaee70c",
+      "loader_sha256": "0cb8619a4a4ba0acceba1f75a2dc0c8e251ab75d4a3c3e9640262c4c650c18af",
+      "code_0": {
+        "utc": "2026-11-18T07:20:36.0884234Z",
+        "kmt_luid": "0000000000103aa1",
+        "physical_devices": 1,
+        "matching_luid": true,
+        "enumeration_exit": 0,
+        "draw_exit": 0,
+        "pixels": 1024,
+        "red": 300,
+        "blue": 724,
+        "guard_bytes": 128
+      },
+      "code_43": {
+        "utc": "2026-11-18T07:09:07.8793226Z",
+        "native_ready_kmd": 0,
+        "physical_devices": 0,
+        "enumeration_exit": 0
+      }
+    },
+    "x64": {
+      "pe_machine": "0x8664",
+      "bytes": 18642960,
+      "signed_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+      "unsigned_sha256": "0fd74f2e1330fc1cbd11556a4a1af2209dfc95e4b8e39de93187918803d4c62e",
+      "shader_cache_build_id": "3b8c84ea3b7e9853637203972c8af074f079decd17a884035a05c7c70295047a",
+      "triangle_exe_sha256": "cd50350d4d2a5aef61df787fe27450b028b6d839c6737609705bae2623f35aa3",
+      "probe_exe_sha256": "7d25bcb2556dd322a8375e6adb6ee31b7f06bbff34b8bd60ca783dea347f60f5",
+      "loader_sha256": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+      "code_0": {
+        "utc": "2026-11-18T07:20:38.8696695Z",
+        "kmt_luid": "0000000000103aa1",
+        "physical_devices": 1,
+        "matching_luid": true,
+        "enumeration_exit": 0,
+        "draw_exit": 0,
+        "pixels": 1024,
+        "red": 300,
+        "blue": 724,
+        "guard_bytes": 128
+      },
+      "code_43": {
+        "utc": "2026-11-18T07:09:08.7543229Z",
+        "native_ready_kmd": 0,
+        "physical_devices": 0,
+        "enumeration_exit": 0
+      }
+    },
+    "arm64": {
+      "pe_machine": "0xaa64",
+      "bytes": 17672208,
+      "signed_sha256": "350d59b164db796692ed2f0c006fc309d149fe534bd04721a3667b07168bec00",
+      "unsigned_sha256": "4b868727f5ac5fb564a56e122d2d3e02234e59e7a8a1bccf912ef9bf2868d12d",
+      "shader_cache_build_id": "9a047a258c8f5e7d91435ff0e5120dee15eec26b1f881665d8320616557de4d2",
+      "triangle_exe_sha256": "23d8a71cecde067c5914cd4510423da4741b8ea2016b1523c4beb847716eb050",
+      "probe_exe_sha256": "427c869a84237b92126c4c11636a3d30516d8cf2deb25d73037ad6310dd8952f",
+      "loader_sha256": "59f237fa06e955cdefbeeaf9e79b127629336cb941473c2c6d9d04a1e7e30408",
+      "code_0": {
+        "utc": "2026-11-18T07:20:40.9946707Z",
+        "kmt_luid": "0000000000103aa1",
+        "physical_devices": 1,
+        "matching_luid": true,
+        "enumeration_exit": 0,
+        "draw_exit": 0,
+        "pixels": 1024,
+        "red": 300,
+        "blue": 724,
+        "guard_bytes": 128
+      },
+      "code_43": {
+        "utc": "2026-11-18T07:09:08.9574498Z",
+        "native_ready_kmd": 0,
+        "physical_devices": 0,
+        "enumeration_exit": 0
+      }
+    }
+  },
+  "test_kit": {
+    "zip_sha256": "70b8a293fbc3864df31a278af13e5e8beb26897b0c89c57da78d08725ae3e5b3",
+    "verified_files": 15,
+    "valid_authenticode_signatures": 12
+  },
+  "normal_loader": {
+    "utc": "2026-11-18T07:22:00.3092320Z",
+    "applications": [
+      {
+        "registered_application": "x86",
+        "icd_arch": "x86",
+        "loader_sha256": "0cb8619a4a4ba0acceba1f75a2dc0c8e251ab75d4a3c3e9640262c4c650c18af",
+        "driver_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "rc": 0,
+        "physical_devices": 1,
+        "matching_luid": true,
+        "loader_reported_versioned_path": true
+      },
+      {
+        "registered_application": "x64",
+        "icd_arch": "x64",
+        "loader_sha256": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+        "driver_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "rc": 0,
+        "physical_devices": 1,
+        "matching_luid": true,
+        "loader_reported_versioned_path": true
+      },
+      {
+        "registered_application": "ec",
+        "icd_arch": "x64",
+        "loader_sha256": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+        "driver_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "rc": 0,
+        "physical_devices": 1,
+        "matching_luid": true,
+        "loader_reported_versioned_path": true
+      },
+      {
+        "registered_application": "arm64",
+        "icd_arch": "arm64",
+        "loader_sha256": "59f237fa06e955cdefbeeaf9e79b127629336cb941473c2c6d9d04a1e7e30408",
+        "driver_sha256": "350d59b164db796692ed2f0c006fc309d149fe534bd04721a3667b07168bec00",
+        "rc": 0,
+        "physical_devices": 1,
+        "matching_luid": true,
+        "loader_reported_versioned_path": true
+      }
+    ],
+    "ec_probe_scope": "The probe in the EC application directory uses the x64 ICD. DXVK ARM64EC gameplay is recorded separately."
+  },
+  "activation": {
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-default-3dc62b5a",
+    "registered_groups": [
+      "matrix-x64",
+      "matrix-x86",
+      "warcraft",
+      "pal4",
+      "native-arm64"
+    ],
+    "settings_and_receipt": [
+      {
+        "kind": "settings",
+        "previous_sha256": "2c41c6a20f34cb668bec56e04210a54c35cc301601a84e44f8dcf98ea770139c",
+        "accepted_sha256": "362d6e4cf8b9876309b01b65e62d95631bcb2aa6b407c3c036b9b8a29d98797a"
+      },
+      {
+        "kind": "receipt",
+        "previous_sha256": "4b68dff5f323a9dd0a251c20b7e2ab2efcaa0e67df43e3ac81f172a603d83736",
+        "accepted_sha256": "6262b8442422b2502100b7880a1a69f69f8a412c22133897652a9a70883d25ed"
+      }
+    ],
+    "pal4_desktop_shortcut": {
+      "target": "仙剑奇侠传四语音版.exe",
+      "working_directory": "game directory",
+      "previous_sha256": "c88981f2373ea7e5c3eeffb3d2e757c563a095dbee1e0155e0000deabd46d460",
+      "accepted_sha256": "870803701585c0cadf70438e03d2975f00154d86d0bb721098caeb9f3e2f723a",
+      "window_pixels": [
+        800,
+        600
+      ]
+    }
+  },
+  "rollback": {
+    "script": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-default-3dc62b5a\\selection\\Select-ApplicationICD.ps1",
+    "restore_parameter": "-Mode Restore",
+    "reselect_parameter": "-Mode Activate",
+    "settings_restored_utc": "2026-11-18T07:22:47.9762981Z",
+    "old_x86_loader_code": 10,
+    "old_x86_devices": 0,
+    "settings_reselected_utc": "2026-11-18T07:22:55.1325470Z",
+    "previous_shortcut_backup": "selection\\pal4-original.lnk"
+  },
+  "public_artifacts": "Source and validation hashes. DXVK modules were taken from the Switch desktop."
+}

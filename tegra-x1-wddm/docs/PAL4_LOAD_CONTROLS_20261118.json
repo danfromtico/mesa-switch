@@ -1,0 +1,189 @@
+{
+  "status": "PAL4 startup and archive workload observations on Switch Lite",
+  "game": {
+    "executable_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+    "dxvk_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "windowed_config_sha256": "9c10ee25076317f4ceed4a7af14309b1821ec69dfdf85866ed3e44e1a12b9dc1",
+    "client_size": [
+      800,
+      600
+    ],
+    "software_icd": "Mesa lavapipe x86 26.2.4 with two llvmpipe threads",
+    "software_icd_sha256": "c65488e6172ca7347bf91a7013e00121f1e627e10b5d16a4d589315ffefda8af"
+  },
+  "runs": [
+    {
+      "id": "software-03",
+      "started_utc": "2026-11-18T06:43:48.9773487Z",
+      "boot_utc": "2026-11-18T06:27:44.6534550Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "seen_renderer": "llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+      "power_mode": 1,
+      "cpu_khz": 1114927,
+      "gpu_reported_khz": 537600,
+      "emc_sample_khz": 1600000,
+      "dxvk_log_sha256": "80d9b8786e85cfd99e95cc73b0da9d066ec88b6b8c4644e4a6457006b63f4b29",
+      "outcome": "User observed a blank game window and an unexpected restart.",
+      "next_boot_utc": "2026-11-18T06:44:39.0837960Z"
+    },
+    {
+      "id": "basic-04",
+      "started_utc": "2026-11-18T06:57:18.2738360Z",
+      "boot_utc": "2026-11-18T06:54:45.9654180Z",
+      "gpu_pnp_code": 43,
+      "dwm_tgd3d_device_count": 0,
+      "seen_renderer": "llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "gpu_reported_khz": 0,
+      "emc_sample_khz": 2500000,
+      "dxvk_log_sha256": "92fd86c47e55c6398ce551a4430139a8b11cbed7c7b2a1ac9e4f71e68869a4a1",
+      "primary_display": "Microsoft Basic Display Driver",
+      "outcome": "Early captures were white. The closing capture contained the PAL4 title and menu.",
+      "menu_capture_sha256": "7530a24f39354fb20f2f3becc9d4ba58c4ec7a841086de364dea824f313a60b2",
+      "close": "Window close request",
+      "exit_code": 0,
+      "session_end_utc": "2026-11-18T07:01:51.2699513Z"
+    },
+    {
+      "id": "fixed-06",
+      "started_utc": "2026-11-18T07:12:20.3251761Z",
+      "boot_utc": "2026-11-18T06:54:45.9735860Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "seen_renderer": "llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "gpu_reported_khz": 460800,
+      "emc_sample_khz": 1331200,
+      "dxvk_log_sha256": "b45035a33f0cb92ad43ef8f475bfe7f861cbe5684a7c4a787cfda4818237d4a9",
+      "outcome": "Title menu visible in the foreground window. Click input was accepted. The process exited after WM_CLOSE and the game recorded subsystem teardown.",
+      "menu_capture_sha256": "e4bc77f79be44ab756a8f746ec8da720b345c6d47368518210addc819f53dce7",
+      "exit_code": null,
+      "exit_observed_utc": "2026-11-18T07:19:51.3696721Z",
+      "boot_after_exit_utc": "2026-11-18T06:54:45.9735860Z",
+      "new_game_play_verified": false
+    },
+    {
+      "id": "nativefixed-07",
+      "started_utc": "2026-11-18T07:26:26.1160369Z",
+      "boot_utc": "2026-11-18T06:54:45.9735860Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "seen_renderer": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "gpu_reported_khz": 460800,
+      "emc_sample_khz": 1600000,
+      "dxvk_log_sha256": "e5dcacc779898c04d3bd36419714983a33e6536e6a3af75d344b9bbb2d4009c3",
+      "outcome": "Unexpected restart before a game frame was captured.",
+      "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "device_opt_in": null,
+      "window_mode": [
+        800,
+        600
+      ],
+      "graphics_pipeline_library": "supported at default setting",
+      "next_boot_utc": "2026-11-18T07:26:49.5169020Z",
+      "recovery_code": 0,
+      "etw": {
+        "trace_sha256": "ad6a8854e33de9b514653010d572e39574fbe46573fc484d3b936a2583b0926c",
+        "last_app_queue_completion_utc": "2026-11-18 07:26:28.950617+00:00",
+        "tail_utc": "2026-11-18 07:26:29.174797+00:00",
+        "retained_system_starts": 513,
+        "unmatched_system_starts": 0,
+        "app_command_bytes": [
+          8532,
+          80,
+          8,
+          36,
+          1096
+        ],
+        "app_waits": 1,
+        "app_signals": 5,
+        "app_completed": 11,
+        "app_present_events": 0
+      }
+    },
+    {
+      "id": "native-nogpl-08",
+      "started_utc": "2026-11-18T07:31:15.8790886Z",
+      "boot_utc": "2026-11-18T07:26:49.5169020Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "seen_renderer": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "gpu_reported_khz": 460800,
+      "emc_sample_khz": 1331200,
+      "dxvk_log_sha256": "81a723a256e9d2fdda0736ece50e399534740c9bad178308cea6a1699d919460",
+      "outcome": "Unexpected restart before a game frame was captured.",
+      "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "device_opt_in": null,
+      "window_mode": [
+        800,
+        600
+      ],
+      "graphics_pipeline_library": "disabled and confirmed by DXVK",
+      "next_boot_utc": "2026-11-18T07:31:47.5915700Z",
+      "recovery_code": 0,
+      "etw": {
+        "trace_sha256": "c8e56ff01063760a612f3b123e1812609b9fcd4407d3e59c4c672ba2ad80d122",
+        "last_app_queue_completion_utc": "2026-11-18 07:31:19.864248+00:00",
+        "tail_utc": "2026-11-18 07:31:22.899294+00:00",
+        "retained_system_starts": 667,
+        "unmatched_system_starts": 0,
+        "app_command_bytes": [
+          8532,
+          80,
+          8,
+          36,
+          1096
+        ],
+        "app_waits": 1,
+        "app_signals": 5,
+        "app_completed": 11,
+        "app_present_events": 0
+      }
+    }
+  ],
+  "archive": {
+    "original": {
+      "start_utc": "2026-11-18T04:48:51.7745207Z",
+      "archive_sha256": "024d403b4986b36d54f81eeb9a91df818e3156dcd0ad1bdce42ed465966887f6",
+      "partial_files": 799,
+      "partial_bytes": 932793266,
+      "next_observed_boot_utc": "2026-11-18T04:59:51.0035730Z",
+      "postboot_game_pids": []
+    },
+    "repeat_one_member": {
+      "start_utc": "2026-11-18T07:35:26.0949449Z",
+      "end_utc": "2026-11-18T07:36:42.8137991Z",
+      "boot_utc": "2026-11-18T07:31:47.5915700Z",
+      "tar_version": "bsdtar 3.6.2 - libarchive 3.6.2 zlib/1.2.5.f-ipp liblzma/5.2.5 bz2lib/1.0.8 libzstd/1.5.4 ",
+      "tar_sha256": "cb7d37a55138cde1ea38883df243af38d4804e1fe5e3ee82100adf2ecd548bd7",
+      "compressed_member_archive_sha256": "bac20852654ccd689f66d3d94f1d2c05ba9a5d20b6e4da6aa30ae576147fa500",
+      "expanded_member_sha256": "fd00f151072214932c28da925f4cd533d21a82dd59a16c06384833a6bb302dda",
+      "member_bytes": 8752515,
+      "iterations": 107,
+      "bytes_decoded_written_and_verified": 936519105,
+      "workload_ms": 72178,
+      "power_mode": 1,
+      "ac": "Online",
+      "pnp_code": 0,
+      "dwm_tgd3d_devices_before_after": [
+        1,
+        1
+      ],
+      "result": "All output hashes matched. The same Windows boot continued.",
+      "fixture_copy_removed_on_both_hosts": true
+    }
+  },
+  "interpretation": [
+    "Keeping the fixed CPU policy and the GPU desktop, both native runs restarted while the software-rendered game reached the menu. EMC frequency samples differed between runs.",
+    "Disabling DXVK graphics pipeline libraries did not prevent the native game restart. Captured scheduler data ends before the reset.",
+    "The original full extraction was interrupted. A repeated single-member RAR5 workload completed on the active tgd3d desktop in Handheld mode. Its file layout and cache behavior differ from the full extraction.",
+    "The underlying system reset cause and interactive PAL4 gameplay on native NVK remain open."
+  ]
+}
