@@ -2649,13 +2649,29 @@
     ]
   },
   "system_legacy_directx": {
-    "status": "Baseline bindings measured; native game qualification pending.",
+    "status": "The 32-bit system D3D9 game fell back to Microsoft GDI Generic. The experimental adapter opened GM20B in a direct DDI control. System-runtime HAL device creation and game acceptance remain open.",
     "order": [
       "32-bit system D3D9 on FTEQW / LibreQuake",
       "32-bit system D3D8, then game",
       "DirectDraw 2D and Direct3D 7, then games"
     ],
     "record": "tegra-x1-wddm/docs/SYSTEM_LEGACY_DIRECTX_20261118.json",
-    "record_sha256": "545824d06301b8564fbeacfc6da58d1d4e97776ec491d5bb73da0b5142b3ab16"
+    "record_sha256": "b6d8a7b580ce407d89cb40cce7d17b3bd06db78fc4ba4c176bc12cec3a555993",
+    "direct_ddi_adapter_control": true,
+    "system_game_accepted": false,
+    "temporary_driver_binding_restored": true
+  },
+  "native_d3d12_device_creation": {
+    "record": "tegra-x1-wddm/docs/D3D12_DEVICE_CREATION_20261118.json",
+    "record_sha256": "361f62ef27e515b229dd5ba70685a3e3f38d040af204e43bbbcb8f9c0691c91c",
+    "process_arch": "ARM64",
+    "native_device_created": {
+      "11_0": false,
+      "12_0": false
+    },
+    "native_hresult": {
+      "11_0": "0x887a0004",
+      "12_0": "0x887a0004"
+    }
   }
 }
