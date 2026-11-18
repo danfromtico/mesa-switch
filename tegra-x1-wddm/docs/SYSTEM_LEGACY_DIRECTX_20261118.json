@@ -1,0 +1,106 @@
+{
+  "objective": "One installed driver serves legacy applications through the Windows system runtimes, including 32-bit callers.",
+  "ordered_acceptance": [
+    {
+      "runtime": "x86 system d3d9.dll",
+      "workload": "FTEQW / LibreQuake on lq_e0m1, matched to DXVK control",
+      "check": "GM20B through installed tgd3d / NVK, visible window, input and exit."
+    },
+    {
+      "runtime": "x86 system d3d8.dll",
+      "workload": "Device creation, drawing and visible presentation, then a representative game."
+    },
+    {
+      "runtime": "system DirectDraw and Direct3D 7",
+      "workload": "Indexed palette, color key, Blt and page flip, textured DX7 teapot, then a game.",
+      "software": "Record software emulation when observed."
+    }
+  ],
+  "game_directory": "No app-local translation DLL. Resolve the actual system runtimes, driver and backend by path, architecture, hash, target process and device identity.",
+  "measured_utc": "2026-11-18T21:46:35.5196884Z",
+  "boot": "2026-11-18T21:30:53.8282480Z",
+  "tegra_problem_code": 0,
+  "readback": [
+    {
+      "registry_view": "Registry64",
+      "user_mode_driver_names_in_order": [
+        "tegragpuno3d.dll",
+        "TegraGpuD3DVk.dll",
+        "TegraGpuD3DVk.dll",
+        "tegragpuno3d.dll"
+      ],
+      "separate_wow_driver_names_present": false
+    },
+    {
+      "registry_view": "Registry32",
+      "user_mode_driver_names_in_order": [
+        "tegragpuno3d.dll",
+        "TegraGpuD3DVk.dll",
+        "TegraGpuD3DVk.dll",
+        "tegragpuno3d.dll"
+      ],
+      "separate_wow_driver_names_present": false
+    }
+  ],
+  "registered_modules": [
+    {
+      "name": "TegraGpuD3DVk.dll",
+      "machine": "0xaa64",
+      "sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d"
+    },
+    {
+      "name": "tegragpuno3d.dll",
+      "machine": "0xaa64",
+      "sha256": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d"
+    }
+  ],
+  "installed_legacy_system_runtimes": [
+    {
+      "system_directory": "System32",
+      "name": "d3d9.dll",
+      "machine": "0xaa64",
+      "sha256": "6f053b30076a7ed8525bd0d5af736bbfb107e0553a55d3930e1ef467a23f70b9",
+      "version": "10.0.22621.2506"
+    },
+    {
+      "system_directory": "System32",
+      "name": "ddraw.dll",
+      "machine": "0xaa64",
+      "sha256": "686782573ab6d08defb88bce019c5e98932d4d8fa531b41896a940841a024195",
+      "version": "10.0.22621.4745"
+    },
+    {
+      "system_directory": "SysWOW64",
+      "name": "d3d9.dll",
+      "machine": "0x014c",
+      "sha256": "53083085224e2b64387614c35dd9aad2062ae04ada0d001044dc1e4301b8e3bf",
+      "version": "10.0.22621.2506"
+    },
+    {
+      "system_directory": "SysWOW64",
+      "name": "d3d8.dll",
+      "machine": "0x014c",
+      "sha256": "56418c454ff4b52be405dcfda59def522948bb0d243b3a701b6eaf4538448b9f",
+      "version": "10.0.22621.1"
+    },
+    {
+      "system_directory": "SysWOW64",
+      "name": "ddraw.dll",
+      "machine": "0x014c",
+      "sha256": "c1cd35ececb899ad25ed3d4d14a5993c485f8ccff7dec630b5b2ef093c6b6fa0",
+      "version": "10.0.22621.2506"
+    }
+  ],
+  "source": {
+    "package_stub": "tegra-x1-wddm/windows/no_d3d.c",
+    "open_adapter_result": "D3DERR_NOTAVAILABLE",
+    "package_registry": "tegra-x1-wddm/windows/tegragpurender.inf",
+    "desktop_exports": "src/nouveau/tgd3d/tgd3d.def",
+    "desktop_entrypoints": [
+      "OpenAdapter10",
+      "OpenAdapter10_2"
+    ]
+  },
+  "endpoint": "Each physical result describes the runtime, loaded driver, native device or software path, pixels, input, normal exit and desktop recovery.",
+  "status": "Driver bindings and runtime identities measured. Native legacy game qualification and a functional D3D9 WDDM adapter entry are pending. Earlier game receipts used DXVK."
+}
