@@ -260,7 +260,52 @@
       "UsbMassStorageDxe",
       "UsbKbDxe"
     ],
-    "remaining": "Firmware initialization time and physical cold-boot sequencing require their own measurements."
+    "remaining": "Firmware initialization time and physical cold-boot sequencing require their own measurements.",
+    "windows_handoff": {
+      "original_volume_dsdt": {
+        "sha256": "0fa9a14fc30df52305b7ba855675a8f075d95e765d9f3ef5c35ebee2ca5f3e0f",
+        "bytes": 4568,
+        "markers": {
+          "WSTA": [
+            16
+          ],
+          "XSTA": [
+            16
+          ]
+        },
+        "unique_offset_in_retained_fvmain": 3037396
+      },
+      "first_loaded_windows_dsdt": {
+        "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849",
+        "bytes": 4993,
+        "same_as_disk_override": true,
+        "markers": {
+          "WSTA": [
+            15
+          ],
+          "XSTA": [
+            16
+          ]
+        },
+        "checked_at": "2026-11-18T15:40:19.1443673Z"
+      },
+      "readiness_tools_on_winarm": [
+        {
+          "sha256": "BB40A5843EC323E84620CC11C3FAD1DA5BB6D16B6E2E578891F0F3959175E939",
+          "name": "SwitchWOA\\Wifi\\WifiPrepare.efi",
+          "bytes": 40960
+        },
+        {
+          "sha256": "4A01FDD3D2BC76B7F99B8396269178170680CFF977AADF0BFDC39F0E262B0688",
+          "name": "SwitchWOA\\Usb\\UsbPrepare.efi",
+          "bytes": 24576
+        }
+      ],
+      "current_wifi_problem_code": 0,
+      "contract": "WinX starts WifiPrepare.efi before Windows Boot Manager. Successful preparation changes the firmware WSTA byte from 0x10 to 0x0f and fixes the DSDT checksum. On failure the firmware leaves the device hidden and continues booting. This build also uses a static Windows ACPI override for NVDEC. The loaded WSTA matches that saved image; reading it alone cannot establish that the firmware preparation succeeded on any individual boot.",
+      "scope": "The two layers have different source tables. The current radio is operational. A bypassed or failed firmware preparation on the earlier affected boot remains unverified.",
+      "receipt_sha256": "429f0fe88d57b0f9e05b649a6c9f700a09be93cdbf9a02b166992bfa546a9da0"
+    }
   },
   "sd": {
     "service": "nvtsdhc",
@@ -301,7 +346,25 @@
         "sha256": "f61afce8fd54faaa218491265a37ae4b1bfe4b75a40c2ddd1096700fe8fe83b0"
       }
     ],
-    "receipt_sha256": "8d1d550cdc740057e7c1fff1ef919dbeea52c92729c6fc1535835d6a0b007568"
+    "receipt_sha256": "8d1d550cdc740057e7c1fff1ef919dbeea52c92729c6fc1535835d6a0b007568",
+    "active_transport": {
+      "utc": "2026-11-18T15:40:24.4778461Z",
+      "mode": "SDR104",
+      "bus_width": 4,
+      "clock_khz": 199680,
+      "signaling_1_8v": true,
+      "ddr200_active": false,
+      "longest_passing_tap_window": 1,
+      "minimum_tap_window": 8,
+      "samples": 128,
+      "tuning_timeouts": 1,
+      "fallbacks": 1,
+      "fallback_recovery_status": 0,
+      "last_attempt_status": "0xc0000185",
+      "adma_errors": 0,
+      "interpretation": "The read sample was taken on a boot that fell back to SDR104. The single passing tap did not meet the eight-tap guard. It does not provide a DDR200 throughput measurement.",
+      "receipt_sha256": "eaa4365545484f639e3d798aedd385cc45990a32d872a3635aa2fa9599c40aa9"
+    }
   },
   "wifi": {
     "source": "125b618c366ff22863468057243278c2f60a36db",
@@ -331,7 +394,8 @@
     "changed_translation_unit": "report.c",
     "build_limit": "The archived installed package matched the device. The fresh reference link did not reproduce that archived unsigned PE byte-for-byte. The two fresh ARM64 builds differ in report.obj alone after normalizing COFF timestamps and the WDK assertion source path.",
     "earlier_startup_issue": "Current device problem code 0. The filtered historical PnP query returned no matching event for this instance in the specified time window. The cause of the earlier unavailable radio remains open.",
-    "startup_issue_history_sha256": "17367ba9d430c5d42389853017957c5d08e58d610209fc613dca0927922bf92f"
+    "startup_issue_history_sha256": "17367ba9d430c5d42389853017957c5d08e58d610209fc613dca0927922bf92f",
+    "startup_layers": "Check the pre-Windows firmware preparation and the Windows ACPI override alongside WDF initialization. A readiness byte from an override can agree with the saved file even when a prior boot has no surviving firmware report."
   },
   "bluetooth": {
     "version_matched_source": "7f6c3cf9b35a63bfc721f78f0e3524ea41012cf7",
@@ -486,5 +550,11 @@
       }
     ]
   },
-  "high_load_followup": "Keep the manual restart for Wi-Fi startup separate from the subsequent verified unexpected restart after the H.264 trial. Both are recorded without assigning a shared cause."
+  "high_load_followup": "Keep the manual restart for Wi-Fi startup separate from the subsequent verified unexpected restart after the H.264 trial. Both are recorded without assigning a shared cause.",
+  "current_platform_readback": {
+    "utc": "2026-11-18T15:42:23.1853799Z",
+    "dwm_pid": 1396,
+    "power_mode": 1,
+    "receipt_sha256": "055f57499058bf022644ee5a008b0bb6e74bbcf6a1c994909a12ba24c41e0620"
+  }
 }
