@@ -2559,7 +2559,11 @@
         "state": "daily",
         "binary_prefix": "ded6fa4a",
         "scope": "H.264 discovery enabled by default; independent-context completion recheck and teardown deferral. Six 720p hashes match on the selected UMD. Full window exit, 1080p in this combination and browser hardware use remain open. Stock Edge used software.",
-        "record": "NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json"
+        "record": "NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json",
+        "browser": "Software H.264 decoding on both stock browsers with the selected UMD.",
+        "browser_record": "tegra-x1-wddm/docs/BROWSER_H264_AND_D3D_FEATURE_LEVEL_20261118.json",
+        "system_d3d11_feature_level": "10_0",
+        "target_feature_level": "11_1"
       },
       "pacecar": {
         "state": "daily",
@@ -2606,5 +2610,37 @@
         "scope": "HDH-001 SMBIOS candidate built, physical startup pending. This boot uses SDR104. Passive BLE receive passed; connected peer traffic and suspend/resume outstanding."
       }
     }
+  },
+  "browser_video_qualification": {
+    "status": "Software H.264 decoding on both stock browsers with the selected UMD.",
+    "record": "tegra-x1-wddm/docs/BROWSER_H264_AND_D3D_FEATURE_LEVEL_20261118.json",
+    "record_sha256": "f71899f26d86ba1fa847823920a5f35d3db4b9898f1521091a0e56d4099dbc0e",
+    "direct3d11_feature_level": "10_0",
+    "d3d11_target": "11_1",
+    "native_nvdec_control": {
+      "size": [
+        1280,
+        720
+      ],
+      "matching_frames": 6
+    },
+    "browsers": [
+      {
+        "version": "157.0.4341.60",
+        "decoder": "FFmpegVideoDecoder",
+        "total": 360,
+        "dropped": 5,
+        "exit": null,
+        "trace_closed": false
+      },
+      {
+        "version": "158.0.8127.37",
+        "decoder": "FFmpegVideoDecoder",
+        "total": 360,
+        "dropped": 29,
+        "exit": 0,
+        "trace_closed": true
+      }
+    ]
   }
 }
