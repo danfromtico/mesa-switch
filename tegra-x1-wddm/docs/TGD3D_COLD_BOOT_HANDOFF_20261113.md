@@ -1,8 +1,15 @@
-# 720p H.264 硬解与窗口呈现
+# 1080p H.264 硬解与固定横屏基线
 
-**720p H.264 硬解及窗口实屏功能验收通过。** 当前基线为 de8bb90b KMD、c7ef263c UMD 和 e563a81d ICD。D3D11VA／NVDEC 解码的六帧 NV12 全部匹配独立参考，GPU 转色后的图案显示在 640×360 的 DWM 窗口中。慢速观察的六次 Present 均返回成功，末帧停留 8 秒，解码会话、GPU 事件、DWM 刷新和窗口关闭均有完成回执。客户端计时 15.109 秒。[组件哈希、逐帧结果与实屏证据](NVDEC_720_COMPOSITOR_OPEN_20261117.json)
+**1080p H.264 六帧慢速窗口实机验收通过。** NVDEC 经 D3D11VA 解出 1920×1080 画面，NV12 纹理池为 1920×1088。六帧均与独立参考逐字节相符。实屏窗口显示彩色图案，六次 Present 成功，末帧 230,400 个像素各通道最大差值为 1。客户端计时 16.093 秒，含末帧停留 8 秒，随后正常回到桌面。[1080p 验收证据与完整 SHA256](NVDEC_1080_D3D11VA_20261117.json)
 
-DWM 通过旧版 DDI `0xA0009` 成功打开两块视频缓冲，pitch 均为 2560。当前和已保存桌面均为 90°、1280×720，面板信号为 720×1280。两次无人工间隔的运行发生意外重启，轻量复测的最后一条记录停在第五次 Present。常规连续播放稳定性保留为后续任务。1080p、2K、4K 待集中验收。[重启记录](LOAD_STABILITY_FOLLOWUP_20261116.json)
+当前 KMD／UMD／ICD 为 `9ef86d7e`／`c8a8eb9a`／`e563a81d`。90° 逐行横屏和 Handheld 电源配置已复核，720p 可用组合保留为恢复目标。2K、4K 已有独立实现，暂缓实机测试。连续播放和高负载重启另案跟进。[版本表](NVDEC_INTEGRATION_20261116.json)
+
+## 上一轮 720p 实机验收
+
+
+**720p H.264 硬解及窗口实屏功能验收通过。** 该轮基线为 de8bb90b KMD、c7ef263c UMD 和 e563a81d ICD。D3D11VA／NVDEC 解码的六帧 NV12 全部匹配独立参考，GPU 转色后的图案显示在 640×360 的 DWM 窗口中。慢速观察的六次 Present 均返回成功，末帧停留 8 秒，解码会话、GPU 事件、DWM 刷新和窗口关闭均有完成回执。客户端计时 15.109 秒。[组件哈希、逐帧结果与实屏证据](NVDEC_720_COMPOSITOR_OPEN_20261117.json)
+
+DWM 通过旧版 DDI `0xA0009` 成功打开两块视频缓冲，pitch 均为 2560。当前和已保存桌面均为 90°、1280×720，面板信号为 720×1280。两次无人工间隔的运行发生意外重启，轻量复测的最后一条记录停在第五次 Present。常规连续播放稳定性保留为后续任务。[重启记录](LOAD_STABILITY_FOLLOWUP_20261116.json)
 
 ### 前一轮 864ff770 UMD 的结果
 
@@ -22,6 +29,8 @@ DWM 通过旧版 DDI `0xA0009` 成功打开两块视频缓冲，pitch 均为 256
 
 ## XP 项目只读源码索引
 
+1080p 的可见区域、编码表面和 NV12 平面边界见配套的 KMD、UMD 改动。原有 GM20B、NVK／NAK、扫描输出与 Windows 宿主索引继续适用。[1080p 源码提交](https://github.com/ruje0504-2/mesa-switch-woa/commit/fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9) · [实机证据](NVDEC_1080_D3D11VA_20261117.json)
+
 下表的链接固定到 Windows ARM64 实际构建所对应的版本。XP 项目可只读查阅硬件格式、执行顺序和验证样例。XP 专用驱动、WOW64 和 D3D9 调用桥由 XP 侧独立实现。两侧的运行结果分别验收。
 
 | 范围 | 源码入口与依赖 | 已有证据 |
@@ -32,7 +41,7 @@ DWM 通过旧版 DDI `0xA0009` 成功打开两块视频缓冲，pitch 均为 256
 | WDDM／KMT 宿主 | `nvkmd/windows/kmt_native.c` 按 LUID 打开适配器并调用 D3DKMT，`nvkmd_windows_queue.c` 管提交和 fence；tgd3d 的 `tgd3d_runtime_queue.cpp` 和 `tgd3d_dxgi.cpp` 使用 D3D runtime 回调。KMD 的 `windows/render_miniport.c`、`paging.c`、`submit_ddi.c` 接 Dxgkrnl／VidMm／VidSch。allocation、GPU VA、上下文、监控 fence、DXGI 呈现令牌和回调生命周期属于 Windows 宿主。[KMT](https://github.com/ruje0504-2/mesa-switch-woa/tree/7823d6419de624bb7ba555fa6a5867b6f79607a4/src/nouveau/vulkan/nvkmd/windows) · [UMD](https://github.com/ruje0504-2/mesa-switch-woa/tree/7823d6419de624bb7ba555fa6a5867b6f79607a4/src/nouveau/tgd3d) · [KMD](https://github.com/ruje0504-2/mesa-switch-woa/tree/4dd80c7920991d51462fc5ce1f120b4e2a23206a/tegra-x1-wddm/windows) | 五项修复分别记录提交、回调控制和实际运行范围。兼容性控制中的模拟设备移除没有在 GPU 上注入。在 864ff770 UMD 上，11.1 生产端通过真实 runtime callback 提交了六个含 WrittenPrimaries 的命令。c7ef263c UMD 的 DWM 接收端已打开两块视频缓冲，跟踪中有 13 次携带一个 WrittenPrimaries 的 DWM 提交成功返回。[五补丁](TGD3D_PRESENT_BASELINE_20261117.json) · [11.1 回调修正](https://github.com/ruje0504-2/mesa-switch-woa/commit/358e0954ce38cca6052e97054e5ecfe2d54a6a0d) · [0xA0009 接收端修正](https://github.com/ruje0504-2/mesa-switch-woa/commit/8549e9e398f6cdb4e064fc30bd7c06a5243be893) · [原故障](NVDEC_720_RUNTIME_WINDOW_20261117.json) · [修正后的实机跟踪](NVDEC_720_COMPOSITOR_OPEN_20261117.json) |
 | NVDEC／Host1x | `src/nouveau/nvdec/` 包含 H.264 参数、固件接口和 NV12 布局。`platform/t214_nvdec.c` 管保留通道和同步点。`windows/nvdec_backend.c`、`nvdec_memory.c` 对接 Windows 资源和 DMA；`tgd3d_video.cpp` 接 D3D11 视频 DDI。[解码核心](https://github.com/ruje0504-2/mesa-switch-woa/tree/4dd80c7920991d51462fc5ce1f120b4e2a23206a/src/nouveau/nvdec) · [Host1x](https://github.com/ruje0504-2/mesa-switch-woa/blob/4dd80c7920991d51462fc5ce1f120b4e2a23206a/tegra-x1-wddm/platform/t214_nvdec.c) · [视频 DDI](https://github.com/ruje0504-2/mesa-switch-woa/blob/7823d6419de624bb7ba555fa6a5867b6f79607a4/src/nouveau/tgd3d/tgd3d_video.cpp) | 720p H.264 的六个 Host1x 目标全部到达，NV12 与独立软件解码逐帧一致，会话关闭。更高分辨率待集中验收。[后端](NVDEC_720_NATIVE_BACKEND_20261117.json) · [D3D11VA](NVDEC_720_WINDOW_BOUNDARY_20261117.json) · [720p 实屏与正常关闭](NVDEC_720_COMPOSITOR_OPEN_20261117.json) |
 
-当前 KMD 的最终源码修正为 `4dd80c7920991d51462fc5ce1f120b4e2a23206a`，构建还包含版本表所列的冻结平台输入。当前 ICD 与 UMD 冻结底本为 `7823d6419de624bb7ba555fa6a5867b6f79607a4`，已安装 UMD 依次含 `358e0954ce38cca6052e97054e5ecfe2d54a6a0d` 与 `8549e9e398f6cdb4e064fc30bd7c06a5243be893` 的独立差异。历史逐行 KMD 则使用 c0c6647c 加已记录的 EMC 差异。可用 `git show <提交>:<仓库相对路径>` 只读核对相应文件。移植时按文件查 SPDX、NOTICE 及上游来源；T214 电源部分含 GPL-2.0-only，NVIDIA 固件另计。[当前构建身份](TGD3D_PRESENT_BASELINE_20261117.json) · [原逐行构建身份](ROW_SCAN_BASELINE_20261116.json) · [来源](../UPSTREAM.md) · [许可](../LICENSE.md) · [NOTICE](../NOTICE)
+当前 KMD 在 720p 已验证的 `4dd80c7920991d51462fc5ce1f120b4e2a23206a` 和冻结平台补丁上加入 `fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9` 的 1080p 改动。ICD 与 UMD 底本为 `7823d6419de624bb7ba555fa6a5867b6f79607a4`，UMD 在已验证的 `358e0954ce38cca6052e97054e5ecfe2d54a6a0d`、`8549e9e398f6cdb4e064fc30bd7c06a5243be893` 两项修改上移植同批解码改动。历史逐行 KMD 为 c0c6647c 加已记录的 EMC 修正。XP 侧可按提交和相对路径只读查阅，并按文件核对 SPDX、NOTICE 及上游来源。T214 电源部分含 GPL-2.0-only，NVIDIA 固件有单独条款。[冻结输入与组件哈希](NVDEC_1080_D3D11VA_20261117.json)
 
 以下为此前轮次的记录。
 

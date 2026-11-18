@@ -1,4 +1,10 @@
-# GPU status
+## Native 1080p H.264 accepted on Switch
+
+The native D3D11VA decoder returned six 1920×1080 pictures from a 1920×1088 NV12 pool. Every frame matched the software reference. All six Presents completed in a 640×360 desktop window. The final GPU image differed from the reference by at most one value per channel. The paced run lasted 16.093 seconds, including an eight-second final hold. The window closed normally. [1080p evidence and signed component identities](NVDEC_1080_D3D11VA_20261117.json)
+
+The selected KMD, UMD and ICD are `9ef86d7e`, `c8a8eb9a` and `e563a81d`. Fixed 90-degree row scan and the Handheld power configuration were verified after playback. The accepted 720p package remains available for recovery. 2K and 4K native validation and unpaced load stability remain deferred. [Resolution roadmap](NVDEC_INTEGRATION_20261116.json)
+
+### Previous 720p functional acceptance
 
 **The native 720p H.264 functional test passed** on the de8bb90b KMD, c7ef263c UMD and e563a81d ICD. All six NV12 frames matched the independent reference. The GPU-converted pattern appeared on the panel in a 640×360 window. Six Presents, the GPU event, DwmFlush, decoder close and window release completed in the paced run. The client measured 15.109 seconds including an eight-second final hold. [Components, per-frame evidence and physical observation](NVDEC_720_COMPOSITOR_OPEN_20261117.json)
 
