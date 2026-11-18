@@ -1,5 +1,5 @@
 {
-  "status": "Objective 5 in progress. Physical Switch audio and wireless candidates are selected. The I2C timeout package has catalog coverage; its physical trials remain open.",
+  "status": "Objective 5 in progress. Audio 1.0.0.10, Wi-Fi 0.5.7.1 and I2C 1.0.0.7 passed physical acceptance. The R402 Lite SMBIOS correction has a byte-for-byte reference repack and awaits a firmware boot test.",
   "order": [
     "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
     "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
@@ -529,6 +529,41 @@
       "contract": "WinX starts WifiPrepare.efi before Windows Boot Manager. Successful preparation changes the firmware WSTA byte from 0x10 to 0x0f and fixes the DSDT checksum. On failure the firmware leaves the device hidden and continues booting. This build also uses a static Windows ACPI override for NVDEC. The loaded WSTA matches that saved image; reading it alone cannot establish that the firmware preparation succeeded on any individual boot.",
       "scope": "The two layers have different source tables. The current radio is operational. A bypassed or failed firmware preparation on the earlier affected boot remains unverified.",
       "receipt_sha256": "429f0fe88d57b0f9e05b649a6c9f700a09be93cdbf9a02b166992bfa546a9da0"
+    },
+    "lite_model_candidate": {
+      "finding": "R402 reports Switch HAC-001 for system product, SKU, version and baseboard on a verified Lite. The candidate sets system and retail model PCDs to HDH-001 for the existing Lite build profile.",
+      "feature_source": "https://github.com/ruje0504-2/winx/commit/f919fd747a6cdbb4766dcc60183c05bd796142b8",
+      "profiles_compiled": [
+        "original",
+        "lite"
+      ],
+      "original_and_rebuilt_baseline_match": true,
+      "archive_method": "Re-encoded the original nested volume, GUID-defined section and firmware file with EDK2 tools. The resulting full BL33 reproduces the image on the device byte for byte. In the candidate only the 24,576-byte SMBIOS PE payload in the inner volume was replaced.",
+      "inner_fv_members": 57,
+      "unchanged_inner_members": 56,
+      "target_guid": "50a15b6f-e3a9-4192-9640-369cb367c4de",
+      "stub_sha256": "8df88458841200af6e99f99e1ba848f10296e077c19a387c1b6cedbcdf0130c3",
+      "original_prepi_ffs_sha256": "824704f7e41ba77d46d83aae56ac022a5ae072f3ad48a11ead97251d96adbf30",
+      "reference": {
+        "bl33_sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e",
+        "bytes": 921600,
+        "outer_fv_sha256": "388de278828dcb2a706ade5ed9a9c3dc4688b036552359482bb771082a4f6176",
+        "main_fv_sha256": "7ea9f9edaede38a47fde85b6533c616855049c32075acaf953b7d408fc0b6081",
+        "smbios_pe_sha256": "fd5041de62f8ec143245c49ab279f5bea3b4ff8eb05de88245e56e1b1d5e033a",
+        "guided_ffs_bytes": 720571,
+        "inner_lzma_roundtrip": true
+      },
+      "candidate": {
+        "bl33_sha256": "6aadfb2fd3979532fca1302edfbc276a154aca84aa37481cdbc0476b6083511a",
+        "bytes": 921600,
+        "outer_fv_sha256": "731b48854ff37cbd84fe9123a01d0e0dbf0abaf0d19ac0bcd3c415dfd6c2f865",
+        "main_fv_sha256": "325c70c70b06ce154acf7822b72c7a9b69673c92aa5bcbb4bd63cdbe166805c2",
+        "smbios_pe_sha256": "d447729b3905ace773eb16e1ecb5f69a0908c81fc820f9beb410a9fabf5ffe8e",
+        "guided_ffs_bytes": 720811,
+        "inner_lzma_roundtrip": true
+      },
+      "selected_on_device": false,
+      "independent_review": "Pending separate Gemini review."
     }
   },
   "sd": {
@@ -685,10 +720,10 @@
       "FTM4 touch parser and HID reports",
       "existing DFLL, PMIC concurrency, EMC governor and display QoS models"
     ],
-    "binding_note": "Three I2C instances bind the November 6 version 1.0.0.5 package. The RTC binds the November 7 build of 1.0.0.3. Fresh ARM64 links reproduce both installed payloads after normalizing the Authenticode fields.",
+    "binding_note": "The initial inventory identifies the earlier I2C 1.0.0.5 and RTC 1.0.0.3 images. All three controllers now bind I2C 1.0.0.7 after a planned Windows restart. The RTC remains on its verified November 7 build.",
     "pending": [
       "Bluetooth transport with a connected peer",
-      "RTC, GPIO, I2C error handling and sleep/resume on the bound versions",
+      "RTC/GPIO runtime behavior and sleep/resume of the bound controllers",
       "Performance under the active CPU/GPU/EMC and NVDEC scheduling choices",
       "DXVK, Pacecar, and the scoped Mesa code review"
     ],
@@ -762,9 +797,8 @@
     },
     "i2c_fifo_timeout": {
       "source": "ca60e5d8112bb5883292c12af525f21ae72c1b2e",
-      "patch_sha256": "d49dce8d25b3c03794b1ba9ce508c4fb539f46ba29dae50c428f60eca094f0b4",
-      "unsigned_sha256": "135612f67f69abf30854afa61215977944b859dbfe4c6efa30817ef44b1f95fc",
-      "controls_sha256": "a875e2719f23d5c5a97e69f87a0f7ff04e3bd565d00afc5d3ad850ce31da2f90",
+      "unsigned_sha256": "a64f1cbac4b2bde94e605a94e925d47d924109df88c0c47390b8ebe0e45b8246",
+      "controls_sha256": "7e66eb593cfb87d2fce87f5b1ef44442f29bc6e625afe82e02a013eaa6d044ca",
       "cases_per_build": 11,
       "outcomes": {
         "reference": {
@@ -852,16 +886,28 @@
           }
         }
       },
-      "scope": "Controlled register test of the installed source. Failed FIFO clearing previously issued three packet headers during the flush. The candidate returns timeout and stops writing. Physical installation and bus recovery testing remain open.",
-      "feature_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/35ec44f8a35cc34b15b6bbfa04a55f43106eb5ec",
-      "candidate_package_version": "1.0.0.6",
+      "scope": "Physical selection covers the three controllers and healthy client traffic. Stuck configuration and FIFO cases run against substituted controller registers.",
+      "feature_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/f4210eb0459ec1dfc7c7040f65b0665ca6adc21c",
+      "candidate_package_version": "1.0.0.7",
       "signed_package_sha256": {
-        "tegra210i2c.inf": "f4ac5086129e7b81713ad9c1e76abfb72b942bf9b9b926ffb97c96d10cc91bb4",
-        "tegra210i2c.cat": "3db91642068eca50067fafa9610fffcb65cce498e8cfe22f80362e17fb6d97ef",
-        "tegra210i2c.sys": "0ebffc1778fbc0b60cf81b270c53458d266b7c4043424319265668482e332713"
+        "tegra210i2c.inf": "93c4ca9c542f49b387151a5db05e2ed960f9320d6d7bc2829145c81076f973fb",
+        "tegra210i2c.cat": "8e0e93c11b5f6e148e5ab135a72d44074accccdff87dd1f488b0a49366472f44",
+        "tegra210i2c.sys": "c7bf8fe18a95d2d5b39d3c8137ea0751eae1471969fe7699f4712f033a45ea31"
       },
-      "physical_candidate_selected": false,
-      "candidate_source_commit": "35ec44f8a35cc34b15b6bbfa04a55f43106eb5ec"
+      "physical_candidate_selected": true,
+      "candidate_source_commit": "f4210eb0459ec1dfc7c7040f65b0665ca6adc21c",
+      "prior_candidate_1_0_0_6": {
+        "unsigned_sha256": "135612f67f69abf30854afa61215977944b859dbfe4c6efa30817ef44b1f95fc",
+        "signed_package_sha256": {
+          "tegra210i2c.inf": "f4ac5086129e7b81713ad9c1e76abfb72b942bf9b9b926ffb97c96d10cc91bb4",
+          "tegra210i2c.cat": "3db91642068eca50067fafa9610fffcb65cce498e8cfe22f80362e17fb6d97ef",
+          "tegra210i2c.sys": "0ebffc1778fbc0b60cf81b270c53458d266b7c4043424319265668482e332713"
+        },
+        "candidate_source_commit": "35ec44f8a35cc34b15b6bbfa04a55f43106eb5ec",
+        "patch_sha256": "d49dce8d25b3c03794b1ba9ce508c4fb539f46ba29dae50c428f60eca094f0b4",
+        "controls_sha256": "a875e2719f23d5c5a97e69f87a0f7ff04e3bd565d00afc5d3ad850ce31da2f90",
+        "physical_candidate_selected": false
+      }
     },
     "battery": {
       "driver": {
@@ -1024,6 +1070,51 @@
           "interpretation": "Windows recorded an unexpected shutdown with zero bugcheck and power-button fields. The reported previous shutdown predates the last verified device read. Exact cutoff time and electrical cause remain unknown. Other crashes are tracked separately."
         }
       }
+    },
+    "selected_i2c_package": {
+      "selected_version": "1.0.0.7",
+      "previous_version": "1.0.0.5",
+      "source_commit": "f4210eb0459ec1dfc7c7040f65b0665ca6adc21c",
+      "acceptance_commit": "9b1544a7762ca6ca72314dcc6571eda3bf24592b",
+      "physical_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/9b1544a7762ca6ca72314dcc6571eda3bf24592b/drivers/Tegra210I2c/tests/physical-board-20261118.json",
+      "record_sha256": "bd44829d370d4b9a226eb2d213a21c6c8c4fc4c07a28e21978b9fe5569bc0817",
+      "package_sha256": {
+        "tegra210i2c.inf": "93c4ca9c542f49b387151a5db05e2ed960f9320d6d7bc2829145c81076f973fb",
+        "tegra210i2c.cat": "8e0e93c11b5f6e148e5ab135a72d44074accccdff87dd1f488b0a49366472f44",
+        "tegra210i2c.sys": "c7bf8fe18a95d2d5b39d3c8137ea0751eae1471969fe7699f4712f033a45ea31"
+      },
+      "physical_boot_utc": "2026-11-18T18:21:09.6142620Z",
+      "verified_utc": "2026-11-18T18:24:16.7170524Z",
+      "pnp_package": "oem23.inf",
+      "hardware_readback": {
+        "buses": [
+          1,
+          3,
+          5
+        ],
+        "hidrev": "0x12127",
+        "legacy_probe": "skipped on Tegra210B01",
+        "i2c5_errors_before_after": [
+          1,
+          0
+        ],
+        "i2c5_nacks_before_after": [
+          1,
+          0
+        ],
+        "charger_revision_result": "0x12f",
+        "pmic_status_result": "0x102",
+        "power_policy": "Handheld",
+        "consumers_code_zero": [
+          "switchrtc",
+          "switchbattery",
+          "switchfan",
+          "switchtouch",
+          "switchaudio",
+          "switchwifi"
+        ]
+      },
+      "independent_review": "Main source review completed. Separate Gemini review is pending."
     }
   },
   "local_control_receipts": {
