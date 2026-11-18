@@ -1,0 +1,1020 @@
+{
+  "branch": "tgd3d-vulkan",
+  "observed_utc": "2026-11-17T23:57:55Z",
+  "scope": "Native 720p H.264 decode, real GPU conversion, redirected-flip presents and normal close. Panel output failed in the observed replay.",
+  "components": {
+    "kmd_sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+    "kmd_last_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "kmd_full_inputs_record": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+    "umd_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "icd_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "umd_source_commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+    "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "only_patch_from_commit": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a",
+    "frozen_source_files": {
+      "src/nouveau/tgd3d/tgd3d_device.cpp": {
+        "base_sha256": "bb5dba752fd9a7daee2cdea69b6d9170de142f89dd60ff9dcd805c0591b71026",
+        "candidate_sha256": "1adf6f187c5e34b3402e253a824350c50c6281d737c212d6405db2293b37f2e9"
+      },
+      "src/nouveau/tgd3d/tgd3d_runtime_queue.cpp": {
+        "base_sha256": "4ad8f0a97aca873c49f254f8fcda2f2ec66fccee3ff625a960f734b1f31fa6e4",
+        "candidate_sha256": "9141302d73932b8e17d9fdb472bdf7b65e5a45613872307fe01d1da4e1a5070e"
+      },
+      "src/nouveau/tgd3d/tgd3d_runtime.cpp": {
+        "base_sha256": "a624fd95c74bb75d174ee31957b8008dec3c19c3b717d5a70e245dc69ebf5b2c",
+        "candidate_sha256": "56e0b8f503613d6912d7541427483db85904b5237c77e4f50a9b431bd30840e8"
+      },
+      "src/nouveau/tgd3d/tgd3d_trace.h": {
+        "base_sha256": "4da72dce1fe23fbf770869f88d7bbf891b7a25485118ed049f07d48b1f238a11",
+        "candidate_sha256": "11fa6442aee7f3b0bad384c72bccf27f707c33f3181114df4676fe6b8faefacf"
+      },
+      "src/nouveau/tgd3d/tests/runtime_queue_contracts.cpp": {
+        "base_sha256": "057971b970ed3a0d82b5c45d52af129d666b9cb9c44e3b329e51c515845b0edc",
+        "candidate_sha256": "d4f4ef442c1d7950ceb9593e8b2b786d2cadbcc9e858ae56cac48945059ea361"
+      },
+      "src/nouveau/tgd3d/tests/runtime_contracts.cpp": {
+        "base_sha256": "8244e77ce232ad1bbf859b3d37c310f389b39065fab4fa601d7201fc6442f0fa",
+        "candidate_sha256": "d7b5e2edc192a86d49b0702cb70e277f32533673d2e6bf45d939245dbe2ae7bf"
+      }
+    },
+    "excluded_source_only_commits": [
+      "ccfc48f4a32c890bede65bd8b07af61d68aa0eea",
+      "a8301b32729e415e7561f11dcb9ff20f8ff9a975"
+    ],
+    "authenticode": {
+      "unsigned_sha256": "38125e576024d2164d325f07e7fe127041bda23281c190e5569e798746eebd22",
+      "signed_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+      "signed_bytes": 3335176,
+      "public_chain_sha256": "460d3d9b2b84b0f486e41d1bbb9c34bf0489a4ed0347337aff6d279623a40031",
+      "local_authenticode_verified": true
+    },
+    "windows_signature_verified": true,
+    "active_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621",
+    "previous_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
+    "previous_umd_sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+    "restore_script_sha256": "5d5552b29e1b899233a4b0709f9a08c19395ea63a73fe0c0d279ed947520bdff",
+    "prior_task_xml_sha256": "7bbb852bc6019c601cbceda04ae23812801fd249e6abad23b9cd6addb41c0307",
+    "installed_files_read_utc": "2026-11-17T23:26:10.0574947Z",
+    "installed_files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 243720,
+        "sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4993,
+        "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17656776,
+        "sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 104456,
+        "sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3335176,
+        "sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ]
+  },
+  "contract": {
+    "first_rejection": "NVDEC_720_COMPOSED_FLIP_20261117.json",
+    "matched_d3d11_runtime": {
+      "sha256": "CCC352F7097D0320368000DBE9FF92772D8FC909185D95C8A0753CB8F115F880",
+      "name": "d3d11.dll",
+      "bytes": 4932192,
+      "version": "10.0.22621.2715 (WinBuild.160101.0800)"
+    },
+    "matched_pdb": "da4d2c31a30feb29311d9545198379374c1c545182bd3a4bc02e7d6dc49f30ab",
+    "observed_callbacks": "D3D11.1 virtual contexts created via the KMT callback on hRTDevice. NVK command bytes and written allocation handles submitted through the public callback on the owning runtime device. Both GPU wait and signal callbacks returned success.",
+    "runtime_queue_activation": "TGD3D_VIDEO_WINDOW_VALIDATE=1 on the selected 11.1 process; TGD3D_VIDEO_VALIDATE=1 exposes its video DDI.",
+    "dxgi_flip_contract": "https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/dxgi-flip-model",
+    "dxgi_open_contract": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/ns-d3d10umddi-d3d10ddiarg_openresource"
+  },
+  "controls": {
+    "native_arm64_cpu_exe_sha256": "c389757454721504b11cf8c1cf4fa54cc8ea5a9331681ef1fa8bf67abe95bf2d",
+    "selected_fields": {
+      "Utc": "2026-11-17T23:04:53.0488336Z",
+      "GPUExecuted": false,
+      "LogSha256": "7A8B79A1242681CE983E99EB15663B73B01FBE9B1B50D999500ACF7C58A291E3",
+      "Exit": 0,
+      "Phase": "Passed",
+      "Candidate": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+      "Pid": 3584
+    },
+    "x64_frozen_cpu_log_sha256": "977c2ebc9a80d2b68e341dd2d7b3f4a11fe4b18b2ddec5b034598b5e7f5bd2f2",
+    "x64_source_branch_cpu_log_sha256": "254cb7bcec0e1e69c50e0cc16ee1c7c3c006210400da3f0bde2bede360274918",
+    "external_review_performed": false
+  },
+  "fixture": {
+    "sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "profile": "H.264 Main level 3.1",
+    "dimensions": [
+      1280,
+      720
+    ],
+    "frames": 6,
+    "media_seconds": 0.1,
+    "media_rate": "60/1",
+    "software_yuv420p_sha256": "c3c1754f557d7375ed660034ef62b0e1d966b7ed7626662802c1609aba886179",
+    "independent_pixel_reference": "FFmpeg software H.264 decode with hardware acceleration disabled. Reference RGB uses limited-range BT.601 for this untagged sample.",
+    "expected_last_640x360_rgb_ppm_sha256": "8b23a1cc5dedbd6db25acfdab6af98cbe4af297d16797d52dc4aa6142fbc54a0"
+  },
+  "color_route": "Synchronous libavcodec/D3D11VA on GM20B NVDEC, CPU readback and upload of separate Y/UV textures, D3D11 GPU color conversion. Two 640x360 BGRA8 FLIP_SEQUENTIAL back buffers on the decode device. Full RGB reference comparison at frames 0 and 5.",
+  "clients": {
+    "initial": {
+      "source": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+      "sha256": "f1f38d235fe6857a5e84e08acdfe5385a197dd31db559fafefa5058a3b8115df"
+    },
+    "drain_before_compositor": {
+      "commit": "17ccb8fbd95cec7088eff420709ad736d163902c",
+      "verified_umd_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+      "client_source_sha256": "26a1130fd34cb4899449b6c68f03b9dad9d055a2f2dc625eba8f2d2e123dc2ba",
+      "arm64_sha256": "d1949b8f357e23d6282615966e61581c4df40d891f714ceb3658d1fdccc2e21f",
+      "bytes": 2945536,
+      "same_shader_header_sha256": {
+        "vs": "8eb9d606708057b851dc77312f2f114ce827dfb48497aa990bc154e2f16f7066",
+        "ps": "0b6449329d2c35502a663aa1819cd1fbdb8b148f54d2b75313f98b79d560aad6"
+      },
+      "zip_sha256": "83370fdd1516ec713e74a059022b80cef9c827986677830fcbf1a259cc33f7cd"
+    },
+    "link_subsystem": "Both clients use the Windows console subsystem. The title, z order and contents of a console were not captured in the replay."
+  },
+  "prior_to_activation": {
+    "staged_utc": "2026-11-17T23:06:30.8132266Z",
+    "old_loaded_sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+    "exit_guard": 4,
+    "swapchain_or_video_attempted": false,
+    "archive_sha256": "8f50b0b43e79c6e9b4b0d8a3b02300c9a19bb22eb4afb0c862995b6f3ac7a1df",
+    "planned_reboot_command_utc": "2026-11-17T23:12:09.0788545Z",
+    "system_1074_record": 61069,
+    "new_boot": "2026-11-17T23:12:41.6434050Z",
+    "dwm": [
+      1444
+    ],
+    "planned_restart_count": 1
+  },
+  "six_presents_then_interrupted": {
+    "pid": 2668,
+    "process_creation_filetime": 134394309598980013,
+    "session": 1,
+    "dispatch_utc": "2026-11-17T23:15:59.9255979Z",
+    "instance": "{6B768FA6-A14F-4B7D-BEC7-4B9A78B4643A}",
+    "luid": "0000000000087508",
+    "boot": "2026-11-17T23:12:41.6434050Z",
+    "dwm": 1444,
+    "loaded_umd_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+    "decoder_surface_pool": 17,
+    "nvdec_target_and_observed": [
+      [
+        1695031683,
+        1695031683
+      ],
+      [
+        1695031684,
+        1695031684
+      ],
+      [
+        1695031685,
+        1695031685
+      ],
+      [
+        1695031686,
+        1695031686
+      ],
+      [
+        1695031687,
+        1695031687
+      ],
+      [
+        1695031688,
+        1695031688
+      ]
+    ],
+    "canonical_frame_sha256": [
+      "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+      "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+      "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+      "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+      "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+      "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+    ],
+    "gpu_images": {
+      "first": {
+        "gpu_ppm": "7d300743cf457afaaeeab0a5398315bfdb38faf5c772ed033fbb49b15fd291fc",
+        "reference_ppm": "148dce2216377c23e72d5c763553d55257f5a86500285442036d211ef50d9977",
+        "pixels": 230400,
+        "worst_error": 1,
+        "pixel_error_counts": {
+          "0": 194356,
+          "1": 36044
+        }
+      },
+      "last": {
+        "gpu_ppm": "2d4c4027c2a92bb9c738828c7b311da0a80f0bf2c0af530991f1e43f4b600eec",
+        "reference_ppm": "8b23a1cc5dedbd6db25acfdab6af98cbe4af297d16797d52dc4aa6142fbc54a0",
+        "pixels": 230400,
+        "worst_error": 1,
+        "pixel_error_counts": {
+          "0": 194112,
+          "1": 36288
+        }
+      }
+    },
+    "presents": 6,
+    "present_hr": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "hwnd": "0x300fc",
+    "present_source_handles": [
+      "0x40000840",
+      "0x400008c0",
+      "0x40000840",
+      "0x400008c0",
+      "0x40000840",
+      "0x400008c0"
+    ],
+    "history_models": [
+      "2",
+      "2",
+      "2",
+      "2",
+      "2",
+      "2"
+    ],
+    "dxgi_kernel_events": {
+      "Microsoft-Windows-DxgKrnl/294": 23,
+      "Microsoft-Windows-DxgKrnl/295": 39,
+      "Microsoft-Windows-DXGI/178": 6,
+      "Microsoft-Windows-DXGI/42": 6,
+      "Microsoft-Windows-DxgKrnl/215": 6,
+      "Microsoft-Windows-DxgKrnl/184": 6,
+      "Microsoft-Windows-DXGI/43": 6,
+      "Microsoft-Windows-DXGI/179": 6
+    },
+    "driver_ddi": "0xb000f",
+    "virtual_context_and_submit_cb_bits": 3,
+    "created_contexts": 2,
+    "destroyed_contexts": 0,
+    "successful_submit_callbacks": 13,
+    "written_primary_command_bytes": [
+      3212,
+      2628,
+      1508,
+      1508,
+      1508,
+      2060
+    ],
+    "gpu_wait_callbacks": 29,
+    "gpu_signal_callbacks": 13,
+    "decode_session_open": [
+      1
+    ],
+    "decode_session_close_result": [],
+    "device_destroy_submitted_completed": [],
+    "end_decode": null,
+    "after_decoder_close": null,
+    "completion_query": null,
+    "dwm_flush": null,
+    "visible_uncloaked": null,
+    "final_hold_ms": null,
+    "release_preview": null,
+    "final_device_status": null,
+    "window_normal_exit": false,
+    "client_elapsed_ms": null,
+    "journal_span_ms": 5047,
+    "last_journal": "205734 3124 VERIFIED LastRenderedFrame 00000000",
+    "terminal_utc": "2026-11-17T23:18:14.0945620Z",
+    "terminal_boot": "2026-11-17T23:16:33.7712450Z",
+    "terminal_dwm": [
+      1364
+    ],
+    "task_result": null,
+    "driver_trace_summary": "ProcessTrace=0 matched=379 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "filtered_system_records": 98,
+    "excluded_other_header_pids_records": 777,
+    "driver_failure_count": 0,
+    "archive_sha256": "1cbe57e52a273c607a0c70dd80888e0c0229649be81d936b0f01c17a914827a1",
+    "archive_bytes": 148643,
+    "archive_files": 21,
+    "raw_etl_sha256": "6d3a176ca16e247c88bd72378e5361ca132f2834399694124b4fd6ec81875ffb",
+    "driver_events_sha256": "555b6a20e6b05e31b4fea6ccfbd03418ca30c51327cf560a2d56eefe0502e91d",
+    "client_system_events_sha256": "b8899eed41b6a169159897b435ef56226bd7e3bf42dabb049a18ba96683c6be1"
+  },
+  "interrupt_evidence": {
+    "new_boot": "2026-11-17T23:16:33.7844790Z",
+    "dwm": [
+      1364
+    ],
+    "kernel_power_41_record": 61176,
+    "unexpected_6008_record": 61167,
+    "bugcheck_code": 0,
+    "dumps": [],
+    "later_boot": "2026-11-17T23:24:18.6890890Z",
+    "attribution": "The incomplete close and the later out-of-test boot have separate timestamps. No root cause established.",
+    "later_event41": 61253,
+    "later_event6008": 61244
+  },
+  "normal_close": {
+    "pid": 2224,
+    "process_creation_filetime": 134394319471302386,
+    "session": 1,
+    "dispatch_utc": "2026-11-17T23:32:27.1223377Z",
+    "instance": "{2F8C7075-D343-4F9A-A3EC-FBD08D41A23B}",
+    "luid": "0000000000080112",
+    "boot": "2026-11-17T23:24:18.6890890Z",
+    "dwm": 1400,
+    "loaded_umd_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+    "decoder_surface_pool": 17,
+    "nvdec_target_and_observed": [
+      [
+        117973155,
+        117973155
+      ],
+      [
+        117973156,
+        117973156
+      ],
+      [
+        117973157,
+        117973157
+      ],
+      [
+        117973158,
+        117973158
+      ],
+      [
+        117973159,
+        117973159
+      ],
+      [
+        117973160,
+        117973160
+      ]
+    ],
+    "canonical_frame_sha256": [
+      "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+      "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+      "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+      "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+      "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+      "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+    ],
+    "gpu_images": {
+      "first": {
+        "gpu_ppm": "7d300743cf457afaaeeab0a5398315bfdb38faf5c772ed033fbb49b15fd291fc",
+        "reference_ppm": "148dce2216377c23e72d5c763553d55257f5a86500285442036d211ef50d9977",
+        "pixels": 230400,
+        "worst_error": 1,
+        "pixel_error_counts": {
+          "0": 194356,
+          "1": 36044
+        }
+      },
+      "last": {
+        "gpu_ppm": "2d4c4027c2a92bb9c738828c7b311da0a80f0bf2c0af530991f1e43f4b600eec",
+        "reference_ppm": "8b23a1cc5dedbd6db25acfdab6af98cbe4af297d16797d52dc4aa6142fbc54a0",
+        "pixels": 230400,
+        "worst_error": 1,
+        "pixel_error_counts": {
+          "0": 194112,
+          "1": 36288
+        }
+      }
+    },
+    "presents": 6,
+    "present_hr": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "hwnd": "0x200a4",
+    "present_source_handles": [
+      "0x40000840",
+      "0x400008c0",
+      "0x40000840",
+      "0x400008c0",
+      "0x40000840",
+      "0x400008c0"
+    ],
+    "history_models": [
+      "2",
+      "2",
+      "2",
+      "2",
+      "2",
+      "2"
+    ],
+    "dxgi_kernel_events": {
+      "Microsoft-Windows-DxgKrnl/294": 23,
+      "Microsoft-Windows-DxgKrnl/295": 39,
+      "Microsoft-Windows-DXGI/178": 6,
+      "Microsoft-Windows-DXGI/42": 6,
+      "Microsoft-Windows-DxgKrnl/215": 6,
+      "Microsoft-Windows-DxgKrnl/184": 6,
+      "Microsoft-Windows-DXGI/43": 6,
+      "Microsoft-Windows-DXGI/179": 6
+    },
+    "driver_ddi": "0xb000f",
+    "virtual_context_and_submit_cb_bits": 3,
+    "created_contexts": 2,
+    "destroyed_contexts": 2,
+    "successful_submit_callbacks": 13,
+    "written_primary_command_bytes": [
+      3212,
+      2628,
+      1508,
+      1508,
+      1508,
+      2060
+    ],
+    "gpu_wait_callbacks": 29,
+    "gpu_signal_callbacks": 13,
+    "decode_session_open": [
+      1
+    ],
+    "decode_session_close_result": [
+      0
+    ],
+    "device_destroy_submitted_completed": [
+      [
+        10,
+        10
+      ]
+    ],
+    "end_decode": "00000000",
+    "after_decoder_close": "00000000",
+    "completion_query": "00000000",
+    "dwm_flush": "00000000",
+    "visible_uncloaked": "00000000",
+    "final_hold_ms": 2000,
+    "release_preview": "00000000",
+    "final_device_status": "00000000",
+    "window_normal_exit": true,
+    "client_elapsed_ms": 8609,
+    "journal_span_ms": 9563,
+    "last_journal": "500203 6620 EXIT RunAndRelease 00000000",
+    "terminal_utc": "2026-11-17T23:32:53.9315706Z",
+    "terminal_boot": "2026-11-17T23:24:18.6890890Z",
+    "terminal_dwm": [
+      1400
+    ],
+    "task_result": 0,
+    "driver_trace_summary": "ProcessTrace=0 matched=418 invalid=0 events_lost=0 buffers_lost=0 end_time=134394319571593717 buffers_written=50",
+    "filtered_system_records": 98,
+    "excluded_other_header_pids_records": 883,
+    "driver_failure_count": 0,
+    "archive_sha256": "482007b66538b35df5b4c326199b55d3b749f16933984e1cc45b7b89fd0c6ef7",
+    "archive_bytes": 152985,
+    "archive_files": 22,
+    "raw_etl_sha256": "154637ccbc8aefe075e80c0d082c31a9a549f595696cf391e27e0ac3a41f14d6",
+    "driver_events_sha256": "20717d2ab1776da8a75b516526b9720669c4ca80eb51389617b283ef74cae134",
+    "client_system_events_sha256": "f96bead22d3b95518444b908da90d78953c54d72c791831e0273d1514a35353b"
+  },
+  "physical_replay": {
+    "pid": 7972,
+    "process_creation_filetime": 134394320731154720,
+    "session": 1,
+    "dispatch_utc": "2026-11-17T23:34:33.1503237Z",
+    "instance": "{B3E4AEA9-DBD7-41AE-A456-79C62FC73000}",
+    "luid": "0000000000080112",
+    "boot": "2026-11-17T23:24:18.6890890Z",
+    "dwm": 1400,
+    "loaded_umd_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+    "decoder_surface_pool": 17,
+    "nvdec_target_and_observed": [
+      [
+        117973161,
+        117973161
+      ],
+      [
+        117973162,
+        117973162
+      ],
+      [
+        117973163,
+        117973163
+      ],
+      [
+        117973164,
+        117973164
+      ],
+      [
+        117973165,
+        117973165
+      ],
+      [
+        117973166,
+        117973166
+      ]
+    ],
+    "canonical_frame_sha256": [
+      "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+      "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+      "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+      "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+      "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+      "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+    ],
+    "gpu_images": {
+      "first": {
+        "gpu_ppm": "7d300743cf457afaaeeab0a5398315bfdb38faf5c772ed033fbb49b15fd291fc",
+        "reference_ppm": "148dce2216377c23e72d5c763553d55257f5a86500285442036d211ef50d9977",
+        "pixels": 230400,
+        "worst_error": 1,
+        "pixel_error_counts": {
+          "0": 194356,
+          "1": 36044
+        }
+      },
+      "last": {
+        "gpu_ppm": "2d4c4027c2a92bb9c738828c7b311da0a80f0bf2c0af530991f1e43f4b600eec",
+        "reference_ppm": "8b23a1cc5dedbd6db25acfdab6af98cbe4af297d16797d52dc4aa6142fbc54a0",
+        "pixels": 230400,
+        "worst_error": 1,
+        "pixel_error_counts": {
+          "0": 194112,
+          "1": 36288
+        }
+      }
+    },
+    "presents": 6,
+    "present_hr": [
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "hwnd": "0x3009a",
+    "present_source_handles": [
+      "0x40000840",
+      "0x400008c0",
+      "0x40000840",
+      "0x400008c0",
+      "0x40000840",
+      "0x400008c0"
+    ],
+    "history_models": [
+      "2",
+      "2",
+      "2",
+      "2",
+      "2",
+      "2"
+    ],
+    "dxgi_kernel_events": {
+      "Microsoft-Windows-DxgKrnl/294": 23,
+      "Microsoft-Windows-DxgKrnl/295": 39,
+      "Microsoft-Windows-DXGI/178": 6,
+      "Microsoft-Windows-DXGI/42": 6,
+      "Microsoft-Windows-DxgKrnl/215": 6,
+      "Microsoft-Windows-DxgKrnl/184": 6,
+      "Microsoft-Windows-DXGI/43": 6,
+      "Microsoft-Windows-DXGI/179": 6
+    },
+    "driver_ddi": "0xb000f",
+    "virtual_context_and_submit_cb_bits": 3,
+    "created_contexts": 2,
+    "destroyed_contexts": 2,
+    "successful_submit_callbacks": 13,
+    "written_primary_command_bytes": [
+      3212,
+      2628,
+      1508,
+      1508,
+      1508,
+      2060
+    ],
+    "gpu_wait_callbacks": 29,
+    "gpu_signal_callbacks": 13,
+    "decode_session_open": [
+      2
+    ],
+    "decode_session_close_result": [
+      0
+    ],
+    "device_destroy_submitted_completed": [
+      [
+        10,
+        10
+      ]
+    ],
+    "end_decode": "00000000",
+    "after_decoder_close": "00000000",
+    "completion_query": "00000000",
+    "dwm_flush": "00000000",
+    "visible_uncloaked": "00000000",
+    "final_hold_ms": 2000,
+    "release_preview": "00000000",
+    "final_device_status": "00000000",
+    "window_normal_exit": true,
+    "client_elapsed_ms": 9297,
+    "journal_span_ms": 10234,
+    "last_journal": "626796 6972 EXIT RunAndRelease 00000000",
+    "terminal_utc": "2026-11-17T23:34:54.7547153Z",
+    "terminal_boot": "2026-11-17T23:24:18.6890890Z",
+    "terminal_dwm": [
+      1400
+    ],
+    "task_result": 0,
+    "driver_trace_summary": "ProcessTrace=0 matched=420 invalid=0 events_lost=0 buffers_lost=0 end_time=134394320837669855 buffers_written=55",
+    "filtered_system_records": 98,
+    "excluded_other_header_pids_records": 830,
+    "driver_failure_count": 0,
+    "archive_sha256": "6e847df9fa9fc009efe260b831894edcc1c2a8ed02cb0cea5602856a3fa4d1a8",
+    "archive_bytes": 152995,
+    "archive_files": 22,
+    "raw_etl_sha256": "b79f7bb5452cbd6ea66483792ec80578a547c481fb48826214b496da331ba518",
+    "driver_events_sha256": "c2dc5688ea5e50fbb79112f9d1c28d0a1a95cbd07c2166bf5c085a4673596df8",
+    "client_system_events_sha256": "9387bef58c3af6a439aaa7ceedcf5e8e238847db92d427c1920acc6c60895270"
+  },
+  "panel_observation": {
+    "result": "failed",
+    "mode": "physical replay",
+    "client_pid": 7972,
+    "sequence": [
+      "black window",
+      "entire panel black",
+      "desktop visible again"
+    ],
+    "elapsed_physical_black_ms": null,
+    "client_kernel_reset_reported": false,
+    "cause_established": false
+  },
+  "same_replay_compositor_evidence": {
+    "dwm": 1400,
+    "same_boot_after": "2026-11-17T23:24:18.6890890Z",
+    "system_trace_sha256": "b79f7bb5452cbd6ea66483792ec80578a547c481fb48826214b496da331ba518",
+    "dwm_header_dxg_event_counts": {
+      "168": 46,
+      "171": 9,
+      "295": 187,
+      "294": 289,
+      "184": 55,
+      "173": 33
+    },
+    "dwm_present_return_codes": {
+      "0": 55
+    },
+    "dwm_present_extent_utc": [
+      "2026-11-17T23:34:33.5688903Z",
+      "2026-11-17T23:34:43.6974081Z"
+    ],
+    "os_event168_sample": {
+      "mmio_flip": "true",
+      "interval": "1"
+    },
+    "incident_interval_utc": [
+      "2026-11-17T23:34:28Z",
+      "2026-11-17T23:34:55Z"
+    ],
+    "matching_system_and_application_incidents": 0,
+    "absent_operational_channels": [
+      "Microsoft-Windows-Dwm-Core/Operational",
+      "Microsoft-Windows-DxgKrnl/Operational"
+    ],
+    "scope": "Client and compositor handles are process-local. Kernel DWM flips provide no pixel readback or confirmation of its OpenResource on either producer surface. The UMD provider was scoped to the client."
+  },
+  "desktop": {
+    "early_adapter": "ROOT\\BasicDisplay",
+    "early_time": "2026-11-17T23:25:49Z",
+    "early_mode": {
+      "width": 720,
+      "height": 1280,
+      "orientation": 0,
+      "bpp": 32,
+      "hz": 64,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "settled_adapter": "ACPI\\VEN_SWOA&DEV_0F01",
+    "settled_utc": "2026-11-17T23:27:30Z",
+    "current": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "saved": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "signal": {
+      "width": 720,
+      "height": 1280
+    },
+    "path_rotation": 2,
+    "mode_written": false,
+    "power_observed_utc": "2026-11-17T23:34:02.2596995Z",
+    "power": {
+      "power_mode": 1,
+      "cpu_dfll": 1,
+      "emc_error": 0,
+      "fan_mode": 1,
+      "charge_limit": 85
+    },
+    "problem_code": 0,
+    "dwm_modules": [
+      {
+        "sha256": "864FF7706906A31081ED8687176F90A5BAF5FDCFB3A116AB4806718597229FED",
+        "name": "TegraGpuD3DVk.dll"
+      },
+      {
+        "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "name": "libvulkan_nouveau.dll"
+      }
+    ],
+    "recovered_after_compositor": {
+      "utc": "2026-11-17T23:57:55Z",
+      "boot": "2026-11-17T23:45:24.3990690Z",
+      "dwm_pid": 1360,
+      "current": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "registry": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "signal": {
+        "width": 720,
+        "height": 1280
+      },
+      "path_rotation": 2,
+      "adapter_device_id": "ACPI\\VEN_SWOA&DEV_0F01",
+      "mode_written": false,
+      "problem_code": 0,
+      "dwm_modules": [
+        {
+          "sha256": "864FF7706906A31081ED8687176F90A5BAF5FDCFB3A116AB4806718597229FED",
+          "name": "TegraGpuD3DVk.dll"
+        },
+        {
+          "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+          "name": "libvulkan_nouveau.dll"
+        }
+      ],
+      "power": {
+        "power_mode": 1,
+        "cpu_dfll": 1,
+        "emc_error": 0,
+        "fan_mode": 1,
+        "charge_limit": 85
+      }
+    }
+  },
+  "acceptance": {
+    "native_decode_nv12": true,
+    "gpu_csc_endpoints": true,
+    "redirected_flip_accepted_by_windows": true,
+    "drained_decoder_and_two_gpu_contexts_retired": true,
+    "window_physical_accepted": false,
+    "full_720p_accepted": false,
+    "higher_resolution_acceptance": "1080p, 2K and 4K deferred together.",
+    "current_obstruction": "DWM consumer OpenResource on the 0xA0009 DDI."
+  },
+  "compositor_diagnostic": {
+    "utc": "2026-11-17T23:47:30.1381443Z",
+    "original_boot": "2026-11-17T23:24:18.6890890Z",
+    "client_pid": 5352,
+    "dwm_pid": 1400,
+    "dwm_creation_filetime": "134394314938719317",
+    "luid": "0000000000080112",
+    "dispatch": "{DD04A1B8-1E0F-4DAF-919E-5FCD45F05010}",
+    "finding": "The DWM consumer on D3D10_0_7 (0xA0009) failed six shared resource opens, all before a residency request for the released allocation. The installed make_ready rejects displayable resources on this interface. Two 960x576 surfaces opened normally.",
+    "evidence_scope": "The displayed-resource flag is inferred from the matched guard, the successful owner deallocation and absence of a MakeResident callback on those handles. The failed event has zero dimensions and carries no producer token, so exact cross-process identity, pixel contents and the cause of the subsequent reboot are unproven.",
+    "dwm_ddi": "0xa0009",
+    "successful_device_creations": 6,
+    "dwm_records": 2479,
+    "successful_opens": [
+      {
+        "width": 960,
+        "height": 576,
+        "pitch": 3840
+      },
+      {
+        "width": 960,
+        "height": 576,
+        "pitch": 3840
+      }
+    ],
+    "failed_opens": [
+      {
+        "time_filetime": 134394326948288523,
+        "thread": 1840,
+        "status": "887a0004",
+        "preceding_deallocated_handle": "0x40000ac0",
+        "prior_residency_request_observed": false
+      },
+      {
+        "time_filetime": 134394326969488985,
+        "thread": 1840,
+        "status": "887a0004",
+        "preceding_deallocated_handle": "0x80005e80",
+        "prior_residency_request_observed": false
+      },
+      {
+        "time_filetime": 134394326981548612,
+        "thread": 1840,
+        "status": "887a0004",
+        "preceding_deallocated_handle": "0x80001340",
+        "prior_residency_request_observed": false
+      },
+      {
+        "time_filetime": 134394326991832806,
+        "thread": 1840,
+        "status": "887a0004",
+        "preceding_deallocated_handle": "0x80001140",
+        "prior_residency_request_observed": false
+      },
+      {
+        "time_filetime": 134394327000877220,
+        "thread": 1840,
+        "status": "887a0004",
+        "preceding_deallocated_handle": "0x40005740",
+        "prior_residency_request_observed": false
+      },
+      {
+        "time_filetime": 134394327010019436,
+        "thread": 1840,
+        "status": "887a0004",
+        "preceding_deallocated_handle": "0x40002a80",
+        "prior_residency_request_observed": false
+      }
+    ],
+    "dwm_errors": {
+      "20/88760870/tgd3d_resource.cpp/706": 8,
+      "20/887a0004/tgd3d_resource.cpp/438": 6,
+      "5/88760870//": 6,
+      "9/887a0004//": 6
+    },
+    "dwm_trace_summary": "ProcessTrace=0 matched=3041 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "dwm_etl_sha256": "01153886222cee69951513a5fd7e3f2f9b6bf0d2a08d37ccd52df929f9a7951c",
+    "dwm_events_sha256": "932d39473730a434dfaf78aa14a887357c579408973e8dd740c340066d719e02",
+    "device_destructions": [
+      {
+        "status": "88760870",
+        "submitted": 1127,
+        "completed": 0
+      },
+      {
+        "status": "88760870",
+        "submitted": 1,
+        "completed": 0
+      },
+      {
+        "status": "88760870",
+        "submitted": 0,
+        "completed": 0
+      },
+      {
+        "status": "88760870",
+        "submitted": 0,
+        "completed": 0
+      },
+      {
+        "status": "88760870",
+        "submitted": 0,
+        "completed": 0
+      },
+      {
+        "status": "88760870",
+        "submitted": 0,
+        "completed": 0
+      }
+    ],
+    "console_suppressed": true,
+    "preview_pixels_sampled": false,
+    "capture_limit": "Both desktop sampling attempts failed to locate the preview HWND. No screen pixels were recorded.",
+    "client_syncpoints": [
+      [
+        117973167,
+        117973167
+      ],
+      [
+        117973168,
+        117973168
+      ],
+      [
+        117973169,
+        117973169
+      ],
+      [
+        117973170,
+        117973170
+      ],
+      [
+        117973171,
+        117973171
+      ],
+      [
+        117973172,
+        117973172
+      ]
+    ],
+    "presents": 6,
+    "last_journal": "1244078 2400 CALL FinalFrameHold 00000000",
+    "decoder_close": true,
+    "gpu_event": true,
+    "dwm_flush": true,
+    "normal_exit": false,
+    "client_journal_span_ms": 7766,
+    "native_archive_sha256": "101274fa45652f92e54c0dd0b89b7db4e9d85375a2580e780903c0afd336b34e",
+    "native_archive_bytes": 222048,
+    "native_archive_file_count": 28,
+    "new_boot": "2026-11-17T23:45:24.3990690Z",
+    "new_dwm": [
+      1360
+    ],
+    "system_event41_record": 61331,
+    "event41_bugcheck": "0",
+    "system_event6008_record": 61322,
+    "dumps": [],
+    "reboot_requested": false
+  },
+  "cleanup": {
+    "utc": "2026-11-17T23:51:11.4818971Z",
+    "remaining_tasks": [],
+    "remaining_traces": [],
+    "remaining_temporary_input_files": [],
+    "verified_device_archives": 5,
+    "restore_inputs_verified": true,
+    "last_display_read_task_removed": true,
+    "last_display_read_command_removed": true
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "observed_utc": "2026-11-17T22:27:37.5428473Z",
+  "branch": "tgd3d-vulkan",
+  "baseline_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+  "installed_sha256": {
+    "kmd": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+    "umd": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+    "icd": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+  },
+  "kmd_final_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+  "umd_icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+  "source_scope": "KMD frozen input details are in the selected baseline record. Only the client changed for this trial.",
+  "client": {
+    "source": "b0b024df15027c3c8642062b2d84db265f3adcca",
+    "source_file": "tegra-x1-wddm/tools/nvdec720_av_window.cpp",
+    "source_sha256": "cb50a4aac0ea3dc8b1f827b06579dbd4bae0cc79f1e2bf95c8295ab0df11bc83",
+    "arm64_sha256": "a2af63c6ab95dc770d23664309e036b2f62330a4f59cb2512a3abbe86dfdc670",
+    "bytes": 2941440,
+    "requested_swapchain": "CreateSwapChainForHwnd, 640x360 BGRA8, FLIP_SEQUENTIAL, two buffers, single sample, windowed, same D3D11VA device and its IDXGIFactory2 parent.",
+    "same_shader_inputs": {
+      "vs": "8eb9d606708057b851dc77312f2f114ce827dfb48497aa990bc154e2f16f7066",
+      "ps": "0b6449329d2c35502a663aa1819cd1fbdb8b148f54d2b75313f98b79d560aad6"
+    },
+    "reference_input_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "review": "Local source and native trace review."
+  },
+  "run": {
+    "boot": "2026-11-17T21:59:53.7074800Z",
+    "dwm_pid": 1216,
+    "luid": "0000000000081785",
+    "session": 1,
+    "pid": 8056,
+    "process_creation_filetime": 134394276515833356,
+    "dispatch_utc": "2026-11-17T22:20:51.5628207Z",
+    "dispatch_instance": "{2827E987-9657-4B9E-ACAC-1EA9E955760A}",
+    "terminal_utc": "2026-11-17T22:21:06.2977733Z",
+    "exit": 4,
+    "first_and_final_journal_span_ms": 625,
+    "journal": [
+      "1260296 8060 ENTER wmain 00000000",
+      "1260312 8060 CALL TraceCurrentProcess 00000000",
+      "1260343 8060 RETURN TraceCurrentProcess 00000000",
+      "1260375 8060 CALL CreateDXGIFactory1 00000000",
+      "1260390 8060 RETURN CreateDXGIFactory1 00000000",
+      "1260406 8060 CALL av_hwdevice_ctx_create_D3D11VA 00000000",
+      "1260546 8060 RETURN av_hwdevice_ctx_create_D3D11VA 00000000",
+      "1260578 8060 CALL GetDecodeAdapterFactory 00000000",
+      "1260593 8060 RETURN GetDecodeAdapterFactory 00000000",
+      "1260609 8060 DISTINCT DXGIFactories 00000000",
+      "1260625 8060 CALL CreatePreviewWindow 00000000",
+      "1260640 8060 RETURN CreatePreviewWindow 00000000",
+      "1260656 8060 CALL CreateSwapChainForHwnd 00000000",
+      "1260656 8060 RETURN CreateSwapChainForHwnd 887a0005",
+      "1260921 8060 FAIL CreateSwapChainForHwnd 887a0005"
+    ],
+    "dwm_after_client_exit": 1216,
+    "decoded": 0,
+    "present_entries": 0,
+    "present_returns": 0
+  },
+  "driver_evidence": {
+    "export_summary": "ProcessTrace=0 matched=33 invalid=0 events_lost=0 buffers_lost=0 end_time=134394276529072675 buffers_written=7",
+    "record_count": 33,
+    "device_ddi": "0xb000f",
+    "first_buffer_bind": "0xa8",
+    "first_buffer_size": [
+      640,
+      360
+    ],
+    "allocation_bytes": 921600,
+    "allocation_callback_hr": "00000000",
+    "allocation_cleanup_handle": "400008c0",
+    "allocation_cleanup_hr": "00000000",
+    "original_resource_result": "887a0004",
+    "public_api_result": "887a0005",
+    "resource_to_close_events": [
+      {
+        "id": 17,
+        "status": "8000000a",
+        "arg0": 0,
+        "arg1": 2046799839536
+      },
+      {
+        "id": 8,
+        "status": "8000000a",
+        "arg0": 12884902056,
+        "arg1": 2748779069800
+      },
+      {
+        "id": 6,
+        "status": "00000000",
+        "arg0": 4294967296,
+        "arg1": 921600
+      },
+      {
+        "id": 6,
+        "status": "00000000",
+        "arg0": 26843547840,
+        "arg1": 0
+      },
+      {
+        "id": 20,
+        "status": "887a0004",
+        "file": "tgd3d_resource.cpp",
+        "line": 438
+      },
+      {
+        "id": 23,
+        "status": "00000000",
+        "arg0": 10,
+        "arg1": 68719476737
+      },
+      {
+        "id": 17,
+        "status": "887a0004",
+        "arg0": 0,
+        "arg1": 2046799839536
+      },
+      {
+        "id": 5,
+        "status": "88760870",
+        "arg0": 0,
+        "arg1": 0
+      },
+      {
+        "id": 7,
+        "status": "00000000",
+        "arg0": 6,
+        "arg1": 0
+      }
+    ],
+    "effect": "Failure in resource creation before MakeResident, Vulkan image creation, decoder submission or any Present."
+  },
+  "matched_source": {
+    "umd": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "error_file": "src/nouveau/tgd3d/tgd3d_resource.cpp:438",
+    "guard_file": "src/nouveau/tgd3d/tgd3d_runtime.cpp:535",
+    "inference": "The complete provider trace shows a successful AllocateCb, immediate successful DeallocateCb, the ordinary-resource error at line 438, and no residency call. On this frozen source a displayable resource reaches the make_ready interface/ownership guard before residency. The negotiated video DDI 0xB000F fails its WDDM2.0 interface test. The trace does not contain the MiscFlags value or a kernel resource handle.",
+    "app_boundary": "This explains the flip-model creation failure. Its relationship to the separate DISCARD first-Present restarts remains unknown.",
+    "contract": "DISPLAYABLE_RESOURCE_CONTRACT_20261116.md"
+  },
+  "system_etw": {
+    "requested_pid": 8056,
+    "header_pids": [
+      4,
+      1216,
+      5164,
+      6880,
+      8056
+    ],
+    "total_display_provider_events": 236,
+    "client_header_event_counts": {
+      "Microsoft-Windows-DxgKrnl/294": 3
+    },
+    "scope": "DxgKrnl included other header PIDs despite the PID filter request. Only the 3 client-header GPU signal events are attributed here. No app Present was called."
+  },
+  "prior_verified_video": {
+    "record": "NVDEC_720_DEVICE_FACTORY_20261117.json",
+    "first_gpu_frame_sha256": "7d300743cf457afaaeeab0a5398315bfdb38faf5c772ed033fbb49b15fd291fc",
+    "six_frame_nv12_record": "NVDEC_720_WINDOW_BOUNDARY_20261117.json"
+  },
+  "post_exit_boot": {
+    "last_etl_inspection_same_boot": "2026-11-17T22:21:57.2508975Z",
+    "remote_archive_utc": "2026-11-17T22:22:45.2040219Z",
+    "local_verified_transfer_end_utc": "2026-11-17T22:23:12.896372+00:00",
+    "new_boot_utc": "2026-11-17T22:24:03.3000340Z",
+    "new_dwm_pid": 1384,
+    "incident_41_record": 60932,
+    "bugcheck_code": 0,
+    "unexpected_shutdown_6008_record": 60923,
+    "dumps": [],
+    "scope": "New boot after client exit and verified archive transfer. Cause undetermined."
+  },
+  "retained": {
+    "verified_utc": "2026-11-17T22:26:01.1367396Z",
+    "pnp_problem_code": 0,
+    "dwm_modules": {
+      "TegraGpuD3DVk.dll": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "power_mode": 1,
+    "dfll": 1,
+    "emc_error": 0,
+    "fan_mode": 1,
+    "charge_limit_percent": 85,
+    "display_scope": "Fixed 90-degree policy retained. No new physical observation."
+  },
+  "host_callbacks": {
+    "d3d11": {
+      "sha256": "CCC352F7097D0320368000DBE9FF92772D8FC909185D95C8A0753CB8F115F880",
+      "name": "d3d11.dll",
+      "bytes": 4932192,
+      "version": "10.0.22621.2715 (WinBuild.160101.0800)"
+    },
+    "pdb": {
+      "file": "d3d11",
+      "PE_age": 1,
+      "DBI_age": 1,
+      "Info_age": 2,
+      "GUID": "4dd64c1c-37d9-00cb-45af-89c52b2a1534",
+      "matched": true,
+      "symbols": 26140
+    },
+    "pdb_sha256": "da4d2c31a30feb29311d9545198379374c1c545182bd3a4bc02e7d6dc49f30ab",
+    "native_create_cb_rva": "0x12fcd0",
+    "native_submit_cb_rva": "0x1415f0",
+    "native_create_observed": "Successful D3D11.1 device stage 1 proves the actual runtime virtual-context callback returned a handle for the existing context.",
+    "submit_observed": false,
+    "scope": "The matched public symbols identify a submission callback and KMT submission path in the binary. Actual submission through that callback with this 11.1 device and its WrittenPrimaries is open."
+  },
+  "cleanup": {
+    "archive_sha256": "cd992f3b0f9fb6ade140bcb514b51f698d2e64e89a8e649078091a3df1223ffa",
+    "archive_bytes": 11867,
+    "files": 12,
+    "driver_events_sha256": "7c7107b3ba0a83a55dd54e7f15ff5f86b5c8ed4f6a9e24b4e5eacdbf02d02a91",
+    "system_events_sha256": "fe6b73a132250d850b529459ec79de67cbe88c2ea8ec5f58c67c838757375f76",
+    "remaining_tasks": [],
+    "remaining_inputs": [],
+    "remaining_trace_sessions": 0,
+    "driver_rollback": false,
+    "raw_session_etl_sha256": "0c84dbbbaae5e71ad054243895a5ae8997f0d8a2769d6e35fe3ddc4ab5f357c3"
+  },
+  "acceptance": {
+    "flip_swapchain_created": false,
+    "displayed_video": false,
+    "phase_complete": false,
+    "higher_resolutions_deferred": [
+      "1080p",
+      "2K",
+      "4K"
+    ]
+  }
+}

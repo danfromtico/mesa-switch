@@ -1,8 +1,14 @@
 # GPU status
 
+On the selected de8bb90b KMD, 864ff770 UMD and e563a81d ICD, the native 720p H.264 client decoded six frames with exact NV12 output. The first and last 640×360 GPU-converted frames matched the reference within one level per RGB channel. Two runs completed six redirected window flips, the GPU event, DwmFlush, decoder close and normal device destruction. The observed replay showed a black window followed by a full-panel blackout before returning to the desktop. The 720p video window failed physical acceptance. A separate compositor trace captured six DWM OpenResource failures on interface 0xA0009 before residency. That diagnostic boot ended unexpectedly during the final hold. [Component identities, timing, traces and panel observation](NVDEC_720_RUNTIME_WINDOW_20261117.json)
+
+## Earlier five-patch observations
+
 On the selected de8bb90b KMD, 45683c21 UMD and e563a81d ICD, native D3D11VA/NVDEC decoded six 720p H.264 frames with byte-exact NV12 output and retired the decode session. The decode loop took 860 ms. [Six-frame record](NVDEC_720_WINDOW_BOUNDARY_20261117.json)
 
 Two interactive previews produced the same 640×360 first frame through the native D3D11 pixel shader. All 230,400 pixels were within one 8-bit level per RGB channel of an independent reference. The latest run created the swapchain with the factory of the actual decoder device. It entered its first windowed Present and the system restarted without a recorded return. The five-patch package remains selected. Decoded-window composition, physical display and the normal closure of this window path are pending. [GPU readback](NVDEC_720_FIRST_SUBMIT_20261117.json) · [DXGI factory correction and incident](NVDEC_720_DEVICE_FACTORY_20261117.json)
+
+The two-buffer composed-flip client exited on the original boot. Its first 640×360 resource received an allocation, then failed the displayable-resource ownership check before residency. CreateSwapChainForHwnd returned 0x887A0005 before decode or Present. A subsequent unexpected boot occurred after the evidence transfer. The installed five-patch package and power policy were rechecked. [Completed driver trace and runtime boundary](NVDEC_720_COMPOSED_FLIP_20261117.json)
 
 Earlier observations follow.
 
