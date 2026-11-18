@@ -63,10 +63,12 @@ struct win_cache_entry {
 static wchar_t *
 join_path(const wchar_t *dir, const wchar_t *name)
 {
-   size_t n = wcslen(dir) + wcslen(name) + 2;
+   size_t length = wcslen(dir);
+   bool separator = length && dir[length - 1] != L'\\' && dir[length - 1] != L'/';
+   size_t n = length + separator + wcslen(name) + 1;
    wchar_t *path = malloc(n * sizeof(*path));
    if (path)
-      swprintf(path, n, L"%ls\\%ls", dir, name);
+      swprintf(path, n, separator ? L"%ls\\%ls" : L"%ls%ls", dir, name);
    return path;
 }
 
@@ -256,6 +258,75 @@ queue_put(struct disk_cache *cache, const cache_key key, void *data,
    util_queue_add_job(&cache->queue, job, NULL, cache_write_job, cache_free_job, size);
 }
 
+/* File APIs keep the extended-length spelling for every cache child,
+ * including the 64-digit blob names and find patterns. */
+static wchar_t *
+extended_cache_path(const wchar_t *path)
+{
+   if (!wcsncmp(path, L"\\\\?\\", 4) || !wcsncmp(path, L"\\\\.\\", 4))
+      return _wcsdup(path);
+
+   DWORD capacity = GetFullPathNameW(path, 0, NULL, NULL);
+   if (!capacity)
+      return NULL;
+   wchar_t *full = calloc(capacity, sizeof(*full));
+   if (!full)
+      return NULL;
+   DWORD length = GetFullPathNameW(path, capacity, full, NULL);
+   wchar_t *extended = NULL;
+   if (length && length < capacity) {
+      extended = !wcsncmp(full, L"\\\\", 2)
+         ? join_path(L"\\\\?\\UNC", full + 2)
+         : join_path(L"\\\\?", full);
+   }
+   free(full);
+   return extended;
+}
+
+static DWORD
+create_directory(const wchar_t *path)
+{
+   if (CreateDirectoryW(path, NULL))
+      return ERROR_SUCCESS;
+   DWORD error = GetLastError();
+   if (error == ERROR_ALREADY_EXISTS) {
+      DWORD attributes = GetFileAttributesW(path);
+      if (attributes != INVALID_FILE_ATTRIBUTES &&
+          (attributes & FILE_ATTRIBUTE_DIRECTORY))
+         return ERROR_SUCCESS;
+   }
+   return error;
+}
+
+static bool
+create_cache_directories(wchar_t *path)
+{
+   DWORD error = create_directory(path);
+   if (error != ERROR_PATH_NOT_FOUND)
+      return error == ERROR_SUCCESS;
+
+   /* Skip the drive or volume root, or both the UNC server and share. */
+   wchar_t *root = path + 4;
+   if (!_wcsnicmp(root, L"UNC\\", 4)) {
+      wchar_t *server_end = wcschr(root + 4, L'\\');
+      if (!server_end)
+         return false;
+      root = server_end + 1;
+   }
+   wchar_t *separator = wcschr(root, L'\\');
+   while (separator) {
+      separator = wcschr(separator + 1, L'\\');
+      if (separator)
+         *separator = L'\0';
+      error = create_directory(path);
+      if (separator)
+         *separator = L'\\';
+      if (error != ERROR_SUCCESS)
+         return false;
+   }
+   return error == ERROR_SUCCESS;
+}
+
 static wchar_t *
 cache_directory(const char *custom)
 {
@@ -264,7 +335,8 @@ cache_directory(const char *custom)
    if (!base)
       return NULL;
    if (n) {
-      if (!GetEnvironmentVariableW(L"MESA_SHADER_CACHE_DIR", base, n)) {
+      DWORD length = GetEnvironmentVariableW(L"MESA_SHADER_CACHE_DIR", base, n);
+      if (!length || length >= n) {
          free(base);
          return NULL;
       }
@@ -285,12 +357,13 @@ cache_directory(const char *custom)
    free(base);
    if (!path)
       return NULL;
-   int result = SHCreateDirectoryExW(NULL, path, NULL);
-   if (result != ERROR_SUCCESS && result != ERROR_ALREADY_EXISTS && result != ERROR_FILE_EXISTS) {
-      free(path);
+   wchar_t *extended = extended_cache_path(path);
+   free(path);
+   if (extended && !create_cache_directories(extended)) {
+      free(extended);
       return NULL;
    }
-   return path;
+   return extended;
 }
 
 static uint64_t

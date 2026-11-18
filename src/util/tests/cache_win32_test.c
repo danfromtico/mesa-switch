@@ -52,6 +52,30 @@ child(const wchar_t *argument)
    finish_child(start_child(argument));
 }
 
+static void
+check_long_cache_root(const wchar_t *root)
+{
+   static const wchar_t component[] = L"\\long-cache-component-\u7f13\u5b58";
+   wchar_t path[MAX_PATH + ARRAY_SIZE(component) + 1];
+   size_t length = wcslen(root);
+   CHECK(length < MAX_PATH);
+   memcpy(path, root, (length + 1) * sizeof(*path));
+   while (length < MAX_PATH) {
+      memcpy(path + length, component, sizeof(component));
+      length += ARRAY_SIZE(component) - 1;
+   }
+   CHECK(SetEnvironmentVariableW(L"MESA_SHADER_CACHE_DIR", path));
+   struct disk_cache *cache = disk_cache_create("gm20b-test", "driver-one", 0);
+   CHECK(cache);
+   cache_key key;
+   disk_cache_compute_key(cache, "shader-one", 10, key);
+   disk_cache_put(cache, key, payload, sizeof(payload), NULL);
+   disk_cache_put_key(cache, key);
+   disk_cache_destroy(cache);
+   child(L"--read");
+   CHECK(SetEnvironmentVariableW(L"MESA_SHADER_CACHE_DIR", root));
+}
+
 int
 main(int argc, char **argv)
 {
@@ -166,6 +190,8 @@ main(int argc, char **argv)
       }
    }
    disk_cache_destroy(cache);
+
+   check_long_cache_root(root);
 
    CHECK(_putenv("MESA_SHADER_CACHE_DISABLE=true") == 0);
    child(L"--disabled");
