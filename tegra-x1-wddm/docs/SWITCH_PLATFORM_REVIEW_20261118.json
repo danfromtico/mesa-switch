@@ -1,5 +1,5 @@
 {
-  "status": "Objective 5 in progress. Audio, Wi-Fi, the three I2C controllers and the updated Pacecar are selected on hardware. An orderly restart retained the UI, its original user settings and an unbuffered SD payload. Unexpected restart evidence, the incomplete live multi-surface trial and remaining peer and firmware tests are recorded separately.",
+  "status": "Objective 5 in progress. The application NVK shader-cache path fix passed three GPU architectures and the registered application entry points, including the ARM64EC D3D9 package. Persistence of the selected application ICDs and Pacecar configuration was checked after an unexpected restart. Separate restart and platform work continues.",
   "order": [
     "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
     "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
@@ -576,6 +576,13 @@
       "accepted_boot_correction_s": 20,
       "first_unexpected_boot_correction_s": 379,
       "second_unexpected_boot_correction_s": 33
+    },
+    "hekate_reset_reason": {
+      "record": "tegra-x1-wddm/docs/WIN32_APPLICATION_CACHE_PATH_20261118.json",
+      "source": "https://github.com/CTCaer/hekate/blob/e487de8fdd6ca9c3f608d1d18c097a86355912b9/bdk/soc/hw_init.c#L293-L298",
+      "matched_payload_sha256": "61cb69d341c0b4363cfb392e9a182bb556ec656932e0e5176bb158c15ff1ad00",
+      "tag": "v6.5.3",
+      "scope": "The SD payload and bootloader/update.bin match the release. Its reset capture precedes Windows and clears the hardware source. The installed Nyx companion differs from that release."
     }
   },
   "sd": {
@@ -680,7 +687,7 @@
     },
     "game_restart_observation": {
       "record": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json",
-      "sha256": "6a4926e3aa856666fc4d23a9eb9f2d52663e29c38c9e4b4127843e78a02dcacb",
+      "sha256": "9491c3d03a02d39004860d84f87bf3b327eb32d9e4b52748350b7926bbafe920",
       "incident_files_read_entirely_as_zero": 5,
       "unusable_shader_payloads": 6,
       "total_shader_entries": 24,
@@ -2185,9 +2192,9 @@
     "selected_ui_sha256": "135285da2255e087c8b37e5034b023035a01d3990ab2b10e4e0220bdc56c7d24",
     "selected_helper_sha256": "73cddb34770b20efdbf518ac2108b50f529adc0d3f03b46a130586bf9befb245",
     "runtime_source": "cb52e1b008f9c440469379a0129e6004690834ce",
-    "acceptance_commit": "bdabe5ad18f4d71dda39ce6dbdc14cf488935a18",
-    "record_sha256": "a254a5e00befa2f078391098a907410e9aec5d77d25a50d58756adf93242c6f4",
-    "physical_record": "https://github.com/ruje0504-2/pacecar/blob/bdabe5ad18f4d71dda39ce6dbdc14cf488935a18/docs/progress/switch-frame-history-and-settings-20261118.json",
+    "acceptance_commit": "c0bf693d22f10d1b4001224dea04afa81ee1b51f",
+    "record_sha256": "81a2af18ffbecb2f94d689772a7047fc991885194f1b5fb95e56e2262c0f512d",
+    "physical_record": "https://github.com/ruje0504-2/pacecar/blob/c0bf693d22f10d1b4001224dea04afa81ee1b51f/docs/progress/switch-frame-history-and-settings-20261118.json",
     "frame_math_and_pipe_cases": 21,
     "settings_cases": 10,
     "replayed_game_events": 1152,
@@ -2196,7 +2203,8 @@
     "desktop_tgd3d_samples": 7,
     "desktop_game_fps_samples_available": 0,
     "selected_profile_sha256": "9b44f2e1666c9d603180972b551797a2dec76326f73bc6693db0d3626a37bfa7",
-    "post_reboot_utc": "2026-11-18T19:07:27.5649700Z"
+    "post_reboot_utc": "2026-11-18T19:07:27.5649700Z",
+    "unexpected_restart_followup": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json"
   },
   "dxvk_frame_limiter": {
     "record": "tegra-x1-wddm/docs/DXVK_FRAME_LIMITER_20261118.json",
@@ -2220,5 +2228,24 @@
     "high_resolution_wait_control": true,
     "high_resolution_15hz_p95_regressions": 4,
     "live_game_trial": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json"
+  },
+  "application_nvk_cache_paths": {
+    "record": "tegra-x1-wddm/docs/WIN32_APPLICATION_CACHE_PATH_20261118.json",
+    "record_sha256": "0987bd3f028a35ada941fc71a2cfd6061a41cfb28a8fdfeb5fa36caff672e495",
+    "package_source": "70f0e7245e7ef40c1ced3430f37adf051910615a",
+    "source_tag": "nvk-application-cache-path-20261118",
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-cache-path-33197ea452",
+    "arch_sha256": {
+      "arm64": "c381a78178b13fb26e09f266248b8351f25053edb9ded2854f6279cfc17d1024",
+      "x86": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+      "x64": "e200a5635c98f8624bf836f1d4f2ad8e6c1a307c30e22f73a5868f5360ca5554"
+    },
+    "registered_d3d9_checks": [
+      "x64",
+      "x86",
+      "x64 host with ARM64EC D3D9"
+    ],
+    "pixel_validated_submissions": 288,
+    "state_after_later_restart": "2026-11-18T20:07:14.7055600Z"
   }
 }

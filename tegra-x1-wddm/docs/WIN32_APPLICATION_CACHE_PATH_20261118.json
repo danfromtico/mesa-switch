@@ -1,0 +1,1402 @@
+{
+  "module": "Mesa Win32 shader cache path handling in the application NVK ICDs",
+  "previous_application_source": "3dc62b5a5a6dc51f42ad0c51bd9bfc5fc4b8e34d",
+  "application_source": {
+    "commit": "70f0e7245e7ef40c1ced3430f37adf051910615a",
+    "parent": "3dc62b5a5a6dc51f42ad0c51bd9bfc5fc4b8e34d",
+    "tree": "9563915d415bcb1db80d9021cabb1205047a9b83",
+    "filenames": {
+      "src/util/disk_cache_win32.c": "33197ea452a55f74a43f8fec09d04b1470d571add9fa38e837be45e13ac4b7d3",
+      "src/util/tests/cache_win32_test.c": "d1ecd844b5cf49e17e85f31488f8ad5317951c387d4fe56dadfa06d5936422c9"
+    },
+    "tag": "nvk-application-cache-path-20261118"
+  },
+  "integration_source_commit": "c4ff3890c53d827169ccb0a25c231608e05c9489",
+  "tested_change": "Build an absolute extended-length Win32 path during cache creation. Create missing parent directories while preserving drive and UNC roots, and reuse the path for index, blob and temporary-file I/O. The cache file format and namespaces retain their existing keys.",
+  "source_files": {
+    "src/util/disk_cache_win32.c": "33197ea452a55f74a43f8fec09d04b1470d571add9fa38e837be45e13ac4b7d3",
+    "src/util/tests/cache_win32_test.c": "d1ecd844b5cf49e17e85f31488f8ad5317951c387d4fe56dadfa06d5936422c9"
+  },
+  "source_references": {
+    "shell_directory_api": "https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shcreatedirectoryexw",
+    "ntfs_paths": "https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation"
+  },
+  "historical_failure": {
+    "record": "tegra-x1-wddm/docs/WIN32_SHADER_CACHE_PERFORMANCE_20261118.json",
+    "receipt_sha256": "de7aafc8c66d187dee8af54ca359cc4738ee663be9d8bb2343182e88f9322199"
+  },
+  "arch_images": {
+    "arm64": {
+      "arch": "arm64",
+      "accepted_image": {
+        "bytes": 17672208,
+        "unsigned": "4b868727f5ac5fb564a56e122d2d3e02234e59e7a8a1bccf912ef9bf2868d12d",
+        "sha256": "350d59b164db796692ed2f0c006fc309d149fe534bd04721a3667b07168bec00"
+      },
+      "source_sha256": "33197ea452a55f74a43f8fec09d04b1470d571add9fa38e837be45e13ac4b7d3",
+      "reference_backend_sha256": "ca5f417b456a3d2d9782f25a4e3420a0040dcd0c076e5e598d5479a35cce0103",
+      "candidate_backend_sha256": "be5698a66b3b232177a250a61e14700f6ad40588279221743fd090fe1d09eb02",
+      "reference_normalized": "18b3acb6733c725df2b2371d42c07c6ebae8c926e19fbb3ce12bf440ff85cea1",
+      "candidate_normalized": "961f02f43860da39d0b38567b8390109aa336fc76aae71c253fe2c9836c23cf9",
+      "signed": {
+        "bytes": 17673232,
+        "unsigned": "786b716f0fe3bd4e0e1a659ed57986148a2116dc8c8ba945d2f4b77a1c18dc83",
+        "sha256": "c381a78178b13fb26e09f266248b8351f25053edb9ded2854f6279cfc17d1024"
+      }
+    },
+    "x86": {
+      "arch": "x86",
+      "accepted_image": {
+        "bytes": 18599440,
+        "unsigned": "b464764d3f649558f477b80fa0a3b9b6ab919eeabc0fd6a4c8c2d74684cfb856",
+        "sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b"
+      },
+      "source_sha256": "33197ea452a55f74a43f8fec09d04b1470d571add9fa38e837be45e13ac4b7d3",
+      "reference_backend_sha256": "2c108b887f76a3fbc20c3c12351e2ee44d8312487bdad284704ae938d13f9d98",
+      "candidate_backend_sha256": "6a56ca743fdd400526fbf0dca24cc148bfe4bfe20d6145834bb7b79a98c4b3a4",
+      "reference_normalized": "970beee2f91c65e8177e6e241771cc7a0399fcd667547eb5ebdf04475a2dc60e",
+      "candidate_normalized": "01ffd0cb305bbf43666551b7725bf85a0710f650d24830ea350f50a48bb182e9",
+      "signed": {
+        "bytes": 18600968,
+        "unsigned": "743c32fc940b9d7ad04a58df58e08b8a45310aa87c9b7e23a9f55a443220b9db",
+        "sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4"
+      }
+    },
+    "x64": {
+      "arch": "x64",
+      "accepted_image": {
+        "bytes": 18642960,
+        "unsigned": "0fd74f2e1330fc1cbd11556a4a1af2209dfc95e4b8e39de93187918803d4c62e",
+        "sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910"
+      },
+      "source_sha256": "33197ea452a55f74a43f8fec09d04b1470d571add9fa38e837be45e13ac4b7d3",
+      "reference_backend_sha256": "dd6de634af361e9a969ec90bab9235b051f4d5111634407fa60c3ceb18bcb1fb",
+      "candidate_backend_sha256": "692c08d56db39a11db3073b6247c4a25b510eed42abe04b1c0ddeb6b6a75334e",
+      "reference_normalized": "f33025554804e8e7b01a4602484b784888520da7ccf1cb3c2483c82bce112fc7",
+      "candidate_normalized": "f4964519962f6c92c4554ef94a076479f58e5acff882bee9da8a22e1fffda5bf",
+      "signed": {
+        "bytes": 18644488,
+        "unsigned": "5246b5afb86f41f23bb62fa8055dbd16822eaeb96fee689a37894835aa9f4107",
+        "sha256": "e200a5635c98f8624bf836f1d4f2ad8e6c1a307c30e22f73a5868f5360ca5554"
+      }
+    }
+  },
+  "storage_controls": {
+    "real_windows_long_paths_registry": 0,
+    "observations": 96,
+    "pairs": [
+      {
+        "architecture": "arm64",
+        "case": "short_default",
+        "reference_root_chars": 84,
+        "candidate_root_chars": 84,
+        "reference_fresh_read": true,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "e192f956248e98cb4044e0bbf671a8ed66e95fc172c6a240233d324e3a860171"
+      },
+      {
+        "architecture": "arm64",
+        "case": "short_custom",
+        "reference_root_chars": 85,
+        "candidate_root_chars": 85,
+        "reference_fresh_read": true,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "b9e4467ac461656663137fbd507750f3a336e0fae232ec722e2bb6211dce31e3"
+      },
+      {
+        "architecture": "arm64",
+        "case": "long_filename",
+        "reference_root_chars": 160,
+        "candidate_root_chars": 160,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "3ba5a4bee0acf205bb5b0a3cd67b4873d9b73f286921abe9955b852759cb5d9e"
+      },
+      {
+        "architecture": "arm64",
+        "case": "deep_default",
+        "reference_root_chars": 295,
+        "candidate_root_chars": 295,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "ded59345b97e5875debd71aaad844aba61ea12807e16ea124fbab13a97ff0fce"
+      },
+      {
+        "architecture": "arm64",
+        "case": "deep_unicode_custom",
+        "reference_root_chars": 295,
+        "candidate_root_chars": 295,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "e71b7be7e6a3bdb068ae724f438a3fbbe548dd273f2ada65358a80a97d6b96bd"
+      },
+      {
+        "architecture": "arm64",
+        "case": "extended_trailing",
+        "reference_root_chars": 285,
+        "candidate_root_chars": 285,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "b20574396a6f028ca4775fc6eb5f39ddf6e45750b452776458b1d9d5d985733a"
+      },
+      {
+        "architecture": "arm64",
+        "case": "relative_parent",
+        "reference_root_chars": 285,
+        "candidate_root_chars": 285,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "26bcd7b933e94b4a7def6b996af60e79baea08dd403a8bc6807210766621331a"
+      },
+      {
+        "architecture": "arm64",
+        "case": "parent_is_file",
+        "reference_root_chars": 96,
+        "candidate_root_chars": 96,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": false,
+        "expected_payload_blake3": "6e1774bd7bf16311f33e63e5258c64140eb57ffe044420a63e500c582fd50848"
+      },
+      {
+        "architecture": "x86",
+        "case": "short_default",
+        "reference_root_chars": 82,
+        "candidate_root_chars": 82,
+        "reference_fresh_read": true,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "e192f956248e98cb4044e0bbf671a8ed66e95fc172c6a240233d324e3a860171"
+      },
+      {
+        "architecture": "x86",
+        "case": "short_custom",
+        "reference_root_chars": 83,
+        "candidate_root_chars": 83,
+        "reference_fresh_read": true,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "b9e4467ac461656663137fbd507750f3a336e0fae232ec722e2bb6211dce31e3"
+      },
+      {
+        "architecture": "x86",
+        "case": "long_filename",
+        "reference_root_chars": 160,
+        "candidate_root_chars": 160,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "3ba5a4bee0acf205bb5b0a3cd67b4873d9b73f286921abe9955b852759cb5d9e"
+      },
+      {
+        "architecture": "x86",
+        "case": "deep_default",
+        "reference_root_chars": 295,
+        "candidate_root_chars": 295,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "ded59345b97e5875debd71aaad844aba61ea12807e16ea124fbab13a97ff0fce"
+      },
+      {
+        "architecture": "x86",
+        "case": "deep_unicode_custom",
+        "reference_root_chars": 295,
+        "candidate_root_chars": 295,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "e71b7be7e6a3bdb068ae724f438a3fbbe548dd273f2ada65358a80a97d6b96bd"
+      },
+      {
+        "architecture": "x86",
+        "case": "extended_trailing",
+        "reference_root_chars": 285,
+        "candidate_root_chars": 285,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "b20574396a6f028ca4775fc6eb5f39ddf6e45750b452776458b1d9d5d985733a"
+      },
+      {
+        "architecture": "x86",
+        "case": "relative_parent",
+        "reference_root_chars": 285,
+        "candidate_root_chars": 285,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "26bcd7b933e94b4a7def6b996af60e79baea08dd403a8bc6807210766621331a"
+      },
+      {
+        "architecture": "x86",
+        "case": "parent_is_file",
+        "reference_root_chars": 94,
+        "candidate_root_chars": 94,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": false,
+        "expected_payload_blake3": "6e1774bd7bf16311f33e63e5258c64140eb57ffe044420a63e500c582fd50848"
+      },
+      {
+        "architecture": "x64",
+        "case": "short_default",
+        "reference_root_chars": 82,
+        "candidate_root_chars": 82,
+        "reference_fresh_read": true,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "e192f956248e98cb4044e0bbf671a8ed66e95fc172c6a240233d324e3a860171"
+      },
+      {
+        "architecture": "x64",
+        "case": "short_custom",
+        "reference_root_chars": 83,
+        "candidate_root_chars": 83,
+        "reference_fresh_read": true,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "b9e4467ac461656663137fbd507750f3a336e0fae232ec722e2bb6211dce31e3"
+      },
+      {
+        "architecture": "x64",
+        "case": "long_filename",
+        "reference_root_chars": 160,
+        "candidate_root_chars": 160,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "3ba5a4bee0acf205bb5b0a3cd67b4873d9b73f286921abe9955b852759cb5d9e"
+      },
+      {
+        "architecture": "x64",
+        "case": "deep_default",
+        "reference_root_chars": 295,
+        "candidate_root_chars": 295,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "ded59345b97e5875debd71aaad844aba61ea12807e16ea124fbab13a97ff0fce"
+      },
+      {
+        "architecture": "x64",
+        "case": "deep_unicode_custom",
+        "reference_root_chars": 295,
+        "candidate_root_chars": 295,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "e71b7be7e6a3bdb068ae724f438a3fbbe548dd273f2ada65358a80a97d6b96bd"
+      },
+      {
+        "architecture": "x64",
+        "case": "extended_trailing",
+        "reference_root_chars": 285,
+        "candidate_root_chars": 285,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "b20574396a6f028ca4775fc6eb5f39ddf6e45750b452776458b1d9d5d985733a"
+      },
+      {
+        "architecture": "x64",
+        "case": "relative_parent",
+        "reference_root_chars": 285,
+        "candidate_root_chars": 285,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": true,
+        "expected_payload_blake3": "26bcd7b933e94b4a7def6b996af60e79baea08dd403a8bc6807210766621331a"
+      },
+      {
+        "architecture": "x64",
+        "case": "parent_is_file",
+        "reference_root_chars": 94,
+        "candidate_root_chars": 94,
+        "reference_fresh_read": false,
+        "candidate_fresh_read": false,
+        "expected_payload_blake3": "6e1774bd7bf16311f33e63e5258c64140eb57ffe044420a63e500c582fd50848"
+      }
+    ],
+    "source": "tegra-x1-wddm/docs/dxvk-games-20261118/win32-cache-path-probe.c",
+    "sha256": "56df829c6d067ab238808c5bd6593afb41dffffa5fb80f8d35f6a805f7dbaa37",
+    "signed_probes": {
+      "arm64": {
+        "reference": "eeafc076eeedebe145f929bc0aaffc83d86974d67363499185cbfd6545f3f996",
+        "candidate": "23373814b4774e29780c6e8f205e0082ea5b9491a272d85ab4858905d8b479f6"
+      },
+      "x86": {
+        "reference": "ce07d598e12ffe92fe1fe14a456a9ace23073959f2739926a5fcc370d278f934",
+        "candidate": "2b3e566cfaa46c42d6d4bfe6f57b16846982f6e0c4395ccd2459fa28944341b3"
+      },
+      "x64": {
+        "reference": "b178c9a3bdd0f73432b30912dafb5d1b5aac86836f3a92bdfce78c1c906075eb",
+        "candidate": "ff207113797592cbf0d6407dc64d9a4069ab3a55f29feda8c653f32edd5562d6"
+      }
+    },
+    "validated": "Distinct processes put and retrieved a known payload. Five previously failing directory cases passed per architecture. Both ordinary short paths passed, and an existing ordinary file used as a parent remained a cache miss. Directory components included UTF-16 Chinese characters. The fixture exercised local drive paths.",
+    "full_arm64_regression": {
+      "boot": "2026-11-18T19:32:39.9317630Z",
+      "image": "19D3548B83088EDA7C4DF011276176ECD14435CD40DAE7E66F18125168AB8B61",
+      "user_cache_disable": null,
+      "stdout": [
+        "PASS: cache hit in a fresh process",
+        "PASS: cache hit in a fresh process",
+        "PASS: Windows cache persistence, concurrent writers, namespaces, integrity, key index, eviction, and disable option; no GPU execution"
+      ],
+      "utc": "2026-11-18T19:52:31.6203331Z",
+      "stderr_sha": "38FBA57722445593CF9BE44C187DC6F2347C84575E73AA615CB8F1F01DD832B4",
+      "stderr": [
+        "MESA: info: disk shader cache: hits = 1, misses = 1",
+        "MESA: info: disk shader cache: hits = 1, misses = 0",
+        "MESA: info: disk shader cache: hits = 0, misses = 1",
+        "MESA: info: disk shader cache: hits = 0, misses = 1",
+        "MESA: info: disk shader cache: hits = 1, misses = 2",
+        "MESA: info: disk shader cache: hits = 2, misses = 1",
+        "MMEESAS:A :i nifnof:o :d diisskk s hsahdaedre cra cchaec:h eh:i ts hi=t s0 ,= mi s0s,e s m=i s0s",
+        "es = 0",
+        "MESA: info: disk shader cache: hits = 64, misses = 0",
+        "MESA: info: disk shader cache: hits = 0, misses = 0",
+        "MESA: info: disk shader cache: hits = 1, misses = 0"
+      ],
+      "machine_cache_disable": null,
+      "exit": 0,
+      "stdout_sha": "82C2E4A065BE403659B84746A05FC5960BE4EDB068BAB3EF47C45CE0DEB19CBC"
+    },
+    "full_regression_source": "d1ecd844b5cf49e17e85f31488f8ad5317951c387d4fe56dadfa06d5936422c9"
+  },
+  "native_gpu": {
+    "boot": "2026-11-18T19:32:39.9317630Z",
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "dwm_pid": 1356,
+    "conditions": [
+      {
+        "arch": "arm64",
+        "boot": "2026-11-18T19:32:39.9317630Z",
+        "dwm_pid": 1356,
+        "before": {
+          "Utc": "2026-11-18T19:51:13.9199797Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 1,
+            "CpuTargetKhz": 1122000,
+            "CpuActualKhz": 1147500,
+            "CpuBootKhz": 998400,
+            "CpuMv": 660,
+            "RamActualKhz": 1600000,
+            "GpuPolicyMode": 1,
+            "GpuPolicyMinKhz": 76800,
+            "GpuPolicyMaxKhz": 537600,
+            "GpuReportedKhz": 76800,
+            "GpuReportedUv": 590000,
+            "GpuStatusWord": 271001089,
+            "TempC": 38,
+            "TempValid": 1,
+            "FanDuty": 51,
+            "Flags": 20,
+            "CpuPolicyMinKhz": 102000,
+            "CpuPolicyMaxKhz": 1581000,
+            "CpuRequestedMaxKhz": 1581000,
+            "GpuRequestedMaxKhz": 537600,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "CpuLoadPermille": 625,
+            "GpuSampleAgeMs": 281,
+            "SocTempC": 38,
+            "BoardTempC": 37,
+            "TempSampleAgeMs": 1172
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 83,
+            "VoltageMv": 3879,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        },
+        "after": {
+          "Utc": "2026-11-18T19:51:21.1795019Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 1,
+            "CpuTargetKhz": 918000,
+            "CpuActualKhz": 916804,
+            "CpuBootKhz": 998400,
+            "CpuMv": 615,
+            "RamActualKhz": 1331200,
+            "GpuPolicyMode": 1,
+            "GpuPolicyMinKhz": 76800,
+            "GpuPolicyMaxKhz": 537600,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "GpuStatusWord": 272901657,
+            "TempC": 38,
+            "TempValid": 1,
+            "FanDuty": 51,
+            "Flags": 20,
+            "CpuPolicyMinKhz": 102000,
+            "CpuPolicyMaxKhz": 1581000,
+            "CpuRequestedMaxKhz": 1581000,
+            "GpuRequestedMaxKhz": 537600,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "CpuLoadPermille": 500,
+            "GpuSampleAgeMs": 287,
+            "SocTempC": 38,
+            "BoardTempC": 37,
+            "TempSampleAgeMs": 547
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 83,
+            "VoltageMv": 3873,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        }
+      },
+      {
+        "arch": "x86",
+        "boot": "2026-11-18T19:32:39.9317630Z",
+        "dwm_pid": 1356,
+        "before": {
+          "Utc": "2026-11-18T19:53:11.8099373Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 1,
+            "CpuTargetKhz": 1020000,
+            "CpuActualKhz": 1007250,
+            "CpuBootKhz": 998400,
+            "CpuMv": 635,
+            "RamActualKhz": 1331200,
+            "GpuPolicyMode": 1,
+            "GpuPolicyMinKhz": 76800,
+            "GpuPolicyMaxKhz": 537600,
+            "GpuReportedKhz": 307200,
+            "GpuReportedUv": 590000,
+            "GpuStatusWord": 304227853,
+            "TempC": 38,
+            "TempValid": 1,
+            "FanDuty": 51,
+            "Flags": 20,
+            "CpuPolicyMinKhz": 102000,
+            "CpuPolicyMaxKhz": 1581000,
+            "CpuRequestedMaxKhz": 1581000,
+            "GpuRequestedMaxKhz": 537600,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "CpuLoadPermille": 562,
+            "GpuSampleAgeMs": 31,
+            "SocTempC": 38,
+            "BoardTempC": 37,
+            "TempSampleAgeMs": 969
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 83,
+            "VoltageMv": 3874,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        },
+        "after": {
+          "Utc": "2026-11-18T19:53:21.3841016Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 1,
+            "CpuTargetKhz": 918000,
+            "CpuActualKhz": 916804,
+            "CpuBootKhz": 998400,
+            "CpuMv": 615,
+            "RamActualKhz": 1331200,
+            "GpuPolicyMode": 1,
+            "GpuPolicyMinKhz": 76800,
+            "GpuPolicyMaxKhz": 537600,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "GpuStatusWord": 306718233,
+            "TempC": 38,
+            "TempValid": 1,
+            "FanDuty": 51,
+            "Flags": 20,
+            "CpuPolicyMinKhz": 102000,
+            "CpuPolicyMaxKhz": 1581000,
+            "CpuRequestedMaxKhz": 1581000,
+            "GpuRequestedMaxKhz": 537600,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "CpuLoadPermille": 529,
+            "GpuSampleAgeMs": 750,
+            "SocTempC": 38,
+            "BoardTempC": 37,
+            "TempSampleAgeMs": 640
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 83,
+            "VoltageMv": 3867,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        }
+      },
+      {
+        "arch": "x64",
+        "boot": "2026-11-18T19:32:39.9317630Z",
+        "dwm_pid": 1356,
+        "before": {
+          "Utc": "2026-11-18T19:54:22.9378984Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 1,
+            "CpuTargetKhz": 1122000,
+            "CpuActualKhz": 1109250,
+            "CpuBootKhz": 998400,
+            "CpuMv": 675,
+            "RamActualKhz": 1600000,
+            "GpuPolicyMode": 1,
+            "GpuPolicyMinKhz": 76800,
+            "GpuPolicyMaxKhz": 537600,
+            "GpuReportedKhz": 76800,
+            "GpuReportedUv": 590000,
+            "GpuStatusWord": 323692033,
+            "TempC": 38,
+            "TempValid": 1,
+            "FanDuty": 51,
+            "Flags": 20,
+            "CpuPolicyMinKhz": 102000,
+            "CpuPolicyMaxKhz": 1581000,
+            "CpuRequestedMaxKhz": 1581000,
+            "GpuRequestedMaxKhz": 537600,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "CpuLoadPermille": 625,
+            "GpuSampleAgeMs": 359,
+            "SocTempC": 38,
+            "BoardTempC": 37,
+            "TempSampleAgeMs": 1985
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 83,
+            "VoltageMv": 3879,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        },
+        "after": {
+          "Utc": "2026-11-18T19:54:32.6809137Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 1,
+            "CpuTargetKhz": 918000,
+            "CpuActualKhz": 905050,
+            "CpuBootKhz": 998400,
+            "CpuMv": 615,
+            "RamActualKhz": 1331200,
+            "GpuPolicyMode": 1,
+            "GpuPolicyMinKhz": 76800,
+            "GpuPolicyMaxKhz": 537600,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 630000,
+            "GpuStatusWord": 326116889,
+            "TempC": 38,
+            "TempValid": 1,
+            "FanDuty": 51,
+            "Flags": 20,
+            "CpuPolicyMinKhz": 102000,
+            "CpuPolicyMaxKhz": 1581000,
+            "CpuRequestedMaxKhz": 1581000,
+            "GpuRequestedMaxKhz": 537600,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "CpuLoadPermille": 500,
+            "GpuSampleAgeMs": 296,
+            "SocTempC": 38,
+            "BoardTempC": 37,
+            "TempSampleAgeMs": 1829
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 83,
+            "VoltageMv": 3843,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        }
+      }
+    ],
+    "adapter_ids": {
+      "arm64": {
+        "candidate": {
+          "scope": "NVK Windows ICD identity",
+          "loader": false,
+          "icd_interface": 7,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000081bb9",
+          "matching_luid": true
+        },
+        "reference": {
+          "scope": "NVK Windows ICD identity",
+          "loader": false,
+          "icd_interface": 7,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000081bb9",
+          "matching_luid": true
+        }
+      },
+      "x86": {
+        "candidate": {
+          "scope": "NVK Windows ICD identity",
+          "loader": false,
+          "icd_interface": 7,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000081bb9",
+          "matching_luid": true
+        },
+        "reference": {
+          "scope": "NVK Windows ICD identity",
+          "loader": false,
+          "icd_interface": 7,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000081bb9",
+          "matching_luid": true
+        }
+      },
+      "x64": {
+        "candidate": {
+          "scope": "NVK Windows ICD identity",
+          "loader": false,
+          "icd_interface": 7,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000081bb9",
+          "matching_luid": true
+        },
+        "reference": {
+          "scope": "NVK Windows ICD identity",
+          "loader": false,
+          "icd_interface": 7,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000081bb9",
+          "matching_luid": true
+        }
+      }
+    },
+    "measurements_by_process": {
+      "arm64": {
+        "reference_cold": {
+          "pipeline_ms": 47.5958,
+          "pipeline_cpu_ms": 31.25,
+          "peak_working_set_bytes": 14446592,
+          "root_characters": 323,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": false
+        },
+        "reference_warm": {
+          "pipeline_ms": 35.2801,
+          "pipeline_cpu_ms": 15.625,
+          "peak_working_set_bytes": 14409728,
+          "root_characters": 323,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": false
+        },
+        "candidate_cold": {
+          "pipeline_ms": 33.5276,
+          "pipeline_cpu_ms": 0.0,
+          "peak_working_set_bytes": 14237696,
+          "root_characters": 323,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": false
+        },
+        "candidate_warm": {
+          "pipeline_ms": 12.8679,
+          "pipeline_cpu_ms": 15.625,
+          "peak_working_set_bytes": 11993088,
+          "root_characters": 323,
+          "cache_hits": 6,
+          "cache_misses": 0,
+          "host_status_query_overlaps_phase_by_clock": false
+        }
+      },
+      "x86": {
+        "candidate_cold": {
+          "pipeline_ms": 477.6766,
+          "pipeline_cpu_ms": 468.75,
+          "peak_working_set_bytes": 24141824,
+          "root_characters": 321,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": false
+        },
+        "candidate_warm": {
+          "pipeline_ms": 149.0822,
+          "pipeline_cpu_ms": 15.625,
+          "peak_working_set_bytes": 18165760,
+          "root_characters": 321,
+          "cache_hits": 6,
+          "cache_misses": 0,
+          "host_status_query_overlaps_phase_by_clock": false
+        },
+        "reference_cold": {
+          "pipeline_ms": 119.298,
+          "pipeline_cpu_ms": 78.125,
+          "peak_working_set_bytes": 21516288,
+          "root_characters": 321,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": false
+        },
+        "reference_warm": {
+          "pipeline_ms": 59.5135,
+          "pipeline_cpu_ms": 46.875,
+          "peak_working_set_bytes": 21540864,
+          "root_characters": 321,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": false
+        }
+      },
+      "x64": {
+        "reference_cold": {
+          "pipeline_ms": 107.814,
+          "pipeline_cpu_ms": 31.25,
+          "peak_working_set_bytes": 32153600,
+          "root_characters": 321,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": false
+        },
+        "reference_warm": {
+          "pipeline_ms": 46.0438,
+          "pipeline_cpu_ms": 46.875,
+          "peak_working_set_bytes": 32063488,
+          "root_characters": 321,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": true
+        },
+        "candidate_cold": {
+          "pipeline_ms": 513.5235,
+          "pipeline_cpu_ms": 515.625,
+          "peak_working_set_bytes": 35012608,
+          "root_characters": 321,
+          "cache_hits": 0,
+          "cache_misses": 6,
+          "host_status_query_overlaps_phase_by_clock": true
+        },
+        "candidate_warm": {
+          "pipeline_ms": 24.491,
+          "pipeline_cpu_ms": 15.625,
+          "peak_working_set_bytes": 29552640,
+          "root_characters": 321,
+          "cache_hits": 6,
+          "cache_misses": 0,
+          "host_status_query_overlaps_phase_by_clock": true
+        }
+      }
+    },
+    "warm_followup": {
+      "x86": {},
+      "x64": {}
+    },
+    "total_verified_submissions": 288,
+    "pixels_per_submit": 1024,
+    "red_pixels": 300,
+    "blue_pixels": 724,
+    "guard_bytes_per_submit": 128,
+    "individual_processes": "tegra-x1-wddm/docs/dxvk-games-20261118/win32-long-path-vk-timings.csv",
+    "individual_processes_sha256": "f7694e100e834eeb7ff447ab92b092f5fc4645ff803739b52c138661e4e4d5fa",
+    "timing_scope": "Initial figures contain one cold and one warm process per image and architecture. Two follow-ups ended without a timed process record. The x86 warm creation time increased in its observed run. The x64 first-pair timings include a host status query overlapping several phases by host and device wall clocks. The warm cache hit count and checked pixel output are the promotion evidence. A steady performance or game FPS improvement remains unverified."
+  },
+  "application_selection": {
+    "installed_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-cache-path-33197ea452",
+    "restore_command": "Select-ApplicationICD.ps1 -Mode Restore",
+    "restore_script": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-cache-path-33197ea452\\selection\\Select-ApplicationICD.ps1",
+    "selector_source": "tegra-x1-wddm/tools/dxvk/Select-ApplicationICD.ps1",
+    "selector_sha256": "91a02bc57cd5669d98a98cf3b14112e8ea19399c20490f5864adfd4b0aa8fd58",
+    "selected_manifest_sha256": {
+      "pal4.json": "fef85ef0ac9773a3e96192e762a7d91adf1a38dbd64249fb1d3341930187fccf",
+      "warcraft.json": "fef85ef0ac9773a3e96192e762a7d91adf1a38dbd64249fb1d3341930187fccf",
+      "matrix-x86.json": "fef85ef0ac9773a3e96192e762a7d91adf1a38dbd64249fb1d3341930187fccf",
+      "matrix-x64.json": "d8462269bcb4a9fb6e340bc985379b3d327c828655d4652c48ab6dd4db0ec3cb",
+      "native-arm64.json": "7a1e61a6afea493ec56d5b6721d78f84ce1541d0a9ddf58f3ac7487bc8e44a57"
+    },
+    "application_keys_by_group": [
+      13,
+      9,
+      4,
+      2,
+      1
+    ],
+    "prior_registry_settings_files": {
+      "settings": "362d6e4cf8b9876309b01b65e62d95631bcb2aa6b407c3c036b9b8a29d98797a",
+      "receipt": "6262b8442422b2502100b7880a1a69f69f8a412c22133897652a9a70883d25ed"
+    },
+    "selected_registry_settings_files": {
+      "settings": "e273b17805e5df8e8f0709d9cf3e4bb70a624e2c644cb40899cc7baf60b332d6",
+      "receipt": "712f44cdf708cb37ef837542dc767908bc3adae506c1f5d628da644bb6253626"
+    },
+    "selection_sequence": [
+      "Activate",
+      "Restore",
+      "Activate"
+    ],
+    "registered_enumeration": [
+      {
+        "app": "x86",
+        "selection": "reference",
+        "exit": 0,
+        "identity": {
+          "scope": "NVK Windows ICD identity",
+          "loader": true,
+          "icd_interface": 0,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000082ee2",
+          "matching_luid": true
+        },
+        "icd_sha": "D584DD77174FBAFF338D8F831702126CD6C9BF09790E37F525E7815280C91C1B",
+        "loader": "0CB8619A4A4BA0ACCEBA1F75A2DC0C8E251AB75D4A3C3E9640262C4C650C18AF",
+        "enum": "1EF77A8E0E83D5C5A8127387B7B4E7742A6CE9C05B352134B09444902444F4ED",
+        "stdout_sha": "678F29FEAC044D9BEABA41F1616B4885B768ED79C4A6401E78C76A651E16AAC8",
+        "stderr_sha": "47393DED0E038CF7E94D3731CDCAF4C587888238948C322DC933F7EFD4B7420E"
+      },
+      {
+        "app": "arm64",
+        "selection": "candidate",
+        "exit": 0,
+        "identity": {
+          "scope": "NVK Windows ICD identity",
+          "loader": true,
+          "icd_interface": 0,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000082ee2",
+          "matching_luid": true
+        },
+        "icd_sha": "C381A78178B13FB26E09F266248B8351F25053EDB9DED2854F6279CFC17D1024",
+        "loader": "59F237FA06E955CDEFBEEAF9E79B127629336CB941473C2C6D9D04A1E7E30408",
+        "enum": "427C869A84237B92126C4C11636A3D30516D8CF2DEB25D73037AD6310DD8952F",
+        "stdout_sha": "678F29FEAC044D9BEABA41F1616B4885B768ED79C4A6401E78C76A651E16AAC8",
+        "stderr_sha": "44332F6809892F56564466284E67643610DA9B629A30EE89098CD8745F64EAAB"
+      },
+      {
+        "app": "x86",
+        "selection": "candidate",
+        "exit": 0,
+        "identity": {
+          "scope": "NVK Windows ICD identity",
+          "loader": true,
+          "icd_interface": 0,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000082ee2",
+          "matching_luid": true
+        },
+        "icd_sha": "CC343903B674B61AEEEE52708A32C9A75997BD082768C1A9E2626F825D7312D4",
+        "loader": "0CB8619A4A4BA0ACCEBA1F75A2DC0C8E251AB75D4A3C3E9640262C4C650C18AF",
+        "enum": "1EF77A8E0E83D5C5A8127387B7B4E7742A6CE9C05B352134B09444902444F4ED",
+        "stdout_sha": "678F29FEAC044D9BEABA41F1616B4885B768ED79C4A6401E78C76A651E16AAC8",
+        "stderr_sha": "54E5EA169D62A90E50312FB590EF1E90B051B5DF6B09F68C4F79915300DD3665"
+      },
+      {
+        "app": "x64",
+        "selection": "candidate",
+        "exit": 0,
+        "identity": {
+          "scope": "NVK Windows ICD identity",
+          "loader": true,
+          "icd_interface": 0,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000082ee2",
+          "matching_luid": true
+        },
+        "icd_sha": "E200A5635C98F8624BF836F1D4F2AD8E6C1A307C30E22F73A5868F5360CA5554",
+        "loader": "4F0E5E0CA9458D4D9542BAAE219C74816840CB90D7C15C224CABB37742AC45CA",
+        "enum": "9C4AB821488A766CA2D8E3922F7B3E2945249F42A9CD62EC5BB3DACABF5FA32F",
+        "stdout_sha": "678F29FEAC044D9BEABA41F1616B4885B768ED79C4A6401E78C76A651E16AAC8",
+        "stderr_sha": "520A36929A6B62E39E2365EE6D6D4624F2F329AE4E2262A6E3B708E0067EC0C0"
+      },
+      {
+        "app": "ec",
+        "selection": "candidate",
+        "exit": 0,
+        "identity": {
+          "scope": "NVK Windows ICD identity",
+          "loader": true,
+          "icd_interface": 0,
+          "api_version": 4211042,
+          "kmt_adapters": 2,
+          "private_queries_ok": 2,
+          "matching_kmd": 1,
+          "native_ready_kmd": 1,
+          "enumerate_result": 0,
+          "physical_devices": 1,
+          "kmt_luid": "0000000000082ee2",
+          "matching_luid": true
+        },
+        "icd_sha": "E200A5635C98F8624BF836F1D4F2AD8E6C1A307C30E22F73A5868F5360CA5554",
+        "loader": "4F0E5E0CA9458D4D9542BAAE219C74816840CB90D7C15C224CABB37742AC45CA",
+        "enum": "9C4AB821488A766CA2D8E3922F7B3E2945249F42A9CD62EC5BB3DACABF5FA32F",
+        "stdout_sha": "678F29FEAC044D9BEABA41F1616B4885B768ED79C4A6401E78C76A651E16AAC8",
+        "stderr_sha": "520A36929A6B62E39E2365EE6D6D4624F2F329AE4E2262A6E3B708E0067EC0C0"
+      }
+    ],
+    "d3d9_with_desktop_package_dlls": [
+      {
+        "app": "ec",
+        "exit": 0,
+        "d3d9_sha": "8ED879D81B1C8C014A0C52549A675BC3FA486556AE001EC0F6421EC90B8C4490",
+        "exe_sha": "DBD51687C9C18BB71B5AFDBFDE2DDFE6FF6ECCDD352F2900E595AAD9003403AA",
+        "driver_sha": "E200A5635C98F8624BF836F1D4F2AD8E6C1A307C30E22F73A5868F5360CA5554",
+        "dxvk_log_sha": "A448E9D9AECB04A2B5FE932B86654495B6B5875301D51D7499970EC323F0A0E2",
+        "stdout_sha": "6E363A225256ADF041723575B32FEB088D1FFDB39AA134BBAB4006FFCC1DE4F8",
+        "stderr_sha": "45C9A861AA3B76151D781AEE7C109ABBD8623EED7B9EE4C62A9C0815307BF445",
+        "stdout": [
+          "MODULE d3d9.dll: C:\\ProgramData\\SwitchWOA\\DxvkGames-01a1ec52\\ec\\app\\d3d9.dll",
+          "DEVICE d3d9: reported adapter \"NVIDIA Tegra X1 (GM20B) (NVK GM20B)\" 10de:0fe0",
+          "STAGE d3d9 clear: PASS",
+          "STAGE d3d9 draw: PASS",
+          "STAGE d3d9 sm2+textured+depth: PASS",
+          "RESULT d3d9: PASS (exit 0)"
+        ]
+      },
+      {
+        "app": "x86",
+        "exit": 0,
+        "d3d9_sha": "8642FCA6AA40B2B289DA4C4CD5334FB984B2BBF3313FFA4DDC46C3238539CEAB",
+        "exe_sha": "574A12450BA85459F68ED4D00FFBE436AA1A6E321C27EA509F7393E63FD0123C",
+        "driver_sha": "CC343903B674B61AEEEE52708A32C9A75997BD082768C1A9E2626F825D7312D4",
+        "dxvk_log_sha": "2E1EA7CD5027D55317D9EB7CFECD26885B407085AF9FF8F4F14224BE0DA2894A",
+        "stdout_sha": "9A024677DA2402C5C6F118C3B89435E5EB75CF33312772620BF1EBF5DF57526B",
+        "stderr_sha": "EFE0D9A8C3C6B3F30B144BCA34C94719A8607C7B9916366E700E6B63B0778F1A",
+        "stdout": [
+          "MODULE d3d9.dll: C:\\ProgramData\\SwitchWOA\\DxvkGames-01a1ec52\\x86\\app\\d3d9.dll",
+          "DEVICE d3d9: reported adapter \"NVIDIA Tegra X1 (GM20B) (NVK GM20B)\" 10de:0fe0",
+          "STAGE d3d9 clear: PASS",
+          "STAGE d3d9 draw: PASS",
+          "STAGE d3d9 sm2+textured+depth: PASS",
+          "RESULT d3d9: PASS (exit 0)"
+        ]
+      },
+      {
+        "app": "x64",
+        "exit": 0,
+        "d3d9_sha": "F73D5B3B4FB702EC340BBD21BF0840AB2186030E72AA9B599D28F20F611ECBF7",
+        "exe_sha": "DBD51687C9C18BB71B5AFDBFDE2DDFE6FF6ECCDD352F2900E595AAD9003403AA",
+        "driver_sha": "E200A5635C98F8624BF836F1D4F2AD8E6C1A307C30E22F73A5868F5360CA5554",
+        "dxvk_log_sha": "157A8C3DD8FFE9024AC9967E6C705764B2C8F86E3CF22FA414CE98362C7ECC63",
+        "stdout_sha": "CD6715E83EDAF3391FFB754B2AB4025E70E682E2D231FED23229B0BDCA645A87",
+        "stderr_sha": "45C9A861AA3B76151D781AEE7C109ABBD8623EED7B9EE4C62A9C0815307BF445",
+        "stdout": [
+          "MODULE d3d9.dll: C:\\ProgramData\\SwitchWOA\\DxvkGames-01a1ec52\\x64\\app\\d3d9.dll",
+          "DEVICE d3d9: reported adapter \"NVIDIA Tegra X1 (GM20B) (NVK GM20B)\" 10de:0fe0",
+          "STAGE d3d9 clear: PASS",
+          "STAGE d3d9 draw: PASS",
+          "STAGE d3d9 sm2+textured+depth: PASS",
+          "RESULT d3d9: PASS (exit 0)"
+        ]
+      }
+    ],
+    "arm64ec_runtime": "The EC directory runs the x64 control executable with an app-local ARM64EC D3D9 DLL and the x64 Vulkan loader/ICD.",
+    "after_qualification": {
+      "boot": "2026-11-18T19:59:33.0217190Z",
+      "utc": "2026-11-18T20:05:34.8170920Z",
+      "dwm_before": 1424,
+      "dwm_after": 1424,
+      "dwm_modules": {
+        "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+        "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      }
+    },
+    "subsequent_unexpected_restart_readback": {
+      "boot": "2026-11-18T20:07:14.7055600Z",
+      "utc": "2026-11-18T20:09:19.3843865Z",
+      "registration": {
+        "settings": "e273b17805e5df8e8f0709d9cf3e4bb70a624e2c644cb40899cc7baf60b332d6",
+        "receipt": "712f44cdf708cb37ef837542dc767908bc3adae506c1f5d628da644bb6253626"
+      },
+      "files": [
+        {
+          "expected": "e200a5635c98f8624bf836f1d4f2ad8e6c1a307c30e22f73a5868f5360ca5554",
+          "group": "matrix-x64",
+          "sha": "E200A5635C98F8624BF836F1D4F2AD8E6C1A307C30E22F73A5868F5360CA5554"
+        },
+        {
+          "expected": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+          "group": "matrix-x86",
+          "sha": "CC343903B674B61AEEEE52708A32C9A75997BD082768C1A9E2626F825D7312D4"
+        },
+        {
+          "expected": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+          "group": "warcraft",
+          "sha": "CC343903B674B61AEEEE52708A32C9A75997BD082768C1A9E2626F825D7312D4"
+        },
+        {
+          "expected": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+          "group": "pal4",
+          "sha": "CC343903B674B61AEEEE52708A32C9A75997BD082768C1A9E2626F825D7312D4"
+        },
+        {
+          "expected": "c381a78178b13fb26e09f266248b8351f25053edb9ded2854f6279cfc17d1024",
+          "group": "native-arm64",
+          "sha": "C381A78178B13FB26E09F266248B8351F25053EDB9DED2854F6279CFC17D1024"
+        }
+      ],
+      "gpu_problem_code": 0,
+      "running_games": [],
+      "wifi_problem_code": 0,
+      "native_dwm_modules": {
+        "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+        "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      }
+    },
+    "full_game_timing_or_new_Warcraft_PAL4_acceptance": false
+  },
+  "additional_unexpected_restarts": [
+    {
+      "boot_utc": "2026-11-18T19:59:33.0217190Z",
+      "readback_utc": "2026-11-18T20:02:04.4278601Z",
+      "events_in_record_order": [
+        {
+          "record": 67299,
+          "utc": "2026-11-18T19:59:12.2599782Z",
+          "id": 12,
+          "fields": {}
+        },
+        {
+          "record": 67308,
+          "utc": "2026-11-18T20:00:27.3495283Z",
+          "id": 6008,
+          "fields": {}
+        },
+        {
+          "record": 67310,
+          "utc": "2026-11-18T20:00:27.3525657Z",
+          "id": 6005,
+          "fields": {}
+        },
+        {
+          "record": 67317,
+          "utc": "2026-11-18T19:59:16.4567013Z",
+          "id": 41,
+          "fields": {
+            "BugcheckCode": "0",
+            "LongPowerButtonPressDetected": "false",
+            "BootAppStatus": "0",
+            "PowerButtonTimestamp": "0",
+            "BugcheckParameter3": "0x0",
+            "BugcheckParameter4": "0x0",
+            "BugcheckParameter1": "0x0",
+            "BugcheckParameter2": "0x0",
+            "Checkpoint": "0",
+            "SleepInProgress": "0"
+          }
+        }
+      ],
+      "rtc_correction_s": 22,
+      "power_button_cached_at_start": {
+        "status": 2,
+        "irq": 0,
+        "first_read_status": 0
+      },
+      "dump_files": [],
+      "power_mode": 1,
+      "external": true,
+      "battery_percent": 84,
+      "temperature_c_after_boot": 38,
+      "gpu_problem_code": 0,
+      "dwm_pid": 1424,
+      "dwm_modules": {
+        "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+        "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      "sd_after_boot": {
+        "dma_errors": 0,
+        "actual_khz": 199680,
+        "ddr200": 0
+      },
+      "pacecar_ui_sha256": "135285da2255e087c8b37e5034b023035a01d3990ab2b10e4e0220bdc56c7d24",
+      "pacecar_config_sha256": "9b44f2e1666c9d603180972b551797a2dec76326f73bc6693db0d3626a37bfa7",
+      "pacecar_backup_sha256": "710c6b79e1e5e7cb82311732d4d34adef76a6bf721573dd6bbd470eca95bbf35",
+      "previous_boot": "2026-11-18T19:32:39.9317630Z",
+      "last_preserved_marker": "Scheduled",
+      "completed_profile_runs": 0,
+      "profile_outputs_persisted": [],
+      "registration_was_previous": true,
+      "measurement": "A 16-process follow-up was dispatched after the functional drawing controls. Only its pre-delay scheduling marker survived. No timed process or image can be assigned to this event."
+    },
+    {
+      "boot_utc": "2026-11-18T20:07:14.7055600Z",
+      "readback_utc": "2026-11-18T20:09:19.3843865Z",
+      "events_in_record_order": [
+        {
+          "record": 67376,
+          "utc": "2026-11-18T20:00:06.8154676Z",
+          "id": 12,
+          "fields": {}
+        },
+        {
+          "record": 67385,
+          "utc": "2026-11-18T20:08:10.4124865Z",
+          "id": 6008,
+          "fields": {}
+        },
+        {
+          "record": 67387,
+          "utc": "2026-11-18T20:08:10.6278739Z",
+          "id": 6005,
+          "fields": {}
+        },
+        {
+          "record": 67394,
+          "utc": "2026-11-18T20:00:11.3696492Z",
+          "id": 41,
+          "fields": {
+            "BugcheckCode": "0",
+            "LongPowerButtonPressDetected": "false",
+            "BootAppStatus": "0",
+            "PowerButtonTimestamp": "0",
+            "BugcheckParameter3": "0x0",
+            "BugcheckParameter4": "0x0",
+            "BugcheckParameter1": "0x0",
+            "BugcheckParameter2": "0x0",
+            "Checkpoint": "0",
+            "SleepInProgress": "0"
+          }
+        }
+      ],
+      "rtc_correction_s": 429,
+      "power_button_cached_at_start": {
+        "status": 2,
+        "irq": 0,
+        "first_read_status": 0
+      },
+      "dump_files": [],
+      "power_mode": 1,
+      "external": true,
+      "battery_percent": 84,
+      "temperature_c_after_boot": 39,
+      "gpu_problem_code": 0,
+      "dwm_pid": 1364,
+      "dwm_modules": {
+        "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+        "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      "sd_after_boot": {
+        "dma_errors": 0,
+        "actual_khz": 199680,
+        "ddr200": 0
+      },
+      "pacecar_ui_sha256": "135285da2255e087c8b37e5034b023035a01d3990ab2b10e4e0220bdc56c7d24",
+      "pacecar_config_sha256": "9b44f2e1666c9d603180972b551797a2dec76326f73bc6693db0d3626a37bfa7",
+      "pacecar_backup_sha256": "710c6b79e1e5e7cb82311732d4d34adef76a6bf721573dd6bbd470eca95bbf35",
+      "previous_boot": "2026-11-18T19:59:33.0217190Z",
+      "last_known_completed_application_trial": "2026-11-18T20:05:34.8170920Z",
+      "focused_script_on_disk_sha256": "f04ab0c2a32848d4e6d14b32b4267413816a0c49bc61fd7594e95a831494e310",
+      "focus_task_acknowledged": false,
+      "focus_task_history_match_count": 0,
+      "focused_result_directory_present": false,
+      "completed_profile_runs": 0,
+      "measurement": "All registration and D3D9 checks finished. A later SSH dispatch timed out. Its script reached the device, but no focused result directory, native startup marker or completed process record was found after reboot. It supplies no repeat timing."
+    }
+  ],
+  "firmware_reset_evidence": {
+    "tag": "v6.5.3",
+    "common_release": "https://github.com/CTCaer/hekate/releases/tag/v6.5.3",
+    "published": "2026-06-16T22:14:44Z",
+    "archive_sha256": "d9e9b93263e37577fd613790b7d67e7050eb35b9f5387ecc0db412ba200c160b",
+    "matching_switch_files": {
+      "D:\\payload.bin": {
+        "distribution_member": "hekate_ctcaer_6.5.3.bin",
+        "release_sha256": "61cb69d341c0b4363cfb392e9a182bb556ec656932e0e5176bb158c15ff1ad00",
+        "release_bytes": 110028,
+        "switch_sha256": "61cb69d341c0b4363cfb392e9a182bb556ec656932e0e5176bb158c15ff1ad00",
+        "switch_bytes": 110028,
+        "identical": true
+      },
+      "D:\\bootloader\\update.bin": {
+        "distribution_member": "bootloader/update.bin",
+        "release_sha256": "61cb69d341c0b4363cfb392e9a182bb556ec656932e0e5176bb158c15ff1ad00",
+        "release_bytes": 110028,
+        "switch_sha256": "61cb69d341c0b4363cfb392e9a182bb556ec656932e0e5176bb158c15ff1ad00",
+        "switch_bytes": 110028,
+        "identical": true
+      },
+      "D:\\bootloader\\sys\\nyx.bin": {
+        "distribution_member": "bootloader/sys/nyx.bin",
+        "release_sha256": "032013e51385c268641e8a2b11facbe75974848ec54e37ad57b5f89265e3301e",
+        "release_bytes": 477261,
+        "switch_sha256": "eb602c0618e82de1e81b7ee17034839fc478c819ebf93d3700b2039e80f44c24",
+        "switch_bytes": 1410201,
+        "identical": false
+      }
+    },
+    "tag_commit": "e487de8fdd6ca9c3f608d1d18c097a86355912b9",
+    "hw_init_source_sha256": "9bf691c619815c93fc4c5bbd88fda7511e89c31bf751b07cd035c8b656e65afb",
+    "early_reset_record": {
+      "read_scratch200": 293,
+      "read_pmc_reason": 294,
+      "clear_scratch200": 297,
+      "write_pmc_por": 298
+    },
+    "reset_symbol_uses": {
+      "bdk/soc/hw_init.c": [
+        50,
+        51,
+        293,
+        294
+      ],
+      "bdk/soc/hw_init.h": [
+        23,
+        24
+      ],
+      "bootloader/main.c": [
+        1043,
+        1058,
+        1138,
+        1139,
+        1140
+      ]
+    },
+    "initialization_source": "https://github.com/CTCaer/hekate/blob/e487de8fdd6ca9c3f608d1d18c097a86355912b9/bdk/soc/hw_init.c#L293-L298",
+    "windows_readback_sha256": "1a59ed49c630fb49585f3b964f8cec370fd1b2ae78635e484ef1f6a12f2e8efc",
+    "scope": "Both SD Hekate payload copies matched the public release byte for byte. The on-card Nyx binary differed from that release. Its early hardware initialization saves SCRATCH200 and the PMC reset source in bootloader variables and then clears SCRATCH200 and writes POR to the reset source. A subsequent Windows read of the register cannot classify the preceding reset by itself. The precise source of the observed restarts was not captured."
+  },
+  "external_review": {
+    "state": "Pending the separate Gemini review of the new source.",
+    "available_after_utc": "2026-11-20T23:53:17.808752+00:00"
+  },
+  "pacecar_profile_followup": {
+    "commit": "c0bf693d22f10d1b4001224dea04afa81ee1b51f",
+    "previous": "bdabe5ad18f4d71dda39ce6dbdc14cf488935a18",
+    "sha256": "81a2af18ffbecb2f94d689772a7047fc991885194f1b5fb95e56e2262c0f512d",
+    "url": "https://github.com/ruje0504-2/pacecar/blob/c0bf693d22f10d1b4001224dea04afa81ee1b51f/docs/progress/switch-frame-history-and-settings-20261118.json"
+  },
+  "receipts": {
+    "case_inputs_sha256": "771cbde6fa64e50bc88c184317aa1705c86418b7a4c2f6155c99cbc4a0d87513",
+    "native_storage_sha256": "bdd32f4bf91338ba1a7f2c7cdba70a6d7ef2bbf35009f52d7601b16d5dc41042",
+    "signed_regression_manifest_sha256": "e75c2571be0973dcb273f73e40629de63c4a60f6becbaf08c3c1c7ef8b4e4346",
+    "registered_receipt_sha256": "ef6cd75ae4a2c9e230ec35fc7f420a0837f612b7b6238a73e9af04dfd6fecae8",
+    "first_unexpected_boot_sha256": "caa135662f9579cda3e80e71d0049495d5fc54577594146a277b8974022b92f2",
+    "second_unexpected_boot_sha256": "1a59ed49c630fb49585f3b964f8cec370fd1b2ae78635e484ef1f6a12f2e8efc"
+  },
+  "cleanup": {
+    "files_removed": 379,
+    "directories_removed": 203,
+    "tasks_removed": 4,
+    "receipt_sha256": "2e4c018de6ed2499cc2fdac06229c0818d530fa728ed2de62c23571d592cfcc0",
+    "local_temporary_files": 33,
+    "local_temporary_bytes": 131254456
+  }
+}

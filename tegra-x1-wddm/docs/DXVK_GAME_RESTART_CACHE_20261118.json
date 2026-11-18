@@ -255,7 +255,7 @@
     "installed_app_config_sha256_after": "90b987ec61e550005389032227ad79933fd29f5bd32ce61e935f8d41b301b91b",
     "ntfs_query": "fsutil file queryvaliddata /D",
     "ntfs_reference": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-file",
-    "interpretation": "NTFS reported exactly 80 valid bytes for each of the six damaged blobs. This ends at the boundary between the cache writer first WriteFile for the header and its second WriteFile for the payload. NTFS returned zeroes for the remaining uninitialized range. All 18 intact blobs and the five small zero-filled files had valid data through EOF. The cause of those five files and their contents and the cause of the reboot remain open."
+    "interpretation": "NTFS reported exactly 80 valid bytes for each of the six damaged blobs. The first WriteFile stores the 80-byte header. The second stores the payload. NTFS returned zeroes for the entire uninitialized payload range. The 18 intact blobs and the five small zero-filled files all had valid data through EOF. The reason the five files read as zero and the cause of the restart remain open."
   },
   "recovered_cache": {
     "envelope": "MSCACHE1 with length, 32-byte key and BLAKE3 payload digest. All 24 headers matched their filenames and sizes.",
