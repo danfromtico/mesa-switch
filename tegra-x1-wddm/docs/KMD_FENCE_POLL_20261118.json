@@ -1,0 +1,1931 @@
+{
+  "scope": "Switch Lite GM20B, Windows ARM64, two native KMD builds with identical graphics, power and decode components. Only the production worker object changed.",
+  "code": {
+    "baseline": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+    "baseline_unsigned": "ed5421b9f424ec55604087cdb52fe0007da9bfe28275047427ef30de7a9e9fb2",
+    "source_parent": "d05721603a6fc16bae3b1f0630d33e025d342bed",
+    "changed_inputs": {
+      "tegra-x1-wddm/windows/worker.c": {
+        "previous": "6129f057c196bb67cc6c6a14209a5bbf3399519f233b346a046d8cca526a48cb",
+        "candidate": "ca5a4c0b61db2a19d93467381a75cd03d0419c14bb3ad327fefa0c96ffcf756b"
+      },
+      "tegra-x1-wddm/tests/test_worker_windows.c": {
+        "previous": "8f6b56fa304c012dc0cbce56a07f0b3132162cfdb4d54ca1c40425ab69a5da78",
+        "candidate": "47439e6b9332afa710a69b7007a5f874c46ccde960f942405724a9420ffecd4b"
+      },
+      "tegra-x1-wddm/tests/unexpected_platform.h": {
+        "previous": "f09b749d4370781622f531fb90d2b304837490f7556a520ef3f2dd013d65deab",
+        "candidate": "5d8fe5f1da7d63c439a527a16a7d7aa6e7cd7e78b10430abe21ba3f6ff7115e8"
+      }
+    },
+    "components": {
+      "driver": {
+        "bytes": 249352,
+        "unsigned": "c31055ff2a8e9a7711672b7727669d1b5b452297ba3a5ed511def2d21145f140",
+        "sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0"
+      },
+      "worker": {
+        "bytes": 12808,
+        "unsigned": "d46b6cce9bc5ed620c944bd2459adb2782ee801e2e88b005948249af50fe8a99",
+        "sha256": "0279cfc5927d167b3f21323f94aa2fc90ef10defd3fcc81c112c0a0c88ee60a5"
+      },
+      "context": {
+        "bytes": 281616,
+        "unsigned": "099e1ec6ee12b7468f013dcb2bd6d513b424117241cc46dc3b4cd1fd2e4a79e5",
+        "sha256": "70baeb25852f24486cc90a4ce642599b16ee2e3e88cd83d8c953cb394f7fb179"
+      }
+    },
+    "candidate_source_commit": "8e9f265f7d0ebb9deab6b57dd576d76e2d0c736f",
+    "candidate_branch": "codex/gm20b-pending-fence-timer",
+    "candidate_branch_role": "Frozen source of the promoted physical driver."
+  },
+  "method": {
+    "scheduler": "Microsoft-Windows-DxgKrnl. Match QueuePacket starts (178 for DMA, 244/245 for fence synchronization) to event 180 by hContext, submit sequence and queue-packet identity before reuse. Match DmaPacket 175 and 176 in that interval using the context and queue sequence. DMA wall time includes driver polling, interrupts and OS scheduling. It is not an engine timestamp.",
+    "workload": "For each kernel and each user-mode ABI, two independent warm 32 x 32 Vulkan triangle processes, 24 serial submissions each. All 1,024 pixels plus both 64-byte guards were checked per submission. An initial one-draw process populated the six shader cache entries. Each measured process reported six hits and zero misses.",
+    "residency": "Ordinary CPU-visible allocations of 4 and 16 MiB per ABI through the existing KMT memory probe. The CPU-side MakeResident ETW entry and return are paired by PID/TID. STATUS_PENDING requires the backend paging-fence wait. The API interval alone does not time GPU residency completion. Group counters and allocation outcomes are recorded separately.",
+    "controls": "The driver change requires a reboot. The same application ICDs, desktop UMD, native KMD feature set, CPU/GPU/EMC Handheld policy and AC power were used. Frequencies are instantaneous samples with the normal governor active. Battery voltage is not system wattage. Reported percentiles use nearest rank.",
+    "reference_trace_close": "Six completed memory probes and six pixel-checked Vulkan probes were durably recorded. The reference controller exited while closing its trace. The host explicitly stopped the same ETW session on the same boot and DWM, checked its absence and hashed the closed file. Only the fixture interval was analyzed."
+  },
+  "microsoft_timer_contract": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-exallocatetimer",
+  "tests": [
+    {
+      "lines": [
+        "PASS: pending one-shot, early wake and stop, allocation fallback, DVFS, recovery and worker lifetime (controlled imports)"
+      ],
+      "sha256": "0279CFC5927D167B3F21323F94AA2FC90EF10DEFD3FCC81C112C0A0C88EE60A5",
+      "name": "test-worker.exe",
+      "exit": 0
+    },
+    {
+      "lines": [
+        "PASS: WDK private GR images/mappings/reset epochs, adapter/LUID/512MiB ABI and ordered queue (controlled substitutes; no live WDDM or GPU pass)"
+      ],
+      "sha256": "70BAEB25852F24486CC90A4CE642599B16EE2E3E88CD83D8C953CB394F7FB179",
+      "name": "test-context.exe",
+      "exit": 0
+    }
+  ],
+  "hardware": {
+    "reference": {
+      "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+      "boot_utc": "2026-11-18T11:54:35.1855130Z",
+      "dwm_pid": 1356,
+      "qpc_frequency": 19200000,
+      "loaded_nvk_sha256": {
+        "x86": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "x64": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "arm64": "350d59b164db796692ed2f0c006fc309d149fe534bd04721a3667b07168bec00"
+      },
+      "matched_luids": {
+        "x64": "00000000000821fa",
+        "x86": "00000000000821fa",
+        "arm64": "00000000000821fa"
+      },
+      "offscreen": {
+        "arm64": {
+          "process_cpu_ms": {
+            "n": 2,
+            "median": 218.75,
+            "p95": 234.375,
+            "p99": 234.375
+          },
+          "peak_working_set_bytes": {
+            "n": 2,
+            "median": 12339200.0,
+            "p95": 12341248,
+            "p99": 12341248
+          },
+          "warm_pipeline_ms": {
+            "n": 2,
+            "median": 8.7299,
+            "p95": 8.9251,
+            "p99": 8.9251
+          },
+          "submit_ms": {
+            "n": 48,
+            "median": 0.3374,
+            "p95": 2.7291,
+            "p99": 4.3338
+          },
+          "wait_ms": {
+            "n": 48,
+            "median": 15.1273,
+            "p95": 16.1722,
+            "p99": 18.9839
+          },
+          "submit_to_fence_ms": {
+            "n": 48,
+            "median": 15.5264,
+            "p95": 16.781,
+            "p99": 20.1503
+          },
+          "invalidate_verify_ms": {
+            "n": 48,
+            "median": 0.0519,
+            "p95": 0.1495,
+            "p99": 0.6368
+          }
+        },
+        "x86": {
+          "process_cpu_ms": {
+            "n": 2,
+            "median": 351.5625,
+            "p95": 359.375,
+            "p99": 359.375
+          },
+          "peak_working_set_bytes": {
+            "n": 2,
+            "median": 18882560.0,
+            "p95": 18890752,
+            "p99": 18890752
+          },
+          "warm_pipeline_ms": {
+            "n": 2,
+            "median": 16.0979,
+            "p95": 21.1272,
+            "p99": 21.1272
+          },
+          "submit_ms": {
+            "n": 48,
+            "median": 0.3962,
+            "p95": 2.0984,
+            "p99": 6.5223
+          },
+          "wait_ms": {
+            "n": 48,
+            "median": 14.8811,
+            "p95": 21.3743,
+            "p99": 33.3147
+          },
+          "submit_to_fence_ms": {
+            "n": 48,
+            "median": 15.2566,
+            "p95": 21.8106,
+            "p99": 33.6454
+          },
+          "invalidate_verify_ms": {
+            "n": 48,
+            "median": 0.2985,
+            "p95": 1.2451,
+            "p99": 15.4866
+          }
+        },
+        "x64": {
+          "process_cpu_ms": {
+            "n": 2,
+            "median": 414.0625,
+            "p95": 500.0,
+            "p99": 500.0
+          },
+          "peak_working_set_bytes": {
+            "n": 2,
+            "median": 29593600.0,
+            "p95": 29655040,
+            "p99": 29655040
+          },
+          "warm_pipeline_ms": {
+            "n": 2,
+            "median": 20.3662,
+            "p95": 30.1277,
+            "p99": 30.1277
+          },
+          "submit_ms": {
+            "n": 48,
+            "median": 0.3472,
+            "p95": 2.4491,
+            "p99": 45.7864
+          },
+          "wait_ms": {
+            "n": 48,
+            "median": 14.9778,
+            "p95": 15.5113,
+            "p99": 16.0933
+          },
+          "submit_to_fence_ms": {
+            "n": 48,
+            "median": 15.3181,
+            "p95": 16.6247,
+            "p99": 60.4517
+          },
+          "invalidate_verify_ms": {
+            "n": 48,
+            "median": 0.2987,
+            "p95": 1.1329,
+            "p99": 15.748
+          }
+        }
+      },
+      "scheduler_and_residency": {
+        "arm64": {
+          "queue_ms": {
+            "n": 54,
+            "median": 15.144,
+            "p95": 16.9033,
+            "p99": 19.1019
+          },
+          "before_dma_ms": {
+            "n": 54,
+            "median": 0.1579,
+            "p95": 1.5383,
+            "p99": 1.8871
+          },
+          "dma_span_ms": {
+            "n": 54,
+            "median": 14.982,
+            "p95": 16.7754,
+            "p99": 18.6428
+          },
+          "after_dma_ms": {
+            "n": 54,
+            "median": 0.0158,
+            "p95": 0.0639,
+            "p99": 0.0888
+          },
+          "draw_make_resident_api_ms": {
+            "n": 26,
+            "median": 0.0286,
+            "p95": 0.0351,
+            "p99": 0.0379
+          },
+          "memory_make_resident_api_ms": {
+            "n": 2,
+            "median": 0.0508,
+            "p95": 0.0552,
+            "p99": 0.0552
+          }
+        },
+        "x86": {
+          "queue_ms": {
+            "n": 54,
+            "median": 14.912,
+            "p95": 21.4258,
+            "p99": 32.9726
+          },
+          "before_dma_ms": {
+            "n": 54,
+            "median": 0.1098,
+            "p95": 0.4178,
+            "p99": 1.0641
+          },
+          "dma_span_ms": {
+            "n": 54,
+            "median": 14.7961,
+            "p95": 21.2426,
+            "p99": 32.8658
+          },
+          "after_dma_ms": {
+            "n": 54,
+            "median": 0.0131,
+            "p95": 0.0267,
+            "p99": 0.0295
+          },
+          "draw_make_resident_api_ms": {
+            "n": 26,
+            "median": 0.0246,
+            "p95": 0.0394,
+            "p99": 0.3034
+          },
+          "memory_make_resident_api_ms": {
+            "n": 2,
+            "median": 0.0499,
+            "p95": 0.0542,
+            "p99": 0.0542
+          }
+        },
+        "x64": {
+          "queue_ms": {
+            "n": 54,
+            "median": 14.9876,
+            "p95": 16.2001,
+            "p99": 18.7227
+          },
+          "before_dma_ms": {
+            "n": 54,
+            "median": 0.1032,
+            "p95": 1.0712,
+            "p99": 1.5542
+          },
+          "dma_span_ms": {
+            "n": 54,
+            "median": 14.8231,
+            "p95": 15.6822,
+            "p99": 18.5068
+          },
+          "after_dma_ms": {
+            "n": 54,
+            "median": 0.0123,
+            "p95": 0.0245,
+            "p99": 0.0605
+          },
+          "draw_make_resident_api_ms": {
+            "n": 26,
+            "median": 0.0318,
+            "p95": 0.0796,
+            "p99": 0.0817
+          },
+          "memory_make_resident_api_ms": {
+            "n": 2,
+            "median": 0.1178,
+            "p95": 0.1707,
+            "p99": 0.1707
+          }
+        }
+      },
+      "power_samples_before_after_draws": {
+        "cpu_khz": {
+          "min": 629531,
+          "max": 1313250
+        },
+        "gpu_khz": {
+          "min": 76800,
+          "max": 537648
+        },
+        "emc_khz": {
+          "min": 204000,
+          "max": 1331200
+        },
+        "soc_c": {
+          "min": 39,
+          "max": 39
+        },
+        "board_c": {
+          "min": 38,
+          "max": 38
+        },
+        "battery_mv": {
+          "min": 3862,
+          "max": 3889
+        }
+      },
+      "memory_allocation_controls": [
+        {
+          "arch": "arm64",
+          "mib": 4,
+          "pid": 6348,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "x86",
+          "mib": 4,
+          "pid": 7320,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "x64",
+          "mib": 4,
+          "pid": 2500,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "x64",
+          "mib": 16,
+          "pid": 4636,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "arm64",
+          "mib": 16,
+          "pid": 4272,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "x86",
+          "mib": 16,
+          "pid": 6504,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        }
+      ],
+      "etw_events_lost": 0,
+      "unpaired_commands_or_syncs": {},
+      "etw_sha256": "5709798c40fb91468c427892f5bca21a53ad6781c8707ec9bd07f747754a0a30",
+      "native_result_sha256": "fbc6d8208487b867c3762570bf36ce8ff1c3199d92a4882b16aa7dc1ccec9853"
+    },
+    "candidate": {
+      "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "boot_utc": "2026-11-18T13:06:01.6786830Z",
+      "dwm_pid": 1404,
+      "qpc_frequency": 19200000,
+      "loaded_nvk_sha256": {
+        "x86": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "x64": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "arm64": "350d59b164db796692ed2f0c006fc309d149fe534bd04721a3667b07168bec00"
+      },
+      "matched_luids": {
+        "x64": "0000000000093cbd",
+        "x86": "0000000000093cbd",
+        "arm64": "0000000000093cbd"
+      },
+      "offscreen": {
+        "arm64": {
+          "process_cpu_ms": {
+            "n": 2,
+            "median": 210.9375,
+            "p95": 234.375,
+            "p99": 234.375
+          },
+          "peak_working_set_bytes": {
+            "n": 2,
+            "median": 12150784.0,
+            "p95": 12152832,
+            "p99": 12152832
+          },
+          "warm_pipeline_ms": {
+            "n": 2,
+            "median": 10.0844,
+            "p95": 10.7664,
+            "p99": 10.7664
+          },
+          "submit_ms": {
+            "n": 48,
+            "median": 0.2001,
+            "p95": 0.3019,
+            "p99": 2.4374
+          },
+          "wait_ms": {
+            "n": 48,
+            "median": 1.5845,
+            "p95": 3.0622,
+            "p99": 3.5224
+          },
+          "submit_to_fence_ms": {
+            "n": 48,
+            "median": 1.7842,
+            "p95": 3.755,
+            "p99": 5.8823
+          },
+          "invalidate_verify_ms": {
+            "n": 48,
+            "median": 0.0398,
+            "p95": 0.0446,
+            "p99": 0.0527
+          }
+        },
+        "x86": {
+          "process_cpu_ms": {
+            "n": 2,
+            "median": 234.375,
+            "p95": 250.0,
+            "p99": 250.0
+          },
+          "peak_working_set_bytes": {
+            "n": 2,
+            "median": 18685952.0,
+            "p95": 18698240,
+            "p99": 18698240
+          },
+          "warm_pipeline_ms": {
+            "n": 2,
+            "median": 14.5359,
+            "p95": 19.5261,
+            "p99": 19.5261
+          },
+          "submit_ms": {
+            "n": 48,
+            "median": 0.3009,
+            "p95": 0.9052,
+            "p99": 3.7674
+          },
+          "wait_ms": {
+            "n": 48,
+            "median": 1.5956,
+            "p95": 2.3702,
+            "p99": 2.8831
+          },
+          "submit_to_fence_ms": {
+            "n": 48,
+            "median": 1.9505,
+            "p95": 2.8374,
+            "p99": 6.6505
+          },
+          "invalidate_verify_ms": {
+            "n": 48,
+            "median": 0.2916,
+            "p95": 0.3987,
+            "p99": 8.2772
+          }
+        },
+        "x64": {
+          "process_cpu_ms": {
+            "n": 2,
+            "median": 312.5,
+            "p95": 328.125,
+            "p99": 328.125
+          },
+          "peak_working_set_bytes": {
+            "n": 2,
+            "median": 29589504.0,
+            "p95": 29622272,
+            "p99": 29622272
+          },
+          "warm_pipeline_ms": {
+            "n": 2,
+            "median": 16.6072,
+            "p95": 23.055,
+            "p99": 23.055
+          },
+          "submit_ms": {
+            "n": 48,
+            "median": 0.2577,
+            "p95": 1.8381,
+            "p99": 3.2135
+          },
+          "wait_ms": {
+            "n": 48,
+            "median": 1.5604,
+            "p95": 1.8792,
+            "p99": 2.9018
+          },
+          "submit_to_fence_ms": {
+            "n": 48,
+            "median": 1.792,
+            "p95": 3.6131,
+            "p99": 6.1153
+          },
+          "invalidate_verify_ms": {
+            "n": 48,
+            "median": 0.2342,
+            "p95": 0.3049,
+            "p99": 6.7967
+          }
+        }
+      },
+      "scheduler_and_residency": {
+        "arm64": {
+          "queue_ms": {
+            "n": 54,
+            "median": 1.6513,
+            "p95": 3.267,
+            "p99": 3.6286
+          },
+          "before_dma_ms": {
+            "n": 54,
+            "median": 0.0725,
+            "p95": 0.1347,
+            "p99": 1.8124
+          },
+          "dma_span_ms": {
+            "n": 54,
+            "median": 1.5668,
+            "p95": 2.7452,
+            "p99": 3.5549
+          },
+          "after_dma_ms": {
+            "n": 54,
+            "median": 0.0085,
+            "p95": 0.012,
+            "p99": 0.0259
+          },
+          "draw_make_resident_api_ms": {
+            "n": 26,
+            "median": 0.0331,
+            "p95": 0.0422,
+            "p99": 0.0429
+          },
+          "memory_make_resident_api_ms": {
+            "n": 2,
+            "median": 0.1423,
+            "p95": 0.1625,
+            "p99": 0.1625
+          }
+        },
+        "x86": {
+          "queue_ms": {
+            "n": 54,
+            "median": 1.7361,
+            "p95": 2.5877,
+            "p99": 3.0657
+          },
+          "before_dma_ms": {
+            "n": 54,
+            "median": 0.089,
+            "p95": 0.1507,
+            "p99": 1.2504
+          },
+          "dma_span_ms": {
+            "n": 54,
+            "median": 1.6203,
+            "p95": 2.465,
+            "p99": 2.9324
+          },
+          "after_dma_ms": {
+            "n": 54,
+            "median": 0.0105,
+            "p95": 0.014,
+            "p99": 0.0281
+          },
+          "draw_make_resident_api_ms": {
+            "n": 26,
+            "median": 0.035,
+            "p95": 0.051,
+            "p99": 0.0535
+          },
+          "memory_make_resident_api_ms": {
+            "n": 2,
+            "median": 0.2383,
+            "p95": 0.3492,
+            "p99": 0.3492
+          }
+        },
+        "x64": {
+          "queue_ms": {
+            "n": 54,
+            "median": 1.6256,
+            "p95": 2.6257,
+            "p99": 3.2556
+          },
+          "before_dma_ms": {
+            "n": 54,
+            "median": 0.0668,
+            "p95": 0.2115,
+            "p99": 1.2476
+          },
+          "dma_span_ms": {
+            "n": 54,
+            "median": 1.553,
+            "p95": 1.8959,
+            "p99": 3.1244
+          },
+          "after_dma_ms": {
+            "n": 54,
+            "median": 0.0069,
+            "p95": 0.0131,
+            "p99": 0.0243
+          },
+          "draw_make_resident_api_ms": {
+            "n": 26,
+            "median": 0.0377,
+            "p95": 0.0482,
+            "p99": 0.0698
+          },
+          "memory_make_resident_api_ms": {
+            "n": 2,
+            "median": 0.0548,
+            "p95": 0.0631,
+            "p99": 0.0631
+          }
+        }
+      },
+      "power_samples_before_after_draws": {
+        "cpu_khz": {
+          "min": 402670,
+          "max": 1134750
+        },
+        "gpu_khz": {
+          "min": 76800,
+          "max": 537600
+        },
+        "emc_khz": {
+          "min": 1331200,
+          "max": 1600000
+        },
+        "soc_c": {
+          "min": 39,
+          "max": 40
+        },
+        "board_c": {
+          "min": 39,
+          "max": 39
+        },
+        "battery_mv": {
+          "min": 3850,
+          "max": 3891
+        }
+      },
+      "memory_allocation_controls": [
+        {
+          "arch": "arm64",
+          "mib": 4,
+          "pid": 8024,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "x86",
+          "mib": 4,
+          "pid": 3560,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "x64",
+          "mib": 4,
+          "pid": 2036,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "x64",
+          "mib": 16,
+          "pid": 6100,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "arm64",
+          "mib": 16,
+          "pid": 3908,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        },
+        {
+          "arch": "x86",
+          "mib": 16,
+          "pid": 3580,
+          "exit": 4,
+          "group_counters": {
+            "before device": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "device open": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation resident": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            },
+            "allocation freed": {
+              "local": {
+                "budget": 1787175936,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 943231744
+              },
+              "non-local": {
+                "budget": 0,
+                "usage": 0,
+                "reservation": 0,
+                "available_for_reservation": 0
+              }
+            }
+          }
+        }
+      ],
+      "etw_events_lost": 0,
+      "unpaired_commands_or_syncs": {},
+      "etw_sha256": "31fbfdf1161102b2092d22ff94d314fb31e4d8740e7d27aac73e85f712b9f215",
+      "native_result_sha256": "c82f82248fc839b77b735b4736d67245bd8daa5e36160b88e7c2f7766c147205"
+    }
+  },
+  "raw_tables_sha256": {
+    "kmd-fence-packets.csv": "e478e3eca9ecb1695d0b1001ed7c1339642db126be82191e2bc0d0a979b65ebb",
+    "kmd-fence-residency.csv": "4356ca2a33112ea9580f1c28049a63876eeb6124eb6f66d21868a0bced033724",
+    "kmd-fence-draws.csv": "fbcd4f6027eea61883d038ee39900741220d686b5c459a802b3cb37b819ecf4a"
+  },
+  "components": {
+    "trace_collector": "95186701e3390655db9b2f6470d57de7157eeb1b1ecc27bbbb382592df35568b",
+    "memory_check": {
+      "arm64": "7624a0049d912118bf9308391fda2e28701114be5761be92d88541111dfc75dd",
+      "x86": "a7bd8fc30476d63d14c6e677ac41782039ff57514feeaa0400d74aa244f62192",
+      "x64": "8122e9db286a4490a175b8c53f388a01a01c843cfd593a5d17b5a9ef6fdf1e27"
+    },
+    "draw_tools_and_loaders": {
+      "x86": {
+        "upload": "perf-triangle-x86-1fade0ed.exe",
+        "probe": "1fade0eda0cb3c9ed904d4a31fa139643b6e8417a392660822e8c5ba48528add",
+        "loader": "0cb8619a4a4ba0acceba1f75a2dc0c8e251ab75d4a3c3e9640262c4c650c18af",
+        "enumerator": "1ce119bd6ac036a356000ce38d52c453bb38e970c23d6383fa4772a3fdaee70c",
+        "accepted": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b"
+      },
+      "x64": {
+        "upload": "perf-triangle-x64-7eef698f.exe",
+        "probe": "7eef698fe3fb632c27105bbda28af6db9f67a7c7fe7ae70115870f78b70ecdfe",
+        "loader": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+        "enumerator": "7d25bcb2556dd322a8375e6adb6ee31b7f06bbff34b8bd60ca783dea347f60f5",
+        "accepted": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910"
+      },
+      "arm64": {
+        "upload": "perf-triangle-arm64-9d8c9c6b.exe",
+        "probe": "9d8c9c6bbe0b5bd378744f7035276bfdd5bb82e5b370d8c6b1eea311a12f4a34",
+        "loader": "59f237fa06e955cdefbeeaf9e79b127629336cb941473c2c6d9d04a1e7e30408",
+        "enumerator": "427c869a84237b92126c4c11636a3d30516d8cf2deb25d73037ad6310dd8952f",
+        "accepted": "350d59b164db796692ed2f0c006fc309d149fe534bd04721a3667b07168bec00"
+      }
+    },
+    "catalog_sha256": "70874304918c90e856770eab782fe259c32aad06ba0cb3f896cf9216f1384acc"
+  },
+  "baseline_interrupted_game": {
+    "case": "x86 Zink FTEQW",
+    "last_durable_event": {
+      "utc": "2026-11-18T13:00:12.9898099Z",
+      "name": "window-640x360",
+      "qpc": 75642094105
+    },
+    "prior_boot": "2026-11-18T11:54:35.1855130Z",
+    "next_boot": "2026-11-18T13:00:39.6794820Z",
+    "system_events": [
+      {
+        "record": 64667,
+        "provider": "EventLog",
+        "utc": "2026-11-18T13:01:45.1545871Z",
+        "id": 6008
+      }
+    ],
+    "dumps_in_interval": [],
+    "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+    "status": "Stopped after the 640x360 window appeared. No complete frame-rate interval or normal exit survived for this reference run.",
+    "recovered_logical_desktop": "5048,True,0,1280,720,45,45,44",
+    "lifecycle_sha256": "7ec3decca5b005f26352dc5afb91221a6e7f9873a89fb79fb07ffc694a2f2368"
+  },
+  "games": {
+    "reference": {
+      "dxvk-x64": {
+        "boot_utc": "2026-11-18T11:54:35.1855130Z",
+        "dwm_pid": 1356,
+        "process_id": 3128,
+        "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+        "game_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "modules_sha256": {
+          "vulkan-1.dll": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+          "dxgi.dll": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+          "d3d9.dll": "f73d5b3b4fb702ec340bbd21bf0840ab2186030e72aa9b599d28f20f611ecbf7",
+          "libvulkan_nouveau.dll": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910"
+        },
+        "renderer": "2026-11-18 20:58:53 D3D9 Driver: NVIDIA Tegra X1 (GM20B) (NVK GM20B)",
+        "size": [
+          640,
+          360
+        ],
+        "game_to_map_s": 28.957,
+        "peak_working_set_bytes": 409460736,
+        "world_crop_pixels_changed": 79134,
+        "world_crop_size": 90000,
+        "input_ack": true,
+        "quit_ack": true,
+        "exit": 0,
+        "platform": {
+          "power_before": {
+            "CpuActualKhz": 705632,
+            "GpuReportedKhz": 76800,
+            "RamActualKhz": 1331200,
+            "SocTempC": 40,
+            "BoardTempC": 38,
+            "FanDuty": 51
+          },
+          "power_after": {
+            "CpuActualKhz": 714796,
+            "GpuReportedKhz": 76800,
+            "RamActualKhz": 204000,
+            "SocTempC": 40,
+            "BoardTempC": 39,
+            "FanDuty": 51
+          }
+        },
+        "trace_sha256": "4ed48ce26fd824b0f5ceecad5d42da469d19bdc0c2d553524c73e9ba828222b4",
+        "lifecycle_sha256": "385d92d97a54e5a317ca498eb01d416ffe439b683ccc0f3cdd94c0e0a22c2758",
+        "receipt_sha256": "b18195781725e80346ceff352be9dde644015e420cb88a8a6d19e12d7d8abd64",
+        "screenshot_sha256": {
+          "map-before": "d34c10e765a804baf77eaf23d638afd637c9d84c062879a2195225c4356478aa",
+          "map-after-input": "c344dac2cceb471a45cc9aa5bb7b5c74c9a59540e67dc702115b6339620ab9f9",
+          "map-final": "9bbee9858ba0b5277d425a00957bbded576f3acc04b90379f2eb6411ba8c945a"
+        },
+        "intervals": {
+          "cap15-interval": {
+            "gdi_updates": {
+              "n": 37,
+              "fps": 10.191,
+              "p95_ms": 119.759,
+              "p99_ms": 126.99
+            },
+            "compositor_updates": {
+              "n": 37,
+              "fps": 10.189,
+              "p95_ms": 118.203,
+              "p99_ms": 129.287
+            },
+            "distinct_captured_images": {
+              "n": 37,
+              "fps": 10.193,
+              "p95_ms": 128.676,
+              "p99_ms": 133.75
+            }
+          },
+          "cap8-interval": {
+            "gdi_updates": {
+              "n": 39,
+              "fps": 8.133,
+              "p95_ms": 145.525,
+              "p99_ms": 152.633
+            },
+            "compositor_updates": {
+              "n": 39,
+              "fps": 8.148,
+              "p95_ms": 149.993,
+              "p99_ms": 150.013
+            },
+            "distinct_captured_images": {
+              "n": 40,
+              "fps": 8.212,
+              "p95_ms": 169.46,
+              "p99_ms": 196.894
+            }
+          },
+          "hitch-interval": {
+            "gdi_updates": {
+              "n": 9,
+              "fps": 2.001,
+              "p95_ms": 515.511,
+              "p99_ms": 515.765
+            },
+            "compositor_updates": {
+              "n": 10,
+              "fps": 2.0,
+              "p95_ms": 509.972,
+              "p99_ms": 515.122
+            },
+            "distinct_captured_images": {
+              "n": 10,
+              "fps": 1.995,
+              "p95_ms": 526.891,
+              "p99_ms": 532.223
+            }
+          },
+          "recovery-interval": {
+            "gdi_updates": {
+              "n": 50,
+              "fps": 11.981,
+              "p95_ms": 100.985,
+              "p99_ms": 106.097
+            },
+            "compositor_updates": {
+              "n": 51,
+              "fps": 12.0,
+              "p95_ms": 100.043,
+              "p99_ms": 100.074
+            },
+            "distinct_captured_images": {
+              "n": 46,
+              "fps": 10.753,
+              "p95_ms": 134.523,
+              "p99_ms": 134.991
+            }
+          }
+        }
+      }
+    }
+  },
+  "decision": "Promote the measured ARM64 fence-timer kernel to the daily tgd3d-vulkan baseline at the owner’s request. Keep the signed XFB kernel as the recovery target. Qualify the native timed submission and paced 720p passes separately from 1080p stability and game FPS.",
+  "720p_paced_window": {
+    "sample_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "signed_client_sha256": "2fcaa94d430411e550f26f5406b25948c5c86ab7fef9f6fd6d176defecfe62c1",
+    "build_shader_scale": 2,
+    "window_pixels": [
+      640,
+      360
+    ],
+    "boot": "2026-11-18T13:15:01.1090800Z",
+    "dwm_before_after": [
+      1352,
+      1352
+    ],
+    "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "decoder_adapter_luid": "0000000000088083",
+    "loaded_desktop_umd": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "native_format": "H.264 Main 1280x720 to 17 D3D11VA NV12 textures, readback then GPU preview.",
+    "input_profile": "H.264 Main level 3.1",
+    "sample_media_rate": "60/1",
+    "pacing": "1000 ms per inter-frame hold, 8000 ms final hold, no optional ETW trace.",
+    "exit": 0,
+    "final_dwm_flush": true,
+    "hash_and_pixel_check": {
+      "pixels": 230400,
+      "max_difference": 1,
+      "exact": 194112,
+      "gpu": "2d4c4027c2a92bb9c738828c7b311da0a80f0bf2c0af530991f1e43f4b600eec",
+      "cpu": "8b23a1cc5dedbd6db25acfdab6af98cbe4af297d16797d52dc4aa6142fbc54a0",
+      "canonical": [
+        "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+        "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+        "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+        "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+        "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+        "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+      ],
+      "frame_count": 6,
+      "present_count": 6
+    },
+    "receipt_sha256": "b96b0b7c344adc7793b4b4922c48104b8890067200c70b72a4458b3dc22d28a9",
+    "observation": "The exact native frame hashes and final pixel buffer match the earlier accepted physical fixture. This run used automated readback and window lifecycle checks."
+  },
+  "1080p_window_attempts": [
+    {
+      "case": "nvdec-kmd-fence-visible-01",
+      "trace_requested": true,
+      "client": "original signed 1080p client",
+      "verified_frames": 6,
+      "successful_present_returns": 6,
+      "final_preview_sha256": "48613254388eefd5d5fbae35f217a5f28e65a31b3a27d2989dcd1a6e67e211a3",
+      "last_durable_call": "402046 3452 FAIL complete video ETW 80004005",
+      "retained_files": {
+        "journal.txt": {
+          "bytes": 5380,
+          "sha256": "943b1c16f543e19f10ec2488e4942a6315d04065bf3114d654bfed94d056772c"
+        },
+        "last-frame.ppm": {
+          "bytes": 691215,
+          "sha256": "48613254388eefd5d5fbae35f217a5f28e65a31b3a27d2989dcd1a6e67e211a3"
+        },
+        "result.json": {
+          "bytes": 10064,
+          "sha256": "be0743ff9a08d5b5131646a05bd36b31a02202518b4790bf5fc637b0a0b13b2e"
+        },
+        "stderr.txt": {
+          "bytes": 293,
+          "sha256": "e29645892e4d222a89d3d326de91d0e8c75709b1279d69fb4ee0af041f8cfa1f"
+        },
+        "stdout.txt": {
+          "bytes": 3114,
+          "sha256": "fdda84be57fe4372ae079d2236e04565bb83ff7efb56146f12e219a583a1116c"
+        },
+        "video.etl": {
+          "bytes": 786432,
+          "sha256": "cacd623c02a5ca7b7f8f8ce97555e7d5256ef177de68d689fc6e8b67ea8402cb"
+        }
+      },
+      "client_exit": 4,
+      "events_lost": 48,
+      "log_buffers_lost": 0,
+      "dwm_before_after": [
+        1404,
+        1404
+      ],
+      "boot": "2026-11-18T13:06:01.6786830Z"
+    },
+    {
+      "case": "nvdec-kmd-fence-trace-02",
+      "trace_requested": true,
+      "client": "larger diagnostic buffer experiment",
+      "verified_frames": 6,
+      "successful_present_returns": 6,
+      "final_preview_sha256": "48613254388eefd5d5fbae35f217a5f28e65a31b3a27d2989dcd1a6e67e211a3",
+      "last_durable_call": "514656 4140 RETURN FinalDeviceStatus 00000000",
+      "retained_files": {
+        "journal.txt": {
+          "bytes": 5334,
+          "sha256": "996dc3be05eacab9f4ab5256f66f0a91d788a64d3120ed6a2cc2d611eb8a8fcb"
+        },
+        "last-frame.ppm": {
+          "bytes": 691215,
+          "sha256": "48613254388eefd5d5fbae35f217a5f28e65a31b3a27d2989dcd1a6e67e211a3"
+        },
+        "stderr.txt": {
+          "bytes": 258,
+          "sha256": "43d8a63329e60966faf6bec50141ce37f6f9ce8983125039a49c571bd0da1cdc"
+        },
+        "stdout.txt": {
+          "bytes": 2829,
+          "sha256": "71996dc27c7bd411fca571eea136b6c3fd67619e7fbaec66588b07f84dda2e9e"
+        },
+        "video.etl": {
+          "bytes": 3866624,
+          "sha256": "18ca9201265dc605ca54bcf3c69bcc49b26fee14b12abe02ab8d2835e25e0bbb"
+        }
+      },
+      "next_boot": "2026-11-18T13:15:01.1090800Z",
+      "system_events": [
+        {
+          "record": 64833,
+          "provider": "EventLog",
+          "utc": "2026-11-18T13:15:58.8156386Z",
+          "id": 6008
+        }
+      ],
+      "normal_exit_recorded": false
+    },
+    {
+      "case": "nvdec-kmd-fence-1080-paced-01",
+      "trace_requested": false,
+      "client": "original signed 1080p client",
+      "verified_frames": 0,
+      "successful_present_returns": 0,
+      "final_preview_sha256": null,
+      "last_durable_call": "288796 6352 CALL CreateDXGIFactory1 00000000",
+      "retained_files": {
+        "journal.txt": {
+          "bytes": 80,
+          "sha256": "617288e83fb776f9ddfdbb3e76dcadf20ae122366fa9d0e904962fbd1094af56"
+        },
+        "stderr.txt": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout.txt": {
+          "bytes": 78,
+          "sha256": "7ff354e5a76ba2420417086ff21f4a27bac0c91282003176731912dce6d71fca"
+        }
+      },
+      "next_boot": "2026-11-18T13:20:10.7920980Z",
+      "system_events": [
+        {
+          "record": 64902,
+          "provider": "EventLog",
+          "utc": "2026-11-18T13:21:06.8324906Z",
+          "id": 6008
+        }
+      ],
+      "normal_exit_recorded": false
+    }
+  ],
+  "candidate_1080p_coverage": "Both traced runs verified six canonical frames and the known 640x360 GPU output. The untraced run ended with only the DXGI factory entry retained. Failure causes and effects on regular playback remain unresolved.",
+  "diagnostic_buffer_experiment": {
+    "source_patch_sha256": "796a3cdd968b2b7d916c65bbd663ab0550ee447c4231cde3a8df855237ecbca4",
+    "source_sha256": "c6807df74206a53b564d865c012a99748fbfaee88fee7028fb69b2c012b9df0c",
+    "1080p_signed_client_sha256": "f234ece1569700d566e86f587f93428b09b98d7ae3e5491cee2d6f15ec2c0ba5",
+    "change": "64-KiB window trace buffers, minimum 16 and maximum 64, with a 32-MiB sequential file bound. Provider filters and the zero-loss assertion were identical. Excluded from production sources pending successful trace validation."
+  },
+  "source_review": {
+    "self_review": "Windows synchronization-object semantics cross-checked with the WDK and Microsoft reference. Real ARM64 fixtures covered expiry, early wake, pending stop, fallback on allocation failure, DVFS and shutdown.",
+    "independent_review": "Pending. VPS Claude Code had no active login, local Claude Code subscription access was unavailable, and the recorded Gemini Carbon High quota reset falls on 2026-11-20 UTC."
+  },
+  "logical_display": {
+    "reference": {
+      "boot": "2026-11-18T13:00:39.6794820Z",
+      "DWM_pid": 1216,
+      "components": [
+        {
+          "sha256": "C8A8EB9AAB7E8DA0EDDBFD33052B51C945FF799A7765B86295303D9E5F65C12E",
+          "name": "TegraGpuD3DVk.dll"
+        },
+        {
+          "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+          "name": "libvulkan_nouveau.dll"
+        }
+      ],
+      "current": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "vidpn_rotation": 2,
+      "shell_response_csv": "5048,True,0,1280,720,45,45,44",
+      "handheld": 1,
+      "dfll_active": 1,
+      "receipt_sha256": "5c67d422c3fd4d2912ab5712f98cf597016f9aa2acbb9632342ad497e51a964c"
+    },
+    "candidate": {
+      "boot": "2026-11-18T13:06:01.6786830Z",
+      "DWM_pid": 1404,
+      "components": [
+        {
+          "sha256": "C8A8EB9AAB7E8DA0EDDBFD33052B51C945FF799A7765B86295303D9E5F65C12E",
+          "name": "TegraGpuD3DVk.dll"
+        },
+        {
+          "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+          "name": "libvulkan_nouveau.dll"
+        }
+      ],
+      "current": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "vidpn_rotation": 2,
+      "shell_response_csv": "5380,True,0,1280,720,45,45,44",
+      "handheld": 1,
+      "dfll_active": 1,
+      "receipt_sha256": "5862e9da141ab25ce8f65cf5a1d94e04705faabae8eb8bc2f363499fb2b60fd8"
+    }
+  },
+  "game_method": "Reference x64 DXVK LibreQuake lq_e0m1 at 640x360, camera input and acknowledged quit. Only the reference kernel produced a complete new game timing interval in this experiment.",
+  "instability_tracking": {
+    "group": "Existing high-load freeze and unexpected-restart issue",
+    "relationship": "Suspected shared cause across the two kernels. The existing data establish unexpected reboots, not a common root cause.",
+    "ordering": "Continue module performance work before returning to the stability investigation.",
+    "reference_event_record": 64667,
+    "promoted_kernel_event_records": [
+      64833,
+      64902
+    ]
+  },
+  "baseline_activation": {
+    "decision": "Operator accepted the measured pending-fence kernel as baseline. Track the existing reboot class in objective 4 after the module performance pass.",
+    "source_commit": "8e9f265f7d0ebb9deab6b57dd576d76e2d0c736f",
+    "boot_utc": "2026-11-18T13:24:13.2668010Z",
+    "promotion_verified_utc": "2026-11-18T13:28:39.5970026Z",
+    "active_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\activation",
+    "recovery_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-xfb-52f47133\\activation",
+    "driver_store_inf": "oem15.inf",
+    "signature_package_members": 26,
+    "signed_driver_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "catalog_sha256": "70874304918c90e856770eab782fe259c32aad06ba0cb3f896cf9216f1384acc",
+    "recovery_driver_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+    "driver_code": 0,
+    "login_task": "Ready",
+    "login_task_enabled": true,
+    "login_delay_s": 5,
+    "native_display": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "path_rotation": 2,
+    "DWM_pid": 1416,
+    "DWM_modules": [
+      {
+        "sha256": "C8A8EB9AAB7E8DA0EDDBFD33052B51C945FF799A7765B86295303D9E5F65C12E",
+        "name": "TegraGpuD3DVk.dll"
+      },
+      {
+        "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "name": "libvulkan_nouveau.dll"
+      }
+    ],
+    "shell_response_csv": "5380,True,0,1280,720,45,45,44",
+    "handheld_mode": 1,
+    "dfll_active": 1,
+    "disk_cache": "enabled",
+    "receipts_sha256": {
+      "promoted-live.json": "dc0b6a7b14242947a0d606fe569e069f82d00585b1661ce6bf6cab07f3431976",
+      "promoted-desktop.json": "2513152b44038039bafab9494c39d7cc3de8ef605532008acd6676b5b5857b22",
+      "promoted-pair.json": "1882a2e17c87e24ec3fae382164cf46b7b11731cf19de823feef96cbebcba58f",
+      "promoted-platform.json": "ed41860d09c9b6a2d60630ceccf048266b620ee407fbb7ae2b2d0b7c473624a0"
+    }
+  },
+  "trace_method_sources": {
+    "timer": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-exallocatetimer",
+    "paging": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dukmdt/ns-d3dukmdt-d3dddi_makeresident"
+  }
+}
