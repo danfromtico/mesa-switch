@@ -1,5 +1,5 @@
 {
-  "status": "Objective 5 in progress. The installed MAX77620 power-button and PMIC RTC updates passed scoped physical qualification. Device-level suspend, connected Bluetooth traffic and the remaining graphics and load cases are open.",
+  "status": "Objective 5 in progress. The selected GPIO driver passed physical touch-controller IRQ delivery, a real downgrade and reselection. The module status index describes runtime choices and remaining validation.",
   "order": [
     "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
     "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
@@ -840,7 +840,7 @@
     "binding_note": "The inventory records the earlier I2C 1.0.0.5, RTC 1.0.0.3 and power-button 1.0.0.7. Current physical selections are I2C 1.0.0.7, RTC 1.0.0.4 and power-button 1.0.0.8.",
     "pending": [
       "Bluetooth transport with a connected peer",
-      "GPIO and device-level suspend/resume, physical button wake and RTC resume",
+      "Physical volume/button/contact input, device sleep and RTC resume",
       "Performance under the active CPU/GPU/EMC and NVDEC scheduling choices",
       "DXVK, Pacecar, and the scoped Mesa code review"
     ],
@@ -1549,6 +1549,71 @@
         }
       },
       "abnormal_reset_attribution": "These ordinary restarts do not identify the cause of the separate load-related resets."
+    },
+    "gpio_irq_query": {
+      "version": "1.0.0.5",
+      "source": "c5ae935b59c6229db4be23c561d31088503f40e4",
+      "physical_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/c5ae935b59c6229db4be23c561d31088503f40e4/drivers/Tegra210Gpio/tests/physical-gpio-irq-20261118.json",
+      "record_sha256": "4eca2fccf7df317238fbc263551b2a0e4c6c820d7402ad1c009458ec34d32ec4",
+      "package_sha256": {
+        "tegra210gpio.cat": "2cb8c254241ebe4cec0d141e2e9984746a26c93ce49bfe9561c1b0c8644d8985",
+        "tegra210gpio.inf": "30a54b56fba6f394c82b28d93bc512d86ef0d12891acc0a1c49a2ccfe0597492",
+        "tegra210gpio.sys": "8a767c673b73d25ef209640f395ed78d99883942b58bed4f2c4a480b30dcca93"
+      },
+      "previous_sha256": "5f93b63a365c1bf4f5b914b466653035d1fcf1e33cc8dc7547878e416a504be3",
+      "tested_date_utc": "2026-11-18T21:03:54.5653781Z",
+      "actual_source_and_consumer": {
+        "commit": "ca891d9d9a36fd74417b768b1587f349e54e76ad",
+        "file": "drivers/SwitchLiteTouch/src/switchtouch.c",
+        "signed_sha256": "d0a056d2de17a3968d7a9340154516f132c0c69bbd3e99a393a5e6557cdb1a39",
+        "normalized_pe_sha256": "048b972e694aac40a50589c63d1507e574f94b5705d2c3a84b90c3f9da6271b4",
+        "exact_unsigned_sha256": "08beacd635d7ab94f90b597399d6a5b64fb7dbfb8ebd3ba1e607b1154b7ff528",
+        "matched": true
+      },
+      "board_qualified": "ACPI GPIO bank 5, pin 25, GSIV 119 / 1026, actual FTM4 ISR during normal panel reinitialization. Volume usages and SIO input enumerated.",
+      "query_timing": {
+        "reference": {
+          "cases": [
+            "irq-old-01",
+            "irq-old-02"
+          ],
+          "queries": 4,
+          "us": [
+            8.33333,
+            8.75,
+            8.64583,
+            8.33333
+          ],
+          "median_us": 8.48958,
+          "range_us": [
+            8.33333,
+            8.75
+          ]
+        },
+        "candidate": {
+          "cases": [
+            "irq-new-01",
+            "irq-new-02"
+          ],
+          "queries": 4,
+          "us": [
+            2.86458,
+            3.48958,
+            3.33333,
+            3.64583
+          ],
+          "median_us": 3.411455,
+          "range_us": [
+            2.86458,
+            3.64583
+          ]
+        }
+      },
+      "previous_register_reads_for_touch": 8,
+      "selected_register_reads_for_touch": 2,
+      "model_cases_per_arm64_build": 32776,
+      "active_after_forced_rollback_then_reselection": true,
+      "independent_review": "Pending separate Gemini review."
     }
   },
   "local_control_receipts": {
@@ -2325,5 +2390,221 @@
     ],
     "pixel_validated_submissions": 288,
     "state_after_later_restart": "2026-11-18T20:07:14.7055600Z"
+  },
+  "objective5_runtime_status": {
+    "as_of_utc": "2026-11-18T21:04:36.0604569Z",
+    "physical_readback": {
+      "board": "Switch Lite",
+      "app_settings_sha": "E273B17805E5DF8E8F0709D9CF3E4BB70A624E2C644CB40899CC7BAF60B332D6",
+      "boot": "2026-11-18T21:02:04.2770480Z",
+      "drivers": {
+        "switchpwrbtn": {
+          "sys_sha": "879550E4EB292619F45DE86EB458FC94F07149CA3DE95BC88369166FCD64914E",
+          "version": "1.0.0.8",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchsio": {
+          "sys_sha": null,
+          "version": "0.2.5.0",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchtouch": {
+          "sys_sha": "D0A056D2DE17A3968D7A9340154516F132C0C69BBD3E99A393A5E6557CDB1A39",
+          "version": "1.0.1.2",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchwifi": {
+          "sys_sha": null,
+          "version": "0.5.7.1",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchrtc": {
+          "sys_sha": "169164193D731756791D476894C67751C87CEEF27D5C14B7AA3A47B9556DE797",
+          "version": "1.0.0.4",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchaudio": {
+          "sys_sha": "36A62D088D2A04DBC5C7ACB97F2B7528FB568CB996A6D2B9F92F27005BBBE81B",
+          "version": "1.0.0.10",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "nvtsdhc": {
+          "sys_sha": "5389B30D3A04FAD330B9AFEF36B0D500AD363C6C5B39C55C9B60096669BFD945",
+          "version": "0.5.1.2",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchfan": {
+          "sys_sha": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+          "version": "1.0.0.33",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchbt": {
+          "sys_sha": "A106E3AC6F9594A64A294C46CE969E623C91F4E3745E8A49961205E29B317CEE",
+          "version": "1.0.0.19",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "tegra210gpio": {
+          "sys_sha": "8A767C673B73D25EF209640F395ED78D99883942B58BED4F2C4A480B30DCCA93",
+          "version": "1.0.0.5",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "tegragpurender": {
+          "sys_sha": "6C86354E781E76D671C20BF14B124248A6E1AA264DCAB6D459A6B14D551469B0",
+          "version": "0.1.0.158",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "tegra210i2c": {
+          "sys_sha": "C7BF8FE18A95D2D5B39D3C8137EA0751EAE1471969FE7699F4712F033A45EA31",
+          "version": "1.0.0.7",
+          "instances": 3,
+          "codes": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "pacecar": [
+        {
+          "sha": "135285DA2255E087C8B37E5034B023035A01D3990AB2B10E4E0220BDC56C7D24",
+          "session": 1
+        }
+      ],
+      "dwm": 1420,
+      "pacecar_settings": "9B44F2E1666C9D603180972B551797A2DEC76326F73BC6693DB0D3626A37BFA7",
+      "storage": {
+        "ClockKhzActual": 199680,
+        "AdmaErrors": 0,
+        "BusWidth": 4,
+        "Ddr200Fallbacks": 1,
+        "Ddr200RecoveryStatus": 0,
+        "Ddr200Active": 0,
+        "BusSpeed": 7,
+        "Ddr200Window": 1
+      },
+      "utc": "2026-11-18T21:04:36.0604569Z",
+      "pacecar_backup": "710C6B79E1E5E7CB82311732D4D34ADEF76A6BF721573DD6BBD470ECA95BBF35",
+      "loaded_dwm_module_sha": {
+        "libvulkan_nouveau.dll": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "TegraGpuD3DVk.dll": "DED6FA4AFFEC0F18773503D282F9B44939090488202EF5F25EA1D879DD862F0D"
+      },
+      "bios": "1.09 (winx-r402)",
+      "cpu_error": 0,
+      "app_icd_sha": {
+        "x64": "E200A5635C98F8624BF836F1D4F2AD8E6C1A307C30E22F73A5868F5360CA5554",
+        "x86": "CC343903B674B61AEEEE52708A32C9A75997BD082768C1A9E2626F825D7312D4",
+        "arm64": "C381A78178B13FB26E09F266248B8351F25053EDB9DED2854F6279CFC17D1024"
+      },
+      "emc_error": 0,
+      "emc_transitions": 113,
+      "handheld": true
+    },
+    "modules": {
+      "kmd_fence": {
+        "state": "daily",
+        "binary_prefix": "6c86354e",
+        "metric": "Offscreen submit to completion median, ms",
+        "reference_arm64_x86_x64": [
+          15.5264,
+          15.2566,
+          15.3181
+        ],
+        "selected_arm64_x86_x64": [
+          1.7842,
+          1.9505,
+          1.792
+        ],
+        "record": "KMD_FENCE_POLL_20261118.json"
+      },
+      "application_nvk": {
+        "state": "daily",
+        "source": "70f0e7245e7ef40c1ced3430f37adf051910615a",
+        "scope": "Opt-in removed, Mesa disk cache enabled; long application cache paths pass with ARM64, x86 and x64 ICDs, including the x64-host ARM64EC D3D9 route.",
+        "record": "WIN32_APPLICATION_CACHE_PATH_20261118.json"
+      },
+      "desktop_umd_and_video": {
+        "state": "daily",
+        "binary_prefix": "ded6fa4a",
+        "scope": "H.264 discovery enabled by default; independent-context completion recheck and teardown deferral. Six 720p hashes match on the selected UMD. Full window exit, 1080p in this combination and browser hardware use remain open. Stock Edge used software.",
+        "record": "NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json"
+      },
+      "pacecar": {
+        "state": "daily",
+        "scope": "Reusable FPS surface slots and durable settings accepted. Fresh live multi-surface workload remains open.",
+        "record": "https://github.com/ruje0504-2/pacecar/blob/c0bf693d22f10d1b4001224dea04afa81ee1b51f/docs/progress/switch-frame-history-and-settings-20261118.json"
+      },
+      "platform_drivers": {
+        "state": "daily",
+        "components": {
+          "audio": "1.0.0.10",
+          "wifi": "0.5.7.1",
+          "i2c": "1.0.0.7",
+          "rtc": "1.0.0.4",
+          "power_button": "1.0.0.8",
+          "gpio": "1.0.0.5"
+        },
+        "outstanding": "Cold Wi-Fi initialization, physical key and contact input, and system sleep/wake."
+      },
+      "dxvk_and_zink": {
+        "state": "original app-local runtime",
+        "scope": "Original package passed earlier LibreQuake game paths. Bounded-spin and high-resolution timer experiments ran on four architectures. Timing tails regressed; no tested replacement was selected. Fresh end-to-end game frame-time and power comparisons remain open.",
+        "records": [
+          "DXVK_ZINK_GAME_MATRIX_20261118.json",
+          "DXVK_FRAME_LIMITER_20261118.json"
+        ]
+      },
+      "wsi_rectangles_and_cache_microoptimization": {
+        "state": "tested candidates outside selection",
+        "scope": "The WSI rectangle control lacks a complete candidate exit. The separate missing-file and eviction sorting candidate passed short-root controls; first-use costs and game results did not justify selecting it. NAK has no independently qualified speedup.",
+        "record": "WIN32_SHADER_CACHE_PERFORMANCE_20261118.json"
+      },
+      "emc_voltage_delivery": {
+        "state": "tested candidate rolled back",
+        "scope": "Six reference-matched 720p frames, followed by an unexpected restart before the parent process captured exit. Daily Handheld scheduling retained.",
+        "record": "EMC_VOTE_DELIVERY_20261118.json"
+      },
+      "paging_and_nvdec_verifier": {
+        "state": "measured",
+        "scope": "Paging retains full validation. The 1080p test client uses a measured BCrypt verification variant; faster hashes do not demonstrate higher hardware decoder throughput.",
+        "record": "NVDEC_MODULE_TIMINGS_20261118.json"
+      },
+      "uefi_sd_bluetooth": {
+        "state": "platform baseline retained",
+        "scope": "HDH-001 SMBIOS candidate built, physical startup pending. This boot uses SDR104. Passive BLE receive passed; connected peer traffic and suspend/resume outstanding."
+      }
+    }
   }
 }
