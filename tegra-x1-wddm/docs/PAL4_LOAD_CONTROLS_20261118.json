@@ -309,5 +309,138 @@
       "second call with Handheld already active"
     ],
     "unresolved": "The driver records STATUS_DEVICE_HARDWARE_ERROR for several DFLL transition failures. The originating transition was not captured."
+  },
+  "matched_cpu_operating_point": {
+    "method": "Begin in healthy Handheld mode. Read the EMC governor until it reaches 204000 kHz, then select the supported fixed power mode. Read back the CPU, GPU, EMC and latch state before launching the same desktop shortcut. The two cases used the same memory, scheduler and file tracing and platform samples.",
+    "boot_control": "SwitchFan read its existing CpuOverclockEnabled DWORD as 0 for one boot to select the standard PLLX boot operating point. A one-shot boot action restored the original DWORD 1 after driver initialization, before the game started. The Handheld policy was restored after the game exited.",
+    "controlled": [
+      "game and settings SHA-256",
+      "window size",
+      "desktop DWM hardware renderer",
+      "x86 DXVK and native x86 NVK",
+      "signed KMD",
+      "AC online",
+      "fixed GPU frequency and measured voltage",
+      "fixed EMC frequency and disabled governor",
+      "healthy CPU status",
+      "charge target 85%"
+    ],
+    "differences": [
+      "CPU operating point includes frequency and voltage",
+      "separate Windows boots and scheduling"
+    ],
+    "runs": [
+      {
+        "case": "emclow-11",
+        "boot_utc": "2026-11-18T08:32:33.8938970Z",
+        "input_utc": "2026-11-18T08:59:20.2037465Z",
+        "gpu_pnp_code": 0,
+        "desktop_tgd3d_devices": 1,
+        "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+        "native_x86_icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "app_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "ac": "Online",
+        "window": [
+          800,
+          600
+        ],
+        "power_policy": 7,
+        "gpu_khz": 460800,
+        "gpu_uv": 800000,
+        "emc_khz": 204000,
+        "emc_transitions_during_sampling": 0,
+        "emc_governor_active": false,
+        "cpu_khz": 1497600,
+        "cpu_mv": 1120,
+        "cpu_status": 0,
+        "cpu_dfll": 0,
+        "temperature_c_range": [
+          35,
+          36
+        ],
+        "sample_count": 4,
+        "first_sample": "2026-11-18T08:59:19.3443514Z",
+        "last_sample": "2026-11-18T08:59:24.9281211Z",
+        "platform_samples_sha256": "abc8ea0e1e3f5b73b7cd2bee4df246332b4bbaea648e803d89735512b9288c0e",
+        "etl_sha256": "fe426a937fac01f04a4145883d8ba58133bfbec791d6592cea19b2f3a84f022f",
+        "dxg_memory_events": 603,
+        "decode_issues": {},
+        "game_command_bytes": [
+          8532,
+          80,
+          8,
+          36,
+          1096
+        ],
+        "game_queue_complete": 11,
+        "game_presents": 0,
+        "retained_system_queue_starts": 451,
+        "unmatched_system_queue_starts": 0,
+        "last_game_queue_complete": "2026-11-18 08:59:24.267618+00:00",
+        "trace_tail": "2026-11-18 08:59:26.285870+00:00",
+        "outcome": "Whole system restarted before a game frame.",
+        "next_boot_utc": "2026-11-18T08:59:53.0123460Z",
+        "post_recovery_gpu_code": 0
+      },
+      {
+        "case": "cpuboot-12",
+        "boot_utc": "2026-11-18T09:06:36.4072070Z",
+        "input_utc": "2026-11-18T09:10:44.9363348Z",
+        "gpu_pnp_code": 0,
+        "desktop_tgd3d_devices": 1,
+        "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+        "native_x86_icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "app_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "ac": "Online",
+        "window": [
+          800,
+          600
+        ],
+        "power_policy": 7,
+        "gpu_khz": 460800,
+        "gpu_uv": 800000,
+        "emc_khz": 204000,
+        "emc_transitions_during_sampling": 0,
+        "emc_governor_active": false,
+        "cpu_khz": 998400,
+        "cpu_mv": 810,
+        "cpu_status": 0,
+        "cpu_dfll": 0,
+        "temperature_c_range": [
+          36,
+          37
+        ],
+        "sample_count": 14,
+        "first_sample": "2026-11-18T09:10:40.7019658Z",
+        "last_sample": "2026-11-18T09:11:12.8353571Z",
+        "platform_samples_sha256": "7f56099a576d7b1a17b6fa9027aed82d95424cb48f99c9176fc24ee40712f2e2",
+        "etl_sha256": "4358d48003f1b7c874bde2f29986453762c1c98ad4ef888a420c76d39278b566",
+        "dxg_memory_events": 1405,
+        "decode_issues": {},
+        "game_command_bytes": [
+          8532,
+          80,
+          8,
+          36,
+          1096
+        ],
+        "game_queue_complete": 11,
+        "game_presents": 0,
+        "retained_system_queue_starts": 1274,
+        "unmatched_system_queue_starts": 0,
+        "last_game_queue_complete": "2026-11-18 09:10:52.106768+00:00",
+        "trace_tail": "2026-11-18 09:11:14.742464+00:00",
+        "outcome": "PAL4 exited with an application exception. DWM and Windows remained responsive.",
+        "process_exit": "0xe06d7363",
+        "same_dwm_process": true,
+        "game_report": "The application reported an access violation at the same main-executable instruction as memory-10.",
+        "game_report_sha256": "2a6bd75b70b03adbd7abe574d7e184ad6e8e7aafdb3604a4410476025e77f8ed",
+        "game_report_utc": "2026-11-18T09:10:55.8237185Z",
+        "trace_events_lost": 0,
+        "trace_buffers_lost": 0,
+        "handheld_restored": true
+      }
+    ],
+    "interpretation": "The 1.497 GHz / 1120 mV run rebooted with EMC held at 204 MHz. At 998.4 MHz / 810 mV the application exited at the same instruction previously observed in the low-clock fault-latched run, while Windows continued. Sampling covered the retained ETW prefix. The final interval before reset is unobserved. These cases do not identify an electrical fault or prove the cause of the archive incident."
   }
 }
