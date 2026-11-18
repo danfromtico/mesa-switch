@@ -108,5 +108,32 @@
     "ssh_observation": "The unpaced replay started after the dispatch connection closed. Later status checks encountered SSH timeouts. No controlled attribution to SSH or load was made.",
     "paced_functional_observation": "Six frames, six successful Presents and normal closure on the same boot.",
     "disposition": "Review existing incident records after the next restart. Higher-resolution acceptance remains separate."
+  },
+  "graphics_stack_comparison_20261118": {
+    "classification": "Treat the desktop freezes and unexpected restarts as one incident family while investigating the shared graphics stack. Platform power handling can change how the console recovers.",
+    "local_lite": {
+      "triggers": [
+        "Warcraft III x86 D3D9 window creation",
+        "PAL4 archive extraction before the game process existed",
+        "Unpaced NVDEC window presents"
+      ],
+      "last_unpaced_video": "Five NV12 frames matched, four Present calls returned and the next Present began before the reboot.",
+      "records": "Multiple Kernel-Power 41 events with BugcheckCode 0. The user saw automatic restarts.",
+      "wifi": "The user recalls a crash with Wi-Fi switched off. The test method and matching event record are unavailable."
+    },
+    "external_oled": {
+      "source": "https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/README.md#gpu-experimental-windows-11",
+      "graphics": "The author integrated mesa-switch-woa WDDM and tgd3d/NVK on Mariko OLED.",
+      "platform": "Windows inbox sdbus behind an EL2 SDMMC trap, SwitchWifi from the shared driver project, and a separate swbatt GPU power bridge. The Lite platform inventory includes switchfan, switchpwrbtn and switchbattery.",
+      "recovery": "The OLED author used a long power-button press after the hang. The Lite user attributes the different recovery behavior to the platform power drivers.",
+      "startup_trials": "Three of five ordinary transitions hung. In five trials with other shell GPU clients delayed for ten seconds, all five remained up thirty seconds after those clients resumed.",
+      "trace_tail": "In two early hangs DWM presented four frames, Explorer created its own device, and both clients submitted work. KMD recorded successful preemption requests through the trace tail. No recovery request or reset was captured.",
+      "longer_session": "A separate KMD 0.1.0.203 session hung after about ten minutes of browser and Explorer use."
+    },
+    "discriminating_measurements": [
+      "Confirm the DWM rendering backend before the workload. Compare the same archive workload on Basic Display and the GPU desktop under the same power and Wi-Fi conditions.",
+      "Correlate per-client submission, hardware progress, fence retirement, preemption completion and recovery with the first missing progress. Record reset source separately."
+    ],
+    "root_cause": "Unknown. The traces justify prioritizing the shared graphics path, particularly overlapping work from separate GPU clients."
   }
 }
