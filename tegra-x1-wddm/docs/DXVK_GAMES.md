@@ -22,20 +22,26 @@ GL 3.2 compatibility context in FTEQW. The game and the profile comparison
 exercise different capabilities. [x64 export](dxvk-games-20261118/vulkaninfo-x64.json)
 and [x86 export](dxvk-games-20261118/vulkaninfo-x86.json). [Profile comparison](dxvk-games-20261118/profile-comparison.json)
 
-FTEQW loaded the LibreQuake map `lq_e0m1` through D3D9. With x64 DXVK and
-with ARM64EC DXVK in the x64 game, movement changed the captured world and
-both processes exited with code zero. The x86 run reached the map and was
-accepted for this compatibility phase. Windows restarted before the controller
-recorded an exit code. [Game measurements](dxvk-games-20261118/librequake-dxvk.json)
+After the application ICDs began enumerating GM20B by default, FTEQW loaded
+the LibreQuake map `lq_e0m1` through x86 and x64 DXVK, x86 and x64 Zink,
+and ARM64EC DXVK in the x64 game. All five runs acknowledged input, changed
+the captured world, exited with code zero and returned to the same desktop.
+The earlier x86 DXVK run had reached the map before Windows restarted.
+[Five game and FPS measurements](DXVK_ZINK_GAME_MATRIX_20261118.json)
+and [earlier D3D9 measurements](dxvk-games-20261118/librequake-dxvk.json).
 
 The component manifest records SHA-256 for each Windows vulkaninfo export with
 its original CRLF endings and for each LF copy in Git. The profile comparison
 uses the Windows hashes. [Component hashes](dxvk-games-20261118/components.json)
 
-In the x64 offscreen test using ARM64EC DXVK, both indirect draws passed and
-the stream-output query counted two triangles. After `DrawAuto` on stream
-output slot 0, pixel (0, 0) retained the clear color. The check exited with
-code 14 before indirect compute dispatch. [Offscreen test record](dxvk-games-20261118/d3d11-indirect-arm64ec.json)
+The signed KMD at source `001ffd4b` passed native Vulkan transform-feedback
+capture and resume on all four output slots in ARM64 and x64 processes. In the
+D3D11 test, x86, x64 and ARM64EC DXVK passed both indirect draws and counted
+two stream-output triangles. Their slot 0 `DrawAuto` images retained the
+clear color at pixel (0, 0). A separate probe on the preceding KMD found two
+correct stream-output vertices out of six for x64 and ARM64EC, and completed
+indirect compute dispatch on both.
+[Kernel and D3D measurements](GM20B_XFB_COUNTER_BASELINE_20261118.json).
 
 The application-scoped loader settings list the exact game executable and its
 matching signed ICD manifest. The bundled x86 loader includes the application
@@ -144,8 +150,8 @@ Requirements audited directly from `src/dxvk/dxvk_instance.h` and
 
 ## Indirect command and transform-feedback submission (`TG_GPU_SUBMIT_ABI_INDIRECT = 2`)
 
-Pre-Turing GM20B executes indirect draws, `DrawAuto`, transform-feedback
-counter loads, and indirect compute dispatches by opening an MME macro call in
+The pre-Turing GM20B submission path encodes indirect draws, `DrawAuto`,
+transform-feedback counter loads and indirect compute dispatches by opening an MME macro call in
 an inline push slice, fetching the indirect argument words from application GPU
 memory via a middle GPFIFO entry, and finishing in a validated inline suffix
 slice:

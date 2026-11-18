@@ -1,0 +1,534 @@
+{
+  "status": "Accepted GM20B kernel driver baseline for native transform-feedback counter resume",
+  "source_commit": "001ffd4b48cabee04fa63e5bab5ba8fabf868fc3",
+  "source_tag": "switch-gm20b-xfb-20261118",
+  "signed_kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+  "signed_kmd_bytes": 248344,
+  "unsigned_kmd_sha256": "ed5421b9f424ec55604087cdb52fe0007da9bfe28275047427ef30de7a9e9fb2",
+  "catalog_sha256": "d7bd3542a8c920e006dffc198ab1e10dc1bafd59368ec4159497b68be5357b37",
+  "previous_kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+  "validated_mme_image_sha256": "fd434bbeb57359bbaed4b09ede66af4623f536fb35c9c105d82159651761f610",
+  "change": "During capture the KMD converts the validated Windows buffer index into the dword offset expected by the resident Maxwell macro. The captured copy for slots 0 through 3 contains offsets 0, 8, 16 and 24. The ICD submission format and macro instruction image retain their deployed encodings.",
+  "source_inputs": {
+    "tegra-x1-wddm/core/command_stream.c": {
+      "baseline": "623ea7856a5bf33e617099dcaf0c16396cfac3fec1fa477916c60fce9ed55949",
+      "candidate": "26df82f905a2c43b766848ab7548446cc07752ce2158f036494b415a465075d8"
+    },
+    "tegra-x1-wddm/tests/test_command_stream.c": {
+      "baseline": "fda35d13f10bf47b1f849df2e0efdadb387f7f8f0867d80f8ea7821164206e87",
+      "candidate": "ae379c1f03a3095c01c8bda4ade8d2d6ac34ebd89dc48bc53499df83558eccbb"
+    }
+  },
+  "host_regression": {
+    "before": "The prepared-slot assertion failed at slot 1.",
+    "after": "The command stream, B06F packet and address range tests passed.",
+    "source": "tegra-x1-wddm/tests/test_command_stream.c"
+  },
+  "previous_arm64": {
+    "record_sha256": "fce9e1a7ad064b75611a210ac12b6a3630b63a98aecf69985d4210e0ccee48ba",
+    "observations": [
+      {
+        "process_arch": "arm64",
+        "slot": 0,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "arm64",
+        "slot": 1,
+        "exit": 5,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 2779096485,
+            "vertex_records_match": false,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      }
+    ],
+    "later_boot_utc": "2026-11-18T07:56:28.0314190Z",
+    "note": "The retained old-driver runs cover ARM64. A subsequent unclean boot interrupted collection before the x64 result."
+  },
+  "candidate": {
+    "boot_utc": "2026-11-18T08:16:56.0950420Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-xfb-52f47133\\activation",
+    "pnp_code": 0,
+    "hardware_status": 0,
+    "signed_package_members_verified": 26,
+    "matched_probe_runs": [
+      {
+        "process_arch": "arm64",
+        "slot": 0,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "arm64",
+        "slot": 1,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "x64",
+        "slot": 0,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "x64",
+        "slot": 1,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      }
+    ],
+    "matched_probe_sha256": {
+      "arm64": "d36166e02a75b08f28e4be24757f3b72d2dd86ca21d0f2e011472952e51a3a9e",
+      "x64": "55c918d3a7ae6d37d347b035fa87a852b85c41939ad1e70653dd21343e280b8f"
+    },
+    "four_slot_probe_sha256": {
+      "x64": "76fb872c98b9026c17a68756c09ad91beee946745c1ffd6926538f18ff2f9753",
+      "arm64": "2036ed3780275b04ac4f4848a3012b67acc4b943b89521480a8d64a3b4e14d3d"
+    },
+    "four_slot_runs": [
+      {
+        "process_arch": "arm64",
+        "slot": 0,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "arm64",
+        "slot": 1,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "arm64",
+        "slot": 2,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "arm64",
+        "slot": 3,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "x64",
+        "slot": 0,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "x64",
+        "slot": 1,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "x64",
+        "slot": 2,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      },
+      {
+        "process_arch": "x64",
+        "slot": 3,
+        "exit": 0,
+        "passes": [
+          {
+            "counter_bytes": 48,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          },
+          {
+            "counter_bytes": 96,
+            "vertex_records_match": true,
+            "guards_match": true,
+            "triangle_pixels_match": true
+          }
+        ]
+      }
+    ],
+    "four_slot_source_sha256": "1bf8a9384b3878f6b06e48b49135d9a02a0f9a44315f11a492866d6f37e50cdb",
+    "shader_sha256": {
+      "0": "522ee3b04ec608e44b394d48eda9bbe65c59de8ba55597539ec09a0580e2d08d",
+      "1": "bcec829afa1db3f5b5b3701051202206e488e8cb034ce592602b8acfd4aab62c",
+      "2": "617682adb1e35f89a27005337d690caeb233e2995e437702a53bacf56bd15324",
+      "3": "ade22a6f865b992696c927b11c03e1e85c49d23c95d99804950aa46821fc051a"
+    },
+    "pixel_check": "Each submitted pass compared a 32 by 32 color readback with 300 red and 724 blue pixels. The stream test compared all four float components of each vertex and preserved unwritten bytes."
+  },
+  "desktop_and_video": {
+    "display_mode": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60
+    },
+    "source_mode": {
+      "width": 720,
+      "height": 1280
+    },
+    "target_signal": {
+      "width": 720,
+      "height": 1280
+    },
+    "path_rotation": 2,
+    "registered_desktop_modules": {
+      "TegraGpuD3DVk.dll": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "power_mode": 1,
+    "cpu_dfll_active": 1,
+    "gpu_policy": 1,
+    "charge_limit_percent": 85,
+    "nvdec_width": 1920,
+    "nvdec_height": 1080,
+    "dwm_pid_before_after": [
+      1424,
+      1424
+    ],
+    "visible_window": true,
+    "hardware_decoded_frames": [
+      {
+        "index": 0,
+        "sha256": "d9368ffd4722e6f05b0265a72f56764d3044ebd098b6ba3dbf388052fe3e84f3"
+      },
+      {
+        "index": 1,
+        "sha256": "f3fc4fd14479a9dbadefe6cda9d9a78d827d07b1bf482e4ef04f4b6913e42838"
+      },
+      {
+        "index": 2,
+        "sha256": "f0f100a93e40b14ad4d20f9dd00c1e42bb92ccb064bdfa7832980b56b4d6c8bc"
+      },
+      {
+        "index": 3,
+        "sha256": "b05651982e6d54528be2fedb5e5242e0a492b1a8c31df0d5ff73f23c0921b6a1"
+      },
+      {
+        "index": 4,
+        "sha256": "f4b944beb06c97abc5084f9bd3d81515592046341b6b3785f6bb5dcb329c8902"
+      },
+      {
+        "index": 5,
+        "sha256": "27f3a47c090c944c3008a351e359d3768af74c4c9b4c8c0bfb00c5cc01816272"
+      }
+    ],
+    "window_frames": 6,
+    "present_exit": 0,
+    "last_frame_rgb_sha256": "48613254388eefd5d5fbae35f217a5f28e65a31b3a27d2989dcd1a6e67e211a3",
+    "original_1080_baseline": "1cf6db16e13c34de39658641b68cdf71cabc292d",
+    "initial_hidden_launch": "The decode-only controller initially hid the preview. The explicit visibility check returned exit 4. Launching with normal window visibility passed the same frame checks and exited zero.",
+    "observation": "Windows confirmed a visible uncloaked window and GPU completion on the active desktop. The earlier physical-panel acceptance is recorded separately."
+  },
+  "direct3d": {
+    "stock_desktop_dlls": true,
+    "rows": [
+      {
+        "dxvk": "x64",
+        "api": "d3d9",
+        "exit": 0,
+        "stages": [
+          "STAGE d3d9 clear: PASS",
+          "STAGE d3d9 draw: PASS",
+          "STAGE d3d9 sm2+textured+depth: PASS"
+        ],
+        "sha256_stdout": "cd6715e83edaf3391ffb754b2ab4025e70e682e2d231fed23229b0bdca645a87"
+      },
+      {
+        "dxvk": "x64",
+        "api": "d3d10",
+        "exit": 0,
+        "stages": [
+          "STAGE d3d10 clear: PASS",
+          "STAGE compile: PASS",
+          "STAGE d3d10 draw: PASS",
+          "STAGE d3d10 textured+depth: PASS"
+        ],
+        "sha256_stdout": "de0b6a7e08f29a14a376bb6a63e322db2da8a15cc0a1bec901633c10e95792b7"
+      },
+      {
+        "dxvk": "x64",
+        "api": "d3d11",
+        "exit": 14,
+        "stages": [
+          "STAGE d3d11 clear: PASS",
+          "STAGE compile: PASS",
+          "STAGE d3d11 draw: PASS",
+          "STAGE d3d11 textured+depth: PASS",
+          "STAGE d3d11 occlusion query: PASS (passed=2016 rejected=0)",
+          "STAGE d3d11 pipeline stats: PASS (VS=11 PS=6112 CS=8)",
+          "STAGE d3d11 indirect draw: PASS",
+          "STAGE d3d11 indirect indexed draw: PASS",
+          "STAGE d3d11 so stats: PASS (written=2 needed=2)",
+          "STAGE d3d11 drawauto: FAIL first mismatch at (0,0) = 64,127,191,255"
+        ],
+        "sha256_stdout": "5c86e0cf703287d7c5ffb6e6bf9c328c56fa4f631d3d197abfe7bc09a6f2daec"
+      },
+      {
+        "dxvk": "x86",
+        "api": "d3d9",
+        "exit": 0,
+        "stages": [
+          "STAGE d3d9 clear: PASS",
+          "STAGE d3d9 draw: PASS",
+          "STAGE d3d9 sm2+textured+depth: PASS"
+        ],
+        "sha256_stdout": "9a024677da2402c5c6f118c3b89435e5eb75cf33312772620bf1ebf5df57526b"
+      },
+      {
+        "dxvk": "x86",
+        "api": "d3d10",
+        "exit": 0,
+        "stages": [
+          "STAGE d3d10 clear: PASS",
+          "STAGE compile: PASS",
+          "STAGE d3d10 draw: PASS",
+          "STAGE d3d10 textured+depth: PASS"
+        ],
+        "sha256_stdout": "7d273fb2c25cc1baa4970824efb2321758e2b7184e66fabd7e67e7c507e4e4d5"
+      },
+      {
+        "dxvk": "x86",
+        "api": "d3d11",
+        "exit": 14,
+        "stages": [
+          "STAGE d3d11 clear: PASS",
+          "STAGE compile: PASS",
+          "STAGE d3d11 draw: PASS",
+          "STAGE d3d11 textured+depth: PASS",
+          "STAGE d3d11 occlusion query: PASS (passed=2016 rejected=0)",
+          "STAGE d3d11 pipeline stats: PASS (VS=11 PS=6112 CS=8)",
+          "STAGE d3d11 indirect draw: PASS",
+          "STAGE d3d11 indirect indexed draw: PASS",
+          "STAGE d3d11 so stats: PASS (written=2 needed=2)",
+          "STAGE d3d11 drawauto: FAIL first mismatch at (0,0) = 64,127,191,255"
+        ],
+        "sha256_stdout": "2396b9bc4fb4c575384d50570ff7c1a253f67b6bfccf26521e3627ca6fb19e22"
+      },
+      {
+        "dxvk": "ec",
+        "api": "d3d9",
+        "exit": 0,
+        "stages": [
+          "STAGE d3d9 clear: PASS",
+          "STAGE d3d9 draw: PASS",
+          "STAGE d3d9 sm2+textured+depth: PASS"
+        ],
+        "sha256_stdout": "6e363a225256adf041723575b32feb088d1ffdb39aa134bbab4006ffcc1de4f8"
+      },
+      {
+        "dxvk": "ec",
+        "api": "d3d10",
+        "exit": 0,
+        "stages": [
+          "STAGE d3d10 clear: PASS",
+          "STAGE compile: PASS",
+          "STAGE d3d10 draw: PASS",
+          "STAGE d3d10 textured+depth: PASS"
+        ],
+        "sha256_stdout": "f31f009cdfc7e94dcf8c234eb2d394468bebbfed6b6e6fea5e3d396b9aab3776"
+      },
+      {
+        "dxvk": "ec",
+        "api": "d3d11",
+        "exit": 14,
+        "stages": [
+          "STAGE d3d11 clear: PASS",
+          "STAGE compile: PASS",
+          "STAGE d3d11 draw: PASS",
+          "STAGE d3d11 textured+depth: PASS",
+          "STAGE d3d11 occlusion query: PASS (passed=2016 rejected=0)",
+          "STAGE d3d11 pipeline stats: PASS (VS=11 PS=6112 CS=8)",
+          "STAGE d3d11 indirect draw: PASS",
+          "STAGE d3d11 indirect indexed draw: PASS",
+          "STAGE d3d11 so stats: PASS (written=2 needed=2)",
+          "STAGE d3d11 drawauto: FAIL first mismatch at (0,0) = 64,127,191,255"
+        ],
+        "sha256_stdout": "1cd9c4ee286103d60fde29bcf2ab6955b41147dd4b4d4e4856f1028d01b83c35"
+      }
+    ],
+    "observed_scope": "Direct and indexed indirect draws passed. D3D11 DrawAuto on stream-output slot 0 still failed the full-image check with x64, x86 and ARM64EC DXVK. On the preceding kernel, a separate query confirmed two stream-output primitives, two correct vertices out of six, and a passing indirect compute dispatch for both x64 and ARM64EC.",
+    "diagnostic_probe_sha256": "565edfeaece53af1fa745ed821e7f54c217318fcceb9e7f901715ef84cc42549",
+    "diagnostic_record_sha256": "d2c4102ccb6c2420c763e45a833b3cdee730d7ab4be3434c2ba84e92c64264d8"
+  },
+  "recovery": {
+    "previous_activation": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxvk-games-b94248bc\\gpu-cycle-02\\activation",
+    "previous_kernel_catalog": "ae13f44d29ae317da84b1b1102a445f581d8bacf13dbafdedda9cf7c410387c7",
+    "controller": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-xfb-52f47133\\Pair.ps1",
+    "phases": [
+      "Recover",
+      "SelectBaseline",
+      "FinishBaseline"
+    ],
+    "readback": "The rollback package and its catalog were verified on the Switch during candidate preparation."
+  }
+}
