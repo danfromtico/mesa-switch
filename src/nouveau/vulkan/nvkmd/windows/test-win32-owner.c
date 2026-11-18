@@ -62,6 +62,9 @@ LONG tg_kmt_export_memory_win32(const struct tg_kmt_allocation *a, const SECURIT
                                DWORD access, LPCWSTR name, HANDLE *h) { UNEXPECTED(); }
 LONG tg_kmt_map(const struct tg_kmt_device *d, const struct tg_kmt_va *v, uint64_t vo,
                 const struct tg_kmt_allocation *a, uint64_t o, uint64_t s, uint8_t k, bool r) { UNEXPECTED(); }
+LONG tg_kmt_query_video_memory(const struct tg_gpu_adapter_info *adapter,
+                               struct tg_kmt_video_memory groups[TG_KMT_MEMORY_GROUPS])
+{ UNEXPECTED(); }
 LONG tg_gpu_kmt_scan_system(struct tg_kmt_scan *scan) { UNEXPECTED(); }
 VkResult nvkmd_windows_create_ctx(struct nvkmd_dev *dev, struct vk_object_base *log,
                                  enum nvkmd_engines engines, struct nvkmd_ctx **out)
