@@ -382,7 +382,7 @@ if args.windows_tests:
                     f"/out:{args.out / 'test-worker.exe'}",str(worker_test),
                     str(args.out / "worker.obj"),str(sdk_lib)],check=True)
     dvfs_test=args.out / "test_dvfs_windows.obj"
-    subprocess.run([args.clang_cl,*flags,"/clang:-funwind-tables",f"/Fo{dvfs_test}","--",
+    subprocess.run([args.clang_cl,*flags,f"/I{root}","/clang:-funwind-tables",f"/Fo{dvfs_test}","--",
                     str(root / "tests/test_dvfs_windows.c")],check=True)
     subprocess.run([args.link,"/nologo","/machine:arm64","/subsystem:console,10.0","/entry:start",
                     "/include:_load_config_used","/nodefaultlib","/release","/opt:ref","/timestamp:0",

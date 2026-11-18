@@ -39,7 +39,10 @@ static VOID detach_bridge_handles(TG_GPU_PLATFORM *p,BOOLEAN query_remove,BOOLEA
     p->Bridge=NULL;
     p->QueryRemove=query_remove;
     ++p->BridgeEpoch;
-    if(mark_reclaim && p->RailClaimed)p->NeedReclaim=TRUE;
+    if(mark_reclaim) {
+        ++p->ProviderGeneration;
+        if(p->RailClaimed)p->NeedReclaim=TRUE;
+    }
     KeReleaseSpinLock(&p->HandleLock,irql);
     if(file)ObfDereferenceObject(file);
     if(handle)(VOID)ZwClose(handle);
@@ -194,6 +197,7 @@ NTSTATUS TgGpuClosePlatform(TG_GPU_PLATFORM *p)
     KeAcquireSpinLock(&p->HandleLock,&irql);
     p->Closing=TRUE;
     ++p->BridgeEpoch;
+    ++p->ProviderGeneration;
     notify=p->PnpNotify;p->PnpNotify=NULL;
     KeReleaseSpinLock(&p->HandleLock,irql);
     if(notify)(VOID)IoUnregisterPlugPlayNotificationEx(notify);
@@ -288,20 +292,24 @@ static NTSTATUS send_pmic_irp(PFILE_OBJECT file,PDEVICE_OBJECT owner_dev,
     return status;
 }
 
-static NTSTATUS platform_request(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op,BOOLEAN optional)
+static NTSTATUS platform_request(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op,BOOLEAN optional,
+                                 ULONG *vote_generation)
 {
     PFILE_OBJECT file=NULL;PDEVICE_OBJECT owner_dev=NULL;
-    BOOLEAN reclaim=FALSE;KIRQL irql;NTSTATUS status;ULONG epoch=0;
+    BOOLEAN reclaim=FALSE;KIRQL irql;NTSTATUS status;ULONG epoch=0,generation=0;
+    ULONG reg;
     PAGED_CODE();
     if(!p || !op || !p->Resources)return STATUS_INVALID_PARAMETER;
+    reg=op->reg;
     KeAcquireSpinLock(&p->HandleLock,&irql);
     file=(PFILE_OBJECT)p->FileObject;
     owner_dev=(PDEVICE_OBJECT)p->OwnerDevice;
     if(!p->Closing && p->Bridge && file) {
         epoch=p->BridgeEpoch;
+        generation=p->ProviderGeneration;
         ObfReferenceObject(file);
         if(owner_dev)ObfReferenceObject(owner_dev);
-        reclaim=p->NeedReclaim && op->reg!=TG_GPU_PMIC_CLAIM_RAIL && op->reg!=TG_GPU_PMIC_RELEASE_RAIL;
+        reclaim=p->NeedReclaim && reg!=TG_GPU_PMIC_CLAIM_RAIL && reg!=TG_GPU_PMIC_RELEASE_RAIL;
     } else {
         file=NULL;owner_dev=NULL;
     }
@@ -315,9 +323,10 @@ static NTSTATUS platform_request(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *
         owner_dev=(PDEVICE_OBJECT)p->OwnerDevice;
         if(!p->Closing && p->Bridge && file) {
             epoch=p->BridgeEpoch;
+            generation=p->ProviderGeneration;
             ObfReferenceObject(file);
             if(owner_dev)ObfReferenceObject(owner_dev);
-            reclaim=p->NeedReclaim && op->reg!=TG_GPU_PMIC_CLAIM_RAIL && op->reg!=TG_GPU_PMIC_RELEASE_RAIL;
+            reclaim=p->NeedReclaim && reg!=TG_GPU_PMIC_CLAIM_RAIL && reg!=TG_GPU_PMIC_RELEASE_RAIL;
         } else {
             file=NULL;owner_dev=NULL;
         }
@@ -325,6 +334,12 @@ static NTSTATUS platform_request(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *
         if(!file)return optional?STATUS_DEVICE_NOT_READY:failure(p,STATUS_DEVICE_NOT_READY);
     }
 
+    /* file and generation describe the same referenced endpoint, even if PnP
+     * replaces the device immediately after HandleLock was released. */
+    if(vote_generation && reg!=TG_GPU_PMIC_QUERY_EMC_VOTE && *vote_generation!=generation) {
+        status=STATUS_DEVICE_NOT_READY;
+        goto finished;
+    }
     if(reclaim) {
         struct tg_gpu_pmic_request claim={0,TG_GPU_PMIC_CLAIM_RAIL,1,TG_GPU_EMC_VOTE_ABI};
         status=send_pmic_irp(file,owner_dev,&claim);
@@ -344,9 +359,11 @@ static NTSTATUS platform_request(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *
          * as the PnP callback, not later in Preflight/release_pmic. */
         if(p->Closing || p->FileObject!=file || p->BridgeEpoch!=epoch) {
             status=STATUS_DEVICE_NOT_READY;
-        } else if(op->reg==TG_GPU_PMIC_CLAIM_RAIL) {
+        } else if(vote_generation && reg==TG_GPU_PMIC_QUERY_EMC_VOTE) {
+            *vote_generation=generation;
+        } else if(reg==TG_GPU_PMIC_CLAIM_RAIL) {
             p->EmcRailOwner=TRUE;p->RailClaimed=TRUE;p->NeedReclaim=FALSE;
-        } else if(op->reg==TG_GPU_PMIC_RELEASE_RAIL) {
+        } else if(reg==TG_GPU_PMIC_RELEASE_RAIL) {
             p->RailClaimed=FALSE;p->NeedReclaim=FALSE;
         }
         KeReleaseSpinLock(&p->HandleLock,irql);
@@ -361,9 +378,16 @@ finished:
 }
 
 NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op)
-{ return platform_request(p,op,FALSE); }
+{ return platform_request(p,op,FALSE,NULL); }
 NTSTATUS TgGpuPlatformTryRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op)
-{ return platform_request(p,op,TRUE); }
+{ return platform_request(p,op,TRUE,NULL); }
+NTSTATUS TgGpuPlatformTryVoteRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op,ULONG *generation)
+{
+    if(!generation || !op || (op->reg!=TG_GPU_PMIC_QUERY_EMC_VOTE &&
+       op->reg!=TG_GPU_PMIC_REPORT_EMC_ACK && op->reg!=TG_GPU_PMIC_REPORT_EMC_FAILURE))
+        return STATUS_INVALID_PARAMETER;
+    return platform_request(p,op,TRUE,generation);
+}
 NTSTATUS TgGpuPlatformPreflight(TG_GPU_PLATFORM *p,UCHAR *address)
 {
     struct tg_gpu_pmic_request request={0,TG_GPU_PMIC_QUERY_ADDRESS,0,0};NTSTATUS status;

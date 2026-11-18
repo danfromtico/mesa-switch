@@ -1,10 +1,12 @@
 /* SPDX-License-Identifier: MIT */
 #include <ntifs.h>
+#include <wdmguid.h>
 #include "../windows/dvfs.h"
 #include "../windows/hardware.h"
 #include "../windows/platform_io.h"
 #include "../windows/work_queue.h"
 #include "../platform/t214_resources.h"
+#include "../integration/switch-lite/windows/SwitchFan/src/t214/emc_gpu_vote.h"
 #include <ntimage.h>
 
 static ULONG_PTR image_cookie=0x00002b992ddfa232ULL;
@@ -36,6 +38,11 @@ static struct {
     ULONGLONG qpc_ticks;
     ULONG policy,temp,emc_khz,reported_khz,reported_uv,reported_status;
     ULONG emc_vote,emc_ack,emc_failed,emc_failures;
+    ULONG emc_failure_reports;
+    NTSTATUS emc_report_status;
+    BOOLEAN emc_report_applied_before_error;
+    PDRIVER_NOTIFICATION_CALLBACK_ROUTINE provider_notify;
+    PVOID provider_context;
     UCHAR rail;
     BOOLEAN counter_bad,fail_target_counter,stop_on_gate;
     UINT32 fail_khz;
@@ -89,17 +96,19 @@ static LONG_PTR FASTCALL DvfsDerefObj(PVOID o){CHECK(o==&dvfs_file || o==&dvfs_o
 static PDEVICE_OBJECT NTAPI DvfsRelDev(PFILE_OBJECT fo){CHECK(fo==&dvfs_file);return &dvfs_dev;}
 static BOOLEAN NTAPI DvfsCancelIrp(PIRP irp){UNREFERENCED_PARAMETER(irp);return FALSE;}
 static NTSTATUS NTAPI DvfsRegPnp(IO_NOTIFICATION_EVENT_CATEGORY c,ULONG f,PVOID d,PDRIVER_OBJECT drv,PDRIVER_NOTIFICATION_CALLBACK_ROUTINE cb,PVOID ctx,PVOID *e)
-{UNREFERENCED_PARAMETER(c);UNREFERENCED_PARAMETER(f);UNREFERENCED_PARAMETER(d);UNREFERENCED_PARAMETER(drv);UNREFERENCED_PARAMETER(cb);UNREFERENCED_PARAMETER(ctx);*e=(PVOID)1;return STATUS_SUCCESS;}
+{UNREFERENCED_PARAMETER(c);UNREFERENCED_PARAMETER(f);UNREFERENCED_PARAMETER(d);UNREFERENCED_PARAMETER(drv);model.provider_notify=cb;model.provider_context=ctx;*e=(PVOID)1;return STATUS_SUCCESS;}
 static NTSTATUS NTAPI DvfsUnregPnp(PVOID e){UNREFERENCED_PARAMETER(e);return STATUS_SUCCESS;}
 static NTSTATUS FASTCALL DvfsCallDriver(PDEVICE_OBJECT dev,PIRP irp)
 {
     PIO_STACK_LOCATION sp=IoGetNextIrpStackLocation(irp);
     struct tg_gpu_pmic_request *op=irp->AssociatedIrp.SystemBuffer;
+    NTSTATUS status=STATUS_SUCCESS;
     CHECK(model.level==PASSIVE_LEVEL && dev==&dvfs_dev && sp->Parameters.DeviceIoControl.IoControlCode==TG_GPU_IOCTL_PMIC);
     if(op->reg==TG_GPU_PMIC_QUERY_ADDRESS)op->value=0x33;
     else if(op->reg==TG_GPU_PMIC_QUERY_TEMP)op->value=model.temp;
     else if(op->reg==TG_GPU_PMIC_QUERY_EMC_KHZ)op->value=model.emc_khz;
-    else if(op->reg==TG_GPU_PMIC_QUERY_EMC_VOTE)op->value=model.emc_vote;
+    else if(op->reg==TG_GPU_PMIC_QUERY_EMC_VOTE)
+        op->value=model.emc_failed==model.emc_vote?model.emc_ack:model.emc_vote;
     else if(op->reg==TG_GPU_PMIC_REPORT_EMC_ABI){CHECK(op->write==1 && op->value==TG_GPU_EMC_VOTE_ABI);}
     else if(op->reg==TG_GPU_PMIC_REPORT_EMC_ACK){
         CHECK(op->write==1 && model.gate_depth && !queue.Current.Engine && !engine.Channel.referenced);
@@ -108,8 +117,17 @@ static NTSTATUS FASTCALL DvfsCallDriver(PDEVICE_OBJECT dev,PIRP irp)
         model.emc_ack=op->value;
     }
     else if(op->reg==TG_GPU_PMIC_REPORT_EMC_FAILURE){
-        CHECK(op->write==1 && op->value==model.emc_vote && model.gate_depth);
-        model.emc_failed=op->value;++model.emc_failures;
+        CHECK(op->write==1 && op->value==model.emc_vote);
+        if(!model.gate_depth) {
+            CHECK(hardware.Dvfs.EmcFailedWord==op->value);
+            CHECK(hardware.Dvfs.EmcVoteWord==hardware.Dvfs.EmcAckWord);
+        }
+        ++model.emc_failure_reports;
+        status=model.emc_report_status;
+        if(NT_SUCCESS(status) || model.emc_report_applied_before_error) {
+            model.emc_failed=op->value;
+            ++model.emc_failures;
+        }
     }
     else if(op->reg==TG_GPU_PMIC_QUERY_DVFS_POLICY)op->value=model.policy;
     else if(op->reg==TG_GPU_PMIC_REPORT_ABI){CHECK(op->write==1 && op->value==TG_GPU_LIVE_COUNTER_ABI);}
@@ -125,9 +143,9 @@ static NTSTATUS FASTCALL DvfsCallDriver(PDEVICE_OBJECT dev,PIRP irp)
             else op->value=model.rail;
         }
     }
-    irp->IoStatus.Status=STATUS_SUCCESS;irp->IoStatus.Information=sizeof(*op);
+    irp->IoStatus.Status=status;irp->IoStatus.Information=NT_SUCCESS(status)?sizeof(*op):0;
     (VOID)sp->CompletionRoutine(dev,irp,sp->Context);
-    return STATUS_SUCCESS;
+    return status;
 }
 static LARGE_INTEGER NTAPI QueryQpc(PLARGE_INTEGER freq)
 {
@@ -209,6 +227,150 @@ KIRQL (NTAPI * const __imp_KeAcquireSpinLockRaiseToDpc)(PKSPIN_LOCK)=LockSpin;
 VOID (NTAPI * const __imp_KeReleaseSpinLock)(PKSPIN_LOCK,KIRQL)=UnlockSpin;
 VOID (NTAPI * const __imp_KeStallExecutionProcessor)(ULONG)=Stall;
 NTSTATUS (NTAPI * const __imp_KeDelayExecutionThread)(KPROCESSOR_MODE,BOOLEAN,PLARGE_INTEGER)=DelayThread;
+
+static void fail_clock_vote(ULONG word, NTSTATUS report_status)
+{
+    ULONG rollbacks=hardware.Dvfs.Rollbacks;
+    model.emc_vote=word;
+    model.emc_report_status=report_status;
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,614400u,614400u,6);
+    model.fail_target_counter=TRUE;
+    model.fail_khz=614400u;
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS);
+    CHECK(hardware.Clock.running && hardware.Dvfs.Rollbacks==rollbacks+1);
+    CHECK(model.emc_ack!=word);
+    model.fail_target_counter=FALSE;
+}
+
+static void test_failure_report_delivery(void)
+{
+    struct tg_emc_gpu_vote provider={.request=model.emc_vote,.failed=model.emc_failed,
+        .acknowledged=model.emc_ack,.guard_uv=TG_GPU_EMC_VOTE_UV(model.emc_ack)};
+    ULONG reports=model.emc_failure_reports;
+    CHECK(tg_emc_gpu_request(&provider,740000u,FALSE));
+    ULONG rejected=provider.request;
+    fail_clock_vote(rejected,STATUS_DEVICE_NOT_READY);
+    CHECK(model.emc_failure_reports==reports+1 && model.emc_failed!=rejected);
+    CHECK(tg_emc_gpu_request(&provider,740000u,FALSE) && provider.request==rejected);
+
+    /* Keep a channel referenced while polling. Reporting the failure does
+     * not touch the rail, ACK the vote or repeat the clock operation. */
+    engine.Channel.referenced=true;
+    UINT writes=model.pmic_writes;
+    ULONG rollbacks=hardware.Dvfs.Rollbacks;
+    model.qpc_ticks+=100000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_failure_reports==reports+1);
+    model.qpc_ticks+=200000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_failure_reports==reports+2);
+    model.emc_report_status=STATUS_SUCCESS;
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_failed==rejected);
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_failure_reports==reports+3);
+    CHECK(model.pmic_writes==writes && hardware.Dvfs.Rollbacks==rollbacks && model.emc_ack!=rejected);
+    engine.Channel.referenced=false;
+
+    /* A replacement that arrives before the next poll supersedes a failed
+     * notification. Only that replacement may receive the normal ACK. */
+    provider.failed=model.emc_failed;
+    CHECK(tg_emc_gpu_request(&provider,740000u,FALSE) && provider.request!=rejected);
+    fail_clock_vote(provider.request,STATUS_DEVICE_NOT_READY);
+    reports=model.emc_failure_reports;
+    CHECK(tg_emc_gpu_request(&provider,590000u,TRUE));
+    model.emc_vote=provider.request;
+    model.emc_report_status=STATUS_SUCCESS;
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,460800u,460800u,7);
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_ack==provider.request);
+    CHECK(model.emc_failure_reports==reports);
+
+    /* If the provider already applied the failure, its vote query returns
+     * the previous ACK. An unavailable completion must not duplicate it. */
+    model.emc_report_applied_before_error=TRUE;
+    CHECK(tg_emc_gpu_request(&provider,740000u,FALSE));
+    fail_clock_vote(provider.request,STATUS_DEVICE_NOT_READY);
+    model.emc_report_applied_before_error=FALSE;
+    CHECK(model.emc_failed==provider.request);
+    reports=model.emc_failure_reports;
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_failure_reports==reports);
+    provider.failed=model.emc_failed;
+
+    /* Older bridges may reject the optional failure opcode permanently. */
+    CHECK(tg_emc_gpu_request(&provider,740000u,FALSE));
+    fail_clock_vote(provider.request,STATUS_INVALID_DEVICE_REQUEST);
+    reports=model.emc_failure_reports;
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_failure_reports==reports);
+    model.emc_report_status=STATUS_SUCCESS;
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,460800u,460800u,8);
+    model.qpc_ticks+=2500000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS);
+}
+
+static void notify_provider(BOOLEAN removed)
+{
+    TARGET_DEVICE_REMOVAL_NOTIFICATION n={.Event=GUID_TARGET_DEVICE_QUERY_REMOVE,.FileObject=&dvfs_file};
+    CHECK(model.provider_notify(&n,model.provider_context)==STATUS_SUCCESS);
+    n.Event=removed?GUID_TARGET_DEVICE_REMOVE_COMPLETE:GUID_TARGET_DEVICE_REMOVE_CANCELLED;
+    CHECK(model.provider_notify(&n,model.provider_context)==STATUS_SUCCESS);
+    if(removed) {
+        model.emc_vote=0;
+        model.emc_ack=0;
+        model.emc_failed=0;
+    }
+}
+
+static void test_provider_replacement(void)
+{
+    ULONG old_vote=(1u<<8)|98u;
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,460800u,460800u,9);
+    model.emc_vote=old_vote;
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_ack==old_vote);
+    CHECK(hardware.Clock.rail_uv==740000u);
+
+    notify_provider(TRUE);
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && !model.emc_ack);
+    CHECK(hardware.Clock.rail_uv==740000u); /* No request from the replacement yet. */
+    model.emc_vote=old_vote;
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_ack==old_vote);
+    model.emc_vote=2u<<8; /* The replacement explicitly releases the floor. */
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_ack==model.emc_vote);
+    CHECK(hardware.Clock.rail_uv<740000u);
+
+    /* A cancelled removal reopens the same provider. It still needs the
+     * undelivered rejection for its outstanding request. */
+    ULONG rejected=(3u<<8)|98u;
+    fail_clock_vote(rejected,STATUS_DEVICE_NOT_READY);
+    notify_provider(FALSE);
+    model.emc_report_status=STATUS_SUCCESS;
+    engine.Channel.referenced=true;
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_failed==rejected);
+    engine.Channel.referenced=false;
+
+    /* A new provider may instead issue the very same previously rejected
+     * word. Its own transaction must be allowed to complete. */
+    rejected=(4u<<8)|98u;
+    fail_clock_vote(rejected,STATUS_DEVICE_NOT_READY);
+    ULONG reports=model.emc_failure_reports;
+    notify_provider(TRUE);
+    model.emc_report_status=STATUS_SUCCESS;
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,460800u,460800u,10);
+    model.emc_vote=rejected;
+    model.qpc_ticks+=300000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_ack==rejected);
+    CHECK(!model.emc_failed && model.emc_failure_reports==reports);
+    model.emc_vote=5u<<8;
+    model.qpc_ticks+=2500000;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && model.emc_ack==model.emc_vote);
+    CHECK(hardware.Clock.target_khz==460800u && hardware.Clock.rail_uv==590000u);
+}
 
 void start(void)
 {
@@ -389,6 +551,9 @@ void start(void)
     model.qpc_ticks+=2500000ULL;
     CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS);
     CHECK(model.emc_failures==1 && model.emc_ack!=model.emc_vote && hardware.Clock.rail_uv==590000u);
+
+    test_failure_report_delivery();
+    test_provider_replacement();
 
     /* Force fatal double counter loss -> STATUS_DEVICE_DATA_ERROR. */
     model.policy=TG_GPU_DVFS_POLICY_PACK(1,153600u,460800u,3);
