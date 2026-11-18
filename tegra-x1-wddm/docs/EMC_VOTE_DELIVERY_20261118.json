@@ -1,0 +1,427 @@
+{
+  "source_commit": "454ea62d70f74665b3839efd29de5f51bfbdabd8",
+  "source_parent": "74b6ad8e8bc3613e6a72300f7f16abe55ac0028e",
+  "source_url": "https://github.com/ruje0504-2/mesa-switch-woa/commit/454ea62d70f74665b3839efd29de5f51bfbdabd8",
+  "source_files_sha256": {
+    "tegra-x1-wddm/windows/dvfs.c": "b9c676345a236f74005c967d7e86168c9f7f02cb67109ab60321e90c88b15dc8",
+    "tegra-x1-wddm/windows/dvfs.h": "5cab388b9eaa5abce23602d9c15c02850a6a7c41d42e2cd822be704c98a4a2a9",
+    "tegra-x1-wddm/windows/platform_io.c": "7a3e6bb4169ccdd1c96b003daaea6ee5d1be01142a06f35b00675a3e4e67c292",
+    "tegra-x1-wddm/windows/platform_io.h": "9bb104bb8f7d2c36b40d81838da9bbd96e8830dd06dc296883c77366550ac327",
+    "tegra-x1-wddm/tests/test_dvfs_windows.c": "0ad57969e1544c24a072900ecfffedcaf20496e1899039385da7441dabf46077",
+    "tegra-x1-wddm/tests/test_platform_windows.c": "9c37fb0ccb2051af0dbc1cbd1c65ec961aa9c8f917f5a1929913df26e4eb4215",
+    "tegra-x1-wddm/tools/build.py": "ea8ce12bf7e0c1bb32261c680501dc9ed156f6f1da3ede2b163e560820ccf7de"
+  },
+  "hardware": "Tegra X1 GM20B in Switch Lite, Handheld policy with the existing Windows SwitchFan EMC governor.",
+  "existing_provider": {
+    "source_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
+    "fresh_unsigned_sha256": "49fdbb366993c332f23a576e296c514bd2d65e6062ac796e5f8b7ff33b74f0aa",
+    "comparison": "Exact bytes of the archived link used for the installed 0453418e provider.",
+    "inputs_sha256": {
+      "emc_windows.h": "44df62a404344361568a0ac6e09a75c6e13200018ee6059f972dfdd651ef2e38",
+      "emc_client_floor.h": "588ecd7d6583adad78a4a5ab8dfb93a32708817f3f67255cd18d2a389186281d",
+      "emc_control.h": "22b45163199f96ec50c4ca34d9230ce6ce5a4b27b32adcac62a4330da1f69007",
+      "dfll_windows.h": "74ddc4693da69d6048ba81505f4ee1650ba265e18ed20cb207c8731e333f2696"
+    }
+  },
+  "provider_signed_sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5",
+  "defects": [
+    "A voltage failure report can fail during delivery after the KMD rejects a rail vote. Dropping the vote at that point leaves the provider awaiting the same generation, including its two-second timeout.",
+    "Completing provider removal and reopening an instance reuses the namespace for voltage requests. An empty mailbox used to drop the retained floor. A reused word could also match the old acknowledgement and suppress the new notification."
+  ],
+  "repair": [
+    "Retry an undelivered failure report on the next regular policy poll for the same request and provider. Preserve the rail result and skip further attempts on a permanently unsupported notification.",
+    "Bind query and notification to the referenced provider instance, change generation on completed removal or close, keep it across canceled removal and retain the prior voltage floor until the next explicit vote."
+  ],
+  "build": {
+    "target": "ARM64",
+    "unsigned_sys_sha256": "b68df979e3111ca288929513d6d3b9bd0a137729cc0f395c4a03ad7c84f4cd38",
+    "candidate_signed_sha256": "34317683cf2864e9e104977a411acf070b2358fcba47ed20ff73ea2e2d76a2e7",
+    "previous_signed_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "candidate_package_sha256": {
+      "fecs_sig.bin": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+      "fecs.bin": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+      "pmu_bl.bin": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+      "tegragpuno3d.dll": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+      "gpccs.bin": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+      "nv_acr_ucode_prod.bin": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+      "gpmu_ucode_desc.bin": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+      "pmu_sig.bin": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+      "gpmu_ucode_image.bin": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699",
+      "NETB_img.bin": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+      "tegragpurender.inf": "a74b0e6003910339afd499debca42f467eaf4d17b654e10d47732e88da9f4673",
+      "tegragpurender.sys": "34317683cf2864e9e104977a411acf070b2358fcba47ed20ff73ea2e2d76a2e7",
+      "tegragpurender.cat": "027edb4c451753a57c0a4cae851db350457a6d49b0536ebc5197bd2d8836b9e6"
+    },
+    "static_analysis": {
+      "dvfs": {
+        "source_sha256": "b9c676345a236f74005c967d7e86168c9f7f02cb67109ab60321e90c88b15dc8",
+        "reports": []
+      },
+      "platform_io": {
+        "source_sha256": "7a3e6bb4169ccdd1c96b003daaea6ee5d1be01142a06f35b00675a3e4e67c292",
+        "reports": []
+      }
+    }
+  },
+  "controls": {
+    "scope": "Production code with substituted hardware and provider calls. On-device CPU controls ran with the previous kernel selected. Exit values 265 and 337 identify the first differing assertions in the two original controls.",
+    "x64": {
+      "shipped_control": {
+        "exit": 0,
+        "unsigned_sha256": "efbf92026fed660fe0c17c1ad24c15e652cdb50318aa5f1606a54da993a0bbfd"
+      },
+      "shipped_fault": {
+        "exit": 265,
+        "unsigned_sha256": "af2d583c1286bdc25bd5b053efde396775a5cf55f3622dc9e04b40d4a29535d1"
+      },
+      "shipped_rebind": {
+        "exit": 337,
+        "unsigned_sha256": "a56926f348037c15e6b7939ca5f414d39b7f68a483620a4d636480a7f4230fb2"
+      },
+      "candidate_fault": {
+        "exit": 0,
+        "unsigned_sha256": "7f22756e25b65df3f09789dfaaddac095ed286b7a9b6cd2dafd58d380a497b6c"
+      },
+      "platform_shipped": {
+        "exit": 0,
+        "unsigned_sha256": "1bc08885d5217e682a35d003c6ce37468eb4e014e257b5f421608daf0da0b914"
+      },
+      "platform_candidate": {
+        "exit": 0,
+        "unsigned_sha256": "bc4b83ebeed8192cf06824c451fd7ae165f9914681cd579802df0be7a678d6a3"
+      }
+    },
+    "arm64_guest": {
+      "environment": "Windows PE ARM64 10.0.22621.2861 on a Cortex-A57 virtual machine",
+      "physical_driver_installed": false,
+      "raw_sha256": "bc749994ef312270f8a08db071962d4ba4cb5dcdae6f82651dd9a3e95fc2afb5",
+      "fixture_sha256": {
+        "s5-dvfs-original-control.exe": "84cb800edbee001bb5ac9b0ed910c63b404e6eb1148617c6597592a359ec35cc",
+        "s5-dvfs-original-fault.exe": "d6abb514f57bf268bb1f96819524c5e4ea6f225a75bf3b8f35136c3911610ea8",
+        "s5-dvfs-original-rebind.exe": "da61b6680e127985ef9a879f28b1f8daf98ac61b858102a4a0dc035b393e7dc3",
+        "s5-dvfs-candidate-report.exe": "cbe4f62ff4f5e8c7f4d99c4815a9fd0a08173d1a0f4b53e9122f97d2cfe669dd",
+        "s5-platform-vote-scope.exe": "0a012409e9e7c7fbfe5b5f7c3db54282defc3e0e577d74f151ffc4a5dce17d60"
+      },
+      "exit_codes": {
+        "s5-dvfs-original-control.exe": 0,
+        "s5-dvfs-original-fault.exe": 265,
+        "s5-dvfs-original-rebind.exe": 337,
+        "s5-dvfs-candidate-report.exe": 0,
+        "s5-platform-vote-scope.exe": 0
+      },
+      "catalog_unsigned_sha256": "25f080c8bfa63c7c4923228c9939ff16f3d3183ebe0535cdb230565c309714e3",
+      "sdk_makecat_sha256": "b32658ff262c0fcfc43fcaec2df06e68cd8cf85f7e8a06d197a38fb69b90da93"
+    },
+    "physical_switch": {
+      "arch": "ARM64",
+      "boot": "2026-11-18T16:53:45.9010870Z",
+      "dwm_before_after": [
+        1432,
+        1432
+      ],
+      "active_kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "receipt_sha256": "cfd88ec5e08dc65f93460728b7cd465f202f52470e7ebd52f9d76b5d3bace8b3",
+      "tests": [
+        {
+          "case": "unchanged normal DVFS control",
+          "exe": "s5-dvfs-original-control.exe",
+          "sha256": "84cb800edbee001bb5ac9b0ed910c63b404e6eb1148617c6597592a359ec35cc",
+          "windows_signature": "Valid",
+          "exit": 0,
+          "expected": 0
+        },
+        {
+          "case": "reference lost failure report",
+          "exe": "s5-dvfs-original-fault.exe",
+          "sha256": "d6abb514f57bf268bb1f96819524c5e4ea6f225a75bf3b8f35136c3911610ea8",
+          "windows_signature": "Valid",
+          "exit": 265,
+          "expected": 265
+        },
+        {
+          "case": "reference replacement provider",
+          "exe": "s5-dvfs-original-rebind.exe",
+          "sha256": "da61b6680e127985ef9a879f28b1f8daf98ac61b858102a4a0dc035b393e7dc3",
+          "windows_signature": "Valid",
+          "exit": 337,
+          "expected": 337
+        },
+        {
+          "case": "candidate DVFS, delivery and rebind controls",
+          "exe": "s5-dvfs-candidate-report.exe",
+          "sha256": "cbe4f62ff4f5e8c7f4d99c4815a9fd0a08173d1a0f4b53e9122f97d2cfe669dd",
+          "windows_signature": "Valid",
+          "exit": 0,
+          "expected": 0
+        },
+        {
+          "case": "candidate provider transport lifecycle",
+          "exe": "s5-platform-vote-scope.exe",
+          "sha256": "0a012409e9e7c7fbfe5b5f7c3db54282defc3e0e577d74f151ffc4a5dce17d60",
+          "windows_signature": "Valid",
+          "exit": 0,
+          "expected": 0
+        }
+      ]
+    }
+  },
+  "physical_staging": {
+    "utc": "2026-11-18T17:08:13.5992882Z",
+    "catalog_checks_including_recovery": 26,
+    "published_inf": "oem16.inf",
+    "candidate_sha256": "34317683cf2864e9e104977a411acf070b2358fcba47ed20ff73ea2e2d76a2e7",
+    "active_kmd_at_import": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "store_receipt_sha256": "430224744ba70ab44d84dfba25d72ce69f4b438f132a634fe4b03590fe893093"
+  },
+  "physical_kmd_activation": {
+    "phase": "CandidateObserved",
+    "time_utc": "2026-11-18T17:17:28.1155330Z",
+    "boot_utc": "2026-11-18T17:13:35.5539070Z",
+    "selected_inf": "oem16.inf",
+    "selected_kmd": "34317683cf2864e9e104977a411acf070b2358fcba47ed20ff73ea2e2d76a2e7",
+    "dwm_pid": 1424,
+    "dwm_modules_sha256": {
+      "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "device_problem_code": 0,
+    "activation_task_result": 0,
+    "power_mode": 1,
+    "cpu_dfll_active": 1,
+    "emc": {
+      "Version": 1,
+      "Flags": 367,
+      "ActualKhz": 1600000,
+      "BootKhz": 2500000,
+      "SampleAgeMs": 93,
+      "LastError": 0,
+      "EnumerationError": 0,
+      "RateCount": 4,
+      "RatesKhz": [
+        204000,
+        1331200,
+        1600000,
+        2500000
+      ],
+      "ActmonError": 0,
+      "AverageActiveKhz": 43383,
+      "RawActiveKhz": 32819,
+      "TargetKhz": 1600000,
+      "DisplayFloorKhz": 38304,
+      "QosError": 0,
+      "TransitionCount": 83
+    },
+    "nvdec_resource_query": {
+      "adapters": 1,
+      "supported": 1,
+      "luid": "00000000000aac73"
+    }
+  },
+  "native_720p": {
+    "resolution": [
+      1280,
+      720
+    ],
+    "mode": "D3D11VA hardware decode-only on native GM20B",
+    "client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+    "client_source_sha256": "dd3b7d7fe0f32da4f4f9d6bcac13b9c0c92baff66e918fca24f089bcb29425a9",
+    "fixture_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "software_reference_sha256_file": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+    "software_reference_frames": [
+      "0 1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+      "1 37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+      "2 504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+      "3 ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+      "4 a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+      "5 f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+    ],
+    "ded6_umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "candidate": {
+      "label": "EMC delivery candidate on external power",
+      "kmd_sha256": "34317683cf2864e9e104977a411acf070b2358fcba47ed20ff73ea2e2d76a2e7",
+      "boot": "2026-11-18T17:13:35.5539070Z",
+      "client_pid": 6572,
+      "dwm": 1424,
+      "adapter_luid": "00000000000aac73",
+      "reported_power_before": {
+        "mode": 1,
+        "battery_percent": 66,
+        "cell_mv": 3752,
+        "external_power": true,
+        "soc_celsius": 38
+      },
+      "trace_requested": false,
+      "timings_requested": true,
+      "client_write_through_ms_since_boot": {
+        "entry": 273734,
+        "open_decoder": 274140,
+        "six_verified_pixel_hashes": [
+          274375,
+          274421,
+          274468,
+          274515,
+          274562,
+          274609
+        ],
+        "close_decoder_returned": 274656,
+        "final_device_status_ok": 274671,
+        "client_success_return_path": 274703
+      },
+      "complete_digests_retrieved_from_stdout": 0,
+      "wrapper_phase": "running",
+      "parent_observed_exit": null,
+      "sources_sha256": {
+        "result.json": "e264b35e33603ae54222e7551a9a3ecda88a79424415a469e7b898830c517c3a",
+        "journal.txt": "46778c73f17d65c446f8cf005faac5fdd18b998edba815dd7f21b7d5e192d404",
+        "stdout.txt": "52fd09198534e62eaef29a5c4a31cbb0e5c4b4473695590ae4ef8ea46fb09e1a",
+        "stderr.txt": "8d4f9c224a3cdb25eb98be11d63973fb19fcc8c57ccf9d7b9dd69862b6392c86"
+      }
+    },
+    "prior": {
+      "label": "accepted video UMD on previous KMD, battery power",
+      "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "boot": "2026-11-18T14:53:27.7277430Z",
+      "client_pid": 5060,
+      "dwm": 1372,
+      "adapter_luid": "0000000000081b04",
+      "reported_power_before": {
+        "mode": 1,
+        "battery_percent": 74,
+        "cell_mv": 3500,
+        "external_power": false,
+        "soc_celsius": 38
+      },
+      "trace_requested": true,
+      "timings_requested": false,
+      "client_write_through_ms_since_boot": {
+        "entry": 352203,
+        "open_decoder": 353062,
+        "six_verified_pixel_hashes": [
+          353250,
+          353281,
+          353312,
+          353343,
+          353390,
+          353406
+        ],
+        "close_decoder_returned": 353437,
+        "final_device_status_ok": 353468,
+        "client_success_return_path": 353531
+      },
+      "complete_digests_retrieved_from_stdout": 6,
+      "wrapper_phase": "running",
+      "parent_observed_exit": null,
+      "sources_sha256": {
+        "result.json": "4be5abf4a6f877c2627fe2f0890100c64d93936811e14f809178257367e4020a",
+        "journal.txt": "5b19647fd350a0553deab2670acaabd239130c292fde262d73a9df8ca4734f89",
+        "stdout.txt": "59c36929903cb6afde80fcede2093d5ddff9c39e7dfb011d0c7fc414b117563c",
+        "stderr.txt": "6bd3749a368b56ead82399ee6d06456c94bde1edab4477a48d4b48ea5e032053"
+      }
+    },
+    "pixel_verification": "For each decoded surface the signed client converts the NV12 readback to canonical planar order, compares all 32 SHA-256 bytes with the software reference, then writes and flushes VERIFIED NV12Frame. Both runs contain all six markers. The candidate stdout ends inside the first printed digest.",
+    "afterward": {
+      "boot_utc": "2026-11-18T17:18:28.7281970Z",
+      "dwm_pid": 1380,
+      "kmd_sha256": "34317683cf2864e9e104977a411acf070b2358fcba47ed20ff73ea2e2d76a2e7",
+      "gpu_code": 0,
+      "battery_percent": 67,
+      "external_power": true,
+      "event41_record": 66324,
+      "event41_fields": {
+        "BugcheckCode": "0",
+        "BugcheckParameter1": "0x0",
+        "BugcheckParameter2": "0x0",
+        "BugcheckParameter3": "0x0",
+        "BugcheckParameter4": "0x0",
+        "LongPowerButtonPressDetected": "false",
+        "PowerButtonTimestamp": "0",
+        "SleepInProgress": "0",
+        "BugcheckInfoFromEFI": "false"
+      },
+      "event6008_record": 66315,
+      "new_minidump_or_livekernel_dump": false
+    },
+    "interpretation": "720p reference pixels, decoder teardown and the final device status passed. Windows restarted before the parent persisted the process exit or desktop health. The prior KMD reached the same final write-through marker under this UMD. The new occurrence was on external power with client ETW disabled. Differences in boot uptime, power, ETW and timing options prevent a KMD-only causal comparison. These records do not identify a decoder, Wi-Fi, storage or power fault.",
+    "windowed_video_or_game_on_candidate": "Deferred after this restart."
+  },
+  "decision": {
+    "decode_function": "passed",
+    "process_exit_and_desktop_stability": "unverified after restart",
+    "source_baseline_promoted": false,
+    "reason": "Candidate voltage protocol has controlled coverage and live activation. Resume ordinary workload acceptance after recovery on the retained daily package. The common post-decode restart is recorded for objective 4."
+  },
+  "restored_daily_baseline": {
+    "phase": "Restored",
+    "boot": "2026-11-18T17:27:14.0334990Z",
+    "utc": "2026-11-18T17:29:52.5612830Z",
+    "selected_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "dwm_modules_sha256": {
+      "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "dwm_pid": 828,
+    "gpu_problem_code": 0,
+    "activation_task": "Ready",
+    "activation_exit": 0,
+    "handheld_mode": 1,
+    "cpu_dfll": 1,
+    "wmi_video_modes": [
+      {
+        "y": 1280,
+        "hz": 60,
+        "code": 0,
+        "name": "Tegra X1 (GM20B) .158 GM20B fence 6c86354e781e",
+        "x": 720
+      }
+    ],
+    "fresh_physical_panel_observation": false,
+    "new_interactive_readback_verified": false,
+    "desktop_receipt_sha256": "eb08b84ebb6d39d7e1c584994bd402827c60f306cd87e52f2d19da13bcaf9ba4",
+    "scope": "Independent OS queries verified the recovered kernel, loaded DWM modules and active GPU. Interactive desktop and panel checks were not repeated after the subsequent restart."
+  },
+  "separate_restart_on_recovered_kmd": {
+    "old_kmd_boot": "2026-11-18T17:22:49.4638400Z",
+    "old_kmd_task_complete_before_check": "Enabled",
+    "old_kmd_dwm_before": [
+      1420
+    ],
+    "known_module_hashes_before": {
+      "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "requested_workload": "Read-only display layout, shell WM_NULL response, DwmFlush and 45 GDI pixel samples. No decoder or game was launched by the test controller.",
+    "dispatch_ack_sha256": "f3aa05548f202a17c63a8b2b73e09cdd6bca1b41025c010e0b97098a13abb32a",
+    "dispatch_utc": "2026-11-18T17:26:49.939745+00:00",
+    "subsequent_boot": "2026-11-18T17:27:14.0334990Z",
+    "first_readback_utc": "2026-11-18T17:28:54.9152644Z",
+    "time_before_next_boot_seconds": 264.57,
+    "scheduler_log_enabled": false,
+    "scheduler_events": [],
+    "test_files_recovered": [
+      {
+        "wt": "2026-11-18T17:26:47.7887250Z",
+        "sha256": "C72768AEAE7B875D730580C8F2FFD6CF4B155C002D217A811CF6768399F1A633",
+        "name": "wsi-perf-emc-34317683-desktop-01.ps1",
+        "len": 3488
+      }
+    ],
+    "task_registered_after_restart": false,
+    "result_persisted": false,
+    "event41": {
+      "record": 66491,
+      "fields": {
+        "BugcheckCode": "0",
+        "LongPowerButtonPressDetected": "false",
+        "PowerButtonTimestamp": "0",
+        "BugcheckParameter3": "0x0",
+        "BugcheckParameter4": "0x0",
+        "BugcheckParameter1": "0x0",
+        "BugcheckParameter2": "0x0",
+        "SleepInProgress": "0"
+      }
+    },
+    "event6008_record": 66482,
+    "new_dumps": [],
+    "conclusion": "Windows restarted on the restored KMD after accepting a desktop-only request. The task writes its result at the end. The scheduling acknowledgement and the new boot cannot identify the last method reached or establish a cause."
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "status": "Objective 5 in progress. This checkpoint adds reproducible platform images, paging-record accounting and controlled audio and Wi-Fi driver candidates.",
+  "status": "Objective 5 in progress. Physical paging CPU timing, five game frame-time histories, the bound battery, I2C and RTC images, and EMC provider handoff controls are recorded.",
   "order": [
     "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
     "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
@@ -311,8 +311,150 @@
         }
       },
       "interpretation": "The eight-record case has 28 validation visits in the shortened suffixes. All 601 OS paging starts have a zero DmaBufferSize field. These ETLs give a request rate and scheduler duration; they do not identify the number of fill records or the validation CPU time. The reference and candidate ETLs compare a different, earlier worker timer change.",
-      "stage": "The host count and the native ETL reduction are complete. The ARM64 timing fixture was built and signed. The physical Switch was offline before it could be dispatched. No validation change was applied to the KMD."
-    }
+      "stage": "Complete on the physical Switch. The KMD retains full record validation.",
+      "physical_cpu_benchmark": {
+        "physical_switch": true,
+        "boot": "2026-11-18T16:53:45.9010870Z",
+        "dwm_pid": 1432,
+        "kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "umd": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+        "status_code": 0,
+        "power_mode": 1,
+        "count_rows": [
+          [
+            1,
+            64,
+            1,
+            1
+          ],
+          [
+            2,
+            128,
+            2,
+            3
+          ],
+          [
+            4,
+            256,
+            4,
+            10
+          ],
+          [
+            8,
+            512,
+            8,
+            36
+          ]
+        ],
+        "timing_us_per_batch": {
+          "1": {
+            "admission": {
+              "median_us": 0.041656,
+              "q1_us": 0.041555,
+              "q3_us": 0.074921
+            },
+            "later_suffix_checks": {
+              "median_us": 5.1e-05,
+              "q1_us": 5.1e-05,
+              "q3_us": 7.6e-05
+            },
+            "worker": {
+              "median_us": 0.102158,
+              "q1_us": 0.101598,
+              "q3_us": 0.186132
+            },
+            "admission_and_worker": {
+              "median_us": 0.146357,
+              "q1_us": 0.145671,
+              "q3_us": 0.264664
+            }
+          },
+          "2": {
+            "admission": {
+              "median_us": 0.067291,
+              "q1_us": 0.066376,
+              "q3_us": 0.082881
+            },
+            "later_suffix_checks": {
+              "median_us": 0.045293,
+              "q1_us": 0.044657,
+              "q3_us": 0.082067
+            },
+            "worker": {
+              "median_us": 0.192693,
+              "q1_us": 0.192591,
+              "q3_us": 0.193329
+            },
+            "admission_and_worker": {
+              "median_us": 0.262705,
+              "q1_us": 0.262248,
+              "q3_us": 0.361404
+            }
+          },
+          "4": {
+            "admission": {
+              "median_us": 0.138702,
+              "q1_us": 0.136795,
+              "q3_us": 0.23997
+            },
+            "later_suffix_checks": {
+              "median_us": 0.252889,
+              "q1_us": 0.245895,
+              "q3_us": 0.287374
+            },
+            "worker": {
+              "median_us": 0.563609,
+              "q1_us": 0.532354,
+              "q3_us": 0.631256
+            },
+            "admission_and_worker": {
+              "median_us": 0.693156,
+              "q1_us": 0.668615,
+              "q3_us": 0.802307
+            }
+          },
+          "8": {
+            "admission": {
+              "median_us": 0.24114,
+              "q1_us": 0.240987,
+              "q3_us": 0.322545
+            },
+            "later_suffix_checks": {
+              "median_us": 1.004181,
+              "q1_us": 0.998586,
+              "q3_us": 1.160685
+            },
+            "worker": {
+              "median_us": 1.539256,
+              "q1_us": 1.482951,
+              "q3_us": 1.941783
+            },
+            "admission_and_worker": {
+              "median_us": 1.817703,
+              "q1_us": 1.703211,
+              "q3_us": 3.112666
+            }
+          }
+        },
+        "timing_method": "Actual ARM64 paging_buffer.obj and a count-instrumented build, 13 rotated rounds of 2048 iterations per phase and batch size, native QPC at 19.2 MHz, CPU-only fill-record microbenchmark.",
+        "what_if_8_fills_every_recorded_os_paging_packet_cpu_us_per_second": {
+          "reference": 5.9396,
+          "candidate": 5.6477
+        },
+        "disposition": "Keep the complete admission checks. These traces do not expose record counts. For this ordinary allocation/draw workload even an assumed eight fills on every paging packet would save roughly six microseconds of one core per second in repeated suffix scans. End-to-end paging latency or gameplay throughput is not attributed to this control.",
+        "receipt_sha256": "4cb29de9497a1c4ed076ed6644fc71fdb5c4fb9e7bef6e067b7821814fa673f9",
+        "raw_qpc_csv_sha256": "401ae62c8a7a78fefa54c351c3816240e58886b281a3c71027d5754862052c53",
+        "count_sha256": "f86079de32af23c953372fcae760a123bd46a7d92126fdc7fdfa17e7144ef319",
+        "timing_sha256": "c63c261b2771feac3277ba98069e122bfe7fdfb8253e6b324f59d02442262b27"
+      },
+      "raw_qpc_file": {
+        "file": "dxvk-games-20261118/kmd-paging-batch-qpc.csv",
+        "published_sha256": "0bc01e15742b8bf07651191b1ac0198c2439a7e947be0d446498dd3cd072ddc0",
+        "rows": 208,
+        "raw_sha256": "401ae62c8a7a78fefa54c351c3816240e58886b281a3c71027d5754862052c53"
+      }
+    },
+    "emc_power_vote_record": "EMC_VOTE_DELIVERY_20261118.json"
   },
   "uefi": {
     "reported_bios": "1.09 (winx-r402)",
@@ -508,7 +650,7 @@
       "FTM4 touch parser and HID reports",
       "existing DFLL, PMIC concurrency, EMC governor and display QoS models"
     ],
-    "binding_note": "I2C 1.0.0.5 and two RTC sources named 1.0.0.3 cross-link. The RTC INFs are dated November 7 and November 14 and contain different code. Verifying the installed RTC INF date and installed I2C/RTC payloads is pending. Touch and SIO version correspondence remains as in the hardware inventory.",
+    "binding_note": "Three I2C instances bind the November 6 version 1.0.0.5 package. The RTC binds the November 7 build of 1.0.0.3. Fresh ARM64 links reproduce both installed payloads after normalizing the Authenticode fields.",
     "pending": [
       "Audio playback and buffer timing",
       "Bluetooth transport with a connected peer",
@@ -537,6 +679,309 @@
         "commit": "b19f617e746eea20ff62aa6e50cb40d9d555fdae",
         "unsigned_sha256": "ecc2716f2e8720630360074a60b793841442c39c4a03ad017a2701a08d118529",
         "normalized_sha256": "4f071825ead685b225acde252871f201a8042c9b861ac545cb70a79343301512"
+      }
+    },
+    "bound_i2c_rtc": {
+      "tegra210i2c": {
+        "inf": "oem22.inf",
+        "inf_sha256": "eea7fed7fa5dbdbc8da995f5457b7056aa3bc17f2d0bced2bae91ea11c3990da",
+        "driver_ver": "DriverVer   = 11/06/2026,1.0.0.5",
+        "installed_signed_sha256": "61a7d83f635abca9bb891ad6625f8b1431f9f72cf2c5b515b7da9bfa88582445",
+        "build_comparison": {
+          "i2c": {
+            "compared_bytes": [
+              20980,
+              20980
+            ],
+            "normalized_equal": true,
+            "different_common_bytes": 0,
+            "source": "ca60e5d8112bb5883292c12af525f21ae72c1b2e"
+          }
+        }
+      },
+      "switchrtc": {
+        "inf": "oem28.inf",
+        "inf_sha256": "100bc32a4f1304a7218ce453e4a2b3a6a7a5827558509857bf12afac79a39057",
+        "driver_ver": "DriverVer   = 11/07/2026,1.0.0.3",
+        "installed_signed_sha256": "b9e7849cc71af7a7762a5b40a5cb29ca4410c5b156936ce6747fd29f2470d1b2",
+        "build_comparison": {
+          "rtc-1107": {
+            "compared_bytes": [
+              17908,
+              17908
+            ],
+            "normalized_equal": true,
+            "different_common_bytes": 0,
+            "source": "5f531e6f2ddb82570c0368eebbf2c73b9deaec03"
+          },
+          "rtc-1114": {
+            "compared_bytes": [
+              19444,
+              17908
+            ],
+            "normalized_equal": false,
+            "different_common_bytes": 11875,
+            "source": "b19f617e746eea20ff62aa6e50cb40d9d555fdae"
+          }
+        }
+      }
+    },
+    "i2c_fifo_timeout": {
+      "source": "ca60e5d8112bb5883292c12af525f21ae72c1b2e",
+      "patch_sha256": "d49dce8d25b3c03794b1ba9ce508c4fb539f46ba29dae50c428f60eca094f0b4",
+      "unsigned_sha256": "3bcdaf60161119da1fc86424a4b75f096ec1afb73bed8aafab2c59a713b400f0",
+      "controls_sha256": "a875e2719f23d5c5a97e69f87a0f7ff04e3bd565d00afc5d3ad850ce31da2f90",
+      "cases_per_build": 11,
+      "outcomes": {
+        "reference": {
+          "stuck_flush": {
+            "status": -4,
+            "simulated_wait_us": 40200,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 3,
+            "bus_clears": 1,
+            "request_timeouts": 1,
+            "gate_acquires": 0,
+            "gate_releases": 0
+          },
+          "prepare_config_stuck": {
+            "status": 0,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 0,
+            "request_timeouts": 0,
+            "gate_acquires": 1,
+            "gate_releases": 1
+          },
+          "prepare_fifo_stuck": {
+            "status": 0,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 0,
+            "request_timeouts": 0,
+            "gate_acquires": 1,
+            "gate_releases": 1
+          },
+          "arbitration_config_stuck": {
+            "status": -3,
+            "simulated_wait_us": 20000,
+            "tx_words_accepted": 3,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 1,
+            "request_timeouts": 0,
+            "gate_acquires": 0,
+            "gate_releases": 0
+          }
+        },
+        "candidate": {
+          "stuck_flush": {
+            "status": -4,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 1,
+            "request_timeouts": 1,
+            "gate_acquires": 0,
+            "gate_releases": 0
+          },
+          "prepare_config_stuck": {
+            "status": -4,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 0,
+            "request_timeouts": 0,
+            "gate_acquires": 1,
+            "gate_releases": 1
+          },
+          "prepare_fifo_stuck": {
+            "status": -4,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 0,
+            "request_timeouts": 0,
+            "gate_acquires": 1,
+            "gate_releases": 1
+          },
+          "arbitration_config_stuck": {
+            "status": -3,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 3,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 1,
+            "request_timeouts": 0,
+            "gate_acquires": 0,
+            "gate_releases": 0
+          }
+        }
+      },
+      "scope": "Controlled register test of the installed source. Failed FIFO clearing previously issued three packet headers during the flush. The candidate returns timeout and stops writing. Physical installation and bus recovery testing remain open.",
+      "feature_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/f0fabfb79dd868291a1a7860077995574bfaeb74",
+      "candidate_package_version": "1.0.0.6"
+    },
+    "battery": {
+      "driver": {
+        "installed_sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60",
+        "source": "06614ee6b9bbe80682f3f45e2c84a5cdd9f69133",
+        "builds": {
+          "provider-wdk": {
+            "unsigned_sha256": "a487496a8bdf03974ebe2adc7191967dbbe1d46e3996194039f3b9bb0527584e",
+            "payload_equal": true
+          }
+        },
+        "source_sha256": {
+          "charge_limit.h": "d4bcf7f76c97775e15a9cd2d395d7d2222cb0acb89acd065f60249a57bd36168",
+          "switchbattery.c": "c1c44ac850a929ad218954f53ed6fe2bf96c984a944dec1e65170ec5f8146e06",
+          "gauge_telemetry.h": "5922b3187520f786de155d0b4bf5d79272cd0dc2321cbd0650b9fd4693e75784",
+          "charge_limit_ioctl.h": "10ac91908eb1a2dd36237e60fadeb3b9c026ebb3896278dc62a5793ef7a242bc"
+        }
+      },
+      "controlled_gauge_reads": {
+        "fixture_sha256": "fe2e3605379b48554d1097fbd6639116efe2e399a06091d2e7638f4dec1ae8a2",
+        "active_charge_query_header_sha256": "d4bcf7f76c97775e15a9cd2d395d7d2222cb0acb89acd065f60249a57bd36168",
+        "source_test_sha256": "518b6d30cc31424541d19f3a9afae892a1d27542b3778a12d681ba031e7fc934",
+        "stdout_sha256": "4786fae106dde8be89357598404d357dd395204df3eb4aa4d06d15171fab877c",
+        "scope": "Synthetic raw registers consistent with the reported endpoint values, with changing input and independent failures at each live gauge read. The original raw registers and current at physical cutoff were not captured."
+      },
+      "hardware_observation": {
+        "last_verified_external_power_sample": {
+          "utc": "2026-11-18T15:12:17.0716236Z",
+          "capacity_percent": 72,
+          "cell_mv": 3621,
+          "charger_status": "0x6C",
+          "flags": "0x0D",
+          "external_online": 1,
+          "charging": 1,
+          "input_src": "0x02",
+          "charger_mode_reg": "0x10",
+          "limit_apply_status": 0,
+          "receipt_sha256": "275e942a34af6bec7fc8497fecdb29bcf2e8299cf2c0dcd3384f20a6b6ddcf41"
+        },
+        "last_verified_battery_sample": {
+          "utc": "2026-11-18T15:42:23.1853799Z",
+          "capacity_percent": 65,
+          "cell_mv": 3321,
+          "charger_status": "0x00",
+          "flags": "0x01",
+          "external_online": 0,
+          "charging": 0,
+          "input_src": "0x02",
+          "charger_mode_reg": "0x10",
+          "limit_apply_status": 0,
+          "receipt_sha256": "055f57499058bf022644ee5a008b0bb6e74bbcf6a1c994909a12ba24c41e0620"
+        },
+        "deduplicated_native_samples": 127,
+        "all_samples_csv_sha256": "bfe3cc596c8aff26263dc64f294bd73ba0f51771979628dc3c25cdbb197f954c",
+        "selected_driver_signed": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60",
+        "offline_observation": "Owner reported the physical Switch battery was depleted during this investigation. This establishes the observed condition without an exact shutdown timestamp.",
+        "report_recorded_by_utc": "2026-11-18T16:54:13Z",
+        "first_unreachable_probe": {
+          "start_utc": "2026-11-18T15:48:35.209203+00:00",
+          "end_utc": "2026-11-18T15:48:51.226365+00:00",
+          "exit": 255,
+          "stdout_bytes": 0
+        },
+        "dispatch_status": "No remote output or command dispatch for the new paging batch fixture before loss of connectivity.",
+        "last_read_to_first_probe_minutes": 6.2,
+        "last_read_to_report_recorded_by_minutes": 71.83,
+        "interpretation": "The charge-limit IOCTL reads live RepSOC, VCELL and charger hardware status. With external power off, it last reported 65% at 3321 mV. No terminal sample or calibrated capacity measurement was captured at loss of power.",
+        "active_driver_charge_query": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/06614ee6b9bbe80682f3f45e2c84a5cdd9f69133/drivers/SwitchBattery/src/charge_limit.h",
+        "board_reference": "https://github.com/CTCaer/hekate/blob/master/bdk/power/max17050.c",
+        "charger_register_reference": "https://www.ti.com/lit/ds/symlink/bq24193.pdf",
+        "physical_return": {
+          "utc": "2026-11-18T17:01:09.5764027Z",
+          "boot": "2026-11-18T16:53:45.9010870Z",
+          "charge": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 64,
+            "VoltageMv": 3630,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          },
+          "telemetry": {
+            "Version": 1,
+            "Flags": 1,
+            "VoltageUv": 3565625,
+            "CurrentUa": 92343,
+            "PowerUw": 329260,
+            "SampleAgeMs": 844,
+            "LastStatus": 0,
+            "RawCurrent": 591,
+            "Cgain": 32767,
+            "GaugeId": 172
+          },
+          "telemetry_valid": true,
+          "system_events": [
+            {
+              "utc": "2026-11-18T15:46:46.7875226Z",
+              "provider": "Microsoft-Windows-Kernel-Power",
+              "id": 41,
+              "record": 66158
+            },
+            {
+              "utc": "2026-11-18T16:54:37.7937116Z",
+              "provider": "EventLog",
+              "id": 6008,
+              "record": 66149
+            }
+          ]
+        },
+        "boot_evidence": {
+          "system_events": [
+            {
+              "record": 66158,
+              "provider": "Microsoft-Windows-Kernel-Power",
+              "id": 41,
+              "utc": "2026-11-18T15:46:46.7875226Z",
+              "fields": {
+                "BugcheckCode": "0",
+                "ConnectedStandbyInProgress": "false",
+                "LongPowerButtonPressDetected": "false",
+                "PowerButtonTimestamp": "0",
+                "BugcheckParameter3": "0x0",
+                "BugcheckParameter4": "0x0",
+                "BugcheckParameter1": "0x0",
+                "BugcheckParameter2": "0x0",
+                "Checkpoint": "0",
+                "SleepInProgress": "0",
+                "BugcheckInfoFromEFI": "false"
+              },
+              "previous_shutdown_local": null
+            },
+            {
+              "record": 66149,
+              "provider": "EventLog",
+              "id": 6008,
+              "utc": "2026-11-18T16:54:37.7937116Z",
+              "fields": {},
+              "previous_shutdown_local": [
+                "23:35:15",
+                "‎2026/‎11/‎18"
+              ]
+            },
+            {
+              "record": 66140,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "id": 12,
+              "utc": "2026-11-18T15:46:42.9235491Z",
+              "fields": {
+                "StartTime": "2026-11-18T15:46:41.4893880Z",
+                "BootMode": "0"
+              },
+              "previous_shutdown_local": null
+            }
+          ],
+          "interpretation": "Windows recorded an unexpected shutdown with zero bugcheck and power-button fields. The reported previous shutdown predates the last verified device read. Exact cutoff time and electrical cause remain unknown. Other crashes are tracked separately."
+        }
       }
     }
   },
@@ -668,10 +1113,24 @@
   },
   "high_load_followup": "Keep the manual restart for Wi-Fi startup separate from the subsequent verified unexpected restart after the H.264 trial. Both are recorded without assigning a shared cause.",
   "current_platform_readback": {
-    "utc": "2026-11-18T15:42:23.1853799Z",
-    "dwm_pid": 1396,
+    "utc": "2026-11-18T17:29:52.5612830Z",
+    "dwm_pid": 828,
     "power_mode": 1,
-    "receipt_sha256": "055f57499058bf022644ee5a008b0bb6e74bbcf6a1c994909a12ba24c41e0620"
+    "receipt_sha256": "eb08b84ebb6d39d7e1c584994bd402827c60f306cd87e52f2d19da13bcaf9ba4",
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "wmi_video_modes": [
+      {
+        "y": 1280,
+        "hz": 60,
+        "code": 0,
+        "name": "Tegra X1 (GM20B) .158 GM20B fence 6c86354e781e",
+        "x": 720
+      }
+    ],
+    "selected_driver_after_trial": "Restored",
+    "wmi_and_loaded_components_verified": true,
+    "new_interactive_readback_verified": false
   },
   "audio": {
     "installed_version": "1.0.0.9",
@@ -789,6 +1248,384 @@
     "catalog_creation_log_sha256": "5a53d16368c71ae9948c913fa827f4638c9c835a50dc175de4d8d9970f927524",
     "signature_and_membership_log_sha256": "14dc4c0fd5134d432508384a69a45de0c7651e9151e2f2c1ad0b8dd9472cc51c",
     "api_reference": "https://learn.microsoft.com/en-us/windows/win32/api/wintrust/ns-wintrust-wintrust_catalog_info",
-    "hardware_status": "The last on-device inventory showed Wi-Fi 0.5.7.0 and audio 1.0.0.9. The prepared candidate packages require a live PnP and functional trial."
+    "hardware_status": "The last on-device inventory showed Wi-Fi 0.5.7.0 and audio 1.0.0.9. The prepared candidate packages require a live PnP and functional trial.",
+    "arm64_driver_store": {
+      "environment": "Windows PE ARM64 10.0.22621.2861 on a Cortex-A57 virtual machine",
+      "receipt_sha256": "913160063e4c56f13a69760a387dc249d3bb35fac229da147599cb1272a85da2",
+      "packages": {
+        "tegragpurender": {
+          "sha256": {
+            "tegragpurender.inf": "a74b0e6003910339afd499debca42f467eaf4d17b654e10d47732e88da9f4673",
+            "tegragpurender.sys": "34317683cf2864e9e104977a411acf070b2358fcba47ed20ff73ea2e2d76a2e7",
+            "tegragpuno3d.dll": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+            "NETB_img.bin": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+            "fecs.bin": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+            "gpccs.bin": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+            "nv_acr_ucode_prod.bin": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+            "pmu_bl.bin": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+            "gpmu_ucode_image.bin": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699",
+            "gpmu_ucode_desc.bin": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+            "pmu_sig.bin": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+            "fecs_sig.bin": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+            "tegragpurender.cat": "027edb4c451753a57c0a4cae851db350457a6d49b0536ebc5197bd2d8836b9e6"
+          },
+          "add_driver_exit": 0,
+          "modified_inf_exit": 1,
+          "all_fetched_hashes_match": true,
+          "member_checks": 12
+        },
+        "switchwifi": {
+          "sha256": {
+            "switchwifi.inf": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
+            "switchwifi.sys": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
+            "switchwifi.cat": "3ac32fcba2c90eab2ab1ce1b1056868fcc6471e8f07e1b5036509aee92208f4b"
+          },
+          "add_driver_exit": 0,
+          "modified_inf_exit": 1,
+          "all_fetched_hashes_match": true,
+          "member_checks": 2
+        },
+        "switchaudio": {
+          "sha256": {
+            "switchaudio.inf": "27a30c89250f6019b1328ecdfc14114e4a48c6c4d1555020e17d41f6adbf8962",
+            "switchaudio.sys": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+            "switchaudio.cat": "7b0d5987d1972a2cc0e5af17665c07aec904f64298196ea9c660c31ae35daa92"
+          },
+          "add_driver_exit": 0,
+          "modified_inf_exit": 1,
+          "all_fetched_hashes_match": true,
+          "member_checks": 2
+        }
+      },
+      "scope": "PnP import, catalog and image checks in Windows PE ARM64. The physical Switch graphics driver store is recorded in EMC_VOTE_DELIVERY_20261118.json. Wi-Fi and audio operational trials are pending."
+    }
+  },
+  "game_frame_and_power": {
+    "scope": "Five retained successful FTE/LibreQuake sessions on one boot and one historical KMD. Both clock snapshots bracket the whole process. Windows clocks, temperatures and sample ages are endpoint observations and do not describe individual frame intervals. There is no continuously sampled power draw. No candidate KMD was running in these sessions.",
+    "metric_definitions": "Application updates use Win32k event 33 attributed to the game PID; DWM event 46 covers compositor updates in the timed interval. Distinct captured images count consecutive changes in the foreground game window. FPS is the inverse mean positive inter-event duration; percentiles use linear interpolation.",
+    "verified_interval_metrics": 60,
+    "intervals": {
+      "file": "dxvk-games-20261118/power-game-frame-intervals.csv",
+      "published_sha256": "b9b63fbfc4dc7f6af05d67088a513f9bf0217c4c6c55d6c5ae45a0a19fd589b0",
+      "rows": 20,
+      "raw_sha256": "37ed740f20ff7be651ff858d4f576c8d51f617f81574424f8551f3db74027fb1"
+    },
+    "runs": [
+      {
+        "path": "dxvk-x64",
+        "case_directory": "fte-default-dxvk-x64-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "game": "fteqw64.exe",
+        "icd_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "backend": "d3d9",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:50:51.3681951Z",
+            "CpuTargetKhz": 1122000,
+            "CpuActualKhz": 1120605,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 307200,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 625,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 36,
+            "SocTempC": 36,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 124,
+            "TempSampleAgeMs": 1296,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:52:11.5541693Z",
+            "CpuTargetKhz": 918000,
+            "CpuActualKhz": 929106,
+            "RamActualKhz": 204000,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 500,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 187,
+            "TempSampleAgeMs": 1062,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 407240704,
+        "inputs_sha256": {
+          "result.json": "c8ed7d85586c8eab6882b972ff61da4578b704106300517c725d0e3626f192ef",
+          "comparison.json": "e926a503a4ac87ddb3cabfe92d1ed1e938555ad5b488c291ca03b3e05ce4852e",
+          "frame-events.csv": "d402b34f999df75cc99c1154cdd70d0e3dea5e7690e08c2714db6ad785773d14",
+          "visible.csv": "16e9f8538ff08d39cdea5fa9e50c2c70c06c5f2d116fe1f4ddd4451c6bdc9adc"
+        }
+      },
+      {
+        "path": "dxvk-x86",
+        "case_directory": "fte-default-dxvk-x86-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+        "game": "fteqw.exe",
+        "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "backend": "d3d9",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:48:32.7220361Z",
+            "CpuTargetKhz": 918000,
+            "CpuActualKhz": 918896,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 307200,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 529,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 31,
+            "TempSampleAgeMs": 1359,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:49:36.5888810Z",
+            "CpuTargetKhz": 408000,
+            "CpuActualKhz": 412432,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 76800,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 176,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 0,
+            "TempSampleAgeMs": 937,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 363659264,
+        "inputs_sha256": {
+          "result.json": "30a3cd1ddebc5a1d97a85584fc2439eab7a746f064de48668586dba69b6cd5b2",
+          "comparison.json": "f2d1adf976504269fa737ec004145c77062ce93ba362d22c95a1963becbe9a55",
+          "frame-events.csv": "015c2e327913849628bbb6859b389609af4cc3e6aa8167d796d94a1b2be813f1",
+          "visible.csv": "060359e9e6184a07f5fa8194a4340f25130b87b8ee2e3af1d7788e97afc66b47"
+        }
+      },
+      {
+        "path": "dxvk-ec",
+        "case_directory": "fte-default-dxvk-ec-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "game": "fteqw64.exe",
+        "icd_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "backend": "d3d9",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:53:21.3639853Z",
+            "CpuTargetKhz": 1020000,
+            "CpuActualKhz": 1021992,
+            "RamActualKhz": 1600000,
+            "GpuReportedKhz": 307200,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 588,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 124,
+            "TempSampleAgeMs": 453,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:54:33.7395546Z",
+            "CpuTargetKhz": 1581000,
+            "CpuActualKhz": 1568250,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 936,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 421,
+            "TempSampleAgeMs": 515,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 405827584,
+        "inputs_sha256": {
+          "result.json": "ef5159a40727e75c923a4aabadb1167efa9b2dcab90668fbbf4817be8eff7e28",
+          "comparison.json": "75489f00ed34b304e9726c7da6c60080f952d888639df24cb17025d0e085d718",
+          "frame-events.csv": "c8c822f2fde7619b5adcfeded7d44ffa36f0f32792faea57c7e852998bdf6fc3",
+          "visible.csv": "3bb28988c20e1f7f84c04d265a39323505c143329c7f91a49933326366ec99f4"
+        }
+      },
+      {
+        "path": "zink-x64",
+        "case_directory": "fte-default-zink-x64-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "game": "fteqw64.exe",
+        "icd_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "backend": "gl",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:46:46.3572870Z",
+            "CpuTargetKhz": 816000,
+            "CpuActualKhz": 815800,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 76800,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 437,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 36,
+            "SocTempC": 36,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 31,
+            "TempSampleAgeMs": 1546,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:47:37.3001801Z",
+            "CpuTargetKhz": 714000,
+            "CpuActualKhz": 712705,
+            "RamActualKhz": 204000,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 411,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 15,
+            "TempSampleAgeMs": 343,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 328146944,
+        "inputs_sha256": {
+          "result.json": "dca6a497f26bcb1563c9e17adfc9fb5cdd086991563fce14c88a56f8c7849f8d",
+          "comparison.json": "fd679c82f2094519627060fbd5b06bdef640968885b52f6828842070d245bb9e",
+          "frame-events.csv": "ad2fa70c7fead8f116512f01c63b6e8469f650904fede09b3ea653a891fc3d10",
+          "visible.csv": "4ae29445a98d54be6a38d51e2b7a9e3997923b2df73dcd4f06cd3a66f6a427c3"
+        }
+      },
+      {
+        "path": "zink-x86",
+        "case_directory": "fte-default-zink-x86-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+        "game": "fteqw.exe",
+        "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "backend": "gl",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:44:17.3717326Z",
+            "CpuTargetKhz": 816000,
+            "CpuActualKhz": 815800,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 466,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 31,
+            "TempSampleAgeMs": 1265,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:45:11.6694333Z",
+            "CpuTargetKhz": 612000,
+            "CpuActualKhz": 620915,
+            "RamActualKhz": 204000,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 294,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 31,
+            "TempSampleAgeMs": 1437,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 279633920,
+        "inputs_sha256": {
+          "result.json": "3c0bf7ca2009c52d52c390b7d6bf1051d2fff8b07ba4b4a1a0a1b32a1676ef60",
+          "comparison.json": "28da9ad1c721cf6bcc9851ea4092bab24c2782d03d6f0e677197758e483a237f",
+          "frame-events.csv": "fe6067184f49611de69084237f4fb08c03b6e762d74de5c8897326cd3699d211",
+          "visible.csv": "86d47fa04132b2c4bdebde952bf667ea3611ebb90195ecdad684fa4dda2c8461"
+        }
+      }
+    ]
+  },
+  "high_load_followup_720p": {
+    "record": "EMC_VOTE_DELIVERY_20261118.json",
+    "result": "Both the baseline and candidate KMD reached six software-reference frame checks and the client success return, followed by an unplanned restart before durable parent exit. The candidate occurrence used external power with client ETW off.",
+    "restored_kmd_desktop_observation": "A later unplanned reboot also occurred with the accepted KMD after dispatch of a desktop check with no video or game. Its last operation is unknown."
   }
 }
