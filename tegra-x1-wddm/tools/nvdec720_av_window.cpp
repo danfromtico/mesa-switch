@@ -539,9 +539,44 @@ static void require_loaded_umd(const wchar_t *expected,const Journal &journal)
    journal.mark("VERIFIED","LoadedCandidateUMD");
 }
 
+struct DecodeTimings {
+   struct Frame {
+      uint64_t readback = 0, verify = 0, preview = 0;
+   } frames[6];
+   uint64_t frequency = 0, submit = 0, receive = 0;
+
+   explicit DecodeTimings(bool enabled) {
+      LARGE_INTEGER f;
+      if (enabled) {
+         check(QueryPerformanceFrequency(&f) && f.QuadPart > 0, "query performance frequency");
+         frequency = static_cast<uint64_t>(f.QuadPart);
+      }
+   }
+
+   uint64_t now() const {
+      if (!frequency) return 0;
+      LARGE_INTEGER t;
+      QueryPerformanceCounter(&t);
+      return static_cast<uint64_t>(t.QuadPart);
+   }
+
+   void print(uint64_t loop) const {
+      if (!frequency) return;
+      std::printf("DECODE_TIMING qpc=%llu loop=%llu send=%llu receive=%llu\n",
+                  (unsigned long long)frequency, (unsigned long long)loop,
+                  (unsigned long long)submit, (unsigned long long)receive);
+      for (unsigned i = 0; i < 6; ++i) {
+         const auto &f = frames[i];
+         std::printf("FRAME_TIMING index=%u readback=%llu verify=%llu preview=%llu\n", i,
+                     (unsigned long long)f.readback, (unsigned long long)f.verify,
+                     (unsigned long long)f.preview);
+      }
+   }
+};
+
 static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,const wchar_t *capture,
                 Mode mode, const Journal &journal,VideoTrace &trace,const wchar_t *first_frame_capture,
-                const wchar_t *expected_umd,bool visual_check)
+                const wchar_t *expected_umd,bool visual_check,bool report_timings)
 {
    Com<IDXGIFactory1> enumeration;
    journal.invoke("CreateDXGIFactory1",[&]{return CreateDXGIFactory1(__uuidof(IDXGIFactory1),(void **)enumeration.put());});
@@ -617,11 +652,15 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
    Av<AVFrame,av_frame_free> frame,cpu;frame.p=av_frame_alloc();cpu.p=av_frame_alloc();
    check(frame.p && cpu.p,"allocate frames");
    unsigned frames=0;int64_t last=AV_NOPTS_VALUE;const ULONGLONG start=GetTickCount64();
+   DecodeTimings timing(report_timings);
+   const uint64_t loop_start=timing.now();
    auto receive=[&](bool flushing) {
       for (;;) {
          const bool after_last=frames==6;
          if (after_last) journal.mark("CALL","ReceiveAfterLastFrame");
+         const uint64_t receive_start=timing.now();
          int ret=avcodec_receive_frame(decoder.p,frame.p);
+         timing.receive+=timing.now()-receive_start;
          if (after_last) journal.mark("RETURN","ReceiveAfterLastFrame",static_cast<HRESULT>(ret));
          if (ret==AVERROR_EOF) return;
          if (ret==AVERROR(EAGAIN)) {check(!flushing,"unexpected EAGAIN while draining");return;}
@@ -634,8 +673,13 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
          check(owner.p==hw->device && desc.Format==DXGI_FORMAT_NV12 && desc.Width==sample_width && desc.Height==coded_height &&
                (desc.BindFlags&D3D11_BIND_DECODER) && slice<desc.ArraySize,"decode texture ownership");
          check(frame->pts!=AV_NOPTS_VALUE && (last==AV_NOPTS_VALUE || frame->pts>last),"display frame order");last=frame->pts;
+         auto &sample_time=timing.frames[frames];
+         const uint64_t read_start=timing.now();
          av_check(av_hwframe_transfer_data(cpu.p,frame.p,0),"Read native NV12 frame");
+         const uint64_t verify_start=timing.now();
+         sample_time.readback=verify_start-read_start;
          check_pixels(*cpu.p,hashes.data()+frames*32,frames);
+         sample_time.verify=timing.now()-verify_start;
          journal.mark("VERIFIED","NV12Frame");
          if (preview && frames==0) {
             check(frame->colorspace==AVCOL_SPC_UNSPECIFIED || frame->colorspace==AVCOL_SPC_BT709 ||
@@ -650,9 +694,12 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
             preview->configure_color(hw,matrix,range);
          }
          std::printf("SAMPLE index=%u subresource=%llu pts=%lld\n",frames,(unsigned long long)slice,(long long)last);
-         if (preview)
+         if (preview) {
+            const uint64_t draw_start=timing.now();
             preview->draw(hw,cpu->data[0],cpu->linesize[0],cpu->data[1],cpu->linesize[1],frames,
                           frames==5 ? capture : nullptr);
+            sample_time.preview=timing.now()-draw_start;
+         }
          ++frames;
          if (frames==6) journal.mark("CALL","ReleaseLastFrameRefs");
          av_frame_unref(cpu.p);av_frame_unref(frame.p);
@@ -663,11 +710,22 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
       int ret=av_read_frame(input.p,packet.p);
       if (ret==AVERROR_EOF) break;
       av_check(ret,"Read packet");
-      if (packet->stream_index==stream) {av_check(avcodec_send_packet(decoder.p,packet.p),"Submit packet");receive(false);}
+      if (packet->stream_index==stream) {
+         const uint64_t send_start=timing.now();
+         av_check(avcodec_send_packet(decoder.p,packet.p),"Submit packet");
+         timing.submit+=timing.now()-send_start;
+         receive(false);
+      }
       av_packet_unref(packet.p);
    }
-   av_check(journal.av_call("DrainDecoder",[&]{return avcodec_send_packet(decoder.p,nullptr);}),"Drain decoder");
+   av_check(journal.av_call("DrainDecoder",[&]{
+      const uint64_t drain_start=timing.now();
+      const int ret=avcodec_send_packet(decoder.p,nullptr);
+      timing.submit+=timing.now()-drain_start;
+      return ret;
+   }),"Drain decoder");
    receive(true);
+   const uint64_t loop_ticks=timing.now()-loop_start;
    check(frames==6,"incomplete decoded sequence");
    journal.mark("COMPLETE","DecodedSequence");
    // After drain, every decoder surface has been read back. The shader uses
@@ -684,6 +742,7 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
       journal.mark("RETURN","ReleasePreview");
    }
    journal.invoke("FinalDeviceStatus",[&]{return hw->device->GetDeviceRemovedReason();});
+   timing.print(loop_ticks);
    std::printf("DECODED_FRAMES=%u WINDOW_FRAMES=%u elapsed_ms=%llu\n",frames,
                mode==Mode::Present?frames:0,GetTickCount64()-start);
 }
@@ -691,6 +750,8 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
 int wmain(int argc,wchar_t **argv)
 {
    SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
+   const bool report_timings=argc>=2 && std::wcscmp(argv[argc-1],L"--timings")==0;
+   if (report_timings) --argc;
    const wchar_t *expected_umd=nullptr;
    if (argc>=3 && std::wcscmp(argv[argc-2],L"--require-umd")==0) {
       expected_umd=argv[argc-1];
@@ -709,7 +770,7 @@ int wmain(int argc,wchar_t **argv)
       argc-=2;
    }
    if ((argc!=4 && argc!=5) || ((check_first || trace_requested) && !evidence)) {
-      std::fprintf(stderr,"usage: nvdec720-av-window <native-luid-hex> <sample.mp4> <reference.sha256> [last-frame.ppm | --prepare-only | --decode-only] [--evidence new-directory [--check-first-submit] [--trace]] [--visual-check] [--require-umd sha256]\n");
+      std::fprintf(stderr,"usage: nvdec720-av-window <native-luid-hex> <sample.mp4> <reference.sha256> [last-frame.ppm | --prepare-only | --decode-only] [--evidence new-directory [--check-first-submit] [--trace]] [--visual-check] [--require-umd sha256] [--timings]\n");
       return 2;
    }
    Mode mode=Mode::Present;
@@ -726,6 +787,10 @@ int wmain(int argc,wchar_t **argv)
             const std::wstring dir=evidence;
             check(_wfreopen((dir+L"\\stderr.txt").c_str(),L"wb",stderr)!=nullptr,"open evidence stderr");
             check(_wfreopen((dir+L"\\stdout.txt").c_str(),L"wb",stdout)!=nullptr,"open evidence stdout");
+         }
+         /* Timed runs select the same native video path without write-through
+          * evidence journaling inside the measured frame loop. */
+         if (evidence || report_timings) {
             check(SetEnvironmentVariableW(L"TGD3D_VIDEO_VALIDATE",L"1"),"enable process-local video validation");
             if (mode!=Mode::DecodeOnly)
                check(SetEnvironmentVariableW(L"TGD3D_VIDEO_WINDOW_VALIDATE",L"1"),"request same-device window submission");
@@ -744,7 +809,7 @@ int wmain(int argc,wchar_t **argv)
          }
          const std::wstring first_image=check_first?std::wstring(evidence)+L"\\first-frame.ppm":L"";
          run(wanted,argv[2],argv[3],argc==5 && mode==Mode::Present?argv[4]:nullptr,
-             mode,journal,trace,check_first?first_image.c_str():nullptr,expected_umd,visual_check);
+             mode,journal,trace,check_first?first_image.c_str():nullptr,expected_umd,visual_check,report_timings);
          trace.finish();
          journal.mark("EXIT","RunAndRelease",S_OK);
          return 0;
