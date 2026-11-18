@@ -32,3 +32,31 @@ foreach($case in @('original','retained','wrong-path','missing-identity','differ
  else{Assert ($null -ne $errorText) ('Invalid binding accepted: '+$case)}
 }
 Write-Output 'PASS: original/retained userspace path and identity rejection controls; file I/O replaced'
+
+$fn=$ast.Find({param($n)$n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Prepare-VideoUmd'},$true)
+. ([scriptblock]::Create($fn.Extent.Text))
+$root='C:\Model\inputs';$candidate='C:\Model\candidate'
+$config=@{CandidateUmd=@{Image=@{Sha256='a'};Control=@{Sha256='b'};RetainedIcd=@{Sha256='c'};Commit='video';Source='frozen + video'}}
+function Read-Json($Path){
+ if($Path -eq (Join-Path $root 'preparation.json')){return $receipt}
+ [pscustomobject]@{TemporaryUmd='old-umd';Manifest='old-manifest'}
+}
+function Assert-File($Path,$Record){Assert ($Record.Sha256 -in 'a','b','c') 'Unknown file record'}
+function Durable-Copy($From,$To){$script:Copied+=@($To)}
+function Write-ActivationJson($Path,$Value){$script:Registration=$Value}
+foreach($case in 'passed','no-exit','wrong-control'){
+ $receipt=@{Phase='Ready';ControlExit=0;Control='b'}
+ if($case -eq 'no-exit'){$receipt.ControlExit=$null}
+ if($case -eq 'wrong-control'){$receipt.Control='other'}
+ $m=[pscustomobject]@{app=[pscustomobject]@{'TegraGpuD3DVk.dll'=0;'tgd3d-contracts.exe'=0};
+   files=[pscustomobject]@{'app\TegraGpuD3DVk.dll'=0;'app\tgd3d-contracts.exe'=0};umd_patch_commits=@('base')}
+ $script:Copied=@();$script:Registration=$null;$failure=$null
+ try{Prepare-VideoUmd $m}catch{$failure=$_.Exception.Message}
+ if($case -eq 'passed'){
+  Assert (!$failure -and $script:Copied.Count -eq 2) ('Paired preparation failed: '+$failure)
+  Assert ($m.app.'TegraGpuD3DVk.dll'.Sha256 -eq 'a' -and $m.files.'app\tgd3d-contracts.exe'.Sha256 -eq 'b') 'Component record differs'
+  Assert (($m.umd_patch_commits -join ',') -eq 'base,video') 'Patch ancestry differs'
+  Assert ($script:Registration.TemporaryUmd -eq (Join-Path $candidate 'app\TegraGpuD3DVk.dll')) 'Candidate registration differs'
+ }else{Assert ($failure -and !$script:Copied.Count -and !$script:Registration) 'Invalid control receipt reached staging'}
+}
+Write-Output 'PASS: paired video component records, candidate registration and incomplete control receipts'

@@ -313,6 +313,28 @@ function Restore-Registration($Backup){
  $k=[Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($subkey,$true)
  try{$k.SetValue('UserModeDriverName',[string[]]$Backup.Registration.Umd,[Microsoft.Win32.RegistryValueKind]::MultiString);$k.SetValue('VulkanDriverName',[string]$Backup.Registration.Icd,[Microsoft.Win32.RegistryValueKind]::String);$k.Flush()}finally{$k.Dispose()}
 }
+function Prepare-VideoUmd($Manifest) {
+ $video=$config.CandidateUmd
+ $control=Read-Json (Join-Path $root 'preparation.json')
+ if($control.Phase -ne 'Ready' -or $null -eq $control.ControlExit -or
+    $control.ControlExit -ne 0 -or $control.Control -ne $video.Control.Sha256){throw 'ARM64 video control receipt differs'}
+ foreach($name in @('TegraGpuD3DVk.dll','tgd3d-contracts.exe')){
+  $record=if($name -eq 'TegraGpuD3DVk.dll'){$video.Image}else{$video.Control}
+  $key='app\'+$name
+  if(!$Manifest.app.PSObject.Properties[$name] -or !$Manifest.files.PSObject.Properties[$key]){throw ('Missing packaged video entry: '+$key)}
+  Assert-File (Join-Path $root $name) $record
+  Durable-Copy (Join-Path $root $name) (Join-Path $candidate $key)
+  $Manifest.app.PSObject.Properties[$name].Value=$record
+  $Manifest.files.PSObject.Properties[$key].Value=$record
+ }
+ Assert-File (Join-Path $candidate 'app\libvulkan_nouveau.dll') $video.RetainedIcd
+ $registration=Read-Json (Join-Path $candidate 'icd-registration.json')
+ $registration.TemporaryUmd=Join-Path $candidate 'app\TegraGpuD3DVk.dll'
+ $registration.Manifest=Join-Path $candidate 'app\nvk_windows_icd.json'
+ Write-ActivationJson (Join-Path $candidate 'icd-registration.json') $registration
+ $Manifest|Add-Member NoteProperty umd_patch_commits (@($Manifest.umd_patch_commits)+@($video.Commit)) -Force
+ $Manifest|Add-Member NoteProperty umd_source_identity $video.Source -Force
+}
 function Install-DefaultTask([string]$Xml,[string]$Directory) {
  $folder=Task-Root;$null=$folder.RegisterTask('Tgd3dDefaultEnable',$Xml,6,'SYSTEM',$null,5,$null)
  New-ItemProperty ($service+'\Tgd3dDefault') Directory -PropertyType String -Value $Directory -Force|Out-Null
@@ -347,7 +369,7 @@ try {
   # before replacing only the candidate package/table records.
   $normalized=[ordered]@{}
   foreach($entry in $original.files.PSObject.Properties){
-   $name=$entry.Name.Replace('\\','\')
+   $name=$entry.Name.Replace('/','\').Replace('\\','\')
    if($normalized.Contains($name)){throw 'Duplicate normalized manifest path'}
    $normalized[$name]=$entry.Value
   }
@@ -372,11 +394,13 @@ try {
   Durable-Copy (Join-Path $root 'candidate-acpi.dat') (Join-Path $candidate 'display158.aml')
   $original.helpers.'display158.aml'=File-Record (Join-Path $candidate 'display158.aml');$original.files.'display158.aml'=$original.helpers.'display158.aml'
   $original.kmd_source=$config.CandidateSource
-  $scope=if($config.Provider){'Coexisting decoder candidate; native decode acceptance pending'}else{'Startup resource snapshot only; decode unavailable'}
+  if($config.CandidateUmd){Prepare-VideoUmd $original}
+  $scope=if($config.Provider -or $config.CandidateUmd){'Coexisting decoder candidate; native decode acceptance pending'}else{'Startup resource snapshot only; decode unavailable'}
   $original|Add-Member NoteProperty nvdec_resource_scope $scope -Force
   Write-ActivationJson (Join-Path $candidate 'trial-components.json') $original
   & icacls.exe $candidate /inheritance:r /grant:r '*S-1-5-18:(OI)(CI)(F)' '*S-1-5-32-544:(OI)(CI)(F)' '*S-1-5-32-545:(OI)(CI)(RX)' /Q|Out-Null
   if($LASTEXITCODE){throw 'Candidate ACL failed'}
+  if($config.CandidateUmd){$null=& (Join-Path $candidate 'Enable-RuntimeAppContainerRead.ps1') -Directory (Join-Path $candidate 'app')}
   $check=& { . (Join-Path $candidate 'Common.ps1');Check-Package }
   if($check.kmd.'tegragpurender.sys'.Sha256 -ne $config.CandidateKmd.Sha256){throw 'Candidate activation package differs'}
   $state.Phase='Prepared';$state.End=[DateTime]::UtcNow.ToString('o');Save-State $state
@@ -417,7 +441,9 @@ try {
   if($config.Provider){Assert-ProviderStaged}
   $state.Phase='ClosingGate';Save-State $state
   Close-Gate
-  Commit-BootTable (Join-Path $root 'candidate-acpi.dat') 'boot-table-candidate.json'
+  if($config.CandidateUmd -and $config.CandidateAcpi.Sha256 -eq $config.BaselineAcpi.Sha256){
+   Assert-File "$env:windir\System32\acpitabl.dat" $config.CandidateAcpi
+  }else{Commit-BootTable (Join-Path $root 'candidate-acpi.dat') 'boot-table-candidate.json'}
   $state.Phase='CandidateRebootRequested';$state.Boot=Read-Boot;$state.RestartRequested=$true;Save-State $state
   & shutdown.exe /r /t 10 /d p:0:0 /c 'Load NVDEC optional resources with native start closed'
   if($LASTEXITCODE){throw 'Planned restart was rejected'}
@@ -450,7 +476,15 @@ try {
   }
   $state.Phase='SelectingCandidate';Save-State $state
   Select-Package (Join-Path $root 'package') $config.CandidateKmd (Join-Path $root 'candidate-selection.json')
-  $backup=Read-Json (Join-Path $root 'pair-backup.json');Restore-Registration $backup
+  $backup=Read-Json (Join-Path $root 'pair-backup.json')
+  if($config.CandidateUmd){
+   $reg=Read-Json (Join-Path $candidate 'icd-registration.json')
+   Assert-File $reg.TemporaryUmd $config.CandidateUmd.Image
+   Assert-File (Join-Path (Split-Path $reg.Manifest) 'libvulkan_nouveau.dll') $config.CandidateUmd.RetainedIcd
+   $backup.Registration.Umd[1]=$backup.Registration.Umd[2]=$reg.TemporaryUmd
+   $backup.Registration.Icd=$reg.Manifest
+  }
+  Restore-Registration $backup
   [xml]$taskDocument=$backup.TaskXml
   if(@($taskDocument.Task.Actions.Exec).Count -ne 1){throw 'Unexpected original default task actions'}
   $taskDocument.Task.Actions.Exec.Arguments='-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "'+$candidate+'\Default-Start.ps1"'
@@ -488,9 +522,11 @@ try {
   if(!$state -or $state.Phase -in @('Prepared','Preparing','StagingPackage','StagingProvider','BaselineRebootRequested','SelectingBaseline','BaselineActivationRequested','Restored')){throw 'No eligible new recovery request'}
   $state.Phase='ClosingForRecovery';Save-State $state
   Close-Gate
-  Commit-BootTable (Join-Path $root 'baseline-acpi.dat') 'boot-table-baseline.json'
+  if($config.CandidateUmd -and $config.CandidateAcpi.Sha256 -eq $config.BaselineAcpi.Sha256){
+   Assert-File "$env:windir\System32\acpitabl.dat" $config.BaselineAcpi
+  }else{Commit-BootTable (Join-Path $root 'baseline-acpi.dat') 'boot-table-baseline.json'}
   $state.Phase='BaselineRebootRequested';$state.Boot=Read-Boot;$state.RestartRequested=$true;Save-State $state
-  & shutdown.exe /r /t 10 /d p:0:0 /c 'Restore the retained E95 and original ACPI pair'
+  & shutdown.exe /r /t 10 /d p:0:0 /c 'Restore the retained display driver package'
   if($LASTEXITCODE){throw 'Recovery restart was rejected'}
  }
  elseif($Action -eq 'SelectBaseline') {
