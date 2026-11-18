@@ -70,8 +70,7 @@ python3 src/nouveau/vulkan/nvkmd/windows/build_icd.py \
 The script builds the checked-out Mesa source and produces a matched
 `libvulkan_nouveau.dll` and `nvk_windows_icd.json`. The ICD requires the
 matching live adapter LUID and the KMD's `NATIVE_SUBMIT` capability.
-Set `NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1` to enable enumeration of the
-experimental GM20B device.
+NVK enumerates a native-ready GM20B by default.
 Use `test-kmt.exe` for the controlled KMT cases and `nvk-windows-check.exe`
 for live ICD enumeration.
 `test-kmt-shared.exe` exercises the SDK-backed shared-resource lifecycle
@@ -114,7 +113,6 @@ the ICD; the trial needed a temporary per-adapter `VulkanDriverName`
 registration, saved and removed by its rollback script:
 
 ```bat
-set NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1
 set VK_DRIVER_FILES=%CD%\nvk_windows_icd.json
 vkcube.exe --suppress_popups --gpu_number 0 --present_mode 2 --width 256 --height 256 --c 120
 ```

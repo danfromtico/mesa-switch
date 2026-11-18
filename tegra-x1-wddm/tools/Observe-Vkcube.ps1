@@ -70,7 +70,6 @@ try{
  if(@(Get-Process vkcube -ErrorAction SilentlyContinue).Count){throw 'Another cube is already running'}
  $code=(Get-PnpDeviceProperty -InstanceId 'ACPI\SWOA0F01\0' -KeyName DEVPKEY_Device_ProblemCode).Data
  if($code -ne 0){throw ('GPU problem code '+$code)}
- $env:NVK_I_WANT_A_BROKEN_VULKAN_DRIVER='1'
  $env:VKCUBE_TIMING_FILE=Join-Path $Root 'timing.csv'
  $identity=Start-Process -FilePath (Join-Path $Root 'nvk-windows-check.exe') -ArgumentList ('--loader "'+(Join-Path $Root 'vulkan-1.dll')+'"') -WorkingDirectory $Root -RedirectStandardOutput (Join-Path $Root 'identity.stdout') -RedirectStandardError (Join-Path $Root 'identity.stderr') -PassThru
  $null=$identity.Handle

@@ -142,11 +142,8 @@ struct wsi_win32_runtime_fence_import {
 #define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA_cast struct wsi_win32_runtime_fence_import
 #endif
 
-/* Chained to VkInstanceCreateInfo by an in-tree Windows user-mode driver that
- * loads the NVK ICD by path, without a Vulkan loader. It replaces the
- * NVK_I_WANT_A_BROKEN_VULKAN_DRIVER environment opt-in for that one matched
- * consumer on GM20B; it does not make the device conformant. This is a
- * private in-tree opt-in, not a public extension or an authorization check.
+/* The Windows tgd3d frontend supplies this marker when it creates its
+ * embedded NVK instance. NVK uses it to attribute device telemetry.
  */
 struct nvk_embedded_instance_info {
     VkStructureType sType;

@@ -351,7 +351,7 @@ compute dispatch failure. [Smoke test source](../tools/dxvk/dxvk_offscreen.cpp)
 2. Run `test-kmt-memory.exe`, `test-exec-transport.exe`, `test-win32-pacing.exe`,
    and `nvk-windows-memory-check.exe <LUID>`, recording which VidMm segment
    group reflects resident allocations before setting `NVK_WINDOWS_BUDGET_GROUP`.
-3. From the ARM64 DXVK `package/` directory with `NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1`,
+3. From the ARM64 DXVK `package/` directory,
    run `dxvk-offscreen.exe selftest`, `d3d9`, `d3d10`, `d3d11`, and
    `d3d11 --indirect`, retaining stdout, process exit codes, and DXVK logs.
 4. Run `--system` controls from an isolated directory without DXVK DLLs.

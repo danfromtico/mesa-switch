@@ -442,8 +442,7 @@ int main(int argc, char **argv)
    if (strlen(argv[3]) != 16 || !end || *end || !luid) return 2;
    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
    SetUnhandledExceptionFilter(unhandled_exception);
-   if (!SetEnvironmentVariableA("VK_DRIVER_FILES", argv[2]) ||
-       !SetEnvironmentVariableA("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", "1")) return 2;
+   if (!SetEnvironmentVariableA("VK_DRIVER_FILES", argv[2])) return 2;
    try {
       Run state;
       run(state, argv[1], luid);

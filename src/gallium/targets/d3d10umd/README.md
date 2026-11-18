@@ -28,8 +28,8 @@ checks the resulting adapter LUID and loaded `TegraGpuD3D.dll`, and does not
 fall back to WARP. `--warp` and `--software path/to/gdi-reference.dll` are
 explicit software controls. These rendering modes do not test resource
 sharing or presentation; none runs as a default Meson test.
-For the experimental NVK hardware path, register the ICD as above, make the
-ARM64 Vulkan loader available and set `NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1`.
+For the experimental NVK hardware path, register the ICD as above and make the
+ARM64 Vulkan loader available.
 Append `--implicit-release` to the hardware command to retain scope-exit
 ComPtr destruction while investigating the exit-path fault. Exception
 diagnostics print raw addresses and a bounded ARM64 frame-pointer chain;
@@ -70,8 +70,7 @@ Stop-EtwTraceSession -Name TegraUmd
 ```
 
 `Trace.h` defines the version-1, 88-byte numeric payload. `ScreenQuery` logs adapter
-flags/budget; `ZinkBegin` logs LUID and opt-in state (0 absent, 1 exactly
-`"1"`, 2 another value); `SupportedVersion` logs index/DDI version;
+flags/budget; `ZinkBegin` logs the LUID and a reserved zero field; `SupportedVersion` logs index/DDI version;
 `GetCaps` logs type/size; `CreateDeviceBegin` logs interface/flags. A failed
 `CreateDeviceResult` identifies interface rejection (arg1=0), context (1),
 CSO state (2) or empty shaders (3). `Blt` logs flags/rotation; its current

@@ -94,13 +94,6 @@ specific to NVK:
    ``dlss_backwards_compat``
       Allow using DLSS bytecode intended for earlier architectures if compatible.
 
-.. envvar:: NVK_I_WANT_A_BROKEN_VULKAN_DRIVER
-
-   If defined to ``1`` or ``true``, this will enable enumeration of all
-   GPUs Kepler and later, including GPUs for which hardware support is
-   poorly tested or completely broken.  This is intended for developer use
-   only.
-
 Developer info
 --------------
 

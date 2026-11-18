@@ -49,12 +49,7 @@ d3d10_create_screen(HANDLE hRTAdapter, const D3DDDI_ADAPTERCALLBACKS *callbacks,
       return DXGI_ERROR_UNSUPPORTED;
    }
 
-   char opt_in[8] = {0};
-   DWORD length = GetEnvironmentVariableA("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", opt_in, sizeof(opt_in));
-   /* Trace absence / exact test opt-in "1" / other value without changing
-    * the process environment or NVK's normal feature policy. */
-   D3D10Trace(D3D10_TRACE_ZINK_BEGIN, S_OK, luid,
-             !length ? 0 : length == 1 && opt_in[0] == '1' ? 1 : 2);
+   D3D10Trace(D3D10_TRACE_ZINK_BEGIN, S_OK, luid, 0);
    struct zink_screen_create_error error = {0};
    *screen = zink_win32_create_screen_with_error(luid, &error);
    const struct zink_instance_diagnostics *instance = &error.instance;
