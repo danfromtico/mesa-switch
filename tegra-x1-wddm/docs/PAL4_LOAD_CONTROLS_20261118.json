@@ -146,6 +146,109 @@
         "app_completed": 11,
         "app_present_events": 0
       }
+    },
+    {
+      "id": "postkmd-09",
+      "invoked_utc": "2026-11-18T08:32:08.7464687Z",
+      "boot_utc": "2026-11-18T08:16:56.1031860Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+      "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "dxvk_log_sha256": "95bd7498911c99bb6cfae2bf1cee11a2ea947a0d599c3d4dd771ec12e8c90d3b",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "cpu_mv": 1120,
+      "gpu_khz": 460800,
+      "emc_khz_before_launch": 1600000,
+      "cpu_status": "0x0",
+      "app_queue_completed": 11,
+      "app_present_events": 0,
+      "trace_sha256": "71dc8ada603f9a90cb7fb6e07ea33eec4777a193c19bdb7ec3934791daf808f1",
+      "last_game_queue_complete_utc": "2026-11-18 08:32:12.358955+00:00",
+      "outcome": "The system rebooted during native game initialization.",
+      "next_boot_utc": "2026-11-18T08:32:33.8938970Z",
+      "system_queue_starts": 666,
+      "unmatched_system_starts": 0,
+      "trace_tail_utc": "2026-11-18 08:32:15.728367+00:00"
+    },
+    {
+      "id": "memory-10",
+      "invoked_utc": "2026-11-18T08:48:03.6784937Z",
+      "boot_utc": "2026-11-18T08:32:33.8938970Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+      "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "dxvk_log_sha256": "11e3b3a3d3d22e604124544bbc9e7c3068fc308b755d28204cafce3b52271a61",
+      "power_mode": 7,
+      "cpu_khz": 998400,
+      "cpu_mv": 810,
+      "gpu_khz": 460800,
+      "emc_khz_before_launch": 204000,
+      "cpu_status": "0xc0000483",
+      "app_queue_completed": 11,
+      "app_present_events": 0,
+      "trace_sha256": "cb959fbe6029a8d0bcd90ce47ef096e1a5647454113745d96b4f024370165bab",
+      "last_game_queue_complete_utc": "2026-11-18 08:48:11.503824+00:00",
+      "outcome": "Only the game exited. Windows and the DWM process stayed up.",
+      "process_exit": "0xe06d7363",
+      "game_fault": {
+        "class": "access violation reported by the game in its main executable",
+        "log_write_utc": "2026-11-18T08:48:21.8700995Z",
+        "log_sha256": "cd5524525fc6a394227d280bd958fe5a4dc54ef0dff448d0075fe221aaca0568"
+      },
+      "boot_verified_after_utc": "2026-11-18T08:32:33.8938970Z",
+      "dwm_before": [
+        1368
+      ],
+      "dwm_after": [
+        1368
+      ],
+      "submitted_close": false,
+      "platform": {
+        "samples": 16,
+        "first_utc": "2026-11-18T08:47:58.1003967Z",
+        "last_utc": "2026-11-18T08:48:38.3166129Z",
+        "cpu_khz": 998400,
+        "cpu_mv": 810,
+        "gpu_khz": 460800,
+        "gpu_uv": 800000,
+        "emc_khz": 204000,
+        "emc_transition_count": 1109,
+        "emc_dynamic_enabled": false,
+        "temperature_range_c": [
+          36,
+          37
+        ],
+        "min_available_physical_bytes": 2051682304,
+        "min_available_commit_bytes": 2669047808,
+        "measurements_sha256": "bbeaabb7fb94468955142860424b13d434eaa28fca1c022f2902bb5cc14e320f"
+      },
+      "graphics_memory": {
+        "manifest_sha256": "7f69dfba391df6bf7f9ed086fb0bbc444cbed7a19416854eb48d958d9f064529",
+        "decoded_events_in_live_snapshot": 1697,
+        "issues": 0,
+        "game_adapter_allocation_start_bytes": {
+          "count": 16,
+          "sum": 13520896,
+          "max": 8388608
+        },
+        "make_resident_on_game_thread": 16,
+        "all_make_resident_return_status_counts": {
+          "0x103": 35
+        },
+        "system_allocation_fault_events": 39,
+        "fault_headers": "All 39 records came from the System process with reason 0 and write set. Header PID alone cannot assign allocation ownership."
+      },
+      "capture": {
+        "live_snapshot_utc": "2026-11-18 08:49:20.773357+00:00",
+        "closed_file_sha256": "0bd9ee5d1543c456ed8821c0d600f3995971e1216bfee706649a883425f4fa54",
+        "stop_utc": "2026-11-18T08:51:15.6603624Z",
+        "lost": 0,
+        "buffers_lost": 0,
+        "note": "A native ControlTraceW stop finalized this circular trace because logman.exe was absent."
+      }
     }
   ],
   "archive": {
@@ -184,6 +287,27 @@
     "Keeping the fixed CPU policy and the GPU desktop, both native runs restarted while the software-rendered game reached the menu. EMC frequency samples differed between runs.",
     "Disabling DXVK graphics pipeline libraries did not prevent the native game restart. Captured scheduler data ends before the reset.",
     "The original full extraction was interrupted. A repeated single-member RAR5 workload completed on the active tgd3d desktop in Handheld mode. Its file layout and cache behavior differ from the full extraction.",
-    "The underlying system reset cause and interactive PAL4 gameplay on native NVK remain open."
-  ]
+    "The underlying system reset cause and interactive PAL4 gameplay on native NVK remain open.",
+    "The session with the latched power fault reached a game-reported exception while Windows stayed up. Its CPU and EMC rates and trace coverage differ from the system-reboot cases."
+  ],
+  "power_recovery": {
+    "driver_sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5",
+    "operating_state": "CPU DFLL fault latch active before the game launch, physical display on, GPU counter live, AC connected. Healthy fixed mode and latched fallback both reported mode 7.",
+    "first_handheld_request": "Win32 error 21",
+    "steps": [
+      "Select fixed mode 7 explicitly through SwitchFan. CPU recovered to 1497600 kHz and CpuLastError cleared.",
+      "Select mode 1. CPU DFLL and GPU policy became active, the charge limit stayed at 85%, and the EMC governor resumed."
+    ],
+    "emc_before_count": 1109,
+    "emc_after_count": 1112,
+    "device_reboot_required": false,
+    "script": "../tools/dvfs-integration/Restore-Handheld.ps1",
+    "script_sha256": "273307d586bf95c63d51553097742a57af2f364772770f761da37f10ba2f23c0",
+    "live_script_checks": [
+      "already healthy Handheld",
+      "healthy fixed mode to Handheld",
+      "second call with Handheld already active"
+    ],
+    "unresolved": "The driver records STATUS_DEVICE_HARDWARE_ERROR for several DFLL transition failures. The originating transition was not captured."
+  }
 }

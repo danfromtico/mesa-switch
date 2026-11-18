@@ -35,13 +35,24 @@ its original CRLF endings and for each LF copy in Git. The profile comparison
 uses the Windows hashes. [Component hashes](dxvk-games-20261118/components.json)
 
 The signed KMD at source `001ffd4b` passed native Vulkan transform-feedback
-capture and resume on all four output slots in ARM64 and x64 processes. In the
-D3D11 test, x86, x64 and ARM64EC DXVK passed both indirect draws and counted
-two stream-output triangles. Their slot 0 `DrawAuto` images retained the
-clear color at pixel (0, 0). A separate probe on the preceding KMD found two
-correct stream-output vertices out of six for x64 and ARM64EC, and completed
-indirect compute dispatch on both.
-[Kernel and D3D measurements](GM20B_XFB_COUNTER_BASELINE_20261118.json).
+capture and resume on all four output slots in ARM64 and x64 processes.
+[Kernel measurements](GM20B_XFB_COUNTER_BASELINE_20261118.json)
+
+On x86, x64 and ARM64EC DXVK, an explicit triangle geometry shader wrote all
+six expected vertices. `DrawAuto` rendered all 4,096 pixels correctly. When
+given the vertex shader directly, the same desktop DXVK packages wrote only
+the first vertex of each triangle. Both variants reported two primitives.
+Microsoft WARP on x86, x64 and native ARM64 produced the expected six vertices
+and image from the vertex shader. The probe selects the explicit shader with
+`d3d11 --explicit-so` and the implicit path with `d3d11 --indirect`.
+[Test cases, shader and component hashes](DXVK_STREAM_OUTPUT_20261118.json)
+
+PAL4 also produced a game-local exception on a boot that remained responsive.
+The power driver had already entered fixed recovery mode and reported a DFLL
+error before launch. Explicitly selecting fixed mode cleared the latch, then
+selecting Handheld restored CPU and GPU policy and EMC transitions on that boot.
+The healthy fixed-mode case on the same signed KMD ended in a system restart.
+[PAL4 and power recovery measurements](PAL4_LOAD_CONTROLS_20261118.json)
 
 The application-scoped loader settings list the exact game executable and its
 matching signed ICD manifest. The bundled x86 loader includes the application

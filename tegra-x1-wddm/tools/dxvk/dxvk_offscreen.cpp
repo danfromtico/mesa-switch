@@ -25,6 +25,8 @@
 //     load + STREAMING_BYTE_COUNT + vkCmdDrawIndirectByteCountEXT)
 //   - DispatchIndirect             (vkCmdDispatchIndirect, non-zero arg offset
 //                                   + structured UAV readback)
+// `--explicit-so` selects a triangle GS for the stream-output control.
+// `--warp` selects the Microsoft software device with the isolated system runtime.
 //
 // A pass shows that this fixed sequence rendered correctly on the machine
 // that ran it. It says nothing about presentation, other features or games.
@@ -250,6 +252,11 @@ const char StreamOutPassVsSource[] =
   "float4 main(float4 position : POSITION) : SV_Position {\n"
   "  return position;\n"
   "}\n";
+const char StreamOutTriangleGsSource[] =
+  "struct V { float4 position : SV_Position; };\n"
+  "[maxvertexcount(3)] void main(triangle V v[3], inout TriangleStream<V> outStream) {\n"
+  "  outStream.Append(v[0]); outStream.Append(v[1]); outStream.Append(v[2]);\n"
+  "}\n";
 // The color comes from a constant buffer so the test covers uniform data.
 const char PixelSource[] =
   "cbuffer Color : register(b0) { float4 color; };\n"
@@ -263,10 +270,10 @@ const char ComputeSource[] =
 
 // Clockwise in a y-down target: top-left, top-right, bottom-left.
 const float TriangleNdc[6] = {-1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f};
-// Two clockwise triangles covering the full 64x64 target.
+// Their first vertices differ from each other and from vertex 1 of the first triangle.
 const float QuadTrianglesNdc[12] = {
   -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f,
-   1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f,
+   1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
 };
 const float DrawRgba[4] = {1.0f, 0.0f, 0.0f, 1.0f};
 
@@ -354,7 +361,7 @@ bool compileShaders(ID3DBlob** vs, ID3DBlob** ps, CompileFn* outCompile = nullpt
 
 // ---- Direct3D 11 -----------------------------------------------------------
 
-int runD3D11(bool indirect) {
+int runD3D11(bool indirect, bool explicitSo, bool warp) {
   HMODULE module = loadApi(L"d3d11.dll");
   if (!module)
     return ExitModule;
@@ -369,7 +376,7 @@ int runD3D11(bool indirect) {
   Com<ID3D11Device> device;
   Com<ID3D11DeviceContext> context;
   D3D_FEATURE_LEVEL level = D3D_FEATURE_LEVEL(0);
-  HRESULT hr = create(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, levels, 3,
+  HRESULT hr = create(nullptr, warp ? D3D_DRIVER_TYPE_WARP : D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, levels, 3,
                       D3D11_SDK_VERSION, &device, &level, &context);
   if (FAILED(hr)) {
     printf("DEVICE d3d11: FAIL hr=0x%08lx\n", static_cast<unsigned long>(hr));
@@ -695,7 +702,7 @@ int runD3D11(bool indirect) {
     Com<ID3D11Buffer> argBuffer;
     D3D11_BUFFER_DESC argDesc = {};
     argDesc.ByteWidth = sizeof(drawArgs);
-    argDesc.Usage = D3D11_USAGE_IMMUTABLE;
+    argDesc.Usage = D3D11_USAGE_DEFAULT;
     argDesc.MiscFlags = D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS;
     init.pSysMem = drawArgs;
     REQUIRE(device->CreateBuffer(&argDesc, &init, &argBuffer));
@@ -777,8 +784,14 @@ int runD3D11(bool indirect) {
     REQUIRE(device->CreateInputLayout(&soElement, 1, soVsBlob->GetBufferPointer(), soVsBlob->GetBufferSize(), &soLayout));
     const D3D11_SO_DECLARATION_ENTRY soDecl = {0, "SV_Position", 0, 0, 4, 0};
     const UINT soStride = 4 * sizeof(float);
+    Com<ID3DBlob> gsBlob;
+    if (explicitSo && !compileBlob(compile, StreamOutTriangleGsSource, sizeof(StreamOutTriangleGsSource) - 1,
+                                    "triangle_so", "gs_4_0", &gsBlob))
+      return ExitCompiler;
+    ID3DBlob* soCode = explicitSo ? gsBlob.p : vsBlob.p;
+    printf("STAGE d3d11 SO source: %s\n", explicitSo ? "explicit triangle GS" : "implicit VS passthrough");
     REQUIRE(device->CreateGeometryShaderWithStreamOutput(
-      vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
+      soCode->GetBufferPointer(), soCode->GetBufferSize(),
       &soDecl, 1, &soStride, 1, D3D11_SO_NO_RASTERIZED_STREAM, nullptr, &soGs));
 
     bd.ByteWidth = sizeof(QuadTrianglesNdc);
@@ -791,7 +804,12 @@ int runD3D11(bool indirect) {
     soDesc.ByteWidth = 6 * soStride;
     soDesc.Usage = D3D11_USAGE_DEFAULT;
     soDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_STREAM_OUTPUT;
-    REQUIRE(device->CreateBuffer(&soDesc, nullptr, &soBuffer));
+    float initialPositions[6][4];
+    for (auto& vertex : initialPositions)
+      for (float& component : vertex)
+        component = -1234.0f;
+    D3D11_SUBRESOURCE_DATA initialSo = {initialPositions, 0, 0};
+    REQUIRE(device->CreateBuffer(&soDesc, &initialSo, &soBuffer));
 
     D3D11_QUERY_DESC soQDesc = {};
     soQDesc.Query = D3D11_QUERY_SO_STATISTICS;
@@ -846,8 +864,29 @@ int runD3D11(bool indirect) {
              static_cast<unsigned long>(hr), static_cast<unsigned long>(removed));
       return ExitDrawAuto;
     }
-    if (!checkFullDraw("d3d11 drawauto", readback))
-      return ExitDrawAuto;
+    const bool drawAutoOk = checkFullDraw("d3d11 drawauto", readback);
+
+    D3D11_BUFFER_DESC soReadDesc = {};
+    soReadDesc.ByteWidth = soDesc.ByteWidth;
+    soReadDesc.Usage = D3D11_USAGE_STAGING;
+    soReadDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    Com<ID3D11Buffer> soReadback;
+    REQUIRE(device->CreateBuffer(&soReadDesc, nullptr, &soReadback));
+    context->CopyResource(soReadback, soBuffer);
+    D3D11_MAPPED_SUBRESOURCE soMap = {};
+    REQUIRE(context->Map(soReadback, 0, D3D11_MAP_READ, 0, &soMap));
+    const float* positions = static_cast<const float*>(soMap.pData);
+    unsigned matched = 0;
+    for (unsigned i = 0; i < 6; i++) {
+      const float* v = positions + 4 * i;
+      const bool correct = v[0] == QuadTrianglesNdc[2 * i] && v[1] == QuadTrianglesNdc[2 * i + 1] &&
+                           v[2] == 0.0f && v[3] == 1.0f;
+      matched += correct;
+      if (!correct)
+        printf("SO vertex %u: (%g,%g,%g,%g)\n", i, v[0], v[1], v[2], v[3]);
+    }
+    context->Unmap(soReadback, 0);
+    printf("STAGE d3d11 stream-output vertices: %s (%u/6)\n", matched == 6 ? "PASS" : "FAIL", matched);
 
     // 4. DispatchIndirect (vkCmdDispatchIndirect -> NVK_MME_DISPATCH_INDIRECT)
     // Non-zero AlignedByteOffsetForArgs (12).
@@ -922,6 +961,8 @@ int runD3D11(bool indirect) {
       return ExitIndirectDispatch;
     }
     printf("STAGE d3d11 indirect dispatch: PASS\n");
+    if (!drawAutoOk || matched != 6)
+      return ExitDrawAuto;
   }
   return ExitPass;
 }
@@ -1408,9 +1449,15 @@ int main(int argc, char** argv) {
   setvbuf(stdout, nullptr, _IONBF, 0);
   const char* api = argc > 1 ? argv[1] : "";
   bool indirect = false;
+  bool explicitSo = false;
+  bool warp = false;
   for (int i = 2; i < argc; i++) {
     if (!strcmp(argv[i], "--system"))
       g_system = true;
+    else if (!strcmp(argv[i], "--warp") && !strcmp(api, "d3d11"))
+      warp = g_system = true;
+    else if (!strcmp(argv[i], "--explicit-so") && !strcmp(api, "d3d11"))
+      explicitSo = indirect = true;
     else if (!strcmp(argv[i], "--indirect") && !strcmp(api, "d3d11"))
       indirect = true;
     else
@@ -1426,9 +1473,10 @@ int main(int argc, char** argv) {
   else if (!strcmp(api, "d3d10"))
     result = runD3D10();
   else if (!strcmp(api, "d3d11"))
-    result = runD3D11(indirect);
+    result = runD3D11(indirect, explicitSo, warp);
   else {
-    printf("usage: dxvk-offscreen.exe selftest | <d3d9|d3d10|d3d11> [--system] [--indirect (d3d11)]\n");
+    printf("usage: dxvk-offscreen.exe selftest | <d3d9|d3d10|d3d11> [--system]\n"
+           "       d3d11 options: [--warp] [--indirect | --explicit-so]\n");
     return ExitUsage;
   }
   printf("RESULT %s%s: %s (exit %d)\n", api, g_system ? " (system runtime control)" : "",
