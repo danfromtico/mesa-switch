@@ -240,13 +240,20 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    if (SUCCEEDED(hr)) {
       stage = 2;
       trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
-      if ((modern && dev->nvk) || video_window)
+      // DWM opens flip-model buffers through the Win7 D3D10 DDI. Its NVK
+      // commands must use allocation handles from the opening runtime device.
+      const bool legacy_flip = dev->nvk && args->Interface == D3D10_0_7_DDI_INTERFACE_VERSION;
+      if ((modern && dev->nvk) || video_window || legacy_flip)
          hr = runtime_queue_prepare(dev, &dev->runtimeTransport);
-      if (video_window) {
+      if (video_window || legacy_flip) {
          const unsigned callbacks = (dev->kt.pfnCreateContextVirtualCb ? 1u : 0u) |
                                     (dev->kt.pfnSubmitCommandCb ? 2u : 0u);
          trace(TGD3D_TRACE_RUNTIME_TRANSPORT, hr, (UINT64_C(6) << 32) | args->Interface, callbacks);
       }
+      // An older callback table can still serve the original legacy path.
+      // prepare checks it before allocating any state or creating a context.
+      if (legacy_flip && hr == DXGI_ERROR_UNSUPPORTED)
+         hr = S_OK;
       if (SUCCEEDED(hr)) {
          const VkResult result = adapter->vk.createDevice(&dev->vkdev, &dev->vk, &dev->queue,
             dev->runtimeQueue ? &dev->runtimeTransport : nullptr);

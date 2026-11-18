@@ -188,14 +188,14 @@ void runtime_queue_contracts()
       failClose = nullContext = failCreateContext = nullFenceValue = failCreateFence = reuseOriginal = false;
       CHECK(runtime_queue_finish(&dev) == S_OK && !liveContexts && !liveFences);
    }
-   {
-      Device video;
-      callbacks(&video, 0);
-      video.interfaceVersion = D3D11_1_DDI_INTERFACE_VERSION;
-      video.hRTCoreLayer.handle = nullptr;
-      video.createContextVirtual = nullptr;
-      CHECK(runtime_queue_prepare(&video, &a) == DXGI_ERROR_UNSUPPORTED);
-      video.kt.pfnCreateContextVirtualCb = [](HANDLE device, D3DDDICB_CREATECONTEXTVIRTUAL *args) -> HRESULT {
+   for (UINT interface_version : {D3D11_1_DDI_INTERFACE_VERSION, D3D10_0_7_DDI_INTERFACE_VERSION}) {
+      Device dev;
+      callbacks(&dev, 0);
+      dev.interfaceVersion = interface_version;
+      dev.hRTCoreLayer.handle = nullptr;
+      dev.createContextVirtual = nullptr;
+      CHECK(runtime_queue_prepare(&dev, &a) == DXGI_ERROR_UNSUPPORTED);
+      dev.kt.pfnCreateContextVirtualCb = [](HANDLE device, D3DDDICB_CREATECONTEXTVIRTUAL *args) -> HRESULT {
          CHECK(device == reinterpret_cast<HANDLE>(0x1000) && GetCurrentThreadId() == callerThread);
          CHECK(!args->NodeOrdinal && args->EngineAffinity == 1 && !args->Flags.Value);
          CHECK(!args->pPrivateDriverData && !args->PrivateDriverDataSize && !args->hContext);
@@ -203,12 +203,12 @@ void runtime_queue_contracts()
          ++liveContexts;
          return S_OK;
       };
-      CHECK(runtime_queue_prepare(&video, &a) == S_OK);
+      CHECK(runtime_queue_prepare(&dev, &a) == S_OK);
       CHECK(a.create_context(a.context, WSI_WIN32_RUNTIME_3D | WSI_WIN32_RUNTIME_COPY, &graphics) == VK_SUCCESS);
       expectedSequence = 1;
       CHECK(a.submit(a.context, graphics, 0x20000, words, sizeof(words), 2, written) == VK_SUCCESS);
       CHECK(a.destroy_context(a.context, graphics) == VK_SUCCESS);
-      CHECK(runtime_queue_finish(&video) == S_OK && !liveContexts && !liveFences);
+      CHECK(runtime_queue_finish(&dev) == S_OK && !liveContexts && !liveFences);
    }
-   std::puts("PASS: runtime-owned WDDM2 and 11.1 contexts, command payload/WrittenPrimaries, per-context sequences, same-device GPU fences, retained import lifetime, bounded CPU waits, quiescence before release and partial/failed cleanup (CPU callbacks; no GPU)");
+   std::puts("PASS: runtime-owned WDDM2 and 11.1 contexts, Win7 D3D10 consumer, command payload/WrittenPrimaries, per-context sequences, same-device GPU fences, retained import lifetime, bounded CPU waits, quiescence before release and partial/failed cleanup (CPU callbacks; no GPU)");
 }

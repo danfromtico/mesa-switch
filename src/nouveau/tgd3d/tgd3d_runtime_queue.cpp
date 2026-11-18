@@ -118,8 +118,8 @@ static VkResult create_context(void *opaque, uint32_t types, void **token)
    trace(TGD3D_TRACE_RUNTIME_TRANSPORT, E_PENDING, (UINT64_C(1) << 32) | types, 0);
    Device *dev = state->device;
    HRESULT hr;
-   if (dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION) {
-      // The 11.1 device uses the public kernel callback on the runtime device.
+   if (dev->interfaceVersion != D3DWDDM2_0_DDI_INTERFACE_VERSION) {
+      // Both admitted older DDIs use the kernel callback on hRTDevice.
       // GM20B routes graphics, compute and copies to node 0, engine mask 1.
       D3DDDICB_CREATECONTEXTVIRTUAL args = {};
       args.EngineAffinity = 1;
@@ -385,9 +385,10 @@ HRESULT runtime_queue_prepare(Device *dev, wsi_win32_runtime *out)
    const auto &cb = dev->kt;
    const bool core_context = dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION &&
                              dev->hRTCoreLayer.handle && dev->createContextVirtual;
-   const bool video_context = dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION &&
-                              cb.pfnCreateContextVirtualCb;
-   if (!dev->nvk || !dev->hRTDevice.handle || (!core_context && !video_context) ||
+   const bool device_context = (dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION ||
+                                dev->interfaceVersion == D3D10_0_7_DDI_INTERFACE_VERSION) &&
+                               cb.pfnCreateContextVirtualCb;
+   if (!dev->nvk || !dev->hRTDevice.handle || (!core_context && !device_context) ||
        !cb.pfnDestroyContextCb || !cb.pfnSubmitCommandCb ||
        !cb.pfnCreateSynchronizationObject2Cb || !cb.pfnDestroySynchronizationObjectCb ||
        !cb.pfnWaitForSynchronizationObjectFromGpuCb || !cb.pfnSignalSynchronizationObjectFromGpuCb ||

@@ -225,6 +225,10 @@ static void primary_creation_contract()
          const auto *wsi = static_cast<const wsi_memory_allocate_info *>(a->pNext);
          const auto *owner = wsi->win32_memory;
          CHECK(owner->allocation == 0x60 && owner->size == 3686400);
+         if (owner->version == WSI_WIN32_MEMORY_RUNTIME_VERSION) {
+            CHECK(owner->runtime_device == rt_device(0) && !owner->kernel_resource);
+            *wsi->win32_written_allocation = owner->allocation;
+         }
          CHECK(owner->map_gpu(owner->context, 0x100000, 0, 3686400, 0, false, 0x100000, 3686400) == VK_SUCCESS);
          owner->retain(owner->context); owners[0] = owner;
          *wsi->win32_imported = true; *out = (VkDeviceMemory)1; return VK_SUCCESS;
@@ -292,6 +296,15 @@ static void primary_creation_contract()
       CHECK(!primaryImages && !owners[0] && primaryError == (failure.step == 6 ? failure.expected : S_OK));
       CHECK(FAILED(dev.lost) == (failure.step == 6));
       CHECK(!dev.removalOnlyErrors);
+      if (!failure.step && !optional && alpha && nonprerotated && rotation == D3DDDI_ROTATION_90) {
+         dev.interfaceVersion = D3D10_0_7_DDI_INTERFACE_VERSION;
+         dev.runtimeQueueAccepted = true;
+         create_or_open();
+         CHECK(SUCCEEDED(dev.lost) && res->storage.writtenAllocation == 0x60);
+         CHECK(runtime_is_primary(res->storage.runtime) && runtime_is_displayable(res->storage.runtime));
+         table.pfnDestroyResource({&dev}, {storage});
+         CHECK(!primaryImages && !owners[0]);
+      }
       runtime_device_destroy(&dev);
    }
    std::puts("PASS: ARGB/XRGB four-direction primary Create/OpenResource and NONPREROTATED modes, exact pitch/extent, imported GPU VA and teardown (CPU control)");
@@ -1059,11 +1072,12 @@ static void displayable_owner_contract()
    producer.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
       HRESULT hr = displayableAllocateBase(h, a); a->hKMResource = 0; return hr;
    };
-   producer.vk.AllocateMemory = [](VkDevice device, const VkMemoryAllocateInfo *a,
+   producer.vk.AllocateMemory = consumer.vk.AllocateMemory = [](VkDevice device, const VkMemoryAllocateInfo *a,
                                   const VkAllocationCallbacks *callbacks, VkDeviceMemory *memory) -> VkResult {
       const auto *info = static_cast<const wsi_memory_allocate_info *>(a->pNext);
       CHECK(info->win32_memory->version == WSI_WIN32_MEMORY_RUNTIME_VERSION &&
-            !info->win32_memory->kernel_resource && info->win32_memory->runtime_device == rt_device(0));
+            !info->win32_memory->kernel_resource &&
+            info->win32_memory->runtime_device == rt_device((uintptr_t)device == 1 ? 0 : 1));
       VkResult result = displayableImportBase(device, a, callbacks, memory);
       if (result == VK_SUCCESS && displayableReply)
          *info->win32_written_allocation = info->win32_memory->allocation + (displayableReply == 1 ? 0 : 1);
@@ -1086,8 +1100,16 @@ static void displayable_owner_contract()
    CHECK(runtime_shared_create(&producer, &desc, {rt_resource(0)}, &p, &pitch) == S_OK);
    CHECK(runtime_bind_image(&producer, p, (VkImage)1, &memory, &written) == S_OK && written == 0x60);
    producer.vk.FreeMemory(producer.vkdev, memory, nullptr);
-   CHECK(runtime_destroy(p) == S_OK);
-   producer.runtimeQueueAccepted = false;
+   // The compositor receives its own opened allocation for this same surface.
+   consumer.interfaceVersion = D3D10_0_7_DDI_INTERFACE_VERSION;
+   CHECK(runtime_shared_open(&consumer, &open, {rt_resource(1)}, &c, &description) == DXGI_ERROR_UNSUPPORTED && !c);
+   consumer.runtimeQueueAccepted = true;
+   CHECK(runtime_shared_open(&consumer, &open, {rt_resource(1)}, &c, &description) == S_OK);
+   CHECK(runtime_is_displayable(c) && description.width == mip.TexelWidth && description.height == mip.TexelHeight);
+   CHECK(runtime_bind_image(&consumer, c, (VkImage)2, &memory, &written) == S_OK && written == allocation_info.hAllocation);
+   consumer.vk.FreeMemory(consumer.vkdev, memory, nullptr);
+   CHECK(runtime_destroy(c) == S_OK && runtime_destroy(p) == S_OK);
+   consumer.runtimeQueueAccepted = producer.runtimeQueueAccepted = false;
    runtime_device_destroy(&consumer); runtime_device_destroy(&producer);
    std::puts("PASS: guarded v1/v2 ABI, v2 alias/v3 runtime owner handshake without kernel-resource export, foreign/ignored acknowledgement rejection, shared reopen and residency protection");
 }

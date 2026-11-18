@@ -643,9 +643,7 @@ static HRESULT make_ready(Device *dev, RuntimeResource *p, uint64_t bytes,
 {
    if (displayable) {
       const bool wddm2 = dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION;
-      const bool video = dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION;
-      const bool same_device = dev->runtimeQueueAccepted && (video || wddm2);
-      if (!dev->nvk || (!same_device && !(wddm2 && kernel_resource)))
+      if (!dev->nvk || (!dev->runtimeQueueAccepted && !(wddm2 && kernel_resource)))
          return DXGI_ERROR_UNSUPPORTED;
    }
    HRESULT hr = runtime_make_resident(dev, p);
@@ -1129,7 +1127,7 @@ HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
          p->primary_layout = a;
       p->memory.allocation = info.hAllocation;
       hr = make_ready(dev, p, a.Buffer.bytes, args->hKMResource.handle,
-         primary && dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION);
+         primary && (dev->runtimeQueueAccepted || dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION));
       if (FAILED(hr)) {
          return cleanup_failed_create(p, hr);
       }
@@ -1269,7 +1267,7 @@ HRESULT runtime_primary_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    p->associated = true;
    p->memory.allocation = info.hAllocation;
    hr = make_ready(dev, p, request.Buffer.bytes, allocate.hKMResource,
-      dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION);
+      dev->runtimeQueueAccepted || dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION);
    if (FAILED(hr)) {
       return cleanup_failed_create(p, hr);
    }
