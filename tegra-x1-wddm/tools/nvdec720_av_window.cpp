@@ -3,12 +3,16 @@
  * Uploaded planes come from a checked hardware-frame readback. The D3D11
  * pixel shader performs CSC on the same device as the decoder.
  */
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0a00
+#endif
 #define WIN32_LEAN_AND_MEAN
 #include "nvdec720_fixture.hpp"
 #include "nvdec720_preview_vs.h"
 #include "nvdec720_preview_ps.h"
 #include <dxgi1_2.h>
 #include <dwmapi.h>
+#include <bcrypt.h>
 #include <evntprov.h>
 #include <evntrace.h>
 #include <io.h>
@@ -508,7 +512,11 @@ static void check_pixels(const AVFrame &frame, const uint8_t *expected, unsigned
          *u++=uv[2*x]; *v++=uv[2*x+1];
       }
    }
-   uint8_t hash[32];tg_nvdec_sha256(i420.data(),i420.size(),hash);
+   uint8_t hash[32];
+   static_assert(luma_bytes * 3 / 2 <= ULONG_MAX);
+   check(BCryptHash(BCRYPT_SHA256_ALG_HANDLE, nullptr, 0, i420.data(),
+                    static_cast<ULONG>(i420.size()), hash, sizeof(hash)) >= 0,
+         "hash canonical frame with SHA-256");
    std::printf("NV12_FRAME index=%u sha256=",index);
    for (uint8_t b:hash) std::printf("%02x",b);
    std::putchar('\n');check(std::memcmp(hash,expected,32)==0,"NV12 software-reference mismatch");
