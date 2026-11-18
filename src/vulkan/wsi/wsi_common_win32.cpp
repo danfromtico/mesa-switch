@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "util/cnd_monotonic.h"
+#include "util/format/u_format.h"
 #include "util/timespec.h"
 #include "util/u_thread.h"
 #include "vk_format.h"
@@ -841,13 +842,22 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
       return chain->status;
    }
 
-   char *ptr = (char *)image->base.cpu_map;
-   char *dptr = (char *)image->sw.ppvBits;
+   const uint8_t *ptr = (const uint8_t *)image->base.cpu_map;
+   uint8_t *dptr = (uint8_t *)image->sw.ppvBits;
+   /* A 32-bit BI_RGB DIB stores B, G, R, X bytes on Windows. */
+   const auto *pack = drv_chain->image_info.create.format == VK_FORMAT_R8G8B8A8_UNORM
+      ? util_format_pack_description(PIPE_FORMAT_B8G8R8A8_UNORM) : nullptr;
    uint32_t hash = 2166136261u;
    uint64_t nonzero_rgb = 0;
 
    for (unsigned h = 0; h < chain->extent.height; h++) {
-      memcpy(dptr, ptr, chain->extent.width * 4);
+      if (pack) {
+         pack->pack_rgba_8unorm(dptr, image->sw.bmp_row_pitch,
+                                ptr, image->base.row_pitches[0],
+                                chain->extent.width, 1);
+      } else {
+         memcpy(dptr, ptr, chain->extent.width * 4);
+      }
       if (WSI_DEBUG & WSI_DEBUG_WIN32) {
          for (unsigned x = 0; x < chain->extent.width; x++) {
             uint32_t pixel;
