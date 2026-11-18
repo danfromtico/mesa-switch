@@ -1,0 +1,225 @@
+{
+  "status": "Investigation of system resets during a candidate driver trial. The record describes exposure and observed execution boundaries.",
+  "components": {
+    "candidate_source": "474ef374510ff7a24e580455a646beefe72a8a64",
+    "baseline_source": "8d353d9bd6d62dec18a9ca770728c166302a99a5",
+    "deployed_signed_umd": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+    "reference_signed_umd": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "kernel": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "desktop_icd": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "firmware": "7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909",
+    "changed_production_translation_unit": "src/nouveau/tgd3d/tgd3d_video.cpp",
+    "reference_source_sha256": "722fbc9b718bc5c71be9c46812beffebcfa03c801219646d27dbfef1b7271ce8",
+    "candidate_source_sha256": "db687c651643a8223e97c47af2442e5c8393a0981d1459e47f5b342146c27d10"
+  },
+  "source_changes": {
+    "runtime": "Remove the process-environment early return from video_adapter_init. The existing adapter callback, GM20B NVDEC resources and client checks, and 128000-byte firmware verification then run for eligible processes. An eligible adapter offers the D3D11.1 interface through GetSupportedVersions.",
+    "hardware_start": "The adapter query copies the start-time KMD resource/client snapshot. Firmware upload to the engine starts in CreateVideoDecoder; capability discovery reads and verifies the firmware on the CPU.",
+    "other_source": "The ARM64 test fixture stops setting the video opt-in. The package updater accepts a default-enabled UMD and clears obsolete selection metadata.",
+    "prior_kernel_change": {
+      "commit": "8e9f265f7d0ebb9deab6b57dd576d76e2d0c736f",
+      "scope": "A high-resolution one-shot timer polls pending GPU fences. The unchanged signed kernel was used in both comparison arms."
+    },
+    "presentation_hypothesis": "CreateDevice prepares the runtime-device NVK submission transport for the Win7 DDI, and for a D3D11.1 video device only with the separate window diagnostic request. Ordinary D3D11.1 callers can negotiate a different path. Existing resource contract tests demonstrate a displayable-resource failure without runtime-queue ownership. The UMD hash loaded by DWM identifies the binary; it does not identify the DDI selected by DWM or prove the cause of a system reset.",
+    "locations": [
+      "src/nouveau/tgd3d/tgd3d_video.cpp:133",
+      "src/nouveau/tgd3d/tgd3d_video.cpp:231",
+      "src/nouveau/tgd3d/tgd3d_entry.cpp:42",
+      "src/nouveau/tgd3d/tgd3d_device.cpp:245",
+      "src/nouveau/tgd3d/tests/runtime_contracts.cpp:1097",
+      "tegra-x1-wddm/windows/query.c:145",
+      "tegra-x1-wddm/tools/nvdec720_av_window.cpp:600"
+    ]
+  },
+  "previous_umd_restart": {
+    "last_completed_edge_boot": "2026-11-18T13:24:13.2694530Z",
+    "next_observed_boot": "2026-11-18T13:39:10.3616030Z",
+    "active_umd_after_restart": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "note": "This unplanned restart preceded staging the candidate. The prior Edge playback used software and had already exited."
+  },
+  "first_three_candidate_transitions": [
+    {
+      "input": "native 720p; initially clean process defaults",
+      "before_boot": "2026-11-18T13:43:45.8608240Z",
+      "following_boot": "2026-11-18T13:47:14.7055060Z",
+      "evidence": "The native executable reported startup, enumerated the Tegra adapter and entered the UMD identity output. The retained text ends mid-line. No verified frame or exit was captured.",
+      "stdout_prefix": "START pid=368 session=1\r\nRETURN CreateDXGIFactory1=0x00000000\r\nRETURN Find native adapter=0x00000000\r\nRETURN Describe adapter=0x00000000\r\nLOADED_U",
+      "last_receipt": "starting"
+    },
+    {
+      "input": "queued diagnostic retry",
+      "before_boot": "2026-11-18T13:47:14.7055060Z",
+      "following_boot": "2026-11-18T13:50:14.6404640Z",
+      "evidence": "Windows acknowledged the task. The test directory survived empty. Native client execution, decoder creation and frames are unverified."
+    },
+    {
+      "input": "shorter launcher",
+      "before_boot": "2026-11-18T13:50:14.6404640Z",
+      "following_boot": "2026-11-18T13:54:15.4611540Z",
+      "evidence": "The first marker used an ambiguous six-argument FileStream constructor in Windows PowerShell 5.1 before the Start-Process statement. The identical marker failed in a software-only replay, and the unchanged reference launcher returned task result 1 while Windows stayed on the same boot. The assigned workload cannot be credited with starting the decoder.",
+      "host_receipt_sha256": "6bbf459d9f715e4f76528a3115ee0b7f3efc3d11bad2f55f8486fadf18b2ecd1",
+      "reference_task_result": 1,
+      "tested_marker_has_ambiguous_overload": true
+    }
+  ],
+  "windows_evidence": {
+    "kernel_power_41_ids": [
+      65401,
+      65328,
+      65251
+    ],
+    "unexpected_6008_ids": [
+      65392,
+      65319,
+      65234
+    ],
+    "bugcheck_values": [
+      "0",
+      "0",
+      "0"
+    ],
+    "latest_available_watchdog_dump_utc": "2026-11-11T18:04:24.9069499Z",
+    "recent_graphics_wer": [],
+    "source": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart"
+  },
+  "paired_decode": {
+    "method": "Same signed ARM64 executable, Tegra adapter selected by LUID, hardware kernel, desktop ICD, clip and six-frame reference. Each headless video fixture ran in the interactive session with decode-only and UMD hash verification. Both controls set the historical environment variable in the child only; the candidate has no reader for it. No video-window override. Caller journal and stdout were streamed over the same SSH controller to persistent host storage.",
+    "reference_readiness_uptime_s": 336.84,
+    "candidate_readiness_uptime_s": 352.19,
+    "controls": [
+      {
+        "case": "video-ab-old-app-02",
+        "umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+        "process_video_setting": "on",
+        "boot_utc": "2026-11-18T13:59:02.0326280Z",
+        "ready_utc": "2026-11-18T14:04:38.8684314Z",
+        "device_problem_code": 0,
+        "desktop_umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+        "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+        "media_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "reference_sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "adapter_luid": "0000000000086fce",
+        "client_umd_verified": true,
+        "frames_matching_reference": 6,
+        "decode_complete": true,
+        "exit": 0,
+        "journal_tail": [
+          "351437 4560 CALL CloseDecoder 00000000",
+          "351468 4560 RETURN CloseDecoder 00000000",
+          "351500 4560 CALL FinalDeviceStatus 00000000",
+          "351500 4560 RETURN FinalDeviceStatus 00000000",
+          "351703 4560 EXIT RunAndRelease 00000000"
+        ],
+        "process_transcript": [
+          "entered 2026-11-18T14:04:45.8348205Z 4628",
+          "launching 2026-11-18T14:04:46.0223243Z probe settings on",
+          "child 2026-11-18T14:04:46.1316999Z 3980",
+          "exit 2026-11-18T14:04:52.1654104Z 0"
+        ],
+        "host_stream_sha256": "d26e99a97f634f7853c5cade6c117627d907570bd39d3b233c9d42c40ba09d1a"
+      },
+      {
+        "case": "video-ab-new-app-01",
+        "umd_sha256": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+        "process_video_setting": "on",
+        "boot_utc": "2026-11-18T14:06:50.3003050Z",
+        "ready_utc": "2026-11-18T14:12:42.4898161Z",
+        "device_problem_code": 0,
+        "desktop_umd_sha256": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+        "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+        "media_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "reference_sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "adapter_luid": "000000000007d89a",
+        "client_umd_verified": false,
+        "frames_matching_reference": 0,
+        "decode_complete": false,
+        "exit": null,
+        "journal_tail": [
+          "366593 5388 ENTER wmain 00000000",
+          "366937 5388 CALL CreateDXGIFactory1 00000000",
+          "366953 5388 RETURN CreateDXGIFactory1 00000000",
+          "367250 5388 CALL av_hwdevice_ctx_create_D3D11VA 00000000"
+        ],
+        "process_transcript": [
+          "entered 2026-11-18T14:12:53.1171786Z 8188",
+          "launching 2026-11-18T14:12:54.5305294Z probe settings on",
+          "child 2026-11-18T14:12:54.5863057Z 5308"
+        ],
+        "host_stream_sha256": "1e6a5603486f915fe1184d16c9e0176f2509766dacea7033b63e204639c360bd"
+      }
+    ],
+    "current_evidence": {
+      "target_pid": 5308,
+      "last_client_marker": "367250 5388 CALL av_hwdevice_ctx_create_D3D11VA 00000000",
+      "last_returned_boundary": "366953 5388 RETURN CreateDXGIFactory1 00000000",
+      "host_ssh_exit": 255,
+      "sample_open_marker_seen": false,
+      "decoder_packets_submitted_confirmed": false,
+      "connection_observation": "The host lost transport. A postincident OS boot ID is required to distinguish reset, hang and lost networking.",
+      "registered_umd_vs_client": "The candidate was verified in DWM and the registered file. Its test process lost transport before the loaded-module proof returned.",
+      "uncontrolled": "Separate boots, background scheduling, temperature and instantaneous clocks. One paired completion provides no failure-rate estimate."
+    }
+  },
+  "older_controls": {
+    "pal4": [
+      {
+        "case": "pal4-game-emclow-11",
+        "outcome": "unexpected reboot",
+        "trace_sha256": "fe426a937fac01f04a4145883d8ba58133bfbec791d6592cea19b2f3a84f022f",
+        "trace_finalized": false,
+        "tgd3d_video_events": 0,
+        "kernel_events": 6,
+        "preemption_samples_waiting_for_gpu_fence": 4,
+        "first_recovery_requests": 0,
+        "last_recorded_status": "0x00000000"
+      },
+      {
+        "case": "pal4-game-cpuboot-12",
+        "outcome": "application exception; OS continued",
+        "trace_sha256": "4358d48003f1b7c874bde2f29986453762c1c98ad4ef888a420c76d39278b566",
+        "trace_finalized": true,
+        "tgd3d_video_events": 0,
+        "kernel_events": 19,
+        "preemption_samples_waiting_for_gpu_fence": 7,
+        "first_recovery_requests": 0,
+        "last_recorded_status": "0x00000000"
+      },
+      {
+        "case": "pal4-game-cpuboot-nolog-14",
+        "outcome": "unexpected reboot",
+        "trace_sha256": "ae02bad0f4221d05892b077e7cec63d1fdf9fea2db1f2ae2d04ef21c13210e91",
+        "trace_finalized": false,
+        "tgd3d_video_events": 0,
+        "kernel_events": 7,
+        "preemption_samples_waiting_for_gpu_fence": 6,
+        "first_recovery_requests": 0,
+        "last_recorded_status": "0x00000000"
+      },
+      {
+        "case": "pal4-game-cpuboot-nocache-15",
+        "outcome": "unexpected reboot",
+        "trace_sha256": "dd40711cb4008111e7c9b5f25102e6db9a7a76d794bd8c991cd8aa5f7d360e43",
+        "trace_finalized": false,
+        "tgd3d_video_events": 0,
+        "kernel_events": 23,
+        "preemption_samples_waiting_for_gpu_fence": 12,
+        "first_recovery_requests": 0,
+        "last_recorded_status": "0x00000000"
+      }
+    ],
+    "trace_coverage": "The KMD and tgd3d providers used all event IDs at the chosen keyword; the separate DxgKrnl provider used an event-ID filter. Aborted captures have no final buffers. Polling at a fence is also visible in the control where Windows continued.",
+    "desktop_render_comparison": "With the same llvmpipe DLL, the verified Code 43 BasicDisplay run reached the PAL4 menu and closed. The Code 0 desktop trial restarted. Their power mode and EMC frequency differed.",
+    "cpu_control": "The matched prior PAL4 trials varied the CPU voltage/frequency together. One boot restarted at 1497.6 MHz, another returned a game exception at 998.4 MHz, with fixed GPU/EMC settings.",
+    "additional_cases": "The full game archive extraction and a desktop logon also have unclean-boot records. A second 7353-file archive completed six verification passes. These cases do not establish a common hardware fault.",
+    "sources": [
+      "tegra-x1-wddm/docs/PAL4_LOAD_CONTROLS_20261118.json",
+      "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json",
+      "tegra-x1-wddm/docs/NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+      "tegra-x1-wddm/docs/KMD_FENCE_POLL_20261118.json"
+    ]
+  },
+  "decision": "The original opt-in removal remains a candidate. The previously accepted baseline corresponds to the reference UMD. The latest retained failure boundary precedes the H.264 file-open call in the fixture; the underlying reset mechanism and the link to all previous incidents remain open."
+}
