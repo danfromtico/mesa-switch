@@ -1,7 +1,5 @@
-# Application-local GM20B opt-in; does not change persistent environment.
 param([ValidateRange(0,36000)][int]$FrameCount=0)
 $ErrorActionPreference='Stop'
-$env:NVK_I_WANT_A_BROKEN_VULKAN_DRIVER='1'
 $arguments='--width 320 --height 240 --gpu_number 0 --present_mode 2'
 if($FrameCount){$arguments+=' --c '+$FrameCount+' --suppress_popups'}
 $record=[ordered]@{Begin=[DateTime]::UtcNow.ToString('o');Arguments=$arguments;PhysicalAcceptance=$false}

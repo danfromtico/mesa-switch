@@ -47,7 +47,6 @@ try{
   $cube=$existing[0]
   if($cube.SessionId -ne (Get-Process -Id $PID).SessionId){throw 'Cube is on another desktop session'}
  }else{
-  $env:NVK_I_WANT_A_BROKEN_VULKAN_DRIVER='1'
   $env:VKCUBE_TIMING_FILE=Join-Path $Root 'occlusion-only-timing.csv'
   $cube=Start-Process -FilePath (Join-Path $Root 'vkcube.exe') -ArgumentList '--width 320 --height 240 --gpu_number 0 --present_mode 2 --suppress_popups' -WorkingDirectory $Root -WindowStyle Normal -RedirectStandardOutput (Join-Path $Root 'occlusion-only.stdout') -RedirectStandardError (Join-Path $Root 'occlusion-only.stderr') -PassThru
   $null=$cube.Handle;$state.OwnsCube=$true
