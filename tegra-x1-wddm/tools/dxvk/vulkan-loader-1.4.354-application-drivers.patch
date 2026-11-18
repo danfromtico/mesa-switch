@@ -1,0 +1,19 @@
+--- a/loader/loader.c
++++ b/loader/loader.c
+@@ -4090,5 +4090,6 @@
+     // Get a list of manifest files for ICDs
+     res = loader_get_data_files(inst, LOADER_DATA_FILE_MANIFEST_DRIVER, NULL, &manifest_files);
+-    if (VK_SUCCESS != res) {
++    // Windows can have a configured application driver without a system ICD for this bitness.
++    if (VK_SUCCESS != res && VK_ERROR_INCOMPATIBLE_DRIVER != res) {
+         goto out;
+     }
+@@ -4097,4 +4098,8 @@
+     res = loader_settings_get_additional_driver_files(inst, &manifest_files);
+     if (VK_SUCCESS != res) {
++        goto out;
++    }
++    if (manifest_files.count == 0) {
++        res = VK_ERROR_INCOMPATIBLE_DRIVER;
+         goto out;
+     }

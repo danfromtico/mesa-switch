@@ -1,15 +1,48 @@
 # Direct3D 9/10/11 applications through DXVK
 
-Game-facing Direct3D 9, 10, and 11 applications use upstream DXVK on top of the
-Windows NVK ICD (`libvulkan_nouveau.dll`), the KMT transport bridge, and the
-GM20B WDDM KMD. The Windows desktop retains its separate D3D UMD and Zink path;
-nothing here modifies desktop composition, CPU clock policy, fan, sleep, power,
-or display mode management.
+On Windows ARM64, the game loads DXVK DLLs beside its executable. DXVK creates
+a Vulkan device through the process-compatible NVK ICD, which submits work to
+the ARM64 GM20B WDDM kernel driver. Keep Windows' Direct3D and DXGI libraries
+in their system directories. The desktop uses its registered tgd3d UMD.
 
-**Status: source, KMD/ICD/KMT ABIs, host models, and cross-builds implemented;
-no GM20B hardware execution is claimed here.** Earlier offscreen smoke runs
-passed on an x86-64 host under Wine with Mesa lavapipe (software Vulkan
-control). Native Switch Lite GM20B hardware validation remains a separate step.
+On a Switch Lite, the D3D11 Utah teapot ran with the desktop x64 and ARM64EC
+DXVK packages. Each run matched the DXGI and Vulkan adapter LUID and identified
+Mesa NVK on NVIDIA `10de:0fe0`. Space paused the object, Right turned it, and
+Escape closed the window with exit code zero. At 384 × 256, the two static
+desktop captures per run matched GPU readback to within two levels at 98,268
+of 98,304 pixels. The remaining 36 pixels were at the rounded window corners.
+These captures measure DWM output. [Teapot measurements](dxvk-games-20261118/teapot.json)
+
+Both 32-bit and 64-bit vulkaninfo reported Vulkan 1.4.354, 164 device
+extensions and 211 formats. The reported properties meet DXVK's D3D9,
+D3D10.1 and D3D11.0/11.1 baseline profiles. Zink's published GL 2.1 profile
+requires `borderColorSwizzleFromImage`, which GM20B NVK reports as false.
+Zink has a texture-border workaround. The signed x64 WGL frontend created a
+GL 3.2 compatibility context in FTEQW. The game and the profile comparison
+exercise different capabilities. [x64 export](dxvk-games-20261118/vulkaninfo-x64.json)
+and [x86 export](dxvk-games-20261118/vulkaninfo-x86.json). [Profile comparison](dxvk-games-20261118/profile-comparison.json)
+
+FTEQW loaded the LibreQuake map `lq_e0m1` through D3D9. With x64 DXVK and
+with ARM64EC DXVK in the x64 game, movement changed the captured world and
+both processes exited with code zero. The x86 run reached the map and was
+accepted for this compatibility phase. Windows restarted before the controller
+recorded an exit code. [Game measurements](dxvk-games-20261118/librequake-dxvk.json)
+
+The component manifest records SHA-256 for each Windows vulkaninfo export with
+its original CRLF endings and for each LF copy in Git. The profile comparison
+uses the Windows hashes. [Component hashes](dxvk-games-20261118/components.json)
+
+In the x64 offscreen test using ARM64EC DXVK, both indirect draws passed and
+the stream-output query counted two triangles. After `DrawAuto` on stream
+output slot 0, pixel (0, 0) retained the clear color. The check exited with
+code 14 before indirect compute dispatch. [Offscreen test record](dxvk-games-20261118/d3d11-indirect-arm64ec.json)
+
+The application-scoped loader settings list the exact game executable and its
+matching signed ICD manifest. The bundled x86 loader includes the application
+driver when the corresponding registry view has no system ICD. Both MinGW
+vulkaninfo builds initialize their Win32 window functions before querying WSI.
+The patches target Khronos Vulkan-Loader and Vulkan-Tools v1.4.354.
+[Component hashes and upstream revisions](dxvk-games-20261118/components.json)
 
 ## Pinned DXVK and license boundary
 
@@ -174,17 +207,17 @@ slice:
 
 ## Windows application architectures (`ARM64`, `ARM64EC`, `x64`, `x86`)
 
-Windows on ARM loads user-mode Vulkan ICDs and DXVK DLLs strictly matching the
-process architecture:
+The user-mode architecture follows the application process and the Windows ABI
+it supports. The tested mixed x64/ARM64EC process used an x64 Vulkan loader
+and an x64 NVK ICD over the native ARM64 kernel driver.
 
-| Application process | DXVK DLLs (`build_dxvk.py`) | KMT ABI & `kmt-native.obj` (`build_icd.py`) | ICD v7 `.def` exports (`vulkan_api_def`) | Full `libvulkan_nouveau.dll` link status on this build host |
-|---|---|---|---|---|
-| Native `ARM64` | Supported (`--arch arm64`, `IMAGE_FILE_MACHINE_ARM64`) | Verified (`aarch64-pc-windows-msvc`, 64-bit KMT) | Verified undecorated | **Supported & linked** (`aarch64-pc-windows-gnullvm` installed) |
-| Emulated `x64` | Supported (`--arch x64`, `IMAGE_FILE_MACHINE_AMD64`) | Verified (`x86_64-pc-windows-msvc`, 64-bit KMT + PE tests linked) | Verified undecorated | Blocked only by missing offline Rust `rust-std` target `x86_64-pc-windows-gnullvm` for NAK |
-| Emulated `x86` (32-bit WOW64) | Supported (`--arch x86`, `IMAGE_FILE_MACHINE_I386`) | Verified (`i686-pc-windows-msvc`, 32-bit pointer / 64-bit GPU VA WOW64 KMT + PE tests linked) | Verified undecorated (`__stdcall` `@N` aliased via `vulkan_api.def.in`) | Blocked only by missing offline Rust `rust-std` target `i686-pc-windows-gnullvm` for NAK |
-| `ARM64EC` | Upstream DXVK uses `x64` DLLs in emulated/hybrid processes | Verified (`arm64ec-pc-windows-msvc` SDK layout + `kmt-native.obj` compiled) | Supported (`vulkan_api_def`) | Blocked by missing `arm64ec-w64-mingw32` CRT/import sysroot in LLVM-MinGW `20261104` and missing Rust `arm64ec-pc-windows-msvc` target |
+| Application | DXVK | NVK ICD build | Hardware evidence |
+|---|---|---|---|
+| Native ARM64 | ARM64 cross-build | ARM64 | Native desktop and NVDEC use the registered ARM64 stack. |
+| Emulated x64 | Desktop x64 DLLs | x64, 64-bit KMT | D3D9 and D3D10 pixel controls, D3D11 teapot, D3D9 LibreQuake |
+| Emulated x86 | Desktop x86 DLLs | i686, 32-bit pointers and 64-bit GPU VAs | 32-bit Vulkan capabilities, D3D9 LibreQuake map |
+| x64 application with ARM64EC DXVK | Desktop ARM64EC DLLs | x64 | D3D9 and D3D10 pixel controls, D3D11 teapot, D3D9 LibreQuake |
 
-### KMT 32-bit WOW64 & 64-bit ABI details
 
 - `kmt_abi.h` and `test-kmt-sdk.c` verify `D3DKMT_*` structures against
   Windows SDK `10.0.26100.0` (`shared/d3dkmthk.h`) on `arm64`, `arm64ec`, `x64`,
@@ -197,8 +230,8 @@ process architecture:
   so WOW64 user processes talk directly to the 64-bit ARM64 GM20B KMD.
 - `kmt_native.c` rejects allocation sizes exceeding 32-bit `SIZE_MAX` before
   calling `CreateFileMappingW` / `VirtualQuery` in 32-bit processes.
-- Once `rust-std` for `x86_64-pc-windows-gnullvm` and `i686-pc-windows-gnullvm`
-  is installed into the Rust sysroot, `build_icd.py --arch x64` and
+- With `rust-std` for `x86_64-pc-windows-gnullvm` and `i686-pc-windows-gnullvm`
+  in the build sysroot, `build_icd.py --arch x64` and
   `build_icd.py --arch x86` can link `libvulkan_nouveau.dll` directly
   (`nvk_windows_icd.json` for 64-bit `VulkanDriverName` and
   `nvk_windows_icd.x86.json` for 32-bit `VulkanDriverNameWow`).
