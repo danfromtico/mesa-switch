@@ -1,0 +1,58 @@
+--- cpuboot-12
+
++++ cpuboot-nolog-14
+
+@@ -6,5 +6,5 @@
+
+ $run=Join-Path $test $Label;if(Test-Path $run){throw 'Existing run'}
+ $cmdDir=Join-Path $run 'commands';$null=[IO.Directory]::CreateDirectory($cmdDir)
+-$rec=[ordered]@{entry='仙剑奇侠传四语音版.exe';start=[DateTime]::UtcNow.ToString('o');mode=$Mode;label=$Label;events=@();processes=@();success=$false}
++$rec=[ordered]@{observer_pid=$PID;entry='仙剑奇侠传四语音版.exe';start=[DateTime]::UtcNow.ToString('o');mode=$Mode;label=$Label;events=@();processes=@();success=$false}
+ function Save($name,$obj){
+  $path=Join-Path $run ($name+'.json');$bytes=$utf.GetBytes(($obj|ConvertTo-Json -Depth 7))
+@@ -106,7 +106,4 @@
+
+  $rec.entry_shortcut=$link;$rec.shortcut_sha256=(Get-FileHash -LiteralPath $shortcut.TargetPath).Hash
+  $start=[Diagnostics.ProcessStartInfo]::new($link);$start.UseShellExecute=$true;$start.WorkingDirectory=$shortcut.WorkingDirectory
+- $logFile=Join-Path $game 'pal4Logfile.log'
+- $preLog=if([IO.File]::Exists($logFile)){[IO.File]::GetLastWriteTimeUtc($logFile).Ticks}else{0}
+- $lastLog=$preLog
+  $traceFile=Join-Path $run 'graphics.etl'
+  $collector=Join-Path $ctrl 'observations\pal4-start-memory-trace.exe'
+@@ -180,12 +177,4 @@
+
+     }
+    }catch{}
+-   try{
+-    if([IO.File]::Exists($logFile)){
+-     $stamp=[IO.File]::GetLastWriteTimeUtc($logFile).Ticks
+-     if($stamp -ne $lastLog -and $stamp -ne $preLog -and ([IO.FileInfo]::new($logFile)).Length -le 262144){
+-      [IO.File]::Copy($logFile,(Join-Path $run 'game-initialization.log'),$true);$lastLog=$stamp
+-     }
+-    }
+-   }catch{}
+    if($launcher.HasExited -and !@($tracked.Values|Where-Object {!$_.HasExited}).Count){
+     foreach($other in @(Get-Process -Name ([IO.Path]::GetFileNameWithoutExtension($entry)) -ErrorAction SilentlyContinue)){
+@@ -250,4 +239,21 @@
+
+  $rec.still_running=@($tracked.Values|Where-Object {!$_.HasExited}|ForEach-Object {$_.Id})
+  $rec.exits=@(foreach($p in $tracked.Values){if($p.HasExited){@{pid=$p.Id;code=$p.ExitCode}}})
++ # PAL4 opens its own diagnostic log repeatedly during initialization.
++ # Only inspect this file after the game and every tracked relaunch have exited.
++ if(!$rec.still_running.Count -and $rec.exits.Count -gt 0){
++  $rec.post_exit_qpc=[Diagnostics.Stopwatch]::GetTimestamp();$rec.post_exit_utc=[DateTime]::UtcNow.ToString('o')
++  $stream=$null;$dest=$null
++  try{
++   $logFile=Join-Path $game 'pal4Logfile.log'
++   if([IO.File]::Exists($logFile) -and [IO.File]::GetLastWriteTimeUtc($logFile) -ge $invoked){
++    $share=[IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete
++    $stream=[IO.FileStream]::new($logFile,[IO.FileMode]::Open,[IO.FileAccess]::Read,$share)
++    if($stream.Length -le 262144){
++     $dest=[IO.FileStream]::new((Join-Path $run 'game-initialization.log'),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
++     $stream.CopyTo($dest);$dest.Flush($true);$rec.post_exit_log=$true
++    }
++   }
++  }catch{$rec.post_exit_log_error=$_.Exception.Message}finally{if($dest){$dest.Dispose()};if($stream){$stream.Dispose()}}
++ }
+  $rec.window_observed=$ever;$rec.close_requested=$manualClose
+  $rec.dwm_after=@(Get-Process dwm|Where-Object SessionId -gt 0|Select-Object -ExpandProperty Id)

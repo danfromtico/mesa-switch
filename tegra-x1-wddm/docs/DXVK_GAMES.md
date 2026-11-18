@@ -48,8 +48,15 @@ and image from the vertex shader. The probe selects the explicit shader with
 [Test cases, shader and component hashes](DXVK_STREAM_OUTPUT_20261118.json)
 
 PAL4 also produced a game-local exception on a boot that remained responsive.
+In two such runs the observer read the game's initialization log while the
+game was opening it. The revised observer opens the file after process exit.
+On the matched 998.4 MHz native NVK run, the observer made zero accesses to
+that log while PAL4 was running. The game finished effect initialization and
+started its player manager before the machine rebooted. Its exception file
+contained only its startup heading. All eleven recorded game queue operations
+completed, with zero recorded game Presents.
 The power driver had already entered fixed recovery mode and reported a DFLL
-error before launch. Explicitly selecting fixed mode cleared the latch, then
+error before one of the earlier launches. Explicitly selecting fixed mode cleared the latch, then
 selecting Handheld restored CPU and GPU policy and EMC transitions on that boot.
 The healthy fixed-mode case on the same signed KMD ended in a system restart.
 [PAL4 and power recovery measurements](PAL4_LOAD_CONTROLS_20261118.json)

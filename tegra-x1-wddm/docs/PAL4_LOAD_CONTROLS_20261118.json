@@ -248,7 +248,8 @@
         "lost": 0,
         "buffers_lost": 0,
         "note": "A native ControlTraceW stop finalized this circular trace because logman.exe was absent."
-      }
+      },
+      "observer_caveat": "A live diagnostic copy overlapped the game opening its own log."
     }
   ],
   "archive": {
@@ -281,6 +282,88 @@
       ],
       "result": "All output hashes matched. The same Windows boot continued.",
       "fixture_copy_removed_on_both_hosts": true
+    },
+    "synthetic_multifile": {
+      "fixture": {
+        "files": 7353,
+        "expanded_bytes": 1131876352,
+        "archive_bytes": 10251357,
+        "archive_sha256": "b4974c7b2419e8387945d8b36481e9ce5e2b907a6bad2d264fd4d15e208cbbdd",
+        "manifest_sha256": "52fb269fbb5d3454cc6cf531a4aa9ccef734da8429d03da1f58c3ef018970c69",
+        "generator": "RAR for macOS ARM64 7.23, non-solid RAR5, 1 MiB dictionary, synthetic deterministic bytes",
+        "verification_manifest_tsv_sha256": "c108a18213413161a2add348b8a3b66c60caba9b25db15d0ae62d0eeb2c28df8",
+        "generator_project": "https://www.rarlab.com/download.htm"
+      },
+      "method": "Use the system ARM64 tar.exe, extract the same non-solid RAR5 tree into an empty task-owned directory, verify every size and SHA-256, then remove the tree. Repeat three times.",
+      "scope": "The file count matches the original game package. Contents, compression ratio and member sizes differ.",
+      "runs": [
+        {
+          "id": "archive-multi-bootcpu-01",
+          "start_utc": "2026-11-18T09:12:58.9611026Z",
+          "end_utc": "2026-11-18T09:38:48.4023618Z",
+          "boot_utc": "2026-11-18T09:06:36.4131810Z",
+          "boot_after_utc": "2026-11-18T09:06:36.4131810Z",
+          "dwm_before": 1416,
+          "dwm_after": [
+            1416
+          ],
+          "desktop_tgd3d_devices": [
+            1,
+            1
+          ],
+          "pnp_code": 0,
+          "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+          "system_tar_sha256": "cb7d37a55138cde1ea38883df243af38d4804e1fe5e3ee82100adf2ecd548bd7",
+          "fixed_cpu_khz": 998400,
+          "cpu_mv": 810,
+          "gpu_policy_khz": 460800,
+          "gpu_measured_khz_range": [
+            460752,
+            460848
+          ],
+          "emc_khz": 204000,
+          "emc_counter_delta": 0,
+          "temp_c_range": [
+            37,
+            40
+          ],
+          "platform_samples": 363,
+          "platform_samples_sha256": "7b8915c40b9a70e38a9121b739cb10a6616a01b0f7a20c2eb9690199377e3af8",
+          "rounds": [
+            {
+              "verify_ms": 238918,
+              "files": 7353,
+              "round": 1,
+              "extract_ms": 280515,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T09:22:26.3443493Z"
+            },
+            {
+              "verify_ms": 206474,
+              "files": 7353,
+              "round": 2,
+              "extract_ms": 250403,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T09:30:13.3802658Z"
+            },
+            {
+              "verify_ms": 236079,
+              "files": 7353,
+              "round": 3,
+              "extract_ms": 254345,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T09:38:38.0117181Z"
+            }
+          ],
+          "total_verified_bytes": 3395629056,
+          "total_file_checks": 22059,
+          "restored_mode": 1,
+          "restored_charge_limit": 85
+        }
+      ]
     }
   },
   "interpretation": [
@@ -441,6 +524,131 @@
         "handheld_restored": true
       }
     ],
-    "interpretation": "The 1.497 GHz / 1120 mV run rebooted with EMC held at 204 MHz. At 998.4 MHz / 810 mV the application exited at the same instruction previously observed in the low-clock fault-latched run, while Windows continued. Sampling covered the retained ETW prefix. The final interval before reset is unobserved. These cases do not identify an electrical fault or prove the cause of the archive incident."
+    "interpretation": "The 1.497 GHz / 1120 mV run rebooted with EMC held at 204 MHz. At 998.4 MHz / 810 mV the application exited at the same instruction previously observed in the low-clock fault-latched run, while Windows continued. Sampling covered the retained ETW prefix. The final interval before reset is unobserved. These cases do not identify an electrical fault or prove the cause of the archive incident.",
+    "later_matched_run": "pal4-game-cpuboot-nolog-14 reproduced a whole-system reboot at 998.4 MHz with the live log copy removed."
+  },
+  "native_no_live_log_observation": {
+    "case": "pal4-game-cpuboot-nolog-14",
+    "comparison": "pal4-game-cpuboot-12",
+    "method": "Launch the same native x86 PAL4 desktop shortcut. Defer all queries and copies of pal4Logfile.log until every tracked game process exits. Keep the ETW collector, window observation, frequency selection and game configuration from the comparison run.",
+    "controller_sha256": "17768e5966bfa4edaa3ea28d134d155fa415591b1d99936e10cd2dba340a5b5e",
+    "matched_controller_sha256": "e30fb68b47d5ff03871f5bc594efd11972838dc7870f4d69fe027712c87752e4",
+    "source_change": "dxvk-games-20261118/pal4-observer-change.diff",
+    "source_change_sha256": "bfc9f6e4a4d27a46c69d36d9faafe84cfedc70c3aa1e62ff2b79605c9230d9ba",
+    "prior_observer_overlap": [
+      {
+        "case": "pal4-game-memory-10",
+        "snapshot_bytes": 4755,
+        "snapshot_sha256": "f163bb895790d7af27a9641a3bda9a07c7cb70e1b5d1f2e2fecf3cce8c28458f",
+        "observer_source_open_count_in_trace": 40,
+        "observer_source_read_count_in_trace": 5
+      },
+      {
+        "case": "pal4-game-cpuboot-12",
+        "snapshot_bytes": 17359,
+        "snapshot_sha256": "677f1bf4f7cd667a99ce5a14fd2e66cfaf7587fa878ff721d3ba6f87a29e9f82",
+        "observer_source_open_count_in_trace": 36,
+        "observer_source_read_count_in_trace": 5
+      }
+    ],
+    "start_boot_utc": "2026-11-18T09:47:51.2700620Z",
+    "launched_utc": "2026-11-18T09:52:07.5628280Z",
+    "game_pid": 2336,
+    "observer_pid": 3208,
+    "x86_icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+    "dxvk_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+    "pnp_code": 0,
+    "desktop_tgd3d_devices": 1,
+    "clock_samples": {
+      "count": 7,
+      "cpu_khz": 998400,
+      "cpu_mv": 810,
+      "gpu_policy_khz": 460800,
+      "gpu_measured_khz_range": [
+        460752,
+        460800
+      ],
+      "gpu_uv": 800000,
+      "emc_khz": 204000,
+      "emc_transition_count": 310,
+      "cpu_status": 0,
+      "first_utc": "2026-11-18T09:52:02.8753415Z",
+      "last_utc": "2026-11-18T09:52:19.3953270Z",
+      "sha256": "95217563e2965e6330b3f24aa9dde5215889983cc3a232a00615335015033a94"
+    },
+    "file_capture": {
+      "etl_sha256": "ae02bad0f4221d05892b077e7cec63d1fdf9fea2db1f2ae2d04ef21c13210e91",
+      "kernel_file_events": 18773,
+      "decode_issues": {},
+      "observer_accesses_to_game_log_in_retained_interval": 0,
+      "game_open_events_for_its_log": 183,
+      "exception_file_written_utc": "2026-11-18T09:52:09.2190788Z",
+      "exception_file_bytes": 295,
+      "exception_file_sha256": "805b46016c504fb0f0e9369bd9ca4ac50931f171e3e3636678b9f6bf552861e1",
+      "exception_file_contents": "Startup heading only. No exception report or stack was recorded.",
+      "initialization_log_collected_after_reboot": true,
+      "initialization_log_sha256": "ebdcd929e20414241f7a20b94b0717fdebd07b57b2a22f1afa655780b9efb41c",
+      "last_game_log_milestones": [
+        "Effect system initialization completed",
+        "Player manager initialization began"
+      ]
+    },
+    "window": {
+      "size": [
+        800,
+        600
+      ],
+      "foreground": true,
+      "class": "rwc",
+      "title": "PAL4-Application",
+      "captures": 2,
+      "identical_capture_sha256": "27aa3ca80af38907e02897ce7ff2bcaf83f0254b002721d412afab09a9d5c0b0",
+      "content": "Both captures showed the desktop within the game window rectangle.",
+      "interactive_menu_observed": false,
+      "input_sent": false,
+      "normal_exit_observed": false
+    },
+    "gpu_queue": {
+      "game_records": 11,
+      "completed": 11,
+      "game_present_events": 0,
+      "system_starts": 651,
+      "unmatched_system_starts": 0,
+      "last_game_completion_utc": "2026-11-18 09:52:14.314142+00:00",
+      "graphics_tail_utc": "2026-11-18 09:52:18.825087+00:00",
+      "successful_tgd3d_presents": 66
+    },
+    "reset": {
+      "next_boot_utc": "2026-11-18T09:52:39.1626390Z",
+      "unexpected_shutdown_record": 64026,
+      "kernel_power_record": 64035,
+      "bugcheck_code": 0,
+      "long_power_button_press": false,
+      "retained_process_exit_code": null,
+      "note": "Boot journal record numbers establish ordering. Some early boot wall-clock timestamps preceded the later synchronized WMI boot time."
+    },
+    "recovery": {
+      "original_cpu_preference": 1,
+      "temporary_boot_task_removed": true,
+      "automatic_restart_loaded_original_setting": true,
+      "gpu_code": 0,
+      "handheld": 1,
+      "dfll_active": 1,
+      "cpu_status": 0,
+      "charge_limit_percent": 85,
+      "desktop_check": "5352,True,0,1280,720,45,45,44",
+      "desktop_check_fields": "explorer_pid,responds_to_WM_NULL,dwm_flush_hresult,width,height,valid_samples,nonblack_samples,unique_colors"
+    },
+    "interpretation": "The earlier application-local failures coincided with the observer copying the log. Removing the copy let this run progress through effect initialization without the previously recorded access violation. A whole-system restart still occurred at the lower CPU operating point before a game Present. Logging interference and the cause of the system reset remain distinct questions."
+  },
+  "recovery_restart_at_0941": {
+    "planned_request_utc": "2026-11-18T09:41:17.4466248Z",
+    "return_boot_utc": "2026-11-18T09:42:03.3283210Z",
+    "evidence": "User32 1074 recorded the CPU-setting restoration command, EventLog 6006 recorded shutdown and Kernel-Boot 20 reported LastShutdownGood.",
+    "subsequent_gpu_code": 0,
+    "desktop_response": "5332,True,0,1280,720,45,45,44",
+    "physical_observation": "The user reported a crash around this transition. The OS check cannot exclude a brief panel freeze.",
+    "later_unexpected_restart": "pal4-game-cpuboot-nolog-14"
   }
 }
