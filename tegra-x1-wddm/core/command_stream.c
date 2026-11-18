@@ -1515,7 +1515,7 @@ static bool check_packet_range(const uint32_t *words, size_t start_word, size_t 
         const bool immediate = op == NVB06F_DMA_IMMD_OPCODE_VALUE;
         const uint32_t subchannel = NVVAL_GET(header, NVB06F, DMA_INCR, SUBCHANNEL);
         if (subchannel == 3) {
-            if (!halfturn(words + n - 1, word_count - n + 1, &ranges)) return false;
+            if (!halfturn(words + n - 1, end_word - n + 1, ranges)) return false;
             n += TG_GPU_PRESENT_HALFTURN_WORDS - 1;
             continue;
         }
