@@ -1,67 +1,21 @@
 # Mesa Switch for Windows ARM64
 
-Mesa NVK and a Windows 11 WDDM driver for the Tegra X1 (GM20B), based on
-the Mesa Switch port. The current hardware validation was performed on
-Nintendo Switch Lite (HDH-001).
+This repository contains the GM20B WDDM kernel driver, the `tgd3d` Direct3D user-mode driver and the Mesa NVK Vulkan driver for Windows 11 ARM64 on Nintendo Switch Lite (HDH-001). On the active `tgd3d-vulkan` branch, DWM uses `tgd3d` to render through NVK on the Tegra X1 GPU. WinX supplies the firmware and ACPI tables. The companion Windows driver project supplies the board drivers and the clocks used by NVDEC. [WinX firmware](https://github.com/ruje0504-2/winx) · [Windows board drivers](https://github.com/ruje0504-2/Windows-for-Switch-Drivers)
 
-The long-term goal is a complete native Vulkan implementation, verified
-with version-appropriate VK-GL-CTS coverage and physical GM20B tests.
-Windows desktop GPU acceleration is the current development milestone.
+## Hardware status
 
-**Current checkpoint (2026-11-16):** the WDDM2.0 UMD admission candidate failed
-before any landscape switch. The device has been restored to the preceding
-5b66bbec UMD with the retained KMD, ICD and platform settings; column scan is
-not accepted. The linear-buffer/error-contract candidate reached modern device
-creation but failed before presentation; modern negotiation is withheld again.
-Local render/paging fence guards now reject all-ones completion values. These
-guards passed builds and CPU controls, but have not been installed or accepted.
-Displayable-write tracking now reaches NVK submissions with bounded batches and
-owned asynchronous metadata. ARM64/x64 CPU controls pass; runtime NT-shareability
-and kernel-resource access remain unresolved, so modern admission stays withheld.
-The new UMD/ICD pair has not been installed or accepted.
-[Current handoff and evidence](tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)
-supersede the historical package milestones below.
+The development baseline selected on November 17, 2026 uses KMD `9ef86d7e`, UMD `c8a8eb9a` and ICD `e563a81d` (SHA-256 prefixes). The 720p combination is retained for recovery. [Full component hashes and recovery package](tegra-x1-wddm/docs/NVDEC_1080_D3D11VA_20261117.json)
 
-Active development uses the default
-[tgd3d-vulkan branch](https://github.com/ruje0504-2/mesa-switch-woa/tree/tgd3d-vulkan):
-**DWM → tgd3d → Vulkan/NVK → KMD → GM20B**. The native D3D WDDM UMD
-translates DDI calls directly to Vulkan. Development on `main`, including its
-Gallium/Zink desktop route, is paused.
-DXVK is the planned DX9/10/11 application compatibility path over the same
-NVK/KMD foundation. OpenGL uses the separate Mesa/WGL → Zink → NVK path;
-neither application path has completed hardware acceptance on this port.
-
-| Area | Status |
+| Area | Result on the tested Switch Lite |
 | --- | --- |
-| Native Vulkan | NVK rendered an offscreen triangle and read back the expected pixels and guards with driver **0.1.0.87**. A Win32 preview showed that readback. |
-| Display adapter | **0.1.0.130** reached **Code 0**, completed GDI copies and displayed verified RGB bars on the internal panel through the GM20B VidPN and native scanout. |
-| Shared storage | **0.1.0.144** passes Vulkan Win32 buffer/image sharing, GPU read/write after producer-device release, and re-export: 32,768 payload words plus 512 guards match. [Scope and evidence](tegra-x1-wddm/docs/VULKAN_WIN32_MEMORY.md). |
-| Native Windows desktop (`tgd3d`) | **Static desktop confirmed; window acceptance pending.** The latest diagnostic trial retains DWM creation and 423 successful Present calls. Its test window stayed hidden, a tool defect subsequently reproduced and corrected on `.59`; the shared ETW session also lost an event. Earlier application/window-start restarts remain unresolved. Five-minute interaction and known-pixel acceptance remain pending. [Implementation and validation scope](src/nouveau/tgd3d/README.md). |
-| Previous Windows desktop (Zink/NVK) | **Development paused on `main`.** The historical .158 combination reached a complete taskbar and native FL10_0 composition, but subsequent trials did not establish sustained visual stability. [Exact components and evidence](tegra-x1-wddm/docs/NATIVE_DESKTOP_158.md). |
-| DX9 / DX10 / DX11 games (`DXVK`) | **Planned; application compatibility unverified on GM20B Windows.** Games can use D3D → DXVK → Vulkan/NVK → KMD, independently of tgd3d's D3D translation. The selected DXVK version requires matching Vulkan features, Win32 presentation and a compatible application/loader/ICD architecture. [DXVK requirements](https://github.com/doitsujin/dxvk/wiki/Driver-support). |
-| OpenGL (`Zink`) | **Separate compatibility path; hardware acceptance pending.** Mesa OpenGL/WGL → Zink → NVK shares the Vulkan driver with tgd3d and DXVK. Pausing the old Zink desktop frontend does not remove the OpenGL route. |
-| Hardware landscape | **Not physically validated.** A correct 1280×720 hardware-rotated desktop must pass geometry, asymmetric-pattern and sustained-interaction checks after desktop stability and pixel validation. |
-| Win32 Vulkan presentation | **`vkcube` acceptance pending.** Verify native NVK rendering, swapchain behavior and sustained physical presentation after hardware landscape passes. |
+| Desktop and internal panel | The fixed 90° desktop uses GPU prerotation and row scan, with a 1280×720 desktop on the native 720×1280 panel. The mode persisted across restart. An ordinary DWM window passed move, resize, minimize, restore and close checks. DC column scan and reliable switching between all four orientations remain open. [Display baseline](tegra-x1-wddm/docs/ROW_SCAN_BASELINE_20261116.md) · [Window checks](tegra-x1-wddm/docs/VKCUBE_ACCEPTANCE_20261116.md) |
+| Native Win32 Vulkan | On the earlier fixed-landscape build, ARM64 `vkcube` rendered through NVK on GM20B in a GDI/DWM window. The timed run lasted 300.289 seconds and exited normally. Resize and recovery after occlusion were observed on the panel. [Components, timing and observations](tegra-x1-wddm/docs/VKCUBE_ACCEPTANCE_20261116.md) |
+| H.264 hardware decoding | D3D11VA drove NVDEC in separate 720p and 1080p runs. Each decoded six frames that matched an independent NV12 reference. The 1080p test presented all six in a 640×360 window, showed the color pattern on the panel and closed to the desktop. Sustained playback and load-related restarts remain under investigation. 2K and 4K device tests are deferred. [720p run](tegra-x1-wddm/docs/NVDEC_720_COMPOSITOR_OPEN_20261117.json) · [1080p run](tegra-x1-wddm/docs/NVDEC_1080_D3D11VA_20261117.json) · [Restart observations](tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json) |
+| Direct3D 9/10/11 games | Integration of DXVK v3.1.1 for ARM64 is in progress. The published baseline has no representative game result covering native NVK rendering, input and normal exit. |
+| Earlier driver milestones | The `.87` KMD passed native Vulkan triangle readback. The `.130` display driver showed verified RGB bars. The `.144` driver passed Win32 Vulkan sharing, GPU access after producer release and re-export, with 32,768 payload words and 512 guards checked. [Display evidence](tegra-x1-wddm/docs/NATIVE_STARTUP_RESULT.md) · [Sharing evidence](tegra-x1-wddm/docs/VULKAN_WIN32_MEMORY.md) |
+| OpenGL and the earlier desktop frontend | Windows OpenGL via WGL → Zink → NVK awaits hardware validation. Development of the earlier Gallium/Zink desktop path on `main` is paused. [Earlier desktop results](tegra-x1-wddm/docs/NATIVE_DESKTOP_158.md) |
 
-Package versions above identify KMD test packages, not a combined UMD/ICD release.
-The latest retained tgd3d trial used signed **.158** KMD (SHA256 prefix
-`46d1757674ff`), UMD source **d6470feb** (`e25c01c90cb6`) and NVK ICD source
-**7c677212** (`17dc31103933`). At the last verified recovery, the device was
-back on **.59 / Code 0**. Each component has its own build manifest and full
-source/artifact identity; the older Zink .158 combination is a separate trial.
-A later baseline freeze coincided with commit exhaustion from this chat's
-PowerShell SD inventory process. The process was identified from its recorded
-command, cleared by the owner's restart, and replaced by bounded native-tool
-collection. This does not resolve the earlier native-window restart.
-[Incident evidence](tegra-x1-wddm/docs/TGD3D_NATIVE_20261113.md).
-
-Continue in order: fix the current restart → 30-second static desktop →
-60-second window interaction → five-minute desktop interaction → known-pixel
-and shared-resource checks → hardware 1280×720 landscape → Win32 `vkcube`.
-Advance only after the preceding stage passes. Build results, Code 0 and
-successful Present calls do not replace physical-screen acceptance.
-Direct Flip remains deferred. This is not a stable-driver release or complete
-D3D/Vulkan conformance claim.
+The 1080p run retained the Handheld profile, CPU DFLL, fan mode 1 and the 85% charge target. Direct Flip is deferred. Full Vulkan conformance remains a long-term goal, with version-appropriate VK-GL-CTS coverage still pending. [Power and display readback](tegra-x1-wddm/docs/NVDEC_1080_D3D11VA_20261117.json) · [Development handoff](tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)
 
 The Windows NVK backend uses KMT for allocations, GPU virtual addresses,
 submissions and monitored fences. The KMD uses dynamically allocated system
