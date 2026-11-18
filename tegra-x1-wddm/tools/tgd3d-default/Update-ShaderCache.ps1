@@ -9,8 +9,7 @@ if($scope -notin @('shader-cache','resource-teardown','copy-lifetime','modern-dd
 $paired=$scope -in @('runtime-submit','present-ownership')
 $video=$scope -in @('video-ddi','present-ownership')
 if($scope -eq 'present-ownership' -and !$payload.gpu_prerotation){throw 'The presentation update requires the retained fixed landscape configuration'}
-if($video -and ($payload.video_validation_environment -ne 'TGD3D_VIDEO_VALIDATE=1' -or
-   !$payload.preserve_display_power -or $payload.modern_ddi_advertised)){throw 'Expected controlled video opt-in with the retained desktop interface'}
+if($video -and (!$payload.preserve_display_power -or $payload.modern_ddi_advertised)){throw 'Expected a video update retaining the display and power configuration'}
 if($scope -in @('modern-ddi','runtime-submit') -and !$payload.modern_ddi_advertised){throw 'Modern DDI update needs an explicit interface declaration'}
 $settings='HKLM:\SYSTEM\CurrentControlSet\Services\tegragpurender\Tgd3dDefault'
 $previous=[string](Get-ItemProperty $settings).Directory
@@ -89,7 +88,10 @@ $m|Add-Member -NotePropertyName umd_frozen_base -NotePropertyValue $payload.froz
 $m|Add-Member -NotePropertyName umd_patch_commits -NotePropertyValue $payload.patches -Force
 $m|Add-Member -NotePropertyName umd_update_scope -NotePropertyValue $scope -Force
 if($scope -in @('modern-ddi','runtime-submit')){$m|Add-Member -NotePropertyName modern_ddi_advertised -NotePropertyValue $true -Force}
-if($video){$m|Add-Member -NotePropertyName video_validation_environment -NotePropertyValue $payload.video_validation_environment -Force}
+if($video){
+    if($payload.video_validation_environment){$m|Add-Member -NotePropertyName video_validation_environment -NotePropertyValue $payload.video_validation_environment -Force}
+    else{$m.PSObject.Properties.Remove('video_validation_environment')}
+}
 $m.umd_source=$payload.frozen_base
 if($paired){$m.icd_source=$payload.frozen_base;$m|Add-Member -NotePropertyName icd_source_identity -NotePropertyValue $payload.source_identity -Force}
 if($payload.source_identity){$m|Add-Member -NotePropertyName umd_source_identity -NotePropertyValue $payload.source_identity -Force}
@@ -98,8 +100,8 @@ $m.scope=switch($scope){
     'copy-lifetime' {'.158 retained KMD/ICD with tgd3d overlap-copy, view bounds and lifetime fixes; modern DDI tables remain unadvertised; logon start; native stability acceptance pending'}
     'modern-ddi' {'.158 retained KMD/ICD with typed WDDM2.0/DXGI1.4 MPO1 and D3D10 pipeline; logon start; native interface and column scan acceptance pending'}
     'runtime-submit' {'.158 retained KMD with paired tgd3d/NVK runtime-owned command and fence transport; native runtime and column scan acceptance pending'}
-    'video-ddi' {'Retained NVDEC KMD/ICD/display/power with process-opt-in D3D11.1 video/NV12 UMD; native720p D3D11VA and window acceptance pending'}
-    'present-ownership' {'Paired presentation and ownership fixes with the retained fixed landscape, power policy, NVDEC KMD and process-opt-in video interface'}
+    'video-ddi' {'D3D11.1 video and NV12 support on the retained NVDEC kernel, display and power configuration'}
+    'present-ownership' {'Paired presentation and ownership fixes on the retained fixed landscape, power policy and NVDEC kernel'}
     default {'.158 existing KMD/ICD with cache-only tgd3d UMD; logon start; cache performance acceptance pending'}
 }
 Save-Json ($dest+'\trial-components.json') $m

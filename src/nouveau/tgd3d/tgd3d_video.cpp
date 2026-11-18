@@ -132,11 +132,6 @@ bool video_device_supported(const Device *dev)
 
 void video_adapter_init(Adapter *adapter)
 {
-    /* Controlled application opt-in while video integration is being
-     * validated. DWM and ordinary applications keep legacy negotiation. */
-    wchar_t enabled[2];
-    if (GetEnvironmentVariableW(L"TGD3D_VIDEO_VALIDATE", enabled, 2) != 1 || enabled[0] != L'1')
-        return;
     tg_gpu_adapter_nvdec_clients_info info = {};
     info.resource.base.version = TG_GPU_ADAPTER_ABI;
     info.resource.base.size = sizeof(tg_gpu_adapter_info);

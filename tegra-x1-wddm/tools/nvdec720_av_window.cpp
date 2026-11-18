@@ -796,13 +796,8 @@ int wmain(int argc,wchar_t **argv)
             check(_wfreopen((dir+L"\\stderr.txt").c_str(),L"wb",stderr)!=nullptr,"open evidence stderr");
             check(_wfreopen((dir+L"\\stdout.txt").c_str(),L"wb",stdout)!=nullptr,"open evidence stdout");
          }
-         /* Timed runs select the same native video path without write-through
-          * evidence journaling inside the measured frame loop. */
-         if (evidence || report_timings) {
-            check(SetEnvironmentVariableW(L"TGD3D_VIDEO_VALIDATE",L"1"),"enable process-local video validation");
-            if (mode!=Mode::DecodeOnly)
-               check(SetEnvironmentVariableW(L"TGD3D_VIDEO_WINDOW_VALIDATE",L"1"),"request same-device window submission");
-         }
+         if ((evidence || report_timings) && mode!=Mode::DecodeOnly)
+            check(SetEnvironmentVariableW(L"TGD3D_VIDEO_WINDOW_VALIDATE",L"1"),"request same-device window submission");
          std::setvbuf(stdout,nullptr,_IONBF,0);
          std::setvbuf(stderr,nullptr,_IONBF,0);
          DWORD session=0;
