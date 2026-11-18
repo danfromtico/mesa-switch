@@ -115,6 +115,14 @@ static VOID report_telemetry(TG_GPU_DVFS *d, const TG_GPU_HARDWARE *h)
     (VOID)TgGpuPlatformTryRequest(d->Platform, &op);
 }
 
+static VOID report_emc_failure(TG_GPU_DVFS *d)
+{
+    struct tg_gpu_pmic_request op = {0, TG_GPU_PMIC_REPORT_EMC_FAILURE, 1, d->EmcFailedWord};
+    NTSTATUS status = TgGpuPlatformTryVoteRequest(d->Platform, &op, &d->EmcProviderGeneration);
+    d->EmcFailureReportPending = !NT_SUCCESS(status) && status != STATUS_NOT_SUPPORTED &&
+        status != STATUS_INVALID_DEVICE_REQUEST && status != STATUS_INVALID_PARAMETER;
+}
+
 static VOID poll_platform_state(TG_GPU_DVFS *d, ULONGLONG now, BOOLEAN initial)
 {
     struct tg_gpu_pmic_request op;
@@ -166,13 +174,33 @@ static VOID poll_platform_state(TG_GPU_DVFS *d, ULONGLONG now, BOOLEAN initial)
          * of assuming the old 1600 MHz boot profile is still active. */
     }
     op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_QUERY_EMC_VOTE, 0, 0};
-    if (NT_SUCCESS(TgGpuPlatformTryRequest(d->Platform, &op))) {
+    ULONG generation;
+    if (NT_SUCCESS(TgGpuPlatformTryVoteRequest(d->Platform, &op, &generation))) {
         UINT32 floor = TG_GPU_EMC_VOTE_UV(op.value);
-        if ((!floor || (floor >= 590000u && floor <= 760000u)) &&
-            (!op.value || op.value != d->EmcFailedWord)) {
+        if (generation != d->EmcProviderGeneration) {
+            /* The new provider starts its sequence at one. A higher vote may
+             * have reached the previous owner just before its removal. */
+            if (d->EmcFloorUv > d->EmcRetainedFloorUv)
+                d->EmcRetainedFloorUv = d->EmcFloorUv;
+            d->EmcProviderGeneration = generation;
+            d->EmcAckWord = d->EmcFailedWord = 0;
+            d->EmcFailureReportPending = FALSE;
+            d->EmcVoteWord = 0;
+            d->EmcFloorUv = d->EmcRetainedFloorUv;
+        }
+        if (op.value && op.value == d->EmcFailedWord) {
+            /* The provider validates the generation under its PMIC lock.
+             * A status replay only records the earlier quiescent rejection. */
+            if (d->EmcFailureReportPending)
+                report_emc_failure(d);
+        } else if (!floor || (floor >= 590000u && floor <= 760000u)) {
             d->EmcVoteSupported = TRUE;
+            d->EmcFailedWord = 0;
+            d->EmcFailureReportPending = FALSE;
             d->EmcVoteWord = op.value;
-            d->EmcFloorUv = floor;
+            /* A zero word is an empty mailbox. Releasing a floor uses a
+             * nonzero sequence with a zero voltage code. */
+            d->EmcFloorUv = op.value ? floor : d->EmcRetainedFloorUv;
         }
     }
     d->LastPollUs = now;
@@ -186,19 +214,21 @@ static VOID acknowledge_emc(TG_GPU_DVFS *d, const TG_GPU_HARDWARE *h)
     if (!d->EmcVoteSupported || !d->EmcVoteWord || d->EmcVoteWord == d->EmcAckWord ||
         !h->Clock.running || h->Clock.rail_uv < d->EmcFloorUv) return;
     op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_REPORT_EMC_ACK, 1, d->EmcVoteWord};
-    if (NT_SUCCESS(TgGpuPlatformTryRequest(d->Platform, &op))) d->EmcAckWord = d->EmcVoteWord;
+    if (NT_SUCCESS(TgGpuPlatformTryVoteRequest(d->Platform, &op, &d->EmcProviderGeneration))) {
+        d->EmcAckWord = d->EmcVoteWord;
+        d->EmcRetainedFloorUv = d->EmcFloorUv;
+    }
 }
 
 static VOID reject_emc(TG_GPU_DVFS *d)
 {
     if (d->EmcVoteWord && d->EmcVoteWord != d->EmcAckWord) {
-        struct tg_gpu_pmic_request op={0,TG_GPU_PMIC_REPORT_EMC_FAILURE,1,d->EmcVoteWord};
         d->EmcFailedWord=d->EmcVoteWord;
-        (VOID)TgGpuPlatformTryRequest(d->Platform,&op);
+        report_emc_failure(d);
         /* No successful ack authorized an EMC increase. Keep the last
          * established vote and do not retry this failed generation forever. */
         d->EmcVoteWord=d->EmcAckWord;
-        d->EmcFloorUv=TG_GPU_EMC_VOTE_UV(d->EmcAckWord);
+        d->EmcFloorUv=d->EmcRetainedFloorUv;
     }
 }
 

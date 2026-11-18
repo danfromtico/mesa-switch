@@ -31,6 +31,8 @@ typedef struct _TG_GPU_DVFS {
     UINT32 EmcAckWord;
     UINT32 EmcFailedWord;
     UINT32 EmcFloorUv;
+    UINT32 EmcRetainedFloorUv; /* held until the current provider acknowledges another floor */
+    ULONG EmcProviderGeneration;
     INT32 TempC;
     UINT32 ThermalRange;
     UINT32 PolicySeq;
@@ -39,6 +41,7 @@ typedef struct _TG_GPU_DVFS {
     UINT32 Rollbacks;
     BOOLEAN PolicyBridgeSupported;
     BOOLEAN EmcVoteSupported;
+    BOOLEAN EmcFailureReportPending;
     BOOLEAN PolicyOverrideActive;
     BOOLEAN TempValid;
     BOOLEAN ThermalThrottled;
