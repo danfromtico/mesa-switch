@@ -182,11 +182,418 @@
       "system_and_dump_inventory": "39c87c673d250ed0545d76c65c5339bb067a7394216147dd3ebf78b1232de3cd",
       "desktop_readback": "1a64babe10633110218a76efe2d1c20bea924deb69ea988fd0c6ae963e666a74"
     },
-    "scope": "This is a separate non-PAL4 startup failure. The observed device creation error does not identify the reset source."
+    "scope": "This is a separate non-PAL4 startup failure. The observed device creation error does not identify the reset source.",
+    "subsequent_loader_control": {
+      "probe_sha256": "9c4ab821488a766ca2d8e3922f7b3e2945249f42a9cd62ec5bb3dacabf5fa32f",
+      "registered_path": {
+        "exit": 0,
+        "physical_devices": 1,
+        "matching_luid": true
+      },
+      "unregistered_path": {
+        "exit": 8,
+        "failure_stage": "vkCreateInstance"
+      },
+      "same_loader_and_environment": true,
+      "system_boot_survived_enumeration_error": true,
+      "cleanup_confirmed": true,
+      "effect": "The calibration initially used an executable path missing from the application driver list. Explicitly registering the two test paths allowed enumeration and restored D3D11 device creation on the accepted baseline."
+    },
+    "zero_filled_experimental_files_after_reboot": [
+      {
+        "name": "candidate\\icd.json",
+        "size": 312,
+        "zeros": 312,
+        "sha": "6287E17FE5EFCB191AEC8A2578E685D0A1040A0AB53BD1F02C7F49CC6C8FCED7"
+      },
+      {
+        "name": "bench.conf",
+        "size": 66,
+        "zeros": 66,
+        "sha": "EFBB03B7A7F6FD3C29391D4D0281E1830A85CAADD831C3F04716FACA4107A42E"
+      },
+      {
+        "name": "cal-01\\01-old-rgba-packed\\wsi-copy-perf_d3d11.log",
+        "size": 59,
+        "zeros": 59,
+        "sha": "DDA4668C44DF722C5A963FBBFA1FF3A597AAEEF5F2BF0EBD5BC28C88C1383F33"
+      }
+    ]
   },
   "file_integrity_at_restart_20261118": {
     "record": "PAL4_LOAD_CONTROLS_20261118.json",
     "field": "win32_shader_cache_after_reset",
     "result": "All nine invalid cache payloads in three unexpected-restart sessions were entirely zero-filled. All 53 cache files in two application-exit controls passed BLAKE3 verification. The initiating fault is still unknown."
+  },
+  "teapot_and_subsequent_logon_20261118": {
+    "benchmark_start_utc": "2026-11-18T10:46:58.2924690Z",
+    "original_boot_utc": "2026-11-18T10:34:18.6689190Z",
+    "first_unexpected_boot_utc": "2026-11-18T10:48:23.9967490Z",
+    "second_unexpected_boot_utc": "2026-11-18T10:50:33.4934180Z",
+    "event_records": {
+      "first_shutdown_6008": 64187,
+      "first_kernel_power_41": 64196,
+      "second_shutdown_6008": 64261,
+      "second_kernel_power_41": 64270
+    },
+    "bugcheck_codes": [
+      0,
+      0
+    ],
+    "graphics": {
+      "resolution": [
+        768,
+        432
+      ],
+      "format": "VK_FORMAT_R8G8B8A8_UNORM",
+      "baseline_icd_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+      "candidate_icd_sha256": "52d51a521d33571c34c1441a1c5524f7b1245d1a9e3ffac52b304971ced4f478",
+      "same_physical_adapter_luid": "0000000000075e16",
+      "measured_frames_each": 96,
+      "total_frames_rendered_each": 124,
+      "matched_window_pixels_per_static_check": 331776,
+      "checks_per_process": 2,
+      "readback_fnv64": [
+        "4b062ae9962327bc",
+        "250d1f52d46c5fb1"
+      ],
+      "baseline_exit": 0,
+      "candidate_exit_record": null,
+      "candidate_last_retained_stdout_line": "FRAME 95 2005286 2004844",
+      "candidate_admitted": false
+    },
+    "first_scope": "Both executables rendered the same scenes. The candidate printed every timing sample after both window checks. Its normal-exit marker was absent after the reset. Write loss prevents assigning the reset to a specific destructor.",
+    "following_boot": {
+      "native_activation_start_utc": "2026-11-18T10:50:02.4386907Z",
+      "native_state_retained": "Starting",
+      "requested_reboot": false,
+      "following_boot_task_state": "Disabled",
+      "gpu_problem_code": 43,
+      "fallback_display": "ROOT\\BasicDisplay",
+      "windows_power_source": "Offline",
+      "battery_mv_at_query": 3455,
+      "temperature_c_at_query": 38,
+      "source": "The untriggered test jobs did not restart with Windows. The accepted login controller recorded entry to native activation and did not record its completion. The next boot disabled that controller and used Basic Display."
+    },
+    "restored_shared_settings_sha256": "362d6e4cf8b9876309b01b65e62d95631bcb2aa6b407c3c036b9b8a29d98797a",
+    "evidence_sha256": {
+      "cal-02-result.json": "1f2ea1e0f319425caa4c81bdeffeea4f3a2194e7684e63d884d282a1c7aab89b",
+      "cal-02-new-stdout.log": "1a9e22f070b74b81fd7607401fa51ea5dac7e9aaf99ebb48857009123c945910",
+      "profile-probes.json": "757dcec7aca1767856f70bffbfb526e7e39b27eaa4ab8e6495200d09fd10ca53",
+      "wsi-cal2-incident-01.stdout": "cf55fd201d3b3938018d8d561e6b4f4bd103f3465cece217b3dcbea87f0c99d1",
+      "wsi-cal2-boots-01.stdout": "32233c6e8d08acfb5fd84910c3f67250ee8ee2ffac921330c2c676dbf785d1fe",
+      "cal2-recovered-desktop.json": "b2a1169d8f13f8f0ee03e45c88abafe32230120c009a057ccb0ff3327e6773ee",
+      "wsi-cal2-pnp-01.stdout": "20c496d2ffff591c7a93349bbee75dbdc06c7701bc75ff9c15d96f2e6be6bc84"
+    },
+    "recovery": {
+      "input_sources": "Windows Kernel-Power event 105 (AcOnline) and the SwitchBattery charge controller status. On this build the charger reports external power when REG08 VBUS_STAT is 1 or 2 and the power-good bit is set.",
+      "power_source_events": [
+        {
+          "record": 64085,
+          "time_utc": "2026-11-18T09:53:38.9223135Z",
+          "on_external_power": false
+        },
+        {
+          "record": 64119,
+          "time_utc": "2026-11-18T10:34:51.0235697Z",
+          "on_external_power": false
+        },
+        {
+          "record": 64201,
+          "time_utc": "2026-11-18T10:48:54.5516162Z",
+          "on_external_power": false
+        },
+        {
+          "record": 64275,
+          "time_utc": "2026-11-18T10:49:12.8407196Z",
+          "on_external_power": false
+        },
+        {
+          "record": 64330,
+          "time_utc": "2026-11-18T10:56:04.1993916Z",
+          "on_external_power": true
+        }
+      ],
+      "protected_boot": {
+        "after_unexpected_boot_on_battery": true,
+        "microsoft_basic_display": true,
+        "native_problem_code": 43,
+        "activation_status": "Starting",
+        "automatic_task": "Disabled"
+      },
+      "retry": {
+        "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+        "controller_sha256": "fd575e71b9b0b1a28f4896bd2cfe5556c056c6f3e628dfb45cd39e83c01e82be",
+        "controller_invocation": "The accepted activation controller was invoked once with -Retry. PowerShell line breakpoints recorded its milestones to a write-through journal. No GPU program was launched during the retry.",
+        "line_power": "Online",
+        "battery_mv_before": 3711,
+        "battery_mv_after": 3748,
+        "markers": [
+          {
+            "utc": "2026-11-18T10:57:52.6181701Z",
+            "qpc": 8467489130,
+            "phase": "preflight-Online-battery-mv-3711"
+          },
+          {
+            "utc": "2026-11-18T10:57:52.7119239Z",
+            "qpc": 8469227854,
+            "phase": "calling-accepted-controller"
+          },
+          {
+            "utc": "2026-11-18T10:57:55.4619217Z",
+            "qpc": 8522014140,
+            "phase": "baseline-validation"
+          },
+          {
+            "utc": "2026-11-18T10:57:56.3525455Z",
+            "qpc": 8539191961,
+            "phase": "before-attempt-receipt"
+          },
+          {
+            "utc": "2026-11-18T10:57:56.4931746Z",
+            "qpc": 8541730049,
+            "phase": "activation-start-durable"
+          },
+          {
+            "utc": "2026-11-18T10:57:56.5244215Z",
+            "qpc": 8542469361,
+            "phase": "before-device-restart"
+          },
+          {
+            "utc": "2026-11-18T10:57:56.6181702Z",
+            "qpc": 8544181976,
+            "phase": "device-restart-returned"
+          },
+          {
+            "utc": "2026-11-18T10:57:57.8456572Z",
+            "qpc": 8567862525,
+            "phase": "gpu-and-panel-ready"
+          },
+          {
+            "utc": "2026-11-18T10:57:57.8769067Z",
+            "qpc": 8568313437,
+            "phase": "begin-desktop-dwell"
+          },
+          {
+            "utc": "2026-11-18T10:58:27.9555046Z",
+            "qpc": 9145733837,
+            "phase": "dwell-complete"
+          },
+          {
+            "utc": "2026-11-18T10:58:28.3617511Z",
+            "qpc": 9153532705,
+            "phase": "final-ready-observed"
+          },
+          {
+            "utc": "2026-11-18T10:58:28.5805020Z",
+            "qpc": 9157932044,
+            "phase": "accepted-controller-returned"
+          },
+          {
+            "utc": "2026-11-18T10:58:29.2211258Z",
+            "qpc": 9170005963,
+            "phase": "handheld-restored"
+          },
+          {
+            "utc": "2026-11-18T10:58:29.4242522Z",
+            "qpc": 9173915041,
+            "phase": "result-durable"
+          }
+        ],
+        "display_mode": [
+          1280,
+          720
+        ],
+        "fixed_rotation_degrees": 90,
+        "native_problem_code": 0,
+        "dfll_active": 1,
+        "handheld": 1,
+        "shell_response_csv": "5308,True,0,1280,720,45,45,44",
+        "shell_response_columns": "explorer_pid,responds_to_WM_NULL,dwm_flush_hresult,width,height,valid_samples,nonblack_samples,unique_colors",
+        "login_task_readback": "Ready",
+        "login_trigger_delay": "PT5S",
+        "raw_hardware_evidence_sha256": {
+          "result.json": "2050cfc45af4308880a89144ba7e2883fa612e59f66754c884b08d3c94e84aac",
+          "phases.tsv": "4c1cc5ee350d636989cbaa7dde60b036e85648e6cbed05fcb8dfea8ca4c2ceba",
+          "desktop.json": "d8614b5983d0a4c88df6d79bf247f75d0ca6e1f95cbbcbd6b47d3ff061ec4dbc",
+          "activation-rearmed-01.stdout": "87e66153f07fedb247d7098e0b67aeb81238b6d6234a1c5a1cfea603827311af",
+          "activation-power-sources-01.stdout": "968c8965fba2b34214aceea05b7dfe366aa058e4a4091281dae52c7a9941e139"
+        }
+      },
+      "interpretation": "The later logged-in desktop activation and its 30-second dwell completed on external power, on the same Windows boot that previously held the native GPU at Code 43. Both battery and externally powered resets have been observed in different workloads. These trials do not isolate a power component or identify the cause."
+    },
+    "single_pair_timing": {
+      "accepted": {
+        "frames": 96,
+        "qpc_hz": 19200000,
+        "draw_and_present_ms": {
+          "mean": 108.59,
+          "median": 106.804,
+          "p95": 140.564,
+          "p99": 195.986
+        },
+        "present_call_ms": {
+          "mean": 108.544,
+          "median": 106.77,
+          "p95": 140.535,
+          "p99": 195.891
+        },
+        "process_cpu_ms_per_frame": 25.553,
+        "peak_working_set_bytes": 101498880
+      },
+      "candidate": {
+        "frames": 96,
+        "qpc_hz": 19200000,
+        "draw_and_present_ms": {
+          "mean": 116.03,
+          "median": 109.035,
+          "p95": 191.28,
+          "p99": 222.854
+        },
+        "present_call_ms": {
+          "mean": 115.965,
+          "median": 108.994,
+          "p95": 190.909,
+          "p99": 222.825
+        },
+        "process_cpu_ms_per_frame": 31.25,
+        "peak_working_set_bytes": 83570688
+      },
+      "scope": "These are single 96-iteration runs in the recorded order. The draw and Present times end when the API returns. The candidate had slower mean and P95 in this pair, and its normal exit could not be verified. The candidate was set aside. The accepted WSI source remained in use."
+    },
+    "accepted_driver_teardown_control": {
+      "source_patch": "tegra-x1-wddm/docs/dxvk-games-20261118/teapot-lifecycle.patch",
+      "patch_sha256": "89eef7c9991a875797f36da56587441031628fbdba645b095ea70f64c8a6864b",
+      "source_sha256": "ffd336f1fea1164242e90cf5de2ce51286dcf670cacdcd862f0c39ead7b96c0c",
+      "signed_x64_exe_sha256": "6f901c7a95df9df3bc42de4baa9579ccdb55653f729f50b1b66d3653decc7f2c",
+      "process_id": 5200,
+      "size": [
+        768,
+        432
+      ],
+      "baseline_icd_verified": true,
+      "rendered_frames": 124,
+      "window_readback_matches_per_check": 331776,
+      "static_checks": 2,
+      "normal_exit_code": 0,
+      "dwm_before_and_after": 1288,
+      "desktop_observation_after_process_exit_seconds": 8,
+      "external_power_before_after": [
+        "Online",
+        "Online"
+      ],
+      "charge_status_before_after": [
+        {
+          "Version": 1,
+          "LimitCenter": 85,
+          "BandMin": 80,
+          "BandMax": 90,
+          "CapacityPercent": 71,
+          "VoltageMv": 3756,
+          "Reg00InputSrc": 2,
+          "Reg01PwrOn": 16,
+          "Reg08SysStat": 108,
+          "LastApplyStatus": 0,
+          "Flags": 13
+        },
+        {
+          "Version": 1,
+          "LimitCenter": 85,
+          "BandMin": 80,
+          "BandMax": 90,
+          "CapacityPercent": 71,
+          "VoltageMv": 3766,
+          "Reg00InputSrc": 2,
+          "Reg01PwrOn": 16,
+          "Reg08SysStat": 108,
+          "LastApplyStatus": 0,
+          "Flags": 13
+        }
+      ],
+      "boot_utc": "2026-11-18T10:50:33.4960130Z",
+      "phases": [
+        {
+          "name": "process-start",
+          "since_previous_ms": 0
+        },
+        {
+          "name": "d3d-device-created",
+          "since_previous_ms": 2971.757
+        },
+        {
+          "name": "physical-nvk-verified",
+          "since_previous_ms": 941.071
+        },
+        {
+          "name": "warm-window-verified",
+          "since_previous_ms": 3884.866
+        },
+        {
+          "name": "final-window-verified",
+          "since_previous_ms": 12505.23
+        },
+        {
+          "name": "frame-report-printed",
+          "since_previous_ms": 13559.315
+        },
+        {
+          "name": "context-cleared",
+          "since_previous_ms": 10.007
+        },
+        {
+          "name": "context-flushed",
+          "since_previous_ms": 12.444
+        },
+        {
+          "name": "scene-resources-released",
+          "since_previous_ms": 20.813
+        },
+        {
+          "name": "swapchain-released",
+          "since_previous_ms": 65.023
+        },
+        {
+          "name": "factory-interface-released",
+          "since_previous_ms": 6.915
+        },
+        {
+          "name": "adapter-interface-released",
+          "since_previous_ms": 6.002
+        },
+        {
+          "name": "dxgi-device-interface-released",
+          "since_previous_ms": 3.567
+        },
+        {
+          "name": "context-released",
+          "since_previous_ms": 6.844
+        },
+        {
+          "name": "device-released",
+          "since_previous_ms": 111.862
+        },
+        {
+          "name": "render-returned",
+          "since_previous_ms": 4.182
+        },
+        {
+          "name": "before-destroy-window",
+          "since_previous_ms": 3.091
+        },
+        {
+          "name": "window-destroyed",
+          "since_previous_ms": 158.912
+        },
+        {
+          "name": "before-main-return",
+          "since_previous_ms": 135.063
+        }
+      ],
+      "evidence_sha256": {
+        "controller_receipt": "0f792c8b44219f26cede88eb1b90977313ff692f7a9f3fc5949fd7797e19d18c",
+        "write_through_process_journal": "cc4d90ed73b356673caf3b68a843128f875b0c08a7ae55e388e3cff3171814c8"
+      },
+      "measurement": "RAII markers recorded completion of the normal COM release order, window destruction and return from main. Each transition flushed the application journal to disk. Parent observation confirmed process exit. The time between final window verification and frame report includes writing 96 timing lines."
+    }
   }
 }

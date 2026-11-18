@@ -363,7 +363,23 @@
           "restored_mode": 1,
           "restored_charge_limit": 85,
           "extract_elapsed_ms": 785263,
-          "verify_elapsed_ms": 681471
+          "verify_elapsed_ms": 681471,
+          "supply_at_endpoints": {
+            "power_before": {
+              "battery_mv": 3808,
+              "reported_charge_percent": 89,
+              "bq_reg08": 68,
+              "driver_flags": 7,
+              "external_online": true
+            },
+            "power_after": {
+              "battery_mv": 3800,
+              "reported_charge_percent": 89,
+              "bq_reg08": 68,
+              "driver_flags": 7,
+              "external_online": true
+            }
+          }
         },
         {
           "id": "archive-multi-basecpu-02",
@@ -431,7 +447,23 @@
           "restored_mode": 1,
           "restored_charge_limit": 85,
           "extract_elapsed_ms": 706293,
-          "verify_elapsed_ms": 579455
+          "verify_elapsed_ms": 579455,
+          "supply_at_endpoints": {
+            "power_before": {
+              "battery_mv": 3568,
+              "reported_charge_percent": 85,
+              "bq_reg08": 0,
+              "driver_flags": 3,
+              "external_online": false
+            },
+            "power_after": {
+              "battery_mv": 3496,
+              "reported_charge_percent": 77,
+              "bq_reg08": 0,
+              "driver_flags": 1,
+              "external_online": false
+            }
+          }
         }
       ],
       "paired_cpu_result": {
@@ -443,7 +475,8 @@
         "across_separate_boots": true,
         "desktop": "Both sessions kept the same DWM process throughout their three passes. The native tgd3d device was present before and after each set.",
         "scope": "Both CPU operating points completed this generated workload. The original game archive uses different data and compression, and its interrupted extraction remains unexplained.",
-        "cleanup": "Both extracted trees, the temporary RAR and its member manifest were verified absent on the Switch after the controls."
+        "cleanup": "Both extracted trees, the temporary RAR and its member manifest were verified absent on the Switch after the controls.",
+        "power_source_difference": "The charger reported external power during the 998.4 MHz control and battery operation during the 1.4976 GHz control. The CPU and supply both differ across these two successful runs. Timing differences cannot be attributed to CPU clock alone."
       }
     }
   },
