@@ -226,6 +226,7 @@ class Preview {
    const Journal &journal;
    VideoTrace &trace;
    const wchar_t *first_frame_capture;
+   const bool visual_check;
 
    void texture(ID3D11Device *device, UINT w, UINT h, DXGI_FORMAT format, UINT bind,
                 Com<ID3D11Texture2D> &out, const char *name) {
@@ -241,9 +242,14 @@ class Preview {
       while (PeekMessageW(&m,nullptr,0,0,PM_REMOVE)) { TranslateMessage(&m); DispatchMessageW(&m); }
       check(IsWindow(window.handle),"preview window closed");
    }
+   ULONGLONG hold_frame(DWORD milliseconds) {
+      const ULONGLONG start=GetTickCount64();
+      while (GetTickCount64()-start<milliseconds) {pump();Sleep(10);}
+      return GetTickCount64()-start;
+   }
 public:
-   Preview(const Journal &j,VideoTrace &t,const wchar_t *first_capture):
-      journal(j),trace(t),first_frame_capture(first_capture) {}
+   Preview(const Journal &j,VideoTrace &t,const wchar_t *first_capture,bool visual):
+      journal(j),trace(t),first_frame_capture(first_capture),visual_check(visual) {}
    void start(IDXGIFactory2 *factory, ID3D11Device *device) {
       journal.mark("CALL","CreatePreviewWindow");
       WNDCLASSW wc={}; wc.lpfnWndProc=DefWindowProcW;wc.hInstance=GetModuleHandleW(nullptr);
@@ -336,6 +342,11 @@ public:
       if (first) trace.end_first_present();
       check(presented==S_OK,"preview did not present");
       if (last) verify_frame(hw,y,y_pitch,uv,uv_pitch,index,capture);
+      if (visual_check && !last) {
+         journal.mark("CALL","VisualFrameHold");
+         hold_frame(1000);
+         journal.mark("RETURN","VisualFrameHold");
+      }
    }
    void verify_frame(AVD3D11VADeviceContext *hw,const uint8_t *y,UINT y_pitch,const uint8_t *uv,
                      UINT uv_pitch,unsigned index,const wchar_t *capture) {
@@ -410,9 +421,7 @@ public:
       check(IsWindowVisible(window.handle) && !cloaked,"preview window not visible");
       journal.mark("VERIFIED","VisibleUncloakedWindow");
       journal.mark("CALL","FinalFrameHold");
-      const ULONGLONG visible=GetTickCount64();
-      while (GetTickCount64()-visible<2000) {pump();Sleep(10);}
-      const ULONGLONG held=GetTickCount64()-visible;
+      const ULONGLONG held=hold_frame(visual_check?8000:2000);
       journal.mark("RETURN","FinalFrameHold");
       ContextLock lock(hw);
       c->PSSetShader(nullptr,nullptr,0);c->VSSetShader(nullptr,nullptr,0);
@@ -518,7 +527,7 @@ static void require_loaded_umd(const wchar_t *expected,const Journal &journal)
 
 static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,const wchar_t *capture,
                 Mode mode, const Journal &journal,VideoTrace &trace,const wchar_t *first_frame_capture,
-                const wchar_t *expected_umd)
+                const wchar_t *expected_umd,bool visual_check)
 {
    Com<IDXGIFactory1> enumeration;
    journal.invoke("CreateDXGIFactory1",[&]{return CreateDXGIFactory1(__uuidof(IDXGIFactory1),(void **)enumeration.put());});
@@ -556,7 +565,7 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
          require(device_factory->QueryInterface(IID_IUnknown,(void **)device_factory_id.put()),"Identify device factory");
          journal.mark(enumerator_id.p==device_factory_id.p?"SAME":"DISTINCT","DXGIFactories");
       }
-      preview=std::make_unique<Preview>(journal,trace,first_frame_capture);
+      preview=std::make_unique<Preview>(journal,trace,first_frame_capture,visual_check);
       preview->start(device_factory.p,hw->device);
    }
    if (mode==Mode::PrepareOnly) {
@@ -673,6 +682,8 @@ int wmain(int argc,wchar_t **argv)
       if (std::wcslen(expected_umd)!=64 || std::wcsspn(expected_umd,L"0123456789abcdefABCDEF")!=64) return 2;
       argc-=2;
    }
+   const bool visual_check=argc>=2 && std::wcscmp(argv[argc-1],L"--visual-check")==0;
+   if (visual_check) --argc;
    const bool trace_requested=argc>=2 && std::wcscmp(argv[argc-1],L"--trace")==0;
    if (trace_requested) --argc;
    const bool check_first=argc>=2 && std::wcscmp(argv[argc-1],L"--check-first-submit")==0;
@@ -683,13 +694,13 @@ int wmain(int argc,wchar_t **argv)
       argc-=2;
    }
    if ((argc!=4 && argc!=5) || ((check_first || trace_requested) && !evidence)) {
-      std::fprintf(stderr,"usage: nvdec720-av-window <native-luid-hex> <sample.mp4> <reference.sha256> [last-frame.ppm | --prepare-only | --decode-only] [--evidence new-directory [--check-first-submit] [--trace]] [--require-umd sha256]\n");
+      std::fprintf(stderr,"usage: nvdec720-av-window <native-luid-hex> <sample.mp4> <reference.sha256> [last-frame.ppm | --prepare-only | --decode-only] [--evidence new-directory [--check-first-submit] [--trace]] [--visual-check] [--require-umd sha256]\n");
       return 2;
    }
    Mode mode=Mode::Present;
    if (argc==5 && std::wcscmp(argv[4],L"--prepare-only")==0) mode=Mode::PrepareOnly;
    if (argc==5 && std::wcscmp(argv[4],L"--decode-only")==0) mode=Mode::DecodeOnly;
-   if (check_first && mode!=Mode::Present) return 2;
+   if ((check_first || visual_check) && mode!=Mode::Present) return 2;
    wchar_t *end=nullptr;const uint64_t wanted=std::wcstoull(argv[1],&end,16);
    if (!wanted || !end || *end || std::wcslen(argv[1])!=16) return 2;
    try {
@@ -709,6 +720,7 @@ int wmain(int argc,wchar_t **argv)
          DWORD session=0;
          check(ProcessIdToSessionId(GetCurrentProcessId(),&session),"query interactive session");
          std::printf("START pid=%lu session=%lu\n",GetCurrentProcessId(),session);
+         if (visual_check) std::puts("VISUAL_CHECK inter_frame_ms=1000 final_frame_ms=8000");
          VideoTrace trace;
          if (trace_requested) {
             journal.mark("CALL","TraceCurrentProcess");
@@ -717,7 +729,7 @@ int wmain(int argc,wchar_t **argv)
          }
          const std::wstring first_image=check_first?std::wstring(evidence)+L"\\first-frame.ppm":L"";
          run(wanted,argv[2],argv[3],argc==5 && mode==Mode::Present?argv[4]:nullptr,
-             mode,journal,trace,check_first?first_image.c_str():nullptr,expected_umd);
+             mode,journal,trace,check_first?first_image.c_str():nullptr,expected_umd,visual_check);
          trace.finish();
          journal.mark("EXIT","RunAndRelease",S_OK);
          return 0;
