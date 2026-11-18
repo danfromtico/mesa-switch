@@ -1,5 +1,5 @@
 {
-  "status": "Objective 5 in progress. This checkpoint covers the first platform inventory, static analysis, a bounded SD read and focused local controls.",
+  "status": "Objective 5 in progress. This checkpoint adds reproducible platform images, paging-record accounting and controlled audio and Wi-Fi driver candidates.",
   "order": [
     "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
     "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
@@ -230,7 +230,89 @@
         "disposition": "CommandBytes starts at zero and is set only from a validated snapshot. The channel-register helper writes the separate Hardware member; with no snapshot the diagnostic record has zero payload."
       }
     ],
-    "manual_read": "Worker timer lifecycle, paging admission/execution and the sampled diagnostic paths. The complete KMD performance and semantic review is still open."
+    "manual_read": "Worker timer lifecycle, paging admission/execution and the sampled diagnostic paths. The complete KMD performance and semantic review is still open.",
+    "paging_record_validation": {
+      "tested_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "production_object": {
+        "name": "paging_buffer.obj",
+        "sha256": "5e7abda795e6905fe9ae7f9d9c1028108e9a70cdb088d4efbb4a40e2041a0f49"
+      },
+      "fixture_source_sha256": "747b5261fb9363a9dc6f1de644314eea8b37d4dc428975fd350bc54cb58d1026",
+      "tested_record_type": "64-byte copy-engine fill records in an immutable paging command buffer. The worker retires one copy-engine step at a time.",
+      "columns": [
+        "records",
+        "bytes",
+        "admission_record_visits",
+        "worker_record_visits"
+      ],
+      "host_x64_rows": [
+        [
+          1,
+          64,
+          1,
+          1
+        ],
+        [
+          2,
+          128,
+          2,
+          3
+        ],
+        [
+          4,
+          256,
+          4,
+          10
+        ],
+        [
+          8,
+          512,
+          8,
+          36
+        ]
+      ],
+      "host_control_sha256": "1ba186a68927dc62ccc545153520fe542f8b9c47257e6217e74859432cd31407",
+      "arm64_cpu_control_sha256": {
+        "count": "cc8bf7f9fbe1bf4d773ccedfd06bacfe181156836d9fc073fec166fe92401dc1",
+        "time": "36900e146e7e9e1cea8b939be3cf79183e69c6b53f44144672331d6845241876"
+      },
+      "native_trace_source": "https://github.com/GameTechDev/PresentMon/blob/main/PresentData/ETW/Microsoft_Windows_DxgKrnl.h",
+      "trace_reduction_sha256": "1cac5ab44b9dd1d506a27b8a111aa7b89c2ab7d3acbf982919e6cc82bf84da79",
+      "native_fixture_windows": {
+        "reference": {
+          "sha256": "5709798c40fb91468c427892f5bca21a53ad6781c8707ec9bd07f747754a0a30",
+          "events_lost": 0,
+          "fixture_window_seconds": 50.71988578125,
+          "os_paging_queue_starts": 300,
+          "matched_os_paging_queue_stops": 300,
+          "os_paging_queue_starts_per_second": 5.914839818328283,
+          "os_paging_queue_buffers_by_bytes": {
+            "0": 300
+          },
+          "os_paging_queue_elapsed_us": {
+            "median": 513.28125,
+            "p95": 5338.385416666667
+          }
+        },
+        "candidate": {
+          "sha256": "31fbfdf1161102b2092d22ff94d314fb31e4d8740e7d27aac73e85f712b9f215",
+          "events_lost": 0,
+          "fixture_window_seconds": 53.5190846875,
+          "os_paging_queue_starts": 301,
+          "matched_os_paging_queue_stops": 301,
+          "os_paging_queue_starts_per_second": 5.624161955637893,
+          "os_paging_queue_buffers_by_bytes": {
+            "0": 301
+          },
+          "os_paging_queue_elapsed_us": {
+            "median": 215.0,
+            "p95": 3703.8020833333335
+          }
+        }
+      },
+      "interpretation": "The eight-record case has 28 validation visits in the shortened suffixes. All 601 OS paging starts have a zero DmaBufferSize field. These ETLs give a request rate and scheduler duration; they do not identify the number of fill records or the validation CPU time. The reference and candidate ETLs compare a different, earlier worker timer change.",
+      "stage": "The host count and the native ETL reduction are complete. The ARM64 timing fixture was built and signed. The physical Switch was offline before it could be dispatched. No validation change was applied to the KMD."
+    }
   },
   "uefi": {
     "reported_bios": "1.09 (winx-r402)",
@@ -390,12 +472,20 @@
       }
     ],
     "native_test_scope": "Signed ARM64 user-mode controls on Switch exercise the production report writer with a substituted registry. The installed Wi-Fi driver remains 0.5.7.0.",
-    "candidate_unsigned_sha256": "3f1a90fdadfe6a7153afe11aeefbf0816df8fe42164a6b06bf884957037e6faf",
+    "candidate_unsigned_sha256": "de01a99ae10e48cfdeb6bb77fbcca87fb03e9029f6c959eaf1129331b8799055",
     "changed_translation_unit": "report.c",
-    "build_limit": "The archived installed package matched the device. The fresh reference link did not reproduce that archived unsigned PE byte-for-byte. The two fresh ARM64 builds differ in report.obj alone after normalizing COFF timestamps and the WDK assertion source path.",
     "earlier_startup_issue": "Current device problem code 0. The filtered historical PnP query returned no matching event for this instance in the specified time window. The cause of the earlier unavailable radio remains open.",
     "startup_issue_history_sha256": "17367ba9d430c5d42389853017957c5d08e58d610209fc613dca0927922bf92f",
-    "startup_layers": "Check the pre-Windows firmware preparation and the Windows ACPI override alongside WDF initialization. A readiness byte from an override can agree with the saved file even when a prior boot has no surviving firmware report."
+    "startup_layers": "Check the pre-Windows firmware preparation and the Windows ACPI override alongside WDF initialization. A readiness byte from an override can agree with the saved file even when a prior boot has no surviving firmware report.",
+    "reference_unsigned_sha256": "660da9acc7a0b1224b0147a753b35235497deac37d4d61c6bfc755e9a165f357",
+    "fresh_reference_matches_deployed_signed_payload": true,
+    "fresh_reference_matches_archived_unsigned": true,
+    "build_provenance": "The archived compiler input order and original source-path spelling reproduce the released build. Normalized COFF comparison isolates report.obj.",
+    "build_receipt_sha256": "058d95511c4d4c945e1d753cc7f340c0948a4c5cc19ea2549ce5ca1a6fc50d8b",
+    "signed_candidate_sys_sha256": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
+    "candidate_inf_sha256": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
+    "candidate_package_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/7d7bf6806d4a22ea0cc9408b00307a281e488a40",
+    "candidate_version": "0.5.7.1"
   },
   "bluetooth": {
     "version_matched_source": "7f6c3cf9b35a63bfc721f78f0e3524ea41012cf7",
@@ -404,8 +494,11 @@
       "in-flight cancellation and ownership",
       "ARM64 cross-link"
     ],
-    "provenance": "The source INF agrees with the installed version. The rebuilt .text differs from the installed image, as do locally compared archives. Functional coverage is for that versioned source; live pairing, traffic and resume remain open.",
-    "device_sha256": "a106e3ac6f9594a64a294c46ce969e623c91f4e3745e8a49961205e29b317cee"
+    "provenance": "The rebuilt ARM64 image matches the installed driver byte for byte after excluding PE checksum, certificate directory and certificate data. The UART and cancellation controls cover its matching source. Physical pairing, traffic and suspend/resume are pending.",
+    "device_sha256": "a106e3ac6f9594a64a294c46ce969e623c91f4e3745e8a49961205e29b317cee",
+    "reference_unsigned_sha256": "20aafaa676752b2eb98ed968bbbf1df1fbf53468c564605631fe0a6b613b4aa2",
+    "compared_payload_bytes": 45044,
+    "link_receipt_sha256": "05c0e9bd51b4852794c9affccd8bdf8b382039e280279ab731a7dd5a7afd93c9"
   },
   "additional_peripherals": {
     "checks": [
@@ -415,14 +508,37 @@
       "FTM4 touch parser and HID reports",
       "existing DFLL, PMIC concurrency, EMC governor and display QoS models"
     ],
-    "binding_note": "The active touch and SIO INFs correspond in version to ca891d9, and the RTC INF to a version present at b19f617. Matching a version alone is insufficient to prove the precise build.",
+    "binding_note": "I2C 1.0.0.5 and two RTC sources named 1.0.0.3 cross-link. The RTC INFs are dated November 7 and November 14 and contain different code. Verifying the installed RTC INF date and installed I2C/RTC payloads is pending. Touch and SIO version correspondence remains as in the hardware inventory.",
     "pending": [
       "Audio playback and buffer timing",
       "Bluetooth transport with a connected peer",
       "RTC, GPIO, I2C error handling and sleep/resume on the bound versions",
       "Performance under the active CPU/GPU/EMC and NVDEC scheduling choices",
       "DXVK, Pacecar, and the scoped Mesa code review"
-    ]
+    ],
+    "gpio_source": {
+      "commit": "ca60e5d8112bb5883292c12af525f21ae72c1b2e",
+      "source_payload_matches_installed": true,
+      "reference_unsigned_sha256": "8808aa6994d09dde55ec2f7645573cd7906001b325492f558ffd30904e7cfe7f",
+      "installed_sha256": "5f93b63a365c1bf4f5b914b466653035d1fcf1e33cc8dc7547878e416a504be3"
+    },
+    "candidate_source_comparison": {
+      "i2c": {
+        "commit": "ca60e5d8112bb5883292c12af525f21ae72c1b2e",
+        "unsigned_sha256": "8804bbf87def9177f3d0a2793e439668362a22ed541f5f5a9f82980f1d33382b",
+        "normalized_sha256": "361a244cab6d7aa44f33fa20f75b8e25987f6d6af19909deb4ece433db505bdb"
+      },
+      "rtc-1107": {
+        "commit": "5f531e6f2ddb82570c0368eebbf2c73b9deaec03",
+        "unsigned_sha256": "872a5cc2eae0b1758cc860cf9f108683cfc90f3592c3311ed4a156f8afa7cf76",
+        "normalized_sha256": "da8e96b9c9daee33025cc093fd416b8df81c8a8333dd3dfeaedd493bdcf77ca7"
+      },
+      "rtc-1114": {
+        "commit": "b19f617e746eea20ff62aa6e50cb40d9d555fdae",
+        "unsigned_sha256": "ecc2716f2e8720630360074a60b793841442c39c4a03ad017a2701a08d118529",
+        "normalized_sha256": "4f071825ead685b225acde252871f201a8042c9b861ac545cb70a79343301512"
+      }
+    }
   },
   "local_control_receipts": {
     "storage_wireless_bluetooth": [
@@ -556,5 +672,123 @@
     "dwm_pid": 1396,
     "power_mode": 1,
     "receipt_sha256": "055f57499058bf022644ee5a008b0bb6e74bbcf6a1c994909a12ba24c41e0620"
+  },
+  "audio": {
+    "installed_version": "1.0.0.9",
+    "candidate_version": "1.0.0.10",
+    "source_last_audio_change": "cbad18d599ca426babc767fa3a3d8592c4a86180",
+    "installed_signed_sha256": "05fd4e2c9dd22d340942d26edfb5e1a83639fe4fff02d14b9a3bf5e95b86aeff",
+    "fresh_reference_unsigned_sha256": "9d7db17a2412a5d9f49fb44691b0dda954640e07609cf5892aed0629238ea6e8",
+    "fresh_reference_matches_installed_signed_payload": true,
+    "compared_payload_bytes": 29172,
+    "candidate_unsigned_sha256": "d8f8878c3f31f61fa7a236cca5b940d5360dd071faf3b7f685793c0e96921b65",
+    "signed_candidate_sys_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+    "candidate_inf_sha256": "27a30c89250f6019b1328ecdfc14114e4a48c6c4d1555020e17d41f6adbf8962",
+    "candidate_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/32b7d18807e7fbaa7cf999d1b50c954d0e39e7b1",
+    "cause": "After starting DMA at passive IRQL, SetState(RUN) requests a -1,000,000 x 100 ns kernel delay between the Run0 and Run100 diagnostics. The installed ARM64 image resolves that call to ntoskrnl!KeDelayExecutionThread.",
+    "change": "Ordinary playback keeps the immediate register capture. Audio.ps1 -Mode Check requests the 100 ms registers and PCM sample for streams starting within the next 30 seconds.",
+    "control_columns": [
+      "hardware_starts",
+      "reported_starts",
+      "early_snapshots",
+      "late_snapshots",
+      "late_pcm",
+      "requested_sleep_ms",
+      "sample_utc",
+      "stops"
+    ],
+    "ordinary_start": {
+      "installed_source": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        100,
+        0,
+        1
+      ],
+      "candidate": [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "explicit_check": {
+      "installed_source": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        100,
+        0,
+        1
+      ],
+      "candidate": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        100,
+        1800000000,
+        1
+      ]
+    },
+    "covered": [
+      "ordinary start",
+      "explicit 30-second window",
+      "final second",
+      "expired or invalid deadline",
+      "clock conversion failure",
+      "dispatch-level call",
+      "repeated RUN and pause/resume",
+      "stop"
+    ],
+    "test_scope": "The host executes the production state transition with substituted clock, waits, registers and tracing. Values in requested_sleep_ms are requested waits. Native playback, onset latency and audio quality are still pending.",
+    "control_sha256": "902a052bebe067c85df2437bd7be345c4059fef63fba03b59fa93aa6dca4fbc4"
+  },
+  "platform_driver_link": {
+    "package": "https://www.nuget.org/packages/Microsoft.Windows.WDK.ARM64/10.0.26100.2454",
+    "scope": "The 26100.2454 ARM64 static support and ntoskrnl import libraries plus the other recorded WDK inputs reproduce the Bluetooth and audio payloads. Their source, PE data and import hints all match. The early 26100.1 support libraries with the same ntoskrnl import library also reproduce the same payloads.",
+    "libraries": {
+      "ntoskrnl.lib": "184c643f74a93303a2cc37ea37281bf0c60d34e38332043af668411cfedca19b",
+      "libcntpr.lib": "ea87dc8eef1f646124fcac939c23d21364b17f648ad95d9f29d5a389d4a3249d",
+      "bufferoverflowfastfailk.lib": "9d759b0bf2a69ce8aea29d8465997744e575eeecd77c64a7a6bcd2ef6a3269ee"
+    },
+    "gpio_i2c_rtc_checks_sha256": "02abd66186a50baa10f355363fe214bb5cc6e2964a9aac9629d48e831db7d74f"
+  },
+  "candidate_package_verification": {
+    "environment": "Windows PE 22621 x64 running on QEMU. The Microsoft 26100 SDK MakeCat created a SHA-256 catalog for each ARM64 driver package. The system WinTrust policy verified the signed catalogs and embedded driver signatures using the project test CA in the temporary guest.",
+    "driver_packages": {
+      "switchwifi": {
+        "switchwifi.inf": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
+        "switchwifi.sys": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
+        "switchwifi.cat": "3ac32fcba2c90eab2ab1ce1b1056868fcc6471e8f07e1b5036509aee92208f4b"
+      },
+      "switchaudio": {
+        "switchaudio.inf": "27a30c89250f6019b1328ecdfc14114e4a48c6c4d1555020e17d41f6adbf8962",
+        "switchaudio.sys": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+        "switchaudio.cat": "7b0d5987d1972a2cc0e5af17665c07aec904f64298196ea9c660c31ae35daa92"
+      }
+    },
+    "embedded_signature_checks": 4,
+    "sha256_catalog_member_checks": 4,
+    "modified_inf_rejections": 2,
+    "modified_inf_wintrust_status": "0x800B0100",
+    "hardware_pnp_install": false,
+    "makecat_exe_sha256": "4126fa639ef895a2e1b9ce08e8495365a5486433aeafd244ae571b9cb2c6780d",
+    "wintrust_verifier_source_sha256": "3192db42e2a23fe062d2dbbf48aa5d5fd7c721cd6c145e2d3641267bb68f65e3",
+    "test_root_der_sha256": "13a0a1e2bd0752723a5fd6d7fb289430430d5beb3a6422e1eccf11d84fac2293",
+    "catalog_creation_log_sha256": "5a53d16368c71ae9948c913fa827f4638c9c835a50dc175de4d8d9970f927524",
+    "signature_and_membership_log_sha256": "14dc4c0fd5134d432508384a69a45de0c7651e9151e2f2c1ad0b8dd9472cc51c",
+    "api_reference": "https://learn.microsoft.com/en-us/windows/win32/api/wintrust/ns-wintrust-wintrust_catalog_info",
+    "hardware_status": "The last on-device inventory showed Wi-Fi 0.5.7.0 and audio 1.0.0.9. The prepared candidate packages require a live PnP and functional trial."
   }
 }
