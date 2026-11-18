@@ -102,7 +102,7 @@
     ]
   },
   "endpoint": "Each physical result describes the runtime, loaded driver, native device or software path, pixels, input, normal exit and desktop recovery.",
-  "status": "The 32-bit system D3D9 game fell back to Microsoft GDI Generic. The experimental adapter opened GM20B in a direct DDI control. System-runtime HAL device creation and game acceptance remain open.",
+  "status": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit.",
   "physical_results": {
     "baseline": {
       "runtime": "C:\\Windows\\SyChpe32\\d3d9.dll",
@@ -682,5 +682,14 @@
       "temporary_files_removed": 51
     },
     "independent_code_review": "Pending Gemini review."
+  },
+  "x86_windowed_retest": {
+    "status": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit.",
+    "record": "tegra-x1-wddm/docs/dxvk-games-20261118/x86-system-d3d9-windowed-retest.json",
+    "record_sha256": "8fc7301526d42c9931d41d73edeca89a0473099b284a85f0d9340f3c32280bb9",
+    "native_game_accepted": false,
+    "native_adapter_open_observed": true,
+    "game_pid": 6112,
+    "original_registrations_restored": true
   }
 }

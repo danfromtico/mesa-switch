@@ -2649,17 +2649,26 @@
     ]
   },
   "system_legacy_directx": {
-    "status": "The 32-bit system D3D9 game fell back to Microsoft GDI Generic. The experimental adapter opened GM20B in a direct DDI control. System-runtime HAL device creation and game acceptance remain open.",
+    "status": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit.",
     "order": [
       "32-bit system D3D9 on FTEQW / LibreQuake",
       "32-bit system D3D8, then game",
       "DirectDraw 2D and Direct3D 7, then games"
     ],
     "record": "tegra-x1-wddm/docs/SYSTEM_LEGACY_DIRECTX_20261118.json",
-    "record_sha256": "b6d8a7b580ce407d89cb40cce7d17b3bd06db78fc4ba4c176bc12cec3a555993",
+    "record_sha256": "1dc1a2564290ae209df10442e558b23d705b15d8a4b69fe30343918215404ebb",
     "direct_ddi_adapter_control": true,
     "system_game_accepted": false,
-    "temporary_driver_binding_restored": true
+    "temporary_driver_binding_restored": true,
+    "x86_system_d3d9_retest": {
+      "status": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit.",
+      "record": "tegra-x1-wddm/docs/dxvk-games-20261118/x86-system-d3d9-windowed-retest.json",
+      "record_sha256": "8fc7301526d42c9931d41d73edeca89a0473099b284a85f0d9340f3c32280bb9",
+      "native_game_accepted": false,
+      "native_adapter_open_observed": true,
+      "game_pid": 6112,
+      "original_registrations_restored": true
+    }
   },
   "native_d3d12_device_creation": {
     "record": "tegra-x1-wddm/docs/D3D12_DEVICE_CREATION_20261118.json",
