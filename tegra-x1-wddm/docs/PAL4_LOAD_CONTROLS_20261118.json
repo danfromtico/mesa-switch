@@ -1007,5 +1007,156 @@
       "raw_output_sha256": "339c52f98cf189f6e0ba176e393968370b2bd40214d852ef3f34c1e36da91fa1",
       "completed_utc": "2026-11-18T10:36:35.9901002Z"
     }
+  },
+  "native_game_without_mesa_disk_cache": {
+    "case": "pal4-game-cpuboot-nocache-15",
+    "reference": "pal4-game-cpuboot-nolog-14",
+    "change": "Set MESA_SHADER_CACHE_DISABLE=true in the launch environment of the x86 game. The reference already omitted the live diagnostic log copy. Each case used a fresh application cache directory.",
+    "controller_sha256": "f64c442822ef2df11ce670dfd4c81d0fe1e4cf1657127bbb21273073f437a4bd",
+    "driver_cache_implementation": "src/util/disk_cache_win32.c",
+    "matched": {
+      "native_icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+      "game_exe_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+      "dxvk_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+      "window_pixels": [
+        800,
+        600
+      ],
+      "pnp_before": 0,
+      "cpu_khz": 998400,
+      "cpu_mv": 810,
+      "gpu_khz": 460800,
+      "gpu_uv": 800000,
+      "emc_khz": 204000,
+      "emc_transition_delta": 0,
+      "ac_source": "Online",
+      "platform_samples": 7,
+      "temperature_c_range": [
+        39,
+        40
+      ]
+    },
+    "power_difference": {
+      "reference": {
+        "CapacityPercent": 89,
+        "VoltageMv": 3812,
+        "Reg08SysStat": 68,
+        "Flags": 7
+      },
+      "cache_disabled": {
+        "CapacityPercent": 71,
+        "VoltageMv": 3775,
+        "Reg08SysStat": 108,
+        "Flags": 13
+      },
+      "note": "The reference battery was charge-inhibited. Charging was active in this run. Both runs had external power."
+    },
+    "file_tracking": {
+      "all_kernel_file_events": 18435,
+      "schema_or_buffer_errors": 0,
+      "observer_live_game_log_opens": 0,
+      "game_cache_directory_present_after": false,
+      "game_direct_cache_opens_or_creates": [
+        {
+          "case": "pal4-game-emclow-11",
+          "parent_directory_counts": {
+            "pal4-game-emclow-11": 213
+          },
+          "direct_cache_opens_or_creates_from_game": 213
+        },
+        {
+          "case": "pal4-game-cpuboot-nolog-14",
+          "parent_directory_counts": {
+            "pal4-game-cpuboot-nolog-14": 213
+          },
+          "direct_cache_opens_or_creates_from_game": 213
+        },
+        {
+          "case": "pal4-game-cpuboot-nocache-15",
+          "parent_directory_counts": {},
+          "direct_cache_opens_or_creates_from_game": 0
+        }
+      ]
+    },
+    "game": {
+      "start_utc": "2026-11-18T11:09:51.1040038Z",
+      "pid": 7024,
+      "capture_sha256": "27aa3ca80af38907e02897ce7ff2bcaf83f0254b002721d412afab09a9d5c0b0",
+      "identical_window_captures": 2,
+      "last_game_log_milestone": "Player manager initialization began",
+      "game_log_sha256": "887321663fe874996fe499c2e6d5cc5fb5ddc4a89719e956399d02f7b4de07e9",
+      "exception_file_bytes": 295,
+      "exception_file_sha256": "805b46016c504fb0f0e9369bd9ca4ac50931f171e3e3636678b9f6bf552861e1",
+      "exception_file_contents": "Startup header only",
+      "recorded_game_presents": 0,
+      "interactive_menu_observed": false
+    },
+    "graphics_queue": {
+      "app_commands": 5,
+      "synchronization_records": 6,
+      "completed_app_records": 11,
+      "retained_system_starts": 875,
+      "unmatched_system_starts": 0,
+      "successful_desktop_presents": 78,
+      "last_app_completion_utc": "2026-11-18 11:09:57.802153+00:00",
+      "graphics_trace_tail_utc": "2026-11-18 11:10:02.824919+00:00"
+    },
+    "unexpected_restart": {
+      "boot_utc": "2026-11-18T11:10:40.0857890Z",
+      "system_6008_record": 64428,
+      "kernel_power_41_record": 64437,
+      "bugcheck_code": 0,
+      "separate_planned_setup_restart_record": 64331,
+      "new_dump_files": 0
+    },
+    "recovery": {
+      "original_cpu_boot_setting": 1,
+      "temporary_return_task_removed": true,
+      "gpu_problem_code": 0,
+      "handheld": 1,
+      "dfll_active": 1,
+      "shell_response_csv": "5624,True,0,1280,720,45,45,44",
+      "shell_response_columns": "explorer_pid,responds_to_WM_NULL,dwm_flush_hresult,width,height,valid_samples,nonblack_samples,unique_colors"
+    },
+    "interpretation": "The native game still reset the system before its first Present while its Mesa disk cache was disabled. The two recorded cache-enabled cases and this case used separate cache roots. Previously damaged entries were not shared with these launches. The initiating system fault is unresolved.",
+    "evidence_sha256": {
+      "graphics.etl": "dd40711cb4008111e7c9b5f25102e6db9a7a76d794bd8c991cd8aa5f7d360e43",
+      "platform.jsonl": "bad10a6983d12166730d49fa1769db7ed5a8b655beaef511b1f7528699f411ac",
+      "cache-root-evidence.json": "c38f88bb02e3bd9cad3832a355e7d08e3f94401cce9ab757ccff659440207c1f",
+      "observer-log-access.json": "b9f78531b2fdfdce2e73b9f2f8535b96d525c791d31419e0c0941b37d517318d",
+      "app-queue.json": "faa1b8da591e4d4458f92c8e148e0f89b3900886cd8904ffd4599a42290cddb2",
+      "system-queue-tail.json": "789790a52519f17200f956207de72e2c9a322b9b9da95170fa3f556732ed1b87",
+      "pal4-cache-trial-state-15b.stdout": "1c6846326dc84c470906182627c9357e52d6fd06d34ec29bcf03143e8c7bd0c2",
+      "pal4-cache-return-15.stdout": "1eacd674383ce0ca1e66a29f27a486f148f29c7d5c8a31a13fdd8ee2b2d53fc6",
+      "recovered-desktop.json": "64e2e4c010a5e176a7780f14e04e684286dedc56641747c7abe03203c25c64e3"
+    },
+    "cache_restored_after_control": {
+      "verified_utc": "2026-11-18T11:20:25.4701326Z",
+      "temporary_test_action_removed": true,
+      "game_shortcut_launches_original_exe": true,
+      "disable_environment": {
+        "User": null,
+        "Process": null,
+        "Machine": null
+      },
+      "persistent_cache_directory_overrides": {
+        "Machine": null,
+        "User": null
+      },
+      "gpu_problem_code": 0,
+      "x86_native_offscreen_pixels_per_run": 1024,
+      "cold_cache": {
+        "hits": 0,
+        "misses": 6
+      },
+      "warm_cache": {
+        "hits": 6,
+        "misses": 0
+      },
+      "verified_blake3_entries": 6,
+      "source_settings_sha256": "362d6e4cf8b9876309b01b65e62d95631bcb2aa6b407c3c036b9b8a29d98797a",
+      "verification_receipt_sha256": "dac45ce06a0a53ce6997fc577cbcf4730e706f435f2f88362b4d99714e1479e0"
+    }
   }
 }

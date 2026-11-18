@@ -38,7 +38,7 @@ def main():
     (args.out / "triangle-shaders.h").write_text("\n".join(header) + "\n")
     run(args.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
         "-I", args.vulkan_include, "-I", args.out, SOURCE / "triangle.c",
-        args.loader_lib, "-lgdi32", "-luser32", "-o", args.out / "vk-triangle.exe")
+        args.loader_lib, "-lgdi32", "-luser32", "-lpsapi", "-o", args.out / "vk-triangle.exe")
     shutil.copyfile(args.loader_dll, args.out / "vulkan-1.dll")
 
 

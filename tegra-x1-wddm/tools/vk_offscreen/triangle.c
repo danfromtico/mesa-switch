@@ -1,6 +1,8 @@
 /* SPDX-License-Identifier: MIT */
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <psapi.h>
+#include <inttypes.h>
 #include <vulkan/vulkan_core.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -173,11 +175,30 @@ static int show_preview(void)
     return next == -1;
 }
 
+enum { PERF_SUBMISSIONS = 24 };
+
+static uint64_t ticks(void)
+{
+    LARGE_INTEGER t;
+    QueryPerformanceCounter(&t);
+    return (uint64_t)t.QuadPart;
+}
+
+static uint64_t cpu_clock(void)
+{
+    FILETIME creation, exit_time, kernel, user;
+    if (!GetProcessTimes(GetCurrentProcess(), &creation, &exit_time, &kernel, &user))
+        return 0;
+    return ((uint64_t)kernel.dwHighDateTime << 32) + kernel.dwLowDateTime +
+           ((uint64_t)user.dwHighDateTime << 32) + user.dwLowDateTime;
+}
+
 int main(int argc, char **argv)
 {
     const bool preview = argc == 4 && strcmp(argv[3], "--preview") == 0;
-    if (argc != 3 && !preview) {
-        fprintf(stderr, "usage: vk-triangle.exe <absolute-NVK-DLL> <hex-KMT-LUID> [--preview]\n");
+    const bool timings = argc == 4 && strcmp(argv[3], "--timings") == 0;
+    if (argc != 3 && !preview && !timings) {
+        fprintf(stderr, "usage: vk-triangle.exe <absolute-NVK-DLL> <hex-KMT-LUID> [--preview | --timings]\n");
         return 2;
     }
     if (strlen(argv[2]) != 16 || strspn(argv[2], "0123456789abcdefABCDEF") != 16)
@@ -185,6 +206,18 @@ int main(int argc, char **argv)
     const uint64_t luid = strtoull(argv[2], NULL, 16);
     if (!luid)
         return 2;
+    LARGE_INTEGER frequency = {0};
+    if (timings && !QueryPerformanceFrequency(&frequency))
+        return 2;
+    const uint64_t start = timings ? ticks() : 0;
+    const uint64_t cpu_start = timings ? cpu_clock() : 0;
+    /* Stage boundaries are load, instance, adapter selection, device, image,
+     * staging, pipeline, recording, submission batch and destruction. */
+    uint64_t stage_ticks[10] = {0};
+    uint64_t submit_ticks[PERF_SUBMISSIONS] = {0};
+    uint64_t wait_ticks[PERF_SUBMISSIONS] = {0};
+    uint64_t read_ticks[PERF_SUBMISSIONS] = {0};
+    uint64_t pipeline_start = 0, pipeline_cpu = 0, pipeline_only = 0;
     HMODULE icd = LoadLibraryExA(argv[1], NULL,
         LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (!icd) {
@@ -192,6 +225,7 @@ int main(int argc, char **argv)
         return 2;
     }
 
+    if (timings) stage_ticks[0] = ticks();
     VkInstance instance = VK_NULL_HANDLE;
     VkDevice device = VK_NULL_HANDLE;
     VkImage image = VK_NULL_HANDLE;
@@ -232,6 +266,7 @@ int main(int argc, char **argv)
         .enabledExtensionCount = 1, .ppEnabledExtensionNames = &extension,
     };
     CHECK(vkCreateInstance(&create_instance, NULL, &instance));
+    if (timings) stage_ticks[1] = ticks();
     VkPhysicalDevice physical = pick_device(instance, luid);
     if (!physical) {
         fprintf(stderr, "NVK did not expose the requested KMT LUID %016llx\n",
@@ -254,7 +289,9 @@ int main(int argc, char **argv)
         .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
         .queueCreateInfoCount = 1, .pQueueCreateInfos = &create_queue,
     };
+    if (timings) stage_ticks[2] = ticks();
     CHECK(vkCreateDevice(physical, &create_device, NULL, &device));
+    if (timings) stage_ticks[3] = ticks();
     VkQueue queue;
     vkGetDeviceQueue(device, family, 0, &queue);
 
@@ -278,6 +315,7 @@ int main(int argc, char **argv)
         goto done;
     CHECK(vkAllocateMemory(device, &allocate, NULL, &image_mem));
     CHECK(vkBindImageMemory(device, image, image_mem, 0));
+    if (timings) stage_ticks[4] = ticks();
 
     const VkImageViewCreateInfo create_view = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -306,6 +344,7 @@ int main(int argc, char **argv)
         .memory = buffer_mem, .size = VK_WHOLE_SIZE,
     };
     CHECK(vkFlushMappedMemoryRanges(device, 1, &staging_range));
+    if (timings) stage_ticks[5] = ticks();
 
     const VkAttachmentDescription color_attachment = {
         .format = create_image.format, .samples = VK_SAMPLE_COUNT_1_BIT,
@@ -397,7 +436,16 @@ int main(int argc, char **argv)
         .pRasterizationState = &rasterization, .pMultisampleState = &multisample,
         .pColorBlendState = &blend, .layout = layout, .renderPass = render_pass,
     };
+    if (timings) {
+        pipeline_cpu = cpu_clock();
+        pipeline_start = ticks();
+    }
     CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &create_pipeline, NULL, &pipeline));
+    if (timings) {
+        stage_ticks[6] = ticks();
+        pipeline_only = stage_ticks[6] - pipeline_start;
+        pipeline_cpu = cpu_clock() - pipeline_cpu;
+    }
 
     const VkCommandPoolCreateInfo create_pool = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, .queueFamilyIndex = family,
@@ -411,7 +459,7 @@ int main(int argc, char **argv)
     CHECK(vkAllocateCommandBuffers(device, &allocate_commands, &commands));
     const VkCommandBufferBeginInfo begin = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        .flags = timings ? 0 : VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
     };
     CHECK(vkBeginCommandBuffer(commands, &begin));
     const VkClearValue clear = {.color.float32 = {0, 0, 1, 1}};
@@ -443,24 +491,41 @@ int main(int argc, char **argv)
     const VkSubmitInfo submit = {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO, .commandBufferCount = 1, .pCommandBuffers = &commands,
     };
-    CHECK(vkQueueSubmit(queue, 1, &submit, fence));
-    VkResult waited = vkWaitForFences(device, 1, &fence, VK_TRUE, 10000000000ULL);
-    if (waited != VK_SUCCESS) {
-        fprintf(stderr, "GPU fence wait returned %d\n", waited);
-        /* Let process teardown release pending GPU objects. */
-        return 4;
-    }
-    CHECK(vkInvalidateMappedMemoryRanges(device, 1, &staging_range));
-    exit_code = check_pixels(mapped);
-    if (!exit_code) {
-        printf("{\"vulkan_draw\":true,\"luid\":\"%016llx\",\"pixels\":1024,"
-               "\"red\":300,\"blue\":724,\"guard_bytes\":128}\n",
-               (unsigned long long)luid);
-        if (preview) {
-            const uint8_t *rgba = (const uint8_t *)mapped + GUARD;
-            for (unsigned i = 0; i < PIXELS; i++, rgba += 4)
-                preview_bgra[i] = (uint32_t)rgba[0] << 16 | (uint32_t)rgba[1] << 8 | rgba[2];
+    if (timings) stage_ticks[7] = ticks();
+    const unsigned submissions = timings ? PERF_SUBMISSIONS : 1;
+    for (unsigned sample = 0; sample < submissions; sample++) {
+        if (sample) {
+            CHECK(vkResetFences(device, 1, &fence));
+            memset((uint8_t *)mapped + GUARD, 0x5a, IMAGE_BYTES);
+            CHECK(vkFlushMappedMemoryRanges(device, 1, &staging_range));
         }
+        const uint64_t queued = timings ? ticks() : 0;
+        CHECK(vkQueueSubmit(queue, 1, &submit, fence));
+        const uint64_t submitted = timings ? ticks() : 0;
+        VkResult waited = vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_C(10000000000));
+        const uint64_t completed = timings ? ticks() : 0;
+        if (waited != VK_SUCCESS) {
+            fprintf(stderr, "GPU fence wait returned %d\n", waited);
+            return 4;
+        }
+        CHECK(vkInvalidateMappedMemoryRanges(device, 1, &staging_range));
+        if (check_pixels(mapped))
+            goto done;
+        if (timings) {
+            submit_ticks[sample] = submitted - queued;
+            wait_ticks[sample] = completed - submitted;
+            read_ticks[sample] = ticks() - completed;
+        }
+    }
+    if (timings) stage_ticks[8] = ticks();
+    exit_code = 0;
+    printf("{\"vulkan_draw\":true,\"luid\":\"%016llx\",\"pixels\":1024,"
+           "\"red\":300,\"blue\":724,\"guard_bytes\":128}\n",
+           (unsigned long long)luid);
+    if (preview) {
+        const uint8_t *rgba = (const uint8_t *)mapped + GUARD;
+        for (unsigned i = 0; i < PIXELS; i++, rgba += 4)
+            preview_bgra[i] = (uint32_t)rgba[0] << 16 | (uint32_t)rgba[1] << 8 | rgba[2];
     }
 
 done:
@@ -485,6 +550,24 @@ done:
     if (instance)
         vkDestroyInstance(instance, NULL);
     FreeLibrary(icd);
+    if (timings) stage_ticks[9] = ticks();
+    if (timings && !exit_code) {
+        PROCESS_MEMORY_COUNTERS memory = {0};
+        memory.cb = sizeof(memory);
+        if (!GetProcessMemoryInfo(GetCurrentProcess(), &memory, sizeof(memory)))
+            return 5;
+        printf("MEASURE %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 "\n",
+               (uint64_t)frequency.QuadPart, cpu_clock() - cpu_start, (uint64_t)memory.PeakWorkingSetSize,
+               pipeline_only, pipeline_cpu);
+        uint64_t previous = start;
+        for (unsigned i = 0; i < 10; i++) {
+            printf("STAGE %u %" PRIu64 "\n", i, stage_ticks[i] - previous);
+            previous = stage_ticks[i];
+        }
+        for (unsigned i = 0; i < PERF_SUBMISSIONS; i++)
+            printf("SUBMIT %u %" PRIu64 " %" PRIu64 " %" PRIu64 "\n",
+                   i, submit_ticks[i], wait_ticks[i], read_ticks[i]);
+    }
     if (!exit_code && preview && show_preview()) {
         fprintf(stderr, "Could not display the verified readback\n");
         return 1;
