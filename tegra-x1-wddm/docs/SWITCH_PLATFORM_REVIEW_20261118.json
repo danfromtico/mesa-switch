@@ -1,5 +1,5 @@
 {
-  "status": "Objective 5 in progress. Native audio stream timing and explicit PCM capture passed on the selected 1.0.0.10 package.",
+  "status": "Objective 5 in progress. Physical Switch audio and wireless candidates are selected. The I2C timeout package has catalog coverage; its physical trials remain open.",
   "order": [
     "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
     "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
@@ -613,10 +613,10 @@
         "exit": 0
       }
     ],
-    "native_test_scope": "Signed ARM64 user-mode controls on Switch exercise the production report writer with a substituted registry. The installed Wi-Fi driver remains 0.5.7.0.",
+    "native_test_scope": "The signed ARM64 fault controls exercise the production writer with a substituted registry. The physical station now runs 0.5.7.1. Both a hot rebind and Windows restart restored connectivity and passed all five bidirectional payload comparisons.",
     "candidate_unsigned_sha256": "de01a99ae10e48cfdeb6bb77fbcca87fb03e9029f6c959eaf1129331b8799055",
     "changed_translation_unit": "report.c",
-    "earlier_startup_issue": "Current device problem code 0. The filtered historical PnP query returned no matching event for this instance in the specified time window. The cause of the earlier unavailable radio remains open.",
+    "earlier_startup_issue": "The original driver recorded three transient driver-attributed WLAN disconnects on one boot. Each reconnected in under seven seconds. These observations leave the previously reported missing radio on startup unresolved.",
     "startup_issue_history_sha256": "17367ba9d430c5d42389853017957c5d08e58d610209fc613dca0927922bf92f",
     "startup_layers": "Check the pre-Windows firmware preparation and the Windows ACPI override alongside WDF initialization. A readiness byte from an override can agree with the saved file even when a prior boot has no surviving firmware report.",
     "reference_unsigned_sha256": "660da9acc7a0b1224b0147a753b35235497deac37d4d61c6bfc755e9a165f357",
@@ -627,7 +627,42 @@
     "signed_candidate_sys_sha256": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
     "candidate_inf_sha256": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
     "candidate_package_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/7d7bf6806d4a22ea0cc9408b00307a281e488a40",
-    "candidate_version": "0.5.7.1"
+    "candidate_version": "0.5.7.1",
+    "selected_package": {
+      "current_version": "0.5.7.1",
+      "previous_version": "0.5.7.0",
+      "signed_sys_sha256": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
+      "signed_cat_sha256": "3ac32fcba2c90eab2ab1ce1b1056868fcc6471e8f07e1b5036509aee92208f4b",
+      "inf_sha256": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
+      "source": "7d7bf6806d4a22ea0cc9408b00307a281e488a40",
+      "acceptance_commit": "6488e438e9f8a093839600ef6f49fd61db3474c7",
+      "hardware_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/6488e438e9f8a093839600ef6f49fd61db3474c7/drivers/SwitchWifi/tests/physical-report-20261118.json",
+      "record_sha256": "0d629afacaf7a7f7625ef35bb2975d8777bb65c038f0c3c1c51adfec8714686c",
+      "cold_power_on_verified": false,
+      "physical_hot_rebind": true,
+      "windows_restart_with_local_recovery_armed": true,
+      "payload_bytes_per_direction_per_session": 1310720,
+      "median_short_sftp_mbit_s": {
+        "reference": {
+          "up_mbit_s": 33.4704,
+          "down_mbit_s": 25.0732
+        },
+        "candidate_hot": {
+          "up_mbit_s": 35.0299,
+          "down_mbit_s": 29.1607
+        },
+        "candidate_after_restart": {
+          "up_mbit_s": 31.5928,
+          "down_mbit_s": 24.0862
+        }
+      },
+      "prior_short_wlan_disconnect_seconds": [
+        4.604,
+        6.25,
+        4.665
+      ],
+      "independent_review": "Main review and native acceptance completed. Separate Gemini review remains pending."
+    }
   },
   "bluetooth": {
     "version_matched_source": "7f6c3cf9b35a63bfc721f78f0e3524ea41012cf7",
@@ -728,7 +763,7 @@
     "i2c_fifo_timeout": {
       "source": "ca60e5d8112bb5883292c12af525f21ae72c1b2e",
       "patch_sha256": "d49dce8d25b3c03794b1ba9ce508c4fb539f46ba29dae50c428f60eca094f0b4",
-      "unsigned_sha256": "3bcdaf60161119da1fc86424a4b75f096ec1afb73bed8aafab2c59a713b400f0",
+      "unsigned_sha256": "135612f67f69abf30854afa61215977944b859dbfe4c6efa30817ef44b1f95fc",
       "controls_sha256": "a875e2719f23d5c5a97e69f87a0f7ff04e3bd565d00afc5d3ad850ce31da2f90",
       "cases_per_build": 11,
       "outcomes": {
@@ -818,8 +853,15 @@
         }
       },
       "scope": "Controlled register test of the installed source. Failed FIFO clearing previously issued three packet headers during the flush. The candidate returns timeout and stops writing. Physical installation and bus recovery testing remain open.",
-      "feature_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/f0fabfb79dd868291a1a7860077995574bfaeb74",
-      "candidate_package_version": "1.0.0.6"
+      "feature_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/35ec44f8a35cc34b15b6bbfa04a55f43106eb5ec",
+      "candidate_package_version": "1.0.0.6",
+      "signed_package_sha256": {
+        "tegra210i2c.inf": "f4ac5086129e7b81713ad9c1e76abfb72b942bf9b9b926ffb97c96d10cc91bb4",
+        "tegra210i2c.cat": "3db91642068eca50067fafa9610fffcb65cce498e8cfe22f80362e17fb6d97ef",
+        "tegra210i2c.sys": "0ebffc1778fbc0b60cf81b270c53458d266b7c4043424319265668482e332713"
+      },
+      "physical_candidate_selected": false,
+      "candidate_source_commit": "35ec44f8a35cc34b15b6bbfa04a55f43106eb5ec"
     },
     "battery": {
       "driver": {
@@ -1356,7 +1398,7 @@
           "member_checks": 2
         }
       },
-      "scope": "Windows PE ARM64 import and catalog checks cover graphics, Wi-Fi and audio. The physical Switch selected the audio candidate and completed ordinary and explicit diagnostic tests. Wi-Fi operational trials remain open."
+      "scope": "Graphics, Wi-Fi and audio packages passed ARM64 Windows PE catalog and store checks. The physical audio and Wi-Fi operational receipts are linked under the selected components."
     }
   },
   "game_frame_and_power": {
