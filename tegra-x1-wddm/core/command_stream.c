@@ -878,12 +878,16 @@ static bool mme_call_allowed(uint32_t op, uint32_t method, uint32_t count,
 
 #define TG_GPU_NVK_CS_GROUP_COUNT_OFFSET 12u
 #define TG_GPU_NVK_CS_GROUP_COUNT_BYTES  12u
+enum {
+    XFB_POINTER_STRIDE_DWORDS = (NVB197_SET_STREAM_OUT_BUFFER_LOAD_WRITE_POINTER(1) -
+                                NVB197_SET_STREAM_OUT_BUFFER_LOAD_WRITE_POINTER(0)) / sizeof(uint32_t),
+};
 
 static bool indirect_mme_call(uint32_t op, uint32_t method, uint32_t count,
                               const uint32_t *args, size_t inline_words,
                               const struct tg_gpu_submit_indirect *indirect,
                               struct tg_gpu_command_info *stream,
-                              uint32_t *slot_out)
+                              uint32_t xfb_selector_stride, uint32_t *slot_out)
 {
     const uint32_t base = NVB197_CALL_MME_MACRO(0);
     if (op != NVB06F_DMA_ONEINCR_OPCODE_VALUE || method < base)
@@ -925,7 +929,7 @@ static bool indirect_mme_call(uint32_t op, uint32_t method, uint32_t count,
         break;
     case NVK_MME_XFB_COUNTER_LOAD:
         if (indirect->suffix_offset || inline_words != 1 || indirect_words != 1 ||
-            count != 2 || args[0] >= 4)
+            count != 2 || args[0] % xfb_selector_stride || args[0] / xfb_selector_stride >= 4)
             return false;
         break;
     case NVK_MME_DISPATCH_INDIRECT:
@@ -1112,7 +1116,7 @@ static bool inspect(const uint32_t *words, uint32_t *staging, size_t bytes,
         if (count > prefix_words - n) {
             if (!indirect || !host_wfi || subchannel != 0 ||
                 !indirect_mme_call(op, method, count, words + n, prefix_words - n,
-                                   indirect, &stream, &indirect_slot))
+                                   indirect, &stream, 1, &indirect_slot))
                 return false;
             n = prefix_words;
             break;
@@ -1360,6 +1364,11 @@ static bool inspect(const uint32_t *words, uint32_t *staging, size_t bytes,
     }
     if (cb0_setup_end && !stream.cb0_end)
         return false;
+    if (staging && indirect_slot == NVK_MME_XFB_COUNTER_LOAD) {
+        /* Windows ICDs send a buffer index in the last inline word. The
+         * installed Maxwell macro adds a dword offset to the slot 0 method. */
+        staging[prefix_words - 1] = words[prefix_words - 1] * XFB_POINTER_STRIDE_DWORDS;
+    }
     if (info)
         *info = stream;
     return true;
@@ -1530,7 +1539,7 @@ static bool check_packet_range(const uint32_t *words, size_t start_word, size_t 
                 uint32_t slot = NVK_MME_COUNT;
                 if (!indirect || !indirect_slot_out || subchannel != 0 ||
                     !indirect_mme_call(op, method, count, words + n, end_word - n,
-                                       indirect, &unused, &slot))
+                                       indirect, &unused, XFB_POINTER_STRIDE_DWORDS, &slot))
                     return false;
                 if ((slot == NVK_MME_DRAW_INDIRECT ||
                      slot == NVK_MME_DRAW_INDEXED_INDIRECT ||

@@ -874,6 +874,19 @@ static void test_indirect_and_xfb_streams(void)
     };
     assert(tg_gpu_inspect_indirect_command_stream(xfb_load, sizeof(xfb_load), &word_ind, &va, &info));
     assert(info.va_end == 0x72004 && !info.requires_program);
+    for (uint32_t slot = 0; slot < 4; ++slot) {
+        xfb_load[2] = slot;
+        uint32_t prepared[3];
+        memcpy(prepared, xfb_load, sizeof(prepared));
+        assert(tg_gpu_prepare_indirect_command_stream(prepared, sizeof(prepared), &word_ind, &va, &info));
+        assert(prepared[2] == 8 * slot && xfb_load[2] == slot);
+        struct range_checks counter = {
+            .expected = {{0x72000, 0x72004}}, .access = {TG_GPU_PITCH_READ},
+        };
+        assert(tg_gpu_check_stream_mappings(prepared, sizeof(prepared), &word_ind,
+                                            &programs, check_range, &counter));
+        assert(counter.next == 1);
+    }
     xfb_load[2] = 4; /* stream index >= 4 */
     assert(!tg_gpu_inspect_indirect_command_stream(xfb_load, sizeof(xfb_load), &word_ind, &va, &info));
 
