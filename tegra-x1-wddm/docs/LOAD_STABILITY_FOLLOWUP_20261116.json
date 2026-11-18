@@ -597,7 +597,7 @@
     }
   },
   "nvdec_default_device_creation_20261118": {
-    "status": "Recorded with the existing load-transition incidents. The operator suspects a shared cause and requested that investigation start with synchronization when a D3D11.1 device skips the Windows runtime submission queue. Causality remains open.",
+    "status": "The owner accepted ded6fa4a for development after a full six-frame default decode. The later unplanned restart is tracked in objective 4, after the objective 5 module reviews.",
     "candidate_source": "474ef374510ff7a24e580455a646beefe72a8a64",
     "matched_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
     "desktop_icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
@@ -611,9 +611,10 @@
       "last_host_checkpoint": "367250 5388 CALL av_hwdevice_ctx_create_D3D11VA 00000000",
       "verified_frames": 0,
       "process_exit": null,
-      "capture": "DXGI identified GM20B; the host last saw entry to D3D11VA device creation. The operator later reported a manual restart and Wi-Fi failing to start on that boot. Capture of the process exit and any subsequent decoded frames remains pending on the device.",
+      "capture": "In the earlier gate-only comparison the on-device journal recorded successful D3D11VA device creation. Frame and process-exit evidence was incomplete before the separately reported manual restart.",
       "operator_reported_restart": "manual",
-      "paired_trial_counted_as_automatic_restart": false
+      "paired_trial_counted_as_automatic_restart": false,
+      "last_device_checkpoint": "367890 5388 RETURN av_hwdevice_ctx_create_D3D11VA 00000000"
     },
     "earlier_candidate_attempts": "Three earlier candidate trials were followed by distinct Windows boots with Event 41 and bugcheck zero. One launcher contained a verified pre-FFmpeg PowerShell error. No new watchdog dump identified their cause.",
     "prior_pal4_windows_queue": {
@@ -645,13 +646,28 @@
       "For each producer and DWM device, establish its negotiated DDI and whether NVK takes the runtime queue.",
       "Check the ingress and completion fence identities, values, GPU waits and ownership of displayed allocations across the two submission paths. Verify completion before resource and context retirement."
     ],
-    "driver_scope": "The paired UMDs share the same frozen device-construction and teardown code. Of 25 linked UMD object files, only tgd3d_video.cpp.obj changed in the default-discovery candidate. The daily reference remains the previously accepted UMD.",
-    "evidence": "https://github.com/ruje0504-2/mesa-switch-woa/blob/00c7d3dd3b0e96c4b15a72c18cbae124aa2f4a3a/tegra-x1-wddm/docs/NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json"
+    "driver_scope": "The gate-only comparison used identical frozen device construction. The accepted UMD adds the checked completion and retirement patch to that source. The KMD and desktop ICD hashes were verified on the accepted boot.",
+    "evidence": "https://github.com/ruje0504-2/mesa-switch-woa/blob/cc41ce9ded615f53b7c47ff4a4f9e63f7fde6989/tegra-x1-wddm/docs/NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json",
+    "accepted_umd": {
+      "sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "trace_sha256": "9e71ffc3bf6151d660b4e25c7184509e23398b34abdd724ffcbc54473cccc646",
+      "native_720p_frames": 6,
+      "decode_exit_marker": "EXIT RunAndRelease 00000000",
+      "parent_process_exit_code": null,
+      "subsequent_unplanned_restart": true,
+      "bugcheck": 0,
+      "default_d3d11_1_independent_submission": true,
+      "monitored_fences_created": 2,
+      "three_d_batches_traced": 0,
+      "new_kernel_dump": false,
+      "acceptance_record": "tegra-x1-wddm/docs/NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json",
+      "baseline_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\tgd3d-video-ddi-ded6fa4a-20261118-230849"
+    }
   },
   "wifi_startup_followup_20261118": {
     "status": "Deferred by the operator for later investigation.",
     "operator_observation": "The operator manually restarted the Switch. On that boot the Wi-Fi driver did not come up.",
-    "effect": "The Mac cannot retrieve the final device-side journal or confirm the active postboot display package until a management connection returns.",
+    "effect": "Management connectivity returned and the earlier journal was retrieved. The startup issue remains in the platform-driver audit; its manual restart remains excluded from the spontaneous reset count.",
     "attribution": "Wi-Fi startup is tracked independently. The manual restart is excluded from the count of spontaneous resets. The earlier three distinct boot transitions and their system records are retained separately.",
     "when_resumed": "Read the Wi-Fi device problem code, driver identity and Kernel-PnP/WLAN startup events for the affected boot before associating the issue with any graphics workload."
   }
