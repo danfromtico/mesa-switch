@@ -1,0 +1,514 @@
+{
+  "module": "DXVK v3.1.1 Windows frame-limiter wait",
+  "version_source": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+  "source_sha256": {
+    "util_fps_limiter.cpp": "ba878e0a2d112ce5d706bd9b41f041d8d9135e564186f23880cbd1c4cd71a91b",
+    "util_fps_limiter.h": "de21a1766e8e6aedfd4ce21b2cf30a4dc8d887daee89dda20e0287b2bd08ff3b",
+    "util_sleep.cpp": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba",
+    "util_sleep.h": "6e73b8e23922aef851e31fdf78fdb578840b1b8bcde574d7d29889e6f2e03a3a",
+    "util_time.h": "c238cb172c9eefb5f664920017659cfcfe74c6f2e6cbab6e7d954d17e932caee",
+    "thread.h": "e5bc21307ad8fa49b0965fc08065f60b1ddd70b1d29ae10dc9ec1a8bfb3522d7"
+  },
+  "production_route": "D3D9 UpdateTargetFrameRate passes the configured limit to Presenter. Without present-wait, signalFrame calls FpsLimiter::delay before signaling frame latency. The existing desktop-package game logs establish the version, settings and features. The experiment compiles that source into separate timing executables.",
+  "archived_game_evidence": {
+    "fte-default-dxvk-ec-01": {
+      "log_sha256": "7b36d3de9142f09c71b0d98d96b4fbc9fc072ea7ba36ce240d2f6ddd2ba956b9",
+      "reported_dxvk_version": "3.1.1",
+      "rendered_game_exit": 0,
+      "configured_max_fps": 15,
+      "compiler_workers": 1,
+      "reported_present_wait": false
+    },
+    "fte-default-dxvk-x64-01": {
+      "log_sha256": "51307080e565b1d2e81291d910e8592d146b0b7644bac05aacb3c8264337c22f",
+      "reported_dxvk_version": "v3.1.1",
+      "rendered_game_exit": 0,
+      "configured_max_fps": 15,
+      "compiler_workers": 1,
+      "reported_present_wait": false
+    },
+    "fte-default-dxvk-x86-01": {
+      "log_sha256": "3d8bfe8f28098c93bed3365ba14968f056aefadf7708c07c0d2bd027fe3f3e9e",
+      "reported_dxvk_version": "v3.1.1",
+      "rendered_game_exit": 0,
+      "configured_max_fps": 15,
+      "compiler_workers": 1,
+      "reported_present_wait": false
+    }
+  },
+  "candidate_change": "On Windows the extra busy-wait margin is limited to one OS timer quantum, in addition to the existing four-quantum margin. The original adds one sixth of the requested sleep.",
+  "case_sha256": "0c8d7b9b128139e5c70dbf83260535842e2566ecb9804d8db624f8711c895b45",
+  "probe_source_sha256": "5897b07fef739a04c423ac5cf585876a642fc470b5a173f101546d4275bd58d7",
+  "images": {
+    "arm64-reference": {
+      "bytes": 738824,
+      "unsigned": "26744f4c5be90a0a46f97bd033f45ab0586105daabf766badc05c3b45c465130",
+      "sha256": "e82701fd90cf6f783d99d79eb376c4178ac265e5005bbf4ce30d70dd2aef52cc",
+      "machine": "0xaa64",
+      "architecture_target": "aarch64",
+      "sleep_source_sha256": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba"
+    },
+    "arm64-candidate": {
+      "bytes": 738824,
+      "unsigned": "5ea906edd0c171055ad2b1930ed7830ae3a14342ad29960ea55802b1ba9324e1",
+      "sha256": "1ac7b9b321e0378a1db629934961beb529abee432f4f6e95ff31f379b202ef59",
+      "machine": "0xaa64",
+      "architecture_target": "aarch64",
+      "sleep_source_sha256": "b3872f7197bf4bda88e7ea38bd7f8289b2eb8c0d4bf9c40fdd4dab1c133b702d"
+    },
+    "x86-reference": {
+      "bytes": 859656,
+      "unsigned": "b1f795614bfd7606e319f0b4972de137505382c02ca6b3cf7461b1ffbaff8efa",
+      "sha256": "57f1df24f6b64862c1ea16d704b7d2c47c0a8614d938bd6d632c1e7714caac74",
+      "machine": "0x14c",
+      "architecture_target": "i686",
+      "sleep_source_sha256": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba"
+    },
+    "x86-candidate": {
+      "bytes": 859656,
+      "unsigned": "eefacade73e559f4960a5f4d6eb25fdba8c68d2bcf828260f567a00f7ca13621",
+      "sha256": "5ee63d5a55dbdd38ab29a66c3db02a306685e334a1ceb9816dedd312442825c6",
+      "machine": "0x14c",
+      "architecture_target": "i686",
+      "sleep_source_sha256": "b3872f7197bf4bda88e7ea38bd7f8289b2eb8c0d4bf9c40fdd4dab1c133b702d"
+    },
+    "x64-reference": {
+      "bytes": 800264,
+      "unsigned": "397e3bf7aa5d940d73c874aa163ae17b36b645a02f05e7012c8e7e464757d723",
+      "sha256": "5271317ffba08a956058c62f0e9e4dca9e2085850ce72869d5cba809dde61f8c",
+      "machine": "0x8664",
+      "architecture_target": "x86_64",
+      "sleep_source_sha256": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba"
+    },
+    "x64-candidate": {
+      "bytes": 800264,
+      "unsigned": "67deae8afa5d06e087739c0e58cf7f7de497ee3097e088b7146c8c2185f07605",
+      "sha256": "ec580fb87291a8b41506442f5f17dfd046b82547ac6ea464e675dd61f61719b4",
+      "machine": "0x8664",
+      "architecture_target": "x86_64",
+      "sleep_source_sha256": "b3872f7197bf4bda88e7ea38bd7f8289b2eb8c0d4bf9c40fdd4dab1c133b702d"
+    },
+    "arm64ec-reference": {
+      "bytes": 826888,
+      "unsigned": "89dc176a199def373cf3576d123afe629a01e5d690530682a0bf2c6c47b759cf",
+      "sha256": "ca60c0d8764ff179e6a9d666581226ece4f14027293c5d8c4dee6350779fb5bc",
+      "machine": "0x8664",
+      "architecture_target": "arm64ec",
+      "sleep_source_sha256": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba"
+    },
+    "arm64ec-candidate": {
+      "bytes": 826888,
+      "unsigned": "d11ad0cf21b293476aaa621dfaa2373242f624b9cbe5ea72dc26b6afd58cb91c",
+      "sha256": "d59e665dacc4264ca1227c91593ee9233078eeb57f166cdcc01ae6babb143519",
+      "machine": "0x8664",
+      "architecture_target": "arm64ec",
+      "sleep_source_sha256": "b3872f7197bf4bda88e7ea38bd7f8289b2eb8c0d4bf9c40fdd4dab1c133b702d"
+    }
+  },
+  "architecture_verification": {
+    "arm64": {
+      "Format": "COFF-ARM64",
+      "Machine": "IMAGE_FILE_MACHINE_ARM64 (0xAA64)",
+      "CHPEMetadataPointer": "0x0"
+    },
+    "x86": {
+      "Format": "COFF-i386",
+      "Machine": "IMAGE_FILE_MACHINE_I386 (0x14C)",
+      "CHPEMetadataPointer": "0x0"
+    },
+    "x64": {
+      "Format": "COFF-x86-64",
+      "Machine": "IMAGE_FILE_MACHINE_AMD64 (0x8664)",
+      "CHPEMetadataPointer": "0x0"
+    },
+    "arm64ec": {
+      "Format": "COFF-ARM64EC",
+      "Machine": "IMAGE_FILE_MACHINE_ARM64EC (0xA641)",
+      "CHPEMetadataPointer": "0x1400A2710"
+    }
+  },
+  "time_source_frequency_hz": 19200000,
+  "windows_boot_utc": "2026-11-18T19:07:27.5697220Z",
+  "power_before": {
+    "cpu_khz": 1007250,
+    "cpu_error": 0,
+    "external": true,
+    "soc_c": 39,
+    "emc_khz": 1331200,
+    "mode": 1,
+    "board_c": 37,
+    "battery_pct": 79
+  },
+  "power_after": {
+    "cpu_khz": 1338750,
+    "cpu_error": 0,
+    "external": true,
+    "soc_c": 38,
+    "emc_khz": 1600000,
+    "mode": 1,
+    "board_c": 37,
+    "battery_pct": 79
+  },
+  "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+  "measurement_method": "Two counterbalanced pairs per architecture. Three warm-ups for each cap precede the local QPC samples. Thread CPU is kernel plus user time from GetThreadTimes, as a percentage of one logical processor. P95 is the absolute distance from the requested interval. No graphics context or game was created by the timing program.",
+  "timer_resolution_log": {
+    "arm64-1-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64-2-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64-3-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64-4-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "x86-1-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "x86-2-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "x86-3-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "x86-4-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "x64-1-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "x64-2-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "x64-3-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "x64-4-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64ec-1-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64ec-2-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64ec-3-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64ec-4-candidate": [
+      "Setting timer interval to 500 us"
+    ]
+  },
+  "comparisons": [
+    {
+      "architecture": "arm64",
+      "target_fps": 8,
+      "reference": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 19.244,
+        "interval_rate_hz": 7.9887,
+        "p95_absolute_period_error_ms": 4.2555,
+        "p99_interval_ms": 130.0954,
+        "maximum_absolute_period_error_ms": 5.33
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 11.46,
+        "interval_rate_hz": 8.0013,
+        "p95_absolute_period_error_ms": 0.2906,
+        "p99_interval_ms": 125.2863,
+        "maximum_absolute_period_error_ms": 0.3
+      },
+      "one_core_percentage_points_saved": 7.784,
+      "p95_absolute_error_change_ms": -3.9649
+    },
+    {
+      "architecture": "arm64",
+      "target_fps": 15,
+      "reference": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 21.215,
+        "interval_rate_hz": 15.0863,
+        "p95_absolute_period_error_ms": 4.5841,
+        "p99_interval_ms": 71.1722,
+        "maximum_absolute_period_error_ms": 13.0358
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 3.571,
+        "interval_rate_hz": 15.2361,
+        "p95_absolute_period_error_ms": 26.1429,
+        "p99_interval_ms": 117.7508,
+        "maximum_absolute_period_error_ms": 76.8489
+      },
+      "one_core_percentage_points_saved": 17.644,
+      "p95_absolute_error_change_ms": 21.5588
+    },
+    {
+      "architecture": "arm64",
+      "target_fps": 60,
+      "reference": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 27.948,
+        "interval_rate_hz": 60.1001,
+        "p95_absolute_period_error_ms": 0.8205,
+        "p99_interval_ms": 17.5332,
+        "maximum_absolute_period_error_ms": 1.8455
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 13.397,
+        "interval_rate_hz": 60.0186,
+        "p95_absolute_period_error_ms": 0.2401,
+        "p99_interval_ms": 16.952,
+        "maximum_absolute_period_error_ms": 0.6296
+      },
+      "one_core_percentage_points_saved": 14.551,
+      "p95_absolute_error_change_ms": -0.5804
+    },
+    {
+      "architecture": "x86",
+      "target_fps": 8,
+      "reference": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 11.984,
+        "interval_rate_hz": 8.003,
+        "p95_absolute_period_error_ms": 2.2239,
+        "p99_interval_ms": 127.1592,
+        "maximum_absolute_period_error_ms": 2.4274
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 5.729,
+        "interval_rate_hz": 8.0002,
+        "p95_absolute_period_error_ms": 0.2424,
+        "p99_interval_ms": 125.2309,
+        "maximum_absolute_period_error_ms": 0.3376
+      },
+      "one_core_percentage_points_saved": 6.255,
+      "p95_absolute_error_change_ms": -1.9815
+    },
+    {
+      "architecture": "x86",
+      "target_fps": 15,
+      "reference": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 18.756,
+        "interval_rate_hz": 15.489,
+        "p95_absolute_period_error_ms": 3.0855,
+        "p99_interval_ms": 68.5681,
+        "maximum_absolute_period_error_ms": 64.1573
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 3.528,
+        "interval_rate_hz": 15.0537,
+        "p95_absolute_period_error_ms": 7.1801,
+        "p99_interval_ms": 71.5306,
+        "maximum_absolute_period_error_ms": 9.1261
+      },
+      "one_core_percentage_points_saved": 15.228,
+      "p95_absolute_error_change_ms": 4.0946
+    },
+    {
+      "architecture": "x86",
+      "target_fps": 60,
+      "reference": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 29.016,
+        "interval_rate_hz": 59.9961,
+        "p95_absolute_period_error_ms": 0.3584,
+        "p99_interval_ms": 19.068,
+        "maximum_absolute_period_error_ms": 11.6365
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 14.508,
+        "interval_rate_hz": 59.9981,
+        "p95_absolute_period_error_ms": 0.6687,
+        "p99_interval_ms": 17.4458,
+        "maximum_absolute_period_error_ms": 1.2851
+      },
+      "one_core_percentage_points_saved": 14.508,
+      "p95_absolute_error_change_ms": 0.3103
+    },
+    {
+      "architecture": "x64",
+      "target_fps": 8,
+      "reference": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 23.427,
+        "interval_rate_hz": 7.9964,
+        "p95_absolute_period_error_ms": 1.1357,
+        "p99_interval_ms": 126.116,
+        "maximum_absolute_period_error_ms": 1.3562
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 0.0,
+        "interval_rate_hz": 8.0027,
+        "p95_absolute_period_error_ms": 5.0085,
+        "p99_interval_ms": 129.5005,
+        "maximum_absolute_period_error_ms": 6.1102
+      },
+      "one_core_percentage_points_saved": 23.427,
+      "p95_absolute_error_change_ms": 3.8728
+    },
+    {
+      "architecture": "x64",
+      "target_fps": 15,
+      "reference": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 13.776,
+        "interval_rate_hz": 11.7559,
+        "p95_absolute_period_error_ms": 43.9345,
+        "p99_interval_ms": 589.6217,
+        "maximum_absolute_period_error_ms": 855.3949
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 2.346,
+        "interval_rate_hz": 15.0171,
+        "p95_absolute_period_error_ms": 1.5265,
+        "p99_interval_ms": 67.9197,
+        "maximum_absolute_period_error_ms": 2.5031
+      },
+      "one_core_percentage_points_saved": 11.43,
+      "p95_absolute_error_change_ms": -42.408
+    },
+    {
+      "architecture": "x64",
+      "target_fps": 60,
+      "reference": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 27.9,
+        "interval_rate_hz": 59.9969,
+        "p95_absolute_period_error_ms": 0.1916,
+        "p99_interval_ms": 20.2881,
+        "maximum_absolute_period_error_ms": 20.263
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 15.628,
+        "interval_rate_hz": 60.0118,
+        "p95_absolute_period_error_ms": 0.5972,
+        "p99_interval_ms": 19.0786,
+        "maximum_absolute_period_error_ms": 10.948
+      },
+      "one_core_percentage_points_saved": 12.272,
+      "p95_absolute_error_change_ms": 0.4056
+    },
+    {
+      "architecture": "arm64ec",
+      "target_fps": 8,
+      "reference": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 22.914,
+        "interval_rate_hz": 7.9989,
+        "p95_absolute_period_error_ms": 3.7164,
+        "p99_interval_ms": 128.6061,
+        "maximum_absolute_period_error_ms": 7.1447
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 1.563,
+        "interval_rate_hz": 8.0024,
+        "p95_absolute_period_error_ms": 90.2586,
+        "p99_interval_ms": 210.5963,
+        "maximum_absolute_period_error_ms": 109.0532
+      },
+      "one_core_percentage_points_saved": 21.351,
+      "p95_absolute_error_change_ms": 86.5422
+    },
+    {
+      "architecture": "arm64ec",
+      "target_fps": 15,
+      "reference": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 20.135,
+        "interval_rate_hz": 15.1604,
+        "p95_absolute_period_error_ms": 1.9556,
+        "p99_interval_ms": 68.1076,
+        "maximum_absolute_period_error_ms": 28.4825
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 2.865,
+        "interval_rate_hz": 14.6704,
+        "p95_absolute_period_error_ms": 32.4101,
+        "p99_interval_ms": 167.5071,
+        "maximum_absolute_period_error_ms": 145.7435
+      },
+      "one_core_percentage_points_saved": 17.27,
+      "p95_absolute_error_change_ms": 30.4545
+    },
+    {
+      "architecture": "arm64ec",
+      "target_fps": 60,
+      "reference": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 25.693,
+        "interval_rate_hz": 60.0548,
+        "p95_absolute_period_error_ms": 0.2636,
+        "p99_interval_ms": 16.9382,
+        "maximum_absolute_period_error_ms": 1.6158
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 15.626,
+        "interval_rate_hz": 60.0033,
+        "p95_absolute_period_error_ms": 1.6013,
+        "p99_interval_ms": 31.6726,
+        "maximum_absolute_period_error_ms": 16.7673
+      },
+      "one_core_percentage_points_saved": 10.067,
+      "p95_absolute_error_change_ms": 1.3377
+    }
+  ],
+  "trial_receipt_sha256": "bba728f265bc95403f60e1f702a37cb398e02a6f78eccd52adebc0bcbff607ea",
+  "cpu_microbenchmark_complete": true,
+  "changed_game_dll_selected": false,
+  "game_frame_or_battery_savings_measured": false,
+  "individual_runs": {
+    "path": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-frame-limiter-timings.csv",
+    "sha256": "c62863912440bfd47a5f65e31cb0866eead7ddaaacbef3760ac2d27c27cd004d"
+  },
+  "source_diff": {
+    "path": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-windows-sleep-margin.patch",
+    "sha256": "0c8d7b9b128139e5c70dbf83260535842e2566ecb9804d8db624f8711c895b45"
+  },
+  "acceptance": "This record covers the CPU timing control. The supplied app-local DXVK game binaries remain the physically accepted game configuration. The change has not been accepted for live gameplay.",
+  "observed_tradeoff": {
+    "comparisons": 12,
+    "lower_thread_cpu_share": 12,
+    "larger_p95_absolute_period_error": 8,
+    "decision": "Retain the existing game limiter. The bounded-spin candidate reduced measured thread CPU in every setting, but several timing tails worsened. On ARM64EC at 8 Hz, P95 absolute period error increased from 3.7164 ms to 90.2586 ms across the two short runs.",
+    "accounting": "GetThreadTimes has finite accounting granularity. One x64 group reported zero charged time despite nonzero thread-cycle counts. No system-wide CPU or power saving is inferred."
+  }
+}

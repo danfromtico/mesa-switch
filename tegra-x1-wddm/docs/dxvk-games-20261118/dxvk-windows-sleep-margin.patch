@@ -1,0 +1,21 @@
+--- a/src/util/util_sleep.cpp
++++ b/src/util/util_sleep.cpp
+@@ -1,4 +1,6 @@
+ #include "util_sleep.h"
++
++#include <algorithm>
+ #include "util_string.h"
+ 
+ #include "./log/log.h"
+@@ -81,7 +83,11 @@
+     TimerDuration sleepThreshold = m_sleepThreshold;
+ 
+     if (m_sleepGranularity != TimerDuration::zero())
++#ifdef _WIN32
++      sleepThreshold += std::min(duration / 6, m_sleepGranularity);
++#else
+       sleepThreshold += duration / 6;
++#endif
+ 
+     TimerDuration remaining = duration;
+     TimePoint t1 = t0;
