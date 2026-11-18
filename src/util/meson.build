@@ -532,6 +532,8 @@ if with_tests
   endif
 
   if with_shader_cache and host_machine.system() == 'windows'
+    executable('bench-win32-shader-cache', 'tests/bench_win32_shader_cache.c',
+               dependencies : idep_mesautil, build_by_default : false)
     test('win32_disk_cache', executable('test-win32-disk-cache',
       'tests/cache_win32_test.c', dependencies : idep_mesautil), suite : ['util'])
   endif
