@@ -2351,7 +2351,7 @@
   },
   "dxvk_frame_limiter": {
     "record": "tegra-x1-wddm/docs/DXVK_FRAME_LIMITER_20261118.json",
-    "record_sha256": "af6192117e238f8c663272067d425bc78e5cf66fc6098155f3e05fb8ceff51ad",
+    "record_sha256": "548a67f8b23b9f4c67bbdb7290fe24b9415c5d2152c3c5eb69bd2e881e0ce079",
     "source_tag": "v3.1.1",
     "source": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
     "arches_with_two_counterbalanced_pairs": [
@@ -2369,8 +2369,13 @@
     "game_dll_changed": false,
     "live_game_performance_verified": false,
     "high_resolution_wait_control": true,
-    "high_resolution_15hz_p95_regressions": 4,
-    "live_game_trial": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json"
+    "high_resolution_15hz_p95_regressions": 2,
+    "live_game_trial": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json",
+    "new_cpu_control_caps": [
+      30,
+      60
+    ],
+    "fixed_500us_tail_cpu_control": true
   },
   "application_nvk_cache_paths": {
     "record": "tegra-x1-wddm/docs/WIN32_APPLICATION_CACHE_PATH_20261118.json",
@@ -2584,7 +2589,7 @@
       },
       "dxvk_and_zink": {
         "state": "original app-local runtime",
-        "scope": "Original package passed earlier LibreQuake game paths. Bounded-spin and high-resolution timer experiments ran on four architectures. Timing tails regressed; no tested replacement was selected. Fresh end-to-end game frame-time and power comparisons remain open.",
+        "scope": "Original app-local runtime selected. The x86 three-way 30/60 Hz CPU control reduced thread usage with a fixed 500-us tail and increased tail latency. LibreQuake restarted on the original DLL during warmup. Fresh game CPU and frame-period comparisons remain open.",
         "records": [
           "DXVK_ZINK_GAME_MATRIX_20261118.json",
           "DXVK_FRAME_LIMITER_20261118.json"
