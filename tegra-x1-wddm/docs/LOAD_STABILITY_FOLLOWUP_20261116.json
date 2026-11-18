@@ -135,5 +135,58 @@
       "Correlate per-client submission, hardware progress, fence retirement, preemption completion and recovery with the first missing progress. Record reset source separately."
     ],
     "root_cause": "Unknown. The traces justify prioritizing the shared graphics path, particularly overlapping work from separate GPU clients."
+  },
+  "windowed_d3d11_startup_20261118": {
+    "start_utc": "2026-11-18T10:33:27.7335077Z",
+    "last_recorded_stage": "old-rgba-packed",
+    "pid": 2620,
+    "before_boot_utc": "2026-11-18T09:52:39.1688090Z",
+    "new_boot_utc": "2026-11-18T10:34:18.6609950Z",
+    "dwm_before": 1396,
+    "dwm_after": 1384,
+    "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+    "signed_probe_sha256": "d5383a73698f62577351a00797933041aeacac933a48deadbd9178d5db1fdd5f",
+    "requested_baseline_icd_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+    "power_at_start": {
+      "PowerMode": 1,
+      "CpuActualKhz": 723960,
+      "CpuMv": 615,
+      "CpuLastError": 0,
+      "CpuDfllActive": 1,
+      "GpuReportedKhz": 537600,
+      "RamActualKhz": 1331200,
+      "TempC": 39
+    },
+    "observation": "The first x64 DXVK windowed teapot control loaded application-local DXGI and D3D11. D3D11 hardware device creation returned E_FAIL (0x80004005). No adapter identity or rendered frame was recorded. Only the baseline trial directory and PID were recorded. The candidate measurement never started.",
+    "system_events": {
+      "unexpected_shutdown_record": 64097,
+      "kernel_power_record": 64114,
+      "reported_bugcheck_code": 0,
+      "long_power_press": false,
+      "controlled_shutdown_request_seen": false,
+      "small_dump_mode": 3,
+      "dump_files_in_interval": 0,
+      "selected_whea_storage_display_application_events": 0
+    },
+    "after_recovery": {
+      "shell_response_csv": "5284,True,0,1280,720,45,45,44",
+      "shell_response_columns": "explorer_pid,responds_to_WM_NULL,dwm_flush_hresult,width,height,valid_samples,nonblack_samples,unique_colors",
+      "display_adapter": "ACPI\\VEN_SWOA&DEV_0F01",
+      "power_mode": 1,
+      "dfll": 1,
+      "cpu_status": 0
+    },
+    "evidence_sha256": {
+      "worker_progress": "9b7a2d0bf9e5e019b73696b5d2e10737684107715ff86d7be11e952fea0bc0b6",
+      "event_and_file_inventory": "8fe326b216d89edc8bfeeb07241fec41c397ad0f9179c99e8622ac771a9689e5",
+      "system_and_dump_inventory": "39c87c673d250ed0545d76c65c5339bb067a7394216147dd3ebf78b1232de3cd",
+      "desktop_readback": "1a64babe10633110218a76efe2d1c20bea924deb69ea988fd0c6ae963e666a74"
+    },
+    "scope": "This is a separate non-PAL4 startup failure. The observed device creation error does not identify the reset source."
+  },
+  "file_integrity_at_restart_20261118": {
+    "record": "PAL4_LOAD_CONTROLS_20261118.json",
+    "field": "win32_shader_cache_after_reset",
+    "result": "All nine invalid cache payloads in three unexpected-restart sessions were entirely zero-filled. All 53 cache files in two application-exit controls passed BLAKE3 verification. The initiating fault is still unknown."
   }
 }

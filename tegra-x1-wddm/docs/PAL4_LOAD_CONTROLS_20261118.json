@@ -361,9 +361,90 @@
           "total_verified_bytes": 3395629056,
           "total_file_checks": 22059,
           "restored_mode": 1,
-          "restored_charge_limit": 85
+          "restored_charge_limit": 85,
+          "extract_elapsed_ms": 785263,
+          "verify_elapsed_ms": 681471
+        },
+        {
+          "id": "archive-multi-basecpu-02",
+          "start_utc": "2026-11-18T10:09:58.1051373Z",
+          "end_utc": "2026-11-18T10:31:56.0458057Z",
+          "boot_utc": "2026-11-18T09:52:39.1688090Z",
+          "boot_after_utc": "2026-11-18T09:52:39.1688090Z",
+          "dwm_before": 1396,
+          "dwm_after": [
+            1396
+          ],
+          "desktop_tgd3d_devices": [
+            1,
+            1
+          ],
+          "pnp_code": 0,
+          "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+          "system_tar_sha256": "cb7d37a55138cde1ea38883df243af38d4804e1fe5e3ee82100adf2ecd548bd7",
+          "fixed_cpu_khz": 1497600,
+          "cpu_mv": 1120,
+          "gpu_policy_khz": 460800,
+          "gpu_measured_khz_range": [
+            460800,
+            460848
+          ],
+          "emc_khz": 204000,
+          "emc_counter_delta": 0,
+          "temp_c_range": [
+            37,
+            42
+          ],
+          "platform_samples": 319,
+          "platform_samples_sha256": "6076099f365c7cebf8e84369df9a5fa0866472a37a4af0d36d9ee88ceef2740a",
+          "rounds": [
+            {
+              "verify_ms": 196931,
+              "files": 7353,
+              "round": 1,
+              "extract_ms": 253685,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T10:17:38.5130432Z"
+            },
+            {
+              "verify_ms": 189642,
+              "files": 7353,
+              "round": 2,
+              "extract_ms": 217197,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T10:24:31.9566247Z"
+            },
+            {
+              "verify_ms": 192882,
+              "files": 7353,
+              "round": 3,
+              "extract_ms": 235411,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T10:31:47.5926123Z"
+            }
+          ],
+          "total_verified_bytes": 3395629056,
+          "total_file_checks": 22059,
+          "restored_mode": 1,
+          "restored_charge_limit": 85,
+          "extract_elapsed_ms": 706293,
+          "verify_elapsed_ms": 579455
         }
-      ]
+      ],
+      "paired_cpu_result": {
+        "rounds": 6,
+        "verified_members": 44118,
+        "verified_bytes": 6791258112,
+        "fixed_gpu_policy_khz": 460800,
+        "fixed_emc_khz": 204000,
+        "across_separate_boots": true,
+        "desktop": "Both sessions kept the same DWM process throughout their three passes. The native tgd3d device was present before and after each set.",
+        "scope": "Both CPU operating points completed this generated workload. The original game archive uses different data and compression, and its interrupted extraction remains unexplained.",
+        "cleanup": "Both extracted trees, the temporary RAR and its member manifest were verified absent on the Switch after the controls."
+      }
     }
   },
   "interpretation": [
@@ -371,7 +452,8 @@
     "Disabling DXVK graphics pipeline libraries did not prevent the native game restart. Captured scheduler data ends before the reset.",
     "The original full extraction was interrupted. A repeated single-member RAR5 workload completed on the active tgd3d desktop in Handheld mode. Its file layout and cache behavior differ from the full extraction.",
     "The underlying system reset cause and interactive PAL4 gameplay on native NVK remain open.",
-    "The session with the latched power fault reached a game-reported exception while Windows stayed up. Its CPU and EMC rates and trace coverage differ from the system-reboot cases."
+    "The session with the latched power fault reached a game-reported exception while Windows stayed up. Its CPU and EMC rates and trace coverage differ from the system-reboot cases.",
+    "The 7,353-member synthetic archive completed three extraction and verification passes at each fixed CPU operating point. All six passes used the native desktop with the GPU policy at 460.8 MHz and EMC at 204 MHz."
   ],
   "power_recovery": {
     "driver_sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5",
@@ -650,5 +732,247 @@
     "desktop_response": "5332,True,0,1280,720,45,45,44",
     "physical_observation": "The user reported a crash around this transition. The OS check cannot exclude a brief panel freeze.",
     "later_unexpected_restart": "pal4-game-cpuboot-nolog-14"
+  },
+  "win32_shader_cache_after_reset": {
+    "method": "Correlate the game PID, cache worker TID, numerical temporary name and adjacent key-file opens in the Windows Kernel-File trace. Inspect cache file headers on the idle device after the runs. Timing starts at the application queue submit event and ends at the corresponding scheduler completion. It includes queue waiting.",
+    "kernel_command_sizes_bytes": [
+      8532,
+      80,
+      8,
+      36,
+      1096
+    ],
+    "file_key_at_job_26": "aac7c31f96fadbd172e646ced66d58bb7a28550010728808681404160c9e5977",
+    "runs": [
+      {
+        "trial": "pal4-game-postkmd-09",
+        "etl_sha256": "71dc8ada603f9a90cb7fb6e07ea33eec4777a193c19bdb7ec3934791daf808f1",
+        "cache_worker_jobs_observed": 31,
+        "ordered_cache_keys_sha256": "6525e6027a58b236f7513ddff15e9aa0eb5c51041e5b6a39ff4491ef48c5fc87",
+        "matched_key_job": 26,
+        "last_cache_job": 31,
+        "last_observed_app_file_open": "MEMF55.tmp",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 3427.636,
+        "queue_submission_to_completion_ms": [
+          3.324,
+          5.78,
+          1.421,
+          4.364,
+          14.483
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 33,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": {
+          "file_sha256": "b330eb4d60821df08930c54ba0ce3adc621b9f64c8d6ac51358c6fb7b483a26c",
+          "payload_bytes": 8694,
+          "header_key_and_length_match": true,
+          "payload_digest_from_header": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373"
+        },
+        "verified_cache_entries": 31,
+        "invalid_cache_entries": [
+          {
+            "key": "0a1df9e7a61ef2a15255ba1803dd49fe0481eacac77d198f86ad6059db297924",
+            "payload_bytes": 10784,
+            "recorded_blake3": "78144fb1d9a062ac48933e82da0320f73963ca58614dad64caa39e116747a5a0",
+            "measured_blake3": "15c4b16ea60d7ad388f00ca11a5a397265d064edb03e7a47ed43d386047eb45b",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "9db104709401fe1d4f0fd12542e1f47f50deef6c8e26f538573c12f8c3c364bd",
+            "payload_bytes": 11990,
+            "recorded_blake3": "483c2b5202becf21c094c40c4d20c906ba5d6db9bc42838dbba6e45d441c74ac",
+            "measured_blake3": "34f62b4887e51ac6b73b577bf500f4dbef3cf893fed55d26afa00252f270c071",
+            "all_payload_bytes_zero": true
+          }
+        ],
+        "focus_entry_payload_valid": true
+      },
+      {
+        "trial": "pal4-game-memory-10",
+        "etl_sha256": "cb959fbe6029a8d0bcd90ce47ef096e1a5647454113745d96b4f024370165bab",
+        "cache_worker_jobs_observed": 29,
+        "ordered_cache_keys_sha256": "b4f5592f76a6cb11f1605bdc09d960651512bac5504bec3f4497c69318451510",
+        "matched_key_job": 26,
+        "last_cache_job": 29,
+        "last_observed_app_file_open": "pal4Exception.log",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 10364.914,
+        "queue_submission_to_completion_ms": [
+          25.135,
+          10.216,
+          11.045,
+          13.178,
+          27.88
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 29,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": {
+          "file_sha256": "b330eb4d60821df08930c54ba0ce3adc621b9f64c8d6ac51358c6fb7b483a26c",
+          "payload_bytes": 8694,
+          "header_key_and_length_match": true,
+          "payload_digest_from_header": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373"
+        },
+        "verified_cache_entries": 29,
+        "invalid_cache_entries": [],
+        "focus_entry_payload_valid": true
+      },
+      {
+        "trial": "pal4-game-emclow-11",
+        "etl_sha256": "fe426a937fac01f04a4145883d8ba58133bfbec791d6592cea19b2f3a84f022f",
+        "cache_worker_jobs_observed": 26,
+        "ordered_cache_keys_sha256": "76fa91648b781033b555dcc049ed27ef79cb6321f7fd98fcc2411178e49fd687",
+        "matched_key_job": 26,
+        "last_cache_job": 26,
+        "last_observed_app_file_open": "cache worker temporary file",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 2016.104,
+        "queue_submission_to_completion_ms": [
+          16.737,
+          8.221,
+          14.797,
+          30.124,
+          44.071
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 27,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": {
+          "file_sha256": "3ab33d3738813362c5289d79091d29ddcccf9e4c45942fb1cabac3fe48518909",
+          "payload_bytes": 8694,
+          "header_key_and_length_match": true,
+          "payload_digest_from_header": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373"
+        },
+        "verified_cache_entries": 22,
+        "invalid_cache_entries": [
+          {
+            "key": "07cd3bd3522636015efb0f78e870de1e85a48c17499cd26d55c1f82791fc5bb7",
+            "payload_bytes": 13448,
+            "recorded_blake3": "7e2bf33f3eda80b8de0e1e2e2d49725c138b71b8b6fb85b73b2680ad1b57a1d8",
+            "measured_blake3": "cad1bb7030a74ddf0abe35ebb1f200508221af23bf087e71b8e8b0dc31489e8a",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "66ebe7931db80eb37e860661f7e7727671b05fc30edd1d7d041e7affb82ea26e",
+            "payload_bytes": 8630,
+            "recorded_blake3": "520cc601d24efa1ce10f3c075dfd0d0b88dabc09c7661c55bc0dcef10b8aa13e",
+            "measured_blake3": "e8d7c7326cd6eb3010c9acf76242aa32611580c6955131968cdab729eafd59bf",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "9a6a3e2e9241ecd41f7d1ac4eb821364c1af4820508bcae3e2dfe4a2b8118321",
+            "payload_bytes": 8176,
+            "recorded_blake3": "2b2019f6deb241a0484d50741eae8f112cbb89b7534287b0001c779a6f1b67ce",
+            "measured_blake3": "03c3ac336844cf0e522deb0bbf18439454c84c4b96bc0b61e0934bb9439db08d",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "aac7c31f96fadbd172e646ced66d58bb7a28550010728808681404160c9e5977",
+            "payload_bytes": 8694,
+            "recorded_blake3": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373",
+            "measured_blake3": "40707050c0e1fe53bd8b9540bc86b54892e92e39197035e375800715062ac1d5",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "fc53b86c61c8d16fb3910801379507772b2de5c3ec4fed5b741a7c6f352ee983",
+            "payload_bytes": 8212,
+            "recorded_blake3": "cfa55958e291f44f05a316e0bcb80a6f95ec56fe43bc70a9a10293d24a15bf36",
+            "measured_blake3": "e7b1618a8f1d322c7bfef8b545ad3584618d0f6cfac2dd6664c7599a7e6b5a39",
+            "all_payload_bytes_zero": true
+          }
+        ],
+        "focus_entry_payload_valid": false
+      },
+      {
+        "trial": "pal4-game-cpuboot-12",
+        "etl_sha256": "4358d48003f1b7c874bde2f29986453762c1c98ad4ef888a420c76d39278b566",
+        "cache_worker_jobs_observed": 24,
+        "ordered_cache_keys_sha256": "f178c396db4dd75651ee98158118d4256dcebb3714eed2bfb5ba64b0a410f797",
+        "matched_key_job": null,
+        "last_cache_job": 24,
+        "last_observed_app_file_open": "pal4Exception.log",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 3716.19,
+        "queue_submission_to_completion_ms": [
+          27.077,
+          16.367,
+          10.834,
+          37.681,
+          43.902
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 24,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": null,
+        "verified_cache_entries": 24,
+        "invalid_cache_entries": [],
+        "focus_entry_payload_valid": null
+      },
+      {
+        "trial": "pal4-game-cpuboot-nolog-14",
+        "etl_sha256": "ae02bad0f4221d05892b077e7cec63d1fdf9fea2db1f2ae2d04ef21c13210e91",
+        "cache_worker_jobs_observed": 26,
+        "ordered_cache_keys_sha256": "76fa91648b781033b555dcc049ed27ef79cb6321f7fd98fcc2411178e49fd687",
+        "matched_key_job": 26,
+        "last_cache_job": 26,
+        "last_observed_app_file_open": "cache worker temporary file",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 4765.042,
+        "queue_submission_to_completion_ms": [
+          25.899,
+          17.546,
+          15.543,
+          29.644,
+          43.23
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 27,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": {
+          "file_sha256": "3ab33d3738813362c5289d79091d29ddcccf9e4c45942fb1cabac3fe48518909",
+          "payload_bytes": 8694,
+          "header_key_and_length_match": true,
+          "payload_digest_from_header": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373"
+        },
+        "verified_cache_entries": 25,
+        "invalid_cache_entries": [
+          {
+            "key": "07cd3bd3522636015efb0f78e870de1e85a48c17499cd26d55c1f82791fc5bb7",
+            "payload_bytes": 13448,
+            "recorded_blake3": "7e2bf33f3eda80b8de0e1e2e2d49725c138b71b8b6fb85b73b2680ad1b57a1d8",
+            "measured_blake3": "cad1bb7030a74ddf0abe35ebb1f200508221af23bf087e71b8e8b0dc31489e8a",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "aac7c31f96fadbd172e646ced66d58bb7a28550010728808681404160c9e5977",
+            "payload_bytes": 8694,
+            "recorded_blake3": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373",
+            "measured_blake3": "40707050c0e1fe53bd8b9540bc86b54892e92e39197035e375800715062ac1d5",
+            "all_payload_bytes_zero": true
+          }
+        ],
+        "focus_entry_payload_valid": false
+      }
+    ],
+    "interpretation": "Across the two 204 MHz EMC reset traces the cache worker reached the same 26 keys in the same order. After restart both directories contained the same 27 final filenames. Their job 26 entries had all 8,694 payload bytes zeroed and failed Mesa’s digest check. Two other runs reached jobs 29 and 31 and stored valid data for this key. Zero-filled payloads with intact headers are consistent with interrupted persistence during a reset. The initiating fault is still unknown. Mesa checks the digest on read and handles a mismatch as a cache miss.",
+    "observed_utc": "2026-11-18T10:32:03.9988598Z",
+    "control_results": {
+      "system_reset": {
+        "entries": 87,
+        "valid": 78,
+        "invalid_zero_payload": 9
+      },
+      "process_exit_windows_survived": {
+        "entries": 53,
+        "valid": 53,
+        "invalid_zero_payload": 0
+      }
+    },
+    "integrity_check": {
+      "source": "tegra-x1-wddm/tools/dxvk/check_win32_shader_cache.c",
+      "source_sha256": "ab72b9b7bca028b0a6aa1eb4bb8e82f3e2e1ca7f236f78dee3088719af2b0f90",
+      "arm64_signed_exe_sha256": "fd0c220c57d912c056959496c7f78e78067ccaaa27c88c6488ee9a5bd8f42ad8",
+      "algorithm": "Read the 80-byte header, match the key to the filename and the recorded payload length to the file size, then compute BLAKE3 over every payload byte using the same Mesa implementation as the cache reader. Count trailing zero bytes. Open all files for shared reads after PAL4 exits.",
+      "arm64_compilation": "llvm-mingw aarch64-w64-mingw32-clang -O2 -std=c11 -municode -DBLAKE3_USE_NEON=0 -DBLAKE3_NO_AVX512 -DBLAKE3_NO_AVX2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_SSE2 -Isrc/util/blake3 tegra-x1-wddm/tools/dxvk/check_win32_shader_cache.c src/util/blake3/blake3.c src/util/blake3/blake3_portable.c src/util/blake3/blake3_dispatch.c -Wl,--no-insert-timestamp -o check-cache.exe",
+      "raw_output_sha256": "339c52f98cf189f6e0ba176e393968370b2bd40214d852ef3f34c1e36da91fa1",
+      "completed_utc": "2026-11-18T10:36:35.9901002Z"
+    }
   }
 }
