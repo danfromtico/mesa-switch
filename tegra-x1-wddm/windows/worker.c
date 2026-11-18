@@ -4,15 +4,25 @@
 
 static VOID run(PVOID context)
 {
-    TG_GPU_WORKER *w=context;PVOID objects[2]={&w->Stop,&w->Queue->Wake};
+    TG_GPU_WORKER *w=context;
+    PEX_TIMER poll_timer=ExAllocateTimer(NULL,NULL,EX_TIMER_HIGH_RESOLUTION);
+    PVOID objects[3]={&w->Stop,&w->Queue->Wake,poll_timer};
     LARGE_INTEGER timeout,dvfs_timeout;NTSTATUS status=STATUS_SUCCESS;BOOLEAN pending=FALSE;
     timeout.QuadPart=-10000; /* one millisecond only while GPU work is pending */
     for(;;) {
         BOOLEAN dvfs=InterlockedCompareExchange(&w->Hardware->Dvfs.Configured,0,0)!=0;
         PLARGE_INTEGER wait_timeout=pending?&timeout:
             (dvfs?TgGpuDvfsWaitTimeout(&w->Hardware->Dvfs,&dvfs_timeout):NULL);
-        NTSTATUS wait=KeWaitForMultipleObjects(2,objects,WaitAny,Executive,KernelMode,
-            FALSE,wait_timeout,NULL);
+        /* A relative dispatcher timeout can defer a completed fence to the
+         * next system tick. Arm a one-shot only while work is outstanding. */
+        BOOLEAN precise=pending && poll_timer!=NULL;
+        if(precise)(VOID)ExSetTimer(poll_timer,timeout.QuadPart,0,NULL);
+        NTSTATUS wait=KeWaitForMultipleObjects(precise?3:2,objects,WaitAny,Executive,KernelMode,
+            FALSE,precise?NULL:wait_timeout,NULL);
+        if(precise) {
+            if(wait==STATUS_WAIT_0+2)wait=STATUS_TIMEOUT;
+            else (VOID)ExCancelTimer(poll_timer,NULL);
+        }
         if(wait==STATUS_WAIT_0)break;
         if(wait!=STATUS_WAIT_0+1 && !(wait_timeout && wait==STATUS_TIMEOUT)) {
             status=NT_SUCCESS(wait)?STATUS_UNSUCCESSFUL:wait;break;
@@ -29,6 +39,7 @@ static VOID run(PVOID context)
             if(!pending && dvfs)TgGpuDvfsNoteServiceComplete(&w->Hardware->Dvfs);
         }
     }
+    if(poll_timer)(VOID)ExDeleteTimer(poll_timer,TRUE,TRUE,NULL);
     if(!NT_SUCCESS(status)) {
         KIRQL irql;
         KeAcquireSpinLock(&w->Queue->Lock,&irql);

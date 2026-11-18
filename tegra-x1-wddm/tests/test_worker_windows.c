@@ -21,6 +21,8 @@ static struct {
     NTSTATUS create,join,close,exit_status,service[3],dvfs_status;
     NTSTATUS waits[4];BOOLEAN timed[4],terminated;
     LONGLONG expected_timeout[4];
+    BOOLEAN have_timer,armed;
+    UINT timer_allocs,timer_arms,timer_cancels,timer_deletes;
     UINT services,wait_count,joins,closes,recovery_requests,dvfs_steps,dvfs_wakes,dvfs_begins,dvfs_completes;
 } model;
 /* No real thread/dispatcher/GPU is used by this native scheduling fixture. */
@@ -33,7 +35,29 @@ static NTSTATUS Create(PHANDLE out,ULONG access,POBJECT_ATTRIBUTES attr,HANDLE p
     *out=(HANDLE)123;model.routine=routine;model.context=context;return STATUS_SUCCESS;
 }
 static NTSTATUS Terminate(NTSTATUS status)
-{CHECK(!model.terminated);model.terminated=TRUE;model.exit_status=status;return STATUS_SUCCESS;}
+{CHECK(!model.terminated && model.timer_allocs==1 && !model.armed &&
+       model.timer_deletes==(UINT)model.have_timer);
+ model.terminated=TRUE;model.exit_status=status;return STATUS_SUCCESS;}
+static PEX_TIMER AllocateTimer(PEXT_CALLBACK callback,PVOID context,ULONG flags)
+{
+    CHECK(!callback && !context && flags==EX_TIMER_HIGH_RESOLUTION && !model.timer_allocs);
+    ++model.timer_allocs;return model.have_timer?(PEX_TIMER)&model.armed:NULL;
+}
+static BOOLEAN SetTimer(PEX_TIMER timer,LONGLONG due,LONGLONG period,PEXT_SET_PARAMETERS params)
+{
+    CHECK(timer==(PEX_TIMER)&model.armed && !model.armed && due==-10000 && !period && !params);
+    ++model.timer_arms;model.armed=TRUE;return FALSE;
+}
+static BOOLEAN CancelTimer(PEX_TIMER timer,PEXT_CANCEL_PARAMETERS params)
+{
+    CHECK(timer==(PEX_TIMER)&model.armed && model.armed && !params);
+    ++model.timer_cancels;model.armed=FALSE;return TRUE;
+}
+static BOOLEAN DeleteTimer(PEX_TIMER timer,BOOLEAN cancel,BOOLEAN wait,PEXT_DELETE_PARAMETERS params)
+{
+    CHECK(timer==(PEX_TIMER)&model.armed && !model.armed && cancel && wait && !params);
+    ++model.timer_deletes;return FALSE;
+}
 static VOID NTAPI InitializeEvent(PRKEVENT e,EVENT_TYPE type,BOOLEAN state)
 {CHECK(e==&worker.Stop && type==NotificationEvent && !state);e->Header.SignalState=state;}
 static LONG NTAPI SetEvent(PRKEVENT e,KPRIORITY priority,BOOLEAN wait)
@@ -44,8 +68,14 @@ static NTSTATUS NTAPI Wait(ULONG count,PVOID objects[],WAIT_TYPE type,KWAIT_REAS
     KPROCESSOR_MODE mode,BOOLEAN alertable,PLARGE_INTEGER timeout,PKWAIT_BLOCK blocks)
 {
     UINT i=model.wait_count++;
-    CHECK(i<4 && count==2 && objects[0]==&worker.Stop && objects[1]==&queue.Wake);
+    CHECK(i<4 && objects[0]==&worker.Stop && objects[1]==&queue.Wake);
     CHECK(type==WaitAny && reason==Executive && mode==KernelMode && !alertable && !blocks);
+    if(model.armed) {
+        CHECK(count==3 && objects[2]==(PVOID)&model.armed && !timeout && model.timed[i]);
+        if(model.waits[i]==STATUS_TIMEOUT){model.armed=FALSE;return STATUS_WAIT_0+2;}
+        return model.waits[i];
+    }
+    CHECK(count==2);
     CHECK((timeout!=NULL)==model.timed[i]);
     if(timeout)CHECK(timeout->QuadPart==(model.expected_timeout[i]?model.expected_timeout[i]:-10000));
     return model.waits[i];
@@ -56,6 +86,10 @@ static NTSTATUS NTAPI Close(HANDLE h)
 {CHECK(h==(HANDLE)123 && model.terminated && model.joins);++model.closes;return model.close;}
 NTSTATUS (* const __imp_PsCreateSystemThread)(PHANDLE,ULONG,POBJECT_ATTRIBUTES,HANDLE,PCLIENT_ID,PKSTART_ROUTINE,PVOID)=Create;
 NTSTATUS (* const __imp_PsTerminateSystemThread)(NTSTATUS)=Terminate;
+__typeof__(&ExAllocateTimer) const __imp_ExAllocateTimer=AllocateTimer;
+__typeof__(&ExSetTimer) const __imp_ExSetTimer=SetTimer;
+__typeof__(&ExCancelTimer) const __imp_ExCancelTimer=CancelTimer;
+__typeof__(&ExDeleteTimer) const __imp_ExDeleteTimer=DeleteTimer;
 VOID (NTAPI * const __imp_KeInitializeEvent)(PRKEVENT,EVENT_TYPE,BOOLEAN)=InitializeEvent;
 LONG (NTAPI * const __imp_KeSetEvent)(PRKEVENT,KPRIORITY,BOOLEAN)=SetEvent;
 KIRQL (NTAPI * const __imp_KeAcquireSpinLockRaiseToDpc)(PKSPIN_LOCK)=Lock;
@@ -102,7 +136,7 @@ static void Setup(void)
 }
 void start(void)
 {
-    static const char pass[]="PASS: kernel worker wake/pending timer, fault pause, join and close retry (controlled substitutes; no kernel thread or GPU pass)\r\n";
+    static const char pass[]="PASS: pending one-shot, early wake and stop, allocation fallback, DVFS, recovery and worker lifetime (controlled imports)\r\n";
     ULONG written;
     Setup();hardware.Ready=FALSE;
     CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_INVALID_DEVICE_STATE);
@@ -120,6 +154,16 @@ void start(void)
     model.join=STATUS_SUCCESS;model.close=STATUS_UNSUCCESSFUL;
     CHECK(TgGpuStopWorker(&worker)==STATUS_UNSUCCESSFUL && worker.Thread && worker.Queue==&queue);
     model.close=STATUS_SUCCESS;CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS && !worker.Thread && !worker.Queue && !worker.Hardware);
+    CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS);
+    Setup();model.have_timer=TRUE;hardware.Dvfs.Configured=1;
+    model.timed[0]=model.timed[3]=TRUE;model.expected_timeout[0]=model.expected_timeout[3]=-2000000;
+    CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);model.routine(model.context);
+    CHECK(model.services==3 && model.timer_arms==2 && model.timer_cancels==1 &&
+          model.dvfs_begins==1 && model.dvfs_completes==1 && model.dvfs_steps==1);
+    CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS);
+    Setup();model.have_timer=TRUE;model.waits[1]=STATUS_WAIT_0;
+    CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);model.routine(model.context);
+    CHECK(model.services==1 && model.timer_arms==1 && model.timer_cancels==1 && !model.recovery_requests);
     CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS);
     Setup();model.service[0]=STATUS_DEVICE_DATA_ERROR;
     CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);model.routine(model.context);
