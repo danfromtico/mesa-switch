@@ -677,6 +677,16 @@
       "no_unexpected_restart_in_this_control": true,
       "sd_driver_source": "5345692e4b7ec0d52e80937ae451bb2c52750fe8",
       "source_observation": "In the bound T214 ADMA path, CMD24/25 copies into a noncached bounce buffer. Completion requires command and transfer completion before T214DmaDone marks this request complete. The file-level test does not establish how the card handles abrupt loss of power."
+    },
+    "game_restart_observation": {
+      "record": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json",
+      "sha256": "6a4926e3aa856666fc4d23a9eb9f2d52663e29c38c9e4b4127843e78a02dcacb",
+      "incident_files_read_entirely_as_zero": 5,
+      "unusable_shader_payloads": 6,
+      "total_shader_entries": 24,
+      "readable_after_real_reader_rewrite": 24,
+      "after_boot_adma_errors": 0,
+      "restart_root_cause": "open"
     }
   },
   "wifi": {
@@ -2190,7 +2200,7 @@
   },
   "dxvk_frame_limiter": {
     "record": "tegra-x1-wddm/docs/DXVK_FRAME_LIMITER_20261118.json",
-    "record_sha256": "8afd5a1f3d7cbaf51d064057bc02a44362f19baa4ccd7e854eca95c42d2c5c80",
+    "record_sha256": "af6192117e238f8c663272067d425bc78e5cf66fc6098155f3e05fb8ceff51ad",
     "source_tag": "v3.1.1",
     "source": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
     "arches_with_two_counterbalanced_pairs": [
@@ -2208,6 +2218,7 @@
     "game_dll_changed": false,
     "live_game_performance_verified": false,
     "high_resolution_wait_control": true,
-    "high_resolution_15hz_p95_regressions": 4
+    "high_resolution_15hz_p95_regressions": 4,
+    "live_game_trial": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json"
   }
 }
