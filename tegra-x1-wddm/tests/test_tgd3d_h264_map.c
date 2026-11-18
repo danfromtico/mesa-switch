@@ -236,9 +236,43 @@ static void test_dxva_boundary(void)
           TGD3D_H264_MAP_BUFFER);
 }
 
+static void test_1080(void)
+{
+    struct tgd3d_h264_pic_in in;
+    struct tg_nvdec_h264_pic pic;
+    char err[160] = {0};
+
+    base_720(&in);
+    in.width_mbs_minus1 = 119;   /* 1920 */
+    in.height_mbs_minus1 = 67;   /* 1088 coded for 1080 visible */
+    in.num_ref_frames = 4;
+    in.curr_slot = 4;
+    in.refs[2].slot = 2;
+    in.refs[2].frame_num = 2;
+    in.refs[2].top_poc = 4;
+    in.refs[2].bottom_poc = 4;
+    in.refs[3].slot = 3;
+    in.refs[3].frame_num = 3;
+    in.refs[3].top_poc = 6;
+    in.refs[3].bottom_poc = 6;
+    CHECK(tgd3d_h264_map(&in, 1920, 1080, &pic, err, sizeof(err)) ==
+          TGD3D_H264_MAP_OK);
+    CHECK(pic.width == 1920 && pic.height == 1080);
+    CHECK(pic.coded_width == 1920 && pic.coded_height == 1088);
+    CHECK(pic.dpb_count == 4 && pic.curr_slot == 4);
+    CHECK(tgd3d_h264_map(&in, 1920, 1088, &pic, err, sizeof(err)) ==
+          TGD3D_H264_MAP_OK);
+    CHECK(pic.height == 1088 && pic.coded_height == 1088);
+    CHECK(!tg_nvdec_stage1_supported(1920, 1080, 1920, 1072, 1, 8));
+    CHECK(!tg_nvdec_stage1_supported(1920, 1080, 1920, 1088, 1, 10));
+    CHECK(tg_nvdec_stage1_supported(1920, 1080, 1920, 1088, 1, 8));
+    CHECK(!tg_nvdec_stage1_supported(3840, 2160, 3840, 2160, 1, 8));
+}
+
 int main(void)
 {
     test_map();
+    test_1080();
     test_assemble();
     test_dxva_boundary();
     if (failures) {

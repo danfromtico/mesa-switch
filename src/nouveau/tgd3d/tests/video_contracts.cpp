@@ -16,11 +16,17 @@
 using namespace tgd3d;
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr, "%s:%u: %s\n", __FILE__, __LINE__, #x); std::exit(1); } } while (0)
 namespace {
-constexpr UINT frame_bytes = 1382400;
+struct Geometry {
+   UINT width, sample_height, texture_height, kmd_pitch, coded_height;
+   UINT transfer_bytes() const { return kmd_pitch * coded_height * 3 / 2; }
+   UINT texture_bytes() const { return width * texture_height * 3 / 2; }
+};
+constexpr Geometry hd720 = {1280, 720, 720, 1280, 720};
 const GUID h264 = {0x1b81be68,0xa0c7,0x11d3,{0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}};
 struct Memory { std::vector<uint8_t> bytes; };
 struct Buffer { VkDeviceSize size; };
 struct State {
+   Geometry geometry = hd720;
    LONG load_error = 0, close_error = 0, destroy_error = 0;
    unsigned opens = 0, devices = 0, decodes = 0, destroys = 0, closes = 0;
    unsigned buffers = 0, memories = 0, notifications = 0;
@@ -60,23 +66,33 @@ extern "C" NTSTATUS APIENTRY D3DKMTEscape(const D3DKMT_ESCAPE *e)
    }
    case TG_NVDEC_ESCAPE_CONFIGURE: {
       auto req = *static_cast<tg_nvdec_config_request *>(payload);
-      CHECK(h->session == 31 && req.width == 1280 && req.height == 720);
+      const auto &g = state.geometry;
+      CHECK(h->session == 31 && req.width == g.width && req.height == g.sample_height);
       auto *out = static_cast<tg_nvdec_config_result *>(payload);
-      *out = {}; out->version = 1; out->pitch = 1280; out->aligned_height = 720; out->frame_size = frame_bytes;
+      *out = {}; out->version = 1; out->pitch = g.kmd_pitch; out->aligned_height = g.coded_height;
+      out->frame_size = g.transfer_bytes();
       return 0;
    }
    case TG_NVDEC_ESCAPE_DECODE: {
+      const auto &g = state.geometry;
+      const UINT frame_bytes = g.transfer_bytes();
       auto *req = static_cast<tg_nvdec_decode_request *>(payload);
       CHECK(h->session == 31 && req->pic.curr_slot == 2 && req->slice_count == 1);
       CHECK(req->pic.scaling4x4[0][0] == 16 && req->output_size == frame_bytes);
       ++state.decodes;
       auto *out = static_cast<tg_nvdec_decode_result *>(payload);
-      *out = {}; out->version = 1; out->width = 1280; out->height = 720;
-      out->pitch = 1280; out->aligned_height = 720;
+      CHECK(req->pic.width == g.width && req->pic.height == g.sample_height &&
+            req->pic.coded_width == g.width && req->pic.coded_height == g.coded_height);
+      *out = {}; out->version = 1; out->width = g.width; out->height = g.sample_height;
+      out->pitch = g.kmd_pitch; out->aligned_height = g.coded_height;
       out->frame_size = frame_bytes; out->bytes_written = frame_bytes - state.short_output;
       out->expected_syncpoint = out->observed_syncpoint = 40;
-      out->mbs_correctly_decoded = 3600;
-      std::memset(out + 1, 0x3d, frame_bytes); return 0;
+      out->mbs_correctly_decoded = (g.width / 16) * (g.coded_height / 16);
+      auto *pixels = reinterpret_cast<uint8_t *>(out + 1);
+      std::memset(pixels, 0xcd, frame_bytes);
+      for (UINT row = 0; row < g.coded_height * 3 / 2; ++row)
+         std::memset(pixels + row * g.kmd_pitch, row < g.coded_height ? 0x3d : 0x78, g.width);
+      return 0;
    }
    case TG_NVDEC_ESCAPE_CLOSE:
       h->result = state.close_error;
@@ -126,7 +142,7 @@ void init(Device &dev, Adapter &adapter)
 D3D11_1DDIARG_CREATEVIDEODECODER decoder_args(Device &dev, D3D11_1DDI_VIDEODEVICEFUNCS &video)
 {
    D3D11_1DDIARG_CREATEVIDEODECODER a = {};
-   a.Desc = {h264, 1280, 720, DXGI_FORMAT_NV12};
+   a.Desc = {h264, state.geometry.width, state.geometry.sample_height, DXGI_FORMAT_NV12};
    UINT count = 0; video.pfnGetVideoDecoderConfigCount({&dev}, &a.Desc, &count); CHECK(count == 1);
    video.pfnGetVideoDecoderConfig({&dev}, &a.Desc, 0, &a.Config);
    CHECK(a.Config.ConfigBitstreamRaw == 2 && a.Config.ConfigMinRenderTargetBuffCount == 17);
@@ -294,9 +310,11 @@ void nv12_clear_output_view()
    video.pfnDestroyVideoDecoderOutputView({&dev}, view);
 }
 
-void decode_frame(unsigned fault, bool release_target_early)
+void decode_frame(unsigned fault, bool release_target_early, Geometry geometry = hd720)
 {
    Device dev; Adapter adapter; init(dev, adapter);
+   state.geometry = geometry;
+   const UINT frame_bytes = geometry.texture_bytes();
    D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
    auto args = decoder_args(dev, video);
    std::vector<uint8_t> storage(video.pfnCalcPrivateVideoDecoderSize({&dev}, &args));
@@ -311,8 +329,8 @@ void decode_frame(unsigned fault, bool release_target_early)
                         info.Size == sizeof(tgd3d_dxva_pic_h264_buffer));
    }
    D3D11_1DDI_DEVICEFUNCS functions = {}; device_fill_table11(&functions);
-   D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = mip.PhysicalWidth = 1280;
-   mip.TexelHeight = mip.PhysicalHeight = 720; mip.TexelDepth = mip.PhysicalDepth = 1;
+   D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = mip.PhysicalWidth = geometry.width;
+   mip.TexelHeight = mip.PhysicalHeight = geometry.texture_height; mip.TexelDepth = mip.PhysicalDepth = 1;
    D3D11DDIARG_CREATERESOURCE desc = {};
    desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D;
    desc.Usage = D3D10_DDI_USAGE_DEFAULT; desc.BindFlags = D3D11_DDI_BIND_DECODER;
@@ -332,7 +350,8 @@ void decode_frame(unsigned fault, bool release_target_early)
    slice_unmap(&dev, res->slice); CHECK(res->slice.cpu());
    tgd3d_dxva_pic_h264_buffer picture_buffer = {};
    auto &pic = picture_buffer.picture;
-   pic.wFrameWidthInMbsMinus1 = 79; pic.wFrameHeightInMbsMinus1 = 44;
+   pic.wFrameWidthInMbsMinus1 = geometry.width / 16 - 1;
+   pic.wFrameHeightInMbsMinus1 = geometry.coded_height / 16 - 1;
    pic.ContinuationFlag = 1;
    pic.CurrPic.bPicEntry = 2; pic.wBitFields = 0x1050;
    std::memset(pic.RefFrameList, 0xff, sizeof(pic.RefFrameList));
@@ -376,8 +395,12 @@ void decode_frame(unsigned fault, bool release_target_early)
       functions.pfnDestroyResource({&dev}, {res}); ::operator delete(res);
    }
    CHECK(!state.buffers && !state.memories && state.freed.size() >= 3u * frame_bytes);
-   for (size_t i=0;i<state.freed.size();++i)
-      CHECK(state.freed[i] == (!fault && i >= 2u*frame_bytes && i < 3u*frame_bytes ? 0x3d : 0xa5));
+   for (size_t i=0;i<state.freed.size();++i) {
+      uint8_t expected = 0xa5;
+      if (!fault && i >= 2u*frame_bytes && i < 3u*frame_bytes)
+         expected = i - 2u*frame_bytes < geometry.width * geometry.texture_height ? 0x3d : 0x78;
+      CHECK(state.freed[i] == expected);
+   }
    video.pfnDestroyVideoDecoder({&dev}, decode);
    CHECK(!dev.videoSessions && state.destroys == 1 && state.closes == 1);
 }
@@ -393,5 +416,8 @@ void video_contracts()
    decode_frame(0, false); decode_frame(0, true);
    decode_frame(1, false); decode_frame(2, false); decode_frame(3, false);
    decode_frame(4, false);
+   decode_frame(0, false, {1920,1088,1088,2048,1088}); // FFmpeg coded descriptor and pool
+   decode_frame(0, true,  {1920,1080,1088,2048,1088}); // visible descriptor, padded texture
+   decode_frame(0, false, {1920,1080,1080,2048,1088}); // cropped, tightly packed output
    std::puts("PASS: video KMT cleanup failures retain ownership; bounded DXVA buffers, frame errors and NV12 array backing survive view/resource release (CPU substitutes only)");
 }

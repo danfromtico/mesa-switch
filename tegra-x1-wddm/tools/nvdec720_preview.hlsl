@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
-// Fixed 640x360 preview of the 1280x720 NV12 acceptance stream.
+// Point-sample the visible NV12 picture into the 640x360 acceptance window.
+#ifndef NVDEC_PREVIEW_SCALE
+#define NVDEC_PREVIEW_SCALE 2
+#endif
 float4 preview_vs(uint vertex_id : SV_VertexID) : SV_Position
 {
     float2 p = float2((vertex_id << 1) & 2, vertex_id & 2);
@@ -17,7 +20,7 @@ cbuffer Conversion : register(b0)
 
 float4 preview_ps(float4 position : SV_Position) : SV_Target
 {
-    int2 source = int2(position.xy) * 2 + 1;
+    int2 source = int2(position.xy) * NVDEC_PREVIEW_SCALE + NVDEC_PREVIEW_SCALE / 2;
     float y = (luma.Load(int3(source, 0)) * 255 - range_scale.x) * range_scale.y;
     float2 uv = (chroma.Load(int3(source / 2, 0)) * 255 - 128) * range_scale.z;
     return float4(saturate(mul(yuv_to_rgb, float4(y, uv, 1)).rgb), 1);

@@ -3,7 +3,7 @@
  * D3D11VA/DXVA H.264 -> NVDEC H.264 picture mapping and Annex B slice
  * assembly.  This is the portable conversion layer used by tgd3d_video.cpp;
  * it has no D3D or OS dependency so it can be checked on the host.  Only the
- * stage-1 720p 8-bit 4:2:0 progressive configuration is admitted.
+ * supported 8-bit 4:2:0 progressive dimensions are admitted.
  */
 #ifndef TGD3D_H264_MAP_H
 #define TGD3D_H264_MAP_H

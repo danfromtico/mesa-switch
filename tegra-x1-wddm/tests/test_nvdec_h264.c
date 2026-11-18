@@ -278,12 +278,14 @@ static void test_nv12_layout(void)
     CHECK(tg_nvdec_nv12_storage_layout(1280,720,&l));
     CHECK(l.chroma_offset==921600 && l.linear_bytes==1382400 && l.tiled_bytes==1392640);
     CHECK(l.chroma_offset+tbl_address(1280,1279,359) >= l.linear_bytes);
+    CHECK(tg_nvdec_nv12_storage_layout(2048,1088,&l));
+    CHECK(l.chroma_offset==2228224 && l.linear_bytes==3342336 && l.tiled_bytes==3342336);
     CHECK(!tg_nvdec_nv12_storage_layout(0,720,&l));
     CHECK(!tg_nvdec_nv12_storage_layout(1279,720,&l));
     CHECK(!tg_nvdec_nv12_storage_layout(1280,719,&l));
     CHECK(!tg_nvdec_nv12_storage_layout(1280,720,NULL));
     CHECK(!tg_nvdec_nv12_storage_layout(0xffffffc0u,0xfffffff0u,&l));
-    const uint32_t cases[][2]={{64,16},{256,32},{768,368},{1280,720}};
+    const uint32_t cases[][2]={{64,16},{256,32},{768,368},{1280,720},{2048,1088}};
     for (size_t c=0;c<sizeof(cases)/sizeof(cases[0]);++c) {
         const uint32_t pitch=cases[c][0], height=cases[c][1];
         CHECK(tg_nvdec_nv12_storage_layout(pitch,height,&l));
@@ -463,16 +465,67 @@ static void test_parser(const char *path)
     free(data);
 }
 
+static void test_parser_1080(const char *path)
+{
+    uint8_t *data, *slice;
+    struct tg_nvdec_parsed_frame *frames;
+    struct tg_nvdec_stream_info info;
+    char err[160] = {0};
+    size_t size = 0;
+    uint32_t count;
+
+    data = read_file(path, &size);
+    CHECK(data != NULL);
+    if (!data)
+        return;
+    slice = malloc(16 * 1024 * 1024);
+    frames = calloc(64, sizeof(*frames));
+    CHECK(slice != NULL && frames != NULL);
+    if (!slice || !frames) {
+        free(slice);
+        free(frames);
+        free(data);
+        return;
+    }
+    count = tg_nvdec_parse_annexb(data, size, slice, 16 * 1024 * 1024,
+                                  frames, 64, &info, err, sizeof(err));
+    CHECK(count == 6);
+    CHECK(err[0] == 0);
+    CHECK(info.supported);
+    CHECK(info.width == 1920 && info.height == 1080);
+    CHECK(info.coded_width == 1920 && info.coded_height == 1088);
+    CHECK(info.profile_idc == 77 && info.level_idc == 40);
+    CHECK(info.chroma_format_idc == 1);
+    CHECK(info.bit_depth_luma == 8 && info.bit_depth_chroma == 8);
+    CHECK(info.max_num_ref_frames == 4);
+    CHECK(info.frame_count == 6 && info.total_slices == 6);
+    CHECK(info.has_b_frame);
+    CHECK(frames[0].idr && frames[0].pic.curr_top_poc == 0);
+    CHECK(frames[1].pic.curr_top_poc == 6);
+    CHECK(frames[2].pic.curr_top_poc == 2);
+    CHECK(frames[3].pic.curr_top_poc == 4);
+    CHECK(frames[4].pic.curr_top_poc == 10);
+    CHECK(frames[5].pic.curr_top_poc == 8);
+    CHECK(frames[3].pic.dpb_count == 3 && frames[5].pic.dpb_count == 4);
+    CHECK(frames[0].pic.pitch_luma == 1920);
+    CHECK(tg_nvdec_stage1_supported(1920, 1080, 1920, 1088, 1, 8));
+    CHECK(!tg_nvdec_stage1_supported(3840, 2160, 3840, 2160, 1, 8));
+    free(slice);
+    free(frames);
+    free(data);
+}
+
 int main(int argc, char **argv)
 {
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s <sample.h264>\n", argv[0]);
+    if (argc < 2 || argc > 3) {
+        fprintf(stderr, "usage: %s <720p-sample.h264> [1080p-sample.h264]\n", argv[0]);
         return 2;
     }
     test_config();
     test_command();
     test_nv12_layout();
     test_parser(argv[1]);
+    if (argc == 3) test_parser_1080(argv[2]);
     if (failures) {
         fprintf(stderr, "NVDEC H.264 control: %d failure(s)\n", failures);
         return 1;

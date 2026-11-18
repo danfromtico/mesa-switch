@@ -35,7 +35,7 @@ static bool decoder_desc_supported(const D3D11_1DDI_VIDEO_DECODER_DESC *desc)
 {
     return desc && IsEqualGUID(desc->Guid, h264_profile) &&
            desc->OutputFormat == DXGI_FORMAT_NV12 &&
-           desc->SampleWidth == 1280 && desc->SampleHeight == 720;
+           tg_nvdec_output_size_supported(desc->SampleWidth, desc->SampleHeight);
 }
 
 static bool decoder_config_supported(const D3D11_1DDI_VIDEO_DECODER_CONFIG &c)
@@ -245,8 +245,11 @@ static HRESULT APIENTRY CreateVideoDecoder(D3D10DDI_HDEVICE hDevice,
         const tg_nvdec_config_request request = {TG_NVDEC_CONTROL_VERSION, args->Desc.SampleWidth,
                                                 args->Desc.SampleHeight};
         hr = native_call(session, TG_NVDEC_ESCAPE_CONFIGURE, &request, sizeof(request), &config, sizeof(config));
+        const UINT pitch = (request.width + 255u) & ~255u;
+        const UINT coded_height = (request.height + 15u) & ~15u;
         if (SUCCEEDED(hr) && (config.version != TG_NVDEC_CONTROL_VERSION || config.result ||
-            config.pitch != 1280 || config.aligned_height != 720 || config.frame_size != 1382400)) hr = E_FAIL;
+            config.pitch != pitch || config.aligned_height != coded_height ||
+            config.frame_size != pitch * coded_height * 3u / 2u)) hr = E_FAIL;
     }
     if (FAILED(hr)) {
         close_session(dev, session); /* still-linked node retains a failed cleanup */
@@ -306,7 +309,8 @@ static HRESULT APIENTRY VideoDecoderBeginFrame(D3D10DDI_HDEVICE hDevice,
     Resource *res = view->res;
     if (view->dev != dec->dev || !res || res->dev != dec->dev ||
         res->kind != ResKind::Staging || !res->slice || res->format != DXGI_FORMAT_NV12 ||
-        res->width != dec->desc.SampleWidth || res->height != dec->desc.SampleHeight ||
+        res->width != dec->desc.SampleWidth ||
+        (res->height != dec->desc.SampleHeight && res->height != dec->aligned_height) ||
         view->mip || view->array_size != 1 || view->first_array >= res->layout.size() ||
         view->first_array >= TG_NVDEC_MAX_SURFACES ||
         !(res->bind & D3D11_DDI_BIND_DECODER)) return E_INVALIDARG;
@@ -408,20 +412,20 @@ static HRESULT write_nv12(VideoDecoder *dec, const uint8_t *nv12, uint32_t width
                           uint32_t height, uint32_t pitch, uint32_t aligned_height)
 {
     uint8_t *dst;
-    uint32_t row, chroma_height = height / 2;
+    uint32_t row;
 
     const auto &layout = dec->output_layout;
     if (!dec->output || !dec->output.cpu() || layout.rowPitch < width ||
-        layout.width != width || layout.height != height ||
-        layout.depthPitch < uint64_t(layout.rowPitch) * height * 3 / 2 ||
+        layout.width != width || layout.height < height || layout.height > aligned_height ||
+        layout.depthPitch < uint64_t(layout.rowPitch) * layout.height * 3 / 2 ||
         layout.offset > dec->output.size || layout.depthPitch > dec->output.size - layout.offset)
         return E_INVALIDARG;
     dst = dec->output.cpu() + layout.offset;
-    for (row = 0; row < height; row++)
+    for (row = 0; row < layout.height; row++)
         memcpy(dst + (size_t)row * layout.rowPitch,
                nv12 + (size_t)row * pitch, width);
-    dst += (size_t)layout.rowPitch * height;
-    for (row = 0; row < chroma_height; row++)
+    dst += (size_t)layout.rowPitch * layout.height;
+    for (row = 0; row < layout.height / 2; row++)
         memcpy(dst + (size_t)row * layout.rowPitch,
                nv12 + (size_t)pitch * aligned_height + (size_t)row * pitch, width);
     return S_OK;
@@ -477,7 +481,8 @@ static HRESULT finish_frame(VideoDecoder *dec)
     if (result->version != TG_NVDEC_CONTROL_VERSION || result->result ||
         result->error_status || result->mbs_in_error || result->slice_header_error_code ||
         result->expected_syncpoint != result->observed_syncpoint ||
-        result->mbs_correctly_decoded != 3600 || result->width != 1280 || result->height != 720 ||
+        result->mbs_correctly_decoded != (pic.coded_width / 16u) * (pic.coded_height / 16u) ||
+        result->width != dec->desc.SampleWidth || result->height != dec->desc.SampleHeight ||
         result->pitch != dec->pitch || result->aligned_height != dec->aligned_height ||
         result->frame_size != dec->frame_size || result->bytes_written != dec->frame_size)
         return E_FAIL;

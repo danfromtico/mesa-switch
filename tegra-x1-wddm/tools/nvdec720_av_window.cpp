@@ -31,6 +31,16 @@ extern "C" {
 #include "../../src/nouveau/tgd3d/tgd3d_csc.h"
 #include "../../src/nouveau/tgd3d/tgd3d_trace.h"
 
+#ifndef NVDEC_PREVIEW_SCALE
+#define NVDEC_PREVIEW_SCALE 2
+#endif
+static constexpr int preview_scale = NVDEC_PREVIEW_SCALE;
+static_assert(preview_scale == 2 || preview_scale == 3);
+static constexpr int preview_width = 640, preview_height = 360;
+static constexpr int sample_width = preview_width * preview_scale;
+static constexpr int sample_height = preview_height * preview_scale;
+static constexpr int coded_height = (sample_height + 15) & ~15;
+
 #ifndef EVENT_FILTER_TYPE_PID
 // The Windows SDK defines this scope filter in evntprov.h.
 #define EVENT_FILTER_TYPE_PID 0x80000004u
@@ -207,7 +217,7 @@ public:
 };
 
 class Preview {
-   static constexpr UINT width = 640, height = 360;
+   static constexpr UINT width = preview_width, height = preview_height;
    struct Window {
       HWND handle = nullptr;
       ~Window() { if (handle && IsWindow(handle)) DestroyWindow(handle); }
@@ -257,7 +267,8 @@ public:
       check(RegisterClassW(&wc)!=0,"register preview window");
       const DWORD style=WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU;
       RECT rect={0,0,LONG(width),LONG(height)};check(AdjustWindowRect(&rect,style,FALSE),"size preview window");
-      window.handle=CreateWindowExW(0,wc.lpszClassName,L"H.264 720p — NVDEC",style,CW_USEDEFAULT,CW_USEDEFAULT,
+      const wchar_t *title = sample_height == 1080 ? L"H.264 1080p — NVDEC" : L"H.264 720p — NVDEC";
+      window.handle=CreateWindowExW(0,wc.lpszClassName,title,style,CW_USEDEFAULT,CW_USEDEFAULT,
                                    rect.right-rect.left,rect.bottom-rect.top,nullptr,nullptr,wc.hInstance,nullptr);
       check(window.handle!=nullptr,"create preview window");
       journal.mark("RETURN","CreatePreviewWindow");
@@ -278,8 +289,8 @@ public:
       journal.invoke("MakeWindowAssociation",[&]{return factory->MakeWindowAssociation(window.handle,DXGI_MWA_NO_ALT_ENTER);});
       journal.invoke("GetBackBuffer",[&]{return swap->GetBuffer(0,__uuidof(ID3D11Texture2D),(void **)back.put());});
       journal.invoke("CreateRenderTargetView",[&]{return device->CreateRenderTargetView(back.p,nullptr,target.put());});
-      texture(device,1280,720,DXGI_FORMAT_R8_UNORM,D3D11_BIND_SHADER_RESOURCE,y_plane,"CreateLumaTexture");
-      texture(device,640,360,DXGI_FORMAT_R8G8_UNORM,D3D11_BIND_SHADER_RESOURCE,uv_plane,"CreateChromaTexture");
+      texture(device,sample_width,sample_height,DXGI_FORMAT_R8_UNORM,D3D11_BIND_SHADER_RESOURCE,y_plane,"CreateLumaTexture");
+      texture(device,sample_width/2,sample_height/2,DXGI_FORMAT_R8G8_UNORM,D3D11_BIND_SHADER_RESOURCE,uv_plane,"CreateChromaTexture");
       texture(device,width,height,sd.Format,0,readback,"CreateReadbackTexture");
       journal.invoke("CreateLumaView",[&]{return device->CreateShaderResourceView(y_plane.p,nullptr,y_view.put());});
       journal.invoke("CreateChromaView",[&]{return device->CreateShaderResourceView(uv_plane.p,nullptr,uv_view.put());});
@@ -359,7 +370,7 @@ public:
       unsigned worst=0;
       for (UINT row=0;row<5;++row) for (UINT col=0;col<7;++col) {
          const UINT x=col*(width-1)/6, py=row*(height-1)/4;
-         const UINT sx=2*x+1, sy=2*py+1;
+         const UINT sx=preview_scale*x+preview_scale/2, sy=preview_scale*py+preview_scale/2;
          const float l=(y[size_t(sy)*y_pitch+sx]-transform.range[0])*transform.range[1];
          const uint8_t *chroma=uv+size_t(sy/2)*uv_pitch+2*(sx/2);
          const float u=(float(chroma[0])-128)*transform.range[2],v=(float(chroma[1])-128)*transform.range[2];
@@ -483,15 +494,18 @@ static std::string utf8_path(const wchar_t *path)
 
 static void check_pixels(const AVFrame &frame, const uint8_t *expected, unsigned index)
 {
-   check(frame.format==AV_PIX_FMT_NV12 && frame.width==1280 && frame.height==720 &&
-         frame.data[0] && frame.data[1] && frame.linesize[0]>=1280 && frame.linesize[1]>=1280,
+   check(frame.format==AV_PIX_FMT_NV12 && frame.width==sample_width && frame.height==sample_height &&
+         frame.data[0] && frame.data[1] && frame.linesize[0]>=sample_width && frame.linesize[1]>=sample_width,
          "hardware readback NV12 layout");
-   std::vector<uint8_t> i420(1280*720*3/2);
-   for (int y=0;y<720;++y) std::memcpy(i420.data()+y*1280,frame.data[0]+size_t(y)*frame.linesize[0],1280);
-   for (int y=0;y<360;++y) {
+   constexpr size_t luma_bytes = sample_width * sample_height;
+   std::vector<uint8_t> i420(luma_bytes*3/2);
+   uint8_t *u=i420.data()+luma_bytes, *v=u+luma_bytes/4;
+   for (int y=0;y<sample_height;++y)
+      std::memcpy(i420.data()+y*sample_width,frame.data[0]+size_t(y)*frame.linesize[0],sample_width);
+   for (int y=0;y<sample_height/2;++y) {
       const uint8_t *uv=frame.data[1]+size_t(y)*frame.linesize[1];
-      for (int x=0;x<640;++x) {
-         i420[921600+y*640+x]=uv[2*x];i420[1152000+y*640+x]=uv[2*x+1];
+      for (int x=0;x<sample_width/2;++x) {
+         *u++=uv[2*x]; *v++=uv[2*x+1];
       }
    }
    uint8_t hash[32];tg_nvdec_sha256(i420.data(),i420.size(),hash);
@@ -588,8 +602,9 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
    int stream=av_find_best_stream(input.p,AVMEDIA_TYPE_VIDEO,-1,-1,&codec,0);
    av_check(stream,"Find video stream");
    const AVCodecParameters *params=input->streams[stream]->codecpar;
-   check(codec && params->codec_id==AV_CODEC_ID_H264 && params->width==1280 && params->height==720,
-         "720p H.264 input required");
+   check(codec && params->codec_id==AV_CODEC_ID_H264 && params->width==sample_width && params->height==sample_height,
+         "H.264 input must match the selected fixture dimensions");
+   std::printf("INPUT visible=%dx%d expected_texture=%dx%d\n",sample_width,sample_height,sample_width,coded_height);
    journal.mark("CALL","OpenDecoder");
    Av<AVCodecContext,avcodec_free_context> decoder;
    decoder.p=avcodec_alloc_context3(codec);check(decoder.p!=nullptr,"allocate decoder");
@@ -616,7 +631,7 @@ static void run(uint64_t wanted,const wchar_t *sample,const wchar_t *reference,c
          auto *tex=reinterpret_cast<ID3D11Texture2D *>(frame->data[0]);Com<ID3D11Device> owner;tex->GetDevice(owner.put());
          D3D11_TEXTURE2D_DESC desc={};tex->GetDesc(&desc);
          const auto slice=reinterpret_cast<uintptr_t>(frame->data[1]);
-         check(owner.p==hw->device && desc.Format==DXGI_FORMAT_NV12 && desc.Width==1280 && desc.Height==720 &&
+         check(owner.p==hw->device && desc.Format==DXGI_FORMAT_NV12 && desc.Width==sample_width && desc.Height==coded_height &&
                (desc.BindFlags&D3D11_BIND_DECODER) && slice<desc.ArraySize,"decode texture ownership");
          check(frame->pts!=AV_NOPTS_VALUE && (last==AV_NOPTS_VALUE || frame->pts>last),"display frame order");last=frame->pts;
          av_check(av_hwframe_transfer_data(cpu.p,frame.p,0),"Read native NV12 frame");

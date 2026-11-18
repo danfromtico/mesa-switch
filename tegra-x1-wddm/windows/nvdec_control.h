@@ -3,7 +3,8 @@
  * Shared bring-up payloads, now carried by the coexisting KMD's versioned
  * nvdec_escape_abi.h transport. The historical probe IOCTL numbers remain
  * for the archived client only. This is not a D3D11VA capability declaration.
- * Only 1280x720 8-bit 4:2:0 progressive H.264 is accepted by this backend.
+ * Width and height describe the requested output. Pitch and aligned_height
+ * describe the linear NV12 readback, including coded bottom rows.
  */
 #ifndef TGD3D_NVDEC_CONTROL_H
 #define TGD3D_NVDEC_CONTROL_H

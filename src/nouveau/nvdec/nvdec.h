@@ -30,18 +30,25 @@ extern "C" {
 #define TG_NVDEC_MAX_PPS       256u
 #define TG_NVDEC_SHA256_SIZE   32u
 
-/* Stage-1 admission policy: only 720p 8-bit 4:2:0 progressive H.264 is
- * enabled.  The core can construct larger pictures, but no caller may
- * advertise or accept a larger mode until that mode has its own validation. */
+/* D3D11VA may describe a 1080-line picture by its visible height or the
+ * full 68 macroblock rows used by the decoder and the FFmpeg texture pool. */
+static inline bool tg_nvdec_output_size_supported(uint32_t width, uint32_t height)
+{
+    return (width == 1280u && height == 720u) ||
+           (width == 1920u && (height == 1080u || height == 1088u));
+}
+
 static inline bool tg_nvdec_stage1_supported(uint32_t width, uint32_t height,
                                              uint32_t coded_width,
                                              uint32_t coded_height,
                                              uint32_t chroma_format_idc,
                                              uint32_t bit_depth_luma)
 {
-    return width >= 16u && height >= 16u && width <= 1280u && height <= 720u &&
-           coded_width <= 1280u && coded_height <= 720u &&
-           chroma_format_idc == 1u && bit_depth_luma == 8u;
+    bool small = width >= 16u && height >= 16u && width <= 1280u && height <= 720u &&
+                 coded_width <= 1280u && coded_height <= 720u;
+    bool hd = width == 1920u && tg_nvdec_output_size_supported(width, height) &&
+              coded_width == 1920u && coded_height == 1088u;
+    return (small || hd) && chroma_format_idc == 1u && bit_depth_luma == 8u;
 }
 
 /* NVDEC register aperture on Tegra210. */

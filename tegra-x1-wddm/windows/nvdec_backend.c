@@ -265,13 +265,12 @@ NTSTATUS TgNvdecConfigure(struct tg_nvdec_win *w, UINT32 width, UINT32 height,
         return STATUS_INVALID_PARAMETER;
     if (w->engine.in_flight) return STATUS_DEVICE_BUSY;
     if (!TgNvdecFirmwareReady(w)) return STATUS_DEVICE_NOT_READY;
-    /* Stage 1 is deliberately limited to 720p 8-bit 4:2:0. */
-    if (!tg_nvdec_stage1_supported(width, height, width, height, 1, 8))
-        return STATUS_NOT_SUPPORTED;
     p = (width + 255u) & ~255u;
     ah = (height + 15u) & ~15u;
     if (p < width || ah < height)
         return STATUS_INVALID_PARAMETER;
+    if (!tg_nvdec_stage1_supported(width, height, width, ah, 1, 8))
+        return STATUS_NOT_SUPPORTED;
     if (!tg_nvdec_nv12_storage_layout(p, ah, &layout) ||
         layout.linear_bytes > MAXULONG)
         return STATUS_INVALID_PARAMETER;
@@ -316,7 +315,9 @@ NTSTATUS TgNvdecDecode(struct tg_nvdec_win *w,
         return STATUS_DEVICE_NOT_READY;
     if (output_size < w->frame_size)
         return STATUS_BUFFER_TOO_SMALL;
-    if (pic->width > w->width || pic->height > w->height ||
+    if (!tg_nvdec_stage1_supported(pic->width, pic->height, pic->coded_width,
+                                   pic->coded_height, pic->chroma_format_idc, pic->bit_depth_luma) ||
+        pic->width > w->width || pic->height > w->height ||
         pic->coded_width > w->pitch || pic->coded_height > w->aligned_height)
         return STATUS_NOT_SUPPORTED;
     slot = pic->curr_slot;

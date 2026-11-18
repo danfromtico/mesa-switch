@@ -67,7 +67,7 @@ enum tgd3d_h264_map_result tgd3d_h264_map(
     }
     if (!tg_nvdec_stage1_supported(sample_width, sample_height, coded_width,
                                    coded_height, chroma, 8u)) {
-        set_err(err, err_size, "stage 1 accepts only 1280x720 8-bit 4:2:0");
+        set_err(err, err_size, "unsupported H.264 sample size, coded size or chroma format");
         return TGD3D_H264_MAP_UNSUPPORTED;
     }
     if (in->bit_depth_luma_minus8 || in->bit_depth_chroma_minus8 ||
