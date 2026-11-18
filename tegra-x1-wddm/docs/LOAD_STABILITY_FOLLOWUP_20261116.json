@@ -595,5 +595,64 @@
       },
       "measurement": "RAII markers recorded completion of the normal COM release order, window destruction and return from main. Each transition flushed the application journal to disk. Parent observation confirmed process exit. The time between final window verification and frame report includes writing 96 timing lines."
     }
+  },
+  "nvdec_default_device_creation_20261118": {
+    "status": "Recorded with the existing load-transition incidents. The operator suspects a shared cause and requested that investigation start with synchronization when a D3D11.1 device skips the Windows runtime submission queue. Causality remains open.",
+    "candidate_source": "474ef374510ff7a24e580455a646beefe72a8a64",
+    "matched_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "desktop_icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "reference": {
+      "umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+      "canonical_h264_720p_frames_verified": 6,
+      "process_exit": 0
+    },
+    "candidate": {
+      "umd_sha256": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+      "last_host_checkpoint": "367250 5388 CALL av_hwdevice_ctx_create_D3D11VA 00000000",
+      "verified_frames": 0,
+      "process_exit": null,
+      "capture": "DXGI identified GM20B; the host last saw entry to D3D11VA device creation. The operator later reported a manual restart and Wi-Fi failing to start on that boot. Capture of the process exit and any subsequent decoded frames remains pending on the device.",
+      "operator_reported_restart": "manual",
+      "paired_trial_counted_as_automatic_restart": false
+    },
+    "earlier_candidate_attempts": "Three earlier candidate trials were followed by distinct Windows boots with Event 41 and bugcheck zero. One launcher contained a verified pre-FFmpeg PowerShell error. No new watchdog dump identified their cause.",
+    "prior_pal4_windows_queue": {
+      "event": "tgd3d event 22, DWM process, stage 3, HRESULT S_OK. Each count is an accepted submission callback. Completion and resource retirement require separate evidence.",
+      "observations": [
+        {
+          "case": "pal4-game-emclow-11",
+          "result": "unexpected reboot",
+          "accepted_submissions": 30
+        },
+        {
+          "case": "pal4-game-cpuboot-12",
+          "result": "application exception; OS continued",
+          "accepted_submissions": 88
+        },
+        {
+          "case": "pal4-game-cpuboot-nolog-14",
+          "result": "unexpected reboot",
+          "accepted_submissions": 46
+        },
+        {
+          "case": "pal4-game-cpuboot-nocache-15",
+          "result": "unexpected reboot",
+          "accepted_submissions": 57
+        }
+      ]
+    },
+    "sync_questions": [
+      "For each producer and DWM device, establish its negotiated DDI and whether NVK takes the runtime queue.",
+      "Check the ingress and completion fence identities, values, GPU waits and ownership of displayed allocations across the two submission paths. Verify completion before resource and context retirement."
+    ],
+    "driver_scope": "The paired UMDs share the same frozen device-construction and teardown code. Of 25 linked UMD object files, only tgd3d_video.cpp.obj changed in the default-discovery candidate. The daily reference remains the previously accepted UMD.",
+    "evidence": "https://github.com/ruje0504-2/mesa-switch-woa/blob/00c7d3dd3b0e96c4b15a72c18cbae124aa2f4a3a/tegra-x1-wddm/docs/NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json"
+  },
+  "wifi_startup_followup_20261118": {
+    "status": "Deferred by the operator for later investigation.",
+    "operator_observation": "The operator manually restarted the Switch. On that boot the Wi-Fi driver did not come up.",
+    "effect": "The Mac cannot retrieve the final device-side journal or confirm the active postboot display package until a management connection returns.",
+    "attribution": "Wi-Fi startup is tracked independently. The manual restart is excluded from the count of spontaneous resets. The earlier three distinct boot transitions and their system records are retained separately.",
+    "when_resumed": "Read the Wi-Fi device problem code, driver identity and Kernel-PnP/WLAN startup events for the affected boot before associating the issue with any graphics workload."
   }
 }
