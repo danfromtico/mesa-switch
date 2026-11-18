@@ -1,7 +1,7 @@
 {
   "branch": "tgd3d-vulkan",
   "status": "Historical five-patch activation and current selected video submission update",
-  "observed_utc": "2026-11-17T23:57:55Z",
+  "observed_utc": "2026-11-18T00:49:22.8988998Z",
   "components": {
     "kmd": {
       "Length": 243720,
@@ -252,36 +252,29 @@
     "rollback_performed": false
   },
   "latest_video_observation": {
-    "record": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
-    "record_sha256": "3ac9d9d3e7b04211adc92d5cb9a0241ec2482c055cda7a28df11f3e48511ccbb",
-    "previous_failed_creation": "NVDEC_720_COMPOSED_FLIP_20261117.json",
-    "previous_failed_creation_sha256": "0ff85169c1c73de7606cf2347236e5795694011e48339103175c27d0d14452c1",
-    "last_confirmed_boot_utc": "2026-11-17T23:45:24.3990690Z",
-    "dwm_pid": 1360,
-    "decode_and_readback_accepted": true,
+    "record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "record_sha256": "2ff2eff8752b1a679156e393b34dd8c28313a1de7f2768f41fa54274f44d3823",
+    "previous_record": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
+    "previous_record_sha256": "3ac9d9d3e7b04211adc92d5cb9a0241ec2482c055cda7a28df11f3e48511ccbb",
+    "dwm_two_640x360_opens": true,
+    "consumer_ddi": "0xA0009",
+    "previous_consumer_error": "0x887A0004",
+    "last_confirmed_boot_utc": "2026-11-18T00:21:19.1378270Z",
+    "dwm_pid": 1396,
     "first_gpu_csc_pixels_accepted": true,
-    "full_gpu_csc_frames_per_completed_run": [
-      0,
-      5
-    ],
-    "first_gpu_frame_size": [
-      640,
-      360
-    ],
     "rgb_max_abs_error": 1,
     "first_present_completed": true,
-    "latest_window_present_entries": 6,
-    "latest_window_present_returns": 6,
-    "redirected_flip_model": 2,
-    "decoder_and_gpu_resources_retired": true,
-    "final_submitted_and_completed": [
-      10,
-      10
-    ],
-    "physical_window_accepted": false,
-    "physical_result": "Black window and full-panel blackout before desktop recovery",
-    "full_720p_accepted": false,
-    "compositor_diagnostic": "The DWM consumer on D3D10_0_7 (0xA0009) failed six shared resource opens, all before a residency request for the released allocation. The installed make_ready rejects displayable resources on this interface. Two 960x576 surfaces opened normally."
+    "traced_present_returns": 2,
+    "light_present_returns": 4,
+    "light_completed": false,
+    "physical_window_accepted": true,
+    "physical_scope": "paced six-frame observation",
+    "ordinary_unpaced_accepted": false,
+    "physical_result": "Without added frame holds, the light client verified five NV12 frames, returned from four Presents and entered the fifth before an unexpected restart. Physical video was unconfirmed in that run. In the separate paced observation, six frame hashes matched, all six Presents returned, the last image stayed visible for eight seconds and the window closed normally. Client elapsed time was 15.109 seconds. The physical test pattern matched the reference.",
+    "functional_720p_accepted": true,
+    "full_720p_accepted": true,
+    "acceptance_scope": "paced six-frame H.264 fixture",
+    "continuous_playback_stability_verified": false
   },
   "source_only_followups": {
     "gpu_wait_and_retirement": "ccfc48f4a32c890bede65bd8b07af61d68aa0eea",
@@ -292,22 +285,27 @@
   "five_patch_activation_utc": "2026-11-17T21:13:35.5466349Z",
   "current_selection": {
     "record": "TGD3D_PRESENT_BASELINE_20261117.json",
-    "source_commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+    "source_commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
     "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
-    "umd_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a",
+    "umd_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
     "icd_source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
     "kmd_sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
     "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
-    "umd_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+    "umd_sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
     "inherited_patch_count": 5,
     "selected": true,
     "post_restart_pair_confirmed": true,
-    "latest_video_observation": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
-    "physical_video_accepted": false,
-    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621",
-    "previous_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-present-ownership-45683c21-20261118-042954",
-    "installed_evidence_sha256": "3ac9d9d3e7b04211adc92d5cb9a0241ec2482c055cda7a28df11f3e48511ccbb",
-    "scope": "Selected 90-degree development baseline with five original fixes and the validated 11.1 producer submission. Decoded-window panel output failed."
+    "latest_video_observation": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "physical_video_accepted": true,
+    "umd_prior_patch_commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+    "umd_prior_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a",
+    "physical_video_scope": "paced six-frame observation",
+    "functional_720p_accepted": true,
+    "ordinary_unpaced_accepted": false,
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736",
+    "previous_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621",
+    "installed_evidence_sha256": "2ff2eff8752b1a679156e393b34dd8c28313a1de7f2768f41fa54274f44d3823",
+    "scope": "Selected 90-degree development baseline with the five original fixes, the 11.1 producer and the D3D10_0_7 consumer. Native 720p H.264 functional acceptance covers the six-frame paced window. Unpaced playback stability remains deferred."
   },
   "historical_fields": "components, package, configuration, validation, retained_after_restart and ordinary_desktop_trial describe the original five-patch activation. current_selection identifies the selected UMD and current component combination."
 }

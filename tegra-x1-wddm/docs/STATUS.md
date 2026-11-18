@@ -1,6 +1,12 @@
 # GPU status
 
-On the selected de8bb90b KMD, 864ff770 UMD and e563a81d ICD, the native 720p H.264 client decoded six frames with exact NV12 output. The first and last 640×360 GPU-converted frames matched the reference within one level per RGB channel. Two runs completed six redirected window flips, the GPU event, DwmFlush, decoder close and normal device destruction. The observed replay showed a black window followed by a full-panel blackout before returning to the desktop. The 720p video window failed physical acceptance. A separate compositor trace captured six DWM OpenResource failures on interface 0xA0009 before residency. That diagnostic boot ended unexpectedly during the final hold. [Component identities, timing, traces and panel observation](NVDEC_720_RUNTIME_WINDOW_20261117.json)
+**The native 720p H.264 functional test passed** on the de8bb90b KMD, c7ef263c UMD and e563a81d ICD. All six NV12 frames matched the independent reference. The GPU-converted pattern appeared on the panel in a 640×360 window. Six Presents, the GPU event, DwmFlush, decoder close and window release completed in the paced run. The client measured 15.109 seconds including an eight-second final hold. [Components, per-frame evidence and physical observation](NVDEC_720_COMPOSITOR_OPEN_20261117.json)
+
+DWM opened both buffers on interface `0xA0009` with a 2560-byte pitch. Two runs without artificial frame holds ended in unexpected restarts. The last persisted record in the light replay was entry into the fifth Present. Continuous playback stability remains open. [Deferred restart observations](LOAD_STABILITY_FOLLOWUP_20261116.json)
+
+### Preceding runtime-window package
+
+On the preceding de8bb90b KMD, 864ff770 UMD and e563a81d ICD, the native 720p H.264 client decoded six frames with exact NV12 output. The first and last 640×360 GPU-converted frames matched the reference within one level per RGB channel. Two runs completed six redirected window flips, the GPU event, DwmFlush, decoder close and normal device destruction. The observed replay showed a black window followed by a full-panel blackout before returning to the desktop. The 720p video window failed physical acceptance. A separate compositor trace captured six DWM OpenResource failures on interface 0xA0009 before residency. That diagnostic boot ended unexpectedly during the final hold. [Component identities, timing, traces and panel observation](NVDEC_720_RUNTIME_WINDOW_20261117.json)
 
 ## Earlier five-patch observations
 

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "recorded_utc": "2026-11-16T14:02:09.076862+00:00",
   "branch": "tgd3d-vulkan",
-  "decision": "Active fixed 90-degree row-scan and power development baseline, with five fixes and the opt-in 11.1 video-window runtime submission.",
+  "decision": "Selected 90-degree development baseline with the five original fixes, the 11.1 producer and the D3D10_0_7 consumer. Native 720p H.264 functional acceptance covers the six-frame paced window. Unpaced playback stability remains deferred.",
   "display_default": {
     "logical_width": 1280,
     "logical_height": 720,
@@ -19,9 +19,13 @@
       "input": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json"
     },
     "UMD": {
-      "commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+      "commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
       "frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
-      "isolated_diff_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a"
+      "prior_patch": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+      "prior_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a",
+      "isolated_diff_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
+      "signed_sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
+      "record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json"
     },
     "ICD": {
       "commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4"
@@ -75,8 +79,8 @@
     },
     {
       "name": "TegraGpuD3DVk.dll",
-      "bytes": 3335176,
-      "sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed"
+      "bytes": 3335184,
+      "sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
     },
     {
       "name": "SwitchPowerTray.exe",
@@ -306,7 +310,7 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-17T23:57:55Z",
+  "updated_utc": "2026-11-18T00:49:22.8988998Z",
   "device_access": {
     "updated_utc": "2026-11-17T22:27:37.5428473Z",
     "owner": "main",
@@ -994,10 +998,10 @@
     }
   },
   "decode_integration": {
-    "updated_utc": "2026-11-17T23:57:55Z",
-    "state": "Six 720p H.264 hardware frames matched the independent NV12 reference. The runtime submitted six redirected window flips and the drained decoder, GPU event, compositor flush and window close completed. Physical replay showed a black window, a transient full-panel blackout and return to the desktop.",
+    "updated_utc": "2026-11-18T00:49:22.8988998Z",
+    "state": "720p H.264 D3D11VA/NVDEC functional acceptance passed on the selected tuple. Six exact NV12 frames, GPU conversion, physical window and normal release were observed in the paced run. Unpaced restarts are tracked separately.",
     "active_sequence": [
-      "720p H.264 decode and decoded window",
+      "720p H.264 decode and decoded-window functional acceptance complete for the paced fixture",
       "1080p, 2K and 4K joint acceptance later"
     ],
     "2k_4k": "Independent implementation exists; untested; integration undecided",
@@ -1112,10 +1116,10 @@
       "native_cleanup_complete": true,
       "native_decode_accepted": false
     },
-    "record": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
-    "latest_native_result": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
+    "record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "latest_native_result": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
     "baseline_promoted": true,
-    "display_scope": "Active and saved 1280x720 at 90 degrees with a 720x1280 panel. The decoded window failed physical output.",
+    "display_scope": "Active and saved Tegra desktop 1280x720 at 90 degrees, 720x1280 signal. Without added frame holds, the light client verified five NV12 frames, returned from four Presents and entered the fifth before an unexpected restart. Physical video was unconfirmed in that run. In the separate paced observation, six frame hashes matched, all six Presents returned, the last image stayed visible for eight seconds and the window closed normally. Client elapsed time was 15.109 seconds. The physical test pattern matched the reference.",
     "loaded_provider_verification": {
       "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
       "baseline_provider_and_kmd_pe_verified": true,
@@ -1255,11 +1259,11 @@
       }
     ],
     "installed_development_combination": {
-      "classification": "Selected 90-degree development baseline with five original fixes and the validated 11.1 producer submission. Decoded-window panel output failed.",
-      "observed_utc": "2026-11-17T23:26:10.0574947Z",
-      "boot": "2026-11-17T23:24:18.6890890Z",
-      "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621",
-      "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621\\app",
+      "classification": "Selected 90-degree development baseline with the five original fixes, the 11.1 producer and the D3D10_0_7 consumer. Native 720p H.264 functional acceptance covers the six-frame paced window. Unpaced playback stability remains deferred.",
+      "observed_utc": "2026-11-18T00:17:49.0647337Z",
+      "boot": "2026-11-18T00:13:14.6706570Z",
+      "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736",
+      "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736\\app",
       "kmd": {
         "Length": 243720,
         "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
@@ -1275,10 +1279,10 @@
         "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
       },
       "umd": {
-        "Length": 3335176,
-        "Sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed"
+        "Length": 3335184,
+        "Sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
       },
-      "umd_source": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+      "umd_source": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
       "icd": {
         "Length": 17656776,
         "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
@@ -1321,7 +1325,7 @@
           "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
         },
         {
-          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621\\app\\libvulkan_nouveau.dll",
+          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736\\app\\libvulkan_nouveau.dll",
           "Length": 17656776,
           "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
         },
@@ -1331,9 +1335,9 @@
           "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
         },
         {
-          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621\\app\\TegraGpuD3DVk.dll",
-          "Length": 3335176,
-          "Sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed"
+          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736\\app\\TegraGpuD3DVk.dll",
+          "Length": 3335184,
+          "Sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
         },
         {
           "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
@@ -1342,10 +1346,12 @@
         }
       ],
       "external_review_performed": false,
-      "source_record": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
-      "platform_file_evidence": "All eleven files and the recovery inputs were hashed on this activation. The DWM module paths and hashes were checked before launching the video client.",
+      "source_record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+      "platform_file_evidence": "Eleven files, the DWM module hashes and both recovery inputs were checked in the selected package.",
       "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
-      "umd_isolated_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a"
+      "umd_isolated_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
+      "umd_prior_patch_commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+      "umd_prior_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a"
     },
     "review": {
       "external_review_required": false,
@@ -1353,46 +1359,56 @@
       "mode": "main source/contract review, ASAN/UBSAN controls, ARM64 builds and native pixel verification"
     },
     "remaining": [
-      "Repair the legacy D3D10_0_7 compositor opening a displayable surface on its own runtime device, then check DWM open, commands, composition and physical pixels.",
-      "Physical video remains unaccepted. Repeat the short physical check after correcting the display boundary.",
-      "1080p, 2K and 4K remain deferred for joint acceptance."
+      "Investigate the two unpaced window restarts in LOAD_STABILITY_FOLLOWUP_20261116.json after the next restart. Common cause with other load incidents remains unconfirmed.",
+      "1080p, 2K and 4K are deferred for joint acceptance."
     ],
-    "decode_blocker_record": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
+    "decode_blocker_record": null,
     "current_combination_restored_to_original": false,
     "installation_retained": true,
     "source_modules_merged": [
       "5f9ab480e5c2ded25220964170f9b09e056ab253",
       "374b9ee5624cd1aea063398fd413fe3c73ff6501"
     ],
-    "promotion_scope": "Selected 90-degree development baseline with five original fixes and the validated 11.1 producer submission. Decoded-window panel output failed.",
-    "native_decode_accepted_scope": "Six 720p H.264 hardware frames matched the independent NV12 reference. The runtime submitted six redirected window flips and the drained decoder, GPU event, compositor flush and window close completed. Physical replay showed a black window, a transient full-panel blackout and return to the desktop.",
-    "baseline_promoted_scope": "Selected 90-degree development baseline with five original fixes and the validated 11.1 producer submission. Decoded-window panel output failed.",
+    "promotion_scope": "Selected 90-degree development baseline with the five original fixes, the 11.1 producer and the D3D10_0_7 consumer. Native 720p H.264 functional acceptance covers the six-frame paced window. Unpaced playback stability remains deferred.",
+    "native_decode_accepted_scope": "DWM opened both 640x360 video buffers (pitch 2560) and submitted from its own device. The traced producer verified its first GPU image and returned from two Presents before an unexpected restart. Without added frame holds, the light client verified five NV12 frames, returned from four Presents and entered the fifth before an unexpected restart. Physical video was unconfirmed in that run. In the separate paced observation, six frame hashes matched, all six Presents returned, the last image stayed visible for eight seconds and the window closed normally. Client elapsed time was 15.109 seconds. The physical test pattern matched the reference.",
+    "baseline_promoted_scope": "Selected 90-degree development baseline with the five original fixes, the 11.1 producer and the D3D10_0_7 consumer. Native 720p H.264 functional acceptance covers the six-frame paced window. Unpaced playback stability remains deferred.",
     "acceptance_scope": {
       "native_backend_720p_fixture_accepted": true,
       "d3d11va_accepted": true,
-      "accepted_client_scope": "Synchronous libavcodec, 17 native surfaces, process-local 11.1 video/queue selection on the verified runtime-window tuple.",
+      "accepted_client_scope": "Synchronous libavcodec, 17 native surfaces and process-local D3D11.1 producer with matched D3D10_0_7 compositor.",
       "frames": 6,
       "decoded_nv12_byte_exact": true,
       "media_foundation_source_reader_accepted": false,
-      "window_presentation_accepted": false,
+      "window_presentation_accepted": true,
       "gpu_csc_pixels_accepted": true,
-      "full_decode_stage_complete": false,
+      "full_decode_stage_complete": true,
       "public_video_enabled": false,
-      "new_physical_screen_acceptance": false,
+      "new_physical_screen_acceptance": true,
       "deferred_joint_acceptance": [
         "1080p",
         "2K",
         "4K"
       ],
-      "gpu_csc_pixels_scope": "Back-buffer GPU readback of both endpoint frames in each completed six-frame run. Full 640x360 RGB comparison, max absolute channel error 1.",
+      "gpu_csc_pixels_scope": "Two full endpoint images verified on the preceding tuple. Current tuple verified the full first image in the traced run and the full last image in the paced six-frame run.",
       "windows_redirected_flip_accepted": true,
       "window_normal_release_verified": true,
-      "physical_replay_status": "failed"
+      "physical_replay_status": "physical picture and return to desktop confirmed in paced mode",
+      "consumer_shared_flip_buffers_open": true,
+      "stage_scope": "720p H.264 six-frame functional acceptance with paced physical observation. Ordinary unpaced stability is deferred.",
+      "regular_playback_stability_accepted": false,
+      "window_presentation_scope": "Paced six-frame observation only",
+      "ordinary_unpaced_window_accepted": false,
+      "previous_combination_retirement_verified": true
     },
-    "latest_native_round": "NVDEC_720_RUNTIME_WINDOW_20261117.json"
+    "latest_native_round": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "restart_followup": {
+      "record": "LOAD_STABILITY_FOLLOWUP_20261116.json",
+      "sha256": "20afd19fe5939ba306fd3d7eccc59a488eac13ebdd8f53c37f22ef4c66199abd",
+      "scope": "Two unpaced Windows video-window restarts; root cause remains open."
+    }
   },
   "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",
-  "deferred_load_stability": "LOAD_STABILITY_FOLLOWUP_20261116.json; weather/browser/vkpeak-exit grouped as user-suspected common cause, unconfirmed",
+  "deferred_load_stability": "LOAD_STABILITY_FOLLOWUP_20261116.json; includes separate video, widget, browser and load-exit cases. A shared cause is unconfirmed.",
   "device_access_after_cube_acceptance": {
     "owner": "user",
     "purpose": "Native cube acceptance completed; device returned to user",
@@ -1412,11 +1428,11 @@
     "additional_checks_after_last_instruction": false
   },
   "installed_development_combination": {
-    "classification": "Selected 90-degree development baseline with five original fixes and the validated 11.1 producer submission. Decoded-window panel output failed.",
-    "observed_utc": "2026-11-17T23:26:10.0574947Z",
-    "boot": "2026-11-17T23:24:18.6890890Z",
-    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621",
-    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621\\app",
+    "classification": "Selected 90-degree development baseline with the five original fixes, the 11.1 producer and the D3D10_0_7 consumer. Native 720p H.264 functional acceptance covers the six-frame paced window. Unpaced playback stability remains deferred.",
+    "observed_utc": "2026-11-18T00:17:49.0647337Z",
+    "boot": "2026-11-18T00:13:14.6706570Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736\\app",
     "kmd": {
       "Length": 243720,
       "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
@@ -1432,10 +1448,10 @@
       "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
     },
     "umd": {
-      "Length": 3335176,
-      "Sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed"
+      "Length": 3335184,
+      "Sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
     },
-    "umd_source": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+    "umd_source": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
     "icd": {
       "Length": 17656776,
       "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
@@ -1478,7 +1494,7 @@
         "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
       },
       {
-        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621\\app\\libvulkan_nouveau.dll",
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736\\app\\libvulkan_nouveau.dll",
         "Length": 17656776,
         "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
       },
@@ -1488,9 +1504,9 @@
         "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
       },
       {
-        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621\\app\\TegraGpuD3DVk.dll",
-        "Length": 3335176,
-        "Sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed"
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736\\app\\TegraGpuD3DVk.dll",
+        "Length": 3335184,
+        "Sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
       },
       {
         "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
@@ -1499,10 +1515,12 @@
       }
     ],
     "external_review_performed": false,
-    "source_record": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
-    "platform_file_evidence": "All eleven files and the recovery inputs were hashed on this activation. The DWM module paths and hashes were checked before launching the video client.",
+    "source_record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "platform_file_evidence": "Eleven files, the DWM module hashes and both recovery inputs were checked in the selected package.",
     "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
-    "umd_isolated_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a"
+    "umd_isolated_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
+    "umd_prior_patch_commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+    "umd_prior_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a"
   },
   "original_fixed90_acceptance_identity": {
     "baseline_files": [
@@ -1579,50 +1597,48 @@
   },
   "selected_presentation_baseline": {
     "record": "TGD3D_PRESENT_BASELINE_20261117.json",
-    "source_commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+    "source_commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
     "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
-    "umd_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a",
+    "umd_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
     "icd_source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
     "kmd_sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
     "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
-    "umd_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+    "umd_sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
     "inherited_patch_count": 5,
     "selected": true,
     "post_restart_pair_confirmed": true,
-    "latest_video_observation": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
-    "physical_video_accepted": false,
-    "record_sha256": "adaeaf90139d4f9268704c86c4df140507dfbef6b09ef605928eb2d5b64c6641"
+    "latest_video_observation": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "physical_video_accepted": true,
+    "umd_prior_patch_commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+    "umd_prior_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a",
+    "physical_video_scope": "paced six-frame observation",
+    "functional_720p_accepted": true,
+    "ordinary_unpaced_accepted": false,
+    "record_sha256": "46a2b8a746a6256deedb386280cddbd3c70c14e861d89681570450758705c12d"
   },
   "latest_video_window_observation": {
-    "record": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
-    "record_sha256": "3ac9d9d3e7b04211adc92d5cb9a0241ec2482c055cda7a28df11f3e48511ccbb",
-    "previous_failed_creation": "NVDEC_720_COMPOSED_FLIP_20261117.json",
-    "previous_failed_creation_sha256": "0ff85169c1c73de7606cf2347236e5795694011e48339103175c27d0d14452c1",
-    "last_confirmed_boot_utc": "2026-11-17T23:45:24.3990690Z",
-    "dwm_pid": 1360,
-    "decode_and_readback_accepted": true,
+    "record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "record_sha256": "2ff2eff8752b1a679156e393b34dd8c28313a1de7f2768f41fa54274f44d3823",
+    "previous_record": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
+    "previous_record_sha256": "3ac9d9d3e7b04211adc92d5cb9a0241ec2482c055cda7a28df11f3e48511ccbb",
+    "dwm_two_640x360_opens": true,
+    "consumer_ddi": "0xA0009",
+    "previous_consumer_error": "0x887A0004",
+    "last_confirmed_boot_utc": "2026-11-18T00:21:19.1378270Z",
+    "dwm_pid": 1396,
     "first_gpu_csc_pixels_accepted": true,
-    "full_gpu_csc_frames_per_completed_run": [
-      0,
-      5
-    ],
-    "first_gpu_frame_size": [
-      640,
-      360
-    ],
     "rgb_max_abs_error": 1,
     "first_present_completed": true,
-    "latest_window_present_entries": 6,
-    "latest_window_present_returns": 6,
-    "redirected_flip_model": 2,
-    "decoder_and_gpu_resources_retired": true,
-    "final_submitted_and_completed": [
-      10,
-      10
-    ],
-    "physical_window_accepted": false,
-    "physical_result": "Black window and full-panel blackout before desktop recovery",
-    "full_720p_accepted": false,
-    "compositor_diagnostic": "The DWM consumer on D3D10_0_7 (0xA0009) failed six shared resource opens, all before a residency request for the released allocation. The installed make_ready rejects displayable resources on this interface. Two 960x576 surfaces opened normally."
+    "traced_present_returns": 2,
+    "light_present_returns": 4,
+    "light_completed": false,
+    "physical_window_accepted": true,
+    "physical_scope": "paced six-frame observation",
+    "ordinary_unpaced_accepted": false,
+    "physical_result": "Without added frame holds, the light client verified five NV12 frames, returned from four Presents and entered the fifth before an unexpected restart. Physical video was unconfirmed in that run. In the separate paced observation, six frame hashes matched, all six Presents returned, the last image stayed visible for eight seconds and the window closed normally. Client elapsed time was 15.109 seconds. The physical test pattern matched the reference.",
+    "functional_720p_accepted": true,
+    "full_720p_accepted": true,
+    "acceptance_scope": "paced six-frame H.264 fixture",
+    "continuous_playback_stability_verified": false
   }
 }

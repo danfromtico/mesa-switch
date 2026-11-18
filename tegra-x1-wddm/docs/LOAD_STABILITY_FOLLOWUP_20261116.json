@@ -1,9 +1,8 @@
 {
   "schema_version": 1,
-  "status": "deferred_by_user",
+  "status": "deferred",
   "recorded_utc": "2026-11-16T17:47:38.683881+00:00",
   "user_report": {
-    "message": "同时打开vkpek与cpuz，关闭vkpeak时，没插电",
     "workload": "vkpeak and CPU-Z concurrently; CPU-Z mode unknown",
     "trigger": "Closing vkpeak",
     "power": "battery, not plugged in",
@@ -11,8 +10,8 @@
     "incident_time": "Not specified"
   },
   "additional_observations": [
-    "External power may improve it according to user; correlation only",
-    "User cautions it may not be GPU-specific"
+    "External power is a possible correlation.",
+    "GPU, CPU, EMC, software and power causes remain unresolved."
   ],
   "evidence": {
     "fresh_inventory_utc": "2026-11-16T17:42:49.6412023Z",
@@ -73,10 +72,41 @@
       "agent_reproduced": false
     }
   ],
-  "common_cause": "User suspects a shared cause; hypothesis only, not established",
+  "common_cause": "A shared cause across the recorded load transitions remains unproven.",
   "exclude_from_group": [
     "Explicit Windows restart requests",
     "Cancelled180-to90 direction-return investigation",
     "Mere SSH disconnect without reboot evidence"
-  ]
+  ],
+  "video_window_followup": {
+    "record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "record_sha256": "2ff2eff8752b1a679156e393b34dd8c28313a1de7f2768f41fa54274f44d3823",
+    "recorded_utc": "2026-11-18T00:49:22.8988998Z",
+    "component_sha256": {
+      "kmd": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+      "umd": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
+      "icd": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "separate_incidents": [
+      {
+        "case": "traced window",
+        "present_returns": 2,
+        "new_boot": "2026-11-18T00:13:14.6706570Z",
+        "system_event41_record": 61494,
+        "bugcheck_code": 0
+      },
+      {
+        "case": "unpaced window",
+        "nv12_checks": 5,
+        "present_returns": 4,
+        "final_call": "fifth Present entered",
+        "new_boot": "2026-11-18T00:21:19.1336760Z",
+        "system_event41_record": 61571,
+        "bugcheck_code": 0
+      }
+    ],
+    "ssh_observation": "The unpaced replay started after the dispatch connection closed. Later status checks encountered SSH timeouts. No controlled attribution to SSH or load was made.",
+    "paced_functional_observation": "Six frames, six successful Presents and normal closure on the same boot.",
+    "disposition": "Review existing incident records after the next restart. Higher-resolution acceptance remains separate."
+  }
 }
