@@ -32,7 +32,20 @@
       ],
       "nvdec_submissions": 0,
       "etw_lost_events": 0,
-      "etw_sha256": "90be4c0f8e2ae3f26e2d31b97b3346d8f465571bf3a8df17e0a82fc4e3daf9c8"
+      "etw_sha256": "90be4c0f8e2ae3f26e2d31b97b3346d8f465571bf3a8df17e0a82fc4e3daf9c8",
+      "hidden_webcodecs_hardware_request": {
+        "case": "hidden target, stock Edge, six-frame H.264 sample, prefer-hardware",
+        "version": "157.0.4341.60",
+        "browser_gpu_pid": 2400,
+        "selected_decoder": "D3D11",
+        "frames": 0,
+        "completed_nvdec_submissions": 0,
+        "completed_first_load_and_configure": true,
+        "second_load_hresult": "0x90000011",
+        "trace_sha256": "37230a2410b3b417af155d5a3a1f8b97d3777cfcdec572d5d53daaa96a3d11c8",
+        "public_api_replay": "luid=0000000000005967 level=b100 raw=2 first=00000000 overlap=90000011 after_release=00000000 removed=00000000",
+        "replay_etl_sha256": "a5a67dc964fc468f65f9c014f7625731c5b5628673a1566cad707293dd6d65d1"
+      }
     },
     "chrome": {
       "version": "158.0.8127.37",
@@ -262,7 +275,12 @@
         "signed_client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
         "clip_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
         "reference_sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
-        "nv12_frame_hashes": [
+        "successful_nvdec_submits": 6,
+        "trace_sha256": "bd4c3d201bcb161e4d230fb20671c39fa59e19742ac1aaff7ed209cfd3a73ed8",
+        "drawn_window_frames": 0,
+        "native_process_exit": 0,
+        "gpu_problem_code": 0,
+        "readback_i420_sha256": [
           "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
           "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
           "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
@@ -270,12 +288,87 @@
           "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
           "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
         ],
-        "successful_nvdec_submits": 6,
-        "trace_sha256": "bd4c3d201bcb161e4d230fb20671c39fa59e19742ac1aaff7ed209cfd3a73ed8",
-        "drawn_window_frames": 0,
-        "native_process_exit": 0,
-        "gpu_problem_code": 0
+        "readback_hash_layout": "NV12 decoded surface, Y rows followed by deinterleaved U and V for the published planar I420 hashes"
       }
     }
+  },
+  "custom_chromium_ffmpeg_copyout": {
+    "scope": "Local H.264 player in a Windows ARM64 Electron Chromium shell. A Chromium utility process hosts an application FFmpeg decoder; website HTML video is a separate path. Software-composited canvas displays CPU-readable NV12.",
+    "chromium": "156.0.8078.100",
+    "electron": "45.4.1",
+    "video": "1280x720 H.264 60 fps, six frames",
+    "sample_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "decoder_component_sha256": "ee9031cf1d11831c20ee94a4363e9331a583255cad0c1ebbc895899a64af69d6",
+    "decoder_process": {
+      "image": "electron.exe",
+      "pid": 3452,
+      "completed_nvdec_submissions": 6
+    },
+    "copied_nv12_sha256": [
+      "ea284b1304d223f09b082206d5cb2228448c132d47cf4e967333792c9ac4c66b",
+      "c33785f08f120f71a7d14d704771cf4c16ba8be94523b38165ed12208894d0d6",
+      "6678800318924a76ccf3d235f3c24f70e1dc82cf98ea9228ceeb01b07b041b11",
+      "1668b84351940ca9858c11d8fc7784ea0d1f0a16c3f7418e2dbcef67ac50511b",
+      "4d7a089ab602cc9f582ed275d0a2cbcd2b7172248bb54c230fa4005e33c227b2",
+      "b7a7465358fba2f2f593777fc2471393c2fbc8bdea5c456eae6c574a66a80c64"
+    ],
+    "matching_reference_frames": 6,
+    "canvas_draws": 6,
+    "first_to_last_draw_ms": 161.112,
+    "capture_stream_video_quality": {
+      "width": 1280,
+      "height": 720,
+      "readyState": 4,
+      "total": 6,
+      "dropped": 5
+    },
+    "capture_stream_callback_counts": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "presentation_scope": "Browser window capture contains the color pattern. Canvas capture stream counters measure the auxiliary video sink. Physical panel frames and sustained real-time playback have not been measured.",
+    "window_png_sha256": "dddcc13fb374c5075cbc9c5be15ca5b91efdef63f62455e105068bce5af217f0",
+    "trace_sha256": "ea548b2eb95575e4f9ac1b82ba49d1915c71f6c8e67d69cb483fa5c4e43ddaf0",
+    "trace_stop": [
+      "stop=0 lost=0 lost_buffers=0 buffers=5"
+    ],
+    "exit_code": 0,
+    "previous_black_window": "MediaStreamTrackGenerator wrote first frame, then video.play waited at readyState 0. Six native decodes and six matching NV12 frames were confirmed in the instrumented run.",
+    "desktop_shortcut_trial": {
+      "chromium": "156.0.8078.100",
+      "shortcut": "Switch Chromium.lnk",
+      "decoder_sha256": "0d65a8573e50ad85775d9f70ab5250639d620f45dddd2d078bd22147bbef73ea",
+      "test": "Desktop shortcut launched through the interactive shell with acceptance argument. Local H.264 file playback using FFmpeg and a software-composited canvas. File selection, sample playback and separate website navigation are available.",
+      "decoder_process_id": 5900,
+      "completed_nvdec_submissions": 6,
+      "matching_nv12_frames": 6,
+      "browser_window_visible": true,
+      "window_capture_sha256": "09999aaa1dab4929896c19336beb6e31374e7f9605cf60a7dfd76cf94b4e1fcd",
+      "etw_sha256": "76edcdcf3a6f35364eea53df8a53340be098afa96ad4e60e0a13ee227bc918b1",
+      "processes_remaining": [],
+      "instrumented_first_to_last_draw_ms": 393.8,
+      "measurement": "includes per-frame SHA256 and IPC; no sustained playback performance claim"
+    }
+  },
+  "wiliwili_windows": {
+    "upstream": "https://github.com/xfangfang/wiliwili/releases/tag/v1.6.0",
+    "version": "1.6.0",
+    "arm64": {
+      "archive_sha256": "778c8c52b98524188bbbd71bb7312bbfed1abb4cf7e461ad8bccb8e8ce3f4c02",
+      "exe_sha256": "461956614db5cdd27ba5d20721bb1d37a1389fd10093839358d63c74572079d4",
+      "hardware_setting": true,
+      "error": "0xc000001d after GLFW platform initialization, before playback. No NVDEC events.",
+      "etw_sha256": "13177a4636ffb9b0e2ef3c748146bdb3a4f96729fa7ec224db2fe3fc946f1f64"
+    },
+    "x64_on_arm": {
+      "archive_sha256": "e98bdbbbc0ab0ac5860c50e35c6414bcd093d0b695e5cce31ccc52b85155d760",
+      "hardware_setting": true,
+      "result": "Created its window and reached home. mpv was not initialized in this home-only capture.",
+      "etw_sha256": "7228a6e5594e5e15619f81e2c0a90a3d0118adb214e7b3a41bd38bb92055e6d4"
+    },
+    "subsequent_video_attempt": "User observed black video followed by reboot. No confirmed causal attribution."
   }
 }
