@@ -254,7 +254,28 @@
         "On the selected Windows tuple, isolate public D3D11VA H.264 decode and CPU-readable NV12 output with a known clip, frame hashes and completed NVDEC submissions.",
         "In each browser identify the chosen decoder, submissions from its processes, and the output handoff to the compositor. Compare decoder selection and presentation independently."
       ],
-      "current_result": "The tested stock browsers played the clip using FFmpegVideoDecoder with zero native decoder submissions. The Noble browser connector is Linux-specific."
+      "current_result": "The tested stock browsers played the clip using FFmpegVideoDecoder with zero native decoder submissions. The Noble browser connector is Linux-specific.",
+      "baseline_copyout_control": {
+        "mode": "public ARM64 FFmpeg D3D11VA, decode-only with av_hwframe_transfer_data, separate six-frame 720p reference clip",
+        "tested_utc": "2026-11-19T11:37:58.6301947Z",
+        "native_luid": "0000000000005967",
+        "signed_client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+        "clip_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "reference_sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "nv12_frame_hashes": [
+          "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+          "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+          "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+          "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+          "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+          "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+        ],
+        "successful_nvdec_submits": 6,
+        "trace_sha256": "bd4c3d201bcb161e4d230fb20671c39fa59e19742ac1aaff7ed209cfd3a73ed8",
+        "drawn_window_frames": 0,
+        "native_process_exit": 0,
+        "gpu_problem_code": 0
+      }
     }
   }
 }
