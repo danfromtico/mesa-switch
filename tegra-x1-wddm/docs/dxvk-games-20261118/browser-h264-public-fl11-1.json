@@ -200,5 +200,61 @@
     "process_exit": 0,
     "etw_sha256": "bd58dfc3bf9837c187c143f44d0f76a56d00f19f1f4346a215dd7394796777fd",
     "scope": "Single-sample RGBA8 and BGRA8 textures, RTVs and SRVs were created. P010 format support returned E_FAIL. No causal link between this optional video format and the Skia failure has been established."
+  },
+  "switchroot_noble_reference": {
+    "local_reference": {
+      "saved_package_index": "emc-runtime/noble-profile-tools-20261115/reference/noble-packages.txt",
+      "index_sha256": "d5a39deb3f126c4fc65989d466b744256d605f9183f27370d1371a52dc937d42",
+      "package_index_entries": [
+        {
+          "Package": "chromium-browser",
+          "Version": "9:126.0.6478.234-1",
+          "Architecture": "arm64",
+          "SHA256": "7643529f55e554c42252e00d824bba2f69938b7a49a9f017d12c64cef394a52b"
+        },
+        {
+          "Package": "ffmpeg",
+          "Version": "9:6.1.1-3ubuntu5l4t3",
+          "Architecture": "arm64",
+          "SHA256": "3db24c6ebafe9dae3a29b3748458c11a0821b64b9542e1c509cdd725312016ca"
+        },
+        {
+          "Package": "libavcodec60",
+          "Version": "9:6.1.1-3ubuntu5l4t3",
+          "Architecture": "arm64",
+          "SHA256": "3876b718b292c772485d077c75bebac0371d0f2cf1dbd7fc7eb6b861d66f062b"
+        }
+      ],
+      "previous_same_board_clock_and_transport_record": "tegra-x1-wddm/docs/NVDEC_COEXISTING_TRANSPORT_20261117.json#noble_evidence",
+      "measurement_scope": "The earlier same-board Noble capture covers clocks and host transport. It contains no active browser playback measurement."
+    },
+    "chromium": {
+      "scope": "Archived Switchroot build, maintained through Chromium 126.",
+      "build_and_package": "https://github.com/theofficialgman/chromium-tegra-scripts/blob/2bfd5683a807bbba4a3bc19c753a5e4d55ddee89/chromium/build_and_pack.sh#L138",
+      "decoder_allowlist": "https://github.com/theofficialgman/chromium-tegra-scripts/blob/2bfd5683a807bbba4a3bc19c753a5e4d55ddee89/chromium/patches/multi-patch-v10.patch#L193-L202",
+      "capture_and_export": "https://github.com/theofficialgman/chromium-tegra-scripts/blob/2bfd5683a807bbba4a3bc19c753a5e4d55ddee89/ffmpeg-chroot-script/nvv4l2-chrome-125.0-dynamic.patch#L2777-L2817",
+      "data_flow": [
+        "Chromium FFmpeg media path selects the permitted h264_nvv4l2 decoder from its packaged libffmpeg.so",
+        "NVIDIA V4L2 receives compressed data through /dev/nvhost-nvdec",
+        "The decoder exports output plane data into an ordinary AVFrame with NvBuffer2Raw for subsequent presentation"
+      ]
+    },
+    "firefox": {
+      "scope": "The Noble-maintainer-reported Firefox path uses the system FFmpeg decoder resolver. Mozilla separately fixed device access for the media process. A later Firefox selection regression was worked around in the FFmpeg fork.",
+      "fix_for_media_process": "https://bugzilla.mozilla.org/show_bug.cgi?id=1903688",
+      "selection_regression": "https://bugzilla.mozilla.org/show_bug.cgi?id=2016587#c9",
+      "downstream_change": "https://github.com/theofficialgman/FFmpeg/commit/65445e23ebc92e6f5e333065e93eb705cb67aac8",
+      "decoder_source": "https://github.com/theofficialgman/FFmpeg/blob/65445e23ebc92e6f5e333065e93eb705cb67aac8/libavcodec/nvv4l2_dec.c#L1212-L1240",
+      "downstream_change_scope": "Removing AV_CODEC_CAP_HARDWARE changes decoder selection metadata. The decoder implementation still dispatches to NVDEC. The archived package index alone cannot identify which later downstream changes an installed binary contains."
+    },
+    "windows_comparison": {
+      "target": "Stock ARM64 Edge and Chrome on tgd3d",
+      "existing_windows_decode_record": "tegra-x1-wddm/docs/NVDEC_720_NATIVE_BACKEND_20261117.json#nv12_byte_comparison",
+      "diagnostic_order": [
+        "On the selected Windows tuple, isolate public D3D11VA H.264 decode and CPU-readable NV12 output with a known clip, frame hashes and completed NVDEC submissions.",
+        "In each browser identify the chosen decoder, submissions from its processes, and the output handoff to the compositor. Compare decoder selection and presentation independently."
+      ],
+      "current_result": "The tested stock browsers played the clip using FFmpegVideoDecoder with zero native decoder submissions. The Noble browser connector is Linux-specific."
+    }
   }
 }
