@@ -69,5 +69,136 @@
     "gl_format": 0,
     "will_gl_fbo0": true,
     "interpretation": "The initial GPU processes failed in Skia output-surface setup before native decode submitted any picture. The failed format query and the fatal surface setup have not been shown to have a common cause."
+  },
+  "public_d3d11_format_control": {
+    "utc": "2026-11-19T10:57:02.6465577Z",
+    "create_flags": [
+      "BGRA_SUPPORT",
+      "VIDEO_SUPPORT"
+    ],
+    "requested_level": [
+      "11_1"
+    ],
+    "obtained_level": "11_1",
+    "video_device_profiles": 1,
+    "render_texture_size": [
+      784,
+      592
+    ],
+    "formats": {
+      "R8G8B8A8_UNORM": {
+        "hresult": "00000000",
+        "support_bits": "13def3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        },
+        "create_texture_rtv_srv_hresult": [
+          "00000000",
+          "00000000",
+          "00000000"
+        ]
+      },
+      "R8G8B8A8_UNORM_SRGB": {
+        "hresult": "00000000",
+        "support_bits": "11def3f0",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "B8G8R8A8_UNORM": {
+        "hresult": "00000000",
+        "support_bits": "11def3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        },
+        "create_texture_rtv_srv_hresult": [
+          "00000000",
+          "00000000",
+          "00000000"
+        ]
+      },
+      "B8G8R8A8_UNORM_SRGB": {
+        "hresult": "00000000",
+        "support_bits": "11def3f0",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "B8G8R8X8_UNORM": {
+        "hresult": "00000000",
+        "support_bits": "00d6f3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "R10G10B10A2_UNORM": {
+        "hresult": "00000000",
+        "support_bits": "13def3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "R16G16B16A16_FLOAT": {
+        "hresult": "00000000",
+        "support_bits": "12def3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "NV12": {
+        "hresult": "00000000",
+        "support_bits": "3a82c320",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "P010": {
+        "hresult": "80004005",
+        "support_bits": "00000000",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "YUY2": {
+        "hresult": "00000000",
+        "support_bits": "22820320",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      }
+    },
+    "process_exit": 0,
+    "etw_sha256": "bd58dfc3bf9837c187c143f44d0f76a56d00f19f1f4346a215dd7394796777fd",
+    "scope": "Single-sample RGBA8 and BGRA8 textures, RTVs and SRVs were created. P010 format support returned E_FAIL. No causal link between this optional video format and the Skia failure has been established."
   }
 }
