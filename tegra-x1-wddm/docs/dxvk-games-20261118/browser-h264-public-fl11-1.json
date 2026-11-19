@@ -369,6 +369,34 @@
       "result": "Created its window and reached home. mpv was not initialized in this home-only capture.",
       "etw_sha256": "7228a6e5594e5e15619f81e2c0a90a3d0118adb214e7b3a41bd38bb92055e6d4"
     },
-    "subsequent_video_attempt": "User observed black video followed by reboot. No confirmed causal attribution."
+    "subsequent_video_attempt": {
+      "user_observation": "Video remained black, then Windows rebooted. The test controller issued no reboot command.",
+      "recovered_boot_utc": "2026-11-19T12:17:45.7849810Z",
+      "recovered_gpu_problem_code": 0,
+      "hardware_setting_after_reboot": true,
+      "custom_hwdec_method": null,
+      "app_reported_hw": "no",
+      "selected_video": "H.264, 640x360, 8-bit yuv420p",
+      "mpv_d3d11va": "Failed to create hwdevice_ctx",
+      "mpv_d3d11va_copy_hresult": "0x887a0004",
+      "mpv_dxva2_copy_hresult": "0x8876086a",
+      "selected_decoder": "software",
+      "render_callback": "mpv_render_context_render() not being called or stuck",
+      "unexpected_shutdown_events": [
+        {
+          "Id": 41,
+          "utc": "2026-11-19T12:16:57.8963045Z"
+        },
+        {
+          "Id": 6008,
+          "utc": "2026-11-19T12:18:25.7034120Z"
+        }
+      ],
+      "causality": "Logs establish fallback and a stalled or uncalled render callback before the black screen. The unclosed ETL and shutdown events cannot attribute the system reset.",
+      "mpv_log_sha256": "3b4dafe2df58a8618e027f6dd1059debf555757daff55c4d5854a4f9ce903b41",
+      "app_log_sha256": "459780bd1a9c1fc290e93776a020f54a63ba9319a9fe77ce0913faf1bc52118b",
+      "desktop_shortcut": "wiliwili.lnk, official x64 1.6.0 under Windows ARM64 emulation",
+      "desktop_target_sha256": "4ba00c63573ae82ff5eec41bab0bae630d5598fcfbea01cbf7700bf49937a55f"
+    }
   }
 }
