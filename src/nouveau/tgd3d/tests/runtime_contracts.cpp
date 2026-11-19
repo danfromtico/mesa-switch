@@ -37,20 +37,20 @@ static void init(Device *dev, Adapter *adapter, unsigned i)
    adapter->vk.caps.memory.memoryTypes[0].propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
    dev->vkdev = (VkDevice)(uintptr_t)(i + 1);
    auto &cb = dev->kt;
-   cb.pfnCreateContextVirtualCb = [](HANDLE h, D3DDDICB_CREATECONTEXTVIRTUAL *a) -> HRESULT {
+   cb.pfnCreateContextVirtualCb = [](HANDLE h, D3DDDICB_CREATECONTEXTVIRTUAL *a) APIENTRY -> HRESULT {
       a->hContext = (HANDLE)(uintptr_t)(0x300 + index(h)); return S_OK;
    };
-   cb.pfnDestroyContextCb = [](HANDLE h, const D3DDDICB_DESTROYCONTEXT *a) -> HRESULT {
+   cb.pfnDestroyContextCb = [](HANDLE h, const D3DDDICB_DESTROYCONTEXT *a) APIENTRY -> HRESULT {
       CHECK(a->hContext == (HANDLE)(uintptr_t)(0x300 + index(h))); return S_OK;
    };
-   cb.pfnCreatePagingQueueCb = [](HANDLE h, D3DDDICB_CREATEPAGINGQUEUE *a) -> HRESULT {
+   cb.pfnCreatePagingQueueCb = [](HANDLE h, D3DDDICB_CREATEPAGINGQUEUE *a) APIENTRY -> HRESULT {
       unsigned n = index(h); a->hPagingQueue = 0x40 + n; a->hSyncObject = 0x50 + n;
       a->FenceValueCPUVirtualAddress = &pagingValues[n]; return S_OK;
    };
-   cb.pfnDestroyPagingQueueCb = [](HANDLE h, const D3DDDI_DESTROYPAGINGQUEUE *a) -> HRESULT {
+   cb.pfnDestroyPagingQueueCb = [](HANDLE h, const D3DDDI_DESTROYPAGINGQUEUE *a) APIENTRY -> HRESULT {
       CHECK(a->hPagingQueue == 0x40 + index(h)); return S_OK;
    };
-   cb.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
+   cb.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) APIENTRY -> HRESULT {
       CHECK(index(h) == 0 && a->hResource == rt_resource(0) && a->NumAllocations == 1);
       CHECK(a->PrivateDriverDataSize == sizeof(metadata));
       CHECK(a->pAllocationInfo2->PrivateDriverDataSize == sizeof(allocation));
@@ -60,39 +60,39 @@ static void init(Device *dev, Adapter *adapter, unsigned i)
       CHECK(allocation.Buffer.bytes == sizeof(bytes));
       a->pAllocationInfo2->hAllocation = 0x60; ++allocations; return S_OK;
    };
-   cb.pfnDeallocateCb = [](HANDLE h, const D3DDDICB_DEALLOCATE *a) -> HRESULT {
+   cb.pfnDeallocateCb = [](HANDLE h, const D3DDDICB_DEALLOCATE *a) APIENTRY -> HRESULT {
       CHECK(a->hResource == rt_resource(index(h)) && !a->NumAllocations && !a->HandleList);
       ++deallocations; return S_OK;
    };
-   cb.pfnMakeResidentCb = [](HANDLE h, D3DDDI_MAKERESIDENT *a) -> HRESULT {
+   cb.pfnMakeResidentCb = [](HANDLE h, D3DDDI_MAKERESIDENT *a) APIENTRY -> HRESULT {
       CHECK(a->hPagingQueue == 0x40 + index(h) && a->NumAllocations == 1);
       CHECK(*a->AllocationList == 0x60 + index(h));
       a->PagingFenceValue = 7; return E_PENDING;
    };
    cb.pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE h,
-         const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) -> HRESULT {
+         const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) APIENTRY -> HRESULT {
       unsigned n = index(h); CHECK(a->ObjectCount == 1 && *a->ObjectHandleArray == 0x50 + n);
       pagingValues[n] = *a->FenceValueArray; ++waits; return S_OK;
    };
-   cb.pfnMapGpuVirtualAddressCb = [](HANDLE h, D3DDDI_MAPGPUVIRTUALADDRESS *a) -> HRESULT {
+   cb.pfnMapGpuVirtualAddressCb = [](HANDLE h, D3DDDI_MAPGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
       CHECK(a->hPagingQueue == 0x40 + index(h) && a->hAllocation == 0x60 + index(h));
       CHECK(a->BaseAddress == 0x100000 && a->SizeInPages == 2 && !a->OffsetInPages);
       a->VirtualAddress = a->BaseAddress; a->PagingFenceValue = 8; ++maps; return E_PENDING;
    };
-   cb.pfnFreeGpuVirtualAddressCb = [](HANDLE h, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) -> HRESULT {
+   cb.pfnFreeGpuVirtualAddressCb = [](HANDLE h, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
       index(h); CHECK(a->BaseAddress == 0x100000 && a->Size == sizeof(bytes)); ++frees; return S_OK;
    };
-   cb.pfnLock2Cb = [](HANDLE h, D3DDDICB_LOCK2 *a) -> HRESULT {
+   cb.pfnLock2Cb = [](HANDLE h, D3DDDICB_LOCK2 *a) APIENTRY -> HRESULT {
       CHECK(a->hAllocation == 0x60 + index(h)); a->pData = bytes; ++locks; return S_OK;
    };
-   cb.pfnUnlock2Cb = [](HANDLE h, const D3DDDICB_UNLOCK2 *a) -> HRESULT {
+   cb.pfnUnlock2Cb = [](HANDLE h, const D3DDDICB_UNLOCK2 *a) APIENTRY -> HRESULT {
       CHECK(a->hAllocation == 0x60 + index(h)); ++unlocks; return S_OK;
    };
-   dev->vk.GetImageMemoryRequirements = [](VkDevice, VkImage, VkMemoryRequirements *r) {
+   dev->vk.GetImageMemoryRequirements = [](VkDevice, VkImage, VkMemoryRequirements *r) VKAPI_CALL {
       *r = {sizeof(bytes), 4096, 1};
    };
    dev->vk.AllocateMemory = [](VkDevice vkdev, const VkMemoryAllocateInfo *a,
-                              const VkAllocationCallbacks *, VkDeviceMemory *memory) {
+                              const VkAllocationCallbacks *, VkDeviceMemory *memory) VKAPI_CALL {
       unsigned n = (uintptr_t)vkdev - 1;
       CHECK(a->memoryTypeIndex == 0 && a->allocationSize == sizeof(bytes));
       const auto *import = static_cast<const wsi_memory_allocate_info *>(a->pNext);
@@ -108,7 +108,7 @@ static void init(Device *dev, Adapter *adapter, unsigned i)
       *import->win32_imported = true;
       return VK_SUCCESS;
    };
-   dev->vk.FreeMemory = [](VkDevice vkdev, VkDeviceMemory, const VkAllocationCallbacks *) {
+   dev->vk.FreeMemory = [](VkDevice vkdev, VkDeviceMemory, const VkAllocationCallbacks *) VKAPI_CALL {
       unsigned n = (uintptr_t)vkdev - 1;
       if (owners[n]) {
          const auto *owner = owners[n];
@@ -116,7 +116,7 @@ static void init(Device *dev, Adapter *adapter, unsigned i)
          owner->unmap_cpu(owner->context); owner->release(owner->context); owners[n] = nullptr;
       }
    };
-   dev->vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize offset) {
+   dev->vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize offset) VKAPI_CALL {
       CHECK(!offset); return VK_SUCCESS;
    };
    CHECK(SUCCEEDED(runtime_device_create(dev)));
@@ -168,11 +168,11 @@ static void primary_creation_contract()
       primaryFailureStep = failure.step; primaryFailure = failure.vulkan;
       primaryRuntimeFailure = failure.runtime;
       expectedPrimaryDeallocations = deallocations + (failure.step != 4);
-      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) {
+      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY {
          CHECK(!primaryImages && !owners[0] && deallocations == expectedPrimaryDeallocations);
          primaryError = hr;
       };
-      dev.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
+      dev.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->hResource == rt_resource(0) && a->NumAllocations == 1);
          CHECK(!a->PrivateDriverDataSize && a->pAllocationInfo2->Flags.Primary);
          CHECK(a->pAllocationInfo2->PrivateDriverDataSize == sizeof(tg_gpu_primary_allocation_request));
@@ -186,26 +186,26 @@ static void primary_creation_contract()
             return primaryRuntimeFailure;
          a->pAllocationInfo2->hAllocation = 0x60; return S_OK;
       };
-      dev.kt.pfnMakeResidentCb = [](HANDLE h, D3DDDI_MAKERESIDENT *a) -> HRESULT {
+      dev.kt.pfnMakeResidentCb = [](HANDLE h, D3DDDI_MAKERESIDENT *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->hPagingQueue == 0x40 && *a->AllocationList == 0x60);
          ++primaryResidents;
          if (primaryFailureStep == 5)
             return primaryRuntimeFailure;
          a->PagingFenceValue = 7; return E_PENDING;
       };
-      dev.kt.pfnSetDisplayModeCb = [](HANDLE h, D3DDDICB_SETDISPLAYMODE *a) -> HRESULT {
+      dev.kt.pfnSetDisplayModeCb = [](HANDLE h, D3DDDICB_SETDISPLAYMODE *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->hPrimaryAllocation == 0x60); ++primaryModes; return S_OK;
       };
-      dev.kt.pfnMapGpuVirtualAddressCb = [](HANDLE h, D3DDDI_MAPGPUVIRTUALADDRESS *a) -> HRESULT {
+      dev.kt.pfnMapGpuVirtualAddressCb = [](HANDLE h, D3DDDI_MAPGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->hAllocation == 0x60 && a->SizeInPages == 900);
          CHECK(a->BaseAddress == 0x100000 && !a->OffsetInPages);
          a->VirtualAddress = a->BaseAddress; return S_OK;
       };
-      dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE h, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) -> HRESULT {
+      dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE h, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->BaseAddress == 0x100000 && a->Size == 3686400);
          return primaryFailureStep == 6 ? primaryRuntimeFailure : S_OK;
       };
-      dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *a, const VkAllocationCallbacks *, VkImage *image) {
+      dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *a, const VkAllocationCallbacks *, VkImage *image) VKAPI_CALL {
          CHECK(a->format == VK_FORMAT_B8G8R8A8_UNORM && a->tiling == VK_IMAGE_TILING_LINEAR);
          CHECK(a->extent.width == primaryWidth && a->extent.height == primaryHeight && a->initialLayout == VK_IMAGE_LAYOUT_PREINITIALIZED);
          const auto *wsi = static_cast<const wsi_image_create_info *>(a->pNext);
@@ -214,11 +214,11 @@ static void primary_creation_contract()
             return primaryFailure;
          *image = (VkImage)0x22; ++primaryImages; return VK_SUCCESS;
       };
-      dev.vk.GetImageSubresourceLayout = [](VkDevice, VkImage, const VkImageSubresource *, VkSubresourceLayout *out) {
+      dev.vk.GetImageSubresourceLayout = [](VkDevice, VkImage, const VkImageSubresource *, VkSubresourceLayout *out) VKAPI_CALL {
          *out = {0, 3686400, primaryPitch, 3686400, 3686400};
       };
-      dev.vk.GetImageMemoryRequirements = [](VkDevice, VkImage, VkMemoryRequirements *out) { *out = {3686400, 4096, 1}; };
-      dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *a, const VkAllocationCallbacks *, VkDeviceMemory *out) {
+      dev.vk.GetImageMemoryRequirements = [](VkDevice, VkImage, VkMemoryRequirements *out) VKAPI_CALL { *out = {3686400, 4096, 1}; };
+      dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *a, const VkAllocationCallbacks *, VkDeviceMemory *out) VKAPI_CALL {
          CHECK(a->allocationSize == 3686400 && a->memoryTypeIndex == 0);
          if (primaryFailureStep == 2)
             return primaryFailure;
@@ -233,17 +233,17 @@ static void primary_creation_contract()
          owner->retain(owner->context); owners[0] = owner;
          *wsi->win32_imported = true; *out = (VkDeviceMemory)1; return VK_SUCCESS;
       };
-      dev.vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize offset) {
+      dev.vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize offset) VKAPI_CALL {
          CHECK(!offset); return primaryFailureStep == 3 ? primaryFailure : VK_SUCCESS;
       };
-      dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) {
+      dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) VKAPI_CALL {
          const auto *owner = owners[0];
          CHECK(owner);
          const VkResult result = owner->free_gpu(owner->context, 0x100000, 3686400);
          CHECK((result == VK_SUCCESS) == (primaryFailureStep != 6));
          owner->release(owner->context); owners[0] = nullptr;
       };
-      dev.vk.DestroyImage = [](VkDevice, VkImage image, const VkAllocationCallbacks *) { CHECK(image == (VkImage)0x22); --primaryImages; };
+      dev.vk.DestroyImage = [](VkDevice, VkImage image, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(image == (VkImage)0x22); --primaryImages; };
       D3D10DDI_MIPINFO mip = {primaryWidth, primaryHeight, 1, primaryWidth, primaryHeight, 1};
       DXGI_DDI_PRIMARY_DESC primary = {};
       primary.Flags = (optional ? DXGI_DDI_PRIMARY_OPTIONAL : 0) |
@@ -320,9 +320,9 @@ static void primary_creation_contract()
    for (UINT optional : {0u, (UINT)DXGI_DDI_PRIMARY_OPTIONAL}) {
       Adapter adapter; Device dev; init(&dev, &adapter, 0);
       primaryError = S_OK;
-      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { primaryError = hr; };
-      dev.kt.pfnAllocateCb = [](HANDLE, D3DDDICB_ALLOCATE *) -> HRESULT { CHECK(false); return E_FAIL; };
-      dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *, const VkAllocationCallbacks *, VkImage *) {
+      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { primaryError = hr; };
+      dev.kt.pfnAllocateCb = [](HANDLE, D3DDDICB_ALLOCATE *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+      dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *, const VkAllocationCallbacks *, VkImage *) VKAPI_CALL {
          CHECK(false); return VK_ERROR_DEVICE_LOST;
       };
       const bool quarter = rotation != DXGI_DDI_MODE_ROTATION_ROTATE180;
@@ -385,7 +385,7 @@ static void primary_private_format_contract()
          (c.current == 4 ? 4 : (wantedFormat + 1) % 4);
       privateInitial = c.initial; privateChange = c.change; privateRetry = c.retry;
       privateModeCalls = privateFormatCalls = 0;
-      dev.kt.pfnSetDisplayModeCb = [](HANDLE h, D3DDDICB_SETDISPLAYMODE *a) -> HRESULT {
+      dev.kt.pfnSetDisplayModeCb = [](HANDLE h, D3DDDICB_SETDISPLAYMODE *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->hPrimaryAllocation == 0x60);
          CHECK(!a->PrivateDriverFormatAttribute);
          ++privateModeCalls;
@@ -393,7 +393,7 @@ static void primary_private_format_contract()
          return privateModeCalls == 1 ? privateInitial : privateRetry;
       };
       if (c.callback) dev.kt.pfnSetDisplayPrivateDriverFormatCb = [](HANDLE h,
-         const D3DDDICB_SETDISPLAYPRIVATEDRIVERFORMAT *a) -> HRESULT {
+         const D3DDDICB_SETDISPLAYPRIVATEDRIVERFORMAT *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && !a->VidPnSourceId);
          CHECK(a->PrivateDriverFormatAttribute == wantedFormat);
          CHECK(privateModeCalls == 1 && !privateFormatCalls);
@@ -401,7 +401,7 @@ static void primary_private_format_contract()
          if (SUCCEEDED(privateChange)) sourceFormat = wantedFormat;
          return privateChange;
       };
-      dev.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
+      dev.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->NumAllocations == 1 && a->pAllocationInfo2->Flags.Primary);
          const auto &r = *static_cast<const tg_gpu_primary_allocation_request *>(a->pAllocationInfo2->pPrivateDriverData);
          CHECK(r.Rotation == wantedFormat + 1);
@@ -468,10 +468,10 @@ static void primary_mode_completion_contract()
       modeWaits = modeCallbacks = modeErrors = 0;
       dev.submitted = dev.gated = 1;
       dev.fence = (VkSemaphore)3;
-      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore fence, uint64_t *out) {
+      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore fence, uint64_t *out) VKAPI_CALL {
          CHECK(fence == (VkSemaphore)3); *out = modeCompleted; return VK_SUCCESS;
       };
-      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *wait, uint64_t timeout) {
+      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *wait, uint64_t timeout) VKAPI_CALL {
          CHECK(wait->semaphoreCount == 1 && *wait->pSemaphores == (VkSemaphore)3);
          CHECK(*wait->pValues == 1 && timeout == UINT64_C(1000000000));
          ++modeWaits;
@@ -479,10 +479,10 @@ static void primary_mode_completion_contract()
             modeCompleted = 1; /* Simulated GPU completion, never a CPU signal. */
          return modeWaitResult;
       };
-      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) {
+      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY {
          CHECK(hr == D3DDDIERR_DEVICEREMOVED); ++modeErrors;
       };
-      dev.kt.pfnSetDisplayModeCb = [](HANDLE h, D3DDDICB_SETDISPLAYMODE *mode) -> HRESULT {
+      dev.kt.pfnSetDisplayModeCb = [](HANDLE h, D3DDDICB_SETDISPLAYMODE *mode) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && mode->hPrimaryAllocation == 0x60);
          CHECK(modeCompleted == 1); ++modeCallbacks; return S_OK;
       };
@@ -598,7 +598,7 @@ static void presentation13_contracts()
 
       DXGI_DDI_BASE_CALLBACKS callbacks = {};
       callbacks.pfnPresentMultiplaneOverlayCb = [](HANDLE device,
-            const DXGIDDICB_PRESENT_MULTIPLANE_OVERLAY *present) -> HRESULT {
+            const DXGIDDICB_PRESENT_MULTIPLANE_OVERLAY *present) APIENTRY -> HRESULT {
          CHECK(GetCurrentThreadId() == presentThread);
          CHECK(device == rt_device(0) && present->hContext == (HANDLE)0x300 &&
                present->pDXGIContext == (void *)0xdeadbeef && !present->BroadcastContextCount);
@@ -608,7 +608,7 @@ static void presentation13_contracts()
          return modernPresentStatus;
       };
       callbacks.pfnPresentMultiplaneOverlay1Cb = [](HANDLE device,
-            const DXGIDDICB_PRESENT_MULTIPLANE_OVERLAY1 *present) -> HRESULT {
+            const DXGIDDICB_PRESENT_MULTIPLANE_OVERLAY1 *present) APIENTRY -> HRESULT {
          CHECK(GetCurrentThreadId() == presentThread);
          CHECK(device == rt_device(0) && present->pDXGIContext == (void *)0xdeadbeef);
          CHECK(present->PresentPlaneCount == 1 && present->ppPresentPlanes);
@@ -625,26 +625,26 @@ static void presentation13_contracts()
       presentThread = GetCurrentThreadId(); presentFailure = failure;
       presentPlaneEnabled = true; modernPresentStatus = failure == 4 ? DXGI_ERROR_DEVICE_REMOVED : S_OK;
       presentOrder.clear();
-      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { CHECK(hr == D3DDDIERR_DEVICEREMOVED); };
+      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { CHECK(hr == D3DDDIERR_DEVICEREMOVED); };
       dev.fence = (VkSemaphore)8; dev.runtimeFence = 0x70;
       dev.ingress = (VkSemaphore)9; dev.runtimeIngress = 0x71;
-      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) -> VkResult {
+      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) VKAPI_CALL -> VkResult {
          CHECK(false && "MPO must queue GPU synchronization, not wait for this frame on the CPU");
          return VK_ERROR_DEVICE_LOST;
       };
-      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore fence, uint64_t *value) {
+      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore fence, uint64_t *value) VKAPI_CALL {
          CHECK(fence == (VkSemaphore)8); *value = 0;
          return presentFailure == 5 ? VK_ERROR_DEVICE_LOST : VK_SUCCESS;
       };
       dev.kt.pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE device,
-            const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *signal) -> HRESULT {
+            const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *signal) APIENTRY -> HRESULT {
          CHECK(device == rt_device(0) && signal->hContext == (HANDLE)0x300);
          CHECK(signal->ObjectCount == 1 && *signal->ObjectHandleArray == 0x71 &&
                *signal->MonitoredFenceValueArray == 1);
          presentOrder.push_back(1);
          return presentFailure == 1 ? E_FAIL : S_OK;
       };
-      dev.vk.QueueSubmit2 = [](VkQueue, uint32_t count, const VkSubmitInfo2 *submit, VkFence) -> VkResult {
+      dev.vk.QueueSubmit2 = [](VkQueue, uint32_t count, const VkSubmitInfo2 *submit, VkFence) VKAPI_CALL -> VkResult {
          CHECK(count == 1 && submit->waitSemaphoreInfoCount == 1 && submit->signalSemaphoreInfoCount == 1);
          CHECK(submit->pWaitSemaphoreInfos[0].semaphore == (VkSemaphore)9 &&
                submit->pWaitSemaphoreInfos[0].value == 1 &&
@@ -655,15 +655,15 @@ static void presentation13_contracts()
          return presentFailure == 2 ? VK_ERROR_DEVICE_LOST : VK_SUCCESS;
       };
       dev.kt.pfnWaitForSynchronizationObjectFromGpuCb = [](HANDLE device,
-            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *wait) -> HRESULT {
+            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *wait) APIENTRY -> HRESULT {
          CHECK(device == rt_device(0) && wait->hContext == (HANDLE)0x300);
          CHECK(wait->ObjectCount == 1 && *wait->ObjectHandleArray == 0x70 &&
                *wait->MonitoredFenceValueArray == 1);
          presentOrder.push_back(3);
          return presentFailure == 3 ? E_FAIL : S_OK;
       };
-      dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer, const VkDependencyInfo *) {};
-      dev.vk.EndCommandBuffer = [](VkCommandBuffer) { return VK_SUCCESS; };
+      dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer, const VkDependencyInfo *) VKAPI_CALL {};
+      dev.vk.EndCommandBuffer = [](VkCommandBuffer) VKAPI_CALL { return VK_SUCCESS; };
       DXGI_DDI_PRESENT_MULTIPLANE_OVERLAY plane = {};
       plane.Enabled = TRUE; plane.hResource = (DXGI_DDI_HRESOURCE)&res;
       plane.PlaneAttributes.SrcRect = {0, 0, (LONG)res.width, (LONG)res.height};
@@ -774,7 +774,7 @@ static void presentation13_contracts()
    Resource surface; surface.dev = &dev; surface.width = 65; surface.height = 17;
    CHECK(runtime_shared_create(&dev, &desc, {rt_resource(0)}, &surface.storage.runtime, &surface.pitch) == S_OK);
    DXGI_DDI_BASE_CALLBACKS callbacks = {};
-   callbacks.pfnPresentCb = [](HANDLE device, DXGIDDICB_PRESENT *present) -> HRESULT {
+   callbacks.pfnPresentCb = [](HANDLE device, DXGIDDICB_PRESENT *present) APIENTRY -> HRESULT {
       CHECK(GetCurrentThreadId() == presentThread && device == rt_device(0));
       CHECK(present->hContext == (HANDLE)0x300 && present->hSrcAllocation == 0x60 && !present->hDstAllocation);
       CHECK(present->pDXGIContext == (void *)0xbeef && present->SyncIntervalOverrideValid &&
@@ -824,14 +824,14 @@ static void shared_tiled_contracts()
       adapter.vk.caps.driverVersion = 0x1234;
       memset(adapter.vk.caps.deviceUUID, 0x31, VK_UUID_SIZE);
       memset(adapter.vk.caps.driverUUID, 0x72, VK_UUID_SIZE);
-      adapter.vk.vk.GetPhysicalDeviceFormatProperties = [](VkPhysicalDevice, VkFormat, VkFormatProperties *out) {
+      adapter.vk.vk.GetPhysicalDeviceFormatProperties = [](VkPhysicalDevice, VkFormat, VkFormatProperties *out) VKAPI_CALL {
          *out = {}; out->optimalTilingFeatures = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
             VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT | VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT;
       };
       for (Device *dev : {&producer, &consumer}) {
          dev->caps = &adapter.vk.caps; dev->interfaceVersion = D3DWDDM2_0_DDI_INTERFACE_VERSION;
          dev->vk.AllocateMemory = [](VkDevice device, const VkMemoryAllocateInfo *a,
-                                    const VkAllocationCallbacks *cb, VkDeviceMemory *out) {
+                                    const VkAllocationCallbacks *cb, VkDeviceMemory *out) VKAPI_CALL {
             VkResult result = tiledImportBase(device, a, cb, out);
             const auto *info = static_cast<const wsi_memory_allocate_info *>(a->pNext);
             if (result == VK_SUCCESS && info->win32_memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION) {
@@ -840,30 +840,30 @@ static void shared_tiled_contracts()
             }
             return result;
          };
-         dev->um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { ++tiledErrors; tiledError = hr; };
+         dev->um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { ++tiledErrors; tiledError = hr; };
          dev->vk.CreateImage = [](VkDevice d, const VkImageCreateInfo *in,
-                                  const VkAllocationCallbacks *, VkImage *out) {
+                                  const VkAllocationCallbacks *, VkImage *out) VKAPI_CALL {
             CHECK(in->tiling == VK_IMAGE_TILING_OPTIMAL && in->initialLayout == VK_IMAGE_LAYOUT_UNDEFINED);
             CHECK(in->extent.width == 17 && in->extent.height == 9 && in->extent.depth == 1 &&
                   in->arrayLayers == 2 && in->mipLevels == 1 && (in->flags & VK_IMAGE_CREATE_ALIAS_BIT));
             *out = (VkImage)(uintptr_t)(0x800 + (uintptr_t)d); ++tiledImages; return VK_SUCCESS;
          };
-         dev->vk.GetImageMemoryRequirements = [](VkDevice d, VkImage, VkMemoryRequirements *out) {
+         dev->vk.GetImageMemoryRequirements = [](VkDevice d, VkImage, VkMemoryRequirements *out) VKAPI_CALL {
             *out = {sizeof(bytes) + (tiledMismatch && (uintptr_t)d == 2 ? 4096u : 0u), 4096, 1};
          };
-         dev->kt.pfnMapGpuVirtualAddressCb = [](HANDLE d, D3DDDI_MAPGPUVIRTUALADDRESS *a) -> HRESULT {
+         dev->kt.pfnMapGpuVirtualAddressCb = [](HANDLE d, D3DDDI_MAPGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
             unsigned n = index(d);
             CHECK(a->hPagingQueue == 0x40 + n && a->hAllocation == 0x60 + n && a->SizeInPages == 2);
             CHECK((a->DriverProtection == 0 && a->BaseAddress == 0x100000) ||
                   (a->DriverProtection == 0xfe && a->BaseAddress == 0x120000 + n * 0x10000));
             a->VirtualAddress = a->BaseAddress; a->PagingFenceValue = 8; ++maps; return E_PENDING;
          };
-         dev->kt.pfnFreeGpuVirtualAddressCb = [](HANDLE d, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) -> HRESULT {
+         dev->kt.pfnFreeGpuVirtualAddressCb = [](HANDLE d, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
             unsigned n = index(d);
             CHECK(a->Size == sizeof(bytes) && (a->BaseAddress == 0x100000 ||
                   a->BaseAddress == 0x120000 + n * 0x10000)); ++frees; return S_OK;
          };
-         dev->vk.BindImageMemory = [](VkDevice d, VkImage, VkDeviceMemory, VkDeviceSize offset) {
+         dev->vk.BindImageMemory = [](VkDevice d, VkImage, VkDeviceMemory, VkDeviceSize offset) VKAPI_CALL {
             unsigned n = (uintptr_t)d - 1; CHECK(!offset && owners[n]);
             if (tiledFailBind && n == 1) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
             const auto *owner = owners[n];
@@ -872,7 +872,7 @@ static void shared_tiled_contracts()
                                   address, sizeof(bytes)) == VK_SUCCESS);
             tiledMapped[n] = true; return VK_SUCCESS;
          };
-         dev->vk.DestroyImage = [](VkDevice d, VkImage, const VkAllocationCallbacks *) {
+         dev->vk.DestroyImage = [](VkDevice d, VkImage, const VkAllocationCallbacks *) VKAPI_CALL {
             unsigned n = (uintptr_t)d - 1; CHECK(tiledImages); --tiledImages;
             if (tiledMapped[n]) {
                CHECK(owners[n] && owners[n]->free_gpu(owners[n]->context,
@@ -881,7 +881,7 @@ static void shared_tiled_contracts()
             }
          };
       }
-      producer.kt.pfnAllocateCb = [](HANDLE d, D3DDDICB_ALLOCATE *a) -> HRESULT {
+      producer.kt.pfnAllocateCb = [](HANDLE d, D3DDDICB_ALLOCATE *a) APIENTRY -> HRESULT {
          CHECK(index(d) == 0 && a->hResource == rt_resource(0) && a->NumAllocations == 1);
          CHECK(a->PrivateDriverDataSize == 152 && a->pAllocationInfo2->PrivateDriverDataSize == sizeof(tiledAllocation));
          const auto data = (const BYTE *)a->pPrivateDriverData;
@@ -963,7 +963,7 @@ static void removed_paging_fence_contract()
       pagingValues[0] = during_wait ? 0 : UINT64_MAX;
       init(&dev, &adapter, 0);
       dev.kt.pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE h,
-            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) -> HRESULT {
+            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) APIENTRY -> HRESULT {
          CHECK(index(h) == 0 && a->ObjectCount == 1 && a->ObjectHandleArray[0] == 0x50);
          pagingValues[0] = UINT64_MAX; ++waits; return S_OK;
       };
@@ -1016,12 +1016,12 @@ static void displayable_owner_contract(UINT interface_version)
    init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
    producer.interfaceVersion = consumer.interfaceVersion = interface_version;
    displayableAllocateBase = producer.kt.pfnAllocateCb;
-   producer.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
+   producer.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) APIENTRY -> HRESULT {
       HRESULT hr = displayableAllocateBase(h, a); a->hKMResource = 0x90; return hr;
    };
    displayableImportBase = producer.vk.AllocateMemory;
    auto importer = [](VkDevice device, const VkMemoryAllocateInfo *a,
-                      const VkAllocationCallbacks *callbacks, VkDeviceMemory *memory) -> VkResult {
+                      const VkAllocationCallbacks *callbacks, VkDeviceMemory *memory) VKAPI_CALL -> VkResult {
       const auto *info = static_cast<const wsi_memory_allocate_info *>(a->pNext);
       CHECK(info->win32_memory->version == WSI_WIN32_MEMORY_DISPLAYABLE_VERSION);
       CHECK(info->win32_memory->kernel_resource == ((uintptr_t)device == 1 ? 0x90u : 0x91u));
@@ -1072,11 +1072,11 @@ static void displayable_owner_contract(UINT interface_version)
    consumer.vk.FreeMemory(consumer.vkdev, memory, nullptr);
    CHECK(runtime_destroy(c) == S_OK && runtime_destroy(p) == S_OK);
    producer.runtimeQueueAccepted = true;
-   producer.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
+   producer.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) APIENTRY -> HRESULT {
       HRESULT hr = displayableAllocateBase(h, a); a->hKMResource = 0; return hr;
    };
    producer.vk.AllocateMemory = consumer.vk.AllocateMemory = [](VkDevice device, const VkMemoryAllocateInfo *a,
-                                  const VkAllocationCallbacks *callbacks, VkDeviceMemory *memory) -> VkResult {
+                                  const VkAllocationCallbacks *callbacks, VkDeviceMemory *memory) VKAPI_CALL -> VkResult {
       const auto *info = static_cast<const wsi_memory_allocate_info *>(a->pNext);
       CHECK(info->win32_memory->version == WSI_WIN32_MEMORY_RUNTIME_VERSION &&
             !info->win32_memory->kernel_resource &&
@@ -1125,16 +1125,16 @@ static void pending_destroy_contract()
       Adapter adapter; Device dev; init(&dev, &adapter, 0);
       ignoreImport = false; pagingValues[0] = 0;
       images = vaFrees = releases = idleCalls = 0;
-      dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE, const D3DDDICB_FREEGPUVIRTUALADDRESS *) -> HRESULT {
+      dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE, const D3DDDICB_FREEGPUVIRTUALADDRESS *) APIENTRY -> HRESULT {
          ++vaFrees; return S_OK;
       };
-      dev.kt.pfnDeallocate2Cb = [](HANDLE device, const D3DDDICB_DEALLOCATE2 *args) -> HRESULT {
+      dev.kt.pfnDeallocate2Cb = [](HANDLE device, const D3DDDICB_DEALLOCATE2 *args) APIENTRY -> HRESULT {
          CHECK(device == rt_device(0) && args->hResource == rt_resource(0));
          CHECK(!args->Flags.Value && !args->NumAllocations && !args->HandleList);
          ++releases; return mode == 3 ? E_FAIL : S_OK;
       };
       if (mode == 4) dev.kt.pfnDeallocate2Cb = nullptr;
-      dev.kt.pfnDeallocateCb = [](HANDLE device, const D3DDDICB_DEALLOCATE *args) -> HRESULT {
+      dev.kt.pfnDeallocateCb = [](HANDLE device, const D3DDDICB_DEALLOCATE *args) APIENTRY -> HRESULT {
          CHECK(device == rt_device(0) && args->hResource == rt_resource(0));
          ++releases; return S_OK;
       };
@@ -1154,22 +1154,22 @@ static void pending_destroy_contract()
       CHECK(owners[0] && dev.runtimeOwners);
       store.lastUse = dev.submitted = 7; dev.fence = (VkSemaphore)1;
       fenceValue = 6; dev.runtimeFenceValue = &fenceValue;
-      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *value) {
+      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *value) VKAPI_CALL {
          *value = 6; return VK_SUCCESS;
       };
-      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) {
+      dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) VKAPI_CALL {
          return VK_ERROR_OUT_OF_HOST_MEMORY;
       };
-      dev.vk.DeviceWaitIdle = [](VkDevice) {
+      dev.vk.DeviceWaitIdle = [](VkDevice) VKAPI_CALL {
          ++idleCalls;
          if (mode == 0) { fenceValue = 7; return VK_SUCCESS; }
          if (mode == 2) { fenceValue = UINT64_MAX; return VK_SUCCESS; }
          return mode == 3 ? VK_ERROR_DEVICE_LOST : VK_ERROR_OUT_OF_HOST_MEMORY;
       };
-      dev.vk.DestroyImage = [](VkDevice, VkImage image, const VkAllocationCallbacks *) {
+      dev.vk.DestroyImage = [](VkDevice, VkImage image, const VkAllocationCallbacks *) VKAPI_CALL {
          CHECK(image == (VkImage)1); ++images;
       };
-      dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) {
+      dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) VKAPI_CALL {
          const auto *p = owners[0]; CHECK(p);
          VkResult hr = p->free_gpu(p->context, 0x100000, sizeof(bytes));
          CHECK((hr != VK_SUCCESS) == (mode == 3));
@@ -1186,7 +1186,7 @@ static void pending_destroy_contract()
          CHECK(owners[0] && owners[0]->allocation == (mode == 3 ? 0x60u : 0u));
          void *ptr = nullptr;
          CHECK(owners[0]->map_cpu(owners[0]->context, &ptr) == VK_ERROR_DEVICE_LOST);
-         dev.vk.DeviceWaitIdle = [](VkDevice) {fenceValue = 7; return VK_SUCCESS;};
+         dev.vk.DeviceWaitIdle = [](VkDevice) VKAPI_CALL {fenceValue = 7; return VK_SUCCESS;};
          CHECK(cleanup_idle(&dev));
          release_parked_images(&dev);
          CHECK(images == 1 && !owners[0] && !dev.parkedImages && releases == 1 && !vaFrees);
@@ -1205,16 +1205,16 @@ static void failed_cleanup_ownership_contract()
       Adapter adapter; Device dev; ignoreImport = false; pagingValues[0] = 0;
       init(&dev, &adapter, 0);
       cleanupFreeCalls = cleanupUnlockCalls = cleanupDeallocCalls = 0;
-      dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE h, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) -> HRESULT {
+      dev.kt.pfnFreeGpuVirtualAddressCb = [](HANDLE h, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->BaseAddress == 0x100000 && a->Size == sizeof(bytes));
          ++cleanupFreeCalls; return cleanupMode == 0 ? E_FAIL : S_OK;
       };
-      dev.kt.pfnUnlock2Cb = [](HANDLE h, const D3DDDICB_UNLOCK2 *a) -> HRESULT {
+      dev.kt.pfnUnlock2Cb = [](HANDLE h, const D3DDDICB_UNLOCK2 *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->hAllocation == 0x60);
          ++cleanupUnlockCalls;
          return cleanupMode == 1 && cleanupUnlockCalls == 1 ? E_FAIL : S_OK;
       };
-      dev.kt.pfnDeallocateCb = [](HANDLE h, const D3DDDICB_DEALLOCATE *a) -> HRESULT {
+      dev.kt.pfnDeallocateCb = [](HANDLE h, const D3DDDICB_DEALLOCATE *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->hResource == rt_resource(0));
          CHECK(!a->NumAllocations && !a->HandleList);
          ++cleanupDeallocCalls; return cleanupDeallocationFails ? E_FAIL : S_OK;
@@ -1256,10 +1256,10 @@ static void failed_cleanup_ownership_contract()
    for (bool failCleanup : {false, true}) {
       Adapter adapter; Device dev; init(&dev, &adapter, 0);
       cleanupMode = failCleanup; cleanupDeallocCalls = 0;
-      dev.kt.pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *) -> HRESULT {
+      dev.kt.pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *) APIENTRY -> HRESULT {
          return D3DDDIERR_OUTOFVIDEOMEMORY;
       };
-      dev.kt.pfnDeallocateCb = [](HANDLE h, const D3DDDICB_DEALLOCATE *a) -> HRESULT {
+      dev.kt.pfnDeallocateCb = [](HANDLE h, const D3DDDICB_DEALLOCATE *a) APIENTRY -> HRESULT {
          CHECK(h == rt_device(0) && a->hResource == rt_resource(0));
          ++cleanupDeallocCalls; return cleanupMode ? E_FAIL : S_OK;
       };
@@ -1377,7 +1377,7 @@ void runtime_contracts()
    CHECK(runtime_bind_image(&producer, p, (VkImage)1, &pm) == DXGI_ERROR_UNSUPPORTED && !pm);
    ignoreImport = false;
    DXGI_DDI_BASE_CALLBACKS callbacks = {};
-   callbacks.pfnPresentCb = [](HANDLE h, DXGIDDICB_PRESENT *a) -> HRESULT {
+   callbacks.pfnPresentCb = [](HANDLE h, DXGIDDICB_PRESENT *a) APIENTRY -> HRESULT {
       CHECK(h == rt_device(0) && a->hContext == (HANDLE)(uintptr_t)0x300);
       CHECK(a->hSrcAllocation == 0x60 && !a->hDstAllocation && a->pDXGIContext == (void *)0x12345);
       CHECK(a->SyncIntervalOverrideValid && a->SyncIntervalOverride == DXGI_DDI_FLIP_INTERVAL_ONE);

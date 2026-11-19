@@ -36,7 +36,7 @@ void shader_cache_contracts(bool child)
    adapter.vk.caps.cbSlots = D3D_CB_SLOTS;
    dev.vkdev = (VkDevice)(uintptr_t)1;
    dev.vk.CreateShadersEXT = [](VkDevice device, uint32_t count, const VkShaderCreateInfoEXT *info,
-                               const VkAllocationCallbacks *, VkShaderEXT *out) {
+                               const VkAllocationCallbacks *, VkShaderEXT *out) VKAPI_CALL {
       CHECK(count == 1);
       *out = VK_NULL_HANDLE;
       if (info->codeType == VK_SHADER_CODE_TYPE_BINARY_EXT) {
@@ -53,7 +53,7 @@ void shader_cache_contracts(bool child)
       *out = (VkShaderEXT)((uintptr_t)device * 100 + spvCalls + binaryCalls);
       return VK_SUCCESS;
    };
-   dev.vk.GetShaderBinaryDataEXT = [](VkDevice, VkShaderEXT, size_t *size, void *data) {
+   dev.vk.GetShaderBinaryDataEXT = [](VkDevice, VkShaderEXT, size_t *size, void *data) VKAPI_CALL {
       if (exportResult != VK_SUCCESS)
          return exportResult;
       if (data) {
@@ -63,7 +63,7 @@ void shader_cache_contracts(bool child)
       *size = sizeof(opaque);
       return VK_SUCCESS;
    };
-   dev.vk.DestroyShaderEXT = [](VkDevice, VkShaderEXT shader, const VkAllocationCallbacks *) {
+   dev.vk.DestroyShaderEXT = [](VkDevice, VkShaderEXT shader, const VkAllocationCallbacks *) VKAPI_CALL {
       CHECK(shader); ++destroyed;
    };
    /* Use the real frontend's VS emitted earlier in this executable. */

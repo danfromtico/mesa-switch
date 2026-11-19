@@ -29,13 +29,13 @@ static void init(Adapter *adapter, D3DDDI_DEVICECALLBACKS *kt,
                   D3DWDDM2_0DDI_CORELAYER_DEVICECALLBACKS *core)
 {
    adapter->vk.caps.cbSlots = D3D_CB_SLOTS;
-   adapter->vk.vk.GetPhysicalDeviceFeatures2 = [](VkPhysicalDevice, VkPhysicalDeviceFeatures2 *) {};
+   adapter->vk.vk.GetPhysicalDeviceFeatures2 = [](VkPhysicalDevice, VkPhysicalDeviceFeatures2 *) VKAPI_CALL {};
    adapter->vk.vk.CreateDevice = [](VkPhysicalDevice, const VkDeviceCreateInfo *,
-                                   const VkAllocationCallbacks *, VkDevice *out) {
+                                   const VkAllocationCallbacks *, VkDevice *out) VKAPI_CALL {
       if (s.failure == 5) return VK_ERROR_OUT_OF_HOST_MEMORY;
       *out = H<VkDevice>(0x100); ++s.devices; return VK_SUCCESS;
    };
-   adapter->vk.vk.GetDeviceProcAddr = [](VkDevice, const char *name) -> PFN_vkVoidFunction {
+   adapter->vk.vk.GetDeviceProcAddr = [](VkDevice, const char *name) VKAPI_CALL -> PFN_vkVoidFunction {
 #define X(n) if (!std::strcmp(name, "vk" #n)) return reinterpret_cast<PFN_vkVoidFunction>(api.n);
       TGD3D_VK_DEVICE_FUNCS(X)
       TGD3D_VK_OPTIONAL_DEVICE_FUNCS(X)
@@ -46,39 +46,39 @@ static void init(Adapter *adapter, D3DDDI_DEVICECALLBACKS *kt,
    TGD3D_VK_DEVICE_FUNCS(X)
    TGD3D_VK_OPTIONAL_DEVICE_FUNCS(X)
 #undef X
-   api.DestroyDevice = [](VkDevice d, const VkAllocationCallbacks *) {
+   api.DestroyDevice = [](VkDevice d, const VkAllocationCallbacks *) VKAPI_CALL {
       CHECK(d == H<VkDevice>(0x100)); ++s.deadDevices;
    };
-   api.GetDeviceQueue = [](VkDevice, UINT, UINT, VkQueue *out) { *out = H<VkQueue>(0x200); };
-   api.CreateSemaphore = [](VkDevice, const VkSemaphoreCreateInfo *, const VkAllocationCallbacks *, VkSemaphore *out) {
+   api.GetDeviceQueue = [](VkDevice, UINT, UINT, VkQueue *out) VKAPI_CALL { *out = H<VkQueue>(0x200); };
+   api.CreateSemaphore = [](VkDevice, const VkSemaphoreCreateInfo *, const VkAllocationCallbacks *, VkSemaphore *out) VKAPI_CALL {
       if (s.failure == 6) return VK_ERROR_OUT_OF_HOST_MEMORY;
       *out = H<VkSemaphore>(++s.objects); return VK_SUCCESS;
    };
-   api.CreateCommandPool = [](VkDevice, const VkCommandPoolCreateInfo *, const VkAllocationCallbacks *, VkCommandPool *out) {
+   api.CreateCommandPool = [](VkDevice, const VkCommandPoolCreateInfo *, const VkAllocationCallbacks *, VkCommandPool *out) VKAPI_CALL {
       if (s.failure == 7) return VK_ERROR_OUT_OF_HOST_MEMORY;
       *out = H<VkCommandPool>(++s.objects); return VK_SUCCESS;
    };
-   api.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *, const VkAllocationCallbacks *, VkDescriptorSetLayout *out) {
+   api.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *, const VkAllocationCallbacks *, VkDescriptorSetLayout *out) VKAPI_CALL {
       if (s.failure == 8 && s.objects == 3) return VK_ERROR_OUT_OF_HOST_MEMORY;
       *out = H<VkDescriptorSetLayout>(++s.objects); return VK_SUCCESS;
    };
-   api.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *, const VkAllocationCallbacks *, VkPipelineLayout *out) {
+   api.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *, const VkAllocationCallbacks *, VkPipelineLayout *out) VKAPI_CALL {
       *out = H<VkPipelineLayout>(++s.objects); return VK_SUCCESS;
    };
-   api.CreateSampler = [](VkDevice, const VkSamplerCreateInfo *, const VkAllocationCallbacks *, VkSampler *out) {
+   api.CreateSampler = [](VkDevice, const VkSamplerCreateInfo *, const VkAllocationCallbacks *, VkSampler *out) VKAPI_CALL {
       *out = H<VkSampler>(++s.objects); return VK_SUCCESS;
    };
-#define DESTROY(n, type) api.n = [](VkDevice, type object, const VkAllocationCallbacks *) { if (object) ++s.deadObjects; }
+#define DESTROY(n, type) api.n = [](VkDevice, type object, const VkAllocationCallbacks *) VKAPI_CALL { if (object) ++s.deadObjects; }
    DESTROY(DestroySemaphore, VkSemaphore);
    DESTROY(DestroyCommandPool, VkCommandPool);
    DESTROY(DestroyDescriptorSetLayout, VkDescriptorSetLayout);
    DESTROY(DestroyPipelineLayout, VkPipelineLayout);
    DESTROY(DestroySampler, VkSampler);
 #undef DESTROY
-   api.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, UINT64 *out) { *out = 0; return VK_SUCCESS; };
-   core->pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT) { ++s.errors; };
+   api.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, UINT64 *out) VKAPI_CALL { *out = 0; return VK_SUCCESS; };
+   core->pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT) APIENTRY { ++s.errors; };
    core->pfnCreateContextVirtualCb = [](D3D10DDI_HRTCORELAYER h,
-                                       D3DWDDM2_0DDICB_CREATECONTEXTVIRTUAL *c) -> HRESULT {
+                                       D3DWDDM2_0DDICB_CREATECONTEXTVIRTUAL *c) APIENTRY -> HRESULT {
       CHECK(s.modern && h.handle == H<HANDLE>(0x300) && !c->NodeOrdinal && c->EngineAffinity == 1);
       CHECK(c->ContextTypeFlags == (D3DWDDM2_0DDI_CONTEXTTYPE_3D | D3DWDDM2_0DDI_CONTEXTTYPE_COPY));
       CHECK(!c->Flags.Value && !c->PrivateDriverDataSize && !c->pPrivateDriverData);
@@ -87,32 +87,32 @@ static void init(Adapter *adapter, D3DDDI_DEVICECALLBACKS *kt,
       if (s.failure != 2) { c->hContext = H<HANDLE>(0x400); ++s.contexts; }
       return S_OK;
    };
-   kt->pfnCreateContextVirtualCb = [](HANDLE h, D3DDDICB_CREATECONTEXTVIRTUAL *c) -> HRESULT {
+   kt->pfnCreateContextVirtualCb = [](HANDLE h, D3DDDICB_CREATECONTEXTVIRTUAL *c) APIENTRY -> HRESULT {
       CHECK(!s.modern && h == H<HANDLE>(0x500));
       c->hContext = H<HANDLE>(0x400); ++s.ktCreates; ++s.contexts; return S_OK;
    };
-   kt->pfnDestroyContextCb = [](HANDLE h, const D3DDDICB_DESTROYCONTEXT *c) -> HRESULT {
+   kt->pfnDestroyContextCb = [](HANDLE h, const D3DDDICB_DESTROYCONTEXT *c) APIENTRY -> HRESULT {
       CHECK(h == H<HANDLE>(0x500) && c->hContext == H<HANDLE>(0x400)); ++s.deadContexts; return S_OK;
    };
-   kt->pfnCreatePagingQueueCb = [](HANDLE h, D3DDDICB_CREATEPAGINGQUEUE *q) -> HRESULT {
+   kt->pfnCreatePagingQueueCb = [](HANDLE h, D3DDDICB_CREATEPAGINGQUEUE *q) APIENTRY -> HRESULT {
       CHECK(h == H<HANDLE>(0x500) && q->Priority == D3DDDI_PAGINGQUEUE_PRIORITY_NORMAL);
       if (s.failure == 3) return E_OUTOFMEMORY;
       q->hPagingQueue = 0x600; ++s.queues;
       if (s.failure != 4) q->hSyncObject = 0x601;
       q->FenceValueCPUVirtualAddress = &s.paging; return S_OK;
    };
-   kt->pfnDestroyPagingQueueCb = [](HANDLE h, const D3DDDI_DESTROYPAGINGQUEUE *q) -> HRESULT {
+   kt->pfnDestroyPagingQueueCb = [](HANDLE h, const D3DDDI_DESTROYPAGINGQUEUE *q) APIENTRY -> HRESULT {
       CHECK(h == H<HANDLE>(0x500) && q->hPagingQueue == 0x600); ++s.deadQueues; return S_OK;
    };
-   kt->pfnAllocateCb = [](HANDLE, D3DDDICB_ALLOCATE *) -> HRESULT { CHECK(false); return E_FAIL; };
-   kt->pfnDeallocateCb = [](HANDLE, const D3DDDICB_DEALLOCATE *) -> HRESULT { CHECK(false); return E_FAIL; };
-   kt->pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *) -> HRESULT { CHECK(false); return E_FAIL; };
-   kt->pfnEvictCb = [](HANDLE, D3DDDICB_EVICT *) -> HRESULT { CHECK(false); return E_FAIL; };
-   kt->pfnMapGpuVirtualAddressCb = [](HANDLE, D3DDDI_MAPGPUVIRTUALADDRESS *) -> HRESULT { CHECK(false); return E_FAIL; };
-   kt->pfnFreeGpuVirtualAddressCb = [](HANDLE, const D3DDDICB_FREEGPUVIRTUALADDRESS *) -> HRESULT { CHECK(false); return E_FAIL; };
-   kt->pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE, const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *) -> HRESULT { CHECK(false); return E_FAIL; };
-   kt->pfnLock2Cb = [](HANDLE, D3DDDICB_LOCK2 *) -> HRESULT { CHECK(false); return E_FAIL; };
-   kt->pfnUnlock2Cb = [](HANDLE, const D3DDDICB_UNLOCK2 *) -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnAllocateCb = [](HANDLE, D3DDDICB_ALLOCATE *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnDeallocateCb = [](HANDLE, const D3DDDICB_DEALLOCATE *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnEvictCb = [](HANDLE, D3DDDICB_EVICT *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnMapGpuVirtualAddressCb = [](HANDLE, D3DDDI_MAPGPUVIRTUALADDRESS *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnFreeGpuVirtualAddressCb = [](HANDLE, const D3DDDICB_FREEGPUVIRTUALADDRESS *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE, const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnLock2Cb = [](HANDLE, D3DDDICB_LOCK2 *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
+   kt->pfnUnlock2Cb = [](HANDLE, const D3DDDICB_UNLOCK2 *) APIENTRY -> HRESULT { CHECK(false); return E_FAIL; };
 }
 }
 

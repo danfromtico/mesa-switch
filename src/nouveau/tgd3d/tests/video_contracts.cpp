@@ -120,26 +120,26 @@ void init(Device &dev, Adapter &adapter)
    dev.adapter = &adapter; dev.caps = &adapter.vk.caps;
    dev.interfaceVersion = D3D11_1_DDI_INTERFACE_VERSION;
    dev.vkdev = (VkDevice)(uintptr_t)1;
-   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { state.error = hr; ++state.notifications; };
-   dev.vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *i, const VkAllocationCallbacks *, VkBuffer *out) {
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { state.error = hr; ++state.notifications; };
+   dev.vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *i, const VkAllocationCallbacks *, VkBuffer *out) VKAPI_CALL {
       *out = handle<VkBuffer>(new Buffer{i->size}); ++state.buffers; return VK_SUCCESS;
    };
-   dev.vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer b, VkMemoryRequirements *out) {
+   dev.vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer b, VkMemoryRequirements *out) VKAPI_CALL {
       *out = {object<Buffer>(b)->size, 256, 1};
    };
-   dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *i, const VkAllocationCallbacks *, VkDeviceMemory *out) {
+   dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *i, const VkAllocationCallbacks *, VkDeviceMemory *out) VKAPI_CALL {
       auto *m = new Memory; m->bytes.resize(i->allocationSize, 0xa5);
       *out = handle<VkDeviceMemory>(m); ++state.memories; return VK_SUCCESS;
    };
-   dev.vk.BindBufferMemory = [](VkDevice, VkBuffer, VkDeviceMemory, VkDeviceSize) { return VK_SUCCESS; };
-   dev.vk.MapMemory = [](VkDevice, VkDeviceMemory m, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **out) {
+   dev.vk.BindBufferMemory = [](VkDevice, VkBuffer, VkDeviceMemory, VkDeviceSize) VKAPI_CALL { return VK_SUCCESS; };
+   dev.vk.MapMemory = [](VkDevice, VkDeviceMemory m, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **out) VKAPI_CALL {
       *out = object<Memory>(m)->bytes.data(); return VK_SUCCESS;
    };
-   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) { CHECK(false); };
-   dev.vk.DestroyBuffer = [](VkDevice, VkBuffer b, const VkAllocationCallbacks *) {
+   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) VKAPI_CALL { CHECK(false); };
+   dev.vk.DestroyBuffer = [](VkDevice, VkBuffer b, const VkAllocationCallbacks *) VKAPI_CALL {
       delete object<Buffer>(b); --state.buffers;
    };
-   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory m, const VkAllocationCallbacks *) {
+   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory m, const VkAllocationCallbacks *) VKAPI_CALL {
       auto *mem = object<Memory>(m); state.freed = mem->bytes; delete mem; --state.memories;
    };
 }
@@ -194,7 +194,7 @@ void processor_enumeration()
 void decoder_input_buffers()
 {
    Device dev; Adapter adapter; init(dev, adapter);
-   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) {};
+   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) VKAPI_CALL {};
    D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
    D3D11_1DDI_DEVICEFUNCS ddi; device_fill_table11(&ddi);
    const auto decoder = decoder_args(dev, video);

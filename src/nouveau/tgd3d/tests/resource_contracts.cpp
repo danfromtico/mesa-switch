@@ -21,36 +21,36 @@ static void init(Device *dev, Adapter *adapter)
    adapter->vk.caps.memory.memoryTypeCount = 1;
    adapter->vk.caps.memory.memoryTypes[0].propertyFlags =
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-   dev->um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) {
+   dev->um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY {
       CHECK(!liveImages && !liveBuffers && !liveMemory);
       reported = hr; ++notifications;
    };
-   dev->vk.CreateImage = [](VkDevice, const VkImageCreateInfo *, const VkAllocationCallbacks *, VkImage *out) {
+   dev->vk.CreateImage = [](VkDevice, const VkImageCreateInfo *, const VkAllocationCallbacks *, VkImage *out) VKAPI_CALL {
       ++calls; if (failureStep == 1) return failureResult;
       *out = (VkImage)(uintptr_t)2; ++liveImages; return VK_SUCCESS;
    };
-   dev->vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *info, const VkAllocationCallbacks *, VkBuffer *out) {
+   dev->vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *info, const VkAllocationCallbacks *, VkBuffer *out) VKAPI_CALL {
       ++calls; if (failureStep == 1) return failureResult;
       bufferSize = info->size; *out = (VkBuffer)(uintptr_t)3; ++liveBuffers; return VK_SUCCESS;
    };
-   dev->vk.GetImageMemoryRequirements = [](VkDevice, VkImage, VkMemoryRequirements *out) { *out = {16384, 4096, 1}; };
-   dev->vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer, VkMemoryRequirements *out) { *out = {bufferSize, 4096, 1}; };
-   dev->vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *, const VkAllocationCallbacks *, VkDeviceMemory *out) {
+   dev->vk.GetImageMemoryRequirements = [](VkDevice, VkImage, VkMemoryRequirements *out) VKAPI_CALL { *out = {16384, 4096, 1}; };
+   dev->vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer, VkMemoryRequirements *out) VKAPI_CALL { *out = {bufferSize, 4096, 1}; };
+   dev->vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *, const VkAllocationCallbacks *, VkDeviceMemory *out) VKAPI_CALL {
       ++calls; if (failureStep == 2) return failureResult;
       *out = (VkDeviceMemory)(uintptr_t)4; ++liveMemory; return VK_SUCCESS;
    };
-   dev->vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize) {
+   dev->vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize) VKAPI_CALL {
       ++calls; return failureStep == 3 ? failureResult : VK_SUCCESS;
    };
-   dev->vk.BindBufferMemory = [](VkDevice, VkBuffer, VkDeviceMemory, VkDeviceSize) {
+   dev->vk.BindBufferMemory = [](VkDevice, VkBuffer, VkDeviceMemory, VkDeviceSize) VKAPI_CALL {
       ++calls; return failureStep == 3 ? failureResult : VK_SUCCESS;
    };
-   dev->vk.MapMemory = [](VkDevice, VkDeviceMemory, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **) {
+   dev->vk.MapMemory = [](VkDevice, VkDeviceMemory, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **) VKAPI_CALL {
       ++calls; CHECK(failureStep == 4); return failureResult;
    };
-   dev->vk.DestroyImage = [](VkDevice, VkImage, const VkAllocationCallbacks *) { CHECK(liveImages == 1); --liveImages; };
-   dev->vk.DestroyBuffer = [](VkDevice, VkBuffer, const VkAllocationCallbacks *) { CHECK(liveBuffers == 1); --liveBuffers; };
-   dev->vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) { CHECK(liveMemory == 1); --liveMemory; };
+   dev->vk.DestroyImage = [](VkDevice, VkImage, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(liveImages == 1); --liveImages; };
+   dev->vk.DestroyBuffer = [](VkDevice, VkBuffer, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(liveBuffers == 1); --liveBuffers; };
+   dev->vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(liveMemory == 1); --liveMemory; };
 }
 
 static void dynamic_unmap_failure_contract()
@@ -69,7 +69,7 @@ static void dynamic_unmap_failure_contract()
       liveBuffers = liveMemory = 1;
       dev.chunks.push_back(chunk);
       if (!dedicated) dev.currentChunk = chunk;
-      dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory memory) {
+      dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory memory) VKAPI_CALL {
          CHECK(memory == (VkDeviceMemory)(uintptr_t)4 && liveMemory == 1);
       };
       Resource res;
@@ -139,8 +139,8 @@ void resource_creation_contracts()
     * labeling every result as memory exhaustion. */
    for (VkResult error : {VK_ERROR_OUT_OF_HOST_MEMORY, VK_ERROR_OUT_OF_DEVICE_MEMORY, VK_ERROR_UNKNOWN}) {
       Adapter adapter; Device dev; init(&dev, &adapter); failureResult = error;
-      dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *, const VkAllocationCallbacks *, VkImageView *) { return failureResult; };
-      dev.vk.CreateBufferView = [](VkDevice, const VkBufferViewCreateInfo *, const VkAllocationCallbacks *, VkBufferView *) { return failureResult; };
+      dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *, const VkAllocationCallbacks *, VkImageView *) VKAPI_CALL { return failureResult; };
+      dev.vk.CreateBufferView = [](VkDevice, const VkBufferViewCreateInfo *, const VkAllocationCallbacks *, VkBufferView *) VKAPI_CALL { return failureResult; };
       Resource res; res.dev = &dev; res.storage.image = (VkImage)(uintptr_t)2;
       View view; view.dev = &dev; view.res = &res; view.type = ViewType::SRV;
       view.info = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};

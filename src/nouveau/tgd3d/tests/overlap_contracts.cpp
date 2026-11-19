@@ -40,65 +40,65 @@ static void init(Device &dev, Adapter &adapter)
    adapter.vk.caps.memory.memoryTypeCount = 1;
    adapter.vk.caps.memory.memoryTypes[0].propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
-   dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) { *out = completed; return VK_SUCCESS; };
-   dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) { ++waits; return VK_TIMEOUT; };
-   dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *in, const VkAllocationCallbacks *, VkImage *out) {
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { error = hr; ++errors; };
+   dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) VKAPI_CALL { *out = completed; return VK_SUCCESS; };
+   dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) VKAPI_CALL { ++waits; return VK_TIMEOUT; };
+   dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *in, const VkAllocationCallbacks *, VkImage *out) VKAPI_CALL {
       if (failStage == 1) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       CHECK(in->mipLevels == 1 && in->arrayLayers == 1 && in->samples == VK_SAMPLE_COUNT_1_BIT);
       auto image = new Image{in->extent.width, in->extent.height, in->extent.depth, {}};
       image->bytes.resize((size_t)image->width * image->height * image->depth * 4);
       *out = handle<VkImage>(image); ++images; return VK_SUCCESS;
    };
-   dev.vk.GetImageMemoryRequirements = [](VkDevice, VkImage h, VkMemoryRequirements *out) {
+   dev.vk.GetImageMemoryRequirements = [](VkDevice, VkImage h, VkMemoryRequirements *out) VKAPI_CALL {
       *out = {object<Image>(h)->bytes.size(), 256, 1};
    };
-   dev.vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *in, const VkAllocationCallbacks *, VkBuffer *out) {
+   dev.vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *in, const VkAllocationCallbacks *, VkBuffer *out) VKAPI_CALL {
       if (failStage == 5) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       CHECK(in->usage & VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT);
       *out = handle<VkBuffer>(new Buffer{(size_t)in->size}); ++buffers; return VK_SUCCESS;
    };
-   dev.vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer h, VkMemoryRequirements *out) {
+   dev.vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer h, VkMemoryRequirements *out) VKAPI_CALL {
       *out = {object<Buffer>(h)->size, 256, 1};
    };
-   dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *in, const VkAllocationCallbacks *, VkDeviceMemory *out) {
+   dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *in, const VkAllocationCallbacks *, VkDeviceMemory *out) VKAPI_CALL {
       if (failStage == 2) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       auto memory = new Memory; memory->bytes.resize(in->allocationSize);
       *out = handle<VkDeviceMemory>(memory); ++memories; return VK_SUCCESS;
    };
-   dev.vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize) {
+   dev.vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize) VKAPI_CALL {
       return failStage == 3 ? VK_ERROR_OUT_OF_DEVICE_MEMORY : VK_SUCCESS;
    };
-   dev.vk.BindBufferMemory = [](VkDevice, VkBuffer b, VkDeviceMemory m, VkDeviceSize offset) {
+   dev.vk.BindBufferMemory = [](VkDevice, VkBuffer b, VkDeviceMemory m, VkDeviceSize offset) VKAPI_CALL {
       if (failStage == 6) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       CHECK(!offset); object<Buffer>(b)->memory = object<Memory>(m); return VK_SUCCESS;
    };
-   dev.vk.MapMemory = [](VkDevice, VkDeviceMemory h, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **out) {
+   dev.vk.MapMemory = [](VkDevice, VkDeviceMemory h, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **out) VKAPI_CALL {
       if (failStage == 7) return VK_ERROR_MEMORY_MAP_FAILED;
       *out = object<Memory>(h)->bytes.data(); return VK_SUCCESS;
    };
-   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) {};
-   dev.vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *out) {
+   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) VKAPI_CALL {};
+   dev.vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *out) VKAPI_CALL {
       CHECK(failStage == 4); *out = VK_NULL_HANDLE; return VK_ERROR_OUT_OF_HOST_MEMORY;
    };
-   dev.vk.DestroyImage = [](VkDevice, VkImage h, const VkAllocationCallbacks *) { CHECK(images); --images; delete object<Image>(h); };
-   dev.vk.DestroyBuffer = [](VkDevice, VkBuffer h, const VkAllocationCallbacks *) { CHECK(buffers); --buffers; delete object<Buffer>(h); };
-   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory h, const VkAllocationCallbacks *) { CHECK(memories); --memories; delete object<Memory>(h); };
-   dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer, const VkDependencyInfo *in) {
+   dev.vk.DestroyImage = [](VkDevice, VkImage h, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(images); --images; delete object<Image>(h); };
+   dev.vk.DestroyBuffer = [](VkDevice, VkBuffer h, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(buffers); --buffers; delete object<Buffer>(h); };
+   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory h, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(memories); --memories; delete object<Memory>(h); };
+   dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer, const VkDependencyInfo *in) VKAPI_CALL {
       if (in->memoryBarrierCount) {
          CHECK(in->pMemoryBarriers[0].srcAccessMask & VK_ACCESS_2_MEMORY_WRITE_BIT);
          CHECK(in->pMemoryBarriers[0].dstAccessMask & VK_ACCESS_2_MEMORY_READ_BIT);
          ++barriers;
       }
    };
-   dev.vk.CmdCopyBuffer = [](VkCommandBuffer, VkBuffer src, VkBuffer dst, UINT count, const VkBufferCopy *r) {
+   dev.vk.CmdCopyBuffer = [](VkCommandBuffer, VkBuffer src, VkBuffer dst, UINT count, const VkBufferCopy *r) VKAPI_CALL {
       CHECK(count == 1);
       if (src == dst) CHECK(r->srcOffset + r->size <= r->dstOffset || r->dstOffset + r->size <= r->srcOffset);
       Copy c; c.srcBuffer = object<Buffer>(src); c.dstBuffer = object<Buffer>(dst);
       c.buffer = *r; c.barrier = barriers; copies.push_back(c);
    };
    dev.vk.CmdCopyImage = [](VkCommandBuffer, VkImage src, VkImageLayout sl, VkImage dst,
-                          VkImageLayout dl, UINT count, const VkImageCopy *r) {
+                          VkImageLayout dl, UINT count, const VkImageCopy *r) VKAPI_CALL {
       CHECK(sl == VK_IMAGE_LAYOUT_GENERAL && dl == sl && count == 1);
       if (src == dst) {
          CHECK(r->srcSubresource.mipLevel != r->dstSubresource.mipLevel ||
@@ -113,7 +113,7 @@ static void init(Device &dev, Adapter &adapter)
       c.image = *r; c.barrier = barriers; copies.push_back(c);
    };
    dev.vk.CmdBlitImage = [](VkCommandBuffer, VkImage src, VkImageLayout sl, VkImage dst,
-                           VkImageLayout dl, UINT count, const VkImageBlit *b, VkFilter filter) {
+                           VkImageLayout dl, UINT count, const VkImageBlit *b, VkFilter filter) VKAPI_CALL {
       CHECK(src != dst && sl == VK_IMAGE_LAYOUT_GENERAL && dl == sl && count == 1);
       CHECK(filter == VK_FILTER_NEAREST && b->srcOffsets[1].x - b->srcOffsets[0].x ==
             b->dstOffsets[1].x - b->dstOffsets[0].x && b->srcOffsets[1].y - b->srcOffsets[0].y ==
@@ -220,7 +220,7 @@ static void dxgi_self_blt(UINT sx, UINT sy, UINT dx, UINT dy)
    r.bind = D3D10_DDI_BIND_RENDER_TARGET;
    args.Rotate = DXGI_DDI_MODE_ROTATION_ROTATE180;
    dev.vk.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *,
-                                   const VkAllocationCallbacks *, VkPipelineLayout *) {
+                                   const VkAllocationCallbacks *, VkPipelineLayout *) VKAPI_CALL {
       return VK_ERROR_OUT_OF_HOST_MEMORY;
    };
    CHECK(t.pfnBlt1(&args) == E_OUTOFMEMORY);

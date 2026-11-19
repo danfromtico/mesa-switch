@@ -62,21 +62,21 @@ void init(Device *dev, Adapter *adapter)
    dev->hRTDevice.handle = h<HANDLE>(0x1000); dev->vkdev = h<VkDevice>(1); dev->queue = h<VkQueue>(2);
    dev->fence = h<VkSemaphore>(3); dev->ingress = h<VkSemaphore>(4);
    dev->runtimeFence = 0x90; dev->runtimeIngress = 0x91; dev->cmdPool = h<VkCommandPool>(5);
-   dev->um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT) { ++s.errors; };
+   dev->um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT) APIENTRY { ++s.errors; };
 #define X(n) dev->vk.n = Stub<PFN_vk##n>::call;
    TGD3D_VK_DEVICE_FUNCS(X)
    TGD3D_VK_OPTIONAL_DEVICE_FUNCS(X)
 #undef X
    auto &cb = dev->kt;
-   cb.pfnCreateContextVirtualCb = [](HANDLE d, D3DDDICB_CREATECONTEXTVIRTUAL *a) -> HRESULT {
+   cb.pfnCreateContextVirtualCb = [](HANDLE d, D3DDDICB_CREATECONTEXTVIRTUAL *a) APIENTRY -> HRESULT {
       CHECK(d == h<HANDLE>(0x1000)); a->hContext = h<HANDLE>(0x2000); return S_OK;
    };
-   cb.pfnDestroyContextCb = [](HANDLE, const D3DDDICB_DESTROYCONTEXT *) -> HRESULT { return S_OK; };
-   cb.pfnCreatePagingQueueCb = [](HANDLE, D3DDDICB_CREATEPAGINGQUEUE *a) -> HRESULT {
+   cb.pfnDestroyContextCb = [](HANDLE, const D3DDDICB_DESTROYCONTEXT *) APIENTRY -> HRESULT { return S_OK; };
+   cb.pfnCreatePagingQueueCb = [](HANDLE, D3DDDICB_CREATEPAGINGQUEUE *a) APIENTRY -> HRESULT {
       a->hPagingQueue = 0x40; a->hSyncObject = 0x41; a->FenceValueCPUVirtualAddress = &s.paging; return S_OK;
    };
-   cb.pfnDestroyPagingQueueCb = [](HANDLE, const D3DDDI_DESTROYPAGINGQUEUE *) -> HRESULT { return S_OK; };
-   cb.pfnAllocateCb = [](HANDLE d, D3DDDICB_ALLOCATE *a) -> HRESULT {
+   cb.pfnDestroyPagingQueueCb = [](HANDLE, const D3DDDI_DESTROYPAGINGQUEUE *) APIENTRY -> HRESULT { return S_OK; };
+   cb.pfnAllocateCb = [](HANDLE d, D3DDDICB_ALLOCATE *a) APIENTRY -> HRESULT {
       CHECK(d == h<HANDLE>(0x1000) && !a->hResource && !a->pPrivateDriverData &&
             !a->PrivateDriverDataSize && a->NumAllocations == 1);
       auto &info = a->pAllocationInfo2[0];
@@ -87,12 +87,12 @@ void init(Device *dev, Adapter *adapter)
       info.hAllocation = ++s.nextAllocation; s.allocations[info.hAllocation].cpu.resize(r->bytes);
       return S_OK;
    };
-   cb.pfnDeallocateCb = [](HANDLE d, const D3DDDICB_DEALLOCATE *a) -> HRESULT {
+   cb.pfnDeallocateCb = [](HANDLE d, const D3DDDICB_DEALLOCATE *a) APIENTRY -> HRESULT {
       CHECK(d == h<HANDLE>(0x1000) && !a->hResource && a->NumAllocations == 1 && a->HandleList);
       for (const auto &m : s.memory) CHECK(m.second.owner->allocation != a->HandleList[0]);
       CHECK(s.allocations.erase(a->HandleList[0]) == 1); ++s.deallocations; return S_OK;
    };
-   cb.pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *a) -> HRESULT {
+   cb.pfnMakeResidentCb = [](HANDLE, D3DDDI_MAKERESIDENT *a) APIENTRY -> HRESULT {
       CHECK(a->hPagingQueue == 0x40 && a->NumAllocations == 1 && s.allocations.count(a->AllocationList[0]));
       auto &allocation = s.allocations.at(a->AllocationList[0]);
       CHECK(!allocation.resident && !a->Flags.MustSucceed && !a->Flags.Reserved);
@@ -104,7 +104,7 @@ void init(Device *dev, Adapter *adapter)
       allocation.resident = true; ++s.residents;
       a->PagingFenceValue = ++s.nextPaging; return E_PENDING;
    };
-   cb.pfnEvictCb = [](HANDLE d, D3DDDICB_EVICT *a) -> HRESULT {
+   cb.pfnEvictCb = [](HANDLE d, D3DDDICB_EVICT *a) APIENTRY -> HRESULT {
       CHECK(d == h<HANDLE>(0x1000) && a->NumAllocations == 1 && !a->Flags.Value);
       auto &allocation = s.allocations.at(a->AllocationList[0]);
       CHECK(allocation.resident && !allocation.offered);
@@ -113,38 +113,38 @@ void init(Device *dev, Adapter *adapter)
       a->NumBytesToTrim = s.evictionBudget; return S_OK;
    };
    cb.pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE,
-      const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) -> HRESULT {
+      const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) APIENTRY -> HRESULT {
       CHECK(a->ObjectCount == 1 && a->ObjectHandleArray[0] == 0x41); ++s.pagingWaits;
       if (s.failPaging) { s.failPaging = false; return E_FAIL; }
       s.paging = a->FenceValueArray[0]; return S_OK;
    };
-   cb.pfnMapGpuVirtualAddressCb = [](HANDLE, D3DDDI_MAPGPUVIRTUALADDRESS *a) -> HRESULT {
+   cb.pfnMapGpuVirtualAddressCb = [](HANDLE, D3DDDI_MAPGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
       CHECK(a->hPagingQueue == 0x40 && s.allocations.count(a->hAllocation) && a->Protection.Write);
       CHECK(a->DriverProtection == 0 || a->DriverProtection == 0xfe);
       s.kinds += a->DriverProtection != 0;
       a->VirtualAddress = a->BaseAddress; a->PagingFenceValue = ++s.nextPaging; return E_PENDING;
    };
-   cb.pfnFreeGpuVirtualAddressCb = [](HANDLE, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) -> HRESULT {
+   cb.pfnFreeGpuVirtualAddressCb = [](HANDLE, const D3DDDICB_FREEGPUVIRTUALADDRESS *a) APIENTRY -> HRESULT {
       CHECK(a->BaseAddress && a->Size && !(a->Size & 4095)); return S_OK;
    };
-   cb.pfnLock2Cb = [](HANDLE, D3DDDICB_LOCK2 *a) -> HRESULT {
+   cb.pfnLock2Cb = [](HANDLE, D3DDDICB_LOCK2 *a) APIENTRY -> HRESULT {
       auto &block = s.allocations.at(a->hAllocation); CHECK(!block.offered);
       a->pData = block.cpu.data(); ++s.locks; return S_OK;
    };
-   cb.pfnUnlock2Cb = [](HANDLE, const D3DDDICB_UNLOCK2 *a) -> HRESULT {
+   cb.pfnUnlock2Cb = [](HANDLE, const D3DDDICB_UNLOCK2 *a) APIENTRY -> HRESULT {
       CHECK(s.allocations.count(a->hAllocation)); ++s.unlocks; return S_OK;
    };
    cb.pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE,
-      const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *a) -> HRESULT {
+      const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *a) APIENTRY -> HRESULT {
       CHECK(a->hContext == h<HANDLE>(0x2000) && a->ObjectHandleArray[0] == 0x91);
       s.order.push_back(1); return S_OK;
    };
    cb.pfnWaitForSynchronizationObjectFromGpuCb = [](HANDLE,
-      const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *a) -> HRESULT {
+      const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *a) APIENTRY -> HRESULT {
       CHECK(a->hContext == h<HANDLE>(0x2000) && a->ObjectHandleArray[0] == 0x90);
       s.order.push_back(3); return S_OK;
    };
-   cb.pfnOfferAllocationsCb = [](HANDLE d, const D3DDDICB_OFFERALLOCATIONS *a) -> HRESULT {
+   cb.pfnOfferAllocationsCb = [](HANDLE d, const D3DDDICB_OFFERALLOCATIONS *a) APIENTRY -> HRESULT {
       CHECK(d == h<HANDLE>(0x1000) && !a->pResources && a->NumAllocations);
       s.order.push_back(4); ++s.offers;
       for (UINT i = 0; i < a->NumAllocations; ++i) {
@@ -156,7 +156,7 @@ void init(Device *dev, Adapter *adapter)
       for (UINT i = 0; i < a->NumAllocations; ++i) s.allocations.at(a->HandleList[i]).offered = true;
       return S_OK;
    };
-   cb.pfnReclaimAllocations2Cb = [](HANDLE, D3DDDICB_RECLAIMALLOCATIONS2 *a) -> HRESULT {
+   cb.pfnReclaimAllocations2Cb = [](HANDLE, D3DDDICB_RECLAIMALLOCATIONS2 *a) APIENTRY -> HRESULT {
       CHECK(a->PagingQueue == 0x40 && !a->pResources && a->pDiscarded); ++s.reclaims;
       for (UINT i = 0; i < a->NumAllocations; ++i) {
          auto &block = s.allocations.at(a->HandleList[i]); CHECK(block.offered);
@@ -170,19 +170,19 @@ void init(Device *dev, Adapter *adapter)
       }
       a->PagingFenceValue = ++s.nextPaging; return E_PENDING;
    };
-   dev->vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *a, const VkAllocationCallbacks *, VkBuffer *out) {
+   dev->vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *a, const VkAllocationCallbacks *, VkBuffer *out) VKAPI_CALL {
       *out = h<VkBuffer>(++s.nextBuffer); s.buffers[(uintptr_t)*out] = a->size; return VK_SUCCESS;
    };
-   dev->vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer b, VkMemoryRequirements *a) {
+   dev->vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer b, VkMemoryRequirements *a) VKAPI_CALL {
       *a = {s.buffers.at((uintptr_t)b), 4096, 1};
    };
-   dev->vk.CreateImage = [](VkDevice, const VkImageCreateInfo *a, const VkAllocationCallbacks *, VkImage *out) {
+   dev->vk.CreateImage = [](VkDevice, const VkImageCreateInfo *a, const VkAllocationCallbacks *, VkImage *out) VKAPI_CALL {
       CHECK(a->tiling == VK_IMAGE_TILING_OPTIMAL && a->initialLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
             a->extent.width == 65 && a->extent.height == 17);
       *out = h<VkImage>(0x800); return VK_SUCCESS;
    };
-   dev->vk.GetImageMemoryRequirements = [](VkDevice, VkImage, VkMemoryRequirements *a) { *a = {16384, 4096, 1}; };
-   dev->vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *a, const VkAllocationCallbacks *, VkDeviceMemory *out) {
+   dev->vk.GetImageMemoryRequirements = [](VkDevice, VkImage, VkMemoryRequirements *a) VKAPI_CALL { *a = {16384, 4096, 1}; };
+   dev->vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *a, const VkAllocationCallbacks *, VkDeviceMemory *out) VKAPI_CALL {
       auto *import = static_cast<const wsi_memory_allocate_info *>(a->pNext);
       CHECK(import && import->sType == VK_STRUCTURE_TYPE_WSI_MEMORY_ALLOCATE_INFO_MESA);
       const auto *owner = import->win32_memory;
@@ -194,37 +194,37 @@ void init(Device *dev, Adapter *adapter)
       CHECK(owner->map_gpu(owner->context, address, 0, owner->size, 0, false, address, owner->size) == VK_SUCCESS);
       *import->win32_imported = true; return VK_SUCCESS;
    };
-   dev->vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory memory, VkDeviceSize) {
+   dev->vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory memory, VkDeviceSize) VKAPI_CALL {
       auto &m = s.memory.at((uintptr_t)memory); m.extra = m.address + 0x20000;
       CHECK(m.owner->map_gpu(m.owner->context, m.extra, 0, m.owner->size,
          0xfe, false, m.extra, m.owner->size) == VK_SUCCESS);
       return VK_SUCCESS;
    };
-   dev->vk.MapMemory = [](VkDevice, VkDeviceMemory memory, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **cpu) {
+   dev->vk.MapMemory = [](VkDevice, VkDeviceMemory memory, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **cpu) VKAPI_CALL {
       auto &m = s.memory.at((uintptr_t)memory); CHECK(!m.mapped);
       VkResult result = m.owner->map_cpu(m.owner->context, cpu);
       m.mapped = result == VK_SUCCESS; return result;
    };
-   dev->vk.UnmapMemory = [](VkDevice, VkDeviceMemory memory) {
+   dev->vk.UnmapMemory = [](VkDevice, VkDeviceMemory memory) VKAPI_CALL {
       auto &m = s.memory.at((uintptr_t)memory); CHECK(m.mapped);
       m.owner->unmap_cpu(m.owner->context); m.mapped = false; ++s.unmaps;
    };
-   dev->vk.FreeMemory = [](VkDevice, VkDeviceMemory memory, const VkAllocationCallbacks *) {
+   dev->vk.FreeMemory = [](VkDevice, VkDeviceMemory memory, const VkAllocationCallbacks *) VKAPI_CALL {
       auto m = s.memory.at((uintptr_t)memory);
       CHECK(m.owner->free_gpu(m.owner->context, m.address, m.owner->size) == VK_SUCCESS);
       if (m.extra) CHECK(m.owner->free_gpu(m.owner->context, m.extra, m.owner->size) == VK_SUCCESS);
       if (m.mapped) m.owner->unmap_cpu(m.owner->context);
       s.memory.erase((uintptr_t)memory); m.owner->release(m.owner->context);
    };
-   dev->vk.DestroyBuffer = [](VkDevice, VkBuffer b, const VkAllocationCallbacks *) { CHECK(s.buffers.erase((uintptr_t)b) == 1); };
-   dev->vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *v) { *v = s.render; return VK_SUCCESS; };
-   dev->vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *c) {
+   dev->vk.DestroyBuffer = [](VkDevice, VkBuffer b, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(s.buffers.erase((uintptr_t)b) == 1); };
+   dev->vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *v) VKAPI_CALL { *v = s.render; return VK_SUCCESS; };
+   dev->vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *c) VKAPI_CALL {
       *c = h<VkCommandBuffer>(0x900); return VK_SUCCESS;
    };
-   dev->vk.QueueSubmit2 = [](VkQueue, UINT count, const VkSubmitInfo2 *info, VkFence) {
+   dev->vk.QueueSubmit2 = [](VkQueue, UINT count, const VkSubmitInfo2 *info, VkFence) VKAPI_CALL {
       CHECK(count == 1 && info->signalSemaphoreInfoCount == 1); s.order.push_back(2); return VK_SUCCESS;
    };
-   dev->vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) {
+   dev->vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) VKAPI_CALL {
       ++s.renderWaits; CHECK(false); return VK_TIMEOUT;
    };
    CHECK(runtime_device_create(dev) == S_OK);
