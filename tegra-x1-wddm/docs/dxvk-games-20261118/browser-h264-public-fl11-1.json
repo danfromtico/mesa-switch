@@ -1,0 +1,73 @@
+{
+  "graphics_commit": "a88217bac76325ef693d1608be667b5134432c23",
+  "feature_level": "11_1",
+  "components": {
+    "umd": "7dcbc53c55dd46ab8ab405884664193e904adb21a408ce169aeb75b390fce4c6",
+    "icd": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+  },
+  "fixture": {
+    "codec": "H.264 Main, level 3.2",
+    "width": 1280,
+    "height": 720,
+    "fps": 60,
+    "frames": 360,
+    "sha256": "13b56f66927e97fcc8050336b70daf2482640fd8f1ae57edb7ab6d0ddfccd164"
+  },
+  "method": "Stock ARM64 browsers in unique temporary standard-user profiles. CDP Media events, video element counters and tgd3d ETW events. No graphics or video feature override.",
+  "browsers": {
+    "edge": {
+      "version": "157.0.4341.60",
+      "boot_utc": "2026-11-19T10:38:08.8915300Z",
+      "decoder": "FFmpegVideoDecoder",
+      "hardware_decoder": false,
+      "reported_video_decode": "disabled_software",
+      "video_ended": true,
+      "total_frames": 360,
+      "dropped_frames": 140,
+      "gpu_adapter_opens": 3,
+      "video_operations": [
+        10,
+        11,
+        12
+      ],
+      "nvdec_submissions": 0,
+      "etw_lost_events": 0,
+      "etw_sha256": "90be4c0f8e2ae3f26e2d31b97b3346d8f465571bf3a8df17e0a82fc4e3daf9c8"
+    },
+    "chrome": {
+      "version": "158.0.8127.37",
+      "boot_utc": "2026-11-19T10:38:08.9024190Z",
+      "decoder": "FFmpegVideoDecoder",
+      "hardware_decoder": false,
+      "reported_video_decode": "disabled_software",
+      "video_ended": true,
+      "total_frames": 360,
+      "dropped_frames": 13,
+      "gpu_adapter_opens": 3,
+      "video_operations": [
+        10,
+        11,
+        12
+      ],
+      "nvdec_submissions": 0,
+      "etw_lost_events": 0,
+      "etw_sha256": "8273d215cf02bc2ab6fc320e4a7db5a2c89d695b82a981dfa3e891c8c9c14c71"
+    }
+  },
+  "chrome_gpu_failure": {
+    "processes": 3,
+    "process_exit_code": "0x80000003",
+    "previous_message": "DirectComposition CheckFormatSupport returned 0x80004005.",
+    "fatal_site": "components/viz/service/display_embedder/skia_output_surface_impl.cc:1218",
+    "size": [
+      784,
+      592
+    ],
+    "format": 4,
+    "color_type": 4,
+    "backend_format_valid": false,
+    "gl_format": 0,
+    "will_gl_fbo0": true,
+    "interpretation": "The initial GPU processes failed in Skia output-surface setup before native decode submitted any picture. The failed format query and the fatal surface setup have not been shown to have a common cause."
+  }
+}
