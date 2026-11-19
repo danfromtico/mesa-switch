@@ -2,7 +2,7 @@
   "schema_version": 1,
   "recorded_utc": "2026-11-16T14:02:09.076862+00:00",
   "branch": "tgd3d-vulkan",
-  "decision": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+  "decision": "Selected repaired tgd3d 49fa08a2 with the 6c86354e kernel and e563a81d NVK ICD. Native GPU startup remains manual pending FL11_1. Previous video acceptance applies to its recorded components.",
   "display_default": {
     "logical_width": 1280,
     "logical_height": 720,
@@ -34,13 +34,13 @@
   "baseline_files": [
     {
       "name": "switchpwrbtn.sys",
-      "bytes": 32264,
-      "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      "bytes": 32280,
+      "sha256": "879550e4eb292619f45de86eb458fc94f07149ca3de95bc88369166fcd64914e"
     },
     {
       "name": "tegragpurender.sys",
-      "bytes": 243712,
-      "sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+      "bytes": 249352,
+      "sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0"
     },
     {
       "name": "woa-lite-home.ini",
@@ -59,8 +59,8 @@
     },
     {
       "name": "Pacecar.Switch.exe",
-      "bytes": 1517568,
-      "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      "bytes": 1537544,
+      "sha256": "135285da2255e087c8b37e5034b023035a01d3990ab2b10e4e0220bdc56c7d24"
     },
     {
       "name": "bl33.bin",
@@ -79,8 +79,8 @@
     },
     {
       "name": "TegraGpuD3DVk.dll",
-      "bytes": 3335688,
-      "sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+      "bytes": 3339272,
+      "sha256": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e"
     },
     {
       "name": "SwitchPowerTray.exe",
@@ -310,7 +310,7 @@
     ],
     "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
   },
-  "updated_utc": "2026-11-18T01:26:41.9873984Z",
+  "updated_utc": "2026-11-19T09:50:05.9621060Z",
   "device_access": {
     "updated_utc": "2026-11-17T22:27:37.5428473Z",
     "owner": "main",
@@ -1435,99 +1435,92 @@
     "additional_checks_after_last_instruction": false
   },
   "installed_development_combination": {
-    "classification": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
-    "observed_utc": "2026-11-18T01:23:28.0679279Z",
-    "boot": "2026-11-18T01:17:41.2840670Z",
-    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation",
-    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app",
-    "kmd": {
-      "Length": 243712,
-      "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
-    },
-    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json + fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9 1080p surface extent",
-    "provider": {
-      "Length": 104456,
-      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
-    },
-    "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
-    "acpi": {
-      "Length": 4993,
-      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
-    },
-    "umd": {
-      "Length": 3335688,
-      "Sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
-    },
-    "umd_source": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
-    "icd": {
-      "Length": 17656776,
-      "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
-    },
+    "classification": "Selected on GM20B after repaired DDI copy acceptance",
+    "observed_utc": "2026-11-19T09:48:13.5755022Z",
+    "boot": "2026-11-19T09:08:05.0393220Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\app",
+    "source_record": "dxvk-games-20261118/native-code0-copy-flags.json",
+    "kmd_source": "8e9f265f7d0ebb9deab6b57dd576d76e2d0c736f",
+    "umd_source": "8e7a1bf85785a84cc26ceebaca8c82854d77af88",
     "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
     "all11_files": [
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
-        "Length": 32264,
-        "Sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+        "Sha256": "879550E4EB292619F45DE86EB458FC94F07149CA3DE95BC88369166FCD64914E",
+        "Length": 32280
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
-        "Length": 243712,
-        "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+        "Sha256": "6C86354E781E76D671C20BF14B124248A6E1AA264DCAB6D459A6B14D551469B0",
+        "Length": 249352
       },
       {
         "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
-        "Length": 138,
-        "Sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+        "Length": 138
       },
       {
         "Path": "C:\\Windows\\System32\\acpitabl.dat",
-        "Length": 4993,
-        "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Length": 4993
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
-        "Length": 42440,
-        "Sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+        "Length": 42440
       },
       {
         "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
-        "Length": 1517568,
-        "Sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+        "Sha256": "135285DA2255E087C8B37E5034B023035A01D3990AB2B10E4E0220BDC56C7D24",
+        "Length": 1537544
       },
       {
         "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
-        "Length": 921600,
-        "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+        "Length": 921600
       },
       {
-        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\libvulkan_nouveau.dll",
-        "Length": 17656776,
-        "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\app\\libvulkan_nouveau.dll",
+        "Sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "Length": 17656776
       },
       {
         "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
-        "Length": 104456,
-        "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+        "Length": 104456
       },
       {
-        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\TegraGpuD3DVk.dll",
-        "Length": 3335688,
-        "Sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "49FA08A2731C083C59F23BA5A5A3DB9E82C40613EF7A0FA4DF233CC20BCCD20E",
+        "Length": 3339272
       },
       {
         "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
-        "Length": 60416,
-        "Sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+        "Length": 60416
       }
     ],
-    "external_review_performed": false,
-    "source_record": "NVDEC_1080_D3D11VA_20261117.json",
-    "platform_file_evidence": "Eleven installed files, both DWM modules, the selected INF and the previous 720p recovery tuple were verified after the 1080p window closed.",
-    "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
-    "umd_isolated_patch_sha256": "465f70dc0b6117274752ae7295f239ad9158d39f8c426c9a03a2b6b380ef56ed",
-    "umd_prior_patch_commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
-    "umd_prior_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d"
+    "kmd": {
+      "Length": 249352,
+      "Sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0"
+    },
+    "umd": {
+      "Length": 3339272,
+      "Sha256": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e"
+    },
+    "icd": {
+      "Length": 17656776,
+      "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849"
+    },
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5"
+    }
   },
   "original_fixed90_acceptance_identity": {
     "baseline_files": [
@@ -1603,31 +1596,23 @@
     "scope": "Component identities for the November 16 fixed-angle, physical screen and five-minute vkcube acceptance."
   },
   "selected_presentation_baseline": {
-    "record": "TGD3D_PRESENT_BASELINE_20261117.json",
-    "source_commit": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
-    "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
-    "umd_patch_sha256": "465f70dc0b6117274752ae7295f239ad9158d39f8c426c9a03a2b6b380ef56ed",
-    "icd_source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
-    "kmd_sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662",
-    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
-    "umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
-    "inherited_patch_count": 5,
     "selected": true,
-    "post_restart_pair_confirmed": true,
-    "latest_video_observation": "NVDEC_1080_D3D11VA_20261117.json",
-    "physical_video_accepted": true,
-    "umd_prior_patch_commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
-    "umd_prior_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
-    "physical_video_scope": "1080p six-frame paced observation",
-    "functional_720p_accepted": true,
-    "ordinary_unpaced_accepted": false,
-    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation",
-    "previous_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736",
-    "installed_evidence_sha256": "c49ddfb308c5b876abd092f1e9d7de326ad65a65b6a81e5fe3ee3c73145a6cad",
-    "scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
-    "functional_1080p_accepted": true,
-    "previous_720p_acceptance": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
-    "record_sha256": "85891b75655ac4141027d9511a949ee06dd76d1452b19759ce51ac8285517cec"
+    "record": "dxvk-games-20261118/native-code0-copy-flags.json",
+    "record_sha256": "e3556a037916db86e2ae4c2a3d9b5e0c4b19e8cdd13ecf9f71da80e8dc8f089e",
+    "source_commit": "8e7a1bf85785a84cc26ceebaca8c82854d77af88",
+    "kmd_sha256": "umd",
+    "umd_sha256": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e",
+    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "icd_source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "previous_umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "physical_copy_accepted": true,
+    "post_restart_pair_confirmed": false,
+    "physical_video_accepted": false,
+    "physical_video_scope": "Video was not retested for this UMD selection. See the earlier video records for their tested tuples.",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2",
+    "startup": "manual",
+    "recovery_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\tgd3d-video-ddi-ded6fa4a-20261118-230849"
   },
   "latest_video_window_observation": {
     "record": "NVDEC_1080_D3D11VA_20261117.json",
