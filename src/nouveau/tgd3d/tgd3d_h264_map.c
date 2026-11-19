@@ -166,13 +166,33 @@ static bool scaling_to_raster(uint8_t *dst, const uint8_t *src, int side)
     return true;
 }
 
+/* All reference pictures retained in this DPB have already claimed a slot.
+ * Prefer an empty slot over replacing an unreferenced picture. */
+static unsigned output_slot(unsigned index, const uint8_t *owners, uint32_t pinned)
+{
+    unsigned first_empty = TG_NVDEC_MAX_SURFACES;
+    unsigned first_unused = TG_NVDEC_MAX_SURFACES;
+    for (unsigned slot = 0; slot < TG_NVDEC_MAX_SURFACES; slot++) {
+        if (pinned & (1u << slot))
+            continue;
+        if (owners[slot] == index + 1)
+            return slot;
+        if (!owners[slot] && (slot == index || first_empty == TG_NVDEC_MAX_SURFACES))
+            first_empty = slot;
+        if (first_unused == TG_NVDEC_MAX_SURFACES)
+            first_unused = slot;
+    }
+    return first_empty != TG_NVDEC_MAX_SURFACES ? first_empty : first_unused;
+}
+
 enum tgd3d_h264_map_result tgd3d_h264_map_dxva(
     const tgd3d_dxva_pic_h264 *p, const tgd3d_dxva_qmatrix_h264 *matrix,
+    const uint8_t owners[TG_NVDEC_MAX_SURFACES],
     uint32_t width, uint32_t height, struct tg_nvdec_h264_pic *out,
     char *err, size_t err_size)
 {
     struct tgd3d_h264_pic_in in = {0};
-    if (!p || !matrix || !out) {
+    if (!p || !matrix || !out || !owners) {
         set_err(err, err_size, "picture and scaling matrix buffers are required");
         return TGD3D_H264_MAP_BUFFER;
     }
@@ -190,7 +210,12 @@ enum tgd3d_h264_map_result tgd3d_h264_map_dxva(
     }
     in.width_mbs_minus1 = p->wFrameWidthInMbsMinus1;
     in.height_mbs_minus1 = p->wFrameHeightInMbsMinus1;
-    in.curr_slot = tgd3d_dxva_entry_index(&p->CurrPic);
+    const unsigned current = tgd3d_dxva_entry_index(&p->CurrPic);
+    if (current >= TGD3D_DXVA_H264_SURFACES) {
+        set_err(err, err_size, "invalid DXVA output picture index");
+        return TGD3D_H264_MAP_DPB;
+    }
+    uint32_t pinned = 0;
     if (p->frame_mbs_only_flag) in.flags |= TGD3D_H264_FRAME_MBS_ONLY;
     if (p->MbaffFrameFlag) in.flags |= TGD3D_H264_MBAFF;
     in.flags |= (p->chroma_format_idc & 3u) << TGD3D_H264_CHROMA_SHIFT;
@@ -227,16 +252,24 @@ enum tgd3d_h264_map_result tgd3d_h264_map_dxva(
         const uint32_t slot = tgd3d_dxva_entry_index(&p->RefFrameList[i]);
         if (!used)
             continue;
-        if (slot >= TG_NVDEC_MAX_SURFACES) {
-            set_err(err, err_size, "used DXVA reference has no valid surface");
+        if (slot >= TGD3D_DXVA_H264_SURFACES || slot == current) {
+            set_err(err, err_size, "invalid DXVA reference picture index");
             return TGD3D_H264_MAP_DPB;
         }
         if (used != 3u || (p->NonExistingFrameFlags & (1u << i))) {
             set_err(err, err_size, "field-only or nonexisting references are not enabled");
             return TGD3D_H264_MAP_UNSUPPORTED;
         }
+        unsigned physical = 0;
+        while (physical < TG_NVDEC_MAX_SURFACES && owners[physical] != slot + 1)
+            physical++;
+        if (physical == TG_NVDEC_MAX_SURFACES || (pinned & (1u << physical))) {
+            set_err(err, err_size, "missing or duplicate decoded reference picture");
+            return TGD3D_H264_MAP_DPB;
+        }
+        pinned |= 1u << physical;
         struct tgd3d_h264_ref_in *r = &in.refs[in.num_ref_frames++];
-        r->slot = (uint8_t)slot;
+        r->slot = (uint8_t)physical;
         r->frame_num = p->FrameNumList[i];
         r->top_poc = p->FieldOrderCntList[i][0];
         r->bottom_poc = p->FieldOrderCntList[i][1];
@@ -248,6 +281,7 @@ enum tgd3d_h264_map_result tgd3d_h264_map_dxva(
         set_err(err, err_size, "active reference count exceeds SPS maximum");
         return TGD3D_H264_MAP_DPB;
     }
+    in.curr_slot = (uint8_t)output_slot(current, owners, pinned);
     in.have_scaling = 1;
     for (unsigned i = 0; i < 6; i++)
         if (!scaling_to_raster(in.scaling4x4[i], matrix->bScalingLists4x4[i], 4)) {

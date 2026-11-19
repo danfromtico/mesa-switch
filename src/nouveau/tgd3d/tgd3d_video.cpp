@@ -75,6 +75,7 @@ struct VideoDecoder {
     Slice output;
     SubLayout output_layout;
     UINT output_slot;
+    uint8_t slot_owners[TG_NVDEC_MAX_SURFACES] = {};
 };
 
 struct OutputView {
@@ -307,7 +308,6 @@ static HRESULT APIENTRY VideoDecoderBeginFrame(D3D10DDI_HDEVICE hDevice,
         res->width != dec->desc.SampleWidth ||
         (res->height != dec->desc.SampleHeight && res->height != dec->aligned_height) ||
         view->mip || view->array_size != 1 || view->first_array >= res->layout.size() ||
-        view->first_array >= TG_NVDEC_MAX_SURFACES ||
         !(res->bind & D3D11_DDI_BIND_DECODER)) return E_INVALIDARG;
     for (const auto &map : res->maps) if (map.mapped) return E_INVALIDARG;
     HRESULT hr = wait_sequence(dec->dev, res->sliceLastUse > res->sliceLastWrite ?
@@ -433,13 +433,16 @@ static HRESULT finish_frame(VideoDecoder *dec)
         dec->slices.empty() || dec->bitstream.empty()) return E_INVALIDARG;
     tg_nvdec_h264_pic pic = {};
     char error[TG_NVDEC_ERROR_SIZE] = {};
-    if (tgd3d_h264_map_dxva(&dec->dxva_pic, &dec->qmatrix,
+    if (tgd3d_dxva_entry_index(&dec->dxva_pic.CurrPic) != dec->output_slot) {
+        trace_message("DXVA output picture does not match decoder output view");
+        return E_INVALIDARG;
+    }
+    if (tgd3d_h264_map_dxva(&dec->dxva_pic, &dec->qmatrix, dec->slot_owners,
                           dec->desc.SampleWidth, dec->desc.SampleHeight,
                           &pic, error, sizeof(error)) != TGD3D_H264_MAP_OK) {
         trace_message(error);
         return DXGI_ERROR_UNSUPPORTED;
     }
-    if (pic.curr_slot != dec->output_slot) return E_INVALIDARG;
     pic.pitch_luma = pic.pitch_chroma = dec->pitch;
     tgd3d_h264_slice_in slices[TG_NVDEC_MAX_SLICES];
     for (size_t i = 0; i < dec->slices.size(); ++i) {
@@ -464,6 +467,8 @@ static HRESULT finish_frame(VideoDecoder *dec)
     memcpy(input.data() + sizeof(*request) + bytes, offsets.data(), offsets.size() * sizeof(uint32_t));
     std::vector<uint8_t> output(sizeof(tg_nvdec_decode_result) + dec->frame_size);
     auto *result = reinterpret_cast<tg_nvdec_decode_result *>(output.data());
+    /* The hardware may have overwritten its target even when the call fails. */
+    dec->slot_owners[pic.curr_slot] = 0;
     HRESULT hr = native_call(dec->session, TG_NVDEC_ESCAPE_DECODE, input.data(), (uint32_t)input.size(),
                              output.data(), (uint32_t)output.size());
     trace(TGD3D_TRACE_VIDEO, hr, 7,
@@ -481,8 +486,11 @@ static HRESULT finish_frame(VideoDecoder *dec)
         result->pitch != dec->pitch || result->aligned_height != dec->aligned_height ||
         result->frame_size != dec->frame_size || result->bytes_written != dec->frame_size)
         return E_FAIL;
-    return write_nv12(dec, output.data() + sizeof(*result), dec->desc.SampleWidth,
-                       dec->desc.SampleHeight, dec->pitch, dec->aligned_height);
+    hr = write_nv12(dec, output.data() + sizeof(*result), dec->desc.SampleWidth,
+                    dec->desc.SampleHeight, dec->pitch, dec->aligned_height);
+    if (SUCCEEDED(hr) && pic.ref_pic_flag)
+        dec->slot_owners[pic.curr_slot] = dec->output_slot + 1;
+    return hr;
 }
 
 static VOID APIENTRY VideoDecoderEndFrame(D3D10DDI_HDEVICE hDevice, D3D11_1DDI_HDECODE hDecode)
@@ -501,7 +509,13 @@ static VOID APIENTRY VideoDecoderEndFrame(D3D10DDI_HDEVICE hDevice, D3D11_1DDI_H
     dec->output = {};
     dec->in_frame = false;
     dec->have_pic = dec->have_qmatrix = false;
-    if (FAILED(hr)) TG_ERROR(dev, hr);
+    if (FAILED(hr)) {
+        /* A failed frame cannot supply the new picture named by the caller,
+         * including errors rejected before the hardware target was selected. */
+        for (uint8_t &owner : dec->slot_owners)
+            if (owner == dec->output_slot + 1) owner = 0;
+        TG_ERROR(dev, hr);
+    }
 }
 
 /* ------------------------------------------------------------------ */
@@ -528,7 +542,7 @@ static HRESULT APIENTRY CreateVideoDecoderOutputView(
         !res || res->dev != dev ||
         res->format != DXGI_FORMAT_NV12 || res->kind != ResKind::Staging ||
         !(res->bind & D3D11_DDI_BIND_DECODER) || args->MipSlice || args->ArraySize != 1 ||
-        args->FirstArraySlice >= res->arraySize || args->FirstArraySlice >= TG_NVDEC_MAX_SURFACES)
+        args->FirstArraySlice >= res->arraySize)
         return E_INVALIDARG;
     view = new (hView.pDrvPrivate) OutputView();
     view->dev = dev;

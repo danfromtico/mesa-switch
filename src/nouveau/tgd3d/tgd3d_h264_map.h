@@ -97,9 +97,11 @@ enum tgd3d_h264_map_result tgd3d_h264_map(
     char *err, size_t err_size);
 
 /* DXVA public bitstream-buffer ABI. The host decoder has already resolved
- * scaling-list defaults; the matrix buffer is required and is in scan order. */
+ * scaling-list defaults; the matrix buffer is in scan order. Each hardware
+ * slot owner is its completed reference picture index plus one, or zero. */
 enum tgd3d_h264_map_result tgd3d_h264_map_dxva(
     const tgd3d_dxva_pic_h264 *pic, const tgd3d_dxva_qmatrix_h264 *matrix,
+    const uint8_t owners[TG_NVDEC_MAX_SURFACES],
     uint32_t sample_width, uint32_t sample_height,
     struct tg_nvdec_h264_pic *out, char *err, size_t err_size);
 

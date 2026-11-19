@@ -27,6 +27,8 @@ struct Memory { std::vector<uint8_t> bytes; };
 struct Buffer { VkDeviceSize size; };
 struct State {
    Geometry geometry = hd720;
+   unsigned expected_slot = 2;
+   int expected_ref = -1;
    LONG load_error = 0, close_error = 0, destroy_error = 0;
    unsigned opens = 0, devices = 0, decodes = 0, destroys = 0, closes = 0;
    unsigned buffers = 0, memories = 0, notifications = 0;
@@ -77,7 +79,10 @@ extern "C" NTSTATUS APIENTRY D3DKMTEscape(const D3DKMT_ESCAPE *e)
       const auto &g = state.geometry;
       const UINT frame_bytes = g.transfer_bytes();
       auto *req = static_cast<tg_nvdec_decode_request *>(payload);
-      CHECK(h->session == 31 && req->pic.curr_slot == 2 && req->slice_count == 1);
+      CHECK(h->session == 31 && req->pic.curr_slot == state.expected_slot && req->slice_count == 1);
+      CHECK(req->pic.dpb_count == (state.expected_ref < 0 ? 0 : 1));
+      if (state.expected_ref >= 0)
+         CHECK(req->pic.dpb[0].slot == (unsigned)state.expected_ref && req->pic.dpb[0].is_long_term);
       CHECK(req->pic.scaling4x4[0][0] == 16 && req->output_size == frame_bytes);
       ++state.decodes;
       auto *out = static_cast<tg_nvdec_decode_result *>(payload);
@@ -310,10 +315,13 @@ void nv12_clear_output_view()
    video.pfnDestroyVideoDecoderOutputView({&dev}, view);
 }
 
-void decode_frame(unsigned fault, bool release_target_early, Geometry geometry = hd720)
+void decode_frame(unsigned fault, bool release_target_early, Geometry geometry = hd720,
+                  UINT array_size = 3)
 {
    Device dev; Adapter adapter; init(dev, adapter);
    state.geometry = geometry;
+   const UINT output_slice = array_size - 1;
+   state.expected_slot = output_slice < TG_NVDEC_MAX_SURFACES ? output_slice : 0;
    const UINT frame_bytes = geometry.texture_bytes();
    D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
    auto args = decoder_args(dev, video);
@@ -334,12 +342,12 @@ void decode_frame(unsigned fault, bool release_target_early, Geometry geometry =
    D3D11DDIARG_CREATERESOURCE desc = {};
    desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D;
    desc.Usage = D3D10_DDI_USAGE_DEFAULT; desc.BindFlags = D3D11_DDI_BIND_DECODER;
-   desc.Format = DXGI_FORMAT_NV12; desc.SampleDesc.Count = 1; desc.MipLevels = 1; desc.ArraySize = 3;
+   desc.Format = DXGI_FORMAT_NV12; desc.SampleDesc.Count = 1; desc.MipLevels = 1; desc.ArraySize = array_size;
    auto *res = static_cast<Resource *>(::operator new(sizeof(Resource)));
    functions.pfnCreateResource({&dev}, &desc, {res}, {(HANDLE)1});
-   CHECK(!state.notifications && res->kind == ResKind::Staging && res->layout.size() == 3);
-   CHECK(res->size == 3u * frame_bytes && res->layout[2].offset == 2u * frame_bytes);
-   D3D11_1DDIARG_CREATEVIDEODECODEROUTPUTVIEW v = {{res}, h264, 0, 2, 1};
+   CHECK(!state.notifications && res->kind == ResKind::Staging && res->layout.size() == array_size);
+   CHECK(res->size == array_size * frame_bytes && res->layout[output_slice].offset == output_slice * frame_bytes);
+   D3D11_1DDIARG_CREATEVIDEODECODEROUTPUTVIEW v = {{res}, h264, 0, output_slice, 1};
    std::vector<uint8_t> view_storage(video.pfnCalcPrivateVideoDecoderOutputViewSize({&dev}, &v));
    D3D11_1DDI_HVIDEODECODEROUTPUTVIEW view = {view_storage.data()};
    CHECK(video.pfnCreateVideoDecoderOutputView({&dev}, &v, view, {}) == S_OK);
@@ -353,7 +361,7 @@ void decode_frame(unsigned fault, bool release_target_early, Geometry geometry =
    pic.wFrameWidthInMbsMinus1 = geometry.width / 16 - 1;
    pic.wFrameHeightInMbsMinus1 = geometry.coded_height / 16 - 1;
    pic.ContinuationFlag = 1;
-   pic.CurrPic.bPicEntry = 2; pic.wBitFields = 0x1050;
+   pic.CurrPic.bPicEntry = (uint8_t)output_slice; pic.wBitFields = 0x1050;
    std::memset(pic.RefFrameList, 0xff, sizeof(pic.RefFrameList));
    tgd3d_dxva_qmatrix_h264 matrix; std::memset(&matrix, 16, sizeof(matrix));
    const uint8_t stream[] = {0,0,1,0x65,0xaa};
@@ -389,16 +397,55 @@ void decode_frame(unsigned fault, bool release_target_early, Geometry geometry =
    video.pfnVideoDecoderEndFrame({&dev}, decode);
    CHECK(state.decodes == (fault == 0 || fault == 3 ? 1u : 0u));
    CHECK(state.notifications == (fault ? 1u : 0u));
+   UINT first_written = output_slice;
+   if (array_size == 20 && !release_target_early && !fault) {
+      auto next_frame = [&](UINT index, int ref, bool reference_picture) {
+         video.pfnDestroyVideoDecoderOutputView({&dev}, view);
+         v.FirstArraySlice = index;
+         CHECK(video.pfnCreateVideoDecoderOutputView({&dev}, &v, view, {}) == S_OK);
+         pic.CurrPic.bPicEntry = index;
+         pic.RefPicFlag = reference_picture;
+         pic.num_ref_frames = ref < 0 ? 0 : 1;
+         pic.UsedForReferenceFlags = ref < 0 ? 0 : 3;
+         pic.RefFrameList[0].bPicEntry = ref < 0 ? 0xff : (0x80 | ref);
+         CHECK(video.pfnVideoDecoderBeginFrame({&dev}, decode, &begin) == S_OK);
+         CHECK(video.pfnVideoDecoderSubmitBuffers({&dev}, decode, 4, input) == S_OK);
+         video.pfnVideoDecoderEndFrame({&dev}, decode);
+      };
+      /* Public 19 lives in hardware slot 0. Public 18 gets slot 1 and
+       * is displayed, but is not retained as a reference picture. */
+      state.expected_slot = 1;
+      state.expected_ref = 0;
+      next_frame(18, 19, false);
+      CHECK(state.decodes == 2 && !state.notifications);
+      first_written = 18;
+      next_frame(17, 18, true);
+      CHECK(state.decodes == 2 && state.notifications == 1);
+      next_frame(19, 18, true); // invalid reference rejects overwrite before submission
+      CHECK(state.decodes == 2 && state.notifications == 2);
+      next_frame(17, 19, true);
+      CHECK(state.decodes == 2 && state.notifications == 3);
+      /* A failed overwrite must also invalidate the old reference. */
+      state.expected_slot = 0;
+      state.expected_ref = -1;
+      next_frame(19, -1, true);
+      CHECK(state.decodes == 3 && state.notifications == 3);
+      state.short_output = true;
+      next_frame(19, -1, true);
+      CHECK(state.decodes == 4 && state.notifications == 4);
+      next_frame(17, 19, true);
+      CHECK(state.decodes == 4 && state.notifications == 5);
+   }
    if (!release_target_early) {
       CHECK(!res->slice.chunk->videoWrites && res->slice.chunk->live == 1);
       video.pfnDestroyVideoDecoderOutputView({&dev}, view);
       functions.pfnDestroyResource({&dev}, {res}); ::operator delete(res);
    }
-   CHECK(!state.buffers && !state.memories && state.freed.size() >= 3u * frame_bytes);
+   CHECK(!state.buffers && !state.memories && state.freed.size() >= array_size * frame_bytes);
    for (size_t i=0;i<state.freed.size();++i) {
       uint8_t expected = 0xa5;
-      if (!fault && i >= 2u*frame_bytes && i < 3u*frame_bytes)
-         expected = i - 2u*frame_bytes < geometry.width * geometry.texture_height ? 0x3d : 0x78;
+      if (!fault && i >= first_written*frame_bytes && i < array_size*frame_bytes)
+         expected = i % frame_bytes < geometry.width * geometry.texture_height ? 0x3d : 0x78;
       CHECK(state.freed[i] == expected);
    }
    video.pfnDestroyVideoDecoder({&dev}, decode);
@@ -414,6 +461,8 @@ void video_contracts()
    nv12_copy_planes();
    nv12_clear_output_view();
    decode_frame(0, false); decode_frame(0, true);
+   decode_frame(0, true, hd720, 20);
+   decode_frame(0, false, hd720, 20);
    decode_frame(1, false); decode_frame(2, false); decode_frame(3, false);
    decode_frame(4, false);
    decode_frame(0, false, {1920,1088,1088,2048,1088}); // FFmpeg coded descriptor and pool

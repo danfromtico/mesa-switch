@@ -171,6 +171,7 @@ static void test_assemble(void)
 
 static void test_dxva_boundary(void)
 {
+    uint8_t owners[TG_NVDEC_MAX_SURFACES] = {[1] = 2};
     tgd3d_dxva_pic_h264 p = {0};
     tgd3d_dxva_qmatrix_h264 matrix;
     struct tg_nvdec_h264_pic out;
@@ -182,10 +183,10 @@ static void test_dxva_boundary(void)
     p.wBitFields = 0x1050; /* frame_mbs_only, RefPicFlag, 4:2:0 */
     p.num_ref_frames = 16; /* SPS maximum; IDR has zero active entries */
     memset(p.RefFrameList, 0xff, sizeof(p.RefFrameList));
-    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, error, sizeof(error)) ==
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, owners, 1280, 720, &out, error, sizeof(error)) ==
           TGD3D_H264_MAP_UNSUPPORTED);
     p.ContinuationFlag = 1;
-    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, error, sizeof(error)) ==
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, owners, 1280, 720, &out, error, sizeof(error)) ==
           TGD3D_H264_MAP_OK);
     CHECK(out.dpb_count == 0 && out.curr_slot == 16 && out.ref_pic_flag);
     CHECK(out.scaling4x4[0][0] == 16);
@@ -197,7 +198,7 @@ static void test_dxva_boundary(void)
     p.FrameNumList[7] = 21;
     p.FieldOrderCntList[7][0] = 36;
     p.FieldOrderCntList[7][1] = 38;
-    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, error, sizeof(error)) ==
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, owners, 1280, 720, &out, error, sizeof(error)) ==
           TGD3D_H264_MAP_OK);
     CHECK(out.dpb_count == 1 && out.dpb[0].slot == 1);
     CHECK(out.dpb[0].frame_num == 21 && out.dpb[0].top_poc == 36 &&
@@ -205,25 +206,25 @@ static void test_dxva_boundary(void)
     CHECK(out.dpb[0].is_long_term && !out.dpb[0].is_field);
 
     p.UsedForReferenceFlags = 1u << 14;
-    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, NULL, 0) ==
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, owners, 1280, 720, &out, NULL, 0) ==
           TGD3D_H264_MAP_UNSUPPORTED);
     p.UsedForReferenceFlags = 3u << 14;
     p.NonExistingFrameFlags = 1u << 7;
-    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, NULL, 0) ==
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, owners, 1280, 720, &out, NULL, 0) ==
           TGD3D_H264_MAP_UNSUPPORTED);
     p.NonExistingFrameFlags = 0;
     p.RefFrameList[7].bPicEntry = 0xff;
-    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, NULL, 0) ==
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, owners, 1280, 720, &out, NULL, 0) ==
           TGD3D_H264_MAP_DPB);
     p.UsedForReferenceFlags = 0;
-    CHECK(tgd3d_h264_map_dxva(&p, NULL, 1280, 720, &out, NULL, 0) ==
+    CHECK(tgd3d_h264_map_dxva(&p, NULL, owners, 1280, 720, &out, NULL, 0) ==
           TGD3D_H264_MAP_BUFFER);
 
     /* Standard AVC zig-zag sequence numbered1..N must reach raster layout.
      * These expected raster rows are independent of the conversion loop. */
     for (unsigned i = 0; i < 16; i++) matrix.bScalingLists4x4[0][i] = (uint8_t)(i + 1);
     for (unsigned i = 0; i < 64; i++) matrix.bScalingLists8x8[0][i] = (uint8_t)(i + 1);
-    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, NULL, 0) ==
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, owners, 1280, 720, &out, NULL, 0) ==
           TGD3D_H264_MAP_OK);
     const uint8_t raster4[16] = {1,2,6,7,3,5,8,13,4,9,12,14,10,11,15,16};
     const uint8_t raster8_first[8] = {1,2,6,7,15,16,28,29};
@@ -232,7 +233,7 @@ static void test_dxva_boundary(void)
     CHECK(memcmp(out.scaling8x8[0], raster8_first, sizeof(raster8_first)) == 0);
     CHECK(memcmp(out.scaling8x8[0] + 56, raster8_last, sizeof(raster8_last)) == 0);
     matrix.bScalingLists8x8[0][32] = 0;
-    CHECK(tgd3d_h264_map_dxva(&p, &matrix, 1280, 720, &out, NULL, 0) ==
+    CHECK(tgd3d_h264_map_dxva(&p, &matrix, owners, 1280, 720, &out, NULL, 0) ==
           TGD3D_H264_MAP_BUFFER);
 }
 
@@ -269,12 +270,70 @@ static void test_1080(void)
     CHECK(!tg_nvdec_stage1_supported(3840, 2160, 3840, 2160, 1, 8));
 }
 
+static void test_larger_output_pool(void)
+{
+    uint8_t owners[TG_NVDEC_MAX_SURFACES] = {0};
+    tgd3d_dxva_qmatrix_h264 matrix;
+    struct tg_nvdec_h264_pic out;
+    memset(&matrix, 16, sizeof(matrix));
+    tgd3d_dxva_pic_h264 base = {0};
+    base.wFrameWidthInMbsMinus1 = 79;
+    base.wFrameHeightInMbsMinus1 = 44;
+    base.ContinuationFlag = 1;
+    base.wBitFields = 0x1050;
+    base.num_ref_frames = 16;
+    /* Keep 16 references live while a 20-slice client pool rotates. Check
+     * each mapping against the actual decoded picture retained in that slot. */
+    for (unsigned frame = 0; frame < 400; frame++) {
+        tgd3d_dxva_pic_h264 pic = base;
+        unsigned logical = frame % 20;
+        unsigned refs = frame < TG_NVDEC_MAX_DPB ? frame : TG_NVDEC_MAX_DPB;
+        pic.CurrPic.bPicEntry = logical;
+        memset(pic.RefFrameList, 0xff, sizeof(pic.RefFrameList));
+        for (unsigned i = 0; i < refs; i++) {
+            pic.RefFrameList[i].bPicEntry = (frame - 1 - i) % 20;
+            if (i == 0) pic.RefFrameList[i].bPicEntry |= 0x80;
+            pic.UsedForReferenceFlags |= 3u << (2 * i);
+        }
+        bool ok = tgd3d_h264_map_dxva(&pic, &matrix, owners, 1280, 720, &out, NULL, 0) == TGD3D_H264_MAP_OK;
+        CHECK(ok);
+        if (!ok) return;
+        unsigned target = out.curr_slot;
+        CHECK(target < TG_NVDEC_MAX_SURFACES);
+        for (unsigned i = 0; i < refs; i++) {
+            unsigned slot = out.dpb[i].slot;
+            CHECK(slot != target);
+            CHECK(slot < TG_NVDEC_MAX_SURFACES && owners[slot] == 1 + (frame - 1 - i) % 20);
+            CHECK(out.dpb[i].is_long_term == (i == 0));
+        }
+        if (target < TG_NVDEC_MAX_SURFACES)
+            owners[target] = logical + 1;
+    }
+    tgd3d_dxva_pic_h264 pic = base;
+    pic.CurrPic.bPicEntry = 63;
+    pic.RefFrameList[15].bPicEntry = 61;
+    pic.UsedForReferenceFlags = 3u << 30;
+    CHECK(tgd3d_h264_map_dxva(&pic, &matrix, owners, 1280, 720, &out, NULL, 0) == TGD3D_H264_MAP_DPB);
+    pic.RefFrameList[15].bPicEntry = 63;
+    CHECK(tgd3d_h264_map_dxva(&pic, &matrix, owners, 1280, 720, &out, NULL, 0) == TGD3D_H264_MAP_DPB);
+    pic.RefFrameList[15].bPicEntry = 0xff;
+    CHECK(tgd3d_h264_map_dxva(&pic, &matrix, owners, 1280, 720, &out, NULL, 0) == TGD3D_H264_MAP_DPB);
+    pic.UsedForReferenceFlags = 0;
+    pic.CurrPic.bPicEntry = 0x80;
+    CHECK(tgd3d_h264_map_dxva(&pic, &matrix, owners, 1280, 720, &out, NULL, 0) == TGD3D_H264_MAP_UNSUPPORTED);
+    pic.CurrPic.bPicEntry = 127;
+    CHECK(tgd3d_h264_map_dxva(&pic, &matrix, owners, 1280, 720, &out, NULL, 0) == TGD3D_H264_MAP_DPB);
+    pic.CurrPic.bPicEntry = 126;
+    CHECK(tgd3d_h264_map_dxva(&pic, &matrix, owners, 1280, 720, &out, NULL, 0) == TGD3D_H264_MAP_OK);
+}
+
 int main(void)
 {
     test_map();
     test_1080();
     test_assemble();
     test_dxva_boundary();
+    test_larger_output_pool();
     if (failures) {
         fprintf(stderr, "tgd3d H.264 map control: %d failure(s)\n", failures);
         return 1;

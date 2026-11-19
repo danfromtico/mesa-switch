@@ -10,6 +10,9 @@
 
 #include <stdint.h>
 
+/* Reserve index 127: a long-term reference to it would be the 0xff invalid entry. */
+#define TGD3D_DXVA_H264_SURFACES 127u
+
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif

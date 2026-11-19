@@ -1,0 +1,152 @@
+{
+  "scope": "Switch Windows ARM64 GM20B. The Windows x64 test player loaded the exact libmpv DLL embedded in stock wiliwili 1.6.0. Native D3D11VA decode, CPU copyout and GDI window output. The official app UI, end-to-end presentation rate and unrelated high-load resets have separate acceptance.",
+  "selected_utc": "2026-11-19T15:03:24.5215679Z",
+  "boot_utc": "2026-11-19T14:55:33.4891350Z",
+  "device_problem_code": 0,
+  "package": "video-pool-900b8d5d1b2c",
+  "previous_package": "dual-abi-6c1ac9f65a67",
+  "previous_record": "dual-architecture-graphics-baseline.json",
+  "native_boot": {
+    "permanent": true,
+    "one_time": false,
+    "dwm_pid_at_acceptance": 1432
+  },
+  "signed_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+  "signed_components_sha256": {
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "bbbb4c9ad12937e6aca8372e5ba949a0cfc3dfb63297bfb080507ab7c4d26b13",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_d3d_x64.dll": "e31d26fd25fcb6ca934b2a2253afb8795e48a72756783174229002bfe1dbb4d9"
+  },
+  "unsigned_umd_sha256": {
+    "arm64": "2f7d83aa6716ea9569830e891bd4f1aa9e95ebd66883e2a4dfff4f70dc7ad47b",
+    "x64": "f35e2d4fb352e5ee90878f748feecaea3e59ec5339bfbe56854b18f466df1cb5"
+  },
+  "graphics_patch_base": "a88217bac76325ef693d1608be667b5134432c23",
+  "changed_source_sha256": {
+    "src/nouveau/tgd3d/tests/video_contracts.cpp": "4ece2ecae8ea02076469c4020743d57a1ff03685cefdeb86e182ef94a29f63ea",
+    "src/nouveau/tgd3d/tgd3d_dxva_h264.h": "1a92c8be3b106e43105e5e60f733d1bf38da0ddc1713ee8586498bdc7b9e9070",
+    "src/nouveau/tgd3d/tgd3d_h264_map.c": "1971646dc70643bd16ed56097426e3a7063a2b4de270d58f4de159f0a6690fa0",
+    "src/nouveau/tgd3d/tgd3d_h264_map.h": "1b040f63613059332619348461a7b41d9e73e44fd072622bacf72394d4037a8f",
+    "src/nouveau/tgd3d/tgd3d_resource.cpp": "66f525af274ce56ee1f808e8eb02ed37069a00deb70ee34d37698ab82ad49772",
+    "src/nouveau/tgd3d/tgd3d_video.cpp": "31a3aa546866f5e5a41647e4372660f3f7460b46b74c93fc90366150f3de1095",
+    "tegra-x1-wddm/tests/test_tgd3d_h264_map.c": "6009e21604b6663a8aad5a0ee27b9fc4268dbb7a25c8647696b969fbf8fbe46c"
+  },
+  "mpv": {
+    "version": "0.40.0",
+    "linked_ffmpeg": "7.1.1",
+    "extraction": {
+      "exe_sha256": "4ba00c63573ae82ff5eec41bab0bae630d5598fcfbea01cbf7700bf49937a55f",
+      "dll_sha256": "bfaf06e26e23c60dbb803d6d6bc47e5535e4a9b631301755b2fde60b8beb21cf",
+      "offset": 22166448,
+      "length": 35219271,
+      "matches_official_dependency": true,
+      "package_sha256": "e98bdbbbc0ab0ac5860c50e35c6414bcd093d0b695e5cce31ccc52b85155d760"
+    },
+    "probe_sha256": "db63f2c1821a8ba6d291982861f7ea97b9840ab5b49fc003b91ffc25fb1c0d65",
+    "wine_texture_trace": {
+      "layers": 20,
+      "mip_levels": 1,
+      "hwdec_extra_frames": 1,
+      "sha256": "88ca7b2765ee320f01cd5c03d1a5816565022346aab579fc600cffed58f32f23"
+    },
+    "previous_driver": [
+      {
+        "pid": 6812,
+        "queue_env": false,
+        "texture_hresult": "0x887a0005",
+        "hwdec_current": "no",
+        "completed_nvdec_submissions": 0,
+        "etl_sha256": "e78aab4bc41c9900d7ef477dfa54056f6c2cb16e4ab24c79dd7773efa802fb25"
+      },
+      {
+        "pid": 5900,
+        "queue_env": true,
+        "texture_hresult": "0x887a0005",
+        "hwdec_current": "no",
+        "completed_nvdec_submissions": 0,
+        "etl_sha256": "cc3e362e17a324d2a9b35c606d93c63864c80ce649ebc86cfa2d8aac7bd65646"
+      }
+    ],
+    "accepted_driver": [
+      {
+        "case": "original",
+        "sha256_h264_clip": "374eddd7825a15b777ae4c32665ddd3dfe1c7112d55b1ed3bd3724e24b8cd624",
+        "dimensions": [
+          1280,
+          720
+        ],
+        "pid": 5316,
+        "decoder": "d3d11va-copy",
+        "completed_nvdec_submissions": 360,
+        "matching_frames_in_display_order": 360,
+        "reference_pixel_format": "yuv420p",
+        "distinct_reference_frames": 6,
+        "frame_types": {
+          "I": 60,
+          "P": 240,
+          "B": 60
+        },
+        "player_exit_code": 0,
+        "end_utc": "2026-11-19T15:01:52.9457639Z",
+        "window_draw_calls": 93,
+        "desktop_pixel_checks": {
+          "matched_captures": 2,
+          "points_each": 40
+        },
+        "etl_sha256": "fdf8fdd81172cdb928cffe8f8767591e23588542132d2025ba74a2876d62348e",
+        "mpv_log_sha256": "a26582c3fa0f6827c4d13f5417eec89dcd8753e3271071a820c040262c383fdb",
+        "reference_sha256": "e18a992c63848434548a5ca6dfb4fb3900bbe6e6ba181fa494be9bc5514e0522"
+      },
+      {
+        "case": "motion",
+        "sha256_h264_clip": "e458fd3b9312a31fbfc72185fa10ee81965d9ea8e79da4407f729bcc40ce38a0",
+        "dimensions": [
+          1280,
+          720
+        ],
+        "pid": 3540,
+        "decoder": "d3d11va-copy",
+        "completed_nvdec_submissions": 120,
+        "matching_frames_in_display_order": 120,
+        "reference_pixel_format": "yuv420p",
+        "distinct_reference_frames": 120,
+        "frame_types": {
+          "I": 2,
+          "P": 30,
+          "B": 88
+        },
+        "player_exit_code": 0,
+        "end_utc": "2026-11-19T15:02:52.1482025Z",
+        "window_draw_calls": 25,
+        "desktop_pixel_checks": {
+          "matched_captures": 2,
+          "points_each": 40
+        },
+        "etl_sha256": "70cf66ee2e8eeed2f4908b38c2552e834abbae5aa6fe082fd9009b742bf3a9cc",
+        "mpv_log_sha256": "c1198523a5b81fbd04e36f31c6807952882b8e84aa6ec8c41f07a8faad78ce46",
+        "reference_sha256": "0b43f604c97681edc1b74f3111d37af4e71382ca14340cb4e99ca9ad5dd13ec8"
+      }
+    ]
+  },
+  "native_arm64": {
+    "h264_720p_matched_frames": 6,
+    "h264_exit": 0,
+    "h264_etl_sha256": "2e047ed22f49446614ab774aa9faccac9103d85da1a4b05edd4a03a66edc97a9",
+    "requested_feature_levels": [
+      "0xb100"
+    ],
+    "triangle_pixels": 280,
+    "background_pixels": 309,
+    "draw_exit": 0,
+    "draw_etl_sha256": "f75e56c99baf07162863ee2c93ca7b86c06fb85adef7e71118092fc7e445b58e"
+  },
+  "local_checks": {
+    "reference_rotation_frames": 400,
+    "public_output_indices": 20,
+    "retained_reference_frames": 16,
+    "wine_ddi_controls_sha256": "6a1ba3e5130d9b7bcbe83212b7651eb28cb54400c56ae16f2ce2571c3f192eba"
+  }
+}

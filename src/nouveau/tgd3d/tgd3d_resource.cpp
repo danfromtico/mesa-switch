@@ -3,6 +3,7 @@
  * Resources, views, CPU access and GPU copies.
  */
 #include "tgd3d.h"
+#include "tgd3d_dxva_h264.h"
 #include "../nvdec/nvdec.h"
 #include "vulkan/util/vk_internal_exts.h"
 
@@ -519,7 +520,7 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
        * Array slices have independent Y/UV extents and retain normal WDDM
        * backing, CPU map, copy and retirement ownership. */
       if (!video_device_supported(dev) || res->dim != D3D10DDIRESOURCE_TEXTURE2D ||
-          res->mips != 1 || res->arraySize > TG_NVDEC_MAX_SURFACES ||
+          res->mips != 1 || res->arraySize > TGD3D_DXVA_H264_SURFACES ||
           !tg_nvdec_output_size_supported(res->width, res->height) ||
           res->depth != 1 || res->misc || desc->pPrimaryDesc || desc->SampleDesc.Quality ||
           (res->usage == D3D10_DDI_USAGE_STAGING ? res->bind != 0 :
