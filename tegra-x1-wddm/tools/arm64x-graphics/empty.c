@@ -1,0 +1,1 @@
+/* Both views consist entirely of export forwarders. */
