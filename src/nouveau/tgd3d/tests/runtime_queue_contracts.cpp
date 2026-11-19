@@ -91,6 +91,56 @@ static void callbacks(Device *dev, uintptr_t number)
    };
 }
 
+enum class FinalQueueState { Drained, TokenHeld, CloseFailed, CloseRecovered };
+
+static void final_queue_owner(FinalQueueState state)
+{
+   Adapter adapter;
+   DeviceSlot slot{new Device};
+   Device *dev = slot.state;
+   dev->adapter = &adapter;
+   callbacks(dev, 0);
+   static unsigned vkDestroys, parentDestroys;
+   vkDestroys = parentDestroys = 0;
+   dev->vkdev = reinterpret_cast<VkDevice>(1);
+   dev->vk.DestroyDevice = [](VkDevice, const VkAllocationCallbacks *) { ++vkDestroys; };
+   dev->kt.pfnDestroyContextCb = [](HANDLE, const D3DDDICB_DESTROYCONTEXT *args) -> HRESULT {
+      CHECK(args->hContext == reinterpret_cast<HANDLE>(0x3000));
+      ++parentDestroys;
+      return S_OK;
+   };
+   wsi_win32_runtime transport = {};
+   wsi_win32_runtime_fence fence = {};
+   CHECK(runtime_queue_prepare(dev, &transport) == S_OK);
+   CHECK(transport.create_fence(transport.context, 0, &fence) == VK_SUCCESS);
+   failClose = state == FinalQueueState::CloseFailed || state == FinalQueueState::CloseRecovered;
+   if (state != FinalQueueState::TokenHeld)
+      transport.release_fence(transport.context, fence.token);
+   if (state == FinalQueueState::CloseRecovered)
+      failClose = false;
+
+   D3D11_1DDI_DEVICEFUNCS table = {};
+   device_fill_table11(&table);
+   table.pfnDestroyDevice({&slot});
+   CHECK(!slot.state && vkDestroys == 1);
+   if (state == FinalQueueState::Drained || state == FinalQueueState::CloseRecovered) {
+      CHECK(!adapter.undrainedDevices && parentDestroys == 1 && !liveFences);
+      return;
+   }
+   CHECK(adapter.undrainedDevices == dev && parentDestroys == 0 && liveFences == 1);
+   CHECK(dev->runtimeQueue && !dev->vkdev && dev->hContext == reinterpret_cast<HANDLE>(0x3000));
+
+   // Tear down the test's simulated runtime. The production retention list has
+   // no worker that calls into the runtime after DestroyDevice has returned.
+   failClose = false;
+   if (state == FinalQueueState::TokenHeld)
+      transport.release_fence(transport.context, fence.token);
+   CHECK(runtime_queue_finish(dev) == S_OK && !liveFences);
+   runtime_device_destroy(dev);
+   adapter.undrainedDevices = nullptr;
+   delete dev;
+}
+
 void runtime_queue_contracts()
 {
    callerThread = GetCurrentThreadId();
@@ -210,5 +260,9 @@ void runtime_queue_contracts()
       CHECK(a.destroy_context(a.context, graphics) == VK_SUCCESS);
       CHECK(runtime_queue_finish(&dev) == S_OK && !liveContexts && !liveFences);
    }
+   for (auto state : {FinalQueueState::Drained, FinalQueueState::TokenHeld,
+                      FinalQueueState::CloseFailed, FinalQueueState::CloseRecovered})
+      final_queue_owner(state);
+   std::puts("PASS: D3D11 DestroyDevice retains the queue owner on incomplete finish and releases a drained queue");
    std::puts("PASS: runtime-owned WDDM2 and 11.1 contexts, Win7 D3D10 consumer, command payload/WrittenPrimaries, per-context sequences, same-device GPU fences, retained import lifetime, bounded CPU waits, quiescence before release and partial/failed cleanup (CPU callbacks; no GPU)");
 }

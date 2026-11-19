@@ -106,7 +106,12 @@ static bool device_teardown(Device *dev)
       dev->vk.DestroyDevice(dev->vkdev, nullptr);
       dev->vkdev = VK_NULL_HANDLE;
    }
-   runtime_queue_finish(dev);
+   const HRESULT hr = runtime_queue_finish(dev);
+   if (FAILED(hr)) {
+      // The queue state still owns callbacks into this Device.
+      trace_error(hr, __FILE__, __LINE__);
+      return false;
+   }
    runtime_device_destroy(dev);
    return true;
 }
@@ -126,7 +131,7 @@ void release_device(DeviceSlot *slot)
       dev->nextUndrained = adapter->undrainedDevices;
       adapter->undrainedDevices = dev;
       ReleaseSRWLockExclusive(&adapter->teardownLock);
-      trace_message("GPU quiescence unconfirmed at final teardown; retaining device until process exit");
+      trace_message("Device teardown incomplete; retaining device until process exit");
    }
    slot->state = nullptr;
 }
