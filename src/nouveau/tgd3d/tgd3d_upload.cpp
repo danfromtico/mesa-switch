@@ -28,7 +28,10 @@ static HRESULT chunk_create(Device *dev, VkDeviceSize size, bool dedicated, Chun
    info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT |
                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT |
+                VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+   if (dev->caps && dev->caps->transformFeedback)
+      info.usage |= VK_BUFFER_USAGE_TRANSFORM_FEEDBACK_BUFFER_BIT_EXT | VK_BUFFER_USAGE_TRANSFORM_FEEDBACK_COUNTER_BUFFER_BIT_EXT;
    info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
    HRESULT hr = resource_result(dev->vk.CreateBuffer(dev->vkdev, &info, nullptr, &chunk->buffer));
    if (FAILED(hr)) {

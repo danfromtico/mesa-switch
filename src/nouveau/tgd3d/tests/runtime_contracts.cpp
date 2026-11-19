@@ -991,7 +991,7 @@ static PFND3DDDI_ALLOCATECB displayableAllocateBase;
 static PFN_vkAllocateMemory displayableImportBase;
 static unsigned displayableReply;
 
-static void displayable_owner_contract()
+static void displayable_owner_contract(UINT interface_version)
 {
    /* A v1 owner ends at the new tail. Put its last byte against an inaccessible
     * page so a full-size copy from an old UMD is a real control failure. */
@@ -1014,7 +1014,7 @@ static void displayable_owner_contract()
    Adapter adapter; Device producer, consumer;
    pagingValues[0] = pagingValues[1] = 0;
    init(&producer, &adapter, 0); init(&consumer, &adapter, 1);
-   producer.interfaceVersion = consumer.interfaceVersion = D3DWDDM2_0_DDI_INTERFACE_VERSION;
+   producer.interfaceVersion = consumer.interfaceVersion = interface_version;
    displayableAllocateBase = producer.kt.pfnAllocateCb;
    producer.kt.pfnAllocateCb = [](HANDLE h, D3DDDICB_ALLOCATE *a) -> HRESULT {
       HRESULT hr = displayableAllocateBase(h, a); a->hKMResource = 0x90; return hr;
@@ -1040,6 +1040,9 @@ static void displayable_owner_contract()
    desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; desc.SampleDesc.Count = 1;
    desc.MipLevels = desc.ArraySize = 1;
    RuntimeResource *p = nullptr, *c = nullptr; UINT pitch;
+   producer.interfaceVersion = D3D10_0_7_DDI_INTERFACE_VERSION;
+   CHECK(runtime_shared_create(&producer, &desc, {rt_resource(0)}, &p, &pitch) == DXGI_ERROR_UNSUPPORTED && !p);
+   producer.interfaceVersion = interface_version;
    CHECK(runtime_shared_create(&producer, &desc, {rt_resource(0)}, &p, &pitch) == S_OK);
    CHECK(runtime_is_displayable(p));
    VkDeviceMemory memory = VK_NULL_HANDLE; uint32_t written = 0;
@@ -1399,7 +1402,8 @@ void runtime_contracts()
    presentation13_contracts();
    shared_tiled_contracts();
    removed_paging_fence_contract();
-   displayable_owner_contract();
+   displayable_owner_contract(D3DWDDM2_0_DDI_INTERFACE_VERSION);
+   displayable_owner_contract(D3D11_1_DDI_INTERFACE_VERSION);
    failed_cleanup_ownership_contract();
    pending_destroy_contract();
 }

@@ -1126,6 +1126,13 @@ lower_interp_at_sample(nir_builder *b, nir_intrinsic_instr *interp,
 
    nir_def *loc = load_root_table(b, 1, 64, draw.sample_locations, ctx);
 
+#ifdef _WIN32
+   if (ctx->dev_info->chipset == 0x12e) {
+      nir_def *high = load_root_table(b, 1, 64, tir_high_locations, ctx);
+      loc = nir_bcsel(b, nir_ilt_imm(b, sample, 8), loc, high);
+      sample = nir_iand_imm(b, sample, 7);
+   }
+#endif
    /* Yay little endian */
    loc = nir_ushr(b, loc, nir_imul_imm(b, sample, 8));
    nir_def *loc_x_u4 = nir_iand_imm(b, loc, 0xf);

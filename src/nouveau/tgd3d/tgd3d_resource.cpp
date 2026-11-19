@@ -106,6 +106,8 @@ HRESULT image_create(Device *dev, Resource *res)
    if (res->bind & (D3D10_DDI_BIND_SHADER_RESOURCE | D3D10_DDI_BIND_RENDER_TARGET |
                     D3D10_DDI_BIND_PRESENT))
       ici.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+   if (res->bind & D3D11_DDI_BIND_UNORDERED_ACCESS)
+      ici.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
    if (res->bind & D3D10_DDI_BIND_RENDER_TARGET)
       ici.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
    if (res->bind & D3D10_DDI_BIND_DEPTH_STENCIL)
@@ -464,6 +466,7 @@ static void resource_fail(Device *dev, Resource *res, HRESULT hr,
 {
    if (res->slice)
       slice_release(dev, res->slice, std::max(res->sliceLastUse, res->sliceLastWrite));
+   slice_release(dev, res->soCounter, res->soCounterLastUse);
    if (res->storage.image || res->storage.runtime)
       retire_resource_image(dev, res->storage);
    resource_untrack(dev, res);
@@ -498,6 +501,10 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
       res->kind = ResKind::Buffer;
       res->size = res->width;
       hr = resource_slice_alloc(res, &res->slice);
+      if (SUCCEEDED(hr) && dev->caps && dev->caps->transformFeedback && (res->bind & D3D10_DDI_BIND_STREAM_OUTPUT)) {
+         hr = slice_alloc(dev, sizeof(UINT), 4, &res->soCounter);
+         if (SUCCEEDED(hr)) memset(res->soCounter.cpu(), 0, sizeof(UINT));
+      }
       if (SUCCEEDED(hr) && desc->pInitialDataUP && desc->pInitialDataUP[0].pSysMem)
          memcpy(res->slice.cpu(), desc->pInitialDataUP[0].pSysMem, res->size);
       return hr;
@@ -537,10 +544,11 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    res->imageType = res->dim == D3D10DDIRESOURCE_TEXTURE1D ? VK_IMAGE_TYPE_1D :
                     res->dim == D3D10DDIRESOURCE_TEXTURE3D ? VK_IMAGE_TYPE_3D : VK_IMAGE_TYPE_2D;
    res->cube = res->dim == D3D10DDIRESOURCE_TEXTURECUBE;
+   const bool linearRgb = res->format == DXGI_FORMAT_B8G8R8A8_UNORM ||
+                          res->format == DXGI_FORMAT_R8G8B8A8_UNORM ||
+                          (dev->interfaceVersion == D3D9_RUNTIME_INTERFACE && res->format == DXGI_FORMAT_B8G8R8X8_UNORM);
    res->tiledShared = !desc->pPrimaryDesc && (res->misc & (D3D10_DDI_RESOURCE_MISC_SHARED |
-      D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) &&
-      (res->arraySize != 1 || (res->format != DXGI_FORMAT_B8G8R8A8_UNORM &&
-                               res->format != DXGI_FORMAT_R8G8B8A8_UNORM));
+      D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) && (res->arraySize != 1 || !linearRgb);
    if (res->tiledShared) {
       if (desc->SampleDesc.Count != 1 || desc->SampleDesc.Quality)
          return DXGI_ERROR_UNSUPPORTED;
@@ -601,13 +609,14 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
    return hr;
 }
 
-static void APIENTRY CreateResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_CREATERESOURCE *desc,
-                                    D3D10DDI_HRESOURCE hResource, D3D10DDI_HRTRESOURCE hRT)
+void create_resource_with_stride(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_CREATERESOURCE *desc,
+                                    D3D10DDI_HRESOURCE hResource, D3D10DDI_HRTRESOURCE hRT, UINT stride)
 {
    Device *dev = D(hDevice);
    Resource *res = new (hResource.pDrvPrivate) Resource();
    res->dev = dev;
    res->hRT = hRT;
+   res->structureStride = stride;
    res->next = dev->resources;
    dev->resources = res;
    trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 0, (uintptr_t)res);
@@ -616,6 +625,12 @@ static void APIENTRY CreateResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_
       resource_fail(dev, res, hr,
          (desc->BindFlags & D3D10_DDI_BIND_PRESENT) ? desc->pPrimaryDesc : nullptr);
    trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 0, (uintptr_t)res);
+}
+
+static void APIENTRY CreateResource(D3D10DDI_HDEVICE h, const D3D10DDIARG_CREATERESOURCE *desc,
+                                    D3D10DDI_HRESOURCE resource, D3D10DDI_HRTRESOURCE rt)
+{
+   create_resource_with_stride(h, desc, resource, rt, 0);
 }
 
 static void APIENTRY OpenResource(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_OPENRESOURCE *args,
@@ -665,6 +680,12 @@ RuntimeResource *resource_runtime(const Resource *res)
 
 void resource_unbind(Device *dev, Resource *res)
 {
+   for (auto &target : dev->soTargets)
+      if (target == res) target = nullptr;
+   for (auto &uav : dev->computeUav)
+      if (uav && uav->res == res) uav = nullptr;
+   for (auto &uav : dev->graphicsUav)
+      if (uav && uav->res == res) { uav = nullptr; dev->dirty |= DIRTY_GRAPHICS_UAVS; }
    for (auto &stage : dev->stage)
       for (auto &srv : stage.srv)
          if (srv && srv->res == res) {
@@ -708,6 +729,7 @@ static void APIENTRY DestroyResource(D3D10DDI_HDEVICE hDevice, D3D10DDI_HRESOURC
    if (res->slice)
       slice_release(dev, res->slice, res->sliceLastUse > res->sliceLastWrite ?
                                         res->sliceLastUse : res->sliceLastWrite);
+   slice_release(dev, res->soCounter, res->soCounterLastUse);
    if (res->storage.image || res->storage.runtime)
       retire_resource_image(dev, res->storage);
    resource_untrack(dev, res);
@@ -735,7 +757,8 @@ VkImageView view_get(View *view, bool arrayed)
 {
    Resource *res = view->res;
    const VkImage image = res->storage.image;
-   const bool key = view->type == ViewType::SRV ? arrayed :
+   const bool shaderView = view->type == ViewType::SRV || view->type == ViewType::UAV;
+   const bool key = shaderView ? arrayed :
       view->info.viewType == VK_IMAGE_VIEW_TYPE_2D_ARRAY;
    Device *dev = view->dev;
    View::Entry *slot = nullptr;
@@ -757,7 +780,7 @@ VkImageView view_get(View *view, bool arrayed)
    }
    VkImageViewCreateInfo info = view->info;
    info.image = image;
-   if (view->type == ViewType::SRV) {
+   if (shaderView) {
       info.viewType = arrayed_type(info.viewType, arrayed);
       if (!arrayed && info.viewType != VK_IMAGE_VIEW_TYPE_CUBE &&
           info.viewType != VK_IMAGE_VIEW_TYPE_3D)
@@ -815,6 +838,11 @@ static View *view_init(Device *dev, void *memory, Resource *res, ViewType type, 
 
 static void view_destroy(Device *dev, View *view)
 {
+   for (auto &uav : dev->computeUav)
+      if (uav == view) uav = nullptr;
+   for (auto &uav : dev->graphicsUav)
+      if (uav == view) { uav = nullptr; dev->dirty |= DIRTY_GRAPHICS_UAVS; }
+   if (view->counter) slice_release(dev, view->counter, dev->lastSeq());
    flush_pending_clears(dev, nullptr);
    end_rendering(dev);
    for (auto &stage : dev->stage)
@@ -823,12 +851,15 @@ static void view_destroy(Device *dev, View *view)
             srv = nullptr;
             dev->dirty |= DIRTY_TEXTURES | DIRTY_TEXEL_BUFFERS;
          }
-   for (auto &rtv : dev->rtv)
-      if (rtv == view)
+   for (auto &rtv : dev->rtv) {
+      if (rtv == view) {
          rtv = nullptr;
+         dev->dirty |= DIRTY_BLEND;
+      }
+   }
    if (dev->dsv == view) {
       dev->dsv = nullptr;
-      dev->dirty |= DIRTY_DEPTH_STENCIL;
+      dev->dirty |= DIRTY_DEPTH_STENCIL | DIRTY_BLEND;
    }
    const uint64_t seq = dev->lastSeq();
    for (auto &entry : view->cache)
@@ -881,6 +912,111 @@ static bool view_image_info(Device *dev, View *view, VkImageViewType type, uint3
    view->width = res->mipWidth(mip);
    view->height = res->mipHeight(mip);
    return true;
+}
+
+/* Untyped D3D views address a range in bytes/structure indices. The shader
+ * converter uses an R32_UINT texel buffer for both, including atomic accesses. */
+static HRESULT buffer_view(Device *dev, View *view, UINT first, UINT elements, bool raw)
+{
+   Resource *res = view->res;
+   if (res->kind != ResKind::Buffer || !elements) return E_INVALIDARG;
+   const FormatInfo *info = format_info(view->format);
+   UINT stride;
+   if (raw) {
+      if (!(res->misc & D3D11_DDI_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS) || view->format != DXGI_FORMAT_R32_TYPELESS)
+         return E_INVALIDARG;
+      stride = 4;
+      view->bufferFormat = VK_FORMAT_R32_UINT;
+   } else if (res->structureStride) {
+      if (view->format != DXGI_FORMAT_UNKNOWN) return E_INVALIDARG;
+      stride = res->structureStride;
+      view->bufferFormat = VK_FORMAT_R32_UINT;
+   } else {
+      if (!info || (info->flags & (FMT_TYPELESS | FMT_BC | FMT_DEPTH | FMT_STENCIL | FMT_NO_VIEW)))
+         return E_INVALIDARG;
+      stride = info->bytes;
+      view->bufferFormat = vertex_vk_format(view->format);
+      if (view->bufferFormat == VK_FORMAT_UNDEFINED) return DXGI_ERROR_UNSUPPORTED;
+   }
+   view->bufferOffset = VkDeviceSize(first) * stride;
+   view->bufferRange = VkDeviceSize(elements) * stride;
+   if (view->bufferOffset > res->size || view->bufferRange > res->size - view->bufferOffset)
+      return E_INVALIDARG;
+   VkFormatProperties props{};
+   dev->adapter->vk.vk.GetPhysicalDeviceFormatProperties(dev->adapter->vk.pdev, view->bufferFormat, &props);
+   const bool storage = view->type == ViewType::UAV;
+   const UINT texel = raw || res->structureStride ? 4 : stride;
+   VkDeviceSize alignment = storage ? dev->caps->storageTexelAlignment : dev->caps->uniformTexelAlignment;
+   if (storage ? dev->caps->storageSingleTexel : dev->caps->uniformSingleTexel)
+      alignment = std::min<VkDeviceSize>(alignment, texel % 3 == 0 ? texel / 3 : texel);
+   if (!alignment || (res->slice.offset + view->bufferOffset) % alignment ||
+       view->bufferRange / texel > dev->caps->maxTexelBufferElements ||
+       !(props.bufferFeatures & (storage ? VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT :
+                                          VK_FORMAT_FEATURE_UNIFORM_TEXEL_BUFFER_BIT)))
+      return DXGI_ERROR_UNSUPPORTED;
+   return S_OK;
+}
+
+void create_buffer_srv11(Device *dev, Resource *res, void *memory, UINT first, UINT count,
+                         DXGI_FORMAT format, UINT flags)
+{
+   if (!res || res->dev != dev || !memory || !(res->bind & D3D10_DDI_BIND_SHADER_RESOURCE) ||
+       (flags & ~D3D11_DDI_BUFFEREX_SRV_FLAG_RAW)) { TG_ERROR(dev, E_INVALIDARG); return; }
+   View *view = view_init(dev, memory, res, ViewType::SRV, format);
+   HRESULT hr = buffer_view(dev, view, first, count, flags & D3D11_DDI_BUFFEREX_SRV_FLAG_RAW);
+   if (FAILED(hr)) { view_destroy(dev, view); TG_ERROR(dev, hr); }
+}
+
+void APIENTRY CreateUav11(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATEUNORDEREDACCESSVIEW *in,
+                          D3D11DDI_HUNORDEREDACCESSVIEW out, D3D11DDI_HRTUNORDEREDACCESSVIEW)
+{
+   Device *dev = D(h);
+   Resource *res = in ? R(in->hDrvResource) : nullptr;
+   if (!res || !out.pDrvPrivate || res->dev != dev || !(res->bind & D3D11_DDI_BIND_UNORDERED_ACCESS)) {
+      TG_ERROR(dev, E_INVALIDARG); return;
+   }
+   View *v = view_init(dev, out.pDrvPrivate, res, ViewType::UAV, in->Format);
+   HRESULT hr = E_INVALIDARG;
+   if (in->ResourceDimension == D3D10DDIRESOURCE_BUFFER) {
+      const UINT flags = in->Buffer.Flags;
+      const UINT counterBits = D3D11_DDI_BUFFER_UAV_FLAG_APPEND | D3D11_DDI_BUFFER_UAV_FLAG_COUNTER;
+      if (!(flags & ~(D3D11_DDI_BUFFER_UAV_FLAG_RAW | counterBits)) &&
+          (!(flags & counterBits) || (res->structureStride && !(flags & D3D11_DDI_BUFFER_UAV_FLAG_RAW) &&
+                                       (flags & counterBits) != counterBits))) {
+         hr = buffer_view(dev, v, in->Buffer.FirstElement, in->Buffer.NumElements, flags & D3D11_DDI_BUFFER_UAV_FLAG_RAW);
+         if (SUCCEEDED(hr) && (flags & counterBits))
+            hr = slice_alloc(dev, 4, dev->caps->counterAlignment, &v->counter);
+      }
+   } else if (res->kind == ResKind::Image) {
+      bool ok = false;
+      switch (in->ResourceDimension) {
+      case D3D10DDIRESOURCE_TEXTURE1D:
+         ok = res->imageType == VK_IMAGE_TYPE_1D && view_image_info(dev, v, VK_IMAGE_VIEW_TYPE_1D,
+            in->Tex1D.MipSlice, 1, in->Tex1D.FirstArraySlice, in->Tex1D.ArraySize);
+         break;
+      case D3D10DDIRESOURCE_TEXTURE2D:
+         ok = res->imageType == VK_IMAGE_TYPE_2D && view_image_info(dev, v, VK_IMAGE_VIEW_TYPE_2D,
+            in->Tex2D.MipSlice, 1, in->Tex2D.FirstArraySlice, in->Tex2D.ArraySize);
+         break;
+      case D3D10DDIRESOURCE_TEXTURE3D:
+         if (res->imageType == VK_IMAGE_TYPE_3D && in->Tex3D.MipSlice < res->mips &&
+             !in->Tex3D.FirstW && (in->Tex3D.WSize == ~0u || in->Tex3D.WSize == res->mipDepth(in->Tex3D.MipSlice)))
+            ok = view_image_info(dev, v, VK_IMAGE_VIEW_TYPE_3D, in->Tex3D.MipSlice, 1, 0, 1);
+         break;
+      default: break;
+      }
+      if (ok) {
+         VkFormatProperties props{};
+         dev->adapter->vk.vk.GetPhysicalDeviceFormatProperties(dev->adapter->vk.pdev, v->info.format, &props);
+         hr = (props.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) ? S_OK : DXGI_ERROR_UNSUPPORTED;
+      }
+   }
+   if (FAILED(hr)) { view_destroy(dev, v); TG_ERROR(dev, hr); }
+}
+
+void APIENTRY DestroyUav11(D3D10DDI_HDEVICE h, D3D11DDI_HUNORDEREDACCESSVIEW view)
+{
+   view_destroy(D(h), static_cast<View *>(view.pDrvPrivate));
 }
 
 static SIZE_T APIENTRY CalcPrivateShaderResourceViewSize(D3D10DDI_HDEVICE,
@@ -1075,6 +1211,8 @@ static void buffer_renamed(Device *dev, Resource *res)
    }
    if (res->bind & D3D10_DDI_BIND_SHADER_RESOURCE)
       dev->dirty |= DIRTY_TEXEL_BUFFERS;
+   if (res->bind & D3D11_DDI_BIND_UNORDERED_ACCESS)
+      dev->dirty |= DIRTY_GRAPHICS_UAVS;
 }
 
 /* Gives the buffer storage that no recorded or queued command references. */

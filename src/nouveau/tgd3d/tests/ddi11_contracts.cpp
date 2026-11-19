@@ -20,31 +20,66 @@ static void adapter_caps_contracts()
    D3D10_2DDI_ADAPTERFUNCS functions = {};
    adapter_fill_queries(&functions);
    UINT count = 0;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 3);
-   UINT64 versions[5] = {0xfeed, 0, 0, 0, 0xbeef}; count = 1;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 3);
-   CHECK(versions[0] == 0xfeed && versions[4] == 0xbeef);
-   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == S_OK);
-   CHECK(versions[0] == D3D10_0_DDI_SUPPORTED && versions[2] == D3D10_0_7_DDI_SUPPORTED &&
-         versions[3] == 0 && versions[4] == 0xbeef);
-   CHECK(functions.pfnGetSupportedVersions(h, nullptr, versions) == E_INVALIDARG);
-   adapter.videoEnabled = true;
-   count = 3; versions[3] = 0xfeed;
-   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 4);
-   CHECK(versions[3] == 0xfeed);
-   CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == S_OK &&
-         versions[3] == D3D11_1_DDI_SUPPORTED && versions[4] == 0xbeef);
+   CHECK(functions.pfnGetSupportedVersions(h, nullptr, nullptr) == E_INVALIDARG);
+   for (bool withVideo : {false, true}) {
+      adapter.videoEnabled = withVideo;
+      CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+      UINT64 versions[5] = {0xfeed, 0, 0, 0, 0xbeef}; count = 3;
+      CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == E_OUTOFMEMORY && count == 4);
+      CHECK(versions[0] == 0xfeed && versions[4] == 0xbeef);
+      CHECK(functions.pfnGetSupportedVersions(h, &count, versions) == S_OK);
+      CHECK(versions[0] == D3D10_0_DDI_SUPPORTED && versions[1] == D3D10_0_x_DDI_SUPPORTED &&
+            versions[2] == D3D10_0_7_DDI_SUPPORTED && versions[3] == D3D11_1_DDI_SUPPORTED &&
+            versions[4] == 0xbeef);
+   }
    adapter.videoEnabled = false;
    struct { UINT before, caps, after; } out = {0xdeadbeef, 0xffffffff, 0xbeefdead};
    D3D10_2DDIARG_GETCAPS query = {D3D11DDICAPS_3DPIPELINESUPPORT, nullptr, &out.caps, sizeof(out.caps)};
    CHECK(functions.pfnGetCaps(h, &query) == S_OK && out.caps == 1);
    CHECK(out.before == 0xdeadbeef && out.after == 0xbeefdead);
+   // A size accepted here must correspond to a level in the adapter's mask.
+   Adapter high;
+   high.vk.nvk = true;
+   auto &c = high.vk.caps;
+   c.compute = c.geometryShader = c.tessellationShader = c.transformFeedback = true;
+   c.pipelineStatistics = c.drawIndirectFirstInstance = c.textureCompressionBC = c.logicOp = true;
+   c.maxColorAttachments = 8; c.maxViewports = 16;
+   c.maxImageDimension2D = 16384; c.maxImageDimension3D = c.maxImageArrayLayers = 2048;
+   c.graphicsUavStages = VK_SHADER_STAGE_ALL_GRAPHICS;
+   c.graphicsUavSlots = 64;
+   c.tirSamples = VK_SAMPLE_COUNT_16_BIT;
+   auto levels = [&](UINT expected) {
+      CHECK(functions.pfnGetCaps({&high}, &query) == S_OK && out.caps == expected);
+      for (UINT level = 0; level <= 6; ++level) {
+         D3D10DDIARG_CALCPRIVATEDEVICESIZE size{D3D11_1_DDI_INTERFACE_VERSION,
+            D3D11_1_DDI_BUILD_VERSION << 16, level << D3D11DDI_CREATEDEVICE_FLAG_3DPIPELINESUPPORT_SHIFT};
+         CHECK(!!CalcPrivateDeviceSize({&high}, &size) == !!(expected & (1u << level)));
+      }
+   };
+   levels(15);
+   c.graphicsUavSlots = 63; levels(7); c.graphicsUavSlots = 64;
+   c.tirSamples = 0; levels(7); c.attachmentlessSamples = VK_SAMPLE_COUNT_16_BIT;
+   c.logicOp = false; levels(7); c.logicOp = true;
+   c.graphicsUavStages &= ~VK_SHADER_STAGE_GEOMETRY_BIT; levels(7);
+   c.tessellationShader = false; levels(1);
+   D3D11_1DDI_D3D11_OPTIONS_DATA options = {};
+   D3D10_2DDIARG_GETCAPS optionsQuery = {D3D11_1DDICAPS_D3D11_OPTIONS, nullptr, &options, sizeof(options)};
+   for (bool supported : {false, true}) {
+      adapter.vk.caps.logicOp = supported;
+      CHECK(functions.pfnGetCaps(h, &optionsQuery) == S_OK);
+      CHECK(!!options.OutputMergerLogicOp == supported && !options.AssignDebugBinarySupport);
+   }
    for (auto type : {D3D11DDICAPS_THREADING, D3D11DDICAPS_SHADER, D3DWDDM1_3DDICAPS_D3D11_OPTIONS1,
                     D3DWDDM1_3DDICAPS_MARKER, D3DWDDM2_0DDICAPS_D3D11_OPTIONS2,
                     D3DWDDM2_0DDICAPS_D3D11_OPTIONS3, D3DWDDM2_2DDICAPS_SHADERCACHE}) {
       query.Type = type; out.caps = 0xffffffff;
       CHECK(functions.pfnGetCaps(h, &query) == S_OK && !out.caps);
    }
+   D3D11DDI_SHADER_CAPS compute{};
+   D3D10_2DDIARG_GETCAPS computeQuery{D3D11DDICAPS_SHADER, nullptr, &compute, sizeof(compute)};
+   adapter.vk.caps.downlevelCompute = true;
+   CHECK(functions.pfnGetCaps(h, &computeQuery) == S_OK &&
+         compute.Caps == D3D11DDICAPS_SHADER_COMPUTE_PLUS_RAW_AND_STRUCTURED_BUFFERS_IN_SHADER_4_X);
    query.Type = D3DWDDM2_0DDICAPS_GPUVA_CAPS;
    CHECK(functions.pfnGetCaps(h, &query) == S_OK && out.caps == 40);
    query.pInfo = &out; // unused input for this query must not be interpreted as layout metadata
@@ -83,7 +118,7 @@ static void ddi20_contracts()
    CHECK(guarded.before == guarded.after && guarded.before == UINT64_C(0x87654321abcdef09));
    CHECK(t.pfnDraw && t.pfnCreateResource && t.pfnCreateShaderResourceView &&
          t.pfnCreateRenderTargetView && t.pfnCreateQuery && t.pfnFlush && t.pfnRelocateDeviceFuncs);
-   CHECK(!t.pfnSetHardwareProtection && !t.pfnGetResourceLayout && !t.pfnDispatch);
+   CHECK(!t.pfnSetHardwareProtection && !t.pfnGetResourceLayout && t.pfnDispatch && t.pfnDispatchIndirect && t.pfnCreateComputeShader && t.pfnCsSetUnorderedAccessViews);
    t.pfnRelocateDeviceFuncs(h, &t);
 
    struct { uint64_t before; DXGI1_4_DDI_BASE_FUNCTIONS table; uint64_t after; } dxgi = {};
@@ -141,6 +176,13 @@ static void ddi20_contracts()
    CHECK(t.pfnCalcPrivateRasterizerStateSize(h, &rasterDesc) == sizeof(RasterizerState));
    t.pfnCreateRasterizerState(h, &rasterDesc, {raster.object()}, {});
    CHECK(!errors && raster.object()->desc.ScissorEnable);
+   t.pfnDestroyRasterizerState(h, {raster.object()});
+   VulkanCaps rasterCaps{};
+   rasterCaps.attachmentlessSamples |= VK_SAMPLE_COUNT_4_BIT;
+   dev.caps = &rasterCaps;
+   rasterDesc.ForcedSampleCount = 4;
+   t.pfnCreateRasterizerState(h, &rasterDesc, {raster.object()}, {});
+   CHECK(!errors && raster.object()->samples == VK_SAMPLE_COUNT_4_BIT);
    t.pfnDestroyRasterizerState(h, {raster.object()});
    rasterDesc.ConservativeRasterizationMode = D3DWDDM2_0DDI_CONSERVATIVE_RASTERIZATION_ON;
    t.pfnCreateRasterizerState(h, &rasterDesc, {raster.object()}, {});
@@ -207,10 +249,55 @@ static void ddi20_contracts()
    std::puts("PASS: typed WDDM2.0/DXGI1.4 boundaries, real views, ROW_MAJOR buffers/padded staging and unsupported texture-layout rejection (CPU control)");
 }
 
+static void om_binding_contracts()
+{
+   Device dev;
+   VulkanCaps caps;
+   dev.caps = &caps;
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
+   D3D10DDI_HDEVICE h{&dev};
+   D3D11_1DDI_DEVICEFUNCS t{};
+   device_fill_table11(&t);
+   View left{}, right{}, srv{}, rtv{};
+   left.dev = right.dev = srv.dev = rtv.dev = &dev;
+   left.type = right.type = ViewType::UAV;
+   srv.type = ViewType::SRV; rtv.type = ViewType::RTV;
+   D3D11DDI_HUNORDEREDACCESSVIEW last[] = {{&left}, {&right}};
+   errors = 0;
+   t.pfnSetRenderTargets(h, nullptr, 0, 0, {}, last, nullptr, 62, 2, 62, 2);
+   CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED && !dev.graphicsUav[62]);
+   caps.graphicsUavSlots = D3D_UAV_SLOTS; errors = 0;
+   t.pfnCsSetUnorderedAccessViews(h, 63, 1, last, nullptr);
+   t.pfnSetRenderTargets(h, nullptr, 0, 0, {}, last, nullptr, 62, 2, 62, 2);
+   CHECK(!errors && dev.graphicsUav[62] == &left && dev.graphicsUav[63] == &right && dev.computeUav[63] == &left);
+   dev.dirty = 0;
+   t.pfnSetRenderTargets(h, nullptr, 0, 0, {}, last + 1, nullptr, 63, 1, 63, 1);
+   CHECK(!errors && !dev.dirty && dev.graphicsUav[62] == &left);
+   last[0] = {}; last[1] = {&srv};
+   t.pfnSetRenderTargets(h, nullptr, 0, 0, {}, last, nullptr, 62, 2, 62, 2);
+   CHECK(errors == 1 && error == E_INVALIDARG && !dev.dirty && dev.graphicsUav[62] == &left && dev.graphicsUav[63] == &right);
+   errors = 0;
+   t.pfnSetRenderTargets(h, nullptr, 0, 0, {}, last, nullptr, 63, 2, 63, 1);
+   CHECK(errors == 1 && error == E_INVALIDARG && dev.graphicsUav[63] == &right);
+   errors = 0;
+   t.pfnSetRenderTargets(h, nullptr, 0, 0, {}, last, nullptr, 63, 1, 63, 1);
+   CHECK(!errors && (dev.dirty & DIRTY_GRAPHICS_UAVS) && !dev.graphicsUav[63] && dev.computeUav[63] == &left);
+   D3D11DDI_HUNORDEREDACCESSVIEW low{&left};
+   t.pfnSetRenderTargets(h, nullptr, 0, 0, {}, &low, nullptr, 0, 1, 0, 1);
+   D3D10DDI_HRENDERTARGETVIEW target{&rtv};
+   t.pfnSetRenderTargets(h, &target, 1, 0, {}, &low, nullptr, 0, 1, 0, 1);
+   CHECK(errors == 1 && error == E_INVALIDARG && !dev.rtv[0] && dev.graphicsUav[0] == &left);
+   errors = 0;
+   t.pfnSetRenderTargets(h, &target, 1, 0, {}, nullptr, nullptr, 0, 0, 0, 0);
+   CHECK(!errors && dev.rtv[0] == &rtv && !dev.graphicsUav[0] && dev.graphicsUav[62] == &left);
+   std::puts("PASS: OM UAV range updates, RTV slot conflicts, compute isolation and failure-atomic validation (CPU control)");
+}
+
 void ddi11_contracts()
 {
    adapter_caps_contracts();
    ddi20_contracts();
+   om_binding_contracts();
    Device dev;
    dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
    D3D10DDI_HDEVICE h = {&dev};
@@ -302,7 +389,8 @@ void ddi11_contracts()
          !std::memcmp(backing, input, sizeof(input)));
    const D3D10DDI_HRESOURCE bound = {resource.object()};
    UINT first = 16, count = 16;
-   for (auto setter : {t.pfnVsSetConstantBuffers, t.pfnGsSetConstantBuffers, t.pfnPsSetConstantBuffers})
+   for (auto setter : {t.pfnVsSetConstantBuffers, t.pfnGsSetConstantBuffers, t.pfnPsSetConstantBuffers,
+                       t.pfnHsSetConstantBuffers, t.pfnDsSetConstantBuffers, t.pfnCsSetConstantBuffers})
       setter(h, 2, 1, &bound, &first, &count);
    for (auto &stage : dev.stage)
       CHECK(stage.cb[2] == resource.object() && stage.cbOffset[2] == 256 && stage.cbBytes[2] == 256);
@@ -370,8 +458,10 @@ void ddi11_contracts()
       t.pfnCreateDepthStencilView(h, &dsv, {view.object()}, {});
       CHECK(!errors && view.object()->dsvFlags == flags && view.object()->width == 32 &&
             view.object()->info.subresourceRange.baseArrayLayer == 1 && view.object()->layers == 2);
+      dev.dsv = view.object();
+      dev.dirty = 0;
       t.pfnDestroyDepthStencilView(h, {view.object()});
-      CHECK(!depth.views && dev.views.empty());
+      CHECK(!dev.dsv && (dev.dirty & DIRTY_BLEND) && !depth.views && dev.views.empty());
    }
    for (UINT invalid = 0; invalid < 4; ++invalid) {
       dsv.Flags = 0; dsv.Tex2D.MipSlice = 1; dsv.Tex2D.FirstArraySlice = 1; dsv.Tex2D.ArraySize = 2;
@@ -385,14 +475,28 @@ void ddi11_contracts()
       CHECK(errors == 1 && error == E_INVALIDARG && !depth.views && dev.views.empty());
    }
 
+   VulkanCaps caps = {};
+   caps.attachmentlessSamples = VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT | VK_SAMPLE_COUNT_8_BIT;
+   dev.caps = &caps;
    D3D11_1_DDI_RASTERIZER_DESC raster = {};
    Storage<RasterizerState> rasterState;
-   for (UINT samples : {0u, 1u, 2u}) {
+   for (UINT samples : {0u, 1u, 2u, 3u, 4u, 8u, 16u}) {
       raster.ForcedSampleCount = samples; errors = 0;
       t.pfnCreateRasterizerState(h, &raster, {rasterState.object()}, {});
-      if (samples < 2) { CHECK(!errors); t.pfnDestroyRasterizerState(h, {rasterState.object()}); }
-      else CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED);
+      if (samples <= 1 || samples == 4 || samples == 8) {
+         CHECK(!errors && UINT(rasterState.object()->samples) == std::max(1u, samples));
+         t.pfnDestroyRasterizerState(h, {rasterState.object()});
+      }
+      else CHECK(errors == 1 && error == (samples == 16 ? DXGI_ERROR_UNSUPPORTED : E_INVALIDARG));
    }
+   errors = 0;
+   t.pfnCreateRasterizerState(h, &raster, {}, {});
+   CHECK(errors == 1 && error == E_INVALIDARG);
+   caps.attachmentlessSamples |= VK_SAMPLE_COUNT_16_BIT;
+   errors = 0;
+   t.pfnCreateRasterizerState(h, &raster, {rasterState.object()}, {});
+   CHECK(!errors && rasterState.object()->samples == VK_SAMPLE_COUNT_16_BIT);
+   t.pfnDestroyRasterizerState(h, {rasterState.object()});
 
    D3D11_1_DDI_BLEND_DESC blend = {};
    blend.RenderTarget[0].BlendEnable = TRUE;
@@ -412,6 +516,27 @@ void ddi11_contracts()
    blend.RenderTarget[0].LogicOpEnable = TRUE; errors = 0;
    t.pfnCreateBlendState(h, &blend, {state.object()}, {});
    CHECK(errors == 1 && error == DXGI_ERROR_UNSUPPORTED);
+   caps.logicOp = true; errors = 0;
+   t.pfnCreateBlendState(h, &blend, {state.object()}, {});
+   CHECK(errors == 1 && error == E_INVALIDARG);
+   blend.RenderTarget[0].BlendEnable = FALSE;
+   constexpr VkLogicOp operations[] = {
+      VK_LOGIC_OP_CLEAR, VK_LOGIC_OP_SET, VK_LOGIC_OP_COPY, VK_LOGIC_OP_COPY_INVERTED,
+      VK_LOGIC_OP_NO_OP, VK_LOGIC_OP_INVERT, VK_LOGIC_OP_AND, VK_LOGIC_OP_NAND,
+      VK_LOGIC_OP_OR, VK_LOGIC_OP_NOR, VK_LOGIC_OP_XOR, VK_LOGIC_OP_EQUIVALENT,
+      VK_LOGIC_OP_AND_REVERSE, VK_LOGIC_OP_AND_INVERTED, VK_LOGIC_OP_OR_REVERSE, VK_LOGIC_OP_OR_INVERTED,
+   };
+   for (unsigned i = 0; i < sizeof(operations)/sizeof(operations[0]); ++i) {
+      blend.RenderTarget[0].LogicOp = static_cast<D3D11_1_DDI_LOGIC_OP>(i);
+      errors = 0;
+      t.pfnCreateBlendState(h, &blend, {state.object()}, {});
+      CHECK(!errors && state.object()->logicOpEnabled && state.object()->logicOp == operations[i]);
+      t.pfnDestroyBlendState(h, {state.object()});
+   }
+   blend.IndependentBlendEnable = TRUE;
+   errors = 0;
+   t.pfnCreateBlendState(h, &blend, {state.object()}, {});
+   CHECK(errors == 1 && error == E_INVALIDARG);
 
    BOOL direct = TRUE;
    t.pfnCheckDirectFlipSupport(h, {}, {}, 0, &direct);

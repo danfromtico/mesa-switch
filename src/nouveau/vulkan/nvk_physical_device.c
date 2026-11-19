@@ -29,6 +29,7 @@
 #include "util/os_misc.h"
 
 #include "vk_android.h"
+#include "vk_internal_exts.h"
 #include "vk_common_entrypoints.h"
 #include "vk_device.h"
 #include "vk_drm_syncobj.h"
@@ -1893,6 +1894,13 @@ nvk_GetPhysicalDeviceProperties2(
    VkPhysicalDeviceProperties2 *pProperties)
 {
    vk_common_GetPhysicalDeviceProperties2(physicalDevice, pProperties);
+#ifdef _WIN32
+   VK_FROM_HANDLE(nvk_physical_device, pdev, physicalDevice);
+   struct nvk_tir_properties *tir = vk_find_struct(pProperties->pNext, NVK_TIR_PROPERTIES_MESA);
+   if (tir)
+      tir->rasterSamples = pdev->info.chipset == 0x12e && pdev->info.cls_eng3d == MAXWELL_B ?
+                           VK_SAMPLE_COUNT_16_BIT : 0;
+#endif
 }
 
 VKAPI_ATTR void VKAPI_CALL

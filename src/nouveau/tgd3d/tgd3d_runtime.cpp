@@ -642,8 +642,13 @@ static HRESULT make_ready(Device *dev, RuntimeResource *p, uint64_t bytes,
                           uint32_t kernel_resource = 0, bool displayable = false)
 {
    if (displayable) {
-      const bool wddm2 = dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION;
-      if (!dev->nvk || (!dev->runtimeQueueAccepted && !(wddm2 && kernel_resource)))
+      // The D3D11.1 frontend also runs on the GPU-VA backend. An independent
+      // queue needs a kernel resource to open its own writable allocation.
+      const bool can_open_alias = kernel_resource &&
+         (dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION ||
+          dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION ||
+          dev->interfaceVersion == D3D9_RUNTIME_INTERFACE);
+      if (!dev->nvk || (!dev->runtimeQueueAccepted && !can_open_alias))
          return DXGI_ERROR_UNSUPPORTED;
    }
    HRESULT hr = runtime_make_resident(dev, p);
@@ -828,6 +833,7 @@ static HRESULT shared_layout(const RuntimeSharedDescription &d,
       return DXGI_ERROR_UNSUPPORTED;
    uint32_t format;
    switch (d.format) {
+   case DXGI_FORMAT_B8G8R8X8_UNORM: format = D3DDDIFMT_X8R8G8B8; break;
    case DXGI_FORMAT_B8G8R8A8_UNORM: format = D3DDDIFMT_A8R8G8B8; break;
    case DXGI_FORMAT_R8G8B8A8_UNORM: format = D3DDDIFMT_A8B8G8R8; break;
    default: return DXGI_ERROR_UNSUPPORTED;

@@ -22,6 +22,7 @@
 
 #include <deque>
 #include <list>
+#include <memory>
 #include <new>
 #include <vector>
 
@@ -55,6 +56,12 @@ struct Adapter {
    std::vector<uint8_t> videoFirmware;
    VulkanAdapter vk;
 };
+
+HRESULT open_native_adapter(HANDLE, const D3DDDI_ADAPTERCALLBACKS *, Adapter **);
+HRESULT close_native_adapter(Adapter *);
+constexpr UINT D3D9_RUNTIME_INTERFACE = 9;
+HRESULT legacy9_create_device(Adapter *adapter, D3DDDIARG_CREATEDEVICE *args);
+UINT native_pipeline_levels(const Adapter *adapter);
 void adapter_fill_queries(D3D10_2DDI_ADAPTERFUNCS *table);
 
 /* ------------------------------------------------------------------ */
@@ -162,7 +169,7 @@ struct Resource {
    Resource *next = nullptr;           /* device-owned list; no allocation on creation */
    D3D10DDI_HRTRESOURCE hRT = {};
    D3D10DDIRESOURCE_TYPE dim = D3D10DDIRESOURCE_BUFFER;
-   UINT usage = 0, bind = 0, mapFlags = 0, misc = 0;
+   UINT usage = 0, bind = 0, mapFlags = 0, misc = 0, structureStride = 0;
    DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
    UINT mips = 1, arraySize = 1;
    UINT width = 0, height = 1, depth = 1;
@@ -175,6 +182,9 @@ struct Resource {
    /* Buffer and staging storage. Renamed on discard; never written while the
     * previous contents are still referenced by recorded or queued commands. */
    Slice slice;
+   Slice soCounter;                   /* byte cursor shared by SO append and DrawAuto */
+   uint64_t soCounterLastUse = 0;
+   UINT soVertexStride = 0;
    VkDeviceSize size = 0;
    uint64_t sliceLastUse = 0;
    uint64_t sliceLastWrite = 0;   /* last GPU write into the slice (staging readback) */
@@ -197,7 +207,7 @@ struct Resource {
    UINT mipDepth(UINT mip) const { UINT v = depth >> mip; return v ? v : 1; }
 };
 
-enum class ViewType : uint8_t { SRV, RTV, DSV };
+enum class ViewType : uint8_t { SRV, RTV, DSV, UAV };
 
 struct View {
    Device *dev = nullptr;
@@ -212,6 +222,7 @@ struct View {
     * rotation of every buffer and then creates nothing per frame. */
    struct Entry { VkImage image; VkImageView view; bool arrayed; } cache[6] = {};
    /* Buffer SRV. Recreated when the buffer is renamed. */
+   Slice counter;                    /* structured UAV's optional append/consume counter */
    VkBufferView bufferView = VK_NULL_HANDLE;
    VkBuffer bufferViewBuffer = VK_NULL_HANDLE;
    VkDeviceSize bufferViewOffset = 0, bufferOffset = 0, bufferRange = 0;
@@ -226,6 +237,8 @@ struct BlendState {
    D3D10_DDI_BLEND_DESC desc;
    VkColorBlendEquationEXT equation;
    bool usesBlendFactor;
+   bool logicOpEnabled = false;
+   VkLogicOp logicOp = VK_LOGIC_OP_COPY;
 };
 
 struct DepthStencilState {
@@ -234,6 +247,7 @@ struct DepthStencilState {
 
 struct RasterizerState {
    D3D10_DDI_RASTERIZER_DESC desc;
+   VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
 };
 
 struct Sampler {
@@ -255,6 +269,11 @@ enum class QueryState : uint8_t { Idle, Active, Ended };
  * result is the sum of the slots. */
 enum { QUERY_SLOTS = 128 };
 
+struct IndirectInvocations {
+   Slice counts;
+   UINT groupSize;
+};
+
 struct Query {
    Device *dev;
    D3D10DDI_QUERY type;
@@ -264,6 +283,8 @@ struct Query {
    uint64_t seq;          /* submit sequence that must complete before data is ready */
    uint32_t used;         /* slots written since Begin */
    bool inPass;
+   uint64_t explicitInvocations = 0;
+   std::vector<IndirectInvocations> indirectInvocations;
    std::vector<VkQueryPool> fullPools;
    HRESULT error = S_OK;
 };
@@ -271,26 +292,64 @@ struct Query {
 /* ------------------------------------------------------------------ */
 /* Shaders                                                             */
 
+struct SoCapture {
+   uint8_t reg, mask;
+   uint16_t offset;
+   bool operator==(const SoCapture &v) const { return reg == v.reg && mask == v.mask && offset == v.offset; }
+};
+
+struct StreamOutput {
+   std::vector<SoCapture> fields;
+   UINT stride = 0;
+   bool discardRaster = false;
+   bool operator==(const StreamOutput &v) const {
+      return stride == v.stride && discardRaster == v.discardRaster && fields == v.fields;
+   }
+};
+
 struct ShaderVariant {
-   uint32_t key;
+   uint64_t key;
    VkShaderEXT shader;
+   std::shared_ptr<const StreamOutput> capture{};
+};
+
+struct ShaderBinding {
+   uint32_t binding, slot;
+   VkDescriptorType type;
+   uint32_t kind;  /* dxbc-spirv resource dimension */
+};
+
+struct DescriptorData {
+   VkDescriptorBufferInfo buffer{};
+   VkDescriptorImageInfo image{};
+   VkBufferView texel = VK_NULL_HANDLE;
 };
 
 struct Shader {
    Device *dev = nullptr;
    Stage stage = STAGE_VS;
    std::vector<uint32_t> tokens;                     /* SHDR token stream */
-   std::vector<D3D10DDIARG_SIGNATURE_ENTRY> inputs, outputs;
+   std::vector<D3D11_1DDIARG_SIGNATURE_ENTRY2> inputs, outputs, patchConstants;
+   std::shared_ptr<const StreamOutput> so;
+   bool soPassthrough = false;
+   uint64_t tessIoMask = 0;             /* low: per-control-point registers, high: per-patch registers */
+   UINT inputControlPoints = 0;
+   UINT tessDomain = 0;
    /* Reflection of statically used bindings. */
    uint32_t cbMask = 0;
    uint32_t samplerMask = 0;
    uint32_t srvMask[4] = {};
    uint32_t srvBufferMask[4] = {};
    uint8_t srvKind[D3D_SRV_SLOTS] = {};      /* dxbc_spv::ir::ResourceKind per slot */
+   uint64_t uavMask = 0, uavBufferMask = 0;
    uint32_t inputRegisters = 0;     /* VS: v# registers read */
    uint32_t outputRegisters = 0;    /* PS: o# registers written */
    bool reflected = false;
    bool usesTexelBuffers = false;
+   UINT groupSize = 0;
+   VkDescriptorSetLayout computeSet = VK_NULL_HANDLE;
+   VkPipelineLayout computeLayout = VK_NULL_HANDLE;
+   std::vector<ShaderBinding> bindings; /* compute descriptors, or graphics UAVs */
    std::vector<ShaderVariant> variants;
    HRESULT error = S_OK;
 };
@@ -312,6 +371,7 @@ enum Dirty : uint32_t {
    DIRTY_TEXTURES = 1u << 10,
    DIRTY_TEXEL_BUFFERS = 1u << 11,
    DIRTY_STATIC = 1u << 12,       /* state set once per command buffer */
+   DIRTY_GRAPHICS_UAVS = 1u << 13,
    DIRTY_ALL = 0xffffffffu,
 };
 
@@ -341,7 +401,7 @@ struct PendingClear {
 struct DeferredSlice { Slice slice; uint64_t seq; };
 
 enum class DeferredType : uint8_t {
-   Image, Memory, ImageView, BufferView, Sampler, Shader, QueryPool, Runtime,
+   Image, Memory, ImageView, BufferView, Sampler, Shader, QueryPool, Runtime, PipelineLayout, SetLayout,
 };
 struct Deferred {
    DeferredType type;
@@ -404,9 +464,10 @@ struct Device : DeviceSlot {
    /* Immediate-context host scratch only. Descriptor sets/pools retain their
     * existing per-submission ownership; none of these arrays is GPU backing. */
    std::vector<VkWriteDescriptorSet> descriptorWrites;
+   std::vector<DescriptorData> shaderDescriptorData;
    std::vector<VkDescriptorImageInfo> descriptorImages;
    std::vector<VkBufferView> descriptorBuffers;
-   VkDescriptorSetLayout setLayouts[SET_COUNT] = {};
+   VkDescriptorSetLayout setLayouts[SET_GRAPHICS_UAV + 1] = {};
    VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
    VkShaderEXT blitVertex[4] = {}, blitFragment = VK_NULL_HANDLE;
    VkPipelineLayout blitPipelineLayout = VK_NULL_HANDLE;
@@ -439,8 +500,11 @@ struct Device : DeviceSlot {
 
    /* Bound state */
    StageBindings stage[STAGE_COUNT];
+   View *computeUav[D3D_UAV_SLOTS] = {};
+   View *graphicsUav[D3D_UAV_SLOTS] = {};
    ElementLayout *inputLayout = nullptr;
    VertexBinding vb[16];
+   Resource *soTargets[4] = {};
    Resource *indexBuffer = nullptr;
    DXGI_FORMAT indexFormat = DXGI_FORMAT_R16_UINT;
    UINT indexOffset = 0;
@@ -504,6 +568,8 @@ void device_fill_table11(D3D11_1DDI_DEVICEFUNCS *table);
 void device_fill_table13(D3DWDDM1_3DDI_DEVICEFUNCS *table);
 void device_fill_table20(D3DWDDM2_0DDI_DEVICEFUNCS *table);
 SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER, const D3D10DDIARG_CALCPRIVATEDEVICESIZE *);
+HRESULT initialize_graphics_device(Device *dev, bool use_runtime_queue, bool allow_independent);
+void release_device(DeviceSlot *slot);
 HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER, D3D10DDIARG_CREATEDEVICE *);
 
 /* tgd3d_cmd.cpp: command recording, submission and the queue fence */
@@ -542,6 +608,8 @@ void upload_trim(Device *dev);
 /* tgd3d_resource.cpp */
 HRESULT resource_result(VkResult result);
 void resource_fill_table(D3D10DDI_DEVICEFUNCS *table);
+void create_resource_with_stride(D3D10DDI_HDEVICE, const D3D10DDIARG_CREATERESOURCE *,
+                                 D3D10DDI_HRESOURCE, D3D10DDI_HRTRESOURCE, UINT stride);
 void resource_creation_error(Device *dev, HRESULT hr, DXGI_DDI_PRIMARY_DESC *primary = nullptr);
 VkImageView view_get(View *view, bool arrayed = false);
 VkBufferView view_get_buffer(View *view);
@@ -557,12 +625,19 @@ void state_fill_table(D3D10DDI_DEVICEFUNCS *table);
 void set_constant_buffers(Device *dev, Stage stage, UINT start, UINT count,
                           const D3D10DDI_HRESOURCE *buffers,
                           const UINT *first = nullptr, const UINT *sizes = nullptr);
+void set_shader_resources(Device *, Stage, UINT, UINT, const D3D10DDI_HSHADERRESOURCEVIEW *);
+void set_samplers(Device *, Stage, UINT, UINT, const D3D10DDI_HSAMPLER *);
 bool blend_uses_dual_source(const BlendState *state);
 
 /* tgd3d_shader.cpp */
 void shader_fill_table(D3D10DDI_DEVICEFUNCS *table);
-VkShaderEXT shader_variant(Shader *shader, uint32_t key);
-VkResult create_shader_cached(Device *dev, const VkShaderCreateInfoEXT &info, VkShaderEXT *shader);
+VkShaderEXT shader_variant(Shader *shader, uint64_t key, const std::shared_ptr<const StreamOutput> &capture = {});
+void create_shader11(D3D10DDI_HDEVICE, const UINT *, D3D10DDI_HSHADER, Stage,
+                     const D3D11_1DDIARG_STAGE_IO_SIGNATURES *, const D3D11_1DDIARG_SIGNATURE_ENTRY2 *patch = nullptr,
+                     UINT patchCount = 0, const D3D11DDIARG_CREATEGEOMETRYSHADERWITHSTREAMOUTPUT *so = nullptr);
+void set_graphics_shader(D3D10DDI_HDEVICE, D3D10DDI_HSHADER, Stage);
+VkResult create_shader_cached(Device *dev, const VkShaderCreateInfoEXT &info, VkShaderEXT *shader,
+                              const Shader *compute = nullptr);
 
 /* tgd3d_draw.cpp */
 void draw_fill_table(D3D10DDI_DEVICEFUNCS *table);
@@ -571,11 +646,29 @@ void APIENTRY DrawIndexedIndirect11(D3D10DDI_HDEVICE device, D3D10DDI_HRESOURCE 
 HRESULT device_layouts_create(Device *dev);
 void device_layouts_destroy(Device *dev);
 VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set);
+VkDescriptorSet alloc_descriptor_snapshot(Device *dev, VkDescriptorSetLayout layout);
+bool srv_matches(uint8_t kind, const View *view);
+void APIENTRY CreateComputeShader(D3D10DDI_HDEVICE, const UINT *, D3D10DDI_HSHADER, D3D10DDI_HRTSHADER);
+void APIENTRY CsSetShader(D3D10DDI_HDEVICE, D3D10DDI_HSHADER);
+void APIENTRY CsSetShaderResources(D3D10DDI_HDEVICE, UINT, UINT, const D3D10DDI_HSHADERRESOURCEVIEW *);
+void APIENTRY CsSetSamplers(D3D10DDI_HDEVICE, UINT, UINT, const D3D10DDI_HSAMPLER *);
+void APIENTRY CsSetUavs(D3D10DDI_HDEVICE, UINT, UINT, const D3D11DDI_HUNORDEREDACCESSVIEW *, const UINT *);
+bool set_uavs(Device *, View **slots, UINT start, UINT count, const D3D11DDI_HUNORDEREDACCESSVIEW *, const UINT *);
+bool bind_graphics_uavs(Device *, VkCommandBuffer);
+void APIENTRY Dispatch11(D3D10DDI_HDEVICE, UINT, UINT, UINT);
+void APIENTRY DispatchIndirect11(D3D10DDI_HDEVICE, D3D10DDI_HRESOURCE, UINT);
+void APIENTRY ClearUavUint11(D3D10DDI_HDEVICE, D3D11DDI_HUNORDEREDACCESSVIEW, const UINT[4]);
+void APIENTRY CopyStructureCount11(D3D10DDI_HDEVICE, D3D10DDI_HRESOURCE, UINT, D3D11DDI_HUNORDEREDACCESSVIEW);
+void APIENTRY CreateUav11(D3D10DDI_HDEVICE, const D3D11DDIARG_CREATEUNORDEREDACCESSVIEW *,
+                          D3D11DDI_HUNORDEREDACCESSVIEW, D3D11DDI_HRTUNORDEREDACCESSVIEW);
+void APIENTRY DestroyUav11(D3D10DDI_HDEVICE, D3D11DDI_HUNORDEREDACCESSVIEW);
+void create_buffer_srv11(Device *, Resource *, void *memory, UINT first, UINT count, DXGI_FORMAT, UINT flags);
 
 /* tgd3d_query.cpp */
 void query_fill_table(D3D10DDI_DEVICEFUNCS *table);
-void query_pass_begin(Device *dev, VkCommandBuffer cmd);
+void query_pass_begin(Device *dev, VkCommandBuffer cmd, bool compute = false);
 void query_pass_end(Device *dev, VkCommandBuffer cmd);
+bool capture_indirect_invocations(Device *, VkCommandBuffer, Resource *arguments, UINT offset, UINT groupSize);
 
 /* tgd3d_dxgi.cpp */
 void dxgi_fill_table(DXGI1_1_DDI_BASE_FUNCTIONS *table, bool has_resolve);

@@ -4,6 +4,7 @@
  * Do not cast device tables or copy descriptors with different union layouts.
  */
 #include "tgd3d.h"
+#include <iterator>
 #include <type_traits>
 
 namespace tgd3d {
@@ -26,12 +27,24 @@ static const D3D10DDI_DEVICEFUNCS &legacy()
 static bool resource_desc(Device *dev, const D3D11DDIARG_CREATERESOURCE *in,
                           D3D10DDIARG_CREATERESOURCE *out)
 {
-   if (!in || !in->pMipInfoList ||
-       (in->BindFlags & (D3D11_DDI_BIND_UNORDERED_ACCESS |
-                        D3D11_DDI_BIND_VIDEO_ENCODER)) ||
-       (in->MiscFlags & (D3D11_DDI_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS |
-                        D3D11_DDI_RESOURCE_MISC_BUFFER_STRUCTURED)))
+   if (!in || !in->pMipInfoList || (in->BindFlags & D3D11_DDI_BIND_VIDEO_ENCODER))
       return false;
+   const UINT raw = D3D11_DDI_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
+   const UINT structured = D3D11_DDI_RESOURCE_MISC_BUFFER_STRUCTURED;
+   if (in->MiscFlags & (raw | structured)) {
+      if (in->ResourceDimension != D3D10DDIRESOURCE_BUFFER || in->Format != DXGI_FORMAT_UNKNOWN ||
+          (in->MiscFlags & (raw | structured)) == (raw | structured) ||
+          (in->BindFlags & D3D10_DDI_BIND_CONSTANT_BUFFER)) return false;
+      if (in->MiscFlags & structured) {
+         if (!in->ByteStride || (in->ByteStride & 3) || in->ByteStride > 2048 ||
+             in->pMipInfoList[0].TexelWidth % in->ByteStride) return false;
+      } else if (in->ByteStride || (in->pMipInfoList[0].TexelWidth & 3)) return false;
+   }
+   if ((in->BindFlags & D3D11_DDI_BIND_UNORDERED_ACCESS) &&
+       (!dev->caps || !dev->caps->compute || in->Usage != D3D10_DDI_USAGE_DEFAULT ||
+        in->MapFlags || in->pPrimaryDesc || in->SampleDesc.Count != 1 ||
+        (in->BindFlags & (D3D10_DDI_BIND_CONSTANT_BUFFER | D3D10_DDI_BIND_DEPTH_STENCIL |
+                         D3D11_DDI_BIND_DECODER)))) return false;
    if (in->ResourceDimension == D3D10DDIRESOURCE_BUFFER && (in->BindFlags & D3D11_DDI_BIND_DECODER)) {
       /* Runtime-created decoder inputs are opaque byte buffers. The type of
        * each occupied byte range is supplied to VideoDecoderSubmitBuffers. */
@@ -39,7 +52,7 @@ static bool resource_desc(Device *dev, const D3D11DDIARG_CREATERESOURCE *in,
           in->Format != DXGI_FORMAT_UNKNOWN || in->Usage != D3D10_DDI_USAGE_DYNAMIC ||
           in->MapFlags != D3D10_DDI_CPU_ACCESS_WRITE || in->MiscFlags || in->pPrimaryDesc)
          return false;
-   } else if (in->ByteStride || ((in->BindFlags & D3D11_DDI_BIND_DECODER) && in->Format != DXGI_FORMAT_NV12)) {
+   } else if ((in->ByteStride && !(in->MiscFlags & structured)) || ((in->BindFlags & D3D11_DDI_BIND_DECODER) && in->Format != DXGI_FORMAT_NV12)) {
       return false;
    }
    /* The 11.1 producer does not provide the WDDM2 TextureLayout tail. Only
@@ -73,7 +86,8 @@ static void APIENTRY CreateResource(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATE
          in && (in->BindFlags & D3D10_DDI_BIND_PRESENT) ? in->pPrimaryDesc : nullptr);
       return;
    }
-   legacy().pfnCreateResource(h, &desc, resource, rt);
+   create_resource_with_stride(h, &desc, resource, rt,
+      (in->MiscFlags & D3D11_DDI_RESOURCE_MISC_BUFFER_STRUCTURED) ? in->ByteStride : 0);
 }
 
 static void APIENTRY CreateResource20(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATERESOURCE *in,
@@ -105,6 +119,15 @@ static void APIENTRY CreateSrv(D3D10DDI_HDEVICE h, const D3D11DDIARG_CREATESHADE
                                D3D10DDI_HSHADERRESOURCEVIEW view, D3D10DDI_HRTSHADERRESOURCEVIEW rt)
 {
    if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   if (in->ResourceDimension == D3D11DDIRESOURCE_BUFFEREX ||
+       (in->ResourceDimension == D3D10DDIRESOURCE_BUFFER && R(in->hDrvResource) && R(in->hDrvResource)->structureStride)) {
+      const bool extended = in->ResourceDimension == D3D11DDIRESOURCE_BUFFEREX;
+      create_buffer_srv11(D(h), R(in->hDrvResource), view.pDrvPrivate,
+         extended ? in->BufferEx.FirstElement : in->Buffer.FirstElement,
+         extended ? in->BufferEx.NumElements : in->Buffer.NumElements, in->Format,
+         extended ? in->BufferEx.Flags : 0);
+      return;
+   }
    D3D10DDIARG_CREATESHADERRESOURCEVIEW desc = {};
    desc.hDrvResource = in->hDrvResource;
    desc.Format = in->Format;
@@ -139,6 +162,7 @@ static void APIENTRY CreateSrv20(D3D10DDI_HDEVICE h, const D3DWDDM2_0DDIARG_CREA
    desc.hDrvResource = in->hDrvResource; desc.Format = in->Format;
    desc.ResourceDimension = in->ResourceDimension;
    switch (in->ResourceDimension) {
+   case D3D11DDIRESOURCE_BUFFEREX: desc.BufferEx = in->BufferEx; break;
    case D3D10DDIRESOURCE_BUFFER: desc.Buffer = in->Buffer; break;
    case D3D10DDIRESOURCE_TEXTURE1D: desc.Tex1D = in->Tex1D; break;
    case D3D10DDIRESOURCE_TEXTURE2D:
@@ -226,15 +250,35 @@ static void APIENTRY CreateBlend(D3D10DDI_HDEVICE h, const D3D11_1_DDI_BLEND_DES
    desc.SrcBlend = first.SrcBlend; desc.DestBlend = first.DestBlend; desc.BlendOp = first.BlendOp;
    desc.SrcBlendAlpha = first.SrcBlendAlpha; desc.DestBlendAlpha = first.DestBlendAlpha;
    desc.BlendOpAlpha = first.BlendOpAlpha;
+   static constexpr VkLogicOp ops[] = {
+      VK_LOGIC_OP_CLEAR, VK_LOGIC_OP_SET, VK_LOGIC_OP_COPY, VK_LOGIC_OP_COPY_INVERTED,
+      VK_LOGIC_OP_NO_OP, VK_LOGIC_OP_INVERT, VK_LOGIC_OP_AND, VK_LOGIC_OP_NAND,
+      VK_LOGIC_OP_OR, VK_LOGIC_OP_NOR, VK_LOGIC_OP_XOR, VK_LOGIC_OP_EQUIVALENT,
+      VK_LOGIC_OP_AND_REVERSE, VK_LOGIC_OP_AND_INVERTED, VK_LOGIC_OP_OR_REVERSE,
+      VK_LOGIC_OP_OR_INVERTED,
+   };
+   static_assert(std::size(ops) == D3D11_1_DDI_LOGIC_OP_OR_INVERTED + 1);
    for (UINT i = 0; i < D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
       const auto &target = in->RenderTarget[in->IndependentBlendEnable ? i : 0];
-      if (target.LogicOpEnable || (target.BlendEnable && !same_blend(first, target))) {
+      if (target.LogicOpEnable && !D(h)->caps->logicOp) {
+         TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
+      }
+      if (target.LogicOpEnable && (in->IndependentBlendEnable || target.BlendEnable ||
+                                   static_cast<UINT>(target.LogicOp) >= std::size(ops))) {
+         TG_ERROR(D(h), E_INVALIDARG); return;
+      }
+      if (target.BlendEnable && !same_blend(first, target)) {
          TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
       }
       desc.BlendEnable[i] = target.BlendEnable;
       desc.RenderTargetWriteMask[i] = target.RenderTargetWriteMask;
    }
    legacy().pfnCreateBlendState(h, &desc, handle, rt);
+   if (first.LogicOpEnable) {
+      auto *state = static_cast<BlendState *>(handle.pDrvPrivate);
+      state->logicOpEnabled = true;
+      state->logicOp = ops[first.LogicOp];
+   }
 }
 
 static SIZE_T APIENTRY RasterizerSize(D3D10DDI_HDEVICE, const D3D11_1_DDI_RASTERIZER_DESC *)
@@ -245,15 +289,19 @@ static SIZE_T APIENTRY RasterizerSize(D3D10DDI_HDEVICE, const D3D11_1_DDI_RASTER
 static void APIENTRY CreateRasterizer(D3D10DDI_HDEVICE h, const D3D11_1_DDI_RASTERIZER_DESC *in,
                                       D3D10DDI_HRASTERIZERSTATE handle, D3D10DDI_HRTRASTERIZERSTATE rt)
 {
-   if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
-   /* The supported attachments and rasterization use one sample. The
-    * mandatory ForcedSampleCount=1 case therefore has the same raster state;
-    * higher sample counts still require multisample implementation. */
-   if (in->ForcedSampleCount > 1) { TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return; }
+   if (!in || !handle.pDrvPrivate) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   const UINT samples = std::max(1u, in->ForcedSampleCount);
+   if (samples != 1 && samples != 4 && samples != 8 && samples != 16) {
+      TG_ERROR(D(h), E_INVALIDARG); return;
+   }
+   if (samples > 1 && (!D(h)->caps || !((D(h)->caps->attachmentlessSamples | D(h)->caps->tirSamples) & samples))) {
+      TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return;
+   }
    D3D10_DDI_RASTERIZER_DESC desc = {in->FillMode, in->CullMode, in->FrontCounterClockwise,
       in->DepthBias, in->DepthBiasClamp, in->SlopeScaledDepthBias, in->DepthClipEnable,
       in->ScissorEnable, in->MultisampleEnable, in->AntialiasedLineEnable};
    legacy().pfnCreateRasterizerState(h, &desc, handle, rt);
+   static_cast<RasterizerState *>(handle.pDrvPrivate)->samples = VkSampleCountFlagBits(samples);
 }
 
 static SIZE_T APIENTRY RasterizerSize20(D3D10DDI_HDEVICE, const D3DWDDM2_0DDI_RASTERIZER_DESC *)
@@ -291,48 +339,45 @@ static void APIENTRY CreateQuery20(D3D10DDI_HDEVICE h, const D3DWDDM2_0DDIARG_CR
    legacy().pfnCreateQuery(h, &desc, query, rt);
 }
 
-struct Signatures {
-   D3D10DDIARG_SIGNATURE_ENTRY input[128] = {}, output[128] = {};
-   D3D10DDIARG_STAGE_IO_SIGNATURES desc = {};
-
-   bool convert(const D3D11_1DDIARG_STAGE_IO_SIGNATURES *in)
-   {
-      if (!in) return true;
-      if (in->NumInputSignatureEntries > 128 || in->NumOutputSignatureEntries > 128 ||
-          (in->NumInputSignatureEntries && !in->pInputSignature) ||
-          (in->NumOutputSignatureEntries && !in->pOutputSignature)) return false;
-      /* The old and new entries have different strides. Minimum precision
-       * may use full precision; no 10/16-bit arithmetic is advertised. */
-      for (UINT i = 0; i < in->NumInputSignatureEntries; ++i) {
-         const auto &s = in->pInputSignature[i];
-         input[i] = {s.SystemValue, s.Register, s.Mask};
-      }
-      for (UINT i = 0; i < in->NumOutputSignatureEntries; ++i) {
-         const auto &s = in->pOutputSignature[i];
-         output[i] = {s.SystemValue, s.Register, s.Mask};
-      }
-      desc = {input, in->NumInputSignatureEntries, output, in->NumOutputSignatureEntries};
-      return true;
-   }
-};
-
 static SIZE_T APIENTRY ShaderSize(D3D10DDI_HDEVICE, const UINT *, const D3D11_1DDIARG_STAGE_IO_SIGNATURES *)
 {
    return sizeof(Shader);
 }
 
-#define SHADER_ENTRY(stage) \
-static void APIENTRY Create##stage(D3D10DDI_HDEVICE h, const UINT *code, D3D10DDI_HSHADER handle, \
-                                   D3D10DDI_HRTSHADER rt, const D3D11_1DDIARG_STAGE_IO_SIGNATURES *in) \
-{ \
-   Signatures sig; \
-   if (!sig.convert(in)) { TG_ERROR(D(h), E_INVALIDARG); return; } \
-   legacy().pfnCreate##stage##Shader(h, code, handle, rt, in ? &sig.desc : nullptr); \
+template<Stage stage>
+static void APIENTRY CreateGraphicsShader(D3D10DDI_HDEVICE h, const UINT *code, D3D10DDI_HSHADER handle,
+                                          D3D10DDI_HRTSHADER, const D3D11_1DDIARG_STAGE_IO_SIGNATURES *io)
+{
+   create_shader11(h, code, handle, stage, io);
 }
-SHADER_ENTRY(Vertex)
-SHADER_ENTRY(Geometry)
-SHADER_ENTRY(Pixel)
-#undef SHADER_ENTRY
+
+static SIZE_T APIENTRY TessShaderSize(D3D10DDI_HDEVICE, const UINT *, const D3D11_1DDIARG_TESSELLATION_IO_SIGNATURES *)
+{
+   return sizeof(Shader);
+}
+
+template<Stage stage>
+static void APIENTRY CreateTessShader(D3D10DDI_HDEVICE h, const UINT *code, D3D10DDI_HSHADER handle,
+                                      D3D10DDI_HRTSHADER, const D3D11_1DDIARG_TESSELLATION_IO_SIGNATURES *sig)
+{
+   if (!sig) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   D3D11_1DDIARG_STAGE_IO_SIGNATURES io{};
+   io.pInputSignature = sig->pInputSignature; io.NumInputSignatureEntries = sig->NumInputSignatureEntries;
+   io.pOutputSignature = sig->pOutputSignature; io.NumOutputSignatureEntries = sig->NumOutputSignatureEntries;
+   create_shader11(h, code, handle, stage, &io, sig->pPatchConstantSignature, sig->NumPatchConstantSignatureEntries);
+}
+
+template<Stage stage>
+static void APIENTRY SetGraphicsShader(D3D10DDI_HDEVICE h, D3D10DDI_HSHADER shader)
+{ set_graphics_shader(h, shader, stage); }
+
+template<Stage stage>
+static void APIENTRY SetGraphicsResources(D3D10DDI_HDEVICE h, UINT start, UINT count, const D3D10DDI_HSHADERRESOURCEVIEW *views)
+{ set_shader_resources(D(h), stage, start, count, views); }
+
+template<Stage stage>
+static void APIENTRY SetGraphicsSamplers(D3D10DDI_HDEVICE h, UINT start, UINT count, const D3D10DDI_HSAMPLER *samplers)
+{ set_samplers(D(h), stage, start, count, samplers); }
 
 static SIZE_T APIENTRY GeometrySoSize(D3D10DDI_HDEVICE,
    const D3D11DDIARG_CREATEGEOMETRYSHADERWITHSTREAMOUTPUT *, const D3D11_1DDIARG_STAGE_IO_SIGNATURES *)
@@ -342,11 +387,10 @@ static SIZE_T APIENTRY GeometrySoSize(D3D10DDI_HDEVICE,
 
 static void APIENTRY CreateGeometrySo(D3D10DDI_HDEVICE h,
    const D3D11DDIARG_CREATEGEOMETRYSHADERWITHSTREAMOUTPUT *in, D3D10DDI_HSHADER handle,
-   D3D10DDI_HRTSHADER rt, const D3D11_1DDIARG_STAGE_IO_SIGNATURES *sig)
+   D3D10DDI_HRTSHADER, const D3D11_1DDIARG_STAGE_IO_SIGNATURES *sig)
 {
    if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
-   if (in->NumEntries || in->RasterizedStream) { TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return; }
-   CreateGeometry(h, in->pShaderCode, handle, rt, sig);
+   create_shader11(h, in->pShaderCode, handle, STAGE_GS, sig, nullptr, 0, in);
 }
 
 #define STAGE_ENTRY(name, stage) \
@@ -357,18 +401,43 @@ static void APIENTRY name##ShaderInterfaces(D3D10DDI_HDEVICE h, D3D10DDI_HSHADER
    UINT count, const UINT *, const D3D11DDIARG_POINTERDATA *) \
 { \
    if (count) { TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return; } \
-   legacy().pfn##name##SetShader(h, shader); \
+   set_graphics_shader(h, shader, stage); \
 }
 STAGE_ENTRY(Vs, STAGE_VS)
 STAGE_ENTRY(Gs, STAGE_GS)
 STAGE_ENTRY(Ps, STAGE_PS)
+STAGE_ENTRY(Hs, STAGE_HS)
+STAGE_ENTRY(Ds, STAGE_DS)
 #undef STAGE_ENTRY
 
 static void APIENTRY SetRenderTargets(D3D10DDI_HDEVICE h, const D3D10DDI_HRENDERTARGETVIEW *rtvs,
    UINT count, UINT clear, D3D10DDI_HDEPTHSTENCILVIEW dsv,
-   const D3D11DDI_HUNORDEREDACCESSVIEW *, const UINT *, UINT, UINT uavs, UINT, UINT)
+   const D3D11DDI_HUNORDEREDACCESSVIEW *views, const UINT *initialCounts, UINT start, UINT uavs, UINT, UINT)
 {
-   if (uavs) { TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return; }
+   Device *dev = D(h);
+   if (uavs && (!dev->caps || !dev->caps->graphicsUavSlots)) {
+      TG_ERROR(dev, DXGI_ERROR_UNSUPPORTED); return;
+   }
+   if (count > D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT ||
+       clear > D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT - count || (count && !rtvs) ||
+       (uavs && (start < count || start > dev->caps->graphicsUavSlots || uavs > dev->caps->graphicsUavSlots - start))) {
+      TG_ERROR(dev, E_INVALIDARG); return;
+   }
+   for (UINT i = 0; i < count; ++i) {
+      const auto *v = static_cast<const View *>(rtvs[i].pDrvPrivate);
+      if (v && (v->dev != dev || v->type != ViewType::RTV)) { TG_ERROR(dev, E_INVALIDARG); return; }
+   }
+   const auto *depth = static_cast<const View *>(dsv.pDrvPrivate);
+   if (depth && (depth->dev != dev || depth->type != ViewType::DSV)) { TG_ERROR(dev, E_INVALIDARG); return; }
+   // The last two DDI parameters are optimization hints. The provided views
+   // include explicit null bindings and counters can be reset on a bound view.
+   if (uavs && !set_uavs(dev, dev->graphicsUav, start, uavs, views, initialCounts)) return;
+   for (UINT i = 0; i < count; ++i) {
+      if (dev->graphicsUav[i]) {
+         dev->graphicsUav[i] = nullptr;
+         dev->dirty |= DIRTY_GRAPHICS_UAVS;
+      }
+   }
    legacy().pfnSetRenderTargets(h, rtvs, count, clear, dsv);
 }
 
@@ -484,6 +553,38 @@ static void APIENTRY CheckDirectFlip(D3D10DDI_HDEVICE h, D3D10DDI_HRESOURCE sour
       *supported = !flags && direct_flip_compatible(D(h), R(source), R(target));
 }
 
+template<typename Descriptor>
+static SIZE_T APIENTRY UavSize(D3D10DDI_HDEVICE, const Descriptor *) { return sizeof(View); }
+
+static void APIENTRY CreateUav20(D3D10DDI_HDEVICE h, const D3DWDDM2_0DDIARG_CREATEUNORDEREDACCESSVIEW *in,
+                                 D3D11DDI_HUNORDEREDACCESSVIEW view, D3D11DDI_HRTUNORDEREDACCESSVIEW rt)
+{
+   if (!in) { TG_ERROR(D(h), E_INVALIDARG); return; }
+   D3D11DDIARG_CREATEUNORDEREDACCESSVIEW desc{};
+   desc.hDrvResource = in->hDrvResource; desc.Format = in->Format; desc.ResourceDimension = in->ResourceDimension;
+   switch (in->ResourceDimension) {
+   case D3D10DDIRESOURCE_BUFFER: desc.Buffer = in->Buffer; break;
+   case D3D10DDIRESOURCE_TEXTURE1D: desc.Tex1D = in->Tex1D; break;
+   case D3D10DDIRESOURCE_TEXTURE2D:
+      if (in->Tex2D.PlaneSlice) { TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return; }
+      desc.Tex2D = {in->Tex2D.MipSlice, in->Tex2D.FirstArraySlice, in->Tex2D.ArraySize}; break;
+   case D3D10DDIRESOURCE_TEXTURE3D: desc.Tex3D = in->Tex3D; break;
+   default: TG_ERROR(D(h), E_INVALIDARG); return;
+   }
+   CreateUav11(h, &desc, view, rt);
+}
+
+static void APIENTRY CsConstants(D3D10DDI_HDEVICE h, UINT start, UINT count, const D3D10DDI_HRESOURCE *buffers,
+                                 const UINT *first, const UINT *sizes)
+{ set_constant_buffers(D(h), STAGE_CS, start, count, buffers, first, sizes); }
+
+static void APIENTRY CsInterfaces(D3D10DDI_HDEVICE h, D3D10DDI_HSHADER shader, UINT count,
+                                  const UINT *, const D3D11DDIARG_POINTERDATA *)
+{
+   if (count) { TG_ERROR(D(h), DXGI_ERROR_UNSUPPORTED); return; }
+   CsSetShader(h, shader);
+}
+
 template<typename Table>
 static void common_table(Table *table)
 {
@@ -570,9 +671,9 @@ static void common_table(Table *table)
    table->pfnCalcPrivateBlendStateSize = BlendSize;
    table->pfnCreateBlendState = CreateBlend;
    table->pfnCalcPrivateShaderSize = ShaderSize;
-   table->pfnCreateVertexShader = CreateVertex;
-   table->pfnCreateGeometryShader = CreateGeometry;
-   table->pfnCreatePixelShader = CreatePixel;
+   table->pfnCreateVertexShader = CreateGraphicsShader<STAGE_VS>;
+   table->pfnCreateGeometryShader = CreateGraphicsShader<STAGE_GS>;
+   table->pfnCreatePixelShader = CreateGraphicsShader<STAGE_PS>;
    table->pfnCalcPrivateGeometryShaderWithStreamOutput = GeometrySoSize;
    table->pfnCreateGeometryShaderWithStreamOutput = CreateGeometrySo;
    table->pfnVsSetConstantBuffers = VsConstants;
@@ -582,6 +683,32 @@ static void common_table(Table *table)
    table->pfnGsSetShaderWithIfaces = GsShaderInterfaces;
    table->pfnPsSetShaderWithIfaces = PsShaderInterfaces;
    table->pfnSetRenderTargets = SetRenderTargets;
+   table->pfnCalcPrivateTessellationShaderSize = TessShaderSize;
+   table->pfnCreateHullShader = CreateTessShader<STAGE_HS>;
+   table->pfnCreateDomainShader = CreateTessShader<STAGE_DS>;
+   table->pfnHsSetShader = SetGraphicsShader<STAGE_HS>;
+   table->pfnDsSetShader = SetGraphicsShader<STAGE_DS>;
+   table->pfnHsSetConstantBuffers = HsConstants;
+   table->pfnDsSetConstantBuffers = DsConstants;
+   table->pfnHsSetShaderResources = SetGraphicsResources<STAGE_HS>;
+   table->pfnDsSetShaderResources = SetGraphicsResources<STAGE_DS>;
+   table->pfnHsSetSamplers = SetGraphicsSamplers<STAGE_HS>;
+   table->pfnDsSetSamplers = SetGraphicsSamplers<STAGE_DS>;
+   table->pfnHsSetShaderWithIfaces = HsShaderInterfaces;
+   table->pfnDsSetShaderWithIfaces = DsShaderInterfaces;
+   table->pfnCreateComputeShader = CreateComputeShader;
+   table->pfnCsSetShader = CsSetShader;
+   table->pfnCsSetShaderWithIfaces = CsInterfaces;
+   table->pfnCsSetSamplers = CsSetSamplers;
+   table->pfnCsSetShaderResources = CsSetShaderResources;
+   table->pfnCsSetConstantBuffers = CsConstants;
+   table->pfnCalcPrivateUnorderedAccessViewSize = UavSize;
+   table->pfnDestroyUnorderedAccessView = DestroyUav11;
+   table->pfnCsSetUnorderedAccessViews = CsSetUavs;
+   table->pfnClearUnorderedAccessViewUint = ClearUavUint11;
+   table->pfnCopyStructureCount = CopyStructureCount11;
+   table->pfnDispatch = Dispatch11;
+   table->pfnDispatchIndirect = DispatchIndirect11;
    table->pfnResourceCopyRegion = CopyRegion;
    table->pfnResourceUpdateSubresourceUP = UpdateResource;
    table->pfnDefaultConstantBufferUpdateSubresourceUP = UpdateResource;
@@ -594,6 +721,7 @@ static void common_table(Table *table)
    table->pfnDrawInstancedIndirect = DrawIndirect11;
    table->pfnDrawIndexedInstancedIndirect = DrawIndexedIndirect11;
    if constexpr (std::is_same_v<Table, D3DWDDM2_0DDI_DEVICEFUNCS>) {
+      table->pfnCreateUnorderedAccessView = CreateUav20;
       table->pfnCreateResource = CreateResource20;
       table->pfnCalcPrivateShaderResourceViewSize = SrvSize20;
       table->pfnCreateShaderResourceView = CreateSrv20;
@@ -604,6 +732,7 @@ static void common_table(Table *table)
       table->pfnCalcPrivateQuerySize = QuerySize20;
       table->pfnCreateQuery = CreateQuery20;
    } else {
+      table->pfnCreateUnorderedAccessView = CreateUav11;
       table->pfnCreateResource = CreateResource;
       table->pfnCalcPrivateShaderResourceViewSize = SrvSize;
       table->pfnCreateShaderResourceView = CreateSrv;

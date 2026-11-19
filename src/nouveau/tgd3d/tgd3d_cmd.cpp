@@ -495,6 +495,12 @@ static void destroy_deferred(Device *dev, const Deferred &d)
    case DeferredType::Shader:
       dev->vk.DestroyShaderEXT(dev->vkdev, (VkShaderEXT)d.handle, nullptr);
       break;
+   case DeferredType::PipelineLayout:
+      dev->vk.DestroyPipelineLayout(dev->vkdev, (VkPipelineLayout)d.handle, nullptr);
+      break;
+   case DeferredType::SetLayout:
+      dev->vk.DestroyDescriptorSetLayout(dev->vkdev, (VkDescriptorSetLayout)d.handle, nullptr);
+      break;
    case DeferredType::QueryPool:
       dev->vk.DestroyQueryPool(dev->vkdev, (VkQueryPool)d.handle, nullptr);
       break;

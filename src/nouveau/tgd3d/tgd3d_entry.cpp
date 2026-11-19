@@ -8,9 +8,8 @@
 
 using namespace tgd3d;
 
-static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter)
+HRESULT tgd3d::close_native_adapter(Adapter *adapter)
 {
-   Adapter *adapter = static_cast<Adapter *>(hAdapter.pDrvPrivate);
    if (adapter->undrainedDevices) {
       /* The DDI handles end here. These independently owned devices still
        * have ICD children. Never destroy their instance or unload the ICD
@@ -30,6 +29,11 @@ static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter)
    return S_OK;
 }
 
+static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter)
+{
+   return close_native_adapter(static_cast<Adapter *>(hAdapter.pDrvPrivate));
+}
+
 /* Keep the accepted legacy negotiation. The paired runtime-context candidate
  * was withdrawn after a native black-screen report before rotation. Preserve
  * its reusable implementation, but do not make it a column-scan prerequisite. */
@@ -37,22 +41,19 @@ static const UINT64 supported_versions[] = {
    D3D10_0_DDI_SUPPORTED,
    D3D10_0_x_DDI_SUPPORTED,
    D3D10_0_7_DDI_SUPPORTED,
+   D3D11_1_DDI_SUPPORTED,
 };
 
 static HRESULT APIENTRY GetSupportedVersions(D3D10DDI_HADAPTER h, UINT32 *count, UINT64 *versions)
 {
    if (!h.pDrvPrivate || !count) return E_INVALIDARG;
-   const auto *adapter = static_cast<const Adapter *>(h.pDrvPrivate);
-   const UINT32 legacy_count = sizeof(supported_versions) / sizeof(supported_versions[0]);
-   const UINT32 available = legacy_count + (adapter->videoEnabled ? 1 : 0);
+   const UINT32 available = std::size(supported_versions);
    const UINT32 capacity = *count;
    *count = available;
    if (versions && capacity < available)
       return E_OUTOFMEMORY;
-   if (versions) {
+   if (versions)
       memcpy(versions, supported_versions, sizeof(supported_versions));
-      if (adapter->videoEnabled) versions[legacy_count] = D3D11_1_DDI_SUPPORTED;
-   }
    return S_OK;
 }
 
@@ -64,19 +65,57 @@ static HRESULT write_caps(const D3D10_2DDIARG_GETCAPS *args, const T &value = {}
    return S_OK;
 }
 
+/* Compute one mask for the runtime query, size negotiation and creation.
+ * Higher pipeline levels use the native SM5 stages and descriptor limits. */
+UINT tgd3d::native_pipeline_levels(const Adapter *adapter)
+{
+   constexpr UINT level10 = D3D11DDI_ENCODE_3DPIPELINESUPPORT_CAP(D3D11DDI_3DPIPELINELEVEL_10_0);
+   if (!adapter || !adapter->vk.nvk) return level10;
+   const auto &c = adapter->vk.caps;
+   if (!c.compute || !c.geometryShader || !c.tessellationShader || !c.transformFeedback ||
+       !c.pipelineStatistics || !c.drawIndirectFirstInstance || !c.textureCompressionBC ||
+       c.maxColorAttachments < 8 || c.maxViewports < 16 || c.maxImageDimension2D < 16384 ||
+       c.maxImageDimension3D < 2048 || c.maxImageArrayLayers < 2048 ||
+       !(c.graphicsUavStages & VK_SHADER_STAGE_FRAGMENT_BIT) || c.graphicsUavSlots < 8)
+      return level10;
+
+   UINT levels = level10 |
+      D3D11DDI_ENCODE_3DPIPELINESUPPORT_CAP(D3D11DDI_3DPIPELINELEVEL_10_1) |
+      D3D11DDI_ENCODE_3DPIPELINESUPPORT_CAP(D3D11DDI_3DPIPELINELEVEL_11_0);
+   constexpr VkShaderStageFlags stages = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT |
+      VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT |
+      VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+   if (c.logicOp && (c.graphicsUavStages & stages) == stages && c.graphicsUavSlots >= 64 &&
+       ((c.attachmentlessSamples | c.tirSamples) & VK_SAMPLE_COUNT_16_BIT))
+      levels |= D3D11DDI_ENCODE_3DPIPELINESUPPORT_CAP(D3D11_1DDI_3DPIPELINELEVEL_11_1);
+   return levels;
+}
+
 static HRESULT APIENTRY GetCaps(D3D10DDI_HADAPTER h, const D3D10_2DDIARG_GETCAPS *args)
 {
    if (!h.pDrvPrivate || !args) return E_INVALIDARG;
-   /* An interface revision is not a new pipeline level. Keep the existing
-    * D3D10 pipeline; no compute, tessellation, UAV, command lists or FL11/12.
-    * Format and sample support are still queried independently on the device. */
    switch (args->Type) {
-   case D3D11DDICAPS_3DPIPELINESUPPORT:
-      return write_caps(args, D3D11DDI_3DPIPELINESUPPORT_CAPS{
-         D3D11DDI_ENCODE_3DPIPELINESUPPORT_CAP(D3D11DDI_3DPIPELINELEVEL_10_0)});
+   case D3D11DDICAPS_3DPIPELINESUPPORT: {
+      const auto *adapter = static_cast<const Adapter *>(h.pDrvPrivate);
+      const UINT levels = native_pipeline_levels(adapter);
+      const HRESULT result = write_caps(args, D3D11DDI_3DPIPELINESUPPORT_CAPS{levels});
+      trace(TGD3D_TRACE_PIPELINE_LEVELS, result, levels, adapter->vk.caps.graphicsUavSlots);
+      return result;
+   }
    case D3D11DDICAPS_THREADING: return write_caps<D3D11DDI_THREADING_CAPS>(args);
-   case D3D11DDICAPS_SHADER: return write_caps<D3D11DDI_SHADER_CAPS>(args);
-   case D3D11_1DDICAPS_D3D11_OPTIONS: return write_caps<D3D11_1DDI_D3D11_OPTIONS_DATA>(args);
+   case D3D11DDICAPS_SHADER: {
+      D3D11DDI_SHADER_CAPS shader{};
+      const auto *adapter = static_cast<const Adapter *>(h.pDrvPrivate);
+      if (adapter->vk.caps.downlevelCompute)
+         shader.Caps |= D3D11DDICAPS_SHADER_COMPUTE_PLUS_RAW_AND_STRUCTURED_BUFFERS_IN_SHADER_4_X;
+      return write_caps(args, shader);
+   }
+   case D3D11_1DDICAPS_D3D11_OPTIONS: {
+      const auto *adapter = static_cast<const Adapter *>(h.pDrvPrivate);
+      D3D11_1DDI_D3D11_OPTIONS_DATA options = {};
+      options.OutputMergerLogicOp = adapter->vk.caps.logicOp;
+      return write_caps(args, options);
+   }
    case D3D11_1DDICAPS_ARCHITECTURE_INFO: return write_caps<D3D11_1DDI_ARCHITECTURE_INFO_DATA>(args);
    case D3D11_1DDICAPS_SHADER_MIN_PRECISION_SUPPORT:
       return write_caps<D3D11_DDI_SHADER_MIN_PRECISION_SUPPORT_DATA>(args);
@@ -106,10 +145,10 @@ void tgd3d::adapter_fill_queries(D3D10_2DDI_ADAPTERFUNCS *table)
    table->pfnGetCaps = GetCaps;
 }
 
-static HRESULT open_adapter(D3D10DDIARG_OPENADAPTER *args)
+HRESULT tgd3d::open_native_adapter(HANDLE runtime_handle, const D3DDDI_ADAPTERCALLBACKS *callbacks,
+                                   Adapter **out)
 {
-   trace(TGD3D_TRACE_OPEN_ADAPTER, S_OK, args->Interface, args->Version);
-   if (!args->pAdapterCallbacks || !args->pAdapterCallbacks->pfnQueryAdapterInfoCb)
+   if (!callbacks || !callbacks->pfnQueryAdapterInfoCb)
       return E_INVALIDARG;
    tg_gpu_adapter_info info = {};
    info.version = TG_GPU_ADAPTER_ABI;
@@ -117,7 +156,7 @@ static HRESULT open_adapter(D3D10DDIARG_OPENADAPTER *args)
    D3DDDICB_QUERYADAPTERINFO query = {};
    query.pPrivateDriverData = &info;
    query.PrivateDriverDataSize = sizeof(info);
-   HRESULT hr = args->pAdapterCallbacks->pfnQueryAdapterInfoCb(args->hRTAdapter.handle, &query);
+   HRESULT hr = callbacks->pfnQueryAdapterInfoCb(runtime_handle, &query);
    trace(TGD3D_TRACE_ADAPTER_INFO, hr, info.flags, info.memory_budget_bytes);
    if (FAILED(hr))
       return hr;
@@ -133,8 +172,8 @@ static HRESULT open_adapter(D3D10DDIARG_OPENADAPTER *args)
    Adapter *adapter = new (std::nothrow) Adapter();
    if (!adapter)
       return E_OUTOFMEMORY;
-   adapter->hRTAdapter = args->hRTAdapter.handle;
-   adapter->callbacks = args->pAdapterCallbacks;
+   adapter->hRTAdapter = runtime_handle;
+   adapter->callbacks = callbacks;
    adapter->info = info;
    adapter->luid = luid;
    hr = adapter->vk.open(luid);
@@ -154,6 +193,16 @@ static HRESULT open_adapter(D3D10DDIARG_OPENADAPTER *args)
       delete adapter;
       return error;
    }
+   *out = adapter;
+   return S_OK;
+}
+
+static HRESULT open_adapter(D3D10DDIARG_OPENADAPTER *args)
+{
+   trace(TGD3D_TRACE_OPEN_ADAPTER, S_OK, args->Interface, args->Version);
+   Adapter *adapter = nullptr;
+   HRESULT hr = open_native_adapter(args->hRTAdapter.handle, args->pAdapterCallbacks, &adapter);
+   if (FAILED(hr)) return hr;
    video_adapter_init(adapter);
    args->hAdapter.pDrvPrivate = adapter;
    args->pAdapterFuncs->pfnCalcPrivateDeviceSize = CalcPrivateDeviceSize;

@@ -142,6 +142,25 @@ struct wsi_win32_runtime_fence_import {
 #define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA_cast struct wsi_win32_runtime_fence_import
 #endif
 
+/* In-tree GM20B pixel-frequency rasterization with UAVs only. The public
+ * Vulkan pipeline stays single-sampled and no attachments can be bound. A paired frontend first queries the
+ * available raster sample counts on its selected physical device. */
+struct nvk_tir_properties {
+   VkStructureType sType;
+   void *pNext;
+   VkSampleCountFlags rasterSamples;
+};
+#define VK_STRUCTURE_TYPE_NVK_TIR_PROPERTIES_MESA (VkStructureType)1000001010
+#define VK_STRUCTURE_TYPE_NVK_TIR_PROPERTIES_MESA_cast struct nvk_tir_properties
+
+struct nvk_tir_rendering_info {
+   VkStructureType sType;
+   const void *pNext;
+   VkSampleCountFlagBits rasterSamples;
+};
+#define VK_STRUCTURE_TYPE_NVK_TIR_RENDERING_INFO_MESA (VkStructureType)1000001011
+#define VK_STRUCTURE_TYPE_NVK_TIR_RENDERING_INFO_MESA_cast struct nvk_tir_rendering_info
+
 /* The Windows tgd3d frontend supplies this marker when it creates its
  * embedded NVK instance. NVK uses it to attribute device telemetry.
  */

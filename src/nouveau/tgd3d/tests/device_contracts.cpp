@@ -118,7 +118,7 @@ static void init(Adapter *adapter, D3DDDI_DEVICECALLBACKS *kt,
 
 void device_contracts()
 {
-   {
+   for (bool withVideo : {false, true}) {
       Adapter adapter; D3DDDI_DEVICECALLBACKS kt = {};
       D3DWDDM2_0DDI_CORELAYER_DEVICECALLBACKS oldCore = {};
       s = {}; init(&adapter, &kt, &oldCore);
@@ -137,9 +137,10 @@ void device_contracts()
       args.DXGIBaseDDI.pDXGIDDIBaseFunctions3 = reinterpret_cast<DXGI1_2_DDI_BASE_FUNCTIONS *>(dxgi + 8);
       args.ppfnRetrieveSubObject = &retrieve;
       D3D10DDIARG_CALCPRIVATEDEVICESIZE size = {args.Interface, 0, 0};
-      CHECK(!CalcPrivateDeviceSize({&adapter}, &size));
-      CHECK(CreateDevice({&adapter}, &args) == DXGI_ERROR_UNSUPPORTED && !s.ktCreates);
-      adapter.videoEnabled = true; adapter.videoFirmware.resize(128000);
+      if (withVideo) {
+         adapter.videoEnabled = true;
+         adapter.videoFirmware.resize(128000);
+      }
       CHECK(CalcPrivateDeviceSize({&adapter}, &size) == sizeof(DeviceSlot));
       CHECK(CreateDevice({&adapter}, &args) == S_OK && s.ktCreates == 1 && !s.coreCreates && retrieve);
       for (unsigned i=0;i<8;++i) CHECK(dxgi[i] == 0xcc && dxgi[dxgi_size+8+i] == 0xcc);
@@ -148,6 +149,13 @@ void device_contracts()
       video.before = video.after = 0x12345678;
       D3D11_1DDI_VIDEO_INPUT input = {FALSE,&video.table};
       BYTE output[3] = {0xa5,0xa5,0xa5};
+      if (!withVideo) {
+         CHECK(retrieve(args.hDrvDevice, D3D11_1DDI_VIDEO_FUNCTIONS, sizeof(input), &input, 1,
+                        output+1) == E_NOINTERFACE);
+         CHECK(!video.table.pfnCreateVideoDecoder && output[1] == 0xa5);
+         table.table.pfnDestroyDevice(args.hDrvDevice);
+         continue;
+      }
       CHECK(retrieve(args.hDrvDevice, D3D11_1DDI_VIDEO_FUNCTIONS, sizeof(input), &input,
                      sizeof(video.table), output+1) == E_INVALIDARG);
       CHECK(!video.table.pfnCreateVideoDecoder && output[1] == 0xa5);

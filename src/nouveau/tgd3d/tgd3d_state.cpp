@@ -394,11 +394,16 @@ void set_constant_buffers(Device *dev, Stage stage, UINT start, UINT count,
    }
 }
 
-static void set_shader_resources(Device *dev, Stage stage, UINT start, UINT count,
-                                 const D3D10DDI_HSHADERRESOURCEVIEW *views)
+void set_shader_resources(Device *dev, Stage stage, UINT start, UINT count,
+                          const D3D10DDI_HSHADERRESOURCEVIEW *views)
 {
+   if (start > D3D_SRV_SLOTS || count > D3D_SRV_SLOTS - start || (count && !views)) { TG_ERROR(dev, E_INVALIDARG); return; }
+   for (UINT i = 0; i < count; ++i) {
+      const auto *v = static_cast<const View *>(views[i].pDrvPrivate);
+      if (v && (v->dev != dev || v->type != ViewType::SRV)) { TG_ERROR(dev, E_INVALIDARG); return; }
+   }
    StageBindings &s = dev->stage[stage];
-   for (UINT i = 0; i < count && start + i < D3D_SRV_SLOTS; i++) {
+   for (UINT i = 0; i < count; i++) {
       View *view = static_cast<View *>(views[i].pDrvPrivate);
       if (s.srv[start + i] != view) {
          s.srv[start + i] = view;
@@ -407,11 +412,16 @@ static void set_shader_resources(Device *dev, Stage stage, UINT start, UINT coun
    }
 }
 
-static void set_samplers(Device *dev, Stage stage, UINT start, UINT count,
-                         const D3D10DDI_HSAMPLER *samplers)
+void set_samplers(Device *dev, Stage stage, UINT start, UINT count,
+                  const D3D10DDI_HSAMPLER *samplers)
 {
+   if (start > D3D_SAMPLER_SLOTS || count > D3D_SAMPLER_SLOTS - start || (count && !samplers)) { TG_ERROR(dev, E_INVALIDARG); return; }
+   for (UINT i = 0; i < count; ++i) {
+      const auto *s = static_cast<const Sampler *>(samplers[i].pDrvPrivate);
+      if (s && s->dev != dev) { TG_ERROR(dev, E_INVALIDARG); return; }
+   }
    StageBindings &s = dev->stage[stage];
-   for (UINT i = 0; i < count && start + i < D3D_SAMPLER_SLOTS; i++) {
+   for (UINT i = 0; i < count; i++) {
       Sampler *sampler = obj<Sampler>(samplers[i]);
       if (s.sampler[start + i] != sampler) {
          s.sampler[start + i] = sampler;
@@ -487,16 +497,31 @@ static void APIENTRY SetScissorRects(D3D10DDI_HDEVICE hDevice, UINT count, UINT 
 static void APIENTRY SoSetTargets(D3D10DDI_HDEVICE hDevice, UINT count, UINT clear,
                                   const D3D10DDI_HRESOURCE *buffers, const UINT *offsets)
 {
-   (void)clear;
-   (void)offsets;
-   /* Stream output is not implemented. Unbinding is always valid; binding a
-    * target is reported instead of silently dropping the captured data. */
-   for (UINT i = 0; i < count; i++) {
-      if (buffers[i].pDrvPrivate) {
-         TG_ERROR(D(hDevice), E_NOTIMPL);
-         return;
+   Device *dev = D(hDevice);
+   if (FAILED(dev->lost)) return;
+   if (count > 4 || clear > 4 - count || (count && !buffers)) { TG_ERROR(dev, E_INVALIDARG); return; }
+   for (UINT i = 0; i < count; ++i) {
+      Resource *res = static_cast<Resource *>(buffers[i].pDrvPrivate);
+      if (!res) continue;
+      if (!dev->caps || !dev->caps->transformFeedback) { TG_ERROR(dev, E_NOTIMPL); return; }
+      if (res->dev != dev || !(res->bind & D3D10_DDI_BIND_STREAM_OUTPUT) || !res->soCounter || !res->slice || !offsets ||
+          runtime_is_offered(resource_runtime(res)) || res->size > dev->caps->maxFeedbackBuffer ||
+          (offsets[i] != UINT_MAX && ((offsets[i] & 3) || offsets[i] > res->size))) {
+         TG_ERROR(dev, E_INVALIDARG); return;
       }
    }
+   VkCommandBuffer cmd = VK_NULL_HANDLE;
+   for (UINT i = 0; i < count; ++i) {
+      Resource *res = static_cast<Resource *>(buffers[i].pDrvPrivate);
+      if (res && offsets[i] != UINT_MAX) {
+         if (!cmd && !(cmd = cmd_begin(dev, nullptr))) return;
+         dev->vk.CmdFillBuffer(cmd, res->soCounter.buffer(), res->soCounter.offset, sizeof(UINT), offsets[i]);
+         res->soCounterLastUse = dev->recordingSeq();
+         buffer_written(dev);
+      }
+      dev->soTargets[i] = res;
+   }
+   for (UINT i = count; i < count + clear; ++i) dev->soTargets[i] = nullptr;
 }
 
 static void APIENTRY SetPredication(D3D10DDI_HDEVICE hDevice, D3D10DDI_HQUERY query, BOOL value)

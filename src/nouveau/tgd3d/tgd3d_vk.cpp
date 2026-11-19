@@ -3,6 +3,7 @@
 #include "util/disk_cache.h"
 #include "vulkan/util/vk_internal_exts.h"
 
+#include <algorithm>
 #include <stdio.h>
 #include <string.h>
 #include <vector>
@@ -43,7 +44,9 @@ struct FeatureChain {
    VkPhysicalDevice4444FormatsFeaturesEXT fmt4444 = {
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT};
 
-   void link(bool with_divisor, bool with_4444)
+   VkPhysicalDeviceTransformFeedbackFeaturesEXT xfb = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_FEATURES_EXT};
+
+   void link(bool with_divisor, bool with_4444, bool with_xfb)
    {
       core.pNext = &v11;
       v11.pNext = &v12;
@@ -64,6 +67,7 @@ struct FeatureChain {
          tail = &fmt4444.pNext;
          *tail = nullptr;
       }
+      if (with_xfb) *tail = &xfb;
    }
 };
 
@@ -216,17 +220,30 @@ HRESULT VulkanAdapter::open(uint64_t luid)
    const bool has_divisor = ext.has(VK_EXT_VERTEX_ATTRIBUTE_DIVISOR_EXTENSION_NAME);
    const bool has_4444 = ext.has(VK_EXT_4444_FORMATS_EXTENSION_NAME);
 
+   nvk_tir_properties tir = {VK_STRUCTURE_TYPE_NVK_TIR_PROPERTIES_MESA};
    props.pNext = caps.externalMemoryHost ? &host : nullptr;
+   if (nvk) {
+      tir.pNext = props.pNext;
+      props.pNext = &tir;
+   }
    vk.GetPhysicalDeviceProperties2(pdev, &props);
+   caps.tirSamples = tir.rasterSamples;
    const VkPhysicalDeviceLimits &limits = props.properties.limits;
    caps.apiVersion = props.properties.apiVersion;
    if (caps.apiVersion < VK_API_VERSION_1_3)
       FAIL(DXGI_ERROR_UNSUPPORTED, "Vulkan 1.3 required");
    caps.cbSlots = D3D_CB_SLOTS;
+   memcpy(caps.maxWorkgroups, limits.maxComputeWorkGroupCount, sizeof(caps.maxWorkgroups));
+   caps.counterAlignment = std::max<VkDeviceSize>(4, limits.minStorageBufferOffsetAlignment);
+   caps.maxTexelBufferElements = limits.maxTexelBufferElements;
    caps.maxImageDimension2D = limits.maxImageDimension2D;
    caps.maxImageDimension3D = limits.maxImageDimension3D;
    caps.maxImageArrayLayers = limits.maxImageArrayLayers;
    caps.maxColorAttachments = limits.maxColorAttachments;
+   if (limits.standardSampleLocations)
+      caps.attachmentlessSamples = limits.framebufferNoAttachmentsSampleCounts;
+   caps.maxFramebufferWidth = limits.maxFramebufferWidth;
+   caps.maxFramebufferHeight = limits.maxFramebufferHeight;
    caps.maxViewports = limits.maxViewports;
    caps.maxSamplerAnisotropy = limits.maxSamplerAnisotropy;
    caps.timestampPeriod = limits.timestampPeriod;
@@ -236,7 +253,8 @@ HRESULT VulkanAdapter::open(uint64_t luid)
       FAIL(DXGI_ERROR_UNSUPPORTED, "device limits below Direct3D 10");
 
    FeatureChain have;
-   have.link(has_divisor, has_4444);
+   const bool has_xfb = ext.has(VK_EXT_TRANSFORM_FEEDBACK_EXTENSION_NAME);
+   have.link(has_divisor, has_4444, has_xfb);
    vk.GetPhysicalDeviceFeatures2(pdev, &have.core);
    const VkPhysicalDeviceFeatures &f = have.core.features;
    struct { VkBool32 value; const char *name; } needed[] = {
@@ -271,14 +289,55 @@ HRESULT VulkanAdapter::open(uint64_t luid)
    caps.occlusionQueryPrecise = f.occlusionQueryPrecise;
    VkPhysicalDeviceVulkan12Properties props12 = {
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES};
+   VkPhysicalDeviceVulkan13Properties props13 = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_PROPERTIES};
+   VkPhysicalDeviceTransformFeedbackPropertiesEXT xfb = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_PROPERTIES_EXT};
+   props13.pNext = has_xfb ? &xfb : nullptr;
+   props12.pNext = &props13;
    props.pNext = &props12;
    vk.GetPhysicalDeviceProperties2(pdev, &props);
+   caps.storageTexelAlignment = props13.storageTexelBufferOffsetAlignmentBytes;
+   caps.uniformTexelAlignment = props13.uniformTexelBufferOffsetAlignmentBytes;
+   caps.storageSingleTexel = props13.storageTexelBufferOffsetSingleTexelAlignment;
+   caps.uniformSingleTexel = props13.uniformTexelBufferOffsetSingleTexelAlignment;
    caps.roundRTE = props12.shaderRoundingModeRTEFloat32;
    caps.roundRTZ = props12.shaderRoundingModeRTZFloat32;
    caps.denormPreserve = props12.shaderDenormPreserveFloat32;
    caps.denormFlush = props12.shaderDenormFlushToZeroFloat32;
    caps.zeroInfNanPreserve = props12.shaderSignedZeroInfNanPreserveFloat32;
    caps.geometryShader = f.geometryShader;
+   caps.transformFeedback = f.geometryShader && have.xfb.transformFeedback && xfb.transformFeedbackDraw &&
+      xfb.maxTransformFeedbackBuffers >= 1 && xfb.maxTransformFeedbackStreamDataSize >= 512 &&
+      xfb.maxTransformFeedbackBufferDataSize >= 512 && xfb.maxTransformFeedbackBufferDataStride >= 2048;
+   caps.maxFeedbackBuffer = xfb.maxTransformFeedbackBufferSize;
+   const uint32_t tessStages = 4 + uint32_t(caps.geometryShader); // VS, HS, DS, PS and optional GS
+   caps.tessellationShader = f.tessellationShader && limits.maxTessellationPatchSize >= 32 &&
+      limits.maxTessellationGenerationLevel >= 64 && limits.maxDescriptorSetUniformBuffers >= tessStages * caps.cbSlots &&
+      limits.maxDescriptorSetSamplers >= tessStages * D3D_SAMPLER_SLOTS &&
+      limits.maxDescriptorSetSampledImages >= tessStages * 2 * D3D_SRV_SLOTS;
+   if (f.fragmentStoresAndAtomics)
+      caps.graphicsUavStages |= VK_SHADER_STAGE_FRAGMENT_BIT;
+   if (f.vertexPipelineStoresAndAtomics) {
+      caps.graphicsUavStages |= VK_SHADER_STAGE_VERTEX_BIT;
+      if (f.geometryShader) caps.graphicsUavStages |= VK_SHADER_STAGE_GEOMETRY_BIT;
+      if (caps.tessellationShader)
+         caps.graphicsUavStages |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+   }
+   const uint32_t stages = __builtin_popcount(caps.graphicsUavStages);
+   const uint32_t sampled = caps.cbSlots + D3D_SAMPLER_SLOTS + 2 * D3D_SRV_SLOTS;
+   if (stages && limits.maxBoundDescriptorSets > SET_GRAPHICS_UAV &&
+       limits.maxPerStageResources >= sampled && f.shaderStorageImageReadWithoutFormat &&
+       f.shaderStorageImageWriteWithoutFormat) {
+      caps.graphicsUavSlots = std::min({uint32_t(D3D_UAV_SLOTS),
+         (limits.maxPerStageResources - sampled) / 3,
+         limits.maxPerStageDescriptorStorageImages / 2, limits.maxPerStageDescriptorStorageBuffers,
+         limits.maxDescriptorSetStorageImages / (1 + stages), limits.maxDescriptorSetStorageBuffers});
+      if (f.fragmentStoresAndAtomics) {
+         const uint32_t colors = 8; /* D3D11 simultaneous render targets */
+         const uint32_t outputs = limits.maxFragmentCombinedOutputResources;
+         caps.graphicsUavSlots = std::min(caps.graphicsUavSlots, outputs > colors ? (outputs - colors) / 3 : 0u);
+      }
+   }
+   caps.logicOp = f.logicOp;
    caps.drawIndirectFirstInstance = f.drawIndirectFirstInstance;
    caps.depthClamp = f.depthClamp;
    caps.pipelineStatistics = f.pipelineStatisticsQuery;
@@ -296,6 +355,13 @@ HRESULT VulkanAdapter::open(uint64_t luid)
    for (uint32_t i = 0; i < count; i++) {
       if (families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
          caps.queueFamily = i;
+         caps.compute = (families[i].queueFlags & VK_QUEUE_COMPUTE_BIT) &&
+                        f.shaderStorageImageReadWithoutFormat && f.shaderStorageImageWriteWithoutFormat;
+         caps.downlevelCompute = caps.compute && f.pipelineStatisticsQuery &&
+            limits.maxComputeWorkGroupCount[0] >= 65535 && limits.maxComputeWorkGroupCount[1] >= 65535 &&
+            limits.maxComputeWorkGroupSize[0] >= 768 && limits.maxComputeWorkGroupSize[1] >= 768 &&
+            limits.maxComputeWorkGroupInvocations >= 768 && limits.maxComputeSharedMemorySize >= 16384 &&
+            caps.storageSingleTexel && caps.uniformSingleTexel;
          caps.timestampValidBits = families[i].timestampValidBits;
          break;
       }
@@ -316,14 +382,21 @@ VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue
                                      const wsi_win32_runtime *runtime) const
 {
    FeatureChain have, want;
-   have.link(caps.instanceDivisor, caps.formatA4B4G4R4);
+   have.link(caps.instanceDivisor, caps.formatA4B4G4R4, caps.transformFeedback);
    vk.GetPhysicalDeviceFeatures2(pdev, &have.core);
-   want.link(caps.instanceDivisor, caps.formatA4B4G4R4);
+   want.link(caps.instanceDivisor, caps.formatA4B4G4R4, caps.transformFeedback);
    const VkPhysicalDeviceFeatures &hf = have.core.features;
    VkPhysicalDeviceFeatures &f = want.core.features;
    f.independentBlend = f.depthBiasClamp = f.fillModeNonSolid = f.samplerAnisotropy = VK_TRUE;
    f.dualSrcBlend = f.fullDrawIndexUint32 = f.robustBufferAccess = VK_TRUE;
    f.geometryShader = hf.geometryShader;
+   f.tessellationShader = caps.tessellationShader;
+   f.vertexPipelineStoresAndAtomics = caps.graphicsUavSlots && hf.vertexPipelineStoresAndAtomics;
+   f.fragmentStoresAndAtomics = caps.graphicsUavSlots && hf.fragmentStoresAndAtomics;
+   f.logicOp = hf.logicOp;
+   f.shaderStorageImageReadWithoutFormat = hf.shaderStorageImageReadWithoutFormat;
+   f.shaderStorageImageWriteWithoutFormat = hf.shaderStorageImageWriteWithoutFormat;
+   f.shaderStorageImageExtendedFormats = hf.shaderStorageImageExtendedFormats;
    f.drawIndirectFirstInstance = hf.drawIndirectFirstInstance;
    f.depthClamp = hf.depthClamp;
    f.occlusionQueryPrecise = hf.occlusionQueryPrecise;
@@ -359,6 +432,10 @@ VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue
       VK_EXT_ROBUSTNESS_2_EXTENSION_NAME, VK_EXT_CUSTOM_BORDER_COLOR_EXTENSION_NAME,
       VK_EXT_DEPTH_CLIP_ENABLE_EXTENSION_NAME,
    };
+   if (caps.transformFeedback) {
+      want.xfb.transformFeedback = VK_TRUE;
+      extensions.push_back(VK_EXT_TRANSFORM_FEEDBACK_EXTENSION_NAME);
+   }
    if (caps.instanceDivisor)
       extensions.push_back(VK_EXT_VERTEX_ATTRIBUTE_DIVISOR_EXTENSION_NAME);
    if (caps.formatA4B4G4R4)
@@ -395,6 +472,11 @@ VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue
 #define X(n) api->n = reinterpret_cast<PFN_vk##n>(vk.GetDeviceProcAddr(*device, "vk" #n));
    TGD3D_VK_OPTIONAL_DEVICE_FUNCS(X)
 #undef X
+   if (caps.transformFeedback && (!api->CmdBindTransformFeedbackBuffersEXT || !api->CmdBeginTransformFeedbackEXT ||
+       !api->CmdEndTransformFeedbackEXT || !api->CmdDrawIndirectByteCountEXT || !api->CmdSetRasterizationStreamEXT))
+      result = VK_ERROR_INITIALIZATION_FAILED;
+   if (caps.tessellationShader && (!api->CmdSetTessellationDomainOriginEXT || !api->CmdSetPatchControlPointsEXT))
+      result = VK_ERROR_INITIALIZATION_FAILED;
    if (nvk && !api->ImportSemaphoreWin32HandleKHR)
       result = VK_ERROR_INITIALIZATION_FAILED;
    if (runtime && !accepted)

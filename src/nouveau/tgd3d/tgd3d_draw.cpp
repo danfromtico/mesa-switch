@@ -4,25 +4,38 @@
  * no pipeline objects to build, look up or compile at draw time.
  */
 #include "tgd3d.h"
+#include "vulkan/util/vk_internal_exts.h"
 
+#include <algorithm>
+#include <cmath>
 #include <string.h>
 
 namespace tgd3d {
 
-static VkShaderStageFlags stage_flag(uint32_t stage)
-{
-   return stage == STAGE_VS ? VK_SHADER_STAGE_VERTEX_BIT :
-          stage == STAGE_GS ? VK_SHADER_STAGE_GEOMETRY_BIT : VK_SHADER_STAGE_FRAGMENT_BIT;
-}
-
 HRESULT device_layouts_create(Device *dev)
 {
    const VulkanCaps &caps = *dev->caps;
-   std::vector<VkDescriptorSetLayoutBinding> bindings[SET_COUNT];
-   for (uint32_t stage = 0; stage < STAGE_COUNT; stage++) {
-      if (stage == STAGE_GS && !caps.geometryShader)
+   std::vector<VkDescriptorSetLayoutBinding> bindings[SET_GRAPHICS_UAV + 1];
+   try {
+      bindings[SET_CB].reserve(GRAPHICS_STAGE_COUNT * caps.cbSlots);
+      bindings[SET_TEX].reserve(GRAPHICS_STAGE_COUNT * SET1_STRIDE);
+      bindings[SET_TBUF].reserve(GRAPHICS_STAGE_COUNT * D3D_SRV_SLOTS);
+      bindings[SET_GRAPHICS_UAV].reserve((2 + __builtin_popcount(caps.graphicsUavStages)) * caps.graphicsUavSlots);
+   } catch (const std::bad_alloc &) { return E_OUTOFMEMORY; }
+   for (uint32_t slot = 0; slot < caps.graphicsUavSlots; ++slot) {
+      for (auto type : {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER})
+         bindings[SET_GRAPHICS_UAV].push_back({graphics_uav_binding(0, slot, type), type, 1, caps.graphicsUavStages, nullptr});
+   }
+   for (uint32_t stage = 0; stage < GRAPHICS_STAGE_COUNT; stage++) {
+      if (!caps.graphicsStageSupported(stage))
          continue;
-      const VkShaderStageFlags flags = stage_flag(stage);
+      const VkShaderStageFlags flags = graphics_stage_flag(stage);
+      if (flags & caps.graphicsUavStages) {
+         for (uint32_t slot = 0; slot < caps.graphicsUavSlots; ++slot) {
+            const auto type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            bindings[SET_GRAPHICS_UAV].push_back({graphics_uav_binding(stage, slot, type), type, 1, flags, nullptr});
+         }
+      }
       for (uint32_t i = 0; i < caps.cbSlots; i++)
          bindings[SET_CB].push_back({stage * caps.cbSlots + i, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                      1, flags, nullptr});
@@ -36,21 +49,20 @@ HRESULT device_layouts_create(Device *dev)
                                        VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1, flags, nullptr});
       }
    }
-   for (uint32_t set = 0; set < SET_COUNT; set++) {
+   for (uint32_t set = 0; set < caps.graphicsSetCount(); set++) {
       VkDescriptorSetLayoutCreateInfo info = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
       /* An immutable set snapshot fits all 3 x 14 D3D10 constant buffers.
        * NVK's push descriptor limit is 32, below that DDI requirement. */
       info.bindingCount = (uint32_t)bindings[set].size();
       info.pBindings = bindings[set].data();
-      if (dev->vk.CreateDescriptorSetLayout(dev->vkdev, &info, nullptr, &dev->setLayouts[set]) !=
-          VK_SUCCESS)
-         return E_OUTOFMEMORY;
+      const VkResult result = dev->vk.CreateDescriptorSetLayout(dev->vkdev, &info, nullptr, &dev->setLayouts[set]);
+      if (result != VK_SUCCESS) return resource_result(result);
    }
    VkPipelineLayoutCreateInfo info = {VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
-   info.setLayoutCount = SET_COUNT;
+   info.setLayoutCount = caps.graphicsSetCount();
    info.pSetLayouts = dev->setLayouts;
-   if (dev->vk.CreatePipelineLayout(dev->vkdev, &info, nullptr, &dev->pipelineLayout) != VK_SUCCESS)
-      return E_OUTOFMEMORY;
+   const VkResult result = dev->vk.CreatePipelineLayout(dev->vkdev, &info, nullptr, &dev->pipelineLayout);
+   if (result != VK_SUCCESS) return resource_result(result);
 
    /* Direct3D 10 default sampler for a slot the application left empty. */
    VkSamplerCreateInfo sampler = {VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
@@ -81,6 +93,11 @@ void device_layouts_destroy(Device *dev)
 
 VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set)
 {
+   return alloc_descriptor_snapshot(dev, dev->setLayouts[set]);
+}
+
+VkDescriptorSet alloc_descriptor_snapshot(Device *dev, VkDescriptorSetLayout layout)
+{
    if (FAILED(dev->lost))
       return VK_NULL_HANDLE;
    for (int attempt = 0; attempt < 2; attempt++) {
@@ -88,7 +105,7 @@ VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set)
          VkDescriptorSetAllocateInfo info = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
          info.descriptorPool = dev->framePools.back();
          info.descriptorSetCount = 1;
-         info.pSetLayouts = &dev->setLayouts[set];
+         info.pSetLayouts = &layout;
          VkDescriptorSet handle = VK_NULL_HANDLE;
          const VkResult result = dev->vk.AllocateDescriptorSets(dev->vkdev, &info, &handle);
          if (result == VK_SUCCESS)
@@ -107,14 +124,17 @@ VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set)
       } else {
          enum { SETS = 64 };
          const VkDescriptorPoolSize sizes[] = {
-            {VK_DESCRIPTOR_TYPE_SAMPLER, SETS * STAGE_COUNT * D3D_SAMPLER_SLOTS},
-            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, SETS * STAGE_COUNT * D3D_SRV_SLOTS},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 8 * STAGE_COUNT * D3D_SRV_SLOTS},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SETS * STAGE_COUNT * D3D_CB_SLOTS},
+            {VK_DESCRIPTOR_TYPE_SAMPLER, SETS * GRAPHICS_STAGE_COUNT * D3D_SAMPLER_SLOTS},
+            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, SETS * GRAPHICS_STAGE_COUNT * D3D_SRV_SLOTS},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 8 * GRAPHICS_STAGE_COUNT * D3D_SRV_SLOTS},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SETS * GRAPHICS_STAGE_COUNT * D3D_CB_SLOTS},
+            {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 8 * D3D_UAV_SLOTS},
+            {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 * D3D_UAV_SLOTS},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 8 * D3D_UAV_SLOTS},
          };
          VkDescriptorPoolCreateInfo info = {VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
          info.maxSets = 2 * SETS + 8;
-         info.poolSizeCount = 4;
+         info.poolSizeCount = dev->caps && (dev->caps->compute || dev->caps->graphicsUavSlots) ? std::size(sizes) : 4;
          info.pPoolSizes = sizes;
          const VkResult result = dev->vk.CreateDescriptorPool(dev->vkdev, &info, nullptr, &pool);
          if (result != VK_SUCCESS) {
@@ -128,7 +148,7 @@ VkDescriptorSet descriptor_set_alloc(Device *dev, uint32_t set)
    return VK_NULL_HANDLE;
 }
 
-static bool srv_matches(uint8_t kind, const View *view)
+bool srv_matches(uint8_t kind, const View *view)
 {
    /* dxbc_spv::ir::ResourceKind: 0-2 buffers, 3/4 1D, 5/6 2D, 9/10 cube, 11 3D. */
    const bool buffer = view->res->kind == ResKind::Buffer;
@@ -149,7 +169,7 @@ static bool srv_matches(uint8_t kind, const View *view)
  * and ordering after an earlier write. May end the current render pass. */
 static void prepare_reads(Device *dev)
 {
-   for (uint32_t s = 0; s < STAGE_COUNT; s++) {
+   for (uint32_t s = 0; s < GRAPHICS_STAGE_COUNT; s++) {
       const StageBindings &stage = dev->stage[s];
       const Shader *shader = stage.shader;
       if (!shader)
@@ -177,8 +197,8 @@ static void prepare_reads(Device *dev)
 static bool bind_textures(Device *dev, VkCommandBuffer cmd)
 {
    bool any = false, any_buffers = false;
-   for (const auto &stage : dev->stage) {
-      const Shader *shader = stage.shader;
+   for (uint32_t s = 0; s < GRAPHICS_STAGE_COUNT; ++s) {
+      const Shader *shader = dev->stage[s].shader;
       if (!shader)
          continue;
       any |= shader->samplerMask != 0;
@@ -199,11 +219,11 @@ static bool bind_textures(Device *dev, VkCommandBuffer cmd)
     * into these arrays. Reuse only host update arguments, never an in-flight
     * descriptor set. Vulkan consumes them during UpdateDescriptorSets. */
    try {
-      writes.reserve(STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
+      writes.reserve(GRAPHICS_STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
       if (textures_dirty)
-         images.reserve(STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
+         images.reserve(GRAPHICS_STAGE_COUNT * (D3D_SAMPLER_SLOTS + D3D_SRV_SLOTS));
       if (buffers_dirty)
-         buffers.reserve(STAGE_COUNT * D3D_SRV_SLOTS);
+         buffers.reserve(GRAPHICS_STAGE_COUNT * D3D_SRV_SLOTS);
    } catch (const std::bad_alloc &) {
       TG_ERROR(dev, DXGI_ERROR_DEVICE_REMOVED);
       return false;
@@ -213,7 +233,7 @@ static bool bind_textures(Device *dev, VkCommandBuffer cmd)
       VkDescriptorSet set = descriptor_set_alloc(dev, SET_TEX);
       if (!set)
          return false;
-      for (uint32_t s = 0; s < STAGE_COUNT; s++) {
+      for (uint32_t s = 0; s < GRAPHICS_STAGE_COUNT; s++) {
          const StageBindings &stage = dev->stage[s];
          const Shader *shader = stage.shader;
          if (!shader)
@@ -266,7 +286,7 @@ static bool bind_textures(Device *dev, VkCommandBuffer cmd)
       if (!set)
          return false;
       writes.clear();
-      for (uint32_t s = 0; s < STAGE_COUNT; s++) {
+      for (uint32_t s = 0; s < GRAPHICS_STAGE_COUNT; s++) {
          const StageBindings &stage = dev->stage[s];
          const Shader *shader = stage.shader;
          if (!shader)
@@ -303,7 +323,8 @@ static bool bind_textures(Device *dev, VkCommandBuffer cmd)
 static bool bind_constant_buffers(Device *dev, VkCommandBuffer cmd)
 {
    bool dirty = false;
-   for (auto &stage : dev->stage) {
+   for (UINT s = 0; s < GRAPHICS_STAGE_COUNT; ++s) {
+      auto &stage = dev->stage[s];
       if (!stage.shader)
          continue;
       dirty |= (stage.cbDirty & stage.shader->cbMask) != 0;
@@ -317,11 +338,11 @@ static bool bind_constant_buffers(Device *dev, VkCommandBuffer cmd)
    VkDescriptorSet set = descriptor_set_alloc(dev, SET_CB);
    if (!set)
       return false;
-   VkWriteDescriptorSet writes[STAGE_COUNT * D3D_CB_SLOTS];
-   VkDescriptorBufferInfo infos[STAGE_COUNT * D3D_CB_SLOTS];
+   VkWriteDescriptorSet writes[GRAPHICS_STAGE_COUNT * D3D_CB_SLOTS];
+   VkDescriptorBufferInfo infos[GRAPHICS_STAGE_COUNT * D3D_CB_SLOTS];
    uint32_t count = 0;
    const uint32_t slots = dev->caps->cbSlots;
-   for (uint32_t s = 0; s < STAGE_COUNT; s++) {
+   for (uint32_t s = 0; s < GRAPHICS_STAGE_COUNT; s++) {
       StageBindings &stage = dev->stage[s];
       const Shader *shader = stage.shader;
       if (!shader)
@@ -359,7 +380,7 @@ static bool bind_constant_buffers(Device *dev, VkCommandBuffer cmd)
 
 /* ------------------------------------------------------------------ */
 
-static bool begin_rendering(Device *dev)
+static bool begin_rendering(Device *dev, bool hasStorageOutput)
 {
    uint32_t width = ~0u, height = ~0u, layers = ~0u, colors = 0;
    for (uint32_t i = 0; i < D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT; i++) {
@@ -375,8 +396,20 @@ static bool begin_rendering(Device *dev)
       height = view->height < height ? view->height : height;
       layers = view->layers < layers ? view->layers : layers;
    }
-   if (width == ~0u)
-      return false;       /* nothing to render into */
+   if (width == ~0u) {
+      if (!hasStorageOutput) return false;
+      // Attachmentless rasterization is bounded by the viewport, independent
+      // of the size and dimensionality of the resources a shader accesses.
+      double right = 1, bottom = 1;
+      for (UINT i = 0; i < dev->viewportCount; ++i) {
+         const auto &vp = dev->viewports[i];
+         right = std::max(right, double(vp.TopLeftX) + vp.Width);
+         bottom = std::max(bottom, double(vp.TopLeftY) + vp.Height);
+      }
+      width = uint32_t(std::min(std::ceil(right), double(dev->caps->maxFramebufferWidth)));
+      height = uint32_t(std::min(std::ceil(bottom), double(dev->caps->maxFramebufferHeight)));
+      layers = 1;
+   }
 
    command_barrier(dev);
    for (uint32_t i = 0; i < colors; i++)
@@ -414,6 +447,11 @@ static bool begin_rendering(Device *dev)
       }
    }
    VkRenderingInfo info = {VK_STRUCTURE_TYPE_RENDERING_INFO};
+   nvk_tir_rendering_info tir = {VK_STRUCTURE_TYPE_NVK_TIR_RENDERING_INFO_MESA};
+   if (dev->rasterizer && (dev->caps->tirSamples & dev->rasterizer->samples)) {
+      tir.rasterSamples = dev->rasterizer->samples;
+      info.pNext = &tir;
+   }
    info.renderArea = {{0, 0}, {width, height}};
    info.layerCount = layers;
    info.colorAttachmentCount = colors;
@@ -456,6 +494,14 @@ static VkStencilOp stencil_op(D3D10_DDI_STENCIL_OP op)
    return op >= 1 && op <= 8 ? (VkStencilOp)(op - 1) : VK_STENCIL_OP_KEEP;
 }
 
+static UINT patch_points(D3D10_DDI_PRIMITIVE_TOPOLOGY topology)
+{
+   const UINT value = UINT(topology);
+   if (value < D3D11_DDI_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST ||
+       value > D3D11_DDI_PRIMITIVE_TOPOLOGY_32_CONTROL_POINT_PATCHLIST) return 0;
+   return value - D3D11_DDI_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST + 1;
+}
+
 static void emit_state(Device *dev, VkCommandBuffer cmd)
 {
    const VulkanCaps &caps = *dev->caps;
@@ -463,14 +509,26 @@ static void emit_state(Device *dev, VkCommandBuffer cmd)
    const auto &vk = dev->vk;
 
    if (dirty & DIRTY_STATIC) {
-      vk.CmdSetRasterizerDiscardEnable(cmd, VK_FALSE);
-      vk.CmdSetRasterizationSamplesEXT(cmd, VK_SAMPLE_COUNT_1_BIT);
+      if (caps.tessellationShader)
+         vk.CmdSetTessellationDomainOriginEXT(cmd, VK_TESSELLATION_DOMAIN_ORIGIN_UPPER_LEFT);
+      if (caps.transformFeedback) vk.CmdSetRasterizationStreamEXT(cmd, 0);
       vk.CmdSetLineWidth(cmd, 1.0f);
       vk.CmdSetDepthBoundsTestEnable(cmd, VK_FALSE);
       vk.CmdSetAlphaToOneEnableEXT(cmd, VK_FALSE);
-      vk.CmdSetLogicOpEnableEXT(cmd, VK_FALSE);
    }
 
+   if (dirty & (DIRTY_STATIC | DIRTY_SHADERS | DIRTY_VIEWPORTS)) {
+      const Shader *gs = dev->stage[STAGE_GS].shader;
+      vk.CmdSetRasterizerDiscardEnable(cmd, gs && gs->so && (gs->so->discardRaster || (gs->so->stride && !dev->viewportCount)));
+   }
+   if (dirty & (DIRTY_RASTERIZER | DIRTY_BLEND | DIRTY_STATIC)) {
+      const auto samples = dev->rasterizer ? dev->rasterizer->samples : VK_SAMPLE_COUNT_1_BIT;
+      const auto targetSamples = dev->caps->tirSamples & samples ? VK_SAMPLE_COUNT_1_BIT : samples;
+      vk.CmdSetRasterizationSamplesEXT(cmd, targetSamples);
+      // D3D11 ignores the output-merger sample mask for UAV-only rasterization.
+      const VkSampleMask sample_mask = dev->boundColorCount || dev->dsv ? dev->sampleMask : ~0u;
+      vk.CmdSetSampleMaskEXT(cmd, targetSamples, &sample_mask);
+   }
    if (dirty & DIRTY_TOPOLOGY) {
       VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
       bool strip = false;
@@ -489,7 +547,12 @@ static void emit_state(Device *dev, VkCommandBuffer cmd)
          topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY; break;
       case D3D10_DDI_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ:
          topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY; strip = true; break;
-      default: break;
+      default:
+         if (UINT points = patch_points(dev->topology)) {
+            topology = VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
+            vk.CmdSetPatchControlPointsEXT(cmd, points);
+         }
+         break;
       }
       vk.CmdSetPrimitiveTopology(cmd, topology);
       vk.CmdSetPrimitiveRestartEnable(cmd, strip);   /* strip-cut index, always on in D3D10 */
@@ -549,6 +612,10 @@ static void emit_state(Device *dev, VkCommandBuffer cmd)
 
    if (dirty & DIRTY_BLEND) {
       const BlendState *state = dev->blend;
+      const bool logic = state && state->logicOpEnabled;
+      vk.CmdSetLogicOpEnableEXT(cmd, logic);
+      if (logic)
+         vk.CmdSetLogicOpEXT(cmd, state->logicOp);
       const uint32_t count = dev->boundColorCount;
       VkBool32 enables[D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT];
       VkColorBlendEquationEXT equations[D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT];
@@ -571,17 +638,14 @@ static void emit_state(Device *dev, VkCommandBuffer cmd)
          vk.CmdSetColorWriteMaskEXT(cmd, 0, count, masks);
       }
       vk.CmdSetBlendConstants(cmd, dev->blendFactor);
-      const VkSampleMask sample_mask = dev->sampleMask;
-      vk.CmdSetSampleMaskEXT(cmd, VK_SAMPLE_COUNT_1_BIT, &sample_mask);
-      vk.CmdSetAlphaToCoverageEnableEXT(cmd, state && state->desc.AlphaToCoverageEnable);
+      vk.CmdSetAlphaToCoverageEnableEXT(cmd, dev->boundColorCount && state && state->desc.AlphaToCoverageEnable);
    }
 
-   uint32_t viewport_count = dev->viewportCount;
-   if (viewport_count > caps.maxViewports)
-      viewport_count = caps.maxViewports;
+   const uint32_t viewport_count = std::max(1u, std::min(dev->viewportCount, caps.maxViewports));
    if (dirty & DIRTY_VIEWPORTS) {
       VkViewport viewports[16];
       for (uint32_t i = 0; i < viewport_count; i++) {
+         if (!dev->viewportCount) { viewports[i] = {0, 0, 1, 1, 0, 1}; continue; }
          const D3D10_DDI_VIEWPORT &v = dev->viewports[i];
          /* Negative height: Direct3D clip space has +Y up. */
          viewports[i] = {(float)v.TopLeftX, (float)v.TopLeftY + (float)v.Height, (float)v.Width,
@@ -594,6 +658,7 @@ static void emit_state(Device *dev, VkCommandBuffer cmd)
       const bool enabled = dev->rasterizer && dev->rasterizer->desc.ScissorEnable;
       for (uint32_t i = 0; i < viewport_count; i++) {
          rects[i] = {{0, 0}, {dev->renderWidth, dev->renderHeight}};
+         if (!dev->viewportCount) { rects[i].extent = {0, 0}; continue; }
          if (!enabled)
             continue;
          if (i >= dev->scissorCount) {
@@ -679,6 +744,8 @@ static bool bind_shaders(Device *dev, VkCommandBuffer cmd)
    Shader *vs = dev->stage[STAGE_VS].shader;
    Shader *gs = dev->stage[STAGE_GS].shader;
    Shader *ps = dev->stage[STAGE_PS].shader;
+   Shader *hs = dev->stage[STAGE_HS].shader;
+   Shader *ds = dev->stage[STAGE_DS].shader;
    if (!vs)
       return false;
    uint32_t vs_key = 0, ps_key = 0;
@@ -699,20 +766,28 @@ static bool bind_shaders(Device *dev, VkCommandBuffer cmd)
       if (blend_uses_dual_source(dev->blend))
          ps_key |= 1u << 31;
    }
-   VkShaderEXT handles[STAGE_COUNT] = {
-      shader_variant(vs, vs_key), gs ? shader_variant(gs, 0) : VK_NULL_HANDLE,
-      ps ? shader_variant(ps, ps_key) : VK_NULL_HANDLE};
-   if (!handles[STAGE_VS] || (gs && !handles[STAGE_GS]) || (ps && !handles[STAGE_PS]))
+   VkShaderEXT handles[GRAPHICS_STAGE_COUNT]{};
+   const bool passthrough = gs && gs->soPassthrough;
+   if (passthrough && !ds) handles[STAGE_VS] = shader_variant(vs, vs_key, gs->so);
+   else handles[STAGE_VS] = shader_variant(vs, vs_key);
+   if (gs && !passthrough) handles[STAGE_GS] = shader_variant(gs, 0);
+   if (ps) handles[STAGE_PS] = shader_variant(ps, ps_key);
+   if (hs && ds) {
+      handles[STAGE_HS] = shader_variant(hs, 0);
+      handles[STAGE_DS] = passthrough ? shader_variant(ds, hs->tessIoMask, gs->so) : shader_variant(ds, hs->tessIoMask);
+   }
+   if (!handles[STAGE_VS] || (gs && !passthrough && !handles[STAGE_GS]) || (ps && !handles[STAGE_PS]) ||
+       (hs && (!handles[STAGE_HS] || !handles[STAGE_DS])))
       return false;
-   VkShaderStageFlagBits stages[STAGE_COUNT];
-   VkShaderEXT shaders[STAGE_COUNT];
+   VkShaderStageFlagBits stages[GRAPHICS_STAGE_COUNT];
+   VkShaderEXT shaders[GRAPHICS_STAGE_COUNT];
    uint32_t count = 0;
-   for (uint32_t s = 0; s < STAGE_COUNT; s++) {
-      if (s == STAGE_GS && !dev->caps->geometryShader)
+   for (uint32_t s = 0; s < GRAPHICS_STAGE_COUNT; s++) {
+      if (!dev->caps->graphicsStageSupported(s))
          continue;
       if (dev->stage[s].bound == handles[s] && !(dev->dirty & DIRTY_STATIC))
          continue;
-      stages[count] = (VkShaderStageFlagBits)stage_flag(s);
+      stages[count] = (VkShaderStageFlagBits)graphics_stage_flag(s);
       shaders[count++] = handles[s];
       dev->stage[s].bound = handles[s];
    }
@@ -725,20 +800,55 @@ static bool bind_shaders(Device *dev, VkCommandBuffer cmd)
  * state applied, or null when Direct3D defines the draw as a no-op. */
 static VkCommandBuffer prepare_draw(Device *dev, bool indexed)
 {
-   if (FAILED(dev->lost) || !dev->stage[STAGE_VS].shader || !dev->viewportCount)
+   if (FAILED(dev->lost) || !dev->stage[STAGE_VS].shader)
       return VK_NULL_HANDLE;
+   const Shader *hs = dev->stage[STAGE_HS].shader, *ds = dev->stage[STAGE_DS].shader;
+   const UINT points = patch_points(dev->topology);
+   if (points || hs || ds) {
+      if (!points || !hs || !ds || points != hs->inputControlPoints || hs->tessDomain != ds->tessDomain)
+         return VK_NULL_HANDLE;
+   }
    if (indexed && (!dev->indexBuffer || !dev->indexBuffer->slice))
       return VK_NULL_HANDLE;
+   uint64_t slots = 0;
+   for (UINT s = 0; s < GRAPHICS_STAGE_COUNT; ++s)
+      if (const Shader *sh = dev->stage[s].shader) slots |= sh->uavMask;
+   const Shader *gs = dev->stage[STAGE_GS].shader;
+   const bool capturing = gs && gs->so && gs->so->stride && dev->soTargets[0];
+   if (!dev->viewportCount && !slots && !capturing) return VK_NULL_HANDLE;
    flush_pending_clears(dev, dev->dsv ? dev->dsv : dev->rtv[0]);
-   const ImageStorage *writes[D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT + 1] = {};
+   ImageStorage *writes[D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT + 1 + D3D_UAV_SLOTS];
+   UINT count = 0;
    for (UINT i = 0; i < D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
-      if (dev->rtv[i]) writes[i] = &dev->rtv[i]->res->storage;
-   if (dev->dsv) writes[D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT] = &dev->dsv->res->storage;
-   if (!prepare_image_writes(dev, writes, D3D10_DDI_SIMULTANEOUS_RENDER_TARGET_COUNT + 1))
+      if (dev->rtv[i]) writes[count++] = &dev->rtv[i]->res->storage;
+   if (dev->dsv) writes[count++] = &dev->dsv->res->storage;
+   const UINT attachments = count;
+   if (attachments && dev->rasterizer && dev->rasterizer->samples > VK_SAMPLE_COUNT_1_BIT) {
+      // Mixing single-sample attachments and multisample rasterization needs
+      // its own target-independent rendering path.
+      trace_message("Forced multisampling with an attachment is unsupported");
+      return VK_NULL_HANDLE;
+   }
+   for (uint64_t mask = slots; mask; mask &= mask - 1) {
+      const View *v = dev->graphicsUav[__builtin_ctzll(mask)];
+      if (v && v->res->kind == ResKind::Image) writes[count++] = &v->res->storage;
+   }
+   if (!prepare_image_writes(dev, writes, count))
       return VK_NULL_HANDLE;
    prepare_reads(dev);
-   barrier_for_read(dev, dev->bufferWriteSerial);
-   if (!dev->rendering && !begin_rendering(dev))
+   // SO targets may have been read as vertex/indirect data in the preceding
+   // draw. Order those reads as well as earlier SO writes before capturing.
+   if (capturing) end_rendering(dev);
+   if (slots) {
+      // UAVs can read and write in the same draw, including after an SRV or
+      // indirect read in the previous draw. Complete these uses before the pass.
+      end_rendering(dev);
+      for (UINT i = attachments; i < count; ++i)
+         image_use(dev, *writes[i], false);
+   } else if (!capturing) {
+      barrier_for_read(dev, dev->bufferWriteSerial);
+   }
+   if (FAILED(dev->lost) || (!dev->rendering && !begin_rendering(dev, slots || capturing)))
       return VK_NULL_HANDLE;
    VkCommandBuffer cmd = cmd_draw(dev);
    if (!cmd)
@@ -750,6 +860,8 @@ static VkCommandBuffer prepare_draw(Device *dev, bool indexed)
       return VK_NULL_HANDLE;
    if (!bind_textures(dev, cmd))
       return VK_NULL_HANDLE;
+   if (slots && (dev->dirty & DIRTY_GRAPHICS_UAVS) && !bind_graphics_uavs(dev, cmd))
+      return VK_NULL_HANDLE;
    if (indexed && (dev->dirty & DIRTY_INDEX_BUFFER)) {
       Resource *res = dev->indexBuffer;
       dev->vk.CmdBindIndexBuffer(cmd, res->slice.buffer(), res->slice.offset + dev->indexOffset,
@@ -759,25 +871,57 @@ static VkCommandBuffer prepare_draw(Device *dev, bool indexed)
    }
    if (indexed)
       dev->indexBuffer->sliceLastUse = dev->recordingSeq();
+   for (uint64_t mask = slots; mask; mask &= mask - 1) {
+      View *v = dev->graphicsUav[__builtin_ctzll(mask)];
+      if (!v) continue;
+      if (v->res->kind == ResKind::Image) {
+         image_use(dev, v->res->storage, true);
+      } else {
+         v->res->sliceLastUse = v->res->sliceLastWrite = dev->recordingSeq();
+         buffer_written(dev);
+      }
+   }
+   if (FAILED(dev->lost)) return VK_NULL_HANDLE;
    dev->dirty &= DIRTY_INDEX_BUFFER;
    dev->stats.draws++;
    return cmd;
+}
+
+/* Scope feedback to one draw. A pass split, failed state bind or internal
+ * blit cannot leave feedback active. The next draw resumes the GPU cursor. */
+template<typename DrawCommand>
+static void record_draw(Device *dev, bool indexed, DrawCommand draw)
+{
+   VkCommandBuffer cmd = prepare_draw(dev, indexed);
+   if (!cmd) return;
+   Shader *gs = dev->stage[STAGE_GS].shader;
+   Resource *target = dev->soTargets[0];
+   if (!gs || !gs->so || !gs->so->stride || !target) {
+      draw(cmd);
+      return;
+   }
+   VkBuffer buffer = target->slice.buffer(), counter = target->soCounter.buffer();
+   dev->vk.CmdBindTransformFeedbackBuffersEXT(cmd, 0, 1, &buffer, &target->slice.offset, &target->size);
+   dev->vk.CmdBeginTransformFeedbackEXT(cmd, 0, 1, &counter, &target->soCounter.offset);
+   draw(cmd);
+   dev->vk.CmdEndTransformFeedbackEXT(cmd, 0, 1, &counter, &target->soCounter.offset);
+   target->soVertexStride = gs->so->stride;
+   target->soCounterLastUse = target->sliceLastUse = target->sliceLastWrite = dev->recordingSeq();
+   buffer_written(dev);
 }
 
 static void APIENTRY Draw(D3D10DDI_HDEVICE hDevice, UINT count, UINT start)
 {
    Device *dev = D(hDevice);
    RemovalOnlyErrorScope errors(dev);
-   if (VkCommandBuffer cmd = prepare_draw(dev, false))
-      dev->vk.CmdDraw(cmd, count, 1, start, 0);
+   record_draw(dev, false, [&](VkCommandBuffer cmd) { dev->vk.CmdDraw(cmd, count, 1, start, 0); });
 }
 
 static void APIENTRY DrawIndexed(D3D10DDI_HDEVICE hDevice, UINT count, UINT start, INT base)
 {
    Device *dev = D(hDevice);
    RemovalOnlyErrorScope errors(dev);
-   if (VkCommandBuffer cmd = prepare_draw(dev, true))
-      dev->vk.CmdDrawIndexed(cmd, count, 1, start, base, 0);
+   record_draw(dev, true, [&](VkCommandBuffer cmd) { dev->vk.CmdDrawIndexed(cmd, count, 1, start, base, 0); });
 }
 
 static void APIENTRY DrawInstanced(D3D10DDI_HDEVICE hDevice, UINT count, UINT instances, UINT start,
@@ -785,8 +929,7 @@ static void APIENTRY DrawInstanced(D3D10DDI_HDEVICE hDevice, UINT count, UINT in
 {
    Device *dev = D(hDevice);
    RemovalOnlyErrorScope errors(dev);
-   if (VkCommandBuffer cmd = prepare_draw(dev, false))
-      dev->vk.CmdDraw(cmd, count, instances, start, start_instance);
+   record_draw(dev, false, [&](VkCommandBuffer cmd) { dev->vk.CmdDraw(cmd, count, instances, start, start_instance); });
 }
 
 static void APIENTRY DrawIndexedInstanced(D3D10DDI_HDEVICE hDevice, UINT count, UINT instances,
@@ -794,8 +937,7 @@ static void APIENTRY DrawIndexedInstanced(D3D10DDI_HDEVICE hDevice, UINT count, 
 {
    Device *dev = D(hDevice);
    RemovalOnlyErrorScope errors(dev);
-   if (VkCommandBuffer cmd = prepare_draw(dev, true))
-      dev->vk.CmdDrawIndexed(cmd, count, instances, start, base, start_instance);
+   record_draw(dev, true, [&](VkCommandBuffer cmd) { dev->vk.CmdDrawIndexed(cmd, count, instances, start, base, start_instance); });
 }
 
 static void draw_indirect(Device *dev, Resource *args, UINT offset, bool indexed)
@@ -819,13 +961,13 @@ static void draw_indirect(Device *dev, Resource *args, UINT offset, bool indexed
    /* The argument buffer stays on the GPU. prepare_draw orders preceding
     * buffer writes before indirect reads; retirement follows the same real
     * completion sequence as vertex/index buffers, including after renaming. */
-   if (VkCommandBuffer cmd = prepare_draw(dev, indexed)) {
+   record_draw(dev, indexed, [&](VkCommandBuffer cmd) {
       args->sliceLastUse = dev->recordingSeq();
       if (indexed)
          dev->vk.CmdDrawIndexedIndirect(cmd, args->slice.buffer(), args->slice.offset + offset, 1, bytes);
       else
          dev->vk.CmdDrawIndirect(cmd, args->slice.buffer(), args->slice.offset + offset, 1, bytes);
-   }
+   });
 }
 
 void APIENTRY DrawIndirect11(D3D10DDI_HDEVICE device, D3D10DDI_HRESOURCE args, UINT offset)
@@ -844,8 +986,15 @@ static void APIENTRY DrawAuto(D3D10DDI_HDEVICE hDevice)
    if (FAILED(dev->lost))
       return;
    RemovalOnlyErrorScope errors(dev);
-   /* Depends on stream output, which is not implemented. */
-   TG_ERROR(dev, E_NOTIMPL);
+   if (!dev->caps || !dev->caps->transformFeedback) { TG_ERROR(dev, E_NOTIMPL); return; }
+   const VertexBinding &vb = dev->vb[0];
+   Resource *source = vb.buffer;
+   if (!source || !source->soCounter || !source->soVertexStride) return;
+   record_draw(dev, false, [&](VkCommandBuffer cmd) {
+      source->sliceLastUse = source->soCounterLastUse = dev->recordingSeq();
+      dev->vk.CmdDrawIndirectByteCountEXT(cmd, 1, 0, source->soCounter.buffer(), source->soCounter.offset,
+                                          vb.offset, source->soVertexStride);
+   });
 }
 
 /* ------------------------------------------------------------------ */

@@ -17,6 +17,7 @@
 #include "util/bitpack_helpers.h"
 #include "util/compiler.h"
 #include "vk_format.h"
+#include "vk_internal_exts.h"
 #include "vk_render_pass.h"
 #include "vk_standard_sample_locations.h"
 
@@ -1229,6 +1230,22 @@ nvk_CmdBeginRendering(VkCommandBuffer commandBuffer,
    render->layer_count = pRenderingInfo->layerCount;
    render->samples = 0;
 
+#ifdef _WIN32
+   const struct nvk_tir_rendering_info *tir =
+      vk_find_struct_const(pRenderingInfo->pNext, NVK_TIR_RENDERING_INFO_MESA);
+   if (tir) {
+      if (pdev->info.chipset != 0x12e || pdev->info.cls_eng3d != MAXWELL_B ||
+          tir->rasterSamples != VK_SAMPLE_COUNT_16_BIT || pRenderingInfo->colorAttachmentCount ||
+          pRenderingInfo->pDepthAttachment || pRenderingInfo->pStencilAttachment || render->flags) {
+         vk_command_buffer_set_error(&cmd->vk, VK_ERROR_FEATURE_NOT_PRESENT);
+         return;
+      }
+      render->tir_samples = tir->rasterSamples;
+      struct vk_dynamic_graphics_state *dyn = &cmd->vk.dynamic_graphics_state;
+      BITSET_SET(dyn->dirty, MESA_VK_DYNAMIC_MS_RASTERIZATION_SAMPLES);
+   }
+#endif
+
    const uint32_t layer_count =
       render->view_mask ? util_last_bit(render->view_mask) :
                           render->layer_count;
@@ -1846,6 +1863,10 @@ nvk_CmdEndRendering2KHR(VkCommandBuffer commandBuffer,
    VK_FROM_HANDLE(nvk_cmd_buffer, cmd, commandBuffer);
    struct nvk_rendering_state *render = &cmd->state.gfx.render;
 
+   if (render->tir_samples) {
+      render->tir_samples = 0;
+      BITSET_SET(cmd->vk.dynamic_graphics_state.dirty, MESA_VK_DYNAMIC_MS_RASTERIZATION_SAMPLES);
+   }
    struct nvk_image *zcull_image = nvk_get_zcull_image(render);
    if (render->zcull_enabled && zcull_image && zcull_image->zcull.addr != 0 &&
        !(render->flags & VK_RENDERING_SUSPENDING_BIT) &&
@@ -3792,7 +3813,16 @@ nvk_flush_ms_state(struct nvk_cmd_buffer *cmd)
           * the hardware so always use at least one sample.
           */
          const uint32_t samples = MAX2(1, dyn->ms.rasterization_samples);
-         nvk_cmd_set_sample_layout(cmd, nil_choose_sample_layout(samples));
+         if (render->tir_samples) {
+            /* No storage sample layout exists for an attachmentless draw.
+             * D3D selects pixel-frequency shading for this mode. */
+            struct nv_push *p = nvk_cmd_buffer_push(cmd, 3);
+            P_IMMD(p, NV9097, SET_ANTI_ALIAS, SAMPLES_MODE_4X4);
+            P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SET_ANTI_ALIAS));
+            P_INLINE_DATA(p, nvk_mme_anti_alias_samples(16));
+         } else {
+            nvk_cmd_set_sample_layout(cmd, nil_choose_sample_layout(samples));
+         }
       } else {
          /* Multisample information MAY be missing (rasterizationSamples == 0)
           * if rasterizer discard is enabled.
@@ -3815,20 +3845,25 @@ nvk_flush_ms_state(struct nvk_cmd_buffer *cmd)
        BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_SAMPLE_LOCATIONS) ||
        BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_SAMPLE_LOCATIONS_ENABLE)) {
       const struct vk_sample_locations_state *sl;
-      if (dyn->ms.sample_locations_enable) {
+      if (render->tir_samples) {
+         sl = vk_standard_sample_locations_state(render->tir_samples);
+      } else if (dyn->ms.sample_locations_enable) {
          sl = dyn->ms.sample_locations;
       } else {
          const uint32_t samples = MAX2(1, dyn->ms.rasterization_samples);
          sl = vk_standard_sample_locations_state(samples);
       }
 
-      struct nak_sample_location push_sl[NVK_MAX_SAMPLES];
+      struct nak_sample_location push_sl[16] = {0};
       for (uint32_t i = 0; i < sl->per_pixel; i++)
          push_sl[i] = vk_to_nak_sample_location(sl->locations[i]);
 
       nvk_descriptor_state_set_root_array(cmd, &cmd->state.gfx.descriptors,
                                           draw.sample_locations,
                                           0, NVK_MAX_SAMPLES, push_sl);
+      if (render->tir_samples)
+         nvk_descriptor_state_set_root_array(cmd, &cmd->state.gfx.descriptors,
+                                             tir_high_locations, 0, 8, &push_sl[8]);
 
       if (nvk_cmd_buffer_3d_cls(cmd) >= MAXWELL_B) {
          struct nak_sample_location loc[16];
@@ -3859,13 +3894,17 @@ nvk_flush_ms_state(struct nvk_cmd_buffer *cmd)
       }
    }
 
-   if (BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_SAMPLE_MASK)) {
+   if (BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_SAMPLE_MASK) ||
+       BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_RASTERIZATION_SAMPLES)) {
       struct nv_push *p = nvk_cmd_buffer_push(cmd, 5);
+      uint32_t mask = dyn->ms.sample_mask & 0xffff;
+      if (render->tir_samples)
+         mask = 0xffff;
       P_MTHD(p, NV9097, SET_SAMPLE_MASK_X0_Y0);
-      P_NV9097_SET_SAMPLE_MASK_X0_Y0(p, dyn->ms.sample_mask & 0xffff);
-      P_NV9097_SET_SAMPLE_MASK_X1_Y0(p, dyn->ms.sample_mask & 0xffff);
-      P_NV9097_SET_SAMPLE_MASK_X0_Y1(p, dyn->ms.sample_mask & 0xffff);
-      P_NV9097_SET_SAMPLE_MASK_X1_Y1(p, dyn->ms.sample_mask & 0xffff);
+      P_NV9097_SET_SAMPLE_MASK_X0_Y0(p, mask);
+      P_NV9097_SET_SAMPLE_MASK_X1_Y0(p, mask);
+      P_NV9097_SET_SAMPLE_MASK_X0_Y1(p, mask);
+      P_NV9097_SET_SAMPLE_MASK_X1_Y1(p, mask);
    }
 }
 

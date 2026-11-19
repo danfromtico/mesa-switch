@@ -49,3 +49,11 @@ executable(
   dependencies : [cpp.find_library('advapi32'), cpp.find_library('psapi')],
   link_args : tgd3d_link_args + (cc.get_argument_syntax() == 'gcc' ? ['-municode'] : []),
 )
+
+executable(
+  'tgd3d-tess-reference',
+  ['native/tess_reference.cpp', '../../vulkan/nvkmd/windows/kmt.c'],
+  include_directories : [include_directories('../../vulkan/nvkmd/windows')],
+  dependencies : [cpp.find_library('gdi32'), cpp.find_library('dxgi'), cpp.find_library('uuid')],
+  link_args : tgd3d_link_args + (cc.get_argument_syntax() == 'gcc' ? ['-municode'] : []),
+)

@@ -900,6 +900,69 @@ static void rotated_views()
    std::puts("PASS: rotated cached/deferred views die before their image and memory");
 }
 
+static void graphics_storage_layout()
+{
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
+   constexpr VkShaderStageFlags stages = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT |
+      VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+   adapter.vk.caps.tessellationShader = true;
+   adapter.vk.caps.graphicsUavStages = stages;
+   adapter.vk.caps.graphicsUavSlots = D3D_UAV_SLOTS;
+   dev.vk.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *info,
+                                         const VkAllocationCallbacks *, VkDescriptorSetLayout *out) {
+      if (layouts == SET_GRAPHICS_UAV) {
+         bool seen[(2 + GRAPHICS_STAGE_COUNT) * D3D_UAV_SLOTS]{};
+         CHECK(info->bindingCount == std::size(seen));
+         for (UINT i = 0; i < info->bindingCount; ++i) {
+            const auto &b = info->pBindings[i];
+            CHECK(b.binding < std::size(seen) && !seen[b.binding] && b.descriptorCount == 1);
+            seen[b.binding] = true;
+            const UINT range = b.binding / D3D_UAV_SLOTS;
+            CHECK(b.stageFlags == (range < 2 ? stages : graphics_stage_flag(range - 2)));
+            CHECK(b.descriptorType == (range == 0 ? VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER :
+                                       range == 1 ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER : VK_DESCRIPTOR_TYPE_STORAGE_IMAGE));
+         }
+      }
+      *out = handle<VkDescriptorSetLayout>(100 + layouts++); return VK_SUCCESS;
+   };
+   CHECK(SUCCEEDED(device_layouts_create(&dev)) && layouts == SET_GRAPHICS_UAV + 1);
+   Shader shaders[GRAPHICS_STAGE_COUNT];
+   for (UINT s = 0; s < GRAPHICS_STAGE_COUNT; ++s) {
+      dev.stage[s].shader = &shaders[s];
+      for (auto type : {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER}) {
+         const UINT slot = type == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE ? 5 : 63;
+         shaders[s].bindings.push_back({graphics_uav_binding(s, slot, type), slot, type, 0});
+      }
+   }
+   dev.framePools.push_back(handle<VkDescriptorPool>(200));
+   dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
+      *out = handle<VkDescriptorSet>(300); return VK_SUCCESS;
+   };
+   dev.vk.UpdateDescriptorSets = [](VkDevice, UINT count, const VkWriteDescriptorSet *w, UINT, const VkCopyDescriptorSet *) {
+      CHECK(count == 2 + GRAPHICS_STAGE_COUNT);
+      unsigned used = 0;
+      for (UINT i = 0; i < count; ++i) {
+         const UINT range = w[i].dstBinding / D3D_UAV_SLOTS;
+         CHECK(range < 2 + GRAPHICS_STAGE_COUNT && w[i].dstBinding % D3D_UAV_SLOTS == (range < 2 ? 63u : 5u) && !(used & (1u << range)));
+         used |= 1u << range;
+         if (range == 0) CHECK(!*w[i].pTexelBufferView);
+         else if (range == 1) CHECK(!w[i].pBufferInfo->buffer);
+         else CHECK(!w[i].pImageInfo->imageView);
+      }
+      CHECK(used == (1u << (2 + GRAPHICS_STAGE_COUNT)) - 1); ++updates;
+   };
+   CHECK(bind_graphics_uavs(&dev, handle<VkCommandBuffer>(4)));
+   auto *scratch = dev.shaderDescriptorData.data();
+   for (auto &entry : dev.shaderDescriptorData) {
+      entry.texel = handle<VkBufferView>(5);
+      entry.image.imageView = handle<VkImageView>(6);
+      entry.buffer.buffer = handle<VkBuffer>(7);
+   }
+   CHECK(bind_graphics_uavs(&dev, handle<VkCommandBuffer>(4)) && updates == 2 && dev.shaderDescriptorData.data() == scratch);
+   device_layouts_destroy(&dev);
+   std::puts("PASS: 448 graphics UAV layout bindings, seven unique writes for fifteen declarations in five stages, reusable null descriptor scratch (CPU control)");
+}
+
 static void descriptor_contract()
 {
    reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
@@ -982,6 +1045,8 @@ static void descriptor_scratch_contract()
 {
    for (unsigned mode = 0; mode < 3; ++mode) {
       reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
+      adapter.vk.caps.tessellationShader = true;
+      dev.topology = D3D11_DDI_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
       dev.defaultSampler = handle<VkSampler>(777);
       dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
                                       const VkAllocationCallbacks *, VkDescriptorPool *out) {
@@ -995,11 +1060,11 @@ static void descriptor_scratch_contract()
          ++scratchCalls;
          const bool texel = writes[0].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
          CHECK(count == (texel ? scratchBuffers : scratchImages));
-         bool seen[STAGE_COUNT * SET1_STRIDE] = {};
+         bool seen[GRAPHICS_STAGE_COUNT * SET1_STRIDE] = {};
          for (unsigned i = 0; i < count; ++i) {
             const auto &w = writes[i];
             CHECK(w.descriptorCount == 1 && w.dstArrayElement == 0);
-            CHECK(w.dstBinding < STAGE_COUNT * SET1_STRIDE && !seen[w.dstBinding]);
+            CHECK(w.dstBinding < GRAPHICS_STAGE_COUNT * SET1_STRIDE && !seen[w.dstBinding]);
             seen[w.dstBinding] = true;
             if (texel) {
                CHECK(w.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER);
@@ -1012,8 +1077,9 @@ static void descriptor_scratch_contract()
             }
          }
       };
-      Shader shaders[STAGE_COUNT];
-      for (unsigned i = 0; i < STAGE_COUNT; ++i) {
+      Shader shaders[GRAPHICS_STAGE_COUNT];
+      shaders[STAGE_HS].inputControlPoints = 3;
+      for (unsigned i = 0; i < GRAPHICS_STAGE_COUNT; ++i) {
          shaders[i].dev = &dev; shaders[i].stage = (Stage)i;
          shaders[i].variants.push_back({0, handle<VkShaderEXT>(600 + i)});
          shaders[i].samplerMask = mode == 1 ? 0 : 0xffffu;
@@ -1024,8 +1090,8 @@ static void descriptor_scratch_contract()
          }
          dev.stage[i].shader = &shaders[i];
       }
-      scratchImages = mode == 1 ? 0 : STAGE_COUNT * (D3D_SAMPLER_SLOTS + (mode == 0 ? 128 : 64));
-      scratchBuffers = mode == 0 ? 0 : STAGE_COUNT * (mode == 1 ? 128 : 64);
+      scratchImages = mode == 1 ? 0 : GRAPHICS_STAGE_COUNT * (D3D_SAMPLER_SLOTS + (mode == 0 ? 128 : 64));
+      scratchBuffers = mode == 0 ? 0 : GRAPHICS_STAGE_COUNT * (mode == 1 ? 128 : 64);
       Resource target; target.dev = &dev; target.kind = ResKind::Image;
       target.storage.image = handle<VkImage>(700); target.storage.layoutReady = true;
       View view; view.dev = &dev; view.res = &target; view.type = ViewType::RTV;
@@ -1656,6 +1722,282 @@ static void shader_contract(const BYTE *dxbc, bool vertex, const char *outputPat
    std::puts("PASS: shader failure preserves OOM/device-loss status and cleans before SetErrorCb");
 }
 
+#include "native/compute_shaders.h"
+
+#include "native/shader_signature.h"
+#include "native/tess_cases.h"
+
+static void stream_output_contract()
+{
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
+   auto &caps = adapter.vk.caps;
+   caps.transformFeedback = true; caps.maxFeedbackBuffer = UINT_MAX;
+   caps.maxFramebufferWidth = caps.maxFramebufferHeight = 1024;
+   D3D11_1DDI_DEVICEFUNCS table{}; device_fill_table11(&table);
+   const D3D10DDI_HDEVICE device{&dev};
+   const char source[] =
+      "struct Vertex {float4 p:SV_Position;}; [maxvertexcount(3)] void main(triangle Vertex v[3],"
+      "inout TriangleStream<Vertex> stream) { [unroll] for(uint i=0;i<3;++i) stream.Append(v[i]); }";
+   HMODULE module = LoadLibraryW(L"d3dcompiler_47.dll"); CHECK(module);
+   auto compile = reinterpret_cast<pD3DCompile>(reinterpret_cast<void *>(GetProcAddress(module, "D3DCompile")));
+   ID3DBlob *blob = nullptr, *error = nullptr;
+   CHECK(compile && SUCCEEDED(compile(source, sizeof(source)-1, nullptr, nullptr, nullptr, "main", "gs_5_0",
+                                       0, 0, &blob, &error)));
+   Signature sig(static_cast<const UINT *>(blob->GetBufferPointer()), blob->GetBufferSize() / 4);
+   CHECK(sig.code && sig.outputs.size() == 1);
+   const UINT stride = 16;
+   D3D11DDIARG_STREAM_OUTPUT_DECLARATION_ENTRY entries[] = {
+      {0, 0, D3D10_SO_DDI_REGISTER_INDEX_DENOTING_GAP, 1}, {0, 0, sig.outputs[0].Register, 6}};
+   D3D11DDIARG_CREATEGEOMETRYSHADERWITHSTREAMOUTPUT so{sig.code, entries, 2, &stride, 1, UINT_MAX};
+   alignas(Shader) BYTE storage[sizeof(Shader)]{};
+   dev.vk.CreateShadersEXT = [](VkDevice, UINT n, const VkShaderCreateInfoEXT *info,
+                                 const VkAllocationCallbacks *, VkShaderEXT *out) {
+      CHECK(n == 1 && info->stage == VK_SHADER_STAGE_GEOMETRY_BIT && info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT);
+      FILE *f = std::fopen(shaderOutput, "wb"); CHECK(f);
+      CHECK(std::fwrite(info->pCode, 1, info->codeSize, f) == info->codeSize && !std::fclose(f));
+      *out = handle<VkShaderEXT>(801); return VK_SUCCESS;
+   };
+   // Unsupported declarations must fail before constructing a backend shader.
+   entries[1].OutputSlot = 1;
+   table.pfnCreateGeometryShaderWithStreamOutput(device, &so, {storage}, {}, &sig.io);
+   CHECK(setErrorCalls == 1 && lastError == DXGI_ERROR_UNSUPPORTED);
+   entries[1].OutputSlot = 0;
+   const UINT shortStride = 8;
+   so.BufferStridesInBytes = &shortStride;
+   table.pfnCreateGeometryShaderWithStreamOutput(device, &so, {storage}, {}, &sig.io);
+   CHECK(setErrorCalls == 2 && lastError == E_INVALIDARG);
+   so.BufferStridesInBytes = &stride;
+   lastError = S_OK; setErrorCalls = 0;
+   for (UINT raster : {0u, UINT_MAX}) {
+      so.RasterizedStream = raster;
+      shaderOutput = raster ? "tgd3d-so-discard.spv" : "tgd3d-so-raster.spv";
+      table.pfnCreateGeometryShaderWithStreamOutput(device, &so, {storage}, {}, &sig.io);
+      CHECK(!setErrorCalls);
+      if (!raster) table.pfnDestroyShader(device, {storage});
+   }
+   shaderOutput = nullptr;
+   if (error) error->Release();
+   blob->Release(); FreeLibrary(module);
+   table.pfnGsSetShader(device, {storage});
+   Shader vs; vs.dev = &dev; vs.variants.push_back({0, handle<VkShaderEXT>(802)});
+   dev.stage[STAGE_VS].shader = &vs;
+   Chunk chunk; chunk.buffer = handle<VkBuffer>(803);
+   Resource data; data.dev = &dev; data.bind = D3D10_DDI_BIND_STREAM_OUTPUT | D3D10_DDI_BIND_VERTEX_BUFFER;
+   data.slice = {&chunk, 64, 256}; data.size = 256; data.soCounter = {&chunk, 384, 4};
+   dev.vk.CmdFillBuffer = [](VkCommandBuffer, VkBuffer b, VkDeviceSize off, VkDeviceSize size, UINT value) {
+      CHECK(b == handle<VkBuffer>(803) && off == 384 && size == 4 && value == 16); events.push_back(10);
+   };
+   dev.vk.CmdBindTransformFeedbackBuffersEXT = [](VkCommandBuffer, UINT slot, UINT n, const VkBuffer *b,
+                                                    const VkDeviceSize *off, const VkDeviceSize *size) {
+      CHECK(!slot && n == 1 && *b == handle<VkBuffer>(803) && *off == 64 && *size == 256); events.push_back(11);
+   };
+   dev.vk.CmdBeginTransformFeedbackEXT = [](VkCommandBuffer, UINT slot, UINT n, const VkBuffer *b, const VkDeviceSize *off) {
+      CHECK(!slot && n == 1 && *b == handle<VkBuffer>(803) && *off == 384); events.push_back(12);
+   };
+   dev.vk.CmdDraw = [](VkCommandBuffer, UINT n, UINT instances, UINT start, UINT) {
+      CHECK(n == 3 && instances == 1 && !start); events.push_back(13);
+   };
+   dev.vk.CmdEndTransformFeedbackEXT = [](VkCommandBuffer, UINT slot, UINT n, const VkBuffer *b, const VkDeviceSize *off) {
+      CHECK(!slot && n == 1 && *b == handle<VkBuffer>(803) && *off == 384); events.push_back(14);
+   };
+   dev.vk.CmdDrawIndirectByteCountEXT = [](VkCommandBuffer, UINT n, UINT first, VkBuffer b, VkDeviceSize at,
+                                           UINT subtract, UINT vertexStride) {
+      CHECK(n == 1 && !first && b == handle<VkBuffer>(803) && at == 384 && subtract == 16 && vertexStride == 16);
+      events.push_back(15);
+   };
+   D3D10DDI_HRESOURCE target{&data};
+   UINT offset = 15;
+   table.pfnSoSetTargets(device, 1, 0, &target, &offset);
+   CHECK(setErrorCalls == 1 && lastError == E_INVALIDARG && !dev.soTargets[0] && events.empty());
+   setErrorCalls = 0; lastError = S_OK;
+   offset = 16;
+   table.pfnSoSetTargets(device, 1, 0, &target, &offset);
+   table.pfnDraw(device, 3, 0);
+   CHECK(data.soVertexStride == stride && data.sliceLastWrite == dev.recordingSeq());
+   table.pfnSoSetTargets(device, 0, 1, nullptr, nullptr);
+   offset = UINT_MAX;
+   table.pfnSoSetTargets(device, 1, 0, &target, &offset);
+   const unsigned previousBarriers = barriers;
+   table.pfnDraw(device, 3, 0);
+   CHECK(barriers > previousBarriers);
+   table.pfnSoSetTargets(device, 0, 1, nullptr, nullptr);
+   table.pfnGsSetShader(device, {});
+   Resource image; image.dev = &dev; image.kind = ResKind::Image;
+   image.storage.image = handle<VkImage>(804); image.storage.layoutReady = true;
+   View view; view.dev = &dev; view.res = &image; view.type = ViewType::RTV; view.width = view.height = view.layers = 1;
+   view.cache[0] = {image.storage.image, handle<VkImageView>(805), false};
+   end_rendering(&dev); dev.rtv[0] = &view; dev.viewportCount = 1;
+   dev.viewports[0].Width = dev.viewports[0].Height = 1;
+   dev.vb[0] = {&data, 32, 16};
+   table.pfnDrawAuto(device);
+   CHECK(events == std::vector<unsigned>({10,11,12,13,14,11,12,13,14,15}));
+   CHECK(!setErrorCalls && !cpuWaits && !cpuSignals);
+   table.pfnDestroyShader(device, {storage}); retire(&dev, true); cmd_destroy(&dev);
+   std::puts("PASS: GS stream output via DDI, gap and component mask, GPU cursor reset/append and DrawAuto replay (CPU control)");
+}
+
+static void so_producer_contract()
+{
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
+   auto &caps = adapter.vk.caps;
+   caps.transformFeedback = caps.tessellationShader = true;
+   caps.graphicsUavSlots = D3D_UAV_SLOTS;
+   caps.graphicsUavStages = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+   D3D11_1DDI_DEVICEFUNCS table{}; device_fill_table11(&table);
+   const D3D10DDI_HDEVICE h{&dev};
+   static unsigned calls;
+   dev.vk.CreateShadersEXT = [](VkDevice, UINT n, const VkShaderCreateInfoEXT *info,
+                                const VkAllocationCallbacks *, VkShaderEXT *out) {
+      CHECK(n == 1 && (info->stage == VK_SHADER_STAGE_VERTEX_BIT || info->stage == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT));
+      if (shaderOutput) {
+         FILE *f = std::fopen(shaderOutput, "wb"); CHECK(f);
+         CHECK(std::fwrite(info->pCode, 1, info->codeSize, f) == info->codeSize && !std::fclose(f));
+      }
+      *out = handle<VkShaderEXT>(900 + ++calls); return VK_SUCCESS;
+   };
+   for (bool domain : {false, true}) {
+      Signature sig(domain ? line_ds : read_vs, domain ? std::size(line_ds) : std::size(read_vs));
+      CHECK(sig.code && sig.outputs.size() == 2);
+      alignas(Shader) BYTE producerMemory[sizeof(Shader)]{}, soMemory[sizeof(Shader)]{};
+      const D3D10DDI_HSHADER prod{producerMemory}, so{soMemory};
+      if (domain) table.pfnCreateDomainShader(h, sig.code, prod, {}, &sig.tess);
+      else table.pfnCreateVertexShader(h, sig.code, prod, {}, &sig.io);
+      CHECK(!setErrorCalls);
+      Shader *producer = reinterpret_cast<Shader *>(producerMemory);
+      UINT stride = 20;
+      D3D11DDIARG_STREAM_OUTPUT_DECLARATION_ENTRY fields[] = {
+         {0, 0, sig.outputs[0].Register, 15}, {0, 0, sig.outputs[1].Register, 1}};
+      D3D11DDIARG_CREATEGEOMETRYSHADERWITHSTREAMOUTPUT args{nullptr, fields, 2, &stride, 1, 0};
+      const uint64_t key = domain ? producer->tessIoMask : 0;
+      const VkShaderEXT ordinary = shader_variant(producer, key);
+      VkShaderEXT first = VK_NULL_HANDLE;
+      for (UINT i = 0; i < 3; ++i) {
+         // Recreate the object in the same private memory. Only the third
+         // declaration changes the byte layout. The cached variant owns it.
+         args.pShaderCode = i ? sig.code : nullptr;
+         if (i == 2) stride = 24;
+         const unsigned before = calls;
+         table.pfnCreateGeometryShaderWithStreamOutput(h, &args, so, {}, i ? &sig.io : nullptr);
+         auto *state = reinterpret_cast<Shader *>(soMemory);
+         CHECK(!setErrorCalls && state->soPassthrough && state->variants.empty() && calls == before);
+         shaderOutput = i == 0 ? (domain ? "tgd3d-so-ds.spv" : "tgd3d-so-vs.spv") : nullptr;
+         VkShaderEXT capture = shader_variant(producer, key, state->so);
+         CHECK(capture && capture != ordinary && calls == before + (i != 1));
+         if (i == 0) first = capture;
+         if (i == 1) CHECK(first == capture);
+         if (i == 2) CHECK(first != capture);
+         shaderOutput = nullptr;
+         table.pfnDestroyShader(h, so);
+         CHECK(shader_variant(producer, key) == ordinary);
+      }
+      table.pfnDestroyShader(h, prod); retire(&dev, true);
+   }
+   std::puts("PASS: signature-only SO compiles on VS/DS, shares equivalent declarations and separates strides and ordinary shaders");
+}
+
+static void tess_shader_contract()
+{
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
+   auto &caps = adapter.vk.caps;
+   caps.tessellationShader = true; caps.graphicsUavSlots = D3D_UAV_SLOTS;
+   caps.graphicsUavStages = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+   D3D11_1DDI_DEVICEFUNCS table{}; device_fill_table11(&table);
+   static UINT compiled;
+   compiled = 0;
+   dev.vk.CreateShadersEXT = [](VkDevice, UINT count, const VkShaderCreateInfoEXT *info,
+                                 const VkAllocationCallbacks *, VkShaderEXT *out) {
+      CHECK(count == 1 && info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT && info->codeSize > 20);
+      CHECK(info->stage == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT ? info->nextStage == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT :
+            info->stage == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT && info->nextStage == (VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT));
+      FILE *f = std::fopen(shaderOutput, "wb"); CHECK(f);
+      CHECK(std::fwrite(info->pCode, 1, info->codeSize, f) == info->codeSize); std::fclose(f);
+      *out = handle<VkShaderEXT>(0x500 + ++compiled); return VK_SUCCESS;
+   };
+   alignas(Shader) BYTE storage[sizeof(Shader)]{};
+   uint64_t outputs[std::size(tess_test::hulls)]{};
+   auto check = [&](const tess_test::Blob &blob, UINT index, bool hull) {
+      Signature sig(blob.code, blob.words);
+      CHECK(sig.code && !sig.patch.empty() && table.pfnCalcPrivateTessellationShaderSize({&dev}, sig.code, &sig.tess) == sizeof(Shader));
+      char file[64]; std::snprintf(file, sizeof(file), "tgd3d-tess-%s-%u.spv", hull ? "hs" : "ds", index);
+      shaderOutput = file;
+      D3D10DDI_HSHADER h{storage}; lastError = S_OK;
+      (hull ? table.pfnCreateHullShader : table.pfnCreateDomainShader)({&dev}, sig.code, h, {}, &sig.tess);
+      CHECK(SUCCEEDED(lastError));
+      auto *sh = reinterpret_cast<Shader *>(storage);
+      CHECK(sh->stage == (hull ? STAGE_HS : STAGE_DS) && sh->patchConstants.size() == sig.patch.size() && sh->tessIoMask);
+      CHECK(sh->uavMask == (UINT64_C(1) << (hull ? 62 : 63)) && sh->samplerMask == (1u << 3) && sh->cbMask == (1u << 13));
+      if (hull) {
+         outputs[index] = sh->tessIoMask;
+         CHECK(sh->inputControlPoints > 0 && sh->inputControlPoints <= 32);
+      } else if (index == tess_test::Triangle) {
+         CHECK(outputs[tess_test::Tri] != outputs[tess_test::Wide]);
+         shaderOutput = "tgd3d-tess-ds-wide.spv";
+         CHECK(shader_variant(sh, outputs[tess_test::Wide]));
+         const UINT before = compiled;
+         CHECK(shader_variant(sh, outputs[tess_test::Wide]) && compiled == before);
+      }
+      table.pfnDestroyShader({&dev}, h); retire(&dev, true);
+   };
+   for (UINT i = 0; i < std::size(tess_test::hulls); ++i) check(tess_test::hulls[i], i, true);
+   for (UINT i = 0; i < std::size(tess_test::domains); ++i) check(tess_test::domains[i], i, false);
+   shaderOutput = nullptr;
+   std::puts("PASS: SM5 hull/domain DDI creation, patch constants, sparse producer linkage, SRV/CB/sampler and UAV slots (CPU control)");
+}
+
+static void compute_shader_contract()
+{
+   reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
+   adapter.vk.caps.compute = true;
+   dev.vk.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *info,
+                                        const VkAllocationCallbacks *, VkDescriptorSetLayout *out) {
+      CHECK(info->bindingCount > 0 && info->bindingCount <= D3D_CB_SLOTS+D3D_SAMPLER_SLOTS+D3D_SRV_SLOTS+2*D3D_UAV_SLOTS);
+      bool seen[D3D_CB_SLOTS+D3D_SAMPLER_SLOTS+D3D_SRV_SLOTS+2*D3D_UAV_SLOTS]{};
+      for (UINT i=0;i<info->bindingCount;++i) {
+         const auto &b=info->pBindings[i];
+         CHECK(b.binding < std::size(seen) && !seen[b.binding] && b.descriptorCount == 1 &&
+               b.stageFlags == VK_SHADER_STAGE_COMPUTE_BIT);
+         seen[b.binding]=true;
+      }
+      *out=handle<VkDescriptorSetLayout>(0xc0); return VK_SUCCESS;
+   };
+   dev.vk.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *info,
+                                   const VkAllocationCallbacks *, VkPipelineLayout *out) {
+      CHECK(info->setLayoutCount == 1 && *info->pSetLayouts == handle<VkDescriptorSetLayout>(0xc0));
+      *out=handle<VkPipelineLayout>(0xc1); return VK_SUCCESS;
+   };
+   dev.vk.CreateShadersEXT = [](VkDevice,UINT count,const VkShaderCreateInfoEXT *info,
+                                const VkAllocationCallbacks *,VkShaderEXT *out) {
+      CHECK(count == 1 && info->stage == VK_SHADER_STAGE_COMPUTE_BIT && !info->nextStage &&
+            info->setLayoutCount == 1 && *info->pSetLayouts == handle<VkDescriptorSetLayout>(0xc0) &&
+            info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT && info->codeSize >= 20);
+      FILE *file = fopen(shaderOutput,"wb"); CHECK(file);
+      CHECK(fwrite(info->pCode,1,info->codeSize,file)==info->codeSize && !fclose(file));
+      *out=handle<VkShaderEXT>(0xc2);return VK_SUCCESS;
+   };
+   dev.vk.DestroyDescriptorSetLayout=[](VkDevice,VkDescriptorSetLayout h,const VkAllocationCallbacks *){CHECK(h==handle<VkDescriptorSetLayout>(0xc0));};
+   dev.vk.DestroyPipelineLayout=[](VkDevice,VkPipelineLayout h,const VkAllocationCallbacks *){CHECK(h==handle<VkPipelineLayout>(0xc1));};
+   dev.vk.DestroyShaderEXT=[](VkDevice,VkShaderEXT h,const VkAllocationCallbacks *){CHECK(h==handle<VkShaderEXT>(0xc2));};
+   D3D11_1DDI_DEVICEFUNCS t{};device_fill_table11(&t);
+   struct Case { const UINT *code; const char *file; UINT bindings; };
+   const Case cases[] = {{cs_produce,"tgd3d-cs-produce.spv",11}, {cs_consume,"tgd3d-cs-consume.spv",6},
+                         {cs_downlevel40,"tgd3d-cs40.spv",4}, {cs_downlevel41,"tgd3d-cs41.spv",4}};
+   for (const auto &item: cases) {
+      shaderOutput=item.file;
+      alignas(Shader) BYTE storage[sizeof(Shader)];
+      D3D10DDI_HSHADER handle{storage};
+      t.pfnCreateComputeShader({&dev},item.code,handle,{});
+      auto *sh=reinterpret_cast<Shader *>(storage);
+      CHECK(SUCCEEDED(lastError) && sh->stage==STAGE_CS && sh->variants.size()==1 &&
+            sh->bindings.size()==item.bindings);
+      t.pfnCsSetShader({&dev},handle);
+      CHECK(dev.stage[STAGE_CS].shader==sh && !dev.stage[STAGE_PS].shader);
+      t.pfnDestroyShader({&dev},handle);
+      CHECK(!dev.stage[STAGE_CS].shader);
+      retire(&dev,true);
+   }
+   std::puts("PASS: four compute shader translations, typed register layouts, independent stage binding and retired shader/layout objects");
+}
+
 static void sampled_shader_contract(const char *source, const char *outputPath)
 {
    HMODULE module = LoadLibraryW(L"d3dcompiler_47.dll"); CHECK(module);
@@ -1981,10 +2323,14 @@ int main(int argc, char **argv)
    overlap_contracts();
    clear_view_contract();
    device_error_contract();
-   rotated_views(); descriptor_contract(); descriptor_scratch_contract(); draw_error_contract(); empty_box_contract();
+   rotated_views(); graphics_storage_layout(); descriptor_contract(); descriptor_scratch_contract(); draw_error_contract(); empty_box_contract();
    indirect_draw_contract(); readonly_depth_contract();
    query_contract();
    query_failure_contract();
+   stream_output_contract();
+   so_producer_contract();
+   compute_shader_contract();
+   tess_shader_contract();
    shader_contract(g_VS, true, "tgd3d-vs.spv"); shader_contract(g_PS, false, "tgd3d-ps.spv");
    sampled_shader_contract(
       "Texture2D<float4> tex:register(t0); SamplerState samp:register(s0);"

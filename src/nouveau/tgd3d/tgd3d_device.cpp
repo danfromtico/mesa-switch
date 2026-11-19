@@ -56,6 +56,9 @@ static void APIENTRY CheckFormatSupport(D3D10DDI_HDEVICE hDevice, DXGI_FORMAT fo
    if ((f & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) &&
        !((info->flags & FMT_R_AS_ALPHA) && !dev->hasA8)) {
       *out |= D3D10_DDI_FORMAT_SUPPORT_RENDERTARGET;
+      if (dev->interfaceVersion >= D3D11_1_DDI_INTERFACE_VERSION && dev->caps->logicOp &&
+          (info->flags & FMT_UINT))
+         *out |= D3D11_1DDI_FORMAT_SUPPORT_OUTPUT_MERGER_LOGIC_OP;
       if (f & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT)
          *out |= D3D10_DDI_FORMAT_SUPPORT_BLENDABLE;
    }
@@ -108,7 +111,7 @@ static bool device_teardown(Device *dev)
    return true;
 }
 
-static void release_device(DeviceSlot *slot)
+void release_device(DeviceSlot *slot)
 {
    Device *dev = slot->state;
    if (device_teardown(dev)) {
@@ -144,18 +147,20 @@ void device_fill_table(D3D10DDI_DEVICEFUNCS *table)
    table->pfnDestroyDevice = DestroyDevice;
 }
 
-static bool device_interface(UINT interfaceVersion, UINT version, UINT flags)
+static bool device_interface(const Adapter *adapter, UINT interfaceVersion, UINT version, UINT flags)
 {
    switch (interfaceVersion) {
    case D3D10_0_DDI_INTERFACE_VERSION:
    case D3D10_0_x_DDI_INTERFACE_VERSION:
    case D3D10_0_7_DDI_INTERFACE_VERSION:
       return true; // retain the accepted legacy negotiation
-   case D3D11_1_DDI_INTERFACE_VERSION:
-      return D3D11DDI_EXTRACT_3DPIPELINELEVEL_FROM_FLAGS(flags) == D3D11DDI_3DPIPELINELEVEL_10_0;
    case D3DWDDM2_0_DDI_INTERFACE_VERSION:
-      return HIWORD(version) >= D3DWDDM2_0_DDI_BUILD_VERSION &&
-         D3D11DDI_EXTRACT_3DPIPELINELEVEL_FROM_FLAGS(flags) == D3D11DDI_3DPIPELINELEVEL_10_0;
+      if (HIWORD(version) < D3DWDDM2_0_DDI_BUILD_VERSION) return false;
+      [[fallthrough]];
+   case D3D11_1_DDI_INTERFACE_VERSION: {
+      const UINT level = D3D11DDI_EXTRACT_3DPIPELINELEVEL_FROM_FLAGS(flags);
+      return (native_pipeline_levels(adapter) & (UINT32_C(1) << level)) != 0;
+   }
    default:
       return false;
    }
@@ -180,58 +185,13 @@ static HRESULT APIENTRY RetrieveSubObject(D3D10DDI_HDEVICE hDevice, UINT32 id,
 SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER h,
                                      const D3D10DDIARG_CALCPRIVATEDEVICESIZE *args)
 {
-   if (!args || !device_interface(args->Interface, args->Version, args->Flags)) return 0;
-   if (args->Interface == D3D11_1_DDI_INTERFACE_VERSION &&
-       (!h.pDrvPrivate || !A(h)->videoEnabled)) return 0;
+   if (!args || !device_interface(A(h), args->Interface, args->Version, args->Flags)) return 0;
+   if (args->Interface == D3D11_1_DDI_INTERFACE_VERSION && !h.pDrvPrivate) return 0;
    return sizeof(DeviceSlot);
 }
 
-HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVICE *args)
+HRESULT initialize_graphics_device(Device *dev, bool use_runtime_queue, bool allow_independent)
 {
-   if (!hAdapter.pDrvPrivate || !args || !args->hDrvDevice.pDrvPrivate ||
-       !args->pKTCallbacks || !args->pUMCallbacks || !args->pDeviceFuncs ||
-       !args->DXGIBaseDDI.pDXGIDDIBaseFunctions)
-      return E_INVALIDARG;
-   Adapter *adapter = A(hAdapter);
-   if (!device_interface(args->Interface, args->Version, args->Flags)) {
-      trace(TGD3D_TRACE_CREATE_DEVICE, DXGI_ERROR_UNSUPPORTED, args->Interface, args->Flags);
-      return DXGI_ERROR_UNSUPPORTED;
-   }
-   const bool video = args->Interface == D3D11_1_DDI_INTERFACE_VERSION;
-   if (video && (!adapter->videoEnabled || !args->ppfnRetrieveSubObject)) return DXGI_ERROR_UNSUPPORTED;
-   wchar_t window_opt_in[2] = {};
-   const bool video_window = video &&
-      GetEnvironmentVariableW(L"TGD3D_VIDEO_WINDOW_VALIDATE", window_opt_in, 2) == 1 &&
-      window_opt_in[0] == L'1';
-   const bool modern = args->Interface == D3DWDDM2_0_DDI_INTERFACE_VERSION;
-   if (modern && (!args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb ||
-                  !args->pKTCallbacks->pfnEvictCb)) return DXGI_ERROR_UNSUPPORTED;
-   auto *slot = new (args->hDrvDevice.pDrvPrivate) DeviceSlot{};
-   try {
-      slot->state = new Device();
-   } catch (const std::bad_alloc &) {
-      return E_OUTOFMEMORY;
-   }
-   Device *dev = slot->state;
-   dev->adapter = adapter;
-   dev->hRTDevice = args->hRTDevice;
-   dev->hRTCoreLayer = args->hRTCoreLayer;
-   runtime_copy_callbacks(&dev->kt, args->pKTCallbacks);
-   /* Read fields through the negotiated type; do not copy a callback table
-    * using the current SDK's size or cast the two context-create signatures. */
-   if (modern) {
-      dev->um.pfnSetErrorCb = args->pWDDM2_0UMCallbacks->pfnSetErrorCb;
-      dev->createContextVirtual = args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb;
-   } else if (video) {
-      dev->um.pfnSetErrorCb = args->p11UMCallbacks->pfnSetErrorCb;
-   } else {
-      dev->um.pfnSetErrorCb = args->pUMCallbacks->pfnSetErrorCb;
-   }
-   dev->dxgi = args->DXGIBaseDDI.pDXGIBaseCallbacks;
-   dev->interfaceVersion = args->Interface;
-   dev->caps = &adapter->vk.caps;
-   dev->nvk = adapter->vk.nvk;
-
    unsigned stage = 1;
    const uint64_t identity = (uintptr_t)dev;
    trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
@@ -240,22 +200,19 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
    if (SUCCEEDED(hr)) {
       stage = 2;
       trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
-      // DWM opens flip-model buffers through the Win7 D3D10 DDI. Its NVK
-      // commands must use allocation handles from the opening runtime device.
-      const bool legacy_flip = dev->nvk && args->Interface == D3D10_0_7_DDI_INTERFACE_VERSION;
-      if ((modern && dev->nvk) || video_window || legacy_flip)
+      if (use_runtime_queue)
          hr = runtime_queue_prepare(dev, &dev->runtimeTransport);
-      if (video_window || legacy_flip) {
+      if (use_runtime_queue && dev->interfaceVersion != D3DWDDM2_0_DDI_INTERFACE_VERSION) {
          const unsigned callbacks = (dev->kt.pfnCreateContextVirtualCb ? 1u : 0u) |
                                     (dev->kt.pfnSubmitCommandCb ? 2u : 0u);
-         trace(TGD3D_TRACE_RUNTIME_TRANSPORT, hr, (UINT64_C(6) << 32) | args->Interface, callbacks);
+         trace(TGD3D_TRACE_RUNTIME_TRANSPORT, hr, (UINT64_C(6) << 32) | dev->interfaceVersion, callbacks);
       }
       // An older callback table can still serve the original legacy path.
       // prepare checks it before allocating any state or creating a context.
-      if (legacy_flip && hr == DXGI_ERROR_UNSUPPORTED)
+      if (allow_independent && hr == DXGI_ERROR_UNSUPPORTED)
          hr = S_OK;
       if (SUCCEEDED(hr)) {
-         const VkResult result = adapter->vk.createDevice(&dev->vkdev, &dev->vk, &dev->queue,
+         const VkResult result = dev->adapter->vk.createDevice(&dev->vkdev, &dev->vk, &dev->queue,
             dev->runtimeQueue ? &dev->runtimeTransport : nullptr);
          hr = result == VK_SUCCESS ? S_OK :
               result == VK_ERROR_OUT_OF_HOST_MEMORY ? E_OUTOFMEMORY : DXGI_ERROR_UNSUPPORTED;
@@ -282,15 +239,69 @@ HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVI
       trace(TGD3D_TRACE_DEVICE_STAGE, hr, stage, identity);
    }
    if (FAILED(hr)) {
-      trace(TGD3D_TRACE_CREATE_DEVICE, hr, args->Interface, stage);
-      release_device(slot);
+      trace(TGD3D_TRACE_CREATE_DEVICE, hr, dev->interfaceVersion, stage);
       return hr;
    }
    /* This consumer requests Vulkan 1.3 and does not enable maintenance5.
     * A 1.4-capable physical device alone does not enable native A8 usage. */
    dev->hasA8 = false;
+   return S_OK;
+}
 
-   if (video) {
+HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVICE *args)
+{
+   if (!hAdapter.pDrvPrivate || !args || !args->hDrvDevice.pDrvPrivate ||
+       !args->pKTCallbacks || !args->pUMCallbacks || !args->pDeviceFuncs ||
+       !args->DXGIBaseDDI.pDXGIDDIBaseFunctions)
+      return E_INVALIDARG;
+   Adapter *adapter = A(hAdapter);
+   if (!device_interface(adapter, args->Interface, args->Version, args->Flags)) {
+      trace(TGD3D_TRACE_CREATE_DEVICE, DXGI_ERROR_UNSUPPORTED, args->Interface, args->Flags);
+      return DXGI_ERROR_UNSUPPORTED;
+   }
+   const bool ddi11 = args->Interface == D3D11_1_DDI_INTERFACE_VERSION;
+   if (ddi11 && !args->ppfnRetrieveSubObject) return DXGI_ERROR_UNSUPPORTED;
+   wchar_t window_opt_in[2] = {};
+   const bool video_window = ddi11 &&
+      GetEnvironmentVariableW(L"TGD3D_VIDEO_WINDOW_VALIDATE", window_opt_in, 2) == 1 &&
+      window_opt_in[0] == L'1';
+   const bool modern = args->Interface == D3DWDDM2_0_DDI_INTERFACE_VERSION;
+   if (modern && (!args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb ||
+                  !args->pKTCallbacks->pfnEvictCb)) return DXGI_ERROR_UNSUPPORTED;
+   auto *slot = new (args->hDrvDevice.pDrvPrivate) DeviceSlot{};
+   try {
+      slot->state = new Device();
+   } catch (const std::bad_alloc &) {
+      return E_OUTOFMEMORY;
+   }
+   Device *dev = slot->state;
+   dev->adapter = adapter;
+   dev->hRTDevice = args->hRTDevice;
+   dev->hRTCoreLayer = args->hRTCoreLayer;
+   runtime_copy_callbacks(&dev->kt, args->pKTCallbacks);
+   /* Read fields through the negotiated type; do not copy a callback table
+    * using the current SDK's size or cast the two context-create signatures. */
+   if (modern) {
+      dev->um.pfnSetErrorCb = args->pWDDM2_0UMCallbacks->pfnSetErrorCb;
+      dev->createContextVirtual = args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb;
+   } else if (ddi11) {
+      dev->um.pfnSetErrorCb = args->p11UMCallbacks->pfnSetErrorCb;
+   } else {
+      dev->um.pfnSetErrorCb = args->pUMCallbacks->pfnSetErrorCb;
+   }
+   dev->dxgi = args->DXGIBaseDDI.pDXGIBaseCallbacks;
+   dev->interfaceVersion = args->Interface;
+   dev->caps = &adapter->vk.caps;
+   dev->nvk = adapter->vk.nvk;
+
+   const bool legacy_flip = dev->nvk && args->Interface == D3D10_0_7_DDI_INTERFACE_VERSION;
+   HRESULT hr = initialize_graphics_device(dev, (modern && dev->nvk) || video_window || legacy_flip, legacy_flip);
+   if (FAILED(hr)) {
+      release_device(slot);
+      return hr;
+   }
+
+   if (ddi11) {
       device_fill_table11(args->p11_1DeviceFuncs);
       dxgi_fill_presentation12(args->DXGIBaseDDI.pDXGIDDIBaseFunctions3,
                               IS_DXGI_MULTIPLANE_OVERLAY_FUNCTIONS(args->Interface, args->Version));

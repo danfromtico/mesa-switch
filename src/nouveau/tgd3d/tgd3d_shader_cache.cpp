@@ -22,7 +22,8 @@ disk_cache *create_shader_cache(const VkPhysicalDeviceShaderObjectPropertiesEXT 
    return disk_cache_create_custom("tgd3d", driver, 0, "tgd3d-shader-objects", 128u * 1024 * 1024);
 }
 
-VkResult create_shader_cached(Device *dev, const VkShaderCreateInfoEXT &info, VkShaderEXT *shader)
+VkResult create_shader_cached(Device *dev, const VkShaderCreateInfoEXT &info, VkShaderEXT *shader,
+                              const Shader *compute)
 {
    disk_cache *cache = dev->adapter->vk.shaderCache;
    if (!cache)
@@ -33,12 +34,26 @@ VkResult create_shader_cached(Device *dev, const VkShaderCreateInfoEXT &info, Vk
     * Layout handles are device-local and must never be hashed or persisted. */
    assert(info.codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT && !info.pNext &&
           !info.pSpecializationInfo && !info.pushConstantRangeCount &&
-          info.setLayoutCount == SET_COUNT && !strcmp(info.pName, "main"));
+          info.setLayoutCount == (compute ? 1u : dev->caps->graphicsSetCount()) && !strcmp(info.pName, "main"));
    const uint32_t state[] = {info.flags, info.stage, info.nextStage,
       info.setLayoutCount, dev->caps->cbSlots, D3D_SRV_SLOTS, D3D_SAMPLER_SLOTS, SET1_STRIDE};
    blake3_hasher hash;
    _mesa_blake3_init(&hash);
    _mesa_blake3_update(&hash, state, sizeof(state));
+   if (!compute && dev->caps->tessellationShader) {
+      const uint32_t stages = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+      _mesa_blake3_update(&hash, &stages, sizeof(stages));
+   }
+   if (compute) {
+      for (const ShaderBinding &b : compute->bindings) {
+         const uint32_t layout[] = {b.binding, static_cast<uint32_t>(b.type)};
+         _mesa_blake3_update(&hash, layout, sizeof(layout));
+      }
+   } else if (dev->caps->graphicsUavSlots) {
+      // Version two shares buffer and counter descriptors among graphics stages.
+      const uint32_t layout[] = {2, dev->caps->graphicsUavSlots, dev->caps->graphicsUavStages};
+      _mesa_blake3_update(&hash, layout, sizeof(layout));
+   }
    _mesa_blake3_update(&hash, info.pCode, info.codeSize);
    blake3_hash digest;
    _mesa_blake3_final(&hash, digest);

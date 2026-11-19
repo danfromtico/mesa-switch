@@ -14,7 +14,7 @@ static inline Query *Q(D3D10DDI_HQUERY h) { return static_cast<Query *>(h.pDrvPr
 static bool pass_query(const Query *q)
 {
    return q->type == D3D10DDI_QUERY_OCCLUSION || q->type == D3D10DDI_QUERY_OCCLUSIONPREDICATE ||
-          q->type == D3D10DDI_QUERY_PIPELINESTATS;
+          q->type == D3D10DDI_QUERY_PIPELINESTATS || q->type == D3D11DDI_QUERY_PIPELINESTATS;
 }
 
 static const VkQueryPipelineStatisticFlags statistics =
@@ -51,10 +51,16 @@ static HRESULT pool_create(Device *dev, Query *q)
    if (q->type == D3D10DDI_QUERY_TIMESTAMP) {
       info.queryType = VK_QUERY_TYPE_TIMESTAMP;
       info.queryCount = 1;
-   } else if (q->type == D3D10DDI_QUERY_PIPELINESTATS) {
+   } else if (q->type == D3D10DDI_QUERY_PIPELINESTATS || q->type == D3D11DDI_QUERY_PIPELINESTATS) {
       info.queryType = VK_QUERY_TYPE_PIPELINE_STATISTICS;
       info.queryCount = QUERY_SLOTS;
       info.pipelineStatistics = statistics;
+      if (q->type == D3D11DDI_QUERY_PIPELINESTATS) {
+         info.pipelineStatistics |= VK_QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT;
+         if (dev->caps->tessellationShader)
+            info.pipelineStatistics |= VK_QUERY_PIPELINE_STATISTIC_TESSELLATION_CONTROL_SHADER_PATCHES_BIT |
+                                       VK_QUERY_PIPELINE_STATISTIC_TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT;
+      }
    } else {
       info.queryType = VK_QUERY_TYPE_OCCLUSION;
       info.queryCount = QUERY_SLOTS;
@@ -68,9 +74,11 @@ static HRESULT pool_create(Device *dev, Query *q)
    return S_OK;
 }
 
-void query_pass_begin(Device *dev, VkCommandBuffer cmd)
+void query_pass_begin(Device *dev, VkCommandBuffer cmd, bool compute)
 {
    for (Query *q : dev->activeQueries) {
+      if (compute && q->type != D3D11DDI_QUERY_PIPELINESTATS)
+         continue;
       if (!query_usable(q))
          return;
       if (q->used == QUERY_SLOTS) {
@@ -139,6 +147,7 @@ static void APIENTRY CreateQuery(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_CRE
       else
          hr = pool_create(dev, q);
       break;
+   case D3D11DDI_QUERY_PIPELINESTATS:
    case D3D10DDI_QUERY_PIPELINESTATS:
       if (!dev->caps->pipelineStatistics) {
          hr = E_NOTIMPL;
@@ -175,11 +184,50 @@ static void query_deactivate(Device *dev, Query *q)
    }
 }
 
+/* Copy group dimensions in GPU execution order. GM20B's older resident
+ * indirect macro can execute the dispatch correctly while miscounting shader
+ * invocations. No CPU-side argument read or queue drain is needed at dispatch. */
+bool capture_indirect_invocations(Device *dev, VkCommandBuffer cmd, Resource *arguments, UINT offset, UINT groupSize)
+{
+   bool recorded = false;
+   for (Query *q : dev->activeQueries) {
+      if (q->type != D3D11DDI_QUERY_PIPELINESTATS) continue;
+      Slice captured{};
+      HRESULT hr = slice_alloc(dev, 3 * sizeof(UINT), 16, &captured);
+      if (FAILED(hr)) { query_error(q, hr); return false; }
+      try {
+         q->indirectInvocations.push_back({captured, groupSize});
+      } catch (const std::bad_alloc &) {
+         slice_release(dev, captured, 0);
+         query_error(q, E_OUTOFMEMORY);
+         return false;
+      }
+      VkBufferCopy copy{arguments->slice.offset + offset, captured.offset, 3 * sizeof(UINT)};
+      dev->vk.CmdCopyBuffer(cmd, arguments->slice.buffer(), captured.buffer(), 1, &copy);
+      recorded = true;
+   }
+   if (recorded) {
+      // A dispatch can also write its argument buffer through a UAV. Complete
+      // the transfer read before the shader starts, even for aliased bindings.
+      buffer_written(dev);
+      command_barrier(dev);
+   }
+   return true;
+}
+
+static void release_invocations(Device *dev, Query *q)
+{
+   for (auto &sample : q->indirectInvocations) slice_release(dev, sample.counts, dev->lastSeq());
+   q->indirectInvocations.clear();
+   q->explicitInvocations = 0;
+}
+
 static void APIENTRY DestroyQuery(D3D10DDI_HDEVICE hDevice, D3D10DDI_HQUERY handle)
 {
    Device *dev = D(hDevice);
    Query *q = Q(handle);
    query_deactivate(dev, q);
+   release_invocations(dev, q);
    defer(dev, DeferredType::QueryPool, (uint64_t)q->pool, dev->lastSeq());
    for (VkQueryPool pool : q->fullPools)
       defer(dev, DeferredType::QueryPool, (uint64_t)pool, dev->lastSeq());
@@ -197,6 +245,7 @@ static void APIENTRY QueryBegin(D3D10DDI_HDEVICE hDevice, D3D10DDI_HQUERY handle
       return;
    }
    query_deactivate(dev, q);
+   release_invocations(dev, q);
    for (VkQueryPool pool : q->fullPools)
       defer(dev, DeferredType::QueryPool, (uint64_t)pool, dev->lastSeq());
    q->fullPools.clear();
@@ -331,22 +380,37 @@ static void APIENTRY QueryGetData(D3D10DDI_HDEVICE hDevice, D3D10DDI_HQUERY hand
       }
       break;
    }
-   case D3D10DDI_QUERY_PIPELINESTATS: {
-      D3D10_DDI_QUERY_DATA_PIPELINE_STATISTICS out = {};
+   case D3D10DDI_QUERY_PIPELINESTATS:
+   case D3D11DDI_QUERY_PIPELINESTATS: {
+      const bool modern = q->type == D3D11DDI_QUERY_PIPELINESTATS;
+      const bool tess = modern && dev->caps->tessellationShader;
+      const UINT counters = tess ? 11 : modern ? 9 : 8;
+      D3D11_DDI_QUERY_DATA_PIPELINE_STATISTICS out = {};
+      out.CSInvocations = q->explicitInvocations;
+      // QueryGetData has checked q->seq against the actual completed fence.
+      for (const auto &sample : q->indirectInvocations) {
+         HRESULT hr = slice_map(dev, sample.counts);
+         if (FAILED(hr)) { query_error(q, hr); return; }
+         uint32_t groups[3];
+         memcpy(groups, sample.counts.cpu(), sizeof(groups));
+         out.CSInvocations += uint64_t(groups[0]) * groups[1] * groups[2] * sample.groupSize;
+      }
+      static_assert(offsetof(D3D11_DDI_QUERY_DATA_PIPELINE_STATISTICS, HSInvocations) ==
+                    sizeof(D3D10_DDI_QUERY_DATA_PIPELINE_STATISTICS));
       for (size_t p = 0; p <= q->fullPools.size(); p++) {
          const bool full = p < q->fullPools.size();
          const uint32_t count = full ? QUERY_SLOTS : q->used;
          if (!count) continue;
-         uint64_t slots[QUERY_SLOTS * 8];
+         uint64_t slots[QUERY_SLOTS * 11];
          VkResult result = dev->vk.GetQueryPoolResults(dev->vkdev, full ? q->fullPools[p] : q->pool,
-            0, count, count * 64, slots, 64, VK_QUERY_RESULT_64_BIT);
+            0, count, size_t(count) * counters * sizeof(uint64_t), slots, counters * sizeof(uint64_t), VK_QUERY_RESULT_64_BIT);
          if (result != VK_SUCCESS) {
             TG_ERROR(dev, result == VK_NOT_READY ? DXGI_DDI_ERR_WASSTILLDRAWING : DXGI_ERROR_DEVICE_REMOVED);
             return;
          }
          for (uint32_t i = 0; i < count; i++) {
             /* Vulkan returns the enabled statistics in bit order. */
-            const uint64_t *v = &slots[(size_t)i * 8];
+            const uint64_t *v = &slots[size_t(i) * counters];
             out.IAVertices += v[0];
             out.IAPrimitives += v[1];
             out.VSInvocations += v[2];
@@ -355,10 +419,15 @@ static void APIENTRY QueryGetData(D3D10DDI_HDEVICE hDevice, D3D10DDI_HQUERY hand
             out.CInvocations += v[5];
             out.CPrimitives += v[6];
             out.PSInvocations += v[7];
+            if (tess) {
+               out.HSInvocations += v[8];
+               out.DSInvocations += v[9];
+            }
+            if (modern) out.CSInvocations += v[counters - 1];
          }
       }
-      if (size >= sizeof(out))
-         memcpy(data, &out, sizeof(out));
+      const size_t bytes = modern ? sizeof(out) : sizeof(D3D10_DDI_QUERY_DATA_PIPELINE_STATISTICS);
+      if (size >= bytes) memcpy(data, &out, bytes);
       break;
    }
    default:

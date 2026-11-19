@@ -46,7 +46,9 @@ enum tgd3d_trace_event {
    TGD3D_TRACE_RUNTIME_TRANSPORT = 22,
    TGD3D_TRACE_VIDEO = 23,         /* arg0 operation, arg1 real session or sync target/observed */
    TGD3D_TRACE_TIMING = 30,        /* tgd3d_trace_timing */
+   TGD3D_TRACE_LEGACY9 = 31,       /* arg0 operation << 32 | selector, arg1 operation data */
    TGD3D_TRACE_COPY_FLAGS = 32,    /* arg0 raw D3D11.1 copy/update flags; result from flag validation */
+   TGD3D_TRACE_PIPELINE_LEVELS = 33, /* arg0 advertised DDI level mask, arg1 graphics UAV slots */
 };
 
 enum tgd3d_timing_kind {

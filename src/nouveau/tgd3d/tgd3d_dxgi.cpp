@@ -540,7 +540,7 @@ static HRESULT APIENTRY RotateResourceIdentities(DXGI_DDI_ARG_ROTATE_RESOURCE_ID
          if (r->storage.runtime)
             runtime_rebind(r->storage.runtime, r->hRT);
       }
-      dev->dirty |= DIRTY_TEXTURES;
+      dev->dirty |= DIRTY_TEXTURES | DIRTY_GRAPHICS_UAVS;
    }
    trace(TGD3D_TRACE_ROTATE, hr, count, 0);
    return hr;
