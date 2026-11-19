@@ -1,6 +1,6 @@
 # 自主完成与实机测试
 
-- 排查 Switch 平台问题时，先查该模块已有的 Switchroot Noble 同机记录，再对照对应版本的 Linux 实现和 Windows 接口。浏览器硬解从 [Noble 解码链路与 Windows 实测](tegra-x1-wddm/docs/dxvk-games-20261118/browser-h264-public-fl11-1.json) 进入。负载重启沿用长期目标第 4 步的 WSL2、微软接口与 Noble 对照。
+- 排查 Switch 实机问题时，先查项目已有记录，对照同机 Switchroot Ubuntu 24.04（Noble）的实现与实测行为、微软 WSL2 Linux 内核 `drivers/hv/dxgkrnl` 中与问题相关的代码和注释，以及对应版本的 Windows、WDDM、Direct3D 官方接口文档，再选择下一项实机验证。浏览器硬解的已有对照见 [Noble 解码链路与 Windows 实测](tegra-x1-wddm/docs/dxvk-games-20261118/browser-h264-public-fl11-1.json)。
 - 在用户已授权范围内，自主完成源码分析、修改、构建、部署、实机测试、核对、恢复和提交，持续推进到任务完成。
 - 模式切换、窗口操作、逻辑像素和时序检查、持续运行、进程及启动连续性检查、失败后的恢复，由执行本任务的窗口完成。不逐步询问用户是否方便观察、是否继续测试或是否已恢复，也不把常规校验交给用户。
 - 只有确实无法继续且缺少必要信息、需要用户人工操作或新增授权时才提问，尽量一次问清。已有授权不重复申请。
