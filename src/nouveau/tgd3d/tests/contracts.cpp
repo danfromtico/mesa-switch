@@ -3,6 +3,7 @@
  */
 #include "tgd3d.h"
 #include "vulkan/util/vk_internal_exts.h"
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -1344,7 +1345,25 @@ static void empty_box_contract()
                   regionTransfer.bufferRowLength == 65 && regionTransfer.bufferImageHeight == 17);
       }
       CHECK(!setErrorCalls);
+      if (kind[0] == ResKind::Staging && kind[1] == ResKind::Staging) {
+         D3D11_1DDI_DEVICEFUNCS modern = {};
+         device_fill_table11(&modern);
+         D3D10_DDI_BOX pair = {0, 0, 0, 2, 1, 1};
+         auto expected = destination;
+         std::fill_n(source.begin() + 16, 8, 0x7a);
+         modern.pfnResourceCopyRegion({&dev}, {&dst}, 0, 8, 0, 0, {&src}, 0, &pair,
+                                      D3D11_1DDI_COPY_TILEABLE);
+         std::fill_n(expected.begin() + 16 + 8 * 4, 8, 0x7a);
+         CHECK(!setErrorCalls && destination == expected);
+         modern.pfnResourceUpdateSubresourceUP({&dev}, {&dst}, 0, &pair, upload.data(), 8, 8,
+                                              D3D11_1DDI_COPY_TILEABLE | D3D11_1DDI_COPY_DISCARD);
+         std::fill_n(expected.begin() + 16, 8, 0x3c);
+         CHECK(!setErrorCalls && destination == expected);
+         modern.pfnResourceCopyRegion({&dev}, {&dst}, 0, 0, 0, 0, {&src}, 0, &pair, 0x80000000u);
+         CHECK(setErrorCalls == 1 && lastError == D3DDDIERR_DEVICEREMOVED && FAILED(dev.lost) && destination == expected);
+      }
    }
+   std::puts("PASS: tileable DDI copy/update preserve the requested range and reject unknown flags");
    std::puts("PASS: empty/inverted copy and update boxes touch no commands, waits or memory; NULL full 65x17x2 copies retain exact layout (CPU control)");
 }
 

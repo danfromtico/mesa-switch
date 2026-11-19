@@ -179,13 +179,14 @@ static void image_copy(UINT depth, UINT sx, UINT sy, UINT dx, UINT dy)
    CHECK(copies.empty());
    box.left = -1;
    t.pfnResourceCopyRegion({&dev}, {&r}, 0, 0, 0, 0, {&r}, 0, &box, 0);
-   CHECK(errors == 1 && error == E_INVALIDARG && copies.empty());
+   CHECK(errors == 1 && error == D3DDDIERR_DEVICEREMOVED && FAILED(dev.lost) && copies.empty());
    box.left = sx;
    for (UINT stage : {1u, 2u, 3u, 4u}) {
+      dev.lost = S_OK;  // Inject each failure independently.
       errors = 0; failStage = stage;
       if (stage == 4) dev.cmd = VK_NULL_HANDLE;
       t.pfnResourceCopyRegion({&dev}, {&r}, 0, dx, dy, dz, {&r}, 0, &box, 0);
-      CHECK(errors == 1 && error == (stage == 4 ? D3DDDIERR_DEVICEREMOVED : E_OUTOFMEMORY));
+      CHECK(errors == 1 && error == D3DDDIERR_DEVICEREMOVED && FAILED(dev.lost));
       CHECK(copies.empty() && images == 1 && memories == 1 && image->bytes == expected);
       CHECK(dev.deferred.empty());
    }
@@ -293,7 +294,7 @@ static void buffer_scratch_failures()
       failStage = stage;
       D3D10_DDI_BOX box = {4, 0, 0, 76, 1, 1};
       t.pfnResourceCopyRegion({&dev}, {&r}, 0, 12, 0, 0, {&r}, 0, &box, 0);
-      CHECK(errors == 1 && error == (stage == 4 ? D3DDDIERR_DEVICEREMOVED : E_OUTOFMEMORY));
+      CHECK(errors == 1 && error == D3DDDIERR_DEVICEREMOVED && FAILED(dev.lost));
       CHECK(copies.empty() && buffers == 1 && memories == 1 && !waits &&
             r.slice.chunk->live == 1 && dev.deferredSlices.empty());
       CHECK(!std::memcmp(r.slice.cpu(), original.data(), r.size));

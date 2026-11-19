@@ -374,7 +374,13 @@ static void APIENTRY SetRenderTargets(D3D10DDI_HDEVICE h, const D3D10DDI_HRENDER
 
 static bool copy_flags(Device *dev, UINT flags)
 {
-   if (flags & ~(D3D11_1DDI_COPY_NO_OVERWRITE | D3D11_1DDI_COPY_DISCARD)) {
+   /* TILEABLE permits a tiled renderer to limit its flush. The regular
+    * synchronized region copy/update already satisfies this hint. */
+   constexpr UINT basic = D3D11_1DDI_COPY_NO_OVERWRITE | D3D11_1DDI_COPY_DISCARD;
+   if (!(flags & ~basic)) return true;
+   const bool valid = !(flags & ~(basic | D3D11_1DDI_COPY_TILEABLE));
+   trace(TGD3D_TRACE_COPY_FLAGS, valid ? S_OK : E_INVALIDARG, flags, 0);
+   if (!valid) {
       TG_ERROR(dev, E_INVALIDARG); return false;
    }
    /* Preserve the existing synchronized copy. Discard permits forgetting
@@ -385,13 +391,17 @@ static bool copy_flags(Device *dev, UINT flags)
 static void APIENTRY CopyRegion(D3D10DDI_HDEVICE h, D3D10DDI_HRESOURCE dst, UINT dstSub,
    UINT x, UINT y, UINT z, D3D10DDI_HRESOURCE src, UINT srcSub, const D3D10_DDI_BOX *box, UINT flags)
 {
-   if (copy_flags(D(h), flags)) legacy().pfnResourceCopyRegion(h, dst, dstSub, x, y, z, src, srcSub, box);
+   Device *dev = D(h);
+   RemovalOnlyErrorScope errors(dev);
+   if (copy_flags(dev, flags)) legacy().pfnResourceCopyRegion(h, dst, dstSub, x, y, z, src, srcSub, box);
 }
 
 static void APIENTRY UpdateResource(D3D10DDI_HDEVICE h, D3D10DDI_HRESOURCE dst, UINT sub,
    const D3D10_DDI_BOX *box, const void *data, UINT rowPitch, UINT depthPitch, UINT flags)
 {
-   if (copy_flags(D(h), flags)) legacy().pfnResourceUpdateSubresourceUP(h, dst, sub, box, data, rowPitch, depthPitch);
+   Device *dev = D(h);
+   RemovalOnlyErrorScope errors(dev);
+   if (copy_flags(dev, flags)) legacy().pfnResourceUpdateSubresourceUP(h, dst, sub, box, data, rowPitch, depthPitch);
 }
 
 static BOOL APIENTRY Flush(D3D10DDI_HDEVICE h, UINT flags)
