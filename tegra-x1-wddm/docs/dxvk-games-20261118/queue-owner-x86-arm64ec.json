@@ -330,5 +330,18 @@
   "open_items": [
     "System-wide x86 DX10/DX11 driver registration and public rendering after selection.",
     "Reproduction of the complete wiliwili interface freeze and system resets remains separate."
-  ]
+  ],
+  "accepted_native_baseline": {
+    "utc": "2026-11-19T16:32:19.7654066Z",
+    "source_commit": "701e579c7c90e118c242eca8182a57c8e76829d6",
+    "package": "queue-finish-6b36641bb429",
+    "previous_package": "video-pool-900b8d5d1b2c",
+    "boot_utc": "2026-11-19T16:30:31.2562230Z",
+    "gpu_problem_code": 0,
+    "dwm_pid": 1460,
+    "permanent_native_boot": true,
+    "one_use_permit": false,
+    "approval_images": "6C86354E781E76D671C20BF14B124248A6E1AA264DCAB6D459A6B14D551469B0/9FF198AEABF1BCFAD98410733D19BACD85E580E65023738BE5641826936BA3FF/3CA2D9EB0FDFD6AFF8A7B667CB364F605629CB3E97DD7A4FE9AC924B10A6A8AB",
+    "scope": "ARM64 and x64 tgd3d with the queue-owner retention fix. ARM64EC uses the x64 leaf through the system facade. The user still observes a system freeze. Only the independently verified lifetime fix is accepted. The x86 D3D9 experiment is excluded from the default registration."
+  }
 }
