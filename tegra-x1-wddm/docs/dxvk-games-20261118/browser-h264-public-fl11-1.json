@@ -351,6 +351,17 @@
       "processes_remaining": [],
       "instrumented_first_to_last_draw_ms": 393.8,
       "measurement": "includes per-frame SHA256 and IPC; no sustained playback performance claim"
+    },
+    "installed_revision": {
+      "chromium": "156.0.8078.100",
+      "decoder_sha256": "77ee04de428f833431915ad141fa17c302dc387e31f6752346e3c27d993d1669",
+      "official_runtime_package_sha256": "5ad2f09093cba71ad7dc8ddb2ef7261978c9130aa07e492556efe802f6ca74e9",
+      "matching_nv12_frames": 6,
+      "completed_nvdec_submissions": 6,
+      "shortcut": "Switch Chromium.lnk",
+      "trace_sha256": "1aba4719f9e71b178f0a2ca5c44e0d3f0a486d4f0ec4e693cfe60455b4dca4d6",
+      "window_capture_sha256": "09999aaa1dab4929896c19336beb6e31374e7f9605cf60a7dfd76cf94b4e1fcd",
+      "review": "Gemini 4 Neon High reviewed the decoder and shell source changes before final shortcut testing."
     }
   },
   "wiliwili_windows": {
@@ -361,7 +372,14 @@
       "exe_sha256": "461956614db5cdd27ba5d20721bb1d37a1389fd10093839358d63c74572079d4",
       "hardware_setting": true,
       "error": "0xc000001d after GLFW platform initialization, before playback. No NVDEC events.",
-      "etw_sha256": "13177a4636ffb9b0e2ef3c748146bdb3a4f96729fa7ec224db2fe3fc946f1f64"
+      "etw_sha256": "13177a4636ffb9b0e2ef3c748146bdb3a4f96729fa7ec224db2fe3fc946f1f64",
+      "windows_event_1000": {
+        "exception_code": "0xc000001d",
+        "fault_rva": "0x5221d0",
+        "instruction": "casal x8, x0, [x19]",
+        "isa": "FEAT_LSE; absent on Cortex-A57",
+        "official_package_retired": true
+      }
     },
     "x64_on_arm": {
       "archive_sha256": "e98bdbbbc0ab0ac5860c50e35c6414bcd093d0b695e5cce31ccc52b85155d760",
@@ -397,6 +415,86 @@
       "app_log_sha256": "459780bd1a9c1fc290e93776a020f54a63ba9319a9fe77ce0913faf1bc52118b",
       "desktop_shortcut": "wiliwili.lnk, official x64 1.6.0 under Windows ARM64 emulation",
       "desktop_target_sha256": "4ba00c63573ae82ff5eec41bab0bae630d5598fcfbea01cbf7700bf49937a55f"
+    },
+    "official_x64_authenticated_retest": {
+      "version": "1.6.0",
+      "exe_sha256": "4ba00c63573ae82ff5eec41bab0bae630d5598fcfbea01cbf7700bf49937a55f",
+      "boot_utc": "2026-11-19T12:44:06.7579660Z",
+      "gpu_problem_code": 0,
+      "app_hwdec_setting": true,
+      "player_pid": 3264,
+      "local_720p": {
+        "auto_safe": {
+          "hwdec": "auto-safe",
+          "hwdec-current": "no",
+          "video-format": "h264",
+          "width": 1280,
+          "height": 720,
+          "time-pos": 0.083333,
+          "eof-reached": true,
+          "decoder-frame-drop-count": 0,
+          "frame-drop-count": 9
+        },
+        "d3d11va_copy": {
+          "hwdec": "d3d11va-copy",
+          "hwdec-current": "no",
+          "video-format": "h264",
+          "width": 1280,
+          "height": 720,
+          "time-pos": 0.083333,
+          "eof-reached": true,
+          "decoder-frame-drop-count": 0,
+          "frame-drop-count": 9
+        },
+        "previous_hwdec_option_restored": true
+      },
+      "online": {
+        "source": "Normal recommended video selected in the signed-in app. No account identifiers or stream URLs retained in this record.",
+        "samples": [
+          {
+            "hwdec": "auto-safe",
+            "hwdec-current": "no",
+            "video-format": "h264",
+            "width": 1920,
+            "height": 1080,
+            "time-pos": 3.566688,
+            "eof-reached": false,
+            "decoder-frame-drop-count": 0,
+            "frame-drop-count": 92
+          },
+          {
+            "hwdec": "auto-safe",
+            "hwdec-current": "no",
+            "video-format": "h264",
+            "width": 1920,
+            "height": 1080,
+            "time-pos": 4.6,
+            "eof-reached": false,
+            "decoder-frame-drop-count": 0,
+            "frame-drop-count": 122
+          },
+          {
+            "hwdec": "auto-safe",
+            "hwdec-current": "no",
+            "video-format": "h264",
+            "width": 1920,
+            "height": 1080,
+            "time-pos": 6.2,
+            "eof-reached": false,
+            "decoder-frame-drop-count": 0,
+            "frame-drop-count": 160
+          }
+        ],
+        "user_observation": "Playback was too choppy and the user closed the video."
+      },
+      "mpv_log_result": "D3D11 hardware-device creation returned DXGI_ERROR_UNSUPPORTED (0x887a0004); mpv selected software decoding.",
+      "completed_nvdec_submissions_from_player": 0,
+      "trace_lost_events": 0,
+      "trace_lost_buffers": 0,
+      "trace_sha256": "7ad65cc3450f8936a223568c1cfd86dcb77fbf8012dce2b06ee4953f07e790f8",
+      "temporary_player_config_removed": true,
+      "installed_desktop_architecture": "x64",
+      "a57_rebuild_retired_at_user_request": true
     }
   }
 }
