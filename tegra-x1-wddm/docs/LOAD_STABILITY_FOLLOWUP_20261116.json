@@ -670,5 +670,204 @@
     "effect": "Management connectivity returned and the earlier journal was retrieved. The startup issue remains in the platform-driver audit; its manual restart remains excluded from the spontaneous reset count.",
     "attribution": "Wi-Fi startup is tracked independently. The manual restart is excluded from the count of spontaneous resets. The earlier three distinct boot transitions and their system records are retained separately.",
     "when_resumed": "Read the Wi-Fi device problem code, driver identity and Kernel-PnP/WLAN startup events for the affected boot before associating the issue with any graphics workload."
+  },
+  "native_sequential_first_present_20261120": {
+    "status": "Reproduced on the accepted native desktop. No driver fix has been promoted.",
+    "scope": "Physical Switch Lite, external power and Code 0. Ordinary window, two 640-by-360 BGRA buffers, six predecoded 720p NV12 input frames. No video decode submitted.",
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "native_arm64_tgd3d_sha256": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+    "native_arm64_nvk_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "matched_swap_effect_executable_sha256": "65036086a1f585fb93d7493d2573ad2759e115c4f0daded8aa10bd78bed940e7",
+    "matched_application_device_executable_sha256": "62100a301ae7c85a7d40d15d13b91837989b4b06ac935cd9182274e8a0ce6f6f",
+    "native_sequential_incidents": [
+      {
+        "case": "PresentPair-261120-012244752359",
+        "trial": "1-B",
+        "archive_sha256": "90e7e934deb5ff5a8ea80dda6a531e5a82d34d6627997e988ccd453ab6a018da",
+        "before_kernel_general_12": 76519,
+        "after_kernel_general_12": 76594,
+        "41": [
+          76612
+        ],
+        "6008": [
+          76603
+        ],
+        "bugcheck": [
+          "0"
+        ],
+        "recorded_present_returns": 0,
+        "last_stage": "CALL Present",
+        "previous_1074": []
+      },
+      {
+        "case": "PresentPair-261120-012654021131",
+        "trial": "2-B",
+        "archive_sha256": "9cd14b6232f1cf3849c419bbd59f383a1edb6be9cb697f75b10603ccd8740644",
+        "before_kernel_general_12": 76594,
+        "after_kernel_general_12": 76669,
+        "41": [
+          76687
+        ],
+        "6008": [
+          76678
+        ],
+        "bugcheck": [
+          "0"
+        ],
+        "recorded_present_returns": 0,
+        "last_stage": "CALL Present",
+        "previous_1074": []
+      },
+      {
+        "case": "PresentPair-261120-013104891162",
+        "trial": "1-B",
+        "archive_sha256": "65aaf06114b0775422b3aedce39a638c80500a1b4a1afc904ecd779d827eae37",
+        "before_kernel_general_12": 76669,
+        "after_kernel_general_12": 76740,
+        "41": [
+          76758
+        ],
+        "6008": [
+          76749
+        ],
+        "bugcheck": [
+          "0"
+        ],
+        "recorded_present_returns": 0,
+        "last_stage": "CALL Present",
+        "previous_1074": []
+      }
+    ],
+    "native_flip_sequential_control": [
+      {
+        "case": "PresentPair-261120-012654021131",
+        "trial": "1-A",
+        "archive_sha256": "9cd14b6232f1cf3849c419bbd59f383a1edb6be9cb697f75b10603ccd8740644",
+        "returned_desc": [
+          2,
+          3
+        ],
+        "returned_presents": 6,
+        "os_present_model_counts": {
+          "2": 6
+        },
+        "desktop_pixels": {
+          "capture": 1,
+          "tested": 15,
+          "matched": 15,
+          "colours": 10,
+          "max_error": 0,
+          "verified": 1
+        },
+        "draw_device": null
+      }
+    ],
+    "warp_sequential_control_on_native_dwm": [
+      {
+        "case": "PresentPair-261120-013457038055",
+        "trial": "1-B",
+        "archive_sha256": "2a80a38bc750ac9b32b559773d3e0df933fe6e558d84a3147a8df22b5507d2e9",
+        "returned_desc": [
+          2,
+          1
+        ],
+        "returned_presents": 6,
+        "os_present_model_counts": {
+          "3": 6
+        },
+        "desktop_pixels": {
+          "capture": 1,
+          "tested": 15,
+          "matched": 15,
+          "colours": 10,
+          "max_error": 0,
+          "verified": 1
+        },
+        "draw_device": "DRAW_DEVICE software=1 luid=0000000000005aed display_luid=00000000000059ec vendor=1414 device=8c fl=b000 name=Microsoft Basic Render Driver"
+      }
+    ],
+    "public_native_no_video_support_incidents": [
+      {
+        "case": "PresentPair-261120-013457038055",
+        "trial": "2-A",
+        "archive_sha256": "2a80a38bc750ac9b32b559773d3e0df933fe6e558d84a3147a8df22b5507d2e9",
+        "before_kernel_general_12": 76740,
+        "after_kernel_general_12": 76816,
+        "41": [
+          76834
+        ],
+        "6008": [
+          76825
+        ],
+        "bugcheck": [
+          "0"
+        ],
+        "recorded_present_returns": 0,
+        "last_stage": "CALL Present",
+        "previous_1074": []
+      }
+    ],
+    "swapchain_rotation_comparison": {
+      "requested_two_normal_and_interrupted": [
+        7,
+        1
+      ],
+      "requested_six_normal_and_interrupted": [
+        7,
+        1
+      ],
+      "matched_bidirectional_fence_calls_frames": 88,
+      "observed_write_dma_retirements": 87,
+      "archives": [
+        "e3519d085c901268be2cab287645c8d84ad7da7eca9b2d1a08b7f8f0ece80b62",
+        "03ec5e5b05f4e0d4f5f57bbf109fd1bf203230eb849148a9e4cffd53ea0a65f8",
+        "0818b5d3a20869b820a9f2299c44a5cb45bb3fbc865bf19aa968fefc1e065f86"
+      ]
+    },
+    "limits": "The hardware client validated its requested sequential swap effect. Truncated captures can stop before the first DXGI event or the kernel redirection copy; a successful API return or scanout on an interrupted run cannot be inferred. The desktop capture corroborates logical desktop contents. The behavior of other workloads and the circuit initiating the reset are still unresolved.",
+    "native_sequential_producer_completion_control": [
+      {
+        "case": "PresentPair-261120-014132023595",
+        "archive_sha256": "858d8ea1345a0001d1ea66832d20abdfacf91bd8b5c1a8d4a8cab6c1b2557781",
+        "boot_before": 76816,
+        "boot_after": 76891,
+        "trials": [
+          {
+            "name": "1-B",
+            "producer_complete_before_present": true,
+            "device_ok_after_sample": true,
+            "present_returns": 0,
+            "last_journal": "364296 3224 CALL Present 00000000"
+          }
+        ]
+      }
+    ],
+    "native_shared_copy_without_present": {
+      "scope": "Two public D3D11 devices in one process, same adapter. The writer copies to a shared BGRA texture and waits for its event; the reader maps and compares every pixel byte. This does not exercise the Windows redirecting blit DDI.",
+      "totals": {
+        "peer/completed_processes": 3,
+        "peer/full_frames_matching": 18,
+        "peer/bytes_verified": 16588800,
+        "producer/completed_processes": 3,
+        "producer/full_frames_matching": 18,
+        "producer/bytes_verified": 16588800
+      },
+      "archives": [
+        "80445aec2de44b67dbdf0731631bdcabd35d5ff5629aed0e9a02c41f6416b5a0"
+      ]
+    },
+    "matching_windows_presentation_runtime": {
+      "system_dxgi_sha256": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+      "pdb_guid": "DF57ECCF-C393-84E3-0F48-17CD2BB5BB71",
+      "pe_pdb_age": 1,
+      "dbi_age": 1,
+      "version": "10.0.22621.2506 (WinBuild.160101.0800)",
+      "static_link": [
+        "CDXGISwapChain::PresentImplCore",
+        "CDXGISwapChain::PrepareWindowedBltPresent",
+        "DwmpDxGetWindowSharedSurface"
+      ],
+      "scope": "The instructions in the matching native ARM64 runtime contain these direct calls. The interrupted native traces did not preserve a receipt showing which of these operations ran."
+    }
   }
 }
