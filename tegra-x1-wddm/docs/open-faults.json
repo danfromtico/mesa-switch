@@ -185,6 +185,23 @@
       "daily_workaround": "Keep the accepted signed profile and its Code 43 recovery path available. After a necessary recovery, check the most recent boot ID, Code 0, loaded components and compositor before starting a graphics workload. These checks verified the recovered desktop on boot 84936. A preventive workaround remains open.",
       "close_when": "Identify the initiating cause on the native recovery boot. After repair, repeat the same controlled return to the accepted profile on AC at least three consecutive times without an extra boot; confirm the login/desktop, Code 0, loaded component hashes and a normal window exit.",
       "resolution": null
+    },
+    {
+      "id": "GM20B-GDI-EXCLUSIVE-MODE",
+      "status": "open",
+      "kind": "display-mode",
+      "affected_scopes": [
+        "presentation",
+        "wddm"
+      ],
+      "trigger": "Native BGRA8 FLIP_SEQUENTIAL window on the 90-degree desktop. SetFullscreenState(TRUE, explicit output) returns E_FAIL.",
+      "evidence": [
+        "tegra-x1-wddm/docs/dxvk-games-20261118/gdi-fullscreen-gm20b/mode-before.json"
+      ],
+      "cause": "The immediate failure is Win32 ChangeDisplaySettingsExW in DXGI PrepUser. The original KMT mode list contained only X8R8G8B8 and this Windows CDD filtered it out. The effect of adding its supported 32-bit mode to the production KMD still needs the public fullscreen case.",
+      "daily_workaround": "Use the verified ordinary flip window or full-monitor borderless mode.",
+      "close_when": "Acquire fullscreen ownership on the same signed original program, verify three displayed colors, input, clean release and return to the same desktop on three consecutive runs of a one-use Code 0 boot.",
+      "resolution": null
     }
   ],
   "independent_qualifications": [
