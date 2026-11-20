@@ -1083,5 +1083,169 @@
         }
       ]
     }
+  },
+  "native_sequential_pitched_backbuffer_20261120": {
+    "status": "The trial produced the intended new back buffers. The native first-Present restart still occurred in all three runs. The accepted package was restored.",
+    "scope": "ARM64 system D3D11 on GM20B, 640x360, two-buffer DXGI_SWAP_EFFECT_SEQUENTIAL, external power. Each fresh trial boot first ran the same nonpresenting native render/readback control, then the unchanged signed application with a WARP control followed by native drawing.",
+    "accepted_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "accepted_umd_sha256": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+    "trial_umd_sha256": "48abd8daa1091039dd28fa6817b1db7d92a811755d9ec95950faf8de21057a2a",
+    "original_present_client_sha256": "62100a301ae7c85a7d40d15d13b91837989b4b06ac935cd9182274e8a0ce6f6f",
+    "no_present_control_sha256": "8a94d73c0f3645e60fdf1f9e13b8e5e637a358bb51cdb2c93889a8ebc6d02262",
+    "negotiated_device_ddi": "D3D11_1_DDI_INTERFACE_VERSION (0x000b000f)",
+    "accepted_allocation_bytes": [
+      983040,
+      983040
+    ],
+    "accepted_allocation_control_sha256": "fb01c628a25e81fb9649ba7b0ea8b1dec7f2441a9237b1711664b663f581548d",
+    "trial_allocation_bytes": [
+      921600,
+      921600
+    ],
+    "trial_change": "The windowed BGRA RENDER_TARGET|PRESENT pair uses a pitch-linear, resource-associated allocation. Each no-Present control verified the loaded native leaf, both successful linear binds and six complete peer-device pixel readbacks. The actual presenting process also recorded the two linear allocations.",
+    "runs": [
+      {
+        "case": "PresentPair-261120-035633666760",
+        "archive_sha256": "3cc1231c3d0b4eec780360296be474b7035ef7112ec51edf694cb6b3bd911e6e",
+        "no_present_control": {
+          "case": "PresentPair-261120-035430407921",
+          "archive_sha256": "6c8b39e6a35bfbfd402832abe41af8c069481feab0110d89c17fd74703981130",
+          "exact_frames": 6,
+          "allocation_sizes": [
+            921600,
+            921600
+          ],
+          "client_umd_sha256": "48abd8daa1091039dd28fa6817b1db7d92a811755d9ec95950faf8de21057a2a"
+        },
+        "start_boot": 77464,
+        "retrieved_boot": 77535,
+        "warp_control": {
+          "public_present_returns": 6,
+          "desktop_matched": 15,
+          "desktop_tested": 15,
+          "exit": 0
+        },
+        "native": {
+          "public_present_calls": 1,
+          "public_present_returns": 0,
+          "allocation_sizes": [
+            921600,
+            921600
+          ],
+          "linear_bind_verified": true,
+          "complete": false,
+          "last_event": "942890 5696 CALL Present 00000000"
+        },
+        "boot_events": {
+          "41": [
+            77553
+          ],
+          "6008": [
+            77544
+          ],
+          "bugcheck": [
+            "0"
+          ],
+          "previous_1074": []
+        }
+      },
+      {
+        "case": "PresentPair-261120-040611784287",
+        "archive_sha256": "58ed26d47cfd5a93c5087354704c9caf83d1a41c07c904f62668be84bfb4420e",
+        "no_present_control": {
+          "case": "PresentPair-261120-040427086269",
+          "archive_sha256": "fc52ae82c4a09a79cd182c6e6b8323a6d99de9e5f324301bfc1f55d561b4f0af",
+          "exact_frames": 6,
+          "allocation_sizes": [
+            921600,
+            921600
+          ],
+          "client_umd_sha256": "48abd8daa1091039dd28fa6817b1db7d92a811755d9ec95950faf8de21057a2a"
+        },
+        "start_boot": 77630,
+        "retrieved_boot": 77700,
+        "warp_control": {
+          "public_present_returns": 6,
+          "desktop_matched": 15,
+          "desktop_tested": 15,
+          "exit": 0
+        },
+        "native": {
+          "public_present_calls": 1,
+          "public_present_returns": 0,
+          "allocation_sizes": [
+            921600,
+            921600
+          ],
+          "linear_bind_verified": true,
+          "complete": false,
+          "last_event": "238015 6136 CALL Present 00000000"
+        },
+        "boot_events": {
+          "41": [
+            77718
+          ],
+          "6008": [
+            77709
+          ],
+          "bugcheck": [
+            "0"
+          ],
+          "previous_1074": []
+        }
+      },
+      {
+        "case": "PresentPair-261120-041422132751",
+        "archive_sha256": "c24022cee6b75b35455abf49352c52e0f2fdc28c6b592a5b469fab4a028b1877",
+        "no_present_control": {
+          "case": "PresentPair-261120-041233395820",
+          "archive_sha256": "db3dc19c59ee64160a76c3a14d474f8e1a2471140d0b08caf38f4a8381ec52e2",
+          "exact_frames": 6,
+          "allocation_sizes": [
+            921600,
+            921600
+          ],
+          "client_umd_sha256": "48abd8daa1091039dd28fa6817b1db7d92a811755d9ec95950faf8de21057a2a"
+        },
+        "start_boot": 77794,
+        "retrieved_boot": 77864,
+        "warp_control": {
+          "public_present_returns": 6,
+          "desktop_matched": 15,
+          "desktop_tested": 15,
+          "exit": 0
+        },
+        "native": {
+          "public_present_calls": 1,
+          "public_present_returns": 0,
+          "allocation_sizes": [
+            921600,
+            921600
+          ],
+          "linear_bind_verified": true,
+          "complete": false,
+          "last_event": "232765 4448 CALL Present 00000000"
+        },
+        "boot_events": {
+          "41": [
+            77882
+          ],
+          "6008": [
+            77873
+          ],
+          "bugcheck": [
+            "0"
+          ],
+          "previous_1074": []
+        }
+      }
+    ],
+    "restored": {
+      "boot_record": 77953,
+      "gpu_problem_code": 0,
+      "permanent_accepted_package": true,
+      "temporary_trial_removed": true
+    },
+    "interpretation": "For this client and input, correct pitched storage, Windows resource association and verified readback are insufficient to make the first native sequential Present complete. These measurements leave the initiating reset cause open."
   }
 }
