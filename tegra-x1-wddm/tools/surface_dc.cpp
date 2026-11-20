@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Check both directions of the public DXGI surface DC handoff on a selected D3D11 device.
-// Arguments are the mode (warp-surface, native-surface, warp-chain, or native-chain),
+// Modes select WARP or native drawing with a surface, chain, or blit (for example, native-blit).
+// The blit cases copy a rectangle between two devices on the same adapter.
+// Arguments are the mode,
 // the GM20B display LUID in hex, native tgd3d and NVK SHA-256 values, and a fresh
 // output directory. RGB comparisons ignore the alpha channel written by GDI.
 #define WIN32_LEAN_AND_MEAN
@@ -288,10 +290,10 @@ class SurfaceDC
       if (hdc)
          surface->ReleaseDC(nullptr);
    }
-   HRESULT release()
+   HRESULT release(RECT *region = nullptr)
    {
       RECT r = dirty;
-      HRESULT hr = surface->ReleaseDC(&r);
+      HRESULT hr = surface->ReleaseDC(region ? region : &r);
       if (SUCCEEDED(hr))
          hdc = nullptr;
       return hr;
@@ -335,6 +337,88 @@ void gdi(Device &d, const Journal &j, ID3D11Texture2D *target, UINT frame)
    j.call("ReleaseDC_dirty", [&] { return dc.release(); });
    verify_gpu(d, j, target, frame, true, "AfterDCWrite");
 }
+void blit_between_devices(const Journal &j, bool warp, unsigned long long display, const wchar_t *umd,
+                          const wchar_t *nvk)
+{
+   Device producer;
+   Device consumer;
+   producer.open(j, display, warp, umd, nvk);
+   consumer.open(j, display, warp, umd, nvk);
+   auto texture = desc();
+   texture.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
+   ComPtr<ID3D11Texture2D> source;
+   j.call("CreateGdiSource", [&] { return producer.dev->CreateTexture2D(&texture, nullptr, &source); });
+   texture.Width = width + 1;
+   texture.Height = height + 1;
+   ComPtr<ID3D11Texture2D> destination;
+   j.call("CreateGdiDestination",
+          [&] { return consumer.dev->CreateTexture2D(&texture, nullptr, &destination); });
+   ComPtr<ID3D11RenderTargetView> target;
+   require(consumer.dev->CreateRenderTargetView(destination.Get(), nullptr, &target), "destination RTV");
+   ComPtr<IDXGISurface1> src_surface;
+   ComPtr<IDXGISurface1> dst_surface;
+   require(source.As(&src_surface), "source DXGI surface");
+   require(destination.As(&dst_surface), "destination DXGI surface");
+   texture.MiscFlags = 0;
+   texture.BindFlags = 0;
+   texture.Usage = D3D11_USAGE_STAGING;
+   texture.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+   ComPtr<ID3D11Texture2D> readback;
+   require(consumer.dev->CreateTexture2D(&texture, nullptr, &readback), "destination readback");
+
+   for (UINT frame = 0; frame < 2; ++frame) {
+      draw(producer, source.Get(), frame);
+      verify_gpu(producer, j, source.Get(), frame, false, "SourceBeforeBlt");
+      const float green[] = {0, 1, 0, 1};
+      consumer.ctx->ClearRenderTargetView(target.Get(), green);
+      {
+         SurfaceDC src_dc(src_surface.Get());
+         SurfaceDC dst_dc(dst_surface.Get());
+         j.call("GetSourceDC", [&] { return src_surface->GetDC(FALSE, &src_dc.hdc); });
+         j.call("GetDestinationDC", [&] { return dst_surface->GetDC(FALSE, &dst_dc.hdc); });
+         j.call("BitBltWindowRect", [&] {
+            if (BitBlt(dst_dc.hdc, 1, 1, width, height, src_dc.hdc, 0, 0, SRCCOPY))
+               return S_OK;
+            DWORD error = GetLastError();
+            return error ? HRESULT_FROM_WIN32(error) : E_FAIL;
+         });
+         check(GdiFlush() != FALSE, "flush DC copy");
+         RECT written{1, 1, LONG(width + 1), LONG(height + 1)};
+         RECT unmodified{};
+         j.call("ReleaseDestinationDC", [&] { return dst_dc.release(&written); });
+         j.call("ReleaseSourceDC", [&] { return src_dc.release(&unmodified); });
+      }
+      consumer.ctx->CopyResource(readback.Get(), destination.Get());
+      D3D11_MAPPED_SUBRESOURCE mapped{};
+      j.call("MapBltResult",
+             [&] { return consumer.ctx->Map(readback.Get(), 0, D3D11_MAP_READ, 0, &mapped); });
+      const UINT pixels = texture.Width * texture.Height;
+      UINT wrong = 0;
+      if (!mapped.pData || mapped.RowPitch < texture.Width * 4) {
+         wrong = pixels;
+      } else {
+         for (UINT y = 0; y < texture.Height; ++y) {
+            const auto *row =
+                static_cast<const std::uint8_t *>(mapped.pData) + size_t(y) * mapped.RowPitch;
+            for (UINT x = 0; x < texture.Width; ++x) {
+               std::uint32_t value;
+               std::memcpy(&value, row + x * 4, sizeof(value));
+               const auto ref = x && y ? expected(x - 1, y - 1, frame, false) : 0x00ff00u;
+               if ((value & 0xffffffu) != ref)
+                  ++wrong;
+            }
+         }
+      }
+      consumer.ctx->Unmap(readback.Get(), 0);
+      std::printf("BLIT_FRAME frame=%u pixels=%u border=%u mismatches=%u staging_pitch=%u\n", frame,
+                  pixels, pixels - width * height, wrong, mapped.RowPitch);
+      check(wrong == 0, "window blit contents and untouched border");
+      j.mark("VERIFIED", "WindowBlitRGB");
+   }
+   j.call("FinalProducerDevice", [&] { return producer.dev->GetDeviceRemovedReason(); });
+   j.call("FinalConsumerDevice", [&] { return consumer.dev->GetDeviceRemovedReason(); });
+}
+
 void run(const Journal &j, bool chain, bool warp, unsigned long long display, const wchar_t *umd,
          const wchar_t *nvk)
 {
@@ -391,9 +475,10 @@ int wmain(int argc, wchar_t **argv)
    if (argc != 6)
       return 2;
    std::wstring mode = argv[1];
-   bool warp = mode == L"warp-surface" || mode == L"warp-chain";
+   bool blit = mode == L"warp-blit" || mode == L"native-blit";
+   bool warp = mode == L"warp-surface" || mode == L"warp-chain" || mode == L"warp-blit";
    bool chain = mode == L"warp-chain" || mode == L"native-chain";
-   if (!warp && !chain && mode != L"native-surface")
+   if (!warp && !chain && !blit && mode != L"native-surface")
       return 2;
    if (std::wcslen(argv[2]) != 16 || std::wcsspn(argv[2], L"0123456789abcdefABCDEF") != 16)
       return 2;
@@ -410,7 +495,10 @@ int wmain(int argc, wchar_t **argv)
       Journal j(dir);
       j.mark("ENTER", "Case");
       try {
-         run(j, chain, warp, std::wcstoull(argv[2], nullptr, 16), argv[3], argv[4]);
+         if (blit)
+            blit_between_devices(j, warp, std::wcstoull(argv[2], nullptr, 16), argv[3], argv[4]);
+         else
+            run(j, chain, warp, std::wcstoull(argv[2], nullptr, 16), argv[3], argv[4]);
       } catch (const Failure &f) {
          j.mark("FAIL", f.where, f.status);
          throw;

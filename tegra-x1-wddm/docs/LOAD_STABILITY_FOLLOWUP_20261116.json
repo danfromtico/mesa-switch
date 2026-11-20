@@ -2355,6 +2355,7 @@
     },
     "public_surface_control": {
       "source": "tegra-x1-wddm/tools/surface_dc.cpp",
+      "source_at_commit": "c8bed6b96f386830b6c92ddc1771e4c08f42a66d",
       "source_sha256": "a0de0300761ecd5a5929537fc8b0aec8ced078ddbe72118ff6b71f7f2ee65d80",
       "unsigned_arm64_exe_sha256": "c9b776fe8f59e39c79f6ddf6dbd938708ab401639de08cc1b5f438874dfc2c4f",
       "signed_arm64_exe_sha256": "d0031db927814225a8b035307f3c265e674e8654086f9aeec687e2cf0f359f8a",
@@ -2484,6 +2485,40 @@
         "final_frame_rgb_points": 35,
         "max_rgb_error": 1,
         "process_option": "off"
+      },
+      {
+        "mode": "native-off-render",
+        "start_boot": 79542,
+        "collection_boot": 79542,
+        "outcome": "completed",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "archive_sha256": "4248b8b46dcef46c6ffa128db5a46c3db19bb14e5f962e530ba909a4cde156ba",
+        "present_calls": 0,
+        "present_returns_s_ok": 0,
+        "verified_desktop_samples": null,
+        "umd_successful_vk_submits": 6,
+        "windows_submit_callback_returns_s_ok": 0,
+        "runtime_trace_finalized": true,
+        "final_frame_rgb_points": 35,
+        "max_rgb_error": 1,
+        "process_option": "off"
+      },
+      {
+        "mode": "native-off-render",
+        "start_boot": 79767,
+        "collection_boot": 79767,
+        "outcome": "completed",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "archive_sha256": "f7adf9c42021adc8703c62cb5424246e9b7744557c54edccca626428c0fd4a5a",
+        "present_calls": 0,
+        "present_returns_s_ok": 0,
+        "verified_desktop_samples": null,
+        "umd_successful_vk_submits": 6,
+        "windows_submit_callback_returns_s_ok": 0,
+        "runtime_trace_finalized": true,
+        "final_frame_rgb_points": 35,
+        "max_rgb_error": 1,
+        "process_option": "off"
       }
     ],
     "presentation_cases": {
@@ -2511,6 +2546,68 @@
                 },
                 {
                   "record": 79343,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
+        },
+        {
+          "mode": "native-gdi",
+          "start_boot": 79617,
+          "collection_boot": 79692,
+          "outcome": "boot changed",
+          "client_sha256": "aa8aad862755246c2bb270a1494eb482aac7cba09f192a220496bab3f210d0ce",
+          "archive_sha256": "08d968c2f21eec674bd1ff10fdf1801d8f0554cbb03e8abacc27537770f3ab12",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "swapchain_flag": "DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE",
+          "last_client_checkpoint": "350765 3112 CALL Present 00000000 qpc=6737791113",
+          "last_os_etw_ms_relative_to_journal_checkpoint": 1.848,
+          "boot_events": [
+            {
+              "boot": 79692,
+              "events": [
+                {
+                  "record": 79701,
+                  "id": 6008
+                },
+                {
+                  "record": 79710,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
+        },
+        {
+          "mode": "native-gdi",
+          "start_boot": 79838,
+          "collection_boot": 79910,
+          "outcome": "boot changed",
+          "client_sha256": "aa8aad862755246c2bb270a1494eb482aac7cba09f192a220496bab3f210d0ce",
+          "archive_sha256": "ce8b40919b8742cecdfd0c2b6420e9a2020293b47fc45ffefa254c2ff8fd060a",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "swapchain_flag": "DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE",
+          "last_client_checkpoint": "223937 4808 CALL Present 00000000 qpc=4302723184",
+          "last_os_etw_ms_relative_to_journal_checkpoint": -21.749,
+          "boot_events": [
+            {
+              "boot": 79910,
+              "events": [
+                {
+                  "record": 79919,
+                  "id": 6008
+                },
+                {
+                  "record": 79928,
                   "id": 41,
                   "bugcheck_code": 0
                 }
@@ -2555,6 +2652,76 @@
               "planned_shutdown_events_before_boot": []
             }
           ]
+        },
+        {
+          "mode": "native-off-full",
+          "start_boot": 79542,
+          "collection_boot": 79617,
+          "outcome": "boot changed",
+          "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+          "archive_sha256": "c7c4d1a220ffd61ed89b46c46a33f26f546d8c09c5032204d758334404f6cf1f",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "umd_successful_vk_submits": 1,
+          "windows_submit_callback_returns_s_ok": 0,
+          "runtime_trace_finalized": false,
+          "runtime_queue_option": "off",
+          "confirmed_unwritten_buffer_before_present": false,
+          "last_client_checkpoint": "299828 7076 CALL Present 00000000 qpc=5759850777",
+          "last_os_etw_ms_relative_to_journal_checkpoint": -9.428,
+          "boot_events": [
+            {
+              "boot": 79617,
+              "events": [
+                {
+                  "record": 79626,
+                  "id": 6008
+                },
+                {
+                  "record": 79635,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
+        },
+        {
+          "mode": "native-off-full",
+          "start_boot": 79767,
+          "collection_boot": 79838,
+          "outcome": "boot changed",
+          "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+          "archive_sha256": "f06ad189d0efd6da04c5638382e21c19573fe11f9879cac42ff9585d66bbd55c",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "umd_successful_vk_submits": 0,
+          "windows_submit_callback_returns_s_ok": 0,
+          "runtime_trace_finalized": false,
+          "runtime_queue_option": "off",
+          "confirmed_unwritten_buffer_before_present": false,
+          "last_client_checkpoint": "302750 3952 CALL Present 00000000 qpc=5816109452",
+          "last_os_etw_ms_relative_to_journal_checkpoint": -9.623,
+          "boot_events": [
+            {
+              "boot": 79838,
+              "events": [
+                {
+                  "record": 79847,
+                  "id": 6008
+                },
+                {
+                  "record": 79856,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
         }
       ],
       "native-on-empty": [
@@ -2592,6 +2759,76 @@
               "planned_shutdown_events_before_boot": []
             }
           ]
+        },
+        {
+          "mode": "native-on-empty",
+          "start_boot": 79467,
+          "collection_boot": 79542,
+          "outcome": "boot changed",
+          "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+          "archive_sha256": "f4464d585ac884ab6543d706e9761ed279d36e19217be6ea56408a6db7ccd762",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "umd_successful_vk_submits": 0,
+          "windows_submit_callback_returns_s_ok": 1,
+          "runtime_trace_finalized": false,
+          "runtime_queue_option": "on",
+          "confirmed_unwritten_buffer_before_present": true,
+          "last_client_checkpoint": "804546 5016 CALL Present 00000000 qpc=15450653348",
+          "last_os_etw_ms_relative_to_journal_checkpoint": -21.089,
+          "boot_events": [
+            {
+              "boot": 79542,
+              "events": [
+                {
+                  "record": 79551,
+                  "id": 6008
+                },
+                {
+                  "record": 79560,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
+        },
+        {
+          "mode": "native-on-empty",
+          "start_boot": 79692,
+          "collection_boot": 79767,
+          "outcome": "boot changed",
+          "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+          "archive_sha256": "bc51d525533616031c04f7e37d954d6ace761308b4a3999629098f8545b283fd",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "umd_successful_vk_submits": 0,
+          "windows_submit_callback_returns_s_ok": 1,
+          "runtime_trace_finalized": false,
+          "runtime_queue_option": "on",
+          "confirmed_unwritten_buffer_before_present": true,
+          "last_client_checkpoint": "226937 6520 CALL Present 00000000 qpc=4360424669",
+          "last_os_etw_ms_relative_to_journal_checkpoint": -16.357,
+          "boot_events": [
+            {
+              "boot": 79767,
+              "events": [
+                {
+                  "record": 79776,
+                  "id": 6008
+                },
+                {
+                  "record": 79785,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
         }
       ]
     },
@@ -2603,6 +2840,28 @@
         "outcome": "completed",
         "client_sha256": "aa8aad862755246c2bb270a1494eb482aac7cba09f192a220496bab3f210d0ce",
         "archive_sha256": "b10b4738fa4b9cae100451053aa980de967f34f8f8775c06b95f8bb774e9333d",
+        "present_calls": 6,
+        "present_returns_s_ok": 6,
+        "verified_desktop_samples": 15
+      },
+      {
+        "mode": "warp-gdi",
+        "start_boot": 79617,
+        "collection_boot": 79617,
+        "outcome": "completed",
+        "client_sha256": "aa8aad862755246c2bb270a1494eb482aac7cba09f192a220496bab3f210d0ce",
+        "archive_sha256": "ac3f1a69c86d61687297c60fcd966b47342eb227b755491ed3fb69afdd6f04d5",
+        "present_calls": 6,
+        "present_returns_s_ok": 6,
+        "verified_desktop_samples": 15
+      },
+      {
+        "mode": "warp-gdi",
+        "start_boot": 79838,
+        "collection_boot": 79838,
+        "outcome": "completed",
+        "client_sha256": "aa8aad862755246c2bb270a1494eb482aac7cba09f192a220496bab3f210d0ce",
+        "archive_sha256": "b108a1766bdf1fbb08523a4d5995bdc24d5b6c1c7cfb214ff2cc5e273e48f60c",
         "present_calls": 6,
         "present_returns_s_ok": 6,
         "verified_desktop_samples": 15
@@ -2634,24 +2893,82 @@
         "umd_successful_vk_submits": 0,
         "windows_submit_callback_returns_s_ok": 0,
         "runtime_trace_finalized": true
+      },
+      {
+        "mode": "warp-on-empty",
+        "start_boot": 79467,
+        "collection_boot": 79467,
+        "outcome": "completed",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "archive_sha256": "9ed4affd9f7ca6c13a2668203de12abb231d8ea2da95708bc82775735beebbdf",
+        "present_calls": 1,
+        "present_returns_s_ok": 1,
+        "verified_desktop_samples": null,
+        "umd_successful_vk_submits": 0,
+        "windows_submit_callback_returns_s_ok": 0,
+        "runtime_trace_finalized": true
+      },
+      {
+        "mode": "warp-on-empty",
+        "start_boot": 79692,
+        "collection_boot": 79692,
+        "outcome": "completed",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "archive_sha256": "6702df78d248590f8b23acd0889c9a56a3ad371f75fb37df77f02679734e7dd8",
+        "present_calls": 1,
+        "present_returns_s_ok": 1,
+        "verified_desktop_samples": null,
+        "umd_successful_vk_submits": 0,
+        "windows_submit_callback_returns_s_ok": 0,
+        "runtime_trace_finalized": true
       }
     ],
     "interpretation": "The public GDI surface ownership handoff preserved the GPU-produced image and the GDI edits. The six-frame native rendering control completed on both process selections. A real sequential Present also produced an unexpected restart with runtime transport unselected, with a GDI-compatible chain, and with an ordinary application back buffer before any app-issued draw, upload, copy or clear. Device initialization and desktop composition still run in the empty-buffer case. The initiating kernel operation remains unresolved.",
     "recovery": {
-      "boot": 79467,
+      "boot": 79910,
       "gpu_problem_code": 0,
       "power": "Online",
       "permanent_baseline_verified": true,
       "remaining_test_directories": 0,
       "remaining_test_tasks": 0,
       "remaining_fixture_processes": 0,
-      "closed_etw_sessions_checked": 16
+      "closed_etw_sessions_checked": 40
     },
     "references": [
       "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgisurface1-getdc",
       "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgisurface1-releasedc",
       "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ne-d3d11-d3d11_resource_misc_flag",
-      "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/dxgi-presentation-path"
-    ]
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/dxgi-presentation-path",
+      "https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt"
+    ],
+    "public_dc_to_dc_rectangle_copy": {
+      "source": "tegra-x1-wddm/tools/surface_dc.cpp",
+      "source_sha256": "9f8ba19966712f26a8b8d19dd88b0a6d35c60d14b0749a9d76b755eb50960bd1",
+      "unsigned_fixture_sha256": "64aab9219dfd5d607e49e124e67521b129ae03a8d1bb6534e23cf3b3b0f4012d",
+      "signed_fixture_sha256": "8c34423ee29c3450fc2c4f93bcea096b9133467b03da7421990e041cfee1f73b",
+      "method": "Two D3D11 devices on the same selected adapter. Copy a 640x360 source DC at offset (1,1) into a 641x361 destination DC, release both, and verify every destination RGB pixel including its untouched border. Both processes set the runtime-queue option. Windows chooses how to implement BitBlt.",
+      "cases": [
+        {
+          "mode": "warp-blit",
+          "boot": 79910,
+          "outcome": "completed",
+          "archive_sha256": "4f9025e90239133f3dee80f7b9d2167fb85a5a5c38b8a0aa44e8f9d7d37ac5de",
+          "pixels_checked_per_frame": 231401,
+          "unchanged_border_pixels_per_frame": 1001,
+          "rgb_mismatches": 0,
+          "frames": 2
+        },
+        {
+          "mode": "native-blit",
+          "boot": 79910,
+          "outcome": "completed",
+          "archive_sha256": "12437218893e56b12267e8ab060946b1264bed081209eeb1653512d767724247",
+          "pixels_checked_per_frame": 231401,
+          "unchanged_border_pixels_per_frame": 1001,
+          "rgb_mismatches": 0,
+          "frames": 2
+        }
+      ]
+    }
   }
 }
