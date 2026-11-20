@@ -1713,5 +1713,97 @@
       "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-present",
       "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/ns-d3dumddi-_d3dddicb_submitcommand"
     ]
+  },
+  "native_linear_texture_sampling_shared_fences_20261120": {
+    "hardware": "Native GM20B on the same Windows boot, AC, GPU Code 0, two independently created ARM64 hardware D3D11 FL11_0 devices. Each process checked its actual adapter LUID and its loaded native tgd3d leaf.",
+    "boot_record": 78266,
+    "adapter_luid": "00000000000059c2",
+    "accepted_components": {
+      "tegragpurender.sys": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "surface": "One 640 by 360 BGRA8 render-target and shader-resource texture shared with IDXGIResource::GetSharedHandle and ID3D11Device::OpenSharedResource. After a full patterned GPU write, subsequent phases include four partial scissored updates. The reader samples the persistent SRV in a pixel shader into a private image. Readback checks every pixel including the areas outside the updated rectangle.",
+    "compiled_shader_sha256": {
+      "fullscreen": "15a04d7c69940ea4c8e207e50e4f9892e07d671f9d74e135ee3b9a677029db5d",
+      "paint": "acec226ae05c358f94928d641fa8686c3dbbea152934292da2131f6bd3839585",
+      "sample_shared": "4cc3b5473d4649612b86d9995785d7d2aeb59586a125da8e73e421ec94992d0e"
+    },
+    "event_query_controls": {
+      "case": "PresentPair-261120-053002243810",
+      "archive_sha256": "02b447cae04026e92160c7d586df8a8f8bbdaf980cf7d8ba8f20ea8df88b10fe",
+      "signed_fixture_sha256": "e200662cbbc8462fd596ccb89a2d184314757b0cc11a6bf872d606dcb22306d5",
+      "same_device": {
+        "frames": 6,
+        "exact_pixels": 1382400,
+        "mismatches": 0,
+        "exit": 0
+      },
+      "alternating_native_devices": {
+        "frames": 6,
+        "exact_pixels": 1382400,
+        "mismatches": 0,
+        "exit": 0
+      },
+      "previous_contents": "The second device opened the shared texture after the first writer had finished its first full image. The roles alternate each subsequent phase in the dual-device group. An event query and S_OK device status precede each transfer."
+    },
+    "public_shared_fences": {
+      "case": "PresentPair-261120-053405960216",
+      "archive_sha256": "ebb747d8a841fc933745bcd42d15b9b94b0a91fae873f060fbcd0cbcfb9198e4",
+      "signed_fixture_sha256": "d7ae36b44b98c8f2b330416de5010ae5499cb29496b32eb0ad2e4c37702264f8",
+      "comparison": "Both modes used two devices and opened an initially painted texture. A wrote phases 0 to 2 and B wrote phases 3 to 5. The first measured full write repeats the initial color pattern. Each phase copied the sampled result to a separate readback resource. Readback validation began only after all six snapshots were enqueued.",
+      "cpu_event_handoff": {
+        "frames": 6,
+        "exact_pixels": 1382400,
+        "mismatches": 0,
+        "exit": 0
+      },
+      "gpu_fence_handoff": {
+        "frames": 6,
+        "exact_pixels": 1382400,
+        "mismatches": 0,
+        "exit": 0,
+        "shared_fences": 2,
+        "api": "ID3D11Device5::CreateFence and OpenSharedFence, ID3D11Fence::CreateSharedHandle, ID3D11DeviceContext4::Signal and Wait.",
+        "reader_waits_with_pre_call_value_below_target": 6,
+        "writer_reuse_waits_with_pre_call_value_below_target": 5,
+        "producer_value_seen_by_reader": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "reader_value_seen_before_reuse": [
+          0,
+          1,
+          1,
+          3,
+          4
+        ],
+        "final_value_on_both_devices": {
+          "producer_fence": 6,
+          "reader_fence": 6
+        },
+        "cpu_fence_waits_after_enqueue_before_readback": 1,
+        "scope": "The measured GPU mode queues work without a per-frame CPU wait. It waits on one event after all six phases are submitted. Pre-call CPU samples describe the value before each Wait call; GPU execution can advance after that sample."
+      }
+    },
+    "combined_checked_pixels": 5529600,
+    "scope": "Offscreen sampling exercises shared linear-image ownership, both synchronization directions and partial-update preservation on this workload. Actual window presentation, DWM consumption of a swapchain buffer and panel scanout require separate evidence.",
+    "recovery": {
+      "boot_record": 78266,
+      "gpu_problem_code": 0,
+      "power": "AC",
+      "permanent_accepted_grant_verified": true,
+      "owned_files_and_tasks_removed": true
+    },
+    "references": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/d3d11_4/nf-d3d11_4-id3d11device5-createfence",
+      "https://learn.microsoft.com/en-us/windows/win32/api/d3d11_3/nf-d3d11_3-id3d11devicecontext4-wait"
+    ]
   }
 }
