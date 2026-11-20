@@ -405,16 +405,23 @@ NTSTATUS APIENTRY TgGpuDdiCloseAllocation(HANDLE device,const DXGKARG_CLOSEALLOC
     KeAcquireSpinLock(&e->Lock,&irql);--d->OpenAllocations;--e->Creating;KeReleaseSpinLock(&e->Lock,irql);
     return STATUS_SUCCESS;
 }
+static NTSTATUS validate_open_access(TG_GPU_DEVICE *device, const TG_GPU_OPEN_ALLOCATION *open, BOOLEAN write)
+{
+    if (open->Device != device || !open->Allocation || open->Allocation->Engine != device->Engine)
+        return STATUS_INVALID_PARAMETER;
+    if (write && open->ReadOnly)
+        return STATUS_ACCESS_DENIED;
+    return STATUS_SUCCESS;
+}
+
 NTSTATUS TgGpuValidateOpenAllocationRange(TG_GPU_DEVICE *d,HANDLE handle,
                                          UINT64 offset,UINT64 bytes,BOOLEAN write)
 {
     TG_GPU_OPEN_ALLOCATION *open=handle;NTSTATUS status=STATUS_SUCCESS;KIRQL irql;
     if(!d || !open || !bytes) return STATUS_INVALID_PARAMETER;
     KeAcquireSpinLock(&d->Engine->Lock,&irql);
-    if(open->Device!=d || !open->Allocation || open->Allocation->Engine!=d->Engine)
-        status=STATUS_INVALID_PARAMETER;
-    else if(write && open->ReadOnly) status=STATUS_ACCESS_DENIED;
-    else if(offset>open->Allocation->Bytes || bytes>open->Allocation->Bytes-offset)
+    status=validate_open_access(d,open,write);
+    if(NT_SUCCESS(status) && (offset>open->Allocation->Bytes || bytes>open->Allocation->Bytes-offset))
         status=STATUS_INVALID_BUFFER_SIZE;
     KeReleaseSpinLock(&d->Engine->Lock,irql);return status;
 }
@@ -426,18 +433,50 @@ void TgGpuRegisterAllocationDdis(DRIVER_INITIALIZATION_DATA *d)
     d->DxgkDdiOpenAllocation=TgGpuDdiOpenAllocation;
     d->DxgkDdiCloseAllocation=TgGpuDdiCloseAllocation;
 }
-NTSTATUS TgGpuGetPresentSurface(TG_GPU_DEVICE *d,HANDLE handle,BOOLEAN write,
-    TG_GPU_PRIMARY_ALLOCATION_REQUEST *desc)
+/* A copy may use a window-sized linear RGB allocation. Direct scanout has
+ * its own stricter format, orientation and extent validation below. */
+static NTSTATUS copy_surface_layout(const TG_GPU_ALLOCATION *allocation,
+                                    TG_GPU_PRIMARY_ALLOCATION_REQUEST *desc)
 {
-    NTSTATUS status=TgGpuValidateOpenAllocationRange(d,handle,0,T214_GPU_POST_FB_SIZE,write);
-    if(!NT_SUCCESS(status) || !desc)return NT_SUCCESS(status)?STATUS_INVALID_PARAMETER:status;
-    const TG_GPU_OPEN_ALLOCATION *open=handle;
-    *desc=open->Allocation->Desc.Primary;
-    if((desc->Buffer.flags&TG_GPU_ALLOCATION_LINEAR_SURFACE) ||
-       desc->Buffer.bytes!=T214_GPU_POST_FB_SIZE ||
-       (desc->Format!=D3DDDIFMT_X8R8G8B8 && desc->Format!=D3DDDIFMT_A8R8G8B8))
+    const TG_GPU_ALLOCATION_DESC *layout = &allocation->Desc;
+    if (layout->Buffer.flags & TG_GPU_ALLOCATION_LINEAR_SURFACE) {
+        const TG_GPU_LINEAR_ALLOCATION_REQUEST *linear = &layout->Linear;
+        if (linear->Buffer.flags != (TG_GPU_ALLOCATION_CPU_VISIBLE | TG_GPU_ALLOCATION_LINEAR_SURFACE))
+            return STATUS_NOT_SUPPORTED;
+        if (linear->Buffer.bytes > allocation->Bytes ||
+            (UINT64)linear->Pitch * linear->Height > linear->Buffer.bytes ||
+            (UINT64)linear->Width * sizeof(UINT32) > linear->Pitch)
+            return STATUS_INVALID_BUFFER_SIZE;
+        *desc = (TG_GPU_PRIMARY_ALLOCATION_REQUEST) {
+            .Buffer = linear->Buffer, .Format = linear->Format,
+            .Rotation = D3DDDI_ROTATION_IDENTITY, .Width = linear->Width,
+            .Height = linear->Height, .Pitch = linear->Pitch
+        };
+    } else {
+        if (allocation->Bytes < T214_GPU_POST_FB_SIZE)
+            return STATUS_INVALID_BUFFER_SIZE;
+        if (layout->Buffer.bytes != T214_GPU_POST_FB_SIZE)
+            return STATUS_NOT_SUPPORTED;
+        *desc = layout->Primary;
+    }
+    if (desc->Format != D3DDDIFMT_X8R8G8B8 && desc->Format != D3DDDIFMT_A8R8G8B8)
         return STATUS_NOT_SUPPORTED;
     return STATUS_SUCCESS;
+}
+
+NTSTATUS TgGpuGetPresentSurface(TG_GPU_DEVICE *device,HANDLE handle,BOOLEAN write,
+    TG_GPU_PRIMARY_ALLOCATION_REQUEST *desc)
+{
+    const TG_GPU_OPEN_ALLOCATION *open = handle;
+    if (!device || !open || !desc)
+        return STATUS_INVALID_PARAMETER;
+    KIRQL irql;
+    KeAcquireSpinLock(&device->Engine->Lock, &irql);
+    NTSTATUS status = validate_open_access(device, open, write);
+    if (NT_SUCCESS(status))
+        status = copy_surface_layout(open->Allocation, desc);
+    KeReleaseSpinLock(&device->Engine->Lock, irql);
+    return status;
 }
 NTSTATUS TgGpuValidatePagingAllocation(TG_GPU_CONTEXT_ENGINE *e,HANDLE handle,UINT64 offset,UINT64 bytes)
 {

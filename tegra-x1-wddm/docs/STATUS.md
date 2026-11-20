@@ -1,4 +1,10 @@
-## Current Switch graphics baseline · 2026-11-19
+## Current Switch graphics baseline · 2026-11-20
+
+Windows starts the GM20B with permanent boot permission. After a planned restart, the adapter reported Code 0 on KMD `fc6e8d08`. DWM loaded the ARM64 tgd3d `c954304f` and NVK `51ff97f6` through dispatcher `9ff198ae`. [Signed components and boot verification](WINDOW_COPY_BASELINE_20261120.json)
+
+On this KMD the public D3D11 hardware call obtained a device and context with FL11_1 as its only requested level. The triangle readback matched 280 foreground and 309 background pixels. Native cross-device rectangle copies also matched both frames. The first-Present restart remains under investigation. [Drawing controls](WINDOW_COPY_BASELINE_20261120.json) · [First-Present observations](LOAD_STABILITY_FOLLOWUP_20261116.json)
+
+## Previous Switch graphics baseline · 2026-11-19
 
 The selected ARM64 combination is KMD `6c86354e`, tgd3d `49fa08a2` and NVK `e563a81d`. The GM20B texture-copy probe verified 28 copied pixels and 63 guard pixels. Native GPU activation is manual pending physical FL11_1 qualification. [Component hashes and hardware readback](dxvk-games-20261118/native-code0-copy-flags.json)
 

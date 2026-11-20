@@ -24,11 +24,11 @@ static struct tg_gpu_blit_rect blit_rect(RECT r)
 {
     return (struct tg_gpu_blit_rect){r.left,r.top,r.right,r.bottom};
 }
-static BOOLEAN surface_va(TG_GPU_CONTEXT *c,UINT64 va)
+static BOOLEAN surface_va(TG_GPU_CONTEXT *c,UINT64 va,UINT64 bytes)
 {
     const UINT64 internal=c->Device->Process->Internal.Base;
-    return va && !(va&3) && va<TG_GPU_VA_LIMIT && T214_GPU_POST_FB_SIZE<=TG_GPU_VA_LIMIT-va &&
-        (va+T214_GPU_POST_FB_SIZE<=internal || va>=internal+TG_GPU_INTERNAL_COVERAGE);
+    return va && !(va&3) && va<TG_GPU_VA_LIMIT && bytes && bytes<=TG_GPU_VA_LIMIT-va &&
+        (va+bytes<=internal || va>=internal+TG_GPU_INTERNAL_COVERAGE);
 }
 
 NTSTATUS APIENTRY TgGpuDdiPresent(HANDLE context,DXGKARG_PRESENT *a)
@@ -83,14 +83,14 @@ NTSTATUS APIENTRY TgGpuDdiPresent(HANDLE context,DXGKARG_PRESENT *a)
         blit_rect(a->SrcRect),blit_rect(a->DstRect),rotation))
         return STATUS_INVALID_PARAMETER;
     if(src->PhysicalAdapterIndex || dst->PhysicalAdapterIndex ||
-       !surface_va(c,src->AllocationVirtualAddress) ||
-       !surface_va(c,dst->AllocationVirtualAddress))return STATUS_INVALID_PARAMETER;
+       !surface_va(c,src->AllocationVirtualAddress,source.Buffer.bytes) ||
+       !surface_va(c,dst->AllocationVirtualAddress,destination.Buffer.bytes))return STATUS_INVALID_PARAMETER;
     const BOOLEAN opaque=source.Format==D3DDDIFMT_X8R8G8B8 && destination.Format==D3DDDIFMT_A8R8G8B8;
     const UINT packet_words=rotation==180?TG_GPU_PRESENT_HALFTURN_WORDS:(opaque?17:13);
     /* Screen-to-screen overlap is not advertised. Shadow/primary ranges are
      * distinct; reject overlap before emitting any commands. */
-    if(src->AllocationVirtualAddress<dst->AllocationVirtualAddress+T214_GPU_POST_FB_SIZE &&
-       dst->AllocationVirtualAddress<src->AllocationVirtualAddress+T214_GPU_POST_FB_SIZE)return STATUS_NOT_SUPPORTED;
+    if(src->AllocationVirtualAddress<dst->AllocationVirtualAddress+destination.Buffer.bytes &&
+       dst->AllocationVirtualAddress<src->AllocationVirtualAddress+source.Buffer.bytes)return STATUS_NOT_SUPPORTED;
     const UINT rectangles=a->SubRectCnt?a->SubRectCnt:1;
     UINT64 total=0;
     for(UINT i=0;i<rectangles;++i) {
