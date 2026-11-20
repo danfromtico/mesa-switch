@@ -1307,5 +1307,245 @@
       "temporary_task_and_test_files_removed": true
     },
     "scope": "The last native checkpoint is the user-mode instruction dispatching a D3DKMT_PRESENT. The incomplete kernel trace ends before that instruction. It cannot identify the receiving KMD operation or the initiating reset cause."
+  },
+  "window_present_packet_adapter_and_restart_20261120": {
+    "workload": "Six prerecorded frames per process, public ARM64 D3D11 FL11_0, 640 by 360, two buffers, Present(1,0). Each run opens WARP SEQUENTIAL first and native GM20B FLIP_SEQUENTIAL second. Both use the same executable and draw input.",
+    "accepted_components": {
+      "tegragpurender.sys": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "power_control": "All launched cases required external power, the accepted native driver and the same power policy. Clock readings are samples before the process, not fixed clocks or measurements at reset.",
+    "signed_test_sha256": "111f0c20af4c6d9230e73208f8329e3cdf19d7394fe8184d2b3ac19da22e409f",
+    "installed_identity_schema_sha256": "6eff0b7424332f43506f3ccdf5b874aab285fe7e8fd01b6a08ed52046fe448e2",
+    "runs": [
+      {
+        "case": "PresentPair-261120-044531694223",
+        "archive_sha256": "0540feb64269273b8b94523d16bcc50f6f71d62534c0bd7dfbb9f2ab1da3850a",
+        "boot_before": 78023,
+        "boot_after": 78099,
+        "verified_arms": [
+          {
+            "drawing_and_present_packet_adapter": "Basic Render",
+            "effect": 1,
+            "returned_presents": 6,
+            "desktop_matches": 15,
+            "desktop_samples": 15,
+            "process_exit": 0,
+            "etl_sha256": "7619b027ec104908b39d038048567711ac22e3a2803d7662c161141d9e6c7f96"
+          }
+        ],
+        "native_flip": {
+          "public_calls_in_journal": 2,
+          "successful_public_returns_in_journal": 2,
+          "ETW_intervals_with_GM20B_queue_and_status_zero": 2,
+          "history_tokens_with_DWM_stop_before_next_reuse": 2,
+          "matching_queue_stops_without_timeout_or_preemption": 2,
+          "normal_exit": false,
+          "trace_finalized": false,
+          "last_write_through_app_marker": "1453140 3660 CALL UploadChroma 00000000",
+          "last_recorded_API_return": "1453109 3660 RETURN Present 00000000",
+          "etl_sha256": "99108431466773ea7364ad5bc6b23aa0650267889262794e813241d859d2da96",
+          "windows_startup_records_during_loss": [
+            {
+              "prior_boot": 78023,
+              "boot": 78099,
+              "41": [
+                78117
+              ],
+              "6008": [
+                78108
+              ],
+              "bugcheck": [
+                "0"
+              ],
+              "previous_1074": [],
+              "previous_shutdown": [],
+              "button_evidence": false
+            }
+          ],
+          "new_test_launch_in_recovery": false
+        },
+        "before_native_power_sample": {
+          "PowerMode": 1,
+          "GpuPolicyMode": 1,
+          "CpuActualKhz": 1032750,
+          "GpuReportedKhz": 76800,
+          "RamActualKhz": 2500000,
+          "TempValid": 1,
+          "TempC": 38
+        }
+      },
+      {
+        "case": "PresentPair-261120-045029623187",
+        "archive_sha256": "2eb28748f809a41652acc0ab9aaf1608491401f79c7409e32488b6f7711a176b",
+        "boot_before": 78099,
+        "boot_after": 78099,
+        "verified_arms": [
+          {
+            "drawing_and_present_packet_adapter": "Basic Render",
+            "effect": 1,
+            "returned_presents": 6,
+            "desktop_matches": 15,
+            "desktop_samples": 15,
+            "process_exit": 0,
+            "etl_sha256": "ca5bc029876ddb0711d4971ea0ceef223c784f496544f9ea7bb642135af74e2c"
+          },
+          {
+            "drawing_and_present_packet_adapter": "GM20B",
+            "effect": 3,
+            "returned_presents": 6,
+            "desktop_matches": 15,
+            "desktop_samples": 15,
+            "process_exit": 0,
+            "etl_sha256": "19707dca695d4acbdb95ff80a40fbfdee1d162fe3e70f9cbed6b94f67bb7c52c"
+          }
+        ],
+        "native_flip": {
+          "public_calls_in_journal": 6,
+          "successful_public_returns_in_journal": 6,
+          "ETW_intervals_with_GM20B_queue_and_status_zero": 6,
+          "history_tokens_with_DWM_stop_before_next_reuse": 6,
+          "matching_queue_stops_without_timeout_or_preemption": 6,
+          "normal_exit": true,
+          "trace_finalized": true
+        },
+        "before_native_power_sample": {
+          "PowerMode": 1,
+          "GpuPolicyMode": 1,
+          "CpuActualKhz": 1147500,
+          "GpuReportedKhz": 76800,
+          "RamActualKhz": 1600000,
+          "TempValid": 1,
+          "TempC": 38
+        }
+      },
+      {
+        "case": "PresentPair-261120-045155904016",
+        "archive_sha256": "08aac40990d7d0e20bc594e3ff3ebacd750d821cc83a11334e2b0fb8dde76478",
+        "boot_before": 78099,
+        "boot_after": 78190,
+        "verified_arms": [
+          {
+            "drawing_and_present_packet_adapter": "Basic Render",
+            "effect": 1,
+            "returned_presents": 6,
+            "desktop_matches": 15,
+            "desktop_samples": 15,
+            "process_exit": 0,
+            "etl_sha256": "19d1be947b2269d077d3bb90202ffbf71c2c28ce3af52a3a5305564cc95a67ec"
+          }
+        ],
+        "native_flip": {
+          "public_calls_in_journal": 2,
+          "successful_public_returns_in_journal": 2,
+          "ETW_intervals_with_GM20B_queue_and_status_zero": 1,
+          "history_tokens_with_DWM_stop_before_next_reuse": 1,
+          "matching_queue_stops_without_timeout_or_preemption": 1,
+          "normal_exit": false,
+          "trace_finalized": false,
+          "last_write_through_app_marker": "331328 3744 CALL UploadChroma 00000000",
+          "last_recorded_API_return": "331296 3744 RETURN Present 00000000",
+          "etl_sha256": "5890a2788929563382c2ab9df2baca5176c3088f9dbb50c7985a0611599f7652",
+          "windows_startup_records_during_loss": [
+            {
+              "prior_boot": 78099,
+              "boot": 78178,
+              "41": [],
+              "6008": [
+                78187
+              ],
+              "bugcheck": [],
+              "previous_1074": [],
+              "previous_shutdown": [],
+              "button_evidence": false,
+              "kernel_boot20": {
+                "record": 78180,
+                "LastShutdownGood": "true",
+                "LastBootGood": "true"
+              }
+            },
+            {
+              "prior_boot": 78178,
+              "boot": 78190,
+              "41": [
+                78208
+              ],
+              "6008": [
+                78192
+              ],
+              "bugcheck": [
+                "0"
+              ],
+              "previous_1074": [],
+              "previous_shutdown": [],
+              "button_evidence": false,
+              "kernel_boot20": {
+                "record": 78196,
+                "LastShutdownGood": "true",
+                "LastBootGood": "true"
+              }
+            }
+          ],
+          "new_test_launch_in_recovery": false
+        },
+        "before_native_power_sample": {
+          "PowerMode": 1,
+          "GpuPolicyMode": 1,
+          "CpuActualKhz": 1224000,
+          "GpuReportedKhz": 76800,
+          "RamActualKhz": 1600000,
+          "TempValid": 1,
+          "TempC": 38
+        }
+      }
+    ],
+    "packet_ownership": {
+      "join": "DxgKrnl packet 178 hContext matches the live Context start/rundown. Its hDevice matches the live Device start/rundown. Its pDxgAdapter matches DpiReportAdapter 110 with the DXGI-reported drawing LUID. Queue completion 180 matches context, packet address, packet type and submit sequence.",
+      "warp_redirection": {
+        "verified_process_exits": 3,
+        "matched_copy_packets": 18,
+        "present_history_model": 3,
+        "packet_type": 0,
+        "public_dst_handle": 0,
+        "resolved_source_allocations": 2,
+        "resolved_destination_allocations": 1,
+        "per_frame": "Two source surfaces alternate. Windows resolves a single destination. Each full-window copy joins its DMA buffer to queue admission and a matched DMA start and stop."
+      },
+      "history_correlation": "Within one process launch, follow the same token from present-history start (215) through info (172) to stop (173) in the actual DWM process. End the search at the next use of that token by any process. The hAdapter field varies between these records on this system. A token stop records DWM consumption of the history entry.",
+      "gm20b_flip": {
+        "verified_process_exits": 1,
+        "matched_returned_present_packets": 9,
+        "present_history_model": 2,
+        "packet_type": 7
+      },
+      "scope": "On the native desktop the WARP copy packet ran on Microsoft Basic Render Driver. That control validates the application and display result. The interrupted native FLIP reports partial progress for its retained frames. Earlier native SEQUENTIAL first-Present restarts remain a separate observation. Presentation completion and final panel latch are different observations."
+    },
+    "restart_observations": "The first and third native processes both returned S_OK twice from public Present. Their final write-through marker announces the third chroma UpdateSubresource call. The second native process returned six times, passed desktop sampling and exited. Neither the marker nor its timing identifies a faulting instruction. The third collection spans two recorded Windows starts. The controller has no boot trigger and starts one native client per run.",
+    "recovery": {
+      "boot": 78190,
+      "gpu_problem_code": 0,
+      "power": "AC",
+      "accepted_permanent_grant_verified": true,
+      "owned_probe_files_tasks_and_ETW_sessions_removed": true
+    },
+    "references": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgiddicb_present",
+      "https://github.com/GameTechDev/PresentMon/blob/main/PresentData/PresentMonTraceConsumer.cpp"
+    ],
+    "recovery_boot_evidence_sha256": "5f453c0e80ef17b246b5a3fb542c13d83dc41b711c56c1418c2cf90945ec710e",
+    "earlier_preloaded_copy_cross_check": {
+      "case": "PresentPair-261119-233931177761",
+      "arm": "4-A",
+      "client_sha256": "7febb0233207aefc46c5ecf67a16fb25f4f34872867919ea02486ff9b2aea4b9",
+      "archive_sha256": "0d477152e9eaf4b37f5821266074c3df89914f6365d7ba8b94287ee589c8679a",
+      "start_record": 75983,
+      "recovery_start_record": 76058,
+      "public_returns_before_restart": 2,
+      "last_marker": "CALL BindPipeline",
+      "observed": "A different native FLIP fixture preloaded all six plane pairs, waited for their GPU completion and used CopyResource for the planes at draw time. Its third frame reached BindPipeline after the two plane copies. It also experienced an unclean restart. Per-frame CPU chroma upload was absent in this earlier case. A shared initiating cause remains unconfirmed."
+    }
   }
 }
