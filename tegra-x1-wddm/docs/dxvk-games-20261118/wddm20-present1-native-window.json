@@ -403,5 +403,164 @@
     },
     "observation": "With one and two rotations, distinct runtime allocation handles, written-allocation handles, last-use and acquire sequences followed their backing images. Both logical render-target views selected their cached view for the current image, and teardown returned each current logical runtime resource handle.",
     "coverage_limit": "Windows callbacks were modeled in this control. The timing of a real DWM read and the first safe reuse of its source surface remain open."
+  },
+  "passive_submit_review": {
+    "phase_order": [
+      "Windows producer-to-renderer signal accepted",
+      "Vulkan submit returned",
+      "Windows renderer-to-presentation wait accepted"
+    ],
+    "cases": [
+      {
+        "case": "Ddi20Case-261120-142236379776",
+        "mode": "native-modern-empty",
+        "etl_sha256": "23ef0e98c3d5ae44dc1b65c2276522e4547f1d224e94aed9bcc82fabcfbde5c2",
+        "trace_finalized": true,
+        "complete_same_thread_signal_submit_wait_sequences": {
+          "draw": 0,
+          "dwm": 58
+        },
+        "successful_present_source_labels": [
+          {
+            "successful_kmt_presents": 1,
+            "source_allocation_labels": [
+              "A"
+            ]
+          }
+        ],
+        "kernel_written_allocation_records": 0,
+        "kernel_allocation_reference_records": 0,
+        "application_write_scheduler_receipts": [
+          {
+            "ordinal": 1,
+            "public_call_recorded": true,
+            "public_return_recorded": true,
+            "written_submissions": 0,
+            "kernel_pairs": false,
+            "join_limit": "no unique client write submission"
+          }
+        ]
+      },
+      {
+        "case": "Ddi20Case-261120-142409259798",
+        "mode": "native-modern-clear",
+        "etl_sha256": "230f5cacdda90a728e6ff5bf5208a3f67c416b7f85d717e67d8ee201c2edb84d",
+        "trace_finalized": true,
+        "complete_same_thread_signal_submit_wait_sequences": {
+          "draw": 1,
+          "dwm": 38
+        },
+        "successful_present_source_labels": [
+          {
+            "successful_kmt_presents": 1,
+            "source_allocation_labels": [
+              "A"
+            ]
+          }
+        ],
+        "kernel_written_allocation_records": 0,
+        "kernel_allocation_reference_records": 0,
+        "application_write_scheduler_receipts": [
+          {
+            "ordinal": 1,
+            "public_call_recorded": true,
+            "public_return_recorded": true,
+            "written_submissions": 1,
+            "kernel_pairs": true,
+            "submission_sequence": 1,
+            "two_distinct_fences": true,
+            "two_distinct_contexts": true,
+            "ingress_signal_retired": null,
+            "ingress_wait_retired": null,
+            "egress_signal_retired": true,
+            "egress_wait_retired": true,
+            "gpu_begin_ms_relative_to_public_entry": -48.353,
+            "gpu_end_ms_relative_to_public_entry": -46.24,
+            "scheduler_end_ms_relative_to_public_entry": -46.229
+          }
+        ]
+      },
+      {
+        "case": "Ddi20Case-261120-142509837272",
+        "mode": "native-modern-full",
+        "etl_sha256": "ef4d9ed654249f7156d4459947e28850c77fd1b35ebb8323996200911d6f6324",
+        "trace_finalized": false,
+        "complete_same_thread_signal_submit_wait_sequences": {
+          "draw": 4,
+          "dwm": 16
+        },
+        "successful_present_source_labels": [
+          {
+            "successful_kmt_presents": 1,
+            "source_allocation_labels": [
+              "A"
+            ]
+          },
+          {
+            "successful_kmt_presents": 1,
+            "source_allocation_labels": [
+              "B"
+            ]
+          }
+        ],
+        "kernel_written_allocation_records": 0,
+        "kernel_allocation_reference_records": 0,
+        "application_write_scheduler_receipts": [
+          {
+            "ordinal": 1,
+            "public_call_recorded": true,
+            "public_return_recorded": true,
+            "written_submissions": 1,
+            "kernel_pairs": true,
+            "submission_sequence": 1,
+            "two_distinct_fences": true,
+            "two_distinct_contexts": true,
+            "ingress_signal_retired": null,
+            "ingress_wait_retired": null,
+            "egress_signal_retired": true,
+            "egress_wait_retired": true,
+            "gpu_begin_ms_relative_to_public_entry": -49.584,
+            "gpu_end_ms_relative_to_public_entry": -44.54,
+            "scheduler_end_ms_relative_to_public_entry": -44.526
+          },
+          {
+            "ordinal": 2,
+            "public_call_recorded": true,
+            "public_return_recorded": true,
+            "written_submissions": 1,
+            "kernel_pairs": true,
+            "submission_sequence": 2,
+            "two_distinct_fences": true,
+            "two_distinct_contexts": true,
+            "ingress_signal_retired": null,
+            "ingress_wait_retired": null,
+            "egress_signal_retired": true,
+            "egress_wait_retired": true,
+            "gpu_begin_ms_relative_to_public_entry": null,
+            "gpu_end_ms_relative_to_public_entry": -0.696,
+            "scheduler_end_ms_relative_to_public_entry": -0.684
+          },
+          {
+            "ordinal": 3,
+            "public_call_recorded": true,
+            "public_return_recorded": false,
+            "written_submissions": 1,
+            "kernel_pairs": true,
+            "submission_sequence": 4,
+            "two_distinct_fences": true,
+            "two_distinct_contexts": true,
+            "ingress_signal_retired": null,
+            "ingress_wait_retired": null,
+            "egress_signal_retired": true,
+            "egress_wait_retired": true,
+            "gpu_begin_ms_relative_to_public_entry": -64.021,
+            "gpu_end_ms_relative_to_public_entry": -61.899,
+            "scheduler_end_ms_relative_to_public_entry": -61.881
+          }
+        ]
+      }
+    ],
+    "finding": "All retained application and DWM Vulkan submit returns had both flanking runtime operations on the same thread and sequence. For the final application write before the third Present, the GPU end was observed 61.899 ms before the client entry; the scheduler packet retired 61.881 ms before entry.",
+    "remaining_question": "The first two presented allocations were distinct. The archive contains no per-allocation Windows reference events that would establish the third presentation source or the completion of the DWM read of that allocation."
   }
 }

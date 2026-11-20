@@ -4638,6 +4638,369 @@
       "before_count": 11,
       "after_count": 11,
       "names_times_sizes_unchanged": true
+    },
+    "legacy_durable_umd_callback_control": {
+      "scope": "Qualification of a write-through user-mode receipt on the healthy legacy FLIP_SEQUENTIAL control and readback after a controlled reboot.",
+      "public_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "legacy_interface": [
+        "0x000b000f"
+      ],
+      "dxgi_table": "DXGI1_2_DDI_BASE_FUNCTIONS.pfnPresent",
+      "wdk_version_check": {
+        "D3D11_1_DDI_INTERFACE_VERSION": "0x000b000f",
+        "D3D10_0_7_DDI_INTERFACE_VERSION": "0x000a0009"
+      },
+      "unchanged_kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+      "comparison_arm64_umd_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+      "signed_observation_umd_sha256": "d93efe9852ff7821ed4590bdf47fc6f4948fa810e108decf64dbc50e3d6ee816",
+      "source_delta_sha256": "3bf3a68978a6c60bcbbc5058b481da6eb01e0a3090cce8bfdb5ba0ea7a614867",
+      "comparison_rebuilt_PE_sections_differing": [
+        ".buildid"
+      ],
+      "code_0_one_use_desktop": {
+        "boot": 83327,
+        "power": "Online",
+        "consumed_token_value": 0,
+        "dwm_loaded_components_sha256": {
+          "tg_d3d_arm64.dll": "d93efe9852ff7821ed4590bdf47fc6f4948fa810e108decf64dbc50e3d6ee816",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+        }
+      },
+      "public_control": {
+        "effect": "FlipSequential",
+        "public_return": [
+          "0x00000000"
+        ],
+        "device_reason_before": "0x00000000",
+        "device_reason_after": "0x00000000",
+        "normal_process_exit": 0,
+        "dwm_continuity": true,
+        "result_archive_sha256": "7427f347f7a2213e8ba0320ae5549a9e4198b12a6c67ecfe849ca97de040541d",
+        "journal_file_sha256": "3d042191ed06231ca3a78e4551d76f5574502b6f7d750be8adf96fbe27e1e737",
+        "qpc_frequency": 19200000,
+        "records": [
+          {
+            "stage": "UMD entry",
+            "hr": "8000000a",
+            "qpc": 5082383447
+          },
+          {
+            "stage": "before invoking Windows PresentCb",
+            "hr": "8000000a",
+            "qpc": 5083723433
+          },
+          {
+            "stage": "Windows PresentCb returned",
+            "hr": "00000000",
+            "qpc": 5083797550
+          },
+          {
+            "stage": "UMD return",
+            "hr": "00000000",
+            "qpc": 5085828929
+          }
+        ],
+        "drawing_pid": 6184,
+        "drawing_thread": 6296,
+        "public_qpc": [
+          5082206366,
+          5087692246
+        ],
+        "across_boot_readback": {
+          "before_boot": 83327,
+          "after_boot": 83414,
+          "sha256": "3d042191ed06231ca3a78e4551d76f5574502b6f7d750be8adf96fbe27e1e737"
+        },
+        "write_mode": "FILE_FLAG_WRITE_THROUGH and FlushFileBuffers requested after each complete identity-bound record."
+      },
+      "standalone_windows_file_control": {
+        "before_boot": 83151,
+        "after_boot": 83239,
+        "records": 4,
+        "identical_sha256": "b7e8a864bf80e8ebcba421e46ab2b7490972136d4831ba18bc1b02267f53eb48"
+      },
+      "original_crash_records": [
+        {
+          "case": "Ddi20Case-261120-122121366257",
+          "boot": 82058,
+          "recovery_boot": 82128,
+          "public_call_qpc": 13070969930,
+          "public_journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+          "streams": {
+            "evidence/scene/video.etl": {
+              "sha256": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+              "qpc_frequency": 19200000,
+              "last_provider_ms_relative_to_public_call": {
+                "windows_graphics/application": -264.515,
+                "windows_graphics/other": -18.181,
+                "tgd3d/application": -259.932,
+                "miniport/other": -47.083,
+                "tgd3d/other": -18.303
+              },
+              "after_call_counts": {},
+              "miniport_event_ids": {
+                "2": 7
+              },
+              "damaged_buffers": []
+            },
+            "evidence/miniport.etl": {
+              "sha256": "448d78b1d7806769b77d9bc745c65b7cf07e038e1451f8f7fcec2ab1f28bf7df",
+              "qpc_frequency": 19200000,
+              "last_provider_ms_relative_to_public_call": {},
+              "after_call_counts": {},
+              "miniport_event_ids": {},
+              "damaged_buffers": []
+            }
+          }
+        },
+        {
+          "case": "Ddi20Case-261120-122937785753",
+          "boot": 82221,
+          "recovery_boot": 82289,
+          "public_call_qpc": 2352403757,
+          "public_journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+          "streams": {
+            "evidence/scene/video.etl": {
+              "sha256": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+              "qpc_frequency": 19200000,
+              "last_provider_ms_relative_to_public_call": {
+                "windows_graphics/application": -127.05,
+                "windows_graphics/other": -27.066,
+                "tgd3d/application": -280.935,
+                "miniport/other": -94.704,
+                "tgd3d/other": -23.846
+              },
+              "after_call_counts": {},
+              "miniport_event_ids": {
+                "2": 7
+              },
+              "damaged_buffers": []
+            },
+            "evidence/miniport.etl": {
+              "sha256": "ae2b064bc83935332746787fdd42cbc661ed4291020ff93a10e167f254bc4fa0",
+              "qpc_frequency": 19200000,
+              "last_provider_ms_relative_to_public_call": {},
+              "after_call_counts": {},
+              "miniport_event_ids": {},
+              "damaged_buffers": []
+            }
+          }
+        },
+        {
+          "case": "Ddi20Case-261120-123625091734",
+          "boot": 82382,
+          "recovery_boot": 82448,
+          "public_call_qpc": 2361927374,
+          "public_journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+          "streams": {
+            "evidence/scene/video.etl": {
+              "sha256": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+              "qpc_frequency": 19200000,
+              "last_provider_ms_relative_to_public_call": {
+                "windows_graphics/application": -403.414,
+                "windows_graphics/other": -25.203,
+                "tgd3d/application": -307.695,
+                "tgd3d/other": -22.624,
+                "miniport/other": -84.342
+              },
+              "after_call_counts": {},
+              "miniport_event_ids": {
+                "2": 11
+              },
+              "damaged_buffers": []
+            },
+            "evidence/miniport.etl": {
+              "sha256": "6457ad2897be7679e1a140cb12b6c51f93167ad6a31f6cca2b2a006fd0b65cf6",
+              "qpc_frequency": 19200000,
+              "last_provider_ms_relative_to_public_call": {},
+              "after_call_counts": {},
+              "miniport_event_ids": {},
+              "damaged_buffers": []
+            }
+          }
+        }
+      ],
+      "historical_kernel_control": {
+        "source": "Previous signed diagnostic KMD and the existing write-through real-time ETW collector.",
+        "previous_accepted_kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "instrumented_kmd": "9dc7e2e89694ada8d4bf627d44e52af5e543cf5f102fb35333d3eabed89e7aff",
+        "kmd_in_original_1938eb32_trials": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+        "cases": [
+          {
+            "case": "ReceiptCase-261120-062010832307",
+            "archive_sha256": "dc9cc8a3b498c79614458cac867549a7353e3187dc7f5cda317ffef2c17b3183",
+            "live_file_sha256": "915e3bd7204023eae90cb6459230953d5cd0bbfd9f1903c09426c4b448696346",
+            "boot": 78442,
+            "recovered_boot": 78606,
+            "live_file_records": [
+              {
+                "role": "adapter_query",
+                "operation": 3,
+                "phase": 2,
+                "status": "00000000",
+                "count": 2
+              },
+              {
+                "role": "drawing_process",
+                "operation": 3,
+                "phase": 2,
+                "status": "00000000",
+                "count": 3
+              },
+              {
+                "role": "dwm",
+                "operation": 1,
+                "phase": 1,
+                "status": "00000103",
+                "count": 5
+              },
+              {
+                "role": "dwm",
+                "operation": 1,
+                "phase": 2,
+                "status": "00000000",
+                "count": 5
+              }
+            ],
+            "drawing_process_present_entries": 0,
+            "dwm_present_entries": 5,
+            "dwm_present_returns": 5
+          },
+          {
+            "case": "ReceiptCase-261120-064042612941",
+            "archive_sha256": "35cf9c685de34f7df56f62ae067c1841176301153e86bba768811ced7d9a33fe",
+            "live_file_sha256": "e3135f82adbecb8683fe42fc82639757e6f736eb32f48090a14b463293a0b028",
+            "boot": 78769,
+            "recovered_boot": 78928,
+            "live_file_records": [
+              {
+                "role": "adapter_query",
+                "operation": 3,
+                "phase": 2,
+                "status": "00000000",
+                "count": 2
+              },
+              {
+                "role": "drawing_process",
+                "operation": 3,
+                "phase": 2,
+                "status": "00000000",
+                "count": 3
+              },
+              {
+                "role": "dwm",
+                "operation": 1,
+                "phase": 1,
+                "status": "00000103",
+                "count": 10
+              },
+              {
+                "role": "dwm",
+                "operation": 1,
+                "phase": 2,
+                "status": "00000000",
+                "count": 9
+              }
+            ],
+            "drawing_process_present_entries": 0,
+            "dwm_present_entries": 10,
+            "dwm_present_returns": 9
+          },
+          {
+            "case": "ReceiptCase-261120-070036400022",
+            "archive_sha256": "36719208a6cbd39937c164048cc24ed55e327b1c7bfe351179b0baea41ee20f9",
+            "live_file_sha256": "d97ac8a21d5516bef7a78405b49561c51bb8fdfdc39ba0c44616c5ac6ba5cfb1",
+            "boot": 79099,
+            "recovered_boot": 79254,
+            "live_file_records": [
+              {
+                "role": "adapter_query",
+                "operation": 3,
+                "phase": 2,
+                "status": "00000000",
+                "count": 2
+              },
+              {
+                "role": "drawing_process",
+                "operation": 3,
+                "phase": 2,
+                "status": "00000000",
+                "count": 3
+              },
+              {
+                "role": "dwm",
+                "operation": 1,
+                "phase": 1,
+                "status": "00000103",
+                "count": 4
+              },
+              {
+                "role": "dwm",
+                "operation": 1,
+                "phase": 2,
+                "status": "00000000",
+                "count": 4
+              }
+            ],
+            "drawing_process_present_entries": 0,
+            "dwm_present_entries": 4,
+            "dwm_present_returns": 4
+          }
+        ],
+        "limit": "Persisted entries prove that the kernel receipt channel can survive an actual restart. The recovered Present entries attributed to DWM do not identify the failing drawing process. Event delivery can lag the driver."
+      },
+      "observations": [
+        "The unchanged public application reached the legacy UMD entry and the real Windows callback returned in the positive case.",
+        "The record immediately before calling Windows identifies the caller boundary. A callback return or independently attributable downstream record is needed to prove execution inside Windows.",
+        "This user-mode recorder covers the DXGI 1.2 normal Present slot. Missing records alone cannot exclude a different DXGI DDI such as Blt or Blt1, or buffered kernel events.",
+        "The original three interruptions retain no graphics-driver record after the application call. Their last internal boundary remains unknown.",
+        "The older KMD observation package has a different kernel hash. Its write-through ETW consumer retained kernel Present records on DWM threads across actual restarts. This does not establish an application KMD entry in the original three cases."
+      ],
+      "controlled_boot_events": [
+        {
+          "id": 1074,
+          "record": 83223
+        },
+        {
+          "id": 12,
+          "record": 83239
+        },
+        {
+          "id": 1074,
+          "record": 83311
+        },
+        {
+          "id": 12,
+          "record": 83327
+        },
+        {
+          "id": 1074,
+          "record": 83397
+        },
+        {
+          "id": 12,
+          "record": 83414
+        }
+      ],
+      "recovery": {
+        "boot": 83414,
+        "problem_code": 0,
+        "power": "Online",
+        "permanent_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25",
+        "loaded_components_sha256": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "remaining_test_tasks": 0,
+        "remaining_test_processes": 0,
+        "remaining_test_directories": 0,
+        "observation_package_removed": true
+      },
+      "selected_as_gpu_baseline": false
     }
   },
   "wddm20_first_present_driver_dispatch_20261120": {
