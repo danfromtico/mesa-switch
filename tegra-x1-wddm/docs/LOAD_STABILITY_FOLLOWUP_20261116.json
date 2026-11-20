@@ -5227,6 +5227,48 @@
         },
         "scope": "This order is relative to the selected events. Windows may execute additional operations. The native flip and software copy controls have different drawing backends."
       }
+    },
+    "public_idle_status_on_accepted_profile": {
+      "scope": "Two fresh native GM20B devices tested status after their respective windows left the minimized state. Both use the system D3D11 FL11_0 entry, 640x360 B8G8R8A8_UNORM, two buffers, and the same selected ARM64 driver. The only Present call in the signed client always sets DXGI_PRESENT_TEST.",
+      "signed_client_sha256": "74eedc59d33c6dff791ac6434d5d369862af40f31319f772d5ea9611cd3b0a03",
+      "source_sha256": "1ab0d174c1ca5bd406795487bf25aa6f287d3381bb5862dcf2f28b06103f9673",
+      "independent_review_sha256": "506464649081f265731a114cecdbe00ef969999a70715fffec1137cd587d0591",
+      "boot": 84029,
+      "dwm": 1420,
+      "process": 852,
+      "luid": "000000000000547e",
+      "power": "Online",
+      "gpu_code": 0,
+      "process_exit": 0,
+      "kernel_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+      "process_modules_sha256": {
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "case_receipt_sha256": "f60a59e9a7503cf3ea0559727b689130b8bec2478b8d91751e2af7bc615bd242",
+      "observations": {
+        "flip-sequential": {
+          "test_present_hresult": "0x00000000",
+          "removed_reason_before": "0x00000000",
+          "removed_reason_after": "0x00000000",
+          "last_present_count_hresult": "0x00000000",
+          "count_before": 0,
+          "count_after": 0
+        },
+        "sequential": {
+          "test_present_hresult": "0x00000000",
+          "removed_reason_before": "0x00000000",
+          "removed_reason_after": "0x00000000",
+          "last_present_count_hresult": "0x00000000",
+          "count_before": 0,
+          "count_after": 0
+        }
+      },
+      "temporary_case_removed": true,
+      "interpretation": "Windows accepted a visibility/status query on the original sequential model on the daily driver. Testing status alone does not exercise a real presentation, the DWM redirection copy or panel scanout. The original first-frame failure remains open.",
+      "contract": "https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/dxgi-present"
     }
   },
   "wddm20_first_present_driver_dispatch_20261120": {
@@ -5286,5 +5328,486 @@
     "restored_boot_record": 82805,
     "test_tasks_remaining": 0,
     "candidate_removed": true
+  },
+  "native_dxgi_colour_copy_and_shared_destination_20261120": {
+    "scope": "Normal legacy ARM64 DXGI Blt and Blt1 on GM20B, including an independent CPU pixel reference, the selected native driver, and a public flip window.",
+    "open_fault": "GM20B-DXGI-SRGB-COPY",
+    "baseline_arm64_umd_sha256": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+    "signed_candidate_arm64_umd_sha256": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+    "native_nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "unchanged_kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "candidate_source_patch_sha256": "8d49750eed5bb245b24b5f219a0527b41e656756081d98fbdfa4bd264b864b14",
+    "local_candidate_commit": "e6852733640f4dc114042796477671ca54c1f3c6",
+    "combined_source_and_regression_patch_sha256": "390104c64fca6f01f4d80198ee130800e8465c7e917e3c42a2f4840485aa8b4f",
+    "change": "An unscaled same-format or compatible sRGB-to-UNORM blit transfers the stored bytes. Filtered encoded data passes through an unsigned-normalized image. A transfer-only linear destination receives one final region copy. A matching explicit-pitch NVK color target retains the private tiled-shadow blit. Scratch storage follows submission retirement.",
+    "independent_review": {
+      "model": "gemini-4-neon-xhigh",
+      "effort": "xhigh",
+      "final_review_sha256": "0ed4ca90102e3871a300152fb2da244ff91367d5e0dc28caec239bf11ea91554",
+      "test_integration_review_sha256": "69e1e141ec2b0a12d6874edf8bd093c3d70b86e008552fef13e227960e69253c"
+    },
+    "host_controls": {
+      "original_full_groups": 79,
+      "candidate_release_full_groups": 79,
+      "integration_branch_candidate_groups": 84,
+      "transfer_only_mock_before": {
+        "unsupported_blits": 1,
+        "raw_copy_regions": 0
+      },
+      "transfer_only_mock_candidate": {
+        "unsupported_blits": 0,
+        "raw_copy_regions": 1
+      },
+      "scaling": "Checks optimal scratch allocation failure, interior copy bounds, border preservation and retirement after completion.",
+      "integration_source_x86_cpu_groups": 84
+    },
+    "physical_format_query": {
+      "case_receipt_sha256": "e34383e016ade32917b59505b28b82a182719ab97cb75f1a8cc1ec92c2866328",
+      "ordinary_linear_bgra8_unorm_features": "0x0001d403",
+      "optimal_bgra8_unorm_features": "0x0001dd83",
+      "b8g8r8a8_unorm_and_r8g8b8a8_unorm": {
+        "ordinary_linear_with_color_attachment": "VK_ERROR_FORMAT_NOT_SUPPORTED",
+        "private_win32_pitch_256_with_color_attachment": "VK_SUCCESS",
+        "ordinary_linear_without_color_attachment": "VK_SUCCESS"
+      },
+      "qualification": "The paired NVK ICD provides an explicit-pitch layout with a tiled color shadow. Public linear masks alone do not establish that a real redirected surface lacks blit destination support."
+    },
+    "physical_comparisons": {
+      "baseline_optimal": {
+        "case_sha256": "5ab06a163490d1d52d65d5d229667f4306f5ed2a915ffc1c83bab7043ced1250",
+        "umd_sha256": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+        "case_result_sha256": "4b4267b14941544d864a9b1028f01ad51f0a35485c01917c0fe75938645102c6",
+        "boot": 83765,
+        "adapter_luid": "0000000000005aaf",
+        "process": 3124,
+        "dwm": 1396,
+        "process_exit": 4,
+        "pitch_bytes": null,
+        "pixels_checked_per_case": 1073,
+        "guard_errors": 0,
+        "pixels": {
+          "whole": {
+            "slot": "Blt",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "encoded": {
+            "slot": "Blt1",
+            "wrong_pixels": 88,
+            "max_channel_error": 73
+          },
+          "encoded_scale_convert": {
+            "slot": "Blt1",
+            "wrong_pixels": 748,
+            "max_channel_error": 74
+          }
+        },
+        "first_wrong_rgba": {
+          "encoded": {
+            "x": 4,
+            "y": 5,
+            "expected": "5977b9a1",
+            "observed": "1a2f7ca1"
+          },
+          "encoded_scale_convert": {
+            "x": 1,
+            "y": 2,
+            "expected": "325ea086",
+            "observed": "081d5a86"
+          }
+        }
+      },
+      "candidate_optimal": {
+        "case_sha256": "5ab06a163490d1d52d65d5d229667f4306f5ed2a915ffc1c83bab7043ced1250",
+        "umd_sha256": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+        "case_result_sha256": "7130639bf345d26e9375fda79bc7246aeac29e67c33707bc06ae298aa67a9d26",
+        "boot": 83765,
+        "adapter_luid": "0000000000005aaf",
+        "process": 3400,
+        "dwm": 1396,
+        "process_exit": 0,
+        "pitch_bytes": null,
+        "pixels_checked_per_case": 1073,
+        "guard_errors": 0,
+        "pixels": {
+          "whole": {
+            "slot": "Blt",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "encoded": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "encoded_scale_convert": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 1
+          }
+        }
+      },
+      "shared_srv": {
+        "case_sha256": "5ab06a163490d1d52d65d5d229667f4306f5ed2a915ffc1c83bab7043ced1250",
+        "umd_sha256": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+        "case_result_sha256": "57678c7612e013aefcc592f5733bbefdb26d5aa83895dd1235311371ccc4d44b",
+        "boot": 83765,
+        "adapter_luid": "0000000000005aaf",
+        "process": 2816,
+        "dwm": 1396,
+        "process_exit": 0,
+        "pitch_bytes": 256,
+        "pixels_checked_per_case": 1073,
+        "guard_errors": 0,
+        "pixels": {
+          "whole": {
+            "slot": "Blt",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "subrectangle": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "encoded": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "scale": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 1
+          },
+          "encoded_scale_convert": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 1
+          },
+          "overlap": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "pending_clear": {
+            "slot": "Blt",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          }
+        }
+      },
+      "shared_render_target": {
+        "case_sha256": "22c9e927a9396836a8669c88d7f6aa16c515d41a0243f753cb91239ad042139b",
+        "umd_sha256": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+        "case_result_sha256": "fd0c7adec5094c1134a4365eb0b0175ad34d77cad16896c0d3413a1eadf1988f",
+        "boot": 83765,
+        "adapter_luid": "0000000000005aaf",
+        "process": 7544,
+        "dwm": 1396,
+        "process_exit": 0,
+        "pitch_bytes": 256,
+        "pixels_checked_per_case": 1073,
+        "guard_errors": 0,
+        "pixels": {
+          "whole": {
+            "slot": "Blt",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "subrectangle": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "encoded": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "scale": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 1
+          },
+          "encoded_scale_convert": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 1
+          },
+          "overlap": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "pending_clear": {
+            "slot": "Blt",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          }
+        }
+      },
+      "system_selected_shared_srv": {
+        "case_sha256": "5ab06a163490d1d52d65d5d229667f4306f5ed2a915ffc1c83bab7043ced1250",
+        "umd_sha256": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+        "case_result_sha256": "3d6236d9db6bc899cdac1fa875880104e7960a6d47cba4e4a2470acaba1ef616",
+        "boot": 83941,
+        "adapter_luid": "0000000000005b47",
+        "process": 7836,
+        "dwm": 1432,
+        "process_exit": 0,
+        "pitch_bytes": 256,
+        "pixels_checked_per_case": 1073,
+        "guard_errors": 0,
+        "pixels": {
+          "whole": {
+            "slot": "Blt",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "subrectangle": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "encoded": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "scale": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 1
+          },
+          "encoded_scale_convert": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 1
+          },
+          "overlap": {
+            "slot": "Blt1",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          },
+          "pending_clear": {
+            "slot": "Blt",
+            "wrong_pixels": 0,
+            "max_channel_error": 0
+          }
+        }
+      }
+    },
+    "pixel_criterion": "Each case reads a 37 by 29 image. Exact RGBA is required outside a scaled region and for unscaled copies. Filtered interior channels allow a one-unit rounding error.",
+    "one_use_boot": {
+      "prior_boot": 83765,
+      "closed_boot_code_43": 83852,
+      "candidate_boot_code_0": 83941,
+      "once_only_token_consumed": true,
+      "dwm_loaded_sha256": {
+        "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+      }
+    },
+    "system_public_fl11_1_draw": {
+      "client_sha256": "1f45a6784afba24396a799ee8d7b1b6830962ec057a4ff555de650ba0b93728f",
+      "receipt_sha256": "0d2ac6e4bab9d24b76c5fe61b72e4649351b829378501cea42958635654197c7",
+      "process": 5124,
+      "dwm": 1432,
+      "boot": 83941,
+      "adapter_luid": "0000000000005b47",
+      "exit": 0,
+      "requested": [
+        "D3D_FEATURE_LEVEL_11_1"
+      ],
+      "actual": "D3D_FEATURE_LEVEL_11_1",
+      "foreground_pixels": 280,
+      "background_pixels": 309,
+      "wrong_pixels": 0
+    },
+    "system_public_flip_window": {
+      "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "receipt_sha256": "b34626aeb27d59bef598ca90a473f9bd63623a7a5a47a9f9cd781a2ec141cc72",
+      "process": 2968,
+      "dwm": 1432,
+      "boot": 83941,
+      "adapter_luid": "0000000000005b47",
+      "exit": 0,
+      "first_capture": {
+        "boot": 83941,
+        "process_exit": 0,
+        "public_present_return": "S_OK",
+        "verified_clear_marker": true,
+        "collector_status": "The program redirected stdout and stderr into its evidence directory. The controller initially read the empty pipes. The subsequent case archived both files and the journal before cleanup."
+      },
+      "effect": "FLIP_SEQUENTIAL",
+      "requested_feature_level": "11_0",
+      "back_buffer": "B8G8R8A8_UNORM",
+      "application_clears": 1,
+      "presents": 1,
+      "clear_matched_screen_samples": 5,
+      "screen_samples": 5,
+      "api_return": "S_OK",
+      "compositor_flush": "S_OK",
+      "normal_resource_release": true
+    },
+    "original_sequential_backbuffers": {
+      "signed_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "client_source_sha256": "b7ba60207ddaa6372edcc705bf76ae627c3d279b3b85648ef6b92fb28df988a3",
+      "application_back_buffer": "DXGI_FORMAT_B8G8R8A8_UNORM",
+      "back_buffer_count": 2,
+      "verified_model": "DXGI_SWAP_EFFECT_SEQUENTIAL",
+      "application_writes_before_first_present": 0,
+      "cases": [
+        {
+          "boot": 82058,
+          "next_boot": 82128,
+          "public_call_qpc": 13070969930,
+          "journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a"
+        },
+        {
+          "boot": 82221,
+          "next_boot": 82289,
+          "public_call_qpc": 2352403757,
+          "journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f"
+        },
+        {
+          "boot": 82382,
+          "next_boot": 82448,
+          "public_call_qpc": 2361927374,
+          "journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd"
+        }
+      ],
+      "interpretation": "Each original run read back the requested format and model before its empty first Present. The sRGB source needed for the measured colour conversion error was absent from the application back buffer. The exact internal redirection resource and its DDI were not captured at the crash boundary."
+    },
+    "recovery": {
+      "boot": 84029,
+      "gpu_code": 0,
+      "power": "Online",
+      "display_inf": "oem19.inf",
+      "permanent_package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25",
+      "seven_verified_components": {
+        "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046"
+      },
+      "case_directories_and_tasks_removed": 13,
+      "system_staging_removed": true,
+      "system_events": [
+        {
+          "record": 83836,
+          "provider": "User32",
+          "utc": "2026-11-20T17:07:04.6252209Z",
+          "id": 1074,
+          "reason": "SwitchWOA close native gate with original UMD before scoped WDDM comparison"
+        },
+        {
+          "record": 83852,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T17:07:29.4328889Z",
+          "id": 12,
+          "reason": {}
+        },
+        {
+          "record": 83924,
+          "provider": "User32",
+          "utc": "2026-11-20T17:12:22.4419393Z",
+          "id": 1074,
+          "reason": "SwitchWOA controlled trial boot for application-scoped WDDM comparison"
+        },
+        {
+          "record": 83941,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T17:12:38.8002756Z",
+          "id": 12,
+          "reason": {}
+        },
+        {
+          "record": 84012,
+          "provider": "User32",
+          "utc": "2026-11-20T17:22:23.0163634Z",
+          "id": 1074,
+          "reason": "SwitchWOA controlled restore boot for application-scoped WDDM comparison"
+        },
+        {
+          "record": 84029,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T17:22:41.2118874Z",
+          "id": 12,
+          "reason": {}
+        }
+      ]
+    },
+    "promotion": "Local candidate. The presentation-related restart remains open. No new baseline selection or permanent permission for this candidate.",
+    "references": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi_ddi_base_functions",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi_ddi_arg_blt1",
+      "https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBlitImage.html",
+      "https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyImage.html"
+    ],
+    "integration_source_cross_builds": {
+      "x86": {
+        "machine": "IMAGE_FILE_MACHINE_I386",
+        "translation_units": 30,
+        "exports": [
+          "OpenAdapter",
+          "OpenAdapter10",
+          "OpenAdapter10_2"
+        ],
+        "unsigned_dll_sha256": "c8b16a9b6b16ffebe917284cf285a9014aa57ff4189d3c2098f4926d77c2f700",
+        "device_tested": false
+      },
+      "arm64ec": {
+        "machine": "IMAGE_FILE_MACHINE_ARM64EC",
+        "translation_units": 30,
+        "exports": [
+          "OpenAdapter",
+          "OpenAdapter10",
+          "OpenAdapter10_2"
+        ],
+        "unsigned_dll_sha256": "9ba59252c2acf0b10e6315098b849f4735567fa97c99ff10bb8a107e729d9023",
+        "device_tested": false
+      },
+      "x64": {
+        "machine": "IMAGE_FILE_MACHINE_AMD64",
+        "translation_units": 30,
+        "exports": [
+          "OpenAdapter",
+          "OpenAdapter10",
+          "OpenAdapter10_2"
+        ],
+        "unsigned_dll_sha256": "a0efe0c01e47f2eb0cbdf86d2f793412b391ca0db099458154fd4ae31e403bcf",
+        "device_tested": false
+      }
+    },
+    "release_reconstruction": {
+      "production_units": 30,
+      "baseline_section_differences": [
+        ".buildid"
+      ],
+      "source_reference_sha256": "e22a9b1fd3e0723cacbd1e1e44284342ee63a16e63f52a9c2773b64140f766e0"
+    },
+    "related_open_restart": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+    "repository_and_device_fault_gate": {
+      "ledger_sha256": "9dcabc90356b7805d849a276df37845e9d3912e72b063559e5fdece92c863fb4",
+      "protected_manifest_sha256": "fd131c86dd7a4b3a6987337977239cb5f578886d22b88e5ae66f3016bcd7907c",
+      "open_fault_count": 6,
+      "restored_profile_boot": 84029,
+      "gpu_code": 0,
+      "verified_permanent_components": 7,
+      "dwm_process": 1420,
+      "installed_policy_receipt_sha256": "2fac3b27f4b61b6713e1153f6956866fb4b837c20801132bd5c04af964c9bcd7",
+      "guarded_restore_receipt_sha256": "071b227140582f5a50c93b2344460903a427e1e84378568e8356c613dda8bfdb",
+      "denial_receipt_sha256": "aa2305994a1f6dd7fbdd3e0e60d9228311181f6eb348f84ab02926d8c92d3118",
+      "synthetic_presentation_qualification_blocked": true,
+      "listed_measured_color_fault": true,
+      "installed_gpu_unchanged": true
+    }
   }
 }

@@ -95,6 +95,23 @@
       "daily_workaround": "Use confirmed working connectivity for remote operation. Keep startup reliability out of acceptance until it is tested.",
       "close_when": "Identify the startup failure and qualify the corrected driver on repeated Windows boots with actual network access.",
       "resolution": null
+    },
+    {
+      "id": "GM20B-DXGI-SRGB-COPY",
+      "status": "open",
+      "kind": "incorrect-rendering",
+      "affected_scopes": [
+        "presentation",
+        "dxgi-color-copy"
+      ],
+      "trigger": "Accepted ARM64 tgd3d 57dc16b4 on GM20B, legacy DXGI Blt1, sRGB source and UNORM destination. The identical test on optimal images changed all 88 pixels in a rectangular copy and all 748 interior pixels in a scaled channel conversion.",
+      "evidence": [
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_dxgi_colour_copy_and_shared_destination_20261120"
+      ],
+      "cause": "The unrotated path uses a Vulkan image blit that decodes sRGB channel values during conversion to UNORM. The signed candidate retained the encoded values on the same hardware and executable. The three logged empty sequential restarts used UNORM application buffers.",
+      "daily_workaround": "In a client that can choose its copy route, the accepted driver passed the measured one-to-one B8G8R8A8_UNORM copy between optimal surfaces. Keep sRGB-to-UNORM presentation copies in diagnostics for clients without a separately qualified option.",
+      "close_when": "On candidate components eligible for presentation promotion, repeat the original encoded-region and filtered-channel cases on AC in three consecutive runs. Verify pixel values, untouched borders, normal exit and the desktop. Record the adopted source, loaded component hashes and actual presentation output.",
+      "resolution": null
     }
   ],
   "independent_qualifications": []
