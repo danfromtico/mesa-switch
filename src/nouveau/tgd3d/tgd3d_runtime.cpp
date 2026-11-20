@@ -1028,13 +1028,30 @@ HRESULT runtime_shared_tiled_create(Device *dev, const Resource *res,
 bool runtime_is_tiled_shared(const RuntimeResource *p) { return p && p->tiled_shared; }
 UINT runtime_shared_layers(const RuntimeResource *p) { return runtime_is_tiled_shared(p) ? p->tiled_layout.array_size : 1; }
 
+/* A windowed blit can hand its back buffer directly to the Windows
+ * PresentCb. Give a simple BGRA render/present target the allocation's row
+ * pitch and resource lifetime even when the runtime did not request sharing. */
+bool runtime_linear_back_buffer(const Device *dev, const D3D10DDIARG_CREATERESOURCE *desc)
+{
+   return dev->nvk && (dev->interfaceVersion == D3D11_1_DDI_INTERFACE_VERSION ||
+                       dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION) &&
+          !desc->pPrimaryDesc && desc->ResourceDimension == D3D10DDIRESOURCE_TEXTURE2D &&
+          desc->Usage == D3D10_DDI_USAGE_DEFAULT && desc->Format == DXGI_FORMAT_B8G8R8A8_UNORM &&
+          desc->BindFlags == (D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_PRESENT) &&
+          !(desc->MiscFlags & ~D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT) && !desc->MapFlags &&
+          desc->pMipInfoList && desc->pMipInfoList[0].TexelDepth == 1 &&
+          desc->MipLevels == 1 && desc->ArraySize == 1 &&
+          desc->SampleDesc.Count == 1 && !desc->SampleDesc.Quality;
+}
+
 HRESULT runtime_shared_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *desc,
                               D3D10DDI_HRTRESOURCE runtime, RuntimeResource **out, UINT *pitch)
 {
    *out = nullptr;
    if (!desc->pMipInfoList || desc->pPrimaryDesc ||
        desc->ResourceDimension != D3D10DDIRESOURCE_TEXTURE2D ||
-       !(desc->MiscFlags & (D3D10_DDI_RESOURCE_MISC_SHARED | D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) ||
+       (!(desc->MiscFlags & (D3D10_DDI_RESOURCE_MISC_SHARED | D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) &&
+        !runtime_linear_back_buffer(dev, desc)) ||
        (desc->MiscFlags & ~(D3D10_DDI_RESOURCE_MISC_SHARED |
                             D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT |
                             D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) || desc->MapFlags ||
