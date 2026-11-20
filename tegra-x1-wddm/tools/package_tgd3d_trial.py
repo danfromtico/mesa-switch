@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import zipfile
 from build_display_acpi import validate_table
+from package_graphics_policy import stage_graphics_policy
 
 
 def identity(path):
@@ -239,6 +240,8 @@ def main():
         for file in (root / "tegra-x1-wddm/tools/tgd3d-default").iterdir():
             if file.is_file():
                 shutil.copyfile(file, args.out / file.name)
+    if args.default_start:
+        manifest["graphics_policy_sha256"] = stage_graphics_policy(root, args.out)
     licenses = args.out / "licenses"
     licenses.mkdir()
     for source, target in ((root / "docs/license.rst", "Mesa.txt"),

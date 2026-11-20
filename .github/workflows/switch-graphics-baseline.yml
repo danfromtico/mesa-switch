@@ -1,0 +1,63 @@
+name: Switch graphics baseline gate
+
+on:
+  pull_request:
+    branches: [tgd3d-vulkan]
+    paths:
+      - '.github/workflows/switch-graphics-baseline.yml'
+      - 'tegra-x1-wddm/docs/**'
+      - 'tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1'
+      - 'tegra-x1-wddm/tools/package_graphics_policy.py'
+      - 'tegra-x1-wddm/tools/package_tgd3d_trial.py'
+      - 'tegra-x1-wddm/tools/check_graphics_baseline_push.py'
+      - 'tegra-x1-wddm/tools/tgd3d-default/**'
+  push:
+    branches: [tgd3d-vulkan]
+    paths:
+      - '.github/workflows/switch-graphics-baseline.yml'
+      - 'tegra-x1-wddm/docs/**'
+      - 'tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1'
+      - 'tegra-x1-wddm/tools/package_graphics_policy.py'
+      - 'tegra-x1-wddm/tools/package_tgd3d_trial.py'
+      - 'tegra-x1-wddm/tools/check_graphics_baseline_push.py'
+      - 'tegra-x1-wddm/tools/tgd3d-default/**'
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate tracked faults and test the guard
+        shell: pwsh
+        run: |
+          ./tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1 -Action CheckLedger
+          ./tegra-x1-wddm/tools/tgd3d-default/tests/Test-BaselinePromotion.ps1
+          python ./tegra-x1-wddm/tools/tgd3d-default/tests/test_baseline_publication.py
+          if ($LASTEXITCODE) { throw 'Baseline Git publication contracts failed' }
+      - name: Verify any newly selected baseline
+        shell: pwsh
+        env:
+          PREVIOUS: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if ($env:PREVIOUS -match '^[0-9a-f]{40}$' -and $env:PREVIOUS -ne ('0'*40)) {
+            $checker='tegra-x1-wddm/tools/check_graphics_baseline_push.py'
+            $previousChecker=git ls-tree --name-only $env:PREVIOUS -- $checker
+            if ($LASTEXITCODE) { throw 'Cannot inspect the previous branch tip' }
+            if ($previousChecker) {
+              $trusted=Join-Path $env:RUNNER_TEMP 'switch-graphics-baseline-push.py'
+              python -c "import pathlib, subprocess, sys; pathlib.Path(sys.argv[1]).write_bytes(subprocess.check_output(['git', 'show', sys.argv[2]]))" $trusted "$($env:PREVIOUS):$checker"
+              if ($LASTEXITCODE) { throw 'Cannot read the previous committed checker' }
+              "HEAD $env:GITHUB_SHA refs/heads/tgd3d-vulkan $env:PREVIOUS" | python $trusted
+              if ($LASTEXITCODE) { throw 'A commit in the proposed history failed the baseline gate' }
+            } else {
+              $transitions=@(git rev-list "$($env:PREVIOUS)..$env:GITHUB_SHA" -- tegra-x1-wddm/docs/open-faults.json tegra-x1-wddm/docs/graphics-baseline.json)
+              if ($LASTEXITCODE -or $transitions.Count) { throw 'Install the first verifier separately from a change in accepted policy data' }
+              ./tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1 -Action CheckPublication
+            }
+          } else { ./tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1 -Action CheckPublication }
+          exit 0

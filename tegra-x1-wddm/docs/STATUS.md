@@ -6,6 +6,8 @@ The accepted component hashes and open faults are tracked in the repository. Nat
 
 The DXGI 1.3 and 1.4 Present1 tables forward optional dirty regions to the runtime through its original context. Both callback tests passed on the Switch in ARM64 and ARM64EC. [Callback qualification](dxvk-games-20261118/present1-dirty-hints-baseline.json)
 
+On boot `82805`, the installed permission tool restored the accepted package after verifying all seven components. DWM loaded the four native user-mode modules. A negative acceptance test for the open presentation faults preserved the existing permanent grant. The desktop stayed at Code 0 on external power throughout installation, restoration and retirement of the previous tool. [Policy and hardware receipts](dxvk-games-20261118/baseline-promotion-gate.json)
+
 On this kernel the preceding ARM64 UMD `c954304f` obtained a hardware device and context with FL11_1 as its only requested level and matched all 589 triangle readback pixels. The first-Present restart remains under investigation. [Kernel drawing qualification](WINDOW_COPY_BASELINE_20261120.json) · [Presentation observations](LOAD_STABILITY_FOLLOWUP_20261116.json)
 
 ## Previous Switch graphics baseline · 2026-11-19

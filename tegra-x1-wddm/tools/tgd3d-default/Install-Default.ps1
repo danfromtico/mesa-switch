@@ -48,7 +48,9 @@ if($native){
         if($task.State -eq 'Running'){throw 'Previous startup task is still running'}
         Unregister-ScheduledTask Tgd3dDefaultEnable -Confirm:$false
     }
-    & (Join-Path $PSScriptRoot 'Native-Boot.ps1')
+    $machinePolicy=Join-Path $env:ProgramFiles 'SwitchWOA-GpuBoot/Native-Boot.ps1'
+    if([IO.File]::Exists($machinePolicy)){& $machinePolicy -Mode Trial -Directory $PSScriptRoot}
+    else{& (Join-Path $PSScriptRoot 'Native-Boot.ps1') -Mode Trial -Directory $PSScriptRoot}
 }else{
     $action=New-ScheduledTaskAction -Execute "$env:windir\System32\WindowsPowerShell\v1.0\powershell.exe" -Argument ('-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "'+$PSScriptRoot+'\Default-Start.ps1"')
     $trigger=New-ScheduledTaskTrigger -AtLogOn -User $backup.User;$trigger.Delay='PT5S'
@@ -58,5 +60,5 @@ if($native){
 $result=@{Utc=[DateTime]::UtcNow.ToString('o');Directory=$PSScriptRoot;Version=(Device-Property 'DriverVersion');SyncMode=$m.sync_mode;User=$backup.User;StartupMode=$m.startup_mode;EnabledAfterNextLogon=(!$native);GpuStartRequested=$false;OsRebootRequested=$false}
 Save-Json (Join-Path $PSScriptRoot 'default-installed.json') $result
 $result|ConvertTo-Json
-if($native){'INSTALLED: restart Windows when ready; the miniport will start natively before logon.'}
+if($native){'INSTALLED: one native trial boot is armed for the next restart.'}
 else{'INSTALLED: restart Windows when ready; tgd3d will enable after logon.'}
