@@ -165,6 +165,26 @@
           }
         ]
       }
+    },
+    {
+      "id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+      "status": "open",
+      "kind": "restart",
+      "affected_scopes": [
+        "native-gpu-startup",
+        "recovery",
+        "power",
+        "wddm"
+      ],
+      "trigger": "During restoration from a one-use display KMD to the previously accepted seven-file profile, Windows began the requested native boot 84914. It started again 47.020 seconds later as 84936, with no second shutdown request or game launch in the recorded sequence.",
+      "evidence": [
+        "tegra-x1-wddm/docs/KMD_DISPLAY_CONTRACTS_20261120.json#baseline_recovery_interruption",
+        "tegra-x1-wddm/docs/KMD_DISPLAY_CONTRACTS_20261120.json#restart_accounting"
+      ],
+      "cause": "Unknown. System events 41 and 6008 report the abnormal shutdown. The bugcheck and power button timestamp were zero; no dump was written in the observed interval. Driver activation and DWM on the interrupted boot were not independently observed.",
+      "daily_workaround": "Keep the accepted signed profile and its Code 43 recovery path available. After a necessary recovery, check the most recent boot ID, Code 0, loaded components and compositor before starting a graphics workload. These checks verified the recovered desktop on boot 84936. A preventive workaround remains open.",
+      "close_when": "Identify the initiating cause on the native recovery boot. After repair, repeat the same controlled return to the accepted profile on AC at least three consecutive times without an extra boot; confirm the login/desktop, Code 0, loaded component hashes and a normal window exit.",
+      "resolution": null
     }
   ],
   "independent_qualifications": [
