@@ -1867,6 +1867,10 @@
           "dwm_pid": 1444,
           "verified_drawing_device": "SystemWarpDrawingDevice",
           "target_display_luid": "0000000000005a5d",
+          "miniport_present_flags": {
+            "dwm/1/flags0x0000000c/dma0/status0x00000103": 57,
+            "dwm/2/flags0x0000000c/dma0/status0x00000000": 57
+          },
           "present_calls": 6,
           "present_success": 6,
           "journal_tail": "306937 7280 EXIT RunAndRelease 00000000",
@@ -1894,6 +1898,10 @@
           "dwm_pid": 1444,
           "verified_drawing_device": "NativeGM20BDrawingDevice",
           "target_display_luid": "0000000000005a5d",
+          "miniport_present_flags": {
+            "dwm/1/flags0x0000000c/dma0/status0x00000103": 12,
+            "dwm/2/flags0x0000000c/dma0/status0x00000000": 12
+          },
           "present_calls": 1,
           "present_success": 0,
           "journal_tail": "367859 3628 CALL Present 00000000",
@@ -1944,6 +1952,7 @@
             "event": 12
           }
         ],
+        "new_dump_files_since_pretest_inventory": [],
         "restore": {
           "boot": 78606,
           "gpu_problem_code": 0,
@@ -1987,6 +1996,10 @@
           "dwm_pid": 1464,
           "verified_drawing_device": "SystemWarpDrawingDevice",
           "target_display_luid": "00000000000054ac",
+          "miniport_present_flags": {
+            "dwm/1/flags0x0000000c/dma0/status0x00000103": 52,
+            "dwm/2/flags0x0000000c/dma0/status0x00000000": 52
+          },
           "present_calls": 6,
           "present_success": 6,
           "journal_tail": "270609 5628 EXIT RunAndRelease 00000000",
@@ -2025,6 +2038,10 @@
           "dwm_pid": 1464,
           "verified_drawing_device": "NativeGM20BDrawingDevice",
           "target_display_luid": "00000000000054ac",
+          "miniport_present_flags": {
+            "dwm/1/flags0x0000000c/dma0/status0x00000103": 12,
+            "dwm/2/flags0x0000000c/dma0/status0x00000000": 12
+          },
           "present_calls": 1,
           "present_success": 0,
           "journal_tail": "326187 2896 CALL Present 00000000",
@@ -2092,6 +2109,7 @@
             "event": 12
           }
         ],
+        "new_dump_files_since_pretest_inventory": [],
         "restore": {
           "boot": 78928,
           "gpu_problem_code": 0,
@@ -2100,9 +2118,224 @@
           "candidate_driverstore_entry_removed": "oem19.inf",
           "scoped_tasks_processes_and_etw_sessions_remaining": 0
         }
+      },
+      {
+        "iteration": 3,
+        "candidate_boot": 79099,
+        "query": {
+          "archive_sha256": "57136df692f3d7e3aa0c1893f318fb97d5667fedae1598c271040b23b640eaad",
+          "kernel_etl_sha256": "e69468f9e6c090b464b26a13e0a61c228fac68ba6a0a6b072564a9a0b319445c",
+          "kernel_etl_finalized": true,
+          "boot": 79099,
+          "boot_at_collection": 79099,
+          "kernel_record_counts": {
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": true,
+          "durable_only": 0,
+          "etl_only": 0
+        },
+        "warp": {
+          "archive_sha256": "81cc35daf45c7f1ccd4113965169ea81e3ae970772e1bc70622be9dafbd2140d",
+          "kernel_etl_sha256": "26944318f7c42227c25bd43baa617689abe36324cf1194f164ad20a80e547509",
+          "kernel_etl_finalized": true,
+          "boot": 79099,
+          "boot_at_collection": 79099,
+          "kernel_record_counts": {
+            "dwm/op1/phase1/0x00000103": 68,
+            "dwm/op1/phase2/0x00000000": 68,
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": true,
+          "durable_only": 0,
+          "etl_only": 8,
+          "application_pid": 1472,
+          "dwm_pid": 1420,
+          "verified_drawing_device": "SystemWarpDrawingDevice",
+          "target_display_luid": "0000000000005a49",
+          "miniport_present_flags": {
+            "dwm/1/flags0x0000000c/dma0/status0x00000103": 68,
+            "dwm/2/flags0x0000000c/dma0/status0x00000000": 68
+          },
+          "present_calls": 6,
+          "present_success": 6,
+          "journal_tail": "264500 4888 EXIT RunAndRelease 00000000",
+          "runtime_etl_finalized": true,
+          "dxgi_start_records": 6,
+          "dxgi_return_records": 6,
+          "verified_desktop_samples": 15,
+          "clock_alignment": {
+            "method": "Same-boot tick transitions sampled just before the workload. Bounds refer to the timestamp recorded before the application flushes its CALL journal entry and invokes DXGI.",
+            "tick_steps": 8,
+            "maximum_sampled_tick_step_ms": 16,
+            "calibration_envelope_width_ms": 37.421,
+            "warp_or_native_present_pairs_covered_by_calibrated_call_return_bounds": 6,
+            "available_complete_dxgi_pairs": 6,
+            "kernel_etl_tail_ms_relative_to_first_journal_tick": [
+              4074.56,
+              4111.982
+            ],
+            "runtime_etl_tail_ms_relative_to_first_journal_tick": [
+              3911.157,
+              3948.578
+            ],
+            "same_boot_clock_control": "complete"
+          }
+        },
+        "native": {
+          "archive_sha256": "36719208a6cbd39937c164048cc24ed55e327b1c7bfe351179b0baea41ee20f9",
+          "kernel_etl_sha256": "4fea206a0cdceb95e3e827b353aaa73b7088e240487a17f5c74be2a0535e0de7",
+          "kernel_etl_finalized": false,
+          "boot": 79099,
+          "boot_at_collection": 79254,
+          "kernel_record_counts": {
+            "draw/op3/phase2/0x00000000": 3,
+            "dwm/op1/phase1/0x00000103": 5,
+            "dwm/op1/phase2/0x00000000": 5,
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": false,
+          "durable_only": 0,
+          "etl_only": 2,
+          "application_pid": 1600,
+          "dwm_pid": 1420,
+          "verified_drawing_device": "NativeGM20BDrawingDevice",
+          "target_display_luid": "0000000000005a49",
+          "miniport_present_flags": {
+            "dwm/1/flags0x0000000c/dma0/status0x00000103": 5,
+            "dwm/2/flags0x0000000c/dma0/status0x00000000": 5
+          },
+          "present_calls": 1,
+          "present_success": 0,
+          "journal_tail": "320375 1880 CALL Present 00000000",
+          "runtime_etl_finalized": false,
+          "dxgi_start_records": 0,
+          "dxgi_return_records": 0,
+          "verified_desktop_samples": null,
+          "clock_alignment": {
+            "method": "Same-boot tick transitions sampled just before the workload. Bounds refer to the timestamp recorded before the application flushes its CALL journal entry and invokes DXGI.",
+            "tick_steps": 8,
+            "maximum_sampled_tick_step_ms": 16,
+            "calibration_envelope_width_ms": 36.947,
+            "warp_or_native_present_pairs_covered_by_calibrated_call_return_bounds": 0,
+            "available_complete_dxgi_pairs": 0,
+            "kernel_etl_tail_ms_relative_to_first_journal_tick": [
+              -73.118,
+              -36.171
+            ],
+            "runtime_etl_tail_ms_relative_to_first_journal_tick": [
+              -41.276,
+              -4.329
+            ],
+            "same_boot_clock_control": "matched WARP"
+          }
+        },
+        "boot_events": [
+          {
+            "record": 78994,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic enter closed gate before selecting candidate"
+          },
+          {
+            "record": 79011,
+            "event": 12
+          },
+          {
+            "record": 79083,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic one-time candidate boot"
+          },
+          {
+            "record": 79099,
+            "event": 12
+          },
+          {
+            "record": 79169,
+            "event": 12
+          },
+          {
+            "record": 79178,
+            "event": 6008
+          },
+          {
+            "record": 79187,
+            "event": 41,
+            "bugcheck_code": 0
+          },
+          {
+            "record": 79238,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic restore verified permanent baseline"
+          },
+          {
+            "record": 79254,
+            "event": 12
+          }
+        ],
+        "new_dump_files_since_pretest_inventory": [],
+        "restore": {
+          "boot": 79254,
+          "gpu_problem_code": 0,
+          "accepted_published_inf": "oem15.inf",
+          "persistent_accepted_grant": true,
+          "candidate_driverstore_entry_removed": "oem19.inf",
+          "scoped_tasks_processes_and_etw_sessions_remaining": 0
+        }
       }
     ],
-    "interpretation": "The fixture and Desktop Window Manager have separate device and process identities. The retained DWM calls in the first native trial carried Flip | FlipWithNoWait (0x0c), with zero DMA bytes and a successful miniport return. The application journal reached its first Present and the ETW files end mid-session. The initiating callback and reset mechanism remain unresolved.",
+    "totals": {
+      "completed_iterations": 3,
+      "warp_present_returns": 18,
+      "warp_verified_desktop_samples": 45,
+      "native_first_present_checkpoints_without_return": 3,
+      "warp_successful_dwm_flip_nowait_receipts": 177,
+      "native_successful_dwm_flip_nowait_receipts": 29
+    },
+    "interpretation": "The fixture and Desktop Window Manager have separate device and process identities. The retained successful DWM Flip | FlipWithNoWait (0x0c) callbacks used zero DMA bytes. The native application journals and incomplete ETW sessions identify the public API boundary. The initiating callback and reset mechanism remain unresolved.",
+    "separate_accepted_baseline_qpc_control": {
+      "case": "ReceiptCase-261120-070959899272",
+      "boot": 79254,
+      "kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "permanent": true,
+      "drawing_device": "Microsoft Basic Render Driver with native GM20B desktop",
+      "verified_desktop_samples": 15,
+      "public_present_and_dxgi_pairs": 6,
+      "qpc_frequency": 19200000,
+      "intervals": [
+        {
+          "checkpoint_to_dxgi_ms": 31.33,
+          "dxgi_ms": 4.686,
+          "dxgi_to_return_checkpoint_ms": 0.007
+        },
+        {
+          "checkpoint_to_dxgi_ms": 3.251,
+          "dxgi_ms": 2.537,
+          "dxgi_to_return_checkpoint_ms": 0.008
+        },
+        {
+          "checkpoint_to_dxgi_ms": 3.103,
+          "dxgi_ms": 1.963,
+          "dxgi_to_return_checkpoint_ms": 0.007
+        },
+        {
+          "checkpoint_to_dxgi_ms": 3.278,
+          "dxgi_ms": 1.503,
+          "dxgi_to_return_checkpoint_ms": 0.007
+        },
+        {
+          "checkpoint_to_dxgi_ms": 11.684,
+          "dxgi_ms": 1.98,
+          "dxgi_to_return_checkpoint_ms": 0.008
+        },
+        {
+          "checkpoint_to_dxgi_ms": 3.095,
+          "dxgi_ms": 2.277,
+          "dxgi_to_return_checkpoint_ms": 0.008
+        }
+      ],
+      "signed_client_sha256": "730f4c1af00706d515700fbe02d717413709101ffd3c8b8cab2e37070b081394",
+      "archive_sha256": "4b6c0554a4d4bec736f6db3dd96977632e71e51bdf6f910f70db9895745b3908"
+    },
     "references": [
       "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_present",
       "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_presentflags",
