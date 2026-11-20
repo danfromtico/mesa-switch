@@ -1620,7 +1620,12 @@ __declspec(noinline) static void TestPagingDispatch(const DXGKRNL_INTERFACE *dxg
     /* A virtual GDI DMA pool must take VidMm's aperture allocation path. */
     CHECK(gdi_context.ContextInfo.DmaBufferSegmentSet==(1u<<(TG_GPU_PAGING_APERTURE_SEGMENT-1)));
     CHECK(ddi.DxgkDdiDestroyContext(gdi_context.hContext)==STATUS_SUCCESS);
+    DXGKARG_CREATECONTEXT physical_context={.hContext=(HANDLE)105,.EngineAffinity=1};
+    CHECK(ddi.DxgkDdiCreateContext(device.hDevice,&physical_context)==STATUS_SUCCESS);
+    CHECK(!physical_context.ContextInfo.DmaBufferSegmentSet && !physical_context.ContextInfo.Caps.NoPatchingRequired);
+    CHECK(ddi.DxgkDdiDestroyContext(physical_context.hContext)==STATUS_SUCCESS);
     CHECK(ddi.DxgkDdiCreateContext(device.hDevice,&context)==STATUS_SUCCESS);
+    CHECK(context.ContextInfo.DmaBufferSegmentSet==(1u<<(TG_GPU_PAGING_APERTURE_SEGMENT-1)));
     CHECK(!context.ContextInfo.AllocationListSize);
     set.hContext=context.hContext;ddi.DxgkDdiSetRootPageTable(&e,&set);
     a.UpdatePageTable=(DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE){.PageTableLevel=1,
