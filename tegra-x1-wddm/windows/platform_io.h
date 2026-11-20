@@ -12,6 +12,7 @@ typedef struct _TG_GPU_PLATFORM {
     PVOID OwnerDevice;
     PVOID PnpNotify;
     ULONG BridgeEpoch;
+    ULONG ProviderGeneration; /* retires the vote namespace on completed removal */
     NTSTATUS IoStatus;
     BOOLEAN EmcRailOwner,RailClaimed,QueryRemove,NeedReclaim,Initialized,Opening,Closing;
 } TG_GPU_PLATFORM;
@@ -27,6 +28,9 @@ NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
 /* Optional capability/telemetry request: does not latch IoStatus when an older
  * SwitchFan build returns STATUS_INVALID_PARAMETER or STATUS_NOT_SUPPORTED. */
 NTSTATUS TgGpuPlatformTryRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
+/* QUERY_EMC_VOTE returns the provider generation. ACK and FAILURE must use
+ * the generation returned with the vote they are reporting. */
+NTSTATUS TgGpuPlatformTryVoteRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *,ULONG *Generation);
 /* Optional long-lived kernel request. Returns referenced real objects; the
  * caller releases both references. Failure does not poison display IoStatus. */
 NTSTATUS TgGpuReferencePlatformBridge(TG_GPU_PLATFORM *,PFILE_OBJECT *,PDEVICE_OBJECT *);

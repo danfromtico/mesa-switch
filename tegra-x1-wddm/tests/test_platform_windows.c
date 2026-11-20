@@ -180,6 +180,9 @@ static NTSTATUS FASTCALL CallDriver(PDEVICE_OBJECT dev,PIRP irp)
     else if(op->reg==TG_GPU_PMIC_QUERY_PLLP)op->value=0x12345678;
     else if(op->reg==TG_GPU_PMIC_QUERY_DVFS_POLICY)op->value=TG_GPU_DVFS_POLICY_PACK(1,153600,460800,2);
     else if(op->reg==TG_GPU_PMIC_QUERY_EMC_KHZ)op->value=1600000;
+    else if(op->reg==TG_GPU_PMIC_QUERY_EMC_VOTE)op->value=(1u<<8)|98u;
+    else if(op->reg==TG_GPU_PMIC_REPORT_EMC_FAILURE || op->reg==TG_GPU_PMIC_REPORT_EMC_ACK)
+        CHECK(op->write && op->value==((1u<<8)|98u));
     else if(op->reg==TG_GPU_PMIC_REPORT_GPU_STATUS)CHECK(op->write==1);
     else if(op->reg==TG_GPU_PMIC_CLAIM_RAIL){
         CHECK(op->write==1 && op->value==TG_GPU_EMC_VOTE_ABI);
@@ -335,11 +338,29 @@ void start(void)
     TARGET_DEVICE_REMOVAL_NOTIFICATION rem={.Event=GUID_TARGET_DEVICE_QUERY_REMOVE,.FileObject=&fake_file};
     PDRIVER_NOTIFICATION_CALLBACK_ROUTINE saved_cb=model.pnp_cb;
     PVOID saved_ctx=model.pnp_ctx;
+    ULONG original_provider=~0u;
+    struct tg_gpu_pmic_request vote={0,TG_GPU_PMIC_QUERY_EMC_VOTE,0,0};
+    CHECK(TgGpuPlatformTryVoteRequest(&platform,&vote,&original_provider)==STATUS_SUCCESS);
     CHECK(saved_cb(&rem,saved_ctx)==STATUS_SUCCESS && !platform.Bridge && !platform.FileObject && model.file_refs==0);
     CHECK(!io.read_pmic(io.context,0x33,0x23,&value)); /* blocked during QueryRemove */
     rem.Event=GUID_TARGET_DEVICE_REMOVE_COMPLETE;platform.IoStatus=STATUS_SUCCESS;
     CHECK(saved_cb(&rem,saved_ctx)==STATUS_SUCCESS && !platform.QueryRemove && platform.NeedReclaim);
     CHECK(io.read_pmic(io.context,0x33,0x23,&value) && value==80 && model.opens==2 && model.pnp_unregs==1 && model.pnp_regs==2 && model.claims==2);
+
+    /* A replacement can start with exactly the same vote word. Rejection and
+     * ACK belonging to the detached instance must never reach its IRP stack. */
+    ULONG requests=model.requests;
+    vote.reg=TG_GPU_PMIC_REPORT_EMC_FAILURE;vote.write=1;
+    CHECK(TgGpuPlatformTryVoteRequest(&platform,&vote,&original_provider)==STATUS_DEVICE_NOT_READY);
+    vote.reg=TG_GPU_PMIC_REPORT_EMC_ACK;
+    CHECK(TgGpuPlatformTryVoteRequest(&platform,&vote,&original_provider)==STATUS_DEVICE_NOT_READY);
+    CHECK(model.requests==requests);
+    ULONG new_provider=original_provider;
+    vote=(struct tg_gpu_pmic_request){0,TG_GPU_PMIC_QUERY_EMC_VOTE,0,0};
+    CHECK(TgGpuPlatformTryVoteRequest(&platform,&vote,&new_provider)==STATUS_SUCCESS);
+    CHECK(new_provider!=original_provider && vote.value==((1u<<8)|98u));
+    vote.reg=TG_GPU_PMIC_REPORT_EMC_ACK;vote.write=1;
+    CHECK(TgGpuPlatformTryVoteRequest(&platform,&vote,&new_provider)==STATUS_SUCCESS);
 
     rem.Event=GUID_TARGET_DEVICE_QUERY_REMOVE;
     CHECK(saved_cb(&rem,saved_ctx)==STATUS_SUCCESS);
