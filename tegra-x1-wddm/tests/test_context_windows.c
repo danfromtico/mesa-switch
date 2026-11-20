@@ -333,6 +333,15 @@ __declspec(noinline) static void TestMmioPresent(TG_GPU_DEVICE *device)
           !a.pDmaBuffer && !a.pDmaBufferPrivateData && !a.MultipassOffset);
     a.Flags.FlipWithNoWait=0;
     CHECK(TgGpuDdiPresent(&context,&a)==STATUS_SUCCESS);
+    CHECK(TgGpuDdiPresent(NULL,&a)==STATUS_SUCCESS);
+    a.Flags.FlipWithMultiPlaneOverlay=1;a.Flags.FlipWithNoWait=1;
+    const DXGKARG_PRESENT mpo=a;
+    CHECK(TgGpuDdiPresent(NULL,&a)==STATUS_SUCCESS);
+    CHECK(memcmp(&a,&mpo,sizeof(a))==0); /* no DMA, MMIO or synthetic completion */
+    a.Flags.Rotate=1;
+    CHECK(TgGpuDdiPresent(NULL,&a)==STATUS_INVALID_PARAMETER);
+    a.Flags.Rotate=0;a.Flags.FlipWithMultiPlaneOverlay=0;
+    CHECK(TgGpuDdiPresent(NULL,NULL)==STATUS_INVALID_PARAMETER);
     a.Flags.FlipWithNoWait=1;a.Flags.Rotate=1;
     CHECK(TgGpuDdiPresent(&context,&a)==STATUS_NOT_SUPPORTED);
     a.Flags.Rotate=0;a.Flags.Flip=0;
@@ -955,10 +964,14 @@ __declspec(noinline) static void TestAllocations(TG_GPU_CONTEXT_ENGINE *e,TG_GPU
             continue;
         }
         CHECK(NT_SUCCESS(ddi->DxgkDdiCreateAllocation(e,&create)));
-        describe.hAllocation=info[0].hAllocation;
+        describe=(DXGKARG_DESCRIBEALLOCATION){.hAllocation=info[0].hAllocation};
         CHECK(NT_SUCCESS(ddi->DxgkDdiDescribeAllocation(e,&describe)) &&
               describe.Width==primary.Width && describe.Height==primary.Height &&
               (UINT)describe.Rotation==rotation && info[0].Size==T214_GPU_POST_FB_SIZE);
+        describe.Flags.CheckDisplayMode=1;
+        CHECK(NT_SUCCESS(ddi->DxgkDdiDescribeAllocation(e,&describe)) &&
+              describe.Width==720 && describe.Height==1280 &&
+              (UINT)describe.Rotation==rotation && describe.Flags.CheckDisplayMode);
         CHECK(TgGpuGetScanoutSurface(other,info[0].hAllocation,&scanout)==STATUS_INVALID_PARAMETER);
         CHECK(TgGpuGetScanoutSurface(e,info[0].hAllocation,&scanout)==STATUS_SUCCESS &&
               scanout.Rotation==rotation && scanout.Width==primary.Width &&

@@ -35,15 +35,20 @@ NTSTATUS APIENTRY TgGpuDdiPresent(HANDLE context,DXGKARG_PRESENT *a)
 {
     TG_GPU_CONTEXT *c=context;
     PAGED_CODE();
-    if(!c || !a)return STATUS_INVALID_PARAMETER;
+    if(!a)return STATUS_INVALID_PARAMETER;
     /* NoWait keeps the GPU pipeline running while the scheduler performs
      * the VSync MMIO flip. This no-DMA path emits no GPU wait commands. */
     /* A flip binds already oriented storage. Rotate is a Blt operation and
      * must execute the copy below, not turn into a no-DMA success receipt. */
     const DXGK_PRESENTFLAGS flips={.Flip=1,.FlipWithNoWait=1,
         .FlipWithMultiPlaneOverlay=1,.RedirectedFlip=1};
+    /* Dxgkrnl's MPO submit path passes NULL hContext for an MMIO flip
+     * (22621.2792: SubmitPresentMultiPlaneOverlays3 -> DdiPresent).
+     * There is no DMA work here. The scheduled panel DDI still validates
+     * allocation residency/layout and reports completion only after latch. */
     if(a->Flags.Flip && !(a->Flags.Value&~flips.Value) && !a->pDmaBuffer && !a->MultipassOffset)
         return STATUS_SUCCESS; /* Panel DDIs perform the scheduled MMIO flip. */
+    if(!c)return STATUS_INVALID_PARAMETER;
     const DXGK_PRESENTFLAGS blt={.Blt=1,.Rotate=1};
     if(!a->Flags.Blt || (a->Flags.Value&~blt.Value) || !c->Flags.GdiContext || !c->Flags.VirtualAddressing ||
        !c->Device->Process)return STATUS_NOT_SUPPORTED;
