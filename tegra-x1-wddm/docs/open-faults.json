@@ -189,20 +189,74 @@
     },
     {
       "id": "GM20B-GDI-EXCLUSIVE-MODE",
-      "status": "open",
+      "status": "closed",
       "kind": "display-mode",
       "affected_scopes": [
         "presentation",
         "wddm"
       ],
-      "trigger": "Native BGRA8 FLIP_SEQUENTIAL window on the 90-degree desktop. SetFullscreenState(TRUE, explicit output) returns E_FAIL.",
+      "trigger": "Native FLIP_SEQUENTIAL swap chain, BGRA8, fixed 90-degree desktop. Request exclusive mode with SetFullscreenState(TRUE, explicit output).",
       "evidence": [
-        "tegra-x1-wddm/docs/dxvk-games-20261118/gdi-fullscreen-gm20b/mode-before.json"
+        "tegra-x1-wddm/docs/dxvk-games-20261118/gdi-fullscreen-gm20b/mode-before.json",
+        "tegra-x1-wddm/docs/dxvk-games-20261118/gdi-fullscreen-gm20b/cause.json"
       ],
-      "cause": "The immediate failure is Win32 ChangeDisplaySettingsExW in DXGI PrepUser. The original KMT mode list contained only X8R8G8B8 and this Windows CDD filtered it out. The effect of adding its supported 32-bit mode to the production KMD still needs the public fullscreen case.",
-      "daily_workaround": "Use the verified ordinary flip window or full-monitor borderless mode.",
-      "close_when": "Acquire fullscreen ownership on the same signed original program, verify three displayed colors, input, clean release and return to the same desktop on three consecutive runs of a one-use Code 0 boot.",
-      "resolution": null
+      "cause": "The miniport enumerated only its POST X8R8G8B8 surface format. The measured Windows CDD discarded format 22 while building the GDI list. DXGI could find the native timing but its ChangeDisplaySettingsExW fullscreen request failed before the client UMD mode callback. Enumerating the supported A8R8G8B8 format alongside POST fixed the same signed exclusive client.",
+      "daily_workaround": "Before this repair the ordinary flip window and a full-monitor borderless window displayed and exited reliably in their measured controls.",
+      "close_when": "On the one-use fixed Code 0 boot, the original exclusive client must acquire ownership, show three frames, process input, release ownership and return to the same desktop on three consecutive launches.",
+      "resolution": {
+        "root_cause": "The miniport enumerated only its POST X8R8G8B8 surface format. The measured Windows CDD discarded format 22 while building the GDI list. DXGI could find the native timing but its ChangeDisplaySettingsExW fullscreen request failed before the client UMD mode callback. Enumerating the supported A8R8G8B8 format alongside POST fixed the same signed exclusive client.",
+        "root_cause_confirmed": true,
+        "commit": "c05e254932dd975bdf69e7046949596dbeb84561",
+        "components": {
+          "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+        },
+        "causal_evidence_file": "tegra-x1-wddm/docs/dxvk-games-20261118/gdi-fullscreen-gm20b/cause.json",
+        "causal_evidence_sha256": "ab63e81a3eb634bff5e9f4e4e3f432c593820c101b06f548be9dd16e5fa6f29e",
+        "original_scenario_runs": [
+          {
+            "name": "exclusive-1",
+            "passed": true,
+            "before_boot": 85471,
+            "after_boot": 85471,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/dxvk-games-20261118/gdi-fullscreen-gm20b/exclusive-1.json",
+            "evidence_sha256": "e1eadc1f9b77ce113cff4eb63c282b07339a653b14bbb051c4dbf9c6788a620b",
+            "original_trigger": true
+          },
+          {
+            "name": "exclusive-2",
+            "passed": true,
+            "before_boot": 85471,
+            "after_boot": 85471,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/dxvk-games-20261118/gdi-fullscreen-gm20b/exclusive-2.json",
+            "evidence_sha256": "7b0a0209b82a7cd908eb7e1b6c40c1d6febd2a611f4f444ba2a4631dfafc881f",
+            "original_trigger": true
+          },
+          {
+            "name": "exclusive-3",
+            "passed": true,
+            "before_boot": 85471,
+            "after_boot": 85471,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/dxvk-games-20261118/gdi-fullscreen-gm20b/exclusive-3.json",
+            "evidence_sha256": "87800c7cdb04237bbab8cd50e2a1ac6c1721cd7709a2536fe18b5f3cb6c0bd92",
+            "original_trigger": true
+          }
+        ]
+      }
     }
   ],
   "independent_qualifications": [
@@ -233,6 +287,41 @@
           "fault_id": "SWITCH-WIFI-STARTUP",
           "reason": "The Wi-Fi package and startup path are unchanged. The externally powered candidate remained connected and the real native color conversion reached verified desktop RGB and normal exit.",
           "test_sha256": "4bcacdd85c935d3c3d0b187493a16dea1f3760714b4214a495cd2994ec88f1c9"
+        }
+      ]
+    },
+    {
+      "evidence_sha256": "ea62b1044e413c21ed316fda6b0fa89b95f81be91cc50ecd46bb5b298c9b2768",
+      "independence": [
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "The registered empty legacy SEQUENTIAL client last reached D3DKMT_PRESENT, with the subsequent kernel failure still unresolved. The diagnosed fullscreen failure instead occurs in Win32 mode enumeration before exclusive submission. The target fixed mode and row-scan allocations keep their existing pitch. A separate ordinary flip window and the earlier NULL/rotated-storage contract records are retained.",
+          "test_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "reason": "The earlier extra boot occurred during restoration of the old selected kernel, before any fullscreen client had run. Its kernel identity and exact cause on that interrupted boot remain unknown. This candidate had one correlated external-power Code 0 start and no additional boot or TDR in the measured interval while the exclusive clients ran. The earlier incident remains open.",
+          "test_sha256": "87800c7cdb04237bbab8cd50e2a1ac6c1721cd7709a2536fe18b5f3cb6c0bd92"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "The reported third-frame restart is on the optional 0x000b0020 path. Here the release uses the ordinary negotiated path with the same signed UMD and NVK. Its ordinary flip desktop output, borderless frames, input and exit were measured.",
+          "test_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "The release keeps the selected UMD and its default legacy DDI. This fixes the Win32 display mode list. The optional WDDM 2.0 callback removal remains outside these successful exclusive frames.",
+          "test_sha256": "e1eadc1f9b77ce113cff4eb63c282b07339a653b14bbb051c4dbf9c6788a620b"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "The candidate changes display-mode enumeration and two checked display contracts. The release retains the CPU, GPU and EMC policies and submission queue. The observed exclusive frames completed on AC within the same boot. General load-induced restarts stay open.",
+          "test_sha256": "7b0a0209b82a7cd908eb7e1b6c40c1d6febd2a611f4f444ba2a4631dfafc881f"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "The Wi-Fi driver and boot configuration were unchanged. The candidate boot connected and the normal-window control returned to the same available desktop.",
+          "test_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c"
         }
       ]
     }

@@ -1,0 +1,94 @@
+{
+  "failure": "GM20B-GDI-EXCLUSIVE-MODE",
+  "source_commit": "c05e254932dd975bdf69e7046949596dbeb84561",
+  "parent": "40e857df71e9091fa494511f7f2f782e6c2da1cd",
+  "baseline_source": "e6852733640f4dc114042796477671ca54c1f3c6",
+  "baseline_kmd": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+  "combined_pre_fix_kmd": "8e0e8e407fbb9419bfbbea92e2297ad37a747ac610efc5b95589f90798d8e1f0",
+  "new_kmd": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+  "previous_cases": {
+    "accepted": [
+      84936,
+      84936,
+      16,
+      "4e9d6cba6d85fe85ac0656174e5ae92391917bc7ac2560f5ba20f09f8abfb42e",
+      "05120dbefd78a375882ee0291d84de50802bf63e5711aef3c9d5638f5daf80c8"
+    ],
+    "candidate": [
+      85123,
+      85123,
+      16,
+      "73bcb5e20ab996ac1898d7eef3446eb44ad3df56ca71dcc4b8a438e1cc901f5e",
+      "bca162ffb68a31e17bd0adbf2f95e2a1498891b1b34a67a880267ab0a1315efc"
+    ],
+    "unchanged_compositor_across_each": true
+  },
+  "query": {
+    "sha256": "71111fc8e5725c0d579a847f3ffb5b9961bac0df3c3faf5f6d6bb43a16915911",
+    "state": "Code 0 on the same candidate boot after its 14-minute recovery controller disarmed the next boot. Read-only mode query.",
+    "result": [
+      "ADAPTER index=0 name=\\\\.\\DISPLAY1 desc=Tegra X1 (GM20B) .158 GM20B combined display contracts 8e0e8e407fbb id=ACPI\\VEN_SWOA&DEV_0F01 state=08000005 is_output=1",
+      "MONITOR name=\\\\.\\DISPLAY1\\Monitor0 description=Generic Non-PnP Monitor id=MONITOR\\Default_Monitor\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0001 state=00000003",
+      "CCD_SOURCE_ONLY os_source_status=87 count=2 target_idx=0",
+      "KMT_OPEN name=\\\\.\\DISPLAY1 status=00000000 source=0 luid=0000000000005a4f",
+      "KMT_MODES status=00000000 count=4",
+      "KMT_MODE i=0 size=720x1280 format=22 refresh=60/1 int_refresh=60 orient=1 fixed=0 valid=1 reason=7",
+      "KMT_MODE i=1 size=720x1280 format=22 refresh=60/1 int_refresh=60 orient=2 fixed=0 valid=1 reason=7",
+      "KMT_MODE i=2 size=720x1280 format=22 refresh=60/1 int_refresh=60 orient=3 fixed=0 valid=1 reason=7",
+      "KMT_MODE i=3 size=720x1280 format=22 refresh=60/1 int_refresh=60 orient=4 fixed=0 valid=1 reason=7"
+    ]
+  },
+  "win32_mode_failures": [
+    "RETURN_QPC qpc=4985592034 reason=00000000",
+    "GDI_CURRENT size=1280x720 orientation=1 refresh=60 bits=32 fields=207c00a0 test=-2 fullscreen_test=-2",
+    "CCD_ACTIVE paths=1 modes=2 validate=1610 validate_allow_changes=0",
+    "CCD_PATH source=1 target=0 rotation=2 scaling=1 refresh=60/1",
+    "CCD_SOURCE size=720x1280 format=4",
+    "CCD_TARGET active=720x1280 total=1000x1300 vsync=60/1 scan=1",
+    "EXCLUSIVE_ENTER hr=80004005 query=00000000 active=0"
+  ],
+  "windows_dxgi": {
+    "sha256": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+    "bytes": 1791792,
+    "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+  },
+  "windows_cdd_filter": {
+    "system_module": {
+      "dll_sha256": "8130843f86a0b27273ce1c454e3747ce20b7d41feeb160891febbdab72ef4815",
+      "version": "10.0.22621.2792 (WinBuild.160101.0800)",
+      "guid": "88722627-16d9-bdcc-3ea0-99d7e921b9a8",
+      "age": 1,
+      "pdb": "cdd.pdb",
+      "url": "https://msdl.microsoft.com/download/symbols/cdd.pdb/8872262716D9BDCC3EA099D7E921B9A81/cdd.pdb",
+      "pdb_sha256": "4155ce3200f2186f59aef8a5d39d8dfb24568bc1831e31cb9b6d8bd19f8f79ff"
+    },
+    "api": "CDD DrvGetModes",
+    "observed_32bpp_format": 22,
+    "accepted_format_values": [
+      20,
+      21,
+      23,
+      41
+    ],
+    "active_32bpp_accepted_format": 21,
+    "fallback": "If zero input modes survive, DrvGetModes reports four orientation variants of its 800x600 32-bpp 60 Hz default. The corresponding physical monitor-validated list instead contains four entries for format 22 only.",
+    "fix_source": "c05e254932dd975bdf69e7046949596dbeb84561",
+    "fixed_kernel_candidate": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+    "comparison_source": "WinX display-only sample AddSingleSourceMode advertises D3DDDIFMT_A8R8G8B8. Native KMD additionally retains POST X8R8G8B8."
+  },
+  "public_failing_sequence": "The two earliest DXGI error stacks include CDXGISwapChain::CPrepWin32Sentinel::PrepUser on both attempts. At the sampled return address the nonzero result is from user32 ChangeDisplaySettingsExW with CDS_FULLSCREEN and is converted to E_FAIL. The independent GDI test, unlike the original DXGI log, exposes DISP_CHANGE_BADMODE directly.",
+  "production_delta_sha256": "9dc51e735458770879a94de83b75361e2eb934766ac505722e70b4f24a7f27ab",
+  "mode_before_sha256": "54436824fac674202f5a032cd7e2c503aea071a600fa3f898ddc12ad194004de",
+  "mode_after_sha256": "9b9d928f405cec258266cec0f43d6c0f84894bd31d474df7b146292ad02a6371",
+  "native_model_sha256": "2614aaff4cff1131ec52bcb17f6fdde5d9ac947874d63182f9d5c7085f99a53f",
+  "candidate_original_receipts": [
+    "e1eadc1f9b77ce113cff4eb63c282b07339a653b14bbb051c4dbf9c6788a620b",
+    "7b0a0209b82a7cd908eb7e1b6c40c1d6febd2a611f4f444ba2a4631dfafc881f",
+    "87800c7cdb04237bbab8cd50e2a1ac6c1721cd7709a2536fe18b5f3cb6c0bd92"
+  ],
+  "prior_merged_contracts": {
+    "git": "40e857df71e9091fa494511f7f2f782e6c2da1cd",
+    "both_earlier_models": "KMD_DISPLAY_CONTRACTS_20261120.json",
+    "observed_scope": "Earlier Windows traces recorded non-NULL MMIO flips and identity storage with rotated display mode. NULL-context and quarter-turned primary-store contracts have additional on-board WDK model controls. These data do not establish that ordinary Windows clients supplied those exceptional inputs."
+  }
+}

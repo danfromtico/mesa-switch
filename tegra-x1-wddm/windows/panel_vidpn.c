@@ -152,21 +152,29 @@ static NTSTATUS add_source(const DXGK_VIDPN_INTERFACE *api, D3DKMDT_HVIDPN vidpn
     NTSTATUS status = api->pfnCreateNewSourceModeSet(vidpn, 0, &set, &modes);
     if (!NT_SUCCESS(status))
         return status;
-    D3DKMDT_VIDPN_SOURCE_MODE *mode;
-    status = modes->pfnCreateNewModeInfo(set, &mode);
-    if (NT_SUCCESS(status)) {
+    /* CDD enumerates A8R8G8B8 for a 32-bit GDI desktop. The firmware may
+     * hand over X8R8G8B8, which the panel can scan with the same pitch. */
+    const D3DDDIFORMAT formats[] = {format, D3DDDIFMT_A8R8G8B8};
+    const UINT count = format == D3DDDIFMT_A8R8G8B8 ? 1 : 2;
+    for (UINT i = 0; i < count; ++i) {
+        D3DKMDT_VIDPN_SOURCE_MODE *mode;
+        status = modes->pfnCreateNewModeInfo(set, &mode);
+        if (!NT_SUCCESS(status))
+            break;
         mode->Type = D3DKMDT_RMT_GRAPHICS;
         mode->Format.Graphics = (D3DKMDT_GRAPHICS_RENDERING_FORMAT){
             .PrimSurfSize = TgGpuPanelSignal.ActiveSize,
             .VisibleRegionSize = TgGpuPanelSignal.ActiveSize,
             .Stride = T214_DC_PANEL_PITCH,
-            .PixelFormat = format,
+            .PixelFormat = formats[i],
             .ColorBasis = D3DKMDT_CB_SRGB,
             .PixelValueAccessMode = D3DKMDT_PVAM_DIRECT,
         };
         status = modes->pfnAddMode(set, mode);
-        if (!NT_SUCCESS(status))
+        if (!NT_SUCCESS(status)) {
             (VOID)modes->pfnReleaseModeInfo(set, mode);
+            break;
+        }
     }
     if (NT_SUCCESS(status)) {
         status = api->pfnAssignSourceModeSet(vidpn, 0, set);

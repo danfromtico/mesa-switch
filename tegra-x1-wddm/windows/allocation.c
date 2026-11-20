@@ -254,14 +254,23 @@ static NTSTATUS APIENTRY describe_allocation(HANDLE adapter,DXGKARG_DESCRIBEALLO
     if(buffer && ((desc->Buffer.flags&TG_GPU_ALLOCATION_DISPLAY_PRIMARY) ||
         args->Flags.CheckDisplayMode || desc->Buffer.bytes>UINT32_MAX))
         return STATUS_NOT_SUPPORTED;
-    /* Geometry is storage; Rotation is the primary's DISPLAY MODE (WDK).
-     * Dxgkrnl compares it with the active display-mode rotation when
-     * CheckDisplayMode is set. NONPREROTATED changes the stored pixels, not
-     * this mode metadata. Keep it immutable: old and new primaries coexist. */
+    UINT width=buffer?(UINT)desc->Buffer.bytes:linear?allocation->Desc.Linear.Width:desc->Width;
+    UINT height=buffer?1:linear?allocation->Desc.Linear.Height:desc->Height;
+    /* A display-mode query describes the mode, not the application's rotated
+     * storage extent. Dxgkrnl compares width/height BEFORE mode rotation; its
+     * cached mode stays panel-oriented while DXGI exposes rotated dimensions.
+     * Undo only the storage quarter-turn here. NONPREROTATED storage already
+     * has identity orientation. Ordinary allocation queries, pitch, backing
+     * and the DC's real scan direction remain unchanged. */
+    if(args->Flags.CheckDisplayMode && !linear && !buffer &&
+       (desc->Buffer.flags&TG_GPU_ALLOCATION_DISPLAY_PRIMARY) &&
+       (desc->Rotation==D3DDDI_ROTATION_90 || desc->Rotation==D3DDDI_ROTATION_270)) {
+        const UINT swap=width;width=height;height=swap;
+    }
     *args=(DXGKARG_DESCRIBEALLOCATION){
         .hAllocation=args->hAllocation,
-        .Width=buffer?(UINT)desc->Buffer.bytes:linear?allocation->Desc.Linear.Width:desc->Width,
-        .Height=buffer?1:linear?allocation->Desc.Linear.Height:desc->Height,
+        .Width=width,
+        .Height=height,
         .Format=(D3DDDIFORMAT)desc->Format,
         .MultisampleMethod={.NumSamples=1},
         .RefreshRate=(linear||buffer)?(D3DDDI_RATIONAL){0}:
