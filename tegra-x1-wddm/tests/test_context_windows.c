@@ -607,6 +607,44 @@ static void TestRotatedGdiPresent(const DXGKRNL_INTERFACE *dxgk)
     CHECK(PoolsInUse()==before);
 }
 
+static void TestStandardStagingSurface(TG_GPU_ADAPTER *adapter, TG_GPU_CONTEXT_ENGINE *engine,
+                                       DRIVER_INITIALIZATION_DATA *ddi)
+{
+    const struct { UINT width, height, pitch, bytes; } cases[] = {
+        {640, 360, 2560, 921600}, {641, 361, 2688, 978944}
+    };
+    const UINT before = PoolsInUse();
+    for (UINT i = 0; i < RTL_NUMBER_OF(cases); ++i) {
+        D3DKMDT_STAGINGSURFACEDATA surface = {.Width = cases[i].width, .Height = cases[i].height};
+        DXGKARG_GETSTANDARDALLOCATIONDRIVERDATA standard = {
+            .StandardAllocationType = D3DKMDT_STANDARDALLOCATION_STAGINGSURFACE,
+            .pCreateStagingSurfaceData = &surface,
+        };
+        CHECK(TgGpuDdiGetStandardAllocationDriverData(adapter, &standard) == STATUS_SUCCESS);
+        CHECK(standard.AllocationPrivateDriverDataSize == sizeof(TG_GPU_LINEAR_ALLOCATION_REQUEST) &&
+              !standard.ResourcePrivateDriverDataSize && !surface.Pitch);
+        TG_GPU_LINEAR_ALLOCATION_REQUEST desc = {0};
+        standard.pAllocationPrivateDriverData = &desc;
+        CHECK(TgGpuDdiGetStandardAllocationDriverData(adapter, &standard) == STATUS_SUCCESS);
+        CHECK(surface.Pitch == cases[i].pitch && desc.Pitch == surface.Pitch &&
+              desc.Buffer.bytes == cases[i].bytes && desc.Format == D3DDDIFMT_X8R8G8B8);
+        DXGK_ALLOCATIONINFO info = {.pPrivateDriverData = &desc, .PrivateDriverDataSize = sizeof(desc)};
+        DXGKARG_CREATEALLOCATION create = {.NumAllocations = 1, .pAllocationInfo = &info};
+        CHECK(ddi->DxgkDdiCreateAllocation(engine, &create) == STATUS_SUCCESS);
+        CHECK(info.Size == cases[i].bytes && info.FlagsWddm2.CpuVisible &&
+              !info.FlagsWddm2.AccessedPhysically && info.PreferredSegment.SegmentId0 == TG_GPU_PAGING_APERTURE_SEGMENT);
+        DXGKARG_DESCRIBEALLOCATION describe = {.hAllocation = info.hAllocation};
+        CHECK(ddi->DxgkDdiDescribeAllocation(engine, &describe) == STATUS_SUCCESS &&
+              describe.Width == surface.Width && describe.Height == surface.Height &&
+              describe.Format == D3DDDIFMT_X8R8G8B8);
+        DXGKARG_DESTROYALLOCATION destroy = {.NumAllocations = 1, .pAllocationList = &info.hAllocation};
+        CHECK(ddi->DxgkDdiDestroyAllocation(engine, &destroy) == STATUS_SUCCESS);
+        surface.Height = 0;
+        CHECK(TgGpuDdiGetStandardAllocationDriverData(adapter, &standard) == STATUS_INVALID_PARAMETER);
+    }
+    CHECK(PoolsInUse() == before && !engine->AllocationBytes);
+}
+
 __declspec(noinline) static void TestLinearAllocations(TG_GPU_CONTEXT_ENGINE *e,
                                                       DRIVER_INITIALIZATION_DATA *ddi)
 {
@@ -1050,6 +1088,7 @@ __declspec(noinline) static void TestAllocations(TG_GPU_CONTEXT_ENGINE *e,TG_GPU
     desc[0].flags=0;desc[0].bytes=TG_GPU_MEMORY_BUDGET_BYTES-TG_GPU_SCANOUT_SEGMENT_BYTES+1;
     CHECK(ddi->DxgkDdiCreateAllocation(e,&create)==STATUS_GRAPHICS_NO_VIDEO_MEMORY);
     RtlZeroMemory(&e->Tables->Scanout,sizeof(e->Tables->Scanout));
+    TestStandardStagingSurface(&surface_adapter, e, ddi);
     TestLinearAllocations(e,ddi);
     TestResourceMetadata(e,ddi,device,second.hDevice);
     CHECK(handle_acquires==handle_releases);
