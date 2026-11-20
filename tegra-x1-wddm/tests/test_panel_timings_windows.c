@@ -293,6 +293,19 @@ static void test_rotation(TG_GPU_ADAPTER *adapter,const DRIVER_INITIALIZATION_DA
             enumerated[0].Format.Graphics.Stride==2880);
     }
     test_path.ContentTransformation.Rotation=D3DKMDT_VPPR_UNPINNED;
+    adapter->Panel.Boot.ColorFormat=D3DDDIFMT_X8R8G8B8;
+    CHECK(d->DxgkDdiEnumVidPnCofuncModality(adapter,&enumerate)==STATUS_SUCCESS && enumerated_count==2);
+    CHECK(enumerated[0].Format.Graphics.PixelFormat==D3DDDIFMT_X8R8G8B8 &&
+          enumerated[1].Format.Graphics.PixelFormat==D3DDDIFMT_A8R8G8B8);
+    CHECK(enumerated[1].Format.Graphics.PrimSurfSize.cx==720 &&
+          enumerated[1].Format.Graphics.PrimSurfSize.cy==1280 &&
+          enumerated[1].Format.Graphics.Stride==2880);
+    UINT before_second_failure=assigned_sets;
+    fail_add=1;
+    CHECK(d->DxgkDdiEnumVidPnCofuncModality(adapter,&enumerate)==STATUS_NO_MEMORY &&
+          assigned_sets==before_second_failure && !new_mode_refs && !new_set_refs);
+    fail_add=UINT32_MAX;
+    adapter->Panel.Boot.ColorFormat=D3DDDIFMT_A8R8G8B8;
     const UINT assigned=assigned_sets;
     enumerate.EnumPivotType=D3DKMDT_EPT_VIDPNSOURCE;
     CHECK(d->DxgkDdiEnumVidPnCofuncModality(adapter,&enumerate)==STATUS_SUCCESS && assigned_sets==assigned);
