@@ -1865,6 +1865,8 @@
           "etl_only": 0,
           "application_pid": 3716,
           "dwm_pid": 1444,
+          "verified_drawing_device": "SystemWarpDrawingDevice",
+          "target_display_luid": "0000000000005a5d",
           "present_calls": 6,
           "present_success": 6,
           "journal_tail": "306937 7280 EXIT RunAndRelease 00000000",
@@ -1890,6 +1892,8 @@
           "etl_only": 14,
           "application_pid": 7396,
           "dwm_pid": 1444,
+          "verified_drawing_device": "NativeGM20BDrawingDevice",
+          "target_display_luid": "0000000000005a5d",
           "present_calls": 1,
           "present_success": 0,
           "journal_tail": "367859 3628 CALL Present 00000000",
@@ -1899,15 +1903,6 @@
           "verified_desktop_samples": null
         },
         "boot_events": [
-          {
-            "record": 78275,
-            "event": 6008
-          },
-          {
-            "record": 78284,
-            "event": 41,
-            "bugcheck_code": 0
-          },
           {
             "record": 78342,
             "event": 1074,
@@ -1951,6 +1946,154 @@
         ],
         "restore": {
           "boot": 78606,
+          "gpu_problem_code": 0,
+          "accepted_published_inf": "oem15.inf",
+          "persistent_accepted_grant": true,
+          "candidate_driverstore_entry_removed": "oem19.inf",
+          "scoped_tasks_processes_and_etw_sessions_remaining": 0
+        }
+      },
+      {
+        "iteration": 2,
+        "candidate_boot": 78769,
+        "query": {
+          "archive_sha256": "9d8f7971570e7874a4dcd75b6af5057487f4fff06105e7b5a004086300b3e6e4",
+          "kernel_etl_sha256": "01232b50b7e6a4184c5bff6dd26a11192de39dbaace9a2702a0e51d77b646fbe",
+          "kernel_etl_finalized": true,
+          "boot": 78769,
+          "boot_at_collection": 78769,
+          "kernel_record_counts": {
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": true,
+          "durable_only": 0,
+          "etl_only": 0
+        },
+        "warp": {
+          "archive_sha256": "2ad51f484cf097cbe58545b39d85435cd31aaa942cf4019ee099517febb700ce",
+          "kernel_etl_sha256": "e94345841e63306c8c31faf21c1de79bc2e1ae9eed515ee1b5de4a2028c78aab",
+          "kernel_etl_finalized": true,
+          "boot": 78769,
+          "boot_at_collection": 78769,
+          "kernel_record_counts": {
+            "dwm/op1/phase1/0x00000103": 52,
+            "dwm/op1/phase2/0x00000000": 52,
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": true,
+          "durable_only": 0,
+          "etl_only": 0,
+          "application_pid": 5924,
+          "dwm_pid": 1464,
+          "verified_drawing_device": "SystemWarpDrawingDevice",
+          "target_display_luid": "00000000000054ac",
+          "present_calls": 6,
+          "present_success": 6,
+          "journal_tail": "270609 5628 EXIT RunAndRelease 00000000",
+          "runtime_etl_finalized": true,
+          "dxgi_start_records": 6,
+          "dxgi_return_records": 6,
+          "verified_desktop_samples": 15,
+          "clock_alignment": {
+            "method": "Same-boot tick transitions sampled just before the workload. Bounds refer to the timestamp recorded before the application flushes its CALL journal entry and invokes DXGI.",
+            "tick_steps": 8,
+            "maximum_sampled_tick_step_ms": 16,
+            "calibration_envelope_width_ms": 37.317,
+            "warp_or_native_present_pairs_covered_by_calibrated_call_return_bounds": 5,
+            "available_complete_dxgi_pairs": 6,
+            "kernel_etl_tail_ms_relative_to_first_journal_tick": null,
+            "runtime_etl_tail_ms_relative_to_first_journal_tick": null,
+            "same_boot_clock_control": "incomplete"
+          }
+        },
+        "native": {
+          "archive_sha256": "35cf9c685de34f7df56f62ae067c1841176301153e86bba768811ced7d9a33fe",
+          "kernel_etl_sha256": "597132951436bfc773415a0b5cf2619fed1c0c0841f412356269e42640a0695f",
+          "kernel_etl_finalized": false,
+          "boot": 78769,
+          "boot_at_collection": 78928,
+          "kernel_record_counts": {
+            "draw/op3/phase2/0x00000000": 3,
+            "dwm/op1/phase1/0x00000103": 12,
+            "dwm/op1/phase2/0x00000000": 12,
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": false,
+          "durable_only": 0,
+          "etl_only": 5,
+          "application_pid": 1852,
+          "dwm_pid": 1464,
+          "verified_drawing_device": "NativeGM20BDrawingDevice",
+          "target_display_luid": "00000000000054ac",
+          "present_calls": 1,
+          "present_success": 0,
+          "journal_tail": "326187 2896 CALL Present 00000000",
+          "runtime_etl_finalized": false,
+          "dxgi_start_records": 0,
+          "dxgi_return_records": 0,
+          "verified_desktop_samples": null,
+          "interrupted_intent_file": {
+            "original_hex": "00-00-00-00-00",
+            "boot_from_mac": 78769,
+            "collection_boot": 78928
+          },
+          "boot_crosscheck": "The pre-restart Mac record had matching current and intended boot IDs. The independent case status preserved that same boot ID. The result archive retains the damaged intent file.",
+          "clock_alignment": {
+            "method": "Same-boot tick transitions sampled just before the workload. Bounds refer to the timestamp recorded before the application flushes its CALL journal entry and invokes DXGI.",
+            "tick_steps": 8,
+            "maximum_sampled_tick_step_ms": 16,
+            "calibration_envelope_width_ms": 36.763,
+            "warp_or_native_present_pairs_covered_by_calibrated_call_return_bounds": 0,
+            "available_complete_dxgi_pairs": 0,
+            "kernel_etl_tail_ms_relative_to_first_journal_tick": null,
+            "runtime_etl_tail_ms_relative_to_first_journal_tick": null,
+            "same_boot_clock_control": "unconfirmed"
+          }
+        },
+        "boot_events": [
+          {
+            "record": 78672,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic enter closed gate before selecting candidate"
+          },
+          {
+            "record": 78689,
+            "event": 12
+          },
+          {
+            "record": 78753,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic one-time candidate boot"
+          },
+          {
+            "record": 78769,
+            "event": 12
+          },
+          {
+            "record": 78839,
+            "event": 12
+          },
+          {
+            "record": 78848,
+            "event": 6008
+          },
+          {
+            "record": 78857,
+            "event": 41,
+            "bugcheck_code": 0
+          },
+          {
+            "record": 78912,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic restore verified permanent baseline"
+          },
+          {
+            "record": 78928,
+            "event": 12
+          }
+        ],
+        "restore": {
+          "boot": 78928,
           "gpu_problem_code": 0,
           "accepted_published_inf": "oem15.inf",
           "persistent_accepted_grant": true,
