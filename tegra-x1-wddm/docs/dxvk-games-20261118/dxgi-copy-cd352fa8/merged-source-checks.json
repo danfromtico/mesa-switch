@@ -1,0 +1,52 @@
+{
+  "present1": {
+    "functional_source_commit": "abd9f213",
+    "previous_instrumented_umd_prefix": "9fb6cef7",
+    "scope": "The ordinary production table accepts the observed input only on a negotiated native WDDM 2.0 device. This separate source change is outside the selected e6852733 build.",
+    "host": {
+      "base": "84952aad731896ee97ba91d38a52d13f8cbbc2fe",
+      "driver": "833a3f1a3eb219ccff28fdad5b1e98b384c607e46021b54249a1a527712c4b75",
+      "tests": "833a3f1a3eb219ccff28fdad5b1e98b384c607e46021b54249a1a527712c4b75",
+      "combined": "833a3f1a3eb219ccff28fdad5b1e98b384c607e46021b54249a1a527712c4b75",
+      "binary": "7ced8d6d818240a08c2d07e7f9572c4920409c08be384fcf82431272828655ed",
+      "log": "e28d0ddbf0e88a28e738f59ff5e3da2fede4c2a18442774963877b685084fb4e",
+      "units": 40,
+      "groups": 84,
+      "exit": 0
+    },
+    "device_evidence": "../wddm20-present1-native-window.json"
+  },
+  "emc": {
+    "source": "454ea62d70f74665b3839efd29de5f51bfbdabd8",
+    "merged": "84952aad731896ee97ba91d38a52d13f8cbbc2fe",
+    "arch_x64": {
+      "candidate_fault": {
+        "unsigned_sha256": "7f22756e25b65df3f09789dfaaddac095ed286b7a9b6cd2dafd58d380a497b6c",
+        "dvfs_object": "4d43e111d0e24129331f568b0d3fc6c7ba4a7edbd251881ea06e81e7a0d2bdf4",
+        "test_source": "0ad57969e1544c24a072900ecfffedcaf20496e1899039385da7441dabf46077",
+        "exit": 0,
+        "stdout": "PASS: WDDM HighOPT GPU DVFS quiescent gating, policy switch, thermal throttle and rollback recovery (controlled substitutes)\nCHILD_EXIT 0\n"
+      },
+      "platform_candidate": {
+        "unsigned_sha256": "bc4b83ebeed8192cf06824c451fd7ae165f9914681cd579802df0be7a678d6a3",
+        "test_source": "9c37fb0ccb2051af0dbc1cbd1c65ec961aa9c8f917f5a1929913df26e4eb4215",
+        "exit": 0,
+        "stdout": "PASS: WDM HandleLock + IoSetCompletionRoutineEx unload-safe async IRP bridge, PnP QueryRemove/RemoveComplete reconnect and rail abandon\nCHILD_EXIT 0\n"
+      }
+    },
+    "arch_arm64": {
+      "candidate_fault": {
+        "unsigned_sha256": "6a1f1fb532cb7685cdfe3842cfcff926dae522d921b69c7dd86a149761e1fb85",
+        "dvfs_object": "08ee3aa3e1f49f773de7e6342154d14bb73bb7cd9e396a7cecd4eea68ec28a11",
+        "test_source": "0ad57969e1544c24a072900ecfffedcaf20496e1899039385da7441dabf46077"
+      },
+      "platform_candidate": {
+        "unsigned_sha256": "9cdbd64299684e565872e4ebafeeb277d1212ad9257123c2c3738c3cc944c47e",
+        "test_source": "9c37fb0ccb2051af0dbc1cbd1c65ec961aa9c8f917f5a1929913df26e4eb4215"
+      }
+    },
+    "device_evidence": "../../EMC_VOTE_DELIVERY_20261118.json",
+    "selected_kmd": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "scope": "The selected display KMD is still the previously characterized fc6e8d08 binary."
+  }
+}

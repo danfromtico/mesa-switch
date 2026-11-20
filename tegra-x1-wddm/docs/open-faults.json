@@ -98,7 +98,7 @@
     },
     {
       "id": "GM20B-DXGI-SRGB-COPY",
-      "status": "open",
+      "status": "closed",
       "kind": "incorrect-rendering",
       "affected_scopes": [
         "presentation",
@@ -111,8 +111,92 @@
       "cause": "The unrotated path uses a Vulkan image blit that decodes sRGB channel values during conversion to UNORM. The signed candidate retained the encoded values on the same hardware and executable. The three logged empty sequential restarts used UNORM application buffers.",
       "daily_workaround": "In a client that can choose its copy route, the accepted driver passed the measured one-to-one B8G8R8A8_UNORM copy between optimal surfaces. Keep sRGB-to-UNORM presentation copies in diagnostics for clients without a separately qualified option.",
       "close_when": "On candidate components eligible for presentation promotion, repeat the original encoded-region and filtered-channel cases on AC in three consecutive runs. Verify pixel values, untouched borders, normal exit and the desktop. Record the adopted source, loaded component hashes and actual presentation output.",
-      "resolution": null
+      "resolution": {
+        "root_cause": "A Vulkan blit decoded encoded sRGB when DXGI required preserved channel bytes. The same signed comparator distinguished the baseline and corrected production driver on GM20B.",
+        "root_cause_confirmed": true,
+        "commit": "e6852733640f4dc114042796477671ca54c1f3c6",
+        "components": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4"
+        },
+        "causal_evidence_file": "tegra-x1-wddm/docs/dxvk-games-20261118/dxgi-copy-cd352fa8/causal-comparison.json",
+        "causal_evidence_sha256": "c0cf95f8e7a07434107c98bba66d24160bbc951186581d40d5f827c1e8d581ce",
+        "original_scenario_runs": [
+          {
+            "name": "encoded-a",
+            "passed": true,
+            "before_boot": 84195,
+            "after_boot": 84195,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/dxvk-games-20261118/dxgi-copy-cd352fa8/encoded-a.json",
+            "evidence_sha256": "b59ea466fbfc79ab43ddebce8d247ad2bba8b6798e66448a1e0f2b935b7e5434",
+            "original_trigger": true
+          },
+          {
+            "name": "encoded-b",
+            "passed": true,
+            "before_boot": 84195,
+            "after_boot": 84195,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/dxvk-games-20261118/dxgi-copy-cd352fa8/encoded-b.json",
+            "evidence_sha256": "902786047c32dcd418607720a04715765d91dc2ab03df0f9a46b990b9c7995ac",
+            "original_trigger": true
+          },
+          {
+            "name": "encoded-c",
+            "passed": true,
+            "before_boot": 84195,
+            "after_boot": 84195,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/dxvk-games-20261118/dxgi-copy-cd352fa8/encoded-c.json",
+            "evidence_sha256": "58da478d06a8f1f150050c14a384f2a7322ec16e422ad76b38ae336bb47a2341",
+            "original_trigger": true
+          }
+        ]
+      }
     }
   ],
-  "independent_qualifications": []
+  "independent_qualifications": [
+    {
+      "evidence_sha256": "7bc6185d0c66fa60823ddfd6eecdf0808a0354ce6cfd8ba39b44c1dadee30c77",
+      "independence": [
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "The previous empty native UNORM case reached the user-mode dispatch of D3DKMT_PRESENT. Its kernel trace ended before the origin of the restart was identified. This release keeps the legacy Present callback, KMD, NVK and runtime fence implementation. Both exact model status queries and unchanged presentation counts were verified on the candidate. Real native sequential submission remains excluded from daily use; no repair is claimed. The candidate passed the separate ordinary Blt outputs and visible flip control.",
+          "test_sha256": "59eabfafcadd4c672cdf5080b233375de911b1a102c8e763ab1042751dea15b7"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "The registered incident uses the optional 0x000b0020 client and third-frame sequence. The release retains the ordinary interface negotiation. Its supported native legacy flip window displayed its reference and exited; the experimental multi-frame case remains in diagnostics.",
+          "test_sha256": "a4f261a207bd7886125604a648a541cdf05f57e89417043befc0a3a8ee41bc45"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "The process-scoped WDDM 2.0 offer and Present1 Reserved guard are outside this copy repair. Public device/context creation and drawing passed through the ordinary selected driver; the experimental offer is not enabled by the candidate.",
+          "test_sha256": "962b1f61990b3cdadf30a2194b8c02b42421a5832923e79b91da45da458d46f9"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "The KMD, NVK and CPU/GPU/EMC scheduling binaries are unchanged. This candidate completed the seven native copy, overlap and pending-write cases and returned to the same desktop. The broader load fault remains open and no universal stability claim is made.",
+          "test_sha256": "126eb65b2a16320ddbfd0005738ba7cbc15c296fda474d75bad59cad39c50d84"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "The Wi-Fi package and startup path are unchanged. The externally powered candidate remained connected and the real native color conversion reached verified desktop RGB and normal exit.",
+          "test_sha256": "4bcacdd85c935d3c3d0b187493a16dea1f3760714b4214a495cd2994ec88f1c9"
+        }
+      ]
+    }
+  ]
 }

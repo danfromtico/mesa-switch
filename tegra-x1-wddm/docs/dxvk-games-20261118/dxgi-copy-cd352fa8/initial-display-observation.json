@@ -1,0 +1,32 @@
+{
+  "source_receipt_sha256": "64eb3b6902971d8fca6a677058db359cdf9c46aa944a3d8d42b6c65070044e5d",
+  "signed_client_sha256": "73676f577209f6c7c437aa76a5ef1ac9f61e73c439928b5807ceec63879cd102",
+  "boot_record": 84195,
+  "exit": 4,
+  "before": {
+    "dwm": 1436,
+    "power": "Online",
+    "code": 0,
+    "boot": 84195,
+    "package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009"
+  },
+  "after": {
+    "dwm": 1436,
+    "power": "Online",
+    "code": 0,
+    "boot": 84195,
+    "package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009"
+  },
+  "output": [
+    "kmt\t0000000000005b39\t10de\t12e\t53",
+    "DEVICE ddi=000b000f module_owner_match=1 gm20b_luid=0000000000005b39",
+    "PIXELS case=whole slot=Blt count=1073 mismatches=0 border_errors=0 max_channel_error=0 linear_pitch=0",
+    "DISPLAY case=encoded sampled=5 matched=0 output=desktop-readback",
+    "PIXELS case=encoded slot=Blt1 count=1073 mismatches=0 border_errors=0 max_channel_error=0 linear_pitch=0",
+    "DISPLAY case=encoded_scale_convert sampled=5 matched=0 output=desktop-readback",
+    "PIXELS case=encoded_scale_convert slot=Blt1 count=1073 mismatches=0 border_errors=0 max_channel_error=1 linear_pitch=0",
+    "COMPLETE passed=0 present_callbacks=0 close=00000000 ddi_error=00000000"
+  ],
+  "interpretation": "The first GDI sample window did not establish visible output. Its GPU pixel checks passed. A separate repaint-aware client displayed the same mapped GPU bytes from an opaque DIB and sampled only desktop points belonging to its own window. Both tests ran on the same driver and desktop.",
+  "retest": "4bcacdd85c935d3c3d0b187493a16dea1f3760714b4214a495cd2994ec88f1c9"
+}

@@ -1,0 +1,35 @@
+{
+  "fault": "GM20B-DXGI-SRGB-COPY",
+  "source_commit": "e6852733640f4dc114042796477671ca54c1f3c6",
+  "base_commit": "86b11bff561ea8107aadd060249eb14a226bd1c0",
+  "build_patch_sha256": "8d49750eed5bb245b24b5f219a0527b41e656756081d98fbdfa4bd264b864b14",
+  "old_umd": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+  "candidate_umd": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+  "production_paths": [
+    "src/nouveau/tgd3d/tgd3d.h",
+    "src/nouveau/tgd3d/tgd3d_dxgi.cpp",
+    "src/nouveau/tgd3d/tgd3d_resource.cpp"
+  ],
+  "same_original_fixture": "5ab06a163490d1d52d65d5d229667f4306f5ed2a915ffc1c83bab7043ced1250",
+  "baseline_original_receipt_sha256": "4b4267b14941544d864a9b1028f01ad51f0a35485c01917c0fe75938645102c6",
+  "baseline_output": [
+    "kmt\t0000000000005aaf\t10de\t12e\t53",
+    "DEVICE ddi=000b000f module_owner_match=1 gm20b_luid=0000000000005aaf",
+    "PIXELS case=whole slot=Blt count=1073 mismatches=0 border_errors=0 max_channel_error=0 linear_pitch=0",
+    "FIRST_PIXEL case=encoded x=4 y=5 expected=5977b9a1 actual=1a2f7ca1",
+    "PIXELS case=encoded slot=Blt1 count=1073 mismatches=88 border_errors=0 max_channel_error=73 linear_pitch=0",
+    "FIRST_PIXEL case=encoded_scale_convert x=1 y=2 expected=325ea086 actual=081d5a86",
+    "PIXELS case=encoded_scale_convert slot=Blt1 count=1073 mismatches=748 border_errors=0 max_channel_error=74 linear_pitch=0",
+    "COMPLETE passed=0 present_callbacks=0 close=00000000 ddi_error=00000000"
+  ],
+  "diagnosis": "The encoded channels were decoded when VkCmdBlitImage read the sRGB source. A compatible byte copy retains encoded pixels; the filtered conversion uses a UNORM source before filtering. The complete candidate also handles transfer-only destinations, explicit Win32 pitch, same-image overlap and deferred image retirement.",
+  "candidate_original_receipts": [
+    "b59ea466fbfc79ab43ddebce8d247ad2bba8b6798e66448a1e0f2b935b7e5434",
+    "902786047c32dcd418607720a04715765d91dc2ab03df0f9a46b990b9c7995ac",
+    "58da478d06a8f1f150050c14a384f2a7322ec16e422ad76b38ae336bb47a2341"
+  ],
+  "candidate_actual_display": "4bcacdd85c935d3c3d0b187493a16dea1f3760714b4214a495cd2994ec88f1c9",
+  "initial_display_observation_sha256": "73a1fd9965f8337762fe9e180f94f5539d8df6b9f6a95f369d90b923dd40ba83",
+  "prior_source_review": "0ed4ca90102e3871a300152fb2da244ff91367d5e0dc28caec239bf11ea91554",
+  "project_scope": "All three production files in e6852733 are included. The previous source was reconstructed from the accepted release; its PE sections matched except the build ID. The new native leaf matches the previous complete one-use trial exactly. The original empty sequential crash and experimental WDDM 2.0 faults remain open."
+}

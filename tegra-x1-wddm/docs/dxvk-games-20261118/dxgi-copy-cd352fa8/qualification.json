@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "change_kind": "verified-fix",
+  "base_commit": "86b11bff561ea8107aadd060249eb14a226bd1c0",
+  "source_commit": "e6852733640f4dc114042796477671ca54c1f3c6",
+  "changed_paths": [
+    ".github/workflows/switch-graphics-baseline.yml",
+    "src/nouveau/tgd3d/tests/contracts.cpp",
+    "src/nouveau/tgd3d/tests/overlap_contracts.cpp",
+    "src/nouveau/tgd3d/tgd3d.h",
+    "src/nouveau/tgd3d/tgd3d_dxgi.cpp",
+    "src/nouveau/tgd3d/tgd3d_resource.cpp",
+    "tegra-x1-wddm/docs/.gitattributes",
+    "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json",
+    "tegra-x1-wddm/docs/STATUS.md",
+    "tegra-x1-wddm/docs/dxvk-games-20261118/baseline-promotion-gate.json",
+    "tegra-x1-wddm/docs/dxvk-games-20261118/wddm20-present1-native-window.json",
+    "tegra-x1-wddm/docs/graphics-baseline.json",
+    "tegra-x1-wddm/docs/open-faults.json",
+    "tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1",
+    "tegra-x1-wddm/tools/check_graphics_baseline_push.py",
+    "tegra-x1-wddm/tools/package_graphics_policy.py",
+    "tegra-x1-wddm/tools/package_tgd3d_trial.py",
+    "tegra-x1-wddm/tools/tgd3d-default/Baseline-Device.ps1",
+    "tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1",
+    "tegra-x1-wddm/tools/tgd3d-default/Install-Default.ps1",
+    "tegra-x1-wddm/tools/tgd3d-default/Install-GraphicsBootPolicy.ps1",
+    "tegra-x1-wddm/tools/tgd3d-default/Invoke-GraphicsBootPolicy.ps1",
+    "tegra-x1-wddm/tools/tgd3d-default/Native-Boot.ps1",
+    "tegra-x1-wddm/tools/tgd3d-default/README.md",
+    "tegra-x1-wddm/tools/tgd3d-default/tests/Test-BaselinePromotion.ps1",
+    "tegra-x1-wddm/tools/tgd3d-default/tests/test_baseline_publication.py"
+  ],
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+  "components": {
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4"
+  },
+  "trial": {
+    "one_time": true,
+    "power": "Online",
+    "gpu_code": 0,
+    "boot_record": 84195,
+    "loaded": {
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4"
+    }
+  },
+  "system_log": {
+    "complete": true,
+    "first_record": 84173,
+    "last_record": 84269,
+    "boot_records": [
+      84195
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "kind": "controlled",
+        "explained": true,
+        "cause": "Windows recorded the requested one-use candidate boot after the closed-gate desktop.",
+        "boot_record": 84195,
+        "system_records": [
+          84178,
+          84195
+        ],
+        "evidence_file": "controlled-trial.json",
+        "evidence_sha256": "51d78e81bdd529e4903ed5fef408294376fcf90b023dc79602e2deeea1e73a6e"
+      }
+    ]
+  },
+  "verified_fix": {
+    "fault_id": "GM20B-DXGI-SRGB-COPY",
+    "causal_evidence_sha256": "c0cf95f8e7a07434107c98bba66d24160bbc951186581d40d5f827c1e8d581ce",
+    "control_sha256": "a4f261a207bd7886125604a648a541cdf05f57e89417043befc0a3a8ee41bc45"
+  },
+  "cases": [
+    {
+      "name": "encoded-a",
+      "passed": true,
+      "before_boot": 84195,
+      "after_boot": 84195,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "encoded-a.json",
+      "evidence_sha256": "b59ea466fbfc79ab43ddebce8d247ad2bba8b6798e66448a1e0f2b935b7e5434"
+    },
+    {
+      "name": "encoded-b",
+      "passed": true,
+      "before_boot": 84195,
+      "after_boot": 84195,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "encoded-b.json",
+      "evidence_sha256": "902786047c32dcd418607720a04715765d91dc2ab03df0f9a46b990b9c7995ac"
+    },
+    {
+      "name": "encoded-c",
+      "passed": true,
+      "before_boot": 84195,
+      "after_boot": 84195,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "encoded-c.json",
+      "evidence_sha256": "58da478d06a8f1f150050c14a384f2a7322ec16e422ad76b38ae336bb47a2341"
+    },
+    {
+      "name": "public",
+      "passed": true,
+      "before_boot": 84195,
+      "after_boot": 84195,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "public.json",
+      "evidence_sha256": "962b1f61990b3cdadf30a2194b8c02b42421a5832923e79b91da45da458d46f9"
+    },
+    {
+      "name": "copy-selected",
+      "passed": true,
+      "before_boot": 84195,
+      "after_boot": 84195,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "copy-selected.json",
+      "evidence_sha256": "126eb65b2a16320ddbfd0005738ba7cbc15c296fda474d75bad59cad39c50d84"
+    },
+    {
+      "name": "window-flip",
+      "passed": true,
+      "before_boot": 84195,
+      "after_boot": 84195,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "window-flip.json",
+      "evidence_sha256": "a4f261a207bd7886125604a648a541cdf05f57e89417043befc0a3a8ee41bc45"
+    },
+    {
+      "name": "idle-status",
+      "passed": true,
+      "before_boot": 84195,
+      "after_boot": 84195,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "idle-status.json",
+      "evidence_sha256": "59eabfafcadd4c672cdf5080b233375de911b1a102c8e763ab1042751dea15b7"
+    },
+    {
+      "name": "visible-copy",
+      "passed": true,
+      "before_boot": 84195,
+      "after_boot": 84195,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "visible-copy.json",
+      "evidence_sha256": "4bcacdd85c935d3c3d0b187493a16dea1f3760714b4214a495cd2994ec88f1c9"
+    }
+  ]
+}
