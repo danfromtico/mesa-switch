@@ -922,7 +922,20 @@
             "surface_return": "0x00263008"
           },
           "public_present_returns": 0,
-          "last_client_event": "CALL Present"
+          "last_client_event": "CALL Present",
+          "render_target_present_buffers": {
+            "count": 2,
+            "size": [
+              640,
+              360
+            ],
+            "ddi_bind_flags": "0xa0 (RENDER_TARGET | PRESENT)",
+            "allocation_sizes_bytes": [
+              983040,
+              983040
+            ],
+            "source_etl_sha256": "61a23d5e062a20eb4891d0d23c2c7d7e5355c7fece1e9507abcd17ef0b875dc3"
+          }
         },
         "system_events": {
           "boot": 76973,
@@ -938,8 +951,137 @@
           ],
           "previous_1074": []
         }
+      },
+      {
+        "case": "PresentPair-261120-024839172443",
+        "archive_sha256": "5d3bdcab4c787a4c3b5d104011fdddaf11fa264922afc12cbe2a60fca157ad8b",
+        "observer_sha256": "ef89562ea5d51485f72168326109209627194fa3fbb447196f79f48d08c23f27",
+        "native_dwm_pid": 1392,
+        "warp": {
+          "child_pid": 2636,
+          "observation_order": [
+            "present",
+            "core",
+            "prepare",
+            "surface_call",
+            "surface_return",
+            "prepare_return",
+            "present_return"
+          ],
+          "return_register_low32": {
+            "surface_return": "0x00263008",
+            "prepare_return": "0x00000003",
+            "present_return": "0x00000000"
+          },
+          "public_present_returns": 6,
+          "desktop_pixel_matches": 15,
+          "desktop_pixel_samples": 15,
+          "client_exit": 0
+        },
+        "native": {
+          "child_pid": 7860,
+          "observation_order": [
+            "present",
+            "core",
+            "prepare",
+            "surface_call",
+            "surface_return",
+            "prepare_return",
+            "umd_present",
+            "flush_recorded_return",
+            "flush_handoff_return",
+            "callback_call"
+          ],
+          "return_register_low32": {
+            "surface_return": "0x00263008",
+            "prepare_return": "0x00000003",
+            "flush_recorded_return": "0x00000000",
+            "flush_handoff_return": "0x00000000"
+          },
+          "public_present_returns": 0,
+          "last_client_event": "CALL Present",
+          "render_target_present_buffers": {
+            "count": 2,
+            "size": [
+              640,
+              360
+            ],
+            "ddi_bind_flags": "0xa0 (RENDER_TARGET | PRESENT)",
+            "allocation_sizes_bytes": [
+              983040,
+              983040
+            ],
+            "source_etl_sha256": "916b1b55c346d35ea44659aa95164c6d9a3a322e14fd5d05412435701d0ef1ab"
+          },
+          "last_driver_receipt": "Both flush(dev, false) and flush(dev, true) returned S_OK. Execution reached the indirect call instruction for pfnPresentCb. The observer did not retain a return from that call."
+        },
+        "system_events": {
+          "boot": 77048,
+          "prior_boot": 76973,
+          "41": [
+            77066
+          ],
+          "6008": [
+            77057
+          ],
+          "bugcheck": [
+            "0"
+          ],
+          "previous_1074": []
+        }
       }
     ],
-    "scope_of_evidence": "Each named checkpoint was written through from the signed client observer before that thread resumed. Stops affect timing. A missing receipt cannot identify the stalled instruction. Event 41 with bugcheck zero identifies an unclean restart and supplies no stop code. A shared-surface status alone cannot establish which component caused it."
+    "scope_of_evidence": "Each named checkpoint was written through from the signed client observer before that thread resumed. Stops affect timing. A missing receipt cannot identify the stalled instruction. Event 41 with bugcheck zero identifies an unclean restart and supplies no stop code. A shared-surface status alone cannot establish which component caused it.",
+    "native_gdi_vs_dxgi_after_identical_readback": {
+      "scope": "Both arms use the native drawing adapter, compositor, window, swap chain and six prerecorded source frames. Both copy the GPU-rendered BGRA image to staging, read it back, verify 35 reference pixels per frame, pack all rows, and unmap before window output. The GDI arm calls SetDIBitsToDevice and GdiFlush. The other arm calls DXGI Present(1,0).",
+      "runs": [
+        {
+          "case": "PresentPair-261120-030145659284",
+          "signed_exe_sha256": "b124732c32f38a40c04c22a8cda4fd7460aa7aca3f13b0b4b82095c86ac03c5c",
+          "archive_sha256": "7b65cdc97174932f8daf7a5a87b4001cf92f9ceed4ea5bac5a20cdc14b527f0f",
+          "first_boot": 77048,
+          "next_boot": 77123,
+          "events_41": [
+            77141
+          ],
+          "events_6008": [
+            77132
+          ],
+          "bugcheck": [
+            "0"
+          ],
+          "previous_1074": [],
+          "gdi_trials": [
+            {
+              "trial": "1-B",
+              "frames_rendered_and_copied": 6,
+              "sampled_desktop_pixels": 15,
+              "matched_desktop_pixels": 15,
+              "exit": 0
+            },
+            {
+              "trial": "2-B",
+              "frames_rendered_and_copied": 6,
+              "sampled_desktop_pixels": 15,
+              "matched_desktop_pixels": 15,
+              "exit": 0
+            },
+            {
+              "trial": "3-B",
+              "frames_rendered_and_copied": 6,
+              "sampled_desktop_pixels": 15,
+              "matched_desktop_pixels": 15,
+              "exit": 0
+            }
+          ],
+          "dxgi_trial": {
+            "trial": "4-A",
+            "verified_gpu_readbacks_before_reboot": 1,
+            "recorded_present_returns": 0,
+            "last_stage": "CALL Present"
+          }
+        }
+      ]
+    }
   }
 }
