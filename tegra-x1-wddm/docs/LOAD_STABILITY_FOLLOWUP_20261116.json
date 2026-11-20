@@ -2925,7 +2925,7 @@
     ],
     "interpretation": "The public GDI surface ownership handoff preserved the GPU-produced image and the GDI edits. The six-frame native rendering control completed on both process selections. A real sequential Present also produced an unexpected restart with runtime transport unselected, with a GDI-compatible chain, and with an ordinary application back buffer before any app-issued draw, upload, copy or clear. Device initialization and desktop composition still run in the empty-buffer case. The initiating kernel operation remains unresolved.",
     "recovery": {
-      "boot": 80251,
+      "boot": 80844,
       "gpu_problem_code": 0,
       "power": "Online",
       "permanent_baseline_verified": true,
@@ -3218,6 +3218,362 @@
         }
       ]
     },
+    "paired_typed_umd_and_kernel_window_copy": {
+      "candidate_kernel_sha256": "6e2ea90712973c1155767efb91177ce23a8cfb48f8456ffa566fd12c4f79b589",
+      "signed_catalog_sha256": "67b60344e19e0ce030b4b96f74e4d4333beebf79758e60c981b07029b4d48c90",
+      "reference_kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "arm64_driver_model_executable_sha256": "edb031995c141659b91548e52c980e8b764302d7b0b6742a1e90f1d797c3a0d8",
+      "signed_candidate_source_patch_sha256": "d741e4abdb85c781d834dd265fb2b4f1657813a8844ca18e9622d9a2c0dfd644",
+      "untraced_functional_source_patch_sha256": "081a805ef7f8920f2114927f6825e2b4b802f2dbf499ac4e30ba13df5da840ba",
+      "driver_model_observation": "A WDK model running on the Switch accepted a standard linear window-sized rectangle, checked both pitches and encoded one packet. The model uses substitutes for WDDM and the GPU.",
+      "observation_scope": "The extra kernel event records the source and destination geometry only after the miniport selected two eligible surface descriptors for a BLT. The regular query event independently establishes that the collector received events from this kernel. A truncated trace gives no coverage after its last retained event.",
+      "trials": [
+        {
+          "candidate_boot": 80685,
+          "one_time_permission_consumed": true,
+          "cases": [
+            {
+              "mode": "candidate-query",
+              "outcome": "completed",
+              "start_boot": 80685,
+              "collection_boot": 80685,
+              "query_receipts": 2,
+              "trace_finalized_without_loss": true,
+              "geometry_receipts": [],
+              "miniport_counts": {
+                "dwm/op1/phase1/0x00000103": 1,
+                "dwm/op1/phase2/0x00000000": 1,
+                "query/op3/phase2/0x00000000": 2
+              },
+              "miniport_present_flags": {
+                "dwm/1/flags0x0000000c/dma0/status0x00000103": 1,
+                "dwm/2/flags0x0000000c/dma0/status0x00000000": 1
+              },
+              "last_client_mark": null,
+              "desktop_samples": null,
+              "fixture_sha256": {
+                "receipt-capture.exe": "e8173e120b12fda5eb21ba253abb7121fd390e0f7063b32eb04f88fe2d39876c",
+                "nvdec-resource-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29"
+              },
+              "capture_archive_sha256": "d4d00af1036bec819b859e34c142cea2eca05a3b916bc483085b2321f9df7a31",
+              "kernel_trace_sha256": "8f4c319350ed5040b32e101667207aac62613d2a9884dad753c2d8349929800e",
+              "present_call_checkpoints": 0,
+              "present_returns_s_ok": 0,
+              "application_exit": false,
+              "zero_application_writes_checkpoint": false
+            },
+            {
+              "mode": "native-render",
+              "outcome": "completed",
+              "start_boot": 80685,
+              "collection_boot": 80685,
+              "query_receipts": 2,
+              "trace_finalized_without_loss": true,
+              "geometry_receipts": [],
+              "miniport_counts": {
+                "draw/op3/phase2/0x00000000": 3,
+                "dwm/op1/phase1/0x00000103": 17,
+                "dwm/op1/phase2/0x00000000": 17,
+                "query/op3/phase2/0x00000000": 2
+              },
+              "miniport_present_flags": {
+                "dwm/1/flags0x0000000c/dma0/status0x00000103": 17,
+                "dwm/2/flags0x0000000c/dma0/status0x00000000": 17
+              },
+              "last_client_mark": "268250 5428 EXIT RunAndRelease 00000000",
+              "desktop_samples": null,
+              "fixture_sha256": {
+                "receipt-capture.exe": "e8173e120b12fda5eb21ba253abb7121fd390e0f7063b32eb04f88fe2d39876c",
+                "nvdec-resource-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+                "step4-present.exe": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb"
+              },
+              "capture_archive_sha256": "7e566fa0c622e82cc30a4239630684acc28f274c45b8eccca96c88a74c1dca5c",
+              "kernel_trace_sha256": "ec91ed0ec8086b702b6ae919f8d0e1e80163fe0d794ff00f8f225753f01e7c28",
+              "present_call_checkpoints": 0,
+              "present_returns_s_ok": 0,
+              "application_exit": true,
+              "zero_application_writes_checkpoint": false
+            },
+            {
+              "mode": "warp-empty",
+              "outcome": "completed",
+              "start_boot": 80685,
+              "collection_boot": 80685,
+              "query_receipts": 2,
+              "trace_finalized_without_loss": true,
+              "geometry_receipts": [],
+              "miniport_counts": {
+                "dwm/op1/phase1/0x00000103": 68,
+                "dwm/op1/phase2/0x00000000": 68,
+                "query/op3/phase2/0x00000000": 2
+              },
+              "miniport_present_flags": {
+                "dwm/1/flags0x0000000c/dma0/status0x00000103": 68,
+                "dwm/2/flags0x0000000c/dma0/status0x00000000": 68
+              },
+              "last_client_mark": "344468 4004 EXIT RunAndRelease 00000000",
+              "desktop_samples": null,
+              "fixture_sha256": {
+                "receipt-capture.exe": "e8173e120b12fda5eb21ba253abb7121fd390e0f7063b32eb04f88fe2d39876c",
+                "nvdec-resource-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+                "step4-present.exe": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb"
+              },
+              "capture_archive_sha256": "51bbed56c4c03dcf5695bda9ee09794d26969d9ee4eb88ae14a127832ba6d4c9",
+              "kernel_trace_sha256": "99ba0d0a433d29ef1cdeaa78a171e7d53c1db261ee8bfea641d36b51549d88d3",
+              "last_kernel_etw_event_ms_from_present_journal_checkpoint": 688.875,
+              "last_recorded_miniport_event_ms_from_present_journal_checkpoint": 683.509,
+              "present_call_checkpoints": 1,
+              "present_returns_s_ok": 1,
+              "application_exit": true,
+              "zero_application_writes_checkpoint": true
+            },
+            {
+              "mode": "native-empty",
+              "outcome": "boot changed",
+              "start_boot": 80685,
+              "collection_boot": 80844,
+              "query_receipts": 2,
+              "trace_finalized_without_loss": false,
+              "geometry_receipts": [],
+              "miniport_counts": {
+                "draw/op3/phase2/0x00000000": 3,
+                "dwm/op1/phase1/0x00000103": 3,
+                "dwm/op1/phase2/0x00000000": 3,
+                "query/op3/phase2/0x00000000": 2
+              },
+              "miniport_present_flags": {
+                "dwm/1/flags0x0000000c/dma0/status0x00000103": 3,
+                "dwm/2/flags0x0000000c/dma0/status0x00000000": 3
+              },
+              "last_client_mark": "430703 7636 CALL Present 00000000 qpc=8272752824",
+              "desktop_samples": null,
+              "fixture_sha256": {
+                "receipt-capture.exe": "e8173e120b12fda5eb21ba253abb7121fd390e0f7063b32eb04f88fe2d39876c",
+                "nvdec-resource-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+                "step4-present.exe": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb"
+              },
+              "capture_archive_sha256": "a1b42d1cb85b49fb013267b6b7ad0494ddc52dbdd2bd0371d5dac2a405f9cf75",
+              "kernel_trace_sha256": "a27c21246ff1255d1fd0cb35024acfcb6ee3c387d9123fa012ea55ad918f3622",
+              "last_kernel_etw_event_ms_from_present_journal_checkpoint": -65.618,
+              "last_recorded_miniport_event_ms_from_present_journal_checkpoint": -65.618,
+              "present_call_checkpoints": 1,
+              "present_returns_s_ok": 0,
+              "application_exit": false,
+              "zero_application_writes_checkpoint": true
+            }
+          ],
+          "events": [
+            {
+              "record": 80584,
+              "id": 1074,
+              "reason": "SwitchWOA paired window-copy trial enter closed gate before selecting candidate"
+            },
+            {
+              "record": 80601,
+              "id": 12
+            },
+            {
+              "record": 80669,
+              "id": 1074,
+              "reason": "SwitchWOA paired window-copy trial one-time candidate boot"
+            },
+            {
+              "record": 80685,
+              "id": 12
+            },
+            {
+              "record": 80751,
+              "id": 12
+            },
+            {
+              "record": 80760,
+              "id": 6008
+            },
+            {
+              "record": 80769,
+              "id": 41,
+              "bugcheck_code": 0
+            },
+            {
+              "record": 80826,
+              "id": 1074,
+              "reason": "SwitchWOA paired window-copy trial restore verified permanent baseline"
+            },
+            {
+              "record": 80844,
+              "id": 12
+            }
+          ],
+          "boot_classification": [
+            {
+              "start_record": 80601,
+              "preceding_shutdown_requests": [
+                {
+                  "record": 80584,
+                  "id": 1074,
+                  "reason": "SwitchWOA paired window-copy trial enter closed gate before selecting candidate"
+                }
+              ],
+              "unexpected_shutdown_events": [],
+              "bugcheck_codes": [],
+              "classification": "planned"
+            },
+            {
+              "start_record": 80685,
+              "preceding_shutdown_requests": [
+                {
+                  "record": 80669,
+                  "id": 1074,
+                  "reason": "SwitchWOA paired window-copy trial one-time candidate boot"
+                }
+              ],
+              "unexpected_shutdown_events": [],
+              "bugcheck_codes": [],
+              "classification": "planned"
+            },
+            {
+              "start_record": 80751,
+              "preceding_shutdown_requests": [],
+              "unexpected_shutdown_events": [
+                6008,
+                41
+              ],
+              "bugcheck_codes": [
+                0
+              ],
+              "classification": "unclean restart"
+            },
+            {
+              "start_record": 80844,
+              "preceding_shutdown_requests": [
+                {
+                  "record": 80826,
+                  "id": 1074,
+                  "reason": "SwitchWOA paired window-copy trial restore verified permanent baseline"
+                }
+              ],
+              "unexpected_shutdown_events": [],
+              "bugcheck_codes": [],
+              "classification": "planned"
+            }
+          ],
+          "dump_inventory": {
+            "pretest_inventory_count": 11,
+            "recovery_inventory_count": 11,
+            "new_entries_in_collected_windows_dump_inventory": []
+          },
+          "restored_boot": 80844,
+          "restored_inf": "oem15.inf",
+          "removed_inf": "oem19.inf",
+          "restored_permanent_baseline": true,
+          "remaining_trial_folders_tasks_traces_and_processes": 0
+        }
+      ],
+      "source_umd_sha256": "48abd8daa1091039dd28fa6817b1db7d92a811755d9ec95950faf8de21057a2a",
+      "source_umd_delta_sha256": "d06ee0319ad50f93f7554ec1dfb925fb08b32a91df88e82e6a73c2df4084e6d5",
+      "reference_umd_sha256": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+      "host_layout_contract": {
+        "scope": "Host WDK models. The allocation requests are captured from the candidate UMD and consumed byte for byte by the geometry KMD model.",
+        "umd_image_sha256": "48abd8daa1091039dd28fa6817b1db7d92a811755d9ec95950faf8de21057a2a",
+        "kmd_functional_source_delta": "081a805ef7f8920f2114927f6825e2b4b802f2dbf499ac4e30ba13df5da840ba",
+        "descriptors": [
+          {
+            "width": 640,
+            "height": 360,
+            "length": 32,
+            "sha256": "d173a008282f5e652b32cae390c207fa66f185580b6b27c6643f895588239f0f",
+            "serialized": "010000000500000000100e0000000000150000008002000068010000000a0000"
+          },
+          {
+            "width": 641,
+            "height": 361,
+            "length": 32,
+            "sha256": "507d1f2a21ce549d54af05835ab1e62105cce77a5d6eedd3cd55bc09d5b55820",
+            "serialized": "010000000500000000f00e0000000000150000008102000069010000800a0000"
+          }
+        ],
+        "kmd_model_output": "WINDOW_COPY 640x360 to 641x361 passed, 2560/2688 pitches, one complete DDI packet\r\nPASS: WDK private GR images/mappings/reset epochs, adapter/LUID/512MiB ABI and ordered queue (controlled substitutes; no live WDDM or GPU pass)"
+      },
+      "aborted_package_selection": {
+        "reason": "The initial inactive registration referred to the previous runtime directory. The existing boot policy rejected it before issuing a native candidate permit.",
+        "history": [
+          {
+            "phase": "Prepared",
+            "boot": 80338,
+            "utc": "2026-11-20T09:34:23.9609226Z"
+          },
+          {
+            "phase": "Disarming",
+            "boot": 80338,
+            "utc": "2026-11-20T09:35:03.4205647Z"
+          },
+          {
+            "phase": "ClosedForTrial",
+            "boot": 80338,
+            "utc": "2026-11-20T09:35:14.7051123Z"
+          },
+          {
+            "phase": "SelectingCandidate",
+            "boot": 80425,
+            "utc": "2026-11-20T09:37:35.2931689Z"
+          },
+          {
+            "phase": "Restoring",
+            "boot": 80425,
+            "utc": "2026-11-20T09:39:21.1194250Z"
+          },
+          {
+            "phase": "BaselineArmed",
+            "boot": 80425,
+            "utc": "2026-11-20T09:39:34.7662176Z"
+          },
+          {
+            "phase": "BaselineActive",
+            "boot": 80509,
+            "utc": "2026-11-20T09:42:10.8682133Z"
+          },
+          {
+            "phase": "Finished",
+            "boot": 80509,
+            "utc": "2026-11-20T09:46:00.1250400Z"
+          }
+        ],
+        "entered_native_trial": false
+      },
+      "per_case_typed_buffers": [
+        {
+          "mode": "native-render",
+          "boot": 80685,
+          "archive_sha256": "7e566fa0c622e82cc30a4239630684acc28f274c45b8eccca96c88a74c1dca5c",
+          "drawing_pid": 5324,
+          "successful_native_device_ddi": [
+            "0x000b000f"
+          ],
+          "pitch_bind_confirmed_for_both_back_buffers": true,
+          "runtime_allocation_sizes": [
+            921600,
+            921600
+          ],
+          "scene_etl_sha256": "d2cc09444bbfa7129924ffd18c273f37c3261c4879dd2a480c583952ddeb8862"
+        },
+        {
+          "mode": "native-empty",
+          "boot": 80685,
+          "archive_sha256": "a1b42d1cb85b49fb013267b6b7ad0494ddc52dbdd2bd0371d5dac2a405f9cf75",
+          "drawing_pid": 7056,
+          "successful_native_device_ddi": [
+            "0x000b000f"
+          ],
+          "pitch_bind_confirmed_for_both_back_buffers": true,
+          "runtime_allocation_sizes": [
+            921600,
+            921600
+          ],
+          "scene_etl_sha256": "29185715838326938d01a6c92a89f965b45d71a282f397b77becda841de850b9"
+        }
+      ],
+      "temporary_umd_directory_removed": true
+    },
     "first_present_allocation_and_paging": {
       "source_commit": "701e579c",
       "scope": "ETW from the drawing PID in each signed public D3D11 test. Count a resource only when one thread entered and returned the same resource operation with a 640x360 render-target/present bind. A successful wait stage may be the fast path. Receipt order within recorded resource creation does not establish GPU ownership at Present.",
@@ -3481,6 +3837,61 @@
             }
           ],
           "scene_etl_sha256": "be0994e0912026939a999ba5587b4e765eccd24728688c34c4007449d6c72cfd"
+        },
+        {
+          "case": "LayoutPairCase-261120-095929090922",
+          "boot": 80685,
+          "cohort": "window-copy-paired",
+          "device_ddi": [
+            "0x000b000f"
+          ],
+          "back_buffers": [
+            {
+              "creation_result": "0x00000000",
+              "allocation_bytes": [
+                921600
+              ],
+              "residency_results": [
+                "0x8000000a"
+              ],
+              "gpu_va_map_results": [
+                "0x8000000a"
+              ],
+              "paging_wait_results": [
+                [
+                  7001,
+                  "0x00000000"
+                ],
+                [
+                  7002,
+                  "0x00000000"
+                ]
+              ]
+            },
+            {
+              "creation_result": "0x00000000",
+              "allocation_bytes": [
+                921600
+              ],
+              "residency_results": [
+                "0x8000000a"
+              ],
+              "gpu_va_map_results": [
+                "0x8000000a"
+              ],
+              "paging_wait_results": [
+                [
+                  7003,
+                  "0x00000000"
+                ],
+                [
+                  7004,
+                  "0x00000000"
+                ]
+              ]
+            }
+          ],
+          "scene_etl_sha256": "29185715838326938d01a6c92a89f965b45d71a282f397b77becda841de850b9"
         }
       ]
     },
