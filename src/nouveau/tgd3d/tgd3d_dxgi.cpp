@@ -541,6 +541,75 @@ static HRESULT APIENTRY RotateResourceIdentities(DXGI_DDI_ARG_ROTATE_RESOURCE_ID
    return hr;
 }
 
+static DXGI_FORMAT encoded_unorm(DXGI_FORMAT format)
+{
+   switch (format) {
+   case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB: return DXGI_FORMAT_R8G8B8A8_UNORM;
+   case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB: return DXGI_FORMAT_B8G8R8A8_UNORM;
+   case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB: return DXGI_FORMAT_B8G8R8X8_UNORM;
+   default: return format;
+   }
+}
+
+static VkFormatFeatureFlags blit_features(Device *dev, const Resource *r, VkImageTiling tiling)
+{
+   VkFormatProperties props;
+   dev->adapter->vk.vk.GetPhysicalDeviceFormatProperties(dev->adapter->vk.pdev, r->vkFormat, &props);
+   return tiling == VK_IMAGE_TILING_LINEAR ? props.linearTilingFeatures : props.optimalTilingFeatures;
+}
+
+static HRESULT begin_color_transfer(Device *dev, Resource *dst, Resource *src)
+{
+   if (!cmd_begin(dev, &dst->storage))
+      return FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
+   image_use(dev, src->storage, false);
+   barrier_for_read(dev, src->storage.writeSerial);
+   image_use(dev, dst->storage, true);
+   return dev->lost;
+}
+
+/* Both offsets refer to a single color subresource. Callers validate the
+ * extents and choose a bit-compatible pair before recording a raw copy. */
+static HRESULT copy_color_rect(Device *dev, Resource *dst, UINT dst_sub, UINT x, UINT y,
+                               Resource *src, UINT src_sub, const RECT &rect)
+{
+   if (!(blit_features(dev, src, src->storage.tiling) & VK_FORMAT_FEATURE_TRANSFER_SRC_BIT) ||
+       !(blit_features(dev, dst, dst->storage.tiling) & VK_FORMAT_FEATURE_TRANSFER_DST_BIT))
+      return DXGI_ERROR_UNSUPPORTED;
+   const HRESULT hr = begin_color_transfer(dev, dst, src);
+   if (FAILED(hr)) return hr;
+   VkImageCopy copy = {};
+   copy.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, src_sub % src->mips, src_sub / src->mips, 1};
+   copy.srcOffset = {rect.left, rect.top, 0};
+   copy.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, dst_sub % dst->mips, dst_sub / dst->mips, 1};
+   copy.dstOffset = {(int32_t)x, (int32_t)y, 0};
+   copy.extent = {(UINT)(rect.right - rect.left), (UINT)(rect.bottom - rect.top), 1};
+   dev->vk.CmdCopyImage(dev->cmd, src->storage.image, VK_IMAGE_LAYOUT_GENERAL,
+                        dst->storage.image, VK_IMAGE_LAYOUT_GENERAL, 1, &copy);
+   dev->stats.copyBytes += (uint64_t)copy.extent.width * copy.extent.height * format_info(src->format)->bytes;
+   return S_OK;
+}
+
+static HRESULT blit_scratch(Device *dev, Resource &scratch, DXGI_FORMAT format, VkFormat vk_format,
+                            UINT width, UINT height, UINT bind = 0)
+{
+   scratch.dev = dev;
+   scratch.kind = ResKind::Image;
+   scratch.dim = D3D10DDIRESOURCE_TEXTURE2D;
+   scratch.format = format;
+   scratch.vkFormat = vk_format;
+   scratch.aspects = VK_IMAGE_ASPECT_COLOR_BIT;
+   scratch.width = width;
+   scratch.height = height;
+   scratch.bind = bind;
+   HRESULT hr = image_create(dev, &scratch);
+   if (SUCCEEDED(hr) && scratch.storage.tiling != VK_IMAGE_TILING_OPTIMAL) {
+      storage_destroy(dev, scratch.storage, false);
+      return DXGI_ERROR_UNSUPPORTED;
+   }
+   return hr;
+}
+
 static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
 {
    if (!args || !args->hDevice || !args->hDstResource || !args->hSrcResource)
@@ -560,6 +629,8 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
                                            src->mipHeight(args->SrcSubresource % src->mips)) ||
                        source->left == source->right || source->top == source->bottom))
       hr = E_INVALIDARG;
+   else if (runtime_is_offered(resource_runtime(src)) || runtime_is_offered(resource_runtime(dst)))
+      hr = DXGI_ERROR_INVALID_CALL;
    else if (args->Flags.Resolve || args->Flags.Reserved)
       hr = DXGI_ERROR_UNSUPPORTED;
    else if (args->Rotate != DXGI_DDI_MODE_ROTATION_IDENTITY &&
@@ -584,32 +655,15 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
          const RECT region = source ? *source :
             RECT{0, 0, (LONG)src->mipWidth(mip), (LONG)src->mipHeight(mip)};
          Resource saved;
-         saved.dev = dev; saved.kind = ResKind::Image; saved.dim = D3D10DDIRESOURCE_TEXTURE2D;
-         saved.format = src->format; saved.vkFormat = src->vkFormat;
-         saved.aspects = VK_IMAGE_ASPECT_COLOR_BIT;
-         saved.width = region.right - region.left; saved.height = region.bottom - region.top;
-         saved.bind = D3D10_DDI_BIND_SHADER_RESOURCE;
-         hr = image_create(dev, &saved);
+         hr = blit_scratch(dev, saved, src->format, src->vkFormat, region.right - region.left,
+                           region.bottom - region.top, D3D10_DDI_BIND_SHADER_RESOURCE);
          if (FAILED(hr)) return hr;
-         VkCommandBuffer cmd = cmd_begin(dev, &saved.storage);
-         if (cmd) {
-            image_use(dev, src->storage, false);
-            barrier_for_read(dev, src->storage.writeSerial);
-            image_use(dev, saved.storage, true);
-            VkImageCopy copy = {};
-            copy.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, mip, args->SrcSubresource / src->mips, 1};
-            copy.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
-            copy.srcOffset = {region.left, region.top, 0};
-            copy.extent = {saved.width, saved.height, 1};
-            dev->vk.CmdCopyImage(dev->cmd, src->storage.image, VK_IMAGE_LAYOUT_GENERAL,
-                                 saved.storage.image, VK_IMAGE_LAYOUT_GENERAL, 1, &copy);
-            dev->stats.copyBytes += (uint64_t)saved.width * saved.height * format->bytes;
+         hr = copy_color_rect(dev, &saved, 0, 0, 0, src, args->SrcSubresource, region);
+         if (SUCCEEDED(hr)) {
             DXGI_DDI_ARG_BLT next = *args;
             next.hSrcResource = (DXGI_DDI_HRESOURCE)&saved;
             next.SrcSubresource = 0;
             hr = blt(&next, nullptr);
-         } else {
-            hr = FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
          }
          /* On any later failure, the saved source may already be in flight.
           * Its image/views/memory follow the recorded GPU sequence as usual. */
@@ -618,7 +672,6 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
       }
       if (args->Rotate >= DXGI_DDI_MODE_ROTATION_ROTATE90) {
          hr = rotated_blit(dev, args, source);
-         trace(TGD3D_TRACE_BLT, hr, args->Flags.Value, args->Rotate);
          return hr;
       }
       const UINT src_mip = args->SrcSubresource % src->mips;
@@ -628,13 +681,73 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
       const int32_t sh = source ? source->bottom - sy : (int32_t)src->mipHeight(src_mip);
       const int32_t dw = (int32_t)(args->DstRight - args->DstLeft);
       const int32_t dh = (int32_t)(args->DstBottom - args->DstTop);
-      VkCommandBuffer cmd = cmd_begin(dev, &dst->storage);
-      if (!cmd)
-         return FAILED(dev->lost) ? dev->lost : E_OUTOFMEMORY;
-      image_use(dev, src->storage, false);
-      barrier_for_read(dev, src->storage.writeSerial);
-      image_use(dev, dst->storage, true);
-      cmd = dev->cmd;
+      const RECT region = {sx, sy, sx + sw, sy + sh};
+      const FormatInfo *src_info = format_info(src->format), *dst_info = format_info(dst->format);
+      if (!src_info || !dst_info)
+         return DXGI_ERROR_UNSUPPORTED;
+      const bool same_size = sw == dw && sh == dh;
+      const DXGI_FORMAT encoded = encoded_unorm(src->format);
+      if (same_size && !(src_info->flags & (FMT_BC | FMT_NV12)) &&
+          (src->format == dst->format || encoded == dst->format)) {
+         hr = copy_color_rect(dev, dst, args->DstSubresource, args->DstLeft, args->DstTop,
+                              src, args->SrcSubresource, region);
+         return hr;
+      }
+
+      // DXGI keeps the encoded channel values when copying sRGB into a
+      // non-sRGB surface, including before filtering or channel conversion.
+      if (encoded != src->format && !(dst_info->flags & FMT_SRGB)) {
+         Resource saved;
+         hr = blit_scratch(dev, saved, encoded, format_info(encoded)->vk, sw, sh);
+         if (FAILED(hr)) return hr;
+         hr = copy_color_rect(dev, &saved, 0, 0, 0, src, args->SrcSubresource, region);
+         if (SUCCEEDED(hr)) {
+            DXGI_DDI_ARG_BLT next = *args;
+            next.hSrcResource = (DXGI_DDI_HRESOURCE)&saved;
+            next.SrcSubresource = 0;
+            hr = blt(&next, nullptr);
+         }
+         storage_destroy(dev, saved.storage, false);
+         return hr;
+      }
+
+      const VkFormatFeatureFlags source_features = blit_features(dev, src, src->storage.tiling);
+      if (!(source_features & VK_FORMAT_FEATURE_BLIT_SRC_BIT) ||
+          (!same_size && !(source_features & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) ||
+          format_numeric_class(src->format) != format_numeric_class(dst->format))
+         return DXGI_ERROR_UNSUPPORTED;
+      /* NVK derives both color-attachment and blit-destination support
+       * from the same color-target capability for its Win32 tiled shadow. */
+      const VkImageTiling target_caps = dst->storage.win32ColorTarget ?
+                                        VK_IMAGE_TILING_OPTIMAL : dst->storage.tiling;
+      if (!(blit_features(dev, dst, target_caps) & VK_FORMAT_FEATURE_BLIT_DST_BIT)) {
+         if (dst->storage.tiling != VK_IMAGE_TILING_LINEAR ||
+             !(blit_features(dev, dst, VK_IMAGE_TILING_OPTIMAL) & VK_FORMAT_FEATURE_BLIT_DST_BIT))
+            return DXGI_ERROR_UNSUPPORTED;
+
+         // NVK's linear display surfaces can receive transfers. Perform the
+         // filtered or converting blit in optimal storage, then write the
+         // requested rectangle into the shared destination once.
+         Resource saved;
+         hr = blit_scratch(dev, saved, dst->format, dst->vkFormat, dw, dh);
+         if (FAILED(hr)) return hr;
+         DXGI_DDI_ARG_BLT next = *args;
+         next.hDstResource = (DXGI_DDI_HRESOURCE)&saved;
+         next.DstSubresource = next.DstLeft = next.DstTop = 0;
+         next.DstRight = dw;
+         next.DstBottom = dh;
+         hr = blt(&next, &region);
+         if (SUCCEEDED(hr)) {
+            const RECT full = {0, 0, dw, dh};
+            hr = copy_color_rect(dev, dst, args->DstSubresource, args->DstLeft, args->DstTop,
+                                 &saved, 0, full);
+         }
+         storage_destroy(dev, saved.storage, false);
+         return hr;
+      }
+      hr = begin_color_transfer(dev, dst, src);
+      if (FAILED(hr)) return hr;
+      VkCommandBuffer cmd = dev->cmd;
       VkImageBlit blit = {};
       blit.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, src_mip, args->SrcSubresource / src->mips, 1};
       blit.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, dst_mip, args->DstSubresource / dst->mips, 1};
@@ -645,15 +758,21 @@ static HRESULT blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
       dev->vk.CmdBlitImage(cmd, src->storage.image, VK_IMAGE_LAYOUT_GENERAL, dst->storage.image,
                            VK_IMAGE_LAYOUT_GENERAL, 1, &blit,
                            (sw != dw || sh != dh) ? VK_FILTER_LINEAR : VK_FILTER_NEAREST);
-      dev->stats.copyBytes += (uint64_t)dw * dh * 4;
+      dev->stats.copyBytes += (uint64_t)dw * dh * dst_info->bytes;
    }
-   trace(TGD3D_TRACE_BLT, hr, args->Flags.Value, args->Rotate);
+   return hr;
+}
+
+static HRESULT record_blt(DXGI_DDI_ARG_BLT *args, const RECT *source)
+{
+   const HRESULT hr = blt(args, source);
+   if (args) trace(TGD3D_TRACE_BLT, hr, args->Flags.Value, args->Rotate);
    return hr;
 }
 
 static HRESULT APIENTRY Blt(DXGI_DDI_ARG_BLT *args)
 {
-   return blt(args, nullptr);
+   return record_blt(args, nullptr);
 }
 
 static HRESULT APIENTRY Blt1(DXGI_DDI_ARG_BLT1 *args)
@@ -670,7 +789,7 @@ static HRESULT APIENTRY Blt1(DXGI_DDI_ARG_BLT1 *args)
    copy.Flags = args->Flags; copy.Rotate = args->Rotate;
    const RECT source = {(LONG)args->SrcLeft, (LONG)args->SrcTop,
                          (LONG)args->SrcRight, (LONG)args->SrcBottom};
-   return blt(&copy, &source);
+   return record_blt(&copy, &source);
 }
 
 static HRESULT APIENTRY ResolveSharedResource(DXGI_DDI_ARG_RESOLVESHAREDRESOURCE *args)

@@ -160,6 +160,35 @@ HRESULT image_create(Device *dev, Resource *res)
    trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 1, (uintptr_t)res);
    if (FAILED(hr))
       return hr;
+   res->storage.tiling = ici.tiling;
+   /* The paired NVK ICD uses a tiled color shadow for its private Win32
+    * pitch layout. Query that exact image description independently of
+    * the public linear-tiling feature bits. */
+   res->storage.win32ColorTarget = false;
+   const VkImageUsageFlags colorTargetUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+   if (dev->nvk && layout.win32_row_pitch && (ici.usage & colorTargetUsage) == colorTargetUsage &&
+       dev->adapter->vk.vk.GetPhysicalDeviceImageFormatProperties2) {
+      auto query_list = list;
+      query_list.pNext = nullptr;
+      auto query_layout = layout;
+      query_layout.pNext = query_list.viewFormatCount ? &query_list : nullptr;
+      VkPhysicalDeviceImageFormatInfo2 query = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2};
+      query.pNext = &query_layout;
+      query.format = ici.format;
+      query.type = ici.imageType;
+      query.tiling = ici.tiling;
+      query.usage = ici.usage;
+      query.flags = ici.flags;
+      VkImageFormatProperties2 caps = {VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2};
+      res->storage.win32ColorTarget =
+         dev->adapter->vk.vk.GetPhysicalDeviceImageFormatProperties2(dev->adapter->vk.pdev,
+            &query, &caps) == VK_SUCCESS && (caps.imageFormatProperties.sampleCounts & ici.samples) &&
+         ici.extent.width <= caps.imageFormatProperties.maxExtent.width &&
+         ici.extent.height <= caps.imageFormatProperties.maxExtent.height &&
+         ici.extent.depth <= caps.imageFormatProperties.maxExtent.depth &&
+         ici.mipLevels <= caps.imageFormatProperties.maxMipLevels &&
+         ici.arrayLayers <= caps.imageFormatProperties.maxArrayLayers;
+   }
    res->storage.aspects = res->aspects;
    res->storage.layoutReady = false;
    res->storage.preinitialized = runtime != nullptr && !res->tiledShared;
