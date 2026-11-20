@@ -120,19 +120,14 @@ bool direct_flip_compatible(Device *dev, const Resource *source, const Resource 
 static HRESULT APIENTRY Present1(DXGI_DDI_ARG_PRESENT1 *args)
 {
    if (!args || !args->hDevice || args->Reserved || args->SurfacesToPresent != 1 ||
-       !args->phSurfacesToPresent || !args->phSurfacesToPresent[0].hSurface ||
-       (args->DirtyRects && !args->pDirtyRects))
+       !args->phSurfacesToPresent || !args->phSurfacesToPresent[0].hSurface)
       return E_INVALIDARG;
    const auto &source = args->phSurfacesToPresent[0];
    const Resource *res = DR(source.hSurface);
    if (res->dev != DD(args->hDevice) || source.SubResourceIndex >= res->subresources())
       return E_INVALIDARG;
-   const UINT mip = source.SubResourceIndex % res->mips;
-   for (UINT i = 0; i < args->DirtyRects; ++i)
-      if (!inside(args->pDirtyRects[i], res->mipWidth(mip), res->mipHeight(mip)))
-         return E_INVALIDARG;
-   /* PresentCb consumes the opaque runtime token, including dirty rectangles.
-    * Do not recreate the token or issue one callback per rectangle. */
+   /* Dirty rectangles are optional optimization hints. Pass DXGI its original
+    * context once so the runtime can apply the dirty region. */
    DXGI_DDI_ARG_PRESENT present = {};
    present.hDevice = args->hDevice;
    present.hSurfaceToPresent = source.hSurface;

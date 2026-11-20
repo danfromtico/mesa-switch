@@ -792,15 +792,18 @@ static void presentation13_contracts()
    CHECK(dxgi.pfnPresent1(&present) == DXGI_STATUS_OCCLUDED && presentOrder == std::vector<unsigned>{4});
    CHECK(present.BackBufferMultiplicity == 0x12345678); // WDDM 1.3 may not touch this later field.
    presentOrder.clear(); dirty[1].right = 66;
-   CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
-   dirty[1].right = 65; present.SurfacesToPresent = 2;
+   CHECK(dxgi.pfnPresent1(&present) == DXGI_STATUS_OCCLUDED && presentOrder == std::vector<unsigned>{4});
+   DXGI1_4_DDI_BASE_FUNCTIONS modern = {}; dxgi_fill_presentation14(&modern);
+   presentOrder.clear();
+   CHECK(modern.pfnPresent1(&present) == DXGI_STATUS_OCCLUDED && presentOrder == std::vector<unsigned>{4});
+   presentOrder.clear(); dirty[1].right = 65; present.SurfacesToPresent = 2;
    CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
    present.SurfacesToPresent = 1; surface.dev = nullptr;
    CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
    surface.dev = &dev;
    CHECK(runtime_destroy(surface.storage.runtime) == S_OK);
    runtime_device_destroy(&dev);
-   std::puts("PASS: Present1 preserves opaque context/status and one callback for dirty rects; validates bounds/ownership and leaves WDDM2 fields untouched (CPU control)");
+   std::puts("PASS: DXGI 1.3/1.4 Present1 forwards dirty hints once with the original context and status, preserves source ownership checks (CPU control)");
 }
 
 static std::vector<BYTE> tiledMetadata;

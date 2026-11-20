@@ -1,0 +1,98 @@
+{
+  "scope": "Selected ARM64 tgd3d Present1 dirty-region correction on GM20B.",
+  "signed_umd_sha256": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+  "signed_kernel_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+  "previous_umd_sha256": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+  "native_components_sha256": {
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+  },
+  "actual_loaded_paths_and_hashes": {
+    "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25\\app\\TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25\\app\\tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+    "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25\\app\\tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "C:\\Windows\\System32\\drivers\\tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25\\app\\libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+  },
+  "candidate_start": {
+    "issued_on_boot": 81539,
+    "one_use_permit_before_boot": 1,
+    "native_desktop_boot": 81625,
+    "consumed_permit": 0,
+    "external_power": "Online",
+    "gpu_problem_code": 0,
+    "dwm_pid": 832,
+    "inf": "oem19.inf"
+  },
+  "decision": {
+    "selected_package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25",
+    "permanent_permission_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25",
+    "remaining_one_use_permit": false,
+    "verified_images": "FC6E8D0876F7E69E16970809FCF191B6187F0D146A6F563DDE2D45CA78A6D1F4/9FF198AEABF1BCFAD98410733D19BACD85E580E65023738BE5641826936BA3FF/3CA2D9EB0FDFD6AFF8A7B667CB364F605629CB3E97DD7A4FE9AC924B10A6A8AB",
+    "previous_package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\window-copy-fc6e8d0876f7",
+    "cleanup": {
+      "previous_package": true,
+      "active_package": true,
+      "transfer_removed": true
+    }
+  },
+  "source_sha256": {
+    "src/nouveau/tgd3d/tgd3d_dxgi.cpp": "f0c37cba34b0d4b577cdd7f0585086580ff9762b5350f7e949ac8e067367fbe2",
+    "src/nouveau/tgd3d/tests/runtime_contracts.cpp": "764803111d91c466293019f9ada8a719be3cab53eb0ceb3b49885ab2f5e769e5"
+  },
+  "source_patch_sha256": "ef319d96161b79004b8e8e54544b9827562216d848319a0931c5cf9d268265a9",
+  "original_behavior": "A dirty hint extending one pixel beyond the source width returned E_INVALIDARG before the runtime callback.",
+  "corrected_behavior": "Both versioned tables call the runtime once with the original context and propagate its status. Existing resource ownership and single-source validation remain active.",
+  "contract": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi_ddi_arg_present1",
+  "host_tests": {
+    "x64": {
+      "arch": "x64",
+      "case": "after",
+      "exit_code": 0,
+      "passed_groups": 89,
+      "binary": "d694ef1b3d1aea6863d91326c8e6716e4df9b373732fb61b8bc76fccb4826f2a",
+      "source_delta": "ef319d96161b79004b8e8e54544b9827562216d848319a0931c5cf9d268265a9"
+    },
+    "x86": {
+      "arch": "x86",
+      "case": "after",
+      "exit_code": 0,
+      "passed_groups": 89,
+      "binary": "c1ad8f232c9cb7457b58882c54964d0393af7c4248b5ee16ca89f5fdab504816",
+      "source_delta": "ef319d96161b79004b8e8e54544b9827562216d848319a0931c5cf9d268265a9"
+    }
+  },
+  "original_host_exit": 1,
+  "switch_callback_models": {
+    "boot": 81277,
+    "active_kmd": "FC6E8D0876F7E69E16970809FCF191B6187F0D146A6F563DDE2D45CA78A6D1F4",
+    "power": "Online",
+    "gpu_code": 0,
+    "dwm_before": 1472,
+    "dwm_after": 1472,
+    "present_table_tests": [
+      {
+        "arch": "arm64",
+        "signed_test_sha256": "a56ab0860d0a34cfaf24a20cc2e788b549df1cdad4ba6f13c0c6db481f82a798",
+        "exit": 0,
+        "output": [
+          "PASS: DXGI1.3 MPO and 1.4 MPO1, four rotations, SDR/plane checks, disabled-plane context, opaque token and dirty hints; signal -> Vulkan submit -> GPU wait -> same-thread callback; six failure paths, no fake completion or early retirement (CPU control)",
+          "PASS: DXGI 1.3/1.4 Present1 forwards dirty hints once with the original context and status, preserves source ownership checks (CPU control)"
+        ]
+      },
+      {
+        "arch": "arm64ec",
+        "signed_test_sha256": "0e7fdedd3c817ea49ef34d4abe3d4b412bf063e9037b237eb32d98f51f0d038c",
+        "exit": 0,
+        "output": [
+          "PASS: DXGI1.3 MPO and 1.4 MPO1, four rotations, SDR/plane checks, disabled-plane context, opaque token and dirty hints; signal -> Vulkan submit -> GPU wait -> same-thread callback; six failure paths, no fake completion or early retirement (CPU control)",
+          "PASS: DXGI 1.3/1.4 Present1 forwards dirty hints once with the original context and status, preserves source ownership checks (CPU control)"
+        ]
+      }
+    ],
+    "temporary_inputs_removed": true
+  },
+  "open_issue": "Native window presentation and the separately observed unexpected reset remain under investigation."
+}
