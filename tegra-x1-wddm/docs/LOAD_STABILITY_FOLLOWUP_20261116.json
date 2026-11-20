@@ -2341,5 +2341,317 @@
       "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_presentflags",
       "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_submitcommandvirtual"
     ]
+  },
+  "native_surface_dc_queue_and_first_frame_20261120": {
+    "components": {
+      "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "desktop_modules": {
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "active_inf": "oem15.inf"
+    },
+    "public_surface_control": {
+      "source": "tegra-x1-wddm/tools/surface_dc.cpp",
+      "source_sha256": "a0de0300761ecd5a5929537fc8b0aec8ced078ddbe72118ff6b71f7f2ee65d80",
+      "unsigned_arm64_exe_sha256": "c9b776fe8f59e39c79f6ddf6dbd938708ab401639de08cc1b5f438874dfc2c4f",
+      "signed_arm64_exe_sha256": "d0031db927814225a8b035307f3c265e674e8654086f9aeec687e2cf0f359f8a",
+      "build_from_repo_root": [
+        "aarch64-w64-mingw32-clang -std=c11 -O2 -Wall -Wextra -Werror -c src/nouveau/nvdec/nvdec_sha256.c -o nvdec_sha256.o",
+        "aarch64-w64-mingw32-clang++ -std=c++17 -O2 -Wall -Wextra -Werror -static -municode tegra-x1-wddm/tools/surface_dc.cpp nvdec_sha256.o -ld3d11 -ldxgi -ldxguid -lgdi32 -luser32 -Wl,--no-insert-timestamp -o surface-dc.exe"
+      ],
+      "test": "640x360 BGRA8. Verify GPU-produced RGB after a clear and an asymmetric copied patch, open IDXGISurface1::GetDC(FALSE), read 13 points, write a clipped region, ReleaseDC with its dirty rectangle, then copy and check the complete RGB surface from D3D11. Repeat with a different background. The chain cases operate on buffer zero of a two-buffer SEQUENTIAL HWND chain and issue zero public Present calls.",
+      "cases": [
+        {
+          "mode": "warp-surface",
+          "boot": 79467,
+          "actual_software_adapter": true,
+          "draw_luid": "0000000000005528",
+          "display_luid": "0000000000005434",
+          "checked_rgb_pixels": 1152000,
+          "gpu_pixel_mismatches": 0,
+          "gdi_pixel_samples": 26,
+          "gdi_pixel_mismatches": 0,
+          "process_exit": 0,
+          "archive_sha256": "6cca07ebfe639fea74877649bc09cb0cb8f06d90decca2300395a3f2b068a94a"
+        },
+        {
+          "mode": "native-surface",
+          "boot": 79467,
+          "actual_software_adapter": false,
+          "draw_luid": "0000000000005434",
+          "display_luid": "0000000000005434",
+          "checked_rgb_pixels": 1152000,
+          "gpu_pixel_mismatches": 0,
+          "gdi_pixel_samples": 26,
+          "gdi_pixel_mismatches": 0,
+          "process_exit": 0,
+          "archive_sha256": "4e7b5d85ed4b3d2ffd8e00f3b80ecbb5841e17e4fbb35c4f466479871bb8f65f"
+        },
+        {
+          "mode": "warp-chain",
+          "boot": 79467,
+          "actual_software_adapter": true,
+          "draw_luid": "0000000000005528",
+          "display_luid": "0000000000005434",
+          "checked_rgb_pixels": 1152000,
+          "gpu_pixel_mismatches": 0,
+          "gdi_pixel_samples": 26,
+          "gdi_pixel_mismatches": 0,
+          "process_exit": 0,
+          "archive_sha256": "df7ca3351bbbe67563fd7698ac3dd25853c1f39f2e91bc7b9baccc63aa6aa5c5"
+        },
+        {
+          "mode": "native-on-chain",
+          "boot": 79467,
+          "actual_software_adapter": false,
+          "draw_luid": "0000000000005434",
+          "display_luid": "0000000000005434",
+          "checked_rgb_pixels": 1152000,
+          "gpu_pixel_mismatches": 0,
+          "gdi_pixel_samples": 26,
+          "gdi_pixel_mismatches": 0,
+          "process_exit": 0,
+          "archive_sha256": "3fd4ce98059159335d737fce97a8277aac85316b6babf35dc031094f9220681e"
+        }
+      ],
+      "matched_runtime_option_controls": [
+        {
+          "mode": "native-on-chain",
+          "boot": 79325,
+          "actual_software_adapter": false,
+          "draw_luid": "0000000000005a2a",
+          "display_luid": "0000000000005a2a",
+          "checked_rgb_pixels": 1152000,
+          "gpu_pixel_mismatches": 0,
+          "gdi_pixel_samples": 26,
+          "gdi_pixel_mismatches": 0,
+          "process_exit": 0,
+          "archive_sha256": "a6da54b0bfd1e3ce9821e74e36cbc15cb9e80de99d3a4f77d9a7876093138b31",
+          "effective_process_option": "1",
+          "signed_fixture_sha256": "03ee24153d9fa2eda8cffacb09a793de801bf44f5795b02b36f8f7dd0bed93eb"
+        },
+        {
+          "mode": "native-off-chain",
+          "boot": 79325,
+          "actual_software_adapter": false,
+          "draw_luid": "0000000000005a2a",
+          "display_luid": "0000000000005a2a",
+          "checked_rgb_pixels": 1152000,
+          "gpu_pixel_mismatches": 0,
+          "gdi_pixel_samples": 26,
+          "gdi_pixel_mismatches": 0,
+          "process_exit": 0,
+          "archive_sha256": "1e53b9869304c57aecf00eb6425f79f664fe2eff7b37a4c4fc8df261a858e983",
+          "effective_process_option": null,
+          "signed_fixture_sha256": "03ee24153d9fa2eda8cffacb09a793de801bf44f5795b02b36f8f7dd0bed93eb"
+        }
+      ]
+    },
+    "six_frame_render_only_controls": [
+      {
+        "mode": "native-on-render",
+        "start_boot": 79325,
+        "collection_boot": 79325,
+        "outcome": "completed",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "archive_sha256": "cd9ac12863f25b0cf1275e1d240d942d7b8ffbcf473606483062a66ee2bfa6df",
+        "present_calls": 0,
+        "present_returns_s_ok": 0,
+        "verified_desktop_samples": null,
+        "umd_successful_vk_submits": 6,
+        "windows_submit_callback_returns_s_ok": 9,
+        "runtime_trace_finalized": true,
+        "final_frame_rgb_points": 35,
+        "max_rgb_error": 1,
+        "process_option": "on"
+      },
+      {
+        "mode": "native-off-render",
+        "start_boot": 79325,
+        "collection_boot": 79325,
+        "outcome": "completed",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "archive_sha256": "55bc9aaffb1c8999a899ef0edb796169fec4fef2e40c030be4f854016a87f0b6",
+        "present_calls": 0,
+        "present_returns_s_ok": 0,
+        "verified_desktop_samples": null,
+        "umd_successful_vk_submits": 6,
+        "windows_submit_callback_returns_s_ok": 0,
+        "runtime_trace_finalized": true,
+        "final_frame_rgb_points": 35,
+        "max_rgb_error": 1,
+        "process_option": "off"
+      }
+    ],
+    "presentation_cases": {
+      "native-gdi": [
+        {
+          "mode": "native-gdi",
+          "start_boot": 79254,
+          "collection_boot": 79325,
+          "outcome": "boot changed",
+          "client_sha256": "aa8aad862755246c2bb270a1494eb482aac7cba09f192a220496bab3f210d0ce",
+          "archive_sha256": "8649801db1995d3207e78ff52ad830e2c89c1f7b3feaa262db94e8daec2624e6",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "swapchain_flag": "DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE",
+          "last_client_checkpoint": "1548671 656 CALL Present 00000000 qpc=29737696942",
+          "last_os_etw_ms_relative_to_journal_checkpoint": -38.146,
+          "boot_events": [
+            {
+              "boot": 79325,
+              "events": [
+                {
+                  "record": 79334,
+                  "id": 6008
+                },
+                {
+                  "record": 79343,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
+        }
+      ],
+      "native-off-full": [
+        {
+          "mode": "native-off-full",
+          "start_boot": 79325,
+          "collection_boot": 79396,
+          "outcome": "boot changed",
+          "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+          "archive_sha256": "1fd2df2a55de22705d52876f138c94b593259c996754da93f98931aac9e59656",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "umd_successful_vk_submits": 1,
+          "windows_submit_callback_returns_s_ok": 0,
+          "runtime_trace_finalized": false,
+          "runtime_queue_option": "off",
+          "confirmed_unwritten_buffer_before_present": false,
+          "last_client_checkpoint": "612718 4184 CALL Present 00000000 qpc=11767470711",
+          "last_os_etw_ms_relative_to_journal_checkpoint": 3.079,
+          "boot_events": [
+            {
+              "boot": 79396,
+              "events": [
+                {
+                  "record": 79397,
+                  "id": 6008
+                },
+                {
+                  "record": 79414,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
+        }
+      ],
+      "native-on-empty": [
+        {
+          "mode": "native-on-empty",
+          "start_boot": 79396,
+          "collection_boot": 79467,
+          "outcome": "boot changed",
+          "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+          "archive_sha256": "22194fe5f11e696e48019b5a2c800bded227d3341ed75210722454f754a692cd",
+          "present_calls": 1,
+          "present_returns_s_ok": 0,
+          "verified_desktop_samples": null,
+          "umd_successful_vk_submits": 0,
+          "windows_submit_callback_returns_s_ok": 1,
+          "runtime_trace_finalized": false,
+          "runtime_queue_option": "on",
+          "confirmed_unwritten_buffer_before_present": true,
+          "last_client_checkpoint": "375718 7160 CALL Present 00000000 qpc=7217013038",
+          "last_os_etw_ms_relative_to_journal_checkpoint": -14.142,
+          "boot_events": [
+            {
+              "boot": 79467,
+              "events": [
+                {
+                  "record": 79476,
+                  "id": 6008
+                },
+                {
+                  "record": 79485,
+                  "id": 41,
+                  "bugcheck_code": 0
+                }
+              ],
+              "planned_shutdown_events_before_boot": []
+            }
+          ]
+        }
+      ]
+    },
+    "ordinary_software_controls": [
+      {
+        "mode": "warp-gdi",
+        "start_boot": 79254,
+        "collection_boot": 79254,
+        "outcome": "completed",
+        "client_sha256": "aa8aad862755246c2bb270a1494eb482aac7cba09f192a220496bab3f210d0ce",
+        "archive_sha256": "b10b4738fa4b9cae100451053aa980de967f34f8f8775c06b95f8bb774e9333d",
+        "present_calls": 6,
+        "present_returns_s_ok": 6,
+        "verified_desktop_samples": 15
+      },
+      {
+        "mode": "warp-on-empty",
+        "start_boot": 79396,
+        "collection_boot": 79396,
+        "outcome": "completed",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "archive_sha256": "5af552c1b8ca1b7a43df8d77928507632eff81ab0e8c8ac7860b6c0220be00de",
+        "present_calls": 1,
+        "present_returns_s_ok": 1,
+        "verified_desktop_samples": null,
+        "umd_successful_vk_submits": 0,
+        "windows_submit_callback_returns_s_ok": 0,
+        "runtime_trace_finalized": true
+      },
+      {
+        "mode": "warp-on-clear",
+        "start_boot": 79396,
+        "collection_boot": 79396,
+        "outcome": "completed",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "archive_sha256": "1732763905ca4185c5dc04551b4f19605578dd059064f96214f6f7f2f68f1d04",
+        "present_calls": 1,
+        "present_returns_s_ok": 1,
+        "verified_desktop_samples": 5,
+        "umd_successful_vk_submits": 0,
+        "windows_submit_callback_returns_s_ok": 0,
+        "runtime_trace_finalized": true
+      }
+    ],
+    "interpretation": "The public GDI surface ownership handoff preserved the GPU-produced image and the GDI edits. The six-frame native rendering control completed on both process selections. A real sequential Present also produced an unexpected restart with runtime transport unselected, with a GDI-compatible chain, and with an ordinary application back buffer before any app-issued draw, upload, copy or clear. Device initialization and desktop composition still run in the empty-buffer case. The initiating kernel operation remains unresolved.",
+    "recovery": {
+      "boot": 79467,
+      "gpu_problem_code": 0,
+      "power": "Online",
+      "permanent_baseline_verified": true,
+      "remaining_test_directories": 0,
+      "remaining_test_tasks": 0,
+      "remaining_fixture_processes": 0,
+      "closed_etw_sessions_checked": 16
+    },
+    "references": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgisurface1-getdc",
+      "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgisurface1-releasedc",
+      "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ne-d3d11-d3d11_resource_misc_flag",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/dxgi-presentation-path"
+    ]
   }
 }
