@@ -257,6 +257,22 @@
           }
         ]
       }
+    },
+    {
+      "id": "SWITCH-COMMIT-PRESSURE-RESTART",
+      "status": "open",
+      "kind": "restart",
+      "affected_scopes": [
+        "load-stability"
+      ],
+      "trigger": "Conditions before the interruption are only partly known. Boot 85471 recorded Windows resource exhaustion, then boot 85554 began before any workload in this fourth-step chat.",
+      "evidence": [
+        "tegra-x1-wddm/docs/legacy-sequential-step4/entry-boot-85554.json"
+      ],
+      "cause": "Unknown. System event 2004 recorded 5964984320 of 6118985728 bytes committed, including 4486160384 bytes for powershell.exe. The subsequent 41 had zero BugcheckCode and 6008 reported abnormal shutdown. No intervening 1074 or new dump was observed. The process identity and memory pressure alone do not explain the reset.",
+      "daily_workaround": "After an interruption, read the boot events and verify the selected seven-file profile, compositor, Code 0 and power before starting graphics work. Limit diagnostic queries to the relevant records. A preventive workaround for this incident is unverified.",
+      "close_when": "Identify the workload and initiating cause, correct it, and verify three consecutive runs under the original conditions with adequate commit headroom, normal exit and a continuous desktop.",
+      "resolution": null
     }
   ],
   "independent_qualifications": [
