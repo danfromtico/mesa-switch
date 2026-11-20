@@ -32,11 +32,31 @@
       "evidence": [
         "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#process_scoped_wddm20_first_present_20261120",
         "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_device_removal_reason_and_swap_effect_20261120",
-        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#wddm20_first_present_driver_dispatch_20261120"
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#wddm20_first_present_driver_dispatch_20261120",
+        "tegra-x1-wddm/docs/dxvk-games-20261118/wddm20-present1-native-window.json"
       ],
-      "cause": "The measured Present1 guard rejects the runtime value Reserved=1 with E_INVALIDARG before reaching the Windows Present callback. Removing the rejection still requires comparison and end-to-end validation.",
+      "cause": "The runtime supplied Reserved=1 and the Present1 input guard returned E_INVALIDARG before the Windows callback. In the process-scoped candidate, the identical FLIP_SEQUENTIAL empty window reached the callback and returned S_OK. A one-clear window also returned S_OK and matched all five desktop samples. The other swap effect still needs candidate validation.",
       "daily_workaround": "Keep the experimental WDDM 2.0 offer confined to a one-time diagnostic client. Use only application paths with independent physical acceptance for daily use.",
       "close_when": "Verify actual rendering, on-screen output and normal exit through the affected system swap effects on three consecutive trials. Keep the legacy restart open until its own criteria pass.",
+      "resolution": null
+    },
+    {
+      "id": "GM20B-WDDM20-FLIP-RESTART",
+      "status": "open",
+      "kind": "restart",
+      "affected_scopes": [
+        "presentation",
+        "wddm",
+        "gpu-synchronization"
+      ],
+      "trigger": "A six-frame native WDDM 2.0 window with external power and the process-scoped Present1 correction. Two frames returned successfully before an unexpected restart.",
+      "evidence": [
+        "tegra-x1-wddm/docs/dxvk-games-20261118/wddm20-present1-native-window.json",
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_device_removal_reason_and_swap_effect_20261120"
+      ],
+      "cause": "Unknown. The last durable application record entered the third Present. The captured DXGI trace ended 8.643 ms before that entry. Windows reported Kernel-Power 41 with bugcheck zero and event 6008, without a matching shutdown intent. The dump inventory was unchanged.",
+      "daily_workaround": "Keep multi-frame rendering through the process-scoped WDDM 2.0 candidate in diagnostics. The previous legacy FLIP_SEQUENTIAL six-frame control is qualified only for its measured client and scene.",
+      "close_when": "Identify and repair the initiating fault. Run the original multi-frame scene on external power at least three consecutive times with the tested components, verified display samples, normal exit and a continuous desktop.",
       "resolution": null
     },
     {
