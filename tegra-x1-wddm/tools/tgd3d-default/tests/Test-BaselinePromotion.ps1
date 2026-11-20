@@ -87,6 +87,38 @@ Assert-SwitchPromotion $closed $e $proof $candidate $directory
 Write-Output 'PASS closed fault with three separate original-scenario reports'
 $bad=Clone $closed;$bad.faults[0].resolution.original_scenario_runs[1].evidence_sha256=$runs[0].evidence_sha256
 Block 'duplicate closure runs' {Assert-SwitchFaultLedger $bad} 'Duplicate closure'
+$verified=Clone $independent
+$verified.change_kind='verified-fix'
+$verified.changed_paths=@('src/nouveau/tgd3d/tgd3d_dxgi.cpp')
+$repair=Clone $closed.faults[0]
+$repair.id='TEST-ENCODED-COPY'
+$repair.resolution.commit=$verified.source_commit
+foreach($run in $repair.resolution.original_scenario_runs){$run.before_boot=$case.before_boot;$run.after_boot=$case.before_boot}
+$verified.cases=@($case)+@($repair.resolution.original_scenario_runs)
+$verified|Add-Member -NotePropertyName verified_fix -NotePropertyValue ([pscustomobject]@{
+    fault_id=$repair.id;causal_evidence_sha256=$repair.resolution.causal_evidence_sha256;control_sha256=$case.evidence_sha256})
+$registered=Clone $approved
+$registered.faults=@($sampleFault,$repair)
+Assert-SwitchPromotion $registered $verified $proof $candidate $directory
+Write-Output 'PASS a verified fix in a presentation file with its original retests and an independent working control'
+$bad=Clone $verified;$bad.verified_fix.fault_id=$sampleFault.id
+Block 'open causal fault cannot authorize a verified fix' {Assert-SwitchPromotion $registered $bad $proof $candidate $directory} 'closed causal'
+$bad=Clone $verified;$bad.source_commit='f'*40
+Block 'different source cannot reuse a closure' {Assert-SwitchPromotion $registered $bad $proof $candidate $directory} 'source, cause'
+$bad=Clone $verified;$bad.cases=@($case)
+Block 'a closed label cannot replace original retests' {Assert-SwitchPromotion $registered $bad $proof $candidate $directory} 'original retests'
+$otherBoot=Clone $registered
+$otherBoot.faults[1].resolution.original_scenario_runs[0].before_boot=90
+$otherBoot.faults[1].resolution.original_scenario_runs[0].after_boot=90
+Block 'same bytes cannot be assigned to a different trial boot' {Assert-SwitchPromotion $otherBoot $verified $proof $candidate $directory} 'original retests'
+$bad=Clone $verified;$bad.verified_fix.causal_evidence_sha256='7'*64
+Block 'wrong causal proof' {Assert-SwitchPromotion $registered $bad $proof $candidate $directory} 'source, cause'
+$bad=Clone $verified;$bad.verified_fix.control_sha256='8'*64
+Block 'missing working-path control' {Assert-SwitchPromotion $registered $bad $proof $candidate $directory} 'distinct working-path'
+
+$bad=Clone $verified;$bad.verified_fix.control_sha256=$repair.resolution.original_scenario_runs[0].evidence_sha256
+Block 'a repair run cannot also prove the working control' {Assert-SwitchPromotion $registered $bad $proof $candidate $directory} 'distinct working-path'
+Block 'a verified fix still needs independent evidence for every open fault' {Assert-SwitchPromotion $registered $verified ('e'*64) $candidate $directory} 'ledger-bound'
 $scratch=Join-Path ([IO.Path]::GetTempPath()) ('switch-gate-'+[guid]::NewGuid().ToString('N'))
 $null=[IO.Directory]::CreateDirectory($scratch)
 try{

@@ -120,10 +120,33 @@ function Assert-SwitchFaultHistory($Previous,$Current) {
     }
 }
 
+# A verified fix in a presentation source needs its own closed fault and a
+# separate working-path control on this trial. Its other open faults still
+# require the ledger-bound evidence checked by Assert-SwitchPromotion.
+function Assert-SwitchVerifiedFix($Ledger, $Evidence) {
+    $binding = $Evidence.verified_fix
+    if (!$binding) { throw 'Verified fix requires its closed causal fault' }
+    $matches = @($Ledger.faults | Where-Object { $_.id -ceq $binding.fault_id -and $_.status -ceq 'closed' })
+    if ($matches.Count -ne 1) { throw 'Verified fix requires its closed causal fault' }
+    $fix = $matches[0].resolution
+    if ($fix.commit -ne $Evidence.source_commit -or !(Test-SwitchSameProfile $fix.components $Evidence.components) -or
+        $binding.causal_evidence_sha256 -ne $fix.causal_evidence_sha256) { throw 'Verified fix source, cause or components differ from closure' }
+    $trial = @($Evidence.cases | Where-Object before_boot -eq $Evidence.trial.boot_record)
+    $original = @($fix.original_scenario_runs | ForEach-Object { $_.evidence_sha256 })
+    foreach ($run in $fix.original_scenario_runs) {
+        if ($run.before_boot -ne $Evidence.trial.boot_record -or $run.after_boot -ne $Evidence.trial.boot_record -or
+            @($trial | Where-Object evidence_sha256 -eq $run.evidence_sha256).Count -ne 1) {
+            throw 'Verified fix requires the original retests on the candidate boot'
+        }
+    }
+    $control = @($trial | Where-Object evidence_sha256 -eq $binding.control_sha256)
+    if ($control.Count -ne 1 -or $binding.control_sha256 -in $original) { throw 'Verified fix needs a distinct working-path control on the candidate boot' }
+}
+
 function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Candidate, [string]$Directory) {
     Assert-SwitchFaultLedger $Ledger
     Assert-SwitchHash $EvidenceSha256
-    if ($Evidence.schema -ne 1 -or $Evidence.change_kind -cnotin @('presentation','independent') -or $Evidence.source_commit -notmatch '^[0-9a-f]{40}$' -or $Evidence.base_commit -notmatch '^[0-9a-f]{40}$' -or $Evidence.changed_paths -isnot [array] -or !$Evidence.changed_paths.Count -or $Evidence.directory -ne $Directory -or [string]::IsNullOrWhiteSpace($Directory)) { throw 'Invalid candidate identity or change scope' }
+    if ($Evidence.schema -ne 1 -or $Evidence.change_kind -cnotin @('presentation','independent','verified-fix') -or $Evidence.source_commit -notmatch '^[0-9a-f]{40}$' -or $Evidence.base_commit -notmatch '^[0-9a-f]{40}$' -or $Evidence.changed_paths -isnot [array] -or !$Evidence.changed_paths.Count -or $Evidence.directory -ne $Directory -or [string]::IsNullOrWhiteSpace($Directory)) { throw 'Invalid candidate identity or change scope' }
     if (!(Test-SwitchSameProfile $Evidence.components $Candidate)) { throw 'Candidate artifacts differ from the hardware evidence' }
     $trial = $Evidence.trial
     if (!$trial -or $trial.one_time -isnot [bool] -or !$trial.one_time -or ($trial.gpu_code -isnot [int] -and $trial.gpu_code -isnot [long]) -or $trial.gpu_code -ne 0 -or $trial.power -ne 'Online' -or !(Test-SwitchRecordId $trial.boot_record)) { throw 'The measured desktop must have Code 0 on a one-time AC boot' }
@@ -154,7 +177,7 @@ function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Ca
     }
     if ($Evidence.cases -isnot [array] -or !$Evidence.cases.Count) { throw 'Missing independent hardware test results' }
     foreach ($test in $Evidence.cases) { Assert-SwitchPassingCase $test }
-    if($Evidence.change_kind -ceq 'presentation'){
+    if($Evidence.change_kind -cin @('presentation','verified-fix')){
         foreach($test in $Evidence.cases){
             foreach($field in @('output_verified','normal_exit','desktop_available')){
                 if($test.$field -isnot [bool] -or !$test.$field){throw "Presentation qualification lacks $field"}
@@ -162,6 +185,7 @@ function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Ca
         }
     }
     if ($trial.boot_record -notin @($Evidence.cases.before_boot)) { throw 'The selected one-time desktop was not tested' }
+    if ($Evidence.change_kind -ceq 'verified-fix') { Assert-SwitchVerifiedFix $Ledger $Evidence }
     $open = @($Ledger.faults | Where-Object status -ceq 'open')
     if (!$open.Count) { return }
     $ids = $open.id -join ', '
