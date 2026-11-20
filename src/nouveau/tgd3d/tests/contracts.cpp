@@ -2171,6 +2171,14 @@ static void presentation_rotation_contract()
    src.bind = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_PRESENT;
    dst.bind = D3D10_DDI_BIND_RENDER_TARGET;
    src.format = DXGI_FORMAT_B8G8R8X8_UNORM; dst.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+   src.vkFormat = VK_FORMAT_B8G8R8A8_UNORM;
+   dst.vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
+   adapter.vk.vk.GetPhysicalDeviceFormatProperties =
+      [](VkPhysicalDevice, VkFormat, VkFormatProperties *p) VKAPI_CALL {
+         *p = {};
+         p->optimalTilingFeatures = VK_FORMAT_FEATURE_BLIT_SRC_BIT | VK_FORMAT_FEATURE_BLIT_DST_BIT |
+                                    VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
+      };
    src.width = 34; src.height = 18; src.mips = src.arraySize = 2;
    dst.width = dst.height = 64;
    src.storage.image = handle<VkImage>(0x100); dst.storage.image = handle<VkImage>(0x200);

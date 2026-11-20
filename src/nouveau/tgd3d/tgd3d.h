@@ -138,6 +138,8 @@ struct ImageStorage {
    RuntimeResource *runtime = nullptr;   /* runtime-owned WDDM allocation */
    uint32_t writtenAllocation = 0;      /* same backing, NVK submitting device's handle */
    VkImageAspectFlags aspects = VK_IMAGE_ASPECT_COLOR_BIT;
+   VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL;
+   bool win32ColorTarget = false;        /* explicit-pitch NVK image with a tiled color shadow */
    bool layoutReady = false;
    bool preinitialized = false;          /* imported contents must survive the first use */
    bool externalShared = false;         /* optimal runtime-owned shared image */
