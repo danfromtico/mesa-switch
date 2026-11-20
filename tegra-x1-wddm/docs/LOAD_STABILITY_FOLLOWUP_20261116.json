@@ -4639,5 +4639,63 @@
       "after_count": 11,
       "names_times_sizes_unchanged": true
     }
+  },
+  "wddm20_first_present_driver_dispatch_20261120": {
+    "purpose": "Find the earliest positively observed driver rejection on the process-local WDDM 2.0 path.",
+    "umd_sha256": "b79145e2d76774a89420b772c45b69a2df2b71f140086d6dcc4983c5178f194b",
+    "kernel_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "wdk_table_slots": 21,
+    "wrapped_nonreserved_slots": 19,
+    "cases": [
+      {
+        "swap_effect": "sequential",
+        "archive_sha256": "d39296d8205559cdaebd30092b9f1ca730b04984d14a4be5f9af2ce8875bfe51",
+        "interface": [
+          "0x000b0020"
+        ],
+        "before_reason": "0x00000000",
+        "public_present": [
+          "0x887a0005"
+        ],
+        "after_reason": "0x887a0020",
+        "entry_summary": "0x0000000100000001",
+        "present1_reserved": 1,
+        "present1_return": "0x80070057",
+        "forwarded_to_common_present": false,
+        "windows_present_callback_entered": false,
+        "complete_etl": true,
+        "device_boot": 82717,
+        "collection_boot": 82717
+      },
+      {
+        "swap_effect": "flip-sequential",
+        "archive_sha256": "b637714bb29f757bc5b1cbee7561bd3615c90454dca778af22fb81e2a3131f09",
+        "interface": [
+          "0x000b0020"
+        ],
+        "before_reason": "0x00000000",
+        "public_present": [
+          "0x887a0005"
+        ],
+        "after_reason": "0x887a0020",
+        "entry_summary": "0x0000000100000001",
+        "present1_reserved": 1,
+        "present1_return": "0x80070057",
+        "forwarded_to_common_present": false,
+        "windows_present_callback_entered": false,
+        "complete_etl": true,
+        "device_boot": 82717,
+        "collection_boot": 82717
+      }
+    ],
+    "finding": "Present1 receives Reserved=1. The current tgd3d guard returns E_INVALIDARG before its common Present implementation. Both measured windows reported DXGI_ERROR_DEVICE_REMOVED and an immediate DXGI_ERROR_DRIVER_INTERNAL_ERROR device reason.",
+    "contract": "Microsoft documents Reserved as a field that should be zero. Both actual calls on this Windows build supplied one. The input was observed, not synthesized.",
+    "scope": "The first rejection is established for WDDM 2.0. The initiating cause of the separate legacy SEQUENTIAL system restarts remains open.",
+    "reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi_ddi_arg_present1",
+    "permanent_baseline_restored": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+    "restored_boot_record": 82805,
+    "test_tasks_remaining": 0,
+    "candidate_removed": true
   }
 }

@@ -2,6 +2,8 @@
 
 Windows starts the GM20B with KMD `fc6e8d08`, ARM64 tgd3d `57dc16b4` and NVK `51ff97f6`. The adapter reached Code 0 on a one-time boot. DWM loaded the signed repaired ARM64 leaf and the native NVK leaf. The selected package has permanent boot permission. [Loaded components and permission readback](dxvk-games-20261118/present1-dirty-hints-baseline.json)
 
+The accepted component hashes and open faults are tracked in the repository. Native legacy `SEQUENTIAL` restarted on three separate AC-powered boots. Keep that route out of daily use. For applications with a verified flip path, the legacy `FLIP_SEQUENTIAL` control displayed six frames and matched all 15 desktop samples. An application with no qualified alternative remains a diagnostic workload. The process-scoped WDDM 2.0 candidate also has an open first-Present device-removal fault. [Accepted graphics baseline](graphics-baseline.json) · [Open faults and daily workarounds](open-faults.json) · [Physical test records](LOAD_STABILITY_FOLLOWUP_20261116.json)
+
 The DXGI 1.3 and 1.4 Present1 tables forward optional dirty regions to the runtime through its original context. Both callback tests passed on the Switch in ARM64 and ARM64EC. [Callback qualification](dxvk-games-20261118/present1-dirty-hints-baseline.json)
 
 On this kernel the preceding ARM64 UMD `c954304f` obtained a hardware device and context with FL11_1 as its only requested level and matched all 589 triangle readback pixels. The first-Present restart remains under investigation. [Kernel drawing qualification](WINDOW_COPY_BASELINE_20261120.json) · [Presentation observations](LOAD_STABILITY_FOLLOWUP_20261116.json)

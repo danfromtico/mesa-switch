@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "faults": [
+    {
+      "id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+      "status": "open",
+      "kind": "restart",
+      "affected_scopes": [
+        "presentation",
+        "wddm",
+        "gpu-synchronization"
+      ],
+      "trigger": "AC, GM20B, 0x000b000f, two-buffer SEQUENTIAL window, no application writes, first Present(1,0).",
+      "evidence": [
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_device_removal_reason_and_swap_effect_20261120",
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_sequential_first_present_20261120"
+      ],
+      "cause": "Unknown. On the matched candidate three independent boots ended abnormally. The last durable operation was the first Present. Event 41 reported bugcheck zero.",
+      "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
+      "close_when": "Identify the initiating failure and fix it. Retest the original legacy SEQUENTIAL trigger on AC at least three consecutive times, including correct visible output, normal exit and desktop continuity.",
+      "resolution": null
+    },
+    {
+      "id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+      "status": "open",
+      "kind": "device-removal",
+      "affected_scopes": [
+        "presentation",
+        "wddm"
+      ],
+      "trigger": "Process-scoped WDDM 2.0 interface 0x000b0020, first empty Present on SEQUENTIAL or FLIP_SEQUENTIAL.",
+      "evidence": [
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#process_scoped_wddm20_first_present_20261120",
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_device_removal_reason_and_swap_effect_20261120",
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#wddm20_first_present_driver_dispatch_20261120"
+      ],
+      "cause": "The measured Present1 guard rejects the runtime value Reserved=1 with E_INVALIDARG before reaching the Windows Present callback. Removing the rejection still requires comparison and end-to-end validation.",
+      "daily_workaround": "Keep the experimental WDDM 2.0 offer confined to a one-time diagnostic client. Use only application paths with independent physical acceptance for daily use.",
+      "close_when": "Verify actual rendering, on-screen output and normal exit through the affected system swap effects on three consecutive trials. Keep the legacy restart open until its own criteria pass.",
+      "resolution": null
+    },
+    {
+      "id": "SWITCH-LOAD-TRANSITION-RESTART",
+      "status": "open",
+      "kind": "restart",
+      "affected_scopes": [
+        "load-stability",
+        "presentation",
+        "power",
+        "storage"
+      ],
+      "trigger": "Intermittent desktop, game, video, exit or file-operation loads. Published observations have different trigger and power conditions.",
+      "evidence": [
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#related_user_reported_triggers",
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#windowed_d3d11_startup_20261118",
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#file_integrity_at_restart_20261118"
+      ],
+      "cause": "Unknown. A common initiating failure across these observations has not been established.",
+      "daily_workaround": "Keep unqualified heavy-load paths in diagnostics. Use only a previously accepted alternative for the specific application and workload. No universal game or extraction workaround has been verified.",
+      "close_when": "Separate triggers with identified causes and document a fix and three consecutive original-scenario retests for each remaining restart.",
+      "resolution": null
+    },
+    {
+      "id": "SWITCH-WIFI-STARTUP",
+      "status": "open",
+      "kind": "connectivity",
+      "affected_scopes": [
+        "wifi"
+      ],
+      "trigger": "Wi-Fi driver failed to start on a boot reported by the operator, followed by a manual restart.",
+      "evidence": [
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#wifi_startup_followup_20261118"
+      ],
+      "cause": "Startup cause unknown. The manual restart is documented separately from graphics resets.",
+      "daily_workaround": "Use confirmed working connectivity for remote operation. Keep startup reliability out of acceptance until it is tested.",
+      "close_when": "Identify the startup failure and qualify the corrected driver on repeated Windows boots with actual network access.",
+      "resolution": null
+    }
+  ],
+  "independent_qualifications": []
+}
