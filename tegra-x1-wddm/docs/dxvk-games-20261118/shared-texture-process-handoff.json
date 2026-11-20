@@ -1,0 +1,99 @@
+{
+  "scope": "Public D3D11 offscreen shared texture on two native GM20B devices in one Windows interactive session.",
+  "baseline_kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+  "permanent_boot_verified": 81111,
+  "resource": "640x360 BGRA8, one mip, render-target and shader-resource binding, D3D11_RESOURCE_MISC_SHARED",
+  "sequence": "The producer paints and waits for a GPU event. A second device opens its DXGI handle, reads the first pattern, writes a different pattern and waits for completion. The producer then verifies the second pattern. The two runs differ in which process owns the second device.",
+  "source": "tegra-x1-wddm/tools/shared_process.cpp",
+  "source_reproduction": {
+    "source_sha256": "395f78fabdf786cf472de538b556b3dfae1618e28d84b050e4fa1f7364301ccf",
+    "unsigned_pe_sha256": "66414f08775fd0bfbb0f508a0d1967f194d5639e13209fd60b97c9a4d10f2e82",
+    "signed_sha256": "fac547cff489db8bed17c6d4c77f8ff625e1dd1c253caccdc2e23118d4471bac"
+  },
+  "build": {
+    "target": "aarch64-windows-gnu",
+    "language": "C++17",
+    "c_object": "src/nouveau/nvdec/nvdec_sha256.c",
+    "link": [
+      "d3d11",
+      "dxgi",
+      "dxguid"
+    ],
+    "entry": "wmain"
+  },
+  "observations": {
+    "local": {
+      "case": "D3DSharedPeer-261120-103628877963",
+      "boot": 81111,
+      "dwm_pid": 1428,
+      "gpu_problem_code": 0,
+      "power": "Online",
+      "adapter_luid": "0000000000005a22",
+      "process_ids": {
+        "producer": 7392,
+        "peer": 7392
+      },
+      "native_module_sha256": {
+        "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "pixel_comparisons": [
+        {
+          "view": "PeerSeesProducer",
+          "pattern": 0,
+          "rgb_pixels": 230400,
+          "mismatches": 0
+        },
+        {
+          "view": "ProducerSeesPeer",
+          "pattern": 1,
+          "rgb_pixels": 230400,
+          "mismatches": 0
+        }
+      ],
+      "process_exit": 0,
+      "separate_peer_exit": null,
+      "record_sha256": "66f64059d51b623fc0c54ce4a0c2be721a3d4b27ed75934a4ab4a1686ed6bde4",
+      "temporary_files_and_task_removed": true
+    },
+    "process": {
+      "case": "D3DSharedPeer-261120-103753332216",
+      "boot": 81111,
+      "dwm_pid": 1428,
+      "gpu_problem_code": 0,
+      "power": "Online",
+      "adapter_luid": "0000000000005a22",
+      "process_ids": {
+        "producer": 7088,
+        "peer": 1804
+      },
+      "native_module_sha256": {
+        "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "pixel_comparisons": [
+        {
+          "view": "ProducerSeesPeer",
+          "pattern": 1,
+          "rgb_pixels": 230400,
+          "mismatches": 0
+        },
+        {
+          "view": "PeerSeesProducer",
+          "pattern": 0,
+          "rgb_pixels": 230400,
+          "mismatches": 0
+        }
+      ],
+      "process_exit": 0,
+      "separate_peer_exit": 0,
+      "record_sha256": "289474e3060b8fde06866610002a62b3258a9b0ad295af7c4e44efa35cb24ac6",
+      "temporary_files_and_task_removed": true
+    }
+  },
+  "remaining_question": "The consumer in these runs is a second D3D11 device. DWM consumption of an HWND swap-chain back buffer during first Present remains under investigation.",
+  "references": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiresource-getsharedhandle",
+    "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11device-opensharedresource"
+  ]
+}
