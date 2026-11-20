@@ -12,6 +12,8 @@ On a one-time WDDM 2.0 trial, ARM64 tgd3d `9fb6cef7` accepted the observed Prese
 
 The known-good legacy flip window negotiated DDI `0x000b000f` and DXGI 1.2 on boot `83327`. Its write-through journal recorded entry into the tgd3d Present function, invocation and successful return of the Windows callback, and return from tgd3d on the same drawing thread. The same bytes were read from the Switch after restoring the accepted desktop on boot `83414`. The three earlier legacy SEQUENTIAL interruptions still have no driver record covering their first public call. [Legacy callback qualification and original trace limits](LOAD_STABILITY_FOLLOWUP_20261116.json)
 
+On one-use boot `83590`, the same signed public client presented three single frames using the legacy GM20B flip path. Windows linked each presentation packet to a graphics context and device owned by the drawing process. DWM completed the matching presentation-history token each time. The two clear windows matched all five desktop pixel samples, including the run with the ordinary UMD entry. All observed miniport Present callbacks ran on DWM threads. The accepted seven-component profile returned to Code 0 with permanent permission on boot `83765`. The original legacy sequential restart remains open. [Hardware observations and restoration](LOAD_STABILITY_FOLLOWUP_20261116.json)
+
 On this kernel the preceding ARM64 UMD `c954304f` obtained a hardware device and context with FL11_1 as its only requested level and matched all 589 triangle readback pixels. The first-Present restart remains under investigation. [Kernel drawing qualification](WINDOW_COPY_BASELINE_20261120.json) · [Presentation observations](LOAD_STABILITY_FOLLOWUP_20261116.json)
 
 ## Previous Switch graphics baseline · 2026-11-19

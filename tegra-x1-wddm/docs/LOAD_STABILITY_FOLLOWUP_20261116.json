@@ -5001,6 +5001,232 @@
         "observation_package_removed": true
       },
       "selected_as_gpu_baseline": false
+    },
+    "legacy_first_present_kernel_ownership_control": {
+      "scope": "Normal single-frame native legacy FLIP_SEQUENTIAL on external power. Compare an empty back buffer with a visible clear, then repeat the clear using the ordinary UMD entry without its optional file journal.",
+      "open_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+      "one_use_boot": 83590,
+      "gpu_problem_code": 0,
+      "candidate_kmd_sha256": "68a7b710eaaf83818f129e604646e8b2c2feae0ed4efd3fde6a2c5a0174e83d4",
+      "diagnostic_kmd_diff_sha256": "6ac1d4f1b0b11942feb34026e3c5e439106baa2c9f63f33d4055c1b4278e0197",
+      "candidate_arm64_umd_sha256": "d93efe9852ff7821ed4590bdf47fc6f4948fa810e108decf64dbc50e3d6ee816",
+      "native_nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "signed_public_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "signed_collector_sha256": "8659102bb4dda74f17ccdab56c39dd00326ed586fb024e5e76281acf73d21cdc",
+      "signed_driver_catalog_sha256": "d7b0deb06df9ad2ba9fe7ad2dbf8365d4e57d615595e19f82762458ee221b3ef",
+      "control_identity": "The preceding healthy UMD journal control on the accepted KMD used the same signed application and ARM64 UMD. The current collector added the installed DxgKrnl Base and Resource device/context events in its existing session.",
+      "windows_path": {
+        "interface": "0x000b000f / DXGI 1.2 pfnPresent",
+        "application_owned_present_packets": 3,
+        "packet_type": 7,
+        "present_packet_dma_bytes": 0,
+        "context_device_owner_and_gm20b_luid_matched_each_time": true,
+        "KMT_context_handle_matched_each_time": true,
+        "scheduler_retirement_without_timeout_or_preemption_each_time": true,
+        "history_model": 2,
+        "same_token_completed_by_DWM_each_time": true,
+        "compositor_pid": 752
+      },
+      "miniport_path": "Each capture received successful adapter queries from the drawing process. The recorded miniport Present entry/return pairs came from DWM threads, with Flip | FlipWithNoWait and zero DMA bytes. The sampled and full miniport logs agree. The v1 miniport record identifies its executing thread and lacks the context field needed for independent object attribution.",
+      "cases": [
+        {
+          "workload": "native-legacy-empty",
+          "process_scoped_umd_journal": true,
+          "drawing_pid": 3340,
+          "drawing_thread": 4268,
+          "desktop_pixels_matched_and_tested": null,
+          "public_present_hresult": "0x00000000",
+          "application_exit": 0,
+          "before_and_after_device_reason": "0x00000000",
+          "interval": "UMD before Windows PresentCb through its return",
+          "dwm_miniport_present_pairs_in_interval": 2,
+          "dwm_miniport_present_pairs_entire_capture": 43,
+          "application_adapter_query_events": 3,
+          "application_miniport_present_events": 0,
+          "flagged_miniport_virtual_present_submits": 0,
+          "gpu_write_completed_ms_before_public_present": null,
+          "recorded_umd_boundaries": 4,
+          "ordinary_execution_preempt_notifications_status_success": 26,
+          "raw_application_journal_sha256": "073f9a783121dec6dd9a337cf5620a68ce124c37a44de35ee52aaa7954ea3591",
+          "raw_miniport_text_sha256": "65a9eab584f9aa7ed2c9849f4e488ca28eb404585a526cfea36682dc033df6e3",
+          "original_files_bytes_after_restart": {
+            "legacy-present.jrn": 365,
+            "kmd-live.tsv": 5530
+          },
+          "miniport_etl_sha256": "c8507da793bc2194ea5653c6ddf79af36a7b408dc8fd3891931d9d2c901b490c",
+          "windows_runtime_etl_sha256": "318fbf63478105fce38bb755c1a37601c40955ddf4035a696a028bc3ec052fd6",
+          "case_archive_sha256": "8b355e5c08a32f822d2704447f2d3c0cd5ecbc701f123a9486dda80edaf67870"
+        },
+        {
+          "workload": "native-legacy-clear",
+          "process_scoped_umd_journal": true,
+          "drawing_pid": 464,
+          "drawing_thread": 5260,
+          "desktop_pixels_matched_and_tested": [
+            5,
+            5
+          ],
+          "public_present_hresult": "0x00000000",
+          "application_exit": 0,
+          "before_and_after_device_reason": "0x00000000",
+          "interval": "UMD before Windows PresentCb through its return",
+          "dwm_miniport_present_pairs_in_interval": 2,
+          "dwm_miniport_present_pairs_entire_capture": 47,
+          "application_adapter_query_events": 3,
+          "application_miniport_present_events": 0,
+          "flagged_miniport_virtual_present_submits": 0,
+          "gpu_write_completed_ms_before_public_present": 98.736,
+          "recorded_umd_boundaries": 4,
+          "ordinary_execution_preempt_notifications_status_success": 43,
+          "raw_application_journal_sha256": "a9824f5d4ce748ddfa96de0c2335d10ffc847dd09395574b00340690469b667a",
+          "raw_miniport_text_sha256": "547b8b6deb47e37ed4f22013b4e84257c3a080c99d68be0b94b850b3624c5cdc",
+          "original_files_bytes_after_restart": {
+            "legacy-present.jrn": 365,
+            "kmd-live.tsv": 6093
+          },
+          "miniport_etl_sha256": "95da294a30356245efaa8b9b72ea21f63e21e299f7f6df252cac951137f04c10",
+          "windows_runtime_etl_sha256": "ba3e81d4e6b32fde698854c61821c971684cedaefc7b9ea6c53253283d76c47c",
+          "case_archive_sha256": "b2f04349f410b8c4c8fa9b0593e071d5e9dca1fdf33ee57a3674eec8e1fda849"
+        },
+        {
+          "workload": "native-legacy-clear",
+          "process_scoped_umd_journal": false,
+          "drawing_pid": 4768,
+          "drawing_thread": 1096,
+          "desktop_pixels_matched_and_tested": [
+            5,
+            5
+          ],
+          "public_present_hresult": "0x00000000",
+          "application_exit": 0,
+          "before_and_after_device_reason": "0x00000000",
+          "interval": "public Present call through return",
+          "dwm_miniport_present_pairs_in_interval": 0,
+          "dwm_miniport_present_pairs_entire_capture": 50,
+          "application_adapter_query_events": 3,
+          "application_miniport_present_events": 0,
+          "flagged_miniport_virtual_present_submits": 0,
+          "gpu_write_completed_ms_before_public_present": 125.17,
+          "recorded_umd_boundaries": 0,
+          "ordinary_execution_preempt_notifications_status_success": 33,
+          "raw_application_journal_sha256": "bc51d040af266ff25dfc998de2d69ca6a69c361fd29a5ed4aefc655e584bb6c6",
+          "raw_miniport_text_sha256": "bb98a90dbb535c8800d69196cdc0c96d6c65bedda13e1ecbc68b1c5e72b26ee0",
+          "original_files_bytes_after_restart": {
+            "legacy-present.jrn": 57,
+            "kmd-live.tsv": 6467
+          },
+          "miniport_etl_sha256": "02e8da880bc6248550ca8481e8b2b88435fadce657c5048a1ba00b37e8650c90",
+          "windows_runtime_etl_sha256": "54667bf179db3e7532d48c3fc66c6288022e336328337a9b1bdeb5b572529fc6",
+          "case_archive_sha256": "9e2eca6054a01b2e4951d60d40c1c8a87d747c22d61be4749c891d93ba002830"
+        }
+      ],
+      "synchronization_scope": "Both clear cases retired the application GPU write before public Present. Their signal/wait pairs used distinct fences and contexts. The outgoing signal and wait retired. The incoming signal and wait retirements and a subsequent application reuse of the old surface remain unverified in these single-frame captures.",
+      "ordinary_control": "The ordinary clear matched five desktop samples, retired its application-owned Present packet and reached DWM without any KMD Present recorded during the public call. DWM KMD calls elsewhere in the capture cannot identify the application's miniport entry.",
+      "original_incident": "Neither retained stream in the original three legacy SEQUENTIAL restarts contains a driver event after the public call. The last internal call and the cause of those restarts remain open. The current observations qualify the healthy flip path.",
+      "startup_check": {
+        "initial_task_result": 1,
+        "same_boot_retry_completed": true,
+        "additional_restart_for_retry": false
+      },
+      "restore": {
+        "previous_baseline_boot": 83414,
+        "restored_boot": 83765,
+        "published_inf": "oem19.inf",
+        "problem_code": 0,
+        "original_evidence_files_byte_identical_after_controlled_restart": true,
+        "permanent_component_hashes": {
+          "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046"
+        },
+        "controlled_system_events": [
+          {
+            "event": 1074,
+            "record": 83485
+          },
+          {
+            "event": 12,
+            "record": 83502
+          },
+          {
+            "event": 1074,
+            "record": 83574
+          },
+          {
+            "event": 12,
+            "record": 83590
+          },
+          {
+            "event": 1074,
+            "record": 83660
+          },
+          {
+            "event": 12,
+            "record": 83676
+          },
+          {
+            "event": 1074,
+            "record": 83748
+          },
+          {
+            "event": 12,
+            "record": 83765
+          }
+        ],
+        "unexplained_restarts": 0,
+        "candidate_package_task_and_traces_removed": true,
+        "owned_ETW_sessions_confirmed_absent": 6
+      },
+      "candidate_selected_as_gpu_baseline": false,
+      "windows_event_order": {
+        "selected_events_on_presenting_thread_in_all_native_controls": [
+          215,
+          178,
+          184
+        ],
+        "event_names": {
+          "166": "Blit",
+          "178": "QueuePacket Start with bPresent set",
+          "184": "Present Info with successful KMT return",
+          "215": "PresentHistoryDetailed Start"
+        },
+        "software_sequential_control_from_archive": {
+          "same_signed_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+          "archive_sha256": "19777eec5446c19ce5bfa231f3bfbf280dac17f64e2fb986085db58d7cf904e2",
+          "trace_sha256": "575a7423d63b2f216ab4b87a38e457b4c462ff7e57f92eac4733ef8a88b6d1b1",
+          "software_renderer": "Windows WARP",
+          "effect": "SEQUENTIAL",
+          "boot": 82058,
+          "case": "Ddi20Case-261120-121438259710",
+          "input": "warp-legacy-empty",
+          "present_return": [
+            "0x00000000"
+          ],
+          "process_exit": 0,
+          "recorded_os_events": [
+            166,
+            178,
+            215,
+            184
+          ],
+          "history_models": [
+            3
+          ],
+          "blits_reported": 1,
+          "dxgkrnl_blit_requested_width_and_height": [
+            [
+              640,
+              360
+            ]
+          ],
+          "display_note": "The software sequential control documents the OS copy model. It does not exercise the native GM20B user-mode or miniport implementation for the drawing device."
+        },
+        "scope": "This order is relative to the selected events. Windows may execute additional operations. The native flip and software copy controls have different drawing backends."
+      }
     }
   },
   "wddm20_first_present_driver_dispatch_20261120": {
