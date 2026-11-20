@@ -4139,5 +4139,505 @@
       "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/timeout-detection-and-recovery",
       "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11device-getdeviceremovedreason"
     ]
+  },
+  "native_device_removal_reason_and_swap_effect_20261120": {
+    "reference_source": "86b11bff561ea8107aadd060249eb14a226bd1c0",
+    "previous_measurement": "ab40eec90da7dc5f1ba8cec635e10e225c5eac1b",
+    "accepted_umd_sha256": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+    "candidate_arm64_umd_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+    "kernel_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "public_test_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "conditions": {
+      "supply": "AC",
+      "feature_level": "11_0 only",
+      "presentation_arguments": "Present(1,0)",
+      "back_buffers": 2,
+      "runtime_queue_option": "on",
+      "modern_ddi": "0x000b0020",
+      "legacy_ddi": "0x000b000f",
+      "first_matrix_boot": 82058,
+      "device_reason_query": "The original drawing device is sampled before the public call and immediately after it returns, before resource or device destruction.",
+      "interrupted_journal_limit": "The same thread writes the durable RETURN marker after reading the post-call device reason. If neither survives, the exact last instruction is unknown."
+    },
+    "cases": [
+      {
+        "mode": "warp-legacy-empty",
+        "effect": "Sequential",
+        "boot": 82058,
+        "collection_boot": 82058,
+        "ddi": [],
+        "device_reason_before": "0x00000000",
+        "present_calls": 1,
+        "present_results": [
+          "0x00000000"
+        ],
+        "device_reason_after": "0x00000000",
+        "result": "completed",
+        "archive_sha256": "19777eec5446c19ce5bfa231f3bfbf280dac17f64e2fb986085db58d7cf904e2",
+        "etl_finalized": true,
+        "windows_present_history_models": [
+          [
+            3
+          ]
+        ],
+        "retained_kmt_returns": [
+          [
+            "0x00000000"
+          ]
+        ],
+        "umd_present_timing_records": 0,
+        "kmd_events": [
+          {
+            "event_id": 2,
+            "source": 1,
+            "status": 0,
+            "count": 8
+          }
+        ]
+      },
+      {
+        "mode": "native-modern-empty",
+        "effect": "Sequential",
+        "boot": 82058,
+        "collection_boot": 82058,
+        "ddi": [
+          "0x000b0020"
+        ],
+        "device_reason_before": "0x00000000",
+        "present_calls": 1,
+        "present_results": [
+          "0x887a0005"
+        ],
+        "device_reason_after": "0x887a0020",
+        "result": "case failed",
+        "archive_sha256": "4852b76b2ffa39aeefceef2a7680d1f030c226483bbf6ee65ebfa0024be2262f",
+        "etl_finalized": true,
+        "windows_present_history_models": [
+          []
+        ],
+        "retained_kmt_returns": [
+          []
+        ],
+        "umd_present_timing_records": 0,
+        "kmd_events": [
+          {
+            "event_id": 2,
+            "source": 1,
+            "status": 0,
+            "count": 9
+          }
+        ]
+      },
+      {
+        "mode": "native-modern-empty",
+        "effect": "FlipSequential",
+        "boot": 82058,
+        "collection_boot": 82058,
+        "ddi": [
+          "0x000b0020"
+        ],
+        "device_reason_before": "0x00000000",
+        "present_calls": 1,
+        "present_results": [
+          "0x887a0005"
+        ],
+        "device_reason_after": "0x887a0020",
+        "result": "case failed",
+        "archive_sha256": "274d7da10ddc2eafc834625377b6ecb410c75bc95cbe8595199307d44519608b",
+        "etl_finalized": true,
+        "windows_present_history_models": [
+          []
+        ],
+        "retained_kmt_returns": [
+          []
+        ],
+        "umd_present_timing_records": 0,
+        "kmd_events": [
+          {
+            "event_id": 2,
+            "source": 1,
+            "status": 0,
+            "count": 28
+          }
+        ]
+      },
+      {
+        "mode": "native-legacy-empty",
+        "effect": "FlipSequential",
+        "boot": 82058,
+        "collection_boot": 82058,
+        "ddi": [
+          "0x000b000f"
+        ],
+        "device_reason_before": "0x00000000",
+        "present_calls": 1,
+        "present_results": [
+          "0x00000000"
+        ],
+        "device_reason_after": "0x00000000",
+        "result": "completed",
+        "archive_sha256": "6677a160e0f23a3618a3ff1d7dd3db0aea21c91c2315caba9a6d7d65000b8a2a",
+        "etl_finalized": true,
+        "windows_present_history_models": [
+          [
+            2
+          ]
+        ],
+        "retained_kmt_returns": [
+          [
+            "0x00000000"
+          ]
+        ],
+        "umd_present_timing_records": 1,
+        "kmd_events": [
+          {
+            "event_id": 2,
+            "source": 1,
+            "status": 0,
+            "count": 19
+          }
+        ]
+      },
+      {
+        "mode": "native-legacy-full",
+        "effect": "FlipSequential",
+        "boot": 82058,
+        "collection_boot": 82058,
+        "ddi": [
+          "0x000b000f"
+        ],
+        "device_reason_before": "0x00000000",
+        "present_calls": 6,
+        "present_results": [
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000"
+        ],
+        "device_reason_after": "0x00000000",
+        "result": "completed",
+        "archive_sha256": "d6f0d94b337fce6c96d257e401346a51c990d025b1204560a768564a50c433d3",
+        "etl_finalized": true,
+        "windows_present_history_models": [
+          [
+            2
+          ],
+          [
+            2
+          ],
+          [
+            2
+          ],
+          [
+            2
+          ],
+          [
+            2
+          ],
+          [
+            2
+          ]
+        ],
+        "retained_kmt_returns": [
+          [
+            "0x00000000"
+          ],
+          [
+            "0x00000000"
+          ],
+          [
+            "0x00000000"
+          ],
+          [
+            "0x00000000"
+          ],
+          [
+            "0x00000000"
+          ],
+          [
+            "0x00000000"
+          ]
+        ],
+        "umd_present_timing_records": 6,
+        "kmd_events": [
+          {
+            "event_id": 2,
+            "source": 1,
+            "status": 0,
+            "count": 49
+          }
+        ],
+        "independent_desktop_sample": {
+          "points": 15,
+          "matched": 15,
+          "reference_colors": 10,
+          "max_channel_error": 0
+        }
+      },
+      {
+        "mode": "native-legacy-empty",
+        "effect": "Sequential",
+        "boot": 82058,
+        "collection_boot": 82128,
+        "ddi": [
+          "0x000b000f"
+        ],
+        "device_reason_before": "0x00000000",
+        "present_calls": 1,
+        "present_results": [],
+        "device_reason_after": null,
+        "result": "boot changed",
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "etl_finalized": false,
+        "windows_present_history_models": [],
+        "retained_kmt_returns": [],
+        "umd_present_timing_records": 0,
+        "kmd_events": [
+          {
+            "event_id": 2,
+            "source": 1,
+            "status": 0,
+            "count": 7
+          }
+        ],
+        "last_durable_client_mark": "680609 6340 CALL Present 00000000 qpc=13070969930",
+        "last_os_qpc_ms_from_client_present_mark": -18.181
+      },
+      {
+        "mode": "native-legacy-empty",
+        "effect": "Sequential",
+        "boot": 82221,
+        "collection_boot": 82289,
+        "ddi": [
+          "0x000b000f"
+        ],
+        "device_reason_before": "0x00000000",
+        "present_calls": 1,
+        "present_results": [],
+        "device_reason_after": null,
+        "result": "boot changed",
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "etl_finalized": false,
+        "windows_present_history_models": [],
+        "retained_kmt_returns": [],
+        "umd_present_timing_records": 0,
+        "kmd_events": [
+          {
+            "event_id": 2,
+            "source": 1,
+            "status": 0,
+            "count": 7
+          }
+        ],
+        "last_durable_client_mark": "122343 4712 CALL Present 00000000 qpc=2352403757",
+        "last_os_qpc_ms_from_client_present_mark": -27.066
+      },
+      {
+        "mode": "native-legacy-empty",
+        "effect": "Sequential",
+        "boot": 82382,
+        "collection_boot": 82448,
+        "ddi": [
+          "0x000b000f"
+        ],
+        "device_reason_before": "0x00000000",
+        "present_calls": 1,
+        "present_results": [],
+        "device_reason_after": null,
+        "result": "boot changed",
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "etl_finalized": false,
+        "windows_present_history_models": [],
+        "retained_kmt_returns": [],
+        "umd_present_timing_records": 0,
+        "kmd_events": [
+          {
+            "event_id": 2,
+            "source": 1,
+            "status": 0,
+            "count": 11
+          }
+        ],
+        "last_durable_client_mark": "122843 7656 CALL Present 00000000 qpc=2361927374",
+        "last_os_qpc_ms_from_client_present_mark": -25.203
+      }
+    ],
+    "legacy_sequential_outcomes": {
+      "boot changed": 3
+    },
+    "prior_activity": "The first legacy SEQUENTIAL case followed the same-boot matrix. The next two cases were each the first test workload on a freshly admitted candidate boot.",
+    "findings": [
+      "Both modern swap effects changed the device reason from S_OK to DXGI_ERROR_DRIVER_INTERNAL_ERROR across the first empty Present, with the desktop and boot surviving.",
+      "On the same candidate and boot, legacy FLIP_SEQUENTIAL crossed the first Present and then completed six visible reference frames. DirectX kernel present-history model 2 was recorded for each frame.",
+      "Missing reset packets on an interrupted trace cannot locate a native TDR. The public removal reason alone does not identify the first failing driver callback."
+    ],
+    "boot_chain": [
+      {
+        "boot": 81969,
+        "previous": 81891,
+        "planned_1074_before": [
+          81953
+        ],
+        "clean_shutdown_6006_before": [
+          81955
+        ],
+        "kernel_shutdown_13_before": [
+          81968
+        ],
+        "unexpected_6008_after": [],
+        "kernel_power_41_after": []
+      },
+      {
+        "boot": 82058,
+        "previous": 81969,
+        "planned_1074_before": [
+          82041
+        ],
+        "clean_shutdown_6006_before": [
+          82044
+        ],
+        "kernel_shutdown_13_before": [
+          82057
+        ],
+        "unexpected_6008_after": [],
+        "kernel_power_41_after": []
+      },
+      {
+        "boot": 82128,
+        "previous": 82058,
+        "planned_1074_before": [],
+        "clean_shutdown_6006_before": [],
+        "kernel_shutdown_13_before": [],
+        "unexpected_6008_after": [
+          82129
+        ],
+        "kernel_power_41_after": [
+          {
+            "record": 82146,
+            "bugcheck": "0"
+          }
+        ]
+      },
+      {
+        "boot": 82221,
+        "previous": 82128,
+        "planned_1074_before": [
+          82205
+        ],
+        "clean_shutdown_6006_before": [
+          82207
+        ],
+        "kernel_shutdown_13_before": [
+          82220
+        ],
+        "unexpected_6008_after": [],
+        "kernel_power_41_after": []
+      },
+      {
+        "boot": 82289,
+        "previous": 82221,
+        "planned_1074_before": [],
+        "clean_shutdown_6006_before": [],
+        "kernel_shutdown_13_before": [],
+        "unexpected_6008_after": [
+          82298
+        ],
+        "kernel_power_41_after": [
+          {
+            "record": 82307,
+            "bugcheck": "0"
+          }
+        ]
+      },
+      {
+        "boot": 82382,
+        "previous": 82289,
+        "planned_1074_before": [
+          82366
+        ],
+        "clean_shutdown_6006_before": [
+          82368
+        ],
+        "kernel_shutdown_13_before": [
+          82381
+        ],
+        "unexpected_6008_after": [],
+        "kernel_power_41_after": []
+      },
+      {
+        "boot": 82448,
+        "previous": 82382,
+        "planned_1074_before": [],
+        "clean_shutdown_6006_before": [],
+        "kernel_shutdown_13_before": [],
+        "unexpected_6008_after": [
+          82457
+        ],
+        "kernel_power_41_after": [
+          {
+            "record": 82466,
+            "bugcheck": "0"
+          }
+        ]
+      },
+      {
+        "boot": 82542,
+        "previous": 82448,
+        "planned_1074_before": [
+          82525
+        ],
+        "clean_shutdown_6006_before": [
+          82528
+        ],
+        "kernel_shutdown_13_before": [
+          82541
+        ],
+        "unexpected_6008_after": [],
+        "kernel_power_41_after": []
+      }
+    ],
+    "restoration": {
+      "boot": 82542,
+      "gpu_problem_code": 0,
+      "permanent_reference_confirmed": true,
+      "loaded_umd_sha256": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+      "remaining_test_tasks": 0,
+      "remaining_test_processes": 0,
+      "remaining_test_folders": 0,
+      "etw_sessions_confirmed_absent": 16,
+      "inactive_candidate_removed": true
+    },
+    "system_logs": {
+      "System": {
+        "previous": 81952,
+        "newest": 82611,
+        "returned": 659,
+        "truncated": false,
+        "query_error": null
+      },
+      "Microsoft-Windows-Kernel-PnP/Configuration": {
+        "previous": 1285,
+        "newest": 1285,
+        "returned": 0,
+        "truncated": false,
+        "query_error": null
+      },
+      "Microsoft-Windows-UserPnp/DeviceInstall": {
+        "previous": 2177,
+        "newest": 2177,
+        "returned": 0,
+        "truncated": false,
+        "query_error": null
+      }
+    },
+    "public_api_reference": "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11device-getdeviceremovedreason",
+    "system_dump_inventory": {
+      "before_count": 11,
+      "after_count": 11,
+      "names_times_sizes_unchanged": true
+    }
   }
 }
