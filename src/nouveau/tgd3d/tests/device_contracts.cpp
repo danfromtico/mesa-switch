@@ -3,6 +3,8 @@
  * Vulkan/runtime substitutes only: no physical device or display is opened.
  */
 #include "tgd3d.h"
+#include "tgd3d_legacy9.h"
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -116,8 +118,267 @@ static void init(Adapter *adapter, D3DDDI_DEVICECALLBACKS *kt,
 }
 }
 
+static void legacy9_upload_contracts(HANDLE device, const D3DDDI_DEVICEFUNCS &table)
+{
+   std::array<BYTE, 24> buffer{};
+   D3DDDI_SURFACEINFO layout{};
+   layout.Width = UINT(buffer.size());
+   layout.Height = layout.Depth = 1;
+   layout.pSysMem = buffer.data();
+   D3DDDIARG_CREATERESOURCE2 vb{};
+   vb.hResource = &vb;
+   vb.Format = D3DDDIFMT_VERTEXDATA;
+   vb.Pool = D3DDDIPOOL_SYSTEMMEM;
+   vb.Flags.VertexBuffer = 1;
+   vb.SurfCount = vb.MipLevels = 1;
+   vb.pSurfList = &layout;
+   CHECK(table.pfnCreateResource2(device, &vb) == S_OK);
+   const BYTE source[]{1, 4, 6, 8};
+   D3DDDIARG_UPDATESUBRESOURCEUP update{};
+   update.hResource = vb.hResource;
+   update.pSysMemUP = source;
+   update.Flags.BoxValid = update.Flags.NoOverwrite = 1;
+   update.DstBox = {4, 0, 8, 1, 0, 1};
+   CHECK(table.pfnUpdateSubresourceUP(device, &update) == S_OK);
+   CHECK(!std::memcmp(buffer.data() + 4, source, sizeof(source)));
+   CHECK(buffer[3] == 0 && buffer[8] == 0);
+   update.DstBox.Right = UINT(buffer.size()) + 1;
+   CHECK(table.pfnUpdateSubresourceUP(device, &update) == E_INVALIDARG);
+   CHECK(table.pfnDestroyResource(device, vb.hResource) == S_OK);
+
+   // Three active pixels plus one guard pixel per row. The source aliases
+   // the destination one row earlier, so a forward per-row copy alone fails.
+   UINT pixels[4][4] = {{1,2,3,90},{4,5,6,91},{7,8,9,92},{10,11,12,93}};
+   const UINT expected[4][4] = {{1,2,3,90},{1,2,3,91},{4,5,6,92},{7,8,9,93}};
+   layout.Width = 3; layout.Height = 4; layout.SysMemPitch = sizeof(pixels[0]); layout.pSysMem = pixels;
+   D3DDDIARG_CREATERESOURCE2 tex{};
+   tex.hResource = &tex; tex.Pool = D3DDDIPOOL_SYSTEMMEM; tex.Format = D3DDDIFMT_A8R8G8B8;
+   tex.Flags.Texture = tex.Flags.CpuOptimized = 1;
+   tex.SurfCount = tex.MipLevels = 1; tex.pSurfList = &layout;
+   CHECK(table.pfnCreateResource2(device, &tex) == S_OK);
+   update = {};
+   update.hResource = tex.hResource; update.Flags.BoxValid = 1; update.RowPitch = sizeof(pixels[0]);
+   update.DstBox = {0,1,3,4,0,1}; update.pSysMemUP = pixels;
+   CHECK(table.pfnUpdateSubresourceUP(device, &update) == S_OK);
+   CHECK(!std::memcmp(pixels, expected, sizeof(pixels)));
+   update.Flags.Value = 0; update.pSysMemUP = expected; // Entire subresource; ignore stale DstBox.
+   CHECK(table.pfnUpdateSubresourceUP(device, &update) == S_OK);
+   D3DDDIARG_LOCK lock{}; lock.hResource = tex.hResource; lock.Flags.ReadOnly = 1;
+   CHECK(table.pfnLock(device, &lock) == S_OK);
+   CHECK(table.pfnUpdateSubresourceUP(device, &update) == D3DERR_INVALIDCALL);
+   D3DDDIARG_UNLOCK unlock{}; unlock.hResource = tex.hResource;
+   CHECK(table.pfnUnlock(device, &unlock) == S_OK);
+   update.SubResourceIndex = 1;
+   CHECK(table.pfnUpdateSubresourceUP(device, &update) == E_INVALIDARG);
+   CHECK(table.pfnDestroyResource(device, tex.hResource) == S_OK);
+}
+
+static void legacy9_mip_edges_contract()
+{
+   using namespace legacy9;
+   Device graphics{};
+   LegacyDevice device{};
+   device.slot.state = &graphics;
+   // DDI-level copy on a 5x3 image and its 2x1 and 1x1 sublevels. Separate
+   // backing arrays make it observable which source level supplied each texel.
+   Surface src{}, dst{};
+   UINT inputs[3][15]{}, outputs[3][15]{};
+   for (UINT i = 0; i < 3; ++i)
+      for (UINT n = 0; n < 15; ++n) inputs[i][n] = 0x1100 + 16*i + n;
+   auto initialize = [&](Surface &surface, UINT (&data)[3][15]) {
+      surface.owner = &device;
+      surface.width = 5; surface.height = 3; surface.levels = 3;
+      surface.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+      surface.texture = std::make_unique<TextureLevel[]>(3);
+      for (UINT i = 0; i < 3; ++i) {
+         auto &level = surface.texture[i];
+         level.width = i == 0 ? 5 : i == 1 ? 2 : 1;
+         level.height = i == 0 ? 3 : 1;
+         level.pitch = level.width * sizeof(UINT);
+         level.bytes = reinterpret_cast<BYTE *>(data[i]);
+      }
+   };
+   initialize(src, inputs);
+   initialize(dst, outputs);
+   src.system = true;
+   static UINT writes;
+   writes = 0;
+   device.graphics.pfnResourceUpdateSubresourceUP = [](D3D10DDI_HDEVICE, D3D10DDI_HRESOURCE,
+       UINT, const D3D10_DDI_BOX *, const void *, UINT, UINT) APIENTRY { ++writes; };
+   D3DDDIARG_TEXBLT1 blt{};
+   blt.hSrcResource = &src; blt.hDstResource = &dst;
+   blt.SrcRect = {4,2,5,3}; blt.DstPoint = {4,2};
+   CHECK(texture_blt(&device, &blt) == S_OK);
+   CHECK(writes == 3 && outputs[0][14] == inputs[0][14] &&
+         outputs[1][1] == inputs[1][1] && outputs[2][0] == inputs[2][0]);
+   CHECK(!outputs[0][13] && !outputs[1][0] && !outputs[2][1]);
+   blt.SrcRect = {1,0,3,1}; blt.DstPoint = {3,0};
+   CHECK(texture_blt(&device, &blt) == S_OK);
+   CHECK(writes == 6 && outputs[0][3] == inputs[0][1] && outputs[0][4] == inputs[0][2] &&
+         outputs[1][1] == inputs[1][0] && !outputs[1][0]);
+   blt.DstPoint.x = 4; // Invalid already at the largest common level.
+   CHECK(texture_blt(&device, &blt) == D3DERR_INVALIDCALL && writes == 6);
+
+   dst.width = 2; dst.height = 1; dst.levels = 2;
+   dst.texture[0].width = 2; dst.texture[0].height = 1; dst.texture[0].pitch = 8;
+   dst.texture[1].width = dst.texture[1].height = 1; dst.texture[1].pitch = 4;
+   std::memset(outputs, 0, sizeof(outputs));
+   blt.SrcRect = {4,2,5,3}; blt.DstPoint = {1,0};
+   CHECK(texture_blt(&device, &blt) == S_OK && writes == 8);
+   CHECK(outputs[0][1] == inputs[1][1] && outputs[1][0] == inputs[2][0]);
+   CHECK(!outputs[0][0] && !outputs[0][2] && !outputs[1][1]);
+}
+
+static void legacy9_retry_contract()
+{
+   using namespace legacy9;
+   Device graphics{};
+   LegacyDevice device{};
+   device.slot.state = &graphics;
+   Surface texture{};
+   texture.owner = &device;
+   texture.lockable = true;
+   texture.levels = 1;
+   texture.texture = std::make_unique<TextureLevel[]>(1);
+   UINT cpu[2][3]{};
+   auto &level = texture.texture[0];
+   level.width = 3; level.height = 2; level.pitch = sizeof(cpu[0]);
+   level.bytes = reinterpret_cast<BYTE *>(cpu);
+   static struct { UINT failures, accepted, gpu[2][3]; } backend;
+   backend = {};
+   backend.failures = 2;
+   device.graphics.pfnResourceUpdateSubresourceUP = [](D3D10DDI_HDEVICE h, D3D10DDI_HRESOURCE,
+       UINT sub, const D3D10_DDI_BOX *box, const void *input, UINT pitch, UINT) APIENTRY {
+      auto *dev = reinterpret_cast<LegacyDevice *>(h.pDrvPrivate); // LegacyDevice starts with DeviceSlot.
+      static_assert(offsetof(LegacyDevice, slot) == 0);
+      CHECK(sub == 0 && box && box->back == 1);
+      if (backend.failures) {
+         --backend.failures;
+         dev->error = E_OUTOFMEMORY;
+         return;
+      }
+      for (LONG y = box->top; y < box->bottom; ++y)
+         std::memcpy(&backend.gpu[y][box->left], static_cast<const BYTE *>(input) + size_t(y - box->top) * pitch,
+                     (box->right - box->left) * sizeof(UINT));
+      ++backend.accepted;
+   };
+   D3DDDIARG_LOCK lock{};
+   lock.Flags.AreaValid = lock.Flags.WriteOnly = 1; lock.Area = {1,0,2,1};
+   CHECK(lock_texture(&texture, &lock) == S_OK);
+   *static_cast<UINT *>(lock.pSurfData) = 23;
+   D3DDDIARG_UNLOCK unlock{};
+   CHECK(unlock_texture(&texture, &unlock) == E_OUTOFMEMORY);
+   CHECK(!level.locked && !IsRectEmpty(&level.pendingUpload) && !backend.gpu[0][1]);
+   device.begin();
+   CHECK(prepare_texture(&texture) == E_OUTOFMEMORY);
+   lock.Area = {2,1,3,2};
+   CHECK(lock_texture(&texture, &lock) == S_OK);
+   *static_cast<UINT *>(lock.pSurfData) = 37;
+   CHECK(prepare_texture(&texture) == D3DERR_INVALIDCALL);
+   CHECK(unlock_texture(&texture, &unlock) == S_OK);
+   CHECK(backend.accepted == 1 && IsRectEmpty(&level.pendingUpload));
+   CHECK(!std::memcmp(backend.gpu, cpu, sizeof(cpu)));
+   CHECK(prepare_texture(&texture) == S_OK && backend.accepted == 1);
+
+   UINT replacement = 51;
+   texture.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+   D3DDDIARG_UPDATESUBRESOURCEUP up{};
+   up.hResource = &texture; up.SubResourceIndex = 0; up.Flags.BoxValid = 1;
+   up.DstBox = {1,0,2,1,0,1}; up.pSysMemUP = &replacement;
+   backend.failures = 1;
+   CHECK(update_subresource(&device, &up) == E_OUTOFMEMORY);
+   CHECK(cpu[0][1] == 23 && backend.gpu[0][1] == 23);
+   CHECK(update_subresource(&device, &up) == S_OK && cpu[0][1] == 51 && backend.gpu[0][1] == 51);
+}
+
+static void legacy9_initialization_contract()
+{
+   Adapter adapter{};
+   D3DDDI_DEVICECALLBACKS callbacks{};
+   D3DWDDM2_0DDI_CORELAYER_DEVICECALLBACKS unusedCore{};
+   s = {};
+   init(&adapter, &callbacks, &unusedCore);
+   adapter.vk.caps.maxImageDimension2D = 4096;
+
+   struct {
+      UINT64 before;
+      D3DDDI_DEVICEFUNCS table;
+      UINT64 after;
+   } output{};
+   output.before = output.after = UINT64_C(0xd011cab1ed011cab);
+   std::memset(&output.table, 0xa5, sizeof(output.table));
+   D3DDDIARG_CREATEDEVICE create{};
+   create.hDevice = H<HANDLE>(0x500);
+   create.Interface = D3D9_RUNTIME_INTERFACE;
+   create.Version = 0x10000; // Runtime build field observed on the Switch.
+   create.pDeviceFuncs = &output.table;
+   create.pCallbacks = &callbacks;
+   CHECK(legacy9_create_device(&adapter, &create) == S_OK);
+   CHECK(create.hDevice && create.hDevice != H<HANDLE>(0x500));
+   const auto &table = output.table;
+   CHECK(!table.pfnCreateResource && table.pfnCreateResource2);
+   CHECK(!table.pfnBufBlt && table.pfnBufBlt1);
+   CHECK(!table.pfnTexBlt && table.pfnTexBlt1);
+   CHECK(!table.pfnVolBlt && table.pfnVolBlt1);
+   CHECK(table.pfnSetScissorRect && table.pfnSetRenderState && table.pfnSetTextureStageState);
+   CHECK(table.pfnSetPixelShader && table.pfnSetVertexShaderFunc && table.pfnSetDepthStencil && table.pfnDestroyDevice);
+   constexpr size_t used = offsetof(D3DDDI_DEVICEFUNCS, pfnTrimResidencySet) + sizeof(table.pfnTrimResidencySet);
+   const auto *bytes = reinterpret_cast<const BYTE *>(&table);
+   for (size_t i = used; i < sizeof(table); ++i) CHECK(bytes[i] == 0xa5);
+   CHECK(output.before == UINT64_C(0xd011cab1ed011cab) && output.after == output.before);
+
+   const HANDLE device = create.hDevice;
+   CHECK(table.pfnPresent1 && table.pfnFlush1 && table.pfnUpdateSubresourceUP && table.pfnCheckCounterInfo &&
+         table.pfnCheckCounter && table.pfnSetMarker && table.pfnSetMarkerMode);
+   D3DDDIARG_COUNTER_INFO info{};
+   info.NumSimultaneousCounters = 7;
+   table.pfnCheckCounterInfo(device, &info);
+   CHECK(info.NumSimultaneousCounters == 0 && UINT(info.LastDeviceDependentCounter) == 0);
+   D3DDDI_COUNTER_TYPE counterType{};
+   UINT active = 0;
+   CHECK(table.pfnCheckCounter(device, D3DDDIQUERYTYPE_EVENT, &counterType, &active, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr) == D3DERR_NOTAVAILABLE);
+   CHECK(table.pfnFlush1(device, 0) == S_OK && table.pfnFlush1(device, D3DDDI_TRIM_MEMORY) == S_OK);
+   CHECK(table.pfnSetMarkerMode(device, D3DDDIMT_NONE, 0) == S_OK && table.pfnSetMarker(device) == S_OK);
+   CHECK(table.pfnSetMarkerMode(device, D3DDDIMT_PROFILE, 0) == D3DERR_NOTAVAILABLE);
+   legacy9_upload_contracts(device, table);
+   legacy9_retry_contract();
+   legacy9_mip_edges_contract();
+   D3DDDIARG_SETDEPTHSTENCIL depth{};
+   CHECK(table.pfnSetDepthStencil(device, &depth) == S_OK);
+   CHECK(table.pfnSetPixelShader(device, nullptr) == S_OK);
+   CHECK(table.pfnSetVertexShaderFunc(device, nullptr) == S_OK);
+   RECT scissor{0, 0, 96, 64};
+   CHECK(table.pfnSetScissorRect(device, &scissor) == S_OK);
+   scissor.left = -1;
+   CHECK(table.pfnSetScissorRect(device, &scissor) == D3DERR_INVALIDCALL);
+
+   D3DDDIARG_RENDERSTATE state{D3DDDIRS_LINEPATTERN, 0};
+   CHECK(table.pfnSetRenderState(device, &state) == S_OK);
+   state.State = D3DDDIRS_VERTEXBLEND;
+   CHECK(table.pfnSetRenderState(device, &state) == S_OK);
+   for (UINT id : {196u, 197u}) {
+      state = {static_cast<D3DDDIRENDERSTATETYPE>(id), UINT32_MAX};
+      CHECK(table.pfnSetRenderState(device, &state) == S_OK);
+      state.Value = 1;
+      CHECK(table.pfnSetRenderState(device, &state) == D3DERR_NOTAVAILABLE);
+   }
+   D3DDDIARG_TEXTURESTAGESTATE stage{0, D3DDDITSS_MAXANISOTROPY, 1};
+   CHECK(table.pfnSetTextureStageState(device, &stage) == S_OK);
+   stage = {1, D3DDDITSS_COLOROP, D3DTOP_DISABLE};
+   CHECK(table.pfnSetTextureStageState(device, &stage) == S_OK);
+   stage.Stage = UINT_MAX;
+   CHECK(table.pfnSetTextureStageState(device, &stage) == E_INVALIDARG);
+   CHECK(table.pfnDestroyDevice(device) == S_OK);
+   CHECK(s.ktCreates == 1 && s.contexts == s.deadContexts && s.devices == s.deadDevices &&
+         s.queues == s.deadQueues && s.objects == s.deadObjects && !s.errors);
+   std::puts("PASS: D3D9 WDDM 1.3 upload, trim, counter and marker callbacks; padded overlap and deferred mip upload retry (CPU substitutes)");
+   std::puts("PASS: D3D9 WDDM2 device table, fixed-function initialization and teardown (CPU substitutes)");
+}
+
 void device_contracts()
 {
+   legacy9_initialization_contract();
    for (bool withVideo : {false, true}) {
       Adapter adapter; D3DDDI_DEVICECALLBACKS kt = {};
       D3DWDDM2_0DDI_CORELAYER_DEVICECALLBACKS oldCore = {};

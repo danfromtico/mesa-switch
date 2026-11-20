@@ -1,0 +1,108 @@
+{
+  "scope": "Selected x86 tgd3d source and private D3D9 graphics baseline on GM20B. The Windows system D3D9 HAL endpoint is tracked separately.",
+  "source_base": "3e6f01a1702db268adddba30110629e9380fd670",
+  "source_patch_sha256": "76b3833cb99b641db748a865e81e2e93fbc878ab4f75ed2311b6149df8d1b0f3",
+  "source_files_sha256": {
+    "src/nouveau/tgd3d/meson.build": "0ca82c9662ae651a6c7f162ae6fd6d07fcd19089057b9d0f0c318dcbb64d4541",
+    "src/nouveau/tgd3d/tgd3d_legacy9.h": "08dcf0343a5e8d2459cf2bafe4f1554ab2b48fd4f33b2c051f7e9816e25e4fdb",
+    "src/nouveau/tgd3d/tgd3d_legacy9.cpp": "645efd58783e691db38cfcf4d8b961ef45ffdae1405153de17b403afdd849001",
+    "src/nouveau/tgd3d/tgd3d_legacy9_device.cpp": "49dddb5f1a32e315b2ba5ab4745fe5eb116ed176a22d356eaa6accdb7e1d8889",
+    "src/nouveau/tgd3d/tgd3d_legacy9_draw.cpp": "333ac4200cd5596ecbf7f5a2744cc5d84655a7eaf77abb59df664645981fa66a",
+    "src/nouveau/tgd3d/tgd3d_legacy9_texture.cpp": "64fac84fdb16b41842497477df20afb45fbfd943370f0f5fbaa7168048e2258d",
+    "src/nouveau/tgd3d/shaders/legacy9_color.h": "0c7f795d2ef83b0604a1af33ad75afb456f7c38e6b7fed449009bbe96c43595b",
+    "src/nouveau/tgd3d/shaders/legacy9_color.hlsl": "b4fc7771c37c4568b6eb62ae1c9b3707000b038a98c93f284fe29b77d7281f2e",
+    "src/nouveau/tgd3d/shaders/generate_legacy9.py": "e7af1fde24d3c7790565e336feed187ef2a4a71a98adc92a49a1e37a62082e25",
+    "src/nouveau/tgd3d/tests/device_contracts.cpp": "41f11b11e919a8500c268f48125ffe3be2bae9126ec296264c8c9aaa9695046f"
+  },
+  "signed_x86_umd_sha256": "b5974ec0fa4ef4806cdad442f8b0f5768dcd237172d4634a8858c3a3b10b957d",
+  "signed_x86_fixture_sha256": "38ab5d6e663747f49347a618bccfd1ed73d4d2a6a83dcaca79f0cdcff1be4188",
+  "x86_nvk_sha256": "1064131dcda0ee441b7b1dab86838a612546f6bdad4265a8d6e7c8ed2277101e",
+  "unsigned_builds": {
+    "x86": {
+      "machine": "0x14c",
+      "bytes": 3732992,
+      "unsigned_sha256": "601212062143ec9435b2b38daf22ebceac83594e4a9fbb8c7f3ccd54965c5088"
+    },
+    "x64": {
+      "machine": "0x8664",
+      "bytes": 3816960,
+      "unsigned_sha256": "11181090d377f9b6f3fbb55f6eadbf3e18ac346fe210ac19f6127fd3aa9b589a"
+    },
+    "arm64ec": {
+      "machine": "0x8664",
+      "bytes": 3801600,
+      "unsigned_sha256": "056347dced6e7ee4ea1754b498a47f955c577300a6ff950dabaaa625ffca61e3",
+      "verified_CHPE_code_map_and_redirection": true
+    },
+    "arm64": {
+      "machine": "0xaa64",
+      "bytes": 3412480,
+      "unsigned_sha256": "0c9d3ac430c47d7db8237b3d93058315a7e271b6fbf17de5242e92d0fda95770"
+    }
+  },
+  "vertex_stream_offset": {
+    "fixture": "Bound vertex buffer plus nonzero stream and draw offsets. Verify rendered RGB and destruction of bound buffers.",
+    "first_gm20b_run": {
+      "cases": [
+        "vb-create",
+        "vb-range-lock",
+        "vb-bind",
+        "vb-unlock",
+        "vb-list-offset-plus-vstart",
+        "vb-release-bound",
+        "vb-system-create",
+        "vb-system-bind",
+        "vb-system-lock",
+        "vb-strip-two-byte-offsets",
+        "vb-system-unlock",
+        "vb-to-user-stream",
+        "draw-readback"
+      ],
+      "checks": [
+        "nonzero binding offset plus vertex-index start",
+        "nonzero binding offset plus draw byte offset",
+        "locked buffer rejection, bounds rejection, unbind on destroy",
+        "runtime system memory alias, draw while explicitly permitted and locked",
+        "switch back to user-memory stream"
+      ],
+      "pixels": {
+        "gradient": 45,
+        "solid": 80,
+        "background": 623
+      },
+      "process_exit": 0,
+      "boot_before": "2026-11-19T16:50:42.5647360Z",
+      "boot_after": "2026-11-19T16:50:42.5647360Z",
+      "dwm_pids": [
+        1424,
+        1424
+      ],
+      "code": 0
+    },
+    "rechecked_in_selected_binary": true
+  },
+  "mip_edge_copy": {
+    "fixture": "5x3 to 2x1 to 1x1, including the last texel, nonzero offsets and different source and destination chains.",
+    "original_regression": "../source/src/nouveau/tgd3d/tests/device_contracts.cpp:213: writes == 3 && outputs[0][14] == inputs[0][14] && outputs[1][1] == inputs[1][1] && outputs[2][0] == inputs[2][0]",
+    "x86_x64_control_exit": {
+      "x86": 0,
+      "x64": 0
+    },
+    "gm20b_verified_pixels": 748,
+    "native_marker": "odd-mips-verified",
+    "draw_readback_hresult": "0x00000000"
+  },
+  "switch_run": {
+    "same_boot": "2026-11-19T20:23:36.7003040Z",
+    "dwm_pid": 1460,
+    "gpu_problem_code": 0,
+    "process_exit": 0,
+    "complete": true,
+    "archive_record_sha256": "e117fb856dabbcb375a74ef0e80eae9d06b5692fba892dde351619d43b8ae533"
+  },
+  "public_system_hal": {
+    "accepted": false,
+    "previous_offset_trial_hresult": "0x8876086a",
+    "selection": "The package-specific x86 test invokes its private UMD. The system-wide x86 slot is kept at the restored setting pending a public device and window pass."
+  }
+}

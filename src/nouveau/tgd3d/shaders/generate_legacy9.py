@@ -19,8 +19,9 @@ with tempfile.TemporaryDirectory() as working:
     work = Path(working)
     source = 'legacy9_color.hlsl'
     shutil.copyfile(here / source, work / source)
-    for stage in ('vs', 'ps'):
-        subprocess.run([*compiler, '/nologo', '/Ges', '/O3', '/E', 'color_' + stage,
+    for entry in ('color_vs', 'color_ps', 'texture_vs', 'texture_ps'):
+        stage = entry.rsplit('_', 1)[1]
+        subprocess.run([*compiler, '/nologo', '/Ges', '/O3', '/E', entry,
                         '/T', stage + '_4_0', '/Fo', 'color.cso', source], cwd=work, check=True)
         data = (work / 'color.cso').read_bytes()
         count, = struct.unpack_from('<I', data, 28)
@@ -29,14 +30,14 @@ with tempfile.TemporaryDirectory() as working:
             body = data[offset+8:offset+8+size]
             if chunk in (b'SHDR', b'SHEX'):
                 words = struct.unpack(f'<{size//4}I', body)
-                lines.append(f'static constexpr UINT color_{stage}[] = {{')
+                lines.append(f'static constexpr UINT {entry}[] = {{')
                 for i in range(0, len(words), 6):
                     lines.append('   ' + ', '.join(f'0x{x:08x}' for x in words[i:i+6]) + ',')
                 lines.extend(['};', ''])
             elif chunk in (b'ISGN', b'OSGN'):
                 direction = 'in' if chunk == b'ISGN' else 'out'
                 entries, first = struct.unpack_from('<II', body)
-                lines.append(f'static constexpr D3D10DDIARG_SIGNATURE_ENTRY color_{stage}_{direction}[] = {{')
+                lines.append(f'static constexpr D3D10DDIARG_SIGNATURE_ENTRY {entry}_{direction}[] = {{')
                 for i in range(entries):
                     _, _, system, _, register, masks = struct.unpack_from('<6I', body, first+24*i)
                     lines.append(f'   {{static_cast<D3D10_SB_NAME>({system}), {register}, 0x{masks & 15:x}}},')
