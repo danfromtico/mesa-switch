@@ -1805,5 +1805,165 @@
       "https://learn.microsoft.com/en-us/windows/win32/api/d3d11_4/nf-d3d11_4-id3d11device5-createfence",
       "https://learn.microsoft.com/en-us/windows/win32/api/d3d11_3/nf-d3d11_3-id3d11devicecontext4-wait"
     ]
+  },
+  "native_first_present_miniport_receipts_20261120": {
+    "hardware": "Windows ARM64 on GM20B, external AC. Windowed public D3D11 FL11_0, DXGI_SWAP_EFFECT_SEQUENTIAL, two 640x360 BGRA buffers and the same six reference frames.",
+    "retained_kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "observation_kernel_sha256": "9dc7e2e89694ada8d4bf627d44e52af5e543cf5f102fb35333d3eabed89e7aff",
+    "observation_catalog_sha256": "79f85a9caa36f9c644955770ee21f7d7aa73d1f734410ce3301c1d89b5fbf111",
+    "unchanged_native_user_modules": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "client_sha256": "62100a301ae7c85a7d40d15d13b91837989b4b06ac935cd9182274e8a0ce6f6f",
+    "collector_sha256": "fae952a5b3eb5abada81c51cdd2f367b0af2c68031b7bddf65339e29feda9d1b",
+    "event_format": "Provider c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0, event 5 version 1, keyword 2, 44 bytes. Operation 1 is DxgkDdiPresent entry/return, operation 2 is entry/internal admission of a present-flagged virtual submit, and operation 3 is a successful private adapter query.",
+    "accepted_kernel_query_control": {
+      "archive_sha256": "48a7505a808ec5ddc1a1787d5b0f0e5b9fb0da3e5307f14b0b8df250227a1a0b",
+      "kernel_etl_sha256": "380320fd58e10aacdbedbbbb3540ef7f50b221d68c916be867c090c000688177",
+      "kernel_etl_finalized": true,
+      "boot": 78266,
+      "boot_at_collection": 78266,
+      "kernel_record_counts": {},
+      "collector_exit_recorded": true,
+      "durable_only": 0,
+      "etl_only": 0
+    },
+    "trials": [
+      {
+        "iteration": 1,
+        "candidate_boot": 78442,
+        "query": {
+          "archive_sha256": "8f6dfabb0e7dfd32cc2d6dd89f50b6916ba929442ad42559bcb30a00ce0510f7",
+          "kernel_etl_sha256": "83642f7abc3c3d7ec739bd469d5750ad37c8a5f9a8f2139f63d11b9d54e0b726",
+          "kernel_etl_finalized": true,
+          "boot": 78442,
+          "boot_at_collection": 78442,
+          "kernel_record_counts": {
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": true,
+          "durable_only": 0,
+          "etl_only": 0,
+          "controller_error": "The candidate-query status-file write overlapped a status reader. The independent query and ETW recorder reached their exit checkpoints. The WARP and native cases repeated the PID-matched control."
+        },
+        "warp": {
+          "archive_sha256": "2a70734449caacf922484653a1ba2024396d8f13004856414bf95e945b1327e1",
+          "kernel_etl_sha256": "932f394a54321f42a93527dc89e4ae474b127e72b8319cdb873454c90bd3922a",
+          "kernel_etl_finalized": true,
+          "boot": 78442,
+          "boot_at_collection": 78442,
+          "kernel_record_counts": {
+            "dwm/op1/phase1/0x00000103": 57,
+            "dwm/op1/phase2/0x00000000": 57,
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": true,
+          "durable_only": 0,
+          "etl_only": 0,
+          "application_pid": 3716,
+          "dwm_pid": 1444,
+          "present_calls": 6,
+          "present_success": 6,
+          "journal_tail": "306937 7280 EXIT RunAndRelease 00000000",
+          "runtime_etl_finalized": true,
+          "dxgi_start_records": 6,
+          "dxgi_return_records": 6,
+          "verified_desktop_samples": 15
+        },
+        "native": {
+          "archive_sha256": "dc9cc8a3b498c79614458cac867549a7353e3187dc7f5cda317ffef2c17b3183",
+          "kernel_etl_sha256": "f0698b29d20f8c88afaab37579da765f9e0dac68b9c6a7ab6ec2ad60ce4dff68",
+          "kernel_etl_finalized": false,
+          "boot": 78442,
+          "boot_at_collection": 78606,
+          "kernel_record_counts": {
+            "draw/op3/phase2/0x00000000": 3,
+            "dwm/op1/phase1/0x00000103": 12,
+            "dwm/op1/phase2/0x00000000": 12,
+            "query/op3/phase2/0x00000000": 2
+          },
+          "collector_exit_recorded": false,
+          "durable_only": 0,
+          "etl_only": 14,
+          "application_pid": 7396,
+          "dwm_pid": 1444,
+          "present_calls": 1,
+          "present_success": 0,
+          "journal_tail": "367859 3628 CALL Present 00000000",
+          "runtime_etl_finalized": false,
+          "dxgi_start_records": 0,
+          "dxgi_return_records": 0,
+          "verified_desktop_samples": null
+        },
+        "boot_events": [
+          {
+            "record": 78275,
+            "event": 6008
+          },
+          {
+            "record": 78284,
+            "event": 41,
+            "bugcheck_code": 0
+          },
+          {
+            "record": 78342,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic enter closed gate before selecting candidate"
+          },
+          {
+            "record": 78358,
+            "event": 12
+          },
+          {
+            "record": 78422,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic one-time candidate boot"
+          },
+          {
+            "record": 78442,
+            "event": 12
+          },
+          {
+            "record": 78512,
+            "event": 12
+          },
+          {
+            "record": 78521,
+            "event": 6008
+          },
+          {
+            "record": 78530,
+            "event": 41,
+            "bugcheck_code": 0
+          },
+          {
+            "record": 78589,
+            "event": 1074,
+            "reason": "SwitchWOA GPU presentation diagnostic restore verified permanent baseline"
+          },
+          {
+            "record": 78606,
+            "event": 12
+          }
+        ],
+        "restore": {
+          "boot": 78606,
+          "gpu_problem_code": 0,
+          "accepted_published_inf": "oem15.inf",
+          "persistent_accepted_grant": true,
+          "candidate_driverstore_entry_removed": "oem19.inf",
+          "scoped_tasks_processes_and_etw_sessions_remaining": 0
+        }
+      }
+    ],
+    "interpretation": "The fixture and Desktop Window Manager have separate device and process identities. The retained DWM calls in the first native trial carried Flip | FlipWithNoWait (0x0c), with zero DMA bytes and a successful miniport return. The application journal reached its first Present and the ETW files end mid-session. The initiating callback and reset mechanism remain unresolved.",
+    "references": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_present",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_presentflags",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_submitcommandvirtual"
+    ]
   }
 }
