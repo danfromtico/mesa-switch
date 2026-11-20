@@ -1,0 +1,608 @@
+{
+  "schema": 1,
+  "date_utc": "2026-11-20",
+  "fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "original_qualifying_runs": 0,
+  "promoted": false,
+  "selected_source": "c05e254932dd975bdf69e7046949596dbeb84561",
+  "source_delta": {
+    "source": "e1314a2c769b92e971640caf67e1a67db270a5ad",
+    "parent": "60220e9e72dfd1a4afe234bf5e4171e30f0f6dd6",
+    "port_sha256": "d06ee0319ad50f93f7554ec1dfb925fb08b32a91df88e82e6a73c2df4084e6d5",
+    "reference_umd": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+    "files": {
+      "src/nouveau/tgd3d/tgd3d.h": "8af8ec6f8e8ef43ea25c430ac885ac2f5d1b052fc7470f0d512a72cdd120d771",
+      "src/nouveau/tgd3d/tgd3d_resource.cpp": "d5c021353f5b1bdaba8a246f8a557317e830f5762c0db3161df1f56382591cd1",
+      "src/nouveau/tgd3d/tgd3d_runtime.cpp": "12fd5325655011821864d8bbcf08d6c21aad0698be016a5bfa29dfdc2f0a7b00"
+    }
+  },
+  "build": {
+    "signed_umd": {
+      "bytes": 3402768,
+      "unsigned": "1bbda949bd1ec220af3e2d161fd6bd47b672edb8e29f735b9d480df8f7f820fb",
+      "sha256": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "production_units": 29,
+    "test_source_sha256": "9ba17a10026b18846d3d9bf37652b3d1c3da81bf847205f855d42d5fc51d6de5",
+    "arm64_model": {
+      "reference": {
+        "output": "window allocation status=887a0004 count=0 pitch=0\r\n",
+        "sha256": "6479b68e4b4fc42128e5a7c025acc4b276f9613cd808c78218cb8a46e2d40d00",
+        "exit": 11
+      },
+      "utc": "2026-11-20T22:34:09.4159472Z",
+      "candidate": {
+        "output": "window allocation status=00000000 count=1 pitch=2560\r\nPASS resource-associated BGRA, typed geometry, resource teardown and unselected inputs\r\n",
+        "sha256": "a1fdeb9b4ed337f7ab658634232d16e8b02d40ecbbf47ff26690a86d188e5fcb",
+        "exit": 0
+      },
+      "kmd": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+      "boot": 85913
+    },
+    "source_review_sha256": "e55743fe100713f226354ae7e7547301064eef16e3003cd71fda8d278198ea9a"
+  },
+  "entry_boot": 85913,
+  "entry_permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+  "one_time_trial": {
+    "boot": 86096,
+    "power": "Online",
+    "gpu_code": 0,
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\linear-surface-b4f6c7bf7d3c",
+    "inf": "oem20.inf",
+    "consumed_token": 0,
+    "permanent": null,
+    "changed_components": [
+      "tegragpurender.sys",
+      "tg_d3d_arm64.dll"
+    ],
+    "seven_hashes": {
+      "tegragpurender.sys": "61787148742b664f1c876570dfed46c61f75e8a66adaa432357214874ac3e8ab",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "dwm_modules": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "dwm": [
+      {
+        "started": "2026-11-20T22:46:40.0010741Z",
+        "id": 1424,
+        "session": 1
+      }
+    ],
+    "kmd_signed_catalog": "0f067af567c148e57db25a12d0530c0af0f8bdb87555c293b929edb99e93b076"
+  },
+  "saved_warp": {
+    "evidence": "warp-control-5.json",
+    "reused": true,
+    "passed": false
+  },
+  "scenes": [
+    {
+      "scene": "paired-flip-1",
+      "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "observer": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "os_trace_tool": "e33b035164c3f73780dbea91600b2c86764e1d624e893422ae2fcb80f8f561ba",
+      "archive_sha256": "5b72296540afbb273814b6f2405a1eac5dc9470875420cdf4c00842e28359323",
+      "raw_result_sha256": "1647cbfa16e6caafd4206b750406c31bdd5e1bc4010371aa581b4a242b7c800c",
+      "journal_sha256": "c51a6b7d50ecb3912b065702f53ce4e7bc0182e7aa5a5bca5846020872f07846",
+      "passed": true,
+      "model": "PRESENT_MODEL buffers=2 effect=3",
+      "drawing_device": "DRAW_DEVICE software=0 luid=0000000000005b65 display_luid=0000000000005b65 vendor=414f5753 device=31304630 fl=b000 name=Tegra X1 (GM20B) .158 GM20B virtual context DMA 61787148742b",
+      "empty": true,
+      "boot": 86096,
+      "same_dwm_and_desktop": true,
+      "application_modules": {
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "first_present": {
+        "calls": 1,
+        "successful": 1,
+        "public_status": "0x00000000",
+        "kmt": {
+          "flags": "0x00009000",
+          "status": "0x00000000",
+          "cross_adapter": false,
+          "source_handle": true,
+          "destination_handle": false,
+          "window_handle_matched": true
+        },
+        "device_healthy": true,
+        "call_qpc": 2907037160,
+        "return_qpc": 2907176761
+      },
+      "traces": {
+        "scene/video.etl": {
+          "sha256": "19ffb1dfb30f65d52e27442c7c2066bbd787b718590564a03ef66d478b5fe9a1",
+          "complete": true,
+          "app_thread_blits": 0,
+          "app_thread_present_packets": 1,
+          "lost_events": 0,
+          "lost_buffers": 0
+        },
+        "display.etl": {
+          "sha256": "afa1a34c6d073fad72653b94603c591ef46258a287cc4bed5ab6acb7acd40e66",
+          "complete": true,
+          "app_thread_blits": 0,
+          "app_thread_present_packets": 1,
+          "lost_events": 0,
+          "lost_buffers": 0
+        }
+      },
+      "source": {
+        "source_device_open_preceded_call": true,
+        "source_handle_live": true,
+        "same_device_as_present_context": true,
+        "same_adapter_as_present_context": true,
+        "same_adapter_as_global_source": true,
+        "source_resource_handle_present": true,
+        "source_dxg_resource_present": true,
+        "source_shared_resource_present": false,
+        "source_global_description": {
+          "allocSize": 921600,
+          "Flags": 538968193,
+          "Format": 0,
+          "Width": 0,
+          "Height": 0,
+          "Pitch": 0,
+          "UsageFlags": 0,
+          "UsageVersion": 0,
+          "dwReadSegment": 0,
+          "dwWriteSegment": 2,
+          "BackingStoreWasPinned": 0
+        },
+        "source_opens": {
+          "application": 1,
+          "dwm": 0,
+          "other": 0
+        },
+        "os_dma_pool": [],
+        "new_device_allocations_in_call": 0,
+        "new_app_device_allocations_in_call": 0,
+        "new_dwm_device_allocations_in_call": 0,
+        "complete": true,
+        "device_allocations_observed_through_return": {
+          "application": {
+            "same_as_present_adapter": 8
+          },
+          "dwm": {
+            "same_as_present_adapter": 227,
+            "different_adapter": 34
+          }
+        },
+        "kmt_window_matches_observer": true
+      },
+      "umd_resource_events": {
+        "open": 0,
+        "blt": 0,
+        "errors": 0
+      },
+      "compositor": {
+        "window_handle_matched_to_observer": true,
+        "fixture_pid": 6308,
+        "dwm_pid": 1424,
+        "matched_dwm_events": [
+          {
+            "event": "Windowed_Dx_Flip_Consumed",
+            "qpc": 2907327848,
+            "display_luid": 23397,
+            "render_luid": 23397,
+            "source": 0,
+            "target": 0
+          }
+        ],
+        "fixture_events": [
+          {
+            "event": "TokenCompositionSurfaceObject",
+            "qpc": 2907172691,
+            "tid": 6564
+          }
+        ],
+        "event_counts": {
+          "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY": 578,
+          "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY_GetPresentHistory": 289,
+          "Dx_Flip_Consumed": 47,
+          "SCHEDULE_DXGI_PRESENT_SUCCEEDED": 165,
+          "SCHEDULE_PRESENTHISTORYTOKEN_GDISYSMEM": 59,
+          "TokenCompositionSurfaceObject": 1,
+          "TokenStateChanged": 5,
+          "Windowed_Dx_Flip_Consumed": 1
+        },
+        "unreadable_buffers": 0,
+        "trace_stop": {
+          "output": [
+            "ETW status=0 lost=0 lost_buffers=0 written=120"
+          ],
+          "session_already_ended": false,
+          "exit": 0
+        }
+      },
+      "input_return": {
+        "application_exit": 0,
+        "observer_exit": 0,
+        "normal_exit": true,
+        "input_verified": true,
+        "cleanup_cancelled_menu": false,
+        "window_closed": true,
+        "desktop_available": true,
+        "post_success_capture_qpc": 2908040349
+      },
+      "client_dimensions": [
+        640,
+        360
+      ],
+      "visibility_intervals": [
+        {
+          "first_qpc": 2892288184,
+          "last_qpc": 2893180433,
+          "flags": 8,
+          "owned_points": 0
+        },
+        {
+          "first_qpc": 2896077214,
+          "last_qpc": 2900401373,
+          "flags": 11,
+          "owned_points": 5
+        },
+        {
+          "first_qpc": 2900784804,
+          "last_qpc": 2903743209,
+          "flags": 11,
+          "owned_points": 4
+        },
+        {
+          "first_qpc": 2904082209,
+          "last_qpc": 2908593101,
+          "flags": 11,
+          "owned_points": 5
+        },
+        {
+          "first_qpc": 2909355189,
+          "last_qpc": 2909355189,
+          "flags": 8,
+          "owned_points": 0
+        }
+      ],
+      "post_present_pixels": {
+        "reference_file": "legacy-sequential-step4-01a1facf/runs/warp-control-5/evidence/present.bmp",
+        "reference_sha256": "53bc2b070a30050b71eaa27ccdc07833d258646f5af866876dc97e6bdb62f7e4",
+        "observed_sha256": "7dac2e59409a3a6127e5423e99c57937a55ddc5fef0e7897317e4e2017add073",
+        "top_left_inclusive": [
+          15,
+          16
+        ],
+        "bottom_right_exclusive": [
+          113,
+          62
+        ],
+        "samples": 4508,
+        "matched": 4508,
+        "reference_rgb": "000000",
+        "sample_source": "Local composed desktop capture of the original window after the public return",
+        "normal_exit": true,
+        "input": true,
+        "window_closed": true,
+        "desktop_available": true,
+        "public_return_qpc": 2907176761,
+        "post_return_capture_qpc": 2908040349,
+        "passed": true
+      }
+    },
+    {
+      "scene": "paired-sequential-1",
+      "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "observer": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "os_trace_tool": "e33b035164c3f73780dbea91600b2c86764e1d624e893422ae2fcb80f8f561ba",
+      "archive_sha256": "4b8c5e0abf91aca2eb21bf6ba36e4f96de5d75b3ec129d4e9d8bc87e3310af8e",
+      "raw_result_sha256": "2b2a33fe5202975af589da2cd62a5ee0487d850b27556f208436882fa4b1f477",
+      "journal_sha256": "83c465040b2519879c752c78b2f792afae11438bac5430eb772aa8a665fe6bb1",
+      "passed": false,
+      "model": "PRESENT_MODEL buffers=2 effect=1",
+      "drawing_device": "DRAW_DEVICE software=0 luid=0000000000005b65 display_luid=0000000000005b65 vendor=414f5753 device=31304630 fl=b000 name=Tegra X1 (GM20B) .158 GM20B virtual context DMA 61787148742b",
+      "empty": true,
+      "boot": 86096,
+      "same_dwm_and_desktop": true,
+      "application_modules": {
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "first_present": {
+        "calls": 1,
+        "successful": 0,
+        "public_status": "0x087a0001",
+        "kmt": {
+          "flags": "0x04011081",
+          "status": "0xc01e0006",
+          "cross_adapter": true,
+          "source_handle": true,
+          "destination_handle": false,
+          "window_handle_matched": true
+        },
+        "device_healthy": true,
+        "call_qpc": 4341724862,
+        "return_qpc": 4341905843
+      },
+      "traces": {
+        "scene/video.etl": {
+          "sha256": "210ea0269650b799b4027a50185c5e3d8802f0fb70bb59794bc43272ff0316ad",
+          "complete": true,
+          "app_thread_blits": 0,
+          "app_thread_present_packets": 0,
+          "lost_events": 0,
+          "lost_buffers": 0
+        },
+        "display.etl": {
+          "sha256": "7745cb7d581134802ebd0e5ec533debb95a21facf778d4a0b302ad4952df3e97",
+          "complete": true,
+          "app_thread_blits": 0,
+          "app_thread_present_packets": 0,
+          "lost_events": 0,
+          "lost_buffers": 0
+        }
+      },
+      "source": {
+        "source_device_open_preceded_call": true,
+        "source_handle_live": true,
+        "same_device_as_present_context": true,
+        "same_adapter_as_present_context": true,
+        "same_adapter_as_global_source": true,
+        "source_resource_handle_present": true,
+        "source_dxg_resource_present": true,
+        "source_shared_resource_present": false,
+        "source_global_description": {
+          "allocSize": 921600,
+          "Flags": 129,
+          "Format": 0,
+          "Width": 0,
+          "Height": 0,
+          "Pitch": 0,
+          "UsageFlags": 0,
+          "UsageVersion": 0,
+          "dwReadSegment": 0,
+          "dwWriteSegment": 2,
+          "BackingStoreWasPinned": 0
+        },
+        "source_opens": {
+          "application": 1,
+          "dwm": 0,
+          "other": 0
+        },
+        "os_dma_pool": [
+          {
+            "DmaSize": 65536,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0
+          },
+          {
+            "DmaSize": 65536,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0
+          }
+        ],
+        "new_device_allocations_in_call": 2,
+        "new_app_device_allocations_in_call": 2,
+        "new_dwm_device_allocations_in_call": 0,
+        "complete": true,
+        "device_allocations_observed_through_return": {
+          "application": {
+            "same_as_present_adapter": 10
+          },
+          "dwm": {
+            "different_adapter": 27,
+            "same_as_present_adapter": 192
+          }
+        },
+        "kmt_window_matches_observer": true
+      },
+      "umd_resource_events": {
+        "open": 0,
+        "blt": 0,
+        "errors": 0
+      },
+      "compositor": {
+        "window_handle_matched_to_observer": true,
+        "fixture_pid": 2236,
+        "dwm_pid": 1424,
+        "matched_dwm_events": [],
+        "fixture_events": [],
+        "event_counts": {
+          "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY": 592,
+          "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY_GetPresentHistory": 296,
+          "SCHEDULE_PRESENTHISTORYTOKEN_GDISYSMEM": 64,
+          "SCHEDULE_DXGI_PRESENT_SUCCEEDED": 174,
+          "Dx_Flip_Consumed": 51
+        },
+        "unreadable_buffers": 0,
+        "trace_stop": {
+          "output": [
+            "ETW status=0 lost=0 lost_buffers=0 written=125"
+          ],
+          "session_already_ended": false,
+          "exit": 0
+        }
+      },
+      "input_return": {
+        "application_exit": 4,
+        "observer_exit": 9,
+        "normal_exit": false,
+        "input_verified": true,
+        "cleanup_cancelled_menu": false,
+        "window_closed": true,
+        "desktop_available": true,
+        "post_success_capture_qpc": 0
+      },
+      "client_dimensions": [
+        640,
+        360
+      ],
+      "visibility_intervals": [
+        {
+          "first_qpc": 4327290664,
+          "last_qpc": 4328182224,
+          "flags": 8,
+          "owned_points": 0
+        },
+        {
+          "first_qpc": 4329913684,
+          "last_qpc": 4329913684,
+          "flags": 11,
+          "owned_points": 5
+        },
+        {
+          "first_qpc": 4332728949,
+          "last_qpc": 4335424371,
+          "flags": 11,
+          "owned_points": 4
+        },
+        {
+          "first_qpc": 4335743870,
+          "last_qpc": 4342693626,
+          "flags": 11,
+          "owned_points": 5
+        },
+        {
+          "first_qpc": 4343167952,
+          "last_qpc": 4344834715,
+          "flags": 8,
+          "owned_points": 0
+        }
+      ]
+    }
+  ],
+  "system_events": [
+    {
+      "record": 85986,
+      "provider": "User32",
+      "utc": "2026-11-20T22:42:01.1016401Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt enter closed gate before selecting candidate"
+      },
+      "id": 1074
+    },
+    {
+      "record": 86003,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T22:42:25.8731871Z",
+      "details": {},
+      "id": 12
+    },
+    {
+      "record": 86079,
+      "provider": "User32",
+      "utc": "2026-11-20T22:45:24.7616496Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt one-time candidate boot"
+      },
+      "id": 1074
+    },
+    {
+      "record": 86096,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T22:45:48.6707289Z",
+      "details": {},
+      "id": 12
+    },
+    {
+      "record": 86166,
+      "provider": "User32",
+      "utc": "2026-11-20T22:55:40.2943743Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt close native gate for baseline restore"
+      },
+      "id": 1074
+    },
+    {
+      "record": 86183,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T22:56:04.8109299Z",
+      "details": {},
+      "id": 12
+    },
+    {
+      "record": 86255,
+      "provider": "User32",
+      "utc": "2026-11-20T22:58:59.7705993Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt restore verified permanent baseline"
+      },
+      "id": 1074
+    },
+    {
+      "record": 86272,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T22:59:23.7028889Z",
+      "details": {},
+      "id": 12
+    }
+  ],
+  "unexplained_restarts_in_trial_and_recovery": [],
+  "recovered": {
+    "boot": 86272,
+    "utc": "2026-11-20T23:03:18.9555542Z",
+    "source": "c05e254932dd975bdf69e7046949596dbeb84561",
+    "gpu_code": 0,
+    "power": "Online",
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+    "policy": "7a257371a5cd0a0e2febc322d141e543f6f61b7585c9f230e5c58963fd7a4875",
+    "qualification": "ea62b1044e413c21ed316fda6b0fa89b95f81be91cc50ecd46bb5b298c9b2768",
+    "trial": false,
+    "token": false,
+    "inf": "oem25.inf",
+    "installed": {
+      "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "dwm": [
+      {
+        "started": "2026-11-20T23:00:18.6055188Z",
+        "id": 1480,
+        "session": 1
+      }
+    ],
+    "dwm_modules": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "candidate_cleanup": {
+      "accepted": {
+        "trial": null,
+        "task": false,
+        "code": 0,
+        "phase_boot": 86272,
+        "utc": "2026-11-20T23:02:47.1331936Z",
+        "boot": 86272,
+        "token": null,
+        "inf": "oem25.inf",
+        "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+        "phase": "Finished",
+        "last_error": null,
+        "kmd": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+        "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0"
+      },
+      "removed_trial_root": true,
+      "candidate_package_removed": "oem20.inf",
+      "recovery_task_removed": true
+    }
+  },
+  "interpretation": "The paired release gives the back buffer a live Windows resource and a 921600-byte allocation. On this boot the original native window returned 0x087a0001 on its first Present. The kernel return for its visible HWND was 0xc01e0006. Neither capture contained an application Blit or queued presentation packet in that interval. The flip control supplied a compositor consumption event and a matching post-return frame. The destination of the unsuccessful window copy and the initiating cause of the historical resets remain unresolved."
+}
