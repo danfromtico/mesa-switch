@@ -317,6 +317,8 @@ static void legacy9_initialization_contract()
    CHECK(create.hDevice && create.hDevice != H<HANDLE>(0x500));
    const auto &table = output.table;
    CHECK(!table.pfnCreateResource && table.pfnCreateResource2);
+   CHECK(!table.pfnPresent && table.pfnPresent1);
+   CHECK(!table.pfnFlush && table.pfnFlush1);
    CHECK(!table.pfnBufBlt && table.pfnBufBlt1);
    CHECK(!table.pfnTexBlt && table.pfnTexBlt1);
    CHECK(!table.pfnVolBlt && table.pfnVolBlt1);
@@ -328,6 +330,7 @@ static void legacy9_initialization_contract()
    CHECK(output.before == UINT64_C(0xd011cab1ed011cab) && output.after == output.before);
 
    const HANDLE device = create.hDevice;
+   CHECK(table.pfnPresent1(device, nullptr) == E_INVALIDARG);
    CHECK(table.pfnPresent1 && table.pfnFlush1 && table.pfnUpdateSubresourceUP && table.pfnCheckCounterInfo &&
          table.pfnCheckCounter && table.pfnSetMarker && table.pfnSetMarkerMode);
    D3DDDIARG_COUNTER_INFO info{};

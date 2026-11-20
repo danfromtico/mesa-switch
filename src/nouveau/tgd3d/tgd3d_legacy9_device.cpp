@@ -632,7 +632,8 @@ HRESULT tgd3d::legacy9_create_device(Adapter *adapter, D3DDDIARG_CREATEDEVICE *a
    table->pfnBufBlt1 = buffer_blt;
    table->pfnTexBlt1 = texture_blt;
    table->pfnVolBlt1 = volume_blt;
-   table->pfnOpenResource=open_resource; table->pfnPresent=present;
+   table->pfnOpenResource = open_resource;
+   // Present1 and Flush1 replace their legacy entries in the negotiated table.
    // Keep the optional WDDM 1.3 callback group complete when exposing Present1.
    // The companion DXGI Present1 is installed by dxgi_fill_presentation13.
    table->pfnPresent1 = present1;
@@ -644,7 +645,7 @@ HRESULT tgd3d::legacy9_create_device(Adapter *adapter, D3DDDIARG_CREATEDEVICE *a
    table->pfnSetMarker = set_marker;
    table->pfnDestroyResource=destroy_resource; table->pfnSetRenderTarget=set_target;
    table->pfnBlt=blt; table->pfnClear=clear; table->pfnColorFill=color_fill;
-   table->pfnLock=lock_surface; table->pfnUnlock=unlock_surface; table->pfnFlush=flush_device;
+   table->pfnLock=lock_surface; table->pfnUnlock=unlock_surface;
    table->pfnDestroyDevice=destroy_device;
    install_draw_functions(table);
    args->hDevice=legacy.release();

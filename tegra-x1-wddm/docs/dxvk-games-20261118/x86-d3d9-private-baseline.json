@@ -104,5 +104,29 @@
     "accepted": false,
     "previous_offset_trial_hresult": "0x8876086a",
     "selection": "The package-specific x86 test invokes its private UMD. The system-wide x86 slot is kept at the restored setting pending a public device and window pass."
+  },
+  "versioned_device_table": {
+    "signed_x86_umd_sha256": "2a9a5e9c286029ad7fe604b62655dfea249b4b71cee1fae680fd10658c3f95dd",
+    "signed_x86_control_sha256": "9084f1a529de61a594cdb82abb779748ed9b84b99ca3177c774a28f7cacc7d37",
+    "source_increment_sha256": "6ad9d0841e05fd65cd9ebb29eb30a70f03193c4b777bae87b6cd651629f60ae9",
+    "source_files_sha256": {
+      "src/nouveau/tgd3d/tgd3d_legacy9_device.cpp": "fd01c793a15d0341692ee60b0f081afd55bf313f6f6ce072fe4441c99dcea924",
+      "src/nouveau/tgd3d/tests/device_contracts.cpp": "ebc2ebf9a3a40c5faca20076eb44fb971e47a20dab9b34d5166b37f98012684e"
+    },
+    "versioned_slots": "The WDDM 2.0 device table supplies Present1 and Flush1 and clears the mutually exclusive legacy slots.",
+    "control": "The original failed the Present pair check. Changing only that pair still failed the Flush pair check. With both pairs corrected the x86 and x64 contract programs exited successfully.",
+    "source_runtime": "10.0.22621.2861 (WinBuild.160101.0800)",
+    "on_device": {
+      "case": "Dx9Versioned-261119-210312632820",
+      "private_d3d9_device": true,
+      "same_desktop": true,
+      "exit": 0,
+      "pixel_markers": [
+        "verified\t34\t22\t152\t0",
+        "verified\t34\t22\t152\t1"
+      ],
+      "record_sha256": "aa73f319179a452f8dde0f6b761c4e0ff972301126a4a5bc2073b2b894e98234"
+    },
+    "scope": "The real GM20B smoke test created the private device, rendered, copied, read pixels and exited. The Windows system HAL and a positive system Present1 dispatch remain separate acceptance endpoints."
   }
 }
