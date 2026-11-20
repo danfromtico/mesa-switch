@@ -3906,5 +3906,238 @@
         "A truncated ETW cannot exclude a late miniport entry. Each qualified kernel trial includes receipt timestamps relative to the application journal checkpoint when available."
       ]
     }
+  },
+  "process_scoped_wddm20_first_present_20261120": {
+    "reference_source": "86b11bff561ea8107aadd060249eb14a226bd1c0",
+    "authoritative_source_for_wsl_guest_comparison": "https://github.com/microsoft/WSL2-Linux-Kernel/tree/a989171929bed4ea681be8d77333845ce1c1732a/drivers/hv/dxgkrnl",
+    "reference_arm64_umd": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+    "kernel_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "trial_loaded_components": {
+      "tg_d3d_arm64.dll": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+    },
+    "trial_umd_source_patch_sha256": "4967923481d99d34157d6f47123baf2b995280a07841b8f70f14135655a3a723",
+    "client_sha256": "8fe0e478cafb13c94ca4f748b32fcbc60874d8262fdf4f1c73bf1a297842bef6",
+    "conditions": {
+      "power": "AC",
+      "public_feature_level_request": "11_0 only",
+      "swap_effect": "SEQUENTIAL",
+      "buffers": 2,
+      "runtime_queue_option": true,
+      "trial_boot": 81800,
+      "gpu_problem_code": 0,
+      "same_desktop_process_in_all_cases": 1436,
+      "kmd_provider": "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0",
+      "kmd_level": 4,
+      "kmd_keyword": 1,
+      "kmd_event_ids": [
+        1,
+        2,
+        3
+      ]
+    },
+    "cases": [
+      {
+        "mode": "warp-legacy-empty",
+        "archive_sha256": "4e18fea05877e440ad66d43bd3de6b76f8e73ed18864e5420ec9a47fda3a6cc4",
+        "drawing_device": "SystemWarpDrawingDevice",
+        "successful_device_ddis": [],
+        "present_calls": 1,
+        "present_results": [
+          "0x00000000"
+        ],
+        "successful_vk_submits": 0,
+        "successful_windows_submit_callbacks": 0,
+        "collector_exit_code": 0,
+        "completed": true,
+        "kmd_events": [
+          {
+            "event": 2,
+            "execution_source": 1,
+            "status": 0,
+            "count": 9
+          }
+        ]
+      },
+      {
+        "mode": "native-legacy-render",
+        "archive_sha256": "ae48693406c9c45a09ee432c542c5923c1b85348e35c38b53983f6d87060f9a8",
+        "drawing_device": "NativeGM20BDrawingDevice",
+        "successful_device_ddis": [
+          "0x000b000f"
+        ],
+        "present_calls": 0,
+        "present_results": [],
+        "successful_vk_submits": 6,
+        "successful_windows_submit_callbacks": 9,
+        "collector_exit_code": 0,
+        "completed": true,
+        "kmd_events": [
+          {
+            "event": 2,
+            "execution_source": 1,
+            "status": 0,
+            "count": 51
+          }
+        ],
+        "rendered_frames": 6,
+        "last_frame_readback": {
+          "points": 35,
+          "max_rgb_channel_error": 1
+        }
+      },
+      {
+        "mode": "native-modern-render",
+        "archive_sha256": "5c045d96b9dd90fe7ec8379e287ac4bda2696be2f02bcd66ed5ed295591327dc",
+        "drawing_device": "NativeGM20BDrawingDevice",
+        "successful_device_ddis": [
+          "0x000b0020"
+        ],
+        "present_calls": 0,
+        "present_results": [],
+        "successful_vk_submits": 6,
+        "successful_windows_submit_callbacks": 9,
+        "collector_exit_code": 0,
+        "completed": true,
+        "kmd_events": [
+          {
+            "event": 2,
+            "execution_source": 1,
+            "status": 0,
+            "count": 40
+          }
+        ],
+        "rendered_frames": 6,
+        "last_frame_readback": {
+          "points": 35,
+          "max_rgb_channel_error": 1
+        }
+      },
+      {
+        "mode": "native-modern-empty",
+        "archive_sha256": "6f20e0d8a2ef07e3c54d726ee1ba9994b2f0111360e13b4d34bab83f62716d60",
+        "drawing_device": "NativeGM20BDrawingDevice",
+        "successful_device_ddis": [
+          "0x000b0020"
+        ],
+        "present_calls": 1,
+        "present_results": [
+          "0x887a0005"
+        ],
+        "successful_vk_submits": 0,
+        "successful_windows_submit_callbacks": 1,
+        "collector_exit_code": 4,
+        "completed": false,
+        "kmd_events": [
+          {
+            "event": 2,
+            "execution_source": 1,
+            "status": 0,
+            "count": 16
+          }
+        ],
+        "write_before_present": false,
+        "error_evidence": {
+          "dxgi_start_to_stop_ms": 2.049,
+          "outer_write_through_journal_interval_ms": 122.37,
+          "drawing_process_umd_events_between_journal_call_and_return": 0,
+          "drawing_process_umd_errors": [
+            {
+              "hr": "0x887a0005",
+              "site": "tgd3d_cmd.cpp:54",
+              "ms_after_journal_return": 163.286
+            }
+          ],
+          "get_device_removed_reason_called": false
+        }
+      }
+    ],
+    "logged_events_before_baseline_restoration": {
+      "41": 0,
+      "6008": 0,
+      "4101": 0,
+      "1001": 0
+    },
+    "bounded_windows_channel_counts": {
+      "System": {
+        "previous": 81695,
+        "newest": 81873,
+        "returned": 178,
+        "query_error": null,
+        "truncated": false
+      },
+      "Microsoft-Windows-Kernel-PnP/Configuration": {
+        "previous": 1285,
+        "newest": 1285,
+        "returned": 0,
+        "query_error": null,
+        "truncated": false
+      },
+      "Microsoft-Windows-UserPnp/DeviceInstall": {
+        "previous": 2177,
+        "newest": 2177,
+        "returned": 0,
+        "query_error": null,
+        "truncated": false
+      }
+    },
+    "interpretation": [
+      "Both public native devices completed six render-only frames. The modern empty first Present returned DXGI_ERROR_DEVICE_REMOVED; the same Windows boot and DWM process survived through evidence collection.",
+      "The retained kernel events were successful preemption reports. Windows TDR, entry to the earliest reset DDI, and the underlying reason for device removal remain unresolved.",
+      "The later UMD error in Device::completed follows the application return. That source site covers a failed semaphore query or an all-ones fence value.",
+      "The older legacy empty-window reboots used different driver components. This trial provides a same-boot comparison of the two native render-only paths and a modern first-Present result."
+    ],
+    "firmware_and_driver_recovery": {
+      "planned_shutdown_1074_records": [
+        81696,
+        81784,
+        81874
+      ],
+      "clean_shutdown_6006_records": [
+        81697,
+        81786,
+        81877
+      ],
+      "kernel_shutdown_13_records": [
+        81711,
+        81799,
+        81890
+      ],
+      "next_boot_12_records": [
+        81712,
+        81800,
+        81891
+      ],
+      "restored_boot_record": 81891,
+      "device_problem_code": 0,
+      "permanent_for_revalidated_reference": true,
+      "restored_arm64_umd": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+      "restored_kernel": "FC6E8D0876F7E69E16970809FCF191B6187F0D146A6F563DDE2D45CA78A6D1F4",
+      "installed_inf": "oem19.inf",
+      "remaining_test_folders": 0,
+      "remaining_test_tasks": 0,
+      "remaining_test_processes": 0,
+      "test_etw_sessions_confirmed_absent": 8,
+      "inactive_candidate_removed": true,
+      "unchanged_dump_inventory_entries": 11
+    },
+    "independent_review": {
+      "model": "gemini-4-neon-xhigh",
+      "effort": "xhigh",
+      "whole_source_directory_files": 15,
+      "source_lines": 16609,
+      "source_revision": "a989171929bed4ea681be8d77333845ce1c1732a",
+      "latest_review_sha256": "45153d1899472a7840e8a654c55b0e954ce6dd04920880d0afb07b76d09390bb",
+      "source_observation": "The WSL guest queries or caches host execution state and can mark a device as erroneous through VMBus. This gives a device-scoped alternative to adapter recovery.",
+      "qualification": "The earliest native reset callback has no entry event. Successful preemption records confirm collection, while a negative reset-event search alone cannot rule out an earlier reset path.",
+      "next_discriminating_measurement": "Read ID3D11Device::GetDeviceRemovedReason before and immediately after the same Present(1,0), before releasing the device. A sync-interval or swap-effect comparison requires a separate case."
+    },
+    "references": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/initializing-communication-with-the-direct3d-version-11-ddi",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/timeout-detection-and-recovery",
+      "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11device-getdeviceremovedreason"
+    ]
   }
 }
