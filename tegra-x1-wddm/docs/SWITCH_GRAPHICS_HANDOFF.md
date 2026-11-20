@@ -20,6 +20,8 @@
 
 ## 已选基线
 
+第四步候选 `60220e9e`（KMD `61787148`）已在外接电源、Code 0 的一次性启动 `85737` 上验证。原生翻转窗口的真实桌面采样、输入和退出通过。原生 `SEQUENTIAL` 两次首次呈现均返回 `DXGI_STATUS_OCCLUDED`，程序退出码为 4。将输入推迟后，完整跟踪仍在应用调度包出现前记录 `STATUS_GRAPHICS_PRESENT_OCCLUDED`。当时窗口位于前台，五个客户区采样位置都归原窗口所有。两次提交均带有 `CrossAdapter` 标志。原重启故障继续开放，原场景通过次数为零。四次受控重启均有对应请求。已在启动 `85913` 核实正式基线七项哈希、DWM 模块和永久许可。[候选实机记录](legacy-sequential-step4/virtual-dma-trial-61787148.json) · [沿用的 WARP 对照及输入结果](legacy-sequential-step4/warp-control-5.json)
+
 实机选用源码 `c05e2549`、KMD `76d5c526`、ARM64 tgd3d `cd352fa8` 和原生 NVK `51ff97f6`。一次性许可下的启动记录为 `85471`，外接电源、GPU Code 0，DWM 实际加载的组件和正式永久许可均已读回。上一套可恢复 KMD 为 `fc6e8d08`。[当前七项哈希](graphics-baseline.json) · [实机永久许可](dxvk-games-20261118/gdi-fullscreen-gm20b/permanent-boot.json)
 
 此版本包含 `102218b0` 的空上下文无 DMA 翻转修复、`a82f2510` 的旋转主表面模式尺寸修复，以及 Win32 枚举所需的 `A8R8G8B8` 源模式。前两项合并后的 `8e0e8e40` 仍返回独占全屏错误 `0x80004005`。其原生四方向模式只有 `X8R8G8B8`，该版 Windows 的 GDI 模式枚举筛掉这个格式后生成 800×600 兜底项。补上同一面板可扫描的 32 位格式后，原生 KMT 模式从四项增至八项，普通 GDI 列表从空变为一项 1280×720、60 Hz 模式，当前横屏模式的 `CDS_TEST` 从 −2 变为 0。同一签名程序连续三次取得独占全屏，完成三帧、输入、退出并回到同一桌面。旧式 `SEQUENTIAL` 首次提交重启仍按第四步单独追查。[模式校验及故障定位](dxvk-games-20261118/gdi-fullscreen-gm20b/cause.json) · [修复后的 Win32 和 KMT 模式](dxvk-games-20261118/gdi-fullscreen-gm20b/mode-after.json) · [专项验收及普通窗口对照](dxvk-games-20261118/gdi-fullscreen-gm20b/qualification.json)
