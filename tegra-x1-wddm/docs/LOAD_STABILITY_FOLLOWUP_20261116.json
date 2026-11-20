@@ -869,5 +869,77 @@
       ],
       "scope": "The instructions in the matching native ARM64 runtime contain these direct calls. The interrupted native traces did not preserve a receipt showing which of these operations ran."
     }
+  },
+  "native_sequential_gdi_redirection_20261120": {
+    "status": "Reproduced on the accepted driver. The underlying cause remains open.",
+    "scope": "One ordinary 640x360 ARM64 D3D11 client, two-buffer windowed sequential swap chain, the same six prerecorded input frames, native desktop compositor and AC power. The drawing device is WARP in the control and GM20B in the native test.",
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "native_arm64_tgd3d_sha256": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+    "native_arm64_nvk_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "client_sha256": "62100a301ae7c85a7d40d15d13b91837989b4b06ac935cd9182274e8a0ce6f6f",
+    "windows_dxgi_sha256": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+    "shared_surface_status": {
+      "value": "0x00263008",
+      "sdk_symbol": "DWM_S_GDI_REDIRECTION_SURFACE_BLT_VIA_GDI",
+      "meaning": "Windows selected a GDI blit for the window redirection surface. The status alone does not distinguish another adapter from system memory. Both drawing devices received it.",
+      "sdk_reference": "https://github.com/microsoft/win32metadata/blob/main/generation/WinSDK/RecompiledIdlHeaders/shared/winerror.h#L41026-L41033"
+    },
+    "matched_runs": [
+      {
+        "case": "PresentPair-261120-024044626612",
+        "archive_sha256": "3985d20ee351c34be0be43fda5302fbedd42bfeb88cdf87306d961750a2e053c",
+        "observer_sha256": "7e31da5e4fe2e9e03a388ed70e09a4e84408ff71b650a3f80d855e4249e2bf5b",
+        "native_dwm_pid": 1404,
+        "warp": {
+          "child_pid": 876,
+          "observation_order": [
+            "present",
+            "core",
+            "prepare",
+            "surface_call",
+            "surface_return",
+            "present_return"
+          ],
+          "return_register_low32": {
+            "surface_return": "0x00263008",
+            "present_return": "0x00000000"
+          },
+          "public_present_returns": 6,
+          "desktop_pixel_matches": 15,
+          "desktop_pixel_samples": 15,
+          "client_exit": 0
+        },
+        "native": {
+          "child_pid": 3284,
+          "observation_order": [
+            "present",
+            "core",
+            "prepare",
+            "surface_call",
+            "surface_return"
+          ],
+          "return_register_low32": {
+            "surface_return": "0x00263008"
+          },
+          "public_present_returns": 0,
+          "last_client_event": "CALL Present"
+        },
+        "system_events": {
+          "boot": 76973,
+          "prior_boot": 76891,
+          "41": [
+            76991
+          ],
+          "6008": [
+            76982
+          ],
+          "bugcheck": [
+            "0"
+          ],
+          "previous_1074": []
+        }
+      }
+    ],
+    "scope_of_evidence": "Each named checkpoint was written through from the signed client observer before that thread resumed. Stops affect timing. A missing receipt cannot identify the stalled instruction. Event 41 with bugcheck zero identifies an unclean restart and supplies no stop code. A shared-surface status alone cannot establish which component caused it."
   }
 }
