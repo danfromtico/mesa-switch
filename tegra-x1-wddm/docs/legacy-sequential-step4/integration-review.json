@@ -1,5 +1,5 @@
 {
-  "status": "Hardware and source review after paired candidate restoration",
+  "status": "Source and hardware review through the standard staging-surface trial",
   "selected_source": "c05e254932dd975bdf69e7046949596dbeb84561",
   "selected_components": {
     "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
@@ -94,6 +94,14 @@
       ],
       "remaining": "The working-tree changes are outside the two frozen trial deltas. Column scan, the extra MPO/display claims, and recovery/activation changes retain their own hardware requirements.",
       "evidence": "SWITCH_GRAPHICS_HANDOFF.md"
+    },
+    {
+      "scope": "Standard CPU-readable window staging surfaces",
+      "source": "aa49f69c8362ddb6e0547ad8f30bb951c9548a5e",
+      "candidate_kmd": "09e40be1b2e634c2944b0d852f0fa48ada7ebe2aed56971f5ef76c451508f344",
+      "evidence": "legacy-sequential-step4/standard-staging-trial-09e40be1.json",
+      "qualification": "ARM64 models passed. The original native window obtained its 640x360 staging surface and Windows issued the blit. The first Present still returned occluded and the application exited 4.",
+      "remaining": "The original scene needs a successful queued and displayed copy, input, normal exit and a continuous desktop on three successive runs. Its historical reset cause remains open."
     }
   ],
   "open_faults": [
@@ -133,6 +141,6 @@
       "closure": "Identify the workload and initiating cause, correct it, and verify three consecutive runs under the original conditions with adequate commit headroom, normal exit and a continuous desktop."
     }
   ],
-  "boot": 86272,
+  "boot": 86638,
   "open_faults_source": "open-faults.json"
 }
