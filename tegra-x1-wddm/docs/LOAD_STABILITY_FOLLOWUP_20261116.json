@@ -1547,5 +1547,171 @@
       "last_marker": "CALL BindPipeline",
       "observed": "A different native FLIP fixture preloaded all six plane pairs, waited for their GPU completion and used CopyResource for the planes at draw time. Its third frame reached BindPipeline after the two plane copies. It also experienced an unclean restart. Per-frame CPU chroma upload was absent in this earlier case. A shared initiating cause remains unconfirmed."
     }
+  },
+  "gm20b_second_flip_idle_and_actual_runtime_queue_20261120": {
+    "scope": "Accepted native stack, AC power, normal ARM64 public D3D11 FL11_0, two 640 by 360 BGRA buffers, six prerecorded frames, WARP warm-up and native FLIP_SEQUENTIAL. The same signed test writes two markers after the second native Present returns S_OK. The only test setting is whether the rendering thread sleeps for 2000 milliseconds between the markers. The zero-delay arm also writes both markers.",
+    "signed_test_sha256": "e244be37837ac0f235326f8a5ed66a80fd1cccd18b6e69a602ec094be1e0a4aa",
+    "app_source_sha256": "478d0b36b365a2cd25e99d4a39e25bddf386786bff27d5d0c7efed48de260576",
+    "accepted_components": {
+      "tegragpurender.sys": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "trials": [
+      {
+        "case": "PresentPair-261120-050720973515",
+        "archive_sha256": "9dee845e2a4c989756f0137e7890245656020f04916aafa9d108bd7f82fc8cab",
+        "start": 78190,
+        "end": 78266,
+        "delay_ms": 2000,
+        "marked_interval_ms": 2011.96,
+        "vsync_records": 121,
+        "public_present_returns": 3,
+        "normal_exit_with_15_desktop_matches": false,
+        "incident": {
+          "last_write_through_action": "803828 7108 RETURN Present 00000000",
+          "kernel41": [
+            78284
+          ],
+          "event6008": [
+            78275
+          ],
+          "bugcheck": [
+            "0"
+          ],
+          "previous1074": [],
+          "completed_flip_packets_retained": 2,
+          "trace_finalized": false
+        }
+      },
+      {
+        "case": "PresentPair-261120-051157086403",
+        "archive_sha256": "803900d23d2a636ce5bcb227726cb59b18a30c1e3bf6484d4665f27a93a35ea1",
+        "start": 78266,
+        "end": 78266,
+        "delay_ms": 0,
+        "marked_interval_ms": 3.236,
+        "vsync_records": 0,
+        "public_present_returns": 6,
+        "normal_exit_with_15_desktop_matches": true
+      },
+      {
+        "case": "PresentPair-261120-051339785548",
+        "archive_sha256": "a6fc5cc5b8bb165f37124ba17a1e679ceeda925192dfe8ab150ebd74fcaacb20",
+        "start": 78266,
+        "end": 78266,
+        "delay_ms": 0,
+        "marked_interval_ms": 37.289,
+        "vsync_records": 2,
+        "public_present_returns": 6,
+        "normal_exit_with_15_desktop_matches": true
+      },
+      {
+        "case": "PresentPair-261120-051500300813",
+        "archive_sha256": "900046934789be49396706f8e03887c19c1f8eefe5d9f93e7cb0f1fbc5f3f14d",
+        "start": 78266,
+        "end": 78266,
+        "delay_ms": 2000,
+        "marked_interval_ms": 2008.556,
+        "vsync_records": 121,
+        "public_present_returns": 6,
+        "normal_exit_with_15_desktop_matches": true
+      },
+      {
+        "case": "PresentPair-261120-051637677204",
+        "archive_sha256": "b1a531e45667f7a6e15d9df57713effa1ded8e344d2588ddb8f74e0a5f225c5e",
+        "start": 78266,
+        "end": 78266,
+        "delay_ms": 2000,
+        "marked_interval_ms": 2005.826,
+        "vsync_records": 120,
+        "public_present_returns": 6,
+        "normal_exit_with_15_desktop_matches": true
+      },
+      {
+        "case": "PresentPair-261120-051755039670",
+        "archive_sha256": "b9f9307eba2eac572b31478609ee2a19b5dac1ca1b1dc05604dadb9506b083aa",
+        "start": 78266,
+        "end": 78266,
+        "delay_ms": 0,
+        "marked_interval_ms": 3.265,
+        "vsync_records": 1,
+        "public_present_returns": 6,
+        "normal_exit_with_15_desktop_matches": true
+      }
+    ],
+    "conclusion": "All three timed waits completed while Windows continued issuing VSync records and the fixture made no new Present or NVK render submission. One timed run restarted after the third Present returned. All three zero-delay runs and the other two timed runs displayed six frames, verified 15 desktop pixels and exited normally. Five native launches shared the same post-recovery boot. This interval does not prevent all restarts.",
+    "runtime_queue": {
+      "receipt": "In the matched UMD source, transport event 22 operation 3 surrounds pfnSubmitCommandCb. A matching entry and S_OK return in the same thread records actual Windows callback use. Kernel completion is a separate observation.",
+      "previous_native_flip_runs": [
+        {
+          "case": "PresentPair-261120-044531694223",
+          "captured_render_submit_count": 2,
+          "successful_windows_callback_pairs": 4
+        },
+        {
+          "case": "PresentPair-261120-045029623187",
+          "captured_render_submit_count": 10,
+          "successful_windows_callback_pairs": 12
+        },
+        {
+          "case": "PresentPair-261120-045155904016",
+          "captured_render_submit_count": 2,
+          "successful_windows_callback_pairs": 4
+        }
+      ],
+      "previous_native_sequential_first_present_restarts": [
+        {
+          "case": "PresentPair-261120-012244752359",
+          "old_boot": 76519,
+          "new_boot": 76594,
+          "trace_sha256": "50286cc1960151dfc967fb1ae08c1a9a228d817a9362375a95d42a3437ad21f3",
+          "first_draw_windows_callbacks": 3,
+          "written_primaries_per_callback": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "case": "PresentPair-261120-012654021131",
+          "old_boot": 76594,
+          "new_boot": 76669,
+          "trace_sha256": "0b2fdd7627f35df88394b11de1f0e94378b6e99e3b56082bf1e89c71349a8cbf",
+          "first_draw_windows_callbacks": 3,
+          "written_primaries_per_callback": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "case": "PresentPair-261120-013104891162",
+          "old_boot": 76669,
+          "new_boot": 76740,
+          "trace_sha256": "d9830dcab9f8335b64fa0361c46b2cb9cc814e01caaa9b167c4113f33c69fa92",
+          "first_draw_windows_callbacks": 3,
+          "written_primaries_per_callback": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "observation": "The native render path used the Windows-supplied submit callback in both presentation modes, including first-Present reboot cases. An independent-queue fallback is not a prerequisite for those incidents. The synchronization and later display handoff still require investigation."
+    },
+    "recovery": {
+      "system_start_record": 78266,
+      "problem_code": 0,
+      "power": "AC",
+      "accepted_permanent_grant_verified": true,
+      "owned_files_tasks_and_ETW_sessions_removed": true
+    },
+    "references": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-present",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/ns-d3dumddi-_d3dddicb_submitcommand"
+    ]
   }
 }
