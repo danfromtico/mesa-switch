@@ -1247,5 +1247,65 @@
       "temporary_trial_removed": true
     },
     "interpretation": "For this client and input, correct pitched storage, Windows resource association and verified readback are insufficient to make the first native sequential Present complete. These measurements leave the initiating reset cause open."
+  },
+  "native_sequential_windows_kmt_dispatch_20261120": {
+    "status": "Unexpected restart on the accepted GM20B stack. The Windows user-mode presentation call boundary is now observed.",
+    "case": "PresentPair-261120-042055370834",
+    "archive_sha256": "4fd7dca31251886fa409627bc2253fff80eafa0d802acc27dae58993a5361a8d",
+    "client_sha256": "62100a301ae7c85a7d40d15d13b91837989b4b06ac935cd9182274e8a0ce6f6f",
+    "temporary_observer_sha256": "849fd187200d89c17a1735707256040a4d55e2104a81e54107248b6d0235b48d",
+    "native_d3d11_version": "10.0.22621.2715 (WinBuild.160101.0800)",
+    "native_d3d11_sha256": "ccc352f7097d0320368000dbe9ff92772d8fc909185d95c8a0753cb8f115f880",
+    "symbols_guid": "4DD64C1C-37D9-00CB-45AF-89C52B2A1534",
+    "symbols_dbi_age": 1,
+    "warp": {
+      "public_present_returns": 6,
+      "desktop_pixels_matched": 15,
+      "desktop_pixels_sampled": 15,
+      "exit": 0,
+      "windows_present_callback_reached": true,
+      "typed_kmt_dispatch_call_reached": true,
+      "typed_kmt_dispatch_return": "0x00000000",
+      "first_public_present_return": "0x00000000"
+    },
+    "native": {
+      "public_present_calls": 1,
+      "public_present_returns": 0,
+      "calling_thread": 8104,
+      "callback_caller": "CDevice::PresentCB_PreWDDM2",
+      "windows_present_callback_reached": true,
+      "typed_kmt_dispatch_call_reached": true,
+      "typed_kmt_dispatch_return_recorded": false,
+      "last_client_stage": "CALL Present",
+      "last_readable_etw_event_ms_relative_to_typed_call": -30.261
+    },
+    "versioned_callback": {
+      "normalized_structure_bytes": 592,
+      "bytes_copied_from_driver": 544,
+      "override_valid_offset": 580,
+      "interval_offset": 584,
+      "result": "This observed Windows compatibility wrapper clears both sync-interval override fields before forwarding to the common callback. The intermediate wrapper that can preserve only the validity flag was not selected by this native test."
+    },
+    "system_events": {
+      "prior_boot": 77953,
+      "boot": 78023,
+      "41": [
+        78041
+      ],
+      "6008": [
+        78032
+      ],
+      "bugcheck": [
+        "0"
+      ],
+      "previous_1074": []
+    },
+    "recovery": {
+      "gpu_problem_code": 0,
+      "external_power": true,
+      "accepted_permanent_grant_verified": true,
+      "temporary_task_and_test_files_removed": true
+    },
+    "scope": "The last native checkpoint is the user-mode instruction dispatching a D3DKMT_PRESENT. The incomplete kernel trace ends before that instruction. It cannot identify the receiving KMD operation or the initiating reset cause."
   }
 }
