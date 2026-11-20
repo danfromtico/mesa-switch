@@ -125,6 +125,22 @@ def exercise(shell, work):
     updated = commit("Register another fault")
     run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan")
     assert remote_head() == updated
+    # The production builder is a linked worktree of a shallow, filtered Mesa clone.
+    # Its proof files are present while unrelated shader history can remain unfetched.
+    partial = work / "partial"
+    run("git", "--git-dir", str(remote), "config", "uploadpack.allowFilter", "true")
+    run("git", "clone", "-q", "--no-checkout", "--depth=3", "--filter=blob:none", "-b", "tgd3d-vulkan",
+        remote.as_uri(), str(partial))
+    run("git", "-C", str(partial), "sparse-checkout", "set", "--no-cone",
+        "/tegra-x1-wddm/docs/", "/tegra-x1-wddm/tools/")
+    run("git", "-C", str(partial), "checkout", "-q", "tgd3d-vulkan")
+    assert run("git", "-C", str(partial), "rev-parse", "--is-shallow-repository") == "true"
+    missing = run("git", "-C", str(partial), "rev-list", "--objects", "--missing=print", "HEAD").splitlines()
+    assert any(line.startswith("?") for line in missing)
+    run("git", "-C", str(partial), "config", "switch.graphicsGatePwsh", shell)
+    lines = f"HEAD {updated} refs/heads/tgd3d-vulkan {selected}\n"
+    subprocess.run([sys.executable, str(partial / hook)], cwd=partial, input=lines, text=True,
+                   capture_output=True, check=True)
     write(repo / docs / "boot.json", {"intent": 108, "boot": 110})
     commit("Accidental replacement of a retained hardware receipt")
     run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan", succeeds=False, contains="mismatched hardware evidence")

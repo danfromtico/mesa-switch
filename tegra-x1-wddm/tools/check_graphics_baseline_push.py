@@ -87,15 +87,23 @@ def check_tree(commit, actions, trusted):
     shell = config or shutil.which("pwsh") or shutil.which("powershell.exe")
     if not shell:
         raise RuntimeError("PowerShell is required to push a changed Switch baseline or fault ledger.")
-    common = git("rev-parse", "--path-format=absolute", "--git-common-dir").stdout.strip()
+    objects = Path(git("rev-parse", "--path-format=absolute", "--git-path", "objects").stdout.strip())
+    shallow = Path(git("rev-parse", "--path-format=absolute", "--git-path", "shallow").stdout.strip())
+    object_format = git("rev-parse", "--show-object-format").stdout.strip()
     clean = os.environ.copy()
     for variable in git("rev-parse", "--local-env-vars").stdout.splitlines():
         clean.pop(variable, None)
     with tempfile.TemporaryDirectory(prefix="switch-baseline-push-") as temporary:
         view = Path(temporary) / "view"
-        # A local object alternate keeps the sparse checkout and its configuration private.
-        git("clone", "-c", "core.autocrlf=false", "--quiet", "--shared", "--no-checkout", common, str(view), env=clean)
-        git("sparse-checkout", "set", "tegra-x1-wddm/docs", "tegra-x1-wddm/tools", cwd=view, env=clean)
+        # Cloning a shallow promisor repository can repack unrelated, unmaterialized
+        # objects. Borrow its object directory and its exact history boundary instead.
+        git("init", "--quiet", f"--object-format={object_format}", str(view), env=clean)
+        metadata = view / ".git"
+        (metadata / "objects/info/alternates").write_bytes((objects.as_posix() + "\n").encode())
+        if shallow.is_file():
+            shutil.copyfile(shallow, metadata / "shallow")
+        git("config", "core.autocrlf", "false", cwd=view, env=clean)
+        git("sparse-checkout", "set", "--no-cone", "/tegra-x1-wddm/docs/", cwd=view, env=clean)
         git("checkout", "--quiet", "--detach", commit, cwd=view, env=clean)
         verifier = Path(temporary) / "verifier"
         for name, content in trusted.items():
