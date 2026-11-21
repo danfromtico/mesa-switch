@@ -1491,6 +1491,33 @@
         "win-post-restart-handheld-20261121-01"
       ],
       "latest_observation": "启动 91918 的首次复查已为 Handheld1，未发送档位切换命令。相隔 62.4 秒的两次完整读回匹配同一 DWM、正式永久许可、七份正式组件和五份实际加载组件，GPU Code 0，交流供电，DFLL 启用且无错误。"
+    },
+    {
+      "id": "WIN-DWM-CONTEXT-STATE-CAPTURE",
+      "priority": "P0",
+      "owner": "Windows DxgKrnl 与 DWM",
+      "question": "正式 GPU 桌面可否通过标准 ETW 状态快照直接配对既有 DWM 上下文、设备、适配器 LUID 与节点？",
+      "status": "实机通过",
+      "existing_observation": "所需模板在同版 Windows 22631 路径存在。原启动 91476 的十六路 ETL 没有对应对象的状态快照。",
+      "missing_observation": "实机确认了各上下文在 91918 的采集和归属。启动 91476 的旧对象缺本次类型的快照。其 152586 仍需原次或新同场景的同号 KMD 准入、完成与异常边界。",
+      "pass_condition": "既有 DWM PID、上下文 hDevice 与节点，通过 Device hProcessId/pDxgAdapter 连接到同适配器 LUID。无重启、无 ETW 丢失，采集会话清理。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json",
+          "sha256": "603e9f83b4b696261b77aacf192d497358f6f55a76d3d8d0f513671d8b12f006"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-post-restart-handheld-20261121-01.result.json",
+          "sha256": "abe259260db07a29dcb9ed16d2fb014b7ed7528f3a6cd8a7c0377008ea98b6a6"
+        }
+      ],
+      "windows_references": [
+        "gpuview"
+      ],
+      "round_ids": [
+        "win-dwm-context-state-capture-20261121-01"
+      ],
+      "latest_observation": "正式启动 91918 的 Windows ETW CAPTURE_STATE 把正在运行的 DWM 的 7 个上下文经 32/29/110 直接配对到两个适配器与节点。GM20B LUID 0x5601 有 4 个上下文，Microsoft 1414:008c LUID 0x56f8 有 3 个。7 个均关联事件 433。正式适配器上有两条同包提交、完成中断、完成与退役的正常样本。"
     }
   ],
   "rounds": [
@@ -3221,19 +3248,72 @@
         "first_anomaly_or_missing": "十六路 ETL 均缺三条 DWM 上下文关联的 Context→Device→Adapter 或同等直接字段，无法为 247 判定适配器。152586 仍缺本机同提交号 KMD 准入及实际完成。"
       },
       "finished_utc": "2026-11-21T16:34:59.168139+00:00"
+    },
+    {
+      "round_id": "win-dwm-context-state-capture-20261121-01",
+      "contract_id": "WIN-DWM-CONTEXT-STATE-CAPTURE",
+      "windows_question": "WIN-DWM-CONTEXT-STATE-CAPTURE",
+      "method": "在当前正式 GPU 桌面校验 Windows 标准 ETW 状态快照，不启动额外图形应用",
+      "plan": "windows-native-graphics/rounds/win-dwm-context-state-capture-20261121-01.plan.json",
+      "plan_sha256": "4aeb9037a98b3740aaedc64f455acce2cad12a9f0e623760ef86bd1931280bb5",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T16:36:00.104364+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-dwm-context-state-capture-20261121-01.result.json",
+      "result_sha256": "7b643c3368a48af47af3b7cc16ecfd4d066ba3d2d2b312005633890158880093",
+      "status": "实机通过",
+      "finding": "正式启动 91918 的 Windows ETW CAPTURE_STATE 把正在运行的 DWM 的 7 个上下文经 32/29/110 直接配对到两个适配器与节点。GM20B LUID 0x5601 有 4 个上下文，Microsoft 1414:008c LUID 0x56f8 有 3 个。7 个均关联事件 433。正式适配器上有两条同包提交、完成中断、完成与退役的正常样本。",
+      "missing_observation": "实机确认了各上下文在 91918 的采集和归属。启动 91476 的旧对象缺本次类型的快照。其 152586 仍需原次或新同场景的同号 KMD 准入、完成与异常边界。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 10879215628,
+          "pid": 4,
+          "tid": 932,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446659461286034880,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 9244,
+            "ulQueueSubmitSequence": 3654,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 3
+          }
+        },
+        "last_return": {
+          "qpc": 10879297392,
+          "pid": 4,
+          "tid": 928,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446659461286034880,
+            "PacketType": 0,
+            "SubmitSequence": 3654,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446607229195537184
+          }
+        },
+        "first_anomaly_or_missing": "实机确认了各上下文在 91918 的采集和归属。启动 91476 的旧对象缺本次类型的快照。其 152586 仍需原次或新同场景的同号 KMD 准入、完成与异常边界。"
+      },
+      "finished_utc": "2026-11-21T16:37:34.348984+00:00"
     }
   ],
   "progress": {
-    "total": 37,
+    "total": 38,
     "by_status": {
-      "实机通过": 12,
+      "实机通过": 13,
       "观测缺口": 9,
       "已有实机通过": 7,
       "故障开放": 4,
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 49,
+    "registered_rounds": 50,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -3386,7 +3466,7 @@
         "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
         "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
       },
-      "followup_boundary": "在当前正式驱动上先校验只读 ETW 状态快照能否一次关联 DWM hContext、hDevice、适配器和节点。152586 的提交与完成仍需同号实机观测。",
+      "followup_boundary": "下次正常公开图形用例可先发送标准 CAPTURE_STATE，保留该启动的对象、适配器和节点映射，再与同包的 Windows 提交、完成及 KMD 回执比对。",
       "same_kernel_event_catalog": {
         "path": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
         "sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25"
@@ -3436,6 +3516,10 @@
       "same_dwm_context_archives": {
         "path": "windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json",
         "sha256": "603e9f83b4b696261b77aacf192d497358f6f55a76d3d8d0f513671d8b12f006"
+      },
+      "validated_windows_context_state_capture": {
+        "path": "windows-native-graphics/rounds/win-dwm-context-state-capture-20261121-01.result.json",
+        "sha256": "7b643c3368a48af47af3b7cc16ecfd4d066ba3d2d2b312005633890158880093"
       }
     },
     "recent_ssh_outage": {

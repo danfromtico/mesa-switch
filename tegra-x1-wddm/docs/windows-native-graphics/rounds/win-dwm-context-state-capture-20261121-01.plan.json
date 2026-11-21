@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-context-state-capture-20261121-01",
+  "contract_id": "WIN-DWM-CONTEXT-STATE-CAPTURE",
+  "windows_question": "WIN-DWM-CONTEXT-STATE-CAPTURE",
+  "owner": "Windows DxgKrnl 与 DWM",
+  "question": "正式 GPU 桌面可否通过标准 ETW 状态快照直接配对既有 DWM 上下文、设备、适配器 LUID 与节点？",
+  "method": "在当前正式 GPU 桌面校验 Windows 标准 ETW 状态快照，不启动额外图形应用",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "既有 DWM PID、上下文 hDevice 与节点，通过 Device hProcessId/pDxgAdapter 连接到同适配器 LUID。无重启、无 ETW 丢失，采集会话清理。",
+  "observations": [
+    "锁定启动 91918、同 DWM、交流电、Handheld1、GPU Code 0、正式永久许可与完整哈希，检查自己的 ETW 会话名和临时档案不存在。",
+    "在限时独立的会话内启用 Microsoft-Windows-DxgKrnl Base/Resource/LongHaul，然后用 EnableTraceEx2 的 CAPTURE_STATE 请求已存在对象。记录实际成功码、QPC、丢失计数与源 ETL。",
+    "用同版系统模板关联 DC_Start 32、29、26 与 110，核对 hProcessId、hDevice、pDxgAdapter、NodeOrdinal 与 LUID，并核对采集完成后同启动同 DWM、会话和临时文件清理。"
+  ],
+  "inputs": {
+    "controller_source_sha256": "9b0e210bdec3b175881f6f7cf7fc1788052aacfd733968f82efab109ca932ff3",
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json",
+      "sha256": "603e9f83b4b696261b77aacf192d497358f6f55a76d3d8d0f513671d8b12f006"
+    },
+    "formal_recent": {
+      "path": "windows-native-graphics/rounds/win-post-restart-handheld-20261121-01.result.json",
+      "sha256": "abe259260db07a29dcb9ed16d2fb014b7ed7528f3a6cd8a7c0377008ea98b6a6"
+    },
+    "installed_catalog_sha256": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357",
+    "session": "SwitchOwnedDwmState01a1fe13-91918",
+    "win_etw": "https://learn.microsoft.com/en-us/windows/win32/api/evntprov/nc-evntprov-penablecallback"
+  }
+}
