@@ -3501,6 +3501,130 @@
           "first_anomaly_or_missing": "此同包最大 Windows 回调延迟 8.945 ms，控制端持久化确认晚于源事件 19.186–22.556 ms。骤停间隔落在这些延迟以内时，缺失事件不能排除对应阶段。历史 152586 仍缺此类型同号回执。"
         },
         "finished_utc": "2026-11-21T16:56:17.984705+00:00"
+      },
+      {
+        "round_id": "win-gated-seq-profiler-present-20261121-01",
+        "contract_id": "WIN-GATED-SEQ-PROFILER-PRESENT",
+        "windows_question": "WIN-GATED-SEQ-PROFILER-PRESENT",
+        "method": "在正式桌面先开启有界实时 Profiler，再放行一次原签名空窗口",
+        "plan": "windows-native-graphics/rounds/win-gated-seq-profiler-present-20261121-01.plan.json",
+        "plan_sha256": "2cd1ed44257e53bbc8140f42a3d952b4a14d52f471c0ff11a6f0ed4c3eac5991",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T17:00:35.769704+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-gated-seq-profiler-present-20261121-01.result.json",
+        "result_sha256": "f600f46c61ce3dd658fa4c7ad8ca4ed9021ca9dbee288159cba3e6c9f55afcd5",
+        "status": "观测缺口",
+        "finding": "启动 91918 的原窗口按同次放行，首次 Present 用时 15.600 ms 并返回 S_OK。客户端、输入、4,508 个空帧客户区像素和同桌面均通过。实时会话达到 768 条上限，最后源事件早于首次 CALL 651.542 ms。",
+        "missing_observation": "实时流 768 条均 fsync 且与封口 Profiler ETL 字节匹配，736 条有返回 Windows 的确认。两种 Profiler 输出均止于首次公开调用之前。窗口自己的视频 ETL 封口且无丢失。另一显示 ETL 达到 16 MiB 后丢失 4 个缓冲，仅采用实际存在的回执。历史重启仍待同号进入、返回及完成。",
+        "boundaries": {
+          "last_entry": {
+            "public_first_present_qpc": 39362317712,
+            "first_event": {
+              "id": 42,
+              "version": 0,
+              "qpc": 39362379525,
+              "fields": {
+                "pIDXGISwapChain": 2211495878848,
+                "Flags": 0,
+                "SyncInterval": 1,
+                "DirtyRects": 0,
+                "ScrollRects": 0
+              }
+            }
+          },
+          "last_return": {
+            "public_first_present_return_qpc": 39362617230,
+            "latest_live_source": {
+              "sequence": 768,
+              "id": 105,
+              "version": 0,
+              "pid": 4,
+              "tid": 932,
+              "source_qpc": 39349808102,
+              "callback_qpc": 39350037525,
+              "payload_hex": "c7130000",
+              "host_receive_ns": 48655983631291,
+              "host_fsynced_ns": 48655983655708
+            }
+          },
+          "first_anomaly_or_missing": "实时流 768 条均 fsync 且与封口 Profiler ETL 字节匹配，736 条有返回 Windows 的确认。两种 Profiler 输出均止于首次公开调用之前。窗口自己的视频 ETL 封口且无丢失。另一显示 ETL 达到 16 MiB 后丢失 4 个缓冲，仅采用实际存在的回执。历史重启仍待同号进入、返回及完成。"
+        },
+        "finished_utc": "2026-11-21T17:03:40.286100+00:00"
+      },
+      {
+        "round_id": "win-seq-new-baseline-profiler-20261121-01",
+        "contract_id": "WIN-SEQ-SELECTED-BASELINE-DMA",
+        "windows_question": "WIN-SEQ-SELECTED-BASELINE-DMA",
+        "method": "以 12 秒有界实时及文件 ETW 观察现行基线原空窗口首次 Present",
+        "plan": "windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.plan.json",
+        "plan_sha256": "e2783c85b985b025262337df740a8b09d64b567c2c629f5bfd167d2963f86db8",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T17:52:15.186817+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json",
+        "result_sha256": "922cd6aaedaf958c38827db41c0d2fb297a179469f3f7e94cbf7612d674ab6a6",
+        "status": "实机通过",
+        "finding": "启动 92083 的原签名窗口首次 Present(1,0) 用时 14.302 ms，返回 S_OK。画面、输入、退出和桌面连续。DWM 同一 GM20B 节点 0 的 DMA 9652 / 队列序号 4444 有同线程 5063 进入与返回，以及同包中断、完成与退役。",
+        "missing_observation": "5063 原始载荷只有函数号。同调度线程由 175 与同对象序号绑定，完成由 Windows 回执核实。DWM 包与窗口处于同一时间区间，仍缺窗口表面与该 DWM 包的直接令牌。91476 DMA 152586 继续缺该次提交的 KMD 进入、返回及完成。手持实测未覆盖 PL=1 高频。",
+        "boundaries": {
+          "last_entry": {
+            "first_present_qpc": 17575906896,
+            "first_dxgi_event": {
+              "id": 42,
+              "version": 0,
+              "qpc": 17575970307,
+              "fields": {
+                "pIDXGISwapChain": 2319578873760,
+                "Flags": 0,
+                "SyncInterval": 1,
+                "DirtyRects": 0,
+                "ScrollRects": 0
+              }
+            },
+            "wrapper_enter": {
+              "qpc": 17576122843,
+              "pid": 4,
+              "tid": 924,
+              "provider": "kernel",
+              "id": 105,
+              "version": 0,
+              "fields": {
+                "Function": 5063
+              }
+            }
+          },
+          "last_return": {
+            "first_present_qpc": 17576181494,
+            "wrapper_return": {
+              "qpc": 17576124727,
+              "pid": 4,
+              "tid": 924,
+              "provider": "kernel",
+              "id": 106,
+              "version": 0,
+              "fields": {
+                "Function": 5063
+              }
+            },
+            "latest_live_source": {
+              "sequence": 3209,
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 936,
+              "source_qpc": 17646726791,
+              "callback_qpc": 17646803050,
+              "payload_hex": "80fc0a580883ffff00000000ed0500000000000000000000208b906881a1ffff",
+              "host_receive_ns": 51746183395541,
+              "confirmed_qpc": 17647053674,
+              "host_ack_return_ns": 51746194823791,
+              "host_fsynced_ns": 51746183511916
+            }
+          },
+          "first_anomaly_or_missing": "5063 原始载荷只有函数号。同调度线程由 175 与同对象序号绑定，完成由 Windows 回执核实。DWM 包与窗口处于同一时间区间，仍缺窗口表面与该 DWM 包的直接令牌。91476 DMA 152586 继续缺该次提交的 KMD 进入、返回及完成。手持实测未覆盖 PL=1 高频。"
+        },
+        "finished_utc": "2026-11-21T17:54:25.453362+00:00"
       }
     ]
   }

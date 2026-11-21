@@ -80,7 +80,15 @@
 
 ## 下一次本机取证
 
-沿用 91476→91557 两份 ETW。首轮只问 Windows 调度器的 DMA 152586 是否有同序号的 KMD 进入回执；先对已有覆盖和事件字段做校验，预抢占 20571 与已完成 fence 152584 均不可顶替。GR 或 PRI 采集只用已归属的快照和非破坏性读取，并标明数据来自哪个阶段。读取 PRI 保存区与 W1C/清零分轮评估。既有采集不能量出状态时记录为未知。
+91476→91557 的两份 ETW 仍缺 DMA 152586 的同序号 KMD 进入、返回及完成。预抢占 20571 的快照覆盖 DMA 152584。现行基线在启动 92083 复放同一签名空窗口，取得正常提交的 5063 进入、返回和实际完成，历史故障仍开放。[历史同包缺口](../windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json) · [现行基线同包回执](../windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json)
+
+| 原表行 | 已核对的可观测范围 | 下一次单项取证 |
+|---:|---|---|
+| 130 | 现行工作线程在有效 MC 采样且 GR 供电位为真时，采集 GR 中断、FECS 错误邮箱和主机中断状态。ExecutionState 的 `gr_valid` 区分实读零与未采样。91476 的 DMA 152558 与 92083 的 DMA 9651 各有一份有效快照，三个字段均为零。两张快照只覆盖各自提交；152584 的翻页态快照没有 `gr_valid`。NETB 的 0x400130/134/138 初值为零，0x419e44/4c 有各自的掩码写入。Linux 另有 FECS 状态处理后 W1C、SM global ESR 回写和 warp ESR 清零。 | 用现有 ETW 同时收集故障来源、快照有效位、阶段和 DMA 身份。逐 SM 的 HWW ESR、PC 及当时生效的掩码仍须在持有设备上下文且供电有效时由驱动留下观测。保留现有中断路由和清除行为。 |
+| 183 | Windows 前端快照保存 PBUS 0x1100、PRI 汇总，并按 SYS 状态位取 0x122120/0x12212c。Linux 在 PBUS 的 PRI 条件命中后先读 0x9084/0x9088，再清锁存。当前 Windows ExecutionState 没有这两个 PTIMER 保存字，已保存的 DXG 同包回执也没有。 | 只在同包出现 PBUS/PRI 相应标志时评估由现有设备所有者增加一次只读锁存快照。分别保留触发、保存字有效位和取样时序。 |
+| 113 | Linux GM20B 走 FIFO init 的 PTIMER 缩放分支，并将 FIFO 调度错误与 engine/TSG 或 channel 归属结合。现行 Windows 运行路径能记录 FIFO 汇总，诊断快照另有 0x254c 调度错误值；两者还需与 Windows 调度器的 preemption 和 TDR 边界配对。现有两轮缺同包的 0x2a0c、0x254c 及关联 TDR 回执。 | 先观察现有事件中硬件调度错误、Windows preemption 与 `DxgkDdiResetFromTimeout` 的顺序和同一包归属。暂无并行使能硬件超时与修改 TDR 的实机依据。 |
+
+源码锚定在已选的 `7f626083` 和 Switchroot `1ae0167d`。前三项仍待观测。其余十项沿原队列。 [Windows 提交轮询](https://github.com/ruje0504-2/mesa-switch-woa/blob/7f626083c90f73a6aa9279fafdf40e2777c0e6c6/tegra-x1-wddm/windows/submit_worker.c#L27) · [Windows 前端快照](https://github.com/ruje0504-2/mesa-switch-woa/blob/7f626083c90f73a6aa9279fafdf40e2777c0e6c6/tegra-x1-wddm/platform/t214_frontend.c#L41) · [Switchroot PRI 锁存](https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/ptimer/ptimer_gk20a.c#L31) · [Windows TDR 契约](https://learn.microsoft.com/windows-hardware/drivers/display/timeout-detection-and-recovery)
 
 后续每轮只验证表内一个问题，保留相同工作负载、设备身份和已加载组件哈希。对 PL=1 过渡、长时间高热、整机重启的结论均需独立实机证据。
 

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "round_id": "win-gated-seq-profiler-present-20261121-01",
+  "contract_id": "WIN-GATED-SEQ-PROFILER-PRESENT",
+  "windows_question": "WIN-GATED-SEQ-PROFILER-PRESENT",
+  "owner": "应用、DXGI、Windows VidSch、DWM 和实时控制端",
+  "question": "原空窗口首次 Present 期间，能否把 DWM 同上下文提交的包装进入、返回及真实完成同时保存到控制端？",
+  "method": "在正式桌面先开启有界实时 Profiler，再放行一次原签名空窗口",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "已验证原应用的首次调用实参、桌面和对象，同包完成确定。实时回执与封口 ETL 一致或写明异常范围。",
+  "observations": [
+    "同次正式启动、交流、手持、Code 0、实载全哈希。先核对本轮两个专属目录与签名。只让应用停在准备完成的位置。",
+    "正在运行的独立 ETW 会话提供 READY QPC 之后，在验证同桌面和采集进程的前提下释放，应用仅派发一次。保留准备、放行、调用和采集时间。",
+    "同包关联 175/105/106/177/176/180、适配器及节点，按时序对照原首次调用。收回两路日志并清理；发生异常立即保全并判断回执覆盖。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "3ab11b187c323fe677839c9e2ff73490a907e061c120f7fcf3c1cb57e966ae18",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "Capture-State.cs": "ca6bd0904fd45c703b3380fd374b2a6ffd2f4267c8cbb8c79e6283e855acec42",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f"
+    },
+    "fixture_runner_sha256": "dd0c5c7669ab7d69c4b928bd7d72e5f93a01f9841440e548ea32224be0e0e7cc",
+    "profiler_runner_sha256": "c38aa1aac5f939c4a270cee2c00e26a9ba243e3e80aec9430b3b72a2e5442fc7",
+    "orchestration_sha256": "3854b5be5fd15891f761ddbab76f82286e960cb01dc4eea34c4d9713bc9eb6df",
+    "source_sha256": "cf4474a857b288d0743362679eecb7f5c9b8a117a742fa80c9be466eb3e8448a",
+    "exe_sha256": "adb87f9f9ad33ff0132230a2de0c86bdfc764d2cc0f65af7a3188d0e7e702784",
+    "receiver_sha256": "0bd52300d070a6402db32b212ef7d233a04c438a527e61a4028cf153d9727a2a",
+    "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+        "sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-dma-ddi-profiler-live-20261121-01.result.json",
+        "sha256": "30278228328b9a81c686f7fb13164b056c9782a1b7d99ef3c1c60cdc6cd32bbc"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-dma175-ddi-order-20261121-01.result.json",
+        "sha256": "f360eb0249210e9b1b4573de8dbf6ae4ae859d3b2a6b39c171780fe3eb42c33c"
+      }
+    ],
+    "boot": 91918,
+    "dwm": 1472,
+    "duration": 7500
+  }
+}

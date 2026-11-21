@@ -2,6 +2,8 @@
 
 ## 当前工作 · Windows ARM64 本机验收
 
+现行 WDDM 2.6 源码 `7f626083`、实载签名 KMD `30331aa3cb57`。启动 92083 的原签名窗口首次 Present(1,0) 用时 14.302 ms，返回 S_OK。画面、输入、退出和桌面连续。DWM 同一 GM20B 节点 0 的 DMA 9652 / 队列序号 4444 有同线程 5063 进入与返回，以及同包中断、完成与退役。91476 的历史根因保持开放，91918→91989 是切换前独立故障。手持取证未覆盖 PL=1 高频。[现行基线回执](nvgpu-init-30331aa3cb57/permanent-boot.json) · [同轮原始证据与边界](windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json)
+
 本轮在手持、交流供电的 Switch 上验证 Windows 11 ARM64、GM20B 和正式 WDDM 2.6 基线 `c137ce75`。先核对普通双缓冲 SEQUENTIAL 首次 Present 与同对象的 GPU 围栏等待，再验收原生 D3D11、应用目录 DXVK、冷启动和受控重启。意外重启和 Wi-Fi 恢复各自保留启动与系统事件。《仙剑四》继续暂缓。[Windows 问题、优先级与进度](windows-native-graphics/index.json) · [单项轮次与开放故障](open-faults.json)
 
 已有 27 轮 Windows 原生实测在新索引中逐项映射。124 条静态核对和 298 条来宾专属条目归入历史旁证。[原始缺口索引](wsl-dxgkrnl-contracts/gap-index.json) · [既有实机回执](wsl-dxgkrnl-contracts/native-27.json)
@@ -95,6 +97,8 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 正式启动 91918 仅启用 Windows Profiler。8 组同线程事件 175.1、105、106 可以配对，7 组归属 GM20B。DWM 的 DMA 17588 在已确认的 GM20B 节点 0 经过虚拟提交包装进入、返回及同号完成。两路历史异常 ETL 无此事件族。会话和临时档案已清理。[Windows 自带 Profiler 的原始回执](windows-native-graphics/rounds/win-dma-ddi-profiler-20261121-01.result.json)
 
 正式启动 91918 的同一限时会话中，52 条实时记录均与原始 ETL 一致且完成控制端 fsync 和 Windows 确认。DWM 的 21991/8136 覆盖 GM20B 节点 0 的 5063 进入与返回以及实际完成。同包持久化确认延迟实测为 19.186 至 22.556 ms，短于该延迟的骤停区间仍有证据缺口。[同包原始记录、耗时及清理回执](windows-native-graphics/rounds/win-dma-ddi-profiler-live-20261121-01.result.json)
+
+原签名窗口首次 Present 15.600 ms 成功，图像、输入、退出和同桌面通过。实时会话上限早于 CALL 651.542 ms，已独立留存 768 条原始回执。应用视频 ETL 完整，另一路显示 ETL 达上限并丢 4 个缓冲。[联动时间线及失败边界](windows-native-graphics/rounds/win-gated-seq-profiler-present-20261121-01.result.json)
 
 ## 此前交接记录
 
