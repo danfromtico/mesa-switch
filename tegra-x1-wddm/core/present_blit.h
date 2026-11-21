@@ -29,5 +29,6 @@ bool tg_gpu_present_blit_halfturn(const struct tg_gpu_present_blit *,
     struct tg_gpu_blit_rect, struct tg_gpu_present_halfturn *);
 #define TG_GPU_PRESENT_COPY_MAX_WORDS 17u
 uint32_t tg_gpu_encode_present_copy(uint32_t *, uint32_t capacity_words,
-    uint64_t source, uint64_t destination, const struct tg_gpu_present_copy *, bool opaque);
+    uint64_t source, uint64_t destination, const struct tg_gpu_present_copy *, bool opaque,
+    bool cpu_readback);
 #endif

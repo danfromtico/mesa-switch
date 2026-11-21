@@ -153,10 +153,12 @@ static NTSTATUS queue_submit(TG_GPU_WORK_QUEUE *q,const DXGKARG_SUBMITCOMMANDVIR
     if(q->Paused || !NT_SUCCESS(q->Failure)) {
         KeReleaseSpinLock(&q->Lock,irql);return STATUS_DEVICE_NOT_READY;
     }
-    /* Context ownership identifies kernel Present work. A private-data byte
-     * count does not distinguish an OS-generated Present from UMD work. */
-    const BOOLEAN kernel_present=a->Flags.Present && TgGpuIsGdiContext(q->Engine,a->hContext);
-    const UINT allowed=0xc9u|(kernel_present?2u:0u);
+    const BOOLEAN gdi_present=a->Flags.Present && TgGpuIsGdiContext(q->Engine,a->hContext);
+    /* An ordinary Present needs an owned queue entry and a validated snapshot
+     * below. Malformed packets take the ordered rejection path. */
+    const BOOLEAN window_present=a->Flags.Present && reserved && !q->Engine->PagingOnly &&
+        a->DmaBufferSize && !a->Flags.Paging && !a->Flags.ContextSwitch && !a->Flags.NullRendering;
+    const UINT allowed=0xc9u|((gdi_present || window_present)?2u:0u);
     if(a->Flags.Value&~allowed){status=STATUS_NOT_SUPPORTED;goto done;}
     if(reserved && !a->Flags.ContextSwitch && !a->Flags.Paging &&
        !a->Flags.NullRendering && a->DmaBufferSize) {
@@ -164,13 +166,13 @@ static NTSTATUS queue_submit(TG_GPU_WORK_QUEUE *q,const DXGKARG_SUBMITCOMMANDVIR
            snapshot->Bytes>TG_GPU_COMMAND_CAPTURE_BYTES) {status=STATUS_INVALID_PARAMETER;goto rejected;}
         entry=reserved;
     }
-    if(reserved && (!a->DmaBufferUmdPrivateDataSize || kernel_present) &&
+    if(reserved && (!a->DmaBufferUmdPrivateDataSize || gdi_present) &&
        (a->Flags.ContextSwitch || (!a->Flags.Paging && (a->Flags.NullRendering || !a->DmaBufferSize))) &&
        (!entry || a->DmaBufferPrivateDataSize<sizeof(*entry)))entry=reserved;
     if(!entry ||
         ((ULONG_PTR)entry&(TYPE_ALIGNMENT(TG_GPU_QUEUE_ENTRY)-1)) ||
         (entry!=reserved && a->DmaBufferPrivateDataSize<sizeof(*entry)) ||
-        (a->DmaBufferUmdPrivateDataSize && !snapshot && !kernel_present)) {
+        (a->DmaBufferUmdPrivateDataSize && !snapshot && !gdi_present)) {
         status=STATUS_INVALID_PARAMETER;goto rejected;
     }
     if(q->CurrentPrivate==entry) { KeReleaseSpinLock(&q->Lock,irql);return STATUS_DEVICE_BUSY; }

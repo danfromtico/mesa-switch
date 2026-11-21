@@ -518,7 +518,7 @@ cleanup:
 #define TG_EXPECT_WINDOW_COPY 1
 /* Standard GDI allocations have their own pitch and size. Exercise a legal
  * 640x360 -> padded 641x361 window copy through the regular virtual GDI DDI. */
-__declspec(noinline) static void TestWindowSizedGdiPresent(TG_GPU_ADAPTER *adapter, TG_GPU_DEVICE *device)
+__declspec(noinline) static void TestWindowSizedPresent(TG_GPU_ADAPTER *adapter, TG_GPU_DEVICE *device, BOOLEAN ordinary)
 {
     TG_GPU_CONTEXT_ENGINE *engine = &adapter->Engine;
     const UINT before = PoolsInUse();
@@ -528,24 +528,29 @@ __declspec(noinline) static void TestWindowSizedGdiPresent(TG_GPU_ADAPTER *adapt
     };
     TG_GPU_LINEAR_ALLOCATION_REQUEST desc[2] = {0};
     DXGK_ALLOCATIONINFO info[2] = {0};
+    D3DKMDT_STAGINGSURFACEDATA staging = {.Width=640,.Height=360};
     for (UINT i=0; i<2; ++i) {
         DXGKARG_GETSTANDARDALLOCATIONDRIVERDATA standard = {
             .StandardAllocationType=D3DKMDT_STANDARDALLOCATION_GDISURFACE,
             .pCreateGdiSurfaceData=&gdi[i]};
+        if (ordinary && i==1) {
+            standard.StandardAllocationType=D3DKMDT_STANDARDALLOCATION_STAGINGSURFACE;
+            standard.pCreateStagingSurfaceData=&staging;
+        }
         CHECK(TgGpuDdiGetStandardAllocationDriverData(adapter,&standard)==STATUS_SUCCESS);
         CHECK(standard.AllocationPrivateDriverDataSize==sizeof(desc[i]));
         standard.pAllocationPrivateDriverData=&desc[i];
         CHECK(TgGpuDdiGetStandardAllocationDriverData(adapter,&standard)==STATUS_SUCCESS);
         info[i].pPrivateDriverData=&desc[i];info[i].PrivateDriverDataSize=sizeof(desc[i]);
     }
-    CHECK(desc[0].Pitch==2560 && desc[1].Pitch==2688 && desc[0].Buffer.bytes==921600);
+    CHECK(desc[0].Pitch==2560 && desc[1].Pitch==(ordinary?2560u:2688u) && desc[0].Buffer.bytes==921600);
     DXGKARG_CREATEALLOCATION create={.NumAllocations=2,.pAllocationInfo=info};
     CHECK(TgGpuDdiCreateAllocation(engine,&create)==STATUS_SUCCESS);
     os_allocation[1]=info[0].hAllocation;os_allocation[2]=info[1].hAllocation;
     DXGK_OPENALLOCATIONINFO oi[2]={{.hAllocation=1},{.hAllocation=2}};
     DXGKARG_OPENALLOCATION open={.NumAllocations=2,.pOpenAllocation=oi};
     CHECK(TgGpuDdiOpenAllocation(device,&open)==STATUS_SUCCESS);
-    DXGKARG_CREATECONTEXT cc={.hContext=(HANDLE)99,.EngineAffinity=1,.Flags={.GdiContext=1,.VirtualAddressing=1}};
+    DXGKARG_CREATECONTEXT cc={.hContext=(HANDLE)99,.EngineAffinity=1,.Flags={.GdiContext=!ordinary,.VirtualAddressing=1}};
     CHECK(TgGpuDdiCreateContext(device,&cc)==STATUS_SUCCESS);
     DXGKARG_SETROOTPAGETABLE root={.hContext=cc.hContext,.Address={1,0,0},.NumEntries=2};
     TgGpuDdiSetRootPageTable(engine,&root);
@@ -559,19 +564,61 @@ __declspec(noinline) static void TestWindowSizedGdiPresent(TG_GPU_ADAPTER *adapt
     DXGKARG_PRESENT present={.pDmaBuffer=words,.DmaSize=sizeof(words),.pDmaBufferPrivateData=&private_data,
         .DmaBufferPrivateDataSize=sizeof(private_data),.pAllocationInfo=slots,.SrcRect={0,0,640,360},
         .DstRect={1,1,641,361},.Flags={.Blt=1},.DmaBufferGpuVirtualAddress=0x10000};
+    if (ordinary) {
+        present.DstRect=present.SrcRect;
+        present.SubRectCnt=1;
+        present.pDstSubRects=&present.DstRect;
+    }
+    const DXGKARG_PRESENT request=present;
     NTSTATUS hr=TgGpuDdiPresent(cc.hContext,&present);
 #ifdef TG_EXPECT_WINDOW_COPY
     CHECK(hr==STATUS_SUCCESS && present.MultipassOffset==1 && present.pDmaBuffer==words+13);
     CHECK(words[7]==desc[0].Pitch && words[8]==desc[1].Pitch && words[9]==640*4 && words[10]==360);
     CHECK(words[4]==slots[DXGK_PRESENT_SOURCE_INDEX].AllocationVirtualAddress);
-    CHECK(words[6]==slots[DXGK_PRESENT_DESTINATION_INDEX].AllocationVirtualAddress+desc[1].Pitch+4);
+    const UINT destination=(UINT)slots[DXGK_PRESENT_DESTINATION_INDEX].AllocationVirtualAddress+
+        (ordinary?0:desc[1].Pitch+4);
+    CHECK(words[6]==destination);
+    if (ordinary) {
+        CHECK((words[12]&7)==6); /* Non-pipelined, flushed CE write for subsequent CPU lock. */
+        UINT used=(UINT)((UCHAR *)present.pDmaBufferPrivateData-(UCHAR *)&private_data);
+        RtlZeroMemory(words,sizeof(words)); /* The encoding DDI has returned. */
+        DXGKARG_SUBMITCOMMANDVIRTUAL submit={.hContext=cc.hContext,.Flags.Present=1,.SubmissionFenceId=23,
+            .DmaBufferSize=sizeof(words),.DmaBufferVirtualAddress=request.DmaBufferGpuVirtualAddress,
+            .pDmaBufferPrivateData=&private_data,.DmaBufferPrivateDataSize=used-1};
+        TG_GPU_COMMAND_SNAPSHOT *snapshot=NULL;
+        CHECK(TgGpuCapturePresentSnapshot(engine,&submit,&snapshot)==STATUS_INVALID_PARAMETER && !snapshot);
+        submit.DmaBufferPrivateDataSize=submit.DmaBufferUmdPrivateDataSize=used;
+        TG_GPU_WORK_QUEUE queue={0};
+        TG_GPU_HARDWARE hardware={.Engine=engine,.Ready=TRUE,.Power={.owned=true,.ready=true}};
+        const BOOLEAN saved_bar1=engine->UserdBar1Ready;
+        engine->HardwareOwner=&hardware;
+        engine->UserdBar1Ready=TRUE;
+        CHECK(TgGpuInitializeWorkQueue(&queue,engine)==STATUS_SUCCESS);
+        CHECK(TgGpuResumeWorkQueue(&queue,&hardware.Power)==STATUS_SUCCESS);
+        CHECK(TgGpuDdiSubmitCommandVirtual(engine,&submit)==STATUS_SUCCESS && !IsListEmpty(&queue.Pending));
+        RtlZeroMemory(&private_data,sizeof(private_data)); /* Only the owned snapshot stays queued. */
+        TG_GPU_QUEUE_ENTRY *entry=CONTAINING_RECORD(queue.Pending.Flink,TG_GPU_QUEUE_ENTRY,Link);
+        CHECK(entry->Owned && entry->Snapshot && !entry->Snapshot->HasIndirect && entry->Snapshot->Words[6]==destination);
+        CHECK(entry->Work.SubmissionFence==23 && !entry->Work.CompletionReady && entry->Work.Context==cc.hContext);
+        CHECK(TgGpuDdiDestroyContext(cc.hContext)==STATUS_DEVICE_BUSY);
+        CHECK(TgGpuResetWorkQueue(&queue,NULL,NULL,NULL)==STATUS_SUCCESS && TgGpuStopWorkQueue(&queue)==STATUS_SUCCESS);
+        engine->UserdBar1Ready=saved_bar1;
+        engine->HardwareOwner=NULL;
+        present=request;
+        present.DmaBufferPrivateDataSize=sizeof(words);
+        CHECK(TgGpuDdiPresent(cc.hContext,&present)==STATUS_GRAPHICS_INSUFFICIENT_DMA_BUFFER && present.pDmaBuffer==words);
+        present=request;
+        slots[DXGK_PRESENT_DESTINATION_INDEX].hDeviceSpecificAllocation=oi[0].hDeviceSpecificAllocation;
+        CHECK(TgGpuDdiPresent(cc.hContext,&present)==STATUS_NOT_SUPPORTED);
+    }
     static const char receipt[]="WINDOW_COPY 640x360 to 641x361 passed, 2560/2688 pitches, one complete DDI packet\r\n";
 #else
     CHECK(hr==STATUS_INVALID_BUFFER_SIZE && present.pDmaBuffer==words && !present.MultipassOffset);
     static const char receipt[]="WINDOW_COPY 640x360 to 641x361 rejected with STATUS_INVALID_BUFFER_SIZE before encoding\r\n";
 #endif
     ULONG written=0;
-    CHECK(WriteFile(GetStdHandle((ULONG)-11),receipt,sizeof(receipt)-1,&written,NULL) && written==sizeof(receipt)-1);
+    if (!ordinary)
+        CHECK(WriteFile(GetStdHandle((ULONG)-11),receipt,sizeof(receipt)-1,&written,NULL) && written==sizeof(receipt)-1);
     CHECK(TgGpuDdiDestroyContext(cc.hContext)==STATUS_SUCCESS);
     HANDLE handles[2]={oi[0].hDeviceSpecificAllocation,oi[1].hDeviceSpecificAllocation};
     DXGKARG_CLOSEALLOCATION close={.NumAllocations=2,.pOpenHandleList=handles};
@@ -595,7 +642,8 @@ static void TestRotatedGdiPresent(const DXGKRNL_INTERFACE *dxgk)
     CHECK(TgGpuInitializeContextEngine(e,dxgk,&tables)==STATUS_SUCCESS);TestGraphicsTemplate(e);
     CHECK(TgGpuDdiCreateProcess(e,&process)==STATUS_SUCCESS);device.hKmdProcess=process.hKmdProcess;
     CHECK(TgGpuDdiCreateDevice(e,&device)==STATUS_SUCCESS);
-    TestWindowSizedGdiPresent(&adapter,device.hDevice);
+    TestWindowSizedPresent(&adapter,device.hDevice,FALSE);
+    TestWindowSizedPresent(&adapter,device.hDevice,TRUE);
     TestGdiPresent(e,device.hDevice,FALSE,TRUE,FALSE,90);
     TestGdiPresent(e,device.hDevice,TRUE,TRUE,FALSE,90);
     TestGdiPresent(e,device.hDevice,FALSE,FALSE,FALSE,180);

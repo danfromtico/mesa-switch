@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: MIT
- * Fixed-panel GDI shadow copies. B0B5 pitch-linear encoding follows NVK's
+ * GDI shadow and ordinary window copies. B0B5 pitch-linear encoding follows NVK's
  * copy engine; VidMm owns the virtual mappings and allocation residency.
  */
 #include "present.h"
@@ -11,6 +11,7 @@
 #include "../platform/t214_dc.h"
 
 #define PRESENT_MAGIC 0x50724754u
+#define WINDOW_COPY_MAGIC 0x57634754u
 #define SNAPSHOT_TAG 0x53674754u
 typedef struct {
     UINT Magic,Bytes;
@@ -19,6 +20,13 @@ typedef struct {
     UINT64 GpuAddress;
 } PRESENT_BUFFER;
 C_ASSERT(sizeof(PRESENT_BUFFER)<=sizeof(TG_GPU_QUEUE_ENTRY));
+
+/* Private command bytes belong to this OS-generated DMA packet. No open
+ * handle or CPU pointer from the encoding DDI survives on the window path. */
+typedef struct {
+    UINT Magic, Bytes;
+    UINT64 GpuAddress;
+} WINDOW_COPY_BUFFER;
 
 static struct tg_gpu_blit_rect blit_rect(RECT r)
 {
@@ -50,13 +58,17 @@ NTSTATUS APIENTRY TgGpuDdiPresent(HANDLE context,DXGKARG_PRESENT *a)
         return STATUS_SUCCESS; /* Panel DDIs perform the scheduled MMIO flip. */
     if(!c)return STATUS_INVALID_PARAMETER;
     const DXGK_PRESENTFLAGS blt={.Blt=1,.Rotate=1};
-    if(!a->Flags.Blt || (a->Flags.Value&~blt.Value) || !c->Flags.GdiContext || !c->Flags.VirtualAddressing ||
+    if(!a->Flags.Blt || (a->Flags.Value&~blt.Value) || !c->Flags.VirtualAddressing ||
        !c->Device->Process)return STATUS_NOT_SUPPORTED;
+    const BOOLEAN window = !c->Flags.GdiContext;
+    if (window && (c->Flags.SystemContext || c->Device->Engine->PagingOnly || a->Flags.Rotate))
+        return STATUS_NOT_SUPPORTED;
     if(!a->pAllocationInfo || !a->pDmaBuffer || !a->pDmaBufferPrivateData ||
        ((ULONG_PTR)a->pDmaBuffer&3) || !a->DmaBufferGpuVirtualAddress ||
        (a->SubRectCnt && !a->pDstSubRects))
         return STATUS_INVALID_PARAMETER;
-    if(a->DmaBufferPrivateDataSize<sizeof(TG_GPU_QUEUE_ENTRY))
+    const UINT private_prefix = window ? sizeof(WINDOW_COPY_BUFFER) : sizeof(TG_GPU_QUEUE_ENTRY);
+    if(a->DmaBufferPrivateDataSize<private_prefix)
         return STATUS_GRAPHICS_INSUFFICIENT_DMA_BUFFER;
     /* Virtual contexts use the 32-byte present records, not the legacy
      * 24-byte patch allocation list. See SHADOW_PRESENT.md for the checked
@@ -64,10 +76,14 @@ NTSTATUS APIENTRY TgGpuDdiPresent(HANDLE context,DXGKARG_PRESENT *a)
     const DXGK_PRESENTALLOCATIONINFO *src=&a->pAllocationInfo[DXGK_PRESENT_SOURCE_INDEX];
     const DXGK_PRESENTALLOCATIONINFO *dst=&a->pAllocationInfo[DXGK_PRESENT_DESTINATION_INDEX];
     TG_GPU_PRIMARY_ALLOCATION_REQUEST source,destination;
-    NTSTATUS status=TgGpuGetPresentSurface(c->Device,src->hDeviceSpecificAllocation,FALSE,&source);
+    NTSTATUS status=TgGpuGetPresentSurfaces(c->Device,src->hDeviceSpecificAllocation,
+        dst->hDeviceSpecificAllocation,&source,&destination);
     if(!NT_SUCCESS(status))return status;
-    status=TgGpuGetPresentSurface(c->Device,dst->hDeviceSpecificAllocation,TRUE,&destination);
-    if(!NT_SUCCESS(status))return status;
+    if (window && (!(source.Buffer.flags & TG_GPU_ALLOCATION_LINEAR_SURFACE) ||
+                   !(destination.Buffer.flags & TG_GPU_ALLOCATION_LINEAR_SURFACE) ||
+                   destination.Format != D3DDDIFMT_X8R8G8B8 ||
+                   source.Width != destination.Width || source.Height != destination.Height))
+        return STATUS_NOT_SUPPORTED;
     UINT rotation=0;
     if(a->Flags.Rotate) {
         /* WDDM serializes the mode change against this source's presents.
@@ -105,7 +121,9 @@ NTSTATUS APIENTRY TgGpuDdiPresent(HANDLE context,DXGKARG_PRESENT *a)
         total+=stripes;
     }
     if(a->MultipassOffset>=total)return STATUS_INVALID_PARAMETER;
-    const UINT bytes=a->DmaSize<TG_GPU_COMMAND_CAPTURE_BYTES?a->DmaSize:TG_GPU_COMMAND_CAPTURE_BYTES;
+    UINT bytes=a->DmaSize<TG_GPU_COMMAND_CAPTURE_BYTES?a->DmaSize:TG_GPU_COMMAND_CAPTURE_BYTES;
+    if (window && bytes > a->DmaBufferPrivateDataSize - private_prefix)
+        bytes = a->DmaBufferPrivateDataSize - private_prefix;
     UINT *begin=a->pDmaBuffer,*p=begin,available=bytes/sizeof(UINT);
     UINT skip=a->MultipassOffset,next=a->MultipassOffset;
     for(UINT i=0;i<rectangles;++i) {
@@ -124,7 +142,7 @@ NTSTATUS APIENTRY TgGpuDdiPresent(HANDLE context,DXGKARG_PRESENT *a)
                 struct tg_gpu_present_copy copy;
                 if(!tg_gpu_present_blit_copy(&plan,r,stripe,&copy))return STATUS_INVALID_PARAMETER;
                 words=tg_gpu_encode_present_copy(p,available,
-                    src->AllocationVirtualAddress,dst->AllocationVirtualAddress,&copy,opaque!=FALSE);
+                    src->AllocationVirtualAddress,dst->AllocationVirtualAddress,&copy,opaque!=FALSE,window!=FALSE);
             }
             if(!words)return STATUS_INVALID_PARAMETER;
             p+=words;available-=words;++next;
@@ -133,12 +151,21 @@ NTSTATUS APIENTRY TgGpuDdiPresent(HANDLE context,DXGKARG_PRESENT *a)
     }
 encoded:
     if(p!=begin) {
-        PRESENT_BUFFER *private_data=a->pDmaBufferPrivateData;
-        RtlZeroMemory(private_data,sizeof(TG_GPU_QUEUE_ENTRY));
-        *private_data=(PRESENT_BUFFER){PRESENT_MAGIC,(UINT)((UCHAR *)p-(UCHAR *)begin),
-            c,begin,a->DmaBufferGpuVirtualAddress};
+        const UINT encoded_bytes = (UINT)((UCHAR *)p - (UCHAR *)begin);
+        UCHAR *private_data = a->pDmaBufferPrivateData;
+        UINT private_used = private_prefix;
+        if (window) {
+            WINDOW_COPY_BUFFER header = {WINDOW_COPY_MAGIC, encoded_bytes, a->DmaBufferGpuVirtualAddress};
+            RtlCopyMemory(private_data, &header, sizeof(header));
+            RtlCopyMemory(private_data + sizeof(header), begin, encoded_bytes);
+            private_used += encoded_bytes;
+        } else {
+            PRESENT_BUFFER *gdi = (PRESENT_BUFFER *)private_data;
+            RtlZeroMemory(gdi, sizeof(TG_GPU_QUEUE_ENTRY));
+            *gdi = (PRESENT_BUFFER){PRESENT_MAGIC, encoded_bytes, c, begin, a->DmaBufferGpuVirtualAddress};
+        }
         a->pDmaBuffer=p;
-        a->pDmaBufferPrivateData=(UCHAR *)private_data+sizeof(TG_GPU_QUEUE_ENTRY);
+        a->pDmaBufferPrivateData=private_data+private_used;
         a->MultipassOffset=next;
     }
     return next==total?STATUS_SUCCESS:STATUS_GRAPHICS_INSUFFICIENT_DMA_BUFFER;
@@ -152,25 +179,35 @@ NTSTATUS TgGpuCapturePresentSnapshot(TG_GPU_CONTEXT_ENGINE *e,
     if(!out)return STATUS_INVALID_PARAMETER;
     *out=NULL;
     if(!a || a->DmaBufferUmdPrivateDataSize>a->DmaBufferPrivateDataSize || !a->pDmaBufferPrivateData ||
-       a->DmaBufferPrivateDataSize!=sizeof(TG_GPU_QUEUE_ENTRY) ||
        a->DmaBufferSize>TG_GPU_COMMAND_CAPTURE_BYTES)return STATUS_INVALID_PARAMETER;
-    /* Resolve the OS context through the engine list before interpreting a
-     * KMD pointer. Application UMD submissions cannot use this GDI path. */
+    /* Only a registered GDI context owns the pointer-bearing GDI record. */
     NTSTATUS status=TgGpuCaptureContextWork(e,a,NULL,&work);
     if(!NT_SUCCESS(status))return status;
-    const PRESENT_BUFFER *p=a->pDmaBufferPrivateData;
-    if(!work.Context->Flags.GdiContext || p->Magic!=PRESENT_MAGIC || p->Context!=work.Context ||
-       !p->CpuAddress || p->GpuAddress!=a->DmaBufferVirtualAddress || p->Bytes!=a->DmaBufferSize)
-        status=STATUS_INVALID_PARAMETER;
+    const VOID *commands = NULL;
+    if (work.Context->Flags.GdiContext && a->DmaBufferPrivateDataSize == sizeof(TG_GPU_QUEUE_ENTRY)) {
+        const PRESENT_BUFFER *gdi = a->pDmaBufferPrivateData;
+        if (gdi->Magic == PRESENT_MAGIC && gdi->Context == work.Context &&
+            gdi->GpuAddress == a->DmaBufferVirtualAddress && gdi->Bytes == a->DmaBufferSize)
+            commands = gdi->CpuAddress;
+    } else if (!work.Context->Flags.GdiContext && !work.Context->Flags.SystemContext &&
+               !e->PagingOnly && a->Flags.Present &&
+               a->DmaBufferPrivateDataSize >= sizeof(WINDOW_COPY_BUFFER) + a->DmaBufferSize) {
+        WINDOW_COPY_BUFFER header;
+        RtlCopyMemory(&header, a->pDmaBufferPrivateData, sizeof(header));
+        if (header.Magic == WINDOW_COPY_MAGIC && header.Bytes == a->DmaBufferSize &&
+            header.GpuAddress == a->DmaBufferVirtualAddress)
+            commands = (const UCHAR *)a->pDmaBufferPrivateData + sizeof(header);
+    }
+    if (!commands) status = STATUS_INVALID_PARAMETER;
     else {
-        TG_GPU_COMMAND_SNAPSHOT *s=ExAllocatePool2(POOL_FLAG_NON_PAGED,sizeof(*s)+p->Bytes,SNAPSHOT_TAG);
+        TG_GPU_COMMAND_SNAPSHOT *s=ExAllocatePool2(POOL_FLAG_NON_PAGED,sizeof(*s)+a->DmaBufferSize,SNAPSHOT_TAG);
         if(!s)status=STATUS_NO_MEMORY;
         else {
             const struct tg_gpu_command_va va={
                 work.Root.VaLimit,work.InternalVa,work.InternalVa+TG_GPU_INTERNAL_COVERAGE
             };
-            s->Bytes=p->Bytes;
-            RtlCopyMemory(s->Words,p->CpuAddress,s->Bytes);
+            s->Bytes=a->DmaBufferSize;
+            RtlCopyMemory(s->Words,commands,s->Bytes);
             if (!tg_gpu_prepare_command_stream(s->Words,s->Bytes,&va,&s->Info)) {
                 TgGpuFreeCommandSnapshot(s);
                 status=STATUS_INVALID_PARAMETER;

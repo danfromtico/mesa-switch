@@ -473,17 +473,24 @@ static NTSTATUS copy_surface_layout(const TG_GPU_ALLOCATION *allocation,
     return STATUS_SUCCESS;
 }
 
-NTSTATUS TgGpuGetPresentSurface(TG_GPU_DEVICE *device,HANDLE handle,BOOLEAN write,
-    TG_GPU_PRIMARY_ALLOCATION_REQUEST *desc)
+NTSTATUS TgGpuGetPresentSurfaces(TG_GPU_DEVICE *device,HANDLE source,HANDLE destination,
+    TG_GPU_PRIMARY_ALLOCATION_REQUEST *source_layout,TG_GPU_PRIMARY_ALLOCATION_REQUEST *destination_layout)
 {
-    const TG_GPU_OPEN_ALLOCATION *open = handle;
-    if (!device || !open || !desc)
+    const TG_GPU_OPEN_ALLOCATION *src = source, *dst = destination;
+    if (!device || !src || !dst || !source_layout || !destination_layout)
         return STATUS_INVALID_PARAMETER;
     KIRQL irql;
     KeAcquireSpinLock(&device->Engine->Lock, &irql);
-    NTSTATUS status = validate_open_access(device, open, write);
+    NTSTATUS status = validate_open_access(device, src, FALSE);
     if (NT_SUCCESS(status))
-        status = copy_surface_layout(open->Allocation, desc);
+        status = validate_open_access(device, dst, TRUE);
+    /* Two device handles and disjoint VAs can still refer to the same backing. */
+    if (NT_SUCCESS(status) && src->Allocation == dst->Allocation)
+        status = STATUS_NOT_SUPPORTED;
+    if (NT_SUCCESS(status))
+        status = copy_surface_layout(src->Allocation, source_layout);
+    if (NT_SUCCESS(status))
+        status = copy_surface_layout(dst->Allocation, destination_layout);
     KeReleaseSpinLock(&device->Engine->Lock, irql);
     return status;
 }

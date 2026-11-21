@@ -99,7 +99,8 @@ static uint32_t header(uint32_t method, uint32_t count)
 }
 
 uint32_t tg_gpu_encode_present_copy(uint32_t *words, uint32_t capacity,
-    uint64_t source, uint64_t destination, const struct tg_gpu_present_copy *copy, bool opaque)
+    uint64_t source, uint64_t destination, const struct tg_gpu_present_copy *copy, bool opaque,
+    bool cpu_readback)
 {
     const uint32_t count = opaque ? 17 : 13;
     if (!words || !copy || capacity < count || !copy->row_bytes || !copy->lines ||
@@ -132,7 +133,9 @@ uint32_t tg_gpu_encode_present_copy(uint32_t *words, uint32_t capacity,
     *p++ = copy->source_pitch; *p++ = copy->destination_pitch;
     *p++ = opaque ? copy->row_bytes / 4 : copy->row_bytes; *p++ = copy->lines;
     *p++ = header(NVB0B5_LAUNCH_DMA, 1);
-    *p++ = NVDEF(NVB0B5, LAUNCH_DMA, DATA_TRANSFER_TYPE, PIPELINED) |
+    /* A CPU lock may follow the scheduler fence for a staging surface. */
+    *p++ = (cpu_readback ? NVDEF(NVB0B5, LAUNCH_DMA, DATA_TRANSFER_TYPE, NON_PIPELINED) :
+                          NVDEF(NVB0B5, LAUNCH_DMA, DATA_TRANSFER_TYPE, PIPELINED)) |
         NVDEF(NVB0B5, LAUNCH_DMA, FLUSH_ENABLE, TRUE) |
         NVDEF(NVB0B5, LAUNCH_DMA, SRC_MEMORY_LAYOUT, PITCH) |
         NVDEF(NVB0B5, LAUNCH_DMA, DST_MEMORY_LAYOUT, PITCH) |

@@ -61,7 +61,7 @@ static void copies(const struct tg_gpu_present_blit *plan, struct tg_gpu_blit_re
             struct tg_gpu_present_copy copy;
             assert(tg_gpu_present_blit_copy(plan, rect, i, &copy));
             count = tg_gpu_encode_present_copy(words, TG_GPU_PRESENT_HALFTURN_WORDS,
-                SOURCE_VA, DESTINATION_VA, &copy, opaque);
+                SOURCE_VA, DESTINATION_VA, &copy, opaque, false);
         }
         assert(count);
         execute(words, count, opaque, source, source_bytes, dst, dst_bytes);
@@ -175,7 +175,7 @@ int main(void)
     assert(!tg_gpu_present_blit_init(&plan, s, s, r, (struct tg_gpu_blit_rect){0,0,2,2}, 0));
     assert(!tg_gpu_present_blit_init(&plan, s, s, r, r, 45));
     uint32_t words[17]; for (unsigned i = 0; i < 17; ++i) words[i] = 0x12345678;
-    assert(!tg_gpu_encode_present_copy(words, 12, SOURCE_VA, DESTINATION_VA, &copy, false));
+    assert(!tg_gpu_encode_present_copy(words, 12, SOURCE_VA, DESTINATION_VA, &copy, false, false));
     for (unsigned i = 0; i < 17; ++i) assert(words[i] == 0x12345678);
     puts("PASS: 0/90/180/270 CE/2D packets, clipped pixels, pitch/alpha, bounded stream and mapping checks (CPU model only)");
     return 0;
