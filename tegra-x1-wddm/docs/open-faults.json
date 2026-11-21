@@ -500,7 +500,10 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dma175-ddi-order-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dma-ddi-profiler-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dma-ddi-profiler-live-20261121-01.result.json",
-        "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json"
+        "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-arm64ec-kmd-fence-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-arm64ec-5063-realigned-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dwm-consume-arm64ec-93748-20261121-01.result.json"
       ],
       "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified. The same Windows kernel image exposes DMA scheduler and optional timing templates. Three healthy archived captures have matching DMA notifications and no per-packet GPU timestamp records. An opt-in DMA-boundary instrumentation package has been built locally and checked with the queue model. Live candidate calibration and accident attribution are open. The signed native ARM64 queue model passed on the recovered Switch. Windows verified the signed candidate catalog and all 12 covered files with the permanent driver still in use. Candidate runtime submission evidence remains open. The prospective observer calibration stopped at an independent abnormal boot transition before any window workload. The permanent baseline was restored. The same unsealed scene trace records Windows DMA submission 247 on another DWM context 9.054 ms after 152586. An earlier packet on that context, 246, has a matching IRQ, DMA completion and queue retirement in both files. Neither file retains any context reporting a DMA completion notification, DMA completion, or queue retirement after 152586. The later context has no directly matched adapter or node identity in the two stored streams. Seven clean archives from the same DWM instance retain 105 DMA IDs with matching Windows interrupt and non-preempted completion on the later context. All sixteen inspected streams still lack a direct mapping from that context to an adapter and node. Only the primary context has temporally matching native GM20B execution snapshots among these recordings. A clean original-window control on boot 91918 captured the DWM adapter and node associations before Present. Four ordinary GM20B DMA completions and four cross-device DWM signal/wait retirements were identified, including the native execution snapshot for DMA 12776. The observation does not backfill boot 91476. The exact Windows image verified on boot 91918 emits the 175.1 descriptor in VidSchiSendToExecutionQueue before releasing its DPC-level queue lock and before the conditional call to the virtual/physical submission wrapper. The 91476 archive contains the identical event descriptor for 152586 and has no separately retained dxgmms2.sys hash. No release, chosen DDI branch, miniport entry, or hardware progress is established for that submission. The stock DxgKrnl profiler on boot 91918 emitted a same-thread function-5063 entry/return pair for DWM DMA 17588, with direct GM20B node mapping and matching IRQ, DMA completion and queue retirement. The two 91476 traces contain no events from the profiler family. This establishes a capture method for the next occurrence. In a bounded normal trace on boot 91918, live event bytes match the ETL. DWM submission 21991 has the complete 175.1, 5063 entry/return, and ordinary completion chain. The host confirmed durable receipt for its events 19.186 to 22.556 ms after their source QPC. This measured delay leaves an earlier reset interval unobserved.",
       "daily_workaround": "Keep this optional board-local diagnostic task out of daily launches while investigating. Use the qualified permanent graphics baseline and established window controls.",
@@ -4601,6 +4604,195 @@
           "first_anomaly_or_missing": "该专项覆盖一次性启动、交互桌面和实际加载。相同 KMD 的 720p 使用联合包启动 92336 的旁证。"
         },
         "finished_utc": "2026-11-21T19:29:45.867292+00:00"
+      },
+      {
+        "round_id": "win-seq-arm64ec-kmd-fence-20261121-01",
+        "contract_id": "WIN-SEQ-ARM64EC-KMD-FENCE",
+        "windows_question": "WIN-SEQ-ARM64EC-KMD-FENCE",
+        "method": "原空窗一发首次 Present 与生产 ETW 单链",
+        "plan": "windows-native-graphics/rounds/win-seq-arm64ec-kmd-fence-20261121-01.plan.json",
+        "plan_sha256": "24ed83ab26658b5ba52b3adc0345ef99ea451dccc01f8321892478392605c1be",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:06:09.515521+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-seq-arm64ec-kmd-fence-20261121-01.result.json",
+        "result_sha256": "3d2232241533b80a54e6eef29ba08080082edf6eca17c6a351caf51e9bddab8c",
+        "status": "观测缺口",
+        "finding": "启动 93748 的旧式空窗口首次 Present(1,0) 返回 S_OK，用时 14.900 ms，52 字节应用 Blt 队列序号 1 在公开返回前已退役。4,508 个客户区采样点与 WARP 对照一致，应用退出码 0。应用封口 ETL 将 DMA 8575 与同号完成中断、完成及队列退役关联。",
+        "missing_observation": "该包仍缺 5063 包装的同包进入和返回。本次应用的退役与同 HWND 的 DWM 调度各自有据。缺将 Blt 目标分配直接连到 DWM 消费的同对象回执。历史 91476 的 DWM 152586 缺本次自身的 miniport 准入、返回及完成，继续开放。实时转发末条相对公开调用为 -141.097 ms。涉及该边界的封口文件与实时回执分别核对。",
+        "boundaries": {
+          "last_entry": {
+            "qpc": 9185976880,
+            "pid": 6388,
+            "tid": 3972,
+            "provider": "kernel",
+            "id": 166,
+            "version": 0,
+            "fields": {
+              "hwnd": 262222,
+              "pDmaBuffer": 18446699600960062128,
+              "PresentHistoryToken": 0,
+              "hSourceAllocation": 18446699600958698000,
+              "hDestAllocation": 18446699600958713616,
+              "bSubmit": 1,
+              "bRedirectedPresent": 0,
+              "Flags": 1,
+              "Source.Left": 0,
+              "Source.Right": 640,
+              "Source.Top": 0,
+              "Source.Bottom": 360,
+              "Dest.Left": 0,
+              "Dest.Right": 640,
+              "Dest.Top": 0,
+              "Dest.Bottom": 360,
+              "SubRectCount": 1
+            }
+          },
+          "last_return": {
+            "qpc": 9186032609,
+            "pid": 4,
+            "tid": 928,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446603342545733280,
+              "PacketType": 0,
+              "SubmitSequence": 1,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446699600951024416
+            }
+          },
+          "first_anomaly_or_missing": "该包仍缺 5063 包装的同包进入和返回。本次应用的退役与同 HWND 的 DWM 调度各自有据。缺将 Blt 目标分配直接连到 DWM 消费的同对象回执。历史 91476 的 DWM 152586 缺本次自身的 miniport 准入、返回及完成，继续开放。实时转发末条相对公开调用为 -141.097 ms。涉及该边界的封口文件与实时回执分别核对。"
+        },
+        "finished_utc": "2026-11-21T22:08:58.382071+00:00"
+      },
+      {
+        "round_id": "win-seq-arm64ec-5063-realigned-20261121-01",
+        "contract_id": "WIN-SEQ-ARM64EC-5063-ALIGN",
+        "windows_question": "WIN-SEQ-ARM64EC-5063-ALIGN",
+        "method": "同版签名客户端、同生产基线，将完整哈希复查移到开启限时实时窗口之前",
+        "plan": "windows-native-graphics/rounds/win-seq-arm64ec-5063-realigned-20261121-01.plan.json",
+        "plan_sha256": "fc56148cf385d7a77b9fcd211ce991968b1f4c2f267381f40cb77f8512718565",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:09:23.680672+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-seq-arm64ec-5063-realigned-20261121-01.result.json",
+        "result_sha256": "e38651b186dd33856463f91cdbb2bf26424a02ca7a6496e9a3bdcbea29fe8be0",
+        "status": "实机通过",
+        "finding": "启动 93748 的旧式空窗口首次 Present(1,0) 返回 S_OK，用时 25.616 ms，52 字节应用 Blt 队列序号 1 在公开返回前已退役。4,508 个客户区采样点与 WARP 对照一致，应用退出码 0。DMA 11582 同线程 5063 进入和返回，随后同号完成中断、完成及队列退役。该应用 DMA 的生产 KMD 内部阶段回执缺失。",
+        "missing_observation": "当前包在 Windows 包装和中断之间缺独立的 KMD 硬件起动标记。本次应用的退役与同 HWND 的 DWM 调度各自有据。缺将 Blt 目标分配直接连到 DWM 消费的同对象回执。历史 91476 的 DWM 152586 缺本次自身的 miniport 准入、返回及完成，继续开放。",
+        "boundaries": {
+          "last_entry": {
+            "qpc": 12339529162,
+            "pid": 2404,
+            "tid": 6596,
+            "provider": "kernel",
+            "id": 166,
+            "version": 0,
+            "fields": {
+              "hwnd": 590058,
+              "pDmaBuffer": 18446699600917713136,
+              "PresentHistoryToken": 0,
+              "hSourceAllocation": 18446699600958709776,
+              "hDestAllocation": 18446699600958714128,
+              "bSubmit": 1,
+              "bRedirectedPresent": 0,
+              "Flags": 1,
+              "Source.Left": 0,
+              "Source.Right": 640,
+              "Source.Top": 0,
+              "Source.Bottom": 360,
+              "Dest.Left": 0,
+              "Dest.Right": 640,
+              "Dest.Top": 0,
+              "Dest.Bottom": 360,
+              "SubRectCount": 1
+            }
+          },
+          "last_return": {
+            "qpc": 12339590455,
+            "pid": 4,
+            "tid": 928,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446603342560714192,
+              "PacketType": 0,
+              "SubmitSequence": 1,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446699600951458592
+            }
+          },
+          "first_anomaly_or_missing": "当前包在 Windows 包装和中断之间缺独立的 KMD 硬件起动标记。本次应用的退役与同 HWND 的 DWM 调度各自有据。缺将 Blt 目标分配直接连到 DWM 消费的同对象回执。历史 91476 的 DWM 152586 缺本次自身的 miniport 准入、返回及完成，继续开放。"
+        },
+        "finished_utc": "2026-11-21T22:12:00.502848+00:00"
+      },
+      {
+        "round_id": "win-dwm-consume-arm64ec-93748-20261121-01",
+        "contract_id": "WIN-DWM-CONSUME",
+        "windows_question": "WIN-DWM-CONSUME",
+        "method": "复用启动 93748 两次既有实机 ETL，逐对象核对 DWM 消费。设备执行次数为零。",
+        "plan": "windows-native-graphics/rounds/win-dwm-consume-arm64ec-93748-20261121-01.plan.json",
+        "plan_sha256": "05d2b2bc43b8ff2e3c297ba19cc4381eac7a3012057b4574dc6ff30783c725e9",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:12:30.486048+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-dwm-consume-arm64ec-93748-20261121-01.result.json",
+        "result_sha256": "d25792b3fe0a8158afd86f33cd10380177e5f96f8900d8d17a8a6dcca56ef5c3",
+        "status": "观测缺口",
+        "finding": "启动 93748 两次原窗口已按应用线程和分配寿命绑定 CDD、全局分配、设备分配及首次 Blt。两次均有同 HWND 的 DWM 91 调度。场景与显示 ETL 留存记录中均无同一 DWM 分配别名、已归属的同令牌记录或同窗口的明确消费事件。",
+        "missing_observation": "同窗口调度已证实。仍缺从 Blt 目标或对应呈现令牌直接指向 DWM 消费的记录。显示 ETL 的失包量单列，缺失不能作为未消费的证据。历史 91476 仍缺其独立的消费、第三次 DMA 完成和重启首因。",
+        "boundaries": {
+          "last_entry": {
+            "qpc": 12339529162,
+            "pid": 2404,
+            "tid": 6596,
+            "provider": "kernel",
+            "id": 166,
+            "version": 0,
+            "fields": {
+              "hwnd": 590058,
+              "pDmaBuffer": 18446699600917713136,
+              "PresentHistoryToken": 0,
+              "hSourceAllocation": 18446699600958709776,
+              "hDestAllocation": 18446699600958714128,
+              "bSubmit": 1,
+              "bRedirectedPresent": 0,
+              "Flags": 1,
+              "Source.Left": 0,
+              "Source.Right": 640,
+              "Source.Top": 0,
+              "Source.Bottom": 360,
+              "Dest.Left": 0,
+              "Dest.Right": 640,
+              "Dest.Top": 0,
+              "Dest.Bottom": 360,
+              "SubRectCount": 1
+            }
+          },
+          "last_return": {
+            "qpc": 12339590455,
+            "pid": 4,
+            "tid": 928,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446603342560714192,
+              "PacketType": 0,
+              "SubmitSequence": 1,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446699600951458592
+            }
+          },
+          "first_anomaly_or_missing": "同窗口调度已证实。仍缺从 Blt 目标或对应呈现令牌直接指向 DWM 消费的记录。显示 ETL 的失包量单列，缺失不能作为未消费的证据。历史 91476 仍缺其独立的消费、第三次 DMA 完成和重启首因。"
+        },
+        "finished_utc": "2026-11-21T22:13:04.775103+00:00"
       }
     ]
   }

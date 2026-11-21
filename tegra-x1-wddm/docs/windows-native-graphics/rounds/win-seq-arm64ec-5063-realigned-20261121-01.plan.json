@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-arm64ec-5063-realigned-20261121-01",
+  "contract_id": "WIN-SEQ-ARM64EC-5063-ALIGN",
+  "windows_question": "WIN-SEQ-ARM64EC-5063-ALIGN",
+  "owner": "Windows VidSch、DXGI 及当前原生 GM20B 应用",
+  "question": "缩短实时收集启动与应用提交的间隔后，本次 52 字节 Blt 能否取得同号 5063 包装进入、返回及完成？",
+  "method": "同版签名客户端、同生产基线，将完整哈希复查移到开启限时实时窗口之前",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "同一窗口和 DMA 的 175/105/106/177/176/180，附时间、同包状态与回执范围。",
+  "observations": [
+    "原设备、平台、适配器及应用参数保持一致，关闭应用、观察器及已登记跟踪会话后再启动。",
+    "将第二次整套组件哈希复查移到 READY 前。放行后的启动/DWM 身份仍有轻量读取，执行结束后再完全校验组件。",
+    "保持 12 秒和同一 4,096 条上限，核对当前同包的 wrapper、完成与独立 KMD 状态。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "6d61186222e270d56cc1da277ae6dbae635650085fb8a24b3127646f60f0b05a",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "Capture-State.cs": "c3160e7b79c326194582ead5de44e9d6d685038f7486257f4cedade027fd0d6b",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f"
+    },
+    "fixture_runner_sha256": "a514016e096fe0e44dbfe92abc2f90168cb71e2952eba24a0104ee5bf2765a3d",
+    "profiler_runner_sha256": "b1d136f62956290ea91da00a10114778b0b24fa7a2cb3ff1205ba2fb78630b6a",
+    "orchestration_sha256": "ce0bb1af0692542a5e611c179bfaaf2c3e638e7b4ff224b289f3006b638ef5ca",
+    "source_sha256": "30b1436fa6406f3a0e6111628b7eb35f925b25df88c67b769df3d3ba0907eb2c",
+    "exe_sha256": "9162b4275dbd793688839c5490da9b4c4b09455d3a51f65174719c057306ad57",
+    "receiver_sha256": "dcbcc13146e3421cb48a919ae1b5137e9cb95e3d719d8d111741cb61efd50314",
+    "baseline_manifest_sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7",
+    "before_sha256": "b1f0e40b528d015fb1581ec60c879b65dede7b7a283bcbeb8855e571b898ade9",
+    "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-seq-arm64ec-kmd-fence-20261121-01.result.json",
+        "sha256": "3d2232241533b80a54e6eef29ba08080082edf6eca17c6a351caf51e9bddab8c"
+      }
+    ],
+    "boot": 93748,
+    "dwm": 1456,
+    "duration": 12000,
+    "wire_limit": 4096,
+    "etl_file_limit_mib": 64,
+    "kmd_event_layout": {
+      "1": 72,
+      "2": 152
+    }
+  }
+}

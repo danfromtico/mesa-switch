@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-arm64ec-kmd-fence-20261121-01",
+  "contract_id": "WIN-SEQ-ARM64EC-KMD-FENCE",
+  "windows_question": "WIN-SEQ-ARM64EC-KMD-FENCE",
+  "owner": "ARM64 应用、Windows DXGI/dxgkrnl/VidSch、GM20B KMD 与 DWM",
+  "question": "现行基线下原双缓冲 SEQUENTIAL 首次 Present(1,0) 进入内核后，同窗口和同 DMA 最后一条成功边界是什么？",
+  "method": "原空窗一发首次 Present 与生产 ETW 单链",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "绑定同窗口/绘图线程、适配器、上下文、提交值，分别记最后进入、返回、有证实的完成和下一证据缺口。",
+  "observations": [
+    "核对现行永久许可、在同一启动载入的相关模块及安装的 ACR 与 ARM64EC 兼容叶片。",
+    "使用同一签名原生 ARM64 客户端，普通窗口、两个 BGRA 缓冲、无应用写入；一次放行首次 Present(1,0)。",
+    "封口窗口 ETL、实时封口 ETL，与持久转发逐载荷交叉。按同窗口归属、KMT 响应、Blt、Windows DMA、5063 包装和实际中断、队列退役及同对象 GPU 信号/等待取证。",
+    "生产 KMD 现有事件按自然触发记录，缺回执就给出范围；无候选切换。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "5727010629eaa4bc8874c972264e786f095f9917cc4d6f3e40c44dfd175ecf03",
+      "Capture-State.cs": "c3160e7b79c326194582ead5de44e9d6d685038f7486257f4cedade027fd0d6b",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d"
+    },
+    "fixture_runner_sha256": "c79dc410acd17e5005e53bb79bbd1678baa9f1e7584edb2627480a205d56fe80",
+    "profiler_runner_sha256": "f86f7d4f8e565ac8d0fc9003c86ae10a5646976f411555f1e37dc0007bb4ba7e",
+    "orchestration_sha256": "02ba0d8c09e268e7954a67e6bfe8e12c9abf6f666eadcde3afcd4e28cddb0b48",
+    "source_sha256": "30b1436fa6406f3a0e6111628b7eb35f925b25df88c67b769df3d3ba0907eb2c",
+    "exe_sha256": "9162b4275dbd793688839c5490da9b4c4b09455d3a51f65174719c057306ad57",
+    "receiver_sha256": "dcbcc13146e3421cb48a919ae1b5137e9cb95e3d719d8d111741cb61efd50314",
+    "baseline_manifest_sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7",
+    "before_sha256": "3b82d2247e5d7b4dd569ec51875d235b2153015ec77f0e9337750d0ec9c345d2",
+    "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-seq-live-kmd-fence-cache-20261121-01.result.json",
+        "sha256": "1bd39d30d4d697adf424189c10c5da2867d3ddd1bf2da973f93531df603a5c1a"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-dma175-ddi-order-20261121-01.result.json",
+        "sha256": "f360eb0249210e9b1b4573de8dbf6ae4ae859d3b2a6b39c171780fe3eb42c33c"
+      },
+      {
+        "path": "legacy-sequential-step4/warp-control-5.json",
+        "sha256": "7ae42105425345066139c3a31d47bf71554d9d373ba6a71196399336021f873e"
+      }
+    ],
+    "boot": 93748,
+    "dwm": 1456,
+    "duration": 12000,
+    "wire_limit": 4096,
+    "etl_file_limit_mib": 64,
+    "kmd_event_layout": {
+      "1": 72,
+      "2": 152
+    }
+  }
+}

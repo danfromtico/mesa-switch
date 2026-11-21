@@ -134,6 +134,10 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 启动 92083 同一原窗首次 Present(1,0) 约 36.285 ms 成功。实时接收 3020 条均与封口 ETL 相符，含 KMD 事件 58 条。3 条同围栏生产 KMD 快照有场景 ETL 副本、控制端 fsync 和 Windows ACK，覆盖 submit、prepare、mappings 阶段，均在同提交完成之前发出。首条是 DWM DMA 13425。[生产 KMD 实时取证回执](windows-native-graphics/rounds/win-seq-live-kmd-fence-cache-20261121-01.result.json)
 
+启动 93748 的正式兼容基线使用原生 ARM64 应用复测旧式双缓冲 SEQUENTIAL 空窗口。两轮首次 Present(1,0) 均返回 S_OK，分别用时 14.900 和 25.616 ms。两次 52 字节 Blt 都在返回前退役，桌面客户区各 4,508 点与 WARP 空窗口对照一致，输入检查通过，进程退出码为 0，DWM 未重启。第一轮实时流在调用前 141.097 ms 截止，封口场景 ETL 保留了 DMA 8575 的完成与退役。第二轮重新对齐实时窗口，核实 DMA 11582 的 Windows 5063 包装进入、返回、同号完成中断、DMA 完成和退役。应用包无独立 KMD 硬件起动标记。[第一轮](windows-native-graphics/rounds/win-seq-arm64ec-kmd-fence-20261121-01.result.json) · [第二轮](windows-native-graphics/rounds/win-seq-arm64ec-5063-realigned-20261121-01.result.json)
+
+两轮都有同 HWND 的 DWM 91 调度。按同次 Blt 目标和呈现史令牌复核，仍缺能把该应用表面直接连到 DWM 消费的回执。历史启动 91476 的最后一条已知 KMD 回执是抢占请求 20571 成功，约 0.276 ms 后 Windows 发出 DWM 的第三次 DMA 提交 152586。该次提交的 miniport 准入、返回、完成及首个复位异常仍待证；两项历史重启故障保持开放。[DWM 分配与令牌复核](windows-native-graphics/rounds/win-dwm-consume-arm64ec-93748-20261121-01.result.json) · [历史内核边界](windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

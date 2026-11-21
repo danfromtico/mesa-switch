@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-consume-arm64ec-93748-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "owner": "Windows DWM、Win32k 和 dxgkrnl 的重定向表面",
+  "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
+  "method": "复用启动 93748 两次既有实机 ETL，逐对象核对 DWM 消费。设备执行次数为零。",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
+  "observations": [
+    "在同一开机内，按轨迹及分配寿命核对同一窗口的 CDD 286、全局分配 33、设备分配 36、Blt 166 与同次应用呈现史令牌。",
+    "在场景 ETL 和显示 ETL 中分别搜索同适配器的 DWM 本地映射、同令牌记录以及窗口消费事件；分别注明相关事件族及封口、失包情况。",
+    "历史 91476 与当前两个窗口分别保留。只用可验证的同一对象或同一令牌确认消费。"
+  ],
+  "inputs": {
+    "cases": {
+      "win-seq-arm64ec-kmd-fence-20261121-01": {
+        "result": {
+          "path": "windows-native-graphics/rounds/win-seq-arm64ec-kmd-fence-20261121-01.result.json",
+          "sha256": "3d2232241533b80a54e6eef29ba08080082edf6eca17c6a351caf51e9bddab8c"
+        },
+        "archive_sha256": "8ec9d1f426b4e55e69cf14a9c009098ace2f97b784cbd9446e8cfb0821b116c7"
+      },
+      "win-seq-arm64ec-5063-realigned-20261121-01": {
+        "result": {
+          "path": "windows-native-graphics/rounds/win-seq-arm64ec-5063-realigned-20261121-01.result.json",
+          "sha256": "e38651b186dd33856463f91cdbb2bf26424a02ca7a6496e9a3bdcbea29fe8be0"
+        },
+        "archive_sha256": "9e5e18b8e7e97b12059c907df0f56a54cfca3e29cdb3f37495aa01b66feada3b"
+      }
+    },
+    "composition_templates_sha256": "594a16e069e2e10846b7a8a99dbc0553e2343b4648a52df19ea506fdc4edffd0",
+    "kernel_catalog_sha256": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357",
+    "baseline": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-dwm-present-history-batch-20261121-01.result.json",
+      "sha256": "80b86e47fc98977c0c2ab70ee9827c8404f7c4cf6cf5961ac2beeed3980c3162"
+    },
+    "historical": {
+      "path": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+      "sha256": "88276f1c69708d28dbc676b2be1d80cf70e095206fd6d55ddc0e3402fde2b586"
+    }
+  }
+}
