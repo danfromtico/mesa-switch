@@ -128,6 +128,8 @@ if($activeComparison.Count){
     $before=$activeComparison[0].before_commit
     & git -C $root merge-base --is-ancestor $e.Data.base_commit $before
     if($LASTEXITCODE){throw 'Comparison snapshot predates the selected baseline source'}
+    & git -C $root merge-base --is-ancestor $e.Data.source_commit $before
+    if($LASTEXITCODE -ne 1){throw 'Comparison snapshot must exclude the candidate source'}
     $beforeTime=& git -C $root show -s --format=%ct $before
     if($LASTEXITCODE){throw 'Missing comparison snapshot'}
     $sourceTime=& git -C $root show -s --format=%ct $e.Data.source_commit
