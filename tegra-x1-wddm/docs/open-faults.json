@@ -13,7 +13,8 @@
       "trigger": "AC, GM20B, 0x000b000f, two-buffer SEQUENTIAL window, no application writes, first Present(1,0).",
       "evidence": [
         "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_device_removal_reason_and_swap_effect_20261120",
-        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_sequential_first_present_20261120"
+        "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_sequential_first_present_20261120",
+        "tegra-x1-wddm/docs/legacy-sequential-step4/historical-restart-order.json"
       ],
       "cause": "Unknown. On the matched candidate three independent boots ended abnormally. The last durable operation was the first Present. Event 41 reported bugcheck zero.",
       "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
@@ -272,6 +273,23 @@
       "cause": "Unknown. System event 2004 recorded 5964984320 of 6118985728 bytes committed, including 4486160384 bytes for powershell.exe. The subsequent 41 had zero BugcheckCode and 6008 reported abnormal shutdown. No intervening 1074 or new dump was observed. The process identity and memory pressure alone do not explain the reset.",
       "daily_workaround": "After an interruption, read the boot events and verify the selected seven-file profile, compositor, Code 0 and power before starting graphics work. Limit diagnostic queries to the relevant records. A preventive workaround for this incident is unverified.",
       "close_when": "Identify the workload and initiating cause, correct it, and verify three consecutive runs under the original conditions with adequate commit headroom, normal exit and a continuous desktop.",
+      "resolution": null
+    },
+    {
+      "id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+      "status": "open",
+      "kind": "restart",
+      "affected_scopes": [
+        "shutdown",
+        "boot-recovery"
+      ],
+      "trigger": "Interactive desktop restart request on accepted-profile boot 86993, before step-four candidate deployment.",
+      "evidence": [
+        "tegra-x1-wddm/docs/legacy-sequential-step4/entry-boot-87084.json"
+      ],
+      "cause": "RuntimeBroker requested a restart in the interactive user session. Winlogon and EventLog began shutdown. The subsequent 6008 and 41 reported an abnormal shutdown with bugcheck zero. The initiating restart request is identified. The failure to complete shutdown cleanly is unresolved.",
+      "daily_workaround": "After a desktop restart, verify the boot record, Code 0, compositor, accepted component hashes and power. A preventive measure is unverified.",
+      "close_when": "Identify the interrupted shutdown stage, correct the initiating fault and verify three consecutive equivalent desktop restarts with clean shutdown records and an accepted-profile desktop.",
       "resolution": null
     }
   ],

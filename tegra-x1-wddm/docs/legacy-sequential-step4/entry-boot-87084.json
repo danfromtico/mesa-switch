@@ -1,0 +1,122 @@
+{
+  "previous_boot": 86993,
+  "boot": 87084,
+  "operation": "Baseline desktop before candidate deployment",
+  "supply": "Online",
+  "code": 0,
+  "retained_shutdown_sequence": [
+    {
+      "record": 87075,
+      "provider": "User32",
+      "id": 1074,
+      "utc": "2026-11-21T01:51:56.0322770Z",
+      "data": {
+        "param5": "重启",
+        "param3": "其他(计划外)",
+        "param6": "",
+        "param1": "C:\\Windows\\System32\\RuntimeBroker.exe (DESKTOP-5RCUK3G)",
+        "param4": "0x0",
+        "param7": "DESKTOP-5RCUK3G\\ruje",
+        "param2": "DESKTOP-5RCUK3G"
+      }
+    },
+    {
+      "record": 87076,
+      "provider": "Microsoft-Windows-Winlogon",
+      "id": 7002,
+      "utc": "2026-11-21T01:51:57.7945203Z",
+      "data": {}
+    },
+    {
+      "record": 87077,
+      "provider": "EventLog",
+      "id": 6006,
+      "utc": "2026-11-21T01:51:58.4411800Z",
+      "data": {}
+    },
+    {
+      "record": 87083,
+      "provider": "Microsoft-Windows-Dhcp-Client",
+      "id": 50037,
+      "utc": "2026-11-21T01:51:58.5244832Z",
+      "data": {}
+    },
+    {
+      "record": 87084,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "id": 12,
+      "utc": "2026-11-21T01:53:01.1312497Z",
+      "data": {
+        "BootMode": "0",
+        "BuildVersion": "22621",
+        "MinorVersion": "0",
+        "QfeVersion": "2861",
+        "StartTime": "2026-11-21T01:52:59.4873326Z",
+        "MajorVersion": "10",
+        "ServiceVersion": "0"
+      }
+    },
+    {
+      "record": 87093,
+      "provider": "EventLog",
+      "id": 6008,
+      "utc": "2026-11-21T01:54:36.0042541Z",
+      "data": {}
+    },
+    {
+      "record": 87102,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "id": 41,
+      "utc": "2026-11-21T01:53:06.8132595Z",
+      "data": {
+        "InputSuppressionState": "0",
+        "BugcheckParameter2": "0x0",
+        "Checkpoint": "0",
+        "PowerButtonTimestamp": "0",
+        "LidState": "3",
+        "CheckpointStatus": "0",
+        "BugcheckInfoFromEFI": "false",
+        "BootAppStatus": "0",
+        "LongPowerButtonPressDetected": "false",
+        "CsEntryScenarioInstanceIdV2": "0",
+        "CsEntryScenarioInstanceId": "0",
+        "BugcheckParameter4": "0x0",
+        "BugcheckCode": "0",
+        "SleepInProgress": "0",
+        "SystemSleepTransitionsToOn": "0",
+        "PowerButtonSuppressionState": "0",
+        "LidReliability": "false",
+        "ConnectedStandbyInProgress": "false",
+        "BugcheckParameter1": "0x0",
+        "BugcheckParameter3": "0x0"
+      }
+    }
+  ],
+  "preflight_sha256": "b1a6ee4f78c11e8faccfb152656dca11f316ce6587257c6f1757a2bc67eeef03",
+  "system_slice_sha256": "29f912e571d9afbbff0697c3dfc141a1015432cce1fa35d0d76368f0e1e86a46",
+  "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+  "active_policy": "7a257371a5cd0a0e2febc322d141e543f6f61b7585c9f230e5c58963fd7a4875",
+  "components": {
+    "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+  },
+  "loaded": {
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+  },
+  "dwm": [
+    {
+      "started": "2026-11-21T01:54:32.0439015Z",
+      "id": 1364,
+      "session": 1
+    }
+  ],
+  "finding": "RuntimeBroker requested a restart in the interactive user session. Winlogon and EventLog began shutdown. The subsequent 6008 and 41 reported an abnormal shutdown with bugcheck zero. The initiating restart request is identified. The failure to complete shutdown cleanly is unresolved."
+}
