@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "date": "2026-11-21",
+  "game": "仙剑奇侠传四语音版",
+  "predicate": "原游戏的 Windows 执行上下文属于同进程创建的原生 GM20B 设备。",
+  "runs": [
+    {
+      "round": "pal4-preimage-context-20261121-01",
+      "status": "未知",
+      "evidence": "wsl-dxgkrnl-contracts/rounds/pal4-preimage-context-20261121-01.result.json",
+      "sha256": "1042c5162e015786d8f5627009c89f952609f2feee2fdd68d116156c9efe6790",
+      "boot_before": 91326,
+      "boot_after": 91401,
+      "checkpoint": false,
+      "native_x86_module_seen": true,
+      "context_count": 2,
+      "context_joins": [
+        {
+          "context": "context1",
+          "device": "device1",
+          "adapter": "adapter1",
+          "device_qpc": 4349945967,
+          "context_qpc": 4350089218,
+          "tid": 4916,
+          "matched": true,
+          "node": 0
+        },
+        {
+          "context": "context2",
+          "device": "device1",
+          "adapter": "adapter1",
+          "device_qpc": 4349945967,
+          "context_qpc": 4350598602,
+          "tid": 4916,
+          "matched": true,
+          "node": 0
+        }
+      ],
+      "trace_complete": false,
+      "markers": [
+        {
+          "qpc": 4435432265,
+          "tid": 4916,
+          "site": "Texture.w512.h512.levels0.usage00000400.format00000016.pool1.shared0",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 4435546722,
+          "tid": 4916,
+          "site": "Texture7.expected-native-module",
+          "edge": "match",
+          "value": 1
+        },
+        {
+          "qpc": 4435591157,
+          "tid": 4916,
+          "site": "Texture7.construct",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 4435631468,
+          "tid": 4916,
+          "site": "Texture7.common",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 4435785842,
+          "tid": 4916,
+          "site": "Texture7.lookup",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 4435828083,
+          "tid": 4916,
+          "site": "Texture7.lookup",
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 4435869799,
+          "tid": 4916,
+          "site": "Texture7.primary",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 4435909345,
+          "tid": 4916,
+          "site": "Texture7.vkCreateImage",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 4435951162,
+          "tid": 4916,
+          "site": "Texture7.vkCreateImage",
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 4435993823,
+          "tid": 4916,
+          "site": "Texture7.image-requirements",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 4436035493,
+          "tid": 4916,
+          "site": "Texture7.image-requirements",
+          "edge": "leave",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "round": "pal4-preimage-context-20261121-02",
+      "status": "已满足",
+      "evidence": "wsl-dxgkrnl-contracts/rounds/pal4-preimage-context-20261121-02.result.json",
+      "sha256": "a7c70a6a1f9d943bb6b77eeb4fbc3de27503e2f7f7b1331f473148bbf1df8897",
+      "boot_before": 91401,
+      "boot_after": 91401,
+      "checkpoint": true,
+      "native_x86_module_seen": true,
+      "context_count": 2,
+      "context_joins": [
+        {
+          "context": "context1",
+          "device": "device1",
+          "adapter": "adapter1",
+          "device_qpc": 5222119367,
+          "context_qpc": 5222311843,
+          "tid": 5468,
+          "matched": true,
+          "node": 0
+        },
+        {
+          "context": "context2",
+          "device": "device1",
+          "adapter": "adapter1",
+          "device_qpc": 5222119367,
+          "context_qpc": 5223273171,
+          "tid": 5468,
+          "matched": true,
+          "node": 0
+        }
+      ],
+      "trace_complete": true,
+      "markers": [
+        {
+          "qpc": 5310071453,
+          "tid": 5468,
+          "site": "Texture.w512.h512.levels0.usage00000400.format00000016.pool1.shared0",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 5310737610,
+          "tid": 5468,
+          "site": "Texture7.expected-native-module",
+          "edge": "match",
+          "value": 1
+        },
+        {
+          "qpc": 5311014939,
+          "tid": 5468,
+          "site": "Texture7.construct",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 5311056793,
+          "tid": 5468,
+          "site": "Texture7.common",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 5311099308,
+          "tid": 5468,
+          "site": "Texture7.lookup",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 5311136463,
+          "tid": 5468,
+          "site": "Texture7.lookup",
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 5311176938,
+          "tid": 5468,
+          "site": "Texture7.primary",
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 5311218373,
+          "tid": 5468,
+          "site": "Texture7.before-native-image",
+          "edge": "checkpoint",
+          "value": 0
+        }
+      ]
+    }
+  ],
+  "finding": "已命中的第二轮：游戏中的两个上下文都匹配到同一设备、同一适配器。已加载 x86 NVK 的路径由游戏进程自身核对，文件完整哈希在启动前验证。第七张纹理停在创建 Vulkan 图像之前，测试器留下结束意图并终止本轮进程，之后游戏进程消失、原 DLL 恢复。",
+  "controller_gap": {
+    "case_summary_missing": true,
+    "controller_error": "Game result unavailable",
+    "durable_stop_intent": {
+      "reason": "halted before native Vulkan image allocation",
+      "pid": 5496,
+      "boot": 91401,
+      "qpc": 5314759832,
+      "utc": "2026-11-21T12:05:30.5694687Z"
+    },
+    "independent_terminal_checks": [
+      "无丢失的 ETW 正常停止",
+      "相同的启动编号、DWM PID 和 DWM 创建时间",
+      "独立读回游戏进程已退出",
+      "原游戏 DLL 完整哈希恢复",
+      "正式七个组件和已加载桌面模块的哈希匹配",
+      "临时目录、恢复任务和启动任务均已清理"
+    ],
+    "decision": "该控制器缺项仍登记，但它未覆盖的流程与本轮单独裁决的设备上下文归属分开。"
+  },
+  "fixture_correction": "第一轮的早停点误放在 CreateResolveImage，实际游戏使用 CreatePrimaryImage；第一轮保持未知。第二轮更正到已核对的主图像函数。",
+  "graphics_baseline_changed": false,
+  "texture_content_rendering_accepted": false,
+  "original_reboot_root_cause": "未知",
+  "next_observed_boundary": "先前未早停的一轮里，vkCreateImage 与 vkGetImageMemoryRequirements2 均正常返回；后续分配、绑定及构造完成仍缺直接证据。"
+}

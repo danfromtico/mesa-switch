@@ -1,0 +1,30 @@
+{
+  "round_id": "pal4-preimage-context-20261121-02",
+  "contract_id": "dxgkrnl.h:588:1",
+  "declared_utc": "2026-11-21T12:04:23.672513+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "3c0d6ecc9f4cb98d6fc8741f81492f793478f6024e93208f4e6872479000db0b",
+  "related_fault": "SWITCH-LOAD-TRANSITION-RESTART",
+  "actor": "原仙剑四 x86 进程，现行原生 GM20B 与已发布的应用 ICD。",
+  "predicate": "原游戏在第七个纹理交给 DXVK 创建 Vulkan 图像前，其 Windows 执行上下文能否关联到同一游戏进程创建的 GM20B 设备。",
+  "required_observation": "进程内核对已加载的 x86 NVK 模块路径和已验证文件的 SHA-256，随后把 Windows Context 事件 30 中的 hDevice 与该进程的 Device 事件 27 逐一匹配，核对两端 QPC 及早停标记。",
+  "satisfied_if": "原游戏命中预定检查点，取证正常封口，启动与 DWM 连续。每个目标上下文的设备字段唯一匹配同进程的原生设备，用户态侧同时确认指定 x86 NVK 模块。",
+  "violated_if": "完整、无丢失且同线程/进程身份明确的归属回执，证明目标上下文引用另一已确认设备，且有独立关联证据。",
+  "unknown_if": "游戏未到检查点、未捕获目标上下文、模块身份缺失、数据配对歧义、ETW 未正常封口或系统重启时填写未知。",
+  "scope_limit": "此检查点位于第七张纹理的 createImage 调用之前。测试器只终止本轮游戏进程，游戏菜单、正常退出、WSL 内部对象和完整纹理分配另计。",
+  "gpu_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "game_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+  "native_x86_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+  "original_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+  "observer_sha256": "42b74f7bc64e3c89f1eab8c156349ca31f3393a5bcd033c69360e171ac5cf6e8",
+  "trace_filter_sha256": "4f68044595176af9b2fcdb623f26a94b893984465709cd6f7967fa6e2417d98a",
+  "event_ids": [
+    27,
+    30
+  ],
+  "reviewer_scope": "原生可比",
+  "reviewer_packet_sha256": "e5c764d7a5fe07ebed6871c7acf76cade3b9aa43deaae00bd31c9955d70141a2",
+  "previous_unhit_round": "pal4-preimage-context-20261121-01",
+  "observer_target_function": "D3D9CommonTexture::CreatePrimaryImage",
+  "prior_fixture_reason": "早停原先在 CreateResolveImage，游戏使用 CreatePrimaryImage。这个版本在已核对的主纹理函数内、调用 DXVK 设备创建 Vulkan 图像之前停住。"
+}
