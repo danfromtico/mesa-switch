@@ -354,7 +354,35 @@
         }
       }
     ],
-    "matching_wer_folders": []
+    "matching_wer_folders": [],
+    "dump_request_check": {
+      "source_sha256": "8c916760dbf8d099cfddf6edfee8cf560d53c249607cf3c2df711f1a48c0e163",
+      "collection_boot": 87084,
+      "queried_locations": [
+        "Windows/MEMORY.DMP",
+        "Windows/Minidump/*.dmp",
+        "Windows/LiveKernelReports/*.dmp",
+        "Windows/LiveKernelReports/WATCHDOG/*.dmp"
+      ],
+      "retained_dumps": 11,
+      "latest_retained_dump_utc": "2026-11-11T18:04:24.9069499Z",
+      "matching_historical_dump_files": 0,
+      "wer_activity_ids": [
+        "",
+        "",
+        ""
+      ],
+      "status_hex": "0xc0000099",
+      "nearby_system_win32k_263": [
+        82154,
+        82183,
+        82315,
+        82344,
+        82474,
+        82503
+      ],
+      "finding": "The WATCHDOG records describe dump requests. No activity ID links them to the original drawing threads. System Win32k event 263 describes pointer-device monitor association. The sampled dump directories contain only older files."
+    }
   },
   "interpretation": "应用首次 Present 调用标记是三次各自最后留存的应用操作。System 事件仅按该通道 RecordId 分组。同次启动用 QPC 对齐的图形记录都止于调用标记前。后三次启动均留下异常关闭记录，但无对应 bugcheck 码。WerKernel 的三条 WATCHDOG 报告策略事件缺少与原调用对应的启动或提交标识。历史重启起因待查。",
   "later_copy_finding": {
