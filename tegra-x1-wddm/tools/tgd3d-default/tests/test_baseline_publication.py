@@ -125,14 +125,6 @@ def exercise(shell, work):
     updated = commit("Register another fault")
     run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan")
     assert remote_head() == updated
-    run("git", "checkout", "-q", "-b", "older-source", original)
-    (repo / "older-source.cpp").write_text("// Qualified source based on the former baseline\n")
-    commit("Source on the former baseline")
-    run("git", "checkout", "-q", "tgd3d-vulkan")
-    run("git", "merge", "--no-ff", "-q", "-m", "Merge source into the current baseline", "older-source")
-    updated = run("git", "rev-parse", "HEAD")
-    run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan")
-    assert remote_head() == updated
     # The production builder is a linked worktree of a shallow, filtered Mesa clone.
     # Its proof files are present while unrelated shader history can remain unfetched.
     partial = work / "partial"
@@ -149,6 +141,14 @@ def exercise(shell, work):
     lines = f"HEAD {updated} refs/heads/tgd3d-vulkan {selected}\n"
     subprocess.run([sys.executable, str(partial / hook)], cwd=partial, input=lines, text=True,
                    capture_output=True, check=True)
+    run("git", "checkout", "-q", "-b", "older-source", original)
+    (repo / "older-source.cpp").write_text("// Qualified source based on the former baseline\n")
+    commit("Source on the former baseline")
+    run("git", "checkout", "-q", "tgd3d-vulkan")
+    run("git", "merge", "--no-ff", "-q", "-m", "Merge source into the current baseline", "older-source")
+    updated = run("git", "rev-parse", "HEAD")
+    run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan")
+    assert remote_head() == updated
     write(repo / docs / "boot.json", {"intent": 108, "boot": 110})
     commit("Accidental replacement of a retained hardware receipt")
     run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan", succeeds=False, contains="mismatched hardware evidence")
