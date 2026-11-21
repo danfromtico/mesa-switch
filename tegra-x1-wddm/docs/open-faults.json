@@ -447,9 +447,10 @@
       ],
       "trigger": "Boot 91476 on AC and Handheld, permanent WDDM 2.6 baseline c137ce75, GM20B and the signed no-write two-buffer legacy SEQUENTIAL window. One autonomous Windows Task Scheduler CDD capture.",
       "evidence": [
-        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json"
       ],
-      "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart.",
+      "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved.",
       "daily_workaround": "Keep this optional board-local diagnostic task out of daily launches while investigating. Use the qualified permanent graphics baseline and established window controls.",
       "close_when": "Identify the initiating failure using evidence for this incident, fix it, and obtain three valid consecutive acceptance runs under the relevant original conditions including window output, input, normal exit, and desktop continuity.",
       "resolution": null
@@ -2332,6 +2333,63 @@
           "first_anomaly_or_missing": "新次在首帧对象释放与正常退出确认之间缺少后续可证应用边界。板端控制器退出摘要、FlushFileBuffers 返回时点、两路 ETL 关闭记录和可用的故障首因记录均缺失。这是正式基线上一次已成功返回后出现的独立异常。旧三次 CALL 后的图形和板级证据仍各自缺失。"
         },
         "finished_utc": "2026-11-21T15:40:33.383709+00:00"
+      },
+      {
+        "round_id": "win-board-cdd-dwm-tail-20261121-01",
+        "contract_id": "WIN-DWM-CONSUME",
+        "windows_question": "WIN-DWM-CONSUME",
+        "method": "按同一启动检查首次呈现后的 DWM 窗口排程和日志末端",
+        "plan": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.plan.json",
+        "plan_sha256": "ea638ebdcd159b55cb076c6b5111beef71c3ebb4570d30328f535f2aa26aaea5",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T15:41:55.603101+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+        "result_sha256": "88276f1c69708d28dbc676b2be1d80cf70e095206fd6d55ddc0e3402fde2b586",
+        "status": "观测缺口",
+        "finding": "回读启动 91476 的全部原始图形提供程序。DWM 1400/2252 的窗口 91 在同次公开返回后 2.402 ms 匹配 HWND 328302。同一 DWM 线程的 tgd3d 资源进入事件 17 和 8 是后续留存末端，最后一条比公开返回晚 154.764 ms，尺寸 640×360。两份 ETL 的缓冲余区均为 FF。",
+        "missing_observation": "窗口 91 两个表面句柄为零，未见 DWM 按同一适配器与完整令牌消费。最后资源进入记录无该资源返回或同窗口对象标识，复位首因仍缺证。",
+        "boundaries": {
+          "last_entry": {
+            "same_hwnd_dwm_schedule": {
+              "qpc": 223219206255,
+              "id": 91,
+              "version": 0,
+              "pid": 1400,
+              "tid": 2252,
+              "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+              "payload_sha256": "e0c3486ab9ca8efbfb7901a4c23fc28b3a06b4c11ed0ebd34b673b010d82587f",
+              "fields": {
+                "hLogicalSurface": 0,
+                "hDxSharedSurface": 0,
+                "EventId": 328302,
+                "NumRects": 0
+              }
+            },
+            "last_raw_umd": {
+              "qpc": 223222131613,
+              "id": 8,
+              "version": 2,
+              "pid": 1400,
+              "tid": 2252,
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "payload_sha256": "ceacdef9cd607352aa351ed8b1b319a1f5df05d2767da2b89700e979fcdb7743",
+              "fields": {
+                "hresult": "0x8000000a",
+                "arg0": 12884901928,
+                "arg1": 2748779069800,
+                "process_image": "dwm.exe",
+                "creation_filetime": 134397370581187736
+              }
+            }
+          },
+          "last_return": {
+            "same_call_public_return_qpc": 223219160141,
+            "dwm_window_schedule_batch_stop_qpc": 223219206393
+          },
+          "first_anomaly_or_missing": "窗口 91 两个表面句柄为零，未见 DWM 按同一适配器与完整令牌消费。最后资源进入记录无该资源返回或同窗口对象标识，复位首因仍缺证。"
+        },
+        "finished_utc": "2026-11-21T15:41:56.392020+00:00"
       }
     ]
   }

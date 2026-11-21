@@ -1,0 +1,370 @@
+{
+  "schema": 1,
+  "round_id": "win-board-cdd-dwm-tail-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "plan_sha256": "ea638ebdcd159b55cb076c6b5111beef71c3ebb4570d30328f535f2aa26aaea5",
+  "status": "观测缺口",
+  "finding": "回读启动 91476 的全部原始图形提供程序。DWM 1400/2252 的窗口 91 在同次公开返回后 2.402 ms 匹配 HWND 328302。同一 DWM 线程的 tgd3d 资源进入事件 17 和 8 是后续留存末端，最后一条比公开返回晚 154.764 ms，尺寸 640×360。两份 ETL 的缓冲余区均为 FF。",
+  "missing_observation": "窗口 91 两个表面句柄为零，未见 DWM 按同一适配器与完整令牌消费。最后资源进入记录无该资源返回或同窗口对象标识，复位首因仍缺证。",
+  "device_executions": 0,
+  "evidence": {
+    "origin_boot": 91476,
+    "recovery_boot": 91557,
+    "app_pid": 3376,
+    "dwm_pid": 1400,
+    "hwnd": 328302,
+    "dwm_window": {
+      "qpc": 223219206255,
+      "id": 91,
+      "version": 0,
+      "pid": 1400,
+      "tid": 2252,
+      "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+      "payload_sha256": "e0c3486ab9ca8efbfb7901a4c23fc28b3a06b4c11ed0ebd34b673b010d82587f",
+      "fields": {
+        "hLogicalSurface": 0,
+        "hDxSharedSurface": 0,
+        "EventId": 328302,
+        "NumRects": 0
+      }
+    },
+    "dwm_batch": [
+      {
+        "qpc": 223219203362,
+        "id": 63,
+        "version": 0,
+        "pid": 1400,
+        "tid": 2252,
+        "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+        "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "fields": {}
+      },
+      {
+        "qpc": 223219203633,
+        "id": 64,
+        "version": 0,
+        "pid": 1400,
+        "tid": 2252,
+        "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+        "payload_sha256": "2fcd151b8295e8b3bf8ec64ede173523417960a8db6cbc569de9a25a458f9135",
+        "fields": {
+          "hr": 0,
+          "cTokenCount": 2
+        }
+      },
+      {
+        "qpc": 223219206255,
+        "id": 91,
+        "version": 0,
+        "pid": 1400,
+        "tid": 2252,
+        "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+        "payload_sha256": "e0c3486ab9ca8efbfb7901a4c23fc28b3a06b4c11ed0ebd34b673b010d82587f",
+        "fields": {
+          "hLogicalSurface": 0,
+          "hDxSharedSurface": 0,
+          "EventId": 328302,
+          "NumRects": 0
+        }
+      },
+      {
+        "qpc": 223219206393,
+        "id": 65,
+        "version": 0,
+        "pid": 1400,
+        "tid": 2252,
+        "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+        "payload_sha256": "d86e8112f3c4c4442126f8e9f44f16867da487f29052bf91b810457db34209a4",
+        "fields": {
+          "cTotalTokenCount": 2,
+          "cIterationCount": 0
+        }
+      }
+    ],
+    "application_token_events": [
+      {
+        "qpc": 223219155605,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 215,
+        "version": 2,
+        "fields": {
+          "hAdapter": 18446706169586577424,
+          "Token": 18446611100095384064,
+          "Model": 3,
+          "TokenSize": 48,
+          "TokenData": 0,
+          "Flags": 0,
+          "CustomDuration": 0,
+          "ScrollRect.left": 0,
+          "ScrollRect.right": 0,
+          "ScrollRect.top": 0,
+          "ScrollRect.bottom": 0,
+          "ScrollOffset.X": 0,
+          "ScrollOffset.Y": 0,
+          "DirtyRectCount": 0,
+          "Left": [],
+          "Right": [],
+          "Top": [],
+          "Bottom": [],
+          "SourceRect.left": 0,
+          "SourceRect.right": 0,
+          "SourceRect.top": 0,
+          "SourceRect.bottom": 0,
+          "DestWidth": 0,
+          "DestHeight": 0,
+          "TargetRect.left": 0,
+          "TargetRect.right": 0,
+          "TargetRect.top": 0,
+          "TargetRect.bottom": 0,
+          "VmBusChannel": 0
+        }
+      },
+      {
+        "qpc": 223219155671,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 215,
+        "version": 2,
+        "fields": {
+          "hAdapter": 18446706169586577424,
+          "Token": 18446611100095384064,
+          "Model": 3,
+          "TokenSize": 48,
+          "TokenData": 0,
+          "Flags": 0,
+          "CustomDuration": 0,
+          "ScrollRect.left": 0,
+          "ScrollRect.right": 0,
+          "ScrollRect.top": 0,
+          "ScrollRect.bottom": 0,
+          "ScrollOffset.X": 0,
+          "ScrollOffset.Y": 0,
+          "DirtyRectCount": 0,
+          "Left": [],
+          "Right": [],
+          "Top": [],
+          "Bottom": [],
+          "SourceRect.left": 0,
+          "SourceRect.right": 0,
+          "SourceRect.top": 0,
+          "SourceRect.bottom": 0,
+          "DestWidth": 0,
+          "DestHeight": 0,
+          "TargetRect.left": 0,
+          "TargetRect.right": 0,
+          "TargetRect.top": 0,
+          "TargetRect.bottom": 0,
+          "VmBusChannel": 0
+        }
+      }
+    ],
+    "dwm_exact_token_matches": [],
+    "final_dwm_resource_entry": [
+      {
+        "qpc": 223222131560,
+        "id": 17,
+        "version": 2,
+        "pid": 1400,
+        "tid": 2252,
+        "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+        "payload_sha256": "febf374581f357466343875c951ba334f72e3ce72137e4171f43b05df7d019b4",
+        "fields": {
+          "hresult": "0x8000000a",
+          "arg0": 0,
+          "arg1": 1846599960752,
+          "process_image": "dwm.exe",
+          "creation_filetime": 134397370581187736
+        }
+      },
+      {
+        "qpc": 223222131613,
+        "id": 8,
+        "version": 2,
+        "pid": 1400,
+        "tid": 2252,
+        "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+        "payload_sha256": "ceacdef9cd607352aa351ed8b1b319a1f5df05d2767da2b89700e979fcdb7743",
+        "fields": {
+          "hresult": "0x8000000a",
+          "arg0": 12884901928,
+          "arg1": 2748779069800,
+          "process_image": "dwm.exe",
+          "creation_filetime": 134397370581187736
+        }
+      }
+    ],
+    "latest_graphics_record": {
+      "qpc": 223222131613,
+      "id": 8,
+      "version": 2,
+      "pid": 1400,
+      "tid": 2252,
+      "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+      "payload_sha256": "ceacdef9cd607352aa351ed8b1b319a1f5df05d2767da2b89700e979fcdb7743",
+      "fields": {
+        "hresult": "0x8000000a",
+        "arg0": 12884901928,
+        "arg1": 2748779069800,
+        "process_image": "dwm.exe",
+        "creation_filetime": 134397370581187736
+      }
+    },
+    "padding_by_stream": {
+      "display.etl": {
+        "latest": {
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": {
+            "qpc": 223221953112,
+            "id": 281,
+            "version": 0,
+            "pid": 4,
+            "tid": 892,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "payload_sha256": "8634b058de318ba00f4aba41f402d272c034c8d513a9bfd6da59052fc44c8db1"
+          },
+          "9e9bba3c-2e38-40cb-99f4-9e8281425164": {
+            "qpc": 223221762809,
+            "id": 65,
+            "version": 0,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+            "payload_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+            "fields": {
+              "cTotalTokenCount": 0,
+              "cIterationCount": 0
+            }
+          }
+        },
+        "provider_counts": {
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 35579,
+          "9e9bba3c-2e38-40cb-99f4-9e8281425164": 680
+        },
+        "padding_bytes": 564672,
+        "padding_values": {
+          "ff": 564672
+        }
+      },
+      "scene/video.etl": {
+        "latest": {
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": {
+            "qpc": 223222129880,
+            "id": 179,
+            "version": 0,
+            "pid": 4,
+            "tid": 904,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "payload_sha256": "33285353e699fcfaa940be487299c94d709b630a00f685a02a51710be28ab373"
+          },
+          "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11": {
+            "qpc": 223222131613,
+            "id": 8,
+            "version": 2,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+            "payload_sha256": "ceacdef9cd607352aa351ed8b1b319a1f5df05d2767da2b89700e979fcdb7743",
+            "fields": {
+              "hresult": "0x8000000a",
+              "arg0": 12884901928,
+              "arg1": 2748779069800,
+              "process_image": "dwm.exe",
+              "creation_filetime": 134397370581187736
+            }
+          },
+          "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0": {
+            "qpc": 223221945396,
+            "id": 2,
+            "version": 1,
+            "pid": 4,
+            "tid": 888,
+            "provider": "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0",
+            "payload_sha256": "9a76d4b1c0de037b2154c73d3e8ef79458f22b7ed77828e235c636b904b71398"
+          },
+          "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9": {
+            "qpc": 223219159535,
+            "id": 179,
+            "version": 0,
+            "pid": 3376,
+            "tid": 3236,
+            "provider": "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9",
+            "payload_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+          }
+        },
+        "provider_counts": {
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 4725,
+          "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11": 1650,
+          "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0": 21,
+          "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9": 4
+        },
+        "padding_bytes": 117560,
+        "padding_values": {
+          "ff": 117560
+        }
+      }
+    },
+    "reference_success_example_by_dimensions": [
+      {
+        "qpc": 209430466650,
+        "id": 8,
+        "version": 2,
+        "pid": 1400,
+        "tid": 2252,
+        "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+        "payload_sha256": "ceacdef9cd607352aa351ed8b1b319a1f5df05d2767da2b89700e979fcdb7743",
+        "fields": {
+          "hresult": "0x8000000a",
+          "arg0": 12884901928,
+          "arg1": 2748779069800,
+          "process_image": "dwm.exe",
+          "creation_filetime": 134397370581187736
+        }
+      }
+    ],
+    "reference_match_count": 1,
+    "prior_three_scope": "启动 91476 此次的同次 DWM 证据仅适用于新增事故。旧三次仍无各自 CALL 后 ETL。",
+    "boundaries": {
+      "last_entry": {
+        "same_hwnd_dwm_schedule": {
+          "qpc": 223219206255,
+          "id": 91,
+          "version": 0,
+          "pid": 1400,
+          "tid": 2252,
+          "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+          "payload_sha256": "e0c3486ab9ca8efbfb7901a4c23fc28b3a06b4c11ed0ebd34b673b010d82587f",
+          "fields": {
+            "hLogicalSurface": 0,
+            "hDxSharedSurface": 0,
+            "EventId": 328302,
+            "NumRects": 0
+          }
+        },
+        "last_raw_umd": {
+          "qpc": 223222131613,
+          "id": 8,
+          "version": 2,
+          "pid": 1400,
+          "tid": 2252,
+          "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+          "payload_sha256": "ceacdef9cd607352aa351ed8b1b319a1f5df05d2767da2b89700e979fcdb7743",
+          "fields": {
+            "hresult": "0x8000000a",
+            "arg0": 12884901928,
+            "arg1": 2748779069800,
+            "process_image": "dwm.exe",
+            "creation_filetime": 134397370581187736
+          }
+        }
+      },
+      "last_return": {
+        "same_call_public_return_qpc": 223219160141,
+        "dwm_window_schedule_batch_stop_qpc": 223219206393
+      },
+      "first_anomaly_or_missing": "窗口 91 两个表面句柄为零，未见 DWM 按同一适配器与完整令牌消费。最后资源进入记录无该资源返回或同窗口对象标识，复位首因仍缺证。"
+    }
+  }
+}

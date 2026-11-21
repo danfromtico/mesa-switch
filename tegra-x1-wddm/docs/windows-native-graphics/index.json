@@ -758,7 +758,7 @@
       "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
       "status": "观测缺口",
       "existing_observation": "当前原空窗口的呈现后客户区像素已验证。正常翻转对照曾匹配到 DWM 的窗口消费。",
-      "missing_observation": "需要 DWM 实际收到的逐令牌标识，或能唯一归到这次应用提交的表面消费记录。现有读取回执只提供批次数目和窗口调度。正常翻转仍有 467 的窗口消费对照。",
+      "missing_observation": "窗口 91 两个表面句柄为零，未见 DWM 按同一适配器与完整令牌消费。最后资源进入记录无该资源返回或同窗口对象标识，复位首因仍缺证。",
       "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
       "evidence": [
         {
@@ -780,9 +780,10 @@
         "win-dwm-window-id-20261121-01",
         "win-dwm-shared-destination-20261121-01",
         "win-dwm-blt-dma-identity-20261121-01",
-        "win-dwm-present-history-batch-20261121-01"
+        "win-dwm-present-history-batch-20261121-01",
+        "win-board-cdd-dwm-tail-20261121-01"
       ],
-      "latest_observation": "正式基线五次空窗口的 DWM 91 均位于同一线程的 63/64/65 读取批次内。64 返回 S_OK，每批汇报 2 或 3 个令牌。应用提交的 Model=3 令牌在两份 ETL 中均未匹配到同令牌的 172 或 DWM PID 记录。两次在批次结束后由另一 PID 用相同地址提交了 Model=7 的新记录。"
+      "latest_observation": "回读启动 91476 的全部原始图形提供程序。DWM 1400/2252 的窗口 91 在同次公开返回后 2.402 ms 匹配 HWND 328302。同一 DWM 线程的 tgd3d 资源进入事件 17 和 8 是后续留存末端，最后一条比公开返回晚 154.764 ms，尺寸 640×360。两份 ETL 的缓冲余区均为 FF。"
     },
     {
       "id": "WIN-PRESENT-IMAGE",
@@ -2220,6 +2221,63 @@
         "first_anomaly_or_missing": "新次在首帧对象释放与正常退出确认之间缺少后续可证应用边界。板端控制器退出摘要、FlushFileBuffers 返回时点、两路 ETL 关闭记录和可用的故障首因记录均缺失。这是正式基线上一次已成功返回后出现的独立异常。旧三次 CALL 后的图形和板级证据仍各自缺失。"
       },
       "finished_utc": "2026-11-21T15:40:33.383709+00:00"
+    },
+    {
+      "round_id": "win-board-cdd-dwm-tail-20261121-01",
+      "contract_id": "WIN-DWM-CONSUME",
+      "windows_question": "WIN-DWM-CONSUME",
+      "method": "按同一启动检查首次呈现后的 DWM 窗口排程和日志末端",
+      "plan": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.plan.json",
+      "plan_sha256": "ea638ebdcd159b55cb076c6b5111beef71c3ebb4570d30328f535f2aa26aaea5",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:41:55.603101+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+      "result_sha256": "88276f1c69708d28dbc676b2be1d80cf70e095206fd6d55ddc0e3402fde2b586",
+      "status": "观测缺口",
+      "finding": "回读启动 91476 的全部原始图形提供程序。DWM 1400/2252 的窗口 91 在同次公开返回后 2.402 ms 匹配 HWND 328302。同一 DWM 线程的 tgd3d 资源进入事件 17 和 8 是后续留存末端，最后一条比公开返回晚 154.764 ms，尺寸 640×360。两份 ETL 的缓冲余区均为 FF。",
+      "missing_observation": "窗口 91 两个表面句柄为零，未见 DWM 按同一适配器与完整令牌消费。最后资源进入记录无该资源返回或同窗口对象标识，复位首因仍缺证。",
+      "boundaries": {
+        "last_entry": {
+          "same_hwnd_dwm_schedule": {
+            "qpc": 223219206255,
+            "id": 91,
+            "version": 0,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+            "payload_sha256": "e0c3486ab9ca8efbfb7901a4c23fc28b3a06b4c11ed0ebd34b673b010d82587f",
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 328302,
+              "NumRects": 0
+            }
+          },
+          "last_raw_umd": {
+            "qpc": 223222131613,
+            "id": 8,
+            "version": 2,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+            "payload_sha256": "ceacdef9cd607352aa351ed8b1b319a1f5df05d2767da2b89700e979fcdb7743",
+            "fields": {
+              "hresult": "0x8000000a",
+              "arg0": 12884901928,
+              "arg1": 2748779069800,
+              "process_image": "dwm.exe",
+              "creation_filetime": 134397370581187736
+            }
+          }
+        },
+        "last_return": {
+          "same_call_public_return_qpc": 223219160141,
+          "dwm_window_schedule_batch_stop_qpc": 223219206393
+        },
+        "first_anomaly_or_missing": "窗口 91 两个表面句柄为零，未见 DWM 按同一适配器与完整令牌消费。最后资源进入记录无该资源返回或同窗口对象标识，复位首因仍缺证。"
+      },
+      "finished_utc": "2026-11-21T15:41:56.392020+00:00"
     }
   ],
   "progress": {
@@ -2232,7 +2290,7 @@
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 36,
+    "registered_rounds": 37,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -2342,7 +2400,22 @@
         "path": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
         "sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099"
       },
-      "verified_phase": "首次 Present、DwmFlush 与首帧资源释放均返回成功。"
+      "verified_phase": "首次 Present、DwmFlush 与首帧资源释放均返回成功。",
+      "compositor_tail": {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+        "sha256": "88276f1c69708d28dbc676b2be1d80cf70e095206fd6d55ddc0e3402fde2b586"
+      },
+      "last_drawing_thread_task": {
+        "event": 329,
+        "version": 0,
+        "provider": "Microsoft-Windows-DxgKrnl",
+        "task": "SetProcessStatus",
+        "dxgkrnl_sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "manifest_observation_boot": 91557,
+        "retained_qpc": 223221819942,
+        "raw_local_receipt": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/event-tail-templates.json",
+        "receipt_sha256": "8a1a2d683d88fcd63e877f84d69e3990f00123d4356a29df94e0304567464450"
+      }
     }
   },
   "cleanup": {

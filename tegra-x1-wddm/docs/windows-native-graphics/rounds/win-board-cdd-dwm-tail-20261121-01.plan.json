@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "round_id": "win-board-cdd-dwm-tail-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "owner": "Windows DWM、Win32k 和 dxgkrnl 的重定向表面",
+  "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
+  "method": "按同一启动检查首次呈现后的 DWM 窗口排程和日志末端",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
+  "observations": [
+    "沿用撤离前保存并两端核对SHA-256的事故 ZIP。回读两个原始 ETL 的全部物理缓冲和位于声明范围之外的字节。",
+    "用系统注册的事件模板，在应用完成首次公开 Present 后筛出同启动既有 DWM PID、事件 91 的 HWND 与 63/64/65 批次。依据 DXGK 令牌完整身份及实际 DWM 记录判断能否证实消费。",
+    "比对本轮 DWM 最后一条 tgd3d 资源事件、范围和有无返回。用正式正常归档核对本类型事件出现方式，保持待证对象归属。"
+  ],
+  "inputs": {
+    "incident": {
+      "path": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+      "sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099"
+    },
+    "archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+    "control": {
+      "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+      "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
+    },
+    "control_archive_sha256": "424c68463a164b7afc967cf8882a0c2af68c8565a568f906ce4ddc8c20e53a02",
+    "manifest_sha256": "38e4004c82a924223b861bbe983384e837f5caebcdcb5f20448732a2081e6ebc",
+    "umd_definition": {
+      "commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+      "path": "src/nouveau/tgd3d/tgd3d_trace.h",
+      "sha256": "48915ebe00d2091d7ef74be3416dcc7badfd0130dd831c2704cdadfe3a0df681"
+    },
+    "reader_sha256": "d255952513c5f21710fb019cf8367bde304bb90b34b04833e93c95d0fd3a7e33"
+  }
+}
