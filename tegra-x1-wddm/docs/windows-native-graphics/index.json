@@ -1179,6 +1179,30 @@
         "power"
       ],
       "round_ids": []
+    },
+    {
+      "id": "WIN-CDD-BOARD-RECOVERY",
+      "priority": "P0",
+      "owner": "Switch 本机事件采集与 Windows CDD",
+      "question": "首次公开 Present 的 CDD 板端观测能否在本机任务内独立完成，连接恢复后按可用档案确定可证边界？",
+      "status": "故障开放",
+      "existing_observation": "已有正式空窗口的 CDD 槽位写透回执早于 DXGI 返回 5.904 ms，该采集器的 ACK 和 DRAIN 由控制端 SSH 管道处理。",
+      "missing_observation": "新次在首帧对象释放与正常退出确认之间缺少后续可证应用边界。板端控制器退出摘要、FlushFileBuffers 返回时点、两路 ETL 关闭记录和可用的故障首因记录均缺失。这是正式基线上一次已成功返回后出现的独立异常。旧三次 CALL 后的图形和板级证据仍各自缺失。",
+      "pass_condition": "在 Switch 本机通过匿名管道发起、接收和关闭采集，取得同次应用、线程、目标分配的可验证板端文件。逐项测试档案缺失时哪些字段可从剩余证据判定。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+          "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "path"
+      ],
+      "round_ids": [
+        "win-present-board-only-cdd-20261121-01"
+      ],
+      "latest_observation": "正式 GM20B 基线的普通双缓冲空窗口在启动 91476 运行一次，绘图 PID/TID 3376/3236。CDD 286 的 84 字节原始记录在恢复启动 91557 完整回读，同次 Windows ETL 和同一 HWND 的 Blt 目标分配吻合。52 字节复制包正常退役，KMT 及首次公开 Present 返回 S_OK，公开调用耗时 58.688 ms。其后设备状态查询、DwmFlush 与首帧对象释放都留下成功回执。绘图线程的最后一条内核事件晚于公开返回 138.531 ms。下次启动 91557 有 6008 和 41，BugcheckCode=0。"
     }
   ],
   "rounds": [
@@ -2127,20 +2151,89 @@
         "first_anomaly_or_missing": "本次正常正式基线窗口的 Windows CDD 分配活动。原三次故障内核入口、Blt 回调与复位原因需要各自的 CALL 后回执。"
       },
       "finished_utc": "2026-11-21T15:19:54.200191+00:00"
+    },
+    {
+      "round_id": "win-present-board-only-cdd-20261121-01",
+      "contract_id": "WIN-CDD-BOARD-RECOVERY",
+      "windows_question": "WIN-CDD-BOARD-RECOVERY",
+      "method": "同一正式空窗口的一次板端取证与回读边界检查",
+      "plan": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.plan.json",
+      "plan_sha256": "ecc08187924cef3f08692d18472aa5036c1b7dec2c059c364d4dbd9eb927b90a",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:29:46.534429+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+      "result_sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099",
+      "status": "故障开放",
+      "finding": "正式 GM20B 基线的普通双缓冲空窗口在启动 91476 运行一次，绘图 PID/TID 3376/3236。CDD 286 的 84 字节原始记录在恢复启动 91557 完整回读，同次 Windows ETL 和同一 HWND 的 Blt 目标分配吻合。52 字节复制包正常退役，KMT 及首次公开 Present 返回 S_OK，公开调用耗时 58.688 ms。其后设备状态查询、DwmFlush 与首帧对象释放都留下成功回执。绘图线程的最后一条内核事件晚于公开返回 138.531 ms。下次启动 91557 有 6008 和 41，BugcheckCode=0。",
+      "missing_observation": "新次在首帧对象释放与正常退出确认之间缺少后续可证应用边界。板端控制器退出摘要、FlushFileBuffers 返回时点、两路 ETL 关闭记录和可用的故障首因记录均缺失。这是正式基线上一次已成功返回后出现的独立异常。旧三次 CALL 后的图形和板级证据仍各自缺失。",
+      "boundaries": {
+        "last_entry": {
+          "boot": 91476,
+          "pid": 3376,
+          "tid": 3236,
+          "hwnd": 328302,
+          "first_dxgi_start_qpc": 223218801252,
+          "cdd": {
+            "sequence": 1,
+            "pid": 3376,
+            "tid": 3236,
+            "event": 286,
+            "version": 0,
+            "source_qpc": 223218873426,
+            "callback_qpc": 223219006978,
+            "payload_size": 24,
+            "payload_sha256": "3c913233644fc4aa51be1f8be917783020ad1360fa34746b01e506fd06697724",
+            "crc_valid": true
+          }
+        },
+        "last_return": {
+          "public_present": "S_OK",
+          "first_copy_retired": true,
+          "last_application_journal": "11626000 3236 RETURN ReleaseFirstFrameObjects 00000000",
+          "last_drawing_thread_etw": {
+            "qpc": 223221819942,
+            "pid": 3376,
+            "tid": 3236,
+            "provider": "kernel",
+            "id": 329,
+            "version": 0,
+            "fields": {
+              "EProcess": 18446706169649672448,
+              "ProcessStatus": 0
+            }
+          },
+          "last_raw_graphics_event": {
+            "qpc": 223222129880,
+            "pid": 4,
+            "tid": 904,
+            "provider": "kernel",
+            "id": 179,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088172560,
+              "PacketType": 7,
+              "SubmitSequence": 741
+            }
+          }
+        },
+        "first_anomaly_or_missing": "新次在首帧对象释放与正常退出确认之间缺少后续可证应用边界。板端控制器退出摘要、FlushFileBuffers 返回时点、两路 ETL 关闭记录和可用的故障首因记录均缺失。这是正式基线上一次已成功返回后出现的独立异常。旧三次 CALL 后的图形和板级证据仍各自缺失。"
+      },
+      "finished_utc": "2026-11-21T15:40:33.383709+00:00"
     }
   ],
   "progress": {
-    "total": 26,
+    "total": 27,
     "by_status": {
       "实机通过": 7,
       "观测缺口": 4,
       "已有实机通过": 7,
-      "故障开放": 2,
+      "故障开放": 3,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 35,
-    "new_device_executions": 9
+    "registered_rounds": 36,
+    "new_device_executions": 10
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -2151,6 +2244,7 @@
       "WIN-KMT-PRE-RETURN-WITNESS",
       "WIN-BLT-LOCAL-FLUSH",
       "WIN-CDD-LOCAL-FLUSH",
+      "WIN-CDD-BOARD-RECOVERY",
       "WIN-PRESENT-SOURCE",
       "WIN-FENCE-WAIT",
       "WIN-BLT-DDI-ORDER",
@@ -2234,7 +2328,21 @@
       "onboard_cdd_receipt": {
         "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
         "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
+      },
+      "board_autonomous_receipt": {
+        "path": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+        "sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099"
       }
+    },
+    "latest_unexpected_restart": {
+      "fault": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+      "case_boot": 91476,
+      "recovery_boot": 91557,
+      "ref": {
+        "path": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+        "sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099"
+      },
+      "verified_phase": "首次 Present、DwmFlush 与首帧资源释放均返回成功。"
     }
   },
   "cleanup": {

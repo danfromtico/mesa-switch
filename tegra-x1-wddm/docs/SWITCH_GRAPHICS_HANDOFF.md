@@ -58,6 +58,8 @@
 
 启动 91476 的同一绘图线程 4836/1256，板端槽的 84 字节 CDD 286 原始回执与独立 ETL 逐字节相符。CDD 目标经 global 33 与 device 36 绑定到同一 HWND 的 Blt 166。写入加刷新耗时 3.535 ms，成功返回相对 DXGI 43 -5.904 ms，相对公开 RETURN -5.926 ms。 同次窗口完成输入、退出及桌面连续检查。三份旧故障仍缺自己的 CALL 后回执。[同次 CDD 分配及板端写透回执](windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json)
 
+正式基线启动 91476 的一次板端 CDD 取证发生意外重启，恢复为 91557。重启后完整读回同窗口 CDD 286，旧启动原件同时保留了复制退役、首次 Present、DwmFlush 和首帧资源释放成功。最后一条同绘图线程内核事件在公开返回后 138.531 ms。正常退出和复位首因缺回执。恢复后核对了 GPU Code 0、全哈希、手持设置和专属探针清理。旧三次故障各自的 CALL 后缺口继续开放。[本次故障及重启后回读](windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

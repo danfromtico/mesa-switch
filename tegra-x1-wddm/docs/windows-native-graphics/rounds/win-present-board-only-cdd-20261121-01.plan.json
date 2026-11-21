@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "round_id": "win-present-board-only-cdd-20261121-01",
+  "contract_id": "WIN-CDD-BOARD-RECOVERY",
+  "windows_question": "WIN-CDD-BOARD-RECOVERY",
+  "owner": "Switch 本机事件采集与 Windows CDD",
+  "question": "首次公开 Present 的 CDD 板端观测能否在本机任务内独立完成，连接恢复后按可用档案确定可证边界？",
+  "method": "同一正式空窗口的一次板端取证与回读边界检查",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "在 Switch 本机通过匿名管道发起、接收和关闭采集，取得同次应用、线程、目标分配的可验证板端文件。逐项测试档案缺失时哪些字段可从剩余证据判定。",
+  "observations": [
+    "核对租约、交流供电、手持、Code 0、永久许可和实载全哈希。复用此前同一签名客户端及 CDD 观测器，计划只在正式基线上启动一次公开普通图形用例。",
+    "Mac 完成文件与任务准备后，只把独有采集任务交给本机 Task Scheduler。Windows 本机进程打开归档 ETL 和已签名 CDD 采集器，从本机匿名管道收到 READY 后启动唯一应用，并在同一管道收发 ACK、DRAIN、DONE。",
+    "分别回读应用和父任务归档，核对设备实际组件、同启动、同线程、原始载荷、时间和对象。确认一次正常用例完成，清理试验私有对象与文件。通过内存掩蔽核对证据缺失边界，不修改归档。"
+  ],
+  "inputs": {
+    "nonce": "c653e6ff6b4c4c17ad4df0f4959ebbdf",
+    "app": {
+      "Board-Case.ps1": "2c7a91f6a636833fbd4312708061843e37c90029ae89ce27be636013047340b1",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0"
+    },
+    "client_input_source_sha256": "863f388517cd989d5ef8278b5f7a680e787a1e681a9bc0e4086518b55f3938c3",
+    "coordinator_sha256": "277f838854cdb1ed11c4a324848fc5c4a4635c61668be165dadd3c6559a38d6b",
+    "launcher_sha256": "6b66c80ec85ea32dba7dfb69cb1bf48873d51776fd837c2a26bf2394adfc78d8",
+    "fixture_sha256": "904039143cc4f29fbd239a8ab7fdc826c2f0434e1d163468ce3fca3af9bd8579",
+    "observer_exe_sha256": "a9425d441b2c53ea9d25da9dbac890b37442fb51bd691d521350e2c0b12ce197",
+    "review_request_sha256": "6727a6f337e72d3ab4fd2c9e2c12f1e02480be609762c13f4267bfeecdcf4b63",
+    "recovery_parser_sha256": "894689dfc0b8383b71f867dd33331b24d3f26954ad007577282ecdcc7f54711b",
+    "recovery_control_sha256": "1079f1dd12011ee0986431302ee18cc9b6190676b789366a0b8cf91f9e682f64",
+    "local_protocol_control_sha256": "0c8d4b3a68ec3ea698eb2502045234f98a2909a2affcd54376b20d6b9faab2d1",
+    "board_capability_sha256": "8a8fd6a2c788af5f003ffaededdd93938ddb669e3442a1e1efaab648ab3becb2",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+        "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
+      }
+    ]
+  }
+}
