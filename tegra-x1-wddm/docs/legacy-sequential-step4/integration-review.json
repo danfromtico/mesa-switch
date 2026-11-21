@@ -1,5 +1,5 @@
 {
-  "status": "Source and hardware review through the standard staging-surface trial",
+  "status": "Integration and device review after direct miniport status collection",
   "selected_source": "c05e254932dd975bdf69e7046949596dbeb84561",
   "selected_components": {
     "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
@@ -101,7 +101,15 @@
       "candidate_kmd": "09e40be1b2e634c2944b0d852f0fa48ada7ebe2aed56971f5ef76c451508f344",
       "evidence": "legacy-sequential-step4/standard-staging-trial-09e40be1.json",
       "qualification": "ARM64 models passed. The original native window obtained its 640x360 staging surface and Windows issued the blit. The first Present still returned occluded and the application exited 4.",
-      "remaining": "The original scene needs a successful queued and displayed copy, input, normal exit and a continuous desktop on three successive runs. Its historical reset cause remains open."
+      "remaining": "The corrected allocation is now exercised by Windows. The existing GDI-specific KMD implementation rejects the ordinary-context copy before a GPU submission. Correct this remaining path and qualify the original application. The historical reset remains separately unconfirmed.",
+      "direct_driver_evidence": "legacy-sequential-step4/staging-ddi-result-13286e3e.json"
+    },
+    {
+      "scope": "Miniport presentation-status diagnostics",
+      "source": "961609375c3a45fb830d84b2f93c474767d3ef7d",
+      "candidate_kmd": "13286e3eb6aeadfda1aac07b138ae21697ba07ecb2c6baf4a5b471f9c2d9e02b",
+      "evidence": "legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+      "qualification": "Direct drawing-thread entry and return were observed in the original window. The observation build preserves the original refusal and has no independent functional qualification."
     }
   ],
   "open_faults": [
@@ -141,6 +149,6 @@
       "closure": "Identify the workload and initiating cause, correct it, and verify three consecutive runs under the original conditions with adequate commit headroom, normal exit and a continuous desktop."
     }
   ],
-  "boot": 86638,
+  "boot": 86993,
   "open_faults_source": "open-faults.json"
 }

@@ -4,7 +4,7 @@
 
 ## 第四步 · 查清旧式窗口首次 Present 的重启
 
-**从原始最小场景开始。** Switch Lite GM20B 使用外接电源，原生 tgd3d 协商旧式 DDI `0x000b000f`，普通窗口、两个 BGRA UNORM 缓冲区。应用没有写入图像时，第一次 `Present(1, 0)` 即出现意外重启。原有三次独立开机的证据仍在。先读对应记录和该版本源码，找出从 Windows 提交到内核后最后完成的操作及首个失败点。已有持久记录到达用户态发出 `D3DKMT_PRESENT` 的边界，现有内核跟踪在此之前结束；公开 API 返回、触发故障的 miniport 调用和根因都还没有证据。另有一条 WDDM 2.0 六帧场景在第三次呈现时重启，分别登记。[原始实机记录](LOAD_STABILITY_FOLLOWUP_20261116.json) · [故障登记及原场景销案条件](open-faults.json)
+**从原始最小场景开始。** Switch Lite GM20B 使用外接电源，原生 tgd3d 协商旧式 DDI `0x000b000f`，普通窗口、两个 BGRA UNORM 缓冲区。应用没有写入图像时，第一次 `Present(1, 0)` 即出现意外重启。原空窗口程序 `fd64bd1b` 的三份历史记录均在首次调用时中断。带绘图的相关程序 `62100a30` 另有持久记录到达用户态发出 `D3DKMT_PRESENT` 的边界，其内核跟踪在此之前结束。历史复位前最后完成的 miniport 操作仍待查明。另有一条 WDDM 2.0 六帧场景在第三次呈现时重启，分别登记。[原始实机记录](LOAD_STABILITY_FOLLOWUP_20261116.json) · [故障登记及原场景销案条件](open-faults.json)
 
 同一个 JSON 里，先读 `native_sequential_windows_kmt_dispatch_20261120` 的 `native`、`versioned_callback` 和 `scope`，再对照 `native_first_present_miniport_receipts_20261120` 的正常窗口记录。两者分别给出故障前最后一个可证实的提交边界和能追到面板的成功路径。[原始记录及字段](LOAD_STABILITY_FOLLOWUP_20261116.json)
 
@@ -26,7 +26,9 @@
 
 留存的 `warp-control-5` 在原绘图线程上记录了标准暂存表面，随后完成 Blt。KMD 此前会拒绝 Windows 的标准暂存表面请求。第三个候选 `aa49f69c`（KMD `09e40be1`）实现了这项分配。一次性启动 `86457` 上，原生旧式窗口首次实际取得了 640×360、行距 2560 字节的目标表面。Windows 的 Blt 事件将源和目标对应到同一 GM20B 应用设备的两个独立分配，DMA 缓冲区也属于同一普通上下文。随后内核返回遮挡，未记录呈现调度包。原生程序退出码为 4，真实输入生效，桌面连续。翻转对照的 4,508 个像素、输入和正常退出均通过。[标准暂存表面实测、调用顺序及恢复](legacy-sequential-step4/standard-staging-trial-09e40be1.json)
 
-前三轮共十二次重启均有 Windows 计划重启请求。启动 `86638` 已恢复正式基线，核对了七项安装哈希、DWM 加载的四个模块、Code 0、外接电源和永久许可。原生旧式窗口连续验收为 0/3。三个历史重启现场的应用及 miniport 跟踪在公开调用之后均没有可读事件；当前暂存复制的具体 DDI 返回和历史复位来源仍待核实。[候选集成复查](legacy-sequential-step4/integration-review.json) · [开放故障](open-faults.json)
+第四轮在同一暂存表面实现上加入驱动返回状态记录。一次性启动 `86815`（KMD `13286e3e`）上，原程序的绘图线程进入 `DxgkDdiPresent`，请求一次 Blt，带一个裁剪矩形。驱动在普通渲染上下文处返回 `STATUS_NOT_SUPPORTED`（`0xc00000bb`）。随后的 KMT 返回 `0xc01e0006`，公开接口返回 `0x087a0001`。两份完整跟踪都没有这次呈现的 GPU 调度包。该检查解释了候选窗口返回遮挡的原因。普通上下文仍缺少能验证读写权限、维持资源生命周期并确认 GPU 实际完成的窗口复制实现。[驱动直接返回、组件与对照记录](legacy-sequential-step4/staging-ddi-result-13286e3e.json)
+
+四轮共十六次重启均有 Windows 计划重启请求。启动 `86993` 已恢复正式基线，核对了七项安装哈希、DWM 加载的四个模块、Code 0、外接电源和永久许可。原生旧式窗口连续验收为 0/3。历史启动 `82058`、`82221`、`82382` 的应用及 miniport 跟踪在首次公开调用之后均无可读事件。归档中仍缺与这些启动对应的崩溃转储、串口或早期复位记录。历史整机重启故障继续开放。[候选集成复查](legacy-sequential-step4/integration-review.json) · [开放故障](open-faults.json)
 
 ## 已选基线
 

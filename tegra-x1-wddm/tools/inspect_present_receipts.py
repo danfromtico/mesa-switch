@@ -4,6 +4,8 @@
 
 Use --etl and/or --live from the same capture. ETL decoding needs dissect.etl.
 Pass the application's journal QPC to measure the retained kernel event window.
+Use --driver-window with the recorded drawing PID, TID and public call/return
+QPCs to read miniport outcomes without running the application again.
 """
 import argparse
 import io
@@ -12,6 +14,8 @@ import struct
 import uuid
 from pathlib import Path
 from collections import defaultdict
+
+OPERATIONS = {1: "present", 2: "virtual_submission", 3: "adapter_query", 4: "non_gdi_blt_rejected"}
 
 def pairs(stream):
     grouped=defaultdict(list)
@@ -61,21 +65,26 @@ def join_geometry(live,etl):
     return result
 
 
-def read_live(path):
+def read_live(path, driver_events=None):
     events = []
     for line in path.read_text(errors="replace").splitlines():
         v = line.split()
         try:
             if len(v) == 15 and v[1] == "geometry":
                 events.append(("geometry", (int(v[0]), int(v[2]), int(v[3]), *(int(n) for n in v[4:]))))
-            elif len(v) == 14 and v[1] == "kmd" and v[4] == "1":
-                events.append(("edge", (int(v[0]), int(v[2]), int(v[3]), int(v[5]), int(v[6], 16), int(v[7], 16))))
+            elif len(v) == 14 and v[1] == "kmd":
+                operation = int(v[4])
+                row = (int(v[0]), int(v[2]), int(v[3]), int(v[5]), int(v[6], 16), int(v[7], 16))
+                if v[4] == "1":
+                    events.append(("edge", row))
+                if driver_events is not None and operation in OPERATIONS and row[3] in (1, 2):
+                    driver_events.append((*row, operation))
         except ValueError:
             continue
     return events
 
 
-def read_etl(path):
+def read_etl(path, driver_events=None):
     from dissect.etl import ETL
     from dissect.etl.c_etl import BufferFlag, c_etl
     from dissect.etl.etl import Buffer
@@ -112,6 +121,8 @@ def read_etl(path):
                     v = struct.unpack("<11I", event.payload)
                     if v[0] == v[1] == 1 and v[2] in (1, 2):
                         events.append(("edge", (*prefix, v[2], v[3], v[4])))
+                    if driver_events is not None and v[0] == 1 and v[1] in OPERATIONS and v[2] in (1, 2):
+                        driver_events.append((*prefix, v[2], v[3], v[4], v[1]))
                 elif item.Id == 6 and len(event.payload) == 48:
                     v = struct.unpack("<12I", event.payload)
                     if v[0] == 1:
@@ -130,11 +141,18 @@ def main():
     parser.add_argument("--etl", type=Path)
     parser.add_argument("--live", type=Path)
     parser.add_argument("--present-qpc", type=int)
+    parser.add_argument("--driver-window", type=int, nargs=4, metavar=("PID", "TID", "CALL_QPC", "RETURN_QPC"))
     args = parser.parse_args()
     if not args.live and not args.etl:
         parser.error("supply --live or --etl")
-    live = read_live(args.live) if args.live else []
-    etl, quality = read_etl(args.etl) if args.etl else ([], {})
+    live_driver = etl_driver = None
+    if args.driver_window:
+        pid, tid, start, end = args.driver_window
+        if min(pid, tid) <= 0 or start < 0 or end < start:
+            parser.error("expected a positive PID/TID and an ordered QPC interval")
+        live_driver, etl_driver = [], []
+    live = read_live(args.live, live_driver) if args.live else []
+    etl, quality = read_etl(args.etl, etl_driver) if args.etl else ([], {})
     pairs = join_geometry(live, etl)
     # Keep repeat records with the same payload and timestamp; both streams
     # can contain the same record, so take their maximum multiplicity.
@@ -149,7 +167,16 @@ def main():
     if args.present_qpc is not None and quality.get("last_retained_qpc") is not None and quality.get("frequency"):
         quality["last_etw_ms_relative_to_present_checkpoint"] = round(
             1000 * (quality["last_retained_qpc"] - args.present_qpc) / quality["frequency"], 3)
-    print(json.dumps({"trace": quality, "geometry": result}, indent=2))
+    report = {"trace": quality, "geometry": result}
+    if args.driver_window:
+        counts = Counter(live_driver) | Counter(etl_driver)
+        report["driver_window"] = {"pid": pid, "tid": tid, "call_qpc": start, "return_qpc": end, "receipts": [
+            {"qpc": qpc, "operation": OPERATIONS[op], "phase": "enter" if phase == 1 else "result",
+             "status": f"0x{status:08x}", "flags": f"0x{flags:08x}"}
+            for qpc, owner, thread, phase, status, flags, op in sorted(counts.elements(), key=lambda row: row[0])
+            if (owner, thread) == (pid, tid) and start <= qpc <= end
+        ]}
+    print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":
