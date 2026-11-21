@@ -568,9 +568,10 @@
         "path"
       ],
       "round_ids": [
-        "win-present-incall-20261121-01"
+        "win-present-incall-20261121-01",
+        "win-present-incall-20261121-02"
       ],
-      "latest_observation": "正式原空窗口首次公开调用历时 15.364 ms。绑定进程后的短刷新区间累计 76 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 []，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 []。"
+      "latest_observation": "正式原空窗口首次公开调用历时 15.363 ms。绑定进程后的短刷新区间累计 511 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 [166]，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 [42]。"
     },
     {
       "id": "WIN-PRESENT-KMT",
@@ -793,7 +794,7 @@
       "question": "受监控围栏的 GPU 信号、同值上下文等待与等待完成能否逐包关联？",
       "status": "观测缺口",
       "existing_observation": "历史序号 2 为值 1 的信号包。独立原生客户端同一围栏 CPU 映射 0→1，记录了 GPU 信号和 CPU 等待。",
-      "missing_observation": "原无写入窗口同绘图线程未取得同设备、对象和值的 GPU 等待请求及其退役；正常清屏的跨上下文配对属于另一进程。",
+      "missing_observation": "原空窗口该值 1 对象仍缺同线程 GPU wait 包，非零 hAsyncEvent 的 CPU 事件是否被该线程实际等待或唤醒也缺回执。三份原故障 ETL 未留存可配对的 1069/297，不能把正式基线对象关系移到历史启动。",
       "pass_condition": "解析安装版本事件模板，按上下文、对象、值和队列包身份匹配 signal 与 wait，证明依赖获满足后等待完成。",
       "evidence": [
         {
@@ -811,9 +812,10 @@
         "fence"
       ],
       "round_ids": [
-        "win-empty-fence-20261121-01"
+        "win-empty-fence-20261121-01",
+        "win-empty-fence-identity-20261121-01"
       ],
-      "latest_observation": "空窗口序号 2 的值 1 信号在首个 CALL 前退役；截至公开返回，绘图线程有 0 条 GPU 等待 API 和 0 个等待包。独立清屏同进程捕获 2 组同设备/对象/值的信号与真实等待退役。"
+      "latest_observation": "正式基线三份无写入窗口中，序号 2 的值 1 信号和源分配分页等待均属同一应用设备，但各自的同步对象指针不同。值 1 的对象从 0 开始，Windows 297 携带非零 hAsyncEvent，登记 CPU 事件通知。分页对象从 7000 开始，三份回执共 6 次在 UMD 驻留或映射回调与后续 S_OK 之间匹配到 hAsyncEvent=0 的实际 CPU 等待。"
     },
     {
       "id": "WIN-MONITORED-CPU",
@@ -1587,6 +1589,54 @@
         "first_anomaly_or_missing": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。"
       },
       "finished_utc": "2026-11-21T14:18:22.773704+00:00"
+    },
+    {
+      "round_id": "win-empty-fence-identity-20261121-01",
+      "contract_id": "WIN-FENCE-WAIT",
+      "windows_question": "WIN-FENCE-WAIT",
+      "method": "复核已收回的本机 ETL 并核对已安装的 Windows 事件模板",
+      "plan": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.plan.json",
+      "plan_sha256": "ae8d6b90da92bdb0ddee95242f69dd336c2c16c0e87f5b5e85a5d8c5f7b0e543",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T14:21:16.324972+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
+      "result_sha256": "65e88f1d74336120718852de8347b208f3b9c935cb083550544e4d6d3ac5b417",
+      "status": "观测缺口",
+      "finding": "正式基线三份无写入窗口中，序号 2 的值 1 信号和源分配分页等待均属同一应用设备，但各自的同步对象指针不同。值 1 的对象从 0 开始，Windows 297 携带非零 hAsyncEvent，登记 CPU 事件通知。分页对象从 7000 开始，三份回执共 6 次在 UMD 驻留或映射回调与后续 S_OK 之间匹配到 hAsyncEvent=0 的实际 CPU 等待。",
+      "missing_observation": "原空窗口该值 1 对象仍缺同线程 GPU wait 包，非零 hAsyncEvent 的 CPU 事件是否被该线程实际等待或唤醒也缺回执。三份原故障 ETL 未留存可配对的 1069/297，不能把正式基线对象关系移到历史启动。",
+      "boundaries": {
+        "last_entry": "同一设备的两个不同同步对象分别见到异步 CPU 通知请求和同步 CPU 分页等待。",
+        "last_return": "值 1 信号包以类型 5 退役，源分配的对应 UMD 分页检查记录 S_OK。",
+        "first_anomaly_or_missing": "原空窗口该值 1 对象仍缺同线程 GPU wait 包，非零 hAsyncEvent 的 CPU 事件是否被该线程实际等待或唤醒也缺回执。三份原故障 ETL 未留存可配对的 1069/297，不能把正式基线对象关系移到历史启动。"
+      },
+      "finished_utc": "2026-11-21T14:22:42.947155+00:00"
+    },
+    {
+      "round_id": "win-present-incall-20261121-02",
+      "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+      "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+      "method": "正式基线首次呈现调用内的实时 Windows 见证",
+      "plan": "windows-native-graphics/rounds/win-present-incall-20261121-02.plan.json",
+      "plan_sha256": "f92189c4b7da0bdb4d8eeee364f015ee40a97293d856bab200d697b3a7c0898b",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T14:23:06.255906+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+      "result_sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701",
+      "status": "观测缺口",
+      "finding": "正式原空窗口首次公开调用历时 15.363 ms。绑定进程后的短刷新区间累计 511 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 [166]，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 [42]。",
+      "missing_observation": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。",
+      "boundaries": {
+        "last_entry": "同一绘图线程首次 DXGI Present Start，独立文件及实时提供程序时间见 verify_each_event。",
+        "last_return": {
+          "public_hresult": "00000000",
+          "public_qpc": 146155271427,
+          "last_durable_ack_qpc": 146155513370
+        },
+        "first_anomaly_or_missing": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。"
+      },
+      "finished_utc": "2026-11-21T14:24:53.455093+00:00"
     }
   ],
   "progress": {
@@ -1599,8 +1649,8 @@
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 17,
-    "new_device_executions": 4
+    "registered_rounds": 19,
+    "new_device_executions": 5
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -1712,6 +1762,21 @@
         },
         "stage_removed": true,
         "receipt_sha256": "12040291ed0eaed96e3765857d5e73f3fc9951b82c833428023bcf4b3ec84c65"
+      },
+      "win-present-incall-20261121-02": {
+        "boot": 91476,
+        "dwm": 1400,
+        "code": 0,
+        "ac": "Online",
+        "power_mode": 1,
+        "windows_trace_query": {
+          "SwitchPresentLive-dcb20a32e3c2": 4201,
+          "Nvdec720Preview-7924": 4201,
+          "SwitchDisplay-dcb20a32e3c2": 4201
+        },
+        "stage_removed": true,
+        "receipt_sha256": "bcadcc3443096a2e1441bcce3bd0f6d933799e797f743013785c2a9e9a219c7f",
+        "local_staging_cleanup_sha256": "77bf13ce79d9450fa556fbe55b6aa1f88cf48777b46ad6591979b5fe03158280"
       }
     }
   },
@@ -2107,6 +2172,57 @@
           "When timer resolution is low (e.g., 1 ms), up to ~500 flushes/sec during the 2 s window increases ETW buffer seal frequency for non-empty buffers (including system-wide DXGI 42/43 and DxgKrnl 166/184 traffic); overflow remains bounded and fail-closed via RealTimeBuffersLost.",
           "Pre-bind gap remains 10 ms polling before client-pid binds, and any observed negative result (no event consumed/ACKed before public Present return) applies only to the measured run/cadence and does not generalize across all boots or timer resolutions."
         ]
+      },
+      "tested_at_commit": "6db533226c92f8edcdcf499eff15ff9231a5e152"
+    },
+    {
+      "round": "win-present-incall-20261121-02",
+      "result": {
+        "path": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+        "sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701"
+      },
+      "mode": "--precise-early-flush",
+      "nominal_interval_ms": 2,
+      "observed_mean_spacing_ms": 2.651,
+      "call_ms": 15.363,
+      "windows_consumer_before_public_return": {
+        "DXGI": [
+          42
+        ],
+        "DxgKrnl": [
+          166
+        ]
+      },
+      "host_confirmed_before_public_return": {
+        "DXGI": [
+          42
+        ],
+        "DxgKrnl": []
+      },
+      "source_files": [
+        {
+          "repo_path": "tegra-x1-wddm/tools/live_present_receipt.c",
+          "sha256": "6a6a38212f85a33853a1e25021f99fcc7b9a109edaa6603c817c1458acfa4fbd"
+        },
+        {
+          "repo_path": "tegra-x1-wddm/tools/live_present_receiver.py",
+          "sha256": "b19472bf5157495b25cbcd7b04ea06012db15456c1b004aa6f044e6297ee3fa8"
+        }
+      ],
+      "signed_observer_sha256": "70c5a017a682864375665c14676f8684824d0a3bdf639182cde585f57bd16cba",
+      "code_review": {
+        "model": "gemini-4-neon-high",
+        "source_sha256": "6a6a38212f85a33853a1e25021f99fcc7b9a109edaa6603c817c1458acfa4fbd",
+        "raw_response_sha256": "e53f383bef398baa1878947145d9551e9065db57c247b842d99e1de6f62eec29",
+        "delta_sha256": "d72657d1de308a93a9ffa1c423bfe0552a57151a6888acbf4e7b39b3e0480084",
+        "blocking": [],
+        "limits": [
+          "CREATE_WAITABLE_TIMER_HIGH_RESOLUTION requires Windows 10 1803+ (satisfied by WDDM 2.6 / 1903+, fails closed with exit 3 on older OS builds).",
+          "early_deadline still uses GetTickCount64() (~15.6 ms system tick granularity), so the nominal 2000 ms high-resolution window boundary is quantized by up to ~1 tick.",
+          "A >=250 ms scheduler stall or preemption while waiting on pulse triggers WAIT_TIMEOUT and aborts fail-closed with ERROR_TIMEOUT.",
+          "Achieving ~2 ms (~500 Hz) actual flush cadence increases ETW buffer seal rate whenever non-empty system-wide DXGI 42/43 or DxgKrnl 166/184 events are present; overflow remains bounded and fail-closed via RealTimeBuffersLost.",
+          "Pre-bind polling remains 10 ms (WaitForSingleObject), catastrophic 5 s drain-timeout ExitProcess(4) skips EARLY_TIMER stderr output, and single-run timing results do not generalize across all boots or system loads."
+        ]
       }
     }
   ],
@@ -2123,5 +2239,16 @@
     "miniport_result": "0xc00000bb",
     "kmt_result": "0xc01e0006",
     "scope": "一次公开调用中的唯一绘图线程 Blt。Windows 记录提供 HWND、上下文和分配，miniport 事件 5 提供操作、状态、旗标和矩形数。"
+  },
+  "empty_window_fence_identity": {
+    "result": {
+      "path": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
+      "sha256": "65e88f1d74336120718852de8347b208f3b9c935cb083550544e4d6d3ac5b417"
+    },
+    "observed_windows_runs": 3,
+    "signal_value": 1,
+    "asynchronous_cpu_registrations": 3,
+    "synchronous_source_paging_waits": 6,
+    "original_reboots_matching_cpu_waits": 0
   }
 }

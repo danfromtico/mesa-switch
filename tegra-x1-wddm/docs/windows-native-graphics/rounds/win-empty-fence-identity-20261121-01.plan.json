@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-fence-identity-20261121-01",
+  "contract_id": "WIN-FENCE-WAIT",
+  "windows_question": "WIN-FENCE-WAIT",
+  "owner": "提交方、Windows VidSch 和 GM20B 上下文",
+  "question": "受监控围栏的 GPU 信号、同值上下文等待与等待完成能否逐包关联？",
+  "method": "复核已收回的本机 ETL 并核对已安装的 Windows 事件模板",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "解析安装版本事件模板，按上下文、对象、值和队列包身份匹配 signal 与 wait，证明依赖获满足后等待完成。",
+  "observations": [
+    "在正式空窗口的同轮原始日志中，把值 1 的信号队列包与 Windows ReportSyncObject 的本地 KMT 句柄、设备身份及信号调用绑定。",
+    "检查是否另有可定位的同设备分页队列和 CPU 分页等待对象、值与返回。只有同一对象并存在真实 GPU wait/退役才裁决 GPU 等待完成。",
+    "复用原三次信号与现有独立分页回执，分别说明哪些对象在原故障启动可绑定。"
+  ],
+  "inputs": {
+    "display_etls": {
+      "win-empty-present-20261121-01": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+      "win-present-live-20261121-02": "14e6750d7823aaeaebda2eafca17da5dbb4f7de7b12cc499459dce10e006c259",
+      "win-present-incall-20261121-01": "c5e687c2200f6624b125b94608e2b4a07e06431a5a76c05800c788125a68b567"
+    },
+    "original_case": {
+      "path": "legacy-sequential-step4/historical-first-present-fence.json",
+      "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+    },
+    "prior_fence": {
+      "path": "windows-native-graphics/rounds/win-empty-fence-20261121-01.result.json",
+      "sha256": "0e9bfd69ff8f0616124ee0895033f703c2175bfee581294a57b9e19815d170a3"
+    },
+    "prior_source": {
+      "path": "windows-native-graphics/rounds/win-empty-source-20261121-01.result.json",
+      "sha256": "b9f233bd54dccd95c93ec55d7e4303f25f28e2c3c33aad3137d08f6afc13d43a"
+    }
+  }
+}

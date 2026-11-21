@@ -216,7 +216,8 @@ int wmain(int argc, wchar_t **argv)
         wcslen(argv[1]+length) != 12 || wcsspn(argv[1]+length, L"0123456789abcdef") != 12)
         return 2;
     BOOL early_flush = argc == 4;
-    if (early_flush && wcscmp(argv[3], L"--early-flush") != 0) return 2;
+    BOOL precise = early_flush && wcscmp(argv[3], L"--precise-early-flush") == 0;
+    if (early_flush && !precise && wcscmp(argv[3], L"--early-flush") != 0) return 2;
     wchar_t directory[MAX_PATH], pid_path[MAX_PATH], image[MAX_PATH];
     DWORD count = GetFullPathNameW(argv[2], MAX_PATH, directory, NULL);
     if (!count || count >= MAX_PATH) return 2;
@@ -232,6 +233,16 @@ int wmain(int argc, wchar_t **argv)
     LARGE_INTEGER freq;
     if (!r->stopping) return 3;
     if (!QueryPerformanceFrequency(&freq)) { CloseHandle(r->stopping); return 3; }
+    HANDLE pulse = NULL;
+    if (precise) {
+        pulse = CreateWaitableTimerExW(NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+                                       SYNCHRONIZE | TIMER_MODIFY_STATE);
+        if (!pulse) {
+            fprintf(stderr, "CreateWaitableTimerEx status=%lu\n", GetLastError());
+            CloseHandle(r->stopping);
+            return 3;
+        }
+    }
     SessionProperties p;
     properties(&p);
     p.properties.BufferSize = 32;
@@ -243,6 +254,7 @@ int wmain(int argc, wchar_t **argv)
     ULONG status = StartTraceW(&session, argv[1], &p.properties);
     if (status) {
         fprintf(stderr, "StartTrace status=%lu\n", status);
+        if (pulse) CloseHandle(pulse);
         CloseHandle(r->stopping);
         return 3;
     }
@@ -294,7 +306,20 @@ int wmain(int argc, wchar_t **argv)
                 }
             }
             DWORD interval = in_early_window ? 2 : (process ? 40 : 10);
-            DWORD wait = WaitForSingleObject(r->stopping, interval);
+            DWORD wait;
+            if (pulse && in_early_window) {
+                LARGE_INTEGER due;
+                due.QuadPart = -(LONGLONG)interval * 10000;
+                if (!SetWaitableTimerEx(pulse, &due, 0, NULL, NULL, NULL, 0)) {
+                    status = GetLastError();
+                    break;
+                }
+                HANDLE wake[2] = {r->stopping, pulse};
+                wait = WaitForMultipleObjects(2, wake, FALSE, 250);
+                if (wait == WAIT_TIMEOUT) { status = ERROR_TIMEOUT; break; }
+            } else {
+                wait = WaitForSingleObject(r->stopping, interval);
+            }
             if (wait == WAIT_FAILED) { status = GetLastError(); break; }
         }
     }
@@ -325,6 +350,10 @@ int wmain(int argc, wchar_t **argv)
     if (early_flush)
         fprintf(stderr, "EARLY_FLUSH 2 2000 %lu %lld %lld\n",
                 early_count, (long long)first_early_qpc, (long long)last_early_qpc);
+    if (pulse) {
+        fprintf(stderr, "EARLY_TIMER high_resolution\n");
+        CloseHandle(pulse);
+    }
     if (acks) CloseHandle(acks);
     if (reader) CloseHandle(reader);
     if (process) CloseHandle(process);

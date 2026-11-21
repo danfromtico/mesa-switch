@@ -23,6 +23,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-historical-call-marker-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-first-present-archives-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result.",
@@ -1752,6 +1754,54 @@
           "first_anomaly_or_missing": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。"
         },
         "finished_utc": "2026-11-21T14:18:22.773704+00:00"
+      },
+      {
+        "round_id": "win-empty-fence-identity-20261121-01",
+        "contract_id": "WIN-FENCE-WAIT",
+        "windows_question": "WIN-FENCE-WAIT",
+        "method": "复核已收回的本机 ETL 并核对已安装的 Windows 事件模板",
+        "plan": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.plan.json",
+        "plan_sha256": "ae8d6b90da92bdb0ddee95242f69dd336c2c16c0e87f5b5e85a5d8c5f7b0e543",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:21:16.324972+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
+        "result_sha256": "65e88f1d74336120718852de8347b208f3b9c935cb083550544e4d6d3ac5b417",
+        "status": "观测缺口",
+        "finding": "正式基线三份无写入窗口中，序号 2 的值 1 信号和源分配分页等待均属同一应用设备，但各自的同步对象指针不同。值 1 的对象从 0 开始，Windows 297 携带非零 hAsyncEvent，登记 CPU 事件通知。分页对象从 7000 开始，三份回执共 6 次在 UMD 驻留或映射回调与后续 S_OK 之间匹配到 hAsyncEvent=0 的实际 CPU 等待。",
+        "missing_observation": "原空窗口该值 1 对象仍缺同线程 GPU wait 包，非零 hAsyncEvent 的 CPU 事件是否被该线程实际等待或唤醒也缺回执。三份原故障 ETL 未留存可配对的 1069/297，不能把正式基线对象关系移到历史启动。",
+        "boundaries": {
+          "last_entry": "同一设备的两个不同同步对象分别见到异步 CPU 通知请求和同步 CPU 分页等待。",
+          "last_return": "值 1 信号包以类型 5 退役，源分配的对应 UMD 分页检查记录 S_OK。",
+          "first_anomaly_or_missing": "原空窗口该值 1 对象仍缺同线程 GPU wait 包，非零 hAsyncEvent 的 CPU 事件是否被该线程实际等待或唤醒也缺回执。三份原故障 ETL 未留存可配对的 1069/297，不能把正式基线对象关系移到历史启动。"
+        },
+        "finished_utc": "2026-11-21T14:22:42.947155+00:00"
+      },
+      {
+        "round_id": "win-present-incall-20261121-02",
+        "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+        "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+        "method": "正式基线首次呈现调用内的实时 Windows 见证",
+        "plan": "windows-native-graphics/rounds/win-present-incall-20261121-02.plan.json",
+        "plan_sha256": "f92189c4b7da0bdb4d8eeee364f015ee40a97293d856bab200d697b3a7c0898b",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:23:06.255906+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+        "result_sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701",
+        "status": "观测缺口",
+        "finding": "正式原空窗口首次公开调用历时 15.363 ms。绑定进程后的短刷新区间累计 511 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 [166]，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 [42]。",
+        "missing_observation": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。",
+        "boundaries": {
+          "last_entry": "同一绘图线程首次 DXGI Present Start，独立文件及实时提供程序时间见 verify_each_event。",
+          "last_return": {
+            "public_hresult": "00000000",
+            "public_qpc": 146155271427,
+            "last_durable_ack_qpc": 146155513370
+          },
+          "first_anomaly_or_missing": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。"
+        },
+        "finished_utc": "2026-11-21T14:24:53.455093+00:00"
       }
     ]
   }

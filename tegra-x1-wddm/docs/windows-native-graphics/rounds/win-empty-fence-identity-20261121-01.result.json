@@ -1,0 +1,795 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-fence-identity-20261121-01",
+  "contract_id": "WIN-FENCE-WAIT",
+  "windows_question": "WIN-FENCE-WAIT",
+  "plan_sha256": "ae8d6b90da92bdb0ddee95242f69dd336c2c16c0e87f5b5e85a5d8c5f7b0e543",
+  "status": "观测缺口",
+  "finding": "正式基线三份无写入窗口中，序号 2 的值 1 信号和源分配分页等待均属同一应用设备，但各自的同步对象指针不同。值 1 的对象从 0 开始，Windows 297 携带非零 hAsyncEvent，登记 CPU 事件通知。分页对象从 7000 开始，三份回执共 6 次在 UMD 驻留或映射回调与后续 S_OK 之间匹配到 hAsyncEvent=0 的实际 CPU 等待。",
+  "missing_observation": "原空窗口该值 1 对象仍缺同线程 GPU wait 包，非零 hAsyncEvent 的 CPU 事件是否被该线程实际等待或唤醒也缺回执。三份原故障 ETL 未留存可配对的 1069/297，不能把正式基线对象关系移到历史启动。",
+  "device_executions": 0,
+  "evidence": {
+    "actual_windows_cases": [
+      {
+        "case": "win-empty-present-20261121-01",
+        "boot": 91476,
+        "pid": 5992,
+        "tid": 5988,
+        "device": 18446611100200693776,
+        "context": 18446611100106939808,
+        "source_allocation": 1073743680,
+        "call_qpc": 94861147189,
+        "clock_hz": 19200000,
+        "archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+        "file_etl_sha256": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+        "umd_etl_sha256": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a",
+        "signal_object": 18446706169642841536,
+        "paging_object": 18446706169642794816,
+        "signal_kmt_handle": 1073743232,
+        "signal_context_record": {
+          "qpc": 94844462772,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 30,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446611100200693776,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446611100106939808,
+            "ContextHandle": 1073743040,
+            "ParentDxgContext": 0
+          }
+        },
+        "signal_creation": {
+          "qpc": 94844483447,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169642841536,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "signal_report": {
+          "qpc": 94844492366,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 1069,
+          "version": 1,
+          "fields": {
+            "pSyncObject": 18446706169642841536,
+            "KMTHandle": 1073743232,
+            "pDxgDevice": 18446611100200693776
+          }
+        },
+        "queue_start": {
+          "qpc": 94844513570,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100106939808,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169642841536
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169621553168
+          }
+        },
+        "signal_api": {
+          "qpc": 94844513741,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 294,
+          "version": 1,
+          "fields": {
+            "ContextCount": 1,
+            "hContext": [
+              18446611100106939808
+            ],
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169642841536
+            ],
+            "MonitoredFenceValue": [
+              1
+            ],
+            "InternalFlagsFlags": 5
+          }
+        },
+        "signal_retirement": {
+          "qpc": 94844561325,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100106939808,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169621553168
+          }
+        },
+        "cpu_notification_request": {
+          "qpc": 94844516499,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 297,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446611100200693776,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169642841536
+            ],
+            "MonitoredFenceValue": [
+              1
+            ],
+            "hAsyncEvent": 696,
+            "Flags": 0
+          }
+        },
+        "notification_request_relative_to_signal_stop_ms": -2.335,
+        "paging_creation": {
+          "qpc": 94844114730,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169642794816,
+            "Reason": 0,
+            "Flags": 144,
+            "SharedHandle": 0,
+            "InitialValue": 7000
+          }
+        },
+        "source_paging_waits": [
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743680,
+            "callback": {
+              "qpc": 94846220800,
+              "stage": 2,
+              "allocation": 1073743680,
+              "hresult": "0x8000000a",
+              "value": 7001
+            },
+            "helper_result": {
+              "qpc": 94846227519,
+              "stage": 3,
+              "allocation": 1073743680,
+              "hresult": "0x00000000",
+              "value": 7001
+            },
+            "windows_wait": {
+              "qpc": 94846221309,
+              "pid": 5992,
+              "tid": 5988,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200693776,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169642794816
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            }
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback": {
+              "qpc": 94846230514,
+              "stage": 4,
+              "allocation": 1073743680,
+              "hresult": "0x8000000a",
+              "value": 921600
+            },
+            "helper_result": {
+              "qpc": 94846258276,
+              "stage": 3,
+              "allocation": 1073743680,
+              "hresult": "0x00000000",
+              "value": 7002
+            },
+            "windows_wait": {
+              "qpc": 94846230840,
+              "pid": 5992,
+              "tid": 5988,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200693776,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169642794816
+                ],
+                "MonitoredFenceValue": [
+                  7002
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            }
+          }
+        ],
+        "gpu_waits_on_sequence2_value": 0
+      },
+      {
+        "case": "win-present-live-20261121-02",
+        "boot": 91476,
+        "pid": 5540,
+        "tid": 7812,
+        "device": 18446611100200628240,
+        "context": 18446611100137971104,
+        "source_allocation": 1073743680,
+        "call_qpc": 131646464982,
+        "clock_hz": 19200000,
+        "archive_sha256": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308",
+        "file_etl_sha256": "14e6750d7823aaeaebda2eafca17da5dbb4f7de7b12cc499459dce10e006c259",
+        "umd_etl_sha256": "f66e4f5690cd6bfc883fc1c2ca880d5a23fa19ba923d61b1bd09df9c3a3f5882",
+        "signal_object": 18446706169620434032,
+        "paging_object": 18446706169620432112,
+        "signal_kmt_handle": 1073743232,
+        "signal_context_record": {
+          "qpc": 131629515943,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 30,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446611100200628240,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446611100137971104,
+            "ContextHandle": 1073743040,
+            "ParentDxgContext": 0
+          }
+        },
+        "signal_creation": {
+          "qpc": 131629541790,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169620434032,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "signal_report": {
+          "qpc": 131629548343,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 1069,
+          "version": 1,
+          "fields": {
+            "pSyncObject": 18446706169620434032,
+            "KMTHandle": 1073743232,
+            "pDxgDevice": 18446611100200628240
+          }
+        },
+        "queue_start": {
+          "qpc": 131629577336,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100137971104,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169620434032
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169645563984
+          }
+        },
+        "signal_api": {
+          "qpc": 131629577576,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 294,
+          "version": 1,
+          "fields": {
+            "ContextCount": 1,
+            "hContext": [
+              18446611100137971104
+            ],
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169620434032
+            ],
+            "MonitoredFenceValue": [
+              1
+            ],
+            "InternalFlagsFlags": 5
+          }
+        },
+        "signal_retirement": {
+          "qpc": 131629626625,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100137971104,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169645563984
+          }
+        },
+        "cpu_notification_request": {
+          "qpc": 131629583152,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 297,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446611100200628240,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169620434032
+            ],
+            "MonitoredFenceValue": [
+              1
+            ],
+            "hAsyncEvent": 676,
+            "Flags": 0
+          }
+        },
+        "notification_request_relative_to_signal_stop_ms": -2.264,
+        "paging_creation": {
+          "qpc": 131629064802,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169620432112,
+            "Reason": 0,
+            "Flags": 144,
+            "SharedHandle": 0,
+            "InitialValue": 7000
+          }
+        },
+        "source_paging_waits": [
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743680,
+            "callback": {
+              "qpc": 131631370743,
+              "stage": 2,
+              "allocation": 1073743680,
+              "hresult": "0x8000000a",
+              "value": 7001
+            },
+            "helper_result": {
+              "qpc": 131631395280,
+              "stage": 3,
+              "allocation": 1073743680,
+              "hresult": "0x00000000",
+              "value": 7001
+            },
+            "windows_wait": {
+              "qpc": 131631371196,
+              "pid": 5540,
+              "tid": 7812,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200628240,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169620432112
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            }
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback": {
+              "qpc": 131631398430,
+              "stage": 4,
+              "allocation": 1073743680,
+              "hresult": "0x8000000a",
+              "value": 921600
+            },
+            "helper_result": {
+              "qpc": 131631427691,
+              "stage": 3,
+              "allocation": 1073743680,
+              "hresult": "0x00000000",
+              "value": 7002
+            },
+            "windows_wait": {
+              "qpc": 131631398793,
+              "pid": 5540,
+              "tid": 7812,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200628240,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169620432112
+                ],
+                "MonitoredFenceValue": [
+                  7002
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            }
+          }
+        ],
+        "gpu_waits_on_sequence2_value": 0
+      },
+      {
+        "case": "win-present-incall-20261121-01",
+        "boot": 91476,
+        "pid": 7576,
+        "tid": 2116,
+        "device": 18446611100107790240,
+        "context": 18446611100108721568,
+        "source_allocation": 1073743680,
+        "call_qpc": 138481770248,
+        "clock_hz": 19200000,
+        "archive_sha256": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4",
+        "file_etl_sha256": "c5e687c2200f6624b125b94608e2b4a07e06431a5a76c05800c788125a68b567",
+        "umd_etl_sha256": "d7d500a2fcfb196e448b3fd0da4d2cbf532a72a2437907a969d2c565e89efcd0",
+        "signal_object": 18446706169652652192,
+        "paging_object": 18446706169647875488,
+        "signal_kmt_handle": 1073743232,
+        "signal_context_record": {
+          "qpc": 138464143959,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 30,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446611100107790240,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446611100108721568,
+            "ContextHandle": 1073743040,
+            "ParentDxgContext": 0
+          }
+        },
+        "signal_creation": {
+          "qpc": 138464170099,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169652652192,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "signal_report": {
+          "qpc": 138464178465,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 1069,
+          "version": 1,
+          "fields": {
+            "pSyncObject": 18446706169652652192,
+            "KMTHandle": 1073743232,
+            "pDxgDevice": 18446611100107790240
+          }
+        },
+        "queue_start": {
+          "qpc": 138464206818,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100108721568,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169652652192
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169616541072
+          }
+        },
+        "signal_api": {
+          "qpc": 138464207067,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 294,
+          "version": 1,
+          "fields": {
+            "ContextCount": 1,
+            "hContext": [
+              18446611100108721568
+            ],
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169652652192
+            ],
+            "MonitoredFenceValue": [
+              1
+            ],
+            "InternalFlagsFlags": 5
+          }
+        },
+        "signal_retirement": {
+          "qpc": 138464263911,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100108721568,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169616541072
+          }
+        },
+        "cpu_notification_request": {
+          "qpc": 138464213689,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 297,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446611100107790240,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169652652192
+            ],
+            "MonitoredFenceValue": [
+              1
+            ],
+            "hAsyncEvent": 696,
+            "Flags": 0
+          }
+        },
+        "notification_request_relative_to_signal_stop_ms": -2.616,
+        "paging_creation": {
+          "qpc": 138463596923,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169647875488,
+            "Reason": 0,
+            "Flags": 144,
+            "SharedHandle": 0,
+            "InitialValue": 7000
+          }
+        },
+        "source_paging_waits": [
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743680,
+            "callback": {
+              "qpc": 138466773956,
+              "stage": 2,
+              "allocation": 1073743680,
+              "hresult": "0x8000000a",
+              "value": 7001
+            },
+            "helper_result": {
+              "qpc": 138466803581,
+              "stage": 3,
+              "allocation": 1073743680,
+              "hresult": "0x00000000",
+              "value": 7001
+            },
+            "windows_wait": {
+              "qpc": 138466774406,
+              "pid": 7576,
+              "tid": 2116,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100107790240,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169647875488
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            }
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback": {
+              "qpc": 138466807270,
+              "stage": 4,
+              "allocation": 1073743680,
+              "hresult": "0x8000000a",
+              "value": 921600
+            },
+            "helper_result": {
+              "qpc": 138466838483,
+              "stage": 3,
+              "allocation": 1073743680,
+              "hresult": "0x00000000",
+              "value": 7002
+            },
+            "windows_wait": {
+              "qpc": 138466807608,
+              "pid": 7576,
+              "tid": 2116,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100107790240,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169647875488
+                ],
+                "MonitoredFenceValue": [
+                  7002
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            }
+          }
+        ],
+        "gpu_waits_on_sequence2_value": 0
+      }
+    ],
+    "original_failure_coverage": [
+      {
+        "boot": 82058,
+        "pid": 1812,
+        "tid": 6340,
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "seq2_object": 18446639661614582272,
+        "retired_before_present_ms": 360.492,
+        "report_1069_matches": 0,
+        "cpu_wait_297_on_signal_object": 0,
+        "cpu_wait_297_on_paging_value_same_actor": 0,
+        "scope": "仅统计原次保留的 ETL 内容。三次历史启动均缺本次 CPU 等待的对象级回执。"
+      },
+      {
+        "boot": 82221,
+        "pid": 4672,
+        "tid": 4712,
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "seq2_object": 18446716605819176784,
+        "retired_before_present_ms": 1101.095,
+        "report_1069_matches": 0,
+        "cpu_wait_297_on_signal_object": 0,
+        "cpu_wait_297_on_paging_value_same_actor": 0,
+        "scope": "仅统计原次保留的 ETL 内容。三次历史启动均缺本次 CPU 等待的对象级回执。"
+      },
+      {
+        "boot": 82382,
+        "pid": 5828,
+        "tid": 7656,
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "seq2_object": 18446682569747834240,
+        "retired_before_present_ms": 400.943,
+        "report_1069_matches": 0,
+        "cpu_wait_297_on_signal_object": 0,
+        "cpu_wait_297_on_paging_value_same_actor": 0,
+        "scope": "仅统计原次保留的 ETL 内容。三次历史启动均缺本次 CPU 等待的对象级回执。"
+      }
+    ],
+    "installed_template_sha256": "6e341d3a94fc1de3175e392d4144de599f60af689afd3c1e1ae8eb7a3b1b8535",
+    "onboard_metadata_utc": "2026-11-21T14:21:19.1856983Z",
+    "source_sha256": "12fd5325655011821864d8bbcf08d6c21aad0698be016a5bfa29dfdc2f0a7b00",
+    "blocking_cpu_paging_calls": 6,
+    "microsoft_cpu_wait": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_waitforsynchronizationobjectfromcpu",
+    "boundaries": {
+      "last_entry": "同一设备的两个不同同步对象分别见到异步 CPU 通知请求和同步 CPU 分页等待。",
+      "last_return": "值 1 信号包以类型 5 退役，源分配的对应 UMD 分页检查记录 S_OK。",
+      "first_anomaly_or_missing": "原空窗口该值 1 对象仍缺同线程 GPU wait 包，非零 hAsyncEvent 的 CPU 事件是否被该线程实际等待或唤醒也缺回执。三份原故障 ETL 未留存可配对的 1069/297，不能把正式基线对象关系移到历史启动。"
+    }
+  }
+}
