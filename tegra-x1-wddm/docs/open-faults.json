@@ -2915,6 +2915,51 @@
           "first_anomaly_or_missing": "较晚上下文缺同启动的 hContext→适配器 LUID、节点映射。两个 ETL 均未封口。152586 和 247 分别缺同提交号的 KMD 准入、实际 GPU 完成及故障首条记录。"
         },
         "finished_utc": "2026-11-21T16:28:20.931559+00:00"
+      },
+      {
+        "round_id": "win-wifi-recovery-20261121-01",
+        "contract_id": "WIN-WIFI-RECOVERY",
+        "windows_question": "WIN-WIFI-RECOVERY",
+        "method": "记录真实 SSH 失联边界，恢复后只读核对本机启动、桌面、功耗档位和网络日志",
+        "plan": "windows-native-graphics/rounds/win-wifi-recovery-20261121-01.plan.json",
+        "plan_sha256": "bb049d38770c599dd018f48cc09d71243225595faaaa8922f306b030d8e6f252",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T16:29:08.947774+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-wifi-recovery-20261121-01.result.json",
+        "result_sha256": "bc056045e70eefb868878c981b855e2312f2d8dc625ea4969447d82ecec78d4b",
+        "status": "实机通过",
+        "finding": "SSH 断线跨 Windows 启动 91832 到 91918。RuntimeBroker 提交重启请求后，6006、109、13 均已留存，下一启动报告 LastShutdownGood=true。BCM4356 在新启动重新关联，SSH 在第一次三分钟重试恢复。",
+        "missing_observation": "本轮已区分正常关机重启与异常重启。1074 提供发起进程，具体交互来源未核对。恢复时功耗档位为 6，开展下一项图形取证前需独立核对 Handheld1。",
+        "boundaries": {
+          "last_entry": {
+            "record": 91902,
+            "utc": "2026-11-21T16:26:43.9265100Z",
+            "id": 1074,
+            "provider": "User32",
+            "fields": {
+              "param1": "C:\\Windows\\System32\\RuntimeBroker.exe (DESKTOP-5RCUK3G)",
+              "param3": "其他(计划外)",
+              "param4": "0x0",
+              "param5": "重启"
+            }
+          },
+          "last_return": {
+            "record": 91920,
+            "utc": "2026-11-21T16:27:02.0026185Z",
+            "id": 20,
+            "provider": "Microsoft-Windows-Kernel-Boot",
+            "fields": {
+              "LastShutdownGood": "true",
+              "LastBootGood": "true"
+            }
+          },
+          "first_anomaly_or_missing": {
+            "connection_failure_utc": "2026-11-21T16:27:21.340114+00:00",
+            "scope": "本轮已区分正常关机重启与异常重启。1074 提供发起进程，具体交互来源未核对。恢复时功耗档位为 6，开展下一项图形取证前需独立核对 Handheld1。"
+          }
+        },
+        "finished_utc": "2026-11-21T16:31:00.107729+00:00"
       }
     ]
   }
