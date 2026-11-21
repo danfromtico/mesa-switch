@@ -1,0 +1,50 @@
+# Switch 实机与 WSL dxgkrnl 契约
+
+Gemini 4 Neon XHigh 审阅了 15 个文件的 452 条注释。主会话核对了源码位置、适用场景和实机回执。当前结论为 **2 条已满足、0 条已违反、450 条未知**。每条结论都有自己的适用范围。[完整契约表](contracts.json) · [覆盖与校验记录](audit.json) · [微软固定版本的源码目录](https://github.com/microsoft/WSL2-Linux-Kernel/tree/a989171929bed4ea681be8d77333845ce1c1732a/drivers/hv/dxgkrnl)
+
+微软源码版本为 `a989171929bed4ea681be8d77333845ce1c1732a`。每个 C 注释以编译器识别的起始行和字节列编号，Kconfig 和 Makefile 按行首注释计数。许可证、标题和分隔行也保留编号，实机状态记为未知。WSL 来宾内部的链表、VMBus 消息和宿主回包需要对应平台上的观测。本版注释正文中 `TDR`、`reset`、`watchdog` 和 `timeout` 的独立词命中数依次为 0, 0, 0, 0。
+
+## 本轮实机结果
+
+- **已满足**。独立 x86 调用方与 Windows 内核在同一请求上都记录了 `STATUS_PENDING`（`0x103`），分页 fence 均为 7001。原游戏另有一份完整记录，其中 16 次驻留请求在内核返回该值。[本轮实机回执](rounds/pal4-residency-x86-20261121-01.result.json) · [仙剑四日志与源码核对](../PAL4_NATIVE_RESIDENCY_20261121.json)
+- **未知**。原游戏三轮均记录到第七个纹理进入构造，随后重启。分配事件的完整时间区间缺失，这次调用中新建分配的归属仍然未知。[三轮游戏回执](../PAL4_TEXTURE_CONSTRUCTOR_BOUNDARY_20261121.json)
+- **未知**。原游戏未命中预定检查点，所保留的 2 个上下文中有 2 个能关联到同进程的设备。[该轮上下文与检查点回执](rounds/pal4-preimage-context-20261121-01.result.json)
+- **已满足**。原游戏命中主纹理的 Vulkan 图像创建前检查点，所保留的 2 个上下文中有 2 个能关联到同进程的设备。[该轮上下文与检查点回执](rounds/pal4-preimage-context-20261121-02.result.json)
+
+## 按源码文件查阅
+
+契约表逐条给出微软源码链接、注释字节哈希、中文断言、判定和证据。下表链接指向相应文件的首条记录。
+
+| 源文件 | 注释 | 已满足 | 已违反 | 未知 |
+| --- | ---: | ---: | ---: | ---: |
+| [Kconfig](contracts.json#L387) | 3 | 0 | 0 | 3 |
+| [Makefile](contracts.json#L435) | 2 | 0 | 0 | 2 |
+| [dxgadapter.c](contracts.json#L467) | 11 | 0 | 0 | 11 |
+| [dxgkrnl.h](contracts.json#L643) | 99 | 1 | 0 | 98 |
+| [dxgmodule.c](contracts.json#L2285) | 40 | 0 | 0 | 40 |
+| [dxgprocess.c](contracts.json#L2925) | 6 | 0 | 0 | 6 |
+| [dxgsyncfile.c](contracts.json#L3021) | 7 | 0 | 0 | 7 |
+| [dxgsyncfile.h](contracts.json#L3139) | 3 | 0 | 0 | 3 |
+| [dxgvmbus.c](contracts.json#L3187) | 70 | 0 | 0 | 70 |
+| [dxgvmbus.h](contracts.json#L4309) | 62 | 0 | 0 | 62 |
+| [hmgr.c](contracts.json#L5301) | 9 | 0 | 0 | 9 |
+| [hmgr.h](contracts.json#L5445) | 4 | 0 | 0 | 4 |
+| [ioctl.c](contracts.json#L5509) | 127 | 1 | 0 | 126 |
+| [misc.c](contracts.json#L7558) | 2 | 0 | 0 | 2 |
+| [misc.h](contracts.json#L7590) | 7 | 0 | 0 | 7 |
+
+## 继续单项实机验收
+
+开始前在故障表的 `dxgkrnl_contracts.rounds` 中登记一个 `contract_id`，保存本轮 `.plan.json` 的 SHA-256。计划写明责任方、触发条件、唯一待裁决的问题与判定所需的回执。启动器读回登记和哈希后才运行。[故障表](../open-faults.json)
+
+结束后填写同一轮的 `.result.json`，把文件、SHA-256 和判定写回故障表。缺少目标事件、身份、时间配对或必要记录时填写未知。发生未解释重启时登记对应开放故障，保留中断前的事实。按不同进程、组件和启动分别说明证据能覆盖到哪一层。
+
+在仓库根目录执行以下命令可核对目录覆盖、来源、固定版本证据指针和每轮的单条登记。
+
+```sh
+python3 tegra-x1-wddm/tools/check_dxgkrnl_contracts.py
+```
+
+另加 `--source-directory /path/to/drivers/hv/dxgkrnl` 可逐字节核对上述微软固定版本中的所有注释。
+
+仓库的 Git 推送检查会读取故障表，并对契约表和关联实机记录执行同一校验。表内的未知项保留适用范围，候选晋升继续依据原有开放故障规则。

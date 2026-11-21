@@ -1,0 +1,353 @@
+{
+  "schema": 1,
+  "date": "2026-11-21",
+  "game": "仙剑四原 x86 窗口程序",
+  "user_direction": "按用户要求暂缓仙剑四。保留这次已签发用例的结果，完成原程序恢复与临时文件清理。",
+  "state": "deferred-by-user",
+  "cases": [
+    {
+      "phase": "before-bind",
+      "round_id": "pal4-texture7-memory-owner-20261121-01",
+      "result_file": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-memory-owner-20261121-01.result.json",
+      "result_sha256": "3ff01b85e2ac44556a53a14f867ffda39d3495d57bbab21abfd7775bb3b2857c",
+      "status": "未知",
+      "boot_before": 91401,
+      "boot_after": 91401,
+      "unexplained_restart": false,
+      "native_renderer": true,
+      "x86_icd_confirmed": true,
+      "last_marker": {
+        "qpc": 15183555091,
+        "tid": 1216,
+        "site": "Texture7.ready-before-bind",
+        "ordinal": 7,
+        "edge": "checkpoint",
+        "value": 0
+      },
+      "seventh_texture_markers": [
+        {
+          "qpc": 15182872661,
+          "tid": 1216,
+          "site": "Texture.w512.h512.levels0.usage00000400.format00000016.pool1.shared0",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15182926482,
+          "tid": 1216,
+          "site": "Texture7.expected-native-module",
+          "ordinal": 7,
+          "edge": "match",
+          "value": 1
+        },
+        {
+          "qpc": 15182990302,
+          "tid": 1216,
+          "site": "Texture7.construct",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15183029928,
+          "tid": 1216,
+          "site": "Texture7.common",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15183071363,
+          "tid": 1216,
+          "site": "Texture7.lookup",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15183110318,
+          "tid": 1216,
+          "site": "Texture7.lookup",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 15183147375,
+          "tid": 1216,
+          "site": "Texture7.primary",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15183187729,
+          "tid": 1216,
+          "site": "Texture7.dxvk-image",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15183229977,
+          "tid": 1216,
+          "site": "Texture7.vkCreateImage",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15183270680,
+          "tid": 1216,
+          "site": "Texture7.vkCreateImage",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 15183308128,
+          "tid": 1216,
+          "site": "Texture7.image-requirements",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15183348176,
+          "tid": 1216,
+          "site": "Texture7.image-requirements",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 15183391724,
+          "tid": 1216,
+          "site": "Texture7.requirements.size1400832.align8192.types00000001.dedicated0.preferred0",
+          "ordinal": 7,
+          "edge": "values",
+          "value": 0
+        },
+        {
+          "qpc": 15183430966,
+          "tid": 1216,
+          "site": "Texture7.allocator-lock",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 15183466572,
+          "tid": 1216,
+          "site": "Texture7.allocator-lock",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 15183511212,
+          "tid": 1216,
+          "site": "Texture7.memory-selection",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 1
+        },
+        {
+          "qpc": 15183555091,
+          "tid": 1216,
+          "site": "Texture7.ready-before-bind",
+          "ordinal": 7,
+          "edge": "checkpoint",
+          "value": 0
+        }
+      ],
+      "complete_interval": true,
+      "capture_complete": true,
+      "new_allocations_in_interval": 0,
+      "post_baseline_verified": true,
+      "restored_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+      "cleanup": {
+        "original": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "removed": true,
+        "files": 21
+      },
+      "diagnostic_cleanup_error": "使用“1”个参数调用“Delete”时发生异常:“对路径“C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\Pal4Memory-2ed83a72647499e0ad24aa31\\case\\restored-candidate.tmp”的访问被拒绝。”"
+    },
+    {
+      "phase": "after-bind",
+      "round_id": "pal4-texture7-bind-owner-20261121-01",
+      "result_file": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-bind-owner-20261121-01.result.json",
+      "result_sha256": "aabc25d311900c7928c8db0ef2b8d80fdde51d99d748742fb41399c88d276865",
+      "status": "未知",
+      "boot_before": 91401,
+      "boot_after": 91476,
+      "unexplained_restart": true,
+      "native_renderer": true,
+      "x86_icd_confirmed": true,
+      "last_marker": {
+        "qpc": 18285634190,
+        "tid": 4340,
+        "site": "Texture7.bind",
+        "ordinal": 7,
+        "edge": "enter",
+        "value": 0
+      },
+      "seventh_texture_markers": [
+        {
+          "qpc": 18284993198,
+          "tid": 4340,
+          "site": "Texture.w512.h512.levels0.usage00000400.format00000016.pool1.shared0",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285054710,
+          "tid": 4340,
+          "site": "Texture7.expected-native-module",
+          "ordinal": 7,
+          "edge": "match",
+          "value": 1
+        },
+        {
+          "qpc": 18285095375,
+          "tid": 4340,
+          "site": "Texture7.construct",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285132718,
+          "tid": 4340,
+          "site": "Texture7.common",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285170269,
+          "tid": 4340,
+          "site": "Texture7.lookup",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285208063,
+          "tid": 4340,
+          "site": "Texture7.lookup",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 18285246551,
+          "tid": 4340,
+          "site": "Texture7.primary",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285285478,
+          "tid": 4340,
+          "site": "Texture7.dxvk-image",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285325048,
+          "tid": 4340,
+          "site": "Texture7.vkCreateImage",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285363851,
+          "tid": 4340,
+          "site": "Texture7.vkCreateImage",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 18285402630,
+          "tid": 4340,
+          "site": "Texture7.image-requirements",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285437364,
+          "tid": 4340,
+          "site": "Texture7.image-requirements",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 18285478941,
+          "tid": 4340,
+          "site": "Texture7.requirements.size1400832.align8192.types00000001.dedicated0.preferred0",
+          "ordinal": 7,
+          "edge": "values",
+          "value": 0
+        },
+        {
+          "qpc": 18285517357,
+          "tid": 4340,
+          "site": "Texture7.allocator-lock",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        },
+        {
+          "qpc": 18285553027,
+          "tid": 4340,
+          "site": "Texture7.allocator-lock",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 0
+        },
+        {
+          "qpc": 18285588496,
+          "tid": 4340,
+          "site": "Texture7.memory-selection",
+          "ordinal": 7,
+          "edge": "leave",
+          "value": 1
+        },
+        {
+          "qpc": 18285634190,
+          "tid": 4340,
+          "site": "Texture7.bind",
+          "ordinal": 7,
+          "edge": "enter",
+          "value": 0
+        }
+      ],
+      "complete_interval": false,
+      "capture_complete": false,
+      "new_allocations_in_interval": null,
+      "post_baseline_verified": true,
+      "restored_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+      "cleanup": {
+        "original": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "removed": true,
+        "files": 18
+      },
+      "diagnostic_cleanup_error": null
+    }
+  ],
+  "observed_progress": "第七张纹理的图像创建与内存需求查询正常返回。内存需求为 1400832 字节、8192 字节对齐、类型位 0x1。DXVK 分配器取得锁并复用已有显存；在绑定前停止的用例保持同一启动与桌面。",
+  "last_recorded_boundary": "后续一次用例记录了 vkBindImageMemory 调用入口，随后重启，尚未记录该调用返回。一次观测和中断的 ETW 均不足以确认具体故障指令。",
+  "repeat_count_for_after_bind": 1,
+  "required_followup_when_resumed": "沿绑定函数的内存映射、分页完成和后续视图创建继续定位；同条件补齐三次观察，保留每次对应的组件、输入和启动身份。",
+  "diagnostic_report_error": "先前的控制器过早读取仍在写入的汇总文件。原游戏 DLL 恢复后，限权游戏测试进程也遇到删除临时副本的访问拒绝；最终由拥有目录的恢复流程逐项校验哈希后清理。",
+  "original_components_promoted": false
+}

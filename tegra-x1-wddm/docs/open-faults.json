@@ -90,7 +90,10 @@
         "tegra-x1-wddm/docs/PAL4_TEXTURE_CONSTRUCTOR_BOUNDARY_20261121.json#aggregate",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/pal4-preimage-context-20261121-01.result.json#observation",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/pal4-preimage-context-20261121-02.result.json#observation",
-        "tegra-x1-wddm/docs/PAL4_PREIMAGE_CONTEXT_20261121.json#runs"
+        "tegra-x1-wddm/docs/PAL4_PREIMAGE_CONTEXT_20261121.json#runs",
+        "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/pal4-texture7-memory-owner-20261121-01.result.json#observation",
+        "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/pal4-texture7-bind-owner-20261121-01.result.json#observation",
+        "tegra-x1-wddm/docs/PAL4_IMAGE_BIND_BOUNDARY_20261121.json#cases"
       ],
       "cause": "Unknown. A common initiating failure across these observations has not been established.",
       "daily_workaround": "Keep unqualified heavy-load paths in diagnostics. Use only a previously accepted alternative for the specific application and workload. No universal game or extraction workaround has been verified.",
@@ -555,5 +558,118 @@
         "SWITCH-DESKTOP-RESTART-SHUTDOWN"
       ]
     }
-  ]
+  ],
+  "dxgkrnl_contracts": {
+    "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+    "source_tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
+    "catalog": "wsl-dxgkrnl-contracts/contracts.json",
+    "rounds": [
+      {
+        "round_id": "pal4-residency-x86-20261121-01",
+        "contract_id": "ioctl.c:2061:2",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/pal4-residency-x86-20261121-01.plan.json",
+        "declaration_sha256": "ef6e7fa36b1e9593aa85994dd18850a048e6cebf75f2ce520d15e9500fd0d602",
+        "state": "recorded",
+        "status": "已满足",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-residency-x86-20261121-01.result.json",
+        "receipt_sha256": "b8f67ed2d8192c04835635edc5232922a538e816e81cf3a30959d9d9ed8368e5"
+      },
+      {
+        "round_id": "pal4-texture7-allocation-owner-20261121-01",
+        "contract_id": "dxgkrnl.h:746:2",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-01.plan.json",
+        "declaration_sha256": "7bf7342c46cee831af35bb65770b4c665a301abf9288c74b5cba59e99c7c55b1",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-01.result.json",
+        "receipt_sha256": "f431d256eb3ada500b184d6c750e082de8744a7b0b89b70c8fc2f2faa8ef2be9"
+      },
+      {
+        "round_id": "pal4-texture7-allocation-owner-20261121-02",
+        "contract_id": "dxgkrnl.h:746:2",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-02.plan.json",
+        "declaration_sha256": "164f91975f5fefb81b141399908289b16178335f57e60b8ccb86685a7bcbcbae",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-02.result.json",
+        "receipt_sha256": "8d1cbbc9b0a0525ec5b8a09a5ef7ea5c14fe6c67402801b13e8e8b2e16a41183"
+      },
+      {
+        "round_id": "pal4-texture7-allocation-owner-20261121-03",
+        "contract_id": "dxgkrnl.h:746:2",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-03.plan.json",
+        "declaration_sha256": "3818b0c2a62df9e2f0df539ce8f4d8a8a1f60aa2e12e6fe926c5b4bd231b4353",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-03.result.json",
+        "receipt_sha256": "df61898b56c1fac71386ca978609f1353c4f0f2ce6a314c5404d84886d93b476"
+      },
+      {
+        "round_id": "pal4-preimage-context-20261121-01",
+        "contract_id": "dxgkrnl.h:588:1",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/pal4-preimage-context-20261121-01.plan.json",
+        "declaration_sha256": "038a00f37f63fa13b6fb0a5c096d1c2b8d8d178782b6df009a7dc97e91a28176",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-preimage-context-20261121-01.result.json",
+        "receipt_sha256": "1042c5162e015786d8f5627009c89f952609f2feee2fdd68d116156c9efe6790"
+      },
+      {
+        "round_id": "pal4-preimage-context-20261121-02",
+        "contract_id": "dxgkrnl.h:588:1",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/pal4-preimage-context-20261121-02.plan.json",
+        "declaration_sha256": "97a742cf717f4772f6c87aa9fa5bbbe84e01940ebaee50775370095ddeb68c9e",
+        "state": "recorded",
+        "status": "已满足",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-preimage-context-20261121-02.result.json",
+        "receipt_sha256": "a7c70a6a1f9d943bb6b77eeb4fbc3de27503e2f7f7b1331f473148bbf1df8897"
+      },
+      {
+        "round_id": "pal4-texture7-memory-owner-20261121-01",
+        "contract_id": "dxgkrnl.h:746:2",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-memory-owner-20261121-01.plan.json",
+        "declaration_sha256": "fcb107bb34344d637ee313c02ca71b7afe47dc55bd390bb984f96f2800b867ee",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-memory-owner-20261121-01.result.json",
+        "receipt_sha256": "3ff01b85e2ac44556a53a14f867ffda39d3495d57bbab21abfd7775bb3b2857c"
+      },
+      {
+        "round_id": "pal4-texture7-bind-owner-20261121-01",
+        "contract_id": "dxgkrnl.h:746:2",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-bind-owner-20261121-01.plan.json",
+        "declaration_sha256": "c2801980d7c059320a067b289c0f74c685e88aa4901876516e559c62e7f7568f",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-bind-owner-20261121-01.result.json",
+        "receipt_sha256": "aabc25d311900c7928c8db0ef2b8d80fdde51d99d748742fb41399c88d276865"
+      }
+    ],
+    "unobserved_recovery_boots": [
+      {
+        "round_id": "pal4-texture7-allocation-owner-20261121-02",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-02.recovery.json",
+        "receipt_sha256": "83fd0e793bdf10ea45e47393b7b0d69af1e16ce3c4f6b5292b9b9e3f6c6bcc5f",
+        "intervals": [
+          [
+            91158,
+            91184
+          ],
+          [
+            91184,
+            91251
+          ]
+        ],
+        "cause": "未知"
+      }
+    ],
+    "deferred_applications": {
+      "pal4": {
+        "state": "deferred-by-user",
+        "recorded_utc": "2026-11-21T12:20:21.562154+00:00",
+        "last_report": "PAL4_IMAGE_BIND_BOUNDARY_20261121.json",
+        "pending": "After-bind repeatability and initiating fault remain unverified."
+      }
+    }
+  }
 }

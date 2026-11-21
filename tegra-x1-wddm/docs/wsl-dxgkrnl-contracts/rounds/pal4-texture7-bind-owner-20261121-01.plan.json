@@ -1,0 +1,25 @@
+{
+  "round_id": "pal4-texture7-bind-owner-20261121-01",
+  "contract_id": "dxgkrnl.h:746:2",
+  "declared_utc": "2026-11-21T12:15:43.307774+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "b3c8aeaf47c657411f11454bf29b572b8de615fbc485b43e923d27f034c03bd2",
+  "related_fault": "SWITCH-LOAD-TRANSITION-RESTART",
+  "actor": "原仙剑四 x86 进程，GM20B 原生 NVK，窗口模式，交流供电，手持策略。",
+  "predicate": "第七张纹理完成图像内存绑定后，期间新建的 Windows VidMm 分配能否在本游戏进程中唯一关联到设备或资源。",
+  "required_observation": "以游戏中的第七次 CreateTexture 入口和 ready-after-bind 早停标记限定 PID/TID/QPC 区间；将该区间的 Windows 事件 33 与 36 按设备、适配器及全局分配标识匹配。",
+  "satisfied_if": "游戏命中早停，跟踪正常封口，无丢失，至少一个目标分配具备唯一且一致的所有者，独立核对原生模块、连续启动和 DWM。",
+  "violated_if": "命中区间内同一明确分配的两个完整记录出现可重复的所有者矛盾，且有独立关联证据。",
+  "unknown_if": "没有新分配、引用旧池、新建区间不完整、早停未命中、跟踪丢失或重启均保留未知。",
+  "scope_limit": "只裁决该区间新建的 Windows 分配归属。单条纹理可复用旧的 GPU 内存分配；命中之前的阶段标记只提供后续故障定位线索。",
+  "gpu_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "original_game_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+  "original_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+  "candidate_dxvk_sha256": "28efb78a38fe9926361347783ee4e20678e2bf539741a131b862c75eb3a2f4da",
+  "x86_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+  "source_patch_sha256": "04f97602141b69daaae0ca82c7544dd82a239b927855bc8670c9e5ef3d635d55",
+  "event_ids": [
+    33,
+    36
+  ]
+}

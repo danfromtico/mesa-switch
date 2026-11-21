@@ -16,6 +16,7 @@ BASELINE = "tegra-x1-wddm/docs/graphics-baseline.json"
 GATE = "tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1"
 LIBRARY = "tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1"
 CHECKER = "tegra-x1-wddm/tools/check_graphics_baseline_push.py"
+CONTRACT_CHECKER = "tegra-x1-wddm/tools/check_dxgkrnl_contracts.py"
 MARKER = b"# switch-graphics-baseline-pre-push\n"
 
 
@@ -123,6 +124,12 @@ def check_tree(commit, actions, trusted):
             subprocess.run([shell, "-NoProfile", "-File", str(verifier / GATE), "-Action", action,
                             "-RepositoryRoot", str(view)],
                            cwd=view, env=clean, check=True)
+        ledger = json.loads((view / LEDGER).read_bytes())
+        if "dxgkrnl_contracts" in ledger:
+            contract_checker = view / CONTRACT_CHECKER
+            contract_checker.parent.mkdir(parents=True, exist_ok=True)
+            contract_checker.write_bytes(blob(commit, CONTRACT_CHECKER))
+            subprocess.run([sys.executable, str(contract_checker)], cwd=view, env=clean, check=True)
 
 def trusted_verifier(remote):
     store = hook_directory() / "switch-graphics-verifiers"
@@ -166,6 +173,15 @@ def retained_reports(commit):
             fix = fault["resolution"]
             paths.add(fix["causal_evidence_file"])
             paths.update(row["evidence_file"] for row in fix["original_scenario_runs"])
+    if "dxgkrnl_contracts" in ledger:
+        contracts = ledger["dxgkrnl_contracts"]
+        docs = PurePosixPath(LEDGER).parent
+        paths.add(str(docs / contracts["catalog"]))
+        for row in contracts["rounds"]:
+            paths.add(str(docs / row["declaration"]))
+            if row["state"] == "recorded":
+                paths.add(str(docs / row["receipt"]))
+        paths.update(str(docs / row["receipt"]) for row in contracts.get("unobserved_recovery_boots", []))
     return paths
 
 
@@ -185,7 +201,7 @@ def check_updates(lines):
         if changed(remote, local, BASELINE):
             require_forward_baseline(remote, local)
         commits = git("log", "--reverse", "--topo-order", "--full-history", "--format=%H",
-                      f"{remote}..{local}", "--", "tegra-x1-wddm/docs").stdout.splitlines()
+                      f"{remote}..{local}", "--", "tegra-x1-wddm/docs", CONTRACT_CHECKER).stdout.splitlines()
         trusted = None
         for commit in dict.fromkeys(commits):
             parents = git("rev-list", "--parents", "-n", "1", commit).stdout.split()[1:]
@@ -204,6 +220,8 @@ def check_updates(lines):
                 for parent in parents:
                     files = git("diff", "--name-only", "--no-renames", parent, commit, "--", "tegra-x1-wddm/docs")
                     touched.update(set(files.stdout.splitlines()) & retained_reports(parent))
+                    if changed(parent, commit, CONTRACT_CHECKER):
+                        touched.add(CONTRACT_CHECKER)
                 if not touched:
                     continue
             actions = ["CheckLedger"]

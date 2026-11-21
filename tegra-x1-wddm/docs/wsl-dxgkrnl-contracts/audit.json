@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "reviewer": "Gemini 4 Neon XHigh",
+  "model": "gemini-4-neon-xhigh",
+  "reasoning": "xhigh",
+  "completed_utc": "2026-11-21T12:17:38.891224+00:00",
+  "reviewed_source": {
+    "commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+    "tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
+    "files": 15,
+    "bytes": 446360,
+    "comments": 452,
+    "canonical_locations_sha256": "de550648d07f2be604c9e216e7b2300a933a6c1430ff16b721f9d7a63afd850d"
+  },
+  "catalog_sha256": "f103a64a293dc48f94e581c1f7196ed7940887e810a21566801b18a49a444f7f",
+  "classification": {
+    "未知": 450,
+    "已满足": 2
+  },
+  "scopes": {
+    "源码元信息": 48,
+    "WSL专属": 345,
+    "原生可比": 59
+  },
+  "complete_reviewer_packets": 20,
+  "native_response_sha256": [
+    "f6c59ab164dba02cfe7918b9d6f33853148932f8db16e8493a118fd78157c02b",
+    "11b8db2bbfb39a9cc28b0551e2cb2153f888baa7cdde2cad2505209dd693536e",
+    "7e4de7e4bce2de829bd0362f772ceaad05852651de630103bf01eeada5f2a893",
+    "e5c764d7a5fe07ebed6871c7acf76cade3b9aa43deaae00bd31c9955d70141a2",
+    "3b1573701d5ac94847846e26b0fce9fd712b46e94a175c95339714094595b387",
+    "f9a10b01d9583efc46516f95156ce87cc5f12501bb0c81ffbee24d6221e840b8",
+    "19040da8ae18b870fd0164272e0364a2a8b88ad52237807b5287f638987be4ef",
+    "427e18960cbf0551717f05d3cf264e17f44a9c4cfca604896f814e0d699d5395",
+    "1004ee3cfacfbca2dab453a4919fe685a2ee5c68292573c8ea2e6cbab234fd26",
+    "d84b62949b2781427b24ff7df46bea738f191ecbcd3f9feb88c9055f5c53548d",
+    "3363f02dda13edd52e31ac1f166dd308f62d0bbc6cb37f3140d9fbe16b658ce4",
+    "5d7d78a5696b8319a61c182b46caa41d3902c1446e8d537ed0704f513c341f6b",
+    "6fc3867c648208a7eb40f4031dc4040205e29e55786b4b1a757b7b2319021f23",
+    "dce5a5242e333013e9bfe95049fc39d2a10711c66aaf81b5275c6cfde55cb09e",
+    "a273ef3b1fd6da2e80def5d9dc34feb14d919114eb5b650ec5bee3940da6e5ce",
+    "94a70b65461e110834bf08096c9f12b91db8f040e4fba35fa4da2f3b08613e9a",
+    "c32ab4a801be213c3eb647e0c9f7d42dfd394dd8ef49e31d327e04dd93ddfdd9",
+    "6059e3517d7178bc347082ca347c6fd5631a889fa4586f062c250253577b5590",
+    "adba234c9e04b626503f5ded7454c61e86e33341fc6694d85ecec2083c751692",
+    "196d6af8d7bb0d0e2b92cb30afd7896bc450ae3148c37722d9ce65d96370a73f"
+  ],
+  "main_review": {
+    "source_coverage": "All 452 locations match compiler-checked tokens at the frozen Git tree.",
+    "conclusive_findings": "Both affirmative findings were independently checked against original, scoped hardware records.",
+    "corrected_rows": 11,
+    "recorded_physical_rounds": 8,
+    "waiting_physical_rounds": 0,
+    "unrelated_unobserved_recovery_intervals": 2
+  },
+  "validator": {
+    "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+    "source_tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
+    "comment_count": 452,
+    "hardware_rounds": 8,
+    "checker_sha256": "9b59343bc29bd120480289ece7c9101d23878d87f3518f420a03060ce893f31e",
+    "source_bytes_verified": true,
+    "all_evidence_hashes_and_fields_verified": true,
+    "negative_cases": [
+      {
+        "case": "missing source comment",
+        "rejected": true,
+        "reason": "Comment inventory coverage differs"
+      },
+      {
+        "case": "duplicate source location",
+        "rejected": true,
+        "reason": "Duplicate or invalid location Kconfig:2:1"
+      },
+      {
+        "case": "changed comment bytes",
+        "rejected": true,
+        "reason": "Kconfig:1:1 source bytes differ"
+      },
+      {
+        "case": "two questions in one trial",
+        "rejected": true,
+        "reason": "pal4-residency-x86-20261121-01 needs one declared source location"
+      },
+      {
+        "case": "WSL-internal claim without native applicability",
+        "rejected": true,
+        "reason": "dxgadapter.c:65:2 lacks evidence for a native verdict"
+      },
+      {
+        "case": "nonexistent hardware evidence pointer",
+        "rejected": true,
+        "reason": "'missing-proof-field'"
+      },
+      {
+        "case": "promotion of an unexplained restart",
+        "rejected": true,
+        "reason": "pal4-texture7-allocation-owner-20261121-01 conclusive verdict requires a measured target"
+      }
+    ]
+  },
+  "existing_publication_regression": {
+    "source": "tegra-x1-wddm/tools/tgd3d-default/tests/test_baseline_publication.py",
+    "source_sha256": "c6a0ccb99fd953c5c19a431270dcea3e3c0d4bbdde2965a4b2aa60026ec42cf2",
+    "checker_sha256": "583d0377d4f210db837010a19bb8b10063ba8effc9de91e130b557b6a2b989f3",
+    "exit_code": 0,
+    "stdout": "PASS blocked selection and push, qualified independent publication, new fault registration and deletion guard"
+  },
+  "interpretation": "The current Windows-only hardware records cannot grade WSL-only state. Unknown findings and interrupted traces retain that status.",
+  "user_deferred_application": "deferred-by-user"
+}
