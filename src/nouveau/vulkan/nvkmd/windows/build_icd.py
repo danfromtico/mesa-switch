@@ -85,6 +85,35 @@ def check_rust_target(rustc_cmd, target):
         )
 
 
+def arm64ec_rust_libraries(out, cc, msvc_runtime):
+    """Bridge Rust MSVC staticlib dependencies to the LLVM-MinGW final link."""
+    directory = out / "ec-link-libraries"
+    directory.mkdir()
+    ar = cc.parent / "llvm-ar"
+    members = subprocess.check_output([ar, "t", msvc_runtime], text=True).splitlines()
+    objects = []
+    # These three VC CRT objects provide Rust panic RTTI and its deleting
+    # destructor. Leave process startup and allocation on the MinGW CRT.
+    for name in ("std_type_info_static.obj", "delete_scalar_size.obj", "delete_scalar.obj"):
+        suffix = "/arm64ec/" + name
+        matches = [m for m in members if m.replace(chr(92), "/").lower().endswith(suffix)]
+        if len(matches) != 1:
+            raise SystemExit(f"Cannot identify {name} for ARM64EC in {msvc_runtime}")
+        target = directory / name
+        target.write_bytes(subprocess.check_output([ar, "p", msvc_runtime, matches[0]]))
+        objects.append(target)
+    run(ar, "rcs", directory / "libec_rust_rtti.a", *objects)
+    # Meson passes Rust MSVC import names (such as kernel32.lib) to the
+    # GNU linker with -l. Use the actual MinGW import libraries in that view.
+    for name in ("kernel32", "ntdll", "userenv", "ws2_32", "dbghelp"):
+        archive = "lib" + name + ".a"
+        source = Path(subprocess.check_output([cc, "-print-file-name=" + archive], text=True).strip())
+        if not source.is_absolute() or not source.is_file():
+            raise SystemExit(f"Missing LLVM-MinGW import library {archive}")
+        shutil.copyfile(source, directory / ("lib" + name + ".lib.a"))
+    return ["-L" + str(directory), "-lec_rust_rtti"]
+
+
 def write_cross_file(path, spec, mingw_bin, rustc_path, pkg_config_libdir):
     triple = spec["mingw_triple"]
     cc = mingw_bin / f"{triple}-clang"
@@ -137,6 +166,8 @@ def main():
     p.add_argument("--wdk-include", type=Path, required=True, help="WDK Include/<version>")
     p.add_argument("--package-cache-dir", type=Path,
                    help="Meson subproject packagecache directory (sets MESON_PACKAGE_CACHE_DIR)")
+    p.add_argument("--arm64ec-msvcrt", type=Path,
+                   help="Visual C++ ARM64X msvcrt.lib for Rust ARM64EC RTTI on LLVM-MinGW")
     p.add_argument("--prepare-only", action="store_true",
                    help="build the SDK ABI fixture, KMT bridge and tests without configuring Mesa")
     a = p.parse_args()
@@ -158,7 +189,14 @@ def main():
         p.error("Pass --cc or --mingw-bin for the target LLVM-MinGW toolchain")
     cc = cc.absolute()
     mingw_root = cc.parent.resolve().parent
-    has_mingw_sysroot = (mingw_root / spec["mingw_triple"]).is_dir()
+    target_sysroot = mingw_root / spec["mingw_triple"]
+    if a.arch == "arm64ec" and not target_sysroot.is_dir():
+        # New LLVM-MinGW releases share the ARM64X CRT with AArch64.
+        startup = Path(subprocess.check_output(
+            [str(cc), "-print-file-name=crt2.o"], text=True).strip())
+        if startup.is_absolute() and startup.is_file():
+            target_sysroot = startup.parent.parent
+    has_mingw_sysroot = target_sysroot.is_dir()
 
     rev = subprocess.check_output(["git", "-C", str(src), "rev-parse", "HEAD"], text=True).strip()
     out = a.out.resolve()
@@ -169,6 +207,8 @@ def main():
         f"--target={spec['msvc_target']}",
         "/c", "/std:c11", "/W4", "/WX", "-Wno-nonportable-include-path",
         *spec["msvc_defines"],
+        # LLVM-MinGW supplies the ABI runtime when linking the SDK C objects.
+        *(["/clang:-fno-autolink"] if a.arch == "arm64ec" else []),
         "/imsvc" + str(a.sdk_include / "um"),
         "/imsvc" + str(a.sdk_include / "shared"),
         "/imsvc" + str(a.wdk_include / "km/crt"),
@@ -262,7 +302,7 @@ def main():
         resource_dirs = sorted(p for p in clang_lib.iterdir() if p.is_dir()) if clang_lib.is_dir() else []
         bindgen_args = [
             f"--target={spec['bindgen_target']}",
-            f"--sysroot={mingw_root / spec['mingw_triple']}",
+            f"--sysroot={target_sysroot}",
         ]
         if resource_dirs:
             bindgen_args += ["-resource-dir", str(resource_dirs[-1])]
@@ -276,6 +316,12 @@ def main():
     if meson_options_file.is_file() and "'tgd3d'" in meson_options_file.read_text(encoding="utf-8", errors="ignore"):
         extra_meson_args.append("-Dtgd3d=disabled")
 
+    if a.arm64ec_msvcrt:
+        if a.arch != "arm64ec":
+            p.error("--arm64ec-msvcrt applies only to --arch arm64ec")
+        flags = arm64ec_rust_libraries(out, cc, a.arm64ec_msvcrt.resolve(strict=True))
+        extra_meson_args.extend(["-Dc_link_args=" + repr(flags),
+                                 "-Dcpp_link_args=" + repr(["-static", *flags])])
     build = out / "build"
     digest = hashlib.sha256(rev.encode())
     digest.update(subprocess.check_output(["git", "-C", str(src), "diff", "--binary", "HEAD"]))

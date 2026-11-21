@@ -65,7 +65,7 @@ TEMPLATE_H = Template(COPYRIGHT + """\
 extern "C" {
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__arm64ec__)
 VKAPI_ATTR void VKAPI_CALL vk_entrypoint_stub(void);
 #endif
 
@@ -567,7 +567,7 @@ vk_device_entrypoint_is_enabled(int index, uint32_t core_version,
    }
 }
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__arm64ec__)
 VKAPI_ATTR void VKAPI_CALL vk_entrypoint_stub(void)
 {
    UNREACHABLE("Entrypoint not implemented");
@@ -576,7 +576,7 @@ VKAPI_ATTR void VKAPI_CALL vk_entrypoint_stub(void)
 static const void *get_function_target(const void *func)
 {
    const uint8_t *address = func;
-#ifdef _M_X64
+#if defined(_M_X64) && !defined(_M_ARM64EC) && !defined(__arm64ec__)
    /* Incremental linking may indirect through relative jump */
    if (*address == 0xE9)
    {
@@ -609,7 +609,7 @@ void vk_${type}_dispatch_table_from_entrypoints(
     if (overwrite) {
         memset(dispatch_table, 0, sizeof(*dispatch_table));
         for (unsigned i = 0; i < ARRAY_SIZE(${type}_compaction_table); i++) {
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__arm64ec__)
             assert(entry[i] != NULL);
             if (vk_function_is_stub(entry[i]))
 #else
@@ -623,7 +623,7 @@ void vk_${type}_dispatch_table_from_entrypoints(
     } else {
         for (unsigned i = 0; i < ARRAY_SIZE(${type}_compaction_table); i++) {
             unsigned disp_index = ${type}_compaction_table[i];
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__arm64ec__)
             assert(entry[i] != NULL);
             if (disp[disp_index] == NULL && !vk_function_is_stub(entry[i]))
 #else
