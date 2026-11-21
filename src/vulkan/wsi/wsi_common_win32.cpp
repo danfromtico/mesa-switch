@@ -931,19 +931,23 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
     * A paced present also re-anchors the fallback deadline to the completed
     * composition, keeping the timer phase-locked to the display. */
    bool compositor_paced = false;
+   bool compositor_resumed = false;
    if (chain->pacer.timer && chain->status == VK_SUCCESS) {
       LARGE_INTEGER before, after;
       if (QueryPerformanceCounter(&before)) {
          if (FAILED(DwmFlush())) {
             chain->status = VK_ERROR_SURFACE_LOST_KHR;
          } else if (QueryPerformanceCounter(&after)) {
+            const int64_t dwm_elapsed = after.QuadPart - before.QuadPart;
+            /* Resume detection must see the previous frame's blocked
+             * state, so it runs before wsi_win32_pacer_presented(). */
+            compositor_resumed =
+               wsi_win32_pacer_compositor_resumed(&chain->pacer, dwm_elapsed);
             compositor_paced =
                wsi_win32_pacer_compositor_paced(&chain->pacer,
-                                                after.QuadPart - before.QuadPart,
-                                                after.QuadPart);
+                                                dwm_elapsed, after.QuadPart);
             wsi_win32_pacer_presented(&chain->pacer,
-                                      after.QuadPart - before.QuadPart,
-                                      after.QuadPart);
+                                      dwm_elapsed, after.QuadPart);
             if (compositor_paced)
                wsi_win32_pacer_sync_compositor(&chain->pacer, after.QuadPart);
          }
@@ -952,11 +956,14 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
       }
    }
 
-   /* Producer cap for frames the compositor did not pace. Running after the
-    * compositor join keeps a single phase reference and leaves the VBlank
-    * wait as the only pacing on a display-locked desktop; a late frame
-    * still resets the deadline instead of accumulating catch-up slots. */
-   if (!compositor_paced && chain->pacer.timer &&
+   /* Producer cap for frames the compositor did not pace. A resumed frame
+    * is released immediately: its deadline was just re-anchored to the
+    * composition it already waited for, so the remaining wait is zero and
+    * skipping it is equivalent. Running after the compositor join keeps a
+    * single phase reference and leaves the VBlank wait as the only pacing
+    * on a display-locked desktop; a late frame still resets the deadline
+    * instead of accumulating catch-up slots. */
+   if (!compositor_paced && !compositor_resumed && chain->pacer.timer &&
        chain->status == VK_SUCCESS &&
        !wsi_win32_pacer_wait(&chain->pacer)) {
       chain->status = VK_ERROR_SURFACE_LOST_KHR;

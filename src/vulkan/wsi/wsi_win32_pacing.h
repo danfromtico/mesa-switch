@@ -89,6 +89,20 @@ wsi_win32_pacer_sync_compositor(struct wsi_win32_pacer *pacer,
    pacer->next = composed_at + pacer->period;
 }
 
+/* Whether this present is the first composited one after uncomposited
+ * frames: DwmFlush() blocked again, but the previous present did not.
+ * This frame's content already made the composition it waited for, so
+ * waiting out a deadline would only skip a display period; release the
+ * producer immediately and let the deadline run from this completion. */
+static inline bool
+wsi_win32_pacer_compositor_resumed(const struct wsi_win32_pacer *pacer,
+                                   int64_t dwm_elapsed)
+{
+   return pacer->last_present > 0 &&
+          dwm_elapsed >= wsi_win32_pacer_min_block(pacer) &&
+          !pacer->compositor_blocked;
+}
+
 /* Record a measured present. When DwmFlush() starts blocking again after
  * uncomposited frames (window back on screen), the free-running deadline
  * has no display phase, so re-anchor it once to this completion; a desktop
@@ -98,10 +112,9 @@ static inline void
 wsi_win32_pacer_presented(struct wsi_win32_pacer *pacer,
                           int64_t dwm_elapsed, int64_t completed_at)
 {
-   const bool blocked = dwm_elapsed >= wsi_win32_pacer_min_block(pacer);
-   if (blocked && !pacer->compositor_blocked && pacer->last_present > 0)
+   if (wsi_win32_pacer_compositor_resumed(pacer, dwm_elapsed))
       wsi_win32_pacer_sync_compositor(pacer, completed_at);
-   pacer->compositor_blocked = blocked;
+   pacer->compositor_blocked = dwm_elapsed >= wsi_win32_pacer_min_block(pacer);
    pacer->last_present = completed_at;
 }
 

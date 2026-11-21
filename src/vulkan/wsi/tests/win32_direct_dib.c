@@ -146,7 +146,9 @@ static void check_predicates(void)
    SelectClipRgn(dc, NULL);
    /* Excluding an interior band leaves a two-rectangle region whose
     * bounding box still spans the whole bitmap; the bounding-box check
-    * alone would be fooled, so readiness must reject it. */
+    * alone would be fooled, so readiness must reject it. queue_present()
+    * consults this predicate before every direct submit, so a frame on a
+    * holed region takes exactly one submission path: the generic blit. */
    ExcludeClipRect(dc, 0, 3, 8, 5);
    {
       RECT box;
