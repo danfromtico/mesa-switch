@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "round_id": "win-post-restart-handheld-20261121-01",
+  "contract_id": "WIN-POST-RESTART-HANDHELD",
+  "windows_question": "WIN-POST-RESTART-HANDHELD",
+  "plan_sha256": "97d031d80ca75882debc538107566bd53744408cdfe918cca4d86087cb7f09c8",
+  "status": "实机通过",
+  "finding": "启动 91918 的首次复查已为 Handheld1，未发送档位切换命令。相隔 62.4 秒的两次完整读回匹配同一 DWM、正式永久许可、七份正式组件和五份实际加载组件，GPU Code 0，交流供电，DFLL 启用且无错误。",
+  "missing_observation": "本轮通过当前桌面取证前置条件。恢复后初见档位 6 与复查时的档位 1 之间，未获取档位切换事件。",
+  "device_executions": 0,
+  "evidence": {
+    "boundaries": {
+      "last_entry": {
+        "boot": 91918,
+        "dwm": 1472,
+        "dwm_start": "2026-11-21T16:28:05.1778623Z",
+        "utc": "2026-11-21T16:32:04.8069064Z",
+        "code": 0,
+        "ac": "Online",
+        "power": {
+          "PowerMode": 1,
+          "CpuDfllActive": 1,
+          "CpuLastError": 0,
+          "GpuPolicyMode": 1,
+          "GpuReportedKhz": 537600,
+          "GpuReportedUv": 590000
+        },
+        "battery": {
+          "LimitCenter": 85,
+          "BandMin": 80,
+          "BandMax": 90
+        }
+      },
+      "last_return": {
+        "boot": 91918,
+        "dwm": 1472,
+        "dwm_start": "2026-11-21T16:28:05.1778623Z",
+        "utc": "2026-11-21T16:33:07.1917198Z",
+        "code": 0,
+        "ac": "Online",
+        "power": {
+          "PowerMode": 1,
+          "CpuDfllActive": 1,
+          "CpuLastError": 0,
+          "GpuPolicyMode": 1,
+          "GpuReportedKhz": 307200,
+          "GpuReportedUv": 590000
+        },
+        "battery": {
+          "LimitCenter": 85,
+          "BandMin": 80,
+          "BandMax": 90
+        }
+      },
+      "first_anomaly_or_missing": "本轮通过当前桌面取证前置条件。恢复后初见档位 6 与复查时的档位 1 之间，未获取档位切换事件。"
+    },
+    "before": {
+      "boot": 91918,
+      "dwm": 1472,
+      "dwm_start": "2026-11-21T16:28:05.1778623Z",
+      "utc": "2026-11-21T16:31:46.9493295Z",
+      "code": 0,
+      "mode": 1,
+      "os_arch": "ARM64",
+      "os_build": "22631",
+      "os_revision": 2861,
+      "ac": "Online"
+    },
+    "previous_recovery_mode": {
+      "path": "windows-native-graphics/rounds/win-wifi-recovery-20261121-01.result.json",
+      "sha256": "bc056045e70eefb868878c981b855e2312f2d8dc625ea4969447d82ecec78d4b"
+    },
+    "policy_sample_delay_s": 62.38481307029724,
+    "component_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "loaded_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "permanent_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "trial": false,
+    "sent_mode_change": false,
+    "script_sha256": {
+      "Power-State.ps1": "f136146792b5a80c6016dbae04668831bee87f0f2f5390017bfb1669cd3cab9f",
+      "Restore-Handheld.ps1": "273307d586bf95c63d51553097742a57af2f364772770f761da37f10ba2f23c0"
+    },
+    "controller_source": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/restore_handheld_91918.py",
+      "sha256": "3c4a6c8f3f2dc90847ffd675a6bf82aee27d22ece8a0f1bc00fdea33f944c075"
+    },
+    "local_receipts": {
+      "before": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/handheld-91918-before.json",
+        "sha256": "1cda40858a36b470fec4da352ededff9d3ebaf1310f2869a486edc5c575e485f"
+      },
+      "immediate": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/handheld-91918-immediate.json",
+        "sha256": "c64fcea5e5fd29a19560067f5a5d323e30dc42625351e57575f37beebb2b851a"
+      },
+      "immediate-policy": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/handheld-91918-immediate-policy.json",
+        "sha256": "bff3d48622b2842ebe43b81ceb8b7e519c116323a9d54ad5105b03b788b133fa"
+      },
+      "recheck": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/handheld-91918-recheck.json",
+        "sha256": "0bb2090aaf18bc87d47de987dc5d241701f22a7e960595c120c1a61b53303515"
+      },
+      "recheck-policy": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/handheld-91918-recheck-policy.json",
+        "sha256": "07bff46c43dad42cf727f057d76647b060a3ebbc7a8a6d9f1ef3ea22a55d5b4d"
+      }
+    }
+  }
+}

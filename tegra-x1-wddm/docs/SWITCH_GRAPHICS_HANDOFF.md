@@ -82,6 +82,8 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 16:27 UTC 的 SSH 断线跨启动 91832 至 91918。RuntimeBroker 先发出重启请求，随后有完整 Windows 关机回执。新启动 16:28:31 WLAN 自动连回，SSH 第一次三分钟重试成功。读回 Code 0、交流供电，功耗档位为 6。[Windows、WLAN 和 SSH 回执](windows-native-graphics/rounds/win-wifi-recovery-20261121-01.result.json)
 
+启动 91918 复查时已回到 Handheld1，本轮只读。两份完整读回仍为同桌面、Code 0、交流供电，正式永久许可及 7 份组件、5 份实载哈希全部一致。[同启动手持模式及正式基线回执](windows-native-graphics/rounds/win-post-restart-handheld-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

@@ -1467,6 +1467,29 @@
         "win-dwm-late-adapter-152586-20261121-01"
       ],
       "latest_observation": "启动 91476 的场景 ETL 中，DWM 另一个上下文在 152586 后 9.054 ms 仍有 Windows DMA 提交 247。该上下文的前一包 246 及其围栏、呈现包均曾正常退役。152586 后两路共享 ETL 的所有上下文均无留存 DMA 完成中断、完成或退役事件。"
+    },
+    {
+      "id": "WIN-POST-RESTART-HANDHELD",
+      "priority": "P0",
+      "owner": "SwitchFan、Windows 电源与当前正式 GPU 桌面",
+      "question": "可否在当前正常重启后的正式桌面上恢复 Handheld1 并证明同启动、同 DWM、完整实载和有效功耗策略？",
+      "status": "实机通过",
+      "existing_observation": "开机 91918 已回到交流供电与 Code 0，SwitchFan 报告档位 6。",
+      "missing_observation": "本轮通过当前桌面取证前置条件。恢复后初见档位 6 与复查时的档位 1 之间，未获取档位切换事件。",
+      "pass_condition": "完整匹配正式目录、组件和永久许可，恢复后保持同次开机、同 DWM、Code 0、交流及原电池充电设置，短间隔复查 Handheld1。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-wifi-recovery-20261121-01.result.json",
+          "sha256": "bc056045e70eefb868878c981b855e2312f2d8dc625ea4969447d82ecec78d4b"
+        }
+      ],
+      "windows_references": [
+        "power"
+      ],
+      "round_ids": [
+        "win-post-restart-handheld-20261121-01"
+      ],
+      "latest_observation": "启动 91918 的首次复查已为 Handheld1，未发送档位切换命令。相隔 62.4 秒的两次完整读回匹配同一 DWM、正式永久许可、七份正式组件和五份实际加载组件，GPU Code 0，交流供电，DFLL 启用且无错误。"
     }
   ],
   "rounds": [
@@ -3083,19 +3106,81 @@
         }
       },
       "finished_utc": "2026-11-21T16:31:00.107729+00:00"
+    },
+    {
+      "round_id": "win-post-restart-handheld-20261121-01",
+      "contract_id": "WIN-POST-RESTART-HANDHELD",
+      "windows_question": "WIN-POST-RESTART-HANDHELD",
+      "method": "沿用已审核的 Switch Lite 手持恢复工具，在同一正式 Windows 桌面进行一次恢复并短间隔读回",
+      "plan": "windows-native-graphics/rounds/win-post-restart-handheld-20261121-01.plan.json",
+      "plan_sha256": "97d031d80ca75882debc538107566bd53744408cdfe918cca4d86087cb7f09c8",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T16:31:31.859449+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-post-restart-handheld-20261121-01.result.json",
+      "result_sha256": "abe259260db07a29dcb9ed16d2fb014b7ed7528f3a6cd8a7c0377008ea98b6a6",
+      "status": "实机通过",
+      "finding": "启动 91918 的首次复查已为 Handheld1，未发送档位切换命令。相隔 62.4 秒的两次完整读回匹配同一 DWM、正式永久许可、七份正式组件和五份实际加载组件，GPU Code 0，交流供电，DFLL 启用且无错误。",
+      "missing_observation": "本轮通过当前桌面取证前置条件。恢复后初见档位 6 与复查时的档位 1 之间，未获取档位切换事件。",
+      "boundaries": {
+        "last_entry": {
+          "boot": 91918,
+          "dwm": 1472,
+          "dwm_start": "2026-11-21T16:28:05.1778623Z",
+          "utc": "2026-11-21T16:32:04.8069064Z",
+          "code": 0,
+          "ac": "Online",
+          "power": {
+            "PowerMode": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "GpuPolicyMode": 1,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000
+          },
+          "battery": {
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90
+          }
+        },
+        "last_return": {
+          "boot": 91918,
+          "dwm": 1472,
+          "dwm_start": "2026-11-21T16:28:05.1778623Z",
+          "utc": "2026-11-21T16:33:07.1917198Z",
+          "code": 0,
+          "ac": "Online",
+          "power": {
+            "PowerMode": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "GpuPolicyMode": 1,
+            "GpuReportedKhz": 307200,
+            "GpuReportedUv": 590000
+          },
+          "battery": {
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90
+          }
+        },
+        "first_anomaly_or_missing": "本轮通过当前桌面取证前置条件。恢复后初见档位 6 与复查时的档位 1 之间，未获取档位切换事件。"
+      },
+      "finished_utc": "2026-11-21T16:33:09.566567+00:00"
     }
   ],
   "progress": {
-    "total": 36,
+    "total": 37,
     "by_status": {
-      "实机通过": 11,
+      "实机通过": 12,
       "观测缺口": 9,
       "已有实机通过": 7,
       "故障开放": 4,
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 47,
+    "registered_rounds": 48,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -3306,8 +3391,12 @@
       "classification": "RuntimeBroker 请求重启，关机与启动记录完整",
       "AC": "Online",
       "code": 0,
-      "last_observed_mode": 6,
-      "next_observation": "复核 Handheld1、完整实载哈希和相同桌面以后再开展图形验收。"
+      "last_observed_mode": 1,
+      "next_observation": "保持当前正式基线，补 KMD 准入或 GPU 完成；诊断候选启动异常需单独查清。",
+      "formal_gpu_and_handheld_recheck": {
+        "path": "windows-native-graphics/rounds/win-post-restart-handheld-20261121-01.result.json",
+        "sha256": "abe259260db07a29dcb9ed16d2fb014b7ed7528f3a6cd8a7c0377008ea98b6a6"
+      }
     }
   },
   "cleanup": {
