@@ -1,0 +1,69 @@
+{
+  "source_commit": "a7c422add36e2d6b2444a7767bafcaef81b4a041",
+  "qualification_boot": 87268,
+  "activation_boot": 87614,
+  "collection_boot": 87687,
+  "selected_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\window-copy-c09c3c868948",
+  "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\window-copy-c09c3c868948",
+  "power": "Online",
+  "code": 0,
+  "components": {
+    "tegragpurender.sys": "c09c3c868948f3a3acc583dd5f34cb098f3819207db817c081e4ade06adf999a",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "loaded": {
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+  },
+  "retained_system_events": [
+    {
+      "record": 87687,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-21T03:09:08.6910340Z",
+      "reason": null,
+      "event": 12
+    },
+    {
+      "record": 87696,
+      "provider": "EventLog",
+      "utc": "2026-11-21T03:10:37.3267324Z",
+      "reason": null,
+      "event": 6008
+    },
+    {
+      "record": 87705,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "utc": "2026-11-21T03:09:12.9991368Z",
+      "reason": null,
+      "event": 41
+    }
+  ],
+  "previous_control": {
+    "scene": "present-baseline-flip",
+    "requested_interface": "process-scoped WDDM 2.0",
+    "effect": "flip-sequential",
+    "issued": true,
+    "boot": 87614,
+    "archive_sha256": "94ffd57c8e61fb48e5a94acd174d22bf9a75f572fbe94f6010d36e94c39d2eca",
+    "archive_bytes": 9643,
+    "configuration_sha256": "70ef78a19392a33eeae5c5ecd821ac0c828c4347852ec28859e77fa247318dcb",
+    "loaded_report_sha256": "51d1b5400656f095dd45d1091e71ad18bd9c98c979dc77c26531a10b074b8e46",
+    "client_result_available": false,
+    "test_passed": false
+  },
+  "gdi_import_case_issued_at_time_of_restart": false,
+  "cause_confirmed": false,
+  "finding": "An unexpected shutdown was recorded after selection of the ordinary-window baseline and before the GDI import trial. The archived flip control has no client result or last-call receipt.",
+  "cleanup": {
+    "owned_case_removed": true,
+    "active_trial": false,
+    "token": false
+  }
+}

@@ -364,6 +364,23 @@
           }
         ]
       }
+    },
+    {
+      "id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+      "status": "open",
+      "kind": "unexpected-restart",
+      "affected_scopes": [
+        "wddm",
+        "presentation"
+      ],
+      "trigger": "An accepted-stack process-scoped WDDM 2.0 flip control was issued on boot 87614. The client has no retained result. Boot 87687 recorded events 6008 and 41.",
+      "evidence": [
+        "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/post-selection-87687.json"
+      ],
+      "cause": "Unconfirmed. Available records do not establish whether the client reached Present1 or whether this shares a cause with earlier restarts.",
+      "daily_workaround": "Keep the optional process-scoped WDDM 2.0 Present1 test deferred. Use the selected native ordinary-window path.",
+      "close_when": "Identify the cause with retained evidence specific to this incident and verify the corresponding repaired path.",
+      "resolution": null
     }
   ],
   "independent_qualifications": [
