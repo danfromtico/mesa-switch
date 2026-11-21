@@ -82,6 +82,13 @@ def changed(before, after, path):
     return comparison.returncode == 1
 
 
+def require_forward_baseline(previous, current):
+    old = json.loads(blob(previous, BASELINE))["source_commit"]
+    new = json.loads(blob(current, BASELINE))["source_commit"]
+    if old == new or git("merge-base", "--is-ancestor", old, new, check=False).returncode:
+        raise RuntimeError("A changed baseline must advance from the accepted source on the destination branch.")
+
+
 def check_tree(commit, actions, trusted):
     config = git("config", "--path", "--get", "switch.graphicsGatePwsh", check=False).stdout.strip()
     shell = config or shutil.which("pwsh") or shutil.which("powershell.exe")
@@ -173,6 +180,8 @@ def check_updates(lines):
         ancestry = git("merge-base", "--is-ancestor", remote, local, check=False)
         if ancestry.returncode:
             raise RuntimeError("Cannot rewrite the accepted baseline and fault history. Fetch and integrate the destination branch first.")
+        if changed(remote, local, BASELINE):
+            require_forward_baseline(remote, local)
         commits = git("log", "--reverse", "--topo-order", "--full-history", "--format=%H",
                       f"{remote}..{local}", "--", "tegra-x1-wddm/docs").stdout.splitlines()
         trusted = None
@@ -181,6 +190,11 @@ def check_updates(lines):
             # A merge selects a new baseline only if it changes the receiving branch.
             # New side-branch transitions are visited as commits in their own right.
             baseline_changed = not parents or changed(parents[0], commit, BASELINE)
+            if len(parents) > 1 and git("merge-base", "--is-ancestor", remote, parents[0], check=False).returncode:
+                for parent in parents[1:]:
+                    if not git("merge-base", "--is-ancestor", remote, parent, check=False).returncode and changed(parent, commit, BASELINE):
+                        require_forward_baseline(parent, commit)
+                        baseline_changed = True
             if not baseline_changed and not any(changed(parent, commit, LEDGER) for parent in parents):
                 touched = set()
                 for parent in parents:

@@ -149,6 +149,12 @@ def exercise(shell, work):
     updated = run("git", "rev-parse", "HEAD")
     run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan")
     assert remote_head() == updated
+    run("git", "checkout", "-q", "-b", "old-baseline-view", original)
+    (repo / "retained-source.cpp").write_text("// Source on the old selection\n")
+    commit("Keep an old selection on another branch")
+    run("git", "merge", "-s", "ours", "--no-ff", "-q", "-m", "Keep the old selection", "tgd3d-vulkan")
+    run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan", succeeds=False, contains="must advance")
+    run("git", "checkout", "-q", "tgd3d-vulkan")
     write(repo / docs / "boot.json", {"intent": 108, "boot": 110})
     commit("Accidental replacement of a retained hardware receipt")
     run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan", succeeds=False, contains="mismatched hardware evidence")
