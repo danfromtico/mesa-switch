@@ -103,6 +103,7 @@ static UCHAR packet_trace_data[TG_GPU_COMMAND_CAPTURE_BYTES];
 static TG_GPU_RESET_PACKET_EVENT packet_trace_record;
 BOOLEAN TgGpuTraceResetPacketEnabled(VOID){return packet_trace_enabled;}
 VOID TgGpuTraceDisplay(const TG_GPU_DISPLAY_EVENT *record){(VOID)record;}
+VOID TgGpuTraceStartupDiagnostic(const TG_GPU_STARTUP_DIAGNOSTIC_EVENT *record){(VOID)record;}
 VOID TgGpuTraceResetPacket(const TG_GPU_RESET_PACKET_EVENT *record,const VOID *commands)
 {
     TG_GPU_WORK_QUEUE *q=trace_engine?trace_engine->QueueOwner:NULL;

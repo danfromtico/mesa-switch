@@ -80,6 +80,26 @@ typedef struct _TG_GPU_DISPLAY_EVENT {
 } TG_GPU_DISPLAY_EVENT;
 C_ASSERT(sizeof(TG_GPU_DISPLAY_EVENT)==52);
 
+/* Versioned payload returned to Windows for WDDM 2.6 startup diagnostics.
+ * A missing adapter leaves Stage and StartStatus unavailable. */
+enum tg_gpu_startup_stage {
+    TgGpuStartupUnavailable, TgGpuStartupAdded, TgGpuStartupEntering,
+    TgGpuStartupPermit, TgGpuStartupResources, TgGpuStartupHardware,
+    TgGpuStartupPanel, TgGpuStartupComplete
+};
+typedef struct _TG_GPU_STARTUP_DIAGNOSTIC {
+    ULONG Version,Type,AdapterAvailable,Stage;
+    NTSTATUS StartStatus;
+} TG_GPU_STARTUP_DIAGNOSTIC;
+C_ASSERT(sizeof(TG_GPU_STARTUP_DIAGNOSTIC)==20);
+
+/* Event 6/version 1 is emitted only when the OS callback writes its payload. */
+typedef struct _TG_GPU_STARTUP_DIAGNOSTIC_EVENT {
+    TG_GPU_STARTUP_DIAGNOSTIC Snapshot;
+    ULONG BufferSizeIn,BufferSizeOut;
+} TG_GPU_STARTUP_DIAGNOSTIC_EVENT;
+C_ASSERT(sizeof(TG_GPU_STARTUP_DIAGNOSTIC_EVENT)==28);
+
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS TgGpuTraceInitialize(VOID);
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -95,4 +115,6 @@ _IRQL_requires_(PASSIVE_LEVEL)
 VOID TgGpuTraceResetPacket(const TG_GPU_RESET_PACKET_EVENT *,const VOID *Commands);
 _IRQL_requires_(PASSIVE_LEVEL)
 VOID TgGpuTraceDisplay(const TG_GPU_DISPLAY_EVENT *);
+_IRQL_requires_(PASSIVE_LEVEL)
+VOID TgGpuTraceStartupDiagnostic(const TG_GPU_STARTUP_DIAGNOSTIC_EVENT *);
 #endif

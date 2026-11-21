@@ -277,7 +277,8 @@ for source in [*core, power, clock, *nvdec_core, root / "platform/t214_nvdec.c",
                root / "windows/diagnostic_events.c",
                root / "windows/platform_io.c",root / "windows/host1x_clock.c",root / "windows/dvfs.c",root / "windows/worker.c",
                root / "windows/platform_adapter.c",root / "windows/gr_firmware_io.c",
-               root / "windows/reset_backend.c",root / "windows/adapter_reset.c"]:
+               root / "windows/reset_backend.c",root / "windows/adapter_reset.c",
+               root / "windows/startup_diagnostic.c"]:
     obj = args.out / (source.stem + ".obj")
     subprocess.run([args.clang_cl, *flags, f"/Fo{obj}", "--", str(source)], check=True)
     objects.append(obj)
@@ -400,6 +401,17 @@ if args.windows_tests:
     subprocess.run([args.link,"/nologo","/machine:arm64","/subsystem:console,10.0","/entry:start",
                     "/include:_load_config_used","/nodefaultlib","/release","/opt:ref","/timestamp:0",
                     f"/out:{args.out / 'test-native-start.exe'}",str(native_start_test),str(sdk_lib)],check=True)
+    startup_diagnostic_test=args.out / "test_startup_diagnostic_windows.obj"
+    subprocess.run([args.clang_cl,*flags,"/clang:-funwind-tables",f"/Fo{startup_diagnostic_test}","--",
+                    str(root / "tests/test_startup_diagnostic_windows.c")],check=True)
+    startup_diagnostic_model=args.out / "startup_diagnostic_model.obj"
+    subprocess.run([args.clang_cl,*flags,"/UDBG","/clang:-funwind-tables",
+                    f"/Fo{startup_diagnostic_model}","--",
+                    str(root / "windows/startup_diagnostic.c")],check=True)
+    subprocess.run([args.link,"/nologo","/machine:arm64","/subsystem:console,10.0","/entry:start",
+                    "/include:_load_config_used","/nodefaultlib","/release","/opt:ref","/timestamp:0",
+                    f"/out:{args.out / 'test-startup-diagnostic.exe'}",str(startup_diagnostic_test),
+                    str(startup_diagnostic_model),str(sdk_lib)],check=True)
 
 def copy_firmware(dest):
     for filename in gr_names:

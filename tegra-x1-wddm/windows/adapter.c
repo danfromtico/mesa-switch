@@ -24,7 +24,9 @@ NTSTATUS APIENTRY TgGpuDdiAddDevice(PDEVICE_OBJECT physical,PVOID *out)
     *out=NULL;
     a=ExAllocatePool2(POOL_FLAG_NON_PAGED,sizeof(*a),TAG);
     if(!a)return STATUS_NO_MEMORY;
-    a->PhysicalDevice=physical;*out=a;
+    a->PhysicalDevice=physical;
+    TgGpuRecordStartup(a,TgGpuStartupAdded,STATUS_SUCCESS);
+    *out=a;
     return STATUS_SUCCESS;
 }
 NTSTATUS APIENTRY TgGpuDdiStopDevice(PVOID context)

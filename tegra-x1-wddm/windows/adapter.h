@@ -9,6 +9,7 @@
 #include "worker.h"
 #include "panel.h"
 #include "nvdec_adapter.h"
+#include "diagnostic_events.h"
 
 /* DWM and shell processes share this VidMm-managed page-table segment.
  * The initial 16-table (2 MiB) pool fills during desktop device creation;
@@ -31,10 +32,13 @@ typedef struct _TG_GPU_ADAPTER {
     TG_GPU_WORKER Worker;
     TG_GPU_PANEL Panel;
     TG_NVDEC_ADAPTER Video;
+    volatile LONG64 StartupDiagnostic;
     enum tg_gpu_adapter_state State;
     BOOLEAN EngineReady,QueueReady;
 } TG_GPU_ADAPTER;
 _Static_assert(FIELD_OFFSET(TG_GPU_ADAPTER,Engine)==0,"adapter DDI handle layout");
+_Static_assert(FIELD_OFFSET(TG_GPU_ADAPTER,StartupDiagnostic)%8==0,
+    "startup diagnostic snapshot alignment");
 
 DXGKDDI_ADD_DEVICE TgGpuDdiAddDevice;
 DXGKDDI_START_DEVICE TgGpuDdiStartDevice;
@@ -42,6 +46,8 @@ DXGKDDI_STOP_DEVICE TgGpuDdiStopDevice;
 DXGKDDI_REMOVE_DEVICE TgGpuDdiRemoveDevice;
 DXGKDDI_RESETFROMTIMEOUT TgGpuDdiResetFromTimeout;
 DXGKDDI_RESTARTFROMTIMEOUT TgGpuDdiRestartFromTimeout;
+DXGKDDI_COLLECTDIAGNOSTICINFO TgGpuDdiCollectDiagnosticInfo;
+void TgGpuRecordStartup(TG_GPU_ADAPTER *,enum tg_gpu_startup_stage,NTSTATUS);
 NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *);
 void TgGpuRegisterResetDdis(DRIVER_INITIALIZATION_DATA *);
 /* The platform provider starts after StartDevice acquires resources. */

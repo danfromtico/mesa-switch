@@ -18,6 +18,7 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
     DXGKRNL_INTERFACE *dxgk,ULONG *sources,ULONG *children)
 {
     TG_GPU_ADAPTER *a=context;
+    TgGpuRecordStartup(a,TgGpuStartupEntering,STATUS_PENDING);
     /* Startup samples only. A closed gate or failed start must not leave an
      * old successful measurement looking like this activation's result.
      */
@@ -31,10 +32,12 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
     record_status(L"BootPermitStatus",permit);
     NTSTATUS gate=NT_SUCCESS(permit)?STATUS_SUCCESS:STATUS_DEVICE_NOT_READY;
     record_status(L"StartGateStatus",gate);
+    TgGpuRecordStartup(a,TgGpuStartupPermit,gate);
     if(!NT_SUCCESS(gate))return gate;
 #endif
     NTSTATUS status=TgGpuDdiStartDevice(context,start,dxgk,sources,children);
     record_status(L"ResourceStatus",status);
+    TgGpuRecordStartup(a,TgGpuStartupResources,status);
     if (!NT_SUCCESS(status)) return status;
 
     /* Ordinary bring-up builds exercise paging. The explicitly gated test
@@ -46,6 +49,7 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
 #endif
     status=TgGpuStartPlatformAdapter(a);
     record_status(L"HardwareStatus",status);
+    TgGpuRecordStartup(a,TgGpuStartupHardware,status);
     if(NT_SUCCESS(status)) {
         record_status(L"BootGpuMeasuredKhz",(NTSTATUS)a->Hardware.Clock.measured_khz);
         record_status(L"BootGpuRailUv",(NTSTATUS)a->Hardware.Clock.rail_uv);
@@ -54,14 +58,21 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
     if (!NT_SUCCESS(status)) return status;
     status=TgGpuPanelStart(a);
     record_status(L"PanelStatus",status);
+    TgGpuRecordStartup(a,TgGpuStartupPanel,status);
     if (!NT_SUCCESS(status)) {
         NTSTATUS cleanup=TgGpuPanelStop(a);
         if (NT_SUCCESS(cleanup)) cleanup=TgGpuDdiStopDevice(a);
-        return NT_SUCCESS(cleanup)?status:cleanup;
+        if (!NT_SUCCESS(cleanup)) {
+            TgGpuRecordStartup(a,TgGpuStartupPanel,cleanup);
+            return cleanup;
+        }
+        return status;
     }
     *sources=*children=1;
 #endif
     if(status==STATUS_SUCCESS)TgNvdecAdapterInitialize(a);
+    if (NT_SUCCESS(status))
+        TgGpuRecordStartup(a,TgGpuStartupComplete,status);
     return status;
 }
 
@@ -197,6 +208,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
     DRIVER_INITIALIZATION_DATA d={0};
     d.Version=DXGKDDI_INTERFACE_VERSION;
     TgGpuRegisterAdapterDdis(&d);
+    d.DxgkDdiCollectDiagnosticInfo=TgGpuDdiCollectDiagnosticInfo;
     d.DxgkDdiStartDevice=start_device;
     d.DxgkDdiSetPowerState=set_power;
     d.DxgkDdiInterruptRoutine=interrupt;
