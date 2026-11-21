@@ -582,7 +582,7 @@
       "question": "在正式无写入窗口的首次公开 CALL 与 RETURN 之间，本机能否写透归属于这次绘图线程与窗口的 Windows Blt 166 原始事件？",
       "status": "观测缺口",
       "existing_observation": "前轮内核 Blt 166 的消费时间早于公开 RETURN 4.013 ms，控制端对该事件的确认返回晚 3.983 ms。启动 83151 的四条独立 Windows 写透记录在受控启动 83239 上完整回读。",
-      "missing_observation": "尚缺此轮完整且匹配的 Blt 166 原始载荷在公开 RETURN 之前由 Windows 本机写透完成的确认。",
+      "missing_observation": "这次同对象的 166 原始载荷尚缺公开 RETURN 前完成本机写透的实测。",
       "pass_condition": "唯一轮次文件以 CREATE_NEW 和 FILE_FLAG_WRITE_THROUGH 创建。完整 WriteFile 及 FlushFileBuffers 成功返回位于首次公开 CALL 至 RETURN 内，回读数据的 CRC32 与两端 SHA-256 通过，并同独立 ETL 的 PID/TID、对象、时间和载荷一致。",
       "evidence": [
         {
@@ -600,9 +600,11 @@
         "path"
       ],
       "round_ids": [
-        "win-present-local-blt-20261121-01"
+        "win-present-local-blt-20261121-01",
+        "win-local-receipt-storage-20261121-01",
+        "win-present-preallocated-blt-20261121-01"
       ],
-      "latest_observation": "启动 91476，绘图 PID/TID 584/1664。首次公开 Present 历时 19.221 ms。同窗口内核 Blt 166 的本机原始记录为 148 字节，两端 SHA-256、CRC32 及独立 ETL 均吻合。写入及文件刷新耗时 10.416 ms，写透返回相对公开 RETURN 为 +5.688 ms，相对 DXGI 43 为 +5.710 ms。"
+      "latest_observation": "开机 91476，绘图 PID/TID 4500/972。独立双路 ETL 与板端 64 KiB 文件中的 148 字节 Blt 166 记录匹配，验证 nonce、CRC 和文件尾部。同步写入及刷新用时 3.472 ms，成功返回相对 DXGI 43 +0.296 ms，相对公开 RETURN +0.278 ms。"
     },
     {
       "id": "WIN-PRESENT-KMT",
@@ -833,7 +835,7 @@
       "question": "受监控围栏的 GPU 信号、同值上下文等待与等待完成能否逐包关联？",
       "status": "观测缺口",
       "existing_observation": "历史序号 2 为值 1 的信号包。独立原生客户端同一围栏 CPU 映射 0→1，记录了 GPU 信号和 CPU 等待。",
-      "missing_observation": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。",
+      "missing_observation": "六个正式空窗口可由固定实现和同阶段成功回执推断事件等待成功，仍缺同句柄 Win32 等待进入、返回码及是否实际阻塞的直接记录。三次原故障的 297 以及首次 CALL 后的 Windows 内核接收、返回或板级复位记录均未留存。",
       "pass_condition": "解析安装版本事件模板，按上下文、对象、值和队列包身份匹配 signal 与 wait，证明依赖获满足后等待完成。",
       "evidence": [
         {
@@ -853,9 +855,10 @@
       "round_ids": [
         "win-empty-fence-20261121-01",
         "win-empty-fence-identity-20261121-01",
-        "win-fence-all-owners-20261121-01"
+        "win-fence-all-owners-20261121-01",
+        "win-fence-cpu-return-20261121-01"
       ],
-      "latest_observation": "六份正式无写入窗口从值 1 的围栏创建到首帧采集，全进程回读覆盖 772 条 GPU 等待API 与 195 条队列等待。三份原故障的 CALL 前缓冲另有 84 条 API 与 21 条队列等待。逐项配对对象和值后，均未发现等待目标为应用值 1 围栏的 GPU 请求。独立清屏对照匹配同一对象和值的 API、等待包、另一上下文及退役。"
+      "latest_observation": "三次原故障启动 82058、82221、82382 的绘图线程均在值 1、序号 2 信号包退役后，分别经 0.391、0.274、0.360 ms 写出 tgd3d 第 2 阶段初始化 S_OK，接着发布旧式 0x000b000f 设备。第 2 阶段成功分别早于首次 CALL 360.101、1100.821、400.583 ms。同期正常翻转对照顺序一致。六个正式空窗口还逐次匹配到同对象值 1 的 CPU 异步通知登记，其登记在信号退役前，同一初始化阶段于退役后 0.311–0.416 ms 成功。"
     },
     {
       "id": "WIN-MONITORED-CPU",
@@ -1990,6 +1993,81 @@
         "first_anomaly_or_missing": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。"
       },
       "finished_utc": "2026-11-21T15:01:49.836236+00:00"
+    },
+    {
+      "round_id": "win-local-receipt-storage-20261121-01",
+      "contract_id": "WIN-BLT-LOCAL-FLUSH",
+      "windows_question": "WIN-BLT-LOCAL-FLUSH",
+      "method": "同卷比较首次扩展文件与提前预写文件的同步持久化开销",
+      "plan": "windows-native-graphics/rounds/win-local-receipt-storage-20261121-01.plan.json",
+      "plan_sha256": "8653893d11f5a82c335c0ef9bd2a3fd4a9066cf67214be8ae278609a195dc1a5",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:06:20.951029+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-local-receipt-storage-20261121-01.result.json",
+      "result_sha256": "a4402fc1c4718b86e2d3da060493b1989c4510527d5dffc161c36068eab4591d",
+      "status": "观测缺口",
+      "finding": "开机 91476 的同一 NTFS 卷，12 对 148 字节写透样本中，空文件组写入加刷新中位数为 8.130 ms，提前预写并刷新 64 KiB 后为 4.664 ms。预写组 5/12 低于既有 Blt 回调至 DXGI 返回的 4.481 ms，11/12 低于较早 CDD 回调的 6.793 ms。24 份均逐字节回读并核对 SHA-256，本轮卷上样本目录已移除。",
+      "missing_observation": "独立 I/O 测量表明提前预写有机会赶上，但 Blt 时间窗仍无可靠裕量。取得实际图形调用中同一个 CDD 或 Blt 原始载荷的本机写透成功时间、独立 ETL 匹配和公开返回顺序后，才能裁决调用内持久化。",
+      "boundaries": {
+        "last_entry": "同一开机和进程线程的同步 148 字节 WriteFile，空文件或已写 64 KiB，时间为 Windows QPC。",
+        "last_return": "24 次 Windows FlushFileBuffers 均成功，数据全量回读后清除了唯一的本轮目录。",
+        "first_anomaly_or_missing": "独立 I/O 测量表明提前预写有机会赶上，但 Blt 时间窗仍无可靠裕量。取得实际图形调用中同一个 CDD 或 Blt 原始载荷的本机写透成功时间、独立 ETL 匹配和公开返回顺序后，才能裁决调用内持久化。"
+      },
+      "finished_utc": "2026-11-21T15:06:53.582744+00:00"
+    },
+    {
+      "round_id": "win-fence-cpu-return-20261121-01",
+      "contract_id": "WIN-FENCE-WAIT",
+      "windows_question": "WIN-FENCE-WAIT",
+      "method": "按实载组件及两路 ETL 复核值 1 CPU 通知所在初始化阶段",
+      "plan": "windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.plan.json",
+      "plan_sha256": "9dd062ec278efc0742426a5cecb14b5dd7a981ce8958287bd57159f70eded749",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:08:07.589623+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json",
+      "result_sha256": "d342b3318a314fc5198a3a50b28fe46d21735a6513e8d90379f044612c926715",
+      "status": "观测缺口",
+      "finding": "三次原故障启动 82058、82221、82382 的绘图线程均在值 1、序号 2 信号包退役后，分别经 0.391、0.274、0.360 ms 写出 tgd3d 第 2 阶段初始化 S_OK，接着发布旧式 0x000b000f 设备。第 2 阶段成功分别早于首次 CALL 360.101、1100.821、400.583 ms。同期正常翻转对照顺序一致。六个正式空窗口还逐次匹配到同对象值 1 的 CPU 异步通知登记，其登记在信号退役前，同一初始化阶段于退役后 0.311–0.416 ms 成功。",
+      "missing_observation": "六个正式空窗口可由固定实现和同阶段成功回执推断事件等待成功，仍缺同句柄 Win32 等待进入、返回码及是否实际阻塞的直接记录。三次原故障的 297 以及首次 CALL 后的 Windows 内核接收、返回或板级复位记录均未留存。",
+      "boundaries": {
+        "last_entry": "四份旧档案均以同一 Device 指针、PID/TID 与进程创建 FILETIME 匹配 tgd3d 第 2 阶段进入，阶段内有值 1 信号进入、提交、返回和退役。",
+        "last_return": "原三次及正常翻转对照的初始化第 2 阶段和旧式 tgd3d 创建设备回执均为 S_OK。单独已核实原三次调用前设备状态查询 S_OK。",
+        "first_anomaly_or_missing": "六个正式空窗口可由固定实现和同阶段成功回执推断事件等待成功，仍缺同句柄 Win32 等待进入、返回码及是否实际阻塞的直接记录。三次原故障的 297 以及首次 CALL 后的 Windows 内核接收、返回或板级复位记录均未留存。"
+      },
+      "finished_utc": "2026-11-21T15:13:54.794976+00:00"
+    },
+    {
+      "round_id": "win-present-preallocated-blt-20261121-01",
+      "contract_id": "WIN-BLT-LOCAL-FLUSH",
+      "windows_question": "WIN-BLT-LOCAL-FLUSH",
+      "method": "同一正式空窗口首次 Present 的板端预写槽复测",
+      "plan": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.plan.json",
+      "plan_sha256": "eb62571a2f7e480900ec6fbe4fe648325e206c4d402230715c815c824fc17a45",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:13:59.189943+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+      "result_sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c",
+      "status": "观测缺口",
+      "finding": "开机 91476，绘图 PID/TID 4500/972。独立双路 ETL 与板端 64 KiB 文件中的 148 字节 Blt 166 记录匹配，验证 nonce、CRC 和文件尾部。同步写入及刷新用时 3.472 ms，成功返回相对 DXGI 43 +0.296 ms，相对公开 RETURN +0.278 ms。",
+      "missing_observation": "这次同对象的 166 原始载荷尚缺公开 RETURN 前完成本机写透的实测。",
+      "boundaries": {
+        "last_entry": {
+          "blt_qpc": 204759296378,
+          "callback_qpc": 204759317895,
+          "write_start_qpc": 204759317986
+        },
+        "last_return": {
+          "board_write_flush_qpc": 204759384649,
+          "dxgi_stop_qpc": 204759378960,
+          "public_return_qpc": 204759379305,
+          "public_hresult": "00000000"
+        },
+        "first_anomaly_or_missing": "这次同对象的 166 原始载荷尚缺公开 RETURN 前完成本机写透的实测。"
+      },
+      "finished_utc": "2026-11-21T15:15:51.417303+00:00"
     }
   ],
   "progress": {
@@ -2002,8 +2080,8 @@
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 31,
-    "new_device_executions": 7
+    "registered_rounds": 34,
+    "new_device_executions": 8
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -2057,6 +2135,10 @@
         {
           "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
           "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+          "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
         }
       ],
       "resume_condition": "发现覆盖原次的故障转储、独立串口或板级记录，或正式条件下再次自然出现同症状并留有同次调用后的持久记录。核对首个失败步骤和组件后再进入原场景的三次修复验收。",
@@ -2072,6 +2154,18 @@
       "external_transport_check": {
         "path": "windows-native-graphics/rounds/win-reset-external-transport-20261121-01.result.json",
         "sha256": "9ae40a973de907e943383a8e60fd313c79836e1bdffcb7629452c94844f620d6"
+      },
+      "original_device_initialization": {
+        "path": "windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json",
+        "sha256": "d342b3318a314fc5198a3a50b28fe46d21735a6513e8d90379f044612c926715"
+      },
+      "onboard_storage_timing": {
+        "path": "windows-native-graphics/rounds/win-local-receipt-storage-20261121-01.result.json",
+        "sha256": "a4402fc1c4718b86e2d3da060493b1989c4510527d5dffc161c36068eab4591d"
+      },
+      "preallocated_board_receipt": {
+        "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+        "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
       }
     }
   },

@@ -50,6 +50,12 @@
 
 六份正式空窗口的会话覆盖所有进程和线程，共有 772 条 GPU 等待 API 和 195 条队列等待。三份历史故障在 CALL 前存有 84 条 API 和 21 条队列等待。两组均未发现等待目标与应用值 1 围栏匹配。独立清屏对照确认另一上下文的同对象、同值等待可以被当前解码识别并配对退役。[全进程围栏回执](windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json)
 
+原三次空窗口故障的值 1 信号退役后 0.274–0.391 ms，同绘图线程的 tgd3d 第 2 阶段返回 S_OK，随后旧式设备创建成功。同期翻转对照顺序一致。六份现行正式空窗口将同对象的 CPU 异步登记与初始化成功配对。原三次仍缺 CPU 句柄等待及首次 CALL 之后的回执。[初始化与信号阶段复核](windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json)
+
+同卷 12 对文件样本中，提前预写使 148 字节同步写入和刷新中位数从 8.130 ms 降至 4.664 ms。5 次预写样本低于此前的 Blt 时间窗，11 次低于更早的 CDD 时间窗。[板端文件回读与逐样本 QPC](windows-native-graphics/rounds/win-local-receipt-storage-20261121-01.result.json)
+
+开机 91476，绘图 PID/TID 4500/972。独立双路 ETL 与板端 64 KiB 文件中的 148 字节 Blt 166 记录匹配，验证 nonce、CRC 和文件尾部。同步写入及刷新用时 3.472 ms，成功返回相对 DXGI 43 +0.296 ms，相对公开 RETURN +0.278 ms。 同次核对了客户区、输入、退出和同一桌面。原三次重启仍需各自 CALL 后的持久记录。[预写槽实机回执](windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

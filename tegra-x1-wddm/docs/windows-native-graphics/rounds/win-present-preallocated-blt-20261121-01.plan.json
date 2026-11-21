@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "round_id": "win-present-preallocated-blt-20261121-01",
+  "contract_id": "WIN-BLT-LOCAL-FLUSH",
+  "windows_question": "WIN-BLT-LOCAL-FLUSH",
+  "owner": "Windows dxgkrnl、专属 ETW 消费端和 Switch 本机存储",
+  "question": "在正式无写入窗口的首次公开 CALL 与 RETURN 之间，本机能否写透归属于这次绘图线程与窗口的 Windows Blt 166 原始事件？",
+  "method": "同一正式空窗口首次 Present 的板端预写槽复测",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "唯一轮次文件以 CREATE_NEW 和 FILE_FLAG_WRITE_THROUGH 创建。完整 WriteFile 及 FlushFileBuffers 成功返回位于首次公开 CALL 至 RETURN 内，回读数据的 CRC32 与两端 SHA-256 通过，并同独立 ETL 的 PID/TID、对象、时间和载荷一致。",
+  "observations": [
+    "沿用同一签名空窗口应用和正式永久许可基线、交流供电、手持、GPU Code 0、两个 BGRA 缓冲、旧式 DDI 0x000b000f 与首次 Present(1,0)。",
+    "在应用发出前 CREATE_NEW 并写透 65536 字节，刷新并归零文件偏移。定向 ETW 的 1 ms 名义刷新实时见证只接受 286 与 166，首条目标 Blt 166 覆盖本机槽且在打印该条实时事件之前完成缓存刷新。",
+    "核对本机文件全哈希、同轮 nonce、有效 CRC 和 A5 尾部，关闭会话和临时任务。与两路独立 ETL 的原始载荷、绘图 PID/TID、窗口及源和目标链交叉核对，按同一 Windows QPC 比较 DXGI 43 及公开 RETURN。",
+    "仅启动一次正常图形应用，覆盖成功、迟到、无记录或未解释重启。保留回执，清理本轮文件和任务，核对供电与同一正式组件。"
+  ],
+  "inputs": {
+    "app": {
+      "Board-Case.ps1": "2c7a91f6a636833fbd4312708061843e37c90029ae89ce27be636013047340b1",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0"
+    },
+    "client_input_source_sha256": "863f388517cd989d5ef8278b5f7a680e787a1e681a9bc0e4086518b55f3938c3",
+    "nonce": "d357b8ba371c427dadbaa47910892f15",
+    "observer_source_sha256": "1e4c5b22b6a534f364653a3db52054403f53c247ed858ad85231269126e9db44",
+    "observer_exe_sha256": "fc9ee359f8258e3c4afb653348a7a4114b5d6e8ff33aaec5bc04277762864e74",
+    "host_receiver_sha256": "c74c93e9e738c20889488d9e39264c90f7739235bdc0c6dd020be7986527b664",
+    "review_sha256": "b2c67f55a60e46ead2b586ec0f69db30b59c03e61958cbf7fa38a2e288cda79c",
+    "runner_sha256": {
+      "run_preallocated_fixture.py": "0bc7e76ad32e7f337bcb118eabab1121b1a9813fdc0b2bf3489e55f9de357246",
+      "dispatch_preallocated.py": "301fdd95863647a3ffa3f326112bf4a252858df0b5906d66533338ed5ee2df4a",
+      "cleanup_preallocated.py": "2de6d7a860383913b6f7cc1246f320b4321f15bd5c766071f7ee3a9cef043e71",
+      "cleanup_preallocated_files.py": "32b4a9bd70d4958d829c6132214a540431b993b615078c6240d0eac7286cab55"
+    },
+    "reader_sha256": "4fb16e46cae1b776dc19555cf6ddee95a41d04e16a5a445d1c8fa99ce7d1226d",
+    "slot_parser_sha256": "354ef541dfd54ac2f0457615bc97fcc58cd6f8d382cd4ec4fb4023e1855e01c3",
+    "slot_parser_checks_sha256": "a4ad47221c534a507e4b337358a7b453b280d92884f0d378269b4e58e44bc7bf",
+    "slot_size": 65536,
+    "placeholder_byte": "a5",
+    "nominal_early_interval_ms": 1,
+    "timing_control": {
+      "path": "windows-native-graphics/rounds/win-local-receipt-storage-20261121-01.result.json",
+      "sha256": "a4402fc1c4718b86e2d3da060493b1989c4510527d5dffc161c36068eab4591d"
+    },
+    "same_app_prior": {
+      "path": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
+      "sha256": "f8f893c4d9a450c4a28716403ce2cc45bbdc1777325420d108c4efd8c7ccec27"
+    }
+  }
+}

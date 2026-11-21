@@ -32,9 +32,10 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-platform-reset-path-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-reset-external-transport-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
       ],
-      "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result.",
+      "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result. An independent replay of the three original client ETLs also found successful stage-2 tgd3d initialization and legacy device publication by the drawing thread after the value-1 signal retired and before the first public CALL. It found the same ordering in the contemporary flip control. The old traces still lack a matching asynchronous CPU wait record and direct evidence after CALL.",
       "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
       "close_when": "Identify the initiating failure and fix it. Retest the original legacy SEQUENTIAL trigger on AC at least three consecutive times, including correct visible output, normal exit and desktop continuity.",
       "resolution": null
@@ -2138,6 +2139,81 @@
           "first_anomaly_or_missing": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。"
         },
         "finished_utc": "2026-11-21T15:01:49.836236+00:00"
+      },
+      {
+        "round_id": "win-local-receipt-storage-20261121-01",
+        "contract_id": "WIN-BLT-LOCAL-FLUSH",
+        "windows_question": "WIN-BLT-LOCAL-FLUSH",
+        "method": "同卷比较首次扩展文件与提前预写文件的同步持久化开销",
+        "plan": "windows-native-graphics/rounds/win-local-receipt-storage-20261121-01.plan.json",
+        "plan_sha256": "8653893d11f5a82c335c0ef9bd2a3fd4a9066cf67214be8ae278609a195dc1a5",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T15:06:20.951029+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-local-receipt-storage-20261121-01.result.json",
+        "result_sha256": "a4402fc1c4718b86e2d3da060493b1989c4510527d5dffc161c36068eab4591d",
+        "status": "观测缺口",
+        "finding": "开机 91476 的同一 NTFS 卷，12 对 148 字节写透样本中，空文件组写入加刷新中位数为 8.130 ms，提前预写并刷新 64 KiB 后为 4.664 ms。预写组 5/12 低于既有 Blt 回调至 DXGI 返回的 4.481 ms，11/12 低于较早 CDD 回调的 6.793 ms。24 份均逐字节回读并核对 SHA-256，本轮卷上样本目录已移除。",
+        "missing_observation": "独立 I/O 测量表明提前预写有机会赶上，但 Blt 时间窗仍无可靠裕量。取得实际图形调用中同一个 CDD 或 Blt 原始载荷的本机写透成功时间、独立 ETL 匹配和公开返回顺序后，才能裁决调用内持久化。",
+        "boundaries": {
+          "last_entry": "同一开机和进程线程的同步 148 字节 WriteFile，空文件或已写 64 KiB，时间为 Windows QPC。",
+          "last_return": "24 次 Windows FlushFileBuffers 均成功，数据全量回读后清除了唯一的本轮目录。",
+          "first_anomaly_or_missing": "独立 I/O 测量表明提前预写有机会赶上，但 Blt 时间窗仍无可靠裕量。取得实际图形调用中同一个 CDD 或 Blt 原始载荷的本机写透成功时间、独立 ETL 匹配和公开返回顺序后，才能裁决调用内持久化。"
+        },
+        "finished_utc": "2026-11-21T15:06:53.582744+00:00"
+      },
+      {
+        "round_id": "win-fence-cpu-return-20261121-01",
+        "contract_id": "WIN-FENCE-WAIT",
+        "windows_question": "WIN-FENCE-WAIT",
+        "method": "按实载组件及两路 ETL 复核值 1 CPU 通知所在初始化阶段",
+        "plan": "windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.plan.json",
+        "plan_sha256": "9dd062ec278efc0742426a5cecb14b5dd7a981ce8958287bd57159f70eded749",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T15:08:07.589623+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json",
+        "result_sha256": "d342b3318a314fc5198a3a50b28fe46d21735a6513e8d90379f044612c926715",
+        "status": "观测缺口",
+        "finding": "三次原故障启动 82058、82221、82382 的绘图线程均在值 1、序号 2 信号包退役后，分别经 0.391、0.274、0.360 ms 写出 tgd3d 第 2 阶段初始化 S_OK，接着发布旧式 0x000b000f 设备。第 2 阶段成功分别早于首次 CALL 360.101、1100.821、400.583 ms。同期正常翻转对照顺序一致。六个正式空窗口还逐次匹配到同对象值 1 的 CPU 异步通知登记，其登记在信号退役前，同一初始化阶段于退役后 0.311–0.416 ms 成功。",
+        "missing_observation": "六个正式空窗口可由固定实现和同阶段成功回执推断事件等待成功，仍缺同句柄 Win32 等待进入、返回码及是否实际阻塞的直接记录。三次原故障的 297 以及首次 CALL 后的 Windows 内核接收、返回或板级复位记录均未留存。",
+        "boundaries": {
+          "last_entry": "四份旧档案均以同一 Device 指针、PID/TID 与进程创建 FILETIME 匹配 tgd3d 第 2 阶段进入，阶段内有值 1 信号进入、提交、返回和退役。",
+          "last_return": "原三次及正常翻转对照的初始化第 2 阶段和旧式 tgd3d 创建设备回执均为 S_OK。单独已核实原三次调用前设备状态查询 S_OK。",
+          "first_anomaly_or_missing": "六个正式空窗口可由固定实现和同阶段成功回执推断事件等待成功，仍缺同句柄 Win32 等待进入、返回码及是否实际阻塞的直接记录。三次原故障的 297 以及首次 CALL 后的 Windows 内核接收、返回或板级复位记录均未留存。"
+        },
+        "finished_utc": "2026-11-21T15:13:54.794976+00:00"
+      },
+      {
+        "round_id": "win-present-preallocated-blt-20261121-01",
+        "contract_id": "WIN-BLT-LOCAL-FLUSH",
+        "windows_question": "WIN-BLT-LOCAL-FLUSH",
+        "method": "同一正式空窗口首次 Present 的板端预写槽复测",
+        "plan": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.plan.json",
+        "plan_sha256": "eb62571a2f7e480900ec6fbe4fe648325e206c4d402230715c815c824fc17a45",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T15:13:59.189943+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+        "result_sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c",
+        "status": "观测缺口",
+        "finding": "开机 91476，绘图 PID/TID 4500/972。独立双路 ETL 与板端 64 KiB 文件中的 148 字节 Blt 166 记录匹配，验证 nonce、CRC 和文件尾部。同步写入及刷新用时 3.472 ms，成功返回相对 DXGI 43 +0.296 ms，相对公开 RETURN +0.278 ms。",
+        "missing_observation": "这次同对象的 166 原始载荷尚缺公开 RETURN 前完成本机写透的实测。",
+        "boundaries": {
+          "last_entry": {
+            "blt_qpc": 204759296378,
+            "callback_qpc": 204759317895,
+            "write_start_qpc": 204759317986
+          },
+          "last_return": {
+            "board_write_flush_qpc": 204759384649,
+            "dxgi_stop_qpc": 204759378960,
+            "public_return_qpc": 204759379305,
+            "public_hresult": "00000000"
+          },
+          "first_anomaly_or_missing": "这次同对象的 166 原始载荷尚缺公开 RETURN 前完成本机写透的实测。"
+        },
+        "finished_utc": "2026-11-21T15:15:51.417303+00:00"
       }
     ]
   }

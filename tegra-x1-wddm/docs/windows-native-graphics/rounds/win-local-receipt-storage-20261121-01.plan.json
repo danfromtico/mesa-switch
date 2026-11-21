@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "round_id": "win-local-receipt-storage-20261121-01",
+  "contract_id": "WIN-BLT-LOCAL-FLUSH",
+  "windows_question": "WIN-BLT-LOCAL-FLUSH",
+  "owner": "Windows dxgkrnl、专属 ETW 消费端和 Switch 本机存储",
+  "question": "在正式无写入窗口的首次公开 CALL 与 RETURN 之间，本机能否写透归属于这次绘图线程与窗口的 Windows Blt 166 原始事件？",
+  "method": "同卷比较首次扩展文件与提前预写文件的同步持久化开销",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "唯一轮次文件以 CREATE_NEW 和 FILE_FLAG_WRITE_THROUGH 创建。完整 WriteFile 及 FlushFileBuffers 成功返回位于首次公开 CALL 至 RETURN 内，回读数据的 CRC32 与两端 SHA-256 通过，并同独立 ETL 的 PID/TID、对象、时间和载荷一致。",
+  "observations": [
+    "核对独占租约，前后复读启动、DWM、交流供电、手持、Code 0、永久许可和已加载组件哈希。只在此前实机采集目录所在卷创建一次性唯一子目录。",
+    "每组先各预热一次。后续 12 组交替测试顺序，两种条件均按既有采集端配置使用 CREATE_NEW、FILE_SHARE_READ、FILE_FLAG_WRITE_THROUGH、148 字节同步 WriteFile 和 FlushFileBuffers。",
+    "预写组先实际写入并刷新 65536 字节，再将文件偏移归零。两种条件均在独立 120 ms 等待后记录同一线程写入与刷新各自的 QPC 进入和返回。",
+    "逐字节回读两类样本并记录 SHA-256，独立按输入生成规则复算期望值，删除仅属本轮的样本目录。将独立 I/O 延迟与既有回调到 DXGI 43 的窗口比较。"
+  ],
+  "inputs": {
+    "script_sha256": "27b900e08cdae87100e1189c206c7857b168ffc005891b70f524888cd093c3fd",
+    "verifier_sha256": "43ecf6ae18d1cccaaaac0ac140a8f94fd24511541b7513963b289b3125250092",
+    "prior_actual": {
+      "path": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
+      "sha256": "f8f893c4d9a450c4a28716403ce2cc45bbdc1777325420d108c4efd8c7ccec27"
+    },
+    "prior_focused": {
+      "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+      "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+    },
+    "microsoft": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+      "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers"
+    ],
+    "applications_launched": 0
+  }
+}

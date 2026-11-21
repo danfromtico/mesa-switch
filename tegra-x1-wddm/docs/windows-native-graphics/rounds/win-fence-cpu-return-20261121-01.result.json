@@ -1,0 +1,2164 @@
+{
+  "schema": 1,
+  "round_id": "win-fence-cpu-return-20261121-01",
+  "contract_id": "WIN-FENCE-WAIT",
+  "windows_question": "WIN-FENCE-WAIT",
+  "plan_sha256": "9dd062ec278efc0742426a5cecb14b5dd7a981ce8958287bd57159f70eded749",
+  "status": "观测缺口",
+  "finding": "三次原故障启动 82058、82221、82382 的绘图线程均在值 1、序号 2 信号包退役后，分别经 0.391、0.274、0.360 ms 写出 tgd3d 第 2 阶段初始化 S_OK，接着发布旧式 0x000b000f 设备。第 2 阶段成功分别早于首次 CALL 360.101、1100.821、400.583 ms。同期正常翻转对照顺序一致。六个正式空窗口还逐次匹配到同对象值 1 的 CPU 异步通知登记，其登记在信号退役前，同一初始化阶段于退役后 0.311–0.416 ms 成功。",
+  "missing_observation": "六个正式空窗口可由固定实现和同阶段成功回执推断事件等待成功，仍缺同句柄 Win32 等待进入、返回码及是否实际阻塞的直接记录。三次原故障的 297 以及首次 CALL 后的 Windows 内核接收、返回或板级复位记录均未留存。",
+  "device_executions": 0,
+  "evidence": {
+    "current": [
+      {
+        "case": "win-empty-present-20261121-01",
+        "boot": 91476,
+        "pid": 5992,
+        "tid": 5988,
+        "hwnd": 524312,
+        "qpc_frequency": 19200000,
+        "archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+        "display_sha256": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+        "scene_sha256": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a",
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "display_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "application_modules": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "stage_enter": {
+          "qpc": 94844115586,
+          "pid": 5992,
+          "tid": 5988,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0a00008000000000020000000000000060f1a622e3010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+          "result": -2147483638,
+          "arg0": 2,
+          "arg1": 2075050570080,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397419614562214
+        },
+        "stage_return": {
+          "qpc": 94844567433,
+          "pid": 5992,
+          "tid": 5988,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0000000000000000020000000000000060f1a622e3010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+          "result": 0,
+          "arg0": 2,
+          "arg1": 2075050570080,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397419614562214
+        },
+        "legacy_device_published": {
+          "qpc": 94844640274,
+          "pid": 5992,
+          "tid": 5988,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397419614562214
+        },
+        "bridge": {
+          "create": {
+            "qpc": 94844483447,
+            "pid": 5992,
+            "tid": 5988,
+            "provider": "kernel",
+            "id": 290,
+            "version": 0,
+            "fields": {
+              "hAdapter": 18446706169594454016,
+              "hSyncObject": 18446706169642841536,
+              "Reason": 0,
+              "Flags": 3,
+              "SharedHandle": 0,
+              "InitialValue": 0
+            }
+          },
+          "kernel_handle": {
+            "qpc": 94844492366,
+            "pid": 5992,
+            "tid": 5988,
+            "provider": "kernel",
+            "id": 1069,
+            "version": 1,
+            "fields": {
+              "pSyncObject": 18446706169642841536,
+              "KMTHandle": 1073743232,
+              "pDxgDevice": 18446611100200693776
+            }
+          },
+          "gpu_signal_enter": {
+            "qpc": 94844512904,
+            "pid": 5992,
+            "tid": 5988,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a00008000000000010000000500000030f8ad22e3010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 2075051030576,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397419614562214
+          },
+          "gpu_signal_packet": {
+            "qpc": 94844513570,
+            "pid": 5992,
+            "tid": 5988,
+            "provider": "kernel",
+            "id": 245,
+            "version": 2,
+            "fields": {
+              "hContext": 18446611100106939808,
+              "SubmitSequence": 2,
+              "Flags": 0,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169642841536
+              ],
+              "FenceValue": [
+                1
+              ],
+              "pQueuePacket": 18446706169621553168
+            }
+          },
+          "gpu_signal_return": {
+            "qpc": 94844513919,
+            "pid": 5992,
+            "tid": 5988,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0000000000000000010000000500000030f8ad22e3010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 2075051030576,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397419614562214
+          },
+          "signal_retired": {
+            "qpc": 94844561325,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100106939808,
+              "PacketType": 5,
+              "SubmitSequence": 2,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169621553168
+            }
+          },
+          "cpu_async_registration": {
+            "qpc": 94844516499,
+            "pid": 5992,
+            "tid": 5988,
+            "provider": "kernel",
+            "id": 297,
+            "version": 0,
+            "fields": {
+              "hDevice": 18446611100200693776,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169642841536
+              ],
+              "MonitoredFenceValue": [
+                1
+              ],
+              "hAsyncEvent": 696,
+              "Flags": 0
+            }
+          },
+          "cpu_async_event_raw": {
+            "qpc": 94844516499,
+            "pid": 5992,
+            "tid": 5988,
+            "version": 0,
+            "flags": 0,
+            "id": 297,
+            "payload": "10703db10f87ffff01000000c07591c586ddffff0100000000000000b80200000000000000000000"
+          },
+          "runtime_admission": {
+            "qpc": 94844115934,
+            "pid": 5992,
+            "tid": 5988,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+            "result": 0,
+            "arg0": 25770524687,
+            "arg1": 3,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397419614562214
+          },
+          "other_sync_requests_same_stage": {
+            "count": 15,
+            "hDevice": 18446611100200697872,
+            "object": 18446706169642833856,
+            "first": {
+              "qpc": 94844389314,
+              "pid": 5992,
+              "tid": 5988,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200697872,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169642833856
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "last": {
+              "qpc": 94844504487,
+              "pid": 5992,
+              "tid": 5988,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200697872,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169642833856
+                ],
+                "MonitoredFenceValue": [
+                  7015
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "values": [
+              7001,
+              7002,
+              7003,
+              7004,
+              7005,
+              7006,
+              7007,
+              7008,
+              7009,
+              7010,
+              7011,
+              7012,
+              7013,
+              7014,
+              7015
+            ]
+          }
+        },
+        "raw_trace_header_types": {
+          "SystemHeader": 4,
+          "EventHeader": 64042
+        },
+        "call_qpc": 94861147189,
+        "returned_qpc": 94861380548,
+        "signal_to_stage_return_ms": 0.318,
+        "stage_return_to_public_call_ms": 863.529
+      },
+      {
+        "case": "win-present-live-20261121-02",
+        "boot": 91476,
+        "pid": 5540,
+        "tid": 7812,
+        "hwnd": 524400,
+        "qpc_frequency": 19200000,
+        "archive_sha256": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308",
+        "display_sha256": "14e6750d7823aaeaebda2eafca17da5dbb4f7de7b12cc499459dce10e006c259",
+        "scene_sha256": "f66e4f5690cd6bfc883fc1c2ca880d5a23fa19ba923d61b1bd09df9c3a3f5882",
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "display_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "application_modules": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "stage_enter": {
+          "qpc": 131629065836,
+          "pid": 5540,
+          "tid": 7812,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0a00008000000000020000000000000010f346e413020000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000009038d52cc279dd01",
+          "result": -2147483638,
+          "arg0": 2,
+          "arg1": 2284457489168,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397438773770384
+        },
+        "stage_return": {
+          "qpc": 131629632925,
+          "pid": 5540,
+          "tid": 7812,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0000000000000000020000000000000010f346e413020000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000009038d52cc279dd01",
+          "result": 0,
+          "arg0": 2,
+          "arg1": 2284457489168,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397438773770384
+        },
+        "legacy_device_published": {
+          "qpc": 131629704614,
+          "pid": 5540,
+          "tid": 7812,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000009038d52cc279dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397438773770384
+        },
+        "bridge": {
+          "create": {
+            "qpc": 131629541790,
+            "pid": 5540,
+            "tid": 7812,
+            "provider": "kernel",
+            "id": 290,
+            "version": 0,
+            "fields": {
+              "hAdapter": 18446706169594454016,
+              "hSyncObject": 18446706169620434032,
+              "Reason": 0,
+              "Flags": 3,
+              "SharedHandle": 0,
+              "InitialValue": 0
+            }
+          },
+          "kernel_handle": {
+            "qpc": 131629548343,
+            "pid": 5540,
+            "tid": 7812,
+            "provider": "kernel",
+            "id": 1069,
+            "version": 1,
+            "fields": {
+              "pSyncObject": 18446706169620434032,
+              "KMTHandle": 1073743232,
+              "pDxgDevice": 18446611100200628240
+            }
+          },
+          "gpu_signal_enter": {
+            "qpc": 131629576509,
+            "pid": 5540,
+            "tid": 7812,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a00008000000000010000000500000030e84de413020000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000009038d52cc279dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 2284457945136,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397438773770384
+          },
+          "gpu_signal_packet": {
+            "qpc": 131629577336,
+            "pid": 5540,
+            "tid": 7812,
+            "provider": "kernel",
+            "id": 245,
+            "version": 2,
+            "fields": {
+              "hContext": 18446611100137971104,
+              "SubmitSequence": 2,
+              "Flags": 0,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169620434032
+              ],
+              "FenceValue": [
+                1
+              ],
+              "pQueuePacket": 18446706169645563984
+            }
+          },
+          "gpu_signal_return": {
+            "qpc": 131629577806,
+            "pid": 5540,
+            "tid": 7812,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0000000000000000010000000500000030e84de413020000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000009038d52cc279dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 2284457945136,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397438773770384
+          },
+          "signal_retired": {
+            "qpc": 131629626625,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100137971104,
+              "PacketType": 5,
+              "SubmitSequence": 2,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169645563984
+            }
+          },
+          "cpu_async_registration": {
+            "qpc": 131629583152,
+            "pid": 5540,
+            "tid": 7812,
+            "provider": "kernel",
+            "id": 297,
+            "version": 0,
+            "fields": {
+              "hDevice": 18446611100200628240,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169620434032
+              ],
+              "MonitoredFenceValue": [
+                1
+              ],
+              "hAsyncEvent": 676,
+              "Flags": 0
+            }
+          },
+          "cpu_async_event_raw": {
+            "qpc": 131629583152,
+            "pid": 5540,
+            "tid": 7812,
+            "version": 0,
+            "flags": 0,
+            "id": 297,
+            "payload": "10703cb10f87ffff01000000708c3bc486ddffff0100000000000000a40200000000000000000000"
+          },
+          "runtime_admission": {
+            "qpc": 131629066264,
+            "pid": 5540,
+            "tid": 7812,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000009038d52cc279dd01",
+            "result": 0,
+            "arg0": 25770524687,
+            "arg1": 3,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397438773770384
+          },
+          "other_sync_requests_same_stage": {
+            "count": 15,
+            "hDevice": 18446611100187377680,
+            "object": 18446706169620431952,
+            "first": {
+              "qpc": 131629393845,
+              "pid": 5540,
+              "tid": 7812,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100187377680,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169620431952
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "last": {
+              "qpc": 131629565318,
+              "pid": 5540,
+              "tid": 7812,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100187377680,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169620431952
+                ],
+                "MonitoredFenceValue": [
+                  7015
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "values": [
+              7001,
+              7002,
+              7003,
+              7004,
+              7005,
+              7006,
+              7007,
+              7008,
+              7009,
+              7010,
+              7011,
+              7012,
+              7013,
+              7014,
+              7015
+            ]
+          }
+        },
+        "raw_trace_header_types": {
+          "SystemHeader": 4,
+          "EventHeader": 58361
+        },
+        "call_qpc": 131646464982,
+        "returned_qpc": 131646719229,
+        "signal_to_stage_return_ms": 0.328,
+        "stage_return_to_public_call_ms": 876.67
+      },
+      {
+        "case": "win-present-incall-20261121-01",
+        "boot": 91476,
+        "pid": 7576,
+        "tid": 2116,
+        "hwnd": 589944,
+        "qpc_frequency": 19200000,
+        "archive_sha256": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4",
+        "display_sha256": "c5e687c2200f6624b125b94608e2b4a07e06431a5a76c05800c788125a68b567",
+        "scene_sha256": "d7d500a2fcfb196e448b3fd0da4d2cbf532a72a2437907a969d2c565e89efcd0",
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "display_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "application_modules": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "stage_enter": {
+          "qpc": 138463598049,
+          "pid": 7576,
+          "tid": 2116,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0a00008000000000020000000000000060e1a609ae010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000d0befd00c379dd01",
+          "result": -2147483638,
+          "arg0": 2,
+          "arg1": 1846997868896,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397442333195984
+        },
+        "stage_return": {
+          "qpc": 138464271893,
+          "pid": 7576,
+          "tid": 2116,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0000000000000000020000000000000060e1a609ae010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000d0befd00c379dd01",
+          "result": 0,
+          "arg0": 2,
+          "arg1": 1846997868896,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397442333195984
+        },
+        "legacy_device_published": {
+          "qpc": 138464353343,
+          "pid": 7576,
+          "tid": 2116,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000d0befd00c379dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397442333195984
+        },
+        "bridge": {
+          "create": {
+            "qpc": 138464170099,
+            "pid": 7576,
+            "tid": 2116,
+            "provider": "kernel",
+            "id": 290,
+            "version": 0,
+            "fields": {
+              "hAdapter": 18446706169594454016,
+              "hSyncObject": 18446706169652652192,
+              "Reason": 0,
+              "Flags": 3,
+              "SharedHandle": 0,
+              "InitialValue": 0
+            }
+          },
+          "kernel_handle": {
+            "qpc": 138464178465,
+            "pid": 7576,
+            "tid": 2116,
+            "provider": "kernel",
+            "id": 1069,
+            "version": 1,
+            "fields": {
+              "pSyncObject": 18446706169652652192,
+              "KMTHandle": 1073743232,
+              "pDxgDevice": 18446611100107790240
+            }
+          },
+          "gpu_signal_enter": {
+            "qpc": 138464205973,
+            "pid": 7576,
+            "tid": 2116,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a000080000000000100000005000000c0f8ad09ae010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000d0befd00c379dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 1846998333632,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397442333195984
+          },
+          "gpu_signal_packet": {
+            "qpc": 138464206818,
+            "pid": 7576,
+            "tid": 2116,
+            "provider": "kernel",
+            "id": 245,
+            "version": 2,
+            "fields": {
+              "hContext": 18446611100108721568,
+              "SubmitSequence": 2,
+              "Flags": 0,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169652652192
+              ],
+              "FenceValue": [
+                1
+              ],
+              "pQueuePacket": 18446706169616541072
+            }
+          },
+          "gpu_signal_return": {
+            "qpc": 138464207293,
+            "pid": 7576,
+            "tid": 2116,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000100000005000000c0f8ad09ae010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000d0befd00c379dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 1846998333632,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397442333195984
+          },
+          "signal_retired": {
+            "qpc": 138464263911,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100108721568,
+              "PacketType": 5,
+              "SubmitSequence": 2,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169616541072
+            }
+          },
+          "cpu_async_registration": {
+            "qpc": 138464213689,
+            "pid": 7576,
+            "tid": 2116,
+            "provider": "kernel",
+            "id": 297,
+            "version": 0,
+            "fields": {
+              "hDevice": 18446611100107790240,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169652652192
+              ],
+              "MonitoredFenceValue": [
+                1
+              ],
+              "hAsyncEvent": 696,
+              "Flags": 0
+            }
+          },
+          "cpu_async_event_raw": {
+            "qpc": 138464213689,
+            "pid": 7576,
+            "tid": 2116,
+            "version": 0,
+            "flags": 0,
+            "id": 297,
+            "payload": "a0d7b3ab0f87ffff01000000a02827c686ddffff0100000000000000b80200000000000000000000"
+          },
+          "runtime_admission": {
+            "qpc": 138463598519,
+            "pid": 7576,
+            "tid": 2116,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000d0befd00c379dd01",
+            "result": 0,
+            "arg0": 25770524687,
+            "arg1": 3,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397442333195984
+          },
+          "other_sync_requests_same_stage": {
+            "count": 15,
+            "hDevice": 18446611100200681488,
+            "object": 18446706169647875648,
+            "first": {
+              "qpc": 138463961655,
+              "pid": 7576,
+              "tid": 2116,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200681488,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169647875648
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "last": {
+              "qpc": 138464195078,
+              "pid": 7576,
+              "tid": 2116,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200681488,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169647875648
+                ],
+                "MonitoredFenceValue": [
+                  7015
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "values": [
+              7001,
+              7002,
+              7003,
+              7004,
+              7005,
+              7006,
+              7007,
+              7008,
+              7009,
+              7010,
+              7011,
+              7012,
+              7013,
+              7014,
+              7015
+            ]
+          }
+        },
+        "raw_trace_header_types": {
+          "SystemHeader": 4,
+          "EventHeader": 65870
+        },
+        "call_qpc": 138481770248,
+        "returned_qpc": 138482065231,
+        "signal_to_stage_return_ms": 0.416,
+        "stage_return_to_public_call_ms": 911.373
+      },
+      {
+        "case": "win-present-incall-20261121-02",
+        "boot": 91476,
+        "pid": 7924,
+        "tid": 1936,
+        "hwnd": 721498,
+        "qpc_frequency": 19200000,
+        "archive_sha256": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b",
+        "display_sha256": "8f80c9125966dabe5fc425af9b23291802572730423c2567f250990993154d57",
+        "scene_sha256": "fe0437513bf92b9d528b61b458bc59c3d6b15a581d6415ac252149dbe7a7bb74",
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "display_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "application_modules": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "stage_enter": {
+          "qpc": 146135460372,
+          "pid": 7924,
+          "tid": 1936,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0a00008000000000020000000000000060f1e6f3fb010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000786c20efc379dd01",
+          "result": -2147483638,
+          "arg0": 2,
+          "arg1": 2181640417632,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397446328446072
+        },
+        "stage_return": {
+          "qpc": 146136117073,
+          "pid": 7924,
+          "tid": 1936,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0000000000000000020000000000000060f1e6f3fb010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000786c20efc379dd01",
+          "result": 0,
+          "arg0": 2,
+          "arg1": 2181640417632,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397446328446072
+        },
+        "legacy_device_published": {
+          "qpc": 146136194338,
+          "pid": 7924,
+          "tid": 1936,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000786c20efc379dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397446328446072
+        },
+        "bridge": {
+          "create": {
+            "qpc": 146136005227,
+            "pid": 7924,
+            "tid": 1936,
+            "provider": "kernel",
+            "id": 290,
+            "version": 0,
+            "fields": {
+              "hAdapter": 18446706169594454016,
+              "hSyncObject": 18446706169599317392,
+              "Reason": 0,
+              "Flags": 3,
+              "SharedHandle": 0,
+              "InitialValue": 0
+            }
+          },
+          "kernel_handle": {
+            "qpc": 146136011058,
+            "pid": 7924,
+            "tid": 1936,
+            "provider": "kernel",
+            "id": 1069,
+            "version": 1,
+            "fields": {
+              "pSyncObject": 18446706169599317392,
+              "KMTHandle": 1073743232,
+              "pDxgDevice": 18446611100204786720
+            }
+          },
+          "gpu_signal_enter": {
+            "qpc": 146136038320,
+            "pid": 7924,
+            "tid": 1936,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a00008000000000010000000500000060eeedf3fb010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000786c20efc379dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 2181640875616,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397446328446072
+          },
+          "gpu_signal_packet": {
+            "qpc": 146136038990,
+            "pid": 7924,
+            "tid": 1936,
+            "provider": "kernel",
+            "id": 245,
+            "version": 2,
+            "fields": {
+              "hContext": 18446611100109440736,
+              "SubmitSequence": 2,
+              "Flags": 0,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169599317392
+              ],
+              "FenceValue": [
+                1
+              ],
+              "pQueuePacket": 18446706169618978080
+            }
+          },
+          "gpu_signal_return": {
+            "qpc": 146136039382,
+            "pid": 7924,
+            "tid": 1936,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0000000000000000010000000500000060eeedf3fb010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000786c20efc379dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 2181640875616,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397446328446072
+          },
+          "signal_retired": {
+            "qpc": 146136110756,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100109440736,
+              "PacketType": 5,
+              "SubmitSequence": 2,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169618978080
+            }
+          },
+          "cpu_async_registration": {
+            "qpc": 146136044857,
+            "pid": 7924,
+            "tid": 1936,
+            "provider": "kernel",
+            "id": 297,
+            "version": 0,
+            "fields": {
+              "hDevice": 18446611100204786720,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169599317392
+              ],
+              "MonitoredFenceValue": [
+                1
+              ],
+              "hAsyncEvent": 684,
+              "Flags": 0
+            }
+          },
+          "cpu_async_event_raw": {
+            "qpc": 146136044857,
+            "pid": 7924,
+            "tid": 1936,
+            "version": 0,
+            "flags": 0,
+            "id": 297,
+            "payload": "20e47bb10f87ffff010000009055f9c286ddffff0100000000000000ac0200000000000000000000"
+          },
+          "runtime_admission": {
+            "qpc": 146135460885,
+            "pid": 7924,
+            "tid": 1936,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000786c20efc379dd01",
+            "result": 0,
+            "arg0": 25770524687,
+            "arg1": 3,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397446328446072
+          },
+          "other_sync_requests_same_stage": {
+            "count": 15,
+            "hDevice": 18446611100202202720,
+            "object": 18446706169633798192,
+            "first": {
+              "qpc": 146135798712,
+              "pid": 7924,
+              "tid": 1936,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100202202720,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169633798192
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "last": {
+              "qpc": 146136028115,
+              "pid": 7924,
+              "tid": 1936,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100202202720,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169633798192
+                ],
+                "MonitoredFenceValue": [
+                  7015
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "values": [
+              7001,
+              7002,
+              7003,
+              7004,
+              7005,
+              7006,
+              7007,
+              7008,
+              7009,
+              7010,
+              7011,
+              7012,
+              7013,
+              7014,
+              7015
+            ]
+          }
+        },
+        "raw_trace_header_types": {
+          "SystemHeader": 4,
+          "EventHeader": 64667
+        },
+        "call_qpc": 146154976455,
+        "returned_qpc": 146155271427,
+        "signal_to_stage_return_ms": 0.329,
+        "stage_return_to_public_call_ms": 982.259
+      },
+      {
+        "case": "win-present-local-blt-20261121-01",
+        "boot": 91476,
+        "pid": 584,
+        "tid": 1664,
+        "hwnd": 786538,
+        "qpc_frequency": 19200000,
+        "archive_sha256": "61cb1ec4e568a2cf37ff874058725ec6ce6c6e140de4a4760d98b21d2c9f4570",
+        "display_sha256": "86a91af28d68d9767c53ad9c25cfe82c7c717842ca3e3b4157d875787c8db960",
+        "scene_sha256": "1257aa4fae41a4e2e8ecba4f89449399899282b44e47b1a1b2c198d6687bb4ad",
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "display_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "application_modules": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "stage_enter": {
+          "qpc": 153037014994,
+          "pid": 584,
+          "tid": 1664,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0a00008000000000020000000000000050fb86050e020000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000141967c5c479dd01",
+          "result": -2147483638,
+          "arg0": 2,
+          "arg1": 2259245529936,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397449923402004
+        },
+        "stage_return": {
+          "qpc": 153037509582,
+          "pid": 584,
+          "tid": 1664,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0000000000000000020000000000000050fb86050e020000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000141967c5c479dd01",
+          "result": 0,
+          "arg0": 2,
+          "arg1": 2259245529936,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397449923402004
+        },
+        "legacy_device_published": {
+          "qpc": 153037581369,
+          "pid": 584,
+          "tid": 1664,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000141967c5c479dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397449923402004
+        },
+        "bridge": {
+          "create": {
+            "qpc": 153037422972,
+            "pid": 584,
+            "tid": 1664,
+            "provider": "kernel",
+            "id": 290,
+            "version": 0,
+            "fields": {
+              "hAdapter": 18446706169594454016,
+              "hSyncObject": 18446706169652853152,
+              "Reason": 0,
+              "Flags": 3,
+              "SharedHandle": 0,
+              "InitialValue": 0
+            }
+          },
+          "kernel_handle": {
+            "qpc": 153037429569,
+            "pid": 584,
+            "tid": 1664,
+            "provider": "kernel",
+            "id": 1069,
+            "version": 1,
+            "fields": {
+              "pSyncObject": 18446706169652853152,
+              "KMTHandle": 1073743232,
+              "pDxgDevice": 18446611100199490592
+            }
+          },
+          "gpu_signal_enter": {
+            "qpc": 153037450163,
+            "pid": 584,
+            "tid": 1664,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a000080000000000100000005000000701a8e050e020000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000141967c5c479dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 2259245996656,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397449923402004
+          },
+          "gpu_signal_packet": {
+            "qpc": 153037450917,
+            "pid": 584,
+            "tid": 1664,
+            "provider": "kernel",
+            "id": 245,
+            "version": 2,
+            "fields": {
+              "hContext": 18446611100109651408,
+              "SubmitSequence": 2,
+              "Flags": 0,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169652853152
+              ],
+              "FenceValue": [
+                1
+              ],
+              "pQueuePacket": 18446706169625292816
+            }
+          },
+          "gpu_signal_return": {
+            "qpc": 153037451288,
+            "pid": 584,
+            "tid": 1664,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000100000005000000701a8e050e020000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000141967c5c479dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 2259245996656,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397449923402004
+          },
+          "signal_retired": {
+            "qpc": 153037503031,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100109651408,
+              "PacketType": 5,
+              "SubmitSequence": 2,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169625292816
+            }
+          },
+          "cpu_async_registration": {
+            "qpc": 153037456415,
+            "pid": 584,
+            "tid": 1664,
+            "provider": "kernel",
+            "id": 297,
+            "version": 0,
+            "fields": {
+              "hDevice": 18446611100199490592,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169652853152
+              ],
+              "MonitoredFenceValue": [
+                1
+              ],
+              "hAsyncEvent": 684,
+              "Flags": 0
+            }
+          },
+          "cpu_async_event_raw": {
+            "qpc": 153037456415,
+            "pid": 584,
+            "tid": 1664,
+            "version": 0,
+            "flags": 0,
+            "id": 297,
+            "payload": "20142bb10f87ffff01000000a0392ac686ddffff0100000000000000ac0200000000000000000000"
+          },
+          "runtime_admission": {
+            "qpc": 153037015457,
+            "pid": 584,
+            "tid": 1664,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000141967c5c479dd01",
+            "result": 0,
+            "arg0": 25770524687,
+            "arg1": 3,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397449923402004
+          },
+          "other_sync_requests_same_stage": {
+            "count": 15,
+            "hDevice": 18446611100200640592,
+            "object": 18446706169652850432,
+            "first": {
+              "qpc": 153037316038,
+              "pid": 584,
+              "tid": 1664,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200640592,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169652850432
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "last": {
+              "qpc": 153037441659,
+              "pid": 584,
+              "tid": 1664,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200640592,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169652850432
+                ],
+                "MonitoredFenceValue": [
+                  7015
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "values": [
+              7001,
+              7002,
+              7003,
+              7004,
+              7005,
+              7006,
+              7007,
+              7008,
+              7009,
+              7010,
+              7011,
+              7012,
+              7013,
+              7014,
+              7015
+            ]
+          }
+        },
+        "raw_trace_header_types": {
+          "SystemHeader": 4,
+          "EventHeader": 64359
+        },
+        "call_qpc": 153054747396,
+        "returned_qpc": 153055116440,
+        "signal_to_stage_return_ms": 0.341,
+        "stage_return_to_public_call_ms": 897.803
+      },
+      {
+        "case": "win-present-focused-20261121-01",
+        "boot": 91476,
+        "pid": 4928,
+        "tid": 2288,
+        "hwnd": 851992,
+        "qpc_frequency": 19200000,
+        "archive_sha256": "26d9aa874b04112779b8e02c4e27cdeb1239b78b94df10fbae91c5f24c47befd",
+        "display_sha256": "13b09d8ed69e66a0f795842e841f6029639881467cc4dd524b16b542381217db",
+        "scene_sha256": "966da5a186391c749ffe3cce65eb7eeeb87837a95026824b8effa95ef94b52b2",
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "display_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": true
+        },
+        "application_modules": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "stage_enter": {
+          "qpc": 187339821595,
+          "pid": 4928,
+          "tid": 2288,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0a000080000000000200000000000000d0552d6bc2010000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000001e9a44eec879dd01",
+          "result": -2147483638,
+          "arg0": 2,
+          "arg1": 1934533416400,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397467788876318
+        },
+        "stage_return": {
+          "qpc": 187340450109,
+          "pid": 4928,
+          "tid": 2288,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "00000000000000000200000000000000d0552d6bc2010000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000001e9a44eec879dd01",
+          "result": 0,
+          "arg0": 2,
+          "arg1": 1934533416400,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397467788876318
+        },
+        "legacy_device_published": {
+          "qpc": 187340524139,
+          "pid": 4928,
+          "tid": 2288,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000001e9a44eec879dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134397467788876318
+        },
+        "bridge": {
+          "create": {
+            "qpc": 187340352409,
+            "pid": 4928,
+            "tid": 2288,
+            "provider": "kernel",
+            "id": 290,
+            "version": 0,
+            "fields": {
+              "hAdapter": 18446706169594454016,
+              "hSyncObject": 18446706169652880992,
+              "Reason": 0,
+              "Flags": 3,
+              "SharedHandle": 0,
+              "InitialValue": 0
+            }
+          },
+          "kernel_handle": {
+            "qpc": 187340360119,
+            "pid": 4928,
+            "tid": 2288,
+            "provider": "kernel",
+            "id": 1069,
+            "version": 1,
+            "fields": {
+              "pSyncObject": 18446706169652880992,
+              "KMTHandle": 1073743232,
+              "pDxgDevice": 18446611100207994784
+            }
+          },
+          "gpu_signal_enter": {
+            "qpc": 187340385522,
+            "pid": 4928,
+            "tid": 2288,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a000080000000000100000005000000f0de286bc2010000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000001e9a44eec879dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 1934533123824,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397467788876318
+          },
+          "gpu_signal_packet": {
+            "qpc": 187340386263,
+            "pid": 4928,
+            "tid": 2288,
+            "provider": "kernel",
+            "id": 245,
+            "version": 2,
+            "fields": {
+              "hContext": 18446611100183145936,
+              "SubmitSequence": 2,
+              "Flags": 0,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169652880992
+              ],
+              "FenceValue": [
+                1
+              ],
+              "pQueuePacket": 18446706169643390176
+            }
+          },
+          "gpu_signal_return": {
+            "qpc": 187340386627,
+            "pid": 4928,
+            "tid": 2288,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000100000005000000f0de286bc2010000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000001e9a44eec879dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 1934533123824,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397467788876318
+          },
+          "signal_retired": {
+            "qpc": 187340444136,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100183145936,
+              "PacketType": 5,
+              "SubmitSequence": 2,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169643390176
+            }
+          },
+          "cpu_async_registration": {
+            "qpc": 187340394220,
+            "pid": 4928,
+            "tid": 2288,
+            "provider": "kernel",
+            "id": 297,
+            "version": 0,
+            "fields": {
+              "hDevice": 18446611100207994784,
+              "ObjectCount": 1,
+              "ObjectArray": [
+                18446706169652880992
+              ],
+              "MonitoredFenceValue": [
+                1
+              ],
+              "hAsyncEvent": 552,
+              "Flags": 0
+            }
+          },
+          "cpu_async_event_raw": {
+            "qpc": 187340394220,
+            "pid": 4928,
+            "tid": 2288,
+            "version": 0,
+            "flags": 0,
+            "id": 297,
+            "payload": "a0d7acb10f87ffff0100000060a62ac686ddffff0100000000000000280200000000000000000000"
+          },
+          "runtime_admission": {
+            "qpc": 187339822129,
+            "pid": 4928,
+            "tid": 2288,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e006500780065000000000000000000000000000000000000000000000000000000000000001e9a44eec879dd01",
+            "result": 0,
+            "arg0": 25770524687,
+            "arg1": 3,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134397467788876318
+          },
+          "other_sync_requests_same_stage": {
+            "count": 15,
+            "hDevice": 18446611100208558160,
+            "object": 18446706169652884192,
+            "first": {
+              "qpc": 187340191820,
+              "pid": 4928,
+              "tid": 2288,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100208558160,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169652884192
+                ],
+                "MonitoredFenceValue": [
+                  7001
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "last": {
+              "qpc": 187340377626,
+              "pid": 4928,
+              "tid": 2288,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100208558160,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169652884192
+                ],
+                "MonitoredFenceValue": [
+                  7015
+                ],
+                "hAsyncEvent": 0,
+                "Flags": 0
+              }
+            },
+            "values": [
+              7001,
+              7002,
+              7003,
+              7004,
+              7005,
+              7006,
+              7007,
+              7008,
+              7009,
+              7010,
+              7011,
+              7012,
+              7013,
+              7014,
+              7015
+            ]
+          }
+        },
+        "raw_trace_header_types": {
+          "SystemHeader": 4,
+          "EventHeader": 62037
+        },
+        "call_qpc": 187364567406,
+        "returned_qpc": 187365345394,
+        "signal_to_stage_return_ms": 0.311,
+        "stage_return_to_public_call_ms": 1256.109
+      }
+    ],
+    "original": [
+      {
+        "boot": 82058,
+        "pid": 1812,
+        "tid": 6340,
+        "scene_sha256": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "stage2": [
+          {
+            "qpc": 13063522268,
+            "pid": 1812,
+            "tid": 6340,
+            "version": 2,
+            "flags": 0,
+            "id": 14,
+            "payload": "0a0000800000000002000000000000006001876c46020000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000035fb81b1e978dd01",
+            "result": -2147483638,
+            "arg0": 2,
+            "arg1": 2501491753312,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396508991781685
+          },
+          {
+            "qpc": 13064056000,
+            "pid": 1812,
+            "tid": 6340,
+            "version": 2,
+            "flags": 0,
+            "id": 14,
+            "payload": "000000000000000002000000000000006001876c46020000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000035fb81b1e978dd01",
+            "result": 0,
+            "arg0": 2,
+            "arg1": 2501491753312,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396508991781685
+          }
+        ],
+        "runtime_admission": {
+          "qpc": 13063522559,
+          "pid": 1812,
+          "tid": 6340,
+          "version": 2,
+          "flags": 0,
+          "id": 22,
+          "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000035fb81b1e978dd01",
+          "result": 0,
+          "arg0": 25770524687,
+          "arg1": 3,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396508991781685
+        },
+        "runtime_signal": [
+          {
+            "qpc": 13064000281,
+            "pid": 1812,
+            "tid": 6340,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a000080000000000100000005000000f0fe8d6c46020000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000035fb81b1e978dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 2501492211440,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396508991781685
+          },
+          {
+            "qpc": 13064002123,
+            "pid": 1812,
+            "tid": 6340,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "00000000000000000100000005000000f0fe8d6c46020000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000035fb81b1e978dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 2501492211440,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396508991781685
+          }
+        ],
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": false
+        },
+        "last_actor_qpc": 13065979234,
+        "call_qpc": 13070969930,
+        "signal_submit_qpc": 13064001407,
+        "signal_retired_qpc": 13064048487,
+        "legacy_device_published": {
+          "qpc": 13064134746,
+          "pid": 1812,
+          "tid": 6340,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000035fb81b1e978dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396508991781685
+        },
+        "signal_to_stage_return_ms": 0.391,
+        "stage_return_to_public_call_ms": 360.101,
+        "process_member_sha256": "4a49f1241b63f4a9d9675f9dc70a14fbf4479d6f60b03601fc33bd2d5d192d09",
+        "same_thread_297_count": 0,
+        "same_thread_297": []
+      },
+      {
+        "boot": 82221,
+        "pid": 4672,
+        "tid": 4712,
+        "scene_sha256": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "stage2": [
+          {
+            "qpc": 2330364622,
+            "pid": 4672,
+            "tid": 4712,
+            "version": 2,
+            "flags": 0,
+            "id": 14,
+            "payload": "0a00008000000000020000000000000060e1e60115020000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000787ee1dbea78dd01",
+            "result": -2147483638,
+            "arg0": 2,
+            "arg1": 2289249476960,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396513997651576
+          },
+          {
+            "qpc": 2331267994,
+            "pid": 4672,
+            "tid": 4712,
+            "version": 2,
+            "flags": 0,
+            "id": 14,
+            "payload": "0000000000000000020000000000000060e1e60115020000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000787ee1dbea78dd01",
+            "result": 0,
+            "arg0": 2,
+            "arg1": 2289249476960,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396513997651576
+          }
+        ],
+        "runtime_admission": {
+          "qpc": 2330364983,
+          "pid": 4672,
+          "tid": 4712,
+          "version": 2,
+          "flags": 0,
+          "id": 22,
+          "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000787ee1dbea78dd01",
+          "result": 0,
+          "arg0": 25770524687,
+          "arg1": 3,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396513997651576
+        },
+        "runtime_signal": [
+          {
+            "qpc": 2331214037,
+            "pid": 4672,
+            "tid": 4712,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a00008000000000010000000500000090f2ed0115020000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000787ee1dbea78dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 2289249940112,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396513997651576
+          },
+          {
+            "qpc": 2331216678,
+            "pid": 4672,
+            "tid": 4712,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0000000000000000010000000500000090f2ed0115020000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000787ee1dbea78dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 2289249940112,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396513997651576
+          }
+        ],
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": false
+        },
+        "last_actor_qpc": 2349964404,
+        "call_qpc": 2352403757,
+        "signal_submit_qpc": 2331215182,
+        "signal_retired_qpc": 2331262737,
+        "legacy_device_published": {
+          "qpc": 2331344274,
+          "pid": 4672,
+          "tid": 4712,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000787ee1dbea78dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396513997651576
+        },
+        "signal_to_stage_return_ms": 0.274,
+        "stage_return_to_public_call_ms": 1100.821,
+        "process_member_sha256": "f45697011c2de64c565170566cb1ff36c5337af2e06832302516f90db0926913",
+        "same_thread_297_count": 0,
+        "same_thread_297": []
+      },
+      {
+        "boot": 82382,
+        "pid": 5828,
+        "tid": 7656,
+        "scene_sha256": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "stage2": [
+          {
+            "qpc": 2353588454,
+            "pid": 5828,
+            "tid": 7656,
+            "version": 2,
+            "flags": 0,
+            "id": 14,
+            "payload": "0a00008000000000020000000000000060e16699b2020000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000000bbe8ceeb78dd01",
+            "result": -2147483638,
+            "arg0": 2,
+            "arg1": 2966101090656,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396518074989312
+          },
+          {
+            "qpc": 2354236184,
+            "pid": 5828,
+            "tid": 7656,
+            "version": 2,
+            "flags": 0,
+            "id": 14,
+            "payload": "0000000000000000020000000000000060e16699b2020000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000000bbe8ceeb78dd01",
+            "result": 0,
+            "arg0": 2,
+            "arg1": 2966101090656,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396518074989312
+          }
+        ],
+        "runtime_admission": {
+          "qpc": 2353588757,
+          "pid": 5828,
+          "tid": 7656,
+          "version": 2,
+          "flags": 0,
+          "id": 22,
+          "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000000bbe8ceeb78dd01",
+          "result": 0,
+          "arg0": 25770524687,
+          "arg1": 3,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396518074989312
+        },
+        "runtime_signal": [
+          {
+            "qpc": 2354180784,
+            "pid": 5828,
+            "tid": 7656,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0a00008000000000010000000500000090fb6d99b2020000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000000bbe8ceeb78dd01",
+            "result": -2147483638,
+            "arg0": 21474836481,
+            "arg1": 2966101556112,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396518074989312
+          },
+          {
+            "qpc": 2354182014,
+            "pid": 5828,
+            "tid": 7656,
+            "version": 2,
+            "flags": 0,
+            "id": 22,
+            "payload": "0000000000000000010000000500000090fb6d99b2020000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000000bbe8ceeb78dd01",
+            "result": 0,
+            "arg0": 21474836481,
+            "arg1": 2966101556112,
+            "image": "step4-present.exe",
+            "process_start_filetime": 134396518074989312
+          }
+        ],
+        "scene_status": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "closed": false
+        },
+        "last_actor_qpc": 2356019627,
+        "call_qpc": 2361927374,
+        "signal_submit_qpc": 2354181618,
+        "signal_retired_qpc": 2354229276,
+        "legacy_device_published": {
+          "qpc": 2354317894,
+          "pid": 5828,
+          "tid": 7656,
+          "version": 2,
+          "flags": 0,
+          "id": 4,
+          "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e0065007800650000000000000000000000000000000000000000000000000000000000000000bbe8ceeb78dd01",
+          "result": 0,
+          "arg0": 720911,
+          "arg1": 0,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396518074989312
+        },
+        "signal_to_stage_return_ms": 0.36,
+        "stage_return_to_public_call_ms": 400.583,
+        "process_member_sha256": "0364855daddc6d4eb854a8b08e4f9affc1ce4348fc72e975a83a045f099b6f85",
+        "same_thread_297_count": 0,
+        "same_thread_297": []
+      }
+    ],
+    "flip_control": {
+      "boot": 82058,
+      "pid": 5712,
+      "tid": 4692,
+      "scene_sha256": "2d5b3e1a8cc96a295cf37f28a7d605848413b32204d0b87c5cb933ca7a817b9f",
+      "archive_sha256": "6677a160e0f23a3618a3ff1d7dd3db0aea21c91c2315caba9a6d7d65000b8a2a",
+      "stage2": [
+        {
+          "qpc": 10302664769,
+          "pid": 5712,
+          "tid": 4692,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0a00008000000000020000000000000060e1c6b5d0010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000e8fcc75be978dd01",
+          "result": -2147483638,
+          "arg0": 2,
+          "arg1": 1995914535264,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396507553529064
+        },
+        {
+          "qpc": 10303391693,
+          "pid": 5712,
+          "tid": 4692,
+          "version": 2,
+          "flags": 0,
+          "id": 14,
+          "payload": "0000000000000000020000000000000060e1c6b5d0010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000e8fcc75be978dd01",
+          "result": 0,
+          "arg0": 2,
+          "arg1": 1995914535264,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396507553529064
+        }
+      ],
+      "runtime_admission": {
+        "qpc": 10302665140,
+        "pid": 5712,
+        "tid": 4692,
+        "version": 2,
+        "flags": 0,
+        "id": 22,
+        "payload": "00000000000000000f000b00060000000300000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000e8fcc75be978dd01",
+        "result": 0,
+        "arg0": 25770524687,
+        "arg1": 3,
+        "image": "step4-present.exe",
+        "process_start_filetime": 134396507553529064
+      },
+      "runtime_signal": [
+        {
+          "qpc": 10303342964,
+          "pid": 5712,
+          "tid": 4692,
+          "version": 2,
+          "flags": 0,
+          "id": 22,
+          "payload": "0a000080000000000100000005000000b013ceb5d0010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000e8fcc75be978dd01",
+          "result": -2147483638,
+          "arg0": 21474836481,
+          "arg1": 1995915006896,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396507553529064
+        },
+        {
+          "qpc": 10303344307,
+          "pid": 5712,
+          "tid": 4692,
+          "version": 2,
+          "flags": 0,
+          "id": 22,
+          "payload": "00000000000000000100000005000000b013ceb5d0010000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000e8fcc75be978dd01",
+          "result": 0,
+          "arg0": 21474836481,
+          "arg1": 1995915006896,
+          "image": "step4-present.exe",
+          "process_start_filetime": 134396507553529064
+        }
+      ],
+      "scene_status": {
+        "events_lost": 0,
+        "buffers_lost": 0,
+        "closed": true
+      },
+      "last_actor_qpc": 10320879415,
+      "call_qpc": 10314713895,
+      "signal_submit_qpc": 10303343853,
+      "signal_retired_qpc": 10303384993,
+      "legacy_device_published": {
+        "qpc": 10303469673,
+        "pid": 5712,
+        "tid": 4692,
+        "version": 2,
+        "flags": 0,
+        "id": 4,
+        "payload": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000e8fcc75be978dd01",
+        "result": 0,
+        "arg0": 720911,
+        "arg1": 0,
+        "image": "step4-present.exe",
+        "process_start_filetime": 134396507553529064
+      },
+      "signal_to_stage_return_ms": 0.349,
+      "stage_return_to_public_call_ms": 589.698,
+      "process_member_sha256": "708c02b85ad0d25d4a36508e1bb918f0f8e27a4dcd2387d34b934e308cdbfe0c",
+      "same_thread_297_count": 0,
+      "same_thread_297": []
+    },
+    "historical_build": {
+      "source_commit": "86b11bff561ea8107aadd060249eb14a226bd1c0",
+      "build_record_sha256": "cbf799401aef40274705f69f1379f3902eead6dbe359a4fb268b835b642ce87a",
+      "binary_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+      "scope": "Process-local enumeration for step4-present.exe.",
+      "patch_sha256": "4967923481d99d34157d6f47123baf2b995280a07841b8f70f14135655a3a723",
+      "patched_source": [
+        "src/nouveau/tgd3d/tgd3d_entry.cpp"
+      ]
+    },
+    "raw_local_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/win-fence-cpu-return-20261121-01.raw.json",
+    "raw_sha256": "72dbcea1c2e96c866774e806f1959270f242cd490209d00cbf01a988af279095",
+    "corrected_verifier_sha256": "96fd1d345855ddc4ae88c7618f3676b9491d5e55caba0f1d9759af19f5120f46",
+    "corrections": "区分同阶段不同设备/对象的同步 297；逐物理缓冲读取未正常结束的原次 ETL。",
+    "initialization_path": "旧式绘图设备协商 WDDM 运行时队列。第 2 阶段的 NVK 设备创建包含 3D 上下文状态推送及 push-stream 完成等待，失败会传播至创建设备结果。在现行实载代码的非零 hAsyncEvent 分支，成功要求 Win32 WAIT_OBJECT_0 且 CPU 映射完成值达到目标。",
+    "reading_limits": "正式样本通过分别解码同次两个 ETL 绑定设备、围栏对象、上下文、值与绘图线程。297 记录无栈，UMD 日志也没有该 WaitForSingleObject 的直接返回。现行样本证明初始化已顺利越过该同步点。原三次只直接证明同次信号先退役且设备成功，原等待 API 形态及线程切换时点缺记录。",
+    "independent_review": {
+      "model": "gemini-4-neon-xhigh",
+      "effort": "xhigh",
+      "request_sha256": "2f60f50e334508b7327377f498fec93ced8680c46d846b538d08cf3d43e91059",
+      "response_sha256": "cb9d53009b5cbd86b9a9542bfc8ff08a662bd7caa9d8f9e9ab0f9ba3a69446a1",
+      "disposition": "回执区分源码推断和直接观测，现行模块四项完整哈希与历史构建匹配见本结果。已核对 result(HRESULT) 将所有失败映射为非成功 VkResult，NVK 队列初始化失败会使 CreateDevice 失败。",
+      "objections": [
+        "不能把代码必要条件推断等同于直接的 OS 调度或原生返回实测：即使 6 份启动 91476 回执中 297（非零 hAsyncEvent）、180 退役与 stage 2 S_OK 严密闭合，ETW 仍未记录 297 返回的 HRESULT、WaitForSingleObject 原生返回码（WAIT_OBJECT_0）、内核调度器对事件对象的触发/线程睡眠唤醒（SetEvent/CSwitch）时点，也未直接观测 *f->value。",
+        "不能将启动 91476 观测到的 297 慢路径直接外推成三次历史故障（82058/82221/82382）和同期 flip 对照必然执行了 WaitForSingleObject：这四份历史归档均无 297 留存（same_thread_297_count=0）且缺 290/1069，而 wait_cpu 存在 current>=value 直接返回 VK_SUCCESS、不调用 297 与 WaitForSingleObject 的快路径；尽管历史四例 stage 2 均在 180 退役后 0.274–0.391 ms 关闭、时序与慢路径吻合，但缺少 297 仍不能构成已调用 WaitForSingleObject 的充分证据。",
+        "不能仅凭给定源码片段宣称无条件逻辑闭环：片段未包含 createDevice 到 nvk_queue_init 的错误传播、nvk_mem_stream_flush、result(hr) 的实现及 wait_cpu 尾部 return 语句，且 JSON 未附 6 份启动 91476 与历史进程实载 UMD/NVK 模块哈希；此外，阶段 2 初始化与值 1 围栏完成均早于 Present CALL 数百毫秒，不能用于确立或解释 CALL 后的整机复位原因。"
+      ],
+      "supported": {
+        "confirmed_init_completion": "在启动 91476 的 6 份正式空窗中，均直接确认同一 PID/TID 完成 stage 2 打开（E_PENDING）→ runtime_admission（0x000b000f，callbacks=3，S_OK）→ 290（初值 0）→ 1069（绑定 pDxgDevice 与 KMTHandle=1073743232）→ 22 包夹 245（SubmitSequence=2，值 1）→ 同对象值 1 的 297（非零 hAsyncEvent 696/676/696/684/684/552，晚于 22 返回 0.134–0.395 ms、早于 180 2.264–3.432 ms）→ 180 干净退役（PacketType=5，无抢占/超时）→ stage 2 晚于 180 0.311–0.416 ms 返回 S_OK。三次历史故障与 flip_control 也均直接确认 stage 2 S_OK、值 1 信号 180 退役与 legacy_device_published（id=4，result=0，0x000b000f）在 call_qpc 前 360.101–1100.821 ms 完成。",
+        "code_inferred_wait_success": "仅限启动 91476 的 6 份空窗，在“实载二进制对应固定树源码、createDevice 透传 nvk_queue_init_context_state 失败且 result(hr) 不将失败 HRESULT 映射为 VK_SUCCESS”的前提下，可由已观测到的同对象非零 hAsyncEvent 297（证实跳过快路径进入 wait_cpu 慢路径）与随后 180 退役、stage 2 返回 S_OK，推断该 6 次调用均满足 pfnWaitForSynchronizationObjectFromCpuCb 成功、WaitForSingleObject(event, INFINITE) 返回 WAIT_OBJECT_0 且 completed>=1（非 UINT64_MAX）。"
+      },
+      "limits": [
+        "缺内核等待调度与原生返回回执：全部 6 份当前样本均未直接记录 WaitForSingleObject 返回值、297 的 HRESULT 返回状态、内核事件信号化与线程阻塞/唤醒调度时点。",
+        "随文附件边界：15 个 7001–7015 同步请求及 stage 2 全量 297 扫描原始事件未附在 JSON 中（唯一非空 hAsyncEvent 依赖外部筛选陈述）；createDevice/result(hr) 片段及实载二进制哈希亦未随本输入附出。",
+        "历史样本缺对象级 297/1069/290：82058、82221、82382 与 flip_control 均 same_thread_297_count=0，即使源码核对一致也只能确认 stage 2 在 180 后成功关闭，不能补出缺失的实机 297 或慢路径等待证明。",
+        "整机重启起因仍缺证：三次历史事故的图形会话均未关闭（closed=false），last_actor_qpc 分别停在 call_qpc 前 127.05–307.70 ms，CALL 之后无任何 Windows/DxgKrnl/KMD 图形事件或板级复位证据。"
+      ]
+    },
+    "boundaries": {
+      "last_entry": "四份旧档案均以同一 Device 指针、PID/TID 与进程创建 FILETIME 匹配 tgd3d 第 2 阶段进入，阶段内有值 1 信号进入、提交、返回和退役。",
+      "last_return": "原三次及正常翻转对照的初始化第 2 阶段和旧式 tgd3d 创建设备回执均为 S_OK。单独已核实原三次调用前设备状态查询 S_OK。",
+      "first_anomaly_or_missing": "六个正式空窗口可由固定实现和同阶段成功回执推断事件等待成功，仍缺同句柄 Win32 等待进入、返回码及是否实际阻塞的直接记录。三次原故障的 297 以及首次 CALL 后的 Windows 内核接收、返回或板级复位记录均未留存。"
+    }
+  }
+}
