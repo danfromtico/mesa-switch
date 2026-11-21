@@ -1,0 +1,39 @@
+{
+  "round_id": "pal4-texture7-allocation-owner-20261121-03",
+  "contract_id": "dxgkrnl.h:746:2",
+  "declared_utc": "2026-11-21T11:55:09.742042+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "b3c8aeaf47c657411f11454bf29b572b8de615fbc485b43e923d27f034c03bd2",
+  "actor": "仙剑四原 x86 游戏进程。核对第七次已知形状的 CreateTexture 调用期间，该线程在原生 GM20B 上新建的 Windows VidMm 分配。",
+  "predicate": "如果该调用在本线程新建原生且无共享资源的 VidMm 分配，Windows 记录能否将该分配唯一关联到游戏的原生设备，或明确记录其所属资源。",
+  "required_observation": "同一设备、启动、游戏 PID/TID 与 QPC 区间内，配对 AdapterAllocation 33 与 DeviceAllocation 36 的 VidMm 全局标识。读取两端的设备、适配器与资源字段。应用日志界定调用边界。",
+  "satisfied_if": "实机正常封口，无丢失。区间内至少一个同线程新分配且所有目标条目唯一匹配同适配器、设备和游戏，能够区分设备直接分配与显式资源关联。",
+  "violated_if": "正常封口且唯一配对的同一分配，在同一原生运行中出现经过独立核实的矛盾归属。",
+  "unknown_if": "没有新分配、游戏或维护线程身份不明、资源语义模糊、区间不完整、ETW 丢失或系统意外重启时保留未知。",
+  "related_fault": "SWITCH-LOAD-TRANSITION-RESTART",
+  "device": "Switch Lite GM20B，WDDM 2.6，交流供电，手持模式，Code 0。",
+  "scope_limit": "仅解释 Windows 原生 VidMm 事件公开的归属字段。WSL 来宾的 dxgallocation.owner 联合体仍需来宾实现本身的观测。游戏纹理对象与 WDDM 资源可有不同分配粒度。",
+  "gpu_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "game_exe_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+  "original_app_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+  "private_app_observer_sha256": "034e0d5d60bce42228af37f34b642529d7de1adc6d77f0f6cb278a79f7c44b94",
+  "native_application_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+  "etw_filter_sha256": "7551fad4bc2784f7e8177a6675abcaaa4c9bb45a23d815464b154a451ef8fa8c",
+  "expected_descriptor": {
+    "ordinal": 7,
+    "width": 512,
+    "height": 512,
+    "levels": 0,
+    "usage": 1024,
+    "format": 22,
+    "pool": 1,
+    "shared": false
+  },
+  "review": {
+    "proposed_scope": "原生可比",
+    "proposed_status": "未知",
+    "native_response_sha256": "3b1573701d5ac94847846e26b0fce9fd712b46e94a175c95339714094595b387"
+  },
+  "repeat_of": "pal4-texture7-allocation-owner-20261121-01",
+  "repeat_reason": "同一套已冻结的游戏、应用观察器与 ETW 条件，按三次独立运行区分随机中断和可重复边界。"
+}
