@@ -1,0 +1,375 @@
+{
+  "schema": 1,
+  "device": "Switch Lite (HDH-001) GM20B, Windows ARM64, x86 D3D9 via DXVK and the native x86 NVK ICD",
+  "selected_gpu_baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "change": "Application option d3d9.deferPixelShaderCompilation. The default remains false. Enabling it registers D3D9 pixel shader libraries without enqueuing the normal-priority precompile. Binding and on-demand compilation still use the existing DXVK paths.",
+  "candidate": {
+    "bytes": 7736352,
+    "unsigned": "92ac241552af57298e40a0a0792a664a7e7d2ff63435f648d52d57c440111fd9",
+    "sha256": "8fa926b9ca64f1c09aa4a4edcc7d1df4e33c2069ef7600032ce65bcf58ee3aeb",
+    "upstream": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+    "source_patch_sha256": "b63c83571e641d06df17b38814239f465689aab2ae4edeefe1e9b430f9e733af",
+    "default_enabled": false,
+    "selected_driver_changed": false
+  },
+  "host": {
+    "bytes": 1576496,
+    "unsigned": "e10b085dd7aa41ebea1b995879f9db560772f997fe1552502aa2187b4b1246c6",
+    "sha256": "982757e8467439d728c26e583f8192270ea8b0c83e2dbce8d3fd8562cffcfbd2",
+    "source_sha256": "dd7af4a5eb5f655dcfa5c4b27ace8530c3c6d480fb1bcde37a45e9f518b1c82e",
+    "original_test_source": "22c8e2b679ec5c914d839008c221a8f37ef759cc4a7133e4f476831c6c318203",
+    "native_key_manifest": "ad6fcd4acdf328ace597aa075d99857efcd7836c66b775dcecfa17c06f9f076e"
+  },
+  "prior_stock_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+  "comparison": {
+    "eager": [
+      0,
+      17,
+      17,
+      17,
+      17
+    ],
+    "deferred": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "both_after_draw": [
+      [
+        17
+      ],
+      [
+        17
+      ]
+    ],
+    "identical_pair_images": 17,
+    "boot": 90934,
+    "same_boot": true,
+    "same_dwm": true,
+    "same_library": true,
+    "deferral_verified": true
+  },
+  "cases": [
+    {
+      "case": "prebind-eager",
+      "boot": 90934,
+      "end_boot": 90934,
+      "dwm": 1412,
+      "ac": "Online",
+      "gpu_code": 0,
+      "device": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) vendor=10de device=0fe0 type=1 luid_valid=1 luid=0000000000005b82",
+      "candidate_sha256": "8fa926b9ca64f1c09aa4a4edcc7d1df4e33c2069ef7600032ce65bcf58ee3aeb",
+      "native_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+      "option": "False",
+      "effective_option_seen": true,
+      "matched_module_paths": true,
+      "registered": 17,
+      "dxvk_keys_in_original_order": true,
+      "cumulative_wait_ms": [
+        0,
+        2000,
+        4000,
+        8000,
+        16000
+      ],
+      "debug_spirv_before_bind": [
+        0,
+        17,
+        17,
+        17,
+        17
+      ],
+      "debug_spirv_after_draw": [
+        17
+      ],
+      "native_debug_spirv_files_written": 17,
+      "completed_readbacks": 35,
+      "matching_original_images": 17,
+      "images": {
+        "fs.0410002af264453c30d7a982caa3a1d4": {
+          "sha256": "4094639dc077388c026a93885c53e8565f4f9d672f86ac32286ae52e88236275",
+          "same_as_original": true
+        },
+        "fs.9fdba0e1c2629e4559ac3f17aa7c1986": {
+          "sha256": "ae5e049a58b0c9d1a7d3d5138c9f5c4ee13609d1acabf0c670b75333eccad4ab",
+          "same_as_original": true
+        },
+        "fs.a340affcdf7f93585c7c362315053af8": {
+          "sha256": "07a21324fed2d7fd79857872a837677c589283e10b58ae21b06adc90c5f42de0",
+          "same_as_original": true
+        },
+        "fs.e9e2b3b05f7ef9e2497005bd527d9ba5": {
+          "sha256": "c1640bbb81ec7108c6220730634192b3d1e6881f347f57b4f1215c7a70cff0a3",
+          "same_as_original": true
+        },
+        "fs.3d740c5cc6fddf66bb3b85e107f14a99": {
+          "sha256": "0d2f030c7f3db90ca96447eab242e61663a71d92cff7cf62ab1ae980c0e112aa",
+          "same_as_original": true
+        },
+        "fs.7851960ce41e6be9ddb00c9a0386f370": {
+          "sha256": "49e9275ee4aaed5c5463a087ebc0966614247a304dabbc278aaf24b96c1f1b54",
+          "same_as_original": true
+        },
+        "fs.c533352a50ab4e1ae47f1de69c192c3c": {
+          "sha256": "6a187de084e854ac98072303af054551b844e8cea07bc25e97c348b56ef6b772",
+          "same_as_original": true
+        },
+        "fs.96456190006cff9655691f75c9d912bd": {
+          "sha256": "283a7acafcc7079cb2508f1ae28075529be9d35f92f955b84340e405c5101de7",
+          "same_as_original": true
+        },
+        "fs.6aa12c6287c4ddee4ae008c5a535eb02": {
+          "sha256": "fc6516a50938a0c331cd525fbb43a0583e27fdbf0c3e9f1f6964b0f40309cf18",
+          "same_as_original": true
+        },
+        "fs.d673d6c48033771124c3d79070c7a27a": {
+          "sha256": "6077ff68a840d7d5f7d4d616c6f0feffce0ce7f6392222c893d7796be96e5d3b",
+          "same_as_original": true
+        },
+        "fs.74bb96de0e7a768a4f38115387e72b23": {
+          "sha256": "09a6c93f8cb2d7492d59d0630de987ba77695738a1115e79c55538efb9811105",
+          "same_as_original": true
+        },
+        "fs.ea6d9ea1302aec350489427602736ebb": {
+          "sha256": "ec019b5d7f640cb7d7805049d343be893a374b49203222cff8cb4993b584bd8b",
+          "same_as_original": true
+        },
+        "fs.4adeafead71566bf7b0b7f27c0b83f4e": {
+          "sha256": "c7202aa723e071eeec85d8b18a0a46c6071c4e9cee47579525a38fdcb99cfd7b",
+          "same_as_original": true
+        },
+        "fs.d9e279770c43578c760caf439ab15e62": {
+          "sha256": "ec019b5d7f640cb7d7805049d343be893a374b49203222cff8cb4993b584bd8b",
+          "same_as_original": true
+        },
+        "fs.ff2e148f3dda99421252c857de25d984": {
+          "sha256": "6fb00975703e224950a076ffeb03ddaed4139cc1eda1e88db9e9cbbd2a571ec6",
+          "same_as_original": true
+        },
+        "fs.d986949b851f158f431dd4cb2a4c26e1": {
+          "sha256": "6fb00975703e224950a076ffeb03ddaed4139cc1eda1e88db9e9cbbd2a571ec6",
+          "same_as_original": true
+        },
+        "fs.6d6a242beecebf7e0b272d5e7e33c79e": {
+          "sha256": "ad5ae0af436a83294d29f05a6007cb7ac0bf98595a00eecf19ba2e3eb4dd9a14",
+          "same_as_original": true
+        }
+      },
+      "exit_code": 0,
+      "original_bench_dxvk_restored": true,
+      "original_bench_client_restored": true,
+      "archive_sha256": "03e366d2bcadd3aedd34684fc8abe965605d3f6c4b8755418e90a8e2237e5ad7"
+    },
+    {
+      "case": "prebind-deferred",
+      "boot": 90934,
+      "end_boot": 90934,
+      "dwm": 1412,
+      "ac": "Online",
+      "gpu_code": 0,
+      "device": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) vendor=10de device=0fe0 type=1 luid_valid=1 luid=0000000000005b82",
+      "candidate_sha256": "8fa926b9ca64f1c09aa4a4edcc7d1df4e33c2069ef7600032ce65bcf58ee3aeb",
+      "native_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+      "option": "True",
+      "effective_option_seen": true,
+      "matched_module_paths": true,
+      "registered": 17,
+      "dxvk_keys_in_original_order": true,
+      "cumulative_wait_ms": [
+        0,
+        2000,
+        4000,
+        8000,
+        16000
+      ],
+      "debug_spirv_before_bind": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "debug_spirv_after_draw": [
+        17
+      ],
+      "native_debug_spirv_files_written": 17,
+      "completed_readbacks": 35,
+      "matching_original_images": 17,
+      "images": {
+        "fs.0410002af264453c30d7a982caa3a1d4": {
+          "sha256": "4094639dc077388c026a93885c53e8565f4f9d672f86ac32286ae52e88236275",
+          "same_as_original": true
+        },
+        "fs.9fdba0e1c2629e4559ac3f17aa7c1986": {
+          "sha256": "ae5e049a58b0c9d1a7d3d5138c9f5c4ee13609d1acabf0c670b75333eccad4ab",
+          "same_as_original": true
+        },
+        "fs.a340affcdf7f93585c7c362315053af8": {
+          "sha256": "07a21324fed2d7fd79857872a837677c589283e10b58ae21b06adc90c5f42de0",
+          "same_as_original": true
+        },
+        "fs.e9e2b3b05f7ef9e2497005bd527d9ba5": {
+          "sha256": "c1640bbb81ec7108c6220730634192b3d1e6881f347f57b4f1215c7a70cff0a3",
+          "same_as_original": true
+        },
+        "fs.3d740c5cc6fddf66bb3b85e107f14a99": {
+          "sha256": "0d2f030c7f3db90ca96447eab242e61663a71d92cff7cf62ab1ae980c0e112aa",
+          "same_as_original": true
+        },
+        "fs.7851960ce41e6be9ddb00c9a0386f370": {
+          "sha256": "49e9275ee4aaed5c5463a087ebc0966614247a304dabbc278aaf24b96c1f1b54",
+          "same_as_original": true
+        },
+        "fs.c533352a50ab4e1ae47f1de69c192c3c": {
+          "sha256": "6a187de084e854ac98072303af054551b844e8cea07bc25e97c348b56ef6b772",
+          "same_as_original": true
+        },
+        "fs.96456190006cff9655691f75c9d912bd": {
+          "sha256": "283a7acafcc7079cb2508f1ae28075529be9d35f92f955b84340e405c5101de7",
+          "same_as_original": true
+        },
+        "fs.6aa12c6287c4ddee4ae008c5a535eb02": {
+          "sha256": "fc6516a50938a0c331cd525fbb43a0583e27fdbf0c3e9f1f6964b0f40309cf18",
+          "same_as_original": true
+        },
+        "fs.d673d6c48033771124c3d79070c7a27a": {
+          "sha256": "6077ff68a840d7d5f7d4d616c6f0feffce0ce7f6392222c893d7796be96e5d3b",
+          "same_as_original": true
+        },
+        "fs.74bb96de0e7a768a4f38115387e72b23": {
+          "sha256": "09a6c93f8cb2d7492d59d0630de987ba77695738a1115e79c55538efb9811105",
+          "same_as_original": true
+        },
+        "fs.ea6d9ea1302aec350489427602736ebb": {
+          "sha256": "ec019b5d7f640cb7d7805049d343be893a374b49203222cff8cb4993b584bd8b",
+          "same_as_original": true
+        },
+        "fs.4adeafead71566bf7b0b7f27c0b83f4e": {
+          "sha256": "c7202aa723e071eeec85d8b18a0a46c6071c4e9cee47579525a38fdcb99cfd7b",
+          "same_as_original": true
+        },
+        "fs.d9e279770c43578c760caf439ab15e62": {
+          "sha256": "ec019b5d7f640cb7d7805049d343be893a374b49203222cff8cb4993b584bd8b",
+          "same_as_original": true
+        },
+        "fs.ff2e148f3dda99421252c857de25d984": {
+          "sha256": "6fb00975703e224950a076ffeb03ddaed4139cc1eda1e88db9e9cbbd2a571ec6",
+          "same_as_original": true
+        },
+        "fs.d986949b851f158f431dd4cb2a4c26e1": {
+          "sha256": "6fb00975703e224950a076ffeb03ddaed4139cc1eda1e88db9e9cbbd2a571ec6",
+          "same_as_original": true
+        },
+        "fs.6d6a242beecebf7e0b272d5e7e33c79e": {
+          "sha256": "ad5ae0af436a83294d29f05a6007cb7ac0bf98595a00eecf19ba2e3eb4dd9a14",
+          "same_as_original": true
+        }
+      },
+      "exit_code": 0,
+      "original_bench_dxvk_restored": true,
+      "original_bench_client_restored": true,
+      "archive_sha256": "22ac60521e842118503c388cd5061655496edd24207215dae87fb991a19a9225"
+    }
+  ],
+  "scope": "Identical x86 DXVK binaries, game bytecode, synthetic input, Handheld policy, external power, boot, DWM and native renderer. Each case had its own fresh DXVK cache and private debug-output directory. The counts measure DXVK debug SPIR-V generation. The two draws per program and their verified pixel readbacks separately prove offscreen execution.",
+  "source_contract": "https://github.com/doitsujin/dxvk/blob/b1a1c99ab52b687cf950d62c88bc2fa316b41663/src/dxvk/dxvk_shader_ir.cpp#L2183-L2199",
+  "previous_stock_comparison": "tegra-x1-wddm/docs/PAL4_SHADER_REPLAY_20261121.json",
+  "full_game": {
+    "start_utc": "2026-11-21T11:18:48.5300216Z",
+    "boot_before": 90934,
+    "boot_after": 91011,
+    "same_dwm_and_boot": false,
+    "power": "Online",
+    "gpu_code_before": 0,
+    "gpu_code_after": 0,
+    "dxvk_candidate_sha256": "8fa926b9ca64f1c09aa4a4edcc7d1df4e33c2069ef7600032ce65bcf58ee3aeb",
+    "original_game_dxvk_restored_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "rollback_sha256": "8cbc9d0587aa0ed5addfe4a204843415780fe40ab2f31f3e621ffa2ab93eb7d9",
+    "x86_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+    "actual_config_seen": true,
+    "renderer_discovery": [
+      "info:  Found device: NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)"
+    ],
+    "loaded_module_paths_verified": {
+      "d3d9.dll": false,
+      "vulkan-1.dll": false,
+      "libvulkan_nouveau.dll": false
+    },
+    "registration_keys": [
+      "fs.0410002af264453c30d7a982caa3a1d4",
+      "fs.9fdba0e1c2629e4559ac3f17aa7c1986",
+      "fs.a340affcdf7f93585c7c362315053af8",
+      "fs.e9e2b3b05f7ef9e2497005bd527d9ba5",
+      "fs.3d740c5cc6fddf66bb3b85e107f14a99",
+      "fs.7851960ce41e6be9ddb00c9a0386f370",
+      "fs.c533352a50ab4e1ae47f1de69c192c3c",
+      "fs.96456190006cff9655691f75c9d912bd",
+      "fs.6aa12c6287c4ddee4ae008c5a535eb02",
+      "fs.d673d6c48033771124c3d79070c7a27a",
+      "fs.74bb96de0e7a768a4f38115387e72b23",
+      "fs.ea6d9ea1302aec350489427602736ebb",
+      "fs.4adeafead71566bf7b0b7f27c0b83f4e",
+      "fs.d9e279770c43578c760caf439ab15e62",
+      "fs.ff2e148f3dda99421252c857de25d984",
+      "fs.d986949b851f158f431dd4cb2a4c26e1",
+      "fs.6d6a242beecebf7e0b272d5e7e33c79e"
+    ],
+    "selected_swapchain_parameters_logged": false,
+    "dxvk_log_sha256": "4670507cbdc72b938867ffe7c0e247e85db70ccf2b5dcd96fffa7a5079daed93",
+    "foreground_client_menu": false,
+    "menu_exit_click_delivered": false,
+    "normal_game_exit": false,
+    "system_events": [
+      {
+        "id": 12,
+        "record": 91011,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T11:20:03.8775427Z",
+        "fields": {}
+      },
+      {
+        "id": 6008,
+        "record": 91020,
+        "provider": "EventLog",
+        "utc": "2026-11-21T11:21:54.0112147Z",
+        "fields": {}
+      },
+      {
+        "id": 41,
+        "record": 91029,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "utc": "2026-11-21T11:20:10.2967491Z",
+        "fields": {
+          "BugcheckCode": "0",
+          "SleepInProgress": "0",
+          "PowerButtonTimestamp": "0",
+          "BugcheckInfoFromEFI": "false",
+          "LongPowerButtonPressDetected": "false"
+        }
+      }
+    ],
+    "permanent_gpu_identity_verified": true,
+    "collection_sha256": "78ab628bb4e1142aec64910beb8bdd6609c0fcf5a2e0a22758a99b7ab2452479",
+    "screen_observations": [],
+    "new_dump_files": 0,
+    "last_saved_sample": {
+      "elapsed": 4.7497468,
+      "cpu_s": 2.875,
+      "dxvk_log_bytes": 15315,
+      "working": 102690816,
+      "hwnd": 590690
+    },
+    "exit_code": null,
+    "runner_forced_exit": null,
+    "previous_measurement_eventlog_sha256": "93f6b1bdd008b90de07aa42f6dbd2a384f127ed5f685e4d3ce81b1c35d053818",
+    "system_records_examined": 71,
+    "system_providers_matching_filter": [
+      "EventLog",
+      "Microsoft-Windows-Kernel-General",
+      "Microsoft-Windows-Kernel-Power"
+    ],
+    "promoted_to_daily_use": false
+  }
+}
