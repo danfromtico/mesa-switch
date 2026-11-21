@@ -1,0 +1,497 @@
+{
+  "schema": 1,
+  "change_kind": "presentation",
+  "source_commit": "9b9a0ee115f8d3c13b0ee87050b326f82e596b33",
+  "base_commit": "e1b2208760dd88c2e11c86eceb60272cb3f16433",
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c",
+  "changed_paths": [
+    "tegra-x1-wddm/docs/DRIVER.md",
+    "tegra-x1-wddm/tests/test_acr_firmware.c",
+    "tegra-x1-wddm/tools/build.py"
+  ],
+  "components": {
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+  },
+  "trial": {
+    "selected": "trial",
+    "dwm": 1424,
+    "boot_record": 93034,
+    "inf": "oem30.inf",
+    "loaded": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c",
+    "gpu_code": 0,
+    "dwm_start": "2026-11-21T20:31:23.9678922Z",
+    "components": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+    },
+    "power": "Online",
+    "one_time": true,
+    "utc": "2026-11-21T20:32:55.7755082Z"
+  },
+  "baseline_cases": [
+    {
+      "name": "acr-control-clear-1",
+      "scenario": "Native BGRA clear and one legacy present",
+      "passed": true,
+      "before_boot": 92858,
+      "after_boot": 92858,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "acr-control-clear-1.json",
+      "evidence_sha256": "9848a7cc15853e4530741e4441e7524cce6f4a2eff6a0fc3be671098bce06323",
+      "source_commit": "e1b2208760dd88c2e11c86eceb60272cb3f16433",
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      }
+    },
+    {
+      "name": "acr-control-sequential-1",
+      "scenario": "Native legacy no-write first SEQUENTIAL Present(1,0)",
+      "passed": true,
+      "before_boot": 92858,
+      "after_boot": 92858,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "acr-control-sequential-1.json",
+      "evidence_sha256": "0d8a3c44b200cb980c78e97dd60344260f8df661df1026953e7da965c49b5843",
+      "source_commit": "e1b2208760dd88c2e11c86eceb60272cb3f16433",
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      }
+    },
+    {
+      "name": "acr-control-sequential-2",
+      "scenario": "Native legacy no-write first SEQUENTIAL Present(1,0)",
+      "passed": true,
+      "before_boot": 92858,
+      "after_boot": 92858,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "acr-control-sequential-2.json",
+      "evidence_sha256": "3f03d5be27492e8ef133566204eb47b2ab1f2a481f18fe0254ad0f4673ddaafb",
+      "source_commit": "e1b2208760dd88c2e11c86eceb60272cb3f16433",
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      }
+    },
+    {
+      "name": "acr-control-sequential-3",
+      "scenario": "Native legacy no-write first SEQUENTIAL Present(1,0)",
+      "passed": true,
+      "before_boot": 92858,
+      "after_boot": 92858,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "acr-control-sequential-3.json",
+      "evidence_sha256": "816bb5e51044c7b5c6ead8d64b092d9bbec04e260b80a560d682a779f8d78072",
+      "source_commit": "e1b2208760dd88c2e11c86eceb60272cb3f16433",
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "name": "acr-candidate-clear-1",
+      "scenario": "Native BGRA clear and one legacy present",
+      "passed": true,
+      "before_boot": 93034,
+      "after_boot": 93034,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "acr-candidate-clear-1.json",
+      "evidence_sha256": "f06d39eebd905f57e149a71f145f84125dfd226d8d37e74dad36e68e73a587eb",
+      "loaded_components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+      },
+      "baseline_case_sha256": "9848a7cc15853e4530741e4441e7524cce6f4a2eff6a0fc3be671098bce06323",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Both boots used the same signed client and power policy, displayed the same 4,508 interior pixels, returned S_OK and exited to the original compositor."
+    },
+    {
+      "name": "acr-candidate-sequential-2",
+      "scenario": "Native legacy no-write first SEQUENTIAL Present(1,0)",
+      "passed": true,
+      "before_boot": 93034,
+      "after_boot": 93034,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "acr-candidate-sequential-2.json",
+      "evidence_sha256": "a6609256e407dd5eb908139b04da5edc4bd44d5d0f9e402cb23f4a57a2f2a714",
+      "loaded_components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+      },
+      "baseline_case_sha256": "0d8a3c44b200cb980c78e97dd60344260f8df661df1026953e7da965c49b5843",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Both boots used the same signed client and power policy, displayed the same 4,508 interior pixels, returned S_OK and exited to the original compositor."
+    },
+    {
+      "name": "acr-candidate-sequential-3",
+      "scenario": "Native legacy no-write first SEQUENTIAL Present(1,0)",
+      "passed": true,
+      "before_boot": 93034,
+      "after_boot": 93034,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "acr-candidate-sequential-3.json",
+      "evidence_sha256": "944bc036fb551f595494a32d09a5fb212d83abb96cd431c5660693097890c6f3",
+      "loaded_components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+      },
+      "baseline_case_sha256": "3f03d5be27492e8ef133566204eb47b2ab1f2a481f18fe0254ad0f4673ddaafb",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Both boots used the same signed client and power policy, displayed the same 4,508 interior pixels, returned S_OK and exited to the original compositor."
+    },
+    {
+      "name": "acr-candidate-sequential-4",
+      "scenario": "Native legacy no-write first SEQUENTIAL Present(1,0)",
+      "passed": true,
+      "before_boot": 93034,
+      "after_boot": 93034,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "acr-candidate-sequential-4.json",
+      "evidence_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f",
+      "loaded_components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+      },
+      "baseline_case_sha256": "816bb5e51044c7b5c6ead8d64b092d9bbec04e260b80a560d682a779f8d78072",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Both boots used the same signed client and power policy, displayed the same 4,508 interior pixels, returned S_OK and exited to the original compositor."
+    }
+  ],
+  "system_log": {
+    "complete": true,
+    "first_record": 93016,
+    "last_record": 93107,
+    "boot_records": [
+      93034
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "kind": "controlled",
+        "explained": true,
+        "boot_record": 93034,
+        "cause": "Recorded one-time Noble ACR candidate restart",
+        "system_records": [
+          93017,
+          93033,
+          93034
+        ],
+        "evidence_file": "system-one-time.json",
+        "evidence_sha256": "c9061e9e7c9c02781aadbe888271f36e0679cb66003bf9146314562daebb169e"
+      }
+    ]
+  },
+  "incomplete_observation": {
+    "attempt": 1,
+    "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "result": {
+      "name": "SwitchStep4Window-61789c818de0",
+      "scene": "acr-candidate-sequential-1",
+      "backend": "native",
+      "swap_effect": "sequential",
+      "begin": "2026-11-21T20:34:38.4136659Z",
+      "passed": false,
+      "before": {
+        "components": {
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1424,
+        "boot": 93034,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T20:31:23.9678922Z"
+      },
+      "luid": "0000000000005c1a",
+      "pid": 5280,
+      "application_modules": {
+        "libvulkan_nouveau.dll": {
+          "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c\\app\\libvulkan_nouveau.dll"
+        },
+        "tg_d3d_arm64.DLL": {
+          "sha256": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c\\app\\tg_d3d_arm64.DLL"
+        },
+        "TegraGpuD3DVk.dll": {
+          "sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c\\app\\TegraGpuD3DVk.dll"
+        },
+        "tg_nvk_arm64.DLL": {
+          "sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c\\app\\tg_nvk_arm64.DLL"
+        }
+      },
+      "client_exit": 0,
+      "observer_exit": 9,
+      "input_and_output": {
+        "window_handle": 197066,
+        "visibility": [
+          {
+            "first_qpc": 4475959105,
+            "last_qpc": 4477453740,
+            "flags": 8,
+            "owned_points": 0
+          },
+          {
+            "first_qpc": 4479239080,
+            "last_qpc": 4479239080,
+            "flags": 11,
+            "owned_points": 5
+          },
+          {
+            "first_qpc": 4482736397,
+            "last_qpc": 4485596247,
+            "flags": 11,
+            "owned_points": 4
+          },
+          {
+            "first_qpc": 4485887666,
+            "last_qpc": 4492870531,
+            "flags": 11,
+            "owned_points": 5
+          }
+        ],
+        "pid": 5280,
+        "tid": 3420,
+        "client_width": 640,
+        "client_height": 360,
+        "owned_points": 5,
+        "visible_qpc": 4482452158,
+        "system_menu_qpc": 4482737113,
+        "escape_input_qpc": 4485608899,
+        "menu_dismissed_qpc": 4490766527,
+        "post_present_capture_qpc": 0,
+        "exit_qpc": 4497382689,
+        "system_menu_flags": 12,
+        "menu_cancelled_by_cleanup": false,
+        "second_escape_qpc": 4490463365,
+        "client_click_qpc": 0,
+        "click_x": 0,
+        "click_y": 0,
+        "capture_changed_samples": 9216,
+        "window_visible": false,
+        "input_verified": true,
+        "window_closed": true,
+        "desktop_available": true
+      },
+      "public_calls": 1,
+      "public_successes": 1,
+      "empty": true,
+      "normal_exit": true,
+      "composed": true,
+      "device_healthy": true,
+      "reported_model": [
+        "PRESENT_MODEL buffers=2 effect=1"
+      ],
+      "drawing_device": [
+        "DRAW_DEVICE software=0 luid=0000000000005c1a display_luid=0000000000005c1a vendor=414f5753 device=31304630 fl=b000 name=Tegra X1 (GM20B) .158 44652f5ef9a1"
+      ],
+      "loaded_umd": [
+        "LOADED_UMD sha256=9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff path=C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c\\app\\TegraGpuD3DVk.dll"
+      ],
+      "after": {
+        "components": {
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1424,
+        "boot": 93034,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\acr-noble-media-f948c259ca1c",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T20:31:23.9678922Z"
+      },
+      "end": "2026-11-21T20:34:46.4503799Z"
+    },
+    "raw_archive_sha256": "ffc1493ef64abb8c0e4072a2e2250ac2b04dfb31c6fd5bd13fc156856fcbadd3",
+    "etw": {
+      "pid": 5280,
+      "drawing_tid": 3420,
+      "dwm_pid": 1424,
+      "boot": 93034,
+      "call_qpc": 4491879982,
+      "return_qpc": 4492161891,
+      "public_status": "00000000",
+      "streams": {
+        "scene/video.etl": {
+          "sha256": "6ded651f260d89bb980536a0398538a1c2900b619d56c39dff2e13f3520f248c",
+          "quality": {
+            "damaged": [],
+            "zero_buffers": 0,
+            "lost_events": 0,
+            "lost_buffers": 0,
+            "complete": true
+          },
+          "last_graphics_event_qpc": 4496019152,
+          "drawing_thread_events_in_interval": {
+            "dxgi/178": 1,
+            "dxgi/42": 1,
+            "kernel/166": 1,
+            "kernel/178": 1,
+            "kernel/215": 1,
+            "kernel/172": 1,
+            "kernel/184": 1,
+            "dxgi/43": 1,
+            "dxgi/179": 1
+          },
+          "blits": [
+            {
+              "bSubmit": 1,
+              "Source.Left": 0,
+              "Source.Top": 0,
+              "Source.Right": 640,
+              "Source.Bottom": 360,
+              "Dest.Left": 0,
+              "Dest.Top": 0,
+              "Dest.Right": 640,
+              "Dest.Bottom": 360
+            }
+          ],
+          "packets": [
+            {
+              "qpc": 4492067986,
+              "packet_type": 0,
+              "dma_bytes": 52,
+              "context_at_creation": null,
+              "context_creation_pid": null,
+              "completion_qpc": 4492116004
+            }
+          ],
+          "kmt_returns": [
+            0
+          ],
+          "recovery_events": []
+        },
+        "display.etl": {
+          "sha256": "c6daab5143ce822e392338e24681282dafc982495c3316dabb3237a53eaf04f5",
+          "quality": {
+            "damaged": [],
+            "zero_buffers": 0,
+            "lost_events": 0,
+            "lost_buffers": 0,
+            "complete": true
+          },
+          "last_graphics_event_qpc": 4885994815,
+          "drawing_thread_events_in_interval": {
+            "kernel/33": 3,
+            "kernel/36": 3,
+            "kernel/322": 6,
+            "kernel/76": 2,
+            "kernel/104": 1,
+            "kernel/286": 1,
+            "kernel/288": 1,
+            "kernel/166": 1,
+            "kernel/167": 1,
+            "kernel/178": 1,
+            "kernel/103": 1,
+            "kernel/41": 1,
+            "kernel/42": 1,
+            "kernel/215": 1,
+            "kernel/172": 1,
+            "kernel/184": 1,
+            "kernel/182": 1
+          },
+          "blits": [
+            {
+              "bSubmit": 1,
+              "Source.Left": 0,
+              "Source.Top": 0,
+              "Source.Right": 640,
+              "Source.Bottom": 360,
+              "Dest.Left": 0,
+              "Dest.Top": 0,
+              "Dest.Right": 640,
+              "Dest.Bottom": 360
+            }
+          ],
+          "packets": [
+            {
+              "qpc": 4492067965,
+              "packet_type": 0,
+              "dma_bytes": 52,
+              "context_at_creation": {
+                "DmaBufferSegmentSet": 2,
+                "DmaBufferSize": 65536,
+                "DmaBufferPrivateDataSize": 65864
+              },
+              "context_creation_pid": 5280,
+              "completion_qpc": 4492115989
+            }
+          ],
+          "kmt_returns": [
+            0
+          ],
+          "recovery_events": []
+        }
+      }
+    },
+    "disposition": "The unchanged client returned S_OK and normal exit. The observer verified input and the desktop but saved no post-return frame. Keep this attempt inconclusive for pixel output. Candidate attempts 2, 3, 4 are independent repetitions with the same client, observer, KMD and firmware."
+  }
+}

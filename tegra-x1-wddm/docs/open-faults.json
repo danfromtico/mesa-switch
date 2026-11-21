@@ -67,7 +67,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-reset-external-transport-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json",
-        "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
+        "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present",
+        "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result. An independent replay of the three original client ETLs also found successful stage-2 tgd3d initialization and legacy device publication by the drawing thread after the value-1 signal retired and before the first public CALL. It found the same ordering in the contemporary flip control. The old traces still lack a matching asynchronous CPU wait record and direct evidence after CALL.",
       "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
@@ -498,7 +499,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dma175-ddi-order-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dma-ddi-profiler-20261121-01.result.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dma-ddi-profiler-live-20261121-01.result.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dma-ddi-profiler-live-20261121-01.result.json",
+        "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json"
       ],
       "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified. The same Windows kernel image exposes DMA scheduler and optional timing templates. Three healthy archived captures have matching DMA notifications and no per-packet GPU timestamp records. An opt-in DMA-boundary instrumentation package has been built locally and checked with the queue model. Live candidate calibration and accident attribution are open. The signed native ARM64 queue model passed on the recovered Switch. Windows verified the signed candidate catalog and all 12 covered files with the permanent driver still in use. Candidate runtime submission evidence remains open. The prospective observer calibration stopped at an independent abnormal boot transition before any window workload. The permanent baseline was restored. The same unsealed scene trace records Windows DMA submission 247 on another DWM context 9.054 ms after 152586. An earlier packet on that context, 246, has a matching IRQ, DMA completion and queue retirement in both files. Neither file retains any context reporting a DMA completion notification, DMA completion, or queue retirement after 152586. The later context has no directly matched adapter or node identity in the two stored streams. Seven clean archives from the same DWM instance retain 105 DMA IDs with matching Windows interrupt and non-preempted completion on the later context. All sixteen inspected streams still lack a direct mapping from that context to an adapter and node. Only the primary context has temporally matching native GM20B execution snapshots among these recordings. A clean original-window control on boot 91918 captured the DWM adapter and node associations before Present. Four ordinary GM20B DMA completions and four cross-device DWM signal/wait retirements were identified, including the native execution snapshot for DMA 12776. The observation does not backfill boot 91476. The exact Windows image verified on boot 91918 emits the 175.1 descriptor in VidSchiSendToExecutionQueue before releasing its DPC-level queue lock and before the conditional call to the virtual/physical submission wrapper. The 91476 archive contains the identical event descriptor for 152586 and has no separately retained dxgmms2.sys hash. No release, chosen DDI branch, miniport entry, or hardware progress is established for that submission. The stock DxgKrnl profiler on boot 91918 emitted a same-thread function-5063 entry/return pair for DWM DMA 17588, with direct GM20B node mapping and matching IRQ, DMA completion and queue retirement. The two 91476 traces contain no events from the profiler family. This establishes a capture method for the next occurrence. In a bounded normal trace on boot 91918, live event bytes match the ETL. DWM submission 21991 has the complete 175.1, 5063 entry/return, and ordinary completion chain. The host confirmed durable receipt for its events 19.186 to 22.556 ms after their source QPC. This measured delay leaves an earlier reset interval unobserved.",
       "daily_workaround": "Keep this optional board-local diagnostic task out of daily launches while investigating. Use the qualified permanent graphics baseline and established window controls.",
@@ -806,6 +808,114 @@
         "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
         "SWITCH-COMMIT-PRESSURE-RESTART",
         "SWITCH-DESKTOP-RESTART-SHUTDOWN"
+      ]
+    },
+    {
+      "evidence_sha256": "c0075d940d4f6d34b7eb7e5409ee7c3628bf525c6112e984995279c77f251d28",
+      "before_commit": "0f48e4ceaa8cfe53a642acc8eb57c837b6759929",
+      "previous_qualification_sha256": "9d6fe47a085be54427842a1ec30150679c8cb114bc67ec76e907c2b175a23093",
+      "previous_control_sha256": "32a380cef7fec9a3bc5ddb8176fb5a357bcf8afeca79b155bcc812bd0fe1e6bb",
+      "inherited_faults": [
+        "GM20B-POST-QUALIFICATION-RESTART-92154",
+        "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+        "GM20B-LEGACY-SEQUENTIAL-RESTART",
+        "GM20B-WDDM20-PRESENT1-REMOVAL",
+        "GM20B-WDDM20-FLIP-RESTART",
+        "SWITCH-LOAD-TRANSITION-RESTART",
+        "SWITCH-WIFI-STARTUP",
+        "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+        "SWITCH-COMMIT-PRESSURE-RESTART",
+        "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+        "GM20B-POST-SELECTION-CONTROL-RESTART",
+        "SWITCH-BASELINE-HANDOFF-RESTARTS",
+        "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+        "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732"
+      ],
+      "fault_assessments": [
+        {
+          "fault_id": "GM20B-POST-QUALIFICATION-RESTART-92154",
+          "relation": "disjoint",
+          "reason": "This receipt covers the bounded A/B interval only. It does not claim stability in an unobserved subsequent interval.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "relation": "covered",
+          "reason": "The previous baseline entered the closed-gate desktop in this comparison with a controlled shutdown and no abnormal-shutdown event.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "relation": "covered",
+          "reason": "Same no-write two-buffer legacy public window and first Present on AC; three successful runs per firmware. Historical cause remains open.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "relation": "disjoint",
+          "reason": "Both clients ran the default legacy interface with the process-specific WDDM 2.0 override removed.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "relation": "disjoint",
+          "reason": "The case uses legacy sequential presentation. The process-scoped six-frame flip workload was outside this comparison.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "relation": "covered",
+          "reason": "Covered native drawing, presentation and client exit only; unrelated game, video, and file workloads remain untested.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "relation": "covered",
+          "reason": "Windows networking and SSH were available on the candidate boot throughout collection. Historical Wi-Fi failures remain open.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "relation": "disjoint",
+          "reason": "The measured transition was a one-time firmware trial, not recovery to a prior KMD.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "relation": "disjoint",
+          "reason": "The small controlled client has no memory-pressure workload. The prior system exhaustion episode is outside this measurement.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "relation": "covered",
+          "reason": "The logged controlled shutdown leaving the original desktop did not produce an abnormal end in the full transition interval.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "relation": "disjoint",
+          "reason": "The prior episode concerns the separate WDDM 2.0 flip control after selection.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "relation": "disjoint",
+          "reason": "Unobserved prior user handoff intervals are outside the recorded boot and workload boundary.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "relation": "covered",
+          "reason": "Same legacy client and first-present transition; observed its return and subsequent desktop continuity. The earlier autonomous CDD tracing schedule was not reproduced.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "relation": "covered",
+          "reason": "Both recorded controlled boot requests match the system log; one-use candidate boot completed with the selected firmware and native desktop.",
+          "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
+        }
       ]
     }
   ],
