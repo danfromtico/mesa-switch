@@ -42,6 +42,16 @@ foreach($comparison in $ledger.baseline_comparisons){
     if($LASTEXITCODE){throw 'Missing historical baseline for comparison'}
     $priorSelection=($priorLines -join "`n")|ConvertFrom-Json -ErrorAction Stop
     if($priorSelection.qualification_sha256 -ne $comparison.previous_qualification_sha256){throw 'Historical comparison used a different selected baseline'}
+    $priorPath=$priorSelection.qualification
+    if($priorPath -notmatch '^tegra-x1-wddm/docs/[a-z0-9_./-]+\.json$' -or $priorPath.Split('/') -contains '..'){throw 'Invalid historical qualification path'}
+    $previousReport=Read-SwitchEvidence (Join-Path $root $priorPath)
+    if($previousReport.Sha256 -ne $comparison.previous_qualification_sha256){throw 'Historical qualification bytes changed'}
+    $anchor=@($previousReport.Data.cases|Where-Object evidence_sha256 -eq $comparison.previous_control_sha256)
+    if($anchor.Count -ne 1){throw 'Missing historical comparison control'}
+    $control=$anchor[0].evidence_file
+    if($control -notmatch '^[a-z0-9][a-z0-9_./-]*$' -or $control.Split('/') -contains '..'){throw 'Invalid historical control path'}
+    $controlFile=Join-Path (Split-Path (Join-Path $root $priorPath)) $control
+    if(!(Test-Path -LiteralPath $controlFile -PathType Leaf) -or (Get-FileHash -LiteralPath $controlFile).Hash -ne $comparison.previous_control_sha256){throw 'Historical control bytes changed'}
     $priorLines=@(& git -C $root show ("${before}:"+$ledgerRel))
     if($LASTEXITCODE){throw 'Missing historical fault ledger for comparison'}
     $priorLedger=($priorLines -join "`n")|ConvertFrom-Json -ErrorAction Stop

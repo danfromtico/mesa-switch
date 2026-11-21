@@ -141,6 +141,13 @@ def retained_reports(commit):
         data = json.loads(blob(commit, qualification))
         reports = data["cases"] + data["system_log"]["restarts"]
         paths.update(str(PurePosixPath(qualification).parent / row["evidence_file"]) for row in reports)
+    for comparison in ledger.get("baseline_comparisons", []):
+        earlier = comparison["before_commit"]
+        previous = json.loads(blob(earlier, BASELINE))["qualification"]
+        record = json.loads(blob(earlier, previous))
+        paths.add(previous)
+        paths.update(str(PurePosixPath(previous).parent / row["evidence_file"]) for row in record["cases"]
+                     if row["evidence_sha256"] == comparison["previous_control_sha256"])
     for fault in ledger["faults"]:
         paths.update(ref.split("#", 1)[0] for ref in fault["evidence"])
         if fault["status"] == "closed":
