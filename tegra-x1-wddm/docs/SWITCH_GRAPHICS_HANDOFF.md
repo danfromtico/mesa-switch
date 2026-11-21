@@ -26,6 +26,10 @@
 
 正式基线启动 91476 的另一无写入窗口由 PID/TID 7924/1936 绘图。专属高分辨率定时器完成 511 次刷新，按首末 QPC 折算平均间隔约 2.651 ms。首次 Present 历时 15.363 ms。Windows 实时消费者在公开 RETURN 前 4.013 ms 读到同窗口 Blt 166。控制端 fsync 的确认回到 Windows 时晚于 RETURN 3.983 ms。DXGI 42 的落盘确认早于 RETURN 0.542 ms。四条原始载荷均与同次文件 ETL 相符。[原始 QPC、载荷与持久化确认](windows-native-graphics/rounds/win-present-incall-20261121-02.result.json)
 
+原三次启动共留下六个 ETL 文件。扫描全部 856,064 字节时，五个目标图形提供程序的 4,770 处标识均对应已正常解码的记录。34 个物理缓冲在已解析记录之后共余 225,648 字节，全部是 0xff 填充。三个原次都能检出 CALL 前的值 1 信号。CALL 后至复位之间仍缺同一绘图线程的内核回执。[原三次逐缓冲核对和正常调用对照](windows-native-graphics/rounds/win-original-etl-bytes-20261121-01.result.json)
+
+启动 91476，绘图 PID/TID 584/1664。首次公开 Present 历时 19.221 ms。同窗口内核 Blt 166 的本机原始记录为 148 字节，两端 SHA-256、CRC32 及独立 ETL 均吻合。写入及文件刷新耗时 10.416 ms，写透返回相对公开 RETURN 为 +5.688 ms，相对 DXGI 43 为 +5.710 ms。 当前基线的写透结果与原三次故障按启动号分别保存。[本机原始记录、文件刷新时间及控制端回读](windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

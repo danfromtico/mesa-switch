@@ -25,6 +25,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-original-etl-bytes-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result.",
@@ -1802,6 +1804,80 @@
           "first_anomaly_or_missing": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。"
         },
         "finished_utc": "2026-11-21T14:24:53.455093+00:00"
+      },
+      {
+        "round_id": "win-original-etl-bytes-20261121-01",
+        "contract_id": "WIN-OLD-RESET",
+        "windows_question": "WIN-OLD-RESET",
+        "method": "原三次异常启动的 ETL 文件字节复核",
+        "plan": "windows-native-graphics/rounds/win-original-etl-bytes-20261121-01.plan.json",
+        "plan_sha256": "f84d041f40a1a9abea5f1451ab0d3bd1690d58a115ea43ac7122a39cb5c56a93",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:27:28.382560+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-original-etl-bytes-20261121-01.result.json",
+        "result_sha256": "fd673ef012dd88a31dd110d9354efd0ddfc02ff0fc775873aa884fd429cc53ce",
+        "status": "故障开放",
+        "finding": "原三次重启的六个 ETL 共 856064 字节、34 个物理缓冲。五个目标图形提供程序的全部 4770 个标识都落在可正常解码的事件头中。逐缓冲检查最后一个已解码记录之后的 225648 字节，全部为 0xff。三个绘图线程的调用前值 1 信号均能从原始字节找回，CALL 后未找到新的图形事件。",
+        "missing_observation": "六个原始文件的已存字节仅覆盖 CALL 之前。复位前留在 RAM、未传到文件或设备外的内核事件仍缺同次原件。",
+        "boundaries": {
+          "last_entry": [
+            [
+              82058,
+              1812,
+              6340,
+              "680609 6340 CALL Present 00000000 qpc=13070969930"
+            ],
+            [
+              82221,
+              4672,
+              4712,
+              "122343 4712 CALL Present 00000000 qpc=2352403757"
+            ],
+            [
+              82382,
+              5828,
+              7656,
+              "122843 7656 CALL Present 00000000 qpc=2361927374"
+            ]
+          ],
+          "last_return": "原三次调用前均已记录设备移除原因检查 S_OK。原客户端在公开 Present 与持久 RETURN 标记之间另有一次状态查询。",
+          "first_anomaly_or_missing": "六个原始文件的已存字节仅覆盖 CALL 之前。复位前留在 RAM、未传到文件或设备外的内核事件仍缺同次原件。"
+        },
+        "finished_utc": "2026-11-21T14:27:44.683564+00:00"
+      },
+      {
+        "round_id": "win-present-local-blt-20261121-01",
+        "contract_id": "WIN-BLT-LOCAL-FLUSH",
+        "windows_question": "WIN-BLT-LOCAL-FLUSH",
+        "method": "原空窗口一次正常首次呈现的 Switch 本机写透观察",
+        "plan": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.plan.json",
+        "plan_sha256": "f458676e6bea991bfcd577f466eb3fd6d2450fef08be9a1d24be19dbad6c50c3",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:29:06.080989+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
+        "result_sha256": "f8f893c4d9a450c4a28716403ce2cc45bbdc1777325420d108c4efd8c7ccec27",
+        "status": "观测缺口",
+        "finding": "启动 91476，绘图 PID/TID 584/1664。首次公开 Present 历时 19.221 ms。同窗口内核 Blt 166 的本机原始记录为 148 字节，两端 SHA-256、CRC32 及独立 ETL 均吻合。写入及文件刷新耗时 10.416 ms，写透返回相对公开 RETURN 为 +5.688 ms，相对 DXGI 43 为 +5.710 ms。",
+        "missing_observation": "尚缺此轮完整且匹配的 Blt 166 原始载荷在公开 RETURN 之前由 Windows 本机写透完成的确认。",
+        "boundaries": {
+          "last_entry": {
+            "windows_blt_source_qpc": 153055020045,
+            "consumer_qpc": 153055025580,
+            "write_start_qpc": 153055025663,
+            "first_dxgi_stop_qpc": 153055116021
+          },
+          "last_return": {
+            "windows_file_flush_qpc": 153055225655,
+            "windows_file_status": 0,
+            "kernel_return_status": 0,
+            "public_return_qpc": 153055116440,
+            "public_hresult": "00000000"
+          },
+          "first_anomaly_or_missing": "尚缺此轮完整且匹配的 Blt 166 原始载荷在公开 RETURN 之前由 Windows 本机写透完成的确认。"
+        },
+        "finished_utc": "2026-11-21T14:30:59.692260+00:00"
       }
     ]
   }

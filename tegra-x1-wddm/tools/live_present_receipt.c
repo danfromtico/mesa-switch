@@ -38,6 +38,12 @@ typedef struct {
     BOOL draining;
     BOOL completed;
     DWORD process_trace_status;
+    HANDLE journal;
+    char journal_token[13];
+    LONG journal_sequence;
+    DWORD journal_status;
+    LONGLONG journal_start;
+    LONGLONG journal_finish;
 } Receiver;
 
 static LONGLONG ticks(void)
@@ -78,6 +84,92 @@ static ULONG enable(TRACEHANDLE session, const GUID *guid, USHORT first, USHORT 
                           TRACE_LEVEL_VERBOSE, 0, 0, 2000, &parameters);
 }
 
+// Place one new file beside the signed observer in its nonce-named staging directory.
+static HANDLE create_blt_journal(const wchar_t *token)
+{
+    static const wchar_t owner_prefix[] = L"WinPresentLive-";
+    wchar_t path[MAX_PATH];
+    DWORD count = GetModuleFileNameW(NULL, path, _countof(path));
+    if (!count) return INVALID_HANDLE_VALUE;
+    if (count >= _countof(path)) {
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        return INVALID_HANDLE_VALUE;
+    }
+    wchar_t *leaf = wcsrchr(path, L'\\');
+    if (leaf) *leaf = 0;
+    const wchar_t *parent = wcsrchr(path, L'\\');
+    if (!leaf || !parent || wcsncmp(parent + 1, owner_prefix, _countof(owner_prefix)-1) != 0 ||
+        wcscmp(parent + _countof(owner_prefix), token) != 0) {
+        SetLastError(ERROR_INVALID_NAME);
+        return INVALID_HANDLE_VALUE;
+    }
+    DWORD attributes = GetFileAttributesW(path);
+    if (attributes == INVALID_FILE_ATTRIBUTES) return INVALID_HANDLE_VALUE;
+    if (!(attributes & FILE_ATTRIBUTE_DIRECTORY) || (attributes & FILE_ATTRIBUTE_REPARSE_POINT) ||
+        wcslen(path) + _countof(L"\\blt-receipt.bin") > _countof(path) ||
+        wcscat_s(path, _countof(path), L"\\blt-receipt.bin")) {
+        SetLastError(ERROR_INVALID_NAME);
+        return INVALID_HANDLE_VALUE;
+    }
+    return CreateFileW(path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW,
+                       FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, NULL);
+}
+
+static uint32_t record_crc32(const BYTE *bytes, size_t length)
+{
+    uint32_t crc = UINT32_MAX;
+    for (size_t i = 0; i < length; ++i) {
+        crc ^= bytes[i];
+        for (unsigned bit = 0; bit < 8; ++bit)
+            crc = (crc >> 1) ^ ((crc & 1) ? 0xedb88320u : 0u);
+    }
+    return ~crc;
+}
+
+typedef struct {
+    char magic[8], token[12];
+    uint32_t sequence, pid, tid;
+    uint16_t event_id;
+    uint8_t version, reserved;
+    uint16_t payload_bytes, header_bytes;
+    int64_t source_qpc, callback_qpc;
+} BltRecordHeader;
+_Static_assert(sizeof(BltRecordHeader) == 56 && offsetof(BltRecordHeader, source_qpc) == 40,
+               "Blt receipt layout must match its little-endian file format");
+
+// The CRC covers the header and verbatim ETW payload. The consumer and subsequent
+// FlushFileBuffers return use the same Windows QPC as the public application.
+static DWORD persist_blt(Receiver *r, const EVENT_HEADER *h, LONGLONG callback,
+                         USHORT length, const BYTE *payload)
+{
+    BltRecordHeader header = {0};
+    BYTE frame[sizeof(header) + 512 + sizeof(uint32_t)];
+    if (length > 512) return ERROR_INSUFFICIENT_BUFFER;
+    memcpy(header.magic, "SWBLT1", 6);
+    memcpy(header.token, r->journal_token, sizeof(header.token));
+    header.sequence = (uint32_t)r->published;
+    header.pid = h->ProcessId;
+    header.tid = h->ThreadId;
+    header.event_id = h->EventDescriptor.Id;
+    header.version = h->EventDescriptor.Version;
+    header.payload_bytes = length;
+    header.header_bytes = sizeof(header);
+    header.source_qpc = h->TimeStamp.QuadPart;
+    header.callback_qpc = callback;
+    memcpy(frame, &header, sizeof(header));
+    if (length) memcpy(frame + sizeof(header), payload, length);
+    DWORD body = (DWORD)sizeof(header) + length;
+    uint32_t crc = record_crc32(frame, body);
+    memcpy(frame + body, &crc, sizeof(crc));
+    DWORD written = 0, size = body + (DWORD)sizeof(crc);
+    r->journal_start = ticks();
+    if (!WriteFile(r->journal, frame, size, &written, NULL)) return GetLastError();
+    if (written != size) return ERROR_WRITE_FAULT;
+    if (!FlushFileBuffers(r->journal)) return GetLastError();
+    r->journal_finish = ticks();
+    return ERROR_SUCCESS;
+}
+
 static void WINAPI on_event(PEVENT_RECORD record)
 {
     Receiver *r = record->UserContext;
@@ -115,10 +207,15 @@ static void WINAPI on_event(PEVENT_RECORD record)
         fail(r);
     } else {
         ++r->published;
+        LONGLONG callback = ticks();
+        if (id == 166 && r->journal != INVALID_HANDLE_VALUE && !r->journal_sequence) {
+            r->journal_sequence = r->published;
+            r->journal_status = persist_blt(r, h, callback, record->UserDataLength, bytes);
+        }
         int n = printf("EVENT %ld %s %u %u %lu %lu %lld %lld %u %s\n",
                        r->published, provider, id, h->EventDescriptor.Version,
                        h->ProcessId, h->ThreadId, (long long)h->TimeStamp.QuadPart,
-                       (long long)ticks(), record->UserDataLength, hex);
+                       (long long)callback, record->UserDataLength, hex);
         if (n < 0 || fflush(stdout) != 0)
             fail(r);
     }
@@ -216,7 +313,8 @@ int wmain(int argc, wchar_t **argv)
         wcslen(argv[1]+length) != 12 || wcsspn(argv[1]+length, L"0123456789abcdef") != 12)
         return 2;
     BOOL early_flush = argc == 4;
-    BOOL precise = early_flush && wcscmp(argv[3], L"--precise-early-flush") == 0;
+    BOOL local_blt = early_flush && wcscmp(argv[3], L"--local-blt-receipt") == 0;
+    BOOL precise = local_blt || (early_flush && wcscmp(argv[3], L"--precise-early-flush") == 0);
     if (early_flush && !precise && wcscmp(argv[3], L"--early-flush") != 0) return 2;
     wchar_t directory[MAX_PATH], pid_path[MAX_PATH], image[MAX_PATH];
     DWORD count = GetFullPathNameW(argv[2], MAX_PATH, directory, NULL);
@@ -229,6 +327,7 @@ int wmain(int argc, wchar_t **argv)
 
     Receiver receiver = {0};
     Receiver *r = &receiver;
+    r->journal = INVALID_HANDLE_VALUE;
     r->stopping = CreateEventW(NULL, TRUE, FALSE, NULL);
     LARGE_INTEGER freq;
     if (!r->stopping) return 3;
@@ -257,6 +356,15 @@ int wmain(int argc, wchar_t **argv)
         if (pulse) CloseHandle(pulse);
         CloseHandle(r->stopping);
         return 3;
+    }
+    if (local_blt) {
+        for (size_t i = 0; i < sizeof(r->journal_token)-1; ++i)
+            r->journal_token[i] = (char)argv[1][length+i];
+        r->journal = create_blt_journal(argv[1]+length);
+        if (r->journal == INVALID_HANDLE_VALUE) {
+            status = GetLastError();
+            fprintf(stderr, "CreateFile journal status=%lu\n", status);
+        }
     }
     EVENT_TRACE_LOGFILEW log = {0};
     log.LoggerName = argv[1];
@@ -354,11 +462,16 @@ int wmain(int argc, wchar_t **argv)
         fprintf(stderr, "EARLY_TIMER high_resolution\n");
         CloseHandle(pulse);
     }
+    if (r->journal != INVALID_HANDLE_VALUE) {
+        fprintf(stderr, "LOCAL_BLT %ld %lu %lld %lld\n", r->journal_sequence, r->journal_status,
+                (long long)r->journal_start, (long long)r->journal_finish);
+        CloseHandle(r->journal);
+    }
     if (acks) CloseHandle(acks);
     if (reader) CloseHandle(reader);
     if (process) CloseHandle(process);
     CloseHandle(r->stopping);
-    return status || stopped || r->process_trace_status || r->failed || !r->completed || p.properties.EventsLost ||
+    return status || stopped || r->process_trace_status || r->failed || !r->completed || r->journal_status || p.properties.EventsLost ||
            p.properties.RealTimeBuffersLost || log.EventsLost || !r->published ||
            r->published != r->acknowledged ? 4 : 0;
 }

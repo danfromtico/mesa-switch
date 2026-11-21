@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "round_id": "win-present-local-blt-20261121-01",
+  "contract_id": "WIN-BLT-LOCAL-FLUSH",
+  "windows_question": "WIN-BLT-LOCAL-FLUSH",
+  "owner": "Windows dxgkrnl、专属 ETW 消费端和 Switch 本机存储",
+  "question": "在正式无写入窗口的首次公开 CALL 与 RETURN 之间，本机能否写透归属于这次绘图线程与窗口的 Windows Blt 166 原始事件？",
+  "method": "原空窗口一次正常首次呈现的 Switch 本机写透观察",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "唯一轮次文件以 CREATE_NEW 和 FILE_FLAG_WRITE_THROUGH 创建。完整 WriteFile 及 FlushFileBuffers 成功返回位于首次公开 CALL 至 RETURN 内，回读数据的 CRC32 与两端 SHA-256 通过，并同独立 ETL 的 PID/TID、对象、时间和载荷一致。",
+  "observations": [
+    "沿用上一正式基线样本同一客户端、空窗口、两个 BGRA 缓冲和专属 2 ms 高分辨率定时器。",
+    "绑定签名观察器与目标进程后，将首条 Windows 内核 Blt 166 写入轮次专属新文件。记录原始字节、CRC32、本机写入开始及 FlushFileBuffers 成功返回 QPC。",
+    "回读本机新文件及 SHA-256，交叉核对同次独立 ETL 和实时传输。区分公开 RETURN 前完成、晚于 RETURN、记录不全及无匹配事件。核对状态再清理本轮临时文件。"
+  ],
+  "inputs": {
+    "app": {
+      "Board-Case.ps1": "2c7a91f6a636833fbd4312708061843e37c90029ae89ce27be636013047340b1",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0"
+    },
+    "client_input_source_sha256": "863f388517cd989d5ef8278b5f7a680e787a1e681a9bc0e4086518b55f3938c3",
+    "observer_source_sha256": "669bf3c8609f547bf854b2d330a48dc2a9cb2144bf3595dca04b7c85c15dc0fe",
+    "observer_exe_sha256": "5f1f3d8cc8b94b64fd69aa3c2a97d09a9d6286c858a6ab37c00015a4f4268bec",
+    "host_receiver_sha256": "b19472bf5157495b25cbcd7b04ea06012db15456c1b004aa6f044e6297ee3fa8",
+    "approved_diff_sha256": "03c0ea1323ec34c0435383b264262327ee821cdb795052e02f48a512216ca316",
+    "nonce": "0f690d12366044d2b51a79ffb43bc584",
+    "nominal_early_interval_ms": 2,
+    "early_window_ms": 2000,
+    "fallback_interval_ms": 40,
+    "previous_control": {
+      "path": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+      "sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701"
+    },
+    "journal_format": "Little endian <8s12sIIIHBBHHqq>, verbatim Windows ETW payload, IEEE CRC32 of header and payload as uint32, write-through then FlushFileBuffers.",
+    "official_file_api": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+      "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers"
+    ],
+    "previous_storage_control": {
+      "file": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/step4-reset-evidence/legacy-present-durable-boundaries/qualified-positive.json",
+      "sha256": "67d091c1e0a1759057a2015bf91494127660e95e0ce1b39e44c524eedd3d453d",
+      "before_boot": 83151,
+      "after_boot": 83239,
+      "records": 4,
+      "identical_sha256": "b7e8a864bf80e8ebcba421e46ab2b7490972136d4831ba18bc1b02267f53eb48"
+    },
+    "diagnostic_event_semantics": {
+      "path": "windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
+      "sha256": "9ed079ccf3df6b1455c9aeaa7b50b936fd26e1c183db5ee0798f5c96d5df08e0"
+    }
+  }
+}

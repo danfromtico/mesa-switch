@@ -1,0 +1,871 @@
+{
+  "schema": 1,
+  "round_id": "win-original-etl-bytes-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "plan_sha256": "f84d041f40a1a9abea5f1451ab0d3bd1690d58a115ea43ac7122a39cb5c56a93",
+  "status": "故障开放",
+  "finding": "原三次重启的六个 ETL 共 856064 字节、34 个物理缓冲。五个目标图形提供程序的全部 4770 个标识都落在可正常解码的事件头中。逐缓冲检查最后一个已解码记录之后的 225648 字节，全部为 0xff。三个绘图线程的调用前值 1 信号均能从原始字节找回，CALL 后未找到新的图形事件。",
+  "missing_observation": "六个原始文件的已存字节仅覆盖 CALL 之前。复位前留在 RAM、未传到文件或设备外的内核事件仍缺同次原件。",
+  "device_executions": 0,
+  "evidence": {
+    "original": [
+      {
+        "case": "Ddi20Case-261120-122121366257",
+        "boot": 82058,
+        "recovery_boot": 82128,
+        "call": "680609 6340 CALL Present 00000000 qpc=13070969930",
+        "pid": 1812,
+        "tid": 6340,
+        "original_components": {
+          "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+          "kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+          "umd_arm64_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+          "nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+        "streams": {
+          "evidence/scene/video.etl": {
+            "bytes": 262144,
+            "sha256": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+            "buffer_bytes": 32768,
+            "physical_buffers": 8,
+            "frequency": 19200000,
+            "declared_graphics_records": 1508,
+            "unique_matching_physical_headers": 1508,
+            "raw_guid_hits": 1508,
+            "guid_hits_by_provider": {
+              "802ec45a-1e99-4b83-9920-87c98277ba9d": 1208,
+              "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11": 293,
+              "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0": 7
+            },
+            "other_valid_event_headers": [],
+            "embedded_or_invalid_guid_hits": [],
+            "residual_bytes": 63952,
+            "residual_values": {
+              "ff": 63952
+            },
+            "residual_sha256": "c45712b822cd02769fb4a25a4792c5b49a378b3e5f404b61fa9c4ffc98ac09d1",
+            "latest_graphics_qpc": 13070620864,
+            "latest_graphics_relative_to_call_ms": -18.181,
+            "after_or_inside_call_records": 0,
+            "actor_records": [],
+            "pre_call_signal_value_one_headers": [
+              {
+                "offset": 61456,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "qpc": 13064001872,
+                "pid": 1812,
+                "tid": 6340,
+                "id": 294,
+                "version": 1,
+                "size": 120,
+                "payload_sha256": "88793157f94a05163240a8a7d866711fa71febefbbbf8922d306384c288a1792"
+              }
+            ],
+            "buffer_details": [
+              {
+                "offset": 0,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 712,
+                "residual_bytes": 32056,
+                "residual_values": {
+                  "ff": 32056
+                },
+                "header_bytes": 72,
+                "declared_filled": 712,
+                "saved_offset": 712,
+                "current_offset": 712,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 32768,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32688,
+                "residual_bytes": 80,
+                "residual_values": {
+                  "ff": 80
+                },
+                "header_bytes": 72,
+                "declared_filled": 32688,
+                "saved_offset": 32688,
+                "current_offset": 32816,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 65536,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32312,
+                "residual_bytes": 456,
+                "residual_values": {
+                  "ff": 456
+                },
+                "header_bytes": 72,
+                "declared_filled": 32312,
+                "saved_offset": 32312,
+                "current_offset": 32976,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 98304,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32704,
+                "residual_bytes": 64,
+                "residual_values": {
+                  "ff": 64
+                },
+                "header_bytes": 72,
+                "declared_filled": 32704,
+                "saved_offset": 32704,
+                "current_offset": 32800,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 131072,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32768,
+                "residual_bytes": 0,
+                "residual_values": {},
+                "header_bytes": 72,
+                "declared_filled": 32768,
+                "saved_offset": 32768,
+                "current_offset": 32912,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 163840,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 24592,
+                "residual_bytes": 8176,
+                "residual_values": {
+                  "ff": 8176
+                },
+                "header_bytes": 72,
+                "declared_filled": 24592,
+                "saved_offset": 24592,
+                "current_offset": 57360,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 196608,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 9688,
+                "residual_bytes": 23080,
+                "residual_values": {
+                  "ff": 23080
+                },
+                "header_bytes": 72,
+                "declared_filled": 9688,
+                "saved_offset": 9688,
+                "current_offset": 42456,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 229376,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32728,
+                "residual_bytes": 40,
+                "residual_values": {
+                  "ff": 40
+                },
+                "header_bytes": 72,
+                "declared_filled": 32728,
+                "saved_offset": 32728,
+                "current_offset": 32856,
+                "buffer_size": 32768
+              }
+            ]
+          },
+          "evidence/miniport.etl": {
+            "bytes": 12288,
+            "sha256": "448d78b1d7806769b77d9bc745c65b7cf07e038e1451f8f7fcec2ab1f28bf7df",
+            "buffer_bytes": 4096,
+            "physical_buffers": 3,
+            "frequency": 19200000,
+            "declared_graphics_records": 0,
+            "unique_matching_physical_headers": 0,
+            "raw_guid_hits": 0,
+            "guid_hits_by_provider": {},
+            "other_valid_event_headers": [],
+            "embedded_or_invalid_guid_hits": [],
+            "residual_bytes": 11080,
+            "residual_values": {
+              "ff": 11080
+            },
+            "residual_sha256": "d872076b3f2405717e7fc1b76daf0c8eb8c58b117dc02bf00f3bd52dc971565c",
+            "latest_graphics_qpc": null,
+            "latest_graphics_relative_to_call_ms": null,
+            "after_or_inside_call_records": 0,
+            "actor_records": [],
+            "pre_call_signal_value_one_headers": [],
+            "buffer_details": [
+              {
+                "offset": 0,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 712,
+                "residual_bytes": 3384,
+                "residual_values": {
+                  "ff": 3384
+                },
+                "header_bytes": 72,
+                "declared_filled": 712,
+                "saved_offset": 712,
+                "current_offset": 712,
+                "buffer_size": 4096
+              },
+              {
+                "offset": 4096,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 336,
+                "residual_bytes": 3760,
+                "residual_values": {
+                  "ff": 3760
+                },
+                "header_bytes": 72,
+                "declared_filled": 336,
+                "saved_offset": 336,
+                "current_offset": 4432,
+                "buffer_size": 4096
+              },
+              {
+                "offset": 8192,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 160,
+                "residual_bytes": 3936,
+                "residual_values": {
+                  "ff": 3936
+                },
+                "header_bytes": 72,
+                "declared_filled": 160,
+                "saved_offset": 160,
+                "current_offset": 4256,
+                "buffer_size": 4096
+              }
+            ]
+          }
+        }
+      },
+      {
+        "case": "Ddi20Case-261120-122937785753",
+        "boot": 82221,
+        "recovery_boot": 82289,
+        "call": "122343 4712 CALL Present 00000000 qpc=2352403757",
+        "pid": 4672,
+        "tid": 4712,
+        "original_components": {
+          "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+          "kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+          "umd_arm64_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+          "nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+        "streams": {
+          "evidence/scene/video.etl": {
+            "bytes": 294912,
+            "sha256": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+            "buffer_bytes": 32768,
+            "physical_buffers": 9,
+            "frequency": 19200000,
+            "declared_graphics_records": 1732,
+            "unique_matching_physical_headers": 1732,
+            "raw_guid_hits": 1732,
+            "guid_hits_by_provider": {
+              "802ec45a-1e99-4b83-9920-87c98277ba9d": 1419,
+              "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11": 306,
+              "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0": 7
+            },
+            "other_valid_event_headers": [],
+            "embedded_or_invalid_guid_hits": [],
+            "residual_bytes": 65776,
+            "residual_values": {
+              "ff": 65776
+            },
+            "residual_sha256": "7c2af9549925d706f4b30ce6b0899c4d5f6af0a621101bc1c0edcd5f822acb18",
+            "latest_graphics_qpc": 2351945912,
+            "latest_graphics_relative_to_call_ms": -23.846,
+            "after_or_inside_call_records": 0,
+            "actor_records": [],
+            "pre_call_signal_value_one_headers": [
+              {
+                "offset": 62640,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "qpc": 2331216126,
+                "pid": 4672,
+                "tid": 4712,
+                "id": 294,
+                "version": 1,
+                "size": 120,
+                "payload_sha256": "37ffb0b271232572d92cb51822eda3ea9723fbcf5e0c7f189687b48e2b87f4c4"
+              }
+            ],
+            "buffer_details": [
+              {
+                "offset": 0,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 712,
+                "residual_bytes": 32056,
+                "residual_values": {
+                  "ff": 32056
+                },
+                "header_bytes": 72,
+                "declared_filled": 712,
+                "saved_offset": 712,
+                "current_offset": 712,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 32768,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32744,
+                "residual_bytes": 24,
+                "residual_values": {
+                  "ff": 24
+                },
+                "header_bytes": 72,
+                "declared_filled": 32744,
+                "saved_offset": 32744,
+                "current_offset": 32840,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 65536,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32752,
+                "residual_bytes": 16,
+                "residual_values": {
+                  "ff": 16
+                },
+                "header_bytes": 72,
+                "declared_filled": 32752,
+                "saved_offset": 32752,
+                "current_offset": 32928,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 98304,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32640,
+                "residual_bytes": 128,
+                "residual_values": {
+                  "ff": 128
+                },
+                "header_bytes": 72,
+                "declared_filled": 32640,
+                "saved_offset": 32640,
+                "current_offset": 32776,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 131072,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 22824,
+                "residual_bytes": 9944,
+                "residual_values": {
+                  "ff": 9944
+                },
+                "header_bytes": 72,
+                "declared_filled": 22824,
+                "saved_offset": 22824,
+                "current_offset": 55592,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 163840,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32768,
+                "residual_bytes": 0,
+                "residual_values": {},
+                "header_bytes": 72,
+                "declared_filled": 32768,
+                "saved_offset": 32768,
+                "current_offset": 32912,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 196608,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32672,
+                "residual_bytes": 96,
+                "residual_values": {
+                  "ff": 96
+                },
+                "header_bytes": 72,
+                "declared_filled": 32672,
+                "saved_offset": 32672,
+                "current_offset": 32800,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 229376,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32680,
+                "residual_bytes": 88,
+                "residual_values": {
+                  "ff": 88
+                },
+                "header_bytes": 72,
+                "declared_filled": 32680,
+                "saved_offset": 32680,
+                "current_offset": 32856,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 262144,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 9344,
+                "residual_bytes": 23424,
+                "residual_values": {
+                  "ff": 23424
+                },
+                "header_bytes": 72,
+                "declared_filled": 9344,
+                "saved_offset": 9344,
+                "current_offset": 42112,
+                "buffer_size": 32768
+              }
+            ]
+          },
+          "evidence/miniport.etl": {
+            "bytes": 12288,
+            "sha256": "ae2b064bc83935332746787fdd42cbc661ed4291020ff93a10e167f254bc4fa0",
+            "buffer_bytes": 4096,
+            "physical_buffers": 3,
+            "frequency": 19200000,
+            "declared_graphics_records": 0,
+            "unique_matching_physical_headers": 0,
+            "raw_guid_hits": 0,
+            "guid_hits_by_provider": {},
+            "other_valid_event_headers": [],
+            "embedded_or_invalid_guid_hits": [],
+            "residual_bytes": 11080,
+            "residual_values": {
+              "ff": 11080
+            },
+            "residual_sha256": "d872076b3f2405717e7fc1b76daf0c8eb8c58b117dc02bf00f3bd52dc971565c",
+            "latest_graphics_qpc": null,
+            "latest_graphics_relative_to_call_ms": null,
+            "after_or_inside_call_records": 0,
+            "actor_records": [],
+            "pre_call_signal_value_one_headers": [],
+            "buffer_details": [
+              {
+                "offset": 0,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 712,
+                "residual_bytes": 3384,
+                "residual_values": {
+                  "ff": 3384
+                },
+                "header_bytes": 72,
+                "declared_filled": 712,
+                "saved_offset": 712,
+                "current_offset": 712,
+                "buffer_size": 4096
+              },
+              {
+                "offset": 4096,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 336,
+                "residual_bytes": 3760,
+                "residual_values": {
+                  "ff": 3760
+                },
+                "header_bytes": 72,
+                "declared_filled": 336,
+                "saved_offset": 336,
+                "current_offset": 4432,
+                "buffer_size": 4096
+              },
+              {
+                "offset": 8192,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 160,
+                "residual_bytes": 3936,
+                "residual_values": {
+                  "ff": 3936
+                },
+                "header_bytes": 72,
+                "declared_filled": 160,
+                "saved_offset": 160,
+                "current_offset": 4256,
+                "buffer_size": 4096
+              }
+            ]
+          }
+        }
+      },
+      {
+        "case": "Ddi20Case-261120-123625091734",
+        "boot": 82382,
+        "recovery_boot": 82448,
+        "call": "122843 7656 CALL Present 00000000 qpc=2361927374",
+        "pid": 5828,
+        "tid": 7656,
+        "original_components": {
+          "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+          "kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+          "umd_arm64_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+          "nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+        "streams": {
+          "evidence/scene/video.etl": {
+            "bytes": 262144,
+            "sha256": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+            "buffer_bytes": 32768,
+            "physical_buffers": 8,
+            "frequency": 19200000,
+            "declared_graphics_records": 1530,
+            "unique_matching_physical_headers": 1530,
+            "raw_guid_hits": 1530,
+            "guid_hits_by_provider": {
+              "802ec45a-1e99-4b83-9920-87c98277ba9d": 1254,
+              "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11": 265,
+              "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0": 11
+            },
+            "other_valid_event_headers": [],
+            "embedded_or_invalid_guid_hits": [],
+            "residual_bytes": 62680,
+            "residual_values": {
+              "ff": 62680
+            },
+            "residual_sha256": "8c134d2499c721b2f4e859118f541bdc460ece3e2db02336cfcc73e7c9c326aa",
+            "latest_graphics_qpc": 2361493000,
+            "latest_graphics_relative_to_call_ms": -22.624,
+            "after_or_inside_call_records": 0,
+            "actor_records": [],
+            "pre_call_signal_value_one_headers": [
+              {
+                "offset": 62000,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "qpc": 2354181827,
+                "pid": 5828,
+                "tid": 7656,
+                "id": 294,
+                "version": 1,
+                "size": 120,
+                "payload_sha256": "043fff206c8052c4cfa41e6903991e39ac099bcee05ad5fea020a21048ed4479"
+              }
+            ],
+            "buffer_details": [
+              {
+                "offset": 0,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 712,
+                "residual_bytes": 32056,
+                "residual_values": {
+                  "ff": 32056
+                },
+                "header_bytes": 72,
+                "declared_filled": 712,
+                "saved_offset": 712,
+                "current_offset": 712,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 32768,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32768,
+                "residual_bytes": 0,
+                "residual_values": {},
+                "header_bytes": 72,
+                "declared_filled": 32768,
+                "saved_offset": 32768,
+                "current_offset": 32912,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 65536,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32752,
+                "residual_bytes": 16,
+                "residual_values": {
+                  "ff": 16
+                },
+                "header_bytes": 72,
+                "declared_filled": 32752,
+                "saved_offset": 32752,
+                "current_offset": 32888,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 98304,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32712,
+                "residual_bytes": 56,
+                "residual_values": {
+                  "ff": 56
+                },
+                "header_bytes": 72,
+                "declared_filled": 32712,
+                "saved_offset": 32712,
+                "current_offset": 32840,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 131072,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32568,
+                "residual_bytes": 200,
+                "residual_values": {
+                  "ff": 200
+                },
+                "header_bytes": 72,
+                "declared_filled": 32568,
+                "saved_offset": 32568,
+                "current_offset": 32800,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 163840,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32744,
+                "residual_bytes": 24,
+                "residual_values": {
+                  "ff": 24
+                },
+                "header_bytes": 72,
+                "declared_filled": 32744,
+                "saved_offset": 32744,
+                "current_offset": 32856,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 196608,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 32648,
+                "residual_bytes": 120,
+                "residual_values": {
+                  "ff": 120
+                },
+                "header_bytes": 72,
+                "declared_filled": 32648,
+                "saved_offset": 32648,
+                "current_offset": 32792,
+                "buffer_size": 32768
+              },
+              {
+                "offset": 229376,
+                "physical_bytes": 32768,
+                "end_of_decoded_records": 2560,
+                "residual_bytes": 30208,
+                "residual_values": {
+                  "ff": 30208
+                },
+                "header_bytes": 72,
+                "declared_filled": 2560,
+                "saved_offset": 2560,
+                "current_offset": 35328,
+                "buffer_size": 32768
+              }
+            ]
+          },
+          "evidence/miniport.etl": {
+            "bytes": 12288,
+            "sha256": "6457ad2897be7679e1a140cb12b6c51f93167ad6a31f6cca2b2a006fd0b65cf6",
+            "buffer_bytes": 4096,
+            "physical_buffers": 3,
+            "frequency": 19200000,
+            "declared_graphics_records": 0,
+            "unique_matching_physical_headers": 0,
+            "raw_guid_hits": 0,
+            "guid_hits_by_provider": {},
+            "other_valid_event_headers": [],
+            "embedded_or_invalid_guid_hits": [],
+            "residual_bytes": 11080,
+            "residual_values": {
+              "ff": 11080
+            },
+            "residual_sha256": "d872076b3f2405717e7fc1b76daf0c8eb8c58b117dc02bf00f3bd52dc971565c",
+            "latest_graphics_qpc": null,
+            "latest_graphics_relative_to_call_ms": null,
+            "after_or_inside_call_records": 0,
+            "actor_records": [],
+            "pre_call_signal_value_one_headers": [],
+            "buffer_details": [
+              {
+                "offset": 0,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 712,
+                "residual_bytes": 3384,
+                "residual_values": {
+                  "ff": 3384
+                },
+                "header_bytes": 72,
+                "declared_filled": 712,
+                "saved_offset": 712,
+                "current_offset": 712,
+                "buffer_size": 4096
+              },
+              {
+                "offset": 4096,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 336,
+                "residual_bytes": 3760,
+                "residual_values": {
+                  "ff": 3760
+                },
+                "header_bytes": 72,
+                "declared_filled": 336,
+                "saved_offset": 336,
+                "current_offset": 4432,
+                "buffer_size": 4096
+              },
+              {
+                "offset": 8192,
+                "physical_bytes": 4096,
+                "end_of_decoded_records": 160,
+                "residual_bytes": 3936,
+                "residual_values": {
+                  "ff": 3936
+                },
+                "header_bytes": 72,
+                "declared_filled": 160,
+                "saved_offset": 160,
+                "current_offset": 4256,
+                "buffer_size": 4096
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "healthy_positive_control": {
+      "round": "win-present-incall-20261121-02",
+      "boot": 91476,
+      "streams": {
+        "display.etl": {
+          "sha256": "8f80c9125966dabe5fc425af9b23291802572730423c2567f250990993154d57",
+          "frequency": 19200000,
+          "actor_records": [
+            {
+              "offset": 3066328,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "qpc": 146155158495,
+              "pid": 7924,
+              "tid": 1936,
+              "id": 166,
+              "version": 0,
+              "size": 168,
+              "payload_sha256": "322af733923998fd832464cdea84536c0cdaab04b7166cd8b12e1aa35376b2d8"
+            },
+            {
+              "offset": 3068888,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "qpc": 146155260674,
+              "pid": 7924,
+              "tid": 1936,
+              "id": 42,
+              "version": 0,
+              "size": 100,
+              "payload_sha256": "30292c9ee57397491d76e16c82c2694749f77d760ac6a484b94150a037052de1"
+            },
+            {
+              "offset": 3069320,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "qpc": 146155268352,
+              "pid": 7924,
+              "tid": 1936,
+              "id": 184,
+              "version": 1,
+              "size": 124,
+              "payload_sha256": "97259d47f0c1923df24c2cdb7dd8f300fcc72542df2d9979f060b1306d8d5392"
+            }
+          ],
+          "declared_graphics_records": 58178,
+          "raw_guid_hits": 58178,
+          "other_valid_event_headers": []
+        },
+        "scene/video.etl": {
+          "sha256": "fe0437513bf92b9d528b61b458bc59c3d6b15a581d6415ac252149dbe7a7bb74",
+          "frequency": 19200000,
+          "actor_records": [
+            {
+              "offset": 732152,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "qpc": 146155158536,
+              "pid": 7924,
+              "tid": 1936,
+              "id": 166,
+              "version": 0,
+              "size": 168,
+              "payload_sha256": "322af733923998fd832464cdea84536c0cdaab04b7166cd8b12e1aa35376b2d8"
+            },
+            {
+              "offset": 733752,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "qpc": 146155268376,
+              "pid": 7924,
+              "tid": 1936,
+              "id": 184,
+              "version": 1,
+              "size": 124,
+              "payload_sha256": "97259d47f0c1923df24c2cdb7dd8f300fcc72542df2d9979f060b1306d8d5392"
+            },
+            {
+              "offset": 727408,
+              "provider": "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9",
+              "qpc": 146155038258,
+              "pid": 7924,
+              "tid": 1936,
+              "id": 42,
+              "version": 0,
+              "size": 104,
+              "payload_sha256": "2807d421a72a81bc90d048aebd7c2da8f8c24e1f75ca5c3a431d04932f0ec9db"
+            },
+            {
+              "offset": 734448,
+              "provider": "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9",
+              "qpc": 146155270944,
+              "pid": 7924,
+              "tid": 1936,
+              "id": 43,
+              "version": 0,
+              "size": 84,
+              "payload_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+            }
+          ],
+          "declared_graphics_records": 6489,
+          "raw_guid_hits": 6489,
+          "other_valid_event_headers": []
+        }
+      }
+    },
+    "file_bytes": 856064,
+    "physical_buffers": 34,
+    "declared_graphics_records": 4770,
+    "residual_filler_bytes": 225648,
+    "raw_data_file": "original-etl-byte-scan.json",
+    "raw_data_sha256": "e081fcef23a5f6ad6aceed4f8c32251cd8a8d7a678c2a44136d4753c63436c09",
+    "audit_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/raw_original_etl.py",
+    "audit_sha256": "5ba72f2e31b1e75e3927284d5ef7226958a1091cf645a7f39ecee4cbaa04bf28",
+    "method": "读取缓冲头的 FilledBytes 并解码记录，再从最后一个按 8 字节对齐的记录末尾逐字节核对到物理缓冲末尾。同时在整个文件按 Windows 小端 GUID 查找指定提供程序，并独立验证 80 字节事件头、长度、PID/TID、版本、QPC 与载荷哈希。",
+    "boundaries": {
+      "last_entry": [
+        [
+          82058,
+          1812,
+          6340,
+          "680609 6340 CALL Present 00000000 qpc=13070969930"
+        ],
+        [
+          82221,
+          4672,
+          4712,
+          "122343 4712 CALL Present 00000000 qpc=2352403757"
+        ],
+        [
+          82382,
+          5828,
+          7656,
+          "122843 7656 CALL Present 00000000 qpc=2361927374"
+        ]
+      ],
+      "last_return": "原三次调用前均已记录设备移除原因检查 S_OK。原客户端在公开 Present 与持久 RETURN 标记之间另有一次状态查询。",
+      "first_anomaly_or_missing": "六个原始文件的已存字节仅覆盖 CALL 之前。复位前留在 RAM、未传到文件或设备外的内核事件仍缺同次原件。"
+    }
+  }
+}
