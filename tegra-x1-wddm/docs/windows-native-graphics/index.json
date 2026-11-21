@@ -515,6 +515,35 @@
       "latest_observation": "开机 91476，绘图 PID/TID 5992/5988，无写入空窗口首次 Present(1,0) 在 DXGI 42/43 之间产生同线程同 HWND 的 Windows DxgKrnl 184，KMT 与公开返回均为 0。旧式 DDI 0x000b000f，原生 GM20B，DWM 1400 连续。"
     },
     {
+      "id": "WIN-PRESENT-LIVE-RECEIPT",
+      "priority": "P0",
+      "owner": "Windows DXGI、dxgkrnl ETW 消费端与控制端文件系统",
+      "question": "正常正式基线空窗口首次 Present 的 Windows 事件，能否在应用仍存活时独立持久写到控制端？",
+      "status": "实机通过",
+      "existing_observation": "已封口的本机 ETL 证明正式基线接收并返回。三次旧启动和较早三个无写入异常启动的文件 ETL 均止于 CALL 前。",
+      "missing_observation": null,
+      "pass_condition": "正常空窗口同一绘图线程的 DXGI Start/Stop、Windows Blt 与 Present/Info 逐条比对独立文件 ETL。每条控制端 fsync 后的 ACK 均在 Windows 测得且此时目标进程仍存活。报告实测延迟与留存边界。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+          "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-first-present-archives-20261121-01.result.json",
+          "sha256": "affb163ba077597729188daca40c106b9a00d8829c0f63e669945d0ffc5edb15"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "path"
+      ],
+      "round_ids": [
+        "win-present-live-20261121-01",
+        "win-present-live-20261121-02"
+      ],
+      "latest_observation": "启动 91476 的正常原空窗口 PID/TID 5540/7812，收到 4 条实时 Windows 记录。其中 4 条与文件 ETL 逐字节匹配，控制端 fsync 后的 Windows ACK 验到进程仍存活。最长实测往返上界 47.022 ms，公开 RETURN 标记前已确认 0 条。"
+    },
+    {
       "id": "WIN-PRESENT-KMT",
       "priority": "P0",
       "owner": "应用绘图线程、系统 D3D11/DXGI 和 Windows dxgkrnl",
@@ -668,7 +697,7 @@
       "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
       "status": "故障开放",
       "existing_observation": "三次发值 1 的信号包已在调用前退役。WARP 完成软件呈现、输入未验收。正常翻转有独立返回，诊断版 Blt 拒绝属于另一次启动。",
-      "missing_observation": "三次原故障的 CALL 之后缺同启动 DXGI Start/Stop、KMT 接收/返回、后置设备查询或早期复位记录。尚不能区分故障发生在公开 Present 内、返回后的查询内，或持久 RETURN 标记之前的其他位置。",
+      "missing_observation": "原三次公开 CALL 到复位之间，仍缺同启动同对象的内核接收、KMD 进入/返回或板级记录。早期不同客户端的独立现象只能裁决自身的调用顺序。",
       "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
       "evidence": [
         {
@@ -695,9 +724,10 @@
       "round_ids": [
         "win-historical-reset-20261121-01",
         "win-historical-process-log-20261121-01",
-        "win-historical-call-marker-20261121-01"
+        "win-historical-call-marker-20261121-01",
+        "win-first-present-archives-20261121-01"
       ],
-      "latest_observation": "三次原空窗口最后已经返回的应用侧 API 均为绘图设备 GetDeviceRemovedReason，值为 S_OK；下一条持久标记为首次 Present CALL。签名客户端在 Present 返回后先读取设备移除原因，再持久写入 RETURN。三次均缺这两条后置标记。"
+      "latest_observation": "五处历史目录的 155 份结果 ZIP 按内容去重得到 154 份，36 份配置对应原签名客户端。启动号变化的 4 份中，3 份为原先的无写入 SEQUENTIAL 故障，另一份为现代 DDI 翻转的第三次呈现。另一个签名客户端在三个较早启动也留下无写入 CALL、异常开机和零份 CALL 后图形事件；它把设备移除查询放在公开返回和 DwmFlush 之后。"
     },
     {
       "id": "WIN-FENCE-WAIT",
@@ -1373,26 +1403,97 @@
         "first_anomaly_or_missing": "三次原故障的 CALL 之后缺同启动 DXGI Start/Stop、KMT 接收/返回、后置设备查询或早期复位记录。尚不能区分故障发生在公开 Present 内、返回后的查询内，或持久 RETURN 标记之前的其他位置。"
       },
       "finished_utc": "2026-11-21T13:47:15.987176+00:00"
+    },
+    {
+      "round_id": "win-first-present-archives-20261121-01",
+      "contract_id": "WIN-OLD-RESET",
+      "windows_question": "WIN-OLD-RESET",
+      "method": "复核已有 Windows 本机原始归档",
+      "plan": "windows-native-graphics/rounds/win-first-present-archives-20261121-01.plan.json",
+      "plan_sha256": "3df44d66036acd43da7c38271cc77159c65c0e4c90f6d7250fb6e690e47063ab",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:56:14.229830+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-first-present-archives-20261121-01.result.json",
+      "result_sha256": "affb163ba077597729188daca40c106b9a00d8829c0f63e669945d0ffc5edb15",
+      "status": "故障开放",
+      "finding": "五处历史目录的 155 份结果 ZIP 按内容去重得到 154 份，36 份配置对应原签名客户端。启动号变化的 4 份中，3 份为原先的无写入 SEQUENTIAL 故障，另一份为现代 DDI 翻转的第三次呈现。另一个签名客户端在三个较早启动也留下无写入 CALL、异常开机和零份 CALL 后图形事件；它把设备移除查询放在公开返回和 DwmFlush 之后。",
+      "missing_observation": "原三次公开 CALL 到复位之间，仍缺同启动同对象的内核接收、KMD 进入/返回或板级记录。早期不同客户端的独立现象只能裁决自身的调用顺序。",
+      "boundaries": {
+        "last_entry": "原签名客户端三份异常启动仍止于公开 Present CALL。另一旧客户端的三份无写入异常启动也止于 CALL。",
+        "last_return": "原签名客户端紧前的设备移除原因是 S_OK；另一旧客户端完成了 FlushBeforeFirstPresent 并确认无应用写入。",
+        "first_anomaly_or_missing": "原三次公开 CALL 到复位之间，仍缺同启动同对象的内核接收、KMD 进入/返回或板级记录。早期不同客户端的独立现象只能裁决自身的调用顺序。"
+      },
+      "finished_utc": "2026-11-21T13:57:48.996094+00:00"
+    },
+    {
+      "round_id": "win-present-live-20261121-01",
+      "contract_id": "WIN-PRESENT-LIVE-RECEIPT",
+      "windows_question": "WIN-PRESENT-LIVE-RECEIPT",
+      "method": "正式基线实时 Windows ETW 控制端见证",
+      "plan": "windows-native-graphics/rounds/win-present-live-20261121-01.plan.json",
+      "plan_sha256": "938c8e087a9152682e39dc403abd44c5ce1e5baf8598e3abc579973ffeccb5ac",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T14:00:40.965525+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-present-live-20261121-01.result.json",
+      "result_sha256": "d400dc1dfa6159bd749ae325083d2f63fdc4640d4c17d02dc97311052498f7aa",
+      "status": "准备阶段修订",
+      "finding": "首次冻结源码的复核确认，ETW 消费者排空、末条 ACK、超时回收及 PID 文件绑定需要改进。该计划仅完成实机只读预检，应用派发次数为零。",
+      "missing_observation": "需要修订后的实时观察器和控制端实际回执。",
+      "boundaries": {
+        "last_entry": "正式组件与交流供电、手持模式的只读预检。",
+        "last_return": "独立源码复核返回，实机图形用例派发次数为零。",
+        "first_anomaly_or_missing": "退出阶段的输出与 ACK 可能交错；尚无合格实机证据。"
+      },
+      "finished_utc": "2026-11-21T14:07:29.634288+00:00"
+    },
+    {
+      "round_id": "win-present-live-20261121-02",
+      "contract_id": "WIN-PRESENT-LIVE-RECEIPT",
+      "windows_question": "WIN-PRESENT-LIVE-RECEIPT",
+      "method": "正式基线实时 Windows ETW 控制端见证",
+      "plan": "windows-native-graphics/rounds/win-present-live-20261121-02.plan.json",
+      "plan_sha256": "df8688b8a49c279c99a043577170386ba6f9551558dbbfa0b63de92858c1cd89",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T14:10:32.194339+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+      "result_sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86",
+      "status": "实机通过",
+      "finding": "启动 91476 的正常原空窗口 PID/TID 5540/7812，收到 4 条实时 Windows 记录。其中 4 条与文件 ETL 逐字节匹配，控制端 fsync 后的 Windows ACK 验到进程仍存活。最长实测往返上界 47.022 ms，公开 RETURN 标记前已确认 0 条。",
+      "missing_observation": null,
+      "boundaries": {
+        "last_entry": "同一绘图线程首次 DXGI Present Start，独立文件及实时提供程序时间见 verify_each_event。",
+        "last_return": {
+          "public_hresult": "00000000",
+          "public_qpc": 131646719229,
+          "last_durable_ack_qpc": 131647432357
+        },
+        "first_anomaly_or_missing": "实测延迟包含 Windows 交付、SSH、控制端 fsync 和确认返回。只给本轮持久化时间上界。未获确认的事件及快速复位前未交付的 ETW 缓冲仍可能缺失。"
+      },
+      "finished_utc": "2026-11-21T14:12:16.835008+00:00"
     }
   ],
   "progress": {
-    "total": 21,
+    "total": 22,
     "by_status": {
-      "实机通过": 5,
+      "实机通过": 6,
       "观测缺口": 2,
       "故障开放": 2,
       "已有实机通过": 6,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 12,
-    "new_device_executions": 2
+    "registered_rounds": 15,
+    "new_device_executions": 3
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
     "scene": "旧式 DDI 0x000b000f、普通窗口、两个 BGRA 缓冲、应用无写入、第一次 Present(1,0)。本次正式驱动和三次历史启动各自归属。",
     "order": [
       "WIN-EMPTY-PRESENT-KMT",
+      "WIN-PRESENT-LIVE-RECEIPT",
       "WIN-PRESENT-SOURCE",
       "WIN-FENCE-WAIT",
       "WIN-PRESENT-BLT",
@@ -1466,7 +1567,23 @@
       "win-empty-present-20261121-01": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961"
     },
     "local_staging_files_removed": 18,
-    "local_cleanup_receipt_sha256": "f4cfaadcf105ebd0613e68468825584225369277afa2d43cd19b2da38a2714c2"
+    "local_cleanup_receipt_sha256": "f4cfaadcf105ebd0613e68468825584225369277afa2d43cd19b2da38a2714c2",
+    "additional_rounds": {
+      "win-present-live-20261121-02": {
+        "boot": 91476,
+        "dwm": 1400,
+        "code": 0,
+        "ac": "Online",
+        "power_mode": 1,
+        "windows_trace_query": {
+          "SwitchDisplay-b6bd79caf1aa": 4201,
+          "SwitchPresentLive-b6bd79caf1aa": 4201,
+          "Nvdec720Preview-5540": 4201
+        },
+        "stage_removed": true,
+        "receipt_sha256": "9c212f933b90f4c97e5aa8381614e149f5a0c9bb30dc605d035477e3ccece061"
+      }
+    }
   },
   "first_present_evidence_scopes": {
     "original_no_write": {
@@ -1781,5 +1898,49 @@
     "objections": [],
     "main_check": "复核的八份回执保持原判。分配身份、窗口像素与原始 PID/TID 还可用完整回执和已发布事件载荷核对。后续四份 DWM 标识与原客户端记录的回执由本会话逐项核实。",
     "historical_result": "原三次重启原因仍缺直接证据。"
-  }
+  },
+  "live_receipt_trials": [
+    {
+      "round": "win-present-live-20261121-02",
+      "result": {
+        "path": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+        "sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86"
+      },
+      "source_files": [
+        {
+          "repo_path": "tegra-x1-wddm/tools/live_present_receipt.c",
+          "sha256": "e9f2c6820a5ccd84b7a055e6bfcfab7e7a62c6a523134f1e0fe93cfc692e398f",
+          "git_blob": "cb7d0f48d54a515a64b5ab3c0188583f01a50e04",
+          "frozen_build_source_sha256": "e7eac48a2bd32745a1d9b6450488ab96d0fb0ceab7a23d9af309ad63c921d053",
+          "normalization": "发布源码移除末尾一个空行。重新构建的未签名 PE 与实测版本逐字节相同，追加一个 LF 可还原审核源文件。",
+          "recompiled_unsigned_sha256": "bbca80ce893e920cb601b5ff9a5370bf1bad956e1de06f26f73cf55aea986c2f"
+        },
+        {
+          "repo_path": "tegra-x1-wddm/tools/live_present_receiver.py",
+          "sha256": "b19472bf5157495b25cbcd7b04ea06012db15456c1b004aa6f044e6297ee3fa8",
+          "git_blob": "9963b9d94ec82ac30734430ab69976b331c6b691"
+        }
+      ],
+      "code_review": {
+        "model": "gemini-4-neon-high",
+        "initial_stage": "win-present-live-20261121-01",
+        "original_response_sha256": "724481abd4a4e8b98a7c5432779df101034024fe730fb1d3cc7fa377e199961b",
+        "same_session_delta_response_sha256": "0930dca5cf0e2946d6d0f4730edfa2998d9bc5055c3cdf790efb013121fda52e",
+        "resolved": {
+          "B1": "resolved",
+          "B2": "resolved",
+          "B3": "resolved",
+          "B4": "resolved",
+          "B5": "resolved"
+        },
+        "residual_blockers": []
+      },
+      "call_ms": 13.242,
+      "first_consumer_receipt_ms_after_public_return": 11.358,
+      "max_confirmed_host_persistence_ms_from_event": 47.022,
+      "host_acknowledged_before_public_return": 0,
+      "real_test_processes_dispatched": 1,
+      "hardware_scope": "促进后续事件保全。目标三次历史启动的 CALL 后内核回执仍待证。"
+    }
+  ]
 }

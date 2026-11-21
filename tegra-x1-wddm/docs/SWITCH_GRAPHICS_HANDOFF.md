@@ -14,6 +14,10 @@
 
 原 27 轮中的 8 项通过判定保留。19 项未知里，15 项已取得缺少设备能力或操作未实现的回执。共享监控围栏的对象身份、普通围栏的值与退役仍可在 Windows 上核对。共享资源成员数和 CPU 映射保护方式只在与本次源或目标分配相符时引用。[27 轮与本机问题的逐项映射](windows-native-graphics/index.json)
 
+五处历史目录的 155 份结果归档按内容去重后为 154 份。36 份配置对应原签名客户端，其中三份原无写入故障仍缺 CALL 后事件。较早的另一客户端在启动 `79396、79467、79692` 上也出现无写入首次 Present 后的异常开机。它把设备移除查询排在公开返回和 DwmFlush 之后。[原归档、组件与六次启动的边界](windows-native-graphics/rounds/win-first-present-archives-20261121-01.result.json)
+
+开机 `91476` 的正式基线增加了一次独立实时见证。绘图 PID/TID `5540/7812` 的 DXGI 42/43、DxgKrnl 166/184 均已写到控制端，载荷和同次文件 ETL 逐字节一致。四次 fsync 确认返回 Windows 时进程都在运行。公开调用历时 13.242 ms，实时消费者首次取到事件已在公开 RETURN 后 11.358 ms。最长观察到的持久化往返上界为 47.022 ms。调用内发生即时复位的区间仍缺回执。本轮结束确认三个专属跟踪会话均已关闭，任务与临时目录已清理。[实时 Windows 回执、原始传输日志与哈希](windows-native-graphics/rounds/win-present-live-20261121-02.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

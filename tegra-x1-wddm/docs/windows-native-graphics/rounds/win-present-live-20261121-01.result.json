@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "round_id": "win-present-live-20261121-01",
+  "contract_id": "WIN-PRESENT-LIVE-RECEIPT",
+  "windows_question": "WIN-PRESENT-LIVE-RECEIPT",
+  "plan_sha256": "938c8e087a9152682e39dc403abd44c5ce1e5baf8598e3abc579973ffeccb5ac",
+  "status": "准备阶段修订",
+  "finding": "首次冻结源码的复核确认，ETW 消费者排空、末条 ACK、超时回收及 PID 文件绑定需要改进。该计划仅完成实机只读预检，应用派发次数为零。",
+  "missing_observation": "需要修订后的实时观察器和控制端实际回执。",
+  "device_executions": 0,
+  "evidence": {
+    "source_review": {
+      "model": "gemini-4-neon-high",
+      "source_hashes": {
+        "live_present_receipt.c": "7d670334f096cbd8869cf0d2fed90654e04baedece60fbe0bba8902d7af51ebe",
+        "stream_receiver.py": "bfb497bd6d48ef1f19c367d21bbdb99eee881f2e1a32446d71e42670be3230e2"
+      },
+      "request_sha256": "67ab38959a89cca949dc0d12e8a22e94bd1ed9d7728955e4b2ccd57358750fa3",
+      "response_sha256": "724481abd4a4e8b98a7c5432779df101034024fe730fb1d3cc7fa377e199961b",
+      "findings": [
+        {
+          "id": "B1",
+          "title": "CloseTrace called before ProcessTrace thread exits causes healthy-path ERROR_CANCELLED rejection and TRACEHANDLE use-after-close race"
+        },
+        {
+          "id": "B2",
+          "title": "Healthy-path protocol failure when any 5th/extra matching event is published around or after DONE"
+        },
+        {
+          "id": "B3",
+          "title": "Single-shot CancelSynchronousIo(acks) race can hang teardown for 5s and call ExitProcess(4) without END"
+        },
+        {
+          "id": "B4",
+          "title": "bind_target fails on trailing backslash in case directory or trailing newline in client-pid, and initial 40ms sleep creates an event-drop blind window"
+        },
+        {
+          "id": "B5",
+          "title": "settle() can leave child subprocess orphaned on TimeoutExpired after early worker failure, and empty exception strings clear self.failure"
+        }
+      ]
+    },
+    "device_preflight_sha256": "f0735fa69aa0657d1546265f1199ceb1de06035396abee991f9b50c31f2c1da5",
+    "observed_boot": 91476,
+    "bounds": "仅准备阶段",
+    "boundaries": {
+      "last_entry": "正式组件与交流供电、手持模式的只读预检。",
+      "last_return": "独立源码复核返回，实机图形用例派发次数为零。",
+      "first_anomaly_or_missing": "退出阶段的输出与 ACK 可能交错；尚无合格实机证据。"
+    }
+  }
+}

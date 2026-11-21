@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "round_id": "win-present-live-20261121-01",
+  "contract_id": "WIN-PRESENT-LIVE-RECEIPT",
+  "windows_question": "WIN-PRESENT-LIVE-RECEIPT",
+  "owner": "Windows DXGI、dxgkrnl ETW 消费端与控制端文件系统",
+  "question": "正常正式基线空窗口首次 Present 的 Windows 事件，能否在应用仍存活时独立持久写到控制端？",
+  "method": "正式基线实时 Windows ETW 控制端见证",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "正常空窗口同一绘图线程的 DXGI Start/Stop、Windows Blt 与 Present/Info 逐条比对独立文件 ETL。每条控制端 fsync 后的 ACK 均在 Windows 测得且此时目标进程仍存活。报告实测延迟与留存边界。",
+  "observations": [
+    "复用原签名无写入普通双缓冲程序和已验收的正式配置，启动一次正常 Present(1,0)。",
+    "事先建立单个专属实时会话，仅取自有进程的 DXGI 42/43 与 Windows DxgKrnl 166/184。完全写入控制端并 fsync 后逐条 ACK，Windows 测 QPC 和对应进程对象状态。",
+    "保存独立文件 ETL 与客户端 CALL/RETURN、对象、启动、Windows 实载组件。核对实测送达和仍可能丢失的时间区间，收尾清理自有任务、会话与文件。"
+  ],
+  "inputs": {
+    "app": {
+      "Board-Case.ps1": "2c7a91f6a636833fbd4312708061843e37c90029ae89ce27be636013047340b1",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0"
+    },
+    "client_input_source_sha256": "863f388517cd989d5ef8278b5f7a680e787a1e681a9bc0e4086518b55f3938c3",
+    "observer_source_sha256": "7d670334f096cbd8869cf0d2fed90654e04baedece60fbe0bba8902d7af51ebe",
+    "observer_exe_sha256": "7260630f382da2821b771bc26cc09959ec44b171621c2fe89c50ef7489512f7f",
+    "host_receiver_sha256": "bfb497bd6d48ef1f19c367d21bbdb99eee881f2e1a32446d71e42670be3230e2",
+    "nonce": "1cbb6f0a533442bda3406d47ef989a85",
+    "nominal_poll_interval_ms": 40,
+    "watchdog_ms": 90000,
+    "clock": "Windows QPC，控制端记录 fsync，再返回有序 ACK",
+    "etw_documents": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-opentracew",
+      "https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-flushtracew"
+    ]
+  }
+}

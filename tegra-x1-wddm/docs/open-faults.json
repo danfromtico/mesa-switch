@@ -21,6 +21,7 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-historical-reset-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-historical-process-log-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-historical-call-marker-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-first-present-archives-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result.",
@@ -1623,6 +1624,76 @@
           "first_anomaly_or_missing": "三次原故障的 CALL 之后缺同启动 DXGI Start/Stop、KMT 接收/返回、后置设备查询或早期复位记录。尚不能区分故障发生在公开 Present 内、返回后的查询内，或持久 RETURN 标记之前的其他位置。"
         },
         "finished_utc": "2026-11-21T13:47:15.987176+00:00"
+      },
+      {
+        "round_id": "win-first-present-archives-20261121-01",
+        "contract_id": "WIN-OLD-RESET",
+        "windows_question": "WIN-OLD-RESET",
+        "method": "复核已有 Windows 本机原始归档",
+        "plan": "windows-native-graphics/rounds/win-first-present-archives-20261121-01.plan.json",
+        "plan_sha256": "3df44d66036acd43da7c38271cc77159c65c0e4c90f6d7250fb6e690e47063ab",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T13:56:14.229830+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-first-present-archives-20261121-01.result.json",
+        "result_sha256": "affb163ba077597729188daca40c106b9a00d8829c0f63e669945d0ffc5edb15",
+        "status": "故障开放",
+        "finding": "五处历史目录的 155 份结果 ZIP 按内容去重得到 154 份，36 份配置对应原签名客户端。启动号变化的 4 份中，3 份为原先的无写入 SEQUENTIAL 故障，另一份为现代 DDI 翻转的第三次呈现。另一个签名客户端在三个较早启动也留下无写入 CALL、异常开机和零份 CALL 后图形事件；它把设备移除查询放在公开返回和 DwmFlush 之后。",
+        "missing_observation": "原三次公开 CALL 到复位之间，仍缺同启动同对象的内核接收、KMD 进入/返回或板级记录。早期不同客户端的独立现象只能裁决自身的调用顺序。",
+        "boundaries": {
+          "last_entry": "原签名客户端三份异常启动仍止于公开 Present CALL。另一旧客户端的三份无写入异常启动也止于 CALL。",
+          "last_return": "原签名客户端紧前的设备移除原因是 S_OK；另一旧客户端完成了 FlushBeforeFirstPresent 并确认无应用写入。",
+          "first_anomaly_or_missing": "原三次公开 CALL 到复位之间，仍缺同启动同对象的内核接收、KMD 进入/返回或板级记录。早期不同客户端的独立现象只能裁决自身的调用顺序。"
+        },
+        "finished_utc": "2026-11-21T13:57:48.996094+00:00"
+      },
+      {
+        "round_id": "win-present-live-20261121-01",
+        "contract_id": "WIN-PRESENT-LIVE-RECEIPT",
+        "windows_question": "WIN-PRESENT-LIVE-RECEIPT",
+        "method": "正式基线实时 Windows ETW 控制端见证",
+        "plan": "windows-native-graphics/rounds/win-present-live-20261121-01.plan.json",
+        "plan_sha256": "938c8e087a9152682e39dc403abd44c5ce1e5baf8598e3abc579973ffeccb5ac",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:00:40.965525+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-present-live-20261121-01.result.json",
+        "result_sha256": "d400dc1dfa6159bd749ae325083d2f63fdc4640d4c17d02dc97311052498f7aa",
+        "status": "准备阶段修订",
+        "finding": "首次冻结源码的复核确认，ETW 消费者排空、末条 ACK、超时回收及 PID 文件绑定需要改进。该计划仅完成实机只读预检，应用派发次数为零。",
+        "missing_observation": "需要修订后的实时观察器和控制端实际回执。",
+        "boundaries": {
+          "last_entry": "正式组件与交流供电、手持模式的只读预检。",
+          "last_return": "独立源码复核返回，实机图形用例派发次数为零。",
+          "first_anomaly_or_missing": "退出阶段的输出与 ACK 可能交错；尚无合格实机证据。"
+        },
+        "finished_utc": "2026-11-21T14:07:29.634288+00:00"
+      },
+      {
+        "round_id": "win-present-live-20261121-02",
+        "contract_id": "WIN-PRESENT-LIVE-RECEIPT",
+        "windows_question": "WIN-PRESENT-LIVE-RECEIPT",
+        "method": "正式基线实时 Windows ETW 控制端见证",
+        "plan": "windows-native-graphics/rounds/win-present-live-20261121-02.plan.json",
+        "plan_sha256": "df8688b8a49c279c99a043577170386ba6f9551558dbbfa0b63de92858c1cd89",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:10:32.194339+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+        "result_sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86",
+        "status": "实机通过",
+        "finding": "启动 91476 的正常原空窗口 PID/TID 5540/7812，收到 4 条实时 Windows 记录。其中 4 条与文件 ETL 逐字节匹配，控制端 fsync 后的 Windows ACK 验到进程仍存活。最长实测往返上界 47.022 ms，公开 RETURN 标记前已确认 0 条。",
+        "missing_observation": null,
+        "boundaries": {
+          "last_entry": "同一绘图线程首次 DXGI Present Start，独立文件及实时提供程序时间见 verify_each_event。",
+          "last_return": {
+            "public_hresult": "00000000",
+            "public_qpc": 131646719229,
+            "last_durable_ack_qpc": 131647432357
+          },
+          "first_anomaly_or_missing": "实测延迟包含 Windows 交付、SSH、控制端 fsync 和确认返回。只给本轮持久化时间上界。未获确认的事件及快速复位前未交付的 ETW 缓冲仍可能缺失。"
+        },
+        "finished_utc": "2026-11-21T14:12:16.835008+00:00"
       }
     ]
   }
