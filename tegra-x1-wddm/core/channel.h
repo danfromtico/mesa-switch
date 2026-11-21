@@ -19,6 +19,7 @@ struct tg_gpu_channel {
     uint32_t stage, last_register, last_value;
     uint32_t fifo_interrupt, mmu_fault, pbdma_interrupt, pbdma_interrupt_1;
     struct tg_gpu_frontend_status frontend;
+    struct tg_gpu_pri_timeout_snapshot pri_timeout;
 };
 /* Sequential read-only reset-time samples, not an atomic GPU snapshot.
  * flags: 1=enabled FIFO, 2=matching PBDMA slot before/after, 4=USERD alias,

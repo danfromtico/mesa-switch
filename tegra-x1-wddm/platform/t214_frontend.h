@@ -18,6 +18,20 @@ struct tg_gpu_frontend_status {
     uint32_t l2_flushes, l2_invalidations;
     uint32_t gr_enable, gr_fifo_access, gr_gate_ctrl[2];
 };
+/* Non-destructive PBUS-gated read-only sample of PTIMER PRI timeout latches
+ * (Switchroot nvgpu 1ae0167d gk20a_bus_isr -> gk20a_ptimer_isr: 0x9084,
+ * 0x9088, and 0x908c when save0 bit 31 FECS_TGT is set). Kept separate from
+ * tg_gpu_frontend_status to preserve TG_GPU_CONTROL_VERSION ABI; never clears
+ * 0x9084/0x9088 during cold start or observation.
+ */
+struct tg_gpu_pri_timeout_snapshot {
+    uint32_t bus_interrupt;
+    uint32_t save0;
+    uint32_t save1;
+    uint32_t fecs_errcode;
+    uint32_t valid;
+    uint32_t fecs_valid;
+};
 
 /* Cold, exclusively owned GPU only. Order: start -> GPC clock -> FIFO reset
  * -> fifo -> memory -> MMU/BAR1 binding -> flush -> runnable channel.
@@ -50,4 +64,6 @@ enum tg_gpu_frontend_result tg_gpu_frontend_sync_memory(const struct tg_gpu_powe
     const struct tg_gpu_power *, struct tg_gpu_frontend_status *);
 void tg_gpu_frontend_snapshot(const struct tg_gpu_power_io *,
     struct tg_gpu_frontend_status *);
+void tg_gpu_frontend_pri_timeout_snapshot(const struct tg_gpu_power_io *,
+    uint32_t bus_interrupt, struct tg_gpu_pri_timeout_snapshot *);
 #endif

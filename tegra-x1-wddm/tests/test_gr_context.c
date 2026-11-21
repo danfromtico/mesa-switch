@@ -19,9 +19,15 @@ struct model {
     unsigned output_exception_writes;
     uint32_t saved_warp_report_mask;
     bool ignore_output_exception_write;
-    unsigned zcull_writes,priv_timeout_writes;
+    unsigned zcull_writes,priv_timeout_writes,rd_coalesce_clears,rd_coalesce_netb_writes;
     uint32_t priv_timeout_order[2];
+    bool seen_ctx_stream;
 };
+/* gr_gpcs_tpcs_tex_m_dbg2: upstream clears bits 2/4 before sw_ctx_load;
+ * L4T 32.7.6 NETB region 5 then writes 0x181e. */
+#define TEX_M_DBG2 0x419a3cu
+#define TEX_M_DBG2_COALESCE_MASK 0x14u
+#define TEX_M_DBG2_NETB_VALUE 0x181eu
 /* gr_pri_gpcs_tpcs_sm_disp_ctrl; bit 3 disables helper-invocation loads. */
 #define SM_DISP_CTRL 0x419f78u
 /* The supplied 32.7.6 NETB context entry, independently checked by hash. */
@@ -65,6 +71,20 @@ static void write32(void *context,uint32_t address,uint32_t value)
         m->priv_timeout_order[m->priv_timeout_writes++]=r;
     } else {
         assert(r!=PRI_SYS_MASTER_CFG_15 && r!=PRI_GPC_MASTER_CFG_A);
+    }
+    if(r==0x400080) m->seen_ctx_stream=true;
+    if(r==TEX_M_DBG2) {
+        if(!m->rd_coalesce_clears) {
+            /* Pre-replay clear runs once, after priv_ring_timeouts and before sw_ctx_load. */
+            assert(m->priv_timeout_writes==2 && !m->seen_ctx_stream && !m->binds && !m->saves);
+            assert(!(value&TEX_M_DBG2_COALESCE_MASK) &&
+                   value==(m->regs[r/4]&~TEX_M_DBG2_COALESCE_MASK));
+            ++m->rd_coalesce_clears;
+        } else {
+            /* Only NETB region 5 (sw_ctx_load) may subsequently write 0x419a3c = 0x181e. */
+            assert(value==TEX_M_DBG2_NETB_VALUE && !m->saves);
+            ++m->rd_coalesce_netb_writes;
+        }
     }
     if(r==0x70000 || r==0x70010 || r==0x70004) {
         assert(value==1);
@@ -138,6 +158,7 @@ static void reset(struct model *m)
     regs[0x409800/4]=0x31; /* An old success/failure reply must be cleared. */
     regs[SM_DISP_CTRL/4]=SM_DISP_CTRL_DEFAULT;
     regs[SM_WARP_REPORT_MASK/4]=SM_WARP_REPORT_DEFAULT;
+    regs[TEX_M_DBG2/4]=TEX_M_DBG2_NETB_VALUE;
     regs[PRI_SYS_MASTER_CFG_15/4]=PRI_TIMEOUT_HW_DEFAULT;
     regs[PRI_GPC_MASTER_CFG_A/4]=PRI_TIMEOUT_HW_DEFAULT;
     for(unsigned i=0;i<TG_GPU_GR_CTX_CAPACITY/4;++i)
@@ -185,6 +206,8 @@ int main(int argc,char **argv)
            m.priv_timeout_order[1]==PRI_GPC_MASTER_CFG_A);
     assert(m.regs[PRI_SYS_MASTER_CFG_15/4]==PRI_TIMEOUT_TARGET &&
            m.regs[PRI_GPC_MASTER_CFG_A/4]==PRI_TIMEOUT_TARGET);
+    assert(m.rd_coalesce_clears==1 &&
+           m.regs[TEX_M_DBG2/4]==(TEX_M_DBG2_NETB_VALUE&~TEX_M_DBG2_COALESCE_MASK));
     {
         struct tg_gpu_power_io io={&m,read32,write32,NULL,NULL,delay, NULL};
         struct tg_gpu_power power={.owned=true,.ready=true};
@@ -280,6 +303,14 @@ int main(int argc,char **argv)
             assert(s.last_register==SM_WARP_REPORT_MASK && s.last_value==unreadable[i]);
             assert(!m.output_exception_writes && !m.saves);
         }
+        /* Unreadable TEX_M_DBG2 fails before sw_ctx_load without writing back. */
+        for(unsigned i=0;i<sizeof(unreadable)/sizeof(unreadable[0]);++i) {
+            reset(&m);m.regs[TEX_M_DBG2/4]=unreadable[i];
+            assert(run(&m,&net,&s)==TG_GPU_GR_CTX_REGISTER && s.stage==2);
+            assert(s.last_register==TEX_M_DBG2 && s.last_value==unreadable[i]);
+            assert(!m.rd_coalesce_clears && !m.seen_ctx_stream && !m.saves &&
+                   m.regs[TEX_M_DBG2/4]==unreadable[i]);
+        }
     }
     {
         const uint32_t unsupported[]={0x20001,0x20002,0x40001,2,0x30002,0x50002,UINT32_MAX};
@@ -352,6 +383,9 @@ int main(int argc,char **argv)
         assert(fread(data,1,(size_t)bytes,f)==(size_t)bytes);fclose(f);
         assert(tg_gpu_gr_netlist_parse((struct tg_gpu_gr_blob){data,(size_t)bytes},&net)==TG_GPU_GR_FW_OK);
         reset(&m);assert(run(&m,&net,&s)==TG_GPU_GR_CTX_OK);free(data);
+        /* Pre-replay clear ran once before sw_ctx_load; NETB region 5 restores 0x181e in both passes. */
+        assert(m.rd_coalesce_clears==1 && m.rd_coalesce_netb_writes==2 &&
+               m.regs[TEX_M_DBG2/4]==TEX_M_DBG2_NETB_VALUE);
         puts("External NETB graphics initialization streams: PASS (model only)");
     }
     free(m.regs);free(m.inst);free(m.work);

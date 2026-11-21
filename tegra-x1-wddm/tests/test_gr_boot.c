@@ -196,12 +196,13 @@ int main(void)
         struct tg_gpu_power power={.owned=true,.ready=true};
         struct tg_gpu_frontend_status fe={.stage=11,.ltc_count=2};
         reset(&m);assert(run(&m,&image,&net,&s)==TG_GPU_GR_OK);
-        m.reg[0x100c80/4]=0x8123987f;m.reg[0x100cc4/4]=0x10000;
+        m.reg[0x100c80/4]=0x8123987f;m.reg[0x100cc4/4]=0x10555;
         m.reg[0x100cc8/4]=0xc00480;m.reg[0x100ccc/4]=0xc00470;
         assert(tg_gpu_gr_gpc_mmu(&io,&power,&fe,&s)==TG_GPU_GR_OK && s.stage==15);
         assert(m.gpc_writes==7 && m.reg[0x418880/4]==0x8000187f);
         assert(!m.reg[0x418890/4] && !m.reg[0x418894/4]);
-        assert(m.reg[0x4188b0/4]==0x10000 && m.reg[0x4188b4/4]==0xc00480);
+        /* Bit 16 (DEBUG) is explicitly cleared while non-debug bits are preserved. */
+        assert(m.reg[0x4188b0/4]==0x555 && m.reg[0x4188b4/4]==0xc00480);
         assert(m.reg[0x4188b8/4]==0xc00470 && m.reg[0x4188ac/4]==2);
         unsigned writes=m.writes;
         assert(tg_gpu_gr_gpc_mmu(&io,&power,&fe,&s)==TG_GPU_GR_ARGUMENT && m.writes==writes);
