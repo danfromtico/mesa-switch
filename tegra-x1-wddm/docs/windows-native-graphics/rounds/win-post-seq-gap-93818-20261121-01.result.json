@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "round_id": "win-post-seq-gap-93818-20261121-01",
+  "contract_id": "WIN-UNEXPECTED-BOOT",
+  "windows_question": "WIN-UNEXPECTED-BOOT",
+  "plan_sha256": "cc5a2a189ea0daace7fe373b1d68abd951ae03645cd7d5ace0e2c205974b0f9c",
+  "status": "故障开放",
+  "finding": "93748 上第二轮窗口在 Windows UTC 22:10:14.409 正常退出，独立实时 Profiler 于 22:10:19.393 封口，设备整体验证在 22:10:49.168 成功，最后持续的 display.etl 于 22:11:07.250 封口。下一启动 93818 在 22:12:07.260 记事件 12，间隔 60.010 秒，随后有 41/6008，BugcheckCode=0。现行同一正式组件及 93818 的 DWM 1384 和 GPU Code 0 已重核。",
+  "missing_observation": "完整的图形档案没有延伸到下一启动之间的空档。Mac 收到清理回执以及离线取证、租约写回各自独立计时。22:13:46 和 22:17:14 的交接写入出现在新启动记录之后，不能证明旧桌面仍活跃。实际复位时刻、对应 KMD/板级异常仍未知。",
+  "device_executions": 0,
+  "evidence": {
+    "windows_timeline": {
+      "present_call": "2026-11-21T22:10:13.907217+00:00",
+      "present_return": "2026-11-21T22:10:13.932833+00:00",
+      "application_exit_observed": "2026-11-21T22:10:14.409235+00:00",
+      "app_etl_end": "2026-11-21T22:10:14.298511+00:00",
+      "profiler_etl_end": "2026-11-21T22:10:19.392636+00:00",
+      "full_desktop_check": "2026-11-21T22:10:49.1675178Z",
+      "display_etl_end": "2026-11-21T22:11:07.250017+00:00",
+      "following_kernel_start": {
+        "record": 93818,
+        "message": {},
+        "utc": "2026-11-21T22:12:07.2599185Z",
+        "id": 12
+      },
+      "unexpected_shutdown": {
+        "record": 93827,
+        "message": {},
+        "utc": "2026-11-21T22:13:32.6694060Z",
+        "id": 6008
+      },
+      "kernel_power": {
+        "record": 93836,
+        "message": {},
+        "utc": "2026-11-21T22:12:11.8278176Z",
+        "id": 41
+      },
+      "flags": {
+        "PowerButtonTimestamp": "0",
+        "LongPowerButtonPressDetected": "false",
+        "BugcheckCode": "0",
+        "SleepInProgress": "0"
+      },
+      "recovered_desktop_read": "2026-11-21T22:28:55.6130236Z"
+    },
+    "host_timeline": {
+      "cleanup_receipt_mac_mtime": "2026-11-21T22:11:24.319487+00:00",
+      "followup_ledger_write": "2026-11-21T22:13:35.694905+00:00",
+      "lease_return_write": "2026-11-21T22:17:14.952356+00:00",
+      "scope": "Mac 清理收件和交接的本地时间各自保留，未用于计算 Windows 同时钟的复位间隔。清理回执没有 Windows UTC。"
+    },
+    "elapsed": {
+      "exit_to_next_boot_s": 112.850683,
+      "last_display_stop_to_next_boot_s": 60.009901,
+      "desktop_snapshot_to_next_boot_s": 78.092401
+    },
+    "recovered": {
+      "boot": 93818,
+      "dwm": 1384,
+      "code": 0,
+      "components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      }
+    },
+    "raw": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/win-post-seq-gap-93818-20261121-01.raw.json",
+      "sha256": "6d47b36e1cfaebcbae70cdc7bf45916b9c5b5cf5c126927c19d27cbba258202c"
+    },
+    "boundaries": {
+      "last_entry": "2026-11-21T22:10:13.907217+00:00",
+      "last_return": "2026-11-21T22:11:07.250017+00:00",
+      "first_anomaly_or_missing": "完整的图形档案没有延伸到下一启动之间的空档。Mac 收到清理回执以及离线取证、租约写回各自独立计时。22:13:46 和 22:17:14 的交接写入出现在新启动记录之后，不能证明旧桌面仍活跃。实际复位时刻、对应 KMD/板级异常仍未知。"
+    }
+  }
+}

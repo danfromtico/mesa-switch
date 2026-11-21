@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-post-exit-tail-93818-20261121-01",
+  "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+  "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+  "plan_sha256": "12f52d1bcabf4bd86fd348b3734466d450a7e2b77a2810a8e9c07abaa8033b94",
+  "status": "观测缺口",
+  "finding": "启动 93818 的正式设备窗口准备阶段，额外实时 Profiler 达 4096 条上限，控制端已收到 4073 条 Windows 确认。远程放行检查发现观察进程已结束，场景未发出。窗口等待任务到期，跟踪、任务和临时文件已清理。随后复核为同一启动 93818、DWM 1384、正式组件及 GPU Code 0。",
+  "missing_observation": "本轮未发出应用，无法裁决首次 Present 或退出后连续性。下一轮用同一签名窗口跟踪和独立后续轮询，省去额外实时放行依赖。",
+  "device_executions": 0,
+  "evidence": {
+    "last_profiler_terminal": [
+      "END",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "37",
+      "4096",
+      "4073",
+      "1"
+    ],
+    "last_task_observation": {
+      "has_result": true,
+      "last": 1,
+      "started": false,
+      "boot": 93818,
+      "state": "Ready"
+    },
+    "preflight_boot": 93818,
+    "after_boot": 93818,
+    "last_result": {
+      "name": "WinNativeWindow-470d883082ce",
+      "scene": "win-seq-post-exit-tail-93818-20261121-01",
+      "backend": "native",
+      "swap_effect": "sequential",
+      "begin": "2026-11-21T22:30:13.7441706Z",
+      "passed": false,
+      "before": {
+        "components": {
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1384,
+        "boot": 93818,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T22:13:11.1047453Z"
+      },
+      "luid": "0000000000005c10",
+      "error": "Profiler did not release this application",
+      "error_line": 58,
+      "end": "2026-11-21T22:31:42.3671062Z"
+    },
+    "application_launched": false,
+    "boundaries": {
+      "last_entry": {
+        "nonce": "470d883082ce430a931468514c01c5db",
+        "dwm": 1384,
+        "boot": 93818,
+        "desktop_start": "2026-11-21T22:13:11.1047453Z",
+        "qpc": 20741733103
+      },
+      "last_return": {
+        "utc": "2026-11-21T22:30:42.741821+00:00",
+        "error": "(1, b'Profiler no longer running\\r\\n\\xe6\\x89\\x80\\xe5\\x9c\\xa8\\xe4\\xbd\\x8d\\xe7\\xbd\\xae \\xe8\\xa1\\x8c:14 \\xe5\\xad\\x97\\xe7\\xac\\xa6: 57\\r\\n+ ... lePath -ine \"$live\\\\profiler.exe\"){throw \\'Profiler no longer running\\'}\\r\\n+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\r\\n    + CategoryInfo          : OperationStopped: (Profiler no longer running:String) [], RuntimeException\\r\\n    + FullyQualifiedErrorId : Profiler no longer running', b'')"
+      },
+      "first_anomaly_or_missing": "本轮未发出应用，无法裁决首次 Present 或退出后连续性。下一轮用同一签名窗口跟踪和独立后续轮询，省去额外实时放行依赖。"
+    },
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/collected.zip",
+        "sha256": "605bb6ebf9c65d3970ec6b589160cf519eb80a01b07e1c5e34de325d3ea5d007",
+        "bytes": 7864311
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/evidence/result.json",
+        "sha256": "c3669f8fb52b3d0d49146b29244f1db2d650a753759f28cc4df5dd404d0eaee0",
+        "bytes": 1214
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/evidence/trace-stop.json",
+        "sha256": "bb487a7203266a7932a738874a6e80ae94217fc4afa7221aaff82f06b8303410",
+        "bytes": 61
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/cleanup.json",
+        "sha256": "c8f4114b97ca00927f52c9f30db2b111280a540a7f198513ed52659f72159608",
+        "bytes": 33
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/release-error.json",
+        "sha256": "fafbc8fba4f4c1cc4add3330415ef334128c3399ab80f1d689a8eb3bd9985642",
+        "bytes": 564
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/progress.json",
+        "sha256": "10cfc165fa8497adfb5d8344860959349ad23604707a104b67485bd37adf65cd",
+        "bytes": 95
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/live/profiler.etl",
+        "sha256": "b0bef4d30ac5f33531c857572b1fb73dcb2dece63f7a352cd508574ddf9a1de3",
+        "bytes": 4521984
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/live/cleanup.json",
+        "sha256": "771ad3d5a3ae0cc1cafbe7113381a5498ae44a124db18d6a8dbe1b72b6e7b0c1",
+        "bytes": 47
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/live/wire.jsonl",
+        "sha256": "b457e8d10f81e7bdd2f075baa997bf24b59858269354fd76da654e7ce8916f65",
+        "bytes": 1892239
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/seq-93818-tail-ungated-preflight.json",
+        "sha256": "03397e045f455819bfd2d59f0e30baf54094cd32dbd45438bf8af353ea79b210",
+        "bytes": 10886
+      }
+    ]
+  }
+}

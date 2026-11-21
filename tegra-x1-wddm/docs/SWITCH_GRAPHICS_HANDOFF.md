@@ -138,6 +138,12 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 两轮都有同 HWND 的 DWM 91 调度。按同次 Blt 目标和呈现史令牌复核，仍缺能把该应用表面直接连到 DWM 消费的回执。历史启动 91476 的最后一条已知 KMD 回执是抢占请求 20571 成功，约 0.276 ms 后 Windows 发出 DWM 的第三次 DMA 提交 152586。该次提交的 miniport 准入、返回、完成及首个复位异常仍待证；两项历史重启故障保持开放。[DWM 分配与令牌复核](windows-native-graphics/rounds/win-dwm-consume-arm64ec-93748-20261121-01.result.json) · [历史内核边界](windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json)
 
+启动 93748 的第二轮客户端正常退出后，显示 ETL 在 Windows UTC 22:11:07.250 封口。距下一次内核启动 93818 的记录为 60.010 秒。窗口任务清理有回执，随后在 Mac 上的回写和租约交接分别计时。41/6008、BugcheckCode 0 的异常启动继续登记为开放故障。[93748 清理与异常启动时序](windows-native-graphics/rounds/win-post-seq-gap-93818-20261121-01.result.json)
+
+恢复后的正式启动 93818 保持已选组件。两次诊断准备分别受 4,096 条实时记录上限和 8 MiB 应用 ETL 限制，均停止于公开 Present 之前。关闭测试专用 ETW 后，同一签名空窗口的首次 Present(1,0) 返回 S_OK，用时 97.894 ms，设备状态与 DwmFlush 正常，输入响应已观察，应用退出码 0。缺本次返回后客户区像素。[实时采集上限](windows-native-graphics/rounds/win-seq-post-exit-tail-93818-20261121-01.result.json) · [应用 ETL 上限](windows-native-graphics/rounds/win-seq-post-exit-ungated-93818-20261121-01.result.json) · [同签名应用回执](windows-native-graphics/rounds/win-seq-post-exit-plain-93818-20261121-01.result.json)
+
+同一应用清理后，第一个只读采样为 14.718 秒。20 条同启动与同 DWM 读回覆盖应用退出后 51.634 至 180.667 秒，采样最长间隔 8.053 秒，期间没有新增 41、6008、BugCheck 或 4101。正式组件、交流供电、GPU Code 0 和永久许可均复核。历史启动 93748 的首个异常、旧 DWM DMA 152586 的准入和完成仍待相应故障证据。[尾部观察回执](windows-native-graphics/rounds/win-seq-post-exit-readback-93818-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

@@ -465,7 +465,9 @@
       "evidence": [
         "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/user-return-88248.json",
         "tegra-x1-wddm/docs/PAL4_TEXTURE_CHECKPOINT_20261121.json#subsequent_unobserved_session",
-        "tegra-x1-wddm/docs/explorer-home-22631/intervening-boot.json"
+        "tegra-x1-wddm/docs/explorer-home-22631/intervening-boot.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-post-seq-gap-93818-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-post-exit-readback-93818-20261121-01.result.json"
       ],
       "cause": "Unconfirmed. The retained records do not correlate these events to a driver candidate, application, or specific initiating load.",
       "daily_workaround": "After a restart, verify Code 0, the active compositor and the selected signed component hashes before resuming the workload.",
@@ -4811,6 +4813,155 @@
           "first_anomaly_or_missing": "同窗口调度已证实。仍缺从 Blt 目标或对应呈现令牌直接指向 DWM 消费的记录。显示 ETL 的失包量单列，缺失不能作为未消费的证据。历史 91476 仍缺其独立的消费、第三次 DMA 完成和重启首因。"
         },
         "finished_utc": "2026-11-21T22:13:04.775103+00:00"
+      },
+      {
+        "round_id": "win-post-seq-gap-93818-20261121-01",
+        "contract_id": "WIN-UNEXPECTED-BOOT",
+        "windows_question": "WIN-UNEXPECTED-BOOT",
+        "method": "离线复核在正式启动 93748 的正常窗口退出及收集空档与下一启动 93818",
+        "plan": "windows-native-graphics/rounds/win-post-seq-gap-93818-20261121-01.plan.json",
+        "plan_sha256": "cc5a2a189ea0daace7fe373b1d68abd951ae03645cd7d5ace0e2c205974b0f9c",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:29:10.748034+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-post-seq-gap-93818-20261121-01.result.json",
+        "result_sha256": "a944b6fce03d1e3b586a848711866b0990c513f703009d6a96fd033eed5bcbef",
+        "status": "故障开放",
+        "finding": "93748 上第二轮窗口在 Windows UTC 22:10:14.409 正常退出，独立实时 Profiler 于 22:10:19.393 封口，设备整体验证在 22:10:49.168 成功，最后持续的 display.etl 于 22:11:07.250 封口。下一启动 93818 在 22:12:07.260 记事件 12，间隔 60.010 秒，随后有 41/6008，BugcheckCode=0。现行同一正式组件及 93818 的 DWM 1384 和 GPU Code 0 已重核。",
+        "missing_observation": "完整的图形档案没有延伸到下一启动之间的空档。Mac 收到清理回执以及离线取证、租约写回各自独立计时。22:13:46 和 22:17:14 的交接写入出现在新启动记录之后，不能证明旧桌面仍活跃。实际复位时刻、对应 KMD/板级异常仍未知。",
+        "boundaries": {
+          "last_entry": "2026-11-21T22:10:13.907217+00:00",
+          "last_return": "2026-11-21T22:11:07.250017+00:00",
+          "first_anomaly_or_missing": "完整的图形档案没有延伸到下一启动之间的空档。Mac 收到清理回执以及离线取证、租约写回各自独立计时。22:13:46 和 22:17:14 的交接写入出现在新启动记录之后，不能证明旧桌面仍活跃。实际复位时刻、对应 KMD/板级异常仍未知。"
+        },
+        "finished_utc": "2026-11-21T22:29:10.765868+00:00"
+      },
+      {
+        "round_id": "win-seq-post-exit-tail-93818-20261121-01",
+        "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+        "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+        "method": "同一签名原最小场景及正式配置，增加清理后的只读观察",
+        "plan": "windows-native-graphics/rounds/win-seq-post-exit-tail-93818-20261121-01.plan.json",
+        "plan_sha256": "12f52d1bcabf4bd86fd348b3734466d450a7e2b77a2810a8e9c07abaa8033b94",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:29:32.916448+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-seq-post-exit-tail-93818-20261121-01.result.json",
+        "result_sha256": "b5e5e5620362d9698f30d60c1fa46bae7b8bd90c9c6ecd8220e2463c5b8402e4",
+        "status": "观测缺口",
+        "finding": "启动 93818 的正式设备窗口准备阶段，额外实时 Profiler 达 4096 条上限，控制端已收到 4073 条 Windows 确认。远程放行检查发现观察进程已结束，场景未发出。窗口等待任务到期，跟踪、任务和临时文件已清理。随后复核为同一启动 93818、DWM 1384、正式组件及 GPU Code 0。",
+        "missing_observation": "本轮未发出应用，无法裁决首次 Present 或退出后连续性。下一轮用同一签名窗口跟踪和独立后续轮询，省去额外实时放行依赖。",
+        "boundaries": {
+          "last_entry": {
+            "nonce": "470d883082ce430a931468514c01c5db",
+            "dwm": 1384,
+            "boot": 93818,
+            "desktop_start": "2026-11-21T22:13:11.1047453Z",
+            "qpc": 20741733103
+          },
+          "last_return": {
+            "utc": "2026-11-21T22:30:42.741821+00:00",
+            "error": "(1, b'Profiler no longer running\\r\\n\\xe6\\x89\\x80\\xe5\\x9c\\xa8\\xe4\\xbd\\x8d\\xe7\\xbd\\xae \\xe8\\xa1\\x8c:14 \\xe5\\xad\\x97\\xe7\\xac\\xa6: 57\\r\\n+ ... lePath -ine \"$live\\\\profiler.exe\"){throw \\'Profiler no longer running\\'}\\r\\n+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\\r\\n    + CategoryInfo          : OperationStopped: (Profiler no longer running:String) [], RuntimeException\\r\\n    + FullyQualifiedErrorId : Profiler no longer running', b'')"
+          },
+          "first_anomaly_or_missing": "本轮未发出应用，无法裁决首次 Present 或退出后连续性。下一轮用同一签名窗口跟踪和独立后续轮询，省去额外实时放行依赖。"
+        },
+        "finished_utc": "2026-11-21T22:32:44.939509+00:00"
+      },
+      {
+        "round_id": "win-seq-post-exit-ungated-93818-20261121-01",
+        "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+        "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+        "method": "原有签名负载及窗口跟踪，绕开额外实时 Profiler 放行控制，观察清理后同一桌面",
+        "plan": "windows-native-graphics/rounds/win-seq-post-exit-ungated-93818-20261121-01.plan.json",
+        "plan_sha256": "6d2bf1b42b9457aa42eb21def4838463b5c9e98d02b4851c0f4009eb50412b7b",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:32:45.001364+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-seq-post-exit-ungated-93818-20261121-01.result.json",
+        "result_sha256": "1b9325c94e68438cee7e36fd0b318cc3d20d50291a0398dc8c21818cab11411f",
+        "status": "观测缺口",
+        "finding": "客户端及观察器在启动 93818 已启动。签名应用创建原交换链、回缓冲和 RTV，并完成应用 Flush。测试专用 ETW 在公开 Present 前的刷新返回 0x80071069，应用退出码 4。无公开 CALL。清理后正式启动和 DWM 1384 仍可读。",
+        "missing_observation": "场景文件达到 8 MiB，ETW 刷新返回 ERROR_WMI_INSTANCE_NOT_FOUND。此采集失败对 GPU Present 和退出后持续性都没有裁决。",
+        "boundaries": {
+          "last_entry": "FlushTraceBeforePresent",
+          "last_return": "0x80071069",
+          "first_anomaly_or_missing": "场景文件达到 8 MiB，ETW 刷新返回 ERROR_WMI_INSTANCE_NOT_FOUND。此采集失败对 GPU Present 和退出后持续性都没有裁决。"
+        },
+        "finished_utc": "2026-11-21T22:34:50.778461+00:00"
+      },
+      {
+        "round_id": "win-seq-post-exit-plain-93818-20261121-01",
+        "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+        "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+        "method": "关闭窗口夹具的测试专用 ETW，原签名应用和同场景尾部观察",
+        "plan": "windows-native-graphics/rounds/win-seq-post-exit-plain-93818-20261121-01.plan.json",
+        "plan_sha256": "abf5d65bd2c16b4569e745dad87ddeaa85cc618484e0bfc508adcb1abe080f55",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:34:50.805152+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-seq-post-exit-plain-93818-20261121-01.result.json",
+        "result_sha256": "c9ffedc6f21a536dc1845ee6b1659015c99d170415331fab1fdf145d8b7ff39c",
+        "status": "观测缺口",
+        "finding": "正式启动 93818 的同一签名双缓冲空窗口首次 Present(1,0) 返回 S_OK，用时 97.894 ms。之后设备状态和 DwmFlush 成功，应用退出码 0，仍为 DWM 1384。确证输入响应。",
+        "missing_observation": "观察器退出码 9，缺本轮首次返回后的客户区像素。因独立窗口验证未通过，原自动尾部观察未发出。整轮保持观测缺口。",
+        "boundaries": {
+          "last_entry": 26186594344,
+          "last_return": 26188473913,
+          "first_anomaly_or_missing": "观察器退出码 9，缺本轮首次返回后的客户区像素。因独立窗口验证未通过，原自动尾部观察未发出。整轮保持观测缺口。"
+        },
+        "finished_utc": "2026-11-21T22:36:05.981422+00:00"
+      },
+      {
+        "round_id": "win-seq-post-exit-readback-93818-20261121-01",
+        "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+        "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+        "method": "复用已实际返回 S_OK 的同次签名应用，补清理时间锚及只读尾部观测",
+        "plan": "windows-native-graphics/rounds/win-seq-post-exit-readback-93818-20261121-01.plan.json",
+        "plan_sha256": "3b42f39f374c5f507544f07bf904996963ba62c0dca0ce571d67f6c430aa51c4",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:36:05.987427+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-seq-post-exit-readback-93818-20261121-01.result.json",
+        "result_sha256": "6b4f44e0db5291843f245607ea8f30559d5c7e36c8f42342b290f6faf361ae17",
+        "status": "观测缺口",
+        "finding": "复用启动 93818 已返回 S_OK 并退出的签名窗口。清理后 14.718 秒开始有 20 条正式桌面读回，覆盖 129.033 秒，最大间隔 8.053 秒。观察覆盖应用退出后 51.634 至 180.667 秒，同一启动与 DWM 1384、交流供电、Code 0、实载哈希保持一致。未发现本段新增 41、6008、BugCheck 或 4101。",
+        "missing_observation": "本轮补齐既有时间范围内的启动连续性。采样间隔内无逐包 KMD 证据，且该应用仍缺返回后客户区像素。93748 的复位时刻及历史 DMA 152586 根因保持开放。",
+        "boundaries": {
+          "last_entry": {
+            "dwm": [
+              {
+                "started": "2026-11-21T22:13:11.1047453Z",
+                "pid": 1384
+              }
+            ],
+            "code": 0,
+            "boot": 93818,
+            "power": "Online",
+            "frequency": 19200000,
+            "utc": "2026-11-21T22:36:08.7419161Z",
+            "qpc": 27189112445,
+            "host_receive_utc": "2026-11-21T22:36:09.792484+00:00",
+            "host_monotonic_ns": 68726196006041
+          },
+          "last_return": {
+            "dwm": [
+              {
+                "started": "2026-11-21T22:13:11.1047453Z",
+                "pid": 1384
+              }
+            ],
+            "code": 0,
+            "boot": 93818,
+            "power": "Online",
+            "frequency": 19200000,
+            "utc": "2026-11-21T22:38:17.7640321Z",
+            "qpc": 29666542101,
+            "host_receive_utc": "2026-11-21T22:38:18.782662+00:00",
+            "host_monotonic_ns": 68855186081375
+          },
+          "first_anomaly_or_missing": "本轮补齐既有时间范围内的启动连续性。采样间隔内无逐包 KMD 证据，且该应用仍缺返回后客户区像素。93748 的复位时刻及历史 DMA 152586 根因保持开放。"
+        },
+        "finished_utc": "2026-11-21T22:38:29.376301+00:00"
       }
     ]
   }

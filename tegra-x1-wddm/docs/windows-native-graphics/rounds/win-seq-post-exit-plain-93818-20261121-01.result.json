@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-post-exit-plain-93818-20261121-01",
+  "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+  "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+  "plan_sha256": "abf5d65bd2c16b4569e745dad87ddeaa85cc618484e0bfc508adcb1abe080f55",
+  "status": "观测缺口",
+  "finding": "正式启动 93818 的同一签名双缓冲空窗口首次 Present(1,0) 返回 S_OK，用时 97.894 ms。之后设备状态和 DwmFlush 成功，应用退出码 0，仍为 DWM 1384。确证输入响应。",
+  "missing_observation": "观察器退出码 9，缺本轮首次返回后的客户区像素。因独立窗口验证未通过，原自动尾部观察未发出。整轮保持观测缺口。",
+  "device_executions": 1,
+  "evidence": {
+    "present": {
+      "call_qpc": 26186594344,
+      "return_qpc": 26188473913,
+      "elapsed_ms": 97.89421875,
+      "code": "S_OK"
+    },
+    "app": {
+      "name": "WinNativeWindow-d86b1ce8366f",
+      "scene": "win-seq-post-exit-plain-93818-20261121-01",
+      "backend": "native",
+      "swap_effect": "sequential",
+      "begin": "2026-11-21T22:35:07.7921984Z",
+      "passed": false,
+      "before": {
+        "components": {
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1384,
+        "boot": 93818,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T22:13:11.1047453Z"
+      },
+      "luid": "0000000000005c10",
+      "pid": 2404,
+      "application_modules": {
+        "libvulkan_nouveau.dll": {
+          "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\libvulkan_nouveau.dll"
+        },
+        "tg_d3d_arm64.DLL": {
+          "sha256": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_d3d_arm64.DLL"
+        },
+        "TegraGpuD3DVk.dll": {
+          "sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\TegraGpuD3DVk.dll"
+        },
+        "tg_nvk_arm64.DLL": {
+          "sha256": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+          "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_nvk_arm64.DLL"
+        }
+      },
+      "client_exit": 0,
+      "observer_exit": 9,
+      "input_and_output": {
+        "window_handle": 328692,
+        "visibility": [
+          {
+            "first_qpc": 26161202395,
+            "last_qpc": 26170000357,
+            "flags": 8,
+            "owned_points": 0
+          },
+          {
+            "first_qpc": 26171503544,
+            "last_qpc": 26174319480,
+            "flags": 11,
+            "owned_points": 5
+          },
+          {
+            "first_qpc": 26175534277,
+            "last_qpc": 26176154554,
+            "flags": 11,
+            "owned_points": 4
+          },
+          {
+            "first_qpc": 26176744123,
+            "last_qpc": 26190068118,
+            "flags": 11,
+            "owned_points": 5
+          }
+        ],
+        "pid": 2404,
+        "tid": 5600,
+        "client_width": 640,
+        "client_height": 360,
+        "owned_points": 5,
+        "visible_qpc": 26173117820,
+        "system_menu_qpc": 26173399275,
+        "escape_input_qpc": 26176168751,
+        "menu_dismissed_qpc": 26181565927,
+        "post_present_capture_qpc": 0,
+        "exit_qpc": 26197743259,
+        "system_menu_flags": 12,
+        "menu_cancelled_by_cleanup": false,
+        "second_escape_qpc": 26181270108,
+        "client_click_qpc": 0,
+        "click_x": 0,
+        "click_y": 0,
+        "capture_changed_samples": 128,
+        "window_visible": false,
+        "input_verified": true,
+        "window_closed": true,
+        "desktop_available": true
+      },
+      "public_calls": 1,
+      "public_successes": 1,
+      "empty": true,
+      "normal_exit": true,
+      "composed": true,
+      "device_healthy": true,
+      "reported_model": [
+        "PRESENT_MODEL buffers=2 effect=1"
+      ],
+      "drawing_device": [
+        "DRAW_DEVICE software=0 luid=0000000000005c10 display_luid=0000000000005c10 vendor=414f5753 device=31304630 fl=b000 name=Tegra X1 (GM20B) .158 44652f5ef9a1"
+      ],
+      "loaded_umd": [
+        "LOADED_UMD sha256=9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff path=C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\TegraGpuD3DVk.dll"
+      ],
+      "after": {
+        "components": {
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1384,
+        "boot": 93818,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T22:13:11.1047453Z"
+      },
+      "end": "2026-11-21T22:35:20.2295029Z"
+    },
+    "cleanup": {
+      "owned_case_removed": true,
+      "frequency": 19200000,
+      "utc": "2026-11-21T22:35:54.0215375Z",
+      "boot": 93818,
+      "action": "removed",
+      "qpc": 26906534146
+    },
+    "boundaries": {
+      "last_entry": 26186594344,
+      "last_return": 26188473913,
+      "first_anomaly_or_missing": "观察器退出码 9，缺本轮首次返回后的客户区像素。因独立窗口验证未通过，原自动尾部观察未发出。整轮保持观测缺口。"
+    },
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-plain-93818-20261121-01/collected.zip",
+        "sha256": "957c6a9bf55b41de06ec4aad2d5fc51b8caed33abfce4738976b9626cc34f52d",
+        "bytes": 5324
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-plain-93818-20261121-01/evidence/scene/journal.txt",
+        "sha256": "be3af6fc168324316b1b3e46a183b55547b914834c8c99264ac0ecb4a85add85",
+        "bytes": 2128
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-plain-93818-20261121-01/cleanup.json",
+        "sha256": "4da455695bb4501f28a3ab6a2612531b2e2dc7777dee93df8baae45fc511fe73",
+        "bytes": 161
+      }
+    ]
+  }
+}
