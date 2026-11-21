@@ -19,6 +19,8 @@ struct model {
     unsigned output_exception_writes;
     uint32_t saved_warp_report_mask;
     bool ignore_output_exception_write;
+    unsigned zcull_writes,priv_timeout_writes;
+    uint32_t priv_timeout_order[2];
 };
 /* gr_pri_gpcs_tpcs_sm_disp_ctrl; bit 3 disables helper-invocation loads. */
 #define SM_DISP_CTRL 0x419f78u
@@ -28,6 +30,14 @@ struct model {
 #define SM_WARP_REPORT_MASK 0x419e44u
 #define SM_WARP_REPORT_DEFAULT 0x00d3eff2u
 #define SM_OUT_OF_RANGE_ADDR (1u<<14)
+/* Upstream nvgpu gm20b_priv_set_timeout_settings: indexed master_config
+ * registers for SYS station 0x15 and GPC station 0xa. 0x400 is the
+ * upstream-documented hardware default, not a live physical readback.
+ */
+#define PRI_SYS_MASTER_CFG_15 0x122354u
+#define PRI_GPC_MASTER_CFG_A 0x128328u
+#define PRI_TIMEOUT_HW_DEFAULT 0x400u
+#define PRI_TIMEOUT_TARGET 0x800u
 static uint32_t read32(void *context,uint32_t address)
 {
     struct model *m=context;uint32_t r=address-GPU;
@@ -40,8 +50,22 @@ static void write32(void *context,uint32_t address,uint32_t value)
     struct model *m=context;uint32_t r=address-GPU;
     assert(address>=GPU && r<0x600000 && !(r&3));
     /* No global IRQ, PFIFO, security fuse, SMMU or power-control writes. */
-    assert(r>=0x400000 || r==0x70000 || r==0x70010 || r==0x70004);
+    assert(r>=0x400000 || r==0x70000 || r==0x70010 || r==0x70004 ||
+           r==PRI_SYS_MASTER_CFG_15 || r==PRI_GPC_MASTER_CFG_A);
     ++m->writes;
+    if(m->zcull_writes<6 &&
+       (r==0x503018 || r==0x418980 || r==0x500914 || r==0x500910 || r==0x500918 || r==0x41bfd4)) {
+        const uint32_t zcull_order[]={0x503018,0x418980,0x500914,0x500910,0x500918,0x41bfd4};
+        assert(r==zcull_order[m->zcull_writes] && !m->priv_timeout_writes);
+        ++m->zcull_writes;
+    } else if(m->zcull_writes==6 && m->priv_timeout_writes<2) {
+        /* Immediately after zcull() and before context_stream()/bind/save. */
+        const uint32_t expected=m->priv_timeout_writes?PRI_GPC_MASTER_CFG_A:PRI_SYS_MASTER_CFG_15;
+        assert(r==expected && value==PRI_TIMEOUT_TARGET && !m->binds && !m->saves);
+        m->priv_timeout_order[m->priv_timeout_writes++]=r;
+    } else {
+        assert(r!=PRI_SYS_MASTER_CFG_15 && r!=PRI_GPC_MASTER_CFG_A);
+    }
     if(r==0x70000 || r==0x70010 || r==0x70004) {
         assert(value==1);
         if(r==0x70010) {
@@ -114,6 +138,8 @@ static void reset(struct model *m)
     regs[0x409800/4]=0x31; /* An old success/failure reply must be cleared. */
     regs[SM_DISP_CTRL/4]=SM_DISP_CTRL_DEFAULT;
     regs[SM_WARP_REPORT_MASK/4]=SM_WARP_REPORT_DEFAULT;
+    regs[PRI_SYS_MASTER_CFG_15/4]=PRI_TIMEOUT_HW_DEFAULT;
+    regs[PRI_GPC_MASTER_CFG_A/4]=PRI_TIMEOUT_HW_DEFAULT;
     for(unsigned i=0;i<TG_GPU_GR_CTX_CAPACITY/4;++i)
         work[TG_GPU_GR_GOLD_OFFSET/4+i]=TG_GPU_GR_GOLD_SENTINEL;
 }
@@ -155,6 +181,10 @@ int main(int argc,char **argv)
     assert(m.saved_sm_disp_ctrl==(SM_DISP_CTRL_DEFAULT&~8u));
     assert(m.output_exception_writes==1 &&
            m.saved_warp_report_mask==(SM_WARP_REPORT_DEFAULT&~SM_OUT_OF_RANGE_ADDR));
+    assert(m.priv_timeout_writes==2 && m.priv_timeout_order[0]==PRI_SYS_MASTER_CFG_15 &&
+           m.priv_timeout_order[1]==PRI_GPC_MASTER_CFG_A);
+    assert(m.regs[PRI_SYS_MASTER_CFG_15/4]==PRI_TIMEOUT_TARGET &&
+           m.regs[PRI_GPC_MASTER_CFG_A/4]==PRI_TIMEOUT_TARGET);
     {
         struct tg_gpu_power_io io={&m,read32,write32,NULL,NULL,delay, NULL};
         struct tg_gpu_power power={.owned=true,.ready=true};
@@ -171,7 +201,7 @@ int main(int argc,char **argv)
         assert(!memcmp((uint8_t *)m.work+256,(uint8_t *)gold+256,s.context_bytes-256));
         uint32_t *patch=(uint32_t *)((uint8_t *)m.work+TG_GPU_GR_PATCH_OFFSET);
         assert(patch[0]==0x40800c&&patch[1]==0x1420);
-        assert(m.binds==1&&m.saves==1); /* no second FECS bind or fabricated GPU write */
+        assert(m.binds==1&&m.saves==1&&m.priv_timeout_writes==2); /* no second FECS bind or fabricated GPU write */
         unsigned writes=m.writes;
         m.regs[0x409b00/4]=0x80080040;
         assert(tg_gpu_gr_context_load_image(&io,&power,&fe,m.inst,&work,&s,43)==TG_GPU_GR_CTX_ARGUMENT);
@@ -211,6 +241,11 @@ int main(int argc,char **argv)
             TG_GPU_GR_CTX_IMAGE,TG_GPU_GR_CTX_IMAGE,TG_GPU_GR_CTX_VISIBILITY,TG_GPU_GR_CTX_VISIBILITY};
         assert(run(&m,&net,&s)==expected[test] && s.stage<9);
         if(test<3 || test==7)assert(!m.saves);
+        if(test==7) {
+            assert(!m.priv_timeout_writes);
+            assert(m.regs[PRI_SYS_MASTER_CFG_15/4]==PRI_TIMEOUT_HW_DEFAULT &&
+                   m.regs[PRI_GPC_MASTER_CFG_A/4]==PRI_TIMEOUT_HW_DEFAULT);
+        }
         assert(!m.regs[0x400208/4] && m.regs[0x404154/4]==0x800);
     }
     {
@@ -250,11 +285,39 @@ int main(int argc,char **argv)
         const uint32_t unsupported[]={0x20001,0x20002,0x40001,2,0x30002,0x50002,UINT32_MAX};
         for(unsigned i=0;i<sizeof(unsupported)/sizeof(unsupported[0]);++i) {
             reset(&m);m.regs[0x502608/4]=unsupported[i];
-            assert(run(&m,&net,&s)==TG_GPU_GR_CTX_TOPOLOGY && !m.writes);
+            assert(run(&m,&net,&s)==TG_GPU_GR_CTX_TOPOLOGY && !m.writes && !m.priv_timeout_writes);
+            assert(m.regs[PRI_SYS_MASTER_CFG_15/4]==PRI_TIMEOUT_HW_DEFAULT &&
+                   m.regs[PRI_GPC_MASTER_CFG_A/4]==PRI_TIMEOUT_HW_DEFAULT);
         }
     }
     reset(&m);ctx[0]=0x70000;
-    assert(run(&m,&net,&s)==TG_GPU_GR_CTX_FORMAT && !m.writes);ctx[0]=0x400080;
+    assert(run(&m,&net,&s)==TG_GPU_GR_CTX_FORMAT && !m.writes && !m.priv_timeout_writes);
+    assert(m.regs[PRI_SYS_MASTER_CFG_15/4]==PRI_TIMEOUT_HW_DEFAULT &&
+           m.regs[PRI_GPC_MASTER_CFG_A/4]==PRI_TIMEOUT_HW_DEFAULT);
+    ctx[0]=0x400080;
+    {
+        /* Non-owned/unready device or unready GR must never write timeouts. */
+        struct tg_gpu_power_io io={&m,read32,write32,NULL,NULL,delay,NULL};
+        struct tg_gpu_frontend_status fe={.stage=11,.ltc_count=2};
+        struct tg_gpu_gr_work work={m.work,0x90000000,TG_GPU_GR_WORK_BYTES};
+        for(unsigned mode=0;mode<3;++mode) {
+            struct tg_gpu_power power={.owned=mode!=0,.ready=mode!=1};
+            struct tg_gpu_gr_status gr={.stage=mode==2?13u:15u,.context_bytes=0x13800};
+            reset(&m);
+            assert(tg_gpu_gr_context_init(&io,&power,&fe,&net,&gr,m.inst,0x80040000,&work,&s)
+                   ==TG_GPU_GR_CTX_ARGUMENT);
+            assert(!m.writes && !m.priv_timeout_writes);
+            assert(m.regs[PRI_SYS_MASTER_CFG_15/4]==PRI_TIMEOUT_HW_DEFAULT &&
+                   m.regs[PRI_GPC_MASTER_CFG_A/4]==PRI_TIMEOUT_HW_DEFAULT);
+        }
+        /* Direct 0x800 writes do not depend on a 0x400 live hardware readback. */
+        reset(&m);
+        m.regs[PRI_SYS_MASTER_CFG_15/4]=0;
+        m.regs[PRI_GPC_MASTER_CFG_A/4]=0x1234;
+        assert(run(&m,&net,&s)==TG_GPU_GR_CTX_OK && m.priv_timeout_writes==2);
+        assert(m.regs[PRI_SYS_MASTER_CFG_15/4]==PRI_TIMEOUT_TARGET &&
+               m.regs[PRI_GPC_MASTER_CFG_A/4]==PRI_TIMEOUT_TARGET);
+    }
     {
         void *arena=aligned_alloc(4096,0x80000);assert(arena);memset(arena,0,0x80000);
         struct tg_gpu_gr_work work={m.work,0x90000000,TG_GPU_GR_WORK_BYTES};
