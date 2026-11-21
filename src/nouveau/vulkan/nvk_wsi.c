@@ -62,7 +62,15 @@ nvk_init_wsi(struct nvk_physical_device *pdev)
 
    pdev->wsi_device.supports_scanout = false;
 #ifdef VK_USE_PLATFORM_WIN32_KHR
-   /* GDI itself does not throttle the producer even with FIFO selected. */
+   /* NVK exposes no D3D12 command queue, so the Win32 WSI cannot use the
+    * DXGI/DirectComposition direct-flip entry and presents through the GDI
+    * path instead: one GPU staging copy moves each finished frame into a
+    * host-visible linear image (the WaitForFences in queue_present stays),
+    * and GDI submits the mapped pixels. Do not declare DXGI support or drop
+    * that GPU wait to fake a zero-readback path. GDI itself does not
+    * throttle the producer even with FIFO selected, so enable a 60 Hz
+    * producer cap whose deadline phase-locks to the measured compositor
+    * cadence (DwmFlush) instead of free-running. */
    pdev->wsi_device.win32.cpu_present_fps = 60;
 #endif
    pdev->wsi_device.supports_modifiers =

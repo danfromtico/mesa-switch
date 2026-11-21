@@ -33,6 +33,9 @@ if with_platform_windows
   if with_tests
     test('win32_pacing', executable('test-win32-pacing',
       'tests/win32_pacing.c'), suite : ['wsi'])
+    test('win32_direct_dib', executable('test-win32-direct-dib',
+      'tests/win32_direct_dib.c', dependencies : [cc.find_library('gdi32')]),
+      suite : ['wsi'])
   endif
 else
   files_vulkan_wsi += files('wsi_common_headless.c')
