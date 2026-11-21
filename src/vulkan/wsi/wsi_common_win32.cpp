@@ -941,7 +941,9 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
                wsi_win32_pacer_compositor_paced(&chain->pacer,
                                                 after.QuadPart - before.QuadPart,
                                                 after.QuadPart);
-            wsi_win32_pacer_presented(&chain->pacer, after.QuadPart);
+            wsi_win32_pacer_presented(&chain->pacer,
+                                      after.QuadPart - before.QuadPart,
+                                      after.QuadPart);
             if (compositor_paced)
                wsi_win32_pacer_sync_compositor(&chain->pacer, after.QuadPart);
          }

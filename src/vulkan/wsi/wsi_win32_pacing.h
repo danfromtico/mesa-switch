@@ -51,6 +51,8 @@ struct wsi_win32_pacer {
     * completion for a paced frame, or its producer-cap wait exit for a
     * capped one. 0 if none. */
    int64_t last_present;
+   /* Whether the previous measured DwmFlush() blocked at all. */
+   bool compositor_blocked;
 };
 
 static inline BOOL
@@ -69,11 +71,13 @@ wsi_win32_pacer_init(struct wsi_win32_pacer *pacer, uint32_t fps)
    return pacer->timer != NULL;
 }
 
-/* Remember when this present completed in the compositor. */
-static inline void
-wsi_win32_pacer_presented(struct wsi_win32_pacer *pacer, int64_t completed_at)
+/* The smallest DwmFlush() wait that counts as the compositor blocking at
+ * all: occluded and idle desktops return within microseconds, so a few
+ * hundred microseconds of blocking already proves a composition happened. */
+static inline int64_t
+wsi_win32_pacer_min_block(const struct wsi_win32_pacer *pacer)
 {
-   pacer->last_present = completed_at;
+   return pacer->period > 64 ? pacer->period / 64 : 1;
 }
 
 /* Anchor the fallback deadline to a completed composition so the timer
@@ -83,6 +87,22 @@ wsi_win32_pacer_sync_compositor(struct wsi_win32_pacer *pacer,
                                 int64_t composed_at)
 {
    pacer->next = composed_at + pacer->period;
+}
+
+/* Record a measured present. When DwmFlush() starts blocking again after
+ * uncomposited frames (window back on screen), the free-running deadline
+ * has no display phase, so re-anchor it once to this completion; a desktop
+ * that keeps blocking (including one faster than the cap) must not be
+ * re-anchored here, or it would escape the producer cap. */
+static inline void
+wsi_win32_pacer_presented(struct wsi_win32_pacer *pacer,
+                          int64_t dwm_elapsed, int64_t completed_at)
+{
+   const bool blocked = dwm_elapsed >= wsi_win32_pacer_min_block(pacer);
+   if (blocked && !pacer->compositor_blocked && pacer->last_present > 0)
+      wsi_win32_pacer_sync_compositor(pacer, completed_at);
+   pacer->compositor_blocked = blocked;
+   pacer->last_present = completed_at;
 }
 
 /* Classify a measured DwmFlush() wait. The compositor must have blocked at
@@ -98,10 +118,9 @@ static inline bool
 wsi_win32_pacer_compositor_paced(const struct wsi_win32_pacer *pacer,
                                  int64_t dwm_elapsed, int64_t completed_at)
 {
-   const int64_t min_block = pacer->period > 64 ? pacer->period / 64 : 1;
    return pacer->timer != NULL && pacer->period > 1 &&
           pacer->last_present > 0 &&
-          dwm_elapsed >= min_block &&
+          dwm_elapsed >= wsi_win32_pacer_min_block(pacer) &&
           completed_at - pacer->last_present >=
              pacer->period - pacer->period / 8;
 }

@@ -54,8 +54,8 @@ int main(void)
    LARGE_INTEGER now;
    CHECK(QueryPerformanceCounter(&now));
    const int64_t period = pacer.period;
-   const int64_t min_block = period > 64 ? period / 64 : 1;
-   wsi_win32_pacer_presented(&pacer, now.QuadPart - period);
+   const int64_t min_block = wsi_win32_pacer_min_block(&pacer);
+   wsi_win32_pacer_presented(&pacer, period, now.QuadPart - period);
    CHECK(wsi_win32_pacer_compositor_paced(&pacer, period, now.QuadPart));
    CHECK(wsi_win32_pacer_compositor_paced(&pacer, period / 2, now.QuadPart));
    CHECK(wsi_win32_pacer_compositor_paced(&pacer, min_block, now.QuadPart));
@@ -77,24 +77,44 @@ int main(void)
    CHECK(!wsi_win32_pacer_compositor_paced(&fresh, period, now.QuadPart));
    wsi_win32_pacer_finish(&fresh);
 
+   /* Back on screen after uncomposited frames: the first blocked present
+    * re-anchors the free-running deadline once, so the cadence locks to
+    * the next display period instead of keeping the free-running phase. */
+   struct wsi_win32_pacer back;
+   CHECK(wsi_win32_pacer_init(&back, 60));
+   wsi_win32_pacer_presented(&back, 0, now.QuadPart - back.period / 2);
+   CHECK(!back.compositor_blocked);
+   wsi_win32_pacer_presented(&back, back.period / 2, now.QuadPart);
+   CHECK(back.compositor_blocked);
+   CHECK(back.next == now.QuadPart + back.period);
+   /* A desktop that keeps blocking is not re-anchored again. */
+   wsi_win32_pacer_presented(&back, back.period / 2, now.QuadPart + back.period);
+   CHECK(back.next == now.QuadPart + back.period);
+   wsi_win32_pacer_finish(&back);
+
    /* 120 Hz desktop closed loop: the compositor completes half a period
     * after each release. Every frame must stay capped; recording the
     * release at the producer-cap wait exit (not at the pre-wait
     * DwmFlush() completion) is what prevents an unpaced/paced frequency
-    * doubling. */
-   struct wsi_win32_pacer fast;
+    * doubling. The 120 Hz waitable timer paces the simulation so the test
+    * does not depend on the system clock tick. */
+   struct wsi_win32_pacer fast, vblank;
    CHECK(wsi_win32_pacer_init(&fast, 60));
-   const DWORD half_period_ms = (DWORD)(fast.period * 1000 / fast.frequency / 2) + 1;
+   CHECK(wsi_win32_pacer_init(&vblank, 120));
    for (unsigned i = 0; i < 4; i++) {
-      if (fast.last_present > 0)
-         Sleep(half_period_ms);
+      if (i > 0) {
+         CHECK(QueryPerformanceCounter(&now));
+         wsi_win32_pacer_sync_compositor(&vblank, now.QuadPart);
+         CHECK(wsi_win32_pacer_wait(&vblank));
+      }
       CHECK(QueryPerformanceCounter(&now));
       const bool paced =
          wsi_win32_pacer_compositor_paced(&fast, fast.period / 4, now.QuadPart);
       CHECK(!paced);
-      wsi_win32_pacer_presented(&fast, now.QuadPart);
+      wsi_win32_pacer_presented(&fast, fast.period / 4, now.QuadPart);
       CHECK(wsi_win32_pacer_wait(&fast));
    }
+   wsi_win32_pacer_finish(&vblank);
    wsi_win32_pacer_finish(&fast);
 
    /* The fallback timer stays phase-locked to the compositor: after a paced
