@@ -12,6 +12,8 @@
 
 整款游戏的原生复现再次发生异常重启。17 次创建像素着色器均有返回，第一次 Vulkan 队列提交及等待均成功。保留下来的 193 条记录中，上屏和绘图调用均为零。末尾仍在执行的操作是游戏线程第七次创建纹理和工作线程第十七个编译任务。游戏自身的日志停在玩家管理器初始化。最后一条记录到下一次 Windows 开机事件相隔约 141 秒，期间的故障起点仍待定位。开机后已核对游戏原 DLL 和正式驱动哈希。[游戏启动时间线和开放故障](PAL4_SHADER_REPLAY_20261121.json#game_startup_boundary)
 
+第七张纹理与第六张参数相同，均为 512×512 的 X8R8G8B8 托管纹理，使用自动生成 mipmap。第一次暂停分配的测试被用户关机中断。复测时游戏在分配前停留 155.7 秒并持续存活，随后由测试程序结束。开机记录 90934、DWM 进程和 Code 0 显卡均连续。用原 DXVK 独立创建七张纹理，以及先登记 17 个真实着色器再创建七张纹理，两组都成功释放资源并正常退出。整款游戏的首次上屏和正常退出仍待验收。此前开机 90872 的异常结束另列在开放故障登记表。[纹理复测与独立对照](PAL4_TEXTURE_CHECKPOINT_20261121.json)
+
 普通窗口暂存复制修复已列为基线。源码为 `a7c422ad`，签名 KMD 为 `c09c3c86`，ARM64 tgd3d 为 `b4f6c7bf`。原程序在 GM20B 上连续三次显示、响应输入、正常退出并返回同一桌面。正常翻转窗口也通过对照。旧式窗口历史重启继续单独排查。WDDM 2.0 进程级 Present1 和标准 GDI allocation-only 导入各自需要对应的生产组件实机回执。[基线清单](graphics-baseline.json) · [三次实测与正常对照](legacy-sequential-step4/window-copy-c09c3c86/result.json) · [晋升回执](legacy-sequential-step4/window-copy-c09c3c86/promotion-qualification.json)
 
 **从原始最小场景开始。** Switch Lite GM20B 使用外接电源，原生 tgd3d 协商旧式 DDI `0x000b000f`，普通窗口、两个 BGRA UNORM 缓冲区。应用没有写入图像时，第一次 `Present(1, 0)` 即出现意外重启。原空窗口程序 `fd64bd1b` 的三份历史记录均在首次调用时中断。带绘图的相关程序 `62100a30` 另有持久记录到达用户态发出 `D3DKMT_PRESENT` 的边界，其内核跟踪在此之前结束。历史复位前最后完成的 miniport 操作仍待查明。另有一条 WDDM 2.0 六帧场景在第三次呈现时重启，分别登记。[原始实机记录](LOAD_STABILITY_FOLLOWUP_20261116.json) · [故障登记及原场景销案条件](open-faults.json)

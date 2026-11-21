@@ -395,9 +395,10 @@
         "boot-recovery",
         "system-stability"
       ],
-      "trigger": "Read-only device return on boot 88248 exposed additional abnormal-shutdown records following the previously documented boot 87687, before the new GDI dispatch.",
+      "trigger": "Read-only device return on boot 88248 exposed additional abnormal-shutdown records following the previously documented boot 87687, before the new GDI dispatch. Boot 90934 also reports an abnormal end to the unobserved boot 90872, after the earlier PAL4 test on boot 90785 had ended in a user-confirmed shutdown.",
       "evidence": [
-        "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/user-return-88248.json"
+        "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/user-return-88248.json",
+        "tegra-x1-wddm/docs/PAL4_TEXTURE_CHECKPOINT_20261121.json#subsequent_unobserved_session"
       ],
       "cause": "Unconfirmed. The retained records do not correlate these events to a driver candidate, application, or specific initiating load.",
       "daily_workaround": "After a restart, verify Code 0, the active compositor and the selected signed component hashes before resuming the workload.",

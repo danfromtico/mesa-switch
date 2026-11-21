@@ -1,0 +1,543 @@
+{
+  "schema": 1,
+  "scope": "Native x86 DXVK running on Switch Lite GM20B. Record the real texture requests, temporarily withhold the seventh allocation and independently replay the seven descriptors on stock DXVK.",
+  "graphics_baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "components": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "loaded_desktop_components": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "ordinary_game_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+  "observer": {
+    "bytes": 7756824,
+    "unsigned": "3561166fe8dd18a39a567fdf26083ccdede3e114e733bf7955714257fcaaa704",
+    "sha256": "cd94568ee136d6c18e0f9de478791aab7cd70f88c8c9b8fe11598837d98720d9",
+    "base": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+    "source_patch_sha256": "ae70210d45adabcc3f8d2215113ce28b7377bcc2108cfe197c34bd58f736b316",
+    "initial_source_probe_sha256": "7b859b854ffa4bceb66ff375c67f8d4bb46d0960e6526cc623584d93b8acd9dc"
+  },
+  "isolated_client": {
+    "bytes": 1570832,
+    "unsigned": "aab8d6fba620fa841bf6d90aecefdf5a91a54d4a2dd3d1aaa3406e1aaa6c56b3",
+    "sha256": "0a276caa765dbc57649bff67388cac5380fdf773b029231ad671f6201cecd518",
+    "source_sha256": "2f6de5716dbf2fb680f4e1b9a1afb4f55369160100104a46eac0b3bc4bc55fee",
+    "base_source_sha256": "22c8e2b679ec5c914d839008c221a8f37ef759cc4a7133e4f476831c6c318203"
+  },
+  "primary_case": "tegra-x1-wddm/docs/PAL4_SHADER_REPLAY_20261121.json#game_startup_boundary",
+  "fixture_positive_control": {
+    "boot": 90785,
+    "native_offscreen_programs_matching_stock": 17,
+    "known_2x2_texture": {
+      "ordinal": 1,
+      "width": 2,
+      "height": 2,
+      "levels": 1,
+      "usage": 0,
+      "format": 21,
+      "pool": 1,
+      "shared": false
+    },
+    "receipt_sha256": "3b0ca8f1952dd304ca04136229807b24a22336c73f85388304f0e415a32e61a6"
+  },
+  "captured_texture_descriptors": [
+    {
+      "ordinal": 1,
+      "width": 32,
+      "height": 32,
+      "levels": 1,
+      "usage": 0,
+      "format": 21,
+      "pool": 1,
+      "shared": false
+    },
+    {
+      "ordinal": 2,
+      "width": 32,
+      "height": 32,
+      "levels": 1,
+      "usage": 0,
+      "format": 21,
+      "pool": 1,
+      "shared": false
+    },
+    {
+      "ordinal": 3,
+      "width": 800,
+      "height": 600,
+      "levels": 1,
+      "usage": 1,
+      "format": 22,
+      "pool": 0,
+      "shared": false
+    },
+    {
+      "ordinal": 4,
+      "width": 512,
+      "height": 512,
+      "levels": 0,
+      "usage": 1024,
+      "format": 21,
+      "pool": 1,
+      "shared": false
+    },
+    {
+      "ordinal": 5,
+      "width": 256,
+      "height": 512,
+      "levels": 0,
+      "usage": 1024,
+      "format": 21,
+      "pool": 1,
+      "shared": false
+    },
+    {
+      "ordinal": 6,
+      "width": 512,
+      "height": 512,
+      "levels": 0,
+      "usage": 1024,
+      "format": 22,
+      "pool": 1,
+      "shared": false
+    },
+    {
+      "ordinal": 7,
+      "width": 512,
+      "height": 512,
+      "levels": 0,
+      "usage": 1024,
+      "format": 22,
+      "pool": 1,
+      "shared": false
+    }
+  ],
+  "seventh_texture": "512 x 512, X8R8G8B8, D3DPOOL_MANAGED, D3DUSAGE_AUTOGENMIPMAP, Levels=0, no shared handle. The sixth request has the same arguments.",
+  "first_checkpoint": {
+    "before_boot": 90785,
+    "after_boot": 90934,
+    "foreground_window_detected": true,
+    "running_pid": 3844,
+    "checkpoint_entered": true,
+    "timeout_marker": false,
+    "last_sample_seconds_after_observed_hold": 97.682,
+    "sampled_cpu_seconds_in_hold": 0.01562,
+    "held_seconds_at_deliberate_stop": null,
+    "alive_at_stop": null,
+    "test_process_stopped_by_runner": false,
+    "game_normal_exit_qualified": false,
+    "remaining_api_calls": [
+      {
+        "tid": 7188,
+        "site": "D3D9DeviceEx::CreateTexture",
+        "n": 7
+      }
+    ],
+    "observed_compiler_inputs": [
+      {
+        "compile_shaders_call": 2,
+        "tid": 8148,
+        "key": "fs.0410002af264453c30d7a982caa3a1d4"
+      },
+      {
+        "compile_shaders_call": 3,
+        "tid": 8148,
+        "key": "fs.9fdba0e1c2629e4559ac3f17aa7c1986"
+      },
+      {
+        "compile_shaders_call": 4,
+        "tid": 8148,
+        "key": "fs.a340affcdf7f93585c7c362315053af8"
+      },
+      {
+        "compile_shaders_call": 5,
+        "tid": 8148,
+        "key": "fs.e9e2b3b05f7ef9e2497005bd527d9ba5"
+      },
+      {
+        "compile_shaders_call": 6,
+        "tid": 8148,
+        "key": "fs.3d740c5cc6fddf66bb3b85e107f14a99"
+      },
+      {
+        "compile_shaders_call": 7,
+        "tid": 8148,
+        "key": "fs.7851960ce41e6be9ddb00c9a0386f370"
+      },
+      {
+        "compile_shaders_call": 8,
+        "tid": 8148,
+        "key": "fs.c533352a50ab4e1ae47f1de69c192c3c"
+      },
+      {
+        "compile_shaders_call": 9,
+        "tid": 8148,
+        "key": "fs.96456190006cff9655691f75c9d912bd"
+      },
+      {
+        "compile_shaders_call": 10,
+        "tid": 8148,
+        "key": "fs.6aa12c6287c4ddee4ae008c5a535eb02"
+      },
+      {
+        "compile_shaders_call": 11,
+        "tid": 8148,
+        "key": "fs.d673d6c48033771124c3d79070c7a27a"
+      },
+      {
+        "compile_shaders_call": 12,
+        "tid": 8148,
+        "key": "fs.74bb96de0e7a768a4f38115387e72b23"
+      },
+      {
+        "compile_shaders_call": 13,
+        "tid": 8148,
+        "key": "fs.ea6d9ea1302aec350489427602736ebb"
+      },
+      {
+        "compile_shaders_call": 14,
+        "tid": 8148,
+        "key": "fs.4adeafead71566bf7b0b7f27c0b83f4e"
+      },
+      {
+        "compile_shaders_call": 15,
+        "tid": 8148,
+        "key": "fs.d9e279770c43578c760caf439ab15e62"
+      },
+      {
+        "compile_shaders_call": 16,
+        "tid": 8148,
+        "key": "fs.ff2e148f3dda99421252c857de25d984"
+      },
+      {
+        "compile_shaders_call": 17,
+        "tid": 8148,
+        "key": "fs.d986949b851f158f431dd4cb2a4c26e1"
+      },
+      {
+        "compile_shaders_call": 18,
+        "tid": 8148,
+        "key": "fs.6d6a242beecebf7e0b272d5e7e33c79e"
+      }
+    ],
+    "kernel_queue_returns": [
+      {
+        "site": "vkQueueSubmit2",
+        "call": 1,
+        "rc": 0
+      },
+      {
+        "site": "vkWaitSemaphores",
+        "call": 1,
+        "rc": 0
+      }
+    ],
+    "retained_first_present": 0,
+    "journal_sha256": "03515e6c480ef59f0c64b9fb0c663843015d3197e04361281c4ecdbc416f4748",
+    "retained_journal_bytes": 16649,
+    "total_journal_bytes": 16649,
+    "archive_sha256": "b7261be0ba50b0c9332e7583142d6a6e77a0932b4f6feb4ee0b0da085aa15765",
+    "game_dll_restored_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "rollback_receipt_sha256": "7a982fe71fbf438860bcaaccdb5e5bca4cf65a0c12d9fe895a5738613ead0242"
+  },
+  "first_interruption": {
+    "previous_boot": 90785,
+    "user_confirmation": "The user confirmed they shut down the Switch during the checkpoint and asked to repeat it.",
+    "shutdown_event": {
+      "id": 1074,
+      "fields": {
+        "param1": "C:\\Windows\\System32\\RuntimeBroker.exe (DESKTOP-5RCUK3G)",
+        "param3": "其他(计划外)",
+        "param4": "0x0",
+        "param5": "关闭电源",
+        "param6": ""
+      },
+      "provider": "User32",
+      "record": 90856,
+      "utc": "2026-11-21T10:29:51.5559262Z",
+      "eventlog_prior_shutdown_time": {}
+    },
+    "log_service_stopped": {
+      "id": 6006,
+      "fields": {},
+      "provider": "EventLog",
+      "record": 90858,
+      "utc": "2026-11-21T10:29:55.4883064Z",
+      "eventlog_prior_shutdown_time": {}
+    },
+    "kernel_shutdown": {
+      "id": 13,
+      "fields": {
+        "StopTime": "2026-11-21T10:30:14.8523192Z"
+      },
+      "provider": "Microsoft-Windows-Kernel-General",
+      "record": 90871,
+      "utc": "2026-11-21T10:30:14.8523228Z",
+      "eventlog_prior_shutdown_time": {}
+    },
+    "following_boot": {
+      "id": 12,
+      "fields": {
+        "StartTime": "2026-11-21T10:30:17.0506158Z"
+      },
+      "provider": "Microsoft-Windows-Kernel-General",
+      "record": 90872,
+      "utc": "2026-11-21T10:30:18.7015605Z",
+      "eventlog_prior_shutdown_time": {}
+    },
+    "held_seconds_documented_by_process_sample": 97.682,
+    "seconds_from_checkpoint_observation_to_shutdown_request": 102.046,
+    "process_cpu_time_change_in_the_sampled_hold": 0.01562,
+    "observed_compiler_jobs": 17,
+    "compiler_open_scopes_at_end": [],
+    "recorded_operations_after_checkpoint": 0,
+    "first_texture_call_withheld_before_allocation": 7,
+    "met_planned_155_second_hold": false,
+    "original_game_dll_verified": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "event_receipt_sha256": "3e950e9f1c20d48e76910d016252e451f1362736c983e1855a8c0de7e743c84c",
+    "readback_sha256": "b7261be0ba50b0c9332e7583142d6a6e77a0932b4f6feb4ee0b0da085aa15765"
+  },
+  "subsequent_unobserved_session": {
+    "boot": 90872,
+    "next_boot": {
+      "id": 12,
+      "fields": {
+        "StartTime": "2026-11-21T11:02:14.0492579Z"
+      },
+      "provider": "Microsoft-Windows-Kernel-General",
+      "record": 90934,
+      "utc": "2026-11-21T11:02:15.7106148Z",
+      "eventlog_prior_shutdown_time": {}
+    },
+    "abnormal_shutdown": [
+      {
+        "id": 6008,
+        "fields": {},
+        "provider": "EventLog",
+        "record": 90943,
+        "utc": "2026-11-21T11:03:58.0546786Z",
+        "eventlog_prior_shutdown_time": [
+          "19:02:20",
+          "‎2026/‎11/‎21"
+        ]
+      },
+      {
+        "id": 41,
+        "fields": {
+          "BugcheckCode": "0",
+          "SleepInProgress": "0",
+          "PowerButtonTimestamp": "0",
+          "LongPowerButtonPressDetected": "false"
+        },
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "record": 90952,
+        "utc": "2026-11-21T11:02:20.0764251Z",
+        "eventlog_prior_shutdown_time": {}
+      }
+    ],
+    "known_game_run_on_that_session": false,
+    "scope": "The checkpoint ran on the preceding boot. The initiating event in this intervening boot is unknown. The prior address stopped responding and the enrolled host key later matched at the user-supplied address."
+  },
+  "resource_replays": [
+    {
+      "case": "resources-only",
+      "boot": 90934,
+      "end_boot": 90934,
+      "ac": "Online",
+      "gpu_code": 0,
+      "dwm": 1412,
+      "renderer": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) vendor=10de device=0fe0 type=1 luid_valid=1 luid=0000000000005b82",
+      "matched_loaded_modules": true,
+      "original_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+      "x86_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+      "native_client_sha256": "0a276caa765dbc57649bff67388cac5380fdf773b029231ad671f6201cecd518",
+      "verified": [
+        "1 levels=1",
+        "2 levels=1",
+        "3 levels=1",
+        "4 levels=1",
+        "5 levels=1",
+        "6 levels=1",
+        "7 levels=1"
+      ],
+      "shader_registration_count": 0,
+      "native_shader_keys_match": true,
+      "released": true,
+      "exit_code": 0,
+      "trace_sha256": "005a7278cb0b062ad2d34df4c7560bb8b449c5f66a18d504ec2aa3618607e1b8",
+      "collection_sha256": "614fc078ce9f0734dcc9cbfef95e5acc7c74a43f52d3569e26f15e150847361d"
+    },
+    {
+      "case": "resources-with-shaders",
+      "boot": 90934,
+      "end_boot": 90934,
+      "ac": "Online",
+      "gpu_code": 0,
+      "dwm": 1412,
+      "renderer": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) vendor=10de device=0fe0 type=1 luid_valid=1 luid=0000000000005b82",
+      "matched_loaded_modules": true,
+      "original_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+      "x86_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+      "native_client_sha256": "0a276caa765dbc57649bff67388cac5380fdf773b029231ad671f6201cecd518",
+      "verified": [
+        "1 levels=1",
+        "2 levels=1",
+        "3 levels=1",
+        "4 levels=1",
+        "5 levels=1",
+        "6 levels=1",
+        "7 levels=1"
+      ],
+      "shader_registration_count": 17,
+      "native_shader_keys_match": true,
+      "released": true,
+      "exit_code": 0,
+      "trace_sha256": "51aae238f4676f0ca9427676d348dff3ddecf0bc8e2d83c596966821d516a017",
+      "collection_sha256": "dbfb7d4b8610c3a5dbbe73b9a682acfd6d65382550af444ad3315a5cd7f50eaf"
+    }
+  ],
+  "resource_scope": "The test retains all seven successfully created textures until the last one is verified, then releases them and the D3D9 device. It verifies format, dimensions, pool, usage and exposed mip levels. No game texture content, scene drawing, or presentation is performed in these two controls.",
+  "contract": "https://learn.microsoft.com/en-us/windows/win32/api/d3d9/nf-d3d9-idirect3ddevice9-createtexture",
+  "level_count_contract": "https://learn.microsoft.com/en-us/windows/win32/api/d3d9/nf-d3d9-idirect3dbasetexture9-getlevelcount",
+  "game_startup_fixed": false,
+  "repeat_checkpoint": {
+    "before_boot": 90934,
+    "after_boot": 90934,
+    "foreground_window_detected": true,
+    "running_pid": 8172,
+    "checkpoint_entered": true,
+    "timeout_marker": false,
+    "last_sample_seconds_after_observed_hold": 151.58,
+    "sampled_cpu_seconds_in_hold": 0.07812,
+    "held_seconds_at_deliberate_stop": 155.70412829999998,
+    "alive_at_stop": true,
+    "test_process_stopped_by_runner": true,
+    "game_normal_exit_qualified": false,
+    "remaining_api_calls": [
+      {
+        "tid": 2620,
+        "site": "D3D9DeviceEx::CreateTexture",
+        "n": 7
+      }
+    ],
+    "observed_compiler_inputs": [
+      {
+        "compile_shaders_call": 2,
+        "tid": 7420,
+        "key": "fs.0410002af264453c30d7a982caa3a1d4"
+      },
+      {
+        "compile_shaders_call": 3,
+        "tid": 7420,
+        "key": "fs.9fdba0e1c2629e4559ac3f17aa7c1986"
+      },
+      {
+        "compile_shaders_call": 4,
+        "tid": 7420,
+        "key": "fs.a340affcdf7f93585c7c362315053af8"
+      },
+      {
+        "compile_shaders_call": 5,
+        "tid": 7420,
+        "key": "fs.e9e2b3b05f7ef9e2497005bd527d9ba5"
+      },
+      {
+        "compile_shaders_call": 6,
+        "tid": 7420,
+        "key": "fs.3d740c5cc6fddf66bb3b85e107f14a99"
+      },
+      {
+        "compile_shaders_call": 7,
+        "tid": 7420,
+        "key": "fs.7851960ce41e6be9ddb00c9a0386f370"
+      },
+      {
+        "compile_shaders_call": 8,
+        "tid": 7420,
+        "key": "fs.c533352a50ab4e1ae47f1de69c192c3c"
+      },
+      {
+        "compile_shaders_call": 9,
+        "tid": 7420,
+        "key": "fs.96456190006cff9655691f75c9d912bd"
+      },
+      {
+        "compile_shaders_call": 10,
+        "tid": 7420,
+        "key": "fs.6aa12c6287c4ddee4ae008c5a535eb02"
+      },
+      {
+        "compile_shaders_call": 11,
+        "tid": 7420,
+        "key": "fs.d673d6c48033771124c3d79070c7a27a"
+      },
+      {
+        "compile_shaders_call": 12,
+        "tid": 7420,
+        "key": "fs.74bb96de0e7a768a4f38115387e72b23"
+      },
+      {
+        "compile_shaders_call": 13,
+        "tid": 7420,
+        "key": "fs.ea6d9ea1302aec350489427602736ebb"
+      },
+      {
+        "compile_shaders_call": 14,
+        "tid": 7420,
+        "key": "fs.4adeafead71566bf7b0b7f27c0b83f4e"
+      },
+      {
+        "compile_shaders_call": 15,
+        "tid": 7420,
+        "key": "fs.d9e279770c43578c760caf439ab15e62"
+      },
+      {
+        "compile_shaders_call": 16,
+        "tid": 7420,
+        "key": "fs.ff2e148f3dda99421252c857de25d984"
+      },
+      {
+        "compile_shaders_call": 17,
+        "tid": 7420,
+        "key": "fs.d986949b851f158f431dd4cb2a4c26e1"
+      },
+      {
+        "compile_shaders_call": 18,
+        "tid": 7420,
+        "key": "fs.6d6a242beecebf7e0b272d5e7e33c79e"
+      }
+    ],
+    "kernel_queue_returns": [
+      {
+        "site": "vkQueueSubmit2",
+        "call": 1,
+        "rc": 0
+      },
+      {
+        "site": "vkWaitSemaphores",
+        "call": 1,
+        "rc": 0
+      }
+    ],
+    "retained_first_present": 0,
+    "journal_sha256": "0c077be24687ef827bb82a10f3c16c0429953e0e096e3c6212dad34fe8e1196a",
+    "retained_journal_bytes": 16646,
+    "total_journal_bytes": 16646,
+    "archive_sha256": "00bf0b768fc96f9ccd4eb6f6053c06226b67c95e0216075102050b1fed3848ec",
+    "game_dll_restored_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "rollback_receipt_sha256": "ec242644cd7ee8d0b4c3debafd071f1905737531e3218609715a100f75bff747"
+  },
+  "same_descriptors_on_repeat": true,
+  "repeat_boot_events": [],
+  "repeat_155_second_control_passed": true
+}
