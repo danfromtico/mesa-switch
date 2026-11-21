@@ -1269,6 +1269,60 @@
         "win-board-cdd-dwm-preempt-control-20261121-01"
       ],
       "latest_observation": "同启动健康轮的 DWM 4632 字节包 44472 也被抢占两次。第三次提交后 6.719 ms 完成并退役，同一对上下文随后依次退役同步对象值 21985 的信号、GPU 等待及呈现包。异常轮同一对象用值 24055，两路见信号和等待入队，缺第三次 DMA 152586 的完成以及随后三个队列包的退役。健康近窗 18 个同上下文包中有一个完成了双抢占后的重提交。三个健康完整 display.etl 有 11 个同为 3524 字节的包，均无双抢占后完成的样本。"
+    },
+    {
+      "id": "WIN-DWM-ETL-TAIL-COVERAGE",
+      "priority": "P0",
+      "owner": "Windows ETW、VidSch 提交与 DMA 完成执行路径",
+      "question": "对于异常轮第三次 DWM DMA 提交 152586，提交线程和完成线程各自的物理 ETL 数据能覆盖到哪一时点？",
+      "status": "观测缺口",
+      "existing_observation": "两路未封口 ETL 末端出现来自多个线程的事件，且缺第三次 DMA 及相邻信号、等待和呈现的退役。",
+      "missing_observation": "两个异常 ETL 未正常封口。物理缓冲索引无法提供真实执行 CPU，其他线程后续事件也无法补证目标线程或完整落盘。当前证据把缺口限定在第三次 DMA 提交后的完成通知与退役，仍无法区分未完成、事件未发出和事件未落盘。",
+      "pass_condition": "从 ETL 缓冲标头逐包定位提交、抢占、最后 DMA/信号/等待线程，列出实际线程与 CPU 证据、末端覆盖及其与健康完成延迟的范围。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+          "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json",
+          "sha256": "0ea143449c305b0c6efe927ca694eb69a1713b0af6e514101f0fd0d6df4331e6"
+        }
+      ],
+      "windows_references": [
+        "dma_interrupt"
+      ],
+      "round_ids": [
+        "win-board-cdd-dwm-completion-coverage-20261121-01"
+      ],
+      "latest_observation": "同启动两路异常原件及两路健康对照均使用共享 ETW 缓冲。异常轮第三次 DMA 提交与档案末端在各自同一物理缓冲。display.etl 在提交后留存 0.126 ms，scene/video.etl 留存 9.423 ms，其中 DxgKrnl 留存至 9.332 ms。两路中，处理该上下文此前完成的 4/884 最后一条记录约早于第三次提交 0.106 ms。健康轮由同一线程发出第三次完成中断，第三次提交到包退役为 6.719 ms。"
+    },
+    {
+      "id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "priority": "P0",
+      "owner": "Windows DxgKrnl 与 GM20B KMD 的提交入口和工作队列",
+      "question": "异常轮 DxgKrnl 为 48660 第三次提交的 DMA 围栏 152586，是否还有同一适配器 KMD 接收或硬件队列证据？",
+      "status": "观测缺口",
+      "existing_observation": "异常轮有 Windows DMA 提交及相邻 KMD 执行状态，缺对应完成中断。提交号与 KMD 抢占请求字段可分别回读。",
+      "missing_observation": "缺 152586 的 DxgkDdiSubmitCommandVirtual 进入和返回、队列准入或硬件开始，以及同一提交的 DMA 完成。基线成功提交无此遥测，单凭事件缺失无法判断 KMD 卡住、未接收或正常继续。",
+      "pass_condition": "原始 KMD 负载按适配器和请求字段明确绑定 152586 至提交入口或返回、工作队列或硬件开始。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+          "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
+          "sha256": "21226aacabf0c345582ff142b88493e08746510cccaf2afcfafe61e1e7095dd2"
+        }
+      ],
+      "windows_references": [
+        "dma_interrupt"
+      ],
+      "round_ids": [
+        "win-board-cdd-dwm-third-submit-kmd-20261121-01"
+      ],
+      "latest_observation": "正式基线实载 KMD 对适配器 5c10 的全部四条 CALL 后事件均为抢占快照。最后一条匹配 DxgKrnl 抢占请求 20571，内部状态成功，记已完成围栏 152584。约 0.276 ms 后，Windows 为 DWM 队列 48660 记录第三次 DMA 提交 152586，留存 KMD 中无该提交号。固定基线源码只为失败提交、抢占等路径发出该遥测。"
     }
   ],
   "rounds": [
@@ -2538,19 +2592,129 @@
         "first_anomaly_or_missing": "异常轮第三次 DMA 152586 之后缺完成中断与序号 48660 退役，同时缺后续信号、等待、呈现队列退役。复位前物理扫描输出与故障首因未捕获。"
       },
       "finished_utc": "2026-11-21T15:49:21.551742+00:00"
+    },
+    {
+      "round_id": "win-board-cdd-dwm-completion-coverage-20261121-01",
+      "contract_id": "WIN-DWM-ETL-TAIL-COVERAGE",
+      "windows_question": "WIN-DWM-ETL-TAIL-COVERAGE",
+      "method": "双路原始 ETL 物理缓冲及提交、完成路径末端核对，无新实机执行",
+      "plan": "windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.plan.json",
+      "plan_sha256": "5fed3e7e0b86dee23a1a8ec3fb972962f3e7f2aaa16ab41ca84f625f38a776c7",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:50:05.773912+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
+      "result_sha256": "21226aacabf0c345582ff142b88493e08746510cccaf2afcfafe61e1e7095dd2",
+      "status": "观测缺口",
+      "finding": "同启动两路异常原件及两路健康对照均使用共享 ETW 缓冲。异常轮第三次 DMA 提交与档案末端在各自同一物理缓冲。display.etl 在提交后留存 0.126 ms，scene/video.etl 留存 9.423 ms，其中 DxgKrnl 留存至 9.332 ms。两路中，处理该上下文此前完成的 4/884 最后一条记录约早于第三次提交 0.106 ms。健康轮由同一线程发出第三次完成中断，第三次提交到包退役为 6.719 ms。",
+      "missing_observation": "两个异常 ETL 未正常封口。物理缓冲索引无法提供真实执行 CPU，其他线程后续事件也无法补证目标线程或完整落盘。当前证据把缺口限定在第三次 DMA 提交后的完成通知与退役，仍无法区分未完成、事件未发出和事件未落盘。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 223221950698,
+          "pid": 4,
+          "tid": 888,
+          "id": 175,
+          "version": 1,
+          "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+          "buffer_stream": 0,
+          "buffer_offset": 950272,
+          "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d"
+        },
+        "last_return": {
+          "incident_completion_thread": {
+            "qpc": 223221948665,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272
+          },
+          "healthy_third_attempt": {
+            "qpc": 204762098614,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "da4b4b11a08bce7fb9f8cda7513c0b7b8f8b98b9b9c1778e33acbf442d0818e7"
+          }
+        },
+        "first_anomaly_or_missing": "末端同一物理缓冲在第三次提交后仍有其他事件，但未见该 DMA 完成、该包退役或负责此前完成的线程 4/884 的后续事件。未封口档案没有采集结束、真实 CPU 或实际缺失原因。"
+      },
+      "finished_utc": "2026-11-21T15:50:54.092542+00:00"
+    },
+    {
+      "round_id": "win-board-cdd-dwm-third-submit-kmd-20261121-01",
+      "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "method": "回读正式基线 KMD 提交和抢占代码及事故双路 ETL 的原始 KMD 提供程序，无新实机执行",
+      "plan": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.plan.json",
+      "plan_sha256": "3c1511cbaa87ef940a10fb8ff77a68379412a6df8fc3d001bfaa3c907cb5b50e",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:51:18.116493+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+      "result_sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317",
+      "status": "观测缺口",
+      "finding": "正式基线实载 KMD 对适配器 5c10 的全部四条 CALL 后事件均为抢占快照。最后一条匹配 DxgKrnl 抢占请求 20571，内部状态成功，记已完成围栏 152584。约 0.276 ms 后，Windows 为 DWM 队列 48660 记录第三次 DMA 提交 152586，留存 KMD 中无该提交号。固定基线源码只为失败提交、抢占等路径发出该遥测。",
+      "missing_observation": "缺 152586 的 DxgkDdiSubmitCommandVirtual 进入和返回、队列准入或硬件开始，以及同一提交的 DMA 完成。基线成功提交无此遥测，单凭事件缺失无法判断 KMD 卡住、未接收或正常继续。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 223221950698,
+          "pid": 4,
+          "tid": 888,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100088564464,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 152586,
+            "ulQueueSubmitSequence": 48660,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 3
+          }
+        },
+        "last_return": {
+          "preempt_request_20571_status": "0x00000000",
+          "kmd_snapshot_qpc": 223221945396,
+          "os_preemption_request_completion": {
+            "qpc": 223221948665,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446706169586005088,
+              "PacketType": 3,
+              "uliCompletionId": 20571,
+              "ulQueueSubmitSequence": 0,
+              "bPreempted": 0
+            }
+          }
+        },
+        "first_anomaly_or_missing": "DxgKrnl 保存 152586 的 DMA 提交事件。正式 KMD 的常规成功提交没有配套进入或返回事件，现有追踪无该请求的 KMD 准入、GP PUT、硬件开始或完成。"
+      },
+      "finished_utc": "2026-11-21T15:51:49.042571+00:00"
     }
   ],
   "progress": {
-    "total": 29,
+    "total": 31,
     "by_status": {
       "实机通过": 9,
-      "观测缺口": 4,
+      "观测缺口": 6,
       "已有实机通过": 7,
       "故障开放": 3,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 39,
+    "registered_rounds": 41,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -2570,6 +2734,8 @@
       "WIN-DWM-CONSUME",
       "WIN-POST-PRESENT-RETIRE",
       "WIN-DWM-TAIL-PREEMPT",
+      "WIN-DWM-ETL-TAIL-COVERAGE",
+      "WIN-DWM-THIRD-KMD-BOUNDARY",
       "WIN-PRESENT-IMAGE",
       "WIN-OLD-RESET"
     ],
@@ -2686,8 +2852,17 @@
         "path": "windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json",
         "sha256": "0ea143449c305b0c6efe927ca694eb69a1713b0af6e514101f0fd0d6df4331e6"
       },
-      "first_unobserved_dwm_boundary": "启动 91476 的 DWM 序号 48660 第三次 DMA 提交 152586，后续同步对象值 24055 的信号 48661、等待 73346 及呈现 73347 均缺退役原件。",
-      "bound_scope": "同启动、同上下文及同对象的健康对照证实可在两次抢占后继续完成。两路异常 ETL 都未封口，仍缺目标窗口对象、DMA 第三次实际结束及板级第一异常之间的直接链。"
+      "first_unobserved_dwm_boundary": "启动 91476 的 Windows 调度器记录序号 48660 第三次 DMA 提交 152586，其后先缺同号 KMD 准入或硬件开始，再缺 DMA 完成与信号 48661、等待 73346 和呈现 73347 的退役。",
+      "bound_scope": "同启动、同上下文及同对象的健康对照证实可在两次抢占后继续完成。两路异常 ETL 都未封口，仍缺目标窗口对象、DMA 第三次实际结束及板级第一异常之间的直接链。",
+      "shared_buffer_coverage": {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
+        "sha256": "21226aacabf0c345582ff142b88493e08746510cccaf2afcfafe61e1e7095dd2"
+      },
+      "third_submit_kmd_boundary": {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      },
+      "followup_boundary": "下一项独立观测优先覆盖同一提交号的 KMD 成功路径、硬件开始或完成，先用正常已知可完成的负载校验记录器。保存窗口或令牌关系以及独立故障首条记录。"
     }
   },
   "cleanup": {

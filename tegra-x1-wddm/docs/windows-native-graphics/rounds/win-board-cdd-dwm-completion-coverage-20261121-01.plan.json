@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "round_id": "win-board-cdd-dwm-completion-coverage-20261121-01",
+  "contract_id": "WIN-DWM-ETL-TAIL-COVERAGE",
+  "windows_question": "WIN-DWM-ETL-TAIL-COVERAGE",
+  "owner": "Windows ETW、VidSch 提交与 DMA 完成执行路径",
+  "question": "对于异常轮第三次 DWM DMA 提交 152586，提交线程和完成线程各自的物理 ETL 数据能覆盖到哪一时点？",
+  "method": "双路原始 ETL 物理缓冲及提交、完成路径末端核对，无新实机执行",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "从 ETL 缓冲标头逐包定位提交、抢占、最后 DMA/信号/等待线程，列出实际线程与 CPU 证据、末端覆盖及其与健康完成延迟的范围。",
+  "observations": [
+    "核验异常 ZIP 和同启动健康参照的双路原件。扫描所有物理缓冲，收集处理器索引、序列、填充边界和末端事件。",
+    "逐事件匹配异常第三次提交、此前 DMA 完成及抢占，健康同上下文第三次提交及随后 DMA、信号、等待和呈现退役。",
+    "区分每个缓冲 CPU、完成执行线程和提供程序可见末端。说明截尾与真实故障在现有回执上能否区分。"
+  ],
+  "inputs": {
+    "incident": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+    },
+    "reference": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-preallocated-blt-20261121-01/collected.zip",
+      "sha256": "df24f085aa7006667e9c1a4d168a1ab6c39d14cf06bc39dfbf2ee478e2f33308"
+    },
+    "prior_rounds": [
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+        "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json",
+        "sha256": "0ea143449c305b0c6efe927ca694eb69a1713b0af6e514101f0fd0d6df4331e6"
+      }
+    ]
+  }
+}

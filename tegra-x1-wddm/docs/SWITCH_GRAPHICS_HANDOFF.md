@@ -66,6 +66,10 @@
 
 同一启动的健康对照中，同一 DWM 线程和上下文的 4632 字节包也被抢占两次。第三次发出后 6.719 ms 正常退役，继而同对上下文退役同一同步对象值 21985 的信号、等待及后续呈现。异常链的同步对象值为 24055，已确认信号、等待及下一 DWM 呈现入队，退役回执缺失。档案未能将这条链归属初始 HWND 或连到复位首因。原三次历史故障仍缺各自 CALL 后的直接观测。[同对象健康对照与异常链](windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json)
 
+物理缓冲定位表明，异常轮两个共享 ETL 在 152586 后分别仍保留 0.126 和 9.423 ms 的其他事件。此前处理同队列完成的线程 4/884 在两路都没有后续记录。封口缺失，档案只能给出事件留存范围。[物理缓冲及对应完成线程](windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json)
+
+同次实载 KMD 的最后一条遥测是匹配 Windows 抢占请求 20571 的成功状态，早于第三次 DMA 提交记录 0.276 ms。正式 KMD 的常规成功提交路径没有配套进入或返回事件。152586 的最早直接缺口在 miniport 准入及硬件开始，之后还缺完成。[KMD 源码点与原始请求对照](windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

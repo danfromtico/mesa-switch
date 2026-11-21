@@ -1,0 +1,1984 @@
+{
+  "schema": 1,
+  "round_id": "win-board-cdd-dwm-completion-coverage-20261121-01",
+  "contract_id": "WIN-DWM-ETL-TAIL-COVERAGE",
+  "windows_question": "WIN-DWM-ETL-TAIL-COVERAGE",
+  "plan_sha256": "5fed3e7e0b86dee23a1a8ec3fb972962f3e7f2aaa16ab41ca84f625f38a776c7",
+  "status": "观测缺口",
+  "finding": "同启动两路异常原件及两路健康对照均使用共享 ETW 缓冲。异常轮第三次 DMA 提交与档案末端在各自同一物理缓冲。display.etl 在提交后留存 0.126 ms，scene/video.etl 留存 9.423 ms，其中 DxgKrnl 留存至 9.332 ms。两路中，处理该上下文此前完成的 4/884 最后一条记录约早于第三次提交 0.106 ms。健康轮由同一线程发出第三次完成中断，第三次提交到包退役为 6.719 ms。",
+  "missing_observation": "两个异常 ETL 未正常封口。物理缓冲索引无法提供真实执行 CPU，其他线程后续事件也无法补证目标线程或完整落盘。当前证据把缺口限定在第三次 DMA 提交后的完成通知与退役，仍无法区分未完成、事件未发出和事件未落盘。",
+  "device_executions": 0,
+  "evidence": {
+    "display.etl": {
+      "incident": {
+        "log_mode": "0x10000001",
+        "shared_buffer": true,
+        "missing_physical_sequence_labels": [
+          20,
+          27
+        ],
+        "on_disk_buffers": 72,
+        "file_sha256": "b6026077eb2ea0707bfc30118ac5ffca819314ea8b4bb51debdd4434b3fb5fb8",
+        "file_size": 4718592,
+        "processor_count": 1,
+        "buffer_size": 65536,
+        "header_end_time": 0,
+        "header_buffers_written": 0,
+        "header_events_lost": 0,
+        "header_buffers_lost": 0,
+        "found": {
+          "earlier_dwm_submit": {
+            "qpc": 223219926278,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4587520,
+            "payload_sha256": "31e38c61f94ab09ee2497f40b45104a836d4354cc6a0d1aa15cc1a754a72fe11"
+          },
+          "earlier_dwm_begin": {
+            "qpc": 223219928683,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4587520,
+            "payload_sha256": "f56b0d83cebe6926a0e6c3a6e9caec90e463c1479e0dce7b09d1ca3078fda8d9"
+          },
+          "earlier_dwm_interrupt": {
+            "qpc": 223220001293,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4587520,
+            "payload_sha256": "7e55282e394113a1262c63433a41159a5732ff7100f4101f9311187d6d33c27d"
+          },
+          "earlier_dwm_dma_stop": {
+            "qpc": 223220001969,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4587520,
+            "payload_sha256": "e8528a2fcbbe3ef3e982c11ec3f1a71fce5053973295724b56bcb0eac21d7bd9"
+          },
+          "earlier_dwm_retire": {
+            "qpc": 223220002451,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4587520,
+            "payload_sha256": "c2f1e0c765bd7769df3dd89ec57f2ed007d29b858502abb704f24a84d9961de4"
+          },
+          "queue_dma": {
+            "qpc": 223221835143,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "f34060641e69ec6af7953919ae7faa44f893a498390feee323e45249196cb895"
+          },
+          "signal_queue": {
+            "qpc": 223221836261,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 245,
+            "version": 2,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "927cc0ad95f0c34112302508d90a48878fec3f87c4e0dd75b2197a4b4c51c980"
+          },
+          "signal_registration": {
+            "qpc": 223221836449,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 294,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "933b25e431f24e65387a1caaf7fc6bc19519e9b7fb6895c3afbcdc9d588c5435"
+          },
+          "dma_1_start": {
+            "qpc": 223221836507,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "d9698c0461516599af2d8f7d20d6fad495f477c303d4fed68a39ac30a561bae7"
+          },
+          "wait_queue": {
+            "qpc": 223221837175,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 244,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "a4057a70b6da0fd6190d1e0917ab5527d79942c46df793684bd6b040ed584301"
+          },
+          "wait_registration": {
+            "qpc": 223221837364,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 295,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "69f9780809f44f77a0d5312f12cd80ee110d1276a4649790a8cadeb47996ab0e"
+          },
+          "system_submit": {
+            "qpc": 223221839975,
+            "pid": 4,
+            "tid": 892,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "0d9cf9b05be91edffd3c319511f3f18c355f5f47090a8b67533a34274783d7c3"
+          },
+          "dma_1_interrupt": {
+            "qpc": 223221936262,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "6f7312968bcc8343c4b3eea15aa9758d55421651932cbecd3402699fbe1d5346"
+          },
+          "dma_1_stop": {
+            "qpc": 223221936870,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "678b0f9d183aabc38c246ec077cf8758435f5ce6100f50c34d0a298c392b6644"
+          },
+          "system_begin": {
+            "qpc": 223221937838,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "701277e889d608f82a356c81895c858f1ec39cab29947c3fefed781dd0368841"
+          },
+          "dma_2_start": {
+            "qpc": 223221939191,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "41f50564ee1443408eb339ee94ad2d5ef1fce45bb377fe36b9bedbf4f6edc9ef"
+          },
+          "system_interrupt": {
+            "qpc": 223221942571,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "4150cac2d62ba6e90cc15a4914196b670c0d92493b5aef8c89c5084892cd6833"
+          },
+          "system_dma_stop": {
+            "qpc": 223221943014,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "fe3470ac968b4fc0790430baaf982a6c3962b6eb69d1b58a751f4ce6b2684bcf"
+          },
+          "system_retire": {
+            "qpc": 223221943110,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "c40a2d7c51203fac9f6d689e55a2919d313f1e58e34b55e3c4b5e388a77ff0b4"
+          },
+          "dma_2_interrupt": {
+            "qpc": 223221947934,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "7942dbf682b21eb8274f3086588a28c6a6c56633363600407dc3d25e9a13c778"
+          },
+          "dma_2_stop": {
+            "qpc": 223221948464,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "2bbc5e7f9e9a6a803576dde5ab6fffd105e8942f180731374dba1b26bdef7fb8"
+          },
+          "dma_3_start": {
+            "qpc": 223221950686,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 4653056,
+            "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d"
+          }
+        },
+        "buffer_stream_tail": {
+          "0": {
+            "all_provider_last": {
+              "qpc": 223221953112,
+              "pid": 4,
+              "tid": 892,
+              "id": 281,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221953112,
+              "pid": 4,
+              "tid": 892,
+              "id": 281,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "kernel_thread_last": {
+              "884": {
+                "qpc": 223221948654,
+                "pid": 4,
+                "tid": 884,
+                "id": 176,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 4653056
+              },
+              "888": {
+                "qpc": 223221950686,
+                "pid": 4,
+                "tid": 888,
+                "id": 175,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 4653056
+              },
+              "892": {
+                "qpc": 223221953112,
+                "pid": 4,
+                "tid": 892,
+                "id": 281,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 4653056
+              },
+              "2252": {
+                "qpc": 223221952612,
+                "pid": 1400,
+                "tid": 2252,
+                "id": 39,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 4653056
+              }
+            },
+            "num_events": 36259,
+            "num_dxgkrnl": 35579
+          }
+        },
+        "threads_tail": {
+          "4/884": {
+            "all_provider_last": {
+              "qpc": 223221948654,
+              "pid": 4,
+              "tid": 884,
+              "id": 176,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221948654,
+              "pid": 4,
+              "tid": 884,
+              "id": 176,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "kernel_thread_last": {
+              "884": {
+                "qpc": 223221948654,
+                "pid": 4,
+                "tid": 884,
+                "id": 176,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 4653056
+              }
+            },
+            "num_events": 6019,
+            "num_dxgkrnl": 6019
+          },
+          "4/888": {
+            "all_provider_last": {
+              "qpc": 223221950686,
+              "pid": 4,
+              "tid": 888,
+              "id": 175,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221950686,
+              "pid": 4,
+              "tid": 888,
+              "id": 175,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "kernel_thread_last": {
+              "888": {
+                "qpc": 223221950686,
+                "pid": 4,
+                "tid": 888,
+                "id": 175,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 4653056
+              }
+            },
+            "num_events": 7296,
+            "num_dxgkrnl": 7296
+          },
+          "4/892": {
+            "all_provider_last": {
+              "qpc": 223221953112,
+              "pid": 4,
+              "tid": 892,
+              "id": 281,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221953112,
+              "pid": 4,
+              "tid": 892,
+              "id": 281,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "kernel_thread_last": {
+              "892": {
+                "qpc": 223221953112,
+                "pid": 4,
+                "tid": 892,
+                "id": 281,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 4653056
+              }
+            },
+            "num_events": 11280,
+            "num_dxgkrnl": 11280
+          },
+          "1400/2252": {
+            "all_provider_last": {
+              "qpc": 223221952612,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 39,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221952612,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 39,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 4653056
+            },
+            "kernel_thread_last": {
+              "2252": {
+                "qpc": 223221952612,
+                "pid": 1400,
+                "tid": 2252,
+                "id": 39,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 4653056
+              }
+            },
+            "num_events": 5962,
+            "num_dxgkrnl": 5282
+          }
+        },
+        "all_provider_last": {
+          "qpc": 223221953112,
+          "pid": 4,
+          "tid": 892,
+          "id": 281,
+          "version": 0,
+          "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+          "buffer_stream": 0,
+          "buffer_offset": 4653056
+        },
+        "buffers": {
+          "4587520": {
+            "file_offset": 4587520,
+            "size": 65536,
+            "buffer_stream": 0,
+            "sequence": 72,
+            "filled_bytes": 65456,
+            "logfile_header_qpc": 223220895592,
+            "sha256": "481005ba743d988219a097bfe2958e5f7551f36cf199c5ba601cbb4bf8229514"
+          },
+          "4653056": {
+            "file_offset": 4653056,
+            "size": 65536,
+            "buffer_stream": 0,
+            "sequence": 73,
+            "filled_bytes": 65464,
+            "logfile_header_qpc": 223221953271,
+            "sha256": "f8a332aa60b219f9af7f47795174926137541bc09d9e7ba6a9c0474968aa0fba"
+          }
+        }
+      },
+      "healthy": {
+        "log_mode": "0x10000001",
+        "shared_buffer": true,
+        "missing_physical_sequence_labels": [
+          10,
+          14,
+          23,
+          30,
+          58,
+          64,
+          69
+        ],
+        "on_disk_buffers": 118,
+        "file_sha256": "828477a87275665be29289e49a3153525aa59004f34301103caa51b4b4814521",
+        "file_size": 7733248,
+        "processor_count": 1,
+        "buffer_size": 65536,
+        "header_end_time": 134397477077688000,
+        "header_buffers_written": 118,
+        "header_events_lost": 0,
+        "header_buffers_lost": 0,
+        "found": {
+          "queue_dma": {
+            "qpc": 204761943405,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "18f0eec342ba8fee7e190d1480fdb6e39fd271462ec6b2d08b98257d16097dd9"
+          },
+          "signal_queue": {
+            "qpc": 204761944605,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 245,
+            "version": 2,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "f08d6a4725a51f533afaed851dd12197e45610a633d4c0c52e7cca67259b3264"
+          },
+          "signal_registration": {
+            "qpc": 204761944809,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 294,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "cd159eedf58fb1751e4fc5a410bf3c504ec8979f65f2068502548b02622221e4"
+          },
+          "dma_1_start": {
+            "qpc": 204761944878,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "3b570a87b3132f49c9ea56d36ecfda6f8c6273007b69cf570ee803774e86981d"
+          },
+          "wait_queue": {
+            "qpc": 204761945673,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 244,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "ff7a7060f5a8040e2ef7c9522c4a9e2d3343bc916e98f21a306d2f07a214c2ec"
+          },
+          "wait_registration": {
+            "qpc": 204761945851,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 295,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "47f3216055e202ca289dcbda8e13596326234f54a491d813f1b21f233401f430"
+          },
+          "dma_1_interrupt": {
+            "qpc": 204761952266,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "b0f0aaa972508a55200e77d0957aaa01d53da6e9b2829eb4fa89f509f63d8c75"
+          },
+          "dma_1_stop": {
+            "qpc": 204761953002,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "43f995c712cd33cea6f1a7994fac57f8a0cdefaea27a884a063bd378b4f21110"
+          },
+          "dma_2_start": {
+            "qpc": 204761959484,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "9a6aabdab516719e1a44186b851588ddb0dc495d611d9023a0a0b100e349a4df"
+          },
+          "dma_2_interrupt": {
+            "qpc": 204761967276,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "09bb49d50d82f2f4dea250e65fa1cbb491c1cd8790495f6f99376e78257fabf5"
+          },
+          "dma_2_stop": {
+            "qpc": 204761967712,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "d9d1be45a34ee256030c5aa65ee29c7c8b7e8f14ed4c2fd1e40b7768bd7eb421"
+          },
+          "dma_3_start": {
+            "qpc": 204761969604,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "1188da3da7e2ca412ad342768755b210317fee82921627c2d5f45675c4de9cf0"
+          },
+          "next_present_queue": {
+            "qpc": 204761974608,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "b31defb3f73693e719206fbf6a518a6d2ebb6d12d898390a2e0aaa2fb9c9b1c4"
+          },
+          "dma_3_interrupt": {
+            "qpc": 204762097910,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "817cbb146413fb06768d2a407bf816d6fa7595a4ed45a0f1bd77ba0d46d535c3"
+          },
+          "dma_3_stop": {
+            "qpc": 204762098429,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "1ef2de469abe2fec2c2333a241898d4102723996823cc89d54b80f578f09cebc"
+          },
+          "dma_queue_retire": {
+            "qpc": 204762098602,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "da4b4b11a08bce7fb9f8cda7513c0b7b8f8b98b9b9c1778e33acbf442d0818e7"
+          },
+          "signal_retire": {
+            "qpc": 204762099148,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "5640a9d74479ae41e9441e38ec424bf78e9ee98a5a9204557c88d9af7e8df680"
+          },
+          "wait_retire": {
+            "qpc": 204762099712,
+            "pid": 4,
+            "tid": 888,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "11df5b90515421c8bb31cf753df8c8be06d908d819e52077d4f3cf4ba32f9d60"
+          },
+          "next_present_retire": {
+            "qpc": 204762100971,
+            "pid": 4,
+            "tid": 888,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 3342336,
+            "payload_sha256": "0d393b1db847eebf3b21d4ac5cf113ce2b06f121d2e2f959c31aa90de5535b57"
+          }
+        },
+        "buffer_stream_tail": {
+          "0": {
+            "all_provider_last": {
+              "qpc": 205167036364,
+              "pid": 5244,
+              "tid": 4812,
+              "id": 319,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 7667712
+            },
+            "dxgkrnl_last": {
+              "qpc": 205167036364,
+              "pid": 5244,
+              "tid": 4812,
+              "id": 319,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 7667712
+            },
+            "kernel_thread_last": {
+              "884": {
+                "qpc": 205166652186,
+                "pid": 4,
+                "tid": 884,
+                "id": 180,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 7667712
+              },
+              "888": {
+                "qpc": 205166655118,
+                "pid": 4,
+                "tid": 888,
+                "id": 18,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 7667712
+              },
+              "2252": {
+                "qpc": 205166594202,
+                "pid": 1400,
+                "tid": 2252,
+                "id": 182,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 7667712
+              }
+            },
+            "num_events": 58114,
+            "num_dxgkrnl": 56959
+          }
+        },
+        "threads_tail": {
+          "4/884": {
+            "all_provider_last": {
+              "qpc": 205166652186,
+              "pid": 4,
+              "tid": 884,
+              "id": 180,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 7667712
+            },
+            "dxgkrnl_last": {
+              "qpc": 205166652186,
+              "pid": 4,
+              "tid": 884,
+              "id": 180,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 7667712
+            },
+            "kernel_thread_last": {
+              "884": {
+                "qpc": 205166652186,
+                "pid": 4,
+                "tid": 884,
+                "id": 180,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 7667712
+              }
+            },
+            "num_events": 9479,
+            "num_dxgkrnl": 9479
+          },
+          "4/888": {
+            "all_provider_last": {
+              "qpc": 205166655118,
+              "pid": 4,
+              "tid": 888,
+              "id": 18,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 7667712
+            },
+            "dxgkrnl_last": {
+              "qpc": 205166655118,
+              "pid": 4,
+              "tid": 888,
+              "id": 18,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 7667712
+            },
+            "kernel_thread_last": {
+              "888": {
+                "qpc": 205166655118,
+                "pid": 4,
+                "tid": 888,
+                "id": 18,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 7667712
+              }
+            },
+            "num_events": 11681,
+            "num_dxgkrnl": 11681
+          },
+          "1400/2252": {
+            "all_provider_last": {
+              "qpc": 205166594202,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 182,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 7667712
+            },
+            "dxgkrnl_last": {
+              "qpc": 205166594202,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 182,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 7667712
+            },
+            "kernel_thread_last": {
+              "2252": {
+                "qpc": 205166594202,
+                "pid": 1400,
+                "tid": 2252,
+                "id": 182,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 7667712
+              }
+            },
+            "num_events": 9215,
+            "num_dxgkrnl": 8060
+          }
+        },
+        "all_provider_last": {
+          "qpc": 205167036364,
+          "pid": 5244,
+          "tid": 4812,
+          "id": 319,
+          "version": 0,
+          "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+          "buffer_stream": 0,
+          "buffer_offset": 7667712
+        },
+        "buffers": {
+          "3342336": {
+            "file_offset": 3342336,
+            "size": 65536,
+            "buffer_stream": 0,
+            "sequence": 55,
+            "filled_bytes": 65536,
+            "logfile_header_qpc": 204762110976,
+            "sha256": "51f3c246f1d2f5891d0ab3736533518695703206443839ca44cca1dac2cb9036"
+          },
+          "7667712": {
+            "file_offset": 7667712,
+            "size": 65536,
+            "buffer_stream": 0,
+            "sequence": 124,
+            "filled_bytes": 35392,
+            "logfile_header_qpc": 205167312784,
+            "sha256": "0529811082d009095abd7d32a3e133bfdd71e462fc7695f9845e98cc95c16886"
+          }
+        }
+      },
+      "timing": {
+        "healthy_third_submit_to_interrupt_ms": 6.682604,
+        "healthy_third_submit_to_retire_ms": 6.718646,
+        "shared_buffer_stream": 0,
+        "expected_completion_thread": [
+          4,
+          884
+        ],
+        "candidate_to_last_shared_buffer_any_provider_ms": 0.126354,
+        "candidate_to_last_shared_buffer_dxgkrnl_ms": 0.126354,
+        "candidate_to_last_completion_thread_any_provider_ms": -0.105833,
+        "candidate_to_last_completion_thread_dxgkrnl_ms": -0.105833,
+        "candidate_to_any_provider_ms": 0.126354
+      }
+    },
+    "scene/video.etl": {
+      "incident": {
+        "log_mode": "0x10000001",
+        "shared_buffer": true,
+        "missing_physical_sequence_labels": [
+          13
+        ],
+        "on_disk_buffers": 30,
+        "file_sha256": "6ec11c2e135e3204048b85be09fc7e8b519465cc8b39fba51cdf3ec0fe9c5596",
+        "file_size": 983040,
+        "processor_count": 1,
+        "buffer_size": 32768,
+        "header_end_time": 0,
+        "header_buffers_written": 0,
+        "header_events_lost": 0,
+        "header_buffers_lost": 0,
+        "found": {
+          "earlier_dwm_submit": {
+            "qpc": 223219926309,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 851968,
+            "payload_sha256": "31e38c61f94ab09ee2497f40b45104a836d4354cc6a0d1aa15cc1a754a72fe11"
+          },
+          "earlier_dwm_begin": {
+            "qpc": 223219928704,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 851968,
+            "payload_sha256": "f56b0d83cebe6926a0e6c3a6e9caec90e463c1479e0dce7b09d1ca3078fda8d9"
+          },
+          "earlier_dwm_interrupt": {
+            "qpc": 223220001341,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 851968,
+            "payload_sha256": "7e55282e394113a1262c63433a41159a5732ff7100f4101f9311187d6d33c27d"
+          },
+          "earlier_dwm_dma_stop": {
+            "qpc": 223220001986,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 851968,
+            "payload_sha256": "e8528a2fcbbe3ef3e982c11ec3f1a71fce5053973295724b56bcb0eac21d7bd9"
+          },
+          "earlier_dwm_retire": {
+            "qpc": 223220002472,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 851968,
+            "payload_sha256": "c2f1e0c765bd7769df3dd89ec57f2ed007d29b858502abb704f24a84d9961de4"
+          },
+          "queue_dma": {
+            "qpc": 223221835173,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "f34060641e69ec6af7953919ae7faa44f893a498390feee323e45249196cb895"
+          },
+          "signal_queue": {
+            "qpc": 223221836278,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 245,
+            "version": 2,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "927cc0ad95f0c34112302508d90a48878fec3f87c4e0dd75b2197a4b4c51c980"
+          },
+          "signal_registration": {
+            "qpc": 223221836468,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 294,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "933b25e431f24e65387a1caaf7fc6bc19519e9b7fb6895c3afbcdc9d588c5435"
+          },
+          "dma_1_start": {
+            "qpc": 223221836521,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "d9698c0461516599af2d8f7d20d6fad495f477c303d4fed68a39ac30a561bae7"
+          },
+          "wait_queue": {
+            "qpc": 223221837190,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 244,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "a4057a70b6da0fd6190d1e0917ab5527d79942c46df793684bd6b040ed584301"
+          },
+          "wait_registration": {
+            "qpc": 223221837380,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 295,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "69f9780809f44f77a0d5312f12cd80ee110d1276a4649790a8cadeb47996ab0e"
+          },
+          "system_submit": {
+            "qpc": 223221839993,
+            "pid": 4,
+            "tid": 892,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "0d9cf9b05be91edffd3c319511f3f18c355f5f47090a8b67533a34274783d7c3"
+          },
+          "dma_1_interrupt": {
+            "qpc": 223221936284,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "6f7312968bcc8343c4b3eea15aa9758d55421651932cbecd3402699fbe1d5346"
+          },
+          "dma_1_stop": {
+            "qpc": 223221936881,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "678b0f9d183aabc38c246ec077cf8758435f5ce6100f50c34d0a298c392b6644"
+          },
+          "system_begin": {
+            "qpc": 223221937850,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "701277e889d608f82a356c81895c858f1ec39cab29947c3fefed781dd0368841"
+          },
+          "dma_2_start": {
+            "qpc": 223221939204,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "41f50564ee1443408eb339ee94ad2d5ef1fce45bb377fe36b9bedbf4f6edc9ef"
+          },
+          "system_interrupt": {
+            "qpc": 223221942588,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "4150cac2d62ba6e90cc15a4914196b670c0d92493b5aef8c89c5084892cd6833"
+          },
+          "system_dma_stop": {
+            "qpc": 223221943025,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "fe3470ac968b4fc0790430baaf982a6c3962b6eb69d1b58a751f4ce6b2684bcf"
+          },
+          "system_retire": {
+            "qpc": 223221943122,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "c40a2d7c51203fac9f6d689e55a2919d313f1e58e34b55e3c4b5e388a77ff0b4"
+          },
+          "dma_2_interrupt": {
+            "qpc": 223221947999,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "7942dbf682b21eb8274f3086588a28c6a6c56633363600407dc3d25e9a13c778"
+          },
+          "dma_2_stop": {
+            "qpc": 223221948475,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "2bbc5e7f9e9a6a803576dde5ab6fffd105e8942f180731374dba1b26bdef7fb8"
+          },
+          "dma_3_start": {
+            "qpc": 223221950698,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d"
+          },
+          "next_present_queue": {
+            "qpc": 223221954493,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 950272,
+            "payload_sha256": "ff3431140ab32a9195e32a81157892dcc193e1c9d281e7dae15384428a3472a5"
+          }
+        },
+        "buffer_stream_tail": {
+          "0": {
+            "all_provider_last": {
+              "qpc": 223222131613,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 8,
+              "version": 2,
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "dxgkrnl_last": {
+              "qpc": 223222129880,
+              "pid": 4,
+              "tid": 904,
+              "id": 179,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "kernel_thread_last": {
+              "884": {
+                "qpc": 223221948665,
+                "pid": 4,
+                "tid": 884,
+                "id": 176,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 950272
+              },
+              "888": {
+                "qpc": 223221966230,
+                "pid": 4,
+                "tid": 888,
+                "id": 179,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 950272
+              },
+              "892": {
+                "qpc": 223221944203,
+                "pid": 4,
+                "tid": 892,
+                "id": 178,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 950272
+              },
+              "2252": {
+                "qpc": 223221959721,
+                "pid": 1400,
+                "tid": 2252,
+                "id": 294,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 950272
+              }
+            },
+            "num_events": 6400,
+            "num_dxgkrnl": 4725
+          }
+        },
+        "threads_tail": {
+          "4/884": {
+            "all_provider_last": {
+              "qpc": 223221948665,
+              "pid": 4,
+              "tid": 884,
+              "id": 176,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221948665,
+              "pid": 4,
+              "tid": 884,
+              "id": 176,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "kernel_thread_last": {
+              "884": {
+                "qpc": 223221948665,
+                "pid": 4,
+                "tid": 884,
+                "id": 176,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 950272
+              }
+            },
+            "num_events": 1441,
+            "num_dxgkrnl": 1441
+          },
+          "4/888": {
+            "all_provider_last": {
+              "qpc": 223221966230,
+              "pid": 4,
+              "tid": 888,
+              "id": 179,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221966230,
+              "pid": 4,
+              "tid": 888,
+              "id": 179,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "kernel_thread_last": {
+              "888": {
+                "qpc": 223221966230,
+                "pid": 4,
+                "tid": 888,
+                "id": 179,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 950272
+              }
+            },
+            "num_events": 1811,
+            "num_dxgkrnl": 1790
+          },
+          "4/892": {
+            "all_provider_last": {
+              "qpc": 223221944203,
+              "pid": 4,
+              "tid": 892,
+              "id": 178,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221944203,
+              "pid": 4,
+              "tid": 892,
+              "id": 178,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "kernel_thread_last": {
+              "892": {
+                "qpc": 223221944203,
+                "pid": 4,
+                "tid": 892,
+                "id": 178,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 950272
+              }
+            },
+            "num_events": 629,
+            "num_dxgkrnl": 629
+          },
+          "1400/2252": {
+            "all_provider_last": {
+              "qpc": 223222131613,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 8,
+              "version": 2,
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "dxgkrnl_last": {
+              "qpc": 223221959721,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 294,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 950272
+            },
+            "kernel_thread_last": {
+              "2252": {
+                "qpc": 223221959721,
+                "pid": 1400,
+                "tid": 2252,
+                "id": 294,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 950272
+              }
+            },
+            "num_events": 2038,
+            "num_dxgkrnl": 446
+          }
+        },
+        "all_provider_last": {
+          "qpc": 223222131613,
+          "pid": 1400,
+          "tid": 2252,
+          "id": 8,
+          "version": 2,
+          "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+          "buffer_stream": 0,
+          "buffer_offset": 950272
+        },
+        "buffers": {
+          "851968": {
+            "file_offset": 851968,
+            "size": 32768,
+            "buffer_stream": 0,
+            "sequence": 27,
+            "filled_bytes": 32600,
+            "logfile_header_qpc": 223220262417,
+            "sha256": "3441d163e5608272e1569d65a4692f637d1db7d0255e07fbd1dd2594067c0024"
+          },
+          "950272": {
+            "file_offset": 950272,
+            "size": 32768,
+            "buffer_stream": 0,
+            "sequence": 30,
+            "filled_bytes": 32760,
+            "logfile_header_qpc": 223222131858,
+            "sha256": "b3ad5408383f3e6827e721a0515c773aae7cc5dd4e6a1855893a80821f2b7a16"
+          }
+        }
+      },
+      "healthy": {
+        "log_mode": "0x10000001",
+        "shared_buffer": true,
+        "missing_physical_sequence_labels": [
+          25
+        ],
+        "on_disk_buffers": 29,
+        "file_sha256": "161691a0e9f0fe4d01b199cfbc564467c1c099d572d8f3eb38ce85a247984e90",
+        "file_size": 950272,
+        "processor_count": 1,
+        "buffer_size": 32768,
+        "header_end_time": 134397476867593345,
+        "header_buffers_written": 29,
+        "header_events_lost": 0,
+        "header_buffers_lost": 0,
+        "found": {
+          "queue_dma": {
+            "qpc": 204761943426,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "18f0eec342ba8fee7e190d1480fdb6e39fd271462ec6b2d08b98257d16097dd9"
+          },
+          "signal_queue": {
+            "qpc": 204761944628,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 245,
+            "version": 2,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "f08d6a4725a51f533afaed851dd12197e45610a633d4c0c52e7cca67259b3264"
+          },
+          "signal_registration": {
+            "qpc": 204761944827,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 294,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "cd159eedf58fb1751e4fc5a410bf3c504ec8979f65f2068502548b02622221e4"
+          },
+          "dma_1_start": {
+            "qpc": 204761944891,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "3b570a87b3132f49c9ea56d36ecfda6f8c6273007b69cf570ee803774e86981d"
+          },
+          "wait_queue": {
+            "qpc": 204761945689,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 244,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "ff7a7060f5a8040e2ef7c9522c4a9e2d3343bc916e98f21a306d2f07a214c2ec"
+          },
+          "wait_registration": {
+            "qpc": 204761945866,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 295,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "47f3216055e202ca289dcbda8e13596326234f54a491d813f1b21f233401f430"
+          },
+          "dma_1_interrupt": {
+            "qpc": 204761952280,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "b0f0aaa972508a55200e77d0957aaa01d53da6e9b2829eb4fa89f509f63d8c75"
+          },
+          "dma_1_stop": {
+            "qpc": 204761953013,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "43f995c712cd33cea6f1a7994fac57f8a0cdefaea27a884a063bd378b4f21110"
+          },
+          "dma_2_start": {
+            "qpc": 204761959497,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "9a6aabdab516719e1a44186b851588ddb0dc495d611d9023a0a0b100e349a4df"
+          },
+          "dma_2_interrupt": {
+            "qpc": 204761967292,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "09bb49d50d82f2f4dea250e65fa1cbb491c1cd8790495f6f99376e78257fabf5"
+          },
+          "dma_2_stop": {
+            "qpc": 204761967724,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "d9d1be45a34ee256030c5aa65ee29c7c8b7e8f14ed4c2fd1e40b7768bd7eb421"
+          },
+          "dma_3_start": {
+            "qpc": 204761969616,
+            "pid": 4,
+            "tid": 888,
+            "id": 175,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "1188da3da7e2ca412ad342768755b210317fee82921627c2d5f45675c4de9cf0"
+          },
+          "next_present_queue": {
+            "qpc": 204761974623,
+            "pid": 1400,
+            "tid": 2252,
+            "id": 178,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "b31defb3f73693e719206fbf6a518a6d2ebb6d12d898390a2e0aaa2fb9c9b1c4"
+          },
+          "dma_3_interrupt": {
+            "qpc": 204762097941,
+            "pid": 4,
+            "tid": 884,
+            "id": 177,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "817cbb146413fb06768d2a407bf816d6fa7595a4ed45a0f1bd77ba0d46d535c3"
+          },
+          "dma_3_stop": {
+            "qpc": 204762098441,
+            "pid": 4,
+            "tid": 884,
+            "id": 176,
+            "version": 0,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "1ef2de469abe2fec2c2333a241898d4102723996823cc89d54b80f578f09cebc"
+          },
+          "dma_queue_retire": {
+            "qpc": 204762098614,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "da4b4b11a08bce7fb9f8cda7513c0b7b8f8b98b9b9c1778e33acbf442d0818e7"
+          },
+          "signal_retire": {
+            "qpc": 204762099161,
+            "pid": 4,
+            "tid": 884,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "5640a9d74479ae41e9441e38ec424bf78e9ee98a5a9204557c88d9af7e8df680"
+          },
+          "wait_retire": {
+            "qpc": 204762099723,
+            "pid": 4,
+            "tid": 888,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "11df5b90515421c8bb31cf753df8c8be06d908d819e52077d4f3cf4ba32f9d60"
+          },
+          "next_present_retire": {
+            "qpc": 204762100982,
+            "pid": 4,
+            "tid": 888,
+            "id": 180,
+            "version": 1,
+            "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+            "buffer_stream": 0,
+            "buffer_offset": 819200,
+            "payload_sha256": "0d393b1db847eebf3b21d4ac5cf113ce2b06f121d2e2f959c31aa90de5535b57"
+          }
+        },
+        "buffer_stream_tail": {
+          "0": {
+            "all_provider_last": {
+              "qpc": 204763849021,
+              "pid": 4500,
+              "tid": 972,
+              "id": 273,
+              "version": 4,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 917504
+            },
+            "dxgkrnl_last": {
+              "qpc": 204763849021,
+              "pid": 4500,
+              "tid": 972,
+              "id": 273,
+              "version": 4,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 917504
+            },
+            "kernel_thread_last": {
+              "884": {
+                "qpc": 204763653355,
+                "pid": 4,
+                "tid": 884,
+                "id": 180,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 917504
+              },
+              "888": {
+                "qpc": 204763652280,
+                "pid": 4,
+                "tid": 888,
+                "id": 179,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 917504
+              },
+              "2252": {
+                "qpc": 204763196367,
+                "pid": 1400,
+                "tid": 2252,
+                "id": 273,
+                "version": 4,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 851968
+              }
+            },
+            "num_events": 6329,
+            "num_dxgkrnl": 4831
+          }
+        },
+        "threads_tail": {
+          "4/884": {
+            "all_provider_last": {
+              "qpc": 204763653355,
+              "pid": 4,
+              "tid": 884,
+              "id": 180,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 917504
+            },
+            "dxgkrnl_last": {
+              "qpc": 204763653355,
+              "pid": 4,
+              "tid": 884,
+              "id": 180,
+              "version": 1,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 917504
+            },
+            "kernel_thread_last": {
+              "884": {
+                "qpc": 204763653355,
+                "pid": 4,
+                "tid": 884,
+                "id": 180,
+                "version": 1,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 917504
+              }
+            },
+            "num_events": 1436,
+            "num_dxgkrnl": 1436
+          },
+          "4/888": {
+            "all_provider_last": {
+              "qpc": 204763652280,
+              "pid": 4,
+              "tid": 888,
+              "id": 179,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 917504
+            },
+            "dxgkrnl_last": {
+              "qpc": 204763652280,
+              "pid": 4,
+              "tid": 888,
+              "id": 179,
+              "version": 0,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 917504
+            },
+            "kernel_thread_last": {
+              "888": {
+                "qpc": 204763652280,
+                "pid": 4,
+                "tid": 888,
+                "id": 179,
+                "version": 0,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 917504
+              }
+            },
+            "num_events": 1851,
+            "num_dxgkrnl": 1822
+          },
+          "1400/2252": {
+            "all_provider_last": {
+              "qpc": 204763245546,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 18,
+              "version": 2,
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "buffer_stream": 0,
+              "buffer_offset": 851968
+            },
+            "dxgkrnl_last": {
+              "qpc": 204763196367,
+              "pid": 1400,
+              "tid": 2252,
+              "id": 273,
+              "version": 4,
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "buffer_stream": 0,
+              "buffer_offset": 851968
+            },
+            "kernel_thread_last": {
+              "2252": {
+                "qpc": 204763196367,
+                "pid": 1400,
+                "tid": 2252,
+                "id": 273,
+                "version": 4,
+                "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+                "buffer_stream": 0,
+                "buffer_offset": 851968
+              }
+            },
+            "num_events": 1840,
+            "num_dxgkrnl": 437
+          }
+        },
+        "all_provider_last": {
+          "qpc": 204763849021,
+          "pid": 4500,
+          "tid": 972,
+          "id": 273,
+          "version": 4,
+          "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+          "buffer_stream": 0,
+          "buffer_offset": 917504
+        },
+        "buffers": {
+          "819200": {
+            "file_offset": 819200,
+            "size": 32768,
+            "buffer_stream": 0,
+            "sequence": 26,
+            "filled_bytes": 16528,
+            "logfile_header_qpc": 204762120133,
+            "sha256": "83f197dfa4666b94544c66717800541ab9fccf7baf6cffb0c27f73674e1cdbc2"
+          },
+          "851968": {
+            "file_offset": 851968,
+            "size": 32768,
+            "buffer_stream": 0,
+            "sequence": 27,
+            "filled_bytes": 32688,
+            "logfile_header_qpc": 204763279085,
+            "sha256": "44c840e2b708485e80f279e25dd4b6ff752c9786d636336cd4ff9db063707580"
+          },
+          "917504": {
+            "file_offset": 917504,
+            "size": 32768,
+            "buffer_stream": 0,
+            "sequence": 29,
+            "filled_bytes": 4696,
+            "logfile_header_qpc": 204763924765,
+            "sha256": "de1fc50ec4fa20665b948bf16b61623843c82e75ed6998e8e9cc583bd655892d"
+          }
+        }
+      },
+      "timing": {
+        "healthy_third_submit_to_interrupt_ms": 6.683594,
+        "healthy_third_submit_to_retire_ms": 6.718646,
+        "shared_buffer_stream": 0,
+        "expected_completion_thread": [
+          4,
+          884
+        ],
+        "candidate_to_last_shared_buffer_any_provider_ms": 9.422656,
+        "candidate_to_last_shared_buffer_dxgkrnl_ms": 9.332396,
+        "candidate_to_last_completion_thread_any_provider_ms": -0.105885,
+        "candidate_to_last_completion_thread_dxgkrnl_ms": -0.105885,
+        "candidate_to_any_provider_ms": 9.422656
+      }
+    },
+    "archive_boots": {
+      "incident": 91476,
+      "reference": 91476,
+      "recovery": 91557
+    },
+    "logging_mode_reference": "https://learn.microsoft.com/en-us/windows/win32/etw/logging-mode-constants",
+    "logging_mode_interpretation": "两个正常与两个异常原件的 LogFileMode 均为 0x10000001，启用了顺序文件及跨 CPU 共享缓冲。所有物理缓冲处理器索引为 0，因此无法得知事件执行的真实 CPU。标头缓冲序号跳号在健康与异常文件均存在。目标第三次提交与各自最后原始事件位于同一物理缓冲内。",
+    "source_reports": {
+      "local_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/dwm-completion-buffer-coverage.json",
+      "sha256": "c3e8332425d76728066365ee9a985dc4846dd2bf00082ab2a5b08964931d25ee",
+      "reader": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/verify_dwm_completion_buffers.py",
+      "reader_sha256": "860503f36724df907cb2ed8b9993691d956427de99c4d0de247337c3ac63290f"
+    },
+    "boundaries": {
+      "last_entry": {
+        "qpc": 223221950698,
+        "pid": 4,
+        "tid": 888,
+        "id": 175,
+        "version": 1,
+        "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+        "buffer_stream": 0,
+        "buffer_offset": 950272,
+        "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d"
+      },
+      "last_return": {
+        "incident_completion_thread": {
+          "qpc": 223221948665,
+          "pid": 4,
+          "tid": 884,
+          "id": 176,
+          "version": 0,
+          "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+          "buffer_stream": 0,
+          "buffer_offset": 950272
+        },
+        "healthy_third_attempt": {
+          "qpc": 204762098614,
+          "pid": 4,
+          "tid": 884,
+          "id": 180,
+          "version": 1,
+          "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+          "buffer_stream": 0,
+          "buffer_offset": 819200,
+          "payload_sha256": "da4b4b11a08bce7fb9f8cda7513c0b7b8f8b98b9b9c1778e33acbf442d0818e7"
+        }
+      },
+      "first_anomaly_or_missing": "末端同一物理缓冲在第三次提交后仍有其他事件，但未见该 DMA 完成、该包退役或负责此前完成的线程 4/884 的后续事件。未封口档案没有采集结束、真实 CPU 或实际缺失原因。"
+    },
+    "device_state": {
+      "new_execution": false,
+      "recovered_snapshot_sha256": "6c0b0f23e6059f1c0376a1e1a71802b4d0718b8ba1213fa8d735b14b80d4a6e1"
+    }
+  }
+}
