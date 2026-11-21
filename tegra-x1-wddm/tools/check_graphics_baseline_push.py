@@ -83,6 +83,8 @@ def changed(before, after, path):
 
 
 def require_forward_baseline(previous, current):
+    if not git("ls-tree", "--name-only", previous, "--", BASELINE).stdout.strip():
+        return
     old = json.loads(blob(previous, BASELINE))["source_commit"]
     new = json.loads(blob(current, BASELINE))["source_commit"]
     if old == new or git("merge-base", "--is-ancestor", old, new, check=False).returncode:
@@ -190,10 +192,12 @@ def check_updates(lines):
             # A merge selects a new baseline only if it changes the receiving branch.
             # New side-branch transitions are visited as commits in their own right.
             baseline_changed = not parents or changed(parents[0], commit, BASELINE)
-            if len(parents) > 1 and git("merge-base", "--is-ancestor", remote, parents[0], check=False).returncode:
-                for parent in parents[1:]:
-                    if not git("merge-base", "--is-ancestor", remote, parent, check=False).returncode and changed(parent, commit, BASELINE):
-                        require_forward_baseline(parent, commit)
+            receiving_parents = [parent for parent in parents
+                                 if not git("merge-base", "--is-ancestor", remote, parent, check=False).returncode]
+            for parent in receiving_parents:
+                if changed(parent, commit, BASELINE):
+                    require_forward_baseline(parent, commit)
+                    if parents[0] not in receiving_parents:
                         baseline_changed = True
             if not baseline_changed and not any(changed(parent, commit, LEDGER) for parent in parents):
                 touched = set()
