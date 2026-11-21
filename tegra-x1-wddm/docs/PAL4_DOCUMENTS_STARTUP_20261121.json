@@ -1122,6 +1122,70 @@
           "actual_swapchain_properties_logged": true
         }
       }
+    },
+    "archived_capture_timing_and_thread_cpu": {
+      "historical_case": "pal4-game-fixed-06",
+      "last_saved_desktop": {
+        "file": "screen-3.png",
+        "sha256": "27aa3ca80af38907e02897ce7ff2bcaf83f0254b002721d412afab09a9d5c0b0",
+        "seconds_from_process_start": 31.822
+      },
+      "first_saved_menu": {
+        "file": "006-window.png",
+        "sha256": "e4bc77f79be44ab756a8f746ec8da720b345c6d47368518210addc819f53dce7",
+        "seconds_from_process_start": 242.273
+      },
+      "process_cpu_ms_bracketing_menu_capture": [
+        249078,
+        251266
+      ],
+      "onset_limit": "The unsampled interval is not a measured time to first frame.",
+      "handheld_software": {
+        "handheld-software": {
+          "pid": 812,
+          "samples_in_interval": 4,
+          "interval_sec": [
+            65.57,
+            145.39
+          ],
+          "tid": 3036,
+          "thread_cpu_sec": 75.625,
+          "process_cpu_sec": 83.766,
+          "one_core_fraction": 0.947,
+          "share_of_process_cpu": 0.903,
+          "process_cpu_at_last_sample": 140.53125
+        },
+        "handheld-software-2": {
+          "pid": 7332,
+          "samples_in_interval": 11,
+          "interval_sec": [
+            65.15,
+            235.42
+          ],
+          "tid": 7728,
+          "thread_cpu_sec": 150.281,
+          "process_cpu_sec": 173.703,
+          "one_core_fraction": 0.883,
+          "share_of_process_cpu": 0.865,
+          "process_cpu_at_last_sample": 232.609375
+        },
+        "handheld-software-3": {
+          "pid": 7772,
+          "samples_in_interval": 11,
+          "interval_sec": [
+            65.21,
+            235.59
+          ],
+          "tid": 3028,
+          "thread_cpu_sec": 157.078,
+          "process_cpu_sec": 182.922,
+          "one_core_fraction": 0.922,
+          "share_of_process_cpu": 0.859,
+          "process_cpu_at_last_sample": 247.53125
+        }
+      },
+      "limits": "Sampled thread IDs and cumulative CPU times do not identify the executing function. The earlier successful case used a different power policy and desktop baseline.",
+      "cross_run_limit": "The last timed window samples in runs two and three preceded the first saved menu image in the historical Code 0 control. Absolute CPU seconds are not equivalent amounts of work across power policies. No thread name or call stack is present in the three captured runs."
     }
   },
   "returned_desktop": {
