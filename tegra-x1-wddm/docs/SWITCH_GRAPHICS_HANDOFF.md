@@ -2,6 +2,12 @@
 
 ## 当前工作 · Windows ARM64 本机验收
 
+### 现行基线 · KMD-only `e1b22087`
+
+Windows 启动 `92696` 在交流与手持模式下一次性加载签名 KMD `69ba174ebe17`，原正式六个用户态组件哈希逐一匹配，ARM64 NVK 为 `51ff97f63d85`。GPU Code 0，交互 Explorer 有响应，同一会话 DWM 已加载预期模块，闭门和一次性启动均有受控关闭回执。正式晋升检查通过后，在同一启动授予永久许可并完成读回。恢复包保留，本轮试用任务和转运临时文件已清理。[独立验收](kmd-only-e1b22087/qualification.json) · [永久许可](kmd-only-e1b22087/permanent-boot.json) · [桌面与系统复核](kmd-only-e1b22087/final-boot.json)
+
+720p 的专项旁证来自联合包启动 92336 的同一签名 KMD，当时使用候选 NVK。当前选定的桌面验收以其自己的启动和实载证据为准。WSI 与直接 DIB 保持候选。历史首次 Present 重启及 91476 的 DMA 152586 仍待定位。[720p 旁证](combined-13-4ab7804d/native720.json) · [首次 Present 与围栏](windows-native-graphics/index.json)
+
 ### 13 组联合候选的一次性实机验收
 
 签名 KMD `69ba174ebe17` 和 ARM64 NVK `a143bee5ba42` 随源码 `4ab7804d` 在交流、手持的单次许可启动 `92336` 实载，GPU Code 0。原生 720p 的六次 KMT NVDEC 提交、六个 Host1x 同步点与六帧软件参考吻合，子进程正常退出并回到同一 DWM。板端包装器误排 POC，已用原始归档按整数重核，留存初次判定及订正回执。[本轮及 13 组逐项覆盖](combined-13-4ab7804d/trial-summary.json) · [720p 原始归档复核](windows-native-graphics/rounds/win-combined-13-candidate-native720-20261121-02.result.json)
@@ -12,7 +18,7 @@
 
 受控回退后的启动 `92516` 已恢复 `7f626083` 的永久许可与 Code 0，七文件和实际加载 KMD、DWM 模块相符。本轮任务、试用包与令牌均已清理。[回退与清理](windows-native-graphics/rounds/win-combined-13-restore-20261121-01.result.json)
 
-现行 WDDM 2.6 源码 `7f626083`、实载签名 KMD `30331aa3cb57`。启动 92083 的原签名窗口首次 Present(1,0) 用时 14.302 ms，返回 S_OK。画面、输入、退出和桌面连续。DWM 同一 GM20B 节点 0 的 DMA 9652 / 队列序号 4444 有同线程 5063 进入与返回，以及同包中断、完成与退役。91476 的历史根因保持开放，91918→91989 是切换前独立故障。手持取证未覆盖 PL=1 高频。[现行基线回执](nvgpu-init-30331aa3cb57/permanent-boot.json) · [同轮原始证据与边界](windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json)
+上一正式 WDDM 2.6 源码 `7f626083`、实载签名 KMD `30331aa3cb57`。启动 92083 的原签名窗口首次 Present(1,0) 用时 14.302 ms，返回 S_OK。画面、输入、退出和桌面连续。DWM 同一 GM20B 节点 0 的 DMA 9652 / 队列序号 4444 有同线程 5063 进入与返回，以及同包中断、完成与退役。91476 的历史根因保持开放，91918→91989 是切换前独立故障。手持取证未覆盖 PL=1 高频。[上一基线回执](nvgpu-init-30331aa3cb57/permanent-boot.json) · [同轮原始证据与边界](windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json)
 
 应用自己的首笔 52 字节 Blt 在 92083 对应 DMA 9651。Windows 回执绑定调用、包装和同包完成。KMD 在完成前的 GPU 围栏快照仍为 observed 0、expected 3272，上一完成值 9650，随后同包完成。有效 GR/FECS 缓存在该采样时点为零。[应用 Blt 同包证据](windows-native-graphics/rounds/win-seq-application-blt-fence-20261121-01.result.json)
 

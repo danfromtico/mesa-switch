@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "change_kind": "independent",
+  "source_commit": "e1b2208760dd88c2e11c86eceb60272cb3f16433",
+  "base_commit": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+  "changed_paths": [
+    "tegra-x1-wddm/core/channel.c",
+    "tegra-x1-wddm/core/channel.h",
+    "tegra-x1-wddm/core/execute.c",
+    "tegra-x1-wddm/platform/t214_frontend.c",
+    "tegra-x1-wddm/platform/t214_frontend.h",
+    "tegra-x1-wddm/platform/t214_gr.c",
+    "tegra-x1-wddm/platform/t214_gr_context.c",
+    "tegra-x1-wddm/platform/t214_gr_context_regs.h",
+    "tegra-x1-wddm/tests/test_channel.c",
+    "tegra-x1-wddm/tests/test_dvfs_windows.c",
+    "tegra-x1-wddm/tests/test_execute_init.c",
+    "tegra-x1-wddm/tests/test_frontend.c",
+    "tegra-x1-wddm/tests/test_gr_boot.c",
+    "tegra-x1-wddm/tests/test_gr_context.c",
+    "tegra-x1-wddm/tests/test_platform_windows.c",
+    "tegra-x1-wddm/tools/build.py",
+    "tegra-x1-wddm/windows/dvfs.c",
+    "tegra-x1-wddm/windows/dvfs.h",
+    "tegra-x1-wddm/windows/platform_io.c",
+    "tegra-x1-wddm/windows/platform_io.h"
+  ],
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+  "components": {
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "trial": {
+    "selected": "trial",
+    "dwm": 1420,
+    "boot_record": 92696,
+    "inf": "oem29.inf",
+    "loaded": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+    "gpu_code": 0,
+    "dwm_start": "2026-11-21T19:27:26.5919071Z",
+    "components": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "power": "Online",
+    "one_time": true,
+    "utc": "2026-11-21T19:29:10.7472738Z"
+  },
+  "cases": [
+    {
+      "name": "KMD-only native 7-file Code 0 desktop with responding Explorer",
+      "evidence_file": "native-desktop.json",
+      "evidence_sha256": "32a380cef7fec9a3bc5ddb8176fb5a357bcf8afeca79b155bcc812bd0fe1e6bb",
+      "passed": true,
+      "before_boot": 92696,
+      "after_boot": 92696
+    }
+  ],
+  "system_log": {
+    "complete": true,
+    "first_record": 92678,
+    "last_record": 92765,
+    "boot_records": [
+      92696
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "explained": true,
+        "kind": "controlled",
+        "boot_record": 92696,
+        "cause": "one-time candidate boot",
+        "system_records": [
+          92679,
+          92682,
+          92696
+        ],
+        "evidence_sha256": "f2f5ad45db36080f0f555f9e2bda232157f967b11972249303b3e45fc5abc3fd",
+        "evidence_file": "system-one-time.json"
+      }
+    ]
+  },
+  "corroboration": {
+    "scope": "同一签名 69ba KMD 在联合包启动 92336 的原生 720p 保留六次提交、参考输出和正常退出。该轮加载候选 NVK a143bee5ba42，作为 KMD 专项旁证。本次 KMD-only 组合只用实际 Code 0、交互桌面及系统日志作资格依据。",
+    "combined_trial_720p": {
+      "path": "windows-native-graphics/rounds/win-combined-13-candidate-native720-20261121-02.result.json",
+      "sha256": "3bcba0cc0e9d35ef3e9dbf3bd0efbeda86abd864c0d15c5c742db878c4495d45"
+    },
+    "complete_controlled_start_interval": {
+      "path": "kmd-only-e1b22087/system-one-time.json",
+      "sha256": "f2f5ad45db36080f0f555f9e2bda232157f967b11972249303b3e45fc5abc3fd"
+    }
+  }
+}

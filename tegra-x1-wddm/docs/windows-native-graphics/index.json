@@ -2031,6 +2031,29 @@
         "win-combined-13-restore-20261121-01"
       ],
       "latest_observation": "启动 92516 恢复 7f626083 永久许可；七组件和实载模块与批准包吻合，GPU 为 Code 0。"
+    },
+    {
+      "id": "WIN-KMD-ONLY-ONE-TIME-START",
+      "priority": "P0",
+      "owner": "Windows PnP、GM20B KMD 和当前正式 DWM 用户态",
+      "question": "只更新签名 KMD 的独立试验能否以一次性许可载入 Code 0，六个用户态组件保持正式哈希？",
+      "status": "实机通过",
+      "existing_observation": "拆分源码已独立构建，目录成员及原回退包已查。",
+      "missing_observation": "该专项覆盖一次性启动、交互桌面和实际加载。相同 KMD 的 720p 使用联合包启动 92336 的旁证。",
+      "pass_condition": "一次性令牌消耗，交流、手持、GPU Code 0，七文件和实际 ARM64 模块精确对应。",
+      "evidence": [
+        {
+          "path": "kmd-only-e1b22087/input-manifest.json",
+          "sha256": "1985af7f143bc85b4009ff0f152b59f269b963f3422efdd27c1dd6d44ee14973"
+        }
+      ],
+      "windows_references": [
+        "power"
+      ],
+      "round_ids": [
+        "win-kmd-only-one-time-start-20261121-01"
+      ],
+      "latest_observation": "独立 KMD 试用启动 92696 实载 69ba174ebe17，六个用户态文件与原正式包相同，ARM64 NVK 为 51ff97f63d85，GPU Code 0。"
     }
   ],
   "rounds": [
@@ -4761,20 +4784,69 @@
         "first_anomaly_or_missing": "正式包已恢复。联合切换与回退的其他启动各自按事件登记。"
       },
       "finished_utc": "2026-11-21T19:20:08.384294+00:00"
+    },
+    {
+      "round_id": "win-kmd-only-one-time-start-20261121-01",
+      "contract_id": "WIN-KMD-ONLY-ONE-TIME-START",
+      "windows_question": "WIN-KMD-ONLY-ONE-TIME-START",
+      "method": "一次性许可，已审签名 KMD 与现行六用户态",
+      "plan": "windows-native-graphics/rounds/win-kmd-only-one-time-start-20261121-01.plan.json",
+      "plan_sha256": "ac5e4ed560536e2f37129c128dcb657e719c5a66225899e51c8229b044bff4e9",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T19:20:31.316501+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-kmd-only-one-time-start-20261121-01.result.json",
+      "result_sha256": "638855bce9bffe24b7c757b025014e9e1b569775d3266a5ae1585673569b33e4",
+      "status": "实机通过",
+      "finding": "独立 KMD 试用启动 92696 实载 69ba174ebe17，六个用户态文件与原正式包相同，ARM64 NVK 为 51ff97f63d85，GPU Code 0。",
+      "missing_observation": "该专项覆盖一次性启动、交互桌面和实际加载。相同 KMD 的 720p 使用联合包启动 92336 的旁证。",
+      "boundaries": {
+        "last_entry": "一次性受控启动",
+        "last_return": {
+          "selected": "trial",
+          "dwm": 1420,
+          "boot_record": 92696,
+          "inf": "oem29.inf",
+          "loaded": {
+            "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+            "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+            "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+            "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+            "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+          },
+          "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+          "gpu_code": 0,
+          "dwm_start": "2026-11-21T19:27:26.5919071Z",
+          "components": {
+            "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+            "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+            "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+            "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+            "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+            "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+            "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+          },
+          "power": "Online",
+          "one_time": true,
+          "utc": "2026-11-21T19:29:10.7472738Z"
+        },
+        "first_anomaly_or_missing": "该专项覆盖一次性启动、交互桌面和实际加载。相同 KMD 的 720p 使用联合包启动 92336 的旁证。"
+      },
+      "finished_utc": "2026-11-21T19:29:45.867292+00:00"
     }
   ],
   "progress": {
-    "total": 56,
+    "total": 57,
     "by_status": {
-      "实机通过": 27,
+      "实机通过": 28,
       "观测缺口": 13,
       "已有实机通过": 7,
       "故障开放": 4,
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 76,
-    "new_device_executions": 29
+    "registered_rounds": 77,
+    "new_device_executions": 30
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",

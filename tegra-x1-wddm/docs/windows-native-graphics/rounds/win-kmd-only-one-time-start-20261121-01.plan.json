@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-only-one-time-start-20261121-01",
+  "contract_id": "WIN-KMD-ONLY-ONE-TIME-START",
+  "windows_question": "WIN-KMD-ONLY-ONE-TIME-START",
+  "owner": "Windows PnP、GM20B KMD 和当前正式 DWM 用户态",
+  "question": "只更新签名 KMD 的独立试验能否以一次性许可载入 Code 0，六个用户态组件保持正式哈希？",
+  "method": "一次性许可，已审签名 KMD 与现行六用户态",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289"
+    },
+    "driver_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+      "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+    }
+  },
+  "pass_condition": "一次性令牌消耗，交流、手持、GPU Code 0，七文件和实际 ARM64 模块精确对应。",
+  "observations": [
+    "在正式 GPU 和回退包核实后并置，暂撤永久权限。",
+    "受控切换后核对前后启动记录、许可、实际 KMD、DWM 模块和功耗模式。"
+  ],
+  "inputs": {
+    "source": {
+      "path": "kmd-only-e1b22087/input-manifest.json",
+      "sha256": "1985af7f143bc85b4009ff0f152b59f269b963f3422efdd27c1dd6d44ee14973"
+    },
+    "initial": 92516,
+    "last_system": 92585,
+    "serial_baseline_backup": "04738187c11a3b400337d25ec7cf76a36cab80d1cb931d36f41a28ebde0f7374",
+    "stage_script_sha256": "fcb7c2c21adc5c65883c20edd877fb99eb66e7f8b59347701be4e0b7ce655515",
+    "transitions_sha256": "b84f9982bc9643a32b118647c4a3fece01759ab865bb5880b7aaf2cfb1574f59"
+  }
+}
