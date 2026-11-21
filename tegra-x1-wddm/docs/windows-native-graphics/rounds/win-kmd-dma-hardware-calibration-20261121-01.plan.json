@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-dma-hardware-calibration-20261121-01",
+  "contract_id": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+  "windows_question": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+  "owner": "同一正常窗口进程、Windows 调度、GM20B KMD 与 GPU",
+  "question": "诊断 KMD 在有效一次性许可的真实 Switch GPU 上，能否为同一提交配对进入、准入、GP_PUT 与 GPU 完成？",
+  "method": "一次性许可下仅运行一个已归档健康的原生 FLIP_SEQUENTIAL 窗口，校准 KMD DMA 见证",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "Code 0、交流、手持、实载哈希与已消费的一次性令牌吻合。相同的 Windows 433/KMD 上下文和提交围栏依次关联四阶段和实际完成，不出现意外重启；恢复正式许可及组件。",
+  "observations": [
+    "锁定租约、交流供电、手持、永久许可、正式 SYS/INF/CAT 和组件哈希。分阶段以系统 1074/12 和意图回执区分计划重启。替换前撤销永久许可，指定候选单次令牌。",
+    "候选确认 Code 0、原生桌面、同一 WDDM 2.6 用户态组件和已消费的唯一令牌后，启用本轮 ETW 关键字 2。仅启动已知正常的 FLIP_SEQUENTIAL 空窗口原生对照，保留公开调用、图片、输入、退出与桌面。",
+    "用同启动、实测 LUID、Windows 27/30/433、真实 KMD 句柄、队列包序号和提交围栏核对四个 KMD 边界、Windows 175/177/176/180。GP_PUT 仅标硬件发布，实际完成由 GPU 标记及通知验证。",
+    "结束收集后撤销候选许可。核实经批准的原厂配置包和开机许可，回读正式 KMD、用户态全哈希。清除本轮任务、ETW、未用的候选包和临时目录。发生意外重启保留表中边界并恢复。"
+  ],
+  "inputs": {
+    "candidate": {
+      "source": "942fd339482886a1696efcb9723cce77f7538702",
+      "parent": "c137ce757b055557cff4b70068e8e2500dd92962",
+      "zip": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/calibration-signed-driver-package.zip",
+      "sha256": "8dccec59326d8c9da282ed0c1c1815ac4d22e6125866f593c7bef138782818cf",
+      "package_members": {
+        "nv_acr_ucode_prod.bin": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+        "fecs_sig.bin": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+        "tegragpurender.sys": "ba56e4350720a262804e669787f7f431fd65e1b0250183266bc850122dcf2171",
+        "gpccs.bin": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+        "pmu_sig.bin": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+        "NETB_img.bin": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+        "tegragpurender.inf": "7e9279bb8c031b239663880adbc7967d23b231458755041e13cf230f3e7f8a09",
+        "pmu_bl.bin": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+        "gpmu_ucode_desc.bin": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+        "fecs.bin": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+        "tegragpuno3d.dll": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+        "gpmu_ucode_image.bin": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699",
+        "tegragpurender.cat": "0718352b0b39ad9ebeb11bc94bbeb9fb55f84de4d6cb18f8abb99df5bc202e6d"
+      },
+      "scope": "local candidate only"
+    },
+    "backup_sha256": "11c136aa891c76662321603816c70c1d6eb934b11c46f08219dccd1826089b29",
+    "board_capabilities_sha256": "c3e2a57f50af8bbf8fc2bb05e4c38ec34e7f303dd74e54ca8bd3d1fa84fabc9c",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-kmd-dma-arm64-fixture-20261121-01.result.json",
+        "sha256": "0c2f3a9483521570190f1a78b500e126eb30a00a79b261beecde93c84a30e721"
+      },
+      {
+        "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-flip-1.json",
+        "sha256": "90decc7daeb29daacaf0043b288a504e3bcf5bec56c4e97ce048305a440c88f6"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      }
+    ],
+    "app": {
+      "Board-Case.ps1": "9dbbc7a2e709ff06b470ea9d540b89fc3121eb77c861cb5880b3ff628621fca4",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d"
+    },
+    "runners": {
+      "Cycle.ps1": "15e56d3f29f27362e42df8865b3bcc244475405647bc34e7ed493fab9d4de797",
+      "Stage-Profile.ps1": "fcb7c2c21adc5c65883c20edd877fb99eb66e7f8b59347701be4e0b7ce655515",
+      "cycle.py": "e50d9c09b31ae7687afabc012fd6168c861f6aa168e73bfdaf29c701dc2a4745",
+      "planned_restart.py": "fc097c40d3c2e1ab23f606a2aa7a5e7bbf688b1490f67891124f0ab3ab784cf4",
+      "run_scene.py": "6ec2861765440710f277ce13eb24048dd0a57e26458620e6729e0749f2ae77af",
+      "stage_profile.py": "2f2876a6138263ea9098b3d9eedd2d2071f486c9011ce8f6a98c2f9bea34d582",
+      "trial_profile.py": "c7907698df7724d9765d884a0904cd234e14b688e71cba9714b4cbe55ca44b88"
+    },
+    "decoder_sha256": "f72630180db621993d4fe1429e06dc25be9069bc037b74c131abcc759eedf0aa"
+  }
+}

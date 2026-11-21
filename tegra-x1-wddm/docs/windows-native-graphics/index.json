@@ -1401,6 +1401,37 @@
         "win-kmd-dma-arm64-fixture-20261121-01"
       ],
       "latest_observation": "Switch 启动 91557 上运行已签名 ARM64 队列夹具并以 0 退出。Inf2Cat 输出的新目录签名在 Switch 上验证有效，逐一核过 12 个文件。已清理临时目录，前后同启动、同 DWM、GPU Code 0，实载正式组件哈希一致。"
+    },
+    {
+      "id": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+      "priority": "P0",
+      "owner": "同一正常窗口进程、Windows 调度、GM20B KMD 与 GPU",
+      "question": "诊断 KMD 在有效一次性许可的真实 Switch GPU 上，能否为同一提交配对进入、准入、GP_PUT 与 GPU 完成？",
+      "status": "故障开放",
+      "existing_observation": "签名包及 ARM64 模型已过。既有正常 FLIP_SEQUENTIAL 空窗口含一条非空设备初始化 DMA 和完整画面、输入、退出回执。",
+      "missing_observation": "没有收到候选 Code 0 或工作负载回执。异常开机转换的第一失败组件、板级记录及原案 152586 的实际 KMD 接收仍待证。",
+      "pass_condition": "Code 0、交流、手持、实载哈希与已消费的一次性令牌吻合。相同的 Windows 433/KMD 上下文和提交围栏依次关联四阶段和实际完成，不出现意外重启；恢复正式许可及组件。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-kmd-dma-arm64-fixture-20261121-01.result.json",
+          "sha256": "0c2f3a9483521570190f1a78b500e126eb30a00a79b261beecde93c84a30e721"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-flip-1.json",
+          "sha256": "90decc7daeb29daacaf0043b288a504e3bcf5bec56c4e97ce048305a440c88f6"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+          "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+        }
+      ],
+      "windows_references": [
+        "dma_interrupt"
+      ],
+      "round_ids": [
+        "win-kmd-dma-hardware-calibration-20261121-01"
+      ],
+      "latest_observation": "候选的一次性启动前，91650 已持久记录令牌值 1、Code 43，并收到 Windows 重启请求 1074。其后 91732 记录 6008/41，BugcheckCode=0。应用未发出，未取得候选 Code 0 或四阶段配对。最后一条关机实证是 91725/6006，距下一次有记录的内核开始 57.750 秒。前后两次受控对照均有 109/13，本段缺失。 启动 91832 已恢复正式 Code 0、永久许可和加载哈希。"
     }
   ],
   "rounds": [
@@ -2877,19 +2908,65 @@
         "first_anomaly_or_missing": "尚缺正式许可下加载候选后，真实队列的 Windows、KMD 与设备回执。"
       },
       "finished_utc": "2026-11-21T16:01:22.393467+00:00"
+    },
+    {
+      "round_id": "win-kmd-dma-hardware-calibration-20261121-01",
+      "contract_id": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+      "windows_question": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+      "method": "一次性许可下仅运行一个已归档健康的原生 FLIP_SEQUENTIAL 窗口，校准 KMD DMA 见证",
+      "plan": "windows-native-graphics/rounds/win-kmd-dma-hardware-calibration-20261121-01.plan.json",
+      "plan_sha256": "b19b57bd37d47f198a3eb6fbe0bf4865292cb6e2899f3b4e421262435489366a",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T16:06:38.313142+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-kmd-dma-hardware-calibration-20261121-01.result.json",
+      "result_sha256": "e1ba827a2b18fefb7822f346ebadfc6530488170beb581a0d53d4cce4a327693",
+      "status": "故障开放",
+      "finding": "候选的一次性启动前，91650 已持久记录令牌值 1、Code 43，并收到 Windows 重启请求 1074。其后 91732 记录 6008/41，BugcheckCode=0。应用未发出，未取得候选 Code 0 或四阶段配对。最后一条关机实证是 91725/6006，距下一次有记录的内核开始 57.750 秒。前后两次受控对照均有 109/13，本段缺失。 启动 91832 已恢复正式 Code 0、永久许可和加载哈希。",
+      "missing_observation": "没有收到候选 Code 0 或工作负载回执。异常开机转换的第一失败组件、板级记录及原案 152586 的实际 KMD 接收仍待证。",
+      "boundaries": {
+        "last_entry": {
+          "phase": "CandidateArmed",
+          "boot": 91650,
+          "utc": "2026-11-21T16:11:38.0327996Z"
+        },
+        "last_return": {
+          "record": 91725,
+          "id": 6006,
+          "provider": "EventLog",
+          "time": "2026-11-21T16:12:04.7879189Z"
+        },
+        "first_anomaly_or_missing": {
+          "event_log": {
+            "record": 91741,
+            "id": 6008,
+            "provider": "EventLog",
+            "time": "2026-11-21T16:14:55.7066228Z"
+          },
+          "kernel_power": {
+            "record": 91750,
+            "id": 41,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "time": "2026-11-21T16:13:08.3340512Z"
+          },
+          "bugcheck_code": 0,
+          "last_candidate_boundary": "The 109/13 pair is absent between the candidate restart request and the next recorded kernel start."
+        }
+      },
+      "finished_utc": "2026-11-21T16:22:04.664837+00:00"
     }
   ],
   "progress": {
-    "total": 34,
+    "total": 35,
     "by_status": {
       "实机通过": 10,
       "观测缺口": 8,
       "已有实机通过": 7,
-      "故障开放": 3,
+      "故障开放": 4,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 44,
+    "registered_rounds": 45,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -2914,6 +2991,7 @@
       "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
       "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
       "WIN-KMD-DMA-ARM64-REHEARSAL",
+      "WIN-KMD-DMA-HARDWARE-CALIBRATION",
       "WIN-PRESENT-IMAGE",
       "WIN-OLD-RESET"
     ],
@@ -3059,6 +3137,28 @@
         "parent": "c137ce757b055557cff4b70068e8e2500dd92962",
         "zip": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/calibration-signed-driver-package.zip",
         "sha256": "8dccec59326d8c9da282ed0c1c1815ac4d22e6125866f593c7bef138782818cf"
+      },
+      "hardware_calibration_round": {
+        "path": "windows-native-graphics/rounds/win-kmd-dma-hardware-calibration-20261121-01.result.json",
+        "sha256": "e1ba827a2b18fefb7822f346ebadfc6530488170beb581a0d53d4cce4a327693"
+      },
+      "formal_restored_after_calibration": {
+        "boot": 91832,
+        "dwm": 1432,
+        "mode": 1,
+        "code": 0,
+        "receipt_sha256": "4bd333a3154e5d44c5767577e259d423fb5bb88ef046bdac8449bf8a15b111c5"
+      },
+      "diagnostic_activation_exception": {
+        "id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+        "receipt": {
+          "path": "windows-native-graphics/rounds/win-kmd-dma-hardware-calibration-20261121-01.result.json",
+          "sha256": "e1ba827a2b18fefb7822f346ebadfc6530488170beb581a0d53d4cce4a327693"
+        },
+        "candidate_control_boot": 91650,
+        "next_recorded_boot": 91732,
+        "workload_count": 0,
+        "formal_recovery": 91832
       }
     }
   },

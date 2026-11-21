@@ -76,6 +76,8 @@
 
 Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名及 12 个成员均经同机验证，本轮目录已清理，前后同一启动、DWM 1392、正式全哈希和 Code 0。签名诊断包保留本机，实载后的正常 GPU 提交配对仍待单轮验证。[原生夹具和签名包回执](windows-native-graphics/rounds/win-kmd-dma-arm64-fixture-20261121-01.result.json)
 
+候选的一次性启动前，91650 已持久记录令牌值 1、Code 43，并收到 Windows 重启请求 1074。其后 91732 记录 6008/41，BugcheckCode=0。应用未发出，未取得候选 Code 0 或四阶段配对。最后一条关机实证是 91725/6006，距下一次有记录的内核开始 57.750 秒。前后两次受控对照均有 109/13，本段缺失。 启动 91832 已恢复正式 Code 0、永久许可和加载哈希。 没有收到候选 Code 0 或工作负载回执。异常开机转换的第一失败组件、板级记录及原案 152586 的实际 KMD 接收仍待证。 [实载 DMA 校准与恢复回执](windows-native-graphics/rounds/win-kmd-dma-hardware-calibration-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)
