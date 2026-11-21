@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-return-v2-calibration-20261121-01",
+  "contract_id": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+  "windows_question": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+  "owner": "同一正常窗口进程、Windows 调度、GM20B KMD 与 GPU",
+  "question": "诊断 KMD 在有效一次性许可的真实 Switch GPU 上，能否为同一提交配对进入、准入、GP_PUT 与 GPU 完成？",
+  "method": "一次性候选，关闭应用内 ETW，外部同一文件采集 WDDM 包装与 KMD 版本 2",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "Code 0、交流、手持、实载哈希与已消费的一次性令牌吻合。相同的 Windows 433/KMD 上下文和提交围栏依次关联四阶段和实际完成，不出现意外重启；恢复正式许可及组件。",
+  "observations": [
+    "实载 KMD、原生 UMD、原生/兼容 GPU 文件及 ACR 安装哈希按此次已消耗的一次性许可核对。",
+    "启用独立的定向文件跟踪，仅一次运行同一签名双缓冲 SEQUENTIAL 空窗口。",
+    "以同一时钟、LUID、上下文、调度线程和 DMA 围栏核对版本 2 的 KMD 进入和返回、准入、GP_PUT 和 GPU 围栏回读；匹配 Windows 包装、完成和退役。"
+  ],
+  "inputs": {
+    "before_sha256": "ef66edf8aec4b33828abced011ae1291134aa5fb4643fce43dace61e203ca0f1",
+    "boot": 94004,
+    "dwm": 1436,
+    "fixture": {
+      "Board-Case.ps1": "2a449bddaad2eba045856ced6b2c907e9fe13e54d9b553d4a4ea2472586cc30e",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "dma-return-file-trace.exe": "077ee2f9d0d38e4aa55c5e35eb211afc0ff352a05e7af5f9d1495a7366b3ccaf"
+    },
+    "runner_sha256": "3834966f9cbe23990f98448d820b6790850fb7891b2c300bde5770c9e924f489",
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-kmd-return-profile-stage-93818-20261121-01.result.json",
+      "sha256": "0f80c5db435212bb32c4b4523b075d20ee4e9885df73b4e603c12f39f4982f7d"
+    },
+    "trace_review_sha256": "e66bad1ce9d2a3ec2a02f9211212b94942d1da35ae0d2abcd1e14f0c9efc8abf",
+    "trace_source_sha256": "6e7f7c294050d5604ef585604a7254fbaeef752dd8668a4f2bb3d852138cc166"
+  }
+}

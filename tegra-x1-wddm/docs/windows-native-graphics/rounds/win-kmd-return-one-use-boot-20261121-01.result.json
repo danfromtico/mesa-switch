@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-return-one-use-boot-20261121-01",
+  "contract_id": "WIN-KMD-RETURN-BOOT-IDENTITY",
+  "windows_question": "WIN-KMD-RETURN-BOOT-IDENTITY",
+  "plan_sha256": "071423a5e753131247fcdcfd4b9c13df7690cd79fbf73879f4542b908d8aa2bd",
+  "status": "实机通过",
+  "finding": "Windows 启动 94004 消耗一次性许可并进入 DWM 1436，Code 0，交流手持。候选 KMD 已实际运行，其余七个配置文件与正式基线一致。受控启动与相应 1074 逐次核对，无新增 41、6008、1001 或 4101。",
+  "missing_observation": "该启动仅确认诊断 KMD 实载及许可。首次 Present 的实际底层返回、同围栏与历史重启归因待独立回合采集。",
+  "device_executions": 0,
+  "evidence": {
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/seq-before-dma-return-boot.json",
+        "sha256": "aca7611e18c3f5ba31456db4b1c4b80cebe2309020332760f42f9ee824aabc58",
+        "bytes": 10886
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/activation/system-events-pre-disarm.json",
+        "sha256": "6fced48b9762361916ff35d70281483f372726f94c0146eec4bdd930bd57f8bd",
+        "bytes": 153
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/activation/system-events-candidate-active.json",
+        "sha256": "458f1eae27928738f466e1e6dce700a34bfcf10e890680e70f4b81869783766c",
+        "bytes": 7264
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/activation/one-time-desktop.json",
+        "sha256": "175d4aca4a4d1978e48a8d66ef9909f8c1f80a87487fa65aa74eb3eee907cba5",
+        "bytes": 1591
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/activation/requested-93818-ClosedForTrial.json",
+        "sha256": "d6902c1043de8e97ba936be59026de13d72ded75128d74fcf78b8b22d0b8163f",
+        "bytes": 168
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/activation/requested-93911-CandidateArmed.json",
+        "sha256": "2cc30759215f90cce297eff1b1fd4f877cee2f06d83bed9bd4bce4e320f7b2b1",
+        "bytes": 147
+      }
+    ],
+    "boot": 94004,
+    "dwm": 1436,
+    "code": 0,
+    "boundaries": {
+      "last_entry": "Windows controlled boot after one-use permit",
+      "last_return": "2026-11-21T23:05:08.5044899Z",
+      "first_anomaly_or_missing": "该启动仅确认诊断 KMD 实载及许可。首次 Present 的实际底层返回、同围栏与历史重启归因待独立回合采集。"
+    }
+  }
+}

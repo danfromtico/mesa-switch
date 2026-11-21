@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-third-return-control-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-CONTROL-COVERAGE",
+  "windows_question": "WIN-DWM-THIRD-KMD-CONTROL-COVERAGE",
+  "plan_sha256": "03380c4e07a153f65a74f72932c7212189284eada4d1b74c7c8345a1cf6e3d1e",
+  "status": "观测缺口",
+  "finding": "启动 94004 留存 ETL 可定位首个应用 Present 之后同一 DWM、同 GM20B 节点 0 的 83 个普通非 Present 队列包。2 个为 3524 字节，0 个出现同队列两次抢占后再次提交。同时满足历史尺寸及抢占条件的有 0 个，其中 0 个核到第三次 KMD 入返与完成。",
+  "missing_observation": "正常轮尚缺同大小、同节点且发生两次抢占的可比包全链。历史 152586 的实载 KMD 边界继续开放。",
+  "device_executions": 0,
+  "evidence": {
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/display.etl",
+        "sha256": "fe0b20ae490d671b7fad7b4918e6512868b75f98f1dca83175f6732243aeb0d5",
+        "bytes": 10551296
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/dwm-preempt-control-analysis.json",
+        "sha256": "e59b077ed568c1860158c8349d7e49abfe7562da27068b8af06166e904545ba6",
+        "bytes": 192702
+      }
+    ],
+    "retained": [
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+        "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-kmd-return-v2-calibration-20261121-01.result.json",
+        "sha256": "2fe87401eac810e054077fbd85714bf2d492392faf3bcf75a23a9af3e4e5667c"
+      }
+    ],
+    "device_executions": 0,
+    "boundaries": {
+      "last_entry": 3582201244,
+      "last_return": 3947175695,
+      "first_anomaly_or_missing": "正常轮尚缺同大小、同节点且发生两次抢占的可比包全链。历史 152586 的实载 KMD 边界继续开放。"
+    }
+  }
+}

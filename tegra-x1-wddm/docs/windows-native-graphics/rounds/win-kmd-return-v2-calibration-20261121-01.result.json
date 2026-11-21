@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-return-v2-calibration-20261121-01",
+  "contract_id": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+  "windows_question": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+  "plan_sha256": "d945b254bfffcdccc452c1d54c928cc81a3fcc4d66521ee00ef3a3214050d7ca",
+  "status": "实机通过",
+  "finding": "启动 94004 的旧式空窗口第一次 Present(1,0) 返回 S_OK。应用 DMA 4328、软件队列 1 有同文件、同适配器、同 KMD 上下文和同调度线程的进入及成功 NTSTATUS。GP_PUT、GPU 执行后的围栏回读、Windows 中断、完成和退役均已关联。 同时段 DWM DMA 4321 有独立通过链，作为独立工作负载保存。 画面像素捕获成功，输入成功。",
+  "missing_observation": "历史 DMA 152586 和原三次旧版重启仍缺同启动的后段证据。 该围栏是 DMA 提交完成值，应用资源的独立等待和异常启动本身仍待同轮证据。",
+  "device_executions": 1,
+  "evidence": {
+    "boundaries": {
+      "last_entry": {
+        "qpc": 3582429811,
+        "pid": 4,
+        "tid": 904,
+        "offset": 4063232,
+        "adapter_luid": "0000000000005c54",
+        "kmd_context": "ffff860d579fd820",
+        "submission_fence": 4328,
+        "dma_bytes": 52,
+        "phase": 1,
+        "phase_name": "ddi_entry",
+        "detail": 2,
+        "version": 2,
+        "payload_sha256": "0a36a83ea061b2c477ed0aa2552dce4deeede0278af15601542d93f4dd00b286"
+      },
+      "last_return": {
+        "qpc": 3582430172,
+        "pid": 4,
+        "tid": 904,
+        "offset": 4063232,
+        "adapter_luid": "0000000000005c54",
+        "kmd_context": "ffff860d579fd820",
+        "submission_fence": 4328,
+        "dma_bytes": 52,
+        "phase": 5,
+        "phase_name": "ddi_return",
+        "detail": 0,
+        "version": 2,
+        "payload_sha256": "20c316e968b8ee60cc18902c055ed852e280135515bd9d2fc87bb1fa913f60fb"
+      },
+      "last_completion": {
+        "qpc": 3582478165,
+        "pid": 4,
+        "tid": 900,
+        "provider": "kernel",
+        "id": 180,
+        "version": 1,
+        "fields": {
+          "hContext": 18446706729050820624,
+          "PacketType": 0,
+          "SubmitSequence": 1,
+          "bPreempted": 0,
+          "bTimeouted": 0,
+          "pQueuePacket": 18446609990588402464
+        }
+      },
+      "first_anomaly_or_missing": "历史 DMA 152586 和原三次旧版重启仍缺同启动的后段证据。 该围栏是 DMA 提交完成值，应用资源的独立等待和异常启动本身仍待同轮证据。"
+    },
+    "boot": 94004,
+    "dwm": 1436,
+    "normal_application_exit": true,
+    "trace_good": true,
+    "scene": "win-kmd-return-v2-calibration-20261121-01",
+    "binaries": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/inputs/dma-return-file-trace.exe",
+        "sha256": "077ee2f9d0d38e4aa55c5e35eb211afc0ff352a05e7af5f9d1495a7366b3ccaf",
+        "bytes": 66056
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/inputs/Board-Case.ps1",
+        "sha256": "2a449bddaad2eba045856ced6b2c907e9fe13e54d9b553d4a4ea2472586cc30e",
+        "bytes": 9360
+      }
+    ],
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/activation/one-time-desktop.json",
+        "sha256": "175d4aca4a4d1978e48a8d66ef9909f8c1f80a87487fa65aa74eb3eee907cba5",
+        "bytes": 1591
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/activation/system-events-after-window.json",
+        "sha256": "2c769027e2cc1eb7c7b09b551f5e36b5ea849490b0ec5e6e5235126fdfa544a6",
+        "bytes": 7264
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/cleanup.json",
+        "sha256": "f51972d6f86c85fd40857205da8b742ad01244f919e55a3249340302be832d34",
+        "bytes": 160
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/collected.zip",
+        "sha256": "8efd9965ce9aa6ff377fb7140f7b02bbfc68f09c28961af9838d0033e7d35249",
+        "bytes": 591306
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/collection.json",
+        "sha256": "ea69cf2507c0e438d5e3dae1faff777f3c284b36b7bddfbcc0241f2ecab0487f",
+        "bytes": 119
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/dma-return-calibration-analysis.json",
+        "sha256": "c01b6d1b10fc940419fbaa436eca8a975d716ac3fd12632adb3e1d8bc5c90983",
+        "bytes": 23149
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/client-pid",
+        "sha256": "5dc3c3700c46499d89e7e810366d9d873e4da6b54c072f8ce515d47d7926878c",
+        "bytes": 4
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/display.etl",
+        "sha256": "fe0b20ae490d671b7fad7b4918e6512868b75f98f1dca83175f6732243aeb0d5",
+        "bytes": 10551296
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/intent.json",
+        "sha256": "f31f53e7b501435aff8a6c764844a275ce24d0932453085118ed63eb6f6bec70",
+        "bytes": 1085
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/issued",
+        "sha256": "3d48d64d7be148a76c1efd7ecb7396c8cd7b6fc10b3dea4dde0686b8fe07a077",
+        "bytes": 32
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/loaded.json",
+        "sha256": "2a8d059981856cb167dfd1074b0699e5d43425bb5c1e0d1c3f631c00722f4976",
+        "bytes": 449
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/observer.json",
+        "sha256": "0df935ede635fb1832f02c6728f539c586359dc62c1162dd021f0e08b6f55a78",
+        "bytes": 921
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/present.bmp",
+        "sha256": "7dac2e59409a3a6127e5423e99c57937a55ddc5fef0e7897317e4e2017add073",
+        "bytes": 36918
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/result.json",
+        "sha256": "3281fd2495b02e4bd8ab54d18d351969717330e355eaf8b8dcb45153136c223c",
+        "bytes": 4442
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/scene/journal.txt",
+        "sha256": "b0b4585e67d89685c8e7b1c71b37822f4d1893e160e8ba83561a254f5f9934d8",
+        "bytes": 2085
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/scene/stderr.txt",
+        "sha256": "43e6f4a12c2a8c3242816b0f3da21f1a8a37c21a78b26e8aae1da3a828ff5685",
+        "bytes": 74
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/scene/stdout.txt",
+        "sha256": "85904c1c652fa3d9d0ef1b5eb423fe5ab9b8a4dfefc5714cc55b77237a20a386",
+        "bytes": 1171
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/task-output.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/trace-owner",
+        "sha256": "86b70b687e18cb7f1271f9d83f6640dff42d92a479ca1bbb2c14aee2cf16fa24",
+        "bytes": 33
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/trace-start.json",
+        "sha256": "2af5314719e92f56567fe7946b3e5e0a564d26d5fff16bb478da350289a69715",
+        "bytes": 120
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/trace-stop.json",
+        "sha256": "ff971d14515cf372a0c597ae72720a1caca74f78843c845f4dd5388733908bf6",
+        "bytes": 116
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/window.bmp",
+        "sha256": "aa3164e0eeeb6fd1be7fda967d31baccebaa2e1dba0aad9035c21b8a76040835",
+        "bytes": 36918
+      }
+    ]
+  }
+}

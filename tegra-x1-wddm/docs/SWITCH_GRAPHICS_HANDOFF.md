@@ -2,6 +2,14 @@
 
 ## 当前工作 · Windows ARM64 本机验收
 
+### 首次 Present · KMD 入返和 GPU 围栏同轮取证
+
+诊断 KMD `bfbc849f36b5` 在启动 `94004` 消耗一次性许可，以交流供电、手持模式和 GPU Code 0 进入桌面。其余七个配置哈希与正式基线一致。复用已核验旧式 DDI `0x000b000f` 的签名夹具，普通窗口的两个 BGRA SEQUENTIAL 缓冲均无应用写入，首次 `Present(1,0)` 在 16.888 ms 后返回 S_OK。应用 DMA `4328` 的 52 字节包在同一 QPC 时钟下串起 Windows 提交、KMD 进入和 NTSTATUS 成功、GP_PUT、GPU BAR1 完成回读以及 Windows 中断、完成和退役。画面、输入、正常退出和同一桌面通过。DWM DMA `4321` 的 8336 字节包在同一时间段有独立全链。[同轮实载、原件哈希与两条提交全链](windows-native-graphics/dma-return-calibration-94004.json)
+
+从同一 ETL 复核首次调用后的 DWM 包，节点 0 有 83 个普通非 Present 包，其中两个为历史相同的 3524 字节。均未出现同一队列两次抢占后再次提交。启动 `91476` 的 DWM 队列 `48660` 第三次提交 `152586` 仍缺当次 KMD 入返和完成回执，原三次重启根因也继续开放。独立的应用资源围栏等待仍需同一对象的证据。[DWM 抢占对照](windows-native-graphics/rounds/win-dwm-third-return-control-20261121-01.result.json) · [历史故障边界](windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json)
+
+启动 `94176` 恢复正式基线 `2c35ae83`、`oem30.inf` 与签名 KMD `69ba174ebe17`。已读回八项全哈希、永久许可、Code 0、DWM 1428 和交流手持状态。四次受控转换逐次匹配 Windows 1074，期间无新增 41、6008、1001 或 4101。诊断包、试用许可、回退任务和采集均已清理。[恢复与清理回执](windows-native-graphics/dma-return-calibration-94004.json)
+
 ### 现行基线 · NVK ARM64EC 兼容实现
 
 启动 `93748` 在交流供电下以一次性许可进入 Code 0 桌面。x64 与 ARM64EC 客户端分别通过系统 D3D11 只请求 FL11_1，加载兼容槽中的 ARM64EC NVK `d31b862075fe`，完成三角形像素校验并以 0 退出。原生 ARM64 对照加载 `a143bee5ba42`，三组均回到同一 DWM。选定后已读回永久许可与所有组件哈希，工作目录内已移除旧的纯 x64 NVK。首次 Present 故障继续登记。[绘图与启动验收](nvk-arm64ec-d31b8620/qualification.json) · [永久许可与兼容槽核对](nvk-arm64ec-d31b8620/selection.json)

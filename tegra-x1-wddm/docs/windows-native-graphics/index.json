@@ -1418,9 +1418,9 @@
       "priority": "P0",
       "owner": "同一正常窗口进程、Windows 调度、GM20B KMD 与 GPU",
       "question": "诊断 KMD 在有效一次性许可的真实 Switch GPU 上，能否为同一提交配对进入、准入、GP_PUT 与 GPU 完成？",
-      "status": "故障开放",
+      "status": "实机通过",
       "existing_observation": "签名包及 ARM64 模型已过。既有正常 FLIP_SEQUENTIAL 空窗口含一条非空设备初始化 DMA 和完整画面、输入、退出回执。",
-      "missing_observation": "没有收到候选 Code 0 或工作负载回执。异常开机转换的第一失败组件、板级记录及原案 152586 的实际 KMD 接收仍待证。",
+      "missing_observation": "历史 DMA 152586 和原三次旧版重启仍缺同启动的后段证据。 该围栏是 DMA 提交完成值，应用资源的独立等待和异常启动本身仍待同轮证据。",
       "pass_condition": "Code 0、交流、手持、实载哈希与已消费的一次性令牌吻合。相同的 Windows 433/KMD 上下文和提交围栏依次关联四阶段和实际完成，不出现意外重启；恢复正式许可及组件。",
       "evidence": [
         {
@@ -1440,9 +1440,10 @@
         "dma_interrupt"
       ],
       "round_ids": [
-        "win-kmd-dma-hardware-calibration-20261121-01"
+        "win-kmd-dma-hardware-calibration-20261121-01",
+        "win-kmd-return-v2-calibration-20261121-01"
       ],
-      "latest_observation": "候选的一次性启动前，91650 已持久记录令牌值 1、Code 43，并收到 Windows 重启请求 1074。其后 91732 记录 6008/41，BugcheckCode=0。应用未发出，未取得候选 Code 0 或四阶段配对。最后一条关机实证是 91725/6006，距下一次有记录的内核开始 57.750 秒。前后两次受控对照均有 109/13，本段缺失。 启动 91832 已恢复正式 Code 0、永久许可和加载哈希。"
+      "latest_observation": "启动 94004 的旧式空窗口第一次 Present(1,0) 返回 S_OK。应用 DMA 4328、软件队列 1 有同文件、同适配器、同 KMD 上下文和同调度线程的进入及成功 NTSTATUS。GP_PUT、GPU 执行后的围栏回读、Windows 中断、完成和退役均已关联。 同时段 DWM DMA 4321 有独立通过链，作为独立工作负载保存。 画面像素捕获成功，输入成功。"
     },
     {
       "id": "WIN-DWM-LATE-ADAPTER-PROGRESS",
@@ -2208,6 +2209,58 @@
         "win-kmd-return-profile-stage-93818-20261121-01"
       ],
       "latest_observation": "正式启动 93818 上完成隔离诊断配置文件准备。12 个签名目录成员复核，8 个配置哈希中只有候选 KMD 不同。正式驱动、DWM 1384 和永久许可均保持，上传临时目录已清理。"
+    },
+    {
+      "id": "WIN-KMD-RETURN-BOOT-IDENTITY",
+      "priority": "P0",
+      "owner": "Windows 启动许可、GPU PnP 和 DWM",
+      "question": "独立诊断 KMD 能否在一次性许可下到达 Code 0，且其余组件与正式基线一致？",
+      "status": "实机通过",
+      "existing_observation": "正式启动 93818 核验隔离候选目录和 oem30.inf 回退包。",
+      "missing_observation": "该启动仅确认诊断 KMD 实载及许可。首次 Present 的实际底层返回、同围栏与历史重启归因待独立回合采集。",
+      "pass_condition": "交流手持。计划重启有 Windows 记录。候选已经加载、许可已消耗、Code 0、桌面可用，其余七个配置哈希一致，且无新增未解释的关机记录。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-kmd-return-profile-stage-93818-20261121-01.result.json",
+          "sha256": "0f80c5db435212bb32c4b4523b075d20ee4e9885df73b4e603c12f39f4982f7d"
+        }
+      ],
+      "windows_references": [
+        "wddm_caps",
+        "dma_interrupt"
+      ],
+      "round_ids": [
+        "win-kmd-return-one-use-boot-20261121-01"
+      ],
+      "latest_observation": "Windows 启动 94004 消耗一次性许可并进入 DWM 1436，Code 0，交流手持。候选 KMD 已实际运行，其余七个配置文件与正式基线一致。受控启动与相应 1074 逐次核对，无新增 41、6008、1001 或 4101。"
+    },
+    {
+      "id": "WIN-DWM-THIRD-KMD-CONTROL-COVERAGE",
+      "priority": "P0",
+      "owner": "Windows dxgkrnl 调度与 DWM GPU 上下文",
+      "question": "本次已封存的正常 DWM 跟踪是否覆盖历史 3524 字节队列包两次抢占后的第三次提交？",
+      "status": "观测缺口",
+      "existing_observation": "诊断启动 94004 已采到单个 DWM 包的全链。旧启动 91476 有独立的第三次提交缺口。",
+      "missing_observation": "正常轮尚缺同大小、同节点且发生两次抢占的可比包全链。历史 152586 的实载 KMD 边界继续开放。",
+      "pass_condition": "该窗口同启动 ETL 中，DWM、GM20B 节点 0、3524 字节、两次抢占与第三次提交身份连贯，且可核对第三次 KMD 入返和同包完成。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+          "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-kmd-return-v2-calibration-20261121-01.result.json",
+          "sha256": "2fe87401eac810e054077fbd85714bf2d492392faf3bcf75a23a9af3e4e5667c"
+        }
+      ],
+      "windows_references": [
+        "dma_interrupt",
+        "dma_submit_virtual"
+      ],
+      "round_ids": [
+        "win-dwm-third-return-control-20261121-01"
+      ],
+      "latest_observation": "启动 94004 留存 ETL 可定位首个应用 Present 之后同一 DWM、同 GM20B 节点 0 的 83 个普通非 Present 队列包。2 个为 3524 字节，0 个出现同队列两次抢占后再次提交。同时满足历史尺寸及抢占条件的有 0 个，其中 0 个核到第三次 KMD 入返与完成。"
     }
   ],
   "rounds": [
@@ -5391,20 +5444,130 @@
         "first_anomaly_or_missing": "候选目录用于后续唯一一次性试用。实际 KMD 返回、硬件围栏及历史故障归因仍需实载回执。"
       },
       "finished_utc": "2026-11-21T22:49:12.176151+00:00"
+    },
+    {
+      "round_id": "win-kmd-return-one-use-boot-20261121-01",
+      "contract_id": "WIN-KMD-RETURN-BOOT-IDENTITY",
+      "windows_question": "WIN-KMD-RETURN-BOOT-IDENTITY",
+      "method": "单次诊断许可和精确组件核对，无图形负载",
+      "plan": "windows-native-graphics/rounds/win-kmd-return-one-use-boot-20261121-01.plan.json",
+      "plan_sha256": "071423a5e753131247fcdcfd4b9c13df7690cd79fbf73879f4542b908d8aa2bd",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T22:55:03.502186+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-kmd-return-one-use-boot-20261121-01.result.json",
+      "result_sha256": "ef785683a51e03ca195167484c7d7646b13f05f04bab950eeaf894a6163d1db9",
+      "status": "实机通过",
+      "finding": "Windows 启动 94004 消耗一次性许可并进入 DWM 1436，Code 0，交流手持。候选 KMD 已实际运行，其余七个配置文件与正式基线一致。受控启动与相应 1074 逐次核对，无新增 41、6008、1001 或 4101。",
+      "missing_observation": "该启动仅确认诊断 KMD 实载及许可。首次 Present 的实际底层返回、同围栏与历史重启归因待独立回合采集。",
+      "boundaries": {
+        "last_entry": "Windows controlled boot after one-use permit",
+        "last_return": "2026-11-21T23:05:08.5044899Z",
+        "first_anomaly_or_missing": "该启动仅确认诊断 KMD 实载及许可。首次 Present 的实际底层返回、同围栏与历史重启归因待独立回合采集。"
+      },
+      "finished_utc": "2026-11-21T23:05:13.397296+00:00"
+    },
+    {
+      "round_id": "win-kmd-return-v2-calibration-20261121-01",
+      "contract_id": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+      "windows_question": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+      "method": "一次性候选，关闭应用内 ETW，外部同一文件采集 WDDM 包装与 KMD 版本 2",
+      "plan": "windows-native-graphics/rounds/win-kmd-return-v2-calibration-20261121-01.plan.json",
+      "plan_sha256": "d945b254bfffcdccc452c1d54c928cc81a3fcc4d66521ee00ef3a3214050d7ca",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T23:05:13.478289+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-kmd-return-v2-calibration-20261121-01.result.json",
+      "result_sha256": "2fe87401eac810e054077fbd85714bf2d492392faf3bcf75a23a9af3e4e5667c",
+      "status": "实机通过",
+      "finding": "启动 94004 的旧式空窗口第一次 Present(1,0) 返回 S_OK。应用 DMA 4328、软件队列 1 有同文件、同适配器、同 KMD 上下文和同调度线程的进入及成功 NTSTATUS。GP_PUT、GPU 执行后的围栏回读、Windows 中断、完成和退役均已关联。 同时段 DWM DMA 4321 有独立通过链，作为独立工作负载保存。 画面像素捕获成功，输入成功。",
+      "missing_observation": "历史 DMA 152586 和原三次旧版重启仍缺同启动的后段证据。 该围栏是 DMA 提交完成值，应用资源的独立等待和异常启动本身仍待同轮证据。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 3582429811,
+          "pid": 4,
+          "tid": 904,
+          "offset": 4063232,
+          "adapter_luid": "0000000000005c54",
+          "kmd_context": "ffff860d579fd820",
+          "submission_fence": 4328,
+          "dma_bytes": 52,
+          "phase": 1,
+          "phase_name": "ddi_entry",
+          "detail": 2,
+          "version": 2,
+          "payload_sha256": "0a36a83ea061b2c477ed0aa2552dce4deeede0278af15601542d93f4dd00b286"
+        },
+        "last_return": {
+          "qpc": 3582430172,
+          "pid": 4,
+          "tid": 904,
+          "offset": 4063232,
+          "adapter_luid": "0000000000005c54",
+          "kmd_context": "ffff860d579fd820",
+          "submission_fence": 4328,
+          "dma_bytes": 52,
+          "phase": 5,
+          "phase_name": "ddi_return",
+          "detail": 0,
+          "version": 2,
+          "payload_sha256": "20c316e968b8ee60cc18902c055ed852e280135515bd9d2fc87bb1fa913f60fb"
+        },
+        "last_completion": {
+          "qpc": 3582478165,
+          "pid": 4,
+          "tid": 900,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446706729050820624,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446609990588402464
+          }
+        },
+        "first_anomaly_or_missing": "历史 DMA 152586 和原三次旧版重启仍缺同启动的后段证据。 该围栏是 DMA 提交完成值，应用资源的独立等待和异常启动本身仍待同轮证据。"
+      },
+      "finished_utc": "2026-11-21T23:06:49.284720+00:00"
+    },
+    {
+      "round_id": "win-dwm-third-return-control-20261121-01",
+      "contract_id": "WIN-DWM-THIRD-KMD-CONTROL-COVERAGE",
+      "windows_question": "WIN-DWM-THIRD-KMD-CONTROL-COVERAGE",
+      "method": "只分析已封存 ETL。无新增实机运行。",
+      "plan": "windows-native-graphics/rounds/win-dwm-third-return-control-20261121-01.plan.json",
+      "plan_sha256": "03380c4e07a153f65a74f72932c7212189284eada4d1b74c7c8345a1cf6e3d1e",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T23:08:46.123623+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-dwm-third-return-control-20261121-01.result.json",
+      "result_sha256": "a8daedad874235127fbc60a5383e0c0e0c13e6a29d76e0ce881535378251838d",
+      "status": "观测缺口",
+      "finding": "启动 94004 留存 ETL 可定位首个应用 Present 之后同一 DWM、同 GM20B 节点 0 的 83 个普通非 Present 队列包。2 个为 3524 字节，0 个出现同队列两次抢占后再次提交。同时满足历史尺寸及抢占条件的有 0 个，其中 0 个核到第三次 KMD 入返与完成。",
+      "missing_observation": "正常轮尚缺同大小、同节点且发生两次抢占的可比包全链。历史 152586 的实载 KMD 边界继续开放。",
+      "boundaries": {
+        "last_entry": 3582201244,
+        "last_return": 3947175695,
+        "first_anomaly_or_missing": "正常轮尚缺同大小、同节点且发生两次抢占的可比包全链。历史 152586 的实载 KMD 边界继续开放。"
+      },
+      "finished_utc": "2026-11-21T23:08:48.087748+00:00"
     }
   ],
   "progress": {
-    "total": 62,
+    "total": 64,
     "by_status": {
-      "实机通过": 31,
-      "观测缺口": 15,
+      "实机通过": 33,
+      "观测缺口": 16,
       "已有实机通过": 7,
-      "故障开放": 4,
+      "故障开放": 3,
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 88,
-    "new_device_executions": 36
+    "registered_rounds": 91,
+    "new_device_executions": 37
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
