@@ -208,6 +208,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
     DRIVER_INITIALIZATION_DATA d={0};
     d.Version=DXGKDDI_INTERFACE_VERSION;
     TgGpuRegisterAdapterDdis(&d);
+    d.DxgkDdiCollectDiagnosticInfo=TgGpuDdiCollectDiagnosticInfo;
     d.DxgkDdiStartDevice=start_device;
     d.DxgkDdiSetPowerState=set_power;
     d.DxgkDdiInterruptRoutine=interrupt;

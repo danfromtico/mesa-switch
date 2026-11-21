@@ -101,5 +101,4 @@ void TgGpuRegisterResetDdis(DRIVER_INITIALIZATION_DATA *d)
     d->DxgkDdiQueryEngineStatus=query_engine;
     d->DxgkDdiResetEngine=reset_engine;
     d->DxgkDdiCollectDbgInfo=collect_debug_info;
-    d->DxgkDdiCollectDiagnosticInfo=TgGpuDdiCollectDiagnosticInfo;
 }
