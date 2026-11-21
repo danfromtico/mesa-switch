@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-return-catalog-93818-20261121-02",
+  "contract_id": "WIN-KMD-RETURN-CATALOG",
+  "windows_question": "WIN-KMD-RETURN-CATALOG",
+  "owner": "Windows 驱动目录工具、签名和 ARM64 模型",
+  "question": "现行基线上的 Windows 能否校验隔离的 KMD return 观测包及 ARM64 队列模型？",
+  "method": "正式 Windows 下校验签名 ARM64 队列模型与候选目录；仅隔离临时目录",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "签名模型正常返回，Windows Inf2Cat 在专属目录生成新目录，签名后核对 12 个成员和完整哈希，正式 KMD / 启动 / DWM 未改变。",
+  "observations": [
+    "核对正式 KMD、启动、永久许可、DWM、Code 0、交流供电及 WDK 工具哈希。",
+    "运行签名 ARM64 模型。使用既有 Windows Inf2Cat 工作流程，再核对签名和全部成员。",
+    "回读正式驱动与系统日志并清理本轮专属目录。诊断事件是否实载由另一轮裁决。"
+  ],
+  "inputs": {
+    "archive_sha256": "5dcd14453d1a4ac7a055d3e83a50ea35b7a6130eec6a330cf5dfb1c0c40b65b6",
+    "manifest_sha256": "0bde42191766ac145e9e78f1b6dbeb041321fc1f7803d1e172d0da956cbb56c4",
+    "kmd": "bfbc849f36b5a67b985f8ff4489d6200b3befda1a8c27be2fd8159744c50dbfa",
+    "model": "ea74a95d9249639ed6172ae341939833e273698d51e5844cf37c584ec51dd16f",
+    "inf2cat": "b594728d38b271979367abc8060a971b8e42422738009be126710b1f5dd0fcbc",
+    "signtool": "29955332740f64db0d2cd67d787fef0ddc0a77525337f966e34e77d8d9a6002e",
+    "active_boot": 93818,
+    "loaded_kmd": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "preflight_sha256": "8991d61e9600fc5f36eb50b0fd3cc1fa8d4d2e8b3efe716340c99a71b396d15a",
+    "runner_sha256": "6cae35b7cb3ae7f2d46ff9597e5a7f7b3f58c3c00d4afd9a8923732035c85711"
+  }
+}

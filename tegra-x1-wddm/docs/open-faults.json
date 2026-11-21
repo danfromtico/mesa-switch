@@ -4962,6 +4962,50 @@
           "first_anomaly_or_missing": "本轮补齐既有时间范围内的启动连续性。采样间隔内无逐包 KMD 证据，且该应用仍缺返回后客户区像素。93748 的复位时刻及历史 DMA 152586 根因保持开放。"
         },
         "finished_utc": "2026-11-21T22:38:29.376301+00:00"
+      },
+      {
+        "round_id": "win-kmd-return-catalog-93818-20261121-01",
+        "contract_id": "WIN-KMD-RETURN-CATALOG",
+        "windows_question": "WIN-KMD-RETURN-CATALOG",
+        "method": "正式 Windows 下校验签名 ARM64 队列模型与候选目录；仅隔离临时目录",
+        "plan": "windows-native-graphics/rounds/win-kmd-return-catalog-93818-20261121-01.plan.json",
+        "plan_sha256": "84356698ff15214398b17ecf3b850f63a4de9d322896f80a7c9cad1e47fd2e53",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:41:07.930401+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-kmd-return-catalog-93818-20261121-01.result.json",
+        "result_sha256": "8f5ca2157af6854e07e3a25bf4457ee320fb656270caad159b99a5d7434e74f1",
+        "status": "观测缺口",
+        "finding": "签名 ARM64 模型输出完整 PASS 信息，Start-Process 退出码字段为空。Windows 目录步骤未发出，正式驱动和开机回读一致，暂存目录已清理。",
+        "missing_observation": "本轮未获得独立的进程退出码、候选目录或签名成员结果。使用可持续持有进程句柄的调用方式补采。",
+        "boundaries": {
+          "last_entry": 3612,
+          "last_return": "WINDOW_COPY 640x360 to 641x361 passed, 2560/2688 pitches, one complete DDI packet\r\nPASS: WDK private GR images/mappings/reset epochs, adapter/LUID/512MiB ABI and ordered queue (controlled substitutes; no live WDDM or GPU pass)\r\n",
+          "first_anomaly_or_missing": "本轮未获得独立的进程退出码、候选目录或签名成员结果。使用可持续持有进程句柄的调用方式补采。"
+        },
+        "finished_utc": "2026-11-21T22:42:24.947164+00:00"
+      },
+      {
+        "round_id": "win-kmd-return-catalog-93818-20261121-02",
+        "contract_id": "WIN-KMD-RETURN-CATALOG",
+        "windows_question": "WIN-KMD-RETURN-CATALOG",
+        "method": "正式 Windows 下校验签名 ARM64 队列模型与候选目录；仅隔离临时目录",
+        "plan": "windows-native-graphics/rounds/win-kmd-return-catalog-93818-20261121-02.plan.json",
+        "plan_sha256": "e0b737d9023c0e1b36913e2340ec24b0ba7235fe23adf0ba8f1d31cd1c4ac750",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T22:42:25.040918+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-kmd-return-catalog-93818-20261121-02.result.json",
+        "result_sha256": "e2edb7b67b5e18c9f28357167d7e4f82a39ffbf719c02106c3a2ec8b2d477853",
+        "status": "实机通过",
+        "finding": "Windows 正式启动 93818 的签名 ARM64 队列模型退出码 0。Windows 生成并验证隔离候选的签名目录，12 个成员全哈希吻合。正式 KMD、Code 0、DWM 1384 与永久许可已读回，专属目录已清理。",
+        "missing_observation": "本轮核验签名和模型。实载候选的事件 7/v2、同包 KMD 返回及故障归属仍须后续实机。",
+        "boundaries": {
+          "last_entry": "2026-11-21T22:42:33.1669583Z",
+          "last_return": "2026-11-21T22:42:51.0266076Z",
+          "first_anomaly_or_missing": "本轮核验签名和模型。实载候选的事件 7/v2、同包 KMD 返回及故障归属仍须后续实机。"
+        },
+        "finished_utc": "2026-11-21T22:43:11.266599+00:00"
       }
     ]
   }
