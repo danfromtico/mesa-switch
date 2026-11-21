@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "round_id": "win-reset-external-transport-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "plan_sha256": "6e5f5af8076f1e0a156d0a7edd7f8fcf66adf74e5fcbbe94f9527e51e99dc703",
+  "status": "故障开放",
+  "finding": "启动 91476 的 DBG2 校验通过，唯一入口为 NVIDIA 16550 的 \\_SB.UAR2。与同次 DSDT 的 NVDA0100 设备对应。BCD 全局调试类型为 Local，当前 OS 与 Boot Manager 条目未列显式 debug 或 bootdebug。控制端仅列出本机 debug-console 和 Bluetooth-Incoming-Port。",
+  "missing_observation": "未找到覆盖原三次的板级或串口捕获。当前 UARTB 如用于后续取证，需有实际外部接收和与同一次公开 CALL 对齐的回执。",
+  "device_executions": 0,
+  "evidence": {
+    "collection_boot": 91476,
+    "switch_utc": "2026-11-21T14:50:50.9876434Z",
+    "external_ac": "Online",
+    "gpu_code": 0,
+    "dbg2": {
+      "bytes": 94,
+      "sha256": "fec61bc9c725ea6c711e219149a98e6a72d8591243d89f722a0ef09f0aea6934",
+      "raw_base64": "REJHMl4AAAAAxk5WSURJQU5JTlRFTkRPFAMhIElNQlUEAAAALAAAAAEAAAAAMgABDAAmAAAAAAAAgAUAAAAWACIAAAAAA0BgAHAAAAAAQAAAAFxfU0IuVUFSMgAAAA==",
+      "namespace": "\\_SB.UAR2",
+      "type": "Serial",
+      "subtype": "NVIDIA 16550",
+      "port_type": 32768,
+      "port_subtype": 5,
+      "address_space": 0,
+      "width": 0,
+      "bit_offset": 0,
+      "access_size": 3,
+      "address_bytes": 64
+    },
+    "dsdt": {
+      "bytes": 4993,
+      "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849",
+      "iasl_dsdt_text_sha256": "51f0a6bce6b857f4c629a9ef547016f2ddb635894efa823fa9f8c489d7de67eb",
+      "node": [
+        "Device (UAR2)",
+        "        {",
+        "            Method (_HID, 0, NotSerialized)  // _HID: Hardware ID",
+        "            {",
+        "                Return (\"NVDA0100\")",
+        "            }"
+      ]
+    },
+    "bcd": {
+      "current_bcd": {
+        "fields": [
+          "identifier              {current}",
+          "inherit                 {bootloadersettings}"
+        ],
+        "exit": 0
+      },
+      "debugger_bcd": {
+        "fields": [
+          "identifier              {dbgsettings}",
+          "debugtype               Local"
+        ],
+        "exit": 0
+      },
+      "bootmgr_bcd": {
+        "fields": [
+          "identifier              {bootmgr}",
+          "inherit                 {globalsettings}"
+        ],
+        "exit": 0
+      }
+    },
+    "controller": {
+      "serial_nodes": [
+        "/dev/cu.Bluetooth-Incoming-Port",
+        "/dev/cu.debug-console"
+      ],
+      "ioreg_sha256": "247cceac6bf2fbfe1a705114fef4635fe125ecb2297efbb867b8b8dc13cfed06",
+      "endpoint_properties": [
+        "\"IOTTYBaseName\" = \"debug-console\"",
+        "\"IOSerialBSDClientType\" = \"IOSerialStream\"",
+        "\"IOCalloutDevice\" = \"/dev/cu.debug-console\"",
+        "\"IODialinDevice\" = \"/dev/tty.debug-console\"",
+        "\"IOTTYBaseName\" = \"Bluetooth-Incoming-Port\"",
+        "\"IOSerialBSDClientType\" = \"IOSerialStream\"",
+        "\"IOCalloutDevice\" = \"/dev/cu.Bluetooth-Incoming-Port\"",
+        "\"IODialinDevice\" = \"/dev/tty.Bluetooth-Incoming-Port\""
+      ],
+      "windbg_on_mac_path": null
+    },
+    "raw_sha256": "e8aa048fc5afb8638a24345dccf96b41520a85f740aa41a7483b4900e5d75720",
+    "local_raw_source": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/win-reset-external-transport-20261121-01.raw.json",
+    "limits": "当前 DBG2 给出固件向 Windows 描述的串口，工具未取得 Switch 至控制端的串口数据或任何对应原故障的外部记录。BCD 的选定条目只读回读了显式字段。",
+    "boundaries": {
+      "last_entry": "本轮从原故障证据缺口出发，仅对当前 Windows 公共固件表接口及 BCD 做只读取证。",
+      "last_return": "读取到当前 UARTB 调试设备描述和 Local 调试类型，同一启动 91476 保持运行。",
+      "first_anomaly_or_missing": "未找到覆盖原三次的板级或串口捕获。当前 UARTB 如用于后续取证，需有实际外部接收和与同一次公开 CALL 对齐的回执。"
+    }
+  }
+}

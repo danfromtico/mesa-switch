@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "round_id": "win-platform-reset-path-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "plan_sha256": "0092c1c6bbaf73906e79a1ef1d270757ec76be5a1e5a613f0dee9539bd123c8e",
+  "status": "故障开放",
+  "finding": "Switch 启动 91476 的 Windows 公共固件表接口成功读出并校验 FACP 与 DSDT。BERT、ERST、HEST 逐项查询均返回 1168。启动 82058、82221、82382 各自到恢复启动之前，System 未查到所选 WHEA 与转储初始化或写入事件。当前 CrashDumpEnabled=3，活动分页文件 512 MiB。",
+  "missing_observation": "仍缺能归属原三次首次 CALL 后的异常回执。原次运行启动区间内未找到 WHEA 持久错误、volmgr 初始化失败或转储写入记录。当前 Windows 固件接口查不到 BERT、ERST、HEST，且当前的小型转储配置没有实测覆盖整机复位。",
+  "device_executions": 0,
+  "evidence": {
+    "collection_boot": 91476,
+    "live_readback": {
+      "expected_architecture": "ARM64",
+      "whea_logs": [
+        {
+          "records": 4230,
+          "name": "Microsoft-Windows-Kernel-WHEA/Operational",
+          "oldest_record": 1,
+          "enabled": true
+        },
+        {
+          "records": 0,
+          "name": "Microsoft-Windows-Kernel-WHEA/Errors",
+          "oldest_record": 0,
+          "enabled": true
+        }
+      ],
+      "dump_config": {
+        "CrashDumpEnabled": 3,
+        "AutoReboot": 1,
+        "LogEvent": 1,
+        "DumpFile": "C:\\Windows\\MEMORY.DMP",
+        "MinidumpDir": "C:\\Windows\\Minidump",
+        "DumpFilters": []
+      },
+      "boot": 91476,
+      "current_events": [
+        {
+          "record": 91476,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-21T12:01:31.2765120Z",
+          "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>12</EventID><Version>0</Version><Level>4</Level><Task>1</Task><Opcode>0</Opcode><Keywords>0x8000000000000080</Keywords><TimeCreated SystemTime='2026-11-21T12:01:31.2765120Z'/><EventRecordID>91476</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='MajorVersion'>10</Data><Data Name='MinorVersion'>0</Data><Data Name='BuildVersion'>22621</Data><Data Name='QfeVersion'>2861</Data><Data Name='ServiceVersion'>0</Data><Data Name='BootMode'>0</Data><Data Name='StartTime'>2026-11-21T12:01:29.6157822Z</Data></EventData></Event>",
+          "id": 12
+        }
+      ],
+      "tables": [
+        {
+          "checksum_mod_256": 0,
+          "oem": "NVIDIA",
+          "revision": 6,
+          "enumerated": true,
+          "name": "FACP",
+          "raw_apei": null,
+          "bytes": 276,
+          "sha256": "5e983e0c24ff8c8cd4ac1c848d41835bb092e6a73e4091c27408b4047846dcb0"
+        },
+        {
+          "checksum_mod_256": 0,
+          "oem": "NVIDIA",
+          "revision": 1,
+          "enumerated": false,
+          "name": "DSDT",
+          "raw_apei": null,
+          "bytes": 4993,
+          "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        },
+        {
+          "error": 1168,
+          "name": "BERT",
+          "bytes": 0,
+          "enumerated": false
+        },
+        {
+          "error": 1168,
+          "name": "ERST",
+          "bytes": 0,
+          "enumerated": false
+        },
+        {
+          "error": 1168,
+          "name": "HEST",
+          "bytes": 0,
+          "enumerated": false
+        }
+      ],
+      "acpi_directory_sha256": "1e8390436b5e0161dc2fd9ffa4d4262999f4f7b46a0a442a0e3e580dd94ea21a",
+      "acpi_directory_base64": "RkFDUEFQSUNQUFRUR1REVERCRzI=",
+      "utc": "2026-11-21T14:49:09.2726899Z",
+      "ac": "Online",
+      "current_window_through": 91555,
+      "acpi_signatures": [
+        "FACP",
+        "APIC",
+        "PPTT",
+        "GTDT",
+        "DBG2"
+      ],
+      "gpu_code": 0,
+      "pshed": [],
+      "os": {
+        "version": "10.0.22631",
+        "build": "22631"
+      },
+      "active_pagefiles": [
+        {
+          "allocated_mib": 512,
+          "name": "C:\\pagefile.sys",
+          "temporary": false
+        }
+      ],
+      "original_boot_windows": [
+        {
+          "records": [
+            {
+              "record": 82058,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "utc": "2026-11-20T12:09:56.8156588Z",
+              "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>12</EventID><Version>0</Version><Level>4</Level><Task>1</Task><Opcode>0</Opcode><Keywords>0x8000000000000080</Keywords><TimeCreated SystemTime='2026-11-20T12:09:56.8156588Z'/><EventRecordID>82058</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='MajorVersion'>10</Data><Data Name='MinorVersion'>0</Data><Data Name='BuildVersion'>22621</Data><Data Name='QfeVersion'>2861</Data><Data Name='ServiceVersion'>0</Data><Data Name='BootMode'>0</Data><Data Name='StartTime'>2026-11-20T12:09:55.2444586Z</Data></EventData></Event>",
+              "id": 12
+            }
+          ],
+          "recovery": 82128,
+          "boot": 82058
+        },
+        {
+          "records": [
+            {
+              "record": 82221,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "utc": "2026-11-20T12:27:41.6517764Z",
+              "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>12</EventID><Version>0</Version><Level>4</Level><Task>1</Task><Opcode>0</Opcode><Keywords>0x8000000000000080</Keywords><TimeCreated SystemTime='2026-11-20T12:27:41.6517764Z'/><EventRecordID>82221</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='MajorVersion'>10</Data><Data Name='MinorVersion'>0</Data><Data Name='BuildVersion'>22621</Data><Data Name='QfeVersion'>2861</Data><Data Name='ServiceVersion'>0</Data><Data Name='BootMode'>0</Data><Data Name='StartTime'>2026-11-20T12:27:40.0875309Z</Data></EventData></Event>",
+              "id": 12
+            }
+          ],
+          "recovery": 82289,
+          "boot": 82221
+        },
+        {
+          "records": [
+            {
+              "record": 82382,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "utc": "2026-11-20T12:34:29.7277365Z",
+              "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>12</EventID><Version>0</Version><Level>4</Level><Task>1</Task><Opcode>0</Opcode><Keywords>0x8000000000000080</Keywords><TimeCreated SystemTime='2026-11-20T12:34:29.7277365Z'/><EventRecordID>82382</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='MajorVersion'>10</Data><Data Name='MinorVersion'>0</Data><Data Name='BuildVersion'>22621</Data><Data Name='QfeVersion'>2861</Data><Data Name='ServiceVersion'>0</Data><Data Name='BootMode'>0</Data><Data Name='StartTime'>2026-11-20T12:34:28.1580391Z</Data></EventData></Event>",
+              "id": 12
+            }
+          ],
+          "recovery": 82448,
+          "boot": 82382
+        }
+      ]
+    },
+    "raw_source_sha256": "86b6797a6720c72ca5f7ea33e556f6853abc433668f81ee85a2d8b8fa412b22e",
+    "local_raw_source": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/win-platform-reset-path-20261121-01.raw.json",
+    "script_sha256": "9e53b7a065b213558455860abeb870553b788522f82760071a389470f2938d71",
+    "before_snapshot_sha256": "5fbecf22e835a778e91bbb20850ee731354866457434e4de8cc56bc6d74b9161",
+    "after_snapshot_sha256": "32963c9b5a133c1058b699d108dc91dfb7122a2d179283ad69cf629ab8f297b2",
+    "verified_device": {
+      "boot": 91476,
+      "dwm": 1400,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0,
+      "components": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "loaded": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      }
+    },
+    "window_filter": "System EventRecordId 自故障启动 12 起，止于对应下一启动 12 前。volmgr 45/46/49/161/162 与 Microsoft-Windows-WHEA-Logger。",
+    "limits": "Windows 公共 ACPI API 的枚举范围及逐表查询只描述 91476。已见 DBG2 签名，尚缺对应传输会话的本机证据。当前配置与原次观察区间分别取证。",
+    "boundaries": {
+      "last_entry": "三次旧客户端各留下首次 Present CALL。固件表和 CrashControl 只在当前 91476 只读采集。",
+      "last_return": "原次 CALL 前已记录设备状态查询成功和值 1 信号退役。当前开机、桌面、负载许可和组件哈希核对一致。",
+      "first_anomaly_or_missing": "仍缺能归属原三次首次 CALL 后的异常回执。原次运行启动区间内未找到 WHEA 持久错误、volmgr 初始化失败或转储写入记录。当前 Windows 固件接口查不到 BERT、ERST、HEST，且当前的小型转储配置没有实测覆盖整机复位。"
+    }
+  }
+}

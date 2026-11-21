@@ -29,6 +29,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-original-kmd-telemetry-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-original-process-lifetime-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-platform-reset-path-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-reset-external-transport-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result.",
@@ -1982,6 +1984,72 @@
           "first_anomaly_or_missing": "每次应用复制的 DMA 归属与退役已核实。DWM 91 的表面字段仍为零，后续消费与应用 Blt 目标之间缺同一表面或提交的直接记录。"
         },
         "finished_utc": "2026-11-21T14:39:41.783933+00:00"
+      },
+      {
+        "round_id": "win-platform-reset-path-20261121-01",
+        "contract_id": "WIN-OLD-RESET",
+        "windows_question": "WIN-OLD-RESET",
+        "method": "实机只读核对固件错误记录接口与原次 Windows 转储初始化",
+        "plan": "windows-native-graphics/rounds/win-platform-reset-path-20261121-01.plan.json",
+        "plan_sha256": "0092c1c6bbaf73906e79a1ef1d270757ec76be5a1e5a613f0dee9539bd123c8e",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:48:45.949365+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-platform-reset-path-20261121-01.result.json",
+        "result_sha256": "16f95a7e6354f93e6d3dfa66fea6de28f36e87d058dc5062481899b0190fdd6d",
+        "status": "故障开放",
+        "finding": "Switch 启动 91476 的 Windows 公共固件表接口成功读出并校验 FACP 与 DSDT。BERT、ERST、HEST 逐项查询均返回 1168。启动 82058、82221、82382 各自到恢复启动之前，System 未查到所选 WHEA 与转储初始化或写入事件。当前 CrashDumpEnabled=3，活动分页文件 512 MiB。",
+        "missing_observation": "仍缺能归属原三次首次 CALL 后的异常回执。原次运行启动区间内未找到 WHEA 持久错误、volmgr 初始化失败或转储写入记录。当前 Windows 固件接口查不到 BERT、ERST、HEST，且当前的小型转储配置没有实测覆盖整机复位。",
+        "boundaries": {
+          "last_entry": "三次旧客户端各留下首次 Present CALL。固件表和 CrashControl 只在当前 91476 只读采集。",
+          "last_return": "原次 CALL 前已记录设备状态查询成功和值 1 信号退役。当前开机、桌面、负载许可和组件哈希核对一致。",
+          "first_anomaly_or_missing": "仍缺能归属原三次首次 CALL 后的异常回执。原次运行启动区间内未找到 WHEA 持久错误、volmgr 初始化失败或转储写入记录。当前 Windows 固件接口查不到 BERT、ERST、HEST，且当前的小型转储配置没有实测覆盖整机复位。"
+        },
+        "finished_utc": "2026-11-21T14:49:52.120807+00:00"
+      },
+      {
+        "round_id": "win-dwm-present-history-batch-20261121-01",
+        "contract_id": "WIN-DWM-CONSUME",
+        "windows_question": "WIN-DWM-CONSUME",
+        "method": "复核五份原空窗口的 PresentHistory 令牌与 DWM 读取批次",
+        "plan": "windows-native-graphics/rounds/win-dwm-present-history-batch-20261121-01.plan.json",
+        "plan_sha256": "5e436d6c926aa2217c0962ea119b55d777674bc428008f57444022101834d980",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:50:08.936187+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-dwm-present-history-batch-20261121-01.result.json",
+        "result_sha256": "80b86e47fc98977c0c2ab70ee9827c8404f7c4cf6cf5961ac2beeed3980c3162",
+        "status": "观测缺口",
+        "finding": "正式基线五次空窗口的 DWM 91 均位于同一线程的 63/64/65 读取批次内。64 返回 S_OK，每批汇报 2 或 3 个令牌。应用提交的 Model=3 令牌在两份 ETL 中均未匹配到同令牌的 172 或 DWM PID 记录。两次在批次结束后由另一 PID 用相同地址提交了 Model=7 的新记录。",
+        "missing_observation": "需要 DWM 实际收到的逐令牌标识，或能唯一归到这次应用提交的表面消费记录。现有读取回执只提供批次数目和窗口调度。正常翻转仍有 467 的窗口消费对照。",
+        "boundaries": {
+          "last_entry": "五个 Model=3 的应用令牌各有同启动、适配器和绘图线程身份。",
+          "last_return": "五个 DWM 读取批次返回 S_OK，且同批 91 的 EventId 对应当次 HWND。",
+          "first_anomaly_or_missing": "需要 DWM 实际收到的逐令牌标识，或能唯一归到这次应用提交的表面消费记录。现有读取回执只提供批次数目和窗口调度。正常翻转仍有 467 的窗口消费对照。"
+        },
+        "finished_utc": "2026-11-21T14:50:27.585552+00:00"
+      },
+      {
+        "round_id": "win-reset-external-transport-20261121-01",
+        "contract_id": "WIN-OLD-RESET",
+        "windows_question": "WIN-OLD-RESET",
+        "method": "只读核对当前 DBG2、Windows 启动调试配置与控制端物理取证路径",
+        "plan": "windows-native-graphics/rounds/win-reset-external-transport-20261121-01.plan.json",
+        "plan_sha256": "6e5f5af8076f1e0a156d0a7edd7f8fcf66adf74e5fcbbe94f9527e51e99dc703",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:50:45.249043+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-reset-external-transport-20261121-01.result.json",
+        "result_sha256": "9ae40a973de907e943383a8e60fd313c79836e1bdffcb7629452c94844f620d6",
+        "status": "故障开放",
+        "finding": "启动 91476 的 DBG2 校验通过，唯一入口为 NVIDIA 16550 的 \\_SB.UAR2。与同次 DSDT 的 NVDA0100 设备对应。BCD 全局调试类型为 Local，当前 OS 与 Boot Manager 条目未列显式 debug 或 bootdebug。控制端仅列出本机 debug-console 和 Bluetooth-Incoming-Port。",
+        "missing_observation": "未找到覆盖原三次的板级或串口捕获。当前 UARTB 如用于后续取证，需有实际外部接收和与同一次公开 CALL 对齐的回执。",
+        "boundaries": {
+          "last_entry": "本轮从原故障证据缺口出发，仅对当前 Windows 公共固件表接口及 BCD 做只读取证。",
+          "last_return": "读取到当前 UARTB 调试设备描述和 Local 调试类型，同一启动 91476 保持运行。",
+          "first_anomaly_or_missing": "未找到覆盖原三次的板级或串口捕获。当前 UARTB 如用于后续取证，需有实际外部接收和与同一次公开 CALL 对齐的回执。"
+        },
+        "finished_utc": "2026-11-21T14:51:06.500574+00:00"
       }
     ]
   }

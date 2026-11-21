@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "round_id": "win-platform-reset-path-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "owner": "历史应用、Windows 内核及早期复位记录",
+  "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+  "method": "实机只读核对固件错误记录接口与原次 Windows 转储初始化",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+  "observations": [
+    "使用 Windows 公共固件表 API 枚举此 Switch 安装的 ACPI 表，以 FACP 和 DSDT 作读取对照，查询 BERT、ERST 和 HEST。",
+    "按 System RecordId 读取三个原运行启动到各恢复启动之前的 WHEA 和 volmgr 转储初始化、写入事件。核对当前 CrashControl、活动分页文件、WHEA 通道及正常供电状态。",
+    "如取得持久记录，将原次记录与开机、首次 CALL 及故障阶段匹配。当前能力及原次错误输出的适用时段分别保存。"
+  ],
+  "inputs": {
+    "records": [
+      {
+        "boot": 82058,
+        "recovery": 82128
+      },
+      {
+        "boot": 82221,
+        "recovery": 82289
+      },
+      {
+        "boot": 82382,
+        "recovery": 82448
+      }
+    ],
+    "script_sha256": "9e53b7a065b213558455860abeb870553b788522f82760071a389470f2938d71",
+    "original_order": {
+      "path": "legacy-sequential-step4/historical-restart-order.json",
+      "sha256": "e00d8d476b7caf397a668444c51bb4fe8338bc016dbb4d46ec8cf42afac18097"
+    },
+    "prior_os_archive": {
+      "path": "windows-native-graphics/rounds/win-historical-reset-20261121-01.result.json",
+      "sha256": "f25542749cb21e1a6664ce81ea494d3cba9b50161ca943dcb888c405f1ed2059"
+    },
+    "microsoft": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-enumsystemfirmwaretables",
+      "https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemfirmwaretable",
+      "https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/event-id-46-start-a-computer"
+    ],
+    "acpi": "https://uefi.org/specs/ACPI/6.5/18_Platform_Error_Interfaces.html"
+  }
+}

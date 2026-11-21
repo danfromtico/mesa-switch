@@ -38,6 +38,12 @@
 
 上述五次 52 字节复制在 Blt 166、队列提交 178 和 DMA 提交 175 携带相同的缓冲指针。DMA 完成号对应 177/176，队列包标识及序号对应 180。原先送审的摘要省略了 178/175，补核回执列出每次完整顺序。[五个应用复制包与后续 DWM 91 的逐字段核对](windows-native-graphics/rounds/win-dwm-blt-dma-identity-20261121-01.result.json)
 
+五次正式空窗口的 DWM 91 均位于同线程的 63/64/65 令牌读取批次内。64 返回 S_OK，各批汇报 2 或 3 个令牌。两次批次结束后，另一 PID 的 Model=7 提交出现与应用 Model=3 相同的令牌地址。逐帧消费仍缺与应用提交对应的令牌记录，翻转对照则有事件 467。[同线程批次、令牌及翻转对照](windows-native-graphics/rounds/win-dwm-present-history-batch-20261121-01.result.json)
+
+当前 Switch 启动 91476 能通过 Windows 公共接口读取并校验 FACP、DSDT。BERT、ERST、HEST 的逐表查询均返回 1168。原三次运行启动到对应恢复启动之间，System 未查到所选 WHEA 或 volmgr 转储初始化和写入事件。当前 Windows 配置小型转储并有活动分页文件。[固件表回读和原次 System 记录范围](windows-native-graphics/rounds/win-platform-reset-path-20261121-01.result.json)
+
+同次 DBG2 描述的调试口是 NVIDIA 16550 的 `\_SB.UAR2`，与 DSDT 的 NVDA0100 设备对应。BCD 全局调试类型为 Local。控制端未取得来自该 UARTB 的采集回执，三次历史故障仍缺能与各自 CALL 对齐的板级证据。[调试口与控制端只读核对](windows-native-graphics/rounds/win-reset-external-transport-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

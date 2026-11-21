@@ -1,0 +1,1778 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-present-history-batch-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "plan_sha256": "5e436d6c926aa2217c0962ea119b55d777674bc428008f57444022101834d980",
+  "status": "观测缺口",
+  "finding": "正式基线五次空窗口的 DWM 91 均位于同一线程的 63/64/65 读取批次内。64 返回 S_OK，每批汇报 2 或 3 个令牌。应用提交的 Model=3 令牌在两份 ETL 中均未匹配到同令牌的 172 或 DWM PID 记录。两次在批次结束后由另一 PID 用相同地址提交了 Model=7 的新记录。",
+  "missing_observation": "需要 DWM 实际收到的逐令牌标识，或能唯一归到这次应用提交的表面消费记录。现有读取回执只提供批次数目和窗口调度。正常翻转仍有 467 的窗口消费对照。",
+  "device_executions": 0,
+  "evidence": {
+    "observed_boot": 91476,
+    "cases": [
+      {
+        "case": "win-empty-present-20261121-01",
+        "archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+        "boot": 91476,
+        "pid": 5992,
+        "tid": 5988,
+        "dwm_pid": 1400,
+        "hwnd": 524312,
+        "luid": "0000000000005c10",
+        "call_qpc": 94861147189,
+        "public_return_qpc": 94861380548,
+        "desktop_capture_qpc": 94863412892,
+        "traces": {
+          "display.etl": {
+            "trace_sha256": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 94861377851,
+                "pid": 5992,
+                "tid": 5988,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 94861377851,
+                "pid": 5992,
+                "tid": 5988,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              },
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 171,
+                "version": 2,
+                "task": "PresentHistory",
+                "qpc": 94861460794,
+                "pid": 5460,
+                "tid": 5592,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 7,
+                  "TokenSize": 0,
+                  "TokenData": 1732,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "f16ee695350bdbed1ba8e46a1c05680408709bf392fc211f7590eab6aa0bd80e"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [
+              {
+                "records": [
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 63,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 94861440742,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {},
+                    "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 64,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY_GetPresentHistory",
+                    "qpc": 94861440913,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hr": 0,
+                      "cTokenCount": 3
+                    },
+                    "payload_sha256": "9ae4c9d0864c30005acac91f21015f39e35691a056d606a097c8cf8380275a17"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 91,
+                    "version": 0,
+                    "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                    "qpc": 94861443540,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hLogicalSurface": 0,
+                      "hDxSharedSurface": 0,
+                      "EventId": 524312,
+                      "NumRects": 0
+                    },
+                    "payload_sha256": "4d9e7f57ec369ef128c06b51b81d53d2831488778930a84e5613b52baddf40d1"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 65,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 94861443624,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "cTotalTokenCount": 3,
+                      "cIterationCount": 0
+                    },
+                    "payload_sha256": "35be322d094f9d154a8aba4733b8497f180353bd7ae7b0a15f90b586b549f28b"
+                  }
+                ],
+                "exact_bracket": true
+              }
+            ],
+            "dwm_window_schedule": [
+              {
+                "provider": "Microsoft-Windows-Dwm-Core",
+                "id": 91,
+                "version": 0,
+                "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                "qpc": 94861443540,
+                "pid": 1400,
+                "tid": 2252,
+                "fields": {
+                  "hLogicalSurface": 0,
+                  "hDxSharedSurface": 0,
+                  "EventId": 524312,
+                  "NumRects": 0
+                },
+                "payload_sha256": "4d9e7f57ec369ef128c06b51b81d53d2831488778930a84e5613b52baddf40d1"
+              }
+            ],
+            "selected_event_counts": {
+              "Microsoft-Windows-Dwm-Core/141": 6,
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 2,
+              "Microsoft-Windows-DxgKrnl/173": 2,
+              "Microsoft-Windows-Dwm-Core/63": 7,
+              "Microsoft-Windows-Dwm-Core/64": 7,
+              "Microsoft-Windows-Dwm-Core/91": 1,
+              "Microsoft-Windows-Dwm-Core/65": 7,
+              "Microsoft-Windows-DxgKrnl/171": 1,
+              "Microsoft-Windows-Dwm-Core/468": 1
+            }
+          },
+          "scene/video.etl": {
+            "trace_sha256": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 94861377896,
+                "pid": 5992,
+                "tid": 5988,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 94861377896,
+                "pid": 5992,
+                "tid": 5988,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              },
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 171,
+                "version": 2,
+                "task": "PresentHistory",
+                "qpc": 94861460837,
+                "pid": 5460,
+                "tid": 5592,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 7,
+                  "TokenSize": 0,
+                  "TokenData": 1732,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "f16ee695350bdbed1ba8e46a1c05680408709bf392fc211f7590eab6aa0bd80e"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [],
+            "dwm_window_schedule": [],
+            "selected_event_counts": {
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 2,
+              "Microsoft-Windows-DxgKrnl/173": 2,
+              "Microsoft-Windows-DxgKrnl/171": 1
+            }
+          }
+        }
+      },
+      {
+        "case": "win-present-live-20261121-02",
+        "archive_sha256": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308",
+        "boot": 91476,
+        "pid": 5540,
+        "tid": 7812,
+        "dwm_pid": 1400,
+        "hwnd": 524400,
+        "luid": "0000000000005c10",
+        "call_qpc": 131646464982,
+        "public_return_qpc": 131646719229,
+        "desktop_capture_qpc": 131648431776,
+        "traces": {
+          "display.etl": {
+            "trace_sha256": "14e6750d7823aaeaebda2eafca17da5dbb4f7de7b12cc499459dce10e006c259",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 131646716196,
+                "pid": 5540,
+                "tid": 7812,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095385168,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "4605bc85e370f3a3e27670154763833eae2102f122cf7e70bf881936efef90b4"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 131646716196,
+                "pid": 5540,
+                "tid": 7812,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095385168,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "4605bc85e370f3a3e27670154763833eae2102f122cf7e70bf881936efef90b4"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [
+              {
+                "records": [
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 63,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 131646722694,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {},
+                    "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 64,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY_GetPresentHistory",
+                    "qpc": 131646722944,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hr": 0,
+                      "cTokenCount": 2
+                    },
+                    "payload_sha256": "2fcd151b8295e8b3bf8ec64ede173523417960a8db6cbc569de9a25a458f9135"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 91,
+                    "version": 0,
+                    "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                    "qpc": 131646724789,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hLogicalSurface": 0,
+                      "hDxSharedSurface": 0,
+                      "EventId": 524400,
+                      "NumRects": 0
+                    },
+                    "payload_sha256": "ff5967b6fca921e0aac03a178962c9e0f4e1e7613e70be52ec3a9bf37ab119ff"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 65,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 131646724895,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "cTotalTokenCount": 2,
+                      "cIterationCount": 0
+                    },
+                    "payload_sha256": "d86e8112f3c4c4442126f8e9f44f16867da487f29052bf91b810457db34209a4"
+                  }
+                ],
+                "exact_bracket": true
+              }
+            ],
+            "dwm_window_schedule": [
+              {
+                "provider": "Microsoft-Windows-Dwm-Core",
+                "id": 91,
+                "version": 0,
+                "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                "qpc": 131646724789,
+                "pid": 1400,
+                "tid": 2252,
+                "fields": {
+                  "hLogicalSurface": 0,
+                  "hDxSharedSurface": 0,
+                  "EventId": 524400,
+                  "NumRects": 0
+                },
+                "payload_sha256": "ff5967b6fca921e0aac03a178962c9e0f4e1e7613e70be52ec3a9bf37ab119ff"
+              }
+            ],
+            "selected_event_counts": {
+              "Microsoft-Windows-Dwm-Core/141": 6,
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 1,
+              "Microsoft-Windows-DxgKrnl/173": 1,
+              "Microsoft-Windows-Dwm-Core/63": 6,
+              "Microsoft-Windows-Dwm-Core/64": 6,
+              "Microsoft-Windows-Dwm-Core/91": 1,
+              "Microsoft-Windows-Dwm-Core/65": 6
+            }
+          },
+          "scene/video.etl": {
+            "trace_sha256": "f66e4f5690cd6bfc883fc1c2ca880d5a23fa19ba923d61b1bd09df9c3a3f5882",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 131646716235,
+                "pid": 5540,
+                "tid": 7812,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095385168,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "4605bc85e370f3a3e27670154763833eae2102f122cf7e70bf881936efef90b4"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 131646716235,
+                "pid": 5540,
+                "tid": 7812,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095385168,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "4605bc85e370f3a3e27670154763833eae2102f122cf7e70bf881936efef90b4"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [],
+            "dwm_window_schedule": [],
+            "selected_event_counts": {
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 1,
+              "Microsoft-Windows-DxgKrnl/173": 1
+            }
+          }
+        }
+      },
+      {
+        "case": "win-present-incall-20261121-01",
+        "archive_sha256": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4",
+        "boot": 91476,
+        "pid": 7576,
+        "tid": 2116,
+        "dwm_pid": 1400,
+        "hwnd": 589944,
+        "luid": "0000000000005c10",
+        "call_qpc": 138481770248,
+        "public_return_qpc": 138482065231,
+        "desktop_capture_qpc": 138483343654,
+        "traces": {
+          "display.etl": {
+            "trace_sha256": "c5e687c2200f6624b125b94608e2b4a07e06431a5a76c05800c788125a68b567",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 138482061340,
+                "pid": 7576,
+                "tid": 2116,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 138482061340,
+                "pid": 7576,
+                "tid": 2116,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              },
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 171,
+                "version": 2,
+                "task": "PresentHistory",
+                "qpc": 138482592541,
+                "pid": 5460,
+                "tid": 5592,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 7,
+                  "TokenSize": 0,
+                  "TokenData": 1664,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "6c0a73be0a78e7754866754d22b6cbeb4d2779c9c6d9d72d676379764e911142"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [
+              {
+                "records": [
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 63,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 138482243320,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {},
+                    "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 64,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY_GetPresentHistory",
+                    "qpc": 138482243619,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hr": 0,
+                      "cTokenCount": 2
+                    },
+                    "payload_sha256": "2fcd151b8295e8b3bf8ec64ede173523417960a8db6cbc569de9a25a458f9135"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 91,
+                    "version": 0,
+                    "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                    "qpc": 138482246214,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hLogicalSurface": 0,
+                      "hDxSharedSurface": 0,
+                      "EventId": 589944,
+                      "NumRects": 0
+                    },
+                    "payload_sha256": "f2797908555035c3d7617af66c0513f925976887cc16dfe9bbf1f11294932d35"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 65,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 138482246338,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "cTotalTokenCount": 2,
+                      "cIterationCount": 0
+                    },
+                    "payload_sha256": "d86e8112f3c4c4442126f8e9f44f16867da487f29052bf91b810457db34209a4"
+                  }
+                ],
+                "exact_bracket": true
+              }
+            ],
+            "dwm_window_schedule": [
+              {
+                "provider": "Microsoft-Windows-Dwm-Core",
+                "id": 91,
+                "version": 0,
+                "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                "qpc": 138482246214,
+                "pid": 1400,
+                "tid": 2252,
+                "fields": {
+                  "hLogicalSurface": 0,
+                  "hDxSharedSurface": 0,
+                  "EventId": 589944,
+                  "NumRects": 0
+                },
+                "payload_sha256": "f2797908555035c3d7617af66c0513f925976887cc16dfe9bbf1f11294932d35"
+              }
+            ],
+            "selected_event_counts": {
+              "Microsoft-Windows-Dwm-Core/63": 4,
+              "Microsoft-Windows-Dwm-Core/64": 4,
+              "Microsoft-Windows-Dwm-Core/65": 4,
+              "Microsoft-Windows-Dwm-Core/141": 2,
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 2,
+              "Microsoft-Windows-DxgKrnl/173": 2,
+              "Microsoft-Windows-Dwm-Core/91": 1,
+              "Microsoft-Windows-DxgKrnl/171": 1,
+              "Microsoft-Windows-Dwm-Core/468": 1
+            }
+          },
+          "scene/video.etl": {
+            "trace_sha256": "d7d500a2fcfb196e448b3fd0da4d2cbf532a72a2437907a969d2c565e89efcd0",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 138482061391,
+                "pid": 7576,
+                "tid": 2116,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 138482061391,
+                "pid": 7576,
+                "tid": 2116,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              },
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 171,
+                "version": 2,
+                "task": "PresentHistory",
+                "qpc": 138482592568,
+                "pid": 5460,
+                "tid": 5592,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 7,
+                  "TokenSize": 0,
+                  "TokenData": 1664,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "6c0a73be0a78e7754866754d22b6cbeb4d2779c9c6d9d72d676379764e911142"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [],
+            "dwm_window_schedule": [],
+            "selected_event_counts": {
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 2,
+              "Microsoft-Windows-DxgKrnl/173": 2,
+              "Microsoft-Windows-DxgKrnl/171": 1
+            }
+          }
+        }
+      },
+      {
+        "case": "win-present-incall-20261121-02",
+        "archive_sha256": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b",
+        "boot": 91476,
+        "pid": 7924,
+        "tid": 1936,
+        "dwm_pid": 1400,
+        "hwnd": 721498,
+        "luid": "0000000000005c10",
+        "call_qpc": 146154976455,
+        "public_return_qpc": 146155271427,
+        "desktop_capture_qpc": 146156604104,
+        "traces": {
+          "display.etl": {
+            "trace_sha256": "8f80c9125966dabe5fc425af9b23291802572730423c2567f250990993154d57",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 146155267410,
+                "pid": 7924,
+                "tid": 1936,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 146155267410,
+                "pid": 7924,
+                "tid": 1936,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [
+              {
+                "records": [
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 63,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 146155525566,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {},
+                    "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 64,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY_GetPresentHistory",
+                    "qpc": 146155525897,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hr": 0,
+                      "cTokenCount": 2
+                    },
+                    "payload_sha256": "2fcd151b8295e8b3bf8ec64ede173523417960a8db6cbc569de9a25a458f9135"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 91,
+                    "version": 0,
+                    "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                    "qpc": 146155528612,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hLogicalSurface": 0,
+                      "hDxSharedSurface": 0,
+                      "EventId": 721498,
+                      "NumRects": 0
+                    },
+                    "payload_sha256": "6146537472364647a3e5128c0936c9584ba26ad16848bea8a4c0a9d96a6fd50c"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 65,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 146155528736,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "cTotalTokenCount": 2,
+                      "cIterationCount": 0
+                    },
+                    "payload_sha256": "d86e8112f3c4c4442126f8e9f44f16867da487f29052bf91b810457db34209a4"
+                  }
+                ],
+                "exact_bracket": true
+              }
+            ],
+            "dwm_window_schedule": [
+              {
+                "provider": "Microsoft-Windows-Dwm-Core",
+                "id": 91,
+                "version": 0,
+                "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                "qpc": 146155528612,
+                "pid": 1400,
+                "tid": 2252,
+                "fields": {
+                  "hLogicalSurface": 0,
+                  "hDxSharedSurface": 0,
+                  "EventId": 721498,
+                  "NumRects": 0
+                },
+                "payload_sha256": "6146537472364647a3e5128c0936c9584ba26ad16848bea8a4c0a9d96a6fd50c"
+              }
+            ],
+            "selected_event_counts": {
+              "Microsoft-Windows-Dwm-Core/63": 4,
+              "Microsoft-Windows-Dwm-Core/64": 4,
+              "Microsoft-Windows-Dwm-Core/65": 4,
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 1,
+              "Microsoft-Windows-DxgKrnl/173": 1,
+              "Microsoft-Windows-Dwm-Core/141": 3,
+              "Microsoft-Windows-Dwm-Core/91": 1
+            }
+          },
+          "scene/video.etl": {
+            "trace_sha256": "fe0437513bf92b9d528b61b458bc59c3d6b15a581d6415ac252149dbe7a7bb74",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 146155267472,
+                "pid": 7924,
+                "tid": 1936,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 146155267472,
+                "pid": 7924,
+                "tid": 1936,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [],
+            "dwm_window_schedule": [],
+            "selected_event_counts": {
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 1,
+              "Microsoft-Windows-DxgKrnl/173": 1
+            }
+          }
+        }
+      },
+      {
+        "case": "win-present-local-blt-20261121-01",
+        "archive_sha256": "61cb1ec4e568a2cf37ff874058725ec6ce6c6e140de4a4760d98b21d2c9f4570",
+        "boot": 91476,
+        "pid": 584,
+        "tid": 1664,
+        "dwm_pid": 1400,
+        "hwnd": 786538,
+        "luid": "0000000000005c10",
+        "call_qpc": 153054747396,
+        "public_return_qpc": 153055116440,
+        "desktop_capture_qpc": 153056731652,
+        "traces": {
+          "display.etl": {
+            "trace_sha256": "86a91af28d68d9767c53ad9c25cfe82c7c717842ca3e3b4157d875787c8db960",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 153055113099,
+                "pid": 584,
+                "tid": 1664,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 153055113099,
+                "pid": 584,
+                "tid": 1664,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [
+              {
+                "records": [
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 63,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 153055362951,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {},
+                    "payload_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 64,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY_GetPresentHistory",
+                    "qpc": 153055363314,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hr": 0,
+                      "cTokenCount": 2
+                    },
+                    "payload_sha256": "2fcd151b8295e8b3bf8ec64ede173523417960a8db6cbc569de9a25a458f9135"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 91,
+                    "version": 0,
+                    "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                    "qpc": 153055367011,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "hLogicalSurface": 0,
+                      "hDxSharedSurface": 0,
+                      "EventId": 786538,
+                      "NumRects": 0
+                    },
+                    "payload_sha256": "641a9f455beb57ee397e3585db65cf5c024c5779ec5f67ef5b016cb401358789"
+                  },
+                  {
+                    "provider": "Microsoft-Windows-Dwm-Core",
+                    "id": 65,
+                    "version": 0,
+                    "task": "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY",
+                    "qpc": 153055367123,
+                    "pid": 1400,
+                    "tid": 2252,
+                    "fields": {
+                      "cTotalTokenCount": 2,
+                      "cIterationCount": 0
+                    },
+                    "payload_sha256": "d86e8112f3c4c4442126f8e9f44f16867da487f29052bf91b810457db34209a4"
+                  }
+                ],
+                "exact_bracket": true
+              }
+            ],
+            "dwm_window_schedule": [
+              {
+                "provider": "Microsoft-Windows-Dwm-Core",
+                "id": 91,
+                "version": 0,
+                "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+                "qpc": 153055367011,
+                "pid": 1400,
+                "tid": 2252,
+                "fields": {
+                  "hLogicalSurface": 0,
+                  "hDxSharedSurface": 0,
+                  "EventId": 786538,
+                  "NumRects": 0
+                },
+                "payload_sha256": "641a9f455beb57ee397e3585db65cf5c024c5779ec5f67ef5b016cb401358789"
+              }
+            ],
+            "selected_event_counts": {
+              "Microsoft-Windows-Dwm-Core/141": 6,
+              "Microsoft-Windows-Dwm-Core/63": 6,
+              "Microsoft-Windows-Dwm-Core/64": 6,
+              "Microsoft-Windows-Dwm-Core/65": 6,
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 1,
+              "Microsoft-Windows-DxgKrnl/173": 1,
+              "Microsoft-Windows-Dwm-Core/91": 1
+            }
+          },
+          "scene/video.etl": {
+            "trace_sha256": "1257aa4fae41a4e2e8ecba4f89449399899282b44e47b1a1b2c198d6687bb4ad",
+            "health": [
+              {
+                "damaged": [],
+                "zero_buffers": 0,
+                "lost_events": 0,
+                "lost_buffers": 0,
+                "complete": true
+              },
+              {
+                "frequency": 19200000,
+                "events_lost": 0,
+                "buffers_lost": 0
+              }
+            ],
+            "application_starts": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 153055113127,
+                "pid": 584,
+                "tid": 1664,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "same_adapter_and_token": [
+              {
+                "provider": "Microsoft-Windows-DxgKrnl",
+                "id": 215,
+                "version": 2,
+                "task": "PresentHistoryDetailed",
+                "qpc": 153055113127,
+                "pid": 584,
+                "tid": 1664,
+                "fields": {
+                  "hAdapter": 18446706169586577424,
+                  "Token": 18446611100095384064,
+                  "Model": 3,
+                  "TokenSize": 48,
+                  "TokenData": 0,
+                  "Flags": 0,
+                  "CustomDuration": 0,
+                  "ScrollRect.left": 0,
+                  "ScrollRect.right": 0,
+                  "ScrollRect.top": 0,
+                  "ScrollRect.bottom": 0,
+                  "ScrollOffset.X": 0,
+                  "ScrollOffset.Y": 0,
+                  "DirtyRectCount": 0,
+                  "Left": [],
+                  "Right": [],
+                  "Top": [],
+                  "Bottom": [],
+                  "SourceRect.left": 0,
+                  "SourceRect.right": 0,
+                  "SourceRect.top": 0,
+                  "SourceRect.bottom": 0,
+                  "DestWidth": 0,
+                  "DestHeight": 0,
+                  "TargetRect.left": 0,
+                  "TargetRect.right": 0,
+                  "TargetRect.top": 0,
+                  "TargetRect.bottom": 0,
+                  "VmBusChannel": 0
+                },
+                "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+              }
+            ],
+            "token_info": [],
+            "direct_dwm_token": [],
+            "all_dwm_batches": [],
+            "dwm_window_schedule": [],
+            "selected_event_counts": {
+              "Microsoft-Windows-DxgKrnl/215": 1,
+              "Microsoft-Windows-DxgKrnl/172": 1,
+              "Microsoft-Windows-DxgKrnl/173": 1
+            }
+          }
+        }
+      },
+      {
+        "case": "copy-flip-1",
+        "archive_sha256": "1e096b5215c2a539e0c09745700c86df16df8f4b13584e9511e99ab209749527",
+        "boot": 87268,
+        "pid": 5872,
+        "dwm_pid": 1468,
+        "hwnd": 262332,
+        "trace": "display.etl",
+        "trace_sha256": "baad5d18dda92cdcc24ac0e83f8ff45dac96d735b647f12ba24d47b1e4a7d9c8",
+        "explicit_flip_consume": [
+          {
+            "provider": "Microsoft-Windows-Dwm-Core",
+            "id": 467,
+            "version": 0,
+            "task": "Windowed_Dx_Flip_Consumed",
+            "qpc": 9901506303,
+            "pid": 1468,
+            "tid": 2316,
+            "fields": {
+              "hWnd": 262332,
+              "displayAdapterLuid": 21904,
+              "renderAdapterLuid": 21904,
+              "vidPnSourceId": 0,
+              "vidPnTargetId": 0,
+              "uniqueId": 1,
+              "surfaceLuid": 1844512,
+              "bindId": 1,
+              "presentCount": 1
+            },
+            "payload_sha256": "e4692c98a6a233ed63d9178ac2471ce5d753c6c3f696c5258003c42fade05710"
+          }
+        ]
+      }
+    ],
+    "successful_batch_counts": {
+      "win-empty-present-20261121-01": 3,
+      "win-present-live-20261121-02": 2,
+      "win-present-incall-20261121-01": 2,
+      "win-present-incall-20261121-02": 2,
+      "win-present-local-blt-20261121-01": 2
+    },
+    "later_same_address_records": [
+      {
+        "case": "win-empty-present-20261121-01",
+        "pid": 5460,
+        "qpc": 94861460794,
+        "model": 7,
+        "ms_after_app_history_start": 4.32
+      },
+      {
+        "case": "win-present-incall-20261121-01",
+        "pid": 5460,
+        "qpc": 138482592541,
+        "model": 7,
+        "ms_after_app_history_start": 27.667
+      }
+    ],
+    "raw_local_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/win-dwm-present-history-batch-20261121-01.raw.json",
+    "raw_sha256": "af543f56e19e3b508ba64ae63c4ff78c24034484b2ca0d95e260a25ecd1fd7fb",
+    "validator_sha256": "db0cd49eac197b66eca512543c93bd449ec8ff5b35aed8892a58a0e9f44db305",
+    "contract": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ne-d3dkmthk-_d3dkmt_present_model",
+    "presentmon_application": "工具按最近一次窗口提交把 GPU GDI Copy 加到 DWM 的候选队列。事件 64 本身只给返回码与批次计数。该规则可对照取证思路，仍缺本机逐令牌等值字段。",
+    "boundaries": {
+      "last_entry": "五个 Model=3 的应用令牌各有同启动、适配器和绘图线程身份。",
+      "last_return": "五个 DWM 读取批次返回 S_OK，且同批 91 的 EventId 对应当次 HWND。",
+      "first_anomaly_or_missing": "需要 DWM 实际收到的逐令牌标识，或能唯一归到这次应用提交的表面消费记录。现有读取回执只提供批次数目和窗口调度。正常翻转仍有 467 的窗口消费对照。"
+    }
+  }
+}
