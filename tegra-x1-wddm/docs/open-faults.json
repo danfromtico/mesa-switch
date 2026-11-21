@@ -461,10 +461,11 @@
         "boot-recovery",
         "system-stability"
       ],
-      "trigger": "Read-only device return on boot 88248 exposed additional abnormal-shutdown records following the previously documented boot 87687, before the new GDI dispatch. Boot 90934 also reports an abnormal end to the unobserved boot 90872, after the earlier PAL4 test on boot 90785 had ended in a user-confirmed shutdown.",
+      "trigger": "Read-only device return on boot 88248 exposed additional abnormal-shutdown records following the previously documented boot 87687, before the new GDI dispatch. Boot 90934 also reports an abnormal end to the unobserved boot 90872, after the earlier PAL4 test on boot 90785 had ended in a user-confirmed shutdown. The interval between test boot 93748 and Explorer inspection on boot 93818 contains records 93827/6008 and 93836/41.",
       "evidence": [
         "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/user-return-88248.json",
-        "tegra-x1-wddm/docs/PAL4_TEXTURE_CHECKPOINT_20261121.json#subsequent_unobserved_session"
+        "tegra-x1-wddm/docs/PAL4_TEXTURE_CHECKPOINT_20261121.json#subsequent_unobserved_session",
+        "tegra-x1-wddm/docs/explorer-home-22631/intervening-boot.json"
       ],
       "cause": "Unconfirmed. The retained records do not correlate these events to a driver candidate, application, or specific initiating load.",
       "daily_workaround": "After a restart, verify Code 0, the active compositor and the selected signed component hashes before resuming the workload.",
@@ -526,6 +527,23 @@
       "evidence": [
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-kmd-dma-hardware-calibration-20261121-01.result.json"
       ],
+      "resolution": null
+    },
+    {
+      "id": "SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+      "status": "open",
+      "kind": "incorrect-output",
+      "affected_scopes": [
+        "presentation",
+        "windows-shell"
+      ],
+      "trigger": "Explorer Home and This PC have a blank upper client region on the native Code 0 desktop, Windows 22631.2861.",
+      "evidence": [
+        "tegra-x1-wddm/docs/explorer-home-22631/shell-header.json"
+      ],
+      "cause": "Unknown. The former NVK meta-state fix is still present. Neither the first affected build nor the shell or driver operation causing the blank region has been identified.",
+      "daily_workaround": "Access drives through the visible This PC content pane. Retain the selected graphics profile for controlled comparison.",
+      "close_when": "Identify the faulty shell or graphics operation against a matched control and verify visible tabs, address and command bar on Home and This PC.",
       "resolution": null
     }
   ],
