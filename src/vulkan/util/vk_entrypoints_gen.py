@@ -59,7 +59,7 @@ extern "C" {
  * On MSVC, weak symbols are not well supported, so we use the functionally
  * equivalent /alternatename.
  */
-#if !defined(_MSC_VER) && defined(VK_ENTRY_USE_WEAK)
+#if !defined(_MSC_VER) && !defined(__arm64ec__) && defined(VK_ENTRY_USE_WEAK)
 #define VK_ENTRY_WEAK __attribute__ ((weak))
 #else
 #define VK_ENTRY_WEAK
@@ -174,7 +174,15 @@ TEMPLATE_C = Template(COPYRIGHT + """
 #ifdef ${e.guard}
     % endif
     % for p in prefixes:
-#ifdef _MSC_VER
+#if defined(__arm64ec__) && !defined(_MSC_VER)
+    /* LLVM-MinGW needs COFF fallbacks for both the address-taken symbol
+     * and its native ARM64EC entry. GNU weak aliases otherwise resolve the
+     * former to zero even when the native implementation exists.
+     */
+    __asm__(".pushsection .drectve,\\"yn\\"\\n"
+            ".ascii \\" /alternatename:${p}_${e.name}=vk_entrypoint_stub"
+            " /alternatename:#${p}_${e.name}=#vk_entrypoint_stub\\"\\n.popsection");
+#elif defined(_MSC_VER)
 #ifdef _M_IX86
       % for args_size in [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 60, 104]:
     #pragma comment(linker, "/alternatename:_${p}_${e.name}@${args_size}=_vk_entrypoint_stub@0")
