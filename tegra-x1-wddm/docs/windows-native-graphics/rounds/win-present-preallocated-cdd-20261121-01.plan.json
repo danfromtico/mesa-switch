@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "round_id": "win-present-preallocated-cdd-20261121-01",
+  "contract_id": "WIN-CDD-LOCAL-FLUSH",
+  "windows_question": "WIN-CDD-LOCAL-FLUSH",
+  "owner": "Windows dxgkrnl、CDD 与 Switch 本机事件采集",
+  "question": "旧式正常空窗口首次 Present 返回前，Switch 能否将同一次 Call 的 CDD 目标分配事件写透到板端？",
+  "method": "同一合法图形应用的最早目标分配板端取证",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "同次公开调用和独立 ETL 中的 CDD 286 原始载荷匹配文件 SHA-256、CRC32 和轮次。CDD 经内核全局/设备分配绑定同一次 Blt 窗口。Windows 刷新成功时点早于 DXGI 43 与公开 RETURN。",
+  "observations": [
+    "同一正式许可基线和签名程序，手持交流供电、Code 0、旧式 0x000b000f、普通窗口和两个 BGRA 缓冲。正常运行一次首次 Present(1,0)。",
+    "探针在应用之前写透 64 KiB 槽。只选同进程第一个 CDD 286 写入。保留值、原始数据和 QPC，与同轮独立 ETL 的 global 33、device 36、Blt 166、KMT 回执及 DXGI 43 关联。",
+    "计算写透返回相对 DXGI 43 与公开 RETURN 的实际关系，复验全文件与事件载荷，回读后清理试验私有会话、文件和任务。单列历史重启仍缺的证据。"
+  ],
+  "inputs": {
+    "app": {
+      "Board-Case.ps1": "2c7a91f6a636833fbd4312708061843e37c90029ae89ce27be636013047340b1",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0"
+    },
+    "client_input_source_sha256": "863f388517cd989d5ef8278b5f7a680e787a1e681a9bc0e4086518b55f3938c3",
+    "nonce": "878abf3ccb4f40f7acbb4ff2267f4ab3",
+    "observer_source_sha256": "cde56ba57dbe622967a198abcf8364a7e43eacbd3a5870ca1b56a41ceb9811d2",
+    "observer_exe_sha256": "a9425d441b2c53ea9d25da9dbac890b37442fb51bd691d521350e2c0b12ce197",
+    "host_receiver_sha256": "c74c93e9e738c20889488d9e39264c90f7739235bdc0c6dd020be7986527b664",
+    "review_sha256": "ff299d85e4404fc996e27de83b2c96d9e13508c484478b2f56d24767e1df1d9c",
+    "runner_sha256": {
+      "run_cdd_fixture.py": "a6bd87c13c5f4c75afe016784ce7a417cf8327774325c2cbf2e2093983b07eb9",
+      "dispatch_cdd_witness.py": "3625c8e53ec8f27b9cba364cc37b759de7d394739248a85b2b56df39b81026ab",
+      "read_cdd_slot.py": "ae91637b20ae235b04d36e85a86daf32d40ab05565785fd78438b178b5ebaf01",
+      "cleanup_cdd_witness.py": "7e61bfeceb513e32ec160590ed0483605be3d3e0595fa9d3907200ff80002f8f",
+      "cleanup_cdd_local_files.py": "486f258e9622d80ec0776f14a3b015e8668b4e65b9bfaa868c266f6f0979fdec"
+    },
+    "parser_sha256": "6c6688734086b74f6b71863c4d661b50065c2da9f4faa6a4e0515bed28ad1fef",
+    "parser_controls_sha256": "b369bad6ff4b7a45720ceb0e15def84fbce0f1a0d525909121fd495cb7a9ff46",
+    "cdd_event": 286,
+    "slot_size": 65536,
+    "placeholder_byte": "a5",
+    "prior_hardware_comparisons": [
+      {
+        "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+        "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+        "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+      }
+    ]
+  }
+}

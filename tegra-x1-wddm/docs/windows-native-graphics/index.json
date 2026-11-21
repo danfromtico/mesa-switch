@@ -607,6 +607,34 @@
       "latest_observation": "开机 91476，绘图 PID/TID 4500/972。独立双路 ETL 与板端 64 KiB 文件中的 148 字节 Blt 166 记录匹配，验证 nonce、CRC 和文件尾部。同步写入及刷新用时 3.472 ms，成功返回相对 DXGI 43 +0.296 ms，相对公开 RETURN +0.278 ms。"
     },
     {
+      "id": "WIN-CDD-LOCAL-FLUSH",
+      "priority": "P0",
+      "owner": "Windows dxgkrnl、CDD 与 Switch 本机事件采集",
+      "question": "旧式正常空窗口首次 Present 返回前，Switch 能否将同一次 Call 的 CDD 目标分配事件写透到板端？",
+      "status": "实机通过",
+      "existing_observation": "正式空窗口中，CDD 286 与 global 33、device 36 和同一 HWND 的 Blt 166 目标分配已配对。预写槽轮的 CDD 消费早于 DXGI 43 5.415 ms，Blt 本机刷新晚于 DXGI 43 0.296 ms。",
+      "missing_observation": null,
+      "pass_condition": "同次公开调用和独立 ETL 中的 CDD 286 原始载荷匹配文件 SHA-256、CRC32 和轮次。CDD 经内核全局/设备分配绑定同一次 Blt 窗口。Windows 刷新成功时点早于 DXGI 43 与公开 RETURN。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+          "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+          "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "path"
+      ],
+      "round_ids": [
+        "win-present-preallocated-cdd-20261121-01"
+      ],
+      "latest_observation": "启动 91476 的同一绘图线程 4836/1256，板端槽的 84 字节 CDD 286 原始回执与独立 ETL 逐字节相符。CDD 目标经 global 33 与 device 36 绑定到同一 HWND 的 Blt 166。写入加刷新耗时 3.535 ms，成功返回相对 DXGI 43 -5.904 ms，相对公开 RETURN -5.926 ms。"
+    },
+    {
       "id": "WIN-PRESENT-KMT",
       "priority": "P0",
       "owner": "应用绘图线程、系统 D3D11/DXGI 和 Windows dxgkrnl",
@@ -2068,20 +2096,51 @@
         "first_anomaly_or_missing": "这次同对象的 166 原始载荷尚缺公开 RETURN 前完成本机写透的实测。"
       },
       "finished_utc": "2026-11-21T15:15:51.417303+00:00"
+    },
+    {
+      "round_id": "win-present-preallocated-cdd-20261121-01",
+      "contract_id": "WIN-CDD-LOCAL-FLUSH",
+      "windows_question": "WIN-CDD-LOCAL-FLUSH",
+      "method": "同一合法图形应用的最早目标分配板端取证",
+      "plan": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.plan.json",
+      "plan_sha256": "11604d456ada945c74fcb3cadf8b76a283a357233f7b05483a1a416ec7e087b0",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:17:59.223087+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+      "result_sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9",
+      "status": "实机通过",
+      "finding": "启动 91476 的同一绘图线程 4836/1256，板端槽的 84 字节 CDD 286 原始回执与独立 ETL 逐字节相符。CDD 目标经 global 33 与 device 36 绑定到同一 HWND 的 Blt 166。写入加刷新耗时 3.535 ms，成功返回相对 DXGI 43 -5.904 ms，相对公开 RETURN -5.926 ms。",
+      "missing_observation": null,
+      "boundaries": {
+        "last_entry": {
+          "cdd_qpc": 209428110760,
+          "consumer_qpc": 209428113305,
+          "write_start_qpc": 209428113368
+        },
+        "last_return": {
+          "board_write_flush_qpc": 209428181231,
+          "dxgi_stop_qpc": 209428294588,
+          "public_return_qpc": 209428295002,
+          "public_hresult": "00000000"
+        },
+        "first_anomaly_or_missing": "本次正常正式基线窗口的 Windows CDD 分配活动。原三次故障内核入口、Blt 回调与复位原因需要各自的 CALL 后回执。"
+      },
+      "finished_utc": "2026-11-21T15:19:54.200191+00:00"
     }
   ],
   "progress": {
-    "total": 25,
+    "total": 26,
     "by_status": {
-      "实机通过": 6,
+      "实机通过": 7,
       "观测缺口": 4,
       "已有实机通过": 7,
       "故障开放": 2,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 34,
-    "new_device_executions": 8
+    "registered_rounds": 35,
+    "new_device_executions": 9
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -2091,6 +2150,7 @@
       "WIN-PRESENT-LIVE-RECEIPT",
       "WIN-KMT-PRE-RETURN-WITNESS",
       "WIN-BLT-LOCAL-FLUSH",
+      "WIN-CDD-LOCAL-FLUSH",
       "WIN-PRESENT-SOURCE",
       "WIN-FENCE-WAIT",
       "WIN-BLT-DDI-ORDER",
@@ -2139,6 +2199,10 @@
         {
           "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
           "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+          "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
         }
       ],
       "resume_condition": "发现覆盖原次的故障转储、独立串口或板级记录，或正式条件下再次自然出现同症状并留有同次调用后的持久记录。核对首个失败步骤和组件后再进入原场景的三次修复验收。",
@@ -2166,6 +2230,10 @@
       "preallocated_board_receipt": {
         "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
         "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+      },
+      "onboard_cdd_receipt": {
+        "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+        "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
       }
     }
   },

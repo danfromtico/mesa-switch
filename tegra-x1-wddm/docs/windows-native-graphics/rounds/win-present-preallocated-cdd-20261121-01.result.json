@@ -1,0 +1,540 @@
+{
+  "schema": 1,
+  "round_id": "win-present-preallocated-cdd-20261121-01",
+  "contract_id": "WIN-CDD-LOCAL-FLUSH",
+  "windows_question": "WIN-CDD-LOCAL-FLUSH",
+  "plan_sha256": "11604d456ada945c74fcb3cadf8b76a283a357233f7b05483a1a416ec7e087b0",
+  "status": "实机通过",
+  "finding": "启动 91476 的同一绘图线程 4836/1256，板端槽的 84 字节 CDD 286 原始回执与独立 ETL 逐字节相符。CDD 目标经 global 33 与 device 36 绑定到同一 HWND 的 Blt 166。写入加刷新耗时 3.535 ms，成功返回相对 DXGI 43 -5.904 ms，相对公开 RETURN -5.926 ms。",
+  "missing_observation": null,
+  "device_executions": 1,
+  "evidence": {
+    "boot": 91476,
+    "dwm": 1400,
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "pid": 4836,
+    "tid": 1256,
+    "hwnd": 917624,
+    "luid": "0000000000005c10",
+    "ac": "Online",
+    "power_mode": 1,
+    "code": 0,
+    "component_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "application_modules": {
+      "libvulkan_nouveau.dll": {
+        "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\libvulkan_nouveau.dll"
+      },
+      "tg_d3d_arm64.DLL": {
+        "sha256": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\tg_d3d_arm64.DLL"
+      },
+      "TegraGpuD3DVk.dll": {
+        "sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\TegraGpuD3DVk.dll"
+      },
+      "tg_nvk_arm64.DLL": {
+        "sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\tg_nvk_arm64.DLL"
+      }
+    },
+    "dxgi_start_qpc": 209428047047,
+    "dxgi_stop_qpc": 209428294588,
+    "public_call_qpc": 209427983062,
+    "public_return_qpc": 209428295002,
+    "record_clock_hz": 19200000,
+    "observed_spacing_ms": 1.403,
+    "flush_summary": "EARLY_FLUSH 1 2000 894 209404564742 209428622250",
+    "verify_each_event": [
+      {
+        "seq": 1,
+        "event": 286,
+        "provider": "DxgKrnl",
+        "source_qpc": 209428110760,
+        "callback_qpc": 209428113305,
+        "windows_ack_qpc": 209428331016,
+        "alive_at_ack": true,
+        "payload_sha256": "4abd4b624be1b9f520bdc51aa9ced47dc818f10637a161632d258e9e40a64bbb",
+        "same_call_and_payload": true,
+        "file_etl_records": {
+          "display.etl": {
+            "qpc": 209428110786,
+            "version": 0,
+            "payload_sha256": "4abd4b624be1b9f520bdc51aa9ced47dc818f10637a161632d258e9e40a64bbb"
+          }
+        },
+        "host_post_fsync_ns": 42486091732000,
+        "source_to_ack_ms": 11.471667,
+        "ack_relative_to_dxgi_stop_ms": 1.897292,
+        "ack_relative_to_public_return_ms": 1.875729
+      },
+      {
+        "seq": 2,
+        "event": 166,
+        "provider": "DxgKrnl",
+        "source_qpc": 209428165559,
+        "callback_qpc": 209428194825,
+        "windows_ack_qpc": 209428352211,
+        "alive_at_ack": true,
+        "payload_sha256": "a685200638d9a49b25c114847e25629826770e01d6a9cbaf57f7f0d690e1c24c",
+        "same_call_and_payload": true,
+        "file_etl_records": {
+          "display.etl": {
+            "qpc": 209428165595,
+            "version": 0,
+            "payload_sha256": "a685200638d9a49b25c114847e25629826770e01d6a9cbaf57f7f0d690e1c24c"
+          },
+          "scene/video.etl": {
+            "qpc": 209428165626,
+            "version": 0,
+            "payload_sha256": "a685200638d9a49b25c114847e25629826770e01d6a9cbaf57f7f0d690e1c24c"
+          }
+        },
+        "host_post_fsync_ns": 42486092264666,
+        "source_to_ack_ms": 9.721458,
+        "ack_relative_to_dxgi_stop_ms": 3.001198,
+        "ack_relative_to_public_return_ms": 2.979635
+      }
+    ],
+    "persisted_blt_before_public_return": false,
+    "persisted_blt_before_dxgi_stop": false,
+    "object_chain": {
+      "cdd_286": {
+        "qpc": 209428110786,
+        "pid": 4836,
+        "tid": 1256,
+        "provider": "kernel",
+        "id": 286,
+        "version": 0,
+        "fields": {
+          "pDxgAdapterAllocation": 18446611100191458528,
+          "Flags": 0,
+          "Width": 640,
+          "Height": 360,
+          "Pitch": 2560
+        }
+      },
+      "global_alloc_33": {
+        "qpc": 209428110381,
+        "pid": 4836,
+        "tid": 1256,
+        "provider": "kernel",
+        "id": 33,
+        "version": 3,
+        "fields": {
+          "hProcessId": 4836,
+          "hDevice": 18446611100208922640,
+          "pDxgAdapter": 18446706169594454016,
+          "Flags": 129,
+          "allocSize": 921600,
+          "ulAlignment": 4096,
+          "dwReadSegment": 0,
+          "dwWriteSegment": 2,
+          "PreferredSegment": 2,
+          "HintedBank": 0,
+          "dwEvictionSegment": 0,
+          "Priority": 2013265920,
+          "hVidMmGlobalAlloc": 18446611100132285840,
+          "hDxgGlobalAlloc": 18446611100191458528,
+          "hDxgSharedResource": 0,
+          "UsageVersion": 0,
+          "UsageFlags": 0,
+          "Format": 0,
+          "SwizzledFormat": 0,
+          "ByteOffset": 0,
+          "Width": 0,
+          "Height": 0,
+          "Pitch": 0,
+          "Depth": 0,
+          "SlicePitch": 0,
+          "BackingStoreWasPinned": 0,
+          "pSectionObject": 0,
+          "PhysicalAdapterIndex": 0,
+          "PageTableOrDirectory": 0
+        }
+      },
+      "destination_36": {
+        "qpc": 209428111752,
+        "pid": 4836,
+        "tid": 1256,
+        "provider": "kernel",
+        "id": 36,
+        "version": 2,
+        "fields": {
+          "hProcessId": 4836,
+          "hDevice": 18446611100208922640,
+          "pDxgAdapter": 18446706169594454016,
+          "hVidMmAlloc": 18446706169574466576,
+          "hVidMmGlobalAlloc": 18446611100132285840,
+          "hDxgResource": 18446611100211641856,
+          "hDxgSharedResource": 18446706169653057264,
+          "hThunkAllocation": 1073743936,
+          "hThunkResource": 1073743872,
+          "PrivateRuntimeResourceHandle": 0,
+          "pVirtualAddress": 2360841617408,
+          "hProcessAllocDetails": 18446611100177842960,
+          "hOtherPartitionHandle": 0
+        }
+      },
+      "source_36": {
+        "qpc": 209412903356,
+        "pid": 4836,
+        "tid": 1256,
+        "provider": "kernel",
+        "id": 36,
+        "version": 2,
+        "fields": {
+          "hProcessId": 4836,
+          "hDevice": 18446611100208922640,
+          "pDxgAdapter": 18446706169594454016,
+          "hVidMmAlloc": 18446706169574458384,
+          "hVidMmGlobalAlloc": 18446611100138048928,
+          "hDxgResource": 18446611100211749856,
+          "hDxgSharedResource": 18446706169653118704,
+          "hThunkAllocation": 1073743680,
+          "hThunkResource": 1073743616,
+          "PrivateRuntimeResourceHandle": 0,
+          "pVirtualAddress": 2360839774208,
+          "hProcessAllocDetails": 18446611100177849104,
+          "hOtherPartitionHandle": 0
+        }
+      },
+      "context": {
+        "qpc": 209410390113,
+        "pid": 4836,
+        "tid": 1256,
+        "provider": "kernel",
+        "id": 30,
+        "version": 0,
+        "fields": {
+          "hDevice": 18446611100208922640,
+          "NodeOrdinal": 0,
+          "EngineAffinity": 1,
+          "DmaBufferSize": 65536,
+          "DmaBufferSegmentSet": 2,
+          "DmaBufferPrivateDataSize": 65864,
+          "AllocationListSize": 0,
+          "PatchLocationListSize": 0,
+          "Flags": 0,
+          "hContext": 18446611100136328608,
+          "ContextHandle": 1073742144,
+          "ParentDxgContext": 0
+        }
+      },
+      "dma_76": {
+        "qpc": 209428104001,
+        "pid": 4836,
+        "tid": 1256,
+        "provider": "kernel",
+        "id": 76,
+        "version": 0,
+        "fields": {
+          "hContext": 18446611100136328608,
+          "pDxgAdapter": 18446706169594454016,
+          "pDmaBuffer": 18446706169658788960,
+          "DmaSize": 65536,
+          "AllocationListSize": 3,
+          "PatchLocationListSize": 0,
+          "hAllocationGlobalHandle": 18446611100204706992
+        }
+      },
+      "blt_166": {
+        "qpc": 209428165595,
+        "pid": 4836,
+        "tid": 1256,
+        "provider": "kernel",
+        "id": 166,
+        "version": 0,
+        "fields": {
+          "hwnd": 917624,
+          "pDmaBuffer": 18446706169658788960,
+          "PresentHistoryToken": 0,
+          "hSourceAllocation": 18446706169574458384,
+          "hDestAllocation": 18446706169574466576,
+          "bSubmit": 1,
+          "bRedirectedPresent": 0,
+          "Flags": 1,
+          "Source.Left": 0,
+          "Source.Right": 640,
+          "Source.Top": 0,
+          "Source.Bottom": 360,
+          "Dest.Left": 0,
+          "Dest.Right": 640,
+          "Dest.Top": 0,
+          "Dest.Bottom": 360,
+          "SubRectCount": 1
+        }
+      },
+      "present_184": {
+        "qpc": 209428291405,
+        "pid": 4836,
+        "tid": 1256,
+        "provider": "kernel",
+        "id": 184,
+        "version": 1,
+        "fields": {
+          "hContext": 1073742144,
+          "hWindow": 917624,
+          "VidPnSourceId": 4294967295,
+          "FlipInterval": 1,
+          "Flags": 67178625,
+          "ReturnStatus": 0,
+          "hSrcAllocHandle": 1073743680,
+          "hDstAllocHandle": 0
+        }
+      }
+    },
+    "registered_inputs": {
+      "app": {
+        "Board-Case.ps1": "2c7a91f6a636833fbd4312708061843e37c90029ae89ce27be636013047340b1",
+        "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+        "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+        "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+        "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+        "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0"
+      },
+      "client_input_source_sha256": "863f388517cd989d5ef8278b5f7a680e787a1e681a9bc0e4086518b55f3938c3",
+      "nonce": "878abf3ccb4f40f7acbb4ff2267f4ab3",
+      "observer_source_sha256": "cde56ba57dbe622967a198abcf8364a7e43eacbd3a5870ca1b56a41ceb9811d2",
+      "observer_exe_sha256": "a9425d441b2c53ea9d25da9dbac890b37442fb51bd691d521350e2c0b12ce197",
+      "host_receiver_sha256": "c74c93e9e738c20889488d9e39264c90f7739235bdc0c6dd020be7986527b664",
+      "review_sha256": "ff299d85e4404fc996e27de83b2c96d9e13508c484478b2f56d24767e1df1d9c",
+      "runner_sha256": {
+        "run_cdd_fixture.py": "a6bd87c13c5f4c75afe016784ce7a417cf8327774325c2cbf2e2093983b07eb9",
+        "dispatch_cdd_witness.py": "3625c8e53ec8f27b9cba364cc37b759de7d394739248a85b2b56df39b81026ab",
+        "read_cdd_slot.py": "ae91637b20ae235b04d36e85a86daf32d40ab05565785fd78438b178b5ebaf01",
+        "cleanup_cdd_witness.py": "7e61bfeceb513e32ec160590ed0483605be3d3e0595fa9d3907200ff80002f8f",
+        "cleanup_cdd_local_files.py": "486f258e9622d80ec0776f14a3b015e8668b4e65b9bfaa868c266f6f0979fdec"
+      },
+      "parser_sha256": "6c6688734086b74f6b71863c4d661b50065c2da9f4faa6a4e0515bed28ad1fef",
+      "parser_controls_sha256": "b369bad6ff4b7a45720ceb0e15def84fbce0f1a0d525909121fd495cb7a9ff46",
+      "cdd_event": 286,
+      "slot_size": 65536,
+      "placeholder_byte": "a5",
+      "prior_hardware_comparisons": [
+        {
+          "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+          "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+          "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+        }
+      ]
+    },
+    "running_observer": {
+      "early_flush": true,
+      "pid": 1108,
+      "utc": "2026-11-21T15:18:23.5445059Z",
+      "sha256": "a9425d441b2c53ea9d25da9dbac890b37442fb51bd691d521350e2c0b12ce197",
+      "image": "C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\WinPresentLive-878abf3ccb4f\\live-present.exe"
+    },
+    "controller_raw_jsonl": [
+      {
+        "wire": "READY 1108 19200000 208866439369",
+        "host_monotonic_ns": 42456831878750,
+        "host_utc": "2026-11-21T15:18:20.382550+00:00"
+      },
+      {
+        "wire": "EVENT 1 DxgKrnl 286 0 4836 1256 209428110760 209428113305 24 e084b0b00f87ffff000000008002000068010000000a0000",
+        "host_monotonic_ns": 42486090937791,
+        "host_utc": "2026-11-21T15:18:49.641498+00:00"
+      },
+      {
+        "event_fsynced": 1,
+        "host_monotonic_ns": 42486091732000,
+        "host_utc": "2026-11-21T15:18:49.642270+00:00"
+      },
+      {
+        "wire": "EVENT 2 DxgKrnl 166 0 4836 1256 209428165559 209428194825 88 78000e000000000060cc84c686ddffff000000000000000010047ec186ddffff10247ec186ddffff010000000000000001000000000000008002000000000000680100000000000080020000000000006801000001000000",
+        "host_monotonic_ns": 42486092100750,
+        "host_utc": "2026-11-21T15:18:49.642637+00:00"
+      },
+      {
+        "event_fsynced": 2,
+        "host_monotonic_ns": 42486092264666,
+        "host_utc": "2026-11-21T15:18:49.642802+00:00"
+      },
+      {
+        "wire": "RECEIVED 1 209428331016 258",
+        "host_monotonic_ns": 42486098093916,
+        "host_utc": "2026-11-21T15:18:49.648632+00:00"
+      },
+      {
+        "wire": "RECEIVED 2 209428352211 258",
+        "host_monotonic_ns": 42486098654958,
+        "host_utc": "2026-11-21T15:18:49.649191+00:00"
+      },
+      {
+        "wire": "DRAINED 2",
+        "host_monotonic_ns": 42486106641666,
+        "host_utc": "2026-11-21T15:18:49.657181+00:00"
+      },
+      {
+        "wire": "END 0 0 0 0 0 0 2 2",
+        "host_monotonic_ns": 42486117781083,
+        "host_utc": "2026-11-21T15:18:49.668322+00:00"
+      }
+    ],
+    "raw_archive_dir": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-preallocated-cdd-20261121-01",
+    "raw_sha256": {
+      "wire.jsonl": "d02e5f393346d1aabca536de5f8be584e8639101cf83346b8485f30bd6afdb86",
+      "collected.zip": "424c68463a164b7afc967cf8882a0c2af68c8565a568f906ce4ddc8c20e53a02",
+      "ssh.stderr": "b55589b5ffdeea8b8c30ed4443b30879e96158c94f920138846637e50995bbb7",
+      "observer-stage.json": "87159c1d798122216f8b62c801a0ca1eb42c5ce49de11d2369f513206f84e3a1",
+      "observer-binding.json": "d821d7f44d5d3fa793e4ce8732bce9d0bba6a22c2b369f1c0fda552985d1c0d0",
+      "live-cleanup.json": "370838c632a837caa71385155cfdf700176b77e41aba6c847857ec91c8b198d5",
+      "local-cleanup.json": "2ccd0a62a68d8d644e3839785193b76f2df43f0e3070b1bf3ee85877470edab7",
+      "evidence/scene/journal.txt": "9d0833836a5b829d0459d777f61c1d39a942574d23b9d4cc90c1eccdcf868cbc",
+      "evidence/scene/video.etl": "9470dffb38c2b44d529841772658e358d0bef0db782e3266a63f5a8fb7831f15",
+      "evidence/display.etl": "a9ee5d9fa4368df21d74bd44caaddf1e4b470b5becc054de46e713e1c218243e",
+      "evidence/observer.json": "8dfac2443fbae79efc632c3b1d4d73629ab7dc3be9f32466c38927593030efcc",
+      "evidence/result.json": "4dfe9762577762d18d56881e15fc930bb5373a79921256a25f0ab2ce16328131",
+      "board-cdd-receipt.bin": "7dd2cc13b59dda48b14159be8d09fc59f7301e9517137321a52a30a93e4b727f",
+      "journal-readback.json": "48dcd1c7dc491964c3f73b03b0f777ac65251a8931cac2e9e66731633ec3872c"
+    },
+    "live_cleanup": {
+      "remaining_tasks": [],
+      "boot": 91476,
+      "fixture_directory": false,
+      "trace_query": {
+        "SwitchPresentLive-878abf3ccb4f": 4201,
+        "SwitchDisplay-878abf3ccb4f": 4201,
+        "Nvdec720Preview-4836": 4201
+      },
+      "collector_processes": [],
+      "utc": "2026-11-21T15:19:43.8568329Z",
+      "collector_directory": false
+    },
+    "input_verified": true,
+    "desktop_available": true,
+    "boundaries": {
+      "last_entry": {
+        "cdd_qpc": 209428110760,
+        "consumer_qpc": 209428113305,
+        "write_start_qpc": 209428113368
+      },
+      "last_return": {
+        "board_write_flush_qpc": 209428181231,
+        "dxgi_stop_qpc": 209428294588,
+        "public_return_qpc": 209428295002,
+        "public_hresult": "00000000"
+      },
+      "first_anomaly_or_missing": "本次正常正式基线窗口的 Windows CDD 分配活动。原三次故障内核入口、Blt 回调与复位原因需要各自的 CALL 后回执。"
+    },
+    "local_journal": {
+      "record": {
+        "sequence": 1,
+        "pid": 4836,
+        "tid": 1256,
+        "event": 286,
+        "version": 0,
+        "source_qpc": 209428110760,
+        "callback_qpc": 209428113305,
+        "payload_size": 24,
+        "payload_sha256": "4abd4b624be1b9f520bdc51aa9ced47dc818f10637a161632d258e9e40a64bbb",
+        "crc_valid": true
+      },
+      "frame_hex": "535743444431000038373861626633636362346601000000e4120000e80400001e01000018003800a85de3c2300000009967e3c230000000e084b0b00f87ffff000000008002000068010000000a000049037eee",
+      "total_bytes": 65536,
+      "full_sha256": "7dd2cc13b59dda48b14159be8d09fc59f7301e9517137321a52a30a93e4b727f",
+      "readback": {
+        "sha256": "7dd2cc13b59dda48b14159be8d09fc59f7301e9517137321a52a30a93e4b727f",
+        "bytes": 65536,
+        "boot": 91476,
+        "path": "C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\WinPresentLive-878abf3ccb4f\\cdd-receipt.bin",
+        "nonce": "878abf3ccb4f40f7acbb4ff2267f4ab3",
+        "utc": "2026-11-21T15:19:32.9821180Z"
+      },
+      "report": "LOCAL_CDD 1 0 209428113368 209428181231",
+      "windows_status": 0,
+      "write_start_qpc": 209428113368,
+      "flushed_qpc": 209428181231,
+      "verified_same_event": true,
+      "inside_public_call": true,
+      "inside_dxgi_interval": true,
+      "interval_ms": 3.535,
+      "relative_public_return_ms": -5.926,
+      "relative_dxgi_stop_ms": -5.904,
+      "relative_same_call_blt_event_ms": 0.816
+    },
+    "source_hashes": {
+      "candidate": {
+        "parent_source_sha256": "1e4c5b22b6a534f364653a3db52054403f53c247ed858ad85231269126e9db44",
+        "source_sha256": "cde56ba57dbe622967a198abcf8364a7e43eacbd3a5870ca1b56a41ceb9811d2",
+        "delta_sha256": "9976381cd64b311de22027af717c0a3120d7d4d65f127018eccbe378bd1269d5",
+        "binary_sha256": "ada4e52dcc673ac1be546ebf57ed1daa292dcde05e83e698fa65a7d206ecaf41"
+      },
+      "local_source": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/live-receipt-preallocated-cdd/live_present_receipt.c",
+      "review": "ff299d85e4404fc996e27de83b2c96d9e13508c484478b2f56d24767e1df1d9c"
+    },
+    "input_window_result": {
+      "window_handle": 917624,
+      "visibility": [
+        {
+          "first_qpc": 209412956603,
+          "last_qpc": 209413833311,
+          "flags": 8,
+          "owned_points": 0
+        },
+        {
+          "first_qpc": 209415491040,
+          "last_qpc": 209415491040,
+          "flags": 11,
+          "owned_points": 5
+        },
+        {
+          "first_qpc": 209418951584,
+          "last_qpc": 209421649322,
+          "flags": 11,
+          "owned_points": 4
+        },
+        {
+          "first_qpc": 209421956074,
+          "last_qpc": 209428519827,
+          "flags": 11,
+          "owned_points": 5
+        },
+        {
+          "first_qpc": 209432413363,
+          "last_qpc": 209432413363,
+          "flags": 8,
+          "owned_points": 0
+        }
+      ],
+      "pid": 4836,
+      "tid": 1256,
+      "client_width": 640,
+      "client_height": 360,
+      "owned_points": 5,
+      "visible_qpc": 209418593107,
+      "system_menu_qpc": 209418952041,
+      "escape_input_qpc": 209421666472,
+      "menu_dismissed_qpc": 209427316589,
+      "post_present_capture_qpc": 209430020066,
+      "exit_qpc": 209434837892,
+      "system_menu_flags": 12,
+      "menu_cancelled_by_cleanup": false,
+      "second_escape_qpc": 209427026270,
+      "client_click_qpc": 0,
+      "click_x": 0,
+      "click_y": 0,
+      "capture_changed_samples": 9159,
+      "window_visible": true,
+      "input_verified": true,
+      "window_closed": true,
+      "desktop_available": true
+    },
+    "trial_scope": "本次正常正式基线窗口的 Windows CDD 分配活动。原三次故障内核入口、Blt 回调与复位原因需要各自的 CALL 后回执。"
+  }
+}

@@ -2214,6 +2214,37 @@
           "first_anomaly_or_missing": "这次同对象的 166 原始载荷尚缺公开 RETURN 前完成本机写透的实测。"
         },
         "finished_utc": "2026-11-21T15:15:51.417303+00:00"
+      },
+      {
+        "round_id": "win-present-preallocated-cdd-20261121-01",
+        "contract_id": "WIN-CDD-LOCAL-FLUSH",
+        "windows_question": "WIN-CDD-LOCAL-FLUSH",
+        "method": "同一合法图形应用的最早目标分配板端取证",
+        "plan": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.plan.json",
+        "plan_sha256": "11604d456ada945c74fcb3cadf8b76a283a357233f7b05483a1a416ec7e087b0",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T15:17:59.223087+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+        "result_sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9",
+        "status": "实机通过",
+        "finding": "启动 91476 的同一绘图线程 4836/1256，板端槽的 84 字节 CDD 286 原始回执与独立 ETL 逐字节相符。CDD 目标经 global 33 与 device 36 绑定到同一 HWND 的 Blt 166。写入加刷新耗时 3.535 ms，成功返回相对 DXGI 43 -5.904 ms，相对公开 RETURN -5.926 ms。",
+        "missing_observation": null,
+        "boundaries": {
+          "last_entry": {
+            "cdd_qpc": 209428110760,
+            "consumer_qpc": 209428113305,
+            "write_start_qpc": 209428113368
+          },
+          "last_return": {
+            "board_write_flush_qpc": 209428181231,
+            "dxgi_stop_qpc": 209428294588,
+            "public_return_qpc": 209428295002,
+            "public_hresult": "00000000"
+          },
+          "first_anomaly_or_missing": "本次正常正式基线窗口的 Windows CDD 分配活动。原三次故障内核入口、Blt 回调与复位原因需要各自的 CALL 后回执。"
+        },
+        "finished_utc": "2026-11-21T15:19:54.200191+00:00"
       }
     ]
   }

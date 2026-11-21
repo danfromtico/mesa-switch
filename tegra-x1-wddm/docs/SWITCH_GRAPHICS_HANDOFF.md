@@ -56,6 +56,8 @@
 
 开机 91476，绘图 PID/TID 4500/972。独立双路 ETL 与板端 64 KiB 文件中的 148 字节 Blt 166 记录匹配，验证 nonce、CRC 和文件尾部。同步写入及刷新用时 3.472 ms，成功返回相对 DXGI 43 +0.296 ms，相对公开 RETURN +0.278 ms。 同次核对了客户区、输入、退出和同一桌面。原三次重启仍需各自 CALL 后的持久记录。[预写槽实机回执](windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json)
 
+启动 91476 的同一绘图线程 4836/1256，板端槽的 84 字节 CDD 286 原始回执与独立 ETL 逐字节相符。CDD 目标经 global 33 与 device 36 绑定到同一 HWND 的 Blt 166。写入加刷新耗时 3.535 ms，成功返回相对 DXGI 43 -5.904 ms，相对公开 RETURN -5.926 ms。 同次窗口完成输入、退出及桌面连续检查。三份旧故障仍缺自己的 CALL 后回执。[同次 CDD 分配及板端写透回执](windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)
