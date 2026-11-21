@@ -1432,6 +1432,38 @@
         "win-kmd-dma-hardware-calibration-20261121-01"
       ],
       "latest_observation": "候选的一次性启动前，91650 已持久记录令牌值 1、Code 43，并收到 Windows 重启请求 1074。其后 91732 记录 6008/41，BugcheckCode=0。应用未发出，未取得候选 Code 0 或四阶段配对。最后一条关机实证是 91725/6006，距下一次有记录的内核开始 57.750 秒。前后两次受控对照均有 109/13，本段缺失。 启动 91832 已恢复正式 Code 0、永久许可和加载哈希。"
+    },
+    {
+      "id": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+      "priority": "P0",
+      "owner": "Windows VidSch、DWM、GM20B 与可能并存的软件适配器",
+      "question": "启动 91476 在 DWM 152586 后还有 DxgKrnl 队列活动。其适配器、节点及实际完成属于哪条执行路径？",
+      "status": "观测缺口",
+      "existing_observation": "场景 ETL 同一共享缓冲在 152586 后留有另一线程的 DxgKrnl 和 UMD 活动；目标提交没有完成记录。",
+      "missing_observation": "较晚上下文缺同启动的 hContext→适配器 LUID、节点映射。两个 ETL 均未封口。152586 和 247 分别缺同提交号的 KMD 准入、实际 GPU 完成及故障首条记录。",
+      "pass_condition": "原始包按上下文、队列对象和适配器或节点明确配对，准确标注每个较晚队列的提交、实际完成和留存段。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+          "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+          "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
+          "sha256": "21226aacabf0c345582ff142b88493e08746510cccaf2afcfafe61e1e7095dd2"
+        }
+      ],
+      "windows_references": [
+        "dma_interrupt",
+        "gpuview_dma"
+      ],
+      "round_ids": [
+        "win-dwm-late-adapter-152586-20261121-01"
+      ],
+      "latest_observation": "启动 91476 的场景 ETL 中，DWM 另一个上下文在 152586 后 9.054 ms 仍有 Windows DMA 提交 247。该上下文的前一包 246 及其围栏、呈现包均曾正常退役。152586 后两路共享 ETL 的所有上下文均无留存 DMA 完成中断、完成或退役事件。"
     }
   ],
   "rounds": [
@@ -2954,19 +2986,68 @@
         }
       },
       "finished_utc": "2026-11-21T16:22:04.664837+00:00"
+    },
+    {
+      "round_id": "win-dwm-late-adapter-152586-20261121-01",
+      "contract_id": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+      "windows_question": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+      "method": "沿用原两路 ETL，在未改动正式基线的条件下离线分清迟到的调度与设备归属",
+      "plan": "windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.plan.json",
+      "plan_sha256": "ff1e88edb5fff67aec611a6030ba18373a37636fb65f68b0f5c51d0a809dc324",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T16:26:06.503036+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json",
+      "result_sha256": "b394a991ddc86d9dd7bc8d918b4708487fb36721459ba5b0e914a47f5ad7f8c3",
+      "status": "观测缺口",
+      "finding": "启动 91476 的场景 ETL 中，DWM 另一个上下文在 152586 后 9.054 ms 仍有 Windows DMA 提交 247。该上下文的前一包 246 及其围栏、呈现包均曾正常退役。152586 后两路共享 ETL 的所有上下文均无留存 DMA 完成中断、完成或退役事件。",
+      "missing_observation": "较晚上下文缺同启动的 hContext→适配器 LUID、节点映射。两个 ETL 均未封口。152586 和 247 分别缺同提交号的 KMD 准入、实际 GPU 完成及故障首条记录。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 223222129880,
+          "pid": 4,
+          "tid": 904,
+          "provider": "kernel",
+          "id": 179,
+          "version": 0,
+          "fields": {
+            "hContext": 18446611100088172560,
+            "PacketType": 7,
+            "SubmitSequence": 741
+          }
+        },
+        "last_return": {
+          "qpc": 223221929073,
+          "pid": 4,
+          "tid": 900,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100088172560,
+            "PacketType": 7,
+            "SubmitSequence": 738,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169632744736
+          }
+        },
+        "first_anomaly_or_missing": "较晚上下文缺同启动的 hContext→适配器 LUID、节点映射。两个 ETL 均未封口。152586 和 247 分别缺同提交号的 KMD 准入、实际 GPU 完成及故障首条记录。"
+      },
+      "finished_utc": "2026-11-21T16:28:20.931559+00:00"
     }
   ],
   "progress": {
-    "total": 35,
+    "total": 36,
     "by_status": {
       "实机通过": 10,
-      "观测缺口": 8,
+      "观测缺口": 9,
       "已有实机通过": 7,
       "故障开放": 4,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 45,
+    "registered_rounds": 46,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -2988,6 +3069,7 @@
       "WIN-DWM-TAIL-PREEMPT",
       "WIN-DWM-ETL-TAIL-COVERAGE",
       "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "WIN-DWM-LATE-ADAPTER-PROGRESS",
       "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
       "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
       "WIN-KMD-DMA-ARM64-REHEARSAL",
@@ -3118,7 +3200,7 @@
         "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
         "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
       },
-      "followup_boundary": "下一项独立观测优先覆盖同一提交号的 KMD 成功路径、硬件开始或完成，先用正常已知可完成的负载校验记录器。保存窗口或令牌关系以及独立故障首条记录。",
+      "followup_boundary": "152586 的 Windows 调度后缺同提交号 KMD 准入或 GPU 完成。不开启上次校准候选，先排查独立启动异常并核对正式驱动还能提供的配对边界。",
       "same_kernel_event_catalog": {
         "path": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
         "sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25"
@@ -3159,7 +3241,12 @@
         "next_recorded_boot": 91732,
         "workload_count": 0,
         "formal_recovery": 91832
-      }
+      },
+      "later_context_progress": {
+        "path": "windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json",
+        "sha256": "b394a991ddc86d9dd7bc8d918b4708487fb36721459ba5b0e914a47f5ad7f8c3"
+      },
+      "recent_scheduler_only_evidence": "启动 91476 的场景 ETL 中，DWM 另一个上下文在 152586 后 9.054 ms 仍有 Windows DMA 提交 247。该上下文的前一包 246 及其围栏、呈现包均曾正常退役。152586 后两路共享 ETL 的所有上下文均无留存 DMA 完成中断、完成或退役事件。"
     }
   },
   "cleanup": {

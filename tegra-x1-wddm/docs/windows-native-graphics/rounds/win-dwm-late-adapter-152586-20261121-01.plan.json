@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-late-adapter-152586-20261121-01",
+  "contract_id": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+  "windows_question": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+  "owner": "Windows VidSch、DWM、GM20B 与可能并存的软件适配器",
+  "question": "启动 91476 在 DWM 152586 后还有 DxgKrnl 队列活动。其适配器、节点及实际完成属于哪条执行路径？",
+  "method": "沿用原两路 ETL，在未改动正式基线的条件下离线分清迟到的调度与设备归属",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "原始包按上下文、队列对象和适配器或节点明确配对，准确标注每个较晚队列的提交、实际完成和留存段。",
+  "observations": [
+    "读取租约与当前正式状态作为环境回执。验证异常 ZIP、两个 ETL、同一正式图形组件与安装的 Windows 事件模板。",
+    "用安装模板检查 SelectContext(23/436)、AddDmaBuffer(76/77)、Device/Context 与 ReportAdapter(110) 对不同上下文的配对。",
+    "按线程、上下文、序号、时间和适配器确认 152586 后是否还有 GM20B 同节点真实完成。正常档案只作字段正对照，不推断未留存事件。"
+  ],
+  "inputs": {
+    "raw_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+    "raw_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+    "manifest_sha256": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+        "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
+        "sha256": "21226aacabf0c345582ff142b88493e08746510cccaf2afcfafe61e1e7095dd2"
+      }
+    ],
+    "control": {
+      "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+      "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+    }
+  }
+}

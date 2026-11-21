@@ -78,6 +78,8 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 候选的一次性启动前，91650 已持久记录令牌值 1、Code 43，并收到 Windows 重启请求 1074。其后 91732 记录 6008/41，BugcheckCode=0。应用未发出，未取得候选 Code 0 或四阶段配对。最后一条关机实证是 91725/6006，距下一次有记录的内核开始 57.750 秒。前后两次受控对照均有 109/13，本段缺失。 启动 91832 已恢复正式 Code 0、永久许可和加载哈希。 没有收到候选 Code 0 或工作负载回执。异常开机转换的第一失败组件、板级记录及原案 152586 的实际 KMD 接收仍待证。 [实载 DMA 校准与恢复回执](windows-native-graphics/rounds/win-kmd-dma-hardware-calibration-20261121-01.result.json)
 
+启动 91476 的场景 ETL 记录了另一个 DWM 上下文。该上下文先前的 DMA 246、后续信号和呈现均退役，随后在主上下文的 152586 后 9.054 ms 记录 DMA 247 提交。两路未封口 ETL 此后都没有留存任何上下文的 DMA 完成中断、完成或队列退役。较晚上下文仍缺适配器和节点归属，152586 仍缺同号 KMD 准入和完成。[两路原始载荷、正常对照与当前实机回执](windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)
