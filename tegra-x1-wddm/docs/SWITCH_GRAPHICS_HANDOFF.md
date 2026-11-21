@@ -62,6 +62,10 @@
 
 回读启动 91476 的全部原始图形提供程序。DWM 1400/2252 的窗口 91 在同次公开返回后 2.402 ms 匹配 HWND 328302。同一 DWM 线程的 tgd3d 资源进入事件 17 和 8 是后续留存末端，最后一条比公开返回晚 154.764 ms，尺寸 640×360。两份 ETL 的缓冲余区均为 FF。 此次全提供程序扫描补充了前轮按 DxgKrnl、DXGI 与 KMD 过滤时的末端。DWM 末端资源与原窗口的具体对象归属、该资源调用返回及复位原因仍待证。[DWM 末端与同一窗口配对](windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json)
 
+两路异常 ETL 确认 DWM 的 3892 字节 DMA 包 48648 在首次 Present 返回后 43.870–43.871 ms 正常退役。晚些时候 KMD 通知的 152584 匹配另一个系统队列包 209489，该包也完成。随后 DWM 3524 字节包 48660 经两次抢占，于 +145.342 ms 第三次提交 152586。两路档案均缺该次 DMA 完成和队列退役。[异常轮提交与完成身份](windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json)
+
+同一启动的健康对照中，同一 DWM 线程和上下文的 4632 字节包也被抢占两次。第三次发出后 6.719 ms 正常退役，继而同对上下文退役同一同步对象值 21985 的信号、等待及后续呈现。异常链的同步对象值为 24055，已确认信号、等待及下一 DWM 呈现入队，退役回执缺失。档案未能将这条链归属初始 HWND 或连到复位首因。原三次历史故障仍缺各自 CALL 后的直接观测。[同对象健康对照与异常链](windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

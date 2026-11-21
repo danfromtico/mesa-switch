@@ -32,7 +32,8 @@
     "alloc": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_createallocation",
     "open": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtopenresourcefromnthandle",
     "power": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart",
-    "cold": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/setup-upgrade-and-drivers/fast-startup-causes-system-hibernation-shutdown-fail"
+    "cold": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/setup-upgrade-and-drivers/fast-startup-causes-system-hibernation-shutdown-fail",
+    "dma_interrupt": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ne-d3dkmddi-_dxgk_interrupt_type"
   },
   "historical_background": {
     "index": {
@@ -1204,6 +1205,70 @@
         "win-present-board-only-cdd-20261121-01"
       ],
       "latest_observation": "正式 GM20B 基线的普通双缓冲空窗口在启动 91476 运行一次，绘图 PID/TID 3376/3236。CDD 286 的 84 字节原始记录在恢复启动 91557 完整回读，同次 Windows ETL 和同一 HWND 的 Blt 目标分配吻合。52 字节复制包正常退役，KMT 及首次公开 Present 返回 S_OK，公开调用耗时 58.688 ms。其后设备状态查询、DwmFlush 与首帧对象释放都留下成功回执。绘图线程的最后一条内核事件晚于公开返回 138.531 ms。下次启动 91557 有 6008 和 41，BugcheckCode=0。"
+    },
+    {
+      "id": "WIN-POST-PRESENT-RETIRE",
+      "priority": "P0",
+      "owner": "Windows VidSch、GM20B miniport 与 DWM",
+      "question": "启动 91476 中应用首次 Present 已返回后，KMD 所见非空 GPU 提交围栏是否属于 DWM，并有同包完成与退役回执？",
+      "status": "实机通过",
+      "existing_observation": "同次已确认应用 52 字节 Blt 包完成，以及同一窗口随后进入 DWM 调度。两路部分 ETL 保存了后续调度和 KMD 遥测。",
+      "missing_observation": "同一 DWM 上下文的较晚 3524 字节包序号 48660 在 +145.342 ms 第三次提交，当前档案未留 DMA 完成或队列退役，也没有能将该包、受监控围栏等待、原窗口实际可见帧与板级复位相连的记录。",
+      "pass_condition": "同一启动的两路原始 ETL 以提交围栏、内核上下文、队列序号和包指针匹配，同一 DWM 线程提交，按时序取得 GPU 完成中断和无超时退役。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+          "sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+          "sha256": "88276f1c69708d28dbc676b2be1d80cf70e095206fd6d55ddc0e3402fde2b586"
+        }
+      ],
+      "windows_references": [
+        "fence"
+      ],
+      "round_ids": [
+        "win-board-cdd-post-present-retire-20261121-01"
+      ],
+      "latest_observation": "启动 91476，两路原始 ETL 确认 DWM 1400/2252 的 3892 字节包序号 48648、提交围栏 152558 收到 DMA 完成中断并无抢占、无超时退役，在应用首次 Present 返回后 43.870–43.871 ms。尾部 KMD 通知提交围栏 152584 关联到独立的系统零字节包序号 209489，亦已正常退役。"
+    },
+    {
+      "id": "WIN-DWM-TAIL-PREEMPT",
+      "priority": "P0",
+      "owner": "DWM、Windows VidSch 与 GM20B miniport",
+      "question": "启动 91476 的末端 DWM 3524 字节包两次被抢占、第三次提交的模式，是否也发生在同启动同上下文的正常普通窗口对照中？",
+      "status": "实机通过",
+      "existing_observation": "异常轮两路 ETL 均见 DWM 1400/2252 序号 48660 提交围栏 152583、152585 两次被抢占，最后围栏 152586 无跟踪完成。",
+      "missing_observation": "未封口 ETL 缺候选链末端的 DMA 完成、同步对象进度或队列退役，且无 HWND/画面及板级故障起点的直接配对。抢占重提交已可见于健康样本，仍待确定异常链第三次实际提交后的结果。",
+      "pass_condition": "按上下文、队列序号和包指针核对正常对照能否出现成对正常抢占、重发、完成中断与同包退役。按实际 245/294/295 记录区分提交围栏与同步对象。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+          "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+          "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+          "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+          "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+        }
+      ],
+      "windows_references": [
+        "dma_interrupt",
+        "signal",
+        "wait"
+      ],
+      "round_ids": [
+        "win-board-cdd-dwm-preempt-control-20261121-01"
+      ],
+      "latest_observation": "同启动健康轮的 DWM 4632 字节包 44472 也被抢占两次。第三次提交后 6.719 ms 完成并退役，同一对上下文随后依次退役同步对象值 21985 的信号、GPU 等待及呈现包。异常轮同一对象用值 24055，两路见信号和等待入队，缺第三次 DMA 152586 的完成以及随后三个队列包的退役。健康近窗 18 个同上下文包中有一个完成了双抢占后的重提交。三个健康完整 display.etl 有 11 个同为 3524 字节的包，均无双抢占后完成的样本。"
     }
   ],
   "rounds": [
@@ -2278,19 +2343,214 @@
         "first_anomaly_or_missing": "窗口 91 两个表面句柄为零，未见 DWM 按同一适配器与完整令牌消费。最后资源进入记录无该资源返回或同窗口对象标识，复位首因仍缺证。"
       },
       "finished_utc": "2026-11-21T15:41:56.392020+00:00"
+    },
+    {
+      "round_id": "win-board-cdd-post-present-retire-20261121-01",
+      "contract_id": "WIN-POST-PRESENT-RETIRE",
+      "windows_question": "WIN-POST-PRESENT-RETIRE",
+      "method": "同一次异常启动留存 ZIP 双 ETL 离线重解，无新实机执行",
+      "plan": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.plan.json",
+      "plan_sha256": "4cde9f2196677f78f1501254bb5b1acc01703fe03975f13cc59b3e28173ce1e3",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:47:35.751301+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+      "result_sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148",
+      "status": "实机通过",
+      "finding": "启动 91476，两路原始 ETL 确认 DWM 1400/2252 的 3892 字节包序号 48648、提交围栏 152558 收到 DMA 完成中断并无抢占、无超时退役，在应用首次 Present 返回后 43.870–43.871 ms。尾部 KMD 通知提交围栏 152584 关联到独立的系统零字节包序号 209489，亦已正常退役。",
+      "missing_observation": "同一 DWM 上下文的较晚 3524 字节包序号 48660 在 +145.342 ms 第三次提交，当前档案未留 DMA 完成或队列退役，也没有能将该包、受监控围栏等待、原窗口实际可见帧与板级复位相连的记录。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 223221950698,
+          "pid": 4,
+          "tid": 888,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100088564464,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 152586,
+            "ulQueueSubmitSequence": 48660,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 3
+          },
+          "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d"
+        },
+        "last_return": {
+          "confirmed_dwm_packet_152558": {
+            "qpc": 223220002472,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 48648,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169623591712
+            },
+            "payload_sha256": "c2f1e0c765bd7769df3dd89ec57f2ed007d29b858502abb704f24a84d9961de4"
+          },
+          "later_kernel_packet_152584": {
+            "qpc": 223221943122,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 8,
+              "SubmitSequence": 209489,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169626875104
+            },
+            "payload_sha256": "c40a2d7c51203fac9f6d689e55a2919d313f1e58e34b55e3c4b5e388a77ff0b4"
+          }
+        },
+        "first_anomaly_or_missing": "DWM 3524 字节包序号 48660 两次抢占后第三次发出提交围栏 152586。两路档案均未留其 DMA 完成或此队列包退役。该缺口本身不能证明卡死、超时或触发复位。"
+      },
+      "finished_utc": "2026-11-21T15:48:14.946869+00:00"
+    },
+    {
+      "round_id": "win-board-cdd-dwm-preempt-control-20261121-01",
+      "contract_id": "WIN-DWM-TAIL-PREEMPT",
+      "windows_question": "WIN-DWM-TAIL-PREEMPT",
+      "method": "原样重解异常轮与同启动三轮健康原始 ETL，无新实机执行",
+      "plan": "windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.plan.json",
+      "plan_sha256": "d4f349c3dd0a01dcb53b7067f7923f965f64963512953f5fef625742346038b9",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:48:25.594712+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json",
+      "result_sha256": "0ea143449c305b0c6efe927ca694eb69a1713b0af6e514101f0fd0d6df4331e6",
+      "status": "实机通过",
+      "finding": "同启动健康轮的 DWM 4632 字节包 44472 也被抢占两次。第三次提交后 6.719 ms 完成并退役，同一对上下文随后依次退役同步对象值 21985 的信号、GPU 等待及呈现包。异常轮同一对象用值 24055，两路见信号和等待入队，缺第三次 DMA 152586 的完成以及随后三个队列包的退役。健康近窗 18 个同上下文包中有一个完成了双抢占后的重提交。三个健康完整 display.etl 有 11 个同为 3524 字节的包，均无双抢占后完成的样本。",
+      "missing_observation": "未封口 ETL 缺候选链末端的 DMA 完成、同步对象进度或队列退役，且无 HWND/画面及板级故障起点的直接配对。抢占重提交已可见于健康样本，仍待确定异常链第三次实际提交后的结果。",
+      "boundaries": {
+        "last_entry": {
+          "dxgk_third_submit": {
+            "qpc": 223221950698,
+            "pid": 4,
+            "tid": 888,
+            "provider": "kernel",
+            "id": 175,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "hQueuePacketContext": 0,
+              "PacketType": 0,
+              "uliSubmissionId": 152586,
+              "ulQueueSubmitSequence": 48660,
+              "pDmaBuffer": 0,
+              "QuantumStatus": 3
+            }
+          },
+          "subsequent_present_enqueued": {
+            "qpc": 223221954493,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "kernel",
+            "id": 178,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088164368,
+              "PacketType": 3,
+              "SubmitSequence": 73347,
+              "DmaBufferSize": 0,
+              "AllocationListSize": 0,
+              "PatchLocationListSize": 0,
+              "bPresent": 1,
+              "hDmaBuffer": 0,
+              "pQueuePacket": 18446706169626818032,
+              "ProgressFenceValue": 0
+            }
+          },
+          "later_signal_queue_state": {
+            "qpc": 223221966230,
+            "pid": 4,
+            "tid": 888,
+            "provider": "kernel",
+            "id": 179,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 5,
+              "SubmitSequence": 48661
+            }
+          }
+        },
+        "last_return": {
+          "second_attempt_preemption_stop": {
+            "qpc": 223221948475,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152585,
+              "ulQueueSubmitSequence": 48660,
+              "bPreempted": 1
+            }
+          },
+          "healthy_dma_queue_retire": {
+            "qpc": 204762098614,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 44472,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169623595808
+            }
+          },
+          "healthy_last_present_queue_retire": {
+            "qpc": 204762100982,
+            "pid": 4,
+            "tid": 888,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088164368,
+              "PacketType": 3,
+              "SubmitSequence": 67102,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169642508304
+            }
+          }
+        },
+        "first_anomaly_or_missing": "异常轮第三次 DMA 152586 之后缺完成中断与序号 48660 退役，同时缺后续信号、等待、呈现队列退役。复位前物理扫描输出与故障首因未捕获。"
+      },
+      "finished_utc": "2026-11-21T15:49:21.551742+00:00"
     }
   ],
   "progress": {
-    "total": 27,
+    "total": 29,
     "by_status": {
-      "实机通过": 7,
+      "实机通过": 9,
       "观测缺口": 4,
       "已有实机通过": 7,
       "故障开放": 3,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 37,
+    "registered_rounds": 39,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -2308,6 +2568,8 @@
       "WIN-BLT-DDI-ORDER",
       "WIN-PRESENT-BLT",
       "WIN-DWM-CONSUME",
+      "WIN-POST-PRESENT-RETIRE",
+      "WIN-DWM-TAIL-PREEMPT",
       "WIN-PRESENT-IMAGE",
       "WIN-OLD-RESET"
     ],
@@ -2415,7 +2677,17 @@
         "retained_qpc": 223221819942,
         "raw_local_receipt": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/event-tail-templates.json",
         "receipt_sha256": "8a1a2d683d88fcd63e877f84d69e3990f00123d4356a29df94e0304567464450"
-      }
+      },
+      "post_present_dma_retirement": {
+        "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+        "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+      },
+      "same_object_preemption_control": {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json",
+        "sha256": "0ea143449c305b0c6efe927ca694eb69a1713b0af6e514101f0fd0d6df4331e6"
+      },
+      "first_unobserved_dwm_boundary": "启动 91476 的 DWM 序号 48660 第三次 DMA 提交 152586，后续同步对象值 24055 的信号 48661、等待 73346 及呈现 73347 均缺退役原件。",
+      "bound_scope": "同启动、同上下文及同对象的健康对照证实可在两次抢占后继续完成。两路异常 ETL 都未封口，仍缺目标窗口对象、DMA 第三次实际结束及板级第一异常之间的直接链。"
     }
   },
   "cleanup": {
