@@ -917,6 +917,114 @@
           "test_sha256": "18e419577e334a219437f0947422857bc73cbd73b453597417491917e50fe35f"
         }
       ]
+    },
+    {
+      "evidence_sha256": "928899874f9b707b254aa89c34bca410d136d5b535291b82a02e5b40fb92f0e3",
+      "before_commit": "145b839cf3cbdc633069d3b3d200cedd8451e7dd",
+      "previous_qualification_sha256": "c0075d940d4f6d34b7eb7e5409ee7c3628bf525c6112e984995279c77f251d28",
+      "previous_control_sha256": "f06d39eebd905f57e149a71f145f84125dfd226d8d37e74dad36e68e73a587eb",
+      "inherited_faults": [
+        "GM20B-POST-QUALIFICATION-RESTART-92154",
+        "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+        "GM20B-LEGACY-SEQUENTIAL-RESTART",
+        "GM20B-WDDM20-PRESENT1-REMOVAL",
+        "GM20B-WDDM20-FLIP-RESTART",
+        "SWITCH-LOAD-TRANSITION-RESTART",
+        "SWITCH-WIFI-STARTUP",
+        "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+        "SWITCH-COMMIT-PRESSURE-RESTART",
+        "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+        "GM20B-POST-SELECTION-CONTROL-RESTART",
+        "SWITCH-BASELINE-HANDOFF-RESTARTS",
+        "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+        "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732"
+      ],
+      "fault_assessments": [
+        {
+          "fault_id": "GM20B-POST-QUALIFICATION-RESTART-92154",
+          "relation": "disjoint",
+          "reason": "This receipt covers the bounded A/B interval only. It does not claim stability in an unobserved subsequent interval.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "relation": "covered",
+          "reason": "The previous baseline entered the closed-gate desktop in this comparison with a controlled shutdown and no abnormal-shutdown event.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "relation": "covered",
+          "reason": "Same native two-buffer legacy no-write first Present. Matched archived accepted output and desktop continuity; historical restart stays open.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "relation": "disjoint",
+          "reason": "Both clients ran the default legacy interface with the process-specific WDDM 2.0 override removed.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "relation": "disjoint",
+          "reason": "The case uses legacy sequential presentation. The process-scoped six-frame flip workload was outside this comparison.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "relation": "covered",
+          "reason": "Covered native drawing, presentation and client exit only; unrelated game, video, and file workloads remain untested.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "relation": "covered",
+          "reason": "Windows networking and SSH were available on the candidate boot throughout collection. Historical Wi-Fi failures remain open.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "relation": "disjoint",
+          "reason": "The measured transition was a one-time firmware trial, not recovery to a prior KMD.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "relation": "disjoint",
+          "reason": "The small controlled client has no memory-pressure workload. The prior system exhaustion episode is outside this measurement.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "relation": "covered",
+          "reason": "The logged controlled shutdown leaving the original desktop did not produce an abnormal end in the full transition interval.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "relation": "disjoint",
+          "reason": "The prior episode concerns the separate WDDM 2.0 flip control after selection.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "relation": "disjoint",
+          "reason": "Unobserved prior user handoff intervals are outside the recorded boot and workload boundary.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "relation": "covered",
+          "reason": "Legacy first Present returned and the same desktop survived the client exit. The historical CDD capture schedule remains open.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "relation": "covered",
+          "reason": "Controlled one-use NVK activation reached the native desktop with the verified NVK and unchanged KMD/ACR.",
+          "test_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5"
+        }
+      ]
     }
   ],
   "dxgkrnl_contracts": {
