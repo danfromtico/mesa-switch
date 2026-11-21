@@ -1746,6 +1746,44 @@
         "win-seq-application-blt-fence-20261121-01"
       ],
       "latest_observation": "启动 92083 的首个 52 字节 Blt 对应同上下文队列 1、DMA 9651。实时及两份 ETL 核对了 5063 包装返回、KMD 同围栏等待阶段快照、中断和同包退役。快照记录有效的 GR/FECS 预抢占状态。"
+    },
+    {
+      "id": "WIN-SEQ-LIVE-KMD-FENCE-CACHE",
+      "priority": "P0",
+      "owner": "Windows VidSch、DxgKrnl、DWM、GM20B KMD",
+      "question": "现行正式 KMD 的同包 GPU 围栏缓存快照，能否在首次 Present 期间通过实时 ETW 传输并绑定 Windows 调度与完成？",
+      "status": "实机通过",
+      "existing_observation": "92083 上一实际运行的应用 DMA 9651 有 KMD 同围栏文件快照，文件记录在完成前。Windows 调度封口与实时已一致。",
+      "missing_observation": "同包有效 GPU 观察值 0 条。发出到 Windows 确认用时 13.893 至 16.987 ms。这些快照覆盖当前成功轮次的采样时点。历史 152586 仍缺该次提交 KMD 证据。",
+      "pass_condition": "在原空窗的一次自然活动中，生产 KMD 同围栏的事件 2 与两路 Windows 记录吻合，或保留未触发和数据质量的证据。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-gated-seq-profiler-present-20261121-01.result.json",
+          "sha256": "f600f46c61ce3dd658fa4c7ad8ca4ed9021ca9dbee288159cba3e6c9f55afcd5"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-seq-application-blt-fence-20261121-01.result.json",
+          "sha256": "7912f01b92a41854e52a7fbf490f147f03a8ca34c3aee6bd6bda33b49bdd27ad"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json",
+          "sha256": "922cd6aaedaf958c38827db41c0d2fb297a179469f3f7e94cbf7612d674ab6a6"
+        },
+        {
+          "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+          "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "gpuview",
+        "dma_interrupt",
+        "fence"
+      ],
+      "round_ids": [
+        "win-seq-live-kmd-fence-cache-20261121-01"
+      ],
+      "latest_observation": "启动 92083 同一原窗首次 Present(1,0) 约 36.285 ms 成功。实时接收 3020 条均与封口 ETL 相符，含 KMD 事件 58 条。3 条同围栏生产 KMD 快照有场景 ETL 副本、控制端 fsync 和 Windows ACK，覆盖 submit、prepare、mappings 阶段，均在同提交完成之前发出。首条是 DWM DMA 13425。"
     }
   ],
   "rounds": [
@@ -3976,20 +4014,72 @@
         "first_anomaly_or_missing": "GR、FECS 错误邮箱及主机中断状态为本次采样时点。逐 SM HWW 和 PRI 锁存仍缺。该 Blt 与历史 91476 的 DWM DMA 152586 是各自启动内的不同提交。"
       },
       "finished_utc": "2026-11-21T17:55:42.800579+00:00"
+    },
+    {
+      "round_id": "win-seq-live-kmd-fence-cache-20261121-01",
+      "contract_id": "WIN-SEQ-LIVE-KMD-FENCE-CACHE",
+      "windows_question": "WIN-SEQ-LIVE-KMD-FENCE-CACHE",
+      "method": "用生产 KMD 既有 ETW 事件 1/2 校准原空窗口同包围栏进度的实时持久接收",
+      "plan": "windows-native-graphics/rounds/win-seq-live-kmd-fence-cache-20261121-01.plan.json",
+      "plan_sha256": "f6e0d69794c5fd42e54ccd6cd24c4bc335599ed89bf0f4481e99333dd4364fb1",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T17:57:26.478790+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-seq-live-kmd-fence-cache-20261121-01.result.json",
+      "result_sha256": "1bd39d30d4d697adf424189c10c5da2867d3ddd1bf2da973f93531df603a5c1a",
+      "status": "实机通过",
+      "finding": "启动 92083 同一原窗首次 Present(1,0) 约 36.285 ms 成功。实时接收 3020 条均与封口 ETL 相符，含 KMD 事件 58 条。3 条同围栏生产 KMD 快照有场景 ETL 副本、控制端 fsync 和 Windows ACK，覆盖 submit、prepare、mappings 阶段，均在同提交完成之前发出。首条是 DWM DMA 13425。",
+      "missing_observation": "同包有效 GPU 观察值 0 条。发出到 Windows 确认用时 13.893 至 16.987 ms。这些快照覆盖当前成功轮次的采样时点。历史 152586 仍缺该次提交 KMD 证据。",
+      "boundaries": {
+        "last_entry": {
+          "public_call": 23597399640,
+          "first_dxgi_start": {
+            "id": 42,
+            "version": 0,
+            "qpc": 23597795555,
+            "fields": {
+              "pIDXGISwapChain": 1410174075856,
+              "Flags": 0,
+              "SyncInterval": 1,
+              "DirtyRects": 0,
+              "ScrollRects": 0
+            }
+          }
+        },
+        "last_return": {
+          "public_call_return": 23598096308,
+          "last_live": {
+            "sequence": 3020,
+            "id": 106,
+            "version": 0,
+            "pid": 4,
+            "tid": 924,
+            "source_qpc": 23676063440,
+            "callback_qpc": 23676184300,
+            "payload_hex": "c7130000",
+            "host_receive_ns": 52060216518250,
+            "confirmed_qpc": 23676374895,
+            "host_ack_return_ns": 52060227644125,
+            "host_fsynced_ns": 52060216655875
+          }
+        },
+        "first_anomaly_or_missing": "同包有效 GPU 观察值 0 条。发出到 Windows 确认用时 13.893 至 16.987 ms。这些快照覆盖当前成功轮次的采样时点。历史 152586 仍缺该次提交 KMD 证据。"
+      },
+      "finished_utc": "2026-11-21T17:59:40.961038+00:00"
     }
   ],
   "progress": {
-    "total": 45,
+    "total": 46,
     "by_status": {
-      "实机通过": 18,
+      "实机通过": 19,
       "观测缺口": 11,
       "已有实机通过": 7,
       "故障开放": 4,
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 57,
-    "new_device_executions": 13
+    "registered_rounds": 58,
+    "new_device_executions": 14
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -4223,6 +4313,10 @@
       "selected_baseline_first_blt": {
         "path": "windows-native-graphics/rounds/win-seq-application-blt-fence-20261121-01.result.json",
         "sha256": "7912f01b92a41854e52a7fbf490f147f03a8ca34c3aee6bd6bda33b49bdd27ad"
+      },
+      "selected_baseline_live_kmd_cache": {
+        "path": "windows-native-graphics/rounds/win-seq-live-kmd-fence-cache-20261121-01.result.json",
+        "sha256": "1bd39d30d4d697adf424189c10c5da2867d3ddd1bf2da973f93531df603a5c1a"
       }
     },
     "recent_ssh_outage": {

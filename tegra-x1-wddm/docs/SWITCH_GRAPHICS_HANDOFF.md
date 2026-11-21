@@ -102,6 +102,8 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 原签名窗口首次 Present 15.600 ms 成功，图像、输入、退出和同桌面通过。实时会话上限早于 CALL 651.542 ms，已独立留存 768 条原始回执。应用视频 ETL 完整，另一路显示 ETL 达上限并丢 4 个缓冲。[联动时间线及失败边界](windows-native-graphics/rounds/win-gated-seq-profiler-present-20261121-01.result.json)
 
+启动 92083 同一原窗首次 Present(1,0) 约 36.285 ms 成功。实时接收 3020 条均与封口 ETL 相符，含 KMD 事件 58 条。3 条同围栏生产 KMD 快照有场景 ETL 副本、控制端 fsync 和 Windows ACK，覆盖 submit、prepare、mappings 阶段，均在同提交完成之前发出。首条是 DWM DMA 13425。[生产 KMD 实时取证回执](windows-native-graphics/rounds/win-seq-live-kmd-fence-cache-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)
