@@ -402,6 +402,61 @@
   ],
   "independent_qualifications": [
     {
+      "evidence_sha256": "bf8287f7204808153194db3340a8199376d5bd7611fbe70434ab4ba2452c4e6c",
+      "independence": [
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "The startup callback samples only the miniport startup stage. The tested patch leaves presentation, Present1, and GPU scheduling code untouched. The one-use GM20B desktop passed its original GDI output, native texture import, input, and exit controls.",
+          "test_sha256": "88bdb74e2b2de672711d3b353341bc3d4ecef942b2a7bd61378e9d793502f0fd"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "The startup callback samples only the miniport startup stage. The tested patch leaves presentation, Present1, and GPU scheduling code untouched. The one-use GM20B desktop passed its original GDI output, native texture import, input, and exit controls.",
+          "test_sha256": "88bdb74e2b2de672711d3b353341bc3d4ecef942b2a7bd61378e9d793502f0fd"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "The startup callback samples only the miniport startup stage. The tested patch leaves presentation, Present1, and GPU scheduling code untouched. The one-use GM20B desktop passed its original GDI output, native texture import, input, and exit controls.",
+          "test_sha256": "88bdb74e2b2de672711d3b353341bc3d4ecef942b2a7bd61378e9d793502f0fd"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "No load, clock, storage or submission policy changes. The GM20B one-use desktop reproduced the baseline GDI client lifecycle.",
+          "test_sha256": "88bdb74e2b2de672711d3b353341bc3d4ecef942b2a7bd61378e9d793502f0fd"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "No network or Wi-Fi driver changes. The device reconnected during the controlled sequence and returned the native desktop evidence.",
+          "test_sha256": "88bdb74e2b2de672711d3b353341bc3d4ecef942b2a7bd61378e9d793502f0fd"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "reason": "The actual Windows STARTDEVICE callback sampled the existing closed-gate failure without changing it. The signed candidate also booted at Code 0 after a controlled restart. This evidence leaves the historic recovery restart open.",
+          "test_sha256": "4e374cc7a166e92d0139c438fd4d5005d98c5e9eeeed49d911fe9f177465433d"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "reason": "The diagnostic wrote 20 bytes in Windows-owned storage without allocating a private buffer. No change to application memory or graphics allocation policy.",
+          "test_sha256": "4e374cc7a166e92d0139c438fd4d5005d98c5e9eeeed49d911fe9f177465433d"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "reason": "The startup observer does not participate in desktop shutdown. The qualification interval pairs each restart with Windows shutdown intent and clean EventLog stop.",
+          "test_sha256": "4e374cc7a166e92d0139c438fd4d5005d98c5e9eeeed49d911fe9f177465433d"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "reason": "The startup callback samples only the miniport startup stage. The tested patch leaves presentation, Present1, and GPU scheduling code untouched. The one-use GM20B desktop passed its original GDI output, native texture import, input, and exit controls.",
+          "test_sha256": "88bdb74e2b2de672711d3b353341bc3d4ecef942b2a7bd61378e9d793502f0fd"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "reason": "The earlier events predate this test. The isolated callback and normal Code 0 desktop cases ran within a separate clean Windows event interval.",
+          "test_sha256": "4e374cc7a166e92d0139c438fd4d5005d98c5e9eeeed49d911fe9f177465433d"
+        }
+      ]
+    },
+    {
       "evidence_sha256": "7bc6185d0c66fa60823ddfd6eecdf0808a0354ce6cfd8ba39b44c1dadee30c77",
       "independence": [
         {

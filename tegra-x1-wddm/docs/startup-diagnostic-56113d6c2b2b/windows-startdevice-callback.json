@@ -1,0 +1,55 @@
+{
+  "source_commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "kmd_sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+  "signed_catalog": "62fba84b6b921bdc8c42053b88dac643f3d7d71aff888feee6a0e8e8e1ff18b4",
+  "cold_entry": {
+    "windows_kernel_boot": 88512,
+    "approved_permanent": null,
+    "one_time_permit": null,
+    "gpu_code": 43,
+    "pnp_inf": "oem27.inf",
+    "recovered_inf": "oem20.inf"
+  },
+  "windows_etw": {
+    "etl_sha256": "8e0e56946ea06471631c2f10acb1f11e5405373f1d6d8c98dbb32e026aa03ec3",
+    "lost_events": 0,
+    "lost_buffers": 0,
+    "damaged": [],
+    "complete": true,
+    "qpc_frequency": 19200000,
+    "closed_gate_event_count": 1,
+    "events": [
+      {
+        "request": "STARTDEVICE",
+        "adapter_available": true,
+        "stage": "permit",
+        "startup_status": "0xc00000a3",
+        "buffer_size_in": 524288,
+        "buffer_size_out": 20,
+        "pid": 872,
+        "tid": 876,
+        "qpc": 606088721
+      }
+    ]
+  },
+  "arm64_test_program": {
+    "sha256": "3913c7fe235f2eda2b044d0ed2dd44472bcaa1b9717b1456fceb3d7bfbfce1c7",
+    "switch_boot": 88248,
+    "result": "startup diagnostic model: ADDDEVICE STARTDEVICE NULL context unsupported type short buffer exact size canaries passed; output bytes=20",
+    "coverage": [
+      "ADDDEVICE with no context and with the matching context",
+      "STARTDEVICE with matching, null and wrong context",
+      "Unaligned output, larger capacity, undersized and null buffers",
+      "Canaries before and after the 20-byte record and zero output on errors",
+      "Unsupported reason and null argument structure"
+    ]
+  },
+  "observed_os_reasons": [
+    "STARTDEVICE"
+  ],
+  "modeled_only": [
+    "ADDDEVICE",
+    "null hAdapter",
+    "buffer edge cases"
+  ]
+}
