@@ -3,6 +3,14 @@
 Native Windows ARM64 backend components for the GM20B in Switch Lite (HDH-001,
 T214). See the [hardware status](STATUS.md) for the latest physical results. This document retains the earlier driver contracts and bring-up history.
 
+## NVK builds and hardware qualification on Switch Windows
+
+For changes to shared NVK code, build ARM64, ARM64EC and x86 from the same source revision and qualify all three on the Switch. For architecture-specific changes, build, test and update only the affected implementation. Promote each implementation after its hardware qualification and the applicable baseline checks pass.
+
+Test native ARM64 with an ARM64 client. For ARM64EC, run both a pure x64 client and an ARM64EC client. Both use the same ARM64EC implementation through the existing `tg_nvk_x64.dll` forwarding slot. The release has three NVK implementations. For x86, use the qualified application-private ICD route and record system-wide WOW64 registration separately. For each client, record the actual loaded DLL path and full SHA-256, verify hardware-drawn output, and check normal process exit.
+
+[Selected NVK baselines and hardware receipts](SWITCH_GRAPHICS_HANDOFF.md#nvk-各架构选定基线)
+
 The default build produces a kernel static library. `--probe` also builds a
 System-class KMDF test driver and its SwitchFan PMIC bridge. These are **not**
 a display miniport or Vulkan ICD. They keep the working POST display driver.
