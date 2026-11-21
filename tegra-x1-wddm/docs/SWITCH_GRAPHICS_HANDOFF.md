@@ -90,6 +90,8 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 正式启动 91918 复跑原双缓冲空窗口。状态快照先落盘，首次 Present 耗时 16.629 ms，52 字节应用 Blt 退役。调用至客户区采样期间，DWM 的四个 DMA 和四组跨设备围栏信号、等待均在 GM20B 节点 0 匹配完成。同包 12776 有正式 KMD 快照。4,508 个客户区采样点与独立空帧对照相同，输入、退出及同一桌面通过。[同次启动的原始回执与哈希](windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json)
 
+比对匹配 Windows ARM64 映像和 Microsoft PDB，确认 DxgKrnl 175.1 在 VidSch 路径中先于释放 DPC 队列锁，随后才选择物理、虚拟提交或抢占 DDI。历史 152586 与正常 12776 的事件描述符完全一致。历史启动缺 dxgmms2 文件哈希以及同号的锁释放、进入及返回回执。[指令位置、接口表和两份原始载荷](windows-native-graphics/rounds/win-dma175-ddi-order-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)
