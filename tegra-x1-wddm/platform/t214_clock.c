@@ -29,6 +29,9 @@
 #define ENABLE 1u
 #define IDDQ 2u
 #define SYNC 4u
+#define OUT_VCODIV_MASK 0x00003f00u
+#define OUT_VCODIV_BY1  0x00000000u
+#define OUT_VCODIV_BY2  (2u << 8)
 
 static const uint32_t clock_regs[TG_GPU_CLOCK_SAVED_REGS] = {
     CFG, COEFF, CFG2, CFG3, DVFS0, DVFS1, DVFS2, VCO, OUT, BYPASS,
@@ -61,6 +64,20 @@ static void clk_select(const struct tg_gpu_power_io *io, uint32_t vco)
     clk_update(io, VCO, 1, vco);
     clk_write(io, THERM, saved);
 }
+
+static void clk_write_vcodiv_double(const struct tg_gpu_power_io *io,
+    uint32_t val)
+{
+    /* Switchroot clk_program_gpc_pll (gm20b/clk_gm20b.c): intentional 2nd
+     * back-to-back write to assure linear divider operation, then readback.
+     */
+    io->write32(io->context, GPU + OUT, val);
+    io->write32(io->context, GPU + OUT, val);
+    (void)clk_read(io, OUT);
+}
+
+static bool program_pll_under_bypass(const struct tg_gpu_power_io *io,
+    uint32_t coeff, uint32_t dfs_coeff, int32_t ext_cal);
 
 static int32_t div_nearest(int32_t n, int32_t d)
 { return n < 0 ? -((-n + d / 2) / d) : (n + d / 2) / d; }
@@ -308,37 +325,20 @@ enum tg_gpu_clock_result tg_gpu_clock_start(const struct tg_gpu_power_io *io,
         return TG_GPU_CLOCK_CALIBRATION_ERROR;
 
     c->stage = 3;
-    clk_update(io, CFG, SYNC, 0);
-    clk_update(io, CFG, ENABLE, 0);
     /* C1 coefficient round((-172550 * 0.8 + 195374) / 1000) = 57.
      * DET_MAX=0 preserves the upper frequency bound if the rail rises.
      */
-    clk_update(io, DVFS2, 1u << 16, 1u << 16);
     value = (uint32_t)div_nearest(div_nearest(-172550 * (int32_t)mv, 1000) + 195374, 1000);
     if (value > 127) return TG_GPU_CLOCK_CALIBRATION_ERROR;
-    clk_update(io, DVFS0, 0x7f7f, value);
-    io->delay_us(io->context, 1);
-    clk_update(io, DVFS2, 1u << 16, 0);
-    clk_update(io, DVFS2, 0x7f, (uint32_t)c->external_calibration);
-    io->delay_us(io->context, 1);
-    clk_update(io, DVFS1, 0x0fff0000, 0x0e010000);
     /* SDM=-4096 (top byte f0) makes effective N equal integer N. C1's
      * VCO must stay in 1.3..2.6 GHz: 460.8 MHz therefore uses N=48, P=2,
      * VCO=1843.2 MHz, not N=24/P=1 with an out-of-range 921.6 MHz VCO.
      * The original 729.6/1228.8 MHz profiles retain N=38/64, P=1.
      * P is the divisor itself (clk_gm20b.h nvgpu_pl_to_div, 1ae0167d).
      */
-    clk_update(io, CFG2, 0xff, 0xf0);
     coeff = target == TG_GPU_LOW_POWER_KHZ ? 0x00023001u :
         0x00010001u | ((target / 19200u) << 8);
-    clk_update(io, COEFF, 0x3fffff, coeff);
-    clk_update(io, CFG, ENABLE, ENABLE);
-    io->delay_us(io->context, 40); /* NA mode has no usable LOCK bit. */
-    clk_update(io, CFG, SYNC, SYNC);
-    clk_select(io, 1);
-    if ((clk_read(io, COEFF) & 0x3fffff) != coeff ||
-        (clk_read(io, CFG) & (ENABLE | SYNC | IDDQ)) != (ENABLE | SYNC) ||
-        !(clk_read(io, VCO) & 1) || (clk_read(io, CFG2) & 0xff) != 0xf0)
+    if (!program_pll_under_bypass(io, coeff, value, c->external_calibration))
         return TG_GPU_CLOCK_READBACK_ERROR;
     c->stage = 4;
     c->running = true;
@@ -376,6 +376,26 @@ enum tg_gpu_clock_result tg_gpu_clock_measure(const struct tg_gpu_power_io *io,
 static bool program_pll_under_bypass(const struct tg_gpu_power_io *io,
     uint32_t coeff, uint32_t dfs_coeff, int32_t ext_cal)
 {
+    uint32_t old_pl = (clk_read(io, COEFF) >> 16) & 0x3fu;
+    uint32_t new_pl = (coeff >> 16) & 0x3fu;
+    bool pll_on_vco = (clk_read(io, CFG) & ENABLE) != 0u &&
+                      (clk_read(io, VCO) & 1u) != 0u;
+    uint32_t out;
+
+    /* Switchroot clk_program_gpc_pll (gm20b/clk_gm20b.c): split FO-to-bypass
+     * and bypass-to-FO jumps in half by setting OUT VCODIV (0x137250[13:8])
+     * to 1:2 whenever either active old PL or target new PL is < 2 (1:1).
+     * Direct 1:1 <=> 1:2 transition is not truly glitchless. Because this KMD
+     * always bypass-relocks without NDIV sliding, PL=1 -> PL=1 changes also
+     * cross bypass and therefore engage this divider transition. On cold start
+     * (PLL off and already on bypass), only new_pl < 2 triggers the split.
+     */
+    if (new_pl < 2u || (pll_on_vco && old_pl < 2u)) {
+        out = (clk_read(io, OUT) & ~OUT_VCODIV_MASK) | OUT_VCODIV_BY2;
+        clk_write_vcodiv_double(io, out);
+        io->delay_us(io->context, 2);
+    }
+
     clk_select(io, 0);
     clk_update(io, CFG, SYNC, 0);
     clk_update(io, CFG, ENABLE, 0);
@@ -389,13 +409,25 @@ static bool program_pll_under_bypass(const struct tg_gpu_power_io *io,
     clk_update(io, CFG2, 0xff, 0xf0);
     clk_update(io, COEFF, 0x3fffff, coeff);
     clk_update(io, CFG, ENABLE, ENABLE);
-    io->delay_us(io->context, 40);
+    io->delay_us(io->context, 40); /* NA mode has no usable LOCK bit. */
     clk_update(io, CFG, SYNC, SYNC);
     clk_select(io, 1);
+
+    /* Restore OUT VCODIV to 1:1 after returning to VCO (clk_program_gpc_pll):
+     * wait 2 us at half rate, then double-write and read back OUT.
+     */
+    out = clk_read(io, OUT);
+    if ((out & OUT_VCODIV_MASK) != OUT_VCODIV_BY1) {
+        out = (out & ~OUT_VCODIV_MASK) | OUT_VCODIV_BY1;
+        io->delay_us(io->context, 2);
+        clk_write_vcodiv_double(io, out);
+    }
+
     return (clk_read(io, COEFF) & 0x3fffff) == coeff &&
            (clk_read(io, CFG) & (ENABLE | SYNC | IDDQ)) == (ENABLE | SYNC) &&
            (clk_read(io, VCO) & 1) != 0 &&
-           (clk_read(io, CFG2) & 0xff) == 0xf0;
+           (clk_read(io, CFG2) & 0xff) == 0xf0 &&
+           (clk_read(io, OUT) & OUT_VCODIV_MASK) == OUT_VCODIV_BY1;
 }
 
 static bool write_gpu_rail_checked(const struct tg_gpu_power_io *io,

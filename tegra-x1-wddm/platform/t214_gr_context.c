@@ -1,7 +1,8 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (c) 2014-2018 NVIDIA CORPORATION. All rights reserved.
  * GM20B cold graphics-context initialization adapted from Switchroot nvgpu
- * 1ae0167d gk20a/gr_gk20a.c and gm20b/gr_gm20b.c. See ../NOTICE.
+ * 1ae0167d gk20a/gr_gk20a.c, gm20b/gr_gm20b.c and
+ * common/priv_ring/priv_ring_gm20b.c. See ../NOTICE.
  */
 #include "t214_gr_context.h"
 #include "t214_gr_context_regs.h"
@@ -228,6 +229,16 @@ static void zcull(const struct tg_gpu_power_io *io, uint32_t banks)
     wr(io,gr_gpcs_ppcs_wwdx_sm_num_rcp_r(),gr_gpcs_ppcs_wwdx_sm_num_rcp_conservative_f(
        (gr_gpc0_zcull_sm_num_rcp_conservative__max_v()+1)/2));
 }
+/* Switchroot nvgpu 1ae0167d gm20b_priv_set_timeout_settings (called from
+ * gk20a_init_gr_setup_hw right after gr_gk20a_zcull_init_hw). Upstream notes
+ * hardware reset defaults of 0x400; live readback on physical hardware is
+ * separate and not assumed here. Apply only the two 0x800 writes.
+ */
+static void priv_ring_timeouts(const struct tg_gpu_power_io *io)
+{
+    wr(io,pri_ringstation_sys_master_config_r(0x15),0x800);
+    wr(io,pri_ringstation_gpc_master_config_r(0xa),0x800);
+}
 static void timeslice(const struct tg_gpu_power_io *io)
 {
     /* Match the vendor's enabled timeslice mode, retaining other NETB bits. */
@@ -349,7 +360,7 @@ enum tg_gpu_gr_context_result tg_gpu_gr_context_init(
         s->result=TG_GPU_GR_CTX_VISIBILITY;goto done;
     }
     s->stage=2;
-    zcull(io,s->zculls);context_stream(io,n);
+    zcull(io,s->zculls);priv_ring_timeouts(io);context_stream(io,n);
     if(!idle(io,s)) goto done;
     wr(io,gr_fe_go_idle_timeout_r(),0);timeslice(io);floorsweep(io,fe->ltc_count);
     wr(io,gr_fe_go_idle_timeout_r(),0x800);method_stream(io,n);

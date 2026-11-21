@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (c) 2014-2020 NVIDIA CORPORATION. All rights reserved.
  * Selected unchanged GM20B definitions from Switchroot nvgpu 1ae0167d
- * include/nvgpu/hw/gm20b/hw_{gr,ctxsw_prog,top,pri_ringmaster}_gm20b.h.
+ * include/nvgpu/hw/gm20b/hw_{gr,ctxsw_prog,top,pri_ringmaster,pri_ringstation_sys,pri_ringstation_gpc}_gm20b.h.
  * Type spelling/whitespace adjusted for this build. See ../NOTICE.
  */
 #ifndef TG_GPU_T214_GR_CONTEXT_REGS_H
@@ -160,6 +160,8 @@ static inline uint32_t gr_scc_pagepool_r(void) { return 0x00408010U; }
 static inline uint32_t gr_scc_pagepool_total_pages_hwmax_v(void) { return 0x00000000U; }
 static inline uint32_t gr_status_r(void) { return 0x00400700U; }
 static inline uint32_t pri_ringmaster_enum_gpc_r(void) { return 0x00120078U; }
+static inline uint32_t pri_ringstation_gpc_master_config_r(uint32_t i) { return 0x00128300U + i*4U; }
+static inline uint32_t pri_ringstation_sys_master_config_r(uint32_t i) { return 0x00122300U + i*4U; }
 static inline uint32_t top_num_gpcs_r(void) { return 0x00022430U; }
 static inline uint32_t top_tpc_per_gpc_r(void) { return 0x00022434U; }
 #endif

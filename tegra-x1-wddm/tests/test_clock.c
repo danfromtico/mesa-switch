@@ -16,9 +16,21 @@ struct model_event {
     uint32_t value;
 };
 
+enum out_trace_kind {
+    TR_OUT_READ  = 1,
+    TR_OUT_WRITE = 2,
+    TR_VCO_WRITE = 3,
+    TR_DELAY_US  = 4,
+};
+
+struct out_trace_entry {
+    enum out_trace_kind kind;
+    uint32_t value;
+};
+
 static uint32_t registers[0x140000 / 4];
 static bool counter_bad, calibration_timeout, slowdown_stuck, live_mode, pmic_fail;
-static bool pmic_fail_after_write;
+static bool pmic_fail_after_write, out_restore_stuck, trace_out;
 static uint32_t pmic_read_failures;
 static uint32_t fail_counter_for_khz;
 static uint32_t gpu_speedo_fuse;
@@ -28,11 +40,19 @@ static uint8_t rail;
 static uint32_t target_khz;
 static struct model_event events[64];
 static uint32_t event_count;
+static struct out_trace_entry out_trace[128];
+static uint32_t out_trace_count;
 
 static void push_event(enum model_event_kind kind, uint32_t value)
 {
     if (event_count < sizeof(events) / sizeof(events[0]))
         events[event_count++] = (struct model_event){ kind, value };
+}
+
+static void push_out_trace(enum out_trace_kind kind, uint32_t value)
+{
+    if (trace_out && out_trace_count < sizeof(out_trace) / sizeof(out_trace[0]))
+        out_trace[out_trace_count++] = (struct out_trace_entry){ kind, value };
 }
 
 static uint32_t read_reg(void *ctx, uint32_t address)
@@ -41,6 +61,8 @@ static uint32_t read_reg(void *ctx, uint32_t address)
     if (address == 0x7000f930) return gpu_speedo_fuse;
     if (address == 0x7000fb04) return adc_fuse;
     assert(address >= 0x57000000 && address < 0x57140000);
+    if (address == 0x57137250)
+        push_out_trace(TR_OUT_READ, registers[0x137250 / 4]);
     return registers[(address - 0x57000000) / 4];
 }
 
@@ -50,6 +72,14 @@ static void write_reg(void *ctx, uint32_t address, uint32_t value)
     assert(address >= 0x57000000 && address < 0x57140000);
     ++writes;
     if (address == 0x57020160 && slowdown_stuck && !(value & 0x003f0000)) return;
+    if (address == 0x57137250) {
+        push_out_trace(TR_OUT_WRITE, value);
+        if (out_restore_stuck && (registers[0x137250 / 4] & 0x3f00u) != 0u &&
+            (value & 0x3f00u) == 0u)
+            return;
+    }
+    if (address == 0x57137100)
+        push_out_trace(TR_VCO_WRITE, value & 1u);
     if (address == 0x57137100 && live_mode) {
         if ((value & 1u) == 0)
             push_event(EV_PLL_BYPASS, 0);
@@ -74,6 +104,7 @@ static void write_reg(void *ctx, uint32_t address, uint32_t value)
         gpc_khz = vco / p / 2;
         /* Counter observes GPCCLK (half the PLL), not GPC2CLK. */
         assert(!(registers[0x20160 / 4] & 0x003f0000));
+        assert((registers[0x137250 / 4] & 0x3f00u) == 0u);
         assert(vco >= 1300000 && vco <= 2600000);
         if (!live_mode) {
             assert(gpc_khz == target_khz);
@@ -113,7 +144,11 @@ static bool write_pmic(void *ctx, uint8_t addr, uint8_t reg, uint8_t value)
     return !pmic_fail_after_write;
 }
 
-static void delay(void *ctx, uint32_t us) { (void)ctx; (void)us; }
+static void delay(void *ctx, uint32_t us)
+{
+    (void)ctx;
+    push_out_trace(TR_DELAY_US, us);
+}
 
 static void reset(void)
 {
@@ -127,11 +162,12 @@ static void reset(void)
     rail = 110;
     target_khz = TG_GPU_FIXED_KHZ;
     counter_bad = calibration_timeout = slowdown_stuck = live_mode = pmic_fail = false;
-    pmic_fail_after_write = false;
+    pmic_fail_after_write = out_restore_stuck = trace_out = false;
     pmic_read_failures = 0;
     fail_counter_for_khz = 0;
     writes = 0;
     event_count = 0;
+    out_trace_count = 0;
 }
 
 static void test_hiopt_characterization(void)
@@ -340,6 +376,178 @@ static void test_partial_pmic_failure(void)
     assert(tg_gpu_clock_stop(&io, &c) == TG_GPU_CLOCK_OK);
 }
 
+static void assert_vcodiv_split_sequence(uint32_t start_idx, uint32_t base_out)
+{
+    uint32_t by2 = (base_out & ~0x3f00u) | (2u << 8);
+    uint32_t by1 = base_out & ~0x3f00u;
+    uint32_t i = start_idx;
+    /* Entry: read OUT -> back-to-back double-write vcodiv(2) -> readback -> 2 us
+     * -> bypass (SEL_VCO=0) -> NA delays (1, 1, 40 us) -> VCO (SEL_VCO=1).
+     */
+    assert(i + 16 < out_trace_count);
+    assert(out_trace[i].kind == TR_OUT_READ && out_trace[i].value == by1); ++i;
+    assert(out_trace[i].kind == TR_OUT_WRITE && out_trace[i].value == by2); ++i;
+    assert(out_trace[i].kind == TR_OUT_WRITE && out_trace[i].value == by2); ++i;
+    assert(out_trace[i].kind == TR_OUT_READ && out_trace[i].value == by2); ++i;
+    assert(out_trace[i].kind == TR_DELAY_US && out_trace[i].value == 2u); ++i;
+    assert(out_trace[i].kind == TR_VCO_WRITE && out_trace[i].value == 0u); ++i;
+    assert(out_trace[i].kind == TR_DELAY_US && out_trace[i].value == 1u); ++i;
+    assert(out_trace[i].kind == TR_DELAY_US && out_trace[i].value == 1u); ++i;
+    assert(out_trace[i].kind == TR_DELAY_US && out_trace[i].value == 40u); ++i;
+    assert(out_trace[i].kind == TR_VCO_WRITE && out_trace[i].value == 1u); ++i;
+    /* Restore: read OUT (still 1:2) -> 2 us -> double-write vcodiv(0) -> readback
+     * -> final verification readback (vcodiv == 0).
+     */
+    assert(out_trace[i].kind == TR_OUT_READ && out_trace[i].value == by2); ++i;
+    assert(out_trace[i].kind == TR_DELAY_US && out_trace[i].value == 2u); ++i;
+    assert(out_trace[i].kind == TR_OUT_WRITE && out_trace[i].value == by1); ++i;
+    assert(out_trace[i].kind == TR_OUT_WRITE && out_trace[i].value == by1); ++i;
+    assert(out_trace[i].kind == TR_OUT_READ && out_trace[i].value == by1); ++i;
+    assert(out_trace[i].kind == TR_OUT_READ && out_trace[i].value == by1);
+}
+
+static void assert_no_vcodiv_split_writes(uint32_t start_idx, uint32_t end_idx)
+{
+    for (uint32_t i = start_idx; i < end_idx; ++i) {
+        assert(out_trace[i].kind != TR_OUT_WRITE);
+        assert(!(out_trace[i].kind == TR_DELAY_US && out_trace[i].value == 2u));
+    }
+}
+
+static void test_vcodiv_pl1_transitions(void)
+{
+    struct tg_gpu_power p = {.owned = true, .ready = true, .pmic_address = 0x33};
+    struct tg_gpu_power_io io = {NULL, read_reg, write_reg, read_pmic, write_pmic, delay, NULL};
+    struct tg_gpu_clock c = {0};
+    uint32_t idx;
+
+    /* 1. Cold start at PL=2 (460.8 MHz) with reset COEFF=0: only the initial
+     *    OUT setup write (0x80000000), zero vcodiv(2) split writes.
+     */
+    reset();
+    gpu_speedo_fuse = 1659u;
+    target_khz = TG_GPU_LOW_POWER_KHZ;
+    trace_out = true;
+    out_trace_count = 0;
+    assert(tg_gpu_clock_start(&io, &p, target_khz, &c) == TG_GPU_CLOCK_OK);
+    {
+        uint32_t out_writes = 0;
+        for (uint32_t i = 0; i < out_trace_count; ++i) {
+            if (out_trace[i].kind == TR_OUT_WRITE) {
+                assert(out_trace[i].value == 0x80000000u);
+                ++out_writes;
+            }
+            assert(!(out_trace[i].kind == TR_DELAY_US && out_trace[i].value == 2u));
+        }
+        assert(out_writes == 1u);
+    }
+
+    /* 2. Live PL>=2 -> PL>=2 control (460.8 [PL=2] -> 153.6 [PL=5], and
+     *    153.6 [PL=5] -> 614.4 [PL=2]): zero OUT writes and no 2 us delays.
+     */
+    live_mode = true;
+    out_trace_count = 0;
+    assert(tg_gpu_clock_set_rate(&io, &p, 153600u, 590000u, &c) == TG_GPU_CLOCK_OK);
+    assert_no_vcodiv_split_writes(0, out_trace_count);
+    out_trace_count = 0;
+    assert(tg_gpu_clock_set_rate(&io, &p, 614400u, 590000u, &c) == TG_GPU_CLOCK_OK);
+    assert_no_vcodiv_split_writes(0, out_trace_count);
+
+    /* 3. Live PL>=2 -> PL<2 (614.4 [PL=2] -> 691.2 [PL=1]): must double-write
+     *    vcodiv(2), read back, delay 2 us, relock under bypass, wait 2 us,
+     *    double-write vcodiv(0), read back, and preserve non-VCODIV bits.
+     */
+    registers[0x137250 / 4] = 0x80000015u; /* non-zero BYPDIV must stay intact */
+    out_trace_count = 0;
+    assert(tg_gpu_clock_set_rate(&io, &p, 691200u, 590000u, &c) == TG_GPU_CLOCK_OK);
+    assert_vcodiv_split_sequence(0, 0x80000015u);
+    assert(registers[0x137250 / 4] == 0x80000015u);
+
+    /* 4. Live PL<2 -> PL<2 same-PL under bypass (691.2 [PL=1] -> 1228.8 [PL=1],
+     *    then voltage-only NA update at 1228.8 [PL=1]): KMD has no NDIV slide,
+     *    so both bypass-relocks must engage and restore vcodiv(2).
+     */
+    registers[0x137250 / 4] = 0x80000000u;
+    out_trace_count = 0;
+    assert(tg_gpu_clock_set_rate(&io, &p, 1228800u, 770000u, &c) == TG_GPU_CLOCK_OK);
+    /* First entry in trace is PMIC V-up 1000 us settle delay, then split seq. */
+    assert(out_trace[0].kind == TR_DELAY_US && out_trace[0].value == 1000u);
+    assert_vcodiv_split_sequence(1u, 0x80000000u);
+    out_trace_count = 0;
+    assert(tg_gpu_clock_set_rate(&io, &p, 1228800u, 800000u, &c) == TG_GPU_CLOCK_OK);
+    assert(out_trace[0].kind == TR_DELAY_US && out_trace[0].value == 1000u);
+    assert_vcodiv_split_sequence(1u, 0x80000000u);
+
+    /* 5. Live PL<2 -> PL>=2 (1228.8 [PL=1] -> 460.8 [PL=2]): must split entry
+     *    from PL=1 to bypass and restore 1:1 after relocking at PL=2.
+     */
+    out_trace_count = 0;
+    assert(tg_gpu_clock_set_rate(&io, &p, 460800u, 590000u, &c) == TG_GPU_CLOCK_OK);
+    assert_vcodiv_split_sequence(0u, 0x80000000u);
+    assert(registers[0x137250 / 4] == 0x80000000u);
+
+    /* 6. Counter failure rollback across PL=2 -> PL=1 -> PL=2: both forward
+     *    attempt and rollback execute vcodiv(2) split + restore, leaving 1:1.
+     */
+    out_trace_count = 0;
+    fail_counter_for_khz = 844800u;
+    assert(tg_gpu_clock_set_rate(&io, &p, 844800u, 615000u, &c) == TG_GPU_CLOCK_COUNTER_ERROR);
+    fail_counter_for_khz = 0;
+    assert(c.running && c.target_khz == 460800u && c.rail_uv == 615000u);
+    assert(registers[0x137250 / 4] == 0x80000000u);
+    /* PMIC 1000 us -> forward split (16 entries) -> counter (200, 100 us) -> rollback split. */
+    assert(out_trace[0].kind == TR_DELAY_US && out_trace[0].value == 1000u);
+    assert_vcodiv_split_sequence(1u, 0x80000000u);
+    assert(out_trace[17].kind == TR_DELAY_US && out_trace[17].value == 200u);
+    assert(out_trace[18].kind == TR_DELAY_US && out_trace[18].value == 100u);
+    assert_vcodiv_split_sequence(19u, 0x80000000u);
+
+    /* 7. Counter failure rollback staying in PL>=2 (460.8 -> 153.6 -> 460.8):
+     *    neither forward attempt nor rollback touches OUT.
+     */
+    out_trace_count = 0;
+    fail_counter_for_khz = 153600u;
+    assert(tg_gpu_clock_set_rate(&io, &p, 153600u, 590000u, &c) == TG_GPU_CLOCK_COUNTER_ERROR);
+    fail_counter_for_khz = 0;
+    assert(c.running && c.target_khz == 460800u && c.rail_uv == 615000u);
+    assert_no_vcodiv_split_writes(0, out_trace_count);
+
+    /* 8. Stuck OUT restore: fails readback, rollback fails readback -> running=false,
+     *    rail is never lowered, and stop restores saved OUT once cleared.
+     */
+    out_restore_stuck = true;
+    assert(tg_gpu_clock_set_rate(&io, &p, 844800u, 615000u, &c) == TG_GPU_CLOCK_READBACK_ERROR);
+    assert(!c.running && c.rail_uv == 615000u);
+    assert((registers[0x137250 / 4] & 0x3f00u) == (2u << 8));
+    out_restore_stuck = false;
+    live_mode = false;
+    trace_out = false;
+    assert(tg_gpu_clock_stop(&io, &c) == TG_GPU_CLOCK_OK);
+    assert((registers[0x137250 / 4] & 0x3f00u) == 0u);
+
+    /* 9. Cold start at PL=1 (729.6 MHz & 1228.8 MHz): initial OUT=0x80000000,
+     *    then full vcodiv(2) split + 2 us + bypass-to-VCO + 2 us + restore 1:1.
+     */
+    for (uint32_t k = 0; k < 2u; ++k) {
+        reset();
+        memset(&c, 0, sizeof(c));
+        gpu_speedo_fuse = 1659u;
+        target_khz = k == 0u ? TG_GPU_FIXED_KHZ : TG_GPU_OVERCLOCK_KHZ;
+        trace_out = true;
+        out_trace_count = 0;
+        assert(tg_gpu_clock_start(&io, &p, target_khz, &c) == TG_GPU_CLOCK_OK);
+        idx = 0;
+        while (idx < out_trace_count &&
+               !(out_trace[idx].kind == TR_OUT_WRITE && out_trace[idx].value == 0x80000200u))
+            ++idx;
+        assert(idx > 0 && idx < out_trace_count);
+        assert_vcodiv_split_sequence(idx - 1u, 0x80000000u);
+        assert(registers[0x137250 / 4] == 0x80000000u);
+        trace_out = false;
+        assert(tg_gpu_clock_stop(&io, &c) == TG_GPU_CLOCK_OK);
+    }
+}
+
 int main(void)
 {
     struct tg_gpu_power p = {.owned = true, .ready = true, .pmic_address = 0x33};
@@ -405,6 +613,7 @@ int main(void)
     test_full_oc_ladder();
     test_live_dvfs_ordering_and_rollback();
     test_partial_pmic_failure();
-    puts("T214 C1 NA clock ordering, HighOPT CVB, live DVFS and unwind tests passed (host model).");
+    test_vcodiv_pl1_transitions();
+    puts("T214 C1 NA clock ordering, HighOPT CVB, live DVFS, VCODIV split and unwind tests passed (host model).");
     return 0;
 }
