@@ -33,6 +33,21 @@ foreach($rev in $revisions){
     $old=$record
 }
 if($old){Assert-SwitchFaultHistory $old $ledger}
+$baselineRel='tegra-x1-wddm/docs/graphics-baseline.json'
+foreach($comparison in $ledger.baseline_comparisons){
+    $before=$comparison.before_commit
+    & git -C $root merge-base --is-ancestor $before HEAD
+    if($LASTEXITCODE){throw 'Historical comparison must come from this repository history'}
+    $priorLines=@(& git -C $root show ("${before}:"+$baselineRel))
+    if($LASTEXITCODE){throw 'Missing historical baseline for comparison'}
+    $priorSelection=($priorLines -join "`n")|ConvertFrom-Json -ErrorAction Stop
+    if($priorSelection.qualification_sha256 -ne $comparison.previous_qualification_sha256){throw 'Historical comparison used a different selected baseline'}
+    $priorLines=@(& git -C $root show ("${before}:"+$ledgerRel))
+    if($LASTEXITCODE){throw 'Missing historical fault ledger for comparison'}
+    $priorLedger=($priorLines -join "`n")|ConvertFrom-Json -ErrorAction Stop
+    $known=@($priorLedger.faults|Where-Object status -ceq 'open'|ForEach-Object { $_.id })
+    foreach($id in $comparison.inherited_faults){if($id -cnotin $known){throw "Fault was not open on the previous baseline: $id"}}
+}
 foreach($fault in $ledger.faults){
     foreach($reference in $fault.evidence){
         $parts=$reference -split '#',2
@@ -101,16 +116,10 @@ if ($publishing) {
     $profile=$e.Data.components
     $directory=$e.Data.directory
 }
-Assert-SwitchPromotion $ledger $e.Data $e.Sha256 $profile $directory
-Assert-SwitchCaseFiles $e.Data (Join-Path $root $Qualification)
 $head=& git -C $root rev-parse HEAD
 if($LASTEXITCODE){throw 'Cannot identify the baseline source checkout'}
-if(!$publishing){
-    if($selected.source_commit -ne $e.Data.base_commit){throw 'Candidate evidence was collected relative to a different accepted source'}
-    Assert-SwitchChangedComponentLoads $selected.components $profile $e.Data
-}
+$priorBaseline=$selected
 if($publishing){
-    $baselineRel='tegra-x1-wddm/docs/graphics-baseline.json'
     $selectedCommit=& git -C $root log -1 --first-parent --format=%H HEAD -- $baselineRel
     if($LASTEXITCODE -or !$selectedCommit){throw 'Cannot identify the committed baseline transition'}
     $parent=& git -C $root rev-parse --verify ($selectedCommit+'^')
@@ -119,9 +128,12 @@ if($publishing){
     if($LASTEXITCODE){throw 'Previous accepted baseline manifest is unavailable'}
     $priorBaseline=($lines -join "`n")|ConvertFrom-Json -ErrorAction Stop
     Assert-SwitchAcceptedBaseline $priorBaseline
-    if($priorBaseline.source_commit -ne $e.Data.base_commit){throw 'Publication evidence does not cover the previous baseline source'}
-    Assert-SwitchChangedComponentLoads $priorBaseline.components $profile $e.Data
 }
+if($priorBaseline.source_commit -ne $e.Data.base_commit){throw 'Candidate evidence was collected relative to a different accepted source'}
+if($priorBaseline.qualification -notmatch '^tegra-x1-wddm/docs/[a-z0-9_./-]+\.json$' -or $priorBaseline.qualification.Split('/') -contains '..'){throw 'Invalid prior qualification path'}
+Assert-SwitchPromotion $ledger $e.Data $e.Sha256 $profile $directory $priorBaseline (Join-Path $root $priorBaseline.qualification)
+Assert-SwitchChangedComponentLoads $priorBaseline.components $profile $e.Data
+Assert-SwitchCaseFiles $e.Data (Join-Path $root $Qualification)
 & git -C $root merge-base --is-ancestor $e.Data.base_commit $e.Data.source_commit
 if($LASTEXITCODE){throw 'Invalid or unrelated source range'}
 & git -C $root merge-base --is-ancestor $e.Data.source_commit $head

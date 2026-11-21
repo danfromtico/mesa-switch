@@ -89,7 +89,8 @@ try {
                 $e=Read-SwitchEvidence $Qualification
                 Assert-SwitchProfile $e.Data.components
                 $live=Get-SwitchInstalledProfile $Directory @($e.Data.components.PSObject.Properties.Name)
-                Assert-SwitchPromotion $ledger $e.Data $e.Sha256 $live $Directory
+                $priorFile=Join-Path ([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($Qualification))) 'previous-qualification.json'
+                Assert-SwitchPromotion $ledger $e.Data $e.Sha256 $live $Directory $previousApproved $priorFile
                 Assert-SwitchChangedComponentLoads $previousApproved.components $live $e.Data
                 Assert-SwitchCaseFiles $e.Data $Qualification
                 Assert-SwitchLiveTrial $policyRoot $Directory $live $e.Data $permit

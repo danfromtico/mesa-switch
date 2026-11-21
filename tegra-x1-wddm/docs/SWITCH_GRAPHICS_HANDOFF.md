@@ -4,6 +4,8 @@
 
 ## 第四步 · 查清旧式窗口首次 Present 的重启
 
+普通窗口暂存复制修复已列为基线。源码为 `a7c422ad`，签名 KMD 为 `c09c3c86`，ARM64 tgd3d 为 `b4f6c7bf`。原程序在 GM20B 上连续三次显示、响应输入、正常退出并返回同一桌面。正常翻转窗口也通过对照。旧式窗口历史重启继续单独排查。WDDM 2.0 进程级 Present1 和标准 GDI allocation-only 导入各自需要对应的生产组件实机回执。[基线清单](graphics-baseline.json) · [三次实测与正常对照](legacy-sequential-step4/window-copy-c09c3c86/result.json) · [晋升回执](legacy-sequential-step4/window-copy-c09c3c86/promotion-qualification.json)
+
 **从原始最小场景开始。** Switch Lite GM20B 使用外接电源，原生 tgd3d 协商旧式 DDI `0x000b000f`，普通窗口、两个 BGRA UNORM 缓冲区。应用没有写入图像时，第一次 `Present(1, 0)` 即出现意外重启。原空窗口程序 `fd64bd1b` 的三份历史记录均在首次调用时中断。带绘图的相关程序 `62100a30` 另有持久记录到达用户态发出 `D3DKMT_PRESENT` 的边界，其内核跟踪在此之前结束。历史复位前最后完成的 miniport 操作仍待查明。另有一条 WDDM 2.0 六帧场景在第三次呈现时重启，分别登记。[原始实机记录](LOAD_STABILITY_FOLLOWUP_20261116.json) · [故障登记及原场景销案条件](open-faults.json)
 
 同一个 JSON 里，先读 `native_sequential_windows_kmt_dispatch_20261120` 的 `native`、`versioned_callback` 和 `scope`，再对照 `native_first_present_miniport_receipts_20261120` 的正常窗口记录。两者分别给出故障前最后一个可证实的提交边界和能追到面板的成功路径。[原始记录及字段](LOAD_STABILITY_FOLLOWUP_20261116.json)

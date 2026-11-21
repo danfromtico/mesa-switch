@@ -292,6 +292,78 @@
       "daily_workaround": "After a desktop restart, verify the boot record, Code 0, compositor, accepted component hashes and power. A preventive measure is unverified.",
       "close_when": "Identify the interrupted shutdown stage, correct the initiating fault and verify three consecutive equivalent desktop restarts with clean shutdown records and an accepted-profile desktop.",
       "resolution": null
+    },
+    {
+      "id": "GM20B-ORDINARY-WINDOW-STAGING-COPY",
+      "status": "closed",
+      "kind": "window-copy",
+      "affected_scopes": [
+        "wddm",
+        "presentation"
+      ],
+      "trigger": "First normal legacy SEQUENTIAL window copy from the application render context into its standard staging surface.",
+      "evidence": [
+        "tegra-x1-wddm/docs/legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+        "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/result.json#ordinary_window",
+        "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/result.json#baseline_comparison"
+      ],
+      "cause": "The miniport accepted the requested Blt only on a GDI context and returned STATUS_NOT_SUPPORTED to the normal application context. Windows reported occlusion and queued no copy for this window.",
+      "daily_workaround": "Retain the previously working flip-window path on older builds.",
+      "close_when": "The original native application presents a visible window, handles input, exits and returns to the same desktop in three consecutive runs. Check a previously working native flip window on the candidate.",
+      "resolution": {
+        "root_cause": "Plain Blt on a non-GDI rendering context returns STATUS_NOT_SUPPORTED.",
+        "root_cause_confirmed": true,
+        "commit": "a7c422add36e2d6b2444a7767bafcaef81b4a041",
+        "components": {
+          "tegragpurender.sys": "c09c3c868948f3a3acc583dd5f34cb098f3819207db817c081e4ade06adf999a",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "causal_evidence_file": "tegra-x1-wddm/docs/legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+        "causal_evidence_sha256": "283175425e0a6d8dbb354bcc1ea5cdc0c8bc8b2aa484540eeeb6133800de3035",
+        "original_scenario_runs": [
+          {
+            "name": "copy-sequential-1",
+            "passed": true,
+            "before_boot": 87268,
+            "after_boot": 87268,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/copy-sequential-1.json",
+            "evidence_sha256": "ecc1197abec78e655bb39734109808765d9cd9c5812da4faf4228920fbab2f4e",
+            "original_trigger": true
+          },
+          {
+            "name": "copy-sequential-2",
+            "passed": true,
+            "before_boot": 87268,
+            "after_boot": 87268,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/copy-sequential-2.json",
+            "evidence_sha256": "ceb981149399bebdf273ce3a84e856c897104e783ed124288a7b1957cb60c2b1",
+            "original_trigger": true
+          },
+          {
+            "name": "copy-sequential-3",
+            "passed": true,
+            "before_boot": 87268,
+            "after_boot": 87268,
+            "output_verified": true,
+            "normal_exit": true,
+            "desktop_available": true,
+            "evidence_file": "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/copy-sequential-3.json",
+            "evidence_sha256": "3d62d7a94a55335e09aa6f23d92add6aa55de6f5b1ca2ad924c435c2622adba8",
+            "original_trigger": true
+          }
+        ]
+      }
     }
   ],
   "independent_qualifications": [
@@ -358,6 +430,24 @@
           "reason": "The Wi-Fi driver and boot configuration were unchanged. The candidate boot connected and the normal-window control returned to the same available desktop.",
           "test_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c"
         }
+      ]
+    }
+  ],
+  "baseline_comparisons": [
+    {
+      "evidence_sha256": "8ba28952d2c533e492441896857a020591d5fdfda10708737f2601ba02f5e8f5",
+      "before_commit": "e02af50fe74a9ea2ea746dc9f2c5c98d480d43a8",
+      "previous_qualification_sha256": "ea62b1044e413c21ed316fda6b0fa89b95f81be91cc50ecd46bb5b298c9b2768",
+      "previous_control_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c",
+      "inherited_faults": [
+        "GM20B-LEGACY-SEQUENTIAL-RESTART",
+        "GM20B-WDDM20-PRESENT1-REMOVAL",
+        "GM20B-WDDM20-FLIP-RESTART",
+        "SWITCH-LOAD-TRANSITION-RESTART",
+        "SWITCH-WIFI-STARTUP",
+        "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+        "SWITCH-COMMIT-PRESSURE-RESTART",
+        "SWITCH-DESKTOP-RESTART-SHUTDOWN"
       ]
     }
   ]
