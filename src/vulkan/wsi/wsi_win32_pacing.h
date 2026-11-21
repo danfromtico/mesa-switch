@@ -98,7 +98,8 @@ static inline bool
 wsi_win32_pacer_compositor_resumed(const struct wsi_win32_pacer *pacer,
                                    int64_t dwm_elapsed)
 {
-   return pacer->last_present > 0 &&
+   return pacer->timer != NULL && pacer->period > 1 &&
+          pacer->last_present > 0 &&
           dwm_elapsed >= wsi_win32_pacer_min_block(pacer) &&
           !pacer->compositor_blocked;
 }
@@ -138,15 +139,23 @@ wsi_win32_pacer_compositor_paced(const struct wsi_win32_pacer *pacer,
              pacer->period - pacer->period / 8;
 }
 
+/* Wait out the producer cap. The deadline is hit when fewer than `slack`
+ * ticks remain: DwmFlush() has just run, so a microscopic remainder means
+ * the frame already reached the composition it was waiting for (e.g. a
+ * panel a few hundred ppm faster than freq / fps with the GPU/GDI beat
+ * landing just before the VBlank); arming a timer for that would only add
+ * scheduler jitter, and on coarse system clocks could oversleep toward a
+ * whole extra period. Callers that need exactness pass 0. A late frame
+ * still resets the deadline instead of accumulating catch-up slots. */
 static inline BOOL
-wsi_win32_pacer_wait(struct wsi_win32_pacer *pacer)
+wsi_win32_pacer_wait(struct wsi_win32_pacer *pacer, int64_t slack)
 {
    if (!pacer->timer)
       return TRUE;
    LARGE_INTEGER now;
    if (!QueryPerformanceCounter(&now))
       return FALSE;
-   while (now.QuadPart < pacer->next) {
+   while (now.QuadPart + slack < pacer->next) {
       LARGE_INTEGER due;
       due.QuadPart = -((pacer->next - now.QuadPart) * INT64_C(10000000) +
                       pacer->frequency - 1) / pacer->frequency;

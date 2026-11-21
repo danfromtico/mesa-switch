@@ -141,6 +141,19 @@ static void check_predicates(void)
    HGDIOBJ previous = SelectObject(dc, dib);
    CHECK(previous && previous != HGDI_ERROR);
    CHECK(wsi_win32_direct_dib_dc_ready(dc, 8, 8));
+   /* Non-default DC states change how GDI interprets the transfer, so a
+    * frame must take the generic path for each of them. */
+   SetGraphicsMode(dc, GM_ADVANCED);
+   CHECK(!wsi_win32_direct_dib_dc_ready(dc, 8, 8));
+   SetGraphicsMode(dc, GM_COMPATIBLE);
+   SetMapMode(dc, MM_ANISOTROPIC);
+   CHECK(!wsi_win32_direct_dib_dc_ready(dc, 8, 8));
+   SetMapMode(dc, MM_TEXT);
+   SetLayout(dc, LAYOUT_RTL);
+   CHECK(!wsi_win32_direct_dib_dc_ready(dc, 8, 8));
+   SetLayout(dc, 0);
+   SetMapMode(dc, MM_TEXT); /* clearing an RTL layout can leave a derived transform */
+   CHECK(wsi_win32_direct_dib_dc_ready(dc, 8, 8));
    ExcludeClipRect(dc, 0, 0, 8, 8);
    CHECK(!wsi_win32_direct_dib_dc_ready(dc, 8, 8));
    SelectClipRgn(dc, NULL);
@@ -161,9 +174,61 @@ static void check_predicates(void)
    CHECK(DeleteDC(dc));
 }
 
+static void check_retry_after_partial_transfer(void)
+{
+   /* If a direct transfer ever delivered only part of a frame,
+    * queue_present() retries through the DIB section; SRCCOPY makes that
+    * retry overwrite every pixel, so the final content must be identical
+    * to a clean reference blit no matter what the partial pass left
+    * behind. */
+   const int width = 8, height = 8;
+   BITMAPINFO info = {0};
+   info.bmiHeader.biSize = sizeof(info.bmiHeader);
+   info.bmiHeader.biWidth = width;
+   info.bmiHeader.biHeight = -height;
+   info.bmiHeader.biPlanes = 1;
+   info.bmiHeader.biBitCount = 32;
+   info.bmiHeader.biCompression = BI_RGB;
+   struct bitmap source = create_bitmap(&info), target = create_bitmap(&info);
+   const size_t count = (size_t)width * height;
+   uint32_t mapped[8 * 8];
+   int ret = 1;
+   if (!source.bits || !target.bits)
+      goto cleanup;
+   for (int y = 0; y < height; y++)
+      for (int x = 0; x < width; x++)
+         mapped[(size_t)y * width + x] = pattern_pixel((unsigned)x, (unsigned)y);
+   memcpy(source.bits, mapped, sizeof(mapped));
+   /* Simulate the partial pass: a clipped direct transfer scribbled over
+    * a strict subset of the target with wrong pixels. */
+   for (size_t i = 0; i < count / 2; i++)
+      target.bits[i] = 0xFF123456u;
+   const BOOL copied = StretchBlt(target.dc, 0, 0, width, height,
+                                  source.dc, 0, 0, width, height, SRCCOPY);
+   if (!GdiFlush() || !copied)
+      goto cleanup;
+   for (size_t i = 0; i < count; i++) {
+      if ((target.bits[i] ^ mapped[i]) & 0xFFFFFFu) {
+         fprintf(stderr, "retry mismatch at %zu (%#x %#x)\n",
+                 i, mapped[i], target.bits[i]);
+         goto cleanup;
+      }
+   }
+   printf("partial transfer then full retry: exact_rgb=%zu\n", count);
+   ret = 0;
+cleanup:
+   destroy_bitmap(source);
+   destroy_bitmap(target);
+   if (ret) {
+      fprintf(stderr, "FAIL: retry after partial transfer\n");
+      exit(1);
+   }
+}
+
 int main(void)
 {
    check_predicates();
+   check_retry_after_partial_transfer();
    int failed = 0;
    failed += check_size(640, 360);
    failed += check_size(1, 1);

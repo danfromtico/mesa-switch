@@ -965,7 +965,8 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
     * instead of accumulating catch-up slots. */
    if (!compositor_paced && !compositor_resumed && chain->pacer.timer &&
        chain->status == VK_SUCCESS &&
-       !wsi_win32_pacer_wait(&chain->pacer)) {
+       !wsi_win32_pacer_wait(&chain->pacer,
+                             wsi_win32_pacer_min_block(&chain->pacer))) {
       chain->status = VK_ERROR_SURFACE_LOST_KHR;
    }
 

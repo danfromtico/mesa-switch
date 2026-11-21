@@ -16,11 +16,13 @@
  * exercise against the live timer. */
 static void check_beats(const char *name, int64_t vblank,
                         const int64_t *work, const bool *idle,
-                        const bool *expect_paced, unsigned n)
+                        const bool *expect_paced, bool expect_lock,
+                        unsigned n)
 {
    struct wsi_win32_pacer sim;
    CHECK(wsi_win32_pacer_init(&sim, 60));
    const int64_t period = sim.period;
+   const int64_t slack = wsi_win32_pacer_min_block(&sim);
    /* Start on a virtual vblank so every scenario is deterministic. */
    int64_t t = (INT64_C(1000000000) / period + 1) * period;
    int64_t prev_release = 0;
@@ -48,18 +50,24 @@ static void check_beats(const char *name, int64_t vblank,
          wsi_win32_pacer_sync_compositor(&sim, completed);
          CHECK(sim.next == completed + period);
       } else if (!resumed) {
-         /* Producer cap: wait out only the time still owed to the
-          * deadline (mirrors wsi_win32_pacer_wait()). */
-         if (sim.next > release)
+         /* Producer cap: within slack of the deadline the frame is
+          * released immediately (mirrors wsi_win32_pacer_wait()'s
+          * post-DwmFlush slack); otherwise the timer fires at the
+          * deadline and the beat advances to it. */
+         if (release + slack < sim.next)
             release = sim.next;
          sim.next = release + period;
          sim.last_present = release;
       }
       /* The cap never holds the producer past the deadline for a full
        * extra period, and a paced or resumed frame is released at the
-       * composition it already waited for. */
+       * composition it already waited for. A locked scenario also pins
+       * that release to land exactly on its composition, so removing the
+       * post-DwmFlush slack (or skipping the re-anchor) is caught here. */
       CHECK(release - completed < period);
       if (paced || resumed)
+         CHECK(release == completed);
+      if (expect_lock)
          CHECK(release == completed);
       if (i > 0)
          CHECK(release > prev_release);
@@ -94,7 +102,7 @@ int main(void)
 
    struct wsi_win32_pacer pacer;
    CHECK(wsi_win32_pacer_init(&pacer, 0) && !pacer.timer);
-   CHECK(wsi_win32_pacer_wait(&pacer));
+   CHECK(wsi_win32_pacer_wait(&pacer, 0));
    /* Without a timer nothing is ever classified as compositor-paced. */
    CHECK(!wsi_win32_pacer_compositor_paced(&pacer, 1000, 1000));
    wsi_win32_pacer_finish(&pacer);
@@ -104,7 +112,7 @@ int main(void)
    CHECK(QueryPerformanceCounter(&start));
    const uint64_t cpu_start = cpu_ticks();
    for (unsigned i = 0; i < 60; ++i)
-      CHECK(wsi_win32_pacer_wait(&pacer));
+      CHECK(wsi_win32_pacer_wait(&pacer, 0));
    CHECK(QueryPerformanceCounter(&end));
    const uint64_t cpu_elapsed = cpu_ticks() - cpu_start;
    CHECK(end.QuadPart - start.QuadPart >= 59 * pacer.period);
@@ -172,14 +180,14 @@ int main(void)
       if (i > 0) {
          CHECK(QueryPerformanceCounter(&now));
          wsi_win32_pacer_sync_compositor(&vblank, now.QuadPart);
-         CHECK(wsi_win32_pacer_wait(&vblank));
+         CHECK(wsi_win32_pacer_wait(&vblank, 0));
       }
       CHECK(QueryPerformanceCounter(&now));
       const bool paced =
          wsi_win32_pacer_compositor_paced(&fast, fast.period / 4, now.QuadPart);
       CHECK(!paced);
       wsi_win32_pacer_presented(&fast, fast.period / 4, now.QuadPart);
-      CHECK(wsi_win32_pacer_wait(&fast));
+      CHECK(wsi_win32_pacer_wait(&fast, 0));
    }
    wsi_win32_pacer_finish(&vblank);
    wsi_win32_pacer_finish(&fast);
@@ -205,25 +213,25 @@ int main(void)
       for (unsigned i = 0; i < 6; i++)
          heavy_work[i] = (i % 2 == 0 ? 12 : 2) * gv / 16 + (i == 2 ? gv / 16 : 0);
       check_beats("60 Hz heavy/light alternation", gv, heavy_work,
-                  heavy_idle, heavy_paced, 6);
+                  heavy_idle, heavy_paced, true, 6);
 
       int64_t occl_work[] = { gv / 8, gv / 8, gv / 8, gv / 8 };
       bool occl_idle[] = { true, true, true, true };
       bool occl_paced[] = { false, false, false, false };
       check_beats("occluded immediate return", gv, occl_work,
-                  occl_idle, occl_paced, 4);
+                  occl_idle, occl_paced, false, 4);
 
       int64_t late_work[] = { gv / 16, gv / 16, 5 * gv / 2, gv / 16, gv / 16 };
       bool late_idle[] = { false, false, false, false, false };
       bool late_paced[] = { false, true, true, true, true };
       check_beats("missed deadline after a late frame", gv, late_work,
-                  late_idle, late_paced, 5);
+                  late_idle, late_paced, true, 5);
 
       int64_t fast_work[] = { gv / 16, gv / 16, gv / 16, gv / 16 };
       bool fast_idle[] = { false, false, false, false };
       bool fast_paced[] = { false, false, false, false };
       check_beats("120 Hz desktop under the 60 Hz cap", gv / 2, fast_work,
-                  fast_idle, fast_paced, 4);
+                  fast_idle, fast_paced, false, 4);
 
       int64_t back_work[] = { gv / 4, gv / 4, gv / 4, gv / 4, gv / 4, gv / 4 };
       bool back_idle[] = { true, true, false, false, false, false };
@@ -233,7 +241,45 @@ int main(void)
        * composition it waited for instead of waiting out a full period;
        * the following frames lock immediately. */
       check_beats("occluded then back on screen", gv, back_work,
-                  back_idle, back_paced, 6);
+                  back_idle, back_paced, false, 6);
+
+      /* Panel a hair faster than freq / 60: heavy beats land in the narrow
+       * window before the VBlank, so DwmFlush() just blocked but under
+       * min_block. The post-DwmFlush slack must release each frame at its
+       * composition instead of arming a timer for a microscopic remainder
+       * (which a coarse clock could stretch toward a whole extra period);
+       * every beat stays on the panel's own grid. */
+      const int64_t mb = gv > 64 ? gv / 64 : 1;
+      const int64_t half = mb / 2 > 0 ? mb / 2 : 1;
+      const int64_t vb = gv - mb;
+      int64_t narrow_work[] = { vb / 2, vb - half, vb - half,
+                                vb - half, vb - half, vb - half };
+      bool narrow_idle[] = { false, false, false, false, false, false };
+      bool narrow_paced[] = { false, false, false, false, false, false };
+      check_beats("fast panel, narrow pre-VBlank window", vb, narrow_work,
+                  narrow_idle, narrow_paced, true, 6);
+   }
+
+   /* A microscopic remainder after DwmFlush() must not arm a timer: with
+    * the post-DwmFlush slack the wait returns immediately and re-anchors
+    * the deadline, instead of sleeping a coarse tick for a remainder of
+    * half min_block. */
+   {
+      struct wsi_win32_pacer tight;
+      CHECK(wsi_win32_pacer_init(&tight, 60));
+      const int64_t mb2 = wsi_win32_pacer_min_block(&tight);
+      const int64_t half2 = mb2 / 2 > 0 ? mb2 / 2 : 1;
+      LARGE_INTEGER enter, leave;
+      CHECK(QueryPerformanceCounter(&enter));
+      wsi_win32_pacer_sync_compositor(&tight,
+                                      enter.QuadPart + half2 - tight.period);
+      CHECK(wsi_win32_pacer_wait(&tight, mb2));
+      CHECK(QueryPerformanceCounter(&leave));
+      CHECK(leave.QuadPart - enter.QuadPart < tight.period / 4);
+      CHECK(tight.last_present >= enter.QuadPart);
+      CHECK(tight.last_present <= leave.QuadPart);
+      CHECK(tight.next == tight.last_present + tight.period);
+      wsi_win32_pacer_finish(&tight);
    }
 
    /* The fallback timer stays phase-locked to the compositor: after a paced
@@ -241,22 +287,22 @@ int main(void)
     * of stacking a full timer period on top of the VBlank wait. */
    wsi_win32_pacer_sync_compositor(&pacer, now.QuadPart);
    CHECK(pacer.next == now.QuadPart + period);
-   CHECK(wsi_win32_pacer_wait(&pacer));
+   CHECK(wsi_win32_pacer_wait(&pacer, 0));
    CHECK(QueryPerformanceCounter(&end));
    CHECK(end.QuadPart >= now.QuadPart + period);
    CHECK(end.QuadPart < now.QuadPart + 2 * period);
 
    /* A late producer gets one slot, never a burst of accumulated slots. */
    Sleep(50);
-   CHECK(wsi_win32_pacer_wait(&pacer));
+   CHECK(wsi_win32_pacer_wait(&pacer, 0));
    const int64_t first_slot = pacer.next;
-   CHECK(wsi_win32_pacer_wait(&pacer));
+   CHECK(wsi_win32_pacer_wait(&pacer, 0));
    CHECK(pacer.next >= first_slot + period);
 
    CHECK(CloseHandle(pacer.timer));
    CHECK(QueryPerformanceCounter(&end));
    pacer.next = end.QuadPart + pacer.frequency;
-   CHECK(!wsi_win32_pacer_wait(&pacer)); /* Timer failure is not success. */
+   CHECK(!wsi_win32_pacer_wait(&pacer, 0)); /* Timer failure is not success. */
    pacer.timer = NULL;
    wsi_win32_pacer_finish(&pacer);
    printf("PASS: 60-Hz cap, blocking wait, late-frame pacing, compositor phase-lock, "
