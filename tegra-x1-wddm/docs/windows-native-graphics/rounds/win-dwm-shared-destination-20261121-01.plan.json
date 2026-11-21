@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-shared-destination-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "owner": "Windows DWM、Win32k 和 dxgkrnl 的重定向表面",
+  "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
+  "method": "复核原空窗口五次正式基线的 DWM 跨进程分配身份",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
+  "observations": [
+    "从同次绘图线程 CDD 286、适配器分配 33、设备分配 36 和窗口 Blt 166 定位唯一目的分配、全局对象及共享资源，同时核对 KMT 源、设备和创建/释放时间。",
+    "以实际 DWM PID、同一适配器和全局分配或共享资源查找 DWM 的本地分配或明确的表面读取。记录 DWM 91 调度、是否有同一提交的消费，区分对象访问、调度、复制目标寿命和画面。",
+    "按各轮启动、进程、窗口、时间范围归属。保留正常翻转的明确消费对照及原三次 CALL 后的实物记录缺口。"
+  ],
+  "inputs": {
+    "cases": {
+      "win-empty-present-20261121-01": {
+        "result": {
+          "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+          "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+        },
+        "archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961"
+      },
+      "win-present-live-20261121-02": {
+        "result": {
+          "path": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+          "sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86"
+        },
+        "archive_sha256": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308"
+      },
+      "win-present-incall-20261121-01": {
+        "result": {
+          "path": "windows-native-graphics/rounds/win-present-incall-20261121-01.result.json",
+          "sha256": "b345beaef3d845873136e56b83967e7bd678ded5a2b31425a4aac22017ef1703"
+        },
+        "archive_sha256": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4"
+      },
+      "win-present-incall-20261121-02": {
+        "result": {
+          "path": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+          "sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701"
+        },
+        "archive_sha256": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b"
+      },
+      "win-present-local-blt-20261121-01": {
+        "result": {
+          "path": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
+          "sha256": "f8f893c4d9a450c4a28716403ce2cc45bbdc1777325420d108c4efd8c7ccec27"
+        },
+        "archive_sha256": "61cb1ec4e568a2cf37ff874058725ec6ce6c6e140de4a4760d98b21d2c9f4570"
+      }
+    },
+    "device_allocation_templates_sha256": "66179e657c859f2dac860fe4163e2709a2e325977e782f347433cfc9c481e2c6",
+    "composition_templates_sha256": "594a16e069e2e10846b7a8a99dbc0553e2343b4648a52df19ea506fdc4edffd0",
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-dwm-window-id-20261121-01.result.json",
+      "sha256": "eb83d9760c78dfcacfcde18bd06c3b91809c4a5258e7f740ed0e8009e8a860ba"
+    },
+    "original_etl": {
+      "path": "windows-native-graphics/rounds/win-original-etl-bytes-20261121-01.result.json",
+      "sha256": "fd673ef012dd88a31dd110d9354efd0ddfc02ff0fc775873aa884fd429cc53ce"
+    },
+    "windows_standard_allocation_contract": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/setting-the-size-and-pitch-of-the-memory-allocation"
+  }
+}

@@ -1,0 +1,1910 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-shared-destination-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "plan_sha256": "af026a2af24449519712b72c455b170b234554f368336008a514bcf017e58954",
+  "status": "观测缺口",
+  "finding": "五份原空窗口归档均将 CDD 286、适配器分配 33、应用设备分配 36 和窗口 Blt 166 精确绑定到同一目标。五次 DWM 事件 91 的 EventId 数值均等于当次应用 HWND，分别在复制包完成后 2.15 至 16.818 ms 调度。目标的设备分配 37 在系统 PID 4 上结束。至画面采样的 1054 条 DWM 进程事件均缺目标分配标识，五轮均未找到 DWM 对同一全局分配的本地开立或该窗口的明确消费记录。",
+  "missing_observation": "仍需将本次 Blt 目标或其后继重定向表面与 DWM 实际消费绑定的同提交标识、资源传递或复制回执。已记录的应用共享资源和 DWM 91 窗口调度之间缺少此对象关系。",
+  "device_executions": 0,
+  "evidence": {
+    "cases": [
+      {
+        "case": "win-empty-present-20261121-01",
+        "boot": 91476,
+        "dwm": 1400,
+        "pid": 5992,
+        "tid": 5988,
+        "hwnd": 524312,
+        "luid": "0000000000005c10",
+        "h_device": 18446611100200693776,
+        "adapter": 18446706169594454016,
+        "archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+        "display_etl_sha256": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+        "journal_sha256": "cb624e86f2f6477ac2d6126d66b7aedb3bfc3ef05af755fa4935d956912fbcf6",
+        "trace_quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": true
+        },
+        "clock": {
+          "frequency": 19200000,
+          "events_lost": 0,
+          "buffers_lost": 0
+        },
+        "call_qpc": 94861147189,
+        "return_qpc": 94861380548,
+        "capture_qpc": 94863412892,
+        "observed_target_objects": {
+          "dxg_adapter_allocation": 18446611100166170064,
+          "vidmm_global_allocation": 18446611100108393888,
+          "dxg_shared_resource": 18446706169653087904,
+          "app_vidmm_local": 18446706169636830992
+        },
+        "standard_allocation": {
+          "qpc": 94861278775,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 286,
+          "version": 0,
+          "fields": {
+            "pDxgAdapterAllocation": 18446611100166170064,
+            "Flags": 0,
+            "Width": 640,
+            "Height": 360,
+            "Pitch": 2560
+          }
+        },
+        "global_allocation": {
+          "qpc": 94861278704,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 33,
+          "version": 3,
+          "fields": {
+            "hProcessId": 5992,
+            "hDevice": 18446611100200693776,
+            "pDxgAdapter": 18446706169594454016,
+            "Flags": 129,
+            "allocSize": 921600,
+            "ulAlignment": 4096,
+            "dwReadSegment": 0,
+            "dwWriteSegment": 2,
+            "PreferredSegment": 2,
+            "HintedBank": 0,
+            "dwEvictionSegment": 0,
+            "Priority": 2013265920,
+            "hVidMmGlobalAlloc": 18446611100108393888,
+            "hDxgGlobalAlloc": 18446611100166170064,
+            "hDxgSharedResource": 0,
+            "UsageVersion": 0,
+            "UsageFlags": 0,
+            "Format": 0,
+            "SwizzledFormat": 0,
+            "ByteOffset": 0,
+            "Width": 0,
+            "Height": 0,
+            "Pitch": 0,
+            "Depth": 0,
+            "SlicePitch": 0,
+            "BackingStoreWasPinned": 0,
+            "pSectionObject": 0,
+            "PhysicalAdapterIndex": 0,
+            "PageTableOrDirectory": 0
+          }
+        },
+        "device_allocation": {
+          "qpc": 94861279542,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 5992,
+            "hDevice": 18446611100200693776,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169636830992,
+            "hVidMmGlobalAlloc": 18446611100108393888,
+            "hDxgResource": 18446611100200890992,
+            "hDxgSharedResource": 18446706169653087904,
+            "hThunkAllocation": 1073743936,
+            "hThunkResource": 1073743872,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2075108851712,
+            "hProcessAllocDetails": 18446611100193443344,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "source_allocation": {
+          "qpc": 94846219401,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 5992,
+            "hDevice": 18446611100200693776,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169646883344,
+            "hVidMmGlobalAlloc": 18446611100182502816,
+            "hDxgResource": 18446611100200920800,
+            "hDxgSharedResource": 18446706169653085024,
+            "hThunkAllocation": 1073743680,
+            "hThunkResource": 1073743616,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2075107008512,
+            "hProcessAllocDetails": 18446611100193433616,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "windows_blt": {
+          "qpc": 94861300682,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 166,
+          "version": 0,
+          "fields": {
+            "hwnd": 524312,
+            "pDmaBuffer": 18446706169646566816,
+            "PresentHistoryToken": 0,
+            "hSourceAllocation": 18446706169646883344,
+            "hDestAllocation": 18446706169636830992,
+            "bSubmit": 1,
+            "bRedirectedPresent": 0,
+            "Flags": 1,
+            "Source.Left": 0,
+            "Source.Right": 640,
+            "Source.Top": 0,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Right": 640,
+            "Dest.Top": 0,
+            "Dest.Bottom": 360,
+            "SubRectCount": 1
+          }
+        },
+        "windows_present": {
+          "qpc": 94861378321,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 184,
+          "version": 1,
+          "fields": {
+            "hContext": 1073742144,
+            "hWindow": 524312,
+            "VidPnSourceId": 4294967295,
+            "FlipInterval": 1,
+            "Flags": 67178625,
+            "ReturnStatus": 0,
+            "hSrcAllocHandle": 1073743680,
+            "hDstAllocHandle": 0
+          }
+        },
+        "windows_token": {
+          "qpc": 94861377851,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 215,
+          "version": 2,
+          "fields": {
+            "hAdapter": 18446706169586577424,
+            "Token": 18446611100095384064,
+            "Model": 3,
+            "TokenSize": 48,
+            "TokenData": 0,
+            "Flags": 0,
+            "CustomDuration": 0,
+            "ScrollRect.left": 0,
+            "ScrollRect.right": 0,
+            "ScrollRect.top": 0,
+            "ScrollRect.bottom": 0,
+            "ScrollOffset.X": 0,
+            "ScrollOffset.Y": 0,
+            "DirtyRectCount": 0,
+            "Left": [],
+            "Right": [],
+            "Top": [],
+            "Bottom": [],
+            "SourceRect.left": 0,
+            "SourceRect.right": 0,
+            "SourceRect.top": 0,
+            "SourceRect.bottom": 0,
+            "DestWidth": 0,
+            "DestHeight": 0,
+            "TargetRect.left": 0,
+            "TargetRect.right": 0,
+            "TargetRect.top": 0,
+            "TargetRect.bottom": 0,
+            "VmBusChannel": 0
+          }
+        },
+        "submit": {
+          "qpc": 94861301402,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100106235296,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "DmaBufferSize": 52,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0,
+            "bPresent": 1,
+            "hDmaBuffer": 18446706169646566816,
+            "pQueuePacket": 18446706169625735184,
+            "ProgressFenceValue": 0
+          }
+        },
+        "completion": {
+          "qpc": 94861344089,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100106235296,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169625735184
+          }
+        },
+        "app_target_releases": [],
+        "matched_local_release_all_actors": [
+          {
+            "qpc": 94866421008,
+            "pid": 4,
+            "tid": 7856,
+            "provider": "kernel",
+            "id": 37,
+            "version": 2,
+            "fields": {
+              "hProcessId": 4,
+              "hDevice": 18446611100200693776,
+              "pDxgAdapter": 18446706169594454016,
+              "hVidMmAlloc": 18446706169636830992,
+              "hVidMmGlobalAlloc": 18446611100108393888,
+              "hDxgResource": 18446611100200890992,
+              "hDxgSharedResource": 18446706169653087904,
+              "hThunkAllocation": 1073743936,
+              "hThunkResource": 1073743872,
+              "PrivateRuntimeResourceHandle": 0,
+              "pVirtualAddress": 2075108851712,
+              "hProcessAllocDetails": 18446611100193443344,
+              "hOtherPartitionHandle": 0
+            }
+          }
+        ],
+        "global_target_releases": [
+          {
+            "qpc": 94866421334,
+            "pid": 4,
+            "tid": 7856,
+            "provider": "kernel",
+            "id": 34,
+            "version": 3,
+            "fields": {
+              "hProcessId": 5992,
+              "hDevice": 18446611100200693776,
+              "pDxgAdapter": 18446706169594454016,
+              "Flags": 129,
+              "allocSize": 921600,
+              "ulAlignment": 4096,
+              "dwReadSegment": 0,
+              "dwWriteSegment": 10,
+              "PreferredSegment": 2,
+              "HintedBank": 0,
+              "dwEvictionSegment": 8,
+              "Priority": 2013265920,
+              "hVidMmGlobalAlloc": 18446611100108393888,
+              "hDxgGlobalAlloc": 18446611100166170064,
+              "hDxgSharedResource": 0,
+              "UsageVersion": 0,
+              "UsageFlags": 0,
+              "Format": 0,
+              "SwizzledFormat": 0,
+              "ByteOffset": 0,
+              "Width": 0,
+              "Height": 0,
+              "Pitch": 0,
+              "Depth": 0,
+              "SlicePitch": 0,
+              "BackingStoreWasPinned": 0,
+              "pSectionObject": 0,
+              "PhysicalAdapterIndex": 0,
+              "PageTableOrDirectory": 0
+            }
+          }
+        ],
+        "per_process_device_allocation_events": [
+          {
+            "owner": 5992,
+            "event": 36,
+            "count": 1
+          },
+          {
+            "owner": 4,
+            "event": 37,
+            "count": 1
+          }
+        ],
+        "dwm_aliases": [],
+        "dwm_shared_resource_members": [],
+        "dwm_raw_target_identity_matches": [],
+        "dwm_event_counts_by_provider": {
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 221,
+          "9e9bba3c-2e38-40cb-99f4-9e8281425164": 30
+        },
+        "dwm_core_event_counts": {
+          "63": 7,
+          "64": 7,
+          "88": 2,
+          "91": 1,
+          "65": 7,
+          "141": 5,
+          "468": 1
+        },
+        "dwm_target_schedules": [
+          {
+            "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+            "id": 91,
+            "version": 0,
+            "pid": 1400,
+            "tid": 2252,
+            "qpc": 94861443540,
+            "payload_sha256": "4d9e7f57ec369ef128c06b51b81d53d2831488778930a84e5613b52baddf40d1",
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 524312,
+              "NumRects": 0
+            }
+          }
+        ],
+        "dwm_target_consumes": [],
+        "cdd_to_blt_ms": 1.141
+      },
+      {
+        "case": "win-present-live-20261121-02",
+        "boot": 91476,
+        "dwm": 1400,
+        "pid": 5540,
+        "tid": 7812,
+        "hwnd": 524400,
+        "luid": "0000000000005c10",
+        "h_device": 18446611100200628240,
+        "adapter": 18446706169594454016,
+        "archive_sha256": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308",
+        "display_etl_sha256": "14e6750d7823aaeaebda2eafca17da5dbb4f7de7b12cc499459dce10e006c259",
+        "journal_sha256": "6a51a7fb74d27c43eae4158ce3371fd8c8f33e5498ff50796cf40e89b39b9cdf",
+        "trace_quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": true
+        },
+        "clock": {
+          "frequency": 19200000,
+          "events_lost": 0,
+          "buffers_lost": 0
+        },
+        "call_qpc": 131646464982,
+        "return_qpc": 131646719229,
+        "capture_qpc": 131648431776,
+        "observed_target_objects": {
+          "dxg_adapter_allocation": 18446611100143981376,
+          "vidmm_global_allocation": 18446611100185472416,
+          "dxg_shared_resource": 18446706169653065104,
+          "app_vidmm_local": 18446706169645322512
+        },
+        "standard_allocation": {
+          "qpc": 131646599285,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 286,
+          "version": 0,
+          "fields": {
+            "pDxgAdapterAllocation": 18446611100143981376,
+            "Flags": 0,
+            "Width": 640,
+            "Height": 360,
+            "Pitch": 2560
+          }
+        },
+        "global_allocation": {
+          "qpc": 131646599196,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 33,
+          "version": 3,
+          "fields": {
+            "hProcessId": 5540,
+            "hDevice": 18446611100200628240,
+            "pDxgAdapter": 18446706169594454016,
+            "Flags": 129,
+            "allocSize": 921600,
+            "ulAlignment": 4096,
+            "dwReadSegment": 0,
+            "dwWriteSegment": 2,
+            "PreferredSegment": 2,
+            "HintedBank": 0,
+            "dwEvictionSegment": 0,
+            "Priority": 2013265920,
+            "hVidMmGlobalAlloc": 18446611100185472416,
+            "hDxgGlobalAlloc": 18446611100143981376,
+            "hDxgSharedResource": 0,
+            "UsageVersion": 0,
+            "UsageFlags": 0,
+            "Format": 0,
+            "SwizzledFormat": 0,
+            "ByteOffset": 0,
+            "Width": 0,
+            "Height": 0,
+            "Pitch": 0,
+            "Depth": 0,
+            "SlicePitch": 0,
+            "BackingStoreWasPinned": 0,
+            "pSectionObject": 0,
+            "PhysicalAdapterIndex": 0,
+            "PageTableOrDirectory": 0
+          }
+        },
+        "device_allocation": {
+          "qpc": 131646600793,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 5540,
+            "hDevice": 18446611100200628240,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169645322512,
+            "hVidMmGlobalAlloc": 18446611100185472416,
+            "hDxgResource": 18446611100200915760,
+            "hDxgSharedResource": 18446706169653065104,
+            "hThunkAllocation": 1073743936,
+            "hThunkResource": 1073743872,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2284513017856,
+            "hProcessAllocDetails": 18446611100177857296,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "source_allocation": {
+          "qpc": 131631369360,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 5540,
+            "hDevice": 18446611100200628240,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169646887952,
+            "hVidMmGlobalAlloc": 18446611100111568288,
+            "hDxgResource": 18446611100200948448,
+            "hDxgSharedResource": 18446706169653087424,
+            "hThunkAllocation": 1073743680,
+            "hThunkResource": 1073743616,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2284511174656,
+            "hProcessAllocDetails": 18446611100177852176,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "windows_blt": {
+          "qpc": 131646640993,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 166,
+          "version": 0,
+          "fields": {
+            "hwnd": 524400,
+            "pDmaBuffer": 18446706169656525200,
+            "PresentHistoryToken": 0,
+            "hSourceAllocation": 18446706169646887952,
+            "hDestAllocation": 18446706169645322512,
+            "bSubmit": 1,
+            "bRedirectedPresent": 0,
+            "Flags": 1,
+            "Source.Left": 0,
+            "Source.Right": 640,
+            "Source.Top": 0,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Right": 640,
+            "Dest.Top": 0,
+            "Dest.Bottom": 360,
+            "SubRectCount": 1
+          }
+        },
+        "windows_present": {
+          "qpc": 131646716784,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 184,
+          "version": 1,
+          "fields": {
+            "hContext": 1073742144,
+            "hWindow": 524400,
+            "VidPnSourceId": 4294967295,
+            "FlipInterval": 1,
+            "Flags": 67178625,
+            "ReturnStatus": 0,
+            "hSrcAllocHandle": 1073743680,
+            "hDstAllocHandle": 0
+          }
+        },
+        "windows_token": {
+          "qpc": 131646716196,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 215,
+          "version": 2,
+          "fields": {
+            "hAdapter": 18446706169586577424,
+            "Token": 18446611100095385168,
+            "Model": 3,
+            "TokenSize": 48,
+            "TokenData": 0,
+            "Flags": 0,
+            "CustomDuration": 0,
+            "ScrollRect.left": 0,
+            "ScrollRect.right": 0,
+            "ScrollRect.top": 0,
+            "ScrollRect.bottom": 0,
+            "ScrollOffset.X": 0,
+            "ScrollOffset.Y": 0,
+            "DirtyRectCount": 0,
+            "Left": [],
+            "Right": [],
+            "Top": [],
+            "Bottom": [],
+            "SourceRect.left": 0,
+            "SourceRect.right": 0,
+            "SourceRect.top": 0,
+            "SourceRect.bottom": 0,
+            "DestWidth": 0,
+            "DestHeight": 0,
+            "TargetRect.left": 0,
+            "TargetRect.right": 0,
+            "TargetRect.top": 0,
+            "TargetRect.bottom": 0,
+            "VmBusChannel": 0
+          }
+        },
+        "submit": {
+          "qpc": 131646641810,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100044127648,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "DmaBufferSize": 52,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0,
+            "bPresent": 1,
+            "hDmaBuffer": 18446706169656525200,
+            "pQueuePacket": 18446706169594030512,
+            "ProgressFenceValue": 0
+          }
+        },
+        "completion": {
+          "qpc": 131646683517,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100044127648,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169594030512
+          }
+        },
+        "app_target_releases": [],
+        "matched_local_release_all_actors": [
+          {
+            "qpc": 131650410845,
+            "pid": 4,
+            "tid": 688,
+            "provider": "kernel",
+            "id": 37,
+            "version": 2,
+            "fields": {
+              "hProcessId": 4,
+              "hDevice": 18446611100200628240,
+              "pDxgAdapter": 18446706169594454016,
+              "hVidMmAlloc": 18446706169645322512,
+              "hVidMmGlobalAlloc": 18446611100185472416,
+              "hDxgResource": 18446611100200915760,
+              "hDxgSharedResource": 18446706169653065104,
+              "hThunkAllocation": 1073743936,
+              "hThunkResource": 1073743872,
+              "PrivateRuntimeResourceHandle": 0,
+              "pVirtualAddress": 2284513017856,
+              "hProcessAllocDetails": 18446611100177857296,
+              "hOtherPartitionHandle": 0
+            }
+          }
+        ],
+        "global_target_releases": [
+          {
+            "qpc": 131650411188,
+            "pid": 4,
+            "tid": 688,
+            "provider": "kernel",
+            "id": 34,
+            "version": 3,
+            "fields": {
+              "hProcessId": 5540,
+              "hDevice": 18446611100200628240,
+              "pDxgAdapter": 18446706169594454016,
+              "Flags": 129,
+              "allocSize": 921600,
+              "ulAlignment": 4096,
+              "dwReadSegment": 0,
+              "dwWriteSegment": 10,
+              "PreferredSegment": 2,
+              "HintedBank": 0,
+              "dwEvictionSegment": 8,
+              "Priority": 2013265920,
+              "hVidMmGlobalAlloc": 18446611100185472416,
+              "hDxgGlobalAlloc": 18446611100143981376,
+              "hDxgSharedResource": 0,
+              "UsageVersion": 0,
+              "UsageFlags": 0,
+              "Format": 0,
+              "SwizzledFormat": 0,
+              "ByteOffset": 0,
+              "Width": 0,
+              "Height": 0,
+              "Pitch": 0,
+              "Depth": 0,
+              "SlicePitch": 0,
+              "BackingStoreWasPinned": 0,
+              "pSectionObject": 0,
+              "PhysicalAdapterIndex": 0,
+              "PageTableOrDirectory": 0
+            }
+          }
+        ],
+        "per_process_device_allocation_events": [
+          {
+            "owner": 5540,
+            "event": 36,
+            "count": 1
+          },
+          {
+            "owner": 4,
+            "event": 37,
+            "count": 1
+          }
+        ],
+        "dwm_aliases": [],
+        "dwm_shared_resource_members": [],
+        "dwm_raw_target_identity_matches": [],
+        "dwm_event_counts_by_provider": {
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 183,
+          "9e9bba3c-2e38-40cb-99f4-9e8281425164": 25
+        },
+        "dwm_core_event_counts": {
+          "63": 6,
+          "64": 6,
+          "88": 1,
+          "91": 1,
+          "65": 6,
+          "141": 5
+        },
+        "dwm_target_schedules": [
+          {
+            "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+            "id": 91,
+            "version": 0,
+            "pid": 1400,
+            "tid": 2252,
+            "qpc": 131646724789,
+            "payload_sha256": "ff5967b6fca921e0aac03a178962c9e0f4e1e7613e70be52ec3a9bf37ab119ff",
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 524400,
+              "NumRects": 0
+            }
+          }
+        ],
+        "dwm_target_consumes": [],
+        "cdd_to_blt_ms": 2.172
+      },
+      {
+        "case": "win-present-incall-20261121-01",
+        "boot": 91476,
+        "dwm": 1400,
+        "pid": 7576,
+        "tid": 2116,
+        "hwnd": 589944,
+        "luid": "0000000000005c10",
+        "h_device": 18446611100107790240,
+        "adapter": 18446706169594454016,
+        "archive_sha256": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4",
+        "display_etl_sha256": "c5e687c2200f6624b125b94608e2b4a07e06431a5a76c05800c788125a68b567",
+        "journal_sha256": "a15101e15344471d35273ab4a3d2057320404e2b98a29c80a9cb45ab260dee7c",
+        "trace_quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": true
+        },
+        "clock": {
+          "frequency": 19200000,
+          "events_lost": 0,
+          "buffers_lost": 0
+        },
+        "call_qpc": 138481770248,
+        "return_qpc": 138482065231,
+        "capture_qpc": 138483343654,
+        "observed_target_objects": {
+          "dxg_adapter_allocation": 18446611100191438848,
+          "vidmm_global_allocation": 18446611100133502384,
+          "dxg_shared_resource": 18446706169653055664,
+          "app_vidmm_local": 18446706169646891024
+        },
+        "standard_allocation": {
+          "qpc": 138481912719,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 286,
+          "version": 0,
+          "fields": {
+            "pDxgAdapterAllocation": 18446611100191438848,
+            "Flags": 0,
+            "Width": 640,
+            "Height": 360,
+            "Pitch": 2560
+          }
+        },
+        "global_allocation": {
+          "qpc": 138481912609,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 33,
+          "version": 3,
+          "fields": {
+            "hProcessId": 7576,
+            "hDevice": 18446611100107790240,
+            "pDxgAdapter": 18446706169594454016,
+            "Flags": 129,
+            "allocSize": 921600,
+            "ulAlignment": 4096,
+            "dwReadSegment": 0,
+            "dwWriteSegment": 2,
+            "PreferredSegment": 2,
+            "HintedBank": 0,
+            "dwEvictionSegment": 0,
+            "Priority": 2013265920,
+            "hVidMmGlobalAlloc": 18446611100133502384,
+            "hDxgGlobalAlloc": 18446611100191438848,
+            "hDxgSharedResource": 0,
+            "UsageVersion": 0,
+            "UsageFlags": 0,
+            "Format": 0,
+            "SwizzledFormat": 0,
+            "ByteOffset": 0,
+            "Width": 0,
+            "Height": 0,
+            "Pitch": 0,
+            "Depth": 0,
+            "SlicePitch": 0,
+            "BackingStoreWasPinned": 0,
+            "pSectionObject": 0,
+            "PhysicalAdapterIndex": 0,
+            "PageTableOrDirectory": 0
+          }
+        },
+        "device_allocation": {
+          "qpc": 138481913791,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 7576,
+            "hDevice": 18446611100107790240,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169646891024,
+            "hVidMmGlobalAlloc": 18446611100133502384,
+            "hDxgResource": 18446611100200876304,
+            "hDxgSharedResource": 18446706169653055664,
+            "hThunkAllocation": 1073743936,
+            "hThunkResource": 1073743872,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 1847056154624,
+            "hProcessAllocDetails": 18446611100193446928,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "source_allocation": {
+          "qpc": 138466772359,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 7576,
+            "hDevice": 18446611100107790240,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169636840464,
+            "hVidMmGlobalAlloc": 18446611100141395360,
+            "hDxgResource": 18446611100200961840,
+            "hDxgSharedResource": 18446706169653104944,
+            "hThunkAllocation": 1073743680,
+            "hThunkResource": 1073743616,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 1847054311424,
+            "hProcessAllocDetails": 18446611100193447696,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "windows_blt": {
+          "qpc": 138481954902,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 166,
+          "version": 0,
+          "fields": {
+            "hwnd": 589944,
+            "pDmaBuffer": 18446706169621113184,
+            "PresentHistoryToken": 0,
+            "hSourceAllocation": 18446706169636840464,
+            "hDestAllocation": 18446706169646891024,
+            "bSubmit": 1,
+            "bRedirectedPresent": 0,
+            "Flags": 1,
+            "Source.Left": 0,
+            "Source.Right": 640,
+            "Source.Top": 0,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Right": 640,
+            "Dest.Top": 0,
+            "Dest.Bottom": 360,
+            "SubRectCount": 1
+          }
+        },
+        "windows_present": {
+          "qpc": 138482062104,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 184,
+          "version": 1,
+          "fields": {
+            "hContext": 1073742144,
+            "hWindow": 589944,
+            "VidPnSourceId": 4294967295,
+            "FlipInterval": 1,
+            "Flags": 67178625,
+            "ReturnStatus": 0,
+            "hSrcAllocHandle": 1073743680,
+            "hDstAllocHandle": 0
+          }
+        },
+        "windows_token": {
+          "qpc": 138482061340,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 215,
+          "version": 2,
+          "fields": {
+            "hAdapter": 18446706169586577424,
+            "Token": 18446611100095384064,
+            "Model": 3,
+            "TokenSize": 48,
+            "TokenData": 0,
+            "Flags": 0,
+            "CustomDuration": 0,
+            "ScrollRect.left": 0,
+            "ScrollRect.right": 0,
+            "ScrollRect.top": 0,
+            "ScrollRect.bottom": 0,
+            "ScrollOffset.X": 0,
+            "ScrollOffset.Y": 0,
+            "DirtyRectCount": 0,
+            "Left": [],
+            "Right": [],
+            "Top": [],
+            "Bottom": [],
+            "SourceRect.left": 0,
+            "SourceRect.right": 0,
+            "SourceRect.top": 0,
+            "SourceRect.bottom": 0,
+            "DestWidth": 0,
+            "DestHeight": 0,
+            "TargetRect.left": 0,
+            "TargetRect.right": 0,
+            "TargetRect.top": 0,
+            "TargetRect.bottom": 0,
+            "VmBusChannel": 0
+          }
+        },
+        "submit": {
+          "qpc": 138481955929,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100137979296,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "DmaBufferSize": 52,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0,
+            "bPresent": 1,
+            "hDmaBuffer": 18446706169621113184,
+            "pQueuePacket": 18446706169621391792,
+            "ProgressFenceValue": 0
+          }
+        },
+        "completion": {
+          "qpc": 138482005737,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100137979296,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169621391792
+          }
+        },
+        "app_target_releases": [],
+        "matched_local_release_all_actors": [
+          {
+            "qpc": 138486553898,
+            "pid": 4,
+            "tid": 620,
+            "provider": "kernel",
+            "id": 37,
+            "version": 2,
+            "fields": {
+              "hProcessId": 4,
+              "hDevice": 18446611100107790240,
+              "pDxgAdapter": 18446706169594454016,
+              "hVidMmAlloc": 18446706169646891024,
+              "hVidMmGlobalAlloc": 18446611100133502384,
+              "hDxgResource": 18446611100200876304,
+              "hDxgSharedResource": 18446706169653055664,
+              "hThunkAllocation": 1073743936,
+              "hThunkResource": 1073743872,
+              "PrivateRuntimeResourceHandle": 0,
+              "pVirtualAddress": 1847056154624,
+              "hProcessAllocDetails": 18446611100193446928,
+              "hOtherPartitionHandle": 0
+            }
+          }
+        ],
+        "global_target_releases": [
+          {
+            "qpc": 138486554205,
+            "pid": 4,
+            "tid": 620,
+            "provider": "kernel",
+            "id": 34,
+            "version": 3,
+            "fields": {
+              "hProcessId": 7576,
+              "hDevice": 18446611100107790240,
+              "pDxgAdapter": 18446706169594454016,
+              "Flags": 129,
+              "allocSize": 921600,
+              "ulAlignment": 4096,
+              "dwReadSegment": 0,
+              "dwWriteSegment": 10,
+              "PreferredSegment": 2,
+              "HintedBank": 0,
+              "dwEvictionSegment": 8,
+              "Priority": 2013265920,
+              "hVidMmGlobalAlloc": 18446611100133502384,
+              "hDxgGlobalAlloc": 18446611100191438848,
+              "hDxgSharedResource": 0,
+              "UsageVersion": 0,
+              "UsageFlags": 0,
+              "Format": 0,
+              "SwizzledFormat": 0,
+              "ByteOffset": 0,
+              "Width": 0,
+              "Height": 0,
+              "Pitch": 0,
+              "Depth": 0,
+              "SlicePitch": 0,
+              "BackingStoreWasPinned": 0,
+              "pSectionObject": 0,
+              "PhysicalAdapterIndex": 0,
+              "PageTableOrDirectory": 0
+            }
+          }
+        ],
+        "per_process_device_allocation_events": [
+          {
+            "owner": 7576,
+            "event": 36,
+            "count": 1
+          },
+          {
+            "owner": 4,
+            "event": 37,
+            "count": 1
+          }
+        ],
+        "dwm_aliases": [],
+        "dwm_shared_resource_members": [],
+        "dwm_raw_target_identity_matches": [],
+        "dwm_event_counts_by_provider": {
+          "9e9bba3c-2e38-40cb-99f4-9e8281425164": 18,
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 157
+        },
+        "dwm_core_event_counts": {
+          "63": 4,
+          "64": 4,
+          "65": 4,
+          "141": 2,
+          "88": 2,
+          "91": 1,
+          "468": 1
+        },
+        "dwm_target_schedules": [
+          {
+            "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+            "id": 91,
+            "version": 0,
+            "pid": 1400,
+            "tid": 2252,
+            "qpc": 138482246214,
+            "payload_sha256": "f2797908555035c3d7617af66c0513f925976887cc16dfe9bbf1f11294932d35",
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 589944,
+              "NumRects": 0
+            }
+          }
+        ],
+        "dwm_target_consumes": [],
+        "cdd_to_blt_ms": 2.197
+      },
+      {
+        "case": "win-present-incall-20261121-02",
+        "boot": 91476,
+        "dwm": 1400,
+        "pid": 7924,
+        "tid": 1936,
+        "hwnd": 721498,
+        "luid": "0000000000005c10",
+        "h_device": 18446611100204786720,
+        "adapter": 18446706169594454016,
+        "archive_sha256": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b",
+        "display_etl_sha256": "8f80c9125966dabe5fc425af9b23291802572730423c2567f250990993154d57",
+        "journal_sha256": "9aeac259bdcf0b81acb46b4d736377c6399a5dc115cffe23e98a7c99a0c10893",
+        "trace_quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": true
+        },
+        "clock": {
+          "frequency": 19200000,
+          "events_lost": 0,
+          "buffers_lost": 0
+        },
+        "call_qpc": 146154976455,
+        "return_qpc": 146155271427,
+        "capture_qpc": 146156604104,
+        "observed_target_objects": {
+          "dxg_adapter_allocation": 18446611100191475088,
+          "vidmm_global_allocation": 18446611100107943328,
+          "dxg_shared_resource": 18446706169628286528,
+          "app_vidmm_local": 18446706169646881808
+        },
+        "standard_allocation": {
+          "qpc": 146155110594,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 286,
+          "version": 0,
+          "fields": {
+            "pDxgAdapterAllocation": 18446611100191475088,
+            "Flags": 0,
+            "Width": 640,
+            "Height": 360,
+            "Pitch": 2560
+          }
+        },
+        "global_allocation": {
+          "qpc": 146155110486,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 33,
+          "version": 3,
+          "fields": {
+            "hProcessId": 7924,
+            "hDevice": 18446611100204786720,
+            "pDxgAdapter": 18446706169594454016,
+            "Flags": 129,
+            "allocSize": 921600,
+            "ulAlignment": 4096,
+            "dwReadSegment": 0,
+            "dwWriteSegment": 2,
+            "PreferredSegment": 2,
+            "HintedBank": 0,
+            "dwEvictionSegment": 0,
+            "Priority": 2013265920,
+            "hVidMmGlobalAlloc": 18446611100107943328,
+            "hDxgGlobalAlloc": 18446611100191475088,
+            "hDxgSharedResource": 0,
+            "UsageVersion": 0,
+            "UsageFlags": 0,
+            "Format": 0,
+            "SwizzledFormat": 0,
+            "ByteOffset": 0,
+            "Width": 0,
+            "Height": 0,
+            "Pitch": 0,
+            "Depth": 0,
+            "SlicePitch": 0,
+            "BackingStoreWasPinned": 0,
+            "pSectionObject": 0,
+            "PhysicalAdapterIndex": 0,
+            "PageTableOrDirectory": 0
+          }
+        },
+        "device_allocation": {
+          "qpc": 146155111704,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 7924,
+            "hDevice": 18446611100204786720,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169646881808,
+            "hVidMmGlobalAlloc": 18446611100107943328,
+            "hDxgResource": 18446611100200881632,
+            "hDxgSharedResource": 18446706169628286528,
+            "hThunkAllocation": 1073743936,
+            "hThunkResource": 1073743872,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2181696667648,
+            "hProcessAllocDetails": 18446611100088836624,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "source_allocation": {
+          "qpc": 146137932232,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 7924,
+            "hDevice": 18446611100204786720,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169646819600,
+            "hVidMmGlobalAlloc": 18446611100106026400,
+            "hDxgResource": 18446611100093396480,
+            "hDxgSharedResource": 18446706169653100624,
+            "hThunkAllocation": 1073743680,
+            "hThunkResource": 1073743616,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2181694824448,
+            "hProcessAllocDetails": 18446611100096576528,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "windows_blt": {
+          "qpc": 146155158495,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 166,
+          "version": 0,
+          "fields": {
+            "hwnd": 721498,
+            "pDmaBuffer": 18446706169646584288,
+            "PresentHistoryToken": 0,
+            "hSourceAllocation": 18446706169646819600,
+            "hDestAllocation": 18446706169646881808,
+            "bSubmit": 1,
+            "bRedirectedPresent": 0,
+            "Flags": 1,
+            "Source.Left": 0,
+            "Source.Right": 640,
+            "Source.Top": 0,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Right": 640,
+            "Dest.Top": 0,
+            "Dest.Bottom": 360,
+            "SubRectCount": 1
+          }
+        },
+        "windows_present": {
+          "qpc": 146155268352,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 184,
+          "version": 1,
+          "fields": {
+            "hContext": 1073742144,
+            "hWindow": 721498,
+            "VidPnSourceId": 4294967295,
+            "FlipInterval": 1,
+            "Flags": 67178625,
+            "ReturnStatus": 0,
+            "hSrcAllocHandle": 1073743680,
+            "hDstAllocHandle": 0
+          }
+        },
+        "windows_token": {
+          "qpc": 146155267410,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 215,
+          "version": 2,
+          "fields": {
+            "hAdapter": 18446706169586577424,
+            "Token": 18446611100095384064,
+            "Model": 3,
+            "TokenSize": 48,
+            "TokenData": 0,
+            "Flags": 0,
+            "CustomDuration": 0,
+            "ScrollRect.left": 0,
+            "ScrollRect.right": 0,
+            "ScrollRect.top": 0,
+            "ScrollRect.bottom": 0,
+            "ScrollOffset.X": 0,
+            "ScrollOffset.Y": 0,
+            "DirtyRectCount": 0,
+            "Left": [],
+            "Right": [],
+            "Top": [],
+            "Bottom": [],
+            "SourceRect.left": 0,
+            "SourceRect.right": 0,
+            "SourceRect.top": 0,
+            "SourceRect.bottom": 0,
+            "DestWidth": 0,
+            "DestHeight": 0,
+            "TargetRect.left": 0,
+            "TargetRect.right": 0,
+            "TargetRect.top": 0,
+            "TargetRect.bottom": 0,
+            "VmBusChannel": 0
+          }
+        },
+        "submit": {
+          "qpc": 146155159537,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100111619808,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "DmaBufferSize": 52,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0,
+            "bPresent": 1,
+            "hDmaBuffer": 18446706169646584288,
+            "pQueuePacket": 18446706169626432784,
+            "ProgressFenceValue": 0
+          }
+        },
+        "completion": {
+          "qpc": 146155205698,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100111619808,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169626432784
+          }
+        },
+        "app_target_releases": [],
+        "matched_local_release_all_actors": [
+          {
+            "qpc": 146160134472,
+            "pid": 4,
+            "tid": 620,
+            "provider": "kernel",
+            "id": 37,
+            "version": 2,
+            "fields": {
+              "hProcessId": 4,
+              "hDevice": 18446611100204786720,
+              "pDxgAdapter": 18446706169594454016,
+              "hVidMmAlloc": 18446706169646881808,
+              "hVidMmGlobalAlloc": 18446611100107943328,
+              "hDxgResource": 18446611100200881632,
+              "hDxgSharedResource": 18446706169628286528,
+              "hThunkAllocation": 1073743936,
+              "hThunkResource": 1073743872,
+              "PrivateRuntimeResourceHandle": 0,
+              "pVirtualAddress": 2181696667648,
+              "hProcessAllocDetails": 18446611100088836624,
+              "hOtherPartitionHandle": 0
+            }
+          }
+        ],
+        "global_target_releases": [
+          {
+            "qpc": 146160134800,
+            "pid": 4,
+            "tid": 620,
+            "provider": "kernel",
+            "id": 34,
+            "version": 3,
+            "fields": {
+              "hProcessId": 7924,
+              "hDevice": 18446611100204786720,
+              "pDxgAdapter": 18446706169594454016,
+              "Flags": 129,
+              "allocSize": 921600,
+              "ulAlignment": 4096,
+              "dwReadSegment": 0,
+              "dwWriteSegment": 10,
+              "PreferredSegment": 2,
+              "HintedBank": 0,
+              "dwEvictionSegment": 8,
+              "Priority": 2013265920,
+              "hVidMmGlobalAlloc": 18446611100107943328,
+              "hDxgGlobalAlloc": 18446611100191475088,
+              "hDxgSharedResource": 0,
+              "UsageVersion": 0,
+              "UsageFlags": 0,
+              "Format": 0,
+              "SwizzledFormat": 0,
+              "ByteOffset": 0,
+              "Width": 0,
+              "Height": 0,
+              "Pitch": 0,
+              "Depth": 0,
+              "SlicePitch": 0,
+              "BackingStoreWasPinned": 0,
+              "pSectionObject": 0,
+              "PhysicalAdapterIndex": 0,
+              "PageTableOrDirectory": 0
+            }
+          }
+        ],
+        "per_process_device_allocation_events": [
+          {
+            "owner": 7924,
+            "event": 36,
+            "count": 1
+          },
+          {
+            "owner": 4,
+            "event": 37,
+            "count": 1
+          }
+        ],
+        "dwm_aliases": [],
+        "dwm_shared_resource_members": [],
+        "dwm_raw_target_identity_matches": [],
+        "dwm_event_counts_by_provider": {
+          "9e9bba3c-2e38-40cb-99f4-9e8281425164": 17,
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 176
+        },
+        "dwm_core_event_counts": {
+          "63": 4,
+          "64": 4,
+          "65": 4,
+          "141": 3,
+          "88": 1,
+          "91": 1
+        },
+        "dwm_target_schedules": [
+          {
+            "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+            "id": 91,
+            "version": 0,
+            "pid": 1400,
+            "tid": 2252,
+            "qpc": 146155528612,
+            "payload_sha256": "6146537472364647a3e5128c0936c9584ba26ad16848bea8a4c0a9d96a6fd50c",
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 721498,
+              "NumRects": 0
+            }
+          }
+        ],
+        "dwm_target_consumes": [],
+        "cdd_to_blt_ms": 2.495
+      },
+      {
+        "case": "win-present-local-blt-20261121-01",
+        "boot": 91476,
+        "dwm": 1400,
+        "pid": 584,
+        "tid": 1664,
+        "hwnd": 786538,
+        "luid": "0000000000005c10",
+        "h_device": 18446611100199490592,
+        "adapter": 18446706169594454016,
+        "archive_sha256": "61cb1ec4e568a2cf37ff874058725ec6ce6c6e140de4a4760d98b21d2c9f4570",
+        "display_etl_sha256": "86a91af28d68d9767c53ad9c25cfe82c7c717842ca3e3b4157d875787c8db960",
+        "journal_sha256": "c23c2dbe9d6e5bc09c08f9499848801b92a28f3ebba9fb2145906435f3561a6f",
+        "trace_quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": true
+        },
+        "clock": {
+          "frequency": 19200000,
+          "events_lost": 0,
+          "buffers_lost": 0
+        },
+        "call_qpc": 153054747396,
+        "return_qpc": 153055116440,
+        "capture_qpc": 153056731652,
+        "observed_target_objects": {
+          "dxg_adapter_allocation": 18446611100192068432,
+          "vidmm_global_allocation": 18446611100179856080,
+          "dxg_shared_resource": 18446706169653076544,
+          "app_vidmm_local": 18446706169646897168
+        },
+        "standard_allocation": {
+          "qpc": 153054978977,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 286,
+          "version": 0,
+          "fields": {
+            "pDxgAdapterAllocation": 18446611100192068432,
+            "Flags": 0,
+            "Width": 640,
+            "Height": 360,
+            "Pitch": 2560
+          }
+        },
+        "global_allocation": {
+          "qpc": 153054978894,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 33,
+          "version": 3,
+          "fields": {
+            "hProcessId": 584,
+            "hDevice": 18446611100199490592,
+            "pDxgAdapter": 18446706169594454016,
+            "Flags": 129,
+            "allocSize": 921600,
+            "ulAlignment": 4096,
+            "dwReadSegment": 0,
+            "dwWriteSegment": 2,
+            "PreferredSegment": 2,
+            "HintedBank": 0,
+            "dwEvictionSegment": 0,
+            "Priority": 2013265920,
+            "hVidMmGlobalAlloc": 18446611100179856080,
+            "hDxgGlobalAlloc": 18446611100192068432,
+            "hDxgSharedResource": 0,
+            "UsageVersion": 0,
+            "UsageFlags": 0,
+            "Format": 0,
+            "SwizzledFormat": 0,
+            "ByteOffset": 0,
+            "Width": 0,
+            "Height": 0,
+            "Pitch": 0,
+            "Depth": 0,
+            "SlicePitch": 0,
+            "BackingStoreWasPinned": 0,
+            "pSectionObject": 0,
+            "PhysicalAdapterIndex": 0,
+            "PageTableOrDirectory": 0
+          }
+        },
+        "device_allocation": {
+          "qpc": 153054979730,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 584,
+            "hDevice": 18446611100199490592,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169646897168,
+            "hVidMmGlobalAlloc": 18446611100179856080,
+            "hDxgResource": 18446611100200901648,
+            "hDxgSharedResource": 18446706169653076544,
+            "hThunkAllocation": 1073743936,
+            "hThunkResource": 1073743872,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2259305906176,
+            "hProcessAllocDetails": 18446611100092203024,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "source_allocation": {
+          "qpc": 153039210204,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 584,
+            "hDevice": 18446611100199490592,
+            "pDxgAdapter": 18446706169594454016,
+            "hVidMmAlloc": 18446706169646892048,
+            "hVidMmGlobalAlloc": 18446611100132834720,
+            "hDxgResource": 18446611100201025200,
+            "hDxgSharedResource": 18446706169653095824,
+            "hThunkAllocation": 1073743680,
+            "hThunkResource": 1073743616,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2259304062976,
+            "hProcessAllocDetails": 18446611100092890384,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "windows_blt": {
+          "qpc": 153055020073,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 166,
+          "version": 0,
+          "fields": {
+            "hwnd": 786538,
+            "pDmaBuffer": 18446706169657950704,
+            "PresentHistoryToken": 0,
+            "hSourceAllocation": 18446706169646892048,
+            "hDestAllocation": 18446706169646897168,
+            "bSubmit": 1,
+            "bRedirectedPresent": 0,
+            "Flags": 1,
+            "Source.Left": 0,
+            "Source.Right": 640,
+            "Source.Top": 0,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Right": 640,
+            "Dest.Top": 0,
+            "Dest.Bottom": 360,
+            "SubRectCount": 1
+          }
+        },
+        "windows_present": {
+          "qpc": 153055114084,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 184,
+          "version": 1,
+          "fields": {
+            "hContext": 1073742144,
+            "hWindow": 786538,
+            "VidPnSourceId": 4294967295,
+            "FlipInterval": 1,
+            "Flags": 67178625,
+            "ReturnStatus": 0,
+            "hSrcAllocHandle": 1073743680,
+            "hDstAllocHandle": 0
+          }
+        },
+        "windows_token": {
+          "qpc": 153055113099,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 215,
+          "version": 2,
+          "fields": {
+            "hAdapter": 18446706169586577424,
+            "Token": 18446611100095384064,
+            "Model": 3,
+            "TokenSize": 48,
+            "TokenData": 0,
+            "Flags": 0,
+            "CustomDuration": 0,
+            "ScrollRect.left": 0,
+            "ScrollRect.right": 0,
+            "ScrollRect.top": 0,
+            "ScrollRect.bottom": 0,
+            "ScrollOffset.X": 0,
+            "ScrollOffset.Y": 0,
+            "DirtyRectCount": 0,
+            "Left": [],
+            "Right": [],
+            "Top": [],
+            "Bottom": [],
+            "SourceRect.left": 0,
+            "SourceRect.right": 0,
+            "SourceRect.top": 0,
+            "SourceRect.bottom": 0,
+            "DestWidth": 0,
+            "DestHeight": 0,
+            "TargetRect.left": 0,
+            "TargetRect.right": 0,
+            "TargetRect.top": 0,
+            "TargetRect.bottom": 0,
+            "VmBusChannel": 0
+          }
+        },
+        "submit": {
+          "qpc": 153055020866,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100146236880,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "DmaBufferSize": 52,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0,
+            "bPresent": 1,
+            "hDmaBuffer": 18446706169657950704,
+            "pQueuePacket": 18446706169619955728,
+            "ProgressFenceValue": 0
+          }
+        },
+        "completion": {
+          "qpc": 153055078007,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100146236880,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169619955728
+          }
+        },
+        "app_target_releases": [],
+        "matched_local_release_all_actors": [
+          {
+            "qpc": 153059760620,
+            "pid": 4,
+            "tid": 4880,
+            "provider": "kernel",
+            "id": 37,
+            "version": 2,
+            "fields": {
+              "hProcessId": 4,
+              "hDevice": 18446611100199490592,
+              "pDxgAdapter": 18446706169594454016,
+              "hVidMmAlloc": 18446706169646897168,
+              "hVidMmGlobalAlloc": 18446611100179856080,
+              "hDxgResource": 18446611100200901648,
+              "hDxgSharedResource": 18446706169653076544,
+              "hThunkAllocation": 1073743936,
+              "hThunkResource": 1073743872,
+              "PrivateRuntimeResourceHandle": 0,
+              "pVirtualAddress": 2259305906176,
+              "hProcessAllocDetails": 18446611100092203024,
+              "hOtherPartitionHandle": 0
+            }
+          }
+        ],
+        "global_target_releases": [
+          {
+            "qpc": 153059761113,
+            "pid": 4,
+            "tid": 4880,
+            "provider": "kernel",
+            "id": 34,
+            "version": 3,
+            "fields": {
+              "hProcessId": 584,
+              "hDevice": 18446611100199490592,
+              "pDxgAdapter": 18446706169594454016,
+              "Flags": 129,
+              "allocSize": 921600,
+              "ulAlignment": 4096,
+              "dwReadSegment": 0,
+              "dwWriteSegment": 10,
+              "PreferredSegment": 2,
+              "HintedBank": 0,
+              "dwEvictionSegment": 8,
+              "Priority": 2013265920,
+              "hVidMmGlobalAlloc": 18446611100179856080,
+              "hDxgGlobalAlloc": 18446611100192068432,
+              "hDxgSharedResource": 0,
+              "UsageVersion": 0,
+              "UsageFlags": 0,
+              "Format": 0,
+              "SwizzledFormat": 0,
+              "ByteOffset": 0,
+              "Width": 0,
+              "Height": 0,
+              "Pitch": 0,
+              "Depth": 0,
+              "SlicePitch": 0,
+              "BackingStoreWasPinned": 0,
+              "pSectionObject": 0,
+              "PhysicalAdapterIndex": 0,
+              "PageTableOrDirectory": 0
+            }
+          }
+        ],
+        "per_process_device_allocation_events": [
+          {
+            "owner": 584,
+            "event": 36,
+            "count": 1
+          },
+          {
+            "owner": 4,
+            "event": 37,
+            "count": 1
+          }
+        ],
+        "dwm_aliases": [],
+        "dwm_shared_resource_members": [],
+        "dwm_raw_target_identity_matches": [],
+        "dwm_event_counts_by_provider": {
+          "9e9bba3c-2e38-40cb-99f4-9e8281425164": 25,
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 202
+        },
+        "dwm_core_event_counts": {
+          "63": 6,
+          "64": 6,
+          "65": 6,
+          "141": 5,
+          "88": 1,
+          "91": 1
+        },
+        "dwm_target_schedules": [
+          {
+            "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+            "id": 91,
+            "version": 0,
+            "pid": 1400,
+            "tid": 2252,
+            "qpc": 153055367011,
+            "payload_sha256": "641a9f455beb57ee397e3585db65cf5c024c5779ec5f67ef5b016cb401358789",
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 786538,
+              "NumRects": 0
+            }
+          }
+        ],
+        "dwm_target_consumes": [],
+        "cdd_to_blt_ms": 2.14
+      }
+    ],
+    "known_flip_positive_control": [
+      {
+        "case": "copy-flip-1",
+        "boot": 87268,
+        "hwnd": 262332,
+        "drawing_pid": 5872,
+        "dwm": 1468,
+        "archive_sha256": "1e096b5215c2a539e0c09745700c86df16df8f4b13584e9511e99ab209749527",
+        "target_consumed": [
+          {
+            "qpc": 9901506303,
+            "event": 467,
+            "task": "Windowed_Dx_Flip_Consumed",
+            "tid": 2316,
+            "fields": {
+              "hWnd": 262332,
+              "displayAdapterLuid": 21904,
+              "renderAdapterLuid": 21904,
+              "vidPnSourceId": 0,
+              "vidPnTargetId": 0,
+              "uniqueId": 1,
+              "surfaceLuid": 1844512,
+              "bindId": 1,
+              "presentCount": 1
+            }
+          }
+        ]
+      }
+    ],
+    "observed_dwm_records_until_capture": 1054,
+    "copy_retirement_to_dwm_schedule_ms_range": [
+      2.15,
+      16.818
+    ],
+    "global_creation_shared_resource_field": "五个适配器创建事件 33 的 hDxgSharedResource 都为零。五个应用设备创建事件 36 携带各自非零的 hDxgSharedResource。",
+    "raw_crosscheck_sha256": "c218f3c5b8b3d005a15c53be287d01dca3bf3b4ba83b79998e2a416a46645149",
+    "decoder_sha256": "09b5fc9fa88c070c04199760ed891d5f5e779827f1c2344de5e092bcf8039c55",
+    "scope": "按单次窗口及本轮完整文件 ETL 的观察范围判断。分配 33/34 与 36/37 表示不同层次的生命周期。DWM 执行进程字段与其他进程中的 Windows 图形操作各归其主。",
+    "boundaries": {
+      "last_entry": "五次目标窗口各有一个 DWM 91 Blt 调度，事件内两个表面句柄均为零。",
+      "last_return": "应用复制包退役、公开成功返回，后续窗口截图可用。在当前目标分配生命期内，系统 PID 4 留下匹配的设备分配停止事件。",
+      "first_anomaly_or_missing": "仍需将本次 Blt 目标或其后继重定向表面与 DWM 实际消费绑定的同提交标识、资源传递或复制回执。已记录的应用共享资源和 DWM 91 窗口调度之间缺少此对象关系。"
+    }
+  },
+  "text_revision": {
+    "version": 2,
+    "preceding_sealed_result": {
+      "path": "windows-native-graphics/rounds/win-dwm-shared-destination-20261121-01.result.json",
+      "sha256": "9beec2a4f7da5f9345ba18d373d7a99271c9ec434d32874db7c98bdfc96fc1c8"
+    },
+    "review_response_sha256": "0d779ce5fffcd08ca4e4d7127dc95c8e6236c8ca8afe6644bfc0a14975d910dc",
+    "field": "finding",
+    "reason": "DWM 事件 91 的安装模板将此字段命名为 EventId。该字段与应用 HWND 的对应来自每轮实机数值和时序。五次表面字段均为零。"
+  }
+}

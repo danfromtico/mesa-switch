@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "round_id": "win-original-process-lifetime-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "owner": "历史应用、Windows 内核及早期复位记录",
+  "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+  "method": "实机只读检查原绘图进程的 Windows 启动与退出审计",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+  "observations": [
+    "从三份原 ZIP 确认绘图 PID 和映像、已正常退出的查询进程、采集进程及后台 GPU 队列 PID。按已核实的开机时间段核对 Security 4688/4689、Sysmon 1/5 和系统进程分析通道的实际覆盖。",
+    "只收回指定 PID 的启动/结束、映像、原始事件哈希及可用状态码，另存窗口内的事件计数和正常查询对照。若范围内缺审计事件、启动归属或对应映像，保留具体缺口。当前审计设置按采集时刻单列。"
+  ],
+  "inputs": {
+    "cases": {
+      "82058": {
+        "boot": 82058,
+        "recovery_boot": 82128,
+        "package_case": "Ddi20Case-261120-122121366257",
+        "registered_draw_image": "step4-present.exe",
+        "draw_pid": 1812,
+        "normal_query_pid": 4020,
+        "collector_pid": 5960,
+        "other_gpu_queue_pid": 5480,
+        "original_call_utc_sample": "2026-11-20T12:21:39.794670Z",
+        "raw_process_qpc_sha256": "4a49f1241b63f4a9d9675f9dc70a14fbf4479d6f60b03601fc33bd2d5d192d09",
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878"
+      },
+      "82221": {
+        "boot": 82221,
+        "recovery_boot": 82289,
+        "package_case": "Ddi20Case-261120-122937785753",
+        "registered_draw_image": "step4-present.exe",
+        "draw_pid": 4672,
+        "normal_query_pid": 484,
+        "collector_pid": 3160,
+        "other_gpu_queue_pid": 5604,
+        "original_call_utc_sample": "2026-11-20T12:30:01.225776Z",
+        "raw_process_qpc_sha256": "f45697011c2de64c565170566cb1ff36c5337af2e06832302516f90db0926913",
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8"
+      },
+      "82382": {
+        "boot": 82382,
+        "recovery_boot": 82448,
+        "package_case": "Ddi20Case-261120-123625091734",
+        "registered_draw_image": "step4-present.exe",
+        "draw_pid": 5828,
+        "normal_query_pid": 2692,
+        "collector_pid": 2128,
+        "other_gpu_queue_pid": 5624,
+        "original_call_utc_sample": "2026-11-20T12:36:48.259890Z",
+        "raw_process_qpc_sha256": "0364855daddc6d4eb854a8b08e4f9affc1ce4348fc72e975a83a045f099b6f85",
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65"
+      }
+    },
+    "bounded_query_windows": [
+      {
+        "boot": 82058,
+        "from": "2026-11-20T12:10:17.899379+00:00",
+        "to": "2026-11-20T12:22:04.428299+00:00",
+        "pids": [
+          1812,
+          4020,
+          5960,
+          5480
+        ]
+      },
+      {
+        "boot": 82221,
+        "from": "2026-11-20T12:27:57.583022+00:00",
+        "to": "2026-11-20T12:30:32.501086+00:00",
+        "pids": [
+          4672,
+          484,
+          3160,
+          5604
+        ]
+      },
+      {
+        "boot": 82382,
+        "from": "2026-11-20T12:34:44.132477+00:00",
+        "to": "2026-11-20T12:37:41.089777+00:00",
+        "pids": [
+          5828,
+          2692,
+          2128,
+          5624
+        ]
+      }
+    ],
+    "script_sha256": "144edf1662173f38085786450decaf17ec1d0151320facba0091915000396501",
+    "previous_process_error_reports": {
+      "path": "windows-native-graphics/rounds/win-historical-process-log-20261121-01.result.json",
+      "sha256": "1ef553202e1f6a417c4a80c6d35f0a2d4d1ec1d768fcd014627e080a820197dc"
+    },
+    "kmd_queue_owners": {
+      "path": "windows-native-graphics/rounds/win-original-kmd-telemetry-20261121-01.result.json",
+      "sha256": "f263d445b7076ed75ece494442ab354df59015e744901b632e63fe489ed52036"
+    },
+    "windows_audit_docs": [
+      "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4688",
+      "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4689"
+    ]
+  }
+}

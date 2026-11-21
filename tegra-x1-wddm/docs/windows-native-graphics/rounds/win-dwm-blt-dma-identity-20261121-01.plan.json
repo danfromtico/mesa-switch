@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-blt-dma-identity-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "owner": "Windows DWM、Win32k 和 dxgkrnl 的重定向表面",
+  "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
+  "method": "按原 ETL 补齐送审的应用 Blt 包与 DWM 调度时间链",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
+  "observations": [
+    "原 Neon XHigh 审阅摘要中省略了进入 DWM 调度前的应用 DMA 提交详情。逐次将 166.pDmaBuffer、76、178.hDmaBuffer 及 175.pDmaBuffer 按同一缓冲、设备、绘图上下文、队列序号和时钟核对。",
+    "再核对 177/176 的 DMA 完成号、180 的队列包与完成旗标和 DWM 91 的窗口数值。向原审阅会话交回每个字段，并核实对上述五次实际消费的独立判据。"
+  ],
+  "inputs": {
+    "target": {
+      "path": "windows-native-graphics/rounds/win-dwm-shared-destination-20261121-01.result.json",
+      "sha256": "9beec2a4f7da5f9345ba18d373d7a99271c9ec434d32874db7c98bdfc96fc1c8"
+    },
+    "original_review_response_sha256": "0d4cec8c6251b78f108d11955c66aad70c3f85f21b01556307f90158c003c1b1",
+    "original_review_request_sha256": "a869f7578ad1dcf039133c0d58c1fa28b427f9868ca923a6e843311abd609024",
+    "raw_archives": {
+      "win-empty-present-20261121-01": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+      "win-present-live-20261121-02": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308",
+      "win-present-incall-20261121-01": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4",
+      "win-present-incall-20261121-02": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b",
+      "win-present-local-blt-20261121-01": "61cb1ec4e568a2cf37ff874058725ec6ce6c6e140de4a4760d98b21d2c9f4570"
+    },
+    "specific_objection": "提交给审阅的摘要缺少 178/175 与 166.pDmaBuffer 的直接字段。"
+  }
+}

@@ -27,6 +27,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-original-etl-bytes-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-original-kmd-telemetry-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-original-process-lifetime-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result.",
@@ -1878,6 +1880,108 @@
           "first_anomaly_or_missing": "尚缺此轮完整且匹配的 Blt 166 原始载荷在公开 RETURN 之前由 Windows 本机写透完成的确认。"
         },
         "finished_utc": "2026-11-21T14:30:59.692260+00:00"
+      },
+      {
+        "round_id": "win-dwm-shared-destination-20261121-01",
+        "contract_id": "WIN-DWM-CONSUME",
+        "windows_question": "WIN-DWM-CONSUME",
+        "method": "复核原空窗口五次正式基线的 DWM 跨进程分配身份",
+        "plan": "windows-native-graphics/rounds/win-dwm-shared-destination-20261121-01.plan.json",
+        "plan_sha256": "af026a2af24449519712b72c455b170b234554f368336008a514bcf017e58954",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:32:00.324425+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-dwm-shared-destination-20261121-01.v2.result.json",
+        "result_sha256": "b3087ab14a7264e3cc767c7fde2aaddd11ae76674724272fe4a93b93a49a7071",
+        "status": "观测缺口",
+        "finding": "五份原空窗口归档均将 CDD 286、适配器分配 33、应用设备分配 36 和窗口 Blt 166 精确绑定到同一目标。五次 DWM 事件 91 的 EventId 数值均等于当次应用 HWND，分别在复制包完成后 2.15 至 16.818 ms 调度。目标的设备分配 37 在系统 PID 4 上结束。至画面采样的 1054 条 DWM 进程事件均缺目标分配标识，五轮均未找到 DWM 对同一全局分配的本地开立或该窗口的明确消费记录。",
+        "missing_observation": "仍需将本次 Blt 目标或其后继重定向表面与 DWM 实际消费绑定的同提交标识、资源传递或复制回执。已记录的应用共享资源和 DWM 91 窗口调度之间缺少此对象关系。",
+        "boundaries": {
+          "last_entry": "五次目标窗口各有一个 DWM 91 Blt 调度，事件内两个表面句柄均为零。",
+          "last_return": "应用复制包退役、公开成功返回，后续窗口截图可用。在当前目标分配生命期内，系统 PID 4 留下匹配的设备分配停止事件。",
+          "first_anomaly_or_missing": "仍需将本次 Blt 目标或其后继重定向表面与 DWM 实际消费绑定的同提交标识、资源传递或复制回执。已记录的应用共享资源和 DWM 91 窗口调度之间缺少此对象关系。"
+        },
+        "finished_utc": "2026-11-21T14:33:46.109369+00:00",
+        "prior_sealed_result": {
+          "path": "windows-native-graphics/rounds/win-dwm-shared-destination-20261121-01.result.json",
+          "sha256": "9beec2a4f7da5f9345ba18d373d7a99271c9ec434d32874db7c98bdfc96fc1c8"
+        }
+      },
+      {
+        "round_id": "win-original-kmd-telemetry-20261121-01",
+        "contract_id": "WIN-OLD-RESET",
+        "windows_question": "WIN-OLD-RESET",
+        "method": "核对原次已实载 KMD 的恢复记录与启动状态归属",
+        "plan": "windows-native-graphics/rounds/win-original-kmd-telemetry-20261121-01.plan.json",
+        "plan_sha256": "8cd3409509baeacc76b41b077f6359ecc0261599adaeaa88867a7d8531c77d7e",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:34:17.981712+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-original-kmd-telemetry-20261121-01.result.json",
+        "result_sha256": "f263d445b7076ed75ece494442ab354df59015e744901b632e63fe489ed52036",
+        "status": "故障开放",
+        "finding": "原三次异常启动中留存 25 条 GM20B KMD 执行快照，均由系统 PID 4 发出，来源为抢占，状态和队列错误均为 0。五条采样时处于 GPU fence 阶段。按 DMA 提交号、执行区间、Windows 上下文、队列序号、字节数及包退役逐条关联，五个包来自其他绘图进程 5480、5604、5624，均在故障窗口首次 CALL 前 92.352 至 112.563 ms 正常退役。",
+        "missing_observation": "原三个窗口首次 CALL 后仍缺该绘图请求的 Windows/KMD 回执或板级复位原因。恢复开机 Code 43 对应启动许可拒绝。驱动启动状态字段未记录前一次桌面的 Present 或运行时 fence 位置。",
+        "boundaries": {
+          "last_entry": "三次公开 CALL 已记录。旧 KMD 的抢占快照全部早于各自 CALL。",
+          "last_return": {
+            "background_gpu_fence_queue_retirement_before_call_ms": [
+              104.744,
+              95.573,
+              94.152,
+              112.563,
+              92.352
+            ],
+            "application_pre_call_status": "GetDeviceRemovedReason=S_OK",
+            "first_present_return_marker": "缺回执"
+          },
+          "first_anomaly_or_missing": "原三个窗口首次 CALL 后仍缺该绘图请求的 Windows/KMD 回执或板级复位原因。恢复开机 Code 43 对应启动许可拒绝。驱动启动状态字段未记录前一次桌面的 Present 或运行时 fence 位置。"
+        },
+        "finished_utc": "2026-11-21T14:35:14.711942+00:00"
+      },
+      {
+        "round_id": "win-original-process-lifetime-20261121-01",
+        "contract_id": "WIN-OLD-RESET",
+        "windows_question": "WIN-OLD-RESET",
+        "method": "实机只读检查原绘图进程的 Windows 启动与退出审计",
+        "plan": "windows-native-graphics/rounds/win-original-process-lifetime-20261121-01.plan.json",
+        "plan_sha256": "3139013227bec159b40ee5dbc86f89d1c368545f267a009ee74773d497772372",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:36:19.964064+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-original-process-lifetime-20261121-01.result.json",
+        "result_sha256": "4e3066fe8799db0315a193bf361d6b2b3d62508f187c416f0145cec8232be2a4",
+        "status": "故障开放",
+        "finding": "原三次启动的绘图 PID、正常查询 PID 和采集 PID 已与各自 ZIP 对齐。Switch 的 Security 环形日志最早留存记录 327248 的墙钟为 11 月 20 日 21:54 UTC，三个原次窗口均未查到 4688/4689 或 4608。Sysmon 通道未找到，内核进程分析通道在取证时关闭。系统事件归档目录及 246 份历史 ZIP 均未找到这些通道的归档。",
+        "missing_observation": "仍缺原绘图进程在首次 CALL 之后、复位之前的 Windows 进程退出回执或等效同启动记录。正常查询进程在应用归档中有退出记录，在原次 Security 范围内也缺对应审计条目。",
+        "boundaries": {
+          "last_entry": "各原进程 draw_start 的 PID 与首次 Present CALL 均可核对。",
+          "last_return": "三个同轮正常查询进程的 query_exit 已入归档。原绘图进程的 CALL 前设备状态查询返回 S_OK。",
+          "first_anomaly_or_missing": "仍缺原绘图进程在首次 CALL 之后、复位之前的 Windows 进程退出回执或等效同启动记录。正常查询进程在应用归档中有退出记录，在原次 Security 范围内也缺对应审计条目。"
+        },
+        "finished_utc": "2026-11-21T14:37:01.700971+00:00"
+      },
+      {
+        "round_id": "win-dwm-blt-dma-identity-20261121-01",
+        "contract_id": "WIN-DWM-CONSUME",
+        "windows_question": "WIN-DWM-CONSUME",
+        "method": "按原 ETL 补齐送审的应用 Blt 包与 DWM 调度时间链",
+        "plan": "windows-native-graphics/rounds/win-dwm-blt-dma-identity-20261121-01.plan.json",
+        "plan_sha256": "1adf725fa50c6f7739d1f491c06d29ef3ac7793bd33836b01d6b9fcc44213414",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:39:38.518339+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-dwm-blt-dma-identity-20261121-01.result.json",
+        "result_sha256": "75ad85a322a3f6434c3626200487704fa704fd7c070e185643f2dae9b6ba3ad3",
+        "status": "观测缺口",
+        "finding": "五个正式基线空窗口中，166 的 pDmaBuffer、178 的 hDmaBuffer 和 175 的 pDmaBuffer 逐次完全相同。每个 52 字节包经相同上下文、提交序号和 DMA 完成号匹配到 177/176，再经队列包标识匹配到 180。DWM 91 均晚于对应包退役，EventId 数值等于当次 HWND。",
+        "missing_observation": "每次应用复制的 DMA 归属与退役已核实。DWM 91 的表面字段仍为零，后续消费与应用 Blt 目标之间缺同一表面或提交的直接记录。",
+        "boundaries": {
+          "last_entry": "五次 Windows Blt 使用的 DMA 缓冲分别同队列及硬件提交逐字相符。",
+          "last_return": "五个包均收到 DMA 完成和队列退役，随后出现对应窗口数值的 DWM 91。",
+          "first_anomaly_or_missing": "每次应用复制的 DMA 归属与退役已核实。DWM 91 的表面字段仍为零，后续消费与应用 Blt 目标之间缺同一表面或提交的直接记录。"
+        },
+        "finished_utc": "2026-11-21T14:39:41.783933+00:00"
       }
     ]
   }

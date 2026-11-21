@@ -30,6 +30,14 @@
 
 启动 91476，绘图 PID/TID 584/1664。首次公开 Present 历时 19.221 ms。同窗口内核 Blt 166 的本机原始记录为 148 字节，两端 SHA-256、CRC32 及独立 ETL 均吻合。写入及文件刷新耗时 10.416 ms，写透返回相对公开 RETURN 为 +5.688 ms，相对 DXGI 43 为 +5.710 ms。 当前基线的写透结果与原三次故障按启动号分别保存。[本机原始记录、文件刷新时间及控制端回读](windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json)
 
+原三次启动保留的 25 条 GM20B KMD 执行快照均来自 PID 4 的抢占观测，状态及队列错误均为零。五条位于 GPU fence 阶段的工作与 Windows DMA 提交、队列上下文、序号、字节数及完成事件全部吻合。发起 PID 分别为 5480、5604、5624，各包早于原窗口首次 CALL 92.352 至 112.563 ms 正常退役。原窗口自身调用前的监控围栏信号仍按值 1、队列序号 2 归属。三个恢复开机中的 Code 43 有各自启动许可拒绝回执。[原 KMD 事件、五个 Windows 包与恢复次状态](windows-native-graphics/rounds/win-original-kmd-telemetry-20261121-01.result.json)
+
+正式基线的五次无写入窗口中，CDD 286 的目标经适配器分配 33、设备分配 36 对应到同一窗口的 Blt。复制包完成后 2.150 至 16.818 ms，各自的 DWM 事件 91 均有一个 EventId 数值等于当次 HWND。各窗口直到截图为止的 DWM 进程记录共 1,054 条，仍缺同提交的明确表面消费回执。[DWM 调度、目标分配寿命及翻转消费对照](windows-native-graphics/rounds/win-dwm-shared-destination-20261121-01.v2.result.json)
+
+原三次的 Windows 进程生命周期审计未补出 CALL 后的退出位置。Security 环形日志最早留存记录的墙钟晚于目标时段，系统原始进程分析通道在查询时关闭。Switch 事件日志归档目录及 246 份本地历史 ZIP 均缺对应通道的归档。[原进程身份、正常查询对照及日志保留范围](windows-native-graphics/rounds/win-original-process-lifetime-20261121-01.result.json)
+
+上述五次 52 字节复制在 Blt 166、队列提交 178 和 DMA 提交 175 携带相同的缓冲指针。DMA 完成号对应 177/176，队列包标识及序号对应 180。原先送审的摘要省略了 178/175，补核回执列出每次完整顺序。[五个应用复制包与后续 DWM 91 的逐字段核对](windows-native-graphics/rounds/win-dwm-blt-dma-identity-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)
