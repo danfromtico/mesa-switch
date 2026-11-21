@@ -1728,5 +1728,58 @@
   "published_windows_logs": {
     "path": "windows-native-graphics/local-windows-logs.json",
     "sha256": "cdfb0eeb2f11161e8ba63ced00ded4795adcf16dde32772d908fedb26b5a67e8"
+  },
+  "independent_review": {
+    "model": "gemini-4-neon-xhigh",
+    "effort": "xhigh",
+    "local_original_response": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/windows-review/response.json",
+    "raw_response_sha256": "17729b32b527b0d32e66de064d738daacae44e57145e4e738e5cc72e81d7db1d",
+    "request_sha256": "a541d85ff9f90d0c6fb8888367b18a6717ad3987c70c4b999cdb8d7446685e1c",
+    "prompt_sha256": "74cf4f7da1539c8473053a66051fa1e4161ef109e56273bc2e75c727742c984a",
+    "reviewed_rounds": {
+      "win-empty-blt-20261121-01": {
+        "contract_id": "WIN-PRESENT-BLT",
+        "result_sha256": "5162d39228ce3073efd4d1f02d5043e15bee5737a872fc4e897f8e1da7d2b224",
+        "status": "实机通过"
+      },
+      "win-empty-dwm-20261121-01": {
+        "contract_id": "WIN-DWM-CONSUME",
+        "result_sha256": "fd5475342760a1424597ce4dc39b89fdbd168a2ccdff9811fd805d857056e655",
+        "status": "观测缺口"
+      },
+      "win-empty-fence-20261121-01": {
+        "contract_id": "WIN-FENCE-WAIT",
+        "result_sha256": "0e9bfd69ff8f0616124ee0895033f703c2175bfee581294a57b9e19815d170a3",
+        "status": "观测缺口"
+      },
+      "win-empty-image-20261121-01": {
+        "contract_id": "WIN-PRESENT-IMAGE",
+        "result_sha256": "4395a9ef94f2e447e96fbc575b5665c3dc6ac4065a36c680b7dd101d0e7cf9b8",
+        "status": "实机通过"
+      },
+      "win-empty-present-20261121-01": {
+        "contract_id": "WIN-EMPTY-PRESENT-KMT",
+        "result_sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c",
+        "status": "实机通过"
+      },
+      "win-empty-source-20261121-01": {
+        "contract_id": "WIN-PRESENT-SOURCE",
+        "result_sha256": "b9f233bd54dccd95c93ec55d7e4303f25f28e2c3c33aad3137d08f6afc13d43a",
+        "status": "实机通过"
+      },
+      "win-first-present-20261121-01": {
+        "contract_id": "WIN-PRESENT-KMT",
+        "result_sha256": "fec3bcb4effe5c3b6dc9da33da1e2ad05f069b3205c81463a1ac1267f647ebcc",
+        "status": "实机通过"
+      },
+      "win-historical-reset-20261121-01": {
+        "contract_id": "WIN-OLD-RESET",
+        "result_sha256": "f25542749cb21e1a6664ce81ea494d3cba9b50161ca943dcb888c405f1ed2059",
+        "status": "故障开放"
+      }
+    },
+    "objections": [],
+    "main_check": "复核的八份回执保持原判。分配身份、窗口像素与原始 PID/TID 还可用完整回执和已发布事件载荷核对。后续四份 DWM 标识与原客户端记录的回执由本会话逐项核实。",
+    "historical_result": "原三次重启原因仍缺直接证据。"
   }
 }
