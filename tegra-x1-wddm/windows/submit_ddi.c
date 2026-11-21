@@ -35,7 +35,7 @@ NTSTATUS APIENTRY TgGpuDdiSubmitCommandVirtual(HANDLE adapter,const DXGKARG_SUBM
             !a->Flags.NullRendering && a->DmaBufferSize;
         status=STATUS_SUCCESS;
         if (application) {
-            if (TgGpuIsGdiContext(e,a->hContext)) {
+            if (TgGpuIsGdiContext(e,a->hContext) || (a->Flags.Present && !e->PagingOnly)) {
                 status=TgGpuCapturePresentSnapshot(e,a,&snapshot);
             } else if (!e->PagingOnly) {
                 struct tg_gpu_command_va va;

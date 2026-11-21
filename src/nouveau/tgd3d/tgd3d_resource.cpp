@@ -614,8 +614,9 @@ static HRESULT create_resource(Device *dev, const D3D10DDIARG_CREATERESOURCE *de
       hr = runtime_primary_create(dev, desc, res->hRT, &res->storage.runtime, &width, &height, &pitch);
       res->primary = true;
       res->pitch = pitch;
-   } else if (SUCCEEDED(hr) && (res->misc & (D3D10_DDI_RESOURCE_MISC_SHARED |
-             D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) && !res->tiledShared) {
+   } else if (SUCCEEDED(hr) && !res->tiledShared &&
+              ((res->misc & (D3D10_DDI_RESOURCE_MISC_SHARED | D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE)) ||
+               runtime_linear_back_buffer(dev, desc))) {
       hr = runtime_shared_create(dev, desc, res->hRT, &res->storage.runtime, &res->pitch);
    } else if (SUCCEEDED(hr) && !res->tiledShared && (res->misc & ~(D3D10_DDI_RESOURCE_AUTO_GEN_MIP_MAP |
                                             D3D10_DDI_RESOURCE_MISC_DISCARD_ON_PRESENT))) {

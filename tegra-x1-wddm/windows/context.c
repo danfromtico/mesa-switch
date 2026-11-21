@@ -168,16 +168,15 @@ NTSTATUS APIENTRY TgGpuDdiCreateContext(HANDLE device, DXGKARG_CREATECONTEXT *a)
     InsertTailList(&e->Contexts,&c->Link); KeReleaseSpinLock(&e->Lock,irql);
     RtlZeroMemory(&a->ContextInfo,sizeof(a->ContextInfo));
     a->ContextInfo.DmaBufferSize=TG_GPU_DMA_BUFFER_BYTES;
+    /* VidMm needs aperture-backed DMA buffers to map OS-generated copies
+     * into a virtual context, including a D3D application's Present context. */
+    if (a->Flags.VirtualAddressing || a->Flags.SystemContext || a->Flags.GdiContext)
+        a->ContextInfo.DmaBufferSegmentSet=1u<<(TG_GPU_PAGING_APERTURE_SEGMENT-1);
     /* The system paging context must match QUERYSEGMENT4's private data size.
      * Application contexts also reserve room for UMD submission data. */
     if (a->Flags.SystemContext) {
         a->ContextInfo.DmaBufferPrivateDataSize=TG_GPU_PAGING_PRIVATE_BYTES;
-        a->ContextInfo.DmaBufferSegmentSet=1u<<(TG_GPU_PAGING_APERTURE_SEGMENT-1);
     } else if (a->Flags.GdiContext) {
-        /* VidMm creates a privileged DMA pool for the virtual GDI context.
-         * Its buffers need allocation objects for GPU VA mapping; segment
-         * set zero takes the physical contiguous-buffer path instead. */
-        a->ContextInfo.DmaBufferSegmentSet=1u<<(TG_GPU_PAGING_APERTURE_SEGMENT-1);
         /* GDI reserves only the kernel queue slot. */
         a->ContextInfo.DmaBufferPrivateDataSize=sizeof(TG_GPU_QUEUE_ENTRY);
     } else
@@ -595,6 +594,10 @@ NTSTATUS TgGpuCaptureSoftwareWork(TG_GPU_CONTEXT_ENGINE *e,const DXGKARG_SUBMITC
     KeAcquireSpinLock(&e->Lock,&irql);c=find_context(e,a->hContext);
     if(e->Stopping){KeReleaseSpinLock(&e->Lock,irql);return STATUS_DEVICE_NOT_READY;}
     if((!c && !(a->Flags.ContextSwitch && !a->hContext)) || (c && c->Closing)) {
+        KeReleaseSpinLock(&e->Lock,irql);return STATUS_INVALID_PARAMETER;
+    }
+    if (a->Flags.Present && c && !c->Flags.GdiContext &&
+        (c->Flags.SystemContext || !c->Flags.VirtualAddressing || !c->Device->Process)) {
         KeReleaseSpinLock(&e->Lock,irql);return STATUS_INVALID_PARAMETER;
     }
     RtlZeroMemory(w,sizeof(*w));w->Engine=e;w->Software=TRUE;

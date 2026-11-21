@@ -733,6 +733,7 @@ HRESULT runtime_reclaim(Device *dev, RuntimeResource *const *resources, UINT cou
 HRESULT runtime_primary_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *desc,
                                D3D10DDI_HRTRESOURCE runtime, RuntimeResource **out,
                                UINT *width, UINT *height, UINT *pitch);
+bool runtime_linear_back_buffer(const Device *dev, const D3D10DDIARG_CREATERESOURCE *desc);
 HRESULT runtime_shared_create(Device *dev, const D3D10DDIARG_CREATERESOURCE *desc,
                               D3D10DDI_HRTRESOURCE runtime, RuntimeResource **out, UINT *pitch);
 HRESULT runtime_shared_open(Device *dev, const D3D10DDIARG_OPENRESOURCE *args,
