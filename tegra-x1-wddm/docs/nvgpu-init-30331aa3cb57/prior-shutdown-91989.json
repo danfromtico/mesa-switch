@@ -1,0 +1,221 @@
+{
+  "finding": "Old-driver closed-gate transition 91918 to 91989 recorded 6008 and Kernel-Power 41, BugcheckCode zero. An explicit shutdown was requested and acknowledged by Windows; no orderly shutdown record for that transition was retained. Its cause is unknown. Do not count the closed-gate transition as a clean pass. The later staging and one-use candidate boot are separately bounded by hardware and policy receipts.",
+  "prior_desktop": {
+    "dwm": 1472,
+    "boot": 91918,
+    "qualification": "bf8287f7204808153194db3340a8199376d5bd7611fbe70434ab4ba2452c4e6c",
+    "loaded": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "kernel": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "active_user_slots": [
+      "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_5f0ab6e9a95064e5\\tegragpuno3d.dll",
+      "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\TegraGpuD3DVk.dll",
+      "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\TegraGpuD3DVk.dll",
+      "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_5f0ab6e9a95064e5\\tegragpuno3d.dll"
+    ],
+    "files": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "native_boot_policy": "b366e79db9c0f55aed09a9c7d19bf71df63b5c361e2cf7f8b48f517c3f62f0a2",
+    "exact_rollback_packages": [
+      {
+        "dir": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_68f96d5fe05649da",
+        "catalogs": [
+          {
+            "sha": "62fba84b6b921bdc8c42053b88dac643f3d7d71aff888feee6a0e8e8e1ff18b4"
+          }
+        ]
+      }
+    ],
+    "power": "Online",
+    "icd_registration": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\nvk_windows_icd.json",
+    "source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "published_inf": "oem27.inf",
+    "code": 0,
+    "published_inf_sha": "cd50c3e948fbcf8895e0d407fd6fc6a72b3c3405303d328bb4544582f3bffef8",
+    "utc": "2026-11-21T17:29:35.8944298Z",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "revision": "7f63adda87a543c06aaae6d9776895178b1856a242e3a07d23c47102f5766021"
+  },
+  "disarm": {
+    "trial": null,
+    "task": true,
+    "code": 0,
+    "phase_boot": 91918,
+    "utc": "2026-11-21T17:33:16.9008276Z",
+    "boot": 91918,
+    "token": null,
+    "inf": "oem27.inf",
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "phase": "ClosedForTrial",
+    "last_error": null,
+    "kmd": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "permanent": null
+  },
+  "requested": {
+    "boot": 91918,
+    "phase": "ClosedForTrial",
+    "reason": "enter closed gate before selecting candidate",
+    "utc": "2026-11-21T17:33:34.9138615Z",
+    "queued": true
+  },
+  "first_reachable_closed_boot": {
+    "last_error": null,
+    "trial": null,
+    "task": true,
+    "code": 43,
+    "phase_boot": 91918,
+    "utc": "2026-11-21T17:35:42.8318049Z",
+    "boot": 91989,
+    "token": null,
+    "inf": "oem27.inf",
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "phase": "ClosedForTrial",
+    "task_state": "Running",
+    "kmd": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "permanent": null
+  },
+  "candidate_selected_while_closed": {
+    "last_error": null,
+    "trial": null,
+    "task": true,
+    "code": 43,
+    "phase_boot": 91989,
+    "utc": "2026-11-21T17:36:03.6972048Z",
+    "boot": 91989,
+    "token": null,
+    "inf": "oem28.inf",
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "phase": "CandidateGateClosed",
+    "task_state": "Ready",
+    "kmd": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+    "permanent": null
+  },
+  "candidate_trial_bookmark": {
+    "schema": 1,
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+    "components": {
+      "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606"
+    },
+    "first_record": 92066,
+    "prior_boot": 91989
+  },
+  "full_interval": {
+    "complete": true,
+    "earliest_available": 42689,
+    "gpu_code": 0,
+    "first_record": 91918,
+    "last_record": 92144,
+    "events": [
+      {
+        "record": 91918,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T16:27:02.0015058Z",
+        "id": 12,
+        "detail": {}
+      },
+      {
+        "record": 91989,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T17:03:23.6408013Z",
+        "id": 12,
+        "detail": {}
+      },
+      {
+        "record": 91998,
+        "provider": "EventLog",
+        "utc": "2026-11-21T17:34:48.1383862Z",
+        "id": 6008,
+        "detail": {
+          "3": "",
+          "4": "",
+          "2": "",
+          "1": "",
+          "0": "",
+          "6": "",
+          "5": ""
+        }
+      },
+      {
+        "record": 92000,
+        "provider": "EventLog",
+        "utc": "2026-11-21T17:34:48.1414512Z",
+        "id": 6005,
+        "detail": {}
+      },
+      {
+        "record": 92007,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "utc": "2026-11-21T17:03:27.4833658Z",
+        "id": 41,
+        "detail": {
+          "PowerButtonTimestamp": "0",
+          "BugcheckCode": "0",
+          "SleepInProgress": "0"
+        }
+      },
+      {
+        "record": 92067,
+        "provider": "User32",
+        "utc": "2026-11-21T17:36:59.6034240Z",
+        "id": 1074,
+        "detail": {
+          "param5": "重启",
+          "param3": "没有找到这个原因的标题",
+          "param6": "SwitchWOA graphics receipt one-time candidate boot",
+          "param1": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+          "param4": "0x81000000",
+          "param7": "DESKTOP-5RCUK3G\\ruje",
+          "param2": "DESKTOP-5RCUK3G"
+        }
+      },
+      {
+        "record": 92069,
+        "provider": "EventLog",
+        "utc": "2026-11-21T17:37:13.8319044Z",
+        "id": 6006,
+        "detail": {}
+      },
+      {
+        "record": 92077,
+        "provider": "EventLog",
+        "utc": "2026-11-21T17:38:29.6048605Z",
+        "id": 6005,
+        "detail": {}
+      },
+      {
+        "record": 92082,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T17:37:30.3599022Z",
+        "id": 13,
+        "detail": {}
+      },
+      {
+        "record": 92083,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T17:37:34.2055939Z",
+        "id": 12,
+        "detail": {}
+      }
+    ],
+    "checked": "2026-11-21T17:40:02.0740785Z",
+    "boot": 92083
+  }
+}

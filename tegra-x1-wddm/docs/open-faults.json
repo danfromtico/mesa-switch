@@ -2,6 +2,23 @@
   "schema": 1,
   "faults": [
     {
+      "id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+      "status": "open",
+      "kind": "restart",
+      "affected_scopes": [
+        "shutdown",
+        "boot-recovery"
+      ],
+      "trigger": "During an authorized change from permanent baseline 56113d6c to a closed-gate desktop, the old-driver shutdown between boots 91918 and 91989 was unclean.",
+      "evidence": [
+        "tegra-x1-wddm/docs/nvgpu-init-30331aa3cb57/prior-shutdown-91989.json"
+      ],
+      "cause": "Windows acknowledged the explicit shutdown request. Boot 91989 logged 6008 and 41 with bugcheck zero. Why shutdown failed or why its terminal events were not retained is unknown. The loaded-file identity and PnP package on the first Code 43 desktop still matched the pretrial baseline.",
+      "daily_workaround": "Retain the tested rollback package and use the guarded change procedure on AC. Observe the closed-gate desktop before installing or arming any candidate.",
+      "close_when": "Explain the abnormal shutdown or the loss of the terminal shutdown records using a full system interval and matching device evidence.",
+      "resolution": null
+    },
+    {
       "id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
       "status": "open",
       "kind": "restart",
@@ -491,6 +508,76 @@
     }
   ],
   "independent_qualifications": [
+    {
+      "evidence_sha256": "025ae574b9291c813ebc96f0a19c7401bfd1cee423f946eaf326b45159b7f20c",
+      "independence": [
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "reason": "The post-failure Code 43 receipt still matched baseline 56113d6c and oem27.inf. The candidate was selected afterward, on boot 91989. The permanent-approval case starts at the later one-use bookmark 92066 and includes its complete subsequent boot. The preceding unexplained shutdown is separately registered and remains open.",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "Only native adapter initialization and the ordinary desktop are qualified. No WDDM presentation, queue/completion, Windows memory manager or recovery code changed; this trial did not exercise or close the recorded trigger. GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "Only native adapter initialization and the ordinary desktop are qualified. No WDDM presentation, queue/completion, Windows memory manager or recovery code changed; this trial did not exercise or close the recorded trigger. GM20B-WDDM20-PRESENT1-REMOVAL",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "Only native adapter initialization and the ordinary desktop are qualified. No WDDM presentation, queue/completion, Windows memory manager or recovery code changed; this trial did not exercise or close the recorded trigger. GM20B-WDDM20-FLIP-RESTART",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "The qualified observation is cold GPU initialization followed by an idle interactive desktop on AC. It does not exercise the historical game, file or video load transitions or establish their cause.",
+          "test_sha256": "dcd7c2f8e5d2e6203a1dd42e6ca362e36e6504321598ed139d2afa10ae8774c8"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "The adapter started and the accepted network link was available to read the physical receipt; no Wi-Fi driver or power-up sequence changed.",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "reason": "This is a controlled cold start through the one-use grant, with a Code 0 native desktop. No TDR recovery path was changed or invoked.",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "reason": "The desktop measurement did not exercise memory pressure and changes no commit-management path.",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "reason": "This annotated controlled restart had an orderly EventLog shutdown and a confirmed next desktop. It did not exercise the interactive shutdown scenario.",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "reason": "Only native adapter initialization and the ordinary desktop are qualified. No WDDM presentation, queue/completion, Windows memory manager or recovery code changed; this trial did not exercise or close the recorded trigger. GM20B-POST-SELECTION-CONTROL-RESTART",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "reason": "Only native adapter initialization and the ordinary desktop are qualified. No WDDM presentation, queue/completion, Windows memory manager or recovery code changed; this trial did not exercise or close the recorded trigger. SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "reason": "No legacy SEQUENTIAL scenario was run. These changes set up hardware before graphics work or at quiescent PLL relock. This is a variable-alignment qualification, not evidence resolving the unknown DWM DMA completion.",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "reason": "This boot used the recorded nvgpu initialization candidate without the prior DMA probe. The interval contains only its controlled restart.",
+          "test_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c"
+        }
+      ]
+    },
     {
       "evidence_sha256": "bf8287f7204808153194db3340a8199376d5bd7611fbe70434ab4ba2452c4e6c",
       "independence": [
