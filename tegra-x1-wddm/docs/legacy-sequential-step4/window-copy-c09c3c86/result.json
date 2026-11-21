@@ -1,0 +1,140 @@
+{
+  "task": "第四步普通窗口呈现与三次历史重启诊断",
+  "candidate_source": "a7c422add36e2d6b2444a7767bafcaef81b4a041",
+  "functional_parent": "aa49f69c8362ddb6e0547ad8f30bb951c9548a5e",
+  "candidate_branch": "step4-ordinary-window-present",
+  "candidate_kmd": "c09c3c868948f3a3acc583dd5f34cb098f3819207db817c081e4ade06adf999a",
+  "paired_umd": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+  "source_patch_sha256": "9d1c8e3486f1a6f77285cfdb52204d49c6a0402bf8c93e2d5e48757b552783a8",
+  "unsigned_kmd": "a2fb1acac97a00ff1f0a852bdabecfa954229683aae93997a3777b187e751955",
+  "build_changed_objects": [
+    "allocation.obj",
+    "context.obj",
+    "present.obj",
+    "present_blit.obj",
+    "submit_ddi.obj",
+    "test_context_windows.obj",
+    "work_queue.obj"
+  ],
+  "build_compared_objects": 90,
+  "host_model_exit": 0,
+  "arm64_model_exit": 0,
+  "signed_arm64_model": "a3f963e4e3b3661bdfaf48898c4f7da5d22e12c8b37f207e11e90f9175a9d7e4",
+  "source_review": {
+    "model": "gemini-4-neon-high",
+    "files": 9,
+    "delta_files": 4,
+    "review_sha256": "5486cd2a0bad6a72b6930979b489fdb01bdd1e74c8b4b9df63e44d7f82c5aa69",
+    "delta_review_sha256": "77aca3cacc080e27dd0ec80d2ca488396a1675f76e58f86166ff50a85065d3e9"
+  },
+  "functional_change": "普通虚拟上下文可将已验证的线性后缓冲复制到同设备 X8R8G8B8 标准暂存表面。VidMm 负责驻留。驱动复制私有命令快照，有序持有上下文直到 GPU 完成，调度器抑制绘制时有序退役空包。",
+  "warp_control": {
+    "file": "../warp-control-5.json",
+    "reused": true,
+    "present": 1,
+    "visible": true,
+    "input": false,
+    "client_exit": 0
+  },
+  "ordinary_window": {
+    "qualification": "qualification.json",
+    "qualification_sha256": "5bdd1938891bb4b2b6f0dda99b8ca07648320a4b1ded9cda7645f74c04a664f4",
+    "boot": 87268,
+    "dwm": 1468,
+    "required": 3,
+    "consecutive_passes": 3,
+    "frame_samples_per_run": 4508,
+    "source_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "same_desktop": true,
+    "gpu_copy_packet_bytes": 52,
+    "clear_pixel_matches": 5,
+    "clear_samples": 5,
+    "flip_control_passed": true
+  },
+  "historical_restart_order": "../historical-restart-order.json",
+  "historical_cause_confirmed": false,
+  "promotion": {
+    "action": "Check",
+    "exit": 1,
+    "receipt_hashes_verified": true,
+    "decision": "Open faults block presentation promotion",
+    "matching_open_faults": [
+      "GM20B-LEGACY-SEQUENTIAL-RESTART",
+      "GM20B-WDDM20-PRESENT1-REMOVAL",
+      "GM20B-WDDM20-FLIP-RESTART",
+      "SWITCH-LOAD-TRANSITION-RESTART",
+      "GM20B-NATIVE-RECOVERY-BOOT-RESTART"
+    ],
+    "active_candidate_grant": "one-time",
+    "new_baseline_selected": false
+  },
+  "sealed_profile_restored": {
+    "boot": 87444,
+    "power": "Online",
+    "gpu_code": 0,
+    "service": "Running",
+    "inf": "oem25.inf",
+    "dwm": [
+      {
+        "started": "2026-11-21T02:32:50.3102307Z",
+        "id": 1440,
+        "session": 1
+      }
+    ],
+    "source": "c05e254932dd975bdf69e7046949596dbeb84561",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+    "active_policy": "7a257371a5cd0a0e2febc322d141e543f6f61b7585c9f230e5c58963fd7a4875",
+    "file_sha256": {
+      "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "dwm_loaded": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "trial_grant": false,
+    "token_present": false,
+    "boot_records": [
+      87084,
+      87179,
+      87268,
+      87355,
+      87444
+    ],
+    "planned_restarts": 4,
+    "unexplained_restarts_during_trial_or_restore": 0,
+    "recovery_receipt_sha256": "d5066a3fc6604263b624430a7fa66f898712e6c72b15ae07808e6d393f8e8dd3",
+    "removed_candidate_package": true,
+    "removed_trial_controller": true,
+    "closed_owned_loggers": 10,
+    "remaining_test_processes": [],
+    "remaining_test_tasks": []
+  },
+  "integration_check": "integration-check.json",
+  "open_faults": "../../open-faults.json",
+  "baseline_comparison": {
+    "accepted_reference": "../../dxvk-games-20261118/gdi-fullscreen-gm20b/window-control.json",
+    "reference_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c",
+    "accepted_ordinary_flip": "GM20B native, five checked desktop pixels matched",
+    "same_original_binary_previous_comparison": "../staging-ddi-result-13286e3e.json",
+    "previous_instrumented_pair": {
+      "sequential": "0x087a0001",
+      "flip": "0x00000000"
+    },
+    "candidate": {
+      "sequential_consecutive_passes": 3,
+      "known_clear_desktop_samples": "5/5",
+      "ordinary_flip": "S_OK, 4508/4508 composed pixel samples, input and exit passed",
+      "new_regression_in_measured_cases": false
+    }
+  },
+  "step4_handoff_sha256": "fa773150eca5d438991ae0b0e885511f35e04cbb575145d5d05c75a4da84fa4f",
+  "remaining_independent_changes": "复查的未接入项中，未找到同时具有独立实机验收、基线回归对照及仓库晋升通过回执的旁路修复。"
+}
