@@ -275,6 +275,10 @@ enum tg_gpu_gr_result tg_gpu_gr_gpc_mmu(const struct tg_gpu_power_io *io,
      * caller through GR reset/MC drain; no new DMA backing is created here.
      */
     values[0]&=0xf000187f;
+    /* Match Switchroot gm20b_gr_set_debug_mode(false): clear GPC MMU debug
+     * bit 16 even if mirrored from an inherited FB_MMU_DEBUG_CTRL value.
+     */
+    values[1]&=~0x10000u;
     write_reg(io,target[0],values[0]);
     write_reg(io,0x418890,0);write_reg(io,0x418894,0);
     for(unsigned i=1;i<4;++i) write_reg(io,target[i],values[i]);

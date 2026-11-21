@@ -39,6 +39,7 @@ static enum tg_gpu_channel_result fault(const struct tg_gpu_power_io *io,struct 
     c->fifo_interrupt=status.fifo; c->mmu_fault=status.mmu;
     c->pbdma_interrupt=status.pbdma; c->pbdma_interrupt_1=status.pbdma1;
     tg_gpu_frontend_snapshot(io,&c->frontend);
+    tg_gpu_frontend_pri_timeout_snapshot(io,c->frontend.bus_interrupt,&c->pri_timeout);
     return pending || c->frontend.result ?
         TG_GPU_CHANNEL_FAULT : TG_GPU_CHANNEL_OK;
 }

@@ -8,7 +8,8 @@
 struct model {
     uint32_t sched,instance,control,runlist,runbase,pbdma,preempt,root;
     uint32_t bar1,userd_base,put,fifo,gr_current;
-    unsigned reads,writes,doorbells,tlbs,flushes;
+    uint32_t bus_intr,pri_save0,pri_save1,pri_fecs;
+    unsigned reads,writes,doorbells,tlbs,flushes,pri_timeout_reads;
     bool bad_post,fail_tlb,fail_preempt,hold_gr,fault_on_put,change_slot;
     unsigned slot_reads,context_reads;
 };
@@ -39,8 +40,12 @@ static uint32_t read32(void *context,uint32_t address)
     case 0x57040084:case 0x570400c0:case 0x570400c4:
         ++m->context_reads;return address;
     case 0x57002100:return m->fifo;
+    case 0x57001100:return m->bus_intr;
+    case 0x57009084:++m->pri_timeout_reads;return m->pri_save0;
+    case 0x57009088:++m->pri_timeout_reads;return m->pri_save1;
+    case 0x5700908c:++m->pri_timeout_reads;return m->pri_fecs;
     case 0x5700259c:case 0x57040108:case 0x57040148:
-    case 0x57001100:case 0x57120058:case 0x5712005c:return 0;
+    case 0x57120058:case 0x5712005c:return 0;
     default:fprintf(stderr,"unexpected register read: %08x\n",address);assert(0);return UINT32_MAX;
     }
 }
@@ -179,8 +184,17 @@ int main(void)
     assert(tg_gpu_channel_retire(&io,&power,&owner,&c)==TG_GPU_CHANNEL_OK);
     init(&m,&c);
     assert(tg_gpu_channel_submit_entries(&io,&power,0xc0000000,0xc0040000,0xc0045000,0x13000,4,&owner,&c)==TG_GPU_CHANNEL_OK);
-    assert(c.submitted && c.last_put==4 && m.put==4 && m.doorbells==1);
+    assert(c.submitted && c.last_put==4 && m.put==4 && m.doorbells==1 && !m.pri_timeout_reads && !c.pri_timeout.valid);
     assert(tg_gpu_channel_retire(&io,&power,&owner,&c)==TG_GPU_CHANNEL_OK);
+    /* PBUS PRI fault triggers read-only 0x9084/0x9088/(0x908c) observation without clearing. */
+    init(&m,&c);m.bus_intr=0x8;m.pri_save0=0x00123400;m.pri_save1=0x00abcdef;m.pri_fecs=0xbad00002;
+    assert(tg_gpu_channel_bind(&io,&power,0xc0000000,0xc0040000,0xc0045000,&owner,&c)==TG_GPU_CHANNEL_FAULT);
+    assert(!m.writes && m.pri_timeout_reads==2 && c.pri_timeout.valid && !c.pri_timeout.fecs_valid);
+    assert(c.pri_timeout.save0==0x00123400 && c.pri_timeout.save1==0x00abcdef && !c.pri_timeout.fecs_errcode);
+    init(&m,&c);m.bus_intr=0x4;m.pri_save0=0x80123400;m.pri_save1=0x00abcdef;m.pri_fecs=0xbad00002;
+    assert(tg_gpu_channel_bind(&io,&power,0xc0000000,0xc0040000,0xc0045000,&owner,&c)==TG_GPU_CHANNEL_FAULT);
+    assert(!m.writes && m.pri_timeout_reads==3 && c.pri_timeout.valid && c.pri_timeout.fecs_valid);
+    assert(c.pri_timeout.save0==0x80123400 && c.pri_timeout.save1==0x00abcdef && c.pri_timeout.fecs_errcode==0xbad00002);
     puts("GM20B hot channel binding, BAR1 notification and retained ownership: PASS (model only)");
     return 0;
 }

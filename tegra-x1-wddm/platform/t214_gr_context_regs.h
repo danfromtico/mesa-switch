@@ -120,6 +120,9 @@ static inline uint32_t gr_gpcs_tpcs_pe_vaf_fast_mode_switch_true_f(void) { retur
 static inline uint32_t gr_gpcs_tpcs_pe_vaf_r(void) { return 0x0041980cU; }
 static inline uint32_t gr_gpcs_tpcs_pes_vsc_vpc_fast_mode_switch_true_f(void) { return 0x4U; }
 static inline uint32_t gr_gpcs_tpcs_pes_vsc_vpc_r(void) { return 0x0041be08U; }
+static inline uint32_t gr_gpcs_tpcs_tex_m_dbg2_lg_rd_coalesce_en_m(void) { return 0x1U << 2U; }
+static inline uint32_t gr_gpcs_tpcs_tex_m_dbg2_r(void) { return 0x00419a3cU; }
+static inline uint32_t gr_gpcs_tpcs_tex_m_dbg2_su_rd_coalesce_en_m(void) { return 0x1U << 4U; }
 static inline uint32_t gr_gpcs_zcull_sm_in_gpc_number_map0_r(void) { return 0x00418980U; }
 static inline uint32_t gr_gpcs_zcull_sm_in_gpc_number_map0_tile_1_f(uint32_t v) { return (v & 0x7U) << 4U; }
 static inline uint32_t gr_pd_ab_dist_cfg0_r(void) { return 0x004064c0U; }

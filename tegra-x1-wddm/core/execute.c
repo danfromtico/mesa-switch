@@ -409,6 +409,15 @@ static enum tg_gpu_execute_result boot(const struct tg_gpu_power_io *io,
      */
     ex_write(io, 0x100cc8, (uint32_t)((physical + DEBUG_WR) >> 8));
     ex_write(io, 0x100ccc, (uint32_t)((physical + DEBUG_RD) >> 8));
+    /* Switchroot gk20a_finalize_poweron -> gm20b_fb_set_mmu_debug_mode(false):
+     * explicitly clear FB_MMU_DEBUG_CTRL.DEBUG (bit 16) rather than inheriting
+     * reset state, while preserving all non-debug fields.
+     */
+    {
+        uint32_t debug_ctrl = ex_read(io, 0x100cc4);
+        if (debug_ctrl == UINT32_MAX) return TG_GPU_EXEC_MMU_TIMEOUT;
+        ex_write(io, 0x100cc4, debug_ctrl & ~0x10000u);
+    }
     for (i = 0; i < 1000 && !(ex_read(io, 0x100c80) & 0x00ff0000); ++i)
         io->delay_us(io->context, 2);
     if (i == 1000) return TG_GPU_EXEC_MMU_TIMEOUT;
@@ -765,9 +774,21 @@ void tg_gpu_execute_stop(const struct tg_gpu_power_io *io, struct tg_gpu_executi
      */
     /* Stop FECS/GPCCS DMA too before the caller drains MC or frees the arena.
      * Their boot surface remains mapped until full GPU power retirement.
+     * Match Switchroot gk20a_gr_suspend before asserting MC PGRAPH reset:
+     * disable GR GPFIFO/semaphore access and mask local GR interrupt/exception
+     * enables only while GR is currently out of reset. Full stop/suspend/TDR
+     * still relies on MC reset, MC drain, CAR/PMC power-down and cold rebuild.
      */
+    uint32_t mc = ex_read(io, 0x200);
+    if (s->gr_owned && mc != UINT32_MAX && (mc & 0x18001000u) == 0x18001000u) {
+        ex_write(io, 0x400500, 0);
+        ex_write(io, 0x40013c, 0);
+        ex_write(io, 0x400138, 0);
+        ex_write(io, 0x400130, 0);
+        ex_write(io, 0x400134, 0);
+    }
     uint32_t reset=(s->gr_owned ? 0x18001100u : 0x100u) | (s->acr_owned ? 0x2000u : 0) | s->ce_reset_mask;
-    ex_write(io, 0x200, ex_read(io, 0x200) & ~reset);
+    if (mc != UINT32_MAX) ex_write(io, 0x200, mc & ~reset);
     io->delay_us(io->context, 20);
     s->gr_owned = false;
     s->acr_owned = false;

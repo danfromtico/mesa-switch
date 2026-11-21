@@ -16,6 +16,8 @@ struct fifo_model {
     bool bad_ltc, flush_timeout, niso, bar1, bad_bar1_write, bar1_dirty, l2_timeout;
     unsigned fb_flushes, l2_flushes, l2_invalidations;
     uint32_t gr_access, gr_gate[2];
+    uint32_t fb_debug_ctrl, gr_intr_en, gr_exc_en[3];
+    unsigned fb_debug_writes, gr_suspend_writes;
     bool fail_gr_enable;
     bool engine_event, stuck_event, late_pb_fault;
     bool secure, valid_pbdma;
@@ -73,6 +75,11 @@ static uint32_t read32(void *context, uint32_t address)
     if (address == 0x5700262c) assert(!"RUNLIST_FAULT is not FIFO_INTR_SCHED_ERROR");
     if (address == 0x57040148 && m->hce_fault && m->runlist && !(m->sched & 1)) return 8;
     if (address == 0x57100c80 && m->allow_mmu) return 0x18000;
+    if (address == 0x57100cc4) return m->fb_debug_ctrl;
+    if (address == 0x5740013c) return m->gr_intr_en;
+    if (address == 0x57400138) return m->gr_exc_en[0];
+    if (address == 0x57400130) return m->gr_exc_en[1];
+    if (address == 0x57400134) return m->gr_exc_en[2];
     if (address == 0x57022454) return 1;
     if (address == 0x5712006c) return m->bad_ltc ? 0 : 1;
     if (address == 0x57070000) return m->flush_timeout ? 3 : 0;
@@ -141,6 +148,19 @@ static void write32(void *context, uint32_t address, uint32_t value)
     } else if (address == 0x57400500) {
         assert(!m->runlist && !m->instance && (m->mc&0x18001000)==0x18001000);
         m->gr_access=value;
+        if (!value) ++m->gr_suspend_writes;
+    } else if (address == 0x5740013c || address == 0x57400138 ||
+               address == 0x57400130 || address == 0x57400134) {
+        assert((m->mc & 0x18001000) == 0x18001000 && !value && !m->gr_access);
+        if (address == 0x5740013c) m->gr_intr_en = value;
+        else if (address == 0x57400138) m->gr_exc_en[0] = value;
+        else if (address == 0x57400130) m->gr_exc_en[1] = value;
+        else m->gr_exc_en[2] = value;
+        ++m->gr_suspend_writes;
+    } else if (address == 0x57100cc4) {
+        assert(!(value & 0x10000u) && value == (m->fb_debug_ctrl & ~0x10000u));
+        m->fb_debug_ctrl = value;
+        ++m->fb_debug_writes;
     } else if (address == 0x5704013c) {
         m->stall = value;
     } else if (address == 0x5704010c) {
@@ -294,7 +314,10 @@ void test_execute_init(void)
 
     memset(&m,0,sizeof(m)); memset(&state,0,sizeof(state));
     m.runlist_map=1; m.allow_mmu=true; m.sched=0xa5; m.stall=UINT32_MAX;
+    m.fb_debug_ctrl=0x105a5u; m.gr_intr_en=0x003901f3u;
+    m.gr_exc_en[0]=m.gr_exc_en[1]=m.gr_exc_en[2]=UINT32_MAX;
     assert(tg_gpu_execute(&io,&power,arena,0xc0000000,NULL,&state,&result) == TG_GPU_EXEC_TIMEOUT);
+    assert(m.fb_debug_writes==1 && m.fb_debug_ctrl==0x5a5u);
     assert(state.stage == 4 && result.userd_gp_put == 1 && result.userd_gp_get == 0);
     assert(m.put == 1 && result.pbdma_gp_base == UINT32_MAX);
     assert(result.observed[0] == 0xdeadbeef && result.observed[1] == 0xdeadbeef);
@@ -331,15 +354,24 @@ void test_execute_init(void)
     state.ce_reset_mask=0x200000;m.mc|=state.ce_reset_mask;
     tg_gpu_execute_stop(&io,&state);
     assert(!(m.mc&0x200000) && !state.ce_reset_mask);
+    assert(m.gr_suspend_writes==5 && !m.gr_access && !m.gr_intr_en &&
+           !m.gr_exc_en[0] && !m.gr_exc_en[1] && !m.gr_exc_en[2]);
     assert(!m.pb && !m.runlist && !m.instance && !state.pbdma_owned);
     assert(m.sched == 0xa5);
+
+    memset(&m,0,sizeof(m));memset(&state,0,sizeof(state));memset(&result.frontend,0,sizeof(result.frontend));
+    m.runlist_map=1;m.allow_mmu=true;m.fb_debug_ctrl=UINT32_MAX;
+    assert(tg_gpu_execute(&io,&power,arena,0xc0000000,NULL,&state,&result)==TG_GPU_EXEC_MMU_TIMEOUT);
+    assert(state.stage==2 && !m.fb_debug_writes && !m.bar1 && !m.runlist);
+    tg_gpu_execute_stop(&io,&state);
+    assert(!m.gr_suspend_writes);
 
     memset(&m,0,sizeof(m));memset(&state,0,sizeof(state));memset(&result.frontend,0,sizeof(result.frontend));
     m.runlist_map=1;m.allow_mmu=true;m.fail_gr_enable=true;
     assert(tg_gpu_execute(&io,&power,arena,0xc0000000,NULL,&state,&result)==TG_GPU_EXEC_FRONTEND);
     assert(state.stage==7 && result.frontend.stage==10 && !m.runlist && !m.put && !m.instance);
     tg_gpu_execute_stop(&io,&state);
-    assert(!m.pb && !m.runlist && !m.instance);
+    assert(!m.pb && !m.runlist && !m.instance && !m.gr_suspend_writes);
 
     /* A secure GPU without a usable WPR must stop before firmware DMA,
      * channel binding or semaphore submission. Cleanup also resets PMU.
@@ -591,6 +623,8 @@ static void gr_model_reset(struct gr_timeout_model *m,uint32_t *userd,uint32_t *
     regs[0x120078/4]=1;regs[0x22430/4]=1;regs[0x22434/4]=2;
     regs[0x502608/4]=0x40002;regs[0x500c30/4]=3;
     regs[0x419f78/4]=0x00010bebu;regs[0x419e44/4]=0x00d3eff2u;
+    regs[0x100cc4/4]=0x10a5au;
+    regs[0x419a3c/4]=0x181eu;
     /* Upstream-documented hardware reset default (0x400), not live readback. */
     regs[0x122354/4]=0x400;regs[0x128328/4]=0x400;
 }
@@ -658,7 +692,11 @@ static void test_graphics_priv_timeouts(void)
     assert(m.priv_timeout_writes==2 && m.priv_timeout_order[0]==0x122354 &&
            m.priv_timeout_order[1]==0x128328);
     assert(m.regs[0x122354/4]==0x800 && m.regs[0x128328/4]==0x800);
+    assert(m.regs[0x100cc4/4]==0xa5au && m.regs[0x4188b0/4]==0xa5au);
+    assert(m.regs[0x419a3c/4]==0x180au);
     tg_gpu_execute_stop(&io,&state);
+    assert(!m.regs[0x400500/4] && !m.regs[0x40013c/4] && !m.regs[0x400138/4] &&
+           !m.regs[0x400130/4] && !m.regs[0x400134/4]);
 
     /* Post-stop reset/rebuild re-applies both 0x800 writes strictly before runlist,
      * scheduler enable (0x2630 &= ~1) and first GP_PUT doorbell release.
@@ -668,7 +706,11 @@ static void test_graphics_priv_timeouts(void)
     assert(tg_gpu_execute_3d(&io,&power,arena,0xc0000000,&fw,&work,&state,&status)==TG_GPU_EXEC_TIMEOUT);
     assert(m.priv_timeout_writes==2 && m.runlist_submits==1 && m.sched_releases==1 && m.put==1);
     assert(m.regs[0x122354/4]==0x800 && m.regs[0x128328/4]==0x800);
+    assert(m.regs[0x100cc4/4]==0xa5au && m.regs[0x4188b0/4]==0xa5au);
+    assert(m.regs[0x419a3c/4]==0x180au);
     tg_gpu_execute_stop(&io,&state);
+    assert(!m.regs[0x400500/4] && !m.regs[0x40013c/4] && !m.regs[0x400138/4] &&
+           !m.regs[0x400130/4] && !m.regs[0x400134/4]);
 
     free(m.regs);free(work_buf);
 }

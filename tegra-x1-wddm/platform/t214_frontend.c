@@ -54,6 +54,27 @@ void tg_gpu_frontend_snapshot(const struct tg_gpu_power_io *io,
         ((s->bus_interrupt & 0xe) || (s->pri_status0 & 0x107) || s->pri_status1))
         s->result = TG_GPU_FE_PRI_FAULT;
 }
+void tg_gpu_frontend_pri_timeout_snapshot(const struct tg_gpu_power_io *io,
+    uint32_t bus_interrupt, struct tg_gpu_pri_timeout_snapshot *s)
+{
+    if (!s) return;
+    *s = (struct tg_gpu_pri_timeout_snapshot){0};
+    if (!io || !io->read32 || bus_interrupt == UINT32_MAX || !(bus_interrupt & 0xeu))
+        return;
+    s->bus_interrupt = bus_interrupt;
+    /* Read-only observation matching Switchroot gk20a_bus_isr ->
+     * gk20a_ptimer_isr (0x9084, 0x9088, conditional 0x908c). Upstream clears
+     * 0x9084/0x9088 only after its ISR finishes; never clear them here or
+     * during cold startup.
+     */
+    s->save0 = get(io, 0x9084);
+    s->save1 = get(io, 0x9088);
+    s->valid = 1;
+    if (s->save0 != UINT32_MAX && (s->save0 & 0x80000000u)) {
+        s->fecs_errcode = get(io, 0x908c);
+        s->fecs_valid = 1;
+    }
+}
 static enum tg_gpu_frontend_result finish(const struct tg_gpu_power_io *io,
     struct tg_gpu_frontend_status *s, enum tg_gpu_frontend_result result)
 {

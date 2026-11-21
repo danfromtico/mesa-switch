@@ -11,12 +11,13 @@ static uint32_t fault_on;
 static unsigned l2_flushes, l2_invalidations;
 static uint32_t fail_l2;
 static uint32_t ignore_write;
-static unsigned ce_delays;
+static unsigned ce_delays, pri_timeout_reads;
 static uint32_t read32(void *ctx, uint32_t address)
 {
     uint32_t reg = address - 0x57000000;
     (void)ctx;
     assert(address >= 0x57000000 && reg < sizeof(regs));
+    if (reg == 0x9084 || reg == 0x9088 || reg == 0x908c) ++pri_timeout_reads;
     if (reg == 0x70000) {
         if (fail_flush == flushes && flushes) return 3;
         if (busy_reads) { --busy_reads; return 3; }
@@ -31,6 +32,7 @@ static void write32(void *ctx, uint32_t address, uint32_t value)
     (void)ctx;
     assert(address >= 0x57000000 && reg < sizeof(regs));
     assert(reg != 0x100d1c && reg != 0x21434);
+    assert(reg != 0x9084 && reg != 0x9088 && reg != 0x908c); /* never clear PRI timeout latches */
     ++writes;
     if (reg == ignore_write) return;
     if (reg == 0x106f28) assert((regs[0x200/4]&0x200000) && ce_delays==1 && value==0x7fe);
@@ -65,7 +67,7 @@ static void reset(void)
     fault_on = UINT32_MAX;
     ignore_write = UINT32_MAX;
     fail_l2 = l2_flushes = l2_invalidations = 0;
-    ce_delays=0;
+    ce_delays = pri_timeout_reads = 0;
     regs[0x22454 / 4] = regs[0x12006c / 4] = 1;
     regs[0x21434 / 4] = 1;
     regs[0x140518 / 4] = 0xa0;
@@ -158,6 +160,30 @@ int main(void)
             assert(ce_delays==1 && regs[0x106f28/4]==0x7fe && !irq_masked && !secure_writes);
         } else if (test<4) assert(!writes && !ce_mask && !ce_delays);
         else assert(ce_mask==0x200000 && ce_delays==1 && s.stage==13);
+    }
+    /* Non-destructive PBUS-gated read-only observation of 0x9084/0x9088/0x908c. */
+    {
+        struct tg_gpu_pri_timeout_snapshot p;
+        reset();
+        regs[0x9084/4] = 0x12345678u;
+        regs[0x9088/4] = 0x89abcdefu;
+        regs[0x908c/4] = 0xdead0001u;
+        tg_gpu_frontend_pri_timeout_snapshot(&io, 0, &p);
+        assert(!p.valid && !p.fecs_valid && !pri_timeout_reads && !writes);
+        tg_gpu_frontend_pri_timeout_snapshot(&io, UINT32_MAX, &p);
+        assert(!p.valid && !p.fecs_valid && !pri_timeout_reads && !writes);
+        tg_gpu_frontend_pri_timeout_snapshot(&io, 0x8u, &p);
+        assert(p.valid && !p.fecs_valid && p.bus_interrupt == 0x8u);
+        assert(p.save0 == 0x12345678u && p.save1 == 0x89abcdefu && !p.fecs_errcode);
+        assert(pri_timeout_reads == 2 && !writes);
+        assert(regs[0x9084/4] == 0x12345678u && regs[0x9088/4] == 0x89abcdefu);
+        regs[0x9084/4] = 0x80400100u; /* bit 31 FECS_TGT set */
+        pri_timeout_reads = 0;
+        tg_gpu_frontend_pri_timeout_snapshot(&io, 0x4u, &p);
+        assert(p.valid && p.fecs_valid && p.bus_interrupt == 0x4u);
+        assert(p.save0 == 0x80400100u && p.save1 == 0x89abcdefu && p.fecs_errcode == 0xdead0001u);
+        assert(pri_timeout_reads == 3 && !writes);
+        assert(regs[0x9084/4] == 0x80400100u && regs[0x9088/4] == 0x89abcdefu);
     }
     puts("PASS: cold frontend/GR/CE ordering, topology, secure policy, bounded cache flush and PRI faults (model only)");
     return 0;
