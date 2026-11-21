@@ -1,0 +1,78 @@
+{
+  "fault": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+  "comparison": {
+    "finding": "OLED and Lite share a symptom of a GPU/display stall during multi-context activity. The startup trigger and a common root cause are unproven. Lite first Present succeeded. Its last unresolved scheduler DMA was 152586. Keep the fault open.",
+    "classification": "Weak symptom-level association only",
+    "same_trigger_proven": false,
+    "same_root_cause_proven": false,
+    "scope": "Retrospective comparison of retained receipts. No additional physical round.",
+    "missing": "OLED per-context submission, preemption and fence completion correlated across the two processes, plus Lite evidence of KMD or hardware acceptance, completion or reset for DMA 152586."
+  },
+  "oled": {
+    "sources": {
+      "docs/notes-for-mesa-switch-woa.md": {
+        "url": "https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/docs/notes-for-mesa-switch-woa.md#L32-L67",
+        "sha256": "c702dd2ff81d9fdf83db7900f21ebde6edc4dec6d4106dae8821b395d89e5779"
+      },
+      "README.md": {
+        "url": "https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/README.md#L538-L581",
+        "sha256": "a447f33bc55ee52f1060c531999e796a593dd9fff01c9de79da3b65e7ee45b26"
+      }
+    },
+    "startup": "The .202 controlled series reported three hangs in five switches without a delay and five successful starts in five with a delayed shell. The reported sequence includes four DWM presents followed by Explorer opening its device and both contexts submitting. Trials 4 and 7 are identifiers in the early series.",
+    "session_load": "Opening Task Manager coincided with one hang. Another trial ran Task Manager and Firefox/video for over ten minutes. A separate .203 GPU-bridge trial hung under load at about ten minutes.",
+    "logging": "Author describes a hard lock requiring power-off, no bugcheck or dump, and no logged driver error explaining the stall. The unsaved end of the trace is unknown."
+  },
+  "lite": {
+    "interrupted_boot": 91476,
+    "recovery_boot": 91557,
+    "selected_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "loaded_kmd_sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+    "etl_sha256": {
+      "app/display.etl": "b6026077eb2ea0707bfc30118ac5ffca819314ea8b4bb51debdd4434b3fb5fb8",
+      "app/scene/video.etl": "6ec11c2e135e3204048b85be09fc7e8b519465cc8b39fba51cdf3ec0fe9c5596"
+    },
+    "receipts": [
+      "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+      "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+      "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+      "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
+      "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json",
+      "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json"
+    ],
+    "observations": [
+      "On an established desktop the empty two-buffer SEQUENTIAL window retired its 52-byte copy. The first Present returned S_OK in 58.688 ms. DwmFlush and client release succeeded.",
+      "DWM DMA 48648, fence 152558, retired about 43.87 ms after the client returned. Completed fence 152584 belongs to a different zero-byte system packet.",
+      "After two preemptions DxgKrnl logged the third submission of DWM queue packet 48660, DMA 152586. Signal and wait 24055 were queued. No matched KMD or hardware acceptance or retirement was retained. Successful submissions do not have a guaranteed KMD diagnostic on this baseline.",
+      "After DMA 152586 the two streams retained 0.126 ms and 9.423 ms respectively. A different healthy retry after two preemptions completed in 6.719 ms.",
+      "The next boot logged events 6008 and 41 with BugcheckCode zero. These establish an abnormal shutdown but do not locate its cause."
+    ]
+  },
+  "priv_timeout": {
+    "historical_signed_file": {
+      "Length": 243712,
+      "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+    },
+    "build_receipt": "tegra-x1-wddm/docs/NVDEC_1080_D3D11VA_20261117.json",
+    "base_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "implementation_commit": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+    "build_patch_sha256": "056cf4b048926d7868f71de1c174e4b3fd5ccfa65475a1467add2b72c9294171",
+    "frontend_path": "tegra-x1-wddm/platform/t214_frontend.c",
+    "frontend_sha256_by_revision": {
+      "4dd80c7920991d51462fc5ce1f120b4e2a23206a": "7fb1f9baa27fff2434035f565bede122830ea052405df18c1cd2d7ae582b3ae0",
+      "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9": "7fb1f9baa27fff2434035f565bede122830ea052405df18c1cd2d7ae582b3ae0",
+      "c137ce757b055557cff4b70068e8e2500dd92962": "7fb1f9baa27fff2434035f565bede122830ea052405df18c1cd2d7ae582b3ae0"
+    },
+    "finding": "The historical KMD build lineage and selected baseline share the frontend priv-ring enable sequence. Neither implements the two station master timeout writes in gm20b_priv_set_timeout_settings (SYS 0x122354 and GPC 0x128328 to 0x800). This is a source/build provenance check. The historical signed machine code was not separately disassembled.",
+    "external_control": "The OLED author describes adding both writes in .204 and still seeing a startup hang on the second undelayed trial. This rules out the missing writes as a sufficient explanation or standalone cure. No timeout follow-up is assigned."
+  },
+  "review": {
+    "model": "gemini-4-neon-xhigh",
+    "effort": "xhigh",
+    "response_sha256": [
+      "5839744236eb15a9fbe361f43143934ee0f920b5f45287d472fd689ae66a97f3",
+      "36a0e6aff4a56698f8e515a52ecb9aeb6a84774c99804f00c3650eb333a0dbc2"
+    ]
+  }
+}
