@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "scope": "Switch Lite public UpdateLayeredWindow and DirectComposition CreateSurfaceFromHwnd on the selected native GM20B desktop",
+  "wddm": "2.6",
+  "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "official_components": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "cases": [
+    {
+      "case": "layered-dcomp-main-90482",
+      "boot": 90482,
+      "same_dwm_pid": 1396,
+      "same_dwm_start": true,
+      "ac": "Online",
+      "gpu_code": 0,
+      "client_exit": 1,
+      "passed": false,
+      "client_source_sha256": "d760de400b2cf4b3c3066d5eea1ce69fa6885af3cafde6c7bc00f34322c5a88b",
+      "case_files_sha256": {
+        "Board-Case.ps1": "4ff970d1da30af9e0877af62e44eaca517bcececef515d7422d6cbce911ed6d1",
+        "gdi-import.exe": "fe4f67e0daa7391b11d5b51b023c602dbb36f5a2074204af98d7adc3809d1891",
+        "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+        "os-trace.exe": "74fe4467f1b83b0bc25267750888a67b87be52ad414b1880507e49cbcf9ae23a"
+      },
+      "dxgkrnl_build": "10.0.22621.2792 (WinBuild.160101.0800)",
+      "adapter_luid": "0000000000005b6b",
+      "native_umd_and_nvk_modules_verified": true,
+      "hardware_device": "ADAPTER luid=0000000000005b6b vendor=414f5753 device=31304630 software=0",
+      "d3d11_feature_level": "11_0",
+      "image_size": [
+        257,
+        119
+      ],
+      "layered_solo_pixels": "LAYERED_ONLY pixels=29095 expected=29095",
+      "layered_mirror_frames": [
+        {
+          "frame": 0,
+          "source_pixels": 29095,
+          "mirror_pixels": 29095,
+          "expected_per_window": 29095,
+          "dib_pitch": 1028
+        }
+      ],
+      "input": "INPUT keys_sent=2 F8_received=0",
+      "normal_exit": false,
+      "windows_closed": true,
+      "forced_cleanup": false,
+      "owned_test_files_removed": true,
+      "archive_sha256": "9c1b834ea85f3b6770140ec527c8521f61acb4c048b0fe9ad52eb2b8370474cc",
+      "raw_etl_sha256": "3a35db3668b84570cac835be3dca12f1eb99d02e78e98c01da318ebfaaae2a45",
+      "trace_quality": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      },
+      "stop": "ETW status=0 lost=0 lost_buffers=0 written=180",
+      "production_umd_events": {
+        "client/1": 1,
+        "client/2": 1,
+        "client/3": 1,
+        "client/4": 1,
+        "client/5": 1,
+        "dwm/6": 6541,
+        "dwm/9": 1,
+        "dwm/30": 1319,
+        "other/1": 4,
+        "other/2": 4,
+        "other/3": 4,
+        "other/4": 4,
+        "other/6": 1096,
+        "other/20": 15,
+        "other/30": 897
+      },
+      "cdd_event_287_total": 0,
+      "production_umd_event_9_total": 1,
+      "production_umd_event_9_during_windows": 0,
+      "production_umd_event_34_total": 0
+    },
+    {
+      "case": "layered-owned-input-main-90482",
+      "boot": 90482,
+      "same_dwm_pid": 1396,
+      "same_dwm_start": true,
+      "ac": "Online",
+      "gpu_code": 0,
+      "client_exit": 0,
+      "passed": true,
+      "client_source_sha256": "840c20a5cb09f3fc1430cb332a1d069aaf99c7bd70bdfda8b0f567a58e01afe4",
+      "case_files_sha256": {
+        "Board-Case.ps1": "4ff970d1da30af9e0877af62e44eaca517bcececef515d7422d6cbce911ed6d1",
+        "gdi-import.exe": "0c4d5073aa3b8e403827bbb0bc94bcc099083878ca1e9787e9a8c5ea480a97cc",
+        "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+        "os-trace.exe": "74fe4467f1b83b0bc25267750888a67b87be52ad414b1880507e49cbcf9ae23a"
+      },
+      "dxgkrnl_build": "10.0.22621.2792 (WinBuild.160101.0800)",
+      "adapter_luid": "0000000000005b6b",
+      "native_umd_and_nvk_modules_verified": true,
+      "hardware_device": "ADAPTER luid=0000000000005b6b vendor=414f5753 device=31304630 software=0",
+      "d3d11_feature_level": "11_0",
+      "image_size": [
+        257,
+        119
+      ],
+      "layered_solo_pixels": "LAYERED_ONLY pixels=29095 expected=29095",
+      "layered_mirror_frames": [
+        {
+          "frame": 0,
+          "source_pixels": 29095,
+          "mirror_pixels": 29095,
+          "expected_per_window": 29095,
+          "dib_pitch": 1028
+        },
+        {
+          "frame": 1,
+          "source_pixels": 29095,
+          "mirror_pixels": 29095,
+          "expected_per_window": 29095,
+          "dib_pitch": 1028
+        }
+      ],
+      "input": "INPUT keys_sent=2 F8_received=1 F8_released=1 source_focused=1",
+      "normal_exit": true,
+      "windows_closed": true,
+      "forced_cleanup": false,
+      "owned_test_files_removed": true,
+      "archive_sha256": "c48b21a05c1c4e793818d47b3273a2d57284aafa8b8641f5f0ff3f3863c32764",
+      "raw_etl_sha256": "420bc7e842a0d11ab7f5d926c8f88d6c936f61b8cfdc1799613c673a45277504",
+      "trace_quality": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      },
+      "stop": "ETW status=0 lost=0 lost_buffers=0 written=39",
+      "production_umd_events": {
+        "client/1": 1,
+        "client/2": 1,
+        "client/3": 1,
+        "client/4": 1,
+        "client/5": 1,
+        "dwm/6": 2866,
+        "dwm/30": 502,
+        "other/6": 153,
+        "other/20": 4,
+        "other/30": 144
+      },
+      "cdd_event_287_total": 0,
+      "production_umd_event_9_total": 0,
+      "production_umd_event_9_during_windows": 0,
+      "production_umd_event_34_total": 0
+    }
+  ],
+  "observations": {
+    "original_input": "The first client sent F8 and timed out before receiving it. Its frame 0 screen pixels were correct. A DWM OpenResource event occurred before WindowsBegin.",
+    "corrected_input": "The only client changes established source keyboard focus, populated the scan code, and waited for both real key messages. Two distinct RGB patterns matched in the source window and its mirror.",
+    "target_import": "Neither trace established a Windows-produced standard GDI allocation entering the GM20B production OpenResource handler with allocation-only data. The layered-window test passed. The import candidate remains unqualified.",
+    "other_coverage": "Earlier same-adapter production texture control carried 72 resource-private bytes. The WARP allocation-only texture was rejected on crossing adapters.",
+    "present1": "The process-level Present1 candidate was outside these cases."
+  },
+  "verified_client": {
+    "source": "tegra-x1-wddm/tools/gdi_layered_composition.cpp",
+    "usage": "Run in an interactive Windows desktop with the 16-hex-digit GM20B adapter LUID from that boot as its sole argument. The client checks the native DXGI adapter, captures visible test pixels, and closes both owned windows.",
+    "compiler": "aarch64-w64-mingw32-clang++",
+    "compiler_version": "clang version 23.1.5 (https://github.com/llvm/llvm-project.git 392dfff97d29b59d77e5cac6d4b6ef2585fe7117)",
+    "arguments": [
+      "-std=c++17",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-static",
+      "-municode",
+      "-DUNICODE",
+      "-D_UNICODE",
+      "gdi_layered_composition.cpp",
+      "-o",
+      "control.exe",
+      "-Wl,--no-insert-timestamp",
+      "-ld3d11",
+      "-ldxgi",
+      "-ldwmapi",
+      "-ldcomp",
+      "-lgdi32",
+      "-luser32",
+      "-luuid"
+    ],
+    "tested_unsigned_sha256": "656ea7950697e7fad9032daf3936bf3b401f5540268f5326a3535cd081aa0b3a",
+    "standalone_build_unsigned_sha256": "656ea7950697e7fad9032daf3936bf3b401f5540268f5326a3535cd081aa0b3a",
+    "source_sha256": "840c20a5cb09f3fc1430cb332a1d069aaf99c7bd70bdfda8b0f567a58e01afe4"
+  }
+}
