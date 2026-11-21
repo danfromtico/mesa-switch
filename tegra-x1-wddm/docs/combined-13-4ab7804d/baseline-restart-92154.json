@@ -1,0 +1,134 @@
+{
+  "previous_boot": 92083,
+  "observed_boot": 92154,
+  "baseline_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+  "components": {
+    "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "actual_loaded": {
+    "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+  },
+  "candidate_active": false,
+  "last_verified_previous": {
+    "utc": "2026-11-21T17:59:38.8509411Z",
+    "snapshot": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-live-seq-end.json",
+    "sha256": "c3979a5b228304aa31dd3dabf3a241199f6275538adfc8aefde7fb9a19e74b3a",
+    "cleanup": "已取回并清除正常完成的首次 Present 采集"
+  },
+  "current": {
+    "preflight": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/combined-13/preflight.json",
+    "sha256": "35e5c640e1a7e2e92c57cccbada004dcb0cac0598968299c39d91afec6c64f15",
+    "utc": "2026-11-21T18:31:22.3904757Z",
+    "external_power": "Online",
+    "gpu_code": 0,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+    "rollback": [
+      {
+        "dir": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_1dff321b509600c2",
+        "members": {
+          "fecs_sig.bin": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+          "gpccs.bin": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+          "NETB_img.bin": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+          "gpmu_ucode_image.bin": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699",
+          "pmu_sig.bin": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+          "tegragpuno3d.dll": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+          "tegragpurender.cat": "4b7a512aed608540ff272510f5450b21f07a1562801f69fa492c297daeb85635",
+          "fecs.bin": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+          "pmu_bl.bin": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+          "nv_acr_ucode_prod.bin": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+          "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+          "gpmu_ucode_desc.bin": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+          "tegragpurender.inf": "5c7d069d16b78ddb7ed4bf84f8a22a68fc6f1ab1d87af620c7b6250514ee558f"
+        },
+        "catalogs": [
+          {
+            "sha": "4b7a512aed608540ff272510f5450b21f07a1562801f69fa492c297daeb85635"
+          }
+        ]
+      }
+    ]
+  },
+  "system": [
+    {
+      "record": 92083,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-21T17:37:34.2055939Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>12</EventID><Version>0</Version><Level>4</Level><Task>1</Task><Opcode>0</Opcode><Keywords>0x8000000000000080</Keywords><TimeCreated SystemTime='2026-11-21T17:37:34.2055939Z'/><EventRecordID>92083</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='MajorVersion'>10</Data><Data Name='MinorVersion'>0</Data><Data Name='BuildVersion'>22621</Data><Data Name='QfeVersion'>2861</Data><Data Name='ServiceVersion'>0</Data><Data Name='BootMode'>0</Data><Data Name='StartTime'>2026-11-21T17:37:32.5249947Z</Data></EventData></Event>",
+      "id": 12
+    },
+    {
+      "record": 92147,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-21T17:40:31.0136587Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>1</EventID><Version>4</Version><Level>4</Level><Task>5</Task><Opcode>0</Opcode><Keywords>0x8000000000000010</Keywords><TimeCreated SystemTime='2026-11-21T17:40:31.0136587Z'/><EventRecordID>92147</EventRecordID><Correlation/><Execution ProcessID='5596' ThreadID='5676'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-19'/></System><EventData><Data Name='NewTime'>2026-11-21T17:40:31.0114046Z</Data><Data Name='OldTime'>2026-11-21T17:40:32.7287635Z</Data><Data Name='TimeDeltaInMs'>-1717</Data><Data Name='Reason'>1</Data><Data Name='ProcessName'>\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe</Data><Data Name='ProcessID'>5596</Data><Data Name='CmosTime'>2026-11-22T01:40:31.0114046Z</Data><Data Name='TimeZoneBias'>-480</Data><Data Name='RealTimeIsUniversal'>false</Data><Data Name='SystemInCmosMode'>false</Data></EventData></Event>",
+      "id": 1
+    },
+    {
+      "record": 92150,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-21T17:40:31.0353782Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>1</EventID><Version>4</Version><Level>4</Level><Task>5</Task><Opcode>0</Opcode><Keywords>0x8000000000000010</Keywords><TimeCreated SystemTime='2026-11-21T17:40:31.0353782Z'/><EventRecordID>92150</EventRecordID><Correlation/><Execution ProcessID='5596' ThreadID='5676'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-19'/></System><EventData><Data Name='NewTime'>2026-11-21T17:40:31.0333322Z</Data><Data Name='OldTime'>2026-11-21T17:40:31.0250611Z</Data><Data Name='TimeDeltaInMs'>8</Data><Data Name='Reason'>1</Data><Data Name='ProcessName'>\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe</Data><Data Name='ProcessID'>5596</Data><Data Name='CmosTime'>2026-11-22T01:40:31.0333322Z</Data><Data Name='TimeZoneBias'>-480</Data><Data Name='RealTimeIsUniversal'>false</Data><Data Name='SystemInCmosMode'>false</Data></EventData></Event>",
+      "id": 1
+    },
+    {
+      "record": 92152,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-21T17:40:48.6786359Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>1</EventID><Version>4</Version><Level>4</Level><Task>5</Task><Opcode>0</Opcode><Keywords>0x8000000000000010</Keywords><TimeCreated SystemTime='2026-11-21T17:40:48.6786359Z'/><EventRecordID>92152</EventRecordID><Correlation/><Execution ProcessID='5596' ThreadID='5676'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-19'/></System><EventData><Data Name='NewTime'>2026-11-21T17:40:48.6780870Z</Data><Data Name='OldTime'>2026-11-21T17:40:48.6729112Z</Data><Data Name='TimeDeltaInMs'>5</Data><Data Name='Reason'>1</Data><Data Name='ProcessName'>\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe</Data><Data Name='ProcessID'>5596</Data><Data Name='CmosTime'>2026-11-22T01:40:48.6780870Z</Data><Data Name='TimeZoneBias'>-480</Data><Data Name='RealTimeIsUniversal'>false</Data><Data Name='SystemInCmosMode'>false</Data></EventData></Event>",
+      "id": 1
+    },
+    {
+      "record": 92154,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-21T17:55:18.4821983Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>12</EventID><Version>0</Version><Level>4</Level><Task>1</Task><Opcode>0</Opcode><Keywords>0x8000000000000080</Keywords><TimeCreated SystemTime='2026-11-21T17:55:18.4821983Z'/><EventRecordID>92154</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='MajorVersion'>10</Data><Data Name='MinorVersion'>0</Data><Data Name='BuildVersion'>22621</Data><Data Name='QfeVersion'>2861</Data><Data Name='ServiceVersion'>0</Data><Data Name='BootMode'>0</Data><Data Name='StartTime'>2026-11-21T17:55:16.8088907Z</Data></EventData></Event>",
+      "id": 12
+    },
+    {
+      "record": 92163,
+      "provider": "EventLog",
+      "utc": "2026-11-21T18:06:53.1054612Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='EventLog'/><EventID Qualifiers='32768'>6008</EventID><Version>0</Version><Level>2</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x80000000000000</Keywords><TimeCreated SystemTime='2026-11-21T18:06:53.1054612Z'/><EventRecordID>92163</EventRecordID><Correlation/><Execution ProcessID='2016' ThreadID='1296'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security/></System><EventData><Data>2:03:28</Data><Data>‎2026/‎11/‎22</Data><Data></Data><Data></Data><Data>1535</Data><Data></Data><Data></Data><Binary>EA070B0000001600020003001C008802EA070B0006001500120003001C008802DC0500003C00000001000000DC050000010000001E00000001000000FFFFFFFF</Binary></EventData></Event>",
+      "id": 6008
+    },
+    {
+      "record": 92165,
+      "provider": "EventLog",
+      "utc": "2026-11-21T18:06:53.1088538Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='EventLog'/><EventID Qualifiers='32768'>6005</EventID><Version>0</Version><Level>4</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x80000000000000</Keywords><TimeCreated SystemTime='2026-11-21T18:06:53.1088538Z'/><EventRecordID>92165</EventRecordID><Correlation/><Execution ProcessID='2016' ThreadID='1296'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security/></System><EventData><Binary>EA070B000600150012000600350069000000000000000000</Binary></EventData></Event>",
+      "id": 6005
+    },
+    {
+      "record": 92172,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "utc": "2026-11-21T17:55:22.8602496Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-Power' Guid='{331c3b3a-2005-44c2-ac5e-77220c37d6b4}'/><EventID>41</EventID><Version>9</Version><Level>1</Level><Task>63</Task><Opcode>0</Opcode><Keywords>0x8000400000000002</Keywords><TimeCreated SystemTime='2026-11-21T17:55:22.8602496Z'/><EventRecordID>92172</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='BugcheckCode'>0</Data><Data Name='BugcheckParameter1'>0x0</Data><Data Name='BugcheckParameter2'>0x0</Data><Data Name='BugcheckParameter3'>0x0</Data><Data Name='BugcheckParameter4'>0x0</Data><Data Name='SleepInProgress'>0</Data><Data Name='PowerButtonTimestamp'>0</Data><Data Name='BootAppStatus'>0</Data><Data Name='Checkpoint'>0</Data><Data Name='ConnectedStandbyInProgress'>false</Data><Data Name='SystemSleepTransitionsToOn'>0</Data><Data Name='CsEntryScenarioInstanceId'>0</Data><Data Name='BugcheckInfoFromEFI'>false</Data><Data Name='CheckpointStatus'>0</Data><Data Name='CsEntryScenarioInstanceIdV2'>0</Data><Data Name='LongPowerButtonPressDetected'>false</Data><Data Name='LidReliability'>false</Data><Data Name='InputSuppressionState'>0</Data><Data Name='PowerButtonSuppressionState'>0</Data><Data Name='LidState'>3</Data></EventData></Event>",
+      "id": 41
+    },
+    {
+      "record": 92224,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-21T18:07:38.5985817Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>1</EventID><Version>4</Version><Level>4</Level><Task>5</Task><Opcode>0</Opcode><Keywords>0x8000000000000010</Keywords><TimeCreated SystemTime='2026-11-21T18:07:38.5985817Z'/><EventRecordID>92224</EventRecordID><Correlation/><Execution ProcessID='5732' ThreadID='5776'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-19'/></System><EventData><Data Name='NewTime'>2026-11-21T18:07:38.5971642Z</Data><Data Name='OldTime'>2026-11-21T18:07:38.5872085Z</Data><Data Name='TimeDeltaInMs'>9</Data><Data Name='Reason'>1</Data><Data Name='ProcessName'>\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe</Data><Data Name='ProcessID'>5732</Data><Data Name='CmosTime'>2026-11-22T02:07:38.5971642Z</Data><Data Name='TimeZoneBias'>-480</Data><Data Name='RealTimeIsUniversal'>false</Data><Data Name='SystemInCmosMode'>false</Data></EventData></Event>",
+      "id": 1
+    },
+    {
+      "record": 92228,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-21T18:08:01.2705178Z",
+      "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>1</EventID><Version>4</Version><Level>4</Level><Task>5</Task><Opcode>0</Opcode><Keywords>0x8000000000000010</Keywords><TimeCreated SystemTime='2026-11-21T18:08:01.2705178Z'/><EventRecordID>92228</EventRecordID><Correlation/><Execution ProcessID='7316' ThreadID='1256'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-19'/></System><EventData><Data Name='NewTime'>2026-11-21T18:08:01.2695694Z</Data><Data Name='OldTime'>2026-11-21T18:08:01.2629819Z</Data><Data Name='TimeDeltaInMs'>6</Data><Data Name='Reason'>1</Data><Data Name='ProcessName'>\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe</Data><Data Name='ProcessID'>7316</Data><Data Name='CmosTime'>2026-11-22T02:08:01.2695694Z</Data><Data Name='TimeZoneBias'>-480</Data><Data Name='RealTimeIsUniversal'>false</Data><Data Name='SystemInCmosMode'>false</Data></EventData></Event>",
+      "id": 1
+    }
+  ],
+  "observation": "Windows 6008 和 Kernel-Power 41 确认基线间隔出现非正常结束。41 的 BugcheckCode 为零。事件 12 的时间与上一开机末次回执有交叠，启动先后由 System 记录号和当前进程重新核对。无 1074、应用或候选触发证据。未解释重启发生于本次联合验收和候选上机前。"
+}

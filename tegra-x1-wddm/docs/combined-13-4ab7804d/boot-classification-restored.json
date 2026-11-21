@@ -1,0 +1,62 @@
+{
+  "complete": true,
+  "first_record": 92229,
+  "last_record": 92581,
+  "boot_records": [
+    92247,
+    92336,
+    92423,
+    92516
+  ],
+  "abnormal_events": [],
+  "restarts": [
+    {
+      "explained": true,
+      "kind": "controlled",
+      "boot_record": 92247,
+      "cause": "enter closed gate before selecting candidate",
+      "system_records": [
+        92230,
+        92247
+      ],
+      "evidence_file": "system-restored.json",
+      "evidence_sha256": "6a70ca82dd76e809e720a80a5e73f409cc94d4c03d70cf8b01cc1b70268ceadd"
+    },
+    {
+      "explained": true,
+      "kind": "controlled",
+      "boot_record": 92336,
+      "cause": "one-time candidate boot",
+      "system_records": [
+        92319,
+        92336
+      ],
+      "evidence_file": "system-restored.json",
+      "evidence_sha256": "6a70ca82dd76e809e720a80a5e73f409cc94d4c03d70cf8b01cc1b70268ceadd"
+    },
+    {
+      "explained": true,
+      "kind": "controlled",
+      "boot_record": 92423,
+      "cause": "close native gate for baseline restore",
+      "system_records": [
+        92406,
+        92423
+      ],
+      "evidence_file": "system-restored.json",
+      "evidence_sha256": "6a70ca82dd76e809e720a80a5e73f409cc94d4c03d70cf8b01cc1b70268ceadd"
+    },
+    {
+      "explained": true,
+      "kind": "controlled",
+      "boot_record": 92516,
+      "cause": "restore verified permanent baseline",
+      "system_records": [
+        92499,
+        92516
+      ],
+      "evidence_file": "system-restored.json",
+      "evidence_sha256": "6a70ca82dd76e809e720a80a5e73f409cc94d4c03d70cf8b01cc1b70268ceadd"
+    }
+  ]
+}

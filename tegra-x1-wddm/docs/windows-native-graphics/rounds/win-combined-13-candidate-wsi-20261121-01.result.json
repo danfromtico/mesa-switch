@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-candidate-wsi-20261121-01",
+  "contract_id": "WIN-COMBINED-13-CANDIDATE-WSI",
+  "windows_question": "WIN-COMBINED-13-CANDIDATE-WSI",
+  "plan_sha256": "1a378be4ef41dc2d72d7ecc7cf8f73c878db63f9bf847a5a8c2b98ccb4ad152b",
+  "status": "实机通过",
+  "finding": "candidate 启动 92336 的原生 NVK 640×360 Vulkan 窗口取得像素、Escape 和正常退出。",
+  "missing_observation": "具体表现按应用帧日志核对。生产包的 GDI 调用路线依赖独立观测。",
+  "device_executions": 1,
+  "evidence": {
+    "boundaries": {
+      "last_entry": "2026-11-21T19:05:09.0914769Z",
+      "last_return": "2026-11-21T19:05:34.8315965Z",
+      "first_anomaly_or_missing": "具体表现按应用帧日志核对。生产包的 GDI 调用路线依赖独立观测。"
+    },
+    "actual_before": {
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "dwm": 1444,
+      "boot": 92336,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+      "gpu_code": 0,
+      "power": "Online",
+      "dwm_start": "2026-11-21T19:01:34.3867526Z"
+    },
+    "actual_after": {
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "dwm": 1444,
+      "boot": 92336,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+      "gpu_code": 0,
+      "power": "Online",
+      "dwm_start": "2026-11-21T19:01:34.3867526Z"
+    },
+    "case": {
+      "passed": true,
+      "begin": "2026-11-21T19:05:09.0914769Z",
+      "before": {
+        "components": {
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1444,
+        "boot": 92336,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T19:01:34.3867526Z"
+      },
+      "luid": "0000000000005c5c",
+      "icd_template_sha256": "829706b27380ae3cc24ce89c85683d3c9377816e219d89e2ece8dd0242610bb3",
+      "icd_manifest": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17\\app\\nvk_windows_icd.json",
+      "icd_manifest_sha256": "829706b27380ae3cc24ce89c85683d3c9377816e219d89e2ece8dd0242610bb3",
+      "direct_dib_requested": false,
+      "pid": 8056,
+      "window_title": "Vulkan Cube",
+      "foreground": {
+        "passed": true,
+        "frequency": 19200000,
+        "pid": 8056,
+        "before": {
+          "boot": 92336,
+          "dwm": 1444,
+          "dwm_start_ticks": 639308844943867526,
+          "session": 1,
+          "power": "Online",
+          "gpu_code": 0
+        },
+        "window": {
+          "hwnd": 196862,
+          "width": 640,
+          "height": 360,
+          "monitor": {
+            "device": "\\\\.\\DISPLAY1",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "desktop_hz": 60,
+        "architecture": {
+          "native_machine": "0xaa64",
+          "image_machine": "0xaa64",
+          "wow64_machine": "0x0000"
+        },
+        "process_start_ticks": 639308847139807976,
+        "app": {
+          "sha256": "f3c7d43fa1c85b73807b7029ca03cdfd15edee6f95b9b36c9cbfee16bd2df4b9",
+          "path": "C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\SwitchForeground-b78b97139083\\vkcube.exe"
+        },
+        "modules": [
+          {
+            "name": "libvulkan_nouveau.dll",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17\\app\\libvulkan_nouveau.dll",
+            "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+          },
+          {
+            "name": "tg_nvk_arm64.DLL",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17\\app\\tg_nvk_arm64.DLL",
+            "sha256": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+          },
+          {
+            "name": "dxgi.dll",
+            "path": "C:\\Windows\\system32\\dxgi.dll",
+            "sha256": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0"
+          },
+          {
+            "name": "vulkan-1.dll",
+            "path": "C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\SwitchForeground-b78b97139083\\vulkan-1.dll",
+            "sha256": "d522870c1a11a11d5a61533ad9a959772b00cf10adc58966cee54c2ddad81cb9"
+          }
+        ],
+        "from_qpc": 5043783489,
+        "to_qpc": 5274804551,
+        "after": {
+          "boot": 92336,
+          "dwm": 1444,
+          "dwm_start_ticks": 639308844943867526,
+          "session": 1,
+          "power": "Online",
+          "gpu_code": 0
+        }
+      },
+      "capture_omitted": true,
+      "client_exit": 0,
+      "input_and_output": {
+        "later": "43cc68ef0c3526564e0457efd064d9dfdc24ae4ece4205e8212de7401cbb9210",
+        "before": "1442d7b11b8fdaca66ff7cd8fa4b4d0ee425224290d9bfb0b929998944631130",
+        "foreground_escape_delivered": true,
+        "animated_output": true
+      },
+      "after": {
+        "components": {
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1444,
+        "boot": 92336,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T19:01:34.3867526Z"
+      },
+      "end": "2026-11-21T19:05:34.8315965Z"
+    },
+    "analysis": {
+      "foreground_sha256": "0ea05951fd7302c563aa2e4a089b6fa2025d13eef9bacc87250296e942939513",
+      "app_present_journal": {
+        "foreground": {
+          "frames": 383,
+          "intervals": {
+            "samples": 382,
+            "median_ms": 32.9096,
+            "p95_ms": 35.4463,
+            "p99_ms": 45.0365,
+            "max_ms": 49.6167
+          },
+          "fps": 31.9563,
+          "call_time": {
+            "samples": 383,
+            "median_ms": 31.9608,
+            "p95_ms": 34.34,
+            "p99_ms": 43.8951,
+            "max_ms": 48.7749
+          }
+        },
+        "during_capture": null,
+        "journal_sha256": "b7d3efb67b60189f1b6128252ffbe9543b5fbadd5a9a3b925053b43633fdd217"
+      },
+      "analysis_quality": {
+        "complete": false,
+        "omitted": true,
+        "lost_events": 0,
+        "lost_buffers": 0
+      }
+    },
+    "collection": {
+      "sha256": "dbee6a79a794e27c3551de67212b43967192b6bb5e9d8912e60151deaf653894",
+      "boot": 92336,
+      "bytes": 368191
+    },
+    "archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/nvk-gdi-perf-01a1fc19/runs/win-combined-13-candidate-wsi-20261121-01/collected.zip",
+      "sha256": "dbee6a79a794e27c3551de67212b43967192b6bb5e9d8912e60151deaf653894"
+    },
+    "cleanup": {
+      "owned_case_removed": true
+    }
+  }
+}

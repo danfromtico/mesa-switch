@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-candidate-native720-20261121-02",
+  "contract_id": "WIN-COMBINED-13-CANDIDATE-NATIVE720",
+  "windows_question": "WIN-COMBINED-13-CANDIDATE-NATIVE720",
+  "owner": "Windows 图形、进程退出观察者及 GM20B",
+  "question": "同一签名 720p 解码夹具在原生 NVDEC 上是否得出六帧参考哈希、正常结束并回到同桌面？",
+  "method": "同一次板端 720p 的归档复核",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289"
+    },
+    "driver_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+      "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+    }
+  },
+  "pass_condition": "原生 KMT NVDEC 720p、硬件 syncpoint、六帧 NV12 哈希和子进程退出回执。如无底层路线观测则注明。",
+  "observations": [
+    "从已回收并清理的原始包逐项核对。",
+    "按整数 POC 排序，检查预先固定的六帧参考值及每次原生提交、退场和桌面身份。"
+  ],
+  "inputs": {
+    "original": {
+      "path": "windows-native-graphics/rounds/win-combined-13-candidate-native720-20261121-01.result.json",
+      "sha256": "d41aa17aae051c112101a8b08b9d799e2fdc25a056db2a915bb6f5bc78a831dc"
+    },
+    "archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/combined-13/runs/win-combined-13-candidate-native720-20261121-01/collected.zip",
+      "sha256": "4c35dcc5d0a40b0721b0d9166937f1450608f7f35ea878485836153ff6845b81"
+    },
+    "software_reference": {
+      "path": "EMC_VOTE_DELIVERY_20261118.json",
+      "sha256": "ed696cc8822f42965841be31ee3a1fc23e2d8b7ed5fe275170897efd6307a4d3"
+    },
+    "review_script_sha256": "b591a62b7d3fd29d890c88d4d6982a4f7da150218a07f4cc93dcdb82df7654f9",
+    "boot": 92336
+  }
+}

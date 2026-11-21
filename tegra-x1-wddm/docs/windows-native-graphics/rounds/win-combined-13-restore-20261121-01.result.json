@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-restore-20261121-01",
+  "contract_id": "WIN-COMBINED-13-RESTORE",
+  "windows_question": "WIN-COMBINED-13-RESTORE",
+  "plan_sha256": "fa81f154c7584bfe4c5acda2a0b712726313e478d57ef46ae6e8fd7398444ded",
+  "status": "实机通过",
+  "finding": "启动 92516 恢复 7f626083 永久许可；七组件和实载模块与批准包吻合，GPU 为 Code 0。",
+  "missing_observation": "正式包已恢复。联合切换与回退的其他启动各自按事件登记。",
+  "device_executions": 1,
+  "evidence": {
+    "restoration": {
+      "boot": 92516,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0,
+      "baseline_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+      "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+      "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+      "components": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "loaded": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      }
+    },
+    "prior_baseline": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "cleanup": {
+      "controlled_task_removed": true,
+      "candidate_copy_removed": true,
+      "boot": 92516,
+      "approved": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+      "gpu_code": 0,
+      "driver": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+      "utc": "2026-11-21T19:20:07.4549758Z"
+    },
+    "system_log": {
+      "path": "combined-13-4ab7804d/boot-classification-restored.json",
+      "sha256": "c75fda1deca675f93015568caf935ad4132ec54287005980bd12bec7acc28798"
+    },
+    "result_summary": {
+      "path": "combined-13-4ab7804d/trial-summary.json",
+      "sha256": "1cf15b79291119c104ae49f4d4bf32ac296657729b6d03a7da2b04f2b91462ed"
+    },
+    "boundaries": {
+      "last_entry": "一次性许可退出后启动已核实的回退包",
+      "last_return": {
+        "boot": 92516,
+        "ac": "Online",
+        "mode": 1,
+        "code": 0,
+        "baseline_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+        "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+        "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+        "components": {
+          "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "loaded": {
+          "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        }
+      },
+      "first_anomaly_or_missing": "正式包已恢复。联合切换与回退的其他启动各自按事件登记。"
+    }
+  }
+}

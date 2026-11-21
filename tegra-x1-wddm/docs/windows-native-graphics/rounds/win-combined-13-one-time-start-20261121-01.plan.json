@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-one-time-start-20261121-01",
+  "contract_id": "WIN-COMBINED-13-ONE-TIME-START",
+  "windows_question": "WIN-COMBINED-13-ONE-TIME-START",
+  "owner": "签名驱动包、Windows PnP、开机许可和 DWM",
+  "question": "联合候选两项变化能否经闭门切换及一次性许可，在外接电源上进入实载七组件的 Code 0 桌面？",
+  "method": "核验双组件联合包与回退包，闭门切换并发出一次性启动许可",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289"
+    },
+    "driver_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+      "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+    }
+  },
+  "pass_condition": "受控启动、Code 0、不持有永久许可、一次性令牌已消费，活动内核、DWM 和真实 NVK 对应候选包。",
+  "observations": [
+    "签名 KMD、INF、目录成员和 NVK 叶片；仅并置暂存，随后核对正式许可未变化。",
+    "先撤销永久许可，再进入受控闭门启动。一次性启动前核对令牌值为 1 且实际选择目录正确。",
+    "保留启动、PnP、实际哈希、交流手持和 Code 0。未知重启单独登记；候选未通过则恢复上次正式包。"
+  ],
+  "inputs": {
+    "approved_base": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "preflight_sha256": "35e5c640e1a7e2e92c57cccbada004dcb0cac0598968299c39d91afec6c64f15",
+    "source": "4ab7804d0fe4bef4aa26ea1b6938ab0795a9312f",
+    "components": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "review_sha256": "bc66a6b261ddcf333a1f057924fc7ca7e1d57a8037b4f5056d47b2c88d529e96",
+    "scripts": {
+      "perf_preflight.py": "d445dccc0771deee108084a29313bda2ec28a9598c86c0f0a751253f7f842be4",
+      "catalog.py": "1fdd3828630f1095dc057a1ac4b6d3bbf89fe2c49bdc6d590d0d48182bfa1212",
+      "Stage-Profile.ps1": "3a7e3a8406bd08b8f7c8ef2d436603c1cd82d2b33bb53425e7e4e387c2d380a5",
+      "stage_profile.py": "0dd46b98a3d209aa05de5f7182dd4473f12c615739cb45e80ff27bd4143644dd",
+      "Cycle.ps1": "15e56d3f29f27362e42df8865b3bcc244475405647bc34e7ed493fab9d4de797",
+      "cycle.py": "02e5fb1f088f4de878f883fe37c48e822b386d982753b1c10cfa30eccd879905",
+      "planned_restart.py": "fc097c40d3c2e1ab23f606a2aa7a5e7bbf688b1490f67891124f0ab3ab784cf4",
+      "advance_to.py": "432758888868501509eb89455da53b9b2bb7d461a69d81e6b7022edbc0e04131",
+      "active_candidate_profile.py": "e13cd53bbec06c2dd96562177316ed243538f9628cb5ccbe8c37c0aefd5139da"
+    }
+  }
+}

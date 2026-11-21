@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-baseline-nvdec-20261121-04",
+  "contract_id": "WIN-COMBINED-13-BASELINE-NVDEC",
+  "windows_question": "WIN-COMBINED-13-BASELINE-NVDEC",
+  "plan_sha256": "6bbab9c30267baddaf86764cd1e6db886e9ca2774aac9ab575cf4183eb804d8b",
+  "status": "观测缺口",
+  "finding": "baseline decode 未通过，Native decoder exit 4 FAIL read exact 6-frame capture=0x80004005\n。",
+  "missing_observation": "保留最后可证实的启动号和应用回执，核对是否与故障事件相邻。",
+  "device_executions": 1,
+  "evidence": {
+    "boundaries": {
+      "last_entry": "2026-11-21T18:51:17.7951258Z",
+      "last_return": "2026-11-21T18:51:23.9720090Z",
+      "first_anomaly_or_missing": "保留最后可证实的启动号和应用回执，核对是否与故障事件相邻。"
+    },
+    "actual_before": {
+      "components": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "dwm": 1432,
+      "boot": 92154,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+      "gpu_code": 0,
+      "power": "Online",
+      "dwm_start": "2026-11-21T18:06:31.3659927Z"
+    },
+    "actual_after": {
+      "components": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "dwm": 1432,
+      "boot": 92154,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+      "gpu_code": 0,
+      "power": "Online",
+      "dwm_start": "2026-11-21T18:06:31.3659927Z"
+    },
+    "case": {
+      "passed": false,
+      "begin": "2026-11-21T18:51:17.7951258Z",
+      "mode": "decode-only",
+      "before": {
+        "components": {
+          "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1432,
+        "boot": 92154,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T18:06:31.3659927Z"
+      },
+      "luid": "0000000000005bcb",
+      "pid": 5768,
+      "client_exit": 4,
+      "early_stdout": "",
+      "early_stderr": "",
+      "after": {
+        "components": {
+          "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1432,
+        "boot": 92154,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T18:06:31.3659927Z"
+      },
+      "error": "Native decoder exit 4 FAIL read exact 6-frame capture=0x80004005\n",
+      "error_line": 75,
+      "end": "2026-11-21T18:51:23.9720090Z"
+    },
+    "analysis": {
+      "journal": {
+        "file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/combined-13/runs/win-combined-13-baseline-nvdec-20261121-04/evidence/scene/journal.txt",
+        "sha256": "a630affea30f0489d812e2440d4610fcac52c42d45164c51362fae1b9fa5e5c4",
+        "tail": [
+          "2728562 5372 ENTER wmain 00000000",
+          "2728578 5372 VERIFIED RuntimeQueueOptionSet 00000000",
+          "2728578 5372 CALL TraceCurrentProcess 00000000",
+          "2728593 5372 RETURN TraceCurrentProcess 00000000",
+          "2728625 5372 FAIL read exact 6-frame capture 80004005"
+        ]
+      },
+      "video_marker": [],
+      "parent_exit": {
+        "pid": 5768,
+        "utc": "2026-11-21T18:51:22.6423816Z",
+        "qpc": 52394130782,
+        "exit": 4
+      },
+      "video_etl": {
+        "file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/combined-13/runs/win-combined-13-baseline-nvdec-20261121-04/evidence/scene/video.etl",
+        "sha256": "85734fc4dedc1baf2f22e7d548d54bf9b94d6bde419d083d147f634b01492869"
+      }
+    },
+    "collection": {
+      "sha256": "e3fa3da5935dadaf66e085120499518a2949bd02f97d7fbf0b083a7a487addca",
+      "boot": 92154,
+      "bytes": 3671
+    },
+    "archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/combined-13/runs/win-combined-13-baseline-nvdec-20261121-04/collected.zip",
+      "sha256": "e3fa3da5935dadaf66e085120499518a2949bd02f97d7fbf0b083a7a487addca"
+    },
+    "cleanup": {
+      "owned_case_removed": true
+    }
+  }
+}

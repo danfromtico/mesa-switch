@@ -2,6 +2,16 @@
 
 ## 当前工作 · Windows ARM64 本机验收
 
+### 13 组联合候选的一次性实机验收
+
+签名 KMD `69ba174ebe17` 和 ARM64 NVK `a143bee5ba42` 随源码 `4ab7804d` 在交流、手持的单次许可启动 `92336` 实载，GPU Code 0。原生 720p 的六次 KMT NVDEC 提交、六个 Host1x 同步点与六帧软件参考吻合，子进程正常退出并回到同一 DWM。板端包装器误排 POC，已用原始归档按整数重核，留存初次判定及订正回执。[本轮及 13 组逐项覆盖](combined-13-4ab7804d/trial-summary.json) · [720p 原始归档复核](windows-native-graphics/rounds/win-combined-13-candidate-native720-20261121-02.result.json)
+
+同一 640×360 Vulkan 窗口的 12 秒测量，DIB OFF 为 383 帧，旧包 OFF 对照为 414 帧。DIB ON 简单裁剪两次分别为 283 和 423 帧，帧间隔 p95 为 113.11 和 35.52 ms。复杂裁剪前后均为 type 3，窗口动画、Escape、退出码 0 和同桌面通过。独立原生 API 夹具比对了直接提交与参考 blit 的像素。生产 NVK 进程逐帧的 GDI 调用路线仍缺独立观测。[DIB OFF](combined-13-4ab7804d/wsi.json) · [DIB ON 首轮](combined-13-4ab7804d/dib-on.json) · [DIB ON 复跑](combined-13-4ab7804d/dib-on-repeat.json) · [复杂裁剪](combined-13-4ab7804d/dib-complex.json)
+
+晋升检查因呈现相关开放故障拒绝该联合包，首个 Present 的历史根因保持开放。候选上机前的 `92083→92154` 有单独的 41/6008，已登记为原基线开放故障。[晋升检查](combined-13-4ab7804d/promotion-result.json) · [独立重启记录](combined-13-4ab7804d/baseline-restart-92154.json)
+
+受控回退后的启动 `92516` 已恢复 `7f626083` 的永久许可与 Code 0，七文件和实际加载 KMD、DWM 模块相符。本轮任务、试用包与令牌均已清理。[回退与清理](windows-native-graphics/rounds/win-combined-13-restore-20261121-01.result.json)
+
 现行 WDDM 2.6 源码 `7f626083`、实载签名 KMD `30331aa3cb57`。启动 92083 的原签名窗口首次 Present(1,0) 用时 14.302 ms，返回 S_OK。画面、输入、退出和桌面连续。DWM 同一 GM20B 节点 0 的 DMA 9652 / 队列序号 4444 有同线程 5063 进入与返回，以及同包中断、完成与退役。91476 的历史根因保持开放，91918→91989 是切换前独立故障。手持取证未覆盖 PL=1 高频。[现行基线回执](nvgpu-init-30331aa3cb57/permanent-boot.json) · [同轮原始证据与边界](windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json)
 
 应用自己的首笔 52 字节 Blt 在 92083 对应 DMA 9651。Windows 回执绑定调用、包装和同包完成。KMD 在完成前的 GPU 围栏快照仍为 observed 0、expected 3272，上一完成值 9650，随后同包完成。有效 GR/FECS 缓存在该采样时点为零。[应用 Blt 同包证据](windows-native-graphics/rounds/win-seq-application-blt-fence-20261121-01.result.json)
