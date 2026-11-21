@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-dma-arm64-fixture-20261121-01",
+  "contract_id": "WIN-KMD-DMA-ARM64-REHEARSAL",
+  "windows_question": "WIN-KMD-DMA-ARM64-REHEARSAL",
+  "owner": "Switch Windows ARM64、已批准的签名工具及 KMD 验证夹具",
+  "question": "本地候选的同号观测能否通过 Switch ARM64 原生队列夹具，并形成可验证的签名包？",
+  "method": "在正式基线下运行独立、受控替代的 ARM64 Windows 夹具及签名包预验收",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "当前正式基线仍生效，已签名的 ARM64 受控夹具原生通过，Inf2Cat/Signtool 验证 12 个成员并清理本次目录。",
+  "observations": [
+    "检查当前租约、永久许可、手持、交流和 Code 0，复核包和夹具身份。在本轮专用目录生成目录签名并逐成员验证。",
+    "以 ARM64 原生进程运行已签测试夹具，记录退出与原始输出。夹具使用内存替代的队列和 MMIO，不启动实际显卡工作负载。",
+    "保留设备前后快照、ZIP/EXE/SYS/CAT 哈希及输出，验证候选未安装，清理本轮文件。该模型结果不直接裁决真实 GPU 完成。"
+  ],
+  "inputs": {
+    "candidate_source": "942fd339482886a1696efcb9723cce77f7538702",
+    "signed_fixture_sha256": "3f0bd95a1649644c941959b3c4722f8f8cf58dd3ccff9faccac00675fae06d1d",
+    "signed_package_input_sha256": "bf0ace9be0ba5e18befe767f836a40e64687262c562f3a63197a8a4608820ac9",
+    "signed_candidate_sys_sha256": "ba56e4350720a262804e669787f7f431fd65e1b0250183266bc850122dcf2171",
+    "inf2cat_sha256": "b594728d38b271979367abc8060a971b8e42422738009be126710b1f5dd0fcbc",
+    "builder": {
+      "path": "windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json",
+      "sha256": "a4ff032913a06a45339456d38c595fd6e4b1c9c3ab839229fd1f09f06f05e5c3"
+    },
+    "control_script_sha256": "512384224a6f46280940e832e00bc14de0ea05075eabc14ab98a69a2ac638e10"
+  }
+}

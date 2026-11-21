@@ -1380,6 +1380,27 @@
         "win-kmd-dma-boundary-build-20261121-01"
       ],
       "latest_observation": "隔离候选已生成 ARM64 KMD。32 字节 ETW 事件从 DDI 进入依次覆盖实际准入、已有 GP_PUT 发布读回和 GPU 完成值匹配。x64 WDK 队列夹具通过同号时间顺序、拒绝准入、发布前失败及读回未完成的用例；ARM64 测试程序已构建。"
+    },
+    {
+      "id": "WIN-KMD-DMA-ARM64-REHEARSAL",
+      "priority": "P0",
+      "owner": "Switch Windows ARM64、已批准的签名工具及 KMD 验证夹具",
+      "question": "本地候选的同号观测能否通过 Switch ARM64 原生队列夹具，并形成可验证的签名包？",
+      "status": "实机通过",
+      "existing_observation": "ARM64 编译通过，x64 WDK 受控模型核对了同号事件与失败边界。",
+      "missing_observation": "此项覆盖 ARM64 原生模型和签名包。真实 KMD 准入、GP_PUT 与 GPU 完成信号仍需用已知正常负载配对，事故 152586 的观测缺口仍开放。",
+      "pass_condition": "当前正式基线仍生效，已签名的 ARM64 受控夹具原生通过，Inf2Cat/Signtool 验证 12 个成员并清理本次目录。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json",
+          "sha256": "a4ff032913a06a45339456d38c595fd6e4b1c9c3ab839229fd1f09f06f05e5c3"
+        }
+      ],
+      "windows_references": [],
+      "round_ids": [
+        "win-kmd-dma-arm64-fixture-20261121-01"
+      ],
+      "latest_observation": "Switch 启动 91557 上运行已签名 ARM64 队列夹具并以 0 退出。Inf2Cat 输出的新目录签名在 Switch 上验证有效，逐一核过 12 个文件。已清理临时目录，前后同启动、同 DWM、GPU Code 0，实载正式组件哈希一致。"
     }
   ],
   "rounds": [
@@ -2834,19 +2855,41 @@
         "first_anomaly_or_missing": "等待正常工作负载下实载候选哈希、Windows 和 KMD 同号完整回执，以及实机环境的实际事件留存。"
       },
       "finished_utc": "2026-11-21T15:58:51.114019+00:00"
+    },
+    {
+      "round_id": "win-kmd-dma-arm64-fixture-20261121-01",
+      "contract_id": "WIN-KMD-DMA-ARM64-REHEARSAL",
+      "windows_question": "WIN-KMD-DMA-ARM64-REHEARSAL",
+      "method": "在正式基线下运行独立、受控替代的 ARM64 Windows 夹具及签名包预验收",
+      "plan": "windows-native-graphics/rounds/win-kmd-dma-arm64-fixture-20261121-01.plan.json",
+      "plan_sha256": "0ce0593ee661cd24b21e755d041b64a17e6146ee286a9f487f2edbecda3edc6f",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T16:00:13.899564+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-kmd-dma-arm64-fixture-20261121-01.result.json",
+      "result_sha256": "0c2f3a9483521570190f1a78b500e126eb30a00a79b261beecde93c84a30e721",
+      "status": "实机通过",
+      "finding": "Switch 启动 91557 上运行已签名 ARM64 队列夹具并以 0 退出。Inf2Cat 输出的新目录签名在 Switch 上验证有效，逐一核过 12 个文件。已清理临时目录，前后同启动、同 DWM、GPU Code 0，实载正式组件哈希一致。",
+      "missing_observation": "此项覆盖 ARM64 原生模型和签名包。真实 KMD 准入、GP_PUT 与 GPU 完成信号仍需用已知正常负载配对，事故 152586 的观测缺口仍开放。",
+      "boundaries": {
+        "last_entry": "2026-11-21T16:00:50.3046463Z",
+        "last_return": 0,
+        "first_anomaly_or_missing": "尚缺正式许可下加载候选后，真实队列的 Windows、KMD 与设备回执。"
+      },
+      "finished_utc": "2026-11-21T16:01:22.393467+00:00"
     }
   ],
   "progress": {
-    "total": 33,
+    "total": 34,
     "by_status": {
-      "实机通过": 9,
+      "实机通过": 10,
       "观测缺口": 8,
       "已有实机通过": 7,
       "故障开放": 3,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 43,
+    "registered_rounds": 44,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -2870,6 +2913,7 @@
       "WIN-DWM-THIRD-KMD-BOUNDARY",
       "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
       "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+      "WIN-KMD-DMA-ARM64-REHEARSAL",
       "WIN-PRESENT-IMAGE",
       "WIN-OLD-RESET"
     ],
@@ -3005,7 +3049,17 @@
         "path": "windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json",
         "sha256": "a4ff032913a06a45339456d38c595fd6e4b1c9c3ab839229fd1f09f06f05e5c3"
       },
-      "candidate_calibration": "用已知正常公开负载配对 Windows 调度、同 LUID/上下文的 KMD 进入、准入、GP_PUT 读回与 GPU 完成标记。已构建的 ARM64 候选预留签名、实际加载及退出回执。单项校验继续独立于原重启的归因。"
+      "candidate_calibration": "Windows 已验证签名包及 ARM64 受控模型。真实观测仍需在一次性许可下校验候选实载哈希和新建原生上下文，以 Windows 433 的 KMD 句柄关联同 LUID、队列序号与提交围栏。先用已知正常 DXGI 或 NVK 用例。取证轮的状态与事故归因各自记录。",
+      "native_arm64_observer_fixture": {
+        "path": "windows-native-graphics/rounds/win-kmd-dma-arm64-fixture-20261121-01.result.json",
+        "sha256": "0c2f3a9483521570190f1a78b500e126eb30a00a79b261beecde93c84a30e721"
+      },
+      "signed_candidate_local": {
+        "source": "942fd339482886a1696efcb9723cce77f7538702",
+        "parent": "c137ce757b055557cff4b70068e8e2500dd92962",
+        "zip": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/calibration-signed-driver-package.zip",
+        "sha256": "8dccec59326d8c9da282ed0c1c1815ac4d22e6125866f593c7bef138782818cf"
+      }
     }
   },
   "cleanup": {

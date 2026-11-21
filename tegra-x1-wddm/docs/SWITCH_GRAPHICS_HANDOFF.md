@@ -74,6 +74,8 @@
 
 在固定基线的隔离工作树中生成了本地 ARM64 诊断包。按 ETW 关键字启用后，同一提交号可以记录进入、准入、GP_PUT 已发布并读回、GPU 完成值已匹配。x64 WDK 受控队列夹具通过，包含拒绝准入和发布前失败。下一轮须完成许可流程、实载身份与正常负载配对，之后才能采用其硬件观测。[候选构建与夹具回执](windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json)
 
+Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名及 12 个成员均经同机验证，本轮目录已清理，前后同一启动、DWM 1392、正式全哈希和 Code 0。签名诊断包保留本机，实载后的正常 GPU 提交配对仍待单轮验证。[原生夹具和签名包回执](windows-native-graphics/rounds/win-kmd-dma-arm64-fixture-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)
