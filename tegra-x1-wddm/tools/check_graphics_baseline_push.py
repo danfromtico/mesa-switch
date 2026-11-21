@@ -155,7 +155,7 @@ def retained_reports(commit):
     paths = {qualification}
     if selected.get("qualification_sha256"):
         data = json.loads(blob(commit, qualification))
-        reports = data["cases"] + data["system_log"]["restarts"]
+        reports = data["cases"] + data.get("baseline_cases", []) + data["system_log"]["restarts"]
         paths.update(str(PurePosixPath(qualification).parent / row["evidence_file"]) for row in reports)
     for comparison in ledger.get("baseline_comparisons", []):
         earlier = comparison["before_commit"]
