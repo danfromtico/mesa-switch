@@ -596,6 +596,10 @@ NTSTATUS TgGpuCaptureSoftwareWork(TG_GPU_CONTEXT_ENGINE *e,const DXGKARG_SUBMITC
     if((!c && !(a->Flags.ContextSwitch && !a->hContext)) || (c && c->Closing)) {
         KeReleaseSpinLock(&e->Lock,irql);return STATUS_INVALID_PARAMETER;
     }
+    if (a->Flags.Present && c && !c->Flags.GdiContext &&
+        (c->Flags.SystemContext || !c->Flags.VirtualAddressing || !c->Device->Process)) {
+        KeReleaseSpinLock(&e->Lock,irql);return STATUS_INVALID_PARAMETER;
+    }
     RtlZeroMemory(w,sizeof(*w));w->Engine=e;w->Software=TRUE;
     w->SubmissionFence=w->CompletionFence=a->SubmissionFenceId;
     KeReleaseSpinLock(&e->Lock,irql);return STATUS_SUCCESS;

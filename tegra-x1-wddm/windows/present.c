@@ -27,6 +27,8 @@ typedef struct {
     UINT Magic, Bytes;
     UINT64 GpuAddress;
 } WINDOW_COPY_BUFFER;
+/* Ordinary context private storage includes at least one queue entry. */
+C_ASSERT(sizeof(WINDOW_COPY_BUFFER) + TG_GPU_PRESENT_COPY_MAX_WORDS * sizeof(UINT) <= sizeof(TG_GPU_QUEUE_ENTRY));
 
 static struct tg_gpu_blit_rect blit_rect(RECT r)
 {

@@ -581,6 +581,7 @@ __declspec(noinline) static void TestWindowSizedPresent(TG_GPU_ADAPTER *adapter,
     if (ordinary) {
         CHECK((words[12]&7)==6); /* Non-pipelined, flushed CE write for subsequent CPU lock. */
         UINT used=(UINT)((UCHAR *)present.pDmaBufferPrivateData-(UCHAR *)&private_data);
+        CHECK(cc.ContextInfo.DmaBufferPrivateDataSize>=used);
         RtlZeroMemory(words,sizeof(words)); /* The encoding DDI has returned. */
         DXGKARG_SUBMITCOMMANDVIRTUAL submit={.hContext=cc.hContext,.Flags.Present=1,.SubmissionFenceId=23,
             .DmaBufferSize=sizeof(words),.DmaBufferVirtualAddress=request.DmaBufferGpuVirtualAddress,
@@ -601,6 +602,18 @@ __declspec(noinline) static void TestWindowSizedPresent(TG_GPU_ADAPTER *adapter,
         CHECK(entry->Owned && entry->Snapshot && !entry->Snapshot->HasIndirect && entry->Snapshot->Words[6]==destination);
         CHECK(entry->Work.SubmissionFence==23 && !entry->Work.CompletionReady && entry->Work.Context==cc.hContext);
         CHECK(TgGpuDdiDestroyContext(cc.hContext)==STATUS_DEVICE_BUSY);
+        /* Both scheduler no-ops must queue behind the real copy and must not
+         * retain or overwrite OS private data on this application context. */
+        for (UINT i=0;i<2;++i) {
+            submit.Flags.NullRendering=!i;
+            submit.DmaBufferSize=i?0:sizeof(words);
+            submit.SubmissionFenceId=24+i;
+            CHECK(TgGpuDdiSubmitCommandVirtual(engine,&submit)==STATUS_SUCCESS);
+            TG_GPU_QUEUE_ENTRY *marker=CONTAINING_RECORD(queue.Pending.Blink,TG_GPU_QUEUE_ENTRY,Link);
+            CHECK(marker!=entry && marker->Owned && marker->Work.Software && !marker->Work.Rejected &&
+                  marker->Work.SubmissionFence==24+i && !marker->Work.CompletionReady && !marker->Snapshot);
+            CHECK(((UCHAR *)&private_data)[0]==0 && queue.Pending.Flink==&entry->Link);
+        }
         CHECK(TgGpuResetWorkQueue(&queue,NULL,NULL,NULL)==STATUS_SUCCESS && TgGpuStopWorkQueue(&queue)==STATUS_SUCCESS);
         engine->UserdBar1Ready=saved_bar1;
         engine->HardwareOwner=NULL;
