@@ -122,6 +122,53 @@ Block 'a verified fix still needs independent evidence for every open fault' {As
 $scratch=Join-Path ([IO.Path]::GetTempPath()) ('switch-gate-'+[guid]::NewGuid().ToString('N'))
 $null=[IO.Directory]::CreateDirectory($scratch)
 try{
+    $priorFile=Join-Path $scratch 'previous-qualification.json'
+    $priorReport=Clone $e
+    $priorReport.source_commit=$verified.base_commit
+    $priorReport.components=$base.components
+    $priorReport.cases[0].evidence_sha256='8'*64
+    [IO.File]::WriteAllText($priorFile,($priorReport|ConvertTo-Json -Depth 12))
+    $previous=Clone $base
+    $previous.source_commit=$verified.base_commit
+    $previous.qualification_sha256=(Get-FileHash $priorFile).Hash.ToLowerInvariant()
+    $compared=Clone $registered
+    $compared.independent_qualifications=@()
+    $compared|Add-Member -NotePropertyName baseline_comparisons -NotePropertyValue @([pscustomobject]@{
+        evidence_sha256=$proof;before_commit='2'*40;previous_qualification_sha256=$previous.qualification_sha256;
+        previous_control_sha256=$priorReport.cases[0].evidence_sha256;inherited_faults=@($sampleFault.id)})
+    Assert-SwitchPromotion $compared $verified $proof $candidate $directory $previous $priorFile
+    Write-Output 'PASS verified driver fix with a previously working control and an inherited open fault'
+    $bad=Clone $compared;$bad.faults+=@($second)
+    Block 'a new fault was not inherited' {Assert-SwitchPromotion $bad $verified $proof $candidate $directory $previous $priorFile} 'New open fault'
+    $bad=Clone $compared;$bad.baseline_comparisons[0].previous_control_sha256='9'*64
+    Block 'previous control must belong to the accepted qualification' {Assert-SwitchPromotion $bad $verified $proof $candidate $directory $previous $priorFile} 'Missing working control'
+    $bad=Clone $previous;$bad.qualification_sha256='9'*64
+    Block 'unaccepted previous qualification' {Assert-SwitchPromotion $compared $verified $proof $candidate $directory $bad $priorFile} 'differs from the accepted'
+    Block 'unverified change cannot inherit faults' {Assert-SwitchPromotion $compared $e $proof $candidate $directory $previous $priorFile} 'requires a verified fix'
+    $bad=Clone $verified;$bad.system_log.abnormal_events=@([pscustomobject]@{id=41;record=111;boot_record=110})
+    Block 'inherited faults cannot mask a new restart' {Assert-SwitchPromotion $compared $bad $proof $candidate $directory $previous $priorFile} 'abnormal'
+    $bad=Clone $verified
+    $extra=Clone $boot;$extra.kind='diagnosed';$extra.boot_record=105;$extra.system_records=@(105);$extra|Add-Member -NotePropertyName fault_id -NotePropertyValue $repair.id
+    $bad.system_log.boot_records=@(105,110);$bad.system_log.restarts=@($extra,$boot)
+    Block 'diagnosed restart still blocks a no-regression comparison' {Assert-SwitchPromotion $compared $bad $proof $candidate $directory $previous $priorFile} 'abnormal candidate interval'
+    . (Join-Path $PolicyDirectory 'Baseline-Device.ps1')
+    $accepted=Clone $previous
+    $accepted.source_commit=$verified.source_commit;$accepted.qualification_sha256=$proof
+    $accepted.components=$candidate;$accepted.directory=$directory
+    $qualified=[pscustomobject]@{Data=$verified;Sha256=$proof}
+    $bookmark=[pscustomobject]@{first_record=200}
+    $events=@([pscustomobject]@{Id=1074;ProviderName='User32';RecordId=205},
+              [pscustomobject]@{Id=12;ProviderName='Microsoft-Windows-Kernel-General';RecordId=210})
+    $actual=Get-SwitchReactivationEvidence $accepted $qualified $bookmark $events 215
+    if($actual.trial.boot_record -ne 210 -or $actual.system_log.first_record -ne 200 -or $actual.system_log.last_record -ne 215 -or
+       $actual.system_log.abnormal_events.Count -or $actual.system_log.restarts[0].kind -ne 'controlled' -or
+       (Compare-Object @(205,210) @($actual.system_log.restarts[0].system_records))){throw 'Wrong later activation interval'}
+    $bad=Clone $accepted;$bad.qualification_sha256='a'*64
+    Block 'later activation requires the selected qualification' {Get-SwitchReactivationEvidence $bad $qualified $bookmark $events 215} 'exact repository-selected'
+    $abnormal=$events+@([pscustomobject]@{Id=6008;ProviderName='EventLog';RecordId=211})
+    Block 'later activation cannot accept an abnormal shutdown' {Get-SwitchReactivationEvidence $accepted $qualified $bookmark $abnormal 215} 'controlled restart'
+    Block 'later activation cannot use an earlier grant' {Get-SwitchReactivationEvidence $accepted $qualified ([pscustomobject]@{first_record=102}) $events 215} 'Invalid interval'
+    Write-Output 'PASS separate hardware qualification and actual reactivation boots'
     [IO.File]::WriteAllText((Join-Path $scratch 'case.json'),'test case record')
     [IO.File]::WriteAllText((Join-Path $scratch 'boot.json'),'test system record')
     $copy=Clone $e

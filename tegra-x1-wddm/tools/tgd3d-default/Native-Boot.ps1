@@ -89,10 +89,21 @@ try {
                 $e=Read-SwitchEvidence $Qualification
                 Assert-SwitchProfile $e.Data.components
                 $live=Get-SwitchInstalledProfile $Directory @($e.Data.components.PSObject.Properties.Name)
-                Assert-SwitchPromotion $ledger $e.Data $e.Sha256 $live $Directory
+                $priorFile=Join-Path ([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($Qualification))) 'previous-qualification.json'
+                Assert-SwitchPromotion $ledger $e.Data $e.Sha256 $live $Directory $previousApproved $priorFile
                 Assert-SwitchChangedComponentLoads $previousApproved.components $live $e.Data
                 Assert-SwitchCaseFiles $e.Data $Qualification
-                Assert-SwitchLiveTrial $policyRoot $Directory $live $e.Data $permit
+                $activation=$e.Data
+                $mark=Read-SwitchPolicyJson (Join-Path $policyRoot 'active-trial.json')
+                if ($mark.first_record -ne $e.Data.system_log.first_record) {
+                    $selectedProfile=Read-SwitchPolicyJson (Get-SwitchPolicyFile $policy 'graphics-baseline.json')
+                    $last=(Get-WinEvent -LogName System -MaxEvents 1 -ErrorAction Stop).RecordId
+                    if (!(Test-SwitchRecordId $mark.first_record) -or !(Test-SwitchRecordId $last)) { throw 'Missing live activation bookmark' }
+                    $filter="*[System[EventRecordID > $([long]$mark.first_record) and EventRecordID <= $([long]$last) and (EventID=12 or EventID=41 or EventID=6008 or EventID=1074)]]"
+                    $events=@(Get-WinEvent -LogName System -FilterXPath $filter -ErrorAction Stop)
+                    $activation=Get-SwitchReactivationEvidence $selectedProfile $e $mark $events $last
+                }
+                Assert-SwitchLiveTrial $policyRoot $Directory $live $activation $permit
                 $approval='QualifiedPromotion'
             }
         }elseif($Mode -eq 'Trial' -and $policy){
@@ -105,7 +116,7 @@ try {
         Initialize-SwitchGrantRename
         if($previousApproved -and $previousApproved.directory -ne $Directory){Save-SwitchRollbackProfile $policyRoot $previousApproved}
         if($approval -eq 'QualifiedPromotion'){
-            $nextAccepted=[pscustomobject]@{schema=1;source_commit=$e.Data.source_commit;directory=$Directory;components=$live;qualification=$e.Sha256;qualification_sha256=$e.Sha256;boot_record=$e.Data.trial.boot_record}
+            $nextAccepted=[pscustomobject]@{schema=1;source_commit=$e.Data.source_commit;directory=$Directory;components=$live;qualification=$e.Sha256;qualification_sha256=$e.Sha256;boot_record=$activation.trial.boot_record;qualification_boot_record=$e.Data.trial.boot_record}
         }else{$nextAccepted=$approved}
     }
     $renew=Get-ScheduledTask SwitchGpuRenewVerifiedBoot -ErrorAction SilentlyContinue
