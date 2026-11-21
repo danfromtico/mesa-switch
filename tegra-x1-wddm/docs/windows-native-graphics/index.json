@@ -544,6 +544,35 @@
       "latest_observation": "启动 91476 的正常原空窗口 PID/TID 5540/7812，收到 4 条实时 Windows 记录。其中 4 条与文件 ETL 逐字节匹配，控制端 fsync 后的 Windows ACK 验到进程仍存活。最长实测往返上界 47.022 ms，公开 RETURN 标记前已确认 0 条。"
     },
     {
+      "id": "WIN-KMT-PRE-RETURN-WITNESS",
+      "priority": "P0",
+      "owner": "Windows dxgkrnl、实时 ETW 消费端和控制端文件系统",
+      "question": "正式原空窗口在首次公开 RETURN 之前，哪个已归属的 Windows 内核 Blt 或 Present 事件能取得控制端落盘确认？",
+      "status": "观测缺口",
+      "existing_observation": "采用 40 ms 名义轮询时四条事件在进程存活期间已获控制端确认，该次所有消费者回调均晚于公开 RETURN。诊断启动 86815 的 166 早于 KMD 入口 29.635 µs。",
+      "missing_observation": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。",
+      "pass_condition": "经独立文件 ETL 核对的同线程内核 166 或 184，控制端 fsync 后的 Windows ACK 位于本次公开 CALL 至 RETURN 之间。只收到消费端回调时保留时间缺口。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+          "sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
+          "sha256": "9ed079ccf3df6b1455c9aeaa7b50b936fd26e1c183db5ee0798f5c96d5df08e0"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "blt",
+        "path"
+      ],
+      "round_ids": [
+        "win-present-incall-20261121-01"
+      ],
+      "latest_observation": "正式原空窗口首次公开调用历时 15.364 ms。绑定进程后的短刷新区间累计 76 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 []，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 []。"
+    },
+    {
       "id": "WIN-PRESENT-KMT",
       "priority": "P0",
       "owner": "应用绘图线程、系统 D3D11/DXGI 和 Windows dxgkrnl",
@@ -603,6 +632,34 @@
         "win-empty-source-20261121-01"
       ],
       "latest_observation": "原空窗口的 KMT 源句柄 0x40000740 属于该应用设备。驻留/映射分别返回 E_PENDING，分页目标 7001/7002 的两次检查均为 S_OK，末次在公开调用前 775.464 ms。"
+    },
+    {
+      "id": "WIN-BLT-DDI-ORDER",
+      "priority": "P0",
+      "owner": "Windows dxgkrnl 与实载 GM20B miniport",
+      "question": "Windows Blit/Info 166 在有同轮直接 miniport 回执的拒绝用例中位于哪个驱动边界？",
+      "status": "已有实机通过",
+      "existing_observation": "诊断启动 86815 有普通上下文 Blt 的直接拒绝回执。正式基线的实时事件 166 可持久保存。",
+      "missing_observation": null,
+      "pass_condition": "在同一公开调用内以 PID/TID、正常上下文、窗口、源与目标、队列状态及原始 QPC 定位 Windows Blt 事件相对 KMD DDI 的位置，逐项标明仅适用于该实机启动的结论。",
+      "evidence": [
+        {
+          "path": "legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+          "sha256": "283175425e0a6d8dbb354bcc1ea5cdc0c8bc8b2aa484540eeeb6133800de3035"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+          "sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86"
+        }
+      ],
+      "windows_references": [
+        "blt",
+        "path"
+      ],
+      "round_ids": [
+        "win-blt-ddi-order-20261121-01"
+      ],
+      "latest_observation": "开机 86815 的真实拒绝用例中，Windows Blit/Info 166 比同绘图线程 KMD Present 入口早 29.635 µs，其后的 167 描述裁剪矩形。KMD 在普通上下文检查处返回 0xc00000bb，Windows 184 返回 0xc01e0006，应用收到 0x087a0001。此次窗口没有呈现调度包。"
     },
     {
       "id": "WIN-PRESENT-BLT",
@@ -1473,20 +1530,77 @@
         "first_anomaly_or_missing": "实测延迟包含 Windows 交付、SSH、控制端 fsync 和确认返回。只给本轮持久化时间上界。未获确认的事件及快速复位前未交付的 ETW 缓冲仍可能缺失。"
       },
       "finished_utc": "2026-11-21T14:12:16.835008+00:00"
+    },
+    {
+      "round_id": "win-blt-ddi-order-20261121-01",
+      "contract_id": "WIN-BLT-DDI-ORDER",
+      "windows_question": "WIN-BLT-DDI-ORDER",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.plan.json",
+      "plan_sha256": "183e8e2d817133b187d92db52dfe341774d0c71590333f4fe35ddb2136fed34f",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T14:14:54.487260+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
+      "result_sha256": "9ed079ccf3df6b1455c9aeaa7b50b936fd26e1c183db5ee0798f5c96d5df08e0",
+      "status": "已有实机通过",
+      "finding": "开机 86815 的真实拒绝用例中，Windows Blit/Info 166 比同绘图线程 KMD Present 入口早 29.635 µs，其后的 167 描述裁剪矩形。KMD 在普通上下文检查处返回 0xc00000bb，Windows 184 返回 0xc01e0006，应用收到 0x087a0001。此次窗口没有呈现调度包。",
+      "missing_observation": null,
+      "boundaries": {
+        "last_entry": {
+          "windows_blt_qpc": 4347366656,
+          "miniport_present_qpc": 4347367225
+        },
+        "last_return": {
+          "miniport_qpc": 4347367284,
+          "miniport_status": "0xc00000bb",
+          "kmt_qpc": 4347369472,
+          "public_qpc": 4347372896,
+          "public_hresult": "0x087a0001"
+        },
+        "first_anomaly_or_missing": "本次诊断 KMD 的普通渲染上下文检查直接拒绝 Blt。原次 82058/82221/82382 缺对应 166 和 miniport 事件，历史复位位置仍未知。"
+      },
+      "finished_utc": "2026-11-21T14:14:55.491047+00:00"
+    },
+    {
+      "round_id": "win-present-incall-20261121-01",
+      "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+      "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+      "method": "正式基线首次呈现调用内的实时 Windows 见证",
+      "plan": "windows-native-graphics/rounds/win-present-incall-20261121-01.plan.json",
+      "plan_sha256": "00de2211a9392d99aa0a2175ddc2386c033c586d954d227d2d6c53b9900caba3",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T14:16:25.957136+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-present-incall-20261121-01.result.json",
+      "result_sha256": "b345beaef3d845873136e56b83967e7bd678ded5a2b31425a4aac22017ef1703",
+      "status": "观测缺口",
+      "finding": "正式原空窗口首次公开调用历时 15.364 ms。绑定进程后的短刷新区间累计 76 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 []，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 []。",
+      "missing_observation": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。",
+      "boundaries": {
+        "last_entry": "同一绘图线程首次 DXGI Present Start，独立文件及实时提供程序时间见 verify_each_event。",
+        "last_return": {
+          "public_hresult": "00000000",
+          "public_qpc": 138482065231,
+          "last_durable_ack_qpc": 138482502477
+        },
+        "first_anomaly_or_missing": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。"
+      },
+      "finished_utc": "2026-11-21T14:18:22.773704+00:00"
     }
   ],
   "progress": {
-    "total": 22,
+    "total": 24,
     "by_status": {
       "实机通过": 6,
-      "观测缺口": 2,
+      "观测缺口": 3,
+      "已有实机通过": 7,
       "故障开放": 2,
-      "已有实机通过": 6,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 15,
-    "new_device_executions": 3
+    "registered_rounds": 17,
+    "new_device_executions": 4
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -1494,8 +1608,10 @@
     "order": [
       "WIN-EMPTY-PRESENT-KMT",
       "WIN-PRESENT-LIVE-RECEIPT",
+      "WIN-KMT-PRE-RETURN-WITNESS",
       "WIN-PRESENT-SOURCE",
       "WIN-FENCE-WAIT",
+      "WIN-BLT-DDI-ORDER",
       "WIN-PRESENT-BLT",
       "WIN-DWM-CONSUME",
       "WIN-PRESENT-IMAGE",
@@ -1582,6 +1698,20 @@
         },
         "stage_removed": true,
         "receipt_sha256": "9c212f933b90f4c97e5aa8381614e149f5a0c9bb30dc605d035477e3ccece061"
+      },
+      "win-present-incall-20261121-01": {
+        "boot": 91476,
+        "dwm": 1400,
+        "code": 0,
+        "ac": "Online",
+        "power_mode": 1,
+        "windows_trace_query": {
+          "SwitchDisplay-f63a761cfae6": 4201,
+          "SwitchPresentLive-f63a761cfae6": 4201,
+          "Nvdec720Preview-7576": 4201
+        },
+        "stage_removed": true,
+        "receipt_sha256": "12040291ed0eaed96e3765857d5e73f3fc9951b82c833428023bcf4b3ec84c65"
       }
     }
   },
@@ -1940,7 +2070,58 @@
       "max_confirmed_host_persistence_ms_from_event": 47.022,
       "host_acknowledged_before_public_return": 0,
       "real_test_processes_dispatched": 1,
-      "hardware_scope": "促进后续事件保全。目标三次历史启动的 CALL 后内核回执仍待证。"
+      "hardware_scope": "促进后续事件保全。目标三次历史启动的 CALL 后内核回执仍待证。",
+      "tested_at_commit": "17d4224805a365324be3960a25962d93f49566dc"
+    },
+    {
+      "round": "win-present-incall-20261121-01",
+      "result": {
+        "path": "windows-native-graphics/rounds/win-present-incall-20261121-01.result.json",
+        "sha256": "b345beaef3d845873136e56b83967e7bd678ded5a2b31425a4aac22017ef1703"
+      },
+      "mode": "--early-flush",
+      "nominal_interval_ms": 2,
+      "observed_mean_spacing_ms": 16.55,
+      "call_ms": 15.364,
+      "windows_consumer_before_public_return": {
+        "DXGI": [
+          42
+        ],
+        "DxgKrnl": []
+      },
+      "host_confirmed_before_public_return": {
+        "DXGI": [],
+        "DxgKrnl": []
+      },
+      "source_sha256": "94ed3b501f37f1d6cb1bfd9d1aa2f655e0646154cd785e8467c2b01de493a2d9",
+      "host_receiver_sha256": "b19472bf5157495b25cbcd7b04ea06012db15456c1b004aa6f044e6297ee3fa8",
+      "code_review": {
+        "model": "gemini-4-neon-high",
+        "source_sha256": "94ed3b501f37f1d6cb1bfd9d1aa2f655e0646154cd785e8467c2b01de493a2d9",
+        "raw_response_sha256": "f0736ffacd2365b6a42e48229d034505e8b4d1083db307f58d3ce1f1f2caf21e",
+        "delta_sha256": "2ceae7176e30fd454e63c2186f5b5f4cfa2e0d13914f6e9ee8e82e2565f0d7b5",
+        "blocking": [],
+        "limits": [
+          "Windows timer granularity: without raising system timer resolution (e.g., timeBeginPeriod), WaitForSingleObject(r->stopping, 2) typically sleeps at the active system tick (~15.625 ms by default unless another process lowered it) rather than 2 ms, and GetTickCount64() advances at the same tick granularity (~2000 ms + up to 1 tick); actual cadence is observable via early_count and [first_early_qpc, last_early_qpc] in EARLY_FLUSH.",
+          "If the very first FlushTraceW fails (status != 0), first_early_qpc is recorded before break while early_count and last_early_qpc stay 0 (harmless diagnostic asymmetry on a failing exit-4 run); catastrophic 5s drain-timeout ExitProcess(4) paths omit EARLY_FLUSH.",
+          "When timer resolution is low (e.g., 1 ms), up to ~500 flushes/sec during the 2 s window increases ETW buffer seal frequency for non-empty buffers (including system-wide DXGI 42/43 and DxgKrnl 166/184 traffic); overflow remains bounded and fail-closed via RealTimeBuffersLost.",
+          "Pre-bind gap remains 10 ms polling before client-pid binds, and any observed negative result (no event consumed/ACKed before public Present return) applies only to the measured run/cadence and does not generalize across all boots or timer resolutions."
+        ]
+      }
     }
-  ]
+  ],
+  "diagnostic_blt_order": {
+    "result": {
+      "path": "windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
+      "sha256": "9ed079ccf3df6b1455c9aeaa7b50b936fd26e1c183db5ee0798f5c96d5df08e0"
+    },
+    "boot": 86815,
+    "pid": 5824,
+    "tid": 3940,
+    "hwnd": 196992,
+    "windows_166_to_ddi_enter_us": 29.635,
+    "miniport_result": "0xc00000bb",
+    "kmt_result": "0xc01e0006",
+    "scope": "一次公开调用中的唯一绘图线程 Blt。Windows 记录提供 HWND、上下文和分配，miniport 事件 5 提供操作、状态、旗标和矩形数。"
+  }
 }

@@ -18,6 +18,10 @@
 
 开机 `91476` 的正式基线增加了一次独立实时见证。绘图 PID/TID `5540/7812` 的 DXGI 42/43、DxgKrnl 166/184 均已写到控制端，载荷和同次文件 ETL 逐字节一致。四次 fsync 确认返回 Windows 时进程都在运行。公开调用历时 13.242 ms，实时消费者首次取到事件已在公开 RETURN 后 11.358 ms。最长观察到的持久化往返上界为 47.022 ms。调用内发生即时复位的区间仍缺回执。本轮结束确认三个专属跟踪会话均已关闭，任务与临时目录已清理。[实时 Windows 回执、原始传输日志与哈希](windows-native-graphics/rounds/win-present-live-20261121-02.result.json)
 
+启动 `86815` 的真实拒绝用例中，Windows Blt 166 比同一绘图线程的 miniport Present 入口早 29.635 微秒。事件 167 给出同一 DMA 缓冲的裁剪矩形，随后 KMD 普通上下文检查返回 `0xc00000bb`，KMT 返回 `0xc01e0006`，公开接口返回 `0x087a0001`。该次未提交呈现包。[同一份 ETL 中 Windows、KMD 与公开返回顺序](windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json)
+
+在正式基线启动 `91476` 上，2 ms 名义等待的专属 ETW 会话完成 76 次刷新。以首个刷新开始和末个刷新返回计算，平均间隔约 16.55 ms。该次首次 Present 用时 15.364 ms，DXGI 42 消费回调早于公开 RETURN 0.246 ms，Windows Blt 166 消费回调晚于 RETURN 0.218 ms。四条事件都在目标进程存活时持久传到控制端，本次调用内尚缺内核事件的落盘确认。[短刷新窗口的实机计时与边界](windows-native-graphics/rounds/win-present-incall-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

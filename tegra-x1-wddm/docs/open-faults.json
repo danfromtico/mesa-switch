@@ -22,6 +22,7 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-historical-process-log-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-historical-call-marker-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-first-present-archives-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result.",
@@ -1694,6 +1695,63 @@
           "first_anomaly_or_missing": "实测延迟包含 Windows 交付、SSH、控制端 fsync 和确认返回。只给本轮持久化时间上界。未获确认的事件及快速复位前未交付的 ETW 缓冲仍可能缺失。"
         },
         "finished_utc": "2026-11-21T14:12:16.835008+00:00"
+      },
+      {
+        "round_id": "win-blt-ddi-order-20261121-01",
+        "contract_id": "WIN-BLT-DDI-ORDER",
+        "windows_question": "WIN-BLT-DDI-ORDER",
+        "method": "复核已收回的本机 ETL 与应用回执",
+        "plan": "windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.plan.json",
+        "plan_sha256": "183e8e2d817133b187d92db52dfe341774d0c71590333f4fe35ddb2136fed34f",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:14:54.487260+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
+        "result_sha256": "9ed079ccf3df6b1455c9aeaa7b50b936fd26e1c183db5ee0798f5c96d5df08e0",
+        "status": "已有实机通过",
+        "finding": "开机 86815 的真实拒绝用例中，Windows Blit/Info 166 比同绘图线程 KMD Present 入口早 29.635 µs，其后的 167 描述裁剪矩形。KMD 在普通上下文检查处返回 0xc00000bb，Windows 184 返回 0xc01e0006，应用收到 0x087a0001。此次窗口没有呈现调度包。",
+        "missing_observation": null,
+        "boundaries": {
+          "last_entry": {
+            "windows_blt_qpc": 4347366656,
+            "miniport_present_qpc": 4347367225
+          },
+          "last_return": {
+            "miniport_qpc": 4347367284,
+            "miniport_status": "0xc00000bb",
+            "kmt_qpc": 4347369472,
+            "public_qpc": 4347372896,
+            "public_hresult": "0x087a0001"
+          },
+          "first_anomaly_or_missing": "本次诊断 KMD 的普通渲染上下文检查直接拒绝 Blt。原次 82058/82221/82382 缺对应 166 和 miniport 事件，历史复位位置仍未知。"
+        },
+        "finished_utc": "2026-11-21T14:14:55.491047+00:00"
+      },
+      {
+        "round_id": "win-present-incall-20261121-01",
+        "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+        "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+        "method": "正式基线首次呈现调用内的实时 Windows 见证",
+        "plan": "windows-native-graphics/rounds/win-present-incall-20261121-01.plan.json",
+        "plan_sha256": "00de2211a9392d99aa0a2175ddc2386c033c586d954d227d2d6c53b9900caba3",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:16:25.957136+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-present-incall-20261121-01.result.json",
+        "result_sha256": "b345beaef3d845873136e56b83967e7bd678ded5a2b31425a4aac22017ef1703",
+        "status": "观测缺口",
+        "finding": "正式原空窗口首次公开调用历时 15.364 ms。绑定进程后的短刷新区间累计 76 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 []，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 []。",
+        "missing_observation": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。",
+        "boundaries": {
+          "last_entry": "同一绘图线程首次 DXGI Present Start，独立文件及实时提供程序时间见 verify_each_event。",
+          "last_return": {
+            "public_hresult": "00000000",
+            "public_qpc": 138482065231,
+            "last_durable_ack_qpc": 138482502477
+          },
+          "first_anomaly_or_missing": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。"
+        },
+        "finished_utc": "2026-11-21T14:18:22.773704+00:00"
       }
     ]
   }

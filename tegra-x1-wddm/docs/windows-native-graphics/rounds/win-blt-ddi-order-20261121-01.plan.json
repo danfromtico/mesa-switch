@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "round_id": "win-blt-ddi-order-20261121-01",
+  "contract_id": "WIN-BLT-DDI-ORDER",
+  "windows_question": "WIN-BLT-DDI-ORDER",
+  "owner": "Windows dxgkrnl 与实载 GM20B miniport",
+  "question": "Windows Blit/Info 166 在有同轮直接 miniport 回执的拒绝用例中位于哪个驱动边界？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "在同一公开调用内以 PID/TID、正常上下文、窗口、源与目标、队列状态及原始 QPC 定位 Windows Blt 事件相对 KMD DDI 的位置，逐项标明仅适用于该实机启动的结论。",
+  "observations": [
+    "对照受检诊断 KMD 的原始事件 5 与同一份 display.etl 中 Windows 166、167、184，按时钟、绘图线程、HWND、上下文和资源配对。",
+    "确认 Windows Blt/Info 能见证的最近步骤，并检查本次拒绝后是否存在呈现调度包。原三次启动独立保留。"
+  ],
+  "inputs": {
+    "diagnostic_report": {
+      "path": "legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+      "sha256": "283175425e0a6d8dbb354bcc1ea5cdc0c8bc8b2aa484540eeeb6133800de3035"
+    },
+    "archive_sha256": "63eb1f564ffb82cb98196f8e145d51ddbfc4745adafcef4d366a77440833adc1",
+    "decoder_sha256": "668a1778de1ccdf66c10edbbcbe2f4fbce7f83ebb1745fdc2cc00d3f53b45939",
+    "current_live_result": {
+      "path": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+      "sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86"
+    }
+  }
+}

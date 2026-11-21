@@ -1,0 +1,278 @@
+{
+  "schema": 1,
+  "round_id": "win-blt-ddi-order-20261121-01",
+  "contract_id": "WIN-BLT-DDI-ORDER",
+  "windows_question": "WIN-BLT-DDI-ORDER",
+  "plan_sha256": "183e8e2d817133b187d92db52dfe341774d0c71590333f4fe35ddb2136fed34f",
+  "status": "已有实机通过",
+  "finding": "开机 86815 的真实拒绝用例中，Windows Blit/Info 166 比同绘图线程 KMD Present 入口早 29.635 µs，其后的 167 描述裁剪矩形。KMD 在普通上下文检查处返回 0xc00000bb，Windows 184 返回 0xc01e0006，应用收到 0x087a0001。此次窗口没有呈现调度包。",
+  "missing_observation": null,
+  "device_executions": 0,
+  "evidence": {
+    "boot": 86815,
+    "pid": 5824,
+    "tid": 3940,
+    "hwnd": 196992,
+    "archive_sha256": "63eb1f564ffb82cb98196f8e145d51ddbfc4745adafcef4d366a77440833adc1",
+    "etl_sha256": "467ba8135f0447ce88dd076c131ae752458d506ab85977ab12eabfd24ab867f5",
+    "journal_sha256": "99ad2686532c8bbb329a2701341d2656788f0439178da123ad025e930f4f6c96",
+    "loaded": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "installed_components": {
+      "tegragpurender.sys": "13286e3eb6aeadfda1aac07b138ae21697ba07ecb2c6baf4a5b471f9c2d9e02b",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "source_decision": {
+      "file": "tegra-x1-wddm/windows/present.c",
+      "functional_source": "aa49f69c8362ddb6e0547ad8f30bb951c9548a5e",
+      "functional_symbol": "TgGpuDdiPresent",
+      "diagnostic_symbol": "encode_present",
+      "decision": "Plain Blt on a non-GDI rendering context returns STATUS_NOT_SUPPORTED."
+    },
+    "qpc_hz": 19200000,
+    "sequence": [
+      {
+        "name": "public CALL",
+        "qpc": 4347185659,
+        "milliseconds_since_call": 0.0
+      },
+      {
+        "name": "Windows CddStandardAllocation 286",
+        "qpc": 4347312669,
+        "milliseconds_since_call": 6.615104
+      },
+      {
+        "name": "Windows Blit 166",
+        "qpc": 4347366656,
+        "milliseconds_since_call": 9.426927
+      },
+      {
+        "name": "Windows BlitRect 167",
+        "qpc": 4347366770,
+        "milliseconds_since_call": 9.432865
+      },
+      {
+        "name": "KMD DDI enter",
+        "qpc": 4347367225,
+        "milliseconds_since_call": 9.456563
+      },
+      {
+        "name": "KMD normal context rejection",
+        "qpc": 4347367255,
+        "milliseconds_since_call": 9.458125
+      },
+      {
+        "name": "KMD DDI result",
+        "qpc": 4347367284,
+        "milliseconds_since_call": 9.459635
+      },
+      {
+        "name": "Windows Present 184",
+        "qpc": 4347369472,
+        "milliseconds_since_call": 9.573594
+      },
+      {
+        "name": "public RETURN",
+        "qpc": 4347372896,
+        "milliseconds_since_call": 9.751927
+      }
+    ],
+    "source_allocation": {
+      "qpc": 4331271050,
+      "pid": 5824,
+      "tid": 3940,
+      "provider": "kernel",
+      "id": 36,
+      "version": 2,
+      "fields": {
+        "hProcessId": 5824,
+        "hDevice": 18446685280597786640,
+        "pDxgAdapter": 18446625356595126272,
+        "hVidMmAlloc": 18446625356630140944,
+        "hVidMmGlobalAlloc": 18446685280571600304,
+        "hDxgResource": 18446685280575224176,
+        "hDxgSharedResource": 18446625356605115808,
+        "hThunkAllocation": 1073743680,
+        "hThunkResource": 1073743616,
+        "PrivateRuntimeResourceHandle": 0,
+        "pVirtualAddress": 1945972776960,
+        "hProcessAllocDetails": 18446685280653607952,
+        "hOtherPartitionHandle": 0
+      }
+    },
+    "device_context": {
+      "qpc": 4328775381,
+      "pid": 5824,
+      "tid": 3940,
+      "provider": "kernel",
+      "id": 30,
+      "version": 0,
+      "fields": {
+        "hDevice": 18446685280597786640,
+        "NodeOrdinal": 0,
+        "EngineAffinity": 1,
+        "DmaBufferSize": 65536,
+        "DmaBufferSegmentSet": 2,
+        "DmaBufferPrivateDataSize": 65864,
+        "AllocationListSize": 0,
+        "PatchLocationListSize": 0,
+        "Flags": 0,
+        "hContext": 18446685280655801808,
+        "ContextHandle": 1073742144,
+        "ParentDxgContext": 0
+      }
+    },
+    "blt": {
+      "qpc": 4347366656,
+      "pid": 5824,
+      "tid": 3940,
+      "provider": "kernel",
+      "id": 166,
+      "version": 0,
+      "fields": {
+        "hwnd": 196992,
+        "pDmaBuffer": 18446625356635707152,
+        "PresentHistoryToken": 0,
+        "hSourceAllocation": 18446625356630140944,
+        "hDestAllocation": 18446625356630139920,
+        "bSubmit": 1,
+        "bRedirectedPresent": 0,
+        "Flags": 1,
+        "Source.Left": 0,
+        "Source.Right": 640,
+        "Source.Top": 0,
+        "Source.Bottom": 360,
+        "Dest.Left": 0,
+        "Dest.Right": 640,
+        "Dest.Top": 0,
+        "Dest.Bottom": 360,
+        "SubRectCount": 1
+      }
+    },
+    "blt_rect": {
+      "qpc": 4347366770,
+      "pid": 5824,
+      "tid": 3940,
+      "provider": "kernel",
+      "id": 167,
+      "version": 0,
+      "fields": {
+        "pDmaBuffer": 18446625356635707152,
+        "FinalEvent": 1,
+        "RectCount": 1,
+        "Left": [
+          0
+        ],
+        "Right": [
+          640
+        ],
+        "Top": [
+          0
+        ],
+        "Bottom": [
+          360
+        ]
+      }
+    },
+    "kmt_result": {
+      "qpc": 4347369472,
+      "pid": 5824,
+      "tid": 3940,
+      "provider": "kernel",
+      "id": 184,
+      "version": 1,
+      "fields": {
+        "hContext": 1073742144,
+        "hWindow": 196992,
+        "VidPnSourceId": 4294967295,
+        "FlipInterval": 1,
+        "Flags": 67178625,
+        "ReturnStatus": 3223191558,
+        "hSrcAllocHandle": 1073743680,
+        "hDstAllocHandle": 0
+      }
+    },
+    "exact_miniport_events": [
+      {
+        "qpc": 4347367225,
+        "operation": "present",
+        "phase": "enter",
+        "status": "0x00000103",
+        "flags": "0x00000001",
+        "dma_bytes": 65536,
+        "private_bytes": 65864,
+        "user_private_bytes": 0,
+        "subrect_count": 1,
+        "multipass_offset": 0,
+        "pid": 5824,
+        "tid": 3940,
+        "id": 5,
+        "version": 1,
+        "payload_hex": "0100000001000000010000000301000001000000000001004801010000000000000000000100000000000000",
+        "payload_sha256": "2e8d02da59b0acd5cbd541397672c8ebed15897039d0f750ed0f691da9c4cd25"
+      },
+      {
+        "qpc": 4347367255,
+        "operation": "non_gdi_blt_rejected",
+        "phase": "result",
+        "status": "0xc00000bb",
+        "flags": "0x00000001",
+        "dma_bytes": 0,
+        "private_bytes": 0,
+        "user_private_bytes": 0,
+        "subrect_count": 1,
+        "multipass_offset": 0,
+        "pid": 5824,
+        "tid": 3940,
+        "id": 5,
+        "version": 1,
+        "payload_hex": "010000000400000002000000bb0000c001000000000000000000000000000000000000000100000000000000",
+        "payload_sha256": "71aa2cc55157a54e375380f9822a80f149bac58e42457d9c072dd071c4f886a7"
+      },
+      {
+        "qpc": 4347367284,
+        "operation": "present",
+        "phase": "result",
+        "status": "0xc00000bb",
+        "flags": "0x00000001",
+        "dma_bytes": 65536,
+        "private_bytes": 65864,
+        "user_private_bytes": 0,
+        "subrect_count": 1,
+        "multipass_offset": 0,
+        "pid": 5824,
+        "tid": 3940,
+        "id": 5,
+        "version": 1,
+        "payload_hex": "010000000100000002000000bb0000c001000000000001004801010000000000000000000100000000000000",
+        "payload_sha256": "b584c93337bd80597ebd17e4f53070437aec51cb2204b19497c1227766fbded7"
+      }
+    ],
+    "present_queue_packets": 0,
+    "windows_blt_precedes_measured_ddi_enter_us": 29.635,
+    "scope": "实测顺序属于启动 86815 的诊断组件。对于正式基线日志，166 作为 Windows Blt 记录，miniport 入栈或退出仍需自己的回执。",
+    "boundaries": {
+      "last_entry": {
+        "windows_blt_qpc": 4347366656,
+        "miniport_present_qpc": 4347367225
+      },
+      "last_return": {
+        "miniport_qpc": 4347367284,
+        "miniport_status": "0xc00000bb",
+        "kmt_qpc": 4347369472,
+        "public_qpc": 4347372896,
+        "public_hresult": "0x087a0001"
+      },
+      "first_anomaly_or_missing": "本次诊断 KMD 的普通渲染上下文检查直接拒绝 Blt。原次 82058/82221/82382 缺对应 166 和 miniport 事件，历史复位位置仍未知。"
+    }
+  }
+}

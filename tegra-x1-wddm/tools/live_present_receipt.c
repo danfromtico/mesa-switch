@@ -212,9 +212,11 @@ static HANDLE bind_target(const wchar_t *pid_path, const wchar_t *image, LONG *p
 int wmain(int argc, wchar_t **argv)
 {
     const size_t length = _countof(prefix)-1;
-    if (argc != 3 || wcsncmp(argv[1], prefix, length) ||
+    if ((argc != 3 && argc != 4) || wcsncmp(argv[1], prefix, length) ||
         wcslen(argv[1]+length) != 12 || wcsspn(argv[1]+length, L"0123456789abcdef") != 12)
         return 2;
+    BOOL early_flush = argc == 4;
+    if (early_flush && wcscmp(argv[3], L"--early-flush") != 0) return 2;
     wchar_t directory[MAX_PATH], pid_path[MAX_PATH], image[MAX_PATH];
     DWORD count = GetFullPathNameW(argv[2], MAX_PATH, directory, NULL);
     if (!count || count >= MAX_PATH) return 2;
@@ -257,6 +259,9 @@ int wmain(int argc, wchar_t **argv)
     if (!status) status = enable(session, &dxgkrnl, 166, 184);
     if (!status && !(reader = CreateThread(NULL, 0, read_events, r, 0, NULL))) status = GetLastError();
     if (!status && !(acks = CreateThread(NULL, 0, read_acks, r, 0, NULL))) status = GetLastError();
+    ULONGLONG early_deadline = 0;
+    ULONG early_count = 0;
+    LONGLONG first_early_qpc = 0, last_early_qpc = 0;
     if (!status) {
         if (printf("READY %lu %lld %lld\n", GetCurrentProcessId(), (long long)freq.QuadPart,
                    (long long)ticks()) < 0 || fflush(stdout)) fail(r);
@@ -267,19 +272,29 @@ int wmain(int argc, wchar_t **argv)
                 LONG pid = 0;
                 process = bind_target(pid_path, image, &pid);
                 if (process) {
+                    if (early_flush) early_deadline = GetTickCount64() + 2000;
                     AcquireSRWLockExclusive(&r->output_lock);
                     r->target_process = process;
                     InterlockedExchange(&r->target_pid, pid);
                     ReleaseSRWLockExclusive(&r->output_lock);
                 }
             }
+            // The optional short interval covers at most the first two seconds
+            // after PID binding. Only our private real-time session is flushed.
+            BOOL in_early_window = process && early_flush && GetTickCount64() < early_deadline;
             if (process) {
                 SessionProperties flush;
                 properties(&flush);
+                if (in_early_window && !early_count) first_early_qpc = ticks();
                 status = FlushTraceW(session, NULL, &flush.properties);
                 if (status) break;
+                if (in_early_window) {
+                    ++early_count;
+                    last_early_qpc = ticks();
+                }
             }
-            DWORD wait = WaitForSingleObject(r->stopping, process ? 40 : 10);
+            DWORD interval = in_early_window ? 2 : (process ? 40 : 10);
+            DWORD wait = WaitForSingleObject(r->stopping, interval);
             if (wait == WAIT_FAILED) { status = GetLastError(); break; }
         }
     }
@@ -307,6 +322,9 @@ int wmain(int argc, wchar_t **argv)
            r->process_trace_status, p.properties.EventsLost, p.properties.RealTimeBuffersLost,
            log.EventsLost, r->published, r->acknowledged);
     fflush(stdout);
+    if (early_flush)
+        fprintf(stderr, "EARLY_FLUSH 2 2000 %lu %lld %lld\n",
+                early_count, (long long)first_early_qpc, (long long)last_early_qpc);
     if (acks) CloseHandle(acks);
     if (reader) CloseHandle(reader);
     if (process) CloseHandle(process);
