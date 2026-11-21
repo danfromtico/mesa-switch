@@ -30,6 +30,7 @@
 #include "util/cnd_monotonic.h"
 #include "util/format/u_format.h"
 #include "util/timespec.h"
+#include "util/u_debug.h"
 #include "util/u_thread.h"
 #include "vk_format.h"
 #include "vk_instance.h"
@@ -37,6 +38,7 @@
 #include "vk_util.h"
 #include "wsi_common_entrypoints.h"
 #include "wsi_common_private.h"
+#include "wsi_win32_direct_dib.h"
 #include "wsi_win32_pacing.h"
 
 #include <dxgi1_4.h>
@@ -114,6 +116,9 @@ struct wsi_win32_swapchain {
    HWND wnd;
    uint64_t gdi_present_count;
    struct wsi_win32_pacer pacer;
+   /* Submit eligible mapped BGRA rows with StretchDIBits() instead of the
+    * CPU row copy into the DIB section (MESA_WSI_WIN32_DIRECT_DIB). */
+   bool direct_dib;
    struct wsi_win32_image     images[0];
 };
 
@@ -836,39 +841,60 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
       }
    }
 
-   if (!wsi_win32_pacer_wait(&chain->pacer)) {
+   /* The private timer only caps the producer when the previous present did
+    * not already block in the compositor; DwmFlush() below measures its own
+    * wait and feeds the decision back through the pacer, so the timer wait
+    * and the VBlank wait never chain into a fixed double period. */
+   if (!wsi_win32_pacer_wait(&chain->pacer, chain->pacer.compositor_paced)) {
       chain->status = VK_ERROR_SURFACE_LOST_KHR;
       wsi_win32_set_image_idle(chain, image);
       return chain->status;
    }
 
    const uint8_t *ptr = (const uint8_t *)image->base.cpu_map;
-   uint8_t *dptr = (uint8_t *)image->sw.ppvBits;
    /* A 32-bit BI_RGB DIB stores B, G, R, X bytes on Windows. */
-   const auto *pack = drv_chain->image_info.create.format == VK_FORMAT_R8G8B8A8_UNORM
+   const VkFormat format = drv_chain->image_info.create.format;
+   const auto *pack = format == VK_FORMAT_R8G8B8A8_UNORM
       ? util_format_pack_description(PIPE_FORMAT_B8G8R8A8_UNORM) : nullptr;
    uint32_t hash = 2166136261u;
    uint64_t nonzero_rgb = 0;
+   const uint32_t width = chain->extent.width, height = chain->extent.height;
 
-   for (unsigned h = 0; h < chain->extent.height; h++) {
-      if (pack) {
-         pack->pack_rgba_8unorm(dptr, image->sw.bmp_row_pitch,
-                                ptr, image->base.row_pitches[0],
-                                chain->extent.width, 1);
-      } else {
-         memcpy(dptr, ptr, chain->extent.width * 4);
-      }
-      if (WSI_DEBUG & WSI_DEBUG_WIN32) {
-         for (unsigned x = 0; x < chain->extent.width; x++) {
-            uint32_t pixel;
-            memcpy(&pixel, ptr + x * 4, sizeof(pixel));
-            nonzero_rgb += (pixel & 0xffffffu) != 0;
-            hash = (hash ^ pixel) * 16777619u;
+   /* Eligible BGRA frames skip the CPU row copy: GDI reads the mapped rows
+    * in place. Everything else (other formats, padded strides, the debug
+    * pixel walk) keeps the generic swizzle path. */
+   const bool direct_dib = chain->direct_dib && !(WSI_DEBUG & WSI_DEBUG_WIN32) &&
+      (format == VK_FORMAT_B8G8R8A8_UNORM || format == VK_FORMAT_B8G8R8A8_SRGB) &&
+      wsi_win32_direct_dib_tight_stride(width, height,
+                                        image->base.row_pitches[0]);
+
+   const auto copy_rows_to_dib = [&]() {
+      const uint8_t *src = ptr;
+      uint8_t *dst = (uint8_t *)image->sw.ppvBits;
+      for (unsigned h = 0; h < height; h++) {
+         if (pack) {
+            pack->pack_rgba_8unorm(dst, image->sw.bmp_row_pitch,
+                                   src, image->base.row_pitches[0],
+                                   width, 1);
+         } else {
+            memcpy(dst, src, (uint64_t)width * 4);
          }
+         if (WSI_DEBUG & WSI_DEBUG_WIN32) {
+            for (unsigned x = 0; x < width; x++) {
+               uint32_t pixel;
+               memcpy(&pixel, src + (uint64_t)x * 4, sizeof(pixel));
+               nonzero_rgb += (pixel & 0xffffffu) != 0;
+               hash = (hash ^ pixel) * 16777619u;
+            }
+         }
+         dst += image->sw.bmp_row_pitch;
+         src += image->base.row_pitches[0];
       }
-      dptr += image->sw.bmp_row_pitch;
-      ptr += image->base.row_pitches[0];
-   }
+   };
+
+   if (!direct_dib)
+      copy_rows_to_dib();
+
    /* A common window DC must be acquired and released on the same thread.
     * Swapchain creation, presentation and destruction may use different
     * threads, so keep its lifetime within this present call. */
@@ -876,24 +902,52 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
    BOOL copied = FALSE, flushed = FALSE;
    COLORREF window_center = CLR_INVALID;
    if (window_dc) {
-      copied = StretchBlt(window_dc, 0, 0, chain->extent.width, chain->extent.height,
-                           image->sw.dc, 0, 0, chain->extent.width, chain->extent.height, SRCCOPY);
+      if (direct_dib && wsi_win32_direct_dib_dc_ready(window_dc, width, height))
+         copied = wsi_win32_direct_dib_submit(window_dc, ptr, width, height);
+      if (!copied) {
+         /* Clipped target, unusual DC state, or a failed fast path: fill
+          * the DIB section and use the reference blit. SRCCOPY overwrites
+          * any partial direct transfer, so the retry is idempotent. */
+         if (direct_dib)
+            copy_rows_to_dib();
+         copied = StretchBlt(window_dc, 0, 0, width, height,
+                             image->sw.dc, 0, 0, width, height, SRCCOPY);
+      }
       /* Complete this thread's GDI batch before another present can write
-       * the DIB section or a different thread can destroy its objects. */
+       * the mapped image storage (direct path) or the DIB section, or a
+       * different thread can destroy its objects. */
       flushed = GdiFlush();
       if (WSI_DEBUG & WSI_DEBUG_WIN32)
-         window_center = GetPixel(window_dc, chain->extent.width / 2,
-                                    chain->extent.height / 2);
+         window_center = GetPixel(window_dc, width / 2, height / 2);
       ReleaseDC(chain->wnd, window_dc);
    }
    if (!copied || !flushed)
       chain->status = VK_ERROR_SURFACE_LOST_KHR;
 
    /* GdiFlush only drains GDI commands. Join the compositor's presentation
-    * before releasing the image; the timer also caps producers when this
-    * call returns immediately or the desktop refreshes faster than 60 Hz. */
-   if (chain->pacer.timer && chain->status == VK_SUCCESS && FAILED(DwmFlush()))
-      chain->status = VK_ERROR_SURFACE_LOST_KHR;
+    * before releasing the image. Measure the wait: when it blocked for at
+    * least half a period the compositor already paced this swapchain and the
+    * timer stays idle next frame; when it returned immediately (occluded or
+    * idle desktop) the timer remains the producer cap, so queueing stays
+    * bounded either way. The deadline is re-anchored to the completed
+    * composition to keep the fallback timer phase-locked to the display. */
+   if (chain->pacer.timer && chain->status == VK_SUCCESS) {
+      LARGE_INTEGER before, after;
+      chain->pacer.compositor_paced = false;
+      if (QueryPerformanceCounter(&before)) {
+         if (FAILED(DwmFlush())) {
+            chain->status = VK_ERROR_SURFACE_LOST_KHR;
+         } else if (QueryPerformanceCounter(&after)) {
+            chain->pacer.compositor_paced =
+               wsi_win32_pacer_compositor_paced(&chain->pacer,
+                                                after.QuadPart - before.QuadPart);
+            if (chain->pacer.compositor_paced)
+               wsi_win32_pacer_sync_compositor(&chain->pacer, after.QuadPart);
+         }
+      } else if (FAILED(DwmFlush())) {
+         chain->status = VK_ERROR_SURFACE_LOST_KHR;
+      }
+   }
 
    if (WSI_DEBUG & WSI_DEBUG_WIN32) {
       uint32_t cpu_center;
@@ -1061,6 +1115,8 @@ wsi_win32_surface_create_swapchain(
    chain->base.queue_present = wsi_win32_queue_present;
    chain->base.present_mode = wsi_swapchain_get_present_mode(wsi_device, create_info);
    chain->extent = create_info->imageExtent;
+   chain->direct_dib = !supports_dxgi &&
+      debug_get_bool_option("MESA_WSI_WIN32_DIRECT_DIB", true);
 
    chain->wsi = wsi;
    chain->status = VK_SUCCESS;

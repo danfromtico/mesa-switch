@@ -32,12 +32,21 @@ wsi_win32_get_surface_image_count_bounds(bool sw,
 
 /* CPU presentation has no swapchain wait object. Use a private one-shot
  * timer, without changing the system timer resolution or polling the CPU.
- * A late frame resets the deadline instead of accumulating catch-up frames. */
+ * A late frame resets the deadline instead of accumulating catch-up frames.
+ *
+ * The deadline is kept phase-locked to the compositor: DwmFlush() measures
+ * its own wait after every present, and when that wait blocked for at
+ * least half a period the timer stays idle for the next frame. The full
+ * timer wait and the VBlank wait therefore never chain into a fixed double
+ * period, and skipping the timer is verified per frame instead of assumed. */
 struct wsi_win32_pacer {
    HANDLE timer;
    int64_t frequency;
    int64_t period;
    int64_t next;
+   /* The previous present blocked in the compositor at least half a period,
+    * so the compositor already provided display-cadence backpressure. */
+   bool compositor_paced;
 };
 
 static inline BOOL
@@ -56,10 +65,29 @@ wsi_win32_pacer_init(struct wsi_win32_pacer *pacer, uint32_t fps)
    return pacer->timer != NULL;
 }
 
-static inline BOOL
-wsi_win32_pacer_wait(struct wsi_win32_pacer *pacer)
+/* Anchor the fallback deadline to a completed composition so the timer
+ * stays phase-locked to the display cadence instead of free-running. */
+static inline void
+wsi_win32_pacer_sync_compositor(struct wsi_win32_pacer *pacer,
+                                int64_t composed_at)
 {
-   if (!pacer->timer)
+   pacer->next = composed_at + pacer->period;
+}
+
+/* Classify a measured DwmFlush() wait: blocking at least half a period
+ * means the compositor presented on its own cadence and the timer must not
+ * add a second wait on top of it. */
+static inline bool
+wsi_win32_pacer_compositor_paced(const struct wsi_win32_pacer *pacer,
+                                 int64_t elapsed)
+{
+   return elapsed >= pacer->period / 2;
+}
+
+static inline BOOL
+wsi_win32_pacer_wait(struct wsi_win32_pacer *pacer, bool compositor_paced)
+{
+   if (!pacer->timer || compositor_paced)
       return TRUE;
    LARGE_INTEGER now;
    if (!QueryPerformanceCounter(&now))
