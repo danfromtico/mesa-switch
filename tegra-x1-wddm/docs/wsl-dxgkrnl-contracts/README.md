@@ -1,8 +1,10 @@
 # Switch 实机与 WSL dxgkrnl 契约
 
-Gemini 4 Neon XHigh 审阅了 15 个文件的 452 条注释。主会话核对了源码位置、适用场景和实机回执。当前结论为 **2 条已满足、0 条已违反、450 条未知**。每条结论都有自己的适用范围。[完整契约表](contracts.json) · [覆盖与校验记录](audit.json) · [微软固定版本的源码目录](https://github.com/microsoft/WSL2-Linux-Kernel/tree/a989171929bed4ea681be8d77333845ce1c1732a/drivers/hv/dxgkrnl)
+Gemini 4 Neon XHigh 审阅了 15 个文件的 452 条注释。主会话核对了源码位置、适用场景和实机回执。当前结论为 **3 条已满足、0 条已违反、449 条未知**。未知项中，27 条有原生 Windows 对照，298 条需要 WSL 来宾或宿主观测，124 条标记源码元信息。[完整契约表](contracts.json) · [覆盖与校验记录](audit.json) · [微软固定版本的源码目录](https://github.com/microsoft/WSL2-Linux-Kernel/tree/a989171929bed4ea681be8d77333845ce1c1732a/drivers/hv/dxgkrnl)
 
 微软源码版本为 `a989171929bed4ea681be8d77333845ce1c1732a`。每个 C 注释以编译器识别的起始行和字节列编号，Kconfig 和 Makefile 按行首注释计数。许可证、标题和分隔行也保留编号，实机状态记为未知。WSL 来宾内部的链表、VMBus 消息和宿主回包需要对应平台上的观测。本版注释正文中 `TDR`、`reset`、`watchdog` 和 `timeout` 的独立词命中数依次为 0, 0, 0, 0。
+
+对原生可比项，状态限定到条目所列的 Windows 用例。来宾锁、引用计数和协议字段需要同层记录。当前实机为 WDDM 2.6，原生围栏的 NT 句柄打开接口要求 WDDM 3.2。[微软接口要求](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtopennativefencefromnthandle)
 
 ## 本轮实机结果
 
@@ -11,27 +13,29 @@ Gemini 4 Neon XHigh 审阅了 15 个文件的 452 条注释。主会话核对了
 - **未知**。原游戏未命中预定检查点，所保留的 2 个上下文中有 2 个能关联到同进程的设备。[该轮上下文与检查点回执](rounds/pal4-preimage-context-20261121-01.result.json)
 - **已满足**。原游戏命中主纹理的 Vulkan 图像创建前检查点，所保留的 2 个上下文中有 2 个能关联到同进程的设备。[该轮上下文与检查点回执](rounds/pal4-preimage-context-20261121-02.result.json)
 
+- **已满足**。独立 x86 程序创建了一份普通分配和一份共享资源分配，各为 4 MiB。同一调用线程的设备、分配及资源句柄都与内核事件吻合。此前游戏第七张纹理的归属仍为未知。[原生创建计划](rounds/native-x86-allocation-owner-20261121-01.plan.json) · [用户态与内核逐次配对](rounds/native-x86-allocation-owner-20261121-01.result.json)
+
 ## 按源码文件查阅
 
 契约表逐条给出微软源码链接、注释字节哈希、中文断言、判定和证据。下表链接指向相应文件的首条记录。
 
 | 源文件 | 注释 | 已满足 | 已违反 | 未知 |
 | --- | ---: | ---: | ---: | ---: |
-| [Kconfig](contracts.json#L387) | 3 | 0 | 0 | 3 |
-| [Makefile](contracts.json#L435) | 2 | 0 | 0 | 2 |
-| [dxgadapter.c](contracts.json#L467) | 11 | 0 | 0 | 11 |
-| [dxgkrnl.h](contracts.json#L643) | 99 | 1 | 0 | 98 |
-| [dxgmodule.c](contracts.json#L2285) | 40 | 0 | 0 | 40 |
-| [dxgprocess.c](contracts.json#L2925) | 6 | 0 | 0 | 6 |
-| [dxgsyncfile.c](contracts.json#L3021) | 7 | 0 | 0 | 7 |
-| [dxgsyncfile.h](contracts.json#L3139) | 3 | 0 | 0 | 3 |
-| [dxgvmbus.c](contracts.json#L3187) | 70 | 0 | 0 | 70 |
-| [dxgvmbus.h](contracts.json#L4309) | 62 | 0 | 0 | 62 |
-| [hmgr.c](contracts.json#L5301) | 9 | 0 | 0 | 9 |
-| [hmgr.h](contracts.json#L5445) | 4 | 0 | 0 | 4 |
-| [ioctl.c](contracts.json#L5509) | 127 | 1 | 0 | 126 |
-| [misc.c](contracts.json#L7558) | 2 | 0 | 0 | 2 |
-| [misc.h](contracts.json#L7590) | 7 | 0 | 0 | 7 |
+| [Kconfig](contracts.json#L401) | 3 | 0 | 0 | 3 |
+| [Makefile](contracts.json#L449) | 2 | 0 | 0 | 2 |
+| [dxgadapter.c](contracts.json#L481) | 11 | 0 | 0 | 11 |
+| [dxgkrnl.h](contracts.json#L657) | 99 | 2 | 0 | 97 |
+| [dxgmodule.c](contracts.json#L2306) | 40 | 0 | 0 | 40 |
+| [dxgprocess.c](contracts.json#L2946) | 6 | 0 | 0 | 6 |
+| [dxgsyncfile.c](contracts.json#L3042) | 7 | 0 | 0 | 7 |
+| [dxgsyncfile.h](contracts.json#L3164) | 3 | 0 | 0 | 3 |
+| [dxgvmbus.c](contracts.json#L3212) | 70 | 0 | 0 | 70 |
+| [dxgvmbus.h](contracts.json#L4334) | 62 | 0 | 0 | 62 |
+| [hmgr.c](contracts.json#L5326) | 9 | 0 | 0 | 9 |
+| [hmgr.h](contracts.json#L5470) | 4 | 0 | 0 | 4 |
+| [ioctl.c](contracts.json#L5534) | 127 | 1 | 0 | 126 |
+| [misc.c](contracts.json#L7583) | 2 | 0 | 0 | 2 |
+| [misc.h](contracts.json#L7615) | 7 | 0 | 0 | 7 |
 
 ## 旧式窗口首次呈现前的围栏
 

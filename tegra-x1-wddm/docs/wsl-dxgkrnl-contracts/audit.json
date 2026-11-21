@@ -12,15 +12,16 @@
     "comments": 452,
     "canonical_locations_sha256": "de550648d07f2be604c9e216e7b2300a933a6c1430ff16b721f9d7a63afd850d"
   },
-  "catalog_sha256": "f103a64a293dc48f94e581c1f7196ed7940887e810a21566801b18a49a444f7f",
+  "catalog_sha256": "3b5eb0ed10cca39dacd97eb284939d754fbf4bc084b73595bac085578707bd5e",
   "classification": {
-    "未知": 450,
-    "已满足": 2
+    "已满足": 3,
+    "已违反": 0,
+    "未知": 449
   },
   "scopes": {
-    "源码元信息": 48,
-    "WSL专属": 345,
-    "原生可比": 59
+    "源码元信息": 124,
+    "WSL专属": 298,
+    "原生可比": 30
   },
   "complete_reviewer_packets": 20,
   "native_response_sha256": [
@@ -47,9 +48,9 @@
   ],
   "main_review": {
     "source_coverage": "All 452 locations match compiler-checked tokens at the frozen Git tree.",
-    "conclusive_findings": "Both affirmative findings were independently checked against original, scoped hardware records.",
+    "conclusive_findings": "Three native findings were checked against the scoped physical observations linked in the catalogue.",
     "corrected_rows": 11,
-    "recorded_physical_rounds": 8,
+    "recorded_physical_rounds": 9,
     "waiting_physical_rounds": 0,
     "unrelated_unobserved_recovery_intervals": 2
   },
@@ -57,7 +58,7 @@
     "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
     "source_tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
     "comment_count": 452,
-    "hardware_rounds": 8,
+    "hardware_rounds": 9,
     "checker_sha256": "9b59343bc29bd120480289ece7c9101d23878d87f3518f420a03060ce893f31e",
     "source_bytes_verified": true,
     "all_evidence_hashes_and_fields_verified": true,
@@ -107,5 +108,211 @@
     "stdout": "PASS blocked selection and push, qualified independent publication, new fault registration and deletion guard"
   },
   "interpretation": "The current Windows-only hardware records cannot grade WSL-only state. Unknown findings and interrupted traces retain that status.",
-  "user_deferred_application": "deferred-by-user"
+  "user_deferred_application": "deferred-by-user",
+  "followup_review": {
+    "model": "gemini-4-neon-xhigh",
+    "effort": "xhigh",
+    "prior_catalog_commit": "9ccbc5492c1a2019edaf3cae0d1a7ac38d45110d",
+    "completed_utc": "2026-11-21T12:57:16.750244+00:00",
+    "checked_locations": 452,
+    "changed_rows": 265,
+    "original_prompt_hashes_recomputed": 20,
+    "original_raw_responses_matched": 20,
+    "packet_reviews": [
+      {
+        "packet": "001",
+        "checked": 23,
+        "suggested": 7,
+        "request_sha256": "435963260e279a3da81f51afd3ae555a3ce83502e15ef8c3e50f3330acca4da1",
+        "native_response_sha256": "d62d4035a2accfebf4ec2c2f3efd9eb9e8fcee00ccbce198ac6139a588cc3b85"
+      },
+      {
+        "packet": "002",
+        "checked": 23,
+        "suggested": 22,
+        "request_sha256": "69d37b53018bd021962763c369accc6fa5be4af701e0f7edf11b645748bb4969",
+        "native_response_sha256": "60f913e3c7e143d2a5411f2c75d32331118211e97a131a6be7075a35105c4396"
+      },
+      {
+        "packet": "003",
+        "checked": 23,
+        "suggested": 20,
+        "request_sha256": "e94f80c95c943e16c95ecc9a241b8c179993264217f507632368a477322b7841",
+        "native_response_sha256": "34f5c06f168f3468d8b9eb90dd9bf3c28e0ea5a667d9e4c0060e035cb2a96114"
+      },
+      {
+        "packet": "004",
+        "checked": 23,
+        "suggested": 16,
+        "request_sha256": "e20922e61b7482834860d080012d10b05b7146ec3cc64bf20f6b6516644aeb24",
+        "native_response_sha256": "420356e7499ae6c33e123369e694a5c766b57aa2fa8df458b0d6871e5633363e"
+      },
+      {
+        "packet": "005",
+        "checked": 23,
+        "suggested": 7,
+        "request_sha256": "c21e8000a2660e416f923356cb65aa50d0df8feffd328ab7a10ddc643d632395",
+        "native_response_sha256": "26e86371c2717ae721378b603454c60e0995f586a1a1b6bf7ed2834b2d5b3046"
+      },
+      {
+        "packet": "006",
+        "checked": 23,
+        "suggested": 7,
+        "request_sha256": "d5d95df6e68c2da48812b2d5e8e4a445fe491fd20c26db20ac24355fe4740ec2",
+        "native_response_sha256": "c07055c38b42ba626e9395ceab793503e82429983b2347196573e52fccbfffd5"
+      },
+      {
+        "packet": "007",
+        "checked": 23,
+        "suggested": 4,
+        "request_sha256": "559f6a429206c967a2ccc4dbb3af2321da95ed285d3e33a4ed41300e285c71a1",
+        "native_response_sha256": "f504aa6ae6f39b24890ab3e7e579258ac05d528153ed2fb8a1add5bc3ca708b1"
+      },
+      {
+        "packet": "008",
+        "checked": 23,
+        "suggested": 13,
+        "request_sha256": "a4d9153158abe418ba307e066da08dd3fb3694aa6462276e8c5b96ff456f4e1a",
+        "native_response_sha256": "6cbe84427355e65ef5903d42248e0322d71c71ff2260b0ed808e3e15b13aead9"
+      },
+      {
+        "packet": "009",
+        "checked": 23,
+        "suggested": 12,
+        "request_sha256": "9a879c8362b95195bb6a49bfba54375365f6b914906e97031f2ce921ffbb0c8a",
+        "native_response_sha256": "f538b8893653a1afb8f37ec528257c9ca6cfcd5b768565e27b13101fbeba3808"
+      },
+      {
+        "packet": "010",
+        "checked": 23,
+        "suggested": 4,
+        "request_sha256": "ce980277fdc00cec358e12ae927043825402c7eee99dde6e0753b3aea2d77294",
+        "native_response_sha256": "81dcdb1617af7da67a8b89d8045151a88621c54795e651e45a4b004651866104"
+      },
+      {
+        "packet": "011",
+        "checked": 23,
+        "suggested": 9,
+        "request_sha256": "dba4f99bed2a5d64b5a18100ed7c89f57e578799cd64bb27d2a9ffa6da7f1b97",
+        "native_response_sha256": "6da5c9ad6ff1eea8088ce469ba80073ff061af2f5d319295a4c1264070147eec"
+      },
+      {
+        "packet": "012",
+        "checked": 23,
+        "suggested": 14,
+        "request_sha256": "64aea9352ed9290929f9a448f674cb4483b593735d76d3c8866cd9921acb2cec",
+        "native_response_sha256": "2e06f5c8604b58a0797f298fe7d3f2b4049aa6fcbb9fddc19f968faa7b9768a4"
+      },
+      {
+        "packet": "013",
+        "checked": 23,
+        "suggested": 17,
+        "request_sha256": "9771f42ab009826678dcbfe0d2073b775c41f13ce3abaf918fd7e33b37874312",
+        "native_response_sha256": "aeec609b08447ea0831454a52256c1e293c0a79b6f5b21c2c956eea159cd2aba"
+      },
+      {
+        "packet": "014",
+        "checked": 23,
+        "suggested": 3,
+        "request_sha256": "b0e67e1cd37884de21f7b2918ce9de245cefd570abdf26f259a523fe8db58c2b",
+        "native_response_sha256": "6dc96f49cc140ee9edb495e4badcd372db819dffacac7f96cd24708125bad691"
+      },
+      {
+        "packet": "015",
+        "checked": 23,
+        "suggested": 15,
+        "request_sha256": "41ee1a1f4d1a1489c2b574c4aa6479a93bd560a9b7e6246d746ff8d1836804d6",
+        "native_response_sha256": "cd46c205d9f4f890855d1a2a94fdbec6609d0c44b64c9f76868d9c3e7936908a"
+      },
+      {
+        "packet": "016",
+        "checked": 23,
+        "suggested": 12,
+        "request_sha256": "ef88fd80dbae72dcb4300cb5ed66139778270c2be502632fd796b77980ff793f",
+        "native_response_sha256": "d45141e4d3be285360ecc71beb311e3591ddf778dff17ab3b75a9c2e54fac64c"
+      },
+      {
+        "packet": "017",
+        "checked": 23,
+        "suggested": 23,
+        "request_sha256": "78d8a8dccbd9d6285ebc51cc78847a1418483c6edfe535ffd1b5922da2157efa",
+        "native_response_sha256": "0f0688b9776b679e8e72b5ae1af02039de749b58f23a830078a759b8d9e8103d"
+      },
+      {
+        "packet": "018",
+        "checked": 23,
+        "suggested": 23,
+        "request_sha256": "51f3dfd53c61067d4f853368d981c8ae3d3f99539e7cbcfa53fae274da24ece8",
+        "native_response_sha256": "97d071e2f1d0800633b9055d85a95caf38d51f6f2d894a84d19ef517522d3822"
+      },
+      {
+        "packet": "019",
+        "checked": 23,
+        "suggested": 23,
+        "request_sha256": "073e5e5e8db235a50ef7d3bf0321d863868b764ac7071318f98b82fdd4dd7006",
+        "native_response_sha256": "fe7cbfc09c41e5fb365dab307bdb7d4cb41c9a0c98d6de29631f89e80f60fbbe"
+      },
+      {
+        "packet": "020",
+        "checked": 15,
+        "suggested": 9,
+        "request_sha256": "5fde26bda3081ef6fbd28bbc287db38859c77305e1e6f022c492c884431588a8",
+        "native_response_sha256": "39aac18f5d48f218c75b24beb9fdea0d343538e59d253e4aa322d1c0e69308d7"
+      }
+    ],
+    "allocation_owner_followup": {
+      "contract_id": "dxgkrnl.h:746:2",
+      "round_id": "native-x86-allocation-owner-20261121-01",
+      "request_sha256": "a83a933035d81ef8f8398391944fbb278b6b62f42498404ac415a6b05ba68d23",
+      "native_response_sha256": "308eb372129aa0a780f205addd10347f93af99e99101d3dc3d720192b375d1d7"
+    },
+    "same_boot_kernel_service": {
+      "boot": 91476,
+      "driver_state": "Running",
+      "dwm": [
+        1400
+      ],
+      "service_image": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "dwm_start": "2026-11-21T12:17:38.1187736Z",
+      "utc": "2026-11-21T12:43:23.4298827Z",
+      "kmd_sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "started": true,
+      "service": "tegragpurender",
+      "code": 0
+    },
+    "field_scope_followup": {
+      "contract_ids": [
+        "dxgkrnl.h:677:2",
+        "dxgkrnl.h:752:2",
+        "dxgkrnl.h:755:2",
+        "dxgkrnl.h:746:2"
+      ],
+      "request_sha256": "156142390cb74276b02493ceb3a57aff6e76ccd35bf1becc2431b78de619fb54",
+      "native_response_sha256": "1920795c6f6df8195d6a356613fde309eeef9e29ee2f2c193da2862b0203f495"
+    },
+    "fence_followup": {
+      "model": "gemini-4-neon-xhigh",
+      "effort": "xhigh",
+      "request_sha256": "3dd0de90b70e79cc9c23ae31fb4431a0ff8a51787e348871763817b42fad5b16",
+      "native_response_sha256": "e67ea577920818a38a44a173f3edff05e06424d3cd26d0f31c396b72ae991de1",
+      "physical_input_summary_sha256": "7229f6424dfac706cfe79f8be8fe54a73ca4ebe02d74b6c42c0f3aad4be7bcb8",
+      "comment_verdicts": {
+        "dxgkrnl.h:145:1": "未知",
+        "dxgsyncfile.c:406:2": "未知"
+      },
+      "scope": "The decoded signal gives no observation of the synchronization object creation type, cross-process opening, destruction or release of a waiter.",
+      "initiating_reset_established": false
+    },
+    "prior_pal4_reports": {
+      "PAL4_DEFERRED_PIXEL_COMPILATION_20261121.json": "493ea0644237be824c023c7c55d34a0132dfd461e79d68f7290fce0a04d3df12",
+      "PAL4_DOCUMENTS_STARTUP_20261121.json": "d86869d26e5ecaa7a9acd9b58dc338a0654d4e0bba6366699cacde611f8ac3c0",
+      "PAL4_IMAGE_BIND_BOUNDARY_20261121.json": "37dc1b30aaf8c7636de9ac91cb873119b87efe0351d210d0e61c8854fc81169c",
+      "PAL4_LOAD_CONTROLS_20261118.json": "eacce54a0b60107fd216b7eef8179f2335615c7fde6858a8463a8ba8e19ec560",
+      "PAL4_NATIVE_RESIDENCY_20261121.json": "dec9f7d449caf53eaf6b8516330624cadeb8e8d769e6f3e25210ca5d420cd35e",
+      "PAL4_PREIMAGE_CONTEXT_20261121.json": "93b2bdbdf5d0047436ff8d26af8f99836172beb1826f1d24a33e3bfe0bde5829",
+      "PAL4_SHADER_REPLAY_20261121.json": "b3efe2af4e0dae1493c68422fa3b9de66cf20130defd688bfaaa3e445977c08e",
+      "PAL4_TEXTURE_CHECKPOINT_20261121.json": "585863a96d6c63caeb88b73b140b68291bbd58550c40d9b894d84a9b2cad101b",
+      "PAL4_TEXTURE_CONSTRUCTOR_BOUNDARY_20261121.json": "0e4cc32de50c72da555321b08e4fbb9099c0478c3a22b29178c194eaf52739aa"
+    }
+  }
 }
