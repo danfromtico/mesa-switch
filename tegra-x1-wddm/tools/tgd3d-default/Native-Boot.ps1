@@ -96,11 +96,12 @@ try {
                 $activation=$e.Data
                 $mark=Read-SwitchPolicyJson (Join-Path $policyRoot 'active-trial.json')
                 if ($mark.first_record -ne $e.Data.system_log.first_record) {
-                    $selected=Read-SwitchPolicyJson (Get-SwitchPolicyFile $policy 'graphics-baseline.json')
+                    $selectedProfile=Read-SwitchPolicyJson (Get-SwitchPolicyFile $policy 'graphics-baseline.json')
                     $last=(Get-WinEvent -LogName System -MaxEvents 1 -ErrorAction Stop).RecordId
+                    if (!(Test-SwitchRecordId $mark.first_record) -or !(Test-SwitchRecordId $last)) { throw 'Missing live activation bookmark' }
                     $filter="*[System[EventRecordID > $([long]$mark.first_record) and EventRecordID <= $([long]$last) and (EventID=12 or EventID=41 or EventID=6008 or EventID=1074)]]"
                     $events=@(Get-WinEvent -LogName System -FilterXPath $filter -ErrorAction Stop)
-                    $activation=Get-SwitchReactivationEvidence $selected $e $mark $events $last
+                    $activation=Get-SwitchReactivationEvidence $selectedProfile $e $mark $events $last
                 }
                 Assert-SwitchLiveTrial $policyRoot $Directory $live $activation $permit
                 $approval='QualifiedPromotion'

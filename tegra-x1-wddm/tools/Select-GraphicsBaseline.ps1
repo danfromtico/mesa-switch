@@ -34,13 +34,18 @@ foreach($rev in $revisions){
 }
 if($old){Assert-SwitchFaultHistory $old $ledger}
 $baselineRel='tegra-x1-wddm/docs/graphics-baseline.json'
-foreach($comparison in $ledger.baseline_comparisons){
+$comparisons=@()
+if($ledger.PSObject.Properties['baseline_comparisons']){$comparisons=@($ledger.baseline_comparisons)}
+foreach($comparison in $comparisons){
     $before=$comparison.before_commit
-    & git -C $root merge-base --is-ancestor $before HEAD
-    if($LASTEXITCODE){throw 'Historical comparison must come from this repository history'}
+    $distance=& git -C $root rev-list --count --first-parent "$before..HEAD"
+    if($LASTEXITCODE){throw 'Cannot inspect historical baseline lineage'}
+    $ancestor=& git -C $root rev-parse --verify "HEAD~$distance"
+    if($LASTEXITCODE -or $ancestor -ne $before){throw 'Historical comparison must come from the first-parent baseline history'}
     $priorLines=@(& git -C $root show ("${before}:"+$baselineRel))
     if($LASTEXITCODE){throw 'Missing historical baseline for comparison'}
     $priorSelection=($priorLines -join "`n")|ConvertFrom-Json -ErrorAction Stop
+    Assert-SwitchAcceptedBaseline $priorSelection
     if($priorSelection.qualification_sha256 -ne $comparison.previous_qualification_sha256){throw 'Historical comparison used a different selected baseline'}
     $priorPath=$priorSelection.qualification
     if($priorPath -notmatch '^tegra-x1-wddm/docs/[a-z0-9_./-]+\.json$' -or $priorPath.Split('/') -contains '..'){throw 'Invalid historical qualification path'}
@@ -118,6 +123,16 @@ if ([string]::IsNullOrWhiteSpace($Qualification) -or $Qualification -notmatch '^
     throw 'Specify a repository-relative hardware qualification in tegra-x1-wddm/docs'
 }
 $e=Read-SwitchEvidence (Join-Path $root $Qualification)
+$activeComparison=@($comparisons|Where-Object evidence_sha256 -eq $e.Sha256)
+if($activeComparison.Count){
+    $before=$activeComparison[0].before_commit
+    & git -C $root merge-base --is-ancestor $e.Data.base_commit $before
+    if($LASTEXITCODE){throw 'Comparison snapshot predates the selected baseline source'}
+    $beforeTime=& git -C $root show -s --format=%ct $before
+    if($LASTEXITCODE){throw 'Missing comparison snapshot'}
+    $sourceTime=& git -C $root show -s --format=%ct $e.Data.source_commit
+    if($LASTEXITCODE -or [long]$beforeTime -ge [long]$sourceTime){throw 'The baseline fault snapshot must precede the candidate source'}
+}
 if ($publishing) {
     if ($selected.source_commit -ne $e.Data.source_commit -or $selected.qualification_sha256 -ne $e.Sha256) { throw 'Selected source or qualification digest differs' }
     $profile=$selected.components
@@ -172,6 +187,12 @@ if ($Action -eq 'Publish') {
              'tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1','tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1')
     $prefix=$Qualification.Substring(0,$Qualification.LastIndexOf('/')+1)
     $paths+=@(@($e.Data.cases)+@($e.Data.system_log.restarts)|ForEach-Object {$prefix+$_.evidence_file})
+    if($activeComparison.Count){
+        $paths+=@($priorBaseline.qualification)
+        $prior=Read-SwitchPolicyJson (Join-Path $root $priorBaseline.qualification)
+        $control=@($prior.cases|Where-Object evidence_sha256 -eq $activeComparison[0].previous_control_sha256)
+        $paths+=@($priorBaseline.qualification.Substring(0,$priorBaseline.qualification.LastIndexOf('/')+1)+$control[0].evidence_file)
+    }
     foreach($path in $paths) {
         $expected=& git -C $root rev-parse --verify ("$head"+':'+$path)
         if ($LASTEXITCODE) { throw "Policy or evidence is absent from the publication commit: $path" }

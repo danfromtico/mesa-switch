@@ -204,7 +204,10 @@ function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Ca
     if ($trial.boot_record -notin @($Evidence.cases.before_boot)) { throw 'The selected one-time desktop was not tested' }
     if ($Evidence.change_kind -ceq 'verified-fix') { Assert-SwitchVerifiedFix $Ledger $Evidence }
     $open = @($Ledger.faults | Where-Object status -ceq 'open')
-    $comparison = @($Ledger.baseline_comparisons | Where-Object evidence_sha256 -eq $EvidenceSha256)
+    $comparison = @()
+    if ($Ledger.PSObject.Properties['baseline_comparisons']) {
+        $comparison = @($Ledger.baseline_comparisons | Where-Object evidence_sha256 -eq $EvidenceSha256)
+    }
     if ($comparison.Count) {
         if ($Evidence.change_kind -cne 'verified-fix') { throw 'A baseline comparison requires a verified fix' }
         if (!$Previous -or $Previous.source_commit -ne $Evidence.base_commit) { throw 'Baseline comparison requires the previous selected source' }
@@ -217,7 +220,8 @@ function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Ca
         foreach ($field in @('output_verified','normal_exit','desktop_available')) {
             if ($working[0].$field -isnot [bool] -or !$working[0].$field) { throw "Previous baseline control lacks $field" }
         }
-        if ($sys.abnormal_events.Count) { throw 'An abnormal candidate interval cannot qualify a baseline comparison' }
+        if ($working[0].evidence_sha256 -eq $Evidence.verified_fix.control_sha256) { throw 'The candidate control must have its own hardware receipt' }
+        if ($sys.abnormal_events.Count -or @($sys.restarts|Where-Object kind -cne 'controlled').Count) { throw 'An abnormal candidate interval cannot qualify a baseline comparison' }
         foreach ($fault in $open) {
             if ($fault.id -cnotin $comparison[0].inherited_faults) { throw "New open fault outside the baseline comparison: $($fault.id)" }
         }

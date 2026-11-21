@@ -73,11 +73,13 @@ function Save-SwitchRollbackProfile([string]$PolicyRoot,$Baseline) {
 
 function Get-SwitchReactivationEvidence($Selected,$Qualification,$Bookmark,$Events,$LastRecord) {
     $proved=$Qualification.Data
+    Assert-SwitchAcceptedBaseline $Selected
+    Assert-SwitchHash $Qualification.Sha256
     if ($Selected.source_commit -ne $proved.source_commit -or $Selected.qualification_sha256 -ne $Qualification.Sha256 -or
         $Selected.directory -ne $proved.directory -or !(Test-SwitchSameProfile $Selected.components $proved.components)) {
         throw 'A later activation requires the exact repository-selected hardware qualification'
     }
-    if (!(Test-SwitchRecordId $Bookmark.first_record) -or $Bookmark.first_record -le $proved.system_log.last_record -or
+    if (!(Test-SwitchRecordId $proved.system_log.last_record) -or !(Test-SwitchRecordId $Bookmark.first_record) -or $Bookmark.first_record -le $proved.system_log.last_record -or
         !(Test-SwitchRecordId $LastRecord) -or $LastRecord -le $Bookmark.first_record) { throw 'Invalid interval for later activation' }
     $boots=@($Events|Where-Object { $_.Id -eq 12 -and $_.ProviderName -eq 'Microsoft-Windows-Kernel-General' })
     $shutdown=@($Events|Where-Object { $_.Id -eq 1074 -and $_.ProviderName -eq 'User32' })
