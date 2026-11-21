@@ -71,6 +71,28 @@ function Save-SwitchRollbackProfile([string]$PolicyRoot,$Baseline) {
     Write-SwitchPolicyText $path ($Baseline|ConvertTo-Json -Depth 6)
 }
 
+function Get-SwitchReactivationEvidence($Selected,$Qualification,$Bookmark,$Events,$LastRecord) {
+    $proved=$Qualification.Data
+    if ($Selected.source_commit -ne $proved.source_commit -or $Selected.qualification_sha256 -ne $Qualification.Sha256 -or
+        $Selected.directory -ne $proved.directory -or !(Test-SwitchSameProfile $Selected.components $proved.components)) {
+        throw 'A later activation requires the exact repository-selected hardware qualification'
+    }
+    if (!(Test-SwitchRecordId $Bookmark.first_record) -or $Bookmark.first_record -le $proved.system_log.last_record -or
+        !(Test-SwitchRecordId $LastRecord) -or $LastRecord -le $Bookmark.first_record) { throw 'Invalid interval for later activation' }
+    $boots=@($Events|Where-Object { $_.Id -eq 12 -and $_.ProviderName -eq 'Microsoft-Windows-Kernel-General' })
+    $shutdown=@($Events|Where-Object { $_.Id -eq 1074 -and $_.ProviderName -eq 'User32' })
+    if ($boots.Count -ne 1 -or $shutdown.Count -ne 1 -or $shutdown[0].RecordId -le $Bookmark.first_record -or
+        $shutdown[0].RecordId -ge $boots[0].RecordId -or $boots[0].RecordId -gt $LastRecord -or
+        @($Events|Where-Object { ($_.Id -eq 41 -and $_.ProviderName -eq 'Microsoft-Windows-Kernel-Power') -or
+                                 ($_.Id -eq 6008 -and $_.ProviderName -eq 'EventLog') }).Count) {
+        throw 'Later activation needs one controlled restart without an abnormal shutdown'
+    }
+    $boot=$boots[0].RecordId
+    return [pscustomobject]@{trial=[pscustomobject]@{boot_record=$boot};system_log=[pscustomobject]@{
+        first_record=$Bookmark.first_record;last_record=$LastRecord;boot_records=@($boot);abnormal_events=@();
+        restarts=@([pscustomobject]@{kind='controlled';boot_record=$boot;system_records=@($shutdown[0].RecordId,$boot)})}}
+}
+
 function Assert-SwitchLiveTrial([string]$PolicyRoot,[string]$Directory,$Profile,$Evidence,[string]$Token) {
     $armed=Read-SwitchPolicyJson (Join-Path $PolicyRoot 'active-trial.json')
     if ($armed.directory -ne $Directory -or !(Test-SwitchSameProfile $armed.components $Profile) -or $armed.first_record -ne $Evidence.system_log.first_record) { throw 'Hardware evidence does not start at this candidate grant' }

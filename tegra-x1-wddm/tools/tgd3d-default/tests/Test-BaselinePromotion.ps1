@@ -146,6 +146,22 @@ try{
     Block 'unverified change cannot inherit faults' {Assert-SwitchPromotion $compared $e $proof $candidate $directory $previous $priorFile} 'requires a verified fix'
     $bad=Clone $verified;$bad.system_log.abnormal_events=@([pscustomobject]@{id=41;record=111;boot_record=110})
     Block 'inherited faults cannot mask a new restart' {Assert-SwitchPromotion $compared $bad $proof $candidate $directory $previous $priorFile} 'abnormal'
+    . (Join-Path $PolicyDirectory 'Baseline-Device.ps1')
+    $accepted=Clone $previous
+    $accepted.source_commit=$verified.source_commit;$accepted.qualification_sha256=$proof
+    $accepted.components=$candidate;$accepted.directory=$directory
+    $qualified=[pscustomobject]@{Data=$verified;Sha256=$proof}
+    $bookmark=[pscustomobject]@{first_record=200}
+    $events=@([pscustomobject]@{Id=1074;ProviderName='User32';RecordId=205},
+              [pscustomobject]@{Id=12;ProviderName='Microsoft-Windows-Kernel-General';RecordId=210})
+    $actual=Get-SwitchReactivationEvidence $accepted $qualified $bookmark $events 215
+    if($actual.trial.boot_record -ne 210 -or $actual.system_log.first_record -ne 200){throw 'Wrong later activation interval'}
+    $bad=Clone $accepted;$bad.qualification_sha256='a'*64
+    Block 'later activation requires the selected qualification' {Get-SwitchReactivationEvidence $bad $qualified $bookmark $events 215} 'exact repository-selected'
+    $abnormal=$events+@([pscustomobject]@{Id=6008;ProviderName='EventLog';RecordId=211})
+    Block 'later activation cannot accept an abnormal shutdown' {Get-SwitchReactivationEvidence $accepted $qualified $bookmark $abnormal 215} 'controlled restart'
+    Block 'later activation cannot use an earlier grant' {Get-SwitchReactivationEvidence $accepted $qualified ([pscustomobject]@{first_record=102}) $events 215} 'Invalid interval'
+    Write-Output 'PASS separate hardware qualification and actual reactivation boots'
     [IO.File]::WriteAllText((Join-Path $scratch 'case.json'),'test case record')
     [IO.File]::WriteAllText((Join-Path $scratch 'boot.json'),'test system record')
     $copy=Clone $e
