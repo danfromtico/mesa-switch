@@ -4,6 +4,8 @@
 
 现行 WDDM 2.6 源码 `7f626083`、实载签名 KMD `30331aa3cb57`。启动 92083 的原签名窗口首次 Present(1,0) 用时 14.302 ms，返回 S_OK。画面、输入、退出和桌面连续。DWM 同一 GM20B 节点 0 的 DMA 9652 / 队列序号 4444 有同线程 5063 进入与返回，以及同包中断、完成与退役。91476 的历史根因保持开放，91918→91989 是切换前独立故障。手持取证未覆盖 PL=1 高频。[现行基线回执](nvgpu-init-30331aa3cb57/permanent-boot.json) · [同轮原始证据与边界](windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json)
 
+应用自己的首笔 52 字节 Blt 在 92083 对应 DMA 9651。Windows 回执绑定调用、包装和同包完成。KMD 在完成前的 GPU 围栏快照仍为 observed 0、expected 3272，上一完成值 9650，随后同包完成。有效 GR/FECS 缓存在该采样时点为零。[应用 Blt 同包证据](windows-native-graphics/rounds/win-seq-application-blt-fence-20261121-01.result.json)
+
 本轮在手持、交流供电的 Switch 上验证 Windows 11 ARM64、GM20B 和正式 WDDM 2.6 基线 `c137ce75`。先核对普通双缓冲 SEQUENTIAL 首次 Present 与同对象的 GPU 围栏等待，再验收原生 D3D11、应用目录 DXVK、冷启动和受控重启。意外重启和 Wi-Fi 恢复各自保留启动与系统事件。《仙剑四》继续暂缓。[Windows 问题、优先级与进度](windows-native-graphics/index.json) · [单项轮次与开放故障](open-faults.json)
 
 已有 27 轮 Windows 原生实测在新索引中逐项映射。124 条静态核对和 298 条来宾专属条目归入历史旁证。[原始缺口索引](wsl-dxgkrnl-contracts/gap-index.json) · [既有实机回执](wsl-dxgkrnl-contracts/native-27.json)

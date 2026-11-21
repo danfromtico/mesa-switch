@@ -3625,6 +3625,48 @@
           "first_anomaly_or_missing": "5063 原始载荷只有函数号。同调度线程由 175 与同对象序号绑定，完成由 Windows 回执核实。DWM 包与窗口处于同一时间区间，仍缺窗口表面与该 DWM 包的直接令牌。91476 DMA 152586 继续缺该次提交的 KMD 进入、返回及完成。手持实测未覆盖 PL=1 高频。"
         },
         "finished_utc": "2026-11-21T17:54:25.453362+00:00"
+      },
+      {
+        "round_id": "win-seq-application-blt-fence-20261121-01",
+        "contract_id": "WIN-SEQ-APP-BLT-DMA-NATIVE",
+        "windows_question": "WIN-SEQ-APP-BLT-DMA-NATIVE",
+        "method": "只读重解 92083 一轮留存文件，检查应用首个 Blt 的 DMA ID 与有效的 KMD 缓存快照",
+        "plan": "windows-native-graphics/rounds/win-seq-application-blt-fence-20261121-01.plan.json",
+        "plan_sha256": "b8552ed882810ae97d3bea34afe20c4611e344a19e8ea963339212e315609d05",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T17:55:41.481266+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-seq-application-blt-fence-20261121-01.result.json",
+        "result_sha256": "7912f01b92a41854e52a7fbf490f147f03a8ca34c3aee6bd6bda33b49bdd27ad",
+        "status": "实机通过",
+        "finding": "启动 92083 的首个 52 字节 Blt 对应同上下文队列 1、DMA 9651。实时及两份 ETL 核对了 5063 包装返回、KMD 同围栏等待阶段快照、中断和同包退役。快照记录有效的 GR/FECS 预抢占状态。",
+        "missing_observation": "GR、FECS 错误邮箱及主机中断状态为本次采样时点。逐 SM HWW 和 PRI 锁存仍缺。该 Blt 与历史 91476 的 DWM DMA 152586 是各自启动内的不同提交。",
+        "boundaries": {
+          "last_entry": {
+            "qpc": 17576074860,
+            "pid": 4,
+            "tid": 924,
+            "provider": "kernel",
+            "id": 105,
+            "version": 0,
+            "fields": {
+              "Function": 5063
+            }
+          },
+          "last_return": {
+            "qpc": 17576075358,
+            "pid": 4,
+            "tid": 924,
+            "provider": "kernel",
+            "id": 106,
+            "version": 0,
+            "fields": {
+              "Function": 5063
+            }
+          },
+          "first_anomaly_or_missing": "GR、FECS 错误邮箱及主机中断状态为本次采样时点。逐 SM HWW 和 PRI 锁存仍缺。该 Blt 与历史 91476 的 DWM DMA 152586 是各自启动内的不同提交。"
+        },
+        "finished_utc": "2026-11-21T17:55:42.800579+00:00"
       }
     ]
   }
