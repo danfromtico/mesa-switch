@@ -37,6 +37,8 @@ typedef struct _TG_GPU_ADAPTER {
     BOOLEAN EngineReady,QueueReady;
 } TG_GPU_ADAPTER;
 _Static_assert(FIELD_OFFSET(TG_GPU_ADAPTER,Engine)==0,"adapter DDI handle layout");
+_Static_assert(FIELD_OFFSET(TG_GPU_ADAPTER,StartupDiagnostic)%8==0,
+    "startup diagnostic snapshot alignment");
 
 DXGKDDI_ADD_DEVICE TgGpuDdiAddDevice;
 DXGKDDI_START_DEVICE TgGpuDdiStartDevice;

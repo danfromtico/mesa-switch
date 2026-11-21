@@ -59,6 +59,7 @@ static void check_case(DXGK_DIAGNOSTICINFO_TYPE type,PDEVICE_OBJECT pdo,HANDLE c
     const ULONG previous_traces=trace_count;
     CHECK(TgGpuDdiCollectDiagnosticInfo(pdo,&args)==status);
     CHECK(args.pReserved==&other && args.BufferSizeIn==capacity && args.hAdapter==context);
+    CHECK(args.pBuffer==(has_buffer?bytes+1:NULL) && args.Type==type);
 
     UINT written=0;
     if (status==STATUS_SUCCESS) {
@@ -74,7 +75,9 @@ static void check_case(DXGK_DIAGNOSTICINFO_TYPE type,PDEVICE_OBJECT pdo,HANDLE c
             "adapter_context_available":"adapter_context_unavailable");
         CHECK(trace_count==previous_traces+1);
         CHECK(trace.BufferSizeIn==capacity && trace.BufferSizeOut==written);
-        CHECK(trace.Snapshot.Type==(ULONG)type && trace.Snapshot.Stage==(ULONG)stage);
+        CHECK(trace.Snapshot.Version==record.Version && trace.Snapshot.Type==record.Type);
+        CHECK(trace.Snapshot.AdapterAvailable==available && trace.Snapshot.Stage==(ULONG)stage);
+        CHECK(trace.Snapshot.StartStatus==start_status);
     } else {
         CHECK(trace_count==previous_traces && !args.BucketingString[0] &&
             !args.DescriptionString[0]);
@@ -100,11 +103,15 @@ void start(void)
         FALSE,TgGpuStartupUnavailable,STATUS_SUCCESS);
     check_case(DXGK_DI_STARTDEVICE,&other,&adapter,size,TRUE,STATUS_SUCCESS,
         FALSE,TgGpuStartupUnavailable,STATUS_SUCCESS);
+    check_case(DXGK_DI_STARTDEVICE,NULL,&adapter,size,TRUE,STATUS_SUCCESS,
+        FALSE,TgGpuStartupUnavailable,STATUS_SUCCESS);
     check_case(DXGK_DI_STARTDEVICE,&physical,&adapter,size-1,TRUE,STATUS_BUFFER_TOO_SMALL,
         FALSE,TgGpuStartupUnavailable,STATUS_SUCCESS);
     check_case(DXGK_DI_STARTDEVICE,&physical,NULL,0,FALSE,STATUS_BUFFER_TOO_SMALL,
         FALSE,TgGpuStartupUnavailable,STATUS_SUCCESS);
     check_case(DXGK_DI_STARTDEVICE,&physical,NULL,size,FALSE,STATUS_INVALID_PARAMETER,
+        FALSE,TgGpuStartupUnavailable,STATUS_SUCCESS);
+    check_case(DXGK_DI_STARTDEVICE,&physical,NULL,size-1,FALSE,STATUS_INVALID_PARAMETER,
         FALSE,TgGpuStartupUnavailable,STATUS_SUCCESS);
     check_case(DXGK_DI_BLACKSCREEN,&physical,&adapter,size,TRUE,STATUS_NOT_SUPPORTED,
         FALSE,TgGpuStartupUnavailable,STATUS_SUCCESS);

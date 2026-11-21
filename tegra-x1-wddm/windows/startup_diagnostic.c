@@ -4,8 +4,10 @@
 void TgGpuRecordStartup(TG_GPU_ADAPTER *adapter,enum tg_gpu_startup_stage stage,NTSTATUS status)
 {
     /* A level-zero callback can sample the stage and status as one value. */
-    if (adapter)
-        InterlockedExchange64(&adapter->StartupDiagnostic,((LONG64)stage<<32)|(ULONG)status);
+    if (adapter) {
+        const ULONGLONG snapshot=((ULONGLONG)stage<<32)|(ULONG)status;
+        InterlockedExchange64(&adapter->StartupDiagnostic,(LONG64)snapshot);
+    }
 }
 
 NTSTATUS APIENTRY TgGpuDdiCollectDiagnosticInfo(PDEVICE_OBJECT physical,
@@ -15,6 +17,10 @@ NTSTATUS APIENTRY TgGpuDdiCollectDiagnosticInfo(PDEVICE_OBJECT physical,
     static const CHAR start_bucket[]="tegragpurender_startdevice";
     static const CHAR with_adapter[]="adapter_context_available";
     static const CHAR without_adapter[]="adapter_context_unavailable";
+    _Static_assert(sizeof(add_bucket)<=sizeof(args->BucketingString),"AddDevice bucket");
+    _Static_assert(sizeof(start_bucket)<=sizeof(args->BucketingString),"StartDevice bucket");
+    _Static_assert(sizeof(with_adapter)<=sizeof(args->DescriptionString),"Available adapter");
+    _Static_assert(sizeof(without_adapter)<=sizeof(args->DescriptionString),"Unavailable adapter");
     PAGED_CODE();
 
     if (!args)
@@ -24,11 +30,12 @@ NTSTATUS APIENTRY TgGpuDdiCollectDiagnosticInfo(PDEVICE_OBJECT physical,
     RtlZeroMemory(args->DescriptionString,sizeof(args->DescriptionString));
     if (args->Type!=DXGK_DI_ADDDEVICE && args->Type!=DXGK_DI_STARTDEVICE)
         return STATUS_NOT_SUPPORTED;
+    if (!args->pBuffer && args->BufferSizeIn)
+        return STATUS_INVALID_PARAMETER;
     if (args->BufferSizeIn<sizeof(TG_GPU_STARTUP_DIAGNOSTIC))
         return STATUS_BUFFER_TOO_SMALL;
-    if (!args->pBuffer)
-        return STATUS_INVALID_PARAMETER;
 
+    /* Stage and StartStatus are meaningful only when AdapterAvailable is set. */
     TG_GPU_STARTUP_DIAGNOSTIC record={.Version=1,.Type=args->Type};
     TG_GPU_ADAPTER *adapter=args->hAdapter;
     if (physical && adapter && adapter->PhysicalDevice==physical) {

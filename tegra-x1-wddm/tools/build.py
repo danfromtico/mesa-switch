@@ -404,10 +404,14 @@ if args.windows_tests:
     startup_diagnostic_test=args.out / "test_startup_diagnostic_windows.obj"
     subprocess.run([args.clang_cl,*flags,"/clang:-funwind-tables",f"/Fo{startup_diagnostic_test}","--",
                     str(root / "tests/test_startup_diagnostic_windows.c")],check=True)
+    startup_diagnostic_model=args.out / "startup_diagnostic_model.obj"
+    subprocess.run([args.clang_cl,*flags,"/UDBG","/clang:-funwind-tables",
+                    f"/Fo{startup_diagnostic_model}","--",
+                    str(root / "windows/startup_diagnostic.c")],check=True)
     subprocess.run([args.link,"/nologo","/machine:arm64","/subsystem:console,10.0","/entry:start",
                     "/include:_load_config_used","/nodefaultlib","/release","/opt:ref","/timestamp:0",
                     f"/out:{args.out / 'test-startup-diagnostic.exe'}",str(startup_diagnostic_test),
-                    str(args.out / "startup_diagnostic.obj"),str(sdk_lib)],check=True)
+                    str(startup_diagnostic_model),str(sdk_lib)],check=True)
 
 def copy_firmware(dest):
     for filename in gr_names:
