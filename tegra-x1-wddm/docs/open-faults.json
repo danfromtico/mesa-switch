@@ -791,6 +791,81 @@
           "test_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c"
         }
       ]
+    },
+    {
+      "evidence_sha256": "212be292c8edcaec806a37eb13aea4b5a48229fe80763272f24dcf02110cbfda",
+      "independence": [
+        {
+          "fault_id": "GM20B-POST-QUALIFICATION-RESTART-92154",
+          "reason": "The controlled boot sequence, signed native DWM components, KMD and firmware were verified against the baseline. Only the compatibility ICD bytes changed. Native desktop continuity and the complete System interval are recorded; the historical reboot remains open.",
+          "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
+        },
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "reason": "The controlled boot sequence, signed native DWM components, KMD and firmware were verified against the baseline. Only the compatibility ICD bytes changed. Native desktop continuity and the complete System interval are recorded; the historical reboot remains open.",
+          "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "This qualification exercises the EC ICD via native Windows offscreen drawing and readback. The application creates no swap chain. The KMD, tgd3d, native DWM leaf and display registration ABI retain the measured baseline bytes or values. The historical presentation scenario remains open.",
+          "test_sha256": "7f9e56ac05b45d8b5b6bad561992bdff7468177d047111e9d02fb894f1bc2362"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "This qualification exercises the EC ICD via native Windows offscreen drawing and readback. The application creates no swap chain. The KMD, tgd3d, native DWM leaf and display registration ABI retain the measured baseline bytes or values. The historical presentation scenario remains open.",
+          "test_sha256": "7f9e56ac05b45d8b5b6bad561992bdff7468177d047111e9d02fb894f1bc2362"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "This qualification exercises the EC ICD via native Windows offscreen drawing and readback. The application creates no swap chain. The KMD, tgd3d, native DWM leaf and display registration ABI retain the measured baseline bytes or values. The historical presentation scenario remains open.",
+          "test_sha256": "7f9e56ac05b45d8b5b6bad561992bdff7468177d047111e9d02fb894f1bc2362"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "The short offscreen draws and clean exits ran on AC with identical KMD, firmware and power configuration. No workload escalation, memory pressure or power-state change is part of this ABI replacement.",
+          "test_sha256": "73e631abc318fbc4ebc2742769b8e6fc0473fa9e7d74f31d1d731f5d6633b277"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "Wi-Fi binaries and configuration are outside the replaced NVK module. The candidate boot remained reachable through readback and exit.",
+          "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "reason": "The controlled boot sequence, signed native DWM components, KMD and firmware were verified against the baseline. Only the compatibility ICD bytes changed. Native desktop continuity and the complete System interval are recorded; the historical reboot remains open.",
+          "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "reason": "The short offscreen draws and clean exits ran on AC with identical KMD, firmware and power configuration. No workload escalation, memory pressure or power-state change is part of this ABI replacement.",
+          "test_sha256": "73e631abc318fbc4ebc2742769b8e6fc0473fa9e7d74f31d1d731f5d6633b277"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "reason": "The controlled boot sequence, signed native DWM components, KMD and firmware were verified against the baseline. Only the compatibility ICD bytes changed. Native desktop continuity and the complete System interval are recorded; the historical reboot remains open.",
+          "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "reason": "The controlled boot sequence, signed native DWM components, KMD and firmware were verified against the baseline. Only the compatibility ICD bytes changed. Native desktop continuity and the complete System interval are recorded; the historical reboot remains open.",
+          "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "reason": "The controlled boot sequence, signed native DWM components, KMD and firmware were verified against the baseline. Only the compatibility ICD bytes changed. Native desktop continuity and the complete System interval are recorded; the historical reboot remains open.",
+          "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "reason": "This qualification exercises the EC ICD via native Windows offscreen drawing and readback. The application creates no swap chain. The KMD, tgd3d, native DWM leaf and display registration ABI retain the measured baseline bytes or values. The historical presentation scenario remains open.",
+          "test_sha256": "7f9e56ac05b45d8b5b6bad561992bdff7468177d047111e9d02fb894f1bc2362"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "reason": "The controlled boot sequence, signed native DWM components, KMD and firmware were verified against the baseline. Only the compatibility ICD bytes changed. Native desktop continuity and the complete System interval are recorded; the historical reboot remains open.",
+          "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
+        }
+      ]
     }
   ],
   "baseline_comparisons": [
