@@ -1,0 +1,429 @@
+{
+  "schema": 1,
+  "round_id": "win-dma-ddi-profiler-live-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "a8e3d74cc4b5faa198b75e0a8783865b9923e24f7617e7bb1e188077c8106f9f",
+  "status": "实机通过",
+  "finding": "在正式启动 91918 的独立 1600 ms 会话中，52 条实时事件与同路 ETL 的头和载荷逐条匹配，控制端均完成 fsync 并收到 Windows 确认。DWM 的 GM20B 节点 0 提交 21991/队列 8136 配齐 175.1、5063 进入与返回、177/176/180。",
+  "missing_observation": "此同包最大 Windows 回调延迟 8.945 ms，控制端持久化确认晚于源事件 19.186–22.556 ms。骤停间隔落在这些延迟以内时，缺失事件不能排除对应阶段。历史 152586 仍缺此类型同号回执。",
+  "device_executions": 0,
+  "evidence": {
+    "boundaries": {
+      "last_entry": {
+        "qpc": 32212647680,
+        "pid": 4,
+        "tid": 932,
+        "provider": "kernel",
+        "id": 105,
+        "version": 0,
+        "fields": {
+          "Function": 5063
+        }
+      },
+      "last_return": {
+        "qpc": 32212720821,
+        "pid": 4,
+        "tid": 928,
+        "provider": "kernel",
+        "id": 180,
+        "version": 1,
+        "fields": {
+          "hContext": 18446659461286034880,
+          "PacketType": 0,
+          "SubmitSequence": 8136,
+          "bPreempted": 0,
+          "bTimeouted": 0,
+          "pQueuePacket": 18446607229195668256
+        }
+      },
+      "first_anomaly_or_missing": "此同包最大 Windows 回调延迟 8.945 ms，控制端持久化确认晚于源事件 19.186–22.556 ms。骤停间隔落在这些延迟以内时，缺失事件不能排除对应阶段。历史 152586 仍缺此类型同号回执。"
+    },
+    "signed_observer": {
+      "sha256": "adb87f9f9ad33ff0132230a2de0c86bdfc764d2cc0f65af7a3188d0e7e702784",
+      "boot": 91918,
+      "signature": "Valid"
+    },
+    "session": "SwitchDdiLive-311b9839e72b",
+    "same_event_header_and_payload_count": 52,
+    "provider_match_definition": "事件 ID、版本、PID、TID、源 QPC 与原始载荷逐条匹配；事件提供方同为 Microsoft-Windows-DxgKrnl。",
+    "dwm_dma_live_and_file": {
+      "owner": {
+        "context": {
+          "qpc": 32196915152,
+          "pid": 676,
+          "tid": 5060,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446659461286286000,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446659461286034880,
+            "ContextHandle": 1073744704,
+            "ParentDxgContext": 0
+          }
+        },
+        "device": {
+          "qpc": 32196915111,
+          "pid": 676,
+          "tid": 5060,
+          "provider": "kernel",
+          "id": 29,
+          "version": 2,
+          "fields": {
+            "hProcessId": 1472,
+            "pDxgAdapter": 18446607229161803776,
+            "ClientType": 1,
+            "hDevice": 18446659461286286000,
+            "RequestVSync": 0,
+            "DisableGpuTimeout": 0,
+            "hThunkHandle": 1073744064,
+            "DxgProcess": 18446659461269970192,
+            "HostDeviceHandle": 0,
+            "VirtualGpu": 0
+          }
+        },
+        "adapter": {
+          "qpc": 32196886882,
+          "pid": 676,
+          "tid": 5060,
+          "provider": "kernel",
+          "id": 110,
+          "version": 1,
+          "fields": {
+            "pDxgAdapter": 18446607229161803776,
+            "ConfigSpaceSize": 0,
+            "ChainUid": 0,
+            "NumberOfLinksInChain": 0,
+            "LeadLink": 0,
+            "BusType": 2,
+            "VendorID": 1095718739,
+            "DeviceID": 825247280,
+            "SubVendorID": 0,
+            "SubSystemID": 0,
+            "RevisionID": 0,
+            "AdapterLuid": 22017
+          }
+        }
+      },
+      "events": [
+        {
+          "qpc": 32212647554,
+          "pid": 4,
+          "tid": 932,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446659461286034880,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 21991,
+            "ulQueueSubmitSequence": 8136,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 3
+          }
+        },
+        {
+          "qpc": 32212647680,
+          "pid": 4,
+          "tid": 932,
+          "provider": "kernel",
+          "id": 105,
+          "version": 0,
+          "fields": {
+            "Function": 5063
+          }
+        },
+        {
+          "qpc": 32212654019,
+          "pid": 4,
+          "tid": 932,
+          "provider": "kernel",
+          "id": 106,
+          "version": 0,
+          "fields": {
+            "Function": 5063
+          }
+        },
+        {
+          "qpc": 32212719757,
+          "pid": 4,
+          "tid": 928,
+          "provider": "kernel",
+          "id": 177,
+          "version": 1,
+          "fields": {
+            "hContext": 18446659461286034880,
+            "PacketType": 0,
+            "uliCompletionId": 21991,
+            "ulQueueSubmitSequence": 8136,
+            "InterruptType": 1,
+            "QuantumStatus": 3,
+            "FaultedVirtualAddress": 0,
+            "PageFaultFlags": 0,
+            "FaultedProcessHandle": 0
+          }
+        },
+        {
+          "qpc": 32212720511,
+          "pid": 4,
+          "tid": 928,
+          "provider": "kernel",
+          "id": 176,
+          "version": 0,
+          "fields": {
+            "hContext": 18446659461286034880,
+            "PacketType": 0,
+            "uliCompletionId": 21991,
+            "ulQueueSubmitSequence": 8136,
+            "bPreempted": 0
+          }
+        },
+        {
+          "qpc": 32212720821,
+          "pid": 4,
+          "tid": 928,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446659461286034880,
+            "PacketType": 0,
+            "SubmitSequence": 8136,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446607229195668256
+          }
+        }
+      ],
+      "live": [
+        {
+          "sequence": 47,
+          "id": 175,
+          "version": 1,
+          "pid": 4,
+          "tid": 932,
+          "source_qpc": 32212647554,
+          "callback_qpc": 32212724775,
+          "payload_hex": "c07d8da20bb3ffff000000000000000000000000e755000000000000c81f0000000000000000000003000000",
+          "host_receive_ns": 48284249625041,
+          "confirmed_qpc": 32213035744,
+          "host_ack_return_ns": 48284261355250,
+          "host_fsynced_ns": 48284249714916,
+          "source_to_callback_us": 4021.9270833333335,
+          "source_to_confirmed_us": 20218.229166666668
+        },
+        {
+          "sequence": 48,
+          "id": 105,
+          "version": 0,
+          "pid": 4,
+          "tid": 932,
+          "source_qpc": 32212647680,
+          "callback_qpc": 32212725472,
+          "payload_hex": "c7130000",
+          "host_receive_ns": 48284249792875,
+          "confirmed_qpc": 32213036137,
+          "host_ack_return_ns": 48284261417541,
+          "host_fsynced_ns": 48284249871208,
+          "source_to_callback_us": 4051.6666666666665,
+          "source_to_confirmed_us": 20232.135416666668
+        },
+        {
+          "sequence": 49,
+          "id": 106,
+          "version": 0,
+          "pid": 4,
+          "tid": 932,
+          "source_qpc": 32212654019,
+          "callback_qpc": 32212726032,
+          "payload_hex": "c7130000",
+          "host_receive_ns": 48284249977416,
+          "confirmed_qpc": 32213087087,
+          "host_ack_return_ns": 48284261478291,
+          "host_fsynced_ns": 48284250170791,
+          "source_to_callback_us": 3750.6770833333335,
+          "source_to_confirmed_us": 22555.625
+        },
+        {
+          "sequence": 50,
+          "id": 177,
+          "version": 1,
+          "pid": 4,
+          "tid": 928,
+          "source_qpc": 32212719757,
+          "callback_qpc": 32212890521,
+          "payload_hex": "c07d8da20bb3ffff00000000e755000000000000c81f000001000000030000000000000000000000000000000000000000000000",
+          "host_receive_ns": 48284250390875,
+          "confirmed_qpc": 32213088131,
+          "host_ack_return_ns": 48284261536333,
+          "host_fsynced_ns": 48284250503125,
+          "source_to_callback_us": 8893.958333333334,
+          "source_to_confirmed_us": 19186.145833333332
+        },
+        {
+          "sequence": 51,
+          "id": 176,
+          "version": 0,
+          "pid": 4,
+          "tid": 928,
+          "source_qpc": 32212720511,
+          "callback_qpc": 32212891891,
+          "payload_hex": "c07d8da20bb3ffff00000000e755000000000000c81f000000000000",
+          "host_receive_ns": 48284250592458,
+          "confirmed_qpc": 32213092538,
+          "host_ack_return_ns": 48284261589916,
+          "host_fsynced_ns": 48284250660125,
+          "source_to_callback_us": 8926.041666666666,
+          "source_to_confirmed_us": 19376.40625
+        },
+        {
+          "sequence": 52,
+          "id": 180,
+          "version": 1,
+          "pid": 4,
+          "tid": 928,
+          "source_qpc": 32212720821,
+          "callback_qpc": 32212892571,
+          "payload_hex": "c07d8da20bb3ffff00000000c81f00000000000000000000204b5c678a83ffff",
+          "host_receive_ns": 48284250743791,
+          "confirmed_qpc": 32213093030,
+          "host_ack_return_ns": 48284261643291,
+          "host_fsynced_ns": 48284250818083,
+          "source_to_callback_us": 8945.3125,
+          "source_to_confirmed_us": 19385.885416666668
+        }
+      ]
+    },
+    "all_event_counts": {
+      "175": 15,
+      "105": 11,
+      "106": 11,
+      "177": 6,
+      "176": 6,
+      "180": 3
+    },
+    "clock_hz": 19200000,
+    "delivery_terminal": {
+      "counts": {
+        "events": 52,
+        "acknowledgments": 52
+      },
+      "terminal": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        258,
+        52,
+        52,
+        0
+      ]
+    },
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "capture_lifetime_ms": 1600,
+    "nominal_flush_interval_ms": 4,
+    "delay_scope": "Windows 源与窗口回调、ACK 均为同一 QPC。控制端先 fsync 再回 ACK。回执上界适用于本次成功对照。",
+    "source_to_confirmed_ms": [
+      19.186146,
+      22.555625
+    ],
+    "max_callback_ms": 8.945312,
+    "artifacts": {
+      "profiler.etl": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-dma-ddi-profiler-live-20261121-01/profiler.etl",
+        "sha256": "f46ed89a577768aa5f6f140f3d813cb8dd395a47482346f1b94cb22077a892fe"
+      },
+      "wire.jsonl": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-dma-ddi-profiler-live-20261121-01/wire.jsonl",
+        "sha256": "73ac403a65a78b55efe50421587ded0eebc2fe128ec1b957c095384e9a4ceae4"
+      },
+      "interpreted.json": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-dma-ddi-profiler-live-20261121-01/interpreted.json",
+        "sha256": "fba731b88047589c533b49f58dbb00054f01f2195a922c44aec7ff99afc3ac39"
+      },
+      "ssh.stderr": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-dma-ddi-profiler-live-20261121-01/ssh.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "delivery.json": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-dma-ddi-profiler-live-20261121-01/delivery.json",
+        "sha256": "11430d6f436984873211d040299976b5d3bd7ae201a0d958fe36345aa402b22e"
+      }
+    },
+    "sources": {
+      "windows": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/live-ddi-profiler/profiler_live.c",
+        "sha256": "cf4474a857b288d0743362679eecb7f5c9b8a117a742fa80c9be466eb3e8448a"
+      },
+      "receiver": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/live-ddi-profiler/receive.py",
+        "sha256": "0bd52300d070a6402db32b212ef7d233a04c438a527e61a4028cf153d9727a2a"
+      },
+      "decoder": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/decode_ddi_live.py",
+        "sha256": "a0fbf343dc55b343f1b145ef73c314786b603a92c6739a59d45c0dcabf8118f8"
+      }
+    },
+    "review_request": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/live-ddi-profiler/review-final/request.json",
+      "sha256": "cf8cc10469bb461da19606c72e0d309430a40a6012f4cae6d37cff137d7f6bf7"
+    },
+    "hardware_state": {
+      "boot": 91918,
+      "dwm": 1472,
+      "dwm_start": "2026-11-21T16:28:05.1778623Z",
+      "code": 0,
+      "mode": 1,
+      "ac": "Online",
+      "components": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "loaded": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      }
+    },
+    "cleanup": {
+      "removed": true,
+      "session_query": 4201
+    },
+    "graphics_workloads_dispatched": 0,
+    "source_reports": [
+      {
+        "path": "windows-native-graphics/rounds/win-dma-ddi-profiler-20261121-01.result.json",
+        "sha256": "2db3149650bdd65be093ea8c92b701ae4887e241933a4bb6a332a181d0bfcd4f"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+        "sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf"
+      }
+    ]
+  }
+}
