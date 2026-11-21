@@ -15,9 +15,10 @@
         "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_device_removal_reason_and_swap_effect_20261120",
         "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_sequential_first_present_20261120",
         "tegra-x1-wddm/docs/legacy-sequential-step4/historical-restart-order.json",
-        "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/qualification.json"
+        "tegra-x1-wddm/docs/legacy-sequential-step4/window-copy-c09c3c86/qualification.json",
+        "tegra-x1-wddm/docs/legacy-sequential-step4/historical-first-present-fence.json#historical_sequential"
       ],
-      "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump.",
+      "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump.",
       "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
       "close_when": "Identify the initiating failure and fix it. Retest the original legacy SEQUENTIAL trigger on AC at least three consecutive times, including correct visible output, normal exit and desktop continuity.",
       "resolution": null

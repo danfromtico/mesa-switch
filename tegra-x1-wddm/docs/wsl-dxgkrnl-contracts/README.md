@@ -33,6 +33,10 @@ Gemini 4 Neon XHigh 审阅了 15 个文件的 452 条注释。主会话核对了
 | [misc.c](contracts.json#L7558) | 2 | 0 | 0 | 2 |
 | [misc.h](contracts.json#L7590) | 7 | 0 | 0 | 7 |
 
+## 旧式窗口首次呈现前的围栏
+
+重读原生窗口三次异常启动和一次正常翻转对照的原始 ETW，绘图线程在首次 `Present` 前发出了值为 1 的 GPU 围栏信号。三次异常启动中，Windows 调度器分别在调用前 360.492、1101.095 和 400.943 毫秒完成了该信号包。早期交接把这条回执解释为等待完成。Neon XHigh 和主会话复核后，`dxgkrnl.h:145:1` 和 `dxgsyncfile.c:406:2` 均保留“未知”。判断对象归属、销毁时 CPU 与 GPU 等待的行为，以及之后的重启起因，都还缺对应记录。[原始事件、匹配字段与审阅回执](../legacy-sequential-step4/historical-first-present-fence.json)
+
 ## 继续单项实机验收
 
 开始前在故障表的 `dxgkrnl_contracts.rounds` 中登记一个 `contract_id`，保存本轮 `.plan.json` 的 SHA-256。计划写明责任方、触发条件、唯一待裁决的问题与判定所需的回执。启动器读回登记和哈希后才运行。[故障表](../open-faults.json)
