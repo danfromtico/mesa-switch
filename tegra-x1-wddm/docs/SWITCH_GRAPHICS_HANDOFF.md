@@ -84,6 +84,8 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 启动 91918 复查时已回到 Handheld1，本轮只读。两份完整读回仍为同桌面、Code 0、交流供电，正式永久许可及 7 份组件、5 份实载哈希全部一致。[同启动手持模式及正式基线回执](windows-native-graphics/rounds/win-post-restart-handheld-20261121-01.result.json)
 
+对照开机 91476 同一 DWM 实例的七个正常归档，较晚上下文有 105 个 DMA 号能对应 Windows 完成中断及非抢占完成。十六路原始 ETL 中，只有主上下文得到与正式 GM20B KMD 状态匹配的编号。较晚上下文的适配器、节点和 247 的完成仍待证。[同启动跨档案、字段和哈希](windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

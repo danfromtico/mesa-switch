@@ -1443,7 +1443,7 @@
       "question": "启动 91476 在 DWM 152586 后还有 DxgKrnl 队列活动。其适配器、节点及实际完成属于哪条执行路径？",
       "status": "观测缺口",
       "existing_observation": "场景 ETL 同一共享缓冲在 152586 后留有另一线程的 DxgKrnl 和 UMD 活动；目标提交没有完成记录。",
-      "missing_observation": "较晚上下文缺同启动的 hContext→适配器 LUID、节点映射。两个 ETL 均未封口。152586 和 247 分别缺同提交号的 KMD 准入、实际 GPU 完成及故障首条记录。",
+      "missing_observation": "十六路 ETL 均缺三条 DWM 上下文关联的 Context→Device→Adapter 或同等直接字段，无法为 247 判定适配器。152586 仍缺本机同提交号 KMD 准入及实际完成。",
       "pass_condition": "原始包按上下文、队列对象和适配器或节点明确配对，准确标注每个较晚队列的提交、实际完成和留存段。",
       "evidence": [
         {
@@ -1464,9 +1464,10 @@
         "gpuview_dma"
       ],
       "round_ids": [
-        "win-dwm-late-adapter-152586-20261121-01"
+        "win-dwm-late-adapter-152586-20261121-01",
+        "win-dwm-late-context-cross-archives-20261121-01"
       ],
-      "latest_observation": "启动 91476 的场景 ETL 中，DWM 另一个上下文在 152586 后 9.054 ms 仍有 Windows DMA 提交 247。该上下文的前一包 246 及其围栏、呈现包均曾正常退役。152586 后两路共享 ETL 的所有上下文均无留存 DMA 完成中断、完成或退役事件。"
+      "latest_observation": "同一启动、同一 DWM 实例的七个正常归档都记录了较晚的上下文 0xffff870faa888010，合计有 105 个可配对 Windows 完成中断和非抢占完成的 DMA 号。主上下文正常档案有 86 条 GM20B KMD 状态比较，同号延续到异常档案；较晚上下文两组均缺适配器和节点配对。"
     },
     {
       "id": "WIN-POST-RESTART-HANDHELD",
@@ -3168,6 +3169,58 @@
         "first_anomaly_or_missing": "本轮通过当前桌面取证前置条件。恢复后初见档位 6 与复查时的档位 1 之间，未获取档位切换事件。"
       },
       "finished_utc": "2026-11-21T16:33:09.566567+00:00"
+    },
+    {
+      "round_id": "win-dwm-late-context-cross-archives-20261121-01",
+      "contract_id": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+      "windows_question": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+      "method": "在同启动与同 DWM 实例的完整正常档案寻找较晚上下文的适配器和完成对照",
+      "plan": "windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.plan.json",
+      "plan_sha256": "af054ed024eb6713befa2bface24fb81cf19ad7751350e657f03058fa8a7672f",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T16:34:13.967934+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json",
+      "result_sha256": "603e9f83b4b696261b77aacf192d497358f6f55a76d3d8d0f513671d8b12f006",
+      "status": "观测缺口",
+      "finding": "同一启动、同一 DWM 实例的七个正常归档都记录了较晚的上下文 0xffff870faa888010，合计有 105 个可配对 Windows 完成中断和非抢占完成的 DMA 号。主上下文正常档案有 86 条 GM20B KMD 状态比较，同号延续到异常档案；较晚上下文两组均缺适配器和节点配对。",
+      "missing_observation": "十六路 ETL 均缺三条 DWM 上下文关联的 Context→Device→Adapter 或同等直接字段，无法为 247 判定适配器。152586 仍缺本机同提交号 KMD 准入及实际完成。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 223222124536,
+          "pid": 4,
+          "tid": 904,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100088172560,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 247,
+            "ulQueueSubmitSequence": 739,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 3
+          }
+        },
+        "last_return": {
+          "qpc": 223221928396,
+          "pid": 4,
+          "tid": 900,
+          "provider": "kernel",
+          "id": 176,
+          "version": 0,
+          "fields": {
+            "hContext": 18446611100088172560,
+            "PacketType": 0,
+            "uliCompletionId": 246,
+            "ulQueueSubmitSequence": 736,
+            "bPreempted": 0
+          }
+        },
+        "first_anomaly_or_missing": "十六路 ETL 均缺三条 DWM 上下文关联的 Context→Device→Adapter 或同等直接字段，无法为 247 判定适配器。152586 仍缺本机同提交号 KMD 准入及实际完成。"
+      },
+      "finished_utc": "2026-11-21T16:34:59.168139+00:00"
     }
   ],
   "progress": {
@@ -3180,7 +3233,7 @@
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 48,
+    "registered_rounds": 49,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -3333,7 +3386,7 @@
         "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
         "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
       },
-      "followup_boundary": "152586 的 Windows 调度后缺同提交号 KMD 准入或 GPU 完成。不开启上次校准候选，先排查独立启动异常并核对正式驱动还能提供的配对边界。",
+      "followup_boundary": "在当前正式驱动上先校验只读 ETW 状态快照能否一次关联 DWM hContext、hDevice、适配器和节点。152586 的提交与完成仍需同号实机观测。",
       "same_kernel_event_catalog": {
         "path": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
         "sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25"
@@ -3379,7 +3432,11 @@
         "path": "windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json",
         "sha256": "b394a991ddc86d9dd7bc8d918b4708487fb36721459ba5b0e914a47f5ad7f8c3"
       },
-      "recent_scheduler_only_evidence": "启动 91476 的场景 ETL 中，DWM 另一个上下文在 152586 后 9.054 ms 仍有 Windows DMA 提交 247。该上下文的前一包 246 及其围栏、呈现包均曾正常退役。152586 后两路共享 ETL 的所有上下文均无留存 DMA 完成中断、完成或退役事件。"
+      "recent_scheduler_only_evidence": "启动 91476 的场景 ETL 中，DWM 另一个上下文在 152586 后 9.054 ms 仍有 Windows DMA 提交 247。该上下文的前一包 246 及其围栏、呈现包均曾正常退役。152586 后两路共享 ETL 的所有上下文均无留存 DMA 完成中断、完成或退役事件。",
+      "same_dwm_context_archives": {
+        "path": "windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json",
+        "sha256": "603e9f83b4b696261b77aacf192d497358f6f55a76d3d8d0f513671d8b12f006"
+      }
     },
     "recent_ssh_outage": {
       "ref": {
