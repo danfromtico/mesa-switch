@@ -1,0 +1,250 @@
+{
+  "schema": 1,
+  "round_id": "c27-allocation-cache-20261121-01",
+  "contract_id": "dxgkrnl.h:759:2",
+  "declaration_sha256": "7c8149f32ff2f978e78e5894cffdfcecdcc15ef1d7fc1fc99222dc25c75bec37",
+  "board_issuance_sha256": "ca9790a26a6fed2a821b0f7e0744e9a84b6cef9d59b0420d62ff481f9ffe47ce",
+  "chronology": "实机签发文件绑定已在故障表登记的计划哈希。程序 QPC 与 ETW 在同一次启动内比较，系统启动用 Event 12 RecordId 标识。",
+  "started_utc": "2026-11-21T13:13:33.7026096Z",
+  "before": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:13:33.7026096Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "after": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:13:50.4221548Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "status": "未知",
+  "target_hit": false,
+  "unexplained_restart": false,
+  "finding": "正常 Lock2 返回可读写的 64 KiB 页，VirtualQuery 的 Protect 和 AllocationProtect 均为 0x404（PAGE_READWRITE | PAGE_WRITECOMBINE）。该轮没有可缓存映射，事件 33 仅给出未具名的原始 Flags=0x81，缺少可缓存映射与明确定义的 Cached 位配对。",
+  "gap": "正常 Lock2 返回可读写的 64 KiB 页，VirtualQuery 的 Protect 和 AllocationProtect 均为 0x404（PAGE_READWRITE | PAGE_WRITECOMBINE）。该轮没有可缓存映射，事件 33 仅给出未具名的原始 Flags=0x81，缺少可缓存映射与明确定义的 Cached 位配对。",
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 3528,
+      "utc": "2026-11-21T13:13:41.7439312Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 65273358389,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "start",
+        "mode": "cache"
+      },
+      {
+        "qpc": 65273711261,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 65274322903,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 65274539211,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "alloc",
+        "status": "00000000",
+        "device": "1073742016",
+        "allocation": "1073742208",
+        "resource": "0",
+        "bytes": "65536"
+      },
+      {
+        "qpc": 65274646000,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "lock_begin",
+        "device": "1073742016",
+        "allocation": "1073742208"
+      },
+      {
+        "qpc": 65274712696,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "lock_return",
+        "status": "00000000",
+        "mapped": "1"
+      },
+      {
+        "qpc": 65274776161,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "cache",
+        "query": "48",
+        "protection": "1028",
+        "allocation_protection": "1028",
+        "state": "4096",
+        "type": "131072",
+        "region_bytes": "65536"
+      },
+      {
+        "qpc": 65274882537,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "unlock",
+        "status": "00000000"
+      },
+      {
+        "qpc": 65274953230,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "free",
+        "status": "00000000"
+      },
+      {
+        "qpc": 65275029095,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 65275097967,
+        "pid": 3528,
+        "tid": 5328,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=9"
+      ]
+    },
+    "actor_event_counts": {
+      "27": 1,
+      "33": 1,
+      "36": 1,
+      "297": 1,
+      "28": 1
+    },
+    "devices": [
+      {
+        "pid": 3528,
+        "tid": 5328,
+        "qpc": 65274318607,
+        "caller_device": 1073742016,
+        "device": "device1",
+        "adapter": "adapter1"
+      }
+    ],
+    "allocation_joins": [
+      {
+        "pid": 3528,
+        "tid": 5328,
+        "operation": "alloc",
+        "begin": 65274322903,
+        "end": 65274539211,
+        "caller_allocation": 1073742208,
+        "caller_resource": 0,
+        "matched_device_allocation": true,
+        "event36_qpc": 65274533706,
+        "device": "device1",
+        "adapter": "adapter1",
+        "resource": null,
+        "shared": null,
+        "global_allocation": "global1",
+        "matched_adapter_allocation": true,
+        "event33_qpc": 65274532151,
+        "bytes": 65536,
+        "flags": 129,
+        "read_segment": 0,
+        "write_segment": 2,
+        "preferred": 2
+      }
+    ],
+    "gpu_signal_packets": [],
+    "cpu_sync": [
+      {
+        "qpc": 65274536264,
+        "pid": 3528,
+        "tid": 5328,
+        "event": 297,
+        "device": "device1",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          7001
+        ]
+      }
+    ],
+    "sync_identity": []
+  },
+  "raw_files_sha256": {
+    "result.json": "8ece8519651b907f2b174849ab6ca603c8a4d3e7edd232ab1d48a0581abac3eb",
+    "issued.json": "ca9790a26a6fed2a821b0f7e0744e9a84b6cef9d59b0420d62ff481f9ffe47ce",
+    "result.zip": "be80299f0340e47734c1198837e811b20e09e36fd0a67df77d1a36c5a3513317",
+    "journal.tsv": "3856266ebf93b96d335b889cfe4f7f70a6c48b33870d7fe06054a97737b5aeaa",
+    "trace.etl": "315b9eab94b75586bdbc59850343a0d1123734423ff06e563bc731869fa259b2",
+    "client.json": "c9a53c688d7aed246bda10e7003ecb588138ec982db0ce840045815d617a9b07"
+  },
+  "installed_event_manifest_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_initial_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "evidence_scope": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "可缩小 CPU 锁定与 staging 读回的观测范围。只凭可访问页或窗口出现不能判定缓存一致性。",
+  "analysis_revision": {
+    "prior_status": "未知",
+    "prior_finding": "Lock2 后 VirtualQuery 的 Protect=1028、AllocationProtect=1028。事件 33 的原始 Flags=129。该安装版事件模板没有单列 KMD Cached 位，常规页保护与该位仍缺同层对应。",
+    "prior_result_sha256": "ab8d7ea5a64108b9d2010ed7b14970d0a7bde318b38b5446049fbb4ecc725a67",
+    "basis": "对同一原始回执复核对象、调用条件和时间。"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "round_id": "win-first-present-20261121-01",
+  "windows_question": "WIN-PRESENT-KMT",
+  "owner": "应用绘图线程、系统 D3D11/DXGI 和 Windows dxgkrnl",
+  "question": "正式基线的普通双缓冲 SEQUENTIAL 窗口第一次 Present(1,0) 是否由同一绘图线程交给 Windows 并成功返回？",
+  "method": "实机首次呈现",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "匹配交换效果、间隔、标志、LUID、原生应用模块和同线程调用区间，取得成对 KMT 成功返回与公开 S_OK。",
+  "observations": [
+    "使用既有签名的 ARM64 公共 D3D11 窗口和独立观察器。清屏一帧、两个 BGRA 缓冲、普通 SEQUENTIAL、Present(1,0)。",
+    "读取正式许可、AC、手持、Code 0、当前启动、DWM、绑定的 miniport 及加载模块路径全哈希；核对系统运行库版本。",
+    "在同一 QPC 时钟关联应用 CALL/RETURN、同 PID/TID 的 DXGI 与 Windows DxgKrnl Present 事件，保留 ETL 及原始状态码。",
+    "按本次所有者和已收回归档哈希清理临时任务和采集。"
+  ],
+  "inputs": {
+    "Board-Case.ps1": "f987bedde65b4a6cdab41ade1909bb152f24863ccb9a1c1bf447d248472fc529",
+    "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+    "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+    "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+    "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+    "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0"
+  }
+}

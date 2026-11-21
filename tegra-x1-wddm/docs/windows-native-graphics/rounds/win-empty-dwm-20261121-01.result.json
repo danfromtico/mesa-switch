@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-dwm-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "plan_sha256": "3aa7a61c2baa8beebecfa2693562a0cf82d54b47a4eb43cb97fbb805bea7e2f0",
+  "status": "观测缺口",
+  "finding": "首个 CALL 至客户区取样区间内，DWM-Core/Win32k 已选事件匹配该 HWND 的记录有 0 条，DWM PID 同 DxgKrnl 令牌记录也为 0。保留复制完成和 4508/4508 客户区像素的独立回执。",
+  "missing_observation": "当前采集中缺与原空窗口这一帧相连的 DWM 消费标识。像素已由呈现后桌面截图独立验收。",
+  "device_executions": 0,
+  "evidence": {
+    "boot": 91476,
+    "pid": 5992,
+    "tid": 5988,
+    "hwnd": 524312,
+    "luid": "0000000000005c10",
+    "dwm": 1400,
+    "qpc_frequency": 19200000,
+    "raw_archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-empty-present-20261121-01/collected.zip",
+    "raw_archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+    "trace_sha256": {
+      "display.etl": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+      "scene/video.etl": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a"
+    },
+    "device_state": {
+      "boot": 91476,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0,
+      "KMD": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "tgd3d": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "NVK": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "call_qpc": 94861147189,
+    "return_qpc": 94861380548,
+    "post_present_sample_qpc": 94863412892,
+    "provider_record_counts": {
+      "Microsoft-Windows-Dwm-Core/141/0": 171,
+      "Microsoft-Windows-Dwm-Core/468/0": 50,
+      "Microsoft-Windows-Dwm-Core/63/0": 286,
+      "Microsoft-Windows-Dwm-Core/64/0": 286,
+      "Microsoft-Windows-Dwm-Core/65/0": 286,
+      "Microsoft-Windows-Dwm-Core/88/0": 63,
+      "Microsoft-Windows-Dwm-Core/91/0": 1
+    },
+    "partial_templates": {},
+    "target_hwnd_rows": [],
+    "other_app_or_dwm_in_window": {
+      "SCHEDULE_DXGI_PRESENT_SUCCEEDED": 6,
+      "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY": 14,
+      "MILEVENT_MEDIA_UCE_PROCESSPRESENTHISTORY_GetPresentHistory": 7,
+      "SCHEDULE_PRESENTHISTORYTOKEN_GDISYSMEM": 2,
+      "SCHEDULE_PRESENTHISTORYTOKEN_BLT": 1,
+      "Dx_Flip_Consumed": 1
+    },
+    "dxg_same_token_dwm_rows": [],
+    "boundaries": {
+      "last_entry": "原线程的首次 KMT 源和 HWND 已配对。",
+      "last_return": {
+        "public_return_qpc": 94861380548,
+        "composed_pixel_capture_qpc": 94863412892
+      },
+      "first_anomaly_or_missing": "当前采集中缺与原空窗口这一帧相连的 DWM 消费标识。像素已由呈现后桌面截图独立验收。"
+    }
+  }
+}

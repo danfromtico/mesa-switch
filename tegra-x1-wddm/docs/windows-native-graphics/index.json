@@ -1,0 +1,1732 @@
+{
+  "schema": 1,
+  "objective": "验证 Switch Windows ARM64 本机图形驱动与稳定性，优先定位首次 Present 和 GPU fence",
+  "platform": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "scope": "进度按本表中唯一 Windows 问题计数。每轮只裁决一个问题；复用的启动、回执和 ETL 指向原件。",
+  "hardware_rules": {
+    "ssh_retry_seconds": 180,
+    "continuous_unreachable_pause_seconds": 1800,
+    "unexpected_restart_total_trials": 3,
+    "pal4": "按用户要求暂缓，保留九份回执"
+  },
+  "references": {
+    "present": "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-present",
+    "effect": "https://learn.microsoft.com/en-us/windows/win32/api/dxgi/ne-dxgi-dxgi_swap_effect",
+    "path": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/dxgi-presentation-path",
+    "paging": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/device-paging-queues",
+    "blt": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_present",
+    "signal": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtsignalsynchronizationobjectfromgpu",
+    "wait": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtwaitforsynchronizationobjectfromgpu",
+    "fence": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/native-gpu-fence-objects",
+    "alloc": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_createallocation",
+    "open": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtopenresourcefromnthandle",
+    "power": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart",
+    "cold": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/setup-upgrade-and-drivers/fast-startup-causes-system-hibernation-shutdown-fail"
+  },
+  "historical_background": {
+    "index": {
+      "path": "wsl-dxgkrnl-contracts/gap-index.json",
+      "sha256": "fe335c0c83e8c762b83c585c6e25127b8b2a1ffd54d80ae57125b09b6917a931"
+    },
+    "static_items": 124,
+    "guest_only_items": 298,
+    "scope": "历史源码旁证。主验收以 Windows 系统契约和 Switch 本机事件为准。"
+  },
+  "native_round_crosswalk": [
+    {
+      "wsl_comment_as_background": "ioctl.c:2581:2",
+      "windows_questions": [
+        "WIN-PRESENT-SOURCE"
+      ],
+      "windows_round": "c27-gpuva-map-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-gpuva-map-20261121-01.result.json",
+        "sha256": "78788f8d09b55d10f59fce25c9bc43cd7b6bebe1cd186ffad297af395312f89c"
+      },
+      "windows_observation": "64 KiB、16 页的合法映射直接返回 0x103，输出 VA 65536 与保留地址一致。对应分页围栏目标为 7002，同步后实读 7002。",
+      "prior_scope_gap": null,
+      "original_verdict": "已满足",
+      "first_present_use": "直接引用",
+      "first_present_condition": "保留独立实机通过项。对应本次窗口时，另核对相同进程、对象、启动与调用。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:197:2",
+      "windows_questions": [
+        "WIN-MONITORED-CPU",
+        "WIN-FENCE-WAIT"
+      ],
+      "windows_round": "c27-monitored-cpu-va-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-monitored-cpu-va-20261121-01.result.json",
+        "sha256": "697a2006ac5f2d7ace5968828ea0a6877b2e3ca36c959bea7efbda5aeec9384c"
+      },
+      "windows_observation": "同一受监控围栏的 CPU 映射先读到 0。事件 30、1069 和 294 关联到同一设备、上下文、局部围栏和 GPU 信号值 1。成功等待后该映射读到 1。本轮没有可配对的调度包退役事件。",
+      "prior_scope_gap": null,
+      "original_verdict": "已满足",
+      "first_present_use": "直接引用",
+      "first_present_condition": "保留独立实机通过项。对应本次窗口时，另核对相同进程、对象、启动与调用。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:723:2",
+      "windows_questions": [
+        "WIN-SHARED-RESOURCE",
+        "WIN-PRESENT-SOURCE"
+      ],
+      "windows_round": "c27-shared-resource-owner-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-resource-owner-20261121-01.result.json",
+        "sha256": "b94f19b04f80d2c90d502a1398436b19326dd031f5616351f00da8b29217b3d0"
+      },
+      "windows_observation": "两个不同进程在各自设备取得资源和分配句柄。两份 DeviceAllocation 事件的非零共享资源身份和全局分配身份分别相同，能配对到每次合法创建或打开。",
+      "prior_scope_gap": null,
+      "original_verdict": "已满足",
+      "first_present_use": "直接引用",
+      "first_present_condition": "保留独立实机通过项。对应本次窗口时，另核对相同进程、对象、启动与调用。"
+    },
+    {
+      "wsl_comment_as_background": "ioctl.c:1710:4",
+      "windows_questions": [
+        "WIN-SHARED-RESOURCE"
+      ],
+      "windows_round": "c27-shared-private-data-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-private-data-20261121-01.result.json",
+        "sha256": "ea4969efd37bc8a2a8b35435f3a9f9a5ad849843573dabcc83075e6df7322c5b"
+      },
+      "windows_observation": "独立打开方查询到 1 份分配、16 字节逐分配私有数据。OpenResourceFromNtHandle 返回的分配描述符指向该输出缓冲，版本、标志和 65536 字节大小逐字段匹配创建输入。",
+      "prior_scope_gap": null,
+      "original_verdict": "已满足",
+      "first_present_use": "直接引用",
+      "first_present_condition": "保留独立实机通过项。对应本次窗口时，另核对相同进程、对象、启动与调用。"
+    },
+    {
+      "wsl_comment_as_background": "ioctl.c:1630:4",
+      "windows_questions": [
+        "WIN-SHARED-RESOURCE"
+      ],
+      "windows_round": "c27-append-allocation-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-append-allocation-20261121-01.result.json",
+        "sha256": "e1987f71c8aecb8d1b2b6ad7641d0b88c88bf3c589f793d2dcfed2693bf8904d"
+      },
+      "windows_observation": "同一未共享资源接受了第二份 64 KiB 分配。两次创建的分配句柄不同，调用方资源句柄相同，各自对应的事件 33/36 均关联到同一设备和资源。",
+      "prior_scope_gap": null,
+      "original_verdict": "已满足",
+      "first_present_use": "直接引用",
+      "first_present_condition": "保留独立实机通过项。对应本次窗口时，另核对相同进程、对象、启动与调用。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:684:4",
+      "windows_questions": [
+        "WIN-RESOURCE-MEMBERS"
+      ],
+      "windows_round": "c27-sealed-members-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-sealed-members-20261121-01.result.json",
+        "sha256": "c2780e8d8428b31e95e358c8ff3927f1fdb752ca6e615ea3be89e3120dcd8834"
+      },
+      "windows_observation": "共享后在创建方、打开方、打开结束时查询的成员数为 1、1、1。现有同层记录没有成员集合被固定或禁止追加的直接观测。",
+      "prior_scope_gap": "同一资源三次成员数为 1。还缺明确记录成员集合固定的同层观测。",
+      "original_verdict": "未知",
+      "first_present_use": "按对象复用",
+      "first_present_condition": "已有共享成员数 1/1/1；若本次重定向源绑定到这种资源，可对齐成员与打开方。集合封存状态无可用字段。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:759:2",
+      "windows_questions": [
+        "WIN-ALLOCATION-MAP"
+      ],
+      "windows_round": "c27-allocation-cache-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-allocation-cache-20261121-01.result.json",
+        "sha256": "23663fb977590001af8d4449cf6cc6b2c988894228df6ca3b84e185a49583b6b"
+      },
+      "windows_observation": "正常 Lock2 返回可读写的 64 KiB 页，VirtualQuery 的 Protect 和 AllocationProtect 均为 0x404（PAGE_READWRITE | PAGE_WRITECOMBINE）。该轮没有可缓存映射，事件 33 仅给出未具名的原始 Flags=0x81，缺少可缓存映射与明确定义的 Cached 位配对。",
+      "prior_scope_gap": "实测页为写合并属性。还缺缓存映射和同一分配的已定义 Cached 位。",
+      "original_verdict": "未知",
+      "first_present_use": "按对象复用",
+      "first_present_condition": "原轮的 Lock2 为写合并映射；只有本次源/目标有相应 CPU 映射才可归属，与 GPUVA 分页回执分开。"
+    },
+    {
+      "wsl_comment_as_background": "dxgvmbus.c:3651:2",
+      "windows_questions": [
+        "WIN-ALLOCATION-UPDATE"
+      ],
+      "windows_round": "c27-allocation-property-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-allocation-property-20261121-01.result.json",
+        "sha256": "ba604dac0173f12e594ce9b1ea42458074c4a14b4483774b774a4eab9520b9db"
+      },
+      "windows_observation": "本次自有分配的 Unmoveable 更新返回 STATUS_NOT_IMPLEMENTED（0xc0000002），输出分页围栏为 0。未取得这次 API 的异步成功回执。",
+      "prior_scope_gap": "此次正常 Unmoveable 属性更新返回 STATUS_NOT_IMPLEMENTED。缺该 API 自然返回 STATUS_PENDING 及有效输出的请求。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "合法 Unmoveable 已实测返回 STATUS_NOT_IMPLEMENTED，无异步目标，沿用原轮。"
+    },
+    {
+      "wsl_comment_as_background": "dxgsyncfile.c:266:2",
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "windows_round": "c27-open-monitor-wait-only-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-open-monitor-wait-only-20261121-01.result.json",
+        "sha256": "fd67cda81ed229dd3f7022fc0b08b80dea56b150058aaf9b740c5aa1acb07f5b"
+      },
+      "windows_observation": "创建方以 NT 安全共享创建监控围栏，子进程合法继承其导出对象，以 NoSignal 打开，得到非零本地句柄并成功等待值 1。两端均正常释放。",
+      "prior_scope_gap": null,
+      "original_verdict": "已满足",
+      "first_present_use": "直接引用",
+      "first_present_condition": "保留独立实机通过项。对应本次窗口时，另核对相同进程、对象、启动与调用。"
+    },
+    {
+      "wsl_comment_as_background": "dxgsyncfile.c:381:2",
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "windows_round": "c27-open-monitor-local-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-open-monitor-local-20261121-01.result.json",
+        "sha256": "6df90d80afb0c7cb843eff6109dd6025ce32640504e88b8f8857bf0bd4ba077d"
+      },
+      "windows_observation": "两个不同 PID 在各自设备持有同一 NT 共享监控围栏的本地 KMT 句柄。打开方等待值 1 后发出值 2，创建方读到应答，两端分别正常释放。",
+      "prior_scope_gap": null,
+      "original_verdict": "已满足",
+      "first_present_use": "直接引用",
+      "first_present_condition": "保留独立实机通过项。对应本次窗口时，另核对相同进程、对象、启动与调用。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:199:2",
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "windows_round": "c27-sync-process-handle-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-sync-process-handle-20261121-01.result.json",
+        "sha256": "fc77c588ec6d8d9002c60145afdb170d8fb4e54bb97baeae33f2fc1651a40d07"
+      },
+      "windows_observation": "两个不同 PID 在各自设备持有同一 NT 共享监控围栏的本地 KMT 句柄。打开方等待值 1 后发出值 2，创建方读到应答，两端分别正常释放。",
+      "prior_scope_gap": null,
+      "original_verdict": "已满足",
+      "first_present_use": "直接引用",
+      "first_present_condition": "保留独立实机通过项。对应本次窗口时，另核对相同进程、对象、启动与调用。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:231:1",
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "windows_round": "c27-shared-parent-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-parent-20261121-01.result.json",
+        "sha256": "f0e2a76f89e0af3ed5a95be771d6cdd70bf8989e7cf255561f0eb12c64d21799"
+      },
+      "windows_observation": "传统全局围栏创建返回 00000000，有效打开回执数为 1。合法全局等待之后的监控围栏读到 1（等待返回 0x00000000）。NT 共享路径打开返回 00000000。本次公开句柄及 ReportSyncObject 模板不提供全局表项指向的父对象。 事件 1069 把两个进程的局部句柄配对到同一非零 pSyncObject。",
+      "prior_scope_gap": "没有全局句柄表项或父对象关系的直接字段。",
+      "original_verdict": "未知",
+      "first_present_use": "部分可观测",
+      "first_present_condition": "在同次窗口轨迹按 1069 和上下文本地句柄绑定本机同步对象，再核对同值信号和等待。公开事件缺少全局表父指针。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:615:1",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-hardware-queue-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-hardware-queue-20261121-01.result.json",
+        "sha256": "f241979df03d5fa93d9a8b42b13a3b4d9bd5d17accea096b8ff4637da829d1a3"
+      },
+      "windows_observation": "GM20B 报告 WDDM 2.6。WDDM_2_7_CAPS 返回 0x00000000，HwSchSupported=0、HwSchEnabled=0。已选 KMD 的普通上下文路径不接受 HwQueueSupported 标志，缺硬件队列创建与设备归属回执。 本轮实机采集到能力查询。HwQueueSupported 的入口限制来自已选 KMD 源码。",
+      "prior_scope_gap": "HwSchSupported=0 且 HwSchEnabled=0。缺实际硬件执行队列及设备创建关联。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "硬件调度能力与启用位均为 0，本次以 VidSch 普通上下文核对。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:145:1",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS",
+        "WIN-MONITORED-CPU"
+      ],
+      "windows_round": "c27-sync-object-scope-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-sync-object-scope-20261121-01.result.json",
+        "sha256": "c0757ca862e00305292c31df7ffbcd01dc792ab962cf37c32d29c18aa91f2367"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 普通监控围栏 CPU 读值依次为 0、1。在活动 GM20B 目标上创建周期型围栏返回 0x00000000。整条的原生围栏及来宾链表/FD 语义仍缺对应回执。 本轮周期型围栏在同一 CPU 映射的两次采样值为 0、218533。",
+      "prior_scope_gap": "缺少受支持的原生围栏类型及共享实例的完整归属。WSL 来宾链表和 FD 映射需要来宾记录。",
+      "original_verdict": "未知",
+      "first_present_use": "部分可观测",
+      "first_present_condition": "WDDM 2.6 的 monitored fence 可以核对同对象、值和队列包退役；已有周期型创建和高版本能力回执另存。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:218:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-type-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-type-20261121-01.result.json",
+        "sha256": "a4f18d271a7d00f8c3af7b15ecd5ea7d70ff9142d0709e69bfabf6399e071f7f"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的创建类型回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "dxgkrnl.h:256:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-shared-type-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-shared-type-20261121-01.result.json",
+        "sha256": "a72e2b6ee1a2497c98986b47e81c9c5b0b77a614166e156982e315efc8bf3caa"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的共享子类型回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "dxgvmbus.c:825:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-open-type-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-type-20261121-01.result.json",
+        "sha256": "bcf4c4df1f3c0688ccee331694672d34979d8d63b79296bba2c4b11d6086a119"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的NT 对象类型回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "dxgvmbus.c:889:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-open-permissions-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-permissions-20261121-01.result.json",
+        "sha256": "4a15f491057548bf3f4e5bc21f0cadb47e8b5f4bd1b8a8ac6ede065621c94aa6"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的打开映射权限回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "dxgvmbus.c:896:3",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-open-intra-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-intra-20261121-01.result.json",
+        "sha256": "3daa616426899ceb3ed1c7b3cec84175b633aad86c39b394a19575c13c235258"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的INTRA_GPU 打开输出回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "dxgvmbus.c:900:3",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-open-default-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-default-20261121-01.result.json",
+        "sha256": "d82e5ee44e3ad990746bf42e71be3cf21fa4913f54099b0cddea4eba91c03954"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的DEFAULT 打开输出回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "dxgvmbus.c:3147:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-create-permissions-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-permissions-20261121-01.result.json",
+        "sha256": "c4b9365234ad7928d7f1015b20d398e9cb0e8dc33f6d1d1110b1da3ff1242c5c"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的创建映射权限回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "dxgvmbus.c:3152:3",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-create-intra-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-intra-20261121-01.result.json",
+        "sha256": "9683b8fe86697ee150de0a3cccc6a8e61329b113cbcde32c1467e4d3ef8f0979"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的INTRA_GPU 创建输出回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "dxgvmbus.c:3156:3",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-create-default-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-default-20261121-01.result.json",
+        "sha256": "d583acc766759b65120a73052f037f03be37d80b06aeed265e2994236fd61a9d"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的DEFAULT 创建输出回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "ioctl.c:2888:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-create-enum-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-enum-20261121-01.result.json",
+        "sha256": "d442e62be3ba67aa02d1f53d076536db08e31a865311df4b6a6bc1f49cc67432"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的创建子类型与共享回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "ioctl.c:3243:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-open-input-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-input-20261121-01.result.json",
+        "sha256": "e5bfa64a2f5ecb09f5b2587fd279fc183495d5ab5c6589651603879a1a292a57"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的NT 打开参数回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "ioctl.c:3302:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-open-object-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-object-20261121-01.result.json",
+        "sha256": "425b733d2fbc42870110296eff61984d06d4658547e2581367a2dee7268f839f"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的打开时的类型检查回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    },
+    {
+      "wsl_comment_as_background": "ioctl.c:3310:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "windows_round": "c27-native-adapter-20261121-01",
+      "receipt": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-adapter-20261121-01.result.json",
+        "sha256": "e3bd575cd5dea031a2653d354062f06b8c86e8cc3328f3cfb58549f5938570ab"
+      },
+      "windows_observation": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的跨适配器约束回执。",
+      "original_verdict": "未知",
+      "first_present_use": "本机条件受限",
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+    }
+  ],
+  "questions": [
+    {
+      "id": "WIN-EMPTY-PRESENT-KMT",
+      "priority": "P0",
+      "owner": "原空窗口绘图线程、DXGI 和 Windows dxgkrnl",
+      "question": "正式基线上的原空窗口，第一次 Present(1,0) 在无应用写入时能否进入 Windows 的同线程 KMT 呈现路径并返回？",
+      "status": "实机通过",
+      "existing_observation": "三次历史空窗口有 CALL 持久标记，图形跟踪在 CALL 前结束。修复版启动 87268 有相同签名空窗口连续三次完成。清屏对照额外包含应用写入。",
+      "missing_observation": null,
+      "pass_condition": "同进程线程及窗口绑定到原生适配器，取得无应用写入证据、首个 Present 的同步间隔/标志和配对内核回执，记录最后进入、最后返回与下一缺口。",
+      "evidence": [
+        {
+          "path": "legacy-sequential-step4/historical-first-present-fence.json",
+          "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-sequential-1.json",
+          "sha256": "ecc1197abec78e655bb39734109808765d9cd9c5812da4faf4228920fbab2f4e"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/result.json",
+          "sha256": "8a1af04dc1a34bc872f70db093e18489397bcd09fe7b20882423479f521816ba"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "effect",
+        "path"
+      ],
+      "round_ids": [
+        "win-empty-present-20261121-01"
+      ],
+      "latest_observation": "开机 91476，绘图 PID/TID 5992/5988，无写入空窗口首次 Present(1,0) 在 DXGI 42/43 之间产生同线程同 HWND 的 Windows DxgKrnl 184，KMT 与公开返回均为 0。旧式 DDI 0x000b000f，原生 GM20B，DWM 1400 连续。"
+    },
+    {
+      "id": "WIN-PRESENT-KMT",
+      "priority": "P0",
+      "owner": "应用绘图线程、系统 D3D11/DXGI 和 Windows dxgkrnl",
+      "question": "正式基线的普通双缓冲 SEQUENTIAL 窗口第一次 Present(1,0) 是否由同一绘图线程交给 Windows 并成功返回？",
+      "status": "实机通过",
+      "existing_observation": "三次旧记录停在公开调用处。启动 87268 的修复版收到并完成了首次普通窗口提交。",
+      "missing_observation": null,
+      "pass_condition": "匹配交换效果、间隔、标志、LUID、原生应用模块和同线程调用区间，取得成对 KMT 成功返回与公开 S_OK。",
+      "evidence": [
+        {
+          "path": "legacy-sequential-step4/historical-first-present-fence.json",
+          "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-clear-1.json",
+          "sha256": "3225870d17360b59cd420ba4a173952230336897f6489d48ccff6ec4e3fd176d"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-sequential-1.json",
+          "sha256": "ecc1197abec78e655bb39734109808765d9cd9c5812da4faf4228920fbab2f4e"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "effect",
+        "path"
+      ],
+      "round_ids": [
+        "win-first-present-20261121-01"
+      ],
+      "latest_observation": "开机 91476，绘图 PID/TID 5364/3528，正常清屏窗口首次 Present(1,0) 在 DXGI 42/43 之间产生同线程同 HWND 的 Windows DxgKrnl 184，KMT 与公开返回均为 0。旧式 DDI 0x000b000f，原生 GM20B，DWM 1400 连续。"
+    },
+    {
+      "id": "WIN-PRESENT-SOURCE",
+      "priority": "P0",
+      "owner": "tgd3d 与 Windows VidMm",
+      "question": "首次 KMT Present 使用的源分配是否在提交前完成 GPUVA 映射与分页？",
+      "status": "实机通过",
+      "existing_observation": "历史三次在调用前有四份映射及对应分页检查，原次 KMT 源句柄缺失。后续成功窗口可以用事件 184 的源句柄对齐回调。",
+      "missing_observation": null,
+      "pass_condition": "同进程同设备的 Present 源与映射对象一致，异步返回对应目标已达且早于首次使用。",
+      "evidence": [
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-sequential-1.json",
+          "sha256": "ecc1197abec78e655bb39734109808765d9cd9c5812da4faf4228920fbab2f4e"
+        }
+      ],
+      "windows_references": [
+        "paging",
+        "path"
+      ],
+      "round_ids": [
+        "win-empty-source-20261121-01"
+      ],
+      "latest_observation": "原空窗口的 KMT 源句柄 0x40000740 属于该应用设备。驻留/映射分别返回 E_PENDING，分页目标 7001/7002 的两次检查均为 S_OK，末次在公开调用前 775.464 ms。"
+    },
+    {
+      "id": "WIN-PRESENT-BLT",
+      "priority": "P0",
+      "owner": "Windows dxgkrnl、GM20B KMD 和 VidSch",
+      "question": "同一次普通窗口 Present 有无匹配源、目标和普通上下文的 Blt、调度提交及完成？",
+      "status": "实机通过",
+      "existing_observation": "诊断版启动 86815 有 DDI 的不支持返回。修复版启动 87268 有三份 52 字节复制包完成。",
+      "missing_observation": null,
+      "pass_condition": "同一次调用取得 Blt，源及目标归属正确，关联到应用上下文的复制提交和同包完成。若 DDI 返回未被记录，单列该边界。",
+      "evidence": [
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-sequential-1.json",
+          "sha256": "ecc1197abec78e655bb39734109808765d9cd9c5812da4faf4228920fbab2f4e"
+        },
+        {
+          "path": "legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+          "sha256": "283175425e0a6d8dbb354bcc1ea5cdc0c8bc8b2aa484540eeeb6133800de3035"
+        }
+      ],
+      "windows_references": [
+        "blt",
+        "path"
+      ],
+      "round_ids": [
+        "win-empty-blt-20261121-01"
+      ],
+      "latest_observation": "原空窗口首次提交中，暂存表面与 Blt 目标的全局身份一致，源和目标均属应用设备。上下文提交 52 字节复制包，序号 1，按上下文、序号与 pQueuePacket 配对正常退役。"
+    },
+    {
+      "id": "WIN-DWM-CONSUME",
+      "priority": "P0",
+      "owner": "Windows DWM、Win32k 和 dxgkrnl 的重定向表面",
+      "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
+      "status": "观测缺口",
+      "existing_observation": "当前原空窗口的呈现后客户区像素已验证。正常翻转对照曾匹配到 DWM 的窗口消费。",
+      "missing_observation": "各受测 Blt 窗口的 DWM 调度已按 EventId 与 HWND 的实际数值和时序对齐。事件 91 的两个表面句柄为零；仍缺同提交的消费或面板扫描标识。",
+      "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-empty-image-20261121-01.result.json",
+          "sha256": "4395a9ef94f2e447e96fbc575b5665c3dc6ac4065a36c680b7dd101d0e7cf9b8"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-flip-1.json",
+          "sha256": "90decc7daeb29daacaf0043b288a504e3bcf5bec56c4e97ce048305a440c88f6"
+        }
+      ],
+      "windows_references": [
+        "path",
+        "effect"
+      ],
+      "round_ids": [
+        "win-empty-dwm-20261121-01",
+        "win-dwm-blt-token-20261121-01",
+        "win-dwm-window-id-20261121-01"
+      ],
+      "latest_observation": "原空窗口的 DWM 91 在 QPC 94861443540 记录 EventId=524312，与应用/Windows HWND 相等。五份 Blt 归档中有 5 份得到同样的数值与时序对应。"
+    },
+    {
+      "id": "WIN-PRESENT-IMAGE",
+      "priority": "P0",
+      "owner": "应用、Windows DWM 与扫描输出",
+      "question": "首个成功返回的普通窗口帧是否在合成桌面对应客户区显示预期颜色？",
+      "status": "实机通过",
+      "existing_observation": "已验收修复版的三个窗口、独立清屏颜色与翻转对照均有合成桌面图像。",
+      "missing_observation": null,
+      "pass_condition": "前台窗口归属及呈现后图像时间匹配，预期颜色在客户区逐点命中，同时记录输入、退出、同桌面。",
+      "evidence": [
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/copy-clear-1.json",
+          "sha256": "3225870d17360b59cd420ba4a173952230336897f6489d48ccff6ec4e3fd176d"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/result.json",
+          "sha256": "8a1af04dc1a34bc872f70db093e18489397bcd09fe7b20882423479f521816ba"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "effect"
+      ],
+      "round_ids": [
+        "win-empty-image-20261121-01"
+      ],
+      "latest_observation": "原空窗口在公开返回后由同 PID 客户区采样，4508/4508 个像素与空帧对照匹配，输入有效、正常退出并回到同一 DWM。应用 PresentHistory 令牌另有 0 条同令牌 DWM PID 记录。"
+    },
+    {
+      "id": "WIN-OLD-RESET",
+      "priority": "P0",
+      "owner": "历史应用、Windows 内核及早期复位记录",
+      "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+      "status": "故障开放",
+      "existing_observation": "三次发值 1 的信号包已在调用前退役。WARP 完成软件呈现、输入未验收。正常翻转有独立返回，诊断版 Blt 拒绝属于另一次启动。",
+      "missing_observation": "三次原故障的 CALL 之后缺同启动 DXGI Start/Stop、KMT 接收/返回、后置设备查询或早期复位记录。尚不能区分故障发生在公开 Present 内、返回后的查询内，或持久 RETURN 标记之前的其他位置。",
+      "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+      "evidence": [
+        {
+          "path": "legacy-sequential-step4/historical-first-present-fence.json",
+          "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+        },
+        {
+          "path": "legacy-sequential-step4/historical-restart-order.json",
+          "sha256": "e00d8d476b7caf397a668444c51bb4fe8338bc016dbb4d46ec8cf42afac18097"
+        },
+        {
+          "path": "legacy-sequential-step4/warp-control-5.json",
+          "sha256": "7ae42105425345066139c3a31d47bf71554d9d373ba6a71196399336021f873e"
+        },
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/result.json",
+          "sha256": "8a1af04dc1a34bc872f70db093e18489397bcd09fe7b20882423479f521816ba"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "power"
+      ],
+      "round_ids": [
+        "win-historical-reset-20261121-01",
+        "win-historical-process-log-20261121-01",
+        "win-historical-call-marker-20261121-01"
+      ],
+      "latest_observation": "三次原空窗口最后已经返回的应用侧 API 均为绘图设备 GetDeviceRemovedReason，值为 S_OK；下一条持久标记为首次 Present CALL。签名客户端在 Present 返回后先读取设备移除原因，再持久写入 RETURN。三次均缺这两条后置标记。"
+    },
+    {
+      "id": "WIN-FENCE-WAIT",
+      "priority": "P0",
+      "owner": "提交方、Windows VidSch 和 GM20B 上下文",
+      "question": "受监控围栏的 GPU 信号、同值上下文等待与等待完成能否逐包关联？",
+      "status": "观测缺口",
+      "existing_observation": "历史序号 2 为值 1 的信号包。独立原生客户端同一围栏 CPU 映射 0→1，记录了 GPU 信号和 CPU 等待。",
+      "missing_observation": "原无写入窗口同绘图线程未取得同设备、对象和值的 GPU 等待请求及其退役；正常清屏的跨上下文配对属于另一进程。",
+      "pass_condition": "解析安装版本事件模板，按上下文、对象、值和队列包身份匹配 signal 与 wait，证明依赖获满足后等待完成。",
+      "evidence": [
+        {
+          "path": "legacy-sequential-step4/historical-first-present-fence.json",
+          "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+        },
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        }
+      ],
+      "windows_references": [
+        "signal",
+        "wait",
+        "fence"
+      ],
+      "round_ids": [
+        "win-empty-fence-20261121-01"
+      ],
+      "latest_observation": "空窗口序号 2 的值 1 信号在首个 CALL 前退役；截至公开返回，绘图线程有 0 条 GPU 等待 API 和 0 个等待包。独立清屏同进程捕获 2 组同设备/对象/值的信号与真实等待退役。"
+    },
+    {
+      "id": "WIN-MONITORED-CPU",
+      "priority": "P1",
+      "owner": "VidSch、KMT 客户端",
+      "question": "WDDM 2.6 的普通受监控围栏能否被 CPU 映射并读到已完成的目标值？",
+      "status": "已有实机通过",
+      "existing_observation": "独立原生回执将 CPU 的 0→1、值 1 的 GPU 信号和成功 CPU 等待绑定到同一对象。",
+      "missing_observation": null,
+      "pass_condition": "有只读映射、信号对象/值、CPU 等待成功及等待后读值。",
+      "evidence": [
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        }
+      ],
+      "windows_references": [
+        "signal",
+        "fence"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-SHARED-FENCE",
+      "priority": "P1",
+      "owner": "Windows 对象管理器、VidSch 与两个客户端",
+      "question": "两进程合法打开的共享监控围栏是否指向同一对象并按打开权限等待或应答？",
+      "status": "已有实机通过",
+      "existing_observation": "独立 NoSignal 打开并等待值 1，有信号权限的打开方可应答值 2。事件 1069 对齐过两个本地句柄。",
+      "missing_observation": null,
+      "pass_condition": "合法共享与打开成功、两端对象或值应答吻合、等待/信号操作符合权限并各自释放。",
+      "evidence": [
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        }
+      ],
+      "windows_references": [
+        "wait",
+        "signal",
+        "fence"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-SHARED-RESOURCE",
+      "priority": "P1",
+      "owner": "Windows VidMm、KMD 与两个 KMT 设备",
+      "question": "合法共享分配的全局身份、私有描述符及未共享资源追加能否逐对象核对？",
+      "status": "已有实机通过",
+      "existing_observation": "既有三轮分别匹配全局分配身份、16 字节描述符和同一未共享 hResource 的第二份分配。",
+      "missing_observation": null,
+      "pass_condition": "创建/打开使用各自设备本地句柄，正确对齐非零全局身份、私有描述符及合法追加的结果。",
+      "evidence": [
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        }
+      ],
+      "windows_references": [
+        "alloc",
+        "open"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-RESOURCE-MEMBERS",
+      "priority": "P2",
+      "owner": "Windows VidMm 和资源打开方",
+      "question": "共享资源在该次创建和跨进程打开时公布的成员数是否一致？",
+      "status": "已有实机通过",
+      "existing_observation": "既有正常共享用例从创建、打开到打开结束三次查询均为一份。",
+      "missing_observation": null,
+      "pass_condition": "同一共享对象两端查询返回相同的已创建成员数。永久封存属于另一主张，现有证据仅覆盖观测区间。",
+      "evidence": [
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        }
+      ],
+      "windows_references": [
+        "open",
+        "alloc"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-ALLOCATION-MAP",
+      "priority": "P2",
+      "owner": "Windows VidMm 与映射方",
+      "question": "该类合法 CPU 映射公开返回的保护方式是什么？",
+      "status": "已有实机通过",
+      "existing_observation": "该 64 KiB Lock2 映射和初始分配保护均读到 0x404，表示可读写且 write-combine。",
+      "missing_observation": null,
+      "pass_condition": "Lock2 成功且 VirtualQuery 指向返回地址，保存当前保护及初始保护的原始值。",
+      "evidence": [
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        }
+      ],
+      "windows_references": [
+        "alloc"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-ALLOCATION-UPDATE",
+      "priority": "P2",
+      "owner": "Windows VidMm 与 GM20B KMD",
+      "question": "正式设备的合法 Unmoveable 分配更新是否返回可等待的分页目标？",
+      "status": "设备条件受限",
+      "existing_observation": "正常更新返回 STATUS_NOT_IMPLEMENTED，输出围栏为 0。",
+      "missing_observation": "如有设备支持这一更新，需要实际操作的成功返回和同队列目标完成。",
+      "pass_condition": "在已声明支持的设备上独立观察合法更新、异步目标与完成。",
+      "evidence": [
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        }
+      ],
+      "windows_references": [
+        "paging"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-SCHEDULER-CAPS",
+      "priority": "P2",
+      "owner": "Windows dxgkrnl 与 GM20B KMD",
+      "question": "本机可用的监控围栏、硬件调度与原生 GPU fence 能力分别是什么？",
+      "status": "已有实机通过",
+      "existing_observation": "DRIVERVERSION=2600，HwSchSupported=0、HwSchEnabled=0、NativeGpuFenceSupported=0；普通与周期型受监控围栏有创建回执。",
+      "missing_observation": null,
+      "pass_condition": "取得适配器身份、版本与逐位能力查询。WDDM 3.2 原生 fence 创建/打开依赖的能力在本基线缺失。",
+      "evidence": [
+        {
+          "path": "wsl-dxgkrnl-contracts/native-27.json",
+          "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+        }
+      ],
+      "windows_references": [
+        "fence"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-D3D11-APP",
+      "priority": "P1",
+      "owner": "系统 DXGI/D3D11、tgd3d、NVK 和窗口应用",
+      "question": "原生 D3D11 普通窗口能否完成首帧、处理输入、正常退出并回到同一桌面？",
+      "status": "待核对",
+      "existing_observation": "本次正式基线清屏窗口已有原生 GM20B 身份、成功呈现、输入、退出和同一桌面的回执，后续应用专项可直接复用。",
+      "missing_observation": "当前应用 PID 的硬件 LUID 与模块全哈希、有效画面、窗口输入效果、退出码、DWM 与开机连续性。",
+      "pass_condition": "原生 GM20B 上应用绑定正确，客户区像素正确，输入有可验证效果，进程正常退出、桌面仍可用。",
+      "evidence": [
+        {
+          "path": "legacy-sequential-step4/window-copy-c09c3c86/result.json",
+          "sha256": "8a1af04dc1a34bc872f70db093e18489397bcd09fe7b20882423479f521816ba"
+        },
+        {
+          "path": "GDI_LAYERED_COMPOSITION_20261121.json",
+          "sha256": "9b0f3f2210311b65b3b69efa16d7da7ae0162e8d225701e1bb7bb05d416d746c"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-first-present-20261121-01.result.json",
+          "sha256": "fec3bcb4effe5c3b6dc9da33da1e2ad05f069b3205c81463a1ac1267f647ebcc"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "path"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-DXVK-APP",
+      "priority": "P1",
+      "owner": "应用目录的 DXVK、Windows Vulkan Loader、NVK 和游戏",
+      "question": "应用目录 DXVK 的 FTEQW/LibreQuake 是否在 GM20B 上进图、响应键盘并正常退出？",
+      "status": "待核对",
+      "existing_observation": "x86/x64 归档有真实地图画面、键盘导致的世界区域变化、加载 DLL 哈希和退出码。",
+      "missing_observation": "当前基线同一游戏 PID 的实际本地 d3d9/DXVK、Vulkan Loader 与 NVK 全哈希、原生适配器、画面及桌面。",
+      "pass_condition": "地图 lq_e0m1 的 640×360 窗口有首帧与输入后画面差异，正常退出并回到同一开机的桌面。",
+      "evidence": [
+        {
+          "path": "dxvk-games-20261118/librequake-dxvk.json",
+          "sha256": "aaa380ff753fd9d3b58fc84db3e247ea8acbfcda6df6f0629533c887689befca"
+        },
+        {
+          "path": "DXVK_ZINK_GAME_MATRIX_20261118.json",
+          "sha256": "69f3da1a57c3ec5608577b6cfa5f108b7fb624dc8c0b9b5fa60575e02fce2633"
+        }
+      ],
+      "windows_references": [
+        "present"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-COLD-BOOT",
+      "priority": "P1",
+      "owner": "Windows Kernel-Boot、PnP、开机许可与 DWM",
+      "question": "明确关机后的一次冷启动是否按永久许可加载正式 GPU 并建立可用桌面？",
+      "status": "待核对",
+      "existing_observation": "运行许可、诊断启动和永久许可启动分别有归档。冷入口诊断 88512 为关闭许可下 Code 43。",
+      "missing_observation": "从完全关机到上电的独立见证、启动类型、永久许可、Code 0、实际 KMD/DWM 路径哈希和桌面使用证据。",
+      "pass_condition": "关机/上电证据排除恢复休眠与软件重启，完整核对七项文件及本次实际加载的组件；桌面连续可用。",
+      "evidence": [
+        {
+          "path": "startup-diagnostic-56113d6c2b2b/windows-startdevice-callback.json",
+          "sha256": "4e374cc7a166e92d0139c438fd4d5005d98c5e9eeeed49d911fe9f177465433d"
+        },
+        {
+          "path": "startup-diagnostic-56113d6c2b2b/permanent-boot.json",
+          "sha256": "f2fda8ad54e091d8d07fb4284b25c3996a5b0a15e263c5ae0d087ba43d3e1bab"
+        }
+      ],
+      "windows_references": [
+        "cold",
+        "power"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-ORDERLY-RESTART",
+      "priority": "P1",
+      "owner": "Windows 关机服务、启动许可、PnP 和 DWM",
+      "question": "一次受控重启能否按永久许可回到 Code 0 的正式原生桌面？",
+      "status": "待核对",
+      "existing_observation": "永久与一次性开机有不同许可回执，早期候选多次计划重启有 1074。",
+      "missing_observation": "在同一受控轮配对请求方的 1074、正常结束、下一开机、实载哈希与可用桌面。",
+      "pass_condition": "请求时间和重启因果成对，恢复永久许可、Code 0、原生 DWM，区间无额外未解释启动。",
+      "evidence": [
+        {
+          "path": "startup-diagnostic-56113d6c2b2b/system-interval.json",
+          "sha256": "e508dddd3c6fc2527b1e816e5f9c3c1f728255a6466d895b1222cbe50338f38e"
+        },
+        {
+          "path": "startup-diagnostic-56113d6c2b2b/permanent-boot.json",
+          "sha256": "f2fda8ad54e091d8d07fb4284b25c3996a5b0a15e263c5ae0d087ba43d3e1bab"
+        }
+      ],
+      "windows_references": [
+        "power",
+        "cold"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-UNEXPECTED-BOOT",
+      "priority": "P1",
+      "owner": "Windows 电源、故障转储和 GPU 恢复",
+      "question": "每个意外开机前最后一次可证实的本机操作及恢复状态是什么？",
+      "status": "故障开放",
+      "existing_observation": "已有故障表单列桌面、接手时启动间隔和 GPU 恢复；41/6008 可确认非正常结束。",
+      "missing_observation": "原区间的首个故障事件、转储或早期记录与恢复后实际加载的正式组件。",
+      "pass_condition": "按启动号分清负载、准备和恢复，相关故障有直接原因或保留缺口，新异常按同条件三次约定登记。",
+      "evidence": [
+        {
+          "path": "LOAD_STABILITY_FOLLOWUP_20261116.json",
+          "sha256": "72a6d2f99d83d2c88b19a9669b02c99f21f6cb576a2c4c72c9a9bae7880d4f6a"
+        },
+        {
+          "path": "startup-diagnostic-56113d6c2b2b/system-interval.json",
+          "sha256": "e508dddd3c6fc2527b1e816e5f9c3c1f728255a6466d895b1222cbe50338f38e"
+        }
+      ],
+      "windows_references": [
+        "power"
+      ],
+      "round_ids": []
+    },
+    {
+      "id": "WIN-WIFI-RECOVERY",
+      "priority": "P1",
+      "owner": "Windows WLAN、SSH 传输和启动事件",
+      "question": "一次连接中断属于 Wi-Fi/SSH、受控重启还是意外重启？",
+      "status": "待核对",
+      "existing_observation": "85304 的无线启动异常与 85382 的计划重启单独登记。",
+      "missing_observation": "当前失联区间两侧启动号、DWM 启动时间、WLAN 状态及连接恢复事件。",
+      "pass_condition": "有重连前后启动和 WLAN 证据；只设置 SSH 重试间隔的区间继续标为网络观测缺口。",
+      "evidence": [
+        {
+          "path": "dxvk-games-20261118/gdi-fullscreen-gm20b/wifi-startup.json",
+          "sha256": "9050bf721e13348fcf9051ca6d1cbd2043d885e107a7ecb1393f35d5460a92ce"
+        }
+      ],
+      "windows_references": [
+        "power"
+      ],
+      "round_ids": []
+    }
+  ],
+  "rounds": [
+    {
+      "round_id": "win-first-present-20261121-01",
+      "windows_question": "WIN-PRESENT-KMT",
+      "method": "实机首次呈现",
+      "plan": "windows-native-graphics/rounds/win-first-present-20261121-01.plan.json",
+      "plan_sha256": "437a9cfef2aa52bd73102565219f39478bd766f9ee7698c53e79ec68071e02c0",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:36:03.584016+00:00",
+      "device_executions": 1,
+      "contract_id": "WIN-PRESENT-KMT",
+      "result": "windows-native-graphics/rounds/win-first-present-20261121-01.result.json",
+      "result_sha256": "fec3bcb4effe5c3b6dc9da33da1e2ad05f069b3205c81463a1ac1267f647ebcc",
+      "status": "实机通过",
+      "finding": "开机 91476，绘图 PID/TID 5364/3528，正常清屏窗口首次 Present(1,0) 在 DXGI 42/43 之间产生同线程同 HWND 的 Windows DxgKrnl 184，KMT 与公开返回均为 0。旧式 DDI 0x000b000f，原生 GM20B，DWM 1400 连续。",
+      "missing_observation": null,
+      "boundaries": {
+        "last_entry": {
+          "api": "DXGI Present Start 42",
+          "qpc": 92572651110,
+          "public_call_qpc": 92572521356
+        },
+        "kernel_receipt": {
+          "api": "DxgKrnl Present/Info 184 v1",
+          "qpc": 92572977537,
+          "return_status": 0
+        },
+        "last_return": {
+          "api": "IDXGISwapChain::Present",
+          "qpc": 92572981150,
+          "hresult": "0x00000000"
+        },
+        "first_anomaly_or_missing": "本次调用正常。事件 184 是带返回值的 Info，精确系统调用入口时刻没有独立回执。历史三次在 CALL 之后的内核边界仍缺。"
+      },
+      "finished_utc": "2026-11-21T13:38:39.326382+00:00"
+    },
+    {
+      "round_id": "win-empty-present-20261121-01",
+      "contract_id": "WIN-EMPTY-PRESENT-KMT",
+      "windows_question": "WIN-EMPTY-PRESENT-KMT",
+      "method": "原场景正式基线实机验收",
+      "plan": "windows-native-graphics/rounds/win-empty-present-20261121-01.plan.json",
+      "plan_sha256": "0e5497cdeae8fd7c3c7caa3e9a7f44a5ec5c3e17e66c2de3103910d4ecae304b",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:38:49.029506+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+      "result_sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c",
+      "status": "实机通过",
+      "finding": "开机 91476，绘图 PID/TID 5992/5988，无写入空窗口首次 Present(1,0) 在 DXGI 42/43 之间产生同线程同 HWND 的 Windows DxgKrnl 184，KMT 与公开返回均为 0。旧式 DDI 0x000b000f，原生 GM20B，DWM 1400 连续。",
+      "missing_observation": null,
+      "boundaries": {
+        "last_entry": {
+          "api": "DXGI Present Start 42",
+          "qpc": 94861212477,
+          "public_call_qpc": 94861147189
+        },
+        "kernel_receipt": {
+          "api": "DxgKrnl Present/Info 184 v1",
+          "qpc": 94861378321,
+          "return_status": 0
+        },
+        "last_return": {
+          "api": "IDXGISwapChain::Present",
+          "qpc": 94861380548,
+          "hresult": "0x00000000"
+        },
+        "first_anomaly_or_missing": "本次调用正常。事件 184 是带返回值的 Info，精确系统调用入口时刻没有独立回执。历史三次在 CALL 之后的内核边界仍缺。"
+      },
+      "finished_utc": "2026-11-21T13:40:14.167067+00:00"
+    },
+    {
+      "round_id": "win-empty-source-20261121-01",
+      "contract_id": "WIN-PRESENT-SOURCE",
+      "windows_question": "WIN-PRESENT-SOURCE",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-empty-source-20261121-01.plan.json",
+      "plan_sha256": "5653d9a8225f5eba3fea94d952f0093238f89b11618195f3e06887a2fa467ed6",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:40:40.082118+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-empty-source-20261121-01.result.json",
+      "result_sha256": "b9f233bd54dccd95c93ec55d7e4303f25f28e2c3c33aad3137d08f6afc13d43a",
+      "status": "实机通过",
+      "finding": "原空窗口的 KMT 源句柄 0x40000740 属于该应用设备。驻留/映射分别返回 E_PENDING，分页目标 7001/7002 的两次检查均为 S_OK，末次在公开调用前 775.464 ms。",
+      "missing_observation": null,
+      "boundaries": {
+        "last_entry": "MapGpuVirtualAddressCb 返回 E_PENDING，源字节数 921600",
+        "last_return": {
+          "api": "wait_paging",
+          "hresult": "S_OK",
+          "target": 7002,
+          "qpc": 94846258276
+        },
+        "first_anomaly_or_missing": "回执给出目标及分页检查成功。检查内部的直接 CPU 读值或阻塞分支没有单独事件。"
+      },
+      "finished_utc": "2026-11-21T13:40:40.721703+00:00"
+    },
+    {
+      "round_id": "win-empty-fence-20261121-01",
+      "contract_id": "WIN-FENCE-WAIT",
+      "windows_question": "WIN-FENCE-WAIT",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-empty-fence-20261121-01.plan.json",
+      "plan_sha256": "2ebc9fdc984d7bc1024ff080f7eeb115d521c6ad2d9d5d526c8e5404c605a064",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:40:40.798507+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-empty-fence-20261121-01.result.json",
+      "result_sha256": "0e9bfd69ff8f0616124ee0895033f703c2175bfee581294a57b9e19815d170a3",
+      "status": "观测缺口",
+      "finding": "空窗口序号 2 的值 1 信号在首个 CALL 前退役；截至公开返回，绘图线程有 0 条 GPU 等待 API 和 0 个等待包。独立清屏同进程捕获 2 组同设备/对象/值的信号与真实等待退役。",
+      "missing_observation": "原无写入窗口同绘图线程未取得同设备、对象和值的 GPU 等待请求及其退役；正常清屏的跨上下文配对属于另一进程。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 94844513741,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 294,
+          "version": 1,
+          "fields": {
+            "ContextCount": 1,
+            "hContext": [
+              18446611100106939808
+            ],
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169642841536
+            ],
+            "MonitoredFenceValue": [
+              1
+            ],
+            "InternalFlagsFlags": 5
+          }
+        },
+        "last_return": {
+          "qpc": 94844561325,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100106939808,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169621553168
+          }
+        },
+        "first_anomaly_or_missing": "原无写入窗口同绘图线程未取得同设备、对象和值的 GPU 等待请求及其退役；正常清屏的跨上下文配对属于另一进程。"
+      },
+      "finished_utc": "2026-11-21T13:40:42.065735+00:00"
+    },
+    {
+      "round_id": "win-empty-blt-20261121-01",
+      "contract_id": "WIN-PRESENT-BLT",
+      "windows_question": "WIN-PRESENT-BLT",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-empty-blt-20261121-01.plan.json",
+      "plan_sha256": "8cf9fe731318bbd8bd3ab7e1f49d90647852474a88ff4c7defb58c2ce8e35ce3",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:40:46.204161+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-empty-blt-20261121-01.result.json",
+      "result_sha256": "5162d39228ce3073efd4d1f02d5043e15bee5737a872fc4e897f8e1da7d2b224",
+      "status": "实机通过",
+      "finding": "原空窗口首次提交中，暂存表面与 Blt 目标的全局身份一致，源和目标均属应用设备。上下文提交 52 字节复制包，序号 1，按上下文、序号与 pQueuePacket 配对正常退役。",
+      "missing_observation": null,
+      "boundaries": {
+        "last_entry": {
+          "call": "DxgKrnl Blit/QueuePacket Start",
+          "blt_qpc": 94861300682,
+          "packet_qpc": 94861301402
+        },
+        "last_return": {
+          "call": "QueuePacket Stop",
+          "qpc": 94861344089,
+          "sequence": 1,
+          "timeout": false,
+          "preempted": false
+        },
+        "first_anomaly_or_missing": "正式组件本次 ETW 有 Windows Blt 与提交/退役。miniport DDI 的原始 NTSTATUS 没有同轮专用返回事件。"
+      },
+      "finished_utc": "2026-11-21T13:40:54.553557+00:00"
+    },
+    {
+      "round_id": "win-empty-image-20261121-01",
+      "contract_id": "WIN-PRESENT-IMAGE",
+      "windows_question": "WIN-PRESENT-IMAGE",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-empty-image-20261121-01.plan.json",
+      "plan_sha256": "ebd61f04d1befaeaf79b3a6c384575dc4488fb8db2d0d0007c37aa3af41ae5c2",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:40:54.637264+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-empty-image-20261121-01.result.json",
+      "result_sha256": "4395a9ef94f2e447e96fbc575b5665c3dc6ac4065a36c680b7dd101d0e7cf9b8",
+      "status": "实机通过",
+      "finding": "原空窗口在公开返回后由同 PID 客户区采样，4508/4508 个像素与空帧对照匹配，输入有效、正常退出并回到同一 DWM。应用 PresentHistory 令牌另有 0 条同令牌 DWM PID 记录。",
+      "missing_observation": null,
+      "boundaries": {
+        "last_entry": "DXGI 首个 Present 的应用 CALL",
+        "last_return": {
+          "public_return_qpc": 94861380548,
+          "desktop_capture_qpc": 94863412892,
+          "window_exit_qpc": 94867588333
+        },
+        "first_anomaly_or_missing": "实体面板锁存与逐像素光学输出没有同轮回执。 同一令牌的 DWM 消费时间也缺回执。"
+      },
+      "finished_utc": "2026-11-21T13:40:55.235355+00:00"
+    },
+    {
+      "round_id": "win-historical-reset-20261121-01",
+      "contract_id": "WIN-OLD-RESET",
+      "windows_question": "WIN-OLD-RESET",
+      "method": "实机只读调查历史启动",
+      "plan": "windows-native-graphics/rounds/win-historical-reset-20261121-01.plan.json",
+      "plan_sha256": "41bf87a4e867fb93b51f5487a9bfac9a229f009e804e6d1ee6535c3f67f31e08",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:41:04.375441+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-historical-reset-20261121-01.result.json",
+      "result_sha256": "f25542749cb21e1a6664ce81ea494d3cba9b50161ca943dcb888c405f1ed2059",
+      "status": "故障开放",
+      "finding": "三次历史开机均确认首次公开 CALL，下一开机各有 41/6008、BugcheckCode=0。当前 Switch 留存的七份可读滚动 ETL 头全部起于次日；另六份 RtBackup 条目为零或 72 字节，读取受限。十一份 WATCHDOG 转储均早于原次。七次 WATCHDOG 请求正文相同，含四次计划重启对照。原次 CALL 后首个故障步骤仍无直接记录。",
+      "missing_observation": "需要原次公开 CALL 之后且在对应复位之前持久保存的 Windows/KMD 事件、同启动崩溃转储或板级复位回执，能绑定该进程、线程、对象和独立时基。",
+      "boundaries": {
+        "last_entry": "三次原窗口首次 Present(1,0) 的 CALL 标记，各自 QPC 见 historical_cases。",
+        "last_return": "每次调用前有同分配分页检查成功和已退役的值 1 信号。首次 Present 自身无返回。",
+        "first_anomaly_or_missing": "原绘图线程公开 CALL 之后的首个 Windows 内核接收位置，至下一次已证实的异常开机之间。"
+      },
+      "finished_utc": "2026-11-21T13:42:21.475276+00:00"
+    },
+    {
+      "round_id": "win-empty-dwm-20261121-01",
+      "contract_id": "WIN-DWM-CONSUME",
+      "windows_question": "WIN-DWM-CONSUME",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-empty-dwm-20261121-01.plan.json",
+      "plan_sha256": "3aa7a61c2baa8beebecfa2693562a0cf82d54b47a4eb43cb97fbb805bea7e2f0",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:42:41.837750+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-empty-dwm-20261121-01.result.json",
+      "result_sha256": "fd5475342760a1424597ce4dc39b89fdbd168a2ccdff9811fd805d857056e655",
+      "status": "观测缺口",
+      "finding": "首个 CALL 至客户区取样区间内，DWM-Core/Win32k 已选事件匹配该 HWND 的记录有 0 条，DWM PID 同 DxgKrnl 令牌记录也为 0。保留复制完成和 4508/4508 客户区像素的独立回执。",
+      "missing_observation": "当前采集中缺与原空窗口这一帧相连的 DWM 消费标识。像素已由呈现后桌面截图独立验收。",
+      "boundaries": {
+        "last_entry": "原线程的首次 KMT 源和 HWND 已配对。",
+        "last_return": {
+          "public_return_qpc": 94861380548,
+          "composed_pixel_capture_qpc": 94863412892
+        },
+        "first_anomaly_or_missing": "当前采集中缺与原空窗口这一帧相连的 DWM 消费标识。像素已由呈现后桌面截图独立验收。"
+      },
+      "finished_utc": "2026-11-21T13:42:51.413914+00:00"
+    },
+    {
+      "round_id": "win-dwm-blt-token-20261121-01",
+      "contract_id": "WIN-DWM-CONSUME",
+      "windows_question": "WIN-DWM-CONSUME",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-dwm-blt-token-20261121-01.plan.json",
+      "plan_sha256": "2afff43437eeba7e3aa4a20216eee1a711fabe428dd4b0d80303042f47d041d2",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:43:30.425115+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-dwm-blt-token-20261121-01.result.json",
+      "result_sha256": "4fba0db912a03d9b2071a45bf42434cb50f62922a54dbec0d06534c2d2ccdfc3",
+      "status": "观测缺口",
+      "finding": "同一窗口公开返回附近有 DWM 91 的 Blt 调度，但应用事件 215 的 TokenData 为 0，目标分配的共享资源身份与 DWM 表面未建立同对象联系。保留 DWM 接收缺口。",
+      "missing_observation": "需要将 DWM 的逻辑表面或共享表面明确绑定到本次 HWND 的重定向资源，或者在生产 ETW 中取得同窗口及提交标识的消费回执。",
+      "boundaries": {
+        "last_entry": "DWM 的 SCHEDULE_PRESENTHISTORYTOKEN_BLT 事件 91 有独立时间与表面字段。",
+        "last_return": {
+          "app_return_qpc": 94861380548,
+          "desktop_sample_qpc": 94863412892
+        },
+        "first_anomaly_or_missing": "需要将 DWM 的逻辑表面或共享表面明确绑定到本次 HWND 的重定向资源，或者在生产 ETW 中取得同窗口及提交标识的消费回执。"
+      },
+      "finished_utc": "2026-11-21T13:43:31.303987+00:00"
+    },
+    {
+      "round_id": "win-dwm-window-id-20261121-01",
+      "contract_id": "WIN-DWM-CONSUME",
+      "windows_question": "WIN-DWM-CONSUME",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-dwm-window-id-20261121-01.plan.json",
+      "plan_sha256": "d4442bd36b4c626c83120aba484ccd2b2d9f1a7fdc2425eb2461b62ef63d786a",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:43:51.161767+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-dwm-window-id-20261121-01.result.json",
+      "result_sha256": "eb83d9760c78dfcacfcde18bd06c3b91809c4a5258e7f740ed0e8009e8a860ba",
+      "status": "观测缺口",
+      "finding": "原空窗口的 DWM 91 在 QPC 94861443540 记录 EventId=524312，与应用/Windows HWND 相等。五份 Blt 归档中有 5 份得到同样的数值与时序对应。",
+      "missing_observation": "各受测 Blt 窗口的 DWM 调度已按 EventId 与 HWND 的实际数值和时序对齐。事件 91 的两个表面句柄为零；仍缺同提交的消费或面板扫描标识。",
+      "boundaries": {
+        "last_entry": "DWM SCHEDULE_PRESENTHISTORYTOKEN_BLT 与原窗口身份数值相同。",
+        "last_return": "应用首次 Present 返回，随后客户区像素匹配。",
+        "first_anomaly_or_missing": "各受测 Blt 窗口的 DWM 调度已按 EventId 与 HWND 的实际数值和时序对齐。事件 91 的两个表面句柄为零；仍缺同提交的消费或面板扫描标识。"
+      },
+      "finished_utc": "2026-11-21T13:43:57.138810+00:00"
+    },
+    {
+      "round_id": "win-historical-process-log-20261121-01",
+      "contract_id": "WIN-OLD-RESET",
+      "windows_question": "WIN-OLD-RESET",
+      "method": "实机只读调查历史启动",
+      "plan": "windows-native-graphics/rounds/win-historical-process-log-20261121-01.plan.json",
+      "plan_sha256": "aba18e31edb68e804150c9d6d52efe6a3c77dd43017b4b9b39ef475932524815",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:44:56.369579+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-historical-process-log-20261121-01.result.json",
+      "result_sha256": "1ef553202e1f6a417c4a80c6d35f0a2d4d1ec1d768fcd014627e080a820197dc",
+      "status": "故障开放",
+      "finding": "原三次归档按完整 ZIP 成员哈希复核，均有当轮目录清理回执。当前正式交互账户未检出 step4-present 的 LocalDumps 或 WER 报告，该时间窗内匹配此客户端的 Application 1000/1001/1002 有 0 条。",
+      "missing_observation": "原三次调用后的责任方与内核阶段仍缺同启动的持久记录；已收回原 ZIP 的哈希及内容、对应清理回执和进程级 Windows 错误记录已核对。",
+      "boundaries": {
+        "last_entry": "原三份签名空窗口 journal 的首次公开 Present CALL。",
+        "last_return": "原次 CALL 前最后一次成功分页检查。",
+        "first_anomaly_or_missing": "原三次调用后的责任方与内核阶段仍缺同启动的持久记录；已收回原 ZIP 的哈希及内容、对应清理回执和进程级 Windows 错误记录已核对。"
+      },
+      "finished_utc": "2026-11-21T13:45:00.318042+00:00"
+    },
+    {
+      "round_id": "win-historical-call-marker-20261121-01",
+      "contract_id": "WIN-OLD-RESET",
+      "windows_question": "WIN-OLD-RESET",
+      "method": "复核已收回的本机 ETL 与应用回执",
+      "plan": "windows-native-graphics/rounds/win-historical-call-marker-20261121-01.plan.json",
+      "plan_sha256": "82acf8bf2cfa00ade8705cdfca78c0a67b48d2652c8f62c3fd9460502859dfbf",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T13:47:15.982962+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-historical-call-marker-20261121-01.result.json",
+      "result_sha256": "e845dd73a595c7bd0c3228629f77c8effd80e5c9250e51c25daf438178eb3e9e",
+      "status": "故障开放",
+      "finding": "三次原空窗口最后已经返回的应用侧 API 均为绘图设备 GetDeviceRemovedReason，值为 S_OK；下一条持久标记为首次 Present CALL。签名客户端在 Present 返回后先读取设备移除原因，再持久写入 RETURN。三次均缺这两条后置标记。",
+      "missing_observation": "三次原故障的 CALL 之后缺同启动 DXGI Start/Stop、KMT 接收/返回、后置设备查询或早期复位记录。尚不能区分故障发生在公开 Present 内、返回后的查询内，或持久 RETURN 标记之前的其他位置。",
+      "boundaries": {
+        "last_return": "三次原绘图线程在公开 CALL 紧前均记录 GetDeviceRemovedReason 返回 S_OK。分页检查属于更早的内存阶段。",
+        "last_entry": "写入 IDXGISwapChain::Present(1,0) 的 CALL 标记，API 函数体入口本身无回执。",
+        "first_anomaly_or_missing": "三次原故障的 CALL 之后缺同启动 DXGI Start/Stop、KMT 接收/返回、后置设备查询或早期复位记录。尚不能区分故障发生在公开 Present 内、返回后的查询内，或持久 RETURN 标记之前的其他位置。"
+      },
+      "finished_utc": "2026-11-21T13:47:15.987176+00:00"
+    }
+  ],
+  "progress": {
+    "total": 21,
+    "by_status": {
+      "实机通过": 5,
+      "观测缺口": 2,
+      "故障开放": 2,
+      "已有实机通过": 6,
+      "设备条件受限": 1,
+      "待核对": 5
+    },
+    "registered_rounds": 12,
+    "new_device_executions": 2
+  },
+  "current_focus": {
+    "first_question": "WIN-EMPTY-PRESENT-KMT",
+    "scene": "旧式 DDI 0x000b000f、普通窗口、两个 BGRA 缓冲、应用无写入、第一次 Present(1,0)。本次正式驱动和三次历史启动各自归属。",
+    "order": [
+      "WIN-EMPTY-PRESENT-KMT",
+      "WIN-PRESENT-SOURCE",
+      "WIN-FENCE-WAIT",
+      "WIN-PRESENT-BLT",
+      "WIN-DWM-CONSUME",
+      "WIN-PRESENT-IMAGE",
+      "WIN-OLD-RESET"
+    ],
+    "original_27_verdicts": {
+      "已满足": 8,
+      "未知": 19
+    },
+    "remaining_19": {
+      "按对象复用": 2,
+      "本机条件受限": 15,
+      "部分可观测": 2
+    },
+    "later_work": [
+      "WIN-D3D11-APP",
+      "WIN-DXVK-APP",
+      "WIN-COLD-BOOT",
+      "WIN-ORDERLY-RESTART"
+    ]
+  },
+  "cleanup": {
+    "observed_utc": "2026-11-21T13:44:42.7900864Z",
+    "onboard": [
+      {
+        "directory": false,
+        "collector": "SwitchDisplay-85db5c31a416",
+        "registered": false,
+        "traces": [],
+        "preview": "Nvdec720Preview-5364",
+        "task": "WinNativeWindow-85db5c31a416"
+      },
+      {
+        "directory": false,
+        "collector": "SwitchDisplay-fd55e11911da",
+        "registered": false,
+        "traces": [],
+        "preview": "Nvdec720Preview-5992",
+        "task": "WinNativeWindow-fd55e11911da"
+      }
+    ],
+    "handoff_boot": 91476,
+    "dwm": 1400,
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "AC": "Online",
+    "power_mode": 1,
+    "code": 0,
+    "source_commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "permanent_profile": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "components": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "loaded": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "bound_service": "tegragpurender",
+    "archive_hashes": {
+      "win-first-present-20261121-01": "e2c65e8f0b47d65fc3af8717ea2c78e4d1ca62994c1e59a75006b0cbe07d4634",
+      "win-empty-present-20261121-01": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961"
+    },
+    "local_staging_files_removed": 18,
+    "local_cleanup_receipt_sha256": "f4cfaadcf105ebd0613e68468825584225369277afa2d43cd19b2da38a2714c2"
+  },
+  "first_present_evidence_scopes": {
+    "original_no_write": {
+      "profile": {
+        "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+        "kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+        "umd_arm64_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+        "nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "ddi": "0x000b000f",
+        "back_buffers": 2,
+        "present_arguments": "Present(1,0)",
+        "scope": "step4-present.exe process-specific DDI enumeration candidate"
+      },
+      "cases": [
+        {
+          "boot": 82058,
+          "pid": 1812,
+          "tid": 6340,
+          "journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+          "last_pre_call_device_status": "680609 6340 OBSERVE RemovedReasonBeforePresent 00000000",
+          "first_call_marker": "680609 6340 CALL Present 00000000 qpc=13070969930",
+          "signal_value": 1,
+          "signal_retirement_ms_before_call": 360.492,
+          "return_marker": false
+        },
+        {
+          "boot": 82221,
+          "pid": 4672,
+          "tid": 4712,
+          "journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+          "last_pre_call_device_status": "122343 4712 OBSERVE RemovedReasonBeforePresent 00000000",
+          "first_call_marker": "122343 4712 CALL Present 00000000 qpc=2352403757",
+          "signal_value": 1,
+          "signal_retirement_ms_before_call": 1101.095,
+          "return_marker": false
+        },
+        {
+          "boot": 82382,
+          "pid": 5828,
+          "tid": 7656,
+          "journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+          "last_pre_call_device_status": "122843 7656 OBSERVE RemovedReasonBeforePresent 00000000",
+          "first_call_marker": "122843 7656 CALL Present 00000000 qpc=2361927374",
+          "signal_value": 1,
+          "signal_retirement_ms_before_call": 400.943,
+          "return_marker": false
+        }
+      ],
+      "source": {
+        "path": "legacy-sequential-step4/historical-first-present-fence.json",
+        "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+      },
+      "application_build_manifest_sha256": "059f19f9fdadc488f0925307a913485c3517cb44dede45bc989c1444dcec2450",
+      "marker_patch_sha256": "61334630b65cf7ddab48c6320742280870662279179e43374f836b666afef714",
+      "marker_order": [
+        "GetDeviceRemovedReason 返回并落盘",
+        "持久 CALL 标记",
+        "IDXGISwapChain::Present(1,0)",
+        "GetDeviceRemovedReason",
+        "持久 RETURN 标记"
+      ],
+      "missing": "原次无 CALL 后的图形事件及 RETURN 标记。客户端在公开 Present 返回后先查设备移除原因，再写 RETURN。旧日志无法区分进入内核、调用返回前后、后置设备查询或回执持久化。"
+    },
+    "original_flip_on_same_boot": {
+      "boot": 82058,
+      "profile": {
+        "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+        "kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+        "umd_arm64_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+        "nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "ddi": "0x000b000f",
+        "back_buffers": 2,
+        "present_arguments": "Present(1,0)",
+        "scope": "step4-present.exe process-specific DDI enumeration candidate"
+      },
+      "case": "Ddi20Case-261120-121855717865",
+      "archive_sha256": "6677a160e0f23a3618a3ff1d7dd3db0aea21c91c2315caba9a6d7d65000b8a2a",
+      "scope": "同旧组件及启动 82058 的 FLIP_SEQUENTIAL 成功回执，仅用于比较呈现模型。",
+      "source": {
+        "path": "legacy-sequential-step4/historical-first-present-fence.json",
+        "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+      }
+    },
+    "warp_control": {
+      "boot": 85554,
+      "backend": "DRAW_DEVICE software=1 luid=0000000000005c4d display_luid=0000000000005b39 vendor=1414 device=8c fl=b000 name=Microsoft Basic Render Driver",
+      "selected_components": {
+        "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+      },
+      "archive_sha256": "64a3c25758fafb0ebefd5b04a7c6daf2966a2707677a3a28638c7168387563fe",
+      "public_successes": 1,
+      "exit": 0,
+      "input_verified": false,
+      "trace_exit": 1,
+      "scope": "软件适配器普通窗口的公开返回与空帧参考。",
+      "source": {
+        "path": "legacy-sequential-step4/warp-control-5.json",
+        "sha256": "7ae42105425345066139c3a31d47bf71554d9d373ba6a71196399336021f873e"
+      }
+    },
+    "separate_drawn_window": {
+      "client_sha256": "62100a301ae7c85a7d40d15d13b91837989b4b06ac935cd9182274e8a0ce6f6f",
+      "archive_sha256": "4fd7dca31251886fa409627bc2253fff80eafa0d802acc27dae58993a5361a8d",
+      "boot": 77953,
+      "next_boot": 78023,
+      "boundary": {
+        "public_present_calls": 1,
+        "public_present_returns": 0,
+        "calling_thread": 8104,
+        "callback_caller": "CDevice::PresentCB_PreWDDM2",
+        "windows_present_callback_reached": true,
+        "typed_kmt_dispatch_call_reached": true,
+        "typed_kmt_dispatch_return_recorded": false,
+        "last_client_stage": "CALL Present",
+        "last_readable_etw_event_ms_relative_to_typed_call": -30.261
+      },
+      "scope": "另一客户端在用户态发出 typed KMT dispatch。缺内核接收和返回。",
+      "source": {
+        "path": "LOAD_STABILITY_FOLLOWUP_20261116.json",
+        "sha256": "72a6d2f99d83d2c88b19a9669b02c99f21f6cb576a2c4c72c9a9bae7880d4f6a"
+      }
+    },
+    "diagnostic_rejection": {
+      "boot": 86815,
+      "installed_components": {
+        "tegragpurender.sys": "13286e3eb6aeadfda1aac07b138ae21697ba07ecb2c6baf4a5b471f9c2d9e02b",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "signed_original_client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "63eb1f564ffb82cb98196f8e145d51ddbfc4745adafcef4d366a77440833adc1",
+      "source_decision": {
+        "file": "tegra-x1-wddm/windows/present.c",
+        "functional_source": "aa49f69c8362ddb6e0547ad8f30bb951c9548a5e",
+        "functional_symbol": "TgGpuDdiPresent",
+        "diagnostic_symbol": "encode_present",
+        "decision": "Plain Blt on a non-GDI rendering context returns STATUS_NOT_SUPPORTED."
+      },
+      "raw_ddi": [
+        {
+          "qpc": 4347367225,
+          "operation": "present",
+          "phase": "enter",
+          "status": "0x00000103",
+          "flags": "0x00000001",
+          "dma_bytes": 65536,
+          "private_bytes": 65864,
+          "user_private_bytes": 0,
+          "subrect_count": 1,
+          "multipass_offset": 0
+        },
+        {
+          "qpc": 4347367255,
+          "operation": "non_gdi_blt_rejected",
+          "phase": "result",
+          "status": "0xc00000bb",
+          "flags": "0x00000001",
+          "dma_bytes": 0,
+          "private_bytes": 0,
+          "user_private_bytes": 0,
+          "subrect_count": 1,
+          "multipass_offset": 0
+        },
+        {
+          "qpc": 4347367284,
+          "operation": "present",
+          "phase": "result",
+          "status": "0xc00000bb",
+          "flags": "0x00000001",
+          "dma_bytes": 65536,
+          "private_bytes": 65864,
+          "user_private_bytes": 0,
+          "subrect_count": 1,
+          "multipass_offset": 0
+        }
+      ],
+      "kernel": {
+        "flags": "0x04011081",
+        "status": "0xc01e0006",
+        "cross_adapter": true,
+        "source_handle": true,
+        "destination_handle": false,
+        "window_handle_matched": true
+      },
+      "public": "0x087a0001",
+      "scope": "启动 86815 中普通渲染上下文 Blt 的 DDI 拒绝直接解释这次遮挡。该次桌面持续运行。",
+      "source": {
+        "path": "legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+        "sha256": "283175425e0a6d8dbb354bcc1ea5cdc0c8bc8b2aa484540eeeb6133800de3035"
+      }
+    },
+    "functional_candidate": {
+      "boot": 87268,
+      "installed_components": {
+        "tegragpurender.sys": "c09c3c868948f3a3acc583dd5f34cb098f3819207db817c081e4ade06adf999a",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "cases": [
+        {
+          "case": "copy-sequential-1",
+          "archive_sha256": "09bc540a153902c33bf25fa6d608ea52c68ca7fabc850119ae8e1fd81f5e715a",
+          "public_successes": 1,
+          "input_verified": true
+        },
+        {
+          "case": "copy-sequential-2",
+          "archive_sha256": "543562f0f57bab939fd8b6fa8cce22b014da8bfcc88b47c9c1877decaef500dc",
+          "public_successes": 1,
+          "input_verified": true
+        },
+        {
+          "case": "copy-sequential-3",
+          "archive_sha256": "4eb3b503b4d14f1b4262c23e38394a1191dce1fe42ca5fcd06f2f202d7222a24",
+          "public_successes": 1,
+          "input_verified": true
+        }
+      ],
+      "copy_bytes": 52,
+      "scope": "已归档修复版同一原空窗口三次通过，历史整机重启根因独立开放。",
+      "source": {
+        "path": "legacy-sequential-step4/window-copy-c09c3c86/result.json",
+        "sha256": "8a1af04dc1a34bc872f70db093e18489397bcd09fe7b20882423479f521816ba"
+      }
+    },
+    "current_baseline": {
+      "boot": 91476,
+      "selected_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+      "components": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "executed_scenes": [
+        "win-first-present-20261121-01",
+        "win-empty-present-20261121-01"
+      ],
+      "open_boundary": "原三次历史 CALL 后没有与复位关联的本机证据。当前成功路径已有分页、内核返回、完整复制包、DWM 调度与客户区色值。"
+    }
+  },
+  "published_windows_logs": {
+    "path": "windows-native-graphics/local-windows-logs.json",
+    "sha256": "cdfb0eeb2f11161e8ba63ced00ded4795adcf16dde32772d908fedb26b5a67e8"
+  }
+}

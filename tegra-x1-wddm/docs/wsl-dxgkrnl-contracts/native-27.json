@@ -1,0 +1,2472 @@
+{
+  "schema": 1,
+  "starting_catalog_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "source_tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
+  "initial_contract_ids": [
+    "dxgkrnl.h:145:1",
+    "dxgkrnl.h:197:2",
+    "dxgkrnl.h:199:2",
+    "dxgkrnl.h:218:2",
+    "dxgkrnl.h:231:1",
+    "dxgkrnl.h:256:2",
+    "dxgkrnl.h:615:1",
+    "dxgkrnl.h:684:4",
+    "dxgkrnl.h:723:2",
+    "dxgkrnl.h:759:2",
+    "dxgsyncfile.c:266:2",
+    "dxgsyncfile.c:381:2",
+    "dxgvmbus.c:825:2",
+    "dxgvmbus.c:889:2",
+    "dxgvmbus.c:896:3",
+    "dxgvmbus.c:900:3",
+    "dxgvmbus.c:3147:2",
+    "dxgvmbus.c:3152:3",
+    "dxgvmbus.c:3156:3",
+    "dxgvmbus.c:3651:2",
+    "ioctl.c:1630:4",
+    "ioctl.c:1710:4",
+    "ioctl.c:2581:2",
+    "ioctl.c:2888:2",
+    "ioctl.c:3243:2",
+    "ioctl.c:3302:2",
+    "ioctl.c:3310:2"
+  ],
+  "physical_rounds": 27,
+  "classification": {
+    "已满足": 8,
+    "已违反": 0,
+    "未知": 19
+  },
+  "device": {
+    "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "os_version": "10.0.22631.0",
+    "boot": 91476,
+    "dwm": [
+      1400
+    ],
+    "ac": "Online",
+    "code": 0,
+    "mode": 1,
+    "selected_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "verified_permanent_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "accepted_components_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "actual_desktop_components_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "kernel_service": {
+      "boot": 91476,
+      "driver_state": "Running",
+      "dwm": 1400,
+      "service_image": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "dwm_start": "2026-11-21T12:17:38.1187736Z",
+      "utc": "2026-11-21T13:24:18.6081087Z",
+      "started": true,
+      "sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "service": "tegragpurender",
+      "mode": 1
+    },
+    "system_log_window": {
+      "start_utc": "2026-11-21T13:10:09.0905572Z",
+      "end_utc": "2026-11-21T13:23:51.3505891Z",
+      "event_ids": [
+        12,
+        41,
+        6008,
+        1001,
+        4101,
+        1074
+      ],
+      "events": []
+    },
+    "initial_readback_sha256": "9f41925d2bb8b41c24fae1d6c8e2f86ab884965490c74975e8052a679478c448",
+    "final_readback_sha256": "832e438d598a167a0dc4fa27fc950a66b1c941ffbd8c9b9e7dd434c3963eb024"
+  },
+  "cleanup": [
+    {
+      "rounds": [
+        "c27-allocation-cache-20261121-01",
+        "c27-allocation-property-20261121-01",
+        "c27-append-allocation-20261121-01",
+        "c27-gpuva-map-20261121-01",
+        "c27-monitored-cpu-va-20261121-01",
+        "c27-open-monitor-local-20261121-01",
+        "c27-open-monitor-wait-only-20261121-01",
+        "c27-sealed-members-20261121-01",
+        "c27-shared-private-data-20261121-01",
+        "c27-shared-resource-owner-20261121-01",
+        "c27-sync-process-handle-20261121-01"
+      ],
+      "allowlist_sha256": "298c555016fbc5eb525197459b97d5e499631116aa39b3355f53088c5ba965ef",
+      "receipt": {
+        "returned_files": 82,
+        "traces": 0,
+        "tasks": 0,
+        "directory_removed": true,
+        "utc": "2026-11-21T13:17:02.4845720Z"
+      }
+    },
+    {
+      "rounds": [
+        "c27-hardware-queue-20261121-01",
+        "c27-native-adapter-20261121-01",
+        "c27-native-create-default-20261121-01",
+        "c27-native-create-enum-20261121-01",
+        "c27-native-create-intra-20261121-01",
+        "c27-native-create-permissions-20261121-01",
+        "c27-native-open-default-20261121-01",
+        "c27-native-open-input-20261121-01",
+        "c27-native-open-intra-20261121-01",
+        "c27-native-open-object-20261121-01",
+        "c27-native-open-permissions-20261121-01",
+        "c27-native-open-type-20261121-01",
+        "c27-native-shared-type-20261121-01",
+        "c27-native-type-20261121-01",
+        "c27-shared-parent-20261121-01",
+        "c27-sync-object-scope-20261121-01"
+      ],
+      "allowlist_sha256": "5fd7ad85456a59e7552ebc678932cec8421934c3b7b944e40628664d56a78df4",
+      "receipt": {
+        "returned_files": 103,
+        "traces": 0,
+        "tasks": 0,
+        "directory_removed": true,
+        "utc": "2026-11-21T13:24:04.5814869Z"
+      }
+    }
+  ],
+  "retained_pal4_reports_sha256": {
+    "PAL4_DEFERRED_PIXEL_COMPILATION_20261121.json": "493ea0644237be824c023c7c55d34a0132dfd461e79d68f7290fce0a04d3df12",
+    "PAL4_TEXTURE_CONSTRUCTOR_BOUNDARY_20261121.json": "0e4cc32de50c72da555321b08e4fbb9099c0478c3a22b29178c194eaf52739aa",
+    "PAL4_PREIMAGE_CONTEXT_20261121.json": "93b2bdbdf5d0047436ff8d26af8f99836172beb1826f1d24a33e3bfe0bde5829",
+    "PAL4_DOCUMENTS_STARTUP_20261121.json": "d86869d26e5ecaa7a9acd9b58dc338a0654d4e0bba6366699cacde611f8ac3c0",
+    "PAL4_LOAD_CONTROLS_20261118.json": "eacce54a0b60107fd216b7eef8179f2335615c7fde6858a8463a8ba8e19ec560",
+    "PAL4_SHADER_REPLAY_20261121.json": "b3efe2af4e0dae1493c68422fa3b9de66cf20130defd688bfaaa3e445977c08e",
+    "PAL4_NATIVE_RESIDENCY_20261121.json": "dec9f7d449caf53eaf6b8516330624cadeb8e8d769e6f3e25210ca5d420cd35e",
+    "PAL4_IMAGE_BIND_BOUNDARY_20261121.json": "37dc1b30aaf8c7636de9ac91cb873119b87efe0351d210d0e61c8854fc81169c",
+    "PAL4_TEXTURE_CHECKPOINT_20261121.json": "585863a96d6c63caeb88b73b140b68291bbd58550c40d9b894d84a9b2cad101b"
+  },
+  "first_present": {
+    "original_native": [
+      {
+        "case": "Ddi20Case-261120-121855717865",
+        "boot": 82058,
+        "pid": 5712,
+        "tid": 4692,
+        "effect": "FlipSequential",
+        "archive_sha256": "6677a160e0f23a3618a3ff1d7dd3db0aea21c91c2315caba9a6d7d65000b8a2a",
+        "journal_sha256": "d27a4b9668bdda27ff9b893928f4c3ca7d6f1ee4246d28b041e05340c12e4421",
+        "markers": [
+          {
+            "operation": "CreatePublicD3D11Device",
+            "edge": "RETURN",
+            "journal_tick": 536468,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "CreateSwapChainForHwnd",
+            "edge": "RETURN",
+            "journal_tick": 536609,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "GetBackBuffer",
+            "edge": "RETURN",
+            "journal_tick": 536671,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "CreateRenderTargetView",
+            "edge": "RETURN",
+            "journal_tick": 536687,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "RemovedReasonBeforePresent",
+            "edge": "OBSERVE",
+            "journal_tick": 537046,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "Present",
+            "edge": "CALL",
+            "journal_tick": 537062,
+            "value": "00000000",
+            "qpc": 10314713895
+          },
+          {
+            "operation": "Present",
+            "edge": "RETURN",
+            "value": "00000000",
+            "qpc": 10314788877
+          }
+        ],
+        "streams": {
+          "scene": {
+            "sha256": "2d5b3e1a8cc96a295cf37f28a7d605848413b32204d0b87c5cb933ca7a817b9f",
+            "complete": true,
+            "matching_actor_records_before": 9,
+            "matching_actor_records_at_or_after": 7,
+            "matching_pre_call_ids": [
+              [
+                "kernel",
+                17,
+                0
+              ],
+              [
+                "kernel",
+                178,
+                1
+              ],
+              [
+                "kernel",
+                245,
+                2
+              ],
+              [
+                "kernel",
+                273,
+                4
+              ],
+              [
+                "kernel",
+                294,
+                1
+              ]
+            ],
+            "matched_pre_call_allocation_events": 0,
+            "matched_pre_call_signal_events": 1
+          },
+          "miniport": {
+            "sha256": "0f447582d7a6c933fcaff34e643f97ff80fe799028eeb0e1b05ca480c4c509b7",
+            "complete": true,
+            "matching_actor_records_before": 0,
+            "matching_actor_records_at_or_after": 0,
+            "matching_pre_call_ids": [],
+            "matched_pre_call_allocation_events": 0,
+            "matched_pre_call_signal_events": 0
+          }
+        },
+        "sequence2_signal_retired_before_present_ms": 590.047,
+        "drawing_thread_umd_payloads_before_call": [
+          [
+            1,
+            2,
+            96,
+            1
+          ],
+          [
+            2,
+            2,
+            96,
+            1
+          ],
+          [
+            3,
+            2,
+            96,
+            1
+          ],
+          [
+            4,
+            2,
+            96,
+            1
+          ],
+          [
+            6,
+            2,
+            96,
+            10
+          ],
+          [
+            7,
+            2,
+            96,
+            4
+          ],
+          [
+            8,
+            2,
+            96,
+            2
+          ],
+          [
+            14,
+            2,
+            96,
+            10
+          ],
+          [
+            17,
+            2,
+            96,
+            12
+          ],
+          [
+            22,
+            2,
+            96,
+            9
+          ],
+          [
+            33,
+            2,
+            96,
+            1
+          ]
+        ],
+        "umd_v2_resource_receipts_before_call": [
+          {
+            "qpc": 10306341560,
+            "stage": 1,
+            "allocation": 0,
+            "hresult": "0x00000000",
+            "value": 921600
+          },
+          {
+            "qpc": 10306342899,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 10306376400,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 10306379943,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 921600
+          },
+          {
+            "qpc": 10306389359,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7002
+          },
+          {
+            "qpc": 10306396286,
+            "stage": 1,
+            "allocation": 0,
+            "hresult": "0x00000000",
+            "value": 921600
+          },
+          {
+            "qpc": 10306397148,
+            "stage": 2,
+            "allocation": 1073743808,
+            "hresult": "0x8000000a",
+            "value": 7003
+          },
+          {
+            "qpc": 10306428155,
+            "stage": 3,
+            "allocation": 1073743808,
+            "hresult": "0x00000000",
+            "value": 7003
+          },
+          {
+            "qpc": 10306430655,
+            "stage": 4,
+            "allocation": 1073743808,
+            "hresult": "0x8000000a",
+            "value": 921600
+          },
+          {
+            "qpc": 10306441606,
+            "stage": 3,
+            "allocation": 1073743808,
+            "hresult": "0x00000000",
+            "value": 7004
+          }
+        ],
+        "pre_call_paging_pairs": [
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743680,
+            "callback_qpc": 10306342899,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 7001,
+            "paging_check_qpc": 10306376400,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7001
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback_qpc": 10306379943,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 921600,
+            "paging_check_qpc": 10306389359,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7002
+          },
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743808,
+            "callback_qpc": 10306397148,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 7003,
+            "paging_check_qpc": 10306428155,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7003
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743808,
+            "callback_qpc": 10306430655,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 921600,
+            "paging_check_qpc": 10306441606,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7004
+          }
+        ],
+        "last_paging_check_before_present_ms": 430.848,
+        "last_paging_check_after_sequence2_retirement_ms": 159.199,
+        "qpc_ticks_per_second": 19200000,
+        "signal_stop_qpc": 10303384993,
+        "scope_after_marker": "该对照留存了应用返回，场景与 miniport ETL 分别核对。"
+      },
+      {
+        "case": "Ddi20Case-261120-122121366257",
+        "boot": 82058,
+        "pid": 1812,
+        "tid": 6340,
+        "effect": "Sequential",
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+        "markers": [
+          {
+            "operation": "CreatePublicD3D11Device",
+            "edge": "RETURN",
+            "journal_tick": 680250,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "CreateSwapChainForHwnd",
+            "edge": "RETURN",
+            "journal_tick": 680343,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "GetBackBuffer",
+            "edge": "RETURN",
+            "journal_tick": 680390,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "CreateRenderTargetView",
+            "edge": "RETURN",
+            "journal_tick": 680390,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "RemovedReasonBeforePresent",
+            "edge": "OBSERVE",
+            "journal_tick": 680609,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "Present",
+            "edge": "CALL",
+            "journal_tick": 680609,
+            "value": "00000000",
+            "qpc": 13070969930
+          }
+        ],
+        "streams": {
+          "scene": {
+            "sha256": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+            "complete": false,
+            "matching_actor_records_before": 17,
+            "matching_actor_records_at_or_after": 0,
+            "matching_pre_call_ids": [
+              [
+                "kernel",
+                17,
+                0
+              ],
+              [
+                "kernel",
+                178,
+                1
+              ],
+              [
+                "kernel",
+                245,
+                2
+              ],
+              [
+                "kernel",
+                273,
+                4
+              ],
+              [
+                "kernel",
+                294,
+                1
+              ]
+            ],
+            "matched_pre_call_allocation_events": 0,
+            "matched_pre_call_signal_events": 1
+          },
+          "miniport": {
+            "sha256": "448d78b1d7806769b77d9bc745c65b7cf07e038e1451f8f7fcec2ab1f28bf7df",
+            "complete": false,
+            "matching_actor_records_before": 0,
+            "matching_actor_records_at_or_after": 0,
+            "matching_pre_call_ids": [],
+            "matched_pre_call_allocation_events": 0,
+            "matched_pre_call_signal_events": 0
+          }
+        },
+        "sequence2_signal_retired_before_present_ms": 360.492,
+        "next_boot": 82128,
+        "next_kernel_power_41": 82146,
+        "drawing_thread_umd_payloads_before_call": [
+          [
+            1,
+            2,
+            96,
+            1
+          ],
+          [
+            2,
+            2,
+            96,
+            1
+          ],
+          [
+            3,
+            2,
+            96,
+            1
+          ],
+          [
+            4,
+            2,
+            96,
+            1
+          ],
+          [
+            6,
+            2,
+            96,
+            14
+          ],
+          [
+            7,
+            2,
+            96,
+            4
+          ],
+          [
+            8,
+            2,
+            96,
+            2
+          ],
+          [
+            14,
+            2,
+            96,
+            10
+          ],
+          [
+            17,
+            2,
+            96,
+            8
+          ],
+          [
+            22,
+            2,
+            96,
+            9
+          ],
+          [
+            33,
+            2,
+            96,
+            1
+          ]
+        ],
+        "umd_v2_resource_receipts_before_call": [
+          {
+            "qpc": 13065900884,
+            "stage": 1,
+            "allocation": 0,
+            "hresult": "0x00000000",
+            "value": 983040
+          },
+          {
+            "qpc": 13065902332,
+            "stage": 2,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 13065912245,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 13065914670,
+            "stage": 4,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 13065925211,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7002
+          },
+          {
+            "qpc": 13065927512,
+            "stage": 4,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 13065939318,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7003
+          },
+          {
+            "qpc": 13065945490,
+            "stage": 1,
+            "allocation": 0,
+            "hresult": "0x00000000",
+            "value": 983040
+          },
+          {
+            "qpc": 13065946449,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7004
+          },
+          {
+            "qpc": 13065956138,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7004
+          },
+          {
+            "qpc": 13065958161,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 13065967797,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7005
+          },
+          {
+            "qpc": 13065969686,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 13065979078,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7006
+          }
+        ],
+        "pre_call_paging_pairs": [
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743616,
+            "callback_qpc": 13065902332,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 7001,
+            "paging_check_qpc": 13065912245,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7001
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743616,
+            "callback_qpc": 13065914670,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 13065925211,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7002
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743616,
+            "callback_qpc": 13065927512,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 13065939318,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7003
+          },
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743680,
+            "callback_qpc": 13065946449,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 7004,
+            "paging_check_qpc": 13065956138,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7004
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback_qpc": 13065958161,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 13065967797,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7005
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback_qpc": 13065969686,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 13065979078,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7006
+          }
+        ],
+        "last_paging_check_before_present_ms": 259.94,
+        "last_paging_check_after_sequence2_retirement_ms": 100.552,
+        "qpc_ticks_per_second": 19200000,
+        "signal_stop_qpc": 13064048487,
+        "scope_after_marker": "场景 ETL 与 miniport ETL 各自保留的记录范围。中断的旧式窗口两份 ETL 均未封口，调用标记后的记录数均为零。"
+      },
+      {
+        "case": "Ddi20Case-261120-122937785753",
+        "boot": 82221,
+        "pid": 4672,
+        "tid": 4712,
+        "effect": "Sequential",
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+        "markers": [
+          {
+            "operation": "CreatePublicD3D11Device",
+            "edge": "RETURN",
+            "journal_tick": 121250,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "CreateSwapChainForHwnd",
+            "edge": "RETURN",
+            "journal_tick": 122062,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "GetBackBuffer",
+            "edge": "RETURN",
+            "journal_tick": 122093,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "CreateRenderTargetView",
+            "edge": "RETURN",
+            "journal_tick": 122109,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "RemovedReasonBeforePresent",
+            "edge": "OBSERVE",
+            "journal_tick": 122343,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "Present",
+            "edge": "CALL",
+            "journal_tick": 122343,
+            "value": "00000000",
+            "qpc": 2352403757
+          }
+        ],
+        "streams": {
+          "scene": {
+            "sha256": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+            "complete": false,
+            "matching_actor_records_before": 15,
+            "matching_actor_records_at_or_after": 0,
+            "matching_pre_call_ids": [
+              [
+                "kernel",
+                17,
+                0
+              ],
+              [
+                "kernel",
+                178,
+                1
+              ],
+              [
+                "kernel",
+                245,
+                2
+              ],
+              [
+                "kernel",
+                273,
+                4
+              ],
+              [
+                "kernel",
+                294,
+                1
+              ]
+            ],
+            "matched_pre_call_allocation_events": 0,
+            "matched_pre_call_signal_events": 1
+          },
+          "miniport": {
+            "sha256": "ae2b064bc83935332746787fdd42cbc661ed4291020ff93a10e167f254bc4fa0",
+            "complete": false,
+            "matching_actor_records_before": 0,
+            "matching_actor_records_at_or_after": 0,
+            "matching_pre_call_ids": [],
+            "matched_pre_call_allocation_events": 0,
+            "matched_pre_call_signal_events": 0
+          }
+        },
+        "sequence2_signal_retired_before_present_ms": 1101.095,
+        "next_boot": 82289,
+        "next_kernel_power_41": 82307,
+        "drawing_thread_umd_payloads_before_call": [
+          [
+            1,
+            2,
+            96,
+            1
+          ],
+          [
+            2,
+            2,
+            96,
+            1
+          ],
+          [
+            3,
+            2,
+            96,
+            1
+          ],
+          [
+            4,
+            2,
+            96,
+            1
+          ],
+          [
+            6,
+            2,
+            96,
+            14
+          ],
+          [
+            7,
+            2,
+            96,
+            4
+          ],
+          [
+            8,
+            2,
+            96,
+            2
+          ],
+          [
+            14,
+            2,
+            96,
+            10
+          ],
+          [
+            17,
+            2,
+            96,
+            8
+          ],
+          [
+            22,
+            2,
+            96,
+            9
+          ],
+          [
+            33,
+            2,
+            96,
+            1
+          ]
+        ],
+        "umd_v2_resource_receipts_before_call": [
+          {
+            "qpc": 2346931575,
+            "stage": 1,
+            "allocation": 0,
+            "hresult": "0x00000000",
+            "value": 983040
+          },
+          {
+            "qpc": 2346932876,
+            "stage": 2,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 2346945941,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 2346948375,
+            "stage": 4,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 2346960842,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7002
+          },
+          {
+            "qpc": 2346962859,
+            "stage": 4,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 2346971127,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7003
+          },
+          {
+            "qpc": 2346977058,
+            "stage": 1,
+            "allocation": 0,
+            "hresult": "0x00000000",
+            "value": 983040
+          },
+          {
+            "qpc": 2346977927,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7004
+          },
+          {
+            "qpc": 2346987095,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7004
+          },
+          {
+            "qpc": 2346989375,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 2346998917,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7005
+          },
+          {
+            "qpc": 2347000886,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 2347009647,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7006
+          }
+        ],
+        "pre_call_paging_pairs": [
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743616,
+            "callback_qpc": 2346932876,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 7001,
+            "paging_check_qpc": 2346945941,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7001
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743616,
+            "callback_qpc": 2346948375,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 2346960842,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7002
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743616,
+            "callback_qpc": 2346962859,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 2346971127,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7003
+          },
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743680,
+            "callback_qpc": 2346977927,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 7004,
+            "paging_check_qpc": 2346987095,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7004
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback_qpc": 2346989375,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 2346998917,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7005
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback_qpc": 2347000886,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 2347009647,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7006
+          }
+        ],
+        "last_paging_check_before_present_ms": 280.943,
+        "last_paging_check_after_sequence2_retirement_ms": 820.152,
+        "qpc_ticks_per_second": 19200000,
+        "signal_stop_qpc": 2331262737,
+        "scope_after_marker": "场景 ETL 与 miniport ETL 各自保留的记录范围。中断的旧式窗口两份 ETL 均未封口，调用标记后的记录数均为零。"
+      },
+      {
+        "case": "Ddi20Case-261120-123625091734",
+        "boot": 82382,
+        "pid": 5828,
+        "tid": 7656,
+        "effect": "Sequential",
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+        "markers": [
+          {
+            "operation": "CreatePublicD3D11Device",
+            "edge": "RETURN",
+            "journal_tick": 122453,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "CreateSwapChainForHwnd",
+            "edge": "RETURN",
+            "journal_tick": 122531,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "GetBackBuffer",
+            "edge": "RETURN",
+            "journal_tick": 122562,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "CreateRenderTargetView",
+            "edge": "RETURN",
+            "journal_tick": 122578,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "RemovedReasonBeforePresent",
+            "edge": "OBSERVE",
+            "journal_tick": 122843,
+            "value": "00000000",
+            "qpc": null
+          },
+          {
+            "operation": "Present",
+            "edge": "CALL",
+            "journal_tick": 122843,
+            "value": "00000000",
+            "qpc": 2361927374
+          }
+        ],
+        "streams": {
+          "scene": {
+            "sha256": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+            "complete": false,
+            "matching_actor_records_before": 9,
+            "matching_actor_records_at_or_after": 0,
+            "matching_pre_call_ids": [
+              [
+                "kernel",
+                17,
+                0
+              ],
+              [
+                "kernel",
+                178,
+                1
+              ],
+              [
+                "kernel",
+                245,
+                2
+              ],
+              [
+                "kernel",
+                273,
+                4
+              ],
+              [
+                "kernel",
+                294,
+                1
+              ]
+            ],
+            "matched_pre_call_allocation_events": 0,
+            "matched_pre_call_signal_events": 1
+          },
+          "miniport": {
+            "sha256": "6457ad2897be7679e1a140cb12b6c51f93167ad6a31f6cca2b2a006fd0b65cf6",
+            "complete": false,
+            "matching_actor_records_before": 0,
+            "matching_actor_records_at_or_after": 0,
+            "matching_pre_call_ids": [],
+            "matched_pre_call_allocation_events": 0,
+            "matched_pre_call_signal_events": 0
+          }
+        },
+        "sequence2_signal_retired_before_present_ms": 400.943,
+        "next_boot": 82448,
+        "next_kernel_power_41": 82466,
+        "drawing_thread_umd_payloads_before_call": [
+          [
+            1,
+            2,
+            96,
+            1
+          ],
+          [
+            2,
+            2,
+            96,
+            1
+          ],
+          [
+            3,
+            2,
+            96,
+            1
+          ],
+          [
+            4,
+            2,
+            96,
+            1
+          ],
+          [
+            6,
+            2,
+            96,
+            14
+          ],
+          [
+            7,
+            2,
+            96,
+            4
+          ],
+          [
+            8,
+            2,
+            96,
+            2
+          ],
+          [
+            14,
+            2,
+            96,
+            10
+          ],
+          [
+            17,
+            2,
+            96,
+            8
+          ],
+          [
+            22,
+            2,
+            96,
+            9
+          ],
+          [
+            33,
+            2,
+            96,
+            1
+          ]
+        ],
+        "umd_v2_resource_receipts_before_call": [
+          {
+            "qpc": 2355939890,
+            "stage": 1,
+            "allocation": 0,
+            "hresult": "0x00000000",
+            "value": 983040
+          },
+          {
+            "qpc": 2355941204,
+            "stage": 2,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 2355950558,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 2355952943,
+            "stage": 4,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 2355963177,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7002
+          },
+          {
+            "qpc": 2355965206,
+            "stage": 4,
+            "allocation": 1073743616,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 2355976472,
+            "stage": 3,
+            "allocation": 1073743616,
+            "hresult": "0x00000000",
+            "value": 7003
+          },
+          {
+            "qpc": 2355982904,
+            "stage": 1,
+            "allocation": 0,
+            "hresult": "0x00000000",
+            "value": 983040
+          },
+          {
+            "qpc": 2355983815,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7004
+          },
+          {
+            "qpc": 2355997156,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7004
+          },
+          {
+            "qpc": 2355999229,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 2356009395,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7005
+          },
+          {
+            "qpc": 2356011063,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 983040
+          },
+          {
+            "qpc": 2356019467,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7006
+          }
+        ],
+        "pre_call_paging_pairs": [
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743616,
+            "callback_qpc": 2355941204,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 7001,
+            "paging_check_qpc": 2355950558,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7001
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743616,
+            "callback_qpc": 2355952943,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 2355963177,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7002
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743616,
+            "callback_qpc": 2355965206,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 2355976472,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7003
+          },
+          {
+            "operation": "MakeResidentCb",
+            "allocation": 1073743680,
+            "callback_qpc": 2355983815,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 7004,
+            "paging_check_qpc": 2355997156,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7004
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback_qpc": 2355999229,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 2356009395,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7005
+          },
+          {
+            "operation": "MapGpuVirtualAddressCb",
+            "allocation": 1073743680,
+            "callback_qpc": 2356011063,
+            "callback_hresult": "0x8000000a",
+            "callback_value": 983040,
+            "paging_check_qpc": 2356019467,
+            "paging_hresult": "0x00000000",
+            "fence_value": 7006
+          }
+        ],
+        "last_paging_check_before_present_ms": 307.703,
+        "last_paging_check_after_sequence2_retirement_ms": 93.239,
+        "qpc_ticks_per_second": 19200000,
+        "signal_stop_qpc": 2354229276,
+        "scope_after_marker": "场景 ETL 与 miniport ETL 各自保留的记录范围。中断的旧式窗口两份 ETL 均未封口，调用标记后的记录数均为零。"
+      }
+    ],
+    "later_instrumented": {
+      "case": "observed-sequential-1",
+      "archive_sha256": "63eb1f564ffb82cb98196f8e145d51ddbfc4745adafcef4d366a77440833adc1",
+      "call_qpc": 4347185659,
+      "staging": {
+        "qpc": 4347312669,
+        "event": 286,
+        "size": [
+          640,
+          360
+        ],
+        "pitch": 2560,
+        "format": null,
+        "gdi_type": null
+      },
+      "ddi": [
+        {
+          "qpc": 4347367225,
+          "operation": "present",
+          "phase": "enter",
+          "status": "0x00000103",
+          "flags": "0x00000001",
+          "dma_bytes": 65536,
+          "private_bytes": 65864,
+          "user_private_bytes": 0,
+          "subrect_count": 1,
+          "multipass_offset": 0
+        },
+        {
+          "qpc": 4347367255,
+          "operation": "non_gdi_blt_rejected",
+          "phase": "result",
+          "status": "0xc00000bb",
+          "flags": "0x00000001",
+          "dma_bytes": 0,
+          "private_bytes": 0,
+          "user_private_bytes": 0,
+          "subrect_count": 1,
+          "multipass_offset": 0
+        },
+        {
+          "qpc": 4347367284,
+          "operation": "present",
+          "phase": "result",
+          "status": "0xc00000bb",
+          "flags": "0x00000001",
+          "dma_bytes": 65536,
+          "private_bytes": 65864,
+          "user_private_bytes": 0,
+          "subrect_count": 1,
+          "multipass_offset": 0
+        }
+      ],
+      "kmt": {
+        "flags": "0x04011081",
+        "status": "0xc01e0006",
+        "cross_adapter": true,
+        "source_handle": true,
+        "destination_handle": false,
+        "window_handle_matched": true
+      },
+      "public_status": "0x087a0001",
+      "return_qpc": 4347372896,
+      "boot": 86815,
+      "pid": 5824,
+      "drawing_tid": 3940,
+      "kmt_event_qpc": 4347369472,
+      "kmt_source_local": 1073743680,
+      "kmt_flags": "0x04011081",
+      "kmt_status": "0xc01e0006",
+      "kmt_cross_adapter": true,
+      "qpc_ticks_per_second": 19200000,
+      "matched_pre_call_source_callbacks": [
+        {
+          "qpc": 4331272572,
+          "stage": 2,
+          "allocation": 1073743680,
+          "hresult": "0x8000000a",
+          "value": 7001
+        },
+        {
+          "qpc": 4331302230,
+          "stage": 3,
+          "allocation": 1073743680,
+          "hresult": "0x00000000",
+          "value": 7001
+        },
+        {
+          "qpc": 4331305992,
+          "stage": 4,
+          "allocation": 1073743680,
+          "hresult": "0x8000000a",
+          "value": 921600
+        },
+        {
+          "qpc": 4331316457,
+          "stage": 3,
+          "allocation": 1073743680,
+          "hresult": "0x00000000",
+          "value": 7002
+        }
+      ]
+    },
+    "later_functional_candidate": [
+      {
+        "case": "copy-sequential-1",
+        "archive_sha256": "09bc540a153902c33bf25fa6d608ea52c68ca7fabc850119ae8e1fd81f5e715a",
+        "boot": 87268,
+        "pid": 6212,
+        "drawing_tid": 7472,
+        "call_qpc": 3510841199,
+        "return_qpc": 3512056690,
+        "public_status": "00000000",
+        "passed": true,
+        "kmt_event_qpc": 3512052829,
+        "source_local_handle": 1073743680,
+        "destination_handle_present": false,
+        "matched_source_callbacks": [
+          {
+            "qpc": 3498183559,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 3498205677,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 3498208746,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 921600
+          },
+          {
+            "qpc": 3498217342,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7002
+          }
+        ],
+        "blit": [
+          {
+            "bSubmit": 1,
+            "Source.Left": 0,
+            "Source.Top": 0,
+            "Source.Right": 640,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Top": 0,
+            "Dest.Right": 640,
+            "Dest.Bottom": 360
+          }
+        ],
+        "submitted_copy_packet": {
+          "qpc": 3511936815,
+          "packet_type": 0,
+          "dma_bytes": 52,
+          "context_at_creation": {
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferSize": 65536,
+            "DmaBufferPrivateDataSize": 65864
+          },
+          "context_creation_pid": 6212,
+          "completion_qpc": 3511991268
+        },
+        "verified_window_image": "7dac2e59409a3a6127e5423e99c57937a55ddc5fef0e7897317e4e2017add073",
+        "input_verified": true,
+        "kmt_source_local": 1073743680,
+        "kmt_flags": "0x04011081",
+        "kmt_status": "0x00000000",
+        "kmt_cross_adapter": true,
+        "qpc_ticks_per_second": 19200000,
+        "matched_pre_call_source_callbacks": [
+          {
+            "qpc": 3498183559,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 3498205677,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 3498208746,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 921600
+          },
+          {
+            "qpc": 3498217342,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7002
+          }
+        ]
+      },
+      {
+        "case": "copy-sequential-2",
+        "archive_sha256": "543562f0f57bab939fd8b6fa8cce22b014da8bfcc88b47c9c1877decaef500dc",
+        "boot": 87268,
+        "pid": 6036,
+        "drawing_tid": 5704,
+        "call_qpc": 5180746623,
+        "return_qpc": 5181126891,
+        "public_status": "00000000",
+        "passed": true,
+        "kmt_event_qpc": 5181122161,
+        "source_local_handle": 1073743680,
+        "destination_handle_present": false,
+        "matched_source_callbacks": [
+          {
+            "qpc": 5086950325,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 5087015184,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 5087019536,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 921600
+          },
+          {
+            "qpc": 5087033225,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7002
+          }
+        ],
+        "blit": [
+          {
+            "bSubmit": 1,
+            "Source.Left": 0,
+            "Source.Top": 0,
+            "Source.Right": 640,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Top": 0,
+            "Dest.Right": 640,
+            "Dest.Bottom": 360
+          }
+        ],
+        "submitted_copy_packet": {
+          "qpc": 5181005525,
+          "packet_type": 0,
+          "dma_bytes": 52,
+          "context_at_creation": {
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferSize": 65536,
+            "DmaBufferPrivateDataSize": 65864
+          },
+          "context_creation_pid": 6036,
+          "completion_qpc": 5181061946
+        },
+        "verified_window_image": "53bc2b070a30050b71eaa27ccdc07833d258646f5af866876dc97e6bdb62f7e4",
+        "input_verified": true,
+        "kmt_source_local": 1073743680,
+        "kmt_flags": "0x04011081",
+        "kmt_status": "0x00000000",
+        "kmt_cross_adapter": true,
+        "qpc_ticks_per_second": 19200000,
+        "matched_pre_call_source_callbacks": [
+          {
+            "qpc": 5086950325,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 5087015184,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 5087019536,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 921600
+          },
+          {
+            "qpc": 5087033225,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7002
+          }
+        ]
+      },
+      {
+        "case": "copy-sequential-3",
+        "archive_sha256": "4eb3b503b4d14f1b4262c23e38394a1191dce1fe42ca5fcd06f2f202d7222a24",
+        "boot": 87268,
+        "pid": 1500,
+        "drawing_tid": 3232,
+        "call_qpc": 6427809546,
+        "return_qpc": 6428196950,
+        "public_status": "00000000",
+        "passed": true,
+        "kmt_event_qpc": 6428194469,
+        "source_local_handle": 1073743680,
+        "destination_handle_present": false,
+        "matched_source_callbacks": [
+          {
+            "qpc": 6409943359,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 6409960802,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 6409963817,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 921600
+          },
+          {
+            "qpc": 6409971923,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7002
+          }
+        ],
+        "blit": [
+          {
+            "bSubmit": 1,
+            "Source.Left": 0,
+            "Source.Top": 0,
+            "Source.Right": 640,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Top": 0,
+            "Dest.Right": 640,
+            "Dest.Bottom": 360
+          }
+        ],
+        "submitted_copy_packet": {
+          "qpc": 6428124848,
+          "packet_type": 0,
+          "dma_bytes": 52,
+          "context_at_creation": {
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferSize": 65536,
+            "DmaBufferPrivateDataSize": 65864
+          },
+          "context_creation_pid": 1500,
+          "completion_qpc": 6428161894
+        },
+        "verified_window_image": "e12b25cc3ffac2572023adf34720187159b219335131b600f3f2306bdbe3ddb6",
+        "input_verified": true,
+        "kmt_source_local": 1073743680,
+        "kmt_flags": "0x04011081",
+        "kmt_status": "0x00000000",
+        "kmt_cross_adapter": true,
+        "qpc_ticks_per_second": 19200000,
+        "matched_pre_call_source_callbacks": [
+          {
+            "qpc": 6409943359,
+            "stage": 2,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 7001
+          },
+          {
+            "qpc": 6409960802,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7001
+          },
+          {
+            "qpc": 6409963817,
+            "stage": 4,
+            "allocation": 1073743680,
+            "hresult": "0x8000000a",
+            "value": 921600
+          },
+          {
+            "qpc": 6409971923,
+            "stage": 3,
+            "allocation": 1073743680,
+            "hresult": "0x00000000",
+            "value": 7002
+          }
+        ]
+      }
+    ],
+    "warp_control": {
+      "case": "warp-control-5",
+      "archive_sha256": "64a3c25758fafb0ebefd5b04a7c6daf2966a2707677a3a28638c7168387563fe",
+      "public_successes": 1,
+      "normal_exit": true,
+      "input_verified": false,
+      "trace_exit": 1
+    },
+    "initiating_cause": "未知",
+    "missing": "三次历史启动均缺本次首次 Present 标记之后的同线程 DXGI/KMT、staging 表面、KMD DDI、窗口队列或系统故障现场。",
+    "later_native_flip_source": {
+      "case": "fixed-flip-1",
+      "boot": 85737,
+      "pid": 7060,
+      "tid": 7096,
+      "call_qpc": 3546493592,
+      "return_qpc": 3546850219,
+      "kmt_event_qpc": 3546847512,
+      "archive_sha256": "9a26df42fed4cf09e86399f2e4d9b87faf8e7d4860344a585d9b01adb6d849ef",
+      "scene_etl_sha256": "c13c2789063c767b6bb5147f965910b2ba02c6e68b38ab835e81c011fdfcecf4",
+      "system_etl_sha256": "06d2129b05e30e9afb79db2dcb755b7030fd050402ebde220ca618b0abcb6110",
+      "present_source_allocation": 1073743680,
+      "source_callbacks_before_call": [
+        {
+          "qpc": 3533129635,
+          "stage": 2,
+          "allocation": 1073743680,
+          "hresult": "0x8000000a",
+          "value": 7001
+        },
+        {
+          "qpc": 3533157617,
+          "stage": 3,
+          "allocation": 1073743680,
+          "hresult": "0x00000000",
+          "value": 7001
+        },
+        {
+          "qpc": 3533161641,
+          "stage": 4,
+          "allocation": 1073743680,
+          "hresult": "0x8000000a",
+          "value": 921600
+        },
+        {
+          "qpc": 3533171528,
+          "stage": 3,
+          "allocation": 1073743680,
+          "hresult": "0x00000000",
+          "value": 7002
+        }
+      ],
+      "public_status": "0x00000000",
+      "scope": "同一进程、绘图线程和源分配。UMD 回调返回 HRESULT，单项 KMT 实测记录 NTSTATUS。"
+    },
+    "runtime_source": {
+      "commit": "86b11bff561ea8107aadd060249eb14a226bd1c0",
+      "path": "src/nouveau/tgd3d/tgd3d_runtime.cpp",
+      "sha256": "899b08e2a5256eea9fa8079afbf1b52c4955ad2d407ff5a45f30b6846407327d",
+      "installed_arm64_umd_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+      "build_record_sha256": "cbf799401aef40274705f69f1379f3902eead6dbe359a4fb268b835b642ce87a",
+      "stage2": "MakeResidentCb HRESULT and paging fence",
+      "stage3": "wait_paging result and target value, including its already-completed path",
+      "stage4": "MapGpuVirtualAddressCb HRESULT and mapped byte count",
+      "event": "TGD3D_TRACE_RUNTIME_MEMORY id 6 version 2, 96-byte payload on the drawing PID and TID",
+      "scope": "同一分配按相邻 UMD 记录配对。旧式重启启动没有调用后的 hSrcAllocHandle，因此无法将这两份分配指认为最终呈现源或重定向目标。"
+    },
+    "historical_profile": {
+      "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+      "umd_arm64_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+      "nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "ddi": "0x000b000f",
+      "back_buffers": 2,
+      "present_arguments": "Present(1,0)",
+      "scope": "step4-present.exe process-specific DDI enumeration candidate"
+    }
+  },
+  "rows": [
+    {
+      "contract_id": "ioctl.c:2581:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "已满足",
+      "mode": "map",
+      "question": "公开 MapGpuVirtualAddress 接受这次异步映射时，将正值 STATUS_PENDING 原样返回给调用线程。",
+      "finding": "64 KiB、16 页的合法映射直接返回 0x103，输出 VA 65536 与保留地址一致。对应分页围栏目标为 7002，同步后实读 7002。",
+      "missing_observation": null,
+      "present_significance": "区分调用前 GPUVA 映射获准和分页完成。历史信号包退役无法代替具体映射调用的返回。",
+      "round_id": "c27-gpuva-map-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-gpuva-map-20261121-01.plan.json",
+      "plan_sha256": "b29425825214054639d1eadb949537e79e43f89f798676ae88075a82354c42ec",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-gpuva-map-20261121-01.result.json",
+      "receipt_sha256": "78788f8d09b55d10f59fce25c9bc43cd7b6bebe1cd186ffad297af395312f89c"
+    },
+    {
+      "contract_id": "dxgkrnl.h:197:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "已满足",
+      "mode": "monitor",
+      "question": "设备监控围栏的创建输出提供可读 CPU VA，向所属上下文提交 GPU 信号后可从同一 VA 看到目标值。",
+      "finding": "同一受监控围栏的 CPU 映射先读到 0。事件 30、1069 和 294 关联到同一设备、上下文、局部围栏和 GPU 信号值 1。成功等待后该映射读到 1。本轮没有可配对的调度包退役事件。",
+      "missing_observation": null,
+      "present_significance": "为旧回执补充独立的 CPU 读值对照。历史启动只有 GPU 信号退役，仍缺当时绘图进程的 CPU 读取。",
+      "round_id": "c27-monitored-cpu-va-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-monitored-cpu-va-20261121-01.plan.json",
+      "plan_sha256": "c0fa1fc6733cc304254e5f6d67c7b5e29ffb035a0f6e55f23424f5a45c2a9562",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-monitored-cpu-va-20261121-01.result.json",
+      "receipt_sha256": "697a2006ac5f2d7ace5968828ea0a6877b2e3ca36c959bea7efbda5aeec9384c"
+    },
+    {
+      "contract_id": "dxgkrnl.h:723:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "已满足",
+      "mode": "resource",
+      "question": "两个原生进程分别打开同一共享资源时，局部资源句柄应关联到同一底层共享资源。",
+      "finding": "两个不同进程在各自设备取得资源和分配句柄。两份 DeviceAllocation 事件的非零共享资源身份和全局分配身份分别相同，能配对到每次合法创建或打开。",
+      "missing_observation": null,
+      "present_significance": "测试可用于配对绘图端与合成端的共享后备。需另将首次 Present 的重定向表面标识绑定到相应设备和调用区间。",
+      "round_id": "c27-shared-resource-owner-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-shared-resource-owner-20261121-01.plan.json",
+      "plan_sha256": "9ac0d62072e0fb9511103ad3eb8b6643dcac000a56efdf88ec791403412ac04d",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-shared-resource-owner-20261121-01.result.json",
+      "receipt_sha256": "b94f19b04f80d2c90d502a1398436b19326dd031f5616351f00da8b29217b3d0"
+    },
+    {
+      "contract_id": "ioctl.c:1710:4",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "已满足",
+      "mode": "resource",
+      "question": "创建共享分配时的逐分配私有数据，由打开方在其合法打开回包中取得。",
+      "finding": "独立打开方查询到 1 份分配、16 字节逐分配私有数据。OpenResourceFromNtHandle 返回的分配描述符指向该输出缓冲，版本、标志和 65536 字节大小逐字段匹配创建输入。",
+      "missing_observation": null,
+      "present_significance": "覆盖共享分配数据交给打开端的阶段。重定向表面的专用布局及历史首次 Present 中实际传递的描述符仍须当次记录。",
+      "round_id": "c27-shared-private-data-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-shared-private-data-20261121-01.plan.json",
+      "plan_sha256": "e56e94472d01d7149769ae5f8608ae4377be083d398211351c5b6fdf288603c6",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-shared-private-data-20261121-01.result.json",
+      "receipt_sha256": "ea4969efd37bc8a2a8b35435f3a9f9a5ad849843573dabcc83075e6df7322c5b"
+    },
+    {
+      "contract_id": "ioctl.c:1630:4",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "已满足",
+      "mode": "append",
+      "question": "在同一设备的既有未共享普通资源中，合法 CreateAllocation2 追加的分配关联回该资源。",
+      "finding": "同一未共享资源接受了第二份 64 KiB 分配。两次创建的分配句柄不同，调用方资源句柄相同，各自对应的事件 33/36 均关联到同一设备和资源。",
+      "missing_observation": null,
+      "present_significance": "区分新建表面与向既有资源添加成员。历史崩溃场景需能识别发生在重定向表面上的那一次调用。",
+      "round_id": "c27-append-allocation-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-append-allocation-20261121-01.plan.json",
+      "plan_sha256": "8a95dec84d5ddc5d3dd2deb74f8012cf0905f42cddca94d25f0ddd21db0252cb",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-append-allocation-20261121-01.result.json",
+      "receipt_sha256": "e1987f71c8aecb8d1b2b6ad7641d0b88c88bf3c589f793d2dcfed2693bf8904d"
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "resource",
+      "question": "共享完成后，已共享资源的分配集合受封装约束。",
+      "finding": "共享后在创建方、打开方、打开结束时查询的成员数为 1、1、1。现有同层记录没有成员集合被固定或禁止追加的直接观测。",
+      "missing_observation": "同一资源三次成员数为 1。还缺明确记录成员集合固定的同层观测。",
+      "present_significance": "区分共享后成员稳定的观测与禁止追加的内部条件。历史异常需要绑定到具体交换链与成员集合。",
+      "round_id": "c27-sealed-members-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-sealed-members-20261121-01.plan.json",
+      "plan_sha256": "3abf62240a8b7fb31952dd8aaf788530808fd6b73f829a40c8704f13255383da",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-sealed-members-20261121-01.result.json",
+      "receipt_sha256": "c2780e8d8428b31e95e358c8ff3927f1fdb752ca6e615ea3be89e3120dcd8834"
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "cache",
+      "question": "CPU 可见分配的缓存映射属性，与同一分配在原生内核中的 Cached 标记相符。",
+      "finding": "正常 Lock2 返回可读写的 64 KiB 页，VirtualQuery 的 Protect 和 AllocationProtect 均为 0x404（PAGE_READWRITE | PAGE_WRITECOMBINE）。该轮没有可缓存映射，事件 33 仅给出未具名的原始 Flags=0x81，缺少可缓存映射与明确定义的 Cached 位配对。",
+      "missing_observation": "实测页为写合并属性。还缺缓存映射和同一分配的已定义 Cached 位。",
+      "present_significance": "可缩小 CPU 锁定与 staging 读回的观测范围。只凭可访问页或窗口出现不能判定缓存一致性。",
+      "round_id": "c27-allocation-cache-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-allocation-cache-20261121-01.plan.json",
+      "plan_sha256": "7c8149f32ff2f978e78e5894cffdfcecdcc15ef1d7fc1fc99222dc25c75bec37",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-allocation-cache-20261121-01.result.json",
+      "receipt_sha256": "23663fb977590001af8d4449cf6cc6b2c988894228df6ca3b84e185a49583b6b"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "property",
+      "question": "合法 UpdateAllocationProperty 自然异步处理时，返回正的 STATUS_PENDING 并输出同队列的分页围栏。",
+      "finding": "本次自有分配的 Unmoveable 更新返回 STATUS_NOT_IMPLEMENTED（0xc0000002），输出分页围栏为 0。未取得这次 API 的异步成功回执。",
+      "missing_observation": "此次正常 Unmoveable 属性更新返回 STATUS_NOT_IMPLEMENTED。缺该 API 自然返回 STATUS_PENDING 及有效输出的请求。",
+      "present_significance": "单独检查属性更新的分页路径。映射或 MakeResident 返回 0x103 都不能说明首次 Present 调用了这个 API。",
+      "round_id": "c27-allocation-property-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-allocation-property-20261121-01.plan.json",
+      "plan_sha256": "10ea19676188c75860bb9e8a9546860a6f637763abd5eba5a8c93752a626977a",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-allocation-property-20261121-01.result.json",
+      "receipt_sha256": "ba604dac0173f12e594ce9b1ea42458074c4a14b4483774b774a4eab9520b9db"
+    },
+    {
+      "contract_id": "dxgsyncfile.c:266:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "已满足",
+      "mode": "nosignal",
+      "question": "合法 NT 共享的设备监控围栏以等待专用行为打开时，打开方得到本地句柄。",
+      "finding": "创建方以 NT 安全共享创建监控围栏，子进程合法继承其导出对象，以 NoSignal 打开，得到非零本地句柄并成功等待值 1。两端均正常释放。",
+      "missing_observation": null,
+      "present_significance": "显示等待专用的打开与同步。旧首帧的信号包自身没有显示任何等待方或跨进程打开。",
+      "round_id": "c27-open-monitor-wait-only-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-open-monitor-wait-only-20261121-01.plan.json",
+      "plan_sha256": "0577e8fd13e8b5ba6b792c7d7e3f0538e79befe22fffd5cc15f7147e246befd0",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-open-monitor-wait-only-20261121-01.result.json",
+      "receipt_sha256": "fd67cda81ed229dd3f7022fc0b08b80dea56b150058aaf9b740c5aa1acb07f5b"
+    },
+    {
+      "contract_id": "dxgsyncfile.c:381:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "已满足",
+      "mode": "shared",
+      "question": "打开一个正常共享同步对象的进程取得自己的本地句柄。",
+      "finding": "两个不同 PID 在各自设备持有同一 NT 共享监控围栏的本地 KMT 句柄。打开方等待值 1 后发出值 2，创建方读到应答，两端分别正常释放。",
+      "missing_observation": null,
+      "present_significance": "区分同步对象共享与纹理共享。历史 Present 的对象打开方仍需实际进程和对象关联。",
+      "round_id": "c27-open-monitor-local-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-open-monitor-local-20261121-01.plan.json",
+      "plan_sha256": "b4aabe6fa6f61588fa971d2388921d41c9859be9d7c463edcaed0da90c63fd4f",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-open-monitor-local-20261121-01.result.json",
+      "receipt_sha256": "6df90d80afb0c7cb843eff6109dd6025ce32640504e88b8f8857bf0bd4ba077d"
+    },
+    {
+      "contract_id": "dxgkrnl.h:199:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "已满足",
+      "mode": "shared",
+      "question": "同步对象的 KMT 句柄按持有它的进程提供本地使用与释放。",
+      "finding": "两个不同 PID 在各自设备持有同一 NT 共享监控围栏的本地 KMT 句柄。打开方等待值 1 后发出值 2，创建方读到应答，两端分别正常释放。",
+      "missing_observation": null,
+      "present_significance": "帮助把绘图进程的局部同步句柄与 DWM 的局部句柄分开。历史判定需要同时确认进程和共享对象。",
+      "round_id": "c27-sync-process-handle-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-sync-process-handle-20261121-01.plan.json",
+      "plan_sha256": "6d63c52fe5c62ccef5e1e18b27fc5742b447674f7928a79fc28ab997afa4683a",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-sync-process-handle-20261121-01.result.json",
+      "receipt_sha256": "fc77c588ec6d8d9002c60145afdb170d8fb4e54bb97baeae33f2fc1651a40d07"
+    },
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "global",
+      "question": "同一共享同步对象的各打开实例关联到同一父对象，非 NT 全局句柄指向该父对象。",
+      "finding": "传统全局围栏创建返回 00000000，有效打开回执数为 1。合法全局等待之后的监控围栏读到 1（等待返回 0x00000000）。NT 共享路径打开返回 00000000。本次公开句柄及 ReportSyncObject 模板不提供全局表项指向的父对象。 事件 1069 把两个进程的局部句柄配对到同一非零 pSyncObject。",
+      "missing_observation": "没有全局句柄表项或父对象关系的直接字段。",
+      "present_significance": "帮助辨认同一个信号对象。只见值传播或共享句柄不足以辨认历史首次 Present 使用的内核父对象。",
+      "round_id": "c27-shared-parent-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-shared-parent-20261121-01.plan.json",
+      "plan_sha256": "6958fbc6f797cadad754bc470033e7f0e0a8132a5ee61e792c356b3eb3dd7aad",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-shared-parent-20261121-01.result.json",
+      "receipt_sha256": "f0e2a76f89e0af3ed5a95be771d6cdd70bf8989e7cf255561f0eb12c64d21799"
+    },
+    {
+      "contract_id": "dxgkrnl.h:615:1",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "hwcaps",
+      "question": "硬件执行队列在支持并启用硬件调度时有可观测的设备归属。",
+      "finding": "GM20B 报告 WDDM 2.6。WDDM_2_7_CAPS 返回 0x00000000，HwSchSupported=0、HwSchEnabled=0。已选 KMD 的普通上下文路径不接受 HwQueueSupported 标志，缺硬件队列创建与设备归属回执。 本轮实机采集到能力查询。HwQueueSupported 的入口限制来自已选 KMD 源码。",
+      "missing_observation": "HwSchSupported=0 且 HwSchEnabled=0。缺实际硬件执行队列及设备创建关联。",
+      "present_significance": "区分普通上下文调度包与硬件执行队列。历史序号 2 的 QueuePacket 不能单独证明硬件队列。",
+      "round_id": "c27-hardware-queue-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-hardware-queue-20261121-01.plan.json",
+      "plan_sha256": "5a81d3c1d80af5a24fc0db15c3a40f62614e28965dcf8e4e8e0ad58cb990ebcc",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-hardware-queue-20261121-01.result.json",
+      "receipt_sha256": "f241979df03d5fa93d9a8b42b13a3b4d9bd5d17accea096b8ff4637da829d1a3"
+    },
+    {
+      "contract_id": "dxgkrnl.h:145:1",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "broad",
+      "question": "同步对象在其支持的类型、共享与所有权范围内用于 GPU 进度和上下文间协调。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 普通监控围栏 CPU 读值依次为 0、1。在活动 GM20B 目标上创建周期型围栏返回 0x00000000。整条的原生围栏及来宾链表/FD 语义仍缺对应回执。 本轮周期型围栏在同一 CPU 映射的两次采样值为 0、218533。",
+      "missing_observation": "缺少受支持的原生围栏类型及共享实例的完整归属。WSL 来宾链表和 FD 映射需要来宾记录。",
+      "present_significance": "旧三次启动有围栏信号退役，整条还涉及类型、归属、跨进程与不同同步方式，需分别观测。",
+      "round_id": "c27-sync-object-scope-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-sync-object-scope-20261121-01.plan.json",
+      "plan_sha256": "4451de60b67c5887d683e5aa2dc3a88038cfd80fa8fc7b3f5df8b0f05d452a69",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-sync-object-scope-20261121-01.result.json",
+      "receipt_sha256": "c0757ca862e00305292c31df7ffbcd01dc792ab962cf37c32d29c18aa91f2367"
+    },
+    {
+      "contract_id": "dxgkrnl.h:218:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "创建出的 DEFAULT 或 INTRA_GPU 原生围栏的类型枚举。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的创建类型回执。",
+      "present_significance": "涉及原生围栏的创建类型。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-type-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-type-20261121-01.plan.json",
+      "plan_sha256": "73a9d012f65a80de8f757f41c1c74653d2e018f2083bcb008c58802b450da4dd",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-type-20261121-01.result.json",
+      "receipt_sha256": "a4f18d271a7d00f8c3af7b15ecd5ea7d70ff9142d0709e69bfabf6399e071f7f"
+    },
+    {
+      "contract_id": "dxgkrnl.h:256:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "共享原生围栏打开端保存的同一子类型。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的共享子类型回执。",
+      "present_significance": "涉及原生围栏的共享子类型。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-shared-type-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-shared-type-20261121-01.plan.json",
+      "plan_sha256": "0e5380e37e9ff94c13f862884309a8eb1fc80f7ff828a833dc8dca751ced9fc1",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-shared-type-20261121-01.result.json",
+      "receipt_sha256": "a72e2b6ee1a2497c98986b47e81c9c5b0b77a614166e156982e315efc8bf3caa"
+    },
+    {
+      "contract_id": "dxgvmbus.c:825:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "NT 打开的对象是 D3DDDI_NATIVE_FENCE 类型。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的NT 对象类型回执。",
+      "present_significance": "涉及原生围栏的NT 对象类型。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-open-type-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-open-type-20261121-01.plan.json",
+      "plan_sha256": "ee9e0a2a5a0b1b278464ceeeec7684620bc992f2f7cce9471007f299fd3e6739",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-open-type-20261121-01.result.json",
+      "receipt_sha256": "bcf4c4df1f3c0688ccee331694672d34979d8d63b79296bba2c4b11d6086a119"
+    },
+    {
+      "contract_id": "dxgvmbus.c:889:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "打开 DEFAULT 和 INTRA_GPU 时各自的 CPU 映射权限。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的打开映射权限回执。",
+      "present_significance": "涉及原生围栏的打开映射权限。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-open-permissions-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-open-permissions-20261121-01.plan.json",
+      "plan_sha256": "fc42232548ecb605c255506341080b69eec1d455e34bec25b38cc78b42baecc9",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-open-permissions-20261121-01.result.json",
+      "receipt_sha256": "4a15f491057548bf3f4e5bc21f0cadb47e8b5f4bd1b8a8ac6ede065621c94aa6"
+    },
+    {
+      "contract_id": "dxgvmbus.c:896:3",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "打开 INTRA_GPU 原生围栏时用户态 CPU VA 为空。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的INTRA_GPU 打开输出回执。",
+      "present_significance": "涉及原生围栏的INTRA_GPU 打开输出。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-open-intra-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-open-intra-20261121-01.plan.json",
+      "plan_sha256": "29038573b3e36871567844160b63ed605744af4cbc7e2ba479a482fc2d159b4f",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-open-intra-20261121-01.result.json",
+      "receipt_sha256": "3daa616426899ceb3ed1c7b3cec84175b633aad86c39b394a19575c13c235258"
+    },
+    {
+      "contract_id": "dxgvmbus.c:900:3",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "打开 DEFAULT 原生围栏时当前值 CPU 映射只读。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的DEFAULT 打开输出回执。",
+      "present_significance": "涉及原生围栏的DEFAULT 打开输出。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-open-default-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-open-default-20261121-01.plan.json",
+      "plan_sha256": "fd355779f0da316483567843462c3bf748c7d0a02271e4b9d820af09f79600cc",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-open-default-20261121-01.result.json",
+      "receipt_sha256": "d82e5ee44e3ad990746bf42e71be3cf21fa4913f54099b0cddea4eba91c03954"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3147:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "创建 DEFAULT 与 INTRA_GPU 时 CPU 映射权限随类型变化。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的创建映射权限回执。",
+      "present_significance": "涉及原生围栏的创建映射权限。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-create-permissions-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-create-permissions-20261121-01.plan.json",
+      "plan_sha256": "943fdb910a172a4ab93e6ecb416e0441d342afb7d6b2dd8f8e667bac476a685c",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-create-permissions-20261121-01.result.json",
+      "receipt_sha256": "c4b9365234ad7928d7f1015b20d398e9cb0e8dc33f6d1d1110b1da3ff1242c5c"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3152:3",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "创建 INTRA_GPU 原生围栏时不给用户态 CPU 访问。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的INTRA_GPU 创建输出回执。",
+      "present_significance": "涉及原生围栏的INTRA_GPU 创建输出。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-create-intra-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-create-intra-20261121-01.plan.json",
+      "plan_sha256": "5f7407b400a960ed85e499799e6ea9c2cac339cb525e0dac85950dd091ad5faf",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-create-intra-20261121-01.result.json",
+      "receipt_sha256": "9683b8fe86697ee150de0a3cccc6a8e61329b113cbcde32c1467e4d3ef8f0979"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3156:3",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "创建 DEFAULT 原生围栏时当前值 CPU 映射只读。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的DEFAULT 创建输出回执。",
+      "present_significance": "涉及原生围栏的DEFAULT 创建输出。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-create-default-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-create-default-20261121-01.plan.json",
+      "plan_sha256": "a5fc7960fcc857fe96f5da134669e648662a25b83962197087a0b67254761b36",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-create-default-20261121-01.result.json",
+      "receipt_sha256": "d583acc766759b65120a73052f037f03be37d80b06aeed265e2994236fd61a9d"
+    },
+    {
+      "contract_id": "ioctl.c:2888:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "有效原生围栏两个子类型的创建与共享约束。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的创建子类型与共享回执。",
+      "present_significance": "涉及原生围栏的创建子类型与共享。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-create-enum-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-create-enum-20261121-01.plan.json",
+      "plan_sha256": "a6ed80d961bf18980c5fee5d5b268ad45245e2e2ecaa6614a80a3740285307ed",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-create-enum-20261121-01.result.json",
+      "receipt_sha256": "d442e62be3ba67aa02d1f53d076536db08e31a865311df4b6a6bc1f49cc67432"
+    },
+    {
+      "contract_id": "ioctl.c:3243:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "在原生围栏 NT 打开中确认句柄、引擎亲和性和目标设备的适用条件。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的NT 打开参数回执。",
+      "present_significance": "涉及原生围栏的NT 打开参数。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-open-input-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-open-input-20261121-01.plan.json",
+      "plan_sha256": "62636242cb28dee1ec896c06446df8a06f78ecf57fe78f884d6618c1585fa2b9",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-open-input-20261121-01.result.json",
+      "receipt_sha256": "e5bfa64a2f5ecb09f5b2587fd279fc183495d5ab5c6589651603879a1a292a57"
+    },
+    {
+      "contract_id": "ioctl.c:3302:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "原生围栏 NT 打开路径核对目标同步对象类型。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的打开时的类型检查回执。",
+      "present_significance": "涉及原生围栏的打开时的类型检查。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-open-object-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-open-object-20261121-01.plan.json",
+      "plan_sha256": "d9f33ed62c4a2651de86971d8100eabecfbb381bcda914cbd406d76733187f46",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-open-object-20261121-01.result.json",
+      "receipt_sha256": "425b733d2fbc42870110296eff61984d06d4658547e2581367a2dee7268f839f"
+    },
+    {
+      "contract_id": "ioctl.c:3310:2",
+      "starting_status": "未知",
+      "state": "recorded",
+      "status": "未知",
+      "mode": "caps",
+      "question": "INTRA_GPU 围栏的共享范围局限于同一适配器。",
+      "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+      "missing_observation": "缺少同一受支持的原生围栏对象与调用区间内的跨适配器约束回执。",
+      "present_significance": "涉及原生围栏的跨适配器约束。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+      "round_id": "c27-native-adapter-20261121-01",
+      "plan": "wsl-dxgkrnl-contracts/rounds/c27-native-adapter-20261121-01.plan.json",
+      "plan_sha256": "142700af48fb3a5f4e5b7a2d13126a1ca5def33ba073dbaa989b2a60d4651dfa",
+      "receipt": "wsl-dxgkrnl-contracts/rounds/c27-native-adapter-20261121-01.result.json",
+      "receipt_sha256": "e3bd575cd5dea031a2653d354062f06b8c86e8cc3328f3cfb58549f5938570ab"
+    }
+  ],
+  "probe_source_sha256": {
+    "initial": {
+      "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+      "outputs": {
+        "contracts-arm64": {
+          "bytes": 101392,
+          "unsigned": "0397f0b25a0a3b9672836fb9a8123edae1eaf462cff64379273512aafc2e72ab",
+          "sha256": "e2660e9d22bc1ae5b2b06befd5d21c1261b18dac97ae9662e5db576efc39590b"
+        },
+        "contract-trace": {
+          "bytes": 65040,
+          "unsigned": "975dd120f58fc236f0a975c68bf5cf1fa85539f7d491340a5c1d61a8a169fe2a",
+          "sha256": "95b5add1077b1ffaf0a4cba7a5b8dcc03783dc38b45fb214462a43686eed743c"
+        }
+      },
+      "source_sha256": {
+        "client.c": "87c692edeaaa020ef1aedf081d97a5d44ecca3a03e3f5a77255491c3bf6ee070",
+        "actions.c": "8518b5611849084cdb599f985d025c343e8d4d31d2a1dc1be6d3830ca0f1431d",
+        "collector.c": "4a24d581969af1a93c4cd8a1a61e82287ede88c9c9f61c154f08ad89c4ffcc5c",
+        "adapter_abi.h": "9cf36e45dac585d0456acf63fb7c441e3be6eb0582dae3fd222263b28719b3ae",
+        "submit_abi.h": "9359c37d2474e67363d24f1f87573015b5cf73ed1d926f55aac7876071de5d9f",
+        "kmt_native.h": "bc11685831906bdf75f5be57185977927937fdd0e3e19b177ace347a3693e610",
+        "allocation_abi.h": "860bbf9c80475c7a853d182cea53ef70a03ef9a5e662aa06c04cf9001aa31ecd",
+        "kmt.h": "61558590186b35dc78f10aeae564139c9cb67578c14158941a4ab6d108a6a22a",
+        "kmt_abi.h": "23f93d58cde3f893463270d263ba07ef3ad5523dbf2692b93fd7b2a2a1255a41",
+        "memory_budget.h": "9c943e1a93ea14be7980f7ca366be50587a3b4f9eab410ff82428ef21ffaeddd",
+        "kmt.c": "97180a7cfcdb53c1412fdc2b625ab5c7e52a570cb3d63248cdf319f08a320949",
+        "kmt_native.c": "72e4935a1cfad56ac9bc4415859c900dd66ff78739da7cc7276cb321a165a397"
+      }
+    },
+    "extended": {
+      "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+      "outputs": {
+        "contracts-arm64": {
+          "bytes": 104976,
+          "unsigned": "607aac03976f8402287edfe6d95ee0950bb8c7cc9a385c5ecb0c495a03b7abe4",
+          "sha256": "bd339ec912bc6121b989da5de1799c51b5e980a4860301d6805c2bf8c8a2214c"
+        },
+        "contract-trace": {
+          "bytes": 65040,
+          "unsigned": "975dd120f58fc236f0a975c68bf5cf1fa85539f7d491340a5c1d61a8a169fe2a",
+          "sha256": "ae6fd30d576521ebb2300d2b07a35106ba972d23d3f6bdf60c1454c2b97b8bad"
+        }
+      },
+      "source_sha256": {
+        "client.c": "e310c4da03b60657409a0f42d034e1b01933619bb0696e8ac83e94bfd7392fcc",
+        "actions.c": "990cba379589b0ee75c9c7015c6a3a67d11e33285ccf5f838106eceeb8021e49",
+        "collector.c": "4a24d581969af1a93c4cd8a1a61e82287ede88c9c9f61c154f08ad89c4ffcc5c",
+        "adapter_abi.h": "9cf36e45dac585d0456acf63fb7c441e3be6eb0582dae3fd222263b28719b3ae",
+        "submit_abi.h": "9359c37d2474e67363d24f1f87573015b5cf73ed1d926f55aac7876071de5d9f",
+        "kmt_native.h": "bc11685831906bdf75f5be57185977927937fdd0e3e19b177ace347a3693e610",
+        "allocation_abi.h": "860bbf9c80475c7a853d182cea53ef70a03ef9a5e662aa06c04cf9001aa31ecd",
+        "kmt.h": "61558590186b35dc78f10aeae564139c9cb67578c14158941a4ab6d108a6a22a",
+        "kmt_abi.h": "23f93d58cde3f893463270d263ba07ef3ad5523dbf2692b93fd7b2a2a1255a41",
+        "memory_budget.h": "9c943e1a93ea14be7980f7ca366be50587a3b4f9eab410ff82428ef21ffaeddd",
+        "kmt.c": "97180a7cfcdb53c1412fdc2b625ab5c7e52a570cb3d63248cdf319f08a320949",
+        "kmt_native.c": "72e4935a1cfad56ac9bc4415859c900dd66ff78739da7cc7276cb321a165a397"
+      }
+    }
+  },
+  "archive_decode_sha256": {
+    "historical.py": "d8ba23b455e642d729a3358d194b0b21a36bda262ee4bcc86c27824c6a227470",
+    "runtime_archive.py": "1e4f4eed3e00268c2894fcc4be864eb47add754176222effea37077b89ce6605",
+    "runtime_records.py": "dc4e96749d6ee3cdc1743f7ca509b851e6dde8168958b4484fedc438bb421162",
+    "corroborate.py": "53ededad16399dc9f167ef2a6fab3ef57c892f058d17c28ee5d1bea2af9da453",
+    "successful_sequential.py": "3783179fa0fd3f3717cd137da8a3641e185531ae215c21cf22a6f502fbae8d6a",
+    "augment_boundaries.py": "157eeb7a9eed13312d109b289e98d0339caf9deb8853d49f916136b3361c1031",
+    "decode.py": "3858b7897b66c0c4aef70247f4bf6d42a393471c177bbf17f3e547dbb72a94a5"
+  }
+}

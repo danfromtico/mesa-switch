@@ -738,8 +738,11 @@
         "E16#/historical_sequential",
         "E16#/neon_xhigh_review/comment_verdicts"
       ],
-      "reason": "四份原生窗口归档按同一上下文、对象和队列包配对到值为 1 的 GPU 信号。归档缺少该对象的创建类型、归属和跨进程打开记录。WSL 的链表与 Linux FD 映射还需要来宾侧证据。",
-      "observable": "在支持相应 WDDM 版本的原生 Windows 正常公开 D3DKMT/D3D11 接口及同层 DxgKrnl 只读记录中，观测各类型同步对象的创建类型、设备/适配器归属与跨进程全局/NT 句柄信号等待。WSL 来宾链表与 Linux FD 映射另需 WSL 来宾与宿主同层只读记录。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 普通监控围栏 CPU 读值依次为 0、1。在活动 GM20B 目标上创建周期型围栏返回 0x00000000。整条的原生围栏及来宾链表/FD 语义仍缺对应回执。 本轮周期型围栏在同一 CPU 映射的两次采样值为 0、218533。 三次历史启动曾观察到调用前的围栏信号包退役。",
+      "observable": "在支持相应 WDDM 版本的原生 Windows 正常公开 D3DKMT/D3D11 接口及同层 DxgKrnl 只读记录中，观测各类型同步对象的创建类型、设备/适配器归属与跨进程全局/NT 句柄信号等待。WSL 来宾链表与 Linux FD 映射另需 WSL 来宾与宿主同层只读记录。",
+      "hardware_rounds": [
+        "c27-sync-object-scope-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:178:2",
@@ -848,10 +851,13 @@
       "comment_sha256": "48316db9528c93d3203b08d01ca1c44d7d02a891d08ce6b719c9c12d7f0c0beb",
       "assertion": "dxgsyncobject::mapped_address 保存“设备”同步对象围栏值的 CPU 虚拟地址。限定到原生 Windows 范围，对应受监控围栏类设备同步对象暴露给进程的围栏值 CPU 虚拟地址。",
       "scope": "原生可比",
-      "status": "未知",
+      "status": "已满足",
       "evidence": [],
-      "reason": "原生 Windows 图形内核与 KMD 侧现有实机回执（含 E05）仅记录提交与队列包完成时延，未采集设备同步对象围栏值 CPU 虚拟地址的直接读写与正常更新记录。",
-      "observable": "在 Switch 原生 GM20B 上通过正常公开的受监控围栏创建接口获取围栏值 CPU 虚拟地址，并记录正常信号推进前后该地址的只读数值变化与正常释放回执。"
+      "reason": "同一受监控围栏的 CPU 映射先读到 0。事件 30、1069 和 294 关联到同一设备、上下文、局部围栏和 GPU 信号值 1。成功等待后该映射读到 1。本轮没有可配对的调度包退役事件。",
+      "observable": "在 Switch 原生 GM20B 上通过正常公开的受监控围栏创建接口获取围栏值 CPU 虚拟地址，并记录正常信号推进前后该地址的只读数值变化与正常释放回执。",
+      "hardware_rounds": [
+        "c27-monitored-cpu-va-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:199:2",
@@ -864,12 +870,15 @@
       "comment_sha256": "9e36f70af1fad31f70e9f317fd6a92ac9f5e5cabb978ab5124254d0e6aa9ffa4",
       "assertion": "同步对象句柄属于持有它的进程句柄表。",
       "scope": "原生可比",
-      "status": "未知",
+      "status": "已满足",
       "evidence": [],
-      "reason": "已有回执缺少同一对象在原注释适用层级的直接观测。",
+      "reason": "两个不同 PID 在各自设备持有同一 NT 共享监控围栏的本地 KMT 句柄。打开方等待值 1 后发出值 2，创建方读到应答，两端分别正常释放。",
       "observable": "从合法创建、共享或打开的同一对象记录进程、各自句柄与正常释放回执。",
       "reviewer_proposed_status": "未知",
-      "review_note": "将观测限定到注释所述字段及合法对象生命周期。"
+      "review_note": "将观测限定到注释所述字段及合法对象生命周期。",
+      "hardware_rounds": [
+        "c27-sync-process-handle-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:201:2",
@@ -948,10 +957,13 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "Switch GM20B 现有实机回执（E06、E09 报告 WDDM 2.6）未记录 Windows 图形内核与 KMD 对原生围栏能力或 D3DDDI_NATIVEFENCE_TYPE_DEFAULT / INTRA_GPU 创建的直接观测。",
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的创建类型回执。",
       "observable": "先通过正常公开接口读取 GM20B 报告的原生围栏能力，再就实际支持的 DEFAULT 或 INTRA_GPU 类型记录一次正常原生围栏创建输出与释放回执。",
       "reviewer_proposed_status": "未知",
-      "review_note": "将观测限定到注释所述字段及合法对象生命周期。"
+      "review_note": "将观测限定到注释所述字段及合法对象生命周期。",
+      "hardware_rounds": [
+        "c27-native-type-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:222:1",
@@ -982,8 +994,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "E03 仅覆盖原生 D3D11 共享纹理句柄而非共享同步对象，现有实机回执缺少 Windows 图形内核与 KMD 对共享同步对象及非 NT 安全全局句柄路径的直接观测。",
-      "observable": "在 Switch 原生 GM20B 上通过正常公开同步对象接口分别记录非 NT 安全全局句柄与 NT 句柄共享同步对象的合法创建、打开、正常同步及释放回执。内部父对象与句柄表指向则需同层内核只读记录。"
+      "reason": "传统全局围栏创建返回 00000000，有效打开回执数为 1。合法全局等待之后的监控围栏读到 1（等待返回 0x00000000）。NT 共享路径打开返回 00000000。本次公开句柄及 ReportSyncObject 模板不提供全局表项指向的父对象。 事件 1069 把两个进程的局部句柄配对到同一非零 pSyncObject。",
+      "observable": "在 Switch 原生 GM20B 上通过正常公开同步对象接口分别记录非 NT 安全全局句柄与 NT 句柄共享同步对象的合法创建、打开、正常同步及释放回执。内部父对象与句柄表指向则需同层内核只读记录。",
+      "hardware_rounds": [
+        "c27-shared-parent-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:238:2",
@@ -1062,8 +1077,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "Switch GM20B 现有实机回执（E06、E09 报告 WDDM 2.6）缺少 Windows 图形内核与 KMD 对共享原生围栏类型（DEFAULT 或 INTRA_GPU）的直接观测。",
-      "observable": "在支持原生围栏的原生 Windows 实机上先查询适配器原生围栏能力，再就实际支持的 DEFAULT 或 INTRA_GPU 类型记录一次正常共享创建、打开与释放回执。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的共享子类型回执。",
+      "observable": "在支持原生围栏的原生 Windows 实机上先查询适配器原生围栏能力，再就实际支持的 DEFAULT 或 INTRA_GPU 类型记录一次正常共享创建、打开与释放回执。",
+      "hardware_rounds": [
+        "c27-native-shared-type-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:294:1",
@@ -1727,8 +1745,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "Windows 原生 dxgkrnl 与 GM20B KMD 负责原生设备的硬件执行队列语义，但现有冻结实机回执（E05、E07）仅覆盖传统设备上下文队列包，缺少硬件执行队列对象创建或自然不支持的直接记录。",
-      "observable": "需在 Switch 原生 Windows ARM64 正常公开接口及同层 Microsoft-Windows-DxgKrnl ETW 只读记录中，核对归属 GM20B 设备的硬件执行队列对象创建、设备关联或自然不支持结果。"
+      "reason": "GM20B 报告 WDDM 2.6。WDDM_2_7_CAPS 返回 0x00000000，HwSchSupported=0、HwSchEnabled=0。已选 KMD 的普通上下文路径不接受 HwQueueSupported 标志，缺硬件队列创建与设备归属回执。",
+      "observable": "需在 Switch 原生 Windows ARM64 正常公开接口及同层 Microsoft-Windows-DxgKrnl ETW 只读记录中，核对归属 GM20B 设备的硬件执行队列对象创建、设备关联或自然不支持结果。",
+      "hardware_rounds": [
+        "c27-hardware-queue-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:619:2",
@@ -1983,8 +2004,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "责任方在原生侧为 Windows dxgkrnl 与驱动、在来宾侧为 WSL dxgkrnl，对象为已封装共享资源的分配集合。现有 Switch 回执（如 E03 单次创建并打开的共享纹理）未记录共享封装状态的只读内核标记或共享前后资源分配集合固定性的同层观测。",
-      "observable": "在正常共享资源建立与共享流程中，通过公开 D3DKMTQueryResourceInfo* 或同层 DxgKrnl 只读记录核对共享后分配数量与成员保持固定。dxgsharedresource::sealed 位域本身须由 WSL 来宾只读记录验证。"
+      "reason": "共享后在创建方、打开方、打开结束时查询的成员数为 1、1、1。现有同层记录没有成员集合被固定或禁止追加的直接观测。",
+      "observable": "在正常共享资源建立与共享流程中，通过公开 D3DKMTQueryResourceInfo* 或同层 DxgKrnl 只读记录核对共享后分配数量与成员保持固定。dxgsharedresource::sealed 位域本身须由 WSL 来宾只读记录验证。",
+      "hardware_rounds": [
+        "c27-sealed-members-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:712:2",
@@ -2029,15 +2053,18 @@
       "comment_sha256": "55535938530ddd50855942d65c8dea48bd319bbc5f60ac1660502a7d29f47eb6",
       "assertion": "WSL 的 dxgresource::shared_owner 指向该资源所属的共享资源所有者 dxgsharedresource。原生 Windows 可限定比较不同设备或进程打开的共享资源句柄关联至同一底层共享资源对象的语义，但不外推至来宾指针、引用计数或内部锁。",
       "scope": "原生可比",
-      "status": "未知",
+      "status": "已满足",
       "evidence": [
         "E03#/sequence",
         "E03#/observations/local",
         "E03#/observations/process",
         "E03#/remaining_question"
       ],
-      "reason": "责任方在原生侧为 Windows dxgkrnl 与驱动，对象为各设备打开的共享资源及其底层共享对象。E03 仅证实两原生 GM20B 设备共享纹理的公开像素读写结果，缺少原生内核层共享对象归属记录与 DWM 消费侧观测，且公开像素结果不能外推至来宾 shared_owner 字段。",
-      "observable": "在正常跨设备或跨进程打开共享资源的流程中，经同层 Windows DxgKrnl 只读记录核对各设备资源句柄关联至同一底层共享资源对象。dxgresource::shared_owner 指针本身须由 WSL 来宾只读记录验证。"
+      "reason": "两个不同进程在各自设备取得资源和分配句柄。两份 DeviceAllocation 事件的非零共享资源身份和全局分配身份分别相同，能配对到每次合法创建或打开。",
+      "observable": "在正常跨设备或跨进程打开共享资源的流程中，经同层 Windows DxgKrnl 只读记录核对各设备资源句柄关联至同一底层共享资源对象。dxgresource::shared_owner 指针本身须由 WSL 来宾只读记录验证。",
+      "hardware_rounds": [
+        "c27-shared-resource-owner-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:744:2",
@@ -2155,8 +2182,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "责任方在原生侧为 Windows dxgkrnl/VidMm 与 GM20B KMD，对象为 CPU 可见分配的缓存映射属性。E05 未记录分配 Cached 标志与实际映射属性，E08 仅为主机仿真模型下的 NVDEC 非缓存内存，缺少原生实机同层记录。",
-      "observable": "在正常建立并锁定 CPU 可见分配的原生 Windows 流程中，由同层 DxgKrnl 或 KMD 只读记录核对分配的 Cached 标志与映射缓存属性。dxgallocation::cached 位域本身须由 WSL 来宾只读记录验证。"
+      "reason": "正常 Lock2 返回可读写的 64 KiB 页，VirtualQuery 的 Protect 和 AllocationProtect 均为 0x404（PAGE_READWRITE | PAGE_WRITECOMBINE）。该轮没有可缓存映射，事件 33 仅给出未具名的原始 Flags=0x81，缺少可缓存映射与明确定义的 Cached 位配对。",
+      "observable": "在正常建立并锁定 CPU 可见分配的原生 Windows 流程中，由同层 DxgKrnl 或 KMD 只读记录核对分配的 Cached 标志与映射缓存属性。dxgallocation::cached 位域本身须由 WSL 来宾只读记录验证。",
+      "hardware_rounds": [
+        "c27-allocation-cache-20261121-01"
+      ]
     },
     {
       "id": "dxgkrnl.h:762:2",
@@ -3097,10 +3127,13 @@
       "comment_sha256": "b2f115539aaa68246301a10c1e059a2e47e1e999b4b3c270414f5c94b13b067f",
       "assertion": "在目标设备上以共享及只等标志（`shared`、`nt_security_sharing`、`no_signal`）打开共享同步对象后，打开方取得自己的本地句柄。",
       "scope": "原生可比",
-      "status": "未知",
+      "status": "已满足",
       "evidence": [],
-      "reason": "E03 共享纹理与已复算的四份原生窗口归档（仅含同线程 GPU signal 值 1、序号 2 包退役）均缺少共享同步对象的创建类型、归属与打开方本地句柄关联。WSL 来宾 `sync_file`、句柄表锁与 VMBus 路径亦不在原生 Switch 上运行。",
-      "observable": "在正常公开 WDDM/D3D 同步对象接口与同层只读记录中，核对同一共享同步对象在创建方与目标设备打开方返回的本地句柄及对象身份。"
+      "reason": "创建方以 NT 安全共享创建监控围栏，子进程合法继承其导出对象，以 NoSignal 打开，得到非零本地句柄并成功等待值 1。两端均正常释放。",
+      "observable": "在正常公开 WDDM/D3D 同步对象接口与同层只读记录中，核对同一共享同步对象在创建方与目标设备打开方返回的本地句柄及对象身份。",
+      "hardware_rounds": [
+        "c27-open-monitor-wait-only-20261121-01"
+      ]
     },
     {
       "id": "dxgsyncfile.c:381:2",
@@ -3113,12 +3146,15 @@
       "comment_sha256": "b2f115539aaa68246301a10c1e059a2e47e1e999b4b3c270414f5c94b13b067f",
       "assertion": "打开共享同步对象后，打开方取得自己的本地句柄。",
       "scope": "原生可比",
-      "status": "未知",
+      "status": "已满足",
       "evidence": [],
-      "reason": "共享纹理读回不能证明共享同步对象返回的本地句柄。当前回执缺少同一同步对象的创建方与打开方关联。",
+      "reason": "两个不同 PID 在各自设备持有同一 NT 共享监控围栏的本地 KMT 句柄。打开方等待值 1 后发出值 2，创建方读到应答，两端分别正常释放。",
       "observable": "读取同一同步对象在合法创建与打开时返回的两个进程句柄及对象身份。",
       "reviewer_proposed_status": "未知",
-      "review_note": "按原注释的对象和责任方独立评估，跨平台类比单独限定。"
+      "review_note": "按原注释的对象和责任方独立评估，跨平台类比单独限定。",
+      "hardware_rounds": [
+        "c27-open-monitor-local-20261121-01"
+      ]
     },
     {
       "id": "dxgsyncfile.c:395:2",
@@ -3621,8 +3657,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "该类型校验在原生侧由 Windows dxgkrnl 负责、在 WSL 侧由客机 dxgkrnl 检查 syncobj->type。Switch Lite GM20B 当前冻结实机基线为 WDDM 2.6，E01–E12 缺少 D3DKMTOpenNativeFenceFromNtHandle 及原生栅栏对象类型核验记录。",
-      "observable": "需要支持 WDDM 3.2 原生栅栏的 Windows 原生 GM20B 环境下，D3DKMTOpenNativeFenceFromNtHandle 对目标同步对象类型的同层只读内核记录。WSL2 来宾字段 syncobj->type 的校验须另由来宾只读记录证实。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的NT 对象类型回执。",
+      "observable": "需要支持 WDDM 3.2 原生栅栏的 Windows 原生 GM20B 环境下，D3DKMTOpenNativeFenceFromNtHandle 对目标同步对象类型的同层只读内核记录。WSL2 来宾字段 syncobj->type 的校验须另由来宾只读记录证实。",
+      "hardware_rounds": [
+        "c27-native-open-type-20261121-01"
+      ]
     },
     {
       "id": "dxgvmbus.c:832:2",
@@ -3717,8 +3756,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "该映射权限由 Windows 原生 dxgkrnl 与支持 WDDM 3.2 原生栅栏的 KMD 共同保障。Switch Lite GM20B 当前冻结实机基线处于 WDDM 2.6，E01–E12（含 E03 与 E05）均缺少 D3DKMTOpenNativeFenceFromNtHandle 的原生栅栏映射观测。",
-      "observable": "需要支持 WDDM 3.2 原生栅栏的 Windows 原生 GM20B 环境下，常规公开接口 D3DKMTOpenNativeFenceFromNtHandle 返回的 CurrentValueCpuVa 及只读虚拟内存属性查询（如 VirtualQuery）记录，分别核对 DEFAULT 为只读映射、INTRA_GPU 为 NULL。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的打开映射权限回执。",
+      "observable": "需要支持 WDDM 3.2 原生栅栏的 Windows 原生 GM20B 环境下，常规公开接口 D3DKMTOpenNativeFenceFromNtHandle 返回的 CurrentValueCpuVa 及只读虚拟内存属性查询（如 VirtualQuery）记录，分别核对 DEFAULT 为只读映射、INTRA_GPU 为 NULL。",
+      "hardware_rounds": [
+        "c27-native-open-permissions-20261121-01"
+      ]
     },
     {
       "id": "dxgvmbus.c:896:3",
@@ -3733,8 +3775,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "INTRA_GPU 原生栅栏禁绝用户态 CPU 映射由 Windows 原生 dxgkrnl 与支持 WDDM 3.2 的 KMD 保障。Switch Lite GM20B 当前冻结基线为 WDDM 2.6，E01–E12 缺乏 D3DKMTOpenNativeFenceFromNtHandle 针对 INTRA_GPU 类型的实机回执。",
-      "observable": "需要支持 WDDM 3.2 原生栅栏的 Windows 原生 GM20B 环境下，常规公开接口 D3DKMTOpenNativeFenceFromNtHandle 打开 INTRA_GPU 原生栅栏时返回 CurrentValueCpuVa 为 NULL 的同层只读记录。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的INTRA_GPU 打开输出回执。",
+      "observable": "需要支持 WDDM 3.2 原生栅栏的 Windows 原生 GM20B 环境下，常规公开接口 D3DKMTOpenNativeFenceFromNtHandle 打开 INTRA_GPU 原生栅栏时返回 CurrentValueCpuVa 为 NULL 的同层只读记录。",
+      "hardware_rounds": [
+        "c27-native-open-intra-20261121-01"
+      ]
     },
     {
       "id": "dxgvmbus.c:900:3",
@@ -3749,8 +3794,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "DEFAULT 原生栅栏用户态只读 CPU 映射由 Windows 原生 dxgkrnl 与 WDDM 3.2+ KMD 保障。Switch Lite GM20B 当前冻结基线为 WDDM 2.6，E01–E12 无 D3DKMTOpenNativeFenceFromNtHandle 针对 DEFAULT 类型的映射实测。",
-      "observable": "需要支持 WDDM 3.2 原生栅栏的 Windows 原生 GM20B 环境下，常规公开接口 D3DKMTOpenNativeFenceFromNtHandle 返回非空 CurrentValueCpuVa、正常只读读取栅栏值及 VirtualQuery 显示只读页面属性的同层记录。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的DEFAULT 打开输出回执。",
+      "observable": "需要支持 WDDM 3.2 原生栅栏的 Windows 原生 GM20B 环境下，常规公开接口 D3DKMTOpenNativeFenceFromNtHandle 返回非空 CurrentValueCpuVa、正常只读读取栅栏值及 VirtualQuery 显示只读页面属性的同层记录。",
+      "hardware_rounds": [
+        "c27-native-open-default-20261121-01"
+      ]
     },
     {
       "id": "dxgvmbus.c:917:2",
@@ -4149,8 +4197,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "该规范语义在支持 WDDM 3.2+ Native Fence 的原生 Windows 图形栈同样适用，但 Switch Lite GM20B 当前冻结实机运行于 WDDM 2.6，且 E01–E12 均未调用 D3DKMTCreateNativeFence 或观测 DEFAULT 只读与 INTRA_GPU 无 CPU 映射行为，缺乏实机裁决依据。",
-      "observable": "先读取当前设备对本条所需功能的支持情况。有支持时经对应公开 API 采集同一对象的正常操作回执，缺少支持时记录能力限制并保持未知。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的创建映射权限回执。",
+      "observable": "先读取当前设备对本条所需功能的支持情况。有支持时经对应公开 API 采集同一对象的正常操作回执，缺少支持时记录能力限制并保持未知。",
+      "hardware_rounds": [
+        "c27-native-create-permissions-20261121-01"
+      ]
     },
     {
       "id": "dxgvmbus.c:3152:3",
@@ -4165,8 +4216,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "该语义由原生 WDDM 3.2+ 的 Windows dxgkrnl 与 KMD 共同承担，但 Switch Lite GM20B 实机基线为 WDDM 2.6 且 E01–E12 未记录任何 D3DKMTCreateNativeFence 调用，缺少 INTRA_GPU 原生围栏返回状态的实机回执。",
-      "observable": "在支持 WDDM 3.2+ 原生围栏的 Windows 环境下，通过公开 D3DKMTCreateNativeFence 正常创建 INTRA_GPU 原生围栏，只读核对返回结构中的 CurrentValueCpuVa 为 NULL。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的INTRA_GPU 创建输出回执。",
+      "observable": "在支持 WDDM 3.2+ 原生围栏的 Windows 环境下，通过公开 D3DKMTCreateNativeFence 正常创建 INTRA_GPU 原生围栏，只读核对返回结构中的 CurrentValueCpuVa 为 NULL。",
+      "hardware_rounds": [
+        "c27-native-create-intra-20261121-01"
+      ]
     },
     {
       "id": "dxgvmbus.c:3156:3",
@@ -4181,8 +4235,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "该语义由原生 WDDM 3.2+ 的 Windows dxgkrnl 与 KMD 共同承担，但 Switch Lite GM20B 实机处于 WDDM 2.6 基线且 E01–E12 未覆盖 D3DKMTCreateNativeFence，缺少 DEFAULT 原生围栏用户态只读页映射的实机回执。",
-      "observable": "在支持 WDDM 3.2+ 原生围栏的 Windows 环境下，通过公开 D3DKMTCreateNativeFence 正常创建 DEFAULT 原生围栏，经公开 VirtualQuery 只读核对 CurrentValueCpuVa 页保护为只读并正常读取当前值。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的DEFAULT 创建输出回执。",
+      "observable": "在支持 WDDM 3.2+ 原生围栏的 Windows 环境下，通过公开 D3DKMTCreateNativeFence 正常创建 DEFAULT 原生围栏，经公开 VirtualQuery 只读核对 CurrentValueCpuVa 页保护为只读并正常读取当前值。",
+      "hardware_rounds": [
+        "c27-native-create-default-20261121-01"
+      ]
     },
     {
       "id": "dxgvmbus.c:3184:2",
@@ -4325,10 +4382,13 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "该语义由 Windows dxgkrnl 与 KMD 针对 D3DKMTUpdateAllocationProperty 承担。E05 仅记录了 ARM64、x86 与 x64 下 MakeResident 的分页驻留计时与方法说明，E01–E12 均无 UpdateAllocationProperty 返回 STATUS_PENDING 与 PagingFenceValue 的实机回执。",
+      "reason": "本次自有分配的 Unmoveable 更新返回 STATUS_NOT_IMPLEMENTED（0xc0000002），输出分页围栏为 0。未取得这次 API 的异步成功回执。",
       "observable": "在原生 Windows 环境下正常调用公开 D3DKMTUpdateAllocationProperty 并在自然返回 STATUS_PENDING 时，按同一进程、线程与调用区间核对该状态按成功处理且输出对应的 PagingFenceValue。",
       "reviewer_proposed_status": "未知",
-      "review_note": "按固定源码的具体调用点分别判定。相同的状态码文字不构成跨 API 的证据。"
+      "review_note": "按固定源码的具体调用点分别判定。相同的状态码文字不构成跨 API 的证据。",
+      "hardware_rounds": [
+        "c27-allocation-property-20261121-01"
+      ]
     },
     {
       "id": "dxgvmbus.h:1:1",
@@ -5733,10 +5793,13 @@
       "comment_sha256": "5da2fe8156aba3b345253d24df749956ef35352250bd1bffc4d8cddac5a3035d",
       "assertion": "在 CreateAllocation 未设置 create_resource 标志而指定非零现有资源句柄 args.resource 时，应将新分配追加到同一设备上的该既有资源对象。",
       "scope": "原生可比",
-      "status": "未知",
+      "status": "已满足",
       "evidence": [],
-      "reason": "原生 Windows 上向既有 hResource 追加分配由系统 dxgkrnl.sys 与 GM20B KMD（DxgkDdiCreateAllocation）协作承担，不应把 WSL 来宾的 sealed/活跃锁检混入本条。现有 E02、E03、E05 与 E07 均仅记录新建资源或独立分配，缺少 CreateResource=0 且指定既有 hResource 的实机回执。",
-      "observable": "在原生 Windows ARM64 GM20B 上通过公开 D3DKMTCreateAllocation/D3DKMTCreateAllocation2 为同设备既有 hResource 正常追加分配，并配对同一次调用的返回状态与同层只读创建记录。"
+      "reason": "同一未共享资源接受了第二份 64 KiB 分配。两次创建的分配句柄不同，调用方资源句柄相同，各自对应的事件 33/36 均关联到同一设备和资源。",
+      "observable": "在原生 Windows ARM64 GM20B 上通过公开 D3DKMTCreateAllocation/D3DKMTCreateAllocation2 为同设备既有 hResource 正常追加分配，并配对同一次调用的返回状态与同层只读创建记录。",
+      "hardware_rounds": [
+        "c27-append-allocation-20261121-01"
+      ]
     },
     {
       "id": "ioctl.c:1653:4",
@@ -5765,14 +5828,17 @@
       "comment_sha256": "b9c34605d7734d19dbd2e34a80d9d71841f3c19686753062198d4db267c6b49b",
       "assertion": "在 CreateAllocation 设置 create_shared 标志创建共享分配时，须保留各分配的私有驱动数据，供后续 OpenResource/OpenResourceFromNtHandle 打开该共享资源时向打开方提供。",
       "scope": "原生可比",
-      "status": "未知",
+      "status": "已满足",
       "evidence": [
         "E03#/resource",
         "E06#/observations/target_import",
         "E06#/observations/other_coverage"
       ],
-      "reason": "原生 Windows 下共享分配的逐分配私有驱动数据保存与交付由系统 dxgkrnl.sys 及 GM20B UMD/KMD 承担（WSL 侧由来宾 alloc->priv_drv_data 缓存，不应在原生可比断言中混入来宾封存流程）。E03 仅观察传统共享纹理像素结果，E06 亦指出先前同适配器样本携带 72 字节资源级私有数据而仅分配级私有数据的 OpenResource 路径仍无实机证据。",
-      "observable": "在原生 Windows ARM64 GM20B 上通过公开共享资源创建与打开接口（D3DKMTCreateAllocation2 与 D3DKMTOpenResourceFromNtHandle）保留同层只读记录，核对逐分配私有驱动数据在打开方的交付结果。"
+      "reason": "独立打开方查询到 1 份分配、16 字节逐分配私有数据。OpenResourceFromNtHandle 返回的分配描述符指向该输出缓冲，版本、标志和 65536 字节大小逐字段匹配创建输入。",
+      "observable": "在原生 Windows ARM64 GM20B 上通过公开共享资源创建与打开接口（D3DKMTCreateAllocation2 与 D3DKMTOpenResourceFromNtHandle）保留同层只读记录，核对逐分配私有驱动数据在打开方的交付结果。",
+      "hardware_rounds": [
+        "c27-shared-private-data-20261121-01"
+      ]
     },
     {
       "id": "ioctl.c:1877:2",
@@ -5873,12 +5939,15 @@
       "comment_sha256": "92ff0257dae03b91d5b7420c63e973b255cf59bda2178056c30b9756360c1ec1",
       "assertion": "MapGpuVirtualAddress 接受异步请求时，STATUS_PENDING 是正的成功状态，应原样传给用户态。",
       "scope": "原生可比",
-      "status": "未知",
+      "status": "已满足",
       "evidence": [],
-      "reason": "已有 x86 双端实机回执针对 MakeResident。当前资料没有为 MapGpuVirtualAddress 配对同一次请求的原始状态与对应返回。",
+      "reason": "64 KiB、16 页的合法映射直接返回 0x103，输出 VA 65536 与保留地址一致。对应分页围栏目标为 7002，同步后实读 7002。",
       "observable": "在 MapGpuVirtualAddress 自然产生异步返回时，按同一进程、线程与调用区间核对该 API 规定的实际输出。",
       "reviewer_proposed_status": "未知",
-      "review_note": "按固定源码的具体调用点分别判定。相同的状态码文字不构成跨 API 的证据。"
+      "review_note": "按固定源码的具体调用点分别判定。相同的状态码文字不构成跨 API 的证据。",
+      "hardware_rounds": [
+        "c27-gpuva-map-20261121-01"
+      ]
     },
     {
       "id": "ioctl.c:2793:1",
@@ -5912,8 +5981,11 @@
         "E06#/wddm",
         "E06#/cases/0/dxgkrnl_build"
       ],
-      "reason": "原生 GPU 栅栏类型与共享范围校验属于 WDDM 3.2+ 规范，由 Windows dxgkrnl.sys 与支持原生栅栏的 KMD 承担。E06 记录 Switch Lite GM20B 当前运行 WDDM 2.6（Windows 10.0.22621.2792），E01-E12 均无 D3DKMTCreateNativeFence 及原生栅栏共享回执。",
-      "observable": "在支持 WDDM 3.2+ 原生栅栏的原生 Windows 平台上，通过公开 D3DKMTCreateNativeFence 与 D3DKMTOpenNativeFenceFromNtHandle 保留正常 DEFAULT 与 INTRA_GPU 对象的创建、共享打开结果及同层只读记录。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的创建子类型与共享回执。",
+      "observable": "在支持 WDDM 3.2+ 原生栅栏的原生 Windows 平台上，通过公开 D3DKMTCreateNativeFence 与 D3DKMTOpenNativeFenceFromNtHandle 保留正常 DEFAULT 与 INTRA_GPU 对象的创建、共享打开结果及同层只读记录。",
+      "hardware_rounds": [
+        "c27-native-create-enum-20261121-01"
+      ]
     },
     {
       "id": "ioctl.c:2902:2",
@@ -6072,8 +6144,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "原生责任方为支持 WDDM 3.2+ 的 Windows dxgkrnl，对象为 D3DKMTOpenNativeFenceFromNtHandle 的 hNtHandle、EngineAffinity 与 hDevice 参数。Switch Lite GM20B 冻结实测 E01–E12 仅涵盖 WDDM 2.6 与进程级 WDDM 2.0，缺少该接口的实机回执。",
-      "observable": "需在支持 WDDM 3.2+ 原生 GPU fence 的 Windows 实机上，保留正常公开 D3DKMTOpenNativeFenceFromNtHandle 调用中 hNtHandle、EngineAffinity、hDevice 与返回状态的同层只读记录。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的NT 打开参数回执。",
+      "observable": "需在支持 WDDM 3.2+ 原生 GPU fence 的 Windows 实机上，保留正常公开 D3DKMTOpenNativeFenceFromNtHandle 调用中 hNtHandle、EngineAffinity、hDevice 与返回状态的同层只读记录。",
+      "hardware_rounds": [
+        "c27-native-open-input-20261121-01"
+      ]
     },
     {
       "id": "ioctl.c:3302:2",
@@ -6088,8 +6163,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "原生责任方为支持 WDDM 3.2+ 的 Windows dxgkrnl，对象为经 NT 句柄打开的共享同步对象类型。Switch Lite GM20B 冻结证据 E01–E12 停留在 WDDM 2.6/2.0，缺少 D3DKMTOpenNativeFenceFromNtHandle 的实机回执。",
-      "observable": "需在支持 WDDM 3.2+ 原生 GPU fence 的 Windows 实机上，保留正常公开 D3DKMTOpenNativeFenceFromNtHandle 调用中目标同步对象类型与 dxgkrnl 返回状态的同层只读记录。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的打开时的类型检查回执。",
+      "observable": "需在支持 WDDM 3.2+ 原生 GPU fence 的 Windows 实机上，保留正常公开 D3DKMTOpenNativeFenceFromNtHandle 调用中目标同步对象类型与 dxgkrnl 返回状态的同层只读记录。",
+      "hardware_rounds": [
+        "c27-native-open-object-20261121-01"
+      ]
     },
     {
       "id": "ioctl.c:3310:2",
@@ -6104,8 +6182,11 @@
       "scope": "原生可比",
       "status": "未知",
       "evidence": [],
-      "reason": "原生责任方为支持 WDDM 3.2+ 的 Windows dxgkrnl，对象为共享的 INTRA_GPU 原生 fence 及源/目标适配器。Switch Lite GM20B 冻结证据 E06 仅涉及 WDDM 2.6 下 WARP 纹理跨适配器被拒，E01–E12 缺少 INTRA_GPU 原生 fence 的实机回执。",
-      "observable": "需在支持 WDDM 3.2+ 原生 GPU fence 的多适配器 Windows 实机上，保留正常公开 D3DKMTOpenNativeFenceFromNtHandle 调用中 INTRA_GPU 子类型、源/目标适配器标识与返回状态的同层只读记录。"
+      "reason": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。 缺少同一受支持的原生围栏对象与调用区间内的跨适配器约束回执。",
+      "observable": "需在支持 WDDM 3.2+ 原生 GPU fence 的多适配器 Windows 实机上，保留正常公开 D3DKMTOpenNativeFenceFromNtHandle 调用中 INTRA_GPU 子类型、源/目标适配器标识与返回状态的同层只读记录。",
+      "hardware_rounds": [
+        "c27-native-adapter-20261121-01"
+      ]
     },
     {
       "id": "ioctl.c:3320:2",

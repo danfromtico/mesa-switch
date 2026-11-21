@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "round_id": "win-historical-process-log-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "plan_sha256": "aba18e31edb68e804150c9d6d52efe6a3c77dd43017b4b9b39ef475932524815",
+  "status": "故障开放",
+  "finding": "原三次归档按完整 ZIP 成员哈希复核，均有当轮目录清理回执。当前正式交互账户未检出 step4-present 的 LocalDumps 或 WER 报告，该时间窗内匹配此客户端的 Application 1000/1001/1002 有 0 条。",
+  "missing_observation": "原三次调用后的责任方与内核阶段仍缺同启动的持久记录；已收回原 ZIP 的哈希及内容、对应清理回执和进程级 Windows 错误记录已核对。",
+  "device_executions": 0,
+  "evidence": {
+    "boot": 91476,
+    "raw_local_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/historical/original-client-records.json",
+    "raw_sha256": "49bf14e78a3805b2e9944e43dcc3d18e6ba0adc1c1dcc9c1c98357564b41f204",
+    "inspected_cases": [
+      {
+        "boot": 82058,
+        "pid": 1812,
+        "tid": 6340,
+        "case": "Ddi20Case-261120-122121366257",
+        "config_sha256": "8433c1c2c59b76b789a2366c802d5f19664d44db5b47d36426a341b9913ca066",
+        "cleanup_sha256": "4f676b368ce8c0ba38035bfdedd8066835f543cbc6d3b14f8490cde968323b09",
+        "archived_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "members": {
+          "intent.json": "13003c0f46d80d344c8fb0c36482c6282c53bb32e39e784e5faba416a23cbfce",
+          "status.json": "dbbb8111648fa49fc951f230a2cc4d56c970a2b19695e4ab0eeea6c47f554d49",
+          "evidence/launch.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/live.tsv": "fd625a1a1ee1af733d35df8a88ec9150c3ed9a59270d65725b65a3383c313bcc",
+          "evidence/miniport.etl": "448d78b1d7806769b77d9bc745c65b7cf07e038e1451f8f7fcec2ab1f28bf7df",
+          "evidence/process.tsv": "4a49f1241b63f4a9d9675f9dc70a14fbf4479d6f60b03601fc33bd2d5d192d09",
+          "evidence/query.txt": "f3b0a431b7ea92b02e52c891310a7163ad0333b03b7494eef7937c97fd305014",
+          "evidence/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/scene/journal.txt": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+          "evidence/scene/stderr.txt": "43e6f4a12c2a8c3242816b0f3da21f1a8a37c21a78b26e8aae1da3a828ff5685",
+          "evidence/scene/stdout.txt": "440f1df46f6c1a961486cc8250cf8b5e118f97ed599ba94e819ad9699eeebdda",
+          "evidence/scene/video.etl": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71"
+        },
+        "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d"
+      },
+      {
+        "boot": 82221,
+        "pid": 4672,
+        "tid": 4712,
+        "case": "Ddi20Case-261120-122937785753",
+        "config_sha256": "982d1ef8c60ed4c72387d6a81befbc9f568eaa020674c60457d66be90837855a",
+        "cleanup_sha256": "4f676b368ce8c0ba38035bfdedd8066835f543cbc6d3b14f8490cde968323b09",
+        "archived_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "members": {
+          "intent.json": "e1f6e8bfef08ce59600d5a4a01296924794ce81273afe74c60641d7e582362f2",
+          "status.json": "673cfdc2cafbf5d5da899cc269723abd5a2e4f47f9851dda97ddf08273375ce6",
+          "evidence/launch.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/live.tsv": "fa5459076f4d13a7cc730673ca29668d1d8cc70f81c21ef81fd4c37c6b3bfd46",
+          "evidence/miniport.etl": "ae2b064bc83935332746787fdd42cbc661ed4291020ff93a10e167f254bc4fa0",
+          "evidence/process.tsv": "f45697011c2de64c565170566cb1ff36c5337af2e06832302516f90db0926913",
+          "evidence/query.txt": "90f234bb02f056311531f481dc5daee34936dab26f1c1a666a1f240fc0a058db",
+          "evidence/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/scene/journal.txt": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+          "evidence/scene/stderr.txt": "d0800cd15f8b849823220f7a12fbaa665fe426ed1ddb13b60ecb89a5d412c1de",
+          "evidence/scene/stdout.txt": "826e2d9f7714d83fb6b83e76540072fcc53339298219704aadab4e22b04ecec6",
+          "evidence/scene/video.etl": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc"
+        },
+        "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d"
+      },
+      {
+        "boot": 82382,
+        "pid": 5828,
+        "tid": 7656,
+        "case": "Ddi20Case-261120-123625091734",
+        "config_sha256": "4c619073145c7b51787b1d2d5645c6923d2c8e343735a62da7f740ba41c3d489",
+        "cleanup_sha256": "4f676b368ce8c0ba38035bfdedd8066835f543cbc6d3b14f8490cde968323b09",
+        "archived_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "members": {
+          "intent.json": "465dbe85b0bde6c41138312f029f23401a38ec5f0a4382c3aa79cdc5e8c8c9b8",
+          "status.json": "7b0de9f7091ff01b93ca85e98f40a6025099d37d46d2340a6f47d6ca30f79037",
+          "evidence/launch.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/live.tsv": "947f2cf448d0327566c3c6beeb20ae0b82cda2f8b02fabf15e0c06f17778cd46",
+          "evidence/miniport.etl": "6457ad2897be7679e1a140cb12b6c51f93167ad6a31f6cca2b2a006fd0b65cf6",
+          "evidence/process.tsv": "0364855daddc6d4eb854a8b08e4f9affc1ce4348fc72e975a83a045f099b6f85",
+          "evidence/query.txt": "e0e9c3749359d514a828f99eeb195aec2a0ac6b11c5e4460efc5713206e20068",
+          "evidence/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidence/scene/journal.txt": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+          "evidence/scene/stderr.txt": "43e6f4a12c2a8c3242816b0f3da21f1a8a37c21a78b26e8aae1da3a828ff5685",
+          "evidence/scene/stdout.txt": "5f2028c76d828b6c4183a2e1879953c558038af59f638f78e40927447ee9bc8f",
+          "evidence/scene/video.etl": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d"
+        },
+        "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d"
+      }
+    ],
+    "local_dump_configuration": [
+      {
+        "key": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps",
+        "folder": null,
+        "type": null,
+        "present": false
+      },
+      {
+        "key": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\\step4-present.exe",
+        "folder": null,
+        "type": null,
+        "present": false
+      }
+    ],
+    "checked_directories": [
+      {
+        "directory": "C:\\Users\\ruje\\AppData\\Local\\CrashDumps",
+        "matches": [],
+        "present": true
+      }
+    ],
+    "error_report_stores": [
+      {
+        "client_reports": [],
+        "root": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportArchive",
+        "exists": true
+      },
+      {
+        "client_reports": [],
+        "root": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportQueue",
+        "exists": true
+      },
+      {
+        "client_reports": [],
+        "root": "C:\\Users\\ruje\\AppData\\Local\\Microsoft\\Windows\\WER\\ReportArchive",
+        "exists": false
+      },
+      {
+        "client_reports": [],
+        "root": "C:\\Users\\ruje\\AppData\\Local\\Microsoft\\Windows\\WER\\ReportQueue",
+        "exists": false
+      }
+    ],
+    "application_window_records": 0,
+    "matching_records": [],
+    "boundaries": {
+      "last_entry": "原三份签名空窗口 journal 的首次公开 Present CALL。",
+      "last_return": "原次 CALL 前最后一次成功分页检查。",
+      "first_anomaly_or_missing": "原三次调用后的责任方与内核阶段仍缺同启动的持久记录；已收回原 ZIP 的哈希及内容、对应清理回执和进程级 Windows 错误记录已核对。"
+    }
+  }
+}

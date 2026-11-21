@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "round_id": "win-historical-call-marker-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "owner": "历史应用、Windows 内核及早期复位记录",
+  "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+  "observations": [
+    "先前历史轮次的 last_return 记录的是分页路径。按原签名客户端补齐桌面线程在公开 CALL 之前的最后一次 API 返回，并核实公开 Present 与持久 RETURN 标记之间的实际调用顺序。",
+    "从三份原始 journal 和同 SHA-256 的软件/翻转对照核对该顺序，保持原次已知区间与后续成功控制分离。"
+  ],
+  "inputs": {
+    "build_manifest_sha256": "059f19f9fdadc488f0925307a913485c3517cb44dede45bc989c1444dcec2450",
+    "client_delta_sha256": "61334630b65cf7ddab48c6320742280870662279179e43374f836b666afef714",
+    "source_receipts": [
+      {
+        "path": "windows-native-graphics/rounds/win-historical-reset-20261121-01.result.json",
+        "sha256": "f25542749cb21e1a6664ce81ea494d3cba9b50161ca943dcb888c405f1ed2059"
+      },
+      {
+        "path": "legacy-sequential-step4/historical-first-present-fence.json",
+        "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+      }
+    ]
+  }
+}

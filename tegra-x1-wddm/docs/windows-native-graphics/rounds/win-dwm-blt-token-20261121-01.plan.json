@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-blt-token-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "owner": "Windows DWM、Win32k 和 dxgkrnl 的重定向表面",
+  "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
+  "observations": [
+    "已读到一个 DWM SCHEDULE_PRESENTHISTORYTOKEN_BLT。核对事件 91 的 EventId、逻辑表面与共享表面，对比应用 PresentHistory 215 TokenData 和分配 36 的共享资源身份。",
+    "仅在同一非零标识及明确的对象类型能对应时判断消费，保留不同句柄和更新区域的原始字段。"
+  ],
+  "inputs": {
+    "parent": {
+      "path": "windows-native-graphics/rounds/win-empty-dwm-20261121-01.result.json",
+      "sha256": "fd5475342760a1424597ce4dc39b89fdbd168a2ccdff9811fd805d857056e655"
+    },
+    "template_sha256": "594a16e069e2e10846b7a8a99dbc0553e2343b4648a52df19ea506fdc4edffd0"
+  }
+}

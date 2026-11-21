@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-source-20261121-01",
+  "contract_id": "WIN-PRESENT-SOURCE",
+  "windows_question": "WIN-PRESENT-SOURCE",
+  "owner": "tgd3d 与 Windows VidMm",
+  "question": "首次 KMT Present 使用的源分配是否在提交前完成 GPUVA 映射与分页？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "同进程同设备的 Present 源与映射对象一致，异步返回对应目标已达且早于首次使用。",
+  "observations": [
+    "按 184 的 hSrcAllocHandle 与 36/30 创建设备对齐，核对同分配 UMD 驻留、映射返回与分页检查。",
+    "复核同一开机、进程、线程、设备、对象与时钟；本轮新增设备执行数为 0。"
+  ],
+  "inputs": {
+    "win-empty-present-20261121-01": {
+      "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+      "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+    }
+  }
+}

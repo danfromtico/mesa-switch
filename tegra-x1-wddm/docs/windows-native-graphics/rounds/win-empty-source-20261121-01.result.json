@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-source-20261121-01",
+  "contract_id": "WIN-PRESENT-SOURCE",
+  "windows_question": "WIN-PRESENT-SOURCE",
+  "plan_sha256": "5653d9a8225f5eba3fea94d952f0093238f89b11618195f3e06887a2fa467ed6",
+  "status": "实机通过",
+  "finding": "原空窗口的 KMT 源句柄 0x40000740 属于该应用设备。驻留/映射分别返回 E_PENDING，分页目标 7001/7002 的两次检查均为 S_OK，末次在公开调用前 775.464 ms。",
+  "missing_observation": null,
+  "device_executions": 0,
+  "evidence": {
+    "boot": 91476,
+    "pid": 5992,
+    "tid": 5988,
+    "hwnd": 524312,
+    "luid": "0000000000005c10",
+    "dwm": 1400,
+    "qpc_frequency": 19200000,
+    "raw_archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-empty-present-20261121-01/collected.zip",
+    "raw_archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+    "trace_sha256": {
+      "display.etl": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+      "scene/video.etl": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a"
+    },
+    "device_state": {
+      "boot": 91476,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0,
+      "KMD": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "tgd3d": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "NVK": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "kmt_source": 1073743680,
+    "local_allocation": {
+      "qpc": 94846219401,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 36,
+      "version": 2,
+      "fields": {
+        "hProcessId": 5992,
+        "hDevice": 18446611100200693776,
+        "pDxgAdapter": 18446706169594454016,
+        "hVidMmAlloc": 18446706169646883344,
+        "hVidMmGlobalAlloc": 18446611100182502816,
+        "hDxgResource": 18446611100200920800,
+        "hDxgSharedResource": 18446706169653085024,
+        "hThunkAllocation": 1073743680,
+        "hThunkResource": 1073743616,
+        "PrivateRuntimeResourceHandle": 0,
+        "pVirtualAddress": 2075107008512,
+        "hProcessAllocDetails": 18446611100193433616,
+        "hOtherPartitionHandle": 0
+      }
+    },
+    "device_context": {
+      "qpc": 94844105971,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 30,
+      "version": 0,
+      "fields": {
+        "hDevice": 18446611100200693776,
+        "NodeOrdinal": 0,
+        "EngineAffinity": 1,
+        "DmaBufferSize": 65536,
+        "DmaBufferSegmentSet": 2,
+        "DmaBufferPrivateDataSize": 65864,
+        "AllocationListSize": 0,
+        "PatchLocationListSize": 0,
+        "Flags": 0,
+        "hContext": 18446611100106235296,
+        "ContextHandle": 1073742144,
+        "ParentDxgContext": 0
+      }
+    },
+    "source_callback_records": [
+      {
+        "qpc": 94846220800,
+        "stage": 2,
+        "allocation": 1073743680,
+        "hresult": "0x8000000a",
+        "value": 7001
+      },
+      {
+        "qpc": 94846227519,
+        "stage": 3,
+        "allocation": 1073743680,
+        "hresult": "0x00000000",
+        "value": 7001
+      },
+      {
+        "qpc": 94846230514,
+        "stage": 4,
+        "allocation": 1073743680,
+        "hresult": "0x8000000a",
+        "value": 921600
+      },
+      {
+        "qpc": 94846258276,
+        "stage": 3,
+        "allocation": 1073743680,
+        "hresult": "0x00000000",
+        "value": 7002
+      }
+    ],
+    "source_file": "src/nouveau/tgd3d/tgd3d_runtime.cpp",
+    "selected_source_sha256": "12fd5325655011821864d8bbcf08d6c21aad0698be016a5bfa29dfdc2f0a7b00",
+    "milliseconds_before_first_call": 775.464,
+    "boundaries": {
+      "last_entry": "MapGpuVirtualAddressCb 返回 E_PENDING，源字节数 921600",
+      "last_return": {
+        "api": "wait_paging",
+        "hresult": "S_OK",
+        "target": 7002,
+        "qpc": 94846258276
+      },
+      "first_anomaly_or_missing": "回执给出目标及分页检查成功。检查内部的直接 CPU 读值或阻塞分支没有单独事件。"
+    }
+  }
+}

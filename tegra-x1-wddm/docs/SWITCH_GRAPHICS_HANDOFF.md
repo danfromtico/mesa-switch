@@ -1,5 +1,21 @@
 # Switch Windows ARM64 图形稳定性交接
 
+## 当前工作 · Windows ARM64 本机验收
+
+本轮在手持、交流供电的 Switch 上验证 Windows 11 ARM64、GM20B 和正式 WDDM 2.6 基线 `c137ce75`。先核对普通双缓冲 SEQUENTIAL 首次 Present 与同对象的 GPU 围栏等待，再验收原生 D3D11、应用目录 DXVK、冷启动和受控重启。意外重启和 Wi-Fi 恢复各自保留启动与系统事件。《仙剑四》继续暂缓。[Windows 问题、优先级与进度](windows-native-graphics/index.json) · [单项轮次与开放故障](open-faults.json)
+
+已有 27 轮 Windows 原生实测在新索引中逐项映射。124 条静态核对和 298 条来宾专属条目归入历史旁证。[原始缺口索引](wsl-dxgkrnl-contracts/gap-index.json) · [既有实机回执](wsl-dxgkrnl-contracts/native-27.json)
+
+当前实机集中在原空窗口首次 Present。应用无写入，旧式 DDI 为 `0x000b000f`。先取同线程 Windows 内核接收和返回，再沿同一源分配、上下文与围栏值核对分页、等待、复制和 DWM。首轮清屏用例为正式基线对照。应用与启动专项随后接续。[Windows 本机验收索引](windows-native-graphics/index.json)
+
+开机 `91476` 上，原无写入窗口第一次 `Present(1,0)` 在绘图 PID/TID `5992/5988` 取得 Windows 内核和 DXGI 的成功回执。源分配的最后一次分页检查早于公开调用 775.464 ms；普通上下文的 52 字节复制包正常退役。DWM 事件 91 的 EventId 与本次 HWND 一致，随后客户区 4,508 个采样点全部与空帧参考匹配，输入有效，应用正常退出。[原始应用日志与 Windows 事件载荷](windows-native-graphics/local-windows-logs.json) · [内核接收与返回](windows-native-graphics/rounds/win-empty-present-20261121-01.result.json) · [源分配](windows-native-graphics/rounds/win-empty-source-20261121-01.result.json) · [复制包](windows-native-graphics/rounds/win-empty-blt-20261121-01.result.json) · [DWM 调度](windows-native-graphics/rounds/win-dwm-window-id-20261121-01.result.json)
+
+原空窗口绘图线程的值 1 信号在调用前退役，截至首次公开返回没有同线程的 GPU 等待请求。独立清屏窗口则有两组同设备、同对象及同值的跨上下文等待包完成。原三次故障客户端在公开 Present 与持久 RETURN 标记之间还要读取设备移除原因。三次原次的 CALL 之后均无匹配图形回执；当前实机回读的 System XML、WER、转储和滚动 ETL 未补出原次位置。继续开放 `GM20B-LEGACY-SEQUENTIAL-RESTART`。[GPU 信号与等待](windows-native-graphics/rounds/win-empty-fence-20261121-01.result.json) · [原次最后已返回的调用](windows-native-graphics/rounds/win-historical-call-marker-20261121-01.result.json) · [历史 Windows 系统证据](windows-native-graphics/rounds/win-historical-reset-20261121-01.result.json) · [原客户端进程记录](windows-native-graphics/rounds/win-historical-process-log-20261121-01.result.json)
+
+原 27 轮中的 8 项通过判定保留。19 项未知里，15 项已取得缺少设备能力或操作未实现的回执。共享监控围栏的对象身份、普通围栏的值与退役仍可在 Windows 上核对。共享资源成员数和 CPU 映射保护方式只在与本次源或目标分配相符时引用。[27 轮与本机问题的逐项映射](windows-native-graphics/index.json)
+
+## 此前交接记录
+
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)
 
 ## 第四步 · 查清旧式窗口首次 Present 的重启

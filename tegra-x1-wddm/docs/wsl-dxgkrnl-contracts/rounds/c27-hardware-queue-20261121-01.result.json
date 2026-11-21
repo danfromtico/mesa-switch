@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "round_id": "c27-hardware-queue-20261121-01",
+  "contract_id": "dxgkrnl.h:615:1",
+  "declaration_sha256": "5a81d3c1d80af5a24fc0db15c3a40f62614e28965dcf8e4e8e0ad58cb990ebcc",
+  "board_issuance_sha256": "45d9949fd34e0b91efeb61ff3b320fd75e67cc3ec03eace337de24d65007974e",
+  "chronology": "实机签发文件绑定已在故障表登记的计划哈希。程序 QPC 与 ETW 在同一次启动内比较，系统启动用 Event 12 RecordId 标识。",
+  "started_utc": "2026-11-21T13:17:44.2554007Z",
+  "before": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:17:44.2554007Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "after": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:18:00.7621169Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "status": "未知",
+  "target_hit": false,
+  "unexplained_restart": false,
+  "finding": "GM20B 报告 WDDM 2.6。WDDM_2_7_CAPS 返回 0x00000000，HwSchSupported=0、HwSchEnabled=0。已选 KMD 的普通上下文路径不接受 HwQueueSupported 标志，缺硬件队列创建与设备归属回执。",
+  "gap": "GM20B 报告 WDDM 2.6。WDDM_2_7_CAPS 返回 0x00000000，HwSchSupported=0、HwSchEnabled=0。已选 KMD 的普通上下文路径不接受 HwQueueSupported 标志，缺硬件队列创建与设备归属回执。",
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 476,
+      "utc": "2026-11-21T13:17:52.1301243Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 70081784991,
+        "pid": 476,
+        "tid": 7920,
+        "event": "start",
+        "mode": "hwcaps"
+      },
+      {
+        "qpc": 70082055029,
+        "pid": 476,
+        "tid": 7920,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 70082136006,
+        "pid": 476,
+        "tid": 7920,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 70082209394,
+        "pid": 476,
+        "tid": 7920,
+        "event": "caps_begin",
+        "adapter": "1073741952"
+      },
+      {
+        "qpc": 70082319164,
+        "pid": 476,
+        "tid": 7920,
+        "event": "caps",
+        "version_status": "00000000",
+        "version": "2600",
+        "mmu_status": "00000000",
+        "gpu_mmu": "1",
+        "io_mmu": "0",
+        "scheduler_status": "00000000",
+        "hw_supported": "0",
+        "hw_enabled": "0",
+        "fence_status": "00000000",
+        "native_fence": "0"
+      },
+      {
+        "qpc": 70082386760,
+        "pid": 476,
+        "tid": 7920,
+        "event": "exports",
+        "native_create": "1",
+        "native_open": "1",
+        "update_property": "1",
+        "hw_queue": "1"
+      },
+      {
+        "qpc": 70082462422,
+        "pid": 476,
+        "tid": 7920,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 70082526659,
+        "pid": 476,
+        "tid": 7920,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": null,
+    "trace_stop": null,
+    "actor_event_counts": {},
+    "devices": [],
+    "allocation_joins": [],
+    "gpu_signal_packets": [],
+    "cpu_sync": [],
+    "sync_identity": []
+  },
+  "raw_files_sha256": {
+    "result.json": "46bd1116f437fb99eb7c5665e5088384248593a83cf574df06931e3ba54915dd",
+    "issued.json": "45d9949fd34e0b91efeb61ff3b320fd75e67cc3ec03eace337de24d65007974e",
+    "result.zip": "e2afa8bd957cd458ffe51163745d0bee6494a27d433a1ce8087cf1350f47502e",
+    "journal.tsv": "027583bba7d477f7421e8680888dbc9b8989f8c17b574cd164e90584168cb5f2",
+    "client.json": "41aa57515cb8277393c64cc5ae6a8bc8047d9267c9f481ae61c095e86cb3555c"
+  },
+  "installed_event_manifest_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_initial_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "evidence_scope": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "区分普通上下文调度包与硬件执行队列。历史序号 2 的 QueuePacket 不能单独证明硬件队列。"
+}

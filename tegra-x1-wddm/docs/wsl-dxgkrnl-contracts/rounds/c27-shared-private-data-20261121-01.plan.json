@@ -1,0 +1,32 @@
+{
+  "round_id": "c27-shared-private-data-20261121-01",
+  "contract_id": "ioctl.c:1710:4",
+  "declared_utc": "2026-11-21T13:12:09.228728+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "b9c34605d7734d19dbd2e34a80d9d71841f3c19686753062198d4db267c6b49b",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Lite GM20B 的 Windows VidMm / VidSch 与交互桌面中的独立 ARM64 调用方。",
+  "predicate": "创建共享分配时的逐分配私有数据，由打开方在其合法打开回包中取得。",
+  "required_observation": "记录公开创建时的版本、标志、字节数及描述符尺寸。子进程用同一 NT 对象查询长度，打开并核对分配输出的实际缓冲与字段。",
+  "satisfied_if": "创建与打开成功且指向同一共享对象。打开端返回的逐分配描述符尺寸及全部字段与创建输入相同。",
+  "violated_if": "在本调用的适用条件、责任方、对象、时间和输出完整匹配时，取得直接否定原生子句的结果。自然不支持、同步返回或缺失观测均单列。",
+  "unknown_if": "能力不足、实际对象或触发条件未命中、记录有缺口、只见间接现象或发生未解释重启时保留未知。",
+  "scope_limit": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "覆盖共享分配数据交给打开端的阶段。重定向表面的专用布局及历史首次 Present 中实际传递的描述符仍须当次记录。",
+  "prior_catalog_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+  "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "selected_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+  "boot": 91476,
+  "dwm": 1400,
+  "ordinal": 4,
+  "nonce": "437d11ebe4a2025188606116",
+  "mode": "resource",
+  "trace": true,
+  "os_build": "10.0.22631.0",
+  "files_sha256": {
+    "contracts-arm64.exe": "e2660e9d22bc1ae5b2b06befd5d21c1261b18dac97ae9662e5db576efc39590b",
+    "contract-trace.exe": "95b5add1077b1ffaf0a4cba7a5b8dcc03783dc38b45fb214462a43686eed743c",
+    "Measure.ps1": "e3f5153d08fe3b81cec941dba4556859f4c9a264c620d8d75b5a755ad2edb973",
+    "Power-State.ps1": "f136146792b5a80c6016dbae04668831bee87f0f2f5390017bfb1669cd3cab9f"
+  }
+}

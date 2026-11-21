@@ -12,11 +12,11 @@
     "comments": 452,
     "canonical_locations_sha256": "de550648d07f2be604c9e216e7b2300a933a6c1430ff16b721f9d7a63afd850d"
   },
-  "catalog_sha256": "3b5eb0ed10cca39dacd97eb284939d754fbf4bc084b73595bac085578707bd5e",
+  "catalog_sha256": "5c201dcf40a097a279ba4bca2a58da2c0d93796bdcaa701d55d86c45ba2cd958",
   "classification": {
-    "已满足": 3,
+    "已满足": 11,
     "已违反": 0,
-    "未知": 449
+    "未知": 441
   },
   "scopes": {
     "源码元信息": 124,
@@ -48,9 +48,9 @@
   ],
   "main_review": {
     "source_coverage": "All 452 locations match compiler-checked tokens at the frozen Git tree.",
-    "conclusive_findings": "Three native findings were checked against the scoped physical observations linked in the catalogue.",
+    "conclusive_findings": "All affirmative native findings are bound to their own actors, conditions, object identities and measured hardware intervals.",
     "corrected_rows": 11,
-    "recorded_physical_rounds": 9,
+    "recorded_physical_rounds": 36,
     "waiting_physical_rounds": 0,
     "unrelated_unobserved_recovery_intervals": 2
   },
@@ -58,7 +58,7 @@
     "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
     "source_tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
     "comment_count": 452,
-    "hardware_rounds": 9,
+    "hardware_rounds": 36,
     "checker_sha256": "1e90e74e7bd258266ec03aeb987092688480b4d3c306aca9bd5268c5241c6176",
     "source_bytes_verified": true,
     "all_evidence_hashes_and_fields_verified": true,
@@ -333,5 +333,116 @@
     "request_sha256": "74ed44f258713357515600b786747fab197ffb4da564cfff8ecea92a654dd679",
     "native_response_sha256": "1e31fc45eb3f8d5f3ac81a0c51c1fc776bf7b68291919dfa9f21fef684a9bac0",
     "verdict": "PASS"
+  },
+  "native_27": {
+    "starting_catalog_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+    "initial_status": "未知",
+    "completed_utc": "2026-11-21T13:24:40.486962+00:00",
+    "assessment": "wsl-dxgkrnl-contracts/native-27.json",
+    "assessment_sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350",
+    "classification": {
+      "已满足": 8,
+      "已违反": 0,
+      "未知": 19
+    },
+    "physical_rounds": 27,
+    "verified_boot": 91476,
+    "unexplained_restarts": 0,
+    "handbacks": {
+      "probe-review": {
+        "model": "gemini-4-neon-xhigh",
+        "effort": "xhigh",
+        "request_sha256": "68666082130c51318b3dc8a76a7b88efa65e2f5f16ddfb2c5595319885e34873",
+        "native_response_sha256": "6e023308e31df27cfae624993e0542051e2f12c1e9eaf02281e7b02f6c00ba86",
+        "files_sha256": {
+          "client.c": "87c692edeaaa020ef1aedf081d97a5d44ecca3a03e3f5a77255491c3bf6ee070",
+          "actions.c": "8518b5611849084cdb599f985d025c343e8d4d31d2a1dc1be6d3830ca0f1431d",
+          "collector.c": "4a24d581969af1a93c4cd8a1a61e82287ede88c9c9f61c154f08ad89c4ffcc5c"
+        }
+      },
+      "evidence-review-active": {
+        "model": "gemini-4-neon-xhigh",
+        "effort": "xhigh",
+        "request_sha256": "af3855423c5509cca223c53876c289c99ba133f77a165f600f12d4b268eb103b",
+        "native_response_sha256": "2320a7036ac8bd6d84654e710b6ddf1daf1cb8e025f5804a54e00e4b615f8b53",
+        "contract_ids": [
+          "dxgkrnl.h:145:1",
+          "dxgkrnl.h:197:2",
+          "dxgkrnl.h:199:2",
+          "dxgkrnl.h:231:1",
+          "dxgkrnl.h:615:1",
+          "dxgkrnl.h:684:4",
+          "dxgkrnl.h:723:2",
+          "dxgkrnl.h:759:2",
+          "dxgsyncfile.c:266:2",
+          "dxgsyncfile.c:381:2",
+          "dxgvmbus.c:3651:2",
+          "ioctl.c:1630:4",
+          "ioctl.c:1710:4",
+          "ioctl.c:2581:2"
+        ],
+        "reviewer_wording": {}
+      },
+      "evidence-review-limits": {
+        "model": "gemini-4-neon-xhigh",
+        "effort": "xhigh",
+        "request_sha256": "606771960da6968fd25f35e1f49aaa3ffafab8032197b5caff67b7a1286f439d",
+        "native_response_sha256": "51499d085d15cc66bc9bcce19102a798fa18b9612b2764fb9f1893e01507641b",
+        "contract_ids": [
+          "dxgkrnl.h:218:2",
+          "dxgkrnl.h:256:2",
+          "dxgvmbus.c:825:2",
+          "dxgvmbus.c:889:2",
+          "dxgvmbus.c:896:3",
+          "dxgvmbus.c:900:3",
+          "dxgvmbus.c:3147:2",
+          "dxgvmbus.c:3152:3",
+          "dxgvmbus.c:3156:3",
+          "ioctl.c:2888:2",
+          "ioctl.c:3243:2",
+          "ioctl.c:3302:2",
+          "ioctl.c:3310:2"
+        ],
+        "reviewer_wording": {
+          "dxgkrnl.h:218:2": "维持未知（理由需补正）",
+          "dxgkrnl.h:256:2": "维持未知（理由需补正）",
+          "dxgvmbus.c:825:2": "维持未知（理由需补正）",
+          "dxgvmbus.c:889:2": "维持未知（理由需补正）",
+          "dxgvmbus.c:896:3": "维持未知（理由需补正）",
+          "dxgvmbus.c:900:3": "维持未知（理由需补正）",
+          "dxgvmbus.c:3147:2": "维持未知（理由需补正）",
+          "dxgvmbus.c:3152:3": "维持未知（理由需补正）",
+          "dxgvmbus.c:3156:3": "维持未知（理由需补正）",
+          "ioctl.c:2888:2": "维持未知（理由需补正）",
+          "ioctl.c:3243:2": "维持未知（理由需补正）",
+          "ioctl.c:3302:2": "维持未知（理由需补正）",
+          "ioctl.c:3310:2": "维持未知（理由需补正）"
+        }
+      },
+      "archive-followup": {
+        "model": "gemini-4-neon-xhigh",
+        "effort": "xhigh",
+        "request_sha256": "fd531618bf96589e4379a43ac88bb6e76c7ea3da21b6c1fd70069c270f846c65",
+        "native_response_sha256": "322ae475e2e3c233d1a93f6a87daf92a13c74dfc33a5b7444b4eead358420b4c",
+        "assessment_sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+      }
+    },
+    "main_review_notes": [
+      "8 项肯定结论均限于原生 Windows 已测对象。按原始 PID、TID、QPC、局部句柄、公开返回值和同层事件逐项核对。13 份跟踪均正常封口，实际大小为 524288 至 720896 字节，事件和缓冲丢失计数均为零。",
+      "源码复核提出的九项问题涵盖采集器过滤与极端错误清理、编译可移植性、日志刷盘和时间锚、导出探测、固定资源格式以及超时和所有权处理。发布判定核对实际接口返回、原始 journal/ETL、结束记录及清理回执。退出码只作为完整性的前提。通用复用时仍须另行处理异常分支。",
+      "27 个父进程和实际启动的子进程均有持久结束记录。跨进程关联用合法传递、实际打开、各进程对应的局部句柄和对象证据；不依赖父进程记录 child_started 的先后时刻。13 个 ETL 文件头均报 19200000 Hz，QPC 同设备同启动配对。",
+      "实际共享资源的公开查询均返回单个分配、16 字节逐分配数据并确实打开；追加轮的两次成功调用返回同一资源及不同分配，按该资源正常销毁。NoSignal 只裁决合法等待专用打开与等待回执。能力依据来自适配器查询，系统导出信息单列，OS 构建来自同一启动读回。",
+      "监控围栏按创建、同一 CPU 映射、事件 30/1069/294、成功等待和读值确认，本轮没有可配对的调度包退役事件。传统全局共享可配对到同一 pSyncObject，仍缺全局表项指向父对象的字段。成员数稳定、写合并页和 STATUS_NOT_IMPLEMENTED 分别保留各自的观测边界。",
+      "14 个能力查询轮次以公开 API 输入输出裁决前置条件。HwSchSupported、HwSchEnabled 和 NativeGpuFenceSupported 均实测为 0。源码中的 HwQueueSupported 入口限制按静态依据记载。能力缺失不产生已违反结论。",
+      "历史绘图线程回调返回 HRESULT，独立 MapGpuVirtualAddress 调用返回 NTSTATUS，Present CALL 标记没有返回语义。三次旧启动的源分配及调用后边界仍未确定。后续诊断与功能控制的数据只绑定到各自启动和组件。"
+    ],
+    "trace_integrity": {
+      "finalized": 13,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "clock_frequency": 19200000,
+      "source_sha256": "98c2da7ae241f0cbb73cba3b497e74aa89fc7da41fb74cce82a32218c4ef5bc7"
+    },
+    "source_review_limit": "第一版通用探针存在收尾和日志完整性风险，已对实际 27 轮回执逐项核过。第二版源码补审中断。Windows 本轮沿用已经封口的实机事实。"
   }
 }

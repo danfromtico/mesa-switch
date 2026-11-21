@@ -1,0 +1,1101 @@
+{
+  "schema": 1,
+  "round_id": "win-historical-reset-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "plan_sha256": "41bf87a4e867fb93b51f5487a9bfac9a229f009e804e6d1ee6535c3f67f31e08",
+  "status": "故障开放",
+  "finding": "三次历史开机均确认首次公开 CALL，下一开机各有 41/6008、BugcheckCode=0。当前 Switch 留存的七份可读滚动 ETL 头全部起于次日；另六份 RtBackup 条目为零或 72 字节，读取受限。十一份 WATCHDOG 转储均早于原次。七次 WATCHDOG 请求正文相同，含四次计划重启对照。原次 CALL 后首个故障步骤仍无直接记录。",
+  "missing_observation": "需要原次公开 CALL 之后且在对应复位之前持久保存的 Windows/KMD 事件、同启动崩溃转储或板级复位回执，能绑定该进程、线程、对象和独立时基。",
+  "device_executions": 0,
+  "evidence": {
+    "collected_on_boot": 91476,
+    "collection_utc": [
+      "2026-11-21T13:41:13.3625320Z",
+      "2026-11-21T13:41:17.4905178Z",
+      "2026-11-21T13:41:42.3077969Z",
+      "2026-11-21T13:41:58.0643873Z"
+    ],
+    "onboard_readbacks": 4,
+    "raw_local_directory": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/historical",
+    "raw_sha256": {
+      "events.json": "1367c8ebba63052a107fd3790c78644374e5a49f0380b9a0db5d90cc313d8f65",
+      "files.json": "216c4c70201f7cfaa86bd24e1a039c15eea26007683d1858473bde4ab34a6d3c",
+      "reports.json": "259a70debf694b7a44c8d65bab2a3c1191428581a1b7cda43a24117708d57785",
+      "candidate-headers.json": "dbb8c870f07cde1ff968998590cf8052f6c644951aa7675df5ae2f8a5728f118",
+      "etl-coverage.json": "6493d557c926752eb8becca31bdce52c6cc130828462638eddc9e176b5f3c57e"
+    },
+    "historical_cases": [
+      {
+        "boot": 82058,
+        "pid": 1812,
+        "tid": 6340,
+        "prior_archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+        "last_completed_paging": {
+          "operation": "MapGpuVirtualAddressCb",
+          "allocation": 1073743680,
+          "callback_qpc": 13065969686,
+          "callback_hresult": "0x8000000a",
+          "callback_value": 983040,
+          "paging_check_qpc": 13065979078,
+          "paging_hresult": "0x00000000",
+          "fence_value": 7006
+        },
+        "sequence2_signal": {
+          "value": 1,
+          "start_qpc": 13064001407,
+          "stop_qpc": 13064048487,
+          "ms_before_call": 360.492
+        },
+        "call_qpc": 13070969930,
+        "public_return": null,
+        "post_call_graphics_records": 0,
+        "first_missing": "绘图线程本次 DXGI/KMT 接收及返回",
+        "next_boot": 82128,
+        "next_41": {
+          "record": 82146,
+          "id": 41,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-20T12:11:28.8474402Z",
+          "level": 1,
+          "fields": {
+            "BugcheckCode": "0",
+            "BugcheckParameter1": "0x0",
+            "BugcheckParameter2": "0x0",
+            "BugcheckParameter3": "0x0",
+            "BugcheckParameter4": "0x0",
+            "SleepInProgress": "0",
+            "PowerButtonTimestamp": "0",
+            "BootAppStatus": "0",
+            "Checkpoint": "0",
+            "ConnectedStandbyInProgress": "false",
+            "SystemSleepTransitionsToOn": "0",
+            "CsEntryScenarioInstanceId": "0",
+            "BugcheckInfoFromEFI": "false",
+            "CheckpointStatus": "0",
+            "CsEntryScenarioInstanceIdV2": "0",
+            "LongPowerButtonPressDetected": "false",
+            "LidReliability": "false",
+            "InputSuppressionState": "0",
+            "PowerButtonSuppressionState": "0",
+            "LidState": "3"
+          },
+          "binary_sha256": null,
+          "xml_sha256": "6df1e21c3ed4fca48093f465fc538dcdb0681f24dc822ce2a97900e0b19ed681"
+        },
+        "next_6008_record": 82129,
+        "next_6008_raw_xml_sha256": "c426e838b14c9e37b3d4a863420ec1aa087e115a181e5efa0fa9b6ec246634c1",
+        "next_6008_binary_sha256": "4983c464355c616677170f27245e2c5361ab59cb282577c33d8d95fc43dba0d6"
+      },
+      {
+        "boot": 82221,
+        "pid": 4672,
+        "tid": 4712,
+        "prior_archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+        "last_completed_paging": {
+          "operation": "MapGpuVirtualAddressCb",
+          "allocation": 1073743680,
+          "callback_qpc": 2347000886,
+          "callback_hresult": "0x8000000a",
+          "callback_value": 983040,
+          "paging_check_qpc": 2347009647,
+          "paging_hresult": "0x00000000",
+          "fence_value": 7006
+        },
+        "sequence2_signal": {
+          "value": 1,
+          "start_qpc": 2331215182,
+          "stop_qpc": 2331262737,
+          "ms_before_call": 1101.095
+        },
+        "call_qpc": 2352403757,
+        "public_return": null,
+        "post_call_graphics_records": 0,
+        "first_missing": "绘图线程本次 DXGI/KMT 接收及返回",
+        "next_boot": 82289,
+        "next_41": {
+          "record": 82307,
+          "id": 41,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-20T12:29:18.5570077Z",
+          "level": 1,
+          "fields": {
+            "BugcheckCode": "0",
+            "BugcheckParameter1": "0x0",
+            "BugcheckParameter2": "0x0",
+            "BugcheckParameter3": "0x0",
+            "BugcheckParameter4": "0x0",
+            "SleepInProgress": "0",
+            "PowerButtonTimestamp": "0",
+            "BootAppStatus": "0",
+            "Checkpoint": "0",
+            "ConnectedStandbyInProgress": "false",
+            "SystemSleepTransitionsToOn": "0",
+            "CsEntryScenarioInstanceId": "0",
+            "BugcheckInfoFromEFI": "false",
+            "CheckpointStatus": "0",
+            "CsEntryScenarioInstanceIdV2": "0",
+            "LongPowerButtonPressDetected": "false",
+            "LidReliability": "false",
+            "InputSuppressionState": "0",
+            "PowerButtonSuppressionState": "0",
+            "LidState": "3"
+          },
+          "binary_sha256": null,
+          "xml_sha256": "c70a7d41336403579e74befbf98ad46f0253a060bf21b445a7d993c277e1ea18"
+        },
+        "next_6008_record": 82298,
+        "next_6008_raw_xml_sha256": "863fca09a9e6d3ddeff5753d95125b505e971f4db24ab65914b4cd6f16dce7cb",
+        "next_6008_binary_sha256": "19fad42cc8df74ef8ed3743bc122f67ff855e3fc61db6e6376c037de3d283367"
+      },
+      {
+        "boot": 82382,
+        "pid": 5828,
+        "tid": 7656,
+        "prior_archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+        "last_completed_paging": {
+          "operation": "MapGpuVirtualAddressCb",
+          "allocation": 1073743680,
+          "callback_qpc": 2356011063,
+          "callback_hresult": "0x8000000a",
+          "callback_value": 983040,
+          "paging_check_qpc": 2356019467,
+          "paging_hresult": "0x00000000",
+          "fence_value": 7006
+        },
+        "sequence2_signal": {
+          "value": 1,
+          "start_qpc": 2354181618,
+          "stop_qpc": 2354229276,
+          "ms_before_call": 400.943
+        },
+        "call_qpc": 2361927374,
+        "public_return": null,
+        "post_call_graphics_records": 0,
+        "first_missing": "绘图线程本次 DXGI/KMT 接收及返回",
+        "next_boot": 82448,
+        "next_41": {
+          "record": 82466,
+          "id": 41,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-20T12:35:56.0745803Z",
+          "level": 1,
+          "fields": {
+            "BugcheckCode": "0",
+            "BugcheckParameter1": "0x0",
+            "BugcheckParameter2": "0x0",
+            "BugcheckParameter3": "0x0",
+            "BugcheckParameter4": "0x0",
+            "SleepInProgress": "0",
+            "PowerButtonTimestamp": "0",
+            "BootAppStatus": "0",
+            "Checkpoint": "0",
+            "ConnectedStandbyInProgress": "false",
+            "SystemSleepTransitionsToOn": "0",
+            "CsEntryScenarioInstanceId": "0",
+            "BugcheckInfoFromEFI": "false",
+            "CheckpointStatus": "0",
+            "CsEntryScenarioInstanceIdV2": "0",
+            "LongPowerButtonPressDetected": "false",
+            "LidReliability": "false",
+            "InputSuppressionState": "0",
+            "PowerButtonSuppressionState": "0",
+            "LidState": "3"
+          },
+          "binary_sha256": null,
+          "xml_sha256": "f3b0e3745df19c17a918ed974cb89216a51ffba13930a68d906fa15635c6a0eb"
+        },
+        "next_6008_record": 82457,
+        "next_6008_raw_xml_sha256": "f7aa3b9c7d473f023dad988273fa3a4d536d8beeb0fdb9873bb8b2b6da9713d4",
+        "next_6008_binary_sha256": "0e8a3d973e2a896303e8b7491dc095376f7ae2fb684e24912ee2584da323f818"
+      }
+    ],
+    "wer_watchdog_requests": [
+      {
+        "record": 1097,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-20T11:43:01.3680806Z",
+        "level": 4,
+        "fields": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "9bec556d9437b75335bc0b645526f43cc63b0b35f73872e16f3ddd423d9800ea"
+      },
+      {
+        "record": 1098,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-20T12:05:56.3635214Z",
+        "level": 4,
+        "fields": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "9aa0599c0879faf15dbd0e027295b65f85fd12d6d2c77398490ee9b55828dc3d"
+      },
+      {
+        "record": 1099,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-20T12:22:40.0004840Z",
+        "level": 4,
+        "fields": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "4a8737874c412d032c6c32d33da99be51c5ec7095ef13334b71b27947375adfe"
+      },
+      {
+        "record": 1100,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-20T12:30:59.7085519Z",
+        "level": 4,
+        "fields": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "988b607345f08d8d03af634141b96f3ce003d144520927e61958dd60bf3b8d92"
+      },
+      {
+        "record": 1101,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-20T12:38:10.6693320Z",
+        "level": 4,
+        "fields": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "48293b50b43bee0030146e12c27bea17d32832a7be0b384cc6ac9e948aa35d2c"
+      },
+      {
+        "record": 1102,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-20T12:50:17.8542661Z",
+        "level": 4,
+        "fields": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "ff2aa7a6ceb0a596affc9ed27e3b9c798b02ec0ae55beafc1ec66f76dd0c9080"
+      },
+      {
+        "record": 1103,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-20T14:16:36.7943668Z",
+        "level": 4,
+        "fields": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "78b07a919cd2243b5b5ebfc7a0a091078c779a61edecbdcf6861d9641c9e745a"
+      }
+    ],
+    "retained_etl_headers": [
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\LwtNetLog.etl",
+        "file_bytes": 393216,
+        "prefix_sha256": "42edbe2a0a687a1e9436b09fbcfa2ad8970df8fa33f676ce04ce6b1b5c520691",
+        "prefix_bytes": 2048,
+        "start_utc": "2026-11-21T12:01:31.121851+00:00",
+        "end_utc": null,
+        "boot_utc": "2026-11-21T12:01:29.615782+00:00",
+        "logger": "LwtNetLog",
+        "buffers_written": 0
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\Microsoft-Windows-Rdp-Graphics-RdpIdd-Trace.etl",
+        "file_bytes": 65536,
+        "prefix_sha256": "6bfd8e2c543a1ac67af9ad5e5256e0e8275d9492f88e92071ec70970e20f261b",
+        "prefix_bytes": 2048,
+        "start_utc": "2026-11-21T12:01:31.121851+00:00",
+        "end_utc": null,
+        "boot_utc": "2026-11-21T12:01:29.615782+00:00",
+        "logger": "Microsoft-Windows-Rdp-Graphics-RdpIdd-Trace",
+        "buffers_written": 0
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\NetCore.etl",
+        "file_bytes": 23068672,
+        "prefix_sha256": "13a61ca2922425aa1e8834021fa1089284ddb59289c5b044f9caabbefef9be0f",
+        "prefix_bytes": 2048,
+        "start_utc": "2026-11-21T12:01:31.121851+00:00",
+        "end_utc": null,
+        "boot_utc": "2026-11-21T12:01:29.615782+00:00",
+        "logger": "NetCore",
+        "buffers_written": 0
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\NtfsLog.etl",
+        "file_bytes": 4096,
+        "prefix_sha256": "ec539dd0560ae8c83e46b30680ac2c901c88d3eed7d93172b3d1a85caaedd48c",
+        "prefix_bytes": 2048,
+        "start_utc": "2026-11-21T12:01:31.121851+00:00",
+        "end_utc": null,
+        "boot_utc": "2026-11-21T12:01:29.615782+00:00",
+        "logger": "NtfsLog",
+        "buffers_written": 0
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\RadioMgr.etl",
+        "file_bytes": 6291456,
+        "prefix_sha256": "231f6f8e400b1b19614e179cdcf44e245e9a6c75710a05fbbc18606a248c4c7e",
+        "prefix_bytes": 2048,
+        "start_utc": "2026-11-21T12:01:31.121851+00:00",
+        "end_utc": null,
+        "boot_utc": "2026-11-21T12:01:29.615782+00:00",
+        "logger": "RadioMgr",
+        "buffers_written": 0
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\Wifi.etl",
+        "file_bytes": 819200,
+        "prefix_sha256": "51fb724cce2cc42e8cf02619b2fdc3ef669c2e3bd06b2799adbe5fbe5531ca6c",
+        "prefix_bytes": 2048,
+        "start_utc": "2026-11-21T12:01:31.121851+00:00",
+        "end_utc": null,
+        "boot_utc": "2026-11-21T12:01:29.615782+00:00",
+        "logger": "WiFiSession",
+        "buffers_written": 0
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTDiagLog.etl",
+        "file_bytes": 72,
+        "error": "对路径“C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTDiagLog.etl”的访问被拒绝。"
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTEventLog-Application.etl",
+        "file_bytes": 72,
+        "error": "对路径“C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTEventLog-Application.etl”的访问被拒绝。"
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTEventLog-System.etl",
+        "file_bytes": 72,
+        "error": "对路径“C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTEventLog-System.etl”的访问被拒绝。"
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTTgPresentReceipt-2128.etl",
+        "file_bytes": 0,
+        "error": "对路径“C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTTgPresentReceipt-2128.etl”的访问被拒绝。"
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTTgPresentReceipt-3160.etl",
+        "file_bytes": 0,
+        "error": "对路径“C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTTgPresentReceipt-3160.etl”的访问被拒绝。"
+      },
+      {
+        "path": "C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTTgPresentReceipt-5960.etl",
+        "file_bytes": 0,
+        "error": "对路径“C:\\Windows\\System32\\LogFiles\\WMI\\RtBackup\\EtwRTTgPresentReceipt-5960.etl”的访问被拒绝。"
+      },
+      {
+        "path": "C:\\Windows\\System32\\WDI\\LogFiles\\ShutdownPerfDiagLogger.etl",
+        "file_bytes": 2949120,
+        "prefix_sha256": "746beb130252e5fa54ad76e316678b500f5c7e1dfe159df0e0a7d9c708f9f2d4",
+        "prefix_bytes": 2048,
+        "start_utc": "2026-11-21T10:20:50.298371+00:00",
+        "end_utc": "2026-11-21T10:30:14.887189+00:00",
+        "boot_utc": "2026-11-21T10:20:48.782760+00:00",
+        "logger": "PerfDiag Logger",
+        "buffers_written": 45
+      }
+    ],
+    "retained_dump_files": [
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG-20261110-0146.dmp",
+        "created": "2026-11-09T17:46:47.7371121Z",
+        "size": 366796800,
+        "modified": "2026-11-09T17:47:30.1713173Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261110-0548.dmp",
+        "created": "2026-11-09T21:48:46.8639076Z",
+        "size": 279238,
+        "modified": "2026-11-09T21:48:47.2389039Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261110-0601.dmp",
+        "created": "2026-11-09T22:01:26.6109490Z",
+        "size": 279265,
+        "modified": "2026-11-09T22:01:26.9078265Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261110-2049.dmp",
+        "created": "2026-11-10T12:49:23.8330870Z",
+        "size": 282049,
+        "modified": "2026-11-10T12:49:24.0987123Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261111-0200.dmp",
+        "created": "2026-11-10T18:00:57.6226540Z",
+        "size": 282001,
+        "modified": "2026-11-10T18:00:57.8726508Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261111-0201.dmp",
+        "created": "2026-11-10T18:01:00.7164013Z",
+        "size": 282259,
+        "modified": "2026-11-10T18:01:00.9663989Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261111-0214.dmp",
+        "created": "2026-11-10T18:14:40.4085468Z",
+        "size": 282018,
+        "modified": "2026-11-10T18:14:40.8616745Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261112-0108.dmp",
+        "created": "2026-11-11T17:08:55.3802209Z",
+        "size": 282292,
+        "modified": "2026-11-11T17:08:56.1458489Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261112-0109.dmp",
+        "created": "2026-11-11T17:09:01.1145934Z",
+        "size": 282594,
+        "modified": "2026-11-11T17:09:01.5364706Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261112-0133.dmp",
+        "created": "2026-11-11T17:33:16.9157710Z",
+        "size": 282295,
+        "modified": "2026-11-11T17:33:17.1501481Z"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261112-0204.dmp",
+        "created": "2026-11-11T18:04:24.4850761Z",
+        "size": 282182,
+        "modified": "2026-11-11T18:04:24.9069499Z"
+      }
+    ],
+    "wer_reliability": {
+      "available": true,
+      "window_total": 3,
+      "matching": [
+        {
+          "id": 6008,
+          "message": "上一次系统的 20:35:22 在 ‎2026/‎11/‎20 上的关闭是意外的。",
+          "source": "EventLog",
+          "channel": "System",
+          "record": 82457,
+          "product": "Windows",
+          "utc": "2026-11-20T12:38:33.7310000Z"
+        },
+        {
+          "id": 6008,
+          "message": "上一次系统的 20:28:33 在 ‎2026/‎11/‎20 上的关闭是意外的。",
+          "source": "EventLog",
+          "channel": "System",
+          "record": 82298,
+          "product": "Windows",
+          "utc": "2026-11-20T12:31:23.4250000Z"
+        },
+        {
+          "id": 6008,
+          "message": "上一次系统的 20:10:55 在 ‎2026/‎11/‎20 上的关闭是意外的。",
+          "source": "EventLog",
+          "channel": "System",
+          "record": 82129,
+          "product": "Windows",
+          "utc": "2026-11-20T12:23:02.7510000Z"
+        }
+      ]
+    },
+    "wer_stores": [
+      {
+        "name": "ReportArchive",
+        "present": true,
+        "eligible_folders": 0,
+        "truncated": false,
+        "parsed": 0,
+        "missing_or_ambiguous_time": 0,
+        "unreadable": 0,
+        "reports": []
+      },
+      {
+        "name": "ReportQueue",
+        "present": true,
+        "eligible_folders": 0,
+        "truncated": false,
+        "parsed": 0,
+        "missing_or_ambiguous_time": 0,
+        "unreadable": 0,
+        "reports": []
+      }
+    ],
+    "shadow_copies": {
+      "available": true,
+      "copies": [],
+      "truncated": false
+    },
+    "whea_events": [
+      {
+        "record": 3784,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:09:57.0208730Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483660",
+          "Flags": "2",
+          "Length": "1009"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "8d74bd6c26fd3d025370730dcc55381b74dd2526cb24afc95d5c44c5e042c791"
+      },
+      {
+        "record": 3785,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:09:58.7702616Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1145590608",
+          "Id": "2147483658",
+          "Flags": "2",
+          "Length": "34"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "46c2dc7a84294321aa1d01f053b7bc03360de571dc39776e9322cb04948f521e"
+      },
+      {
+        "record": 3786,
+        "id": 5,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:09:58.7703689Z",
+        "level": 4,
+        "fields": {
+          "ErrorSourceCount": "5",
+          "ErrorRecordFormat": "10",
+          "ErrorSourceTableLength": "5360"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "927f08beedaae79be97ad4ca19826860342f2958c58a4b549a5f010adc8c8dc9"
+      },
+      {
+        "record": 3787,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:09:58.7703813Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483650",
+          "Flags": "2",
+          "Length": "5392"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "bda0c250b00694cf19bfd50fba061ed7005a6aea070cabbfc8c97361cc60aefd"
+      },
+      {
+        "record": 3788,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:11:25.1373386Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483660",
+          "Flags": "2",
+          "Length": "1009"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "4a98e3e298d9389f728403850d5d9c4dc38c364090a3ac0d46ce7386e9289b4d"
+      },
+      {
+        "record": 3789,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:11:27.0988010Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1145590608",
+          "Id": "2147483658",
+          "Flags": "2",
+          "Length": "34"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "0a69f3a72c9f98fa1e9bf9df3cc06a0e7e2e97c55230d4609ae745a16d897efd"
+      },
+      {
+        "record": 3790,
+        "id": 5,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:11:27.0988820Z",
+        "level": 4,
+        "fields": {
+          "ErrorSourceCount": "5",
+          "ErrorRecordFormat": "10",
+          "ErrorSourceTableLength": "5360"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "78873edb491389bf70829e0a4541641307b4bed0aa9c4a6114142f49f9697e53"
+      },
+      {
+        "record": 3791,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:11:27.0988925Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483650",
+          "Flags": "2",
+          "Length": "5392"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "6fac6e617487c19c82e8590ef7f9a56e1c78d8e309ce2f579ec54ae7eea3d74d"
+      },
+      {
+        "record": 3792,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:27:41.8570022Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483660",
+          "Flags": "2",
+          "Length": "1009"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "b9bd9b51318da27f85b978dbad8d538ea3d631393adba67e2f220b258f2c7051"
+      },
+      {
+        "record": 3793,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:27:43.5847866Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1145590608",
+          "Id": "2147483658",
+          "Flags": "2",
+          "Length": "34"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "c28a6358d3dd9a5a9cc122de3634ff0034368b5a11cc98aec68fadc868b86cf6"
+      },
+      {
+        "record": 3794,
+        "id": 5,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:27:43.5848846Z",
+        "level": 4,
+        "fields": {
+          "ErrorSourceCount": "5",
+          "ErrorRecordFormat": "10",
+          "ErrorSourceTableLength": "5360"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "9614cc01b51c52af708ea8b7d5cbc2f4897c3db49f7241c3ac9b23ac973505c4"
+      },
+      {
+        "record": 3795,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:27:43.5848956Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483650",
+          "Flags": "2",
+          "Length": "5392"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "55c673427ae2ca004143bbd82305fb9d0a86e84e107406644a5383bfaa256733"
+      },
+      {
+        "record": 3796,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:29:14.1059285Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483660",
+          "Flags": "2",
+          "Length": "1009"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "b75eeeabc68401b568f61171aeada9522fded4ccb04f329b19f9da4247c8c230"
+      },
+      {
+        "record": 3797,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:29:16.7941822Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1145590608",
+          "Id": "2147483658",
+          "Flags": "2",
+          "Length": "34"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "f061b3f6f35972acc082486fc9a31df75f1184f5a107bb1a69821dc124076590"
+      },
+      {
+        "record": 3798,
+        "id": 5,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:29:16.7942629Z",
+        "level": 4,
+        "fields": {
+          "ErrorSourceCount": "5",
+          "ErrorRecordFormat": "10",
+          "ErrorSourceTableLength": "5360"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "89926f9cba8a2f3a03a71aaba3f49e7f60ad2e2be90fc0516a66f548f2ecb6dc"
+      },
+      {
+        "record": 3799,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:29:16.7942816Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483650",
+          "Flags": "2",
+          "Length": "5392"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "43f8b173175fc161ed337d096e8842bf8dab899891e89ce23070c5d59c12325a"
+      },
+      {
+        "record": 3800,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:34:29.9300322Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483660",
+          "Flags": "2",
+          "Length": "1009"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "4591d25ecf324d7b0a503606c3513bf7d2a4fe82541bfb57f3096845b063ba6f"
+      },
+      {
+        "record": 3801,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:34:31.6829788Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1145590608",
+          "Id": "2147483658",
+          "Flags": "2",
+          "Length": "34"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "ff9fb864bf051efbd6ce0b7e598212472da43e52b1639b712d7d464994f54b11"
+      },
+      {
+        "record": 3802,
+        "id": 5,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:34:31.6830554Z",
+        "level": 4,
+        "fields": {
+          "ErrorSourceCount": "5",
+          "ErrorRecordFormat": "10",
+          "ErrorSourceTableLength": "5360"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "fcc985ba17adf2a2d70c7d6b1bc6c00102b5f0216597789eb7d00c72b9d45f8d"
+      },
+      {
+        "record": 3803,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:34:31.6830657Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483650",
+          "Flags": "2",
+          "Length": "5392"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "7252ccd3715ab73a185445c7cfbbfd45a4a7038096f6897cf2224d3ea71cc08b"
+      },
+      {
+        "record": 3804,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:35:51.5738580Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483660",
+          "Flags": "2",
+          "Length": "1009"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "22ba70afe8a437812e70a8b3129881417540f5be92583f3288c218a7f0e300a7"
+      },
+      {
+        "record": 3805,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:35:54.2989202Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1145590608",
+          "Id": "2147483658",
+          "Flags": "2",
+          "Length": "34"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "4ff34d0b7bd32f3cd62c557c242f904e643ae7b4605628f0cb4cf467868c4d55"
+      },
+      {
+        "record": 3806,
+        "id": 5,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:35:54.2990278Z",
+        "level": 4,
+        "fields": {
+          "ErrorSourceCount": "5",
+          "ErrorRecordFormat": "10",
+          "ErrorSourceTableLength": "5360"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "cf28755b5b8e22b3c540943c377bbcd19baaa40c403db8586893939789a1368c"
+      },
+      {
+        "record": 3807,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:35:54.2990387Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483650",
+          "Flags": "2",
+          "Length": "5392"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "55759f2b16003c447cdf56a4181d7e52e72f6d75501ec5e20d3501e7e95c4827"
+      },
+      {
+        "record": 3808,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:41:11.2144612Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483660",
+          "Flags": "2",
+          "Length": "1009"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "9173166cee8bfafbe826d4512d5935e5cf00bebc634917ecf8456ad526aeca64"
+      },
+      {
+        "record": 3809,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:41:13.0197209Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1145590608",
+          "Id": "2147483658",
+          "Flags": "2",
+          "Length": "34"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "19558f3cd9a256ba300172a95de53d0c15fdecd9366a8318caa3f79a3ad4af3f"
+      },
+      {
+        "record": 3810,
+        "id": 5,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:41:13.0198059Z",
+        "level": 4,
+        "fields": {
+          "ErrorSourceCount": "5",
+          "ErrorRecordFormat": "10",
+          "ErrorSourceTableLength": "5360"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "df9a79fe5a4e656d9c304b879efdfe2d18edbbc1cf7a87113ac5e55f282e89c9"
+      },
+      {
+        "record": 3811,
+        "id": 42,
+        "provider": "Microsoft-Windows-Kernel-WHEA",
+        "utc": "2026-11-20T12:41:13.0198166Z",
+        "level": 4,
+        "fields": {
+          "Type": "0",
+          "Owner": "1280201291",
+          "Id": "2147483650",
+          "Flags": "2",
+          "Length": "5392"
+        },
+        "binary_sha256": null,
+        "xml_sha256": "82ccb7cf5fddbeb8428f20e13f0fb20db5f49e8bfa3bee64470d54a322063fd0"
+      }
+    ],
+    "channel_inventory": [
+      {
+        "mode": "Circular",
+        "oldest": 0,
+        "name": "Microsoft-Windows-Crashdump/Operational",
+        "count": 0,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 1,
+        "name": "Microsoft-Windows-Kernel-LiveDump/Operational",
+        "count": 27,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 1,
+        "name": "Microsoft-Windows-Kernel-WHEA/Operational",
+        "count": 4230,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 0,
+        "name": "Microsoft-Windows-Kernel-WHEA/Errors",
+        "count": 0,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 0,
+        "name": "Microsoft-Windows-Kernel-Power/Thermal-Operational",
+        "count": 0,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 15479,
+        "name": "Microsoft-Windows-Time-Service/Operational",
+        "count": 1240,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 0,
+        "name": "Microsoft-Windows-Time-Service-PTP-Provider/PTP-Operational",
+        "count": 0,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 0,
+        "name": "Microsoft-Windows-DxgKrnl-Operational",
+        "count": 0,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 1,
+        "name": "Microsoft-Windows-DxgKrnl-Admin",
+        "count": 9,
+        "enabled": true
+      },
+      {
+        "mode": "Circular",
+        "oldest": 1,
+        "name": "Microsoft-Windows-Kernel-EventTracing/Admin",
+        "count": 19,
+        "enabled": true
+      }
+    ],
+    "direct_link": "WHEA 的错误源表与信息记录、WER 策略请求均缺原绘图进程及提交对象身份。",
+    "clock": "同一启动内按 QPC 排序。跨启动使用 System RecordId、41/6008 和归档控制。早期开机墙钟存在跳变。",
+    "controls": [
+      {
+        "path": "legacy-sequential-step4/historical-first-present-fence.json",
+        "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+      },
+      {
+        "path": "legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+        "sha256": "283175425e0a6d8dbb354bcc1ea5cdc0c8bc8b2aa484540eeeb6133800de3035"
+      },
+      {
+        "path": "legacy-sequential-step4/window-copy-c09c3c86/result.json",
+        "sha256": "8a1af04dc1a34bc872f70db093e18489397bcd09fe7b20882423479f521816ba"
+      },
+      {
+        "path": "legacy-sequential-step4/warp-control-5.json",
+        "sha256": "7ae42105425345066139c3a31d47bf71554d9d373ba6a71196399336021f873e"
+      }
+    ],
+    "boundaries": {
+      "last_entry": "三次原窗口首次 Present(1,0) 的 CALL 标记，各自 QPC 见 historical_cases。",
+      "last_return": "每次调用前有同分配分页检查成功和已退役的值 1 信号。首次 Present 自身无返回。",
+      "first_anomaly_or_missing": "原绘图线程公开 CALL 之后的首个 Windows 内核接收位置，至下一次已证实的异常开机之间。"
+    }
+  }
+}

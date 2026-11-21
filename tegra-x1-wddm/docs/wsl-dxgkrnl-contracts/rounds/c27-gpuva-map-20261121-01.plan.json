@@ -1,0 +1,32 @@
+{
+  "round_id": "c27-gpuva-map-20261121-01",
+  "contract_id": "ioctl.c:2581:2",
+  "declared_utc": "2026-11-21T13:10:00.136362+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "92ff0257dae03b91d5b7420c63e973b255cf59bda2178056c30b9756360c1ec1",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Lite GM20B 的 Windows VidMm / VidSch 与交互桌面中的独立 ARM64 调用方。",
+  "predicate": "公开 MapGpuVirtualAddress 接受这次异步映射时，将正值 STATUS_PENDING 原样返回给调用线程。",
+  "required_observation": "同一 PID/TID 的入口与直接返回、分页队列、已创建分配、保留地址、映射输出及对应分页围栏完成值。",
+  "satisfied_if": "直接返回 0x103、输出地址等于合法保留地址、输出围栏非零且同一队列在释放前到达该值。",
+  "violated_if": "在本调用的适用条件、责任方、对象、时间和输出完整匹配时，取得直接否定原生子句的结果。自然不支持、同步返回或缺失观测均单列。",
+  "unknown_if": "能力不足、实际对象或触发条件未命中、记录有缺口、只见间接现象或发生未解释重启时保留未知。",
+  "scope_limit": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "区分调用前 GPUVA 映射获准和分页完成。历史信号包退役无法代替具体映射调用的返回。",
+  "prior_catalog_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+  "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "selected_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+  "boot": 91476,
+  "dwm": 1400,
+  "ordinal": 1,
+  "nonce": "437d11ebe4a2025188606116",
+  "mode": "map",
+  "trace": true,
+  "os_build": "10.0.22631.0",
+  "files_sha256": {
+    "contracts-arm64.exe": "e2660e9d22bc1ae5b2b06befd5d21c1261b18dac97ae9662e5db576efc39590b",
+    "contract-trace.exe": "95b5add1077b1ffaf0a4cba7a5b8dcc03783dc38b45fb214462a43686eed743c",
+    "Measure.ps1": "e3f5153d08fe3b81cec941dba4556859f4c9a264c620d8d75b5a755ad2edb973",
+    "Power-State.ps1": "f136146792b5a80c6016dbae04668831bee87f0f2f5390017bfb1669cd3cab9f"
+  }
+}

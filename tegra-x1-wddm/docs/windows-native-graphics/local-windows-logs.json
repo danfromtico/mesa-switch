@@ -1,0 +1,666 @@
+{
+  "schema": 1,
+  "scope": "两次真实 Windows 应用运行的原始 UTF-8 日志，以及已定位 Windows 事件的原始载荷字节。通过 QPC、进程/线程、提供程序与事件版本复核。整份 ETL 和窗口截图保留在每轮的本地原件归档。",
+  "selected_templates": {
+    "802ec45a-1e99-4b83-9920-87c98277ba9d": [
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hDevice\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"NodeOrdinal\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"EngineAffinity\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"DmaBufferSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"DmaBufferSegmentSet\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"DmaBufferPrivateDataSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"AllocationListSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"PatchLocationListSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"ContextHandle\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"ParentDxgContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n</template>\r\n",
+        "task": "Context",
+        "id": 30,
+        "opcode": "win:Start",
+        "version": 0
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hProcessId\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hDevice\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"pDxgAdapter\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hVidMmAlloc\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hVidMmGlobalAlloc\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hDxgResource\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hDxgSharedResource\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hThunkAllocation\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hThunkResource\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PrivateRuntimeResourceHandle\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"pVirtualAddress\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hProcessAllocDetails\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hOtherPartitionHandle\" inType=\"win:UInt32\" outType=\"win:HexInt32\"/>\r\n</template>\r\n",
+        "task": "DeviceAllocation",
+        "id": 36,
+        "opcode": "win:Start",
+        "version": 2
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hwnd\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"pDmaBuffer\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PresentHistoryToken\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"hSourceAllocation\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hDestAllocation\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"bSubmit\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n  <data name=\"bRedirectedPresent\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Source.Left\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  <data name=\"Source.Right\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  <data name=\"Source.Top\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  <data name=\"Source.Bottom\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  <data name=\"Dest.Left\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  <data name=\"Dest.Right\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  <data name=\"Dest.Top\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  <data name=\"Dest.Bottom\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  <data name=\"SubRectCount\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n</template>\r\n",
+        "task": "Blit",
+        "id": 166,
+        "opcode": "win:Info",
+        "version": 0
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PacketType\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"SubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"DmaBufferSize\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"AllocationListSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"PatchLocationListSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"bPresent\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n  <data name=\"hDmaBuffer\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"pQueuePacket\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"ProgressFenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n</template>\r\n",
+        "task": "QueuePacket",
+        "id": 178,
+        "opcode": "win:Start",
+        "version": 1
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PacketType\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"SubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"bPreempted\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n  <data name=\"bTimeouted\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n  <data name=\"pQueuePacket\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n</template>\r\n",
+        "task": "QueuePacket",
+        "id": 180,
+        "opcode": "win:Stop",
+        "version": 1
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"hWindow\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"VidPnSourceId\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"FlipInterval\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"ReturnStatus\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"hSrcAllocHandle\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hDstAllocHandle\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n</template>\r\n",
+        "task": "Present",
+        "id": 184,
+        "opcode": "win:Info",
+        "version": 1
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"SubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"hSyncObject\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"FenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"pQueuePacket\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n</template>\r\n",
+        "task": "QueuePacket",
+        "id": 244,
+        "opcode": "win:Start",
+        "version": 1
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"SubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"ObjectCount\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"ObjectArray\" inType=\"win:Pointer\" outType=\"win:HexInt64\" count=\"ObjectCount\"/>\r\n  <data name=\"FenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\" count=\"ObjectCount\"/>\r\n  <data name=\"pQueuePacket\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n</template>\r\n",
+        "task": "QueuePacket",
+        "id": 245,
+        "opcode": "win:Start",
+        "version": 2
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"pDxgAdapterAllocation\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Width\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Height\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Pitch\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n</template>\r\n",
+        "task": "CddStandardAllocation",
+        "id": 286,
+        "opcode": "win:Info",
+        "version": 0
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"ContextCount\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\" count=\"ContextCount\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"ObjectCount\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"ObjectArray\" inType=\"win:Pointer\" outType=\"win:HexInt64\" count=\"ObjectCount\"/>\r\n  <data name=\"MonitoredFenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\" count=\"ObjectCount\"/>\r\n  <data name=\"InternalFlagsFlags\" inType=\"win:HexInt32\" outType=\"win:HexInt32\"/>\r\n</template>\r\n",
+        "task": "SignalSynchronizationObjectFromGpu",
+        "id": 294,
+        "opcode": "win:Info",
+        "version": 1
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"ObjectCount\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"ObjectArray\" inType=\"win:Pointer\" outType=\"win:HexInt64\" count=\"ObjectCount\"/>\r\n  <data name=\"MonitoredFenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\" count=\"ObjectCount\"/>\r\n</template>\r\n",
+        "task": "WaitForSynchronizationObjectFromGpu",
+        "id": 295,
+        "opcode": "win:Info",
+        "version": 0
+      }
+    ],
+    "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9": [
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"pIDXGISwapChain\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"SyncInterval\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"DirtyRects\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"ScrollRects\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n</template>\r\n",
+        "task": "Present",
+        "id": 42,
+        "opcode": "win:Start",
+        "version": 0
+      },
+      {
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"Result\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n</template>\r\n",
+        "task": "Present",
+        "id": 43,
+        "opcode": "win:Stop",
+        "version": 0
+      }
+    ],
+    "9e9bba3c-2e38-40cb-99f4-9e8281425164": [
+      {
+        "id": 91,
+        "version": 0,
+        "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+        "opcode": "win:Info",
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hLogicalSurface\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hDxSharedSurface\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"EventId\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"NumRects\" inType=\"win:UInt32\" outType=\"win:HexInt32\"/>\r\n  <struct name=\"DirtyRegions\" count=\"NumRects\">\r\n    <data name=\"left\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n    <data name=\"top\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n    <data name=\"right\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n    <data name=\"bottom\" inType=\"win:Int32\" outType=\"xs:int\"/>\r\n  </struct>\r\n</template>\r\n"
+      }
+    ]
+  },
+  "cases": {
+    "win-first-present-20261121-01": {
+      "boot": 91476,
+      "pid": 5364,
+      "tid": 3528,
+      "archive_sha256": "e2c65e8f0b47d65fc3af8717ea2c78e4d1ca62994c1e59a75006b0cbe07d4634",
+      "journal": {
+        "scene/journal.txt": {
+          "sha256": "009ee5655ecb46bb53843b39845d886a547f64050eb71e1c2a264749811b0bdb",
+          "utf8": "4820156 3528 ENTER wmain 00000000\r\n4820156 3528 VERIFIED RuntimeQueueOptionSet 00000000\r\n4820171 3528 CALL TraceCurrentProcess 00000000\r\n4820203 3528 RETURN TraceCurrentProcess 00000000\r\n4820250 3528 CALL CreateDXGIFactory1 00000000\r\n4820281 3528 RETURN CreateDXGIFactory1 00000000\r\n4820312 3528 CALL CreatePublicD3D11Device 00000000\r\n4820421 3528 RETURN CreatePublicD3D11Device 00000000\r\n4820437 3528 VERIFIED LoadedCandidateUMD 00000000\r\n4820453 3528 VERIFIED NativeGM20BDrawingDevice 00000000\r\n4820468 3528 CALL GetDecodeAdapterFactory 00000000\r\n4820468 3528 RETURN GetDecodeAdapterFactory 00000000\r\n4820468 3528 CALL CreatePreviewWindow 00000000\r\n4820484 3528 RETURN CreatePreviewWindow 00000000\r\n4820500 3528 CALL CreateSwapChainForHwnd 00000000\r\n4820515 3528 RETURN CreateSwapChainForHwnd 00000000\r\n4820546 3528 CALL GetWindowSwapChainDesc 00000000\r\n4820546 3528 RETURN GetWindowSwapChainDesc 00000000\r\n4820546 3528 VERIFIED RequestedPresentModel 00000000\r\n4820546 3528 MODEL Sequential 00000000\r\n4820562 3528 CALL MakeWindowAssociation 00000000\r\n4820562 3528 RETURN MakeWindowAssociation 00000000\r\n4820562 3528 CALL GetBackBuffer 00000000\r\n4820578 3528 RETURN GetBackBuffer 00000000\r\n4820578 3528 CALL CreateRenderTargetView 00000000\r\n4820578 3528 RETURN CreateRenderTargetView 00000000\r\n4821218 3528 CALL WindowCloakingBeforePresent 00000000\r\n4821218 3528 RETURN WindowCloakingBeforePresent 00000000\r\n4821218 3528 CALL ClearBackBuffer 00000000\r\n4821234 3528 RETURN ClearBackBuffer 00000000\r\n4821234 3528 CALL FlushBeforeFirstPresent 00000000\r\n4821250 3528 RETURN FlushBeforeFirstPresent 00000000\r\n4821250 3528 VERIFIED OneApplicationClear 00000000\r\n4821281 3528 CALL FlushTraceBeforePresent 00000000\r\n4821296 3528 RETURN FlushTraceBeforePresent 00000000\r\n4821312 3528 CLOCK FirstPresentUtcFiletime_134397418434454988 00000000\r\n4821312 3528 OBSERVE RemovedReasonBeforePresent 00000000\r\n4821312 3528 CALL Present 00000000 qpc=92572521356\r\n4821343 3528 RETURN Present 00000000 qpc=92572981150\r\n4821359 3528 OBSERVE RemovedReasonAfterPresent 00000000\r\n4821359 3528 CALL DwmFlushAfterFirstPresent 00000000\r\n4821406 3528 RETURN DwmFlushAfterFirstPresent 00000000\r\n4821875 3528 VERIFIED ClearDesktopPixels 00000000\r\n4821906 3528 CALL DeviceAfterFirstPresent 00000000\r\n4821906 3528 RETURN DeviceAfterFirstPresent 00000000\r\n4821984 3528 RETURN ReleaseFirstFrameObjects 00000000\r\n4822062 3528 EXIT RunAndRelease 00000000\r\n"
+        },
+        "trace-stop.json": {
+          "sha256": "37109623404f67d82851fab1b571cbe3f20a595d5080987118cce7929f521cf6",
+          "utf8": "{\"output\":[\"ETW status=0 lost=0 lost_buffers=0 written=120\"],\"session_already_ended\":false,\"exit\":0}"
+        }
+      },
+      "windows_events": {
+        "display.etl": {
+          "source_sha256": "e7f04ea3af7938dfb867e89576fa1a29815a4fb093b4c2ada9bb56c701ca1471",
+          "qpc_frequency": 19200000,
+          "records": [
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 245,
+              "version": 2,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92555194604,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff020000000000000001000000907aedc486ddffff01000000000000005020acc286ddffff",
+              "payload_sha256": "a06832c321b9abb2523583b3a1cac97379ddceb92437e2fdbfdcb93efef1370b"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 294,
+              "version": 1,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92555195579,
+              "is_64bit": true,
+              "payload_hex": "01000000d04d28b00f87ffff0000000001000000907aedc486ddffff010000000000000005000000",
+              "payload_sha256": "42c0c211c25869b619ee068bad14da5c70d0c842927414578745d02bcc5229a2"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 884,
+              "qpc": 92555244118,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff050000000200000000000000000000005020acc286ddffff",
+              "payload_sha256": "60a71f6eee7cd60c1296a01c875127a935a1404eff9475780eafbeb3fa7ea00d"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 245,
+              "version": 2,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571076718,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff040000000000000001000000907aedc486ddffff0200000000000000506037c586ddffff",
+              "payload_sha256": "3c0969091d32db913508d9dcc0b9d35f52d38d18603a53cf00556d7f5a9f5ab6"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 294,
+              "version": 1,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571076929,
+              "is_64bit": true,
+              "payload_hex": "01000000d04d28b00f87ffff0000000001000000907aedc486ddffff020000000000000005000000",
+              "payload_sha256": "16e4a558655887409843951fdca6fbd686db154b90b7dde6345433cb6645124f"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 888,
+              "qpc": 92571130478,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff05000000040000000000000000000000506037c586ddffff",
+              "payload_sha256": "a160f08919d5b1b1b47d7dea5439fef2d3908dcc6c51a1dc1bde2ecab7573494"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 245,
+              "version": 2,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571134125,
+              "is_64bit": true,
+              "payload_hex": "d07d63ad0f87ffff020000000000000001000000b082edc486ddffff010000000000000050f032c286ddffff",
+              "payload_sha256": "a967264a179ab66acf72ef4fb694d8da43592b2c6ee627879d73e339ef0c38d9"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 294,
+              "version": 1,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571134331,
+              "is_64bit": true,
+              "payload_hex": "01000000d07d63ad0f87ffff0000000001000000b082edc486ddffff010000000000000005000000",
+              "payload_sha256": "320a4be877edb2b8a1fc4c1cfc368558b082a57e09a24c66ff95f19d5e11c1e7"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 244,
+              "version": 1,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571135373,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff0500000004000000b082edc486ddffff0100000000000000206537c586ddffff",
+              "payload_sha256": "5b61caa2a55653ed79829f8fb4d777a412b05cf107472abb86c197f85f3c1baf"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 295,
+              "version": 0,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571135768,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff01000000b082edc486ddffff0100000000000000",
+              "payload_sha256": "7c42cd0e58f195f83e3fa56940465f09a50d4f4c46e10356d32d917f1a8646a3"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 245,
+              "version": 2,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571139389,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff07000000000000000100000030a8edc486ddffff01000000000000002025acc286ddffff",
+              "payload_sha256": "0dc64b1b1ce14b2b368232820d6ef98dc03c552f37d5620ef789ac37ecb44758"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 294,
+              "version": 1,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571139555,
+              "is_64bit": true,
+              "payload_hex": "01000000d04d28b00f87ffff000000000100000030a8edc486ddffff010000000000000005000000",
+              "payload_sha256": "6f138be959087968d70b284b4a5b2dc577401643ddcdb52ab43c3db82c9ae464"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 244,
+              "version": 1,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571141667,
+              "is_64bit": true,
+              "payload_hex": "d01de2af0f87ffff010000000400000030a8edc486ddffff010000000000000050a0a6c286ddffff",
+              "payload_sha256": "6489fca74ccd3dd53bab9fcde1ea3fb5f35e7369c5629736a577c27b06008f90"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 295,
+              "version": 0,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92571141981,
+              "is_64bit": true,
+              "payload_hex": "d01de2af0f87ffff0100000030a8edc486ddffff0100000000000000",
+              "payload_sha256": "b1bf693b907c2406905a16e0944fd03ed82cefb1f5c5b4261733b4676643b38c"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 884,
+              "qpc": 92571152205,
+              "is_64bit": true,
+              "payload_hex": "d07d63ad0f87ffff0500000002000000000000000000000050f032c286ddffff",
+              "payload_sha256": "c39dd9e01d12ea341186cc4332a9183214de6cb94180a421e13e2ee85c86a5d2"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 888,
+              "qpc": 92571152639,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff04000000050000000000000000000000206537c586ddffff",
+              "payload_sha256": "e9d8f283308d42b99dbfcd12806bc33025225ace73bb3488e44fc3851e7ec3a0"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 884,
+              "qpc": 92571180908,
+              "is_64bit": true,
+              "payload_hex": "d04d28b00f87ffff050000000700000000000000000000002025acc286ddffff",
+              "payload_sha256": "ce8ca48005a49eddfdbe7de1ca060c9349ded615b553b2c64430ea9fe0c9fd31"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 888,
+              "qpc": 92571181339,
+              "is_64bit": true,
+              "payload_hex": "d01de2af0f87ffff0400000001000000000000000000000050a0a6c286ddffff",
+              "payload_sha256": "18c26f56821172a9508af89a7a3255a7aa46193204ab87a8bbe609d829eb32d9"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 184,
+              "version": 1,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92572977537,
+              "is_64bit": true,
+              "payload_hex": "400100406a00070000000000ffffffff01000000811001040000000040070040000000000000000000000000",
+              "payload_sha256": "726bf58a69f93c78909d5c6a22506614939e103763c71195ee0dffc185135b33"
+            }
+          ]
+        },
+        "scene/video.etl": {
+          "source_sha256": "08c54e661bb44d6aba13dce03d5402ca5f06cbcc2c5a2ca00bb976783beb658f",
+          "qpc_frequency": 19200000,
+          "records": [
+            {
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "id": 4,
+              "version": 2,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92555320058,
+              "is_64bit": true,
+              "payload_hex": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000da4fc26fbd79dd01",
+              "payload_sha256": "13000d91036ce5e32f0440ea2ed5f2dac2d263feac4ef1c5ed1260701acaa672"
+            },
+            {
+              "provider": "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9",
+              "id": 42,
+              "version": 0,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92572651110,
+              "is_64bit": true,
+              "payload_hex": "90c0cc811802000000000000010000000000000000000000",
+              "payload_sha256": "6bf26e713400b7983ba59a252803ab656bad066535732cac0a0ca6fa02265d56"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 184,
+              "version": 1,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92572977557,
+              "is_64bit": true,
+              "payload_hex": "400100406a00070000000000ffffffff01000000811001040000000040070040000000000000000000000000",
+              "payload_sha256": "726bf58a69f93c78909d5c6a22506614939e103763c71195ee0dffc185135b33"
+            },
+            {
+              "provider": "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9",
+              "id": 43,
+              "version": 0,
+              "pid": 5364,
+              "tid": 3528,
+              "qpc": 92572980490,
+              "is_64bit": true,
+              "payload_hex": "00000000",
+              "payload_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+            }
+          ]
+        }
+      }
+    },
+    "win-empty-present-20261121-01": {
+      "boot": 91476,
+      "pid": 5992,
+      "tid": 5988,
+      "archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+      "journal": {
+        "scene/journal.txt": {
+          "sha256": "cb624e86f2f6477ac2d6126d66b7aedb3bfc3ef05af755fa4935d956912fbcf6",
+          "utf8": "4939406 5988 ENTER wmain 00000000\r\n4939421 5988 VERIFIED RuntimeQueueOptionSet 00000000\r\n4939437 5988 CALL TraceCurrentProcess 00000000\r\n4939453 5988 RETURN TraceCurrentProcess 00000000\r\n4939515 5988 CALL CreateDXGIFactory1 00000000\r\n4939531 5988 RETURN CreateDXGIFactory1 00000000\r\n4939562 5988 CALL CreatePublicD3D11Device 00000000\r\n4939656 5988 RETURN CreatePublicD3D11Device 00000000\r\n4939671 5988 VERIFIED LoadedCandidateUMD 00000000\r\n4939687 5988 VERIFIED NativeGM20BDrawingDevice 00000000\r\n4939703 5988 CALL GetDecodeAdapterFactory 00000000\r\n4939703 5988 RETURN GetDecodeAdapterFactory 00000000\r\n4939703 5988 CALL CreatePreviewWindow 00000000\r\n4939718 5988 RETURN CreatePreviewWindow 00000000\r\n4939718 5988 CALL CreateSwapChainForHwnd 00000000\r\n4939734 5988 RETURN CreateSwapChainForHwnd 00000000\r\n4939734 5988 CALL GetWindowSwapChainDesc 00000000\r\n4939750 5988 RETURN GetWindowSwapChainDesc 00000000\r\n4939750 5988 VERIFIED RequestedPresentModel 00000000\r\n4939750 5988 MODEL Sequential 00000000\r\n4939750 5988 CALL MakeWindowAssociation 00000000\r\n4939750 5988 RETURN MakeWindowAssociation 00000000\r\n4939765 5988 CALL GetBackBuffer 00000000\r\n4939765 5988 RETURN GetBackBuffer 00000000\r\n4939765 5988 CALL CreateRenderTargetView 00000000\r\n4939765 5988 RETURN CreateRenderTargetView 00000000\r\n4940468 5988 CALL WindowCloakingBeforePresent 00000000\r\n4940468 5988 RETURN WindowCloakingBeforePresent 00000000\r\n4940468 5988 CALL FlushBeforeFirstPresent 00000000\r\n4940484 5988 RETURN FlushBeforeFirstPresent 00000000\r\n4940484 5988 VERIFIED NoApplicationWrites 00000000\r\n4940484 5988 CALL FlushTraceBeforePresent 00000000\r\n4940515 5988 RETURN FlushTraceBeforePresent 00000000\r\n4940515 5988 CLOCK FirstPresentUtcFiletime_134397419626451889 00000000\r\n4940515 5988 OBSERVE RemovedReasonBeforePresent 00000000\r\n4940515 5988 CALL Present 00000000 qpc=94861147189\r\n4940531 5988 RETURN Present 00000000 qpc=94861380548\r\n4940578 5988 OBSERVE RemovedReasonAfterPresent 00000000\r\n4940593 5988 CALL DwmFlushAfterFirstPresent 00000000\r\n4940625 5988 RETURN DwmFlushAfterFirstPresent 00000000\r\n4940640 5988 VERIFIED EmptyPresentReturned 00000000\r\n4940671 5988 CALL DeviceAfterFirstPresent 00000000\r\n4940671 5988 RETURN DeviceAfterFirstPresent 00000000\r\n4940718 5988 RETURN ReleaseFirstFrameObjects 00000000\r\n4940812 5988 EXIT RunAndRelease 00000000\r\n"
+        },
+        "trace-stop.json": {
+          "sha256": "37109623404f67d82851fab1b571cbe3f20a595d5080987118cce7929f521cf6",
+          "utf8": "{\"output\":[\"ETW status=0 lost=0 lost_buffers=0 written=120\"],\"session_already_ended\":false,\"exit\":0}"
+        }
+      },
+      "windows_events": {
+        "display.etl": {
+          "source_sha256": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+          "qpc_frequency": 19200000,
+          "records": [
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 30,
+              "version": 0,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94844105971,
+              "is_64bit": true,
+              "payload_hex": "10703db10f87ffff0000000001000000000001000200000048010100000000000000000000000000a01d9cab0f87ffff40010040000000000000000000000000",
+              "payload_sha256": "fbbad985b4b43df356235ff0e7be4792857f01fb8bf8a111b270313ecbe8c3d9"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 245,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94844513570,
+              "is_64bit": true,
+              "payload_hex": "a0dda6ab0f87ffff020000000000000001000000c07591c586ddffff010000000000000010a04cc486ddffff",
+              "payload_sha256": "af41657fba68454275e96abc770df083877257344e9a3ea84461e08fe11cfa39"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 294,
+              "version": 1,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94844513741,
+              "is_64bit": true,
+              "payload_hex": "01000000a0dda6ab0f87ffff0000000001000000c07591c586ddffff010000000000000005000000",
+              "payload_sha256": "c55c447649e327acecf0804a9ac66b8f5e8b5cfc7b35e5d24e81f6146052ff05"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 884,
+              "qpc": 94844561325,
+              "is_64bit": true,
+              "payload_hex": "a0dda6ab0f87ffff0500000002000000000000000000000010a04cc486ddffff",
+              "payload_sha256": "08b96cff84f41bf2cbc5a62c18adf1b3e555310af7ef2684eb342093f0004936"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 36,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94846219401,
+              "is_64bit": true,
+              "payload_hex": "681700000000000010703db10f87ffff0020afc286ddffff1022cfc586ddffffa0dd27b00f87ffffe0e640b10f87ffff60c32dc686ddffff40070040000000000007004000000000000000000000000000200426e301000010a8ceb00f87ffff00000000",
+              "payload_sha256": "fae24fe18cb3de1af5104bf35e8c6f6b4097815ca1a6172f6999ea935d999330"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 286,
+              "version": 0,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861278775,
+              "is_64bit": true,
+              "payload_hex": "d0a52eaf0f87ffff000000008002000068010000000a0000",
+              "payload_sha256": "6d9a866eb601bdbff022f5e8136861e4046151bf3bb161266c3c381b9ce8a052"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 36,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861279542,
+              "is_64bit": true,
+              "payload_hex": "681700000000000010703db10f87ffff0020afc286ddffff10bf35c586ddffffa00dbdab0f87ffff707240b10f87ffffa0ce2dc686ddffff40080040000000000008004000000000000000000000000000402026e301000010ceceb00f87ffff00000000",
+              "payload_sha256": "0a905f4e574a00b8c064026d1eb4ff2b5d77aaef101353eb2042862602a610c5"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 166,
+              "version": 0,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861300682,
+              "is_64bit": true,
+              "payload_hex": "1800080000000000a04dcac586ddffff00000000000000001022cfc586ddffff10bf35c586ddffff010000000000000001000000000000008002000000000000680100000000000080020000000000006801000001000000",
+              "payload_sha256": "f06461e78fdaf67a06649f8d2a1679f651e6e2c841eb8bfc0799baa075e35fb7"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 178,
+              "version": 1,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861301402,
+              "is_64bit": true,
+              "payload_hex": "a01d9cab0f87ffff00000000010000003400000000000000030000000000000001000000a04dcac586ddffff10708cc486ddffff0000000000000000",
+              "payload_sha256": "ef517b78e9d90320b57b6a88f94b10de9f36a87ae38e0f725b8d2f2f9f60200b"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 180,
+              "version": 1,
+              "pid": 4,
+              "tid": 884,
+              "qpc": 94861344089,
+              "is_64bit": true,
+              "payload_hex": "a01d9cab0f87ffff0000000001000000000000000000000010708cc486ddffff",
+              "payload_sha256": "9a8aa2b2a6bb286426660ad98df1319499d20605523777816699737a1c8cc630"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 215,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861377851,
+              "is_64bit": true,
+              "payload_hex": "10f036c286ddffff008af6aa0f87ffff03000000300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+              "payload_sha256": "3fe29f7a5f5dfe702cc6ac248b90b1d2a903ced64d94f9b4391a60beac5eda5e"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 184,
+              "version": 1,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861378321,
+              "is_64bit": true,
+              "payload_hex": "400100401800080000000000ffffffff01000000811001040000000040070040000000000000000000000000",
+              "payload_sha256": "e30350bd9c332e43f6b748d27d91ebb215c6b713242fe544865d29770d609cc4"
+            },
+            {
+              "provider": "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+              "id": 91,
+              "version": 0,
+              "pid": 1400,
+              "tid": 2252,
+              "qpc": 94861443540,
+              "is_64bit": true,
+              "payload_hex": "00000000000000000000000000000000180008000000000000000000",
+              "payload_sha256": "4d9e7f57ec369ef128c06b51b81d53d2831488778930a84e5613b52baddf40d1"
+            }
+          ]
+        },
+        "scene/video.etl": {
+          "source_sha256": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a",
+          "qpc_frequency": 19200000,
+          "records": [
+            {
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "id": 4,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94844640274,
+              "is_64bit": true,
+              "payload_hex": "00000000000000000f000b00000000000000000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+              "payload_sha256": "46a77098aac9ba83e2ab35845d30e75f18bf2df4c3a4b127a3fc90faf029d1fe"
+            },
+            {
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "id": 6,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94846220800,
+              "is_64bit": true,
+              "payload_hex": "0a000080000000004007004002000000591b000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+              "payload_sha256": "a8cba80669b14c197c7778bb60b938ea46baf291352eef30849d6686432789a3"
+            },
+            {
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "id": 6,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94846227519,
+              "is_64bit": true,
+              "payload_hex": "00000000000000004007004003000000591b000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+              "payload_sha256": "3fec74986fc6ca01c6b9d28a90fb52db08e1da8f8b5a6acd74c6945d54ff9e9c"
+            },
+            {
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "id": 6,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94846230514,
+              "is_64bit": true,
+              "payload_hex": "0a00008000000000400700400400000000100e0000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+              "payload_sha256": "ce8718ba4f1ca1441930371c124544bef3aff9ee55ff73ffa6647234b13734a7"
+            },
+            {
+              "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+              "id": 6,
+              "version": 2,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94846258276,
+              "is_64bit": true,
+              "payload_hex": "000000000000000040070040030000005a1b000000000000730074006500700034002d00700072006500730065006e0074002e00650078006500000000000000000000000000000000000000000000000000000000000000a6e7dab6bd79dd01",
+              "payload_sha256": "8a18ec439a3905266160d26a2a6e4fe0d49b241a0491a766685c6795bffe6a53"
+            },
+            {
+              "provider": "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9",
+              "id": 42,
+              "version": 0,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861212477,
+              "is_64bit": true,
+              "payload_hex": "d0c3ac22e301000000000000010000000000000000000000",
+              "payload_sha256": "2aae0988f3da3ebb5a073c33b68483468176804a4fa8c51c1e95cabcc9b916c2"
+            },
+            {
+              "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+              "id": 184,
+              "version": 1,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861378335,
+              "is_64bit": true,
+              "payload_hex": "400100401800080000000000ffffffff01000000811001040000000040070040000000000000000000000000",
+              "payload_sha256": "e30350bd9c332e43f6b748d27d91ebb215c6b713242fe544865d29770d609cc4"
+            },
+            {
+              "provider": "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9",
+              "id": 43,
+              "version": 0,
+              "pid": 5992,
+              "tid": 5988,
+              "qpc": 94861380173,
+              "is_64bit": true,
+              "payload_hex": "00000000",
+              "payload_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "tgd3d_event_layout": {
+    "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+    "version": 2,
+    "payload_bytes": 96,
+    "prefix_little_endian": "int32 result (HRESULT), uint32 reserved, uint64 arg0, uint64 arg1",
+    "event_4": "建图形设备时 arg0 为 DDI interface。",
+    "event_6": "arg0 高 32 位为阶段，低 32 位为本地分配句柄。对于 stage 2/3，arg1 为分页目标。对于 stage 4，arg1 为映射字节数。",
+    "source": "https://github.com/ruje0504-2/mesa-switch-woa/blob/c137ce757b055557cff4b70068e8e2500dd92962/src/nouveau/tgd3d/tgd3d_runtime.cpp",
+    "layout_source": "https://github.com/ruje0504-2/mesa-switch-woa/blob/c137ce757b055557cff4b70068e8e2500dd92962/src/nouveau/tgd3d/tgd3d_trace.h"
+  }
+}

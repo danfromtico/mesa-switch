@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-fence-20261121-01",
+  "contract_id": "WIN-FENCE-WAIT",
+  "windows_question": "WIN-FENCE-WAIT",
+  "owner": "提交方、Windows VidSch 和 GM20B 上下文",
+  "question": "受监控围栏的 GPU 信号、同值上下文等待与等待完成能否逐包关联？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "解析安装版本事件模板，按上下文、对象、值和队列包身份匹配 signal 与 wait，证明依赖获满足后等待完成。",
+  "observations": [
+    "按受监控对象、值、设备和上下文配对 API 与队列 244/245/180。原空窗口为目标，清屏结果按独立进程保留。",
+    "复核同一开机、进程、线程、设备、对象与时钟；本轮新增设备执行数为 0。"
+  ],
+  "inputs": {
+    "win-empty-present-20261121-01": {
+      "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+      "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+    },
+    "win-first-present-20261121-01": {
+      "path": "windows-native-graphics/rounds/win-first-present-20261121-01.result.json",
+      "sha256": "fec3bcb4effe5c3b6dc9da33da1e2ad05f069b3205c81463a1ac1267f647ebcc"
+    }
+  }
+}
