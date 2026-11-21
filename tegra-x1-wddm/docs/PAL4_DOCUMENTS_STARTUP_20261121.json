@@ -1075,7 +1075,8 @@
     "workload": "Same x86 game, 800x600 window, external power and Handheld desktop. The software Vulkan device used two LLVM threads. All driver boot components were unchanged.",
     "observation_differences": "In the first run the blocking keyboard observer timed out and the game continued running. The next runs requested the same keys with nonblocking Windows input. The third also sampled the client DC and layered desktop and posted WM_CLOSE to the actual game window.",
     "relationship_to_earlier_native_restarts": "Unknown. The first software run reached full game initialization and remained alive for several minutes before a later unexpected shutdown.",
-    "scope": "Count an actual application renderer only from each game DXVK log. A successful Vulkan swapchain creation and a completed game initialization are distinct from recovered menu pixels and from normal exit.",
+    "scope": "DXVK v3.1.1 logs its chosen swapchain parameters before calling vkCreateSwapchainKHR. This message supplies no return status. Use the captures for visible output and the process receipt for normal exit.",
+    "swapchain_log_source": "https://github.com/doitsujin/dxvk/blob/b1a1c99ab52b687cf950d62c88bc2fa316b41663/src/dxvk/dxvk_presenter.cpp#L778-L790",
     "historical_comparison": {
       "historical_software_case": "pal4-game-fixed-06",
       "documents_software_case": "handheld-software",
