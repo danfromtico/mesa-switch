@@ -471,6 +471,12 @@ if build_miniport:
             display_inf = re.sub(r"^Device=.*$",
                 f'Device="Tegra X1 (GM20B) .{args.native_test_version} {build_id}"',
                 display_inf, flags=re.MULTILINE)
+        # Keep the driver version and device identity for a firmware-only trial.
+        # Windows deduplicates the old package if its INF is byte-identical.
+        hs_acr = args.acr_firmware / "nv_acr_ucode_prod.bin"
+        if hashlib.sha256(hs_acr.read_bytes()).hexdigest() == "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841":
+            display_inf = display_inf.replace('Disk="T214 render driver"',
+                                              'Disk="T214 render driver - ACR f948c259ca1c"')
         (dest / inf.name).write_text(display_inf)
     else:
         shutil.copyfile(inf, dest / inf.name)

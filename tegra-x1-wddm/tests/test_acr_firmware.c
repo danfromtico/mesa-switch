@@ -116,7 +116,13 @@ static void files(const char *dir)
     gr.surface=malloc(gr.image.size); assert(gr.surface);
     assert(tg_gpu_gr_image_prepare(n,boots,(void *)gr.surface,gr.image.size,&gr.image)==TG_GPU_GR_FW_OK);
     assert(tg_gpu_acr_prepare(&f,false,&v)==TG_GPU_ACR_OK);
-    assert(v.hs.size==0x4900 && v.boot.size==0x200 && v.signature_offset==0x2790);
+    /* Both signed GM20B images use the same PMU and FECS package. */
+    const int noble = f.hs.size == 18944;
+    assert(v.hs.size==(noble ? 0x4800u : 0x4900u) && v.boot.size==0x200);
+    assert(v.signature_offset==(noble ? 0x2690u : 0x2790u));
+    assert(v.secure_offset==256 && v.secure_size==(noble ? 6656u : 6912u));
+    assert(v.dmem_offset==(noble ? 6912u : 7168u) && v.dmem_size==3072);
+    assert(v.pmu_version==20490253u);
     assert(v.wpr_size==0x12c00 && v.wpr_offset==0x5000 && v.size==0x17c00);
     /* FECS file padding is not boot code: its descriptor declares 256 bytes. */
     assert(v.lsf[0].image.size==0x5600 && v.lsf[1].image.size==0xbb00);
@@ -126,7 +132,7 @@ static void files(const char *dir)
     assert(!memcmp(out+v.wpr_offset+v.lsf[0].lsb_offset,f.fecs_sig.data,76));
     assert(!memcmp(out+v.wpr_offset+v.lsf[1].image_offset,f.pmu.data,f.pmu.size));
     assert(r32(out+v.dmem_offset+584)==addresses.physical+v.wpr_offset);
-    printf("NVIDIA 32.7.6 GM20B ACR packing: PASS (host only); WPR=%u total=%u PMU=%08x\n",
+    printf("NVIDIA GM20B ACR packing: PASS (host only); WPR=%u total=%u PMU=%08x\n",
         v.wpr_size,v.size,v.pmu_version);
     free(out); free((void *)gr.surface); free((void *)n.data);
     for (unsigned i=0;i<2;++i) free((void *)boots[i].data);
