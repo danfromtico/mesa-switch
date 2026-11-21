@@ -23,7 +23,7 @@ function Assert-SwitchProfile($Profile) {
         if ($name -notin $names) { throw "Required graphics component missing: $name" }
     }
     foreach ($entry in $Profile.PSObject.Properties) {
-        if ($entry.Name -notmatch '^[a-z0-9_-]+\.(sys|dll)$') { throw "Unexpected graphics component name: $($entry.Name)" }
+        if ($entry.Name -cne 'nv_acr_ucode_prod.bin' -and $entry.Name -notmatch '^[a-z0-9_-]+\.(sys|dll)$') { throw "Unexpected graphics component name: $($entry.Name)" }
         Assert-SwitchHash $entry.Value
     }
 }
@@ -40,6 +40,9 @@ function Test-SwitchSameProfile($First, $Second) {
 }
 
 function Assert-SwitchChangedComponentLoads($Accepted,$Candidate,$Evidence) {
+    if ($Accepted -and $Accepted.PSObject.Properties['nv_acr_ucode_prod.bin'] -and !$Candidate.PSObject.Properties['nv_acr_ucode_prod.bin']) {
+        throw 'The candidate must identify the already tracked ACR firmware'
+    }
     $desktopNames=@('tegragpurender.sys','TegraGpuD3DVk.dll','libvulkan_nouveau.dll','tg_d3d_arm64.dll','tg_nvk_arm64.dll')
     foreach ($entry in $Candidate.PSObject.Properties) {
         if ($entry.Name -in $desktopNames) { continue }

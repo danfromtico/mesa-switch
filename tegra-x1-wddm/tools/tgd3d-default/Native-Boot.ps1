@@ -64,6 +64,12 @@ try {
         $u=(Get-FileHash $slots[1]).Hash
         $i=(Get-FileHash (Join-Path (Split-Path $slots[1]) 'libvulkan_nouveau.dll')).Hash
         if($k -ne $m.kmd.'tegragpurender.sys'.Sha256 -or $u -ne $m.app.'TegraGpuD3DVk.dll'.Sha256 -or $i -ne $m.app.'libvulkan_nouveau.dll'.Sha256 -or (Get-FileHash (Join-Path (Split-Path $icd) 'libvulkan_nouveau.dll')).Hash -ne $i){throw 'Installed files differ from the selected package'}
+        $acrName='nv_acr_ucode_prod.bin'
+        $acrExpected=$m.kmd.$acrName.Sha256
+        if($acrExpected){
+            $acrFile=Join-Path $env:windir 'System32/drivers/TegraGpu/nv_acr_ucode_prod.bin'
+            if((Get-FileHash -LiteralPath $acrFile).Hash -ne $acrExpected){throw 'Installed ACR differs from the selected package'}
+        }
         if($Mode -eq 'Accept' -and ($k -ne $VerifiedKmd -or $u -ne $VerifiedUmd -or $i -ne $VerifiedIcd)){throw 'Accepted baseline hashes differ'}
         if($persistent){
             $acceptedReceipt=Join-Path $policyRoot 'last-accepted.json'
@@ -109,6 +115,13 @@ try {
         }elseif($Mode -eq 'Trial' -and $policy){
             $names=@('tegragpurender.sys','TegraGpuD3DVk.dll','libvulkan_nouveau.dll','tg_d3d_arm64.dll','tg_d3d_x64.dll','tg_nvk_arm64.dll','tg_nvk_x64.dll')
             $names+=@($m.app.PSObject.Properties.Name|Where-Object {$_ -match '^[a-z0-9_-]+\.dll$' -and $_ -notin $names})
+            $selectedBaseline=Read-SwitchPolicyJson (Get-SwitchPolicyFile $policy 'graphics-baseline.json')
+            $acceptedAcr=$selectedBaseline.components.PSObject.Properties[$acrName]
+            $baseFirmware=Join-Path (Join-Path $selectedBaseline.directory 'package') $acrName
+            if($acceptedAcr -or ($acrExpected -and (![IO.File]::Exists($baseFirmware) -or (Get-FileHash -LiteralPath $baseFirmware).Hash -ne $acrExpected))){
+                if(!$acrExpected){throw 'Missing ACR package hash for tracked firmware'}
+                $names+=$acrName
+            }
             $trialProfile=Get-SwitchInstalledProfile $Directory $names -AllowMissing
         }
     }

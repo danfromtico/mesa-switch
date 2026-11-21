@@ -22,8 +22,9 @@ function Get-SwitchPolicyFile($Snapshot,[string]$Name) {
 function Get-SwitchInstalledProfile([string]$Directory,[string[]]$Names,[switch]$AllowMissing) {
     $result=[ordered]@{}
     foreach ($name in $Names) {
-        if ($name -notmatch '^[a-z0-9_-]+\.(dll|sys)$') { throw "Invalid component name: $name" }
+        if ($name -cne 'nv_acr_ucode_prod.bin' -and $name -notmatch '^[a-z0-9_-]+\.(dll|sys)$') { throw "Invalid component name: $name" }
         $file=if ($name -eq 'tegragpurender.sys') { Join-Path $env:windir 'System32/drivers/tegragpurender.sys' }
+              elseif ($name -ceq 'nv_acr_ucode_prod.bin') { Join-Path $env:windir 'System32/drivers/TegraGpu/nv_acr_ucode_prod.bin' }
               else { Join-Path (Join-Path $Directory 'app') $name }
         if ($AllowMissing -and ![IO.File]::Exists($file)) { continue }
         $result[$name]=(Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
