@@ -88,6 +88,8 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 在正式基线启动 91918，只读 ETW 状态快照把 DWM 7 个既有上下文、节点、两个适配器的 LUID 和调度对象字段直接配对。其中 GM20B 有 4 个上下文，同一原生上下文留有两组完整的正常 DMA 提交及退役。采集过程保持同桌面及 Code 0，专用会话和临时 ETL 已清理。[状态快照载荷及实载哈希](windows-native-graphics/rounds/win-dwm-context-state-capture-20261121-01.result.json)
 
+正式启动 91918 复跑原双缓冲空窗口。状态快照先落盘，首次 Present 耗时 16.629 ms，52 字节应用 Blt 退役。调用至客户区采样期间，DWM 的四个 DMA 和四组跨设备围栏信号、等待均在 GM20B 节点 0 匹配完成。同包 12776 有正式 KMD 快照。4,508 个客户区采样点与独立空帧对照相同，输入、退出及同一桌面通过。[同次启动的原始回执与哈希](windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

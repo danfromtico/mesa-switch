@@ -459,9 +459,10 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-kmd-dma-arm64-fixture-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-kmd-dma-hardware-calibration-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json"
       ],
-      "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified. The same Windows kernel image exposes DMA scheduler and optional timing templates. Three healthy archived captures have matching DMA notifications and no per-packet GPU timestamp records. An opt-in DMA-boundary instrumentation package has been built locally and checked with the queue model. Live candidate calibration and accident attribution are open. The signed native ARM64 queue model passed on the recovered Switch. Windows verified the signed candidate catalog and all 12 covered files with the permanent driver still in use. Candidate runtime submission evidence remains open. The prospective observer calibration stopped at an independent abnormal boot transition before any window workload. The permanent baseline was restored. The same unsealed scene trace records Windows DMA submission 247 on another DWM context 9.054 ms after 152586. An earlier packet on that context, 246, has a matching IRQ, DMA completion and queue retirement in both files. Neither file retains any context reporting a DMA completion notification, DMA completion, or queue retirement after 152586. The later context has no directly matched adapter or node identity in the two stored streams. Seven clean archives from the same DWM instance retain 105 DMA IDs with matching Windows interrupt and non-preempted completion on the later context. All sixteen inspected streams still lack a direct mapping from that context to an adapter and node. Only the primary context has temporally matching native GM20B execution snapshots among these recordings.",
+      "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified. The same Windows kernel image exposes DMA scheduler and optional timing templates. Three healthy archived captures have matching DMA notifications and no per-packet GPU timestamp records. An opt-in DMA-boundary instrumentation package has been built locally and checked with the queue model. Live candidate calibration and accident attribution are open. The signed native ARM64 queue model passed on the recovered Switch. Windows verified the signed candidate catalog and all 12 covered files with the permanent driver still in use. Candidate runtime submission evidence remains open. The prospective observer calibration stopped at an independent abnormal boot transition before any window workload. The permanent baseline was restored. The same unsealed scene trace records Windows DMA submission 247 on another DWM context 9.054 ms after 152586. An earlier packet on that context, 246, has a matching IRQ, DMA completion and queue retirement in both files. Neither file retains any context reporting a DMA completion notification, DMA completion, or queue retirement after 152586. The later context has no directly matched adapter or node identity in the two stored streams. Seven clean archives from the same DWM instance retain 105 DMA IDs with matching Windows interrupt and non-preempted completion on the later context. All sixteen inspected streams still lack a direct mapping from that context to an adapter and node. Only the primary context has temporally matching native GM20B execution snapshots among these recordings. A clean original-window control on boot 91918 captured the DWM adapter and node associations before Present. Four ordinary GM20B DMA completions and four cross-device DWM signal/wait retirements were identified, including the native execution snapshot for DMA 12776. The observation does not backfill boot 91476.",
       "daily_workaround": "Keep this optional board-local diagnostic task out of daily launches while investigating. Use the qualified permanent graphics baseline and established window controls.",
       "close_when": "Identify the initiating failure using evidence for this incident, fix it, and obtain three valid consecutive acceptance runs under the relevant original conditions including window output, input, normal exit, and desktop continuity.",
       "resolution": null
@@ -3128,6 +3129,83 @@
           "first_anomaly_or_missing": "实机确认了各上下文在 91918 的采集和归属。启动 91476 的旧对象缺本次类型的快照。其 152586 仍需原次或新同场景的同号 KMD 准入、完成与异常边界。"
         },
         "finished_utc": "2026-11-21T16:37:34.348984+00:00"
+      },
+      {
+        "round_id": "win-seq-first-present-dwm-rundown-20261121-01",
+        "contract_id": "WIN-SEQ-FIRST-PRESENT-DWM-ROUTE",
+        "windows_question": "WIN-SEQ-FIRST-PRESENT-DWM-ROUTE",
+        "method": "原普通窗口首次 Present 实测，加同一 Windows ETW 会话里的既有对象状态快照",
+        "plan": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.plan.json",
+        "plan_sha256": "6fce6adc3503e658c55ec94fcf3f441c1db24f2321d31503b1c71a8818f8db8e",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T16:41:01.441707+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+        "result_sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf",
+        "status": "实机通过",
+        "finding": "正式启动 91918、绘图 PID/TID 2572/5356 的原空窗首次 Present(1,0) 在 16.629 ms 内返回 S_OK。52 字节应用 Blt 退役；DWM 的 4 个正常 DMA 与 4 组跨设备同对象、同值的信号和等待均直接绑定 GM20B 节点 0。正式 KMD 抢占快照记录同一提交号 12776。4508 个客户区像素与空帧对照一致，输入、退出及同一桌面通过。",
+        "missing_observation": "异常启动 91476 的历史指针不能与 91918 的快照跨启动相连。历史 152586 的 KMD 准入、GPU 完成和首个异常仍缺直接回执。本轮 DWM 91 关联窗口调度；逐个 DWM DMA 包尚无指向该应用表面消费的直接令牌。",
+        "boundaries": {
+          "last_entry": {
+            "public_present_qpc": 16336745280,
+            "windows_kmt": {
+              "qpc": 16337061300,
+              "pid": 2572,
+              "tid": 5356,
+              "provider": "kernel",
+              "id": 184,
+              "version": 1,
+              "fields": {
+                "hContext": 1073742144,
+                "hWindow": 196746,
+                "VidPnSourceId": 4294967295,
+                "FlipInterval": 1,
+                "Flags": 67178625,
+                "ReturnStatus": 0,
+                "hSrcAllocHandle": 1073743680,
+                "hDstAllocHandle": 0
+              }
+            }
+          },
+          "last_return": {
+            "public_present_qpc": 16337064560,
+            "application_blt_retire": {
+              "qpc": 16337012550,
+              "pid": 4,
+              "tid": 928,
+              "provider": "kernel",
+              "id": 180,
+              "version": 1,
+              "fields": {
+                "hContext": 18446659461282852304,
+                "PacketType": 0,
+                "SubmitSequence": 1,
+                "bPreempted": 0,
+                "bTimeouted": 0,
+                "pQueuePacket": 18446607229204635664
+              }
+            },
+            "latest_matched_dwm_wait": {
+              "qpc": 16337951111,
+              "pid": 4,
+              "tid": 932,
+              "provider": "kernel",
+              "id": 180,
+              "version": 1,
+              "fields": {
+                "hContext": 18446659461289669296,
+                "PacketType": 4,
+                "SubmitSequence": 7310,
+                "bPreempted": 0,
+                "bTimeouted": 0,
+                "pQueuePacket": 18446607229207552016
+              }
+            },
+            "application_exit": 16343922714
+          },
+          "first_anomaly_or_missing": "异常启动 91476 的历史指针不能与 91918 的快照跨启动相连。历史 152586 的 KMD 准入、GPU 完成和首个异常仍缺直接回执。本轮 DWM 91 关联窗口调度；逐个 DWM DMA 包尚无指向该应用表面消费的直接令牌。"
+        },
+        "finished_utc": "2026-11-21T16:43:24.495372+00:00"
       }
     ]
   }

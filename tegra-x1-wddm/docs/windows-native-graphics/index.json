@@ -1518,6 +1518,44 @@
         "win-dwm-context-state-capture-20261121-01"
       ],
       "latest_observation": "正式启动 91918 的 Windows ETW CAPTURE_STATE 把正在运行的 DWM 的 7 个上下文经 32/29/110 直接配对到两个适配器与节点。GM20B LUID 0x5601 有 4 个上下文，Microsoft 1414:008c LUID 0x56f8 有 3 个。7 个均关联事件 433。正式适配器上有两条同包提交、完成中断、完成与退役的正常样本。"
+    },
+    {
+      "id": "WIN-SEQ-FIRST-PRESENT-DWM-ROUTE",
+      "priority": "P0",
+      "owner": "DXGI、Windows VidSch、DWM 与正式 GM20B KMD",
+      "question": "原空窗口首次 Present 的同启动状态快照，能否直接区分 DWM 各适配器上的调度、围栏和实际完成？",
+      "status": "实机通过",
+      "existing_observation": "当前正式桌面已校验 29/32/110/433 状态快照。异常 91476 缺较晚上下文的直接归属与 152586 的实际完成。",
+      "missing_observation": "异常启动 91476 的历史指针不能与 91918 的快照跨启动相连。历史 152586 的 KMD 准入、GPU 完成和首个异常仍缺直接回执。本轮 DWM 91 关联窗口调度；逐个 DWM DMA 包尚无指向该应用表面消费的直接令牌。",
+      "pass_condition": "应用明确为两个 BGRA 缓冲、旧式 DDI、无写入的首个 Present(1,0)。同启动核对 DWM 对象、适配器节点、至少一组实际提交完成，并保留应用可视区域、输入、退出和桌面连续性。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-dwm-context-state-capture-20261121-01.result.json",
+          "sha256": "7b643c3368a48af47af3b7cc16ecfd4d066ba3d2d2b312005633890158880093"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json",
+          "sha256": "603e9f83b4b696261b77aacf192d497358f6f55a76d3d8d0f513671d8b12f006"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+          "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
+          "sha256": "65e88f1d74336120718852de8347b208f3b9c935cb083550544e4d6d3ac5b417"
+        }
+      ],
+      "windows_references": [
+        "present",
+        "gpuview",
+        "dma_interrupt",
+        "fence"
+      ],
+      "round_ids": [
+        "win-seq-first-present-dwm-rundown-20261121-01"
+      ],
+      "latest_observation": "正式启动 91918、绘图 PID/TID 2572/5356 的原空窗首次 Present(1,0) 在 16.629 ms 内返回 S_OK。52 字节应用 Blt 退役；DWM 的 4 个正常 DMA 与 4 组跨设备同对象、同值的信号和等待均直接绑定 GM20B 节点 0。正式 KMD 抢占快照记录同一提交号 12776。4508 个客户区像素与空帧对照一致，输入、退出及同一桌面通过。"
     }
   ],
   "rounds": [
@@ -3301,20 +3339,97 @@
         "first_anomaly_or_missing": "实机确认了各上下文在 91918 的采集和归属。启动 91476 的旧对象缺本次类型的快照。其 152586 仍需原次或新同场景的同号 KMD 准入、完成与异常边界。"
       },
       "finished_utc": "2026-11-21T16:37:34.348984+00:00"
+    },
+    {
+      "round_id": "win-seq-first-present-dwm-rundown-20261121-01",
+      "contract_id": "WIN-SEQ-FIRST-PRESENT-DWM-ROUTE",
+      "windows_question": "WIN-SEQ-FIRST-PRESENT-DWM-ROUTE",
+      "method": "原普通窗口首次 Present 实测，加同一 Windows ETW 会话里的既有对象状态快照",
+      "plan": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.plan.json",
+      "plan_sha256": "6fce6adc3503e658c55ec94fcf3f441c1db24f2321d31503b1c71a8818f8db8e",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T16:41:01.441707+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+      "result_sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf",
+      "status": "实机通过",
+      "finding": "正式启动 91918、绘图 PID/TID 2572/5356 的原空窗首次 Present(1,0) 在 16.629 ms 内返回 S_OK。52 字节应用 Blt 退役；DWM 的 4 个正常 DMA 与 4 组跨设备同对象、同值的信号和等待均直接绑定 GM20B 节点 0。正式 KMD 抢占快照记录同一提交号 12776。4508 个客户区像素与空帧对照一致，输入、退出及同一桌面通过。",
+      "missing_observation": "异常启动 91476 的历史指针不能与 91918 的快照跨启动相连。历史 152586 的 KMD 准入、GPU 完成和首个异常仍缺直接回执。本轮 DWM 91 关联窗口调度；逐个 DWM DMA 包尚无指向该应用表面消费的直接令牌。",
+      "boundaries": {
+        "last_entry": {
+          "public_present_qpc": 16336745280,
+          "windows_kmt": {
+            "qpc": 16337061300,
+            "pid": 2572,
+            "tid": 5356,
+            "provider": "kernel",
+            "id": 184,
+            "version": 1,
+            "fields": {
+              "hContext": 1073742144,
+              "hWindow": 196746,
+              "VidPnSourceId": 4294967295,
+              "FlipInterval": 1,
+              "Flags": 67178625,
+              "ReturnStatus": 0,
+              "hSrcAllocHandle": 1073743680,
+              "hDstAllocHandle": 0
+            }
+          }
+        },
+        "last_return": {
+          "public_present_qpc": 16337064560,
+          "application_blt_retire": {
+            "qpc": 16337012550,
+            "pid": 4,
+            "tid": 928,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446659461282852304,
+              "PacketType": 0,
+              "SubmitSequence": 1,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446607229204635664
+            }
+          },
+          "latest_matched_dwm_wait": {
+            "qpc": 16337951111,
+            "pid": 4,
+            "tid": 932,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446659461289669296,
+              "PacketType": 4,
+              "SubmitSequence": 7310,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446607229207552016
+            }
+          },
+          "application_exit": 16343922714
+        },
+        "first_anomaly_or_missing": "异常启动 91476 的历史指针不能与 91918 的快照跨启动相连。历史 152586 的 KMD 准入、GPU 完成和首个异常仍缺直接回执。本轮 DWM 91 关联窗口调度；逐个 DWM DMA 包尚无指向该应用表面消费的直接令牌。"
+      },
+      "finished_utc": "2026-11-21T16:43:24.495372+00:00"
     }
   ],
   "progress": {
-    "total": 38,
+    "total": 39,
     "by_status": {
-      "实机通过": 13,
+      "实机通过": 14,
       "观测缺口": 9,
       "已有实机通过": 7,
       "故障开放": 4,
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 50,
-    "new_device_executions": 10
+    "registered_rounds": 51,
+    "new_device_executions": 11
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -3466,7 +3581,7 @@
         "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
         "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
       },
-      "followup_boundary": "下次正常公开图形用例可先发送标准 CAPTURE_STATE，保留该启动的对象、适配器和节点映射，再与同包的 Windows 提交、完成及 KMD 回执比对。",
+      "followup_boundary": "同场景正对照已覆盖源分页、52 字节 Blt、KMT 返回、DWM 适配器映射与实际围栏等待。故障仍需同号 KMD 准入或 GPU 完成，并保留异常前关闭或复位的位置。",
       "same_kernel_event_catalog": {
         "path": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
         "sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25"
@@ -3520,6 +3635,10 @@
       "validated_windows_context_state_capture": {
         "path": "windows-native-graphics/rounds/win-dwm-context-state-capture-20261121-01.result.json",
         "sha256": "7b643c3368a48af47af3b7cc16ecfd4d066ba3d2d2b312005633890158880093"
+      },
+      "original_fixture_with_context_capture": {
+        "path": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+        "sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf"
       }
     },
     "recent_ssh_outage": {

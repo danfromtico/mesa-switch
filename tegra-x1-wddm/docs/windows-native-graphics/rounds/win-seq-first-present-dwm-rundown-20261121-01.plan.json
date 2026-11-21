@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-first-present-dwm-rundown-20261121-01",
+  "contract_id": "WIN-SEQ-FIRST-PRESENT-DWM-ROUTE",
+  "windows_question": "WIN-SEQ-FIRST-PRESENT-DWM-ROUTE",
+  "owner": "DXGI、Windows VidSch、DWM 与正式 GM20B KMD",
+  "question": "原空窗口首次 Present 的同启动状态快照，能否直接区分 DWM 各适配器上的调度、围栏和实际完成？",
+  "method": "原普通窗口首次 Present 实测，加同一 Windows ETW 会话里的既有对象状态快照",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "应用明确为两个 BGRA 缓冲、旧式 DDI、无写入的首个 Present(1,0)。同启动核对 DWM 对象、适配器节点、至少一组实际提交完成，并保留应用可视区域、输入、退出和桌面连续性。",
+  "observations": [
+    "保留当前启动、DWM 创建时间、实际加载全哈希和设备状态。登记单次派发标识。复用归档里原签名客户端与观察器。",
+    "在新会话启用 DxgKrnl 和 Dwm-Core，调用 CAPTURE_STATE 并刷新落盘。仅在会话确认就绪后派发一次空画面原用例。",
+    "按同一 QPC、启动、PID/TID、HWND、hContext、适配器 LUID、节点、DMA 提交号、等待及退役核对。先保存异常和回收档案，再清理自己的任务及会话。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "2c7a91f6a636833fbd4312708061843e37c90029ae89ce27be636013047340b1",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "Capture-State.cs": "ca6bd0904fd45c703b3380fd374b2a6ffd2f4267c8cbb8c79e6283e855acec42",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f"
+    },
+    "runner_sha256": "c7971c72450c3f5f1c1437f6912f69938aea3d71d69024db5b1e34db60393a03",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-dwm-context-state-capture-20261121-01.result.json",
+        "sha256": "7b643c3368a48af47af3b7cc16ecfd4d066ba3d2d2b312005633890158880093"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-dwm-late-context-cross-archives-20261121-01.result.json",
+        "sha256": "603e9f83b4b696261b77aacf192d497358f6f55a76d3d8d0f513671d8b12f006"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+        "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
+        "sha256": "65e88f1d74336120718852de8347b208f3b9c935cb083550544e4d6d3ac5b417"
+      }
+    ],
+    "locked_boot": 91918,
+    "locked_dwm": 1472,
+    "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "source_archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/legacy-sequential-step4-01a1fbd1/runs/copy-sequential-1/input.zip",
+      "sha256": "863f388517cd989d5ef8278b5f7a680e787a1e681a9bc0e4086518b55f3938c3"
+    },
+    "manifest_sha256": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357"
+  }
+}
