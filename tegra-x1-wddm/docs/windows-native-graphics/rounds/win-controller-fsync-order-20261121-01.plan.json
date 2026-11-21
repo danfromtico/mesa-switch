@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "round_id": "win-controller-fsync-order-20261121-01",
+  "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+  "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+  "owner": "Windows dxgkrnl、实时 ETW 消费端和控制端文件系统",
+  "question": "正式原空窗口在首次公开 RETURN 之前，哪个已归属的 Windows 内核 Blt 或 Present 事件能取得控制端落盘确认？",
+  "method": "按既有双端回执复算控制端 Blt 166 写入的因果时限",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "经独立文件 ETL 核对的同线程内核 166 或 184，控制端 fsync 后的 Windows ACK 位于本次公开 CALL 至 RETURN 之间。只收到消费端回调时保留时间缺口。",
+  "observations": [
+    "确认 Mac 记录的 event_fsynced 时间位于 EVENT 载荷的 fsync 返回之后、ACK 发送之前。用实时记录与独立文件 ETL 的载荷、QPC、进程及线程关系核对目标 Blt 166。",
+    "按消息的真实产生、持久确认及接收顺序导出 Windows QPC 的上下界。独立核对写透试验中写文件完成至发出 EVENT 的程序顺序。",
+    "用经过预先声明的名义频率和相对频率偏差做条件性复算。只用平台同 QPC 或消息因果顺序正式裁决。区分 DXGI 43 提供程序停止与公开 RETURN 标记。"
+  ],
+  "inputs": {
+    "rounds": {
+      "win-present-live-20261121-02": {
+        "path": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+        "sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86"
+      },
+      "win-present-incall-20261121-01": {
+        "path": "windows-native-graphics/rounds/win-present-incall-20261121-01.result.json",
+        "sha256": "b345beaef3d845873136e56b83967e7bd678ded5a2b31425a4aac22017ef1703"
+      },
+      "win-present-incall-20261121-02": {
+        "path": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+        "sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701"
+      },
+      "win-present-local-blt-20261121-01": {
+        "path": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
+        "sha256": "f8f893c4d9a450c4a28716403ce2cc45bbdc1777325420d108c4efd8c7ccec27"
+      }
+    },
+    "wire": {
+      "win-present-live-20261121-02": "c5489ae1d5300854061fac782b9438e9fd6bfe52a0fb9cde7f15c4e72e50161b",
+      "win-present-incall-20261121-01": "4f39c952f687982a9d5a32903c2705d8330844cec4d9a0c0447d49e9110f7694",
+      "win-present-incall-20261121-02": "da281dcf2ce9192d68b645baae31dff061628e110354dce551d615c7a84fef37",
+      "win-present-local-blt-20261121-01": "2e67daff2d8db4488d8d523d5b766daa61c7b7dba28c759dfb0249830a3274ad"
+    },
+    "assumed_relative_rates_ppm": [
+      0,
+      1000
+    ],
+    "host_log_implementation": "b19472bf5157495b25cbcd7b04ea06012db15456c1b004aa6f044e6297ee3fa8",
+    "windows_observer_implementation": "669bf3c8609f547bf854b2d330a48dc2a9cb2144bf3595dca04b7c85c15dc0fe"
+  }
+}

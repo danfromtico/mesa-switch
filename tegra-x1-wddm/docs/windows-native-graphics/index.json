@@ -550,7 +550,7 @@
       "question": "正式原空窗口在首次公开 RETURN 之前，哪个已归属的 Windows 内核 Blt 或 Present 事件能取得控制端落盘确认？",
       "status": "观测缺口",
       "existing_observation": "采用 40 ms 名义轮询时四条事件在进程存活期间已获控制端确认，该次所有消费者回调均晚于公开 RETURN。诊断启动 86815 的 166 早于 KMD 入口 29.635 µs。",
-      "missing_observation": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。",
+      "missing_observation": "Blt 166 的控制端 fsync 已核对，仍未取得在公开 RETURN 前回到 Windows 的 ACK。",
       "pass_condition": "经独立文件 ETL 核对的同线程内核 166 或 184，控制端 fsync 后的 Windows ACK 位于本次公开 CALL 至 RETURN 之间。只收到消费端回调时保留时间缺口。",
       "evidence": [
         {
@@ -569,9 +569,11 @@
       ],
       "round_ids": [
         "win-present-incall-20261121-01",
-        "win-present-incall-20261121-02"
+        "win-present-incall-20261121-02",
+        "win-controller-fsync-order-20261121-01",
+        "win-present-focused-20261121-01"
       ],
-      "latest_observation": "正式原空窗口首次公开调用历时 15.363 ms。绑定进程后的短刷新区间累计 511 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 [166]，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 [42]。"
+      "latest_observation": "开机 91476 的同次空窗口中，CDD 286 的实时载荷与 display.etl 一致，Blt 166 与两份文件 ETL 一致。相对 DXGI 43，控制端 fsync 后的 Windows ACK 分别为 +30.028 ms 和 +30.439 ms。公开 RETURN 相对时差分别为 +30.001 ms 和 +30.412 ms。"
     },
     {
       "id": "WIN-BLT-LOCAL-FLUSH",
@@ -831,7 +833,7 @@
       "question": "受监控围栏的 GPU 信号、同值上下文等待与等待完成能否逐包关联？",
       "status": "观测缺口",
       "existing_observation": "历史序号 2 为值 1 的信号包。独立原生客户端同一围栏 CPU 映射 0→1，记录了 GPU 信号和 CPU 等待。",
-      "missing_observation": "原空窗口该值 1 对象仍缺同线程 GPU wait 包，非零 hAsyncEvent 的 CPU 事件是否被该线程实际等待或唤醒也缺回执。三份原故障 ETL 未留存可配对的 1069/297，不能把正式基线对象关系移到历史启动。",
+      "missing_observation": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。",
       "pass_condition": "解析安装版本事件模板，按上下文、对象、值和队列包身份匹配 signal 与 wait，证明依赖获满足后等待完成。",
       "evidence": [
         {
@@ -850,9 +852,10 @@
       ],
       "round_ids": [
         "win-empty-fence-20261121-01",
-        "win-empty-fence-identity-20261121-01"
+        "win-empty-fence-identity-20261121-01",
+        "win-fence-all-owners-20261121-01"
       ],
-      "latest_observation": "正式基线三份无写入窗口中，序号 2 的值 1 信号和源分配分页等待均属同一应用设备，但各自的同步对象指针不同。值 1 的对象从 0 开始，Windows 297 携带非零 hAsyncEvent，登记 CPU 事件通知。分页对象从 7000 开始，三份回执共 6 次在 UMD 驻留或映射回调与后续 S_OK 之间匹配到 hAsyncEvent=0 的实际 CPU 等待。"
+      "latest_observation": "六份正式无写入窗口从值 1 的围栏创建到首帧采集，全进程回读覆盖 772 条 GPU 等待API 与 195 条队列等待。三份原故障的 CALL 前缓冲另有 84 条 API 与 21 条队列等待。逐项配对对象和值后，均未发现等待目标为应用值 1 围栏的 GPU 请求。独立清屏对照匹配同一对象和值的 API、等待包、另一上下文及退役。"
     },
     {
       "id": "WIN-MONITORED-CPU",
@@ -1916,6 +1919,77 @@
         "first_anomaly_or_missing": "未找到覆盖原三次的板级或串口捕获。当前 UARTB 如用于后续取证，需有实际外部接收和与同一次公开 CALL 对齐的回执。"
       },
       "finished_utc": "2026-11-21T14:51:06.500574+00:00"
+    },
+    {
+      "round_id": "win-controller-fsync-order-20261121-01",
+      "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+      "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+      "method": "按既有双端回执复算控制端 Blt 166 写入的因果时限",
+      "plan": "windows-native-graphics/rounds/win-controller-fsync-order-20261121-01.plan.json",
+      "plan_sha256": "31202a77b243819ce8847957bcd8a4fbf22db9fb2ef03d72b259ba6d4d8bcb24",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T14:56:24.389387+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-controller-fsync-order-20261121-01.result.json",
+      "result_sha256": "7efbad357fd730ec1f4d439cb27b9c83a7733f53e32aeda6d7862d90463e9040",
+      "status": "观测缺口",
+      "finding": "四份正式基线回执中，三次控制端 Blt 166 的 fsync 按消息或程序顺序确认发生在 DXGI 43 之后。高分辨率对照的同 QPC 因果范围为 DXGI 43 前 3.986 ms 至之后 4.010 ms。该次原始 Mac 写入时点仍横跨 DXGI 返回边界。",
+      "missing_observation": "还需同一次空窗口首次呈现里，由控制端完成 fsync 后的 Windows 确认先于 DXGI 43 或公开 RETURN。无法直接把 Mac 单调钟写入时间减去 Windows QPC。",
+      "boundaries": {
+        "last_entry": "四份回执均有和独立文件 ETL 原载荷核对一致的 Blt 166。",
+        "last_return": "三次可证实控制端写入在 DXGI 停止之后。另一次只有跨越该边界的范围。",
+        "first_anomaly_or_missing": "还需同一次空窗口首次呈现里，由控制端完成 fsync 后的 Windows 确认先于 DXGI 43 或公开 RETURN。无法直接把 Mac 单调钟写入时间减去 Windows QPC。"
+      },
+      "finished_utc": "2026-11-21T14:56:48.848553+00:00"
+    },
+    {
+      "round_id": "win-present-focused-20261121-01",
+      "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+      "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+      "method": "同一正式空窗口首次 Present 的 CDD 与 Blt 控制端持久确认",
+      "plan": "windows-native-graphics/rounds/win-present-focused-20261121-01.plan.json",
+      "plan_sha256": "80cc452aad71b384e6438292a02f0f07089f2997751c040688e8b0f02d77e59f",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T14:58:52.276619+00:00",
+      "device_executions": 1,
+      "result": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+      "result_sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000",
+      "status": "观测缺口",
+      "finding": "开机 91476 的同次空窗口中，CDD 286 的实时载荷与 display.etl 一致，Blt 166 与两份文件 ETL 一致。相对 DXGI 43，控制端 fsync 后的 Windows ACK 分别为 +30.028 ms 和 +30.439 ms。公开 RETURN 相对时差分别为 +30.001 ms 和 +30.412 ms。",
+      "missing_observation": "Blt 166 的控制端 fsync 已核对，仍未取得在公开 RETURN 前回到 Windows 的 ACK。",
+      "boundaries": {
+        "last_entry": "同一绘图线程和 Blt 目标的 DxgKrnl 286 CDD 前置分配与 166 Blt 载荷。",
+        "last_return": {
+          "dxgi_stop_qpc": 187365344875,
+          "public_return_qpc": 187365345394,
+          "CDD_ack": 187365921420,
+          "Blt_ack": 187365929299
+        },
+        "first_anomaly_or_missing": "Blt 166 的控制端 fsync 已核对，仍未取得在公开 RETURN 前回到 Windows 的 ACK。"
+      },
+      "finished_utc": "2026-11-21T15:00:39.693415+00:00"
+    },
+    {
+      "round_id": "win-fence-all-owners-20261121-01",
+      "contract_id": "WIN-FENCE-WAIT",
+      "windows_question": "WIN-FENCE-WAIT",
+      "method": "复核应用值 1 围栏在全部进程及上下文中的 GPU 等待",
+      "plan": "windows-native-graphics/rounds/win-fence-all-owners-20261121-01.plan.json",
+      "plan_sha256": "76749e34343d423ab21af2110cbd60475e3856d55ae1272891fe83b4754e9388",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:01:03.770187+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
+      "result_sha256": "c24a31504ff6dead5b01ea833bcf58ede36173ec78f8fbcb03af9d890f29cc96",
+      "status": "观测缺口",
+      "finding": "六份正式无写入窗口从值 1 的围栏创建到首帧采集，全进程回读覆盖 772 条 GPU 等待API 与 195 条队列等待。三份原故障的 CALL 前缓冲另有 84 条 API 与 21 条队列等待。逐项配对对象和值后，均未发现等待目标为应用值 1 围栏的 GPU 请求。独立清屏对照匹配同一对象和值的 API、等待包、另一上下文及退役。",
+      "missing_observation": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。",
+      "boundaries": {
+        "last_entry": "原次和正式控制的值 1 信号各自按对象、上下文与队列序号归属。",
+        "last_return": "六份正式空窗口有信号退役。清屏正对照还验证另一上下文的同值 GPU 等待退役。",
+        "first_anomaly_or_missing": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。"
+      },
+      "finished_utc": "2026-11-21T15:01:49.836236+00:00"
     }
   ],
   "progress": {
@@ -1928,8 +2002,8 @@
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 28,
-    "new_device_executions": 6
+    "registered_rounds": 31,
+    "new_device_executions": 7
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -1979,6 +2053,10 @@
         {
           "path": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
           "sha256": "f8f893c4d9a450c4a28716403ce2cc45bbdc1777325420d108c4efd8c7ccec27"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+          "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
         }
       ],
       "resume_condition": "发现覆盖原次的故障转储、独立串口或板级记录，或正式条件下再次自然出现同症状并留有同次调用后的持久记录。核对首个失败步骤和组件后再进入原场景的三次修复验收。",
@@ -2612,6 +2690,31 @@
         "flush_relative_to_first_dxgi_stop_ms": 5.71
       },
       "tested_at_commit": "1c81a3e572ce8b1ea93830e876516e20dbfb4abc"
+    },
+    {
+      "round": "win-present-focused-20261121-01",
+      "result": {
+        "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+        "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+      },
+      "mode": "--focused-blt-receipt",
+      "source_files": [
+        {
+          "repo_path": "tegra-x1-wddm/tools/live_present_receipt.c",
+          "sha256": "eac36561de62858453cf456ac6d8e50d121060119f76a799854244959a22e63d"
+        },
+        {
+          "repo_path": "tegra-x1-wddm/tools/live_present_receiver.py",
+          "sha256": "c74c93e9e738c20889488d9e39264c90f7739235bdc0c6dd020be7986527b664"
+        }
+      ],
+      "observer_sha256": "1947e12a480e0f0d2f9b30b6c3772f2f4ff426961271764b35e48c232f47f59b",
+      "scope": "同一正式无写入窗口调用。对照正式组件与独立文件 ETL。",
+      "observed_spacing_ms": 1.355,
+      "ack_relative_to_dxgi_stop_ms": {
+        "286": 30.028385,
+        "166": 30.43875
+      }
     }
   ],
   "diagnostic_blt_order": {
@@ -2779,5 +2882,23 @@
     ],
     "historical_cause": "仍缺证（未确立），原三次异常启动复位起因维持开放。",
     "main_verification": "本会话从原文件复算了 856064 字节及填充范围，并核对五条历史 KMD 快照与五个正常窗口的 DMA 归属。原异常的 CALL 后步骤、信号事件的等待唤醒与同表面 DWM 消费均按相应回执保留缺口。"
+  },
+  "controller_fsync_order": {
+    "path": "windows-native-graphics/rounds/win-controller-fsync-order-20261121-01.result.json",
+    "sha256": "7efbad357fd730ec1f4d439cb27b9c83a7733f53e32aeda6d7862d90463e9040"
+  },
+  "focused_receipt_review": {
+    "model": "gemini-4-neon-high",
+    "effort": "high",
+    "sources": {
+      "live_present_receipt.c": "eac36561de62858453cf456ac6d8e50d121060119f76a799854244959a22e63d",
+      "live_present_receiver.py": "c74c93e9e738c20889488d9e39264c90f7739235bdc0c6dd020be7986527b664"
+    },
+    "response": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/live-receipt-focused/review/response.json",
+    "response_sha256": "9f2ef5f6c2eb91c64b90c34debedb3780d9b93189b972770b82f7600969078a6"
+  },
+  "fence_wait_all_owners": {
+    "path": "windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
+    "sha256": "c24a31504ff6dead5b01ea833bcf58ede36173ec78f8fbcb03af9d890f29cc96"
   }
 }

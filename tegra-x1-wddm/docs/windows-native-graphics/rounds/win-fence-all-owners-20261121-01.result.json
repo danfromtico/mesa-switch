@@ -1,0 +1,1052 @@
+{
+  "schema": 1,
+  "round_id": "win-fence-all-owners-20261121-01",
+  "contract_id": "WIN-FENCE-WAIT",
+  "windows_question": "WIN-FENCE-WAIT",
+  "plan_sha256": "76749e34343d423ab21af2110cbd60475e3856d55ae1272891fe83b4754e9388",
+  "status": "观测缺口",
+  "finding": "六份正式无写入窗口从值 1 的围栏创建到首帧采集，全进程回读覆盖 772 条 GPU 等待API 与 195 条队列等待。三份原故障的 CALL 前缓冲另有 84 条 API 与 21 条队列等待。逐项配对对象和值后，均未发现等待目标为应用值 1 围栏的 GPU 请求。独立清屏对照匹配同一对象和值的 API、等待包、另一上下文及退役。",
+  "missing_observation": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。",
+  "device_executions": 0,
+  "evidence": {
+    "stats": {
+      "formal_no_writes": {
+        "244": 195,
+        "295": 772
+      },
+      "historical_pre_call": {
+        "244": 21,
+        "295": 84
+      }
+    },
+    "raw_local_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/win-fence-all-owners-20261121-01.raw.json",
+    "raw_sha256": "969a0606a2f461fe1f1d699a9b8f8cee494b74ab4c9bf6e5e855e1dd25288caa",
+    "verifier_sha256": "f95ced9931786810c8f2ae89fda034b4279196f95d29d3f86f635e792ead6469",
+    "healthy": [
+      {
+        "case": "win-empty-present-20261121-01",
+        "boot": 91476,
+        "draw_pid": 5992,
+        "draw_tid": 5988,
+        "dwm": 1400,
+        "phase": [
+          94844483447,
+          94863412892
+        ],
+        "public_call": 94861147189,
+        "public_return": 94861380548,
+        "first_capture": 94863412892,
+        "archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+        "raw_etl_sha256": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+        "queue_signal": {
+          "qpc": 94844513570,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100106939808,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169642841536
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169621553168
+          }
+        },
+        "signal_done": {
+          "qpc": 94844561325,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100106939808,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169621553168
+          }
+        },
+        "creation": {
+          "qpc": 94844483447,
+          "pid": 5992,
+          "tid": 5988,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169642841536,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "next_lifetime_events": [],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [
+          {
+            "request": {
+              "qpc": 94844516499,
+              "pid": 5992,
+              "tid": 5988,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200693776,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169642841536
+                ],
+                "MonitoredFenceValue": [
+                  1
+                ],
+                "hAsyncEvent": 696,
+                "Flags": 0
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "reported_handles": [
+          {
+            "record": {
+              "qpc": 94844492366,
+              "pid": 5992,
+              "tid": 5988,
+              "provider": "kernel",
+              "id": 1069,
+              "version": 1,
+              "fields": {
+                "pSyncObject": 18446706169642841536,
+                "KMTHandle": 1073743232,
+                "pDxgDevice": 18446611100200693776
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 34,
+          "295": 128,
+          "297": 224,
+          "1069": 5
+        }
+      },
+      {
+        "case": "win-present-live-20261121-02",
+        "boot": 91476,
+        "draw_pid": 5540,
+        "draw_tid": 7812,
+        "dwm": 1400,
+        "phase": [
+          131629541790,
+          131648431776
+        ],
+        "public_call": 131646464982,
+        "public_return": 131646719229,
+        "first_capture": 131648431776,
+        "archive_sha256": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308",
+        "raw_etl_sha256": "14e6750d7823aaeaebda2eafca17da5dbb4f7de7b12cc499459dce10e006c259",
+        "queue_signal": {
+          "qpc": 131629577336,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100137971104,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169620434032
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169645563984
+          }
+        },
+        "signal_done": {
+          "qpc": 131629626625,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100137971104,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169645563984
+          }
+        },
+        "creation": {
+          "qpc": 131629541790,
+          "pid": 5540,
+          "tid": 7812,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169620434032,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "next_lifetime_events": [],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [
+          {
+            "request": {
+              "qpc": 131629583152,
+              "pid": 5540,
+              "tid": 7812,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100200628240,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169620434032
+                ],
+                "MonitoredFenceValue": [
+                  1
+                ],
+                "hAsyncEvent": 676,
+                "Flags": 0
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "reported_handles": [
+          {
+            "record": {
+              "qpc": 131629548343,
+              "pid": 5540,
+              "tid": 7812,
+              "provider": "kernel",
+              "id": 1069,
+              "version": 1,
+              "fields": {
+                "pSyncObject": 18446706169620434032,
+                "KMTHandle": 1073743232,
+                "pDxgDevice": 18446611100200628240
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 27,
+          "295": 108,
+          "297": 193,
+          "1069": 5
+        }
+      },
+      {
+        "case": "win-present-incall-20261121-01",
+        "boot": 91476,
+        "draw_pid": 7576,
+        "draw_tid": 2116,
+        "dwm": 1400,
+        "phase": [
+          138464170099,
+          138483343654
+        ],
+        "public_call": 138481770248,
+        "public_return": 138482065231,
+        "first_capture": 138483343654,
+        "archive_sha256": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4",
+        "raw_etl_sha256": "c5e687c2200f6624b125b94608e2b4a07e06431a5a76c05800c788125a68b567",
+        "queue_signal": {
+          "qpc": 138464206818,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100108721568,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169652652192
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169616541072
+          }
+        },
+        "signal_done": {
+          "qpc": 138464263911,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100108721568,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169616541072
+          }
+        },
+        "creation": {
+          "qpc": 138464170099,
+          "pid": 7576,
+          "tid": 2116,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169652652192,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "next_lifetime_events": [],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [
+          {
+            "request": {
+              "qpc": 138464213689,
+              "pid": 7576,
+              "tid": 2116,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100107790240,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169652652192
+                ],
+                "MonitoredFenceValue": [
+                  1
+                ],
+                "hAsyncEvent": 696,
+                "Flags": 0
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "reported_handles": [
+          {
+            "record": {
+              "qpc": 138464178465,
+              "pid": 7576,
+              "tid": 2116,
+              "provider": "kernel",
+              "id": 1069,
+              "version": 1,
+              "fields": {
+                "pSyncObject": 18446706169652652192,
+                "KMTHandle": 1073743232,
+                "pDxgDevice": 18446611100107790240
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 26,
+          "295": 104,
+          "297": 247,
+          "1069": 5
+        }
+      },
+      {
+        "case": "win-present-incall-20261121-02",
+        "boot": 91476,
+        "draw_pid": 7924,
+        "draw_tid": 1936,
+        "dwm": 1400,
+        "phase": [
+          146136005227,
+          146156604104
+        ],
+        "public_call": 146154976455,
+        "public_return": 146155271427,
+        "first_capture": 146156604104,
+        "archive_sha256": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b",
+        "raw_etl_sha256": "8f80c9125966dabe5fc425af9b23291802572730423c2567f250990993154d57",
+        "queue_signal": {
+          "qpc": 146136038990,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100109440736,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169599317392
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169618978080
+          }
+        },
+        "signal_done": {
+          "qpc": 146136110756,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100109440736,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169618978080
+          }
+        },
+        "creation": {
+          "qpc": 146136005227,
+          "pid": 7924,
+          "tid": 1936,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169599317392,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "next_lifetime_events": [],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [
+          {
+            "request": {
+              "qpc": 146136044857,
+              "pid": 7924,
+              "tid": 1936,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100204786720,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169599317392
+                ],
+                "MonitoredFenceValue": [
+                  1
+                ],
+                "hAsyncEvent": 684,
+                "Flags": 0
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "reported_handles": [
+          {
+            "record": {
+              "qpc": 146136011058,
+              "pid": 7924,
+              "tid": 1936,
+              "provider": "kernel",
+              "id": 1069,
+              "version": 1,
+              "fields": {
+                "pSyncObject": 18446706169599317392,
+                "KMTHandle": 1073743232,
+                "pDxgDevice": 18446611100204786720
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 38,
+          "295": 152,
+          "297": 209,
+          "1069": 5
+        }
+      },
+      {
+        "case": "win-present-local-blt-20261121-01",
+        "boot": 91476,
+        "draw_pid": 584,
+        "draw_tid": 1664,
+        "dwm": 1400,
+        "phase": [
+          153037422972,
+          153056731652
+        ],
+        "public_call": 153054747396,
+        "public_return": 153055116440,
+        "first_capture": 153056731652,
+        "archive_sha256": "61cb1ec4e568a2cf37ff874058725ec6ce6c6e140de4a4760d98b21d2c9f4570",
+        "raw_etl_sha256": "86a91af28d68d9767c53ad9c25cfe82c7c717842ca3e3b4157d875787c8db960",
+        "queue_signal": {
+          "qpc": 153037450917,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100109651408,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169652853152
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169625292816
+          }
+        },
+        "signal_done": {
+          "qpc": 153037503031,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100109651408,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169625292816
+          }
+        },
+        "creation": {
+          "qpc": 153037422972,
+          "pid": 584,
+          "tid": 1664,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169652853152,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "next_lifetime_events": [],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [
+          {
+            "request": {
+              "qpc": 153037456415,
+              "pid": 584,
+              "tid": 1664,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100199490592,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169652853152
+                ],
+                "MonitoredFenceValue": [
+                  1
+                ],
+                "hAsyncEvent": 684,
+                "Flags": 0
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "reported_handles": [
+          {
+            "record": {
+              "qpc": 153037429569,
+              "pid": 584,
+              "tid": 1664,
+              "provider": "kernel",
+              "id": 1069,
+              "version": 1,
+              "fields": {
+                "pSyncObject": 18446706169652853152,
+                "KMTHandle": 1073743232,
+                "pDxgDevice": 18446611100199490592
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 30,
+          "295": 120,
+          "297": 218,
+          "1069": 5
+        }
+      },
+      {
+        "case": "win-present-focused-20261121-01",
+        "boot": 91476,
+        "draw_pid": 4928,
+        "draw_tid": 2288,
+        "dwm": 1400,
+        "phase": [
+          187340352409,
+          187367311670
+        ],
+        "public_call": 187364567406,
+        "public_return": 187365345394,
+        "first_capture": 187367311670,
+        "archive_sha256": "26d9aa874b04112779b8e02c4e27cdeb1239b78b94df10fbae91c5f24c47befd",
+        "raw_etl_sha256": "13b09d8ed69e66a0f795842e841f6029639881467cc4dd524b16b542381217db",
+        "queue_signal": {
+          "qpc": 187340386263,
+          "pid": 4928,
+          "tid": 2288,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100183145936,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169652880992
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169643390176
+          }
+        },
+        "signal_done": {
+          "qpc": 187340444136,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100183145936,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169643390176
+          }
+        },
+        "creation": {
+          "qpc": 187340352409,
+          "pid": 4928,
+          "tid": 2288,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169652880992,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "next_lifetime_events": [],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [
+          {
+            "request": {
+              "qpc": 187340394220,
+              "pid": 4928,
+              "tid": 2288,
+              "provider": "kernel",
+              "id": 297,
+              "version": 0,
+              "fields": {
+                "hDevice": 18446611100207994784,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169652880992
+                ],
+                "MonitoredFenceValue": [
+                  1
+                ],
+                "hAsyncEvent": 552,
+                "Flags": 0
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "reported_handles": [
+          {
+            "record": {
+              "qpc": 187340360119,
+              "pid": 4928,
+              "tid": 2288,
+              "provider": "kernel",
+              "id": 1069,
+              "version": 1,
+              "fields": {
+                "pSyncObject": 18446706169652880992,
+                "KMTHandle": 1073743232,
+                "pDxgDevice": 18446611100207994784
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 40,
+          "295": 160,
+          "297": 146,
+          "1069": 5
+        }
+      },
+      {
+        "case": "win-first-present-20261121-01",
+        "boot": 91476,
+        "draw_pid": 5364,
+        "draw_tid": 3528,
+        "dwm": 1400,
+        "phase": [
+          92554864733,
+          92574542876
+        ],
+        "public_call": 92572521356,
+        "public_return": 92572981150,
+        "first_capture": 92574542876,
+        "archive_sha256": "e2c65e8f0b47d65fc3af8717ea2c78e4d1ca62994c1e59a75006b0cbe07d4634",
+        "raw_etl_sha256": "e7f04ea3af7938dfb867e89576fa1a29815a4fb093b4c2ada9bb56c701ca1471",
+        "queue_signal": {
+          "qpc": 92571134125,
+          "pid": 5364,
+          "tid": 3528,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446611100136078800,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446706169632096944
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446706169586315344
+          }
+        },
+        "signal_done": {
+          "qpc": 92571152205,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100136078800,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169586315344
+          }
+        },
+        "creation": {
+          "qpc": 92554864733,
+          "pid": 5364,
+          "tid": 3528,
+          "provider": "kernel",
+          "id": 290,
+          "version": 0,
+          "fields": {
+            "hAdapter": 18446706169594454016,
+            "hSyncObject": 18446706169632096944,
+            "Reason": 0,
+            "Flags": 3,
+            "SharedHandle": 0,
+            "InitialValue": 0
+          }
+        },
+        "next_lifetime_events": [],
+        "gpu_wait_api": [
+          {
+            "request": {
+              "qpc": 92571135768,
+              "pid": 5364,
+              "tid": 3528,
+              "provider": "kernel",
+              "id": 295,
+              "version": 0,
+              "fields": {
+                "hContext": 18446611100182531536,
+                "ObjectCount": 1,
+                "ObjectArray": [
+                  18446706169632096944
+                ],
+                "MonitoredFenceValue": [
+                  1
+                ]
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "gpu_wait_packets": [
+          {
+            "request": {
+              "qpc": 92571135373,
+              "pid": 5364,
+              "tid": 3528,
+              "provider": "kernel",
+              "id": 244,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100182531536,
+                "SubmitSequence": 5,
+                "Flags": 4,
+                "hSyncObject": 18446706169632096944,
+                "FenceValue": 1,
+                "pQueuePacket": 18446706169636939040
+              }
+            },
+            "completion": {
+              "qpc": 92571152639,
+              "pid": 4,
+              "tid": 888,
+              "provider": "kernel",
+              "id": 180,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100182531536,
+                "PacketType": 4,
+                "SubmitSequence": 5,
+                "bPreempted": 0,
+                "bTimeouted": 0,
+                "pQueuePacket": 18446706169636939040
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "cpu_wait_api": [],
+        "reported_handles": [
+          {
+            "record": {
+              "qpc": 92554962971,
+              "pid": 5364,
+              "tid": 3528,
+              "provider": "kernel",
+              "id": 1069,
+              "version": 1,
+              "fields": {
+                "pSyncObject": 18446706169632096944,
+                "KMTHandle": 1073742720,
+                "pDxgDevice": 18446611100193304592
+              }
+            },
+            "actor": "原绘图线程"
+          }
+        ],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 32,
+          "295": 123,
+          "297": 240,
+          "1069": 7
+        }
+      }
+    ],
+    "historical": [
+      {
+        "case": "Ddi20Case-261120-122121366257",
+        "boot": 82058,
+        "pid": 1812,
+        "tid": 6340,
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "raw_etl_sha256": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+        "signal_packet": {
+          "qpc": 13064001407,
+          "pid": 1812,
+          "tid": 6340,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446618779004575184,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446639661614582272
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446639661602902032
+          }
+        },
+        "call_qpc": 13070969930,
+        "retained_scope": [
+          13060771322,
+          13070620864
+        ],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [],
+        "reported_handles": [],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 5,
+          "295": 20
+        }
+      },
+      {
+        "case": "Ddi20Case-261120-122937785753",
+        "boot": 82221,
+        "pid": 4672,
+        "tid": 4712,
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "raw_etl_sha256": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+        "signal_packet": {
+          "qpc": 2331215182,
+          "pid": 4672,
+          "tid": 4712,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446675373214805456,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446716605819176784
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446716605818211104
+          }
+        },
+        "call_qpc": 2352403757,
+        "retained_scope": [
+          2326604219,
+          2351884088
+        ],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [],
+        "reported_handles": [],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 10,
+          "295": 40
+        }
+      },
+      {
+        "case": "Ddi20Case-261120-123625091734",
+        "boot": 82382,
+        "pid": 5828,
+        "tid": 7656,
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "raw_etl_sha256": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+        "signal_packet": {
+          "qpc": 2354181618,
+          "pid": 5828,
+          "tid": 7656,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446659970587016656,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446682569747834240
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446682569734855456
+          }
+        },
+        "call_qpc": 2361927374,
+        "retained_scope": [
+          2350243593,
+          2361443485
+        ],
+        "gpu_wait_api": [],
+        "gpu_wait_packets": [],
+        "cpu_wait_api": [],
+        "reported_handles": [],
+        "unparsed_templates": [],
+        "all_pid_event_counts": {
+          "244": 6,
+          "295": 24
+        }
+      }
+    ],
+    "boundaries": {
+      "last_entry": "原次和正式控制的值 1 信号各自按对象、上下文与队列序号归属。",
+      "last_return": "六份正式空窗口有信号退役。清屏正对照还验证另一上下文的同值 GPU 等待退役。",
+      "first_anomaly_or_missing": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。"
+    }
+  }
+}

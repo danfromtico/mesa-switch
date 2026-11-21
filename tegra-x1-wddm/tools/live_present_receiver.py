@@ -8,10 +8,14 @@ import subprocess
 import threading
 import time
 
-EXPECTED = {('DXGI',42), ('DxgKrnl',166), ('DxgKrnl',184), ('DXGI',43)}
+EXPECTED = frozenset({('DXGI',42), ('DxgKrnl',166), ('DxgKrnl',184), ('DXGI',43)})
+FOCUSED_BLT = frozenset({('DxgKrnl',286), ('DxgKrnl',166)})
 
 class ReceiptPipe:
-    def __init__(self, command, directory):
+    def __init__(self, command, directory, *, expected_events=EXPECTED):
+        self.expected_events = frozenset(expected_events)
+        if self.expected_events not in (EXPECTED, FOCUSED_BLT):
+            raise ValueError('Unsupported collector event filter')
         self.directory = Path(directory)
         self.ready = threading.Event()
         self.finished = threading.Event()
@@ -66,7 +70,7 @@ class ReceiptPipe:
                     self.ready.set()
                 elif words[:1]==['EVENT'] and len(words)==11 and self.ready.is_set():
                     n=int(words[1]);key=(words[2],int(words[3]));payload=bytes.fromhex(words[10])
-                    if n != len(event_keys)+1 or key not in EXPECTED or not 0<len(payload)==int(words[9])<=512:
+                    if n != len(event_keys)+1 or key not in self.expected_events or not 0<len(payload)==int(words[9])<=512:
                         raise ValueError('Unexpected sequence, payload or provider')
                     if n>48 or final_sequence is not None:raise ValueError('Collector delivery bound exceeded')
                     event_keys[n]=key
@@ -77,7 +81,7 @@ class ReceiptPipe:
                     if n != len(acknowledgments)+1 or n not in event_keys or qpc<=0 or state not in (0,258):
                         raise ValueError('Invalid Windows acknowledgement')
                     acknowledgments[n]=qpc
-                    if not requested_drain and {event_keys[k] for k in acknowledgments}==EXPECTED:
+                    if not requested_drain and {event_keys[k] for k in acknowledgments}==self.expected_events:
                         self.send('DRAIN')
                         requested_drain=True
                 elif words[:1]==['DRAINED'] and len(words)==2:

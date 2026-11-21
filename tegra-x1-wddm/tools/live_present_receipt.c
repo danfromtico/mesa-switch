@@ -37,6 +37,7 @@ typedef struct {
     LONG acknowledged;
     BOOL draining;
     BOOL completed;
+    BOOL focused_blt;
     DWORD process_trace_status;
     HANDLE journal;
     char journal_token[13];
@@ -179,9 +180,10 @@ static void WINAPI on_event(PEVENT_RECORD record)
         return;
     const USHORT id = h->EventDescriptor.Id;
     const char *provider;
-    if (IsEqualGUID(&h->ProviderId, &dxgi) && (id == 42 || id == 43))
+    if (!r->focused_blt && IsEqualGUID(&h->ProviderId, &dxgi) && (id == 42 || id == 43))
         provider = "DXGI";
-    else if (IsEqualGUID(&h->ProviderId, &dxgkrnl) && (id == 166 || id == 184))
+    else if (IsEqualGUID(&h->ProviderId, &dxgkrnl) &&
+             (id == 166 || id == (r->focused_blt ? 286 : 184)))
         provider = "DxgKrnl";
     else
         return;
@@ -314,7 +316,9 @@ int wmain(int argc, wchar_t **argv)
         return 2;
     BOOL early_flush = argc == 4;
     BOOL local_blt = early_flush && wcscmp(argv[3], L"--local-blt-receipt") == 0;
-    BOOL precise = local_blt || (early_flush && wcscmp(argv[3], L"--precise-early-flush") == 0);
+    BOOL focused_blt = early_flush && wcscmp(argv[3], L"--focused-blt-receipt") == 0;
+    BOOL precise = local_blt || focused_blt ||
+        (early_flush && wcscmp(argv[3], L"--precise-early-flush") == 0);
     if (early_flush && !precise && wcscmp(argv[3], L"--early-flush") != 0) return 2;
     wchar_t directory[MAX_PATH], pid_path[MAX_PATH], image[MAX_PATH];
     DWORD count = GetFullPathNameW(argv[2], MAX_PATH, directory, NULL);
@@ -327,6 +331,7 @@ int wmain(int argc, wchar_t **argv)
 
     Receiver receiver = {0};
     Receiver *r = &receiver;
+    r->focused_blt = focused_blt;
     r->journal = INVALID_HANDLE_VALUE;
     r->stopping = CreateEventW(NULL, TRUE, FALSE, NULL);
     LARGE_INTEGER freq;
@@ -375,12 +380,13 @@ int wmain(int argc, wchar_t **argv)
     r->reader = OpenTraceW(&log);
     HANDLE reader = NULL, acks = NULL, process = NULL;
     if (r->reader == INVALID_PROCESSTRACE_HANDLE) status = GetLastError();
-    if (!status) status = enable(session, &dxgi, 42, 43);
-    if (!status) status = enable(session, &dxgkrnl, 166, 184);
+    if (!status && !focused_blt) status = enable(session, &dxgi, 42, 43);
+    if (!status) status = enable(session, &dxgkrnl, 166, focused_blt ? 286 : 184);
     if (!status && !(reader = CreateThread(NULL, 0, read_events, r, 0, NULL))) status = GetLastError();
     if (!status && !(acks = CreateThread(NULL, 0, read_acks, r, 0, NULL))) status = GetLastError();
     ULONGLONG early_deadline = 0;
     ULONG early_count = 0;
+    const DWORD early_interval = focused_blt ? 1 : 2;
     LONGLONG first_early_qpc = 0, last_early_qpc = 0;
     if (!status) {
         if (printf("READY %lu %lld %lld\n", GetCurrentProcessId(), (long long)freq.QuadPart,
@@ -413,7 +419,7 @@ int wmain(int argc, wchar_t **argv)
                     last_early_qpc = ticks();
                 }
             }
-            DWORD interval = in_early_window ? 2 : (process ? 40 : 10);
+            DWORD interval = in_early_window ? early_interval : (process ? 40 : 10);
             DWORD wait;
             if (pulse && in_early_window) {
                 LARGE_INTEGER due;
@@ -456,8 +462,8 @@ int wmain(int argc, wchar_t **argv)
            log.EventsLost, r->published, r->acknowledged);
     fflush(stdout);
     if (early_flush)
-        fprintf(stderr, "EARLY_FLUSH 2 2000 %lu %lld %lld\n",
-                early_count, (long long)first_early_qpc, (long long)last_early_qpc);
+        fprintf(stderr, "EARLY_FLUSH %lu 2000 %lu %lld %lld\n",
+                early_interval, early_count, (long long)first_early_qpc, (long long)last_early_qpc);
     if (pulse) {
         fprintf(stderr, "EARLY_TIMER high_resolution\n");
         CloseHandle(pulse);

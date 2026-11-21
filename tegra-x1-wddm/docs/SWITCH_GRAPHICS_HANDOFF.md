@@ -44,6 +44,12 @@
 
 同次 DBG2 描述的调试口是 NVIDIA 16550 的 `\_SB.UAR2`，与 DSDT 的 NVDA0100 设备对应。BCD 全局调试类型为 Local。控制端未取得来自该 UARTB 的采集回执，三次历史故障仍缺能与各自 CALL 对齐的板级证据。[调试口与控制端只读核对](windows-native-graphics/rounds/win-reset-external-transport-20261121-01.result.json)
 
+先前四轮中，三轮的控制端 Blt 166 写入按消息因果顺序晚于 DXGI 43。高分辨率对照的上下界为 DXGI 43 前 3.986 ms 至之后 4.010 ms。[既有回执的写入时限](windows-native-graphics/rounds/win-controller-fsync-order-20261121-01.result.json)
+
+随后在正式启动 91476，用同一驱动和应用，只实时转发该绘图进程的 CDD 286、Blt 166。两条记录均完成控制端 fsync，Windows 收到 ACK 的时点分别比 DXGI 43 +30.028 ms 和 +30.439 ms。回执附同窗口、适配器及 CDD 到 Blt 目标分配关系。[定向实时见证与完整 ETL 对照](windows-native-graphics/rounds/win-present-focused-20261121-01.result.json)
+
+六份正式空窗口的会话覆盖所有进程和线程，共有 772 条 GPU 等待 API 和 195 条队列等待。三份历史故障在 CALL 前存有 84 条 API 和 21 条队列等待。两组均未发现等待目标与应用值 1 围栏匹配。独立清屏对照确认另一上下文的同对象、同值等待可以被当前解码识别并配对退役。[全进程围栏回执](windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

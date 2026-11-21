@@ -31,6 +31,7 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-original-process-lifetime-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-platform-reset-path-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-reset-external-transport-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result.",
@@ -2050,6 +2051,77 @@
           "first_anomaly_or_missing": "未找到覆盖原三次的板级或串口捕获。当前 UARTB 如用于后续取证，需有实际外部接收和与同一次公开 CALL 对齐的回执。"
         },
         "finished_utc": "2026-11-21T14:51:06.500574+00:00"
+      },
+      {
+        "round_id": "win-controller-fsync-order-20261121-01",
+        "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+        "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+        "method": "按既有双端回执复算控制端 Blt 166 写入的因果时限",
+        "plan": "windows-native-graphics/rounds/win-controller-fsync-order-20261121-01.plan.json",
+        "plan_sha256": "31202a77b243819ce8847957bcd8a4fbf22db9fb2ef03d72b259ba6d4d8bcb24",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:56:24.389387+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-controller-fsync-order-20261121-01.result.json",
+        "result_sha256": "7efbad357fd730ec1f4d439cb27b9c83a7733f53e32aeda6d7862d90463e9040",
+        "status": "观测缺口",
+        "finding": "四份正式基线回执中，三次控制端 Blt 166 的 fsync 按消息或程序顺序确认发生在 DXGI 43 之后。高分辨率对照的同 QPC 因果范围为 DXGI 43 前 3.986 ms 至之后 4.010 ms。该次原始 Mac 写入时点仍横跨 DXGI 返回边界。",
+        "missing_observation": "还需同一次空窗口首次呈现里，由控制端完成 fsync 后的 Windows 确认先于 DXGI 43 或公开 RETURN。无法直接把 Mac 单调钟写入时间减去 Windows QPC。",
+        "boundaries": {
+          "last_entry": "四份回执均有和独立文件 ETL 原载荷核对一致的 Blt 166。",
+          "last_return": "三次可证实控制端写入在 DXGI 停止之后。另一次只有跨越该边界的范围。",
+          "first_anomaly_or_missing": "还需同一次空窗口首次呈现里，由控制端完成 fsync 后的 Windows 确认先于 DXGI 43 或公开 RETURN。无法直接把 Mac 单调钟写入时间减去 Windows QPC。"
+        },
+        "finished_utc": "2026-11-21T14:56:48.848553+00:00"
+      },
+      {
+        "round_id": "win-present-focused-20261121-01",
+        "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+        "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+        "method": "同一正式空窗口首次 Present 的 CDD 与 Blt 控制端持久确认",
+        "plan": "windows-native-graphics/rounds/win-present-focused-20261121-01.plan.json",
+        "plan_sha256": "80cc452aad71b384e6438292a02f0f07089f2997751c040688e8b0f02d77e59f",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T14:58:52.276619+00:00",
+        "device_executions": 1,
+        "result": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+        "result_sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000",
+        "status": "观测缺口",
+        "finding": "开机 91476 的同次空窗口中，CDD 286 的实时载荷与 display.etl 一致，Blt 166 与两份文件 ETL 一致。相对 DXGI 43，控制端 fsync 后的 Windows ACK 分别为 +30.028 ms 和 +30.439 ms。公开 RETURN 相对时差分别为 +30.001 ms 和 +30.412 ms。",
+        "missing_observation": "Blt 166 的控制端 fsync 已核对，仍未取得在公开 RETURN 前回到 Windows 的 ACK。",
+        "boundaries": {
+          "last_entry": "同一绘图线程和 Blt 目标的 DxgKrnl 286 CDD 前置分配与 166 Blt 载荷。",
+          "last_return": {
+            "dxgi_stop_qpc": 187365344875,
+            "public_return_qpc": 187365345394,
+            "CDD_ack": 187365921420,
+            "Blt_ack": 187365929299
+          },
+          "first_anomaly_or_missing": "Blt 166 的控制端 fsync 已核对，仍未取得在公开 RETURN 前回到 Windows 的 ACK。"
+        },
+        "finished_utc": "2026-11-21T15:00:39.693415+00:00"
+      },
+      {
+        "round_id": "win-fence-all-owners-20261121-01",
+        "contract_id": "WIN-FENCE-WAIT",
+        "windows_question": "WIN-FENCE-WAIT",
+        "method": "复核应用值 1 围栏在全部进程及上下文中的 GPU 等待",
+        "plan": "windows-native-graphics/rounds/win-fence-all-owners-20261121-01.plan.json",
+        "plan_sha256": "76749e34343d423ab21af2110cbd60475e3856d55ae1272891fe83b4754e9388",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T15:01:03.770187+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
+        "result_sha256": "c24a31504ff6dead5b01ea833bcf58ede36173ec78f8fbcb03af9d890f29cc96",
+        "status": "观测缺口",
+        "finding": "六份正式无写入窗口从值 1 的围栏创建到首帧采集，全进程回读覆盖 772 条 GPU 等待API 与 195 条队列等待。三份原故障的 CALL 前缓冲另有 84 条 API 与 21 条队列等待。逐项配对对象和值后，均未发现等待目标为应用值 1 围栏的 GPU 请求。独立清屏对照匹配同一对象和值的 API、等待包、另一上下文及退役。",
+        "missing_observation": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。",
+        "boundaries": {
+          "last_entry": "原次和正式控制的值 1 信号各自按对象、上下文与队列序号归属。",
+          "last_return": "六份正式空窗口有信号退役。清屏正对照还验证另一上下文的同值 GPU 等待退役。",
+          "first_anomaly_or_missing": "六份正式空窗口中的值 1 对象只有 CPU 异步通知登记，实际线程唤醒缺回执。原三次 CALL 后的 GPU 等待、内核接收和复位原因仍无同次记录。"
+        },
+        "finished_utc": "2026-11-21T15:01:49.836236+00:00"
       }
     ]
   }
