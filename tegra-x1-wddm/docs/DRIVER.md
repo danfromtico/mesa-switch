@@ -15,7 +15,7 @@ callbacks. `GR_FIRMWARE` is a local directory containing NVIDIA's external
 are supplied by the operator, not stored in this repository. `ACR_FIRMWARE`
 contains the external NVIDIA 32.7.6 `nv_acr_ucode_prod.bin`, `pmu_bl.bin`,
 `gpmu_ucode_image.bin`, `gpmu_ucode_desc.bin`, `pmu_sig.bin` and `fecs_sig.bin`.
-Both sets are required for the secure T214 probe. Run this from the Mesa root.
+The alternate HS ACR from Switchroot Noble’s installed `nvidia-l4t-firmware` 32.3.1-20191209225816 package is `/lib/firmware/gm20b/acr_ucode.bin` (SHA-256 `f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841`). Stage these original bytes under the Windows name `nv_acr_ucode_prod.bin` alongside the same companion files. Both sets are required for the secure T214 probe. Run this from the Mesa root.
 
 ```sh
 python3 tegra-x1-wddm/tools/build.py \
