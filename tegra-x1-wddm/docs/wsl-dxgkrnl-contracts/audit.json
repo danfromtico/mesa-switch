@@ -59,7 +59,7 @@
     "source_tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
     "comment_count": 452,
     "hardware_rounds": 9,
-    "checker_sha256": "9b59343bc29bd120480289ece7c9101d23878d87f3518f420a03060ce893f31e",
+    "checker_sha256": "1e90e74e7bd258266ec03aeb987092688480b4d3c306aca9bd5268c5241c6176",
     "source_bytes_verified": true,
     "all_evidence_hashes_and_fields_verified": true,
     "negative_cases": [
@@ -314,5 +314,24 @@
       "PAL4_TEXTURE_CHECKPOINT_20261121.json": "585863a96d6c63caeb88b73b140b68291bbd58550c40d9b894d84a9b2cad101b",
       "PAL4_TEXTURE_CONSTRUCTOR_BOUNDARY_20261121.json": "0e4cc32de50c72da555321b08e4fbb9099c0478c3a22b29178c194eaf52739aa"
     }
+  },
+  "windows_output_check": {
+    "original_run": "https://github.com/ruje0504-2/mesa-switch-woa/actions/runs/44906444435",
+    "original_error": "UnicodeEncodeError at final status printing under CP1252",
+    "cp1252_summary": "452 comment records, 9 single-question hardware rounds, 3 satisfied, 0 violated, 449 unknown",
+    "historical_range_rechecked": [
+      "9ccbc5492c1a2019edaf3cae0d1a7ac38d45110d",
+      "560635688fbcc77d7d2fe2f1ce5e3ad90b67ac2f"
+    ],
+    "historical_stdout_encoding": "utf-8",
+    "reviewed_files_sha256": {
+      "tegra-x1-wddm/tools/check_dxgkrnl_contracts.py": "1e90e74e7bd258266ec03aeb987092688480b4d3c306aca9bd5268c5241c6176",
+      ".github/workflows/switch-graphics-baseline.yml": "33acf17afada0f27b6a3c1a2062d5135dbf18cc99add95c519862ce4eff44dee"
+    },
+    "reviewer": "gemini-4-neon-xhigh",
+    "effort": "xhigh",
+    "request_sha256": "74ed44f258713357515600b786747fab197ffb4da564cfff8ecea92a654dd679",
+    "native_response_sha256": "1e31fc45eb3f8d5f3ac81a0c51c1fc776bf7b68291919dfa9f21fef684a9bac0",
+    "verdict": "PASS"
   }
 }

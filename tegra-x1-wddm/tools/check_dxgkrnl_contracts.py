@@ -188,7 +188,9 @@ def main():
     ids = check_sources(catalog, args.source_directory)
     rounds = check_rounds(section, ids, {f["id"] for f in ledger["faults"]})
     check_evidence(catalog, ids, rounds)
-    print(f"{len(ids)} comment records, {len(rounds)} single-question hardware rounds", dict(Counter(r["status"] for r in ids.values())))
+    counts = Counter(row["status"] for row in ids.values())
+    print(f"{len(ids)} comment records, {len(rounds)} single-question hardware rounds, "
+          f"{counts['已满足']} satisfied, {counts['已违反']} violated, {counts['未知']} unknown")
 
 
 if __name__ == "__main__":
