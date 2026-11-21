@@ -122,6 +122,9 @@ struct wsi_win32_swapchain {
    struct wsi_win32_image     images[0];
 };
 
+DEBUG_GET_ONCE_BOOL_OPTION(mesa_wsi_win32_direct_dib,
+                           "MESA_WSI_WIN32_DIRECT_DIB", true)
+
 VKAPI_ATTR VkBool32 VKAPI_CALL
 wsi_GetPhysicalDeviceWin32PresentationSupportKHR(VkPhysicalDevice physicalDevice,
                                                  uint32_t queueFamilyIndex)
@@ -841,16 +844,6 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
       }
    }
 
-   /* The private timer only caps the producer when the previous present did
-    * not already block in the compositor; DwmFlush() below measures its own
-    * wait and feeds the decision back through the pacer, so the timer wait
-    * and the VBlank wait never chain into a fixed double period. */
-   if (!wsi_win32_pacer_wait(&chain->pacer, chain->pacer.compositor_paced)) {
-      chain->status = VK_ERROR_SURFACE_LOST_KHR;
-      wsi_win32_set_image_idle(chain, image);
-      return chain->status;
-   }
-
    const uint8_t *ptr = (const uint8_t *)image->base.cpu_map;
    /* A 32-bit BI_RGB DIB stores B, G, R, X bytes on Windows. */
    const VkFormat format = drv_chain->image_info.create.format;
@@ -862,7 +855,10 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
 
    /* Eligible BGRA frames skip the CPU row copy: GDI reads the mapped rows
     * in place. Everything else (other formats, padded strides, the debug
-    * pixel walk) keeps the generic swizzle path. */
+    * pixel walk) keeps the generic swizzle path. Note that enabling
+    * WSI_DEBUG=win32 forces the generic path, so pixel-level debugging
+    * changes the submission route; compare against
+    * MESA_WSI_WIN32_DIRECT_DIB=false when triaging visuals. */
    const bool direct_dib = chain->direct_dib && !(WSI_DEBUG & WSI_DEBUG_WIN32) &&
       (format == VK_FORMAT_B8G8R8A8_UNORM || format == VK_FORMAT_B8G8R8A8_SRGB) &&
       wsi_win32_direct_dib_tight_stride(width, height,
@@ -877,7 +873,7 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
                                    src, image->base.row_pitches[0],
                                    width, 1);
          } else {
-            memcpy(dst, src, (uint64_t)width * 4);
+            memcpy(dst, src, (size_t)width * 4);
          }
          if (WSI_DEBUG & WSI_DEBUG_WIN32) {
             for (unsigned x = 0; x < width; x++) {
@@ -925,28 +921,43 @@ wsi_win32_queue_present(struct wsi_swapchain *drv_chain,
       chain->status = VK_ERROR_SURFACE_LOST_KHR;
 
    /* GdiFlush only drains GDI commands. Join the compositor's presentation
-    * before releasing the image. Measure the wait: when it blocked for at
-    * least half a period the compositor already paced this swapchain and the
-    * timer stays idle next frame; when it returned immediately (occluded or
-    * idle desktop) the timer remains the producer cap, so queueing stays
-    * bounded either way. The deadline is re-anchored to the completed
-    * composition to keep the fallback timer phase-locked to the display. */
+    * before releasing the image, and measure that wait: when it blocked at
+    * all and this present completed a full display period after the previous
+    * one, the compositor is already pacing this swapchain. Otherwise (the
+    * call returned immediately because the window is occluded or the
+    * desktop is idle, or the desktop refreshes faster than the cap) the
+    * private timer caps the producer below, so queueing stays bounded
+    * either way and the two waits never chain into a fixed double period.
+    * A paced present also re-anchors the fallback deadline to the completed
+    * composition, keeping the timer phase-locked to the display. */
+   bool compositor_paced = false;
    if (chain->pacer.timer && chain->status == VK_SUCCESS) {
       LARGE_INTEGER before, after;
-      chain->pacer.compositor_paced = false;
       if (QueryPerformanceCounter(&before)) {
          if (FAILED(DwmFlush())) {
             chain->status = VK_ERROR_SURFACE_LOST_KHR;
          } else if (QueryPerformanceCounter(&after)) {
-            chain->pacer.compositor_paced =
+            compositor_paced =
                wsi_win32_pacer_compositor_paced(&chain->pacer,
-                                                after.QuadPart - before.QuadPart);
-            if (chain->pacer.compositor_paced)
+                                                after.QuadPart - before.QuadPart,
+                                                after.QuadPart);
+            wsi_win32_pacer_presented(&chain->pacer, after.QuadPart);
+            if (compositor_paced)
                wsi_win32_pacer_sync_compositor(&chain->pacer, after.QuadPart);
          }
       } else if (FAILED(DwmFlush())) {
          chain->status = VK_ERROR_SURFACE_LOST_KHR;
       }
+   }
+
+   /* Producer cap for frames the compositor did not pace. Running after the
+    * compositor join keeps a single phase reference and leaves the VBlank
+    * wait as the only pacing on a display-locked desktop; a late frame
+    * still resets the deadline instead of accumulating catch-up slots. */
+   if (!compositor_paced && chain->pacer.timer &&
+       chain->status == VK_SUCCESS &&
+       !wsi_win32_pacer_wait(&chain->pacer)) {
+      chain->status = VK_ERROR_SURFACE_LOST_KHR;
    }
 
    if (WSI_DEBUG & WSI_DEBUG_WIN32) {
@@ -1115,8 +1126,7 @@ wsi_win32_surface_create_swapchain(
    chain->base.queue_present = wsi_win32_queue_present;
    chain->base.present_mode = wsi_swapchain_get_present_mode(wsi_device, create_info);
    chain->extent = create_info->imageExtent;
-   chain->direct_dib = !supports_dxgi &&
-      debug_get_bool_option("MESA_WSI_WIN32_DIRECT_DIB", true);
+   chain->direct_dib = !supports_dxgi && debug_get_option_mesa_wsi_win32_direct_dib();
 
    chain->wsi = wsi;
    chain->status = VK_SUCCESS;

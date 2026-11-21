@@ -34,19 +34,21 @@ wsi_win32_get_surface_image_count_bounds(bool sw,
  * timer, without changing the system timer resolution or polling the CPU.
  * A late frame resets the deadline instead of accumulating catch-up frames.
  *
- * The deadline is kept phase-locked to the compositor: DwmFlush() measures
- * its own wait after every present, and when that wait blocked for at
- * least half a period the timer stays idle for the next frame. The full
- * timer wait and the VBlank wait therefore never chain into a fixed double
- * period, and skipping the timer is verified per frame instead of assumed. */
+ * The deadline is kept phase-locked to the compositor. Every present
+ * measures its own DwmFlush() wait; a present that blocked in the
+ * compositor and completed one display period after the previous one is
+ * display-locked, and the timer stays idle for it. The timer only caps the
+ * producer when the compositor returns immediately (occluded or idle
+ * desktop) or the desktop refreshes faster than the cap, so the timer wait
+ * and the VBlank wait never chain into a fixed double period and queueing
+ * stays bounded either way. */
 struct wsi_win32_pacer {
    HANDLE timer;
    int64_t frequency;
    int64_t period;
    int64_t next;
-   /* The previous present blocked in the compositor at least half a period,
-    * so the compositor already provided display-cadence backpressure. */
-   bool compositor_paced;
+   /* QPC of the previous present's compositor completion, 0 if none. */
+   int64_t last_present;
 };
 
 static inline BOOL
@@ -65,6 +67,13 @@ wsi_win32_pacer_init(struct wsi_win32_pacer *pacer, uint32_t fps)
    return pacer->timer != NULL;
 }
 
+/* Remember when this present completed in the compositor. */
+static inline void
+wsi_win32_pacer_presented(struct wsi_win32_pacer *pacer, int64_t completed_at)
+{
+   pacer->last_present = completed_at;
+}
+
 /* Anchor the fallback deadline to a completed composition so the timer
  * stays phase-locked to the display cadence instead of free-running. */
 static inline void
@@ -74,20 +83,27 @@ wsi_win32_pacer_sync_compositor(struct wsi_win32_pacer *pacer,
    pacer->next = composed_at + pacer->period;
 }
 
-/* Classify a measured DwmFlush() wait: blocking at least half a period
- * means the compositor presented on its own cadence and the timer must not
- * add a second wait on top of it. */
+/* Classify a measured DwmFlush() wait. The compositor must have blocked at
+ * all (an occluded or idle desktop returns within microseconds), a previous
+ * present must exist to measure the cadence against, and the completed
+ * frame must sit a full display period after the previous one, so on a
+ * desktop that refreshes faster than the cap the timer still limits the
+ * producer instead of the fast compositor cadence. */
 static inline bool
 wsi_win32_pacer_compositor_paced(const struct wsi_win32_pacer *pacer,
-                                 int64_t elapsed)
+                                 int64_t dwm_elapsed, int64_t completed_at)
 {
-   return elapsed >= pacer->period / 2;
+   return pacer->timer != NULL && pacer->period > 1 &&
+          pacer->last_present > 0 &&
+          dwm_elapsed >= pacer->period / 16 &&
+          completed_at - pacer->last_present >=
+             pacer->period - pacer->period / 8;
 }
 
 static inline BOOL
-wsi_win32_pacer_wait(struct wsi_win32_pacer *pacer, bool compositor_paced)
+wsi_win32_pacer_wait(struct wsi_win32_pacer *pacer)
 {
-   if (!pacer->timer || compositor_paced)
+   if (!pacer->timer)
       return TRUE;
    LARGE_INTEGER now;
    if (!QueryPerformanceCounter(&now))

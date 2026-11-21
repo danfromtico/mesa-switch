@@ -30,8 +30,9 @@ int main(void)
 
    struct wsi_win32_pacer pacer;
    CHECK(wsi_win32_pacer_init(&pacer, 0) && !pacer.timer);
-   CHECK(wsi_win32_pacer_wait(&pacer, false));
-   CHECK(wsi_win32_pacer_wait(&pacer, true));
+   CHECK(wsi_win32_pacer_wait(&pacer));
+   /* Without a timer nothing is ever classified as compositor-paced. */
+   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, 1000, 1000));
    wsi_win32_pacer_finish(&pacer);
 
    CHECK(wsi_win32_pacer_init(&pacer, 60));
@@ -39,52 +40,60 @@ int main(void)
    CHECK(QueryPerformanceCounter(&start));
    const uint64_t cpu_start = cpu_ticks();
    for (unsigned i = 0; i < 60; ++i)
-      CHECK(wsi_win32_pacer_wait(&pacer, false));
+      CHECK(wsi_win32_pacer_wait(&pacer));
    CHECK(QueryPerformanceCounter(&end));
    const uint64_t cpu_elapsed = cpu_ticks() - cpu_start;
    CHECK(end.QuadPart - start.QuadPart >= 59 * pacer.period);
    const double wall_seconds = (double)(end.QuadPart - start.QuadPart) / pacer.frequency;
    CHECK(cpu_elapsed / 10000000.0 < wall_seconds / 2.0 + 0.02);
 
-   /* A compositor-paced frame neither waits nor moves the deadline: the
-    * VBlank wait already provided the full backpressure for that frame. */
-   LARGE_INTEGER composed;
-   CHECK(QueryPerformanceCounter(&composed));
-   wsi_win32_pacer_sync_compositor(&pacer, composed.QuadPart);
-   CHECK(pacer.next == composed.QuadPart + pacer.period);
-   CHECK(QueryPerformanceCounter(&start));
-   CHECK(wsi_win32_pacer_wait(&pacer, true));
-   CHECK(QueryPerformanceCounter(&end));
-   CHECK(end.QuadPart - start.QuadPart < pacer.period / 4);
-   CHECK(pacer.next == composed.QuadPart + pacer.period);
+   /* Compositor classification. A present is display-locked when DwmFlush()
+    * blocked at all and it completed a full display period after the
+    * previous present; this holds no matter how much of the period the
+    * GPU/GDI work consumed before DwmFlush() ran. */
+   LARGE_INTEGER now;
+   CHECK(QueryPerformanceCounter(&now));
+   const int64_t period = pacer.period;
+   wsi_win32_pacer_presented(&pacer, now.QuadPart - period);
+   CHECK(wsi_win32_pacer_compositor_paced(&pacer, period, now.QuadPart));
+   CHECK(wsi_win32_pacer_compositor_paced(&pacer, period / 2, now.QuadPart));
+   CHECK(wsi_win32_pacer_compositor_paced(&pacer, period / 16, now.QuadPart));
+   /* An occluded or idle desktop returns from DwmFlush() within
+    * microseconds, so the producer cap must stay armed. */
+   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, period / 16 - 1, now.QuadPart));
+   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, 0, now.QuadPart));
+   /* A desktop refreshing twice as fast as the cap completes presents only
+    * half a period apart; the timer keeps limiting the producer. */
+   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, period, now.QuadPart - period / 2));
+   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, period,
+                                           now.QuadPart - (period - period / 8) + 1));
+   /* Nothing recorded yet: any first present is unpaced by default. */
+   struct wsi_win32_pacer fresh;
+   CHECK(wsi_win32_pacer_init(&fresh, 60));
+   CHECK(!wsi_win32_pacer_compositor_paced(&fresh, period, now.QuadPart));
+   wsi_win32_pacer_finish(&fresh);
 
    /* The fallback timer stays phase-locked to the compositor: after a paced
-    * frame it waits out only the remainder of the display period instead of
-    * stacking a full timer period on top of the VBlank wait. */
-   CHECK(wsi_win32_pacer_wait(&pacer, false));
+    * present it waits out only the remainder of the display period instead
+    * of stacking a full timer period on top of the VBlank wait. */
+   wsi_win32_pacer_sync_compositor(&pacer, now.QuadPart);
+   CHECK(pacer.next == now.QuadPart + period);
+   CHECK(wsi_win32_pacer_wait(&pacer));
    CHECK(QueryPerformanceCounter(&end));
-   CHECK(end.QuadPart >= composed.QuadPart + pacer.period);
-   CHECK(end.QuadPart < composed.QuadPart + 2 * pacer.period);
-
-   /* Classification boundary: blocking at least half a period in the
-    * compositor counts as paced; anything shorter leaves the timer armed. */
-   CHECK(wsi_win32_pacer_compositor_paced(&pacer, pacer.period));
-   CHECK(wsi_win32_pacer_compositor_paced(&pacer, pacer.period / 2));
-   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, pacer.period / 2 - 1));
-   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, 0));
+   CHECK(end.QuadPart >= now.QuadPart + period);
+   CHECK(end.QuadPart < now.QuadPart + 2 * period);
 
    /* A late producer gets one slot, never a burst of accumulated slots. */
    Sleep(50);
-   CHECK(wsi_win32_pacer_wait(&pacer, false));
+   CHECK(wsi_win32_pacer_wait(&pacer));
    const int64_t first_slot = pacer.next;
-   CHECK(wsi_win32_pacer_wait(&pacer, false));
-   CHECK(pacer.next >= first_slot + pacer.period);
+   CHECK(wsi_win32_pacer_wait(&pacer));
+   CHECK(pacer.next >= first_slot + period);
 
    CHECK(CloseHandle(pacer.timer));
    CHECK(QueryPerformanceCounter(&end));
    pacer.next = end.QuadPart + pacer.frequency;
-   CHECK(!wsi_win32_pacer_wait(&pacer, false)); /* Timer failure is not success. */
-   CHECK(wsi_win32_pacer_wait(&pacer, true));   /* A paced frame cannot fail. */
+   CHECK(!wsi_win32_pacer_wait(&pacer)); /* Timer failure is not success. */
    pacer.timer = NULL;
    wsi_win32_pacer_finish(&pacer);
    printf("PASS: 60-Hz cap, blocking wait, late-frame pacing, compositor phase-lock, "

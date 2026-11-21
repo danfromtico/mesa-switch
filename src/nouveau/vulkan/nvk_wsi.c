@@ -68,9 +68,9 @@ nvk_init_wsi(struct nvk_physical_device *pdev)
     * host-visible linear image (the WaitForFences in queue_present stays),
     * and GDI submits the mapped pixels. Do not declare DXGI support or drop
     * that GPU wait to fake a zero-readback path. GDI itself does not
-    * throttle the producer even with FIFO selected, so enable the
-    * compositor-locked pacing (measured DwmFlush plus the phase-locked
-    * fallback timer) at the desktop refresh rate. */
+    * throttle the producer even with FIFO selected, so enable a 60 Hz
+    * producer cap whose deadline phase-locks to the measured compositor
+    * cadence (DwmFlush) instead of free-running. */
    pdev->wsi_device.win32.cpu_present_fps = 60;
 #endif
    pdev->wsi_device.supports_modifiers =

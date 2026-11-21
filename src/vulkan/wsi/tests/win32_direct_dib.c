@@ -115,13 +115,17 @@ static void check_predicates(void)
    CHECK(!wsi_win32_direct_dib_tight_stride(640, 0, 640u * 4));
    CHECK(!wsi_win32_direct_dib_tight_stride(640, 360, 640u * 4 + 4)); /* padded stride */
    CHECK(!wsi_win32_direct_dib_tight_stride(640, 360, 640u * 4 - 4)); /* truncated */
-   CHECK(!wsi_win32_direct_dib_tight_stride(INT32_MAX, 4, (uint64_t)INT32_MAX * 4 + 4));
+   /* Width, height, and total byte limits are all enforced. */
+   CHECK(!wsi_win32_direct_dib_tight_stride((uint32_t)INT32_MAX + 1, 1,
+                                            ((uint64_t)INT32_MAX + 1) * 4));
+   CHECK(!wsi_win32_direct_dib_tight_stride(1, (uint32_t)INT32_MAX + 1, 4));
+   CHECK(wsi_win32_direct_dib_tight_stride(16384, 16384, 16384ull * 4));
+   CHECK(!wsi_win32_direct_dib_tight_stride(65536, 16384, 65536ull * 4));
+   CHECK(!wsi_win32_direct_dib_tight_stride(32768, 16384, 32768ull * 4));
 
-   /* A DC whose clip box no longer covers the target is not ready; the
-    * production path then keeps the generic blit for this frame and never
-    * issues the direct submit, so a clipped transfer can only arise from a
-    * clip change racing the present, which the submit's line count reports
-    * and the caller retries idempotently through the DIB section. */
+   /* Only a simple rectangular clip region that covers the target is
+    * ready. A fully excluded DC, or one whose region is complex (its
+    * bounding box can still cover the target), keeps the generic blit. */
    HDC dc = CreateCompatibleDC(NULL);
    CHECK(dc != NULL);
    BITMAPINFO info = {0};
@@ -134,22 +138,36 @@ static void check_predicates(void)
    void *bits = NULL;
    HBITMAP dib = CreateDIBSection(dc, &info, DIB_RGB_COLORS, &bits, NULL, 0);
    CHECK(dib && bits);
-   SelectObject(dc, dib);
+   HGDIOBJ previous = SelectObject(dc, dib);
+   CHECK(previous && previous != HGDI_ERROR);
    CHECK(wsi_win32_direct_dib_dc_ready(dc, 8, 8));
    ExcludeClipRect(dc, 0, 0, 8, 8);
    CHECK(!wsi_win32_direct_dib_dc_ready(dc, 8, 8));
-   DeleteObject(dib);
-   DeleteDC(dc);
+   SelectClipRgn(dc, NULL);
+   /* Excluding an interior band leaves a two-rectangle region whose
+    * bounding box still spans the whole bitmap; the readiness check must
+    * agree with whatever region kind the platform reports for it. */
+   ExcludeClipRect(dc, 0, 3, 8, 5);
+   {
+      RECT box;
+      const int kind = GetClipBox(dc, &box);
+      const bool simple_cover = kind == SIMPLEREGION &&
+         box.left <= 0 && box.top <= 0 && box.right >= 8 && box.bottom >= 8;
+      CHECK(wsi_win32_direct_dib_dc_ready(dc, 8, 8) == simple_cover);
+   }
+   SelectObject(dc, previous);
+   CHECK(DeleteObject(dib));
+   CHECK(DeleteDC(dc));
 }
 
 int main(void)
 {
    check_predicates();
    int failed = 0;
-   failed |= check_size(640, 360);
-   failed |= check_size(1, 1);
-   failed |= check_size(127, 61);
-   failed |= check_size(3, 257);
+   failed += check_size(640, 360);
+   failed += check_size(1, 1);
+   failed += check_size(127, 61);
+   failed += check_size(3, 257);
    if (failed) {
       fprintf(stderr, "FAIL: %d size cases mismatched\n", failed);
       return 1;
