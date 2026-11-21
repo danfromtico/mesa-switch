@@ -189,6 +189,9 @@ if ($Action -eq 'Publish') {
              'tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1','tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1')
     $prefix=$Qualification.Substring(0,$Qualification.LastIndexOf('/')+1)
     $paths+=@(@($e.Data.cases)+@($e.Data.system_log.restarts)|ForEach-Object {$prefix+$_.evidence_file})
+    if($e.Data.PSObject.Properties['baseline_cases']){
+        $paths+=@($e.Data.baseline_cases | ForEach-Object {$prefix+$_.evidence_file})
+    }
     if($activeComparison.Count){
         $paths+=@($priorBaseline.qualification)
         $prior=Read-SwitchPolicyJson (Join-Path $root $priorBaseline.qualification)

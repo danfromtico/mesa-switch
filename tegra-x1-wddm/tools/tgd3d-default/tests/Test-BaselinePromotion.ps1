@@ -138,13 +138,39 @@ try{
         previous_control_sha256=$priorReport.cases[0].evidence_sha256;inherited_faults=@($sampleFault.id)})
     Assert-SwitchPromotion $compared $verified $proof $candidate $directory $previous $priorFile
     Write-Output 'PASS verified driver fix with a previously working control and an inherited open fault'
+    $pair=Clone $case
+    $pair.before_boot=90
+    $pair.after_boot=90
+    $pair.evidence_sha256='6'*64
+    $pair.evidence_file='baseline-case.json'
+    $pair|Add-Member -NotePropertyMembers @{source_commit=$previous.source_commit;components=$previous.components;scenario='direct DIB'}
+    $scoped=Clone $e
+    $scoped|Add-Member -NotePropertyName baseline_cases -NotePropertyValue @($pair)
+    $scoped.cases[0]|Add-Member -NotePropertyMembers @{
+        scenario=$pair.scenario;baseline_case_sha256=$pair.evidence_sha256
+        comparison_result='no-regression';comparison_reason='Matched visible output, input and desktop return'}
+    $comparisonLedger=Clone $compared
+    $comparisonLedger.baseline_comparisons[0]|Add-Member -NotePropertyName fault_assessments -NotePropertyValue @(
+        [pscustomobject]@{fault_id=$sampleFault.id;relation='disjoint';reason='The DIB case presents using GDI';test_sha256=$case.evidence_sha256})
+    Assert-SwitchPromotion $comparisonLedger $scoped $proof $candidate $directory $previous $priorFile
+    Write-Output 'PASS matched presentation comparison with an inherited open fault'
+    $bad=Clone $scoped;$bad.baseline_cases[0].components.'tg_nvk_arm64.dll'='0'*64
+    Block 'baseline comparison used a different NVK' {Assert-SwitchPromotion $comparisonLedger $bad $proof $candidate $directory $previous $priorFile} 'wrong profile or boot'
+    $bad=Clone $scoped;$bad.cases[0].scenario='unrelated scenario'
+    Block 'candidate and baseline scenarios differ' {Assert-SwitchPromotion $comparisonLedger $bad $proof $candidate $directory $previous $priorFile} 'does not match'
+    $bad=Clone $scoped;$bad.cases[0].comparison_result='regression'
+    Block 'candidate comparison regressed' {Assert-SwitchPromotion $comparisonLedger $bad $proof $candidate $directory $previous $priorFile} 'Missing passing comparison'
+    $bad=Clone $scoped;$bad.baseline_cases[0].evidence_sha256=$case.evidence_sha256;$bad.cases[0].baseline_case_sha256=$case.evidence_sha256
+    Block 'same receipt claimed on both boots' {Assert-SwitchPromotion $comparisonLedger $bad $proof $candidate $directory $previous $priorFile} 'distinct hardware receipt'
+    $bad=Clone $comparisonLedger;$bad.baseline_comparisons[0].fault_assessments=@()
+    Block 'open fault with no assessment' {Assert-SwitchPromotion $bad $scoped $proof $candidate $directory $previous $priorFile} 'Every inherited fault'
     $bad=Clone $compared;$bad.faults+=@($second)
     Block 'a new fault was not inherited' {Assert-SwitchPromotion $bad $verified $proof $candidate $directory $previous $priorFile} 'New open fault'
     $bad=Clone $compared;$bad.baseline_comparisons[0].previous_control_sha256='9'*64
     Block 'previous control must belong to the accepted qualification' {Assert-SwitchPromotion $bad $verified $proof $candidate $directory $previous $priorFile} 'Missing working control'
     $bad=Clone $previous;$bad.qualification_sha256='9'*64
     Block 'unaccepted previous qualification' {Assert-SwitchPromotion $compared $verified $proof $candidate $directory $bad $priorFile} 'differs from the accepted'
-    Block 'unverified change cannot inherit faults' {Assert-SwitchPromotion $compared $e $proof $candidate $directory $previous $priorFile} 'requires a verified fix'
+    Block 'presentation without paired hardware evidence cannot inherit faults' {Assert-SwitchPromotion $compared $e $proof $candidate $directory $previous $priorFile} 'Missing matched baseline cases'
     $bad=Clone $verified;$bad.system_log.abnormal_events=@([pscustomobject]@{id=41;record=111;boot_record=110})
     Block 'inherited faults cannot mask a new restart' {Assert-SwitchPromotion $compared $bad $proof $candidate $directory $previous $priorFile} 'abnormal'
     $bad=Clone $verified

@@ -160,6 +160,48 @@ function Assert-SwitchVerifiedFix($Ledger, $Evidence) {
     if ($control.Count -ne 1 -or $binding.control_sha256 -in $original) { throw 'Verified fix needs a distinct working-path control on the candidate boot' }
 }
 
+# Compare the changed behavior on the selected profile and on the one-use desktop.
+# The prior qualification anchors the profile. Its original tests need not have
+# exercised the scenarios measured specifically for this promotion.
+function Assert-SwitchPresentationComparison($Evidence, $Previous, $Comparison) {
+    $controls = @{}
+    if ($Evidence.baseline_cases -isnot [array] -or !$Evidence.baseline_cases.Count) { throw 'Missing matched baseline cases' }
+    foreach ($control in $Evidence.baseline_cases) {
+        Assert-SwitchPassingCase $control
+        foreach ($field in @('output_verified','normal_exit','desktop_available')) {
+            if ($control.$field -isnot [bool] -or !$control.$field) { throw "Baseline case lacks $field" }
+        }
+        if ($control.source_commit -cne $Previous.source_commit -or !(Test-SwitchSameProfile $control.components $Previous.components) -or
+            $control.after_boot -ge $Evidence.trial.boot_record) { throw 'Baseline case has the wrong profile or boot' }
+        if ([string]::IsNullOrWhiteSpace($control.scenario) -or $controls.ContainsKey($control.evidence_sha256)) { throw 'Missing scenario or duplicate baseline receipt' }
+        $controls[$control.evidence_sha256] = $control
+    }
+    $used = @{}
+    $candidateHashes = @{}
+    foreach ($case in $Evidence.cases) {
+        Assert-SwitchHash $case.baseline_case_sha256
+        $control = $controls[$case.baseline_case_sha256]
+        if (!$control -or $control.scenario -cne $case.scenario -or $case.before_boot -ne $Evidence.trial.boot_record) {
+            throw 'Candidate case does not match its baseline scenario or trial boot'
+        }
+        if ($controls.ContainsKey($case.evidence_sha256) -or $candidateHashes.ContainsKey($case.evidence_sha256)) { throw 'Candidate needs a distinct hardware receipt' }
+        if ($case.comparison_result -cne 'no-regression' -or [string]::IsNullOrWhiteSpace($case.comparison_reason)) { throw 'Missing passing comparison against the baseline case' }
+        $used[$case.baseline_case_sha256] = $true
+        $candidateHashes[$case.evidence_sha256] = $true
+    }
+    if ($used.Count -ne $controls.Count) { throw 'Baseline case has no candidate measurement' }
+
+    $assessed = @{}
+    if ($Comparison.fault_assessments -isnot [array]) { throw 'Missing inherited fault assessments' }
+    foreach ($assessment in $Comparison.fault_assessments) {
+        if ($assessment.fault_id -cnotin $Comparison.inherited_faults -or $assessed.ContainsKey($assessment.fault_id) -or
+            $assessment.relation -cnotin @('disjoint','covered') -or [string]::IsNullOrWhiteSpace($assessment.reason) -or
+            $assessment.test_sha256 -notin $candidateHashes.Keys) { throw 'Invalid fault assessment or missing candidate evidence' }
+        $assessed[$assessment.fault_id] = $true
+    }
+    if ($assessed.Count -ne $Comparison.inherited_faults.Count) { throw 'Every inherited fault needs a scoped assessment' }
+}
+
 function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Candidate, [string]$Directory, $Previous, [string]$PreviousQualification) {
     Assert-SwitchFaultLedger $Ledger
     Assert-SwitchHash $EvidenceSha256
@@ -209,7 +251,7 @@ function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Ca
         $comparison = @($Ledger.baseline_comparisons | Where-Object evidence_sha256 -eq $EvidenceSha256)
     }
     if ($comparison.Count) {
-        if ($Evidence.change_kind -cne 'verified-fix') { throw 'A baseline comparison requires a verified fix' }
+        if ($Evidence.change_kind -cnotin @('presentation','verified-fix')) { throw 'Baseline comparison requires presentation or verified-fix evidence' }
         if (!$Previous -or $Previous.source_commit -ne $Evidence.base_commit) { throw 'Baseline comparison requires the previous selected source' }
         $prior = Read-SwitchEvidence $PreviousQualification
         if ($prior.Sha256 -ne $Previous.qualification_sha256 -or $prior.Sha256 -ne $comparison[0].previous_qualification_sha256 -or $prior.Data.source_commit -ne $Previous.source_commit -or
@@ -217,10 +259,14 @@ function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Ca
         $working = @($prior.Data.cases | Where-Object evidence_sha256 -eq $comparison[0].previous_control_sha256)
         if ($working.Count -ne 1 -or $working[0].before_boot -ne $prior.Data.trial.boot_record) { throw 'Missing working control from the previous baseline' }
         Assert-SwitchPassingCase $working[0]
-        foreach ($field in @('output_verified','normal_exit','desktop_available')) {
-            if ($working[0].$field -isnot [bool] -or !$working[0].$field) { throw "Previous baseline control lacks $field" }
+        if ($Evidence.change_kind -ceq 'presentation') {
+            Assert-SwitchPresentationComparison $Evidence $Previous $comparison[0]
+        } else {
+            foreach ($field in @('output_verified','normal_exit','desktop_available')) {
+                if ($working[0].$field -isnot [bool] -or !$working[0].$field) { throw "Previous baseline control lacks $field" }
+            }
+            if ($working[0].evidence_sha256 -eq $Evidence.verified_fix.control_sha256) { throw 'The candidate control must have its own hardware receipt' }
         }
-        if ($working[0].evidence_sha256 -eq $Evidence.verified_fix.control_sha256) { throw 'The candidate control must have its own hardware receipt' }
         if ($sys.abnormal_events.Count -or @($sys.restarts|Where-Object kind -cne 'controlled').Count) { throw 'An abnormal candidate interval cannot qualify a baseline comparison' }
         foreach ($fault in $open) {
             if ($fault.id -cnotin $comparison[0].inherited_faults) { throw "New open fault outside the baseline comparison: $($fault.id)" }
@@ -233,7 +279,7 @@ function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Ca
         'presentation' -in $_.affected_scopes -or 'wddm' -in $_.affected_scopes -or 'gpu-synchronization' -in $_.affected_scopes
     })
     if ($Evidence.change_kind -ceq 'presentation' -and $presentationFaults.Count) {
-        throw ('Open faults block presentation promotion: '+($presentationFaults.id -join ', '))
+        throw ('Open faults block presentation promotion without a scoped baseline comparison: '+($presentationFaults.id -join ', '))
     }
     foreach($file in $Evidence.changed_paths){
         if ($file -like 'tegra-x1-wddm/docs/*') { continue }
@@ -260,7 +306,9 @@ function Read-SwitchEvidence([string]$Path) {
 
 function Assert-SwitchCaseFiles($Evidence,[string]$Qualification) {
     $parent=[IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($Qualification))
-    foreach($record in @($Evidence.cases)+@($Evidence.system_log.restarts)){
+    $records = @($Evidence.cases) + @($Evidence.system_log.restarts)
+    if ($Evidence.PSObject.Properties['baseline_cases']) { $records += @($Evidence.baseline_cases) }
+    foreach($record in $records){
         if ($record.evidence_file -notmatch '^[a-z0-9][a-z0-9_./-]*$' -or $record.evidence_file.Split('/') -contains '..') { throw 'A qualification record needs a relative evidence file' }
         $path=Join-Path $parent $record.evidence_file
         if (![IO.File]::Exists($path) -or (Get-FileHash -LiteralPath $path).Hash -ne $record.evidence_sha256) { throw "Missing or mismatched hardware evidence: $($record.evidence_file)" }
