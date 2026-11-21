@@ -6,6 +6,16 @@
 
 启动 `93748` 在交流供电下以一次性许可进入 Code 0 桌面。x64 与 ARM64EC 客户端分别通过系统 D3D11 只请求 FL11_1，加载兼容槽中的 ARM64EC NVK `d31b862075fe`，完成三角形像素校验并以 0 退出。原生 ARM64 对照加载 `a143bee5ba42`，三组均回到同一 DWM。选定后已读回永久许可与所有组件哈希，工作目录内已移除旧的纯 x64 NVK。首次 Present 故障继续登记。[绘图与启动验收](nvk-arm64ec-d31b8620/qualification.json) · [永久许可与兼容槽核对](nvk-arm64ec-d31b8620/selection.json)
 
+### NVK 各架构选定基线
+
+| 进程 | 选定的 NVK 实现 | 已验收的入口 |
+| --- | --- | --- |
+| ARM64 | 原生 ARM64，`a143bee5ba42` | Windows 系统 D3D11 与原生 Vulkan ICD |
+| x64、ARM64EC | ARM64EC，`d31b862075fe` | 系统兼容槽 `tg_nvk_x64.dll`，两个 ABI 分别通过绘图与退出 |
+| x86 | 32 位 x86，`1064131dcda0` | 应用私有 ICD，GM20B 绘图读回、Code 0、同次启动和正常退出 |
+
+ARM64 与 ARM64EC 共用一份开机许可。x86 选定的是已通过绘图验收的私有实现，系统级 WOW64 Vulkan 注册仍待独立验收。《冰封王座》私有 WSI 包 `5bd669c74530` 已确认能枚举 GM20B，保留为另一份应用专用构建。[64 位双路径验收](nvk-arm64ec-d31b8620/qualification.json) · [x86 实机验收与完整哈希](dxvk-games-20261118/x86-d3d9-private-baseline.json)
+
 ### 历史基线 · KMD-only `e1b22087`
 
 Windows 启动 `92696` 在交流与手持模式下一次性加载签名 KMD `69ba174ebe17`，原正式六个用户态组件哈希逐一匹配，ARM64 NVK 为 `51ff97f63d85`。GPU Code 0，交互 Explorer 有响应，同一会话 DWM 已加载预期模块，闭门和一次性启动均有受控关闭回执。正式晋升检查通过后，在同一启动授予永久许可并完成读回。恢复包保留，本轮试用任务和转运临时文件已清理。[独立验收](kmd-only-e1b22087/qualification.json) · [永久许可](kmd-only-e1b22087/permanent-boot.json) · [桌面与系统复核](kmd-only-e1b22087/final-boot.json)
