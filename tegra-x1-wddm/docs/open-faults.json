@@ -579,6 +579,22 @@
   "dxgkrnl_contracts": {
     "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
     "source_tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
+    "historical_ci": {
+      "scope": "历史旁证 · Windows CI 输出编码",
+      "status": "resolved",
+      "original_commit": "560635688fbcc77d7d2fe2f1ce5e3ad90b67ac2f",
+      "failed_run": "https://github.com/ruje0504-2/mesa-switch-woa/actions/runs/44906444435",
+      "failed_step": "Verify any newly selected baseline",
+      "retained_step_log_sha256": "2e1df8e94b449d4853cda1f98e7cf04feeeadc6da4f1cae7cb8f5396e15fa31b",
+      "cause": "Windows runner 以 CP1252 编码重定向的 stdout。历史检查器在完成源码、轮次和证据校验后打印含中文判定的汇总，触发 UnicodeEncodeError。",
+      "catalog_check": "该提交仅修改 README.md、contracts.json 和 audit.json。当时 README 与索引均为 3 条已满足、0 条已违反、449 条未知。",
+      "fix_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+      "passing_run": "https://github.com/ruje0504-2/mesa-switch-woa/actions/runs/44906791971",
+      "verification": "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/audit.json#windows_output_check",
+      "native_impact": "本次归档仅解释历史 CI。Windows 本机驱动与基线选择均未改动。已按 27 轮索引和故障表重新核对 8 条已满足项的原始回执 SHA-256、目标命中和判定。",
+      "native_receipts": "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json",
+      "native_assessment_sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+    },
     "catalog": "wsl-dxgkrnl-contracts/contracts.json",
     "rounds": [
       {
