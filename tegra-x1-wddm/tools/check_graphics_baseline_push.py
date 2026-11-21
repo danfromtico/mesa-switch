@@ -146,8 +146,11 @@ def retained_reports(commit):
         previous = json.loads(blob(earlier, BASELINE))["qualification"]
         record = json.loads(blob(earlier, previous))
         paths.add(previous)
-        paths.update(str(PurePosixPath(previous).parent / row["evidence_file"]) for row in record["cases"]
-                     if row["evidence_sha256"] == comparison["previous_control_sha256"])
+        controls = [row for row in record["cases"]
+                    if row["evidence_sha256"].lower() == comparison["previous_control_sha256"].lower()]
+        if len(controls) != 1:
+            raise RuntimeError("The earlier baseline must identify one working comparison control.")
+        paths.add(str(PurePosixPath(previous).parent / controls[0]["evidence_file"]))
     for fault in ledger["faults"]:
         paths.update(ref.split("#", 1)[0] for ref in fault["evidence"])
         if fault["status"] == "closed":
@@ -175,7 +178,9 @@ def check_updates(lines):
         trusted = None
         for commit in dict.fromkeys(commits):
             parents = git("rev-list", "--parents", "-n", "1", commit).stdout.split()[1:]
-            baseline_changed = not parents or any(changed(parent, commit, BASELINE) for parent in parents)
+            # A merge selects a new baseline only if it changes the receiving branch.
+            # New side-branch transitions are visited as commits in their own right.
+            baseline_changed = not parents or changed(parents[0], commit, BASELINE)
             if not baseline_changed and not any(changed(parent, commit, LEDGER) for parent in parents):
                 touched = set()
                 for parent in parents:

@@ -125,6 +125,14 @@ def exercise(shell, work):
     updated = commit("Register another fault")
     run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan")
     assert remote_head() == updated
+    run("git", "checkout", "-q", "-b", "older-source", original)
+    (repo / "older-source.cpp").write_text("// Qualified source based on the former baseline\n")
+    commit("Source on the former baseline")
+    run("git", "checkout", "-q", "tgd3d-vulkan")
+    run("git", "merge", "--no-ff", "-q", "-m", "Merge source into the current baseline", "older-source")
+    updated = run("git", "rev-parse", "HEAD")
+    run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan")
+    assert remote_head() == updated
     # The production builder is a linked worktree of a shallow, filtered Mesa clone.
     # Its proof files are present while unrelated shader history can remain unfetched.
     partial = work / "partial"
