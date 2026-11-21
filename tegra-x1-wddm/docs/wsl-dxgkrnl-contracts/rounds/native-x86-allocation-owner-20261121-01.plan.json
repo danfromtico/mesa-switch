@@ -1,0 +1,27 @@
+{
+  "round_id": "native-x86-allocation-owner-20261121-01",
+  "contract_id": "dxgkrnl.h:746:2",
+  "declared_utc": "2026-11-21T12:30:36.135900+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "b3c8aeaf47c657411f11454bf29b572b8de615fbc485b43e923d27f034c03bd2",
+  "related_fault": "SWITCH-LOAD-TRANSITION-RESTART",
+  "actor": "GM20B 原生 Windows 的 VidMm 和同一 WOW64 x86 调用线程，使用已选基线的普通 NVK 分配函数。",
+  "predicate": "一次普通设备分配和一次由共享资源持有的分配，在创建区间内各自具有与调用方一致的归属。",
+  "required_observation": "记录两个互不重叠的调用区间、PID、TID、设备和返回的分配与资源句柄。用事件 27 定位设备，再按同一进程、线程、QPC、设备、适配器和全局分配标识匹配 33 与 36，读取资源对象及 thunk 句柄。",
+  "satisfied_if": "两次正常创建返回的分配句柄与事件 36 匹配。普通分配记录该设备且资源为空，共享分配记录同一设备和与返回句柄匹配的资源。完整 ETW，正常释放与退出，AC、启动和桌面连续。",
+  "violated_if": "在相同身份和时间条件下完整配对的成功创建，内核记录明确指向另一归属或与该请求的资源归属相矛盾。",
+  "unknown_if": "两种创建任一未完成，或请求、设备、分配、时间、句柄、跟踪质量或实机连续性缺少直接回执。",
+  "scope_limit": "只裁决此独立进程的两个公开 Windows 分配。第七张游戏纹理及来宾内部联合体各自需要对应平台和调用区间的证据。",
+  "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "files_sha256": {
+    "alloc-owner-x86.exe": "d4a4b0b5dc57ddb50c6878ac276a3c8c1dca679114bc1cc1139c19332e3da7c2",
+    "owner-trace.exe": "1244e7f4d4100c34ccb4dad70de0146989cdc1d4fbaa4b3a156c53c2d188709b",
+    "Measure.ps1": "560b8bd6a379e357e249ec29a172591f5f136d908dd8578f97f218a757be428a",
+    "Power-State.ps1": "f136146792b5a80c6016dbae04668831bee87f0f2f5390017bfb1669cd3cab9f"
+  },
+  "event_ids": [
+    27,
+    33,
+    36
+  ]
+}
