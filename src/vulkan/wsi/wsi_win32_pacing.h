@@ -47,7 +47,9 @@ struct wsi_win32_pacer {
    int64_t frequency;
    int64_t period;
    int64_t next;
-   /* QPC of the previous present's compositor completion, 0 if none. */
+   /* QPC when the previous present released the producer: its compositor
+    * completion for a paced frame, or its producer-cap wait exit for a
+    * capped one. 0 if none. */
    int64_t last_present;
 };
 
@@ -86,16 +88,20 @@ wsi_win32_pacer_sync_compositor(struct wsi_win32_pacer *pacer,
 /* Classify a measured DwmFlush() wait. The compositor must have blocked at
  * all (an occluded or idle desktop returns within microseconds), a previous
  * present must exist to measure the cadence against, and the completed
- * frame must sit a full display period after the previous one, so on a
- * desktop that refreshes faster than the cap the timer still limits the
- * producer instead of the fast compositor cadence. */
+ * frame must sit a full display period after the previous present was
+ * released. Released means the end of the whole present beat: the
+ * compositor completion for a paced frame, or the producer-cap wait exit
+ * for a capped one, so the timer's own sleep never counts toward the
+ * display cadence and a faster-than-cap desktop keeps the producer capped
+ * instead of latching into a frequency-doubling oscillation. */
 static inline bool
 wsi_win32_pacer_compositor_paced(const struct wsi_win32_pacer *pacer,
                                  int64_t dwm_elapsed, int64_t completed_at)
 {
+   const int64_t min_block = pacer->period > 64 ? pacer->period / 64 : 1;
    return pacer->timer != NULL && pacer->period > 1 &&
           pacer->last_present > 0 &&
-          dwm_elapsed >= pacer->period / 16 &&
+          dwm_elapsed >= min_block &&
           completed_at - pacer->last_present >=
              pacer->period - pacer->period / 8;
 }
@@ -118,6 +124,8 @@ wsi_win32_pacer_wait(struct wsi_win32_pacer *pacer)
          return FALSE;
    }
    pacer->next = now.QuadPart + pacer->period;
+   /* The producer is released now; see wsi_win32_pacer_compositor_paced(). */
+   pacer->last_present = now.QuadPart;
    return TRUE;
 }
 

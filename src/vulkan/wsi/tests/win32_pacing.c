@@ -49,29 +49,53 @@ int main(void)
 
    /* Compositor classification. A present is display-locked when DwmFlush()
     * blocked at all and it completed a full display period after the
-    * previous present; this holds no matter how much of the period the
-    * GPU/GDI work consumed before DwmFlush() ran. */
+    * previous present was released; this holds no matter how much of the
+    * period the GPU/GDI work consumed before DwmFlush() ran. */
    LARGE_INTEGER now;
    CHECK(QueryPerformanceCounter(&now));
    const int64_t period = pacer.period;
+   const int64_t min_block = period > 64 ? period / 64 : 1;
    wsi_win32_pacer_presented(&pacer, now.QuadPart - period);
    CHECK(wsi_win32_pacer_compositor_paced(&pacer, period, now.QuadPart));
    CHECK(wsi_win32_pacer_compositor_paced(&pacer, period / 2, now.QuadPart));
-   CHECK(wsi_win32_pacer_compositor_paced(&pacer, period / 16, now.QuadPart));
+   CHECK(wsi_win32_pacer_compositor_paced(&pacer, min_block, now.QuadPart));
    /* An occluded or idle desktop returns from DwmFlush() within
     * microseconds, so the producer cap must stay armed. */
-   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, period / 16 - 1, now.QuadPart));
+   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, min_block - 1, now.QuadPart));
    CHECK(!wsi_win32_pacer_compositor_paced(&pacer, 0, now.QuadPart));
    /* A desktop refreshing twice as fast as the cap completes presents only
-    * half a period apart; the timer keeps limiting the producer. */
+    * half a period after the previous release; the timer keeps limiting
+    * the producer. */
    CHECK(!wsi_win32_pacer_compositor_paced(&pacer, period, now.QuadPart - period / 2));
-   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, period,
-                                           now.QuadPart - (period - period / 8) + 1));
+   /* Interval boundary: just short of a full period releases the producer,
+    * a full period locks to the display. */
+   CHECK(!wsi_win32_pacer_compositor_paced(&pacer, period, now.QuadPart - period / 8 - 1));
+   CHECK(wsi_win32_pacer_compositor_paced(&pacer, period, now.QuadPart - period / 8));
    /* Nothing recorded yet: any first present is unpaced by default. */
    struct wsi_win32_pacer fresh;
    CHECK(wsi_win32_pacer_init(&fresh, 60));
    CHECK(!wsi_win32_pacer_compositor_paced(&fresh, period, now.QuadPart));
    wsi_win32_pacer_finish(&fresh);
+
+   /* 120 Hz desktop closed loop: the compositor completes half a period
+    * after each release. Every frame must stay capped; recording the
+    * release at the producer-cap wait exit (not at the pre-wait
+    * DwmFlush() completion) is what prevents an unpaced/paced frequency
+    * doubling. */
+   struct wsi_win32_pacer fast;
+   CHECK(wsi_win32_pacer_init(&fast, 60));
+   const DWORD half_period_ms = (DWORD)(fast.period * 1000 / fast.frequency / 2) + 1;
+   for (unsigned i = 0; i < 4; i++) {
+      if (fast.last_present > 0)
+         Sleep(half_period_ms);
+      CHECK(QueryPerformanceCounter(&now));
+      const bool paced =
+         wsi_win32_pacer_compositor_paced(&fast, fast.period / 4, now.QuadPart);
+      CHECK(!paced);
+      wsi_win32_pacer_presented(&fast, now.QuadPart);
+      CHECK(wsi_win32_pacer_wait(&fast));
+   }
+   wsi_win32_pacer_finish(&fast);
 
    /* The fallback timer stays phase-locked to the compositor: after a paced
     * present it waits out only the remainder of the display period instead

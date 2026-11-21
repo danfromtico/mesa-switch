@@ -145,15 +145,14 @@ static void check_predicates(void)
    CHECK(!wsi_win32_direct_dib_dc_ready(dc, 8, 8));
    SelectClipRgn(dc, NULL);
    /* Excluding an interior band leaves a two-rectangle region whose
-    * bounding box still spans the whole bitmap; the readiness check must
-    * agree with whatever region kind the platform reports for it. */
+    * bounding box still spans the whole bitmap; the bounding-box check
+    * alone would be fooled, so readiness must reject it. */
    ExcludeClipRect(dc, 0, 3, 8, 5);
    {
       RECT box;
-      const int kind = GetClipBox(dc, &box);
-      const bool simple_cover = kind == SIMPLEREGION &&
-         box.left <= 0 && box.top <= 0 && box.right >= 8 && box.bottom >= 8;
-      CHECK(wsi_win32_direct_dib_dc_ready(dc, 8, 8) == simple_cover);
+      CHECK(GetClipBox(dc, &box) == COMPLEXREGION);
+      CHECK(box.left <= 0 && box.top <= 0 && box.right >= 8 && box.bottom >= 8);
+      CHECK(!wsi_win32_direct_dib_dc_ready(dc, 8, 8));
    }
    SelectObject(dc, previous);
    CHECK(DeleteObject(dib));
