@@ -1,0 +1,23 @@
+{
+  "round_id": "pal4-residency-x86-20261121-01",
+  "contract_id": "ioctl.c:2061:2",
+  "declared_utc": "2026-11-21T11:33:12.193747+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "92ff0257dae03b91d5b7420c63e973b255cf59bda2178056c30b9756360c1ec1",
+  "device": "Switch Lite GM20B，Windows ARM64，交流供电，手持模式，GPU Code 0",
+  "actor": "与仙剑四同为 WOW64 的独立 x86 客户端，使用基线 NVK 的普通分配函数，向原生 GM20B 申请一份 4 MiB CPU 可见分配。",
+  "predicate": "本次 MakeResident 接受异步驻留请求时，Windows 将正值 STATUS_PENDING (0x103) 原样返回给 x86 用户态调用点。",
+  "required_observation": "在同一启动与 DWM 会话，按 PID、TID 和调用前后 QPC 配对一条 DxgKrnl 338/339 记录，分别读出内核返回码与用户态原始 LONG，核对分配数和对应分页 fence 值。",
+  "satisfied_if": "内核事件 339 返回 0x103，x86 调用点直接读出相同正值，完整配对且无跟踪丢失，程序退出并保留原启动与桌面。",
+  "violated_if": "在同一已确认的异步请求内，完整证据显示调用点读到与内核 0x103 不同的值。",
+  "unknown_if": "仅同步返回、目标未命中、记录缺失、身份或时间配对失败、跟踪丢失、启动或桌面切换时均保留未知。",
+  "scope_limit": "本轮判定限于原生 Windows 的 API 返回。仙剑四历史 ETW、游戏中的具体调用点、WSL 来宾的 ioctl 转发和分页完成各有独立证据范围。",
+  "gpu_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "x86_caller_sha256": "83b0735d96082b6f0fa29633c8d1aa47a4392d98e33b452002c1f63a84ccd131",
+  "arm64_trace_sha256": "4a9d6d032ec5929945727013158b66ecdc131e6ba49228f50b19aaab15998c9f",
+  "event_ids": [
+    338,
+    339
+  ],
+  "related_fault": "SWITCH-LOAD-TRANSITION-RESTART"
+}

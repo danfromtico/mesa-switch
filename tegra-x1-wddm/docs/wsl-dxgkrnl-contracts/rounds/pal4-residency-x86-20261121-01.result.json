@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "round_id": "pal4-residency-x86-20261121-01",
+  "contract_id": "ioctl.c:2061:2",
+  "declaration_sha256": "ef6e7fa36b1e9593aa85994dd18850a048e6cebf75f2ce520d15e9500fd0d602",
+  "started_utc": "2026-11-21T11:35:47.4821708Z",
+  "before": {
+    "utc": "2026-11-21T11:35:47.4821708Z",
+    "boot": 91011,
+    "dwm": 1056,
+    "dwm_start": "2026-11-21T11:21:43.9213255Z",
+    "session": 1,
+    "ac": "Online",
+    "code": 0,
+    "mode": 1
+  },
+  "after": {
+    "utc": "2026-11-21T11:36:05.4093625Z",
+    "boot": 91011,
+    "dwm": 1056,
+    "dwm_start": "2026-11-21T11:21:43.9213255Z",
+    "session": 1,
+    "ac": "Online",
+    "code": 0,
+    "mode": 1
+  },
+  "status": "已满足",
+  "target_hit": true,
+  "unexplained_restart": false,
+  "observation": {
+    "actor": "独立 x86 调用方",
+    "adapter_luid": "000000000000551c",
+    "pid": 4516,
+    "tid": 4444,
+    "caller": {
+      "pid": 4516,
+      "tid": 4444,
+      "allocations": 1,
+      "status": 259,
+      "paging_fence": 7001,
+      "qpc_before": 17242754543,
+      "qpc_after": 17242757666
+    },
+    "etw": {
+      "tid": 4444,
+      "enter_qpc": 17242756156,
+      "return_qpc": 17242756763,
+      "allocations": 1,
+      "status": 259,
+      "paging_fence": 7001
+    },
+    "interval_match": true,
+    "client_exit": 0,
+    "wrapper_cleanup": "EXIT wrapper=00000000 free=00000000 close=00000000 observed=1",
+    "trace_sha256": "ed937f33db39bbc016f48ffb839b4b924f6a90cb374c74e9fe860ba52901aa8b",
+    "capture_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "etw_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=4"
+      ]
+    }
+  },
+  "selection": {
+    "gpu_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "permanent": true,
+    "components_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "loaded_desktop_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    }
+  },
+  "client_build": {
+    "bytes": 70680,
+    "unsigned": "4084ab281edb6ca22b6ae1ef62f508e608b3d258b927fa8bf2a3031661de2d43",
+    "sha256": "83b0735d96082b6f0fa29633c8d1aa47a4392d98e33b452002c1f63a84ccd131",
+    "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "original_sources": {
+      "kmt_native.c": "72e4935a1cfad56ac9bc4415859c900dd66ff78739da7cc7276cb321a165a397",
+      "kmt.c": "97180a7cfcdb53c1412fdc2b625ab5c7e52a570cb3d63248cdf319f08a320949",
+      "kmt.h": "61558590186b35dc78f10aeae564139c9cb67578c14158941a4ab6d108a6a22a",
+      "kmt_native.h": "bc11685831906bdf75f5be57185977927937fdd0e3e19b177ace347a3693e610",
+      "kmt_abi.h": "23f93d58cde3f893463270d263ba07ef3ad5523dbf2692b93fd7b2a2a1255a41",
+      "adapter_abi.h": "9cf36e45dac585d0456acf63fb7c441e3be6eb0582dae3fd222263b28719b3ae",
+      "allocation_abi.h": "860bbf9c80475c7a853d182cea53ef70a03ef9a5e662aa06c04cf9001aa31ecd",
+      "submit_abi.h": "9359c37d2474e67363d24f1f87573015b5cf73ed1d926f55aac7876071de5d9f",
+      "memory_budget.h": "9c943e1a93ea14be7980f7ca366be50587a3b4f9eab410ff82428ef21ffaeddd"
+    },
+    "instrumented_source": "5a6389638a660d848bf812eaee2c604e499ac2cc883748a080a5b7631e2a2332",
+    "program_source": "a382d8b2b57a58bbdcb4a7c37442312e658d50dbc9c679061c30905a42642807",
+    "build_source": "2c44346d984a4d2415a171ca11e91e3e6f31f8f2292625280e027a529408dcd2"
+  },
+  "filter_build": {
+    "bytes": 65032,
+    "unsigned": "0948dd74d69fc25dff606a4121fa050b93c32665d29a3a6f88dd1adbea74d8d9",
+    "sha256": "4a9d6d032ec5929945727013158b66ecdc131e6ba49228f50b19aaab15998c9f",
+    "source_sha256": "f10424a0667f753779029c6523e805b514e0102d134c6892c00c7d1ee7017bcd"
+  },
+  "installed_event_templates": [
+    {
+      "id": 338,
+      "version": 0,
+      "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"pPagingQueue\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"pSyncObject\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"NumAllocations\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n</template>\r\n",
+      "opcode": "win:Start",
+      "keywords": [
+        null,
+        "References"
+      ],
+      "task": "MakeResident"
+    },
+    {
+      "id": 339,
+      "version": 0,
+      "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"Status\" inType=\"win:UInt32\" outType=\"win:NTStatus\"/>\r\n  <data name=\"NumBytesToTrim\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"PagingFenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n</template>\r\n",
+      "opcode": "win:Stop",
+      "keywords": [
+        null,
+        "References"
+      ],
+      "task": "MakeResident"
+    }
+  ],
+  "archived_pal4_game_kernel_observations": [
+    {
+      "case": "pal4-game-cpuboot-12",
+      "boot_utc": "2026-11-18T09:06:36.4072070Z",
+      "game_pid": 7320,
+      "real_game_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+      "game_initialization_sha256": "0d1aa11fde4acf9c8711107eed9273466fedb5074e37f5f2fe920eb25a0806e5",
+      "etl_sha256": "4358d48003f1b7c874bde2f29986453762c1c98ad4ef888a420c76d39278b566",
+      "complete": true,
+      "events_lost": 0,
+      "buffers_lost": 0,
+      "game_pairs": 16,
+      "return_status_histogram": {
+        "0x103": 16
+      },
+      "pair_errors": [],
+      "unmatched": []
+    },
+    {
+      "case": "pal4-game-cpuboot-nocache-15",
+      "boot_utc": "2026-11-18T11:05:50.2638710Z",
+      "game_pid": 7024,
+      "real_game_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+      "game_initialization_sha256": "d6b518630d30040677bf0438b52aad1c475a58c9ea0b5f1de7937da3a4174df5",
+      "etl_sha256": "dd40711cb4008111e7c9b5f25102e6db9a7a76d794bd8c991cd8aa5f7d360e43",
+      "complete": false,
+      "events_lost": 0,
+      "buffers_lost": 0,
+      "game_pairs": 17,
+      "return_status_histogram": {
+        "0x103": 17
+      },
+      "pair_errors": [],
+      "unmatched": []
+    },
+    {
+      "case": "pal4-game-cpuboot-nolog-14",
+      "boot_utc": "2026-11-18T09:47:51.2700620Z",
+      "game_pid": 2336,
+      "real_game_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+      "game_initialization_sha256": "707281901c1f2157f8aabaf0b170a14353a3f334579bf181cde8197b3266c1c1",
+      "etl_sha256": "ae02bad0f4221d05892b077e7cec63d1fdf9fea2db1f2ae2d04ef21c13210e91",
+      "complete": false,
+      "events_lost": 0,
+      "buffers_lost": 0,
+      "game_pairs": 16,
+      "return_status_histogram": {
+        "0x103": 16
+      },
+      "pair_errors": [],
+      "unmatched": []
+    },
+    {
+      "case": "pal4-game-emclow-11",
+      "boot_utc": "2026-11-18T08:32:33.8938970Z",
+      "game_pid": 4292,
+      "real_game_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+      "game_initialization_sha256": "c3e49b1392c275042a7b6eee89d871e9b4cb217f293a733b35c6f6d7d09cf144",
+      "etl_sha256": "fe426a937fac01f04a4145883d8ba58133bfbec791d6592cea19b2f3a84f022f",
+      "complete": false,
+      "events_lost": 0,
+      "buffers_lost": 0,
+      "game_pairs": 17,
+      "return_status_histogram": {
+        "0x103": 17
+      },
+      "pair_errors": [],
+      "unmatched": []
+    },
+    {
+      "case": "pal4-game-memory-10",
+      "boot_utc": "2026-11-18T08:32:33.8938970Z",
+      "game_pid": 4644,
+      "real_game_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+      "game_initialization_sha256": "ff1c00515c3f950b5771544cad4e13993142106f7940e2babc1dd20a3ff23ece",
+      "etl_sha256": "cb959fbe6029a8d0bcd90ce47ef096e1a5647454113745d96b4f024370165bab",
+      "complete": false,
+      "events_lost": 0,
+      "buffers_lost": 0,
+      "game_pairs": 16,
+      "return_status_histogram": {
+        "0x103": 16
+      },
+      "pair_errors": [],
+      "unmatched": []
+    }
+  ],
+  "historical_scope": "独立的五份仙剑四原生实机记录按游戏 PID/TID 重读。一份正常封口，四份只保留中断前的前缀。它们记录内核返回；此次 x86 调用点位于独立程序。",
+  "applicability": "判断限于 GM20B 原生 Windows MakeResident 的异步返回值。游戏进程内侧的读取、后续分页完成、WSL ioctl 转发与整机重启仍需各自证据。",
+  "cleanup": {
+    "task_count": 0,
+    "file_count": 12,
+    "directory_removed": true
+  }
+}
