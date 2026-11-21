@@ -70,6 +70,10 @@
 
 同次实载 KMD 的最后一条遥测是匹配 Windows 抢占请求 20571 的成功状态，早于第三次 DMA 提交记录 0.276 ms。正式 KMD 的常规成功提交路径没有配套进入或返回事件。152586 的最早直接缺口在 miniport 准入及硬件开始，之后还缺完成。[KMD 源码点与原始请求对照](windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json)
 
+恢复开机 91557 的 dxgkrnl.sys 全哈希与事故轮一致。主发布者可读 640 份模板，三份健康档案均有同号 DMA 完成，八份健康与事故 ETL 中均未采到队列时间戳、GPU 历史缓冲或硬件队列进度。SysMm 发布者的模板读回报数据无效，正式基线源码给出的 GPU 时钟和历史缓冲能力见回执。[图形提供程序与健康样本核对](windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json)
+
+在固定基线的隔离工作树中生成了本地 ARM64 诊断包。按 ETW 关键字启用后，同一提交号可以记录进入、准入、GP_PUT 已发布并读回、GPU 完成值已匹配。x64 WDK 受控队列夹具通过，包含拒绝准入和发布前失败。下一轮须完成许可流程、实载身份与正常负载配对，之后才能采用其硬件观测。[候选构建与夹具回执](windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

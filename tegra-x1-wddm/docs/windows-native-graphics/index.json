@@ -33,7 +33,9 @@
     "open": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtopenresourcefromnthandle",
     "power": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart",
     "cold": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/setup-upgrade-and-drivers/fast-startup-causes-system-hibernation-shutdown-fail",
-    "dma_interrupt": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ne-d3dkmddi-_dxgk_interrupt_type"
+    "dma_interrupt": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ne-d3dkmddi-_dxgk_interrupt_type",
+    "gpuview_dma": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/selections-in-the-gpu-hardware-queue",
+    "gpuview": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/using-gpuview"
   },
   "historical_background": {
     "index": {
@@ -1323,6 +1325,61 @@
         "win-board-cdd-dwm-third-submit-kmd-20261121-01"
       ],
       "latest_observation": "正式基线实载 KMD 对适配器 5c10 的全部四条 CALL 后事件均为抢占快照。最后一条匹配 DxgKrnl 抢占请求 20571，内部状态成功，记已完成围栏 152584。约 0.276 ms 后，Windows 为 DWM 队列 48660 记录第三次 DMA 提交 152586，留存 KMD 中无该提交号。固定基线源码只为失败提交、抢占等路径发出该遥测。"
+    },
+    {
+      "id": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+      "priority": "P0",
+      "owner": "Switch Windows DxgKrnl、GM20B KMD 与 ETW",
+      "question": "正式基线的 Windows 已安装图形事件中，能否为任一健康 DMA 提交号分别直接观察 KMD 准入或 GPU 开始？",
+      "status": "观测缺口",
+      "existing_observation": "异常轮 152586 有 Windows 175，实载 KMD 成功提交缺专门遥测。GPUView 区分快速入硬件队列、GPU 开始和完成。",
+      "missing_observation": "基线源码返回零位宽的历史缓冲能力，时钟校准与历史格式化均返回不支持。已归档本机能力报告 WDDM 2.6、HwSchSupported=0。SysMm 元数据读取失败，当前结论限于主发布者、现有归档及实载基线源码。仍需同号 KMD 准入与硬件发布回执。",
+      "pass_condition": "按供应程序、版本、模板和同次已知提交号配对 KMD 准入或 GPU 开始。覆盖无实证时写出适用字段和观察限制。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+          "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+          "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+        }
+      ],
+      "windows_references": [
+        "gpuview_dma",
+        "gpuview"
+      ],
+      "round_ids": [
+        "win-native-submit-event-catalog-20261121-01"
+      ],
+      "latest_observation": "同哈希 Windows dxgkrnl.sys 的主发布者可读 640 份事件模板。启动 91476 的三份健康样本均可见 175/176/177。对同上下文 138354，两路记录到完成中断和队列退役。八份健康与异常 ETL 中均无 185 队列时间戳、262/431 GPU 时钟校准、263 历史缓冲或 450/451 硬件队列进度事件。"
+    },
+    {
+      "id": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+      "priority": "P0",
+      "owner": "GM20B Windows ARM64 KMD 与本机 ETW",
+      "question": "能否在不修改队列、寄存器操作或完成顺序的前提下，为同一提交号补出 KMD 进入、准入、GP_PUT 发布和 GPU 围栏回读的独立踪迹？",
+      "status": "观测缺口",
+      "existing_observation": "现行正式基线缺成功提交路径专用事件。Windows 175 表示调度边界，健康样本可复核 177/176/180。",
+      "missing_observation": "候选仍在本地，尚无从 Switch 实载候选采到的健康负载配对。GP_PUT 观测是驱动发布边界，物理 GPU 执行起始仍无独立时间戳。历史 152586 及板级首因仍待证。",
+      "pass_condition": "隔离构建并通过主机与驱动夹具，再按正式许可规则用已知健康负载验证同号阶段和真实加载哈希。GP_PUT 发布与 GPU 实际完成分别记录。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
+          "sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+          "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+        }
+      ],
+      "windows_references": [
+        "dma_interrupt"
+      ],
+      "round_ids": [
+        "win-kmd-dma-boundary-build-20261121-01"
+      ],
+      "latest_observation": "隔离候选已生成 ARM64 KMD。32 字节 ETW 事件从 DDI 进入依次覆盖实际准入、已有 GP_PUT 发布读回和 GPU 完成值匹配。x64 WDK 队列夹具通过同号时间顺序、拒绝准入、发布前失败及读回未完成的用例；ARM64 测试程序已构建。"
     }
   ],
   "rounds": [
@@ -2702,19 +2759,94 @@
         "first_anomaly_or_missing": "DxgKrnl 保存 152586 的 DMA 提交事件。正式 KMD 的常规成功提交没有配套进入或返回事件，现有追踪无该请求的 KMD 准入、GP PUT、硬件开始或完成。"
       },
       "finished_utc": "2026-11-21T15:51:49.042571+00:00"
+    },
+    {
+      "round_id": "win-native-submit-event-catalog-20261121-01",
+      "contract_id": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+      "windows_question": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+      "method": "实机只读枚举图形提供程序/事件模板及正式健康轮双路关联，无新增图形负载",
+      "plan": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.plan.json",
+      "plan_sha256": "0cf3be7931e4fbbfec751bca8d4f7dd7422f4041b2754e23aaaf41dd2ab66bb1",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:55:05.970576+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
+      "result_sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25",
+      "status": "观测缺口",
+      "finding": "同哈希 Windows dxgkrnl.sys 的主发布者可读 640 份事件模板。启动 91476 的三份健康样本均可见 175/176/177。对同上下文 138354，两路记录到完成中断和队列退役。八份健康与异常 ETL 中均无 185 队列时间戳、262/431 GPU 时钟校准、263 历史缓冲或 450/451 硬件队列进度事件。",
+      "missing_observation": "基线源码返回零位宽的历史缓冲能力，时钟校准与历史格式化均返回不支持。已归档本机能力报告 WDDM 2.6、HwSchSupported=0。SysMm 元数据读取失败，当前结论限于主发布者、现有归档及实载基线源码。仍需同号 KMD 准入与硬件发布回执。",
+      "boundaries": {
+        "last_entry": {
+          "qpc": 204761969616,
+          "pid": 4,
+          "tid": 888,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100088564464,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 138354,
+            "ulQueueSubmitSequence": 44472,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 3
+          }
+        },
+        "last_return": {
+          "qpc": 204762098614,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100088564464,
+            "PacketType": 0,
+            "SubmitSequence": 44472,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169623595808
+          }
+        },
+        "first_anomaly_or_missing": "健康样本可验证 Windows 同号 DMA 完成。没有与目标上下文提交号匹配的独立 KMD 准入或硬件起始事件。"
+      },
+      "finished_utc": "2026-11-21T15:56:30.827142+00:00"
+    },
+    {
+      "round_id": "win-kmd-dma-boundary-build-20261121-01",
+      "contract_id": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+      "windows_question": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+      "method": "在固定正式基线的独立工作树构建仅诊断的本地候选；无驱动切换与实机图形执行",
+      "plan": "windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.plan.json",
+      "plan_sha256": "e3428d0058337833d0a5bccb515566cf3dd334fede96fd02a9bcb204a3a54c16",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T15:56:52.215232+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json",
+      "result_sha256": "a4ff032913a06a45339456d38c595fd6e4b1c9c3ab839229fd1f09f06f05e5c3",
+      "status": "观测缺口",
+      "finding": "隔离候选已生成 ARM64 KMD。32 字节 ETW 事件从 DDI 进入依次覆盖实际准入、已有 GP_PUT 发布读回和 GPU 完成值匹配。x64 WDK 队列夹具通过同号时间顺序、拒绝准入、发布前失败及读回未完成的用例；ARM64 测试程序已构建。",
+      "missing_observation": "候选仍在本地，尚无从 Switch 实载候选采到的健康负载配对。GP_PUT 观测是驱动发布边界，物理 GPU 执行起始仍无独立时间戳。历史 152586 及板级首因仍待证。",
+      "boundaries": {
+        "last_entry": "正式基线来源的隔离候选增加可按 ETW 关键字启用的 32 字节回执。",
+        "last_return": "生成 ARM64 WDDM 包及 ARM64 测试程序；x64 WDK 队列夹具退出 0。",
+        "first_anomaly_or_missing": "等待正常工作负载下实载候选哈希、Windows 和 KMD 同号完整回执，以及实机环境的实际事件留存。"
+      },
+      "finished_utc": "2026-11-21T15:58:51.114019+00:00"
     }
   ],
   "progress": {
-    "total": 31,
+    "total": 33,
     "by_status": {
       "实机通过": 9,
-      "观测缺口": 6,
+      "观测缺口": 8,
       "已有实机通过": 7,
       "故障开放": 3,
       "设备条件受限": 1,
       "待核对": 5
     },
-    "registered_rounds": 41,
+    "registered_rounds": 43,
     "new_device_executions": 10
   },
   "current_focus": {
@@ -2736,6 +2868,8 @@
       "WIN-DWM-TAIL-PREEMPT",
       "WIN-DWM-ETL-TAIL-COVERAGE",
       "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+      "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
       "WIN-PRESENT-IMAGE",
       "WIN-OLD-RESET"
     ],
@@ -2862,7 +2996,16 @@
         "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
         "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
       },
-      "followup_boundary": "下一项独立观测优先覆盖同一提交号的 KMD 成功路径、硬件开始或完成，先用正常已知可完成的负载校验记录器。保存窗口或令牌关系以及独立故障首条记录。"
+      "followup_boundary": "下一项独立观测优先覆盖同一提交号的 KMD 成功路径、硬件开始或完成，先用正常已知可完成的负载校验记录器。保存窗口或令牌关系以及独立故障首条记录。",
+      "same_kernel_event_catalog": {
+        "path": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
+        "sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25"
+      },
+      "local_kmd_witness_build": {
+        "path": "windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json",
+        "sha256": "a4ff032913a06a45339456d38c595fd6e4b1c9c3ab839229fd1f09f06f05e5c3"
+      },
+      "candidate_calibration": "用已知正常公开负载配对 Windows 调度、同 LUID/上下文的 KMD 进入、准入、GP_PUT 读回与 GPU 完成标记。已构建的 ARM64 候选预留签名、实际加载及退出回执。单项校验继续独立于原重启的归因。"
     }
   },
   "cleanup": {

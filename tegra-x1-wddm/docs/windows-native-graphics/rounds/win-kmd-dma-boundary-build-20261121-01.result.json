@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-dma-boundary-build-20261121-01",
+  "contract_id": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+  "windows_question": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+  "plan_sha256": "e3428d0058337833d0a5bccb515566cf3dd334fede96fd02a9bcb204a3a54c16",
+  "status": "观测缺口",
+  "finding": "隔离候选已生成 ARM64 KMD。32 字节 ETW 事件从 DDI 进入依次覆盖实际准入、已有 GP_PUT 发布读回和 GPU 完成值匹配。x64 WDK 队列夹具通过同号时间顺序、拒绝准入、发布前失败及读回未完成的用例；ARM64 测试程序已构建。",
+  "missing_observation": "候选仍在本地，尚无从 Switch 实载候选采到的健康负载配对。GP_PUT 观测是驱动发布边界，物理 GPU 执行起始仍无独立时间戳。历史 152586 及板级首因仍待证。",
+  "device_executions": 0,
+  "evidence": {
+    "candidate": {
+      "git_commit": "942fd339482886a1696efcb9723cce77f7538702",
+      "parent": "c137ce757b055557cff4b70068e8e2500dd92962",
+      "local_patch": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/local-candidate.patch",
+        "sha256": "243050b0c1b7590202be1931a5fd7f624e35ef78921b072ae73042333b147583",
+        "bytes": 11450
+      },
+      "source": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/source",
+      "compiled_sources": {
+        "tegra-x1-wddm/tests/test_context_windows.c": "bb079218d78a8bca079e79f060b16339881d5789b3d1404e821156397e108961",
+        "tegra-x1-wddm/windows/diagnostic_events.c": "10c1c9b1690ff04af8267e335bcde6410d4948d08e3e821a2685c93d508ce8fc",
+        "tegra-x1-wddm/windows/diagnostic_events.h": "d58be277943b3c4bc44b5e838b8c33a32aa6ec11845785a4d76f8237a9a3d8f7",
+        "tegra-x1-wddm/windows/submit_ddi.c": "8d6c001cefd9906d2c372394c2fafc48ef1e8526fd6e630a9bc1d9666e344a31",
+        "tegra-x1-wddm/windows/work_queue.c": "2b3088db864df481c9286d281736eb8fb93c2fc4429d019aed7b89d504e55285"
+      },
+      "driver": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/build-arm64/kit/tegragpurender/tegragpurender.sys",
+        "sha256": "1b6b69db18af53bb5f9043ce8c6bc72b617474a5dce89140b80cd36a274a2c80",
+        "bytes": 248832
+      },
+      "arm64_fixture": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/build-arm64/test-context.exe",
+        "sha256": "c58bb3fad31bec1041bd406e3f225bdaf67a89b682c07a03133aa84ed09b274e",
+        "bytes": 288768
+      },
+      "signing": "unsigned",
+      "pe_import_symbols": 59,
+      "package_hashes": {
+        "NETB_img.bin": {
+          "candidate_sha256": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+          "prior_unsigned_sha256": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3"
+        },
+        "fecs.bin": {
+          "candidate_sha256": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+          "prior_unsigned_sha256": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253"
+        },
+        "fecs_sig.bin": {
+          "candidate_sha256": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+          "prior_unsigned_sha256": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc"
+        },
+        "gpccs.bin": {
+          "candidate_sha256": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+          "prior_unsigned_sha256": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba"
+        },
+        "gpmu_ucode_desc.bin": {
+          "candidate_sha256": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+          "prior_unsigned_sha256": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b"
+        },
+        "gpmu_ucode_image.bin": {
+          "candidate_sha256": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699",
+          "prior_unsigned_sha256": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699"
+        },
+        "nv_acr_ucode_prod.bin": {
+          "candidate_sha256": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+          "prior_unsigned_sha256": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772"
+        },
+        "pmu_bl.bin": {
+          "candidate_sha256": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+          "prior_unsigned_sha256": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1"
+        },
+        "pmu_sig.bin": {
+          "candidate_sha256": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+          "prior_unsigned_sha256": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132"
+        },
+        "tegragpuno3d.dll": {
+          "candidate_sha256": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+          "prior_unsigned_sha256": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d"
+        },
+        "tegragpurender.inf": {
+          "candidate_sha256": "7e9279bb8c031b239663880adbc7967d23b231458755041e13cf230f3e7f8a09",
+          "prior_unsigned_sha256": "cd50c3e948fbcf8895e0d407fd6fc6a72b3c3405303d328bb4544582f3bffef8"
+        },
+        "tegragpurender.sys": {
+          "candidate_sha256": "1b6b69db18af53bb5f9043ce8c6bc72b617474a5dce89140b80cd36a274a2c80",
+          "prior_unsigned_sha256": "b27ef5100818ef07b2a7abe7eada51c2da6951865ddfdb049a3e1ad36fb8a8f5"
+        }
+      }
+    },
+    "event": {
+      "provider": "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0",
+      "event_id": 7,
+      "version": 1,
+      "level": 4,
+      "keyword": 2,
+      "bytes": 32,
+      "identity": [
+        "AdapterLuid",
+        "KMD context",
+        "SubmissionFence",
+        "DmaBytes"
+      ],
+      "phases": [
+        {
+          "value": 1,
+          "label": "ddi_entry",
+          "detail": "原始提交标志，含 Resubmission"
+        },
+        {
+          "value": 2,
+          "label": "admitted",
+          "detail": "队列准入返回成功且拥有记录，仍在 DispatchGate 内"
+        },
+        {
+          "value": 3,
+          "label": "gp_put_published",
+          "detail": "现有通道发布并读回 GP_PUT 成功"
+        },
+        {
+          "value": 4,
+          "label": "gpu_fence_observed",
+          "detail": "已在设备 BAR1 读回匹配 GPU 完成标记"
+        }
+      ]
+    },
+    "build": {
+      "command": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/build-command.json",
+        "sha256": "91d2085fd20f97942ee9caa9a15521a9a8d8c3484cabe5ec1478ead6bd94bb58",
+        "bytes": 1442
+      },
+      "log": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/build-arm64.log",
+        "sha256": "d949ffb50b353a7d02186d755c22a52efb146501eca7ebe966292baf3c2366ec",
+        "bytes": 2983
+      }
+    },
+    "model": {
+      "executable": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/model-x64/context.exe",
+        "sha256": "d2f5125d2453ef1ce026040fbdc22c5196006c55474d630762eb9c2d9c033461",
+        "bytes": 329728
+      },
+      "log": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/model-x64/context.log",
+        "sha256": "89b485060b8482cf5b8fac91735c9a580b6a99f981357fbbc9d80aae752f5831",
+        "bytes": 10988
+      },
+      "runner": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/run_context_model.py",
+        "sha256": "460cdebee4db9454ce71cc91827da97a3ada86ad2c9661487e3dc1225ac11c7b",
+        "bytes": 3208
+      },
+      "scope": "x64 WDK 布局，受控替代的 MMIO、通知与工作队列；ARM64 测试程序已构建。",
+      "checked": [
+        "模拟 Resubmission 的非空提交中，夹具按同 LUID、KMD 上下文、提交号和 DMA 字节数确认 4 次事件。既有模拟 GP_PUT 与第三阶段 Detail 一致。无 GPU 标记时反复轮询不报告完成。",
+        "提交未获准入只有进入事件。模拟通道发布前失败不报告发布或完成。"
+      ]
+    },
+    "decoder": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/decode_dma_boundary.py",
+      "sha256": "ebb316173e1ef19e797d8428396e427929821effad8cd4261e5289c997efb613",
+      "bytes": 3379
+    },
+    "device": {
+      "boot": 91557,
+      "formal_live_kmd_sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "accepted_components": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "status": "本轮本地构建；候选未签名及加载"
+    },
+    "boundaries": {
+      "last_entry": "正式基线来源的隔离候选增加可按 ETW 关键字启用的 32 字节回执。",
+      "last_return": "生成 ARM64 WDDM 包及 ARM64 测试程序；x64 WDK 队列夹具退出 0。",
+      "first_anomaly_or_missing": "等待正常工作负载下实载候选哈希、Windows 和 KMD 同号完整回执，以及实机环境的实际事件留存。"
+    }
+  }
+}

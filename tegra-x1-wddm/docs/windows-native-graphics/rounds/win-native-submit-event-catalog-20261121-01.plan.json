@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "round_id": "win-native-submit-event-catalog-20261121-01",
+  "contract_id": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+  "windows_question": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+  "owner": "Switch Windows DxgKrnl、GM20B KMD 与 ETW",
+  "question": "正式基线的 Windows 已安装图形事件中，能否为任一健康 DMA 提交号分别直接观察 KMD 准入或 GPU 开始？",
+  "method": "实机只读枚举图形提供程序/事件模板及正式健康轮双路关联，无新增图形负载",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "按供应程序、版本、模板和同次已知提交号配对 KMD 准入或 GPU 开始。覆盖无实证时写出适用字段和观察限制。",
+  "observations": [
+    "核对设备租约和正式基线实载签名对应哈希、AC、Code 0 与手持模式；读取已安装完整 Windows 图形模板及当前提供程序，不启用新跟踪。",
+    "将当前 dxgkrnl.sys 哈希与启动 91476 对照；扫描提交和硬件开始相关全模板，与健康轮同 DWM 上下文及提交号配对，同时验已知 DMA 完成阳性对照。",
+    "只有实际包含适配器或队列、提交号及阶段的记录才计为 KMD 接收或硬件开始；同表项可列明更高版本及未捕获的候选事件。"
+  ],
+  "inputs": {
+    "read_only_script_sha256": "da08c50a478299d082acf336b58f1c800ef233ce849dee07bfc9be191e09c780",
+    "prior_rounds": [
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+        "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+      }
+    ],
+    "references": {
+      "gpuview_dma": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/selections-in-the-gpu-hardware-queue",
+      "gpuview": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/using-gpuview"
+    },
+    "control_archive_sha256": "df24f085aa7006667e9c1a4d168a1ab6c39d14cf06bc39dfbf2ee478e2f33308",
+    "case_archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+  }
+}

@@ -452,9 +452,11 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json"
       ],
-      "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified.",
+      "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified. The same Windows kernel image exposes DMA scheduler and optional timing templates. Three healthy archived captures have matching DMA notifications and no per-packet GPU timestamp records. An opt-in DMA-boundary instrumentation package has been built locally and checked with the queue model. Live candidate calibration and accident attribution are open.",
       "daily_workaround": "Keep this optional board-local diagnostic task out of daily launches while investigating. Use the qualified permanent graphics baseline and established window controls.",
       "close_when": "Identify the initiating failure using evidence for this incident, fix it, and obtain three valid consecutive acceptance runs under the relevant original conditions including window output, input, normal exit, and desktop continuity.",
       "resolution": null
@@ -2699,6 +2701,81 @@
           "first_anomaly_or_missing": "DxgKrnl 保存 152586 的 DMA 提交事件。正式 KMD 的常规成功提交没有配套进入或返回事件，现有追踪无该请求的 KMD 准入、GP PUT、硬件开始或完成。"
         },
         "finished_utc": "2026-11-21T15:51:49.042571+00:00"
+      },
+      {
+        "round_id": "win-native-submit-event-catalog-20261121-01",
+        "contract_id": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+        "windows_question": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+        "method": "实机只读枚举图形提供程序/事件模板及正式健康轮双路关联，无新增图形负载",
+        "plan": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.plan.json",
+        "plan_sha256": "0cf3be7931e4fbbfec751bca8d4f7dd7422f4041b2754e23aaaf41dd2ab66bb1",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T15:55:05.970576+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
+        "result_sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25",
+        "status": "观测缺口",
+        "finding": "同哈希 Windows dxgkrnl.sys 的主发布者可读 640 份事件模板。启动 91476 的三份健康样本均可见 175/176/177。对同上下文 138354，两路记录到完成中断和队列退役。八份健康与异常 ETL 中均无 185 队列时间戳、262/431 GPU 时钟校准、263 历史缓冲或 450/451 硬件队列进度事件。",
+        "missing_observation": "基线源码返回零位宽的历史缓冲能力，时钟校准与历史格式化均返回不支持。已归档本机能力报告 WDDM 2.6、HwSchSupported=0。SysMm 元数据读取失败，当前结论限于主发布者、现有归档及实载基线源码。仍需同号 KMD 准入与硬件发布回执。",
+        "boundaries": {
+          "last_entry": {
+            "qpc": 204761969616,
+            "pid": 4,
+            "tid": 888,
+            "provider": "kernel",
+            "id": 175,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "hQueuePacketContext": 0,
+              "PacketType": 0,
+              "uliSubmissionId": 138354,
+              "ulQueueSubmitSequence": 44472,
+              "pDmaBuffer": 0,
+              "QuantumStatus": 3
+            }
+          },
+          "last_return": {
+            "qpc": 204762098614,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 44472,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169623595808
+            }
+          },
+          "first_anomaly_or_missing": "健康样本可验证 Windows 同号 DMA 完成。没有与目标上下文提交号匹配的独立 KMD 准入或硬件起始事件。"
+        },
+        "finished_utc": "2026-11-21T15:56:30.827142+00:00"
+      },
+      {
+        "round_id": "win-kmd-dma-boundary-build-20261121-01",
+        "contract_id": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+        "windows_question": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+        "method": "在固定正式基线的独立工作树构建仅诊断的本地候选；无驱动切换与实机图形执行",
+        "plan": "windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.plan.json",
+        "plan_sha256": "e3428d0058337833d0a5bccb515566cf3dd334fede96fd02a9bcb204a3a54c16",
+        "state": "已回写",
+        "registered_utc": "2026-11-21T15:56:52.215232+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-kmd-dma-boundary-build-20261121-01.result.json",
+        "result_sha256": "a4ff032913a06a45339456d38c595fd6e4b1c9c3ab839229fd1f09f06f05e5c3",
+        "status": "观测缺口",
+        "finding": "隔离候选已生成 ARM64 KMD。32 字节 ETW 事件从 DDI 进入依次覆盖实际准入、已有 GP_PUT 发布读回和 GPU 完成值匹配。x64 WDK 队列夹具通过同号时间顺序、拒绝准入、发布前失败及读回未完成的用例；ARM64 测试程序已构建。",
+        "missing_observation": "候选仍在本地，尚无从 Switch 实载候选采到的健康负载配对。GP_PUT 观测是驱动发布边界，物理 GPU 执行起始仍无独立时间戳。历史 152586 及板级首因仍待证。",
+        "boundaries": {
+          "last_entry": "正式基线来源的隔离候选增加可按 ETW 关键字启用的 32 字节回执。",
+          "last_return": "生成 ARM64 WDDM 包及 ARM64 测试程序；x64 WDK 队列夹具退出 0。",
+          "first_anomaly_or_missing": "等待正常工作负载下实载候选哈希、Windows 和 KMD 同号完整回执，以及实机环境的实际事件留存。"
+        },
+        "finished_utc": "2026-11-21T15:58:51.114019+00:00"
       }
     ]
   }
