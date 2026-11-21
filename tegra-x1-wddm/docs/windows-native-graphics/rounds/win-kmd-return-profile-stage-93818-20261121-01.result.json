@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-return-profile-stage-93818-20261121-01",
+  "contract_id": "WIN-KMD-RETURN-PROFILE-STAGING",
+  "windows_question": "WIN-KMD-RETURN-PROFILE-STAGING",
+  "plan_sha256": "d34de7de6800b314347c24773fb6be30841335511c37054a453ea04319bfaf1a",
+  "status": "实机通过",
+  "finding": "正式启动 93818 上完成隔离诊断配置文件准备。12 个签名目录成员复核，8 个配置哈希中只有候选 KMD 不同。正式驱动、DWM 1384 和永久许可均保持，上传临时目录已清理。",
+  "missing_observation": "候选目录用于后续唯一一次性试用。实际 KMD 返回、硬件围栏及历史故障归因仍需实载回执。",
+  "device_executions": 0,
+  "evidence": {
+    "boot": 93818,
+    "dwm": 1384,
+    "physical_code": 0,
+    "stage": {
+      "source": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+      "icd": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "members": 76,
+      "transfer": "C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\SwitchStartupProfile-87b8d4243fc7",
+      "umd": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "kmd": "bfbc849f36b5a67b985f8ff4489d6200b3befda1a8c27be2fd8159744c50dbfa",
+      "package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dma-return-diagnostic-bfbc849f36b5",
+      "owner": "87b8d4243fc746408a530bc4017b8cbf",
+      "components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "tegragpurender.sys": "bfbc849f36b5a67b985f8ff4489d6200b3befda1a8c27be2fd8159744c50dbfa",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "active": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+      "catalog_members": [
+        "nv_acr_ucode_prod.bin",
+        "fecs_sig.bin",
+        "tegragpurender.sys",
+        "gpccs.bin",
+        "pmu_sig.bin",
+        "NETB_img.bin",
+        "tegragpurender.inf",
+        "pmu_bl.bin",
+        "gpmu_ucode_desc.bin",
+        "fecs.bin",
+        "tegragpuno3d.dll",
+        "gpmu_ucode_image.bin"
+      ]
+    },
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/daily-staged.json",
+        "sha256": "c522ace2e94b17421cfe6b9498d822ebdea7d07e0dcd073614ced522d1fd752c",
+        "bytes": 1703
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/seq-93818-after-profile-stage.json",
+        "sha256": "5af4163442678055512b36104ae58f68b91f8639c6d379b77c8fbde3385d446f",
+        "bytes": 10886
+      }
+    ],
+    "boundaries": {
+      "last_entry": "Catalog-verified inactive profile staging",
+      "last_return": "2026-11-21T22:49:10.7966411Z",
+      "first_anomaly_or_missing": "候选目录用于后续唯一一次性试用。实际 KMD 返回、硬件围栏及历史故障归因仍需实载回执。"
+    }
+  }
+}

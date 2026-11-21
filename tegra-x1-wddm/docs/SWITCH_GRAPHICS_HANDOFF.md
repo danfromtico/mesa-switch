@@ -146,6 +146,8 @@ Switch 正式启动 91557 上的签名 ARM64 队列夹具返回 0。目录签名
 
 提交 ef790ec9 补充 opt-in KMD 提交返回状态。正式启动 93818 上，Windows 签名 ARM64 队列模型的原生退出码为 0，Inf2Cat 生成的目录签名和 12 个成员通过核验。该轮保留正式驱动、永久许可和同一桌面。事件 7/v2 仍待一次性候选实载校准。[目录和模型验证](windows-native-graphics/rounds/win-kmd-return-catalog-93818-20261121-02.result.json)
 
+正式启动 93818 仍绑定实核回退包 oem30.inf，Driver Store 的目录和全部 13 个文件哈希吻合。隔离试用目录已准备，8 个组件中仅 KMD 的哈希不同，正式驱动和永久许可已回读。新 ETW 采集器待复核后进行一次性诊断。[隔离目录准备](windows-native-graphics/rounds/win-kmd-return-profile-stage-93818-20261121-01.result.json)
+
 ## 此前交接记录
 
 工作目录为 `/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan`，分支为 `tgd3d-vulkan`。原会话 `01a1ec52-4325-7bf2-b65d-3c934aadfad2` 保留。新会话可以自行创建进行中的长期目标，专门接手下述第四步。前三步从新会话的待办中移除，已有能力查询、游戏和 Pacecar 验收留档。[四组游戏及 ARM64EC 记录](DXVK_ZINK_GAME_MATRIX_20261118.json)

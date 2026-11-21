@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-return-profile-stage-93818-20261121-01",
+  "contract_id": "WIN-KMD-RETURN-PROFILE-STAGING",
+  "windows_question": "WIN-KMD-RETURN-PROFILE-STAGING",
+  "owner": "Windows 正式基线及下一次 GPU 独立试用的目录准备",
+  "question": "独立诊断 KMD 能否与正式驱动并存准备，保留同一开机和回退包？",
+  "method": "文件准备和有效目录签名复核，正式基线仍在运行",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "核验隔离目录的签名、13 个包成员与 8 个实际比较叶，候选 KMD 是唯一不同组件，正式许可和运行中桌面一致。",
+  "observations": [
+    "复用已审现成控制器的隔离目录复制。不执行选驱动、切开机许可、计划重启或候选负载。",
+    "确认候选与恢复包的完整目录、实载正式配置和由 KMD 哈希派生的诊断路径，并清理上传临时目录。"
+  ],
+  "inputs": {
+    "candidate": "bfbc849f36b5a67b985f8ff4489d6200b3befda1a8c27be2fd8159744c50dbfa",
+    "source": "ef790ec99d5b8c508bf232e40faa04b4cd9df1bf",
+    "formal": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "board_rollback_sha256": "03d7eeded269c7f656cfbe932d2b6c15b8812ac8fbb3a55174300a300606334b",
+    "stage_script_sha256": "55cdc58debde160590ccfbab9a0c32256704ad932af778f32d2f192151917952",
+    "stage_runner_sha256": "66ec445ea7c332333b362d1e1cae02a087f8126134930230426a0ee7cf73c23e",
+    "cycle_review_sha256": "012c7b9069273f9aa08f387eafeacc8bc9340d05ba4b66a3efb911e80c25c4e3"
+  }
+}

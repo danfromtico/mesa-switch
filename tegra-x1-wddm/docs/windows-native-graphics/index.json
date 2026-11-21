@@ -2184,6 +2184,30 @@
         "win-kmd-return-catalog-93818-20261121-02"
       ],
       "latest_observation": "Windows 正式启动 93818 的签名 ARM64 队列模型退出码 0。Windows 生成并验证隔离候选的签名目录，12 个成员全哈希吻合。正式 KMD、Code 0、DWM 1384 与永久许可已读回，专属目录已清理。"
+    },
+    {
+      "id": "WIN-KMD-RETURN-PROFILE-STAGING",
+      "priority": "P0",
+      "owner": "Windows 正式基线及下一次 GPU 独立试用的目录准备",
+      "question": "独立诊断 KMD 能否与正式驱动并存准备，保留同一开机和回退包？",
+      "status": "实机通过",
+      "existing_observation": "候选目录签名和 12 个成员实机通过，正式 oem30.inf 及 13 个回退成员已实机核验。",
+      "missing_observation": "候选目录用于后续唯一一次性试用。实际 KMD 返回、硬件围栏及历史故障归因仍需实载回执。",
+      "pass_condition": "核验隔离目录的签名、13 个包成员与 8 个实际比较叶，候选 KMD 是唯一不同组件，正式许可和运行中桌面一致。",
+      "evidence": [
+        {
+          "path": "windows-native-graphics/rounds/win-kmd-return-catalog-93818-20261121-02.result.json",
+          "sha256": "e2edb7b67b5e18c9f28357167d7e4f82a39ffbf719c02106c3a2ec8b2d477853"
+        }
+      ],
+      "windows_references": [
+        "dma_interrupt",
+        "fence"
+      ],
+      "round_ids": [
+        "win-kmd-return-profile-stage-93818-20261121-01"
+      ],
+      "latest_observation": "正式启动 93818 上完成隔离诊断配置文件准备。12 个签名目录成员复核，8 个配置哈希中只有候选 KMD 不同。正式驱动、DWM 1384 和永久许可均保持，上传临时目录已清理。"
     }
   ],
   "rounds": [
@@ -5345,19 +5369,41 @@
         "first_anomaly_or_missing": "本轮核验签名和模型。实载候选的事件 7/v2、同包 KMD 返回及故障归属仍须后续实机。"
       },
       "finished_utc": "2026-11-21T22:43:11.266599+00:00"
+    },
+    {
+      "round_id": "win-kmd-return-profile-stage-93818-20261121-01",
+      "contract_id": "WIN-KMD-RETURN-PROFILE-STAGING",
+      "windows_question": "WIN-KMD-RETURN-PROFILE-STAGING",
+      "method": "文件准备和有效目录签名复核，正式基线仍在运行",
+      "plan": "windows-native-graphics/rounds/win-kmd-return-profile-stage-93818-20261121-01.plan.json",
+      "plan_sha256": "d34de7de6800b314347c24773fb6be30841335511c37054a453ea04319bfaf1a",
+      "state": "已回写",
+      "registered_utc": "2026-11-21T22:48:39.118891+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-kmd-return-profile-stage-93818-20261121-01.result.json",
+      "result_sha256": "0f80c5db435212bb32c4b4523b075d20ee4e9885df73b4e603c12f39f4982f7d",
+      "status": "实机通过",
+      "finding": "正式启动 93818 上完成隔离诊断配置文件准备。12 个签名目录成员复核，8 个配置哈希中只有候选 KMD 不同。正式驱动、DWM 1384 和永久许可均保持，上传临时目录已清理。",
+      "missing_observation": "候选目录用于后续唯一一次性试用。实际 KMD 返回、硬件围栏及历史故障归因仍需实载回执。",
+      "boundaries": {
+        "last_entry": "Catalog-verified inactive profile staging",
+        "last_return": "2026-11-21T22:49:10.7966411Z",
+        "first_anomaly_or_missing": "候选目录用于后续唯一一次性试用。实际 KMD 返回、硬件围栏及历史故障归因仍需实载回执。"
+      },
+      "finished_utc": "2026-11-21T22:49:12.176151+00:00"
     }
   ],
   "progress": {
-    "total": 61,
+    "total": 62,
     "by_status": {
-      "实机通过": 30,
+      "实机通过": 31,
       "观测缺口": 15,
       "已有实机通过": 7,
       "故障开放": 4,
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 87,
+    "registered_rounds": 88,
     "new_device_executions": 36
   },
   "current_focus": {
