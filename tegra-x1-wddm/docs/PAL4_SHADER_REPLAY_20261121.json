@@ -1408,6 +1408,363 @@
       "expected_outputs": true,
       "replay_bound_device": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) vendor=10de device=0fe0 type=1 luid_valid=1 luid=0000000000005c45"
     },
+    "game_startup_trace": {
+      "label": "game-startup-trace",
+      "app": {
+        "case": "game-startup-trace",
+        "utc": "2026-11-21T10:18:17.8819272Z",
+        "boot": 90707,
+        "ac": "Online",
+        "code": 0,
+        "dwm": 1360,
+        "mode": 1,
+        "inherited_graphics_environment": {
+          "DXVK_CONFIG": "unset",
+          "DXVK_CONFIG_FILE": "unset",
+          "DXVK_HUD": "unset",
+          "DXVK_SHADER_CACHE_PATH": "unset",
+          "DXVK_FILTER_DEVICE_NAME": "unset",
+          "MESA_SHADER_CACHE_DISABLE": "unset",
+          "LP_NUM_THREADS": "unset"
+        }
+      },
+      "observed_boot": 90785,
+      "result": {},
+      "transaction": {
+        "boot": 90707,
+        "dest": "Documents game d3d9.dll",
+        "qpc_hz": 19200000,
+        "utc": "2026-11-21T10:18:23.0887799Z",
+        "original": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "settings": "2d30f3102c1c3ab8399295d8ac6efd12ab013416031f0d0b2f19dcc2b92db6e0",
+        "qpc_before": 39911585862,
+        "candidate": "7b859b854ffa4bceb66ff375c67f8d4bb46d0960e6526cc623584d93b8acd9dc",
+        "qpc_after": 39911659697
+      },
+      "app_dll_restored": {
+        "path": "Documents game d3d9.dll",
+        "utc": "2026-11-21T10:23:39.9678395Z",
+        "boot": 90785,
+        "sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab"
+      },
+      "found_device": [
+        "info:  Found device: NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)"
+      ],
+      "journal_sha256": "12d56d066f20ddc75b3f33a88222c3df3d53ddbfdd5c270516caeb58aa69f7f4",
+      "journal_lines": 193,
+      "file_bytes": 13484,
+      "parsed_prefix_bytes": 13484,
+      "first_nul_byte": null,
+      "malformed_prefix_offset": null,
+      "unmatched_scope_markers": [],
+      "final_line_complete": true,
+      "stage_counts": {
+        "D3D9InterfaceEx::CreateDevice": {
+          "enter": 1,
+          "max_sampled_invocation": 1,
+          "leave": 1
+        },
+        "D3D9InterfaceEx::CreateDeviceEx": {
+          "enter": 1,
+          "max_sampled_invocation": 1,
+          "leave": 1
+        },
+        "DxvkShaderPipelineLibrary::compilePipeline": {
+          "enter": 17,
+          "max_sampled_invocation": 17,
+          "leave": 16
+        },
+        "DxvkShaderPipelineLibrary::compileShaders": {
+          "enter": 17,
+          "max_sampled_invocation": 17,
+          "leave": 16
+        },
+        "DxvkShaderPipelineLibrary::compileFragmentShaderPipeline": {
+          "enter": 16,
+          "max_sampled_invocation": 16,
+          "leave": 16
+        },
+        "D3D9DeviceEx::ResetSwapChain": {
+          "enter": 1,
+          "max_sampled_invocation": 1,
+          "leave": 1
+        },
+        "Presenter::createSurface": {
+          "enter": 1,
+          "max_sampled_invocation": 1,
+          "leave": 1
+        },
+        "vkQueueSubmit2": {
+          "enter": 1,
+          "max_sampled_invocation": 1,
+          "result": 1,
+          "leave": 1
+        },
+        "D3D9DeviceEx::CreateIndexBuffer": {
+          "enter": 2,
+          "max_sampled_invocation": 2,
+          "leave": 2
+        },
+        "vkWaitSemaphores": {
+          "enter": 1,
+          "max_sampled_invocation": 1,
+          "result": 1,
+          "leave": 1
+        },
+        "D3D9DeviceEx::CreateVertexBuffer": {
+          "enter": 4,
+          "max_sampled_invocation": 4,
+          "leave": 4
+        },
+        "D3D9DeviceEx::CreatePixelShader": {
+          "enter": 17,
+          "max_sampled_invocation": 17,
+          "leave": 17
+        },
+        "D3D9DeviceEx::CreateTexture": {
+          "enter": 7,
+          "max_sampled_invocation": 7,
+          "leave": 6
+        },
+        "D3D9DeviceEx::LockImage": {
+          "enter": 5,
+          "max_sampled_invocation": 5,
+          "leave": 5
+        },
+        "D3D9DeviceEx::UnlockImage": {
+          "enter": 5,
+          "max_sampled_invocation": 5,
+          "leave": 5
+        },
+        "D3D9DeviceEx::Clear": {
+          "enter": 1,
+          "max_sampled_invocation": 1,
+          "leave": 1
+        }
+      },
+      "last_markers": [
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compileFragmentShaderPipeline",
+          "n": 15,
+          "edge": "enter",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.775438+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compileFragmentShaderPipeline",
+          "n": 15,
+          "edge": "leave",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.780070+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compilePipeline",
+          "n": 15,
+          "edge": "leave",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.782125+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compilePipeline",
+          "n": 16,
+          "edge": "enter",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.784247+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compileShaders",
+          "n": 16,
+          "edge": "enter",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.786357+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compileShaders",
+          "n": 16,
+          "edge": "leave",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.842962+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compileFragmentShaderPipeline",
+          "n": 16,
+          "edge": "enter",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.860542+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compileFragmentShaderPipeline",
+          "n": 16,
+          "edge": "leave",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.900220+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compilePipeline",
+          "n": 16,
+          "edge": "leave",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.902660+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compilePipeline",
+          "n": 17,
+          "edge": "enter",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.916945+00:00"
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compileShaders",
+          "n": 17,
+          "edge": "enter",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.918986+00:00"
+        },
+        {
+          "tid": 468,
+          "site": "D3D9DeviceEx::CreateTexture",
+          "n": 7,
+          "edge": "enter",
+          "status": 0,
+          "utc": "2026-11-21T10:18:29.932343+00:00"
+        }
+      ],
+      "line_cap_reached": false,
+      "scope_note": "Enter/leave markers identify observed API boundaries. Blocking file writes change scheduling. An open scope alone does not identify the cause of a system reset.",
+      "open_at_end": [
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compilePipeline",
+          "n": 17
+        },
+        {
+          "tid": 5716,
+          "site": "DxvkShaderPipelineLibrary::compileShaders",
+          "n": 17
+        },
+        {
+          "tid": 468,
+          "site": "D3D9DeviceEx::CreateTexture",
+          "n": 7
+        }
+      ],
+      "vulkan_results": [
+        {
+          "site": "vkQueueSubmit2",
+          "invocation": 1,
+          "result": 0,
+          "pid": 488,
+          "tid": 1420
+        },
+        {
+          "site": "vkWaitSemaphores",
+          "invocation": 1,
+          "result": 0,
+          "pid": 488,
+          "tid": 7456
+        }
+      ],
+      "samples": [
+        {
+          "trace_bytes": 0,
+          "cpu_s": 0.203125,
+          "pid": 488,
+          "elapsed": 0.09068559999999999,
+          "working": 10592256,
+          "hwnd": 0
+        },
+        {
+          "trace_bytes": 0,
+          "cpu_s": 1.125,
+          "pid": 488,
+          "elapsed": 2.1724628,
+          "working": 59686912,
+          "hwnd": 786544
+        },
+        {
+          "trace_bytes": 4257,
+          "cpu_s": 2.765625,
+          "pid": 488,
+          "elapsed": 4.1935534,
+          "working": 105701376,
+          "hwnd": 786544
+        }
+      ],
+      "collection_sha256": "7047e56a07b7deb098714bea5bbaf159499680b98de6550dcb4434b26d392abe",
+      "first_marker_utc": "2026-11-21T10:18:27.684012+00:00",
+      "last_marker_utc": "2026-11-21T10:18:29.932343+00:00",
+      "clock_bracket_seconds": 0.003845572916666667,
+      "after_boot_evidence": {
+        "initial": 90707,
+        "after": 90785,
+        "new_boots": [
+          90785
+        ],
+        "boot_utc": "2026-11-21T10:20:50.4527506Z",
+        "events": [
+          {
+            "id": 12,
+            "record": 90785,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "utc": "2026-11-21T10:20:50.4527506Z",
+            "fields": {}
+          },
+          {
+            "id": 6008,
+            "record": 90794,
+            "provider": "EventLog",
+            "utc": "2026-11-21T10:22:27.0585562Z",
+            "fields": {}
+          },
+          {
+            "id": 41,
+            "record": 90803,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "utc": "2026-11-21T10:20:55.8030841Z",
+            "fields": {
+              "BugcheckCode": "0",
+              "SleepInProgress": "0",
+              "PowerButtonTimestamp": "0",
+              "BugcheckInfoFromEFI": "false",
+              "LongPowerButtonPressDetected": "false"
+            }
+          }
+        ],
+        "dump_count": 0,
+        "desktop_dwm": [
+          1228
+        ],
+        "gpu_code": 0,
+        "stable_rendering_components": true,
+        "original_app_dll": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "app_rollback_checked_sha256": "5a959820871d16ae371be120985508afe0c0a90d365d6a8380eeaeb8d351951c"
+      },
+      "observation_delay_seconds": 105,
+      "pictures": [],
+      "game_log": {
+        "receipt": {
+          "name": "pal4Logfile.log",
+          "utc": "2026-11-21T10:18:29.1811203Z",
+          "size": 26924,
+          "sha256": "36f1a1fc0d46be84e25f95b942d122ff429d61e5750620828c39be5c4a19b8a9"
+        },
+        "retained_prefix_bytes": 26924,
+        "startup_info_lines": 181,
+        "same_as_software_prefix": 181,
+        "last_milestone": "INFO:  palPlayerManager initializing begin..."
+      }
+    },
     "build": {
       "bytes": 7752728,
       "unsigned": "4e2d1944d03eb1a3444e2335590fe1f6a9bcb7a602ce67bfdec433e9796dfe48",
@@ -1418,6 +1775,95 @@
     },
     "scope": "An opt-in diagnostic rebuild at the pinned DXVK revision. The clean rebuild had seven differing PE sections versus the installed original. Renderer identity, signing, a normal exit and 17 original offscreen readback hashes are checked in its own control. Synchronous file writes alter timing."
   },
+  "game_startup_boundary": {
+    "before_boot": 90707,
+    "after_boot": 90785,
+    "new_boots": [
+      90785
+    ],
+    "events": [
+      {
+        "id": 12,
+        "record": 90785,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T10:20:50.4527506Z",
+        "fields": {}
+      },
+      {
+        "id": 6008,
+        "record": 90794,
+        "provider": "EventLog",
+        "utc": "2026-11-21T10:22:27.0585562Z",
+        "fields": {}
+      },
+      {
+        "id": 41,
+        "record": 90803,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "utc": "2026-11-21T10:20:55.8030841Z",
+        "fields": {
+          "BugcheckCode": "0",
+          "SleepInProgress": "0",
+          "PowerButtonTimestamp": "0",
+          "BugcheckInfoFromEFI": "false",
+          "LongPowerButtonPressDetected": "false"
+        }
+      }
+    ],
+    "new_dump_count": 0,
+    "last_durable_utc": "2026-11-21T10:18:29.932343+00:00",
+    "seconds_to_next_windows_boot_event": 140.52,
+    "trace_lines": 193,
+    "parsed_bytes": 13484,
+    "trace_bytes": 13484,
+    "captured_api_returns": {
+      "D3D9InterfaceEx::CreateDevice": 1,
+      "D3D9DeviceEx::CreatePixelShader": 17,
+      "D3D9DeviceEx::CreateTexture": 6,
+      "D3D9DeviceEx::LockImage": 5,
+      "D3D9DeviceEx::UnlockImage": 5,
+      "D3D9DeviceEx::Clear": 1
+    },
+    "successful_queue_results": [
+      "vkQueueSubmit2",
+      "vkWaitSemaphores"
+    ],
+    "recorded_draw_or_present": {
+      "D3D9DeviceEx::BeginScene": 0,
+      "D3D9DeviceEx::DrawPrimitive": 0,
+      "D3D9DeviceEx::DrawIndexedPrimitive": 0,
+      "D3D9DeviceEx::DrawPrimitiveUP": 0,
+      "D3D9DeviceEx::DrawIndexedPrimitiveUP": 0,
+      "D3D9DeviceEx::Present": 0,
+      "D3D9DeviceEx::PresentEx": 0,
+      "D3D9SwapChainEx::Present": 0,
+      "D3D9SwapChainEx::PresentImageGDI": 0,
+      "vkCreateSwapchainKHR": 0,
+      "vkQueuePresentKHR": 0
+    },
+    "open_scopes": [
+      {
+        "tid": 5716,
+        "site": "DxvkShaderPipelineLibrary::compilePipeline",
+        "n": 17
+      },
+      {
+        "tid": 5716,
+        "site": "DxvkShaderPipelineLibrary::compileShaders",
+        "n": 17
+      },
+      {
+        "tid": 468,
+        "site": "D3D9DeviceEx::CreateTexture",
+        "n": 7
+      }
+    ],
+    "last_game_milestone": "INFO:  palPlayerManager initializing begin...",
+    "game_log_prefix_matching_software": 181,
+    "original_app_library": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "cause_status": "unresolved",
+    "interpretation": "The retained journal ends with the seventh texture creation on the application thread and the seventeenth compiler job on a worker. The job ordinal does not identify a particular game shader. The gap to the next Windows boot includes unobserved time and boot initialization. These overlapping calls cannot by themselves identify the initiating fault."
+  },
   "sampled_power_driver": {
     "version": null,
     "name": "switchfan",
@@ -1427,7 +1873,7 @@
     "parameters": {
       "DriverVersion": 33,
       "DisplayState": 1,
-      "CpuLastError": -1073740669,
+      "CpuLastError": 0,
       "PowerMode": 1,
       "DfllAcquireStage": 4
     }
