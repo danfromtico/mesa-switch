@@ -88,30 +88,30 @@ static void init_device(Device &dev, Adapter *adapter)
    TGD3D_VK_DEVICE_FUNCS(X)
    TGD3D_VK_OPTIONAL_DEVICE_FUNCS(X)
 #undef X
-   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { ++setErrorCalls; lastError = hr; };
-   dev.vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *out) VKAPI_CALL {
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { ++setErrorCalls; lastError = hr; };
+   dev.vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *out) {
       *out = handle<VkCommandBuffer>(0x100); return VK_SUCCESS;
    };
-   dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) VKAPI_CALL {
+   dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) {
       *out = completedValue; return VK_SUCCESS;
    };
-   dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *info, uint64_t) VKAPI_CALL {
+   dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *info, uint64_t) {
       ++cpuWaits; completedValue = *info->pValues; return VK_SUCCESS;
    };
-   dev.vk.SignalSemaphore = [](VkDevice, const VkSemaphoreSignalInfo *) VKAPI_CALL {
+   dev.vk.SignalSemaphore = [](VkDevice, const VkSemaphoreSignalInfo *) {
       ++cpuSignals; return VK_SUCCESS;
    };
-   dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer cmd, const VkDependencyInfo *info) VKAPI_CALL {
+   dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer cmd, const VkDependencyInfo *info) {
       CHECK(cmd && (info->memoryBarrierCount || info->imageMemoryBarrierCount)); ++barriers;
    };
    dev.kt.pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE device,
-         const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *info) APIENTRY -> HRESULT {
+         const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *info) -> HRESULT {
       CHECK(device == handle<HANDLE>(0x4000) && info->hContext == handle<HANDLE>(0x3000));
       CHECK(info->ObjectCount == 1 && info->ObjectHandleArray[0] == 0x21);
       CHECK(info->MonitoredFenceValueArray[0] == submissions + 1);
       ++signals; events.push_back(1); return failAt == 1 ? E_FAIL : S_OK;
    };
-   dev.vk.QueueSubmit2 = [](VkQueue, uint32_t count, const VkSubmitInfo2 *info, VkFence) VKAPI_CALL {
+   dev.vk.QueueSubmit2 = [](VkQueue, uint32_t count, const VkSubmitInfo2 *info, VkFence) {
       CHECK(count == 1 && info->commandBufferInfoCount == 1 && info->signalSemaphoreInfoCount == 1);
       CHECK(info->pSignalSemaphoreInfos[0].value == submissions + 1);
       CHECK(info->pSignalSemaphoreInfos[0].semaphore == handle<VkSemaphore>(3));
@@ -139,16 +139,16 @@ static void init_device(Device &dev, Adapter *adapter)
       return failAt == 2 ? VK_ERROR_DEVICE_LOST : VK_SUCCESS;
    };
    dev.kt.pfnWaitForSynchronizationObjectFromGpuCb = [](HANDLE,
-         const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *info) APIENTRY -> HRESULT {
+         const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *info) -> HRESULT {
       CHECK(info->hContext == handle<HANDLE>(0x3000) && info->ObjectCount == 1);
       CHECK(info->ObjectHandleArray[0] == 0x20 && info->MonitoredFenceValueArray[0] == submissions);
       ++gates; events.push_back(3); return failAt == 3 ? E_FAIL : S_OK;
    };
-   dev.vk.DestroyImageView = [](VkDevice, VkImageView, const VkAllocationCallbacks *) VKAPI_CALL {
+   dev.vk.DestroyImageView = [](VkDevice, VkImageView, const VkAllocationCallbacks *) {
       ++viewsDestroyed; events.push_back(4);
    };
-   dev.vk.DestroyImage = [](VkDevice, VkImage, const VkAllocationCallbacks *) VKAPI_CALL { events.push_back(5); };
-   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) VKAPI_CALL { events.push_back(6); };
+   dev.vk.DestroyImage = [](VkDevice, VkImage, const VkAllocationCallbacks *) { events.push_back(5); };
+   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory, const VkAllocationCallbacks *) { events.push_back(6); };
 }
 
 static void reset_device(Device &dev, Adapter *adapter)
@@ -171,7 +171,7 @@ static void displayable_write_batches()
    reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    Resource resources[33]; View views[33];
    dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *info,
-                              const VkAllocationCallbacks *, VkImageView *out) VKAPI_CALL -> VkResult {
+                              const VkAllocationCallbacks *, VkImageView *out) -> VkResult {
       *out = (VkImageView)info->image; return VK_SUCCESS;
    };
    for (UINT i = 0; i < 33; ++i) {
@@ -210,7 +210,7 @@ static void shared_ownership_contract()
    for (bool imported : {false, true}) {
       Adapter adapter; reset(); Device dev; init_device(dev, &adapter);
       adapter.vk.caps.queueFamily = 2; transitions.clear();
-      dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer cmd, const VkDependencyInfo *info) VKAPI_CALL {
+      dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer cmd, const VkDependencyInfo *info) {
          CHECK(cmd);
          for (UINT i = 0; i < info->imageMemoryBarrierCount; ++i)
             transitions.push_back(info->pImageMemoryBarriers[i]);
@@ -272,14 +272,14 @@ static void clear_view_contract()
    } seen;
    seen = {};
    dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *info,
-                              const VkAllocationCallbacks *, VkImageView *out) VKAPI_CALL {
+                              const VkAllocationCallbacks *, VkImageView *out) {
       CHECK(info->viewType == VK_IMAGE_VIEW_TYPE_2D_ARRAY &&
             info->subresourceRange.baseMipLevel == 1 &&
             info->subresourceRange.baseArrayLayer == 2 &&
             info->subresourceRange.layerCount == 3);
       *out = handle<VkImageView>(0x1000 + ++seen.views); return VK_SUCCESS;
    };
-   dev.vk.CmdBeginRendering = [](VkCommandBuffer cmd, const VkRenderingInfo *info) VKAPI_CALL {
+   dev.vk.CmdBeginRendering = [](VkCommandBuffer cmd, const VkRenderingInfo *info) {
       CHECK(cmd && info->colorAttachmentCount == 1 && info->layerCount == 3 &&
             !info->renderArea.offset.x && !info->renderArea.offset.y &&
             info->renderArea.extent.width == 65 && info->renderArea.extent.height == 17);
@@ -288,7 +288,7 @@ static void clear_view_contract()
       seen.load = a.loadOp; seen.value = a.clearValue; ++seen.begins;
    };
    dev.vk.CmdClearAttachments = [](VkCommandBuffer, UINT count, const VkClearAttachment *a,
-                                   UINT rectCount, const VkClearRect *rects) VKAPI_CALL {
+                                   UINT rectCount, const VkClearRect *rects) {
       CHECK(count == 1 && a->aspectMask == VK_IMAGE_ASPECT_COLOR_BIT && !a->colorAttachment);
       CHECK(rectCount && rectCount <= 32);
       seen.value = a->clearValue; ++seen.batches;
@@ -297,10 +297,10 @@ static void clear_view_contract()
          seen.rects.push_back(rects[i]);
       }
    };
-   dev.vk.CmdEndRendering = [](VkCommandBuffer) VKAPI_CALL { ++seen.ends; };
-   dev.vk.CmdBeginQuery = [](VkCommandBuffer, VkQueryPool, UINT, VkQueryControlFlags) VKAPI_CALL { CHECK(false); };
-   dev.vk.CmdEndQuery = [](VkCommandBuffer, VkQueryPool, UINT) VKAPI_CALL { CHECK(false); };
-   dev.vk.CmdDraw = [](VkCommandBuffer, UINT, UINT, UINT, UINT) VKAPI_CALL { CHECK(false); };
+   dev.vk.CmdEndRendering = [](VkCommandBuffer) { ++seen.ends; };
+   dev.vk.CmdBeginQuery = [](VkCommandBuffer, VkQueryPool, UINT, VkQueryControlFlags) { CHECK(false); };
+   dev.vk.CmdEndQuery = [](VkCommandBuffer, VkQueryPool, UINT) { CHECK(false); };
+   dev.vk.CmdDraw = [](VkCommandBuffer, UINT, UINT, UINT, UINT) { CHECK(false); };
    Resource res; res.dev = &dev; res.kind = ResKind::Image;
    res.imageType = VK_IMAGE_TYPE_2D; res.storage.image = handle<VkImage>(0x800);
    res.storage.preinitialized = true; // imported pixels outside rectangles must survive
@@ -392,11 +392,11 @@ static void clear_view_dimensions_contract()
       viewType = height == 1 ? VK_IMAGE_VIEW_TYPE_1D_ARRAY : VK_IMAGE_VIEW_TYPE_2D_ARRAY;
       D3DWDDM2_0DDI_DEVICEFUNCS table = {}; device_fill_table20(&table);
       dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *info,
-                                 const VkAllocationCallbacks *, VkImageView *out) VKAPI_CALL {
+                                 const VkAllocationCallbacks *, VkImageView *out) {
          CHECK(info->viewType == viewType && info->subresourceRange.layerCount == 2);
          *out = handle<VkImageView>(0x410); return VK_SUCCESS;
       };
-      dev.vk.CmdBeginRendering = [](VkCommandBuffer, const VkRenderingInfo *info) VKAPI_CALL {
+      dev.vk.CmdBeginRendering = [](VkCommandBuffer, const VkRenderingInfo *info) {
          CHECK(info->layerCount == 2 && info->renderArea.extent.width == 13 && info->renderArea.extent.height == height);
          const auto *a = depth ? info->pDepthAttachment : info->pColorAttachments;
          CHECK(a && !info->pStencilAttachment && info->colorAttachmentCount == (depth ? 0u : 1u));
@@ -406,7 +406,7 @@ static void clear_view_dimensions_contract()
          ++begins;
       };
       dev.vk.CmdClearAttachments = [](VkCommandBuffer, UINT count, const VkClearAttachment *a,
-                                     UINT n, const VkClearRect *r) VKAPI_CALL {
+                                     UINT n, const VkClearRect *r) {
          CHECK(count == 1 && n == 1 && a->aspectMask == (depth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT));
          CHECK(r->rect.offset.x == 1 && r->rect.offset.y == 0 && r->rect.extent.width == 7 &&
                r->rect.extent.height == height && r->layerCount == 2);
@@ -445,21 +445,21 @@ static void submission_record_contract()
       reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
       CHECK(cmd_begin(&dev));
       dev.framePools.push_back(handle<VkDescriptorPool>(200));
-      dev.vk.EndCommandBuffer = [](VkCommandBuffer) VKAPI_CALL {
+      dev.vk.EndCommandBuffer = [](VkCommandBuffer) {
          return VK_SUCCESS;
       };
       dev.kt.pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE,
-            const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *) APIENTRY -> HRESULT {
+            const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *) -> HRESULT {
          ++signals; return S_OK;
       };
-      dev.vk.QueueSubmit2 = [](VkQueue, uint32_t, const VkSubmitInfo2 *, VkFence) VKAPI_CALL {
+      dev.vk.QueueSubmit2 = [](VkQueue, uint32_t, const VkSubmitInfo2 *, VkFence) {
          ++submissions; countNewAfterSubmit = true; return VK_SUCCESS;
       };
       dev.kt.pfnWaitForSynchronizationObjectFromGpuCb = [](HANDLE,
-            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *) APIENTRY -> HRESULT {
+            const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *) -> HRESULT {
          countNewAfterSubmit = false; ++gates; return S_OK;
       };
-      if (fail) dev.vk.EndCommandBuffer = [](VkCommandBuffer) VKAPI_CALL {
+      if (fail) dev.vk.EndCommandBuffer = [](VkCommandBuffer) {
          failNextNew = true; return VK_SUCCESS;
       };
       newAfterSubmit = 0;
@@ -496,20 +496,20 @@ static void recycle_failure_contract()
       dev.submittedCommands.push_back({cmd, 7, {handle<VkDescriptorPool>(10),
                                                 handle<VkDescriptorPool>(11)}});
       commands = pools = destroyed = freed = 0;
-      dev.vk.ResetCommandBuffer = [](VkCommandBuffer, VkCommandBufferResetFlags) VKAPI_CALL {
+      dev.vk.ResetCommandBuffer = [](VkCommandBuffer, VkCommandBufferResetFlags) {
          ++commands;
          return mode == 1 ? VK_ERROR_OUT_OF_HOST_MEMORY : VK_SUCCESS;
       };
-      dev.vk.ResetDescriptorPool = [](VkDevice, VkDescriptorPool, VkDescriptorPoolResetFlags) VKAPI_CALL {
+      dev.vk.ResetDescriptorPool = [](VkDevice, VkDescriptorPool, VkDescriptorPoolResetFlags) {
          ++pools;
          if (mode == 4 && pools == 2) failNextNew = true;
          if (mode == 5 && pools == 2) return VK_ERROR_DEVICE_LOST;
          return mode == pools + 1 ? VK_ERROR_OUT_OF_DEVICE_MEMORY : VK_SUCCESS;
       };
-      dev.vk.FreeCommandBuffers = [](VkDevice, VkCommandPool, uint32_t count, const VkCommandBuffer *buffers) VKAPI_CALL {
+      dev.vk.FreeCommandBuffers = [](VkDevice, VkCommandPool, uint32_t count, const VkCommandBuffer *buffers) {
          CHECK(count == 1 && buffers[0] == handle<VkCommandBuffer>(9)); ++freed;
       };
-      dev.vk.DestroyDescriptorPool = [](VkDevice, VkDescriptorPool, const VkAllocationCallbacks *) VKAPI_CALL {
+      dev.vk.DestroyDescriptorPool = [](VkDevice, VkDescriptorPool, const VkAllocationCallbacks *) {
          ++destroyed;
       };
       completedValue = 6; retire(&dev);
@@ -562,7 +562,7 @@ static void ambiguous_submit_idle_contract()
 {
    reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    dev.nvk = true; dev.submitted = 7; dev.uncertainSubmit = true;
-   dev.vk.DeviceWaitIdle = [](VkDevice) VKAPI_CALL {return VK_SUCCESS;};
+   dev.vk.DeviceWaitIdle = [](VkDevice) {return VK_SUCCESS;};
    CHECK(!cleanup_idle(&dev)); /* missing native completion evidence */
    uint64_t observed = 7; dev.runtimeFenceValue = &observed;
    CHECK(!cleanup_idle(&dev));
@@ -584,10 +584,10 @@ static void final_quiesce_contract()
    dev->submittedCommands.push_back({handle<VkCommandBuffer>(9), 3, {handle<VkDescriptorPool>(10)}});
    defer(dev, DeferredType::ImageView, 11, 3);
    idleCalls = destroys = 0;
-   dev->vk.DeviceWaitIdle = [](VkDevice) VKAPI_CALL {++idleCalls; return VK_ERROR_OUT_OF_DEVICE_MEMORY;};
-   dev->vk.DestroyDescriptorPool = [](VkDevice, VkDescriptorPool, const VkAllocationCallbacks *) VKAPI_CALL {++destroys;};
-   dev->vk.DestroyCommandPool = [](VkDevice, VkCommandPool, const VkAllocationCallbacks *) VKAPI_CALL {++destroys;};
-   dev->vk.DestroyDevice = [](VkDevice, const VkAllocationCallbacks *) VKAPI_CALL {++destroys;};
+   dev->vk.DeviceWaitIdle = [](VkDevice) {++idleCalls; return VK_ERROR_OUT_OF_DEVICE_MEMORY;};
+   dev->vk.DestroyDescriptorPool = [](VkDevice, VkDescriptorPool, const VkAllocationCallbacks *) {++destroys;};
+   dev->vk.DestroyCommandPool = [](VkDevice, VkCommandPool, const VkAllocationCallbacks *) {++destroys;};
+   dev->vk.DestroyDevice = [](VkDevice, const VkAllocationCallbacks *) {++destroys;};
    D3D10DDI_DEVICEFUNCS table = {}; device_fill_table(&table);
    DeviceSlot slot{dev};
    table.pfnDestroyDevice({&slot});
@@ -684,15 +684,15 @@ static void incomplete_fence_keeps_resources()
       CHECK(cmd_begin(&dev)); CHECK(SUCCEEDED(flush(&dev, false)));
       defer(&dev, DeferredType::ImageView, 0x500, 1);
       if (result == VK_ERROR_DEVICE_LOST) {
-         dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) VKAPI_CALL {
+         dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) {
             if (cpuWaits) return VK_ERROR_DEVICE_LOST;
             *out = completedValue; return VK_SUCCESS;
          };
       }
       dev.vk.WaitSemaphores = result == VK_TIMEOUT ?
-         +[](VkDevice, const VkSemaphoreWaitInfo *, uint64_t timeout) VKAPI_CALL -> VkResult {
+         +[](VkDevice, const VkSemaphoreWaitInfo *, uint64_t timeout) -> VkResult {
             CHECK(timeout == UINT64_C(1000000000)); ++cpuWaits; return VK_TIMEOUT;
-         } : +[](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) VKAPI_CALL -> VkResult {
+         } : +[](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) -> VkResult {
             ++cpuWaits; return VK_ERROR_DEVICE_LOST;
          };
       CHECK(wait_sequence(&dev, 1, TGD3D_WAIT_DESTROY) == DXGI_ERROR_DEVICE_REMOVED);
@@ -716,7 +716,7 @@ static void removed_fence_never_completes()
       if (mode) CHECK(flush(&dev, false) == S_OK);
       defer(&dev, DeferredType::ImageView, 0x500, 1);
       if (mode == 2) {
-         dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) VKAPI_CALL -> VkResult {
+         dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) -> VkResult {
             ++cpuWaits; completedValue = UINT64_MAX; return VK_SUCCESS;
          };
       } else {
@@ -743,7 +743,7 @@ static void completion_failure_propagates()
 {
    Adapter adapter;
    auto hook_counter = [](Device &dev) {
-      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) VKAPI_CALL {
+      dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) {
          if (++completionReads >= completionFailureRead)
             return VK_ERROR_DEVICE_LOST;
          *out = completedValue;
@@ -836,7 +836,7 @@ static void completion_failure_propagates()
       reset(); Device dev; init_device(dev, &adapter);
       clearViewFailure = failure;
       dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *,
-                                  const VkAllocationCallbacks *, VkImageView *out) VKAPI_CALL {
+                                  const VkAllocationCallbacks *, VkImageView *out) {
          *out = VK_NULL_HANDLE; return clearViewFailure;
       };
       Resource target; target.dev = &dev; target.kind = ResKind::Image;
@@ -909,7 +909,7 @@ static void graphics_storage_layout()
    adapter.vk.caps.graphicsUavStages = stages;
    adapter.vk.caps.graphicsUavSlots = D3D_UAV_SLOTS;
    dev.vk.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *info,
-                                         const VkAllocationCallbacks *, VkDescriptorSetLayout *out) VKAPI_CALL {
+                                         const VkAllocationCallbacks *, VkDescriptorSetLayout *out) {
       if (layouts == SET_GRAPHICS_UAV) {
          bool seen[(2 + GRAPHICS_STAGE_COUNT) * D3D_UAV_SLOTS]{};
          CHECK(info->bindingCount == std::size(seen));
@@ -935,10 +935,10 @@ static void graphics_storage_layout()
       }
    }
    dev.framePools.push_back(handle<VkDescriptorPool>(200));
-   dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) VKAPI_CALL {
+   dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
       *out = handle<VkDescriptorSet>(300); return VK_SUCCESS;
    };
-   dev.vk.UpdateDescriptorSets = [](VkDevice, UINT count, const VkWriteDescriptorSet *w, UINT, const VkCopyDescriptorSet *) VKAPI_CALL {
+   dev.vk.UpdateDescriptorSets = [](VkDevice, UINT count, const VkWriteDescriptorSet *w, UINT, const VkCopyDescriptorSet *) {
       CHECK(count == 2 + GRAPHICS_STAGE_COUNT);
       unsigned used = 0;
       for (UINT i = 0; i < count; ++i) {
@@ -967,20 +967,20 @@ static void descriptor_contract()
 {
    reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    dev.vk.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *info,
-                                        const VkAllocationCallbacks *, VkDescriptorSetLayout *out) VKAPI_CALL {
+                                        const VkAllocationCallbacks *, VkDescriptorSetLayout *out) {
       CHECK(!(info->flags & VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR));
       if (!layouts) CHECK(info->bindingCount == 42);
       *out = handle<VkDescriptorSetLayout>(100 + layouts++); return VK_SUCCESS;
    };
    dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
-                                   const VkAllocationCallbacks *, VkDescriptorPool *out) VKAPI_CALL {
+                                   const VkAllocationCallbacks *, VkDescriptorPool *out) {
       *out = handle<VkDescriptorPool>(200); return VK_SUCCESS;
    };
-   dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) VKAPI_CALL {
+   dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
       *out = handle<VkDescriptorSet>(300 + descriptorSets++); return VK_SUCCESS;
    };
    dev.vk.UpdateDescriptorSets = [](VkDevice, uint32_t count, const VkWriteDescriptorSet *writes,
-                                   uint32_t, const VkCopyDescriptorSet *) VKAPI_CALL {
+                                   uint32_t, const VkCopyDescriptorSet *) {
       CHECK(count == 3); cbBindings.clear(); ++updates;
       for (unsigned i = 0; i < count; i++) {
          CHECK(writes[i].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
@@ -1049,14 +1049,14 @@ static void descriptor_scratch_contract()
       dev.topology = D3D11_DDI_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
       dev.defaultSampler = handle<VkSampler>(777);
       dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
-                                      const VkAllocationCallbacks *, VkDescriptorPool *out) VKAPI_CALL {
+                                      const VkAllocationCallbacks *, VkDescriptorPool *out) {
          *out = handle<VkDescriptorPool>(200); return VK_SUCCESS;
       };
-      dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) VKAPI_CALL {
+      dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
          *out = handle<VkDescriptorSet>(300 + descriptorSets++); return VK_SUCCESS;
       };
       dev.vk.UpdateDescriptorSets = [](VkDevice, uint32_t count, const VkWriteDescriptorSet *writes,
-                                      uint32_t, const VkCopyDescriptorSet *) VKAPI_CALL {
+                                      uint32_t, const VkCopyDescriptorSet *) {
          ++scratchCalls;
          const bool texel = writes[0].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
          CHECK(count == (texel ? scratchBuffers : scratchImages));
@@ -1143,23 +1143,23 @@ static void draw_error_contract()
       drawFailure = failure; drawFailureAt = where;
       poolCreates = setAllocates = imageViews = drawCalls = 0;
       dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
-                                      const VkAllocationCallbacks *, VkDescriptorPool *out) VKAPI_CALL {
+                                      const VkAllocationCallbacks *, VkDescriptorPool *out) {
          ++poolCreates; *out = VK_NULL_HANDLE;
          CHECK(drawFailureAt == 0); return drawFailure;
       };
-      dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) VKAPI_CALL {
+      dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
          ++setAllocates; *out = VK_NULL_HANDLE;
          CHECK(drawFailureAt == 1); return drawFailure;
       };
       dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *,
-                                 const VkAllocationCallbacks *, VkImageView *out) VKAPI_CALL {
+                                 const VkAllocationCallbacks *, VkImageView *out) {
          ++imageViews; *out = VK_NULL_HANDLE;
          CHECK(drawFailureAt == 2); return drawFailure;
       };
-      dev.vk.CmdDraw = [](VkCommandBuffer, uint32_t, uint32_t, uint32_t, uint32_t) VKAPI_CALL { ++drawCalls; };
-      dev.vk.CmdDrawIndexed = [](VkCommandBuffer, uint32_t, uint32_t, uint32_t, int32_t, uint32_t) VKAPI_CALL { ++drawCalls; };
+      dev.vk.CmdDraw = [](VkCommandBuffer, uint32_t, uint32_t, uint32_t, uint32_t) { ++drawCalls; };
+      dev.vk.CmdDrawIndexed = [](VkCommandBuffer, uint32_t, uint32_t, uint32_t, int32_t, uint32_t) { ++drawCalls; };
       dev.vk.CmdDrawIndirect = dev.vk.CmdDrawIndexedIndirect =
-         [](VkCommandBuffer, VkBuffer, VkDeviceSize, uint32_t, uint32_t) VKAPI_CALL { ++drawCalls; };
+         [](VkCommandBuffer, VkBuffer, VkDeviceSize, uint32_t, uint32_t) { ++drawCalls; };
       if (where == 1) dev.framePools.push_back(handle<VkDescriptorPool>(200));
       Shader vs; vs.dev = &dev; vs.stage = STAGE_VS; vs.cbMask = 1;
       vs.variants.push_back({0, handle<VkShaderEXT>(600)}); dev.stage[STAGE_VS].shader = &vs;
@@ -1194,7 +1194,7 @@ static void draw_error_contract()
    /* A no-op Draw must leave the ordinary allocation error contract intact. */
    table.pfnDraw({&dev}, 0, 0);
    dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
-                                   const VkAllocationCallbacks *, VkDescriptorPool *) VKAPI_CALL {
+                                   const VkAllocationCallbacks *, VkDescriptorPool *) {
       return VK_ERROR_OUT_OF_HOST_MEMORY;
    };
    CHECK(!descriptor_set_alloc(&dev, 0) && lastError == E_OUTOFMEMORY && SUCCEEDED(dev.lost));
@@ -1206,12 +1206,12 @@ static void draw_error_contract()
       reset(); Adapter a; Device d; init_device(d, &a);
       drawFailure = full; poolCreates = setAllocates = 0;
       d.framePools.push_back(handle<VkDescriptorPool>(200));
-      d.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) VKAPI_CALL {
+      d.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *out) {
          if (++setAllocates == 1) { *out = VK_NULL_HANDLE; return drawFailure; }
          *out = handle<VkDescriptorSet>(300); return VK_SUCCESS;
       };
       d.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
-                                    const VkAllocationCallbacks *, VkDescriptorPool *out) VKAPI_CALL {
+                                    const VkAllocationCallbacks *, VkDescriptorPool *out) {
          ++poolCreates; *out = handle<VkDescriptorPool>(201); return VK_SUCCESS;
       };
       CHECK(descriptor_set_alloc(&d, 0) == handle<VkDescriptorSet>(300));
@@ -1246,15 +1246,15 @@ static void indirect_draw_contract()
       dev.indexBuffer = &args;
       /* Deliberately no CPU mapping: any argument readback would be invalid. */
       drawCalls = 0;
-      dev.vk.CmdDrawIndirect = [](VkCommandBuffer, VkBuffer b, VkDeviceSize offset, UINT count, UINT stride) VKAPI_CALL {
+      dev.vk.CmdDrawIndirect = [](VkCommandBuffer, VkBuffer b, VkDeviceSize offset, UINT count, UINT stride) {
          CHECK(b == handle<VkBuffer>(500) && offset == 304 && count == 1 && stride == 16 && barriers);
          ++drawCalls;
       };
-      dev.vk.CmdDrawIndexedIndirect = [](VkCommandBuffer, VkBuffer b, VkDeviceSize offset, UINT count, UINT stride) VKAPI_CALL {
+      dev.vk.CmdDrawIndexedIndirect = [](VkCommandBuffer, VkBuffer b, VkDeviceSize offset, UINT count, UINT stride) {
          CHECK(b == handle<VkBuffer>(500) && offset == 300 && count == 1 && stride == 20 && barriers);
          ++drawCalls;
       };
-      dev.vk.MapMemory = [](VkDevice, VkDeviceMemory, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **) VKAPI_CALL {
+      dev.vk.MapMemory = [](VkDevice, VkDeviceMemory, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **) {
          CHECK(false); return VK_ERROR_MEMORY_MAP_FAILED;
       };
       CHECK(cmd_draw(&dev)); buffer_written(&dev);
@@ -1307,8 +1307,8 @@ static void readonly_depth_contract()
    static uint32_t stencilWrites;
    static unsigned stateChanges;
    stateChanges = 0;
-   dev.vk.CmdSetDepthWriteEnable = [](VkCommandBuffer, VkBool32 value) VKAPI_CALL { depthWrites = value; ++stateChanges; };
-   dev.vk.CmdSetStencilWriteMask = [](VkCommandBuffer, VkStencilFaceFlags, UINT value) VKAPI_CALL { stencilWrites = value; };
+   dev.vk.CmdSetDepthWriteEnable = [](VkCommandBuffer, VkBool32 value) { depthWrites = value; ++stateChanges; };
+   dev.vk.CmdSetStencilWriteMask = [](VkCommandBuffer, VkStencilFaceFlags, UINT value) { stencilWrites = value; };
    View dsv[4];
    for (UINT flags = 0; flags < 4; ++flags) {
       dsv[flags].dev = &dev; dsv[flags].res = &depth; dsv[flags].type = ViewType::DSV;
@@ -1357,18 +1357,18 @@ static void empty_box_contract()
       regionCopies = 0;
       dev.submitted = dev.gated = 1; /* Existing work must remain untouched by a no-op. */
       dev.vk.CmdCopyImage = [](VkCommandBuffer, VkImage, VkImageLayout, VkImage, VkImageLayout,
-                              uint32_t count, const VkImageCopy *r) VKAPI_CALL {
+                              uint32_t count, const VkImageCopy *r) {
          CHECK(count == 1); ++regionCopies; regionImage = *r;
       };
       dev.vk.CmdCopyImageToBuffer = [](VkCommandBuffer, VkImage, VkImageLayout, VkBuffer,
-                                      uint32_t count, const VkBufferImageCopy *r) VKAPI_CALL {
+                                      uint32_t count, const VkBufferImageCopy *r) {
          CHECK(count == 1); ++regionCopies; regionTransfer = *r;
       };
       dev.vk.CmdCopyBufferToImage = [](VkCommandBuffer, VkBuffer, VkImage, VkImageLayout,
-                                      uint32_t count, const VkBufferImageCopy *r) VKAPI_CALL {
+                                      uint32_t count, const VkBufferImageCopy *r) {
          CHECK(count == 1); ++regionCopies; regionTransfer = *r;
       };
-      dev.vk.CmdCopyBuffer = [](VkCommandBuffer, VkBuffer, VkBuffer, uint32_t, const VkBufferCopy *) VKAPI_CALL {
+      dev.vk.CmdCopyBuffer = [](VkCommandBuffer, VkBuffer, VkBuffer, uint32_t, const VkBufferCopy *) {
          ++regionCopies;
       };
       std::vector<uint8_t> source(9216, 0x19), destination(9216, 0xa5), upload(8840, 0x3c);
@@ -1440,11 +1440,11 @@ static void query_contract()
    reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    D3D10DDI_DEVICEFUNCS table = {}; query_fill_table(&table);
    dev.vk.CreateQueryPool = [](VkDevice, const VkQueryPoolCreateInfo *,
-                               const VkAllocationCallbacks *, VkQueryPool *out) VKAPI_CALL {
+                               const VkAllocationCallbacks *, VkQueryPool *out) {
       static uintptr_t next = 1; *out = handle<VkQueryPool>(next++); return VK_SUCCESS;
    };
    dev.vk.GetQueryPoolResults = [](VkDevice, VkQueryPool, uint32_t, uint32_t count,
-                                   size_t size, void *data, VkDeviceSize stride, VkQueryResultFlags) VKAPI_CALL {
+                                   size_t size, void *data, VkDeviceSize stride, VkQueryResultFlags) {
       CHECK(size == count * 8 && stride == 8);
       for (uint32_t i = 0; i < count; i++) static_cast<uint64_t *>(data)[i] = 1;
       return VK_SUCCESS;
@@ -1484,7 +1484,7 @@ static void query_backend(Device &dev)
    queryPoolFailure = VK_ERROR_OUT_OF_DEVICE_MEMORY;
    queryReadResult = VK_NOT_READY;
    dev.vk.CreateQueryPool = [](VkDevice, const VkQueryPoolCreateInfo *,
-                               const VkAllocationCallbacks *, VkQueryPool *out) VKAPI_CALL {
+                               const VkAllocationCallbacks *, VkQueryPool *out) {
       ++queryPoolCalls;
       if (queryPoolCalls == queryFailPoolCall) {
          *out = VK_NULL_HANDLE;
@@ -1493,14 +1493,14 @@ static void query_backend(Device &dev)
       *out = handle<VkQueryPool>(queryPoolCalls);
       return VK_SUCCESS;
    };
-   dev.vk.CmdBeginQuery = [](VkCommandBuffer, VkQueryPool pool, uint32_t slot, VkQueryControlFlags) VKAPI_CALL {
+   dev.vk.CmdBeginQuery = [](VkCommandBuffer, VkQueryPool pool, uint32_t slot, VkQueryControlFlags) {
       CHECK(pool && slot < QUERY_SLOTS); ++queryBeginCalls;
    };
-   dev.vk.CmdWriteTimestamp = [](VkCommandBuffer, VkPipelineStageFlagBits, VkQueryPool pool, uint32_t) VKAPI_CALL {
+   dev.vk.CmdWriteTimestamp = [](VkCommandBuffer, VkPipelineStageFlagBits, VkQueryPool pool, uint32_t) {
       CHECK(pool); ++timestampCalls;
    };
    dev.vk.GetQueryPoolResults = [](VkDevice, VkQueryPool, uint32_t, uint32_t,
-                                   size_t, void *, VkDeviceSize, VkQueryResultFlags) VKAPI_CALL {
+                                   size_t, void *, VkDeviceSize, VkQueryResultFlags) {
       ++queryResultCalls; return queryReadResult;
    };
 }
@@ -1540,7 +1540,7 @@ static void query_failure_contract()
       desc.Query = mode == 1 ? D3D10DDI_QUERY_TIMESTAMP : D3D10DDI_QUERY_OCCLUSION;
       table.pfnCreateQuery({&dev}, &desc, {storage}, {});
       CHECK(lastError == S_OK);
-      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY {
+      dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) {
          CHECK(hr == D3DDDIERR_DEVICEREMOVED); ++setErrorCalls; lastError = hr;
       };
       queryFailPoolCall = 2;
@@ -1596,7 +1596,7 @@ static void query_failure_contract()
    table.pfnCreateQuery({&dev}, &desc, {storage}, {});
    CHECK(cmd_draw(&dev)); table.pfnQueryEnd({&dev}, {storage});
    CHECK(SUCCEEDED(flush(&dev, false)));
-   dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *) VKAPI_CALL { return VK_ERROR_DEVICE_LOST; };
+   dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *) { return VK_ERROR_DEVICE_LOST; };
    uint64_t value = UINT64_MAX;
    table.pfnQueryGetData({&dev}, {storage}, &value, sizeof(value), 0);
    CHECK(lastError == D3DDDIERR_DEVICEREMOVED && value == UINT64_MAX && !queryResultCalls);
@@ -1607,10 +1607,10 @@ static void query_failure_contract()
    query_backend(timestampDev); timestampAdapter.vk.caps.timestampValidBits = 64;
    desc.Query = D3D10DDI_QUERY_TIMESTAMP;
    table.pfnCreateQuery({&timestampDev}, &desc, {storage}, {});
-   timestampDev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY {
+   timestampDev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) {
       CHECK(hr == D3DDDIERR_DEVICEREMOVED); lastError = hr;
    };
-   timestampDev.vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *) VKAPI_CALL {
+   timestampDev.vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *) {
       return VK_ERROR_OUT_OF_HOST_MEMORY;
    };
    table.pfnQueryEnd({&timestampDev}, {storage});
@@ -1625,7 +1625,7 @@ static void shader_contract(const BYTE *dxbc, bool vertex, const char *outputPat
    reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    shaderOutput = outputPath;
    dev.vk.CreateShadersEXT = [](VkDevice, uint32_t count, const VkShaderCreateInfoEXT *info,
-                               const VkAllocationCallbacks *, VkShaderEXT *out) VKAPI_CALL {
+                               const VkAllocationCallbacks *, VkShaderEXT *out) {
       CHECK(count == 1 && info->codeSize > 20 && info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT);
       CHECK(static_cast<const uint32_t *>(info->pCode)[0] == 0x07230203);
       FILE *file = fopen(shaderOutput, "wb"); CHECK(file);
@@ -1668,7 +1668,7 @@ static void shader_contract(const BYTE *dxbc, bool vertex, const char *outputPat
     * The base handle must not make the device look usable again. */
    shaderBackendCalls = 0;
    dev.vk.CreateShadersEXT = [](VkDevice, uint32_t, const VkShaderCreateInfoEXT *,
-                               const VkAllocationCallbacks *, VkShaderEXT *out) VKAPI_CALL {
+                               const VkAllocationCallbacks *, VkShaderEXT *out) {
       ++shaderBackendCalls; *out = VK_NULL_HANDLE; return VK_ERROR_DEVICE_LOST;
    };
    Shader *created = reinterpret_cast<Shader *>(storage);
@@ -1685,7 +1685,7 @@ static void shader_contract(const BYTE *dxbc, bool vertex, const char *outputPat
     * that the production callback frees its arrays before reporting it. */
    failedShader = reinterpret_cast<Shader *>(storage);
    dev.vk.CreateShadersEXT = [](VkDevice, uint32_t, const VkShaderCreateInfoEXT *,
-                               const VkAllocationCallbacks *, VkShaderEXT *out) VKAPI_CALL {
+                               const VkAllocationCallbacks *, VkShaderEXT *out) {
       shaderAllocations[0] = failedShader->tokens.data();
       shaderAllocations[1] = failedShader->inputs.data();
       shaderAllocations[2] = failedShader->outputs.data();
@@ -1693,7 +1693,7 @@ static void shader_contract(const BYTE *dxbc, bool vertex, const char *outputPat
       *out = VK_NULL_HANDLE;
       return shaderFailure;
    };
-   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY {
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) {
       CHECK(shaderAllocationFrees == 3);
       lastError = hr;
    };
@@ -1714,7 +1714,7 @@ static void shader_contract(const BYTE *dxbc, bool vertex, const char *outputPat
    CHECK(shader_variant(&cached, 0) == VK_NULL_HANDLE);
    CHECK(!cmd_begin(&dev) && FAILED(flush(&dev, true)) && !submissions);
    dev.vk.CreateShadersEXT = [](VkDevice, uint32_t, const VkShaderCreateInfoEXT *,
-                               const VkAllocationCallbacks *, VkShaderEXT *) VKAPI_CALL -> VkResult {
+                               const VkAllocationCallbacks *, VkShaderEXT *) -> VkResult {
       CHECK(false); return VK_ERROR_UNKNOWN;
    };
    create({&dev}, tokens.data(), {storage}, {}, &sig);
@@ -1751,7 +1751,7 @@ static void stream_output_contract()
    D3D11DDIARG_CREATEGEOMETRYSHADERWITHSTREAMOUTPUT so{sig.code, entries, 2, &stride, 1, UINT_MAX};
    alignas(Shader) BYTE storage[sizeof(Shader)]{};
    dev.vk.CreateShadersEXT = [](VkDevice, UINT n, const VkShaderCreateInfoEXT *info,
-                                 const VkAllocationCallbacks *, VkShaderEXT *out) VKAPI_CALL {
+                                 const VkAllocationCallbacks *, VkShaderEXT *out) {
       CHECK(n == 1 && info->stage == VK_SHADER_STAGE_GEOMETRY_BIT && info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT);
       FILE *f = std::fopen(shaderOutput, "wb"); CHECK(f);
       CHECK(std::fwrite(info->pCode, 1, info->codeSize, f) == info->codeSize && !std::fclose(f));
@@ -1784,24 +1784,24 @@ static void stream_output_contract()
    Chunk chunk; chunk.buffer = handle<VkBuffer>(803);
    Resource data; data.dev = &dev; data.bind = D3D10_DDI_BIND_STREAM_OUTPUT | D3D10_DDI_BIND_VERTEX_BUFFER;
    data.slice = {&chunk, 64, 256}; data.size = 256; data.soCounter = {&chunk, 384, 4};
-   dev.vk.CmdFillBuffer = [](VkCommandBuffer, VkBuffer b, VkDeviceSize off, VkDeviceSize size, UINT value) VKAPI_CALL {
+   dev.vk.CmdFillBuffer = [](VkCommandBuffer, VkBuffer b, VkDeviceSize off, VkDeviceSize size, UINT value) {
       CHECK(b == handle<VkBuffer>(803) && off == 384 && size == 4 && value == 16); events.push_back(10);
    };
    dev.vk.CmdBindTransformFeedbackBuffersEXT = [](VkCommandBuffer, UINT slot, UINT n, const VkBuffer *b,
-                                                    const VkDeviceSize *off, const VkDeviceSize *size) VKAPI_CALL {
+                                                    const VkDeviceSize *off, const VkDeviceSize *size) {
       CHECK(!slot && n == 1 && *b == handle<VkBuffer>(803) && *off == 64 && *size == 256); events.push_back(11);
    };
-   dev.vk.CmdBeginTransformFeedbackEXT = [](VkCommandBuffer, UINT slot, UINT n, const VkBuffer *b, const VkDeviceSize *off) VKAPI_CALL {
+   dev.vk.CmdBeginTransformFeedbackEXT = [](VkCommandBuffer, UINT slot, UINT n, const VkBuffer *b, const VkDeviceSize *off) {
       CHECK(!slot && n == 1 && *b == handle<VkBuffer>(803) && *off == 384); events.push_back(12);
    };
-   dev.vk.CmdDraw = [](VkCommandBuffer, UINT n, UINT instances, UINT start, UINT) VKAPI_CALL {
+   dev.vk.CmdDraw = [](VkCommandBuffer, UINT n, UINT instances, UINT start, UINT) {
       CHECK(n == 3 && instances == 1 && !start); events.push_back(13);
    };
-   dev.vk.CmdEndTransformFeedbackEXT = [](VkCommandBuffer, UINT slot, UINT n, const VkBuffer *b, const VkDeviceSize *off) VKAPI_CALL {
+   dev.vk.CmdEndTransformFeedbackEXT = [](VkCommandBuffer, UINT slot, UINT n, const VkBuffer *b, const VkDeviceSize *off) {
       CHECK(!slot && n == 1 && *b == handle<VkBuffer>(803) && *off == 384); events.push_back(14);
    };
    dev.vk.CmdDrawIndirectByteCountEXT = [](VkCommandBuffer, UINT n, UINT first, VkBuffer b, VkDeviceSize at,
-                                           UINT subtract, UINT vertexStride) VKAPI_CALL {
+                                           UINT subtract, UINT vertexStride) {
       CHECK(n == 1 && !first && b == handle<VkBuffer>(803) && at == 384 && subtract == 16 && vertexStride == 16);
       events.push_back(15);
    };
@@ -1847,7 +1847,7 @@ static void so_producer_contract()
    const D3D10DDI_HDEVICE h{&dev};
    static unsigned calls;
    dev.vk.CreateShadersEXT = [](VkDevice, UINT n, const VkShaderCreateInfoEXT *info,
-                                const VkAllocationCallbacks *, VkShaderEXT *out) VKAPI_CALL {
+                                const VkAllocationCallbacks *, VkShaderEXT *out) {
       CHECK(n == 1 && (info->stage == VK_SHADER_STAGE_VERTEX_BIT || info->stage == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT));
       if (shaderOutput) {
          FILE *f = std::fopen(shaderOutput, "wb"); CHECK(f);
@@ -1905,7 +1905,7 @@ static void tess_shader_contract()
    static UINT compiled;
    compiled = 0;
    dev.vk.CreateShadersEXT = [](VkDevice, UINT count, const VkShaderCreateInfoEXT *info,
-                                 const VkAllocationCallbacks *, VkShaderEXT *out) VKAPI_CALL {
+                                 const VkAllocationCallbacks *, VkShaderEXT *out) {
       CHECK(count == 1 && info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT && info->codeSize > 20);
       CHECK(info->stage == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT ? info->nextStage == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT :
             info->stage == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT && info->nextStage == (VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT));
@@ -1949,7 +1949,7 @@ static void compute_shader_contract()
    reset(); Adapter adapter; Device dev; init_device(dev, &adapter);
    adapter.vk.caps.compute = true;
    dev.vk.CreateDescriptorSetLayout = [](VkDevice, const VkDescriptorSetLayoutCreateInfo *info,
-                                        const VkAllocationCallbacks *, VkDescriptorSetLayout *out) VKAPI_CALL {
+                                        const VkAllocationCallbacks *, VkDescriptorSetLayout *out) {
       CHECK(info->bindingCount > 0 && info->bindingCount <= D3D_CB_SLOTS+D3D_SAMPLER_SLOTS+D3D_SRV_SLOTS+2*D3D_UAV_SLOTS);
       bool seen[D3D_CB_SLOTS+D3D_SAMPLER_SLOTS+D3D_SRV_SLOTS+2*D3D_UAV_SLOTS]{};
       for (UINT i=0;i<info->bindingCount;++i) {
@@ -1961,12 +1961,12 @@ static void compute_shader_contract()
       *out=handle<VkDescriptorSetLayout>(0xc0); return VK_SUCCESS;
    };
    dev.vk.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *info,
-                                   const VkAllocationCallbacks *, VkPipelineLayout *out) VKAPI_CALL {
+                                   const VkAllocationCallbacks *, VkPipelineLayout *out) {
       CHECK(info->setLayoutCount == 1 && *info->pSetLayouts == handle<VkDescriptorSetLayout>(0xc0));
       *out=handle<VkPipelineLayout>(0xc1); return VK_SUCCESS;
    };
    dev.vk.CreateShadersEXT = [](VkDevice,UINT count,const VkShaderCreateInfoEXT *info,
-                                const VkAllocationCallbacks *,VkShaderEXT *out) VKAPI_CALL {
+                                const VkAllocationCallbacks *,VkShaderEXT *out) {
       CHECK(count == 1 && info->stage == VK_SHADER_STAGE_COMPUTE_BIT && !info->nextStage &&
             info->setLayoutCount == 1 && *info->pSetLayouts == handle<VkDescriptorSetLayout>(0xc0) &&
             info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT && info->codeSize >= 20);
@@ -1974,9 +1974,9 @@ static void compute_shader_contract()
       CHECK(fwrite(info->pCode,1,info->codeSize,file)==info->codeSize && !fclose(file));
       *out=handle<VkShaderEXT>(0xc2);return VK_SUCCESS;
    };
-   dev.vk.DestroyDescriptorSetLayout=[](VkDevice,VkDescriptorSetLayout h,const VkAllocationCallbacks *) VKAPI_CALL{CHECK(h==handle<VkDescriptorSetLayout>(0xc0));};
-   dev.vk.DestroyPipelineLayout=[](VkDevice,VkPipelineLayout h,const VkAllocationCallbacks *) VKAPI_CALL{CHECK(h==handle<VkPipelineLayout>(0xc1));};
-   dev.vk.DestroyShaderEXT=[](VkDevice,VkShaderEXT h,const VkAllocationCallbacks *) VKAPI_CALL{CHECK(h==handle<VkShaderEXT>(0xc2));};
+   dev.vk.DestroyDescriptorSetLayout=[](VkDevice,VkDescriptorSetLayout h,const VkAllocationCallbacks *){CHECK(h==handle<VkDescriptorSetLayout>(0xc0));};
+   dev.vk.DestroyPipelineLayout=[](VkDevice,VkPipelineLayout h,const VkAllocationCallbacks *){CHECK(h==handle<VkPipelineLayout>(0xc1));};
+   dev.vk.DestroyShaderEXT=[](VkDevice,VkShaderEXT h,const VkAllocationCallbacks *){CHECK(h==handle<VkShaderEXT>(0xc2));};
    D3D11_1DDI_DEVICEFUNCS t{};device_fill_table11(&t);
    struct Case { const UINT *code; const char *file; UINT bindings; };
    const Case cases[] = {{cs_produce,"tgd3d-cs-produce.spv",11}, {cs_consume,"tgd3d-cs-consume.spv",6},
@@ -2086,20 +2086,20 @@ static void presentation_rotation_contract()
    } observed;
    observed = {};
    dev.vk.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *info,
-                                    const VkAllocationCallbacks *, VkPipelineLayout *out) VKAPI_CALL {
+                                    const VkAllocationCallbacks *, VkPipelineLayout *out) {
       CHECK(info->setLayoutCount == SET_COUNT && info->pushConstantRangeCount == 1 &&
             info->pPushConstantRanges[0].stageFlags == VK_SHADER_STAGE_VERTEX_BIT &&
             !info->pPushConstantRanges[0].offset && info->pPushConstantRanges[0].size == 16);
       ++observed.layoutCalls; *out = handle<VkPipelineLayout>(0x21); return VK_SUCCESS;
    };
    dev.vk.CmdPushConstants = [](VkCommandBuffer, VkPipelineLayout layout,
-                                 VkShaderStageFlags stages, UINT offset, UINT size, const void *data) VKAPI_CALL {
+                                 VkShaderStageFlags stages, UINT offset, UINT size, const void *data) {
       CHECK(layout == handle<VkPipelineLayout>(0x21) && stages == VK_SHADER_STAGE_VERTEX_BIT &&
             !offset && size == sizeof(observed.uv));
       std::memcpy(observed.uv, data, size);
    };
    dev.vk.CreateShadersEXT = [](VkDevice, UINT count, const VkShaderCreateInfoEXT *info,
-                              const VkAllocationCallbacks *, VkShaderEXT *shader) VKAPI_CALL {
+                              const VkAllocationCallbacks *, VkShaderEXT *shader) {
       CHECK(count == 1 && info->codeType == VK_SHADER_CODE_TYPE_SPIRV_EXT &&
             info->setLayoutCount == SET_COUNT && info->codeSize > 20);
       CHECK(info->pushConstantRangeCount == 1 && info->pPushConstantRanges[0].size == 16 &&
@@ -2119,12 +2119,12 @@ static void presentation_rotation_contract()
       return VK_SUCCESS;
    };
    dev.vk.CreateSampler = [](VkDevice, const VkSamplerCreateInfo *info,
-                             const VkAllocationCallbacks *, VkSampler *sampler) VKAPI_CALL {
+                             const VkAllocationCallbacks *, VkSampler *sampler) {
       CHECK(info->minFilter == VK_FILTER_NEAREST && info->magFilter == VK_FILTER_NEAREST);
       *sampler = handle<VkSampler>(0x31); return VK_SUCCESS;
    };
    dev.vk.CreateImageView = [](VkDevice, const VkImageViewCreateInfo *info,
-                               const VkAllocationCallbacks *, VkImageView *view) VKAPI_CALL {
+                               const VkAllocationCallbacks *, VkImageView *view) {
       ++observed.viewCalls;
       CHECK(info->viewType == VK_IMAGE_VIEW_TYPE_2D && info->subresourceRange.layerCount == 1);
       if (info->image == handle<VkImage>(0x100)) {
@@ -2137,19 +2137,19 @@ static void presentation_rotation_contract()
       *view = handle<VkImageView>(0x400+observed.viewCalls); return VK_SUCCESS;
    };
    dev.vk.CreateDescriptorPool = [](VkDevice, const VkDescriptorPoolCreateInfo *,
-                                    const VkAllocationCallbacks *, VkDescriptorPool *pool) VKAPI_CALL {
+                                    const VkAllocationCallbacks *, VkDescriptorPool *pool) {
       *pool = handle<VkDescriptorPool>(0x500); return VK_SUCCESS;
    };
-   dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *set) VKAPI_CALL {
+   dev.vk.AllocateDescriptorSets = [](VkDevice, const VkDescriptorSetAllocateInfo *, VkDescriptorSet *set) {
       *set = handle<VkDescriptorSet>(0x600); return VK_SUCCESS;
    };
    dev.vk.UpdateDescriptorSets = [](VkDevice, UINT count, const VkWriteDescriptorSet *write,
-                                   UINT, const VkCopyDescriptorSet *) VKAPI_CALL {
+                                   UINT, const VkCopyDescriptorSet *) {
       CHECK(count == 2 && write[0].dstBinding == 288 && write[1].dstBinding == 304);
       CHECK(write[0].pImageInfo->sampler == handle<VkSampler>(observed.scaled ? 0x30 : 0x31));
       CHECK(write[1].pImageInfo->imageLayout == VK_IMAGE_LAYOUT_GENERAL);
    };
-   dev.vk.CmdBeginRendering = [](VkCommandBuffer, const VkRenderingInfo *info) VKAPI_CALL {
+   dev.vk.CmdBeginRendering = [](VkCommandBuffer, const VkRenderingInfo *info) {
       CHECK(info->colorAttachmentCount == 1 && info->layerCount == 1);
       CHECK(info->renderArea.offset.x == 7 && info->renderArea.offset.y == 11);
       CHECK(info->renderArea.extent.width == observed.width && info->renderArea.extent.height == observed.height);
@@ -2157,13 +2157,13 @@ static void presentation_rotation_contract()
             info->pColorAttachments[0].storeOp == VK_ATTACHMENT_STORE_OP_STORE);
    };
    dev.vk.CmdBindShadersEXT = [](VkCommandBuffer, UINT count, const VkShaderStageFlagBits *stages,
-                                 const VkShaderEXT *shaders) VKAPI_CALL {
+                                 const VkShaderEXT *shaders) {
       CHECK(count == 3 && stages[0] == VK_SHADER_STAGE_VERTEX_BIT &&
             stages[1] == VK_SHADER_STAGE_FRAGMENT_BIT && stages[2] == VK_SHADER_STAGE_GEOMETRY_BIT);
       CHECK(shaders[0] == handle<VkShaderEXT>(0x1000+observed.angle) &&
             shaders[1] == handle<VkShaderEXT>(0x2000) && !shaders[2]);
    };
-   dev.vk.CmdDraw = [](VkCommandBuffer, UINT vertices, UINT instances, UINT first, UINT base) VKAPI_CALL {
+   dev.vk.CmdDraw = [](VkCommandBuffer, UINT vertices, UINT instances, UINT first, UINT base) {
       CHECK(vertices == 3 && instances == 1 && !first && !base); ++observed.draws;
    };
    Resource src, dst;
@@ -2171,14 +2171,6 @@ static void presentation_rotation_contract()
    src.bind = D3D10_DDI_BIND_RENDER_TARGET | D3D10_DDI_BIND_PRESENT;
    dst.bind = D3D10_DDI_BIND_RENDER_TARGET;
    src.format = DXGI_FORMAT_B8G8R8X8_UNORM; dst.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-   src.vkFormat = VK_FORMAT_B8G8R8A8_UNORM;
-   dst.vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
-   adapter.vk.vk.GetPhysicalDeviceFormatProperties =
-      [](VkPhysicalDevice, VkFormat, VkFormatProperties *p) VKAPI_CALL {
-         *p = {};
-         p->optimalTilingFeatures = VK_FORMAT_FEATURE_BLIT_SRC_BIT | VK_FORMAT_FEATURE_BLIT_DST_BIT |
-                                    VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
-      };
    src.width = 34; src.height = 18; src.mips = src.arraySize = 2;
    dst.width = dst.height = 64;
    src.storage.image = handle<VkImage>(0x100); dst.storage.image = handle<VkImage>(0x200);
@@ -2220,7 +2212,7 @@ static void presentation_rotation_contract()
    }
    CHECK(observed.draws == 8 && observed.shaderCalls == 4 && observed.layoutCalls == 1);
    dev.vk.CmdBlitImage = [](VkCommandBuffer, VkImage src, VkImageLayout sl, VkImage dst,
-                            VkImageLayout dl, UINT count, const VkImageBlit *blit, VkFilter filter) VKAPI_CALL {
+                            VkImageLayout dl, UINT count, const VkImageBlit *blit, VkFilter filter) {
       CHECK(src == handle<VkImage>(0x100) && dst == handle<VkImage>(0x200) &&
             sl == VK_IMAGE_LAYOUT_GENERAL && dl == VK_IMAGE_LAYOUT_GENERAL && count == 1);
       CHECK(blit->srcSubresource.mipLevel == 1 && blit->srcSubresource.baseArrayLayer == 1);
@@ -2247,7 +2239,7 @@ static void presentation_rotation_contract()
 
    reset(); reset_device(dev, &adapter);
    dev.vk.CreateShadersEXT = [](VkDevice, UINT, const VkShaderCreateInfoEXT *,
-                               const VkAllocationCallbacks *, VkShaderEXT *) VKAPI_CALL { return VK_ERROR_OUT_OF_DEVICE_MEMORY; };
+                               const VkAllocationCallbacks *, VkShaderEXT *) { return VK_ERROR_OUT_OF_DEVICE_MEMORY; };
    src.dev = dst.dev = &dev; src.storage.image = handle<VkImage>(1); dst.storage.image = handle<VkImage>(2);
    args.Rotate = DXGI_DDI_MODE_ROTATION_ROTATE90;
    CHECK(table.pfnBlt(&args) == E_OUTOFMEMORY && setErrorCalls == 1 && !dev.cmdHasWork);

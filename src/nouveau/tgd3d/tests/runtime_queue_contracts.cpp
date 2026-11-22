@@ -25,7 +25,7 @@ static void callbacks(Device *dev, uintptr_t number)
    dev->hRTDevice.handle = reinterpret_cast<HANDLE>(0x1000 + number);
    dev->hRTCoreLayer.handle = reinterpret_cast<void *>(0x2000 + number);
    dev->hContext = reinterpret_cast<HANDLE>(0x3000 + number);
-   dev->createContextVirtual = [](D3D10DDI_HRTCORELAYER h, D3DWDDM2_0DDICB_CREATECONTEXTVIRTUAL *a) APIENTRY -> HRESULT {
+   dev->createContextVirtual = [](D3D10DDI_HRTCORELAYER h, D3DWDDM2_0DDICB_CREATECONTEXTVIRTUAL *a) -> HRESULT {
       CHECK((uintptr_t)h.handle >= 0x2000 && (uintptr_t)h.handle <= 0x2001);
       CHECK(GetCurrentThreadId() == callerThread && a->NodeOrdinal == 0 && a->EngineAffinity == 1);
       CHECK(!a->Flags.Value && !a->pPrivateDriverData && !a->PrivateDriverDataSize);
@@ -34,13 +34,13 @@ static void callbacks(Device *dev, uintptr_t number)
       if (!nullContext) { a->hContext = reinterpret_cast<HANDLE>(0x4000 + ++nextContext); ++liveContexts; }
       return failCreateContext ? E_OUTOFMEMORY : S_OK;
    };
-   dev->kt.pfnDestroyContextCb = [](HANDLE h, const D3DDDICB_DESTROYCONTEXT *a) APIENTRY -> HRESULT {
+   dev->kt.pfnDestroyContextCb = [](HANDLE h, const D3DDDICB_DESTROYCONTEXT *a) -> HRESULT {
       CHECK((uintptr_t)h >= 0x1000 && (uintptr_t)h <= 0x1001 && (uintptr_t)a->hContext > 0x4000);
       CHECK(GetCurrentThreadId() == callerThread && liveContexts);
       if (failClose) return D3DDDIERR_DEVICEREMOVED;
       --liveContexts; return S_OK;
    };
-   dev->kt.pfnSubmitCommandCb = [](HANDLE h, const D3DDDICB_SUBMITCOMMAND *a) APIENTRY -> HRESULT {
+   dev->kt.pfnSubmitCommandCb = [](HANDLE h, const D3DDDICB_SUBMITCOMMAND *a) -> HRESULT {
       CHECK(h == reinterpret_cast<HANDLE>(0x1000) && GetCurrentThreadId() == callerThread);
       CHECK(a->Commands == 0x20000 && a->CommandLength == 16 && !a->Flags.Value);
       CHECK(a->BroadcastContextCount == 1 && (uintptr_t)a->BroadcastContext[0] > 0x4000);
@@ -53,7 +53,7 @@ static void callbacks(Device *dev, uintptr_t number)
       CHECK(!memcmp(request + 1, expected, sizeof(expected)));
       ++submits; return failSubmit ? E_FAIL : S_OK;
    };
-   dev->kt.pfnCreateSynchronizationObject2Cb = [](HANDLE h, D3DDDICB_CREATESYNCHRONIZATIONOBJECT2 *a) APIENTRY -> HRESULT {
+   dev->kt.pfnCreateSynchronizationObject2Cb = [](HANDLE h, D3DDDICB_CREATESYNCHRONIZATIONOBJECT2 *a) -> HRESULT {
       CHECK((uintptr_t)h >= 0x1000 && (uintptr_t)h <= 0x1001 && GetCurrentThreadId() == callerThread);
       CHECK(a->Info.Type == D3DDDI_MONITORED_FENCE && a->Info.Flags.Shared && a->Info.Flags.NtSecuritySharing);
       CHECK(a->Info.MonitoredFence.EngineAffinity == 1 && nextFence + 1 < 64);
@@ -62,22 +62,22 @@ static void callbacks(Device *dev, uintptr_t number)
       a->Info.MonitoredFence.FenceValueCPUVirtualAddress = nullFenceValue ? nullptr : &values[n];
       return failCreateFence ? E_OUTOFMEMORY : S_OK;
    };
-   dev->kt.pfnDestroySynchronizationObjectCb = [](HANDLE h, const D3DDDICB_DESTROYSYNCHRONIZATIONOBJECT *a) APIENTRY -> HRESULT {
+   dev->kt.pfnDestroySynchronizationObjectCb = [](HANDLE h, const D3DDDICB_DESTROYSYNCHRONIZATIONOBJECT *a) -> HRESULT {
       CHECK((uintptr_t)h >= 0x1000 && (uintptr_t)h <= 0x1001 && a->hSyncObject > 0x100 && liveFences);
       if (failClose) return D3DDDIERR_DEVICEREMOVED;
       --liveFences; return S_OK;
    };
-   dev->kt.pfnWaitForSynchronizationObjectFromGpuCb = [](HANDLE h, const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *a) APIENTRY -> HRESULT {
+   dev->kt.pfnWaitForSynchronizationObjectFromGpuCb = [](HANDLE h, const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMGPU *a) -> HRESULT {
       CHECK(h == reinterpret_cast<HANDLE>(0x1000) && GetCurrentThreadId() == callerThread);
       CHECK((uintptr_t)a->hContext > 0x4000 && a->ObjectCount == 1 && a->ObjectHandleArray[0] > 0x100 && a->MonitoredFenceValueArray[0] == 7);
       ++gpuWaits; return failGpu ? E_FAIL : S_OK;
    };
-   dev->kt.pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE h, const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *a) APIENTRY -> HRESULT {
+   dev->kt.pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE h, const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *a) -> HRESULT {
       CHECK(h == reinterpret_cast<HANDLE>(0x1000) && GetCurrentThreadId() == callerThread);
       CHECK((uintptr_t)a->hContext > 0x4000 && a->ObjectCount == 1 && a->ObjectHandleArray[0] > 0x100 && a->MonitoredFenceValueArray[0] == 9);
       ++gpuSignals; return S_OK; // submission success is not simulated GPU completion
    };
-   dev->kt.pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE h, const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) APIENTRY -> HRESULT {
+   dev->kt.pfnWaitForSynchronizationObjectFromCpuCb = [](HANDLE h, const D3DDDICB_WAITFORSYNCHRONIZATIONOBJECTFROMCPU *a) -> HRESULT {
       CHECK(h == reinterpret_cast<HANDLE>(0x1000) && a->ObjectCount == 1 && a->hAsyncEvent && !a->Flags.Value);
       ++cpuWaits; lastWaitEvent = a->hAsyncEvent;
       if (cpuWaitMode == 1) return D3DDDIERR_DEVICEREMOVED;
@@ -85,7 +85,7 @@ static void callbacks(Device *dev, uintptr_t number)
       values[a->ObjectHandleArray[0] - 0x100] = cpuWaitMode == 3 ? UINT64_MAX : *a->FenceValueArray;
       CHECK(SetEvent(a->hAsyncEvent)); return S_OK;
    };
-   dev->kt.pfnSignalSynchronizationObjectFromCpuCb = [](HANDLE h, const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMCPU *a) APIENTRY -> HRESULT {
+   dev->kt.pfnSignalSynchronizationObjectFromCpuCb = [](HANDLE h, const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMCPU *a) -> HRESULT {
       CHECK(h == reinterpret_cast<HANDLE>(0x1000) && a->ObjectCount == 1);
       values[*a->ObjectHandleArray - 0x100] = *a->FenceValueArray; ++cpuSignals; return S_OK;
    };
@@ -103,8 +103,8 @@ static void final_queue_owner(FinalQueueState state)
    static unsigned vkDestroys, parentDestroys;
    vkDestroys = parentDestroys = 0;
    dev->vkdev = reinterpret_cast<VkDevice>(1);
-   dev->vk.DestroyDevice = [](VkDevice, const VkAllocationCallbacks *) VKAPI_CALL { ++vkDestroys; };
-   dev->kt.pfnDestroyContextCb = [](HANDLE, const D3DDDICB_DESTROYCONTEXT *args) APIENTRY -> HRESULT {
+   dev->vk.DestroyDevice = [](VkDevice, const VkAllocationCallbacks *) { ++vkDestroys; };
+   dev->kt.pfnDestroyContextCb = [](HANDLE, const D3DDDICB_DESTROYCONTEXT *args) -> HRESULT {
       CHECK(args->hContext == reinterpret_cast<HANDLE>(0x3000));
       ++parentDestroys;
       return S_OK;
@@ -245,7 +245,7 @@ void runtime_queue_contracts()
       dev.hRTCoreLayer.handle = nullptr;
       dev.createContextVirtual = nullptr;
       CHECK(runtime_queue_prepare(&dev, &a) == DXGI_ERROR_UNSUPPORTED);
-      dev.kt.pfnCreateContextVirtualCb = [](HANDLE device, D3DDDICB_CREATECONTEXTVIRTUAL *args) APIENTRY -> HRESULT {
+      dev.kt.pfnCreateContextVirtualCb = [](HANDLE device, D3DDDICB_CREATECONTEXTVIRTUAL *args) -> HRESULT {
          CHECK(device == reinterpret_cast<HANDLE>(0x1000) && GetCurrentThreadId() == callerThread);
          CHECK(!args->NodeOrdinal && args->EngineAffinity == 1 && !args->Flags.Value);
          CHECK(!args->pPrivateDriverData && !args->PrivateDriverDataSize && !args->hContext);

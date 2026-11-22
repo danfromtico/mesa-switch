@@ -23,7 +23,6 @@ tgd3d_files = files(
   'tgd3d_legacy9.cpp',
   'tgd3d_legacy9_device.cpp',
   'tgd3d_legacy9_draw.cpp',
-  'tgd3d_legacy9_texture.cpp',
   'tgd3d_format.cpp',
    'tgd3d_offer.cpp',
   'tgd3d_query.cpp',

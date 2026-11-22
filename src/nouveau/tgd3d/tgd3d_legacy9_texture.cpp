@@ -158,6 +158,7 @@ HRESULT APIENTRY update_subresource(HANDLE handle, const D3DDDIARG_UPDATESUBRESO
       return E_INVALIDARG;
    auto *surface = static_cast<Surface *>(args->hResource);
    if (surface->owner != dev || surface->locked) return D3DERR_INVALIDCALL;
+   if (surface->isDepth()) return D3DERR_NOTAVAILABLE;
    const UINT sub = args->SubResourceIndex;
    if (sub >= (surface->texture ? surface->levels : 1)) return E_INVALIDARG;
    auto *level = surface->texture ? &surface->texture[sub] : nullptr;

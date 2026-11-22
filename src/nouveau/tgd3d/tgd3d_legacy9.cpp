@@ -48,7 +48,7 @@ UINT display_formats(Adapter *adapter, FORMATOP *formats)
    if (adapter->vk.vk.GetPhysicalDeviceImageFormatProperties2(adapter->vk.pdev, &image, &props) != VK_SUCCESS ||
        !(props.imageFormatProperties.sampleCounts & VK_SAMPLE_COUNT_1_BIT))
       return 0;
-   const DWORD surface = FORMATOP_OFFSCREENPLAIN | FORMATOP_OFFSCREEN_RENDERTARGET | FORMATOP_TEXTURE;
+   const DWORD surface = FORMATOP_OFFSCREENPLAIN | FORMATOP_OFFSCREEN_RENDERTARGET;
    if (formats) {
       formats[0] = {D3DDDIFMT_X8R8G8B8, surface | FORMATOP_DISPLAYMODE | FORMATOP_3DACCELERATION, 0, 0, 0};
       formats[1] = {D3DDDIFMT_A8R8G8B8, surface, 0, 0, 0};
@@ -89,15 +89,6 @@ HRESULT APIENTRY get_caps(HANDLE handle, const D3DDDIARG_GETCAPS *query)
    case D3DDDICAPS_DDRAW_MODE_SPECIFIC:
       result = write(*query, DDRAW_MODE_SPECIFIC_CAPS{});
       break;
-   case D3DDDICAPS_GET_MARKER_CAPS:
-      result = write(*query, D3DDDIMT_NONE);
-      break;
-   case D3DDDICAPS_GET_SIMPLE_INSTANCING_SUPPORT:
-      result = write(*query, D3DDDICAPS_SIMPLE_INSTANCING_SUPPORT{});
-      break;
-   case D3DDDICAPS_GETGAMMARAMPCAPS:
-      result = write(*query, DDIGAMMACAPS{});
-      break;
    case D3DDDICAPS_GET_ARCHITECTURE_INFO:
       result = write(*query, D3DDDICAPS_ARCHITECTURE_INFO{});
       break;
@@ -107,23 +98,8 @@ HRESULT APIENTRY get_caps(HANDLE handle, const D3DDDIARG_GETCAPS *query)
       caps.NumberOfAdaptersInGroup = 1;
       caps.NumSimultaneousRTs = 1;
       caps.DevCaps = D3DDEVCAPS_DRAWPRIMTLVERTEX | D3DDEVCAPS_TLVERTEXSYSTEMMEMORY;
-      caps.Caps2 = D3DCAPS2_DYNAMICTEXTURES;
-      caps.TextureCaps = D3DPTEXTURECAPS_ALPHA | D3DPTEXTURECAPS_MIPMAP;
-      caps.FVFCaps = 1; // One set of texture coordinates.
-      caps.MaxTextureWidth = caps.MaxTextureHeight = adapter->vk.caps.maxImageDimension2D;
-      caps.MaxTextureAspectRatio = caps.MaxTextureWidth;
-      caps.MaxTextureBlendStages = caps.MaxSimultaneousTextures = 1;
-      caps.TextureAddressCaps = D3DPTADDRESSCAPS_WRAP | D3DPTADDRESSCAPS_CLAMP | D3DPTADDRESSCAPS_INDEPENDENTUV;
-      caps.TextureOpCaps = D3DTEXOPCAPS_DISABLE | D3DTEXOPCAPS_SELECTARG1 | D3DTEXOPCAPS_SELECTARG2 |
-                           D3DTEXOPCAPS_MODULATE;
-      caps.TextureFilterCaps = D3DPTFILTERCAPS_MINFPOINT | D3DPTFILTERCAPS_MAGFPOINT |
-                               D3DPTFILTERCAPS_MIPFPOINT | D3DPTFILTERCAPS_MINFLINEAR |
-                               D3DPTFILTERCAPS_MAGFLINEAR | D3DPTFILTERCAPS_MIPFLINEAR;
-      caps.DevCaps2 = D3DDEVCAPS2_STREAMOFFSET;
       caps.PrimitiveMiscCaps = D3DPMISCCAPS_CULLNONE | D3DPMISCCAPS_CULLCW | D3DPMISCCAPS_CULLCCW;
-      caps.RasterCaps = D3DPRASTERCAPS_SCISSORTEST;
       caps.ShadeCaps = D3DPSHADECAPS_COLORGOURAUDRGB;
-      caps.MaxVertexIndex = legacy9::max_vertex_index;
       caps.MaxPrimitiveCount = legacy9::max_primitives;
       caps.MaxStreams = 1;
       caps.MaxStreamStride = legacy9::max_stream_stride;

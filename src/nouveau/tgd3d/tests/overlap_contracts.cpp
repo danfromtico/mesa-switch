@@ -35,77 +35,70 @@ static void init(Device &dev, Adapter &adapter)
    images = buffers = memories = barriers = waits = errors = 0;
    completed = 6; error = S_OK; failStage = 0; copies.clear();
    dev.adapter = &adapter; dev.caps = &adapter.vk.caps;
-   adapter.vk.vk.GetPhysicalDeviceFormatProperties =
-      [](VkPhysicalDevice, VkFormat, VkFormatProperties *p) VKAPI_CALL {
-         *p = {};
-         p->linearTilingFeatures = VK_FORMAT_FEATURE_TRANSFER_SRC_BIT | VK_FORMAT_FEATURE_TRANSFER_DST_BIT |
-                                   VK_FORMAT_FEATURE_BLIT_SRC_BIT | VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
-         p->optimalTilingFeatures = p->linearTilingFeatures | VK_FORMAT_FEATURE_BLIT_DST_BIT;
-      };
    dev.vkdev = (VkDevice)(uintptr_t)1; dev.cmd = (VkCommandBuffer)(uintptr_t)2;
    dev.fence = (VkSemaphore)(uintptr_t)3; dev.submitted = completed;
    adapter.vk.caps.memory.memoryTypeCount = 1;
    adapter.vk.caps.memory.memoryTypes[0].propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { error = hr; ++errors; };
-   dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) VKAPI_CALL { *out = completed; return VK_SUCCESS; };
-   dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) VKAPI_CALL { ++waits; return VK_TIMEOUT; };
-   dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *in, const VkAllocationCallbacks *, VkImage *out) VKAPI_CALL {
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
+   dev.vk.GetSemaphoreCounterValue = [](VkDevice, VkSemaphore, uint64_t *out) { *out = completed; return VK_SUCCESS; };
+   dev.vk.WaitSemaphores = [](VkDevice, const VkSemaphoreWaitInfo *, uint64_t) { ++waits; return VK_TIMEOUT; };
+   dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *in, const VkAllocationCallbacks *, VkImage *out) {
       if (failStage == 1) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       CHECK(in->mipLevels == 1 && in->arrayLayers == 1 && in->samples == VK_SAMPLE_COUNT_1_BIT);
       auto image = new Image{in->extent.width, in->extent.height, in->extent.depth, {}};
       image->bytes.resize((size_t)image->width * image->height * image->depth * 4);
       *out = handle<VkImage>(image); ++images; return VK_SUCCESS;
    };
-   dev.vk.GetImageMemoryRequirements = [](VkDevice, VkImage h, VkMemoryRequirements *out) VKAPI_CALL {
+   dev.vk.GetImageMemoryRequirements = [](VkDevice, VkImage h, VkMemoryRequirements *out) {
       *out = {object<Image>(h)->bytes.size(), 256, 1};
    };
-   dev.vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *in, const VkAllocationCallbacks *, VkBuffer *out) VKAPI_CALL {
+   dev.vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *in, const VkAllocationCallbacks *, VkBuffer *out) {
       if (failStage == 5) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       CHECK(in->usage & VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT);
       *out = handle<VkBuffer>(new Buffer{(size_t)in->size}); ++buffers; return VK_SUCCESS;
    };
-   dev.vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer h, VkMemoryRequirements *out) VKAPI_CALL {
+   dev.vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer h, VkMemoryRequirements *out) {
       *out = {object<Buffer>(h)->size, 256, 1};
    };
-   dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *in, const VkAllocationCallbacks *, VkDeviceMemory *out) VKAPI_CALL {
+   dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *in, const VkAllocationCallbacks *, VkDeviceMemory *out) {
       if (failStage == 2) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       auto memory = new Memory; memory->bytes.resize(in->allocationSize);
       *out = handle<VkDeviceMemory>(memory); ++memories; return VK_SUCCESS;
    };
-   dev.vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize) VKAPI_CALL {
+   dev.vk.BindImageMemory = [](VkDevice, VkImage, VkDeviceMemory, VkDeviceSize) {
       return failStage == 3 ? VK_ERROR_OUT_OF_DEVICE_MEMORY : VK_SUCCESS;
    };
-   dev.vk.BindBufferMemory = [](VkDevice, VkBuffer b, VkDeviceMemory m, VkDeviceSize offset) VKAPI_CALL {
+   dev.vk.BindBufferMemory = [](VkDevice, VkBuffer b, VkDeviceMemory m, VkDeviceSize offset) {
       if (failStage == 6) return VK_ERROR_OUT_OF_DEVICE_MEMORY;
       CHECK(!offset); object<Buffer>(b)->memory = object<Memory>(m); return VK_SUCCESS;
    };
-   dev.vk.MapMemory = [](VkDevice, VkDeviceMemory h, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **out) VKAPI_CALL {
+   dev.vk.MapMemory = [](VkDevice, VkDeviceMemory h, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **out) {
       if (failStage == 7) return VK_ERROR_MEMORY_MAP_FAILED;
       *out = object<Memory>(h)->bytes.data(); return VK_SUCCESS;
    };
-   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) VKAPI_CALL {};
-   dev.vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *out) VKAPI_CALL {
+   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) {};
+   dev.vk.AllocateCommandBuffers = [](VkDevice, const VkCommandBufferAllocateInfo *, VkCommandBuffer *out) {
       CHECK(failStage == 4); *out = VK_NULL_HANDLE; return VK_ERROR_OUT_OF_HOST_MEMORY;
    };
-   dev.vk.DestroyImage = [](VkDevice, VkImage h, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(images); --images; delete object<Image>(h); };
-   dev.vk.DestroyBuffer = [](VkDevice, VkBuffer h, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(buffers); --buffers; delete object<Buffer>(h); };
-   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory h, const VkAllocationCallbacks *) VKAPI_CALL { CHECK(memories); --memories; delete object<Memory>(h); };
-   dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer, const VkDependencyInfo *in) VKAPI_CALL {
+   dev.vk.DestroyImage = [](VkDevice, VkImage h, const VkAllocationCallbacks *) { CHECK(images); --images; delete object<Image>(h); };
+   dev.vk.DestroyBuffer = [](VkDevice, VkBuffer h, const VkAllocationCallbacks *) { CHECK(buffers); --buffers; delete object<Buffer>(h); };
+   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory h, const VkAllocationCallbacks *) { CHECK(memories); --memories; delete object<Memory>(h); };
+   dev.vk.CmdPipelineBarrier2 = [](VkCommandBuffer, const VkDependencyInfo *in) {
       if (in->memoryBarrierCount) {
          CHECK(in->pMemoryBarriers[0].srcAccessMask & VK_ACCESS_2_MEMORY_WRITE_BIT);
          CHECK(in->pMemoryBarriers[0].dstAccessMask & VK_ACCESS_2_MEMORY_READ_BIT);
          ++barriers;
       }
    };
-   dev.vk.CmdCopyBuffer = [](VkCommandBuffer, VkBuffer src, VkBuffer dst, UINT count, const VkBufferCopy *r) VKAPI_CALL {
+   dev.vk.CmdCopyBuffer = [](VkCommandBuffer, VkBuffer src, VkBuffer dst, UINT count, const VkBufferCopy *r) {
       CHECK(count == 1);
       if (src == dst) CHECK(r->srcOffset + r->size <= r->dstOffset || r->dstOffset + r->size <= r->srcOffset);
       Copy c; c.srcBuffer = object<Buffer>(src); c.dstBuffer = object<Buffer>(dst);
       c.buffer = *r; c.barrier = barriers; copies.push_back(c);
    };
    dev.vk.CmdCopyImage = [](VkCommandBuffer, VkImage src, VkImageLayout sl, VkImage dst,
-                          VkImageLayout dl, UINT count, const VkImageCopy *r) VKAPI_CALL {
+                          VkImageLayout dl, UINT count, const VkImageCopy *r) {
       CHECK(sl == VK_IMAGE_LAYOUT_GENERAL && dl == sl && count == 1);
       if (src == dst) {
          CHECK(r->srcSubresource.mipLevel != r->dstSubresource.mipLevel ||
@@ -120,7 +113,7 @@ static void init(Device &dev, Adapter &adapter)
       c.image = *r; c.barrier = barriers; copies.push_back(c);
    };
    dev.vk.CmdBlitImage = [](VkCommandBuffer, VkImage src, VkImageLayout sl, VkImage dst,
-                           VkImageLayout dl, UINT count, const VkImageBlit *b, VkFilter filter) VKAPI_CALL {
+                           VkImageLayout dl, UINT count, const VkImageBlit *b, VkFilter filter) {
       CHECK(src != dst && sl == VK_IMAGE_LAYOUT_GENERAL && dl == sl && count == 1);
       CHECK(filter == VK_FILTER_NEAREST && b->srcOffsets[1].x - b->srcOffsets[0].x ==
             b->dstOffsets[1].x - b->dstOffsets[0].x && b->srcOffsets[1].y - b->srcOffsets[0].y ==
@@ -227,7 +220,7 @@ static void dxgi_self_blt(UINT sx, UINT sy, UINT dx, UINT dy)
    r.bind = D3D10_DDI_BIND_RENDER_TARGET;
    args.Rotate = DXGI_DDI_MODE_ROTATION_ROTATE180;
    dev.vk.CreatePipelineLayout = [](VkDevice, const VkPipelineLayoutCreateInfo *,
-                                   const VkAllocationCallbacks *, VkPipelineLayout *) VKAPI_CALL {
+                                   const VkAllocationCallbacks *, VkPipelineLayout *) {
       return VK_ERROR_OUT_OF_HOST_MEMORY;
    };
    CHECK(t.pfnBlt1(&args) == E_OUTOFMEMORY);
@@ -324,96 +317,10 @@ static void discard_hint()
          dev.submitted == 6 && completed == 6 && r.storage.lastUse == 7 && r.storage.writeSerial == 11 &&
          r.storage.layoutReady && r.storage.preinitialized);
 }
-
-static void dxgi_linear_destination_contract()
-{
-   Adapter adapter;
-   Device dev;
-   init(dev, adapter);
-   Resource src, dst;
-   for (auto *r : {&src, &dst}) {
-      r->dev = &dev; r->kind = ResKind::Image; r->dim = D3D10DDIRESOURCE_TEXTURE2D;
-      r->format = DXGI_FORMAT_B8G8R8A8_UNORM; r->vkFormat = VK_FORMAT_B8G8R8A8_UNORM;
-      r->width = 13; r->height = 9; r->aspects = VK_IMAGE_ASPECT_COLOR_BIT;
-      CHECK(image_create(&dev, r) == S_OK);
-   }
-   dst.storage.preinitialized = true;
-   dst.storage.tiling = VK_IMAGE_TILING_LINEAR;
-   static VkImage linear_image;
-   static unsigned invalid_blits;
-   linear_image = dst.storage.image;
-   invalid_blits = 0;
-   dev.vk.CmdBlitImage = [](VkCommandBuffer, VkImage, VkImageLayout, VkImage destination,
-                            VkImageLayout, UINT, const VkImageBlit *, VkFilter) VKAPI_CALL {
-      if (destination == linear_image) ++invalid_blits;
-   };
-   auto &source = object<Image>(src.storage.image)->bytes;
-   auto &destination = object<Image>(dst.storage.image)->bytes;
-   fill(source); destination.assign(destination.size(), 0xa7);
-   auto expected = destination;
-   for (UINT y = 0; y < 4; ++y)
-      std::memcpy(&expected[((y+3)*13+4)*4], &source[((y+1)*13+2)*4], 7*4);
-   DXGI1_2_DDI_BASE_FUNCTIONS table{};
-   dxgi_fill_presentation12(&table, false);
-   DXGI_DDI_ARG_BLT1 args{};
-   args.hDevice=(DXGI_DDI_HDEVICE)&dev;
-   args.hSrcResource=(DXGI_DDI_HRESOURCE)&src; args.hDstResource=(DXGI_DDI_HRESOURCE)&dst;
-   args.SrcLeft=2; args.SrcRight=9; args.SrcTop=1; args.SrcBottom=5;
-   args.DstLeft=4; args.DstRight=11; args.DstTop=3; args.DstBottom=7;
-   args.Flags.Present=1; args.Rotate=DXGI_DDI_MODE_ROTATION_IDENTITY;
-   CHECK(table.pfnBlt1(&args)==S_OK);
-   std::printf("LINEAR_DXGI unsupported_blits=%u copy_regions=%zu\n",invalid_blits,copies.size());
-   CHECK(invalid_blits==0 && copies.size()==1);
-   execute(dev);
-   CHECK(destination==expected && waits==0);
-   src.format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; src.vkFormat = VK_FORMAT_B8G8R8A8_SRGB;
-   destination.assign(destination.size(), 0xa7);
-   CHECK(table.pfnBlt1(&args) == S_OK && !invalid_blits && copies.size()==1);
-   execute(dev); CHECK(destination==expected);
-   src.format = DXGI_FORMAT_B8G8R8A8_UNORM; src.vkFormat = VK_FORMAT_B8G8R8A8_UNORM;
-   source.assign(source.size(), 0x57); destination.assign(destination.size(), 0xa7);
-   expected=destination;
-   args.Flags.Stretch=1;
-   args.SrcLeft=2; args.SrcRight=6; args.SrcTop=1; args.SrcBottom=3;
-   args.DstLeft=1; args.DstRight=9; args.DstTop=3; args.DstBottom=7;
-   for (UINT y=3;y<7;++y) std::memset(&expected[(y*13+1)*4],0x57,8*4);
-   static unsigned filtered;
-   filtered=0;
-   dev.vk.CmdBlitImage=[](VkCommandBuffer,VkImage from,VkImageLayout sl,VkImage to,VkImageLayout dl,
-                          UINT count,const VkImageBlit *b,VkFilter filter) VKAPI_CALL {
-      CHECK(to!=linear_image && from!=to && sl==VK_IMAGE_LAYOUT_GENERAL && dl==sl && count==1);
-      CHECK(filter==VK_FILTER_LINEAR && b->srcOffsets[0].x==2 && b->srcOffsets[0].y==1 &&
-            b->srcOffsets[1].x==6 && b->srcOffsets[1].y==3 && b->dstOffsets[0].x==0 &&
-            b->dstOffsets[0].y==0 && b->dstOffsets[1].x==8 && b->dstOffsets[1].y==4);
-      const Image &in=*object<Image>(from);
-      for (auto byte:in.bytes) CHECK(byte==0x57);
-      Image &scratch=*object<Image>(to); CHECK(scratch.width==8 && scratch.height==4);
-      scratch.bytes.assign(scratch.bytes.size(), in.bytes[0]);
-      ++filtered;
-   };
-   failStage=1;
-   CHECK(table.pfnBlt1(&args)==E_OUTOFMEMORY && copies.empty() && !filtered && !invalid_blits);
-   failStage=0;
-   CHECK(table.pfnBlt1(&args)==S_OK && filtered==1 && !invalid_blits && copies.size()==1 && images==3);
-   CHECK(copies[0].dstImage==object<Image>(linear_image) && copies[0].image.dstOffset.x==1 && copies[0].image.dstOffset.y==3);
-   retire(&dev); CHECK(images==3);
-   execute(dev); CHECK(destination==expected && images==2);
-   args.Flags.Stretch=0; args.DstRight=args.DstLeft+(args.SrcRight-args.SrcLeft);
-   args.DstBottom=args.DstTop+(args.SrcBottom-args.SrcTop);
-   adapter.vk.vk.GetPhysicalDeviceFormatProperties =
-      [](VkPhysicalDevice, VkFormat, VkFormatProperties *p) VKAPI_CALL {
-         *p = {}; p->optimalTilingFeatures = VK_FORMAT_FEATURE_TRANSFER_SRC_BIT;
-      };
-   CHECK(table.pfnBlt1(&args)==DXGI_ERROR_UNSUPPORTED && !invalid_blits && copies.empty());
-
-   storage_destroy(&dev,src.storage,true); storage_destroy(&dev,dst.storage,true);
-   std::puts("PASS: legal DXGI copy to a transfer-only linear destination with untouched border");
-}
 }
 
 void overlap_contracts()
 {
-   dxgi_linear_destination_contract();
    dxgi_self_blt(1, 1, 3, 2); dxgi_self_blt(3, 2, 1, 1);
    buffer_copy(4, 12); buffer_copy(12, 4);
    image_copy(1, 1, 1, 3, 2); image_copy(1, 3, 2, 1, 1); image_copy(3, 1, 1, 3, 2);
