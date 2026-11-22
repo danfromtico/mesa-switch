@@ -1,0 +1,172 @@
+{
+  "actual_model": "Gemini 4 Neon (High)",
+  "verdict": "changes_required",
+  "coverage": {
+    "review_mode": "read-only inspection of frozen inputs under /Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/present1-verified-fix-20261122-main/review",
+    "production_source_and_binary_identity": {
+      "status": "production_delta_passed_static_review_with_test_and_evidence_issues",
+      "files_reviewed": [
+        "production.patch",
+        "baseline/tgd3d_dxgi.cpp",
+        "candidate/src/nouveau/tgd3d/tgd3d_dxgi.cpp",
+        "candidate/src/nouveau/tgd3d/tgd3d_device.cpp",
+        "candidate/src/nouveau/tgd3d/tgd3d_entry.cpp",
+        "candidate/src/nouveau/tgd3d/tgd3d_ddi11.cpp",
+        "candidate/src/nouveau/tgd3d/tgd3d_cmd.cpp",
+        "candidate/src/nouveau/tgd3d/tgd3d.h",
+        "candidate/src/nouveau/tgd3d/meson.build",
+        "evidence/producer-source-identity.json",
+        "evidence/source-identity.json",
+        "evidence/producer-builds.json",
+        "evidence/candidate-binary-equivalence.json",
+        "evidence/signed-result.json",
+        "evidence/umd-signature.log"
+      ],
+      "assessment": "The production code delta in candidate/src/nouveau/tgd3d/tgd3d_dxgi.cpp:120-130 is minimal and semantically correct: args->Reserved == 1 is accepted only when dev->nvk is true and dev->interfaceVersion == D3DWDDM2_0_DDI_INTERFACE_VERSION (0x000b0020); Reserved == 0 remains unchanged; Reserved >= 2 or Reserved == 1 on non-NVK/non-WDDM2.0 paths returns E_INVALIDARG before touching Device/Resource state or forwarding. Present1 is wired to both DXGI1_3 (tgd3d_dxgi.cpp:368) and DXGI1_4 (tgd3d_dxgi.cpp:387, filled on WDDM 2.0 in tgd3d_device.cpp:316). Global GetSupportedVersions (tgd3d_entry.cpp:40-45) continues not to advertise WDDM 2.0 by default. Device/Resource ownership checks (tgd3d_dxgi.cpp:133,32), SubResourceIndex bounds, Flags.Reserved rejection (tgd3d_dxgi.cpp:41), flush/device-loss handling, and Present(&present) return propagation remain intact. Frozen binary/signing artifacts report PE section equivalence (.buildid-only diff) against both rebuilt baseline b4f6c7bf and prior process-scoped candidate 4d35f14b, matching export table (OpenAdapter/OpenAdapter10/OpenAdapter10_2), and local CA Authenticode verification exit 0 for signed ARM64 DLL dcc71e34e229c7090d05b424e03ef959b682170eb8fed7e2c77684d041426688; however, source-identity.json is stale relative to canonical source commit 329d0d21a96f0dc2958b954723fc2984c07b4613 (Finding F6)."
+    },
+    "cpp_unit_tests": {
+      "status": "failed_static_review_and_unexecuted",
+      "files_reviewed": [
+        "candidate/src/nouveau/tgd3d/tests/runtime_contracts.cpp"
+      ],
+      "assessment": "The four ported Reserved input-combination assertions at runtime_contracts.cpp:794-809 exercise the shared Present1 implementation via DXGI1_3, but runtime_contracts.cpp:812-813 contains a guaranteed failing assertion (dirty[1].right = 66 expecting E_INVALIDARG) that contradicts candidate/src/nouveau/tgd3d/tgd3d_dxgi.cpp:120-148 (where dirty rects are treated as unchecked hints). No C++ test execution receipt exists in evidence/, confirming the ported test suite was not run against the candidate source."
+    },
+    "policy_and_release_gate": {
+      "status": "changes_required",
+      "files_reviewed": [
+        "policy.patch",
+        "policy/tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1",
+        "policy/tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1",
+        "policy/tegra-x1-wddm/tools/check_graphics_baseline_push.py",
+        "policy/tegra-x1-wddm/tools/tgd3d-default/Native-Boot.ps1",
+        "policy/tegra-x1-wddm/tools/tgd3d-default/Baseline-Device.ps1",
+        "policy/tegra-x1-wddm/tools/tgd3d-default/tests/Test-BaselinePromotion.ps1",
+        "policy/tegra-x1-wddm/tools/tgd3d-default/tests/test_baseline_publication.py",
+        "evidence/policy-tests-result.json",
+        "evidence/policy-tests.stdout",
+        "evidence/publication-tests-result.json",
+        "evidence/publication-tests.stdout",
+        "existing-evidence/tegra-x1-wddm/docs/open-faults.json",
+        "existing-evidence/tegra-x1-wddm/docs/graphics-baseline.json"
+      ],
+      "assessment": "Existing closure-based verified-fix rules, closed-fault 3-run requirements, and existing open-faults.json / graphics-baseline.json records remain compatible, and host test receipts show 63/63 PowerShell unit checks and 2/2 isolated Git publication checks passed. However, static review identified reachable gate gaps in the new scoped verified-fix path: (1) scope-mixing bypass if paired with baseline_comparisons (F2), (2) missing open-status enforcement and missing case-vs-proof hash distinctness check (F3), (3) unconditional output_verified=true requirement conflicting with the user-specified empty-window Reserved=1 test (F4), (4) lack of fault.verified_fix ledger validation and post-supersession evidence retention (F5), and (5) hash casing inconsistency (F7). Native-Boot.ps1 and Baseline-Device.ps1 integrate cleanly with Assert-SwitchPromotion and Assert-SwitchCaseFiles once the updated policy snapshot and supporting evidence files are staged alongside qualification.json."
+    },
+    "existing_native_evidence": {
+      "status": "reviewed_and_limits_preserved",
+      "files_reviewed": [
+        "existing-evidence/tegra-x1-wddm/docs/dxvk-games-20261118/wddm20-present1-native-window.json",
+        "existing-evidence/tegra-x1-wddm/docs/open-faults.json"
+      ],
+      "assessment": "Retained process-scoped control proves baseline Reserved=1 -> Present1 E_INVALIDARG (0x80070057) -> DXGI_ERROR_DEVICE_REMOVED (0x887a0005 / reason 0x887a0020) on both Sequential and FlipSequential, while the process-scoped candidate passed FlipSequential native-modern-empty (S_OK, no display samples) and native-modern-clear (S_OK, 5/5 desktop samples) but hit an unexplained Kernel-Power 41 / EventLog 6008 restart during the 6-frame native-modern-full trial after 2 successful Presents and entry into the 3rd Present (trace ended 8.643 ms before entry; cause remains open)."
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "high",
+      "category": "cpp_test_mismatch",
+      "file": "candidate/src/nouveau/tgd3d/tests/runtime_contracts.cpp",
+      "lines": "812-813 (against candidate/src/nouveau/tgd3d/tgd3d_dxgi.cpp:120-148)",
+      "summary": "Ported runtime_contracts.cpp contains a dirty-rectangle bounds assertion that unconditionally fails against candidate tgd3d_dxgi.cpp, and no passing C++ test run is recorded in evidence/.",
+      "reachable_scenario": "Compiling and running runtime_contracts() (specifically presentation13_contracts()) against the frozen candidate tree. After setting dirty[1].right = 66 on a 65x17 surface, dxgi.pfnPresent1(&present) does not inspect DirtyRects/pDirtyRects, forwards to Present(&present), pushes 4 into presentOrder, and returns DXGI_STATUS_OCCLUDED instead of E_INVALIDARG, triggering CHECK failure and std::exit(1).",
+      "impact": "The C++ unit test file bundled in canonical source commit 329d0d21a96f0dc2958b954723fc2984c07b4613 is broken against the shipped Present1 implementation, and the four ported Reserved-word regression checks (lines 794-809) have no verified execution on this candidate tree.",
+      "minimal_fix": "Update candidate/src/nouveau/tgd3d/tests/runtime_contracts.cpp:812-813 to align with the deployed Present1 contract (dirty rectangles are optional hints forwarded via pDXGIContext and not bounds-rejected in Present1; test an enforced Present1 guard such as SubResourceIndex >= res->subresources() or null phSurfacesToPresent instead), also assert dxgi14.pfnPresent1 == dxgi.pfnPresent1 (or test WDDM 2.0 Reserved=1 through dxgi14.pfnPresent1), then build and execute runtime_contracts and archive its passing log in evidence/."
+    },
+    {
+      "id": "F2",
+      "severity": "high",
+      "category": "policy_scope_mixing",
+      "file": "policy/tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1",
+      "lines": "287-315 (specifically 293-314 and 308)",
+      "summary": "A scoped verified-fix paired with a baseline_comparisons entry bypasses independent_qualifications, per-fault assessments, and distinct working-path control verification.",
+      "reachable_scenario": "A qualification with change_kind='verified-fix' and verified_fix.scope (which has no control_sha256) is referenced in open-faults.json under baseline_comparisons instead of independent_qualifications during Select, Check, Publish, CheckPublication, or Native-Boot -Mode Accept. Assert-SwitchVerifiedFix succeeds on lines 149-184; Assert-SwitchPromotion enters if ($comparison.Count) at line 293, takes the else branch at line 304, compares $working[0].evidence_sha256 against $null ($Evidence.verified_fix.control_sha256) at line 308 (always false), and returns at line 314 without checking independent_qualifications or fault_assessments.",
+      "impact": "Allows promoting a scoped repair while skipping per-fault accounting for all other open faults and without requiring a candidate working-path control or distinctness from previous_control_sha256.",
+      "minimal_fix": "In Baseline-Promotion.ps1:294 (or inside the else block at line 304), explicitly reject scoped verified-fix qualifications in baseline_comparisons: `if ($Evidence.change_kind -ceq 'verified-fix' -and $Evidence.verified_fix.PSObject.Properties['scope']) { throw 'Scoped repair must account for open faults via independent_qualifications' }`, and add a negative test in Test-BaselinePromotion.ps1."
+    },
+    {
+      "id": "F3",
+      "severity": "medium",
+      "category": "policy_validation_gap",
+      "file": "policy/tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1",
+      "lines": "150-151, 169-173",
+      "summary": "Scoped verified-fix validation does not require the target fault to remain status='open', and does not ensure case_sha256 is distinct from the three supporting proof hashes.",
+      "reachable_scenario": "(1) During Assert-SwitchVerifiedFix, if a closed fault still carries a historical verified_fix object, line 150 (`Where-Object id -CEQ $binding.fault_id`) matches it without checking `$_.status -ceq 'open'`. (2) If a qualification sets verified_fix.case_sha256 equal to causal_evidence_sha256, code_review_sha256, or build_sha256, lines 169-171 only check pairwise uniqueness among the 3 proof hashes and accept the collision.",
+      "impact": "(1) Allows mixing scoped open-fault repair rules onto a closed fault; (2) allows reusing a static cause/review/build proof file as the native candidate boot test receipt.",
+      "minimal_fix": "At Baseline-Promotion.ps1:150, require open status: `$matches = @($Ledger.faults | Where-Object { $_.id -ceq $binding.fault_id -and $_.status -ceq 'open' })`. At lines 172-173, enforce distinctness of case_sha256 from the 3 proof hashes: `if ($binding.case_sha256 -in $proofHashes) { throw 'Scoped repair native case must be distinct from cause, review and build evidence' }`. Add negative tests in Test-BaselinePromotion.ps1."
+    },
+    {
+      "id": "F4",
+      "severity": "medium",
+      "category": "policy_scope_mismatch",
+      "file": "policy/tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1",
+      "lines": "279-285",
+      "summary": "Assert-SwitchPromotion unconditionally requires output_verified=true on every case for change_kind='verified-fix', conflicting with the user-specified empty-window Reserved=1 verification.",
+      "reachable_scenario": "When qualifying the actual production package using only the user-specified empty-window Reserved=1 test (matching native-modern-empty in wddm20-present1-native-window.json:143,173,183 where display_samples=null and on_screen_observation=null), Assert-SwitchPromotion line 281 rejects the qualification unless the empty-window case sets output_verified=true.",
+      "impact": "Forces either claiming output_verified=true on an empty-window test that only verifies Present1 callback forwarding/S_OK return (as happened in test_baseline_publication.py:190,196) or adding unrequested rendering cases (and even with an extra case, line 280 iterates over every case in $Evidence.cases, so the empty-window case still cannot truthfully set output_verified=false).",
+      "minimal_fix": "Keep output_verified=true mandatory for presentation and closure-based verified-fix qualifications, while for scoped verified-fix (`$Evidence.change_kind -ceq 'verified-fix' -and $Evidence.verified_fix.PSObject.Properties['scope']`) require normal_exit=true and desktop_available=true on every case and make output_verified=true required only when the registered fault.verified_fix requires visible-output verification (or when a non-empty visual scenario is registered)."
+    },
+    {
+      "id": "F5",
+      "severity": "medium",
+      "category": "policy_evidence_retention",
+      "file": "policy/tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1; policy/tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1; policy/tegra-x1-wddm/tools/check_graphics_baseline_push.py",
+      "lines": "Baseline-Promotion.ps1:78-81; Select-GraphicsBaseline.ps1:66-85; check_graphics_baseline_push.py:159-160,172-177,243",
+      "summary": "fault.verified_fix is not validated by Assert-SwitchFaultLedger/CheckLedger, its review/build proof files lose pre-push retention once a later baseline supersedes graphics-baseline.json, and check_graphics_baseline_push.py does not guard against verified_fix: null.",
+      "reachable_scenario": "(1) Committing a malformed fault.verified_fix in open-faults.json passes CheckLedger until Select. (2) After a future baseline replaces graphics-baseline.json, retained_reports() (check_graphics_baseline_push.py:156-161) only inspects the currently selected qualification, and lines 172-177 only retain fault.evidence and closed fault.resolution files; modifying or deleting the earlier scoped repair's review or build proof files is no longer caught by pre-push or CheckLedger. (3) If a qualification contains '\"verified_fix\": null', check_graphics_baseline_push.py:160 raises AttributeError, which is not caught by the except clause on line 243.",
+      "impact": "Malformed scoped-repair registrations can enter open-faults.json unchecked; retained independent-review and signed-build proofs for an open scoped repair are not tamper-protected across subsequent baseline promotions the way closed-fault proofs are.",
+      "minimal_fix": "Validate fault.verified_fix schema/hashes/commit/components in Assert-SwitchFaultLedger whenever present on an open fault (and forbid it or check consistency on closed faults); record repository-relative causal_evidence_file, code_review_file, and build_file on fault.verified_fix and verify/retain them in Select-GraphicsBaseline.ps1:66-85 and check_graphics_baseline_push.py:172-177; guard check_graphics_baseline_push.py:160 with `(data.get('verified_fix') or {}).get('evidence') or []`."
+    },
+    {
+      "id": "F6",
+      "severity": "medium",
+      "category": "evidence_identity_inconsistency",
+      "file": "evidence/source-identity.json",
+      "lines": "2-8 (against evidence/producer-source-identity.json:2-32, evidence/signed-result.json:3, frozen-inputs.json:2, and Select-GraphicsBaseline.ps1:168-169)",
+      "summary": "evidence/source-identity.json references an older candidate commit (c0e44ea3...) and 2-file changed_paths instead of canonical source_commit 329d0d21a96f0dc2958b954723fc2984c07b4613.",
+      "reachable_scenario": "If evidence/source-identity.json is included in the bound build evidence or used to construct qualification.json, Select-GraphicsBaseline.ps1:168-169 will reject changed_paths against git diff 54ea32fb..329d0d21 (which includes the 19 archived deployed-input files listed in producer-source-identity.json:12-32), or commit identity will conflict with signed-result.json (329d0d21...).",
+      "impact": "Provenance ambiguity in the frozen review bundle and potential Select/Check failure during qualification assembly.",
+      "minimal_fix": "Regenerate or retire evidence/source-identity.json so all bound source/build proofs consistently reference canonical source_commit 329d0d21a96f0dc2958b954723fc2984c07b4613 and ensure the final qualification.json changed_paths matches `git diff --no-renames --name-only 54ea32fb3e1c714f8f83cd108f2615e37119ec84 329d0d21a96f0dc2958b954723fc2984c07b4613`."
+    },
+    {
+      "id": "F7",
+      "severity": "low",
+      "category": "policy_casing_inconsistency",
+      "file": "policy/tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1",
+      "lines": "12, 164-165, 173, 181",
+      "summary": "Scoped verified-fix uses case-sensitive SHA-256 comparisons (-cne/-CEQ) while Assert-SwitchHash and all other profile/case hash checks are case-insensitive.",
+      "reachable_scenario": "On-device Windows PowerShell collection writes uppercase Get-FileHash output into loaded_components or evidence_sha256 while components uses lowercase hex.",
+      "impact": "Causes spurious rejection during Select/Check/Native-Boot on valid uppercase-hex SHA-256 values (no security bypass).",
+      "minimal_fix": "Either enforce canonical lowercase hex in Assert-SwitchHash (`-cnotmatch '^[0-9a-f]{64}$'`) or use case-insensitive `-ne`/`-eq` for SHA-256 comparisons at lines 164, 165, 173, and 181."
+    }
+  ],
+  "required_corrections": [
+    "No code change is required to the production Present1 guard in candidate/src/nouveau/tgd3d/tgd3d_dxgi.cpp:120-130 (once confirmed unchanged after fixing tests).",
+    "[F1] Fix candidate/src/nouveau/tgd3d/tests/runtime_contracts.cpp:812-813 so the Present1 contract test aligns with the deployed dirty-rect hint behavior, add explicit DXGI1_4 Present1 coverage/equality check, compile and execute runtime_contracts against the candidate tree, and retain its passing receipt in evidence/.",
+    "[F2] Block scoped verified-fix qualifications from entering the baseline_comparisons shortcut in Baseline-Promotion.ps1:293-314 (requiring independent_qualifications for other open faults) and add a regression test in Test-BaselinePromotion.ps1.",
+    "[F3] Require status -ceq 'open' on the target fault at Baseline-Promotion.ps1:150 and require binding.case_sha256 to be distinct from causal_evidence_sha256, code_review_sha256, and build_sha256 at lines 169-173; add negative tests in Test-BaselinePromotion.ps1.",
+    "[F4] Adjust Baseline-Promotion.ps1:279-285 so a scoped input-guard repair verified with an empty-window Reserved=1 case does not have to assert a false visual output_verified=true (while keeping normal_exit=true, desktop_available=true, and preserving output_verified=true for presentation and closure-based verified-fix).",
+    "[F5] Validate fault.verified_fix in Assert-SwitchFaultLedger, bind/retain its supporting proof file paths across subsequent baselines in Select-GraphicsBaseline.ps1 and check_graphics_baseline_push.py, and guard check_graphics_baseline_push.py:160 against null verified_fix.",
+    "[F6] Reconcile evidence/source-identity.json with canonical source_commit 329d0d21a96f0dc2958b954723fc2984c07b4613 (and note that final qualification.json changed_paths must match git diff from 54ea32fb to 329d0d21; if runtime_contracts.cpp is updated for F1, record the resulting commit and confirm production ARM64 DLL PE sections remain unchanged).",
+    "[F7] Standardize SHA-256 case handling between Assert-SwitchHash and Baseline-Promotion.ps1:164-181.",
+    "Operational prerequisite before publication/device acceptance (not a code defect): commit and install the updated verifier hook (`check_graphics_baseline_push.py --install`), update the on-device immutable policy snapshot under Program Files\\SwitchWOA-GpuBoot with the revised Baseline-Promotion.ps1 and open-faults.json, and stage the three supporting evidence files alongside qualification.json when invoking Native-Boot.ps1 -Mode Accept."
+  ],
+  "native_acceptance_limits": {
+    "established_by_source_models_and_prior_process_control": [
+      "Static review confirms candidate/src/nouveau/tgd3d/tgd3d_dxgi.cpp accepts args->Reserved == 1 only on NVK + negotiated D3DWDDM2_0_DDI_INTERFACE_VERSION and leaves all other Present1/Present/MPO paths and error checks intact.",
+      "Frozen build/signing artifacts record that rebuilt baseline matches deployed ARM64 UMD b4f6c7bf in all mapped PE sections except .buildid, candidate unsigned DLL 0a6e5305 matches prior process-scoped candidate 4d35f14b in all mapped PE sections except .buildid, 86 non-test compiled production inputs match canonical commit 329d0d21a96f0dc2958b954723fc2984c07b4613 (archiving the already-deployed legacy9 inputs rather than introducing new runtime behavior), and local CA Authenticode verification passed (exit 0) for signed tg_d3d_arm64.dll dcc71e34e229c7090d05b424e03ef959b682170eb8fed7e2c77684d041426688.",
+      "Prior same-machine process-scoped control (wddm20-present1-native-window.json) confirmed the Reserved=1 E_INVALIDARG root cause on baseline and showed FlipSequential native-modern-empty and native-modern-clear returning S_OK on the process-scoped candidate.",
+      "Host policy tests passed 63/63 PowerShell checks and 2/2 isolated Git publication checks (prior to fixing Findings F2-F5, F7); C++ runtime_contracts execution on the candidate source is NOT yet established (Finding F1)."
+    ],
+    "pending_for_this_actual_production_package_acceptance": [
+      "Windows OS trust verification on the Switch ARM64 target for signed tg_d3d_arm64.dll dcc71e34... (signed-result.json currently records Windows_trust_verified: false, deployed: false).",
+      "One-time AC-powered trial boot on the Switch with selected software-fence KMD ce54d025 and the rest of the 8-component profile unchanged, confirming Code 0, one-use permit consumption, unique interactive DWM loading the exact 5 runtime components (including dcc71e34...), and a complete System event log interval free of abnormal events 41/6008 or TDRs.",
+      "Actual on-device execution of the empty-window Reserved=1 Present1 case with the production package loading tg_d3d_arm64.dll dcc71e34..., verifying Present1 callback reach/S_OK return, normal client exit, and desktop continuity on that same one-time boot."
+    ],
+    "explicitly_remaining_open_after_scoped_acceptance": [
+      "GM20B-WDDM20-PRESENT1-REMOVAL remains open for broader closure (SEQUENTIAL swap effect candidate validation, visible rendered output, and 3 consecutive trials across affected swap effects).",
+      "GM20B-WDDM20-FLIP-RESTART remains open: the 6-frame native-modern-full trial on the process-scoped candidate hit an unexplained Kernel-Power 41 / EventLog 6008 restart after 2 successful Presents and entry into the 3rd Present (DXGI trace truncated 8.643 ms before entry; root cause and DWM read-completion timing remain unknown).",
+      "GM20B-LEGACY-SEQUENTIAL-RESTART, GM20B-POST-SELECTION-CONTROL-RESTART, GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557, SWITCH-LOAD-TRANSITION-RESTART, and all other open reboot/TDR/shutdown/Wi-Fi faults remain open and unclosed.",
+      "Default global DDI negotiation (GetSupportedVersions in tgd3d_entry.cpp:40-45) still does not advertise WDDM 2.0 globally; WDDM 2.0 remains confined to its negotiated/process-scoped path."
+    ]
+  }
+}
