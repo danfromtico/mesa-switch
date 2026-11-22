@@ -158,9 +158,13 @@ static NTSTATUS queue_submit(TG_GPU_WORK_QUEUE *q,const DXGKARG_SUBMITCOMMANDVIR
      * only its ordered fence in that case. Every real copy requires a snapshot. */
     const BOOLEAN window_present=a->Flags.Present && reserved && !q->Engine->PagingOnly &&
         !gdi_present && !a->Flags.Paging && !a->Flags.ContextSwitch;
+    const BOOLEAN null_rendering=reserved && !a->Flags.Paging && !a->Flags.ContextSwitch &&
+        a->Flags.NullRendering;
     const UINT allowed=0xc9u|((gdi_present || window_present)?2u:0u);
     if(a->Flags.Value&~allowed){status=STATUS_NOT_SUPPORTED;goto done;}
-    if (window_present) entry=reserved;
+    /* Null rendering retains only an ordered fence. Its UMD bytes are not
+     * command input, and the queue owns the reserved software record. */
+    if (window_present || null_rendering) entry=reserved;
     if(reserved && !a->Flags.ContextSwitch && !a->Flags.Paging &&
        !a->Flags.NullRendering && a->DmaBufferSize) {
         if(!snapshot || snapshot->Bytes!=a->DmaBufferSize ||
@@ -173,7 +177,7 @@ static NTSTATUS queue_submit(TG_GPU_WORK_QUEUE *q,const DXGKARG_SUBMITCOMMANDVIR
     if(!entry ||
         ((ULONG_PTR)entry&(TYPE_ALIGNMENT(TG_GPU_QUEUE_ENTRY)-1)) ||
         (entry!=reserved && a->DmaBufferPrivateDataSize<sizeof(*entry)) ||
-        (a->DmaBufferUmdPrivateDataSize && !snapshot && !gdi_present && !window_present)) {
+        (a->DmaBufferUmdPrivateDataSize && !snapshot && !gdi_present && !window_present && !null_rendering)) {
         status=STATUS_INVALID_PARAMETER;goto rejected;
     }
     if(q->CurrentPrivate==entry) { KeReleaseSpinLock(&q->Lock,irql);return STATUS_DEVICE_BUSY; }

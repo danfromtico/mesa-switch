@@ -1863,9 +1863,18 @@ __declspec(noinline) static void TestPagingDispatch(const DXGKRNL_INTERFACE *dxg
     submit.SubmissionFenceId=104;submit.DmaBufferSize=3;submit.pDmaBufferPrivateData=NULL;submit.DmaBufferPrivateDataSize=0;
     CHECK(SubmitModel(&e,&submit)==STATUS_INVALID_PARAMETER && PoolsInUse()==pools+3);
     CHECK(e.LastCompletedFence==102 && !e.RecoveryPending);
-    submit.SubmissionFenceId=105;submit.DmaBufferSize=40;submit.Flags.NullRendering=1;
+    /* Match the native probe's ABI1 payload. Null rendering must keep its
+     * fence behind 103/104 without retaining these ignored private bytes. */
+    const struct {struct tg_gpu_submit_request Header;UINT Words[2];} null_payload={
+        {TG_GPU_SUBMIT_ABI,sizeof(null_payload),sizeof(null_payload.Words),0},
+        {0x20010000,0xb197},
+    };
+    memcpy(&priv[1],&null_payload,sizeof(null_payload));
+    submit.SubmissionFenceId=105;submit.DmaBufferSize=sizeof(null_payload.Words);submit.Flags.NullRendering=1;
     submit.pDmaBufferPrivateData=&priv[1];submit.DmaBufferPrivateDataSize=sizeof(priv[1]);
+    submit.DmaBufferUmdPrivateDataSize=sizeof(null_payload);
     CHECK(SubmitModel(&e,&submit)==STATUS_SUCCESS);
+    memset(&priv[1],0xcc,sizeof(priv[1]));
     CHECK(TgGpuServiceWorkQueue(&q,&io,&power)==STATUS_PENDING && e.LastCompletedFence==102);
     hw.gpu_fence=q.Current.Expected;expected_fence=103;notify_engine=&e;expected_driver_fence=104;
     CHECK(TgGpuServiceWorkQueue(&q,&io,&power)==STATUS_SUCCESS && e.LastCompletedFence==104);
@@ -1876,10 +1885,12 @@ __declspec(noinline) static void TestPagingDispatch(const DXGKRNL_INTERFACE *dxg
     CHECK(render_context->Programs.end[TG_GPU_PROGRAM_3D]==0x200000000 &&
           render_context->Programs.graphics_enabled==(1u<<1) &&
           render_context->Programs.graphics_offset[1]==0x7fb0);
-    CHECK(interrupts==before+4 && PoolsInUse()==pools); /* no extra DMA event for 104 */
+    CHECK(interrupts==before+4); /* no extra DMA event for 104 */
+    CHECK(PoolsInUse()==pools+1); /* owned 105 is still pending */
     accesses=hw.reads+hw.writes;expected_fence=expected_driver_fence=105;
     CHECK(TgGpuServiceWorkQueue(&q,&io,&power)==STATUS_SUCCESS && e.LastCompletedFence==105);
-    CHECK(hw.reads+hw.writes==accesses && interrupts==before+5);
+    CHECK(hw.reads+hw.writes==accesses && interrupts==before+5 && PoolsInUse()==pools);
+    submit.DmaBufferUmdPrivateDataSize=0;
     submit.Flags.Value=0;submit.SubmissionFenceId=106;submit.DmaBufferSize=3;
     submit.pDmaBufferPrivateData=NULL;submit.DmaBufferPrivateDataSize=0;
     CHECK(SubmitModel(&e,&submit)==STATUS_INVALID_PARAMETER && e.LastCompletedFence==106);
