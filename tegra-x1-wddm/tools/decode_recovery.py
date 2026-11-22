@@ -22,6 +22,8 @@ PAYLOAD = struct.Struct('<6IQ10I')
 EXECUTION_PAYLOAD = struct.Struct('<8I3Q24I')
 RESET_PACKET_HEADER = struct.Struct('<4I2Q28I')
 DISPLAY_PAYLOAD = struct.Struct('<13I')
+TDR_PAYLOAD = struct.Struct('<4IQ2Ii6Ii')
+TDR_OPERATIONS = ('unknown', 'reset_adapter', 'restart_adapter', 'query_engine', 'reset_engine', 'query_current_fence')
 DISPLAY_OPERATIONS = ('unknown', 'commit_vidpn', 'set_timings', 'update_active_path', 'source_visibility')
 RESET_HARDWARE_FIELDS = ('flags', 'mc_enable', 'pbdma_enable', 'pbdma_before', 'pbdma_after',
     'userd_get', 'userd_put', 'userd_reference', 'gp_get', 'gp_put', 'gp_fetch',
@@ -49,6 +51,36 @@ EXECUTION_FIELDS = ('submission_fence', 'last_completed_fence', 'expected', 'obs
 def _decode_event(event_id, version, payload, metadata):
     """Decode the same fixed KMD payload for binary and live exports."""
     size = len(payload)
+    if event_id == 8:
+        if version != 1 or size != TDR_PAYLOAD.size:
+            raise ValueError('unsupported TDR contract schema')
+        v = TDR_PAYLOAD.unpack(payload)
+        operation, phase, flags, status = v[1], v[2], v[3], v[7]
+        if v[0] != 1 or not 1 <= operation <= 5 or phase not in (0, 1) or flags & ~8191:
+            raise ValueError('invalid TDR contract header')
+        result_valid, snapshot = bool(flags & 2), bool(flags & 4)
+        if ((result_valid and (phase != 1 or operation not in (3, 4, 5) or status != 0)) or
+                (operation in (3, 4, 5) and (phase != 1 or (status == 0) != result_valid)) or
+                (operation == 3 and result_valid and v[12] not in (0, 1)) or
+                (flags & (1 | 4096) and not snapshot) or
+                (flags & 8 and (not snapshot or operation != 3))):
+            raise ValueError('inconsistent TDR contract field validity')
+        queue = None
+        if snapshot and operation in (3, 4):
+            queue = dict(zip(('healthy', 'idle', 'paused', 'failed', 'servicing', 'pending'),
+                             (bool(flags & bit) for bit in (16, 32, 256, 512, 1024, 2048))))
+            queue['failure_status'] = f'0x{v[14] & 0xffffffff:08x}'
+        return {'event': 'TdrContract', **metadata, 'operation': TDR_OPERATIONS[operation],
+                'phase': 'return' if phase else 'entry', 'engine_identity': f'0x{v[4]:016x}',
+                'adapter_luid': f'{v[6]:08x}{v[5]:08x}' if flags & 4096 else None,
+                'node': v[8], 'engine': v[9], 'status': f'0x{status & 0xffffffff:08x}' if phase else None,
+                'flags': f'0x{flags:08x}', 'engine_snapshot': snapshot,
+                'last_submitted_fence': v[10] if flags & 1 else None,
+                'last_completed_fence': v[11] if snapshot else None,
+                'result': v[12] if result_valid else None,
+                'previous_query_fence': v[13] if flags & 8 else None,
+                'queue': queue, 'recovery_pending': bool(flags & 64) if snapshot else None,
+                'resetting': bool(flags & 128) if snapshot else None}
     if event_id == 4:
         if version != 1 or size != DISPLAY_PAYLOAD.size:
             raise ValueError('unsupported display-path schema')

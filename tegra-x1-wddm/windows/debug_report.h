@@ -31,7 +31,7 @@ C_ASSERT(sizeof(TG_GPU_DEBUG_REPORT)==256);
 static inline VOID TgGpuPublishDebugRecord(volatile LONG *sequence,volatile LONG *words,
     const VOID *record,ULONG bytes)
 {
-    ULONG next=(ULONG)InterlockedCompareExchange(sequence,0,0)+2u;
+    ULONG next=((ULONG)InterlockedCompareExchange(sequence,0,0)&~1u)+2u;
     if(!next)next=2; /* zero means never published */
     (VOID)InterlockedExchange(sequence,(LONG)(next-1));
     for(ULONG i=0;i<bytes/sizeof(LONG);++i) {
@@ -45,15 +45,24 @@ static inline VOID TgGpuCacheRecovery(TG_GPU_DEBUG_CACHE *cache,const TG_GPU_REC
 static inline VOID TgGpuCacheExecution(TG_GPU_DEBUG_CACHE *cache,const TG_GPU_EXECUTION_EVENT *record)
 {TgGpuPublishDebugRecord(&cache->ExecutionSequence,cache->ExecutionWords,record,sizeof(*record));}
 
-/* Stop has joined all publishers before a new engine initialization. Publish
- * unavailable sequences before memset can replace resident cache words. */
+static inline VOID TgGpuInvalidateDebugRecord(volatile LONG *sequence)
+{
+    ULONG old=(ULONG)InterlockedCompareExchange(sequence,0,0);
+    /* Preserve zero for an owner that has never published. Once used, never
+     * reset the generation to zero: a reader can span stop/start and a fresh
+     * publication. Reusing its old even sequence would validate mixed data. */
+    if(old && !(old&1u))(VOID)InterlockedExchange(sequence,(LONG)(old+1u));
+}
+/* Stop has joined all publishers. Resident words and their sequence lifetime
+ * survive engine initialization; an invalidated record stays unavailable
+ * until a new publication advances to the next even sequence. */
 static inline VOID TgGpuResetDebugCache(TG_GPU_DEBUG_CACHE *cache)
 {
-    (VOID)InterlockedExchange(&cache->RecoverySequence,0);
-    (VOID)InterlockedExchange(&cache->ExecutionSequence,0);
+    TgGpuInvalidateDebugRecord(&cache->RecoverySequence);
+    TgGpuInvalidateDebugRecord(&cache->ExecutionSequence);
 }
 
-/* 0 = never published, 1 = coherent copy, 2 = publication in progress. */
+/* 0 = never published, 1 = coherent copy, 2 = publication/reinitialization unavailable. */
 static inline ULONG TgGpuReadDebugRecord(volatile LONG *sequence,volatile LONG *words,
     VOID *record,ULONG bytes)
 {

@@ -51,6 +51,32 @@ typedef struct _TG_GPU_EXECUTION_EVENT {
 } TG_GPU_EXECUTION_EVENT;
 C_ASSERT(sizeof(TG_GPU_EXECUTION_EVENT)==152);
 
+/* Event 8/version 1: direct TDR DDI observations. Phase 0 is entry (Status
+ * is not a return value); phase 1 is return. ETW thread/QPC plus Engine and
+ * adapter/boot identity associate synchronous entry/return pairs. Engine is
+ * opaque. Result/identity/snapshot flags distinguish unavailable fields. */
+enum tg_gpu_tdr_operation {
+    TgGpuTdrResetAdapter=1,TgGpuTdrRestartAdapter,TgGpuTdrQueryEngine,
+    TgGpuTdrResetEngine,TgGpuTdrQueryFence
+};
+enum tg_gpu_tdr_flags {
+    TgGpuTdrSubmittedValid=1,TgGpuTdrResultValid=2,TgGpuTdrEngineSnapshot=4,
+    TgGpuTdrQuerySampleValid=8,TgGpuTdrHealthy=16,TgGpuTdrIdle=32,
+    TgGpuTdrRecoveryPending=64,TgGpuTdrResetting=128,TgGpuTdrQueuePaused=256,
+    TgGpuTdrQueueFailure=512,TgGpuTdrQueueServicing=1024,TgGpuTdrQueuePending=2048,
+    TgGpuTdrIdentityValid=4096
+};
+typedef struct _TG_GPU_TDR_EVENT {
+    ULONG Version,Operation,Phase,Flags;
+    ULONGLONG Engine;
+    LUID AdapterLuid;
+    NTSTATUS Status;
+    ULONG NodeOrdinal,EngineOrdinal,LastSubmittedFence,LastCompletedFence;
+    ULONG Result,QuerySampleFence;
+    NTSTATUS QueueFailure;
+} TG_GPU_TDR_EVENT;
+C_ASSERT(sizeof(TG_GPU_TDR_EVENT)==64);
+
 /* Event 3/version 1: immutable owned command bytes before destructive reset.
  * One 144-byte header plus at most 1024 command bytes per event. */
 #define TG_GPU_TRACE_COMMAND_CHUNK_BYTES 1024u
@@ -109,6 +135,10 @@ _IRQL_requires_max_(DISPATCH_LEVEL)
 VOID TgGpuTraceRecovery(const TG_GPU_RECOVERY_EVENT *);
 _IRQL_requires_max_(DISPATCH_LEVEL)
 VOID TgGpuTraceExecution(const TG_GPU_EXECUTION_EVENT *);
+_IRQL_requires_max_(DISPATCH_LEVEL)
+BOOLEAN TgGpuTraceTdrEnabled(VOID);
+_IRQL_requires_max_(DISPATCH_LEVEL)
+VOID TgGpuTraceTdr(const TG_GPU_TDR_EVENT *);
 _IRQL_requires_(PASSIVE_LEVEL)
 BOOLEAN TgGpuTraceResetPacketEnabled(VOID);
 _IRQL_requires_(PASSIVE_LEVEL)

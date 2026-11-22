@@ -3,15 +3,39 @@
 #include "reset_backend.h"
 #include "gr_firmware_io.h"
 
+/* Caller holds Engine.Lock; event publication always follows lock release. */
+static VOID tdr_snapshot_locked(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_TDR_EVENT *record)
+{
+    record->Flags|=TgGpuTdrEngineSnapshot;
+    record->LastSubmittedFence=e->LastSubmittedFence;
+    record->LastCompletedFence=e->LastCompletedFence;
+    if(e->SubmittedFenceValid)record->Flags|=TgGpuTdrSubmittedValid;
+    if(e->AdapterIdentityReady){record->AdapterLuid=e->AdapterLuid;record->Flags|=TgGpuTdrIdentityValid;}
+    if(e->RecoveryPending)record->Flags|=TgGpuTdrRecoveryPending;
+    if(e->Resetting)record->Flags|=TgGpuTdrResetting;
+}
+static VOID trace_adapter_tdr(TG_GPU_CONTEXT_ENGINE *e,ULONG operation,ULONG phase,NTSTATUS status)
+{
+    KIRQL irql;
+    if(!TgGpuTraceTdrEnabled())return;
+    TG_GPU_TDR_EVENT record={.Version=1,.Operation=operation,.Phase=phase,
+        .Status=status,.Engine=(ULONGLONG)(ULONG_PTR)e};
+    KeAcquireSpinLock(&e->Lock,&irql);tdr_snapshot_locked(e,&record);KeReleaseSpinLock(&e->Lock,irql);
+    TgGpuTraceTdr(&record);
+}
+
 NTSTATUS APIENTRY TgGpuDdiResetFromTimeout(HANDLE adapter)
 {
     TG_GPU_ADAPTER *a=adapter;NTSTATUS status;
     PAGED_CODE();
     if(!a || !a->EngineReady || (a->State!=TgGpuAdapterReady && a->State!=TgGpuAdapterResetting))
         return STATUS_INVALID_DEVICE_STATE;
+    trace_adapter_tdr(&a->Engine,TgGpuTdrResetAdapter,0,0);
     a->State=TgGpuAdapterResetting;
     status=TgNvdecAdapterStop(a);
-    if(status!=STATUS_SUCCESS)return status;
+    if(status!=STATUS_SUCCESS) {
+        trace_adapter_tdr(&a->Engine,TgGpuTdrResetAdapter,1,status);return status;
+    }
     status=TgGpuResetBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
     if(status==STATUS_SUCCESS) {
         KIRQL irql;
@@ -26,7 +50,8 @@ NTSTATUS APIENTRY TgGpuDdiResetFromTimeout(HANDLE adapter)
         a->Engine.EngineQueryFence=a->Engine.LastCompletedFence;
         KeReleaseSpinLock(&a->Engine.Lock,irql);
     }
-    a->QueueReady=a->Queue.Engine==&a->Engine;return status;
+    a->QueueReady=a->Queue.Engine==&a->Engine;
+    trace_adapter_tdr(&a->Engine,TgGpuTdrResetAdapter,1,status);return status;
 }
 NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *a)
 {
@@ -58,9 +83,11 @@ NTSTATUS APIENTRY TgGpuDdiRestartFromTimeout(HANDLE adapter)
 {
     TG_GPU_ADAPTER *a=adapter;
     if (!a || a->State!=TgGpuAdapterResetting) return STATUS_INVALID_DEVICE_STATE;
-    return TgGpuRestartAdapterHardware(a);
+    trace_adapter_tdr(&a->Engine,TgGpuTdrRestartAdapter,0,0);
+    NTSTATUS status=TgGpuRestartAdapterHardware(a);
+    trace_adapter_tdr(&a->Engine,TgGpuTdrRestartAdapter,1,status);return status;
 }
-static BOOLEAN engine_idle(TG_GPU_ADAPTER *a,UINT *fence,BOOLEAN *responsive)
+static BOOLEAN engine_idle(TG_GPU_ADAPTER *a,UINT *fence,BOOLEAN *responsive,TG_GPU_TDR_EVENT *record)
 {
     KIRQL irql,engine_irql;
     TG_GPU_WORK_QUEUE *q=&a->Queue;
@@ -74,6 +101,17 @@ static BOOLEAN engine_idle(TG_GPU_ADAPTER *a,UINT *fence,BOOLEAN *responsive)
     BOOLEAN idle=!q->Servicing &&
         !q->Current.Engine && IsListEmpty(&q->Pending);
     *fence=e->LastCompletedFence;
+    if(record) {
+        tdr_snapshot_locked(e,record);
+        if(healthy)record->Flags|=TgGpuTdrHealthy;
+        if(idle)record->Flags|=TgGpuTdrIdle;
+        if(q->Paused)record->Flags|=TgGpuTdrQueuePaused;
+        if(!NT_SUCCESS(q->Failure))record->Flags|=TgGpuTdrQueueFailure;
+        record->QueueFailure=q->Failure;
+        if(q->Servicing)record->Flags|=TgGpuTdrQueueServicing;
+        if(!IsListEmpty(&q->Pending))record->Flags|=TgGpuTdrQueuePending;
+        if(responsive){record->QuerySampleFence=e->EngineQueryFence;record->Flags|=TgGpuTdrQuerySampleValid;}
+    }
     if(responsive) {
         /* Busy is not the same as unresponsive. Report an actual completed
          * packet since the previous sample, or a healthy empty queue. The
@@ -96,8 +134,12 @@ static NTSTATUS APIENTRY query_engine(HANDLE adapter,DXGKARG_QUERYENGINESTATUS *
 {
     UINT fence;BOOLEAN responsive;
     if (!adapter || !a || a->NodeOrdinal || a->EngineOrdinal) return STATUS_INVALID_PARAMETER;
-    (VOID)engine_idle(adapter,&fence,&responsive);
+    TG_GPU_ADAPTER *d=adapter;BOOLEAN trace=TgGpuTraceTdrEnabled();
+    TG_GPU_TDR_EVENT record={.Version=1,.Operation=TgGpuTdrQueryEngine,.Phase=1,
+        .Engine=(ULONGLONG)(ULONG_PTR)&d->Engine,.NodeOrdinal=a->NodeOrdinal,.EngineOrdinal=a->EngineOrdinal};
+    (VOID)engine_idle(d,&fence,&responsive,trace?&record:NULL);
     a->EngineStatus.Value=responsive?1:0;
+    if(trace){record.Result=a->EngineStatus.Value;record.Flags|=TgGpuTdrResultValid;TgGpuTraceTdr(&record);}
     return STATUS_SUCCESS;
 }
 static NTSTATUS APIENTRY reset_engine(HANDLE adapter,DXGKARG_RESETENGINE *a)
@@ -106,9 +148,13 @@ static NTSTATUS APIENTRY reset_engine(HANDLE adapter,DXGKARG_RESETENGINE *a)
     if (!adapter || !a || a->NodeOrdinal || a->EngineOrdinal) return STATUS_INVALID_PARAMETER;
     /* The queue may have drained before the timeout callback arrived.
      * Otherwise GR and CE share the runlist and need the full adapter reset. */
-    if (!engine_idle(adapter,&fence,NULL)) return STATUS_UNSUCCESSFUL;
-    a->LastAbortedFenceId=fence;
-    return STATUS_SUCCESS;
+    TG_GPU_ADAPTER *d=adapter;BOOLEAN trace=TgGpuTraceTdrEnabled();
+    TG_GPU_TDR_EVENT record={.Version=1,.Operation=TgGpuTdrResetEngine,.Phase=1,
+        .Engine=(ULONGLONG)(ULONG_PTR)&d->Engine,.NodeOrdinal=a->NodeOrdinal,.EngineOrdinal=a->EngineOrdinal};
+    NTSTATUS status=engine_idle(d,&fence,NULL,trace?&record:NULL)?STATUS_SUCCESS:STATUS_UNSUCCESSFUL;
+    if(status==STATUS_SUCCESS){a->LastAbortedFenceId=fence;record.Result=fence;record.Flags|=TgGpuTdrResultValid;}
+    if(trace){record.Status=status;TgGpuTraceTdr(&record);}
+    return status;
 }
 static NTSTATUS APIENTRY collect_debug_info(HANDLE adapter,const DXGKARG_COLLECTDBGINFO *a)
 {

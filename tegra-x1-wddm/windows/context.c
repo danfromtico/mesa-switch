@@ -50,7 +50,12 @@ NTSTATUS TgGpuInitializeContextEngine(TG_GPU_CONTEXT_ENGINE *e,
         !dxgk->DxgkCbReserveGpuVirtualAddressRange)
         return STATUS_INVALID_PARAMETER;
     TgGpuResetDebugCache(&e->DebugCache);
-    RtlZeroMemory(e,sizeof(*e));
+    /* CollectDbgInfo can span reinitialization. Clear the engine around its
+     * resident cache, preserving the invalidated sequence and atomic words. */
+    SIZE_T cache_offset=FIELD_OFFSET(TG_GPU_CONTEXT_ENGINE,DebugCache);
+    SIZE_T cache_end=cache_offset+sizeof(e->DebugCache);
+    RtlZeroMemory(e,cache_offset);
+    RtlZeroMemory((UCHAR *)e+cache_end,sizeof(*e)-cache_end);
     e->Dxgk=*dxgk; e->Tables=tables;
     KeInitializeSpinLock(&e->Lock);
     InitializeListHead(&e->Processes); InitializeListHead(&e->Devices); InitializeListHead(&e->Contexts);
@@ -258,7 +263,17 @@ NTSTATUS APIENTRY TgGpuDdiQueryCurrentFence(HANDLE adapter, DXGKARG_QUERYCURRENT
 {
     TG_GPU_CONTEXT_ENGINE *e=adapter;
     if (!e || !a || a->NodeOrdinal || a->EngineOrdinal) return STATUS_INVALID_PARAMETER;
-    KeMemoryBarrier(); a->CurrentFence=e->LastCompletedFence; return STATUS_SUCCESS;
+    KeMemoryBarrier(); a->CurrentFence=e->LastCompletedFence;
+    if(TgGpuTraceTdrEnabled()) {
+        /* QueryCurrentFence can reenter notification with Engine.Lock held.
+         * Report only its actual output; do not lock or claim a paired engine
+         * snapshot or adapter identity from independently sampled fields. */
+        TG_GPU_TDR_EVENT record={.Version=1,.Operation=TgGpuTdrQueryFence,.Phase=1,
+            .Flags=TgGpuTdrResultValid,.Engine=(ULONGLONG)(ULONG_PTR)e,
+            .NodeOrdinal=a->NodeOrdinal,.EngineOrdinal=a->EngineOrdinal,.Result=a->CurrentFence};
+        TgGpuTraceTdr(&record);
+    }
+    return STATUS_SUCCESS;
 }
 VOID TgGpuDdiDpcRoutine(PVOID adapter)
 {

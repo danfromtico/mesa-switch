@@ -116,6 +116,8 @@ struct _TG_GPU_CONTEXT_WORK {
  * operation/session retains the actual device until its last DMA is retired. */
 NTSTATUS TgGpuReferenceVideoDevice(TG_GPU_CONTEXT_ENGINE *, HANDLE, TG_GPU_DEVICE **);
 void TgGpuDereferenceVideoDevice(TG_GPU_DEVICE *);
+/* Owner storage is zeroed once before first use (nonpaged zeroed pool in the
+ * adapter/diagnostic callers). The resident cache then lives until owner free. */
 NTSTATUS TgGpuInitializeContextEngine(TG_GPU_CONTEXT_ENGINE *, const DXGKRNL_INTERFACE *,
                                      TG_GPU_TABLE_SEGMENT *);
 /* Install the trusted cold backend's immutable golden copy once. Submission
