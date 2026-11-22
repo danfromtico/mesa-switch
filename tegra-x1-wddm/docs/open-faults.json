@@ -71,7 +71,8 @@
         "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json",
         "tegra-x1-wddm/docs/windows-native-graphics/native-5-live-follow-up.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/continuation-main-review-20261122.json#historical91476"
+        "tegra-x1-wddm/docs/windows-native-graphics/continuation-main-review-20261122.json#historical91476",
+        "tegra-x1-wddm/docs/windows-native-graphics/historical-after-native-main-review-20261122.json#causal_gaps"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result. An independent replay of the three original client ETLs also found successful stage-2 tgd3d initialization and legacy device publication by the drawing thread after the value-1 signal retired and before the first public CALL. It found the same ordering in the contemporary flip control. The old traces still lack a matching asynchronous CPU wait record and direct evidence after CALL.",
       "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
@@ -160,12 +161,31 @@
         "tegra-x1-wddm/docs/PAL4_PREIMAGE_CONTEXT_20261121.json#runs",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/pal4-texture7-memory-owner-20261121-01.result.json#observation",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/pal4-texture7-bind-owner-20261121-01.result.json#observation",
-        "tegra-x1-wddm/docs/PAL4_IMAGE_BIND_BOUNDARY_20261121.json#cases"
+        "tegra-x1-wddm/docs/PAL4_IMAGE_BIND_BOUNDARY_20261121.json#cases",
+        "tegra-x1-wddm/docs/kmt-software-fence-ce54d025/native-activation-main-review.json#later_restart_classification"
       ],
       "cause": "Unknown. A common initiating failure across these observations has not been established.",
       "daily_workaround": "Keep unqualified heavy-load paths in diagnostics. Use only a previously accepted alternative for the specific application and workload. No universal game or extraction workaround has been verified.",
       "close_when": "Separate triggers with identified causes and document a fix and three consecutive original-scenario retests for each remaining restart.",
-      "resolution": null
+      "resolution": null,
+      "later_observations": [
+        {
+          "date": "2026-11-22",
+          "boot_records": [
+            96953,
+            97025,
+            97098
+          ],
+          "events": [
+            41,
+            6008
+          ],
+          "classification": "Operator-attributed recurrence of existing game/load hangs followed by forced resets. Raw System records retained; per-boot game mapping and identical underlying root cause are not independently established.",
+          "selected_KMD_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+          "controlled_graphics_test_passes_added": 0,
+          "first_present_cause_confirmed": false
+        }
+      ]
     },
     {
       "id": "SWITCH-WIFI-STARTUP",
@@ -531,7 +551,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/lifecycle-preservation-main-review-20261122.json",
         "tegra-x1-wddm/docs/windows-native-graphics/offline-model-wrapper-main-review-20261122.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/valid-payload-main-review-20261122.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/valid-payload-main-review-20261122.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/historical-after-native-main-review-20261122.json#causal_gaps"
       ],
       "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified. The same Windows kernel image exposes DMA scheduler and optional timing templates. Three healthy archived captures have matching DMA notifications and no per-packet GPU timestamp records. An opt-in DMA-boundary instrumentation package has been built locally and checked with the queue model. Live candidate calibration and accident attribution are open. The signed native ARM64 queue model passed on the recovered Switch. Windows verified the signed candidate catalog and all 12 covered files with the permanent driver still in use. Candidate runtime submission evidence remains open. The prospective observer calibration stopped at an independent abnormal boot transition before any window workload. The permanent baseline was restored. The same unsealed scene trace records Windows DMA submission 247 on another DWM context 9.054 ms after 152586. An earlier packet on that context, 246, has a matching IRQ, DMA completion and queue retirement in both files. Neither file retains any context reporting a DMA completion notification, DMA completion, or queue retirement after 152586. The later context has no directly matched adapter or node identity in the two stored streams. Seven clean archives from the same DWM instance retain 105 DMA IDs with matching Windows interrupt and non-preempted completion on the later context. All sixteen inspected streams still lack a direct mapping from that context to an adapter and node. Only the primary context has temporally matching native GM20B execution snapshots among these recordings. A clean original-window control on boot 91918 captured the DWM adapter and node associations before Present. Four ordinary GM20B DMA completions and four cross-device DWM signal/wait retirements were identified, including the native execution snapshot for DMA 12776. The observation does not backfill boot 91476. The exact Windows image verified on boot 91918 emits the 175.1 descriptor in VidSchiSendToExecutionQueue before releasing its DPC-level queue lock and before the conditional call to the virtual/physical submission wrapper. The 91476 archive contains the identical event descriptor for 152586 and has no separately retained dxgmms2.sys hash. No release, chosen DDI branch, miniport entry, or hardware progress is established for that submission. The stock DxgKrnl profiler on boot 91918 emitted a same-thread function-5063 entry/return pair for DWM DMA 17588, with direct GM20B node mapping and matching IRQ, DMA completion and queue retirement. The two 91476 traces contain no events from the profiler family. This establishes a capture method for the next occurrence. In a bounded normal trace on boot 91918, live event bytes match the ETL. DWM submission 21991 has the complete 175.1, 5063 entry/return, and ordinary completion chain. The host confirmed durable receipt for its events 19.186 to 22.556 ms after their source QPC. This measured delay leaves an earlier reset interval unobserved. A separate clock review brackets the last retained ETL event and the recovery kernel start by about 55.860 seconds of wall time. The previous shutdown time in recovery event 6008 is 24.613 seconds after that kernel start. The exact reset time and the submit return and completion for 152586 remain unobserved. The scene ETL preserves an EventQueueSelect for dependent signal packet 48661 on the submission thread 0.809 ms after DMA 152586. The same signal was selected while the first two attempts were pending, and a healthy same-boot control selected its signal before the third DMA interrupt. This bounds scheduler activity without establishing lock release, return or retirement for 152586. The reset mechanism remains unknown. A local replay of the separate calibrated DWM DMA from boot 94004 verified controller readback after receiver termination. A partial host journal confirms nine synchronized records through the Windows completion notification. The truncated marker provides no additional synchronization evidence. No new board execution was made and the original scene has no new incident receipt. The live collector is not armed. The controlled reboot readback qualified the independently stored complete application DMA packet for a new, normal SEQUENTIAL window. DWM coverage is recorded for that run separately. The boot 91476 failure and its initiating cause remain open. A local call-flow follow-up verified two literal queue-select callers and a comparator path that can bypass the three submission DDI call sites after event175.1. The incident branch remains unobserved. The last raw KMD preemption snapshot describes paging152584 at notification, with zero hardware polls and unset sample-valid bits; its zero error caches do not establish GPU health for later DMA152586. The initiating reset cause remains unknown. The comparator TDR recovery path emits ResetAdapterStart through the separate DxgKrnlTelemetry provider c6998471-62cd-424d-a9a3-fe4c1fa378a4, absent from both retained incident ETLs. Four read-only queries on restored96251 and a local read-only SQLite snapshot analysis recovered no matched initiating record. The current empty event table and missing private-provider events do not establish that the historical incident had no TDR.",
       "daily_workaround": "Keep this optional board-local diagnostic task out of daily launches while investigating. Use the qualified permanent graphics baseline and established window controls.",
@@ -633,7 +654,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-early-startup-retained-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-once-20261121-02.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/continuation-main-review-20261122.json#boot95090"
+        "tegra-x1-wddm/docs/windows-native-graphics/continuation-main-review-20261122.json#boot95090",
+        "tegra-x1-wddm/docs/windows-native-graphics/historical-after-native-main-review-20261122.json#causal_gaps"
       ],
       "cause": "早期启动日志未给出停止码或故障模块。事件 41 的 BugcheckCode 为 0，无 BugCheck 1001 或本次转储。95090 缺候选 Code 0、实载和会话就绪回执。需有针对候选启动异常的可验证修正或能跨该启动丢失的独立启动证据，方能接续这次真实请求。91476 的历史同包缺口仍开放。",
       "daily_workaround": "正式96251已恢复并核对Code0、永久许可、八件哈希、KMD/DWM实载和Handheld。后续成功启动及原场景一次结果分别归档；95090原次缺证与根因保持开放。",
@@ -666,10 +688,11 @@
         "tegra-x1-wddm/docs/windows-native-graphics/native-kmt-main-review-20261122.json#source_boundary",
         "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json#native_completion",
         "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json#source_review",
-        "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json#formal_restoration"
+        "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json#formal_restoration",
+        "tegra-x1-wddm/docs/kmt-software-fence-ce54d025/native-activation-main-review.json#final_closeout"
       ],
       "cause": "Bound native submission181026 records internal SubmitFailure0xc000000d with request flags0x8, DMA8, total private65864 and UMD private24. Direct user SubmitCommand returned0; probe observed UINT64_MAX and failed valid completion. The source NULL-snapshot/nonzero-UMD admission predicate is consistent with this failure, but a branch-specific sample and final DDI NTSTATUS are absent. The program does not distinguish an actual MAX fence read from a null CPU pointer fallback. No causal link to historical first-Present restart is established. Candidate b88d7dcc uses an owned reserved software record for this NullRendering input and removes the inapplicable snapshot requirement. On one-use boot96434 the matching two-case native program exited0, with non-null CPU mappings and real fence0->1 in both cases, no SubmitFailure, and independent ETL correlation. This establishes the scoped candidate improvement; old final DDI status/MAX ambiguity and historical first-Present causality remain unknown.",
-      "daily_workaround": "Keep this NullRendering combination unqualified. Continue the already qualified ordinary baseline paths; do not equate Windows packet retirement or wait-helper success with a valid monitored-fence value. Do not replay the consumed diagnostic unchanged.",
+      "daily_workaround": "Use the independently selected software-fence repair only within its measured ordinary/NullRendering8-byte-command/24-byte-UMD scope. The original failure remains open under the closure process; broader NullRendering/zero-DMA behavior and historical presentation/game failures are not qualified by this one-program result. Do not equate packet retirement alone with valid fence completion or replay consumed diagnostics merely for counts.",
       "close_when": "Establish the failure cause within this exact input scope, verify a corresponding repair using the repository native qualification and closure process, and demonstrate valid monitored-fence completion with matching actual component identities. Do not use this fault closure to close the independent historical first-Present or95090 faults.",
       "resolution": null,
       "first_observed_boot": 96251,
@@ -687,6 +710,16 @@
         "main_review_file": "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json",
         "main_review_sha256": "0fb1657206d580be1f88e8d5df3d28df4d89d51290b6d704557d17cd49baf355",
         "closure_requirements_satisfied": false
+      },
+      "independent_promotion": {
+        "release_source_commit": "54ea32fb3e1c714f8f83cd108f2615e37119ec84",
+        "build_and_test_source_commit": "b88d7dcc3b6f2b2fe48a8b9d7c0a0f2e41a0453e",
+        "qualification_sha256": "0bd96eea375a86c13bf24884f0bbddba9a78381ec46f35cdd36f38f85e3af76d",
+        "qualification_boot": 96434,
+        "activation_boot": 96796,
+        "permanent_boot": 96878,
+        "latest_verified_boot": 97098,
+        "open_fault_closure": false
       }
     }
   ],
@@ -1138,7 +1171,7 @@
         }
       ],
       "assessment_file": "tegra-x1-wddm/docs/kmt-software-fence-ce54d025/independence-review.json",
-      "assessment_sha256": "f00e79f35451ece44564b5abe15122f030075811e81f0a9c4fef12c2cc065a58"
+      "assessment_sha256": "757f63e9e7aea5e5cc4af2c98a677bfb281834d4b4190ecfb380e90a7acd5423"
     }
   ],
   "baseline_comparisons": [
