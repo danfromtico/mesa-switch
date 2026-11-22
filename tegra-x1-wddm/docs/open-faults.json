@@ -734,7 +734,8 @@
       "evidence": [
         "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#native_control",
         "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#dump_evidence",
-        "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#restoration_and_cleanup"
+        "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#restoration_and_cleanup",
+        "tegra-x1-wddm/docs/windows-native-graphics/predecessor-recovery-main-review-20261122.json#diagnostic_failure_boundary"
       ],
       "cause": "The one-shot consumption receipt and official tool banner were retained. The following boot reported Event41 with BugcheckCode0 and Event6008. No new dump was found and the11 preexisting WATCHDOG file hashes were stable. Kernel-Dump/Operational recorded disabled crash dumping while CrashDumpEnabled remained3. The actual NT bugcheck boundary and dump initialization/write failure cause remain unknown. A static SD-port initializer advertises support; a functioning dump instance remains unobserved.",
       "daily_workaround": "Use the selected component profile and retain bounded logs and durable operation receipts. Crash-dump capture and TDR vendor data require corresponding native evidence.",
@@ -747,7 +748,24 @@
         "actual_loads": 5
       },
       "dump_capture_qualified": false,
-      "historical_first_present_cause_confirmed": false
+      "historical_first_present_cause_confirmed": false,
+      "diagnostic_load_followup": {
+        "boot": 97176,
+        "scm_records": [
+          97257,
+          97259
+        ],
+        "win32_error": 487,
+        "category": "separate diagnostic preparation/load failure",
+        "latest_retained_control_matches_record": 97259,
+        "both_records_bound_to_same_driver_bytes": false,
+        "nt_loader_return": "not observed",
+        "nt_bugcheck_arrival": "unknown",
+        "dump_capture_qualified": false,
+        "successor_replayed_control": false,
+        "formal_components_and_actual_paths_verified": true,
+        "review": "tegra-x1-wddm/docs/windows-native-graphics/predecessor-recovery-main-review-20261122.json"
+      }
     }
   ],
   "independent_qualifications": [
