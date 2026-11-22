@@ -6231,6 +6231,25 @@
       "new_open_fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
       "historical_root_cause_proven": false,
       "baseline_promoted": false
+    },
+    "tdr_reset_contract_main_review": {
+      "path": "windows-native-graphics/tdr-reset-contract-main-review-20261122.json",
+      "sha256": "5feabc1aa2a2198ca6e0e55ea73c5c1c3973d353287ddc193d5779cad6a07562",
+      "status": "签名 KMD 的静态契约差异已核实，运行时影响待实机证据",
+      "confirmed_difference": "QueryEngineStatus 以队列空闲状态填写 Responsive，无法表示队列忙碌期间仍在取得进展。",
+      "runtime_evidence_gaps": [
+        "同一适配器复位中，各节点的最后提交号、复位返回及随后 QueryCurrentFence 实值的对应关系。",
+        "对应故障启动的可解析转储、跨启动持久读回、实际 CollectDbgInfo 调用及其 KMD 数据。"
+      ],
+      "source_commit": "54ea32fb3e1c714f8f83cd108f2615e37119ec84",
+      "KMD_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "root_cause_found": false,
+      "native_validation_complete": false,
+      "historical_attribution": {
+        "91476_DMA152586": "原次 KMD 入返、完整提交/复位因果仍未知",
+        "95090": "启动首因未知",
+        "original_first_Present": "持久 CALL 后首个故障步骤未知"
+      }
     }
   }
 }

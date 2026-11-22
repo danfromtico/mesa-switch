@@ -1,0 +1,365 @@
+{
+  "schema": 1,
+  "utc": "2026-11-22T17:09:37.472401+00:00",
+  "review_role": "本地主审",
+  "release_source_commit": "54ea32fb3e1c714f8f83cd108f2615e37119ec84",
+  "build_source_commit": "b88d7dcc3b6f2b2fe48a8b9d7c0a0f2e41a0453e",
+  "bound_selected_image": {
+    "proof_file": "tegra-x1-wddm/docs/windows-native-graphics/tdr-baseline-callback-binding-20261122.json",
+    "function_count": 6,
+    "registered_addresses": 5,
+    "nonrelocated_words_matched": 201,
+    "proof_sha256": "19bdaf672c60e82548f6d7d71ac6664d97ffc6e5427f24b2019a5f4318978185",
+    "image_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173"
+  },
+  "source_files_verified_sha256": {
+    "tegra-x1-wddm/windows/adapter_reset.c": "71bb152704be995d5cd685638139080789bb8a9b9fe7429a8d01078dd7188b9f",
+    "tegra-x1-wddm/tests/test_context_windows.c": "de106e8213df050a2e4f8734197164544d3fb27e2985be2ead8a8a368278adbb",
+    "tegra-x1-wddm/windows/query.c": "db7b45113a2b10cf39c019152397756983f7313d7026e0a66e533ad228973050",
+    "tegra-x1-wddm/windows/submit_ddi.c": "b01cef642b9c660226fd24e468b861f9f21b3176fba6ae7ba6a3fcda0e2d1548",
+    "tegra-x1-wddm/windows/work_queue.c": "1c8d644b3f822390a833ec7c9f64727d8ad9ecd61346f8ccdba9437f64fb594c",
+    "tegra-x1-wddm/windows/context.c": "7aa0a007bc1a59b35eaccdcd9ff3e7ea054aa1f0a985e73545d585815225a4d8",
+    "tegra-x1-wddm/windows/reset_backend.c": "80de5157b6f708757c3954644efd8528062ce18d71bf923ce405add456827fa9",
+    "tegra-x1-wddm/tests/test_hardware_windows.c": "6cb3971a3e4047d21685e4f382525432f8e6d6e03ce53e713ea49fae4e1ff6c2",
+    "tegra-x1-wddm/windows/nvdec_adapter.c": "82d8162a9bf3b876a63d9b34b2364a67372ca2712785454619fef2617e271679",
+    "tegra-x1-wddm/windows/worker.c": "ca5a4c0b61db2a19d93467381a75cd03d0419c14bb3ad327fefa0c96ffcf756b",
+    "tegra-x1-wddm/windows/hardware.c": "7dacfc9466d35dc83c52624b245349e960d9309466efe401b708fe5e625e4d17",
+    "tegra-x1-wddm/windows/diagnostic_backend.c": "48c8f5fae05bda58ce5057985bbd6e842458b335071c3ab47faadc21e42fada8",
+    "tegra-x1-wddm/windows/render_miniport.c": "bc548d8f1e34382d7a7731672a4a788d691abb082da5ab2eb685a9e6a0353e34"
+  },
+  "findings": [
+    {
+      "subject": "QueryEngineStatus.Responsive",
+      "disposition": "明确的源码语义差异，事故现场的这一调用未知",
+      "fact": "驱动以引擎空闲谓词填写进展位。有正在服务的工作或待处理队列时，返回 0。它没有用完成围栏或执行进度来区分正常忙碌与无响应。WDDM 要求节点和适配器有进展时设置 Responsive。",
+      "source": [
+        {
+          "file": "tegra-x1-wddm/windows/adapter_reset.c",
+          "lines": [
+            50,
+            58,
+            59,
+            75
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/tests/test_context_windows.c",
+          "lines": [
+            1878,
+            1880,
+            1889,
+            1891
+          ]
+        }
+      ],
+      "control_scope": "既有 r2 CPU 模型在围栏到 104 时仍有 105 等待，之后完成 105。该用例没有调用 QueryEngineStatus。",
+      "needed": "同次查询的返回位、节点、进度和采样时点，及与进展停止时的区分。",
+      "reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_enginestatus"
+    },
+    {
+      "subject": "ResetEngine / fallback",
+      "disposition": "忙时升级路径符合契约，空闲成功条件待实机见证",
+      "fact": "单节点逐引擎 TDR 能力已注册。非空闲返回失败，交由调度器决定整适配器复位。成功分支返回缓存的最后完成提交号。其前提是硬件队列确已清空，节点能再接收新包。软件空闲谓词仅验证这组条件的一部分，其余由代码不变量和硬件实况决定。",
+      "source": [
+        {
+          "file": "tegra-x1-wddm/windows/query.c",
+          "lines": [
+            85,
+            98
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/adapter_reset.c",
+          "lines": [
+            68,
+            84,
+            85
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/submit_ddi.c",
+          "lines": [
+            30,
+            31
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/work_queue.c",
+          "lines": [
+            153
+          ]
+        }
+      ],
+      "references": [
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_resetengine",
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/tdr-changes-in-windows-8"
+      ]
+    },
+    {
+      "subject": "Adapter-wide reset and QueryCurrentFence",
+      "disposition": "复位时提交围栏的记账缺口，Windows 实际提交序列及复位后查询值待证",
+      "fact": "QueryCurrentFence 读取 LastCompletedFence。正常完成与有序拒绝维护该值。完整适配器复位调用队列清理和硬件隔离，重启恢复队列。在这些路径内未发现向复位时每个节点最后提交的围栏推进的动作。",
+      "source": [
+        {
+          "file": "tegra-x1-wddm/windows/context.c",
+          "lines": [
+            260,
+            499,
+            568
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/work_queue.c",
+          "lines": [
+            301,
+            530,
+            539
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/reset_backend.c",
+          "lines": [
+            28,
+            34,
+            93
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/tests/test_context_windows.c",
+          "lines": [
+            2628,
+            2668,
+            2670
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/tests/test_hardware_windows.c",
+          "lines": [
+            63,
+            207,
+            222
+          ]
+        }
+      ],
+      "control_scope": "既有队列模型收下 10 至 13，完成到 11，清理队列后仍检查 11。它直接调用共享辅助函数。完整后端模型中的队列和 worker 是替身。两者都缺少调度器在适配器 DDI 复位时的提交锚点。",
+      "needed": "以调度器对应节点的提交、排空、复位返回和随后 QueryCurrentFence 关联验证。分别识别请求、准入、完成、抢占序号与资源等待值，尤其是回绕、失败或重置。验证适配器范围时还要区分休眠和通用清理辅助函数。",
+      "references": [
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/tdr-changes-in-windows-8",
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_querycurrentfence"
+      ]
+    },
+    {
+      "subject": "Adapter reset boundary and worker isolation",
+      "disposition": "源码顺序已核，历史故障调用链未知",
+      "fact": "外层 ResetFromTimeout 先停止 NVDEC，再进入重置后端。后端使队列暂停并设置复位状态，随后释放自旋锁，等待 worker 退出，再等待 DispatchGate、清空队列并核对隔离。worker 的 join 没有超时。重启在系统清理后重新建立硬件、队列及 worker。复位或重启错误会向上传递。",
+      "source": [
+        {
+          "file": "tegra-x1-wddm/windows/adapter_reset.c",
+          "lines": [
+            13,
+            15,
+            47
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/nvdec_adapter.c",
+          "lines": [
+            163,
+            165
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/worker.c",
+          "lines": [
+            77
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/reset_backend.c",
+          "lines": [
+            20,
+            23,
+            25,
+            34,
+            52,
+            54,
+            100
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/hardware.c",
+          "lines": [
+            72,
+            80,
+            97
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/diagnostic_backend.c",
+          "lines": [
+            472
+          ]
+        }
+      ],
+      "event_limit": "ResetBegin/End 由 TgGpuResetBackend 发出。外层视频停止可能在这对事件前就返回，RestartBackend 失败清理也会调用同一后端。独立诊断程序的源码另有直接调用，由它的构建配置启用；这不是当前已发布 miniport 运行了该诊断程序的回执。",
+      "references": [
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_resetfromtimeout",
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_restartfromtimeout",
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/thread-synchronization-and-tdr"
+      ],
+      "reference_scope": "全适配器 TDR 有操作系统的同步规则。中断、DPC、运行时电源回调和驱动自建 worker 需要各自的同步及实际时序证据。"
+    },
+    {
+      "subject": "CollectDbgInfo and dump evidence",
+      "disposition": "已证当前回调只有一个 UINT 的缓存完成围栏",
+      "fact": "TDR 两种原因在同步级别零、PASSIVE_LEVEL 采集，其他原因的 IRQL 可更高。现有回调检查容量后复制一个围栏。操作系统即使收到成功返回也可以忽略缓冲内容。启动专用 CollectDiagnosticInfo 是另一个回调。",
+      "source": [
+        {
+          "file": "tegra-x1-wddm/windows/adapter_reset.c",
+          "lines": [
+            88,
+            91,
+            93,
+            103
+          ]
+        },
+        {
+          "file": "tegra-x1-wddm/windows/render_miniport.c",
+          "lines": [
+            210,
+            211
+          ]
+        }
+      ],
+      "lineage": "历史 7a1f7176 曾含 TGDB 诊断块，本基线树及已核实的签名回调使用四字节版本。",
+      "needed": "以转储的类别、故障码、启动身份、有效结构、持久读回和 TDR 专属 KMD 数据分别裁定。一般受控转储成功只能证明所测转储类别和存储路径。",
+      "references": [
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_collectdbginfo",
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/threading-and-synchronization-zero-level"
+      ]
+    }
+  ],
+  "existing_model": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/queue-unit-r2/result.json",
+    "sha256": "7af71611c22545968a0ba3cabb4bd32c3f3130103bbc693f7b51040a0f5dca05",
+    "terminal": {
+      "exited": true,
+      "exit": 0,
+      "timed_out": false,
+      "kill_requested": false,
+      "kill_error": null,
+      "wait_error": null
+    },
+    "frozen_source_matches_release": true,
+    "executable_sha256": "bc885384b6b5d3c66279bee6d086e2d5e1d98bd46af909bc93ed7f56df9d5700",
+    "model_entry": "start",
+    "direct_queue_reset_check_line": 2670,
+    "paging_dispatch_invoked_line": 2712,
+    "coverage": "队列辅助函数与完成条件的既有模型运行。操作系统调用 QueryEngineStatus 以及带积压时的完整适配器复位仍缺实机记录。"
+  },
+  "platform_basis": "WDDM 官方接口定义适用于物理 miniport。固定版本 WSL2 来宾资料作为对应层级的参考。",
+  "hardware_attribution": {
+    "91476_DMA152586": "原次 KMD 入返、完整提交/复位因果仍未知",
+    "95090": "启动首因未知",
+    "original_first_Present": "持久 CALL 后首个故障步骤未知"
+  },
+  "new_device_runs": 0,
+  "baseline_changed": false,
+  "deferred_contracts_new_direct_observations": 0,
+  "retained_dump_chain": {
+    "source_files": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/historical/events.json",
+        "bytes": 190835,
+        "sha256": "1367c8ebba63052a107fd3790c78644374e5a49f0380b9a0db5d90cc313d8f65"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/historical/candidate-headers.json",
+        "bytes": 212994,
+        "sha256": "dbb8c870f07cde1ff968998590cf8052f6c644951aa7675df5ae2f8a5728f118"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/rounds/win-historical-reset-20261121-01.result.json",
+        "bytes": 37897,
+        "sha256": "f25542749cb21e1a6664ce81ea494d3cba9b50161ca943dcb888c405f1ed2059"
+      }
+    ],
+    "wer_operational": {
+      "provider": "Microsoft-Windows-WerKernel",
+      "channel": "Microsoft-Windows-WerKernel/Operational",
+      "id": 1001,
+      "requested_component": "WATCHDOG",
+      "count": 7,
+      "record_ids": [
+        1097,
+        1098,
+        1099,
+        1100,
+        1101,
+        1102,
+        1103
+      ],
+      "identical_event_data": true,
+      "requested_policy": 2,
+      "granted_policy": 2,
+      "status": "0xc0000099",
+      "status_as_NTSTATUS": "STATUS_ALLOTTED_SPACE_EXCEEDED",
+      "sdk_definition": {
+        "file": "/Users/rujian/.local/share/mesa-switch-woa-build/sdk/c/Include/10.0.26100.0/shared/ntstatus.h",
+        "line": 3493
+      },
+      "throttle_check_result_raw": 33,
+      "interpretation": "这是 WATCHDOG 请求的事件字段。Status 按 NTSTATUS 对应分配空间超限。具体受限对象、ThrottleCheckResult 位含义、TDR 原因和是否写出可用文件均未从该事件确定。"
+    },
+    "dump_inventory": {
+      "count": 11,
+      "fields": [
+        "created",
+        "modified",
+        "path",
+        "size"
+      ],
+      "write_utc_range": [
+        "2026-11-09T17:47:30.1713173Z",
+        "2026-11-11T18:04:24.9069499Z"
+      ],
+      "last_write_precedes_all_three_original_boots": true,
+      "scope": "此次采集保留路径、时间和长度。文件正文、故障码和事故提交归属仍缺原件。"
+    },
+    "original_incidents": [
+      {
+        "prior_boot": 82058,
+        "next_boot": 82128,
+        "kernel_power_41": 82146,
+        "bugcheck_field": 0,
+        "eventlog_6008": 82129
+      },
+      {
+        "prior_boot": 82221,
+        "next_boot": 82289,
+        "kernel_power_41": 82307,
+        "bugcheck_field": 0,
+        "eventlog_6008": 82298
+      },
+      {
+        "prior_boot": 82382,
+        "next_boot": 82448,
+        "kernel_power_41": 82466,
+        "bugcheck_field": 0,
+        "eventlog_6008": 82457
+      }
+    ],
+    "association": "System 与 WerKernel 为不同日志，各自的 RecordId 只在本日志内使用。跨启动还要考虑早期墙钟调整。节点 91476 的另一次 DWM 提交与 95090 启动另行跟踪。",
+    "acceptance_boundary": "历史转储枚举、一次系统故障小转储跨启动读回、OS 发起的图形 TDR 回调及其报告负载，各自需要相应证据。须在对应故障运行内将可解析的转储、记录代码、启动及提交链配对。",
+    "references": [
+      "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/596a1078-e883-4972-9bbc-49e60bebca55",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/kernel-live-dump-code-reference",
+      "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart"
+    ]
+  },
+  "retained_dump_review_utc": "2026-11-22T17:16:03.264075+00:00",
+  "source_review_record": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/tdr-reset-contract-main-review-20261122.json",
+    "sha256": "f384e20ad14baebccfb14fd26edf7f42c0d5d36d154652976bfbeab833f711a5"
+  }
+}

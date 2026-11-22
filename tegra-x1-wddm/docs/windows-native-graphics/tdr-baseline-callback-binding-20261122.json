@@ -1,0 +1,106 @@
+{
+  "source_commit": "54ea32fb3e1c714f8f83cd108f2615e37119ec84",
+  "build_source": "b88d7dcc3b6f2b2fe48a8b9d7c0a0f2e41a0453e",
+  "object_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/build/adapter_reset.obj",
+  "object_sha256": "84fa9b9ee137369222026388eab72147a3b942670204befdc6284ba262ea0290",
+  "PE_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/signed/tegragpurender.sys",
+  "PE_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+  "PE_machine": "ARM64",
+  "matching_method": "Compare all 32-bit words outside COFF relocation sites across the executable PE sections. Require one match per COMDAT. Resolve ADR/ADRP/ADD and stores in the linked callback registration function.",
+  "function_matches": [
+    {
+      "symbol": "query_engine",
+      "section": ".text",
+      "image_rva": 27152,
+      "source_object_bytes": 272,
+      "nonrelocated_words_matched": 64,
+      "relocated_word_offsets": [
+        88,
+        100,
+        168,
+        180
+      ],
+      "unique_match": true
+    },
+    {
+      "symbol": "reset_engine",
+      "section": ".text",
+      "image_rva": 27424,
+      "source_object_bytes": 312,
+      "nonrelocated_words_matched": 72,
+      "relocated_word_offsets": [
+        96,
+        108,
+        172,
+        184,
+        232,
+        244
+      ],
+      "unique_match": true
+    },
+    {
+      "symbol": "collect_debug_info",
+      "section": ".text",
+      "image_rva": 27736,
+      "source_object_bytes": 80,
+      "nonrelocated_words_matched": 19,
+      "relocated_word_offsets": [
+        64
+      ],
+      "unique_match": true
+    },
+    {
+      "symbol": "TgGpuDdiResetFromTimeout",
+      "section": ".text",
+      "image_rva": 26512,
+      "source_object_bytes": 140,
+      "nonrelocated_words_matched": 33,
+      "relocated_word_offsets": [
+        68,
+        108
+      ],
+      "unique_match": true
+    },
+    {
+      "symbol": "TgGpuDdiRestartFromTimeout",
+      "section": ".text",
+      "image_rva": 26992,
+      "source_object_bytes": 32,
+      "nonrelocated_words_matched": 7,
+      "relocated_word_offsets": [
+        16
+      ],
+      "unique_match": true
+    },
+    {
+      "symbol": "TgGpuRegisterResetDdis",
+      "section": ".text",
+      "image_rva": 27024,
+      "source_object_bytes": 72,
+      "nonrelocated_words_matched": 6,
+      "relocated_word_offsets": [
+        0,
+        4,
+        8,
+        12,
+        20,
+        24,
+        32,
+        36,
+        44,
+        48,
+        56,
+        60
+      ],
+      "unique_match": true
+    }
+  ],
+  "resolved_callback_slots": {
+    "query_engine": 584,
+    "reset_engine": 592,
+    "collect_debug_info": 280,
+    "TgGpuDdiResetFromTimeout": 256,
+    "TgGpuDdiRestartFromTimeout": 264
+  },
+  "interpretation": "File and registration identity of selected build. Actual OS invocation and arguments during any specific reset require separate tracing or dump evidence."
+}
