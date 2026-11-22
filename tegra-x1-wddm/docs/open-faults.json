@@ -567,7 +567,14 @@
       "cause": "Unknown. A 2026-11-18T06:27:16Z normal-folder capture shows tabs, address and commands on Code 0 with KMD b94248bc. The earlier user confirmation on d3423d26 establishes Home opening. Boot 93818 has the earliest retained blank-header pixels for Home and This PC. The NVK meta source is identical at the old and current endpoints, and the ARM64EC slot selection left the native components loaded by Explorer and DWM byte-identical to the preceding native WSI/DIB release. The first affected build lacks a matched earlier Home or This PC pixel and component record.",
       "daily_workaround": "Access drives through the visible This PC content pane. Retain the selected graphics profile for controlled comparison.",
       "close_when": "Identify the faulty shell or graphics operation against a matched control and verify visible tabs, address and command bar on Home and This PC.",
-      "resolution": null
+      "resolution": null,
+      "work_order": {
+        "state": "按用户原计划最后单独处理",
+        "blocks_current_first_present_investigation": false,
+        "blocks_current_evidence_handoff": false,
+        "publication_checks": "仅真正准备发布时按仓库规则处理",
+        "user_direction_utc": "2026-11-22T06:59:22.003678+00:00"
+      }
     },
     {
       "id": "GM20B-ON-DEMAND-CANDIDATE-BOOT-95090-RESET",
@@ -5877,6 +5884,13 @@
       "original_request_dispatches": 1,
       "application_pid": 4332,
       "complete_dma": 5406
+    },
+    "first_present_main_review": {
+      "path": "windows-native-graphics/first-present-main-review-20261121.json",
+      "sha256": "75ef64cbaf3c3fd0e19b3ab8f57d7742e8f493083c99ce1df7b81c53145b5cf0",
+      "status": "阶段交验通过：本次未复现，正常对照及恢复证据可接入",
+      "root_cause_status": "开放；未确认重启根因或接受重启修复",
+      "original_request_consumed": true
     }
   }
 }

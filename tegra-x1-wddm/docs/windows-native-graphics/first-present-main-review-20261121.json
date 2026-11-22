@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T07:05:08.767421+00:00",
+  "review_thread": "01a201d4-d569-7fd0-84bd-20573a8968ce",
+  "execution_thread": "01a201d2-60fa-7bb1-a0d7-0264756995d2",
+  "reviewed_commits": [
+    "5f92c216f6cdd92e650fd339379eb0174e76b27b",
+    "ecd21b52f0d063d64983ed2b714fdfb78bcebd3e"
+  ],
+  "status": "阶段交验通过：本次未复现，正常对照及恢复证据可接入",
+  "root_cause_status": "开放；未确认重启根因或接受重启修复",
+  "request": {
+    "id": "f6264ee11289",
+    "original_application_executions": 1,
+    "dispatches": 1,
+    "consumed": true,
+    "may_dispatch_again": false
+  },
+  "observed_run": {
+    "boot": 96075,
+    "application_pid": 4332,
+    "dwm_pid": 924,
+    "first_present": "S_OK",
+    "first_present_elapsed_ms": 61.91552083333333,
+    "application_exit": 0,
+    "observer_exit": 0,
+    "window_input_exit_and_dwm_continuity_verified": true,
+    "new_physical_orientation_acceptance": false
+  },
+  "independent_dma_review": {
+    "checker": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/check_persisted.py",
+      "bytes": 4216,
+      "sha256": "03ddc39ba978d9bc7f215ce680ced893805803e0c483936b24ec5af8901b8ec7"
+    },
+    "journal": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/diagnostic-installed/live/attempts.journal",
+      "bytes": 4441995,
+      "sha256": "95629e797ec273a5a11b88a21a02f923fc2863e94c263e11d41d97746b8108b2"
+    },
+    "journal_closed": true,
+    "committed_snapshots": 849,
+    "unconfirmed_tail": false,
+    "capture_end_clean": true,
+    "wire_events_received_fsynced_and_windows_acknowledged": 1762,
+    "application_complete_attempts": 1,
+    "application_dma": 5406,
+    "dma_bytes": 52,
+    "same_attempt_identity": {
+      "boot": 96075,
+      "capture": "7b6194525f3143c683df6345ed7822f8",
+      "context": 18446660549293215184,
+      "context_start_qpc": 4668891564,
+      "dma": 5406,
+      "dma_bytes": 52,
+      "kmd_context": 18446624269196808432,
+      "luid": 23417,
+      "node": 0,
+      "owner_pid": 4332,
+      "queue": 1,
+      "queue_packet": 18446624269193388048
+    },
+    "complete_record_sha256": "580a93b8a0f0f2ed4a57d0aa76e34bcb79773c6cf747a0dfd78be7446ede54d6",
+    "verified_stages": [
+      "submit175",
+      "KMD7v2-entry",
+      "KMD7v2-return-success",
+      "GPU-complete",
+      "notification177",
+      "stop176",
+      "retire180"
+    ],
+    "dwm_complete_attempts": 112,
+    "dwm_preempted_stops": 14,
+    "dwm_incomplete_without_explicit_preemption": 0,
+    "no_cross_boot_or_cross_attempt_substitution": true
+  },
+  "restoration": {
+    "boot": 96251,
+    "code": 0,
+    "approved_components_match": 8,
+    "loaded_modules_and_paths_match": 5,
+    "permanent_selected_baseline_restored": true,
+    "trial_permission_absent": true,
+    "ac": "Online",
+    "power_mode": 1,
+    "cpu_dfll_active": 1,
+    "gpu_policy_mode": 1,
+    "charge_limit": 85,
+    "owned_temporary_resources_cleaned": true,
+    "source": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/formal-power-verified.json",
+      "bytes": 12193,
+      "sha256": "bebe98a7ecf28100db030a21d61d5e2bacdea0c6fdb2abf4a78f6c4f1d4f9cd1"
+    },
+    "cleanup_source": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/post-restore-resource-proof.json",
+      "bytes": 2348,
+      "sha256": "16d28aefab824729590e9f991ed46505525e135e512fe31e00cfe263b3671b73"
+    },
+    "post_restore_readback": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/post-restore-independent-readback.json",
+      "bytes": 1865,
+      "sha256": "f1d71b1b2fa72758140b51c8faf16f972ce3f9bae8810d391979cfbc14779139"
+    }
+  },
+  "system_event_review": {
+    "source": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/windows-system-interval.json",
+      "bytes": 427125,
+      "sha256": "0fb42b489f4de88094128e3329aab38779d61ce9d6ed448891d034887246f39a"
+    },
+    "xml_records_verified": 432,
+    "boot_records": [
+      95892,
+      95985,
+      96075,
+      96162,
+      96251
+    ],
+    "planned_1074_records": [
+      95968,
+      96058,
+      96145,
+      96234
+    ],
+    "new_41_6008_bugcheck1001": []
+  },
+  "source_review": {
+    "gate_change": "Five JSON file reads explicitly use UTF8; confirmed preparation-parser fix only.",
+    "frozen_scripts_matching_gemini_and_execution": 5,
+    "review_model": "gemini-4-neon-high",
+    "review": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/utf8-review/review-response.md",
+      "bytes": 8646,
+      "sha256": "e5f95646cf6b65ad4d9658995f04166f21009ba80f9b8853329875326dfe0465"
+    },
+    "source_hashes": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/utf8-review/source-hashes.json",
+      "bytes": 475,
+      "sha256": "388b6938296aab95354996fdf96dce58fbb9e78b77f3bfd7d1bd6762713f4db3"
+    },
+    "production_gpu_changes_in_delivery": false
+  },
+  "deferred_contract_review": {
+    "policy_commit": "470e1dbc4ff65affe8ee6395a12bf8e2060cd338",
+    "result": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/first-present-deferred-contracts-20261121.json",
+      "bytes": 5251,
+      "sha256": "de1b1a1280a4318cc5c38b7906004a26001d59d126a67cd8a448ce364ae1b06e"
+    },
+    "items": [
+      {
+        "contract_id": "dxgkrnl.h:231:1",
+        "status": "未知",
+        "original_receipt_and_revisit_conditions_preserved": true
+      },
+      {
+        "contract_id": "dxgkrnl.h:684:4",
+        "status": "未知",
+        "original_receipt_and_revisit_conditions_preserved": true
+      },
+      {
+        "contract_id": "dxgkrnl.h:759:2",
+        "status": "未知",
+        "original_receipt_and_revisit_conditions_preserved": true
+      },
+      {
+        "contract_id": "dxgvmbus.c:3651:2",
+        "status": "未知",
+        "original_receipt_and_revisit_conditions_preserved": true
+      }
+    ]
+  },
+  "historical_faults_remain_open": [
+    "GM20B-LEGACY-SEQUENTIAL-RESTART",
+    "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+    "GM20B-ON-DEMAND-CANDIDATE-BOOT-95090-RESET"
+  ],
+  "explorer_work_order": {
+    "state": "按用户原计划最后单独处理",
+    "blocks_current_first_present_investigation": false,
+    "blocks_current_evidence_handoff": false,
+    "publication_checks": "仅真正准备发布时按仓库规则处理",
+    "user_direction_utc": "2026-11-22T06:59:22.003678+00:00"
+  },
+  "publication_scope": {
+    "new_baseline_selected": false,
+    "new_baseline_promoted": false,
+    "full_publication_check_is_current_handoff_prerequisite": false,
+    "run_full_publication_check_when": "真正准备发布基线时，按仓库规则处理"
+  },
+  "review_sources": {
+    "delivery_result": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+      "bytes": 11402,
+      "sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20"
+    },
+    "package": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/first-present-f6264ee11289-review.zip",
+      "bytes": 299714,
+      "sha256": "ffb628ecca68dd40fdf74464386d898962624700afeaa6740e2dac254e8b2e64"
+    },
+    "verified_input_hashes": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/startup4-verified-inputs.json",
+      "bytes": 46410,
+      "sha256": "098a8e88fd46c05e4c6e0d62f206af70dfd4d157396b1605ae72ff9a548b0cd6"
+    },
+    "referenced_files_verified": 195
+  },
+  "next_root_cause_work": "执行会话继续沿已有91476提交线程175之后的EventQueueSelect和匹配系统二进制约束缺失边界；主审核接收后续整批结论。原请求已消费，正常演练不重测。"
+}
