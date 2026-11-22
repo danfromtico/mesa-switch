@@ -49,6 +49,7 @@ NTSTATUS TgGpuInitializeContextEngine(TG_GPU_CONTEXT_ENGINE *e,
         !dxgk->DxgkCbQueueDpc || !dxgk->DxgkCbNotifyDpc ||
         !dxgk->DxgkCbReserveGpuVirtualAddressRange)
         return STATUS_INVALID_PARAMETER;
+    TgGpuResetDebugCache(&e->DebugCache);
     RtlZeroMemory(e,sizeof(*e));
     e->Dxgk=*dxgk; e->Tables=tables;
     KeInitializeSpinLock(&e->Lock);

@@ -4,13 +4,32 @@
 #include "hardware.h"
 #include "present.h"
 
+static NTSTATUS finish_submit(TG_GPU_CONTEXT_ENGINE *e,
+    const DXGKARG_SUBMITCOMMANDVIRTUAL *a,TG_GPU_WORK_QUEUE *q,NTSTATUS result)
+{
+    KIRQL irql;
+    KeAcquireSpinLock(&e->Lock,&irql);
+    /* A malformed DMA/private payload still carries a scheduler fence. Its
+     * ordered rejection marker must retire after the preceding packets, and
+     * an intervening adapter reset must account for that same fence too. */
+    e->LastSubmittedFence=a->SubmissionFenceId;
+    e->SubmittedFenceValid=TRUE;
+    KeReleaseSpinLock(&e->Lock,irql);
+    /* Publish the scheduler fence before releasing the submission gate;
+     * a newer caller must not be overwritten by this older return path. */
+    if(q)(VOID)KeReleaseMutex(&q->DispatchGate,FALSE);
+    KeAcquireSpinLock(&e->Lock,&irql);--e->Creating;KeReleaseSpinLock(&e->Lock,irql);
+    return result;
+}
+
 NTSTATUS APIENTRY TgGpuDdiSubmitCommandVirtual(HANDLE adapter,const DXGKARG_SUBMITCOMMANDVIRTUAL *a)
 {
     TG_GPU_CONTEXT_ENGINE *e=adapter;TG_GPU_QUEUE_ENTRY *reserved;TG_GPU_HARDWARE *h;
     TG_GPU_WORK_QUEUE *q;TG_GPU_COMMAND_SNAPSHOT *snapshot=NULL;
     NTSTATUS status;BOOLEAN used=FALSE;KIRQL irql;
     PAGED_CODE();
-    if(!e || !a || !e->Dxgk.DeviceHandle)return STATUS_INVALID_PARAMETER;
+    if(!e || !a || !e->Dxgk.DeviceHandle || a->NodeOrdinal || a->EngineOrdinal)
+        return STATUS_INVALID_PARAMETER;
     KeAcquireSpinLock(&e->Lock,&irql);++e->Creating;q=e->QueueOwner;KeReleaseSpinLock(&e->Lock,irql);
     if(q) {
         status=KeWaitForSingleObject(&q->DispatchGate,Executive,KernelMode,FALSE,NULL);
@@ -18,7 +37,7 @@ NTSTATUS APIENTRY TgGpuDdiSubmitCommandVirtual(HANDLE adapter,const DXGKARG_SUBM
             TgGpuTraceExecutionState(e,TgGpuExecutionSubmitFailure,status,0,a);
             (VOID)TgGpuRequestEngineRecoveryAt(e,NT_SUCCESS(status)?STATUS_DEVICE_BUSY:status,
                 TgGpuRecoverySubmitGate,a);
-            KeAcquireSpinLock(&e->Lock,&irql);--e->Creating;KeReleaseSpinLock(&e->Lock,irql);return STATUS_SUCCESS;
+            return finish_submit(e,a,NULL,STATUS_SUCCESS);
         }
     }
     /* Reserve before inspecting the submission. Allocation failure is an
@@ -56,12 +75,10 @@ NTSTATUS APIENTRY TgGpuDdiSubmitCommandVirtual(HANDLE adapter,const DXGKARG_SUBM
         NTSTATUS drain=TgGpuDrainRejectedIdle(q);
         if(!NT_SUCCESS(drain))(VOID)TgGpuRequestEngineRecoveryAt(e,drain,TgGpuRecoveryRejectDrain,a);
     } else if(status!=STATUS_SUCCESS)(VOID)TgGpuRequestEngineRecoveryAt(e,status,TgGpuRecoverySubmit,a);
-    if(q)(VOID)KeReleaseMutex(&q->DispatchGate,FALSE);
-    KeAcquireSpinLock(&e->Lock,&irql);--e->Creating;KeReleaseSpinLock(&e->Lock,irql);
-    if(status==STATUS_INVALID_PARAMETER && used)return STATUS_INVALID_PARAMETER;
     /* Busy, OOM, lost root and transport failures must never escape this DDI:
      * Microsoft permits only SUCCESS or malformed INVALID_PARAMETER here. */
-    return STATUS_SUCCESS;
+    return finish_submit(e,a,q,status==STATUS_INVALID_PARAMETER && used?
+        STATUS_INVALID_PARAMETER:STATUS_SUCCESS);
 }
 NTSTATUS APIENTRY TgGpuDdiPreemptCommand(HANDLE adapter,const DXGKARG_PREEMPTCOMMAND *a)
 {
@@ -112,11 +129,16 @@ static NTSTATUS APIENTRY patch_legacy(HANDLE adapter, const DXGKARG_PATCH *args)
 
 static NTSTATUS APIENTRY submit_legacy(HANDLE adapter, const DXGKARG_SUBMITCOMMAND *args)
 {
-    UNREFERENCED_PARAMETER(args);
+    TG_GPU_CONTEXT_ENGINE *e=adapter;KIRQL irql;
     /* This DISPATCH_LEVEL DDI has no failure return. An unexpected physical
      * submission enters the existing recovery path without retiring a fence.
      */
-    (VOID)TgGpuRequestEngineRecoveryAt(adapter,STATUS_NOT_SUPPORTED,TgGpuRecoveryLegacySubmit,NULL);
+    if(e && args) {
+        KeAcquireSpinLock(&e->Lock,&irql);
+        e->LastSubmittedFence=args->SubmissionFenceId;e->SubmittedFenceValid=TRUE;
+        KeReleaseSpinLock(&e->Lock,irql);
+    }
+    (VOID)TgGpuRequestEngineRecoveryAt(e,STATUS_NOT_SUPPORTED,TgGpuRecoveryLegacySubmit,NULL);
     return STATUS_SUCCESS;
 }
 

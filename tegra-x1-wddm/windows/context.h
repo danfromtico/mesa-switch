@@ -9,7 +9,7 @@
 #include "adapter_abi.h"
 #include "nvdec_abi.h"
 #include "graphics.h"
-#include "diagnostic_events.h"
+#include "debug_report.h"
 
 typedef struct _TG_GPU_CONTEXT_ENGINE TG_GPU_CONTEXT_ENGINE;
 typedef struct _TG_GPU_PROCESS TG_GPU_PROCESS;
@@ -73,6 +73,8 @@ struct _TG_GPU_CONTEXT_ENGINE {
     BOOLEAN UserdBar1Ready;
     struct tg_gpu_channel Channel;
     volatile UINT LastCompletedFence;
+    UINT LastSubmittedFence,EngineQueryFence;
+    BOOLEAN SubmittedFenceValid;
     UINT Marker;
     UINT SnapshotUploads,SnapshotBytes;
     UINT Creating;
@@ -85,6 +87,7 @@ struct _TG_GPU_CONTEXT_ENGINE {
     struct tg_nvdec_client_info NvdecClients;
     NTSTATUS RecoveryStatus;
     BOOLEAN RecoveryPending,RecoverySending,RecoveryNotified,Resetting;
+    TG_GPU_DEBUG_CACHE DebugCache;
 };
 /* The single physical execution slot is serialized; the number of software
  * contexts is limited only by allocation failures, not a fixed slot array.

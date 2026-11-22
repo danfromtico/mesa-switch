@@ -13,6 +13,19 @@ NTSTATUS APIENTRY TgGpuDdiResetFromTimeout(HANDLE adapter)
     status=TgNvdecAdapterStop(a);
     if(status!=STATUS_SUCCESS)return status;
     status=TgGpuResetBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
+    if(status==STATUS_SUCCESS) {
+        KIRQL irql;
+        /* This is the scheduler's adapter-wide reset boundary. Suspend and
+         * generic cleanup share ResetBackend but must not retire its fences.
+         * Use the most recent scheduler submission, including ordered
+         * format rejection markers and wraparound;
+         * preemption identifiers belong to a separate sequence. */
+        KeAcquireSpinLock(&a->Engine.Lock,&irql);
+        if(a->Engine.SubmittedFenceValid)
+            a->Engine.LastCompletedFence=a->Engine.LastSubmittedFence;
+        a->Engine.EngineQueryFence=a->Engine.LastCompletedFence;
+        KeReleaseSpinLock(&a->Engine.Lock,irql);
+    }
     a->QueueReady=a->Queue.Engine==&a->Engine;return status;
 }
 NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *a)
@@ -47,20 +60,31 @@ NTSTATUS APIENTRY TgGpuDdiRestartFromTimeout(HANDLE adapter)
     if (!a || a->State!=TgGpuAdapterResetting) return STATUS_INVALID_DEVICE_STATE;
     return TgGpuRestartAdapterHardware(a);
 }
-static BOOLEAN engine_idle(TG_GPU_ADAPTER *a,UINT *fence)
+static BOOLEAN engine_idle(TG_GPU_ADAPTER *a,UINT *fence,BOOLEAN *responsive)
 {
     KIRQL irql,engine_irql;
     TG_GPU_WORK_QUEUE *q=&a->Queue;
     TG_GPU_CONTEXT_ENGINE *e=&a->Engine;
+    if(responsive)*responsive=FALSE;
     if (a->State!=TgGpuAdapterReady || !a->QueueReady) return FALSE;
     KeAcquireSpinLock(&q->Lock,&irql);
     KeAcquireSpinLock(&e->Lock,&engine_irql);
-    BOOLEAN idle=!e->RecoveryPending && !e->Resetting && !q->Servicing &&
+    BOOLEAN healthy=!q->Paused && NT_SUCCESS(q->Failure) &&
+        !e->RecoveryPending && !e->Resetting;
+    BOOLEAN idle=!q->Servicing &&
         !q->Current.Engine && IsListEmpty(&q->Pending);
     *fence=e->LastCompletedFence;
+    if(responsive) {
+        /* Busy is not the same as unresponsive. Report an actual completed
+         * packet since the previous sample, or a healthy empty queue. The
+         * first admission after idle starts a fresh observation interval.
+         * No observed completion is not a claim that the GPU is dead. */
+        *responsive=healthy && (idle || *fence!=e->EngineQueryFence);
+        e->EngineQueryFence=*fence;
+    }
     KeReleaseSpinLock(&e->Lock,engine_irql);
     KeReleaseSpinLock(&q->Lock,irql);
-    return idle;
+    return healthy && idle;
 }
 static NTSTATUS APIENTRY query_group(HANDLE adapter,DXGKARG_QUERYDEPENDENTENGINEGROUP *a)
 {
@@ -70,9 +94,10 @@ static NTSTATUS APIENTRY query_group(HANDLE adapter,DXGKARG_QUERYDEPENDENTENGINE
 }
 static NTSTATUS APIENTRY query_engine(HANDLE adapter,DXGKARG_QUERYENGINESTATUS *a)
 {
-    UINT fence;
+    UINT fence;BOOLEAN responsive;
     if (!adapter || !a || a->NodeOrdinal || a->EngineOrdinal) return STATUS_INVALID_PARAMETER;
-    a->EngineStatus.Value=engine_idle(adapter,&fence)?1:0;
+    (VOID)engine_idle(adapter,&fence,&responsive);
+    a->EngineStatus.Value=responsive?1:0;
     return STATUS_SUCCESS;
 }
 static NTSTATUS APIENTRY reset_engine(HANDLE adapter,DXGKARG_RESETENGINE *a)
@@ -81,17 +106,20 @@ static NTSTATUS APIENTRY reset_engine(HANDLE adapter,DXGKARG_RESETENGINE *a)
     if (!adapter || !a || a->NodeOrdinal || a->EngineOrdinal) return STATUS_INVALID_PARAMETER;
     /* The queue may have drained before the timeout callback arrived.
      * Otherwise GR and CE share the runlist and need the full adapter reset. */
-    if (!engine_idle(adapter,&fence)) return STATUS_UNSUCCESSFUL;
+    if (!engine_idle(adapter,&fence,NULL)) return STATUS_UNSUCCESSFUL;
     a->LastAbortedFenceId=fence;
     return STATUS_SUCCESS;
 }
 static NTSTATUS APIENTRY collect_debug_info(HANDLE adapter,const DXGKARG_COLLECTDBGINFO *a)
 {
-    const TG_GPU_ADAPTER *d=adapter;
-    if (!d || !a || !a->pBuffer || a->BufferSize<sizeof(UINT)) return STATUS_INVALID_PARAMETER;
-    UINT fence=d->Engine.LastCompletedFence;
-    RtlCopyMemory(a->pBuffer,&fence,sizeof(fence));
-    return STATUS_SUCCESS;
+    TG_GPU_ADAPTER *d=adapter;
+    if(!d || !a)return STATUS_UNSUCCESSFUL;
+    /* May run during a bugcheck at undefined IRQL. All data is resident:
+     * no queue/context dereference, lock wait, allocation, ETW or MMIO here.
+     * LastCompletedFence is an independent aligned observation; cached
+     * boundaries include their own fence/generation and validity flags. */
+    return TgGpuCopyDebugReport(&d->Engine.DebugCache,d->Engine.LastCompletedFence,
+        a->Reason,a->pBuffer,a->BufferSize);
 }
 void TgGpuRegisterResetDdis(DRIVER_INITIALIZATION_DATA *d)
 {

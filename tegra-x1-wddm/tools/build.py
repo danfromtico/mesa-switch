@@ -77,6 +77,7 @@ core = [root / "core/gm20b_mmu.c", root / "core/report.c", root / "core/gpfifo.c
         root / "core/gr_firmware.c", root / "core/acr_firmware.c", root / "core/gr_image.c",
         root / "core/gr_submit.c", root / "core/gr_clear.c", root / "core/gr_draw.c",
         root / "platform/t214_gr_context.c", root / "platform/t214_interrupt.c", encoder]
+subprocess.run(["python3", str(root / "tests/test_debug_report.py")], check=True)
 host = args.out / "test-gm20b-core"
 subprocess.run([args.cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
                 *[f"-I{p}" for p in mesa_includes], *map(str, core), str(root / "tests/test_core.c"),

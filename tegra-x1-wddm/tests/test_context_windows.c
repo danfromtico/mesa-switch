@@ -6,6 +6,7 @@
 #include "../windows/adapter.h"
 #include "../windows/paging_dispatch.h"
 #include "../windows/submit_ddi.h"
+#include "../windows/reset_backend.h"
 #include "../windows/present.h"
 #include "../core/present_blit.h"
 #include "../platform/t214_resources.h"
@@ -1556,6 +1557,156 @@ static TG_GPU_CONTEXT *RecreateContext(DRIVER_INITIALIZATION_DATA *ddi,TG_GPU_DE
     CHECK(((TG_GPU_CONTEXT *)create.hContext)->Root.Valid);
     return create.hContext;
 }
+static VOID TestDebugReport(TG_GPU_ADAPTER *a,DRIVER_INITIALIZATION_DATA *ddi)
+{
+    TG_GPU_DEBUG_REPORT report;
+    UCHAR bytes[sizeof(report)+8];
+    DXGKARG_COLLECTDBGINFO arg={.Reason=0x141,.pBuffer=bytes+3,.BufferSize=sizeof(report)};
+    TG_GPU_RECOVERY_EVENT recovery={.Version=1,.Source=TgGpuRecoveryWorker,
+        .Status=STATUS_IO_TIMEOUT,.SubmissionFence=81,.LastCompletedFence=80,.GraphicsGeneration=2};
+    TG_GPU_EXECUTION_EVENT execution={.Version=1,.Source=TgGpuExecutionPreempt,
+        .Stage=TgGpuExecutionGpuFence,.SubmissionFence=81,.Expected=7,.Observed=6};
+    UINT accesses=hw.reads+hw.writes,pools=PoolsInUse(),fence=a->Engine.LastCompletedFence;
+    PVOID queue=a->Engine.QueueOwner,hardware=a->Engine.HardwareOwner;
+    a->Engine.LastCompletedFence=80;
+    /* A bugcheck can interrupt a held lock or a private object's teardown. */
+    a->Engine.Lock=a->Queue.Lock=1;level=HIGH_LEVEL;
+    a->Engine.QueueOwner=a->Engine.HardwareOwner=(PVOID)1;
+    CHECK(ddi->DxgkDdiCollectDbgInfo(a,&arg)==STATUS_SUCCESS);
+    memcpy(&report,bytes+3,sizeof(report));
+    CHECK(report.Signature==TG_GPU_DEBUG_SIGNATURE && report.Version==1 &&
+        report.Reason==0x141 && report.LastCompletedFence==80 && !report.Flags);
+    TgGpuCacheRecovery(&a->Engine.DebugCache,&recovery);
+    TgGpuCacheExecution(&a->Engine.DebugCache,&execution);
+    for(UINT capacity=0;capacity<=sizeof(report)+2;++capacity) {
+        memset(bytes,0xa5,sizeof(bytes));arg.BufferSize=capacity;
+        NTSTATUS status=ddi->DxgkDdiCollectDbgInfo(a,&arg);
+        CHECK(status==(capacity<TG_GPU_DEBUG_HEADER_BYTES?STATUS_UNSUCCESSFUL:STATUS_SUCCESS));
+        UINT written=capacity<TG_GPU_DEBUG_HEADER_BYTES?0:capacity<sizeof(report)?capacity:sizeof(report);
+        for(UINT i=0;i<3;++i)CHECK(bytes[i]==0xa5);
+        for(UINT i=3+written;i<sizeof(bytes);++i)CHECK(bytes[i]==0xa5);
+        if(written) {
+            memset(&report,0,sizeof(report));memcpy(&report,bytes+3,written);
+            CHECK(report.ReportBytes==sizeof(report) && report.WrittenBytes==written &&
+                !!(report.Flags&TgGpuDebugTruncated)==(written<sizeof(report)));
+            CHECK(!!(report.Flags&TgGpuDebugRecoveryValid)==
+                (written>=FIELD_OFFSET(TG_GPU_DEBUG_REPORT,Execution)));
+            CHECK(!!(report.Flags&TgGpuDebugExecutionValid)==(written==sizeof(report)));
+        }
+    }
+    CHECK(report.Recovery.SubmissionFence==81 && report.Execution.Expected==7 && report.Execution.Observed==6);
+    a->Engine.DebugCache.RecoverySequence|=1;arg.BufferSize=sizeof(report);
+    CHECK(ddi->DxgkDdiCollectDbgInfo(a,&arg)==STATUS_SUCCESS);
+    memcpy(&report,bytes+3,sizeof(report));
+    CHECK(report.Flags==(TgGpuDebugRecoveryBusy|TgGpuDebugExecutionValid) && !report.Recovery.Version);
+    CHECK(hw.reads+hw.writes==accesses && PoolsInUse()==pools && a->Engine.Lock==1 && a->Queue.Lock==1);
+    arg.pBuffer=NULL;CHECK(ddi->DxgkDdiCollectDbgInfo(a,&arg)==STATUS_UNSUCCESSFUL);
+    CHECK(ddi->DxgkDdiCollectDbgInfo(NULL,&arg)==STATUS_UNSUCCESSFUL);
+    CHECK(ddi->DxgkDdiCollectDbgInfo(a,NULL)==STATUS_UNSUCCESSFUL);
+    a->Engine.Lock=a->Queue.Lock=0;level=PASSIVE_LEVEL;
+    a->Engine.QueueOwner=queue;a->Engine.HardwareOwner=hardware;a->Engine.LastCompletedFence=fence;
+    memset(&a->Engine.DebugCache,0,sizeof(a->Engine.DebugCache));
+}
+static VOID TestResetAdmission(TG_GPU_ADAPTER *a,DRIVER_INITIALIZATION_DATA *ddi)
+{
+    DXGKARG_QUERYENGINESTATUS query={0};
+    DXGKARG_RESETENGINE reset={.LastAbortedFenceId=UINT32_MAX};
+    UINT accesses=hw.reads+hw.writes;
+    UINT savedFence=a->Engine.LastCompletedFence;
+    UINT savedQuery=a->Engine.EngineQueryFence;
+    a->Engine.LastCompletedFence=0x1234;
+    CHECK(!a->Queue.Paused && NT_SUCCESS(a->Queue.Failure) && !a->Engine.RecoveryPending);
+    CHECK(ddi->DxgkDdiQueryEngineStatus(a,&query)==STATUS_SUCCESS && query.EngineStatus.Value==1);
+    CHECK(ddi->DxgkDdiResetEngine(a,&reset)==STATUS_SUCCESS &&
+        reset.LastAbortedFenceId==a->Engine.LastCompletedFence);
+    /* A backlog with actual completed packets is responsive even though an
+     * engine reset must still escalate while that backlog is nonempty. */
+    LIST_ENTRY pending;InsertTailList(&a->Queue.Pending,&pending);
+    CHECK(ddi->DxgkDdiQueryEngineStatus(a,&query)==STATUS_SUCCESS && !query.EngineStatus.Value);
+    ++a->Engine.LastCompletedFence;
+    CHECK(ddi->DxgkDdiQueryEngineStatus(a,&query)==STATUS_SUCCESS && query.EngineStatus.Value==1);
+    CHECK(ddi->DxgkDdiQueryEngineStatus(a,&query)==STATUS_SUCCESS && !query.EngineStatus.Value);
+    reset.LastAbortedFenceId=UINT32_MAX;
+    CHECK(ddi->DxgkDdiResetEngine(a,&reset)==STATUS_UNSUCCESSFUL && reset.LastAbortedFenceId==UINT32_MAX);
+    a->Engine.EngineQueryFence=UINT32_MAX;a->Engine.LastCompletedFence=0;
+    CHECK(ddi->DxgkDdiQueryEngineStatus(a,&query)==STATUS_SUCCESS && query.EngineStatus.Value==1);
+    RemoveEntryList(&pending);
+    /* A worker failure publishes Paused/Failure before requesting TDR.
+     * An empty queue at that boundary cannot accept a new packet. ResetEngine
+     * must escalate, without claiming a successful reset or changing fences. */
+    a->Queue.Paused=TRUE;reset.LastAbortedFenceId=UINT32_MAX;
+    CHECK(ddi->DxgkDdiQueryEngineStatus(a,&query)==STATUS_SUCCESS && !query.EngineStatus.Value);
+    CHECK(ddi->DxgkDdiResetEngine(a,&reset)==STATUS_UNSUCCESSFUL && reset.LastAbortedFenceId==UINT32_MAX);
+    a->Queue.Paused=FALSE;a->Queue.Failure=STATUS_IO_TIMEOUT;
+    CHECK(ddi->DxgkDdiQueryEngineStatus(a,&query)==STATUS_SUCCESS && !query.EngineStatus.Value);
+    CHECK(ddi->DxgkDdiResetEngine(a,&reset)==STATUS_UNSUCCESSFUL && reset.LastAbortedFenceId==UINT32_MAX);
+    a->Queue.Failure=STATUS_SUCCESS;
+    CHECK(ddi->DxgkDdiQueryEngineStatus(a,&query)==STATUS_SUCCESS && query.EngineStatus.Value==1);
+    a->Queue.Paused=TRUE;a->Queue.Failure=STATUS_IO_TIMEOUT;
+    CHECK(ddi->DxgkDdiResetEngine(a,&reset)==STATUS_UNSUCCESSFUL && reset.LastAbortedFenceId==UINT32_MAX);
+    a->Queue.Paused=FALSE;a->Queue.Failure=STATUS_SUCCESS;
+    a->Engine.LastCompletedFence=savedFence;
+    a->Engine.EngineQueryFence=savedQuery;
+    CHECK(hw.reads+hw.writes==accesses);
+}
+static __declspec(noinline) VOID TestAdapterResetFences(VOID)
+{
+    static TG_GPU_ADAPTER a;
+    DXGKARG_QUERYCURRENTFENCE fence={0};UINT accesses=hw.reads+hw.writes,pools=PoolsInUse();
+    memset(&a,0,sizeof(a));a.State=TgGpuAdapterReady;a.EngineReady=TRUE;
+    KeInitializeSpinLock(&a.Engine.Lock);KeInitializeSpinLock(&a.Queue.Lock);
+    InitializeListHead(&a.Engine.Contexts);
+    a.Engine.Commands.Handle=(HANDLE)1;a.Hardware.Isolated=TRUE;
+    a.Engine.LastCompletedFence=7;a.Engine.LastSubmittedFence=11;a.Engine.SubmittedFenceValid=TRUE;
+    /* Hardware is already isolated and there is no queue or worker. These
+     * direct production calls test DDI bookkeeping, not physical recovery. */
+    CHECK(TgGpuResetBackend(&a.Engine,&a.Queue,&a.Hardware,&a.Worker)==STATUS_SUCCESS);
+    CHECK(a.Engine.LastCompletedFence==7); /* generic cleanup never advances */
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS);
+    CHECK(TgGpuDdiQueryCurrentFence(&a.Engine,&fence)==STATUS_SUCCESS && fence.CurrentFence==11);
+    a.State=TgGpuAdapterReady;a.Engine.LastCompletedFence=UINT32_MAX-1;a.Engine.LastSubmittedFence=1;
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS && a.Engine.LastCompletedFence==1);
+    a.State=TgGpuAdapterReady;a.Hardware.Isolated=FALSE;
+    a.Engine.LastCompletedFence=5;a.Engine.LastSubmittedFence=9;
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_DEVICE_NOT_READY && a.Engine.LastCompletedFence==5);
+    a.State=TgGpuAdapterReady;a.Hardware.Isolated=TRUE;a.Engine.SubmittedFenceValid=FALSE;
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS && a.Engine.LastCompletedFence==5);
+    /* Drive both DDI submission returns before the reset: a valid software
+     * packet followed by a pending malformed-payload rejection marker. */
+    memset(&a,0,sizeof(a));a.State=TgGpuAdapterReady;a.EngineReady=TRUE;
+    KeInitializeSpinLock(&a.Engine.Lock);InitializeListHead(&a.Engine.Contexts);
+    a.Engine.Commands.Handle=(HANDLE)1;a.Engine.Dxgk.DeviceHandle=(HANDLE)1;
+    a.Engine.PagingOnly=TRUE;a.Engine.LastCompletedFence=20;
+    CHECK(TgGpuInitializeWorkQueue(&a.Queue,&a.Engine)==STATUS_SUCCESS);
+    a.Hardware.Engine=&a.Engine;a.Hardware.Ready=TRUE;
+    a.Hardware.Power.owned=a.Hardware.Power.ready=true;a.Engine.HardwareOwner=&a.Hardware;
+    a.Queue.Servicing=TRUE; /* keep both records pending; no modeled GPU work */
+    DXGKARG_SUBMITCOMMANDVIRTUAL submit={.SubmissionFenceId=21,.Flags.ContextSwitch=1};
+    CHECK(TgGpuDdiSubmitCommandVirtual(&a.Engine,&submit)==STATUS_SUCCESS && a.Engine.LastSubmittedFence==21);
+    submit.Flags.Value=0;submit.SubmissionFenceId=22;submit.DmaBufferSize=3;
+    CHECK(TgGpuDdiSubmitCommandVirtual(&a.Engine,&submit)==STATUS_INVALID_PARAMETER);
+    CHECK(a.Engine.SubmittedFenceValid && a.Engine.LastSubmittedFence==22 && a.Engine.LastCompletedFence==20);
+    /* Model the worker having stopped and hardware already being isolated.
+     * The production DDI must now account for both discarded queue records. */
+    a.Queue.Servicing=FALSE;a.Hardware.Engine=NULL;a.Hardware.Power.owned=false;a.Hardware.Isolated=TRUE;
+    TG_GPU_CONTEXT_ENGINE *savedTrace=trace_engine;trace_engine=&a.Engine;
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS && a.Engine.LastCompletedFence==22);
+    CHECK(TgGpuDdiQueryCurrentFence(&a.Engine,&fence)==STATUS_SUCCESS && fence.CurrentFence==22);
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS && a.Engine.LastCompletedFence==22);
+    DRIVER_INITIALIZATION_DATA ddi={0};DXGKARG_SUBMITCOMMAND legacy={.SubmissionFenceId=23};
+    TgGpuRegisterDisplaySubmissionDdis(&ddi);level=DISPATCH_LEVEL;
+    CHECK(ddi.DxgkDdiSubmitCommand(&a.Engine,&legacy)==STATUS_SUCCESS);
+    level=PASSIVE_LEVEL;
+    CHECK(a.Engine.LastSubmittedFence==23 && a.Engine.LastCompletedFence==22);
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS && a.Engine.LastCompletedFence==23);
+    submit.NodeOrdinal=1;submit.SubmissionFenceId=UINT32_MAX;
+    CHECK(TgGpuDdiSubmitCommandVirtual(&a.Engine,&submit)==STATUS_INVALID_PARAMETER && a.Engine.LastSubmittedFence==23);
+    submit.NodeOrdinal=0;submit.EngineOrdinal=1;
+    CHECK(TgGpuDdiSubmitCommandVirtual(&a.Engine,&submit)==STATUS_INVALID_PARAMETER && a.Engine.LastSubmittedFence==23);
+    trace_engine=savedTrace;
+    CHECK(PoolsInUse()==pools);
+    CHECK(hw.reads+hw.writes==accesses);
+}
 static __declspec(noinline) void TestAdapterLifecycle(const DXGKRNL_INTERFACE *callbacks)
 {
     DXGKRNL_INTERFACE dxgk=*callbacks;DRIVER_INITIALIZATION_DATA d={0};
@@ -1592,6 +1743,7 @@ static __declspec(noinline) void TestAdapterLifecycle(const DXGKRNL_INTERFACE *c
     fail_pool=FALSE;
     CHECK(NT_SUCCESS(d.DxgkDdiAddDevice((PDEVICE_OBJECT)1,(PVOID *)&a)));
     CHECK(a && a->PhysicalDevice==(PDEVICE_OBJECT)1 && a->State==TgGpuAdapterAdded);
+    TestDebugReport(a,&d);
     const DXGK_WDDMDEVICECAPSIN caps_in={.DxgkrnlInterfaceVersion=DXGKDDI_INTERFACE_VERSION};
     DXGK_WDDMDEVICECAPS caps={0};
     DXGKARG_QUERYADAPTERINFO query={
@@ -1642,6 +1794,7 @@ static __declspec(noinline) void TestAdapterLifecycle(const DXGKRNL_INTERFACE *c
     memory_fail_after=UINT32_MAX;
     ResourceList(TRUE);CHECK(NT_SUCCESS(d.DxgkDdiStartDevice(a,&start,&dxgk,&sources,&children)));
     CHECK(!sources && !children && a->State==TgGpuAdapterReady && a->EngineReady && a->QueueReady);
+    TestResetAdmission(a,&d);
     CHECK(a->Engine.Tables==&a->Tables && a->Queue.Engine==&a->Engine && a->Engine.QueueOwner==&a->Queue);
     CHECK(a->Tables.Memory.Bytes==16u*1024*1024 && adapter_table_used);
     /* Exercise translations beyond the old 16-table pool, including the
@@ -1894,6 +2047,7 @@ __declspec(noinline) static void TestPagingDispatch(const DXGKRNL_INTERFACE *dxg
     submit.Flags.Value=0;submit.SubmissionFenceId=106;submit.DmaBufferSize=3;
     submit.pDmaBufferPrivateData=NULL;submit.DmaBufferPrivateDataSize=0;
     CHECK(SubmitModel(&e,&submit)==STATUS_INVALID_PARAMETER && e.LastCompletedFence==106);
+    CHECK(e.SubmittedFenceValid && e.LastSubmittedFence==106);
     CHECK(PoolsInUse()==pools && interrupts==before+5 && hw.reads+hw.writes==accesses);
     /* Context-switch-to-null may carry no private/DMA buffer. */
     submit.Flags.ContextSwitch=1;submit.Flags.Paging=1;submit.hContext=NULL;submit.SubmissionFenceId=107;submit.DmaBufferSize=0;
@@ -1975,6 +2129,7 @@ __declspec(noinline) static void TestPagingDispatch(const DXGKRNL_INTERFACE *dxg
     CHECK(SubmitModel(&e,&submit)==STATUS_SUCCESS);
     trace_engine=NULL;
     fail_pool=fail_sync=FALSE;
+    CHECK(e.SubmittedFenceValid && e.LastSubmittedFence==submit.SubmissionFenceId);
     CHECK(e.RecoveryPending && !e.RecoveryNotified && e.RecoveryStatus==STATUS_NO_MEMORY && q.Paused);
     CHECK(e.LastCompletedFence==107 && recovery_interrupts==faults);
     CHECK(recovery_records==records+1 && recovery_interrupts_at_trace==faults &&
@@ -1993,6 +2148,10 @@ __declspec(noinline) static void TestPagingDispatch(const DXGKRNL_INTERFACE *dxg
         recovery_record.PrivateBytes==submit.DmaBufferPrivateDataSize &&
         recovery_record.UmdPrivateBytes==submit.DmaBufferUmdPrivateDataSize &&
         recovery_record.SubmissionFence==submit.SubmissionFenceId);
+    TG_GPU_DEBUG_REPORT retained;
+    CHECK(TgGpuCopyDebugReport(&e.DebugCache,e.LastCompletedFence,0x117,&retained,sizeof(retained))==STATUS_SUCCESS);
+    CHECK((retained.Flags&TgGpuDebugRecoveryValid) && retained.Recovery.Source==TgGpuRecoverySubmit &&
+        retained.Recovery.Status==STATUS_NO_MEMORY && retained.Recovery.SubmissionFence==submit.SubmissionFenceId);
     CHECK(TgGpuRequestEngineRecovery(&e,STATUS_DEVICE_DATA_ERROR)==STATUS_SUCCESS && recovery_interrupts==faults+1);
     CHECK(TgGpuRequestEngineRecovery(&e,STATUS_DEVICE_NOT_READY)==STATUS_SUCCESS && recovery_interrupts==faults+1);
     CHECK(e.RecoveryStatus==STATUS_NO_MEMORY && e.LastCompletedFence==107);
@@ -2069,12 +2228,19 @@ static __declspec(noinline) VOID TestPreemption(const DXGKRNL_INTERFACE *dxgk)
         execution_record.RequestFence==500 && execution_record.LastCompletedFence==17 &&
         !execution_record.WorkFlags && (execution_record.QueueFlags&24)==24 &&
         execution_trace_level==DISPATCH_LEVEL && !execution_gate_held);
+    TG_GPU_DEBUG_REPORT debug;
+    CHECK(TgGpuCopyDebugReport(&e.DebugCache,e.LastCompletedFence,0x141,&debug,sizeof(debug))==STATUS_SUCCESS);
+    CHECK(debug.Flags==TgGpuDebugExecutionValid && debug.Execution.RequestFence==500 &&
+        debug.Execution.Source==TgGpuExecutionPreempt);
     CHECK(q.Preemptions==1 && PoolsInUse()==pools+1 && preemption_interrupts==events);
     CHECK(TgGpuServiceWorkQueue(&q,NULL,NULL)==STATUS_SUCCESS && preemption_interrupts==events+1);
     CHECK(!q.Preemptions && PoolsInUse()==pools && e.LastCompletedFence==17 && interrupts==dma);
     /* Cancel only the admitted prefix; the newer null-render packet remains. */
+    e.EngineQueryFence=UINT32_MAX; /* the new idle-to-busy admission must resample */
     submit.hContext=c;submit.SubmissionFenceId=200;CHECK(SubmitModel(&e,&submit)==STATUS_SUCCESS);
+    CHECK(e.SubmittedFenceValid && e.LastSubmittedFence==200 && e.EngineQueryFence==17);
     expected_preemption=501;RequestPreempt(&e,501);
+    CHECK(e.LastSubmittedFence==200); /* never substitute the preempt sequence */
     submit.Flags.NullRendering=1;submit.SubmissionFenceId=201;submit.pDmaBufferPrivateData=&entries[1];
     CHECK(SubmitModel(&e,&submit)==STATUS_SUCCESS && c->References==1);
     accesses=hw.reads+hw.writes;
@@ -2709,6 +2875,7 @@ void start(void)
     for(i=0;i<64;++i) CHECK(!pool_used[i] && !memory_used[i]);
     for(i=0;i<4;++i)CHECK(!graphics_used[i]);
     TestAdapterLifecycle(&dxgk);
+    TestAdapterResetFences();
     TestPagingDispatch(&dxgk);
     TestPreemption(&dxgk);
     TestQueuedProgramState(&dxgk);
