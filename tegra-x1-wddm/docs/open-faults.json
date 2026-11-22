@@ -1030,6 +1030,115 @@
           "test_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573"
         }
       ]
+    },
+    {
+      "evidence_sha256": "0bd96eea375a86c13bf24884f0bbddba9a78381ec46f35cdd36f38f85e3af76d",
+      "independence": [
+        {
+          "fault_id": "GM20B-POST-QUALIFICATION-RESTART-92154",
+          "relation": "controlled_activation_and_restoration_covered",
+          "reason": "The repair does not change native boot gating, driver initialization, power policy or shutdown logic. The archived one-use candidate and complete selected-ID interval record four owned planned restarts, Code0 candidate96434 and exact formal restoration96614 with8 components/5 loads, no new abnormal-shutdown/bugcheck/TDR-ID event. Candidate/permanent permission sequencing and archive readback were independently checked. This accepts this controlled activation interval only, not a cure or universal prevention for the older boot/shutdown incident; that fault and recovery checks remain.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "relation": "controlled_activation_and_restoration_covered",
+          "reason": "The repair does not change native boot gating, driver initialization, power policy or shutdown logic. The archived one-use candidate and complete selected-ID interval record four owned planned restarts, Code0 candidate96434 and exact formal restoration96614 with8 components/5 loads, no new abnormal-shutdown/bugcheck/TDR-ID event. Candidate/permanent permission sequencing and archive readback were independently checked. This accepts this controlled activation interval only, not a cure or universal prevention for the older boot/shutdown incident; that fault and recovery checks remain.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "relation": "historical_overlap_unknown_scoped_candidate_checked",
+          "reason": "The original incident Flags and first reset boundary remain unknown, so this does not assert disjoint historical causality. The release changes only non-Paging/non-ContextSwitch NullRendering software entry ownership/admission. Existing non-NullRendering real command capture, render/copy, Present UMD and ordinary window paths retain their production bytes/branches; non-GDI window-Present already selected the reserved entry. The changed software fence and ordinary KMT control passed with the same available DWM and no new restart. Legacy first-Present replay remains excluded and the historical fault remains open; no claim that its scenario is fixed.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "relation": "separate_unchanged_subsystem_or_trigger",
+          "reason": "The optional process-scoped WDDM2.0 offer/Present1 fix, UMD/NVK and all swap-chain code are absent from this independent release-source delta and runtime component change. Their previously excluded scenarios stay excluded. Candidate96434 verified native ordinary and NullRendering KMT completion and retained DWM/loaded baseline user-mode DLLs; it did not exercise or qualify optional Present1.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "relation": "separate_unchanged_subsystem_or_trigger",
+          "reason": "The optional process-scoped WDDM2.0 offer/Present1 fix, UMD/NVK and all swap-chain code are absent from this independent release-source delta and runtime component change. Their previously excluded scenarios stay excluded. Candidate96434 verified native ordinary and NullRendering KMT completion and retained DWM/loaded baseline user-mode DLLs; it did not exercise or qualify optional Present1.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "relation": "separate_unchanged_subsystem_or_trigger",
+          "reason": "CPU/GPU/EMC policy, storage, memory-pressure and hardware render/copy implementations remain unchanged. This bounded software submission now uses one existing reserved owned record and releases it through existing queue completion/preemption/reset paths; the model checked retained allocation then release/no additional MMIO and the native ordinary/Null controls completed. This is not heavy-load or memory-pressure qualification; those triggers remain excluded and no historical cause is inferred.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "relation": "separate_unchanged_subsystem_or_trigger",
+          "reason": "No Wi-Fi driver, network or startup connectivity code changes. The candidate remained reachable for its actual program and evidence readback. The one banner timeout recovered on the same boot and remains a transport event, not a proven networking repair. Historical startup reliability stays open.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "relation": "controlled_activation_and_restoration_covered",
+          "reason": "The repair does not change native boot gating, driver initialization, power policy or shutdown logic. The archived one-use candidate and complete selected-ID interval record four owned planned restarts, Code0 candidate96434 and exact formal restoration96614 with8 components/5 loads, no new abnormal-shutdown/bugcheck/TDR-ID event. Candidate/permanent permission sequencing and archive readback were independently checked. This accepts this controlled activation interval only, not a cure or universal prevention for the older boot/shutdown incident; that fault and recovery checks remain.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "relation": "separate_unchanged_subsystem_or_trigger",
+          "reason": "CPU/GPU/EMC policy, storage, memory-pressure and hardware render/copy implementations remain unchanged. This bounded software submission now uses one existing reserved owned record and releases it through existing queue completion/preemption/reset paths; the model checked retained allocation then release/no additional MMIO and the native ordinary/Null controls completed. This is not heavy-load or memory-pressure qualification; those triggers remain excluded and no historical cause is inferred.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "relation": "controlled_activation_and_restoration_covered",
+          "reason": "The repair does not change native boot gating, driver initialization, power policy or shutdown logic. The archived one-use candidate and complete selected-ID interval record four owned planned restarts, Code0 candidate96434 and exact formal restoration96614 with8 components/5 loads, no new abnormal-shutdown/bugcheck/TDR-ID event. Candidate/permanent permission sequencing and archive readback were independently checked. This accepts this controlled activation interval only, not a cure or universal prevention for the older boot/shutdown incident; that fault and recovery checks remain.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "relation": "separate_unchanged_subsystem_or_trigger",
+          "reason": "The optional process-scoped WDDM2.0 offer/Present1 fix, UMD/NVK and all swap-chain code are absent from this independent release-source delta and runtime component change. Their previously excluded scenarios stay excluded. Candidate96434 verified native ordinary and NullRendering KMT completion and retained DWM/loaded baseline user-mode DLLs; it did not exercise or qualify optional Present1.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "relation": "controlled_activation_and_restoration_covered",
+          "reason": "The repair does not change native boot gating, driver initialization, power policy or shutdown logic. The archived one-use candidate and complete selected-ID interval record four owned planned restarts, Code0 candidate96434 and exact formal restoration96614 with8 components/5 loads, no new abnormal-shutdown/bugcheck/TDR-ID event. Candidate/permanent permission sequencing and archive readback were independently checked. This accepts this controlled activation interval only, not a cure or universal prevention for the older boot/shutdown incident; that fault and recovery checks remain.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "relation": "historical_overlap_unknown_scoped_candidate_checked",
+          "reason": "The original incident Flags and first reset boundary remain unknown, so this does not assert disjoint historical causality. The release changes only non-Paging/non-ContextSwitch NullRendering software entry ownership/admission. Existing non-NullRendering real command capture, render/copy, Present UMD and ordinary window paths retain their production bytes/branches; non-GDI window-Present already selected the reserved entry. The changed software fence and ordinary KMT control passed with the same available DWM and no new restart. Legacy first-Present replay remains excluded and the historical fault remains open; no claim that its scenario is fixed.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "relation": "controlled_activation_and_restoration_covered",
+          "reason": "The repair does not change native boot gating, driver initialization, power policy or shutdown logic. The archived one-use candidate and complete selected-ID interval record four owned planned restarts, Code0 candidate96434 and exact formal restoration96614 with8 components/5 loads, no new abnormal-shutdown/bugcheck/TDR-ID event. Candidate/permanent permission sequencing and archive readback were independently checked. This accepts this controlled activation interval only, not a cure or universal prevention for the older boot/shutdown incident; that fault and recovery checks remain.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+          "relation": "separate_unchanged_subsystem_or_trigger",
+          "reason": "No shell, UMD drawing, display-mode, shader or composition source/runtime bytes change in this release. Ordinary command admission remains the original branch and passed; DWM continuity and five loaded component identities were checked. No Explorer output claim is made and its existing workaround remains.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-ON-DEMAND-CANDIDATE-BOOT-95090-RESET",
+          "relation": "controlled_activation_and_restoration_covered",
+          "reason": "The repair does not change native boot gating, driver initialization, power policy or shutdown logic. The archived one-use candidate and complete selected-ID interval record four owned planned restarts, Code0 candidate96434 and exact formal restoration96614 with8 components/5 loads, no new abnormal-shutdown/bugcheck/TDR-ID event. Candidate/permanent permission sequencing and archive readback were independently checked. This accepts this controlled activation interval only, not a cure or universal prevention for the older boot/shutdown incident; that fault and recovery checks remain.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        },
+        {
+          "fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+          "relation": "target_trigger_covered_without_closure",
+          "reason": "This is the repaired target, not a disjoint historical condition: the source removes the proven NULL-snapshot/nonzero-UMD admission contradiction, and the actual candidate target completes fence0->1 with non-null CPU mapping, raw KMT0, one program exit0 and matching ETL. Ordinary admission is a separate control in that same program. Promotion of these bounded semantics is distinct from formal fault closure; the fault stays open, old MAX/DDI gaps persist, and no three-run or broader NullRendering qualification is claimed.",
+          "test_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646"
+        }
+      ],
+      "assessment_file": "tegra-x1-wddm/docs/kmt-software-fence-ce54d025/independence-review.json",
+      "assessment_sha256": "f00e79f35451ece44564b5abe15122f030075811e81f0a9c4fef12c2cc065a58"
     }
   ],
   "baseline_comparisons": [

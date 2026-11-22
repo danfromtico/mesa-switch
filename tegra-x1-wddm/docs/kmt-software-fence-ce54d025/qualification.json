@@ -1,0 +1,160 @@
+{
+  "schema": 1,
+  "change_kind": "independent",
+  "source_commit": "54ea32fb3e1c714f8f83cd108f2615e37119ec84",
+  "base_commit": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+  "changed_paths": [
+    "tegra-x1-wddm/tests/test_context_windows.c",
+    "tegra-x1-wddm/windows/work_queue.c"
+  ],
+  "build_source_commit": "b88d7dcc3b6f2b2fe48a8b9d7c0a0f2e41a0453e",
+  "source_identity_note": "The release commit isolates exactly the tested KMD and model bytes on the selected source. The original b88d7dcc build and96434 hardware artifacts are retained unchanged; no new-build or new-test claim.",
+  "source_equivalence_file": "source-equivalence.json",
+  "source_equivalence_sha256": "c909a82f8bfe00cfdc26dc5101b8a7206b68a9f0c609e5e31558c95ab160ff2c",
+  "components": {
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f",
+  "trial": {
+    "one_time": true,
+    "gpu_code": 0,
+    "power": "Online",
+    "boot_record": 96434,
+    "token_before": 1,
+    "token_after": 0,
+    "permanent_grant": false,
+    "loaded": {
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    },
+    "loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_nvk_arm64.dll"
+    }
+  },
+  "system_log": {
+    "complete": true,
+    "scope": "Complete selected restart/abnormal-shutdown/bugcheck/TDR-ID inventory covering the controlled candidate and restoration interval, not a claim to preserve every System event or private reset path.",
+    "queried_ids": [
+      12,
+      41,
+      6008,
+      1074,
+      1001,
+      4101
+    ],
+    "first_record": 96322,
+    "last_record": 96614,
+    "boot_records": [
+      96338,
+      96434,
+      96521,
+      96614
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "boot_record": 96338,
+        "kind": "controlled",
+        "explained": true,
+        "cause": "enter closed gate before selecting candidate",
+        "system_records": [
+          96322,
+          96338
+        ],
+        "evidence_file": "controlled-restart-96338.json",
+        "evidence_sha256": "2a11bc5ad1a0f06cba47a23307f41fe87aeca20afa90e5827bcb4543892bece6"
+      },
+      {
+        "boot_record": 96434,
+        "kind": "controlled",
+        "explained": true,
+        "cause": "one-time candidate boot",
+        "system_records": [
+          96418,
+          96434
+        ],
+        "evidence_file": "controlled-restart-96434.json",
+        "evidence_sha256": "7eec40fb6f949e290211f26d46b41b375500ed3cb429f74ab5c49c84a4a0e7fe"
+      },
+      {
+        "boot_record": 96521,
+        "kind": "controlled",
+        "explained": true,
+        "cause": "close native gate for baseline restore",
+        "system_records": [
+          96505,
+          96521
+        ],
+        "evidence_file": "controlled-restart-96521.json",
+        "evidence_sha256": "76e8f81f1a5a0056908a3ff2a1ac47714215cca5d5c3e075919bb9ada6c3aaa5"
+      },
+      {
+        "boot_record": 96614,
+        "kind": "controlled",
+        "explained": true,
+        "cause": "restore verified permanent baseline",
+        "system_records": [
+          96597,
+          96614
+        ],
+        "evidence_file": "controlled-restart-96614.json",
+        "evidence_sha256": "4ae35c411d50a9dee4f77b7896632f26ab5bd7c67633581876a1b6fb0e335b81"
+      }
+    ],
+    "raw_selected_snapshot_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/profile-formal-142125085865.json",
+    "raw_selected_snapshot_sha256": "e8e768384c3239ad6d661585d7221ee534a47a9c90556a0216ed5f068cd316c7"
+  },
+  "cases": [
+    {
+      "name": "candidate-ordinary-and-null-software-fence",
+      "passed": true,
+      "before_boot": 96434,
+      "after_boot": 96434,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "process_abi": "arm64",
+      "loaded_components": {
+        "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+      },
+      "evidence_file": "native-completion.json",
+      "evidence_sha256": "240e11b1d33205f6cf4e13d87dfb7575c708915fbb409b521beccb844d5e8646",
+      "target_case_runs": 1,
+      "ordinary_control_runs": 1
+    }
+  ],
+  "corroboration": {
+    "source_review": "Existing Gemini4NeonHigh approvals and independent main review, unchanged production bytes.",
+    "full_artifact_and_ETL_review": true,
+    "formal_restore": 96614,
+    "no_unexpected_restart_in_interval": true,
+    "no_fault_closed": true,
+    "qualification_reuses_completed_native_run": true,
+    "later_activation_requires_live_identity_and_controlled_boot_verification": true
+  },
+  "limits": [
+    "No Present or repeated historical trigger.",
+    "Both NullRendering flags changed together;8-byte command/24-byte UMD payload only.",
+    "Original96251 MAX/final DDI status limits persist.",
+    "All17 fault records and original daily exclusions remain visible.",
+    "This is one program and one target NullRendering case, not3 closure runs."
+  ]
+}
