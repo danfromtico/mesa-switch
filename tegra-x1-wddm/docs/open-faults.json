@@ -721,6 +721,33 @@
         "latest_verified_boot": 97098,
         "open_fault_closure": false
       }
+    },
+    {
+      "id": "SWITCH-CONTROLLED-CRASH-DUMP-MISSING-97176",
+      "status": "open",
+      "kind": "crash-dump-evidence",
+      "affected_scopes": [
+        "windows-dump-capture",
+        "tdr-recovery"
+      ],
+      "trigger": "One official native ARM64 small-dump control on formal boot97098 followed by boot97176.",
+      "evidence": [
+        "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#native_control",
+        "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#dump_evidence",
+        "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#restoration_and_cleanup"
+      ],
+      "cause": "The one-shot consumption receipt and official tool banner were retained. The following boot reported Event41 with BugcheckCode0 and Event6008. No new dump was found and the11 preexisting WATCHDOG file hashes were stable. Kernel-Dump/Operational recorded disabled crash dumping while CrashDumpEnabled remained3. The actual NT bugcheck boundary and dump initialization/write failure cause remain unknown. A static SD-port initializer advertises support; a functioning dump instance remains unobserved.",
+      "daily_workaround": "Use the selected component profile and retain bounded logs and durable operation receipts. Crash-dump capture and TDR vendor data require corresponding native evidence.",
+      "close_when": "Identify the missing-dump failure boundary and verify its repair through the repository fault-closure procedure, with matching boot identity, diagnostic code and readable durable dump evidence.",
+      "resolution": null,
+      "latest_native_identity": {
+        "boot": 97176,
+        "gpu_code": 0,
+        "components": 8,
+        "actual_loads": 5
+      },
+      "dump_capture_qualified": false,
+      "historical_first_present_cause_confirmed": false
     }
   ],
   "independent_qualifications": [
@@ -6250,6 +6277,16 @@
         "95090": "启动首因未知",
         "original_first_Present": "持久 CALL 后首个故障步骤未知"
       }
+    },
+    "controlled_small_dump_main_review": {
+      "path": "windows-native-graphics/small-dump-control-main-review-20261122.json",
+      "sha256": "416beb3798fa69c81b5265b36044b5f123260345f9d6ce9e8cf33a91509ff484",
+      "status": "负结果及有限清理回执审核通过，转储取证链未验收",
+      "fault_id": "SWITCH-CONTROLLED-CRASH-DUMP-MISSING-97176",
+      "before_boot": 97098,
+      "after_boot": 97176,
+      "capture_and_cross_boot_dump_readback_passed": false,
+      "root_cause_found": false
     }
   }
 }
