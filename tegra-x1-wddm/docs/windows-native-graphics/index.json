@@ -1457,7 +1457,7 @@
       "question": "异常轮 DxgKrnl 为 48660 第三次提交的 DMA 围栏 152586，是否还有同一适配器 KMD 接收或硬件队列证据？",
       "status": "观测缺口",
       "existing_observation": "异常轮有 Windows DMA 提交及相邻 KMD 执行状态，缺对应完成中断。提交号与 KMD 抢占请求字段可分别回读。",
-      "missing_observation": "152586 本身最后可证步骤仍为 Windows 175.1。随后缺同次锁释放与提交分支、KMD 入返、硬件开始与完成、Windows 退役，以及能归因的首条复位异常。未封口 ETL 的缺失事件无法判定卡点。",
+      "missing_observation": "原事故仍缺执行栈和实际提交分支、KMD入返、GPU开始/完成、Windows退役，以及首条可归因的复位异常。91476也无dxgmms2模块全哈希；比较代码不充当实际执行回执。",
       "pass_condition": "原始 KMD 负载按适配器和请求字段明确绑定 152586 至提交入口或返回、工作队列或硬件开始。",
       "evidence": [
         {
@@ -1471,6 +1471,10 @@
         {
           "path": "windows-native-graphics/rounds/win-dwm-152586-stage-boundary-20261121-01.result.json",
           "sha256": "5ed702ae4feeb610d16b72159b44c821fe0ed3bfa33cb14b2e7e89cfff0626cc"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-dwm-152586-select-callflow-20261121-01.result.json",
+          "sha256": "85dcfd54eac9a04bac95129b2e14780884a06ed5aee91653d76f6ea2021c3ddf"
         }
       ],
       "windows_references": [
@@ -1478,9 +1482,10 @@
       ],
       "round_ids": [
         "win-board-cdd-dwm-third-submit-kmd-20261121-01",
-        "win-dwm-152586-stage-boundary-20261121-01"
+        "win-dwm-152586-stage-boundary-20261121-01",
+        "win-dwm-152586-select-callflow-20261121-01"
       ],
-      "latest_observation": "双 ETL 证明同一 DWM 队列 48660 第三次提交 152586。场景 ETL 又在 0.809 ms 后从同一线程 4/888 记录 48661 的 EventQueueSelect。公开符号匹配原始描述符。前两次尝试尚未抢占完成时已有该信号选择。同启动正常对照 44472 的同类选择也早于第三次 DMA 中断。"
+      "latest_observation": "原91476同线程队列选择位于DMA152586提交后0.808958ms。91918比较映像的两个常数selector5入口和175.1后绕过提交DDI的具体分支已核对。原最后KMD快照另属分页包152584的notify阶段：零硬件缓存没有有效采样标志，不能证明152586的硬件健康。"
     },
     {
       "id": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
@@ -5944,6 +5949,23 @@
       "result": "windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
       "result_sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20",
       "finished_utc": "2026-11-22T06:48:54.508399+00:00"
+    },
+    {
+      "round_id": "win-dwm-152586-select-callflow-20261121-01",
+      "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "method": "本地原事故ETL、比较映像调用路径和故障版本KMD快照字段核对；冻结独立审核。",
+      "state": "已回写",
+      "plan": "windows-native-graphics/rounds/win-dwm-152586-select-callflow-20261121-01.plan.json",
+      "plan_sha256": "81a6e6b7e489282dfb7324a86a3c458b32fc6ddfa4351981e2ee922926f00721",
+      "registered_utc": "2026-11-22T07:20:12.031914+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-dwm-152586-select-callflow-20261121-01.result.json",
+      "result_sha256": "85dcfd54eac9a04bac95129b2e14780884a06ed5aee91653d76f6ea2021c3ddf",
+      "status": "观测缺口",
+      "finding": "原91476同线程队列选择位于DMA152586提交后0.808958ms。91918比较映像的两个常数selector5入口和175.1后绕过提交DDI的具体分支已核对。原最后KMD快照另属分页包152584的notify阶段：零硬件缓存没有有效采样标志，不能证明152586的硬件健康。",
+      "missing_observation": "原事故仍缺执行栈和实际提交分支、KMD入返、GPU开始/完成、Windows退役，以及首条可归因的复位异常。91476也无dxgmms2模块全哈希；比较代码不充当实际执行回执。",
+      "finished_utc": "2026-11-22T07:20:12.031914+00:00"
     }
   ],
   "progress": {
@@ -5956,7 +5978,7 @@
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 101,
+    "registered_rounds": 102,
     "new_device_executions": 39
   },
   "current_focus": {
@@ -7092,5 +7114,21 @@
     "maximum_original_application_executions": 1,
     "current_round": "win-seq-original-demand-utf8-20261121-03",
     "original_application_executions": 1
+  },
+  "first_present_root_cause_followup": {
+    "state": "active",
+    "current_normal_run_is_fix_evidence": false,
+    "request_f6264ee11289_consumed": true,
+    "repeat_dispatch_allowed": false,
+    "explorer_work_order": "deferred until last, separately tracked, not a prerequisite",
+    "next_question": "沿原91476提交线程在175之后的EventQueueSelect，结合匹配二进制约束锁释放、DDI调用与返回路径。",
+    "utc": "2026-11-22T06:59:22.003678+00:00",
+    "status": "active",
+    "latest_local_boundary": {
+      "path": "windows-native-graphics/rounds/win-dwm-152586-select-callflow-20261121-01.result.json",
+      "sha256": "85dcfd54eac9a04bac95129b2e14780884a06ed5aee91653d76f6ea2021c3ddf"
+    },
+    "latest_analysis_utc": "2026-11-22T07:20:12.031914+00:00",
+    "next_step": "继续核对原版本提交抑制条件、上下文及分配生命周期；不重复已消费的请求，仍需原事故的实际分支和复位首因证据。"
   }
 }
