@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "purpose": "记录工程语境、实际动作和服务中断，供人工复核；不是推断或规避审核规则",
+  "service_message": "This content was flagged for possible cybersecurity risk. If this seems wrong, try rephrasing your request. If you’re doing authorized security work that requires more cyber permissive safeguards, apply for Daybreak access via https://platform.openai.com/settings/organization/status-and-access before retrying.",
+  "review_request": "这是对合法驱动开发内容的误判，请复核",
+  "review_status": "prepared_not_submitted",
+  "review_submission_capability": "No human-review submission interface was found among available tools; no submission or approval is claimed.",
+  "records": [
+    {
+      "thread": "01a201d2-60fa-7bb1-a0d7-0264756995d2",
+      "turn": "01a2023c-7406-77a2-ac16-a4687d11515d",
+      "topic": "旧版本生命周期与本地提交模型验证",
+      "last_observed_result": "本地模型只完成case0，夹具错误释放栈对象后退出-6；case1/2未执行。",
+      "evidence": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/lifecycle-interruption-20261122.json",
+      "classifier_trigger": "unknown",
+      "later_state": "原件保留；用户澄清后的两批独立复核模型由正常工具执行完成，不能把其结果外推为所有后续动作已获放行。"
+    },
+    {
+      "thread": "01a201d2-60fa-7bb1-a0d7-0264756995d2",
+      "turn": "01a20259-fe79-74f2-8638-eda59bb13bed",
+      "topic": "既有材料只读核对与保全报告整理",
+      "last_observed_result": "保全文件已生成；会话再次以同类服务中断结束。",
+      "evidence": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/preservation-20261122/",
+      "classifier_trigger": "unknown"
+    },
+    {
+      "thread": "01a2026d-3f59-7041-8676-a9267b034280",
+      "turn": "01a20290-b7a3-7a81-936a-8d94603c02ef",
+      "topic": "公开KMT接口的独立Windows ARM64验证程序交叉编译准备",
+      "last_tool": "exec-5608114a-7650-42bf-a314-bff4406059ef",
+      "last_observed_result": "本地build.py编译退出1，snprintf声明缺失；会话随后出现服务级中断。",
+      "evidence": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/null-submit/build-result.json",
+      "native_state": "已完成正式96251只读预检；未取得新验证程序成功构建、派发或实机运行回执。",
+      "classifier_trigger": "unknown",
+      "review_status": "prepared_not_submitted"
+    }
+  ],
+  "observed_record_count": 3,
+  "pattern_assessment": "已有三条中断记录，但只有当时主题与服务原文，尚无证据确定触发关键词或分类器因果。所有主题统一使用原件路径和必要摘要，不据此隐藏内容。"
+}
