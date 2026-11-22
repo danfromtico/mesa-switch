@@ -663,14 +663,31 @@
       "evidence": [
         "tegra-x1-wddm/docs/windows-native-graphics/native-kmt-main-review-20261122.json#null_rendering_case",
         "tegra-x1-wddm/docs/windows-native-graphics/native-kmt-main-review-20261122.json#case_interpretation",
-        "tegra-x1-wddm/docs/windows-native-graphics/native-kmt-main-review-20261122.json#source_boundary"
+        "tegra-x1-wddm/docs/windows-native-graphics/native-kmt-main-review-20261122.json#source_boundary",
+        "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json#native_completion",
+        "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json#source_review",
+        "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json#formal_restoration"
       ],
-      "cause": "Bound native submission181026 records internal SubmitFailure0xc000000d with request flags0x8, DMA8, total private65864 and UMD private24. Direct user SubmitCommand returned0; probe observed UINT64_MAX and failed valid completion. The source NULL-snapshot/nonzero-UMD admission predicate is consistent with this failure, but a branch-specific sample and final DDI NTSTATUS are absent. The program does not distinguish an actual MAX fence read from a null CPU pointer fallback. No causal link to historical first-Present restart is established.",
+      "cause": "Bound native submission181026 records internal SubmitFailure0xc000000d with request flags0x8, DMA8, total private65864 and UMD private24. Direct user SubmitCommand returned0; probe observed UINT64_MAX and failed valid completion. The source NULL-snapshot/nonzero-UMD admission predicate is consistent with this failure, but a branch-specific sample and final DDI NTSTATUS are absent. The program does not distinguish an actual MAX fence read from a null CPU pointer fallback. No causal link to historical first-Present restart is established. Candidate b88d7dcc uses an owned reserved software record for this NullRendering input and removes the inapplicable snapshot requirement. On one-use boot96434 the matching two-case native program exited0, with non-null CPU mappings and real fence0->1 in both cases, no SubmitFailure, and independent ETL correlation. This establishes the scoped candidate improvement; old final DDI status/MAX ambiguity and historical first-Present causality remain unknown.",
       "daily_workaround": "Keep this NullRendering combination unqualified. Continue the already qualified ordinary baseline paths; do not equate Windows packet retirement or wait-helper success with a valid monitored-fence value. Do not replay the consumed diagnostic unchanged.",
       "close_when": "Establish the failure cause within this exact input scope, verify a corresponding repair using the repository native qualification and closure process, and demonstrate valid monitored-fence completion with matching actual component identities. Do not use this fault closure to close the independent historical first-Present or95090 faults.",
       "resolution": null,
       "first_observed_boot": 96251,
-      "unexpected_restart_observed": false
+      "unexpected_restart_observed": false,
+      "candidate_validation": {
+        "commit": "b88d7dcc3b6f2b2fe48a8b9d7c0a0f2e41a0453e",
+        "boot": 96434,
+        "KMD_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+        "program_runs": 1,
+        "ordinary_control_passed": true,
+        "null_rendering_case_passed": true,
+        "formal_restored_boot": 96614,
+        "selected_baseline_changed": false,
+        "candidate_source_kept_local": true,
+        "main_review_file": "tegra-x1-wddm/docs/windows-native-graphics/kmt-software-fence-candidate-main-review-20261122.json",
+        "main_review_sha256": "0fb1657206d580be1f88e8d5df3d28df4d89d51290b6d704557d17cd49baf355",
+        "closure_requirements_satisfied": false
+      }
     }
   ],
   "independent_qualifications": [
