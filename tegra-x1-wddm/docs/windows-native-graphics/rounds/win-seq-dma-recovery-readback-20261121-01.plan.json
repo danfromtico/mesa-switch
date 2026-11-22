@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-recovery-readback-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "question": "在 Windows 采集者连接中断、独立接收进程退出且缺 END 时，重开的读取进程能否区分同包源事件、接收、fsync 和 Windows ACK 来回，并留下未证实的阶段？",
+  "method": "将 94004 已归档原始事件作为正常图形的历史控制输入，经原接收器写盘。用本地进程退出及短尾模拟传输中断，重新读取记录，另用既有 93818 中断线缆日志复核。禁止把离线回放的事件、时钟和 ACK 写作新 Windows 实测。",
+  "pass_condition": "完整回执逐序号与原字节核对。无 END 时恢复已确认 fsync 的前缀，截断尾无确认，未知最终 ETW 丢失数。分别验证同队列重提交不可跨 DMA 或上下文套用下游事件。",
+  "device_executions": 0,
+  "new_repro": false,
+  "inputs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-return-observer/capture/receive.py",
+      "sha256": "539e616afe6d4efdf71d29369666e5232a79aa6ca840dfa935f4909d423b3ff0"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-return-observer/capture/join_submit.py",
+      "sha256": "47353f8b981f8c6417f8e132f27775bbe4f469b33925fd9d4cc0598032f92ae6"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-return-observer/capture/decode_dma_boundary.py",
+      "sha256": "f36fe5ebf495c9fa95e57b588b78214028a85eda854630d4b883bb283a81eff5"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/docs/windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-tail-93818-20261121-01/live/wire.jsonl",
+      "sha256": "b457e8d10f81e7bdd2f075baa997bf24b59858269354fd76da654e7ce8916f65"
+    }
+  ]
+}
