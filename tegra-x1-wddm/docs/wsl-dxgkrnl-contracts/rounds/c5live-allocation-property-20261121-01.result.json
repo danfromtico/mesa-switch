@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "round_id": "c5live-allocation-property-20261121-01",
+  "contract_id": "dxgvmbus.c:3651:2",
+  "status": "未知",
+  "declaration_sha256": "d3e350bc1ec49f19bf3cb27ddf67bdaee2d2e1f65ccfa5c1f54c05c9db638396",
+  "started_utc": "2026-11-22T03:04:43.947883+00:00",
+  "device_executions": 1,
+  "target_hit": false,
+  "unexplained_restart": false,
+  "finding": "本轮自有 64 KiB 分配的合法属性更新，入口与返回已匹配。实际 NTSTATUS 为 0xc0000002，输出 PagingFenceValue 为 0。",
+  "gap": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+  "before": {
+    "boot": 94176,
+    "dwm": 1428,
+    "dwm_start": "2026-11-21T23:12:10.5181790Z",
+    "session": 1,
+    "code": 0,
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "ac": "Online",
+    "trial": false,
+    "utc": "2026-11-22T03:04:49.3423020Z"
+  },
+  "after": {
+    "boot": 94176,
+    "dwm": 1428,
+    "dwm_start": "2026-11-21T23:12:10.5181790Z",
+    "session": 1,
+    "code": 0,
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "ac": "Online",
+    "trial": false,
+    "utc": "2026-11-22T03:05:06.0797340Z"
+  },
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 5560,
+      "utc": "2026-11-22T03:04:57.1425545Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 268832312955,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "start",
+        "mode": "property"
+      },
+      {
+        "qpc": 268832435870,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 268832511193,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 268832620849,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "alloc",
+        "status": "00000000",
+        "device": "1073742016",
+        "allocation": "1073742208",
+        "resource": "0",
+        "bytes": "65536"
+      },
+      {
+        "qpc": 268832683524,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "property_begin",
+        "queue": "1073742144",
+        "allocation": "1073742208",
+        "mask": "8",
+        "flags": "2"
+      },
+      {
+        "qpc": 268832741652,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "property_return",
+        "status": "c0000002",
+        "queue": "1073742144",
+        "allocation": "1073742208",
+        "target": "0"
+      },
+      {
+        "qpc": 268832802122,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "free",
+        "status": "00000000"
+      },
+      {
+        "qpc": 268832867712,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 268832969102,
+        "pid": 5560,
+        "tid": 7020,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=10"
+      ]
+    },
+    "actor_event_counts": {
+      "27": 1,
+      "33": 1,
+      "36": 1,
+      "297": 1,
+      "28": 1
+    },
+    "devices": [
+      {
+        "pid": 5560,
+        "tid": 7020,
+        "qpc": 268832508437,
+        "caller_device": 1073742016,
+        "device": "device1",
+        "adapter": "adapter1"
+      }
+    ],
+    "allocation_joins": [
+      {
+        "pid": 5560,
+        "tid": 7020,
+        "operation": "alloc",
+        "begin": 268832511193,
+        "end": 268832620849,
+        "caller_allocation": 1073742208,
+        "caller_resource": 0,
+        "matched_device_allocation": true,
+        "event36_qpc": 268832616343,
+        "device": "device1",
+        "adapter": "adapter1",
+        "resource": null,
+        "shared": null,
+        "global_allocation": "global1",
+        "matched_adapter_allocation": true,
+        "event33_qpc": 268832615008,
+        "bytes": 65536,
+        "flags": 129,
+        "read_segment": 0,
+        "write_segment": 2,
+        "preferred": 2
+      }
+    ],
+    "gpu_signal_packets": [],
+    "cpu_sync": [
+      {
+        "qpc": 268832618111,
+        "pid": 5560,
+        "tid": 7020,
+        "event": 297,
+        "device": "device1",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          7001
+        ]
+      }
+    ],
+    "sync_identity": [],
+    "same_request": true,
+    "application_binding": "本用例为 Windows 自有 KMT 客户端；以进程、适配器和实载正式 KMD 为准，应用没有声称加载 tgd3d/NVK。"
+  },
+  "client": {
+    "timed_out": false,
+    "pid": 5560,
+    "utc": "2026-11-22T03:04:57.1425545Z",
+    "session": 1,
+    "exit": 0
+  },
+  "capture": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-allocation-property-20261121-01/evidence.zip",
+    "sha256": "f2ac25e41ba079feec25a0a1eb9a440409d2fd5460c7aef6777060d2da1de2fa"
+  },
+  "verified_preflight": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/initial-formal.json",
+    "sha256": "02826ee856b58dd3883126e43cba21b8387e21b78823a7c7c37be5f2e195b663"
+  },
+  "verified_postflight": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-allocation-property-20261121-01/after.json",
+    "sha256": "55e11c2430562cbf3780f5416789956cc68e66d99a21c04f34e0c90f980324b7"
+  },
+  "cleanup": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-allocation-property-20261121-01/cleanup.json",
+    "sha256": "4f676b368ce8c0ba38035bfdedd8066835f543cbc6d3b14f8490cde968323b09"
+  },
+  "fixture": {
+    "Measure.ps1": "cefe8bf12e30623eabf6da3420e5f0607cee8a9ebc9bafe965f9b25dcd0476a0",
+    "contracts.exe": "c9c9321eeaf82eca2e9f8c463e1d1d13c8ae275f1625eaa699841a32da20302b",
+    "trace.exe": "6f0e3a1367eeaef1dc3ff939dee0b580dbc1566d284096558455e90145c9eeaf"
+  },
+  "approved_component_sha256": {
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_dwm_and_kernel_loaded": {
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+  },
+  "application_modules": {},
+  "trace_stop": {
+    "exit": 0,
+    "output": [
+      "ETW status=0 lost=0 lost_buffers=0 written=10"
+    ]
+  },
+  "new_system_events": [],
+  "scope": "本次正式桌面和合法应用自有对象；旧启动和之前测试各有独立回执。"
+}

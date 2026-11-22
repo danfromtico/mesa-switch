@@ -68,7 +68,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present",
-        "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json"
+        "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/native-5-live-follow-up.json"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result. An independent replay of the three original client ETLs also found successful stage-2 tgd3d initialization and legacy device publication by the drawing thread after the value-1 signal retired and before the first public CALL. It found the same ordering in the contemporary flip control. The old traces still lack a matching asynchronous CPU wait record and direct evidence after CALL.",
       "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
@@ -2108,6 +2109,102 @@
         "finding": "本条原次对 GM20B 的能力查询成功，WDDM=2600，NativeGpuFenceSupported=0；创建和打开入口有导出。已验收的 94176 平台仍为 Windows 22631／WDDM 2.6，未达到官方原生围栏 Windows 11 24H2／WDDM 3.2 适用条件。",
         "missing_observation": "缺受支持类型的合法共享关系、适配器身份及对应的约束回执。当前设备未满足原生围栏条件。",
         "device_executions": 0
+      },
+      {
+        "round_id": "c5live-first-present-fence-20261121-01",
+        "contract_id": "dxgkrnl.h:145:1",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/c5live-first-present-fence-20261121-01.plan.json",
+        "declaration_sha256": "3501063bf6a039261a18645bfcf97e2b1fd124f994aa20839623ab4f404e88d8",
+        "question": "同一原生 ARM64 窗口进程在首次 SEQUENTIAL Present 前，能否把自有共享围栏的 GPU 信号、第二设备正常打开和实际等待返回配对？",
+        "applicable_when": "启动 94176 的正式 Code 0／交流供电组合。通过公开 D3D11 共享围栏 API，同 GM20B 适配器的两个设备分别创建和打开应用自有围栏。记录 API HRESULT、对象标识和值、等待返回与 QPC。仅在完成前置链后做一次 2 缓冲 BGRA SEQUENTIAL 窗口 Present(1,0)。保存 ETW、实载组件、像素、正常退出、同一 DWM 与无新增异常事件。先确认正式基线；前置能力不足即结束本次并保留未知。本次不能充当旧启动的观察。",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/c5live-first-present-fence-20261121-01.result.json",
+        "receipt_sha256": "330554794c8da2cbd4d36b0af523640ad49fa88b2478bd81a3a42fdc99727d8f",
+        "target_hit": false,
+        "finding": "本次公开 DXGI 枚举返回到夹具的 GM20B 选择条件后，夹具以 0x80004002 退出适配器选择。选择条件将 KMT 芯片号当成 DXGI DeviceId；未创建设备、围栏或窗口。任务确认进程已退出，同启动 94176／DWM 1428 保持 Code 0。",
+        "missing_observation": "缺围栏创建、打开、信号及同对象的等待和首次 Present。下轮使用已验收的 GM20B 适配器 LUID 选择。",
+        "device_executions": 1
+      },
+      {
+        "round_id": "c5live-first-present-fence-20261121-02",
+        "contract_id": "dxgkrnl.h:145:1",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/c5live-first-present-fence-20261121-02.plan.json",
+        "declaration_sha256": "0093c179c00d6f37d6f958f93f944df41696fe152f7370a588353b1ae9dd0342",
+        "question": "改用已验收 GM20B LUID 选择后，应用能否在首次 SEQUENTIAL Present 前配对自有围栏的 GPU 信号、第二设备合法打开及实际等待返回？",
+        "applicable_when": "继续同一正式桌面。使用公开 D3D11 共享围栏 API，修复夹具适配器定位与退出码读回。仍仅在围栏链通过后调用一次 2 缓冲 BGRA SEQUENTIAL Present。",
+        "state": "recorded",
+        "status": "已满足",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/c5live-first-present-fence-20261121-02.result.json",
+        "receipt_sha256": "7950cbb0c71e082752b8171879bb6165b747d0b20970b5b3f43f9c0447fab408",
+        "target_hit": true,
+        "finding": "正式启动 94176 的 PID 5284／TID 6060，同一对象的两条 1069 匹配两个设备和不同局部句柄。294 的值 1 信号与 297 的事件 428 均归同对象。事件等待返回 WAIT_OBJECT_0 并读回值 1，随后同 HWND 首次 SEQUENTIAL Present 的事件 184、公开返回均为 0，耗时 25.313 ms。应用退出 0，桌面连续。",
+        "missing_observation": "本次已补齐目标对象链。它覆盖应用自有共享监控围栏和 CPU 事件完成；未观察到该对象的独立同对象 DMA 包、GPU 等待方、历史三次 CALL 后事件，以及 91476 的 DWM DMA 152586 完成。",
+        "device_executions": 1
+      },
+      {
+        "round_id": "c5live-shared-parent-20261121-01",
+        "contract_id": "dxgkrnl.h:231:1",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.plan.json",
+        "declaration_sha256": "ba4c6aa54ca19837eba3b816b752e78331e6b487f9f84159e785b08686e8671e",
+        "question": "同次合法非 NT 共享围栏打开能否将全局表项、两进程局部打开与内核父对象直接关联？",
+        "applicable_when": "沿用主机正式配置与冻结的正常共享用例，留存进程日志、DxgKrnl 1069、进程退出和同桌面回执。",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+        "receipt_sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943",
+        "target_hit": false,
+        "finding": "同启动的传统非 NT 共享入口创建与打开都成功。PID 4984 与 1824 的 1069 把各自局部句柄连到同一同步对象。新 ETW 覆盖这次打开。同层事件模板只给 pSyncObject 和局部句柄，缺全局表项到父对象的字段。",
+        "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+        "device_executions": 1
+      },
+      {
+        "round_id": "c5live-sealed-resource-20261121-01",
+        "contract_id": "dxgkrnl.h:684:4",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.plan.json",
+        "declaration_sha256": "b847f21e38f9d3e5898c2e506208df2a808960d57683f72c402778bc84045f7f",
+        "question": "在本次正常跨进程共享与打开资源中，Windows 是否可观测地固定同一资源的分配成员集合？",
+        "applicable_when": "只用自有共享分配的创建、正常导出、子进程打开和成员查询，不向已共享对象试写或额外追加。",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+        "receipt_sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc",
+        "target_hit": false,
+        "finding": "正式启动新采集的同资源成员查询为 1, 1, 1。创建与打开的 36 对同一共享／全局分配已匹配。本轮按合法创建、共享、打开、关闭走完整生命周期。",
+        "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+        "device_executions": 1
+      },
+      {
+        "round_id": "c5live-allocation-cache-20261121-01",
+        "contract_id": "dxgkrnl.h:759:2",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.plan.json",
+        "declaration_sha256": "d48a0e3e31b73453af0a597f79dc00bfd7d02eb9ec6314118612bfc88aa3e694",
+        "question": "调取同一正式基线的真实 CPU 映射，能否将页保护与同一分配的具名 Cached 属性配对？",
+        "applicable_when": "正常自有分配、Lock2、VirtualQuery、解锁和释放，按 PID/TID、局部及全局分配身份关联 ETW。",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+        "receipt_sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d",
+        "target_hit": false,
+        "finding": "本次 Lock2 返回 0x00000000，已分配地址的 VirtualQuery.Protect 为 0x404。已采集的同分配 33/36 与锁定绑定成功；无具名 Cached 位的回执。",
+        "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+        "device_executions": 1
+      },
+      {
+        "round_id": "c5live-allocation-property-20261121-01",
+        "contract_id": "dxgvmbus.c:3651:2",
+        "declaration": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.plan.json",
+        "declaration_sha256": "d3e350bc1ec49f19bf3cb27ddf67bdaee2d2e1f65ccfa5c1f54c05c9db638396",
+        "question": "合法自有分配的属性更新是否实际异步返回并提供对应分页围栏值？",
+        "applicable_when": "用当前正式基线运行已知正常、单次自有分配更新用例；只有自然返回 STATUS_PENDING 时核对同队列的围栏输出。",
+        "state": "recorded",
+        "status": "未知",
+        "receipt": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+        "receipt_sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409",
+        "target_hit": false,
+        "finding": "本轮自有 64 KiB 分配的合法属性更新，入口与返回已匹配。实际 NTSTATUS 为 0xc0000002，输出 PagingFenceValue 为 0。",
+        "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+        "device_executions": 1
       }
     ],
     "unobserved_recovery_boots": [
@@ -2151,6 +2248,10 @@
       "follow_up": {
         "path": "windows-native-graphics/native-19-follow-up.json",
         "sha256": "d16875ce7bca863e559385f0e7182c78c82692dec10e53c58134d679d601939b"
+      },
+      "current_windows_physical_follow_up": {
+        "path": "windows-native-graphics/native-5-live-follow-up.json",
+        "sha256": "97440662c6c06cc80af7a56c8b3d84cc750c50c7df48170f377e7e50f054afdb"
       }
     }
   },

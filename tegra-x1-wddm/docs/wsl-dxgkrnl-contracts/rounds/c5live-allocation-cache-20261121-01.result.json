@@ -1,0 +1,271 @@
+{
+  "schema": 1,
+  "round_id": "c5live-allocation-cache-20261121-01",
+  "contract_id": "dxgkrnl.h:759:2",
+  "status": "未知",
+  "declaration_sha256": "d48a0e3e31b73453af0a597f79dc00bfd7d02eb9ec6314118612bfc88aa3e694",
+  "started_utc": "2026-11-22T03:03:59.506460+00:00",
+  "device_executions": 1,
+  "target_hit": false,
+  "unexplained_restart": false,
+  "finding": "本次 Lock2 返回 0x00000000，已分配地址的 VirtualQuery.Protect 为 0x404。已采集的同分配 33/36 与锁定绑定成功；无具名 Cached 位的回执。",
+  "gap": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+  "before": {
+    "boot": 94176,
+    "dwm": 1428,
+    "dwm_start": "2026-11-21T23:12:10.5181790Z",
+    "session": 1,
+    "code": 0,
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "ac": "Online",
+    "trial": false,
+    "utc": "2026-11-22T03:04:05.2484341Z"
+  },
+  "after": {
+    "boot": 94176,
+    "dwm": 1428,
+    "dwm_start": "2026-11-21T23:12:10.5181790Z",
+    "session": 1,
+    "code": 0,
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "ac": "Online",
+    "trial": false,
+    "utc": "2026-11-22T03:04:21.7500777Z"
+  },
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 5684,
+      "utc": "2026-11-22T03:04:13.3079928Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 267989672227,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "start",
+        "mode": "cache"
+      },
+      {
+        "qpc": 267989810198,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 267989885947,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 267989962167,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "alloc",
+        "status": "00000000",
+        "device": "1073742016",
+        "allocation": "1073742208",
+        "resource": "0",
+        "bytes": "65536"
+      },
+      {
+        "qpc": 267990027876,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "lock_begin",
+        "device": "1073742016",
+        "allocation": "1073742208"
+      },
+      {
+        "qpc": 267990130661,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "lock_return",
+        "status": "00000000",
+        "mapped": "1"
+      },
+      {
+        "qpc": 267990194355,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "cache",
+        "query": "48",
+        "protection": "1028",
+        "allocation_protection": "1028",
+        "state": "4096",
+        "type": "131072",
+        "region_bytes": "65536"
+      },
+      {
+        "qpc": 267990254581,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "unlock",
+        "status": "00000000"
+      },
+      {
+        "qpc": 267990317333,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "free",
+        "status": "00000000"
+      },
+      {
+        "qpc": 267990429250,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 267990491469,
+        "pid": 5684,
+        "tid": 8120,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=9"
+      ]
+    },
+    "actor_event_counts": {
+      "27": 1,
+      "33": 1,
+      "36": 1,
+      "297": 1,
+      "28": 1
+    },
+    "devices": [
+      {
+        "pid": 5684,
+        "tid": 8120,
+        "qpc": 267989882504,
+        "caller_device": 1073742016,
+        "device": "device1",
+        "adapter": "adapter1"
+      }
+    ],
+    "allocation_joins": [
+      {
+        "pid": 5684,
+        "tid": 8120,
+        "operation": "alloc",
+        "begin": 267989885947,
+        "end": 267989962167,
+        "caller_allocation": 1073742208,
+        "caller_resource": 0,
+        "matched_device_allocation": true,
+        "event36_qpc": 267989954723,
+        "device": "device1",
+        "adapter": "adapter1",
+        "resource": null,
+        "shared": null,
+        "global_allocation": "global1",
+        "matched_adapter_allocation": true,
+        "event33_qpc": 267989953500,
+        "bytes": 65536,
+        "flags": 129,
+        "read_segment": 0,
+        "write_segment": 2,
+        "preferred": 2
+      }
+    ],
+    "gpu_signal_packets": [],
+    "cpu_sync": [
+      {
+        "qpc": 267989956810,
+        "pid": 5684,
+        "tid": 8120,
+        "event": 297,
+        "device": "device1",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          7001
+        ]
+      }
+    ],
+    "sync_identity": [],
+    "same_allocation_create_to_lock": true,
+    "application_binding": "本用例为 Windows 自有 KMT 客户端；以进程、适配器和实载正式 KMD 为准，应用没有声称加载 tgd3d/NVK。"
+  },
+  "client": {
+    "timed_out": false,
+    "pid": 5684,
+    "utc": "2026-11-22T03:04:13.3079928Z",
+    "session": 1,
+    "exit": 0
+  },
+  "capture": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-allocation-cache-20261121-01/evidence.zip",
+    "sha256": "9874d37f349a4768084db606af5b191fe1037b26893ad46f61e16adc589d9207"
+  },
+  "verified_preflight": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/initial-formal.json",
+    "sha256": "02826ee856b58dd3883126e43cba21b8387e21b78823a7c7c37be5f2e195b663"
+  },
+  "verified_postflight": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-allocation-cache-20261121-01/after.json",
+    "sha256": "c59270475a81ededfe6d716e494742fec59c9b72733fc162302dda4870b90ffb"
+  },
+  "cleanup": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-allocation-cache-20261121-01/cleanup.json",
+    "sha256": "4f676b368ce8c0ba38035bfdedd8066835f543cbc6d3b14f8490cde968323b09"
+  },
+  "fixture": {
+    "Measure.ps1": "cefe8bf12e30623eabf6da3420e5f0607cee8a9ebc9bafe965f9b25dcd0476a0",
+    "contracts.exe": "c9c9321eeaf82eca2e9f8c463e1d1d13c8ae275f1625eaa699841a32da20302b",
+    "trace.exe": "6f0e3a1367eeaef1dc3ff939dee0b580dbc1566d284096558455e90145c9eeaf"
+  },
+  "approved_component_sha256": {
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_dwm_and_kernel_loaded": {
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+  },
+  "application_modules": {},
+  "trace_stop": {
+    "exit": 0,
+    "output": [
+      "ETW status=0 lost=0 lost_buffers=0 written=9"
+    ]
+  },
+  "new_system_events": [],
+  "scope": "本次正式桌面和合法应用自有对象；旧启动和之前测试各有独立回执。"
+}

@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "round_id": "c5live-first-present-fence-20261121-01",
+  "contract_id": "dxgkrnl.h:145:1",
+  "status": "未知",
+  "declaration_sha256": "3501063bf6a039261a18645bfcf97e2b1fd124f994aa20839623ab4f404e88d8",
+  "started_utc": "2026-11-22T02:59:58.488816+00:00",
+  "device_executions": 1,
+  "target_hit": false,
+  "unexplained_restart": false,
+  "finding": "本次公开 DXGI 枚举返回到夹具的 GM20B 选择条件后，夹具以 0x80004002 退出适配器选择。选择条件将 KMT 芯片号当成 DXGI DeviceId；未创建设备、围栏或窗口。任务确认进程已退出，同启动 94176／DWM 1428 保持 Code 0。",
+  "gap": "缺围栏创建、打开、信号及同对象的等待和首次 Present。下轮使用已验收的 GM20B 适配器 LUID 选择。",
+  "before": {
+    "boot": 94176,
+    "dwm": 1428,
+    "dwm_start": "2026-11-21T23:12:10.5181790Z",
+    "session": 1,
+    "code": 0,
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "ac": "Online",
+    "trial": false,
+    "utc": "2026-11-22T03:00:03.8954608Z"
+  },
+  "after": {
+    "boot": 94176,
+    "dwm": 1428,
+    "dwm_start": "2026-11-21T23:12:10.5181790Z",
+    "session": 1,
+    "code": 0,
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "ac": "Online",
+    "trial": false,
+    "utc": "2026-11-22T03:00:24.2721736Z"
+  },
+  "observation": {
+    "journal": [
+      {
+        "name": "start",
+        "pid": 5648,
+        "tid": 484,
+        "qpc": 263434625556,
+        "hr": "00000000",
+        "value": 19200000
+      },
+      {
+        "name": "factory",
+        "pid": 5648,
+        "tid": 484,
+        "qpc": 263435153856,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "gm20b",
+        "pid": 5648,
+        "tid": 484,
+        "qpc": 263435207262,
+        "hr": "80004002",
+        "value": 0
+      },
+      {
+        "name": "exit",
+        "pid": 5648,
+        "tid": 484,
+        "qpc": 263435254072,
+        "hr": "00000000",
+        "value": 2
+      }
+    ],
+    "app_exit_receipt": "应用日志记录 2；任务等待完成，但旧版 Start-Process 的 ExitCode 字段为空。"
+  },
+  "client": {
+    "timed_out": false,
+    "pid": 5648,
+    "utc": "2026-11-22T03:00:15.8764975Z",
+    "session": 1,
+    "exit": null
+  },
+  "capture": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-first-present-fence-20261121-01/evidence.zip",
+    "sha256": "f7c2ff2229995fe333257433e443d62afe00a787f430fcd07ef756832711616c"
+  },
+  "verified_preflight": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/initial-formal.json",
+    "sha256": "02826ee856b58dd3883126e43cba21b8387e21b78823a7c7c37be5f2e195b663"
+  },
+  "verified_postflight": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-first-present-fence-20261121-01/after.json",
+    "sha256": "93269af406d5020716275dbe958b3ff55557716aac68363e7fc590c0df0e785e"
+  },
+  "cleanup": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-first-present-fence-20261121-01/cleanup.json",
+    "sha256": "4f676b368ce8c0ba38035bfdedd8066835f543cbc6d3b14f8490cde968323b09"
+  },
+  "fixture": {
+    "Measure.ps1": "0882fdc5670d608c9f89406beb13449125177dbd1959dcd47355c61a9c44edf1",
+    "window_fence.exe": "4000075030be6356006ce556bc01faa37ad720c8ea6871437a58a8138a7b7902",
+    "trace.exe": "6f0e3a1367eeaef1dc3ff939dee0b580dbc1566d284096558455e90145c9eeaf"
+  },
+  "approved_component_sha256": {
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_dwm_and_kernel_loaded": {
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+  },
+  "application_modules": {},
+  "trace_stop": {
+    "exit": 0,
+    "output": [
+      "ETW status=0 lost=0 lost_buffers=0 written=9"
+    ]
+  },
+  "new_system_events": [],
+  "scope": "本次正式桌面和合法应用自有对象；旧启动和之前测试各有独立回执。"
+}

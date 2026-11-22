@@ -1,0 +1,20 @@
+{
+  "round_id": "c5live-first-present-fence-20261121-02",
+  "contract_id": "dxgkrnl.h:145:1",
+  "declared_utc": "2026-11-22T03:01:12.733924+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "cbde4a5d6bda8fd51ff07d7192f8952728985908d73f747e9e48b8dcc059a6aa",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "同步对象在其支持的类型、共享与所有权范围内用于 GPU 进度和上下文间协调。",
+  "question": "改用已验收 GM20B LUID 选择后，应用能否在首次 SEQUENTIAL Present 前配对自有围栏的 GPU 信号、第二设备合法打开及实际等待返回？",
+  "method": "继续同一正式桌面。使用公开 D3D11 共享围栏 API，修复夹具适配器定位与退出码读回。仍仅在围栏链通过后调用一次 2 缓冲 BGRA SEQUENTIAL Present。",
+  "required_observation": "改用已验收 GM20B LUID 选择后，应用能否在首次 SEQUENTIAL Present 前配对自有围栏的 GPU 信号、第二设备合法打开及实际等待返回？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-sync-object-scope-20261121-01.result.json",
+    "sha256": "c0757ca862e00305292c31df7ffbcd01dc792ab962cf37c32d29c18aa91f2367"
+  }
+}

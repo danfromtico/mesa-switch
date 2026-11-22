@@ -1,0 +1,20 @@
+{
+  "round_id": "c5live-allocation-cache-20261121-01",
+  "contract_id": "dxgkrnl.h:759:2",
+  "declared_utc": "2026-11-22T03:03:55.778309+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "a62444f34701ccb9974e3bc80447a3978c175a837ed65a1787384929f25e1ec1",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "CPU 可见分配的缓存映射属性，与同一分配在原生内核中的 Cached 标记相符。",
+  "question": "调取同一正式基线的真实 CPU 映射，能否将页保护与同一分配的具名 Cached 属性配对？",
+  "method": "正常自有分配、Lock2、VirtualQuery、解锁和释放，按 PID/TID、局部及全局分配身份关联 ETW。",
+  "required_observation": "调取同一正式基线的真实 CPU 映射，能否将页保护与同一分配的具名 Cached 属性配对？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-allocation-cache-20261121-01.result.json",
+    "sha256": "23663fb977590001af8d4449cf6cc6b2c988894228df6ca3b84e185a49583b6b"
+  }
+}
