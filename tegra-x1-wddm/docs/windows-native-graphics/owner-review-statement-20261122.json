@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-22T10:35:34.565930+00:00",
+  "source_thread": "01a2026b-02b8-7ea3-996a-e5472b0bde3f",
+  "source": "Direct project-owner message in this chat",
+  "reported_object": "dma-empty-submit-probe-stdio-fix-01a202a1-r2/ (formerly null-submit)",
+  "owner_claims": [
+    "本人编写的自用诊断工具，目标为本人所有Nintendo Switch及自研KMD",
+    "功能为一次空DMA提交以验证提交链回执",
+    "无网络行为、无持久化、无权限提升",
+    "安全审查系误判，允许继续"
+  ],
+  "authorized_scope": [
+    "Windows ARM64交叉编译",
+    "编译产物在本人设备实机运行"
+  ],
+  "authority_classification": "Project-owner authorization and owner review; not an independently verified platform human-review decision.",
+  "factual_corrections": {
+    "program_runs_max": 1,
+    "cases_max": 2,
+    "cases": [
+      "ordinary control",
+      "NullRendering comparison, only if control succeeds"
+    ],
+    "dma_command_bytes_per_case": 8,
+    "private_packet_bytes_per_case": 24,
+    "journal_persistence": true,
+    "automatic_startup_persistence_not_claimed": "The source writes and flushes a diagnostic file; do not conflate it with installing an auto-start mechanism.",
+    "zero_length_dma": false,
+    "other_absence_claims": "Owner assertions are retained as assertions; no new exhaustive security audit is claimed."
+  },
+  "reported_commit": "582f1799b0923be2dbe0a53a899c5cecbed5e4ca",
+  "commit_check": "Modifies Capture-DesktopEvidence.ps1 progress recording on main; not part of current tgd3d-vulkan and not evidence that all probe references were rewritten.",
+  "path_lineage": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/external-path-lineage-20261122.json",
+    "bytes": 54472,
+    "sha256": "0505693f2d4eb7ed1a261bdd6ef927ea3d5e070cd74cb4e94acdca0eb74e4ca5"
+  },
+  "device_executor": "01a202a1-7c8c-70c1-8363-52cc06d2708b",
+  "gemini_native_assignment": "cancelled; no device lease acceptance",
+  "main_device_access": false,
+  "naming": "Prefer accurate functional descriptions for new diagnostic tools; preserve API/symbol/history names and substantive behavior, without using names to influence safety controls."
+}

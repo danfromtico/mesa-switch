@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T10:35:34.565930+00:00",
+  "review_thread": "01a2026b-02b8-7ea3-996a-e5472b0bde3f",
+  "execution_thread": "01a202a1-7c8c-70c1-8363-52cc06d2708b",
+  "status": "既有最终ARM64编译修复及独立代码审核通过；实机计划与验收尚未通过本主审",
+  "root_cause_found": false,
+  "production_driver_fix_accepted": false,
+  "archive": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/dma-empty-submit-probe-stdio-fix-01a202a1-r2/delivery/batch-review.zip",
+    "bytes": 253389,
+    "sha256": "c8fa6a69fcc679990d896656f80094d7e76ef0c6ec4735e30223c26ac6f63070"
+  },
+  "manifest": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/dma-empty-submit-probe-stdio-fix-01a202a1-r2/delivery/batch-manifest.json",
+    "bytes": 40187,
+    "sha256": "a2b73f050b1d6467693d358a361510f133127d0644cd2cac746b1a05fbb2e77f"
+  },
+  "archive_members_verified": 111,
+  "archive_total_entries": 112,
+  "source": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/dma-empty-submit-probe-stdio-fix-01a202a1-r2/null-submit-check.c",
+    "bytes": 7805,
+    "sha256": "d861f3780a13ef8f03442f5893f58a7f4ca19a5222159debc32ead572212db9c"
+  },
+  "source_change": "Relative to original frozen source, exactly one underscore: snprintf -> _snprintf at line23. Logging failure/length checks and all KMT behavior unchanged.",
+  "unchanged_inputs": {
+    "build_script": true,
+    "nvk_helpers": 9,
+    "final_frozen_files_verified": 13,
+    "full_review_coverage_files_verified": 13
+  },
+  "actual_tools": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/arm64-build-actual-tools-20261122.json",
+    "bytes": 7638,
+    "sha256": "3af1a7f461774108446c85c84738963e7984333ea9f06b7c17efef91858177d1"
+  },
+  "actual_r1_tool": "exec-7aae88a4-46dd-4f49-8d74-1049bde9aba3",
+  "actual_r1_step_exits": [
+    0,
+    0,
+    0,
+    1
+  ],
+  "actual_r1_failure": "_snprintf_s undefined at link; ordinary tool failure, not service refusal.",
+  "actual_r2_tool": "exec-44d4a17f-926f-470d-b1a3-17a492385e4d",
+  "actual_r2_step_exits": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "build_stderr_bytes": 0,
+  "binary": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/dma-empty-submit-probe-stdio-fix-01a202a1-r2/build-arm64/null-submit-check.exe",
+    "bytes": 78336,
+    "sha256": "b0e6d275845a04938bb7cbc86ba9ebe4184550cbe0cc195a854708da3b28f26c"
+  },
+  "PE": {
+    "machine": "ARM64 (0xAA64)",
+    "independent_readobj_output_matches": true,
+    "static_imports_match_saved_record": true,
+    "Windows_execution_by_main": 0
+  },
+  "independent_review": {
+    "requested_model": "gemini-4-neon-high",
+    "conversation_id": "573afcaf-11cb-430a-b8be-7164661144c7",
+    "full13_file_hash_coverage_matched": true,
+    "final_delta_status": "approve",
+    "final_delta_findings": 0,
+    "F1": "resolved",
+    "reports": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/dma-empty-submit-probe-stdio-fix-01a202a1-r1/review/attempt2/parsed-review.json",
+        "bytes": 15729,
+        "sha256": "cf08b59f97b61efdfc7e040fbd9c5da20dd31496d25d7d7237a6bc72d19adf36"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/dma-empty-submit-probe-stdio-fix-01a202a1-r2/review/parsed-review.json",
+        "bytes": 11202,
+        "sha256": "7ef19d454048c6a5a250da83ed7f18fcca39fe75023aa7562bc73a81fd303e82"
+      }
+    ],
+    "scope": "Static code and build/PE evidence; no native admission or historical attribution."
+  },
+  "main_proof": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/arm64-build-main-proof-20261122.json",
+    "bytes": 2089,
+    "sha256": "35fb52a46ba9280ff5ae651bc03c58b623eac1eb4c69bc9aab0d5504e7813e62"
+  },
+  "external_path_lineage": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/external-path-lineage-20261122.json",
+    "bytes": 54472,
+    "sha256": "0505693f2d4eb7ed1a261bdd6ef927ea3d5e070cd74cb4e94acdca0eb74e4ca5"
+  },
+  "path_change_scope": "Directories were externally renamed; main only verified old/current mapping and unchanged archived bytes. Do not attribute the rename to this reviewer or infer platform approval from it.",
+  "owner_review": {
+    "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/owner-review-statement-20261122.json",
+    "bytes": 2310,
+    "sha256": "44de6545ca7920ad370ed3eed9fadb95d40cda56622c034bcf945a259742c47a"
+  },
+  "native_limits": {
+    "program_executions_max": 1,
+    "cases_max": 2,
+    "command_bytes": 8,
+    "private_bytes": 24,
+    "cpu_fence_timeout_ms_per_case": 5000,
+    "both_context_and_submit_null_flags_in_case1": true,
+    "effects_independently_separated": false,
+    "not_zero_dma": true,
+    "cross_compile_does_not_prove_runtime_success": true,
+    "no_new_native_result_in_this_batch": true,
+    "native_plan_draft_not_admitted": true,
+    "pending_technical_items": [
+      "Concrete capture scope and bounds covering setup/cases/cleanup",
+      "Device-side executable SHA verification before unique launch",
+      "Process-wide observation/cleanup timeout and no re-dispatch on observation timeout"
+    ]
+  },
+  "formal_baseline_changed": false,
+  "open_faults_closed": 0,
+  "four_deferred_contracts_status": "All4 remain unknown; no new direct observation from compilation.",
+  "source22_preexisting_modifications_preserved": true,
+  "main_build_reruns": 0,
+  "main_device_calls": 0,
+  "publication": "Local documentation only; no upload or baseline promotion."
+}
