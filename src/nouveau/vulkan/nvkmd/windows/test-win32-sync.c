@@ -174,6 +174,7 @@ static void runtime_unmap(struct nvkmd_mem *mem, enum nvkmd_mem_map_flags flags,
 
 static void runtime_contract(struct nvk_device *nvk, struct nvkmd_windows_dev *kmd)
 {
+   struct nvkmd_pdev *previous_pdev = kmd->base.pdev;
    struct nvkmd_pdev pdev = {0};
    kmd->base.pdev = &pdev;
    rt.thread = GetCurrentThreadId();
@@ -261,6 +262,7 @@ static void runtime_contract(struct nvk_device *nvk, struct nvkmd_windows_dev *k
    list_del(&mem.link); simple_mtx_destroy(&mem.map_mutex); simple_mtx_destroy(&kmd->base.mems_mutex);
    nvkmd_ctx_destroy(ctx); vk_common_DestroySemaphore(device, sem, NULL);
    CHECK(!rt.context_refs && !live && !contexts && gpu_waits == 1 && gpu_signals == 1);
+   kmd->base.pdev = previous_pdev;
    for (unsigned i = 1; i <= rt.next; ++i) CHECK(!rt.fences[i].refs);
    puts("PASS: actual NVK runtime transport, caller thread, retained same-device fences, real payload/write-list forwarding, no allocator KMT fallback, failure/timeout propagation (CPU callbacks; no GPU)");
 }
@@ -550,7 +552,8 @@ kmt_batch_and_concurrency_tests(struct nvk_device *nvk, struct nvkmd_windows_dev
    list_inithead(&kmd->base.mems);
 
    const struct nvkmd_mem_ops ops = {.map = batch_mem_map, .unmap = batch_mem_unmap};
-   uint32_t *buf0 = calloc(TG_GPU_SUBMIT_MAX_BYTES / 4u, sizeof(uint32_t));
+   const uint32_t buf0_bytes = TG_GPU_SUBMIT_MAX_BYTES + 64u;
+   uint32_t *buf0 = calloc(buf0_bytes / 4u, sizeof(uint32_t));
    uint32_t *buf1 = calloc(TG_GPU_SUBMIT_MAX_BYTES / 4u, sizeof(uint32_t));
    uint32_t *ind_buf = calloc(64, sizeof(uint32_t));
    CHECK(buf0 && buf1 && ind_buf);
@@ -566,8 +569,8 @@ kmt_batch_and_concurrency_tests(struct nvk_device *nvk, struct nvkmd_windows_dev
    buf0[20] = 1;
 
    struct batch_mem_backing b0 = {.words = buf0}, b1 = {.words = buf1}, bi = {.words = ind_buf};
-   nvkmd_mem_init(&kmd->base, &b0.mem, &ops, NVKMD_MEM_CAN_MAP, TG_GPU_SUBMIT_MAX_BYTES, 4);
-   b0.va = (struct nvkmd_va){.addr = 0x200000, .size_B = TG_GPU_SUBMIT_MAX_BYTES};
+   nvkmd_mem_init(&kmd->base, &b0.mem, &ops, NVKMD_MEM_CAN_MAP, buf0_bytes, 4);
+   b0.va = (struct nvkmd_va){.addr = 0x200000, .size_B = buf0_bytes};
    b0.mem.va = &b0.va;
    list_addtail(&b0.mem.link, &kmd->base.mems);
 
@@ -632,6 +635,33 @@ kmt_batch_and_concurrency_tests(struct nvk_device *nvk, struct nvkmd_windows_dev
          kmt_batch.last_sync_points[0] == 100u + WSI_WIN32_RUNTIME_MAX_SYNCS &&
          kmt_batch.last_sync_points[1] == 101u + WSI_WIN32_RUNTIME_MAX_SYNCS);
 
+   VkSemaphoreCreateInfo binary_info = {.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+   VkSemaphore binary_sem;
+   CHECK(vk_common_CreateSemaphore(device, &binary_info, NULL, &binary_sem) == VK_SUCCESS);
+   struct vk_sync *binary_sync = &vk_semaphore_from_handle(binary_sem)->permanent;
+   struct vk_sync_binary *binary = vk_sync_as_binary(binary_sync);
+   CHECK(binary);
+   binary->next_point = 77;
+   const struct vk_sync_wait mixed_waits[2] = {
+      {.sync = binary_sync, .wait_value = 999}, {.sync = syncs[0], .wait_value = 42},
+   };
+   const struct vk_sync_signal mixed_signals[2] = {
+      {.sync = binary_sync, .signal_value = 999}, {.sync = syncs[0], .signal_value = 43},
+   };
+   CHECK(nvkmd_ctx_wait(ctx0, &nvk->vk.base, 2, mixed_waits) == VK_SUCCESS);
+   CHECK(kmt_batch.last_sync_count == 2 && kmt_batch.last_sync_points[0] == 77 &&
+         kmt_batch.last_sync_points[1] == 42);
+   CHECK(nvkmd_ctx_signal(ctx0, &nvk->vk.base, 2, mixed_signals) == VK_SUCCESS);
+   CHECK(kmt_batch.last_sync_count == 2 && kmt_batch.last_sync_points[0] == 77 &&
+         kmt_batch.last_sync_points[1] == 43);
+   const struct vk_sync_signal bad_signals[2] = {
+      {.sync = syncs[0], .signal_value = 44}, {.sync = &bogus_sync, .signal_value = 45},
+   };
+   const LONG prior_signals = kmt_batch.signal_calls;
+   CHECK(nvkmd_ctx_signal(ctx0, &nvk->vk.base, 2, bad_signals) == VK_ERROR_FEATURE_NOT_PRESENT);
+   CHECK(kmt_batch.signal_calls == prior_signals);
+   vk_common_DestroySemaphore(device, binary_sem, NULL);
+
    /* 2. Contiguous linear coalescing; discontiguous BOs keep their actual command VA. */
    const uint32_t w0[] = {10, 11}, w1[] = {11, 12};
    const struct nvkmd_ctx_exec coalesced[3] = {
@@ -665,7 +695,7 @@ kmt_batch_and_concurrency_tests(struct nvk_device *nvk, struct nvkmd_windows_dev
    kmt_batch.submit_count = 0;
    const struct nvkmd_ctx_exec split_and_ind[5] = {
       {.addr = 0x200000, .size_B = TG_GPU_SUBMIT_MAX_BYTES - 8},
-      {.addr = 0x300000, .size_B = 16},
+      {.addr = 0x200000 + TG_GPU_SUBMIT_MAX_BYTES - 8, .size_B = 16},
       {.addr = 0x200040, .size_B = 20, .incomplete = true},
       {.addr = 0x400000, .size_B = 40, .no_prefetch = true},
       {.addr = 0x300010, .size_B = 8},
@@ -674,6 +704,29 @@ kmt_batch_and_concurrency_tests(struct nvk_device *nvk, struct nvkmd_windows_dev
    CHECK(kmt_batch.submit_count == 4 && !kmt_batch.submit_is_indirect[0] &&
          !kmt_batch.submit_is_indirect[1] && kmt_batch.submit_is_indirect[2] &&
          !kmt_batch.submit_is_indirect[3]);
+   CHECK(kmt_batch.submit_addrs[0] == 0x200000 &&
+         kmt_batch.submit_bytes[0] == TG_GPU_SUBMIT_MAX_BYTES - 8 &&
+         kmt_batch.submit_addrs[1] == 0x200000 + TG_GPU_SUBMIT_MAX_BYTES - 8 &&
+         kmt_batch.submit_bytes[1] == 16);
+
+   kmt_batch.submit_count = 0;
+   const struct nvkmd_ctx_exec gap[2] = {
+      {.addr = 0x200000, .size_B = 8}, {.addr = 0x20000c, .size_B = 8},
+   };
+   CHECK(nvkmd_ctx_exec(ctx0, &nvk->vk.base, 2, gap) == VK_SUCCESS);
+   CHECK(kmt_batch.submit_count == 2 && kmt_batch.submit_addrs[0] == 0x200000 &&
+         kmt_batch.submit_addrs[1] == 0x20000c && kmt_batch.submit_bytes[0] == 8 &&
+         kmt_batch.submit_bytes[1] == 8);
+   b1.va.addr = b0.va.addr + b0.va.size_B;
+   kmt_batch.submit_count = 0;
+   const struct nvkmd_ctx_exec adjacent_bos[2] = {
+      {.addr = b1.va.addr - 8, .size_B = 8}, {.addr = b1.va.addr, .size_B = 8},
+   };
+   CHECK(nvkmd_ctx_exec(ctx0, &nvk->vk.base, 2, adjacent_bos) == VK_SUCCESS);
+   CHECK(kmt_batch.submit_count == 2 && kmt_batch.submit_addrs[0] == b1.va.addr - 8 &&
+         kmt_batch.submit_addrs[1] == b1.va.addr && kmt_batch.submit_bytes[0] == 8 &&
+         kmt_batch.submit_bytes[1] == 8);
+   b1.va.addr = 0x300000;
 
    /* 4. Malformed duplicate written primary is preserved as error (not masked). */
    const uint32_t bad_written[] = {55, 55};
@@ -698,8 +751,9 @@ kmt_batch_and_concurrency_tests(struct nvk_device *nvk, struct nvkmd_windows_dev
 
    /* 6. Concurrent execution on two KMT contexts sharing device mems_mutex. */
    kmt_batch.concurrent = true;
-   struct concurrent_worker_args a0 = {nvk, ctx0, {syncs[0], syncs[1]}, 0x200000, 0x300000};
-   struct concurrent_worker_args a1 = {nvk, ctx1, {syncs[1], syncs[2]}, 0x200010, 0x300010};
+   const LONG prior_submits = kmt_batch.linear_submits;
+   struct concurrent_worker_args a0 = {nvk, ctx0, {syncs[0], syncs[1]}, 0x200000, 0x200010};
+   struct concurrent_worker_args a1 = {nvk, ctx1, {syncs[1], syncs[2]}, 0x300000, 0x300010};
    HANDLE threads[2] = {
       CreateThread(NULL, 0, concurrent_worker, &a0, 0, NULL),
       CreateThread(NULL, 0, concurrent_worker, &a1, 0, NULL),
@@ -707,6 +761,7 @@ kmt_batch_and_concurrency_tests(struct nvk_device *nvk, struct nvkmd_windows_dev
    CHECK(threads[0] && threads[1]);
    CHECK(WaitForMultipleObjects(2, threads, TRUE, 30000) == WAIT_OBJECT_0);
    CHECK(CloseHandle(threads[0]) && CloseHandle(threads[1]));
+   CHECK(kmt_batch.linear_submits == prior_submits + 64);
    CHECK(b0.mem.refcnt == 1 && !b0.mem.map_cnt && b1.mem.refcnt == 1 && !b1.mem.map_cnt);
 
    nvkmd_ctx_destroy(ctx0);
