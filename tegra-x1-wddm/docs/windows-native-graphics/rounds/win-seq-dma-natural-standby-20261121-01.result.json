@@ -4,9 +4,9 @@
   "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
   "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
   "plan_sha256": "6fbaf884b724d7f3cfad2eb54efda6975ed2b91b614c56912295b26e535a462e",
-  "status": "实机待命",
-  "finding": "启动 94734 的一次性诊断候选已验证同一原场景入口到独立控制端，Windows→控制端→Windows 的原入口门控探针收到同 nonce 确认后退出，原窗口、渲染和 ETW 收集均未启动。",
-  "missing_observation": "待实际原场景自然启动及异常证据。长期覆盖未知。候选超时无人值守恢复尚待真实到期回执，既有恢复路径已通过本地策略模拟。",
+  "status": "限时布防已结束",
+  "finding": "完整候选在启动 94734 完成同入口门控探针并真实待命。候选到期前无原场景请求，未开启实际捕获。原恢复任务以 0x8007042B 退出后，控制端补启动所属任务。Windows 执行两次有记录的恢复重启，到达正式启动 94912。Code 0、交流供电、永久许可和八件哈希已核对，临时任务和目录已清理。恢复后功耗模式为 7。",
+  "missing_observation": "本轮无原场景自然复现回执，GM20B 旧事故首因与长期覆盖仍未知。System 记录了候选启动内一次短暂交流掉线，计划任务 Operational 与用户态电源 Diagnostic 频道关闭，原恢复任务的退出成因仍未知。",
   "device_executions": 0,
   "controlled_restart_is_reproduction": false,
   "historical_root_cause": "未知",
@@ -105,21 +105,18 @@
     ],
     "candidate_permission": "one-time diagnostic",
     "controller_state_at_writeback": {
-      "state": "installed-standby",
-      "utc": "2026-11-22T04:05:50.244213+00:00",
+      "state": "expired-awaiting-owned-restore",
+      "utc": "2026-11-22T04:17:51.418876+00:00",
       "controller_pid": 55311,
       "boot": 94734,
       "current_capture": false,
-      "scope": "Windows scheduler, project KMD entry/return and GPU fence readback, Windows DMA retirement",
-      "remote_heartbeat": "ALIVE",
-      "task": "SwitchWOA-FirstPresent-202c8276baa1",
-      "accept_until_qpc": 17673419605,
-      "watchdog_expiry_utc": "2026-11-22T04:18:21.3250685+00:00"
+      "observed_boot": 94734,
+      "scope": "Windows scheduler, project KMD entry/return and GPU fence readback, Windows DMA retirement"
     },
     "arm_policy": {
       "same_boot_prelaunch_entry": true,
       "reverse_probe": true,
-      "armed": true,
+      "armed": false,
       "collector_running": false,
       "permanent_candidate_permission": false,
       "window_ms": 12000,
@@ -131,6 +128,72 @@
     "natural_reproduction": {
       "observed": false
     },
+    "recovery_state": {
+      "verified_formal": true,
+      "origin": "controller restarted the owned recovery task",
+      "initial_watchdog_exit_status": "0x8007042B",
+      "initial_watchdog_exit_cause": "未知",
+      "restored_boot": 94912,
+      "observed_power_mode": 7,
+      "comparison_power_mode": 1,
+      "power_mode_written_by_controller": false
+    },
+    "reusable_explicit_entry": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/request_original_sequential.py",
+        "sha256": "7d700e5cd643a9ff4db139cc129fb003a52e691b739d98ec585ef2c5db2eff6d"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/reusable-entry-local-check.json",
+        "sha256": "25a9bbd31e0ec2dcd4fa28ec9d80e2dd8c7bd70377c6e188e8c5d7a9c17b52ef"
+      }
+    ],
+    "expired_restore": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/diagnostic-installed/bounded-restore-receipt.json",
+        "sha256": "84c583dacec17144f4020d1288b79f76cfe8546636caac1084118816d67d1765"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/diagnostic-installed/observed-expiry.json",
+        "sha256": "b016cde76cccbb0789d7385efadfe95b2ccf4f3172cb49543eb5cc527729cc91"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/cycle-history.json",
+        "sha256": "2e9bf376adf3c1adda1c4a719dfdb314e45e2dae47857fc42dcccabddff0a8ef"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/cleanup.json",
+        "sha256": "8c026787d6f24fc0e5afa1de4004f6592d45fec882528b03c01ef07f6e96a569"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/daily-cleanup.json",
+        "sha256": "36cb8b6966efde51eec1d2f73796913181b19f504b8f28171db7d5046eaed565"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/dma-natural-formal-final-readback.json",
+        "sha256": "9d1ee1ec341efb8a4f943bee4b698edb4ef8214ee5d6067cccfcc3fc8de4183b"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/dma-natural-standby-formal-recovery-first-read.json",
+        "sha256": "ff8509951cb45bf25ae4c29173c8bce2eea54b1e863842c4347edce294a5b3c5"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/watchdog-stopped-without-restore.json",
+        "sha256": "1291367538742bb5aa980808f834d969c9dbea7c63f8e86c82e92e1831cccdd5"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/controller-restarted-expired-watchdog.json",
+        "sha256": "27a52376217ee9781948b9dcdffc6c0e6730f98512ea82602f5de79a87af4d7f"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/diagnostic-installed/recovery-system-interval.json",
+        "sha256": "07b696bf35e5ec55b5f1120604e0b8ae542627468d82d82bb9cb045cfa0642f3"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/diagnostic-installed/owned-natural-gate-cleanup.json",
+        "sha256": "921e70cdaa2c634d94dcebd8bcb4ff2940bed965aeae00ada3f711d1df34f318"
+      }
+    ],
     "review": [
       {
         "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/review/response.json",

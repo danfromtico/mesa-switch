@@ -1803,7 +1803,7 @@
         },
         {
           "path": "windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
-          "sha256": "4009fcdf89c11115817a6209bf4be826fe4b76a30cfcb4c49aa0686cea98b71e"
+          "sha256": "dca64450d991f007ba1e27f6976d93633b0de9726dd9befcf93b28ddb3c0bbdf"
         }
       ],
       "windows_references": [
@@ -5850,12 +5850,12 @@
       "plan_sha256": "6fbaf884b724d7f3cfad2eb54efda6975ed2b91b614c56912295b26e535a462e",
       "registered_utc": "2026-11-22T03:53:00.897046+00:00",
       "device_executions": 0,
-      "status": "实机待命",
+      "status": "限时布防已结束",
       "result": "windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
-      "result_sha256": "4009fcdf89c11115817a6209bf4be826fe4b76a30cfcb4c49aa0686cea98b71e",
-      "finding": "启动 94734 的一次性诊断候选已验证同一原场景入口到独立控制端，Windows→控制端→Windows 的原入口门控探针收到同 nonce 确认后退出，原窗口、渲染和 ETW 收集均未启动。",
-      "missing_observation": "待实际原场景自然启动及异常证据。长期覆盖未知。候选超时无人值守恢复尚待真实到期回执，既有恢复路径已通过本地策略模拟。",
-      "finished_utc": "2026-11-22T04:05:53.314350+00:00"
+      "result_sha256": "dca64450d991f007ba1e27f6976d93633b0de9726dd9befcf93b28ddb3c0bbdf",
+      "finding": "完整候选在启动 94734 完成同入口门控探针并真实待命。候选到期前无原场景请求，未开启实际捕获。原恢复任务以 0x8007042B 退出后，控制端补启动所属任务。Windows 执行两次有记录的恢复重启，到达正式启动 94912。Code 0、交流供电、永久许可和八件哈希已核对，临时任务和目录已清理。恢复后功耗模式为 7。",
+      "missing_observation": "本轮无原场景自然复现回执，GM20B 旧事故首因与长期覆盖仍未知。System 记录了候选启动内一次短暂交流掉线，计划任务 Operational 与用户态电源 Diagnostic 频道关闭，原恢复任务的退出成因仍未知。",
+      "finished_utc": "2026-11-22T04:31:00.312535+00:00"
     }
   ],
   "progress": {
@@ -6989,6 +6989,6 @@
   },
   "sequential_natural_trigger": {
     "path": "windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
-    "sha256": "4009fcdf89c11115817a6209bf4be826fe4b76a30cfcb4c49aa0686cea98b71e"
+    "sha256": "dca64450d991f007ba1e27f6976d93633b0de9726dd9befcf93b28ddb3c0bbdf"
   }
 }
