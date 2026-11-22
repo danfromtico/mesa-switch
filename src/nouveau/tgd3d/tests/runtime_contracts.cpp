@@ -783,6 +783,8 @@ static void presentation13_contracts()
    };
    dev.dxgi = &callbacks; presentThread = GetCurrentThreadId(); presentOrder.clear();
    DXGI1_3_DDI_BASE_FUNCTIONS dxgi = {}; dxgi_fill_presentation13(&dxgi);
+   DXGI1_4_DDI_BASE_FUNCTIONS dxgi14 = {}; dxgi_fill_presentation14(&dxgi14);
+   CHECK(dxgi14.pfnPresent1 == dxgi.pfnPresent1);
    DXGI_DDI_ARG_PRESENTSURFACE source = {(DXGI_DDI_HRESOURCE)&surface, 0};
    RECT dirty[] = {{0, 0, 10, 9}, {10, 9, 65, 17}};
    DXGI_DDI_ARG_PRESENT1 present = {};
@@ -796,22 +798,22 @@ static void presentation13_contracts()
    present.Reserved = 1;
    dev.nvk = true;
    dev.interfaceVersion = D3D11_1_DDI_INTERFACE_VERSION;
-   CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
+   CHECK(dxgi14.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
    dev.nvk = false;
    dev.interfaceVersion = D3DWDDM2_0_DDI_INTERFACE_VERSION;
-   CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
+   CHECK(dxgi14.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
    dev.nvk = true;
    present.Reserved = 2;
-   CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
+   CHECK(dxgi14.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
    present.Reserved = 1;
-   CHECK(dxgi.pfnPresent1(&present) == DXGI_STATUS_OCCLUDED && presentOrder == std::vector<unsigned>{4});
+   CHECK(dxgi14.pfnPresent1(&present) == DXGI_STATUS_OCCLUDED && presentOrder == std::vector<unsigned>{4});
    dev.nvk = savedNvk;
    dev.interfaceVersion = savedInterface;
    present.Reserved = 0;
    CHECK(present.BackBufferMultiplicity == 0x12345678); // WDDM 1.3 may not touch this later field.
-   presentOrder.clear(); dirty[1].right = 66;
+   presentOrder.clear(); source.SubResourceIndex = surface.subresources();
    CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
-   dirty[1].right = 65; present.SurfacesToPresent = 2;
+   source.SubResourceIndex = 0; present.SurfacesToPresent = 2;
    CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
    present.SurfacesToPresent = 1; surface.dev = nullptr;
    CHECK(dxgi.pfnPresent1(&present) == E_INVALIDARG && presentOrder.empty());
