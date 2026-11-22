@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-152586-stage-boundary-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "owner": "Windows VidSch、DxgKrnl 与 GM20B 原生 KMD",
+  "question": "启动 91476 的 152586 之后，同一线程上队列 48661 的 Info 事件能证明哪个最早的后续步骤？",
+  "method": "本地重新对齐同启动双路事故 ETW 和同启动正常对照，核对 Info 的事件描述符及公开符号。",
+  "pass_condition": "同对象、队列、上下文及 QPC 绑定原始事件。核对同线程 Info 与前两次抢占、同启动正常对照，并区分选择、DDI、完成和退役边界。",
+  "device_executions": 0,
+  "origin_boot": 91476,
+  "recovery_boot": 91557,
+  "inputs": {
+    "archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+    },
+    "preemption": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/dwm-preempt-control-verified.json",
+      "sha256": "b85a70fcc036398b96e5dc56cab86229fe259e081dd60b1b3a9fda792f461e64"
+    },
+    "coverage": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/dwm-completion-buffer-coverage.json",
+      "sha256": "c3e8332425d76728066365ee9a985dc4846dd2bf00082ab2a5b08964931d25ee"
+    },
+    "same_image_comparator": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/verified-call-order.json",
+      "sha256": "1b48f398c2a91689706ba06ab421d05459a82f4165155e8c1a7d84fb1733f622"
+    },
+    "reset_time": {
+      "path": "windows-native-graphics/rounds/win-cdd-wall-clock-91476-20261121-01.result.json",
+      "sha256": "fd59be8dd4604185b88004ba9be7f15158627a83104d249a8dc19d94b5b4f133"
+    }
+  }
+}

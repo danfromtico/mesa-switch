@@ -1457,7 +1457,7 @@
       "question": "异常轮 DxgKrnl 为 48660 第三次提交的 DMA 围栏 152586，是否还有同一适配器 KMD 接收或硬件队列证据？",
       "status": "观测缺口",
       "existing_observation": "异常轮有 Windows DMA 提交及相邻 KMD 执行状态，缺对应完成中断。提交号与 KMD 抢占请求字段可分别回读。",
-      "missing_observation": "缺 152586 的 DxgkDdiSubmitCommandVirtual 进入和返回、队列准入或硬件开始，以及同一提交的 DMA 完成。基线成功提交无此遥测，单凭事件缺失无法判断 KMD 卡住、未接收或正常继续。",
+      "missing_observation": "152586 本身最后可证步骤仍为 Windows 175.1。随后缺同次锁释放与提交分支、KMD 入返、硬件开始与完成、Windows 退役，以及能归因的首条复位异常。未封口 ETL 的缺失事件无法判定卡点。",
       "pass_condition": "原始 KMD 负载按适配器和请求字段明确绑定 152586 至提交入口或返回、工作队列或硬件开始。",
       "evidence": [
         {
@@ -1467,15 +1467,20 @@
         {
           "path": "windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
           "sha256": "21226aacabf0c345582ff142b88493e08746510cccaf2afcfafe61e1e7095dd2"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-dwm-152586-stage-boundary-20261121-01.result.json",
+          "sha256": "5ed702ae4feeb610d16b72159b44c821fe0ed3bfa33cb14b2e7e89cfff0626cc"
         }
       ],
       "windows_references": [
         "dma_interrupt"
       ],
       "round_ids": [
-        "win-board-cdd-dwm-third-submit-kmd-20261121-01"
+        "win-board-cdd-dwm-third-submit-kmd-20261121-01",
+        "win-dwm-152586-stage-boundary-20261121-01"
       ],
-      "latest_observation": "正式基线实载 KMD 对适配器 5c10 的全部四条 CALL 后事件均为抢占快照。最后一条匹配 DxgKrnl 抢占请求 20571，内部状态成功，记已完成围栏 152584。约 0.276 ms 后，Windows 为 DWM 队列 48660 记录第三次 DMA 提交 152586，留存 KMD 中无该提交号。固定基线源码只为失败提交、抢占等路径发出该遥测。"
+      "latest_observation": "双 ETL 证明同一 DWM 队列 48660 第三次提交 152586。场景 ETL 又在 0.809 ms 后从同一线程 4/888 记录 48661 的 EventQueueSelect。公开符号匹配原始描述符。前两次尝试尚未抢占完成时已有该信号选择。同启动正常对照 44472 的同类选择也早于第三次 DMA 中断。"
     },
     {
       "id": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
@@ -5726,6 +5731,39 @@
         "first_anomaly_or_missing": "末条 ETL 到下一内核启动之间缺少连续记录或独立复位时戳。6008 所报时刻与内核启动顺序冲突。仍缺 152586 的同次驱动返回、硬件完成和复位首因。"
       },
       "finished_utc": "2026-11-22T02:42:20.907797Z"
+    },
+    {
+      "round_id": "win-dwm-152586-stage-boundary-20261121-01",
+      "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+      "method": "本地重新对齐同启动双路事故 ETW 和同启动正常对照，核对 Info 的事件描述符及公开符号。",
+      "state": "已回写",
+      "plan": "windows-native-graphics/rounds/win-dwm-152586-stage-boundary-20261121-01.plan.json",
+      "plan_sha256": "94b193b91082854cb0fa0636641d15336d7af75b066406c897a3a4396325548f",
+      "registered_utc": "2026-11-22T03:13:07.190210+00:00",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-dwm-152586-stage-boundary-20261121-01.result.json",
+      "result_sha256": "5ed702ae4feeb610d16b72159b44c821fe0ed3bfa33cb14b2e7e89cfff0626cc",
+      "status": "观测缺口",
+      "finding": "双 ETL 证明同一 DWM 队列 48660 第三次提交 152586。场景 ETL 又在 0.809 ms 后从同一线程 4/888 记录 48661 的 EventQueueSelect。公开符号匹配原始描述符。前两次尝试尚未抢占完成时已有该信号选择。同启动正常对照 44472 的同类选择也早于第三次 DMA 中断。",
+      "missing_observation": "152586 本身最后可证步骤仍为 Windows 175.1。随后缺同次锁释放与提交分支、KMD 入返、硬件开始与完成、Windows 退役，以及能归因的首条复位异常。未封口 ETL 的缺失事件无法判定卡点。",
+      "boundaries": {
+        "last_entry": {
+          "stage": "Windows 175.1 EventDmaSubmit",
+          "origin_boot": 91476,
+          "dwm_pid": 1400,
+          "queue_sequence": 48660,
+          "dma_id": 152586,
+          "scene_qpc": 223221950698,
+          "actor_pid_tid": [
+            4,
+            888
+          ]
+        },
+        "last_return": null,
+        "first_anomaly_or_missing": "同包 175.1 之后，最早缺调度器实际释放提交锁、选择分支与进入对应提交包装的同次回执。首条导致复位的异常仍无直接记录。"
+      },
+      "finished_utc": "2026-11-22T03:14:05.227293+00:00"
     }
   ],
   "progress": {
@@ -5738,7 +5776,7 @@
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 92,
+    "registered_rounds": 93,
     "new_device_executions": 37
   },
   "current_focus": {
@@ -5985,6 +6023,10 @@
       "recovery_clock_review": {
         "path": "windows-native-graphics/rounds/win-cdd-wall-clock-91476-20261121-01.result.json",
         "sha256": "fd59be8dd4604185b88004ba9be7f15158627a83104d249a8dc19d94b5b4f133"
+      },
+      "dma_152586_stage_matrix": {
+        "path": "windows-native-graphics/rounds/win-dwm-152586-stage-boundary-20261121-01.result.json",
+        "sha256": "5ed702ae4feeb610d16b72159b44c821fe0ed3bfa33cb14b2e7e89cfff0626cc"
       }
     },
     "recent_ssh_outage": {

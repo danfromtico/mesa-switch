@@ -1,0 +1,639 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-152586-stage-boundary-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "plan_sha256": "94b193b91082854cb0fa0636641d15336d7af75b066406c897a3a4396325548f",
+  "status": "观测缺口",
+  "finding": "双 ETL 证明同一 DWM 队列 48660 第三次提交 152586。场景 ETL 又在 0.809 ms 后从同一线程 4/888 记录 48661 的 EventQueueSelect。公开符号匹配原始描述符。前两次尝试尚未抢占完成时已有该信号选择。同启动正常对照 44472 的同类选择也早于第三次 DMA 中断。",
+  "missing_observation": "152586 本身最后可证步骤仍为 Windows 175.1。随后缺同次锁释放与提交分支、KMD 入返、硬件开始与完成、Windows 退役，以及能归因的首条复位异常。未封口 ETL 的缺失事件无法判定卡点。",
+  "device_executions": 0,
+  "root_cause": "未知",
+  "candidate_fix": null,
+  "evidence": {
+    "origin_boot": 91476,
+    "recovery_boot": 91557,
+    "full_analysis": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma152586-follow-up/packet-analysis.json",
+      "sha256": "51a52379cdfa9bda21df2ba86df900f9c1bba2283720cd13926eec4913f1ff4d"
+    },
+    "analyzer": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma152586-follow-up/inspect_packet.py",
+      "sha256": "df49d0869f615143f506e37a009085bc140018974c013ada2450bbd5bc8640c8"
+    },
+    "historical_raw_archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+    },
+    "historical_baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "historical_loaded_kmd_sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "clock": {
+      "kind": "QPC",
+      "ticks_per_second": 19200000,
+      "third_submit_approx_utc": "2026-11-21T15:30:48.110560Z",
+      "archive_general_end_utc": "2026-11-21T15:30:48.119983Z",
+      "wall_gap_to_recovery_boot_s": 55.859521,
+      "event_6008_time_after_recovery_start_s": 24.613495
+    },
+    "stage_matrix": [
+      {
+        "stage": "Windows 队列与第三次 DMA 提交",
+        "status": "已证实",
+        "observation": "DWM 1400/2252 的 3524 字节普通包 48660，经 DMA 152583、152585 两次抢占。两路证实第三次提交 152586，并有相同事件描述符与负载哈希。该 175.1 字段 pDmaBuffer=0。"
+      },
+      {
+        "stage": "Windows 继续选择同上下文信号",
+        "status": "已证实",
+        "observation": "场景 ETL 在 152586 后 0.808958 ms，同一 PID/TID 4/888 选择序号 48661。该 179.0 对应 EventQueueSelect，信号 24055 在同一个同步对象上与等待 73346 配对。"
+      },
+      {
+        "stage": "调度锁释放、miniport 分支及 KMD 进入",
+        "status": "未知",
+        "observation": "91918 验证的映像里 175.1 写点早于实际释放调度锁和提交分支。91476 有匹配描述符，缺该启动 dxgmms2.sys 全哈希、该次释放和进入所选 DDI 的动态回执。"
+      },
+      {
+        "stage": "KMD 准入与返回",
+        "status": "未知",
+        "observation": "同启动最后 KMD 快照为抢占请求 20571 成功，完成围栏 152584。事故 KMD 的成功提交没有对称入返事件，两路 152586 后无留存 KMD 供应程序事件。"
+      },
+      {
+        "stage": "硬件开始、围栏完成与 DMA 中断",
+        "status": "未知",
+        "observation": "两路均无 152586 的同包硬件发布、完成围栏和 177 通知。事故 ETL 尚缺完整封口或独立硬件回执，无法区分事件未发生、未发出和未持久保存。"
+      },
+      {
+        "stage": "Windows 退役",
+        "status": "未知",
+        "observation": "两路在 152586 之后均无任何 176、177、180 留存。队列 48660、信号 48661、等待 73346 和呈现 73347 均无匹配退役。"
+      },
+      {
+        "stage": "首个异常与整机复位",
+        "status": "根因未知",
+        "observation": "末条旧启动 ETL 至恢复内核启动相差约 55.860 秒。91557 的 Event 41（BugcheckCode=0）与 6008 只确认非正常关机；6008 所报时刻晚于恢复内核启动 24.613 秒。缺旧启动首条异常栈、TDR/复位边界或独立复位回执。"
+      }
+    ],
+    "incident_streams": {
+      "display.etl": {
+        "sha256": "b6026077eb2ea0707bfc30118ac5ffca819314ea8b4bb51debdd4434b3fb5fb8",
+        "coverage": {
+          "buffers_on_disk": 72,
+          "buffer_bytes": 65536,
+          "sealed": false,
+          "buffers_written_header": 0,
+          "events_lost_header": 0,
+          "buffers_lost_header": 0,
+          "log_mode": "0x10000001",
+          "missing_physical_sequence_labels": [
+            20,
+            27
+          ]
+        },
+        "windows_selection_and_dma": [
+          {
+            "qpc": 223221836507,
+            "pid": 4,
+            "tid": 888,
+            "event": 175,
+            "version": 1,
+            "descriptor": "af000111000108000100000000000040",
+            "payload_sha256": "d9698c0461516599af2d8f7d20d6fad495f477c303d4fed68a39ac30a561bae7",
+            "physical_buffer_offset": 4653056,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 0,
+              "submission_id": 152583,
+              "sequence": 48660,
+              "quantum_status": 3,
+              "dma_pointer": 0
+            }
+          },
+          {
+            "qpc": 223221838377,
+            "pid": 4,
+            "tid": 888,
+            "event": 179,
+            "version": 0,
+            "descriptor": "b3000011000009000100000000000040",
+            "payload_sha256": "643102a3bd6366b117d44b269e1b96d0013757f424844212619fab0e7c5931f1",
+            "physical_buffer_offset": 4653056,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 5,
+              "sequence": 48661
+            }
+          },
+          {
+            "qpc": 223221939191,
+            "pid": 4,
+            "tid": 888,
+            "event": 175,
+            "version": 1,
+            "descriptor": "af000111000108000100000000000040",
+            "payload_sha256": "41f50564ee1443408eb339ee94ad2d5ef1fce45bb377fe36b9bedbf4f6edc9ef",
+            "physical_buffer_offset": 4653056,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 0,
+              "submission_id": 152585,
+              "sequence": 48660,
+              "quantum_status": 3,
+              "dma_pointer": 0
+            }
+          },
+          {
+            "qpc": 223221940488,
+            "pid": 4,
+            "tid": 888,
+            "event": 179,
+            "version": 0,
+            "descriptor": "b3000011000009000100000000000040",
+            "payload_sha256": "643102a3bd6366b117d44b269e1b96d0013757f424844212619fab0e7c5931f1",
+            "physical_buffer_offset": 4653056,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 5,
+              "sequence": 48661
+            }
+          },
+          {
+            "qpc": 223221950686,
+            "pid": 4,
+            "tid": 888,
+            "event": 175,
+            "version": 1,
+            "descriptor": "af000111000108000100000000000040",
+            "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d",
+            "physical_buffer_offset": 4653056,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 0,
+              "submission_id": 152586,
+              "sequence": 48660,
+              "quantum_status": 3,
+              "dma_pointer": 0
+            }
+          }
+        ],
+        "target_submission": {
+          "qpc": 223221950686,
+          "pid": 4,
+          "tid": 888,
+          "event": 175,
+          "version": 1,
+          "descriptor": "af000111000108000100000000000040",
+          "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d",
+          "physical_buffer_offset": 4653056,
+          "fields": {
+            "context": 18446611100088564464,
+            "packet_type": 0,
+            "submission_id": 152586,
+            "sequence": 48660,
+            "quantum_status": 3,
+            "dma_pointer": 0
+          }
+        },
+        "earlier_attempt_stop": [
+          {
+            "qpc": 223221936870,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152583,
+              "ulQueueSubmitSequence": 48660,
+              "bPreempted": 1
+            }
+          },
+          {
+            "qpc": 223221948464,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152585,
+              "ulQueueSubmitSequence": 48660,
+              "bPreempted": 1
+            }
+          }
+        ],
+        "signal_queue_48661_qpc": 223221836261,
+        "wait_queue_73346_qpc": 223221837175,
+        "present_queue_73347_qpc": null,
+        "events_after_target_by_provider": {
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 3
+        },
+        "provider_completion_events_176_177_180_after_target": 0,
+        "kmd_provider_events_after_target": 0,
+        "last_retained": {
+          "qpc": 223221953112,
+          "pid": 4,
+          "tid": 892,
+          "provider": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+          "event": 281,
+          "version": 0,
+          "ms_after_target": 0.126354
+        },
+        "matching_signal_select_after_target": []
+      },
+      "scene/video.etl": {
+        "sha256": "6ec11c2e135e3204048b85be09fc7e8b519465cc8b39fba51cdf3ec0fe9c5596",
+        "coverage": {
+          "buffers_on_disk": 30,
+          "buffer_bytes": 32768,
+          "sealed": false,
+          "buffers_written_header": 0,
+          "events_lost_header": 0,
+          "buffers_lost_header": 0,
+          "log_mode": "0x10000001",
+          "missing_physical_sequence_labels": [
+            13
+          ]
+        },
+        "windows_selection_and_dma": [
+          {
+            "qpc": 223221836521,
+            "pid": 4,
+            "tid": 888,
+            "event": 175,
+            "version": 1,
+            "descriptor": "af000111000108000100000000000040",
+            "payload_sha256": "d9698c0461516599af2d8f7d20d6fad495f477c303d4fed68a39ac30a561bae7",
+            "physical_buffer_offset": 950272,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 0,
+              "submission_id": 152583,
+              "sequence": 48660,
+              "quantum_status": 3,
+              "dma_pointer": 0
+            }
+          },
+          {
+            "qpc": 223221838388,
+            "pid": 4,
+            "tid": 888,
+            "event": 179,
+            "version": 0,
+            "descriptor": "b3000011000009000100000000000040",
+            "payload_sha256": "643102a3bd6366b117d44b269e1b96d0013757f424844212619fab0e7c5931f1",
+            "physical_buffer_offset": 950272,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 5,
+              "sequence": 48661
+            }
+          },
+          {
+            "qpc": 223221939204,
+            "pid": 4,
+            "tid": 888,
+            "event": 175,
+            "version": 1,
+            "descriptor": "af000111000108000100000000000040",
+            "payload_sha256": "41f50564ee1443408eb339ee94ad2d5ef1fce45bb377fe36b9bedbf4f6edc9ef",
+            "physical_buffer_offset": 950272,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 0,
+              "submission_id": 152585,
+              "sequence": 48660,
+              "quantum_status": 3,
+              "dma_pointer": 0
+            }
+          },
+          {
+            "qpc": 223221940500,
+            "pid": 4,
+            "tid": 888,
+            "event": 179,
+            "version": 0,
+            "descriptor": "b3000011000009000100000000000040",
+            "payload_sha256": "643102a3bd6366b117d44b269e1b96d0013757f424844212619fab0e7c5931f1",
+            "physical_buffer_offset": 950272,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 5,
+              "sequence": 48661
+            }
+          },
+          {
+            "qpc": 223221950698,
+            "pid": 4,
+            "tid": 888,
+            "event": 175,
+            "version": 1,
+            "descriptor": "af000111000108000100000000000040",
+            "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d",
+            "physical_buffer_offset": 950272,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 0,
+              "submission_id": 152586,
+              "sequence": 48660,
+              "quantum_status": 3,
+              "dma_pointer": 0
+            }
+          },
+          {
+            "qpc": 223221966230,
+            "pid": 4,
+            "tid": 888,
+            "event": 179,
+            "version": 0,
+            "descriptor": "b3000011000009000100000000000040",
+            "payload_sha256": "643102a3bd6366b117d44b269e1b96d0013757f424844212619fab0e7c5931f1",
+            "physical_buffer_offset": 950272,
+            "fields": {
+              "context": 18446611100088564464,
+              "packet_type": 5,
+              "sequence": 48661
+            }
+          }
+        ],
+        "target_submission": {
+          "qpc": 223221950698,
+          "pid": 4,
+          "tid": 888,
+          "event": 175,
+          "version": 1,
+          "descriptor": "af000111000108000100000000000040",
+          "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d",
+          "physical_buffer_offset": 950272,
+          "fields": {
+            "context": 18446611100088564464,
+            "packet_type": 0,
+            "submission_id": 152586,
+            "sequence": 48660,
+            "quantum_status": 3,
+            "dma_pointer": 0
+          }
+        },
+        "earlier_attempt_stop": [
+          {
+            "qpc": 223221936881,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152583,
+              "ulQueueSubmitSequence": 48660,
+              "bPreempted": 1
+            }
+          },
+          {
+            "qpc": 223221948475,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152585,
+              "ulQueueSubmitSequence": 48660,
+              "bPreempted": 1
+            }
+          }
+        ],
+        "signal_queue_48661_qpc": 223221836278,
+        "wait_queue_73346_qpc": 223221837190,
+        "present_queue_73347_qpc": 223221954493,
+        "events_after_target_by_provider": {
+          "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11": 7,
+          "802ec45a-1e99-4b83-9920-87c98277ba9d": 20
+        },
+        "provider_completion_events_176_177_180_after_target": 0,
+        "kmd_provider_events_after_target": 0,
+        "last_retained": {
+          "qpc": 223222131613,
+          "pid": 1400,
+          "tid": 2252,
+          "provider": "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+          "event": 8,
+          "version": 2,
+          "ms_after_target": 9.422656
+        },
+        "matching_signal_select_after_target": [
+          {
+            "qpc": 223221966230,
+            "ms_after_target": 0.808958
+          }
+        ]
+      }
+    },
+    "last_kmd_preempt_snapshot": {
+      "event": "ExecutionState",
+      "qpc": 223221945396,
+      "pid": 4,
+      "tid": 888,
+      "id": 2,
+      "version": 1,
+      "buffer_offset": 950272,
+      "raw_hex": "0100000001000000105c000000000000000000005b500000000000000a0000000000000000000000000000000000000000000000000000000854020008540200000000000000000000000000037000001d0100000000000001000000070000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "payload_sha256": "9a76d4b1c0de037b2154c73d3e8ef79458f22b7ed77828e235c636b904b71398",
+      "source": 1,
+      "source_name": "preempt",
+      "adapter_luid": "0000000000005c10",
+      "status": "0x00000000",
+      "request_fence": 20571,
+      "request_flags": "0x00000000",
+      "stage": 10,
+      "stage_name": "notify",
+      "request_context": "0x0000000000000000",
+      "context": "0x0000000000000000",
+      "dma_address": "0x0000000000000000",
+      "submission_fence": 152584,
+      "last_completed_fence": 152584,
+      "expected": 0,
+      "observed": 0,
+      "dma_bytes": 0,
+      "work_flags": "0x00007003",
+      "queue_flags": "0x0000011d",
+      "queue_failure": "0x00000000",
+      "graphics_generation": 1,
+      "channel_stage": 7,
+      "channel_register": "0x00800000",
+      "channel_value": "0x00000000",
+      "cached_fifo": "0x00000000",
+      "cached_mmu": "0x00000000",
+      "cached_pbdma": "0x00000000",
+      "cached_pbdma1": "0x00000000",
+      "cached_mc": "0x00000000",
+      "cached_gr": "0x00000000",
+      "cached_fecs_error": "0x00000000",
+      "cached_fecs_host": "0x00000000",
+      "poll_count": 0,
+      "request_dma_bytes": 0,
+      "private_bytes": 0,
+      "umd_private_bytes": 0,
+      "work_state": [
+        "active",
+        "paging",
+        "completion_ready",
+        "signaling",
+        "notified"
+      ],
+      "queue_state": [
+        "engine",
+        "servicing",
+        "preemptions_pending",
+        "pending",
+        "channel_fields_valid"
+      ]
+    },
+    "later_other_context_event": {
+      "qpc": 223222124536,
+      "pid": 4,
+      "tid": 904,
+      "provider": "kernel",
+      "id": 175,
+      "version": 1,
+      "fields": {
+        "hContext": 18446611100088172560,
+        "hQueuePacketContext": 0,
+        "PacketType": 0,
+        "uliSubmissionId": 247,
+        "ulQueueSubmitSequence": 739,
+        "pDmaBuffer": 0,
+        "QuantumStatus": 3
+      }
+    },
+    "later_other_context_advanced_after_target_ms": 9.054063,
+    "same_boot_healthy_control": {
+      "archive": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-preallocated-blt-20261121-01/collected.zip",
+        "sha256": "df24f085aa7006667e9c1a4d168a1ab6c39d14cf06bc39dfbf2ee478e2f33308"
+      },
+      "boot": 91476,
+      "dwm_pid": 1400,
+      "queue_sequence": 44472,
+      "bytes": 4632,
+      "streams": {
+        "display.etl": {
+          "submission_id": 138354,
+          "submission_qpc": 204761969604,
+          "later_selection_qpc": 204761983419,
+          "interrupt_qpc": 204762097910,
+          "retirement_qpc": 204762098602,
+          "select_after_submit_ms": 0.719531,
+          "retire_after_submit_ms": 6.718646
+        },
+        "scene/video.etl": {
+          "submission_id": 138354,
+          "submission_qpc": 204761969616,
+          "later_selection_qpc": 204761983436,
+          "interrupt_qpc": 204762097941,
+          "retirement_qpc": 204762098614,
+          "select_after_submit_ms": 0.719792,
+          "retire_after_submit_ms": 6.718646
+        }
+      }
+    },
+    "comparison_binary": {
+      "boot": 91918,
+      "image": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.sys",
+        "sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5"
+      },
+      "pdb": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.pdb",
+        "sha256": "54ed9eab4bff5bdcec9c5571ab05fe415052a106ad39ad9f713e939f87b65f3a"
+      },
+      "previous_identity_verification": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/verified-call-order.json",
+        "sha256": "1b48f398c2a91689706ba06ab421d05459a82f4165155e8c1a7d84fb1733f622"
+      },
+      "descriptors": {
+        "EventQueueComplete": {
+          "rva": "0x4ec38",
+          "descriptor": "b4000111000209000100000000000040"
+        },
+        "EventQueueSelect": {
+          "rva": "0x4e668",
+          "descriptor": "b3000011000009000100000000000040"
+        },
+        "EventDmaSubmit": {
+          "rva": "0x4ed28",
+          "descriptor": "af000111000108000100000000000040"
+        }
+      }
+    },
+    "symbol_binding_scope": "匹配已验收启动 91918 的 ARM64 映像与公开符号中的事件描述符。事故启动 91476 的 dxgmms2.sys 全哈希未留存。",
+    "capture_limit": "原两路共享缓冲均未封口。头部写入、丢失计数为 0，且存在物理序列标签缺口，无法证明连续事件全部持久化。PID/TID 表示事件归属，不能单独恢复实际 DPC 执行栈。",
+    "system_raw": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/exact-windows-reboot.json",
+      "sha256": "9e96882bdb82f7ad0caf34b51e7788748143cf7360872dfdaf162fe067bde2b0"
+    },
+    "related": [
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-preempt-control-20261121-01.result.json",
+        "sha256": "0ea143449c305b0c6efe927ca694eb69a1713b0af6e514101f0fd0d6df4331e6"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-dma175-ddi-order-20261121-01.result.json",
+        "sha256": "f360eb0249210e9b1b4573de8dbf6ae4ae859d3b2a6b39c171780fe3eb42c33c"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json",
+        "sha256": "b394a991ddc86d9dd7bc8d918b4708487fb36721459ba5b0e914a47f5ad7f8c3"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-cdd-wall-clock-91476-20261121-01.result.json",
+        "sha256": "fd59be8dd4604185b88004ba9be7f15158627a83104d249a8dc19d94b5b4f133"
+      },
+      {
+        "path": "windows-native-graphics/dma-return-calibration-94004.json",
+        "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+      },
+      {
+        "path": "windows-native-graphics/native-5-live-follow-up.json",
+        "sha256": "97440662c6c06cc80af7a56c8b3d84cc750c50c7df48170f377e7e50f054afdb"
+      }
+    ],
+    "diagnostic_decision": "复用同启动正常对照完成本轮鉴别。再跑普通窗口会产生新的提交号，历史入返和复位见证仍需同次持久材料。以后自然复现时，目标是同一启动、适配器、节点、队列、上下文、提交号的 175→DDI 入返→硬件开始和完成→180，以及首条异常的独立记录。",
+    "boundaries": {
+      "last_entry": {
+        "stage": "Windows 175.1 EventDmaSubmit",
+        "origin_boot": 91476,
+        "dwm_pid": 1400,
+        "queue_sequence": 48660,
+        "dma_id": 152586,
+        "scene_qpc": 223221950698,
+        "actor_pid_tid": [
+          4,
+          888
+        ]
+      },
+      "last_return": null,
+      "first_anomaly_or_missing": "同包 175.1 之后，最早缺调度器实际释放提交锁、选择分支与进入对应提交包装的同次回执。首条导致复位的异常仍无直接记录。"
+    },
+    "application_present": {
+      "pid": 3376,
+      "tid": 3236,
+      "hwnd": 328302,
+      "first_public_return_qpc": 223219160141,
+      "hresult": "S_OK",
+      "duration_ms": 58.688,
+      "earlier_than_dwm_third_submit_ms": 145.34151,
+      "dwm_flush": "S_OK",
+      "receipt": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/incident-analysis.json",
+        "sha256": "b1aa491cfe5d24996d9549c47bf0328d82b3b39cfbf872e4bf3d32fe174c2c99"
+      }
+    }
+  },
+  "official_reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/selections-in-the-gpu-hardware-queue"
+}
