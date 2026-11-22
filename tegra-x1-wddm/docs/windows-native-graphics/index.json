@@ -1804,6 +1804,10 @@
         {
           "path": "windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
           "sha256": "dca64450d991f007ba1e27f6976d93633b0de9726dd9befcf93b28ddb3c0bbdf"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-seq-dma-original-demand-20261121-01.result.json",
+          "sha256": "3c0702218f751651f43165d69a6d9d5645c81671f5cf6a05b3c27a274bbb45cd"
         }
       ],
       "windows_references": [
@@ -1815,7 +1819,8 @@
         "win-seq-dma-recovery-readback-20261121-01",
         "win-seq-dma-packet-checkpoint-local-20261121-01",
         "win-seq-dma-packet-checkpoint-board-20261121-01",
-        "win-seq-dma-natural-standby-20261121-01"
+        "win-seq-dma-natural-standby-20261121-01",
+        "win-seq-dma-original-demand-20261121-01"
       ],
       "latest_observation": "在正式启动 91918 的独立 1600 ms 会话中，52 条实时事件与同路 ETL 的头和载荷逐条匹配，控制端均完成 fsync 并收到 Windows 确认。DWM 的 GM20B 节点 0 提交 21991/队列 8136 配齐 175.1、5063 进入与返回、177/176/180。"
     },
@@ -5856,6 +5861,23 @@
       "finding": "完整候选在启动 94734 完成同入口门控探针并真实待命。候选到期前无原场景请求，未开启实际捕获。原恢复任务以 0x8007042B 退出后，控制端补启动所属任务。Windows 执行两次有记录的恢复重启，到达正式启动 94912。Code 0、交流供电、永久许可和八件哈希已核对，临时任务和目录已清理。恢复后功耗模式为 7。",
       "missing_observation": "本轮无原场景自然复现回执，GM20B 旧事故首因与长期覆盖仍未知。System 记录了候选启动内一次短暂交流掉线，计划任务 Operational 与用户态电源 Diagnostic 频道关闭，原恢复任务的退出成因仍未知。",
       "finished_utc": "2026-11-22T04:31:00.312535+00:00"
+    },
+    {
+      "round_id": "win-seq-dma-original-demand-20261121-01",
+      "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+      "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+      "method": "在已验正式桌面核对交流、Handheld、完整哈希和回滚包，以一次性诊断权限接收原生旧式 SEQUENTIAL 的一次真实按需请求。",
+      "state": "已回写",
+      "plan": "windows-native-graphics/rounds/win-seq-dma-original-demand-20261121-01.plan.json",
+      "plan_sha256": "282db6439d9fc2d35071439978601eb78af478183962de993814453c59db16f3",
+      "registered_utc": "2026-11-22T04:58:02.392835+00:00",
+      "device_executions": 0,
+      "status": "候选启动发生异常，原场景待取证",
+      "result": "windows-native-graphics/rounds/win-seq-dma-original-demand-20261121-01.result.json",
+      "result_sha256": "3c0702218f751651f43165d69a6d9d5645c81671f5cf6a05b3c27a274bbb45cd",
+      "finding": "请求 f6264ee11289 的候选启动 95090 在原窗口门控前非正常重启。用户看到蓝屏。恢复启动 95099 留有 Kernel-Power 41 和 EventLog 6008。原场景执行零次，控制端无本次 DMA 日志。随后 Windows 托管恢复到正式启动 95192。",
+      "missing_observation": "早期启动日志未给出停止码或故障模块。事件 41 的 BugcheckCode 为 0，无 BugCheck 1001 或本次转储。95090 缺候选 Code 0、实载和会话就绪回执。需有针对候选启动异常的可验证修正或能跨该启动丢失的独立启动证据，方能接续这次真实请求。91476 的历史同包缺口仍开放。",
+      "finished_utc": "2026-11-22T05:13:10.802430+00:00"
     }
   ],
   "progress": {
