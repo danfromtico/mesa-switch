@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T06:36:49.320504+00:00",
+  "policy_commit": "470e1dbc4ff65affe8ee6395a12bf8e2060cd338",
+  "request": "f6264ee11289",
+  "new_scene_boot": 96075,
+  "new_application_dma": 5406,
+  "new_evidence": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/capture-readback.json",
+    "sha256": "53033f6da5e563e4e63d95d3b9ce3222548f9ea1ecde40f2063e4ab107c1a91a"
+  },
+  "items": [
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "status": "未知",
+      "disposition": "保留暂缓与原实机判定",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+        "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+      },
+      "original_finding": "同启动的传统非 NT 共享入口创建与打开都成功。PID 4984 与 1824 的 1069 把各自局部句柄连到同一同步对象。新 ETW 覆盖这次打开。同层事件模板只给 pSyncObject 和局部句柄，缺全局表项到父对象的字段。",
+      "new_same_object_evidence": "未取得此契约所要求的直接同对象字段",
+      "assessment": "本轮记录同一次 DMA 的适配器、device/context 与队列身份，不含传统全局共享表项到父对象和派生实例的 Windows 具名关系；原 1069 同步对象关联不能代替父子字段。",
+      "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+      "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。",
+      "new_device_executions": 0
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "status": "未知",
+      "disposition": "保留暂缓与原实机判定",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+        "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+      },
+      "original_finding": "正式启动新采集的同资源成员查询为 1, 1, 1。创建与打开的 36 对同一共享／全局分配已匹配。本轮按合法创建、共享、打开、关闭走完整生命周期。",
+      "new_same_object_evidence": "未取得此契约所要求的直接同对象字段",
+      "assessment": "本轮原窗口及 DWM 合成成功，不提供已共享资源成员固定状态或受支持的成员约束操作结果。原成员数 1/1/1 和 36 的共享关联仍不能证明 sealed。",
+      "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+      "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。",
+      "new_device_executions": 0
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "status": "未知",
+      "disposition": "保留暂缓与原实机判定",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+        "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+      },
+      "original_finding": "本次 Lock2 返回 0x00000000，已分配地址的 VirtualQuery.Protect 为 0x404。已采集的同分配 33/36 与锁定绑定成功；无具名 Cached 位的回执。",
+      "new_same_object_evidence": "未取得此契约所要求的直接同对象字段",
+      "assessment": "本轮 52 字节 Present 复制及完成链没有同一分配的 Cached=1 与真实可缓存 CPU 映射配对。原 Lock2/VirtualQuery 0x404 只覆盖写合并映射。",
+      "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+      "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。",
+      "new_device_executions": 0
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "status": "未知",
+      "disposition": "保留暂缓与原实机判定",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+        "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+      },
+      "original_finding": "本轮自有 64 KiB 分配的合法属性更新，入口与返回已匹配。实际 NTSTATUS 为 0xc0000002，输出 PagingFenceValue 为 0。",
+      "new_same_object_evidence": "未取得此契约所要求的直接同对象字段",
+      "assessment": "本轮没有新增合法属性更新调用或原 API 的支持修正；原 Windows 入口仍只有 0xc0000002、分页围栏0的回执，不能制造 0x103 来通过异步分支。",
+      "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+      "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。",
+      "new_device_executions": 0
+    }
+  ],
+  "classification_changed": false,
+  "hardware_replays": 0
+}

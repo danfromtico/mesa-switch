@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-early-startup-retained-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "request_id": "f6264ee11289",
+  "question": "当前关闭门控与后续一次性启动能否留下可按启动身份独立恢复的 DriverEntry、许可和 StartDevice 证据？",
+  "method": "用已签 Windows ARM64 启动观测候选复用 Code 43 的关闭阶段。启用仅记录 KMD 启动阶段的文件 AutoLogger，归档原始物理缓冲与同次 System 启动证据，独立读回。",
+  "uses_original_application": false,
+  "observations": [
+    "认可的正式 95192 上验证 ARM64 许可替身与隔离 Inf2Cat。",
+    "关闭门控验证 DriverEntry、许可拒绝与 StartDevice 的同启动回执，不启动原应用。",
+    "每次启动目录拆分，恢复清理前封存哈希、原 ETL、丢失与截尾界限。",
+    "关闭门控读回通过后才为同一真实请求使用一次性诊断。"
+  ],
+  "inputs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/signed.json",
+      "sha256": "8809f8d536e1af19d1743c61b910d6af961faf4e2bd12500acce339707b79232"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/catalog-result.json",
+      "sha256": "7fb4a4b982319f7d1e065070e32c5ff7f7ef75099e1b0d07b7a0e0add5a824f2"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/build-arm64.log",
+      "sha256": "80abd8080d7507dc843d776638c6562d55ac157a4cf9530d7153d275d040e7c6"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/docs/windows-native-graphics/candidate-boot-95090-comparison.json",
+      "sha256": "e7205c0a2f8b6c1de2dd42bdc5cb7cd37dbcfe6310d47adea3557484600f3841"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/boot_archive.py",
+      "sha256": "baa7e7a03e37102fc9e9ec1ee9363eb56dcb741cff59eb44d5124e215a8cd56c"
+    }
+  ]
+}

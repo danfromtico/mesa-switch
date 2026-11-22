@@ -69,12 +69,18 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json",
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present",
         "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/native-5-live-follow-up.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/native-5-live-follow-up.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result. An independent replay of the three original client ETLs also found successful stage-2 tgd3d initialization and legacy device publication by the drawing thread after the value-1 signal retired and before the first public CALL. It found the same ordering in the contemporary flip control. The old traces still lack a matching asynchronous CPU wait record and direct evidence after CALL.",
       "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
       "close_when": "Identify the initiating failure and fix it. Retest the original legacy SEQUENTIAL trigger on AC at least three consecutive times, including correct visible output, normal exit and desktop continuity.",
-      "resolution": null
+      "resolution": null,
+      "latest_follow_up": {
+        "result": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+        "sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20",
+        "scope": "本次正常路径及恢复取证；原次首因保持开放"
+      }
     },
     {
       "id": "GM20B-WDDM20-PRESENT1-REMOVAL",
@@ -514,12 +520,18 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-local-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-board-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/on-demand-prefix-recovery.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/on-demand-prefix-recovery.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json"
       ],
       "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified. The same Windows kernel image exposes DMA scheduler and optional timing templates. Three healthy archived captures have matching DMA notifications and no per-packet GPU timestamp records. An opt-in DMA-boundary instrumentation package has been built locally and checked with the queue model. Live candidate calibration and accident attribution are open. The signed native ARM64 queue model passed on the recovered Switch. Windows verified the signed candidate catalog and all 12 covered files with the permanent driver still in use. Candidate runtime submission evidence remains open. The prospective observer calibration stopped at an independent abnormal boot transition before any window workload. The permanent baseline was restored. The same unsealed scene trace records Windows DMA submission 247 on another DWM context 9.054 ms after 152586. An earlier packet on that context, 246, has a matching IRQ, DMA completion and queue retirement in both files. Neither file retains any context reporting a DMA completion notification, DMA completion, or queue retirement after 152586. The later context has no directly matched adapter or node identity in the two stored streams. Seven clean archives from the same DWM instance retain 105 DMA IDs with matching Windows interrupt and non-preempted completion on the later context. All sixteen inspected streams still lack a direct mapping from that context to an adapter and node. Only the primary context has temporally matching native GM20B execution snapshots among these recordings. A clean original-window control on boot 91918 captured the DWM adapter and node associations before Present. Four ordinary GM20B DMA completions and four cross-device DWM signal/wait retirements were identified, including the native execution snapshot for DMA 12776. The observation does not backfill boot 91476. The exact Windows image verified on boot 91918 emits the 175.1 descriptor in VidSchiSendToExecutionQueue before releasing its DPC-level queue lock and before the conditional call to the virtual/physical submission wrapper. The 91476 archive contains the identical event descriptor for 152586 and has no separately retained dxgmms2.sys hash. No release, chosen DDI branch, miniport entry, or hardware progress is established for that submission. The stock DxgKrnl profiler on boot 91918 emitted a same-thread function-5063 entry/return pair for DWM DMA 17588, with direct GM20B node mapping and matching IRQ, DMA completion and queue retirement. The two 91476 traces contain no events from the profiler family. This establishes a capture method for the next occurrence. In a bounded normal trace on boot 91918, live event bytes match the ETL. DWM submission 21991 has the complete 175.1, 5063 entry/return, and ordinary completion chain. The host confirmed durable receipt for its events 19.186 to 22.556 ms after their source QPC. This measured delay leaves an earlier reset interval unobserved. A separate clock review brackets the last retained ETL event and the recovery kernel start by about 55.860 seconds of wall time. The previous shutdown time in recovery event 6008 is 24.613 seconds after that kernel start. The exact reset time and the submit return and completion for 152586 remain unobserved. The scene ETL preserves an EventQueueSelect for dependent signal packet 48661 on the submission thread 0.809 ms after DMA 152586. The same signal was selected while the first two attempts were pending, and a healthy same-boot control selected its signal before the third DMA interrupt. This bounds scheduler activity without establishing lock release, return or retirement for 152586. The reset mechanism remains unknown. A local replay of the separate calibrated DWM DMA from boot 94004 verified controller readback after receiver termination. A partial host journal confirms nine synchronized records through the Windows completion notification. The truncated marker provides no additional synchronization evidence. No new board execution was made and the original scene has no new incident receipt. The live collector is not armed. The controlled reboot readback qualified the independently stored complete application DMA packet for a new, normal SEQUENTIAL window. DWM coverage is recorded for that run separately. The boot 91476 failure and its initiating cause remain open.",
       "daily_workaround": "Keep this optional board-local diagnostic task out of daily launches while investigating. Use the qualified permanent graphics baseline and established window controls.",
       "close_when": "Identify the initiating failure using evidence for this incident, fix it, and obtain three valid consecutive acceptance runs under the relevant original conditions including window output, input, normal exit, and desktop continuity.",
-      "resolution": null
+      "resolution": null,
+      "latest_follow_up": {
+        "result": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+        "sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20",
+        "scope": "本次正常路径及恢复取证；原次首因保持开放"
+      }
     },
     {
       "id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
@@ -570,12 +582,20 @@
       "evidence": [
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-original-demand-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-original-demand-20261121-01.plan.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/candidate-boot-95090-comparison.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/candidate-boot-95090-comparison.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-early-startup-retained-20261121-01.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-once-20261121-02.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json"
       ],
       "cause": "早期启动日志未给出停止码或故障模块。事件 41 的 BugcheckCode 为 0，无 BugCheck 1001 或本次转储。95090 缺候选 Code 0、实载和会话就绪回执。需有针对候选启动异常的可验证修正或能跨该启动丢失的独立启动证据，方能接续这次真实请求。91476 的历史同包缺口仍开放。",
-      "daily_workaround": "正式启动 95192 已恢复并验证。保留已签候选，不在缺少启动修正和独立证据时重复部署。",
+      "daily_workaround": "正式96251已恢复并核对Code0、永久许可、八件哈希、KMD/DWM实载和Handheld。后续成功启动及原场景一次结果分别归档；95090原次缺证与根因保持开放。",
       "close_when": "确认早期候选启动的首个异常，核对修正或用持久独立证据区分失败边界，验证候选一次性正常进入 Code 0 并通过原场景的受控取证。",
-      "resolution": null
+      "resolution": null,
+      "latest_follow_up": {
+        "result": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+        "sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20",
+        "scope": "本次正常路径及恢复取证；原次首因保持开放"
+      }
     }
   ],
   "independent_qualifications": [
@@ -2331,7 +2351,12 @@
         "closeout_review": {
           "when": "首次 Present 排查收尾、形成交接前逐条复查。当前保持搁置。",
           "procedure": "对照原判定、原实机回执及本轮新增同对象证据。有直接证据时据实更新判定；具备合法验证条件时逐项实测并回写；仍缺条件时保留未知，写明所缺观测和重新启动验证的条件。",
-          "handoff": "分别列出四条的最终处置、引用的回执和未决条件。"
+          "handoff": "分别列出四条的最终处置、引用的回执和未决条件。",
+          "latest_review": {
+            "path": "windows-native-graphics/first-present-deferred-contracts-20261121.json",
+            "sha256": "de1b1a1280a4318cc5c38b7906004a26001d59d126a67cd8a448ce364ae1b06e",
+            "status": "四条逐项复查，仍未知；未满足原恢复验证条件"
+          }
         }
       }
     }
@@ -5784,7 +5809,74 @@
         "finding": "请求 f6264ee11289 的候选启动 95090 在原窗口门控前非正常重启。用户看到蓝屏。恢复启动 95099 留有 Kernel-Power 41 和 EventLog 6008。原场景执行零次，控制端无本次 DMA 日志。随后 Windows 托管恢复到正式启动 95192。",
         "missing_observation": "早期启动日志未给出停止码或故障模块。事件 41 的 BugcheckCode 为 0，无 BugCheck 1001 或本次转储。95090 缺候选 Code 0、实载和会话就绪回执。需有针对候选启动异常的可验证修正或能跨该启动丢失的独立启动证据，方能接续这次真实请求。91476 的历史同包缺口仍开放。",
         "finished_utc": "2026-11-22T05:13:10.802606+00:00"
+      },
+      {
+        "round_id": "win-seq-early-startup-retained-20261121-01",
+        "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+        "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+        "method": "用已签 Windows ARM64 启动观测候选复用 Code 43 的关闭阶段。启用仅记录 KMD 启动阶段的文件 AutoLogger，归档原始物理缓冲与同次 System 启动证据，独立读回。",
+        "state": "已回写",
+        "plan": "windows-native-graphics/rounds/win-seq-early-startup-retained-20261121-01.plan.json",
+        "plan_sha256": "0bdffe1b81dc240e2d12cdf97331d437f27338ded13e72fa6bf0668df3bf3752",
+        "registered_utc": "2026-11-22T05:26:28.693672+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-seq-early-startup-retained-20261121-01.result.json",
+        "result_sha256": "f868614148cd94b6e3b1cd665feebaa4ed9481ab07bd5d7aeb33b614170c98e8",
+        "status": "早期启动回执跨受控恢复读回通过，原窗口待续",
+        "finding": "95280 同启动保留 DriverEntry、许可拒绝和 StartDevice 返回。95368 在一次性许可下保留同一次 StartDevice 的许可消费后刷盘成功、资源、硬件、面板及成功返回。正式 95548 之后用全新进程从控制端原 ETL 复读，两份内容与哈希均匹配。",
+        "missing_observation": "95368 的原应用前探针返回 Unexpected probe acknowledgement；后续归档中的确认身份一致，任务初读时为何拒绝未知。原窗口执行零次，无 DMA 日志。该探针独立修正后接续同一逻辑请求。95090 仍未归因。",
+        "finished_utc": "2026-11-22T05:48:17.438621+00:00"
+      },
+      {
+        "round_id": "win-seq-original-demand-once-20261121-02",
+        "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+        "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+        "method": "沿用 f6264ee11289 和已在实机核对启动证据的同一签名候选。探针改用完整文件快照和显式字段，核对未启动后续见证再放行一次原生旧式 SEQUENTIAL。",
+        "state": "已回写",
+        "plan": "windows-native-graphics/rounds/win-seq-original-demand-once-20261121-02.plan.json",
+        "plan_sha256": "afa0d2d2829d5f769c7645f7ef4838c3146ef903538bd5b379664b0bba391737",
+        "registered_utc": "2026-11-22T05:48:17.438621+00:00",
+        "device_executions": 0,
+        "result": "windows-native-graphics/rounds/win-seq-original-demand-once-20261121-02.result.json",
+        "result_sha256": "4528cf4dc64ab212308e2a2fd9368f0e7d7b4850dbfc85badd2a23e3746ec556",
+        "status": "UTF-8 探针结果误读已定位，原窗口零启动，正式档已恢复",
+        "finding": "第三次准备在一次性候选启动 95719 完整保留 StartDevice、许可消费及成功返回。探针五项校验全部通过；无 BOM 的 UTF-8 结果含中文 probe_read_error，Windows PowerShell 5.1 默认代码页 936 读取后 JSON 解析失败。恢复正式启动 95892 后，从同一原始文件独立复现默认读取失败、显式 UTF-8 成功。原应用与捕获均未启动。本次各次重启均有计划记录，未见 41/6008。",
+        "missing_observation": "本次零应用执行，无首次 Present 或同包 DMA；不能用成功启动 95719 解释早期 95090 或历史 91476 的 DMA 152586。修正读取编码并保留身份反例控制后，接续同一请求的唯一原应用执行。",
+        "finished_utc": "2026-11-22T06:14:19.796801+00:00"
+      },
+      {
+        "round_id": "win-seq-original-demand-utf8-20261121-03",
+        "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+        "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+        "method": "在同一 f6264ee11289 的前三次零应用执行证据和正式 95892 回执上，沿用已签 cb640495 候选，显式 UTF-8 读取探针结果，经同一门验证后至多派发一次原生旧式 SEQUENTIAL，保全同次 DMA 并恢复正式档。",
+        "state": "已回写",
+        "plan": "windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.plan.json",
+        "plan_sha256": "77e3648e1c182bceee65dbf345a69cf39ada8156088c6c8881758a343a47b71a",
+        "registered_utc": "2026-11-22T06:21:45.249809+00:00",
+        "device_executions": 1,
+        "status": "原场景一次通过，正式档恢复并跨恢复独立读回通过",
+        "finding": "boot96075的PID4332原生SEQUENTIAL空窗口首次Present返回S_OK，画面/输入/正常退出/DWM连续性通过。52字节DMA5406同次七阶段完整。DWM126次中112完整、14明确抢占。正式96251恢复Code0、永久许可、8件哈希及KMD/DWM实载、Handheld。新进程原日志复读与恢复前一致；本轮无未计划重启，临时资源已清理。",
+        "missing_observation": "原三次首次Present重启、91476/DWM152586及95090早期启动的原次首因仍未知；本轮正常记录不替代旧证据。四条暂缓契约逐项复查仍未知。",
+        "result": "windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+        "result_sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20",
+        "finished_utc": "2026-11-22T06:48:54.508399+00:00"
       }
-    ]
+    ],
+    "current_original_request_progress": {
+      "request": "f6264ee11289",
+      "preparation": 4,
+      "application_executions": 1,
+      "restored_boot": 96251,
+      "state": "原场景一次通过，正式档恢复并跨恢复独立读回通过",
+      "receipt": "windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+      "receipt_sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20",
+      "utc": "2026-11-22T06:48:54.508399+00:00",
+      "closed_boot": 95985,
+      "candidate_kmd_sha256": "98bd917941d6505436b85ec07d1aaa47d58529a2912a3b8b7bb6cdafae6201f0",
+      "candidate_boot": 96075,
+      "original_request_dispatches": 1,
+      "application_pid": 4332,
+      "complete_dma": 5406
+    }
   }
 }

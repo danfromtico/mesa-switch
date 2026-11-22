@@ -1,0 +1,264 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-original-demand-utf8-20261121-03",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "77e3648e1c182bceee65dbf345a69cf39ada8156088c6c8881758a343a47b71a",
+  "status": "原场景一次通过，正式档恢复并跨恢复独立读回通过",
+  "finding": "boot96075的PID4332原生SEQUENTIAL空窗口首次Present返回S_OK，画面/输入/正常退出/DWM连续性通过。52字节DMA5406同次七阶段完整。DWM126次中112完整、14明确抢占。正式96251恢复Code0、永久许可、8件哈希及KMD/DWM实载、Handheld。新进程原日志复读与恢复前一致；本轮无未计划重启，临时资源已清理。",
+  "missing_observation": "原三次首次Present重启、91476/DWM152586及95090早期启动的原次首因仍未知；本轮正常记录不替代旧证据。四条暂缓契约逐项复查仍未知。",
+  "device_executions": 1,
+  "request_id": "f6264ee11289",
+  "preparation": 4,
+  "original_request_dispatches": 1,
+  "original_application_executions": 1,
+  "unexplained_restart": false,
+  "candidate_boot": 96075,
+  "formal_recovery_boot": 96251,
+  "application_pid": 4332,
+  "first_present": {
+    "call_qpc": 4689453236,
+    "return_qpc": 4690642014,
+    "qpc_hz": 19200000,
+    "hresult": "0x00000000",
+    "elapsed_ms": 61.91552083333333,
+    "window_verified": true,
+    "input_verified": true,
+    "normal_exit": true,
+    "dwm_continuity": true
+  },
+  "complete_application_dma": {
+    "identity": {
+      "boot": 96075,
+      "capture": "7b6194525f3143c683df6345ed7822f8",
+      "context": 18446660549293215184,
+      "context_start_qpc": 4668891564,
+      "dma": 5406,
+      "dma_bytes": 52,
+      "kmd_context": 18446624269196808432,
+      "luid": 23417,
+      "node": 0,
+      "owner_pid": 4332,
+      "queue": 1,
+      "queue_packet": 18446624269193388048
+    },
+    "complete_record_sha256": "580a93b8a0f0f2ed4a57d0aa76e34bcb79773c6cf747a0dfd78be7446ede54d6",
+    "stages": {
+      "submit": {
+        "provider": "DxgKrnl",
+        "event_id": 175,
+        "version": 1,
+        "source_qpc": 4690570086
+      },
+      "kmd_entry": {
+        "provider": "TegraKMD",
+        "event_id": 7,
+        "version": 2,
+        "source_qpc": 4690570190
+      },
+      "kmd_return": {
+        "provider": "TegraKMD",
+        "event_id": 7,
+        "version": 2,
+        "source_qpc": 4690570493
+      },
+      "gpu_complete": {
+        "provider": "TegraKMD",
+        "event_id": 7,
+        "version": 2,
+        "source_qpc": 4690604974
+      },
+      "driver_notification": {
+        "provider": "DxgKrnl",
+        "event_id": 177,
+        "version": 1,
+        "source_qpc": 4690606554
+      },
+      "dma_stop": {
+        "provider": "DxgKrnl",
+        "event_id": 176,
+        "version": 0,
+        "source_qpc": 4690606967
+      },
+      "retire": {
+        "provider": "DxgKrnl",
+        "event_id": 180,
+        "version": 1,
+        "source_qpc": 4690607173
+      }
+    }
+  },
+  "dwm": {
+    "attempts": 126,
+    "complete": 112,
+    "preempted": 14
+  },
+  "post_restore_readback": {
+    "schema": 1,
+    "utc": "2026-11-22T06:43:46.234129+00:00",
+    "request": "f6264ee11289",
+    "original_boot": 96075,
+    "read_after_formal_boot": 96251,
+    "reader": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/tools/dma_attempt_capture.py",
+      "sha256": "9b13baaf8e1faa5a4c505cca676dfb4d9d1e967746160c66486e350d8255f969"
+    },
+    "journal": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/diagnostic-installed/live/attempts.journal",
+      "bytes": 4441995,
+      "sha256": "95629e797ec273a5a11b88a21a02f923fc2863e94c263e11d41d97746b8108b2"
+    },
+    "fresh_reader_process_exit": 0,
+    "report": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/post-restore-journal-readback.json",
+      "sha256": "758e83ff78a72b6c5a32dc80ec13ad52815817d35896e537b5591133260a6e05"
+    },
+    "matches_pre_restore_readback": true,
+    "complete_application": {
+      "serial": 395,
+      "identity": {
+        "boot": 96075,
+        "capture": "7b6194525f3143c683df6345ed7822f8",
+        "context": 18446660549293215184,
+        "context_start_qpc": 4668891564,
+        "dma": 5406,
+        "dma_bytes": 52,
+        "kmd_context": 18446624269196808432,
+        "luid": 23417,
+        "node": 0,
+        "owner_pid": 4332,
+        "queue": 1,
+        "queue_packet": 18446624269193388048
+      },
+      "complete_record_sha256": "580a93b8a0f0f2ed4a57d0aa76e34bcb79773c6cf747a0dfd78be7446ede54d6"
+    },
+    "attempts": 127,
+    "complete_attempts": 113,
+    "unconfirmed_tail": null,
+    "capture_terminal": {
+      "collector_error": 0,
+      "events_lost": 0,
+      "file_buffers_lost": 0,
+      "flushes": 2443,
+      "process_trace": 0,
+      "realtime_buffers_lost": 0,
+      "sent": 1762,
+      "status": 0,
+      "stop": 0,
+      "windows_acknowledged": 1762
+    }
+  },
+  "formal_components": {
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "formal_loaded_paths": {
+    "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+    "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\libvulkan_nouveau.dll",
+    "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_d3d_arm64.dll",
+    "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\TegraGpuD3DVk.dll",
+    "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_nvk_arm64.dll"
+  },
+  "formal_power": {
+    "mode": 1,
+    "dfll_active": 1,
+    "gpu_policy": 1,
+    "ac": "Online",
+    "charge_limit": 85
+  },
+  "planned_boot_records": [
+    95892,
+    95985,
+    96075,
+    96162,
+    96251
+  ],
+  "unplanned_event_records": [],
+  "evidence": {
+    "artifacts": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/work/first-present-f6264ee11289/report/2026-11-21_re-switch-first-present-report.md",
+        "sha256": "3847a5f454d9a3e11015d5c68e32f57b26f98016930f94b8fd998c7b10ed0571"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/post-restore-independent-readback.json",
+        "sha256": "f1d71b1b2fa72758140b51c8faf16f972ce3f9bae8810d391979cfbc14779139"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/capture-readback.json",
+        "sha256": "53033f6da5e563e4e63d95d3b9ce3222548f9ea1ecde40f2063e4ab107c1a91a"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/diagnostic-installed/live/attempts.journal",
+        "sha256": "95629e797ec273a5a11b88a21a02f923fc2863e94c263e11d41d97746b8108b2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/diagnostic-installed/live/wire.jsonl",
+        "sha256": "01c25e24548b04f2c9da45e759bbf25756806455b053f368c2ec6fa9fdbe749c"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/diagnostic-installed/collection.json",
+        "sha256": "ec1028f14b87d4c29b1bbef0e6e230551f8d87062e08fbaf8ef16255329346c0"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/diagnostic-installed/outcome.zip",
+        "sha256": "e8196b9c6314ccbc5200157653f00ef0e8a7c0bbca4f818d7d63af42d6c99970"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/formal-power-verified.json",
+        "sha256": "bebe98a7ecf28100db030a21d61d5e2bacdea0c6fdb2abf4a78f6c4f1d4f9cd1"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/windows-system-interval.json",
+        "sha256": "0fb42b489f4de88094128e3329aab38779d61ce9d6ed448891d034887246f39a"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/post-restore-resource-proof.json",
+        "sha256": "16d28aefab824729590e9f991ed46505525e135e512fe31e00cfe263b3671b73"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/early-candidate-boot/verified.json",
+        "sha256": "bdbca1026aed4c9559ec06f18aac781d549a58c02366ab97050ce35eb2f32612"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/diagnostic-installed/standby-receipt.json",
+        "sha256": "cb51f61cdbdb300f2df22497f8d4354ff92e65b23a7022c09b4a6598623c4458"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/diagnostic-installed/original-demand-issued.json",
+        "sha256": "d4d6ae6171f93ca10bf6aa0f593ed48f22b582d3adc9995760dd90061f0fb5f2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/utf8-review/review-response.md",
+        "sha256": "e5f95646cf6b65ad4d9658995f04166f21009ba80f9b8853329875326dfe0465"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/docs/windows-native-graphics/first-present-deferred-contracts-20261121.json",
+        "sha256": "de1b1a1280a4318cc5c38b7906004a26001d59d126a67cd8a448ce364ae1b06e"
+      }
+    ]
+  },
+  "candidate_promoted": false,
+  "validation": {
+    "CheckLedger": "PASS",
+    "WSL_contracts": "PASS: 452 comments, 61 hardware rounds; 11 satisfied, 0 violated, 441 unknown",
+    "case_review": "PASS: 12 evidence, 5 work items, 5 findings, 1 path; 0 errors and warnings",
+    "git_diff_check": "PASS",
+    "skill_routing": "PASS: 221 cases plus default-root regression",
+    "skill_bootstrap_manifest": "PASS",
+    "CheckPublication": {
+      "status": "BLOCKED",
+      "reason": "Missing independently tested separation from SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+      "same_on_inherited_commit": "5f92c216f6cdd92e650fd339379eb0174e76b27b",
+      "selected_baseline_and_qualification_unchanged": true,
+      "applies_to_new_baseline_publication": true,
+      "new_baseline_selected": false
+    }
+  }
+}
