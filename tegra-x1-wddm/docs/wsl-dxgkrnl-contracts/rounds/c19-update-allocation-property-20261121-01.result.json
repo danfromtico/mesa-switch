@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "round_id": "c19-update-allocation-property-20261121-01",
+  "contract_id": "dxgvmbus.c:3651:2",
+  "declaration_sha256": "7ee04470ef6f8ffc4827ad8de99751fafe793be841495f88e974654548b4aff7",
+  "started_utc": "2026-11-22T02:53:45.934279+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "同一属性更新的入口和返回均来自 PID 8068／TID 536，使用同一队列和分配，返回 STATUS_NOT_IMPLEMENTED，输出围栏 0。正常映射对照的 0x103 及实读 7002 归另一个调用进程的 MapGpuVirtualAddress。",
+  "gap": "缺自然进入异步处理的合法 UpdateAllocationProperty 调用，以及该调用返回的正值 0x103 和可配对的有效 PagingFenceValue。现存不支持回执的触发条件未成立。",
+  "observation": {
+    "boot": 91476,
+    "property_call": {
+      "entry": {
+        "qpc": 65791894066,
+        "pid": 8068,
+        "tid": 536,
+        "event": "property_begin",
+        "queue": "1073742144",
+        "allocation": "1073742208",
+        "mask": "8",
+        "flags": "2"
+      },
+      "return": {
+        "qpc": 65791958814,
+        "pid": 8068,
+        "tid": 536,
+        "event": "property_return",
+        "status": "c0000002",
+        "queue": "1073742144",
+        "allocation": "1073742208",
+        "target": "0"
+      }
+    },
+    "separate_gpuva_control": {
+      "return": {
+        "qpc": 61346886293,
+        "pid": 1640,
+        "tid": 2008,
+        "event": "map_return",
+        "status": "00000103",
+        "queue": "1073742144",
+        "allocation": "1073742208",
+        "address": "65536",
+        "target": "7002"
+      },
+      "paging": {
+        "qpc": 61347056946,
+        "pid": 1640,
+        "tid": 2008,
+        "event": "paging",
+        "queue": "1073742144",
+        "fence": "1073742080",
+        "target": "7002",
+        "before": "7001",
+        "after": "7002",
+        "status": "00000000"
+      }
+    }
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-allocation-property-20261121-01.result.json",
+      "sha256": "ba604dac0173f12e594ce9b1ea42458074c4a14b4483774b774a4eab9520b9db"
+    },
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-gpuva-map-20261121-01.result.json",
+      "sha256": "78788f8d09b55d10f59fce25c9bc43cd7b6bebe1cd186ffad297af395312f89c"
+    }
+  ]
+}

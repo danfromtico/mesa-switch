@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "round_id": "c19-native-create-permissions-20261121-01",
+  "contract_id": "dxgvmbus.c:3147:2",
+  "declaration_sha256": "ba96244d37aae4a027866c5924bfdb329540c4215920acf4ae7f51ac867ed3c6",
+  "started_utc": "2026-11-22T02:54:00.709636+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "本条原次对 GM20B 的能力查询成功，WDDM=2600，NativeGpuFenceSupported=0；创建和打开入口有导出。已验收的 94176 平台仍为 Windows 22631／WDDM 2.6，未达到官方原生围栏 Windows 11 24H2／WDDM 3.2 适用条件。",
+  "gap": "缺两种受支持子类型各自的创建返回、实际映射与页保护。当前设备未满足原生围栏条件。",
+  "observation": {
+    "original_capability": {
+      "boot": 91476,
+      "adapter_luid": "0000000000005c10",
+      "qpc": 73976506013,
+      "pid": 5904,
+      "tid": 6268,
+      "version": 2600,
+      "native_gpu_fence_supported": false,
+      "creation_export_present": true,
+      "opening_export_present": true
+    },
+    "selected_platform": {
+      "last_verified_boot": 94176,
+      "build": 22631,
+      "wddm": "2.6",
+      "source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9"
+    },
+    "missing_target": "两种受支持子类型各自的创建返回、实际映射与页保护。",
+    "official_api": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtcreatenativefence"
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-permissions-20261121-01.result.json",
+      "sha256": "c4b9365234ad7928d7f1015b20d398e9cb0e8dc33f6d1d1110b1da3ff1242c5c"
+    },
+    {
+      "path": "windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    }
+  ]
+}

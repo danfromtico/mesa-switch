@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "round_id": "c19-hardware-queue-owner-20261121-01",
+  "contract_id": "dxgkrnl.h:615:1",
+  "declaration_sha256": "7157bcbfb7b96e314806fdb831e9e77403e61c2016316aadd1c09731083a04aa",
+  "started_utc": "2026-11-22T02:54:00.628866+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "启动 91476 的实际 WDDM 2.7 能力结构查询返回成功，HwSchSupported 与 HwSchEnabled 均为 0。94176 正式 KMD 与源码身份吻合，其普通上下文仍拒绝 HwQueueSupported；已验收的普通 DMA 提交只覆盖软件调度上下文。",
+  "gap": "缺在支持并启用硬件调度的同一设备上的硬件队列创建返回及设备归属回执。当前 Switch 组合没有该采集条件。",
+  "observation": {
+    "earlier_capability_observation": {
+      "boot": 91476,
+      "caps": {
+        "qpc": 70082319164,
+        "pid": 476,
+        "tid": 7920,
+        "event": "caps",
+        "version_status": "00000000",
+        "version": "2600",
+        "mmu_status": "00000000",
+        "gpu_mmu": "1",
+        "io_mmu": "0",
+        "scheduler_status": "00000000",
+        "hw_supported": "0",
+        "hw_enabled": "0",
+        "fence_status": "00000000",
+        "native_fence": "0"
+      }
+    },
+    "selected_formal_source": {
+      "boot": 94176,
+      "sha256": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "source_commit": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+      "context_source": "tegra-x1-wddm/windows/context.c",
+      "context_sha256": "7aa0a007bc1a59b35eaccdcd9ff3e7ea054aa1f0a985e73545d585815225a4d8",
+      "line": 150
+    },
+    "reference": "https://learn.microsoft.com/sv-se/windows-hardware/drivers/ddi/d3dkmdt/ns-d3dkmdt-d3dkmt_wddm_2_7_caps"
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-hardware-queue-20261121-01.result.json",
+      "sha256": "f241979df03d5fa93d9a8b42b13a3b4d9bd5d17accea096b8ff4637da829d1a3"
+    },
+    {
+      "path": "windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    }
+  ]
+}

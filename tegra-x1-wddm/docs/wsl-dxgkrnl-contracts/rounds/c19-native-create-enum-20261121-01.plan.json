@@ -1,0 +1,20 @@
+{
+  "round_id": "c19-native-create-enum-20261121-01",
+  "contract_id": "ioctl.c:2888:2",
+  "declared_utc": "2026-11-22T02:54:00.729947+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "79591767c2675c29f76cfd0776a30643c8e3326cbb32c4712bca58d6b3efca7c",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "有效原生围栏两个子类型的创建与共享约束。",
+  "question": "DEFAULT 和 INTRA_GPU 在合法创建与共享时受哪些实际子类型约束？",
+  "method": "只复用本条原来的 Windows 能力回执，并核对当前正式系统版本与该 API 的受支持条件。",
+  "required_observation": "DEFAULT 和 INTRA_GPU 在合法创建与共享时受哪些实际子类型约束？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-enum-20261121-01.result.json",
+    "sha256": "d442e62be3ba67aa02d1f53d076536db08e31a865311df4b6a6bc1f49cc67432"
+  }
+}

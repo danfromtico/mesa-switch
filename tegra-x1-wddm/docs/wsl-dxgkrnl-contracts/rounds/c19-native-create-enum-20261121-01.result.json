@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "round_id": "c19-native-create-enum-20261121-01",
+  "contract_id": "ioctl.c:2888:2",
+  "declaration_sha256": "ca53333ec8393afc8349b4bd7c317e008759a4c1981fdbb98e1dbd065fe86693",
+  "started_utc": "2026-11-22T02:54:00.733531+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "本条原次对 GM20B 的能力查询成功，WDDM=2600，NativeGpuFenceSupported=0；创建和打开入口有导出。已验收的 94176 平台仍为 Windows 22631／WDDM 2.6，未达到官方原生围栏 Windows 11 24H2／WDDM 3.2 适用条件。",
+  "gap": "缺两种原生类型的有效创建结果及同对象的共享能力输出。当前设备未满足原生围栏条件。",
+  "observation": {
+    "original_capability": {
+      "boot": 91476,
+      "adapter_luid": "0000000000005c10",
+      "qpc": 75388444169,
+      "pid": 368,
+      "tid": 1528,
+      "version": 2600,
+      "native_gpu_fence_supported": false,
+      "creation_export_present": true,
+      "opening_export_present": true
+    },
+    "selected_platform": {
+      "last_verified_boot": 94176,
+      "build": 22631,
+      "wddm": "2.6",
+      "source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9"
+    },
+    "missing_target": "两种原生类型的有效创建结果及同对象的共享能力输出。",
+    "official_api": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtcreatenativefence"
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-enum-20261121-01.result.json",
+      "sha256": "d442e62be3ba67aa02d1f53d076536db08e31a865311df4b6a6bc1f49cc67432"
+    },
+    {
+      "path": "windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    }
+  ]
+}

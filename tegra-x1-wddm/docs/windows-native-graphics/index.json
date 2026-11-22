@@ -147,7 +147,12 @@
       "prior_scope_gap": "同一资源三次成员数为 1。还缺明确记录成员集合固定的同层观测。",
       "original_verdict": "未知",
       "first_present_use": "按对象复用",
-      "first_present_condition": "已有共享成员数 1/1/1；若本次重定向源绑定到这种资源，可对齐成员与打开方。集合封存状态无可用字段。"
+      "first_present_condition": "已有共享成员数 1/1/1；若本次重定向源绑定到这种资源，可对齐成员与打开方。集合封存状态无可用字段。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-sealed-members-20261121-01.result.json",
+        "sha256": "dfc1b73b62756699772398e712866ead51732cc4700967cd76d1a4d40a75dd84"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgkrnl.h:759:2",
@@ -163,7 +168,12 @@
       "prior_scope_gap": "实测页为写合并属性。还缺缓存映射和同一分配的已定义 Cached 位。",
       "original_verdict": "未知",
       "first_present_use": "按对象复用",
-      "first_present_condition": "原轮的 Lock2 为写合并映射；只有本次源/目标有相应 CPU 映射才可归属，与 GPUVA 分页回执分开。"
+      "first_present_condition": "原轮的 Lock2 为写合并映射；只有本次源/目标有相应 CPU 映射才可归属，与 GPUVA 分页回执分开。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-mapped-cache-attribute-20261121-01.result.json",
+        "sha256": "c4f9534a614b436fb36abd822fcb536fe7996b746879c8cf53b50c352acc98d9"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgvmbus.c:3651:2",
@@ -179,7 +189,12 @@
       "prior_scope_gap": "此次正常 Unmoveable 属性更新返回 STATUS_NOT_IMPLEMENTED。缺该 API 自然返回 STATUS_PENDING 及有效输出的请求。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "合法 Unmoveable 已实测返回 STATUS_NOT_IMPLEMENTED，无异步目标，沿用原轮。"
+      "first_present_condition": "合法 Unmoveable 已实测返回 STATUS_NOT_IMPLEMENTED，无异步目标，沿用原轮。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-update-allocation-property-20261121-01.result.json",
+        "sha256": "cd284f26bca4ba985629aa8a661ee0bc95463e88163c437ca8ad6375b6b478b5"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgsyncfile.c:266:2",
@@ -243,7 +258,12 @@
       "prior_scope_gap": "没有全局句柄表项或父对象关系的直接字段。",
       "original_verdict": "未知",
       "first_present_use": "部分可观测",
-      "first_present_condition": "在同次窗口轨迹按 1069 和上下文本地句柄绑定本机同步对象，再核对同值信号和等待。公开事件缺少全局表父指针。"
+      "first_present_condition": "在同次窗口轨迹按 1069 和上下文本地句柄绑定本机同步对象，再核对同值信号和等待。公开事件缺少全局表父指针。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-shared-fence-parent-20261121-01.result.json",
+        "sha256": "e923c8e61e03ded3972857af815111680c7c31ce6b294a31389e663197b91092"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgkrnl.h:615:1",
@@ -259,7 +279,12 @@
       "prior_scope_gap": "HwSchSupported=0 且 HwSchEnabled=0。缺实际硬件执行队列及设备创建关联。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "硬件调度能力与启用位均为 0，本次以 VidSch 普通上下文核对。"
+      "first_present_condition": "硬件调度能力与启用位均为 0，本次以 VidSch 普通上下文核对。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-hardware-queue-owner-20261121-01.result.json",
+        "sha256": "8f0eff5a62fef013558843a17fb60946ae900b9a733189e62a6ad2c7857792b4"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgkrnl.h:145:1",
@@ -276,7 +301,12 @@
       "prior_scope_gap": "缺少受支持的原生围栏类型及共享实例的完整归属。WSL 来宾链表和 FD 映射需要来宾记录。",
       "original_verdict": "未知",
       "first_present_use": "部分可观测",
-      "first_present_condition": "WDDM 2.6 的 monitored fence 可以核对同对象、值和队列包退役；已有周期型创建和高版本能力回执另存。"
+      "first_present_condition": "WDDM 2.6 的 monitored fence 可以核对同对象、值和队列包退役；已有周期型创建和高版本能力回执另存。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-old-first-present-sync-owner-20261121-01.result.json",
+        "sha256": "4c8076b76b090e404f29dceaa46ba485830fe66beb94d7d056177834e2d6d4ac"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgkrnl.h:218:2",
@@ -292,7 +322,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的创建类型回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-type-20261121-01.result.json",
+        "sha256": "c6ecbc925502c92eabaa129ea1d0de39aa325d381b569c4b0685bce86f78ebc8"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgkrnl.h:256:2",
@@ -308,7 +343,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的共享子类型回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-shared-type-20261121-01.result.json",
+        "sha256": "d189762cb55395d76c7ce40ae325f5b7d001c9e467c56d143cf205f0dbb8d154"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgvmbus.c:825:2",
@@ -324,7 +364,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的NT 对象类型回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-type-20261121-01.result.json",
+        "sha256": "197a1149049cb53d1015b73ada9877054ca80eb1dca27cf6d7cd36551af9b85d"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgvmbus.c:889:2",
@@ -340,7 +385,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的打开映射权限回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-permissions-20261121-01.result.json",
+        "sha256": "37a78a695bd17d97e9c71da2c3f0ef96ae4ca3e20e3b45b5146db2f609bca7b8"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgvmbus.c:896:3",
@@ -356,7 +406,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的INTRA_GPU 打开输出回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-intra-20261121-01.result.json",
+        "sha256": "5f4ba0afbfba9174432289a61edcb4c5976395a208441a32f720cc58da4d0980"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgvmbus.c:900:3",
@@ -372,7 +427,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的DEFAULT 打开输出回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-default-20261121-01.result.json",
+        "sha256": "0615ee455b7f21a02ad32a7af7eaad2006fc27fb2bd3bc50f451e81613f02f53"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgvmbus.c:3147:2",
@@ -388,7 +448,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的创建映射权限回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-create-permissions-20261121-01.result.json",
+        "sha256": "9fecba5e3bd65dc71386ca658d5f0c854ed499dd0ae9337c407bddf24da5993a"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgvmbus.c:3152:3",
@@ -404,7 +469,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的INTRA_GPU 创建输出回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-create-intra-20261121-01.result.json",
+        "sha256": "c13b59304d61ff228eb3ca329982c121ce1fdb75013c911888eac6babdd5b1df"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "dxgvmbus.c:3156:3",
@@ -420,7 +490,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的DEFAULT 创建输出回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-create-default-20261121-01.result.json",
+        "sha256": "f218c2ba3eb091d5eff184b35dc44a6e2cf1b87c8fa9330823e594060c588a41"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "ioctl.c:2888:2",
@@ -436,7 +511,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的创建子类型与共享回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-create-enum-20261121-01.result.json",
+        "sha256": "807e6f6d6d2243a5498e0d08624046bae09d6d92a749e3a0149d947e94d7f666"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "ioctl.c:3243:2",
@@ -452,7 +532,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的NT 打开参数回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-input-20261121-01.result.json",
+        "sha256": "d7c27c7ebbb3637f00790e635722ef37d5fb6a2f8150b60da62dde7c00dd9669"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "ioctl.c:3302:2",
@@ -468,7 +553,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的打开时的类型检查回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-object-20261121-01.result.json",
+        "sha256": "c76b9a84488b3af1ec032711e6508b0d57d98a1b1177f569bd394104b3894254"
+      },
+      "current_native_verdict": "未知"
     },
     {
       "wsl_comment_as_background": "ioctl.c:3310:2",
@@ -484,7 +574,12 @@
       "prior_scope_gap": "缺少同一受支持的原生围栏对象与调用区间内的跨适配器约束回执。",
       "original_verdict": "未知",
       "first_present_use": "本机条件受限",
-      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。"
+      "first_present_condition": "版本 2600 及 NativeGpuFenceSupported=0 已实测。既有回执用于划定能力边界。",
+      "native_follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-adapter-20261121-01.result.json",
+        "sha256": "ab025fc1af799448852395446a07b36dd9354abf92707957f139c2912997cd6d"
+      },
+      "current_native_verdict": "未知"
     }
   ],
   "questions": [
@@ -6695,5 +6790,9 @@
   "fence_wait_all_owners": {
     "path": "windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
     "sha256": "c24a31504ff6dead5b01ea833bcf58ede36173ec78f8fbcb03af9d890f29cc96"
+  },
+  "native_19_follow_up": {
+    "path": "windows-native-graphics/native-19-follow-up.json",
+    "sha256": "d16875ce7bca863e559385f0e7182c78c82692dec10e53c58134d679d601939b"
   }
 }

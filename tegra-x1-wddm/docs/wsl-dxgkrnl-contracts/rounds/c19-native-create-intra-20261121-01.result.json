@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "round_id": "c19-native-create-intra-20261121-01",
+  "contract_id": "dxgvmbus.c:3152:3",
+  "declaration_sha256": "c02a59db4e5ddd448f8f522c3e4c8ae9ee5d32621393e6c59052fb0cf61b2c72",
+  "started_utc": "2026-11-22T02:54:00.717201+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "本条原次对 GM20B 的能力查询成功，WDDM=2600，NativeGpuFenceSupported=0；创建和打开入口有导出。已验收的 94176 平台仍为 Windows 22631／WDDM 2.6，未达到官方原生围栏 Windows 11 24H2／WDDM 3.2 适用条件。",
+  "gap": "缺INTRA_GPU 的创建返回、当前值和监控值的 CPU 映射输出。当前设备未满足原生围栏条件。",
+  "observation": {
+    "original_capability": {
+      "boot": 91476,
+      "adapter_luid": "0000000000005c10",
+      "qpc": 74435624988,
+      "pid": 5444,
+      "tid": 756,
+      "version": 2600,
+      "native_gpu_fence_supported": false,
+      "creation_export_present": true,
+      "opening_export_present": true
+    },
+    "selected_platform": {
+      "last_verified_boot": 94176,
+      "build": 22631,
+      "wddm": "2.6",
+      "source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9"
+    },
+    "missing_target": "INTRA_GPU 的创建返回、当前值和监控值的 CPU 映射输出。",
+    "official_api": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtcreatenativefence"
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-intra-20261121-01.result.json",
+      "sha256": "9683b8fe86697ee150de0a3cccc6a8e61329b113cbcde32c1467e4d3ef8f0979"
+    },
+    {
+      "path": "windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    }
+  ]
+}

@@ -1,0 +1,511 @@
+{
+  "schema": 1,
+  "objective": "完成 19 条 Windows 本机可比项的逐条取证，优先首次 Present 与 GPU fence",
+  "original_native_scope": {
+    "path": "wsl-dxgkrnl-contracts/native-27.json",
+    "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+  },
+  "gap_index": {
+    "path": "wsl-dxgkrnl-contracts/gap-index.json",
+    "sha256": "fe335c0c83e8c762b83c585c6e25127b8b2a1ffd54d80ae57125b09b6917a931"
+  },
+  "new_device_executions": 0,
+  "counts": {
+    "已满足": 8,
+    "已违反": 0,
+    "未知": 19,
+    "已逐条复核": 19,
+    "其中设备能力条件未满足": 14,
+    "其中缺匹配对象或结果": 5
+  },
+  "input_scope": "原 27 条中的 19 条未知项逐条先登记后核对 Windows 原件，8 条已满足直接引用。298 条 WSL 专属和 124 条源码元信息不进入本机待办。",
+  "same_boot_limits": "82058、82221、82382 各自只确认本次 Present 调用前的信号。91476 的 DWM DMA 152586 仍缺同次 KMD 返回与完成。94004 的正常校准及 94176 的恢复回执仅适用于各自启动。",
+  "supporting_windows_evidence": [
+    {
+      "path": "windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    },
+    {
+      "path": "windows-native-graphics/rounds/win-cdd-wall-clock-91476-20261121-01.result.json",
+      "sha256": "fd59be8dd4604185b88004ba9be7f15158627a83104d249a8dc19d94b5b4f133"
+    }
+  ],
+  "rows": [
+    {
+      "contract_id": "ioctl.c:2581:2",
+      "windows_questions": [
+        "WIN-PRESENT-SOURCE"
+      ],
+      "predicate": "公开 MapGpuVirtualAddress 接受这次异步映射时，将正值 STATUS_PENDING 原样返回给调用线程。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-gpuva-map-20261121-01.result.json",
+        "sha256": "78788f8d09b55d10f59fce25c9bc43cd7b6bebe1cd186ffad297af395312f89c"
+      },
+      "status": "已满足",
+      "round_id": "c27-gpuva-map-20261121-01",
+      "missing_observation": null
+    },
+    {
+      "contract_id": "dxgkrnl.h:197:2",
+      "windows_questions": [
+        "WIN-MONITORED-CPU",
+        "WIN-FENCE-WAIT"
+      ],
+      "predicate": "设备监控围栏的创建输出提供可读 CPU VA，向所属上下文提交 GPU 信号后可从同一 VA 看到目标值。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-monitored-cpu-va-20261121-01.result.json",
+        "sha256": "697a2006ac5f2d7ace5968828ea0a6877b2e3ca36c959bea7efbda5aeec9384c"
+      },
+      "status": "已满足",
+      "round_id": "c27-monitored-cpu-va-20261121-01",
+      "missing_observation": null
+    },
+    {
+      "contract_id": "dxgkrnl.h:723:2",
+      "windows_questions": [
+        "WIN-SHARED-RESOURCE",
+        "WIN-PRESENT-SOURCE"
+      ],
+      "predicate": "两个原生进程分别打开同一共享资源时，局部资源句柄应关联到同一底层共享资源。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-resource-owner-20261121-01.result.json",
+        "sha256": "b94f19b04f80d2c90d502a1398436b19326dd031f5616351f00da8b29217b3d0"
+      },
+      "status": "已满足",
+      "round_id": "c27-shared-resource-owner-20261121-01",
+      "missing_observation": null
+    },
+    {
+      "contract_id": "ioctl.c:1710:4",
+      "windows_questions": [
+        "WIN-SHARED-RESOURCE"
+      ],
+      "predicate": "创建共享分配时的逐分配私有数据，由打开方在其合法打开回包中取得。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-private-data-20261121-01.result.json",
+        "sha256": "ea4969efd37bc8a2a8b35435f3a9f9a5ad849843573dabcc83075e6df7322c5b"
+      },
+      "status": "已满足",
+      "round_id": "c27-shared-private-data-20261121-01",
+      "missing_observation": null
+    },
+    {
+      "contract_id": "ioctl.c:1630:4",
+      "windows_questions": [
+        "WIN-SHARED-RESOURCE"
+      ],
+      "predicate": "在同一设备的既有未共享普通资源中，合法 CreateAllocation2 追加的分配关联回该资源。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-append-allocation-20261121-01.result.json",
+        "sha256": "e1987f71c8aecb8d1b2b6ad7641d0b88c88bf3c589f793d2dcfed2693bf8904d"
+      },
+      "status": "已满足",
+      "round_id": "c27-append-allocation-20261121-01",
+      "missing_observation": null
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "windows_questions": [
+        "WIN-RESOURCE-MEMBERS"
+      ],
+      "predicate": "共享完成后，已共享资源的分配集合受封装约束。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-sealed-members-20261121-01.result.json",
+        "sha256": "c2780e8d8428b31e95e358c8ff3927f1fdb752ca6e615ea3be89e3120dcd8834"
+      },
+      "status": "未知",
+      "round_id": "c19-sealed-members-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-sealed-members-20261121-01.result.json",
+        "sha256": "dfc1b73b62756699772398e712866ead51732cc4700967cd76d1a4d40a75dd84"
+      },
+      "missing_observation": "缺该已共享资源进入固定成员状态的直接 Windows 记录，或自然发生的等价成员约束结果。单成员计数稳定只覆盖这些正常操作。",
+      "scope": "缺匹配对象或结果"
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "windows_questions": [
+        "WIN-ALLOCATION-MAP"
+      ],
+      "predicate": "CPU 可见分配的缓存映射属性，与同一分配在原生内核中的 Cached 标记相符。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-allocation-cache-20261121-01.result.json",
+        "sha256": "23663fb977590001af8d4449cf6cc6b2c988894228df6ca3b84e185a49583b6b"
+      },
+      "status": "未知",
+      "round_id": "c19-mapped-cache-attribute-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-mapped-cache-attribute-20261121-01.result.json",
+        "sha256": "c4f9534a614b436fb36abd822fcb536fe7996b746879c8cf53b50c352acc98d9"
+      },
+      "missing_observation": "仍缺同一分配 Cached=1 时的真实缓存映射和 Windows 运行时具名属性配对。现有对象只覆盖写合并映射。",
+      "scope": "缺匹配对象或结果"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "windows_questions": [
+        "WIN-ALLOCATION-UPDATE"
+      ],
+      "predicate": "合法 UpdateAllocationProperty 自然异步处理时，返回正的 STATUS_PENDING 并输出同队列的分页围栏。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-allocation-property-20261121-01.result.json",
+        "sha256": "ba604dac0173f12e594ce9b1ea42458074c4a14b4483774b774a4eab9520b9db"
+      },
+      "status": "未知",
+      "round_id": "c19-update-allocation-property-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-update-allocation-property-20261121-01.result.json",
+        "sha256": "cd284f26bca4ba985629aa8a661ee0bc95463e88163c437ca8ad6375b6b478b5"
+      },
+      "missing_observation": "缺自然进入异步处理的合法 UpdateAllocationProperty 调用，以及该调用返回的正值 0x103 和可配对的有效 PagingFenceValue。现存不支持回执的触发条件未成立。",
+      "scope": "缺匹配对象或结果"
+    },
+    {
+      "contract_id": "dxgsyncfile.c:266:2",
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "predicate": "合法 NT 共享的设备监控围栏以等待专用行为打开时，打开方得到本地句柄。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-open-monitor-wait-only-20261121-01.result.json",
+        "sha256": "fd67cda81ed229dd3f7022fc0b08b80dea56b150058aaf9b740c5aa1acb07f5b"
+      },
+      "status": "已满足",
+      "round_id": "c27-open-monitor-wait-only-20261121-01",
+      "missing_observation": null
+    },
+    {
+      "contract_id": "dxgsyncfile.c:381:2",
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "predicate": "打开一个正常共享同步对象的进程取得自己的本地句柄。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-open-monitor-local-20261121-01.result.json",
+        "sha256": "6df90d80afb0c7cb843eff6109dd6025ce32640504e88b8f8857bf0bd4ba077d"
+      },
+      "status": "已满足",
+      "round_id": "c27-open-monitor-local-20261121-01",
+      "missing_observation": null
+    },
+    {
+      "contract_id": "dxgkrnl.h:199:2",
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "predicate": "同步对象的 KMT 句柄按持有它的进程提供本地使用与释放。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-sync-process-handle-20261121-01.result.json",
+        "sha256": "fc77c588ec6d8d9002c60145afdb170d8fb4e54bb97baeae33f2fc1651a40d07"
+      },
+      "status": "已满足",
+      "round_id": "c27-sync-process-handle-20261121-01",
+      "missing_observation": null
+    },
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "predicate": "同一共享同步对象的各打开实例关联到同一父对象，非 NT 全局句柄指向该父对象。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-parent-20261121-01.result.json",
+        "sha256": "f0e2a76f89e0af3ed5a95be771d6cdd70bf8989e7cf255561f0eb12c64d21799"
+      },
+      "status": "未知",
+      "round_id": "c19-shared-fence-parent-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-shared-fence-parent-20261121-01.result.json",
+        "sha256": "e923c8e61e03ded3972857af815111680c7c31ce6b294a31389e663197b91092"
+      },
+      "missing_observation": "需源自同一打开的 Windows 全局表项或内部父对象关系；事件 1069 只提供对象与当前局部句柄的关联。原历史 SEQUENTIAL 三次也无同对象的 1069。",
+      "scope": "缺匹配对象或结果"
+    },
+    {
+      "contract_id": "dxgkrnl.h:615:1",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "硬件执行队列在支持并启用硬件调度时有可观测的设备归属。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-hardware-queue-20261121-01.result.json",
+        "sha256": "f241979df03d5fa93d9a8b42b13a3b4d9bd5d17accea096b8ff4637da829d1a3"
+      },
+      "status": "未知",
+      "round_id": "c19-hardware-queue-owner-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-hardware-queue-owner-20261121-01.result.json",
+        "sha256": "8f0eff5a62fef013558843a17fb60946ae900b9a733189e62a6ad2c7857792b4"
+      },
+      "missing_observation": "缺在支持并启用硬件调度的同一设备上的硬件队列创建返回及设备归属回执。当前 Switch 组合没有该采集条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgkrnl.h:145:1",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS",
+        "WIN-MONITORED-CPU"
+      ],
+      "predicate": "同步对象在其支持的类型、共享与所有权范围内用于 GPU 进度和上下文间协调。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-sync-object-scope-20261121-01.result.json",
+        "sha256": "c0757ca862e00305292c31df7ffbcd01dc792ab962cf37c32d29c18aa91f2367"
+      },
+      "status": "未知",
+      "round_id": "c19-old-first-present-sync-owner-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-old-first-present-sync-owner-20261121-01.result.json",
+        "sha256": "4c8076b76b090e404f29dceaa46ba485830fe66beb94d7d056177834e2d6d4ac"
+      },
+      "missing_observation": "缺原次同对象 1069 的创建设备与局部打开身份、同对象 297 及应用等待返回，或匹配的 GPU 等待方与退役记录。另缺受支持原生围栏类型及共享归属。",
+      "scope": "缺匹配对象或结果"
+    },
+    {
+      "contract_id": "dxgkrnl.h:218:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "创建出的 DEFAULT 或 INTRA_GPU 原生围栏的类型枚举。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-type-20261121-01.result.json",
+        "sha256": "a4f18d271a7d00f8c3af7b15ecd5ea7d70ff9142d0709e69bfabf6399e071f7f"
+      },
+      "status": "未知",
+      "round_id": "c19-native-type-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-type-20261121-01.result.json",
+        "sha256": "c6ecbc925502c92eabaa129ea1d0de39aa325d381b569c4b0685bce86f78ebc8"
+      },
+      "missing_observation": "缺同设备创建入参与成功返回的子类型及同步对象关联。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgkrnl.h:256:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "共享原生围栏打开端保存的同一子类型。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-shared-type-20261121-01.result.json",
+        "sha256": "a72e2b6ee1a2497c98986b47e81c9c5b0b77a614166e156982e315efc8bf3caa"
+      },
+      "status": "未知",
+      "round_id": "c19-native-shared-type-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-shared-type-20261121-01.result.json",
+        "sha256": "d189762cb55395d76c7ce40ae325f5b7d001c9e467c56d143cf205f0dbb8d154"
+      },
+      "missing_observation": "缺合法导出／打开前后的共享对象身份与两端子类型。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgvmbus.c:825:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "NT 打开的对象是 D3DDDI_NATIVE_FENCE 类型。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-type-20261121-01.result.json",
+        "sha256": "bcf4c4df1f3c0688ccee331694672d34979d8d63b79296bba2c4b11d6086a119"
+      },
+      "status": "未知",
+      "round_id": "c19-native-open-type-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-type-20261121-01.result.json",
+        "sha256": "197a1149049cb53d1015b73ada9877054ca80eb1dca27cf6d7cd36551af9b85d"
+      },
+      "missing_observation": "缺合法 NT 打开、同对象的类型回执，以及返回的局部句柄绑定。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgvmbus.c:889:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "打开 DEFAULT 和 INTRA_GPU 时各自的 CPU 映射权限。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-permissions-20261121-01.result.json",
+        "sha256": "4a15f491057548bf3f4e5bc21f0cadb47e8b5f4bd1b8a8ac6ede065621c94aa6"
+      },
+      "status": "未知",
+      "round_id": "c19-native-open-permissions-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-permissions-20261121-01.result.json",
+        "sha256": "37a78a695bd17d97e9c71da2c3f0ef96ae4ca3e20e3b45b5146db2f609bca7b8"
+      },
+      "missing_observation": "缺同一合法打开区间内，两个受支持子类型各自的输出映射与页保护。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgvmbus.c:896:3",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "打开 INTRA_GPU 原生围栏时用户态 CPU VA 为空。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-intra-20261121-01.result.json",
+        "sha256": "3daa616426899ceb3ed1c7b3cec84175b633aad86c39b394a19575c13c235258"
+      },
+      "status": "未知",
+      "round_id": "c19-native-open-intra-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-intra-20261121-01.result.json",
+        "sha256": "5f4ba0afbfba9174432289a61edcb4c5976395a208441a32f720cc58da4d0980"
+      },
+      "missing_observation": "缺INTRA_GPU 的已支持打开返回和用户态 CPU VA 字段。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgvmbus.c:900:3",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "打开 DEFAULT 原生围栏时当前值 CPU 映射只读。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-default-20261121-01.result.json",
+        "sha256": "d82e5ee44e3ad990746bf42e71be3cf21fa4913f54099b0cddea4eba91c03954"
+      },
+      "status": "未知",
+      "round_id": "c19-native-open-default-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-default-20261121-01.result.json",
+        "sha256": "0615ee455b7f21a02ad32a7af7eaad2006fc27fb2bd3bc50f451e81613f02f53"
+      },
+      "missing_observation": "缺DEFAULT 打开返回产生的同一当前值 CPU 映射与页保护。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3147:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "创建 DEFAULT 与 INTRA_GPU 时 CPU 映射权限随类型变化。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-permissions-20261121-01.result.json",
+        "sha256": "c4b9365234ad7928d7f1015b20d398e9cb0e8dc33f6d1d1110b1da3ff1242c5c"
+      },
+      "status": "未知",
+      "round_id": "c19-native-create-permissions-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-create-permissions-20261121-01.result.json",
+        "sha256": "9fecba5e3bd65dc71386ca658d5f0c854ed499dd0ae9337c407bddf24da5993a"
+      },
+      "missing_observation": "缺两种受支持子类型各自的创建返回、实际映射与页保护。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3152:3",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "创建 INTRA_GPU 原生围栏时不给用户态 CPU 访问。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-intra-20261121-01.result.json",
+        "sha256": "9683b8fe86697ee150de0a3cccc6a8e61329b113cbcde32c1467e4d3ef8f0979"
+      },
+      "status": "未知",
+      "round_id": "c19-native-create-intra-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-create-intra-20261121-01.result.json",
+        "sha256": "c13b59304d61ff228eb3ca329982c121ce1fdb75013c911888eac6babdd5b1df"
+      },
+      "missing_observation": "缺INTRA_GPU 的创建返回、当前值和监控值的 CPU 映射输出。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3156:3",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "创建 DEFAULT 原生围栏时当前值 CPU 映射只读。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-default-20261121-01.result.json",
+        "sha256": "d583acc766759b65120a73052f037f03be37d80b06aeed265e2994236fd61a9d"
+      },
+      "status": "未知",
+      "round_id": "c19-native-create-default-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-create-default-20261121-01.result.json",
+        "sha256": "f218c2ba3eb091d5eff184b35dc44a6e2cf1b87c8fa9330823e594060c588a41"
+      },
+      "missing_observation": "缺DEFAULT 创建返回产生的同一当前值 CPU 映射与页保护。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "ioctl.c:2888:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "有效原生围栏两个子类型的创建与共享约束。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-enum-20261121-01.result.json",
+        "sha256": "d442e62be3ba67aa02d1f53d076536db08e31a865311df4b6a6bc1f49cc67432"
+      },
+      "status": "未知",
+      "round_id": "c19-native-create-enum-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-create-enum-20261121-01.result.json",
+        "sha256": "807e6f6d6d2243a5498e0d08624046bae09d6d92a749e3a0149d947e94d7f666"
+      },
+      "missing_observation": "缺两种原生类型的有效创建结果及同对象的共享能力输出。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "ioctl.c:3243:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "在原生围栏 NT 打开中确认句柄、引擎亲和性和目标设备的适用条件。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-input-20261121-01.result.json",
+        "sha256": "e5bfa64a2f5ecb09f5b2587fd279fc183495d5ab5c6589651603879a1a292a57"
+      },
+      "status": "未知",
+      "round_id": "c19-native-open-input-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-input-20261121-01.result.json",
+        "sha256": "d7c27c7ebbb3637f00790e635722ef37d5fb6a2f8150b60da62dde7c00dd9669"
+      },
+      "missing_observation": "缺匹配的共享对象、目标设备／引擎和 Windows 打开输出。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "ioctl.c:3302:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "原生围栏 NT 打开路径核对目标同步对象类型。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-object-20261121-01.result.json",
+        "sha256": "425b733d2fbc42870110296eff61984d06d4658547e2581367a2dee7268f839f"
+      },
+      "status": "未知",
+      "round_id": "c19-native-open-object-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-open-object-20261121-01.result.json",
+        "sha256": "c76b9a84488b3af1ec032711e6508b0d57d98a1b1177f569bd394104b3894254"
+      },
+      "missing_observation": "缺Windows 对同一次合法打开的目标对象类型确认和绑定结果。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    },
+    {
+      "contract_id": "ioctl.c:3310:2",
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS"
+      ],
+      "predicate": "INTRA_GPU 围栏的共享范围局限于同一适配器。",
+      "original": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c27-native-adapter-20261121-01.result.json",
+        "sha256": "e3bd575cd5dea031a2653d354062f06b8c86e8cc3328f3cfb58549f5938570ab"
+      },
+      "status": "未知",
+      "round_id": "c19-native-adapter-20261121-01",
+      "follow_up": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-native-adapter-20261121-01.result.json",
+        "sha256": "ab025fc1af799448852395446a07b36dd9354abf92707957f139c2912997cd6d"
+      },
+      "missing_observation": "缺受支持类型的合法共享关系、适配器身份及对应的约束回执。当前设备未满足原生围栏条件。",
+      "scope": "设备能力条件未满足"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "round_id": "c19-mapped-cache-attribute-20261121-01",
+  "contract_id": "dxgkrnl.h:759:2",
+  "declaration_sha256": "1798319f92cb960b0369e559819defcfcdfa9e1d4634cbe395de0343818df6f3",
+  "started_utc": "2026-11-22T02:53:36.460104+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "同一 64 KiB 分配的 33/36、Lock2 与 VirtualQuery 已配对，页为 PAGE_WRITECOMBINE。实载 KMD 对应源码在分配 DDI 输出屏蔽 Cached 位，且该分支未重新置位。Windows ETW 33 的模板只给未具名 Flags，不能把其字段当作 WDK 位域的现场读值。",
+  "gap": "仍缺同一分配 Cached=1 时的真实缓存映射和 Windows 运行时具名属性配对。现有对象只覆盖写合并映射。",
+  "observation": {
+    "boot": 91476,
+    "allocation": {
+      "pid": 3528,
+      "tid": 5328,
+      "operation": "alloc",
+      "begin": 65274322903,
+      "end": 65274539211,
+      "caller_allocation": 1073742208,
+      "caller_resource": 0,
+      "matched_device_allocation": true,
+      "event36_qpc": 65274533706,
+      "device": "device1",
+      "adapter": "adapter1",
+      "resource": null,
+      "shared": null,
+      "global_allocation": "global1",
+      "matched_adapter_allocation": true,
+      "event33_qpc": 65274532151,
+      "bytes": 65536,
+      "flags": 129,
+      "read_segment": 0,
+      "write_segment": 2,
+      "preferred": 2
+    },
+    "lock_request": {
+      "qpc": 65274646000,
+      "pid": 3528,
+      "tid": 5328,
+      "event": "lock_begin",
+      "device": "1073742016",
+      "allocation": "1073742208"
+    },
+    "lock_return": {
+      "qpc": 65274712696,
+      "pid": 3528,
+      "tid": 5328,
+      "event": "lock_return",
+      "status": "00000000",
+      "mapped": "1"
+    },
+    "query": {
+      "qpc": 65274776161,
+      "pid": 3528,
+      "tid": 5328,
+      "event": "cache",
+      "query": "48",
+      "protection": "1028",
+      "allocation_protection": "1028",
+      "state": "4096",
+      "type": "131072",
+      "region_bytes": "65536"
+    },
+    "windows_template": {
+      "file_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+      "id": 33,
+      "cache_named_field": false
+    },
+    "kmd_source": {
+      "commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+      "path": "tegra-x1-wddm/windows/allocation.c",
+      "sha256": "4356ec3032f76dfea895dc461726401ee4628c2501a1fcce49744f6defdb8677",
+      "lines": [
+        201,
+        220
+      ],
+      "cached_mask_supported_from_source": false
+    },
+    "wdk_reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_allocationinfoflags_wddm2_0"
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-allocation-cache-20261121-01.result.json",
+      "sha256": "23663fb977590001af8d4449cf6cc6b2c988894228df6ca3b84e185a49583b6b"
+    }
+  ]
+}

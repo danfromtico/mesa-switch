@@ -1,0 +1,20 @@
+{
+  "round_id": "c19-hardware-queue-owner-20261121-01",
+  "contract_id": "dxgkrnl.h:615:1",
+  "declared_utc": "2026-11-22T02:53:45.962579+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "6e5e752a25ebc2d26ebb8da64f5e3143bdfe08cb9b6cc01a4864ed80f4c73b52",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "硬件执行队列在支持并启用硬件调度时有可观测的设备归属。",
+  "question": "已验收的 Windows GM20B 是否能创建归属设备的硬件调度队列？",
+  "method": "核对已存 Windows 能力实测和实际所用 KMD 硬件队列入口；普通提交记录只用作上下文对照。",
+  "required_observation": "已验收的 Windows GM20B 是否能创建归属设备的硬件调度队列？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-hardware-queue-20261121-01.result.json",
+    "sha256": "f241979df03d5fa93d9a8b42b13a3b4d9bd5d17accea096b8ff4637da829d1a3"
+  }
+}

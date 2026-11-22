@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "round_id": "c19-old-first-present-sync-owner-20261121-01",
+  "contract_id": "dxgkrnl.h:145:1",
+  "declaration_sha256": "3db12b73acadb1f3b332d4fbbeabbdc671294bde6f4b3a9eaaa708a2e9ef3949",
+  "started_utc": "2026-11-22T02:52:48.569067+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "按归档哈希、启动、线程、序号和值交叉核对，三个原次的值 1 信号均已在首个公开 CALL 前退役。84 条公开 GPU 等待、21 条等待包中同对象命中均为 0，各次均缺 1069 和同对象 297。留存范围分别早于 CALL 18.181、27.066、25.203 ms 结束。",
+  "gap": "缺原次同对象 1069 的创建设备与局部打开身份、同对象 297 及应用等待返回，或匹配的 GPU 等待方与退役记录。另缺受支持原生围栏类型及共享归属。",
+  "observation": {
+    "original_same_boot": [
+      {
+        "boot": 82058,
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "scene_etl_sha256": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+        "pid": 1812,
+        "tid": 6340,
+        "queue_signal_sequence": 2,
+        "fence_value": 1,
+        "signal_object": 18446639661614582272,
+        "signal_retired_qpc": 13064048487,
+        "drawing_initialization_success_qpc": 13064056000,
+        "first_public_call_qpc": 13070969930,
+        "last_retained_scope_qpc": 13070620864,
+        "retained_scope_ends_before_call_ms": 18.181,
+        "signal_retired_before_call_ms": 360.492,
+        "all_scope_wait_api_count": 20,
+        "all_scope_wait_packet_count": 5,
+        "matched_wait_api": 0,
+        "matched_wait_packets": 0,
+        "matched_handle_reports": 0,
+        "matched_cpu_event_registration": 0
+      },
+      {
+        "boot": 82221,
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "scene_etl_sha256": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+        "pid": 4672,
+        "tid": 4712,
+        "queue_signal_sequence": 2,
+        "fence_value": 1,
+        "signal_object": 18446716605819176784,
+        "signal_retired_qpc": 2331262737,
+        "drawing_initialization_success_qpc": 2331267994,
+        "first_public_call_qpc": 2352403757,
+        "last_retained_scope_qpc": 2351884088,
+        "retained_scope_ends_before_call_ms": 27.066,
+        "signal_retired_before_call_ms": 1101.095,
+        "all_scope_wait_api_count": 40,
+        "all_scope_wait_packet_count": 10,
+        "matched_wait_api": 0,
+        "matched_wait_packets": 0,
+        "matched_handle_reports": 0,
+        "matched_cpu_event_registration": 0
+      },
+      {
+        "boot": 82382,
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "scene_etl_sha256": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+        "pid": 5828,
+        "tid": 7656,
+        "queue_signal_sequence": 2,
+        "fence_value": 1,
+        "signal_object": 18446682569747834240,
+        "signal_retired_qpc": 2354229276,
+        "drawing_initialization_success_qpc": 2354236184,
+        "first_public_call_qpc": 2361927374,
+        "last_retained_scope_qpc": 2361443485,
+        "retained_scope_ends_before_call_ms": 25.203,
+        "signal_retired_before_call_ms": 400.943,
+        "all_scope_wait_api_count": 24,
+        "all_scope_wait_packet_count": 6,
+        "matched_wait_api": 0,
+        "matched_wait_packets": 0,
+        "matched_handle_reports": 0,
+        "matched_cpu_event_registration": 0
+      }
+    ],
+    "formal_controls_scope": "正常对照仅校验对象解码及等待配对方法。"
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-sync-object-scope-20261121-01.result.json",
+      "sha256": "c0757ca862e00305292c31df7ffbcd01dc792ab962cf37c32d29c18aa91f2367"
+    },
+    {
+      "path": "legacy-sequential-step4/historical-first-present-fence.json",
+      "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+    },
+    {
+      "path": "windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
+      "sha256": "c24a31504ff6dead5b01ea833bcf58ede36173ec78f8fbcb03af9d890f29cc96"
+    },
+    {
+      "path": "windows-native-graphics/rounds/win-fence-cpu-return-20261121-01.result.json",
+      "sha256": "d342b3318a314fc5198a3a50b28fe46d21735a6513e8d90379f044612c926715"
+    },
+    {
+      "path": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
+      "sha256": "65e88f1d74336120718852de8347b208f3b9c935cb083550544e4d6d3ac5b417"
+    }
+  ]
+}
