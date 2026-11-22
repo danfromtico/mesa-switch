@@ -542,9 +542,10 @@
       ],
       "trigger": "Explorer Home and This PC have a blank upper client region on the native Code 0 desktop, Windows 22631.2861.",
       "evidence": [
-        "tegra-x1-wddm/docs/explorer-home-22631/shell-header.json"
+        "tegra-x1-wddm/docs/explorer-home-22631/shell-header.json",
+        "tegra-x1-wddm/docs/explorer-home-22631/history-comparison.json"
       ],
-      "cause": "Unknown. The former NVK meta-state fix is still present. Neither the first affected build nor the shell or driver operation causing the blank region has been identified.",
+      "cause": "Unknown. A 2026-11-18T06:27:16Z normal-folder capture shows tabs, address and commands on Code 0 with KMD b94248bc. The earlier user confirmation on d3423d26 establishes Home opening. Boot 93818 has the earliest retained blank-header pixels for Home and This PC. The NVK meta source is identical at the old and current endpoints, and the ARM64EC slot selection left the native components loaded by Explorer and DWM byte-identical to the preceding native WSI/DIB release. The first affected build lacks a matched earlier Home or This PC pixel and component record.",
       "daily_workaround": "Access drives through the visible This PC content pane. Retain the selected graphics profile for controlled comparison.",
       "close_when": "Identify the faulty shell or graphics operation against a matched control and verify visible tabs, address and command bar on Home and This PC.",
       "resolution": null
