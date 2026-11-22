@@ -4,9 +4,9 @@
   "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
   "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
   "plan_sha256": "71d1723e3e0ad0b1bf76ce9d4cf1ddb110c5ca395669f976f15117bc81676fc3",
-  "status": "待验收",
-  "finding": "启动 94382 的真实应用 DMA 6763 已确认第 342 条完整检查点。同轮窗口可见并正常退出，ETW 末尾零丢失。",
-  "missing_observation": "正在按计划回退正式基线，待验证新启动号、许可和组件，并以新进程仅读按包日志完成验收。",
+  "status": "实机通过",
+  "finding": "同一真实应用 DMA 6763 在候选启动 94382 以独立日志提交完整包，恢复正式启动 94557 后的新进程仅读日志，完整版本身份及 SHA-256 均一致。",
+  "missing_observation": "同轮 DWM 可关联尝试 115 条，完整 110 条，有抢占回执 5 条。原场景自然重启及历史根因仍待证据。",
   "device_executions": 1,
   "historical_root_cause": "未知",
   "controlled_restart_is_reproduction": false,
@@ -16,6 +16,22 @@
       {
         "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/one-time-desktop.json",
         "sha256": "8f3fd0f9dbf7338f41e6e6bb4b13710b8dc8a643bfd355f25dedddee2c1f4cb5"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/dma-packet-drill-formal-restored.json",
+        "sha256": "2ca835509079f05cdfca7541cd45970b5833ec8b8b0faafd290cc90ef46604c3"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/cycle-history.json",
+        "sha256": "f0ee67ebaaf4e90079d05dd888b6b84ab4f400239b15c736b0b83b8a96d0ed31"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/cleanup.json",
+        "sha256": "9bea7e3514ad33320568a88b0784169ef0ecc22be6b43b6f58f551e2e21d7aa2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/daily-cleanup.json",
+        "sha256": "74f880772908a41fcfdd8237a5e67ddda6916b10025074609ae5bc1ddd000261"
       },
       {
         "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/requested-94176-ClosedForTrial.json",
@@ -28,6 +44,10 @@
       {
         "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/requested-94382-ClosedForRestore.json",
         "sha256": "456dbf1be613717a245ad66116087ad6662b2616585644598e9c21fbe57b1d77"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/requested-94472-BaselineArmed.json",
+        "sha256": "6412f3556c31d174dc275c184835070b971e2022b7c4f50e1a4fc7c9893392cb"
       }
     ],
     "window_and_capture": [
@@ -66,6 +86,14 @@
       {
         "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/before-restore.json",
         "sha256": "0a449186cfbeb5a0e401d35f4fa1234d279e486f49e8dd64d9f8cd973796778e"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/readback-after-restore.json",
+        "sha256": "d4ce06c4874620bb4baabcfc1b3ec35cca75cc0ef1f5aaef3853dba3caec8987"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/reboot-readback-proof.json",
+        "sha256": "bd7059f94e1fe0e4d2ba71ed494372c9cbd31a2b925d21472b503a64c834bebc"
       },
       {
         "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/delivery.json",
@@ -168,7 +196,25 @@
       },
       "unconfirmed_tail": null
     },
-    "dwm_coverage": null,
+    "dwm_coverage": {
+      "pid": 1428,
+      "attempts": 115,
+      "complete": 110,
+      "sources": [
+        {
+          "ids": [
+            110,
+            29,
+            32,
+            433,
+            178
+          ],
+          "attempts": 115
+        }
+      ],
+      "same_queue_retries_rechecked": 5,
+      "preempted": 5
+    },
     "independent_code_review": {
       "state": "pending",
       "artifacts": [
