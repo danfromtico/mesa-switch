@@ -119,8 +119,14 @@ bool direct_flip_compatible(Device *dev, const Resource *source, const Resource 
 
 static HRESULT APIENTRY Present1(DXGI_DDI_ARG_PRESENT1 *args)
 {
-   if (!args || !args->hDevice || args->Reserved || args->SurfacesToPresent != 1 ||
+   if (!args || !args->hDevice || args->SurfacesToPresent != 1 ||
        !args->phSurfacesToPresent || !args->phSurfacesToPresent[0].hSurface)
+      return E_INVALIDARG;
+   /* The GM20B Windows runtime sets this input word to one on the
+    * negotiated WDDM 2.0 path. It is independent of the present flags. */
+   const Device *dev = DD(args->hDevice);
+   if (args->Reserved && (args->Reserved != 1 || !dev->nvk ||
+                         dev->interfaceVersion != D3DWDDM2_0_DDI_INTERFACE_VERSION))
       return E_INVALIDARG;
    const auto &source = args->phSurfacesToPresent[0];
    const Resource *res = DR(source.hSurface);
