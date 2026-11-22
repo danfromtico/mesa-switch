@@ -62,6 +62,31 @@ function Assert-SwitchPassingCase($Case) {
     Assert-SwitchHash $Case.evidence_sha256
 }
 
+function Assert-SwitchScopedFix($Fix) {
+    if (!$Fix -or $Fix.scope -isnot [string] -or [string]::IsNullOrWhiteSpace($Fix.scope) -or
+        [string]::IsNullOrWhiteSpace($Fix.root_cause) -or $Fix.commit -notmatch '^[0-9a-f]{40}$' -or
+        $Fix.root_cause_confirmed -isnot [bool] -or !$Fix.root_cause_confirmed -or
+        $Fix.independent_review_passed -isnot [bool] -or !$Fix.independent_review_passed -or
+        $Fix.build_signed -isnot [bool] -or !$Fix.build_signed -or $Fix.output_required -isnot [bool]) {
+        throw 'Scoped repair lacks a confirmed cause, independent review, signed build or output scope'
+    }
+    Assert-SwitchProfile $Fix.components
+    if ([string]::IsNullOrWhiteSpace($Fix.component) -or !$Fix.components.PSObject.Properties[$Fix.component]) {
+        throw 'Scoped repair must identify its component'
+    }
+    $proofFiles = [ordered]@{causal_evidence_sha256='causal_evidence_file';code_review_sha256='code_review_file';build_sha256='build_file'}
+    $hashes = @()
+    foreach ($entry in $proofFiles.GetEnumerator()) {
+        Assert-SwitchHash $Fix.($entry.Key)
+        $hashes += $Fix.($entry.Key)
+        $file = $Fix.($entry.Value)
+        if ($file -isnot [string] -or $file -notmatch '^tegra-x1-wddm/docs/[a-z0-9_./-]+$' -or $file.Split('/') -contains '..') {
+            throw 'Scoped repair needs repository-relative supporting evidence files'
+        }
+    }
+    if (@($hashes | Sort-Object -Unique).Count -ne 3) { throw 'Scoped repair evidence files must be distinct' }
+}
+
 function Assert-SwitchFaultLedger($Ledger) {
     if ($Ledger.schema -ne 1 -or $Ledger.faults -isnot [array] -or $Ledger.independent_qualifications -isnot [array]) { throw 'Invalid open-fault ledger schema' }
     $ids = @{}
@@ -75,6 +100,7 @@ function Assert-SwitchFaultLedger($Ledger) {
         foreach ($v in @($fault.affected_scopes)+@($fault.evidence)) {
             if ($v -isnot [string] -or [string]::IsNullOrWhiteSpace($v)) { throw "Empty fault reference or scope: $($fault.id)" }
         }
+        if ($fault.PSObject.Properties['verified_fix']) { Assert-SwitchScopedFix $fault.verified_fix }
         if ($fault.status -ceq 'open') {
             if ($null -ne $fault.resolution) { throw "Open fault has a closure record: $($fault.id)" }
             continue
@@ -140,12 +166,49 @@ function Assert-SwitchFaultHistory($Previous,$Current) {
     }
 }
 
-# A verified fix in a presentation source needs its own closed fault and a
-# separate working-path control on this trial. Its other open faults still
-# require the ledger-bound evidence checked by Assert-SwitchPromotion.
+# A scoped repair binds a confirmed cause, reviewed signed build and matching
+# native case while the broader fault stays open. Existing closure-based
+# qualifications retain their original retests and separate working control.
 function Assert-SwitchVerifiedFix($Ledger, $Evidence) {
     $binding = $Evidence.verified_fix
     if (!$binding) { throw 'Verified fix requires its closed causal fault' }
+    if ($binding.PSObject.Properties['scope']) {
+        $matches = @($Ledger.faults | Where-Object { $_.id -ceq $binding.fault_id -and $_.status -ceq 'open' })
+        if ($matches.Count -ne 1) { throw 'Scoped repair requires its registered open causal fault' }
+        $fix = $matches[0].verified_fix
+        Assert-SwitchScopedFix $fix
+        if ($fix.scope -cne $binding.scope -or $binding.output_required -isnot [bool] -or $fix.output_required -ne $binding.output_required) {
+            throw 'Scoped repair qualification differs from its registered scope'
+        }
+        if ($fix.commit -ne $Evidence.source_commit -or !(Test-SwitchSameProfile $fix.components $Evidence.components)) {
+            throw 'Scoped repair source or components differ from the registered repair'
+        }
+        if ($binding.evidence -isnot [array] -or $binding.evidence.Count -ne 3) { throw 'Scoped repair requires three bound evidence files' }
+        foreach ($field in @('causal_evidence_sha256','code_review_sha256','build_sha256')) {
+            Assert-SwitchHash $binding.$field
+            if ($binding.$field -ne $fix.$field -or
+                @($binding.evidence | Where-Object evidence_sha256 -EQ $binding.$field).Count -ne 1) {
+                throw 'Scoped repair cause, review or build evidence differs from its registration'
+            }
+        }
+        $proofHashes = @($binding.causal_evidence_sha256,$binding.code_review_sha256,$binding.build_sha256)
+        if (@($proofHashes | Sort-Object -Unique).Count -ne 3 -or
+            @($binding.evidence.evidence_sha256 | Sort-Object -Unique).Count -ne 3) { throw 'Scoped repair evidence files must be distinct' }
+        Assert-SwitchHash $binding.case_sha256
+        if ($binding.case_sha256 -in $proofHashes) { throw 'Scoped repair native case must be distinct from cause, review and build evidence' }
+        $test = @($Evidence.cases | Where-Object evidence_sha256 -EQ $binding.case_sha256)
+        if ($test.Count -ne 1 -or $test[0].before_boot -ne $Evidence.trial.boot_record -or
+            $test[0].scenario -cne $binding.scope -or $test[0].original_trigger -isnot [bool] -or !$test[0].original_trigger) {
+            throw 'Scoped repair requires its matching original input on the candidate boot'
+        }
+        $component = [string]$fix.component
+        if ([string]::IsNullOrWhiteSpace($component) -or !$Evidence.components.PSObject.Properties[$component] -or
+            !$test[0].loaded_components -or
+            $test[0].loaded_components.PSObject.Properties[$component].Value -ne $Evidence.components.PSObject.Properties[$component].Value) {
+            throw 'Scoped repair case did not load the repaired component'
+        }
+        return
+    }
     $matches = @($Ledger.faults | Where-Object { $_.id -ceq $binding.fault_id -and $_.status -ceq 'closed' })
     if ($matches.Count -ne 1) { throw 'Verified fix requires its closed causal fault' }
     $fix = $matches[0].resolution
@@ -239,21 +302,25 @@ function Assert-SwitchPromotion($Ledger, $Evidence, [string]$EvidenceSha256, $Ca
     }
     if ($Evidence.cases -isnot [array] -or !$Evidence.cases.Count) { throw 'Missing independent hardware test results' }
     foreach ($test in $Evidence.cases) { Assert-SwitchPassingCase $test }
+    if ($Evidence.change_kind -ceq 'verified-fix') { Assert-SwitchVerifiedFix $Ledger $Evidence }
+    $scopedRepair = $Evidence.change_kind -ceq 'verified-fix' -and $Evidence.verified_fix.PSObject.Properties['scope']
     if($Evidence.change_kind -cin @('presentation','verified-fix')){
+        $requiredFields = @('normal_exit','desktop_available')
+        if (!$scopedRepair -or $Evidence.verified_fix.output_required) { $requiredFields += 'output_verified' }
         foreach($test in $Evidence.cases){
-            foreach($field in @('output_verified','normal_exit','desktop_available')){
+            foreach($field in $requiredFields){
                 if($test.$field -isnot [bool] -or !$test.$field){throw "Presentation qualification lacks $field"}
             }
         }
     }
     if ($trial.boot_record -notin @($Evidence.cases.before_boot)) { throw 'The selected one-time desktop was not tested' }
-    if ($Evidence.change_kind -ceq 'verified-fix') { Assert-SwitchVerifiedFix $Ledger $Evidence }
     $open = @($Ledger.faults | Where-Object status -ceq 'open')
     $comparison = @()
     if ($Ledger.PSObject.Properties['baseline_comparisons']) {
         $comparison = @($Ledger.baseline_comparisons | Where-Object evidence_sha256 -eq $EvidenceSha256)
     }
     if ($comparison.Count) {
+        if ($scopedRepair) { throw 'Scoped repair must account for open faults via independent_qualifications' }
         if ($Evidence.change_kind -cnotin @('presentation','verified-fix')) { throw 'Baseline comparison requires presentation or verified-fix evidence' }
         if (!$Previous -or $Previous.source_commit -ne $Evidence.base_commit) { throw 'Baseline comparison requires the previous selected source' }
         $prior = Read-SwitchEvidence $PreviousQualification
@@ -311,6 +378,9 @@ function Assert-SwitchCaseFiles($Evidence,[string]$Qualification) {
     $parent=[IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($Qualification))
     $records = @($Evidence.cases) + @($Evidence.system_log.restarts)
     if ($Evidence.PSObject.Properties['baseline_cases']) { $records += @($Evidence.baseline_cases) }
+    if ($Evidence.change_kind -ceq 'verified-fix' -and $Evidence.verified_fix.PSObject.Properties['scope']) {
+        $records += @($Evidence.verified_fix.evidence)
+    }
     foreach($record in $records){
         if ($record.evidence_file -notmatch '^[a-z0-9][a-z0-9_./-]*$' -or $record.evidence_file.Split('/') -contains '..') { throw 'A qualification record needs a relative evidence file' }
         $path=Join-Path $parent $record.evidence_file

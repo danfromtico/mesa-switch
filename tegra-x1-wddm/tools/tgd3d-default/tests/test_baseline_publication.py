@@ -174,6 +174,98 @@ def exercise(shell, work):
     assert remote_head() == updated
     print("PASS blocked selection and push, qualified independent publication, new fault registration and deletion guard")
 
+    run("git", "reset", "--hard", updated)
+    ledger = json.loads(ledger_path.read_bytes())
+    previous = json.loads(accepted_path.read_bytes())
+    implementation = repo / "src/nouveau/tgd3d/tgd3d_dxgi.cpp"
+    implementation.parent.mkdir(parents=True, exist_ok=True)
+    implementation.write_text("// Repair the observed runtime input guard\n")
+    repair_source = commit("Scoped input repair")
+    repaired = dict(previous["components"], **{"tg_d3d_arm64.dll": "6" * 64})
+    supporting = []
+    for kind in ("cause", "review", "build"):
+        path = repo / docs / f"repair-{kind}.json"
+        write(path, {"kind": kind, "source_commit": repair_source, "components": repaired})
+        supporting.append({"evidence_file": path.name, "evidence_sha256": sha(path)})
+    write(repo / docs / "repair-case.json", {"input": 1, "callback_return": 0, "boot": 210})
+    write(repo / docs / "repair-boot.json", {"intent": 205, "boot": 210})
+    scoped = json.loads(json.dumps(claim))
+    scoped.update(change_kind="verified-fix", source_commit=repair_source,
+                  base_commit=previous["source_commit"], components=repaired,
+                  changed_paths=run("git", "diff", "--name-only", previous["source_commit"], repair_source).splitlines())
+    scoped["trial"].update(boot_record=210, loaded=repaired)
+    scoped["system_log"].update(first_record=200, last_record=220, boot_records=[210])
+    scoped["system_log"]["restarts"][0].update(boot_record=210, system_records=[205, 210],
+        evidence_file="repair-boot.json", evidence_sha256=sha(repo / docs / "repair-boot.json"))
+    scoped["cases"][0].update(before_boot=210, after_boot=210, scenario="observed input", original_trigger=True,
+        loaded_components=repaired, output_verified=False, evidence_file="repair-case.json", evidence_sha256=sha(repo / docs / "repair-case.json"))
+    binding = {"fault_id": "TEST-INPUT", "scope": "observed input", "case_sha256": scoped["cases"][0]["evidence_sha256"],
+               "output_required": False,
+               "causal_evidence_sha256": supporting[0]["evidence_sha256"],
+               "code_review_sha256": supporting[1]["evidence_sha256"], "build_sha256": supporting[2]["evidence_sha256"],
+               "evidence": supporting}
+    scoped["verified_fix"] = binding
+    repair_fault = dict(fault, id="TEST-INPUT", kind="device-removal",
+                        evidence=[(docs / "repair-cause.json").as_posix()])
+    repair_fault["verified_fix"] = {"scope": binding["scope"], "root_cause": "Runtime input rejected by the guard",
+        "root_cause_confirmed": True, "independent_review_passed": True, "build_signed": True,
+        "commit": repair_source, "components": repaired, "component": "tg_d3d_arm64.dll", "output_required": False,
+        "causal_evidence_file": (docs / "repair-cause.json").as_posix(),
+        "code_review_file": (docs / "repair-review.json").as_posix(),
+        "build_file": (docs / "repair-build.json").as_posix(),
+        **{field: binding[field] for field in ("causal_evidence_sha256", "code_review_sha256", "build_sha256")}}
+    ledger["faults"].append(repair_fault)
+    scoped_file = (docs / "scoped-qualification.json").as_posix()
+    write(repo / scoped_file, scoped)
+    ledger["independent_qualifications"].append({"evidence_sha256": sha(repo / scoped_file), "independence": [
+        {"fault_id": item["id"], "reason": "Limited input repair with retained fault scope",
+         "test_sha256": binding["case_sha256"]} for item in ledger["faults"]]})
+    write(ledger_path, ledger)
+    commit("Register scoped cause, review, build and native receipt")
+    run(shell, "-NoProfile", "-File", gate, "-Action", "Select", "-Qualification", scoped_file)
+    scoped_selected = commit("Select the scoped input repair")
+    run(shell, "-NoProfile", "-File", gate, "-Action", "Publish")
+    assert remote_head() == scoped_selected
+    assert json.loads(ledger_path.read_bytes())["faults"][-1]["status"] == "open"
+    write(repo / docs / "repair-review.json", {"changed": True})
+    commit("Replace a retained independent review")
+    run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan", succeeds=False, contains="mismatched scoped repair evidence")
+    assert remote_head() == scoped_selected
+    print("PASS scoped repair selection, publication and retained review integrity")
+    run("git", "reset", "--hard", scoped_selected)
+    (repo / "shader.cpp").write_text("// Later independent shader revision\n")
+    later_source = commit("Later independent source")
+    later_components = dict(repaired, **{"tg_d3d_arm64.dll": "7" * 64})
+    later = json.loads(json.dumps(scoped))
+    later.update(change_kind="independent", source_commit=later_source, base_commit=repair_source,
+                 components=later_components,
+                 changed_paths=run("git", "diff", "--name-only", repair_source, later_source).splitlines())
+    del later["verified_fix"]
+    write(repo / docs / "later-case.json", {"boot": 310, "result": "working path"})
+    write(repo / docs / "later-boot.json", {"intent": 305, "boot": 310})
+    later["trial"].update(boot_record=310, loaded=later_components)
+    later["system_log"].update(first_record=300, last_record=320, boot_records=[310])
+    later["system_log"]["restarts"][0].update(boot_record=310, system_records=[305, 310],
+        evidence_file="later-boot.json", evidence_sha256=sha(repo / docs / "later-boot.json"))
+    later["cases"][0].update(before_boot=310, after_boot=310, loaded_components=later_components,
+        evidence_file="later-case.json", evidence_sha256=sha(repo / docs / "later-case.json"))
+    later_file = (docs / "later-qualification.json").as_posix()
+    write(repo / later_file, later)
+    ledger["independent_qualifications"].append({"evidence_sha256": sha(repo / later_file), "independence": [
+        {"fault_id": item["id"], "reason": "Independent later test retains the earlier repair record",
+         "test_sha256": later["cases"][0]["evidence_sha256"]} for item in ledger["faults"]]})
+    write(ledger_path, ledger)
+    commit("Register the later independent qualification")
+    run(shell, "-NoProfile", "-File", gate, "-Action", "Select", "-Qualification", later_file)
+    later_selected = commit("Select the later package")
+    run(shell, "-NoProfile", "-File", gate, "-Action", "Publish")
+    assert remote_head() == later_selected
+    write(repo / docs / "repair-review.json", {"changed_after_later_selection": True})
+    commit("Replace a historical repair review after a later selection")
+    run("git", "push", "origin", "HEAD:refs/heads/tgd3d-vulkan", succeeds=False, contains="mismatched scoped repair evidence")
+    assert remote_head() == later_selected
+    print("PASS supporting repair evidence retained across a later baseline")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)

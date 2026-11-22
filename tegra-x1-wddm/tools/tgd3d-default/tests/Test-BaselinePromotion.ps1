@@ -119,6 +119,65 @@ Block 'missing working-path control' {Assert-SwitchPromotion $registered $bad $p
 $bad=Clone $verified;$bad.verified_fix.control_sha256=$repair.resolution.original_scenario_runs[0].evidence_sha256
 Block 'a repair run cannot also prove the working control' {Assert-SwitchPromotion $registered $bad $proof $candidate $directory} 'distinct working-path'
 Block 'a verified fix still needs independent evidence for every open fault' {Assert-SwitchPromotion $registered $verified ('e'*64) $candidate $directory} 'ledger-bound'
+$limited=Clone $e
+$limited.change_kind='verified-fix'
+$limited.changed_paths=@('src/nouveau/tgd3d/tgd3d_dxgi.cpp')
+$limited.cases[0].output_verified=$false
+$limited.cases[0]|Add-Member -NotePropertyName scenario -NotePropertyValue 'observed input word'
+$limited.cases[0]|Add-Member -NotePropertyName original_trigger -NotePropertyValue $true
+$limited.cases[0]|Add-Member -NotePropertyName loaded_components -NotePropertyValue $candidate
+$limited|Add-Member -NotePropertyName verified_fix -NotePropertyValue ([pscustomobject]@{
+    fault_id='TEST-INPUT-WORD';scope='observed input word';output_required=$false;case_sha256=$case.evidence_sha256;
+    causal_evidence_sha256='1'*64;code_review_sha256='2'*64;build_sha256='3'*64;
+    evidence=@([pscustomobject]@{evidence_file='cause.json';evidence_sha256='1'*64},
+        [pscustomobject]@{evidence_file='review.json';evidence_sha256='2'*64},
+        [pscustomobject]@{evidence_file='build.json';evidence_sha256='3'*64})})
+$inputFault=Clone $sampleFault
+$inputFault.id='TEST-INPUT-WORD'
+$inputFault|Add-Member -NotePropertyName verified_fix -NotePropertyValue ([pscustomobject]@{
+    scope='observed input word';root_cause='The validated runtime input was rejected';root_cause_confirmed=$true;
+    independent_review_passed=$true;build_signed=$true;commit=$limited.source_commit;components=$candidate;
+    component='tg_d3d_arm64.dll';output_required=$false;
+    causal_evidence_sha256='1'*64;code_review_sha256='2'*64;build_sha256='3'*64;
+    causal_evidence_file='tegra-x1-wddm/docs/cause.json';code_review_file='tegra-x1-wddm/docs/review.json';build_file='tegra-x1-wddm/docs/build.json'})
+$limitedLedger=Clone $approved
+$limitedLedger.faults+=@($inputFault)
+$limitedLedger.independent_qualifications[0].independence+=@([pscustomobject]@{
+    fault_id=$inputFault.id;reason='The native case covers the registered input repair';test_sha256=$case.evidence_sha256})
+Assert-SwitchPromotion $limitedLedger $limited $proof $candidate $directory
+if($limitedLedger.faults[1].status -cne 'open' -or $limitedLedger.faults[1].resolution){throw 'Scoped promotion changed fault closure'}
+Write-Output 'PASS registered input repair with one matching native case and retained open fault'
+$bad=Clone $limitedLedger;$bad.faults[1].verified_fix.root_cause_confirmed=$false
+Block 'unconfirmed cause cannot authorize a scoped repair' {Assert-SwitchPromotion $bad $limited $proof $candidate $directory} 'confirmed cause'
+$bad=Clone $limited;$bad.source_commit='f'*40
+Block 'scoped repair requires the registered source' {Assert-SwitchPromotion $limitedLedger $bad $proof $candidate $directory} 'source or components'
+$bad=Clone $limited;$bad.verified_fix.code_review_sha256='4'*64
+Block 'scoped repair requires the registered independent review' {Assert-SwitchPromotion $limitedLedger $bad $proof $candidate $directory} 'review or build evidence'
+$bad=Clone $limited;$bad.cases[0].scenario='different input'
+Block 'another input cannot qualify a scoped repair' {Assert-SwitchPromotion $limitedLedger $bad $proof $candidate $directory} 'matching original input'
+$bad=Clone $limited;$bad.cases[0].before_boot=90;$bad.cases[0].after_boot=90
+Block 'old receipt cannot replace the candidate test' {Assert-SwitchPromotion $limitedLedger $bad $proof $candidate $directory} 'matching original input'
+$bad=Clone $limited;$bad.cases[0].loaded_components.'tg_d3d_arm64.dll'='5'*64
+Block 'scoped repair case must load the repaired DLL' {Assert-SwitchPromotion $limitedLedger $bad $proof $candidate $directory} 'did not load'
+$bad=Clone $limited;$bad.system_log.abnormal_events=@([pscustomobject]@{id=41;record=111;boot_record=110})
+Block 'scoped repair cannot hide an abnormal shutdown' {Assert-SwitchPromotion $limitedLedger $bad $proof $candidate $directory} 'abnormal'
+$bad=Clone $limitedLedger;$bad.independent_qualifications=@()
+Block 'scoped repair still accounts for every open fault' {Assert-SwitchPromotion $bad $limited $proof $candidate $directory} 'ledger-bound'
+$bad=Clone $limitedLedger;$bad.faults[1].verified_fix.code_review_file='../review.json'
+Block 'scoped repair proof must be inside the repository docs' {Assert-SwitchFaultLedger $bad} 'repository-relative'
+$bad=Clone $limitedLedger;$bad.faults[1].status='closed';$bad.faults[1].resolution=Clone $repair.resolution
+Block 'closed fault uses its closure qualification' {Assert-SwitchPromotion $bad $limited $proof $candidate $directory} 'registered open'
+$bad=Clone $limited;$bad.verified_fix.case_sha256=$bad.verified_fix.code_review_sha256
+Block 'static review cannot serve as the native receipt' {Assert-SwitchPromotion $limitedLedger $bad $proof $candidate $directory} 'native case must be distinct'
+$visualLedger=Clone $limitedLedger;$visualLedger.faults[1].verified_fix.output_required=$true
+$visual=Clone $limited;$visual.verified_fix.output_required=$true
+Block 'visual repair requires output evidence' {Assert-SwitchPromotion $visualLedger $visual $proof $candidate $directory} 'output_verified'
+$bad=Clone $limited;$bad.verified_fix.output_required=$true
+Block 'qualification must preserve the registered output scope' {Assert-SwitchPromotion $limitedLedger $bad $proof $candidate $directory} 'registered scope'
+$upper=Clone $limited;$upper.verified_fix.case_sha256=$upper.verified_fix.case_sha256.ToUpperInvariant()
+$upper.cases[0].loaded_components.'tg_d3d_arm64.dll'=$upper.cases[0].loaded_components.'tg_d3d_arm64.dll'.ToUpperInvariant()
+Assert-SwitchPromotion $limitedLedger $upper $proof $candidate $directory
+Write-Output 'PASS Windows uppercase hash receipts'
 $scratch=Join-Path ([IO.Path]::GetTempPath()) ('switch-gate-'+[guid]::NewGuid().ToString('N'))
 $null=[IO.Directory]::CreateDirectory($scratch)
 try{
@@ -138,6 +197,11 @@ try{
         previous_control_sha256=$priorReport.cases[0].evidence_sha256;inherited_faults=@($sampleFault.id)})
     Assert-SwitchPromotion $compared $verified $proof $candidate $directory $previous $priorFile
     Write-Output 'PASS verified driver fix with a previously working control and an inherited open fault'
+    $mixedScope=Clone $limitedLedger
+    $mixedScope.independent_qualifications=@()
+    $mixedScope|Add-Member -NotePropertyName baseline_comparisons -NotePropertyValue @((Clone $compared.baseline_comparisons[0]))
+    $mixedScope.baseline_comparisons[0].inherited_faults=@($mixedScope.faults.id)
+    Block 'scoped repair cannot enter baseline comparison accounting' {Assert-SwitchPromotion $mixedScope $limited $proof $candidate $directory $previous $priorFile} 'independent_qualifications'
     $pair=Clone $case
     $pair.before_boot=90
     $pair.after_boot=90
@@ -205,6 +269,17 @@ try{
     $parsed=Read-SwitchEvidence $inputFile
     if($parsed.Sha256 -ne (Get-FileHash $inputFile).Hash){throw 'Qualification hash mismatch'}
     Assert-SwitchCaseFiles $parsed.Data $inputFile
+    $scopedFiles=Clone $copy
+    $scopedFiles.change_kind='verified-fix'
+    $scopedFiles|Add-Member -NotePropertyName verified_fix -NotePropertyValue (Clone $limited.verified_fix)
+    foreach($record in $scopedFiles.verified_fix.evidence){
+        $path=Join-Path $scratch $record.evidence_file
+        [IO.File]::WriteAllText($path,$record.evidence_file)
+        $record.evidence_sha256=(Get-FileHash $path).Hash.ToLowerInvariant()
+    }
+    Assert-SwitchCaseFiles $scopedFiles $inputFile
+    [IO.File]::WriteAllText((Join-Path $scratch 'review.json'),'changed independent review')
+    Block 'scoped repair review bytes are bound to the qualification' {Assert-SwitchCaseFiles $scopedFiles $inputFile} 'mismatched hardware'
     [IO.File]::WriteAllText((Join-Path $scratch 'case.json'),'different case record')
     Block 'mismatched hardware evidence bytes' {Assert-SwitchCaseFiles $parsed.Data $inputFile} 'mismatched hardware'
     [IO.File]::WriteAllText($inputFile,'{bad')

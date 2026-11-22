@@ -71,6 +71,16 @@ foreach($fault in $ledger.faults){
         if(![IO.File]::Exists($file)){throw "Missing fault evidence: $reference"}
         if($parts.Count -eq 2 -and !(Read-SwitchPolicyJson $file).PSObject.Properties[$parts[1]]){throw "Missing fault evidence section: $reference"}
     }
+    if ($fault.PSObject.Properties['verified_fix']) {
+        $repair=$fault.verified_fix
+        $proofFiles=[ordered]@{causal_evidence_file='causal_evidence_sha256';code_review_file='code_review_sha256';build_file='build_sha256'}
+        foreach ($entry in $proofFiles.GetEnumerator()) {
+            $path=Join-Path $root $repair.($entry.Key)
+            if (![IO.File]::Exists($path) -or (Get-FileHash -LiteralPath $path).Hash -ne $repair.($entry.Value)) {
+                throw "Missing or mismatched scoped repair evidence: $($fault.id)"
+            }
+        }
+    }
     if($fault.status -ceq 'closed'){
         $reason=$fault.resolution.causal_evidence_file
         if($reason -notmatch '^tegra-x1-wddm/docs/[a-z0-9_./-]+$' -or $reason.Split('/') -contains '..' -or !(Test-Path -LiteralPath (Join-Path $root $reason) -PathType Leaf) -or (Get-FileHash -LiteralPath (Join-Path $root $reason)).Hash -ne $fault.resolution.causal_evidence_sha256){throw "Missing causal proof for $($fault.id)"}
@@ -191,6 +201,9 @@ if ($Action -eq 'Publish') {
     $paths+=@(@($e.Data.cases)+@($e.Data.system_log.restarts)|ForEach-Object {$prefix+$_.evidence_file})
     if($e.Data.PSObject.Properties['baseline_cases']){
         $paths+=@($e.Data.baseline_cases | ForEach-Object {$prefix+$_.evidence_file})
+    }
+    if($e.Data.change_kind -ceq 'verified-fix' -and $e.Data.verified_fix.PSObject.Properties['scope']){
+        $paths+=@($e.Data.verified_fix.evidence | ForEach-Object {$prefix+$_.evidence_file})
     }
     if($activeComparison.Count){
         $paths+=@($priorBaseline.qualification)
