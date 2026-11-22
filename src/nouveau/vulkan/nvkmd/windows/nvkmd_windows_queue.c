@@ -292,26 +292,47 @@ queue_fence(struct vk_sync *sync, uint64_t *value)
 }
 
 static VkResult
+win_ctx_submit_syncs(struct windows_ctx *ctx, struct vk_object_base *log,
+                     bool signal, uint32_t count,
+                     const uint32_t *handles, const uint64_t *values)
+{
+   const struct wsi_win32_runtime *runtime = ctx_runtime(ctx->base.dev);
+   if (runtime)
+      return runtime->gpu_sync(runtime->context, ctx->runtime_context,
+                               signal, count, handles, values);
+
+   LONG status = signal ?
+      tg_kmt_signal_gpu(ctx->context, count, handles, values) :
+      tg_kmt_wait_gpu(ctx->context, count, handles, values);
+   return nvkmd_windows_status(log, signal ? "GPU signal monitored fence" :
+                               "GPU wait monitored fence", status,
+                               VK_ERROR_DEVICE_LOST);
+}
+
+static VkResult
 win_ctx_wait(struct nvkmd_ctx *base, struct vk_object_base *log,
              uint32_t count, const struct vk_sync_wait *waits)
 {
    struct windows_ctx *ctx = container_of(base, struct windows_ctx, base);
    for (uint32_t i = 0; i < count; i++) {
       uint64_t value = waits[i].wait_value;
-      struct tg_kmt_fence *fence = queue_fence(waits[i].sync, &value);
-      if (!fence)
+      if (!queue_fence(waits[i].sync, &value))
          return vk_error(log, VK_ERROR_FEATURE_NOT_PRESENT);
-      const struct wsi_win32_runtime *runtime = ctx_runtime(base->dev);
-      if (runtime) {
-         VkResult result = runtime->gpu_sync(runtime->context, ctx->runtime_context,
-                                            false, 1, &fence->handle, &value);
-         if (result != VK_SUCCESS) return result;
-         continue;
+   }
+   for (uint32_t offset = 0; offset < count; ) {
+      uint32_t handles[WSI_WIN32_RUNTIME_MAX_SYNCS];
+      uint64_t values[WSI_WIN32_RUNTIME_MAX_SYNCS];
+      const uint32_t batch = MIN2(count - offset, (uint32_t)WSI_WIN32_RUNTIME_MAX_SYNCS);
+      for (uint32_t i = 0; i < batch; i++) {
+         uint64_t value = waits[offset + i].wait_value;
+         struct tg_kmt_fence *fence = queue_fence(waits[offset + i].sync, &value);
+         handles[i] = fence->handle;
+         values[i] = value;
       }
-      LONG status = tg_kmt_wait_gpu(ctx->context, 1, &fence->handle, &value);
-      if (status < 0)
-         return nvkmd_windows_status(log, "GPU wait monitored fence", status,
-                                     VK_ERROR_DEVICE_LOST);
+      VkResult result = win_ctx_submit_syncs(ctx, log, false, batch, handles, values);
+      if (result != VK_SUCCESS)
+         return result;
+      offset += batch;
    }
    return VK_SUCCESS;
 }
@@ -323,20 +344,23 @@ win_ctx_signal(struct nvkmd_ctx *base, struct vk_object_base *log,
    struct windows_ctx *ctx = container_of(base, struct windows_ctx, base);
    for (uint32_t i = 0; i < count; i++) {
       uint64_t value = signals[i].signal_value;
-      struct tg_kmt_fence *fence = queue_fence(signals[i].sync, &value);
-      if (!fence)
+      if (!queue_fence(signals[i].sync, &value))
          return vk_error(log, VK_ERROR_FEATURE_NOT_PRESENT);
-      const struct wsi_win32_runtime *runtime = ctx_runtime(base->dev);
-      if (runtime) {
-         VkResult result = runtime->gpu_sync(runtime->context, ctx->runtime_context,
-                                            true, 1, &fence->handle, &value);
-         if (result != VK_SUCCESS) return result;
-         continue;
+   }
+   for (uint32_t offset = 0; offset < count; ) {
+      uint32_t handles[WSI_WIN32_RUNTIME_MAX_SYNCS];
+      uint64_t values[WSI_WIN32_RUNTIME_MAX_SYNCS];
+      const uint32_t batch = MIN2(count - offset, (uint32_t)WSI_WIN32_RUNTIME_MAX_SYNCS);
+      for (uint32_t i = 0; i < batch; i++) {
+         uint64_t value = signals[offset + i].signal_value;
+         struct tg_kmt_fence *fence = queue_fence(signals[offset + i].sync, &value);
+         handles[i] = fence->handle;
+         values[i] = value;
       }
-      LONG status = tg_kmt_signal_gpu(ctx->context, 1, &fence->handle, &value);
-      if (status < 0)
-         return nvkmd_windows_status(log, "GPU signal monitored fence", status,
-                                     VK_ERROR_DEVICE_LOST);
+      VkResult result = win_ctx_submit_syncs(ctx, log, true, batch, handles, values);
+      if (result != VK_SUCCESS)
+         return result;
+      offset += batch;
    }
    return VK_SUCCESS;
 }
@@ -437,52 +461,143 @@ done:
    return result;
 }
 
+#define TG_WIN_EXEC_MAX_WRITTEN 16u
+
+static bool
+merge_written_allocations(uint32_t *merged_count, uint32_t *merged,
+                          uint32_t add_count, const uint32_t *add_allocs)
+{
+   if (!add_count)
+      return true;
+   if (!add_allocs || add_count > TG_WIN_EXEC_MAX_WRITTEN)
+      return false;
+   for (uint32_t i = 0; i < add_count; i++) {
+      if (!add_allocs[i])
+         return false;
+      for (uint32_t j = 0; j < i; j++)
+         if (add_allocs[i] == add_allocs[j])
+            return false;
+   }
+   uint32_t count = *merged_count;
+   for (uint32_t i = 0; i < add_count; i++) {
+      bool present = false;
+      for (uint32_t j = 0; j < count; j++) {
+         if (merged[j] == add_allocs[i]) {
+            present = true;
+            break;
+         }
+      }
+      if (!present) {
+         if (count >= TG_WIN_EXEC_MAX_WRITTEN)
+            return false;
+         merged[count++] = add_allocs[i];
+      }
+   }
+   *merged_count = count;
+   return true;
+}
+
+static VkResult
+submit_linear_words(struct windows_ctx *ctx, struct vk_object_base *log,
+                    uint64_t addr, const void *words, uint32_t size_B,
+                    uint32_t written_count, const uint32_t *written_allocations)
+{
+   const struct wsi_win32_runtime *runtime = ctx_runtime(ctx->base.dev);
+   if (runtime)
+      return runtime->submit(runtime->context, ctx->runtime_context, addr,
+                             words, size_B, written_count, written_allocations);
+
+   LONG status = tg_kmt_submit_primaries(ctx->context, addr, words, size_B,
+                                         written_count, written_allocations);
+   return nvkmd_windows_status(log, "D3DKMTSubmitCommand", status,
+                               VK_ERROR_DEVICE_LOST);
+}
+
+static bool
+exec_is_coalesceable_linear(const struct nvkmd_ctx_exec *exec, uint32_t remaining_B)
+{
+   return !exec->incomplete && !exec->no_prefetch &&
+          exec->addr && !(exec->addr & 3u) &&
+          exec->size_B && !(exec->size_B & 3u) &&
+          exec->size_B <= remaining_B;
+}
+
 static VkResult
 win_ctx_exec(struct nvkmd_ctx *base, struct vk_object_base *log,
              uint32_t count, const struct nvkmd_ctx_exec *execs)
 {
    struct windows_ctx *ctx = container_of(base, struct windows_ctx, base);
-   for (uint32_t i = 0; i < count; i++) {
+   for (uint32_t i = 0; i < count; ) {
       const struct nvkmd_ctx_exec *exec = &execs[i];
       if (exec->incomplete || exec->no_prefetch) {
          uint32_t consumed;
          VkResult result = win_ctx_exec_indirect(base, log, exec, count - i, &consumed);
          if (result != VK_SUCCESS)
             return result;
-         i += consumed - 1;
+         i += consumed;
          continue;
       }
       if (!exec->size_B || exec->size_B > TG_GPU_SUBMIT_MAX_BYTES)
          return vk_errorf(log, VK_ERROR_FEATURE_NOT_PRESENT,
                           "Windows NVK requires complete CPU-visible push buffers");
 
-      uint64_t offset;
-      struct nvkmd_mem *mem = nvkmd_dev_lookup_mem_by_va(base->dev, exec->addr, &offset);
-      if (!mem)
+      uint64_t offset0 = 0;
+      struct nvkmd_mem *mem0 = nvkmd_dev_lookup_mem_by_va(base->dev, exec->addr, &offset0);
+      if (!mem0)
          return vk_error(log, VK_ERROR_DEVICE_LOST);
-
-      VkResult result = VK_ERROR_DEVICE_LOST;
-      if (offset <= mem->size_B && exec->size_B <= mem->size_B - offset) {
-         void *cpu = NULL;
-         result = nvkmd_mem_map(mem, log, NVKMD_MEM_MAP_RD, NULL, &cpu);
-         if (result == VK_SUCCESS) {
-            const struct wsi_win32_runtime *runtime = ctx_runtime(base->dev);
-            if (runtime) {
-               result = runtime->submit(runtime->context, ctx->runtime_context, exec->addr,
-                  (const uint8_t *)cpu + offset, exec->size_B, exec->written_count, exec->written_allocations);
-            } else {
-               LONG status = tg_kmt_submit_primaries(ctx->context, exec->addr,
-                  (const uint8_t *)cpu + offset, exec->size_B,
-                  exec->written_count, exec->written_allocations);
-               result = nvkmd_windows_status(log, "D3DKMTSubmitCommand", status,
-                                             VK_ERROR_DEVICE_LOST);
-            }
-            nvkmd_mem_unmap(mem, 0);
-         }
+      if (offset0 > mem0->size_B || exec->size_B > mem0->size_B - offset0) {
+         nvkmd_mem_unref(mem0);
+         return vk_error(log, VK_ERROR_DEVICE_LOST);
       }
-      nvkmd_mem_unref(mem);
+
+      uint32_t written[TG_WIN_EXEC_MAX_WRITTEN];
+      uint32_t written_count = 0;
+      const bool can_coalesce = exec_is_coalesceable_linear(exec, TG_GPU_SUBMIT_MAX_BYTES) &&
+         merge_written_allocations(&written_count, written,
+                                   exec->written_count, exec->written_allocations);
+      uint32_t batch_bytes = exec->size_B;
+      uint32_t j = i + 1;
+
+      while (can_coalesce && j < count) {
+         const struct nvkmd_ctx_exec *next = &execs[j];
+         if (!exec_is_coalesceable_linear(next, TG_GPU_SUBMIT_MAX_BYTES - batch_bytes))
+            break;
+         if (exec->addr > UINT64_MAX - batch_bytes ||
+             next->addr != exec->addr + batch_bytes ||
+             next->size_B > mem0->size_B - offset0 - batch_bytes)
+            break;
+         uint32_t next_written[TG_WIN_EXEC_MAX_WRITTEN];
+         uint32_t next_written_count = written_count;
+         if (written_count)
+            memcpy(next_written, written, written_count * sizeof(*written));
+         if (!merge_written_allocations(&next_written_count, next_written,
+                                        next->written_count, next->written_allocations))
+            break;
+         written_count = next_written_count;
+         if (written_count)
+            memcpy(written, next_written, written_count * sizeof(*written));
+         batch_bytes += next->size_B;
+         j++;
+      }
+
+      void *cpu0 = NULL;
+      VkResult result = nvkmd_mem_map(mem0, log, NVKMD_MEM_MAP_RD, NULL, &cpu0);
+      if (result != VK_SUCCESS) {
+         nvkmd_mem_unref(mem0);
+         return result;
+      }
+
+      const uint32_t submit_written_count = can_coalesce ? written_count : exec->written_count;
+      const uint32_t *submit_written = can_coalesce ?
+         (written_count ? written : NULL) : exec->written_allocations;
+      result = submit_linear_words(ctx, log, exec->addr,
+                                   (const uint8_t *)cpu0 + offset0, batch_bytes,
+                                   submit_written_count, submit_written);
+      nvkmd_mem_unmap(mem0, 0);
+      nvkmd_mem_unref(mem0);
       if (result != VK_SUCCESS)
          return result;
+      i = j;
    }
    return VK_SUCCESS;
 }
