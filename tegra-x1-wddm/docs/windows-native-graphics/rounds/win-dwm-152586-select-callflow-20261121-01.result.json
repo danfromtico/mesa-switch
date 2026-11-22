@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-152586-select-callflow-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "plan_sha256": "81a6e6b7e489282dfb7324a86a3c458b32fc6ddfa4351981e2ee922926f00721",
+  "status": "观测缺口",
+  "finding": "原91476同线程队列选择位于DMA152586提交后0.808958ms。91918比较映像的两个常数selector5入口和175.1后绕过提交DDI的具体分支已核对。原最后KMD快照另属分页包152584的notify阶段：零硬件缓存没有有效采样标志，不能证明152586的硬件健康。",
+  "missing_observation": "原事故仍缺执行栈和实际提交分支、KMD入返、GPU开始/完成、Windows退役，以及首条可归因的复位异常。91476也无dxgmms2模块全哈希；比较代码不充当实际执行回执。",
+  "device_executions": 0,
+  "root_cause": "未知",
+  "candidate_fix": null,
+  "evidence": {
+    "analysis": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/event179-analysis.json",
+      "sha256": "d7e8f66dfef009e912d2a8007f7beb4a5fc00437db1189c86610c2e46f7d64e1"
+    },
+    "analyzer": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/analyze_event179.py",
+      "sha256": "5867ab65a211ca4bb87d62ff613c7527a8d6c9891c25ada269aa563050c1c644"
+    },
+    "findings": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/findings.md",
+      "sha256": "d944f9ab7d82ce0454a140484ef19c57b651c3ff5d2c6b5e0eb048b5f1378e11"
+    },
+    "snapshot_boundary": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/kmd-snapshot-boundary.json",
+      "sha256": "527c54863683b1a262c8262e7dcb4aff9543a5f503113a923b3e78410f7bee7a"
+    },
+    "snapshot_payload": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/last-kmd-152584.bin",
+      "sha256": "9a76d4b1c0de037b2154c73d3e8ef79458f22b7ed77828e235c636b904b71398"
+    },
+    "paging_windows_events": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/paging152584-windows-submit.json",
+      "sha256": "e34c8a93bb52256bc0944a235582e2ce8adaae31067eadf865b54ed9a2d0d886"
+    },
+    "comparison_scope": {
+      "origin_boot": 91476,
+      "comparator_boot": 91918,
+      "incident_dxgmms2_full_hash": null
+    },
+    "boundaries": {
+      "last_entry": {
+        "origin_boot": 91476,
+        "stage": "Windows175.1",
+        "dma": 152586,
+        "qpc": 223221950698
+      },
+      "last_return": null,
+      "first_anomaly_or_missing": "175.1后实际锁释放与选择分支仍未实测；本轮静态抑制分支说明同线程继续选择也不足以证明KMD接收。首条复位异常仍未知。"
+    },
+    "work_scope": {
+      "ssh_operations": 0,
+      "application_dispatches": 0,
+      "request_f6264ee11289_consumed": true,
+      "restored_formal_boot_unchanged": 96251,
+      "explorer_prerequisite": false,
+      "publication_check_only_at_release": true
+    },
+    "independent_review": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/independent-review.json",
+      "sha256": "42f0150fd0ef44a1d630aa882107df63c22aaf7a11e58d4f426b8c62abea4151"
+    },
+    "case_supplement": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/work/first-present-f6264ee11289/report/2026-11-21_re-91476-boundary-followup.md",
+      "sha256": "18952af6743dbe935d4e068cdaf44b4fff9cad9c6073c88cc216f9890916cdce"
+    }
+  },
+  "official_references": [
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_submitcommandvirtual",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_preemptcommand"
+  ]
+}
