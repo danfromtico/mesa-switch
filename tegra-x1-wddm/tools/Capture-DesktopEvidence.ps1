@@ -8,10 +8,20 @@ param(
 )
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue'
 $started=[DateTime]::UtcNow.ToString('o')
+$captureWatch=[Diagnostics.Stopwatch]::StartNew()
 if((Get-Process -Id $PID).SessionId -eq 0){throw 'Capture requires an interactive session'}
-foreach($suffix in '.png','.json','.pending.png','.geometry.json'){
+foreach($suffix in '.png','.json','.pending.png','.geometry.json','.progress.jsonl'){
  if(Test-Path -LiteralPath ($OutputPrefix+$suffix)){throw 'Capture output already exists'}
 }
+function Write-CaptureProgress([string]$phase) {
+ $line=@{Utc=[DateTime]::UtcNow.ToString('o');Pid=$PID;Phase=$phase;ElapsedMs=$captureWatch.ElapsedMilliseconds}|ConvertTo-Json -Compress
+ $bytes=[Text.Encoding]::UTF8.GetBytes($line+"`n")
+ $stream=[IO.FileStream]::new(($OutputPrefix+'.progress.jsonl'),[IO.FileMode]::Append,[IO.FileAccess]::Write,[IO.FileShare]::Read,4096,[IO.FileOptions]::WriteThrough)
+ try{$stream.Write($bytes,0,$bytes.Length);$stream.Flush($true)}finally{$stream.Dispose()}
+}
+# Retain entry before compiling interop or querying the desktop/PnP stack.
+# A missing geometry checkpoint alone does not identify the blocked operation.
+Write-CaptureProgress 'compile-interop'
 Add-Type @'
 using System;
 using System.Text;
@@ -105,22 +115,27 @@ public static class TgDesktopCapture {
  }
 }
 '@
+Write-CaptureProgress 'read-input-desktop'
 $desktop=[TgDesktopCapture]::InputDesktop()
 if($desktop -ne 'Default'){throw ('Capture requires Default desktop; current='+$desktop)}
 $dpi=[TgDesktopCapture]::SetThreadDpiAwarenessContext([IntPtr](-4))
 if($dpi -eq [IntPtr]::Zero){throw 'Could not select physical pixel coordinates'}
-$record=@{Begin=$started;Session=(Get-Process -Id $PID).SessionId;Desktop=$desktop;PhysicalPanelVerified=$false;Exit=1;Shortcut=$Shortcut}
+$record=@{Begin=$started;Pid=$PID;Session=(Get-Process -Id $PID).SessionId;Desktop=$desktop;PhysicalPanelVerified=$false;Exit=1;Shortcut=$Shortcut}
 try{
+ Write-CaptureProgress 'load-drawing'
  Add-Type -AssemblyName System.Drawing
  Add-Type -AssemblyName System.Windows.Forms
  $id='ACPI\SWOA0F01\0'
+ Write-CaptureProgress 'query-driver-before'
  $record.DriverBefore=(Get-PnpDeviceProperty -InstanceId $id -KeyName DEVPKEY_Device_DriverVersion).Data
  $record.ProblemBefore=(Get-PnpDeviceProperty -InstanceId $id -KeyName DEVPKEY_Device_ProblemCode).Data
  if($Shortcut -ne 'None') {
+  Write-CaptureProgress 'send-shortcut'
   $record.ShortcutInputs=[TgDesktopCapture]::ShellShortcut($Shortcut)
   $record.ShortcutUtc=[DateTime]::UtcNow.ToString('o')
   Start-Sleep -Milliseconds 1500
  }
+ Write-CaptureProgress 'read-geometry'
  $record.Foreground=[TgDesktopCapture]::Foreground()
  $bounds=[Windows.Forms.Screen]::PrimaryScreen.Bounds
  $record.Bounds=@{X=$bounds.X;Y=$bounds.Y;Width=$bounds.Width;Height=$bounds.Height}
@@ -139,13 +154,20 @@ try{
  $record|ConvertTo-Json -Depth 5|Set-Content -LiteralPath ($OutputPrefix+'.geometry.json') -Encoding UTF8
  $checkpoint=[IO.File]::Open(($OutputPrefix+'.geometry.json'),[IO.FileMode]::Open,[IO.FileAccess]::ReadWrite,[IO.FileShare]::Read)
  try{$checkpoint.Flush($true)}finally{$checkpoint.Dispose()}
+ Write-CaptureProgress 'create-bitmap'
  $image=New-Object Drawing.Bitmap($bounds.Width,$bounds.Height)
  try{
   $g=[Drawing.Graphics]::FromImage($image)
-  try{$g.CopyFromScreen($bounds.X,$bounds.Y,0,0,$image.Size)}finally{$g.Dispose()}
+  try{
+   Write-CaptureProgress 'copy-from-screen'
+   $g.CopyFromScreen($bounds.X,$bounds.Y,0,0,$image.Size)
+   Write-CaptureProgress 'screen-copied'
+  }finally{$g.Dispose()}
+  Write-CaptureProgress 'save-png'
   $image.Save(($OutputPrefix+'.pending.png'),[Drawing.Imaging.ImageFormat]::Png)
  }finally{$image.Dispose()}
  Move-Item -LiteralPath ($OutputPrefix+'.pending.png') -Destination ($OutputPrefix+'.png')
+ Write-CaptureProgress 'query-driver-after'
  $record.DriverAfter=(Get-PnpDeviceProperty -InstanceId $id -KeyName DEVPKEY_Device_DriverVersion).Data
  $record.ProblemAfter=(Get-PnpDeviceProperty -InstanceId $id -KeyName DEVPKEY_Device_ProblemCode).Data
  $record.DesktopAfter=[TgDesktopCapture]::InputDesktop()
@@ -155,5 +177,6 @@ try{
  $record.End=[DateTime]::UtcNow.ToString('o')
  $null=[TgDesktopCapture]::SetThreadDpiAwarenessContext($dpi)
  $record|ConvertTo-Json -Depth 5|Set-Content -LiteralPath ($OutputPrefix+'.json') -Encoding UTF8
+ Write-CaptureProgress $(if($record.Exit -eq 0){'completed'}else{'failed'})
 }
 if($record.Exit){exit 1}
