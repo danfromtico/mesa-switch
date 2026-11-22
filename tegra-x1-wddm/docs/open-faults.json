@@ -521,7 +521,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-board-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/on-demand-prefix-recovery.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/lifecycle-preservation-main-review-20261122.json"
       ],
       "cause": "Initiating failure unknown. Same-drawing-thread trace and application journal prove the 52-byte copy retired, first Present(1,0) returned S_OK, device status and DwmFlush returned S_OK, and the first-frame objects were released. The last drawing-thread ETW event is 138.531 ms after public return. The application's normal exit, final collector output, and the initiating failure were not recorded. Boot 91557 recorded 6008 and Kernel-Power 41 with BugcheckCode 0. This is a separate incident from the historical legacy restart. DWM scheduled the same HWND 2.402 ms after public return. The complete physical buffer census found two final tgd3d resource entry events on that compositor thread, with the last at +154.764 ms. The allocation identity, return and the initiating failure remain unobserved. The 3,892-byte DWM DMA packet 48648 completed after public Present returned. Both traces show two preemptions and a third submission (152586) of later DWM DMA packet 48660. They retain enqueue records for the linked signal, wait and subsequent DWM Present, with no retained retirement for that chain. A healthy sample in the same boot used the same DWM contexts and synchronization object and retired the chain after two preemptions. Frame attribution, third-attempt completion on the incident, and the initiating reset condition remain open. Shared-buffer ETLs preserve other activity for 0.126 and 9.423 ms after the third Windows DMA submission. The prior completion thread has no subsequent retained events and the logs are unsealed. The last KMD record is a successful preemption snapshot for request 20571, 0.276 ms before the Windows event for 152586. The loaded baseline has no symmetric success-path submit trace. The entry, hardware start and completion for 152586 remain unverified. The same Windows kernel image exposes DMA scheduler and optional timing templates. Three healthy archived captures have matching DMA notifications and no per-packet GPU timestamp records. An opt-in DMA-boundary instrumentation package has been built locally and checked with the queue model. Live candidate calibration and accident attribution are open. The signed native ARM64 queue model passed on the recovered Switch. Windows verified the signed candidate catalog and all 12 covered files with the permanent driver still in use. Candidate runtime submission evidence remains open. The prospective observer calibration stopped at an independent abnormal boot transition before any window workload. The permanent baseline was restored. The same unsealed scene trace records Windows DMA submission 247 on another DWM context 9.054 ms after 152586. An earlier packet on that context, 246, has a matching IRQ, DMA completion and queue retirement in both files. Neither file retains any context reporting a DMA completion notification, DMA completion, or queue retirement after 152586. The later context has no directly matched adapter or node identity in the two stored streams. Seven clean archives from the same DWM instance retain 105 DMA IDs with matching Windows interrupt and non-preempted completion on the later context. All sixteen inspected streams still lack a direct mapping from that context to an adapter and node. Only the primary context has temporally matching native GM20B execution snapshots among these recordings. A clean original-window control on boot 91918 captured the DWM adapter and node associations before Present. Four ordinary GM20B DMA completions and four cross-device DWM signal/wait retirements were identified, including the native execution snapshot for DMA 12776. The observation does not backfill boot 91476. The exact Windows image verified on boot 91918 emits the 175.1 descriptor in VidSchiSendToExecutionQueue before releasing its DPC-level queue lock and before the conditional call to the virtual/physical submission wrapper. The 91476 archive contains the identical event descriptor for 152586 and has no separately retained dxgmms2.sys hash. No release, chosen DDI branch, miniport entry, or hardware progress is established for that submission. The stock DxgKrnl profiler on boot 91918 emitted a same-thread function-5063 entry/return pair for DWM DMA 17588, with direct GM20B node mapping and matching IRQ, DMA completion and queue retirement. The two 91476 traces contain no events from the profiler family. This establishes a capture method for the next occurrence. In a bounded normal trace on boot 91918, live event bytes match the ETL. DWM submission 21991 has the complete 175.1, 5063 entry/return, and ordinary completion chain. The host confirmed durable receipt for its events 19.186 to 22.556 ms after their source QPC. This measured delay leaves an earlier reset interval unobserved. A separate clock review brackets the last retained ETL event and the recovery kernel start by about 55.860 seconds of wall time. The previous shutdown time in recovery event 6008 is 24.613 seconds after that kernel start. The exact reset time and the submit return and completion for 152586 remain unobserved. The scene ETL preserves an EventQueueSelect for dependent signal packet 48661 on the submission thread 0.809 ms after DMA 152586. The same signal was selected while the first two attempts were pending, and a healthy same-boot control selected its signal before the third DMA interrupt. This bounds scheduler activity without establishing lock release, return or retirement for 152586. The reset mechanism remains unknown. A local replay of the separate calibrated DWM DMA from boot 94004 verified controller readback after receiver termination. A partial host journal confirms nine synchronized records through the Windows completion notification. The truncated marker provides no additional synchronization evidence. No new board execution was made and the original scene has no new incident receipt. The live collector is not armed. The controlled reboot readback qualified the independently stored complete application DMA packet for a new, normal SEQUENTIAL window. DWM coverage is recorded for that run separately. The boot 91476 failure and its initiating cause remain open. A local call-flow follow-up verified two literal queue-select callers and a comparator path that can bypass the three submission DDI call sites after event175.1. The incident branch remains unobserved. The last raw KMD preemption snapshot describes paging152584 at notification, with zero hardware polls and unset sample-valid bits; its zero error caches do not establish GPU health for later DMA152586. The initiating reset cause remains unknown. The comparator TDR recovery path emits ResetAdapterStart through the separate DxgKrnlTelemetry provider c6998471-62cd-424d-a9a3-fe4c1fa378a4, absent from both retained incident ETLs. Four read-only queries on restored96251 and a local read-only SQLite snapshot analysis recovered no matched initiating record. The current empty event table and missing private-provider events do not establish that the historical incident had no TDR.",
       "daily_workaround": "Keep this optional board-local diagnostic task out of daily launches while investigating. Use the qualified permanent graphics baseline and established window controls.",
@@ -538,10 +539,22 @@
         "scope": "比较私有TDR遥测与现存诊断只读调查；首因仍未知。"
       },
       "current_local_inquiry": {
-        "state": "local existing-materials batch reviewed; root remains unknown",
-        "progress_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/inquiry-progress.json",
-        "sha256": "bf359d4da846f39ac4c31dc7ed7c24ca909872e22d4bd29ad46f4fa2a5442e16",
-        "scope": "四个只读RPC，无新增图形负载；私有TDR遥测原ETL缺失、现存材料未找回首因，不以当前空快照否定历史。"
+        "state": "保全批次已审核；新执行会话完整目标active，最小夹具复核与正常本地验证进行中；根因未知",
+        "review": {
+          "path": "windows-native-graphics/lifecycle-preservation-main-review-20261122.json",
+          "sha256": "ca3e201a14f6051228c8980a506feda7c17fcf556e2a6fbfeb4720ed601b641d",
+          "status": "保全与证据范围审核通过；两项意见均未确认为驱动缺陷或历史首因",
+          "root_cause_found": false,
+          "repair_accepted": false
+        },
+        "execution_thread": "01a2026d-3f59-7041-8676-a9267b034280",
+        "prior_inquiry": {
+          "state": "local existing-materials batch reviewed; root remains unknown",
+          "progress_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/inquiry-progress.json",
+          "sha256": "bf359d4da846f39ac4c31dc7ed7c24ca909872e22d4bd29ad46f4fa2a5442e16",
+          "scope": "四个只读RPC，无新增图形负载；私有TDR遥测原ETL缺失、现存材料未找回首因，不以当前空快照否定历史。"
+        },
+        "scope": "本审核批次无新增实机操作、驱动修复或基线晋升。"
       }
     },
     {
@@ -2374,6 +2387,11 @@
             "path": "windows-native-graphics/first-present-deferred-contracts-20261121.json",
             "sha256": "de1b1a1280a4318cc5c38b7906004a26001d59d126a67cd8a448ce364ae1b06e",
             "status": "四条逐项复查，仍未知；未满足原恢复验证条件"
+          },
+          "latest_checkpoint": {
+            "path": "windows-native-graphics/first-present-deferred-contracts-review-20261122.json",
+            "sha256": "864ec6e03b0d0440316e9f50a76fb407056588cf69dea11b44d1125c7892c97a",
+            "status": "四条逐项复查仍未知；原回执和重新验证条件均保留，完整根因排查尚未收尾"
           }
         }
       }
@@ -5958,6 +5976,13 @@
       "status": "TDR采集覆盖及现存诊断调查审核通过；根因仍未知",
       "root_cause_found": false,
       "tdr_excluded": false
+    },
+    "lifecycle_preservation_main_review": {
+      "path": "windows-native-graphics/lifecycle-preservation-main-review-20261122.json",
+      "sha256": "ca3e201a14f6051228c8980a506feda7c17fcf556e2a6fbfeb4720ed601b641d",
+      "status": "保全与证据范围审核通过；两项意见均未确认为驱动缺陷或历史首因",
+      "root_cause_found": false,
+      "repair_accepted": false
     }
   }
 }
