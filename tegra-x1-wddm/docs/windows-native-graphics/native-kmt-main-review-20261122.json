@@ -1,0 +1,502 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T12:11:16.510760+00:00",
+  "review_thread": "01a2026b-02b8-7ea3-996a-e5472b0bde3f",
+  "execution_thread": "01a202a1-7c8c-70c1-8363-52cc06d2708b",
+  "status": "实机诊断整批证据及清理审核通过；普通对照通过，NullRendering对照未获有效完成，不构成驱动修复或历史首次Present验收",
+  "evidence_accepted": true,
+  "all_cases_passed": false,
+  "root_cause_found_for_historical_first_present": false,
+  "production_repair_accepted": false,
+  "selected_baseline_changed": false,
+  "full_goal_status": "active",
+  "fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+  "delivery": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/native-delivery-20261122.json",
+    "bytes": 5953,
+    "sha256": "bb821ab86c42b399ba636d6872c989f503f636e86eff660e83f8c24176ce981e"
+  },
+  "archive": {
+    "schema": 1,
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/native-kmt-validation-01a202a1-20261122.zip",
+    "bytes": 1963321,
+    "sha256": "fa3a17e067e5deb2d45e1c706074534e49997a59aa75e35162f4bb084620d5b9",
+    "manifest_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/native-delivery-manifest.json",
+    "manifest_sha256": "e8880bf1a53738995ff2e483f22433e640191a6b35f547517cf2ae7427d1acb7",
+    "files_hashed": 237,
+    "zip_members": 238,
+    "all_members_bytes_and_sha256_verified": true,
+    "original26_and_recovery20_frozen_verified": true
+  },
+  "independent_proofs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/native-kmt-raw-main-proof-20261122.json",
+      "bytes": 6034,
+      "sha256": "980dff387676cccaeb3be034107e92407afffe866af54e98adf05b61968374f7"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/native-kmt-baseline-main-proof-20261122.json",
+      "bytes": 12896,
+      "sha256": "7b3b06adafeaf11dbd39db5c0de433bae3436fc07db2c53a9548d3fd16da7aaa"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/native-kmt-actual-tools-20261122.json",
+      "bytes": 6093,
+      "sha256": "99b332c9edfbf1fe9a924db73131caf577d363ebf46bf2417e494886f25125b1"
+    }
+  ],
+  "verification_counts": {
+    "batch_files": 237,
+    "zip_members": 238,
+    "normalized_native_zip_members": 47,
+    "snapshot_receipts": 6,
+    "components_each": 8,
+    "loaded_bindings_each": 5,
+    "ETL_buffers": 6,
+    "critical_kernel_records_strictly_decoded": 1310,
+    "KMD_records_independently_unpacked": 3,
+    "journal_records": 36,
+    "native_program_executions": 1,
+    "cases": 2,
+    "original_frozen_inputs": 26,
+    "recovery_frozen_inputs": 20
+  },
+  "execution_identity": {
+    "boot": 96251,
+    "binary": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/normalized-result/ps51/null-submit-check.exe",
+      "bytes": 78336,
+      "sha256": "b0e6d275845a04938bb7cbc86ba9ebe4184550cbe0cc195a854708da3b28f26c"
+    },
+    "native_pid": 2424,
+    "native_tid": 456,
+    "native_program_exit": 1,
+    "timed_out": false,
+    "controller_kill": false,
+    "DWM_pid": 1420,
+    "DWM_start": "2026-11-22T06:37:29.9939088Z",
+    "capture_stop_exit": 0,
+    "capture_lost_events": 0,
+    "capture_lost_buffers": 0,
+    "new_device_calls_by_main": 0
+  },
+  "ordinary_case": {
+    "case": 0,
+    "native_context_handle": 1073742208,
+    "dxg_context": "0xffff9082e7317dd0",
+    "kmd_handle": "0xffffe60d750a1a70",
+    "lifetime_qpc": [
+      340534149119,
+      340535261323
+    ],
+    "submission_fence": 181013,
+    "queue_sequence": 1,
+    "scheduler_qpc": 340535083927,
+    "wrapper_qpc": [
+      340535083989,
+      340535084575
+    ],
+    "retirement_qpc": {
+      "177": 340535128615,
+      "176": 340535128890,
+      "180": 340535129028
+    },
+    "journal_submit_status": "00000000",
+    "journal_wait_helper_status": "00000000",
+    "journal_observed": 1,
+    "internal_failures": []
+  },
+  "null_rendering_case": {
+    "case": 1,
+    "native_context_handle": 1073742400,
+    "dxg_context": "0xffff9082e7317dd0",
+    "kmd_handle": "0xffffe60d765a1e00",
+    "lifetime_qpc": [
+      340535587708,
+      340536539253
+    ],
+    "submission_fence": 181026,
+    "queue_sequence": 1,
+    "scheduler_qpc": 340536362737,
+    "wrapper_qpc": [
+      340536362799,
+      340536363260
+    ],
+    "retirement_qpc": {
+      "177": 340536363650,
+      "176": 340536363802,
+      "180": 340536363962
+    },
+    "journal_submit_status": "00000000",
+    "journal_wait_helper_status": "00000000",
+    "journal_observed": 18446744073709551615,
+    "internal_failures": [
+      {
+        "qpc": 340536363093,
+        "pid": 4,
+        "tid": 904,
+        "provider": "kmd",
+        "id": 2,
+        "version": 1,
+        "source": 3,
+        "adapter_luid": 23669,
+        "status": 3221225485,
+        "request_fence": 181026,
+        "request_flags": 8,
+        "stage": 0,
+        "request_context": 18446715544227421696,
+        "work_context": 0,
+        "work_dma_address": 0,
+        "submission_fence": 0,
+        "last_completed_fence": 181025,
+        "work_flags": 0,
+        "queue_flags": 273,
+        "request_dma_bytes": 8,
+        "private_bytes": 65864,
+        "umd_private_bytes": 24,
+        "payload_sha256": "0bc4ee95c77cdef69c8b5169d55bcb356e961aa2f9a8558ae972bef42362b662",
+        "buffer_offset": 262144
+      }
+    ]
+  },
+  "case_interpretation": {
+    "direct_D3DKMTSubmitCommand": "Both recorded STATUS_SUCCESS (0).",
+    "SignalGpuFence": "Both logged helper status0.",
+    "WaitCpuFence": "Both logged tg_kmt_wait_fences status0, which maps async event signaling to0; original underlying wait NTSTATUS was not separately logged.",
+    "ordinary_observed": 1,
+    "null_observed": "UINT64_MAX",
+    "CaseResult_FinalResult_c000000d": "Probe-synthesized generic failure labels, not the status returned by D3DKMTSubmitCommand.",
+    "fence_pointer_limit": "The program computes fence.value ? *fence.value : UINT64_MAX. create_fence accepts the successful call without a non-null pointer guard, and the CPU pointer was not recorded. Thus the sentinel observation cannot by itself distinguish an actual MAX read from the null-pointer fallback, or prove device removal.",
+    "functional_result": "Case0 reached a valid observed fence1. Case1 failed its valid-completion check; an independently bound internal SubmitFailure also exists. Neither scheduler retirement nor wait-helper success upgrades case1 to a pass."
+  },
+  "context_identity": {
+    "native_context_handles": [
+      1073742208,
+      1073742400
+    ],
+    "same_dxg_pointer_reused": true,
+    "separate_lifetimes_verified": true,
+    "different_KMD_handles_verified": true,
+    "client_context_flags": [
+      0,
+      1
+    ],
+    "event30_Flags": [
+      0,
+      0
+    ],
+    "flag_scope": "Observed event30 Flags do not replace the client CreateContextVirtual flags; do not decode generic event Flags as a direct NullRendering observation.",
+    "binding": "Native handle -> event30 lifetime -> same-create433 ->175 fence/sequence -> same-thread105/106 Function5063; internal failure additionally matches KMD handle, fence, thread, LUID and wrapper interval."
+  },
+  "submission_stage_audit": {
+    "scheduler_submit": "Observed for181013 and181026, sequence1 in distinct context lifetimes.",
+    "KMD_boundary": "Function5063 wrapper entry/return observed for both; internal request-specific failure0xc000000d for181026. No recorded final DDI NTSTATUS.",
+    "GPU_completion": "No new independent direct hardware start/completion observation; current-work/cached hardware fields from the failure snapshot are not the target request execution.",
+    "Windows_retirement": "Matched177/176/180 for both packets. Retirement is not a valid monitored-fence result in this diagnostic.",
+    "disk_readback": "Source archives, returned program log and ETL byte identities verified. This batch stayed on96251 and is not a new cross-reboot readback experiment.",
+    "prior_restart_readback": "Previously accepted94382→94557 retained; not repeated."
+  },
+  "source_boundary": {
+    "checks": [
+      {
+        "path": "tegra-x1-wddm/windows/submit_ddi.c",
+        "baseline_source_commit": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+        "sha256": "b01cef642b9c660226fd24e468b861f9f21b3176fba6ae7ba6a3fcda0e2d1548",
+        "frozen_source_matches": true,
+        "current_source_matches": true
+      },
+      {
+        "path": "tegra-x1-wddm/windows/work_queue.c",
+        "baseline_source_commit": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+        "sha256": "4a5c659465f757319d340af3cd0c2962c8131f5b6c1c85a8ea53d0ca23108a1e",
+        "frozen_source_matches": true,
+        "current_source_matches": true
+      }
+    ],
+    "observed_request": {
+      "flags": "0x00000008",
+      "NullRendering": true,
+      "dma_bytes": 8,
+      "private_bytes": 65864,
+      "umd_private_bytes": 24,
+      "internal_status": "0xc000000d"
+    },
+    "source_guard_evaluation": {
+      "submit_ddi_c_lines_34_46": "NullRendering suppresses application snapshot capture, leaving snapshot NULL.",
+      "work_queue_c_line_176": "Nonzero UMD private size and NULL snapshot satisfy the rejection predicate outside GDI/window-present exceptions.",
+      "work_queue_c_lines_212_214": "Software-work selection is later than this admission guard.",
+      "zero_DMA_claim": false
+    },
+    "assessment": "The source predicate matches the observed rejection: NullRendering leaves snapshot NULL and nonzero UMD private size reaches the admission rejection before software-work selection. This is source-grounded consistency, not a branch-specific runtime sample or a newly rebuilt deployed KMD identity.",
+    "final_DDI_status": "Unknown; internal status and profiler return do not contain that value.",
+    "both_flags_changed": true,
+    "independent_effects_isolated": false,
+    "zero_DMA_accepted": false
+  },
+  "preparation_failure": {
+    "first_preparation_program_runs": 0,
+    "actual_native_runs_after_recovery": 1,
+    "same_shared_CreateNew_program_slot": true,
+    "failure_archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/native-result.zip",
+      "bytes": 136661,
+      "sha256": "5550413e368ace0014ec82845f74772850291102668772dfa76cdc172fb4ca73"
+    },
+    "actual_archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/native-result.zip",
+      "bytes": 288608,
+      "sha256": "1da40fb96b07f7b86832d35aa4fb3c9869ef3dc4c48a0a8d287e948b579c382b"
+    },
+    "cause_boundary": "Initial WinPS5.1 Start-Process object ExitCode was null before probe launch; observer independently misread UTF8 as the default encoding. These are preparation failures, not the GPU diagnostic result.",
+    "correction": "Reviewed Process.Start/wait/output functions and explicit UTF8 reads; three short process checks ran on target WinPS5.1. No duplicate GPU run.",
+    "raw_preservation": "Initial failure, transport outputs and reviewer original response preserved. A single invalid JSON escape was repaired only in the derived review parse. ZIP entry path normalization changed only the offline extraction paths, not archive bytes.",
+    "required_review_checks": [
+      {
+        "raw": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/review-v2/stdout.json",
+          "bytes": 15363,
+          "sha256": "b3337c98995a27f88c16d41d33e792203d2e2b06b9f496c22453dc2a48e94275"
+        },
+        "parsed": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/review-v2/parsed-review.json",
+          "bytes": 14468,
+          "sha256": "a706473928f6282f08cffeb90fdda4dcdda2ecc474e21afcd6615175e13b067a"
+        },
+        "status": "approve",
+        "findings": 0,
+        "derived_json_escape_repairs": [],
+        "conversation_id": "573afcaf-11cb-430a-b8be-7164661144c7"
+      },
+      {
+        "raw": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/review/stdout.json",
+          "bytes": 14060,
+          "sha256": "89fb67292e66f879698075f362537662b47c8ec12816bb5a7700ab2c27def40c"
+        },
+        "parsed": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/review/parsed-review.json",
+          "bytes": 13302,
+          "sha256": "19eee0ace2e7032bd0ce095c115adb46cdf13f4a0dc141a7b2930c5f89bac3ac"
+        },
+        "status": "approve",
+        "findings": 0,
+        "derived_json_escape_repairs": [
+          5207
+        ],
+        "conversation_id": "573afcaf-11cb-430a-b8be-7164661144c7"
+      }
+    ],
+    "new_service_refusals_reported": 0
+  },
+  "baseline_and_cleanup": {
+    "selected_baseline": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/graphics-baseline.json",
+      "bytes": 1100,
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "snapshot_checks": [
+      {
+        "receipt": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/preflight-before.json",
+          "bytes": 13064,
+          "sha256": "c6969476ecedfda687ccdf567420eb6e764b51bf2a10df348cd523c5aafec165"
+        },
+        "snapshot_utc": "2026-11-22T10:38:16.7914535Z",
+        "boot": 96251,
+        "components": 8,
+        "loaded_paths_and_hashes": 5,
+        "Code": 0,
+        "AC": "Online",
+        "Handheld": 1,
+        "DWM": 1420,
+        "DWM_start": "2026-11-22T06:37:29.9939088Z"
+      },
+      {
+        "receipt": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/normalized-result/baseline-before-run.json",
+          "bytes": 10164,
+          "sha256": "711efb0ed591a9aa5c4fdd04fd2ebb9c846dbf3f6b100e1a80d8e8e7af94f914"
+        },
+        "snapshot_utc": "2026-11-22T11:19:11.8663741Z",
+        "boot": 96251,
+        "components": 8,
+        "loaded_paths_and_hashes": 5,
+        "Code": 0,
+        "AC": "Online",
+        "Handheld": 1,
+        "DWM": 1420,
+        "DWM_start": "2026-11-22T06:37:29.9939088Z"
+      },
+      {
+        "receipt": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/normalized-result/baseline-after-run.json",
+          "bytes": 10162,
+          "sha256": "ebcf6121fde09e977d197b7f90725feb733bcf5e65f11a6dfa3008680bf054ec"
+        },
+        "snapshot_utc": "2026-11-22T11:19:20.6665479Z",
+        "boot": 96251,
+        "components": 8,
+        "loaded_paths_and_hashes": 5,
+        "Code": 0,
+        "AC": "Online",
+        "Handheld": 1,
+        "DWM": 1420,
+        "DWM_start": "2026-11-22T06:37:29.9939088Z"
+      },
+      {
+        "receipt": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/normalized-result/ps51/baseline-before-run.json",
+          "bytes": 10162,
+          "sha256": "5072fe0fa11d6223b8bbf1b08464890362067eca8b6e88aa8d3991d9d2f732d5"
+        },
+        "snapshot_utc": "2026-11-22T11:32:29.5922213Z",
+        "boot": 96251,
+        "components": 8,
+        "loaded_paths_and_hashes": 5,
+        "Code": 0,
+        "AC": "Online",
+        "Handheld": 1,
+        "DWM": 1420,
+        "DWM_start": "2026-11-22T06:37:29.9939088Z"
+      },
+      {
+        "receipt": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/normalized-result/ps51/baseline-after-run.json",
+          "bytes": 10164,
+          "sha256": "55ab80e2f4581d206fbc4790576e8b54d9d55792ab8f5856164179fa25554a62"
+        },
+        "snapshot_utc": "2026-11-22T11:32:38.7561061Z",
+        "boot": 96251,
+        "components": 8,
+        "loaded_paths_and_hashes": 5,
+        "Code": 0,
+        "AC": "Online",
+        "Handheld": 1,
+        "DWM": 1420,
+        "DWM_start": "2026-11-22T06:37:29.9939088Z"
+      },
+      {
+        "receipt": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/post-cleanup-result.json",
+          "bytes": 14471,
+          "sha256": "e19e03044594babb8ae27b4ed1174d18f7bbf0980903fe9953ab9ed716451615"
+        },
+        "snapshot_utc": "2026-11-22T11:37:21.4149692Z",
+        "boot": 96251,
+        "components": 8,
+        "loaded_paths_and_hashes": 5,
+        "Code": 0,
+        "AC": "Online",
+        "Handheld": 1,
+        "DWM": 1420,
+        "DWM_start": "2026-11-22T06:37:29.9939088Z"
+      }
+    ],
+    "final_owned_state": {
+      "task_absent": true,
+      "three_exact_paths_absent": true,
+      "owned_processes_empty": true,
+      "actual_post_transport": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-submit-validation-native-20261122-01a202a1/ps51-recovery/post-cleanup-transport.json",
+        "bytes": 137,
+        "sha256": "b68ffe214ba3e8debb887d56d9bc689bb5989456a5dedbf4f6118cc9f7fa711a"
+      },
+      "raw_post_matches_parsed": true,
+      "capture_stop_exit_and_payload": 0,
+      "three_old_trace_queries": "ObjectNotFound for three named historic sessions only; not a global enumeration or fresh query for the new collector."
+    },
+    "post_cleanup_utc": "2026-11-22T11:37:26.0381352Z",
+    "permanent_package": "nvk-ec-d31b862075fe",
+    "trial_absent": true,
+    "driver_license_policy_power_orientation_changes": 0,
+    "fresh_baseline_observation": true,
+    "return_device_owner": "01a202a1-7c8c-70c1-8363-52cc06d2708b"
+  },
+  "system_event_scope": {
+    "query_ids": [
+      12,
+      41,
+      6008,
+      1074,
+      1001,
+      4101
+    ],
+    "record_count": 0,
+    "query_error": null,
+    "same_boot_and_DWM": true,
+    "scope": "No matching new System records in the controller interval. This is not proof that every possible private TDR path was observed."
+  },
+  "decode_scope": {
+    "critical_templates": 11,
+    "critical_payloads_fully_consumed": true,
+    "raw_buffers_fully_consumed": true,
+    "KMD_schema_or_buffer_gaps": 0,
+    "limit": "Zero decode-gap count in the executor report covers KMD schemas and physical buffers. Main additionally verified complete decoding of the11 kernel event IDs used for correlation; other kernel fields are not covered by a blanket full-decoding claim."
+  },
+  "historical_limits": {
+    "91476_DMA152586": "No new original-boot flags, selected branch, KMD final return, GPU completion or initiating reset evidence.",
+    "95090": "Separate early candidate-boot fault remains unknown; this successful formal96251 interval does not fill its missing original receipts.",
+    "f6264ee11289": "Original window and dispatch remain1 each, Finished; not replayed.",
+    "94382_to94557": "No repeat.",
+    "new_native_result": "Independent no-Present KMT comparison; not the original legacy window and not proof of the historical restart cause.",
+    "unexpected_restart_in_this_batch": "No matching new System restart records and same boot across all6 snapshots; private TDR paths are not exhaustively excluded."
+  },
+  "deferred_contracts": {
+    "policy_commit": "470e1dbc4ff65affe8ee6395a12bf8e2060cd338",
+    "checkpoint": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/first-present-deferred-contracts-review-20261122.json",
+      "bytes": 6852,
+      "sha256": "864ec6e03b0d0440316e9f50a76fb407056588cf69dea11b44d1125c7892c97a"
+    },
+    "items": [
+      {
+        "contract_id": "dxgkrnl.h:231:1",
+        "status": "未知",
+        "original_receipt_sha256_verified": true,
+        "new_direct_observation": false,
+        "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+        "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。"
+      },
+      {
+        "contract_id": "dxgkrnl.h:684:4",
+        "status": "未知",
+        "original_receipt_sha256_verified": true,
+        "new_direct_observation": false,
+        "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+        "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。"
+      },
+      {
+        "contract_id": "dxgkrnl.h:759:2",
+        "status": "未知",
+        "original_receipt_sha256_verified": true,
+        "new_direct_observation": false,
+        "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+        "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。"
+      },
+      {
+        "contract_id": "dxgvmbus.c:3651:2",
+        "status": "未知",
+        "original_receipt_sha256_verified": true,
+        "new_direct_observation": false,
+        "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+        "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。"
+      }
+    ],
+    "all_remain_unknown": true,
+    "closeout_complete": false
+  },
+  "public_contracts": [
+    {
+      "title": "DXGK_SUBMITCOMMANDFLAGS",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_submitcommandflags",
+      "scope": "NullRendering0x8 retains simulated submission/fence signaling without rendering; not a claim about the historical incident flag."
+    },
+    {
+      "title": "DXGKDDI_SUBMITCOMMANDVIRTUAL",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_submitcommandvirtual",
+      "scope": "Malformed data can produce invalid-parameter handling and ordered completion; this documentation does not supply the unrecorded final return in this run."
+    }
+  ],
+  "follow_up": "Executor continues autonomous root investigation and any justified repair/validation. Do not repeat this consumed diagnostic solely to fill logging fields; preserve these evidence limits for future necessary changed-code validation.",
+  "main_mutation_scope": "Evidence documentation and open-fault ledger only; no driver, test dispatch or baseline promotion."
+}

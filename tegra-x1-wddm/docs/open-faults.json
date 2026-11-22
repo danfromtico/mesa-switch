@@ -650,6 +650,27 @@
         "scope": "14分钟心跳分支需先有CandidateActive返回；另有CandidateArmed/nonCode0立即恢复路径。现有记录不支持将95090归于14分钟心跳到期；95099上后续正式恢复意图发生更晚。",
         "root_cause_found": false
       }
+    },
+    {
+      "id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+      "status": "open",
+      "kind": "submission-completion",
+      "affected_scopes": [
+        "wddm",
+        "gpu-synchronization"
+      ],
+      "trigger": "Formal boot96251 on AC/Handheld: one native ARM64 KMT program, ordinary case then context+submit NullRendering case, each with8-byte command/24-byte UMD private payload; no window or Present.",
+      "evidence": [
+        "tegra-x1-wddm/docs/windows-native-graphics/native-kmt-main-review-20261122.json#null_rendering_case",
+        "tegra-x1-wddm/docs/windows-native-graphics/native-kmt-main-review-20261122.json#case_interpretation",
+        "tegra-x1-wddm/docs/windows-native-graphics/native-kmt-main-review-20261122.json#source_boundary"
+      ],
+      "cause": "Bound native submission181026 records internal SubmitFailure0xc000000d with request flags0x8, DMA8, total private65864 and UMD private24. Direct user SubmitCommand returned0; probe observed UINT64_MAX and failed valid completion. The source NULL-snapshot/nonzero-UMD admission predicate is consistent with this failure, but a branch-specific sample and final DDI NTSTATUS are absent. The program does not distinguish an actual MAX fence read from a null CPU pointer fallback. No causal link to historical first-Present restart is established.",
+      "daily_workaround": "Keep this NullRendering combination unqualified. Continue the already qualified ordinary baseline paths; do not equate Windows packet retirement or wait-helper success with a valid monitored-fence value. Do not replay the consumed diagnostic unchanged.",
+      "close_when": "Establish the failure cause within this exact input scope, verify a corresponding repair using the repository native qualification and closure process, and demonstrate valid monitored-fence completion with matching actual component identities. Do not use this fault closure to close the independent historical first-Present or95090 faults.",
+      "resolution": null,
+      "first_observed_boot": 96251,
+      "unexpected_restart_observed": false
     }
   ],
   "independent_qualifications": [
@@ -6040,6 +6061,17 @@
       "status": "既有最终ARM64编译修复及独立代码审核通过；实机计划与验收尚未通过本主审",
       "native_acceptance": false,
       "root_cause_found": false
+    },
+    "native_kmt_comparison_main_review": {
+      "path": "windows-native-graphics/native-kmt-main-review-20261122.json",
+      "sha256": "c49d25a6ce652fa8d785f227b83c2cc5650fd41d5b0c8e97b30568617b0e1d10",
+      "status": "实机诊断整批证据及清理审核通过；普通对照通过，NullRendering对照未获有效完成，不构成驱动修复或历史首次Present验收",
+      "native_program_executions": 1,
+      "ordinary_case_passed": true,
+      "null_case_passed": false,
+      "new_open_fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+      "historical_root_cause_proven": false,
+      "baseline_promoted": false
     }
   }
 }
