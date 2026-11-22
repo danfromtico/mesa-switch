@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-152586-tdr-coverage-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "plan_sha256": "f85d6d0829b7bb7fedacfe46917be949e14d4cba694d08f4093275146448a7e9",
+  "status": "观测缺口",
+  "finding": "比较映像的TDR恢复路径使用独立DxgKrnlTelemetry私有provider，原91476双ETL没有该GUID/channel11。只读现存诊断归档和当前空SQLite快照，未找回原次触发证据；未把缺记录当作无TDR。",
+  "missing_observation": "仍缺原事故实际抑制分支、TDR触发或其他复位首因及目标DMA的KMD入返/硬件完成/Windows退役。当前空快照不证明历史无事件，比较代码不充当旧启动实测。",
+  "device_executions": 1,
+  "execution_scope": "一次只读现存诊断调查，4个RPC；新增图形工作负载/原应用派发/部署/许可/重启/ETW启停均0。",
+  "root_cause": "未知",
+  "candidate_fix": null,
+  "evidence": {
+    "analysis": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/tdr-coverage-analysis.json",
+      "sha256": "224a648f8b2090a1a2042a4a595d138323349e38a42a73378c1a5c8aa0b4ec34"
+    },
+    "analyzer": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/inspect_tdr_coverage.py",
+      "sha256": "8c3e292ce4f27141580c0a69eb853bcfa8e8f50ddac00dbf5fa07ea74e8733e9"
+    },
+    "findings": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/findings.md",
+      "sha256": "8c0d6395b69e5753af5587748078ed3ea0b33f419701e3e147e6c3af7870f76e"
+    },
+    "board_inventory": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/existing-diagnostics-inventory.json",
+      "sha256": "73efe4799fe20c4f82e829db0b94ab84ac60677693d7f05e2fbaf3c13fff8229"
+    },
+    "dxg_admin": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/existing-dxg-admin.json",
+      "sha256": "18ab7b1a955ca87ddeb38bfa0c7ad2ada53e8f7722ae9a2a5dafbb6d769a7c38"
+    },
+    "sqlite_native_schema": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/existing-diagnosis-schema.json",
+      "sha256": "7e708926b2e950bcbf8b0f19ddc4099e1cc334f5324832579a28f6d623cdd664"
+    },
+    "sqlite_local_schema": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/existing-diagnosis-local-schema.json",
+      "sha256": "fd4179acfbb61c16a71fe219bda7846c80142b9e652c809b88c027500ff72265"
+    },
+    "case_supplement": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/work/first-present-f6264ee11289/report/2026-11-21_re-91476-tdr-coverage.md",
+      "sha256": "55394162ad8f2272d50ac859fbd069d07fdfca344699d53394785ca277248755"
+    },
+    "independent_review": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/independent-review.json",
+      "sha256": "d9ad8062f2aefef1b3fa2e1720c40759220e357a72305073bdb32b6b567540dd"
+    },
+    "boundaries": {
+      "last_entry": "原91476 DMA152586 Windows175.1，未改变",
+      "last_return": null,
+      "first_anomaly_or_missing": "实际抑制分支和首条导致复位的异常仍无直接回执。"
+    },
+    "actual_copy_and_log_checks": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/review-adjudication-proof.json",
+      "sha256": "9b43c830bf507c8f33b5766ecfa0be2a9319ba93bfd21fa3006e3b70dd301733"
+    },
+    "optional_claude_source_review_unavailable": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-c137-review/unavailable.json",
+      "sha256": "41bd0f7321272679c7981b3c45e60883baf9b576335260f98522fdd9146b055d"
+    }
+  }
+}
