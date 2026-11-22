@@ -569,7 +569,8 @@
       "trigger": "从已核对的正式 94912 经关闭闸门到 95002 后，启动一次性 DMA 诊断候选 95090。原 SEQUENTIAL 应用门控未装载。",
       "evidence": [
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-original-demand-20261121-01.result.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-original-demand-20261121-01.plan.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-dma-original-demand-20261121-01.plan.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/candidate-boot-95090-comparison.json"
       ],
       "cause": "早期启动日志未给出停止码或故障模块。事件 41 的 BugcheckCode 为 0，无 BugCheck 1001 或本次转储。95090 缺候选 Code 0、实载和会话就绪回执。需有针对候选启动异常的可验证修正或能跨该启动丢失的独立启动证据，方能接续这次真实请求。91476 的历史同包缺口仍开放。",
       "daily_workaround": "正式启动 95192 已恢复并验证。保留已签候选，不在缺少启动修正和独立证据时重复部署。",
