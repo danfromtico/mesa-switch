@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-natural-standby-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "6fbaf884b724d7f3cfad2eb54efda6975ed2b91b614c56912295b26e535a462e",
+  "status": "实机待命",
+  "finding": "启动 94734 的一次性诊断候选已验证同一原场景入口到独立控制端，Windows→控制端→Windows 的原入口门控探针收到同 nonce 确认后退出，原窗口、渲染和 ETW 收集均未启动。",
+  "missing_observation": "待实际原场景自然启动及异常证据。长期覆盖未知。候选超时无人值守恢复尚待真实到期回执，既有恢复路径已通过本地策略模拟。",
+  "device_executions": 0,
+  "controlled_restart_is_reproduction": false,
+  "historical_root_cause": "未知",
+  "evidence": {
+    "verified_reboot_drill": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/reboot-readback-proof.json",
+      "sha256": "bd7059f94e1fe0e4d2ba71ed494372c9cbd31a2b925d21472b503a64c834bebc"
+    },
+    "formal_fallback_only_prior": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/installed/standby-receipt.json",
+        "sha256": "de76e02939768ed5b6fd55a66eef53d685df212b1b2948d5773b120117900d8b"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/installed/disarmed.json",
+        "sha256": "d80e635ea8700fcc66e2fcb60ade37d79afccdeb6626f8a999367604418d297c"
+      }
+    ],
+    "controller_sources": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/Board-Natural-Gate.ps1",
+        "sha256": "97bfaba8c4c0ecc9a6e5bbcad670abeeb858ac8ba69afc18bc28fd15a93307f2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/install_candidate.py",
+        "sha256": "93e604ccd7594d57ed79012810c46fec1e99c711be8f5827f5a3958c1816484c"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/watch_candidate.py",
+        "sha256": "809a56dc1c49a09bf2b0fdbc5de050d08ec16ea67a5b7368922fce22ddf672e1"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/verify_candidate.py",
+        "sha256": "98ed5422d3a859ebbca1530904133909877b03ddcc5d879f62dba4011903f48c"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/original_sequential_entry.py",
+        "sha256": "7d5f6a57eab49699ecaec478126e7fe2bb87ccd4fe2be20f45eb6b0354c89ebd"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/observe_bounded_window.py",
+        "sha256": "0d068c23989f15f3ca16e500e3864ba991c63c3959cc329ede03d80bb34328fa"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/script-parser-check.txt",
+        "sha256": "4b113128bfbc6e956e6d44ed7fa715598d41eafffc7a28bef732da7029b9661c"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/Cycle.ps1",
+        "sha256": "27f03ace06598776b73219b0f21a0805378fc13d6bf4f137d87e88a0e7d95232"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/cycle.py",
+        "sha256": "578059b0bf421334324cfd8ba527064f01165db1a98c40112dd7ad29b1a5d377"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/restore-policy-mock.txt",
+        "sha256": "6543c465965b254fe7d4edf2659774b8b697469bdcc79d43bd70e9883458e19e"
+      }
+    ],
+    "candidate_boot": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/one-time-desktop.json",
+        "sha256": "9f90583a4909231fd3315f95fec7069394b50e92ccd79b56681b828f6fb2664a"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/cycle-config.json",
+        "sha256": "a6d03735d4c717a4d4b44d961ae2b5b1d8bfa827bbbcb4f7611b3631c431ab95"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/requested-94557-ClosedForTrial.json",
+        "sha256": "32f0e834417eb5335316c27746b7338df4a18c9c77690f542dd761eb3ceb6547"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/requested-94644-CandidateArmed.json",
+        "sha256": "5b7f055c8155269f99facec7bd8e26dff5bc96d3de09cf6c7bf2fb16b88a5ef4"
+      }
+    ],
+    "armed_receipts": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/diagnostic-installed/installation.json",
+        "sha256": "09071ab6d35ea4e31ce4ed9712a7d789630e0b21329d0fe1a602d43b44bc5c82"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/diagnostic-installed/standby-receipt.json",
+        "sha256": "4bc9e1c2f40a229ac7d293edf7062ab915429b9e2ba66edd87336fed4ecebc0b"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/diagnostic-installed/real-gate-probe-readback.json",
+        "sha256": "bf438180e1c3966e74cc09751d0d5b523d1794b4137112d5974ee78798bbd09d"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/diagnostic-installed/probe-received.json",
+        "sha256": "bfa17c133aae7561b1693084b13d14b1337842384d432f4ca07685269934beaa"
+      }
+    ],
+    "candidate_permission": "one-time diagnostic",
+    "controller_state_at_writeback": {
+      "state": "installed-standby",
+      "utc": "2026-11-22T04:05:50.244213+00:00",
+      "controller_pid": 55311,
+      "boot": 94734,
+      "current_capture": false,
+      "scope": "Windows scheduler, project KMD entry/return and GPU fence readback, Windows DMA retirement",
+      "remote_heartbeat": "ALIVE",
+      "task": "SwitchWOA-FirstPresent-202c8276baa1",
+      "accept_until_qpc": 17673419605,
+      "watchdog_expiry_utc": "2026-11-22T04:18:21.3250685+00:00"
+    },
+    "arm_policy": {
+      "same_boot_prelaunch_entry": true,
+      "reverse_probe": true,
+      "armed": true,
+      "collector_running": false,
+      "permanent_candidate_permission": false,
+      "window_ms": 12000,
+      "max_events": 8192,
+      "no_contact_minutes": 14,
+      "ssh_retry_seconds": 180,
+      "ssh_outage_pause_seconds": 1800
+    },
+    "natural_reproduction": {
+      "observed": false
+    },
+    "review": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/review/response.json",
+        "sha256": "5ee3093faeb85101ece0ba69d1cec53fba93c41631a3405533997ffc7589167a"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/review/input-sha256.txt",
+        "sha256": "b1773c4e9017eae19ba06545cfaa0857ff7d0af41678662e68d8181893f43637"
+      }
+    ]
+  }
+}

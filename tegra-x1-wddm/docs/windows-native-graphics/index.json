@@ -1800,6 +1800,10 @@
         {
           "path": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-board-20261121-01.result.json",
           "sha256": "68369bdea9c3b9b026410a136cff4a0b40c96f0a5315a31c4bfeb40cc15541fd"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
+          "sha256": "4009fcdf89c11115817a6209bf4be826fe4b76a30cfcb4c49aa0686cea98b71e"
         }
       ],
       "windows_references": [
@@ -1810,7 +1814,8 @@
         "win-dma-ddi-profiler-live-20261121-01",
         "win-seq-dma-recovery-readback-20261121-01",
         "win-seq-dma-packet-checkpoint-local-20261121-01",
-        "win-seq-dma-packet-checkpoint-board-20261121-01"
+        "win-seq-dma-packet-checkpoint-board-20261121-01",
+        "win-seq-dma-natural-standby-20261121-01"
       ],
       "latest_observation": "在正式启动 91918 的独立 1600 ms 会话中，52 条实时事件与同路 ETL 的头和载荷逐条匹配，控制端均完成 fsync 并收到 Windows 确认。DWM 的 GM20B 节点 0 提交 21991/队列 8136 配齐 175.1、5063 进入与返回、177/176/180。"
     },
@@ -5834,6 +5839,23 @@
       "finding": "应用及 DWM 历史正常回放通过。每项取齐 7 个源步骤并提交 1 条自校验完整包帧。截尾保留前 7 个确认帧，同一队列的模拟抢占和重提交分别保存。",
       "missing_observation": "需在新的实机启动端到端确认。",
       "finished_utc": "2026-11-22T03:50:57.668237+00:00"
+    },
+    {
+      "round_id": "win-seq-dma-natural-standby-20261121-01",
+      "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+      "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+      "method": "配置完整一次性 GM20B 诊断候选和原始旧式 SEQUENTIAL 窗口启动门。实际执行同一门控的只读探针，不启动窗口应用，不制造意外重启。",
+      "state": "已回写",
+      "plan": "windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.plan.json",
+      "plan_sha256": "6fbaf884b724d7f3cfad2eb54efda6975ed2b91b614c56912295b26e535a462e",
+      "registered_utc": "2026-11-22T03:53:00.897046+00:00",
+      "device_executions": 0,
+      "status": "实机待命",
+      "result": "windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
+      "result_sha256": "4009fcdf89c11115817a6209bf4be826fe4b76a30cfcb4c49aa0686cea98b71e",
+      "finding": "启动 94734 的一次性诊断候选已验证同一原场景入口到独立控制端，Windows→控制端→Windows 的原入口门控探针收到同 nonce 确认后退出，原窗口、渲染和 ETW 收集均未启动。",
+      "missing_observation": "待实际原场景自然启动及异常证据。长期覆盖未知。候选超时无人值守恢复尚待真实到期回执，既有恢复路径已通过本地策略模拟。",
+      "finished_utc": "2026-11-22T04:05:53.314350+00:00"
     }
   ],
   "progress": {
@@ -5846,7 +5868,7 @@
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 96,
+    "registered_rounds": 97,
     "new_device_executions": 38
   },
   "current_focus": {
@@ -6964,5 +6986,9 @@
       "path": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-board-20261121-01.result.json",
       "sha256": "68369bdea9c3b9b026410a136cff4a0b40c96f0a5315a31c4bfeb40cc15541fd"
     }
+  },
+  "sequential_natural_trigger": {
+    "path": "windows-native-graphics/rounds/win-seq-dma-natural-standby-20261121-01.result.json",
+    "sha256": "4009fcdf89c11115817a6209bf4be826fe4b76a30cfcb4c49aa0686cea98b71e"
   }
 }
