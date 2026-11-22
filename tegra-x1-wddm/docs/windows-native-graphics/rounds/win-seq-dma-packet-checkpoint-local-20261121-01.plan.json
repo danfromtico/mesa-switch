@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-packet-checkpoint-local-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "question": "可否恢复一次 DMA 尝试的各版完整前缀，识别短写、截尾及同队列重提？",
+  "method": "仅回放 94004 的已归档原生源记录，验证按 DMA 尝试逐阶段刷盘和独立读回。",
+  "device_executions": 0,
+  "inputs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/check_local.py",
+      "sha256": "3bf771782f1a8d4e27a16655bbd3d5ecba5a9c1e61795e6fd221326042e92efb"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/check_archived_bandwidth.py",
+      "sha256": "926fce8b48f5e2b95565a6e7b2c7a6f0a1efa1b1bd94dd3ea8a15072971ae18b"
+    }
+  ]
+}

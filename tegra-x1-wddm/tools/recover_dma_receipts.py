@@ -17,6 +17,8 @@ MAX_LINE = 4096
 KMD_SIZES = {(1, 1): 72, (2, 1): 152, (7, 1): 32, (7, 2): 32}
 DXG_SIZES = {(105, 0): 4, (106, 0): 4, (175, 1): 44,
              (176, 0): 28, (177, 1): 52, (180, 1): 32}
+ATTEMPT_DXG_SIZES = {(27, 2): 60, (29, 2): 60, (30, 0): 64, (31, 0): 64,
+                     (32, 0): 64, (178, 1): 60, (433, 1): 32}
 END_FIELDS = ("status", "stop", "process_trace", "events_lost",
               "realtime_buffers_lost", "file_buffers_lost", "flushes",
               "sent", "windows_acknowledged", "collector_error")
@@ -30,7 +32,9 @@ def decode_event(words):
         raise ValueError("invalid event source or payload")
     if size == KMD_SIZES.get(key):
         provider = "TegraKMD"
-    elif pid == 4 and size == DXG_SIZES.get(key):
+    elif (size == ATTEMPT_DXG_SIZES.get(key)
+          or (key == (110, 1) and 56 <= size <= 512)
+          or (size == DXG_SIZES.get(key) and (pid == 4 or event in (175, 176, 177, 180)))):
         provider = "DxgKrnl"
     else:
         raise ValueError("unknown event identity")

@@ -1792,6 +1792,14 @@
         {
           "path": "windows-native-graphics/rounds/win-seq-dma-recovery-readback-20261121-01.result.json",
           "sha256": "41e6885e21c521dc3a07a80e2f1b112e391094e8f383e42b2bdf8ef067a47a1d"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-local-20261121-01.result.json",
+          "sha256": "d3469ee233a0121e2ac0541d2729c73b4970b0813a5275a5f3a28372d13f0b78"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-board-20261121-01.result.json",
+          "sha256": "7cf215aa8b6c141c0e12e8aca0a9cc2afb6b309546f1d533ba3bc8e8114b1389"
         }
       ],
       "windows_references": [
@@ -1800,7 +1808,9 @@
       ],
       "round_ids": [
         "win-dma-ddi-profiler-live-20261121-01",
-        "win-seq-dma-recovery-readback-20261121-01"
+        "win-seq-dma-recovery-readback-20261121-01",
+        "win-seq-dma-packet-checkpoint-local-20261121-01",
+        "win-seq-dma-packet-checkpoint-board-20261121-01"
       ],
       "latest_observation": "在正式启动 91918 的独立 1600 ms 会话中，52 条实时事件与同路 ETL 的头和载荷逐条匹配，控制端均完成 fsync 并收到 Windows 确认。DWM 的 GM20B 节点 0 提交 21991/队列 8136 配齐 175.1、5063 进入与返回、177/176/180。"
     },
@@ -5791,6 +5801,39 @@
         "first_anomaly_or_missing": "回放截断后的同包 176.0、180.1 缺失。无 END 时丢失计数未知。原现场未出现新的事故回执。"
       },
       "finished_utc": "2026-11-22T03:26:59.513914+00:00"
+    },
+    {
+      "round_id": "win-seq-dma-packet-checkpoint-board-20261121-01",
+      "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+      "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+      "method": "旧式 SEQUENTIAL 正常窗口只执行一轮。使用独立按包日志核对窗口应用包，并在同轮检视 DWM 已存在上下文的 29/32 rundown、433、原始队列和各次重提。回退正式基线的受控重启完成后，用新进程只打开前一启动的 journal 重读，核对独立持久确认、完整四段、实际采集丢失和实载。",
+      "state": "已回写",
+      "plan": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-board-20261121-01.plan.json",
+      "plan_sha256": "71d1723e3e0ad0b1bf76ce9d4cf1ddb110c5ca395669f976f15117bc81676fc3",
+      "registered_utc": "2026-11-22T03:29:26.537846+00:00",
+      "device_executions": 1,
+      "status": "待验收",
+      "result": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-board-20261121-01.result.json",
+      "result_sha256": "7cf215aa8b6c141c0e12e8aca0a9cc2afb6b309546f1d533ba3bc8e8114b1389",
+      "finding": "启动 94382 的真实应用 DMA 6763 已确认第 342 条完整检查点。同轮窗口可见并正常退出，ETW 末尾零丢失。",
+      "missing_observation": "正在按计划回退正式基线，待验证新启动号、许可和组件，并以新进程仅读按包日志完成验收。",
+      "finished_utc": "2026-11-22T03:43:17.354160+00:00"
+    },
+    {
+      "round_id": "win-seq-dma-packet-checkpoint-local-20261121-01",
+      "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+      "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+      "method": "仅回放 94004 的已归档原生源记录，验证按 DMA 尝试逐阶段刷盘和独立读回。",
+      "state": "已回写",
+      "plan": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-local-20261121-01.plan.json",
+      "plan_sha256": "3d77370b2f82e57cb742edcbdcd4ea8a27c95271c0cfbc4c1dc9821c11a6a363",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-local-20261121-01.result.json",
+      "result_sha256": "d3469ee233a0121e2ac0541d2729c73b4970b0813a5275a5f3a28372d13f0b78",
+      "status": "本地通过",
+      "finding": "应用及 DWM 历史正常回放通过。每项取齐 7 个源步骤并提交 1 条自校验完整包帧。截尾保留前 7 个确认帧，同一队列的模拟抢占和重提交分别保存。",
+      "missing_observation": "需在新的实机启动端到端确认。",
+      "finished_utc": "2026-11-22T03:43:17.354160+00:00"
     }
   ],
   "progress": {
@@ -5803,8 +5846,8 @@
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 94,
-    "new_device_executions": 37
+    "registered_rounds": 96,
+    "new_device_executions": 38
   },
   "current_focus": {
     "first_question": "WIN-EMPTY-PRESENT-KMT",
@@ -6911,5 +6954,15 @@
   "sequential_dma_receipt_recovery": {
     "path": "windows-native-graphics/rounds/win-seq-dma-recovery-readback-20261121-01.result.json",
     "sha256": "41e6885e21c521dc3a07a80e2f1b112e391094e8f383e42b2bdf8ef067a47a1d"
+  },
+  "sequential_dma_attempt_checkpoints": {
+    "local": {
+      "path": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-local-20261121-01.result.json",
+      "sha256": "d3469ee233a0121e2ac0541d2729c73b4970b0813a5275a5f3a28372d13f0b78"
+    },
+    "board": {
+      "path": "windows-native-graphics/rounds/win-seq-dma-packet-checkpoint-board-20261121-01.result.json",
+      "sha256": "7cf215aa8b6c141c0e12e8aca0a9cc2afb6b309546f1d533ba3bc8e8114b1389"
+    }
   }
 }

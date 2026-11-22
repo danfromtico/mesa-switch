@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-packet-checkpoint-board-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "question": "一次正常旧式 SEQUENTIAL 窗口的真实同包四段能否用新的独立按包日志完整落盘，再由新进程仅读日志复原？",
+  "method": "旧式 SEQUENTIAL 正常窗口只执行一轮。使用独立按包日志核对窗口应用包，并在同轮检视 DWM 已存在上下文的 29/32 rundown、433、原始队列和各次重提。回退正式基线的受控重启完成后，用新进程只打开前一启动的 journal 重读，核对独立持久确认、完整四段、实际采集丢失和实载。",
+  "conditions": {
+    "lease_owner": "01a20121-2443-7823-8cb6-37ed0d557e2a",
+    "ac": true,
+    "permanent_preflight_boot": 94176,
+    "max_application_executions": 1
+  },
+  "pass_condition": "新进程仅凭 attempts.journal 验证同一真实 175、7.2 入返、GPU 读回、177/176/180、178/433 和同次身份，完整自检且版本有 fsync 确认。Windows 端 END 及丢失统计完整，无超限或不明重启。候选有 Code 0 和实载记录，正式组件按哈希恢复。 受控重启新启动号和正常恢复另记，之后仅读 journal 复核原启动同包。应用包采集验收与 DWM 事故范围分开。",
+  "status": "待验收",
+  "inputs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/formal-preflight.json",
+      "sha256": "ac62388a3ae0574ff25552b57ef40e7c7a824e5f4a154aecee74a9cd6c1557f3"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/board-published-profile.json",
+      "sha256": "d9a65c183acf710ded9224319304eda014ac7881655346757f289b9a1c79548b"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/candidate/package/tegragpurender.sys",
+      "sha256": "bfbc849f36b5a67b985f8ff4489d6200b3befda1a8c27be2fd8159744c50dbfa"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/Cycle.ps1",
+      "sha256": "93297be1200d9ba7557a9e84ffdb73251d46d19dc61d242069fbdd70ec23cadf"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/Stage-Profile.ps1",
+      "sha256": "55cdc58debde160590ccfbab9a0c32256704ad932af778f32d2f192151917952"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/dma-attempt-trace-rundown.exe",
+      "sha256": "12fa9486c916540d712639b79fd5b9a5572b738a63e3126ad09ccde3c31421e6"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/local-application-receipt.json",
+      "sha256": "c847be75d6ab7bf69a53d8c7cd4d9f80bf810baa290ec7a218d0f72cba1cf5ce"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/local-dwm-receipt.json",
+      "sha256": "6e07fcb9d3599332b527852a3edbdf07a16e8e994f2dd6b78a6cfdb8041eb534"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/local-full-window-receipt.json",
+      "sha256": "ad667da5ea816633dcb6a690e3659f7ee51e8e89c6c5abd48eeb1f9154c0a01b"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/board_drill.py",
+      "sha256": "afe5a0058f4092dc853fbbcf439a327435b860ad672ae500f868a73574a7fd08"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/collect_drill.py",
+      "sha256": "1e88ba61b703b01304c43844f052abf2c8ddf061216590ae3c88bc758353d50a"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/tools/dma_attempt_trace.c",
+      "sha256": "0f335b757603b496efa0ab4a42083afd01d617055e5fb4065c29618942b55edf"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/tools/dma_attempt_receiver.py",
+      "sha256": "8d89b45acefe30d47968c9ba17ec4bf4db2ac4254e74b20b3914cc9d2933ce91"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/tools/dma_attempt_capture.py",
+      "sha256": "9b13baaf8e1faa5a4c505cca676dfb4d9d1e967746160c66486e350d8255f969"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/tools/dma_attempt_journal.py",
+      "sha256": "49945ad24828c43a7ab53a5af3cdc48d36f1dec2b364a299787c190f211091d8"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/tools/recover_dma_receipts.py",
+      "sha256": "b0bcd766ed4b8b78af0937e3968e75d355c7b8a7dfe83f4ad1bd74896b8da26c"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/Board-Case.ps1",
+      "sha256": "5bb5ae827bb00ca3683d6c6c82fde864e105a1c3f2fc6e908acf93df054faab2"
+    }
+  ],
+  "previous_plan": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/board-plan-initial.json",
+    "sha256": "0b20afbe05ba21dc4680f38fbcdd1bbc3a5a3bf68879cc4ff0e7b23c28026bdc"
+  },
+  "failure_recovery": "若新采集或正常窗口缺成功回执，从独立日志先保留前缀，另保存本轮辅助 ETL 供诊断。正式验收的新进程仅打开按包日志。",
+  "recovered_prelaunch": {
+    "boot": 94382,
+    "window_executed": false,
+    "capture_started": false,
+    "observed": "首次门控在核对 ACR 文件时退出。已按 94004 的 System32 固件路径修正。用系统 ETW cmdlet 清理自有临时目录与任务。保持同一候选启动。",
+    "retained": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/prelaunch-acr-path-94382/board/result.json",
+        "sha256": "6fa338467880ba6241b74e777d927a83d776e2e733a1a5d0c0426b593ce0559c"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/prelaunch-acr-path-94382/final-status.json",
+        "sha256": "fb1bb8ab835ebd1fe38960d5b0dfbdbe1b67d4f13bbd8c5a598ee98cdfdad09f"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/prelaunch-acr-path-94382/cleanup.json",
+        "sha256": "f1b61f9cc1ac7ef43401150b97ade6b9ff7f799777c27549bb51dd9fd2ec0e80"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/prelaunch-acr-path-94382/outcome.zip",
+        "sha256": "e63dd4aee2ab69e32b406e73fac1696daee3293b1bfa5a7d825e268086fcd834"
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-packet-checkpoint-local-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "3d77370b2f82e57cb742edcbdcd4ea8a27c95271c0cfbc4c1dc9821c11a6a363",
+  "status": "本地通过",
+  "finding": "应用及 DWM 历史正常回放通过。每项取齐 7 个源步骤并提交 1 条自校验完整包帧。截尾保留前 7 个确认帧，同一队列的模拟抢占和重提交分别保存。",
+  "missing_observation": "需在新的实机启动端到端确认。",
+  "device_executions": 0,
+  "evidence": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/local-application-receipt.json",
+      "sha256": "c847be75d6ab7bf69a53d8c7cd4d9f80bf810baa290ec7a218d0f72cba1cf5ce"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/local-dwm-receipt.json",
+      "sha256": "6e07fcb9d3599332b527852a3edbdf07a16e8e994f2dd6b78a6cfdb8041eb534"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/local-full-window-receipt.json",
+      "sha256": "ad667da5ea816633dcb6a690e3659f7ee51e8e89c6c5abd48eeb1f9154c0a01b"
+    }
+  ]
+}
