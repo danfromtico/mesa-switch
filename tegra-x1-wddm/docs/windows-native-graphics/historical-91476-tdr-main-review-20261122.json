@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "review_thread": "01a201d4-d569-7fd0-84bd-20573a8968ce",
+  "reviewed_utc": "2026-11-22T08:02:54.326095+00:00",
+  "reviewed_commit": "0b26b0ece1b79f24423011c13862c77ec485820c",
+  "status": "TDR采集覆盖及现存诊断调查审核通过；根因仍未知",
+  "incident_boot": 91476,
+  "comparator_boot": 91918,
+  "static_review": {
+    "image": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.sys",
+      "sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5"
+    },
+    "retained_instruction_words_verified": 149,
+    "pdb_function": "VidSchiRecoverFromTDR",
+    "pdb_function_rva": "0xfcd30",
+    "field_write_rva": "0xfce24",
+    "field_write_value": 2,
+    "async_reset_iat_rva": "0x5f118",
+    "async_reset_import": "TdrResetFromTimeoutAsync",
+    "event_write_iat_rva": "0x5f168",
+    "event_write_import": "EtwWriteTransfer",
+    "event_metadata": {
+      "name": "ResetAdapterStart",
+      "channel": 11,
+      "level": 5,
+      "keyword": "0x400000000010",
+      "provider": "c6998471-62cd-424d-a9a3-fe4c1fa378a4",
+      "provider_name": "DxgKrnlTelemetry"
+    },
+    "tracer": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-first-present-dwm-rundown-20261121-01/inputs/os-trace.exe",
+      "sha256": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "primary_match_any_keyword": "0x41",
+      "guid_constants": [
+        "802ec45a-1e99-4b83-9920-87c98277ba9d",
+        "9e9bba3c-2e38-40cb-99f4-9e8281425164",
+        "8c416c79-d49b-4f01-a467-e56d3aa8234c",
+        "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0"
+      ],
+      "limit": "This is a verified comparator executable matching the original archive's hash; it does not exhaust other sessions or the scene client's provider configuration."
+    },
+    "tracer_enable_call_rva": "0x1638",
+    "tracer_enable_iat_rva": "0x36f0",
+    "tracer_enable_import": "EnableTraceEx2",
+    "tracer_match_any_keyword": "0x41",
+    "scope": "所有静态结论均限于已核对的比较映像，未填补91476模块全哈希或运行分支。",
+    "event_metadata_rva": "0x513db"
+  },
+  "original_etl_census": {
+    "app/display.etl": {
+      "event_headers": 36259,
+      "system_headers": 2,
+      "private_provider_events": 0,
+      "channel11_events": 0
+    },
+    "app/scene/video.etl": {
+      "event_headers": 6400,
+      "system_headers": 2,
+      "private_provider_events": 0,
+      "channel11_events": 0
+    },
+    "interpretation": "仅说明两份留存流中未捕获该私有提供程序；不能据此排除原事故TDR。"
+  },
+  "existing_diagnostics_review": {
+    "observed_utc": "2026-11-22T07:29:25.1376578Z",
+    "boot": 96251,
+    "code": 0,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "kmd_sha256": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "admin_xml_records_verified": 35,
+    "admin_event_id": 457,
+    "admin_message": "Start Device Failed",
+    "admin_status": "0xc00000a3",
+    "operational_record_count": 0,
+    "other_returned_wer_event_classes": {
+      "APPCRASH_war3.exe": 12,
+      "StoreAgentDownloadFailure1": 4
+    },
+    "watchdog_files_observed": 11,
+    "watchdog_write_time_interval_utc": [
+      "2026-11-09T17:47:30.1713173Z",
+      "2026-11-11T18:04:24.9069499Z"
+    ],
+    "matched_incident_dump_established": false,
+    "original_realtime_rtbackup_nonce_prefix": "c653e6ff6b4c",
+    "original_realtime_rtbackup_bytes": 0,
+    "enumeration_bounds": "指定目录、2026-11-20起的筛选、每目录250项、每日志200项及诊断目录300项等原查询边界保留；不是全机穷尽。"
+  },
+  "database_review": {
+    "snapshot_utc": "2026-11-22T07:33:36.4329894Z",
+    "two_read_pass_hashes_equal": true,
+    "source_and_query_db_wal_hashes_equal": true,
+    "independent_review_method": "在本机临时副本用mode=ro和显式关闭连接复读；临时副本已清理，原始文件未写入。",
+    "integrity_check": "ok",
+    "AsimovEvents_rows": 0,
+    "NumberOfEvents_sum": 0,
+    "defined_raw_marker_counts_zero": true,
+    "ticket_or_api_key_columns_selected": false,
+    "snapshot_hashes": {
+      "EventStore.db": "3016c557b6dccab60cd422ead8b00741beb13f32ec667dd57a0fbc83aec345d2",
+      "EventStore.db-wal": "00eebda04f03918266639c8caf3223c0b2e416788f5cfc60b4c809b1be02e315"
+    },
+    "private_raw_db_wal_or_base64_uploaded": false,
+    "limit": "当前空表及给定标记未命中不证明历史无事件。"
+  },
+  "execution_scope": {
+    "executor_readonly_inquiries": 1,
+    "executor_readonly_rpc_calls": 4,
+    "reviewer_device_calls": 0,
+    "new_graphics_workloads": 0,
+    "original_request_dispatches": 0,
+    "request_f6264ee11289_consumed": true,
+    "installs_permission_changes_restarts_etw_changes": 0,
+    "baseline_selected_or_promoted": false,
+    "explorer_is_current_prerequisite": false,
+    "publication_gate_only_at_actual_release": true
+  },
+  "source_review": {
+    "frozen_gemini_review_files": 10,
+    "review_model": "gemini-4-neon-high",
+    "verified_references": 16,
+    "review": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/independent-review.json",
+      "sha256": "d9ad8062f2aefef1b3fa2e1720c40759220e357a72305073bdb32b6b567540dd"
+    },
+    "optional_claude_review": "未完成，未取得报告；不视为审核通过。",
+    "optional_claude_failure": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-c137-review/unavailable.json",
+      "sha256": "41bd0f7321272679c7981b3c45e60883baf9b576335260f98522fdd9146b055d"
+    }
+  },
+  "evidence": {
+    "round": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dwm-152586-tdr-coverage-20261121-01.result.json",
+      "sha256": "98f911f083516c30d7ff287479f2d07d7bb6d49280b23ea9622b5309a10cec5a"
+    },
+    "analysis": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/tdr-coverage-analysis.json",
+      "sha256": "224a648f8b2090a1a2042a4a595d138323349e38a42a73378c1a5c8aa0b4ec34"
+    },
+    "inventory": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/existing-diagnostics-inventory.json",
+      "sha256": "73efe4799fe20c4f82e829db0b94ab84ac60677693d7f05e2fbaf3c13fff8229"
+    },
+    "admin_log": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/existing-dxg-admin.json",
+      "sha256": "18ab7b1a955ca87ddeb38bfa0c7ad2ada53e8f7722ae9a2a5dafbb6d769a7c38"
+    },
+    "database_metadata": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/existing-diagnosis-local-schema.json",
+      "sha256": "fd4179acfbb61c16a71fe219bda7846c80142b9e652c809b88c027500ff72265"
+    },
+    "copy_and_query_proof": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-suppression/review-adjudication-proof.json",
+      "sha256": "9b43c830bf507c8f33b5766ecfa0be2a9319ba93bfd21fa3006e3b70dd301733"
+    },
+    "package": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/historical-91476-tdr-coverage-review.zip",
+      "sha256": "6d2c1f46344a83b08a15bf5f527b9a7b4ab54845ced94a59505420a3597a804c"
+    }
+  },
+  "primary_reference": "https://raw.githubusercontent.com/microsoft/win32metadata/main/generation/WinSDK/RecompiledIdlHeaders/shared/TraceLoggingProvider.h",
+  "root_cause_found": false,
+  "tdr_excluded": false,
+  "repair_accepted": false,
+  "next": "继续旧版本提交、抢占、上下文和分配生命周期的证据分析；历史三个重启范围均保持开放。"
+}
