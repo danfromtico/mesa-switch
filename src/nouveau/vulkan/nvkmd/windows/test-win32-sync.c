@@ -725,7 +725,8 @@ kmt_batch_and_concurrency_tests(struct nvk_device *nvk, struct nvkmd_windows_dev
 int main(void)
 {
    struct nvk_device *nvk = calloc(1, sizeof(*nvk));
-   struct nvkmd_windows_dev kmd = {.kmt.handle = 7};
+   struct nvkmd_pdev pdev = {0};
+   struct nvkmd_windows_dev kmd = {.base.pdev = &pdev, .kmt.handle = 7};
    struct vk_sync_binary_type binary = vk_sync_binary_get_type(&nvkmd_windows_sync_type);
    const struct vk_sync_type *types[] = {&binary.sync, &nvkmd_windows_sync_type, NULL};
    struct vk_physical_device physical = {.supported_sync_types = types};
