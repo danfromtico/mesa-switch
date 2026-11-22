@@ -83,7 +83,7 @@ static void header(const EVENT_HEADER &h, const WCHAR *image, uint64_t process_s
    ++matched;
    std::printf("{\"id\":%u,\"version\":%u,\"pid\":%lu,\"tid\":%lu,\"%s\":%llu,\"process_start\":%llu,\"image\":",
       h.EventDescriptor.Id, h.EventDescriptor.Version, h.ProcessId, h.ThreadId,
-      live_session ? "qpc_stamp" : "time", (unsigned long long)h.TimeStamp.QuadPart,
+      (live_session || follow_all) ? "qpc_stamp" : "time", (unsigned long long)h.TimeStamp.QuadPart,
       (unsigned long long)process_start);
    json_string(image);
 }
@@ -248,6 +248,13 @@ int wmain(int argc, WCHAR **argv)
    if (handle == INVALID_PROCESSTRACE_HANDLE) {
       std::fprintf(stderr, "OpenTrace failed: %lu\n", GetLastError()); return 1;
    }
+   if (export_all && (log.LogfileHeader.ReservedFlags != 1 ||
+                      log.LogfileHeader.PerfFreq.QuadPart <= 0)) {
+      std::fprintf(stderr, "Unsupported ETL clock_context=%lu perf_frequency=%lld (expected QPC)\n",
+                   log.LogfileHeader.ReservedFlags, (long long)log.LogfileHeader.PerfFreq.QuadPart);
+      CloseTrace(handle);
+      return 1;
+   }
    HANDLE flusher = nullptr;
    if (live_all) {
       const ULONG status = flush_session();
@@ -281,10 +288,10 @@ int wmain(int argc, WCHAR **argv)
    }
    if (follow)
       live_state("TraceEnd", status);
-   std::fprintf(stderr, "ProcessTrace=%lu matched=%u invalid=%u events_lost=%lu buffers_lost=%lu end_time=%llu buffers_written=%lu perf_frequency=%lld\n",
-                status, matched, invalid, log.LogfileHeader.EventsLost, log.LogfileHeader.BuffersLost,
+   std::fprintf(stderr, "ProcessTrace=%lu matched=%u raw_matched=%u invalid=%u events_lost=%lu buffers_lost=%lu end_time=%llu buffers_written=%lu clock_context=%lu perf_frequency=%lld\n",
+                status, matched, raw_matched, invalid, log.LogfileHeader.EventsLost, log.LogfileHeader.BuffersLost,
                 (unsigned long long)log.LogfileHeader.EndTime.QuadPart, log.LogfileHeader.BuffersWritten,
-                (long long)log.LogfileHeader.PerfFreq.QuadPart);
+                log.LogfileHeader.ReservedFlags, (long long)log.LogfileHeader.PerfFreq.QuadPart);
    return status || invalid || !(matched || raw_matched) ||
       InterlockedCompareExchange(&flush_error, 0, 0) || std::ferror(stdout) ? 1 : 0;
 }
