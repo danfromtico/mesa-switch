@@ -1208,6 +1208,10 @@
         {
           "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
           "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
+        },
+        {
+          "path": "windows-native-graphics/rounds/win-cdd-wall-clock-91476-20261121-01.result.json",
+          "sha256": "fd59be8dd4604185b88004ba9be7f15158627a83104d249a8dc19d94b5b4f133"
         }
       ],
       "windows_references": [
@@ -1215,7 +1219,8 @@
         "path"
       ],
       "round_ids": [
-        "win-present-board-only-cdd-20261121-01"
+        "win-present-board-only-cdd-20261121-01",
+        "win-cdd-wall-clock-91476-20261121-01"
       ],
       "latest_observation": "正式 GM20B 基线的普通双缓冲空窗口在启动 91476 运行一次，绘图 PID/TID 3376/3236。CDD 286 的 84 字节原始记录在恢复启动 91557 完整回读，同次 Windows ETL 和同一 HWND 的 Blt 目标分配吻合。52 字节复制包正常退役，KMT 及首次公开 Present 返回 S_OK，公开调用耗时 58.688 ms。其后设备状态查询、DwmFlush 与首帧对象释放都留下成功回执。绘图线程的最后一条内核事件晚于公开返回 138.531 ms。下次启动 91557 有 6008 和 41，BugcheckCode=0。"
     },
@@ -5554,6 +5559,38 @@
         "first_anomaly_or_missing": "正常轮尚缺同大小、同节点且发生两次抢占的可比包全链。历史 152586 的实载 KMD 边界继续开放。"
       },
       "finished_utc": "2026-11-21T23:08:48.087748+00:00"
+    },
+    {
+      "round_id": "win-cdd-wall-clock-91476-20261121-01",
+      "contract_id": "WIN-CDD-BOARD-RECOVERY",
+      "windows_question": "WIN-CDD-BOARD-RECOVERY",
+      "method": "本地对齐两路原始 ETL 时钟、同启动板端时锚与恢复启动 System 记录。",
+      "plan": "windows-native-graphics/rounds/win-cdd-wall-clock-91476-20261121-01.plan.json",
+      "plan_sha256": "241a7077f28facb580441a624a146cae4c29b1eb6daf51adaef3da46a858fce9",
+      "state": "已回写",
+      "registered_utc": "2026-11-22T02:42:20.907797Z",
+      "device_executions": 0,
+      "result": "windows-native-graphics/rounds/win-cdd-wall-clock-91476-20261121-01.result.json",
+      "result_sha256": "fd59be8dd4604185b88004ba9be7f15158627a83104d249a8dc19d94b5b4f133",
+      "status": "观测缺口",
+      "finding": "两路未封口 ETL 的 QPC 换算偏置约相差 0.1 微秒，较同启动板端时锚约晚 1.94 ms。末条留存事件在 15:30:48.120 UTC，距 91557 的内核启动约 55.860 秒。恢复启动的 6008 二进制载荷所报关机时间反而晚于该内核启动 24.613 秒。",
+      "missing_observation": "末条 ETL 到下一内核启动之间缺少连续记录或独立复位时戳。6008 所报时刻与内核启动顺序冲突。仍缺 152586 的同次驱动返回、硬件完成和复位首因。",
+      "boundaries": {
+        "last_entry": {
+          "actor": "DWM",
+          "event_id": 8,
+          "qpc": 223222131613,
+          "approx_utc": "2026-11-21T15:30:48.119983Z"
+        },
+        "last_return": {
+          "actor": "application Present",
+          "qpc": 223219160141,
+          "hresult": "S_OK",
+          "approx_utc": "2026-11-21T15:30:47.965219Z"
+        },
+        "first_anomaly_or_missing": "末条 ETL 到下一内核启动之间缺少连续记录或独立复位时戳。6008 所报时刻与内核启动顺序冲突。仍缺 152586 的同次驱动返回、硬件完成和复位首因。"
+      },
+      "finished_utc": "2026-11-22T02:42:20.907797Z"
     }
   ],
   "progress": {
@@ -5566,7 +5603,7 @@
       "设备条件受限": 1,
       "待核对": 4
     },
-    "registered_rounds": 91,
+    "registered_rounds": 92,
     "new_device_executions": 37
   },
   "current_focus": {
@@ -5809,6 +5846,10 @@
       "latest_current_baseline_seq_comparison": {
         "path": "windows-native-graphics/rounds/win-seq-arm64ec-5063-realigned-20261121-01.result.json",
         "sha256": "e38651b186dd33856463f91cdbb2bf26424a02ca7a6496e9a3bdcbea29fe8be0"
+      },
+      "recovery_clock_review": {
+        "path": "windows-native-graphics/rounds/win-cdd-wall-clock-91476-20261121-01.result.json",
+        "sha256": "fd59be8dd4604185b88004ba9be7f15158627a83104d249a8dc19d94b5b4f133"
       }
     },
     "recent_ssh_outage": {
