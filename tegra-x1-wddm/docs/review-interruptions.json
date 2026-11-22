@@ -3,8 +3,8 @@
   "purpose": "记录工程语境、实际动作和服务中断，供人工复核；不是推断或规避审核规则",
   "service_message": "This content was flagged for possible cybersecurity risk. If this seems wrong, try rephrasing your request. If you’re doing authorized security work that requires more cyber permissive safeguards, apply for Daybreak access via https://platform.openai.com/settings/organization/status-and-access before retrying.",
   "review_request": "这是对合法驱动开发内容的误判，请复核",
-  "review_status": "prepared_not_submitted",
-  "review_submission_capability": "No human-review submission interface was found among available tools; no submission or approval is claimed.",
+  "review_status": "user_reported_permission_not_independently_verified",
+  "review_submission_capability": "No human-review submission interface was found among available tools; no platform submission or approval was independently verified by main review. The subsequent user report is tracked separately.",
   "records": [
     {
       "thread": "01a201d2-60fa-7bb1-a0d7-0264756995d2",
@@ -30,11 +30,32 @@
       "last_tool": "exec-5608114a-7650-42bf-a314-bff4406059ef",
       "last_observed_result": "本地build.py编译退出1，snprintf声明缺失；会话随后出现服务级中断。",
       "evidence": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/null-submit/build-result.json",
-      "native_state": "已完成正式96251只读预检；未取得新验证程序成功构建、派发或实机运行回执。",
+      "native_state": "原中断时已完成正式96251只读预检，未取得新验证程序成功构建或实机运行回执；后续进行中构建不在本批交验范围。",
       "classifier_trigger": "unknown",
-      "review_status": "prepared_not_submitted"
+      "review_status": "user_reported_permission_not_independently_verified",
+      "review_status_at_delivery": "prepared_not_submitted",
+      "subsequent_user_report_reference": "subsequent_user_report"
     }
   ],
   "observed_record_count": 3,
-  "pattern_assessment": "已有三条中断记录，但只有当时主题与服务原文，尚无证据确定触发关键词或分类器因果。所有主题统一使用原件路径和必要摘要，不据此隐藏内容。"
+  "pattern_assessment": "已有三条中断记录，但只有当时主题与服务原文，尚无证据确定触发关键词或分类器因果。所有主题统一使用原件路径和必要摘要，不据此隐藏内容。",
+  "review_status_at_creation": "prepared_not_submitted",
+  "subsequent_user_report": {
+    "source_thread": "01a202a1-7c8c-70c1-8363-52cc06d2708b",
+    "user_message_id": "01a202a8-d5cb-73e1-a4ff-cb2f7dcc0d4a",
+    "question_scope": "受中断的Windows ARM64验证程序编译",
+    "answer": "已取得平台允许继续的回执",
+    "read_from_original_thread": true,
+    "assessment": "原问题明确指向受中断的Windows ARM64编译；已独立读到用户报告，但未独立核验平台回执内容或覆盖范围。记录用户报告与平台工具实际结果，不把编号缺失另设为常规工作门槛，不把该报告或新会话当成规避拒绝的依据。"
+  },
+  "naming_suggestion": {
+    "requested_names": [
+      "dma-empty-submit-probe",
+      "空提交验证"
+    ],
+    "user_reason": "降低分类器误判率；此因果未经核验。",
+    "disposition": "仅记录建议；未为影响安全审核而改名、改路径或重提被中断流程。准确API/功能、原名和原中断记录保留。",
+    "executor_notified": true,
+    "renamed_by_main": false
+  }
 }

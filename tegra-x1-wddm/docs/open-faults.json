@@ -70,7 +70,8 @@
         "tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json#first_present",
         "tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json",
         "tegra-x1-wddm/docs/windows-native-graphics/native-5-live-follow-up.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/continuation-main-review-20261122.json#historical91476"
       ],
       "cause": "Historical initiating failure unknown. Each of the three original boots ended abnormally after the first Present call marker. On each boot the drawing context's sequence-2 packet signaled fence value 1 and retired before the call. On each of the three original boots, the drawing thread recorded four pre-call MapGpuVirtualAddressCb E_PENDING results across two allocations. Each was followed by a successful paging check on that allocation. The final checks for fence 7006 preceded the public call by 259.940, 280.943 and 307.703 ms respectively. The interrupted records lack a post-call source allocation handle and a matching failure boundary. The readable graphics streams end before that marker. A later instrumented trial directly observed the ordinary-context staging copy rejection. A one-time functional candidate completed the same native scene on three consecutive runs, with GPU copy retirement, verified window output, input, normal exit and desktop continuity. The historical crash boundary lacks a comparable DDI receipt or dump. The later instrumented rejection and all three functional SEQUENTIAL controls used the same KMT flags (0x04011081) and each recorded a successful paging check for 7002 on its presented source before the call. The later cases differ at the measured copy path and its result. An independent replay of the three original client ETLs also found successful stage-2 tgd3d initialization and legacy device publication by the drawing thread after the value-1 signal retired and before the first public CALL. It found the same ordering in the contemporary flip control. The old traces still lack a matching asynchronous CPU wait record and direct evidence after CALL.",
       "daily_workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
@@ -80,6 +81,12 @@
         "result": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
         "sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20",
         "scope": "本次正常路径及恢复取证；原次首因保持开放"
+      },
+      "latest_local_review": {
+        "path": "windows-native-graphics/continuation-main-review-20261122.json",
+        "sha256": "499eff9185ede9d2508b0b74e8cf5f64809426827d6baf761a872a72f5d35b57",
+        "scope": "仍缺原事故完整同次提交链及复位首因；以上准备/源码/正常回执不替代。",
+        "root_cause_found": false
       }
     },
     {
@@ -625,7 +632,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/candidate-boot-95090-comparison.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-early-startup-retained-20261121-01.result.json",
         "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-once-20261121-02.result.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/continuation-main-review-20261122.json#boot95090"
       ],
       "cause": "早期启动日志未给出停止码或故障模块。事件 41 的 BugcheckCode 为 0，无 BugCheck 1001 或本次转储。95090 缺候选 Code 0、实载和会话就绪回执。需有针对候选启动异常的可验证修正或能跨该启动丢失的独立启动证据，方能接续这次真实请求。91476 的历史同包缺口仍开放。",
       "daily_workaround": "正式96251已恢复并核对Code0、永久许可、八件哈希、KMD/DWM实载和Handheld。后续成功启动及原场景一次结果分别归档；95090原次缺证与根因保持开放。",
@@ -635,6 +643,12 @@
         "result": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-utf8-20261121-03.result.json",
         "sha256": "dcf296d82cf013db676cc240a590312747743a25ebbc78b36f9a9ebe5c5f7a20",
         "scope": "本次正常路径及恢复取证；原次首因保持开放"
+      },
+      "latest_local_review": {
+        "path": "windows-native-graphics/continuation-main-review-20261122.json",
+        "sha256": "499eff9185ede9d2508b0b74e8cf5f64809426827d6baf761a872a72f5d35b57",
+        "scope": "14分钟心跳分支需先有CandidateActive返回；另有CandidateArmed/nonCode0立即恢复路径。现有记录不支持将95090归于14分钟心跳到期；95099上后续正式恢复意图发生更晚。",
+        "root_cause_found": false
       }
     }
   ],
@@ -5963,6 +5977,11 @@
       "latest_local_root_boundary": {
         "path": "windows-native-graphics/rounds/win-dwm-152586-tdr-coverage-20261121-01.result.json",
         "sha256": "98f911f083516c30d7ff287479f2d07d7bb6d49280b23ea9622b5309a10cec5a"
+      },
+      "execution_thread": "01a202a1-7c8c-70c1-8363-52cc06d2708b",
+      "latest_continuation_review": {
+        "path": "windows-native-graphics/continuation-main-review-20261122.json",
+        "sha256": "499eff9185ede9d2508b0b74e8cf5f64809426827d6baf761a872a72f5d35b57"
       }
     },
     "first_present_main_review": {
@@ -6006,6 +6025,14 @@
       "status": "完整载荷模型准入差异和有界比较/历史提取材料审核通过；真实Windows验收及历史归因未完成",
       "root_cause_found": false,
       "production_driver_fix_accepted": false
+    },
+    "continuation_main_review": {
+      "path": "windows-native-graphics/continuation-main-review-20261122.json",
+      "sha256": "499eff9185ede9d2508b0b74e8cf5f64809426827d6baf761a872a72f5d35b57",
+      "status": "接续交接及三个有限增量审核通过；历史首因、生产修复和对应实机验收未完成",
+      "root_cause_found": false,
+      "production_driver_fix_accepted": false,
+      "new_device_actions_by_main": 0
     }
   }
 }
