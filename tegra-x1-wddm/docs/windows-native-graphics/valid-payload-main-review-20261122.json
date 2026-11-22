@@ -1,0 +1,236 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T09:15:24.555935+00:00",
+  "review_thread": "01a2026b-02b8-7ea3-996a-e5472b0bde3f",
+  "execution_thread": "01a2026d-3f59-7041-8676-a9267b034280",
+  "status": "完整载荷模型准入差异和有界比较/历史提取材料审核通过；真实Windows验收及历史归因未完成",
+  "root_cause_found": false,
+  "production_driver_fix_accepted": false,
+  "full_goal_status": "active",
+  "archive": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-offline-20261122/followup-valid-abi/batch-review.zip",
+    "sha256": "ae2471bca6f83bb35db1a75c8772e97de5fdd3961163659e2bd959a11515b7ce",
+    "bytes": 1527469
+  },
+  "manifest_sha256": "0d0498736db51c525f00224970ce25d55d42c402ff77adb07f81fa0709560b7c",
+  "independent_proof": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/valid-payload-independent-20261122.json",
+    "sha256": "2ace5bba5edcd6b365ab488d910aa15b3d3216da51e78cfbe2b17c89c3401bef",
+    "bytes": 27923
+  },
+  "verified_scope": {
+    "archive_entries_including_manifest": 238,
+    "manifest_members_verified": 237,
+    "frozen_review_inputs_verified": 204,
+    "source_files_matching_c137_git_blobs": 202,
+    "unchanged_driver_function_bodies": [
+      "queue_submit",
+      "TgGpuDdiSubmitCommandVirtual",
+      "TgGpuCaptureCommandSnapshot"
+    ],
+    "actual_executor_tool_record": "exec-9d577de5-85f5-40b1-b3cd-d2d6ee0df60a",
+    "actual_tool_exit": 0,
+    "tool_output_matched_archived_run": true,
+    "main_model_reruns": 0
+  },
+  "model": {
+    "source_commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "fixture_sha256": "f61dfce66fdfe97624db08bf2903f9dedae9850033e3609792309acaa0e28c85",
+    "payload": {
+      "bytes": 24,
+      "sha256": "48828265b6778542368c57781415efe45cac8272116fe6bb0a9cc4881e3e788c",
+      "fields_and_words": [
+        1,
+        24,
+        8,
+        0,
+        536936448,
+        45463
+      ]
+    },
+    "parser": "TgGpuCaptureCommandSnapshot -> tg_gpu_prepare_command_stream, real frozen command_stream.c/copy_stream.c/present_halfturn.c linked",
+    "source_review": {
+      "model": "gemini-4-neon-high",
+      "conversation_id": "2c398c3f-4679-4164-beac-92a183d56b43",
+      "scope": "311行新夹具差异及实际ABI/解析器依赖；旧11文件不重复审核",
+      "cli_exit": 0,
+      "before_run": true,
+      "frozen_inputs_unchanged": true
+    },
+    "compile_exit": 0,
+    "run_exit": 0,
+    "sanitizers": "address,undefined",
+    "stderr_bytes": 0,
+    "executable_sha256": "4c4b089b204cacbdc4714a926a76cb2e63b91abb7259b596c4942179e6b41bb8",
+    "cases": [
+      {
+        "case": 0,
+        "null_rendering": 0,
+        "dma_bytes": 8,
+        "umd_private_bytes": 24,
+        "capture_precheck": "0x00000000",
+        "returned_status": "0x00000000",
+        "snapshot_owned": 1,
+        "software": 0,
+        "rejected": 0,
+        "owned": 1,
+        "drain_calls": 0,
+        "trace_failures": 0,
+        "unexpected_calls": 0,
+        "creating_after": 0
+      },
+      {
+        "case": 1,
+        "null_rendering": 1,
+        "dma_bytes": 8,
+        "umd_private_bytes": 24,
+        "capture_precheck": "0x00000000",
+        "returned_status": "0xc000000d",
+        "snapshot_owned": 0,
+        "software": 1,
+        "rejected": 1,
+        "owned": 1,
+        "drain_calls": 1,
+        "trace_failures": 1,
+        "unexpected_calls": 0,
+        "creating_after": 0
+      }
+    ],
+    "accepted_finding": "两例相同24字节ABI1载荷均通过真实冻结解析器。普通提交持快照并准入成功，NullRendering跳过快照后被非零UMD私有字节且无快照的条件拒绝。相较首批只填48长度，已补齐有效载荷这一项缺口。",
+    "limits": [
+      "TgGpuGetCommandVa和TgGpuCaptureContextWork仍为模拟函数，不证明真实上下文、映射及引用生命周期合法。",
+      "Windows结构布局、OS调度、worker和真实围栏送达未覆盖。",
+      "8字节命令不证明原零DMA情形合法；该分支仍未知。",
+      "没有证明91476收到同类输入，不能把模型结果归为历史重启首因。"
+    ]
+  },
+  "comparator": {
+    "image_sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5",
+    "pdb_sha256": "54ed9eab4bff5bdcec9c5571ab05fe415052a106ad39ad9f713e939f87b65f3a",
+    "identity_review": "offline-model-wrapper-main-review-20261122.json",
+    "source_scope": "91918设备哈希对应比较映像；91476实际映像/分支仍缺证。",
+    "assembly_files_verified": 5,
+    "listed_32bit_words_verified": 379,
+    "word_count_scope": "包含常量和填充；reproduce.md的4份应为5份，原交付不改。",
+    "null_flag_if_input_path": {
+      "condition": "x9来自input+0x38，非零且其+0x48字段bit15置位；还受同函数其他分支影响。",
+      "test": "0xbe54",
+      "veneer": "0xd7bc",
+      "set_8": "0x29970",
+      "store": "0xbe60",
+      "private_field_stores": [
+        "0xbef8",
+        "0xbf04",
+        "0xbf0c"
+      ],
+      "incident_reachability_proven": false
+    },
+    "private_data_pointer_store": "0xbef8 -> output+0x18",
+    "private_total_bytes_store": "0xbf04 -> output+0x20",
+    "private_umd_bytes_store": "0xbf0c -> output+0x24",
+    "interpretation": "该条件路径可形成NullRendering标志，并有继续复制私有数据指针/大小的静态路径；没有证明完整上游约束、源对象字段含义或事故取值。",
+    "direct_calls_verified": 8,
+    "call_scope": "8个B/BL目标及相关公共符号已复核；最近前置公共符号不构成完整函数归属证明，且不穷尽间接调度。",
+    "concurrency_status": "同一SendToExecutionQueue入口不证明单线程或任意交错合法；共享请求、调用者预持独占及额外调度器串行仍须分开核对。LC-OPINION-2确定缺陷标签继续不接受。"
+  },
+  "historical_flags": {
+    "input": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dwm-late-context-cross-archives.json",
+      "sha256": "84ecc7d38b4dce40cdccf8146e22238dea4f8838a5817928d783854e48ee1075"
+    },
+    "boot": 91476,
+    "dwm_pid": 1400,
+    "target_context": "0xffff870faa8e7af0",
+    "retained_stream_results_rechecked": 16,
+    "target_context_start_or_rundown_in_saved_counts": false,
+    "target_Flags_in_saved_direct_attachments": false,
+    "scope": "仅复读原已保存16流提取结果，未重新解析全部原ETL；缺字段不能证明事故NullRendering为0或1。",
+    "NullRendering_value": null,
+    "provider_type_warning": "Generic Context.Flags不能直接混用D3DDDI_CREATECONTEXTFLAGS与DXGK_CREATECONTEXTFLAGS；需核事件生产者和对应版本。"
+  },
+  "primary_references": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/references/null-rendering-flags-20261122.json",
+    "sha256": "34f3c8be5ee962f115ccadf1d9a16884b3e218b24fcd6dc8f450764503cbaae5",
+    "bytes": 976
+  },
+  "hardware_and_baseline": {
+    "new_device_calls": 0,
+    "new_graphics_workloads": 0,
+    "new_driver_changes": 0,
+    "new_permit_or_power_changes": 0,
+    "selected_baseline": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7",
+      "bytes": 1100
+    },
+    "last_complete_formal_boot": 96251,
+    "restore_evidence_reused": true,
+    "new_baseline_selected": false,
+    "device_lease_transferred": false
+  },
+  "retained_boundaries": {
+    "request_f6264ee11289": "consumed; total original application execution 1; no replay",
+    "normal_94382_94557": "已有有效演练不重测",
+    "91476_DMA152586": "本次未补出原次KMD入返/GPU完成/Windows退役及独立复位首因",
+    "95090": "独立候选早期启动故障保持开放，未用后续成功启动填补",
+    "later_preparation_failures": "与历史事故及正常96075分别登记"
+  },
+  "deferred_contract_review": {
+    "policy_commit": "470e1dbc4ff65affe8ee6395a12bf8e2060cd338",
+    "retained_checkpoint": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/first-present-deferred-contracts-review-20261122.json",
+      "sha256": "864ec6e03b0d0440316e9f50a76fb407056588cf69dea11b44d1125c7892c97a",
+      "bytes": 6852
+    },
+    "items": [
+      {
+        "contract_id": "dxgkrnl.h:231:1",
+        "status": "未知",
+        "new_direct_observation": false,
+        "original_receipt": {
+          "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+          "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+        },
+        "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。"
+      },
+      {
+        "contract_id": "dxgkrnl.h:684:4",
+        "status": "未知",
+        "new_direct_observation": false,
+        "original_receipt": {
+          "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+          "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+        },
+        "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。"
+      },
+      {
+        "contract_id": "dxgkrnl.h:759:2",
+        "status": "未知",
+        "new_direct_observation": false,
+        "original_receipt": {
+          "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+          "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+        },
+        "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。"
+      },
+      {
+        "contract_id": "dxgvmbus.c:3651:2",
+        "status": "未知",
+        "new_direct_observation": false,
+        "original_receipt": {
+          "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+          "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+        },
+        "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。"
+      }
+    ],
+    "classification_changed": false,
+    "full_root_closeout_complete": false
+  },
+  "next": "继续补原事故字段生产者和合法调度约束；模型准入差异可作为候选问题证据，生产修复及历史故障关闭仍需对应真实条件与实机因果验收。",
+  "publication": {
+    "local_only": true,
+    "uploaded": false,
+    "full_release_gate_only_on_actual_release": true
+  }
+}
