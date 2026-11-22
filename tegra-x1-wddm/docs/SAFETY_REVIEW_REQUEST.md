@@ -23,4 +23,6 @@
 
 后续项目所有者明确授权交叉编译和本人设备实机运行，并提供其自行复核的裁定；按 [所有者声明核对记录](windows-native-graphics/owner-review-statement-20261122.json) 登记，不视作独立核验的平台人工复核。证据目录已由外部更名，主审核对了旧新路径与111个包成员的相同哈希，原件中的名称和历史引用不改写。上述旧路径通过该记录的映射定位当前文件。
 
+项目所有者要求一并发布的原文保存为 [项目所有者复核裁定书](windows-native-graphics/owner-review-decision-20261122.md)。
+
 最终 r2 编译修复的真实四步构建、原生 ARM64 PE 和两轮独立代码审核已由主审核对，见 [编译主审记录](windows-native-graphics/arm64-probe-build-main-review-20261122.json)。程序最多运行普通对照和 NullRendering 两个 case，每次使用8字节命令、24字节私有数据，并创建和刷盘诊断日志；不是零长度 DMA，也不是完全不写盘。该批仍无实机验收，Gemini 实机委派已取消，设备继续由原新执行会话负责。
