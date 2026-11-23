@@ -766,6 +766,37 @@
         "formal_components_and_actual_paths_verified": true,
         "review": "tegra-x1-wddm/docs/windows-native-graphics/predecessor-recovery-main-review-20261122.json"
       }
+    },
+    {
+      "id": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+      "status": "open",
+      "kind": "unexpected-restart",
+      "affected_scopes": [
+        "tdr-recovery",
+        "wddm",
+        "gpu-synchronization"
+      ],
+      "trigger": "A single test-only OS ENGINETDR=8/node0 request returned success on candidate boot97365;an unplanned boot97437 was subsequently observed. Temporal association only;cause unknown.",
+      "evidence": [
+        "tegra-x1-wddm/docs/windows-native-graphics/tdr-native-failure-main-review-20261122.json#request_boundary",
+        "tegra-x1-wddm/docs/windows-native-graphics/tdr-native-failure-main-review-20261122.json#unexpected_restart",
+        "tegra-x1-wddm/docs/windows-native-graphics/tdr-native-failure-main-review-20261122.json#trace",
+        "tegra-x1-wddm/docs/windows-native-graphics/tdr-native-failure-main-review-20261122.json#formal_restoration"
+      ],
+      "cause": "Unknown. API STATUS_SUCCESS and C exit0 were observed before a later unplanned reboot. Event41 reports BugcheckCode0 and Event6008 is retained. No new dump in enumerated standard/configured paths. Both live and closed-ETL raw captures contain zero TdrContract callback outputs. Short coverage cannot establish absence of callback execution or causal attribution to the original legacy Present failure.",
+      "daily_workaround": "Keep restored selected ce54 baseline and preserve evidence. Do not rearm this candidate or repeat the consumed engine request; no adapter test was dispatched.",
+      "close_when": "Establish the causal boundary and necessary repair,then satisfy the repository fault-closure procedure with independent native qualification,applicable callback outputs,complete boot continuity,and durable dump evidence when relevant.",
+      "resolution": null,
+      "latest_native_identity": {
+        "boot": 97530,
+        "gpu_code": 0,
+        "components": 8,
+        "actual_loads": 5
+      },
+      "candidate_qualified": false,
+      "dump_capture_qualified": false,
+      "historical_first_present_cause_confirmed": false,
+      "restoration_verified": true
     }
   ],
   "independent_qualifications": [
@@ -6319,7 +6350,30 @@
       "actual_OS_TDR_validated": false,
       "cross_boot_dump_validated": false,
       "baseline_promoted": false,
-      "root_cause_found": false
+      "root_cause_found": false,
+      "subsequent_native_review": {
+        "review": "tegra-x1-wddm/docs/windows-native-graphics/tdr-native-failure-main-review-20261122.json",
+        "status": "failed_not_qualified",
+        "candidate_boot": 97365,
+        "unplanned_boot": 97437,
+        "formal_restoration_boot": 97530
+      }
+    },
+    "tdr_native_failure_main_review": {
+      "review": "tegra-x1-wddm/docs/windows-native-graphics/tdr-native-failure-main-review-20261122.json",
+      "status": "negative_evidence_accepted_candidate_failed_not_qualified",
+      "candidate_source": "cd9b18eecbdbae82d3f831f8422e7b2dba3e2498",
+      "candidate_boot": 97365,
+      "unplanned_boot": 97437,
+      "formal_boot": 97530,
+      "fault_id": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+      "OS_engine_requests": 1,
+      "adapter_requests": 0,
+      "observed_TdrContract_records": 0,
+      "capture_seconds": 2.8795486979166665,
+      "main_device_operations": 0,
+      "baseline_promoted": false,
+      "historical_root_cause_found": false
     }
   }
 }

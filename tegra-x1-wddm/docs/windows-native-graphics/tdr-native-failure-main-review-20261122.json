@@ -1,0 +1,461 @@
+{
+  "schema": 1,
+  "scope": "Independent main review of the first actual OS engine TDR request on candidate cd9b18ee, its negative native result, retained dump/log evidence and formal recovery.",
+  "verdict": "negative_evidence_accepted;candidate_failed_not_qualified",
+  "archive": {
+    "sha256": "34ae6340d374a76c6ebe896159ef8cb2d5299c69390d06be7e0e714581d1bc1b",
+    "bytes": 1907960,
+    "archive_members": 464,
+    "individually_hashed_members": 463
+  },
+  "integrity": {
+    "all_member_lengths_SHA256_and_ZIP_CRC_independently_verified": true,
+    "R1_immutable_members": 431,
+    "R2_incremental_members": 11,
+    "remote_original_names_mapped": 72,
+    "native_inventory_transport_batches": [
+      {
+        "batch": "20261122T221846202895Z",
+        "boot": 97176,
+        "members": 20
+      },
+      {
+        "batch": "20261122T224009929580Z",
+        "boot": 97276,
+        "members": 37
+      },
+      {
+        "batch": "20261122T224818276888Z",
+        "boot": 97365,
+        "members": 42
+      },
+      {
+        "batch": "20261122T225444809110Z",
+        "boot": 97365,
+        "members": 48
+      },
+      {
+        "batch": "20261122T231123232021Z",
+        "boot": 97365,
+        "members": 54
+      },
+      {
+        "batch": "20261122T232211402579Z",
+        "boot": 97437,
+        "members": 71
+      },
+      {
+        "batch": "20261122T234253835263Z",
+        "boot": 97530,
+        "members": 72
+      }
+    ],
+    "same_hash_filename_aliases_preserve_each_original_identity": true
+  },
+  "candidate": {
+    "source": "cd9b18eecbdbae82d3f831f8422e7b2dba3e2498",
+    "sha256": "53ce9c401afb5e51873f2224bd2aab27487ceab730053ab5ca0e865bb29424eb",
+    "bytes": 256544,
+    "unsigned_prior_build_sha256": "0d3f42c82fb40ea0971fd66ae8e1ceafb86442131f5cf907af9f71b309fd4f26",
+    "only_signing_checksum_security_directory_and_certificate_changed": true,
+    "machine": "ARM64",
+    "native_CAT_signature": "Valid",
+    "native_CAT_members_verified": 12,
+    "selected_ACR_preserved": true,
+    "changed_component_profile_names": [
+      "tegragpurender.sys"
+    ]
+  },
+  "activation": {
+    "prior_formal_boot": 97176,
+    "permanent_revoked_while_old_formal_SYS_remained": true,
+    "closed_candidate_boot": 97276,
+    "closed_code": 43,
+    "candidate_inf": "oem32.inf",
+    "one_use_token_before_boot": 1,
+    "candidate_boot": 97365,
+    "candidate_activations": 1,
+    "code": 0,
+    "AC": "Online",
+    "Handheld": 1,
+    "token_after_boot": 0,
+    "permanent": null,
+    "components": 8,
+    "actual_load_hashes_and_paths": 5,
+    "all_actual_hashes_match_intended_profile": true,
+    "dwm_pid": 1412
+  },
+  "request_boundary": {
+    "request": {
+      "event": "request",
+      "pid": 6296,
+      "tid": 876,
+      "luid": "0000000000005cb6",
+      "control": 8,
+      "node": 0,
+      "flags": 0,
+      "bytes": 8,
+      "qpc_stamp": 36420042308,
+      "qpc_frequency": 19200000,
+      "api_requests": 1
+    },
+    "return": {
+      "event": "return",
+      "pid": 6296,
+      "tid": 876,
+      "luid": "0000000000005cb6",
+      "control": 8,
+      "status": "00000000",
+      "qpc_stamp": 36420497036
+    },
+    "immediate_C_exit": 0,
+    "immediate_boot": 97365,
+    "immediate_Code0": true,
+    "adapter_request_files": 0,
+    "only_API_elapsed_seconds": 0.02368375,
+    "completion_of_OS_TDR_proved": false
+  },
+  "unexpected_restart": {
+    "next_boot": 97437,
+    "System12": 97437,
+    "Event6008": 97438,
+    "Event41": 97455,
+    "BugcheckCode": 0,
+    "intervening_User32_1074": false,
+    "cause": "unknown",
+    "NT_bugcheck_arrival": "unknown",
+    "automatic_recovery_state": "BaselineArmed,Code43,formal ce54;later planned boot97530 restores Code0.",
+    "candidate_qualified": false,
+    "adapter_control_dispatched": false,
+    "same_request_rearm_or_replay": false
+  },
+  "trace": {
+    "raw_records": 4092,
+    "live_closed_exports_identical": true,
+    "ETL_sha256": "d49ba5496d3f493d602aeaaf13a2de85e1046890fc64d9b15f35d717151a6515",
+    "independent_ETL_matching_header_payload_records": 4092,
+    "independent_ETL_method_limit": "Record GUID/id/version/opcode/task/PID/TID/QPC/payload multiset corroboration;not an independent ETL container/loss reader.",
+    "live_decoder_records": 2,
+    "observed_TdrContract_records": 0,
+    "KMD_records_before_start_and_request": 2,
+    "duration_seconds": 2.8795486979166665,
+    "last_raw_after_request_seconds": 2.02321265625,
+    "loss_counters_observed": 0,
+    "TraceEnd_query_status": 4201,
+    "footer": "ProcessTrace=0 matched=0 raw_matched=4092 invalid=0 events_lost=0 buffers_lost=0 end_time=134398629625592117 buffers_written=84 clock_context=1 perf_frequency=19200000",
+    "callback_coverage_proved": false
+  },
+  "capture_control_boundary": {
+    "source": "native-cycle/Tdr-Round.ps1",
+    "process_observation": "C process completion is followed by a fixed900ms sleep, immediate boot/Code0 result and unconditional finally cleanup of the owned ETW session.",
+    "actual_window_seconds": 2.8795486979166665,
+    "conclusion": "The controller actively stops capture after the immediate API observation. This does not establish asynchronous OS TDR callback or recovery completion;zero observed losses do not repair missing time coverage.",
+    "future_condition": "For a distinct unconsumed investigation, retain capture to a verifiable callback/recovery endpoint or an explicit bounded observation deadline with terminal state evidence. This is not a replay request for the consumed engine control.",
+    "executor_correction_sent": true
+  },
+  "system_evidence": {
+    "complete_interval": [
+      97348,
+      97530
+    ],
+    "continuous_records": 183,
+    "critical_records": [
+      {
+        "record": 97348,
+        "id": 1074,
+        "utc": "2026-11-22T22:43:40.2175041Z"
+      },
+      {
+        "record": 97365,
+        "id": 12,
+        "utc": "2026-11-22T22:44:07.0531028Z"
+      },
+      {
+        "record": 97437,
+        "id": 12,
+        "utc": "2026-11-22T23:15:44.8365155Z"
+      },
+      {
+        "record": 97438,
+        "id": 6008,
+        "utc": "2026-11-22T23:17:30.0601987Z"
+      },
+      {
+        "record": 97455,
+        "id": 41,
+        "utc": "2026-11-22T23:15:48.6257678Z"
+      },
+      {
+        "record": 97514,
+        "id": 1074,
+        "utc": "2026-11-22T23:27:40.9048744Z"
+      },
+      {
+        "record": 97530,
+        "id": 12,
+        "utc": "2026-11-22T23:28:05.4968891Z"
+      }
+    ],
+    "XML_records_independently_parsed": 3179,
+    "XML_parse_failures": 0,
+    "time_change_records": 12,
+    "retained_channels": {
+      "Microsoft-Windows-WerKernel/Operational": 1238,
+      "Microsoft-Windows-Kernel-Dump/Operational": 1746
+    },
+    "cross_boot_wall_clock_elapsed_used": false,
+    "clock_limit": "The immediate candidate result wall-clock UTC is later than the next boot wall-clock UTC. Same-boot QPC identifies request timing;no restart delay or clock-adjustment cause is inferred."
+  },
+  "dump_evidence": {
+    "old_files_full_native_hash_and_length_unchanged": 11,
+    "retained_prefix_bytes_each": 8192,
+    "new_enumerated_dump_files": 0,
+    "CrashDumpEnabled": {
+      "kind": "DWord",
+      "value": 3
+    },
+    "scope": "Enumerated standard/configured paths;not all filesystem locations. Old SDK header trailing fields may be filler;no new dump body/stack/TGDB or validated old BootId/WriterStatus asserted.",
+    "Kernel_Dump_Event10": "Disabled-crash-dump messages coexist with configuration3;the producer path and failing dump stage remain unknown.",
+    "WerKernel_WATCHDOG_status": "0xc0000099",
+    "same_status_records": 692,
+    "earliest_retained_same_status": {
+      "record": 329,
+      "utc": "2026-11-11T21:37:05.1595726Z"
+    },
+    "causal_limit": "This status predates the candidate. It does not identify a quota source,resource leak,storage failure,adapter or the cause of this restart.",
+    "new_dump_payload_or_TGDB_qualified": false
+  },
+  "pre_request_errors": {
+    "initial_FileStream_failure": "WindowsPowerShell5.1 six-argument overload ambiguity before either reader or OS request program started. Original intent,error and ETL preserved.",
+    "installer_partial_update": "Original script was backed up and a temporary replacement written;File.Replace with null backup failed. Full hashes were rechecked before the reviewed same-volume backup completion.",
+    "continuation": "Same candidate boot and unconsumed stage;source CreateNew/FlushFileBuffers request marker remained global. The eventual request/return files each exist once;the adapter request is absent.",
+    "R1_blocking_findings_resolved_before_use": [
+      "Restore temporary settings on recovery/reboot/Finish with serialized repeatable restoration.",
+      "Bound outer RPC execution separately from the25-second inner OS process timeout."
+    ],
+    "new_platform_risk_rejection_reported": false
+  },
+  "formal_restoration": {
+    "boot": 97530,
+    "code": 0,
+    "ac": "Online",
+    "mode": 1,
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "actual_loads": {
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    },
+    "actual_paths": {
+      "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_nvk_arm64.dll"
+    },
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f",
+    "trial": false,
+    "token_exists": false,
+    "tasks": 0,
+    "diagnostic_processes": 0,
+    "restored_settings": [
+      {
+        "path": "SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+        "name": "TdrTestMode",
+        "exists": false
+      },
+      {
+        "path": "SYSTEM\\CurrentControlSet\\Control\\CrashControl\\FullLiveKernelReports",
+        "name": "FullLiveReportsMax",
+        "exists": false
+      }
+    ],
+    "finish_phase": "Finished",
+    "candidate_oem32_INF_absence": "Established by successful Finish control flow:if the identified inactive INF exists,pnputil must return0 and its absence is asserted;otherwise the INF is already absent. The final Formal snapshot does not independently repeat this deletion query.",
+    "diagnostic_root_and_inactive_candidate_clone": "Retained as inactive forensic originals;not deleted and not selected.",
+    "temporary_settings_after_restore": "TdrTestMode and FullLiveReportsMax absent,matching originals;formal restoration includes a fresh boot.",
+    "state_limit": "Last verified native receipt in this batch;not a new main-chat device query.",
+    "dwm_pid": 1420
+  },
+  "independent_review": {
+    "native_review_rounds": [
+      {
+        "round": "native-dispatch-review-r1",
+        "conversation": "a48fd72a-67e3-4e89-b44b-2bdb7f7ce1f3",
+        "model": "gemini-4-neon-high",
+        "overall": "changes_required",
+        "findings": [
+          {
+            "id": "ND-01",
+            "severity": "blocking"
+          },
+          {
+            "id": "ND-02",
+            "severity": "blocking"
+          }
+        ]
+      },
+      {
+        "round": "native-dispatch-review-r2",
+        "conversation": "a48fd72a-67e3-4e89-b44b-2bdb7f7ce1f3",
+        "model": "gemini-4-neon-high",
+        "overall": "approve",
+        "findings": [
+          {
+            "id": "ND2-01",
+            "severity": "non_blocking"
+          },
+          {
+            "id": "ND2-02",
+            "severity": "non_blocking"
+          }
+        ]
+      },
+      {
+        "round": "native-dispatch-review-r3",
+        "conversation": "a48fd72a-67e3-4e89-b44b-2bdb7f7ce1f3",
+        "model": "gemini-4-neon-high",
+        "overall": "approve",
+        "findings": [
+          {
+            "id": "ND3-01",
+            "severity": "non_blocking"
+          },
+          {
+            "id": "ND3-02",
+            "severity": "non_blocking"
+          }
+        ]
+      },
+      {
+        "round": "native-dispatch-review-r4",
+        "conversation": "a48fd72a-67e3-4e89-b44b-2bdb7f7ce1f3",
+        "model": "gemini-4-neon-high",
+        "overall": "approve",
+        "findings": []
+      },
+      {
+        "round": "review/native-episode-review-r1",
+        "conversation": "36d036b3-b661-4c71-a776-8b69a9090920",
+        "model": "gemini-4-neon-high",
+        "overall": "approve_evidence_delivery",
+        "findings": [
+          {
+            "id": "ER-01",
+            "severity": "low"
+          },
+          {
+            "id": "ER-02",
+            "severity": "low"
+          },
+          {
+            "id": "ER-03",
+            "severity": "low"
+          },
+          {
+            "id": "ER-04",
+            "severity": "info"
+          }
+        ]
+      },
+      {
+        "round": "review/native-episode-review-r2",
+        "conversation": "36d036b3-b661-4c71-a776-8b69a9090920",
+        "model": "gemini-4-neon-high",
+        "overall": "approve_evidence_delivery",
+        "findings": []
+      }
+    ],
+    "R1_negative_evidence_nonblocking_findings": 4,
+    "R2_negative_evidence_findings": 0,
+    "approval_scope": "Evidence delivery only;no native qualification,promotion or historical causality inferred."
+  },
+  "deferred_470e1dbc_contracts": [
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+        "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+      },
+      "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+      "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。",
+      "new_direct_same_object_observations": 0
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+        "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+      },
+      "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+      "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。",
+      "new_direct_same_object_observations": 0
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+        "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+      },
+      "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+      "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。",
+      "new_direct_same_object_observations": 0
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+        "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+      },
+      "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+      "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。",
+      "new_direct_same_object_observations": 0
+    }
+  ],
+  "historical_boundaries": {
+    "legacy_first_Present": "Root cause remains unknown;old consumed request not replayed.",
+    "91476_DWM_DMA152586": "No new original-incident KMD entry/return or reset first-cause evidence.",
+    "95090": "Original early-boot first cause remains unknown.",
+    "94382_to_94557_and_consumed_KMT_dump_controls": "Not repeated."
+  },
+  "new_open_fault": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+  "existing_open_faults_preserved": 18,
+  "open_faults_after_this_review": 19,
+  "closed_faults_unchanged": 3,
+  "selected_baseline_unchanged": true,
+  "baseline_descriptor_sha256": "2b3a2624cd826fa41f47e4c621e6fdee9cd0e6a25161fab78eb9ec3ca5ef9154",
+  "candidate_implementation_published": false,
+  "baseline_promoted": false,
+  "main_device_operations": 0,
+  "root_cause_found": false,
+  "references": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_escape",
+      "scope": "Test-only OS TDR control and explicit test-mode requirement;not ordinary driver-private rendering."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ne-d3dkmthk-_d3dkmt_tdrdbgctrltype",
+      "scope": "ENGINETDR enum8 simulates an engine TDR;not evidence of completed recovery."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/tdr-registry-keys",
+      "scope": "Driver-development test settings;TdrTestMode is reserved in the generic guide and distinct from TdrDebugMode."
+    }
+  ]
+}
