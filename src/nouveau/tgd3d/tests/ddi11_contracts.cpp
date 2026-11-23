@@ -32,6 +32,27 @@ static void adapter_caps_contracts()
             versions[2] == D3D10_0_7_DDI_SUPPORTED && versions[3] == D3D11_1_DDI_SUPPORTED &&
             versions[4] == 0xbeef);
    }
+   /* The offer is process-scoped and exact: neither another value nor a
+    * non-NVK adapter may enable the unselected modern presentation path. */
+   CHECK(SetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", L"1"));
+   count = 0;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+   adapter.vk.nvk = true;
+   for (const wchar_t *value : {L"0", L"10", L"", L"true"}) {
+      CHECK(SetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", value));
+      count = 0;
+      CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+   }
+   CHECK(SetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", L"1"));
+   UINT64 modern[6] = {0xfeed, 0, 0, 0, 0, 0xbeef}; count = 4;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, modern) == E_OUTOFMEMORY && count == 5);
+   CHECK(modern[0] == 0xfeed && modern[5] == 0xbeef);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, modern) == S_OK && count == 5 &&
+         modern[3] == D3D11_1_DDI_SUPPORTED && modern[4] == D3DWDDM2_0_DDI_SUPPORTED && modern[5] == 0xbeef);
+   CHECK(SetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", nullptr));
+   count = 0;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+   adapter.vk.nvk = false;
    adapter.videoEnabled = false;
    struct { UINT before, caps, after; } out = {0xdeadbeef, 0xffffffff, 0xbeefdead};
    D3D10_2DDIARG_GETCAPS query = {D3D11DDICAPS_3DPIPELINESUPPORT, nullptr, &out.caps, sizeof(out.caps)};
@@ -109,7 +130,7 @@ template<typename T> struct Storage {
 static void ddi20_contracts()
 {
    Device dev;
-   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { error = hr; ++errors; };
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
    D3D10DDI_HDEVICE h = {&dev};
    struct { uint64_t before; D3DWDDM2_0DDI_DEVICEFUNCS table; uint64_t after; } guarded = {};
    guarded.before = guarded.after = UINT64_C(0x87654321abcdef09);
@@ -131,9 +152,9 @@ static void ddi20_contracts()
    CHECK(!dxgi.table.pfnReserved1 && !dxgi.table.pfnReserved2 && dxgi.table.pfnTrimResidencySet);
    // Exact slot read by the matched native D3D11 runtime. No shifted 1.3 table.
    static_assert(offsetof(DXGI1_4_DDI_BASE_FUNCTIONS, pfnPresentMultiplaneOverlay1) == 20 * sizeof(void *));
-   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, DriverPrivateDataSize) == 3 * sizeof(void *));
-   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, pDriverPrivateData) == 4 * sizeof(void *));
-   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, SyncIntervalOverrideValid) == 5 * sizeof(void *));
+   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, DriverPrivateDataSize) == 24);
+   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, pDriverPrivateData) == 32);
+   static_assert(offsetof(DXGIDDI_MULTIPLANE_OVERLAY_PLANE_INFO, SyncIntervalOverrideValid) == 40);
 
    // Test actual constructors, including array/mip mapping, rather than only
    // pointer presence. Vulkan views are lazy; no physical device is involved.
@@ -254,7 +275,7 @@ static void om_binding_contracts()
    Device dev;
    VulkanCaps caps;
    dev.caps = &caps;
-   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { error = hr; ++errors; };
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
    D3D10DDI_HDEVICE h{&dev};
    D3D11_1DDI_DEVICEFUNCS t{};
    device_fill_table11(&t);
@@ -299,7 +320,7 @@ void ddi11_contracts()
    ddi20_contracts();
    om_binding_contracts();
    Device dev;
-   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { error = hr; ++errors; };
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) { error = hr; ++errors; };
    D3D10DDI_HDEVICE h = {&dev};
    struct { uint64_t before; D3D11_1DDI_DEVICEFUNCS table; uint64_t after; } guarded = {};
    guarded.before = guarded.after = UINT64_C(0x9876543210abcdef);
@@ -353,10 +374,10 @@ void ddi11_contracts()
    CHECK(callbacksBytes < sizeof(D3DDDI_DEVICECALLBACKS) && callbacksBytes < system.dwPageSize);
    auto producer = reinterpret_cast<D3DDDI_DEVICECALLBACKS *>(page + system.dwPageSize - callbacksBytes);
    std::memset(producer, 0, callbacksBytes);
-   producer->pfnAllocateCb = [](HANDLE, D3DDDICB_ALLOCATE *) APIENTRY -> HRESULT { return S_OK; };
-   producer->pfnCreateContextVirtualCb = [](HANDLE, D3DDDICB_CREATECONTEXTVIRTUAL *) APIENTRY -> HRESULT { return S_OK; };
+   producer->pfnAllocateCb = [](HANDLE, D3DDDICB_ALLOCATE *) -> HRESULT { return S_OK; };
+   producer->pfnCreateContextVirtualCb = [](HANDLE, D3DDDICB_CREATECONTEXTVIRTUAL *) -> HRESULT { return S_OK; };
    producer->pfnSignalSynchronizationObjectFromGpuCb = [](HANDLE,
-      const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *) APIENTRY -> HRESULT { return S_OK; };
+      const D3DDDICB_SIGNALSYNCHRONIZATIONOBJECTFROMGPU *) -> HRESULT { return S_OK; };
    D3DDDI_DEVICECALLBACKS consumer;
    std::memset(&consumer, 0xcc, sizeof(consumer));
    runtime_copy_callbacks(&consumer, producer);

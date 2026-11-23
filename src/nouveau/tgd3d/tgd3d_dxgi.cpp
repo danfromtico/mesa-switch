@@ -144,7 +144,10 @@ static HRESULT APIENTRY Present1(DXGI_DDI_ARG_PRESENT1 *args)
    present.Flags = args->Flags;
    present.FlipInterval = args->FlipInterval;
    /* BackBufferMultiplicity belongs to WDDM 2.0, not this 1.3 table. */
-   return Present(&present);
+   trace(TGD3D_TRACE_PRESENT1, E_PENDING, args->Reserved, dev->interfaceVersion);
+   const HRESULT hr = Present(&present);
+   trace(TGD3D_TRACE_PRESENT1, hr, args->Reserved, dev->interfaceVersion);
+   return hr;
 }
 
 static bool mpo_plane(Device *dev, const DXGI_DDI_PRESENT_MULTIPLANE_OVERLAY &plane)
