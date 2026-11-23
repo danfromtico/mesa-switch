@@ -826,7 +826,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json#direct_native_observations",
         "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json#native_identity_and_cause_limits",
         "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json#candidate_source",
-        "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json#CPU_comparison"
+        "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json#CPU_comparison",
+        "tegra-x1-wddm/docs/windows-native-graphics/normal-store-staging-main-review-20261122.json"
       ],
       "cause": "Unplanned boot97437 remains unexplained. Recovered original boot97365 cold traces contain29 direct TDR observations:one successful/eight failed ResetEngine returns and five successful adapter reset/restart pairs. The same hContext pointer value in Paging=1 submissions then reports C00000A3 at generations2..6. Root/generation lifecycle defects were independently identified and repaired locally with an old/new CPU comparison, but exact native rejection operands and context creation/lifetime are not recorded; the new KMD has no GPU validation. Short live/closed captures still contain zero Event8, while the cold trace has positive records. NT bugcheck arrival and missing-dump stage remain unknown; historical first-Present causality is not established.",
       "daily_workaround": "Keep restored selected ce54 baseline and preserve evidence. Do not rearm this candidate or repeat the consumed engine request; no adapter test was dispatched.",
@@ -865,7 +866,8 @@
       ],
       "trigger": "Unplanned boot97983 followed formal boot97912. The observed scene is associated with the lower-left weather/news UI according to the device owner; the trigger chain has not been independently reproduced.",
       "evidence": [
-        "tegra-x1-wddm/docs/windows-native-graphics/context-runtime-reboot97983-main-review-20261122.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/context-runtime-reboot97983-main-review-20261122.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/normal-store-staging-main-review-20261122.json"
       ],
       "cause": "Unknown. System12/6008/41 record the unplanned boot with BugcheckCode0 and no1074 in the collected selected-ID query. The inactive CAT completion request overlaps in time, but its execution reach and SignTool start are unknown; no causal link is established. Candidate c4 was not installed and no new controlled TDR request was sent.",
       "daily_workaround": "Avoid the lower-left weather/news entry pending deferred investigation. Retain the selected df08/0790651c formal component set and preserve the failed verification originals. Known unexplained boot97983 is not an acceptance pass.",
@@ -6728,6 +6730,21 @@
       "SDK_runtime_identity_distinguished": true,
       "confirmed_SD_source_defect": false,
       "SD_source_changes": 0,
+      "faults_closed": 0,
+      "main_device_operations": 0
+    },
+    "normal_store_staging_main_review": {
+      "review": "tegra-x1-wddm/docs/windows-native-graphics/normal-store-staging-main-review-20261122.json",
+      "status": "normal_store_staging_accepted_only;candidate_load_and_TDR_validation_pending",
+      "source": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+      "native_boot": 97983,
+      "published_inf": "oem32.inf",
+      "store_directory": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230",
+      "required_members": 13,
+      "new_TDR_requests": 0,
+      "candidate_installed": false,
+      "candidate_promoted": false,
+      "formal_source": "df08e8583abc202732036597f5cb7f0519ba11a5",
       "faults_closed": 0,
       "main_device_operations": 0
     }
