@@ -52,6 +52,7 @@ struct _TG_GPU_CONTEXT {
     struct tg_gpu_texture_pool_range TexturePool[TG_GPU_PROGRAM_ENGINES][TG_GPU_TEXTURE_POOLS];
     struct tg_gpu_compute_slm ComputeSlm;
     BOOLEAN Closing,MmeInitialized;
+    UINT PagingEvidenceGeneration; /* first observed CE sub-operation per epoch */
 };
 struct _TG_GPU_CONTEXT_ENGINE {
     DXGKRNL_INTERFACE Dxgk;
@@ -160,7 +161,8 @@ NTSTATUS TgGpuGetCommandVa(TG_GPU_CONTEXT_ENGINE *,HANDLE,struct tg_gpu_command_
 NTSTATUS TgGpuCaptureContextWork(TG_GPU_CONTEXT_ENGINE *,
     const DXGKARG_SUBMITCOMMANDVIRTUAL *, const struct tg_gpu_command_info *,
     TG_GPU_CONTEXT_WORK *);
-NTSTATUS TgGpuCapturePagingContext(TG_GPU_CONTEXT_ENGINE *,HANDLE,TG_GPU_CONTEXT_WORK *);
+NTSTATUS TgGpuCapturePagingContext(TG_GPU_CONTEXT_ENGINE *,HANDLE,TG_GPU_CONTEXT_WORK *,TG_GPU_CONTEXT_EVENT *);
+VOID TgGpuTracePagingCompletion(TG_GPU_CONTEXT_ENGINE *,TG_GPU_CONTEXT_WORK *);
 NTSTATUS TgGpuActivateContextWork(TG_GPU_CONTEXT_ENGINE *, TG_GPU_CONTEXT_WORK *,
                                   const struct tg_gpu_command_info *);
 NTSTATUS TgGpuCancelCapturedWork(TG_GPU_CONTEXT_ENGINE *, TG_GPU_CONTEXT_WORK *);

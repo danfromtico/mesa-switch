@@ -159,6 +159,8 @@ static NTSTATUS queue_submit(TG_GPU_WORK_QUEUE *q,const DXGKARG_SUBMITCOMMANDVIR
     TG_GPU_QUEUE_ENTRY *reserved,TG_GPU_COMMAND_SNAPSHOT *snapshot,BOOLEAN *used)
 {
     TG_GPU_QUEUE_ENTRY *entry;LIST_ENTRY *l;KIRQL irql,engine_irql;NTSTATUS status;
+    TG_GPU_CONTEXT_EVENT context_evidence={0};
+    const BOOLEAN context_trace=TgGpuTraceContextEnabled();
     if(used)*used=FALSE;
     if(!q || !q->Engine || !a)return STATUS_INVALID_PARAMETER;
     entry=a->pDmaBufferPrivateData;
@@ -221,7 +223,8 @@ static NTSTATUS queue_submit(TG_GPU_WORK_QUEUE *q,const DXGKARG_SUBMITCOMMANDVIR
                 if (!system_context || (a->hContext && a->hContext!=system_context))
                     status=STATUS_INVALID_PARAMETER;
                 else
-                    status=TgGpuCapturePagingContext(q->Engine,system_context,&entry->Work);
+                    status=TgGpuCapturePagingContext(q->Engine,system_context,&entry->Work,
+                        context_trace?&context_evidence:NULL);
             }
         }
     } else {
@@ -257,6 +260,7 @@ rejected:
     }
 done:
     KeReleaseSpinLock(&q->Lock,irql);
+    if(context_evidence.Version)TgGpuTraceContext(&context_evidence);
     if(NT_SUCCESS(status) || (used && *used)) (VOID)KeSetEvent(&q->Wake,IO_NO_INCREMENT,FALSE);
     return status;
 }

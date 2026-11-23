@@ -220,5 +220,138 @@ class RecoveryDecode(unittest.TestCase):
         self.assertEqual(summary['export_records'], 1)
 
 
+class ContextEvidenceDecode(unittest.TestCase):
+    # Independent fixed 120-byte wire record. Named flags are producer
+    # observations, not guesses derived from Windows' raw ContextFlags bits.
+    FAILURE = bytes.fromhex('''
+        01000000 06000000 0f2c0200 a30000c0
+        2222222211111111 55555555aaaaaaaa
+        3333333333333333 4444444444444444
+        88776655 44332211 07000000 14000000
+        01000000 02000000 03000000 03000000
+        00000000 00400000 0000040000000000
+        01000000 51000000 00000000 00000000
+        06000000 00000000
+    ''')
+
+    def decode_one(self, data):
+        return decoder._decode_event(9, 1, data, {'qpc_stamp': 10})
+
+    def test_branch_point_identity_and_named_flags(self):
+        value = self.decode_one(self.FAILURE)
+        self.assertEqual(len(self.FAILURE), 120)
+        self.assertEqual(value['event'], 'ContextEvidence')
+        self.assertEqual(value['operation'], 'paging_capture_failure')
+        self.assertEqual(value['context'], '0xaaaaaaaa55555555')
+        self.assertEqual(value['context_id'], 7)
+        self.assertEqual(value['adapter_luid'], '1122334455667788')
+        self.assertEqual(value['decision'], 'stale_generation')
+        self.assertEqual((value['engine_generation'], value['context_generation']), (2, 3))
+        self.assertEqual(value['submission_fence'], 81)
+        self.assertIn('system_context', value['state'])
+        self.assertIn('system_process', value['state'])
+        self.assertEqual(value['canonical_root_segment_offset'], 0x40000)
+
+    def test_same_pointer_does_not_replace_creation_serial(self):
+        first, second = bytearray(self.FAILURE), bytearray(self.FAILURE)
+        struct.pack_into('<I', second, 56, 8)
+        a, b = self.decode_one(first), self.decode_one(second)
+        self.assertEqual(a['context'], b['context'])
+        self.assertNotEqual(a['context_id'], b['context_id'])
+
+    def test_absent_object_never_supplies_creation_flags(self):
+        raw = bytearray(self.FAILURE)
+        struct.pack_into('<I', raw, 8, 0)
+        struct.pack_into('<I', raw, 112, 2)
+        value = self.decode_one(raw)
+        self.assertIsNone(value['context_id'])
+        self.assertIsNone(value['context_flags'])
+        self.assertIsNone(value['process_flags'])
+        self.assertIsNone(value['canonical_root_status'])
+
+    def test_invalid_root_never_supplies_old_binding(self):
+        raw = bytearray(self.FAILURE)
+        flags = struct.unpack_from('<I', raw, 8)[0]
+        struct.pack_into('<I', raw, 8, flags & ~8)
+        value = self.decode_one(raw)
+        self.assertEqual(value['context_id'], 7)
+        self.assertEqual(value['canonical_root_status'], '0x00000000')
+        for key in ('canonical_root_entries', 'canonical_root_segment_offset', 'canonical_root_segment'):
+            self.assertIsNone(value[key])
+
+    def test_both_export_formats_preserve_context_record(self):
+        raw = bytearray(self.FAILURE)
+        struct.pack_into('<I', raw, 52, 0x80000001)  # Negative LUID.HighPart.
+        binary, summary = decoder.decode(export(raw, event_id=9))
+        live, live_summary = decoder.decode_live(json_lines(START, live_event(raw, 9)))
+        self.assertEqual(summary['context_records'], 1)
+        self.assertEqual(live_summary['issues'], [])
+        self.assertEqual(binary[0]['adapter_luid'], '8000000155667788')
+        self.assertEqual(live[0]['adapter_luid'], binary[0]['adapter_luid'])
+        omit = ('time', 'cpu', 'qpc_stamp', 'input_line', 'header_flags')
+        self.assertEqual({k: v for k, v in live[0].items() if k not in omit},
+                         {k: v for k, v in binary[0].items() if k not in omit})
+        self.assertFalse(live_summary['coverage_proven'])
+
+    def test_work_and_operation_validity_flags(self):
+        flags = struct.unpack_from('<I', self.FAILURE, 8)[0]
+        work_only = (32, 64, 128, 256, 512, 524288, 1048576, 4194304, 8388608, 16777216)
+        for operation in (1, 2, 3, 4, 6):
+            for flag in work_only:
+                raw = bytearray(self.FAILURE)
+                struct.pack_into('<I', raw, 4, operation)
+                struct.pack_into('<I', raw, 8, flags | flag)
+                if operation != 6:
+                    struct.pack_into('<I', raw, 112, 0)
+                with self.subTest(operation=operation, flag=flag), self.assertRaises(ValueError):
+                    self.decode_one(raw)
+        for operation in (1, 2, 3, 4, 5):
+            raw = bytearray(self.FAILURE)
+            struct.pack_into('<II', raw, 4, operation, 0)
+            struct.pack_into('<I', raw, 112, 0)
+            with self.subTest(missing_found=operation), self.assertRaises(ValueError):
+                self.decode_one(raw)
+        for operation in (1, 2, 3, 6):
+            for extra in (16, 2097152):
+                raw = bytearray(self.FAILURE)
+                struct.pack_into('<II', raw, 4, operation, flags | extra)
+                if operation != 6:
+                    struct.pack_into('<I', raw, 112, 0)
+                with self.subTest(operation=operation, extra=extra), self.assertRaises(ValueError):
+                    self.decode_one(raw)
+
+    def test_marker_observation_requires_all_source_predicates(self):
+        raw = bytearray(self.FAILURE)
+        flags = (1 | 2 | 4 | 8 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 8192 |
+                 131072 | 524288 | 1048576 | 2097152 | 4194304 | 16777216 | 33554432)
+        struct.pack_into('<III', raw, 4, 5, flags, 0)
+        struct.pack_into('<II', raw, 72, 2, 2)
+        struct.pack_into('<III', raw, 104, 9, 9, 0)
+        value = self.decode_one(raw)
+        self.assertEqual(value['operation'], 'paging_dma_complete')
+        self.assertIn('work_root_matches_canonical', value['state'])
+        self.assertEqual(value['expected'], value['observed'])
+        for missing in (1, 2, 32, 64, 128, 256, 512, 1024, 2048, 8192,
+                        2097152, 4194304, 16777216, 33554432):
+            changed = bytearray(raw)
+            struct.pack_into('<I', changed, 8, flags & ~missing)
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                self.decode_one(changed)
+        changed = bytearray(raw);struct.pack_into('<I', changed, 108, 8)
+        with self.assertRaises(ValueError):self.decode_one(changed)
+        for offset, bad in ((8, flags | 8388608), (12, 0xc00000a3), (68, 0),
+                            (72, 0), (72, 3), (104, 0)):
+            changed = bytearray(raw);struct.pack_into('<I', changed, offset, bad)
+            with self.subTest(offset=offset, bad=bad), self.assertRaises(ValueError):
+                self.decode_one(changed)
+
+    def test_unknown_schema_and_reserved_bits_remain_errors(self):
+        for offset, value in ((0, 2), (8, 0x80000000), (112, 0), (116, 1), (12, 0)):
+            changed = bytearray(self.FAILURE);struct.pack_into('<I', changed, offset, value)
+            with self.subTest(offset=offset), self.assertRaises(ValueError):
+                self.decode_one(changed)
+        with self.assertRaises(ValueError):self.decode_one(self.FAILURE[:-1])
+
+
 if __name__ == '__main__':
     unittest.main()
