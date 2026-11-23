@@ -103,7 +103,8 @@
         "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#process_scoped_wddm20_first_present_20261120",
         "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#native_device_removal_reason_and_swap_effect_20261120",
         "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json#wddm20_first_present_driver_dispatch_20261120",
-        "tegra-x1-wddm/docs/dxvk-games-20261118/wddm20-present1-native-window.json"
+        "tegra-x1-wddm/docs/dxvk-games-20261118/wddm20-present1-native-window.json",
+        "tegra-x1-wddm/docs/present1-reserved1-0790651c/independent-review.json"
       ],
       "cause": "The runtime supplied Reserved=1 and the Present1 input guard returned E_INVALIDARG before the Windows callback. In the process-scoped candidate, the identical FLIP_SEQUENTIAL empty window reached the callback and returned S_OK. A one-clear window also returned S_OK and matched all five desktop samples. The other swap effect still needs candidate validation.",
       "daily_workaround": "Keep the experimental WDDM 2.0 offer confined to a one-time diagnostic client. Use only application paths with independent physical acceptance for daily use.",
@@ -1504,7 +1505,9 @@
           "reason": "No reset, bugcheck, dump or TDR control was dispatched. The same accepted KMD/firmware and complete System interval accompany one normal process exit. This scoped UMD input repair does not diagnose or close the historical recovery fault.",
           "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
         }
-      ]
+      ],
+      "assessment_file": "tegra-x1-wddm/docs/present1-reserved1-0790651c/independent-review.json",
+      "assessment_sha256": "3d68ef6dd6819b8d1c24dd7cca15e7c35a2f72a33a178a22b99b6a28f6b12a2a"
     }
   ],
   "baseline_comparisons": [

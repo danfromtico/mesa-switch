@@ -1,0 +1,293 @@
+{
+  "schema": 1,
+  "decision": "accept_scoped_verified_fix_and_formal_promotion",
+  "reviewer": "independent main review",
+  "main_device_operations": 0,
+  "archive": {
+    "sha256": "e8f3c9857ac1fc5744e8a39bc617bcfe56d11aacff70462a3218edf17a7fdffb",
+    "bytes": 4471418,
+    "members": 279,
+    "originals": 278,
+    "manifest_sha256": "c3bda759f4fa0113cd7031dbd22aafd93435670b05a92730f49082e65d63b09a",
+    "all_SHA_bytes_CRC_and_paths_verified": true,
+    "external_originals_full_SHA_verified": 9
+  },
+  "source": {
+    "integration_head": "df543f16692c6bb220615ba7a7663a1a020e47da",
+    "release_source": "df08e8583abc202732036597f5cb7f0519ba11a5",
+    "UMD_producer": "b02c99e37a9c11c942e237af5fc4642598946c76",
+    "old_native_UMD_producer": "329d0d21a96f0dc2958b954723fc2984c07b4613",
+    "integration_changes_only_four_reviewed_source_files": [
+      "src/nouveau/tgd3d/tgd3d_entry.cpp",
+      "src/nouveau/tgd3d/tgd3d_dxgi.cpp",
+      "src/nouveau/tgd3d/tgd3d_trace.h",
+      "src/nouveau/tgd3d/tests/ddi11_contracts.cpp"
+    ],
+    "release_range_files": 22,
+    "source_identity_limit": "The22-file release range retains actual UMD producer inputs. Main integration preserves unrelated published source outside the four reviewed entry files; do not describe every integration-tree file as the native UMD producer."
+  },
+  "build_review_reused": {
+    "entry_archive": "6deee731e5b3fd3cea87ffeda861e26c6abdf5c7160ee77b83134a3425cff3a5",
+    "signed_UMD": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+    "production_inputs": 86,
+    "dependency_headers": 52,
+    "recompiled_tgd3d_units": 27,
+    "retained_NVDEC_objects": 2,
+    "CPU_model_steps": 6,
+    "new_UMD_builds_or_model_runs": 0
+  },
+  "client_final_build_supplement": {
+    "manifest_sha256": "9ff82fa4a5d4e6ae42f4166ee565ff71c038ff609d55b79a09c7dd02137c7f43",
+    "originals": [
+      {
+        "file": "command.json",
+        "sha256": "1dda9ecacd58c32b8eefa94a7f5f766cc1f52bb3547dc8b23bd8b228f290d558",
+        "bytes": 714
+      },
+      {
+        "file": "stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "file": "stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "file": "Wddm20Present1Empty.exe",
+        "sha256": "c861ed8b491e637e0ee0a141f2700979111b278fb5d65019571e132e643460a3",
+        "bytes": 213504
+      },
+      {
+        "file": "Wddm20Present1Empty.exe.sign.log",
+        "sha256": "86b6c039255d9f5ce40b60411885c0965d4bc001fcd9f6e29116b831f8ed5849",
+        "bytes": 1760
+      }
+    ],
+    "source_sha256": "2f30b8d02ed5d85b529134008181824d45f82a67a11b296c90d03d0499a89edc",
+    "unsigned_sha256": "c861ed8b491e637e0ee0a141f2700979111b278fb5d65019571e132e643460a3",
+    "signed_sha256": "6955881ee6b5e398b7fd2906c7a1a3a7fb6c27394e1bde89cc2f33cd4b0342c9",
+    "compile_exit": 0,
+    "PE": "ARM64",
+    "unsigned_signed_identical_except_PE_signature_fields": true,
+    "reason": "The delivery client/unsigned-build directory is an earlier revision. Existing build-r3 originals were independently recovered and bound to final source/signed runtime bytes; original archive retained unchanged. No recompilation or test replay."
+  },
+  "actual_native_case": {
+    "boot": 97912,
+    "Code": 0,
+    "AC": "Online",
+    "PID": 7676,
+    "TID": 6912,
+    "process_start_filetime": 134398845579346428,
+    "native_dispatches": 1,
+    "public_Present1_calls": 1,
+    "system_DXGI": true,
+    "effect": "FLIP_SEQUENTIAL",
+    "rendering_writes": 0,
+    "output_required": false,
+    "visible_output_claim": false,
+    "normal_exit": 0,
+    "DWM": 1412,
+    "DWM_start": "2026-11-23T05:10:48.8135948Z",
+    "loaded_paths": {
+      "d3d11.dll": "C:\\Windows\\SYSTEM32\\d3d11.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_nvk_arm64.DLL",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_d3d_arm64.DLL",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\TegraGpuD3DVk.dll",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\libvulkan_nouveau.dll",
+      "dxgi.dll": "C:\\Windows\\SYSTEM32\\dxgi.dll"
+    },
+    "loaded_hashes": {
+      "d3d11.dll": "ccc352f7097d0320368000dbe9ff92772d8fc909185d95c8a0753cb8f115f880",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "dxgi.dll": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0"
+    },
+    "CreateDevice_WDDM20": [
+      {
+        "id": 4,
+        "version": 2,
+        "pid": 7676,
+        "tid": 6912,
+        "qpc_stamp": 6624158700,
+        "process_start": 134398845579346428,
+        "image": "Wddm20Present1Empty.exe",
+        "status": "00000000",
+        "arg0": 720928,
+        "arg1": 0
+      }
+    ],
+    "validated_Present1_forwarding_pair": [
+      {
+        "id": 34,
+        "version": 2,
+        "pid": 7676,
+        "tid": 6912,
+        "qpc_stamp": 6627178747,
+        "process_start": 134398845579346428,
+        "image": "Wddm20Present1Empty.exe",
+        "status": "8000000a",
+        "arg0": 1,
+        "arg1": 720928
+      },
+      {
+        "id": 34,
+        "version": 2,
+        "pid": 7676,
+        "tid": 6912,
+        "qpc_stamp": 6627182203,
+        "process_start": 134398845579346428,
+        "image": "Wddm20Present1Empty.exe",
+        "status": "00000000",
+        "arg0": 1,
+        "arg1": 720928
+      }
+    ]
+  },
+  "trace": {
+    "ETL_sha256": "1f99ebb5c0edc0cc6d4f255164072498abd8d2c765fb80d8b46781c0d52520cd",
+    "bytes": 22609920,
+    "live_lines": 5874,
+    "trace_state_lines": 27,
+    "event_headers_independently_matched_to_ETL": 5847,
+    "generic_96byte_payloads_independently_decoded": 5215,
+    "live_and_closed_decoded_body_records_equal": 5847,
+    "original_loss_counters": 0,
+    "parse_errors": 0,
+    "TraceEnd_query_status": 4201,
+    "TraceEnd_query_interpretation": "session already stopped by owned controller; closed ProcessTrace0, finalized nonzero EndTime and buffer count retained",
+    "independent_scope": "Raw original ETL header and96-byte payload decoding, including the target pair. This is not a separately implemented full ETL container/loss/clock converter; other payload shapes use retained exporter output plus header identity and live/closed parity."
+  },
+  "system_interval": {
+    "first": 97806,
+    "last": 97981,
+    "selected_ids": [
+      12,
+      13,
+      41,
+      6005,
+      6006,
+      6008,
+      1074,
+      1001,
+      4101
+    ],
+    "xml_records": [
+      {
+        "record": 97810,
+        "id": 1074,
+        "provider": "User32"
+      },
+      {
+        "record": 97813,
+        "id": 6006,
+        "provider": "EventLog"
+      },
+      {
+        "record": 97819,
+        "id": 6005,
+        "provider": "EventLog"
+      },
+      {
+        "record": 97826,
+        "id": 13,
+        "provider": "Microsoft-Windows-Kernel-General"
+      },
+      {
+        "record": 97827,
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General"
+      },
+      {
+        "record": 97895,
+        "id": 1074,
+        "provider": "User32"
+      },
+      {
+        "record": 97897,
+        "id": 6006,
+        "provider": "EventLog"
+      },
+      {
+        "record": 97906,
+        "id": 6005,
+        "provider": "EventLog"
+      },
+      {
+        "record": 97911,
+        "id": 13,
+        "provider": "Microsoft-Windows-Kernel-General"
+      },
+      {
+        "record": 97912,
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General"
+      }
+    ],
+    "unexplained_restart_records": []
+  },
+  "formal": {
+    "boot": 97912,
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+    },
+    "source": "df08e8583abc202732036597f5cb7f0519ba11a5",
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981",
+    "qualification_sha256": "abc337bd86346191bee2828564e60898e19493233e2c1d4966d1a833a07281af",
+    "policy_revision": "605644880f1a4c183121cfb645a6a9e775aa2dac2e5fcb707ed9ddfe4eb300eb",
+    "permanent_equals_selected": true,
+    "same_qualified_boot_accepted": true,
+    "additional_permanent_boot_test": false,
+    "trial_and_token_absent": true,
+    "owned_tasks_processes_sessions_active_diagnostic_drivers": 0,
+    "private_x86": {
+      "path": "C:\\Program Files\\SwitchWOA-GpuBoot\\NeonAcceptance-01a20660\\private-x86\\libvulkan_nouveau.dll",
+      "sha256": "5ac50269abb761c9e77dabfb71da035f211263c9609adff056dd6a1cec79cd69",
+      "retained": true
+    },
+    "handoff_to": "01a204e6-bb5e-7a63-b829-4718f86cbd1e",
+    "handoff_sha256": "b56c8cdbf8c605c063847d3553f4e3155e465b9b1aedac6068f6d2aa45728185"
+  },
+  "preparation_failures_retained": [
+    "AtStartup task last1 on each planned boot, exact existing task resumed once after Ready/no-process observation; causes remain unknown.",
+    "Premature candidate identity query rejected CandidateArmed; later CandidateActive plus actual loaded hashes verified before the unique application dispatch."
+  ],
+  "faults": {
+    "open": 19,
+    "closed": 0,
+    "new_GPU_faults": 0,
+    "verified_fix_scope": "wddm20-flip-sequential-empty-reserved1",
+    "output_required": false
+  },
+  "limits": [
+    "Only this actual signed native ARM64 empty-window Reserved1 input is qualified. Other swap effects, rendered output, repeated presentation and game performance are not accepted by this batch.",
+    "Event34 starts after input/version/surface validation; E_PENDING is an entry marker, not a completed return, and absence does not prove no invocation.",
+    "Legacy first-Present,91476/DWM152586,95090,TDR/dump failures and four470e1dbc deferred contracts retain prior unknown/closure conditions.",
+    "Current97912 cold004 files were still active at handoff; only older closed97530/97726 originals are verified here.",
+    "No new Gemini call, UMD rebuild, CPU-model rerun or Switch operation by main review."
+  ],
+  "publication_branch": "tgd3d-vulkan",
+  "goal_complete": false,
+  "independent_audit_sha256": "ca35d642f12117c0a91f5a038047ddd56f52ebd1422f88708e4524060b825cb8",
+  "independent_review_supplement": {
+    "archive": "present1-main-review-supplement-20261122.zip",
+    "bytes": 90941,
+    "sha256": "21bb3cb0eea6bdf6b3e4e6ec3f463fc1327d2311ca985d254c0a2350b5132659",
+    "members": 9,
+    "all_member_SHA_bytes_CRC_verified": true
+  },
+  "workspace_preservation": {
+    "existing_dirty_files": 42,
+    "all_hashes_unchanged": true
+  }
+}
