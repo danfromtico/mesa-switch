@@ -493,6 +493,60 @@ nvk_queue_submit_exec(struct nvk_queue *queue,
    result = nvk_queue_submit_cmd_buffers(queue, submit);
    if (result != VK_SUCCESS)
       goto fail;
+#elif defined(_WIN32)
+   uint32_t max_execs = 0;
+   for (unsigned i = 0; i < submit->command_buffer_count; i++) {
+      struct nvk_cmd_buffer *cmd =
+         container_of(submit->command_buffers[i], struct nvk_cmd_buffer, vk);
+      const uint32_t cmd_execs =
+         util_dynarray_num_elements(&cmd->pushes, struct nvk_cmd_push);
+      if (cmd_execs > UINT32_MAX - max_execs) {
+         result = vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
+         goto fail;
+      }
+      max_execs += cmd_execs;
+   }
+
+   if (max_execs > 0) {
+      if (max_execs > SIZE_MAX / sizeof(struct nvkmd_ctx_exec)) {
+         result = vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
+         goto fail;
+      }
+      STACK_ARRAY(struct nvkmd_ctx_exec, execs, max_execs);
+      if (!execs) {
+         result = vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
+         goto fail;
+      }
+      uint32_t exec_count = 0;
+
+      for (unsigned i = 0; i < submit->command_buffer_count; i++) {
+         struct nvk_cmd_buffer *cmd =
+            container_of(submit->command_buffers[i], struct nvk_cmd_buffer, vk);
+
+         util_dynarray_foreach(&cmd->pushes, struct nvk_cmd_push, push) {
+            if (push->range == 0)
+               continue;
+
+            execs[exec_count++] = (struct nvkmd_ctx_exec) {
+               .addr = push->addr,
+               .size_B = push->range,
+               .incomplete = push->incomplete,
+               .no_prefetch = push->no_prefetch,
+               .written_count = submit->win32_written_count,
+               .written_allocations = submit->win32_written_allocations,
+            };
+         }
+      }
+
+      if (exec_count > 0)
+         result = nvkmd_ctx_exec(queue->exec_ctx, &queue->vk.base,
+                                 exec_count, execs);
+
+      STACK_ARRAY_FINISH(execs);
+
+      if (result != VK_SUCCESS)
+         goto fail;
+   }
 #else
    for (unsigned i = 0; i < submit->command_buffer_count; i++) {
       struct nvk_cmd_buffer *cmd =
@@ -511,10 +565,6 @@ nvk_queue_submit_exec(struct nvk_queue *queue,
             .size_B = push->range,
             .incomplete = push->incomplete,
             .no_prefetch = push->no_prefetch,
-#ifdef _WIN32
-            .written_count = submit->win32_written_count,
-            .written_allocations = submit->win32_written_allocations,
-#endif
          };
       }
 
