@@ -9,7 +9,7 @@
 #include "adapter_abi.h"
 #include "nvdec_abi.h"
 #include "graphics.h"
-#include "diagnostic_events.h"
+#include "debug_report.h"
 
 typedef struct _TG_GPU_CONTEXT_ENGINE TG_GPU_CONTEXT_ENGINE;
 typedef struct _TG_GPU_PROCESS TG_GPU_PROCESS;
@@ -52,6 +52,7 @@ struct _TG_GPU_CONTEXT {
     struct tg_gpu_texture_pool_range TexturePool[TG_GPU_PROGRAM_ENGINES][TG_GPU_TEXTURE_POOLS];
     struct tg_gpu_compute_slm ComputeSlm;
     BOOLEAN Closing,MmeInitialized;
+    UINT PagingEvidenceGeneration; /* first observed CE sub-operation per epoch */
 };
 struct _TG_GPU_CONTEXT_ENGINE {
     DXGKRNL_INTERFACE Dxgk;
@@ -73,6 +74,8 @@ struct _TG_GPU_CONTEXT_ENGINE {
     BOOLEAN UserdBar1Ready;
     struct tg_gpu_channel Channel;
     volatile UINT LastCompletedFence;
+    UINT LastSubmittedFence,EngineQueryFence;
+    BOOLEAN SubmittedFenceValid;
     UINT Marker;
     UINT SnapshotUploads,SnapshotBytes;
     UINT Creating;
@@ -85,6 +88,7 @@ struct _TG_GPU_CONTEXT_ENGINE {
     struct tg_nvdec_client_info NvdecClients;
     NTSTATUS RecoveryStatus;
     BOOLEAN RecoveryPending,RecoverySending,RecoveryNotified,Resetting;
+    TG_GPU_DEBUG_CACHE DebugCache;
 };
 /* The single physical execution slot is serialized; the number of software
  * contexts is limited only by allocation failures, not a fixed slot array.
@@ -113,6 +117,8 @@ struct _TG_GPU_CONTEXT_WORK {
  * operation/session retains the actual device until its last DMA is retired. */
 NTSTATUS TgGpuReferenceVideoDevice(TG_GPU_CONTEXT_ENGINE *, HANDLE, TG_GPU_DEVICE **);
 void TgGpuDereferenceVideoDevice(TG_GPU_DEVICE *);
+/* Owner storage is zeroed once before first use (nonpaged zeroed pool in the
+ * adapter/diagnostic callers). The resident cache then lives until owner free. */
 NTSTATUS TgGpuInitializeContextEngine(TG_GPU_CONTEXT_ENGINE *, const DXGKRNL_INTERFACE *,
                                      TG_GPU_TABLE_SEGMENT *);
 /* Install the trusted cold backend's immutable golden copy once. Submission
@@ -155,7 +161,8 @@ NTSTATUS TgGpuGetCommandVa(TG_GPU_CONTEXT_ENGINE *,HANDLE,struct tg_gpu_command_
 NTSTATUS TgGpuCaptureContextWork(TG_GPU_CONTEXT_ENGINE *,
     const DXGKARG_SUBMITCOMMANDVIRTUAL *, const struct tg_gpu_command_info *,
     TG_GPU_CONTEXT_WORK *);
-NTSTATUS TgGpuCapturePagingContext(TG_GPU_CONTEXT_ENGINE *,HANDLE,TG_GPU_CONTEXT_WORK *);
+NTSTATUS TgGpuCapturePagingContext(TG_GPU_CONTEXT_ENGINE *,HANDLE,TG_GPU_CONTEXT_WORK *,TG_GPU_CONTEXT_EVENT *);
+VOID TgGpuTracePagingCompletion(TG_GPU_CONTEXT_ENGINE *,TG_GPU_CONTEXT_WORK *);
 NTSTATUS TgGpuActivateContextWork(TG_GPU_CONTEXT_ENGINE *, TG_GPU_CONTEXT_WORK *,
                                   const struct tg_gpu_command_info *);
 NTSTATUS TgGpuCancelCapturedWork(TG_GPU_CONTEXT_ENGINE *, TG_GPU_CONTEXT_WORK *);

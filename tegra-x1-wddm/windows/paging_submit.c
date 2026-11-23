@@ -45,6 +45,10 @@ static NTSTATUS finish_dma(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
     status = TgGpuObserveContextWork(e,w,io,power);
     if (status != STATUS_SUCCESS) return status;
 
+    /* Observed GPU and CPU-visible markers after retirement, not a software
+     * completion claim. At most one record per context/hardware generation. */
+    TgGpuTracePagingCompletion(e,w);
+
     /* Only a retired and CPU-visible marker advances this sub-operation.
      * Keep the context reference and OS fence until the entire DMA buffer
      * completes, including subsequent PTE updates and TLB invalidations. */

@@ -39,6 +39,59 @@ BOOLEAN TgGpuIsGdiContext(TG_GPU_CONTEXT_ENGINE *e,HANDLE handle)
     return gdi;
 }
 
+/* Engine.Lock held; publish only after all spin locks are released. Root
+ * fields describe the canonical binding. Work flags distinguish an owned
+ * snapshot and a canonical binding changed since that snapshot was taken. */
+static VOID context_snapshot_locked(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT *c,
+    ULONG operation,NTSTATUS status,UINT prior,const TG_GPU_CONTEXT_WORK *w,TG_GPU_CONTEXT_EVENT *r)
+{
+    *r=(TG_GPU_CONTEXT_EVENT){.Version=1,.Operation=operation,.Status=status,
+        .Engine=(ULONGLONG)(ULONG_PTR)e,.EngineGeneration=e->GraphicsGeneration,.PriorGeneration=prior};
+    if(e->AdapterIdentityReady){r->AdapterLuid=e->AdapterLuid;r->Flags|=TgGpuContextAdapterValid;}
+    if(e->RecoveryPending)r->Flags|=TgGpuContextRecovery;
+    if(e->Resetting)r->Flags|=TgGpuContextResetting;
+    if(e->Stopping)r->Flags|=TgGpuContextStopping;
+    if(e->Graphics.Memory.Handle)r->Flags|=TgGpuContextGraphicsReady;
+    if(!c)return;
+    r->Flags|=TgGpuContextFound;r->Context=(ULONGLONG)(ULONG_PTR)c;
+    r->Device=(ULONGLONG)(ULONG_PTR)c->Device;r->ContextId=c->ContextId;
+    r->ContextFlags=c->Flags.Value;r->ContextGeneration=c->GraphicsGeneration;
+    r->RootStatus=c->RootStatus;
+    if(c->Root.Valid) {
+        r->Flags|=TgGpuContextRootValid;r->RootEntries=c->Root.Entries;
+        r->RootSegmentId=c->Root.Address.SegmentId;r->RootSegmentOffset=c->Root.Address.SegmentOffset;
+    }
+    if(c->Closing)r->Flags|=TgGpuContextClosing;
+    if(c->Flags.SystemContext)r->Flags|=TgGpuContextSystem;
+    if(c->Flags.VirtualAddressing)r->Flags|=TgGpuContextVirtual;
+    if(c->Flags.GdiContext)r->Flags|=TgGpuContextGdi;
+    if(c->Device->Process) {
+        r->Flags|=TgGpuContextProcessPresent;
+        r->Process=(ULONGLONG)(ULONG_PTR)c->Device->Process;
+        r->ProcessFlags=c->Device->Process->Flags.Value;
+        if(c->Device->Process->Flags.SystemProcess)r->Flags|=TgGpuContextSystemProcess;
+    }
+    if(w && w->Engine==e && w->Context==c) {
+        r->Flags|=TgGpuContextWorkSnapshot;r->SubmissionFence=w->SubmissionFence;
+        r->Expected=w->Expected;r->Observed=w->TraceObserved;
+        if(w->Root.Valid)r->Flags|=TgGpuContextWorkRootValid;
+        if(w->Root.Valid && c->Root.Valid && w->Root.DeviceAddress==c->Root.DeviceAddress &&
+           w->Root.Address.SegmentId==c->Root.Address.SegmentId &&
+           w->Root.Address.SegmentOffset==c->Root.Address.SegmentOffset &&
+           w->Root.Entries==c->Root.Entries && w->Root.VaLimit==c->Root.VaLimit)
+            r->Flags|=TgGpuContextWorkRootMatches;
+        if(w->GpuCompleted)r->Flags|=TgGpuContextGpuCompleted;
+        if(w->CpuCompleted)r->Flags|=TgGpuContextCpuCompleted;
+        if(w->Retired)r->Flags|=TgGpuContextRetired;
+        if(w->TraceObservedValid)r->Flags|=TgGpuContextObservedValid;
+        if(w->TraceObservedCpu)r->Flags|=TgGpuContextObservedCpu;
+        if(w->Submitted)r->Flags|=TgGpuContextSubmitted;
+        if(w->HardwareBusy)r->Flags|=TgGpuContextHardwareBusy;
+        if(w->Attempted)r->Flags|=TgGpuContextAttempted;
+        if(w->Paging)r->Flags|=TgGpuContextPaging;
+    }
+}
+
 NTSTATUS TgGpuInitializeContextEngine(TG_GPU_CONTEXT_ENGINE *e,
     const DXGKRNL_INTERFACE *dxgk, TG_GPU_TABLE_SEGMENT *tables)
 {
@@ -49,7 +102,13 @@ NTSTATUS TgGpuInitializeContextEngine(TG_GPU_CONTEXT_ENGINE *e,
         !dxgk->DxgkCbQueueDpc || !dxgk->DxgkCbNotifyDpc ||
         !dxgk->DxgkCbReserveGpuVirtualAddressRange)
         return STATUS_INVALID_PARAMETER;
-    RtlZeroMemory(e,sizeof(*e));
+    TgGpuResetDebugCache(&e->DebugCache);
+    /* CollectDbgInfo can span reinitialization. Clear the engine around its
+     * resident cache, preserving the invalidated sequence and atomic words. */
+    SIZE_T cache_offset=FIELD_OFFSET(TG_GPU_CONTEXT_ENGINE,DebugCache);
+    SIZE_T cache_end=cache_offset+sizeof(e->DebugCache);
+    RtlZeroMemory(e,cache_offset);
+    RtlZeroMemory((UCHAR *)e+cache_end,sizeof(*e)-cache_end);
     e->Dxgk=*dxgk; e->Tables=tables;
     KeInitializeSpinLock(&e->Lock);
     InitializeListHead(&e->Processes); InitializeListHead(&e->Devices); InitializeListHead(&e->Contexts);
@@ -141,7 +200,8 @@ NTSTATUS APIENTRY TgGpuDdiCreateDevice(HANDLE adapter, DXGKARG_CREATEDEVICE *a)
 NTSTATUS APIENTRY TgGpuDdiCreateContext(HANDLE device, DXGKARG_CREATECONTEXT *a)
 {
     TG_GPU_DEVICE *d=device; TG_GPU_CONTEXT_ENGINE *e; TG_GPU_CONTEXT *c;
-    KIRQL irql; NTSTATUS status;
+    KIRQL irql; NTSTATUS status;TG_GPU_CONTEXT_EVENT event;
+    BOOLEAN trace=TgGpuTraceContextEnabled();
     if (!d || !a) return STATUS_INVALID_PARAMETER;
     /* One node/physical engine; no protected or hardware-queue capability is
      * advertised. A software context does not consume a hardware FIFO slot.
@@ -154,10 +214,8 @@ NTSTATUS APIENTRY TgGpuDdiCreateContext(HANDLE device, DXGKARG_CREATECONTEXT *a)
     KeAcquireSpinLock(&e->Lock,&irql);
     if (e->Stopping || d->Closing) { KeReleaseSpinLock(&e->Lock,irql); ExFreePoolWithTag(c,TAG); return STATUS_DEVICE_NOT_READY; }
     ++d->Contexts;++e->Creating; /* reserve the parent while allocation may sleep */
-    if(d->Process) {
-        if(!++e->ContextSerial)++e->ContextSerial;
-        c->ContextId=e->ContextSerial;
-    }
+    if(!++e->ContextSerial)++e->ContextSerial;
+    c->ContextId=e->ContextSerial;
     KeReleaseSpinLock(&e->Lock,irql);
     status=TgGpuAllocatePrivateMemory(&e->Dxgk,d->Process?TG_GPU_CONTEXT_PRIVATE_BYTES:PAGE_SIZE,
                                      0x80000000,0xffffffff,&c->Instance);
@@ -165,7 +223,9 @@ NTSTATUS APIENTRY TgGpuDdiCreateContext(HANDLE device, DXGKARG_CREATECONTEXT *a)
     if (!NT_SUCCESS(status)) {
         --d->Contexts; KeReleaseSpinLock(&e->Lock,irql); ExFreePoolWithTag(c,TAG); return status;
     }
-    InsertTailList(&e->Contexts,&c->Link); KeReleaseSpinLock(&e->Lock,irql);
+    InsertTailList(&e->Contexts,&c->Link);
+    if(trace)context_snapshot_locked(e,c,TgGpuContextCreate,STATUS_SUCCESS,0,NULL,&event);
+    KeReleaseSpinLock(&e->Lock,irql);
     RtlZeroMemory(&a->ContextInfo,sizeof(a->ContextInfo));
     a->ContextInfo.DmaBufferSize=TG_GPU_DMA_BUFFER_BYTES;
     /* VidMm needs aperture-backed DMA buffers to map OS-generated copies
@@ -189,11 +249,12 @@ NTSTATUS APIENTRY TgGpuDdiCreateContext(HANDLE device, DXGKARG_CREATECONTEXT *a)
     /* VidMm manages residency. No system-IOMMU capability or GDI acceleration
      * is implied by creating the object. Submission/paging dispatch is separate.
      */
-    a->hContext=c; return STATUS_SUCCESS;
+    a->hContext=c;if(trace)TgGpuTraceContext(&event);return STATUS_SUCCESS;
 }
 NTSTATUS APIENTRY TgGpuDdiDestroyContext(HANDLE context)
 {
     TG_GPU_CONTEXT *c=context; TG_GPU_CONTEXT_ENGINE *e; KIRQL irql; NTSTATUS status;
+    TG_GPU_CONTEXT_EVENT event;BOOLEAN trace=TgGpuTraceContextEnabled();
     if (!c) return STATUS_INVALID_PARAMETER;
     e=c->Device->Engine; KeAcquireSpinLock(&e->Lock,&irql);
     if (c->References || c->Closing) { KeReleaseSpinLock(&e->Lock,irql); return STATUS_DEVICE_BUSY; }
@@ -206,7 +267,10 @@ NTSTATUS APIENTRY TgGpuDdiDestroyContext(HANDLE context)
         c->Closing=FALSE; KeReleaseSpinLock(&e->Lock,irql); return status;
     }
     RemoveEntryList(&c->Link); --c->Device->Contexts;
-    KeReleaseSpinLock(&e->Lock,irql); ExFreePoolWithTag(c,TAG); return STATUS_SUCCESS;
+    if(trace)context_snapshot_locked(e,c,TgGpuContextDestroy,STATUS_SUCCESS,c->GraphicsGeneration,NULL,&event);
+    KeReleaseSpinLock(&e->Lock,irql);
+    if(trace)TgGpuTraceContext(&event);
+    ExFreePoolWithTag(c,TAG);return STATUS_SUCCESS;
 }
 SIZE_T APIENTRY TgGpuDdiGetRootPageTableSize(HANDLE adapter, DXGKARG_GETROOTPAGETABLESIZE *a)
 {
@@ -220,6 +284,7 @@ SIZE_T APIENTRY TgGpuDdiGetRootPageTableSize(HANDLE adapter, DXGKARG_GETROOTPAGE
 VOID APIENTRY TgGpuDdiSetRootPageTable(HANDLE adapter, const DXGKARG_SETROOTPAGETABLE *a)
 {
     TG_GPU_CONTEXT_ENGINE *e=adapter; TG_GPU_CONTEXT *c; KIRQL irql;
+    TG_GPU_CONTEXT_EVENT event;BOOLEAN trace=TgGpuTraceContextEnabled(),publish=FALSE;
     if (!e || !a) return;
     KeAcquireSpinLock(&e->Lock,&irql); c=find_context(e,a->hContext);
     if (c) {
@@ -234,8 +299,10 @@ VOID APIENTRY TgGpuDdiSetRootPageTable(HANDLE adapter, const DXGKARG_SETROOTPAGE
          * failed change; existing work retains its own validated snapshot.
          */
         if (!NT_SUCCESS(c->RootStatus)) c->Root.Valid=FALSE;
+        if(trace){context_snapshot_locked(e,c,TgGpuContextSetRoot,c->RootStatus,c->GraphicsGeneration,NULL,&event);publish=TRUE;}
     }
     KeReleaseSpinLock(&e->Lock,irql);
+    if(publish)TgGpuTraceContext(&event);
 }
 void TgGpuRegisterContextDdis(DRIVER_INITIALIZATION_DATA *d)
 {
@@ -257,7 +324,17 @@ NTSTATUS APIENTRY TgGpuDdiQueryCurrentFence(HANDLE adapter, DXGKARG_QUERYCURRENT
 {
     TG_GPU_CONTEXT_ENGINE *e=adapter;
     if (!e || !a || a->NodeOrdinal || a->EngineOrdinal) return STATUS_INVALID_PARAMETER;
-    KeMemoryBarrier(); a->CurrentFence=e->LastCompletedFence; return STATUS_SUCCESS;
+    KeMemoryBarrier(); a->CurrentFence=e->LastCompletedFence;
+    if(TgGpuTraceTdrEnabled()) {
+        /* QueryCurrentFence can reenter notification with Engine.Lock held.
+         * Report only its actual output; do not lock or claim a paired engine
+         * snapshot or adapter identity from independently sampled fields. */
+        TG_GPU_TDR_EVENT record={.Version=1,.Operation=TgGpuTdrQueryFence,.Phase=1,
+            .Flags=TgGpuTdrResultValid,.Engine=(ULONGLONG)(ULONG_PTR)e,
+            .NodeOrdinal=a->NodeOrdinal,.EngineOrdinal=a->EngineOrdinal,.Result=a->CurrentFence};
+        TgGpuTraceTdr(&record);
+    }
+    return STATUS_SUCCESS;
 }
 VOID TgGpuDdiDpcRoutine(PVOID adapter)
 {
@@ -332,20 +409,26 @@ NTSTATUS TgGpuCaptureContextWork(TG_GPU_CONTEXT_ENGINE *e,
     ++c->References;
     KeReleaseSpinLock(&e->Lock,irql); return STATUS_SUCCESS;
 }
-NTSTATUS TgGpuCapturePagingContext(TG_GPU_CONTEXT_ENGINE *e,HANDLE handle,TG_GPU_CONTEXT_WORK *w)
+NTSTATUS TgGpuCapturePagingContext(TG_GPU_CONTEXT_ENGINE *e,HANDLE handle,TG_GPU_CONTEXT_WORK *w,
+                                  TG_GPU_CONTEXT_EVENT *evidence)
 {
-    KIRQL irql;
-    NTSTATUS status = STATUS_INVALID_PARAMETER;
-
+    KIRQL irql;UINT decision=TgGpuContextNoDecision;
+    NTSTATUS status=STATUS_INVALID_PARAMETER;
+    if(evidence)RtlZeroMemory(evidence,sizeof(*evidence));
     KeAcquireSpinLock(&e->Lock,&irql);
-    TG_GPU_CONTEXT *c = find_context(e,handle);
-    if (e->Stopping || e->Resetting || e->RecoveryPending)
-        status = STATUS_DEVICE_NOT_READY;
+    TG_GPU_CONTEXT *c=find_context(e,handle);
+    if(e->Stopping || e->Resetting || e->RecoveryPending) {
+        status=STATUS_DEVICE_NOT_READY;decision=TgGpuContextEngineUnavailable;
+    }
     else if (c && !c->Closing && c->Flags.SystemContext && c->Flags.VirtualAddressing &&
              c->Device->Process && c->Device->Process->Flags.SystemProcess) {
-        status = STATUS_DEVICE_NOT_READY;
-        if (c->Root.Valid && NT_SUCCESS(c->RootStatus) && e->Graphics.Memory.Handle &&
-            (!c->GraphicsGeneration || c->GraphicsGeneration == e->GraphicsGeneration)) {
+        status=STATUS_DEVICE_NOT_READY;
+        if(!c->Root.Valid)decision=TgGpuContextRootUnavailable;
+        else if(!NT_SUCCESS(c->RootStatus))decision=TgGpuContextRootFailed;
+        else if(!e->Graphics.Memory.Handle)decision=TgGpuContextGraphicsUnavailable;
+        else if(c->GraphicsGeneration && c->GraphicsGeneration!=e->GraphicsGeneration)
+            decision=TgGpuContextStaleGeneration;
+        else {
             w->Context = c;
             w->Root = c->Root;
             w->InternalVa = c->Device->Process->Internal.Base;
@@ -353,9 +436,38 @@ NTSTATUS TgGpuCapturePagingContext(TG_GPU_CONTEXT_ENGINE *e,HANDLE handle,TG_GPU
             ++c->References;
             status = STATUS_SUCCESS;
         }
+    } else decision=TgGpuContextInvalid;
+    /* Queue submission holds Queue.Lock here. Return a branch-point snapshot
+     * for publication after that caller releases the lock; never emit ETW
+     * under either object spin lock or inspect a handle after its lifetime. */
+    if(evidence && status!=STATUS_SUCCESS) {
+        context_snapshot_locked(e,c,TgGpuContextCaptureFailure,status,c?c->GraphicsGeneration:0,NULL,evidence);
+        evidence->Context=(ULONGLONG)(ULONG_PTR)handle;evidence->Decision=decision;
+        evidence->SubmissionFence=w->SubmissionFence;
+        if(w->Paging)evidence->Flags|=TgGpuContextPaging;
     }
     KeReleaseSpinLock(&e->Lock,irql);
     return status;
+}
+
+VOID TgGpuTracePagingCompletion(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w)
+{
+    TG_GPU_CONTEXT_EVENT event;KIRQL irql;BOOLEAN publish=FALSE;
+    if(!e || !w || !TgGpuTraceContextEnabled())return;
+    KeAcquireSpinLock(&e->Lock,&irql);
+    TG_GPU_CONTEXT *c=w->Context;
+    if(w->Engine==e && e->Active==w && w->Paging && c && c->References &&
+       c->Flags.SystemContext && c->Flags.VirtualAddressing && c->Device->Process && c->Device->Process->Flags.SystemProcess &&
+       e->GraphicsGeneration && c->GraphicsGeneration==e->GraphicsGeneration &&
+       c->PagingEvidenceGeneration!=e->GraphicsGeneration && w->Submitted && w->Attempted && !w->HardwareBusy &&
+       w->Retired && w->GpuCompleted && w->CpuCompleted && w->Expected &&
+       w->TraceObservedValid && w->TraceObservedCpu && w->TraceObserved==w->Expected) {
+        context_snapshot_locked(e,c,TgGpuContextPagingDmaComplete,STATUS_SUCCESS,
+            c->GraphicsGeneration,w,&event);
+        c->PagingEvidenceGeneration=e->GraphicsGeneration;publish=TRUE;
+    }
+    KeReleaseSpinLock(&e->Lock,irql);
+    if(publish)TgGpuTraceContext(&event);
 }
 
 NTSTATUS TgGpuActivateContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
@@ -451,7 +563,8 @@ NTSTATUS TgGpuAcquireContextWork(TG_GPU_CONTEXT_ENGINE *e,
 NTSTATUS TgGpuPrepareContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w)
 {
     KIRQL irql;NTSTATUS status=STATUS_SUCCESS;TG_GPU_CONTEXT *c;
-    BOOLEAN build;UINT generation;
+    BOOLEAN build;UINT generation;TG_GPU_CONTEXT_EVENT event;
+    BOOLEAN trace=TgGpuTraceContextEnabled(),publish=FALSE;
     if (!e || !w) return STATUS_INVALID_PARAMETER;
     KeAcquireSpinLock(&e->Lock,&irql);c=w->Context;
     if (e->Active!=w || !c || w->Prepared || w->Signaling || w->Notified || w->HardwareBusy || w->Attempted) {
@@ -481,7 +594,13 @@ NTSTATUS TgGpuPrepareContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w
         w->IndirectSuffixOffset,w->Expected,&gp_put)) status=STATUS_INVALID_PARAMETER;
     if (NT_SUCCESS(status)) { w->GpPut=gp_put;KeMemoryBarrier();w->Prepared=TRUE; }
     w->HardwareBusy=FALSE;
-    KeReleaseSpinLock(&e->Lock,irql);return status;
+    if(trace && build && c->Flags.SystemContext) {
+        context_snapshot_locked(e,c,TgGpuContextPrepare,status,0,w,&event);
+        event.Flags|=TgGpuContextRebuilding;publish=TRUE;
+    }
+    KeReleaseSpinLock(&e->Lock,irql);
+    if(publish)TgGpuTraceContext(&event);
+    return status;
 }
 static BOOLEAN NotifyFence(PVOID context)
 {

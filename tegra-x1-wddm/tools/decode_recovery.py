@@ -22,6 +22,19 @@ PAYLOAD = struct.Struct('<6IQ10I')
 EXECUTION_PAYLOAD = struct.Struct('<8I3Q24I')
 RESET_PACKET_HEADER = struct.Struct('<4I2Q28I')
 DISPLAY_PAYLOAD = struct.Struct('<13I')
+TDR_PAYLOAD = struct.Struct('<4IQ2Ii6Ii')
+CONTEXT_PAYLOAD = struct.Struct('<3Ii4Q8IiIQ6I')
+CONTEXT_OPERATIONS = ('unknown', 'create', 'destroy', 'set_root', 'prepare',
+                      'paging_dma_complete', 'paging_capture_failure')
+CONTEXT_DECISIONS = ('none', 'engine_unavailable', 'invalid_context', 'root_unavailable',
+                     'root_status_failed', 'graphics_unavailable', 'stale_generation')
+CONTEXT_FLAGS = ('found', 'process_present', 'adapter_identity_valid', 'root_valid', 'rebuilding',
+                 'gpu_completed', 'cpu_completed', 'retired', 'observed_valid', 'observed_cpu',
+                 'system_context', 'virtual_addressing', 'gdi_context', 'system_process',
+                 'recovery_pending', 'resetting', 'stopping', 'graphics_ready', 'closing',
+                 'work_root_valid', 'work_root_matches_canonical', 'work_snapshot',
+                 'submitted', 'hardware_busy', 'attempted', 'paging')
+TDR_OPERATIONS = ('unknown', 'reset_adapter', 'restart_adapter', 'query_engine', 'reset_engine', 'query_current_fence')
 DISPLAY_OPERATIONS = ('unknown', 'commit_vidpn', 'set_timings', 'update_active_path', 'source_visibility')
 RESET_HARDWARE_FIELDS = ('flags', 'mc_enable', 'pbdma_enable', 'pbdma_before', 'pbdma_after',
     'userd_get', 'userd_put', 'userd_reference', 'gp_get', 'gp_put', 'gp_fetch',
@@ -49,6 +62,76 @@ EXECUTION_FIELDS = ('submission_fence', 'last_completed_fence', 'expected', 'obs
 def _decode_event(event_id, version, payload, metadata):
     """Decode the same fixed KMD payload for binary and live exports."""
     size = len(payload)
+    if event_id == 9:
+        if version != 1 or size != CONTEXT_PAYLOAD.size:
+            raise ValueError('unsupported context evidence schema')
+        v = CONTEXT_PAYLOAD.unpack(payload)
+        operation, flags, decision = v[1], v[2], v[23]
+        if (v[0] != 1 or not 1 <= operation <= 6 or flags & ~0x3ffffff or
+                v[24] or not 0 <= decision < len(CONTEXT_DECISIONS) or
+                ((operation == 6) != (decision != 0)) or
+                (operation == 6 and v[3] >= 0) or
+                (operation != 6 and not flags & 1) or
+                (flags & 8192 and not flags & 2) or
+                (flags & (2 | 8 | 1024 | 2048 | 4096 | 262144 | 2097152) and not flags & 1) or
+                (flags & (32 | 64 | 128 | 256 | 512 | 524288 | 1048576 | 4194304 | 8388608 | 16777216) and not flags & 2097152) or
+                (operation == 4 and not flags & 2097152) or
+                (operation in (1, 2, 3, 6) and flags & 2097152) or
+                (flags & 16 and operation != 4) or
+                (flags & 1048576 and flags & (8 | 524288 | 2097152) != (8 | 524288 | 2097152))):
+            raise ValueError('invalid context evidence validity flags')
+        if operation == 5:
+            required = 1 | 2 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 8192 | 2097152 | 4194304 | 16777216 | 33554432
+            if (flags & required != required or flags & 8388608 or v[3] != 0 or
+                    not v[13] or v[13] != v[14] or not v[21] or v[21] != v[22]):
+                raise ValueError('inconsistent paging DMA observation')
+        found, process, root = bool(flags & 1), bool(flags & 2), bool(flags & 8)
+        return {'event': 'ContextEvidence', **metadata, 'operation': CONTEXT_OPERATIONS[operation],
+                'flags': f'0x{flags:08x}', 'state': [name for bit, name in enumerate(CONTEXT_FLAGS) if flags & (1 << bit)],
+                'status': f'0x{v[3] & 0xffffffff:08x}', 'engine_identity': f'0x{v[4]:016x}',
+                'context': f'0x{v[5]:016x}', 'device': f'0x{v[6]:016x}' if found else None,
+                'process': f'0x{v[7]:016x}' if process else None,
+                'adapter_luid': f'{v[9]:08x}{v[8]:08x}' if flags & 4 else None,
+                'context_id': v[10] if found else None, 'context_flags': f'0x{v[11]:08x}' if found else None,
+                'process_flags': f'0x{v[12]:08x}' if process else None,
+                'engine_generation': v[13], 'context_generation': v[14] if found else None,
+                'prior_generation': v[15] if found else None,
+                'canonical_root_status': f'0x{v[16] & 0xffffffff:08x}' if found else None,
+                'canonical_root_entries': v[17] if root else None,
+                'canonical_root_segment_offset': v[18] if root else None,
+                'canonical_root_segment': v[19] if root else None,
+                'submission_fence': v[20], 'expected': v[21], 'observed': v[22],
+                'decision': CONTEXT_DECISIONS[decision]}
+    if event_id == 8:
+        if version != 1 or size != TDR_PAYLOAD.size:
+            raise ValueError('unsupported TDR contract schema')
+        v = TDR_PAYLOAD.unpack(payload)
+        operation, phase, flags, status = v[1], v[2], v[3], v[7]
+        if v[0] != 1 or not 1 <= operation <= 5 or phase not in (0, 1) or flags & ~8191:
+            raise ValueError('invalid TDR contract header')
+        result_valid, snapshot = bool(flags & 2), bool(flags & 4)
+        if ((result_valid and (phase != 1 or operation not in (3, 4, 5) or status != 0)) or
+                (operation in (3, 4, 5) and (phase != 1 or (status == 0) != result_valid)) or
+                (operation == 3 and result_valid and v[12] not in (0, 1)) or
+                (flags & (1 | 4096) and not snapshot) or
+                (flags & 8 and (not snapshot or operation != 3))):
+            raise ValueError('inconsistent TDR contract field validity')
+        queue = None
+        if snapshot and operation in (3, 4):
+            queue = dict(zip(('healthy', 'idle', 'paused', 'failed', 'servicing', 'pending'),
+                             (bool(flags & bit) for bit in (16, 32, 256, 512, 1024, 2048))))
+            queue['failure_status'] = f'0x{v[14] & 0xffffffff:08x}'
+        return {'event': 'TdrContract', **metadata, 'operation': TDR_OPERATIONS[operation],
+                'phase': 'return' if phase else 'entry', 'engine_identity': f'0x{v[4]:016x}',
+                'adapter_luid': f'{v[6]:08x}{v[5]:08x}' if flags & 4096 else None,
+                'node': v[8], 'engine': v[9], 'status': f'0x{status & 0xffffffff:08x}' if phase else None,
+                'flags': f'0x{flags:08x}', 'engine_snapshot': snapshot,
+                'last_submitted_fence': v[10] if flags & 1 else None,
+                'last_completed_fence': v[11] if snapshot else None,
+                'result': v[12] if result_valid else None,
+                'previous_query_fence': v[13] if flags & 8 else None,
+                'queue': queue, 'recovery_pending': bool(flags & 64) if snapshot else None,
+                'resetting': bool(flags & 128) if snapshot else None}
     if event_id == 4:
         if version != 1 or size != DISPLAY_PAYLOAD.size:
             raise ValueError('unsupported display-path schema')
@@ -149,6 +232,7 @@ def decode(data):
                      'execution_records': sum(r['event'] == 'ExecutionState' for r in records),
                      'reset_packet_chunks': sum(r['event'] == 'ResetPacket' for r in records),
                      'display_records': sum(r['event'] == 'DisplayPath' for r in records),
+                     'context_records': sum(r['event'] == 'ContextEvidence' for r in records),
                      'last_timestamp': last, 'requested_seconds': seconds,
                      'sha256': hashlib.sha256(data).hexdigest()}
 

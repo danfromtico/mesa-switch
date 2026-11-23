@@ -49,6 +49,7 @@ VOID TgGpuTraceExecutionState(TG_GPU_CONTEXT_ENGINE *e,enum tg_gpu_execution_sou
             record.ChannelValue=e->Channel.last_value;
         }
     }
+    TgGpuCacheExecution(&e->DebugCache,&record);
     KeReleaseSpinLock(&e->Lock,irql);
     if(q)KeReleaseSpinLock(&q->Lock,queue_irql);
     TgGpuTraceExecution(&record);
@@ -106,6 +107,7 @@ NTSTATUS TgGpuInitializeWorkQueue(TG_GPU_WORK_QUEUE *q,TG_GPU_CONTEXT_ENGINE *e)
     KeInitializeSpinLock(&q->Lock);InitializeListHead(&q->Pending);
     KeInitializeMutex(&q->DispatchGate,0);
     KeInitializeEvent(&q->Wake,SynchronizationEvent,FALSE);e->QueueOwner=q;
+    e->EngineQueryFence=e->LastCompletedFence;
     KeReleaseSpinLock(&e->Lock,irql);return STATUS_SUCCESS;
 }
 static NTSTATUS paging_range(TG_GPU_CONTEXT_ENGINE *engine,const DXGKARG_SUBMITCOMMANDVIRTUAL *a,
@@ -142,10 +144,23 @@ static NTSTATUS paging_range(TG_GPU_CONTEXT_ENGINE *engine,const DXGKARG_SUBMITC
     return end-*offset==a->DmaBufferSize?STATUS_SUCCESS:STATUS_INVALID_PARAMETER;
 }
 
+/* Caller holds Queue.Lock; the worker uses the same Queue -> Engine order. */
+static VOID begin_progress_interval(TG_GPU_WORK_QUEUE *q)
+{
+    KIRQL irql;
+    if(!q->Servicing && !q->Current.Engine && IsListEmpty(&q->Pending)) {
+        KeAcquireSpinLock(&q->Engine->Lock,&irql);
+        q->Engine->EngineQueryFence=q->Engine->LastCompletedFence;
+        KeReleaseSpinLock(&q->Engine->Lock,irql);
+    }
+}
+
 static NTSTATUS queue_submit(TG_GPU_WORK_QUEUE *q,const DXGKARG_SUBMITCOMMANDVIRTUAL *a,
     TG_GPU_QUEUE_ENTRY *reserved,TG_GPU_COMMAND_SNAPSHOT *snapshot,BOOLEAN *used)
 {
     TG_GPU_QUEUE_ENTRY *entry;LIST_ENTRY *l;KIRQL irql,engine_irql;NTSTATUS status;
+    TG_GPU_CONTEXT_EVENT context_evidence={0};
+    const BOOLEAN context_trace=TgGpuTraceContextEnabled();
     if(used)*used=FALSE;
     if(!q || !q->Engine || !a)return STATUS_INVALID_PARAMETER;
     entry=a->pDmaBufferPrivateData;
@@ -208,7 +223,8 @@ static NTSTATUS queue_submit(TG_GPU_WORK_QUEUE *q,const DXGKARG_SUBMITCOMMANDVIR
                 if (!system_context || (a->hContext && a->hContext!=system_context))
                     status=STATUS_INVALID_PARAMETER;
                 else
-                    status=TgGpuCapturePagingContext(q->Engine,system_context,&entry->Work);
+                    status=TgGpuCapturePagingContext(q->Engine,system_context,&entry->Work,
+                        context_trace?&context_evidence:NULL);
             }
         }
     } else {
@@ -234,14 +250,17 @@ rejected:
         RtlZeroMemory(reserved,sizeof(*reserved));reserved->Owned=TRUE;
         reserved->Work.Engine=q->Engine;reserved->Work.Software=reserved->Work.Rejected=TRUE;
         reserved->Work.SubmissionFence=reserved->Work.CompletionFence=a->SubmissionFenceId;
+        begin_progress_interval(q);
         InsertTailList(&q->Pending,&reserved->Link);*used=TRUE;
     }
     if(NT_SUCCESS(status)) {
         if(entry==reserved){entry->Owned=TRUE;*used=TRUE;}
+        begin_progress_interval(q);
         InsertTailList(&q->Pending,&entry->Link);
     }
 done:
     KeReleaseSpinLock(&q->Lock,irql);
+    if(context_evidence.Version)TgGpuTraceContext(&context_evidence);
     if(NT_SUCCESS(status) || (used && *used)) (VOID)KeSetEvent(&q->Wake,IO_NO_INCREMENT,FALSE);
     return status;
 }
@@ -263,6 +282,7 @@ NTSTATUS TgGpuQueuePreempt(TG_GPU_WORK_QUEUE *q,const DXGKARG_PREEMPTCOMMAND *a,
             RtlZeroMemory(entry,sizeof(*entry));entry->Owned=TRUE;
             entry->Work.Engine=q->Engine;entry->Work.Preemption=TRUE;
             entry->Work.SubmissionFence=a->PreemptionFenceId;
+            begin_progress_interval(q);
             InsertTailList(&q->Pending,&entry->Link);++q->Preemptions;
         }
     }

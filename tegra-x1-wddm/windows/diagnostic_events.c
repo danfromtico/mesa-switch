@@ -29,6 +29,16 @@ VOID TgGpuTraceRecovery(const TG_GPU_RECOVERY_EVENT *record)
 {write_event(1,2,record,sizeof(*record));}
 VOID TgGpuTraceExecution(const TG_GPU_EXECUTION_EVENT *record)
 {write_event(2,4,record,sizeof(*record));}
+static const EVENT_DESCRIPTOR tdr_event={.Id=8,.Version=1,.Level=4,.Keyword=1};
+BOOLEAN TgGpuTraceTdrEnabled(VOID)
+{return provider && EtwEventEnabled(provider,&tdr_event);}
+VOID TgGpuTraceTdr(const TG_GPU_TDR_EVENT *record)
+{write_event(8,4,record,sizeof(*record));}
+static const EVENT_DESCRIPTOR context_event={.Id=9,.Version=1,.Level=4,.Keyword=1};
+BOOLEAN TgGpuTraceContextEnabled(VOID)
+{return provider && EtwEventEnabled(provider,&context_event);}
+VOID TgGpuTraceContext(const TG_GPU_CONTEXT_EVENT *record)
+{write_event(9,4,record,sizeof(*record));}
 VOID TgGpuTraceDisplay(const TG_GPU_DISPLAY_EVENT *record)
 {write_event(4,4,record,sizeof(*record));}
 VOID TgGpuTraceStartupDiagnostic(const TG_GPU_STARTUP_DIAGNOSTIC_EVENT *record)
