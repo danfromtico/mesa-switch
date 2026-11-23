@@ -765,7 +765,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/predecessor-recovery-main-review-20261122.json#diagnostic_failure_boundary",
         "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-contract-main-review-20261122.json#producer_image_binding",
         "tegra-x1-wddm/docs/windows-native-graphics/context-native-idle-main-review-20261123.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/livedump-queue-main-review-20261123.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/livedump-queue-main-review-20261123.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/watchdog-archive-main-review-20261123.json"
       ],
       "cause": "The one-shot consumption receipt and official tool banner were retained. The following boot reported Event41 with BugcheckCode0 and Event6008. No new dump was found and the11 preexisting WATCHDOG file hashes were stable. Kernel-Dump/Operational recorded disabled crash dumping while CrashDumpEnabled remained3. The actual NT bugcheck boundary and dump initialization/write failure cause remain unknown. A static SD-port initializer advertises support; a functioning dump instance remains unobserved.",
       "daily_workaround": "Use the selected component profile and retain bounded logs and durable operation receipts. Crash-dump capture and TDR vendor data require corresponding native evidence.",
@@ -830,20 +831,40 @@
         "root_cause": "unknown"
       },
       "current_Mini_queue_capacity_followup": {
-        "review": "tegra-x1-wddm/docs/windows-native-graphics/livedump-queue-main-review-20261123.json",
+        "review": "tegra-x1-wddm/docs/windows-native-graphics/watchdog-archive-main-review-20261123.json",
         "observation_boot": 98337,
         "component": "WATCHDOG",
-        "registry_subkeys": 10,
+        "registry_subkeys": 0,
         "retained_Mini_path_capacity_predicate": "SubKeys < 10",
-        "present_admission_condition_satisfied": false,
+        "present_admission_condition_satisfied": true,
         "static_matching_false_status": "0xc0000099",
         "per_attempt_failure_branch_proved": false,
         "classic97176_cause_confirmed": false,
         "historical_dump_originals_preserved": 11,
         "historical_dump_content_bytes": 369612993,
-        "queue_cleanup_performed": false,
+        "queue_cleanup_performed": true,
         "new_dump_control_requests": 0,
-        "dump_capture_qualified": false
+        "dump_capture_qualified": false,
+        "before_maintenance_snapshot": {
+          "review": "tegra-x1-wddm/docs/windows-native-graphics/livedump-queue-main-review-20261123.json",
+          "observation_boot": 98337,
+          "component": "WATCHDOG",
+          "registry_subkeys": 10,
+          "retained_Mini_path_capacity_predicate": "SubKeys < 10",
+          "present_admission_condition_satisfied": false,
+          "static_matching_false_status": "0xc0000099",
+          "per_attempt_failure_branch_proved": false,
+          "classic97176_cause_confirmed": false,
+          "historical_dump_originals_preserved": 11,
+          "historical_dump_content_bytes": 369612993,
+          "queue_cleanup_performed": false,
+          "new_dump_control_requests": 0,
+          "dump_capture_qualified": false
+        },
+        "last_capacity_read_utc": "2026-11-23T10:42:59.0212393Z",
+        "old_report_files_archived": 10,
+        "new_dump_write_proved": false,
+        "static_false_status_scope": "Conditional mapping for a failed helper; capacity comparison now passes for the observed count0. No new request was executed."
       }
     },
     {
@@ -6825,6 +6846,21 @@
       "new_GPU_TDR_dump_requests": 0,
       "queue_cleanup_performed": false,
       "baseline_promoted": false,
+      "faults_closed": 0,
+      "main_device_operations": 0,
+      "subsequent_capacity_maintenance_review": "tegra-x1-wddm/docs/windows-native-graphics/watchdog-archive-main-review-20261123.json"
+    },
+    "watchdog_report_archive_main_review": {
+      "review": "tegra-x1-wddm/docs/windows-native-graphics/watchdog-archive-main-review-20261123.json",
+      "status": "ten_old_reports_preserved_and_capacity_count_cleared;new_dump_writing_unproved",
+      "formal_boot": 98337,
+      "reports_archived": 10,
+      "old_empty_registry_children_removed": 10,
+      "remaining_children": 0,
+      "quota_value_changes": 0,
+      "new_GPU_TDR_crash_requests": 0,
+      "candidate_c4_qualified": false,
+      "baseline_changed": false,
       "faults_closed": 0,
       "main_device_operations": 0
     }
