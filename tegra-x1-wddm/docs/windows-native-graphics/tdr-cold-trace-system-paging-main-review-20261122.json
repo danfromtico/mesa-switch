@@ -1,0 +1,566 @@
+{
+  "schema": 1,
+  "scope": "Independent reconciliation of retained boot97365 cold traces and review of the system paging lifecycle repair plus one old/new Windows ARM64 CPU comparison.",
+  "verdict": "positive_native_TDR_callback_evidence_and_candidate_CPU_repair_accepted;GPU_fix_validation_pending",
+  "archive": {
+    "sha256": "d91283835a8beb8acb94662e855b6b115b9426d7e9644f7074a897cb9aab5a33",
+    "bytes": 29571087,
+    "archive_members": 426,
+    "individual_members_SHA_verified": 425,
+    "manifest_sha256": "3a2f42fccf6c1770469cf4245b0548a86cf47844221b1914328307224b9e2b69"
+  },
+  "all_members_bytes_SHA256_CRC_safe_paths_independently_verified": true,
+  "cold_trace_identity": {
+    "originals": [
+      {
+        "name": "graphics.etl.002",
+        "bytes": 67108864,
+        "sha256": "72d06360a6d73b5a666a4edc1abfc65fcceb2f5dcde273b677bf715e8b15c29b",
+        "header": {
+          "boot_time": 134398610453436546,
+          "qpc_frequency": 19200000,
+          "start_time": 134398610468876239,
+          "end_time": 0,
+          "buffers_written": 0,
+          "clock_context": 1,
+          "events_lost": 0,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "name": "tgd3d.etl.002",
+        "bytes": 33554432,
+        "sha256": "fd5f4778833a3ae14614691caa34b2532cd9dfdbc686005f676e87a8873df52c",
+        "header": {
+          "boot_time": 134398610453436546,
+          "qpc_frequency": 19200000,
+          "start_time": 134398610468876239,
+          "end_time": 0,
+          "buffers_written": 0,
+          "clock_context": 1,
+          "events_lost": 0,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "name": "loader.etl.002",
+        "bytes": 9109504,
+        "sha256": "8f665b0f8df158d2e7ed1389b9f61bbf111ade093bace335c479fbf3bad53ef7",
+        "header": {
+          "boot_time": 134398610453436546,
+          "qpc_frequency": 19200000,
+          "start_time": 134398610468876239,
+          "end_time": 0,
+          "buffers_written": 0,
+          "clock_context": 1,
+          "events_lost": 0,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "name": "kernel.etl.002",
+        "bytes": 67108864,
+        "sha256": "4f76716d806b21108febd1dc06507f36f7a98c2bb62c9dd1adfb24d22fbb929f",
+        "header": {
+          "boot_time": 134398610453436546,
+          "qpc_frequency": 19200000,
+          "start_time": 134398610468876239,
+          "end_time": 0,
+          "buffers_written": 0,
+          "clock_context": 1,
+          "events_lost": 0,
+          "buffers_lost": 0
+        }
+      }
+    ],
+    "all_native_before_host_native_after_hashes_equal": true,
+    "source_boot": 97365,
+    "collection_boot": 97530,
+    "System12_StartTime": "2026-11-22T22:44:05.3436546Z",
+    "exact_FILETIME_equal": true,
+    "request_qpc": 36420042308,
+    "request_luid": "0000000000005cb6",
+    "unclosed_tail_or_loss_qualified": false
+  },
+  "direct_native_observations": {
+    "original_KMD_header_payload_records": 428,
+    "counts": {
+      "ExecutionState": 374,
+      "TdrContract": 29,
+      "DisplayPath": 20,
+      "FirstRecoveryRequest": 5
+    },
+    "Event8_64byte_payloads_independently_decoded": 29,
+    "target_adapter_luid": "0000000000005cb6",
+    "reset_engine_return_count": 9,
+    "reset_engine_successes": 1,
+    "reset_engine_failures": 8,
+    "first_reset_engine": {
+      "qpc_stamp": 36462911624,
+      "status": "0x00000000",
+      "last_submitted_fence": 21555,
+      "last_completed_fence": 21555,
+      "result": 21555,
+      "queue": {
+        "healthy": true,
+        "idle": true,
+        "paused": false,
+        "failed": false,
+        "servicing": false,
+        "pending": false,
+        "failure_status": "0x00000000"
+      }
+    },
+    "adapter_callback_pairs": {
+      "reset_adapter": [
+        {
+          "entry_qpc": 36465699099,
+          "return_qpc": 36466456680,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21555
+        },
+        {
+          "entry_qpc": 36519376074,
+          "return_qpc": 36520170926,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21666
+        },
+        {
+          "entry_qpc": 36571424185,
+          "return_qpc": 36572076383,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21731
+        },
+        {
+          "entry_qpc": 36621550204,
+          "return_qpc": 36622170736,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21776
+        },
+        {
+          "entry_qpc": 36693430645,
+          "return_qpc": 36694180243,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21838
+        }
+      ],
+      "restart_adapter": [
+        {
+          "entry_qpc": 36467041137,
+          "return_qpc": 36468729494,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21555
+        },
+        {
+          "entry_qpc": 36520452154,
+          "return_qpc": 36523144650,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21666
+        },
+        {
+          "entry_qpc": 36572317892,
+          "return_qpc": 36574449410,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21731
+        },
+        {
+          "entry_qpc": 36622289939,
+          "return_qpc": 36624557014,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21776
+        },
+        {
+          "entry_qpc": 36694257733,
+          "return_qpc": 36695835630,
+          "return_status": "0x00000000",
+          "last_completed_fence": 21838
+        }
+      ]
+    },
+    "reset_return_completed_equals_entry_last_submitted_observed_pairs": 5,
+    "post_restart_epochs": [
+      {
+        "generation": 2,
+        "restart_return_qpc": 36468729494,
+        "first_failure_qpc": 36474621421,
+        "fence_value_advance": 109,
+        "gap_seconds": 0.30687119791666667,
+        "request_fence": 21666
+      },
+      {
+        "generation": 3,
+        "restart_return_qpc": 36523144650,
+        "first_failure_qpc": 36526426989,
+        "fence_value_advance": 63,
+        "gap_seconds": 0.17095515625,
+        "request_fence": 21730
+      },
+      {
+        "generation": 4,
+        "restart_return_qpc": 36574449410,
+        "first_failure_qpc": 36576284083,
+        "fence_value_advance": 43,
+        "gap_seconds": 0.09555588541666667,
+        "request_fence": 21775
+      },
+      {
+        "generation": 5,
+        "restart_return_qpc": 36624557014,
+        "first_failure_qpc": 36630018648,
+        "fence_value_advance": 60,
+        "gap_seconds": 0.28446010416666667,
+        "request_fence": 21837
+      },
+      {
+        "generation": 6,
+        "restart_return_qpc": 36695835630,
+        "first_failure_qpc": 36699622254,
+        "fence_value_advance": 90,
+        "gap_seconds": 0.19722,
+        "request_fence": 21929
+      }
+    ],
+    "paging_failures": [
+      {
+        "qpc_stamp": 36474621421,
+        "status": "0xc00000a3",
+        "flags": "0x00000001",
+        "context": "0xffffa085c32f76e0",
+        "submission_fence": 21666,
+        "last_completed_fence": 21664,
+        "graphics_generation": 2
+      },
+      {
+        "qpc_stamp": 36526426989,
+        "status": "0xc00000a3",
+        "flags": "0x00000001",
+        "context": "0xffffa085c32f76e0",
+        "submission_fence": 21730,
+        "last_completed_fence": 21729,
+        "graphics_generation": 3
+      },
+      {
+        "qpc_stamp": 36576284083,
+        "status": "0xc00000a3",
+        "flags": "0x00000001",
+        "context": "0xffffa085c32f76e0",
+        "submission_fence": 21775,
+        "last_completed_fence": 21774,
+        "graphics_generation": 4
+      },
+      {
+        "qpc_stamp": 36630018648,
+        "status": "0xc00000a3",
+        "flags": "0x00000001",
+        "context": "0xffffa085c32f76e0",
+        "submission_fence": 21837,
+        "last_completed_fence": 21836,
+        "graphics_generation": 5
+      },
+      {
+        "qpc_stamp": 36699622254,
+        "status": "0xc00000a3",
+        "flags": "0x00000001",
+        "context": "0xffffa085c32f76e0",
+        "submission_fence": 21929,
+        "last_completed_fence": 21928,
+        "graphics_generation": 6
+      }
+    ],
+    "query_engine_observations": 0,
+    "query_current_fence_observations": 0,
+    "callback_success_is_full_recovery": false,
+    "fence_value_advances_are_GPU_packet_counts": false,
+    "fence_narrative_correction": "The independent initial narrative43..90 was incomplete;the five observed completed-fence value advances are109,63,43,60,90. Raw review retained."
+  },
+  "native_identity_and_cause_limits": {
+    "context": "Same hContext pointer value with Paging=1;no retained creation/teardown or explicit SystemContext/SystemProcess fields bind its lifetime. System-context lifecycle interpretation rests on source/OS contracts,not direct creation metadata.",
+    "first_native_rejection_predicate": "Root.Valid,RootStatus,context generation and other admission state were not directly recorded at the exact rejection. The source/CPU defect does not retrospectively provide that missing native operand.",
+    "unplanned_restart": "Boot97437 remains unexplained. Direct callbacks narrow the recovery sequence but do not establish NT bugcheck arrival or eventual restart mechanism.",
+    "historical_TdrLimit": "Current97530 absent registry values are not proof of the effective97365 policy;five resets do not by themselves prove escalation into a particular bugcheck.",
+    "full_tail": "All four cold files are unclosed,EndTime0/BuffersWritten0. Zero header loss fields are not proof of loss-free or complete tail coverage.",
+    "other_OS_messages": "WATCHDOG/Azure triage and numeric device-error reasons are retained as diagnostics;no undocumented private callback or root cause is inferred from their numbers."
+  },
+  "short_trace_reconciliation": {
+    "previous_report": "tegra-x1-wddm/docs/windows-native-graphics/tdr-native-failure-main-review-20261122.json",
+    "old_short_capture_Event8": 0,
+    "new_cold_Event8": 29,
+    "first_cold_callback_after_old_last_raw_ms": 209.56421875,
+    "first_cold_callback_before_old_TraceEnd_ms": 407.0310416666667,
+    "conclusion": "The first positive callback was inside the old TraceEnd marker lifetime but after its last observed raw event. Do not claim that it occurred after the old session end. The short-trace negative result remains scoped to its recorded events;marker lifetime is not proven provider coverage. Missing buffered-tail cause remains unknown.",
+    "cross_session_QPC": "Same-payload emissions may have different per-session timestamps;exact equality is not required for proposed overlap matching. BootTime,LUID and original request establish the episode binding independently.",
+    "new_hardware_request": false
+  },
+  "candidate_source": {
+    "commit": "e1d34c6165b00bda047f448075e5318d740bfef2",
+    "changed_files": [
+      "tegra-x1-wddm/tests/test_context_windows.c",
+      "tegra-x1-wddm/windows/reset_backend.c"
+    ],
+    "frozen_source_files_matching_commit": 21,
+    "old_new_core_library_members": 72,
+    "only_COFF_member_changed_after_timestamp_normalization": [
+      "reset_backend.obj"
+    ],
+    "full_red_green_build_exits": [
+      0,
+      0
+    ],
+    "final_CPU_compile_link_exits": [
+      0,
+      0,
+      0
+    ],
+    "native_version": 159,
+    "signed_KMD_sha256": "13aba657d0391dc98186d50afbd51e59052a7143a8699e208684461db20c6f88",
+    "signed_KMD_bytes": 255944,
+    "signing_only_changes_verified": true,
+    "WindowsTrust": false,
+    "CAT_prepared": false,
+    "native_GPU_validation": false,
+    "published": false
+  },
+  "production_review": {
+    "confirmed_gaps": [
+      "Full adapter isolation increments the engine graphics generation while retaining a stale nonzero generation on surviving system paging contexts.",
+      "The old reset path invalidates every retained context root,including a system paging binding that the OS may continue using after recovery."
+    ],
+    "minimal_change": "After successful isolation,an eligible live unreferenced virtual SystemContext attached to a live SystemProcess retains its current authoritative OS root state and resets only its private graphics generation to zero. The next activation rebuilds from the new template.",
+    "eligibility": "SystemContext and VirtualAddressing;not GDI;context/device/process not closing;zero references;SystemProcess present.",
+    "unchanged_rules": [
+      "SetRootPageTable remains the authoritative root update path;failed or invalid root updates are never revived from a saved descriptor.",
+      "Resetting/RecoveryPending block admission during cleanup and cold startup.",
+      "Ordinary application contexts retain root invalidation and stale-generation rejection,even after a fresh root update.",
+      "Existing suspend behavior remains;failed isolation returns before this context-state change."
+    ],
+    "review_scope": "One production file reset_backend.c;no speculative saved-root tracking or unrelated production edits.",
+    "runtime_limit": "No native execution of the new signed KMD or real VidMm root relocation/recovery acceptance yet.",
+    "primary_contracts": [
+      {
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/tdr-changes-in-windows-8",
+        "fact": "A system device can resume after paging-related adapter recovery;engine reset failure can escalate to a full adapter reset."
+      },
+      {
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_setrootpagetable",
+        "fact": "The OS reports root moves/resizes while the target context is idle."
+      },
+      {
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/thread-synchronization-and-tdr",
+        "fact": "Cleanup occurs between ResetFromTimeout and RestartFromTimeout;the latter resumes adapter use."
+      }
+    ]
+  },
+  "CPU_comparison": {
+    "fixtures": [
+      {
+        "variant": "red",
+        "sha256": "679182604e46786b6ab4f5ba0988d15296ceed432b98a058fea5c04b757fbf4d",
+        "bytes": 311808,
+        "pid": 6812,
+        "exit": 1641,
+        "imports": [
+          [
+            "kernel32.dll",
+            "ExitProcess"
+          ],
+          [
+            "kernel32.dll",
+            "GetStdHandle"
+          ],
+          [
+            "kernel32.dll",
+            "WriteFile"
+          ]
+        ],
+        "consumption_before_start": true,
+        "stdout_bytes": 83
+      },
+      {
+        "variant": "green",
+        "sha256": "055fa3c6c1d92b47ffb03a74b1497b0b44d00663d9d1e0d43f9140ab274effd7",
+        "bytes": 311808,
+        "pid": 4376,
+        "exit": 0,
+        "imports": [
+          [
+            "kernel32.dll",
+            "ExitProcess"
+          ],
+          [
+            "kernel32.dll",
+            "GetStdHandle"
+          ],
+          [
+            "kernel32.dll",
+            "WriteFile"
+          ]
+        ],
+        "consumption_before_start": true,
+        "stdout_bytes": 228
+      }
+    ],
+    "native_before_wire_local_originals_verified": 16,
+    "program_starts": 2,
+    "old_composite_check_line": 1641,
+    "failed_check_operand_values_not_recorded": true,
+    "counterfactual_scope": "Same final CPU fixture linked against72-member old/new production libraries;only reset_backend.obj changes apart from COFF timestamps. Hardware isolation/startup are controlled substitutes;not real VidMm/root relocation/GPU recovery.",
+    "root_removed": true,
+    "formal_boot": 97530,
+    "code": 0,
+    "components": 8,
+    "actual_loaded_paths_hashes": 5,
+    "dwm": 1420,
+    "dwm_start_unchanged": true,
+    "boot_events_unchanged": true,
+    "registry_session_GPU_TDR_mutations": 0
+  },
+  "CPU_test_scope": [
+    "Real production root-admission/activation/template helpers exercise distinct new template contents across generations2,3,4.",
+    "Pending paging references are discarded before isolation;the model retains no active work at the reset boundary.",
+    "Failed root updates remain invalid;valid OS relocations are authoritative;the no-SetRoot case retains its existing canonical binding.",
+    "With UserdBar1Ready explicitly true,the stale application rejection is not masked by unrelated readiness;fresh application context admission is also checked.",
+    "The red1641 result is a composite assertion failure;individual operands were not logged. Hardware startup/isolation remains modeled."
+  ],
+  "independent_reviews": [
+    {
+      "round": "cold-trace-review-r1",
+      "model": "gemini-4-neon-high",
+      "conversation": "e428871a-aef5-463b-a63b-957f04d6257d",
+      "overall": "evidence_valid_with_open_root_cause",
+      "frozen_members": 29,
+      "findings": [
+        {
+          "id": "F1",
+          "severity": "high"
+        },
+        {
+          "id": "F2",
+          "severity": "high"
+        },
+        {
+          "id": "F3",
+          "severity": "medium"
+        },
+        {
+          "id": "F4",
+          "severity": "low"
+        },
+        {
+          "id": "F5",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "round": "system-paging-review-r1",
+      "model": "gemini-4-neon-high",
+      "conversation": "e428871a-aef5-463b-a63b-957f04d6257d",
+      "overall": "needs_correction",
+      "frozen_members": 40,
+      "findings": [
+        {
+          "id": "F1",
+          "severity": "medium"
+        },
+        {
+          "id": "F2",
+          "severity": "low"
+        },
+        {
+          "id": "F3",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "round": "system-paging-review-r2",
+      "model": "gemini-4-neon-high",
+      "conversation": "e428871a-aef5-463b-a63b-957f04d6257d",
+      "overall": "approve_CPU_lifecycle_fixture",
+      "frozen_members": 16,
+      "findings": []
+    },
+    {
+      "round": "system-paging-review-r3",
+      "model": "gemini-4-neon-high",
+      "conversation": "e428871a-aef5-463b-a63b-957f04d6257d",
+      "overall": "approve_completed_evidence_CPU_batch",
+      "frozen_members": 41,
+      "findings": []
+    }
+  ],
+  "formal_continuity": {
+    "boot": 97530,
+    "code": 0,
+    "ac": "Online",
+    "KMD": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+    "components_full_SHA": 8,
+    "actual_loaded_paths_and_full_SHA": 5,
+    "DWM_pid": 1420,
+    "DWM_start": "2026-11-22T23:29:12.9305817Z",
+    "before_after_boot_events": "Each retained snapshot contains only boot97530 Event12 in the queried12/41/6008/1074 interval.",
+    "selected_equals_permanent": true,
+    "trial": false,
+    "token": false,
+    "owned_CPU_root_removed": true,
+    "full_profile_after_utc": "2026-11-23T02:11:57.0791210Z",
+    "selected_descriptor_sha256": "2b3a2624cd826fa41f47e4c621e6fdee9cd0e6a25161fab78eb9ec3ca5ef9154",
+    "main_device_operations": 0
+  },
+  "deferred_470e1dbc_contracts": [
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+        "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+      },
+      "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+      "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+        "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+      },
+      "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+      "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+        "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+      },
+      "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+      "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+        "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+      },
+      "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+      "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。"
+    }
+  ],
+  "open_faults": 19,
+  "faults_closed": 0,
+  "candidate_selected": false,
+  "candidate_GPU_qualified": false,
+  "candidate_code_published": false,
+  "root_cause_of_historical_first_Present_found": false,
+  "remaining": [
+    "CAT,Windows signature trust,complete unchanged-runtime-firmware package and independently reviewed unconsumed native plan for the new signed159KMD.",
+    "Corresponding GPU TDR/recovery acceptance and formal restoration or reviewed promotion.",
+    "Actual NT bugcheck/dump initialization/write boundary and a new readable durable dump payload.",
+    "Legacy first Present,91476/DWM152586 and95090 retain their separate missing causal evidence.",
+    "Four470e1dbc deferred contracts have no new same-object evidence or satisfied revisit conditions."
+  ],
+  "non_replay": "Originalf6264ee11289,94382..94557,consumed KMT/dump controls and97365 engine request were not replayed;the new work read retained traces and ran two new CPU-only fixtures."
+}
