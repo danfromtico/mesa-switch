@@ -763,7 +763,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#dump_evidence",
         "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#restoration_and_cleanup",
         "tegra-x1-wddm/docs/windows-native-graphics/predecessor-recovery-main-review-20261122.json#diagnostic_failure_boundary",
-        "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-contract-main-review-20261122.json#producer_image_binding"
+        "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-contract-main-review-20261122.json#producer_image_binding",
+        "tegra-x1-wddm/docs/windows-native-graphics/context-native-idle-main-review-20261123.json"
       ],
       "cause": "The one-shot consumption receipt and official tool banner were retained. The following boot reported Event41 with BugcheckCode0 and Event6008. No new dump was found and the11 preexisting WATCHDOG file hashes were stable. Kernel-Dump/Operational recorded disabled crash dumping while CrashDumpEnabled remained3. The actual NT bugcheck boundary and dump initialization/write failure cause remain unknown. A static SD-port initializer advertises support; a functioning dump instance remains unobserved.",
       "daily_workaround": "Use the selected component profile and retain bounded logs and durable operation receipts. Crash-dump capture and TDR vendor data require corresponding native evidence.",
@@ -806,6 +807,26 @@
         "SDK_version": "26100",
         "runtime_kernel_lineage": "22621",
         "virtual_dump_module_loading": "unknown"
+      },
+      "subsequent_WATCHDOG_live_dump_observation": {
+        "review": "tegra-x1-wddm/docs/windows-native-graphics/context-native-idle-main-review-20261123.json",
+        "candidate_boot": 98157,
+        "WerKernel_records": [
+          1242,
+          1252
+        ],
+        "count": 11,
+        "status": "0xc0000099",
+        "requested_policy": 1,
+        "granted_policy": 1,
+        "PID": 4,
+        "TID": 924,
+        "later_closed_restore_record": 1253,
+        "later_record_separate": true,
+        "standard_path_metadata_unchanged": 11,
+        "NT_classic_bugcheck_arrival": "unknown",
+        "writer_failure_stage": "unknown",
+        "root_cause": "unknown"
       }
     },
     {
@@ -827,7 +848,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json#native_identity_and_cause_limits",
         "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json#candidate_source",
         "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json#CPU_comparison",
-        "tegra-x1-wddm/docs/windows-native-graphics/normal-store-staging-main-review-20261122.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/normal-store-staging-main-review-20261122.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/context-native-idle-main-review-20261123.json"
       ],
       "cause": "Unplanned boot97437 remains unexplained. Recovered original boot97365 cold traces contain29 direct TDR observations:one successful/eight failed ResetEngine returns and five successful adapter reset/restart pairs. The same hContext pointer value in Paging=1 submissions then reports C00000A3 at generations2..6. Root/generation lifecycle defects were independently identified and repaired locally with an old/new CPU comparison, but exact native rejection operands and context creation/lifetime are not recorded; the new KMD has no GPU validation. Short live/closed captures still contain zero Event8, while the cold trace has positive records. NT bugcheck arrival and missing-dump stage remain unknown; historical first-Present causality is not established.",
       "daily_workaround": "Keep restored selected ce54 baseline and preserve evidence. Do not rearm this candidate or repeat the consumed engine request; no adapter test was dispatched.",
@@ -853,6 +875,19 @@
         "native_fix_qualified": false,
         "context_lifetime_directly_bound": false,
         "formal_boot": 97530
+      },
+      "subsequent_c4_idle_callback_evidence": {
+        "review": "tegra-x1-wddm/docs/windows-native-graphics/context-native-idle-main-review-20261123.json",
+        "source": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+        "candidate_boot": 98157,
+        "formal_restoration_boot": 98337,
+        "OS_requests": 1,
+        "ResetEngine_observed_returns": 1,
+        "NTSTATUS": "0x00000000",
+        "completed_and_returned_fence": 7451,
+        "healthy_idle_branch": true,
+        "system_paging_repair_qualified": false,
+        "historical_cause_confirmed": false
       }
     },
     {
@@ -6745,6 +6780,20 @@
       "candidate_installed": false,
       "candidate_promoted": false,
       "formal_source": "df08e8583abc202732036597f5cb7f0519ba11a5",
+      "faults_closed": 0,
+      "main_device_operations": 0
+    },
+    "context_native_idle_main_review": {
+      "review": "tegra-x1-wddm/docs/windows-native-graphics/context-native-idle-main-review-20261123.json",
+      "status": "bounded_callback_and_restoration_accepted;system_paging_repair_not_qualified",
+      "candidate_source": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+      "candidate_boot": 98157,
+      "formal_boot": 98337,
+      "observation_seconds": 45,
+      "exact_KMD_selected_header_fields_and_payload_matches": 139,
+      "whole_header_bit_identity": false,
+      "formal_source": "df08e8583abc202732036597f5cb7f0519ba11a5",
+      "candidate_promoted": false,
       "faults_closed": 0,
       "main_device_operations": 0
     }
