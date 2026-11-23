@@ -1,0 +1,367 @@
+{
+  "schema": 1,
+  "decision": "accept_factual_batch_and_new_open_fault; no_candidate_or_CAT_qualification",
+  "reviewer": "independent main review, local originals only",
+  "main_device_operations": 0,
+  "archive": {
+    "sha256": "ef3a877de732f0d375f57bac085aeb643edb6d99301e125fa44be68e2d6e2ddd",
+    "bytes": 16382880,
+    "members": 420,
+    "originals": 419,
+    "manifest_sha256": "ca83141cc592f1a9293cc271b70eac235cdd51f4936f735760594d69ac21104a",
+    "all_SHA_bytes_CRC_paths_verified": true,
+    "filename": "context-runtime-reboot97983-01a204e6.zip"
+  },
+  "packaging_finding": {
+    "id": "MAIN-PACKAGE-ACR-1",
+    "status": "resolved_in_new_runtime_package",
+    "source": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+    "exact_formal_non_kernel_inputs": [
+      "fecs_sig.bin",
+      "fecs.bin",
+      "pmu_bl.bin",
+      "tegragpuno3d.dll",
+      "gpccs.bin",
+      "nv_acr_ucode_prod.bin",
+      "gpmu_ucode_desc.bin",
+      "pmu_sig.bin",
+      "gpmu_ucode_image.bin",
+      "NETB_img.bin"
+    ],
+    "formal_ACR_sha256": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "reviewed_SYS_and_INF_unchanged": true,
+    "runtime_manifest_sha256": "95b73754e44f4fdc0118730cb1c8817292de5b590d354f1af0eb5377c28944ab",
+    "old_594a_package_and_catalog_not_reused": true
+  },
+  "CPU_fixture": {
+    "boot": 97726,
+    "PID": 3564,
+    "executions": 1,
+    "exit": 0,
+    "originals_verified": 9,
+    "exe_sha256": "df077a6e08428309e64322ffc0a4d86efee5cd80bed2e5b8e755e06cace6b4fa",
+    "model_wire_records": 2,
+    "model_operations": [
+      "paging_dma_complete",
+      "paging_capture_failure"
+    ],
+    "native_GPU_or_ETW_proof": false,
+    "cleanup_verified": true,
+    "independent_wire_redecode": true
+  },
+  "catalog": {
+    "producer_boot": 97912,
+    "producer_exit": 0,
+    "producer_started_and_terminal": true,
+    "native_SYS_signature": "Valid",
+    "new_CAT_native_generation_count": 1,
+    "signed_catalog_sha256": "a3058b2eae1973c594feeceb69eb638bc550c7fb02757c085b413f315fc61c11",
+    "unsigned_catalog_sha256": "e4681ecdcd431d19df97d12bc0faaa33913a0b948ac0564605e98ce0b88ec5a4",
+    "local_sign_verify_exit": [
+      0,
+      0
+    ],
+    "Windows_CAT_trust_proved": false,
+    "Windows_12_member_verification_proved": false
+  },
+  "first_membership_attempt": {
+    "boot": 97912,
+    "program_start_intents": 1,
+    "actual_SignTool_starts": 0,
+    "evidence": "Persistent process_started=false, process_terminal=true, PID/exit null and invalid-path exception at File.Replace before Process.Start",
+    "input_files_unchanged": true,
+    "originals": 28
+  },
+  "completion_attempt": {
+    "intent_count": 1,
+    "transport_exit": 255,
+    "stdout_bytes": 0,
+    "transport_error": "timeout/broken pipe",
+    "native_completion_markers_found": 0,
+    "current_CAT_still_original_unsigned": true,
+    "signed_transfer_exact_preserved": true,
+    "initial_28_originals_equal_after_reboot": true,
+    "execution_reach": "unknown",
+    "SignTool_started": "unknown",
+    "replayed": false,
+    "no_new_install_or_TDR_request": true
+  },
+  "formal_reboot": {
+    "before_boot": 97912,
+    "after_boot": 97983,
+    "system_selected_records": [
+      {
+        "record": 98001,
+        "id": 41,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "channel": "System",
+        "time_created": "2026-11-23T05:48:21.5980671Z",
+        "data": {
+          "BugcheckCode": "0",
+          "BugcheckParameter1": "0x0",
+          "BugcheckParameter2": "0x0",
+          "BugcheckParameter3": "0x0",
+          "BugcheckParameter4": "0x0",
+          "SleepInProgress": "0",
+          "PowerButtonTimestamp": "0",
+          "BootAppStatus": "0",
+          "Checkpoint": "0",
+          "ConnectedStandbyInProgress": "false",
+          "SystemSleepTransitionsToOn": "0",
+          "CsEntryScenarioInstanceId": "0",
+          "BugcheckInfoFromEFI": "false",
+          "CheckpointStatus": "0",
+          "CsEntryScenarioInstanceIdV2": "0",
+          "LongPowerButtonPressDetected": "false",
+          "LidReliability": "false",
+          "InputSuppressionState": "0",
+          "PowerButtonSuppressionState": "0",
+          "LidState": "3"
+        }
+      },
+      {
+        "record": 97992,
+        "id": 6008,
+        "provider": "EventLog",
+        "channel": "System",
+        "time_created": "2026-11-23T05:49:44.6929420Z",
+        "data": {
+          "null": null
+        }
+      },
+      {
+        "record": 97983,
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "channel": "System",
+        "time_created": "2026-11-23T05:48:17.1380027Z",
+        "data": {
+          "MajorVersion": "10",
+          "MinorVersion": "0",
+          "BuildVersion": "22621",
+          "QfeVersion": "2861",
+          "ServiceVersion": "0",
+          "BootMode": "0",
+          "StartTime": "2026-11-23T05:48:15.4189460Z"
+        }
+      },
+      {
+        "record": 97912,
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "channel": "System",
+        "time_created": "2026-11-23T05:09:58.5194549Z",
+        "data": {
+          "MajorVersion": "10",
+          "MinorVersion": "0",
+          "BuildVersion": "22621",
+          "QfeVersion": "2861",
+          "ServiceVersion": "0",
+          "BootMode": "0",
+          "StartTime": "2026-11-23T05:09:56.8037381Z"
+        }
+      }
+    ],
+    "no_1074_in_collected_query": true,
+    "BugcheckCode": 0,
+    "classification": "Lower-left weather/news UI association from device-owner observation; no controlled reproduction in this batch",
+    "root_cause": "unknown",
+    "CAT_or_TDR_causation": "not established",
+    "current_components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+    },
+    "post_reboot_Code": 0,
+    "AC": "Online",
+    "selected_equals_permanent": true,
+    "source_commit": "df08e8583abc202732036597f5cb7f0519ba11a5",
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981",
+    "actual_loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_nvk_arm64.dll"
+    },
+    "DWM": 1400,
+    "DWM_start": "2026-11-23T05:49:40.9551376Z",
+    "private_x86": {
+      "path": "C:\\Program Files\\SwitchWOA-GpuBoot\\NeonAcceptance-01a20660\\private-x86\\libvulkan_nouveau.dll",
+      "sha256": "5ac50269abb761c9e77dabfb71da035f211263c9609adff056dd6a1cec79cd69",
+      "matches": true
+    },
+    "current_boot_is_new_acceptance": false,
+    "restoration_operation_claimed": false,
+    "formal_readback_verified": true,
+    "owned_membership_processes_remaining": 0
+  },
+  "cold_originals": {
+    "source_boot": 97912,
+    "collection_boot": 97983,
+    "System12_StartTime": "2026-11-23T05:09:56.8037381Z",
+    "BootTime_FILETIME_matches": true,
+    "files": [
+      {
+        "name": "graphics.etl.004",
+        "bytes": 67108864,
+        "sha256": "3385f0a890c29d6320cf1022f9595b0171246d10b53d78eec5bf9ea529519591",
+        "header": {
+          "boot_time": 134398841968037381,
+          "qpc_frequency": 19200000,
+          "end_time": 0,
+          "buffers_written": 0,
+          "clock_context": 1,
+          "events_lost": 0,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "name": "kernel.etl.004",
+        "bytes": 67108864,
+        "sha256": "ef4009a9614ed23c9a61d80c69340b67dc150398b764d62cb08b143ff6303579",
+        "header": {
+          "boot_time": 134398841968037381,
+          "qpc_frequency": 19200000,
+          "end_time": 0,
+          "buffers_written": 0,
+          "clock_context": 1,
+          "events_lost": 0,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "name": "loader.etl.004",
+        "bytes": 8781824,
+        "sha256": "e86fe7fc379f107b8c9587ad18eb8e60dbbb27ef273bc3cf0ea2443b066765c8",
+        "header": {
+          "boot_time": 134398841968037381,
+          "qpc_frequency": 19200000,
+          "end_time": 0,
+          "buffers_written": 0,
+          "clock_context": 1,
+          "events_lost": 0,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "name": "tgd3d.etl.004",
+        "bytes": 33554432,
+        "sha256": "3e369f46ff190824d462066efb880309f58f2235ac522e22a8936799e4967640",
+        "header": {
+          "boot_time": 134398841968037381,
+          "qpc_frequency": 19200000,
+          "end_time": 0,
+          "buffers_written": 0,
+          "clock_context": 1,
+          "events_lost": 0,
+          "buffers_lost": 0
+        }
+      }
+    ],
+    "native_source_copy_source_host_full_SHA_equal": true,
+    "inactive_prior_rotation": true,
+    "gracefully_finalized_ETL": false,
+    "complete_tail_or_zero_loss_proved": false,
+    "reason": "All four headers retain EndTime=0 and BuffersWritten=0. Closed here means inactive prior rotation, not proof of finalized complete capture. No weather/news trigger analysis or replay was performed."
+  },
+  "dump_boundary": {
+    "parsed_Operational_records": 60,
+    "KernelDump_latest_record": 1751,
+    "KernelDump_event10_text": "Crash dumps are disabled",
+    "CrashDumpEnabled": 3,
+    "retained_WerKernel_latest_record": 1240,
+    "retained_WerKernel_latest_time": "2026-11-23T05:04:37.2218705Z",
+    "Wer_status": "0xc0000099",
+    "Wer_latest_predates_97912": true,
+    "standard_paths_file_metadata_count": 11,
+    "file_content_hashes_in_this_inventory": false,
+    "query_and_scan_errors": [],
+    "NT_bugcheck_arrival": "unknown",
+    "dump_writer_failure_stage": "unknown",
+    "whole_system_dump_absence_proved": false
+  },
+  "ordinary_collection_failure": {
+    "original_exit": 1,
+    "original_stdout_bytes": 0,
+    "cause": "System-channel Kernel-Dump provider query returned incorrect parameter; corrected read queries the two actual Operational channels and preserves per-channel errors",
+    "readonly_completion_exit": 0,
+    "new_program_starts": 0
+  },
+  "review_provenance": [
+    {
+      "round": "runtime-catalog-review-r1",
+      "conversation": "7f8db931-36bb-4f5d-88e7-d38675422948",
+      "model": "gemini-4-neon-high",
+      "frozen_files": 53,
+      "verdict": "approve_corrected_runtime_catalog",
+      "findings": [
+        "RCAT-R1-N1",
+        "RCAT-R1-N2",
+        "RCAT-R1-N3"
+      ]
+    },
+    {
+      "round": "runtime-membership-review-r1",
+      "conversation": "a5b6303a-0cd6-4af1-821b-b8b98aa91748",
+      "model": "gemini-4-neon-high",
+      "frozen_files": 38,
+      "verdict": "approve_corrected_runtime_membership",
+      "findings": []
+    },
+    {
+      "round": "runtime-membership-completion-review-r1",
+      "conversation": "425b9fe0-6823-4d98-8c39-006d6624a3f6",
+      "model": "gemini-4-neon-high",
+      "frozen_files": 67,
+      "verdict": "approve_unstarted_runtime_membership_completion",
+      "findings": []
+    }
+  ],
+  "factual_precheck": {
+    "CLI_exit": 3,
+    "final_approval_obtained": false,
+    "underlying_service_turn_completion": "not established by CLI timeout",
+    "main_adjudication": "Direct independent primary-evidence review; timeout is not an approval or a new platform safety refusal."
+  },
+  "policy": {
+    "installed_revision": "605644880f1a4c183121cfb645a6a9e775aa2dac2e5fcb707ed9ddfe4eb300eb",
+    "installed_ledger_sha256": "f47973bfd40a9798854f746bef9fbf05bf1f9b9c0774401adca158c6811bf056",
+    "pre_append_repository_ledger_sha256": "8bc171f607584239a41e1b3955bdda7a8987916f9ee888e8a6b420397415b51f",
+    "reinstalled_for_metadata": false
+  },
+  "fault": {
+    "id": "GM20B-WEATHER-NEWS-UI-RESTART-97983",
+    "status": "open",
+    "exclusion_deferred": true,
+    "existing_faults_preserved": 22,
+    "previous_open": 19,
+    "next_open": 20,
+    "new_closures": 0
+  },
+  "candidate_status": {
+    "c4_installed": false,
+    "c4_hardware_qualified": false,
+    "final_native_dispatch_review": "incomplete; local template revisions are not dispatch qualification"
+  },
+  "historical_limits": [
+    "91476/DWM152586,95090 and legacy first-Present causal boundaries remain unknown.",
+    "Original f6264ee11289, rehearsal94382->94557 and consumed KMT/TDR/dump controls were not replayed by this review.",
+    "All four470e1dbc deferred contracts and their existing re-entry conditions remain unknown/unchanged.",
+    "New formal hash readback after known unexplained boot97983 does not turn that boot into a passed acceptance."
+  ],
+  "goal_complete": false,
+  "local_audit_sha256": "d9babdaa362db5b356a02474a406e9150ba88321ef27a8167be37a9f8d9f243a",
+  "local_audit_script_sha256": "4dfa52bb9d6d55f5c6288f1f059a986253e458fa81ba0a4f46a83a77612b1f8f",
+  "workspace_preservation": {
+    "existing_dirty_files": 42,
+    "all_SHA_unchanged": true
+  },
+  "formal_package_intake_boundary": "Ten non-KMD payload originals were collected and matched; the old formal SYS/INF/CAT have native before/after hash metadata only in this intake. The candidate SYS/INF remain bound to the previously reviewed preparation originals.",
+  "publication_scope": "Evidence and open-fault registration only; graphics-baseline.json and all existing qualifications remain byte-identical; no candidate source or driver promotion."
+}

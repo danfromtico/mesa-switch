@@ -853,6 +853,59 @@
         "context_lifetime_directly_bound": false,
         "formal_boot": 97530
       }
+    },
+    {
+      "id": "GM20B-WEATHER-NEWS-UI-RESTART-97983",
+      "status": "open",
+      "kind": "unexpected-restart",
+      "affected_scopes": [
+        "wddm",
+        "windows-shell-ui",
+        "gpu-synchronization"
+      ],
+      "trigger": "Unplanned boot97983 followed formal boot97912. The observed scene is associated with the lower-left weather/news UI according to the device owner; the trigger chain has not been independently reproduced.",
+      "evidence": [
+        "tegra-x1-wddm/docs/windows-native-graphics/context-runtime-reboot97983-main-review-20261122.json"
+      ],
+      "cause": "Unknown. System12/6008/41 record the unplanned boot with BugcheckCode0 and no1074 in the collected selected-ID query. The inactive CAT completion request overlaps in time, but its execution reach and SignTool start are unknown; no causal link is established. Candidate c4 was not installed and no new controlled TDR request was sent.",
+      "daily_workaround": "Avoid the lower-left weather/news entry pending deferred investigation. Retain the selected df08/0790651c formal component set and preserve the failed verification originals. Known unexplained boot97983 is not an acceptance pass.",
+      "close_when": "Establish or exclude the actual weather/news trigger chain with independent native evidence, identify the cause and verify any required repair through the existing closure process. Normal controls, models, configuration and post-reboot component identity alone do not close it.",
+      "resolution": null,
+      "latest_native_identity": {
+        "boot": 97983,
+        "source_commit": "df08e8583abc202732036597f5cb7f0519ba11a5",
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981",
+        "components": {
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+          "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+          "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+        },
+        "actual_loaded_paths": {
+          "tegragpurender.sys": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+          "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\libvulkan_nouveau.dll",
+          "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_d3d_arm64.dll",
+          "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\TegraGpuD3DVk.dll",
+          "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_nvk_arm64.dll"
+        },
+        "permanent_matches_selected": true,
+        "Code": 0,
+        "AC": "Online",
+        "DWM": 1400,
+        "DWM_start": "2026-11-23T05:49:40.9551376Z"
+      },
+      "formal_readback_verified": true,
+      "acceptance_qualified": false,
+      "candidate_c4_installed": false,
+      "candidate_c4_qualified": false,
+      "weather_news_exclusion_deferred": true,
+      "CAT_windows_membership_verified": false,
+      "NT_bugcheck_arrival": "unknown",
+      "dump_writer_failure_stage": "unknown"
     }
   ],
   "independent_qualifications": [
