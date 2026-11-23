@@ -108,7 +108,33 @@
       "cause": "The runtime supplied Reserved=1 and the Present1 input guard returned E_INVALIDARG before the Windows callback. In the process-scoped candidate, the identical FLIP_SEQUENTIAL empty window reached the callback and returned S_OK. A one-clear window also returned S_OK and matched all five desktop samples. The other swap effect still needs candidate validation.",
       "daily_workaround": "Keep the experimental WDDM 2.0 offer confined to a one-time diagnostic client. Use only application paths with independent physical acceptance for daily use.",
       "close_when": "Verify actual rendering, on-screen output and normal exit through the affected system swap effects on three consecutive trials. Keep the legacy restart open until its own criteria pass.",
-      "resolution": null
+      "resolution": null,
+      "verified_fix": {
+        "scope": "wddm20-flip-sequential-empty-reserved1",
+        "root_cause": "The Present1 Reserved input guard rejected runtime Reserved=1 on NVK WDDM2.0 before forwarding. The repair permits exactly that combination, with the modern offer restricted to exact per-process opt-in.",
+        "root_cause_confirmed": true,
+        "commit": "df08e8583abc202732036597f5cb7f0519ba11a5",
+        "independent_review_passed": true,
+        "build_signed": true,
+        "output_required": false,
+        "component": "tg_d3d_arm64.dll",
+        "components": {
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+          "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+          "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+        },
+        "causal_evidence_sha256": "fbbaf44106df0c18e147f67af07ad85c680de0461c2e2bb5d26b2d2436972325",
+        "causal_evidence_file": "tegra-x1-wddm/docs/present1-reserved1-0790651c/causal-evidence.json",
+        "code_review_sha256": "cd770072c737ef478c9df4b4d0469971eeb66b7b0fb1f8e9b4422dc3ab0710c6",
+        "code_review_file": "tegra-x1-wddm/docs/present1-reserved1-0790651c/code-review.json",
+        "build_sha256": "b2e0eb9346d9e1d5e531c52fe721133e4b32296813bce182a1351eeaa448f418",
+        "build_file": "tegra-x1-wddm/docs/present1-reserved1-0790651c/build.json"
+      }
     },
     {
       "id": "GM20B-WDDM20-FLIP-RESTART",
@@ -1379,6 +1405,106 @@
       ],
       "assessment_file": "tegra-x1-wddm/docs/nvk-neon-13ae4c9c/independent-review.json",
       "assessment_sha256": "e6fd05f25dc41d917548c7dda5aecb682fd665cd72e380cb1550eeadd5f2f003"
+    },
+    {
+      "evidence_sha256": "abc337bd86346191bee2828564e60898e19493233e2c1d4966d1a833a07281af",
+      "independence": [
+        {
+          "fault_id": "GM20B-POST-QUALIFICATION-RESTART-92154",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "The actual signed native ARM64 repair, reached via process-only WDDM2.0 negotiation, passed the matching Reserved=1 FLIP_SEQUENTIAL empty-window input with forwarding S_OK, normal exit and continuous desktop. This partial input repair does not establish rendered output, the alternate swap effect or full closure of this fault.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "One empty-window case ran on external power with unchanged KMD, firmware and power configuration. No pressure, transition or clock workload was requested. Normal exit and desktop continuity do not close the older load/power fault.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "Wi-Fi software/settings retain their accepted state. Transport originals are retained and boot/DWM continuity was checked around the one case. No Wi-Fi startup or reconnection repair is claimed.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "reason": "One empty-window case ran on external power with unchanged KMD, firmware and power configuration. No pressure, transition or clock workload was requested. Normal exit and desktop continuity do not close the older load/power fault.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "reason": "One empty-window case ran on external power with unchanged KMD, firmware and power configuration. No pressure, transition or clock workload was requested. Normal exit and desktop continuity do not close the older load/power fault.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-ON-DEMAND-CANDIDATE-BOOT-95090-RESET",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+          "reason": "This acceptance is limited to the documented native ARM64 WDDM2.0 Reserved=1 empty FLIP_SEQUENTIAL input. The default offer remains unchanged without exact process opt-in. No historical legacy first-Present, six-frame, KMT or reset control was replayed; the old failure remains open. Actual signed loading, callback return, process exit and complete controlled-boot interval were verified with the other seven components retained.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "SWITCH-CONTROLLED-CRASH-DUMP-MISSING-97176",
+          "reason": "No reset, bugcheck, dump or TDR control was dispatched. The same accepted KMD/firmware and complete System interval accompany one normal process exit. This scoped UMD input repair does not diagnose or close the historical recovery fault.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        },
+        {
+          "fault_id": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+          "reason": "No reset, bugcheck, dump or TDR control was dispatched. The same accepted KMD/firmware and complete System interval accompany one normal process exit. This scoped UMD input repair does not diagnose or close the historical recovery fault.",
+          "test_sha256": "f5ca29ef5b864d01ae2038ebb64e5da881818206e08cdf1da3f3d45569ac573b"
+        }
+      ]
     }
   ],
   "baseline_comparisons": [
