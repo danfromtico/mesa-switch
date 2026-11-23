@@ -1,0 +1,104 @@
+{
+  "complete_candidate": {
+    "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/game-path-efficiency-gemini-20261122-main/nvk-game-candidate-complete.zip",
+    "bytes": 12680770,
+    "sha256": "5a0e7b19b744dd6519b477fcc8503d0d29bdb954ad6aa69442e22db1e9188e86",
+    "original_files": 191,
+    "members": 192,
+    "complete_frozen_review_inputs": true,
+    "all_members_sha_bytes_crc_verified": true
+  },
+  "source_review": "Existing unchanged Neon code review and host build/model evidence retained in the complete archive; no repeated code review",
+  "new_orchestration_review": {
+    "schema": 1,
+    "reviewer": "executing Codex, direct source review",
+    "utc": "2026-11-23T03:38:15.640386+00:00",
+    "Gemini": "Canceled by direct user instruction; no passed independent review claimed",
+    "findings_corrected": [
+      "Windows PowerShell 5.1 member enumeration returns one Count per property; archive entry count now explicitly wraps properties in an array, verified on the actual host",
+      "Existing accepted NVK clients emit the nonconformance warning on stderr; preserve diagnostics while judging exit, actual identity and exact pixel output",
+      "Package records exact production and release sources for the two changed leaves and retains the old producer identity only as historical provenance"
+    ],
+    "scope": [
+      "Two replacement NVK leaves plus private x86 ICD",
+      "Unchanged reviewed activation/recovery controller and current ce54 config",
+      "No TDR or presentation test, one issued batch only",
+      "Dynamic x86 private loader matches nvk_GetInstanceProcAddr and vk_instance_get_proc_addr supported dispatch in the actual frozen producer source"
+    ],
+    "checks": {
+      "x86_compiled_exit": 0,
+      "x86_machine": "0x14c",
+      "actual_ps51_version": "5.1.22621.2506",
+      "parser_errors_r1": 0
+    },
+    "files": {
+      "kit/RunPrivate.ps1": "aad9a4908ad91f9e2a7d3924709960910811b636f1111bf626e0cf4beb68a692",
+      "kit/RunClients.ps1": "ceff2f522827ccf8b03835224dc527a75d73a348557890c622459710f8a2c008",
+      "kit/Cycle.ps1": "fdb37ed767d06b77fb99cb1ae3d4acef8233c00f4aefa11b46e90524967a4b5a",
+      "kit/Stage.ps1": "12b68fcb5d2f6341e6857269c088ee657ca69639612a3cf12d623d68b7cb866f",
+      "kit/RunAll.ps1": "e0d38fc73d050ade0f393332235d5685e79ea3853b00ad98116348906ff5b5b1",
+      "prepare_workflow.py": "7b78f9427c468db23575066aa92014c54a3439b68f39ad26d74e7dd659c1d432",
+      "prepare-device.ps1": "4bd4fa46c9e0fc7521c4c3c097cd8bce2731ba79b2d9812fd26eec8bf4be97ee",
+      "run_native.py": "e41784838adb1929589a149ae54be1e536903d5b310232838b58708f087f2892",
+      "upload_native.py": "9190682f56065e6abaec61bdb546eb8a51ff420861617797341772c9abdea59d",
+      "x86-draw-source/triangle.c": "152e03e91b23f406aae3b264448d35c76d35a4a796c0a728c37377de03eb6f4e"
+    },
+    "final_review_utc": "2026-11-23T04:06:37.540741+00:00",
+    "later_differences_reviewed": [
+      "Restart-plan guard now checks a nonempty error string, not the verified empty PSCustomObject emitted by the reused controller",
+      "Launch refreshes only the existing one-time contact marker before issuing its single owned task",
+      "Actual ps5.1 scripts completed the four-case batch; no new source or binary changes after these successful cases"
+    ],
+    "final_files": {
+      "restart.ps1": "ec0f8c572f3a611c6a449a14eabaec7aa7386fb3667a228d71289953df05496e",
+      "launch-clients.ps1": "78da558bcc8f821a843e6ad1669be9cd7a19666a669b535a95f67e796a42ecf2",
+      "read-candidate.ps1": "dda5145fd3ffc239e0d6636cc23ca12d28a5279d6e79f3a519d0f93b68a8f5ee",
+      "read-clients.ps1": "d559e0e5a3f86f4a51820322bcf2d479dc316f7d4b6245b10a6fd4d83d9d411d",
+      "run_native.py": "e41784838adb1929589a149ae54be1e536903d5b310232838b58708f087f2892",
+      "kit/RunAll.ps1": "e0d38fc73d050ade0f393332235d5685e79ea3853b00ad98116348906ff5b5b1",
+      "kit/RunClients.ps1": "ceff2f522827ccf8b03835224dc527a75d73a348557890c622459710f8a2c008",
+      "kit/RunPrivate.ps1": "aad9a4908ad91f9e2a7d3924709960910811b636f1111bf626e0cf4beb68a692",
+      "kit/Stage.ps1": "12b68fcb5d2f6341e6857269c088ee657ca69639612a3cf12d623d68b7cb866f"
+    }
+  },
+  "user_override": "No more Gemini review; partial extra review canceled, not claimed passed",
+  "new_x86_client_source": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/neon-present1-acceptance-01a20660/x86-draw-source",
+  "client_build": [
+    [
+      "/opt/homebrew/bin/glslangValidator",
+      "-V",
+      "--target-env",
+      "vulkan1.0",
+      "-o",
+      "x86-draw-source/triangle-vert.spv",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/tools/vk_offscreen/triangle.vert"
+    ],
+    [
+      "/opt/homebrew/bin/glslangValidator",
+      "-V",
+      "--target-env",
+      "vulkan1.0",
+      "-o",
+      "x86-draw-source/triangle-frag.spv",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/tools/vk_offscreen/triangle.frag"
+    ],
+    [
+      "/Users/rujian/.local/share/mesa-switch-woa-build/toolchain/llvm-mingw-20261104-ucrt-macos-universal/bin/i686-w64-mingw32-clang",
+      "-std=c11",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-I",
+      "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/include",
+      "-I",
+      "x86-draw-source",
+      "x86-draw-source/triangle.c",
+      "-lgdi32",
+      "-luser32",
+      "-lpsapi",
+      "-o",
+      "kit/private-x86/triangle-x86.exe"
+    ]
+  ]
+}

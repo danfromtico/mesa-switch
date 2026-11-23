@@ -1263,6 +1263,106 @@
       ],
       "assessment_file": "tegra-x1-wddm/docs/kmt-software-fence-ce54d025/independence-review.json",
       "assessment_sha256": "757f63e9e7aea5e5cc4af2c98a677bfb281834d4b4190ecfb380e90a7acd5423"
+    },
+    {
+      "evidence_sha256": "3ba0fa9673d513206e74b334738d566c19ea4bc15ff0a330ea3a5dff7c8ea847",
+      "independence": [
+        {
+          "fault_id": "GM20B-POST-QUALIFICATION-RESTART-92154",
+          "reason": "The complete selected-ID System interval records only the two owned planned restarts, clean EventLog stops/starts, Code0 candidate boot and the same DWM through all four exits. Only the two NVK leaves and a separate x86 private ICD are candidates; KMD/firmware/UMDs and boot policy code retain accepted bytes. No cause or universal fix for the historical boot/shutdown failure is asserted.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "reason": "The complete selected-ID System interval records only the two owned planned restarts, clean EventLog stops/starts, Code0 candidate boot and the same DWM through all four exits. Only the two NVK leaves and a separate x86 private ICD are candidates; KMD/firmware/UMDs and boot policy code retain accepted bytes. No cause or universal fix for the historical boot/shutdown failure is asserted.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "f3998875c8d486a607878ad66da24f99a28ceb7d5b0d7121b521e7d8ba4b0c64"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "f3998875c8d486a607878ad66da24f99a28ceb7d5b0d7121b521e7d8ba4b0c64"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "Wi-Fi software and settings were not replaced. One SSH banner timeout was preserved; the later read returned on the same boot and DWM, with all four original cases complete. The cause of that timeout is not determined and Wi-Fi startup is not claimed repaired.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "reason": "This is one small offscreen draw per ABI on external power, with the same KMD, firmware and power configuration. No memory-pressure, load-transition or clock experiment was dispatched. Pixel readback, exit, boot and DWM continuity were verified; the older stress/power fault remains open.",
+          "test_sha256": "4fe819280f86bfcd66b5b594d018494c6f9cfe798b1b0f21ba819f890a092096"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "reason": "The complete selected-ID System interval records only the two owned planned restarts, clean EventLog stops/starts, Code0 candidate boot and the same DWM through all four exits. Only the two NVK leaves and a separate x86 private ICD are candidates; KMD/firmware/UMDs and boot policy code retain accepted bytes. No cause or universal fix for the historical boot/shutdown failure is asserted.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "reason": "The complete selected-ID System interval records only the two owned planned restarts, clean EventLog stops/starts, Code0 candidate boot and the same DWM through all four exits. Only the two NVK leaves and a separate x86 private ICD are candidates; KMD/firmware/UMDs and boot policy code retain accepted bytes. No cause or universal fix for the historical boot/shutdown failure is asserted.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "f3998875c8d486a607878ad66da24f99a28ceb7d5b0d7121b521e7d8ba4b0c64"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "reason": "The complete selected-ID System interval records only the two owned planned restarts, clean EventLog stops/starts, Code0 candidate boot and the same DWM through all four exits. Only the two NVK leaves and a separate x86 private ICD are candidates; KMD/firmware/UMDs and boot policy code retain accepted bytes. No cause or universal fix for the historical boot/shutdown failure is asserted.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "GM20B-ON-DEMAND-CANDIDATE-BOOT-95090-RESET",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "f3998875c8d486a607878ad66da24f99a28ceb7d5b0d7121b521e7d8ba4b0c64"
+        },
+        {
+          "fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "f3998875c8d486a607878ad66da24f99a28ceb7d5b0d7121b521e7d8ba4b0c64"
+        },
+        {
+          "fault_id": "SWITCH-CONTROLLED-CRASH-DUMP-MISSING-97176",
+          "reason": "No dump request, bugcheck, TDR injection or reset control was used. Ordinary hardware rendering and clean process exits were recorded with the unchanged KMD and full selected-ID System interval. This independent NVK acceptance neither replays nor closes the controlled-dump/TDR fault.",
+          "test_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad"
+        },
+        {
+          "fault_id": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+          "reason": "Four actual hardware offscreen draws and readbacks completed with normal exits on one continuous desktop. No swap chain, Present, NullRendering probe, explicit reset/TDR or historical trigger was executed. The KMD ce54, UMDs, ARM64X forwarders, firmware and registration ABI retain the accepted bytes. This NVK batching qualification is limited to the recorded submission path and does not diagnose or close the historical presentation/synchronization failure.",
+          "test_sha256": "f3998875c8d486a607878ad66da24f99a28ceb7d5b0d7121b521e7d8ba4b0c64"
+        }
+      ]
     }
   ],
   "baseline_comparisons": [
