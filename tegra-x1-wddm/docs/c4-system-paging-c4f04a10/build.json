@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "release_source_commit": "6a5a999ff9b7cd540a3167baa0cbf64d14b43725",
+  "production_source_commit": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+  "source_equivalent_merge_not_a_rebuild": true,
+  "build_command": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/tdr-context-evidence-01a204e6/tegra-x1-wddm/tools/build.py",
+    "--mesa",
+    "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/tdr-context-evidence-01a204e6",
+    "--wdk-include",
+    "/Users/rujian/.local/share/mesa-switch-woa-build/wdk/c/Include/10.0.26100.0",
+    "--sdk-include",
+    "/Users/rujian/.local/share/mesa-switch-woa-build/sdk/c/Include/10.0.26100.0",
+    "--out",
+    "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/context-evidence-160/build-r4/output",
+    "--clang-cl",
+    "/opt/homebrew/opt/llvm/bin/clang-cl",
+    "--lib",
+    "/Users/rujian/.local/share/mesa-switch-woa-build/toolchain/llvm-mingw-20261104-ucrt-macos-universal/bin/llvm-lib",
+    "--link",
+    "/Users/rujian/.local/share/mesa-switch-woa-build/toolchain/llvm-mingw-20261104-ucrt-macos-universal/bin/lld-link",
+    "--dlltool",
+    "/Users/rujian/.local/share/mesa-switch-woa-build/toolchain/llvm-mingw-20261104-ucrt-macos-universal/bin/llvm-dlltool",
+    "--display",
+    "--native-test-version",
+    "158",
+    "--render-gpu-khz",
+    "460800",
+    "--gr-firmware",
+    "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/known/signed-kmd-package",
+    "--acr-firmware",
+    "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/known/signed-kmd-package",
+    "--windows-tests"
+  ],
+  "build_result": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/context-evidence-160/build-r4/result.json",
+    "sha256": "e9f18112100594d3eb809aafcabb22c7a5f4985c81310f9c7a02488c1eb31b6d",
+    "bytes": 55
+  },
+  "source_identity": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/context-evidence-160/build-r4/source-identity.json",
+    "sha256": "642da5e3403367a964d0cafdef2fb9b9f7a242838e78c2e79a34b73654f47c63",
+    "bytes": 1897
+  },
+  "signed_KMD": {
+    "schema": 1,
+    "source_commit": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+    "unsigned_sha256": "a8f9ede257465b0288f20d1f03906d08ba930673f125ee2f87f4ac5aea9ebccc",
+    "signed_sha256": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+    "signed_bytes": 257984,
+    "steps": [
+      {
+        "step": "sign",
+        "exit": 0
+      },
+      {
+        "step": "verify",
+        "exit": 0
+      }
+    ],
+    "local_signature_verified": true,
+    "Windows_trust_verified": false,
+    "catalog_generated": false,
+    "native_executions": 0,
+    "GPUCalls": 0,
+    "TdrRequests": 0,
+    "evidence_revision": 160,
+    "native_test_version": 158,
+    "actual_policy_contract_snapshot": "context-evidence-160/prerequisites-r2/active-policy/Native-Boot.ps1",
+    "utc": "2026-11-23T03:29:19.387099+00:00"
+  },
+  "signed_catalog": {
+    "source_commit": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+    "exits": [
+      0,
+      0
+    ],
+    "package_identity_sha256": "8f16443183ce98192a8e82ffd43d9d95279217ae8e4e7fad94e38f2048ddb1ce",
+    "producer_collection_sha256": "70050da5de77e04ca9606dfea7855806531e379bf1853d7ffbe59438e55d1c95",
+    "unsigned_catalog_sha256": "e4681ecdcd431d19df97d12bc0faaa33913a0b948ac0564605e98ce0b88ec5a4",
+    "signed_catalog_sha256": "a3058b2eae1973c594feeceb69eb638bc550c7fb02757c085b413f315fc61c11",
+    "local_signature_verified": true,
+    "Windows_catalog_trust_verified": false,
+    "Windows_catalog_members_verified": false,
+    "native_installations": 0,
+    "TdrRequests": 0
+  },
+  "actual_package": {
+    "files": {
+      "fecs_sig.bin": {
+        "bytes": 108,
+        "sha256": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc"
+      },
+      "fecs.bin": {
+        "bytes": 528,
+        "sha256": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253"
+      },
+      "pmu_bl.bin": {
+        "bytes": 1280,
+        "sha256": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1"
+      },
+      "tegragpuno3d.dll": {
+        "bytes": 2048,
+        "sha256": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d"
+      },
+      "gpccs.bin": {
+        "bytes": 528,
+        "sha256": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba"
+      },
+      "nv_acr_ucode_prod.bin": {
+        "bytes": 18944,
+        "sha256": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+      },
+      "gpmu_ucode_desc.bin": {
+        "bytes": 652,
+        "sha256": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b"
+      },
+      "pmu_sig.bin": {
+        "bytes": 76,
+        "sha256": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132"
+      },
+      "gpmu_ucode_image.bin": {
+        "bytes": 47872,
+        "sha256": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699"
+      },
+      "NETB_img.bin": {
+        "bytes": 70502,
+        "sha256": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3"
+      },
+      "tegragpurender.inf": {
+        "bytes": 1536,
+        "sha256": "d3b657068c78a51829dad7789339941c068bb8464ae9eca8f317dbbf7f6405a8"
+      },
+      "tegragpurender.sys": {
+        "bytes": 257984,
+        "sha256": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164"
+      },
+      "tegragpurender.cat": {
+        "bytes": 7237,
+        "sha256": "a3058b2eae1973c594feeceb69eb638bc550c7fb02757c085b413f315fc61c11"
+      }
+    },
+    "current_stage_fingerprint": "23af0c9fc21515c4a4c58888ce998caff2439ec167a9c1300f2bb97d971a7455",
+    "historical_runtime_fingerprint": "95b73754e44f4fdc0118730cb1c8817292de5b590d354f1af0eb5377c28944ab",
+    "runtime_members": 12,
+    "signed_members": 13,
+    "all12_runtime_members_byte_identical": true,
+    "catalog_added_member": "tegragpurender.cat",
+    "fingerprint_serialization_matches": [
+      {
+        "sha256": "23af0c9fc21515c4a4c58888ce998caff2439ec167a9c1300f2bb97d971a7455",
+        "sort_keys": true,
+        "indent": null,
+        "compact": true,
+        "newline": false
+      }
+    ],
+    "current_stage_original": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/continuation-01a2094a/normal-stage-proof-r1/staging-qualified.json",
+      "sha256": "8001bb7f02a826c090472ce44e7225b54d3f365c0870d866f07c9ccdaf1b62e0"
+    },
+    "source_commit": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+    "GPU_qualified": false
+  },
+  "native_code0_and_module_identity": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/continuation-01a2094a/target-native-case-r1/native-adapter-case-r1/native-originals/adapter-trace-start.json",
+    "sha256": "9357878873c194a3f3d33a8533de41d854ff96e8d19dadc8fed3c2f331955388",
+    "bytes": 12542
+  },
+  "signature_delta_independently_checked": true,
+  "trust_scope": "Normal Windows Driver Store import and actual signed C4 module at Code0; no Microsoft/WHQL signing claim. Retained local signing receipts report their earlier observation-time limits.",
+  "firmware": "The13-file actual package retains the10 formal non-KMD inputs, including ACRf948; build-directory ACR594a is not the deployed artifact.",
+  "changed_runtime_components": [
+    "tegragpurender.sys"
+  ],
+  "preserved_UMD_NVK_ARM64_ARM64EC_x86_and_forwarders": true,
+  "desktop_DXVK_native_ARM64_retained": true,
+  "new_builds": 0
+}

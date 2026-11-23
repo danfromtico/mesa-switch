@@ -1,0 +1,826 @@
+{
+  "schema": 1,
+  "name": "adapter-reset-system-paging-recovery",
+  "scenario": "adapter-reset-system-paging-recovery",
+  "passed": true,
+  "original_trigger": true,
+  "original_trigger_scope": "The confirmed contract input is a full adapter Reset/Restart with a surviving valid system paging context; this is not replay of any historical sealed request.",
+  "before_boot": 99215,
+  "after_boot": 99215,
+  "normal_exit": true,
+  "desktop_available": true,
+  "output_verified": false,
+  "trial_profile": {
+    "events": [
+      {
+        "record": 99215,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T20:00:34.0436903Z",
+        "id": 12
+      },
+      {
+        "record": 99199,
+        "provider": "User32",
+        "utc": "2026-11-23T20:00:07.2376543Z",
+        "id": 1074
+      },
+      {
+        "record": 99126,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T19:50:15.6359079Z",
+        "id": 12
+      },
+      {
+        "record": 99110,
+        "provider": "User32",
+        "utc": "2026-11-23T19:49:50.1628662Z",
+        "id": 1074
+      },
+      {
+        "record": 99039,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T14:24:28.2805390Z",
+        "id": 12
+      },
+      {
+        "record": 99022,
+        "provider": "User32",
+        "utc": "2026-11-23T14:24:01.3655332Z",
+        "id": 1074
+      },
+      {
+        "record": 98949,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T14:16:08.4033219Z",
+        "id": 12
+      },
+      {
+        "record": 98933,
+        "provider": "User32",
+        "utc": "2026-11-23T14:15:43.4405885Z",
+        "id": 1074
+      },
+      {
+        "record": 98932,
+        "provider": "Display",
+        "utc": "2026-11-23T14:06:38.6561271Z",
+        "id": 4101
+      },
+      {
+        "record": 98860,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T14:02:11.9241492Z",
+        "id": 12
+      },
+      {
+        "record": 98844,
+        "provider": "User32",
+        "utc": "2026-11-23T14:01:45.3783482Z",
+        "id": 1074
+      },
+      {
+        "record": 98772,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T13:52:38.7858979Z",
+        "id": 12
+      },
+      {
+        "record": 98756,
+        "provider": "User32",
+        "utc": "2026-11-23T13:52:13.7511388Z",
+        "id": 1074
+      },
+      {
+        "record": 98684,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T13:30:06.2127961Z",
+        "id": 12
+      },
+      {
+        "record": 98668,
+        "provider": "User32",
+        "utc": "2026-11-23T13:29:41.4990470Z",
+        "id": 1074
+      },
+      {
+        "record": 98596,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T13:22:19.1350517Z",
+        "id": 12
+      },
+      {
+        "record": 98580,
+        "provider": "User32",
+        "utc": "2026-11-23T13:21:54.5517751Z",
+        "id": 1074
+      },
+      {
+        "record": 98509,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T13:02:00.9279788Z",
+        "id": 12
+      },
+      {
+        "record": 98493,
+        "provider": "User32",
+        "utc": "2026-11-23T13:01:13.0696695Z",
+        "id": 1074
+      },
+      {
+        "record": 98425,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T12:54:52.4455356Z",
+        "id": 12
+      },
+      {
+        "record": 98408,
+        "provider": "User32",
+        "utc": "2026-11-23T12:54:23.4618932Z",
+        "id": 1074
+      },
+      {
+        "record": 98337,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T08:44:37.2677647Z",
+        "id": 12
+      },
+      {
+        "record": 98321,
+        "provider": "User32",
+        "utc": "2026-11-23T08:44:12.8121264Z",
+        "id": 1074
+      },
+      {
+        "record": 98249,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T08:28:51.9588020Z",
+        "id": 12
+      },
+      {
+        "record": 98233,
+        "provider": "User32",
+        "utc": "2026-11-23T08:28:27.2672179Z",
+        "id": 1074
+      },
+      {
+        "record": 98157,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T08:13:47.6077313Z",
+        "id": 12
+      },
+      {
+        "record": 98141,
+        "provider": "User32",
+        "utc": "2026-11-23T08:13:22.4934281Z",
+        "id": 1074
+      },
+      {
+        "record": 98075,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T07:53:22.2700756Z",
+        "id": 12
+      },
+      {
+        "record": 98059,
+        "provider": "User32",
+        "utc": "2026-11-23T07:52:57.2616075Z",
+        "id": 1074
+      },
+      {
+        "record": 98001,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "utc": "2026-11-23T05:48:21.5980671Z",
+        "id": 41
+      },
+      {
+        "record": 97992,
+        "provider": "EventLog",
+        "utc": "2026-11-23T05:49:44.6929420Z",
+        "id": 6008
+      },
+      {
+        "record": 97983,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T05:48:17.1380027Z",
+        "id": 12
+      },
+      {
+        "record": 97912,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T05:09:58.5194549Z",
+        "id": 12
+      },
+      {
+        "record": 97895,
+        "provider": "User32",
+        "utc": "2026-11-23T05:09:35.0401559Z",
+        "id": 1074
+      },
+      {
+        "record": 97827,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T05:03:43.6097307Z",
+        "id": 12
+      },
+      {
+        "record": 97810,
+        "provider": "User32",
+        "utc": "2026-11-23T05:03:18.6709803Z",
+        "id": 1074
+      },
+      {
+        "record": 97726,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T03:49:43.4923208Z",
+        "id": 12
+      },
+      {
+        "record": 97710,
+        "provider": "User32",
+        "utc": "2026-11-23T03:49:17.4890344Z",
+        "id": 1074
+      },
+      {
+        "record": 97634,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T03:42:12.5276888Z",
+        "id": 12
+      },
+      {
+        "record": 97615,
+        "provider": "User32",
+        "utc": "2026-11-23T03:41:45.8310035Z",
+        "id": 1074
+      },
+      {
+        "record": 97530,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T23:28:05.4968891Z",
+        "id": 12
+      },
+      {
+        "record": 97514,
+        "provider": "User32",
+        "utc": "2026-11-22T23:27:40.9048744Z",
+        "id": 1074
+      },
+      {
+        "record": 97455,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "utc": "2026-11-22T23:15:48.6257678Z",
+        "id": 41
+      },
+      {
+        "record": 97438,
+        "provider": "EventLog",
+        "utc": "2026-11-22T23:17:30.0601987Z",
+        "id": 6008
+      },
+      {
+        "record": 97437,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T23:15:44.8365155Z",
+        "id": 12
+      },
+      {
+        "record": 97365,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T22:44:07.0531028Z",
+        "id": 12
+      },
+      {
+        "record": 97348,
+        "provider": "User32",
+        "utc": "2026-11-22T22:43:40.2175041Z",
+        "id": 1074
+      },
+      {
+        "record": 97276,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T22:35:28.8754407Z",
+        "id": 12
+      }
+    ],
+    "expected_components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+    },
+    "trial_token_exists": true,
+    "trial": true,
+    "service": "tegragpurender",
+    "boot": 99215,
+    "binaries": {
+      "dxgi.dll": {
+        "path": "C:\\Windows\\System32\\dxgi.dll",
+        "sha256": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      },
+      "d3d11.dll": {
+        "path": "C:\\Windows\\System32\\d3d11.dll",
+        "sha256": "ccc352f7097d0320368000dbe9ff92772d8fc909185d95c8a0753cb8f115f880",
+        "version": "10.0.22621.2715 (WinBuild.160101.0800)"
+      },
+      "dxgkrnl.sys": {
+        "path": "C:\\Windows\\System32\\drivers\\dxgkrnl.sys",
+        "sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+      },
+      "dxgmms2.sys": {
+        "path": "C:\\Windows\\System32\\drivers\\dxgmms2.sys",
+        "sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5",
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+      },
+      "gdi32.dll": {
+        "path": "C:\\Windows\\System32\\gdi32.dll",
+        "sha256": "16296352c617d83dda1ccce5ad0048cef8ee30d22b9960681e833b5767f8a5bb",
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+      }
+    },
+    "permanent": null,
+    "boot_after": 99215,
+    "mode": 1,
+    "dwm_start": "2026-11-23T20:01:21.7141762Z",
+    "code": 0,
+    "loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1\\app\\tg_nvk_arm64.dll"
+    },
+    "diagnostic_processes": [],
+    "dwm": 1476,
+    "utc": "2026-11-23T20:36:18.7621018Z",
+    "power_state": {
+      "Utc": "2026-11-23T20:36:11.4931628Z",
+      "Power": {
+        "Version": 2,
+        "IsLite": 1,
+        "CpuConfigured": 1,
+        "PowerMode": 1,
+        "CpuTargetKhz": 918000,
+        "CpuActualKhz": 916804,
+        "CpuBootKhz": 998400,
+        "CpuMv": 620,
+        "RamActualKhz": 1331200,
+        "GpuPolicyMode": 1,
+        "GpuPolicyMinKhz": 76800,
+        "GpuPolicyMaxKhz": 537600,
+        "GpuReportedKhz": 307200,
+        "GpuReportedUv": 590000,
+        "GpuStatusWord": 554379277,
+        "TempC": 40,
+        "TempValid": 1,
+        "FanDuty": 51,
+        "Flags": 20,
+        "CpuPolicyMinKhz": 102000,
+        "CpuPolicyMaxKhz": 1581000,
+        "CpuRequestedMaxKhz": 1581000,
+        "GpuRequestedMaxKhz": 537600,
+        "CpuSpeedo": 1630,
+        "CpuProcessId": 0,
+        "CpuDfllAvailable": 1,
+        "CpuDfllActive": 1,
+        "CpuLastError": 0,
+        "CpuLoadPermille": 500,
+        "GpuSampleAgeMs": 15,
+        "SocTempC": 40,
+        "BoardTempC": 39,
+        "TempSampleAgeMs": 344
+      }
+    },
+    "ac": "Online",
+    "trace_query": [
+      {
+        "error_id": "CmdletizationQuery_NotFound_Name,Get-EtwTraceSession",
+        "category": "ObjectNotFound",
+        "name": "SwitchDdiLive-cb7c49efe696",
+        "query_error": "找不到任何“Name”属性等于“SwitchDdiLive-cb7c49efe696”的 MSFT_EtwTraceSession 对象。请验证属性值，然后重试。"
+      },
+      {
+        "error_id": "CmdletizationQuery_NotFound_Name,Get-EtwTraceSession",
+        "category": "ObjectNotFound",
+        "name": "SwitchDdiLive-7eca0cfb6e14",
+        "query_error": "找不到任何“Name”属性等于“SwitchDdiLive-7eca0cfb6e14”的 MSFT_EtwTraceSession 对象。请验证属性值，然后重试。"
+      },
+      {
+        "error_id": "CmdletizationQuery_NotFound_Name,Get-EtwTraceSession",
+        "category": "ObjectNotFound",
+        "name": "SwitchDdiLive-7b6194525f31",
+        "query_error": "找不到任何“Name”属性等于“SwitchDdiLive-7b6194525f31”的 MSFT_EtwTraceSession 对象。请验证属性值，然后重试。"
+      }
+    ],
+    "service_state": "Running",
+    "boot_utc": "2026-11-23T20:00:34.0436903Z",
+    "os_arch": "ARM64",
+    "os_build": "22631",
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+    },
+    "owned_tasks": [],
+    "interactive_user": "DESKTOP-5RCUK3G\\ruje",
+    "loaded": {
+      "tegragpurender.sys": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+    },
+    "os_revision": 2861,
+    "trace_query_exit": null,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1",
+    "preserved_private_x86": {
+      "sha256": "5ac50269abb761c9e77dabfb71da035f211263c9609adff056dd6a1cec79cd69",
+      "path": "C:\\Program Files\\SwitchWOA-GpuBoot\\NeonAcceptance-01a20660\\private-x86\\libvulkan_nouveau.dll"
+    }
+  },
+  "loaded_components": {
+    "tegragpurender.sys": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+  },
+  "loaded_paths": {
+    "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+    "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1\\app\\libvulkan_nouveau.dll",
+    "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1\\app\\tg_d3d_arm64.dll",
+    "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1\\app\\TegraGpuD3DVk.dll",
+    "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\c4-adapter-target-23af0c9f-01a2094a-r1\\app\\tg_nvk_arm64.dll"
+  },
+  "request": {
+    "event": "dispatch_intent",
+    "pid": 4712,
+    "tid": 5480,
+    "luid": "0000000000005605",
+    "hAdapter": 1073741952,
+    "escape_type": 3,
+    "vidsch_type": 6,
+    "flags": 0,
+    "bytes": 48,
+    "qpc_stamp": 41750421889,
+    "qpc_frequency": 19200000,
+    "planned_api_requests": 1,
+    "dispatch_completion": "unknown"
+  },
+  "return": {
+    "event": "return",
+    "pid": 4712,
+    "tid": 5480,
+    "luid": "0000000000005605",
+    "hAdapter": 1073741952,
+    "escape_type": 3,
+    "vidsch_type": 6,
+    "status": "00000000",
+    "qpc_stamp": 41750777124,
+    "qpc_valid": 1,
+    "api_calls_returned": 1
+  },
+  "adapter_result": {
+    "timed_out": false,
+    "pid": 4712,
+    "gpu_code": 0,
+    "action": "Adapter",
+    "exit": 0,
+    "boot_after": 99215,
+    "utc": "2026-11-23T20:37:02.3515942Z",
+    "observation": {
+      "qpc_frequency": 19200000,
+      "seconds": 45,
+      "deadline_reached": true,
+      "reader_exited_seen": false,
+      "recovery_completion_inferred": false,
+      "start_qpc": 41755008501,
+      "deadline_qpc": 42619008501,
+      "elapsed_seconds": 50.74126640625,
+      "stop_reason": "bounded_observation_deadline",
+      "observed_qpc": 42729240816,
+      "journal": "C:\\Program Files\\SwitchWOA-C4AdapterTarget-01a2094a-r1\\adapter-observation.jsonl",
+      "samples": 82
+    },
+    "stdout": "{\"event\":\"return\",\"pid\":4712,\"tid\":5480,\"luid\":\"0000000000005605\",\"hAdapter\":1073741952,\"escape_type\":3,\"vidsch_type\":6,\"status\":\"00000000\",\"qpc_stamp\":41750777124,\"qpc_valid\":1,\"api_calls_returned\":1}\r\n",
+    "boot_before": 99215,
+    "stderr": "{\"event\":\"machine_observation\",\"success\":1,\"guest\":0,\"native\":43620,\"error\":0}\r\n{\"event\":\"code_integrity_observation\",\"status\":\"00000000\",\"returned_bytes\":8,\"length\":8,\"options\":\"00080203\",\"test_signing_allowed\":1}\r\n",
+    "dwm": [
+      {
+        "started": "2026-11-23T20:37:03.5348350Z",
+        "pid": 3784
+      }
+    ]
+  },
+  "reset_restart": [
+    {
+      "line": 79077,
+      "qpc": 41760223246,
+      "pid": 4,
+      "tid": 492,
+      "version": 1,
+      "operation": 1,
+      "phase": 0,
+      "flags": 4101,
+      "engine": 18446627003606978560,
+      "luid": 22021,
+      "status": 0,
+      "node": 0,
+      "engine_ordinal": 0,
+      "submitted": 25454,
+      "completed": 25454,
+      "result": 0,
+      "query_fence": 0,
+      "queue_failure": 0
+    },
+    {
+      "line": 79294,
+      "qpc": 41760767946,
+      "pid": 4,
+      "tid": 492,
+      "version": 1,
+      "operation": 1,
+      "phase": 1,
+      "flags": 4293,
+      "engine": 18446627003606978560,
+      "luid": 22021,
+      "status": 0,
+      "node": 0,
+      "engine_ordinal": 0,
+      "submitted": 25454,
+      "completed": 25454,
+      "result": 0,
+      "query_fence": 0,
+      "queue_failure": 0
+    },
+    {
+      "line": 81115,
+      "qpc": 41763417012,
+      "pid": 4,
+      "tid": 492,
+      "version": 1,
+      "operation": 2,
+      "phase": 0,
+      "flags": 4293,
+      "engine": 18446627003606978560,
+      "luid": 22021,
+      "status": 0,
+      "node": 0,
+      "engine_ordinal": 0,
+      "submitted": 25454,
+      "completed": 25454,
+      "result": 0,
+      "query_fence": 0,
+      "queue_failure": 0
+    },
+    {
+      "line": 81180,
+      "qpc": 41765198987,
+      "pid": 4,
+      "tid": 492,
+      "version": 1,
+      "operation": 2,
+      "phase": 1,
+      "flags": 4101,
+      "engine": 18446627003606978560,
+      "luid": 22021,
+      "status": 0,
+      "node": 0,
+      "engine_ordinal": 0,
+      "submitted": 25454,
+      "completed": 25454,
+      "result": 0,
+      "query_fence": 0,
+      "queue_failure": 0
+    }
+  ],
+  "system_paging_prepare": {
+    "line": 87336,
+    "qpc": 41769647905,
+    "pid": 4,
+    "tid": 1332,
+    "version": 1,
+    "operation": 4,
+    "flags": 37366815,
+    "status": 0,
+    "engine": 18446627003606978560,
+    "context": 18446627003585572352,
+    "device": 18446627003583174944,
+    "process": 18446627003585161872,
+    "luid": 22021,
+    "context_id": 1,
+    "context_flags": 5,
+    "process_flags": 1,
+    "engine_generation": 2,
+    "context_generation": 2,
+    "prior_generation": 0,
+    "root_status": 0,
+    "root_entries": 16384,
+    "root_offset": 0,
+    "root_segment": 1,
+    "submission_fence": 25519,
+    "expected": 8185,
+    "observed": 0,
+    "decision": 0,
+    "reserved": 0
+  },
+  "system_paging_complete": {
+    "line": 87337,
+    "qpc": 41769681697,
+    "pid": 4,
+    "tid": 1332,
+    "version": 1,
+    "operation": 5,
+    "flags": 58339311,
+    "status": 0,
+    "engine": 18446627003606978560,
+    "context": 18446627003585572352,
+    "device": 18446627003583174944,
+    "process": 18446627003585161872,
+    "luid": 22021,
+    "context_id": 1,
+    "context_flags": 5,
+    "process_flags": 1,
+    "engine_generation": 2,
+    "context_generation": 2,
+    "prior_generation": 2,
+    "root_status": 0,
+    "root_entries": 16384,
+    "root_offset": 0,
+    "root_segment": 1,
+    "submission_fence": 25519,
+    "expected": 8185,
+    "observed": 8185,
+    "decision": 0,
+    "reserved": 0
+  },
+  "windows_same_packet": {
+    "175": {
+      "line": 87311,
+      "qpc": 41769621808,
+      "pid": 4,
+      "tid": 940,
+      "id": 175,
+      "version": 1,
+      "fields": {
+        "hContext": 18446627003609287520,
+        "hQueuePacketContext": 18446627003609287520,
+        "PacketType": 1,
+        "uliSubmissionId": 25519,
+        "ulQueueSubmitSequence": 31722,
+        "pDmaBuffer": 18446627003606840000,
+        "QuantumStatus": 3
+      }
+    },
+    "176": {
+      "line": 87346,
+      "qpc": 41769733402,
+      "pid": 4,
+      "tid": 1332,
+      "id": 176,
+      "version": 0,
+      "fields": {
+        "hContext": 18446627003609287520,
+        "PacketType": 1,
+        "uliCompletionId": 25519,
+        "ulQueueSubmitSequence": 31722,
+        "bPreempted": 0
+      }
+    },
+    "177": {
+      "line": 87340,
+      "qpc": 41769732919,
+      "pid": 4,
+      "tid": 1332,
+      "id": 177,
+      "version": 1,
+      "fields": {
+        "hContext": 18446627003609287520,
+        "PacketType": 1,
+        "uliCompletionId": 25519,
+        "ulQueueSubmitSequence": 31722,
+        "InterruptType": 1,
+        "QuantumStatus": 3,
+        "FaultedVirtualAddress": 0,
+        "PageFaultFlags": 0,
+        "FaultedProcessHandle": 0
+      }
+    },
+    "178": {
+      "line": 87216,
+      "qpc": 41769611859,
+      "pid": 4,
+      "tid": 944,
+      "id": 178,
+      "version": 1,
+      "fields": {
+        "hContext": 18446627003609287520,
+        "PacketType": 8,
+        "SubmitSequence": 31722,
+        "DmaBufferSize": 0,
+        "AllocationListSize": 0,
+        "PatchLocationListSize": 0,
+        "bPresent": 0,
+        "hDmaBuffer": 18446627003606840000,
+        "pQueuePacket": 18446627003627388944,
+        "ProgressFenceValue": 0
+      }
+    },
+    "180": {
+      "line": 87347,
+      "qpc": 41769733503,
+      "pid": 4,
+      "tid": 1332,
+      "id": 180,
+      "version": 1,
+      "fields": {
+        "hContext": 18446627003609287520,
+        "PacketType": 8,
+        "SubmitSequence": 31722,
+        "bPreempted": 0,
+        "bTimeouted": 0,
+        "pQueuePacket": 18446627003627388944
+      }
+    }
+  },
+  "data_integrity": {
+    "live_raw_records": 323274,
+    "live_status_lines": 76,
+    "closed_ETL_bytes": 244645888,
+    "buffers": 3733,
+    "all_raw_event_identity_and_payload_multisets_equal": true,
+    "compared_fields": [
+      "QPC",
+      "PID",
+      "TID",
+      "provider",
+      "ID",
+      "version",
+      "opcode",
+      "task",
+      "full payload"
+    ],
+    "whole_header_equal": false,
+    "disk_flags": 0,
+    "live_flags": 576,
+    "lost_events": 0,
+    "lost_buffers": 0
+  },
+  "DWM": {
+    "before_pid": 1476,
+    "before_start": "2026-11-23T20:01:21.7141762Z",
+    "after": [
+      {
+        "started": "2026-11-23T20:37:03.5348350Z",
+        "pid": 3784
+      }
+    ],
+    "same_process_continuity": false,
+    "scope": "Desktop compositor recreated during controlled adapter recovery; normal same-boot desktop available afterward. No game or visible rendered-output qualification."
+  },
+  "DDI_boundary_limit": "Profiler entry/return identifies call boundaries, not final DDI NTSTATUS. Completion/Windows retirement is separately demonstrated by original records.",
+  "raw_delivery": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/continuation-01a2094a/target-c4-type3-native-delivery-r1/DELIVERY_INDEX.json",
+    "sha256": "745232ab285c8851aff93d642505545c18ef3f40d53fe1895fabc3531952fec3",
+    "bytes": 8888
+  },
+  "native_requests": 1,
+  "additional_target_requests_allowed": 0,
+  "restarts_and_full_episode": {
+    "evidence_file": "system-interval.json",
+    "evidence_sha256": "3e2b086d142a1f1dec1085d9fe3f50001f26e228a56f958175b8a0f678ad8226",
+    "full_collected_interval": [
+      99039,
+      99472
+    ],
+    "qualification_interval": [
+      99110,
+      99472
+    ],
+    "candidate_same_boot": true,
+    "controlled_reboots": 4,
+    "selected_41_6008_1001": 0,
+    "controlled_TDR_event": {
+      "record": 99292,
+      "id": 4101,
+      "driver": "tegragpurender"
+    },
+    "prior_formal_restoration_boot": 99402
+  },
+  "test_configuration": {
+    "actual_TdrTestMode": 1,
+    "actual_CodeIntegrity_options": "0x80203",
+    "test_sign_enabled": true,
+    "original_typed_settings_restored": true,
+    "proof_scope": "Explicit OS test request; not natural game-hang or classic NT crashdump acceptance"
+  }
+}

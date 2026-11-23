@@ -1,0 +1,264 @@
+{
+  "schema": 1,
+  "disposition": "accept_scoped_verified_fix",
+  "scope": "adapter-reset-system-paging-recovery",
+  "source_commit": "6a5a999ff9b7cd540a3167baa0cbf64d14b43725",
+  "tested_producer": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+  "conclusion": "The exact signed C4 candidate on boot99215 completed the adapter Reset/Restart path, rebuilt the surviving system paging context and completed its correlated paging packet through GPU visibility and Windows retirement. It qualifies this recovery repair; the historical initiating failure and restart cause remain open.",
+  "raw_identity": {
+    "index": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/continuation-01a2094a/target-technical-delivery-preparation-r1/raw-original-identity-index.json",
+      "sha256": "255690bebc4c8119203e61d0dd0cb4959774c061e5e062537d9604c0d6b40466",
+      "bytes": 97971
+    },
+    "files": 212,
+    "bytes": 1136220135,
+    "zip_count_claimed": false
+  },
+  "independent_reports": {
+    "runtime": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-type3-99215-main-review-20261123/runtime-independent-verification.json",
+      "sha256": "ad95445732bb9002555231b564dfb287953ea38e634c988052b2bc2b5caf2290",
+      "bytes": 11829
+    },
+    "provenance": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-type3-99215-main-review-20261123/provenance-independent-verification.json",
+      "sha256": "320e893d00289013e93428e81193deb3087b3c84ef2e0124ec726a260d5081fb",
+      "bytes": 2573
+    },
+    "preservation": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-type3-99215-main-review-20261123/preservation-independent-verification.json",
+      "sha256": "d8d67dec6b95d47f059d42b475344c603958c0fc037800778a6ac058f1a00e1b",
+      "bytes": 44067
+    }
+  },
+  "identity_report": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-type3-99215-main-review-20261123/identity-verification.json",
+    "sha256": "bff4b1b3998fea306f78441dd1bfc25e3c833894c2bf82ed5a761b1c76c8920a",
+    "bytes": 143707
+  },
+  "source_equivalence": "The18 candidate changed files retain exact tested-source bytes. No KMD/core/platform/include/build.py/test_context differences existed between the39998019 candidate base and150c6038 publication before this merge. Current published user-mode implementation and firmware selection remain preserved.",
+  "native": {
+    "boot": 99215,
+    "LUID": "0x5605",
+    "Code0": true,
+    "AC": true,
+    "one_time": true,
+    "signed_KMD": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+    "actual_requests": 1,
+    "request_type": 3,
+    "vidsch_type": 6,
+    "request_flags": 0,
+    "request_bytes": 48,
+    "request_return": "0x00000000",
+    "actual_Reset_and_Restart_pairs": 2,
+    "return_statuses": [
+      "0x00000000",
+      "0x00000000"
+    ],
+    "generation": [
+      1,
+      2
+    ],
+    "system_context_id": 1,
+    "paging_fence": 25519,
+    "GPU_expected": 8185,
+    "GPU_observed_by_CPU": 8185,
+    "Windows_sequence": 31722,
+    "evidence_file": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/native-case.json",
+    "evidence_sha256": "ae52a3cbaf5d5db12d71863fc457bd64de16b24e85a3356cc96c93544366b39b"
+  },
+  "same_attempt_evidence": [
+    "Same actual LUID/engine and TID492 bind four Reset/Restart entry/return records.",
+    "Startup creation ID1 and later root/generation/prepare/completion records identify the surviving KMD system paging object lifetime.",
+    "Producer requires GpuCompleted AND CpuCompleted, retired and a nonzero expected value equal to the valid CPU observation of GPU output.",
+    "Windows unique fence25519 with sequence31722, same context, DMA buffer, nonzero queue pointer and QPC interval links submit/begin/interrupt/DMAstop/retirement.",
+    "Profiler105/106 records mark the submission call boundary; they do not carry its final DDI NTSTATUS. Windows internal context pointer is not directly equated with the KMD context pointer."
+  ],
+  "live_closed_trace": {
+    "raw_events": 323274,
+    "live_status_rows": 76,
+    "full_multiset_fields": [
+      "QPC",
+      "PID",
+      "TID",
+      "provider",
+      "id",
+      "version",
+      "opcode",
+      "task",
+      "full payload"
+    ],
+    "closed_buffers": 3733,
+    "closed_bytes": 244645888,
+    "closed_loss": 0,
+    "damaged_buffers": 0,
+    "whole_header_identity": false,
+    "disk_flags": 0,
+    "live_flags": "0x240"
+  },
+  "requested_observation_seconds": 45,
+  "actual_elapsed_seconds": 50.74126640625,
+  "durable_observation_samples": 82,
+  "desktop": {
+    "before_DWM": 1476,
+    "after_DWM": 3784,
+    "same_DWM_process": false,
+    "same_OS_boot": true,
+    "desktop_recovered": true,
+    "application_output_qualified": false
+  },
+  "System": {
+    "full_collected": [
+      99039,
+      99472
+    ],
+    "qualification": [
+      99110,
+      99472
+    ],
+    "query_error_count": 0,
+    "owned_reboots": 4,
+    "restart1074": [
+      99110,
+      99199,
+      99293,
+      99386
+    ],
+    "boot12": [
+      99039,
+      99126,
+      99215,
+      99309,
+      99402
+    ],
+    "controlled_TDR4101": 99292,
+    "events41_6008_1001": 0
+  },
+  "cross_boot": {
+    "cold_epochs": [
+      99039,
+      99126,
+      99215,
+      99309
+    ],
+    "provider_files": 16,
+    "exact_BootTime_matches_System12_StartTime": true,
+    "source_before_copy_after_host_sha_match": true,
+    "complete_tail_or_zero_loss_claimed": false
+  },
+  "dumps": {
+    "raw_originals": 5,
+    "code117_arg2_inside_same_boot_C4_RVA": "0x6ea0",
+    "bounded_header_module_fact_only": true,
+    "debugger_stack_proved": false,
+    "classic_NT_crashdump_or_SD_repair_proved": false
+  },
+  "formal_restoration": {
+    "boot": 99402,
+    "Code0": true,
+    "component_full_hashes": 8,
+    "loaded_path_hashes": 5,
+    "private_x86_preserved": true,
+    "KMD": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+    "selected_equals_permanent": true,
+    "owned_tasks_processes_sessions": 0,
+    "unused_oem32_removed": true,
+    "evidence_file": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/formal-restoration.json"
+  },
+  "independent_Gemini": {
+    "model": "gemini-4-neon-high",
+    "native_session": "7f56e815-db18-45e1-aae9-e891c6f19f8e",
+    "exit": 0,
+    "overall": "runtime_contract_supported",
+    "findings": [],
+    "frozen_inputs": 50,
+    "manifest_inclusive_files": 51,
+    "original": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/continuation-01a2094a/target-runtime-primary-originals-r1/stdout.jsonl",
+      "sha256": "b161d82c09e5f124bb02e145d85a5cf4648b1753f0c32f21e2a27bb07a24749e",
+      "bytes": 98088
+    }
+  },
+  "wording_corrections": [
+    {
+      "id": "MAIN-C4-HEADER",
+      "scope": "wording",
+      "fact": "All 323274 raw events match in QPC/PID/TID/provider/id/version/opcode/task/full payload. Disk Flags=0; live EVENT_RECORD flags=0x240. Whole binary-header or JSON-line byte identity is not claimed."
+    },
+    {
+      "id": "MAIN-C4-OBSERVATION",
+      "scope": "wording",
+      "fact": "Requested minimum deadline45s; native result records actual elapsed50.74126640625s and82durable observation samples.76live status lines are a different count."
+    },
+    {
+      "id": "MAIN-C4-DWM",
+      "scope": "acceptance boundary",
+      "fact": "DWM1476/start20:01:21.7141762Z before TDR and DWM3784/start20:37:03.5348350Z afterward. No same-DWM process continuity. Desktop recovery and same OS boot are the relevant limited TDR outcome, not application/rendering acceptance."
+    }
+  ],
+  "deferred_470e1dbc_contracts": [
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+        "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+      },
+      "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+      "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。",
+      "new_batch_disposition": "未取得该具名条件的新直接证据。适配器复位及系统分页包退役不替代此契约；原重入条件保持。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+        "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+      },
+      "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+      "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。",
+      "new_batch_disposition": "未取得该具名条件的新直接证据。适配器复位及系统分页包退役不替代此契约；原重入条件保持。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+        "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+      },
+      "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+      "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。",
+      "new_batch_disposition": "未取得该具名条件的新直接证据。适配器复位及系统分页包退役不替代此契约；原重入条件保持。"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+        "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+      },
+      "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+      "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。",
+      "new_batch_disposition": "未取得该具名条件的新直接证据。适配器复位及系统分页包退役不替代此契约；原重入条件保持。"
+    }
+  ],
+  "open_faults": {
+    "before": 20,
+    "after": 20,
+    "closed_unchanged": 3,
+    "target": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+    "target_closed": false
+  },
+  "limits": [
+    "No claim to 91476/DWM152586,95090 or legacy SEQUENTIAL first-Present initiating cause.",
+    "The precise first failed native predicate on97365,97437 final restart/NT bugcheck and classic dump failure stage remain unknown.",
+    "Cold circular trace loss/wrap is retained. Lossless correlation applies to the separate owned closed adapter trace.",
+    "DWM was recreated during TDR. This is recovered desktop evidence, not uninterrupted compositor, rendered output, games or performance acceptance.",
+    "Previous sealed controls and the one request in this batch are not replayed; no new target requests are needed for promotion.",
+    "Only the KMD runtime component changes; all accepted UMD/NVK ABI variants, forwarding DLLs, firmware, private x86 and desktop native ARM64 DXVK remain preserved."
+  ],
+  "stage": "Local independent acceptance; normal repository qualification and executor activation follow",
+  "main_device_operations": 0,
+  "goal_complete": false
+}
