@@ -1571,6 +1571,136 @@ static TG_GPU_CONTEXT *RecreateContext(DRIVER_INITIALIZATION_DATA *ddi,TG_GPU_DE
     CHECK(((TG_GPU_CONTEXT *)create.hContext)->Root.Valid);
     return create.hContext;
 }
+
+/* Exercise the real admission/activation/template path used by CE paging.
+ * No channel submission occurs: retirement releases the captured reference
+ * without MMIO, and this fixture makes no claim about physical DMA/recovery. */
+static VOID PrepareSystemPagingImage(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT *c,UINT32 word)
+{
+    TG_GPU_CONTEXT_WORK work={.Engine=e,.Paging=TRUE};
+    UINT accesses=hw.reads+hw.writes;
+    CHECK(TgGpuCapturePagingContext(e,c,&work)==STATUS_SUCCESS);
+    work.DmaAddress=work.InternalVa+TG_GPU_COMMAND_CAPTURE;work.DmaBytes=8;
+    CHECK(TgGpuActivateContextWork(e,&work,NULL)==STATUS_SUCCESS);
+    CHECK(TgGpuPrepareContextWork(e,&work)==STATUS_SUCCESS);
+    CHECK(c->GraphicsGeneration==e->GraphicsGeneration && c->References==1);
+    const UINT32 *image=(const UINT32 *)((const UCHAR *)c->Instance.CpuAddress+TG_GPU_CONTEXT_GR_OFFSET);
+    CHECK(image[0x100/4]==word);
+    CHECK(TgGpuRetireContextWork(e,&work,NULL,NULL)==STATUS_SUCCESS);
+    CHECK(!c->References && !e->Active && !work.Context && hw.reads+hw.writes==accesses);
+}
+
+static __declspec(noinline) VOID TestSystemPagingReset(const DXGKRNL_INTERFACE *dxgk)
+{
+    static TG_GPU_CONTEXT_ENGINE e;static TG_GPU_WORK_QUEUE q;static TG_GPU_HARDWARE hardware;
+    static TG_GPU_WORKER worker;
+    static _Alignas(PAGE_SIZE) UCHAR gold[TG_GPU_GR_GOLD_OFFSET+TG_GPU_GR_IMAGE_MAX_BYTES];
+    static TG_GPU_TABLE_SEGMENT tables={.Memory={(HANDLE)99,paging_tables,{.QuadPart=0x94000000},sizeof(paging_tables)},.SegmentId=1};
+    DRIVER_INITIALIZATION_DATA ddi={0};
+    DXGKARG_CREATEPROCESS process={.hDxgkProcess=(HANDLE)100,.Flags.SystemProcess=1};
+    DXGKARG_CREATEDEVICE device={.hDevice=(HANDLE)101};
+    DXGKARG_CREATECONTEXT create={.hContext=(HANDLE)102,.EngineAffinity=1,
+        .Flags={.SystemContext=1,.VirtualAddressing=1}};
+    DXGKARG_SETROOTPAGETABLE root={.Address={1,0,0},.NumEntries=TG_GPU_TABLE_ENTRIES};
+    struct tg_gpu_gr_work next_work={gold,0x94000000,sizeof(gold)};
+    struct tg_gpu_gr_context_status golden={.stage=9,.context_bytes=512,.gpcs=1,.tpcs=2,.zculls=4,
+        .image_magic=0x600dc0de,.image_changed_words=64};
+    UINT pools=PoolsInUse();
+    memset(&e,0,sizeof(e));memset(&q,0,sizeof(q));KeInitializeSpinLock(&q.Lock);
+    memset(&hardware,0,sizeof(hardware));
+    memset(&worker,0,sizeof(worker));memset(paging_tables,0,sizeof(paging_tables));
+    CHECK(TgGpuInitializeContextEngine(&e,dxgk,&tables)==STATUS_SUCCESS);TestGraphicsTemplate(&e);
+    TgGpuRegisterContextDdis(&ddi);
+    CHECK(ddi.DxgkDdiCreateProcess(&e,&process)==STATUS_SUCCESS);device.hKmdProcess=process.hKmdProcess;
+    CHECK(ddi.DxgkDdiCreateDevice(&e,&device)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiCreateContext(device.hDevice,&create)==STATUS_SUCCESS);
+    TG_GPU_CONTEXT *system=create.hContext;
+    root.hContext=system;ddi.DxgkDdiSetRootPageTable(&e,&root);
+    CHECK(system->Root.Valid && system->RootStatus==STATUS_SUCCESS);
+    create.Flags.SystemContext=0;create.hContext=(HANDLE)103;
+    CHECK(ddi.DxgkDdiCreateContext(device.hDevice,&create)==STATUS_SUCCESS);
+    TG_GPU_CONTEXT *application=create.hContext;
+    root.hContext=application;ddi.DxgkDdiSetRootPageTable(&e,&root);
+    application->GraphicsGeneration=1;
+    PrepareSystemPagingImage(&e,system,0xa5a5a5a5);
+    hardware.Engine=&e;hardware.GpuOwned=TRUE;e.HardwareOwner=&hardware;
+    hardware.Io=(struct tg_gpu_power_io){&hw,Read,Write,ReadPmic,WritePmic,Delay,NULL};
+    /* Model the ownership readbacks after queue-level isolation. The real
+     * isolation helper advances the epoch; cold hardware startup itself is
+     * outside this CPU fixture. */
+    hw.clamp=1;hw.reset=0x01000000;
+    TG_GPU_QUEUE_ENTRY pending={.Work={.Engine=&e,.Paging=TRUE}};
+    CHECK(TgGpuInitializeWorkQueue(&q,&e)==STATUS_SUCCESS);
+    CHECK(TgGpuCapturePagingContext(&e,system,&pending.Work)==STATUS_SUCCESS && system->References==1);
+    InsertTailList(&q.Pending,&pending.Link);
+    for(UINT generation=2;generation<=3;++generation) {
+        const D3DGPU_PHYSICAL_ADDRESS canonical=system->Root.Address;
+        CHECK(TgGpuResetBackend(&e,&q,&hardware,&worker)==STATUS_SUCCESS);
+        CHECK(e.GraphicsGeneration==generation && e.Resetting && e.RecoveryPending);
+        CHECK(!system->References && !q.Engine && !e.QueueOwner);
+        CHECK(system->Root.Valid && system->RootStatus==STATUS_SUCCESS && !system->GraphicsGeneration);
+        CHECK(system->Root.Address.SegmentId==canonical.SegmentId &&
+              system->Root.Address.SegmentOffset==canonical.SegmentOffset);
+        CHECK(!application->Root.Valid && application->GraphicsGeneration==1);
+        TG_GPU_CONTEXT_WORK blocked={.Engine=&e,.Paging=TRUE};
+        CHECK(TgGpuCapturePagingContext(&e,system,&blocked)==STATUS_DEVICE_NOT_READY);
+        /* An authoritative failed root update during cleanup must survive
+         * restart; no saved pre-reset descriptor may revive it. */
+        root.hContext=system;root.Address.SegmentId=0;
+        ddi.DxgkDdiSetRootPageTable(&e,&root);
+        CHECK(!system->Root.Valid);
+        /* A later valid OS relocation is the sole source of a valid root.
+         * Alternate two real table offsets and never restore the old one. */
+        root.Address.SegmentId=1;root.Address.SegmentOffset=(generation==2)?TG_GPU_TABLE_BYTES:0;
+        ddi.DxgkDdiSetRootPageTable(&e,&root);
+        CHECK(system->Root.Valid && system->Root.Address.SegmentOffset==root.Address.SegmentOffset);
+        CHECK(TgGpuFreePrivateMemory(&e.Dxgk,&e.Graphics.Memory)==STATUS_SUCCESS);e.Graphics.ImageBytes=0;
+        memset(gold,0,sizeof(gold));UINT32 *image=(UINT32 *)(gold+TG_GPU_GR_GOLD_OFFSET);
+        image[0xfc/4]=0x600dc0de;image[0x100/4]=0xabab0000u+generation;
+        CHECK(TgGpuInitializeGraphicsTemplate(&e,&next_work,&golden)==STATUS_SUCCESS);
+        e.Resetting=e.RecoveryPending=FALSE;e.UserdBar1Ready=TRUE;
+        PrepareSystemPagingImage(&e,system,0xabab0000u+generation);
+        CHECK(system->Root.Address.SegmentOffset==root.Address.SegmentOffset);
+        /* Even a fresh root binding does not restore an application image
+         * that belongs to the discarded hardware generation. */
+        DXGKARG_SETROOTPAGETABLE app_root=root;app_root.hContext=application;
+        ddi.DxgkDdiSetRootPageTable(&e,&app_root);
+        DXGKARG_SUBMITCOMMANDVIRTUAL submit={.hContext=application,.DmaBufferVirtualAddress=0x10000,.DmaBufferSize=8};
+        TG_GPU_CONTEXT_WORK stale={0};
+        CHECK(TgGpuCaptureContextWork(&e,&submit,NULL,&stale)==STATUS_DEVICE_NOT_READY);
+        DXGKARG_CREATECONTEXT fresh={.hContext=(HANDLE)104,.EngineAffinity=1,.Flags.VirtualAddressing=1};
+        CHECK(ddi.DxgkDdiCreateContext(device.hDevice,&fresh)==STATUS_SUCCESS);
+        app_root.hContext=fresh.hContext;ddi.DxgkDdiSetRootPageTable(&e,&app_root);
+        submit.hContext=fresh.hContext;
+        CHECK(TgGpuCaptureContextWork(&e,&submit,NULL,&stale)==STATUS_SUCCESS);
+        CHECK(TgGpuCancelCapturedWork(&e,&stale)==STATUS_SUCCESS);
+        CHECK(ddi.DxgkDdiDestroyContext(fresh.hContext)==STATUS_SUCCESS);
+        hardware.Isolated=FALSE;
+    }
+    /* No root update after reset: retain the canonical OS binding and rebuild
+     * the next private image, without making an invalid root valid. */
+    CHECK(TgGpuResetBackend(&e,&q,&hardware,&worker)==STATUS_SUCCESS);
+    CHECK(e.GraphicsGeneration==4 && system->Root.Valid && !system->GraphicsGeneration);
+    CHECK(TgGpuFreePrivateMemory(&e.Dxgk,&e.Graphics.Memory)==STATUS_SUCCESS);e.Graphics.ImageBytes=0;
+    ((UINT32 *)(gold+TG_GPU_GR_GOLD_OFFSET))[0x100/4]=0xabab0004u;
+    CHECK(TgGpuInitializeGraphicsTemplate(&e,&next_work,&golden)==STATUS_SUCCESS);
+    e.Resetting=e.RecoveryPending=FALSE;e.UserdBar1Ready=TRUE;
+    PrepareSystemPagingImage(&e,system,0xabab0004u);
+    root.hContext=system;root.Address.SegmentId=0;ddi.DxgkDdiSetRootPageTable(&e,&root);
+    hardware.Isolated=FALSE;
+    CHECK(TgGpuResetBackend(&e,&q,&hardware,&worker)==STATUS_SUCCESS);
+    e.Resetting=e.RecoveryPending=FALSE;
+    TG_GPU_CONTEXT_WORK invalid={.Engine=&e,.Paging=TRUE};
+    CHECK(!system->Root.Valid && TgGpuCapturePagingContext(&e,system,&invalid)==STATUS_DEVICE_NOT_READY);
+    e.HardwareOwner=NULL;hardware.Engine=NULL;
+    CHECK(ddi.DxgkDdiDestroyContext(application)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiDestroyContext(system)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiDestroyDevice(device.hDevice)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiDestroyProcess(&e,process.hKmdProcess)==STATUS_SUCCESS);
+    CHECK(TgGpuStopContextEngine(&e)==STATUS_SUCCESS && PoolsInUse()==pools);
+    for(UINT i=0;i<64;++i)CHECK(!memory_used[i]);
+    for(UINT i=0;i<4;++i)CHECK(!graphics_used[i]);
+}
 static VOID TestDebugReport(TG_GPU_ADAPTER *a,DRIVER_INITIALIZATION_DATA *ddi)
 {
     TG_GPU_DEBUG_REPORT report;
@@ -2940,6 +3070,7 @@ void start(void)
     TestContextCacheReinitialize(&dxgk,&tables);
     TestAdapterLifecycle(&dxgk);
     TestAdapterResetFences();
+    TestSystemPagingReset(&dxgk);
     TestPagingDispatch(&dxgk);
     TestPreemption(&dxgk);
     TestQueuedProgramState(&dxgk);

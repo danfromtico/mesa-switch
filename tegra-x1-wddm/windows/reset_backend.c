@@ -35,11 +35,21 @@ static NTSTATUS isolate_backend(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_WORK_QUEUE *q,
     KeAcquireSpinLock(&e->Lock,&irql);
     for(link=e->Contexts.Flink;link!=&e->Contexts;link=link->Flink) {
         TG_GPU_CONTEXT *c=CONTAINING_RECORD(link,TG_GPU_CONTEXT,Link);
-        if(reset) {
+        const BOOLEAN system_paging=c->Flags.SystemContext && c->Flags.VirtualAddressing &&
+            !c->Flags.GdiContext && !c->Closing && !c->References &&
+            c->Device && !c->Device->Closing && c->Device->Process &&
+            !c->Device->Process->Closing && c->Device->Process->Flags.SystemProcess;
+        if(reset && !system_paging) {
             /* VidMm can evict the roots during TDR cleanup. */
             c->Root.Valid=FALSE;c->RootStatus=STATUS_DEVICE_NOT_READY;
         } else {
-            /* Paging-only contexts have no application state to restore. */
+            /* The system paging device survives adapter recovery. Its root
+             * is the authoritative OS binding, updated by SetRootPageTable
+             * when moved/resized; never revive a failed binding from a saved
+             * descriptor. Resetting/RecoveryPending still block execution
+             * through OS cleanup and cold startup. Only its private image
+             * must be rebuilt from the new hardware generation's template.
+             * Suspend retains its existing paging-only behavior. */
             c->GraphicsGeneration=0;
         }
     }
