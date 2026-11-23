@@ -32,6 +32,27 @@ static void adapter_caps_contracts()
             versions[2] == D3D10_0_7_DDI_SUPPORTED && versions[3] == D3D11_1_DDI_SUPPORTED &&
             versions[4] == 0xbeef);
    }
+   /* The offer is process-scoped and exact: neither another value nor a
+    * non-NVK adapter may enable the unselected modern presentation path. */
+   CHECK(SetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", L"1"));
+   count = 0;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+   adapter.vk.nvk = true;
+   for (const wchar_t *value : {L"0", L"10", L"", L"true"}) {
+      CHECK(SetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", value));
+      count = 0;
+      CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+   }
+   CHECK(SetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", L"1"));
+   UINT64 modern[6] = {0xfeed, 0, 0, 0, 0, 0xbeef}; count = 4;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, modern) == E_OUTOFMEMORY && count == 5);
+   CHECK(modern[0] == 0xfeed && modern[5] == 0xbeef);
+   CHECK(functions.pfnGetSupportedVersions(h, &count, modern) == S_OK && count == 5 &&
+         modern[3] == D3D11_1_DDI_SUPPORTED && modern[4] == D3DWDDM2_0_DDI_SUPPORTED && modern[5] == 0xbeef);
+   CHECK(SetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", nullptr));
+   count = 0;
+   CHECK(functions.pfnGetSupportedVersions(h, &count, nullptr) == S_OK && count == 4);
+   adapter.vk.nvk = false;
    adapter.videoEnabled = false;
    struct { UINT before, caps, after; } out = {0xdeadbeef, 0xffffffff, 0xbeefdead};
    D3D10_2DDIARG_GETCAPS query = {D3D11DDICAPS_3DPIPELINESUPPORT, nullptr, &out.caps, sizeof(out.caps)};

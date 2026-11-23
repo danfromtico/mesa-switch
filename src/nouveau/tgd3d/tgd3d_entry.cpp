@@ -34,9 +34,9 @@ static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter)
    return close_native_adapter(static_cast<Adapter *>(hAdapter.pDrvPrivate));
 }
 
-/* Keep the accepted legacy negotiation. The paired runtime-context candidate
- * was withdrawn after a native black-screen report before rotation. Preserve
- * its reusable implementation, but do not make it a column-scan prerequisite. */
+/* Ordinary processes retain the accepted negotiation. WDDM 2.0 is offered
+ * only to an explicitly opted-in NVK application, never to the desktop by
+ * installing this UMD alone. */
 static const UINT64 supported_versions[] = {
    D3D10_0_DDI_SUPPORTED,
    D3D10_0_x_DDI_SUPPORTED,
@@ -47,13 +47,20 @@ static const UINT64 supported_versions[] = {
 static HRESULT APIENTRY GetSupportedVersions(D3D10DDI_HADAPTER h, UINT32 *count, UINT64 *versions)
 {
    if (!h.pDrvPrivate || !count) return E_INVALIDARG;
-   const UINT32 available = std::size(supported_versions);
+   wchar_t application[2] = {};
+   const bool modern = static_cast<const Adapter *>(h.pDrvPrivate)->vk.nvk &&
+      GetEnvironmentVariableW(L"TGD3D_WDDM20_APPLICATION", application, std::size(application)) == 1 &&
+      application[0] == L'1';
+   const UINT32 legacy = std::size(supported_versions);
+   const UINT32 available = legacy + (modern ? 1 : 0);
    const UINT32 capacity = *count;
    *count = available;
    if (versions && capacity < available)
       return E_OUTOFMEMORY;
-   if (versions)
+   if (versions) {
       memcpy(versions, supported_versions, sizeof(supported_versions));
+      if (modern) versions[legacy] = D3DWDDM2_0_DDI_SUPPORTED;
+   }
    return S_OK;
 }
 
