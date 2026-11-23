@@ -764,7 +764,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/small-dump-control-main-review-20261122.json#restoration_and_cleanup",
         "tegra-x1-wddm/docs/windows-native-graphics/predecessor-recovery-main-review-20261122.json#diagnostic_failure_boundary",
         "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-contract-main-review-20261122.json#producer_image_binding",
-        "tegra-x1-wddm/docs/windows-native-graphics/context-native-idle-main-review-20261123.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/context-native-idle-main-review-20261123.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/livedump-queue-main-review-20261123.json"
       ],
       "cause": "The one-shot consumption receipt and official tool banner were retained. The following boot reported Event41 with BugcheckCode0 and Event6008. No new dump was found and the11 preexisting WATCHDOG file hashes were stable. Kernel-Dump/Operational recorded disabled crash dumping while CrashDumpEnabled remained3. The actual NT bugcheck boundary and dump initialization/write failure cause remain unknown. A static SD-port initializer advertises support; a functioning dump instance remains unobserved.",
       "daily_workaround": "Use the selected component profile and retain bounded logs and durable operation receipts. Crash-dump capture and TDR vendor data require corresponding native evidence.",
@@ -827,6 +828,22 @@
         "NT_classic_bugcheck_arrival": "unknown",
         "writer_failure_stage": "unknown",
         "root_cause": "unknown"
+      },
+      "current_Mini_queue_capacity_followup": {
+        "review": "tegra-x1-wddm/docs/windows-native-graphics/livedump-queue-main-review-20261123.json",
+        "observation_boot": 98337,
+        "component": "WATCHDOG",
+        "registry_subkeys": 10,
+        "retained_Mini_path_capacity_predicate": "SubKeys < 10",
+        "present_admission_condition_satisfied": false,
+        "static_matching_false_status": "0xc0000099",
+        "per_attempt_failure_branch_proved": false,
+        "classic97176_cause_confirmed": false,
+        "historical_dump_originals_preserved": 11,
+        "historical_dump_content_bytes": 369612993,
+        "queue_cleanup_performed": false,
+        "new_dump_control_requests": 0,
+        "dump_capture_qualified": false
       }
     },
     {
@@ -6794,6 +6811,20 @@
       "whole_header_bit_identity": false,
       "formal_source": "df08e8583abc202732036597f5cb7f0519ba11a5",
       "candidate_promoted": false,
+      "faults_closed": 0,
+      "main_device_operations": 0
+    },
+    "livedump_queue_main_review": {
+      "review": "tegra-x1-wddm/docs/windows-native-graphics/livedump-queue-main-review-20261123.json",
+      "status": "present_Mini_capacity_condition_unsatisfied;per_attempt_and_classic_dump_causes_unproved",
+      "formal_boot": 98337,
+      "WATCHDOG_subkeys": 10,
+      "historical_dump_files_full_SHA_verified": 11,
+      "PDB_identity_comparisons": "GUID equal; InfoAge2>=PEAge1; DBIAge1==PEAge1",
+      "native_DIA_validation": false,
+      "new_GPU_TDR_dump_requests": 0,
+      "queue_cleanup_performed": false,
+      "baseline_promoted": false,
       "faults_closed": 0,
       "main_device_operations": 0
     }
