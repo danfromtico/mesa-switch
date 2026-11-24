@@ -2016,6 +2016,41 @@
       },
       "acceptance_qualified": false,
       "candidate_promotion_blocked": true
+    },
+    {
+      "id": "GM20B-C4-SD0515-DESKTOP-BLACK-SCREEN-100692",
+      "status": "open",
+      "kind": "display-black-screen",
+      "affected_scopes": [
+        "present",
+        "wddm",
+        "baseline-lifecycle"
+      ],
+      "trigger": "Desktop was observed after the SD0515 planned transition, followed by a reported black screen. The bounded native collection is on boot100692; no directNT R3 request had been dispatched.",
+      "evidence": [
+        "tegra-x1-wddm/docs/windows-native-graphics/sd0515-boot100692-black-screen-20261124.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/sd0515-boot100692-black-screen-20261124.System.xml",
+        "tegra-x1-wddm/docs/windows-native-graphics/sd0515-boot100692-black-screen-20261124.native-original.bin"
+      ],
+      "cause": "Unknown. Authenticated system queries continue and DWM/Explorer processes persist with C4 vendor identities. The exact System snapshot contains no extra boot or41/6008/4101/1001; missing events do not establish TDR absence. First power-policy query failed and cannot establish display timeout.",
+      "daily_workaround": "No black-screen workaround has been validated. Preserve originals and components, continue the independent SD main flow under its existing gates and sole lease, and keep this display case open.",
+      "close_when": "Bind the black-screen episode to actual display/power/rendering evidence, establish cause and any necessary repair, and verify corresponding real output and continuity. Code0, responding flags and preserved hashes alone do not close it.",
+      "resolution": null,
+      "episode": {
+        "observed_boot": 100692,
+        "system_record_range": [
+          100675,
+          100763
+        ],
+        "system_count": 89,
+        "new_SD_R3_NT_requested": false,
+        "black_screen_cause": "unknown",
+        "TDR_arrival": "unknown",
+        "additional_reboot_in_snapshot": false,
+        "normalIO_and_SD_dump_qualification": "not_yet_run_on_this_candidate"
+      },
+      "acceptance_qualified": false,
+      "candidate_promotion_blocked": true
     }
   ],
   "independent_qualifications": [
