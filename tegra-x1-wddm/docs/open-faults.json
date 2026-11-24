@@ -1895,6 +1895,117 @@
       "acceptance_qualified": false,
       "candidate_promotion_blocked": true,
       "current_owner_retains_candidate": true
+    },
+    {
+      "id": "GM20B-C4-SD0513-UNEXPLAINED-BOOT-100286",
+      "status": "open",
+      "kind": "unexpected-restart",
+      "affected_scopes": [
+        "classic-dump-forensics",
+        "baseline-lifecycle",
+        "wddm"
+      ],
+      "trigger": "The observed boot advanced from the preceding verified boot100210 to100286 before the bounded readonly Explorer/ETW collection. The transition has not been bound to an application, operator action, or driver-control request.",
+      "evidence": [
+        "tegra-x1-wddm/docs/windows-native-graphics/c4-sd0513-unexplained-boot100286-20261124.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/c4-sd0513-unexplained-boot100286-20261124.System.xml",
+        "tegra-x1-wddm/docs/windows-native-graphics/c4-sd0513-unexplained-boot100286-20261124.native-original.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/c4-sd0513-unexplained-boot100286-20261124.main-review.json"
+      ],
+      "cause": "Unknown. System100295/Event6008 and100304/Kernel-Power41 record an unclean predecessor shutdown; BugcheckCode and four parameters are0. Kernel-Boot100288 simultaneously reports LastShutdownGood/LastBootGood=true. Full System record-id100210..100361 has no User32/1074 or EventLog/6006. No application, SD, manual reset/power, NT or TDR cause is established.",
+      "daily_workaround": "Retain the owner-selected SD0513 candidate and current accepted GPU components. Preserve the current originals and observe the single-executor lease and consumed-request boundaries while continuing the authorized diagnosis.",
+      "close_when": "Bind the observed new boot to actual original events/workload or operator cause and establish justified fault boundary; current file hashes/module enumeration do not close it.",
+      "resolution": null,
+      "episode": {
+        "from_last_observed_boot": 100210,
+        "observed_boot": 100286,
+        "event_originals": "collected_complete_System_record_id100210_to100361_152_records",
+        "operator_reset_or_power_action": "unknown",
+        "NT_arrival": "unknown",
+        "acceptance_qualified": false,
+        "events": [
+          {
+            "record_id": 100286,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "id": 12,
+            "utc": "2026-11-24T05:03:45.9042385Z",
+            "data": {
+              "MajorVersion": "10",
+              "MinorVersion": "0",
+              "BuildVersion": "22621",
+              "QfeVersion": "2861",
+              "ServiceVersion": "0",
+              "BootMode": "0",
+              "StartTime": "2026-11-24T05:03:44.1172416Z"
+            }
+          },
+          {
+            "record_id": 100288,
+            "provider": "Microsoft-Windows-Kernel-Boot",
+            "id": 20,
+            "utc": "2026-11-24T05:03:45.9054474Z",
+            "data": {
+              "LastShutdownGood": "true",
+              "LastBootGood": "true",
+              "LastBootId": "1",
+              "BootStatusPolicy": "2"
+            }
+          },
+          {
+            "record_id": 100295,
+            "provider": "EventLog",
+            "id": 6008,
+            "utc": "2026-11-24T05:35:27.4849897Z",
+            "data": {
+              "0": "13:30:05",
+              "1": "‎2026/‎11/‎24",
+              "2": null,
+              "3": null,
+              "4": "3070",
+              "5": null,
+              "6": null
+            }
+          },
+          {
+            "record_id": 100297,
+            "provider": "EventLog",
+            "id": 6005,
+            "utc": "2026-11-24T05:35:27.4877987Z",
+            "data": {}
+          },
+          {
+            "record_id": 100304,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "id": 41,
+            "utc": "2026-11-24T05:03:49.9643176Z",
+            "data": {
+              "BugcheckCode": "0",
+              "BugcheckParameter1": "0x0",
+              "BugcheckParameter2": "0x0",
+              "BugcheckParameter3": "0x0",
+              "BugcheckParameter4": "0x0",
+              "SleepInProgress": "0",
+              "PowerButtonTimestamp": "0",
+              "BootAppStatus": "0",
+              "Checkpoint": "0",
+              "ConnectedStandbyInProgress": "false",
+              "SystemSleepTransitionsToOn": "0",
+              "CsEntryScenarioInstanceId": "0",
+              "BugcheckInfoFromEFI": "false",
+              "CheckpointStatus": "0",
+              "CsEntryScenarioInstanceIdV2": "0",
+              "LongPowerButtonPressDetected": "false",
+              "LidReliability": "false",
+              "InputSuppressionState": "0",
+              "PowerButtonSuppressionState": "0",
+              "LidState": "3"
+            }
+          }
+        ],
+        "TDR_arrival": "unknown"
+      },
+      "acceptance_qualified": false,
+      "candidate_promotion_blocked": true
     }
   ],
   "independent_qualifications": [

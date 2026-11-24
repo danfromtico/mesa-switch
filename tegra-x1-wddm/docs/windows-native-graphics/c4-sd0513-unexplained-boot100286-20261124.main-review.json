@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "utc": "2026-11-24T07:16:43.515039+00:00",
+  "reviewer_thread": "01a20b2b-9760-7e92-a0e1-19deb1db9a47",
+  "status": "new_episode_originals_verified_cause_and_qualification_open",
+  "fault_id": "GM20B-C4-SD0513-UNEXPLAINED-BOOT-100286",
+  "source_assessment": {
+    "path": "tegra-x1-wddm/docs/windows-native-graphics/c4-sd0513-unexplained-boot100286-20261124.json",
+    "sha256": "8cb8754754591b6621add1b364aa89af0555aa03bd3bc3596fe302956a378771"
+  },
+  "native_original": {
+    "path": "tegra-x1-wddm/docs/windows-native-graphics/c4-sd0513-unexplained-boot100286-20261124.native-original.json",
+    "sha256": "41044840e97132493e8f2eaf5905631c160ab271e60a10b7c25c249442bcd691"
+  },
+  "System_xml": {
+    "path": "tegra-x1-wddm/docs/windows-native-graphics/c4-sd0513-unexplained-boot100286-20261124.System.xml",
+    "sha256": "71dc3b9392548e73dbd014ac668b293ba19e7b6c7baa4bc387c1d22886bb6fab",
+    "bytes": 115196
+  },
+  "System_evtx": {
+    "sha256": "fc6d3176d9ecc0a77b0fd458ad14280c0c318711e404e6fbddfcc5955b1d60c8",
+    "bytes": 69632,
+    "retention": "Original bytes preserved in the local content-addressed native archive and independent review; not decoded in this review."
+  },
+  "independent_review": {
+    "schema": 1,
+    "utc": "2026-11-24T07:15:05.766972+00:00",
+    "status": "verified",
+    "errors": [],
+    "checks_passed": 361,
+    "System": {
+      "records": 152,
+      "record_range": [
+        100210,
+        100361
+      ],
+      "overlap_complete_events_equal": 75,
+      "overlap_differences": [],
+      "new_records": 77,
+      "new_range": [
+        100285,
+        100361
+      ],
+      "selected_events": [
+        {
+          "record_id": 100286,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "id": 12,
+          "utc": "2026-11-24T05:03:45.9042385Z",
+          "data": {
+            "MajorVersion": "10",
+            "MinorVersion": "0",
+            "BuildVersion": "22621",
+            "QfeVersion": "2861",
+            "ServiceVersion": "0",
+            "BootMode": "0",
+            "StartTime": "2026-11-24T05:03:44.1172416Z"
+          }
+        },
+        {
+          "record_id": 100288,
+          "provider": "Microsoft-Windows-Kernel-Boot",
+          "id": 20,
+          "utc": "2026-11-24T05:03:45.9054474Z",
+          "data": {
+            "LastShutdownGood": "true",
+            "LastBootGood": "true",
+            "LastBootId": "1",
+            "BootStatusPolicy": "2"
+          }
+        },
+        {
+          "record_id": 100295,
+          "provider": "EventLog",
+          "id": 6008,
+          "utc": "2026-11-24T05:35:27.4849897Z",
+          "data": {
+            "0": "13:30:05",
+            "1": "‎2026/‎11/‎24",
+            "2": null,
+            "3": null,
+            "4": "3070",
+            "5": null,
+            "6": null
+          }
+        },
+        {
+          "record_id": 100297,
+          "provider": "EventLog",
+          "id": 6005,
+          "utc": "2026-11-24T05:35:27.4877987Z",
+          "data": {}
+        },
+        {
+          "record_id": 100304,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "id": 41,
+          "utc": "2026-11-24T05:03:49.9643176Z",
+          "data": {
+            "BugcheckCode": "0",
+            "BugcheckParameter1": "0x0",
+            "BugcheckParameter2": "0x0",
+            "BugcheckParameter3": "0x0",
+            "BugcheckParameter4": "0x0",
+            "SleepInProgress": "0",
+            "PowerButtonTimestamp": "0",
+            "BootAppStatus": "0",
+            "Checkpoint": "0",
+            "ConnectedStandbyInProgress": "false",
+            "SystemSleepTransitionsToOn": "0",
+            "CsEntryScenarioInstanceId": "0",
+            "BugcheckInfoFromEFI": "false",
+            "CheckpointStatus": "0",
+            "CsEntryScenarioInstanceIdV2": "0",
+            "LongPowerButtonPressDetected": "false",
+            "LidReliability": "false",
+            "InputSuppressionState": "0",
+            "PowerButtonSuppressionState": "0",
+            "LidState": "3"
+          }
+        }
+      ],
+      "record100285": {
+        "record_id": 100285,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 16,
+        "utc": "2026-11-24T04:51:31.9921033Z",
+        "data": {
+          "HiveNameLength": "85",
+          "HiveName": "\\??\\C:\\ProgramData\\Microsoft\\Provisioning\\Microsoft-Desktop-Provisioning-Sequence.dat",
+          "KeysUpdated": "0",
+          "DirtyPages": "0"
+        }
+      },
+      "orderly_shutdown_matches": [],
+      "nonmonotonic_UTC_adjacent_record_pairs": [
+        [
+          100222,
+          100223
+        ],
+        [
+          100298,
+          100299
+        ]
+      ],
+      "comparison_scope": "Every node, attribute, text and child of each complete overlapping Event, including Binary; whitespace outside Event is ignored."
+    },
+    "native_operation": {
+      "id": "r8-literal-rolled-etw-6b9c2cfab47d",
+      "boot_before": 100286,
+      "boot_after": 100286,
+      "qpc_begin": 42097867190,
+      "qpc_end": 43979081749,
+      "qpc_frequency": 19200000,
+      "readonly_fields_verified": true,
+      "jobs_sample": {
+        "processes": [],
+        "tasks": [],
+        "sessions": [],
+        "utc": "2026-11-24T06:11:08.5538187Z"
+      }
+    },
+    "ETL": {
+      "files": [
+        {
+          "role": "UMD",
+          "bytes": 33554432,
+          "sha256": "f3b62e1fd488f376590bba0c6370a4a093db279979dcd0bcdf986171ba6c19b4",
+          "sampled_lengths_hashes_match": false
+        },
+        {
+          "role": "Loader",
+          "bytes": 15859712,
+          "sha256": "6dc95cabe8673b953a54da7116fbd0e248ace13348d5f1939a64a61722d217a2",
+          "sampled_lengths_hashes_match": true
+        },
+        {
+          "role": "Graphics",
+          "bytes": 67108864,
+          "sha256": "56d28dc7162c4d07405887c8f843343531e6c6003bb378127f4505e613e58ce0",
+          "sampled_lengths_hashes_match": false
+        }
+      ],
+      "loss_samples": {
+        "before": {
+          "TgdColdBoot-20261113-UMD": 0,
+          "TgdColdBoot-20261113-Loader": 0,
+          "TgdColdBoot-20261113-Graphics": 1236003
+        },
+        "after": {
+          "TgdColdBoot-20261113-UMD": 0,
+          "TgdColdBoot-20261113-Loader": 0,
+          "TgdColdBoot-20261113-Graphics": 1651389
+        }
+      },
+      "scope": "Active-file snapshots; no atomicity or complete historical coverage claimed. ETL payload interpretation is delegated to the unified executor, not accepted by this review."
+    },
+    "SD": {
+      "pnp": [
+        {
+          "DeviceID": "ACPI\\NVDA0101\\0",
+          "ConfigManagerErrorCode": 0,
+          "Status": "OK"
+        }
+      ],
+      "driver": {
+        "DeviceID": "ACPI\\NVDA0101\\0",
+        "InfName": "oem35.inf",
+        "DriverVersion": "0.5.1.3"
+      },
+      "file": {
+        "path": "C:\\Windows\\System32\\drivers\\nvtsdhc.sys",
+        "sha256": "7100cc604cdce194afe7b6bb19f7f51ac29aa54784e53ac7de6adfbc6e021470",
+        "bytes": 50616
+      },
+      "service": {
+        "Name": "nvtsdhc",
+        "State": "Running",
+        "Started": true,
+        "StartMode": "Boot"
+      }
+    },
+    "limits": [
+      "Event6008 embedded local date/time is not UTC.",
+      "BugcheckCode0 and missing orderly-shutdown events do not prove NT/TDR non-entry or an application/driver/operator cause.",
+      "Kernel-Boot good flags and Event41/6008 are retained together without selecting a convenient interpretation.",
+      "SD service/PnP state and corresponding disk file SHA do not prove a usable dump writer or an in-memory image hash.",
+      "EVTX bytes were fully hashed and preserved; only XML events were independently decoded.",
+      "Existing current process observations cannot establish the cause of a prior reboot."
+    ],
+    "device_actions_by_main": 0,
+    "candidate_promotion": false,
+    "faults_closed": 0,
+    "goal_complete": false
+  },
+  "verification_script_sha256": "6da34122e846a20af3352a20cc7d31c94221fb24edd5ae14e40fa9b0e68f12d6",
+  "input_verification_sha256": "4557d3efe5c7ba4ea1abb84fceaf4c93b1f763b8dd826867d6173dcd538a0679",
+  "existing_public_ledger_preservation": "All previous faults, qualifications, baseline comparisons, contract declarations and native-graphics review metadata are retained exactly as JSON values from267a7fe3339bd6a5ec0d96f3f33f491e9a45b082; the older dirty-tree ledger is not used as a replacement.",
+  "scope": "Accepts original identities and bounded record observations only. No NT/TDR cause, dump readiness, driver fix, new baseline, or fault closure is accepted.",
+  "publication_changes_device_policy": false,
+  "source_or_driver_binary_changes": 0,
+  "main_device_actions": 0,
+  "goal_complete": false
+}
