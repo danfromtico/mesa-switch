@@ -651,7 +651,8 @@
       "evidence": [
         "tegra-x1-wddm/docs/explorer-home-22631/shell-header.json",
         "tegra-x1-wddm/docs/explorer-home-22631/history-comparison.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/post99580-owner-scenario-context-20261124.json#explorer_recurrence"
+        "tegra-x1-wddm/docs/windows-native-graphics/post99580-owner-scenario-context-20261124.json#explorer_recurrence",
+        "tegra-x1-wddm/docs/windows-native-graphics/explorer5496-retained-umd-main-review-20261124.json"
       ],
       "cause": "Unknown. A 2026-11-18T06:27:16Z normal-folder capture shows tabs, address and commands on Code 0 with KMD b94248bc. The earlier user confirmation on d3423d26 establishes Home opening. Boot 93818 has the earliest retained blank-header pixels for Home and This PC. The NVK meta source is identical at the old and current endpoints, and the ARM64EC slot selection left the native components loaded by Explorer and DWM byte-identical to the preceding native WSI/DIB release. The first affected build lacks a matched earlier Home or This PC pixel and component record.",
       "daily_workaround": "Access drives through the visible This PC content pane. Retain the selected graphics profile for controlled comparison.",
@@ -670,6 +671,15 @@
         "blocks_current_evidence_handoff": false,
         "publication_checks": "仅真正准备发布时按仓库规则处理",
         "user_direction_utc": "2026-11-22T06:59:22.003678+00:00"
+      },
+      "retained_UMD_observation_boot100286": {
+        "review": "tegra-x1-wddm/docs/windows-native-graphics/explorer5496-retained-umd-main-review-20261124.json",
+        "sha256": "996a2e46c5751eb9830377f375989a1c7451887615cce2618a2227d14b9ef4cd",
+        "pid": 5496,
+        "process_start_FILETIME": 134399721435338049,
+        "retained_resource_failure_chains": 552,
+        "same_pixels_or_restart_cause_proved": false,
+        "status": "bounded_process_resource_failure_observed_root_cause_open"
       }
     },
     {
