@@ -919,7 +919,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/c4-adapter-boundary-main-review-20261123.json",
         "tegra-x1-wddm/docs/windows-native-graphics/c4-adapter-target-static-main-review-20261123.json",
         "tegra-x1-wddm/docs/windows-native-graphics/c4-adapter-target-store-main-review-20261123.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/c4-adapter-target-native-main-review-20261123.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/c4-adapter-target-native-main-review-20261123.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/c4-formal-activation-main-review-20261124.json"
       ],
       "cause": "Unplanned boot97437 remains unexplained. Recovered original boot97365 cold traces contain29 direct TDR observations:one successful/eight failed ResetEngine returns and five successful adapter reset/restart pairs. The same hContext pointer value in Paging=1 submissions then reports C00000A3 at generations2..6. Root/generation lifecycle defects were independently identified and repaired locally with an old/new CPU comparison, but exact native rejection operands and context creation/lifetime are not recorded; the new KMD has no GPU validation. Short live/closed captures still contain zero Event8, while the cold trace has positive records. NT bugcheck arrival and missing-dump stage remain unknown; historical first-Present causality is not established.",
       "daily_workaround": "Keep the selected ce54 baseline. Failed53ce and consumed historical engine controls remain sealed. The later c4 control0 request also remains consumed; it did not qualify a full C4 reset or repaired system paging.",
@@ -1033,7 +1034,31 @@
         "Windows_sequence": 31722,
         "historical_cause_confirmed": false,
         "classic_NT_dump_chain_proved": false,
-        "scoped_acceptance_only": true
+        "scoped_acceptance_only": true,
+        "formal_activation": {
+          "review": "tegra-x1-wddm/docs/windows-native-graphics/c4-formal-activation-main-review-20261124.json",
+          "activation_boot": 99580,
+          "qualification_boot": 99215,
+          "release_source": "6a5a999ff9b7cd540a3167baa0cbf64d14b43725",
+          "policy_revision": "5f41eba816d6c8be45ec6bb0ab3a09a825916cb5f0ebf1f3508d2a631e7ad495",
+          "installed_policy_ledger_sha256": "b489dfa75ac3c926bbd4c03fb152a6b3380d1aa7ed1756c0d136704835058ef1",
+          "permanent_grant_verified": true,
+          "Code": 0,
+          "components": 8,
+          "loaded_path_hashes": 5,
+          "candidate_driverstore_members": 13,
+          "private_x86_preserved": true,
+          "new_TDR_GPU_probe_requests": 0,
+          "post_permanent_boot_requested": false,
+          "System_interval": [
+            99473,
+            99652
+          ],
+          "controlled_reboots": 2,
+          "selected_abnormal_or_TDR_events": 0,
+          "qualification_scope_only": true,
+          "historical_root_cause_proven": false
+        }
       }
     },
     {
