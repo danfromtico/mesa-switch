@@ -605,7 +605,7 @@ nouveau_horizon_memory_create(
             }
             nouveau_horizon_memory_record_create_failure(device);
             FREE(identity);
-            return NOUVEAU_HORIZON_ERROR_OUT_OF_HOST_MEMORY;
+            return NOUVEAU_HORIZON_ERROR_OUT_OF_DEVICE_MEMORY;
          }
 
          Result rc = nouveau_horizon_memory_nvmap_create(&identity->map, identity->cpu_addr,
