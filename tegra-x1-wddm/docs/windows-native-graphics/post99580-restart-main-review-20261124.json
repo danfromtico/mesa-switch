@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-24T03:28:41.723516+00:00",
+  "review_thread": "01a20b2b-9760-7e92-a0e1-19deb1db9a47",
+  "verdict": "five_unexplained_restart_episodes_and_current_read_identity_independently_verified; no root-cause or TDR-entry finding",
+  "originals": [
+    {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/post99580-restart-series-native-20261124.json",
+      "sha256": "9add151c4f674728dc03f9b9cdc468902cd42dbee84b17967a677a6f561ed7e1",
+      "bytes": 16426
+    },
+    {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/post99580-restart-series-native-20261124.native-original.json",
+      "sha256": "277d2ac7d496b4ffcbba73865f5ed31ab5f0a536ffc406fe62df88d9672de033",
+      "bytes": 13135
+    },
+    {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/post99580-restart-series-native-20261124.System.xml",
+      "sha256": "f5a21f52d63766ab7585ec24cc28d6dfacfce0b4fe538a7dba14766346793959",
+      "bytes": 16082
+    }
+  ],
+  "native_archive_proof": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/continuation-01a20b38/current-storage-read-at-192168193-r1/native-originals-verified.json",
+    "sha256": "9ce57c1bdf040c5f2c82408535d935d94f6539330a36a87b2cff676a423e4b38",
+    "bytes": 7838
+  },
+  "native_archive_members_full_hash_and_length_verified": 8,
+  "events": {
+    "count": 16,
+    "counts": {
+      "12": 6,
+      "6008": 5,
+      "41": 5
+    },
+    "record_span": [
+      99580,
+      99953
+    ],
+    "boots": [
+      99580,
+      99653,
+      99725,
+      99793,
+      99868,
+      99935
+    ],
+    "new_boots": [
+      99653,
+      99725,
+      99793,
+      99868,
+      99935
+    ],
+    "no_1074_4101_1001_in_this_selected_span": true,
+    "clock_reversals_by_record_order": [
+      {
+        "from_record": 99662,
+        "to_record": 99671,
+        "from_utc": "2026-11-24T02:25:08.7246846Z",
+        "to_utc": "2026-11-24T01:57:59.1679648Z"
+      },
+      {
+        "from_record": 99734,
+        "to_record": 99743,
+        "from_utc": "2026-11-24T02:28:07.4395716Z",
+        "to_utc": "2026-11-24T02:26:45.7452950Z"
+      },
+      {
+        "from_record": 99802,
+        "to_record": 99811,
+        "from_utc": "2026-11-24T02:47:58.8475555Z",
+        "to_utc": "2026-11-24T02:28:01.5764855Z"
+      },
+      {
+        "from_record": 99877,
+        "to_record": 99886,
+        "from_utc": "2026-11-24T02:54:22.4161637Z",
+        "to_utc": "2026-11-24T02:52:08.5953633Z"
+      },
+      {
+        "from_record": 99944,
+        "to_record": 99953,
+        "from_utc": "2026-11-24T02:56:20.1830678Z",
+        "to_utc": "2026-11-24T02:54:04.2701111Z"
+      }
+    ],
+    "scope": "Selected-ID System span only. No complete-system-log, zero-loss, clock-change-cause or workload-attribution claim."
+  },
+  "current_read": {
+    "operation_id": "sd-current-read-ce89fc02c97e",
+    "utc": "2026-11-24T03:01:45.2332144Z",
+    "boot_before": 99935,
+    "boot_after": 99935,
+    "preflight_outcome": "Explicit expected99580 mismatch after retained state/events; native result false and transport exit1 preserved.",
+    "accepted_GPU_hashes": 8,
+    "GPU_files": 9,
+    "DWM_loaded_file_paths": 4,
+    "SD_version": "0.5.1.2",
+    "SD_loaded_path_and_disk_hash_observed": true,
+    "fresh_KMD_memory_image_identity": false,
+    "SD0513_installed": false,
+    "native_controls": 0
+  },
+  "owner_context": {
+    "path": "tegra-x1-wddm/docs/windows-native-graphics/post99580-owner-scenario-context-20261124.json",
+    "sha256": "b56b5959e0b67497d109bbb6f0706fd2c6ebc9ec1b9bf8d5c4d13792a8b34b06",
+    "bytes": 1918
+  },
+  "TDR_assessment": "Still insufficient to distinguish never-entered TDR from failed recovery or an interruption elsewhere. Event41 zero fields and missing selected events do not resolve this.",
+  "separate_side_observations": "Dump absence, Kernel-Dump1770/1771/1772 and Explorer module observations were supplied by the side chat; their raw outputs are not part of this8-file formal intake.",
+  "task_separation": {
+    "regressions": "01a20b90-be6d-7ff2-9358-1db468c3af7a",
+    "SD_executor": "01a20b38-b0b4-73a2-83bb-55540ceef451",
+    "SD_continues_under_existing_scoped_independent_acceptance": true,
+    "regression_root_cause_is_not_a_blanket_prerequisite_for_SD_work": true
+  },
+  "source_claims": [
+    {
+      "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart",
+      "fact": "Event41 records an unclean preceding shutdown and may lack enough data to identify the cause."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/tdr-registry-keys",
+      "fact": "The documented default TdrLevel is recovery level3; missing an explicit custom value is not evidence that TDR is disabled."
+    }
+  ],
+  "faults_to_register": 5,
+  "faults_closed": 0,
+  "new_GPU_or_SD_qualification": false,
+  "baseline_changed": false,
+  "main_device_actions": 0,
+  "goal_complete": false,
+  "local_original_review": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/post99580-restart-main-review-20261124/MAIN_REVIEW.json",
+    "sha256": "5b54b5a6c443a17626678997ebd1a302a6e70d7e03da449fbdbaaad5efce632a",
+    "bytes": 5526
+  },
+  "owner_application_context_received_after_original_manifest": true,
+  "per_episode_application_or_manual_reset_mapping_still_unknown": true,
+  "verification_parser_scope": "All EventData children, including Event6008 Binary, are preserved and compared against the producer episode records."
+}
