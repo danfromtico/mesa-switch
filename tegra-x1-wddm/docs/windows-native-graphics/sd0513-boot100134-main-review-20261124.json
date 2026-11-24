@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "utc": "2026-11-24T04:32:36.185088+00:00",
+  "reviewer_thread": "01a20b2b-9760-7e92-a0e1-19deb1db9a47",
+  "status": "verified_existing_native_evidence_open_fault_candidate_not_qualified",
+  "source_executor": "01a20b38-b0b4-73a2-83bb-55540ceef451",
+  "source_packet": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/sd-boot100134-main-review-20261124/input-verification.json",
+  "source_packet_sha256": "1c4f8156d85c6d35c240cc14e288602e538e750f022bb5496ce3ad5dac382219",
+  "verification": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/sd-boot100134-main-review-20261124/native-evidence-verification.json",
+  "verification_sha256": "4924e3cae59488ddce8379f61589e02d59d1bbb5ad03974de44e2d740cfda198",
+  "verified_facts": {
+    "boot_transition": [
+      99935,
+      100134
+    ],
+    "consumed_restart_operation": "sd-restartcandidate-e9ecbf774f23",
+    "restart_boundary": "API request queued; new boot subsequently observed through that operation. The causal shutdown/reset mechanism remains unproved.",
+    "SD": {
+      "version": "0.5.1.3",
+      "oem_INF": "oem35.inf",
+      "path": "C:\\Windows\\System32\\drivers\\nvtsdhc.sys",
+      "sha256": "7100cc604cdce194afe7b6bb19f7f51ac29aa54784e53ac7de6adfbc6e021470",
+      "bytes": 50616,
+      "Code": 0,
+      "service": "Running/Started",
+      "loaded_path_and_corresponding_disk_SHA": true,
+      "relocated_memory_SHA": false,
+      "WMI_IsSigned": false
+    },
+    "GPU": "Nine full path/hash identities and four DWM1404 loaded-path/disk identities match retained C4 observations; installed GPU policy/permanent directory unchanged. This is current identity evidence, not renewed C4 qualification.",
+    "System_export": {
+      "first_record": 99935,
+      "last_record": 100208,
+      "records": 274,
+      "continuous_IDs": true,
+      "1074_count": 0,
+      "6006_count": 0,
+      "new_boot_Event41_record": 100152,
+      "new_boot_Event6008_record": 100143,
+      "BugcheckCode": 0,
+      "four_parameters_zero": true,
+      "clock_nonmonotonic": true
+    },
+    "dump_preparation": "Raw LastPrepare/LastRelease receipts decode to SD0513 and a later successful prepare after release. This only records preparation; crash-time write/readability remains unproved.",
+    "existing_dump_inventory": [],
+    "NormalIO_consumed_at_snapshot": false,
+    "DumpAcceptance_consumed_at_snapshot": false,
+    "native_snapshot_utc": "2026-11-24T04:22:00.9061215Z"
+  },
+  "qualification": {
+    "candidate_install_restart_lifecycle": false,
+    "normal_IO": false,
+    "real_readable_dump": false,
+    "candidate_promotion": false,
+    "new_fault_id": "GM20B-SD0513-CANDIDATE-UNCLEAN-BOOT-100134",
+    "cause": "unknown",
+    "TDR_entry": "unknown",
+    "NT_bugcheck_entry": "unknown",
+    "diagnostic_scope": "Any separately authorized, previously unconsumed diagnostic results would have to remain bounded and cannot close this lifecycle fault or promote the candidate by themselves. No new native request is issued here."
+  },
+  "existing_independent_review": {
+    "agent": "Gemini",
+    "model": "gemini-4-neon-high",
+    "native_session": "04b7147a-8433-41b9-8ea5-badde368b13e",
+    "terminal": "SUCCESS",
+    "process_exit": 0,
+    "terminal_collected_utc": "2026-11-24T04:28:14.591619+00:00",
+    "stdout_sha256": "8d761a816e81e03f61a523d80bd59a3647d4f1cc176649e2704759bda9d2bc41",
+    "parsed": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/sd-boot100134-main-review-20261124/existing-Gemini-terminal-parsed.json",
+    "parsed_sha256": "812e2a54c0370e13b5fb86deef2d5b3cf4a9b216cab27266364fed62e1a38227",
+    "overall": "bounded_SD_diagnostic_continuation_supported",
+    "main_disposition": "Bounded evidence interpretation received. No device-dispatch approval or new platform authorization inferred.",
+    "new_jobs": 0
+  },
+  "current_constraints": {
+    "retain_SD0513_candidate": true,
+    "restoration_authorized_now": false,
+    "restoration_started": false,
+    "GPU_baseline_remains_C4": true,
+    "no_replay_of_install_or_consumed_restart": true,
+    "SD_priority_before_WDDM26": true,
+    "new_platform_interruption": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/executor-new-platform-interruption-20261124/PLATFORM_INTERRUPTION.json"
+  },
+  "limits": [
+    "Absence of1074/6006 or dumps and BugcheckCode0 do not prove NT or TDR non-entry.",
+    "Kernel-Boot LastShutdownGood/LastBootGood values coexist with41/6008 and do not settle the cause.",
+    "The five preceding application/UI restart episodes remain separate; this SD candidate transition is not assigned to those scenes.",
+    "No test/build/review of already completed C4 qualification repeated."
+  ],
+  "main_device_actions": 0,
+  "main_driver_source_or_binary_changes": 0,
+  "faults_closed": 0,
+  "goal_complete": false
+}

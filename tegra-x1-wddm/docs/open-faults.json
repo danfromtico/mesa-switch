@@ -1710,6 +1710,98 @@
         "limit": "These unexplained episodes are not acceptance passes and remain relevant to their affected qualification scopes.",
         "executor": "01a20b38-b0b4-73a2-83bb-55540ceef451"
       }
+    },
+    {
+      "id": "GM20B-SD0513-CANDIDATE-UNCLEAN-BOOT-100134",
+      "status": "open",
+      "kind": "unexpected-restart",
+      "affected_scopes": [
+        "classic-dump-forensics",
+        "baseline-lifecycle"
+      ],
+      "trigger": "Owned one-use SD0513 installation succeeded and planned restart request returned queued; new boot100134 has41/6008 with BugcheckCode0 and no1074 in the selected System span. The originating shutdown/reset mechanism remains unproved.",
+      "evidence": [
+        "tegra-x1-wddm/docs/windows-native-graphics/sd0513-candidate-boot100134-unclean-20261124.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/sd0513-candidate-boot100134-unclean-20261124.System.xml",
+        "tegra-x1-wddm/docs/windows-native-graphics/sd0513-candidate-boot100134-unclean-20261124.native-original.json",
+        "tegra-x1-wddm/docs/windows-native-graphics/sd0513-boot100134-main-review-20261124.json"
+      ],
+      "cause": "Unknown. Planned shutdown queue success, Code0 and current SD0513 file identity do not explain the unclean restart; non-monotonic clock and absent dump/1074 do not prove no NT bugcheck.",
+      "daily_workaround": "Retain current SD0513 candidate per owner direction; no restoration is authorized now. Preserve C4 GPU baseline. No replay of installation or consumed restart. Continue bounded SD evidence work; this boot is not acceptance.",
+      "close_when": "Reconcile actual consumed restart with native boot/shutdown evidence and establish justified fault boundary/cause before corresponding SD qualification or promotion. No model/configuration/Code0 substitution for hardware evidence.",
+      "resolution": null,
+      "episode": {
+        "from_last_observed_boot": 99935,
+        "observed_boot": 100134,
+        "events": [
+          {
+            "record": 100134,
+            "id": 12,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "utc": "2026-11-24T03:33:03.8779066Z",
+            "fields": {
+              "MajorVersion": "10",
+              "MinorVersion": "0",
+              "BuildVersion": "22621",
+              "QfeVersion": "2861",
+              "ServiceVersion": "0",
+              "BootMode": "0",
+              "StartTime": "2026-11-24T03:33:02.1360343Z"
+            }
+          },
+          {
+            "record": 100143,
+            "id": 6008,
+            "provider": "EventLog",
+            "utc": "2026-11-24T04:11:59.9759287Z",
+            "fields": {
+              "0": "11:46:31",
+              "1": "‎2026/‎11/‎24",
+              "2": null,
+              "3": null,
+              "4": "3053",
+              "5": null,
+              "6": null
+            }
+          },
+          {
+            "record": 100152,
+            "id": 41,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "utc": "2026-11-24T03:33:08.2555924Z",
+            "fields": {
+              "BugcheckCode": "0",
+              "BugcheckParameter1": "0x0",
+              "BugcheckParameter2": "0x0",
+              "BugcheckParameter3": "0x0",
+              "BugcheckParameter4": "0x0",
+              "SleepInProgress": "0",
+              "PowerButtonTimestamp": "0",
+              "BootAppStatus": "0",
+              "Checkpoint": "0",
+              "ConnectedStandbyInProgress": "false",
+              "SystemSleepTransitionsToOn": "0",
+              "CsEntryScenarioInstanceId": "0",
+              "BugcheckInfoFromEFI": "false",
+              "CheckpointStatus": "0",
+              "CsEntryScenarioInstanceIdV2": "0",
+              "LongPowerButtonPressDetected": "false",
+              "LidReliability": "false",
+              "InputSuppressionState": "0",
+              "PowerButtonSuppressionState": "0",
+              "LidState": "3"
+            }
+          }
+        ],
+        "operator_reset_or_power_action": "unknown",
+        "cause": "unknown",
+        "NT_bugcheck_arrival": "unknown",
+        "acceptance_qualified": false
+      },
+      "acceptance_qualified": false,
+      "candidate_promotion_blocked": true,
+      "current_owner_retains_candidate": true,
+      "diagnostic_scope_limit": "Previously unconsumed diagnostic observations, if separately authorized and executed, must remain bounded; they cannot by themselves qualify the installation/restart lifecycle, close this fault or promote the SD candidate. Current executor platform interruption is recorded separately; this ledger entry dispatches no action."
     }
   ],
   "independent_qualifications": [
