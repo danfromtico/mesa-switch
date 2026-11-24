@@ -1,0 +1,26 @@
+{
+  "reviewed_utc": "2026-11-24T01:40:22.493362+00:00",
+  "sources": [
+    {
+      "title": "MmMapIoSpaceEx",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-mmmapiospaceex",
+      "contract": "Maps physical ranges to nonpaged system space; documented maximum IRQL is DISPATCH_LEVEL. NULL denotes insufficient mapping space."
+    },
+    {
+      "title": "MmUnmapIoSpace",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-mmunmapiospace",
+      "contract": "Documented maximum IRQL is DISPATCH_LEVEL; releases a prior physical-address mapping."
+    },
+    {
+      "title": "KeAcquireSpinLock",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-keacquirespinlock",
+      "contract": "Caller at or below DISPATCH_LEVEL; acquisition raises to DISPATCH_LEVEL, requires nonpageable protected code/data, and release restores saved IRQL."
+    },
+    {
+      "title": "ZwFlushKey",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-zwflushkey",
+      "contract": "PASSIVE_LEVEL; successful return means changed registry data was transferred to disk. The call can flush an entire hive. Merely issuing it is not durable-evidence proof."
+    }
+  ],
+  "limit": "Public DDI constraints do not establish actual callback reachability, runtime IRQL or SDK26100/runtime22621 equivalence."
+}

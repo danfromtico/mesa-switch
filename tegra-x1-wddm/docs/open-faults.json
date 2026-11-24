@@ -768,7 +768,8 @@
         "tegra-x1-wddm/docs/windows-native-graphics/livedump-queue-main-review-20261123.json",
         "tegra-x1-wddm/docs/windows-native-graphics/watchdog-archive-main-review-20261123.json",
         "tegra-x1-wddm/docs/windows-native-graphics/c4-adapter-boundary-main-review-20261123.json",
-        "tegra-x1-wddm/docs/windows-native-graphics/c4-adapter-target-static-main-review-20261123.json#additional_module_names"
+        "tegra-x1-wddm/docs/windows-native-graphics/c4-adapter-target-static-main-review-20261123.json#additional_module_names",
+        "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-preparation-main-review-20261124.json"
       ],
       "cause": "The one-shot consumption receipt and official tool banner were retained. The following boot reported Event41 with BugcheckCode0 and Event6008. No new dump was found and the11 preexisting WATCHDOG file hashes were stable. Kernel-Dump/Operational recorded disabled crash dumping while CrashDumpEnabled remained3. The actual NT bugcheck boundary and dump initialization/write failure cause remain unknown. A static SD-port initializer advertises support; a functioning dump instance remains unobserved.",
       "daily_workaround": "Use the selected component profile and retain bounded logs and durable operation receipts. Crash-dump capture and TDR vendor data require corresponding native evidence.",
@@ -893,6 +894,18 @@
         "global_inventory_only": true,
         "classic_dump_qualification": false,
         "historical_NT_arrival_proved": false
+      },
+      "sd_preparation_source_followup": {
+        "review": "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-preparation-main-review-20261124.json",
+        "review_sha256": "314552cd0212e6b7d4d90ddfb96c6be9d67ce858ef7c4c606e1f85d1f11e82c6",
+        "local_source_commit": "a041ca8c8ff5347235a2ac57d71c85a19b5e4eb1",
+        "signed_candidate_sha256": "7100cc604cdce194afe7b6bb19f7f51ac29aa54784e53ac7de6adfbc6e021470",
+        "conditional_initializer_mapping_gap_reviewed": true,
+        "source_review_only": true,
+        "actual_historical_path_proved": false,
+        "native_storage_or_classic_dump_qualified": false,
+        "latest_recorded_boundary": "Signed local SD0513 package; compiled unsigned diagnostic; no new installation or actual dump qualification in this reviewed batch.",
+        "execution_interruption_and_owner_continuation": "tegra-x1-wddm/docs/windows-native-graphics/executor-interruption-main-review-20261124.json"
       }
     },
     {
@@ -7129,6 +7142,18 @@
       "candidate_promoted": false,
       "faults_closed": 0,
       "main_device_operations": 0
+    },
+    "sd_preparation_source_main_review": {
+      "review": "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-preparation-main-review-20261124.json",
+      "review_sha256": "314552cd0212e6b7d4d90ddfb96c6be9d67ce858ef7c4c606e1f85d1f11e82c6",
+      "local_source_commit": "a041ca8c8ff5347235a2ac57d71c85a19b5e4eb1",
+      "signed_candidate_sha256": "7100cc604cdce194afe7b6bb19f7f51ac29aa54784e53ac7de6adfbc6e021470",
+      "conditional_initializer_mapping_gap_reviewed": true,
+      "source_review_only": true,
+      "actual_historical_path_proved": false,
+      "native_storage_or_classic_dump_qualified": false,
+      "latest_recorded_boundary": "Signed local SD0513 package; compiled unsigned diagnostic; no new installation or actual dump qualification in this reviewed batch.",
+      "execution_interruption_and_owner_continuation": "tegra-x1-wddm/docs/windows-native-graphics/executor-interruption-main-review-20261124.json"
     }
   }
 }
