@@ -9,7 +9,10 @@
 #include "nouveau_context.h"
 #include "nouveau_device.h"
 
-// #include <xf86drm.h>
+#if __has_include(<xf86drm.h>)
+/* Only NAK's hardware tests use it, and the Switch has no libdrm. */
+#include <xf86drm.h>
+#endif
 #include "drm-uapi/nouveau_drm.h"
 
 #define DRM_RS_IOCTL(FOO) \
