@@ -47,6 +47,7 @@ static struct {
     ULONG_PTR bytes;
     ULONG address,temp,opens,closes,requests,waits,cancels,stalls,sleeps;
     ULONG claims,releases,raw_writes,pnp_regs,pnp_unregs,safe_completions;
+    ULONG addr_not_ready_polls,temp_not_ready_polls;
     LONG file_refs,owner_refs,live_pool,live_irps;
     KIRQL irql;
     BOOLEAN defer_complete;
@@ -175,8 +176,13 @@ static NTSTATUS FASTCALL CallDriver(PDEVICE_OBJECT dev,PIRP irp)
     CHECK(sp->Parameters.DeviceIoControl.InputBufferLength==sizeof(*op) && sp->Parameters.DeviceIoControl.OutputBufferLength==sizeof(*op));
     ++model.requests;
     NTSTATUS st=model.completion;
-    if(op->reg==TG_GPU_PMIC_QUERY_ADDRESS)op->value=model.address;
-    else if(op->reg==TG_GPU_PMIC_QUERY_TEMP)op->value=model.temp;
+    if(op->reg==TG_GPU_PMIC_QUERY_ADDRESS){
+        if(model.addr_not_ready_polls){--model.addr_not_ready_polls;st=STATUS_DEVICE_NOT_READY;}
+        else op->value=model.address;
+    } else if(op->reg==TG_GPU_PMIC_QUERY_TEMP){
+        if(model.temp_not_ready_polls){--model.temp_not_ready_polls;st=STATUS_DEVICE_NOT_READY;}
+        else op->value=model.temp;
+    }
     else if(op->reg==TG_GPU_PMIC_QUERY_PLLP)op->value=0x12345678;
     else if(op->reg==TG_GPU_PMIC_QUERY_DVFS_POLICY)op->value=TG_GPU_DVFS_POLICY_PACK(1,153600,460800,2);
     else if(op->reg==TG_GPU_PMIC_QUERY_EMC_KHZ)op->value=1600000;
@@ -224,7 +230,11 @@ static NTSTATUS NTAPI RegPnp(IO_NOTIFICATION_EVENT_CATEGORY cat,ULONG flags,PVOI
 static NTSTATUS NTAPI UnregPnp(PVOID entry){CHECK(model.irql==PASSIVE_LEVEL && entry==(PVOID)0x777);++model.pnp_unregs;model.pnp_cb=NULL;return STATUS_SUCCESS;}
 static VOID NTAPI Stall(ULONG us){CHECK(us==999);++model.stalls;}
 static NTSTATUS NTAPI Sleep(KPROCESSOR_MODE mode,BOOLEAN alertable,PLARGE_INTEGER interval)
-{CHECK(mode==KernelMode && !alertable && interval->QuadPart==-10000);++model.sleeps;return STATUS_SUCCESS;}
+{
+    CHECK(mode==KernelMode && !alertable &&
+          (interval->QuadPart==-10000 || interval->QuadPart==-500000));
+    ++model.sleeps;return STATUS_SUCCESS;
+}
 
 VOID (NTAPI * const __imp_KeInitializeSpinLock)(PKSPIN_LOCK)=InitSpin;
 KIRQL (NTAPI * const __imp_KeAcquireSpinLockRaiseToDpc)(PKSPIN_LOCK)=LockSpin;
@@ -372,7 +382,76 @@ void start(void)
     model.claim=STATUS_SUCCESS;platform.IoStatus=STATUS_SUCCESS;
     CHECK(io.read_pmic(io.context,0x33,0x23,&value) && !platform.NeedReclaim);
 
+    /* First-error IoStatus latch persists across subsequent healthy requests
+     * until the restart epoch explicitly resets IoStatus. */
+    io.write32(io.context,0x57fffffcu,0u);
+    CHECK(platform.IoStatus==STATUS_DEVICE_CONFIGURATION_ERROR);
+    model.completion=STATUS_IO_TIMEOUT;
+    CHECK(!io.read_pmic(io.context,0x33,0x23,&value));
+    CHECK(platform.IoStatus==STATUS_DEVICE_CONFIGURATION_ERROR); /* retains first error */
+    model.completion=STATUS_SUCCESS;
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_SUCCESS &&
+          platform.IoStatus==STATUS_DEVICE_CONFIGURATION_ERROR);
+    platform.IoStatus=STATUS_SUCCESS;
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_SUCCESS &&
+          platform.IoStatus==STATUS_SUCCESS);
+    {
+        struct tg_gpu_pmic_request opt={0x33,0x23,0,0};
+        model.completion=STATUS_IO_DEVICE_ERROR;
+        CHECK(TgGpuPlatformTryRequest(&platform,&opt)==STATUS_IO_DEVICE_ERROR &&
+              platform.IoStatus==STATUS_SUCCESS);
+        model.completion=STATUS_IO_TIMEOUT;
+        CHECK(TgGpuPlatformTryRequest(&platform,&opt)==STATUS_IO_TIMEOUT &&
+              platform.IoStatus==STATUS_SUCCESS);
+        model.completion=STATUS_SUCCESS;
+    }
+
+    /* SwitchFan D0Entry / SelfManagedIoRestart window: bounded passive retry
+     * recovers without poisoning IoStatus, caps at 12 retries, and never
+     * retries genuine >=80 C over-temperature rejections. */
+    {
+        ULONG sleeps_before=model.sleeps;
+        model.addr_not_ready_polls=2;
+        model.temp_not_ready_polls=3;
+        address=0;
+        CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_SUCCESS &&
+              address==0x33 && platform.IoStatus==STATUS_SUCCESS &&
+              model.sleeps==sleeps_before+5);
+
+        sleeps_before=model.sleeps;
+        model.temp_not_ready_polls=20;
+        CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_DEVICE_NOT_READY &&
+              platform.IoStatus==STATUS_DEVICE_NOT_READY &&
+              model.sleeps==sleeps_before+12);
+        model.temp_not_ready_polls=0;
+        platform.IoStatus=STATUS_SUCCESS;
+
+        sleeps_before=model.sleeps;
+        model.temp=80;
+        CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_DEVICE_NOT_READY &&
+              platform.IoStatus==STATUS_DEVICE_NOT_READY &&
+              model.sleeps==sleeps_before);
+        model.temp=42;
+        platform.IoStatus=STATUS_SUCCESS;
+
+        /* QueryRemove/Closing aborts preflight_query_ready immediately with 0 sleeps. */
+        sleeps_before=model.sleeps;
+        platform.QueryRemove=TRUE;
+        model.addr_not_ready_polls=5;
+        CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_DEVICE_NOT_READY &&
+              platform.IoStatus==STATUS_DEVICE_NOT_READY &&
+              model.sleeps==sleeps_before);
+        platform.QueryRemove=FALSE;
+        model.addr_not_ready_polls=0;
+        platform.IoStatus=STATUS_SUCCESS;
+    }
+
     /* A non-owned but running adapter must not change its rail. */
+    registers[0][0]=0;
+    for(UINT i=0;i<TgGpuApertureCount;++i){
+        if(bases[i]==0x60006280u)registers[i][3]=0;
+        if(bases[i]==0x7000e6d4u)registers[i][0]=0;
+    }
     model.enable=0x54;model.voltage=0x46;
     TgGpuPlatformAbandonRail(&platform,address);
     CHECK(platform.RailClaimed && !model.releases);

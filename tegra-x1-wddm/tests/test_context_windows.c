@@ -35,29 +35,129 @@ void *memcpy(void *p,const void *source,size_t n)
  * Bridge execution/lifetime is covered separately by test-platform/test-dvfs. */
 int memcmp(const void *a,const void *b,size_t n)
 {const UCHAR *x=a,*y=b;for(;n--;++x,++y)if(*x!=*y)return (int)*x-(int)*y;return 0;}
-static POBJECT_TYPE context_file_type;
+static KIRQL level;
+static POBJECT_TYPE context_file_type=(POBJECT_TYPE)(ULONG_PTR)0x46494c45u;
 POBJECT_TYPE *IoFileObjectType=&context_file_type;
+static DRIVER_OBJECT restart_driver;
+static DEVICE_OBJECT restart_owner_device={.DriverObject=&restart_driver,.StackSize=1};
+static DEVICE_OBJECT restart_target_device={.StackSize=1};
+static FILE_OBJECT restart_file={.DeviceObject=&restart_target_device};
+static struct {
+    UCHAR irp_storage[512];
+    PIO_COMPLETION_ROUTINE cb;
+    PVOID ctx;
+    BOOLEAN used;
+} restart_irps[4];
+static _Alignas(PAGE_SIZE) UCHAR restart_boot_mem[TG_GPU_ARENA_BYTES];
+static _Alignas(PAGE_SIZE) UCHAR restart_work_mem[TG_GPU_GR_CHANNEL_WORK_BYTES];
+static struct {
+    BOOLEAN active,boot_used,work_used;
+    BOOLEAN poison_unmapped_write,fail_isolate_drain;
+    NTSTATUS preflight_status,fw_status,thread_status,pmic_read_status;
+    ULONG opens,closes,claims,releases,requests,pnp_regs,pnp_unregs;
+    ULONG fw_loads,fw_frees,threads_started,threads_joined,threads_closed;
+    LONG file_refs,owner_refs,live_irps;
+    UCHAR enable,voltage;
+    TG_GPU_WORKER *active_worker;
+} restart_fixture;
 static NTSTATUS NTAPI ContextRefHandle(HANDLE h,ACCESS_MASK a,POBJECT_TYPE t,KPROCESSOR_MODE m,
     PVOID *o,POBJECT_HANDLE_INFORMATION i)
-{(void)h;(void)a;(void)t;(void)m;(void)o;(void)i;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
-static LONG_PTR FASTCALL ContextObjectRef(PVOID p){(void)p;CHECK(FALSE);return 0;}
-LONG_PTR (FASTCALL *const __imp_ObfReferenceObject)(PVOID)=ContextObjectRef;
-LONG_PTR (FASTCALL *const __imp_ObfDereferenceObject)(PVOID)=ContextObjectRef;
+{
+    CHECK(restart_fixture.active && level==PASSIVE_LEVEL && h==(HANDLE)0x551 &&
+        a==(FILE_READ_DATA|FILE_WRITE_DATA) && t==context_file_type && m==KernelMode && !i);
+    ++restart_fixture.file_refs;*o=&restart_file;return STATUS_SUCCESS;
+}
+static LONG_PTR FASTCALL ContextRefObject(PVOID p)
+{
+    CHECK(restart_fixture.active);
+    if(p==&restart_file)return ++restart_fixture.file_refs;
+    if(p==&restart_owner_device)return ++restart_fixture.owner_refs;
+    CHECK(FALSE);return 0;
+}
+static LONG_PTR FASTCALL ContextDerefObject(PVOID p)
+{
+    CHECK(restart_fixture.active);
+    if(p==&restart_file){CHECK(restart_fixture.file_refs>0);return --restart_fixture.file_refs;}
+    if(p==&restart_owner_device){CHECK(restart_fixture.owner_refs>0);return --restart_fixture.owner_refs;}
+    CHECK(FALSE);return 0;
+}
+LONG_PTR (FASTCALL *const __imp_ObfReferenceObject)(PVOID)=ContextRefObject;
+LONG_PTR (FASTCALL *const __imp_ObfDereferenceObject)(PVOID)=ContextDerefObject;
 static PDEVICE_OBJECT NTAPI ContextRelatedDevice(PFILE_OBJECT f)
-{(void)f;CHECK(FALSE);return NULL;}
+{CHECK(restart_fixture.active && f==&restart_file);return &restart_target_device;}
 static PIRP NTAPI ContextAllocateIrp(CCHAR s,BOOLEAN q)
-{(void)s;(void)q;CHECK(FALSE);return NULL;}
-static VOID NTAPI ContextFreeIrp(PIRP p){(void)p;CHECK(FALSE);}
+{
+    CHECK(restart_fixture.active && s==1 && !q);
+    for(UINT i=0;i<4;++i)if(!restart_irps[i].used) {
+        PIRP irp=(PIRP)restart_irps[i].irp_storage;
+        memset(&restart_irps[i],0,sizeof(restart_irps[i]));
+        restart_irps[i].used=TRUE;++restart_fixture.live_irps;
+        irp->Type=IO_TYPE_IRP;irp->Size=(USHORT)sizeof(restart_irps[i].irp_storage);
+        irp->StackCount=s;irp->CurrentLocation=(CCHAR)(s+1);
+        irp->Tail.Overlay.CurrentStackLocation=(PIO_STACK_LOCATION)(irp+1)+s;
+        return irp;
+    }
+    return NULL;
+}
+static VOID NTAPI ContextFreeIrp(PIRP p)
+{
+    CHECK(restart_fixture.active);
+    for(UINT i=0;i<4;++i)if((PVOID)p==restart_irps[i].irp_storage && restart_irps[i].used) {
+        restart_irps[i].used=FALSE;--restart_fixture.live_irps;return;
+    }
+    CHECK(FALSE);
+}
 static NTSTATUS NTAPI ContextCompletion(PDEVICE_OBJECT d,PIRP p,PIO_COMPLETION_ROUTINE r,
     PVOID c,BOOLEAN s,BOOLEAN e,BOOLEAN x)
-{(void)d;(void)p;(void)r;(void)c;(void)s;(void)e;(void)x;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
+{
+    CHECK(restart_fixture.active && d==&restart_owner_device && r && s && e && x);
+    for(UINT i=0;i<4;++i)if((PVOID)p==restart_irps[i].irp_storage && restart_irps[i].used) {
+        ++restart_fixture.owner_refs;restart_irps[i].cb=r;restart_irps[i].ctx=c;
+        return STATUS_SUCCESS;
+    }
+    CHECK(FALSE);return STATUS_NOT_SUPPORTED;
+}
 static BOOLEAN NTAPI ContextCancelIrp(PIRP p){(void)p;CHECK(FALSE);return FALSE;}
 static NTSTATUS FASTCALL ContextCallDriver(PDEVICE_OBJECT d,PIRP p)
-{(void)d;(void)p;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
+{
+    PIO_STACK_LOCATION sp;struct tg_gpu_pmic_request *op;NTSTATUS st=STATUS_SUCCESS;UINT slot=4;
+    CHECK(restart_fixture.active && level==PASSIVE_LEVEL && d==&restart_target_device && p);
+    for(UINT i=0;i<4;++i)if((PVOID)p==restart_irps[i].irp_storage && restart_irps[i].used){slot=i;break;}
+    CHECK(slot<4 && restart_irps[slot].cb && restart_fixture.owner_refs>0);
+    sp=IoGetNextIrpStackLocation(p);op=p->AssociatedIrp.SystemBuffer;
+    CHECK(sp->MajorFunction==IRP_MJ_DEVICE_CONTROL && sp->Parameters.DeviceIoControl.IoControlCode==TG_GPU_IOCTL_PMIC);
+    ++restart_fixture.requests;
+    if(op->reg==TG_GPU_PMIC_QUERY_ADDRESS)op->value=0x33;
+    else if(op->reg==TG_GPU_PMIC_QUERY_TEMP){st=restart_fixture.preflight_status;op->value=42;}
+    else if(op->reg==TG_GPU_PMIC_CLAIM_RAIL){CHECK(op->write==1 && op->value==TG_GPU_EMC_VOTE_ABI);++restart_fixture.claims;}
+    else if(op->reg==TG_GPU_PMIC_RELEASE_RAIL){CHECK(op->write==1 && op->address==0x33);++restart_fixture.releases;}
+    else if(op->reg==TG_GPU_PMIC_QUERY_DVFS_POLICY)op->value=TG_GPU_DVFS_POLICY_PACK(0,460800u,460800u,0);
+    else if(op->reg==TG_GPU_PMIC_QUERY_EMC_KHZ)op->value=1600000u;
+    else if(op->reg==TG_GPU_PMIC_QUERY_EMC_VOTE)op->value=0;
+    else if(op->reg==TG_GPU_PMIC_REPORT_ABI || op->reg==TG_GPU_PMIC_REPORT_EMC_ABI ||
+            op->reg==TG_GPU_PMIC_REPORT_GPU_KHZ || op->reg==TG_GPU_PMIC_REPORT_GPU_UV ||
+            op->reg==TG_GPU_PMIC_REPORT_GPU_STATUS){CHECK(op->write==1);}
+    else {
+        CHECK(op->address==0x33 && (op->reg==0x06 || op->reg==0x23));
+        if(!op->write && !NT_SUCCESS(restart_fixture.pmic_read_status))st=restart_fixture.pmic_read_status;
+        else if(op->write){if(op->reg==0x06)restart_fixture.enable=(UCHAR)op->value;else restart_fixture.voltage=(UCHAR)op->value;}
+        else op->value=(op->reg==0x06)?restart_fixture.enable:restart_fixture.voltage;
+    }
+    p->IoStatus.Status=st;p->IoStatus.Information=NT_SUCCESS(st)?sizeof(*op):0;
+    CHECK(restart_irps[slot].cb(&restart_target_device,p,restart_irps[slot].ctx)==STATUS_MORE_PROCESSING_REQUIRED);
+    --restart_fixture.owner_refs;
+    return st;
+}
 static NTSTATUS NTAPI ContextRegisterPnp(IO_NOTIFICATION_EVENT_CATEGORY c,ULONG f,PVOID d,
     PDRIVER_OBJECT o,PDRIVER_NOTIFICATION_CALLBACK_ROUTINE r,PVOID x,PVOID *n)
-{(void)c;(void)f;(void)d;(void)o;(void)r;(void)x;(void)n;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
-static NTSTATUS NTAPI ContextUnregisterPnp(PVOID p){(void)p;CHECK(FALSE);return STATUS_NOT_SUPPORTED;}
+{
+    (void)x;
+    CHECK(restart_fixture.active && level==PASSIVE_LEVEL && c==EventCategoryTargetDeviceChange &&
+        !f && d==&restart_file && o==&restart_driver && r && n);
+    ++restart_fixture.pnp_regs;*n=(PVOID)0x888;return STATUS_SUCCESS;
+}
+static NTSTATUS NTAPI ContextUnregisterPnp(PVOID p)
+{CHECK(restart_fixture.active && level==PASSIVE_LEVEL && p==(PVOID)0x888);++restart_fixture.pnp_unregs;return STATUS_SUCCESS;}
 NTSTATUS (NTAPI *const __imp_ObReferenceObjectByHandle)(HANDLE,ACCESS_MASK,POBJECT_TYPE,KPROCESSOR_MODE,PVOID *,POBJECT_HANDLE_INFORMATION)=ContextRefHandle;
 PDEVICE_OBJECT (NTAPI *const __imp_IoGetRelatedDeviceObject)(PFILE_OBJECT)=ContextRelatedDevice;
 PIRP (NTAPI *const __imp_IoAllocateIrp)(CCHAR,BOOLEAN)=ContextAllocateIrp;
@@ -89,7 +189,6 @@ static TG_GPU_CONTEXT_ENGINE *notify_engine;
 static TG_GPU_QUEUE_ENTRY *reuse_private;
 static TG_GPU_CONTEXT *notify_context;
 static UINT notify_references;
-static KIRQL level;
 static UINT recovery_records,recovery_interrupts_at_trace;
 static KIRQL recovery_trace_level;
 static TG_GPU_RECOVERY_EVENT recovery_record;
@@ -189,7 +288,7 @@ VOID TgGpuTraceRecovery(const TG_GPU_RECOVERY_EVENT *record)
 static VOID NTAPI InitializeLock(PKSPIN_LOCK lock) { *lock=0; }
 VOID (NTAPI * const __imp_KeInitializeSpinLock)(PKSPIN_LOCK)=InitializeLock;
 static VOID NTAPI InitializeEvent(PRKEVENT event,EVENT_TYPE type,BOOLEAN state)
-{ CHECK(event && type==SynchronizationEvent);event->Header.SignalState=state; }
+{ CHECK(event && (type==SynchronizationEvent || (restart_fixture.active && type==NotificationEvent)));event->Header.SignalState=state; }
 static LONG NTAPI SetEvent(PRKEVENT event,KPRIORITY priority,BOOLEAN wait)
 { CHECK(event && !priority && !wait);event->Header.SignalState=1;return 0; }
 VOID (NTAPI * const __imp_KeInitializeEvent)(PRKEVENT,EVENT_TYPE,BOOLEAN)=InitializeEvent;
@@ -199,6 +298,11 @@ static VOID NTAPI InitializeMutex(PRKMUTEX m,ULONG rank)
 static NTSTATUS NTAPI WaitSingle(PVOID object,KWAIT_REASON reason,KPROCESSOR_MODE mode,BOOLEAN alertable,PLARGE_INTEGER timeout)
 {
     PKMUTEX m=object;
+    if(restart_fixture.active && timeout) {
+        CHECK(object && reason==Executive && mode==KernelMode && !alertable &&
+            timeout->QuadPart==-10000000LL && level==PASSIVE_LEVEL && ((PRKEVENT)object)->Header.SignalState==1);
+        return STATUS_SUCCESS;
+    }
     CHECK(m && reason==Executive && mode==KernelMode && !alertable && !timeout && level==PASSIVE_LEVEL);
     CHECK(m->Header.SignalState<=1);--m->Header.SignalState;return STATUS_SUCCESS;
 }
@@ -208,9 +312,24 @@ VOID (NTAPI * const __imp_KeInitializeMutex)(PRKMUTEX,ULONG)=InitializeMutex;
 NTSTATUS (NTAPI * const __imp_KeWaitForSingleObject)(PVOID,KWAIT_REASON,KPROCESSOR_MODE,BOOLEAN,PLARGE_INTEGER)=WaitSingle;
 LONG (NTAPI * const __imp_KeReleaseMutex)(PRKMUTEX,BOOLEAN)=ReleaseMutex;
 /* Resource-only adapter tests must never open a bridge or start a thread. */
-static NTSTATUS NTAPI UnexpectedClose(HANDLE h){(void)h;CHECK(FALSE);return STATUS_UNSUCCESSFUL;}
+static NTSTATUS NTAPI UnexpectedClose(HANDLE h)
+{
+    CHECK(restart_fixture.active && level==PASSIVE_LEVEL);
+    if(h==(HANDLE)0x551){++restart_fixture.closes;return STATUS_SUCCESS;}
+    if(h==(HANDLE)0x777){
+        CHECK(restart_fixture.threads_joined==restart_fixture.threads_started);
+        ++restart_fixture.threads_closed;restart_fixture.active_worker=NULL;
+        return STATUS_SUCCESS;
+    }
+    CHECK(FALSE);return STATUS_UNSUCCESSFUL;
+}
 static NTSTATUS NTAPI UnexpectedJoin(HANDLE h,BOOLEAN a,PLARGE_INTEGER t)
-{(void)h;(void)a;(void)t;CHECK(FALSE);return STATUS_UNSUCCESSFUL;}
+{
+    CHECK(restart_fixture.active && level==PASSIVE_LEVEL && h==(HANDLE)0x777 && !a && !t &&
+        restart_fixture.active_worker && restart_fixture.active_worker->Stop.Header.SignalState);
+    ++restart_fixture.threads_joined;
+    return STATUS_SUCCESS;
+}
 NTSTATUS (NTAPI * const __imp_ZwClose)(HANDLE)=UnexpectedClose;
 NTSTATUS (NTAPI * const __imp_ZwWaitForSingleObject)(HANDLE,BOOLEAN,PLARGE_INTEGER)=UnexpectedJoin;
 #include "unexpected_platform.h"
@@ -252,6 +371,12 @@ static PHYSICAL_ADDRESS NTAPI Physical(PVOID address)
     ULONG_PTR table_offset=(ULONG_PTR)address-(ULONG_PTR)adapter_table;
     ULONG_PTR graphics_offset=(ULONG_PTR)address-(ULONG_PTR)graphics_memory;
     ULONG_PTR paging_offset=(ULONG_PTR)address-(ULONG_PTR)paging_tables;
+    if(restart_fixture.active) {
+        ULONG_PTR boot_off=(ULONG_PTR)address-(ULONG_PTR)restart_boot_mem;
+        ULONG_PTR work_off=(ULONG_PTR)address-(ULONG_PTR)restart_work_mem;
+        if(boot_off<sizeof(restart_boot_mem)){p.QuadPart=0x95000000+boot_off;return p;}
+        if(work_off<sizeof(restart_work_mem)){p.QuadPart=0x96000000+work_off;return p;}
+    }
     if(paging_offset<sizeof(paging_tables)){p.QuadPart=0x94000000+paging_offset;return p;}
     if(table_offset<sizeof(adapter_table)){p.QuadPart=0x92000000+table_offset;return p;}
     if(graphics_offset<sizeof(graphics_memory)) {
@@ -266,10 +391,22 @@ static NTSTATUS NTAPI Allocate(HANDLE device,DXGKARGCB_ALLOCATECONTIGUOUSMEMORY 
     UINT i;CHECK(device==(HANDLE)1 && level==PASSIVE_LEVEL);
     CHECK((a->NumberOfBytes==PAGE_SIZE || a->NumberOfBytes==TG_GPU_COMMAND_BYTES ||
            a->NumberOfBytes==TG_GPU_TABLE_BYTES || a->NumberOfBytes==TG_GPU_ADAPTER_TABLE_BYTES ||
-           a->NumberOfBytes==TG_GPU_CONTEXT_PRIVATE_BYTES) && a->CacheType==DXGK_MEMORY_CACHING_TYPE_NON_CACHED);
+           a->NumberOfBytes==TG_GPU_CONTEXT_PRIVATE_BYTES ||
+           (restart_fixture.active && (a->NumberOfBytes==TG_GPU_ARENA_BYTES ||
+            a->NumberOfBytes==TG_GPU_GR_CHANNEL_WORK_BYTES))) && a->CacheType==DXGK_MEMORY_CACHING_TYPE_NON_CACHED);
     CHECK(a->LowestAcceptableAddress.QuadPart==0x80000000 && a->HighestAcceptableAddress.QuadPart==0xffffffff);
     if(fail_allocate) return STATUS_INSUFFICIENT_RESOURCES;
     if(memory_fail_after!=UINT32_MAX){if(!memory_fail_after)return STATUS_INSUFFICIENT_RESOURCES;--memory_fail_after;}
+    if(restart_fixture.active) {
+        if(a->NumberOfBytes==TG_GPU_ARENA_BYTES){
+            CHECK(!restart_fixture.boot_used);restart_fixture.boot_used=TRUE;
+            a->hMemoryHandle=(HANDLE)768;a->pMemory=restart_boot_mem;return STATUS_SUCCESS;
+        }
+        if(a->NumberOfBytes==TG_GPU_GR_CHANNEL_WORK_BYTES){
+            CHECK(!restart_fixture.work_used);restart_fixture.work_used=TRUE;
+            a->hMemoryHandle=(HANDLE)769;a->pMemory=restart_work_mem;return STATUS_SUCCESS;
+        }
+    }
     if(a->NumberOfBytes==TG_GPU_CONTEXT_PRIVATE_BYTES) {
         for(i=0;i<4;++i)if(!graphics_used[i]) {
             graphics_used[i]=TRUE;a->hMemoryHandle=(HANDLE)(ULONG_PTR)(512+i);
@@ -289,6 +426,16 @@ static NTSTATUS NTAPI Allocate(HANDLE device,DXGKARGCB_ALLOCATECONTIGUOUSMEMORY 
 static NTSTATUS NTAPI Free(HANDLE device,const DXGKARGCB_FREECONTIGUOUSMEMORY *a)
 {
     UINT i=(UINT)(ULONG_PTR)a->hMemoryHandle-1;
+    if(a->hMemoryHandle==(HANDLE)768){
+        CHECK(restart_fixture.active && device==(HANDLE)1 && level==PASSIVE_LEVEL && restart_fixture.boot_used);
+        if(fail_free)return STATUS_UNSUCCESSFUL;
+        restart_fixture.boot_used=FALSE;++frees;return STATUS_SUCCESS;
+    }
+    if(a->hMemoryHandle==(HANDLE)769){
+        CHECK(restart_fixture.active && device==(HANDLE)1 && level==PASSIVE_LEVEL && restart_fixture.work_used);
+        if(fail_free)return STATUS_UNSUCCESSFUL;
+        restart_fixture.work_used=FALSE;++frees;return STATUS_SUCCESS;
+    }
     if((ULONG_PTR)a->hMemoryHandle>=512 && (ULONG_PTR)a->hMemoryHandle<516) {
         i=(UINT)(ULONG_PTR)a->hMemoryHandle-512;
         CHECK(device==(HANDLE)1 && level==PASSIVE_LEVEL && graphics_used[i]);
@@ -2149,6 +2296,311 @@ static __declspec(noinline) VOID TestAdapterResetFences(VOID)
     CHECK(PoolsInUse()==pools);
     CHECK(hw.reads+hw.writes==accesses);
 }
+NTSTATUS TgGpuStartHardware(TG_GPU_HARDWARE *h,TG_GPU_CONTEXT_ENGINE *e,
+    const struct tg_gpu_power_io *io,UCHAR address,const struct tg_gpu_gr_payload *firmware)
+{
+    KIRQL irql;NTSTATUS status;struct tg_gpu_gr_work work;UINT32 *image;
+    CHECK(restart_fixture.active && h && e && io && firmware && address==0x33 &&
+        e->Commands.Handle && !h->Engine && !h->Boot.Handle && !h->Work.Handle &&
+        !h->Power.owned && !h->Clock.owned && level==PASSIVE_LEVEL);
+    KeAcquireSpinLock(&e->Lock,&irql);
+    if(e->Stopping || e->HardwareOwner || e->Active || e->Notification || e->Creating ||
+       e->Channel.referenced || e->Graphics.Memory.Handle) {
+        KeReleaseSpinLock(&e->Lock,irql);return STATUS_INVALID_DEVICE_STATE;
+    }
+    RtlZeroMemory(h,sizeof(*h));h->Engine=e;h->Io=*io;
+    e->HardwareOwner=h;e->UserdBar1Ready=FALSE;
+    KeReleaseSpinLock(&e->Lock,irql);
+    status=TgGpuAllocatePrivateMemory(&e->Dxgk,TG_GPU_ARENA_BYTES,0x80000000,0xffffffff,&h->Boot);
+    if(!NT_SUCCESS(status))return status;
+    status=TgGpuAllocatePrivateMemory(&e->Dxgk,TG_GPU_GR_CHANNEL_WORK_BYTES,0x80000000,0xffffffff,&h->Work);
+    if(!NT_SUCCESS(status))return status;
+    h->Power.pmic_address=address;
+    if(!io->read_pmic(io->context,address,0x06u,&h->Power.original_enable) ||
+       !io->read_pmic(io->context,address,0x23u,&h->Power.original_voltage))
+        return STATUS_DEVICE_NOT_READY;
+    h->Power.owned=true;h->GpuOwned=TRUE;
+    if(!io->write_pmic(io->context,address,0x23u,110u) ||
+       !io->write_pmic(io->context,address,0x06u,0x41u))
+        return STATUS_DEVICE_NOT_READY;
+    h->Power.ready=true;h->Power.stage=TG_GPU_STAGE_READY;
+    h->Clock.owned=h->Clock.running=true;
+    h->Clock.target_khz=h->Clock.measured_khz=TG_GPU_RENDER_KHZ;
+    h->Clock.rail_uv=800000u;h->Clock.gpu_speedo=1659u;
+    h->Execution.owned=h->Execution.boot_ready=h->Execution.fifo_ready=true;
+    work=(struct tg_gpu_gr_work){h->Work.CpuAddress,(UINT64)h->Work.SystemPhysicalAddress.QuadPart,h->Work.Bytes};
+    image=(UINT32 *)((UCHAR *)h->Work.CpuAddress+TG_GPU_GR_GOLD_OFFSET);
+    memset(image,0,512);image[0xfc/4]=0x600dc0deu;
+    image[0x100/4]=0xc01d0000u+e->GraphicsGeneration;
+    h->Status.graphics=(struct tg_gpu_gr_context_status){.stage=9,.context_bytes=512,
+        .gpcs=1,.tpcs=2,.zculls=4,.image_magic=0x600dc0deu,.image_changed_words=64};
+    status=TgGpuInitializeGraphicsTemplate(e,&work,&h->Status.graphics);
+    if(!NT_SUCCESS(status))return status;
+    /* Simulate a void MMIO write faulting into Platform.IoStatus without
+     * aborting cold bootstrap so RestartBackend returns STATUS_SUCCESS. */
+    if(restart_fixture.poison_unmapped_write)
+        io->write32(io->context,0x57fffffcu,0u);
+    KeAcquireSpinLock(&e->Lock,&irql);
+    e->UserdBar1Offset=TG_GPU_BOOT_USERD_BAR1_OFFSET;
+    e->UserdBar1Ready=TRUE;h->Ready=TRUE;
+    KeReleaseSpinLock(&e->Lock,irql);
+    return STATUS_SUCCESS;
+}
+NTSTATUS TgGpuIsolateHardware(TG_GPU_HARDWARE *h)
+{
+    TG_GPU_CONTEXT_ENGINE *e;KIRQL irql;UINT32 clamp,reset;
+    if(!h)return STATUS_INVALID_PARAMETER;
+    e=h->Engine;if(!e)return STATUS_SUCCESS;
+    KeAcquireSpinLock(&e->Lock,&irql);
+    if(e->HardwareOwner!=h){KeReleaseSpinLock(&e->Lock,irql);return STATUS_INVALID_DEVICE_STATE;}
+    if(e->QueueOwner || e->Active || e->Notification || e->Channel.referenced || e->Creating) {
+        KeReleaseSpinLock(&e->Lock,irql);return STATUS_DEVICE_BUSY;
+    }
+    h->Ready=FALSE;e->UserdBar1Ready=FALSE;
+    KeReleaseSpinLock(&e->Lock,irql);
+    if(!h->Isolated) {
+        if(h->Power.ready && restart_fixture.active && restart_fixture.fail_isolate_drain) {
+            h->Status.restore_result=TG_GPU_POWER_MC_TIMEOUT;
+            return STATUS_IO_TIMEOUT;
+        }
+        if(h->Power.owned) {
+            if(h->Io.release_pmic &&
+               !h->Io.release_pmic(h->Io.context,h->Power.pmic_address,
+                                   h->Power.original_enable,h->Power.original_voltage)) {
+                h->Status.restore_result=TG_GPU_POWER_PMIC_ERROR;
+                return STATUS_DEVICE_DATA_ERROR;
+            }
+            h->Power.owned=h->Power.ready=false;
+        }
+        h->Status.restore_result=0;
+        if(h->GpuOwned) {
+            clamp=h->Io.read32(h->Io.context,0x7000e6d4u);
+            reset=h->Io.read32(h->Io.context,0x6000628cu);
+            if(clamp==UINT32_MAX || reset==UINT32_MAX || !(clamp&1u) || !(reset&0x01000000u)) {
+                h->Power.owned=true;h->Power.ready=false;return STATUS_DEVICE_DATA_ERROR;
+            }
+        }
+        h->Isolated=TRUE;
+        if(h->GpuOwned) {
+            KeAcquireSpinLock(&e->Lock,&irql);
+            if(!++e->GraphicsGeneration)++e->GraphicsGeneration;
+            KeReleaseSpinLock(&e->Lock,irql);
+        }
+        h->Clock.owned=h->Clock.running=false;h->Execution.owned=false;
+    }
+    return h->Status.restore_result?STATUS_DEVICE_DATA_ERROR:STATUS_SUCCESS;
+}
+NTSTATUS TgGpuStopHardware(TG_GPU_HARDWARE *h)
+{
+    TG_GPU_CONTEXT_ENGINE *e;KIRQL irql;NTSTATUS status;
+    if(!h)return STATUS_INVALID_PARAMETER;
+    e=h->Engine;if(!e)return STATUS_SUCCESS;
+    status=TgGpuIsolateHardware(h);
+    if(!h->Isolated || (status!=STATUS_SUCCESS && status!=STATUS_DEVICE_DATA_ERROR))return status;
+    status=TgGpuFreePrivateMemory(&e->Dxgk,&h->Work);
+    if(!NT_SUCCESS(status))return status;
+    status=TgGpuFreePrivateMemory(&e->Dxgk,&h->Boot);
+    if(!NT_SUCCESS(status))return status;
+    KeAcquireSpinLock(&e->Lock,&irql);
+    e->HardwareOwner=NULL;h->Engine=NULL;
+    KeReleaseSpinLock(&e->Lock,irql);
+    return h->Status.restore_result?STATUS_DEVICE_DATA_ERROR:STATUS_SUCCESS;
+}
+static __declspec(noinline) VOID TestAdapterRestartFromTimeout(const DXGKRNL_INTERFACE *dxgk)
+{
+    static TG_GPU_ADAPTER a;
+    static TG_GPU_RESOURCES res;
+    static ULONG regs[TgGpuApertureCount][4],lic_regs[T214_GPU_LIC_SIZE/4];
+    static const ULONG aperture_bases[]={T214_GPU_REG_BASE,T214_GPU_BAR1_BASE,T214_GPU_AUX_BASE,
+#define BASE(b,s) b,
+        T214_GPU_EXTRA_RESOURCES(BASE)
+#undef BASE
+    };
+    DRIVER_INITIALIZATION_DATA ddi={0};
+    DXGKARG_CREATEPROCESS process={.hDxgkProcess=(HANDLE)100,.Flags.SystemProcess=1};
+    DXGKARG_CREATEDEVICE sys_dev={.hDevice=(HANDLE)101};
+    DXGKARG_CREATECONTEXT sys_create={.hContext=(HANDLE)102,.EngineAffinity=1,
+        .Flags={.SystemContext=1,.VirtualAddressing=1}};
+    DXGKARG_CREATECONTEXT app_create={.hContext=(HANDLE)103,.EngineAffinity=1,
+        .Flags={.VirtualAddressing=1}};
+    DXGKARG_SETROOTPAGETABLE root={.Address={1,0,0},.NumEntries=TG_GPU_TABLE_ENTRIES};
+    UINT pools=PoolsInUse();
+    BOOLEAN savedTdr=tdr_trace_enabled;TG_GPU_CONTEXT_ENGINE *savedTrace=trace_engine;
+
+    memset(&a,0,sizeof(a));memset(&res,0,sizeof(res));
+    memset(regs,0,sizeof(regs));memset(lic_regs,0,sizeof(lic_regs));
+    memset(&restart_fixture,0,sizeof(restart_fixture));
+    memset(paging_tables,0,sizeof(paging_tables));
+    for(UINT i=0;i<TgGpuApertureCount;++i) {
+        res.Memory[i].Type=CmResourceTypeMemory;
+        res.Memory[i].u.Memory.Start.QuadPart=aperture_bases[i];
+        res.Memory[i].u.Memory.Length=sizeof(regs[i]);
+        res.Mapping[i]=regs[i];
+        if(aperture_bases[i]==0x60006280u)regs[i][3]=0x01000000u; /* CAR_RESET_X: GPU_GATE */
+        if(aperture_bases[i]==0x7000e6d4u)regs[i][0]=1u;          /* PMC_GPU_CLAMP: clamped */
+    }
+    res.LicMapping=lic_regs;
+
+    restart_driver.DeviceObject=&restart_owner_device;
+    restart_fixture.active=TRUE;
+    restart_fixture.enable=0x40;
+    restart_fixture.voltage=0x46;
+    TgGpuSetPlatformDriverObject(&restart_driver);
+
+    a.Tables=(TG_GPU_TABLE_SEGMENT){.Memory={(HANDLE)99,paging_tables,{.QuadPart=0x94000000},sizeof(paging_tables)},.SegmentId=1};
+    CHECK(TgGpuInitializeContextEngine(&a.Engine,dxgk,&a.Tables)==STATUS_SUCCESS);
+    TestGraphicsTemplate(&a.Engine);
+    a.EngineReady=TRUE;a.State=TgGpuAdapterReady;
+    CHECK(TgGpuOpenPlatform(&a.Platform,&res)==STATUS_SUCCESS);
+    TgGpuRegisterContextDdis(&ddi);
+    CHECK(ddi.DxgkDdiCreateProcess(&a.Engine,&process)==STATUS_SUCCESS);
+    sys_dev.hKmdProcess=process.hKmdProcess;
+    CHECK(ddi.DxgkDdiCreateDevice(&a.Engine,&sys_dev)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiCreateContext(sys_dev.hDevice,&sys_create)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiCreateContext(sys_dev.hDevice,&app_create)==STATUS_SUCCESS);
+    TG_GPU_CONTEXT *system=sys_create.hContext,*app=app_create.hContext;
+    root.hContext=system;ddi.DxgkDdiSetRootPageTable(&a.Engine,&root);
+    root.hContext=app;ddi.DxgkDdiSetRootPageTable(&a.Engine,&root);
+    app->GraphicsGeneration=1;
+
+    /* Invalid state guards must not touch Platform.IoStatus. */
+    CHECK(TgGpuDdiRestartFromTimeout(NULL)==STATUS_INVALID_DEVICE_STATE);
+    a.Platform.IoStatus=STATUS_IO_TIMEOUT;
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_INVALID_DEVICE_STATE);
+    CHECK(TgGpuRestartAdapterHardware(&a)==STATUS_INVALID_DEVICE_STATE &&
+          a.Platform.IoStatus==STATUS_IO_TIMEOUT);
+
+    /* Cold-start baseline before injecting faulted TDR epoch. */
+    a.Platform.IoStatus=STATUS_SUCCESS;
+    {
+        UCHAR addr=0;struct tg_gpu_gr_payload fw={0};struct tg_gpu_power_io io;
+        CHECK(TgGpuPlatformPreflight(&a.Platform,&addr)==STATUS_SUCCESS && addr==0x33);
+        io=TgGpuPlatformIo(&a.Platform);
+        CHECK(TgGpuFreePrivateMemory(&a.Engine.Dxgk,&a.Engine.Graphics.Memory)==STATUS_SUCCESS);
+        a.Engine.Graphics.ImageBytes=0;
+        CHECK(TgGpuStartHardware(&a.Hardware,&a.Engine,&io,addr,&fw)==STATUS_SUCCESS);
+        CHECK(TgGpuInitializeWorkQueue(&a.Queue,&a.Engine)==STATUS_SUCCESS);
+        CHECK(TgGpuStartWorker(&a.Worker,&a.Queue,&a.Hardware)==STATUS_SUCCESS);
+        a.QueueReady=TRUE;
+    }
+
+    /* 1. Poison Platform.IoStatus via a real failed PMIC read before TDR.
+     *    TgGpuRestartAdapterHardware must clear the stale IoStatus and recover. */
+    {
+        UINT8 v=0;struct tg_gpu_power_io io=TgGpuPlatformIo(&a.Platform);
+        restart_fixture.pmic_read_status=STATUS_IO_TIMEOUT;
+        CHECK(!io.read_pmic(io.context,0x33u,0x23u,&v) && a.Platform.IoStatus==STATUS_IO_TIMEOUT);
+        restart_fixture.pmic_read_status=STATUS_SUCCESS;
+    }
+    a.Engine.LastCompletedFence=30;a.Engine.LastSubmittedFence=34;a.Engine.SubmittedFenceValid=TRUE;
+    tdr_trace_enabled=TRUE;trace_engine=&a.Engine;
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS);
+    CHECK(a.State==TgGpuAdapterResetting && !a.QueueReady && a.Engine.Resetting &&
+          a.Hardware.Isolated && !a.Worker.Thread && a.Engine.LastCompletedFence==34);
+    CHECK(a.Platform.IoStatus==STATUS_IO_TIMEOUT); /* still poisoned entering RestartFromTimeout */
+    CHECK(system->Root.Valid && !app->Root.Valid);
+
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_SUCCESS);
+    CHECK(a.Platform.IoStatus==STATUS_SUCCESS && a.State==TgGpuAdapterReady && a.QueueReady);
+    CHECK(!a.Engine.Resetting && !a.Engine.RecoveryPending && a.Worker.Thread==(HANDLE)0x777);
+    CHECK(a.Hardware.Ready && a.Hardware.Power.owned && a.Platform.RailClaimed);
+    CHECK(a.Hardware.Dvfs.Configured==1 && restart_fixture.fw_loads==restart_fixture.fw_frees);
+    PrepareSystemPagingImage(&a.Engine,system,0xc01d0000u+2u);
+
+    /* 2. Preflight, firmware load, and worker-thread creation failures unwind cleanly. */
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS);
+    restart_fixture.preflight_status=STATUS_ACCESS_DENIED;
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_ACCESS_DENIED &&
+          a.Platform.IoStatus==STATUS_ACCESS_DENIED && !a.Platform.RailClaimed);
+    restart_fixture.preflight_status=STATUS_SUCCESS;
+
+    ULONG releases_before=restart_fixture.releases;
+    restart_fixture.fw_status=STATUS_OBJECT_NAME_NOT_FOUND;
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_OBJECT_NAME_NOT_FOUND);
+    restart_fixture.fw_status=STATUS_SUCCESS;
+    CHECK(a.State==TgGpuAdapterResetting && !a.QueueReady && a.Engine.Resetting &&
+          a.Hardware.Isolated && !a.Worker.Thread && !a.Hardware.Power.owned &&
+          !a.Platform.RailClaimed && restart_fixture.releases==releases_before+1);
+
+    releases_before=restart_fixture.releases;
+    restart_fixture.thread_status=STATUS_INSUFFICIENT_RESOURCES;
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_INSUFFICIENT_RESOURCES);
+    restart_fixture.thread_status=STATUS_SUCCESS;
+    CHECK(a.State==TgGpuAdapterResetting && !a.QueueReady && a.Engine.Resetting &&
+          a.Hardware.Isolated && !a.Worker.Thread && !a.Hardware.Power.owned &&
+          !a.Platform.RailClaimed && restart_fixture.releases==releases_before+1);
+
+    /* 3. RestartBackend succeeds (worker started, queue attached, Resetting=FALSE),
+     *    but Platform.IoStatus latched an unmapped write error: must roll back
+     *    worker, queue, engine admission, hardware power and rail cleanly! */
+    restart_fixture.poison_unmapped_write=TRUE;
+    ULONG joins_before=restart_fixture.threads_joined;
+    releases_before=restart_fixture.releases;
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_DEVICE_CONFIGURATION_ERROR);
+    restart_fixture.poison_unmapped_write=FALSE;
+    CHECK(a.State==TgGpuAdapterResetting && !a.QueueReady && !a.Queue.Engine && !a.Engine.QueueOwner);
+    CHECK(!a.Worker.Thread && restart_fixture.threads_joined==joins_before+1 &&
+          restart_fixture.threads_closed==restart_fixture.threads_joined);
+    CHECK(a.Engine.Resetting && a.Engine.RecoveryPending && !a.Engine.UserdBar1Ready);
+    CHECK(a.Hardware.Isolated && !a.Hardware.Ready && !a.Hardware.Power.owned &&
+          !a.Hardware.Dvfs.Configured && !a.Platform.RailClaimed &&
+          restart_fixture.releases==releases_before+1);
+    CHECK(system->Root.Valid);
+
+    /* Immediate retry after rollback must succeed cleanly without wedging. */
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_SUCCESS);
+    CHECK(a.State==TgGpuAdapterReady && a.QueueReady && a.Platform.IoStatus==STATUS_SUCCESS &&
+          !a.Engine.Resetting && a.Worker.Thread==(HANDLE)0x777 && a.Platform.RailClaimed);
+
+    /* 4. Rollback failure propagation: if hardware drain times out during rollback,
+     *    worker/queue still stop, cleanup status propagates, and live rail is retained. */
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS);
+    restart_fixture.poison_unmapped_write=TRUE;
+    restart_fixture.fail_isolate_drain=TRUE;
+    releases_before=restart_fixture.releases;
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_IO_TIMEOUT);
+    CHECK(a.State==TgGpuAdapterResetting && !a.QueueReady && !a.Worker.Thread &&
+          a.Engine.Resetting && !a.Hardware.Isolated && a.Hardware.Power.owned &&
+          a.Platform.RailClaimed && restart_fixture.releases==releases_before);
+    restart_fixture.poison_unmapped_write=FALSE;
+    restart_fixture.fail_isolate_drain=FALSE;
+    CHECK(TgGpuDdiResetFromTimeout(&a)==STATUS_SUCCESS && a.Hardware.Isolated && !a.Hardware.Power.owned);
+    CHECK(TgGpuDdiRestartFromTimeout(&a)==STATUS_SUCCESS && a.State==TgGpuAdapterReady);
+
+    /* 5. Suspended PagingOnly D0 wake rollback preserves non-system roots too. */
+    a.Engine.PagingOnly=TRUE;
+    root.hContext=app;ddi.DxgkDdiSetRootPageTable(&a.Engine,&root);
+    CHECK(app->Root.Valid);
+    CHECK(TgGpuSuspendBackend(&a.Engine,&a.Queue,&a.Hardware,&a.Worker)==STATUS_SUCCESS);
+    a.State=TgGpuAdapterSuspended;a.QueueReady=FALSE;
+    restart_fixture.poison_unmapped_write=TRUE;
+    CHECK(TgGpuRestartAdapterHardware(&a)==STATUS_DEVICE_CONFIGURATION_ERROR);
+    restart_fixture.poison_unmapped_write=FALSE;
+    CHECK(a.State==TgGpuAdapterSuspended && !a.QueueReady && !a.Worker.Thread &&
+          a.Engine.Resetting && a.Hardware.Isolated && app->Root.Valid && system->Root.Valid);
+    CHECK(TgGpuRestartAdapterHardware(&a)==STATUS_SUCCESS && a.State==TgGpuAdapterReady && app->Root.Valid);
+    a.Engine.PagingOnly=FALSE;
+
+    /* Teardown and leak verification. */
+    tdr_trace_enabled=savedTdr;trace_engine=savedTrace;
+    CHECK(TgGpuResetBackend(&a.Engine,&a.Queue,&a.Hardware,&a.Worker)==STATUS_SUCCESS);
+    CHECK(TgGpuStopHardware(&a.Hardware)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiDestroyContext(app)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiDestroyContext(system)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiDestroyDevice(sys_dev.hDevice)==STATUS_SUCCESS);
+    CHECK(ddi.DxgkDdiDestroyProcess(&a.Engine,process.hKmdProcess)==STATUS_SUCCESS);
+    CHECK(TgGpuStopContextEngine(&a.Engine)==STATUS_SUCCESS);
+    CHECK(TgGpuClosePlatform(&a.Platform)==STATUS_SUCCESS);
+    TgGpuSetPlatformDriverObject(NULL);
+    CHECK(!restart_fixture.boot_used && !restart_fixture.work_used &&
+          !restart_fixture.file_refs && !restart_fixture.owner_refs && !restart_fixture.live_irps &&
+          restart_fixture.fw_loads==restart_fixture.fw_frees &&
+          restart_fixture.threads_started==restart_fixture.threads_closed &&
+          PoolsInUse()==pools);
+    for(UINT i=0;i<64;++i)CHECK(!memory_used[i]);
+    for(UINT i=0;i<4;++i)CHECK(!graphics_used[i]);
+    restart_fixture.active=FALSE;
+}
 static __declspec(noinline) VOID TestContextCacheReinitialize(const DXGKRNL_INTERFACE *dxgk,
     TG_GPU_TABLE_SEGMENT *tables)
 {
@@ -3340,6 +3792,7 @@ void start(void)
     TestContextCacheReinitialize(&dxgk,&tables);
     TestAdapterLifecycle(&dxgk);
     TestAdapterResetFences();
+    TestAdapterRestartFromTimeout(&dxgk);
     TestSystemPagingReset(&dxgk);
     TestContextEvidence(&dxgk);
     TestPagingCompletionEvidence(&dxgk);

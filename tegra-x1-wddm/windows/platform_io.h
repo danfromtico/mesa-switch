@@ -25,8 +25,7 @@ VOID TgGpuSetPlatformDriverObject(PVOID DriverObject);
 NTSTATUS TgGpuOpenPlatform(TG_GPU_PLATFORM *,const TG_GPU_RESOURCES *);
 NTSTATUS TgGpuClosePlatform(TG_GPU_PLATFORM *);
 NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
-/* Optional capability/telemetry request: does not latch IoStatus when an older
- * SwitchFan build returns STATUS_INVALID_PARAMETER or STATUS_NOT_SUPPORTED. */
+/* Optional capability/telemetry request: never latches IoStatus on failure. */
 NTSTATUS TgGpuPlatformTryRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_request *);
 /* QUERY_EMC_VOTE returns the provider generation. ACK and FAILURE must use
  * the generation returned with the vote they are reporting. */

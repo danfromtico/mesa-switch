@@ -40,6 +40,7 @@ static struct {
     ULONG emc_vote,emc_ack,emc_failed,emc_failures;
     ULONG emc_failure_reports;
     NTSTATUS emc_report_status;
+    NTSTATUS telemetry_rail_status,telemetry_report_status;
     BOOLEAN emc_report_applied_before_error;
     PDRIVER_NOTIFICATION_CALLBACK_ROUTINE provider_notify;
     PVOID provider_context;
@@ -130,16 +131,29 @@ static NTSTATUS FASTCALL DvfsCallDriver(PDEVICE_OBJECT dev,PIRP irp)
         }
     }
     else if(op->reg==TG_GPU_PMIC_QUERY_DVFS_POLICY)op->value=model.policy;
-    else if(op->reg==TG_GPU_PMIC_REPORT_ABI){CHECK(op->write==1 && op->value==TG_GPU_LIVE_COUNTER_ABI);}
-    else if(op->reg==TG_GPU_PMIC_REPORT_GPU_KHZ){CHECK(op->write==1);model.reported_khz=op->value;}
-    else if(op->reg==TG_GPU_PMIC_REPORT_GPU_UV){CHECK(op->write==1);model.reported_uv=op->value;}
-    else if(op->reg==TG_GPU_PMIC_REPORT_GPU_STATUS){CHECK(op->write==1);model.reported_status=op->value;}
+    else if(op->reg==TG_GPU_PMIC_REPORT_ABI){
+        CHECK(op->write==1 && op->value==TG_GPU_LIVE_COUNTER_ABI);
+        status=model.telemetry_report_status;
+    }
+    else if(op->reg==TG_GPU_PMIC_REPORT_GPU_KHZ){
+        CHECK(op->write==1);status=model.telemetry_report_status;
+        if(NT_SUCCESS(status))model.reported_khz=op->value;
+    }
+    else if(op->reg==TG_GPU_PMIC_REPORT_GPU_UV){
+        CHECK(op->write==1);status=model.telemetry_report_status;
+        if(NT_SUCCESS(status))model.reported_uv=op->value;
+    }
+    else if(op->reg==TG_GPU_PMIC_REPORT_GPU_STATUS){
+        CHECK(op->write==1);status=model.telemetry_report_status;
+        if(NT_SUCCESS(status))model.reported_status=op->value;
+    }
     else {
         CHECK(op->address==0x33);
         if(op->reg==0x06){CHECK(!op->write);op->value=0x41;}
         else {
             CHECK(op->reg==0x23);
             if(op->write){model.rail=(UCHAR)op->value;++model.pmic_writes;}
+            else if(!NT_SUCCESS(model.telemetry_rail_status))status=model.telemetry_rail_status;
             else op->value=model.rail;
         }
     }
@@ -554,6 +568,28 @@ void start(void)
 
     test_failure_report_delivery();
     test_provider_replacement();
+
+    /* Telemetry PMIC 0x23 reads and optional report IRPs must never poison
+     * global Platform.IoStatus on transient I2C/IRP errors. */
+    CHECK(platform.IoStatus==STATUS_SUCCESS);
+    model.policy=TG_GPU_DVFS_POLICY_PACK(1,460800u,460800u,11);
+    model.telemetry_rail_status=STATUS_IO_DEVICE_ERROR;
+    model.telemetry_report_status=STATUS_IO_TIMEOUT;
+    model.qpc_ticks+=1100000ULL;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS && platform.IoStatus==STATUS_SUCCESS);
+    model.telemetry_report_status=STATUS_SUCCESS;
+    model.reported_uv=0xdeadbeefu;
+    model.qpc_ticks+=1100000ULL;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS &&
+          platform.IoStatus==STATUS_SUCCESS && model.reported_uv==0u);
+    model.telemetry_rail_status=STATUS_IO_TIMEOUT;
+    model.reported_uv=0xdeadbeefu;
+    TgGpuDvfsAttach(&hardware,&platform,&queue);
+    CHECK(platform.IoStatus==STATUS_SUCCESS && model.reported_uv==0u);
+    model.telemetry_rail_status=STATUS_SUCCESS;
+    model.qpc_ticks+=1100000ULL;
+    CHECK(TgGpuDvfsStep(&hardware,&queue,FALSE)==STATUS_SUCCESS &&
+          platform.IoStatus==STATUS_SUCCESS && model.reported_uv==250000u+5000u*model.rail);
 
     /* Force fatal double counter loss -> STATUS_DEVICE_DATA_ERROR. */
     model.policy=TG_GPU_DVFS_POLICY_PACK(1,153600u,460800u,3);

@@ -90,7 +90,6 @@ static VOID report_telemetry(TG_GPU_DVFS *d, const TG_GPU_HARDWARE *h)
 {
     struct tg_gpu_pmic_request op;
     UINT32 opp, temp_byte, status_word;
-    uint8_t rail_code = 0;
     UINT32 rail_uv = 0;
     if (!d->Platform || !d->PolicyBridgeSupported) return;
     op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_REPORT_ABI, 1, TG_GPU_LIVE_COUNTER_ABI};
@@ -99,8 +98,11 @@ static VOID report_telemetry(TG_GPU_DVFS *d, const TG_GPU_HARDWARE *h)
         op = (struct tg_gpu_pmic_request){0, TG_GPU_PMIC_REPORT_EMC_ABI, 1, TG_GPU_EMC_VOTE_ABI};
         (VOID)TgGpuPlatformTryRequest(d->Platform, &op);
     }
-    if (h->Io.read_pmic(h->Io.context, h->Power.pmic_address, 0x23u, &rail_code))
-        rail_uv = 250000u + (UINT32)rail_code * 5000u;
+    if (h->Power.pmic_address) {
+        op = (struct tg_gpu_pmic_request){ h->Power.pmic_address, 0x23u, 0, 0 };
+        if (NT_SUCCESS(TgGpuPlatformTryRequest(d->Platform, &op)) && op.value <= 0xffu)
+            rail_uv = 250000u + op.value * 5000u;
+    }
     opp = tg_gpu_clock_hiopt_index(h->Clock.target_khz);
     if (opp == UINT32_MAX) opp = 0x3fu;
     temp_byte = d->TempValid ? (UINT32)((UINT8)d->TempC) : 0xffu;

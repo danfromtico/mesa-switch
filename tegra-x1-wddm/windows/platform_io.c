@@ -7,6 +7,8 @@
 
 #define TG_PLATFORM_TAG 0x50674754u
 #define TG_PLATFORM_TIMEOUT_100NS (-10000000LL) /* pending IRP wait: 1 s */
+#define TG_PLATFORM_READY_RETRIES 12u
+#define TG_PLATFORM_READY_RETRY_US 50000u       /* 12 * 50 ms = 600 ms wake window */
 
 typedef struct _TG_PLATFORM_IRP_CTX {
     PIRP Irp;
@@ -371,10 +373,7 @@ static NTSTATUS platform_request(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *
 finished:
     if(owner_dev)ObfDereferenceObject(owner_dev);
     ObfDereferenceObject(file);
-    if(optional && (status==STATUS_INVALID_PARAMETER || status==STATUS_NOT_SUPPORTED ||
-                    status==STATUS_INVALID_DEVICE_REQUEST || status==STATUS_DEVICE_NOT_READY))
-        return status;
-    return failure(p,status);
+    return optional?status:failure(p,status);
 }
 
 NTSTATUS TgGpuPlatformRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_request *op)
@@ -388,16 +387,37 @@ NTSTATUS TgGpuPlatformTryVoteRequest(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_reque
         return STATUS_INVALID_PARAMETER;
     return platform_request(p,op,TRUE,generation);
 }
+static void delay(void *context,UINT32 us);
+
+static NTSTATUS preflight_query_ready(TG_GPU_PLATFORM *p,ULONG reg,ULONG *value)
+{
+    NTSTATUS status=STATUS_DEVICE_NOT_READY;
+    for(UINT attempt=0;;++attempt) {
+        KIRQL irql;BOOLEAN abort;
+        struct tg_gpu_pmic_request request={0,reg,0,0};
+        status=TgGpuPlatformTryRequest(p,&request);
+        if(NT_SUCCESS(status)){*value=request.value;return STATUS_SUCCESS;}
+        if(status!=STATUS_DEVICE_NOT_READY || attempt>=TG_PLATFORM_READY_RETRIES)break;
+        KeAcquireSpinLock(&p->HandleLock,&irql);
+        abort=p->Closing || p->QueryRemove || !p->Bridge || !p->FileObject;
+        KeReleaseSpinLock(&p->HandleLock,irql);
+        if(abort)break;
+        delay(p,TG_PLATFORM_READY_RETRY_US);
+    }
+    return failure(p,status);
+}
+
 NTSTATUS TgGpuPlatformPreflight(TG_GPU_PLATFORM *p,UCHAR *address)
 {
-    struct tg_gpu_pmic_request request={0,TG_GPU_PMIC_QUERY_ADDRESS,0,0};NTSTATUS status;
+    struct tg_gpu_pmic_request request;ULONG value=0;NTSTATUS status;
     if(!address)return STATUS_INVALID_PARAMETER;
-    status=TgGpuPlatformRequest(p,&request);if(!NT_SUCCESS(status))return status;
-    if(!request.value || request.value>0x7f)return failure(p,STATUS_DEVICE_PROTOCOL_ERROR);
-    UCHAR candidate=(UCHAR)request.value;
-    request=(struct tg_gpu_pmic_request){0,TG_GPU_PMIC_QUERY_TEMP,0,0};
-    status=TgGpuPlatformRequest(p,&request);if(!NT_SUCCESS(status))return status;
-    if(request.value>=80)return failure(p,STATUS_DEVICE_NOT_READY);
+    status=preflight_query_ready(p,TG_GPU_PMIC_QUERY_ADDRESS,&value);
+    if(!NT_SUCCESS(status))return status;
+    if(!value || value>0x7f)return failure(p,STATUS_DEVICE_PROTOCOL_ERROR);
+    UCHAR candidate=(UCHAR)value;
+    status=preflight_query_ready(p,TG_GPU_PMIC_QUERY_TEMP,&value);
+    if(!NT_SUCCESS(status))return status;
+    if(value>=80)return failure(p,STATUS_DEVICE_NOT_READY);
     request=(struct tg_gpu_pmic_request){0,TG_GPU_PMIC_CLAIM_RAIL,1,TG_GPU_EMC_VOTE_ABI};
     status=TgGpuPlatformTryRequest(p,&request);
     if(!NT_SUCCESS(status) && status!=STATUS_INVALID_PARAMETER && status!=STATUS_NOT_SUPPORTED &&

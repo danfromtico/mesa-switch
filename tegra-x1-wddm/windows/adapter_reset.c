@@ -56,19 +56,28 @@ NTSTATUS APIENTRY TgGpuDdiResetFromTimeout(HANDLE adapter)
 NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *a)
 {
     TG_GPU_FIRMWARE firmware={0};
-    struct tg_gpu_power_io io;UCHAR address=0;NTSTATUS status;
+    struct tg_gpu_power_io io;UCHAR address=0;NTSTATUS status,cleanup;
     PAGED_CODE();
     if(!a || !a->EngineReady || !a->Engine.Resetting ||
        !a->Platform.Resources || !a->Hardware.Isolated)return STATUS_INVALID_DEVICE_STATE;
-    /* The OS has completed its cleanup interval. Only now load firmware,
-     * preflight the platform and perform a new cold hardware initialization. */
+    /* The OS has completed its cleanup interval. Clear any sticky I/O status
+     * from the prior epoch before preflight and cold hardware initialization. */
+    a->Platform.IoStatus=STATUS_SUCCESS;
     status=TgGpuPlatformPreflight(&a->Platform,&address);
     if(NT_SUCCESS(status))status=TgGpuFirmwareLoad(&firmware);
     if(NT_SUCCESS(status)) {
         io=TgGpuPlatformIo(&a->Platform);
         status=TgGpuRestartBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker,
             &io,address,&firmware.payload);
-        if(NT_SUCCESS(status) && !NT_SUCCESS(a->Platform.IoStatus))status=a->Platform.IoStatus;
+        if(NT_SUCCESS(status) && !NT_SUCCESS(a->Platform.IoStatus)) {
+            status=a->Platform.IoStatus;
+            cleanup=(a->State==TgGpuAdapterSuspended && a->Engine.PagingOnly)?
+                TgGpuSuspendBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker):
+                TgGpuResetBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
+            if(cleanup==STATUS_DEVICE_BUSY)
+                cleanup=TgGpuResetBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
+            if(!NT_SUCCESS(cleanup))status=cleanup;
+        }
     }
     TgGpuFirmwareFree(&firmware);a->QueueReady=a->Queue.Engine==&a->Engine;
     if(NT_SUCCESS(status)) {

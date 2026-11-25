@@ -69,6 +69,27 @@ static BOOLEAN SwFanGpuLiveCounter(PSWFAN_DEVICE Dev)
     return Dev->GpuAbiTime && KeQueryInterruptTime() - Dev->GpuAbiTime <= 20000000ULL;
 }
 
+/* Lock order: SensorLock -> CpuLock -> PmicLock. Call before PmicLock. */
+static NTSTATUS SwFanGpuQueryTemp(PSWFAN_DEVICE Dev, PULONG TempOut)
+{
+    BOOLEAN valid;
+    ULONG temp;
+    SwFanCpuLock(Dev);
+    valid = Dev->TempValid;
+    temp = Dev->LastTemp;
+    SwFanCpuUnlock(Dev);
+    if (!valid) {
+#ifdef SWFAN_HAVE_SENSOR_SAMPLE
+        NTSTATUS status = SwFanSampleTemp(Dev, &temp);
+        if (!NT_SUCCESS(status)) return STATUS_DEVICE_NOT_READY;
+#else
+        return STATUS_DEVICE_NOT_READY;
+#endif
+    }
+    *TempOut = temp;
+    return STATUS_SUCCESS;
+}
+
 static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *Info)
 {
     struct tg_gpu_pmic_request *In, *Out, Op;
@@ -95,8 +116,10 @@ static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *I
             if (Dev->Car == NULL) return STATUS_DEVICE_NOT_READY;
             Op.value = SwCpuRead(Dev, 0xa0);
         } else if (Op.reg == TG_GPU_PMIC_QUERY_TEMP) {
-            if (!Dev->TempValid) return STATUS_DEVICE_NOT_READY;
-            Op.value = Dev->LastTemp;
+            ULONG LiveTemp = 0;
+            Status = SwFanGpuQueryTemp(Dev, &LiveTemp);
+            if (!NT_SUCCESS(Status)) return Status;
+            Op.value = LiveTemp;
         } else if (Op.reg == TG_GPU_PMIC_QUERY_EMC_KHZ) {
             SwFanCpuLock(Dev);
             Op.value = Dev->Emc.SampleTime &&
@@ -188,6 +211,13 @@ static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *I
          (Op.reg != CPU_M4_VOUT || Op.write)))
         return STATUS_INVALID_PARAMETER;
 
+    if (Op.write && Op.reg == GPU_M1_ENABLE_REG && (Op.value & 1u) != 0) {
+        ULONG LiveTemp = 0;
+        Status = SwFanGpuQueryTemp(Dev, &LiveTemp);
+        if (!NT_SUCCESS(Status) || LiveTemp >= 80)
+            return STATUS_DEVICE_NOT_READY;
+    }
+
     SwFanPmicLock(Dev);
     if (Op.write) {
         Buffer[0] = (UCHAR)Op.reg;
@@ -217,10 +247,6 @@ static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *I
                 return STATUS_INVALID_DEVICE_STATE;
             }
             if ((Op.value & 1u) != 0) {
-                if (!Dev->TempValid || Dev->LastTemp >= 80) {
-                    SwFanPmicUnlock(Dev);
-                    return STATUS_DEVICE_NOT_READY;
-                }
                 Status = SwFanReadReg(Dev->Pmic, GPU_M1_VOUT_REG, &M1Code);
                 if (!NT_SUCCESS(Status)) { SwFanPmicUnlock(Dev); return Status; }
                 if (M1Code < GPU_M1_MIN_CODE || M1Code > GPU_M1_MAX_CODE) {
