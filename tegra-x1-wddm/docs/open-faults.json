@@ -2051,6 +2051,53 @@
       },
       "acceptance_qualified": false,
       "candidate_promotion_blocked": true
+    },
+    {
+      "id": "GM20B-TDR-RESTART-IOSTATUS-PREFLIGHT",
+      "status": "open",
+      "kind": "tdr-recovery",
+      "affected_scopes": [
+        "tdr-recovery",
+        "wddm",
+        "power"
+      ],
+      "trigger": "WDDM full-adapter timeout reset/restart concurrent with Tegra210B01 I2C5 CL-DVFS DFLL traffic, DVFS PMIC 0x23 telemetry polling, or D0Entry-to-SelfManagedIoRestart sensor window.",
+      "evidence": [
+        "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/causal-evidence.json",
+        "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/step4-organic-result.json",
+        "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/tdr-organic-etw-summary.json",
+        "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/permanent-boot-101268.json"
+      ],
+      "cause": "TgGpuRestartAdapterHardware retained sticky Platform.IoStatus errors latched before or during TDR (including non-optional dvfs.c PMIC 0x23 telemetry reads and platform_request TryRequest transport errors triggered by Tegra210B01 I2C5 DFLL multi-master INT_ARB_LOST), lacked backend isolation rollback when post-restart IoStatus failed, and TgGpuPlatformPreflight queried temperature with zero retry across the SwitchFan KMDF D0Entry-to-SelfManagedIoRestart window. Note: Session 1 interactive desktop passed 2x organic WDDM TDR recovery cleanly (Boot 101172) and permanent AllowNativeBoot cold/warm startup passed on Boot 101268/101514; triggering GPU timeout from Session 0 while sitting at the unauthenticated Lockscreen remains unsupported.",
+      "daily_workaround": "Use the verified e9981cfbccf8 KMD with SwitchFan 1.0.0.34 and Tegra210I2c 1.0.0.8 under permanent AllowNativeBoot; run interactive TDR tests from an active Session 1 desktop rather than Session 0 on Lockscreen.",
+      "close_when": "Complete a standalone single-boot controlled 1074 one-time interactive desktop qualification interval for formal graphics-baseline.json promotion and verify remaining upstream TDR initiators.",
+      "resolution": null,
+      "verified_fix": {
+        "scope": "tdr-restart-iostatus-rollback-preflight",
+        "root_cause": "TgGpuRestartAdapterHardware retained sticky Platform.IoStatus errors latched before or during TDR (including non-optional dvfs.c PMIC 0x23 telemetry reads and platform_request TryRequest transport errors triggered by Tegra210B01 I2C5 DFLL multi-master INT_ARB_LOST), lacked backend isolation rollback when post-restart IoStatus failed, and TgGpuPlatformPreflight queried temperature with zero retry across the SwitchFan KMDF D0Entry-to-SelfManagedIoRestart window.",
+        "root_cause_confirmed": true,
+        "commit": "244d138fde43e70b089e2d6148fd09394604443a",
+        "independent_review_passed": true,
+        "build_signed": true,
+        "output_required": false,
+        "component": "tegragpurender.sys",
+        "components": {
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+          "tegragpurender.sys": "e9981cfbccf824c363f9bbfcc1f0b9f8c2db10c4c55254c1d3888f0397e7aa8e",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+          "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+        },
+        "causal_evidence_file": "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/causal-evidence.json",
+        "causal_evidence_sha256": "6c0ccbabf2af99a5fb8c942363f6f1cda945b39c9cd3e4d8f1fe881367872a9d",
+        "code_review_file": "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/code-review.json",
+        "code_review_sha256": "61467eee1aac257ff6c47ac250c533278dadc3b5adffc2d4e0272cd912c8d2b6",
+        "build_file": "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/build.json",
+        "build_sha256": "01f71ff43951d6cdeba421326131cefad014dbdf996fdabcd4d3bfdc62afb2c9"
+      }
     }
   ],
   "independent_qualifications": [

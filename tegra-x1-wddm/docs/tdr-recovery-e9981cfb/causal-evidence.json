@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "fault_id": "GM20B-TDR-RESTART-IOSTATUS-PREFLIGHT",
+  "scope": "tdr-restart-iostatus-rollback-preflight",
+  "confirmed_cause": "TgGpuRestartAdapterHardware retained sticky Platform.IoStatus errors latched before or during TDR (including non-optional dvfs.c PMIC 0x23 telemetry reads and platform_request TryRequest transport errors triggered by Tegra210B01 I2C5 DFLL multi-master INT_ARB_LOST), lacked backend isolation rollback when post-restart IoStatus failed, and TgGpuPlatformPreflight queried temperature with zero retry across the SwitchFan KMDF D0Entry-to-SelfManagedIoRestart window.",
+  "source_commit": "244d138fde43e70b089e2d6148fd09394604443a",
+  "platform_drivers_commit": "e5892b05f81478c4ae4acad2ade01180829b641c",
+  "platform_drivers_release_commit": "de636f5350a39658bd4b992f18b19778bb1ec6b2",
+  "repaired_files": [
+    "tegra-x1-wddm/windows/adapter_reset.c",
+    "tegra-x1-wddm/windows/dvfs.c",
+    "tegra-x1-wddm/windows/platform_io.c",
+    "tegra-x1-wddm/windows/platform_io.h",
+    "tegra-x1-wddm/integration/switch-lite/windows/SwitchFan/src/t214/gpu_pmic.h"
+  ],
+  "live_interactive_verification": {
+    "boot_record": 101172,
+    "organic_tdr_cycles": 2,
+    "result": "ORGANIC_TDR_2X_PASS",
+    "graphics_generations": [
+      1,
+      3,
+      5
+    ],
+    "reset_adapter_returns": [
+      "0x00000000",
+      "0x00000000"
+    ],
+    "restart_adapter_returns": [
+      "0x00000000",
+      "0x00000000"
+    ],
+    "system_paging_rebuilds": [
+      3,
+      5
+    ],
+    "etw_decoded_records": 477,
+    "nonzero_context_evidence": 0,
+    "gpu_dvfs_mode": 1,
+    "permanent_boot_verified": 101268
+  }
+}

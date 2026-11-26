@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "scope": "tdr-restart-iostatus-rollback-preflight",
+  "source_commit": "244d138fde43e70b089e2d6148fd09394604443a",
+  "independent_review_passed": true,
+  "p0_findings": 0,
+  "p1_findings": 0,
+  "verified_invariants": [
+    "IRQL PASSIVE_LEVEL safety for preflight bounded sleep and TryRequest",
+    "Strict lock hierarchy SensorLock -> CpuLock -> BacklightLock / PmicLock",
+    "Symmetric Worker/WorkQueue/Hardware/Rail rollback on post-RestartBackend IoStatus failure",
+    "Zero 9-SCL BusClear injection on multi-master I2C5 pure INT_ARB_LOST with full RepeatStart replay"
+  ],
+  "disposition": "accept_scoped_tdr_restart_iostatus_and_preflight_repair"
+}
