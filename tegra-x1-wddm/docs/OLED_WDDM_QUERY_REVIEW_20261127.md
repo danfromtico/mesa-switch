@@ -21,15 +21,27 @@ ARM64 WDK 10.0.26100 构建已链接 WDDM 显示版和 MCDM 纯计算版。使�
 
 ## OLED 实机启动记录
 
-Tsunami714! 在 HEG-001 上首次报告 `step.log` 从平台桥打开、PMIC 预检、固件加载一路走到 GPU 硬件启动返回，随后出现了显示路径查询。进入系统后内屏仍然黑屏。[OLED 移植与实机测试](https://github.com/Tsunami714a)
+Tsunami714! 报告 HEG-001 的内核显示驱动（KMD）首次走完启动序列。进入系统后内屏一直黑屏，Windows 在整个观察期间持续运行。[OLED 移植与实机测试](https://github.com/Tsunami714a)
 
 | 本轮阶段 | 测试者提供的记录 |
 | --- | --- |
 | 进入 `StartDevice` 并打开平台桥 | `44 → 460 → 4631:0 → 461`，`TgGpuOpenPlatform` 返回成功。 |
 | PMIC 预检与固件加载 | `462 → 4632:0 → 463 → 464 → 4633:0 → 465`，预检与固件加载均返回成功。 |
-| GPU 硬件启动与显示路径查询 | `466 → 467` 记录硬件启动调用进入和返回。随后记录到 `4820/4821`（`IsSupportedVidPn` 进入和返回），同轮出现 3 次 `vidpn-config`。 |
+| GPU 硬件启动 | `466 → 467` 记录硬件启动调用进入和返回。随后出现了 `IsSupportedVidPn` 的进入和返回标记（`4820/4821`）。 |
 
-这些记录确认 `dxgkrnl` 已开始查询显示路径。该轮的 GPU 设备管理器状态、首帧是否提交到内屏均待确认。桌面 UMD 的 C++ 运行库是否与黑屏有关，也待同次启动的模块加载记录确认。
+同轮出现 3 次 `vidpn-config`。下表按测试者提供的 `step.log` 标记计数。
+
+| 标记 | 显示回调 | 本轮出现次数 |
+| --- | --- | ---: |
+| `4820` | `IsSupportedVidPn` | 15 |
+| `4830` | `SetTimingsFromVidPn` | 1 |
+| `4832` | `SetVidPnSourceVisibility` | 1 |
+| `4834` | `UpdateActiveVidPnPresentPath` | 0 |
+| `4840` | `SetVidPnSourceAddress` | 0 |
+
+`dxgkrnl` 已请求设置时序和源可见性。`4832` 写在实际设置可见性的调用之前。`4840` 只覆盖常规地址回调，驱动另有多平面叠加（MPO3）的地址回调。该轮首帧是否提交到内屏及 GPU 的设备管理器状态仍待确认。
+
+测试者报告 UMD 仍未加载，现场没有找到 `umd.log`。要确认 DWM 的加载结果以及 C++ 运行库是否与黑屏有关，还缺同次启动的模块或加载错误记录。
 
 ### 早期启动对照
 
