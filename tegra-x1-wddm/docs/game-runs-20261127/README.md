@@ -80,3 +80,13 @@ contribute.
 These results apply to the tested Lite and component combination. They do
 not claim OLED validation, general game compatibility, full audio/input
 acceptance, or completion of the baseline promotion checks.
+
+## Scoped daily baseline follow-up
+
+The directory-kind repair was subsequently qualified in a separate daily KMD
+(`1d88065b2e4a`) with bounded diagnostics and the active stop probe disabled.
+The guarded policy granted permanent startup, and boot 106579 verified Code 0
+and the exact native component hashes. The original forced-stop diagnostic
+image described above was not promoted. This scoped repair does not resolve
+PAL4 audio or either game's frame-rate limitations.
+[Daily qualification and permanent-boot evidence](../pal4-pde-kind-daily-20261127/README.md).

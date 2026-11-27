@@ -2156,12 +2156,40 @@
       ],
       "trigger": "Launching the original x86 PAL4 client on Switch Lite causes a page-table update rejection and VIDEO_MEMORY_MANAGEMENT_INTERNAL.",
       "evidence": [
-        "tegra-x1-wddm/docs/LITE_PAL4_PDE_KIND_20261127.json#diagnostic"
+        "tegra-x1-wddm/docs/LITE_PAL4_PDE_KIND_20261127.json#diagnostic",
+        "tegra-x1-wddm/docs/pal4-pde-kind-daily-20261127/qualification.json"
       ],
       "cause": "The one-use 0xE0535751 capture proves UPDATE_PAGE_TABLE, STATUS_NOT_SUPPORTED, site 5, PageTableLevel 1, GPU_PHYSICAL mode 2, NULL hAllocation, DriverProtection 0xfe. The KMD rejected a known leaf kind solely because the request updated a page directory.",
-      "daily_workaround": "No accepted PAL4 workaround. Keep the fix under a one-use diagnostic permit until original-game acceptance. The selected daily baseline remains 1d7fcf5d75ed.",
+      "daily_workaround": "Use the scoped daily PDE-kind repair only after qualification; preserve two page-table levels. Diagnostic error events are available by default through ETW, active stop probe is off. PAL4 performance/audio and full three-run closure remain pending.",
       "close_when": "Verify three original PAL4 launches with the fixed KMD and actual loaded component hashes, hardware drawing, physical display and normal exit, with no unexplained restart.",
-      "resolution": null
+      "resolution": null,
+      "verified_fix": {
+        "scope": "gpu-physical-directory-known-kind",
+        "root_cause": "Windows propagated known leaf kind 0xfe to a GPU_PHYSICAL level-1 PDE update with no allocation; the previous level restriction rejected it before the existing plain-PDE encoder.",
+        "commit": "d1c07b6a8c4cc812ba8fdbdd53a3780dcac9c7a2",
+        "root_cause_confirmed": true,
+        "independent_review_passed": true,
+        "review_basis": "Project owner stated 我审核过了; human attestation recorded, no completed external model review is claimed.",
+        "build_signed": true,
+        "output_required": true,
+        "component": "tegragpurender.sys",
+        "components": {
+          "tegragpurender.sys": "1d88065b2e4a8ed777c40da0802331ed542763ca1520ee5630c2a150185813d5",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+          "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+        },
+        "causal_evidence_sha256": "22eadb66ff0e7b45d30438dc5df32ead225210aedd0423d90aaf45f9bc1dfecc",
+        "code_review_sha256": "e39b7fd6a9a7e6d5f0382992637aaf40664df80cac3258cb97eeaee6d1bff813",
+        "build_sha256": "cd5036c226966107d849f9922c8a0f0c20f364ec5e7ef27fd10f32484c49f431",
+        "causal_evidence_file": "tegra-x1-wddm/docs/pal4-pde-kind-daily-20261127/causal-evidence.json",
+        "code_review_file": "tegra-x1-wddm/docs/pal4-pde-kind-daily-20261127/code-review.json",
+        "build_file": "tegra-x1-wddm/docs/pal4-pde-kind-daily-20261127/build.json"
+      }
     }
   ],
   "independent_qualifications": [
@@ -2924,6 +2952,171 @@
       ],
       "assessment_file": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/open-fault-separation.json",
       "assessment_sha256": "16b65e3cafe0f7fdcc9588763614b6130138d5b02d1a356b9d3627b3dc983a61"
+    },
+    {
+      "evidence_sha256": "c57aa67c3a9b829c0d664bdce60562a995ef8d20abbb9e52a5cc55258fac7ded",
+      "independence": [
+        {
+          "fault_id": "GM20B-POST-QUALIFICATION-RESTART-92154",
+          "reason": "The qualification is limited to the explicitly recorded controlled boot and two bounded GPU image readbacks. Both exit normally on the same boot; the original shutdown, natural-load, long-duration or post-selection trigger is not claimed fixed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "reason": "The qualification is limited to the explicitly recorded controlled boot and two bounded GPU image readbacks. Both exit normally on the same boot; the original shutdown, natural-load, long-duration or post-selection trigger is not claimed fixed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "The unchanged accepted UMD/NVK components perform an offscreen readback without a new application swapchain, Present or display-mode transition. This isolates the directory-kind repair from the historical presentation/UI trigger; no closure or expanded presentation coverage is claimed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "The unchanged accepted UMD/NVK components perform an offscreen readback without a new application swapchain, Present or display-mode transition. This isolates the directory-kind repair from the historical presentation/UI trigger; no closure or expanded presentation coverage is claimed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "The unchanged accepted UMD/NVK components perform an offscreen readback without a new application swapchain, Present or display-mode transition. This isolates the directory-kind repair from the historical presentation/UI trigger; no closure or expanded presentation coverage is claimed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "The qualification is limited to the explicitly recorded controlled boot and two bounded GPU image readbacks. Both exit normally on the same boot; the original shutdown, natural-load, long-duration or post-selection trigger is not claimed fixed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "No network driver or network policy changes. Connectivity was needed to operate the single controlled GPU test; intermittent SSH recovery is recorded separately and no Wi-Fi startup fix is claimed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "reason": "The qualification is limited to the explicitly recorded controlled boot and two bounded GPU image readbacks. Both exit normally on the same boot; the original shutdown, natural-load, long-duration or post-selection trigger is not claimed fixed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "reason": "The qualification is limited to the explicitly recorded controlled boot and two bounded GPU image readbacks. Both exit normally on the same boot; the original shutdown, natural-load, long-duration or post-selection trigger is not claimed fixed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "reason": "The qualification is limited to the explicitly recorded controlled boot and two bounded GPU image readbacks. Both exit normally on the same boot; the original shutdown, natural-load, long-duration or post-selection trigger is not claimed fixed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "reason": "The qualification is limited to the explicitly recorded controlled boot and two bounded GPU image readbacks. Both exit normally on the same boot; the original shutdown, natural-load, long-duration or post-selection trigger is not claimed fixed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "reason": "The unchanged accepted UMD/NVK components perform an offscreen readback without a new application swapchain, Present or display-mode transition. This isolates the directory-kind repair from the historical presentation/UI trigger; no closure or expanded presentation coverage is claimed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+          "reason": "The unchanged accepted UMD/NVK components perform an offscreen readback without a new application swapchain, Present or display-mode transition. This isolates the directory-kind repair from the historical presentation/UI trigger; no closure or expanded presentation coverage is claimed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-ON-DEMAND-CANDIDATE-BOOT-95090-RESET",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "SWITCH-CONTROLLED-CRASH-DUMP-MISSING-97176",
+          "reason": "Storage and dump components are unchanged. The original SD/dump workload is not repeated. The bounded GPU memory test completed on one boot without abnormal-shutdown events; dump capture and historical SD causality remain open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-WEATHER-NEWS-UI-RESTART-97983",
+          "reason": "The unchanged accepted UMD/NVK components perform an offscreen readback without a new application swapchain, Present or display-mode transition. This isolates the directory-kind repair from the historical presentation/UI trigger; no closure or expanded presentation coverage is claimed.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99653",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99725",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99793",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99868",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99935",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-SD0513-CANDIDATE-UNCLEAN-BOOT-100134",
+          "reason": "Storage and dump components are unchanged. The original SD/dump workload is not repeated. The bounded GPU memory test completed on one boot without abnormal-shutdown events; dump capture and historical SD causality remain open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "SWITCH-SD0513-DIRECT-NT-DUMP-ABSENT-100210",
+          "reason": "Storage and dump components are unchanged. The original SD/dump workload is not repeated. The bounded GPU memory test completed on one boot without abnormal-shutdown events; dump capture and historical SD causality remain open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-C4-SD0513-UNEXPLAINED-BOOT-100286",
+          "reason": "Storage and dump components are unchanged. The original SD/dump workload is not repeated. The bounded GPU memory test completed on one boot without abnormal-shutdown events; dump capture and historical SD causality remain open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-C4-SD0515-DESKTOP-BLACK-SCREEN-100692",
+          "reason": "Storage and dump components are unchanged. The original SD/dump workload is not repeated. The bounded GPU memory test completed on one boot without abnormal-shutdown events; dump capture and historical SD causality remain open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-TDR-RESTART-IOSTATUS-PREFLIGHT",
+          "reason": "The new qualification exercises a known-kind page-directory update and finite offscreen GPU readbacks with unchanged user-mode components. It does not replay the original fault/recovery workload. Its complete interval has one explained controlled boot and no abnormal restart; historical causality remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-STALL-FAULT-ISR-AND-RAIL-OWNERSHIP",
+          "reason": "The existing fault-ISR and rail ownership implementation from the accepted live 4c0cb225/1d7fcf5d profile is retained. This test observes successful paging and GPU output without injecting a stall or reset; the broader registered fault remains open.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        },
+        {
+          "fault_id": "GM20B-PAL4-PDE-KIND-20261127",
+          "reason": "The captured level-1/GPU_PHYSICAL/NULL-allocation/kind-0xfe input is now accepted and the bounded optimal-image GPU readback exits normally on the one-use boot. This is a scoped repair, not closure of the broader game/performance/audio scenario.",
+          "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        }
+      ]
     }
   ],
   "baseline_comparisons": [

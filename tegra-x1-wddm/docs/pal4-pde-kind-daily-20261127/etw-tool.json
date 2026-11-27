@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "source": "a39ee0dc1a2e283e57d18fb4ccf332378d2d9fac78a0ac18b1b80a2436271a0e",
+  "executable": "3bc663fe9222fc4a012d068d7d08d6b176c6cba375275581bd90aae24a1f6d0e",
+  "purpose": "Temporary one-provider level-2 ETW collector because logman.exe is absent. Start/stop and raw-file read only; emits loss counts. No KMD or global tracing policy changes.",
+  "references": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-starttracew",
+    "https://learn.microsoft.com/en-us/windows/win32/api/evntrace/nf-evntrace-enabletraceex2"
+  ],
+  "provider": "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0",
+  "session": "SwitchWOA-Pal4DailyPaging",
+  "max_file_mib": 16,
+  "kernel_driver_source_unchanged": true
+}

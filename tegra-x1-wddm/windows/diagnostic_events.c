@@ -31,6 +31,10 @@ VOID TgGpuTraceRecovery(const TG_GPU_RECOVERY_EVENT *record)
 {write_event(1,2,record,sizeof(*record));}
 VOID TgGpuTraceFaultIsr(const TG_GPU_FAULT_ISR_EVENT *record)
 {write_event_ver(10,2,2,record,sizeof(*record));}
+VOID TgGpuTracePagingRejection(const TG_GPU_PAGING_REJECTION_EVENT *record)
+{write_event(11,2,record,sizeof(*record));}
+VOID TgGpuTracePagingDirectory(const TG_GPU_PAGING_REJECTION_EVENT *record)
+{write_event(12,2,record,sizeof(*record));}
 VOID TgGpuTraceExecution(const TG_GPU_EXECUTION_EVENT *record)
 {write_event(2,4,record,sizeof(*record));}
 static const EVENT_DESCRIPTOR tdr_event={.Id=8,.Version=1,.Level=4,.Keyword=1};

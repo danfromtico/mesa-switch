@@ -1,0 +1,49 @@
+{
+  "BeforeBoot": 106486,
+  "AfterBoot": 106486,
+  "FirstRecord": 106468,
+  "LastRecord": 106561,
+  "GpuCode": 0,
+  "DesktopPid": 1396,
+  "Events": [
+    {
+      "Id": 12,
+      "Record": 106486,
+      "Provider": "Microsoft-Windows-Kernel-General",
+      "Utc": "2026-11-27T22:06:12.4899794Z",
+      "Message": "操作系统已在系统时间 ‎2026‎-‎11‎-‎27T22:06:10.552166200Z 启动。"
+    },
+    {
+      "Id": 1074,
+      "Record": 106469,
+      "Provider": "User32",
+      "Utc": "2026-11-27T22:05:47.4870747Z",
+      "Message": "The process C:\\Windows\\system32\\shutdown.exe (DESKTOP-5RCUK3G) has initiated the 重启 of computer DESKTOP-5RCUK3G on behalf of user DESKTOP-5RCUK3G\\ruje for the following reason: 没有找到这个原因的标题\r\n Reason Code: 0x800000ff\r\n Shutdown Type: 重启\r\n Comment: SwitchWOA PAL4 daily scoped-fix qualification"
+    }
+  ],
+  "Directory": {
+    "Name": "vk-triangle.exe",
+    "Arguments": "\"C:\\ProgramData\\SwitchWOA\\GpuUpdate\\pal4-pde-kind-1d88065b2e4a\\app\\libvulkan_nouveau.dll\" 00000000000a8add --directory-kind",
+    "StartUtc": "2026-11-27T22:13:49.4738826Z",
+    "EndUtc": "2026-11-27T22:13:50.0614332Z",
+    "ExitCode": 0,
+    "Stdout": "{\"vulkan_draw\":true,\"luid\":\"00000000000a8add\",\"pixels\":1024,\"red\":300,\"blue\":724,\"guard_bytes\":128,\"directory_kind\":true,\"image_allocation_bytes\":69206016}\r\n",
+    "Stderr": "WARNING: NVK is not a conformant Vulkan implementation, testing use only.\r\n"
+  },
+  "WorkingControl": {
+    "Name": "vk-triangle.exe",
+    "Arguments": "\"C:\\ProgramData\\SwitchWOA\\GpuUpdate\\pal4-pde-kind-1d88065b2e4a\\app\\libvulkan_nouveau.dll\" 00000000000a8add",
+    "StartUtc": "2026-11-27T22:13:50.0770463Z",
+    "EndUtc": "2026-11-27T22:13:50.2497908Z",
+    "ExitCode": 0,
+    "Stdout": "{\"vulkan_draw\":true,\"luid\":\"00000000000a8add\",\"pixels\":1024,\"red\":300,\"blue\":724,\"guard_bytes\":128,\"directory_kind\":false,\"image_allocation_bytes\":4096}\r\n",
+    "Stderr": "WARNING: NVK is not a conformant Vulkan implementation, testing use only.\r\n"
+  },
+  "Loaded": {
+    "tegragpurender.sys": "1d88065b2e4a8ed777c40da0802331ed542763ca1520ee5630c2a150185813d5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+    "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+  }
+}

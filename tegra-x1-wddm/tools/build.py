@@ -464,6 +464,7 @@ if build_miniport:
     test_objects = []
     if args.native_test_version is not None:
         miniport_flags.append(f"/DTG_GPU_NATIVE_TEST_VERSION={args.native_test_version}")
+        miniport_flags.append("/DTG_GPU_PAGING_DIAGNOSTICS=1")
         gate = args.out / "native_start_test.obj"
         subprocess.run([args.clang_cl,*flags,*miniport_flags,f"/Fo{gate}","--",
                         str(root / "windows/native_start_test.c")],check=True)
