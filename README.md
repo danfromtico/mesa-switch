@@ -2,6 +2,14 @@
 
 This repository contains the GM20B WDDM kernel driver, the `tgd3d` Direct3D user-mode driver and the Mesa NVK Vulkan driver for Windows 11 ARM64 on Nintendo Switch. On the tested Switch Lite configuration, DWM uses `tgd3d` from the `tgd3d-vulkan` branch to render through NVK on the Tegra X1 GPU. This configuration uses WinX firmware and ACPI tables. The companion Windows driver project supplies its board drivers and NVDEC clocks. [WinX firmware](https://github.com/ruje0504-2/winx) · [Windows board drivers](https://github.com/ruje0504-2/Windows-for-Switch-Drivers)
 
+## Game progress
+
+**PAL4 (Chinese Paladin 4 / 仙剑奇侠传四)** now starts and reaches a game scene
+on the tested Switch Lite. **Warcraft III** reaches a map through Mesa NVK on
+GM20B. **Frame rates still need optimization**: CPU/D3D translation overhead
+and NVK/KMD driver performance remain to be distinguished. PAL4 game audio
+also remains unresolved. [Game results and remaining work](tegra-x1-wddm/docs/game-runs-20261127/README.md).
+
 ## Hardware status
 
 ### Switch OLED (HEG-001 / Aula)
