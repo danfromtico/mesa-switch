@@ -2098,6 +2098,23 @@
         "build_file": "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/build.json",
         "build_sha256": "01f71ff43951d6cdeba421326131cefad014dbdf996fdabcd4d3bfdc62afb2c9"
       }
+    },
+    {
+      "id": "GM20B-PAL4-PDE-KIND-20261127",
+      "status": "open",
+      "kind": "restart",
+      "affected_scopes": [
+        "wddm",
+        "load-stability"
+      ],
+      "trigger": "Launching the original x86 PAL4 client on Switch Lite causes a page-table update rejection and VIDEO_MEMORY_MANAGEMENT_INTERNAL.",
+      "evidence": [
+        "tegra-x1-wddm/docs/LITE_PAL4_PDE_KIND_20261127.json#diagnostic"
+      ],
+      "cause": "The one-use 0xE0535751 capture proves UPDATE_PAGE_TABLE, STATUS_NOT_SUPPORTED, site 5, PageTableLevel 1, GPU_PHYSICAL mode 2, NULL hAllocation, DriverProtection 0xfe. The KMD rejected a known leaf kind solely because the request updated a page directory.",
+      "daily_workaround": "No accepted PAL4 workaround. Keep the fix under a one-use diagnostic permit until original-game acceptance. The selected daily baseline remains 1d7fcf5d75ed.",
+      "close_when": "Verify three original PAL4 launches with the fixed KMD and actual loaded component hashes, hardware drawing, physical display and normal exit, with no unexplained restart.",
+      "resolution": null
     }
   ],
   "independent_qualifications": [
