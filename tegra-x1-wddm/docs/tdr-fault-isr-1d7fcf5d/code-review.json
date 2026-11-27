@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "scope": "gm20b-stall-fault-isr-barriers-and-rail-ownership",
+  "source_commit": "4c0cb225526ef65a456a41c3f257db54d8abf14e",
+  "independent_review_passed": true,
+  "p0_findings": 0,
+  "p1_findings": 0,
+  "verified_invariants": [
+    "Zero bl/blr and zero dsb sy inside dirql_acquire_commit_sync under DxgkCbSynchronizeExecution",
+    "Cold-reset ~0u NV_PMC_INTR_MSK_0 (0x640) and LIC_IER accepted while bus liveness validated via 0x140/0x2140/0x4010c/LIC_FIR",
+    "Strict lock order state->Lock -> HandleLock across bridge publication, PnP detach, Close, and deferred compensation",
+    "Zero double-queue of CompensateWorkItem and atomic ClosedGpuIsolated + ledger publication"
+  ]
+}

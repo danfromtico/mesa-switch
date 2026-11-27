@@ -2098,6 +2098,53 @@
         "build_file": "tegra-x1-wddm/docs/tdr-recovery-e9981cfb/build.json",
         "build_sha256": "01f71ff43951d6cdeba421326131cefad014dbdf996fdabcd4d3bfdc62afb2c9"
       }
+    },
+    {
+      "id": "GM20B-STALL-FAULT-ISR-AND-RAIL-OWNERSHIP",
+      "status": "open",
+      "kind": "tdr-recovery",
+      "affected_scopes": [
+        "tdr-recovery",
+        "wddm",
+        "power"
+      ],
+      "trigger": "GM20B MMU/FIFO stall fault interrupt (SPI 157) or concurrent SwitchFan PnP/close/reclaim rail handoff.",
+      "evidence": [
+        "tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/causal-evidence.json",
+        "tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/step4-fault-isr-result.json",
+        "tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/tdr-fault-isr-etw-summary.json",
+        "tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/permanent-boot-103136.json"
+      ],
+      "cause": "GM20B lacked an armed stall-fault interrupt handler (SPI 157) with DIRQL MMIO commit gating and cold-reset 0xFFFFFFFF NV_PMC_INTR_MSK_0 / LIC_IER acceptance, leaving MMU/FIFO faults to rely solely on polling or 2s timeout; concurrently, platform_io.c needed single-owner state->Lock -> HandleLock atomic bridge publication, ordinary/deadline pending-CLAIM tracking, and atomic isolation-revocation ledger updates with SwitchFan versioned claim/handoff tokens.",
+      "daily_workaround": "Use permanent AllowNativeBoot baseline tdr-fault-isr-1d7fcf5d75ed (tegragpurender 0.1.0.158 1d7fcf5d75ed..., SwitchFan 1.0.0.35 1bdb70e94ae9..., Tegra210I2c 1.0.0.9 b632905162c6...).",
+      "close_when": "Complete three consecutive heavy DXVK/Warcraft III workload runs under the permanent Fault-ISR baseline without bus lockup or unrecovered TDR.",
+      "resolution": null,
+      "verified_fix": {
+        "scope": "gm20b-stall-fault-isr-barriers-and-rail-ownership",
+        "root_cause": "GM20B lacked an armed stall-fault interrupt handler (SPI 157) with DIRQL MMIO commit gating and cold-reset 0xFFFFFFFF NV_PMC_INTR_MSK_0 / LIC_IER acceptance, leaving MMU/FIFO faults to rely solely on polling or 2s timeout; concurrently, platform_io.c needed single-owner state->Lock -> HandleLock atomic bridge publication, ordinary/deadline pending-CLAIM tracking, and atomic isolation-revocation ledger updates with SwitchFan versioned claim/handoff tokens.",
+        "root_cause_confirmed": true,
+        "commit": "4c0cb225526ef65a456a41c3f257db54d8abf14e",
+        "independent_review_passed": true,
+        "build_signed": true,
+        "output_required": false,
+        "component": "tegragpurender.sys",
+        "components": {
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+          "tegragpurender.sys": "1d7fcf5d75ed70858e0d7ebdf293cb449586f25619d6f2ff7ee55c647b8c4c6a",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+          "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+        },
+        "causal_evidence_file": "tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/causal-evidence.json",
+        "causal_evidence_sha256": "f95bef7030e95756454b30a962546b854ce294da14e32654402c28670c497227",
+        "code_review_file": "tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/code-review.json",
+        "code_review_sha256": "afe2a9d2ccba65a0e609914f98fde393215f04c7c7726eaeea6289f46602f056",
+        "build_file": "tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/build.json",
+        "build_sha256": "571a07bf16f6a1d3ee1cb02a48af82e30ec42e594698f413648f59667f48180d"
+      }
     }
   ],
   "independent_qualifications": [
