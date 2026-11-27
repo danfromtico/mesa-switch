@@ -2,25 +2,6 @@
 
 This repository contains the GM20B WDDM kernel driver, the `tgd3d` Direct3D user-mode driver and the Mesa NVK Vulkan driver for Windows 11 ARM64 on Nintendo Switch. On the tested Switch Lite configuration, DWM uses `tgd3d` from the `tgd3d-vulkan` branch to render through NVK on the Tegra X1 GPU. This configuration uses WinX firmware and ACPI tables. The companion Windows driver project supplies its board drivers and NVDEC clocks. [WinX firmware](https://github.com/ruje0504-2/winx) · [Windows board drivers](https://github.com/ruje0504-2/Windows-for-Switch-Drivers)
 
-## Games now reach gameplay
-
-On the tested Switch Lite, **PAL4 (Chinese Paladin 4 / 仙剑奇侠传四)** now starts,
-plays its opening movie and reaches a game scene after the paging compatibility
-fix. **Warcraft III** reaches a map and renders through **Mesa NVK on GM20B**.
-The owner's photograph below shows approximately **12 FPS**.
-
-**Frame rates still need optimization.** CPU translation, DXVK, synchronization,
-NVK/KMD submission and presentation remain under investigation. PAL4 also has
-no audible game sound although desktop audio works. Its explicit 10 FPS DXVK
-cap has been removed, with retesting pending. These observations are specific
-to the tested Lite and do not establish smooth gameplay or OLED game support.
-
-<img src="tegra-x1-wddm/docs/game-runs-20261127/warcraft3-switch-lite.jpg" alt="Warcraft III map on Switch Lite, with the NVK GM20B HUD showing approximately 12 FPS" width="640">
-
-[Game results, screenshot provenance and remaining performance work](tegra-x1-wddm/docs/game-runs-20261127/README.md).
-The PAL4 diagnostic candidate's baseline promotion is still pending; the
-hardware results and component identities below retain their stated scope.
-
 ## Hardware status
 
 ### Switch OLED (HEG-001 / Aula)
