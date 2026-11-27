@@ -20,9 +20,20 @@ NTSTATUS TgGpuStartPlatformAdapter(TG_GPU_ADAPTER *a)
     }
     TgGpuFirmwareFree(&firmware);
     if(NT_SUCCESS(status))TgGpuDvfsAttach(&a->Hardware,&a->Platform,NULL);
+    if(NT_SUCCESS(status) && a->Resources.Mapping[TgGpuRegisters] && a->Resources.LicMapping &&
+       a->Resources.Memory[TgGpuRegisters].u.Memory.Length>=T214_GPU_REG_SIZE &&
+       a->Resources.Lic.u.Memory.Length>=T214_GPU_LIC_SIZE) {
+        status=TgGpuArmFaultIsr(&a->Engine.FaultIsr,&a->Engine.Dxgk,
+            a->Resources.Mapping[TgGpuRegisters],a->Resources.LicMapping);
+    }
     if(NT_SUCCESS(status))status=TgGpuStartWorker(&a->Worker,&a->Queue,&a->Hardware);
     if(NT_SUCCESS(status))return STATUS_SUCCESS;
-    if(!a->Hardware.Power.owned)TgGpuPlatformAbandonRail(&a->Platform,address);
+    cleanup=TgGpuDisarmFaultIsr(&a->Engine.FaultIsr,&a->Engine.Dxgk,
+        a->Hardware.Power.owned && a->Hardware.Power.ready);
+    if(!NT_SUCCESS(cleanup))return cleanup;
+    NTSTATUS abandon=STATUS_SUCCESS;
+    if(!a->Hardware.Power.owned)abandon=TgGpuPlatformAbandonRail(&a->Platform,address);
     cleanup=TgGpuDdiStopDevice(a);
-    return NT_SUCCESS(cleanup)?status:cleanup;
+    if(!NT_SUCCESS(cleanup))return cleanup;
+    return NT_SUCCESS(status)?abandon:status;
 }

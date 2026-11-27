@@ -27,6 +27,8 @@ static struct display_model model;
 static TG_GPU_ADAPTER adapter;
 static KIRQL level;
 static BOOLEAN auto_latch=TRUE;
+static BOOLEAN corrupt_active_size_on_latch=FALSE;
+static BOOLEAN drop_target_active_on_latch=FALSE;
 static UINT stalls, notifications, sync_calls;
 static ULONGLONG reported_present;
 static BOOLEAN debug_privilege = TRUE;
@@ -43,9 +45,15 @@ static void advance(ULONGLONG ticks)
     /* The test variants use the WDK's relocatable shared-time support. */
     *(volatile ULONGLONG *)&ki_user_shared_data.InterruptTime+=ticks;
     if(auto_latch)latch(&model,true);
+    if(corrupt_active_size_on_latch) {
+        model.assembly[T214_DC_ACTIVE_SIZE]=0u;
+        model.active[T214_DC_ACTIVE_SIZE]=0u;
+    }
+    if(drop_target_active_on_latch)
+        adapter.Panel.TargetActive=FALSE;
 }
 static VOID NTAPI stall(ULONG us)
-{ CHECK(level==PASSIVE_LEVEL && us==1);++stalls;advance(1000); }
+{ CHECK((level==PASSIVE_LEVEL || level==15) && us==1);++stalls;advance(1000); }
 static NTSTATUS NTAPI delay(KPROCESSOR_MODE mode,BOOLEAN alert,PLARGE_INTEGER interval)
 { CHECK(level==PASSIVE_LEVEL && mode==KernelMode && !alert && interval->QuadPart==-10000);advance(10000);return STATUS_SUCCESS; }
 VOID (NTAPI *const __imp_KeStallExecutionProcessor)(ULONG)=stall;
@@ -381,6 +389,176 @@ void start(void)
     CHECK(d.DxgkDdiSetVidPnSourceAddress(&adapter,&modeset)==STATUS_SUCCESS);
     CHECK(!adapter.Panel.Pending.Address);
     active_is(0x98000000,TRUE);
+
+    /* B03: Display A VBlank returns TRUE immediately without probing GPU PRI. */
+    {
+        static ULONG fake_gpu[0x200 / sizeof(ULONG)] = {0};
+        static ULONG fake_lic[8] = {0};
+        adapter.Engine.FaultIsr.GpuRegs = fake_gpu;
+        adapter.Engine.FaultIsr.LicRegs = fake_lic;
+        InterlockedExchange(&adapter.Engine.FaultIsr.Armed, 1);
+        InterlockedExchange(&adapter.Engine.FaultIsr.IsrProbeEnterCount, 0);
+        signal_vblank(&d);
+        CHECK(adapter.Engine.FaultIsr.IsrProbeEnterCount == 0);
+        InterlockedExchange(&adapter.Engine.FaultIsr.Armed, 0);
+        adapter.Engine.FaultIsr.GpuRegs = NULL;
+        adapter.Engine.FaultIsr.LicRegs = NULL;
+    }
+
+    /* DxgkDdiSystemDisplayEnable / Write: HIGH_LEVEL takeover onto POST FB,
+     * strict ACT_REQ/active-bank verification (M3/N2), and 4-angle rotation. */
+    {
+        static ULONG fake_post_fb[T214_DC_PANEL_WIDTH * T214_DC_PANEL_HEIGHT];
+        static ULONG src_patch[4 * 4];
+        DXGKARG_SYSTEM_DISPLAY_ENABLE_FLAGS sflags = {0};
+        UINT sw = 0, sh = 0; D3DDDIFORMAT sfmt = 0;
+        CHECK(d.DxgkDdiSystemDisplayEnable && d.DxgkDdiSystemDisplayWrite);
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_NOT_READY);
+        adapter.Panel.PostCpuAddress = fake_post_fb;
+        fake_post_fb[0] = 0x11223344u;
+        level = 15; /* HIGH_LEVEL */
+
+        /* M3 counterexample: when ACT_REQ stays pending and active address stays
+         * on 0x98000000, SystemDisplayEnable MUST return STATUS_IO_TIMEOUT! */
+        auto_latch = FALSE;
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_IO_TIMEOUT);
+        CHECK(model.active[T214_DC_WIN_A_ADDR] == 0x98000000u);
+        auto_latch = TRUE;
+        latch(&model, true);
+
+        /* N2 / T3 counterexamples: when DSI output is disabled, scanout mode is
+         * non-continuous, or TargetActive is FALSE, SystemDisplayEnable MUST
+         * return STATUS_DEVICE_NOT_READY (even though Window A can latch)! */
+        const ULONG saved_out = model.assembly[T214_DC_OUTPUT_OPTIONS];
+        model.assembly[T214_DC_OUTPUT_OPTIONS] = saved_out & ~T214_DC_DSI_ENABLE;
+        model.active[T214_DC_OUTPUT_OPTIONS] = model.assembly[T214_DC_OUTPUT_OPTIONS];
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_NOT_READY);
+        model.assembly[T214_DC_OUTPUT_OPTIONS] = saved_out;
+        model.active[T214_DC_OUTPUT_OPTIONS] = saved_out;
+
+        const ULONG saved_cmd = model.assembly[T214_DC_COMMAND];
+        model.assembly[T214_DC_COMMAND] = saved_cmd & ~T214_DC_MODE_MASK;
+        model.active[T214_DC_COMMAND] = model.assembly[T214_DC_COMMAND];
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_NOT_READY);
+        model.assembly[T214_DC_COMMAND] = saved_cmd;
+        model.active[T214_DC_COMMAND] = saved_cmd;
+
+        adapter.Panel.TargetActive = FALSE;
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_NOT_READY);
+        adapter.Panel.TargetActive = TRUE;
+
+        /* N2 v5 counterexample 1: geometry (ACTIVE_SIZE=0) or TargetActive
+         * invalidated DURING latch must fail post-latch verification! */
+        corrupt_active_size_on_latch = TRUE;
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_NOT_READY);
+        corrupt_active_size_on_latch = FALSE;
+        model.assembly[T214_DC_ACTIVE_SIZE] = T214_DC_PANEL_ACTIVE;
+        model.active[T214_DC_ACTIVE_SIZE] = T214_DC_PANEL_ACTIVE;
+
+        drop_target_active_on_latch = TRUE;
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_NOT_READY);
+        drop_target_active_on_latch = FALSE;
+        adapter.Panel.TargetActive = TRUE;
+
+        /* N2 v5/v6 counterexamples: active/submitted GPU work without mapped
+         * CarX/Clamp/McFlush or with undrained MC status MUST be rejected
+         * BEFORE touching clamp/reset or setting Isolated; with stable MC drain
+         * (initial + 5 reads) + clamp + reset, SystemDisplayEnable isolates GPU
+         * work at HIGH_LEVEL with zero GPU BAR0 PRI reads! */
+        {
+            static ULONG fake_clamp[1] = {0};
+            static ULONG fake_car[6] = {0};
+            static ULONG fake_mc_flush[2] = {0, 1u << 2};
+            adapter.Hardware.Power.owned = true;
+            adapter.Hardware.Power.ready = true;
+            adapter.Hardware.Isolated = FALSE;
+            adapter.Platform.PreservedGpuIsolated = FALSE;
+            adapter.Engine.Channel.referenced = true;
+            adapter.Engine.Channel.submitted = true;
+            InterlockedExchange(&adapter.Engine.FaultIsr.IsrProbeEnterCount, 0);
+            /* Missing CarX/Clamp -> cannot prove GPU isolation -> reject! */
+            CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_NOT_READY);
+            /* N2 v6: Clamp + CarX mapped, but McFlush missing -> MUST reject! */
+            adapter.Resources.Mapping[TgGpuClamp] = fake_clamp;
+            adapter.Resources.Memory[TgGpuClamp].u.Memory.Length = sizeof(fake_clamp);
+            adapter.Resources.Mapping[TgGpuCarX] = fake_car;
+            adapter.Resources.Memory[TgGpuCarX].u.Memory.Length = sizeof(fake_car);
+            adapter.Resources.Mapping[TgGpuMcFlush] = NULL;
+            fake_clamp[0] = 0u;
+            fake_car[3] = 1u << 24;
+            CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_NOT_READY);
+            CHECK(!adapter.Hardware.Isolated && fake_clamp[0] == 0u);
+            /* Map SoC MC_FLUSH, test persistently undrained MC_FLUSH_STATUS == 0 -> TIMEOUT before clamp! */
+            adapter.Resources.Mapping[TgGpuMcFlush] = fake_mc_flush;
+            adapter.Resources.Memory[TgGpuMcFlush].u.Memory.Length = sizeof(fake_mc_flush);
+            fake_mc_flush[0] = 0u;
+            fake_mc_flush[1] = 0u;
+            CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_IO_TIMEOUT);
+            CHECK(!adapter.Hardware.Isolated && fake_clamp[0] == 0u && (fake_mc_flush[0] & (1u << 2)) != 0u);
+            /* Now provide stable MC_FLUSH_STATUS bit 2, but let CAR_RESET_X stay 0 -> DATA_ERROR! */
+            fake_mc_flush[1] = 1u << 2;
+            fake_clamp[0] = 0u;
+            fake_car[3] = 0u;
+            CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_DEVICE_DATA_ERROR);
+            CHECK(!adapter.Hardware.Isolated && (fake_clamp[0] & 1u) == 1u && (fake_car[4] & (1u << 24)) != 0u);
+            /* Now reflect asserted CAR_RESET_X bit 24 -> isolation proven -> succeeds! */
+            fake_car[3] = 1u << 24;
+            CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_SUCCESS);
+            CHECK(adapter.Hardware.Isolated && adapter.Platform.PreservedGpuIsolated &&
+                  !adapter.Hardware.Power.ready &&
+                  adapter.Engine.FaultIsr.IsrProbeEnterCount == 0 &&
+                  (fake_mc_flush[0] & (1u << 2)) != 0u && (fake_car[2] & (1u << 24)) != 0u);
+            /* Already-isolated GPU re-entry also succeeds with 0 BAR0 PRI reads: */
+            CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_SUCCESS);
+            memset(&adapter.Hardware, 0, sizeof(adapter.Hardware));
+            memset(&adapter.Engine.Channel, 0, sizeof(adapter.Engine.Channel));
+            adapter.Platform.PreservedGpuIsolated = FALSE;
+            adapter.Engine.Stopping = FALSE;
+            InterlockedExchange(&adapter.Engine.FaultIsr.GpuUnreachable, 0);
+            adapter.Resources.Mapping[TgGpuClamp] = NULL;
+            adapter.Resources.Mapping[TgGpuCarX] = NULL;
+            adapter.Resources.Mapping[TgGpuMcFlush] = NULL;
+        }
+
+        /* Landscape 90-degree handheld mapping: 1280x720, (lx=2, ly=1) -> (px=718, py=2). */
+        adapter.Panel.PathRotation = D3DKMDT_VPPR_ROTATE90;
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_SUCCESS);
+        CHECK(sw == T214_DC_PANEL_HEIGHT && sh == T214_DC_PANEL_WIDTH && sfmt == D3DDDIFMT_A8R8G8B8);
+        CHECK(fake_post_fb[0] == 0u);
+        active_is(T214_GPU_POST_FB_BASE, TRUE);
+        memset(src_patch, 0, sizeof(src_patch));
+        src_patch[1 * 4 + 2] = 0xAABBCCDDu;
+        d.DxgkDdiSystemDisplayWrite(&adapter, src_patch, 4, 4, 4 * sizeof(ULONG), 0, 0);
+        CHECK(fake_post_fb[(SIZE_T)2 * T214_DC_PANEL_WIDTH + (T214_DC_PANEL_WIDTH - 1u - 1u)] == 0xAABBCCDDu);
+
+        /* 270-degree mapping: 1280x720, (lx=2, ly=1) -> (px=1, py=1277). */
+        adapter.Panel.PathRotation = D3DKMDT_VPPR_ROTATE270;
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_SUCCESS);
+        CHECK(sw == T214_DC_PANEL_HEIGHT && sh == T214_DC_PANEL_WIDTH);
+        src_patch[1 * 4 + 2] = 0x55667788u;
+        d.DxgkDdiSystemDisplayWrite(&adapter, src_patch, 4, 4, 4 * sizeof(ULONG), 0, 0);
+        CHECK(fake_post_fb[(SIZE_T)(T214_DC_PANEL_HEIGHT - 1u - 2u) * T214_DC_PANEL_WIDTH + 1u] == 0x55667788u);
+
+        /* Portrait IDENTITY mapping: 720x1280, (lx=2, ly=1) -> (px=2, py=1). */
+        adapter.Panel.PathRotation = D3DKMDT_VPPR_IDENTITY;
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_SUCCESS);
+        CHECK(sw == T214_DC_PANEL_WIDTH && sh == T214_DC_PANEL_HEIGHT);
+        src_patch[1 * 4 + 2] = 0x13572468u;
+        d.DxgkDdiSystemDisplayWrite(&adapter, src_patch, 4, 4, 4 * sizeof(ULONG), 0, 0);
+        CHECK(fake_post_fb[(SIZE_T)1 * T214_DC_PANEL_WIDTH + 2u] == 0x13572468u);
+
+        /* Portrait ROTATE180 mapping: 720x1280, (lx=2, ly=1) -> (px=717, py=1278). */
+        adapter.Panel.PathRotation = D3DKMDT_VPPR_ROTATE180;
+        CHECK(d.DxgkDdiSystemDisplayEnable(&adapter, 7, &sflags, &sw, &sh, &sfmt) == STATUS_SUCCESS);
+        CHECK(sw == T214_DC_PANEL_WIDTH && sh == T214_DC_PANEL_HEIGHT);
+        src_patch[1 * 4 + 2] = 0x99887766u;
+        d.DxgkDdiSystemDisplayWrite(&adapter, src_patch, 4, 4, 4 * sizeof(ULONG), 0, 0);
+        CHECK(fake_post_fb[(SIZE_T)(T214_DC_PANEL_HEIGHT - 1u - 1u) * T214_DC_PANEL_WIDTH +
+                           (T214_DC_PANEL_WIDTH - 1u - 2u)] == 0x99887766u);
+
+        adapter.Panel.PostCpuAddress = NULL;
+        level = PASSIVE_LEVEL;
+    }
 
     const struct tg_t214_dc_scanout post={T214_GPU_POST_FB_BASE,true};
     CHECK(tg_t214_dc_queue_surface(&adapter.Panel.Dc,&post,false)==TG_T214_DC_OK);

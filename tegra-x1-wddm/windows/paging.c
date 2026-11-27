@@ -88,10 +88,10 @@ NTSTATUS TgGpuUpdatePageTable(const DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE *Upda
     if (!Target->CpuMappingUncached) return STATUS_NOT_SUPPORTED;
     status = TgGpuEncodePageTable(Update, Target);
     if (!NT_SUCCESS(status)) return status;
-    KeMemoryBarrier();
+    TgGpuDataSyncBarrier();
     for (i = 0; i < Update->NumPageTableEntries; ++i)
         Target->Entries[Update->StartIndex + i] = Target->Scratch[i];
-    KeMemoryBarrier();
+    TgGpuDataSyncBarrier();
     return STATUS_SUCCESS;
 }
 

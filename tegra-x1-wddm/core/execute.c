@@ -10,6 +10,7 @@
 #include "gpfifo.h"
 #include "fault.h"
 #include "runlist.h"
+#include "../platform/t214_mmu.h"
 #include "nouveau/headers/drf.h"
 #include "nouveau/headers/nvidia/classes/clb06f.h"
 
@@ -210,7 +211,9 @@ static bool ex_wait(const struct tg_gpu_power_io *io, uint32_t reg,
 {
     uint32_t i;
     for (i = 0; i < 1000; ++i) {
-        if ((ex_read(io, reg) & mask) == value) return true;
+        uint32_t v = ex_read(io, reg);
+        if (v == UINT32_MAX) return false;
+        if ((v & mask) == value) return true;
         io->delay_us(io->context, 5);
     }
     return false;
@@ -298,7 +301,7 @@ static enum tg_gpu_execute_result boot(const struct tg_gpu_power_io *io,
     struct tg_gpu_status *s)
 {
     volatile uint32_t *fence, *userd;
-    uint32_t i, intr_stall;
+    uint32_t intr_stall;
     if (!io || !io->read32 || !io->write32 || !io->delay_us || !power ||
         !power->owned || !power->ready || !cpu || !state || !s || state->owned ||
         (notify && (!notify->arm || !notify->wait)) ||
@@ -418,12 +421,8 @@ static enum tg_gpu_execute_result boot(const struct tg_gpu_power_io *io,
         if (debug_ctrl == UINT32_MAX) return TG_GPU_EXEC_MMU_TIMEOUT;
         ex_write(io, 0x100cc4, debug_ctrl & ~0x10000u);
     }
-    for (i = 0; i < 1000 && !(ex_read(io, 0x100c80) & 0x00ff0000); ++i)
-        io->delay_us(io->context, 2);
-    if (i == 1000) return TG_GPU_EXEC_MMU_TIMEOUT;
-    ex_write(io, 0x100cb8, (uint32_t)(physical >> 8));
-    ex_write(io, 0x100cbc, 0x80000001);
-    if (!ex_wait(io, 0x100c80, 0x8000, 0x8000)) return TG_GPU_EXEC_MMU_TIMEOUT;
+    if (tg_gpu_tlb_invalidate(io, power, physical) != TG_GPU_TLB_OK)
+        return TG_GPU_EXEC_MMU_TIMEOUT;
     ex_write(io, 0x1704, (uint32_t)((physical + INST) >> 12) | 0x80000000);
     if (!ex_wait(io, 0x1710, 3, 0)) return TG_GPU_EXEC_BAR1;
     if (tg_gpu_frontend_flush(io, power, &s->frontend) != TG_GPU_FE_OK)

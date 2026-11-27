@@ -33,6 +33,9 @@ struct tg_gpu_channel_snapshot {
 void tg_gpu_channel_snapshot(const struct tg_gpu_power_io *,
     const struct tg_gpu_power *,const void *owner,const struct tg_gpu_channel *,
     struct tg_gpu_channel_snapshot *);
+void tg_gpu_channel_snapshot_checked(const struct tg_gpu_power_io *,
+    const struct tg_gpu_power *,const void *owner,const struct tg_gpu_channel *,
+    struct tg_gpu_channel_snapshot *,const struct tg_gpu_commit_guard *);
 /* Hot channel path after exclusive cold GPU/FIFO/LTC/MMU initialization and
  * clock setup. One bare channel/runlist/PBDMA (zero). Command and RAMIN bytes
  * must already be published; caller owns CPU/MMIO ordering and residency.
@@ -40,9 +43,13 @@ void tg_gpu_channel_snapshot(const struct tg_gpu_power_io *,
  * notify through the owned USERD BAR1 alias after the runlist is runnable.
  * The caller maps that alias and programs FIFO_BAR1_BASE before binding.
  */
+typedef tg_gpu_abort_fn tg_gpu_channel_abort_fn;
 enum tg_gpu_channel_result tg_gpu_channel_bind(const struct tg_gpu_power_io *,
     const struct tg_gpu_power *, uint64_t root, uint64_t instance, uint64_t runlist,
     const void *owner, struct tg_gpu_channel *);
+enum tg_gpu_channel_result tg_gpu_channel_bind_checked(const struct tg_gpu_power_io *,
+    const struct tg_gpu_power *, uint64_t root, uint64_t instance, uint64_t runlist,
+    const void *owner, struct tg_gpu_channel *, const struct tg_gpu_commit_guard *);
 /* One non-wrapping batch in the fixed 512-entry ring. Only increasing indices
  * 1..511 are accepted. The USERD page must match the active BAR1 snoop base.
  * A posted-write/readback failure may already have started DMA; retain owner
@@ -51,6 +58,9 @@ enum tg_gpu_channel_result tg_gpu_channel_bind(const struct tg_gpu_power_io *,
 enum tg_gpu_channel_result tg_gpu_channel_publish(const struct tg_gpu_power_io *,
     const struct tg_gpu_power *, uint32_t userd_bar1_offset, uint32_t gp_put,
     const void *owner, struct tg_gpu_channel *);
+enum tg_gpu_channel_result tg_gpu_channel_publish_checked(const struct tg_gpu_power_io *,
+    const struct tg_gpu_power *, uint32_t userd_bar1_offset, uint32_t gp_put,
+    const void *owner, struct tg_gpu_channel *, const struct tg_gpu_commit_guard *);
 /* WDDM's two-entry batch: USER workload plus KERNEL completion packet. */
 enum tg_gpu_channel_result tg_gpu_channel_submit(const struct tg_gpu_power_io *,
     const struct tg_gpu_power *, uint64_t root, uint64_t instance, uint64_t runlist,
@@ -62,6 +72,10 @@ enum tg_gpu_channel_result tg_gpu_channel_submit_entries(const struct tg_gpu_pow
     const struct tg_gpu_power *, uint64_t root, uint64_t instance, uint64_t runlist,
     uint32_t userd_bar1_offset, uint32_t gp_put, const void *owner,
     struct tg_gpu_channel *);
+enum tg_gpu_channel_result tg_gpu_channel_submit_entries_checked(const struct tg_gpu_power_io *,
+    const struct tg_gpu_power *, uint64_t root, uint64_t instance, uint64_t runlist,
+    uint32_t userd_bar1_offset, uint32_t gp_put, const void *owner,
+    struct tg_gpu_channel *, const struct tg_gpu_commit_guard *);
 /* Success means preempt/GR unload/runlist/unbind/FB flush/TLB invalidation
  * finished. GR unload is checked only when MC reports the GR engine enabled.
  * Failure retains referenced/owner: do not recycle any backing until retry
@@ -69,6 +83,9 @@ enum tg_gpu_channel_result tg_gpu_channel_submit_entries(const struct tg_gpu_pow
  */
 enum tg_gpu_channel_result tg_gpu_channel_retire(const struct tg_gpu_power_io *,
     const struct tg_gpu_power *, const void *owner, struct tg_gpu_channel *);
+enum tg_gpu_channel_result tg_gpu_channel_retire_checked(const struct tg_gpu_power_io *,
+    const struct tg_gpu_power *, const void *owner, struct tg_gpu_channel *,
+    const struct tg_gpu_commit_guard *);
 /* Recovery precursor, not a release proof. Follow with MC drain and the
  * platform's full reset/power-down before dropping referenced/owner.
  */

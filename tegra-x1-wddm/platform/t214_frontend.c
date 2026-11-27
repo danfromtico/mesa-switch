@@ -23,6 +23,7 @@
  */
 #include "t214_frontend.h"
 #include "t214_power.h"
+#include "t214_mmu.h"
 #include "t214_gr_gating.h"
 #include <stddef.h>
 
@@ -34,33 +35,57 @@ static void put(const struct tg_gpu_power_io *io, uint32_t reg, uint32_t value)
     io->write32(io->context, GPU + reg, value);
     (void)get(io, reg);
 }
+static bool fe_aborted(const struct tg_gpu_commit_guard *guard)
+{ return guard && guard->abort && guard->abort(guard->context); }
+static bool put_fe_checked(const struct tg_gpu_power_io *io, uint32_t reg,
+    uint32_t value, const struct tg_gpu_commit_guard *guard)
+{
+    if (fe_aborted(guard)) return false;
+    io->write32(io->context, GPU + reg, value);
+    if (fe_aborted(guard)) return false;
+    (void)get(io, reg);
+    return !fe_aborted(guard);
+}
 static bool owned(const struct tg_gpu_power_io *io, const struct tg_gpu_power *p,
                   const struct tg_gpu_frontend_status *s)
 { return io && io->read32 && io->write32 && io->delay_us && p && p->owned && p->ready && s; }
 
-void tg_gpu_frontend_snapshot(const struct tg_gpu_power_io *io,
-                             struct tg_gpu_frontend_status *s)
+void tg_gpu_frontend_snapshot_checked(const struct tg_gpu_power_io *io,
+    struct tg_gpu_frontend_status *s, const struct tg_gpu_commit_guard *guard)
 {
+    if (fe_aborted(guard)) { s->result = TG_GPU_FE_FAULT; return; }
     s->bus_interrupt = get(io, 0x1100);
+    if (fe_aborted(guard)) { s->result = TG_GPU_FE_FAULT; return; }
     s->pri_status0 = get(io, 0x120058);
+    if (fe_aborted(guard)) { s->result = TG_GPU_FE_FAULT; return; }
     s->pri_status1 = get(io, 0x12005c);
     s->pri_error_address = s->pri_error_code = 0;
+    if (fe_aborted(guard)) { s->result = TG_GPU_FE_FAULT; return; }
     /* SYS error info is valid only with the corresponding PRI status bit. */
     if (s->pri_status0 != UINT32_MAX && (s->pri_status0 & 0x100)) {
         s->pri_error_address = get(io, 0x122120);
+        if (fe_aborted(guard)) { s->result = TG_GPU_FE_FAULT; return; }
         s->pri_error_code = get(io, 0x12212c);
+        if (fe_aborted(guard)) { s->result = TG_GPU_FE_FAULT; return; }
     }
     if (s->result == TG_GPU_FE_OK &&
         ((s->bus_interrupt & 0xe) || (s->pri_status0 & 0x107) || s->pri_status1))
         s->result = TG_GPU_FE_PRI_FAULT;
 }
-void tg_gpu_frontend_pri_timeout_snapshot(const struct tg_gpu_power_io *io,
-    uint32_t bus_interrupt, struct tg_gpu_pri_timeout_snapshot *s)
+void tg_gpu_frontend_snapshot(const struct tg_gpu_power_io *io,
+                             struct tg_gpu_frontend_status *s)
+{
+    tg_gpu_frontend_snapshot_checked(io, s, NULL);
+}
+void tg_gpu_frontend_pri_timeout_snapshot_checked(const struct tg_gpu_power_io *io,
+    uint32_t bus_interrupt, struct tg_gpu_pri_timeout_snapshot *s,
+    const struct tg_gpu_commit_guard *guard)
 {
     if (!s) return;
     *s = (struct tg_gpu_pri_timeout_snapshot){0};
     if (!io || !io->read32 || bus_interrupt == UINT32_MAX || !(bus_interrupt & 0xeu))
         return;
+    if (fe_aborted(guard)) return;
     s->bus_interrupt = bus_interrupt;
     /* Read-only observation matching Switchroot gk20a_bus_isr ->
      * gk20a_ptimer_isr (0x9084, 0x9088, conditional 0x908c). Upstream clears
@@ -68,21 +93,38 @@ void tg_gpu_frontend_pri_timeout_snapshot(const struct tg_gpu_power_io *io,
      * during cold startup.
      */
     s->save0 = get(io, 0x9084);
+    if (fe_aborted(guard)) return;
     s->save1 = get(io, 0x9088);
     s->valid = 1;
+    if (fe_aborted(guard)) return;
     if (s->save0 != UINT32_MAX && (s->save0 & 0x80000000u)) {
         s->fecs_errcode = get(io, 0x908c);
         s->fecs_valid = 1;
     }
 }
-static enum tg_gpu_frontend_result finish(const struct tg_gpu_power_io *io,
-    struct tg_gpu_frontend_status *s, enum tg_gpu_frontend_result result)
+void tg_gpu_frontend_pri_timeout_snapshot(const struct tg_gpu_power_io *io,
+    uint32_t bus_interrupt, struct tg_gpu_pri_timeout_snapshot *s)
 {
+    tg_gpu_frontend_pri_timeout_snapshot_checked(io, bus_interrupt, s, NULL);
+}
+static enum tg_gpu_frontend_result finish_checked(const struct tg_gpu_power_io *io,
+    struct tg_gpu_frontend_status *s, enum tg_gpu_frontend_result result,
+    const struct tg_gpu_commit_guard *guard)
+{
+    if (fe_aborted(guard)) {
+        s->result = (result != TG_GPU_FE_OK) ? result : TG_GPU_FE_FAULT;
+        return (enum tg_gpu_frontend_result)s->result;
+    }
     s->result = result;
-    tg_gpu_frontend_snapshot(io, s);
+    tg_gpu_frontend_snapshot_checked(io, s, guard);
     /* Keep the first specific failure; retain PRI evidence alongside it. */
     if (result != TG_GPU_FE_OK) s->result = result;
     return (enum tg_gpu_frontend_result)s->result;
+}
+static enum tg_gpu_frontend_result finish(const struct tg_gpu_power_io *io,
+    struct tg_gpu_frontend_status *s, enum tg_gpu_frontend_result result)
+{
+    return finish_checked(io, s, result, NULL);
 }
 
 enum tg_gpu_frontend_result tg_gpu_frontend_start(const struct tg_gpu_power_io *io,
@@ -157,12 +199,14 @@ enum tg_gpu_frontend_result tg_gpu_frontend_memory(const struct tg_gpu_power_io 
     return finish(io, s, TG_GPU_FE_OK);
 }
 
-enum tg_gpu_frontend_result tg_gpu_frontend_flush(const struct tg_gpu_power_io *io,
-    const struct tg_gpu_power *power, struct tg_gpu_frontend_status *s)
+enum tg_gpu_frontend_result tg_gpu_frontend_flush_checked(const struct tg_gpu_power_io *io,
+    const struct tg_gpu_power *power, struct tg_gpu_frontend_status *s,
+    const struct tg_gpu_commit_guard *guard)
 {
     unsigned pass, retry;
     uint32_t value;
     if (!owned(io, power, s)) return TG_GPU_FE_ARGUMENT;
+    if (fe_aborted(guard)) return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
     s->stage = 5;
     s->fb_flushes = 0;
     /* Upstream MMU setup issues two FB flushes after BAR1 binding. This is an
@@ -170,18 +214,30 @@ enum tg_gpu_frontend_result tg_gpu_frontend_flush(const struct tg_gpu_power_io *
      * The caller must first program an owned NISO flush-scratch address.
      */
     for (pass = 0; pass < 2; ++pass) {
-        put(io, 0x70000, 1);
+        if (!put_fe_checked(io, 0x70000, 1, guard))
+            return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
         for (retry = 0; retry < 100; ++retry) {
+            if (fe_aborted(guard))
+                return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
             value = get(io, 0x70000);
-            if (value == UINT32_MAX) return finish(io, s, TG_GPU_FE_REGISTER);
+            if (fe_aborted(guard))
+                return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
+            if (value == UINT32_MAX) return finish_checked(io, s, TG_GPU_FE_REGISTER, guard);
             if (!(value & 3)) break;
+            if (fe_aborted(guard))
+                return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
             io->delay_us(io->context, 5);
         }
-        if (retry == 100) return finish(io, s, TG_GPU_FE_FLUSH_TIMEOUT);
+        if (retry == 100) return finish_checked(io, s, TG_GPU_FE_FLUSH_TIMEOUT, guard);
         ++s->fb_flushes;
     }
     s->stage = 6;
-    return finish(io, s, TG_GPU_FE_OK);
+    return finish_checked(io, s, TG_GPU_FE_OK, guard);
+}
+enum tg_gpu_frontend_result tg_gpu_frontend_flush(const struct tg_gpu_power_io *io,
+    const struct tg_gpu_power *power, struct tg_gpu_frontend_status *s)
+{
+    return tg_gpu_frontend_flush_checked(io, power, s, NULL);
 }
 
 enum tg_gpu_frontend_result tg_gpu_frontend_gr_prepare(const struct tg_gpu_power_io *io,
@@ -279,8 +335,9 @@ enum tg_gpu_frontend_result tg_gpu_frontend_ce_prepare(const struct tg_gpu_power
     return TG_GPU_FE_OK;
 }
 
-enum tg_gpu_frontend_result tg_gpu_frontend_sync_memory(const struct tg_gpu_power_io *io,
-    const struct tg_gpu_power *power, struct tg_gpu_frontend_status *s)
+enum tg_gpu_frontend_result tg_gpu_frontend_sync_memory_checked(const struct tg_gpu_power_io *io,
+    const struct tg_gpu_power *power, struct tg_gpu_frontend_status *s,
+    const struct tg_gpu_commit_guard *guard)
 {
     static const uint32_t registers[] = {0x70010, 0x70004};
     static const unsigned limits[] = {2000, 200};
@@ -288,30 +345,43 @@ enum tg_gpu_frontend_result tg_gpu_frontend_sync_memory(const struct tg_gpu_powe
     uint32_t value;
     bool gr_ready;
     if (!owned(io, power, s)) return TG_GPU_FE_ARGUMENT;
+    if (fe_aborted(guard)) return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
     gr_ready=s->stage==11 && s->result==TG_GPU_FE_OK;
-    if (tg_gpu_frontend_flush(io, power, s) != TG_GPU_FE_OK)
+    if (tg_gpu_frontend_flush_checked(io, power, s, guard) != TG_GPU_FE_OK)
         return (enum tg_gpu_frontend_result)s->result;
     /* Switchroot gk20a_mm_l2_flush(true): dirty writeback precedes clean-line
      * invalidation. FB flush alone expressly does not guarantee DRAM visibility.
      */
     for (pass = 0; pass < 2; ++pass) {
         s->stage = 7 + pass;
-        put(io, registers[pass], 1);
+        if (!put_fe_checked(io, registers[pass], 1, guard))
+            return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
         for (retry = 0; retry < limits[pass]; ++retry) {
+            if (fe_aborted(guard))
+                return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
             value = get(io, registers[pass]);
-            if (value == UINT32_MAX) return finish(io, s, TG_GPU_FE_REGISTER);
+            if (fe_aborted(guard))
+                return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
+            if (value == UINT32_MAX) return finish_checked(io, s, TG_GPU_FE_REGISTER, guard);
             if (!(value & 3)) break;
+            if (fe_aborted(guard))
+                return (enum tg_gpu_frontend_result)(s->result = TG_GPU_FE_FAULT);
             io->delay_us(io->context, 5);
         }
-        if (retry == limits[pass]) return finish(io, s, TG_GPU_FE_L2_TIMEOUT);
+        if (retry == limits[pass]) return finish_checked(io, s, TG_GPU_FE_L2_TIMEOUT, guard);
         if (pass) ++s->l2_invalidations; else ++s->l2_flushes;
     }
     s->stage = 9;
-    if (finish(io,s,TG_GPU_FE_OK)!=TG_GPU_FE_OK)
+    if (finish_checked(io,s,TG_GPU_FE_OK,guard)!=TG_GPU_FE_OK)
         return (enum tg_gpu_frontend_result)s->result;
     /* ACR packing needs another sync after the GR preamble. Successful cache
      * work does not undo that preamble; failures retain their own cache stage.
      */
     if (gr_ready) s->stage=11;
     return TG_GPU_FE_OK;
+}
+enum tg_gpu_frontend_result tg_gpu_frontend_sync_memory(const struct tg_gpu_power_io *io,
+    const struct tg_gpu_power *power, struct tg_gpu_frontend_status *s)
+{
+    return tg_gpu_frontend_sync_memory_checked(io, power, s, NULL);
 }

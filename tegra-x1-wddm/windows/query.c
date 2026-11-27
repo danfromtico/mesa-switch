@@ -66,7 +66,7 @@ NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYAD
         const BOOLEAN display=e->Tables->Scanout.Handle!=NULL;
         status=buffers(a,0,sizeof(caps));
         if (!NT_SUCCESS(status)) return status;
-        caps.HighestAcceptableAddress.QuadPart=TG_GPU_VA_LIMIT-1;
+        caps.HighestAcceptableAddress.QuadPart=T214_SYSTEM_LIMIT-1;
         caps.InterruptMessageNumber=0; /* line-based */
         caps.WDDMVersion=wddm_version;
         caps.MiscCaps.ComputeOnly=!display;

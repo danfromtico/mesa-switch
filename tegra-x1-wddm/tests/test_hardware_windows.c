@@ -36,6 +36,8 @@ static UINT reset_trace_records;
 static BOOLEAN reset_trace_open;
 static NTSTATUS reset_trace_status;
 static UINT packet_trace_calls;
+VOID TgGpuTraceFaultIsr(const TG_GPU_FAULT_ISR_EVENT *record)
+{ (void)record; }
 VOID TgGpuTraceResetWork(TG_GPU_WORK_QUEUE *q,const struct tg_gpu_power_io *i,
     const struct tg_gpu_power *p)
 {

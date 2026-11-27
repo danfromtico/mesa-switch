@@ -36,6 +36,9 @@ NTSTATUS APIENTRY TgGpuDdiStopDevice(PVOID context)
     if(!a)return STATUS_INVALID_PARAMETER;
     if(a->State==TgGpuAdapterAdded)return STATUS_SUCCESS;
     a->State=TgGpuAdapterStopping;
+    status=TgGpuDisarmFaultIsr(&a->Engine.FaultIsr,&a->Engine.Dxgk,
+        a->Hardware.Power.owned && a->Hardware.Power.ready);
+    if(!NT_SUCCESS(status))return status;
     if(a->EngineReady) {
         KIRQL irql;
         KeAcquireSpinLock(&a->Engine.Lock,&irql);
@@ -68,6 +71,9 @@ NTSTATUS APIENTRY TgGpuDdiStopDevice(PVOID context)
         status=TgGpuDestroyTableSegment(&a->Engine.Dxgk,&a->Tables);
         if(!NT_SUCCESS(status))return status;
     }
+    /* Capture real hardware clamp/reset proof while apertures are still mapped
+     * so RemoveDevice never fabricates isolation when reset=0 or clamp=0 (A05). */
+    TgGpuPlatformRefreshIsolation(&a->Platform,&a->Resources);
     status=TgGpuReleaseResources(&a->Engine.Dxgk,&a->Resources);
     if(!NT_SUCCESS(status))return status;
     a->State=TgGpuAdapterAdded;
@@ -124,6 +130,10 @@ NTSTATUS APIENTRY TgGpuDdiRemoveDevice(PVOID context)
     if(a->State!=TgGpuAdapterAdded || a->EngineReady || a->QueueReady ||
        a->Worker.Thread || a->Platform.Bridge || a->Platform.Resources ||
        a->Hardware.Engine || a->Tables.Memory.Handle || mapped(a))return STATUS_DEVICE_BUSY;
+    /* Hand off any unresolved PMIC rail claim using only real hardware-verified
+     * clamp/reset isolation proof captured prior to resource unmap (A05 / T7). */
+    TgGpuHandOffUnresolvedRail(&a->Platform,a->Platform.PreservedGpuIsolated);
+    (VOID)TgGpuRetryUnresolvedRailRelease();
     ExFreePoolWithTag(a,TAG);return STATUS_SUCCESS;
 }
 NTSTATUS TgGpuStartAdapterHardware(TG_GPU_ADAPTER *a,const struct tg_gpu_power_io *io,

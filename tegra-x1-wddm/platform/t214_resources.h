@@ -13,11 +13,13 @@
 /* Tegra GIC SPI 157/158, plus the 32 private interrupts for ACPI GSIs. */
 #define T214_GPU_STALL_GSI        189
 #define T214_GPU_NONSTALL_GSI     190
-/* Optional CPU-side LIC forwarding for SPI 158. Only GPU bit 30 is owned.
- * FIR, FIR_SET/CLR, IER, IER_SET/CLR and IRQ/FIQ class, in LIC bank 4.
+/* Optional CPU-side LIC forwarding for SPI 157 (stall) / SPI 158 (nonstall).
+ * Only GPU bits 29 and 30 are owned in LIC bank 4 (FIR, FIR_SET/CLR, IER,
+ * IER_SET/CLR and IRQ/FIQ class).
  */
 #define T214_GPU_LIC_BASE         0x60004414
 #define T214_GPU_LIC_SIZE         0x0000001C
+#define T214_GPU_LIC_STALL        0x20000000u
 #define T214_GPU_LIC_NONSTALL     0x40000000u
 
 /* Hekate IPL scanout on HDH-001: 720 x 1280 x 4 bytes, pitch 2880. */

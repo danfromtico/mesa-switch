@@ -23,6 +23,7 @@ int memcmp(const void *a,const void *b,size_t n){const UCHAR *x=a,*y=b;for(;n--;
 
 static TG_GPU_RESOURCES resources;
 static TG_GPU_PLATFORM platform;
+KUSER_SHARED_DATA ki_user_shared_data;
 static TG_GPU_HARDWARE hardware;
 static TG_GPU_WORK_QUEUE queue;
 static TG_GPU_CONTEXT_ENGINE engine;
@@ -81,11 +82,20 @@ static DEVICE_OBJECT dvfs_dev={.StackSize=1};
 static DRIVER_OBJECT dvfs_driver;
 static DEVICE_OBJECT dvfs_owner={.DriverObject=&dvfs_driver,.StackSize=1};
 static FILE_OBJECT dvfs_file={.DeviceObject=&dvfs_dev};
-static UCHAR dvfs_pool[512],dvfs_irp_buf[512];
+static UCHAR dvfs_pool[4][512],dvfs_irp_buf[512];
+static BOOLEAN dvfs_pool_used[4];
 static VOID NTAPI DvfsInitSpin(PKSPIN_LOCK l){*l=0;}
 static VOID NTAPI DvfsInitEvent(PRKEVENT ev,EVENT_TYPE t,BOOLEAN state){CHECK(ev && t==NotificationEvent);ev->Header.SignalState=state?1:0;}
-static PVOID NTAPI DvfsAllocPool2(POOL_FLAGS f,SIZE_T b,ULONG t){UNREFERENCED_PARAMETER(f);UNREFERENCED_PARAMETER(t);CHECK(b<=sizeof(dvfs_pool));memset(dvfs_pool,0,b);return dvfs_pool;}
-static VOID NTAPI DvfsFreePool(PVOID p,ULONG t){UNREFERENCED_PARAMETER(t);CHECK(p==dvfs_pool);}
+static PVOID NTAPI DvfsAllocPool2(POOL_FLAGS f,SIZE_T b,ULONG t){
+    UNREFERENCED_PARAMETER(f);UNREFERENCED_PARAMETER(t);CHECK(b<=sizeof(dvfs_pool[0]));
+    for(UINT i=0;i<4;++i){if(!dvfs_pool_used[i]){dvfs_pool_used[i]=TRUE;memset(dvfs_pool[i],0,b);return dvfs_pool[i];}}
+    CHECK(FALSE);return NULL;
+}
+static VOID NTAPI DvfsFreePool(PVOID p,ULONG t){
+    UNREFERENCED_PARAMETER(t);
+    for(UINT i=0;i<4;++i){if(p==dvfs_pool[i]){CHECK(dvfs_pool_used[i]);dvfs_pool_used[i]=FALSE;return;}}
+    CHECK(FALSE);
+}
 static PIRP NTAPI DvfsAllocIrp(CCHAR s,BOOLEAN q){UNREFERENCED_PARAMETER(q);PIRP irp=(PIRP)dvfs_irp_buf;memset(irp,0,sizeof(dvfs_irp_buf));irp->Type=IO_TYPE_IRP;irp->Size=(USHORT)sizeof(dvfs_irp_buf);irp->StackCount=s;irp->CurrentLocation=(CCHAR)(s+1);irp->Tail.Overlay.CurrentStackLocation=(PIO_STACK_LOCATION)(irp+1)+s;return irp;}
 static VOID NTAPI DvfsFreeIrp(PIRP irp){CHECK((PVOID)irp==dvfs_irp_buf);}
 static NTSTATUS NTAPI DvfsSetCompEx(PDEVICE_OBJECT d,PIRP irp,PIO_COMPLETION_ROUTINE cb,PVOID ctx,BOOLEAN s,BOOLEAN e,BOOLEAN c)
@@ -171,7 +181,7 @@ static NTSTATUS NTAPI WaitObject(PVOID obj,KWAIT_REASON reason,KPROCESSOR_MODE m
     BOOLEAN alertable,PLARGE_INTEGER timeout)
 {
     CHECK(reason==Executive && mode==KernelMode && !alertable && model.level==PASSIVE_LEVEL);
-    if(timeout){CHECK(timeout->QuadPart==-10000000LL);return STATUS_SUCCESS;}
+    if(timeout){CHECK(timeout->QuadPart<0 && timeout->QuadPart>=-10000000LL);return STATUS_SUCCESS;}
     CHECK(obj==&queue.DispatchGate);
     ++model.gate_depth;
     if(model.stop_on_gate)hardware.Dvfs.Configured=0;
@@ -180,7 +190,7 @@ static NTSTATUS NTAPI WaitObject(PVOID obj,KWAIT_REASON reason,KPROCESSOR_MODE m
 static LONG NTAPI ReleaseMutex(PRKMUTEX m,BOOLEAN wait)
 {CHECK(m==&queue.DispatchGate && !wait && model.gate_depth && model.level==PASSIVE_LEVEL);--model.gate_depth;return 0;}
 static LONG NTAPI SetEvent(PRKEVENT e,KPRIORITY prio,BOOLEAN wait)
-{CHECK((e==&queue.Wake || ((PUCHAR)e>=dvfs_pool && (PUCHAR)e<dvfs_pool+sizeof(dvfs_pool))) && !prio && !wait);e->Header.SignalState=1;return 0;}
+{CHECK((e==&queue.Wake || ((PUCHAR)e>=(PUCHAR)dvfs_pool && (PUCHAR)e<(PUCHAR)dvfs_pool+sizeof(dvfs_pool))) && !prio && !wait);e->Header.SignalState=1;return 0;}
 static KIRQL NTAPI LockSpin(PKSPIN_LOCK l)
 {KIRQL old=model.level;CHECK(!*l);*l=1;model.level=DISPATCH_LEVEL;return old;}
 static VOID NTAPI UnlockSpin(PKSPIN_LOCK l,KIRQL old)
@@ -224,8 +234,16 @@ VOID (NTAPI * const __imp_KeInitializeSpinLock)(PKSPIN_LOCK)=DvfsInitSpin;
 VOID (NTAPI * const __imp_KeInitializeEvent)(PRKEVENT,EVENT_TYPE,BOOLEAN)=DvfsInitEvent;
 PVOID (NTAPI * const __imp_ExAllocatePool2)(POOL_FLAGS,SIZE_T,ULONG)=DvfsAllocPool2;
 VOID (NTAPI * const __imp_ExFreePoolWithTag)(PVOID,ULONG)=DvfsFreePool;
+static UCHAR dvfs_workitem_buf[64];
+static PIO_WORKITEM NTAPI DvfsAllocWorkItem(PDEVICE_OBJECT d){CHECK(d==&dvfs_owner);return (PIO_WORKITEM)dvfs_workitem_buf;}
+static VOID NTAPI DvfsFreeWorkItem(PIO_WORKITEM w){CHECK((PVOID)w==dvfs_workitem_buf);}
+static VOID NTAPI DvfsQueueWorkItem(PIO_WORKITEM w,PIO_WORKITEM_ROUTINE r,WORK_QUEUE_TYPE q,PVOID ctx)
+{CHECK((PVOID)w==dvfs_workitem_buf && r && q==DelayedWorkQueue);r(&dvfs_owner,ctx);}
 PIRP (NTAPI * const __imp_IoAllocateIrp)(CCHAR,BOOLEAN)=DvfsAllocIrp;
 VOID (NTAPI * const __imp_IoFreeIrp)(PIRP)=DvfsFreeIrp;
+PIO_WORKITEM (NTAPI * const __imp_IoAllocateWorkItem)(PDEVICE_OBJECT)=DvfsAllocWorkItem;
+VOID (NTAPI * const __imp_IoFreeWorkItem)(PIO_WORKITEM)=DvfsFreeWorkItem;
+VOID (NTAPI * const __imp_IoQueueWorkItem)(PIO_WORKITEM,PIO_WORKITEM_ROUTINE,WORK_QUEUE_TYPE,PVOID)=DvfsQueueWorkItem;
 NTSTATUS (NTAPI * const __imp_IoSetCompletionRoutineEx)(PDEVICE_OBJECT,PIRP,PIO_COMPLETION_ROUTINE,PVOID,BOOLEAN,BOOLEAN,BOOLEAN)=DvfsSetCompEx;
 BOOLEAN (NTAPI * const __imp_IoCancelIrp)(PIRP)=DvfsCancelIrp;
 NTSTATUS (FASTCALL * const __imp_IofCallDriver)(PDEVICE_OBJECT,PIRP)=DvfsCallDriver;

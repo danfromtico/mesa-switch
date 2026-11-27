@@ -11,7 +11,7 @@ struct fifo_model {
     uint32_t mc, instance, asid[2], pb, runlist_map, put;
     uint32_t sched, runlist_base, stall, fifo_fault, intr0, intr1, bar1_value;
     unsigned writes, channel_reads, channel_writes, asid_writes, ticks, enabled_at;
-    bool fail_enable, unreadable_channel, fail_pb_enable, allow_mmu, runlist;
+    bool fail_enable, unreadable_channel, fail_pb_enable, allow_mmu, runlist, dead_mmu;
     bool fail_sched_allow, hce_fault;
     bool bad_ltc, flush_timeout, niso, bar1, bad_bar1_write, bar1_dirty, l2_timeout;
     unsigned fb_flushes, l2_flushes, l2_invalidations;
@@ -74,7 +74,7 @@ static uint32_t read32(void *context, uint32_t address)
     if (address == 0x57002648) return 0x2000;
     if (address == 0x5700262c) assert(!"RUNLIST_FAULT is not FIFO_INTR_SCHED_ERROR");
     if (address == 0x57040148 && m->hce_fault && m->runlist && !(m->sched & 1)) return 8;
-    if (address == 0x57100c80 && m->allow_mmu) return 0x18000;
+    if (address == 0x57100c80) return m->dead_mmu ? UINT32_MAX : (m->allow_mmu ? 0x18000 : 0);
     if (address == 0x57100cc4) return m->fb_debug_ctrl;
     if (address == 0x5740013c) return m->gr_intr_en;
     if (address == 0x57400138) return m->gr_exc_en[0];
@@ -365,6 +365,13 @@ void test_execute_init(void)
     assert(state.stage==2 && !m.fb_debug_writes && !m.bar1 && !m.runlist);
     tg_gpu_execute_stop(&io,&state);
     assert(!m.gr_suspend_writes);
+
+    /* B12: 0xffffffff on FB_MMU_CTRL must never satisfy TLB SPACE or EMPTY bits. */
+    memset(&m,0,sizeof(m));memset(&state,0,sizeof(state));memset(&result.frontend,0,sizeof(result.frontend));
+    m.runlist_map=1;m.dead_mmu=true;
+    assert(tg_gpu_execute(&io,&power,arena,0xc0000000,NULL,&state,&result)==TG_GPU_EXEC_MMU_TIMEOUT);
+    assert(state.stage==2 && !m.bar1 && !m.runlist);
+    tg_gpu_execute_stop(&io,&state);
 
     memset(&m,0,sizeof(m));memset(&state,0,sizeof(state));memset(&result.frontend,0,sizeof(result.frontend));
     m.runlist_map=1;m.allow_mmu=true;m.fail_gr_enable=true;

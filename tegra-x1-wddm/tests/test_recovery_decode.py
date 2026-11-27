@@ -219,6 +219,52 @@ class RecoveryDecode(unittest.TestCase):
         self.assertEqual(records, [])
         self.assertEqual(summary['export_records'], 1)
 
+    def test_fault_isr_v2_and_isr_recovery_source(self):
+        isr_rec = bytearray(PAYLOAD)
+        struct.pack_into('<I', isr_rec, 4, 7)
+        recs, summary = decoder.decode(export(isr_rec, event_id=1))
+        self.assertEqual(recs[0]['source_name'], 'isr')
+        self.assertEqual(summary['recovery_records'], 1)
+
+        top = struct.pack('<26I',
+            2, 0x02, 0x55667788, 0x11223344,
+            1, 0x50000100, 0, 0,
+            0, 0xffffffff, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 1,
+            1, 1)
+        cap = struct.pack('<26I',
+            2, 0x3e, 0x55667788, 0x11223344,
+            1, 0x50000100, 0x10000000, 0x24,
+            2, 2, 0x80094000, 0xdeadbee0,
+            1, 0x800000ea, 0, 0,
+            8, 0x100, 1, 0,
+            0x80123400, 0xabcdef, 0xbad00002, 1,
+            1, 2)
+        raw = (struct.pack('<8sQQII', b'SWETW001', 2, 1338, 12, 48) +
+               struct.pack('<Q16sIIHHHHBBB5x', 1337, decoder.PROVIDER,
+                           4, 6020, 2, 10, 0x40, len(top), 0, 2, 2) + top +
+               struct.pack('<Q16sIIHHHHBBB5x', 1338, decoder.PROVIDER,
+                           4, 6020, 2, 10, 0x40, len(cap), 0, 2, 2) + cap)
+        f_recs, f_sum = decoder.decode(raw)
+        self.assertEqual(f_sum['fault_isr_records'], 2)
+        self.assertEqual(f_recs[0]['phase'], 'top_half')
+        self.assertIsNone(f_recs[0]['fault_id'])
+        self.assertEqual(f_recs[0]['state'], ['stall_irq'])
+        self.assertEqual(f_recs[1]['phase'], 'passive_capture')
+        self.assertEqual(f_recs[1]['fault_id'], 2)
+        self.assertEqual(f_recs[1]['fault_addr_lo'], '0xdeadbee0')
+        self.assertEqual(f_recs[1]['fault_addr_hi'], '0x00000001')
+        self.assertIn('details_captured', f_recs[1]['state'])
+        self.assertIn('multi_mmu', f_recs[1]['state'])
+        for bad_ver, bad_payload in ((1, top), (2, top[:-4]),
+                                     (2, struct.pack('<I', 1) + top[4:]),
+                                     (2, top[:4] + struct.pack('<I', 0x80) + top[8:]),
+                                     (2, top[:-4] + struct.pack('<I', 3))):
+            with self.assertRaises(ValueError):
+                decoder.decode(export(bad_payload, version=bad_ver, event_id=10))
+
 
 class ContextEvidenceDecode(unittest.TestCase):
     # Independent fixed 120-byte wire record. Named flags are producer

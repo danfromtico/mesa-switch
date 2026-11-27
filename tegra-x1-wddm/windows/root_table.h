@@ -44,4 +44,8 @@ NTSTATUS TgGpuWriteRootInstance(const TG_GPU_ROOT_TABLE *Root,
 NTSTATUS TgGpuFlushRootTable(const TG_GPU_ROOT_TABLE *Root,
     const DXGK_BUILDPAGINGBUFFER_FLUSHTLB *Args,
     const struct tg_gpu_power_io *Io, const struct tg_gpu_power *Power);
+NTSTATUS TgGpuFlushRootTableChecked(const TG_GPU_ROOT_TABLE *Root,
+    const DXGK_BUILDPAGINGBUFFER_FLUSHTLB *Args,
+    const struct tg_gpu_power_io *Io, const struct tg_gpu_power *Power,
+    const struct tg_gpu_commit_guard *Guard);
 #endif

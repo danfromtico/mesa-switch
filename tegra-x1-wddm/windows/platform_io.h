@@ -11,10 +11,16 @@ typedef struct _TG_GPU_PLATFORM {
     PVOID FileObject;
     PVOID OwnerDevice;
     PVOID PnpNotify;
+    PVOID RailState; /* Refcounted nonpaged state shared safely with async IRP completions. */
     ULONG BridgeEpoch;
     ULONG ProviderGeneration; /* retires the vote namespace on completed removal */
+    ULONG ClaimEpoch;
     NTSTATUS IoStatus;
-    BOOLEAN EmcRailOwner,RailClaimed,QueryRemove,NeedReclaim,Initialized,Opening,Closing;
+    NTSTATUS LastAbandonStatus;
+    ULONG AbandonFailureCount;
+    UCHAR LastPmicAddress;
+    BOOLEAN EmcRailOwner,RailClaimed,RailOwnershipUncertain,PreservedGpuIsolated;
+    BOOLEAN QueryRemove,NeedReclaim,Initialized,Opening,Closing;
 } TG_GPU_PLATFORM;
 
 /* Open/Close and requests have a serialized adapter lifetime. PnP callbacks
@@ -34,6 +40,11 @@ NTSTATUS TgGpuPlatformTryVoteRequest(TG_GPU_PLATFORM *,struct tg_gpu_pmic_reques
  * caller releases both references. Failure does not poison display IoStatus. */
 NTSTATUS TgGpuReferencePlatformBridge(TG_GPU_PLATFORM *,PFILE_OBJECT *,PDEVICE_OBJECT *);
 NTSTATUS TgGpuPlatformPreflight(TG_GPU_PLATFORM *,UCHAR *PmicAddress);
-VOID TgGpuPlatformAbandonRail(TG_GPU_PLATFORM *,UCHAR PmicAddress);
+NTSTATUS TgGpuPlatformAbandonRail(TG_GPU_PLATFORM *,UCHAR PmicAddress);
+VOID TgGpuPlatformRefreshIsolation(TG_GPU_PLATFORM *,const TG_GPU_RESOURCES *);
+VOID TgGpuHandOffUnresolvedRail(TG_GPU_PLATFORM *,BOOLEAN GpuIsolated);
+NTSTATUS TgGpuRetryUnresolvedRailRelease(VOID);
+BOOLEAN TgGpuQueryUnresolvedRail(BOOLEAN *GpuIsolated,UCHAR *PmicAddress,
+                                 ULONG *RetryCount,NTSTATUS *LastStatus);
 struct tg_gpu_power_io TgGpuPlatformIo(TG_GPU_PLATFORM *);
 #endif

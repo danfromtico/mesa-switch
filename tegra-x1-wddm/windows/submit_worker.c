@@ -2,6 +2,43 @@
 #include "context.h"
 #include "../core/fault.h"
 
+struct fault_guard {
+    TG_GPU_CONTEXT_ENGINE *engine;
+    LONG epoch;
+};
+
+static bool fault_abort_cb(void *ctx)
+{
+    const struct fault_guard *g=ctx;
+    return !TgGpuFaultEpochHealthy(&g->engine->FaultIsr,g->epoch);
+}
+
+static bool fault_acquire_cb(void *ctx)
+{
+    struct fault_guard *g=ctx;
+    TG_GPU_CONTEXT_ENGINE *e=g->engine;
+    return TgGpuFaultIsrAcquireCommit(&e->FaultIsr,&e->Dxgk,g->epoch,
+        &e->DiagCommitSeq,&e->DiagCommitPermitCount,&e->DiagCommitStep,&e->DiagLastMmioReg)!=FALSE;
+}
+
+static void fault_write32_cb(void *ctx,const struct tg_gpu_power_io *io,
+    uint32_t reg,uint32_t val,bool final_step)
+{
+    struct fault_guard *g=ctx;
+    TG_GPU_CONTEXT_ENGINE *e=g->engine;
+    TgGpuFaultIsrTrackedWrite32(io,reg,val,final_step?TRUE:FALSE,
+        &e->DiagCommitSeq,&e->DiagLastMmioReg,&e->DiagMmioEnterCount,
+        &e->DiagMmioDoneCount,&e->DiagCommitStep);
+}
+
+static BOOLEAN fault_latched_or_stale(const TG_GPU_FAULT_ISR *isr,LONG epoch,
+    struct tg_gpu_fault_status *faults)
+{
+    if(TgGpuFaultEpochHealthy(isr,epoch))return FALSE;
+    (VOID)TgGpuReadFaultIsr(isr,faults);
+    return TRUE;
+}
+
 static NTSTATUS channel_status(enum tg_gpu_channel_result result)
 {
     switch(result) {
@@ -41,29 +78,54 @@ NTSTATUS TgGpuObserveContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w
     if(retired && !w->GpuCompleted) {
         KeReleaseSpinLock(&e->Lock,irql);return STATUS_INVALID_DEVICE_STATE;
     }
-    expected=w->Expected;w->HardwareBusy=TRUE;KeReleaseSpinLock(&e->Lock,irql);
+    expected=w->Expected;const LONG fault_epoch=w->FaultEpoch;
+    w->HardwareBusy=TRUE;KeReleaseSpinLock(&e->Lock,irql);
     status=STATUS_PENDING;
-    if(tg_gpu_fault_poll(io,&faults))status=STATUS_DEVICE_DATA_ERROR;
-    else {
+    faults=(struct tg_gpu_fault_status){0};
+    struct tg_gpu_fault_status isr_faults={0};
+    struct fault_guard guard_ctx={.engine=e,.epoch=fault_epoch};
+    const struct tg_gpu_commit_guard guard={
+        .abort=fault_abort_cb,.acquire=fault_acquire_cb,.write32=fault_write32_cb,.context=&guard_ctx
+    };
+    if(fault_latched_or_stale(&e->FaultIsr,fault_epoch,&faults) ||
+       tg_gpu_fault_poll_checked(io,&faults,&guard) ||
+       fault_latched_or_stale(&e->FaultIsr,fault_epoch,&isr_faults)) {
+        if(isr_faults.fifo)faults.fifo=isr_faults.fifo;
+        if(isr_faults.mmu)faults.mmu=isr_faults.mmu;
+        if(isr_faults.pbdma)faults.pbdma=isr_faults.pbdma;
+        if(isr_faults.pbdma1)faults.pbdma1=isr_faults.pbdma1;
+        status=STATUS_DEVICE_DATA_ERROR;
+    } else {
         mc=io->read32(io->context,0x57000200);
         mc_sample=TRUE;
-        if(mc==UINT32_MAX)status=STATUS_DEVICE_DATA_ERROR;
+        if(mc==UINT32_MAX || fault_latched_or_stale(&e->FaultIsr,fault_epoch,&faults))
+            status=STATUS_DEVICE_DATA_ERROR;
         else if(mc&0x1000) {
-            tg_gpu_gr_snapshot(io,&gr);
-            gr_sample=TRUE;
-            if(gr.gr_interrupt || gr.fecs_error_mailbox || gr.fecs_host_interrupt)
+            if(!tg_gpu_gr_snapshot_checked(io,&gr,&guard)) {
+                (VOID)fault_latched_or_stale(&e->FaultIsr,fault_epoch,&faults);
                 status=STATUS_DEVICE_DATA_ERROR;
+            } else {
+                gr_sample=TRUE;
+                if(gr.gr_interrupt || gr.fecs_error_mailbox || gr.fecs_host_interrupt)
+                    status=STATUS_DEVICE_DATA_ERROR;
+            }
         }
+        if(status==STATUS_PENDING && fault_latched_or_stale(&e->FaultIsr,fault_epoch,&faults))
+            status=STATUS_DEVICE_DATA_ERROR;
         if(status==STATUS_PENDING) {
             observed=retired?expected:
                 io->read32(io->context,0x58000000u+offset+TG_GPU_COMMAND_FENCE-TG_GPU_COMMAND_USERD);
             sampled=!retired;
-            if(observed==UINT32_MAX)status=STATUS_DEVICE_DATA_ERROR;
+            if(fault_latched_or_stale(&e->FaultIsr,fault_epoch,&faults) || observed==UINT32_MAX)
+                status=STATUS_DEVICE_DATA_ERROR;
             else if(observed==expected) {
-                if(tg_gpu_frontend_sync_memory(io,power,&e->Channel.frontend)!=TG_GPU_FE_OK)
+                if(fault_latched_or_stale(&e->FaultIsr,fault_epoch,&faults) ||
+                   tg_gpu_frontend_sync_memory_checked(io,power,&e->Channel.frontend,&guard)!=TG_GPU_FE_OK)
+                    status=STATUS_DEVICE_DATA_ERROR;
+                else if(fault_latched_or_stale(&e->FaultIsr,fault_epoch,&faults))
                     status=STATUS_DEVICE_DATA_ERROR;
                 else {
-                    KeMemoryBarrier();
+                    TgGpuDataSyncBarrier();
                     if(retired){
                         observed=*(volatile UINT32 *)((UCHAR *)e->Commands.CpuAddress+TG_GPU_COMMAND_FENCE);
                         sampled=cpu_sample=TRUE;
@@ -101,6 +163,8 @@ NTSTATUS TgGpuSubmitContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
         KeReleaseSpinLock(&e->Lock,irql);return STATUS_DEVICE_NOT_READY;
     }
     w->HardwareBusy=TRUE;w->Attempted=TRUE;
+    const LONG fault_epoch=TgGpuCurrentFaultEpoch(&e->FaultIsr);
+    w->FaultEpoch=fault_epoch;
     instance=(UINT64)w->Context->Instance.SystemPhysicalAddress.QuadPart;
     runlist=(UINT64)e->Commands.SystemPhysicalAddress.QuadPart+TG_GPU_COMMAND_RUNLIST;
     const UINT gp_put=w->GpPut?w->GpPut:2u;
@@ -108,9 +172,27 @@ NTSTATUS TgGpuSubmitContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
     /* All waits/MMIO run outside the object spin lock. References remain held
      * even when a partial bind fails or a teardown request races this worker.
      */
-    result=tg_gpu_channel_submit_entries(io,power,w->Root.DeviceAddress,instance,runlist,
-                                         e->UserdBar1Offset,gp_put,w,&e->Channel);
+    struct tg_gpu_fault_status isr_faults={0};
+    struct fault_guard guard_ctx={.engine=e,.epoch=fault_epoch};
+    const struct tg_gpu_commit_guard guard={
+        .abort=fault_abort_cb,.acquire=fault_acquire_cb,.write32=fault_write32_cb,.context=&guard_ctx
+    };
+    BOOLEAN faulted=fault_latched_or_stale(&e->FaultIsr,fault_epoch,&isr_faults);
+    if(faulted) {
+        result=TG_GPU_CHANNEL_FAULT;
+    } else {
+        result=tg_gpu_channel_submit_entries_checked(io,power,w->Root.DeviceAddress,instance,runlist,
+                                                     e->UserdBar1Offset,gp_put,w,&e->Channel,&guard);
+        faulted=fault_latched_or_stale(&e->FaultIsr,fault_epoch,&isr_faults);
+    }
     KeAcquireSpinLock(&e->Lock,&irql);
+    if(faulted) {
+        if(isr_faults.fifo)e->Channel.fifo_interrupt=isr_faults.fifo;
+        if(isr_faults.mmu)e->Channel.mmu_fault=isr_faults.mmu;
+        if(isr_faults.pbdma)e->Channel.pbdma_interrupt=isr_faults.pbdma;
+        if(isr_faults.pbdma1)e->Channel.pbdma_interrupt_1=isr_faults.pbdma1;
+        result=TG_GPU_CHANNEL_FAULT;
+    }
     w->Submitted=result==TG_GPU_CHANNEL_OK;w->HardwareBusy=FALSE;
     KeReleaseSpinLock(&e->Lock,irql);return channel_status(result);
 }
@@ -125,8 +207,14 @@ static NTSTATUS retire(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
     }
     if(e->Active!=w || !w->Context) { KeReleaseSpinLock(&e->Lock,irql);return STATUS_INVALID_PARAMETER; }
     if(w->HardwareBusy || w->Signaling) { KeReleaseSpinLock(&e->Lock,irql);return STATUS_DEVICE_BUSY; }
+    const LONG fault_epoch=w->FaultEpoch;
     w->HardwareBusy=TRUE;KeReleaseSpinLock(&e->Lock,irql);
-    result=tg_gpu_channel_retire(io,power,w,&e->Channel);
+    struct fault_guard guard_ctx={.engine=e,.epoch=fault_epoch};
+    const struct tg_gpu_commit_guard guard={
+        .abort=fault_abort_cb,.acquire=fault_acquire_cb,.write32=fault_write32_cb,.context=&guard_ctx
+    };
+    result=tg_gpu_channel_retire_checked(io,power,w,&e->Channel,
+        (io && power) ? &guard : NULL);
     KeAcquireSpinLock(&e->Lock,&irql);w->HardwareBusy=FALSE;
     if(result==TG_GPU_CHANNEL_OK) {
         w->Retired=TRUE;

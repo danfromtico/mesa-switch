@@ -13,4 +13,11 @@ NTSTATUS TgGpuResetBackend(TG_GPU_CONTEXT_ENGINE *,TG_GPU_WORK_QUEUE *,TG_GPU_HA
 NTSTATUS TgGpuSuspendBackend(TG_GPU_CONTEXT_ENGINE *,TG_GPU_WORK_QUEUE *,TG_GPU_HARDWARE *,TG_GPU_WORKER *);
 NTSTATUS TgGpuRestartBackend(TG_GPU_CONTEXT_ENGINE *,TG_GPU_WORK_QUEUE *,TG_GPU_HARDWARE *,TG_GPU_WORKER *,
     const struct tg_gpu_power_io *,UCHAR,const struct tg_gpu_gr_payload *);
+/* Atomic restart variant: validates platform IoStatus and arms the stall fault
+ * ISR while holding DispatchGate BEFORE starting the worker or opening admission.
+ * When PreserveRoots is TRUE (suspended PagingOnly D0 wake), rollback uses
+ * TgGpuSuspendBackend first so non-system roots survive a failed wake. */
+NTSTATUS TgGpuRestartBackendEx(TG_GPU_CONTEXT_ENGINE *,TG_GPU_WORK_QUEUE *,TG_GPU_HARDWARE *,TG_GPU_WORKER *,
+    const struct tg_gpu_power_io *,UCHAR,const struct tg_gpu_gr_payload *,
+    const NTSTATUS *IoStatus,PVOID GpuRegisters,PVOID LicRegisters,BOOLEAN PreserveRoots);
 #endif

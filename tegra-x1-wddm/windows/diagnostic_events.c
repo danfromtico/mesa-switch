@@ -14,9 +14,9 @@ VOID TgGpuTraceShutdown(VOID)
     PAGED_CODE();
     if(provider){(VOID)EtwUnregister(provider);provider=0;}
 }
-static VOID write_event(USHORT id,UCHAR level,const VOID *record,ULONG bytes)
+static VOID write_event_ver(USHORT id,UCHAR version,UCHAR level,const VOID *record,ULONG bytes)
 {
-    const EVENT_DESCRIPTOR event={.Id=id,.Version=1,.Level=level,.Keyword=1};
+    const EVENT_DESCRIPTOR event={.Id=id,.Version=version,.Level=level,.Keyword=1};
     EVENT_DATA_DESCRIPTOR data={0};
     if(!provider)return;
     data.Ptr=(ULONGLONG)(ULONG_PTR)record;
@@ -25,8 +25,12 @@ static VOID write_event(USHORT id,UCHAR level,const VOID *record,ULONG bytes)
      * ETW loss/flush limits still apply; no disk I/O or GPU work is added. */
     (VOID)EtwWrite(provider,&event,NULL,1,&data);
 }
+static VOID write_event(USHORT id,UCHAR level,const VOID *record,ULONG bytes)
+{write_event_ver(id,1,level,record,bytes);}
 VOID TgGpuTraceRecovery(const TG_GPU_RECOVERY_EVENT *record)
 {write_event(1,2,record,sizeof(*record));}
+VOID TgGpuTraceFaultIsr(const TG_GPU_FAULT_ISR_EVENT *record)
+{write_event_ver(10,2,2,record,sizeof(*record));}
 VOID TgGpuTraceExecution(const TG_GPU_EXECUTION_EVENT *record)
 {write_event(2,4,record,sizeof(*record));}
 static const EVENT_DESCRIPTOR tdr_event={.Id=8,.Version=1,.Level=4,.Keyword=1};

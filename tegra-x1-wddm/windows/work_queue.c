@@ -57,7 +57,14 @@ VOID TgGpuTraceExecutionState(TG_GPU_CONTEXT_ENGINE *e,enum tg_gpu_execution_sou
 
 static VOID trace_stage(TG_GPU_WORK_QUEUE *q,enum tg_gpu_execution_stage stage)
 {
-    KIRQL irql;KeAcquireSpinLock(&q->Lock,&irql);q->TraceStage=stage;KeReleaseSpinLock(&q->Lock,irql);
+    KIRQL irql;
+    if(q->Engine)InterlockedExchange(&q->Engine->DiagWorkerStage,(LONG)stage);
+    KeAcquireSpinLock(&q->Lock,&irql);q->TraceStage=stage;KeReleaseSpinLock(&q->Lock,irql);
+}
+
+static bool snapshot_fault_abort(void *ctx)
+{
+    return TgGpuIsFaultLatched((const TG_GPU_FAULT_ISR *)ctx) != FALSE;
 }
 
 VOID TgGpuTraceResetWork(TG_GPU_WORK_QUEUE *q,const struct tg_gpu_power_io *io,
@@ -76,7 +83,13 @@ VOID TgGpuTraceResetWork(TG_GPU_WORK_QUEUE *q,const struct tg_gpu_power_io *io,
     if(snapshot && snapshot->Bytes==w->DmaBytes && snapshot->Bytes &&
        !(snapshot->Bytes&3) && snapshot->Bytes<=TG_GPU_COMMAND_CAPTURE_BYTES)
         record.CommandBytes=snapshot->Bytes;
-    tg_gpu_channel_snapshot(io,power,w,&e->Channel,&record.Hardware);
+    /* Do not issue fresh BAR1/PRI snapshot reads after or across a latched stall fault. */
+    if(!TgGpuIsFaultLatched(&e->FaultIsr)) {
+        const struct tg_gpu_commit_guard snap_guard={
+            .abort=snapshot_fault_abort,.context=&e->FaultIsr
+        };
+        tg_gpu_channel_snapshot_checked(io,power,w,&e->Channel,&record.Hardware,&snap_guard);
+    }
     /* Only the KMD-owned immutable snapshot is read, never the application's
      * VA, borrowed UMD/private bytes, shader memory or mutable GPU mirror.
      * This remains bounded to one 64-KiB packet without allocating memory. */
@@ -449,6 +462,7 @@ NTSTATUS TgGpuServiceWorkQueue(TG_GPU_WORK_QUEUE *q,const struct tg_gpu_power_io
             }
             /* Prepare cleared control pages, not this region. Only the
              * serialized execution slot can publish captured USER words. */
+            TgGpuDataSyncBarrier();
             RtlZeroMemory((UCHAR *)q->Engine->Commands.CpuAddress+TG_GPU_COMMAND_CAPTURE,TG_GPU_COMMAND_CAPTURE_BYTES);
             RtlCopyMemory((UCHAR *)q->Engine->Commands.CpuAddress+TG_GPU_COMMAND_CAPTURE,snapshot->Words,snapshot->Bytes);
             /* Refresh the data mirror for each execution slot, including
@@ -458,7 +472,7 @@ NTSTATUS TgGpuServiceWorkQueue(TG_GPU_WORK_QUEUE *q,const struct tg_gpu_power_io
             RtlZeroMemory((UCHAR *)q->Engine->Commands.CpuAddress+TG_GPU_COMMAND_QMD,TG_GPU_COMMAND_QMD_BYTES);
             if(snapshot->Info.has_qmd)
                 RtlCopyMemory((UCHAR *)q->Engine->Commands.CpuAddress+TG_GPU_COMMAND_QMD,snapshot->Words,snapshot->Bytes);
-            KeMemoryBarrier();++q->Engine->SnapshotUploads;q->Engine->SnapshotBytes+=snapshot->Bytes;
+            TgGpuDataSyncBarrier();++q->Engine->SnapshotUploads;q->Engine->SnapshotBytes+=snapshot->Bytes;
         }
         trace_stage(q,TgGpuExecutionSubmit);
         status=TgGpuSubmitContextWork(q->Engine,w,io,power);
@@ -501,7 +515,10 @@ notify:
 done:
     KeAcquireSpinLock(&q->Lock,&irql);
     if(!NT_SUCCESS(status)) q->Failure=status;
-    if(status==STATUS_SUCCESS)q->TraceStage=TgGpuExecutionIdle;
+    if(status==STATUS_SUCCESS) {
+        q->TraceStage=TgGpuExecutionIdle;
+        if(q->Engine)InterlockedExchange(&q->Engine->DiagWorkerStage,(LONG)TgGpuExecutionIdle);
+    }
     q->Servicing=FALSE;KeReleaseSpinLock(&q->Lock,irql);
     /* Preserve the original failure before another admission sees only the
      * failed queue after DispatchGate is released. */

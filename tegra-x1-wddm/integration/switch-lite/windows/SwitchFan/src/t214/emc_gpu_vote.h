@@ -10,7 +10,10 @@
 struct tg_emc_gpu_vote {
     uint32_t request, acknowledged, guard_uv, failed;
     uint32_t release_value;
+    uint32_t claim_token, claim_seq, handoff_token;
+    uint8_t handoff_address;
     bool released, release_valid;
+    bool claimed, handoff_active, handoff_isolated;
 };
 static inline bool tg_emc_gpu_request(struct tg_emc_gpu_vote *s, uint32_t uv,
                                       bool memory_down_complete)

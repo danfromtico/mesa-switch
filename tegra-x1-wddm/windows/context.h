@@ -10,6 +10,7 @@
 #include "nvdec_abi.h"
 #include "graphics.h"
 #include "debug_report.h"
+#include "fault_isr.h"
 
 typedef struct _TG_GPU_CONTEXT_ENGINE TG_GPU_CONTEXT_ENGINE;
 typedef struct _TG_GPU_PROCESS TG_GPU_PROCESS;
@@ -88,6 +89,17 @@ struct _TG_GPU_CONTEXT_ENGINE {
     struct tg_nvdec_client_info NvdecClients;
     NTSTATUS RecoveryStatus;
     BOOLEAN RecoveryPending,RecoverySending,RecoveryNotified,Resetting;
+    ULONG RecoverySendToken,RecoveryActiveToken;
+    /* Resident nonpaged diagnostic breadcrumbs (lock-free, safe at any IRQL). */
+    volatile LONG DiagWorkerStage;
+    volatile LONG DiagLastPagingKind;
+    volatile LONG DiagCommitSeq;
+    volatile LONG DiagCommitPermitCount;
+    volatile LONG DiagCommitStep;
+    volatile LONG DiagLastMmioReg;
+    volatile LONG DiagMmioEnterCount;
+    volatile LONG DiagMmioDoneCount;
+    TG_GPU_FAULT_ISR FaultIsr;
     TG_GPU_DEBUG_CACHE DebugCache;
 };
 /* The single physical execution slot is serialized; the number of software
@@ -106,6 +118,7 @@ struct _TG_GPU_CONTEXT_WORK {
     BOOLEAN GpuCompleted,CpuCompleted,UploadsMme;
     UINT PagingOffset, PagingBytes, PagingCursor, PagingDmaBytes;
     BOOLEAN PagingStarted;
+    LONG FaultEpoch;
     /* Last completed observation, copied under Engine.Lock. No extra MMIO. */
     UINT TracePolls,TraceObserved;
     UINT TraceFifo,TraceMmu,TracePbdma,TracePbdma1;
@@ -174,6 +187,9 @@ NTSTATUS TgGpuRequestEngineRecovery(TG_GPU_CONTEXT_ENGINE *,NTSTATUS);
 _IRQL_requires_max_(DISPATCH_LEVEL)
 NTSTATUS TgGpuRequestEngineRecoveryAt(TG_GPU_CONTEXT_ENGINE *,NTSTATUS,
     enum tg_gpu_recovery_source,const DXGKARG_SUBMITCOMMANDVIRTUAL *);
+_IRQL_requires_max_(DISPATCH_LEVEL)
+NTSTATUS TgGpuRequestEngineRecoveryForEpoch(TG_GPU_CONTEXT_ENGINE *,NTSTATUS,
+    enum tg_gpu_recovery_source,const DXGKARG_SUBMITCOMMANDVIRTUAL *,LONG FaultEpoch);
 /* Kernel-generated paging records share the ordered execution slot. CPU PTE
  * publication and real TLB completion precede arming the OS notification. */
 NTSTATUS TgGpuExecutePagingWork(TG_GPU_CONTEXT_ENGINE *,TG_GPU_CONTEXT_WORK *,

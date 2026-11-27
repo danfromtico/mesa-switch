@@ -59,8 +59,15 @@ static void reset_publish_during_read(volatile LONG *address){
  }
 }
 int main(int argc,char **argv){
- assert(argc==3);
+ assert(argc==4);
  TG_GPU_DEBUG_REPORT out;
+ UCHAR ext_buf[sizeof(TG_GPU_DEBUG_REPORT)+sizeof(TG_GPU_DIAG_BREADCRUMBS)];
+ TG_GPU_DIAG_BREADCRUMBS bc={.Version=2,.WorkerStage=12,.LastPagingKind=1,
+  .FaultState=TgGpuBreadcrumbFaulted|(1u<<TgGpuBreadcrumbCommitStepShift)|TgGpuBreadcrumbMmioInFlight|
+              TgGpuBreadcrumbPrivSysValid|TgGpuBreadcrumbPrivGpcValid,
+  .Epoch=3,.ActiveEpoch=0,.FaultEpoch=3,.IsrProbeEnterCount=4,.IsrProbeDoneCount=4,
+  .IsrEnterCount=1,.IsrMaskCount=1,.DpcCount=1,.CaptureCount=2,
+  .CommitPermitCount=5,.LastMmioReg=0x57100cb8u,.MmioEnterCount=9,.MmioDoneCount=8};
  TG_GPU_RECOVERY_EVENT first={.Version=1,.Source=5,.AdapterLuid={0x1234,2},
   .Status=(NTSTATUS)0xc00000b5,.SubmissionFence=77,.LastCompletedFence=76};
  TG_GPU_EXECUTION_EVENT execution={.Version=1,.Source=1,.Stage=7,.SubmissionFence=77,.Expected=8,.Observed=7};
@@ -69,6 +76,10 @@ int main(int argc,char **argv){
  assert(TgGpuCopyDebugReport(&cache,76,0x141,&out,sizeof(out))==0&&out.Flags==3);
  assert(!memcmp(&out.Recovery,&first,sizeof(first))&&!memcmp(&out.Execution,&execution,sizeof(execution)));
  FILE *f=fopen(argv[1],"wb");assert(f&&fwrite(&out,1,sizeof(out),f)==sizeof(out));fclose(f);
+ assert(TgGpuCopyDebugReportEx(&cache,76,0x141,&bc,ext_buf,sizeof(ext_buf))==0);
+ f=fopen(argv[3],"wb");assert(f&&fwrite(ext_buf,1,sizeof(ext_buf),f)==sizeof(ext_buf));fclose(f);
+ /* 256-byte capacity on TgGpuCopyDebugReportEx stays 100% compatible with 256-byte schema. */
+ assert(TgGpuCopyDebugReportEx(&cache,76,0x141,&bc,&out,sizeof(out))==0&&out.ReportBytes==256&&out.WrittenBytes==256&&out.Flags==3);
  TG_GPU_TDR_EVENT contract={.Version=1,.Operation=TgGpuTdrQueryEngine,.Phase=1,
   .Flags=TgGpuTdrSubmittedValid|TgGpuTdrResultValid|TgGpuTdrEngineSnapshot|
          TgGpuTdrQuerySampleValid|TgGpuTdrHealthy|TgGpuTdrQueuePending|TgGpuTdrIdentityValid,
@@ -140,15 +151,75 @@ with tempfile.TemporaryDirectory(prefix='tg-debug-report-') as directory:
                     '-o', str(path / 'test')], check=True)
     wire = path / 'report.bin'
     tdr_wire = path / 'tdr.bin'
-    subprocess.run([str(path / 'test'), str(wire), str(tdr_wire)], check=True)
+    ext_wire = path / 'report320.bin'
+    subprocess.run([str(path / 'test'), str(wire), str(tdr_wire), str(ext_wire)], check=True)
     sys.path.insert(0, str(root / 'tools'))
     from decode_debug_report import decode, HEADER
     data = wire.read_bytes()
     report = decode(data)
     assert report['reason'] == '0x00000141' and report['last_completed_fence'] == 76
+    assert report['report_bytes'] == 256 and report['written_bytes'] == 256 and report['breadcrumbs'] is None
     assert report['recovery']['submission_fence'] == 77
     assert report['execution']['stage_name'] == 'gpu_fence'
     assert report['execution']['expected'] == 8 and report['execution']['observed'] == 7
+    # N3 / T10: Decode real 320-byte report with 64-byte v2 breadcrumbs trailer!
+    ext_data = ext_wire.read_bytes()
+    assert len(ext_data) == 320
+    ext_report = decode(ext_data)
+    assert ext_report['report_bytes'] == 320 and ext_report['written_bytes'] == 320
+    assert ext_report['breadcrumbs']['version'] == 2
+    assert ext_report['breadcrumbs']['worker_stage'] == 12
+    assert ext_report['breadcrumbs']['isr_probe_enter_count'] == 4
+    assert ext_report['breadcrumbs']['capture_count'] == 2
+    assert ext_report['breadcrumbs']['commit_permit_count'] == 5
+    assert ext_report['breadcrumbs']['last_mmio_reg'] == '0x57100cb8'
+    assert ext_report['breadcrumbs']['mmio_enter_count'] == 9
+    assert ext_report['breadcrumbs']['mmio_done_count'] == 8
+    assert ext_report['breadcrumbs']['mmio_in_flight'] is True
+    assert ext_report['breadcrumbs']['commit_step_name'] == 'mmio_in_flight'
+    assert ext_report['breadcrumbs']['faulted'] and ext_report['breadcrumbs']['priv_sys_valid']
+    # Verify all 3 non-in-flight commit stages (pre-PDB, after-PDB, after-TRIGGER) distinguish cleanly.
+    from decode_debug_report import BREADCRUMBS_V2
+    for step_id, reg_val, enter_c, done_c, expected_name in (
+        (1, 0, 8, 8, 'permitted_pre_mmio'),
+        (2, 0x57100cb8, 9, 9, 'partial_after_reg0'),
+        (3, 0x57100cbc, 10, 10, 'commit_done'),
+    ):
+        bc_tuple = list(BREADCRUMBS_V2.unpack_from(ext_data, 256))
+        bc_tuple[3] = (bc_tuple[3] & ~0x70) | (step_id << 4)
+        bc_tuple[15] = reg_val
+        bc_tuple[16] = enter_c
+        bc_tuple[17] = done_c
+        step_rep = decode(ext_data[:256] + BREADCRUMBS_V2.pack(*bc_tuple))
+        assert step_rep['breadcrumbs']['commit_step_name'] == expected_name
+        assert step_rep['breadcrumbs']['mmio_in_flight'] is False
+        assert step_rep['breadcrumbs']['commit_uncertain'] is False
+    # N3 v6 counterexample: torn {enter=0, done=1} or explicit TgGpuBreadcrumbCommitUncertain (0x80)
+    # MUST report commit_uncertain=True and mmio_in_flight=False (never false mmio_in_flight!).
+    for f_bits, enter_c, done_c in (
+        (0x010 | 0x080, 0, 1),
+        (0x010 | 0x040, 0, 1),
+        (0x020 | 0x080, 4, 4),
+    ):
+        bc_tuple = list(BREADCRUMBS_V2.unpack_from(ext_data, 256))
+        bc_tuple[3] = (bc_tuple[3] & ~0xf0) | f_bits
+        bc_tuple[16] = enter_c
+        bc_tuple[17] = done_c
+        torn_rep = decode(ext_data[:256] + BREADCRUMBS_V2.pack(*bc_tuple))
+        assert torn_rep['breadcrumbs']['commit_uncertain'] is True
+        assert torn_rep['breadcrumbs']['mmio_in_flight'] is False
+        assert torn_rep['breadcrumbs']['commit_step_name'] == 'uncertain'
+    # Reject mismatched 256/320 headers or bad breadcrumb version (0 or 3).
+    bad320 = list(HEADER.unpack_from(ext_data)); bad320[2] = 256
+    for candidate in (HEADER.pack(*bad320) + ext_data[32:], ext_data[:319],
+                      ext_data[:256] + b'\x00\x00' + ext_data[258:],
+                      ext_data[:256] + b'\x03\x00' + ext_data[258:]):
+        try:
+            decode(candidate)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('accepted malformed 320-byte breadcrumbs report')
     # Parse the actual C wire layout, then check incomplete/contradictory headers.
     for written, flags, accepted in ((32, 4, True), (104, 5, True), (256, 10, True),
                                     (32, 5, False), (104, 7, False), (256, 9, False),

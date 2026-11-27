@@ -20,6 +20,8 @@ struct tg_gpu_gr_status {
 /* Read while GR is owned and clocked, including after channel submission.
  * A pre-submission ready reply is not a snapshot of a later channel failure. */
 void tg_gpu_gr_snapshot(const struct tg_gpu_power_io *io, struct tg_gpu_gr_status *status);
+bool tg_gpu_gr_snapshot_checked(const struct tg_gpu_power_io *io,
+    struct tg_gpu_gr_status *status, const struct tg_gpu_commit_guard *guard);
 /* Non-secure Switchroot DMA bootstrap. Caller owns a cold GR with its reset/
  * access preamble complete, a valid instance/PDB and an immutable image mapped
  * read-only at gpu_va. No runnable channels may exist. This call never changes

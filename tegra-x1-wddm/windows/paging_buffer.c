@@ -222,10 +222,12 @@ NTSTATUS TgGpuValidatePagingBuffer(const TG_GPU_TABLE_SEGMENT *Tables,const void
     if (RequiresSystemContext) *RequiresSystemContext = requires;
     return STATUS_SUCCESS;
 }
-NTSTATUS TgGpuExecutePagingBuffer(const TG_GPU_TABLE_SEGMENT *Tables,
+NTSTATUS TgGpuExecutePagingBufferChecked(const TG_GPU_TABLE_SEGMENT *Tables,
     const void *Buffer, SIZE_T Bytes, BOOLEAN AddressSpaceIdle,
     const struct tg_gpu_power_io *Io, const struct tg_gpu_power *Power,
-    SIZE_T *CompletedBytes, TG_GPU_PAGING_DMA_STEP *NextDma)
+    SIZE_T *CompletedBytes, TG_GPU_PAGING_DMA_STEP *NextDma,
+    const struct tg_gpu_commit_guard *Guard,
+    volatile LONG *DiagLastKind)
 {
     SIZE_T offset;NTSTATUS status;BOOLEAN requires;
     if (!CompletedBytes) return STATUS_INVALID_PARAMETER;
@@ -240,6 +242,11 @@ NTSTATUS TgGpuExecutePagingBuffer(const TG_GPU_TABLE_SEGMENT *Tables,
         !Power || !Power->owned || !Power->ready) return STATUS_DEVICE_NOT_READY;
     for (offset = 0; offset < Bytes; ) {
         const PAGING_RECORD *record = (const void *)((const UCHAR *)Buffer + offset);
+        /* Per-record fault/epoch gate (B11) and per-record kind breadcrumb (N3). */
+        if (Guard && Guard->abort && Guard->abort(Guard->context))
+            return STATUS_DEVICE_DATA_ERROR;
+        if (DiagLastKind)
+            InterlockedExchange(DiagLastKind, (LONG)record->Kind);
         if (record->Kind == PAGING_UPDATE) {
             PVOID cpu;
             UINT64 address;
@@ -248,10 +255,10 @@ NTSTATUS TgGpuExecutePagingBuffer(const TG_GPU_TABLE_SEGMENT *Tables,
             status = TgGpuMapTableSegment(Tables, record->Table.SegmentOffset,
                 record->TableBytes, &cpu, &address);
             if (!NT_SUCCESS(status)) return status;
-            KeMemoryBarrier();
+            TgGpuDataSyncBarrier();
             for (i = 0; i < record->Count; ++i)
                 ((volatile UINT64 *)cpu)[record->Start+i] = values[i];
-            KeMemoryBarrier();
+            TgGpuDataSyncBarrier();
         } else if (record->Kind == PAGING_FLUSH) {
             TG_GPU_ROOT_TABLE root;
             DXGK_BUILDPAGINGBUFFER_FLUSHTLB flush = {0};
@@ -260,8 +267,10 @@ NTSTATUS TgGpuExecutePagingBuffer(const TG_GPU_TABLE_SEGMENT *Tables,
             flush.RootPageTableAddress = record->Table;
             flush.StartVirtualAddress = record->FirstVa;
             flush.EndVirtualAddress = record->LastVa;
-            status = TgGpuFlushRootTable(&root, &flush, Io, Power);
+            status = TgGpuFlushRootTableChecked(&root, &flush, Io, Power, Guard);
             if (!NT_SUCCESS(status)) return status;
+            if (Guard && Guard->abort && Guard->abort(Guard->context))
+                return STATUS_DEVICE_DATA_ERROR;
         } else {
             NextDma->Operation = record->Dma;
             NextDma->RecordBytes = record->Bytes;
@@ -271,4 +280,12 @@ NTSTATUS TgGpuExecutePagingBuffer(const TG_GPU_TABLE_SEGMENT *Tables,
         *CompletedBytes = offset;
     }
     return STATUS_SUCCESS;
+}
+NTSTATUS TgGpuExecutePagingBuffer(const TG_GPU_TABLE_SEGMENT *Tables,
+    const void *Buffer, SIZE_T Bytes, BOOLEAN AddressSpaceIdle,
+    const struct tg_gpu_power_io *Io, const struct tg_gpu_power *Power,
+    SIZE_T *CompletedBytes, TG_GPU_PAGING_DMA_STEP *NextDma)
+{
+    return TgGpuExecutePagingBufferChecked(Tables, Buffer, Bytes, AddressSpaceIdle,
+        Io, Power, CompletedBytes, NextDma, NULL, NULL);
 }

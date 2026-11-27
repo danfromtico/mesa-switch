@@ -17,6 +17,8 @@ typedef struct _TG_GPU_PANEL {
     DXGK_DISPLAY_INFORMATION Boot;
     TG_GPU_PANEL_FLIP Pending, Displayed;
     D3DKMDT_VIDPN_PRESENT_PATH_ROTATION PathRotation;
+    volatile PVOID PostCpuAddress;
+    UINT SystemDisplayWidth, SystemDisplayHeight;
     BOOLEAN Stopping, NotifyVBlank, NotifyMpoVBlank, SourceVisible, TargetActive;
 } TG_GPU_PANEL;
 

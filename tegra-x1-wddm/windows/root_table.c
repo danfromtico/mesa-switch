@@ -93,13 +93,14 @@ NTSTATUS TgGpuWriteRootInstance(const TG_GPU_ROOT_TABLE *Root,
     words[129] = (UINT32)(pdb >> 32);
     words[130] = (UINT32)limit & ~0xfffu;
     words[131] = (UINT32)(limit >> 32);
-    KeMemoryBarrier();
+    TgGpuDataSyncBarrier();
     return STATUS_SUCCESS;
 }
 
-NTSTATUS TgGpuFlushRootTable(const TG_GPU_ROOT_TABLE *Root,
+NTSTATUS TgGpuFlushRootTableChecked(const TG_GPU_ROOT_TABLE *Root,
     const DXGK_BUILDPAGINGBUFFER_FLUSHTLB *Args,
-    const struct tg_gpu_power_io *Io, const struct tg_gpu_power *Power)
+    const struct tg_gpu_power_io *Io, const struct tg_gpu_power *Power,
+    const struct tg_gpu_commit_guard *Guard)
 {
     enum tg_gpu_tlb_result result;
     if (!Root || !Root->Valid || !Args || Args->RootPageTableAddress.Padding ||
@@ -113,14 +114,21 @@ NTSTATUS TgGpuFlushRootTable(const TG_GPU_ROOT_TABLE *Root,
     /* Full-root invalidate covers the requested subrange too. Publish all
      * uncached CPU PTE writes before issuing the actual hardware operation.
      */
-    KeMemoryBarrier();
-    result = tg_gpu_tlb_invalidate(Io, Power, Root->DeviceAddress);
+    TgGpuDataSyncBarrier();
+    result = tg_gpu_tlb_invalidate_checked(Io, Power, Root->DeviceAddress, Guard);
     switch (result) {
     case TG_GPU_TLB_OK: return STATUS_SUCCESS;
     case TG_GPU_TLB_NOT_READY: return STATUS_DEVICE_NOT_READY;
     case TG_GPU_TLB_NO_SPACE:
     case TG_GPU_TLB_TIMEOUT: return STATUS_IO_TIMEOUT;
-    case TG_GPU_TLB_IO_ERROR: return STATUS_DEVICE_DATA_ERROR;
+    case TG_GPU_TLB_IO_ERROR:
+    case TG_GPU_TLB_FAULT: return STATUS_DEVICE_DATA_ERROR;
     default: return STATUS_INVALID_PARAMETER;
     }
+}
+NTSTATUS TgGpuFlushRootTable(const TG_GPU_ROOT_TABLE *Root,
+    const DXGK_BUILDPAGINGBUFFER_FLUSHTLB *Args,
+    const struct tg_gpu_power_io *Io, const struct tg_gpu_power *Power)
+{
+    return TgGpuFlushRootTableChecked(Root, Args, Io, Power, NULL);
 }

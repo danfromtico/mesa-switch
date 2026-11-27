@@ -9,7 +9,7 @@
 enum tg_gpu_recovery_source {
     TgGpuRecoveryUnspecified, TgGpuRecoverySubmitGate, TgGpuRecoverySubmit,
     TgGpuRecoveryRejectDrain, TgGpuRecoveryPreempt, TgGpuRecoveryWorker,
-    TgGpuRecoveryLegacySubmit
+    TgGpuRecoveryLegacySubmit, TgGpuRecoveryIsr
 };
 typedef struct _TG_GPU_RECOVERY_EVENT {
     ULONG Version,Source;
@@ -164,6 +164,33 @@ typedef struct _TG_GPU_STARTUP_DIAGNOSTIC_EVENT {
 } TG_GPU_STARTUP_DIAGNOSTIC_EVENT;
 C_ASSERT(sizeof(TG_GPU_STARTUP_DIAGNOSTIC_EVENT)==28);
 
+/* Event 10/version 2: GM20B stall fault latch (DIRQL top-half mask-only plus
+ * optional single-owner PASSIVE raw register capture before cold reset).
+ * Hardware register fields remain raw; software classification lives in Flags. */
+enum tg_gpu_fault_isr_flags {
+    TgGpuFaultFlagUnreachable     = 0x01u,
+    TgGpuFaultFlagStallIrq        = 0x02u,
+    TgGpuFaultFlagDetailsCaptured = 0x04u,
+    TgGpuFaultFlagMultiMmu        = 0x08u,
+    TgGpuFaultFlagPriTimeout      = 0x10u,
+    TgGpuFaultFlagFecsError       = 0x20u,
+};
+enum tg_gpu_fault_isr_phase {
+    TgGpuFaultPhaseTopHalf        = 1u,
+    TgGpuFaultPhasePassiveCapture = 2u,
+};
+typedef struct _TG_GPU_FAULT_ISR_EVENT {
+    ULONG Version,Flags;
+    LUID AdapterLuid;
+    ULONG Epoch,McIntr0,FifoIntr,MmuFaultMask;
+    ULONG MmuFaultCount,FaultId,FaultInst,FaultAddrLo;
+    ULONG FaultAddrHi,FaultInfo,Pbdma0,Pbdma1;
+    ULONG BusIntr,PriStatus0,PriStatus1,GrIntr;
+    ULONG PriSave0,PriSave1,PriFecs,IsrCount;
+    ULONG DpcCount,Phase;
+} TG_GPU_FAULT_ISR_EVENT;
+C_ASSERT(sizeof(TG_GPU_FAULT_ISR_EVENT)==104);
+
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS TgGpuTraceInitialize(VOID);
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -171,6 +198,8 @@ VOID TgGpuTraceShutdown(VOID);
 /* EtwWrite accepts nonpaged system-memory payloads at elevated IRQL. */
 _IRQL_requires_max_(DISPATCH_LEVEL)
 VOID TgGpuTraceRecovery(const TG_GPU_RECOVERY_EVENT *);
+_IRQL_requires_max_(DISPATCH_LEVEL)
+VOID TgGpuTraceFaultIsr(const TG_GPU_FAULT_ISR_EVENT *);
 _IRQL_requires_max_(DISPATCH_LEVEL)
 VOID TgGpuTraceExecution(const TG_GPU_EXECUTION_EVENT *);
 _IRQL_requires_max_(DISPATCH_LEVEL)

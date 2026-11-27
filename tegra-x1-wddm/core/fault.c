@@ -17,30 +17,50 @@ bool tg_gpu_fault_pending(const struct tg_gpu_fault_status *s)
     }
     return tg_gpu_fifo_has_error(fifo) || s->mmu || pbdma || s->pbdma1;
 }
-static void read_status(const struct tg_gpu_power_io *io, struct tg_gpu_fault_status *s)
+static bool fault_aborted(const struct tg_gpu_commit_guard *guard)
 {
-    s->fifo = io->read32(io->context, GPU + 0x2100);
-    s->mmu = io->read32(io->context, GPU + 0x259c);
-    s->pbdma = io->read32(io->context, GPU + 0x40108);
-    s->pbdma1 = io->read32(io->context, GPU + 0x40148);
+    return guard && guard->abort && guard->abort(guard->context);
 }
-bool tg_gpu_fault_poll(const struct tg_gpu_power_io *io, struct tg_gpu_fault_status *s)
+static bool read_status_checked(const struct tg_gpu_power_io *io,
+    struct tg_gpu_fault_status *s, const struct tg_gpu_commit_guard *guard)
 {
-    read_status(io, s);
+    *s = (struct tg_gpu_fault_status){0};
+    if (fault_aborted(guard)) return false;
+    s->fifo = io->read32(io->context, GPU + 0x2100);
+    if (fault_aborted(guard)) return false;
+    s->mmu = io->read32(io->context, GPU + 0x259c);
+    if (fault_aborted(guard)) return false;
+    s->pbdma = io->read32(io->context, GPU + 0x40108);
+    if (fault_aborted(guard)) return false;
+    s->pbdma1 = io->read32(io->context, GPU + 0x40148);
+    return !fault_aborted(guard);
+}
+bool tg_gpu_fault_poll_checked(const struct tg_gpu_power_io *io,
+    struct tg_gpu_fault_status *s, const struct tg_gpu_commit_guard *guard)
+{
+    if (!read_status_checked(io, s, guard))
+        return true;
     /* ENGINE (bit 24) is absent from GM20B's fatal/restartable masks. The
      * upstream ISR returns NO_RC for that lone bit, then W1C-acks it and the
-     * FIFO PBDMA summary. Do not clear or mask concurrent real/unknown faults.
-     * Re-read for concurrent faults, but do not invent channel recovery for a
-     * reasserted ENGINE notification: the upstream handler returns NO_RC.
-     * The caller's bounded fence wait still requires actual GPU completion.
+     * FIFO PBDMA summary. Do not clear or mask concurrent real/unknown faults,
+     * and never start W1C writes or follow-up PRI reads once guard aborts (B04).
      */
     if (s->pbdma == ENGINE_EVENT && !s->pbdma1 && !s->mmu &&
         !tg_gpu_fifo_has_error(s->fifo & ~PBDMA_SUMMARY)) {
+        if (fault_aborted(guard)) return true;
         io->write32(io->context, GPU + 0x40108, ENGINE_EVENT);
+        if (fault_aborted(guard)) return true;
         (void)io->read32(io->context, GPU + 0x40108);
+        if (fault_aborted(guard)) return true;
         io->write32(io->context, GPU + 0x2100, PBDMA_SUMMARY);
+        if (fault_aborted(guard)) return true;
         (void)io->read32(io->context, GPU + 0x2100);
-        read_status(io, s);
+        if (!read_status_checked(io, s, guard))
+            return true;
     }
-    return tg_gpu_fault_pending(s);
+    return fault_aborted(guard) || tg_gpu_fault_pending(s);
+}
+bool tg_gpu_fault_poll(const struct tg_gpu_power_io *io, struct tg_gpu_fault_status *s)
+{
+    return tg_gpu_fault_poll_checked(io, s, NULL);
 }

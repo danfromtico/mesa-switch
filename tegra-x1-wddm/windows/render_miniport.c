@@ -7,11 +7,53 @@
 #include "native_start_test.h"
 #endif
 
+static DXGKDDI_STOP_DEVICE *g_BaseStopDevice;
+static DXGKDDI_STOP_DEVICE_AND_RELEASE_POST_DISPLAY_OWNERSHIP *g_BaseStopAndRelease;
+
 static VOID record_status(PCWSTR name, NTSTATUS status)
 {
     ULONG value=(ULONG)status;
     (VOID)RtlWriteRegistryValue(RTL_REGISTRY_SERVICES,L"tegragpurender\\Parameters",
                               name,REG_DWORD,&value,sizeof(value));
+}
+
+static VOID map_post_display(TG_GPU_ADAPTER *a)
+{
+    if (!a || a->Panel.PostCpuAddress)
+        return;
+    PHYSICAL_ADDRESS pa = {.QuadPart = T214_GPU_POST_FB_BASE};
+    a->Panel.PostCpuAddress = MmMapIoSpaceEx(
+        pa, T214_GPU_POST_FB_SIZE, PAGE_READWRITE | PAGE_NOCACHE);
+    record_status(L"PostDisplayMapStatus",
+        a->Panel.PostCpuAddress ? STATUS_SUCCESS : STATUS_INSUFFICIENT_RESOURCES);
+}
+
+static VOID unmap_post_display(TG_GPU_ADAPTER *a)
+{
+    if (!a || !a->Panel.PostCpuAddress)
+        return;
+    PVOID mapping = (PVOID)a->Panel.PostCpuAddress;
+    a->Panel.PostCpuAddress = NULL;
+    MmUnmapIoSpace(mapping, T214_GPU_POST_FB_SIZE);
+}
+
+static NTSTATUS APIENTRY miniport_stop_device(PVOID context)
+{
+    TG_GPU_ADAPTER *a = context;
+    NTSTATUS status = g_BaseStopDevice ? g_BaseStopDevice(context) : STATUS_INVALID_PARAMETER;
+    if (NT_SUCCESS(status) && a)
+        unmap_post_display(a);
+    return status;
+}
+
+static NTSTATUS APIENTRY miniport_stop_and_release(PVOID context, D3DDDI_VIDEO_PRESENT_TARGET_ID target,
+    PDXGK_DISPLAY_INFORMATION info)
+{
+    TG_GPU_ADAPTER *a = context;
+    NTSTATUS status = g_BaseStopAndRelease ? g_BaseStopAndRelease(context, target, info) : STATUS_NOT_SUPPORTED;
+    if (NT_SUCCESS(status) && a)
+        unmap_post_display(a);
+    return status;
 }
 
 static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
@@ -49,6 +91,7 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
 #endif
     status=TgGpuStartPlatformAdapter(a);
     record_status(L"HardwareStatus",status);
+    record_status(L"HardwareStage",(NTSTATUS)a->Hardware.Status.stage);
     TgGpuRecordStartup(a,TgGpuStartupHardware,status);
     if(NT_SUCCESS(status)) {
         record_status(L"BootGpuMeasuredKhz",(NTSTATUS)a->Hardware.Clock.measured_khz);
@@ -68,6 +111,7 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
         }
         return status;
     }
+    map_post_display(a);
     *sources=*children=1;
 #endif
     if(status==STATUS_SUCCESS)TgNvdecAdapterInitialize(a);
@@ -78,32 +122,15 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
 
 static NTSTATUS set_power(PVOID context,ULONG uid,DEVICE_POWER_STATE state,POWER_ACTION action)
 {
-    TG_GPU_ADAPTER *a=context;
-    UNREFERENCED_PARAMETER(action);
     PAGED_CODE();
-    if (uid!=DISPLAY_ADAPTER_HW_ID || !a->EngineReady) return STATUS_SUCCESS;
-    if (state==PowerDeviceD0) {
-        return a->State==TgGpuAdapterSuspended ? TgGpuRestartAdapterHardware(a) : STATUS_SUCCESS;
-    }
-    if (a->State!=TgGpuAdapterReady && a->State!=TgGpuAdapterSuspended) return STATUS_SUCCESS;
-    if (a->State==TgGpuAdapterSuspended && a->Hardware.Isolated) return STATUS_SUCCESS;
-    NTSTATUS status=TgNvdecAdapterStop(a);
-    if(status!=STATUS_SUCCESS)return status;
-    status=TgGpuSuspendBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
-    if (a->Engine.Resetting) {
-        a->State=TgGpuAdapterSuspended;
-        a->QueueReady=a->Queue.Engine==&a->Engine;
-    }
-    return status;
+    return TgGpuSetAdapterPowerState(context,uid,state,action);
 }
 
 static BOOLEAN interrupt(PVOID context,ULONG message)
 {
-    UNREFERENCED_PARAMETER(context);
-    UNREFERENCED_PARAMETER(message);
-    /* The cold backend leaves hardware sources masked. The worker reports
-     * verified completions through DxgkCbSynchronizeExecution and NotifyDpc. */
-    return FALSE;
+    TG_GPU_ADAPTER *a=context;
+    if(!a || message)return FALSE;
+    return TgGpuServiceFaultIsr(&a->Engine.FaultIsr,&a->Engine.Dxgk);
 }
 
 static NTSTATUS query_children(PVOID context,PDXGK_CHILD_DESCRIPTOR children,ULONG bytes)
@@ -197,7 +224,12 @@ static NTSTATUS APIENTRY set_vm_data(HANDLE adapter,const DXGKARG_SETVIRTUALMACH
     return STATUS_NOT_SUPPORTED;
 }
 
-static VOID unload(VOID) {TgGpuSetPlatformDriverObject(NULL);TgGpuTraceShutdown();}
+static VOID unload(VOID)
+{
+    (VOID)TgGpuRetryUnresolvedRailRelease();
+    TgGpuSetPlatformDriverObject(NULL);
+    TgGpuTraceShutdown();
+}
 
 DRIVER_INITIALIZE DriverEntry;
 NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
@@ -231,6 +263,12 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
 #else
     d.DxgkDdiQueryCurrentFence=NULL; /* MCDM uses scheduler fence notifications. */
 #endif
+    g_BaseStopDevice=d.DxgkDdiStopDevice;
+    d.DxgkDdiStopDevice=miniport_stop_device;
+    if(d.DxgkDdiStopDeviceAndReleasePostDisplayOwnership) {
+        g_BaseStopAndRelease=d.DxgkDdiStopDeviceAndReleasePostDisplayOwnership;
+        d.DxgkDdiStopDeviceAndReleasePostDisplayOwnership=miniport_stop_and_release;
+    }
     TgNvdecRegisterEscape(&d); /* preserve the existing panel escape */
     NTSTATUS status=DxgkInitialize(object,path,&d);
     if(!NT_SUCCESS(status)){TgGpuSetPlatformDriverObject(NULL);TgGpuTraceShutdown();}

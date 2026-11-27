@@ -2,6 +2,36 @@
 #include "context.h"
 #include "paging_buffer.h"
 
+struct paging_fault_guard {
+    TG_GPU_CONTEXT_ENGINE *engine;
+    LONG epoch;
+};
+
+static bool paging_abort_cb(void *ctx)
+{
+    const struct paging_fault_guard *g = ctx;
+    return !TgGpuFaultEpochHealthy(&g->engine->FaultIsr, g->epoch);
+}
+
+static bool paging_acquire_cb(void *ctx)
+{
+    struct paging_fault_guard *g = ctx;
+    TG_GPU_CONTEXT_ENGINE *e = g->engine;
+    return TgGpuFaultIsrAcquireCommit(&e->FaultIsr, &e->Dxgk, g->epoch,
+        &e->DiagCommitSeq, &e->DiagCommitPermitCount, &e->DiagCommitStep,
+        &e->DiagLastMmioReg) != FALSE;
+}
+
+static void paging_write32_cb(void *ctx, const struct tg_gpu_power_io *io,
+    uint32_t reg, uint32_t val, bool final_step)
+{
+    struct paging_fault_guard *g = ctx;
+    TG_GPU_CONTEXT_ENGINE *e = g->engine;
+    TgGpuFaultIsrTrackedWrite32(io, reg, val, final_step ? TRUE : FALSE,
+        &e->DiagCommitSeq, &e->DiagLastMmioReg, &e->DiagMmioEnterCount,
+        &e->DiagMmioDoneCount, &e->DiagCommitStep);
+}
+
 static BOOLEAN valid_range(const TG_GPU_CONTEXT_WORK *w,UINT64 address,UINT64 bytes)
 {
     return address < w->Root.VaLimit && bytes <= w->Root.VaLimit - address &&
@@ -29,9 +59,10 @@ static NTSTATUS start_dma(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
     if (status != STATUS_SUCCESS) return status;
 
     UCHAR *staging = (UCHAR *)e->Commands.CpuAddress + TG_GPU_COMMAND_CAPTURE;
+    TgGpuDataSyncBarrier();
     RtlZeroMemory(staging,TG_GPU_COMMAND_CAPTURE_BYTES);
     RtlCopyMemory(staging,packet,w->DmaBytes);
-    KeMemoryBarrier();
+    TgGpuDataSyncBarrier();
     return TgGpuSubmitContextWork(e,w,io,power);
 }
 
@@ -67,6 +98,8 @@ NTSTATUS TgGpuExecutePagingWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
     NTSTATUS status;
     if (!e || !w || w->Engine!=e || !w->Paging || !buffer || bytes!=w->PagingBytes)
         return STATUS_INVALID_PARAMETER;
+    if (TgGpuIsFaultLatched(&e->FaultIsr))
+        return STATUS_DEVICE_DATA_ERROR;
 
     KeAcquireSpinLock(&e->Lock,&irql);
     if (w->CompletionReady) {
@@ -81,9 +114,17 @@ NTSTATUS TgGpuExecutePagingWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
         }
         e->Active = w;
         w->PagingStarted = TRUE;
+        w->FaultEpoch = TgGpuCurrentFaultEpoch(&e->FaultIsr);
         KeReleaseSpinLock(&e->Lock,irql);
+        if (!TgGpuFaultEpochHealthy(&e->FaultIsr,w->FaultEpoch))
+            return STATUS_DEVICE_DATA_ERROR;
+        struct paging_fault_guard sync_guard_ctx = {.engine = e, .epoch = w->FaultEpoch};
+        const struct tg_gpu_commit_guard sync_guard = {
+            .abort = paging_abort_cb, .acquire = paging_acquire_cb,
+            .write32 = paging_write32_cb, .context = &sync_guard_ctx
+        };
         struct tg_gpu_frontend_status sync = {0};
-        if (tg_gpu_frontend_sync_memory(io,power,&sync)!=TG_GPU_FE_OK)
+        if (tg_gpu_frontend_sync_memory_checked(io,power,&sync,&sync_guard)!=TG_GPU_FE_OK)
             return STATUS_DEVICE_DATA_ERROR;
     } else {
         BOOLEAN active = e->Active==w;
@@ -96,12 +137,22 @@ NTSTATUS TgGpuExecutePagingWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w,
         if (status != STATUS_SUCCESS) return status;
     }
 
+    if (!TgGpuFaultEpochHealthy(&e->FaultIsr,w->FaultEpoch))
+        return STATUS_DEVICE_DATA_ERROR;
     SIZE_T completed;
     TG_GPU_PAGING_DMA_STEP step = {0};
-    status = TgGpuExecutePagingBuffer(e->Tables,(const UCHAR *)buffer+w->PagingCursor,
-        bytes-w->PagingCursor,TRUE,io,power,&completed,&step);
+    struct paging_fault_guard guard_ctx = {.engine = e, .epoch = w->FaultEpoch};
+    const struct tg_gpu_commit_guard guard = {
+        .abort = paging_abort_cb, .acquire = paging_acquire_cb,
+        .write32 = paging_write32_cb, .context = &guard_ctx
+    };
+    status = TgGpuExecutePagingBufferChecked(e->Tables,(const UCHAR *)buffer+w->PagingCursor,
+        bytes-w->PagingCursor,TRUE,io,power,&completed,&step,
+        &guard,&e->DiagLastPagingKind);
     w->PagingCursor += (UINT)completed;
     if (status != STATUS_SUCCESS) return status;
+    if (!TgGpuFaultEpochHealthy(&e->FaultIsr,w->FaultEpoch))
+        return STATUS_DEVICE_DATA_ERROR;
     if (step.RecordBytes) {
         status = start_dma(e,w,&step,io,power);
         return status==STATUS_SUCCESS ? STATUS_PENDING : status;

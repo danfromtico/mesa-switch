@@ -3,7 +3,6 @@
 
 #define T214_TABLE_LOW  UINT64_C(0x80000000)
 #define T214_TABLE_HIGH UINT64_C(0xffffffff)
-#define T214_SYSTEM_LIMIT (UINT64_C(1) << 34)
 
 static BOOLEAN ValidContiguousMemory(const TG_GPU_PRIVATE_MEMORY *Memory)
 {
@@ -202,7 +201,7 @@ NTSTATUS TgGpuResolveVidMmPage(PVOID Context, UINT SegmentId,
     if (SegmentId) {
         if (ByteAddress >= TG_GPU_PAGING_APERTURE_BYTES)
             return STATUS_INVALID_ADDRESS;
-        ByteAddress = (UINT64)ReadAcquire(&segment->AperturePfns[ByteAddress >> PAGE_SHIFT]) << PAGE_SHIFT;
+        ByteAddress = (UINT64)(ULONG)ReadAcquire(&segment->AperturePfns[ByteAddress >> PAGE_SHIFT]) << PAGE_SHIFT;
     }
     if (ByteAddress < T214_TABLE_LOW || ByteAddress >= T214_SYSTEM_LIMIT)
         return STATUS_INVALID_ADDRESS;

@@ -24,6 +24,33 @@ static NTSTATUS isolate_backend(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_WORK_QUEUE *q,
     if(q->Engine) {
         status=KeWaitForSingleObject(&q->DispatchGate,Executive,KernelMode,FALSE,NULL);
         if(status!=STATUS_SUCCESS)return status;
+        if(reset && TgGpuIsFaultLatched(&e->FaultIsr)) {
+            TG_GPU_FAULT_ISR_EVENT details={0};
+            if(TgGpuCaptureFaultDetails(&e->FaultIsr,&h->Io,&h->Power,&details)) {
+                KeAcquireSpinLock(&e->Lock,&engine_irql);
+                details.AdapterLuid=e->AdapterLuid;
+                e->Channel.fifo_interrupt=details.FifoIntr;
+                e->Channel.mmu_fault=details.MmuFaultMask;
+                e->Channel.pbdma_interrupt=details.Pbdma0;
+                e->Channel.pbdma_interrupt_1=details.Pbdma1;
+                KeReleaseSpinLock(&e->Lock,engine_irql);
+                TgGpuTraceFaultIsr(&details);
+                /* Emit Event 10 v2 for every additional set MMU fault ID (B08). */
+                const ULONG mmu_count=TgGpuGetCapturedMmuEntryCount(&e->FaultIsr,(LONG)details.Epoch);
+                for(ULONG i=1;i<mmu_count;++i) {
+                    TG_GPU_MMU_FAULT_ENTRY mmu={0};
+                    if(TgGpuGetCapturedMmuEntry(&e->FaultIsr,(LONG)details.Epoch,i,&mmu)) {
+                        TG_GPU_FAULT_ISR_EVENT extra=details;
+                        extra.FaultId=mmu.Id;
+                        extra.FaultInst=mmu.Inst;
+                        extra.FaultAddrLo=mmu.AddrLo;
+                        extra.FaultAddrHi=mmu.AddrHi;
+                        extra.FaultInfo=mmu.Info;
+                        TgGpuTraceFaultIsr(&extra);
+                    }
+                }
+            }
+        }
         if(reset)TgGpuTraceResetWork(q,&h->Io,&h->Power);
         status=TgGpuResetWorkQueue(q,&h->Io,&h->Power,&h->Clock);
         if(NT_SUCCESS(status))status=TgGpuStopWorkQueue(q);
@@ -71,11 +98,13 @@ NTSTATUS TgGpuSuspendBackend(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_WORK_QUEUE *q,
     if (!e || !e->PagingOnly) return STATUS_NOT_SUPPORTED;
     return isolate_backend(e,q,h,w,FALSE);
 }
-NTSTATUS TgGpuRestartBackend(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_WORK_QUEUE *q,
+NTSTATUS TgGpuRestartBackendEx(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_WORK_QUEUE *q,
     TG_GPU_HARDWARE *h,TG_GPU_WORKER *w,const struct tg_gpu_power_io *io,
-    UCHAR address,const struct tg_gpu_gr_payload *firmware)
+    UCHAR address,const struct tg_gpu_gr_payload *firmware,
+    const NTSTATUS *io_status,PVOID gpu_regs,PVOID lic_regs,BOOLEAN preserve_roots)
 {
     struct tg_gpu_power_io next_io;KIRQL irql,engine_irql;NTSTATUS status,cleanup;
+    BOOLEAN armed=FALSE;LONG armed_epoch=0;
     PAGED_CODE();
     if(!e || !q || !h || !w || !io || !firmware || !e->Resetting ||
        !h->Isolated || h->Power.owned || w->Thread || q->Engine ||
@@ -92,21 +121,57 @@ NTSTATUS TgGpuRestartBackend(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_WORK_QUEUE *q,
     RtlZeroMemory(&e->Channel,sizeof(e->Channel));
     status=TgGpuStartHardware(h,e,&next_io,address,firmware);
     if(!NT_SUCCESS(status))goto fail;
+    if(io_status && !NT_SUCCESS(*io_status)) {
+        status=*io_status;
+        goto fail;
+    }
     status=TgGpuInitializeWorkQueue(q,e);if(!NT_SUCCESS(status))goto fail;
     status=KeWaitForSingleObject(&q->DispatchGate,Executive,KernelMode,FALSE,NULL);
     if(status!=STATUS_SUCCESS)goto fail;
-    /* Normal submission takes this mutex; DISPATCH preemption is rejected
-     * by RecoveryPending until the thread has actually been created. */
-    status=TgGpuStartWorker(w,q,h);
+    /* Validate IoStatus and arm the stall ISR BEFORE starting the worker or
+     * releasing RecoveryPending/Resetting, so no submit can race an unarmed
+     * or failed restart epoch. */
+    if(gpu_regs && lic_regs) {
+        status=TgGpuArmFaultIsr(&e->FaultIsr,&e->Dxgk,gpu_regs,lic_regs);
+        if(NT_SUCCESS(status)) {
+            armed=TRUE;
+            armed_epoch=TgGpuCurrentFaultEpoch(&e->FaultIsr);
+        }
+    }
+    if(NT_SUCCESS(status))
+        status=TgGpuStartWorker(w,q,h);
     if(NT_SUCCESS(status)) {
         KeAcquireSpinLock(&q->Lock,&irql);KeAcquireSpinLock(&e->Lock,&engine_irql);
-        e->RecoveryPending=e->RecoveryNotified=e->RecoverySending=e->Resetting=FALSE;
-        e->RecoveryStatus=STATUS_SUCCESS;
+        if(armed && !TgGpuFaultEpochHealthy(&e->FaultIsr,armed_epoch)) {
+            /* A new stall fault latched between ArmFaultIsr and releasing
+             * Resetting (AB06). Keep Resetting/RecoveryPending asserted and
+             * fail this restart so the fault cannot be swallowed. */
+            status=STATUS_DEVICE_DATA_ERROR;
+        } else {
+            e->RecoveryPending=e->RecoveryNotified=e->RecoverySending=e->Resetting=FALSE;
+            e->RecoveryActiveToken=0;
+            e->RecoveryStatus=STATUS_SUCCESS;
+        }
         KeReleaseSpinLock(&e->Lock,engine_irql);KeReleaseSpinLock(&q->Lock,irql);
     }
     (VOID)KeReleaseMutex(&q->DispatchGate,FALSE);
     if(NT_SUCCESS(status))return status;
 fail:
-    cleanup=TgGpuResetBackend(e,q,h,w);
+    if(armed) {
+        NTSTATUS disarm=TgGpuDisarmFaultIsr(&e->FaultIsr,&e->Dxgk,
+            h->Power.owned && h->Power.ready);
+        if(!NT_SUCCESS(disarm))return disarm;
+    }
+    cleanup=(preserve_roots && e->PagingOnly)?
+        TgGpuSuspendBackend(e,q,h,w):
+        TgGpuResetBackend(e,q,h,w);
+    if(cleanup==STATUS_DEVICE_BUSY)
+        cleanup=TgGpuResetBackend(e,q,h,w);
     return NT_SUCCESS(cleanup)?status:cleanup;
+}
+NTSTATUS TgGpuRestartBackend(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_WORK_QUEUE *q,
+    TG_GPU_HARDWARE *h,TG_GPU_WORKER *w,const struct tg_gpu_power_io *io,
+    UCHAR address,const struct tg_gpu_gr_payload *firmware)
+{
+    return TgGpuRestartBackendEx(e,q,h,w,io,address,firmware,NULL,NULL,NULL,FALSE);
 }

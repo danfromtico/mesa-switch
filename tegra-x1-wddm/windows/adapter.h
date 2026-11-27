@@ -49,6 +49,8 @@ DXGKDDI_RESTARTFROMTIMEOUT TgGpuDdiRestartFromTimeout;
 DXGKDDI_COLLECTDIAGNOSTICINFO TgGpuDdiCollectDiagnosticInfo;
 void TgGpuRecordStartup(TG_GPU_ADAPTER *,enum tg_gpu_startup_stage,NTSTATUS);
 NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *);
+NTSTATUS TgGpuSetAdapterPowerState(TG_GPU_ADAPTER *,ULONG DeviceUid,
+    DEVICE_POWER_STATE PowerState,POWER_ACTION Action);
 void TgGpuRegisterResetDdis(DRIVER_INITIALIZATION_DATA *);
 /* The platform provider starts after StartDevice acquires resources. */
 NTSTATUS TgGpuStartAdapterHardware(TG_GPU_ADAPTER *,const struct tg_gpu_power_io *,

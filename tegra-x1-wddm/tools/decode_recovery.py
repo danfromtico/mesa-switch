@@ -24,6 +24,10 @@ RESET_PACKET_HEADER = struct.Struct('<4I2Q28I')
 DISPLAY_PAYLOAD = struct.Struct('<13I')
 TDR_PAYLOAD = struct.Struct('<4IQ2Ii6Ii')
 CONTEXT_PAYLOAD = struct.Struct('<3Ii4Q8IiIQ6I')
+FAULT_ISR_PAYLOAD = struct.Struct('<26I')
+FAULT_ISR_FLAGS = ('unreachable', 'stall_irq', 'details_captured', 'multi_mmu',
+                   'pri_timeout', 'fecs_error')
+FAULT_ISR_PHASES = {1: 'top_half', 2: 'passive_capture'}
 CONTEXT_OPERATIONS = ('unknown', 'create', 'destroy', 'set_root', 'prepare',
                       'paging_dma_complete', 'paging_capture_failure')
 CONTEXT_DECISIONS = ('none', 'engine_unavailable', 'invalid_context', 'root_unavailable',
@@ -41,7 +45,7 @@ RESET_HARDWARE_FIELDS = ('flags', 'mc_enable', 'pbdma_enable', 'pbdma_before', '
     'pb_get_lo', 'pb_get_hi', 'pb_fetch_lo', 'pb_fetch_hi', 'pb_header', 'method0',
     'data0', 'engine0', 'engine1', 'gr_interrupt', 'gr_current')
 SOURCES = ('unspecified', 'submit_gate', 'submit', 'reject_drain', 'preempt',
-           'worker', 'legacy_submit')
+           'worker', 'legacy_submit', 'isr')
 EXECUTION_SOURCES = ('unknown', 'preempt', 'worker_failure', 'submit_failure',
                      'reset_begin', 'reset_end')
 STAGES = ('idle', 'software', 'paging', 'mappings', 'activate', 'prepare',
@@ -62,6 +66,29 @@ EXECUTION_FIELDS = ('submission_fence', 'last_completed_fence', 'expected', 'obs
 def _decode_event(event_id, version, payload, metadata):
     """Decode the same fixed KMD payload for binary and live exports."""
     size = len(payload)
+    if event_id == 10:
+        if version != 2 or size != FAULT_ISR_PAYLOAD.size:
+            raise ValueError('unsupported fault ISR schema')
+        v = FAULT_ISR_PAYLOAD.unpack(payload)
+        flags, phase = v[1], v[25]
+        if v[0] != 2 or flags & ~0x3f or phase not in FAULT_ISR_PHASES or not v[4]:
+            raise ValueError('invalid fault ISR event')
+        return {'event': 'FaultIsr', **metadata,
+                'flags': f'0x{flags:08x}',
+                'state': [name for bit, name in enumerate(FAULT_ISR_FLAGS) if flags & (1 << bit)],
+                'phase': FAULT_ISR_PHASES[phase],
+                'adapter_luid': f'{v[3]:08x}{v[2]:08x}',
+                'epoch': v[4], 'mc_intr0': f'0x{v[5]:08x}',
+                'fifo_intr': f'0x{v[6]:08x}', 'mmu_fault_mask': f'0x{v[7]:08x}',
+                'mmu_fault_count': v[8],
+                'fault_id': None if v[9] == 0xffffffff else v[9],
+                'fault_inst': f'0x{v[10]:08x}', 'fault_addr_lo': f'0x{v[11]:08x}',
+                'fault_addr_hi': f'0x{v[12]:08x}', 'fault_info': f'0x{v[13]:08x}',
+                'pbdma0': f'0x{v[14]:08x}', 'pbdma1': f'0x{v[15]:08x}',
+                'bus_intr': f'0x{v[16]:08x}', 'pri_status0': f'0x{v[17]:08x}',
+                'pri_status1': f'0x{v[18]:08x}', 'gr_intr': f'0x{v[19]:08x}',
+                'pri_save0': f'0x{v[20]:08x}', 'pri_save1': f'0x{v[21]:08x}',
+                'pri_fecs': f'0x{v[22]:08x}', 'isr_count': v[23], 'dpc_count': v[24]}
     if event_id == 9:
         if version != 1 or size != CONTEXT_PAYLOAD.size:
             raise ValueError('unsupported context evidence schema')
@@ -229,6 +256,7 @@ def decode(data):
         raise ValueError(f'export event count differs: {total}/{expected}')
     return records, {'export_records': total,
                      'recovery_records': sum(r['event'] == 'FirstRecoveryRequest' for r in records),
+                     'fault_isr_records': sum(r['event'] == 'FaultIsr' for r in records),
                      'execution_records': sum(r['event'] == 'ExecutionState' for r in records),
                      'reset_packet_chunks': sum(r['event'] == 'ResetPacket' for r in records),
                      'display_records': sum(r['event'] == 'DisplayPath' for r in records),

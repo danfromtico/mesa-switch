@@ -5,6 +5,16 @@
 #include <dispmprt.h>
 #include "../core/gm20b_mmu.h"
 
+/* Drain non-cacheable CPU store buffers to Tegra MC DRAM before MMIO/DMA. */
+static __forceinline VOID TgGpuDataSyncBarrier(VOID)
+{
+#if defined(_M_ARM64) || defined(_ARM64_)
+    _DataSynchronizationBarrier();
+#else
+    KeMemoryBarrier();
+#endif
+}
+
 /* The adapter supplies a pinned table mapping and reusable nonpaged scratch
  * memory. Updates run with the address space idle and serialized. The
  * resolver translates a VidMm segment offset/system byte address into an owned GPU

@@ -8,6 +8,8 @@
 #define TG_GPU_PAGING_APERTURE_BYTES (1024u * 1024u)
 #define TG_GPU_SCANOUT_SEGMENT 3u
 #define TG_GPU_SCANOUT_SEGMENT_BYTES (16u * 1024u * 1024u)
+/* Direct physical GM20B DMA must leave Tegra SMMU translation bit 34 clear. */
+#define T214_SYSTEM_LIMIT (UINT64_C(1) << 34)
 
 /* VidMm owns allocation/residency within this CPU-visible memory segment.
  * The adapter owns its contiguous, uncached backing until StopDevice. This

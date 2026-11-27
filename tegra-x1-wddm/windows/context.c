@@ -339,7 +339,23 @@ NTSTATUS APIENTRY TgGpuDdiQueryCurrentFence(HANDLE adapter, DXGKARG_QUERYCURRENT
 VOID TgGpuDdiDpcRoutine(PVOID adapter)
 {
     TG_GPU_CONTEXT_ENGINE *e=adapter;
+    TG_GPU_FAULT_ISR_EVENT fault={0};
     e->Dxgk.DxgkCbNotifyDpc(e->Dxgk.DeviceHandle);
+    if(TgGpuConsumeFaultDpc(&e->FaultIsr,&fault)) {
+        KIRQL irql;
+        TG_GPU_WORK_QUEUE *q;
+        const LONG fault_epoch=(LONG)fault.Epoch;
+        KeAcquireSpinLock(&e->Lock,&irql);
+        fault.AdapterLuid=e->AdapterLuid;
+        q=e->QueueOwner;
+        KeReleaseSpinLock(&e->Lock,irql);
+        TgGpuTraceFaultIsr(&fault);
+        if(TgGpuFaultEpochMatches(&e->FaultIsr,fault_epoch)) {
+            if(q)(VOID)KeSetEvent(&q->Wake,IO_NO_INCREMENT,FALSE);
+            (VOID)TgGpuRequestEngineRecoveryForEpoch(e,STATUS_DEVICE_DATA_ERROR,
+                TgGpuRecoveryIsr,NULL,fault_epoch);
+        }
+    }
 }
 
 static NTSTATUS command_context(TG_GPU_CONTEXT_ENGINE *e,HANDLE handle,TG_GPU_CONTEXT **out)
@@ -531,7 +547,7 @@ NTSTATUS TgGpuActivateContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *
     w->Expected=marker;
     /* CPU initializes only the complement, never the expected completion. */
     *(volatile UINT32 *)((UCHAR *)e->Commands.CpuAddress+TG_GPU_COMMAND_FENCE)=~marker;
-    KeMemoryBarrier();e->Active=w;
+    TgGpuDataSyncBarrier();e->Active=w;
     KeReleaseSpinLock(&e->Lock,irql);return STATUS_SUCCESS;
 }
 NTSTATUS TgGpuCancelCapturedWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w)
@@ -592,7 +608,7 @@ NTSTATUS TgGpuPrepareContextWork(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w
         c->Instance.CpuAddress,c->Instance.Bytes,(UINT64)c->Instance.SystemPhysicalAddress.QuadPart,
         w->DmaAddress,w->DmaBytes,w->IndirectAddress,w->IndirectBytes,
         w->IndirectSuffixOffset,w->Expected,&gp_put)) status=STATUS_INVALID_PARAMETER;
-    if (NT_SUCCESS(status)) { w->GpPut=gp_put;KeMemoryBarrier();w->Prepared=TRUE; }
+    if (NT_SUCCESS(status)) { w->GpPut=gp_put;TgGpuDataSyncBarrier();w->Prepared=TRUE; }
     w->HardwareBusy=FALSE;
     if(trace && build && c->Flags.SystemContext) {
         context_snapshot_locked(e,c,TgGpuContextPrepare,status,0,w,&event);
@@ -606,6 +622,14 @@ static BOOLEAN NotifyFence(PVOID context)
 {
     TG_GPU_CONTEXT_WORK *w=context; TG_GPU_CONTEXT_ENGINE *e=w->Engine;
     DXGKARGCB_NOTIFY_INTERRUPT_DATA data={0};
+    /* Runs at DIRQL serialized with TgGpuServiceFaultIsr (B04): refuse to
+     * advance LastCompletedFence or publish DMA completion if a fault latched
+     * or the fault epoch changed before notification. */
+    if(!w->Software && !w->Preemption && !w->Rejected &&
+       !TgGpuFaultEpochHealthy(&e->FaultIsr,w->FaultEpoch)) {
+        w->Notified=FALSE;
+        return TRUE;
+    }
     if(w->Preemption) {
         data.InterruptType=DXGK_INTERRUPT_DMA_PREEMPTED;
         data.DmaPreempted.PreemptionFenceId=w->SubmissionFence;
@@ -655,6 +679,9 @@ NTSTATUS TgGpuSignalContextWork(TG_GPU_CONTEXT_ENGINE *e, TG_GPU_CONTEXT_WORK *w
         if(!w->Submitted || !w->Retired || !w->GpuCompleted || !w->CpuCompleted) {
             KeReleaseSpinLock(&e->Lock,irql);return STATUS_DEVICE_NOT_READY;
         }
+        if(!TgGpuFaultEpochHealthy(&e->FaultIsr,w->FaultEpoch)) {
+            KeReleaseSpinLock(&e->Lock,irql);return STATUS_DEVICE_DATA_ERROR;
+        }
         if(*(volatile UINT32 *)((UCHAR *)e->Commands.CpuAddress+TG_GPU_COMMAND_FENCE)!=w->Expected) {
             KeReleaseSpinLock(&e->Lock,irql);return STATUS_PENDING;
         }
@@ -691,7 +718,11 @@ NTSTATUS TgGpuSignalContextWork(TG_GPU_CONTEXT_ENGINE *e, TG_GPU_CONTEXT_WORK *w
     status=e->Dxgk.DxgkCbSynchronizeExecution(e->Dxgk.DeviceHandle,NotifyFence,w,0,&invoked);
     KeAcquireSpinLock(&e->Lock,&irql); w->Signaling=FALSE;
     if (w->Notified) { status=STATUS_SUCCESS;e->Notification=NULL; }
-    else if (NT_SUCCESS(status)) status=STATUS_UNSUCCESSFUL;
+    else if (NT_SUCCESS(status)) {
+        status=(!w->Software && !w->Preemption && !w->Rejected &&
+                !TgGpuFaultEpochHealthy(&e->FaultIsr,w->FaultEpoch)) ?
+               STATUS_DEVICE_DATA_ERROR : STATUS_UNSUCCESSFUL;
+    }
     KeReleaseSpinLock(&e->Lock,irql); return status;
 }
 NTSTATUS TgGpuCancelContextNotification(TG_GPU_CONTEXT_ENGINE *e,TG_GPU_CONTEXT_WORK *w)

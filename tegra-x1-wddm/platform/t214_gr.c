@@ -4,6 +4,7 @@
  * See ../NOTICE. DMA bootstrap only; secure ACR and graphics contexts are separate.
  */
 #include "t214_gr.h"
+#include "t214_mmu.h"
 #define GPU 0x57000000u
 #define FECS 0x409000u
 #define GPCCS 0x41a000u
@@ -17,15 +18,30 @@ static void write_reg(const struct tg_gpu_power_io *io, uint32_t reg, uint32_t v
 /* Streaming ports advance on access; never add the normal posted-write readback. */
 static void stream_word(const struct tg_gpu_power_io *io, uint32_t reg, uint32_t value)
 { io->write32(io->context, GPU + reg, value); }
+static bool gr_aborted(const struct tg_gpu_commit_guard *guard)
+{ return guard && guard->abort && guard->abort(guard->context); }
+bool tg_gpu_gr_snapshot_checked(const struct tg_gpu_power_io *io,
+    struct tg_gpu_gr_status *s, const struct tg_gpu_commit_guard *guard)
+{
+    if (gr_aborted(guard)) return false;
+    s->fecs_mailbox = read_reg(io, FECS + 0x800);
+    if (gr_aborted(guard)) return false;
+    s->gr_interrupt = read_reg(io, 0x400100);
+    if (gr_aborted(guard)) return false;
+    s->current_context = read_reg(io, FECS + 0xb00);
+    if (gr_aborted(guard)) return false;
+    s->new_context = read_reg(io, FECS + 0xb04);
+    if (gr_aborted(guard)) return false;
+    s->fecs_host_interrupt = read_reg(io, FECS + 0xc18);
+    if (gr_aborted(guard)) return false;
+    s->fecs_ctxsw_status = read_reg(io, FECS + 0x400);
+    if (gr_aborted(guard)) return false;
+    s->fecs_error_mailbox = read_reg(io, FECS + 0x818);
+    return !gr_aborted(guard);
+}
 void tg_gpu_gr_snapshot(const struct tg_gpu_power_io *io, struct tg_gpu_gr_status *s)
 {
-    s->fecs_mailbox = read_reg(io, FECS + 0x800);
-    s->gr_interrupt = read_reg(io, 0x400100);
-    s->current_context = read_reg(io, FECS + 0xb00);
-    s->new_context = read_reg(io, FECS + 0xb04);
-    s->fecs_host_interrupt = read_reg(io, FECS + 0xc18);
-    s->fecs_ctxsw_status = read_reg(io, FECS + 0x400);
-    s->fecs_error_mailbox = read_reg(io, FECS + 0x818);
+    (void)tg_gpu_gr_snapshot_checked(io, s, NULL);
 }
 static uint32_t le32(const uint8_t *p)
 { return p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24; }

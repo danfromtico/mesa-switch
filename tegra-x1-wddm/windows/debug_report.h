@@ -16,7 +16,7 @@ typedef struct _TG_GPU_DEBUG_CACHE {
 
 enum tg_gpu_debug_flags {
     TgGpuDebugRecoveryValid=1, TgGpuDebugExecutionValid=2, TgGpuDebugTruncated=4,
-    TgGpuDebugRecoveryBusy=8, TgGpuDebugExecutionBusy=16
+    TgGpuDebugRecoveryBusy=8, TgGpuDebugExecutionBusy=16, TgGpuDebugBreadcrumbsValid=32
 };
 typedef struct _TG_GPU_DEBUG_REPORT {
     ULONG Signature,Version,ReportBytes,WrittenBytes;
@@ -25,6 +25,46 @@ typedef struct _TG_GPU_DEBUG_REPORT {
     TG_GPU_EXECUTION_EVENT Execution;
 } TG_GPU_DEBUG_REPORT;
 C_ASSERT(sizeof(TG_GPU_DEBUG_REPORT)==256);
+
+/* Optional 64-byte resident nonpaged breadcrumb trailer appended by CollectDbgInfo
+ * when the OS buffer holds >= 320 bytes (256-byte base + 64-byte v2 trailer, N3).
+ * FaultState bits: bit0=Armed, bit1=Faulted, bit2=GpuUnreachable, bit3=ActiveEpochValid,
+ * bits4..5=CommitStep(0=none,1=permitted_pre_mmio,2=after_reg0,3=commit_done),
+ * bit6=MmioInFlight (MmioEnterCount != MmioDoneCount), bit8=PrivSysValid,
+ * bit9=PrivGpcValid. Safe at arbitrary IRQL without locks or MMIO. */
+enum tg_gpu_breadcrumb_fault_state {
+    TgGpuBreadcrumbArmed           = 0x001u,
+    TgGpuBreadcrumbFaulted         = 0x002u,
+    TgGpuBreadcrumbGpuUnreachable  = 0x004u,
+    TgGpuBreadcrumbActiveEpoch     = 0x008u,
+    TgGpuBreadcrumbCommitStepMask  = 0x030u,
+    TgGpuBreadcrumbCommitStepShift = 4u,
+    TgGpuBreadcrumbMmioInFlight    = 0x040u,
+    TgGpuBreadcrumbCommitUncertain = 0x080u,
+    TgGpuBreadcrumbPrivSysValid    = 0x100u,
+    TgGpuBreadcrumbPrivGpcValid    = 0x200u,
+};
+typedef struct _TG_GPU_DIAG_BREADCRUMBS {
+    USHORT Version;
+    UCHAR WorkerStage;
+    UCHAR LastPagingKind;
+    ULONG FaultState;
+    ULONG Epoch;
+    ULONG ActiveEpoch;
+    ULONG FaultEpoch;
+    ULONG IsrProbeEnterCount;
+    ULONG IsrProbeDoneCount;
+    ULONG IsrEnterCount;
+    ULONG IsrMaskCount;
+    ULONG IsrUnreachableCount;
+    ULONG DpcCount;
+    ULONG CaptureCount;
+    ULONG CommitPermitCount;
+    ULONG LastMmioReg;
+    ULONG MmioEnterCount;
+    ULONG MmioDoneCount;
+} TG_GPU_DIAG_BREADCRUMBS;
+C_ASSERT(sizeof(TG_GPU_DIAG_BREADCRUMBS)==64);
 #define TG_GPU_DEBUG_SIGNATURE 0x42444754u /* "TGDB", little endian */
 #define TG_GPU_DEBUG_HEADER_BYTES FIELD_OFFSET(TG_GPU_DEBUG_REPORT,Recovery)
 
@@ -79,28 +119,44 @@ static inline ULONG TgGpuReadDebugRecord(volatile LONG *sequence,volatile LONG *
     }
     return 1;
 }
-static inline NTSTATUS TgGpuCopyDebugReport(TG_GPU_DEBUG_CACHE *cache,ULONG fence,
-    ULONG reason,VOID *buffer,SIZE_T capacity)
+static inline NTSTATUS TgGpuCopyDebugReportEx(TG_GPU_DEBUG_CACHE *cache,ULONG fence,
+    ULONG reason,const TG_GPU_DIAG_BREADCRUMBS *breadcrumbs,VOID *buffer,SIZE_T capacity)
 {
     TG_GPU_DEBUG_REPORT report={.Signature=TG_GPU_DEBUG_SIGNATURE,.Version=1,
         .ReportBytes=sizeof(report),.Reason=reason,.LastCompletedFence=fence};
     if(!cache || !buffer || capacity<TG_GPU_DEBUG_HEADER_BYTES)return STATUS_UNSUCCESSFUL;
-    report.WrittenBytes=(ULONG)(capacity<sizeof(report)?capacity:sizeof(report));
-    if(report.WrittenBytes<sizeof(report))report.Flags|=TgGpuDebugTruncated;
+    const BOOLEAN append_breadcrumbs=breadcrumbs &&
+        capacity>=sizeof(report)+sizeof(*breadcrumbs);
+    const SIZE_T base_bytes=capacity<sizeof(report)?capacity:sizeof(report);
+    if(append_breadcrumbs) {
+        report.ReportBytes=(ULONG)(sizeof(report)+sizeof(*breadcrumbs));
+        report.WrittenBytes=report.ReportBytes;
+        report.Flags|=TgGpuDebugBreadcrumbsValid;
+    } else {
+        report.WrittenBytes=(ULONG)base_bytes;
+    }
+    if(base_bytes<sizeof(report))report.Flags|=TgGpuDebugTruncated;
     /* Do not claim a valid payload that the caller's buffer cannot hold. */
-    if(report.WrittenBytes>=FIELD_OFFSET(TG_GPU_DEBUG_REPORT,Execution)) {
+    if(base_bytes>=FIELD_OFFSET(TG_GPU_DEBUG_REPORT,Execution)) {
         ULONG state=TgGpuReadDebugRecord(&cache->RecoverySequence,cache->RecoveryWords,
             &report.Recovery,sizeof(report.Recovery));
         if(state==1)report.Flags|=TgGpuDebugRecoveryValid;
         else if(state==2)report.Flags|=TgGpuDebugRecoveryBusy;
     }
-    if(report.WrittenBytes==sizeof(report)) {
+    if(base_bytes==sizeof(report)) {
         ULONG state=TgGpuReadDebugRecord(&cache->ExecutionSequence,cache->ExecutionWords,
             &report.Execution,sizeof(report.Execution));
         if(state==1)report.Flags|=TgGpuDebugExecutionValid;
         else if(state==2)report.Flags|=TgGpuDebugExecutionBusy;
     }
-    RtlCopyMemory(buffer,&report,report.WrittenBytes);
+    RtlCopyMemory(buffer,&report,base_bytes);
+    if(append_breadcrumbs)
+        RtlCopyMemory((UCHAR *)buffer+sizeof(report),breadcrumbs,sizeof(*breadcrumbs));
     return STATUS_SUCCESS;
+}
+static inline NTSTATUS TgGpuCopyDebugReport(TG_GPU_DEBUG_CACHE *cache,ULONG fence,
+    ULONG reason,VOID *buffer,SIZE_T capacity)
+{
+    return TgGpuCopyDebugReportEx(cache,fence,reason,NULL,buffer,capacity);
 }
 #endif

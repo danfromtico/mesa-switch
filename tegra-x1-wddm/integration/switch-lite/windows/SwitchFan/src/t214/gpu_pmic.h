@@ -69,19 +69,32 @@ static BOOLEAN SwFanGpuLiveCounter(PSWFAN_DEVICE Dev)
     return Dev->GpuAbiTime && KeQueryInterruptTime() - Dev->GpuAbiTime <= 20000000ULL;
 }
 
+#define SWFAN_TEMP_MAX_AGE_100NS 50000000ULL /* 5 s thermal freshness bound */
+
+static BOOLEAN SwFanGpuTempFreshLocked(PSWFAN_DEVICE Dev)
+{
+    const ULONGLONG now = KeQueryInterruptTime();
+    /* A zero timestamp is treated as unsampled even if TempValid was set. */
+    if (Dev->Stopping || !Dev->TempValid || !Dev->TempSampleTime)
+        return FALSE;
+    if (now < Dev->TempSampleTime || now - Dev->TempSampleTime > SWFAN_TEMP_MAX_AGE_100NS)
+        return FALSE;
+    return TRUE;
+}
+
 /* Lock order: SensorLock -> CpuLock -> PmicLock. Call before PmicLock. */
 static NTSTATUS SwFanGpuQueryTemp(PSWFAN_DEVICE Dev, PULONG TempOut)
 {
-    BOOLEAN valid;
+    BOOLEAN fresh;
     ULONG temp;
     SwFanCpuLock(Dev);
-    valid = Dev->TempValid;
+    fresh = SwFanGpuTempFreshLocked(Dev);
     temp = Dev->LastTemp;
     SwFanCpuUnlock(Dev);
-    if (!valid) {
+    if (!fresh) {
 #ifdef SWFAN_HAVE_SENSOR_SAMPLE
         NTSTATUS status = SwFanSampleTemp(Dev, &temp);
-        if (!NT_SUCCESS(status)) return STATUS_DEVICE_NOT_READY;
+        if (!NT_SUCCESS(status)) return status;
 #else
         return STATUS_DEVICE_NOT_READY;
 #endif
@@ -111,7 +124,20 @@ static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *I
 
     if (!Op.write && Op.reg >= TG_GPU_PMIC_QUERY_ADDRESS) {
         if (Op.reg == TG_GPU_PMIC_QUERY_ADDRESS) {
+            const BOOLEAN query_rail = (Op.address == TG_GPU_RAIL_QUERY_MAGIC);
             Op.value = Dev->Config.PmicAddress;
+            if (query_rail) {
+                SwFanPmicLock(Dev);
+                const struct tg_emc_gpu_vote *v = &Dev->EmcGpuVote;
+                Op.address = TG_GPU_RAIL_STATE_ACK |
+                    (v->claimed ? TG_GPU_RAIL_STATE_CLAIMED : 0u) |
+                    (v->handoff_active ? TG_GPU_RAIL_STATE_HANDOFF : 0u) |
+                    (v->handoff_isolated ? TG_GPU_RAIL_STATE_ISOLATED : 0u);
+                if (v->handoff_active && v->handoff_address)
+                    Op.value = v->handoff_address;
+                Op.write = ((v->claim_seq & 0xffffu) << 16) | (v->claim_token & 0xffffu);
+                SwFanPmicUnlock(Dev);
+            }
         } else if (Op.reg == TG_GPU_PMIC_QUERY_PLLP) {
             if (Dev->Car == NULL) return STATUS_DEVICE_NOT_READY;
             Op.value = SwCpuRead(Dev, 0xa0);
@@ -153,8 +179,27 @@ static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *I
             Dev->GpuBridgeSeen = TRUE;
             Dev->GpuReportedUv = Op.value;
         } else if (Op.reg == TG_GPU_PMIC_REPORT_GPU_STATUS) {
-            Dev->GpuBridgeSeen = TRUE;
-            Dev->GpuStatusWord = Op.value;
+            if ((Op.address & TG_GPU_RAIL_HANDOFF_MASK) == TG_GPU_RAIL_HANDOFF_MAGIC) {
+                const ULONG tok = (Op.value >> 16) & 0xffffu;
+                const UCHAR addr = (UCHAR)(Op.address & 0xffu);
+                const BOOLEAN active = (Op.value & TG_GPU_RAIL_STATE_HANDOFF) != 0u;
+                const BOOLEAN iso = (Op.value & TG_GPU_RAIL_STATE_ISOLATED) != 0u;
+                SwFanPmicLock(Dev);
+                struct tg_emc_gpu_vote *v = &Dev->EmcGpuVote;
+                if (v->claimed && (!v->claim_token || tok == v->claim_token)) {
+                    v->handoff_active = active;
+                    v->handoff_isolated = active ? iso : false;
+                    v->handoff_token = v->claim_token ? v->claim_token : tok;
+                    if (addr) v->handoff_address = addr;
+                } else if (!active && (!tok || tok == v->handoff_token)) {
+                    v->handoff_active = false;
+                    v->handoff_isolated = false;
+                }
+                SwFanPmicUnlock(Dev);
+            } else {
+                Dev->GpuBridgeSeen = TRUE;
+                Dev->GpuStatusWord = Op.value;
+            }
         } else if (Op.reg == TG_GPU_PMIC_REPORT_ABI) {
             Dev->GpuAbiTime = Op.value == TG_GPU_LIVE_COUNTER_ABI ? KeQueryInterruptTime() : 0;
         } else if (Op.reg == TG_GPU_PMIC_REPORT_EMC_ABI) {
@@ -170,9 +215,28 @@ static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *I
             SwFanPmicUnlock(Dev);
             if (!NT_SUCCESS(Status)) return Status;
         } else if (Op.reg == TG_GPU_PMIC_CLAIM_RAIL) {
-            if (Op.value != TG_GPU_EMC_VOTE_ABI) return STATUS_INVALID_PARAMETER;
+            if (Op.value != TG_GPU_EMC_VOTE_ABI || Op.address > 0xffffu)
+                return STATUS_INVALID_PARAMETER;
             SwFanPmicLock(Dev);
-            Dev->EmcGpuVote.released = false;
+            {
+                struct tg_emc_gpu_vote *v = &Dev->EmcGpuVote;
+                uint32_t next_seq = (v->claim_seq + 1u) & 0xffffu;
+                if (!next_seq) next_seq = 1u;
+                if (Op.address > next_seq && Op.address <= 0xffffu)
+                    next_seq = Op.address;
+                v->claim_seq = next_seq;
+                v->claimed = true;
+                v->released = false;
+                v->handoff_active = false;
+                v->handoff_isolated = false;
+                v->handoff_address = Dev->Config.PmicAddress;
+                if (Op.address != 0u) {
+                    v->claim_token = next_seq;
+                    Op.address = TG_GPU_RAIL_STATE_ACK | next_seq;
+                } else {
+                    v->claim_token = 0u;
+                }
+            }
             Dev->EmcGpuAbiTime = KeQueryInterruptTime();
             SwFanPmicUnlock(Dev);
         } else if (Op.reg == TG_GPU_PMIC_REPORT_EMC_FAILURE) {
@@ -183,19 +247,32 @@ static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *I
             SwFanPmicUnlock(Dev);
             if (!NT_SUCCESS(Status)) return Status;
         } else if (Op.reg == TG_GPU_PMIC_RELEASE_RAIL) {
-            if (Op.address != Dev->Config.PmicAddress || Op.value > 0xffffu ||
-                (Op.value & 0xffu) > GPU_M1_MAX_CODE ||
-                ((Op.value & 0x100u) && (Op.value & 0xffu) < GPU_M1_MIN_CODE))
+            const ULONG req_token = (Op.value >> 16) & 0xffffu;
+            const ULONG rel_value = Op.value & 0xffffu;
+            if (Op.address != Dev->Config.PmicAddress ||
+                (rel_value & 0xffu) > GPU_M1_MAX_CODE ||
+                ((rel_value & 0x100u) && (rel_value & 0xffu) < GPU_M1_MIN_CODE))
                 return STATUS_INVALID_PARAMETER;
             SwFanPmicLock(Dev);
+            if ((Dev->EmcGpuVote.claim_token != 0u && req_token != Dev->EmcGpuVote.claim_token) ||
+                (req_token != 0u && !Dev->EmcGpuVote.claimed)) {
+                SwFanPmicUnlock(Dev);
+                return STATUS_INVALID_DEVICE_STATE;
+            }
             /* Retain the first pre-GPU state across adapter restarts. A later
              * snapshot may already contain a voltage retained for EMC. */
             if (!Dev->EmcGpuVote.release_valid) {
-                Dev->EmcGpuVote.release_value = Op.value;
+                Dev->EmcGpuVote.release_value = rel_value;
                 Dev->EmcGpuVote.release_valid = true;
             }
             Status = SwFanGpuApplyReleased(Dev);
-            if (NT_SUCCESS(Status)) Dev->EmcGpuVote.released = true;
+            if (NT_SUCCESS(Status)) {
+                Dev->EmcGpuVote.released = true;
+                Dev->EmcGpuVote.claimed = false;
+                Dev->EmcGpuVote.claim_token = 0u;
+                Dev->EmcGpuVote.handoff_active = false;
+                Dev->EmcGpuVote.handoff_isolated = false;
+            }
             SwFanPmicUnlock(Dev);
             if (!NT_SUCCESS(Status)) return Status;
         } else {
@@ -211,63 +288,108 @@ static NTSTATUS SwFanGpuPmic(PSWFAN_DEVICE Dev, WDFREQUEST Request, ULONG_PTR *I
          (Op.reg != CPU_M4_VOUT || Op.write)))
         return STATUS_INVALID_PARAMETER;
 
+    BOOLEAN HoldCpuLock = FALSE;
     if (Op.write && Op.reg == GPU_M1_ENABLE_REG && (Op.value & 1u) != 0) {
         ULONG LiveTemp = 0;
         Status = SwFanGpuQueryTemp(Dev, &LiveTemp);
-        if (!NT_SUCCESS(Status) || LiveTemp >= 80)
+        if (!NT_SUCCESS(Status))
+            return Status;
+        if (LiveTemp >= 80)
             return STATUS_DEVICE_NOT_READY;
+        SwFanCpuLock(Dev);
+        HoldCpuLock = TRUE;
     }
 
     SwFanPmicLock(Dev);
+    if (HoldCpuLock && (!SwFanGpuTempFreshLocked(Dev) || Dev->LastTemp >= 80)) {
+        /* Freshness and threshold verified AFTER acquiring BOTH CpuLock and
+         * PmicLock so waiting on PmicLock cannot silently cross the 5 s bound. */
+        SwFanPmicUnlock(Dev);
+        SwFanCpuUnlock(Dev);
+        return STATUS_DEVICE_NOT_READY;
+    }
     if (Op.write) {
         Buffer[0] = (UCHAR)Op.reg;
         Buffer[1] = (UCHAR)Op.value;
         if (Op.reg == GPU_M1_VOUT_REG) {
             if (250000u + 5000u * Op.value < Dev->EmcGpuVote.guard_uv) {
                 SwFanPmicUnlock(Dev);
+                if (HoldCpuLock) SwFanCpuUnlock(Dev);
                 return STATUS_INVALID_DEVICE_STATE;
             }
             if (Op.value > GPU_M1_MAX_CODE) {
                 SwFanPmicUnlock(Dev);
+                if (HoldCpuLock) SwFanCpuUnlock(Dev);
                 return STATUS_INVALID_PARAMETER;
             }
             if (Op.value < GPU_M1_MIN_CODE) {
                 Status = SwFanReadReg(Dev->Pmic, GPU_M1_ENABLE_REG, &EnCtrl);
-                if (!NT_SUCCESS(Status)) { SwFanPmicUnlock(Dev); return Status; }
+                if (!NT_SUCCESS(Status)) {
+                    SwFanPmicUnlock(Dev);
+                    if (HoldCpuLock) SwFanCpuUnlock(Dev);
+                    return Status;
+                }
                 /* Never allow undervolting M1 below 590 mV while enabled;
                  * restoring original_voltage after M1 disable remains valid. */
                 if ((EnCtrl & 1u) != 0) {
                     SwFanPmicUnlock(Dev);
+                    if (HoldCpuLock) SwFanCpuUnlock(Dev);
                     return STATUS_INVALID_PARAMETER;
                 }
             }
         } else if (Op.reg == GPU_M1_ENABLE_REG) {
             if (!(Op.value & 1u) && Dev->EmcGpuVote.guard_uv) {
                 SwFanPmicUnlock(Dev);
+                if (HoldCpuLock) SwFanCpuUnlock(Dev);
                 return STATUS_INVALID_DEVICE_STATE;
             }
             if ((Op.value & 1u) != 0) {
                 Status = SwFanReadReg(Dev->Pmic, GPU_M1_VOUT_REG, &M1Code);
-                if (!NT_SUCCESS(Status)) { SwFanPmicUnlock(Dev); return Status; }
+                if (!NT_SUCCESS(Status)) {
+                    SwFanPmicUnlock(Dev);
+                    if (HoldCpuLock) SwFanCpuUnlock(Dev);
+                    return Status;
+                }
                 if (M1Code < GPU_M1_MIN_CODE || M1Code > GPU_M1_MAX_CODE) {
                     SwFanPmicUnlock(Dev);
+                    if (HoldCpuLock) SwFanCpuUnlock(Dev);
                     return STATUS_INVALID_DEVICE_STATE;
                 }
             }
             Status = SwFanReadReg(Dev->Pmic, GPU_M1_ENABLE_REG, &Readback);
-            if (!NT_SUCCESS(Status)) { SwFanPmicUnlock(Dev); return Status; }
+            if (!NT_SUCCESS(Status)) {
+                SwFanPmicUnlock(Dev);
+                if (HoldCpuLock) SwFanCpuUnlock(Dev);
+                return Status;
+            }
             Buffer[1] = (UCHAR)((Readback & ~1u) | (Op.value & 1u));
+        }
+        /* Re-verify thermal freshness immediately before dispatching the M1
+         * enable write so synchronous pre-reads cannot cross the 5 s bound (A03). */
+        if (HoldCpuLock && (!SwFanGpuTempFreshLocked(Dev) || Dev->LastTemp >= 80)) {
+            SwFanPmicUnlock(Dev);
+            SwFanCpuUnlock(Dev);
+            return STATUS_DEVICE_NOT_READY;
         }
         WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&Memory, Buffer, sizeof(Buffer));
         WDF_REQUEST_SEND_OPTIONS_INIT(&Options, WDF_REQUEST_SEND_OPTION_TIMEOUT);
         Options.Timeout = WDF_REL_TIMEOUT_IN_MS(200);
         Bytes = 0;
         Status = WdfIoTargetSendWriteSynchronously(Dev->Pmic, NULL, &Memory, NULL, &Options, &Bytes);
-        if (!NT_SUCCESS(Status)) { SwFanPmicUnlock(Dev); return Status; }
-        if (Bytes != sizeof(Buffer)) { SwFanPmicUnlock(Dev); return STATUS_DEVICE_PROTOCOL_ERROR; }
+        if (!NT_SUCCESS(Status)) {
+            SwFanPmicUnlock(Dev);
+            if (HoldCpuLock) SwFanCpuUnlock(Dev);
+            return Status;
+        }
+        if (Bytes != sizeof(Buffer)) {
+            SwFanPmicUnlock(Dev);
+            if (HoldCpuLock) SwFanCpuUnlock(Dev);
+            return STATUS_DEVICE_PROTOCOL_ERROR;
+        }
     }
     Status = SwFanReadReg(Dev->Pmic, (UCHAR)Op.reg, &Readback);
     SwFanPmicUnlock(Dev);
+    if (HoldCpuLock) SwFanCpuUnlock(Dev);
     if (!NT_SUCCESS(Status)) return Status;
     if (Op.write && Readback != Buffer[1]) return STATUS_DEVICE_DATA_ERROR;
     if (Op.write && Op.reg == GPU_M1_VOUT_REG)

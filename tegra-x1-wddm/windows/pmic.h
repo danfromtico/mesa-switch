@@ -24,6 +24,24 @@
 #define TG_GPU_PMIC_REPORT_EMC_FAILURE 0x10fu
 #define TG_GPU_LIVE_COUNTER_ABI       0x00020001u
 #define TG_GPU_EMC_VOTE_ABI           0x00010001u
+
+/* Cross-instance / cross-reload rail ownership & handoff protocol (V7-01, A05):
+ * - QUERY_ADDRESS with address == TG_GPU_RAIL_QUERY_MAGIC returns PmicAddress in
+ *   value, TG_GPU_RAIL_STATE_ACK | flags in address, and (claim_seq<<16)|claim_token
+ *   in write when serviced by a token-aware SwitchFan provider.
+ * - CLAIM_RAIL with non-zero address (1..0xffff) assigns a monotonic 16-bit
+ *   claim_token in SwitchFan and returns TG_GPU_RAIL_STATE_ACK | claim_token in address.
+ * - RELEASE_RAIL encodes (claim_token<<16) | ((enable<<8)|vout) in value when
+ *   talking to a token-aware provider; SwitchFan rejects mismatched tokens.
+ * - REPORT_GPU_STATUS with (address & TG_GPU_RAIL_HANDOFF_MASK) == TG_GPU_RAIL_HANDOFF_MAGIC
+ *   records/updates unresolved rail handoff ((claim_token<<16)|flags) across KMD unload. */
+#define TG_GPU_RAIL_QUERY_MAGIC       0x5241494Cu
+#define TG_GPU_RAIL_HANDOFF_MAGIC     0x52484f00u
+#define TG_GPU_RAIL_HANDOFF_MASK      0xffffff00u
+#define TG_GPU_RAIL_STATE_ACK         0x80000000u
+#define TG_GPU_RAIL_STATE_CLAIMED     0x00000001u
+#define TG_GPU_RAIL_STATE_HANDOFF     0x00000002u
+#define TG_GPU_RAIL_STATE_ISOLATED    0x00000004u
 /* Low byte is MAX77812 M1 voltage code (zero = no EMC vote); high 24 bits
  * identify a request. Only the quiescent GPU clock owner acknowledges it. */
 #define TG_GPU_EMC_VOTE_CODE(word) ((uint32_t)(word) & 0xffu)

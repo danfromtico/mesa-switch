@@ -5,10 +5,11 @@
 
 struct tg_gpu_power_io;
 struct tg_gpu_power;
+struct tg_gpu_commit_guard;
 enum tg_gpu_frontend_result {
     TG_GPU_FE_OK, TG_GPU_FE_ARGUMENT, TG_GPU_FE_REGISTER,
     TG_GPU_FE_LTC, TG_GPU_FE_FLUSH_TIMEOUT, TG_GPU_FE_PRI_FAULT,
-    TG_GPU_FE_L2_TIMEOUT, TG_GPU_FE_TOPOLOGY
+    TG_GPU_FE_L2_TIMEOUT, TG_GPU_FE_TOPOLOGY, TG_GPU_FE_FAULT
 };
 /* Fixed-size diagnostic appended to the control ABI; overwritten per run. */
 struct tg_gpu_frontend_status {
@@ -45,6 +46,9 @@ enum tg_gpu_frontend_result tg_gpu_frontend_memory(const struct tg_gpu_power_io 
     const struct tg_gpu_power *, struct tg_gpu_frontend_status *);
 enum tg_gpu_frontend_result tg_gpu_frontend_flush(const struct tg_gpu_power_io *,
     const struct tg_gpu_power *, struct tg_gpu_frontend_status *);
+enum tg_gpu_frontend_result tg_gpu_frontend_flush_checked(const struct tg_gpu_power_io *,
+    const struct tg_gpu_power *, struct tg_gpu_frontend_status *,
+    const struct tg_gpu_commit_guard *);
 /* Cold GR reset/access preamble, after MMU/BAR1 and before any channel bind.
  * No Falcon is started; GR firmware/context/non-context setup remains separate.
  * The caller owns the whole GPU and must reset/power it down on every exit.
@@ -62,8 +66,16 @@ enum tg_gpu_frontend_result tg_gpu_frontend_ce_prepare(const struct tg_gpu_power
  */
 enum tg_gpu_frontend_result tg_gpu_frontend_sync_memory(const struct tg_gpu_power_io *,
     const struct tg_gpu_power *, struct tg_gpu_frontend_status *);
+enum tg_gpu_frontend_result tg_gpu_frontend_sync_memory_checked(const struct tg_gpu_power_io *,
+    const struct tg_gpu_power *, struct tg_gpu_frontend_status *,
+    const struct tg_gpu_commit_guard *);
 void tg_gpu_frontend_snapshot(const struct tg_gpu_power_io *,
     struct tg_gpu_frontend_status *);
+void tg_gpu_frontend_snapshot_checked(const struct tg_gpu_power_io *,
+    struct tg_gpu_frontend_status *, const struct tg_gpu_commit_guard *);
 void tg_gpu_frontend_pri_timeout_snapshot(const struct tg_gpu_power_io *,
     uint32_t bus_interrupt, struct tg_gpu_pri_timeout_snapshot *);
+void tg_gpu_frontend_pri_timeout_snapshot_checked(const struct tg_gpu_power_io *,
+    uint32_t bus_interrupt, struct tg_gpu_pri_timeout_snapshot *,
+    const struct tg_gpu_commit_guard *);
 #endif

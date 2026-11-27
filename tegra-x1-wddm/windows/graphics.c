@@ -33,7 +33,7 @@ NTSTATUS TgGpuCreateGraphicsTemplate(const DXGKRNL_INTERFACE *dxgk,
     status=TgGpuAllocatePrivateMemory(dxgk,TG_GPU_GR_IMAGE_MAX_BYTES,0x80000000,0xffffffff,&out->Memory);
     if(!NT_SUCCESS(status))return status;
     RtlCopyMemory(out->Memory.CpuAddress,source,s->context_bytes);
-    out->ImageBytes=s->context_bytes;KeMemoryBarrier();return STATUS_SUCCESS;
+    out->ImageBytes=s->context_bytes;TgGpuDataSyncBarrier();return STATUS_SUCCESS;
 }
 NTSTATUS TgGpuBuildContextGraphics(const TG_GPU_GRAPHICS_TEMPLATE *t,
     const TG_GPU_PRIVATE_MEMORY *m,UINT64 internal,UINT id)
@@ -62,7 +62,7 @@ NTSTATUS TgGpuBuildContextGraphics(const TG_GPU_GRAPHICS_TEMPLATE *t,
        !tg_gpu_gr_patch_build(cpu+TG_GPU_CONTEXT_PATCH_OFFSET,TG_GPU_GR_PATCH_BYTES,
                              patch,TG_GPU_GR_GLOBAL_PATCH_COUNT))return STATUS_DEVICE_DATA_ERROR;
     instance=m->CpuAddress;instance[132]=(UINT32)va|4;instance[133]=(UINT32)(va>>32);
-    KeMemoryBarrier();return STATUS_SUCCESS;
+    TgGpuDataSyncBarrier();return STATUS_SUCCESS;
 }
 NTSTATUS TgGpuMapContextGraphics(TG_GPU_INTERNAL_VA *v,const TG_GPU_PRIVATE_MEMORY *m)
 {
@@ -77,8 +77,9 @@ NTSTATUS TgGpuMapContextGraphics(TG_GPU_INTERNAL_VA *v,const TG_GPU_PRIVATE_MEMO
         entries[i]|=2; /* GR private buffers use privileged mappings in nvgpu. */
     }
     pt=(volatile UINT64 *)v->Leaf.CpuAddress+TG_GPU_CONTEXT_GR_VA_OFFSET/PAGE_SIZE;
+    TgGpuDataSyncBarrier();
     for(UINT i=0;i<TG_GPU_CONTEXT_GR_BYTES/PAGE_SIZE;++i)pt[i]=entries[i];
-    v->GraphicsPhysical=physical;KeMemoryBarrier();return STATUS_SUCCESS;
+    v->GraphicsPhysical=physical;TgGpuDataSyncBarrier();return STATUS_SUCCESS;
 }
 VOID TgGpuUnmapContextGraphics(TG_GPU_INTERNAL_VA *v,const TG_GPU_PRIVATE_MEMORY *m)
 {
@@ -86,6 +87,7 @@ VOID TgGpuUnmapContextGraphics(TG_GPU_INTERNAL_VA *v,const TG_GPU_PRIVATE_MEMORY
     if(!internal_valid(v) || !instance_valid(m) ||
        v->GraphicsPhysical!=(UINT64)m->SystemPhysicalAddress.QuadPart+TG_GPU_CONTEXT_GR_OFFSET)return;
     pt=(volatile UINT64 *)v->Leaf.CpuAddress+TG_GPU_CONTEXT_GR_VA_OFFSET/PAGE_SIZE;
+    TgGpuDataSyncBarrier();
     for(UINT i=0;i<TG_GPU_CONTEXT_GR_BYTES/PAGE_SIZE;++i)pt[i]=0;
-    v->GraphicsPhysical=0;KeMemoryBarrier();
+    v->GraphicsPhysical=0;TgGpuDataSyncBarrier();
 }

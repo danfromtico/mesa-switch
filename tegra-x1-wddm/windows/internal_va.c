@@ -40,7 +40,7 @@ NTSTATUS TgGpuCreateInternalVa(const DXGKRNL_INTERFACE *dxgk, HANDLE process,
     /* Remaining entries and the physical runlist page stay unmapped. RAMIN
      * is a separate allocation and never appears in this GPU VA mapping.
      */
-    KeMemoryBarrier(); return STATUS_SUCCESS;
+    TgGpuDataSyncBarrier(); return STATUS_SUCCESS;
 }
 NTSTATUS TgGpuInstallInternalRoot(const TG_GPU_TABLE_SEGMENT *tables,
     const TG_GPU_ROOT_TABLE *root, const TG_GPU_INTERNAL_VA *v)
@@ -58,5 +58,5 @@ NTSTATUS TgGpuInstallInternalRoot(const TG_GPU_TABLE_SEGMENT *tables,
     if (!NT_SUCCESS(status)) return status;
     if (physical!=root->DeviceAddress) return STATUS_INVALID_ADDRESS;
     ((volatile UINT64 *)cpu)[index]=pde;
-    KeMemoryBarrier();return STATUS_SUCCESS;
+    TgGpuDataSyncBarrier();return STATUS_SUCCESS;
 }
