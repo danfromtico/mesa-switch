@@ -12,10 +12,17 @@
 #define VIDEO_SYNCPOINT 191u
 #define CHANNEL_BASE (VIDEO_CHANNEL * 0x4000u)
 #define SYNCPOINT_OFFSET (0x2100u + 0xf80u + 4u * VIDEO_SYNCPOINT)
+#define TG_NVDEC_SHUTDOWN_WAIT_100NS (-10000000LL) /* one second, relative */
 static DXGKDDI_ESCAPE *previous_escape;
 
 static void lock(KMUTEX *gate)
 { (VOID)KeWaitForSingleObject(gate,Executive,KernelMode,FALSE,NULL); }
+static NTSTATUS lock_gate(KMUTEX *gate,BOOLEAN bounded)
+{
+    LARGE_INTEGER timeout={.QuadPart=TG_NVDEC_SHUTDOWN_WAIT_100NS};
+    NTSTATUS status=KeWaitForSingleObject(gate,Executive,KernelMode,FALSE,bounded?&timeout:NULL);
+    return status==STATUS_SUCCESS?STATUS_SUCCESS:(NT_SUCCESS(status)?STATUS_DEVICE_BUSY:status);
+}
 static void unlock(KMUTEX *gate) { (VOID)KeReleaseMutex(gate,FALSE); }
 
 /* Translate only assigned ranges. Never manufacture an MMIO mapping from a
@@ -110,8 +117,11 @@ static NTSTATUS clock_quiesce(PVOID ctx)
 {
     TG_GPU_ADAPTER *a=ctx;
     InterlockedExchange(&a->Video.Closing,1);
-    /* No Video.Gate here: release may hold it while waiting for this callback. */
-    lock(&a->Queue.DispatchGate);
+    /* No Video.Gate here: release may hold it while waiting for this callback.
+     * Terminal shutdown bounds every DispatchGate acquisition to avoid hanging
+     * behind a wedged GPU worker. */
+    NTSTATUS gate=lock_gate(&a->Queue.DispatchGate,a->Video.ShutdownBounded || a->ShutdownFinal);
+    if (gate!=STATUS_SUCCESS) return gate;
     NTSTATUS status=TgNvdecQuiesce(a->Video.Backend);
     unlock(&a->Queue.DispatchGate);
     return status;
@@ -121,9 +131,12 @@ static bool clock_release(void *ctx)
     TG_GPU_ADAPTER *a=ctx;
     /* The backend has already proved quiescence. Keep its object and the
      * lifecycle gate, but let the provider's passive callback acquire MC. */
+    a->Video.DispatchGateHeld=FALSE;
     unlock(&a->Queue.DispatchGate);
     NTSTATUS status=TgHost1xClockRelease(&a->Video.Clock);
-    lock(&a->Queue.DispatchGate);
+    NTSTATUS relock=lock_gate(&a->Queue.DispatchGate,a->Video.ShutdownBounded);
+    if (relock!=STATUS_SUCCESS) return false;
+    a->Video.DispatchGateHeld=TRUE;
     return status==STATUS_SUCCESS;
 }
 static NTSTATUS close_locked(TG_GPU_ADAPTER *a)
@@ -143,8 +156,10 @@ static NTSTATUS close_device(PVOID owner, TG_GPU_DEVICE *device)
     TG_GPU_ADAPTER *a=owner;
     NTSTATUS status=STATUS_SUCCESS;
     lock(&a->Video.Gate); lock(&a->Queue.DispatchGate);
+    a->Video.ShutdownBounded=FALSE; a->Video.DispatchGateHeld=TRUE;
     if (a->Video.Device==device) status=close_locked(a);
-    unlock(&a->Queue.DispatchGate); unlock(&a->Video.Gate);
+    if (a->Video.DispatchGateHeld) { a->Video.DispatchGateHeld=FALSE; unlock(&a->Queue.DispatchGate); }
+    unlock(&a->Video.Gate);
     return status;
 }
 void TgNvdecAdapterInitialize(TG_GPU_ADAPTER *a)
@@ -156,14 +171,36 @@ void TgNvdecAdapterInitialize(TG_GPU_ADAPTER *a)
     a->Engine.VideoOwner=a;
     a->Engine.VideoCloseDevice=close_device;
 }
-NTSTATUS TgNvdecAdapterStop(TG_GPU_ADAPTER *a)
+static NTSTATUS adapter_stop(TG_GPU_ADAPTER *a,BOOLEAN shutdown)
 {
+    NTSTATUS status;
     PAGED_CODE();
     if (!a || !a->Video.Initialized) return STATUS_SUCCESS;
-    lock(&a->Video.Gate); lock(&a->Queue.DispatchGate);
-    NTSTATUS status=close_locked(a);
-    unlock(&a->Queue.DispatchGate); unlock(&a->Video.Gate);
+    status=lock_gate(&a->Video.Gate,shutdown);
+    if (status!=STATUS_SUCCESS) return status;
+    status=lock_gate(&a->Queue.DispatchGate,shutdown);
+    if (status!=STATUS_SUCCESS) {
+        unlock(&a->Video.Gate);
+        return status;
+    }
+    a->Video.ShutdownBounded=shutdown;
+    a->Video.DispatchGateHeld=TRUE;
+    status=close_locked(a);
+    a->Video.ShutdownBounded=FALSE;
+    if (a->Video.DispatchGateHeld) {
+        a->Video.DispatchGateHeld=FALSE;
+        unlock(&a->Queue.DispatchGate);
+    }
+    unlock(&a->Video.Gate);
     return status;
+}
+NTSTATUS TgNvdecAdapterStop(TG_GPU_ADAPTER *a)
+{
+    return adapter_stop(a,FALSE);
+}
+NTSTATUS TgNvdecAdapterShutdown(TG_GPU_ADAPTER *a)
+{
+    return adapter_stop(a,TRUE);
 }
 
 /* This miniport owns the assigned Host1x aperture and exposes one decoder.
@@ -430,8 +467,10 @@ static NTSTATUS APIENTRY escape(HANDLE adapter, const DXGKARG_ESCAPE *args)
     else {
         if (input) RtlCopyMemory(input,(const UCHAR *)args->pPrivateDriverData+sizeof(h),h.input_bytes);
         lock(&a->Video.Gate); lock(&a->Queue.DispatchGate);
+        a->Video.ShutdownBounded=FALSE; a->Video.DispatchGateHeld=TRUE;
         if (h.command!=TG_NVDEC_ESCAPE_CLOSE && h.command!=TG_NVDEC_ESCAPE_STATUS &&
-            (a->State!=TgGpuAdapterReady || a->Engine.Stopping || a->Engine.Resetting || a->Engine.RecoveryPending))
+            (a->State!=TgGpuAdapterReady || a->Engine.Stopping || a->Engine.Resetting ||
+             a->Engine.RecoveryPending || a->ShutdownFinal))
             h.result=STATUS_DEVICE_NOT_READY;
         else h.result=execute(a,device,&h,input,output);
         if (h.result==STATUS_SUCCESS && a->Video.IoStatus!=STATUS_SUCCESS && h.command!=TG_NVDEC_ESCAPE_CLOSE)
@@ -444,7 +483,8 @@ static NTSTATUS APIENTRY escape(HANDLE adapter, const DXGKARG_ESCAPE *args)
                 RtlZeroMemory(r+1,h.output_bytes-sizeof(*r));
             }
         }
-        unlock(&a->Queue.DispatchGate); unlock(&a->Video.Gate);
+        if (a->Video.DispatchGateHeld) { a->Video.DispatchGateHeld=FALSE; unlock(&a->Queue.DispatchGate); }
+        unlock(&a->Video.Gate);
         RtlCopyMemory(args->pPrivateDriverData,&h,sizeof(h));
         if (output) RtlCopyMemory((UCHAR *)args->pPrivateDriverData+sizeof(h),output,h.output_bytes);
         status=STATUS_SUCCESS; /* delivery only; caller must inspect h.result */

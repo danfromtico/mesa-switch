@@ -54,8 +54,14 @@ VOID TgGpuTraceExecutionState(TG_GPU_CONTEXT_ENGINE *e,enum tg_gpu_execution_sou
     else {CHECK(source==TgGpuExecutionResetEnd && reset_trace_open);reset_trace_open=FALSE;reset_trace_status=status;}
     ++reset_trace_records;
 }
+static BOOLEAN fail_gate,fail_pmic_release;
 static NTSTATUS NTAPI Wait(PVOID object,KWAIT_REASON reason,KPROCESSOR_MODE mode,BOOLEAN alertable,PLARGE_INTEGER timeout)
-{CHECK(object==&queue.DispatchGate && reason==Executive && mode==KernelMode && !alertable && !timeout && level==PASSIVE_LEVEL);++gate_depth;return STATUS_SUCCESS;}
+{
+    CHECK(object==&queue.DispatchGate && reason==Executive && mode==KernelMode && !alertable &&
+        (!timeout || timeout->QuadPart==-10000000LL) && level==PASSIVE_LEVEL);
+    if(timeout && fail_gate)return STATUS_TIMEOUT;
+    ++gate_depth;return STATUS_SUCCESS;
+}
 static LONG NTAPI Release(PRKMUTEX mutex,BOOLEAN wait)
 {CHECK(mutex==&queue.DispatchGate && !wait && gate_depth && level==PASSIVE_LEVEL);--gate_depth;return 0;}
 NTSTATUS (NTAPI * const __imp_KeWaitForSingleObject)(PVOID,KWAIT_REASON,KPROCESSOR_MODE,BOOLEAN,PLARGE_INTEGER)=Wait;
@@ -70,6 +76,8 @@ NTSTATUS TgGpuStartWorker(TG_GPU_WORKER *w,TG_GPU_WORK_QUEUE *q,TG_GPU_HARDWARE 
 {CHECK(w==&worker && q==&queue && h==&hardware && h->Ready && !w->Thread);if(engine.Resetting)CHECK(gate_depth && engine.RecoveryPending);if(fail_thread)return STATUS_NO_MEMORY;w->Thread=(HANDLE)1;w->Queue=q;w->Hardware=h;return STATUS_SUCCESS;}
 NTSTATUS TgGpuStopWorker(TG_GPU_WORKER *w)
 {CHECK(w==&worker && !gate_depth);if(fail_join)return STATUS_UNSUCCESSFUL;w->Thread=NULL;w->Queue=NULL;w->Hardware=NULL;return STATUS_SUCCESS;}
+NTSTATUS TgGpuStopWorkerEx(TG_GPU_WORKER *w,PLARGE_INTEGER timeout)
+{CHECK(timeout && timeout->QuadPart==-10000000LL);return TgGpuStopWorker(w);}
 static KIRQL NTAPI Lock(PKSPIN_LOCK l){KIRQL old=level;CHECK(!*l);*l=1;level=DISPATCH_LEVEL;return old;}
 static VOID NTAPI Unlock(PKSPIN_LOCK l,KIRQL old){CHECK(*l && level==DISPATCH_LEVEL);*l=0;level=old;}
 KIRQL (NTAPI * const __imp_KeAcquireSpinLockRaiseToDpc)(PKSPIN_LOCK)=Lock;
@@ -125,7 +133,9 @@ enum tg_gpu_power_result tg_gpu_power_down(const struct tg_gpu_power_io *i,struc
     CHECK(i->context==&model && level==PASSIVE_LEVEL);if(!p->owned)return TG_GPU_POWER_OK;
     CHECK(!model.clock_started || model.clock_stops);++model.downs;
     if(model.fail_down)return TG_GPU_POWER_RESET_ERROR;
-    p->owned=p->ready=false;return TG_GPU_POWER_OK;
+    p->ready=false;
+    if(fail_pmic_release)return TG_GPU_POWER_PMIC_ERROR; /* owned rail retained */
+    p->owned=false;return TG_GPU_POWER_OK;
 }
 enum tg_gpu_frontend_result tg_gpu_frontend_start(const struct tg_gpu_power_io *i,
     const struct tg_gpu_power *p,struct tg_gpu_frontend_status *s)
@@ -242,10 +252,58 @@ static void TestReset(void)
         CHECK(TgGpuStopHardware(&hardware)==STATUS_SUCCESS);RemoveEntryList(&lost.Link);Finish();
     }
 }
+static void TestShutdown(void)
+{
+    struct tg_gpu_gr_payload firmware={0};TG_GPU_CONTEXT lost={0};
+    for(UINT failure=0;failure<4;++failure) {
+        Setup();fail_gate=fail_pmic_release=FALSE;
+        CHECK(TgGpuStartHardware(&hardware,&engine,&io,0x33,&firmware)==STATUS_SUCCESS);
+        CHECK(TgGpuInitializeWorkQueue(&queue,&engine)==STATUS_SUCCESS);
+        CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);
+        lost.GraphicsGeneration=1;lost.Root.Valid=TRUE;InsertTailList(&engine.Contexts,&lost.Link);
+        CHECK(TgGpuSuspendBackend(&engine,&queue,&hardware,&worker)==STATUS_NOT_SUPPORTED &&
+              hardware.Ready && worker.Thread && !engine.Resetting);
+        const UINT generation=engine.GraphicsGeneration,traces=reset_trace_records;
+        if(failure==1)fail_pmic_release=TRUE;
+        if(failure==2)fail_join=TRUE;
+        if(failure==3)fail_gate=TRUE;
+        NTSTATUS status=TgGpuShutdownBackend(&engine,&queue,&hardware,&worker);
+        if(failure==2) {
+            CHECK(status==STATUS_UNSUCCESSFUL && worker.Thread && !hardware.Isolated &&
+                  !engine.RecoveryPending && reset_trace_records==traces);
+            fail_join=FALSE;status=TgGpuShutdownBackend(&engine,&queue,&hardware,&worker);
+        }
+        if(failure==3) {
+            CHECK(status==STATUS_DEVICE_BUSY && !worker.Thread && queue.Engine==&engine &&
+                  !hardware.Isolated && !gate_depth && reset_trace_records==traces);
+            fail_gate=FALSE;status=TgGpuShutdownBackend(&engine,&queue,&hardware,&worker);
+        }
+        CHECK(status==STATUS_SUCCESS && engine.Resetting && engine.ShutdownFinal &&
+              !engine.RecoveryPending && queue.Paused && !queue.Engine &&
+              !engine.QueueOwner && !worker.Thread && !gate_depth);
+        CHECK(TgGpuRestartBackend(&engine,&queue,&hardware,&worker,&io,0x33,&firmware)==
+              STATUS_INVALID_DEVICE_STATE);
+        CHECK(hardware.Isolated && hardware.Engine==&engine && !hardware.Ready &&
+              !hardware.Clock.owned && !hardware.Clock.running && !hardware.Execution.owned &&
+              engine.GraphicsGeneration==generation+1 && !lost.Root.Valid &&
+              lost.RootStatus==STATUS_DEVICE_NOT_READY && reset_trace_records==traces);
+        if(failure==1)
+            CHECK(hardware.Power.owned && !hardware.Power.ready &&
+                  (hardware.Status.restore_result&0xffffu)==TG_GPU_POWER_PMIC_ERROR);
+        else CHECK(!hardware.Power.owned && !hardware.Power.ready);
+        const UINT downs=model.downs;
+        CHECK(TgGpuShutdownBackend(&engine,&queue,&hardware,&worker)==STATUS_SUCCESS &&
+              model.downs==downs && engine.GraphicsGeneration==generation+1);
+        RemoveEntryList(&lost.Link);
+        status=TgGpuStopHardware(&hardware);
+        CHECK(status==(failure==1?STATUS_DEVICE_DATA_ERROR:STATUS_SUCCESS));Finish();
+    }
+}
 void start(void)
 {
     struct tg_gpu_gr_payload firmware={0};ULONG written;UINT before;
-    static const char pass[]="PASS: cold hardware/isolation and two-phase global reset/restart, retained backing, lost epochs and failed join/free/thread retry (controlled substitutes)\r\n";
+    static const char pass[]="PASS: cold hardware/isolation, reset/restart and bounded terminal shutdown with retained unresolved rail (controlled substitutes)\r\n";
+    TestShutdown();
     for(UINT n=0;n<3;++n) {
         Setup();model.fail_after=n;
         CHECK(TgGpuStartHardware(&hardware,&engine,&io,0x33,&firmware)==STATUS_INSUFFICIENT_RESOURCES);

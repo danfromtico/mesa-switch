@@ -288,7 +288,8 @@ VOID APIENTRY TgGpuDdiSetRootPageTable(HANDLE adapter, const DXGKARG_SETROOTPAGE
     if (!e || !a) return;
     KeAcquireSpinLock(&e->Lock,&irql); c=find_context(e,a->hContext);
     if (c) {
-        if (c->References || c->Closing) c->RootStatus=STATUS_GRAPHICS_ALLOCATION_BUSY;
+        if (e->ShutdownFinal) c->RootStatus=STATUS_DEVICE_NOT_READY;
+        else if (c->References || c->Closing) c->RootStatus=STATUS_GRAPHICS_ALLOCATION_BUSY;
         else {
             c->RootStatus=TgGpuResolveRootTable(e->Tables,a,&c->Root);
             if (NT_SUCCESS(c->RootStatus)) c->RootStatus=c->Device->Process ?

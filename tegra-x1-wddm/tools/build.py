@@ -63,7 +63,7 @@ if (args.probe or build_miniport) and (not args.acr_firmware or
     any(not (args.acr_firmware / n).is_file() for n in acr_names)):
     parser.error("--probe, --render and --display require --acr-firmware with all six external NVIDIA ACR files")
 mesa_base = subprocess.run(
-    ["git", "-C", str(args.mesa), "merge-base", "--is-ancestor", MESA_REVISION, "HEAD"],
+    ["git", "--no-lazy-fetch", "-C", str(args.mesa), "merge-base", "--is-ancestor", MESA_REVISION, "HEAD"],
     check=False)
 if mesa_base.returncode != 0:
     parser.error(f"Mesa must contain the tested mesa-switch base {MESA_REVISION}")

@@ -23,6 +23,7 @@ static TG_GPU_PROCESS process;
 static TG_GPU_DEVICE *first,*second;
 static ULONG pool_live, acquires, releases, creates, destroys, decodes;
 static BOOLEAN fail_pool, valid_firmware=TRUE, fail_stop, fail_release, fail_decode, held;
+static BOOLEAN contend_quiesce_gate, contend_relock_gate;
 static TG_HOST1X_QUIESCE quiesce;
 static PVOID quiesce_context;
 static struct tg_nvdec_platform_owner saved_owner;
@@ -44,8 +45,15 @@ static VOID NTAPI free_pool(PVOID p,ULONG tag)
 PVOID (NTAPI *const __imp_ExAllocatePool2)(POOL_FLAGS,SIZE_T,ULONG)=alloc;
 VOID (NTAPI *const __imp_ExFreePoolWithTag)(PVOID,ULONG)=free_pool;
 static VOID NTAPI init_mutex(PRKMUTEX m,ULONG l) { CHECK(!l);m->Header.SignalState=1; }
+static UINT bounded_waits,bounded_timeouts;
 static NTSTATUS NTAPI wait_object(PVOID p,KWAIT_REASON r,KPROCESSOR_MODE m,BOOLEAN a,PLARGE_INTEGER t)
-{ (void)r;CHECK(m==KernelMode && !a && !t && !level);PKMUTEX gate=p;CHECK(gate->Header.SignalState==1);gate->Header.SignalState=0;return STATUS_SUCCESS; }
+{
+    (void)r;CHECK(m==KernelMode && !a && !level);PKMUTEX gate=p;
+    if(t){CHECK(t->QuadPart==-10000000LL);++bounded_waits;
+        if(gate->Header.SignalState<=0){++bounded_timeouts;return STATUS_TIMEOUT;}}
+    else CHECK(gate->Header.SignalState==1);
+    gate->Header.SignalState=0;return STATUS_SUCCESS;
+}
 static LONG NTAPI release_mutex(PRKMUTEX m,BOOLEAN w)
 { CHECK(!w && !level && !m->Header.SignalState);m->Header.SignalState=1;return 0; }
 static KIRQL NTAPI lock_spin(PKSPIN_LOCK p) { CHECK(!*p && !level);*p=1;level=DISPATCH_LEVEL;return PASSIVE_LEVEL; }
@@ -80,9 +88,12 @@ NTSTATUS TgHost1xClockRelease(TG_HOST1X_CLOCK_LEASE **p)
     if(!*p)return STATUS_SUCCESS;
     CHECK(adapter.Queue.DispatchGate.Header.SignalState==1);
     CHECK(adapter.Video.Gate.Header.SignalState==0);++releases;
+    if(contend_quiesce_gate)adapter.Queue.DispatchGate.Header.SignalState=0;
     NTSTATUS s=quiesce(quiesce_context);
+    if(contend_quiesce_gate)adapter.Queue.DispatchGate.Header.SignalState=1;
     if(s!=STATUS_SUCCESS)return s;
     if(fail_release)return STATUS_IO_TIMEOUT;
+    if(contend_relock_gate)adapter.Queue.DispatchGate.Header.SignalState=0;
     *p=NULL;held=FALSE;return STATUS_SUCCESS;
 }
 BOOLEAN TgNvdecFirmwareValid(const void *data,SIZE_T bytes,const UINT8 sha[32])
@@ -238,10 +249,30 @@ void start(void)
     CHECK(TgGpuDdiDestroyDevice(first)==STATUS_DEVICE_BUSY && first->Closing && first->VideoReferences==1 && held);
     fail_release=FALSE;CHECK(TgGpuDdiDestroyDevice(first)==0 && !held && destroys==1 && !adapter.Video.Device);
     prepare_load();CHECK(call(&ddi,second)==0 && h->result==0 && h->session!=session && held);
-    CHECK(TgGpuDdiDestroyDevice(second)==0 && !held && destroys==2 && !process.Devices && !pool_live);
+    adapter.Video.Gate.Header.SignalState=0;
+    CHECK(TgNvdecAdapterShutdown(&adapter)==STATUS_DEVICE_BUSY && held && destroys==1 &&
+          bounded_waits==1 && bounded_timeouts==1);
+    adapter.Video.Gate.Header.SignalState=1;adapter.Queue.DispatchGate.Header.SignalState=0;
+    CHECK(TgNvdecAdapterShutdown(&adapter)==STATUS_DEVICE_BUSY && held && destroys==1 &&
+          adapter.Video.Gate.Header.SignalState==1 && bounded_waits==3 && bounded_timeouts==2);
+    adapter.Queue.DispatchGate.Header.SignalState=1;
+    contend_quiesce_gate=TRUE;
+    CHECK(TgNvdecAdapterShutdown(&adapter)==STATUS_DEVICE_BUSY && held && destroys==1 &&
+          adapter.Video.Gate.Header.SignalState==1 && adapter.Queue.DispatchGate.Header.SignalState==1 &&
+          bounded_waits==7 && bounded_timeouts==3);
+    contend_quiesce_gate=FALSE;contend_relock_gate=TRUE;
+    CHECK(TgNvdecAdapterShutdown(&adapter)==STATUS_DEVICE_BUSY && !held && destroys==1 &&
+          adapter.Video.Gate.Header.SignalState==1 && adapter.Queue.DispatchGate.Header.SignalState==0 &&
+          bounded_waits==11 && bounded_timeouts==4);
+    contend_relock_gate=FALSE;adapter.Queue.DispatchGate.Header.SignalState=1;
+    CHECK(TgNvdecAdapterShutdown(&adapter)==STATUS_SUCCESS && !held && destroys==2 &&
+          !adapter.Video.Device && adapter.Video.Gate.Header.SignalState==1 &&
+          adapter.Queue.DispatchGate.Header.SignalState==1 &&
+          bounded_waits==14 && bounded_timeouts==4);
+    CHECK(TgGpuDdiDestroyDevice(second)==0 && !held && !process.Devices && !pool_live);
     CHECK(foreign[0]==0x80100840u && !foreign[0x18/4] && foreign[0x1c/4]==0x21d84cf0u && foreign[0x24/4]==1);
     CHECK(!active[0] && active[0x18/4]==0x200u && active[0x1c/4]==0x100u && !active[0x24/4]);
-    CHECK(acquires==3+host_rejections && releases==4+host_rejections);
+    CHECK(acquires==3+host_rejections && releases==5+host_rejections);
     ULONG written;const char ok[]="PASS: NVDEC escape ownership, packet bounds, retained stop failures and lock order (CPU only)\n";
     WriteFile(GetStdHandle((ULONG)-11),ok,sizeof(ok)-1,&written,NULL);ExitProcess(0);
 }

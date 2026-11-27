@@ -88,7 +88,7 @@ struct _TG_GPU_CONTEXT_ENGINE {
     struct tg_nvdec_resource_info NvdecInfo; /* copied start snapshot; no borrowed MMIO */
     struct tg_nvdec_client_info NvdecClients;
     NTSTATUS RecoveryStatus;
-    BOOLEAN RecoveryPending,RecoverySending,RecoveryNotified,Resetting;
+    BOOLEAN RecoveryPending,RecoverySending,RecoveryNotified,Resetting,ShutdownFinal;
     ULONG RecoverySendToken,RecoveryActiveToken;
     /* Resident nonpaged diagnostic breadcrumbs (lock-free, safe at any IRQL). */
     volatile LONG DiagWorkerStage;

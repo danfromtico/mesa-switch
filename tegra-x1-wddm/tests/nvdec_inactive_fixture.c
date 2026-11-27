@@ -9,3 +9,7 @@ NTSTATUS TgNvdecAdapterStop(TG_GPU_ADAPTER *a)
         ExitProcess(__LINE__);
     return STATUS_SUCCESS;
 }
+NTSTATUS TgNvdecAdapterShutdown(TG_GPU_ADAPTER *a)
+{
+    return TgNvdecAdapterStop(a);
+}

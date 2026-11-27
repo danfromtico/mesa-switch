@@ -35,6 +35,8 @@ typedef struct _TG_GPU_ADAPTER {
     volatile LONG64 StartupDiagnostic;
     enum tg_gpu_adapter_state State;
     BOOLEAN EngineReady,QueueReady;
+    /* A terminal power transition retires native roots and forbids D0 wake. */
+    BOOLEAN ShutdownFinal;
 } TG_GPU_ADAPTER;
 _Static_assert(FIELD_OFFSET(TG_GPU_ADAPTER,Engine)==0,"adapter DDI handle layout");
 _Static_assert(FIELD_OFFSET(TG_GPU_ADAPTER,StartupDiagnostic)%8==0,

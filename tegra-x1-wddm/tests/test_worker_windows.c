@@ -81,7 +81,8 @@ static NTSTATUS NTAPI Wait(ULONG count,PVOID objects[],WAIT_TYPE type,KWAIT_REAS
     return model.waits[i];
 }
 static NTSTATUS NTAPI Join(HANDLE h,BOOLEAN alertable,PLARGE_INTEGER timeout)
-{CHECK(h==(HANDLE)123 && !alertable && !timeout && worker.Stop.Header.SignalState);++model.joins;return model.join;}
+{CHECK(h==(HANDLE)123 && !alertable && (!timeout || timeout->QuadPart==-10000000LL) &&
+    worker.Stop.Header.SignalState);++model.joins;return model.join;}
 static NTSTATUS NTAPI Close(HANDLE h)
 {CHECK(h==(HANDLE)123 && model.terminated && model.joins);++model.closes;return model.close;}
 NTSTATUS (* const __imp_PsCreateSystemThread)(PHANDLE,ULONG,POBJECT_ATTRIBUTES,HANDLE,PCLIENT_ID,PKSTART_ROUTINE,PVOID)=Create;
@@ -155,6 +156,16 @@ void start(void)
     CHECK(TgGpuStopWorker(&worker)==STATUS_UNSUCCESSFUL && worker.Thread && worker.Queue==&queue);
     model.close=STATUS_SUCCESS;CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS && !worker.Thread && !worker.Queue && !worker.Hardware);
     CHECK(TgGpuStopWorker(&worker)==STATUS_SUCCESS);
+    {
+        LARGE_INTEGER timeout={.QuadPart=-10000000LL};
+        Setup();CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);model.routine(model.context);
+        model.join=STATUS_TIMEOUT;
+        CHECK(TgGpuStopWorkerEx(&worker,&timeout)==STATUS_DEVICE_BUSY && model.joins==1 &&
+              !model.closes && worker.Thread && worker.Queue==&queue);
+        model.join=STATUS_SUCCESS;
+        CHECK(TgGpuStopWorkerEx(&worker,&timeout)==STATUS_SUCCESS && model.joins==2 &&
+              model.closes==1 && !worker.Thread && !worker.Queue && !worker.Hardware);
+    }
     Setup();model.have_timer=TRUE;hardware.Dvfs.Configured=1;
     model.timed[0]=model.timed[3]=TRUE;model.expected_timeout[0]=model.expected_timeout[3]=-2000000;
     CHECK(TgGpuStartWorker(&worker,&queue,&hardware)==STATUS_SUCCESS);model.routine(model.context);

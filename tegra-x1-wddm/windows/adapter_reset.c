@@ -28,7 +28,7 @@ NTSTATUS APIENTRY TgGpuDdiResetFromTimeout(HANDLE adapter)
 {
     TG_GPU_ADAPTER *a=adapter;NTSTATUS status;
     PAGED_CODE();
-    if(!a || !a->EngineReady || (a->State!=TgGpuAdapterReady && a->State!=TgGpuAdapterResetting))
+    if(!a || a->ShutdownFinal || !a->EngineReady || (a->State!=TgGpuAdapterReady && a->State!=TgGpuAdapterResetting))
         return STATUS_INVALID_DEVICE_STATE;
     trace_adapter_tdr(&a->Engine,TgGpuTdrResetAdapter,0,0);
     a->State=TgGpuAdapterResetting;
@@ -64,7 +64,7 @@ NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *a)
     struct tg_gpu_power_io io;UCHAR address=0;NTSTATUS status;
     PVOID gpu_regs=NULL,lic_regs=NULL;
     PAGED_CODE();
-    if(!a || !a->EngineReady || !a->Engine.Resetting ||
+    if(!a || a->ShutdownFinal || !a->EngineReady || !a->Engine.Resetting ||
        !a->Platform.Resources || !a->Hardware.Isolated)return STATUS_INVALID_DEVICE_STATE;
     if(a->Resources.Mapping[TgGpuRegisters] && a->Resources.LicMapping &&
        a->Resources.Memory[TgGpuRegisters].u.Memory.Length>=T214_GPU_REG_SIZE &&
@@ -95,16 +95,60 @@ NTSTATUS TgGpuRestartAdapterHardware(TG_GPU_ADAPTER *a)
     }
     return status;
 }
+static BOOLEAN terminal_power_action(POWER_ACTION action)
+{
+    return action==PowerActionShutdown || action==PowerActionShutdownReset ||
+        action==PowerActionShutdownOff;
+}
+static NTSTATUS terminal_shutdown(TG_GPU_ADAPTER *a)
+{
+    KIRQL q_irql,e_irql;NTSTATUS status;
+    /* Publish the one-way state before any operation that can fail. Resetting
+     * closes native admission; no branch below requests recovery or rearms ISR. */
+    a->ShutdownFinal=TRUE;a->State=TgGpuAdapterSuspended;
+    if(a->QueueReady && a->Queue.Engine==&a->Engine) {
+        KeAcquireSpinLock(&a->Queue.Lock,&q_irql);
+        a->Queue.Paused=TRUE;
+        KeAcquireSpinLock(&a->Engine.Lock,&e_irql);
+        a->Engine.Resetting=TRUE;a->Engine.ShutdownFinal=TRUE;
+        KeReleaseSpinLock(&a->Engine.Lock,e_irql);
+        KeReleaseSpinLock(&a->Queue.Lock,q_irql);
+    } else {
+        KeAcquireSpinLock(&a->Engine.Lock,&e_irql);
+        a->Engine.Resetting=TRUE;a->Engine.ShutdownFinal=TRUE;
+        KeReleaseSpinLock(&a->Engine.Lock,e_irql);
+    }
+    status=TgGpuDisarmFaultIsrEx(&a->Engine.FaultIsr,&a->Engine.Dxgk,
+        a->Hardware.Power.owned && a->Hardware.Power.ready,NULL,NULL);
+    if(!NT_SUCCESS(status))return status;
+    status=TgNvdecAdapterShutdown(a);
+    if(status!=STATUS_SUCCESS)return status;
+    status=TgGpuShutdownBackend(&a->Engine,&a->Queue,&a->Hardware,&a->Worker);
+    if(a->Engine.Resetting) {
+        a->State=TgGpuAdapterSuspended;
+        a->QueueReady=a->Queue.Engine==&a->Engine;
+    }
+    if(NT_SUCCESS(status) && a->Hardware.Isolated && a->Hardware.Power.owned) {
+        a->Platform.PreservedGpuIsolated=TRUE;
+        TgGpuHandOffUnresolvedRail(&a->Platform,TRUE);
+    }
+    return status;
+}
 NTSTATUS TgGpuSetAdapterPowerState(TG_GPU_ADAPTER *a,ULONG uid,
     DEVICE_POWER_STATE state,POWER_ACTION action)
 {
-    UNREFERENCED_PARAMETER(action);
     PAGED_CODE();
     if(!a)return STATUS_INVALID_PARAMETER;
     if(uid!=DISPLAY_ADAPTER_HW_ID || !a->EngineReady)return STATUS_SUCCESS;
     if(state==PowerDeviceD0) {
+        if(a->ShutdownFinal)return STATUS_INVALID_DEVICE_STATE;
         return a->State==TgGpuAdapterSuspended ? TgGpuRestartAdapterHardware(a) : STATUS_SUCCESS;
     }
+    if(state>PowerDeviceD0 && terminal_power_action(action) &&
+       (a->State==TgGpuAdapterReady || a->State==TgGpuAdapterSuspended ||
+        a->State==TgGpuAdapterResetting))return terminal_shutdown(a);
+    if(a->ShutdownFinal)
+        return a->Hardware.Isolated?STATUS_SUCCESS:STATUS_INVALID_DEVICE_STATE;
     if(a->State!=TgGpuAdapterReady && a->State!=TgGpuAdapterSuspended)return STATUS_SUCCESS;
     if(a->State==TgGpuAdapterSuspended && a->Hardware.Isolated)return STATUS_SUCCESS;
     if(!a->Engine.PagingOnly)return STATUS_NOT_SUPPORTED;

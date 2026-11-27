@@ -32,10 +32,13 @@ typedef struct _TG_NVDEC_ADAPTER {
     volatile LONG Closing;
     NTSTATUS IoStatus;
     BOOLEAN Initialized;
+    BOOLEAN ShutdownBounded, DispatchGateHeld;
 } TG_NVDEC_ADAPTER;
 
 void TgNvdecAdapterInitialize(struct _TG_GPU_ADAPTER *Adapter);
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS TgNvdecAdapterStop(struct _TG_GPU_ADAPTER *Adapter);
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS TgNvdecAdapterShutdown(struct _TG_GPU_ADAPTER *Adapter);
 void TgNvdecRegisterEscape(DRIVER_INITIALIZATION_DATA *Ddis);
 #endif

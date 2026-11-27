@@ -338,6 +338,8 @@ static VOID NTAPI InitializeMutex(PRKMUTEX m,ULONG rank)
 {CHECK(m && !rank);m->Header.SignalState=1;}
 KUSER_SHARED_DATA ki_user_shared_data;
 static UINT zero_timeout_gate_probes,null_timeout_on_owned_gate;
+static PKMUTEX bounded_shutdown_gate;
+static UINT bounded_shutdown_gate_waits,bounded_shutdown_gate_timeouts;
 static NTSTATUS NTAPI WaitSingle(PVOID object,KWAIT_REASON reason,KPROCESSOR_MODE mode,BOOLEAN alertable,PLARGE_INTEGER timeout)
 {
     PKMUTEX m=object;
@@ -345,6 +347,13 @@ static NTSTATUS NTAPI WaitSingle(PVOID object,KWAIT_REASON reason,KPROCESSOR_MOD
         CHECK(m && reason==Executive && mode==KernelMode && !alertable && level==PASSIVE_LEVEL);
         ++zero_timeout_gate_probes;
         if(m->Header.SignalState<=0)return STATUS_TIMEOUT;
+        --m->Header.SignalState;return STATUS_SUCCESS;
+    }
+    if(restart_fixture.active && timeout && m==bounded_shutdown_gate) {
+        CHECK(reason==Executive && mode==KernelMode && !alertable &&
+            timeout->QuadPart==-10000000LL && level==PASSIVE_LEVEL);
+        ++bounded_shutdown_gate_waits;
+        if(m->Header.SignalState<=0){++bounded_shutdown_gate_timeouts;return STATUS_TIMEOUT;}
         --m->Header.SignalState;return STATUS_SUCCESS;
     }
     if(restart_fixture.active && timeout) {
@@ -376,8 +385,9 @@ static NTSTATUS NTAPI UnexpectedClose(HANDLE h)
 }
 static NTSTATUS NTAPI UnexpectedJoin(HANDLE h,BOOLEAN a,PLARGE_INTEGER t)
 {
-    CHECK(restart_fixture.active && level==PASSIVE_LEVEL && h==(HANDLE)0x777 && !a && !t &&
-        restart_fixture.active_worker && restart_fixture.active_worker->Stop.Header.SignalState);
+    CHECK(restart_fixture.active && level==PASSIVE_LEVEL && h==(HANDLE)0x777 && !a &&
+        (!t || t->QuadPart==-10000000LL) && restart_fixture.active_worker &&
+        restart_fixture.active_worker->Stop.Header.SignalState);
     ++restart_fixture.threads_joined;
     return STATUS_SUCCESS;
 }
@@ -2492,6 +2502,7 @@ NTSTATUS TgGpuIsolateHardware(TG_GPU_HARDWARE *h)
                !h->Io.release_pmic(h->Io.context,h->Power.pmic_address,
                                    h->Power.original_enable,h->Power.original_voltage)) {
                 h->Status.restore_result=TG_GPU_POWER_PMIC_ERROR;
+                h->Power.ready=false; /* clamp/reset precede provider release */
                 return STATUS_DEVICE_DATA_ERROR;
             }
             h->Power.owned=h->Power.ready=false;
@@ -2529,6 +2540,157 @@ NTSTATUS TgGpuStopHardware(TG_GPU_HARDWARE *h)
     e->HardwareOwner=NULL;h->Engine=NULL;
     KeReleaseSpinLock(&e->Lock,irql);
     return h->Status.restore_result?STATUS_DEVICE_DATA_ERROR:STATUS_SUCCESS;
+}
+static __declspec(noinline) VOID TestAdapterTerminalShutdown(const DXGKRNL_INTERFACE *dxgk)
+{
+    static TG_GPU_ADAPTER a;
+    static TG_GPU_TABLE_SEGMENT tables;
+    static ULONG shutdown_gpu_regs[T214_GPU_REG_SIZE/4];
+    static ULONG shutdown_lic_regs[T214_GPU_LIC_SIZE/4];
+    static ULONG ap[TgGpuApertureCount][4];
+    static const ULONG ap_bases[]={T214_GPU_REG_BASE,T214_GPU_BAR1_BASE,T214_GPU_AUX_BASE,
+#define BASE(b,s) b,
+        T214_GPU_EXTRA_RESOURCES(BASE)
+#undef BASE
+    };
+    static const POWER_ACTION actions[]={PowerActionShutdown,PowerActionShutdownReset,
+        PowerActionShutdownOff,PowerActionShutdownReset,PowerActionShutdown,PowerActionShutdownOff};
+    const UINT pools=PoolsInUse();
+    restart_driver.DeviceObject=&restart_owner_device;
+    TgGpuSetPlatformDriverObject(&restart_driver);
+    for(UINT scenario=0;scenario<RTL_NUMBER_OF(actions);++scenario) {
+        TG_GPU_CONTEXT lost={0};UCHAR address=0;NTSTATUS status;
+        memset(&a,0,sizeof(a));memset(&restart_fixture,0,sizeof(restart_fixture));
+        memset(shutdown_gpu_regs,0,sizeof(shutdown_gpu_regs));
+        memset(shutdown_lic_regs,0,sizeof(shutdown_lic_regs));memset(ap,0,sizeof(ap));
+        bounded_shutdown_gate=NULL;bounded_shutdown_gate_waits=bounded_shutdown_gate_timeouts=0;
+        restart_fixture.active=TRUE;restart_fixture.enable=0x40;restart_fixture.voltage=0x46;
+        tables=(TG_GPU_TABLE_SEGMENT){.Memory={(HANDLE)98,paging_tables,
+            {.QuadPart=0x94000000},sizeof(paging_tables)},.SegmentId=1};
+        CHECK(TgGpuInitializeContextEngine(&a.Engine,dxgk,&tables)==STATUS_SUCCESS);
+        a.EngineReady=TRUE;a.State=TgGpuAdapterReady;a.Engine.GraphicsGeneration=1;
+        CHECK(TgGpuInitializeWorkQueue(&a.Queue,&a.Engine)==STATUS_SUCCESS);a.QueueReady=TRUE;
+        bounded_shutdown_gate=&a.Queue.DispatchGate;
+        for(UINT i=0;i<TgGpuApertureCount;++i) {
+            a.Resources.Memory[i].Type=CmResourceTypeMemory;
+            a.Resources.Memory[i].u.Memory.Start.QuadPart=ap_bases[i];
+            a.Resources.Memory[i].u.Memory.Length=sizeof(ap[i]);a.Resources.Mapping[i]=ap[i];
+            if(ap_bases[i]==0x60006280u)ap[i][3]=0x01000000u;
+            if(ap_bases[i]==0x7000e6d4u)ap[i][0]=1u;
+        }
+        a.Resources.Memory[TgGpuRegisters].u.Memory.Length=T214_GPU_REG_SIZE;
+        a.Resources.Mapping[TgGpuRegisters]=shutdown_gpu_regs;
+        a.Resources.Lic.u.Memory.Length=T214_GPU_LIC_SIZE;a.Resources.LicMapping=shutdown_lic_regs;
+        CHECK(TgGpuOpenPlatform(&a.Platform,&a.Resources)==STATUS_SUCCESS);
+        CHECK(TgGpuPlatformPreflight(&a.Platform,&address)==STATUS_SUCCESS && address==0x33);
+        struct tg_gpu_pmic_request claim={address,TG_GPU_PMIC_CLAIM_RAIL,1,TG_GPU_EMC_VOTE_ABI};
+        CHECK(TgGpuPlatformRequest(&a.Platform,&claim)==STATUS_SUCCESS &&
+              a.Platform.EmcRailOwner && a.Platform.RailClaimed);
+        a.Hardware.Engine=&a.Engine;a.Hardware.Io=TgGpuPlatformIo(&a.Platform);
+        a.Hardware.Power=(struct tg_gpu_power){.owned=true,.ready=true,.stage=TG_GPU_STAGE_READY,
+            .pmic_address=address,.original_enable=0x40,.original_voltage=0x46};
+        a.Hardware.Ready=a.Hardware.GpuOwned=TRUE;
+        a.Hardware.Clock.owned=a.Hardware.Clock.running=true;a.Hardware.Execution.owned=true;
+        a.Engine.HardwareOwner=&a.Hardware;a.Engine.UserdBar1Ready=TRUE;
+        lost.Flags.VirtualAddressing=1;lost.Root.Valid=TRUE;lost.RootStatus=STATUS_SUCCESS;
+        lost.GraphicsGeneration=1;InsertTailList(&a.Engine.Contexts,&lost.Link);
+        shutdown_gpu_regs[0x100/4]=0u;shutdown_gpu_regs[0x2140/4]=0x40000001u;
+        shutdown_gpu_regs[0x4010c/4]=0x01000010u;shutdown_gpu_regs[0x640/4]=0x40u;
+        shutdown_gpu_regs[0x140/4]=0u;
+        shutdown_lic_regs[12/4]=0x00001234u|T214_GPU_LIC_STALL;
+        shutdown_lic_regs[24/4]=T214_GPU_LIC_STALL|0x8u;
+        CHECK(TgGpuArmFaultIsr(&a.Engine.FaultIsr,&a.Engine.Dxgk,
+              shutdown_gpu_regs,shutdown_lic_regs)==STATUS_SUCCESS);
+        CHECK(TgGpuStartWorker(&a.Worker,&a.Queue,&a.Hardware)==STATUS_SUCCESS);
+        /* Native adapters retain the old recoverable-transition rejection. */
+        const POWER_ACTION recoverable[]={PowerActionSleep,PowerActionHibernate,PowerActionNone};
+        for(UINT i=0;i<RTL_NUMBER_OF(recoverable);++i)
+            CHECK(TgGpuSetAdapterPowerState(&a,DISPLAY_ADAPTER_HW_ID,PowerDeviceD3,
+                  recoverable[i])==STATUS_NOT_SUPPORTED && a.State==TgGpuAdapterReady &&
+                  !a.ShutdownFinal && a.Engine.FaultIsr.Armed==1 && a.Worker.Thread &&
+                  !restart_fixture.releases);
+        if(scenario==3)restart_fixture.release_status=STATUS_IO_DEVICE_ERROR;
+        if(scenario==4) {
+            KIRQL old;
+            shutdown_gpu_regs[0x100/4]=TG_GPU_MC_STALL_PFIFO;
+            old=level;level=3;in_sync=TRUE;
+            CHECK(TgGpuServiceFaultIsr(&a.Engine.FaultIsr,&a.Engine.Dxgk));
+            in_sync=FALSE;level=old;
+            old=level;level=DISPATCH_LEVEL;TgGpuDdiDpcRoutine(&a.Engine);level=old;
+            CHECK(a.Engine.FaultIsr.Faulted==1 && a.Engine.RecoveryPending &&
+                  a.Engine.RecoveryNotified && a.Queue.Paused);
+            a.Queue.Failure=STATUS_IO_TIMEOUT;
+        }
+        if(scenario==5) {
+            a.Queue.DispatchGate.Header.SignalState=0;
+        }
+        const UINT recovery_before=recovery_records,recovery_irq_before=recovery_interrupts;
+        const UINT null_waits_before=null_timeout_on_owned_gate;
+        status=TgGpuSetAdapterPowerState(&a,DISPLAY_ADAPTER_HW_ID,PowerDeviceD3,actions[scenario]);
+        if(scenario==5) {
+            CHECK(status==STATUS_DEVICE_BUSY && bounded_shutdown_gate_waits==1 &&
+                  bounded_shutdown_gate_timeouts==1 && null_timeout_on_owned_gate==null_waits_before);
+            CHECK(a.ShutdownFinal && a.State==TgGpuAdapterSuspended && !a.Engine.FaultIsr.Armed &&
+                  !a.Worker.Thread && a.Queue.Engine==&a.Engine && !a.Hardware.Isolated &&
+                  a.Hardware.Power.ready && !restart_fixture.releases);
+            CHECK(TgGpuSetAdapterPowerState(&a,DISPLAY_ADAPTER_HW_ID,PowerDeviceD0,
+                  PowerActionNone)==STATUS_INVALID_DEVICE_STATE);
+            a.Queue.DispatchGate.Header.SignalState=1;
+            status=TgGpuSetAdapterPowerState(&a,DISPLAY_ADAPTER_HW_ID,PowerDeviceD3,actions[scenario]);
+            CHECK(bounded_shutdown_gate_waits==2 && bounded_shutdown_gate_timeouts==1);
+        }
+        CHECK(status==STATUS_SUCCESS && a.ShutdownFinal && a.State==TgGpuAdapterSuspended &&
+              a.Engine.Resetting && !a.QueueReady && !a.Queue.Engine && !a.Engine.QueueOwner &&
+              a.Queue.Paused && !a.Worker.Thread && !a.Engine.FaultIsr.Armed &&
+              a.Hardware.Isolated && !a.Hardware.Ready && !a.Hardware.Clock.owned &&
+              !a.Hardware.Execution.owned && !a.Engine.UserdBar1Ready &&
+              a.Engine.GraphicsGeneration==2 && !lost.Root.Valid &&
+              lost.RootStatus==STATUS_DEVICE_NOT_READY && restart_fixture.releases==1 &&
+              recovery_records==recovery_before && recovery_interrupts==recovery_irq_before &&
+              null_timeout_on_owned_gate==null_waits_before);
+        if(scenario==3)
+            CHECK(a.Hardware.Power.owned && !a.Hardware.Power.ready &&
+                  (a.Hardware.Status.restore_result&0xffffu)==TG_GPU_POWER_PMIC_ERROR);
+        else CHECK(!a.Hardware.Power.owned && !a.Hardware.Power.ready);
+        if(scenario==4)
+            CHECK(a.Engine.FaultIsr.Faulted==1 && a.Engine.RecoveryPending);
+        /* Neither D0 nor a direct scheduler restart/reset/SetRootPageTable may revive native roots. */
+        CHECK(a.Engine.ShutdownFinal);
+        CHECK(TgGpuSetAdapterPowerState(&a,DISPLAY_ADAPTER_HW_ID,PowerDeviceD0,
+              PowerActionNone)==STATUS_INVALID_DEVICE_STATE);
+        CHECK(TgGpuRestartAdapterHardware(&a)==STATUS_INVALID_DEVICE_STATE &&
+              TgGpuDdiResetFromTimeout(&a)==STATUS_INVALID_DEVICE_STATE &&
+              TgGpuDdiRestartFromTimeout(&a)==STATUS_INVALID_DEVICE_STATE &&
+              !restart_fixture.fw_loads && !restart_fixture.fw_frees && !a.Engine.FaultIsr.Armed);
+        {
+            DXGKARG_SETROOTPAGETABLE late_root={.hContext=&lost,.Address={1,0,0},
+                .NumEntries=TG_GPU_TABLE_ENTRIES};
+            TgGpuDdiSetRootPageTable(&a.Engine,&late_root);
+            CHECK(!lost.Root.Valid && lost.RootStatus==STATUS_DEVICE_NOT_READY);
+        }
+        CHECK(TgGpuSetAdapterPowerState(&a,DISPLAY_ADAPTER_HW_ID,PowerDeviceD3,
+              actions[scenario])==STATUS_SUCCESS && a.Engine.GraphicsGeneration==2 &&
+              restart_fixture.releases==1 && !a.Engine.FaultIsr.Armed);
+        if(scenario==3) {
+            BOOLEAN isolated=FALSE;UCHAR owed=0;
+            CHECK(TgGpuQueryUnresolvedRail(&isolated,&owed,NULL,NULL) && isolated && owed==address);
+            restart_fixture.release_status=STATUS_SUCCESS;
+            CHECK(TgGpuPlatformAbandonRail(&a.Platform,address)==STATUS_SUCCESS &&
+                  restart_fixture.releases==2 && !TgGpuQueryUnresolvedRail(NULL,NULL,NULL,NULL));
+        }
+        CHECK(!TgGpuQueryUnresolvedRail(NULL,NULL,NULL,NULL));
+        RemoveEntryList(&lost.Link);
+        status=TgGpuStopHardware(&a.Hardware);
+        CHECK(status==(scenario==3?STATUS_DEVICE_DATA_ERROR:STATUS_SUCCESS) &&
+              !a.Hardware.Engine && !a.Engine.HardwareOwner);
+        CHECK(TgGpuStopContextEngine(&a.Engine)==STATUS_SUCCESS);
+        CHECK(TgGpuClosePlatform(&a.Platform)==STATUS_SUCCESS);
+        CHECK(!restart_fixture.file_refs && !restart_fixture.owner_refs && !restart_fixture.live_irps &&
+              restart_fixture.threads_started==1 && restart_fixture.threads_joined==1 &&
+              restart_fixture.threads_closed==1 && PoolsInUse()==pools);
+        restart_fixture.active=FALSE;
+    }
+    bounded_shutdown_gate=NULL;TgGpuSetPlatformDriverObject(NULL);
 }
 static __declspec(noinline) VOID TestAdapterRestartFromTimeout(const DXGKRNL_INTERFACE *dxgk)
 {
@@ -4691,6 +4853,7 @@ void start(void)
     TestContextCacheReinitialize(&dxgk,&tables);
     TestAdapterLifecycle(&dxgk);
     TestAdapterResetFences();
+    TestAdapterTerminalShutdown(&dxgk);
     TestAdapterRestartFromTimeout(&dxgk);
     TestSystemPagingReset(&dxgk);
     TestContextEvidence(&dxgk);

@@ -67,16 +67,20 @@ NTSTATUS TgGpuStartWorker(TG_GPU_WORKER *w,TG_GPU_WORK_QUEUE *q,TG_GPU_HARDWARE 
     if(!NT_SUCCESS(status)){w->Thread=NULL;w->Queue=NULL;w->Hardware=NULL;}
     return status;
 }
-NTSTATUS TgGpuStopWorker(TG_GPU_WORKER *w)
+NTSTATUS TgGpuStopWorkerEx(TG_GPU_WORKER *w,PLARGE_INTEGER timeout)
 {
     NTSTATUS status;
     PAGED_CODE();
     if(!w)return STATUS_INVALID_PARAMETER;
     if(!w->Thread)return STATUS_SUCCESS;
     (VOID)KeSetEvent(&w->Stop,IO_NO_INCREMENT,FALSE);
-    status=ZwWaitForSingleObject(w->Thread,FALSE,NULL);
+    status=ZwWaitForSingleObject(w->Thread,FALSE,timeout);
     if(status!=STATUS_SUCCESS)return NT_SUCCESS(status)?STATUS_DEVICE_BUSY:status;
     status=ZwClose(w->Thread);
     if(NT_SUCCESS(status)){w->Thread=NULL;w->Queue=NULL;w->Hardware=NULL;}
     return status;
+}
+NTSTATUS TgGpuStopWorker(TG_GPU_WORKER *w)
+{
+    return TgGpuStopWorkerEx(w,NULL);
 }

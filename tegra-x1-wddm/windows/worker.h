@@ -15,4 +15,7 @@ typedef struct _TG_GPU_WORKER {
  * request WDDM recovery; actual reset/restart callbacks remain separate. */
 NTSTATUS TgGpuStartWorker(TG_GPU_WORKER *,TG_GPU_WORK_QUEUE *,TG_GPU_HARDWARE *);
 NTSTATUS TgGpuStopWorker(TG_GPU_WORKER *);
+/* Terminal teardown uses a caller-supplied relative timeout and retains the
+ * thread/ownership records on timeout so a later cleanup can retry safely. */
+NTSTATUS TgGpuStopWorkerEx(TG_GPU_WORKER *,PLARGE_INTEGER Timeout);
 #endif
