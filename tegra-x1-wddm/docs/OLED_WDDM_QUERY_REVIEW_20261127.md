@@ -18,3 +18,14 @@ Switch OLED（HEG-001 / Aula）的 Windows ARM64 适配、移植源码和四项�
 ARM64 WDK 10.0.26100 构建已链接 WDDM 显示版和 MCDM 纯计算版。使用同批构建对象，在 Apple Silicon 上执行 `test-context`、`test-panel-scanout`、`test-panel-timings`，三个 WDK 用户态模型均返回 0。覆盖表段建立前的查询、单槽和双槽、过短输出的写入边界、DC 释放后的面板标识和错误 UID。
 
 共用改动可进入实机候选。该候选在 Lite 和 OLED 上的驱动加载、冷启动及桌面显示验收均待完成。OLED 冻结的根因仍待确认。判定单槽和旧版能力布局是否需要另行适配，须将同次启动上报的 `NumberOfChildren`、查询类型、输入输出字节数、返回状态和实际加载的 KMD 对齐。
+
+## OLED 实机启动记录
+
+移植者报告在 HEG-001 上测试了基于共用 WDDM 提交 `74638ab474d` 的带诊断标记版本。以下编号来自移植测试包。现有材料是测试者提供的阶段摘要，尚缺同次启动的原始日志及实际加载 KMD 的完整 SHA-256。
+
+| 启动 | 测试者报告 | 能确认的范围 |
+| --- | --- | --- |
+| 第一次，有一次性许可 | 进入 `AddDevice` 和 `StartDevice`，最后记录 `460`，随后挂起。 | `460` 标在调用 `TgGpuOpenPlatform` 前，返回标记是 `461`。摘要中没有 `461`。这段发生在平台预检、GPU 固件加载和面板接管之前。具体阻塞调用待定位。 |
+| 第二次开机 | `42 → 44 → 499 → 481`，Windows 正常启动。 | 在移植测试包中，`499` 表示一次性启动许可检查拒绝，`481` 表示进入移除设备回调。此次在平台初始化前退出。 |
+
+共享源码在 `TgGpuOpenPlatform` 内打开 `\Device\SwitchBacklight`、取得文件对象引用，并在相应条件下注册设备的 PnP 通知。移植者先前提供的源码包关闭了这项通知注册。下一步需要核对测试机的桥接驱动和首轮这几个调用的返回记录。OLED 图形启动及桌面显示验收仍待完成。[平台启动顺序](https://github.com/ruje0504-2/mesa-switch-woa/blob/74638ab474db5eec9a7d5749a4adb28f5a4bff6b/tegra-x1-wddm/windows/platform_adapter.c#L13) · [桥接设备打开与通知注册](https://github.com/ruje0504-2/mesa-switch-woa/blob/74638ab474db5eec9a7d5749a4adb28f5a4bff6b/tegra-x1-wddm/windows/platform_io.c#L632)

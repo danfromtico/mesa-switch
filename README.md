@@ -6,7 +6,7 @@ This repository contains the GM20B WDDM kernel driver, the `tgd3d` Direct3D user
 
 ### Switch OLED (HEG-001 / Aula)
 
-The port author reports that Windows starts and the screen can go black during display activation. The driver fails at different points when loaded at boot and when enabled after startup. The shared WDDM query fixes in `74638ab474d` await OLED hardware validation. OLED port and compatibility findings by [Tsunami714!](https://github.com/Tsunami714a). [WDDM query review](tegra-x1-wddm/docs/OLED_WDDM_QUERY_REVIEW_20261127.md)
+The OLED port author tested a build based on the shared WDDM changes in `74638ab474d`. On the first boot the system hung. The last recorded marker preceded `TgGpuOpenPlatform`, before the driver took over the panel. On the next boot the one-use permit blocked the GPU driver from starting again and Windows started normally. OLED graphics bring-up remains open. Port and hardware testing by [Tsunami714!](https://github.com/Tsunami714a). [OLED startup observations](tegra-x1-wddm/docs/OLED_WDDM_QUERY_REVIEW_20261127.md#oled-实机启动记录)
 
 ### Switch Lite (HDH-001)
 
