@@ -21,11 +21,18 @@ ARM64 WDK 10.0.26100 构建已链接 WDDM 显示版和 MCDM 纯计算版。使�
 
 ## OLED 实机启动记录
 
-移植者报告在 HEG-001 上测试了基于共用 WDDM 提交 `74638ab474d` 的带诊断标记版本。以下编号来自移植测试包。现有材料是测试者提供的阶段摘要，尚缺同次启动的原始日志及实际加载 KMD 的完整 SHA-256。
+移植者在 HEG-001 上测试了基于共用 WDDM 提交 `74638ab474d` 的带诊断标记版本。以下采用测试者最后逐项对照的 A、B 两次实验。编号来自移植测试包，目前有阶段摘要，尚缺同次启动的原始日志及实际加载 KMD 的完整 SHA-256。当前移植和实机测试由 [Tsunami714!](https://github.com/Tsunami714a) 提供。
 
-| 启动 | 测试者报告 | 能确认的范围 |
+| 场景 | 测试者报告的标记 | 结果 |
 | --- | --- | --- |
-| 第一次，有一次性许可 | 进入 `AddDevice` 和 `StartDevice`，最后记录 `460`，随后挂起。 | `460` 标在调用 `TgGpuOpenPlatform` 前，返回标记是 `461`。摘要中没有 `461`。这段发生在平台预检、GPU 固件加载和面板接管之前。具体阻塞调用待定位。 |
-| 第二次开机 | `42 → 44 → 499 → 481`，Windows 正常启动。 | 在移植测试包中，`499` 表示一次性启动许可检查拒绝，`481` 表示进入移除设备回调。此次在平台初始化前退出。 |
+| A，开机时允许 GPU 启动 | `42 → 44 → 40 → … → 460` | 系统挂起。最后记录的是调用 `TgGpuOpenPlatform` 前的标记。 |
+| B，系统运行时允许 GPU 启动 | `42 → 44 → 40 → … → 460` | 系统也挂起。两份摘要都没有调用返回后的 `461`。 |
+| 挂起后另一次开机，一次性许可已消耗 | `42 → 44 → 499 → 481` | `499` 表示启动许可检查拒绝，`481` 表示进入移除设备回调。Windows 正常启动。 |
 
-共享源码在 `TgGpuOpenPlatform` 内打开 `\Device\SwitchBacklight`、取得文件对象引用，并在相应条件下注册设备的 PnP 通知。移植者先前提供的源码包关闭了这项通知注册。下一步需要核对测试机的桥接驱动和首轮这几个调用的返回记录。OLED 图形启动及桌面显示验收仍待完成。[平台启动顺序](https://github.com/ruje0504-2/mesa-switch-woa/blob/74638ab474db5eec9a7d5749a4adb28f5a4bff6b/tegra-x1-wddm/windows/platform_adapter.c#L13) · [桥接设备打开与通知注册](https://github.com/ruje0504-2/mesa-switch-woa/blob/74638ab474db5eec9a7d5749a4adb28f5a4bff6b/tegra-x1-wddm/windows/platform_io.c#L632)
+这两次获准启动都停在平台预检、GPU 固件加载和面板接管之前。推迟到运行时启用仍复现同一最后标记。具体阻塞的调用、桥接设备当时的就绪状态仍待确认。OLED 图形启动及桌面显示验收保持开放。[平台启动顺序](https://github.com/ruje0504-2/mesa-switch-woa/blob/74638ab474db5eec9a7d5749a4adb28f5a4bff6b/tegra-x1-wddm/windows/platform_adapter.c#L13-L18)
+
+### 独立的 OLED GPU 桌面实测
+
+[DanilKhmyrov](https://github.com/DanilKhmyrov) 的 `windows-switch` 项目记录了HEG-001 在 Windows 11 ARM64 23H2（22631）上的测试。该项目使用 NintendoSwitchPkg UEFI 和 SwBatt 提供的 PMIC 桥。较早的显示 KMD 在登录后切换到 GPU 时达到 Code 0，DWM 加载 tgd3d 和 NVK，内屏显示竖屏桌面。报告也记录了随后在桌面负载下挂起的情况。[显示接管与 Code 0](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/README.md#L525-L540) · [测试版本和后续稳定性](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/docs/notes-for-mesa-switch-woa.md#L3-L59)
+
+两套 KMD 都打开 `\Device\SwitchBacklight`。早期实测所用的 `a5d80906` 在 `ZwCreateFile` 成功后保存资源并返回。`74638ab474d` 的共用实现还引用文件对象，并在相应条件下注册目标设备 PnP 通知。先前收到的移植包关闭了这项注册。对照当前实机时，需核实实际加载的 KMD 和桥接驱动，区分打开设备、取得对象及注册通知各自的返回状态。这三个调用的先后关系为定位 `460` 提供了检查点。[早期 KMD 的桥接路径](https://github.com/ruje0504-2/mesa-switch-woa/blob/a5d80906e64195606342e976df34c7f755576cd5/tegra-x1-wddm/windows/platform_io.c#L11-L27) · [共用 KMD 的桥接路径](https://github.com/ruje0504-2/mesa-switch-woa/blob/74638ab474db5eec9a7d5749a4adb28f5a4bff6b/tegra-x1-wddm/windows/platform_io.c#L628-L647) · [SwBatt 桥设备的创建](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/drivers/swbatt/swbatt.c#L941-L956)

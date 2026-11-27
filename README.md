@@ -6,7 +6,9 @@ This repository contains the GM20B WDDM kernel driver, the `tgd3d` Direct3D user
 
 ### Switch OLED (HEG-001 / Aula)
 
-The OLED port author tested a build based on the shared WDDM changes in `74638ab474d`. On the first boot the system hung. The last recorded marker preceded `TgGpuOpenPlatform`, before the driver took over the panel. On the next boot the one-use permit blocked the GPU driver from starting again and Windows started normally. OLED graphics bring-up remains open. Port and hardware testing by [Tsunami714!](https://github.com/Tsunami714a). [OLED startup observations](tegra-x1-wddm/docs/OLED_WDDM_QUERY_REVIEW_20261127.md#oled-实机启动记录)
+On a build based on `74638ab474d`, starting the GPU at boot and enabling it after Windows started both hung. In both trials the last marker was `460`, immediately before `TgGpuOpenPlatform`. On a separate boot the one-use permit blocked another GPU start and Windows came up normally. Current port and hardware testing by [Tsunami714!](https://github.com/Tsunami714a). [OLED startup observations](tegra-x1-wddm/docs/OLED_WDDM_QUERY_REVIEW_20261127.md#oled-实机启动记录)
+
+An earlier HEG-001 setup used the SwBatt power-management bridge and switched to the GPU after logon. It reached GPU Code 0 and displayed a portrait Windows desktop through tgd3d and NVK. Some runs later hung under desktop load. Independent OLED tests and SwBatt integration documented by [DanilKhmyrov](https://github.com/DanilKhmyrov). [Desktop bring-up](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/README.md#L525-L540) · [Hardware test notes](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/docs/notes-for-mesa-switch-woa.md#L32-L59)
 
 ### Switch Lite (HDH-001)
 

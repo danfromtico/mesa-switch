@@ -2,7 +2,7 @@
 
 This tree contains the Tegra X1 (GM20B) kernel driver and Mesa NVK transport for Windows 11 ARM64 on Nintendo Switch. [NVK Windows backend](../src/nouveau/vulkan/nvkmd/windows/)
 
-Switch Lite (HDH-001) has a verified permanent-boot baseline. On Switch OLED (HEG-001), the permitted GPU startup hung during early platform initialization. Windows started normally on the following boot with the GPU start blocked. OLED port and compatibility findings by [Tsunami714!](https://github.com/Tsunami714a). [Hardware status and baseline hashes](../README.md#hardware-status) · [OLED startup observations](docs/OLED_WDDM_QUERY_REVIEW_20261127.md#oled-实机启动记录)
+Switch Lite (HDH-001) has a verified permanent-boot baseline. Both boot-time and runtime GPU starts on the current Switch OLED (HEG-001) port stopped at the platform-open marker. An earlier HEG-001 setup displayed the Windows desktop on GM20B using SwBatt. Current OLED port and testing by [Tsunami714!](https://github.com/Tsunami714a). Earlier GPU desktop and SwBatt reference by [DanilKhmyrov](https://github.com/DanilKhmyrov). [Hardware status and baseline hashes](../README.md#hardware-status) · [OLED startup observations](docs/OLED_WDDM_QUERY_REVIEW_20261127.md#oled-实机启动记录)
 
 The long-term goal is a complete native Vulkan implementation, verified
 with version-appropriate VK-GL-CTS coverage and physical GM20B tests.
