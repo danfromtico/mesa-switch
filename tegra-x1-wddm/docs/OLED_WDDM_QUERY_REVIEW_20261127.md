@@ -21,6 +21,18 @@ ARM64 WDK 10.0.26100 构建已链接 WDDM 显示版和 MCDM 纯计算版。使�
 
 ## OLED 实机启动记录
 
+Tsunami714! 在 HEG-001 上首次报告 `step.log` 从平台桥打开、PMIC 预检、固件加载一路走到 GPU 硬件启动返回，随后出现了显示路径查询。进入系统后内屏仍然黑屏。[OLED 移植与实机测试](https://github.com/Tsunami714a)
+
+| 本轮阶段 | 测试者提供的记录 |
+| --- | --- |
+| 进入 `StartDevice` 并打开平台桥 | `44 → 460 → 4631:0 → 461`，`TgGpuOpenPlatform` 返回成功。 |
+| PMIC 预检与固件加载 | `462 → 4632:0 → 463 → 464 → 4633:0 → 465`，预检与固件加载均返回成功。 |
+| GPU 硬件启动与显示路径查询 | `466 → 467` 记录硬件启动调用进入和返回。随后记录到 `4820/4821`（`IsSupportedVidPn` 进入和返回），同轮出现 3 次 `vidpn-config`。 |
+
+这些记录确认 `dxgkrnl` 已开始查询显示路径。该轮的 GPU 设备管理器状态、首帧是否提交到内屏均待确认。桌面 UMD 的 C++ 运行库是否与黑屏有关，也待同次启动的模块加载记录确认。
+
+### 早期启动对照
+
 移植者在 HEG-001 上测试了基于共用 WDDM 提交 `74638ab474d` 的带诊断标记版本。以下采用测试者最后逐项对照的 A、B 两次实验。编号来自移植测试包，目前有阶段摘要，尚缺同次启动的原始日志及实际加载 KMD 的完整 SHA-256。当前移植和实机测试由 [Tsunami714!](https://github.com/Tsunami714a) 提供。
 
 | 场景 | 测试者报告的标记 | 结果 |
@@ -33,11 +45,11 @@ ARM64 WDK 10.0.26100 构建已链接 WDDM 显示版和 MCDM 纯计算版。使�
 
 ### SwBatt 预检兼容候选
 
-测试者随后报告已越过桥接打开的挂点。带标记的 KMD 到达预检返回标记 `463`，在固件加载标记 `464` 之前走清理路径，设备管理器报 Code 43。此次实机的预检原始返回码仍待核对。
+在较早一次测试中，带标记的 KMD 已越过桥接打开的挂点，到达预检返回标记 `463`，在固件加载标记 `464` 之前走清理路径，设备管理器报 Code 43。测试者后来报告当时的预检错误为 `0xC0000022`。
 
 候选按已打开的设备识别参考工程的 `\Driver\swbatt` 控制设备。该桥随驱动装载和卸载管理生命周期，通过已引用的文件对象访问。SwitchFan 继续使用目标设备 PnP 通知。SwBatt 拒绝带所有权标记的地址查询时，KMD 在同一文件和原有超时内尝试旧版只读查询。确认旧协议后，可选的电源轨认领按旧格式发送。桥未实现认领时不会登记所有权，真正的权限错误仍会中止启动。
 
-使用 ARM64 KMD 对象和 DanilKhmyrov 原版 SwBatt 请求处理函数做离线对照，I²C 和温度使用模型输入。原版 KMD 在首条查询返回 `0xC0000022`。候选在模拟 PMIC 地址 `0x31` 和 `0x33` 上均通过预检，未知温度和探测不到 PMIC 仍会中止。OLED 实机候选需核对实际加载的 KMD 和 SwBatt 哈希、预检返回值、是否到达固件加载，以及最终的 GPU Code 0 和桌面显示。[参考 SwBatt 请求处理](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/drivers/swbatt/swbatt.c#L819-L885)
+使用 ARM64 KMD 对象和 DanilKhmyrov 原版 SwBatt 请求处理函数做离线对照，I²C 和温度使用模型输入。原版 KMD 在首条查询返回 `0xC0000022`。候选 `976da83d44b` 在模拟 PMIC 地址 `0x31` 和 `0x33` 上均通过预检，未知温度和探测不到 PMIC 仍会中止。要将最新 OLED 实机结果与该候选对应，还需核对实机加载的 KMD 和 SwBatt 完整 SHA-256。[参考 SwBatt 请求处理](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/drivers/swbatt/swbatt.c#L819-L885)
 
 ### 独立的 OLED GPU 桌面实测
 
