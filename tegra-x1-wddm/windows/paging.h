@@ -25,6 +25,37 @@ static __forceinline VOID TgGpuDataSyncBarrier(VOID)
 typedef NTSTATUS (*TG_GPU_RESOLVE_PAGE)(PVOID Context, UINT Segment,
     UINT64 ByteOffset, SIZE_T Bytes, UINT64 *DeviceAddress);
 
+/* Values are part of the one-use paging probe's stop screen. */
+typedef enum _TG_GPU_PAGING_REJECT_SITE {
+    TgGpuPagingRejectUnknown = 0,
+    TgGpuPagingRejectOperation = 1,
+    TgGpuPagingRejectDirectoryAllocation = 2,
+    TgGpuPagingRejectUpdateMode = 3,
+    TgGpuPagingRejectUpdateFlags = 4,
+    TgGpuPagingRejectDriverProtection = 5,
+    TgGpuPagingRejectPteFlags = 6,
+    TgGpuPagingRejectDirectorySegment = 7,
+    TgGpuPagingRejectCpuAlias = 8,
+    TgGpuPagingRejectVirtualTransfer = 9,
+    TgGpuPagingRejectApertureFlags = 10,
+    TgGpuPagingRejectBufferOperation = 11
+} TG_GPU_PAGING_REJECT_SITE;
+
+typedef struct _TG_GPU_PAGING_REJECTION {
+    TG_GPU_PAGING_REJECT_SITE Site;
+    UINT64 Detail;
+} TG_GPU_PAGING_REJECTION;
+
+static __forceinline NTSTATUS TgGpuRejectPaging(TG_GPU_PAGING_REJECTION *Rejection,
+    TG_GPU_PAGING_REJECT_SITE Site, UINT64 Detail)
+{
+    if (Rejection) {
+        Rejection->Site = Site;
+        Rejection->Detail = Detail;
+    }
+    return STATUS_NOT_SUPPORTED;
+}
+
 typedef struct _TG_GPU_PAGE_UPDATE_TARGET {
     volatile UINT64 *Entries;
     SIZE_T Size;
@@ -34,6 +65,7 @@ typedef struct _TG_GPU_PAGE_UPDATE_TARGET {
     BOOLEAN GpuPagesUncached;
     TG_GPU_RESOLVE_PAGE Resolve;
     PVOID ResolveContext;
+    TG_GPU_PAGING_REJECTION *Rejection;
 } TG_GPU_PAGE_UPDATE_TARGET;
 
 /* Translate into caller-owned scratch only. Used while building an ordered

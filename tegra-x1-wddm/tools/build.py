@@ -35,6 +35,8 @@ parser.add_argument("--keep-fan", action="store_true", help="with --probe, prese
 parser.add_argument("--windows-tests", action="store_true", help="build the real-WDK paging test executable for ARM64 Windows")
 parser.add_argument("--native-test-version", type=int, metavar="N",
                     help="with --display, build gated native submission as package 0.1.0.N")
+parser.add_argument("--paging-stop-probe", action="store_true",
+                    help="capture one unsupported paging return on the stop screen in a native trial")
 parser.add_argument("--render-gpu-khz", type=int, choices=(460800, 729600), default=729600,
                     help="fixed GPU clock; 460800 is an opt-in display power control")
 parser.add_argument("--nvdec-firmware", type=Path,
@@ -44,6 +46,8 @@ parser.add_argument("--nvdec-sample", type=Path,
 args = parser.parse_args()
 if args.native_test_version is not None and (not args.display or not 1 <= args.native_test_version <= 65535):
     parser.error("--native-test-version requires --display and a version from 1 to 65535")
+if args.paging_stop_probe and args.native_test_version is None:
+    parser.error("--paging-stop-probe requires --native-test-version")
 if args.keep_fan and not args.probe:
     parser.error("--keep-fan requires --probe")
 if args.render_gpu_khz != 729600 and not args.display:
@@ -455,6 +459,8 @@ if build_miniport:
     obj = args.out / "render_miniport.obj"
     km_lib = args.wdk_include.parent.parent / "Lib" / args.wdk_include.name / "km/ARM64"
     miniport_flags = ["/DTG_GPU_PANEL_WDDM=1"] if args.display else []
+    if args.paging_stop_probe:
+        miniport_flags.append("/DTG_GPU_PAGING_STOP_PROBE=1")
     test_objects = []
     if args.native_test_version is not None:
         miniport_flags.append(f"/DTG_GPU_NATIVE_TEST_VERSION={args.native_test_version}")

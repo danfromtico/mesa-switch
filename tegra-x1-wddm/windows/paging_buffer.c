@@ -75,7 +75,8 @@ static NTSTATUS InitialUpdate(DXGKARG_BUILDPAGINGBUFFER *Args,
     if (Args->MultipassOffset || !alias || (alias & (PAGE_SIZE - 1)) ||
         alias > (ULONG_PTR)-1 - Target->Size)
         return STATUS_INVALID_PARAMETER;
-    if (!Build->InitialMappingUncached) return STATUS_NOT_SUPPORTED;
+    if (!Build->InitialMappingUncached)
+        return TgGpuRejectPaging(Target->Rejection, TgGpuPagingRejectCpuAlias, 1);
     /* VidMm supplies a valid nonpaged alias; verify every page, not just the
      * first address. Never assume its virtual address equals our own mapping.
      */
@@ -113,6 +114,7 @@ NTSTATUS TgGpuBuildPagingBuffer(DXGKARG_BUILDPAGINGBUFFER *Args,
         target.GpuPagesUncached = Build->GpuPagesUncached;
         target.Resolve = TgGpuResolveVidMmPage;
         target.ResolveContext = (PVOID)Build->Tables;
+        target.Rejection = Build->Rejection;
         if (!target.Size || target.Size > TG_GPU_TABLE_BYTES ||
             (target.Size & (PAGE_SIZE - 1))) return STATUS_INVALID_PARAMETER;
         if (update->UpdateMode == DXGK_PAGETABLEUPDATE_CPU_VIRTUAL) {
@@ -121,7 +123,8 @@ NTSTATUS TgGpuBuildPagingBuffer(DXGKARG_BUILDPAGINGBUFFER *Args,
             return InitialUpdate(Args, Build, &target);
         }
         if (update->UpdateMode != DXGK_PAGETABLEUPDATE_GPU_PHYSICAL)
-            return STATUS_NOT_SUPPORTED;
+            return TgGpuRejectPaging(target.Rejection, TgGpuPagingRejectUpdateMode,
+                                     update->UpdateMode);
         record.Kind = PAGING_UPDATE;
         record.Table = update->PageTableAddress.GpuPhysical;
         if (record.Table.Padding || record.Table.SegmentId != Build->Tables->SegmentId)
@@ -178,7 +181,9 @@ NTSTATUS TgGpuBuildPagingBuffer(DXGKARG_BUILDPAGINGBUFFER *Args,
         } else {
             const DXGK_BUILDPAGINGBUFFER_TRANSFERVIRTUAL *transfer = &Args->TransferVirtual;
             if (transfer->Flags.Flags || (UINT)transfer->TransferDirection > DXGK_MEMORY_TRANSFER_LOCAL_TO_LOCAL)
-                return STATUS_NOT_SUPPORTED;
+                return TgGpuRejectPaging(Build->Rejection, TgGpuPagingRejectVirtualTransfer,
+                                         ((UINT64)(UINT)transfer->TransferDirection << 32) |
+                                         transfer->Flags.Flags);
             record.Kind = PAGING_COPY;
             record.Dma = (struct tg_gpu_paging_dma){
                 .source = transfer->SourceVirtualAddress,
@@ -191,7 +196,8 @@ NTSTATUS TgGpuBuildPagingBuffer(DXGKARG_BUILDPAGINGBUFFER *Args,
             return STATUS_INVALID_PARAMETER;
         if (!Args->pDmaBuffer || Args->DmaSize < sizeof(record))
             return STATUS_GRAPHICS_INSUFFICIENT_DMA_BUFFER;
-    } else return STATUS_NOT_SUPPORTED;
+    } else return TgGpuRejectPaging(Build->Rejection, TgGpuPagingRejectBufferOperation,
+                                   Args->MultipassOffset);
     if ((ULONG_PTR)Args->pDmaBuffer & 7) return STATUS_INVALID_PARAMETER;
     *(PAGING_RECORD *)Args->pDmaBuffer = record;
     for (i = 0; i < count; ++i)

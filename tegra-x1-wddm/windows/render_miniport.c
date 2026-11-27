@@ -6,6 +6,25 @@
 #ifdef TG_GPU_NATIVE_TEST_VERSION
 #include "native_start_test.h"
 #endif
+#ifdef TG_GPU_PAGING_STOP_PROBE
+#include "paging_dispatch.h"
+
+#define TG_GPU_PAGING_PROBE_BUGCHECK 0xe0535750u
+enum { PagingProbeInactive, PagingProbeArmed, PagingProbeCaptured };
+static volatile LONG g_PagingProbeState;
+
+static NTSTATUS APIENTRY probe_paging_buffer(HANDLE adapter, DXGKARG_BUILDPAGINGBUFFER *args)
+{
+    TG_GPU_PAGING_REJECTION rejection = {0};
+    NTSTATUS status = TgGpuBuildPagingRequest(adapter, args, &rejection);
+    if (status == STATUS_NOT_SUPPORTED && args &&
+        InterlockedCompareExchange(&g_PagingProbeState, PagingProbeCaptured,
+                                   PagingProbeArmed) == PagingProbeArmed)
+        KeBugCheckEx(TG_GPU_PAGING_PROBE_BUGCHECK, (ULONG)args->Operation,
+                     (ULONG)status, (ULONG)rejection.Site, rejection.Detail);
+    return status;
+}
+#endif
 
 static DXGKDDI_STOP_DEVICE *g_BaseStopDevice;
 static DXGKDDI_STOP_DEVICE_AND_RELEASE_POST_DISPLAY_OWNERSHIP *g_BaseStopAndRelease;
@@ -115,8 +134,14 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
     *sources=*children=1;
 #endif
     if(status==STATUS_SUCCESS)TgNvdecAdapterInitialize(a);
-    if (NT_SUCCESS(status))
+    if (NT_SUCCESS(status)) {
         TgGpuRecordStartup(a,TgGpuStartupComplete,status);
+#ifdef TG_GPU_PAGING_STOP_PROBE
+        if (InterlockedCompareExchange(&g_PagingProbeState, PagingProbeArmed,
+                                       PagingProbeInactive) == PagingProbeInactive)
+            record_status(L"PagingStopProbeArmed", (NTSTATUS)TG_GPU_PAGING_PROBE_BUGCHECK);
+#endif
+    }
     return status;
 }
 
@@ -240,6 +265,9 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
     DRIVER_INITIALIZATION_DATA d={0};
     d.Version=DXGKDDI_INTERFACE_VERSION;
     TgGpuRegisterAdapterDdis(&d);
+#ifdef TG_GPU_PAGING_STOP_PROBE
+    d.DxgkDdiBuildPagingBuffer=probe_paging_buffer;
+#endif
     d.DxgkDdiCollectDiagnosticInfo=TgGpuDdiCollectDiagnosticInfo;
     d.DxgkDdiStartDevice=start_device;
     d.DxgkDdiSetPowerState=set_power;

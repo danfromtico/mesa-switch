@@ -12,6 +12,7 @@ typedef struct _TG_GPU_PAGING_BUILD {
     SIZE_T ScratchEntries;
     BOOLEAN GpuPagesUncached;
     BOOLEAN InitialMappingUncached;
+    TG_GPU_PAGING_REJECTION *Rejection;
 } TG_GPU_PAGING_BUILD;
 
 /* Build private kernel paging records into the supplied DMA buffer. Ordinary

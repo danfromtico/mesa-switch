@@ -34,7 +34,11 @@ NTSTATUS TgGpuConsumeNativeStartPermit(void)
     NTSTATUS status=ZwOpenKey(&handle,KEY_QUERY_VALUE,&attributes);
     if(NT_SUCCESS(status)) {
         ZwClose(handle);
+#ifdef TG_GPU_PAGING_STOP_PROBE
+        return STATUS_ACCESS_DENIED;
+#else
         return STATUS_SUCCESS;
+#endif
     }
     if(status!=STATUS_OBJECT_NAME_NOT_FOUND && status!=STATUS_OBJECT_PATH_NOT_FOUND)
         return status;
