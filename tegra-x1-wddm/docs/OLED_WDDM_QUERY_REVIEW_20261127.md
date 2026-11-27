@@ -31,6 +31,14 @@ ARM64 WDK 10.0.26100 构建已链接 WDDM 显示版和 MCDM 纯计算版。使�
 
 这两次获准启动都停在平台预检、GPU 固件加载和面板接管之前。推迟到运行时启用仍复现同一最后标记。具体阻塞的调用、桥接设备当时的就绪状态仍待确认。OLED 图形启动及桌面显示验收保持开放。[平台启动顺序](https://github.com/ruje0504-2/mesa-switch-woa/blob/74638ab474db5eec9a7d5749a4adb28f5a4bff6b/tegra-x1-wddm/windows/platform_adapter.c#L13-L18)
 
+### SwBatt 预检兼容候选
+
+测试者随后报告已越过桥接打开的挂点。带标记的 KMD 到达预检返回标记 `463`，在固件加载标记 `464` 之前走清理路径，设备管理器报 Code 43。此次实机的预检原始返回码仍待核对。
+
+候选按已打开的设备识别参考工程的 `\Driver\swbatt` 控制设备。该桥随驱动装载和卸载管理生命周期，通过已引用的文件对象访问。SwitchFan 继续使用目标设备 PnP 通知。SwBatt 拒绝带所有权标记的地址查询时，KMD 在同一文件和原有超时内尝试旧版只读查询。确认旧协议后，可选的电源轨认领按旧格式发送。桥未实现认领时不会登记所有权，真正的权限错误仍会中止启动。
+
+使用 ARM64 KMD 对象和 DanilKhmyrov 原版 SwBatt 请求处理函数做离线对照，I²C 和温度使用模型输入。原版 KMD 在首条查询返回 `0xC0000022`。候选在模拟 PMIC 地址 `0x31` 和 `0x33` 上均通过预检，未知温度和探测不到 PMIC 仍会中止。OLED 实机候选需核对实际加载的 KMD 和 SwBatt 哈希、预检返回值、是否到达固件加载，以及最终的 GPU Code 0 和桌面显示。[参考 SwBatt 请求处理](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/drivers/swbatt/swbatt.c#L819-L885)
+
 ### 独立的 OLED GPU 桌面实测
 
 [DanilKhmyrov](https://github.com/DanilKhmyrov) 的 `windows-switch` 项目记录了HEG-001 在 Windows 11 ARM64 23H2（22631）上的测试。该项目使用 NintendoSwitchPkg UEFI 和 SwBatt 提供的 PMIC 桥。较早的显示 KMD 在登录后切换到 GPU 时达到 Code 0，DWM 加载 tgd3d 和 NVK，内屏显示竖屏桌面。报告也记录了随后在桌面负载下挂起的情况。[显示接管与 Code 0](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/README.md#L525-L540) · [测试版本和后续稳定性](https://github.com/DanilKhmyrov/windows-switch/blob/ebff45d3038d1e321f3dc83dc7eea2dbe6cf79c1/docs/notes-for-mesa-switch-woa.md#L3-L59)

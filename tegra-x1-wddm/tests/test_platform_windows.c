@@ -4,6 +4,7 @@
 #include "../windows/platform_io.h"
 #include "../platform/t214_resources.h"
 #include <ntimage.h>
+#include "platform_unicode_fixture.h"
 static ULONG_PTR image_cookie=0x00002b992ddfa232ULL;
 const IMAGE_LOAD_CONFIG_DIRECTORY64 _load_config_used={
     .Size=sizeof(IMAGE_LOAD_CONFIG_DIRECTORY64),.SecurityCookie=(ULONGLONG)&image_cookie
@@ -29,7 +30,7 @@ static POBJECT_TYPE fake_file_type=(POBJECT_TYPE)(ULONG_PTR)0x46494c45u;
 POBJECT_TYPE *IoFileObjectType=&fake_file_type;
 static DRIVER_OBJECT fake_driver;
 static DEVICE_OBJECT fake_owner_device={.DriverObject=&fake_driver,.StackSize=1};
-static DEVICE_OBJECT fake_target_device={.StackSize=1};
+static DEVICE_OBJECT fake_target_device={.StackSize=1,.DeviceType=FILE_DEVICE_UNKNOWN};
 static FILE_OBJECT fake_file={.DeviceObject=&fake_target_device};
 
 typedef struct {
@@ -51,6 +52,8 @@ static struct {
     ULONG_PTR bytes;
     ULONG address,temp,opens,closes,requests,waits,cancels,stalls,sleeps;
     ULONG claims,releases,raw_writes,pnp_regs,pnp_unregs,safe_completions;
+    BOOLEAN swbatt_wire;
+    ULONG tagged_queries,plain_queries,last_claim_address;
     ULONG addr_not_ready_polls,temp_not_ready_polls;
     LONG file_refs,owner_refs,live_pool,live_irps,live_workitems;
     KIRQL irql;
@@ -427,7 +430,14 @@ static NTSTATUS FASTCALL CallDriver(PDEVICE_OBJECT dev,PIRP irp)
     }
     ++model.requests;
     NTSTATUS st=model.completion;
-    if(op->reg==TG_GPU_PMIC_QUERY_ADDRESS){
+    if(model.swbatt_wire && op->reg==TG_GPU_PMIC_QUERY_ADDRESS) {
+        if(op->address)++model.tagged_queries;
+        else ++model.plain_queries;
+    }
+    if(model.swbatt_wire && !model.token_aware_provider && op->address &&
+       op->reg>=TG_GPU_PMIC_QUERY_ADDRESS) {
+        st=STATUS_ACCESS_DENIED;
+    } else if(op->reg==TG_GPU_PMIC_QUERY_ADDRESS){
         const BOOLEAN q_rail=(op->address==TG_GPU_RAIL_QUERY_MAGIC);
         if(model.addr_not_ready_polls){--model.addr_not_ready_polls;st=STATUS_DEVICE_NOT_READY;}
         else {
@@ -472,7 +482,9 @@ static NTSTATUS FASTCALL CallDriver(PDEVICE_OBJECT dev,PIRP irp)
     else if(op->reg==TG_GPU_PMIC_CLAIM_RAIL){
         CHECK(op->write==1 && op->value==TG_GPU_EMC_VOTE_ABI);
         ++model.claims;
+        model.last_claim_address=op->address;
         if(!NT_SUCCESS(model.claim))st=model.claim;
+        else if(model.swbatt_wire && !model.token_aware_provider)st=STATUS_INVALID_PARAMETER;
         else if(model.token_aware_provider) {
             ULONG next_seq=(model.provider_claim_seq+1u)&0xffffu;
             if(!next_seq)next_seq=1u;
@@ -642,6 +654,79 @@ static void Setup(void)
     model.enable=0x55;model.voltage=80;
 }
 #ifndef TG_PLATFORM_FIXTURE_ONLY
+static void TestSwBattControl(void)
+{
+    DECLARE_CONST_UNICODE_STRING(swbatt,L"\\Driver\\SwBatt");
+    DECLARE_CONST_UNICODE_STRING(other,L"\\Driver\\SwBattTest");
+    DRIVER_OBJECT provider={0};
+    UCHAR address=0;
+
+    Setup();
+    fake_target_device.DriverObject=&provider;
+    provider.DriverName=swbatt;
+    model.swbatt_wire=TRUE;
+    CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_SUCCESS && !model.pnp_regs);
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_SUCCESS && address==0x33);
+    CHECK(model.tagged_queries==1 && model.plain_queries==1 && model.claims==1 && !model.last_claim_address);
+    CHECK(!platform.RailClaimed && !platform.EmcRailOwner && !model.raw_writes);
+    CHECK(TgGpuClosePlatform(&platform)==STATUS_SUCCESS && !model.pnp_unregs);
+
+    /* Genuine read/write denials and an unknown temperature remain fatal. */
+    Setup();model.swbatt_wire=TRUE;model.completion=STATUS_ACCESS_DENIED;
+    CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_SUCCESS);
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_ACCESS_DENIED);
+    CHECK(model.tagged_queries==1 && model.plain_queries==1 && !model.claims && !model.raw_writes);
+    CHECK(TgGpuClosePlatform(&platform)==STATUS_SUCCESS);
+    Setup();model.swbatt_wire=TRUE;model.claim=STATUS_ACCESS_DENIED;
+    CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_SUCCESS);
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_ACCESS_DENIED && model.claims==1);
+    CHECK(!platform.RailClaimed && !model.raw_writes);
+    CHECK(TgGpuClosePlatform(&platform)==STATUS_SUCCESS);
+    Setup();model.swbatt_wire=TRUE;model.temp=255;
+    CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_SUCCESS);
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_DEVICE_NOT_READY && !model.claims);
+    CHECK(TgGpuClosePlatform(&platform)==STATUS_SUCCESS);
+
+    /* No fallback for a different provider. Reopen the named endpoint as
+     * SwBatt on the deadline worker and check it gets its own wire protocol. */
+    Setup();model.swbatt_wire=TRUE;provider.DriverName=other;
+    CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_SUCCESS && model.pnp_regs==1);
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_ACCESS_DENIED && !model.plain_queries);
+    TARGET_DEVICE_REMOVAL_NOTIFICATION rem={.Event=GUID_TARGET_DEVICE_QUERY_REMOVE,.FileObject=&fake_file};
+    PDRIVER_NOTIFICATION_CALLBACK_ROUTINE notify=model.pnp_cb;
+    PVOID context=model.pnp_ctx;
+    CHECK(notify(&rem,context)==STATUS_SUCCESS);
+    rem.Event=GUID_TARGET_DEVICE_REMOVE_COMPLETE;
+    CHECK(notify(&rem,context)==STATUS_SUCCESS && !platform.FileObject);
+    provider.DriverName=swbatt;
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_SUCCESS && model.pnp_regs==1);
+    CHECK(model.plain_queries==1 && !platform.RailClaimed && !model.raw_writes);
+    CHECK(TgGpuClosePlatform(&platform)==STATUS_SUCCESS && model.pnp_unregs==1);
+    fake_target_device.DriverObject=NULL;
+}
+
+static void TestSwBattVersioned(void)
+{
+    DECLARE_CONST_UNICODE_STRING(name,L"\\Driver\\swbatt");
+    DRIVER_OBJECT provider={.DriverName=name};
+    UCHAR address=0;
+    Setup();
+    fake_target_device.DriverObject=&provider;
+    model.swbatt_wire=TRUE;model.token_aware_provider=TRUE;
+    CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_SUCCESS && !model.pnp_regs);
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_SUCCESS && address==0x33);
+    CHECK(model.tagged_queries==1 && !model.plain_queries && model.last_claim_address);
+    CHECK(platform.RailClaimed && platform.EmcRailOwner && model.provider_claimed && model.provider_claim_token);
+
+    model.token_aware_provider=FALSE;
+    CHECK(TgGpuPlatformPreflight(&platform,&address)==STATUS_INVALID_DEVICE_STATE);
+    CHECK(model.claims==1 && platform.RailClaimed && !model.raw_writes);
+    model.token_aware_provider=TRUE;
+    struct tg_gpu_power_io io=TgGpuPlatformIo(&platform);
+    CHECK(io.release_pmic(io.context,0x33,0x54,0x46) && !platform.RailClaimed && model.releases==1);
+    CHECK(TgGpuClosePlatform(&platform)==STATUS_SUCCESS);
+    fake_target_device.DriverObject=NULL;
+}
 void start(void)
 {
     static const char pass[]="PASS: WDM HandleLock + IoSetCompletionRoutineEx unload-safe async IRP bridge, PnP QueryRemove/RemoveComplete reconnect and rail abandon\r\n";
@@ -654,6 +739,7 @@ void start(void)
         resources.Memory[i].u.Memory.Length=sizeof(registers[i]);resources.Mapping[i]=registers[i];
     }
     resources.LicMapping=lic;
+    TestSwBattControl();
     Setup();CHECK(TgGpuOpenPlatform(NULL,&resources)==STATUS_INVALID_PARAMETER);
     resources.Mapping[4]=NULL;
     CHECK(TgGpuOpenPlatform(&platform,&resources)==STATUS_DEVICE_CONFIGURATION_ERROR && !model.opens);
@@ -1577,6 +1663,8 @@ void start(void)
             model.token_aware_provider=FALSE;
         }
     }
+    CHECK(!model.live_pool && !model.live_irps && !model.live_workitems && !model.file_refs && !model.owner_refs);
+    TestSwBattVersioned();
     CHECK(!model.live_pool && !model.live_irps && !model.live_workitems && !model.file_refs && !model.owner_refs);
     CHECK(WriteFile(GetStdHandle((ULONG)-11),pass,sizeof(pass)-1,&written,NULL));ExitProcess(0);
 }

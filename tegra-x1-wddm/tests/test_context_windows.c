@@ -14,6 +14,7 @@
 #include "nouveau/headers/nvidia/classes/clb197.h"
 #include "nouveau/vulkan/nvk_mme_slots.h"
 #include <ntimage.h>
+#include "platform_unicode_fixture.h"
 static NTSTATUS SubmitModel(TG_GPU_CONTEXT_ENGINE *,const DXGKARG_SUBMITCOMMANDVIRTUAL *);
 static void TestGraphicsTemplate(TG_GPU_CONTEXT_ENGINE *);
 

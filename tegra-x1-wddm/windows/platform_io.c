@@ -24,6 +24,12 @@ enum tg_platform_rail_op_state {
     TgRailOpFailed = 3,
 };
 
+enum tg_platform_rail_abi {
+    TgRailAbiUnknown = 0,
+    TgRailAbiToken,
+    TgRailAbiSwBattLegacy,
+};
+
 /* Independent nonpaged refcounted rail-ownership & bridge state.
  * Async IRP completions, PnP notifications, and async reconnect/compensate work
  * items reference ONLY this object (never a bare TG_GPU_PLATFORM pointer).
@@ -37,6 +43,7 @@ typedef struct _TG_PLATFORM_RAIL_STATE {
     PFILE_OBJECT ActiveFile;
     HANDLE ActiveBridge;
     PVOID ActivePnpNotify;
+    enum tg_platform_rail_abi RailAbi; /* Per open file, under Lock. */
     ULONG BridgeEpoch;
     ULONG ProviderGeneration;
     ULONG ClaimEpoch;
@@ -344,6 +351,36 @@ static VOID ingest_provider_rail_query(const struct tg_gpu_pmic_request *q)
     }
 }
 
+/* SwBatt creates this named control device in DriverEntry and deletes it in
+ * DriverUnload. It is separate from its battery PnP stack. The referenced
+ * file keeps the endpoint alive until close. SwitchFan uses target PnP. */
+static BOOLEAN swbatt_control_file(PFILE_OBJECT file)
+{
+    DECLARE_CONST_UNICODE_STRING(name,L"\\Driver\\swbatt");
+    PDEVICE_OBJECT device=file->DeviceObject;
+    return device && device->DeviceType==FILE_DEVICE_UNKNOWN && device->DriverObject &&
+        RtlEqualUnicodeString(&device->DriverObject->DriverName,&name,TRUE);
+}
+
+/* A legacy SwBatt rejects the tagged read before touching the PMIC. Query
+ * its untagged ABI on the same file within the original time budget. */
+static NTSTATUS query_provider_address(TG_PLATFORM_RAIL_STATE *state,ULONG epoch,
+    PFILE_OBJECT file,PDEVICE_OBJECT owner_dev,struct tg_gpu_pmic_request *q,
+    BOOLEAN has_deadline,ULONGLONG deadline,BOOLEAN *used_legacy)
+{
+    if(used_legacy)*used_legacy=FALSE;
+    NTSTATUS status=send_pmic_irp(state,epoch,0,0,file,owner_dev,q,has_deadline,deadline);
+    if(status!=STATUS_ACCESS_DENIED || !swbatt_control_file(file))return status;
+
+    struct tg_gpu_pmic_request legacy={0,TG_GPU_PMIC_QUERY_ADDRESS,0,0};
+    status=send_pmic_irp(state,epoch,0,0,file,owner_dev,&legacy,has_deadline,deadline);
+    if(!NT_SUCCESS(status))return status;
+    if(!legacy.value || legacy.value>0x7f)return STATUS_DEVICE_PROTOCOL_ERROR;
+    *q=(struct tg_gpu_pmic_request){0,TG_GPU_PMIC_QUERY_ADDRESS,0,legacy.value};
+    if(used_legacy)*used_legacy=TRUE;
+    return STATUS_SUCCESS;
+}
+
 /* On a freshly loaded KMD image (State64 == 0 && g_ProviderRailSynced == 0),
  * query SwitchFan once so any unresolved rail claim from an unloaded prior KMD
  * image is recovered into this image's ledger and watermark (A05 reload). */
@@ -372,7 +409,7 @@ static VOID sync_provider_rail_once(VOID)
     if(NT_SUCCESS(st)) {
         ObfReferenceObject(owner_dev);
         struct tg_gpu_pmic_request q={TG_GPU_RAIL_QUERY_MAGIC,TG_GPU_PMIC_QUERY_ADDRESS,0,0};
-        st=send_pmic_irp(NULL,0,0,0,file,owner_dev,&q,FALSE,0);
+        st=query_provider_address(NULL,0,file,owner_dev,&q,FALSE,0,NULL);
         if(NT_SUCCESS(st))
             ingest_provider_rail_query(&q);
         else
@@ -636,7 +673,7 @@ static NTSTATUS open_bridge_internal(TG_GPU_PLATFORM *p)
     status=ObReferenceObjectByHandle(handle,FILE_READ_DATA|FILE_WRITE_DATA,*IoFileObjectType,
         KernelMode,(PVOID *)&file,NULL);
     if(!NT_SUCCESS(status))goto done;
-    if(g_PlatformDriverObject) {
+    if(g_PlatformDriverObject && !swbatt_control_file(file)) {
         InterlockedIncrement(&state->RefCount);
         notify_has_ref=TRUE;
         status=IoRegisterPlugPlayNotification(EventCategoryTargetDeviceChange,0,file,
@@ -669,6 +706,7 @@ static NTSTATUS open_bridge_internal(TG_GPU_PLATFORM *p)
     }
     state->BridgeEpoch=epoch;
     state->ActiveFile=file;
+    state->RailAbi=TgRailAbiUnknown;
     state->ActiveBridge=handle;
     state->ActivePnpNotify=notify;
     p->Bridge=handle;
@@ -740,7 +778,7 @@ static VOID NTAPI platform_open_work(PDEVICE_OBJECT DeviceObject,PVOID Context)
         status=STATUS_IO_TIMEOUT;
         goto finish;
     }
-    if(octx->DriverObject) {
+    if(octx->DriverObject && !swbatt_control_file(file)) {
         InterlockedIncrement(&state->RefCount);
         notify_has_ref=TRUE;
         status=IoRegisterPlugPlayNotification(EventCategoryTargetDeviceChange,0,file,
@@ -967,6 +1005,7 @@ static NTSTATUS open_bridge_deadline(TG_GPU_PLATFORM *p,ULONGLONG deadline)
     }
     state->BridgeEpoch=epoch;
     state->ActiveFile=file;
+    state->RailAbi=TgRailAbiUnknown;
     state->ActiveBridge=handle;
     state->ActivePnpNotify=notify;
     p->Bridge=handle;
@@ -1618,6 +1657,7 @@ static PIO_WORKITEM reconcile_rail_completion_locked(TG_PLATFORM_RAIL_STATE *sta
     if(ok) {
         state->LastRailOpState=TgRailOpSucceeded;
         if(ctx->Reg==TG_GPU_PMIC_CLAIM_RAIL) {
+            if(ctx->Buffer.address & TG_GPU_RAIL_STATE_ACK)state->RailAbi=TgRailAbiToken;
             state->ClaimEpoch=ctx->ClaimEpoch;
             state->ProviderToken=provider_tok;
             state->EmcRailOwner=TRUE;
@@ -2176,6 +2216,7 @@ static NTSTATUS platform_request_deadline(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_
     }
     ULONG op_claim_epoch=0;
     struct tg_gpu_pmic_request local_op=*op;
+    BOOLEAN legacy_swbatt=FALSE;
     if(reg==TG_GPU_PMIC_CLAIM_RAIL || reg==TG_GPU_PMIC_RELEASE_RAIL) {
         ULONG state_tok=0;
         BOOLEAN op_busy=FALSE;
@@ -2184,6 +2225,7 @@ static NTSTATUS platform_request_deadline(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_
             if(state->InFlightClaimSeq) {
                 op_busy=TRUE;
             } else {
+                legacy_swbatt=state->RailAbi==TgRailAbiSwBattLegacy;
                 rail_op_seq=++state->LastRailOpSeq;
                 if(reg==TG_GPU_PMIC_CLAIM_RAIL) {
                     op_claim_epoch=next_rail_claim_epoch();
@@ -2209,7 +2251,7 @@ static NTSTATUS platform_request_deadline(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_
         if(op_busy){status=STATUS_DEVICE_BUSY;goto finished;}
         if(!rail_op_seq){status=STATUS_DEVICE_NOT_READY;goto finished;}
         if(reg==TG_GPU_PMIC_CLAIM_RAIL) {
-            if(!local_op.address) {
+            if(!local_op.address && !legacy_swbatt) {
                 local_op.address=op_claim_epoch & 0xffffu;
                 if(!local_op.address)local_op.address=1u;
             }
@@ -2218,7 +2260,13 @@ static NTSTATUS platform_request_deadline(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_
             local_op.value=((UINT32)(state_tok&0xffffu)<<16)|(local_op.value&0xffffu);
         }
     }
-    status=send_pmic_irp(state,epoch,op_claim_epoch,rail_op_seq,file,owner_dev,&local_op,has_deadline,deadline);
+    const BOOLEAN rail_query=reg==TG_GPU_PMIC_QUERY_ADDRESS &&
+        !op->write && op->address==TG_GPU_RAIL_QUERY_MAGIC;
+    BOOLEAN legacy_reply=FALSE;
+    if(rail_query)
+        status=query_provider_address(state,epoch,file,owner_dev,&local_op,has_deadline,deadline,&legacy_reply);
+    else
+        status=send_pmic_irp(state,epoch,op_claim_epoch,rail_op_seq,file,owner_dev,&local_op,has_deadline,deadline);
     if(NT_SUCCESS(status)) {
         *op=local_op;
         KeAcquireSpinLock(&state->Lock,&state_irql);
@@ -2227,6 +2275,15 @@ static NTSTATUS platform_request_deadline(TG_GPU_PLATFORM *p,struct tg_gpu_pmic_
          * are reconciled exclusively inside platform_irp_complete (A05). */
         if(state->Closed || state->ActiveFile!=file || state->BridgeEpoch!=epoch) {
             status=STATUS_DEVICE_NOT_READY;
+        } else if(legacy_reply) {
+            /* Never downgrade a token-aware endpoint or a live/unresolved claim. */
+            if(state->RailAbi==TgRailAbiToken || state->EmcRailOwner || state->RailOwnershipUncertain ||
+               state->InFlightClaimSeq || InterlockedCompareExchange64(&g_UnresolvedRail.State64,0,0)!=0)
+                status=STATUS_INVALID_DEVICE_STATE;
+            else
+                state->RailAbi=TgRailAbiSwBattLegacy;
+        } else if(rail_query && (local_op.address & TG_GPU_RAIL_STATE_ACK)) {
+            state->RailAbi=TgRailAbiToken;
         } else if(vote_generation && reg==TG_GPU_PMIC_QUERY_EMC_VOTE) {
             *vote_generation=generation;
         }

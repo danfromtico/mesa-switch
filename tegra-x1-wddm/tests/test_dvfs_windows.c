@@ -8,6 +8,7 @@
 #include "../platform/t214_resources.h"
 #include "../integration/switch-lite/windows/SwitchFan/src/t214/emc_gpu_vote.h"
 #include <ntimage.h>
+#include "platform_unicode_fixture.h"
 
 static ULONG_PTR image_cookie=0x00002b992ddfa232ULL;
 const IMAGE_LOAD_CONFIG_DIRECTORY64 _load_config_used={

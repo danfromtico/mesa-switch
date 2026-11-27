@@ -110,8 +110,8 @@ static const GUID GUID_TARGET_DEVICE_REMOVE_COMPLETE  = {2,0,0,{0}};
 static const GUID GUID_TARGET_DEVICE_REMOVE_CANCELLED = {3,0,0,{0}};
 
 struct _DRIVER_OBJECT;
-typedef struct _DEVICE_OBJECT { struct _DRIVER_OBJECT *DriverObject; CCHAR StackSize; } DEVICE_OBJECT, *PDEVICE_OBJECT;
-typedef struct _DRIVER_OBJECT { PDEVICE_OBJECT DeviceObject; } DRIVER_OBJECT, *PDRIVER_OBJECT;
+typedef struct _DEVICE_OBJECT { struct _DRIVER_OBJECT *DriverObject; CCHAR StackSize; ULONG DeviceType; } DEVICE_OBJECT, *PDEVICE_OBJECT;
+typedef struct _DRIVER_OBJECT { PDEVICE_OBJECT DeviceObject; UNICODE_STRING DriverName; } DRIVER_OBJECT, *PDRIVER_OBJECT;
 typedef struct _FILE_OBJECT { PDEVICE_OBJECT DeviceObject; } FILE_OBJECT, *PFILE_OBJECT;
 typedef void *POBJECT_TYPE, *POBJECT_HANDLE_INFORMATION;
 extern POBJECT_TYPE *IoFileObjectType;
@@ -459,6 +459,8 @@ static NTSTATUS KeDelayExecutionThread(KPROCESSOR_MODE m, BOOLEAN a, PLARGE_INTE
     return STATUS_SUCCESS;
 }
 
+#define TG_PLATFORM_PTHREAD_MODEL
+#include "platform_unicode_fixture.h"
 #include "windows/platform_io.c"
 
 static VOID set_iso(TG_GPU_RESOURCES *r, BOOLEAN isolated) {
