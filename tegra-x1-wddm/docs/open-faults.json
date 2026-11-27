@@ -652,7 +652,8 @@
         "tegra-x1-wddm/docs/explorer-home-22631/shell-header.json",
         "tegra-x1-wddm/docs/explorer-home-22631/history-comparison.json",
         "tegra-x1-wddm/docs/windows-native-graphics/post99580-owner-scenario-context-20261124.json#explorer_recurrence",
-        "tegra-x1-wddm/docs/windows-native-graphics/explorer5496-retained-umd-main-review-20261124.json"
+        "tegra-x1-wddm/docs/windows-native-graphics/explorer5496-retained-umd-main-review-20261124.json",
+        "tegra-x1-wddm/docs/explorer-ui-a8-20261127/qualification.json"
       ],
       "cause": "Unknown. A 2026-11-18T06:27:16Z normal-folder capture shows tabs, address and commands on Code 0 with KMD b94248bc. The earlier user confirmation on d3423d26 establishes Home opening. Boot 93818 has the earliest retained blank-header pixels for Home and This PC. The NVK meta source is identical at the old and current endpoints, and the ARM64EC slot selection left the native components loaded by Explorer and DWM byte-identical to the preceding native WSI/DIB release. The first affected build lacks a matched earlier Home or This PC pixel and component record.",
       "daily_workaround": "Access drives through the visible This PC content pane. Retain the selected graphics profile for controlled comparison.",
@@ -680,6 +681,33 @@
         "retained_resource_failure_chains": 552,
         "same_pixels_or_restart_cause_proved": false,
         "status": "bounded_process_resource_failure_observed_root_cause_open"
+      },
+      "verified_fix": {
+        "scope": "explorer-winui-a8-shared-and-fl11-1-tir-gate",
+        "root_cause": "tgd3d hardcoded Device::hasA8=false without VK_KHR_maintenance5, runtime_shared_tiled_validate rejected D3D11.1 shared A8_UNORM textures (causing 119x DEVICEREMOVED in Explorer.EXE), and global FL11_1 caused DWM/D2D attachment-bound TIR draws to be dropped.",
+        "commit": "76f6bcd1a07eb0ef15207a04997fb9bea46ee7bf",
+        "root_cause_confirmed": true,
+        "independent_review_passed": true,
+        "review_basis": "Independent read-only subagent review (3e154433-17c4-41cc-92b6-bf105ec4daaf) passed all invariants.",
+        "build_signed": true,
+        "output_required": true,
+        "component": "tg_d3d_arm64.dll",
+        "components": {
+          "tegragpurender.sys": "1d88065b2e4a8ed777c40da0802331ed542763ca1520ee5630c2a150185813d5",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.dll": "1f81681c0862619f591f596c537d8fc37ffc8555fa39c03c964a368c1c7e38c1",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+          "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+          "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+        },
+        "causal_evidence_sha256": "4c254268010ed5adfd4fb32ac0de4725d4209aec1d96c2302a1bc7be091e6f9a",
+        "code_review_sha256": "974d3172d6ae5f9fa9c6c51f55e5bc5c526d9e4105d17c2bffd25f1323b2f6f6",
+        "build_sha256": "32e178ddc71e9be2483608b2b504bce3d664b37d55f86f42268b9f9f2049d923",
+        "causal_evidence_file": "tegra-x1-wddm/docs/explorer-ui-a8-20261127/causal-evidence.json",
+        "code_review_file": "tegra-x1-wddm/docs/explorer-ui-a8-20261127/code-review.json",
+        "build_file": "tegra-x1-wddm/docs/explorer-ui-a8-20261127/build.json"
       }
     },
     {
@@ -3115,6 +3143,171 @@
           "fault_id": "GM20B-PAL4-PDE-KIND-20261127",
           "reason": "The captured level-1/GPU_PHYSICAL/NULL-allocation/kind-0xfe input is now accepted and the bounded optimal-image GPU readback exits normally on the one-use boot. This is a scoped repair, not closure of the broader game/performance/audio scenario.",
           "test_sha256": "9285ac42a8e2aa97770fd2038605d3319dca69521017dedc451e0b7ee53978ef"
+        }
+      ]
+    },
+    {
+      "evidence_sha256": "25c86396e658589de0d158fee410ec3c81481df33ad8bd839319c4cb83720845",
+      "independence": [
+        {
+          "fault_id": "GM20B-POST-QUALIFICATION-RESTART-92154",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-CLOSED-GATE-SHUTDOWN-91989",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-WDDM20-FLIP-RESTART",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "SWITCH-WIFI-STARTUP",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "SWITCH-COMMIT-PRESSURE-RESTART",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "SWITCH-DESKTOP-RESTART-SHUTDOWN",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-POST-SELECTION-CONTROL-RESTART",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "SWITCH-BASELINE-HANDOFF-RESTARTS",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+          "reason": "Scoped UMD repair verified on one-time AC trial boot 106676 with maintenance5=true, formatA8=true, levels=7, 0 resource failures, 0 DEVICEREMOVED, 0 DWM TIR drops, 610 Explorer draws, and owner visual confirmation; broader shell fault remains open pending full multi-scenario closure.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-ON-DEMAND-CANDIDATE-BOOT-95090-RESET",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "SWITCH-CONTROLLED-CRASH-DUMP-MISSING-97176",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-WEATHER-NEWS-UI-RESTART-97983",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99653",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99725",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99793",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99868",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-FORMAL-C4-UNEXPLAINED-RESTART-99935",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-SD0513-CANDIDATE-UNCLEAN-BOOT-100134",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "SWITCH-SD0513-DIRECT-NT-DUMP-ABSENT-100210",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-C4-SD0513-UNEXPLAINED-BOOT-100286",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-C4-SD0515-DESKTOP-BLACK-SCREEN-100692",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-TDR-RESTART-IOSTATUS-PREFLIGHT",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-STALL-FAULT-ISR-AND-RAIL-OWNERSHIP",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
+        },
+        {
+          "fault_id": "GM20B-PAL4-PDE-KIND-20261127",
+          "reason": "Only tg_d3d_arm64.dll changed (enabling native A8_UNORM shared/RT and gating FL11_1 TIR); KMD, NVK, ACR, and x64 UMD are unchanged. Boot 106676 completed cleanly with one controlled restart, zero abnormal shutdowns, passing Explorer ETW/contracts and vk-triangle control; this historical fault remains open.",
+          "test_sha256": "19274f283c7377af2bc9e484efd4c4a41ec0c5a94feb42ee7f2baf9c9e9742c2"
         }
       ]
     }

@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Explorer WinUI A8_UNORM shared/RT + FL11_1 TIR gate native trial verification",
+  "scenario": "explorer-winui-a8-shared-and-fl11-1-tir-gate",
+  "source_commit": "76f6bcd1a07eb0ef15207a04997fb9bea46ee7bf",
+  "before_boot": 106676,
+  "after_boot": 106676,
+  "passed": true,
+  "original_trigger": true,
+  "output_verified": true,
+  "normal_exit": true,
+  "desktop_available": true,
+  "loaded_components": {
+    "tegragpurender.sys": "1d88065b2e4a8ed777c40da0802331ed542763ca1520ee5630c2a150185813d5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "1f81681c0862619f591f596c537d8fc37ffc8555fa39c03c964a368c1c7e38c1",
+    "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+  },
+  "loaded_explorer_components": {
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "1f81681c0862619f591f596c537d8fc37ffc8555fa39c03c964a368c1c7e38c1",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+  },
+  "etw": {
+    "matched_events": 7598,
+    "invalid_events": 0,
+    "events_lost": 0,
+    "buffers_lost": 0,
+    "vulkan_caps": {
+      "nvk": true,
+      "maintenance5": true,
+      "formatA8": true
+    },
+    "pipeline_levels": 7,
+    "resource_fails": 0,
+    "device_removed_errors": 0,
+    "dwm_tir_drop_messages": 0,
+    "explorer_submits": 140,
+    "explorer_draws": 610,
+    "explorer_render_passes": 353,
+    "dwm_draws": 3504,
+    "tiled_shared_opens_ok": [
+      "32x32",
+      "640x384",
+      "672x544"
+    ]
+  },
+  "contracts": {
+    "executable": "tgd3d-ui-fix-contracts.exe",
+    "exit_code": 0,
+    "tail": [
+      "PASS: MakeResident budget failures trim/retry, follow changing estimates, preserve protected backing, terminate irreducible OOM and balance paging references (CPU control)",
+      "PASS: video KMT cleanup failures retain ownership; bounded DXVA buffers, frame errors and NV12 array backing survive view/resource release (CPU substitutes only)",
+      "ALL_UI_FIX_CONTRACTS_PASS"
+    ]
+  },
+  "owner_visual_confirmation": {
+    "confirmed": true,
+    "statement": "现在修复了，更新基线，更新github",
+    "note": "Owner confirmed Win11 File Explorer UI rendering restored on the physical Switch Lite screen; automated elevated scheduled-task screenshot was also captured on boot 106676 (sha256 afc181995917d3b7b18cae23fd69f5f8da5e00a7f7bd0fcb23d24626c18f802f)."
+  },
+  "desktop": {
+    "gpu_code": 0,
+    "dwm_pid": 476,
+    "explorer_pid": 696
+  },
+  "causal_fault_remains_open": true
+}

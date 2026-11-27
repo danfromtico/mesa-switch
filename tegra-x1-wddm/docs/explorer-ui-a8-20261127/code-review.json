@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "source_commit": "76f6bcd1a07eb0ef15207a04997fb9bea46ee7bf",
+  "reviewer": "independent-research-subagent",
+  "review_conversation_id": "3e154433-17c4-41cc-92b6-bf105ec4daaf",
+  "review_type": "independent read-only subagent code audit of committed diff 76f6bcd1a07eb0ef15207a04997fb9bea46ee7bf",
+  "independent_review_passed": true,
+  "verdict": "PASS",
+  "checked_invariants": [
+    "FeatureChain::link pNext null termination and conditional VK_KHR_maintenance5 query/enablement",
+    "VK_FORMAT_A8_UNORM 6-bit optimalTilingFeatures probing and Device::hasA8 derivation",
+    "runtime_shared_tiled_validate bounds, D3DWDDM2_0 displayable restriction, D3D11.1 A8_UNORM/R8_UNORM validation, and metadata/image-flag symmetry",
+    "TGD3D_FL11_1_APPLICATION=1 exact opt-in gating preserving FL10_0..11_0, D3D11VA, compute, and tessellation",
+    "ETW event IDs/bit-packing and CPU contract test coverage"
+  ],
+  "non_blocking_notes": [
+    "tgd3d_trace.h:20 comment for TGD3D_TRACE_VULKAN does not yet document bits 33..34",
+    "device_contracts/resource_contracts do not yet assert pNext maintenance5 chaining or full A8/R8 tiled create-open round-trip",
+    "requiredA8 omits BLIT_SRC/BLIT_DST (supported by NVK; theoretical only on generic ICDs)"
+  ],
+  "recorded_utc": "2026-11-27T22:53:47Z"
+}
