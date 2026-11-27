@@ -1,0 +1,103 @@
+{
+  "date_utc": "2026-11-20",
+  "scope": "On-device baseline selection policy migration and the guarded permanent-permission entry on a previously accepted GM20B desktop.",
+  "baseline_source": "86b11bff561ea8107aadd060249eb14a226bd1c0",
+  "accepted_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25",
+  "boot_event_12_record": 82805,
+  "adapter_problem_code": 0,
+  "external_power": "Online",
+  "operation_times_utc": {
+    "test": "2026-11-20T14:06:41.1613233Z",
+    "install": "2026-11-20T14:06:56.3432515Z",
+    "restore": "2026-11-20T14:07:21.7540824Z",
+    "deny": "2026-11-20T14:07:37.7507431Z",
+    "retire": "2026-11-20T14:07:57.0152785Z"
+  },
+  "policy_manifest_sha256": "6553619f19aaf971fedbc2bc9e361533cf50a68ba85645da754a254e871552f5",
+  "installed_files_sha256": {
+    "Baseline-Device.ps1": "4b48fd10a8a8069ff04cc8dd39299f6061872182e59865209a019cdf3be3cfa8",
+    "Baseline-Promotion.ps1": "8c6de6cd55d3f314e1297e15e15b3e2d9dd0bef43b66f1b2d5df16255a2f7abd",
+    "Install-GraphicsBootPolicy.ps1": "5ecebad470d243814b2ce90354f2e09dcd947715babda834152a59c074c5d505",
+    "Invoke-GraphicsBootPolicy.ps1": "b366e79db9c0f55aed09a9c7d19bf71df63b5c361e2cf7f8b48f517c3f62f0a2",
+    "Native-Boot.ps1": "08b3862a9382fb80f1a856d69d6bb3090da252650e4858f19fc045c51a70be72",
+    "graphics-baseline.json": "58fc53664b0f5f85c13e428b5b43cae5f70b6e62532606417b111699d4f0d1dc",
+    "open-faults.json": "00647627939c078a69e529605706b1645ad2e514b7ce1675c52d460249ab04b3"
+  },
+  "windows_powershell": "5.1.22621.2506",
+  "windows_contract_count": 28,
+  "windows_contracts": [
+    "PASS no open faults with tested native candidate",
+    "PASS presentation blocked with Code 0",
+    "PASS missing ledger",
+    "PASS malformed empty ledger",
+    "PASS duplicate fault identifier",
+    "PASS fault deletion",
+    "PASS closure without causal evidence",
+    "PASS permanent boot substituted for trial",
+    "PASS incorrect loaded UMD",
+    "PASS unexplained restart",
+    "PASS unexpected event hidden behind planned restart",
+    "PASS interrupted case marked passed",
+    "PASS boolean boot record",
+    "PASS candidate boot camouflaged as a diagnosed restart",
+    "PASS matching dispatcher with changed candidate bytes",
+    "PASS self-declared bypass",
+    "PASS independently qualified bypass with exact evidence",
+    "PASS qualified presentation with a separately accounted Wi-Fi fault",
+    "PASS an unchanged DWM cannot qualify a changed x64 leaf",
+    "PASS changed x64 leaf measured in the candidate boot application",
+    "PASS presentation change labeled independent",
+    "PASS different evidence reuses an exception",
+    "PASS new open fault invalidates an older independent qualification",
+    "PASS closed fault with three separate original-scenario reports",
+    "PASS duplicate closure runs",
+    "PASS mismatched hardware evidence bytes",
+    "PASS unreadable JSON evidence",
+    "PASS Windows atomic registry grant and interrupted receipt recovery"
+  ],
+  "restore": {
+    "approval": "RestoreAccepted",
+    "persistent": true,
+    "registry_and_installed_components_sha256": {
+      "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7"
+    },
+    "interactive_dwm_process": 1412,
+    "dwm_loaded_components_sha256": {
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    }
+  },
+  "presentation_denial": {
+    "input": "Synthetic negative qualification submitted to the installed Accept entry with the current directory and hashes. This case measures admission policy.",
+    "blocked": true,
+    "reason": "Open faults block presentation promotion: GM20B-LEGACY-SEQUENTIAL-RESTART, GM20B-WDDM20-PRESENT1-REMOVAL, SWITCH-LOAD-TRANSITION-RESTART",
+    "prior_and_final_permission_identical": true
+  },
+  "retired_legacy_entry": {
+    "active_path_present": false,
+    "archived_source_sha256": "0eef4f5b33e4ed5a1feeceb4bc2ed25305e99741bc42c87cfad4f4ef3f9f7bed"
+  },
+  "final_state": {
+    "permanent_permission": true,
+    "trial_registry_grant": false,
+    "trial_token": false,
+    "open_fault_count": 4,
+    "unchanged_boot_throughout": true,
+    "selected_gpu_baseline_changed": false
+  },
+  "archived_operation_receipts_sha256": {
+    "test": "0941b47d66a5089159b27c31f38b6d0f1766fab26d52ebb3196c6b146df97018",
+    "install": "1c2b8c5b82a3847d0e5488734c571349b931ee6fb9a03e08e9fb90677b7ad00d",
+    "restore": "74ba224428dd3e7f10b6580d0705c0b205a91f6a8fcb52c8a6741fb1da351a22",
+    "deny": "a4ac8692473ce821355e27bef3bcc2ec4977d70270f20a178e682dbf5dc5d79a",
+    "retire": "36d2f0c25c7bd6e27beb42e25080bb27d427306e8d8e938eb94910f83ea8ecb0"
+  }
+}

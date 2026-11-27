@@ -36,20 +36,17 @@
 #include "State.h"
 
 #include "Debug.h"
+#include "Trace.h"
 
 #include "util/u_memory.h"
 
 
-EXTERN_C struct pipe_screen *
-d3d10_create_screen(void);
+EXTERN_C HRESULT
+d3d10_create_screen(HANDLE hRTAdapter, const D3DDDI_ADAPTERCALLBACKS *callbacks,
+                    struct pipe_screen **screen);
 
 
 static HRESULT APIENTRY CloseAdapter(D3D10DDI_HADAPTER hAdapter);
-
-static unsigned long numAdapters = 0;
-#if 0
-static unsigned long memdbg_no = 0;
-#endif
 
 /*
  * ----------------------------------------------------------------------
@@ -65,24 +62,17 @@ static unsigned long memdbg_no = 0;
 static HRESULT
 OpenAdapterCommon(__inout D3D10DDIARG_OPENADAPTER *pOpenData)   // IN
 {
-#if 0
-   if (numAdapters == 0) {
-      memdbg_no = debug_memory_begin();
-   }
-#endif
-   ++numAdapters;
-
    Adapter *pAdaptor = (Adapter *)calloc(sizeof *pAdaptor, 1);
    if (!pAdaptor) {
-      --numAdapters;
       return E_OUTOFMEMORY;
    }
 
-   pAdaptor->screen = d3d10_create_screen();
-   if (!pAdaptor->screen) {
+   HRESULT hr = d3d10_create_screen((HANDLE)pOpenData->hRTAdapter.handle,
+                                   pOpenData->pAdapterCallbacks, &pAdaptor->screen);
+   D3D10Trace(D3D10_TRACE_OPEN_RESULT, hr, pOpenData->Interface, pOpenData->Version);
+   if (FAILED(hr)) {
       free(pAdaptor);
-      --numAdapters;
-      return E_OUTOFMEMORY;
+      return hr;
    }
 
    pOpenData->hAdapter.pDrvPrivate = pAdaptor;
@@ -111,6 +101,7 @@ EXTERN_C HRESULT APIENTRY
 OpenAdapter10(__inout D3D10DDIARG_OPENADAPTER *pOpenData)   // IN
 {
    LOG_ENTRYPOINT();
+   D3D10Trace(D3D10_TRACE_OPEN10, S_OK, pOpenData->Interface, pOpenData->Version);
 
    /*
     * This is checked here and not on the common code because MSDN docs
@@ -135,6 +126,7 @@ OpenAdapter10(__inout D3D10DDIARG_OPENADAPTER *pOpenData)   // IN
          DebugPrintf("%s: unsupported interface version 0x%08x\n",
                      __func__, pOpenData->Interface);
       }
+      D3D10Trace(D3D10_TRACE_OPEN_RESULT, E_FAIL, pOpenData->Interface, pOpenData->Version);
       return E_FAIL;
    }
 
@@ -188,6 +180,8 @@ GetSupportedVersions(D3D10DDI_HADAPTER hAdapter,
       memcpy(pSupportedDDIInterfaceVersions,
              SupportedDDIInterfaceVersions,
              sizeof SupportedDDIInterfaceVersions);
+      for (UINT32 i = 0; i < *puEntries; ++i)
+         D3D10Trace(D3D10_TRACE_SUPPORTED_VERSION, S_OK, i, SupportedDDIInterfaceVersions[i]);
    }
 
    return S_OK;
@@ -210,6 +204,7 @@ GetCaps(D3D10DDI_HADAPTER hAdapter,
 {
    LOG_ENTRYPOINT();
    memset(pData->pData, 0, pData->DataSize);
+   D3D10Trace(D3D10_TRACE_CAPS, S_OK, pData->Type, pData->DataSize);
    return S_OK;
 }
 
@@ -230,6 +225,7 @@ EXTERN_C HRESULT APIENTRY
 OpenAdapter10_2(__inout D3D10DDIARG_OPENADAPTER *pOpenData)   // IN
 {
    LOG_ENTRYPOINT();
+   D3D10Trace(D3D10_TRACE_OPEN10_2, S_OK, pOpenData->Interface, pOpenData->Version);
 
    HRESULT hr = OpenAdapterCommon(pOpenData);
 
@@ -262,13 +258,6 @@ CloseAdapter(D3D10DDI_HADAPTER hAdapter)  // IN
    struct pipe_screen *screen = pAdapter->screen;
    screen->destroy(screen);
    free(pAdapter);
-
-   --numAdapters;
-#if 0
-   if (numAdapters == 0) {
-      debug_memory_end(memdbg_no);
-   }
-#endif
 
    return S_OK;
 }

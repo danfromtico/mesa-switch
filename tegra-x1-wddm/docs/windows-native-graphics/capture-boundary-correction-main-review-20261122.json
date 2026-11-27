@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "scope": "Main review of the local capture-boundary correction,one WindowsPowerShell5.1 CPU regression,cleanup,and separately reviewed read-only dump followup.",
+  "verdict": "capture_helper_CPU_evidence_and_bounded_readonly_followup_accepted;live_integration_pending",
+  "archive": {
+    "sha256": "44336df7c4db4a5e536828617c8ff15c717d6777c1bc76e8664fb01c0f9eece0",
+    "bytes": 225175,
+    "archive_members": 136,
+    "individually_hashed_members": 135
+  },
+  "all_archive_lengths_SHA256_CRC_and_safe_paths_verified": true,
+  "draft": {
+    "predecessor_sha256": "e7e95bb31a5466542b5ff20fda9ae0219c073e422885cb26f1cc963f83267c58",
+    "Tdr_Round_sha256": "5d2625a73e02aa444a0ae919c40ce15dc81998eb3cd7d69b45eac305f4208be0",
+    "helper_sha256": "abe344af49dc96010e142ac37c12213833511761c381f22f387d6c99c1ee8f1f",
+    "actual_patch_matches": true,
+    "draft_matches_R2_freeze": true,
+    "deployed": false,
+    "seconds": 45,
+    "runtime_integration_qualified": false,
+    "outer_budget_required_seconds": 180
+  },
+  "implementation_review": {
+    "old_gap": "The consumed controller stopped capture after the OS test process exited plus900ms.",
+    "new_behavior": "The local future script first persists immediate process-return facts,then observes45 seconds by monotonic QPC while appending CreateNew/WriteThrough records with Flush(true). Reader exit is recorded without shortening this file-session observation interval;an early reader exit still leaves collection unresolved.",
+    "deadline_semantics": "A reached deadline is an observation boundary,not a recovery success. Reboot,IO failure or missing deadline records remain incomplete evidence. Trace stop/drain can extend actual coverage beyond the deadline.",
+    "helper_import": "The exact helper name must be present in tool_files and its full SHA verified before dot-sourcing. RestoreSettings returns independently of the helper.",
+    "future_scope": "No draft staging or execution occurred. A distinct unconsumed plan must bind the new hashes and180-second outer budget;the consumed110-second controller remains unchanged.",
+    "CPU_scope": "Only the helper and fixture were exercised. No ETW control,OS TDR request,driver/configuration mutation or historical incident replay."
+  },
+  "CPU_evidence": {
+    "dispatches": 1,
+    "PSVersion": "5.1.22621.2506",
+    "cases": [
+      {
+        "case": "exited-reader",
+        "pid": 7652,
+        "seconds": 1,
+        "elapsed_seconds": 1.0302347395833333,
+        "journal_records": 3,
+        "deadline_reached": true,
+        "reader_exited_seen": true
+      },
+      {
+        "case": "running-reader",
+        "pid": 2728,
+        "seconds": 1,
+        "elapsed_seconds": 1.0149685416666667,
+        "journal_records": 3,
+        "deadline_reached": true,
+        "reader_exited_seen": false
+      }
+    ],
+    "native_wire_and_host_identity_count": 7,
+    "embedded_inputs_match_reviewed_files": true,
+    "same_boot_before_after_and_cleanup": 97530,
+    "ce54_Code0_selected_permanent_unchanged": true,
+    "fresh_full8_components_5_loads_claimed": false,
+    "cleanup_failure_preserved": true,
+    "cleanup_only_completion": {
+      "child_PIDs": [
+        7652,
+        2728
+      ],
+      "owned_root_removed": true,
+      "GPUCalls": 0,
+      "child_PID_source": "preserved SHA-verified observation journals",
+      "RegistryMutations": 0,
+      "boot": 97530,
+      "members_verified": 7,
+      "TdrRequests": 0
+    },
+    "GPUCalls": 0,
+    "TdrRequests": 0,
+    "RegistryMutations": 0,
+    "cross_reboot_durability_tested": false,
+    "live_ETW_TDR_coverage_proved": false
+  },
+  "independent_reviews": [
+    {
+      "round": "future-capture-review-r1",
+      "conversation": "36d036b3-b661-4c71-a776-8b69a9090920",
+      "model": "gemini-4-neon-high",
+      "frozen_members": 9,
+      "overall": "needs_correction",
+      "findings": [
+        "FC-01",
+        "FC-02",
+        "FC-03"
+      ]
+    },
+    {
+      "round": "future-capture-review-r2",
+      "conversation": "36d036b3-b661-4c71-a776-8b69a9090920",
+      "model": "gemini-4-neon-high",
+      "frozen_members": 10,
+      "overall": "approve_cpu_fixture_and_future_draft",
+      "findings": []
+    },
+    {
+      "round": "future-capture-review-r3",
+      "conversation": "36d036b3-b661-4c71-a776-8b69a9090920",
+      "model": "gemini-4-neon-high",
+      "frozen_members": 13,
+      "overall": "approve_completed_capture_correction",
+      "findings": []
+    }
+  ],
+  "review_corrections": {
+    "R1": [
+      "Typed double Math.Min arguments avoid the WindowsPowerShell5 overload ambiguity.",
+      "Verify helper identity before import and leave RestoreSettings independent.",
+      "Retain bounded child cleanup with process-exit race handling."
+    ],
+    "R2": "Approved the corrected helper,CPU fixture and local future draft with no findings.",
+    "R3": "Approved completed CPU evidence and cleanup-only completion with no findings;13 frozen members independently hashed.",
+    "cleanup_failure": "The first cleanup queried a missing summary reader_pid and stopped before removal. The corrected cleanup extracted each positive PID from its SHA-verified observation journal,checked all lines agree and the child has exited,then removed exactly the seven-file owned root. No fixture replay.",
+    "baseline_limit": "CPU before/after checks retain boot97530,ce54,Code0 and selected=permanent. They do not repeat the previous full8-component/5-loaded-path proof."
+  },
+  "dump_readonly_followup": {
+    "native_boot": 97530,
+    "pagefile_allocated_MB": 512,
+    "pagefile_configured_MB": [
+      512,
+      2048
+    ],
+    "automatic_pagefile": false,
+    "four_targeted_dump_logs_absent": true,
+    "EnableLogFile": 0,
+    "CrashDumpEnabled": 3,
+    "ForceDumpsDisabled_key_absent": true,
+    "LiveKernelReports_redirect_value_absent": true,
+    "WATCHDOG_tracking_counts": [
+      10,
+      1
+    ],
+    "quota_storage_or_dump_cause_established": false,
+    "source_image_boot": 97176,
+    "source_image_sha256": "5389b30d3a04fad330b9afef36b0d500ad363c6c5b39c55c9b60096669bfd945",
+    "source_image_bytes": 48056,
+    "Initialize_structure_offset": 88,
+    "Initialize_RVA": "0x28a4",
+    "R1_slot24_was_Interrupt_RVA": "0x108c",
+    "CrashdumpSupported": 1,
+    "PrivateExtensionSize": 528,
+    "ASM_instruction_words_matching_PE": 382,
+    "imports_independently_decoded": 32,
+    "Initialize_IRQL_guard_import": "KeGetCurrentIrql",
+    "SDPORT_INITIALIZE_SDK_annotation": "PASSIVE_LEVEL",
+    "SDK_header_sha256": "7d08a8fa90f7418212c02c3d9a81feba79169f02b339e4594cd1b252c0791b72",
+    "SDK_header_path": "/Users/rujian/.local/share/mesa-switch-woa-build/wdk/c/Include/10.0.26100.0/km/sdport.h",
+    "actual_dump_instance_observed": false,
+    "review_scope": "Not covered by Gemini R3;main independently reconciled existing native readbacks,image bytes,retained ARM64 layout and SDK annotation. No new compile or device query."
+  },
+  "static_conclusion_limits": {
+    "R1_retained_correction": "The provisional slot24 Initialize label was wrong;slot24 is Interrupt. Corrected ARM64 layout places Initialize at88 with RVA0x28a4.",
+    "actual_Initialize": "Retained instruction words match the old97176 PE. The CrashdumpMode branch queries imported KeGetCurrentIrql and has a nonzero-IRQL failure path. The locally inspected SDK annotation requires PASSIVE_LEVEL. No actual caller,IRQL,return or dump instance has been observed.",
+    "source_binding": "Nearby source was not bound to the installed SD binary and was not used as deployed-source proof.",
+    "pagefile_and_log_limits": "Allocated512MB,EnableLogFile0,four exact log paths absent and missing redirect/force-disable key are readback facts only. They do not prove insufficient pagefile capacity,a storage defect,quota cause or the reason no new dump was produced.",
+    "independent_review_scope": "Gemini R3 did not review the appended native dump/static originals. Main independently checked their transports,retained PE,382 instruction words,import table,retained ARM64 layout and SDK annotation without a new build or device query."
+  },
+  "baseline": {
+    "last_full_profile_boot": 97530,
+    "CPU_boundary_boot": 97530,
+    "KMD": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+    "selected_descriptor_unchanged": true,
+    "descriptor_sha256": "2b3a2624cd826fa41f47e4c621e6fdee9cd0e6a25161fab78eb9ec3ca5ef9154",
+    "full_profile_reference": "tegra-x1-wddm/docs/windows-native-graphics/tdr-native-failure-main-review-20261122.json#formal_restoration"
+  },
+  "remaining": [
+    "Real45-second ETW continuity/loss/deadline records and direct OS TDR callback outputs remain unverified.",
+    "No fresh OS dump/TGDB or cross-reboot dump chain.",
+    "Rejected KMD53ce remains unqualified;97365 engine control remains consumed;no adapter control.",
+    "Legacy first Present,91476/DWM152586 and95090 causal boundaries remain unknown.",
+    "Four470e1dbc deferred contracts receive no new relevant direct observations;their previous per-item unknown/revisit conditions remain."
+  ],
+  "open_faults": 19,
+  "faults_closed": 0,
+  "baseline_promoted": false,
+  "main_device_operations": 0,
+  "root_cause_found": false
+}

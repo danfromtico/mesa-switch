@@ -406,7 +406,9 @@ cbuf_set_is_push(const struct lower_descriptors_ctx *ctx, uint8_t desc_set)
 
    return set_layout != NULL &&
           (set_layout->flags &
-           VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT);
+           VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT) &&
+          !(set_layout->flags &
+            VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT);
 }
 
 static void
@@ -1124,6 +1126,13 @@ lower_interp_at_sample(nir_builder *b, nir_intrinsic_instr *interp,
 
    nir_def *loc = load_root_table(b, 1, 64, draw.sample_locations, ctx);
 
+#ifdef _WIN32
+   if (ctx->dev_info->chipset == 0x12e) {
+      nir_def *high = load_root_table(b, 1, 64, tir_high_locations, ctx);
+      loc = nir_bcsel(b, nir_ilt_imm(b, sample, 8), loc, high);
+      sample = nir_iand_imm(b, sample, 7);
+   }
+#endif
    /* Yay little endian */
    loc = nir_ushr(b, loc, nir_imul_imm(b, sample, 8));
    nir_def *loc_x_u4 = nir_iand_imm(b, loc, 0xf);

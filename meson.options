@@ -137,6 +137,29 @@ option(
 )
 
 option(
+  'gallium-d3d10-backend',
+  type : 'combo',
+  choices : ['gdi', 'nvk'],
+  value : 'gdi',
+  description : 'D3D10 UMD backend: GDI software rendering or Tegra NVK through Zink.',
+)
+
+option(
+  'tgd3d',
+  type : 'feature',
+  value : 'auto',
+  description : 'build tgd3d, the Direct3D 10 WDDM user-mode driver that renders ' +
+                'with Vulkan (NVK on Tegra GM20B). Windows only.',
+)
+
+option(
+  'tgd3d-dll-name',
+  type : 'string',
+  value : 'TegraGpuD3DVk',
+  description : 'name of the tgd3d user-mode driver DLL',
+)
+
+option(
   'gallium-rusticl',
   type : 'boolean',
   value : false,
@@ -914,4 +937,11 @@ option(
   type : 'boolean',
   value : false,
   description : 'Build panfrost Rust components.'
+)
+
+option(
+  'nvk-windows-kmt-object',
+  type : 'string',
+  value : '',
+  description : 'Path to the Windows SDK-compiled NVK KMT bridge object',
 )

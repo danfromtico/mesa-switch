@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "change_kind": "presentation",
+  "source_commit": "e9e8a3a3c69379065467f5d86a5d5054e550b9ff",
+  "base_commit": "9b9a0ee115f8d3c13b0ee87050b326f82e596b33",
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-wsi-dib-acr-a143bee5ba42",
+  "components": {
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "changed_paths": [
+    "src/nouveau/vulkan/nvk_wsi.c",
+    "src/vulkan/wsi/meson.build",
+    "src/vulkan/wsi/tests/win32_direct_dib.c",
+    "src/vulkan/wsi/tests/win32_pacing.c",
+    "src/vulkan/wsi/wsi_common_win32.cpp",
+    "src/vulkan/wsi/wsi_win32_direct_dib.h",
+    "src/vulkan/wsi/wsi_win32_pacing.h"
+  ],
+  "trial": {
+    "selected": "trial",
+    "dwm": 1428,
+    "boot_record": 93215,
+    "inf": "oem30.inf",
+    "loaded": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    },
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-wsi-dib-acr-a143bee5ba42",
+    "gpu_code": 0,
+    "dwm_start": "2026-11-21T20:51:20.9546229Z",
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "power": "Online",
+    "one_time": true,
+    "utc": "2026-11-21T20:52:54.1280937Z"
+  },
+  "system_log": {
+    "complete": true,
+    "first_record": 93193,
+    "last_record": 93284,
+    "boot_records": [
+      93215
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "kind": "controlled",
+        "explained": true,
+        "boot_record": 93215,
+        "cause": "One-time NVK activation after a closed-gate maintenance boot",
+        "system_records": [
+          93198,
+          93214,
+          93215
+        ],
+        "evidence_file": "system-one-time.json",
+        "evidence_sha256": "819f0c6e1db10e7037f54b35a1c67a57c66f70803ccaeb9b1e7a80620c110f20"
+      }
+    ]
+  },
+  "baseline_cases": [
+    {
+      "name": "accepted-clear",
+      "scenario": "Native BGRA clear and one legacy present",
+      "passed": true,
+      "before_boot": 93034,
+      "after_boot": 93034,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "base-clear.json",
+      "evidence_sha256": "4b01e72d3cdf59a7dc372ddcb58746f9eb176932cf073a4bf73cb11de2dc05d3",
+      "source_commit": "9b9a0ee115f8d3c13b0ee87050b326f82e596b33",
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+      }
+    },
+    {
+      "name": "accepted-sequential",
+      "scenario": "Native legacy no-write first SEQUENTIAL Present(1,0)",
+      "passed": true,
+      "before_boot": 93034,
+      "after_boot": 93034,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "base-sequential.json",
+      "evidence_sha256": "70368efdce9079a9428e9f2258a88a2aaae80e3b05b43d12daa16207a7e59176",
+      "source_commit": "9b9a0ee115f8d3c13b0ee87050b326f82e596b33",
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "name": "qualified-clear",
+      "scenario": "Native BGRA clear and one legacy present",
+      "passed": true,
+      "before_boot": 93215,
+      "after_boot": 93215,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "nvk-clear.json",
+      "evidence_sha256": "fa3dea1932738a08dba78e7a099fe918628cba189e6bf9dac1e37534ac338c30",
+      "loaded_components": {
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+      },
+      "baseline_case_sha256": "4b01e72d3cdf59a7dc372ddcb58746f9eb176932cf073a4bf73cb11de2dc05d3",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Same signed client, native GM20B, matching displayed pixels, input, normal exit and original compositor."
+    },
+    {
+      "name": "qualified-sequential",
+      "scenario": "Native legacy no-write first SEQUENTIAL Present(1,0)",
+      "passed": true,
+      "before_boot": 93215,
+      "after_boot": 93215,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "nvk-sequential.json",
+      "evidence_sha256": "fa1ddaa54b49e3c955beb53de4ea6cbebafceb6d2d9d4db96229922132115cc5",
+      "loaded_components": {
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+      },
+      "baseline_case_sha256": "70368efdce9079a9428e9f2258a88a2aaae80e3b05b43d12daa16207a7e59176",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Same signed client, native GM20B, matching displayed pixels, input, normal exit and original compositor."
+    }
+  ],
+  "prior_wsi_dib": {
+    "baseline-wsi": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-combined-13-baseline-wsi-20261121-01.result.json",
+      "sha256": "3143559b46df8f1cbcd92da0786b493c0b4272b4c901e1031dc740dc76de3c23",
+      "finding": "baseline 启动 92154 的原生 NVK 640×360 Vulkan 窗口取得像素、Escape 和正常退出。"
+    },
+    "candidate-wsi": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-combined-13-candidate-wsi-20261121-01.result.json",
+      "sha256": "64c5bd1c08a3d0713cab73cf3456e0b3b5705e61dff60aa8ba1183a47a49a688",
+      "finding": "candidate 启动 92336 的原生 NVK 640×360 Vulkan 窗口取得像素、Escape 和正常退出。"
+    },
+    "candidate-dib-on": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-combined-13-candidate-dib-on-20261121-01.result.json",
+      "sha256": "7c75caa238a82af048809a3d78fdcbc0b8ba6d32619a5d35f0f168e18c4b11d8",
+      "finding": "candidate 启动 92336 的原生 NVK 640×360 Vulkan 窗口取得像素、Escape 和正常退出。"
+    },
+    "candidate-dib-complex": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-combined-13-candidate-dib-complex-20261121-01.result.json",
+      "sha256": "a2dc30b429fad51268951bc7f459d2a1eeca3321b0b68cdb888f56083bdb809d",
+      "finding": "candidate 启动 92336 的原生 NVK 640×360 Vulkan 窗口取得像素、Escape 和正常退出。"
+    },
+    "baseline-dib-complex": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-combined-13-baseline-dib-complex-20261121-01.result.json",
+      "sha256": "ad5d21be8914f17aea87869c4c2a58f9afa3d722fe1db41da1262b112b248f05",
+      "finding": "baseline 启动 92154 的原生 NVK 640×360 Vulkan 窗口取得像素、Escape 和正常退出。"
+    },
+    "one-time-start": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/rounds/win-combined-13-one-time-start-20261121-01.result.json",
+      "sha256": "2f37e91dbcb4b7c421836e8a9a602ec7c2883ebaac0caa0632bf495368bffaa0",
+      "finding": "已验证并置联合包、目录和精确回退包。活动桌面保持正式基线。"
+    }
+  },
+  "operator_observation": "用户已测 WSI 帧节奏和直接 DIB，报告没有引入新 bug，要求正式启用。此轮保留该结果，未重跑游戏或帧率对照。"
+}

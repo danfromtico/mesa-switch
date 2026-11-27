@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "round_id": "win-cdd-wall-clock-91476-20261121-01",
+  "contract_id": "WIN-CDD-BOARD-RECOVERY",
+  "windows_question": "WIN-CDD-BOARD-RECOVERY",
+  "plan_sha256": "241a7077f28facb580441a624a146cae4c29b1eb6daf51adaef3da46a858fce9",
+  "status": "观测缺口",
+  "finding": "两路未封口 ETL 的 QPC 换算偏置约相差 0.1 微秒，较同启动板端时锚约晚 1.94 ms。末条留存事件在 15:30:48.120 UTC，距 91557 的内核启动约 55.860 秒。恢复启动的 6008 二进制载荷所报关机时间反而晚于该内核启动 24.613 秒。",
+  "missing_observation": "末条 ETL 到下一内核启动之间缺少连续记录或独立复位时戳。6008 所报时刻与内核启动顺序冲突。仍缺 152586 的同次驱动返回、硬件完成和复位首因。",
+  "device_executions": 0,
+  "evidence": {
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+        "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/exact-windows-reboot.json",
+        "sha256": "9e96882bdb82f7ad0caf34b51e7788748143cf7360872dfdaf162fe067bde2b0"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/incident-analysis.json",
+        "sha256": "b1aa491cfe5d24996d9549c47bf0328d82b3b39cfbf872e4bf3d32fe174c2c99"
+      }
+    ],
+    "retained": [
+      {
+        "path": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+        "sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+        "sha256": "88276f1c69708d28dbc676b2be1d80cf70e095206fd6d55ddc0e3402fde2b586"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      }
+    ],
+    "original_boot": 91476,
+    "board_anchor": {
+      "archive_member": "board/board-started.json",
+      "sha256": "52730b15cc1e2b749f706e2ab2ec5f5ce886eab2a8cbc5f4cc206fa9fa32ad27",
+      "qpc": 222953552589,
+      "utc": "2026-11-21T15:30:34.1295497Z"
+    },
+    "clocks": {
+      "app/display.etl": {
+        "sha256": "b6026077eb2ea0707bfc30118ac5ffca819314ea8b4bb51debdd4434b3fb5fb8",
+        "header_boot_filetime_100ns": 134397360896157822,
+        "session_start_filetime_100ns": 134397486344480898,
+        "header_qpc": 222959631252,
+        "clock_hz": 19200000,
+        "sealed": false,
+        "utc_offset_from_board_ms": 1.943069,
+        "last_retained": {
+          "qpc": 223221953112,
+          "pid": 4,
+          "tid": 892,
+          "id": 281,
+          "filetime_100ns": 134397486481106866
+        }
+      },
+      "app/scene/video.etl": {
+        "sha256": "6ec11c2e135e3204048b85be09fc7e8b519465cc8b39fba51cdf3ec0fe9c5596",
+        "header_boot_filetime_100ns": 134397360896157822,
+        "session_start_filetime_100ns": 134397486468744424,
+        "header_qpc": 223198217223,
+        "clock_hz": 19200000,
+        "sealed": false,
+        "utc_offset_from_board_ms": 1.943013,
+        "last_retained": {
+          "qpc": 223222131613,
+          "pid": 1400,
+          "tid": 2252,
+          "id": 8,
+          "filetime_100ns": 134397486481199835
+        }
+      }
+    },
+    "recovery_boot": {
+      "system_record": 91557,
+      "kernel_start_utc": "2026-11-21T15:31:43.9795048Z",
+      "event_written_utc": "2026-11-21T15:31:45.6459831Z"
+    },
+    "previous_shutdown_6008": {
+      "system_record": 91566,
+      "event_written_utc": "2026-11-21T15:33:21.7664645Z",
+      "reported_local_time": "2026-11-21T23:32:08.593+08:00",
+      "reported_utc": "2026-11-21T15:32:08.593Z"
+    },
+    "kernel_power_41": {
+      "system_record": 91575,
+      "bugcheck_code": 0,
+      "event_written_utc": "2026-11-21T15:31:51.9496938Z"
+    },
+    "wall_clock_gap_seconds": 55.859521,
+    "reported_shutdown_after_recovery_start_seconds": 24.613495,
+    "limits": "55.860 秒为留存末端到新内核启动的墙钟差，涵盖未观测的旧启动末段和新启动开始前的时间。两路 ETL 均未封口。",
+    "reference": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart",
+    "boundaries": {
+      "last_entry": {
+        "actor": "DWM",
+        "event_id": 8,
+        "qpc": 223222131613,
+        "approx_utc": "2026-11-21T15:30:48.119983Z"
+      },
+      "last_return": {
+        "actor": "application Present",
+        "qpc": 223219160141,
+        "hresult": "S_OK",
+        "approx_utc": "2026-11-21T15:30:47.965219Z"
+      },
+      "first_anomaly_or_missing": "末条 ETL 到下一内核启动之间缺少连续记录或独立复位时戳。6008 所报时刻与内核启动顺序冲突。仍缺 152586 的同次驱动返回、硬件完成和复位首因。"
+    }
+  }
+}

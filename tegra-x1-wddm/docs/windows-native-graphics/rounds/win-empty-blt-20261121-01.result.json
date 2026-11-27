@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-blt-20261121-01",
+  "contract_id": "WIN-PRESENT-BLT",
+  "windows_question": "WIN-PRESENT-BLT",
+  "plan_sha256": "8cf9fe731318bbd8bd3ab7e1f49d90647852474a88ff4c7defb58c2ce8e35ce3",
+  "status": "实机通过",
+  "finding": "原空窗口首次提交中，暂存表面与 Blt 目标的全局身份一致，源和目标均属应用设备。上下文提交 52 字节复制包，序号 1，按上下文、序号与 pQueuePacket 配对正常退役。",
+  "missing_observation": null,
+  "device_executions": 0,
+  "evidence": {
+    "boot": 91476,
+    "pid": 5992,
+    "tid": 5988,
+    "hwnd": 524312,
+    "luid": "0000000000005c10",
+    "dwm": 1400,
+    "qpc_frequency": 19200000,
+    "raw_archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-empty-present-20261121-01/collected.zip",
+    "raw_archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+    "trace_sha256": {
+      "display.etl": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+      "scene/video.etl": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a"
+    },
+    "device_state": {
+      "boot": 91476,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0,
+      "KMD": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "tgd3d": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "NVK": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "staging": {
+      "qpc": 94861278775,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 286,
+      "version": 0,
+      "fields": {
+        "pDxgAdapterAllocation": 18446611100166170064,
+        "Flags": 0,
+        "Width": 640,
+        "Height": 360,
+        "Pitch": 2560
+      }
+    },
+    "blt": {
+      "qpc": 94861300682,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 166,
+      "version": 0,
+      "fields": {
+        "hwnd": 524312,
+        "pDmaBuffer": 18446706169646566816,
+        "PresentHistoryToken": 0,
+        "hSourceAllocation": 18446706169646883344,
+        "hDestAllocation": 18446706169636830992,
+        "bSubmit": 1,
+        "bRedirectedPresent": 0,
+        "Flags": 1,
+        "Source.Left": 0,
+        "Source.Right": 640,
+        "Source.Top": 0,
+        "Source.Bottom": 360,
+        "Dest.Left": 0,
+        "Dest.Right": 640,
+        "Dest.Top": 0,
+        "Dest.Bottom": 360,
+        "SubRectCount": 1
+      }
+    },
+    "source_owned": {
+      "qpc": 94846219401,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 36,
+      "version": 2,
+      "fields": {
+        "hProcessId": 5992,
+        "hDevice": 18446611100200693776,
+        "pDxgAdapter": 18446706169594454016,
+        "hVidMmAlloc": 18446706169646883344,
+        "hVidMmGlobalAlloc": 18446611100182502816,
+        "hDxgResource": 18446611100200920800,
+        "hDxgSharedResource": 18446706169653085024,
+        "hThunkAllocation": 1073743680,
+        "hThunkResource": 1073743616,
+        "PrivateRuntimeResourceHandle": 0,
+        "pVirtualAddress": 2075107008512,
+        "hProcessAllocDetails": 18446611100193433616,
+        "hOtherPartitionHandle": 0
+      }
+    },
+    "target_owned": {
+      "qpc": 94861279542,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 36,
+      "version": 2,
+      "fields": {
+        "hProcessId": 5992,
+        "hDevice": 18446611100200693776,
+        "pDxgAdapter": 18446706169594454016,
+        "hVidMmAlloc": 18446706169636830992,
+        "hVidMmGlobalAlloc": 18446611100108393888,
+        "hDxgResource": 18446611100200890992,
+        "hDxgSharedResource": 18446706169653087904,
+        "hThunkAllocation": 1073743936,
+        "hThunkResource": 1073743872,
+        "PrivateRuntimeResourceHandle": 0,
+        "pVirtualAddress": 2075108851712,
+        "hProcessAllocDetails": 18446611100193443344,
+        "hOtherPartitionHandle": 0
+      }
+    },
+    "context": {
+      "qpc": 94844105971,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 30,
+      "version": 0,
+      "fields": {
+        "hDevice": 18446611100200693776,
+        "NodeOrdinal": 0,
+        "EngineAffinity": 1,
+        "DmaBufferSize": 65536,
+        "DmaBufferSegmentSet": 2,
+        "DmaBufferPrivateDataSize": 65864,
+        "AllocationListSize": 0,
+        "PatchLocationListSize": 0,
+        "Flags": 0,
+        "hContext": 18446611100106235296,
+        "ContextHandle": 1073742144,
+        "ParentDxgContext": 0
+      }
+    },
+    "gpu_packet": {
+      "qpc": 94861301402,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 178,
+      "version": 1,
+      "fields": {
+        "hContext": 18446611100106235296,
+        "PacketType": 0,
+        "SubmitSequence": 1,
+        "DmaBufferSize": 52,
+        "AllocationListSize": 3,
+        "PatchLocationListSize": 0,
+        "bPresent": 1,
+        "hDmaBuffer": 18446706169646566816,
+        "pQueuePacket": 18446706169625735184,
+        "ProgressFenceValue": 0
+      }
+    },
+    "completion": {
+      "qpc": 94861344089,
+      "pid": 4,
+      "tid": 884,
+      "provider": "kernel",
+      "id": 180,
+      "version": 1,
+      "fields": {
+        "hContext": 18446611100106235296,
+        "PacketType": 0,
+        "SubmitSequence": 1,
+        "bPreempted": 0,
+        "bTimeouted": 0,
+        "pQueuePacket": 18446706169625735184
+      }
+    },
+    "kmt_receipt": {
+      "qpc": 94861378321,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 184,
+      "version": 1,
+      "fields": {
+        "hContext": 1073742144,
+        "hWindow": 524312,
+        "VidPnSourceId": 4294967295,
+        "FlipInterval": 1,
+        "Flags": 67178625,
+        "ReturnStatus": 0,
+        "hSrcAllocHandle": 1073743680,
+        "hDstAllocHandle": 0
+      }
+    },
+    "boundaries": {
+      "last_entry": {
+        "call": "DxgKrnl Blit/QueuePacket Start",
+        "blt_qpc": 94861300682,
+        "packet_qpc": 94861301402
+      },
+      "last_return": {
+        "call": "QueuePacket Stop",
+        "qpc": 94861344089,
+        "sequence": 1,
+        "timeout": false,
+        "preempted": false
+      },
+      "first_anomaly_or_missing": "正式组件本次 ETW 有 Windows Blt 与提交/退役。miniport DDI 的原始 NTSTATUS 没有同轮专用返回事件。"
+    }
+  }
+}

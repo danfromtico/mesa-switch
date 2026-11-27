@@ -39,6 +39,9 @@ nvk_upload_queue_init(struct nvk_device *dev,
 
    nv_push_init(&queue->push, queue->push_data, ARRAY_SIZE(queue->push_data),
                 nvk_queue_subchannels_from_engines(NVKMD_ENGINE_COPY));
+#ifdef _WIN32
+   nvk_push_bind_copy(&queue->push, nvk_device_physical(dev)->info.cls_copy);
+#endif
 
    return VK_SUCCESS;
 

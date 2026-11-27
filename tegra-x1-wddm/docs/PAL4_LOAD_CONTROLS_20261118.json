@@ -1,0 +1,1162 @@
+{
+  "status": "PAL4 startup and archive workload observations on Switch Lite",
+  "game": {
+    "executable_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+    "dxvk_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "windowed_config_sha256": "9c10ee25076317f4ceed4a7af14309b1821ec69dfdf85866ed3e44e1a12b9dc1",
+    "client_size": [
+      800,
+      600
+    ],
+    "software_icd": "Mesa lavapipe x86 26.2.4 with two llvmpipe threads",
+    "software_icd_sha256": "c65488e6172ca7347bf91a7013e00121f1e627e10b5d16a4d589315ffefda8af"
+  },
+  "runs": [
+    {
+      "id": "software-03",
+      "started_utc": "2026-11-18T06:43:48.9773487Z",
+      "boot_utc": "2026-11-18T06:27:44.6534550Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "seen_renderer": "llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+      "power_mode": 1,
+      "cpu_khz": 1114927,
+      "gpu_reported_khz": 537600,
+      "emc_sample_khz": 1600000,
+      "dxvk_log_sha256": "80d9b8786e85cfd99e95cc73b0da9d066ec88b6b8c4644e4a6457006b63f4b29",
+      "outcome": "User observed a blank game window and an unexpected restart.",
+      "next_boot_utc": "2026-11-18T06:44:39.0837960Z"
+    },
+    {
+      "id": "basic-04",
+      "started_utc": "2026-11-18T06:57:18.2738360Z",
+      "boot_utc": "2026-11-18T06:54:45.9654180Z",
+      "gpu_pnp_code": 43,
+      "dwm_tgd3d_device_count": 0,
+      "seen_renderer": "llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "gpu_reported_khz": 0,
+      "emc_sample_khz": 2500000,
+      "dxvk_log_sha256": "92fd86c47e55c6398ce551a4430139a8b11cbed7c7b2a1ac9e4f71e68869a4a1",
+      "primary_display": "Microsoft Basic Display Driver",
+      "outcome": "Early captures were white. The closing capture contained the PAL4 title and menu.",
+      "menu_capture_sha256": "7530a24f39354fb20f2f3becc9d4ba58c4ec7a841086de364dea824f313a60b2",
+      "close": "Window close request",
+      "exit_code": 0,
+      "session_end_utc": "2026-11-18T07:01:51.2699513Z"
+    },
+    {
+      "id": "fixed-06",
+      "started_utc": "2026-11-18T07:12:20.3251761Z",
+      "boot_utc": "2026-11-18T06:54:45.9735860Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "seen_renderer": "llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "gpu_reported_khz": 460800,
+      "emc_sample_khz": 1331200,
+      "dxvk_log_sha256": "b45035a33f0cb92ad43ef8f475bfe7f861cbe5684a7c4a787cfda4818237d4a9",
+      "outcome": "Title menu visible in the foreground window. Click input was accepted. The process exited after WM_CLOSE and the game recorded subsystem teardown.",
+      "menu_capture_sha256": "e4bc77f79be44ab756a8f746ec8da720b345c6d47368518210addc819f53dce7",
+      "exit_code": null,
+      "exit_observed_utc": "2026-11-18T07:19:51.3696721Z",
+      "boot_after_exit_utc": "2026-11-18T06:54:45.9735860Z",
+      "new_game_play_verified": false
+    },
+    {
+      "id": "nativefixed-07",
+      "started_utc": "2026-11-18T07:26:26.1160369Z",
+      "boot_utc": "2026-11-18T06:54:45.9735860Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "seen_renderer": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "gpu_reported_khz": 460800,
+      "emc_sample_khz": 1600000,
+      "dxvk_log_sha256": "e5dcacc779898c04d3bd36419714983a33e6536e6a3af75d344b9bbb2d4009c3",
+      "outcome": "Unexpected restart before a game frame was captured.",
+      "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "device_opt_in": null,
+      "window_mode": [
+        800,
+        600
+      ],
+      "graphics_pipeline_library": "supported at default setting",
+      "next_boot_utc": "2026-11-18T07:26:49.5169020Z",
+      "recovery_code": 0,
+      "etw": {
+        "trace_sha256": "ad6a8854e33de9b514653010d572e39574fbe46573fc484d3b936a2583b0926c",
+        "last_app_queue_completion_utc": "2026-11-18 07:26:28.950617+00:00",
+        "tail_utc": "2026-11-18 07:26:29.174797+00:00",
+        "retained_system_starts": 513,
+        "unmatched_system_starts": 0,
+        "app_command_bytes": [
+          8532,
+          80,
+          8,
+          36,
+          1096
+        ],
+        "app_waits": 1,
+        "app_signals": 5,
+        "app_completed": 11,
+        "app_present_events": 0
+      }
+    },
+    {
+      "id": "native-nogpl-08",
+      "started_utc": "2026-11-18T07:31:15.8790886Z",
+      "boot_utc": "2026-11-18T07:26:49.5169020Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "seen_renderer": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "gpu_reported_khz": 460800,
+      "emc_sample_khz": 1331200,
+      "dxvk_log_sha256": "81a723a256e9d2fdda0736ece50e399534740c9bad178308cea6a1699d919460",
+      "outcome": "Unexpected restart before a game frame was captured.",
+      "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "device_opt_in": null,
+      "window_mode": [
+        800,
+        600
+      ],
+      "graphics_pipeline_library": "disabled and confirmed by DXVK",
+      "next_boot_utc": "2026-11-18T07:31:47.5915700Z",
+      "recovery_code": 0,
+      "etw": {
+        "trace_sha256": "c8e56ff01063760a612f3b123e1812609b9fcd4407d3e59c4c672ba2ad80d122",
+        "last_app_queue_completion_utc": "2026-11-18 07:31:19.864248+00:00",
+        "tail_utc": "2026-11-18 07:31:22.899294+00:00",
+        "retained_system_starts": 667,
+        "unmatched_system_starts": 0,
+        "app_command_bytes": [
+          8532,
+          80,
+          8,
+          36,
+          1096
+        ],
+        "app_waits": 1,
+        "app_signals": 5,
+        "app_completed": 11,
+        "app_present_events": 0
+      }
+    },
+    {
+      "id": "postkmd-09",
+      "invoked_utc": "2026-11-18T08:32:08.7464687Z",
+      "boot_utc": "2026-11-18T08:16:56.1031860Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+      "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "dxvk_log_sha256": "95bd7498911c99bb6cfae2bf1cee11a2ea947a0d599c3d4dd771ec12e8c90d3b",
+      "power_mode": 7,
+      "cpu_khz": 1497600,
+      "cpu_mv": 1120,
+      "gpu_khz": 460800,
+      "emc_khz_before_launch": 1600000,
+      "cpu_status": "0x0",
+      "app_queue_completed": 11,
+      "app_present_events": 0,
+      "trace_sha256": "71dc8ada603f9a90cb7fb6e07ea33eec4777a193c19bdb7ec3934791daf808f1",
+      "last_game_queue_complete_utc": "2026-11-18 08:32:12.358955+00:00",
+      "outcome": "The system rebooted during native game initialization.",
+      "next_boot_utc": "2026-11-18T08:32:33.8938970Z",
+      "system_queue_starts": 666,
+      "unmatched_system_starts": 0,
+      "trace_tail_utc": "2026-11-18 08:32:15.728367+00:00"
+    },
+    {
+      "id": "memory-10",
+      "invoked_utc": "2026-11-18T08:48:03.6784937Z",
+      "boot_utc": "2026-11-18T08:32:33.8938970Z",
+      "gpu_pnp_code": 0,
+      "dwm_tgd3d_device_count": 1,
+      "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+      "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "dxvk_log_sha256": "11e3b3a3d3d22e604124544bbc9e7c3068fc308b755d28204cafce3b52271a61",
+      "power_mode": 7,
+      "cpu_khz": 998400,
+      "cpu_mv": 810,
+      "gpu_khz": 460800,
+      "emc_khz_before_launch": 204000,
+      "cpu_status": "0xc0000483",
+      "app_queue_completed": 11,
+      "app_present_events": 0,
+      "trace_sha256": "cb959fbe6029a8d0bcd90ce47ef096e1a5647454113745d96b4f024370165bab",
+      "last_game_queue_complete_utc": "2026-11-18 08:48:11.503824+00:00",
+      "outcome": "Only the game exited. Windows and the DWM process stayed up.",
+      "process_exit": "0xe06d7363",
+      "game_fault": {
+        "class": "access violation reported by the game in its main executable",
+        "log_write_utc": "2026-11-18T08:48:21.8700995Z",
+        "log_sha256": "cd5524525fc6a394227d280bd958fe5a4dc54ef0dff448d0075fe221aaca0568"
+      },
+      "boot_verified_after_utc": "2026-11-18T08:32:33.8938970Z",
+      "dwm_before": [
+        1368
+      ],
+      "dwm_after": [
+        1368
+      ],
+      "submitted_close": false,
+      "platform": {
+        "samples": 16,
+        "first_utc": "2026-11-18T08:47:58.1003967Z",
+        "last_utc": "2026-11-18T08:48:38.3166129Z",
+        "cpu_khz": 998400,
+        "cpu_mv": 810,
+        "gpu_khz": 460800,
+        "gpu_uv": 800000,
+        "emc_khz": 204000,
+        "emc_transition_count": 1109,
+        "emc_dynamic_enabled": false,
+        "temperature_range_c": [
+          36,
+          37
+        ],
+        "min_available_physical_bytes": 2051682304,
+        "min_available_commit_bytes": 2669047808,
+        "measurements_sha256": "bbeaabb7fb94468955142860424b13d434eaa28fca1c022f2902bb5cc14e320f"
+      },
+      "graphics_memory": {
+        "manifest_sha256": "7f69dfba391df6bf7f9ed086fb0bbc444cbed7a19416854eb48d958d9f064529",
+        "decoded_events_in_live_snapshot": 1697,
+        "issues": 0,
+        "game_adapter_allocation_start_bytes": {
+          "count": 16,
+          "sum": 13520896,
+          "max": 8388608
+        },
+        "make_resident_on_game_thread": 16,
+        "all_make_resident_return_status_counts": {
+          "0x103": 35
+        },
+        "system_allocation_fault_events": 39,
+        "fault_headers": "All 39 records came from the System process with reason 0 and write set. Header PID alone cannot assign allocation ownership."
+      },
+      "capture": {
+        "live_snapshot_utc": "2026-11-18 08:49:20.773357+00:00",
+        "closed_file_sha256": "0bd9ee5d1543c456ed8821c0d600f3995971e1216bfee706649a883425f4fa54",
+        "stop_utc": "2026-11-18T08:51:15.6603624Z",
+        "lost": 0,
+        "buffers_lost": 0,
+        "note": "A native ControlTraceW stop finalized this circular trace because logman.exe was absent."
+      },
+      "observer_caveat": "A live diagnostic copy overlapped the game opening its own log."
+    }
+  ],
+  "archive": {
+    "original": {
+      "start_utc": "2026-11-18T04:48:51.7745207Z",
+      "archive_sha256": "024d403b4986b36d54f81eeb9a91df818e3156dcd0ad1bdce42ed465966887f6",
+      "partial_files": 799,
+      "partial_bytes": 932793266,
+      "next_observed_boot_utc": "2026-11-18T04:59:51.0035730Z",
+      "postboot_game_pids": []
+    },
+    "repeat_one_member": {
+      "start_utc": "2026-11-18T07:35:26.0949449Z",
+      "end_utc": "2026-11-18T07:36:42.8137991Z",
+      "boot_utc": "2026-11-18T07:31:47.5915700Z",
+      "tar_version": "bsdtar 3.6.2 - libarchive 3.6.2 zlib/1.2.5.f-ipp liblzma/5.2.5 bz2lib/1.0.8 libzstd/1.5.4 ",
+      "tar_sha256": "cb7d37a55138cde1ea38883df243af38d4804e1fe5e3ee82100adf2ecd548bd7",
+      "compressed_member_archive_sha256": "bac20852654ccd689f66d3d94f1d2c05ba9a5d20b6e4da6aa30ae576147fa500",
+      "expanded_member_sha256": "fd00f151072214932c28da925f4cd533d21a82dd59a16c06384833a6bb302dda",
+      "member_bytes": 8752515,
+      "iterations": 107,
+      "bytes_decoded_written_and_verified": 936519105,
+      "workload_ms": 72178,
+      "power_mode": 1,
+      "ac": "Online",
+      "pnp_code": 0,
+      "dwm_tgd3d_devices_before_after": [
+        1,
+        1
+      ],
+      "result": "All output hashes matched. The same Windows boot continued.",
+      "fixture_copy_removed_on_both_hosts": true
+    },
+    "synthetic_multifile": {
+      "fixture": {
+        "files": 7353,
+        "expanded_bytes": 1131876352,
+        "archive_bytes": 10251357,
+        "archive_sha256": "b4974c7b2419e8387945d8b36481e9ce5e2b907a6bad2d264fd4d15e208cbbdd",
+        "manifest_sha256": "52fb269fbb5d3454cc6cf531a4aa9ccef734da8429d03da1f58c3ef018970c69",
+        "generator": "RAR for macOS ARM64 7.23, non-solid RAR5, 1 MiB dictionary, synthetic deterministic bytes",
+        "verification_manifest_tsv_sha256": "c108a18213413161a2add348b8a3b66c60caba9b25db15d0ae62d0eeb2c28df8",
+        "generator_project": "https://www.rarlab.com/download.htm"
+      },
+      "method": "Use the system ARM64 tar.exe, extract the same non-solid RAR5 tree into an empty task-owned directory, verify every size and SHA-256, then remove the tree. Repeat three times.",
+      "scope": "The file count matches the original game package. Contents, compression ratio and member sizes differ.",
+      "runs": [
+        {
+          "id": "archive-multi-bootcpu-01",
+          "start_utc": "2026-11-18T09:12:58.9611026Z",
+          "end_utc": "2026-11-18T09:38:48.4023618Z",
+          "boot_utc": "2026-11-18T09:06:36.4131810Z",
+          "boot_after_utc": "2026-11-18T09:06:36.4131810Z",
+          "dwm_before": 1416,
+          "dwm_after": [
+            1416
+          ],
+          "desktop_tgd3d_devices": [
+            1,
+            1
+          ],
+          "pnp_code": 0,
+          "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+          "system_tar_sha256": "cb7d37a55138cde1ea38883df243af38d4804e1fe5e3ee82100adf2ecd548bd7",
+          "fixed_cpu_khz": 998400,
+          "cpu_mv": 810,
+          "gpu_policy_khz": 460800,
+          "gpu_measured_khz_range": [
+            460752,
+            460848
+          ],
+          "emc_khz": 204000,
+          "emc_counter_delta": 0,
+          "temp_c_range": [
+            37,
+            40
+          ],
+          "platform_samples": 363,
+          "platform_samples_sha256": "7b8915c40b9a70e38a9121b739cb10a6616a01b0f7a20c2eb9690199377e3af8",
+          "rounds": [
+            {
+              "verify_ms": 238918,
+              "files": 7353,
+              "round": 1,
+              "extract_ms": 280515,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T09:22:26.3443493Z"
+            },
+            {
+              "verify_ms": 206474,
+              "files": 7353,
+              "round": 2,
+              "extract_ms": 250403,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T09:30:13.3802658Z"
+            },
+            {
+              "verify_ms": 236079,
+              "files": 7353,
+              "round": 3,
+              "extract_ms": 254345,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T09:38:38.0117181Z"
+            }
+          ],
+          "total_verified_bytes": 3395629056,
+          "total_file_checks": 22059,
+          "restored_mode": 1,
+          "restored_charge_limit": 85,
+          "extract_elapsed_ms": 785263,
+          "verify_elapsed_ms": 681471,
+          "supply_at_endpoints": {
+            "power_before": {
+              "battery_mv": 3808,
+              "reported_charge_percent": 89,
+              "bq_reg08": 68,
+              "driver_flags": 7,
+              "external_online": true
+            },
+            "power_after": {
+              "battery_mv": 3800,
+              "reported_charge_percent": 89,
+              "bq_reg08": 68,
+              "driver_flags": 7,
+              "external_online": true
+            }
+          }
+        },
+        {
+          "id": "archive-multi-basecpu-02",
+          "start_utc": "2026-11-18T10:09:58.1051373Z",
+          "end_utc": "2026-11-18T10:31:56.0458057Z",
+          "boot_utc": "2026-11-18T09:52:39.1688090Z",
+          "boot_after_utc": "2026-11-18T09:52:39.1688090Z",
+          "dwm_before": 1396,
+          "dwm_after": [
+            1396
+          ],
+          "desktop_tgd3d_devices": [
+            1,
+            1
+          ],
+          "pnp_code": 0,
+          "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+          "system_tar_sha256": "cb7d37a55138cde1ea38883df243af38d4804e1fe5e3ee82100adf2ecd548bd7",
+          "fixed_cpu_khz": 1497600,
+          "cpu_mv": 1120,
+          "gpu_policy_khz": 460800,
+          "gpu_measured_khz_range": [
+            460800,
+            460848
+          ],
+          "emc_khz": 204000,
+          "emc_counter_delta": 0,
+          "temp_c_range": [
+            37,
+            42
+          ],
+          "platform_samples": 319,
+          "platform_samples_sha256": "6076099f365c7cebf8e84369df9a5fa0866472a37a4af0d36d9ee88ceef2740a",
+          "rounds": [
+            {
+              "verify_ms": 196931,
+              "files": 7353,
+              "round": 1,
+              "extract_ms": 253685,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T10:17:38.5130432Z"
+            },
+            {
+              "verify_ms": 189642,
+              "files": 7353,
+              "round": 2,
+              "extract_ms": 217197,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T10:24:31.9566247Z"
+            },
+            {
+              "verify_ms": 192882,
+              "files": 7353,
+              "round": 3,
+              "extract_ms": 235411,
+              "tar_exit": 0,
+              "bytes": 1131876352,
+              "utc": "2026-11-18T10:31:47.5926123Z"
+            }
+          ],
+          "total_verified_bytes": 3395629056,
+          "total_file_checks": 22059,
+          "restored_mode": 1,
+          "restored_charge_limit": 85,
+          "extract_elapsed_ms": 706293,
+          "verify_elapsed_ms": 579455,
+          "supply_at_endpoints": {
+            "power_before": {
+              "battery_mv": 3568,
+              "reported_charge_percent": 85,
+              "bq_reg08": 0,
+              "driver_flags": 3,
+              "external_online": false
+            },
+            "power_after": {
+              "battery_mv": 3496,
+              "reported_charge_percent": 77,
+              "bq_reg08": 0,
+              "driver_flags": 1,
+              "external_online": false
+            }
+          }
+        }
+      ],
+      "paired_cpu_result": {
+        "rounds": 6,
+        "verified_members": 44118,
+        "verified_bytes": 6791258112,
+        "fixed_gpu_policy_khz": 460800,
+        "fixed_emc_khz": 204000,
+        "across_separate_boots": true,
+        "desktop": "Both sessions kept the same DWM process throughout their three passes. The native tgd3d device was present before and after each set.",
+        "scope": "Both CPU operating points completed this generated workload. The original game archive uses different data and compression, and its interrupted extraction remains unexplained.",
+        "cleanup": "Both extracted trees, the temporary RAR and its member manifest were verified absent on the Switch after the controls.",
+        "power_source_difference": "The charger reported external power during the 998.4 MHz control and battery operation during the 1.4976 GHz control. The CPU and supply both differ across these two successful runs. Timing differences cannot be attributed to CPU clock alone."
+      }
+    }
+  },
+  "interpretation": [
+    "Keeping the fixed CPU policy and the GPU desktop, both native runs restarted while the software-rendered game reached the menu. EMC frequency samples differed between runs.",
+    "Disabling DXVK graphics pipeline libraries did not prevent the native game restart. Captured scheduler data ends before the reset.",
+    "The original full extraction was interrupted. A repeated single-member RAR5 workload completed on the active tgd3d desktop in Handheld mode. Its file layout and cache behavior differ from the full extraction.",
+    "The underlying system reset cause and interactive PAL4 gameplay on native NVK remain open.",
+    "The session with the latched power fault reached a game-reported exception while Windows stayed up. Its CPU and EMC rates and trace coverage differ from the system-reboot cases.",
+    "The 7,353-member synthetic archive completed three extraction and verification passes at each fixed CPU operating point. All six passes used the native desktop with the GPU policy at 460.8 MHz and EMC at 204 MHz."
+  ],
+  "power_recovery": {
+    "driver_sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5",
+    "operating_state": "CPU DFLL fault latch active before the game launch, physical display on, GPU counter live, AC connected. Healthy fixed mode and latched fallback both reported mode 7.",
+    "first_handheld_request": "Win32 error 21",
+    "steps": [
+      "Select fixed mode 7 explicitly through SwitchFan. CPU recovered to 1497600 kHz and CpuLastError cleared.",
+      "Select mode 1. CPU DFLL and GPU policy became active, the charge limit stayed at 85%, and the EMC governor resumed."
+    ],
+    "emc_before_count": 1109,
+    "emc_after_count": 1112,
+    "device_reboot_required": false,
+    "script": "../tools/dvfs-integration/Restore-Handheld.ps1",
+    "script_sha256": "273307d586bf95c63d51553097742a57af2f364772770f761da37f10ba2f23c0",
+    "live_script_checks": [
+      "already healthy Handheld",
+      "healthy fixed mode to Handheld",
+      "second call with Handheld already active"
+    ],
+    "unresolved": "The driver records STATUS_DEVICE_HARDWARE_ERROR for several DFLL transition failures. The originating transition was not captured."
+  },
+  "matched_cpu_operating_point": {
+    "method": "Begin in healthy Handheld mode. Read the EMC governor until it reaches 204000 kHz, then select the supported fixed power mode. Read back the CPU, GPU, EMC and latch state before launching the same desktop shortcut. The two cases used the same memory, scheduler and file tracing and platform samples.",
+    "boot_control": "SwitchFan read its existing CpuOverclockEnabled DWORD as 0 for one boot to select the standard PLLX boot operating point. A one-shot boot action restored the original DWORD 1 after driver initialization, before the game started. The Handheld policy was restored after the game exited.",
+    "controlled": [
+      "game and settings SHA-256",
+      "window size",
+      "desktop DWM hardware renderer",
+      "x86 DXVK and native x86 NVK",
+      "signed KMD",
+      "AC online",
+      "fixed GPU frequency and measured voltage",
+      "fixed EMC frequency and disabled governor",
+      "healthy CPU status",
+      "charge target 85%"
+    ],
+    "differences": [
+      "CPU operating point includes frequency and voltage",
+      "separate Windows boots and scheduling"
+    ],
+    "runs": [
+      {
+        "case": "emclow-11",
+        "boot_utc": "2026-11-18T08:32:33.8938970Z",
+        "input_utc": "2026-11-18T08:59:20.2037465Z",
+        "gpu_pnp_code": 0,
+        "desktop_tgd3d_devices": 1,
+        "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+        "native_x86_icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "app_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "ac": "Online",
+        "window": [
+          800,
+          600
+        ],
+        "power_policy": 7,
+        "gpu_khz": 460800,
+        "gpu_uv": 800000,
+        "emc_khz": 204000,
+        "emc_transitions_during_sampling": 0,
+        "emc_governor_active": false,
+        "cpu_khz": 1497600,
+        "cpu_mv": 1120,
+        "cpu_status": 0,
+        "cpu_dfll": 0,
+        "temperature_c_range": [
+          35,
+          36
+        ],
+        "sample_count": 4,
+        "first_sample": "2026-11-18T08:59:19.3443514Z",
+        "last_sample": "2026-11-18T08:59:24.9281211Z",
+        "platform_samples_sha256": "abc8ea0e1e3f5b73b7cd2bee4df246332b4bbaea648e803d89735512b9288c0e",
+        "etl_sha256": "fe426a937fac01f04a4145883d8ba58133bfbec791d6592cea19b2f3a84f022f",
+        "dxg_memory_events": 603,
+        "decode_issues": {},
+        "game_command_bytes": [
+          8532,
+          80,
+          8,
+          36,
+          1096
+        ],
+        "game_queue_complete": 11,
+        "game_presents": 0,
+        "retained_system_queue_starts": 451,
+        "unmatched_system_queue_starts": 0,
+        "last_game_queue_complete": "2026-11-18 08:59:24.267618+00:00",
+        "trace_tail": "2026-11-18 08:59:26.285870+00:00",
+        "outcome": "Whole system restarted before a game frame.",
+        "next_boot_utc": "2026-11-18T08:59:53.0123460Z",
+        "post_recovery_gpu_code": 0
+      },
+      {
+        "case": "cpuboot-12",
+        "boot_utc": "2026-11-18T09:06:36.4072070Z",
+        "input_utc": "2026-11-18T09:10:44.9363348Z",
+        "gpu_pnp_code": 0,
+        "desktop_tgd3d_devices": 1,
+        "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+        "native_x86_icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "app_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "ac": "Online",
+        "window": [
+          800,
+          600
+        ],
+        "power_policy": 7,
+        "gpu_khz": 460800,
+        "gpu_uv": 800000,
+        "emc_khz": 204000,
+        "emc_transitions_during_sampling": 0,
+        "emc_governor_active": false,
+        "cpu_khz": 998400,
+        "cpu_mv": 810,
+        "cpu_status": 0,
+        "cpu_dfll": 0,
+        "temperature_c_range": [
+          36,
+          37
+        ],
+        "sample_count": 14,
+        "first_sample": "2026-11-18T09:10:40.7019658Z",
+        "last_sample": "2026-11-18T09:11:12.8353571Z",
+        "platform_samples_sha256": "7f56099a576d7b1a17b6fa9027aed82d95424cb48f99c9176fc24ee40712f2e2",
+        "etl_sha256": "4358d48003f1b7c874bde2f29986453762c1c98ad4ef888a420c76d39278b566",
+        "dxg_memory_events": 1405,
+        "decode_issues": {},
+        "game_command_bytes": [
+          8532,
+          80,
+          8,
+          36,
+          1096
+        ],
+        "game_queue_complete": 11,
+        "game_presents": 0,
+        "retained_system_queue_starts": 1274,
+        "unmatched_system_queue_starts": 0,
+        "last_game_queue_complete": "2026-11-18 09:10:52.106768+00:00",
+        "trace_tail": "2026-11-18 09:11:14.742464+00:00",
+        "outcome": "PAL4 exited with an application exception. DWM and Windows remained responsive.",
+        "process_exit": "0xe06d7363",
+        "same_dwm_process": true,
+        "game_report": "The application reported an access violation at the same main-executable instruction as memory-10.",
+        "game_report_sha256": "2a6bd75b70b03adbd7abe574d7e184ad6e8e7aafdb3604a4410476025e77f8ed",
+        "game_report_utc": "2026-11-18T09:10:55.8237185Z",
+        "trace_events_lost": 0,
+        "trace_buffers_lost": 0,
+        "handheld_restored": true
+      }
+    ],
+    "interpretation": "The 1.497 GHz / 1120 mV run rebooted with EMC held at 204 MHz. At 998.4 MHz / 810 mV the application exited at the same instruction previously observed in the low-clock fault-latched run, while Windows continued. Sampling covered the retained ETW prefix. The final interval before reset is unobserved. These cases do not identify an electrical fault or prove the cause of the archive incident.",
+    "later_matched_run": "pal4-game-cpuboot-nolog-14 reproduced a whole-system reboot at 998.4 MHz with the live log copy removed."
+  },
+  "native_no_live_log_observation": {
+    "case": "pal4-game-cpuboot-nolog-14",
+    "comparison": "pal4-game-cpuboot-12",
+    "method": "Launch the same native x86 PAL4 desktop shortcut. Defer all queries and copies of pal4Logfile.log until every tracked game process exits. Keep the ETW collector, window observation, frequency selection and game configuration from the comparison run.",
+    "controller_sha256": "17768e5966bfa4edaa3ea28d134d155fa415591b1d99936e10cd2dba340a5b5e",
+    "matched_controller_sha256": "e30fb68b47d5ff03871f5bc594efd11972838dc7870f4d69fe027712c87752e4",
+    "source_change": "dxvk-games-20261118/pal4-observer-change.diff",
+    "source_change_sha256": "bfc9f6e4a4d27a46c69d36d9faafe84cfedc70c3aa1e62ff2b79605c9230d9ba",
+    "prior_observer_overlap": [
+      {
+        "case": "pal4-game-memory-10",
+        "snapshot_bytes": 4755,
+        "snapshot_sha256": "f163bb895790d7af27a9641a3bda9a07c7cb70e1b5d1f2e2fecf3cce8c28458f",
+        "observer_source_open_count_in_trace": 40,
+        "observer_source_read_count_in_trace": 5
+      },
+      {
+        "case": "pal4-game-cpuboot-12",
+        "snapshot_bytes": 17359,
+        "snapshot_sha256": "677f1bf4f7cd667a99ce5a14fd2e66cfaf7587fa878ff721d3ba6f87a29e9f82",
+        "observer_source_open_count_in_trace": 36,
+        "observer_source_read_count_in_trace": 5
+      }
+    ],
+    "start_boot_utc": "2026-11-18T09:47:51.2700620Z",
+    "launched_utc": "2026-11-18T09:52:07.5628280Z",
+    "game_pid": 2336,
+    "observer_pid": 3208,
+    "x86_icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+    "dxvk_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+    "pnp_code": 0,
+    "desktop_tgd3d_devices": 1,
+    "clock_samples": {
+      "count": 7,
+      "cpu_khz": 998400,
+      "cpu_mv": 810,
+      "gpu_policy_khz": 460800,
+      "gpu_measured_khz_range": [
+        460752,
+        460800
+      ],
+      "gpu_uv": 800000,
+      "emc_khz": 204000,
+      "emc_transition_count": 310,
+      "cpu_status": 0,
+      "first_utc": "2026-11-18T09:52:02.8753415Z",
+      "last_utc": "2026-11-18T09:52:19.3953270Z",
+      "sha256": "95217563e2965e6330b3f24aa9dde5215889983cc3a232a00615335015033a94"
+    },
+    "file_capture": {
+      "etl_sha256": "ae02bad0f4221d05892b077e7cec63d1fdf9fea2db1f2ae2d04ef21c13210e91",
+      "kernel_file_events": 18773,
+      "decode_issues": {},
+      "observer_accesses_to_game_log_in_retained_interval": 0,
+      "game_open_events_for_its_log": 183,
+      "exception_file_written_utc": "2026-11-18T09:52:09.2190788Z",
+      "exception_file_bytes": 295,
+      "exception_file_sha256": "805b46016c504fb0f0e9369bd9ca4ac50931f171e3e3636678b9f6bf552861e1",
+      "exception_file_contents": "Startup heading only. No exception report or stack was recorded.",
+      "initialization_log_collected_after_reboot": true,
+      "initialization_log_sha256": "ebdcd929e20414241f7a20b94b0717fdebd07b57b2a22f1afa655780b9efb41c",
+      "last_game_log_milestones": [
+        "Effect system initialization completed",
+        "Player manager initialization began"
+      ]
+    },
+    "window": {
+      "size": [
+        800,
+        600
+      ],
+      "foreground": true,
+      "class": "rwc",
+      "title": "PAL4-Application",
+      "captures": 2,
+      "identical_capture_sha256": "27aa3ca80af38907e02897ce7ff2bcaf83f0254b002721d412afab09a9d5c0b0",
+      "content": "Both captures showed the desktop within the game window rectangle.",
+      "interactive_menu_observed": false,
+      "input_sent": false,
+      "normal_exit_observed": false
+    },
+    "gpu_queue": {
+      "game_records": 11,
+      "completed": 11,
+      "game_present_events": 0,
+      "system_starts": 651,
+      "unmatched_system_starts": 0,
+      "last_game_completion_utc": "2026-11-18 09:52:14.314142+00:00",
+      "graphics_tail_utc": "2026-11-18 09:52:18.825087+00:00",
+      "successful_tgd3d_presents": 66
+    },
+    "reset": {
+      "next_boot_utc": "2026-11-18T09:52:39.1626390Z",
+      "unexpected_shutdown_record": 64026,
+      "kernel_power_record": 64035,
+      "bugcheck_code": 0,
+      "long_power_button_press": false,
+      "retained_process_exit_code": null,
+      "note": "Boot journal record numbers establish ordering. Some early boot wall-clock timestamps preceded the later synchronized WMI boot time."
+    },
+    "recovery": {
+      "original_cpu_preference": 1,
+      "temporary_boot_task_removed": true,
+      "automatic_restart_loaded_original_setting": true,
+      "gpu_code": 0,
+      "handheld": 1,
+      "dfll_active": 1,
+      "cpu_status": 0,
+      "charge_limit_percent": 85,
+      "desktop_check": "5352,True,0,1280,720,45,45,44",
+      "desktop_check_fields": "explorer_pid,responds_to_WM_NULL,dwm_flush_hresult,width,height,valid_samples,nonblack_samples,unique_colors"
+    },
+    "interpretation": "The earlier application-local failures coincided with the observer copying the log. Removing the copy let this run progress through effect initialization without the previously recorded access violation. A whole-system restart still occurred at the lower CPU operating point before a game Present. Logging interference and the cause of the system reset remain distinct questions."
+  },
+  "recovery_restart_at_0941": {
+    "planned_request_utc": "2026-11-18T09:41:17.4466248Z",
+    "return_boot_utc": "2026-11-18T09:42:03.3283210Z",
+    "evidence": "User32 1074 recorded the CPU-setting restoration command, EventLog 6006 recorded shutdown and Kernel-Boot 20 reported LastShutdownGood.",
+    "subsequent_gpu_code": 0,
+    "desktop_response": "5332,True,0,1280,720,45,45,44",
+    "physical_observation": "The user reported a crash around this transition. The OS check cannot exclude a brief panel freeze.",
+    "later_unexpected_restart": "pal4-game-cpuboot-nolog-14"
+  },
+  "win32_shader_cache_after_reset": {
+    "method": "Correlate the game PID, cache worker TID, numerical temporary name and adjacent key-file opens in the Windows Kernel-File trace. Inspect cache file headers on the idle device after the runs. Timing starts at the application queue submit event and ends at the corresponding scheduler completion. It includes queue waiting.",
+    "kernel_command_sizes_bytes": [
+      8532,
+      80,
+      8,
+      36,
+      1096
+    ],
+    "file_key_at_job_26": "aac7c31f96fadbd172e646ced66d58bb7a28550010728808681404160c9e5977",
+    "runs": [
+      {
+        "trial": "pal4-game-postkmd-09",
+        "etl_sha256": "71dc8ada603f9a90cb7fb6e07ea33eec4777a193c19bdb7ec3934791daf808f1",
+        "cache_worker_jobs_observed": 31,
+        "ordered_cache_keys_sha256": "6525e6027a58b236f7513ddff15e9aa0eb5c51041e5b6a39ff4491ef48c5fc87",
+        "matched_key_job": 26,
+        "last_cache_job": 31,
+        "last_observed_app_file_open": "MEMF55.tmp",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 3427.636,
+        "queue_submission_to_completion_ms": [
+          3.324,
+          5.78,
+          1.421,
+          4.364,
+          14.483
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 33,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": {
+          "file_sha256": "b330eb4d60821df08930c54ba0ce3adc621b9f64c8d6ac51358c6fb7b483a26c",
+          "payload_bytes": 8694,
+          "header_key_and_length_match": true,
+          "payload_digest_from_header": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373"
+        },
+        "verified_cache_entries": 31,
+        "invalid_cache_entries": [
+          {
+            "key": "0a1df9e7a61ef2a15255ba1803dd49fe0481eacac77d198f86ad6059db297924",
+            "payload_bytes": 10784,
+            "recorded_blake3": "78144fb1d9a062ac48933e82da0320f73963ca58614dad64caa39e116747a5a0",
+            "measured_blake3": "15c4b16ea60d7ad388f00ca11a5a397265d064edb03e7a47ed43d386047eb45b",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "9db104709401fe1d4f0fd12542e1f47f50deef6c8e26f538573c12f8c3c364bd",
+            "payload_bytes": 11990,
+            "recorded_blake3": "483c2b5202becf21c094c40c4d20c906ba5d6db9bc42838dbba6e45d441c74ac",
+            "measured_blake3": "34f62b4887e51ac6b73b577bf500f4dbef3cf893fed55d26afa00252f270c071",
+            "all_payload_bytes_zero": true
+          }
+        ],
+        "focus_entry_payload_valid": true
+      },
+      {
+        "trial": "pal4-game-memory-10",
+        "etl_sha256": "cb959fbe6029a8d0bcd90ce47ef096e1a5647454113745d96b4f024370165bab",
+        "cache_worker_jobs_observed": 29,
+        "ordered_cache_keys_sha256": "b4f5592f76a6cb11f1605bdc09d960651512bac5504bec3f4497c69318451510",
+        "matched_key_job": 26,
+        "last_cache_job": 29,
+        "last_observed_app_file_open": "pal4Exception.log",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 10364.914,
+        "queue_submission_to_completion_ms": [
+          25.135,
+          10.216,
+          11.045,
+          13.178,
+          27.88
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 29,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": {
+          "file_sha256": "b330eb4d60821df08930c54ba0ce3adc621b9f64c8d6ac51358c6fb7b483a26c",
+          "payload_bytes": 8694,
+          "header_key_and_length_match": true,
+          "payload_digest_from_header": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373"
+        },
+        "verified_cache_entries": 29,
+        "invalid_cache_entries": [],
+        "focus_entry_payload_valid": true
+      },
+      {
+        "trial": "pal4-game-emclow-11",
+        "etl_sha256": "fe426a937fac01f04a4145883d8ba58133bfbec791d6592cea19b2f3a84f022f",
+        "cache_worker_jobs_observed": 26,
+        "ordered_cache_keys_sha256": "76fa91648b781033b555dcc049ed27ef79cb6321f7fd98fcc2411178e49fd687",
+        "matched_key_job": 26,
+        "last_cache_job": 26,
+        "last_observed_app_file_open": "cache worker temporary file",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 2016.104,
+        "queue_submission_to_completion_ms": [
+          16.737,
+          8.221,
+          14.797,
+          30.124,
+          44.071
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 27,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": {
+          "file_sha256": "3ab33d3738813362c5289d79091d29ddcccf9e4c45942fb1cabac3fe48518909",
+          "payload_bytes": 8694,
+          "header_key_and_length_match": true,
+          "payload_digest_from_header": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373"
+        },
+        "verified_cache_entries": 22,
+        "invalid_cache_entries": [
+          {
+            "key": "07cd3bd3522636015efb0f78e870de1e85a48c17499cd26d55c1f82791fc5bb7",
+            "payload_bytes": 13448,
+            "recorded_blake3": "7e2bf33f3eda80b8de0e1e2e2d49725c138b71b8b6fb85b73b2680ad1b57a1d8",
+            "measured_blake3": "cad1bb7030a74ddf0abe35ebb1f200508221af23bf087e71b8e8b0dc31489e8a",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "66ebe7931db80eb37e860661f7e7727671b05fc30edd1d7d041e7affb82ea26e",
+            "payload_bytes": 8630,
+            "recorded_blake3": "520cc601d24efa1ce10f3c075dfd0d0b88dabc09c7661c55bc0dcef10b8aa13e",
+            "measured_blake3": "e8d7c7326cd6eb3010c9acf76242aa32611580c6955131968cdab729eafd59bf",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "9a6a3e2e9241ecd41f7d1ac4eb821364c1af4820508bcae3e2dfe4a2b8118321",
+            "payload_bytes": 8176,
+            "recorded_blake3": "2b2019f6deb241a0484d50741eae8f112cbb89b7534287b0001c779a6f1b67ce",
+            "measured_blake3": "03c3ac336844cf0e522deb0bbf18439454c84c4b96bc0b61e0934bb9439db08d",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "aac7c31f96fadbd172e646ced66d58bb7a28550010728808681404160c9e5977",
+            "payload_bytes": 8694,
+            "recorded_blake3": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373",
+            "measured_blake3": "40707050c0e1fe53bd8b9540bc86b54892e92e39197035e375800715062ac1d5",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "fc53b86c61c8d16fb3910801379507772b2de5c3ec4fed5b741a7c6f352ee983",
+            "payload_bytes": 8212,
+            "recorded_blake3": "cfa55958e291f44f05a316e0bcb80a6f95ec56fe43bc70a9a10293d24a15bf36",
+            "measured_blake3": "e7b1618a8f1d322c7bfef8b545ad3584618d0f6cfac2dd6664c7599a7e6b5a39",
+            "all_payload_bytes_zero": true
+          }
+        ],
+        "focus_entry_payload_valid": false
+      },
+      {
+        "trial": "pal4-game-cpuboot-12",
+        "etl_sha256": "4358d48003f1b7c874bde2f29986453762c1c98ad4ef888a420c76d39278b566",
+        "cache_worker_jobs_observed": 24,
+        "ordered_cache_keys_sha256": "f178c396db4dd75651ee98158118d4256dcebb3714eed2bfb5ba64b0a410f797",
+        "matched_key_job": null,
+        "last_cache_job": 24,
+        "last_observed_app_file_open": "pal4Exception.log",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 3716.19,
+        "queue_submission_to_completion_ms": [
+          27.077,
+          16.367,
+          10.834,
+          37.681,
+          43.902
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 24,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": null,
+        "verified_cache_entries": 24,
+        "invalid_cache_entries": [],
+        "focus_entry_payload_valid": null
+      },
+      {
+        "trial": "pal4-game-cpuboot-nolog-14",
+        "etl_sha256": "ae02bad0f4221d05892b077e7cec63d1fdf9fea2db1f2ae2d04ef21c13210e91",
+        "cache_worker_jobs_observed": 26,
+        "ordered_cache_keys_sha256": "76fa91648b781033b555dcc049ed27ef79cb6321f7fd98fcc2411178e49fd687",
+        "matched_key_job": 26,
+        "last_cache_job": 26,
+        "last_observed_app_file_open": "cache worker temporary file",
+        "last_observed_file_open_after_graphics_queue_complete_ms": 4765.042,
+        "queue_submission_to_completion_ms": [
+          25.899,
+          17.546,
+          15.543,
+          29.644,
+          43.23
+        ],
+        "cache_directory_exists_after_run": true,
+        "final_cache_files_after_run": 27,
+        "residual_temporary_files_after_run": 0,
+        "matched_file_after_run": {
+          "file_sha256": "3ab33d3738813362c5289d79091d29ddcccf9e4c45942fb1cabac3fe48518909",
+          "payload_bytes": 8694,
+          "header_key_and_length_match": true,
+          "payload_digest_from_header": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373"
+        },
+        "verified_cache_entries": 25,
+        "invalid_cache_entries": [
+          {
+            "key": "07cd3bd3522636015efb0f78e870de1e85a48c17499cd26d55c1f82791fc5bb7",
+            "payload_bytes": 13448,
+            "recorded_blake3": "7e2bf33f3eda80b8de0e1e2e2d49725c138b71b8b6fb85b73b2680ad1b57a1d8",
+            "measured_blake3": "cad1bb7030a74ddf0abe35ebb1f200508221af23bf087e71b8e8b0dc31489e8a",
+            "all_payload_bytes_zero": true
+          },
+          {
+            "key": "aac7c31f96fadbd172e646ced66d58bb7a28550010728808681404160c9e5977",
+            "payload_bytes": 8694,
+            "recorded_blake3": "4e4d0f8f6907e11f1302b352f101009fc8203b0297285543ccb3ad73324ea373",
+            "measured_blake3": "40707050c0e1fe53bd8b9540bc86b54892e92e39197035e375800715062ac1d5",
+            "all_payload_bytes_zero": true
+          }
+        ],
+        "focus_entry_payload_valid": false
+      }
+    ],
+    "interpretation": "Across the two 204 MHz EMC reset traces the cache worker reached the same 26 keys in the same order. After restart both directories contained the same 27 final filenames. Their job 26 entries had all 8,694 payload bytes zeroed and failed Mesa’s digest check. Two other runs reached jobs 29 and 31 and stored valid data for this key. Zero-filled payloads with intact headers are consistent with interrupted persistence during a reset. The initiating fault is still unknown. Mesa checks the digest on read and handles a mismatch as a cache miss.",
+    "observed_utc": "2026-11-18T10:32:03.9988598Z",
+    "control_results": {
+      "system_reset": {
+        "entries": 87,
+        "valid": 78,
+        "invalid_zero_payload": 9
+      },
+      "process_exit_windows_survived": {
+        "entries": 53,
+        "valid": 53,
+        "invalid_zero_payload": 0
+      }
+    },
+    "integrity_check": {
+      "source": "tegra-x1-wddm/tools/dxvk/check_win32_shader_cache.c",
+      "source_sha256": "ab72b9b7bca028b0a6aa1eb4bb8e82f3e2e1ca7f236f78dee3088719af2b0f90",
+      "arm64_signed_exe_sha256": "fd0c220c57d912c056959496c7f78e78067ccaaa27c88c6488ee9a5bd8f42ad8",
+      "algorithm": "Read the 80-byte header, match the key to the filename and the recorded payload length to the file size, then compute BLAKE3 over every payload byte using the same Mesa implementation as the cache reader. Count trailing zero bytes. Open all files for shared reads after PAL4 exits.",
+      "arm64_compilation": "llvm-mingw aarch64-w64-mingw32-clang -O2 -std=c11 -municode -DBLAKE3_USE_NEON=0 -DBLAKE3_NO_AVX512 -DBLAKE3_NO_AVX2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_SSE2 -Isrc/util/blake3 tegra-x1-wddm/tools/dxvk/check_win32_shader_cache.c src/util/blake3/blake3.c src/util/blake3/blake3_portable.c src/util/blake3/blake3_dispatch.c -Wl,--no-insert-timestamp -o check-cache.exe",
+      "raw_output_sha256": "339c52f98cf189f6e0ba176e393968370b2bd40214d852ef3f34c1e36da91fa1",
+      "completed_utc": "2026-11-18T10:36:35.9901002Z"
+    }
+  },
+  "native_game_without_mesa_disk_cache": {
+    "case": "pal4-game-cpuboot-nocache-15",
+    "reference": "pal4-game-cpuboot-nolog-14",
+    "change": "Set MESA_SHADER_CACHE_DISABLE=true in the launch environment of the x86 game. The reference already omitted the live diagnostic log copy. Each case used a fresh application cache directory.",
+    "controller_sha256": "f64c442822ef2df11ce670dfd4c81d0fe1e4cf1657127bbb21273073f437a4bd",
+    "driver_cache_implementation": "src/util/disk_cache_win32.c",
+    "matched": {
+      "native_icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+      "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+      "game_exe_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+      "dxvk_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+      "window_pixels": [
+        800,
+        600
+      ],
+      "pnp_before": 0,
+      "cpu_khz": 998400,
+      "cpu_mv": 810,
+      "gpu_khz": 460800,
+      "gpu_uv": 800000,
+      "emc_khz": 204000,
+      "emc_transition_delta": 0,
+      "ac_source": "Online",
+      "platform_samples": 7,
+      "temperature_c_range": [
+        39,
+        40
+      ]
+    },
+    "power_difference": {
+      "reference": {
+        "CapacityPercent": 89,
+        "VoltageMv": 3812,
+        "Reg08SysStat": 68,
+        "Flags": 7
+      },
+      "cache_disabled": {
+        "CapacityPercent": 71,
+        "VoltageMv": 3775,
+        "Reg08SysStat": 108,
+        "Flags": 13
+      },
+      "note": "The reference battery was charge-inhibited. Charging was active in this run. Both runs had external power."
+    },
+    "file_tracking": {
+      "all_kernel_file_events": 18435,
+      "schema_or_buffer_errors": 0,
+      "observer_live_game_log_opens": 0,
+      "game_cache_directory_present_after": false,
+      "game_direct_cache_opens_or_creates": [
+        {
+          "case": "pal4-game-emclow-11",
+          "parent_directory_counts": {
+            "pal4-game-emclow-11": 213
+          },
+          "direct_cache_opens_or_creates_from_game": 213
+        },
+        {
+          "case": "pal4-game-cpuboot-nolog-14",
+          "parent_directory_counts": {
+            "pal4-game-cpuboot-nolog-14": 213
+          },
+          "direct_cache_opens_or_creates_from_game": 213
+        },
+        {
+          "case": "pal4-game-cpuboot-nocache-15",
+          "parent_directory_counts": {},
+          "direct_cache_opens_or_creates_from_game": 0
+        }
+      ]
+    },
+    "game": {
+      "start_utc": "2026-11-18T11:09:51.1040038Z",
+      "pid": 7024,
+      "capture_sha256": "27aa3ca80af38907e02897ce7ff2bcaf83f0254b002721d412afab09a9d5c0b0",
+      "identical_window_captures": 2,
+      "last_game_log_milestone": "Player manager initialization began",
+      "game_log_sha256": "887321663fe874996fe499c2e6d5cc5fb5ddc4a89719e956399d02f7b4de07e9",
+      "exception_file_bytes": 295,
+      "exception_file_sha256": "805b46016c504fb0f0e9369bd9ca4ac50931f171e3e3636678b9f6bf552861e1",
+      "exception_file_contents": "Startup header only",
+      "recorded_game_presents": 0,
+      "interactive_menu_observed": false
+    },
+    "graphics_queue": {
+      "app_commands": 5,
+      "synchronization_records": 6,
+      "completed_app_records": 11,
+      "retained_system_starts": 875,
+      "unmatched_system_starts": 0,
+      "successful_desktop_presents": 78,
+      "last_app_completion_utc": "2026-11-18 11:09:57.802153+00:00",
+      "graphics_trace_tail_utc": "2026-11-18 11:10:02.824919+00:00"
+    },
+    "unexpected_restart": {
+      "boot_utc": "2026-11-18T11:10:40.0857890Z",
+      "system_6008_record": 64428,
+      "kernel_power_41_record": 64437,
+      "bugcheck_code": 0,
+      "separate_planned_setup_restart_record": 64331,
+      "new_dump_files": 0
+    },
+    "recovery": {
+      "original_cpu_boot_setting": 1,
+      "temporary_return_task_removed": true,
+      "gpu_problem_code": 0,
+      "handheld": 1,
+      "dfll_active": 1,
+      "shell_response_csv": "5624,True,0,1280,720,45,45,44",
+      "shell_response_columns": "explorer_pid,responds_to_WM_NULL,dwm_flush_hresult,width,height,valid_samples,nonblack_samples,unique_colors"
+    },
+    "interpretation": "The native game still reset the system before its first Present while its Mesa disk cache was disabled. The two recorded cache-enabled cases and this case used separate cache roots. Previously damaged entries were not shared with these launches. The initiating system fault is unresolved.",
+    "evidence_sha256": {
+      "graphics.etl": "dd40711cb4008111e7c9b5f25102e6db9a7a76d794bd8c991cd8aa5f7d360e43",
+      "platform.jsonl": "bad10a6983d12166730d49fa1769db7ed5a8b655beaef511b1f7528699f411ac",
+      "cache-root-evidence.json": "c38f88bb02e3bd9cad3832a355e7d08e3f94401cce9ab757ccff659440207c1f",
+      "observer-log-access.json": "b9f78531b2fdfdce2e73b9f2f8535b96d525c791d31419e0c0941b37d517318d",
+      "app-queue.json": "faa1b8da591e4d4458f92c8e148e0f89b3900886cd8904ffd4599a42290cddb2",
+      "system-queue-tail.json": "789790a52519f17200f956207de72e2c9a322b9b9da95170fa3f556732ed1b87",
+      "pal4-cache-trial-state-15b.stdout": "1c6846326dc84c470906182627c9357e52d6fd06d34ec29bcf03143e8c7bd0c2",
+      "pal4-cache-return-15.stdout": "1eacd674383ce0ca1e66a29f27a486f148f29c7d5c8a31a13fdd8ee2b2d53fc6",
+      "recovered-desktop.json": "64e2e4c010a5e176a7780f14e04e684286dedc56641747c7abe03203c25c64e3"
+    },
+    "cache_restored_after_control": {
+      "verified_utc": "2026-11-18T11:20:25.4701326Z",
+      "temporary_test_action_removed": true,
+      "game_shortcut_launches_original_exe": true,
+      "disable_environment": {
+        "User": null,
+        "Process": null,
+        "Machine": null
+      },
+      "persistent_cache_directory_overrides": {
+        "Machine": null,
+        "User": null
+      },
+      "gpu_problem_code": 0,
+      "x86_native_offscreen_pixels_per_run": 1024,
+      "cold_cache": {
+        "hits": 0,
+        "misses": 6
+      },
+      "warm_cache": {
+        "hits": 6,
+        "misses": 0
+      },
+      "verified_blake3_entries": 6,
+      "source_settings_sha256": "362d6e4cf8b9876309b01b65e62d95631bcb2aa6b407c3c036b9b8a29d98797a",
+      "verification_receipt_sha256": "dac45ce06a0a53ce6997fc577cbcf4730e706f435f2f88362b4d99714e1479e0"
+    }
+  }
+}

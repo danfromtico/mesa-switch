@@ -1,0 +1,347 @@
+{
+  "source_base": "00eddeb9abfc15c29e192569f387133304a2f602",
+  "queue_owner_fix": "701e579c7c90e118c242eca8182a57c8e76829d6",
+  "arch_build_support": "16b97583d7ce96660fb030d4f09f801aa450d7f3",
+  "side_patch_sha256": "4562ef93c4327fae719ae21211ac3e30da2e616c709c925366e3385b88839b14",
+  "review": "Independent Neon review of the lifetime fix and the ABI changes. The recommended defined() checks preserve preprocessed output for four architectures.",
+  "hardware": {
+    "boot_utc": "2026-11-19T15:42:07.6196220Z",
+    "gpu_problem_code": 0,
+    "dwm_pid": 1464,
+    "native_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "signed_trial_components": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7"
+    },
+    "selected_trial_name": "queue-finish-6b36641bb429",
+    "boot_policy": "One-use trial consumed. No reboot or new boot grant during these checks."
+  },
+  "sources_of_evidence": {
+    "queue_failure_cases": "Injected runtime callbacks. Each of x86 and ARM64EC runs a full contracts executable on the Switch. In the x64 before/after controls TokenHeld and CloseFailed change from failure to success, while Drained and CloseRecovered pass both builds.",
+    "private_draw": "Native NVK and real kernel submission, driver loaded from a per-test directory.",
+    "public_draw": "System d3d11.dll, explicit GM20B adapter LUID and feature level 11_1 only."
+  },
+  "architectures": {
+    "x86": {
+      "signed_umd": {
+        "bytes": 3716632,
+        "unsigned": "ba1e174825d539bb0c1268f4f9ef9f3db02d53dfb583e5dd9a0d8edd04e6b48b",
+        "sha256": "ac62c2cb1e0d3affc229754be3957769c449b34ffa20d7d74208e08ef655dfab",
+        "pe_machine": "0x14c",
+        "llvm_format": "COFF-i386"
+      },
+      "contracts_exit": 0,
+      "contracts_sha256": "11e638db38dd7bfbf74b108c6de5b5e860e2a62e7681861d56463957a4f4f635",
+      "queue_owner_cases": [
+        "Drained",
+        "TokenHeld",
+        "CloseFailed",
+        "CloseRecovered"
+      ],
+      "private_rendering": {
+        "gpu": "GM20B, vendor 10de, chipset 12e, SM53",
+        "ddi": "D3D11 --logic",
+        "formats": 10,
+        "verified_cases": 180,
+        "close_adapter": 0,
+        "close_kernel": 0,
+        "exit": 0,
+        "components_sha256": {
+          "private.exe": "4a091e6597631c7e5f4e22bbc0711ce3d986c198a2e3e89010544fd1e21b8600",
+          "libvulkan_nouveau.dll": "1064131dcda0ee441b7b1dab86838a612546f6bdad4265a8d6e7c8ed2277101e",
+          "tg_d3d_x86.dll": "ac62c2cb1e0d3affc229754be3957769c449b34ffa20d7d74208e08ef655dfab"
+        }
+      },
+      "system_fl11_1": {
+        "exit": 3,
+        "output": [
+          "hardware-adapter\t0000000000005309\t10de\t12e\t53",
+          "api-error\tD3D11CreateDevice\t887a0004"
+        ]
+      }
+    },
+    "arm64ec": {
+      "signed_umd": {
+        "bytes": 3784224,
+        "unsigned": "1e124ef2ee7bd546cd69cf1ac3a055cae4d558b501d070b533058d418dfcf976",
+        "sha256": "47e1b844bd062b7c8fb13a1952922cc584157d49e589182f49b00ce16bc55697",
+        "pe_machine": "0x8664",
+        "llvm_format": "COFF-ARM64EC",
+        "chpe_metadata": "0x180245d80"
+      },
+      "contracts_exit": 0,
+      "contracts_sha256": "a29290af94f030dfe16a74b79a69eabba8bcaddcc1557d52be2a45dbfd8dcc05",
+      "queue_owner_cases": [
+        "Drained",
+        "TokenHeld",
+        "CloseFailed",
+        "CloseRecovered"
+      ],
+      "private_rendering": {
+        "gpu": "GM20B, vendor 10de, chipset 12e, SM53",
+        "ddi": "D3D11 --logic",
+        "formats": 10,
+        "verified_cases": 180,
+        "close_adapter": 0,
+        "close_kernel": 0,
+        "exit": 0,
+        "components_sha256": {
+          "private.exe": "18815727b78c7b3752ccfe888a4ce706a6513a3026fd3ace5e09f423efcc6326",
+          "libvulkan_nouveau.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "tg_d3d_arm64ec.dll": "47e1b844bd062b7c8fb13a1952922cc584157d49e589182f49b00ce16bc55697"
+        }
+      },
+      "system_fl11_1": {
+        "exit": 0,
+        "output": [
+          "hardware-adapter\t0000000000005309\t10de\t12e\t53",
+          "runtime\thardware\tb100\t414f5753\t31304630\t0\t0000000000005309",
+          "triangle-readback\t280\t309",
+          "complete\t1"
+        ]
+      },
+      "system_facade_target": "tg_d3d_x64.dll"
+    }
+  },
+  "arm64_public_triangle": {
+    "painted": 280,
+    "untouched": 309,
+    "exit": 0,
+    "etl_sha256": "264f9f6b24169cdff8d3d76bedfdf71536f168e9da0bb8641b7c11c00e4014ed"
+  },
+  "x64_embedded_mpv": {
+    "scope": "Extracted wiliwili libmpv, 720p window with software reference",
+    "libmpv_sha256": "bfaf06e26e23c60dbb803d6d6bc47e5535e4a9b631301755b2fde60b8beb21cf",
+    "passed": true,
+    "checks": {
+      "probe_exit_success": true,
+      "player_eof": true,
+      "boot_continuity": true,
+      "decoder": true,
+      "nvdec": true,
+      "pixel_checks": true,
+      "visible_window": true
+    },
+    "pid": 524,
+    "hardware_frames": 120,
+    "matched_frames": 120,
+    "frame_count": 120,
+    "etl_sha256": "322c1b679abb813d5fa669f1b31c4ba59087b88b91f85e3a2a017ee4d97ba196",
+    "lifecycle_events": [
+      {
+        "event": 4,
+        "status": "0x0",
+        "count": 1
+      },
+      {
+        "event": 5,
+        "status": "0x0",
+        "count": 1
+      }
+    ]
+  },
+  "windows_dxgi_driver_selection": {
+    "wow_umd_registry": null,
+    "registry_native_dx10_dx11": "TegraGpuD3DVk.dll",
+    "observations": {
+      "x86": {
+        "pid": 6960,
+        "kmt_driver_slots": [
+          [
+            "0",
+            "c000000d"
+          ],
+          [
+            "1",
+            "c000000d"
+          ],
+          [
+            "2",
+            "c000000d"
+          ],
+          [
+            "3",
+            "c000000d"
+          ]
+        ],
+        "create_columns": [
+          "route",
+          "requested_level_hex_0_means_default",
+          "hresult",
+          "returned_level_hex",
+          "device",
+          "context"
+        ],
+        "create": [
+          [
+            "gm20b",
+            "b100",
+            "887a0004",
+            "0000",
+            "0",
+            "0"
+          ],
+          [
+            "gm20b",
+            "b000",
+            "887a0004",
+            "0000",
+            "0",
+            "0"
+          ],
+          [
+            "gm20b",
+            "a000",
+            "887a0004",
+            "0000",
+            "0",
+            "0"
+          ],
+          [
+            "default",
+            "0000",
+            "887a0004",
+            "0000",
+            "0",
+            "0"
+          ],
+          [
+            "warp",
+            "b100",
+            "00000000",
+            "b100",
+            "1",
+            "1"
+          ]
+        ],
+        "tgd3d_events_by_id": {},
+        "etl_sha256": "b127d443713c2d3a0f3619c7ce2633a88df949d7461b03846b84120436f18bb9",
+        "driver_modules": [
+          "D3D10Warp.dll",
+          "d3d11.dll"
+        ]
+      },
+      "arm64ec": {
+        "pid": 724,
+        "kmt_driver_slots": [
+          [
+            "0",
+            "00000000",
+            "tegragpuno3d.dll"
+          ],
+          [
+            "1",
+            "00000000",
+            "TegraGpuD3DVk.dll"
+          ],
+          [
+            "2",
+            "00000000",
+            "TegraGpuD3DVk.dll"
+          ],
+          [
+            "3",
+            "00000000",
+            "tegragpuno3d.dll"
+          ]
+        ],
+        "create_columns": [
+          "route",
+          "requested_level_hex_0_means_default",
+          "hresult",
+          "returned_level_hex",
+          "device",
+          "context"
+        ],
+        "create": [
+          [
+            "gm20b",
+            "b100",
+            "00000000",
+            "b100",
+            "1",
+            "1"
+          ],
+          [
+            "gm20b",
+            "b000",
+            "00000000",
+            "b000",
+            "1",
+            "1"
+          ],
+          [
+            "gm20b",
+            "a000",
+            "00000000",
+            "a000",
+            "1",
+            "1"
+          ],
+          [
+            "default",
+            "0000",
+            "00000000",
+            "b000",
+            "1",
+            "1"
+          ],
+          [
+            "warp",
+            "b100",
+            "00000000",
+            "b100",
+            "1",
+            "1"
+          ]
+        ],
+        "tgd3d_events_by_id": {
+          "1": 4,
+          "2": 4,
+          "3": 4,
+          "4": 4,
+          "5": 4,
+          "7": 20,
+          "14": 40,
+          "33": 4
+        },
+        "etl_sha256": "07c1aaa28b692b3e06eb29520ad5910f02122c898170a1af79f4bda892353c7d",
+        "driver_modules": [
+          "D3D10Warp.dll",
+          "TegraGpuD3DVk.dll",
+          "d3d11.dll",
+          "libvulkan_nouveau.dll",
+          "tg_d3d_x64.DLL"
+        ]
+      }
+    },
+    "source_locations": [
+      "tegra-x1-wddm/windows/tegragpurender.inf",
+      "tegra-x1-wddm/tools/tgd3d-default/Install-Default.ps1"
+    ],
+    "reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/microsoft-windows-vista-display-driver-64-bit-issues",
+    "first_blocker": "The current GPU package registers native UserModeDriverName only. The 32-bit process successfully opens the GM20B LUID, but its KMT DX10 and DX11 filename requests return STATUS_INVALID_PARAMETER with empty paths. Hardware creation returns DXGI_ERROR_UNSUPPORTED before the first tgd3d OpenAdapter event. WARP 11_1 succeeds in that same process. The matched ARM64EC process sees both paths and enters and exits the driver four times.",
+    "verification_pending": "Validate x86 system rendering with only the WoW D3D11 driver selection changed. This run did not alter system registration."
+  },
+  "open_items": [
+    "System-wide x86 DX10/DX11 driver registration and public rendering after selection.",
+    "Reproduction of the complete wiliwili interface freeze and system resets remains separate."
+  ],
+  "accepted_native_baseline": {
+    "utc": "2026-11-19T16:32:19.7654066Z",
+    "source_commit": "701e579c7c90e118c242eca8182a57c8e76829d6",
+    "package": "queue-finish-6b36641bb429",
+    "previous_package": "video-pool-900b8d5d1b2c",
+    "boot_utc": "2026-11-19T16:30:31.2562230Z",
+    "gpu_problem_code": 0,
+    "dwm_pid": 1460,
+    "permanent_native_boot": true,
+    "one_use_permit": false,
+    "approval_images": "6C86354E781E76D671C20BF14B124248A6E1AA264DCAB6D459A6B14D551469B0/9FF198AEABF1BCFAD98410733D19BACD85E580E65023738BE5641826936BA3FF/3CA2D9EB0FDFD6AFF8A7B667CB364F605629CB3E97DD7A4FE9AC924B10A6A8AB",
+    "scope": "ARM64 and x64 tgd3d with the queue-owner retention fix. ARM64EC uses the x64 leaf through the system facade. The user still observes a system freeze. Only the independently verified lifetime fix is accepted. The x86 D3D9 experiment is excluded from the default registration."
+  }
+}

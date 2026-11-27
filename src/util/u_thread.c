@@ -243,6 +243,7 @@ void util_barrier_destroy(util_barrier *barrier)
 
 bool util_barrier_wait(util_barrier *barrier)
 {
+   bool serial = false;
    mtx_lock(&barrier->mutex);
 
    assert(barrier->waiters < barrier->count);
@@ -255,6 +256,7 @@ bool util_barrier_wait(util_barrier *barrier)
          cnd_wait(&barrier->condvar, &barrier->mutex);
       } while (sequence == barrier->sequence);
    } else {
+      serial = true;
       barrier->waiters = 0;
       barrier->sequence++;
       cnd_broadcast(&barrier->condvar);
@@ -262,7 +264,7 @@ bool util_barrier_wait(util_barrier *barrier)
 
    mtx_unlock(&barrier->mutex);
 
-   return true;
+   return serial;
 }
 
 #endif

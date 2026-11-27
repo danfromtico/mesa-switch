@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "round_id": "win-first-present-20261121-01",
+  "contract_id": "WIN-PRESENT-KMT",
+  "windows_question": "WIN-PRESENT-KMT",
+  "plan_sha256": "437a9cfef2aa52bd73102565219f39478bd766f9ee7698c53e79ec68071e02c0",
+  "status": "实机通过",
+  "finding": "开机 91476，绘图 PID/TID 5364/3528，正常清屏窗口首次 Present(1,0) 在 DXGI 42/43 之间产生同线程同 HWND 的 Windows DxgKrnl 184，KMT 与公开返回均为 0。旧式 DDI 0x000b000f，原生 GM20B，DWM 1400 连续。",
+  "missing_observation": null,
+  "device_executions": 1,
+  "evidence": {
+    "raw_archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-first-present-20261121-01/collected.zip",
+    "archive_sha256": "e2c65e8f0b47d65fc3af8717ea2c78e4d1ca62994c1e59a75006b0cbe07d4634",
+    "member_sha256": {
+      "client-pid": "b346a1b3ea9188978a5ae72f38f1eafefe2939fe7afa3cad1fa8e38e2c2c56b9",
+      "display.etl": "e7f04ea3af7938dfb867e89576fa1a29815a4fb093b4c2ada9bb56c701ca1471",
+      "intent.json": "2654432c03bf6a211ed8c606fd6174bd12becc9db5220d9b243225f6794ee15f",
+      "loaded.json": "19a5a55c8944d7e1a0edfb090b9ec787697a4d871e32ecda87bb51b2bc6aab73",
+      "observer.json": "7ae2ca91f50c82bf1ac9c9f878a3b2f8c73888717f552ea9d365c7b11cba7c07",
+      "present.bmp": "8eaaa480f7e8f6440e76bb3cfd30360ce00baefd6b28a0f5b9e34bc0c91b4f65",
+      "result.json": "9b7b0de32930880fefec3909d4f373ba6f67833a438dd4b13298f7e04bf859b5",
+      "scene/journal.txt": "009ee5655ecb46bb53843b39845d886a547f64050eb71e1c2a264749811b0bdb",
+      "scene/stderr.txt": "43e6f4a12c2a8c3242816b0f3da21f1a8a37c21a78b26e8aae1da3a828ff5685",
+      "scene/stdout.txt": "8084f4902c5ad762fa5519ccbc5ea2ce4ddfc8112c80c80a1d9676ebfbe59fb8",
+      "scene/video.etl": "08c54e661bb44d6aba13dce03d5402ca5f06cbcc2c5a2ca00bb976783beb658f",
+      "task-output.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "trace-stop.json": "37109623404f67d82851fab1b571cbe3f20a595d5080987118cce7929f521cf6",
+      "window.bmp": "84b8eb22c3b07ec8097c2230ce6e18ae29bd86518f32e632343e792c04602283"
+    },
+    "local_snapshot": "windows-native-graphics-01a1fe13/runs/win-first-present-20261121-01",
+    "cleanup": {
+      "owned_case_removed": true
+    },
+    "boot": 91476,
+    "dwm": 1400,
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "pid": 5364,
+    "tid": 3528,
+    "hwnd": 458858,
+    "luid": "0000000000005c10",
+    "ac": "Online",
+    "handheld_mode": 1,
+    "gpu_code": 0,
+    "permanent_profile": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "component_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "bound_driver": {
+      "service": "tegragpurender",
+      "state": "Running",
+      "image": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18"
+    },
+    "dwm_loaded": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "application_loads": {
+      "libvulkan_nouveau.dll": {
+        "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\libvulkan_nouveau.dll"
+      },
+      "tg_d3d_arm64.DLL": {
+        "sha256": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\tg_d3d_arm64.DLL"
+      },
+      "TegraGpuD3DVk.dll": {
+        "sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\TegraGpuD3DVk.dll"
+      },
+      "tg_nvk_arm64.DLL": {
+        "sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\tg_nvk_arm64.DLL"
+      }
+    },
+    "windows_version": "22631.2861",
+    "system_files": {
+      "gdi32.dll": {
+        "path": "C:\\Windows\\System32\\gdi32.dll",
+        "sha256": "16296352c617d83dda1ccce5ad0048cef8ee30d22b9960681e833b5767f8a5bb",
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+      },
+      "d3d11.dll": {
+        "path": "C:\\Windows\\System32\\d3d11.dll",
+        "sha256": "ccc352f7097d0320368000dbe9ff92772d8fc909185d95c8a0753cb8f115f880",
+        "version": "10.0.22621.2715 (WinBuild.160101.0800)"
+      },
+      "dxgkrnl.sys": {
+        "path": "C:\\Windows\\System32\\drivers\\dxgkrnl.sys",
+        "sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+      },
+      "dxgi.dll": {
+        "path": "C:\\Windows\\System32\\dxgi.dll",
+        "sha256": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      }
+    },
+    "manifest_sha256": "e7180cddc7ad868cf2648cdf56164982ef45ff7be96a38e022c61e5008f9a14c",
+    "journal_markers": [
+      "4820546 3528 MODEL Sequential 00000000",
+      "4821250 3528 VERIFIED OneApplicationClear 00000000",
+      "4821312 3528 CALL Present 00000000 qpc=92572521356",
+      "4821343 3528 RETURN Present 00000000 qpc=92572981150",
+      "4821875 3528 VERIFIED ClearDesktopPixels 00000000"
+    ],
+    "qpc_frequency": 19200000,
+    "dxgi": [
+      {
+        "id": 42,
+        "version": 0,
+        "qpc": 92572651110,
+        "fields": {
+          "pIDXGISwapChain": 2304280150160,
+          "Flags": 0,
+          "SyncInterval": 1,
+          "DirtyRects": 0,
+          "ScrollRects": 0
+        }
+      },
+      {
+        "id": 43,
+        "version": 0,
+        "qpc": 92572980490,
+        "fields": {
+          "Result": 0
+        }
+      }
+    ],
+    "kmt": {
+      "display.etl": {
+        "qpc": 92572977537,
+        "pid": 5364,
+        "tid": 3528,
+        "provider": "kernel",
+        "id": 184,
+        "version": 1,
+        "fields": {
+          "hContext": 1073742144,
+          "hWindow": 458858,
+          "VidPnSourceId": 4294967295,
+          "FlipInterval": 1,
+          "Flags": 67178625,
+          "ReturnStatus": 0,
+          "hSrcAllocHandle": 1073743680,
+          "hDstAllocHandle": 0
+        }
+      },
+      "scene/video.etl": {
+        "qpc": 92572977557,
+        "pid": 5364,
+        "tid": 3528,
+        "provider": "kernel",
+        "id": 184,
+        "version": 1,
+        "fields": {
+          "hContext": 1073742144,
+          "hWindow": 458858,
+          "VidPnSourceId": 4294967295,
+          "FlipInterval": 1,
+          "Flags": 67178625,
+          "ReturnStatus": 0,
+          "hSrcAllocHandle": 1073743680,
+          "hDstAllocHandle": 0
+        }
+      }
+    },
+    "successful_umd_create": [
+      {
+        "id": 4,
+        "qpc": 92555320058,
+        "tid": 3528,
+        "status": 0,
+        "arg0": 720911,
+        "arg1": 0
+      }
+    ],
+    "drawing_adapter": [
+      "DRAW_DEVICE software=0 luid=0000000000005c10 display_luid=0000000000005c10 vendor=414f5753 device=31304630 fl=b000 name=Tegra X1 (GM20B) .158 b27ef5100818"
+    ],
+    "trace_quality": {
+      "display.etl": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      },
+      "scene/video.etl": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      }
+    },
+    "device_begin": "2026-11-21T13:36:19.5536124Z",
+    "device_end": "2026-11-21T13:38:20.2804593Z",
+    "system_events_during": [],
+    "boundaries": {
+      "last_entry": {
+        "api": "DXGI Present Start 42",
+        "qpc": 92572651110,
+        "public_call_qpc": 92572521356
+      },
+      "kernel_receipt": {
+        "api": "DxgKrnl Present/Info 184 v1",
+        "qpc": 92572977537,
+        "return_status": 0
+      },
+      "last_return": {
+        "api": "IDXGISwapChain::Present",
+        "qpc": 92572981150,
+        "hresult": "0x00000000"
+      },
+      "first_anomaly_or_missing": "本次调用正常。事件 184 是带返回值的 Info，精确系统调用入口时刻没有独立回执。历史三次在 CALL 之后的内核边界仍缺。"
+    },
+    "client_exit": 0,
+    "observer_exit": 0,
+    "input_verified": true,
+    "desktop_available": true,
+    "frame_kind": "单次清屏",
+    "collector_setup": {
+      "owned_task_removed": true,
+      "utc": "2026-11-21T13:36:58.9885802Z",
+      "owned_directory_removed": true,
+      "client_dispatched": false,
+      "reason": "签名 ETW 收集器限制会话名前缀为 SwitchDisplay-。首轮应用尚未派发。"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-post-exit-tail-93818-20261121-01",
+  "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+  "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+  "owner": "Windows 电源、DWM、GM20B KMD 与原普通窗口客户端",
+  "question": "正式基线下原窗口正常退出并清理后，能否跨过 93818 异常启动前未覆盖的时间区间，持续观察同一 DWM 与开机？",
+  "method": "同一签名原最小场景及正式配置，增加清理后的只读观察",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "相同输入正常退出、清理完成后，至少 125 秒连续有同一正式启动、DWM、Code 0 回执，保存新增故障事件及前后哈希；一次正常样本仅验证本轮。",
+  "observations": [
+    "复用签名夹具和既有 12 秒生产跟踪，唯一一次启动旧式双缓冲 SEQUENTIAL 空窗口。",
+    "关闭本轮应用、会话和任务。保留 Windows 源时间、Mac 实时接收以及同对象的原始输出。",
+    "每轮读回同一 Windows 开机、DWM PID 与起始时间、交流供电、GPU Code 0。连续使用设备 QPC 观察清理后至少 125 秒。任何新异常停止扩大测试，再保存回执和状态。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "6d61186222e270d56cc1da277ae6dbae635650085fb8a24b3127646f60f0b05a",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "Capture-State.cs": "c3160e7b79c326194582ead5de44e9d6d685038f7486257f4cedade027fd0d6b",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f"
+    },
+    "fixture_runner_sha256": "e585561331139568e615de556c4646ced70445149a9db7e102c4a32b2e8b860a",
+    "profiler_runner_sha256": "763d8ab5f7ff2c54b642b14c6e98dd12ec19f7be4c283786eefaa5e818a7d094",
+    "orchestration_sha256": "07a0d1ba3a3a1dbe378723a778072374ab29601bd4eeae0ca6e1045489367723",
+    "source_sha256": "30b1436fa6406f3a0e6111628b7eb35f925b25df88c67b769df3d3ba0907eb2c",
+    "exe_sha256": "9162b4275dbd793688839c5490da9b4c4b09455d3a51f65174719c057306ad57",
+    "receiver_sha256": "dcbcc13146e3421cb48a919ae1b5137e9cb95e3d719d8d111741cb61efd50314",
+    "baseline_manifest_sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7",
+    "before_sha256": "79f18b09962591caafdf2f9fd32cea8eb990be58ff6362a2aa1ce449330e2300",
+    "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-post-seq-gap-93818-20261121-01.result.json",
+        "sha256": "a944b6fce03d1e3b586a848711866b0990c513f703009d6a96fd033eed5bcbef"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-seq-arm64ec-5063-realigned-20261121-01.result.json",
+        "sha256": "e38651b186dd33856463f91cdbb2bf26424a02ca7a6496e9a3bdcbea29fe8be0"
+      }
+    ],
+    "boot": 93818,
+    "dwm": 1384,
+    "duration": 12000,
+    "wire_limit": 4096,
+    "etl_file_limit_mib": 64,
+    "kmd_event_layout": {
+      "1": 72,
+      "2": 152
+    },
+    "minimum_observation_seconds": 125,
+    "tail_runner_sha256": "3928f87004cf0579525add105468bc2cc497b0df8e0f61d8be3ce88d675b38bc"
+  }
+}

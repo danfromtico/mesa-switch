@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-early-startup-retained-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "0bdffe1b81dc240e2d12cdf97331d437f27338ded13e72fa6bf0668df3bf3752",
+  "status": "早期启动回执跨受控恢复读回通过，原窗口待续",
+  "finding": "95280 同启动保留 DriverEntry、许可拒绝和 StartDevice 返回。95368 在一次性许可下保留同一次 StartDevice 的许可消费后刷盘成功、资源、硬件、面板及成功返回。正式 95548 之后用全新进程从控制端原 ETL 复读，两份内容与哈希均匹配。",
+  "missing_observation": "95368 的原应用前探针返回 Unexpected probe acknowledgement；后续归档中的确认身份一致，任务初读时为何拒绝未知。原窗口执行零次，无 DMA 日志。该探针独立修正后接续同一逻辑请求。95090 仍未归因。",
+  "device_executions": 0,
+  "request_id": "f6264ee11289",
+  "evidence": {
+    "artifacts": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/catalog-result.json",
+        "sha256": "7fb4a4b982319f7d1e065070e32c5ff7f7ef75099e1b0d07b7a0e0add5a824f2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/startup-reader-local-check.json",
+        "sha256": "ee513a2711756628ee2e102a5f8bf3d6b0ea8c02635ae67063eeeab87797f816"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/early-closed-boot/independent-confirmation.json",
+        "sha256": "36fcd24b51cba54e1f605eddd5f06b09fe6b45ec79f3eba0294f784131b5e4c1"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/early-closed-boot/verified.json",
+        "sha256": "b66e385b7597b948703ff8931fdcfcb49f1b623ab7d805230448e13ef2b6340b"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/early-candidate-boot/verified.json",
+        "sha256": "c727c6edc620aca90b4350bb5ccabcfd335a69935d45f0c9704e6268500b7422"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/early-boot-cross-restore-readback.json",
+        "sha256": "337cb5fd96e8e5930f4666a1520ecfc724aedb593152059d01564c809966e462"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/windows-system-interval.json",
+        "sha256": "e6245301e45e0f9efc09835e9bbec8df181182f37c5aa39e47d312ffa36a09d2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/diagnostic-installed/failed-probe-raw-query.json",
+        "sha256": "99995f01a2190018b07b8dc8769b3161a8b45430fc25fa11fae91862c76baed2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/diagnostic-installed/cleanup.json",
+        "sha256": "09466daaf934a7caf6292efe95328c76a6c2d8fe66212c3564cce101d1b186f3"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/capture-readback.json",
+        "sha256": "1360ef4f2f70290357c95664b72d810a6cd0749e71419ae3f73af1d49a692f71"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup2/formal-power-verified.json",
+        "sha256": "79d64a111642c572d2f92fd243f8efdd49f718625de774481eb467c13bef27c2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-board-f6264ee11289-startup2/activation/cycle-history.json",
+        "sha256": "2af4e23cf21ec7d579b5e370c2d7816d4b31d7be67e7639626bd5477f08a560d"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-board-f6264ee11289-startup2/activation/cleanup.json",
+        "sha256": "cfe59a5aa82b0b69cd6b37e92477801625bd806d08f43aace284626772a79c15"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-board-f6264ee11289-startup2/activation/daily-cleanup.json",
+        "sha256": "5d5e6f1ced0b1b724bd4669bc83dc609c6ef8b447469472809077ae4bb27d431"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/gate-v3-local-proof.json",
+        "sha256": "bda1f8149560e3eb8fbfdd74ce9993280c8b88411b0d8505b97c6040933e4055"
+      }
+    ],
+    "signed_diagnostic_kmd_commit": "cb6404953a76f9a50a03ae6c5deea52c2c833097",
+    "closed_boot": 95280,
+    "candidate_boot": 95368,
+    "formal_recovery_boot": 95548,
+    "actual_unplanned_restart": false,
+    "previous_candidate_root_cause_remains_unknown": 95090
+  }
+}

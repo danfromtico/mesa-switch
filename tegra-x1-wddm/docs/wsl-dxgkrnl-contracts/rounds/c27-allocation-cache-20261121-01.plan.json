@@ -1,0 +1,32 @@
+{
+  "round_id": "c27-allocation-cache-20261121-01",
+  "contract_id": "dxgkrnl.h:759:2",
+  "declared_utc": "2026-11-21T13:13:26.224970+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "a62444f34701ccb9974e3bc80447a3978c175a837ed65a1787384929f25e1ec1",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Lite GM20B 的 Windows VidMm / VidSch 与交互桌面中的独立 ARM64 调用方。",
+  "predicate": "CPU 可见分配的缓存映射属性，与同一分配在原生内核中的 Cached 标记相符。",
+  "required_observation": "在合法分配和 Lock2/Unlock2 的区间配对同一分配句柄、公开 VirtualQuery 页面保护和可解释的同层缓存标志。",
+  "satisfied_if": "同次正常缓存映射有直接的缓存属性证据，且能把有明确定义的 Cached 标记配对到同一分配。",
+  "violated_if": "在本调用的适用条件、责任方、对象、时间和输出完整匹配时，取得直接否定原生子句的结果。自然不支持、同步返回或缺失观测均单列。",
+  "unknown_if": "能力不足、实际对象或触发条件未命中、记录有缺口、只见间接现象或发生未解释重启时保留未知。",
+  "scope_limit": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "可缩小 CPU 锁定与 staging 读回的观测范围。只凭可访问页或窗口出现不能判定缓存一致性。",
+  "prior_catalog_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+  "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "selected_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+  "boot": 91476,
+  "dwm": 1400,
+  "ordinal": 7,
+  "nonce": "437d11ebe4a2025188606116",
+  "mode": "cache",
+  "trace": true,
+  "os_build": "10.0.22631.0",
+  "files_sha256": {
+    "contracts-arm64.exe": "e2660e9d22bc1ae5b2b06befd5d21c1261b18dac97ae9662e5db576efc39590b",
+    "contract-trace.exe": "95b5add1077b1ffaf0a4cba7a5b8dcc03783dc38b45fb214462a43686eed743c",
+    "Measure.ps1": "e3f5153d08fe3b81cec941dba4556859f4c9a264c620d8d75b5a755ad2edb973",
+    "Power-State.ps1": "f136146792b5a80c6016dbae04668831bee87f0f2f5390017bfb1669cd3cab9f"
+  }
+}

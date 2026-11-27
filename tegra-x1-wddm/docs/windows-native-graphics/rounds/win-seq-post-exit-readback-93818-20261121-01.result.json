@@ -1,0 +1,428 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-post-exit-readback-93818-20261121-01",
+  "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+  "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+  "plan_sha256": "3b42f39f374c5f507544f07bf904996963ba62c0dca0ce571d67f6c430aa51c4",
+  "status": "观测缺口",
+  "finding": "复用启动 93818 已返回 S_OK 并退出的签名窗口。清理后 14.718 秒开始有 20 条正式桌面读回，覆盖 129.033 秒，最大间隔 8.053 秒。观察覆盖应用退出后 51.634 至 180.667 秒，同一启动与 DWM 1384、交流供电、Code 0、实载哈希保持一致。未发现本段新增 41、6008、BugCheck 或 4101。",
+  "missing_observation": "本轮补齐既有时间范围内的启动连续性。采样间隔内无逐包 KMD 证据，且该应用仍缺返回后客户区像素。93748 的复位时刻及历史 DMA 152586 根因保持开放。",
+  "device_executions": 0,
+  "evidence": {
+    "reference": {
+      "path": "windows-native-graphics/rounds/win-seq-post-exit-plain-93818-20261121-01.result.json",
+      "sha256": "c9ffedc6f21a536dc1845ee6b1659015c99d170415331fab1fdf145d8b7ff39c"
+    },
+    "same_boundaries": {
+      "cleanup_to_first_s": 14.717619739583334,
+      "exit_to_first_s": 51.63381177083333,
+      "exit_to_last_s": 180.66660635416667,
+      "max_sample_spacing_s": 8.053129114583333
+    },
+    "tail_status": {
+      "app_completed": true,
+      "baseline_unchanged": true,
+      "cleanup": {
+        "owned_case_removed": true,
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:35:54.0215375Z",
+        "boot": 93818,
+        "action": "removed",
+        "qpc": 26906534146
+      },
+      "after_cleanup_to_first_sample_s": 14.717619739583334,
+      "original_boot": 93818,
+      "last_boot": 93818,
+      "original_dwm": 1384,
+      "last_dwm": 1384,
+      "elapsed_device_seconds": 129.03279458333333,
+      "reason": null,
+      "unexpected_events": [],
+      "heartbeat_sha256": "a2d208478508b38dc07f8a7b2115684ca0afec5c1d6923f05edd9ac9359b0cd2"
+    },
+    "samples": [
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:08.7419161Z",
+        "qpc": 27189112445,
+        "host_receive_utc": "2026-11-21T22:36:09.792484+00:00",
+        "host_monotonic_ns": 68726196006041
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:15.3752637Z",
+        "qpc": 27316634594,
+        "host_receive_utc": "2026-11-21T22:36:16.391596+00:00",
+        "host_monotonic_ns": 68732795107125
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:21.9952581Z",
+        "qpc": 27443618948,
+        "host_receive_utc": "2026-11-21T22:36:22.986656+00:00",
+        "host_monotonic_ns": 68739390161541
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:28.5196067Z",
+        "qpc": 27568854423,
+        "host_receive_utc": "2026-11-21T22:36:29.521764+00:00",
+        "host_monotonic_ns": 68745925266125
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:35.2099846Z",
+        "qpc": 27697470605,
+        "host_receive_utc": "2026-11-21T22:36:36.253598+00:00",
+        "host_monotonic_ns": 68752657097916
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:41.9329762Z",
+        "qpc": 27826346845,
+        "host_receive_utc": "2026-11-21T22:36:42.933517+00:00",
+        "host_monotonic_ns": 68759337003708
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:48.7203670Z",
+        "qpc": 27956664441,
+        "host_receive_utc": "2026-11-21T22:36:49.782524+00:00",
+        "host_monotonic_ns": 68766186019333
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:55.4420329Z",
+        "qpc": 28085685547,
+        "host_receive_utc": "2026-11-21T22:36:56.423223+00:00",
+        "host_monotonic_ns": 68772826703541
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:02.5447960Z",
+        "qpc": 28222102953,
+        "host_receive_utc": "2026-11-21T22:37:03.531979+00:00",
+        "host_monotonic_ns": 68779935454166
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:09.4569632Z",
+        "qpc": 28355053201,
+        "host_receive_utc": "2026-11-21T22:37:11.784719+00:00",
+        "host_monotonic_ns": 68788188205375
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:17.5075812Z",
+        "qpc": 28509673280,
+        "host_receive_utc": "2026-11-21T22:37:18.764355+00:00",
+        "host_monotonic_ns": 68795167816583
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:24.3317278Z",
+        "qpc": 28640404020,
+        "host_receive_utc": "2026-11-21T22:37:25.536091+00:00",
+        "host_monotonic_ns": 68801939558250
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:31.2599565Z",
+        "qpc": 28773610353,
+        "host_receive_utc": "2026-11-21T22:37:32.532945+00:00",
+        "host_monotonic_ns": 68808936402708
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:38.2237655Z",
+        "qpc": 28907154385,
+        "host_receive_utc": "2026-11-21T22:37:39.226156+00:00",
+        "host_monotonic_ns": 68815629611125
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:44.8172183Z",
+        "qpc": 29033787535,
+        "host_receive_utc": "2026-11-21T22:37:45.809872+00:00",
+        "host_monotonic_ns": 68822213319583
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:51.2273114Z",
+        "qpc": 29156956955,
+        "host_receive_utc": "2026-11-21T22:37:52.240808+00:00",
+        "host_monotonic_ns": 68828644254666
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:37:57.9381963Z",
+        "qpc": 29285629813,
+        "host_receive_utc": "2026-11-21T22:37:58.936034+00:00",
+        "host_monotonic_ns": 68835339483458
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:38:04.5356334Z",
+        "qpc": 29412358156,
+        "host_receive_utc": "2026-11-21T22:38:05.530064+00:00",
+        "host_monotonic_ns": 68841933493916
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:38:11.0735938Z",
+        "qpc": 29537908066,
+        "host_receive_utc": "2026-11-21T22:38:12.143658+00:00",
+        "host_monotonic_ns": 68848547098791
+      },
+      {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:38:17.7640321Z",
+        "qpc": 29666542101,
+        "host_receive_utc": "2026-11-21T22:38:18.782662+00:00",
+        "host_monotonic_ns": 68855186081375
+      }
+    ],
+    "stability_interval_verified": true,
+    "hardware": {
+      "boot": 93818,
+      "dwm": 1384,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0,
+      "exact_components": true,
+      "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe"
+    },
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-readback-93818-20261121-01/post-exit-live.jsonl",
+        "sha256": "a2d208478508b38dc07f8a7b2115684ca0afec5c1d6923f05edd9ac9359b0cd2",
+        "bytes": 5360
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-readback-93818-20261121-01/post-exit-status.json",
+        "sha256": "38c7e5ade02de2171c48de4028e8cc8fa3b3c8e7826cd890a359ef7aa80e5291",
+        "bytes": 579
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/seq-93818-tail-readback-end.json",
+        "sha256": "32a84f67392e60871f2491342dd259334c87b1abdeb3dc3c014525f73efe1058",
+        "bytes": 10886
+      }
+    ],
+    "boundaries": {
+      "last_entry": {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:36:08.7419161Z",
+        "qpc": 27189112445,
+        "host_receive_utc": "2026-11-21T22:36:09.792484+00:00",
+        "host_monotonic_ns": 68726196006041
+      },
+      "last_return": {
+        "dwm": [
+          {
+            "started": "2026-11-21T22:13:11.1047453Z",
+            "pid": 1384
+          }
+        ],
+        "code": 0,
+        "boot": 93818,
+        "power": "Online",
+        "frequency": 19200000,
+        "utc": "2026-11-21T22:38:17.7640321Z",
+        "qpc": 29666542101,
+        "host_receive_utc": "2026-11-21T22:38:18.782662+00:00",
+        "host_monotonic_ns": 68855186081375
+      },
+      "first_anomaly_or_missing": "本轮补齐既有时间范围内的启动连续性。采样间隔内无逐包 KMD 证据，且该应用仍缺返回后客户区像素。93748 的复位时刻及历史 DMA 152586 根因保持开放。"
+    }
+  }
+}

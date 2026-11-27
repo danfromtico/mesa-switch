@@ -1,0 +1,20 @@
+{
+  "round_id": "c5live-sealed-resource-20261121-01",
+  "contract_id": "dxgkrnl.h:684:4",
+  "declared_utc": "2026-11-22T03:03:05.248370+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "86b07448f51dd2616c968aec5f4966f7d13f730b0892189f2b7ea633f6a68196",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "共享完成后，已共享资源的分配集合受封装约束。",
+  "question": "在本次正常跨进程共享与打开资源中，Windows 是否可观测地固定同一资源的分配成员集合？",
+  "method": "只用自有共享分配的创建、正常导出、子进程打开和成员查询，不向已共享对象试写或额外追加。",
+  "required_observation": "在本次正常跨进程共享与打开资源中，Windows 是否可观测地固定同一资源的分配成员集合？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-sealed-members-20261121-01.result.json",
+    "sha256": "c2780e8d8428b31e95e358c8ff3927f1fdb752ca6e615ea3be89e3120dcd8834"
+  }
+}

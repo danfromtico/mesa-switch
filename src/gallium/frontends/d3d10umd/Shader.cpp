@@ -75,8 +75,10 @@ CreateEmptyShader(Device *pDevice,
    ureg_END(ureg);
 
    tokens = ureg_get_tokens(ureg, &nr_tokens);
-   if (!tokens)
+   if (!tokens) {
+      ureg_destroy(ureg);
       return NULL;
+   }
 
    ureg_destroy(ureg);
 
@@ -99,8 +101,6 @@ CreateEmptyShader(Device *pDevice,
       handle = NULL;
       assert(0);
    }
-   assert(handle);
-
    ureg_free_tokens(tokens);
 
    return handle;
@@ -1251,6 +1251,12 @@ CreateShaderResourceView(
    }
 
    pSRView->handle = pipe->create_sampler_view(pipe, resource, &desc);
+   pSRView->link = {};
+   if (pSRView->handle)
+      AttachResourceView(CastResource(pCreateSRView->hDrvResource),
+                         &pSRView->link, NULL, &pSRView->handle);
+   else
+      SetError(hDevice, E_OUTOFMEMORY);
 }
 
 
@@ -1333,6 +1339,12 @@ CreateShaderResourceView1(
    }
 
    pSRView->handle = pipe->create_sampler_view(pipe, resource, &desc);
+   pSRView->link = {};
+   if (pSRView->handle)
+      AttachResourceView(CastResource(pCreateSRView->hDrvResource),
+                         &pSRView->link, NULL, &pSRView->handle);
+   else
+      SetError(hDevice, E_OUTOFMEMORY);
 }
 
 
@@ -1362,6 +1374,7 @@ DestroyShaderResourceView(D3D10DDI_HDEVICE hDevice,                           //
 
    pipe->sampler_view_release(pipe, pSRView->handle);
    pSRView->handle = NULL;
+   DetachResourceView(&pSRView->link);
 }
 
 

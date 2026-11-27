@@ -78,6 +78,7 @@ header_code = """
 #define ZINK_INSTANCE_H
 
 #include "util/u_process.h"
+#include "zink_public.h"
 
 #include <vulkan/vulkan_core.h>
 
@@ -93,6 +94,12 @@ struct zink_screen;
 struct zink_instance_info {
    uint32_t loader_version;
    bool no_device_select;
+   VkResult create_result;
+   bool missing_create_entrypoints;
+   bool capture_create_error;
+   int create_message_claimed;
+   char create_message[1024];
+   struct zink_instance_diagnostics diagnostics;
 
 %for ext in extensions:
    bool have_${ext.name_with_vendor()};
@@ -133,10 +140,30 @@ impl_code = """
 #include "vk_enum_to_str.h"
 #include "zink_instance.h"
 #include "zink_screen.h"
+#include "util/u_atomic.h"
+#include <stdio.h>
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL
+capture_instance_error(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+                       VkDebugUtilsMessageTypeFlagsEXT types,
+                       const VkDebugUtilsMessengerCallbackDataEXT *data,
+                       void *user_data)
+{
+   struct zink_instance_info *info = user_data;
+   if ((severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) &&
+       data && data->pMessage &&
+       p_atomic_cmpxchg(&info->create_message_claimed, 0, 1) == 0)
+      snprintf(info->create_message, sizeof(info->create_message), "%s", data->pMessage);
+   return VK_FALSE;
+}
 
 VkInstance
 zink_create_instance(struct zink_screen *screen, struct zink_instance_info *instance_info)
 {
+   instance_info->create_result = VK_SUCCESS;
+   instance_info->missing_create_entrypoints = false;
+   instance_info->create_message_claimed = 0;
+   instance_info->create_message[0] = 0;
    /* reserve one slot for MoltenVK */
    const char *layers[${len(layers) + 1}] = {0};
    uint32_t num_layers = 0;
@@ -155,18 +182,26 @@ zink_create_instance(struct zink_screen *screen, struct zink_instance_info *inst
    GET_PROC_ADDR_INSTANCE_LOCAL(screen, NULL, EnumerateInstanceExtensionProperties);
    GET_PROC_ADDR_INSTANCE_LOCAL(screen, NULL, EnumerateInstanceLayerProperties);
    if (!vk_EnumerateInstanceExtensionProperties ||
-       !vk_EnumerateInstanceLayerProperties)
+       !vk_EnumerateInstanceLayerProperties) {
+      instance_info->missing_create_entrypoints = true;
       return NULL;
+   }
 
    // Build up the extensions from the reported ones but only for the unnamed layer
    uint32_t extension_count = 0;
-   if (vk_EnumerateInstanceExtensionProperties(NULL, &extension_count, NULL) != VK_SUCCESS) {
+   VkResult result = vk_EnumerateInstanceExtensionProperties(NULL, &extension_count, NULL);
+   zink_record_instance_call(&instance_info->diagnostics, ZINK_INSTANCE_EXTENSION_COUNT,
+                             result, extension_count);
+   if (result != VK_SUCCESS) {
        if (!screen->driver_name_is_inferred)
            mesa_loge("ZINK: vkEnumerateInstanceExtensionProperties failed");
    } else {
        VkExtensionProperties *extension_props = malloc(extension_count * sizeof(VkExtensionProperties));
        if (extension_props) {
-           if (vk_EnumerateInstanceExtensionProperties(NULL, &extension_count, extension_props) != VK_SUCCESS) {
+           result = vk_EnumerateInstanceExtensionProperties(NULL, &extension_count, extension_props);
+           zink_record_instance_call(&instance_info->diagnostics, ZINK_INSTANCE_EXTENSIONS,
+                                     result, extension_count);
+           if (result != VK_SUCCESS) {
                if (!screen->driver_name_is_inferred)
                    mesa_loge("ZINK: vkEnumerateInstanceExtensionProperties failed");
            } else {
@@ -179,19 +214,27 @@ zink_create_instance(struct zink_screen *screen, struct zink_instance_info *inst
               }
            }
        free(extension_props);
+       } else if (extension_count) {
+           instance_info->diagnostics.flags |= ZINK_INSTANCE_EXTENSION_ALLOC_FAILED;
        }
    }
 
     // Build up the layers from the reported ones
     uint32_t layer_count = 0;
 
-    if (vk_EnumerateInstanceLayerProperties(&layer_count, NULL) != VK_SUCCESS) {
+    result = vk_EnumerateInstanceLayerProperties(&layer_count, NULL);
+    zink_record_instance_call(&instance_info->diagnostics, ZINK_INSTANCE_LAYER_COUNT,
+                              result, layer_count);
+    if (result != VK_SUCCESS) {
         if (!screen->driver_name_is_inferred)
            mesa_loge("ZINK: vkEnumerateInstanceLayerProperties failed");
     } else {
         VkLayerProperties *layer_props = malloc(layer_count * sizeof(VkLayerProperties));
         if (layer_props) {
-            if (vk_EnumerateInstanceLayerProperties(&layer_count, layer_props) != VK_SUCCESS) {
+            result = vk_EnumerateInstanceLayerProperties(&layer_count, layer_props);
+            zink_record_instance_call(&instance_info->diagnostics, ZINK_INSTANCE_LAYERS,
+                                      result, layer_count);
+            if (result != VK_SUCCESS) {
                 if (!screen->driver_name_is_inferred)
                     mesa_loge("ZINK: vkEnumerateInstanceLayerProperties failed");
             } else {
@@ -209,6 +252,8 @@ zink_create_instance(struct zink_screen *screen, struct zink_instance_info *inst
                }
             }
         free(layer_props);
+        } else if (layer_count) {
+            instance_info->diagnostics.flags |= ZINK_INSTANCE_LAYER_ALLOC_FAILED;
         }
     }
 
@@ -276,11 +321,34 @@ zink_create_instance(struct zink_screen *screen, struct zink_instance_info *inst
        lsci.pSettings = &ds_layer;
        ici.pNext = &lsci;
    }
+   /* instance_info has the same lifetime as the cached VkInstance. The
+    * callback may also run during destruction; never point it at the
+    * caller's stack-local failure record.
+    */
+   VkDebugUtilsMessengerCreateInfoEXT debug_info = {0};
+   instance_info->diagnostics.enabled_extensions = num_extensions;
+   instance_info->diagnostics.enabled_layers = num_layers;
+   if (have_EXT_debug_utils)
+      instance_info->diagnostics.flags |= ZINK_INSTANCE_DEBUG_AVAILABLE;
+   if (instance_info->capture_create_error && have_EXT_debug_utils) {
+      instance_info->diagnostics.flags |= ZINK_INSTANCE_DEBUG_CHAINED;
+      debug_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+      debug_info.pNext = ici.pNext;
+      debug_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+      debug_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+      debug_info.pfnUserCallback = capture_instance_error;
+      debug_info.pUserData = instance_info;
+      ici.pNext = &debug_info;
+   }
    GET_PROC_ADDR_INSTANCE_LOCAL(screen, NULL, CreateInstance);
    assert(vk_CreateInstance);
 
    VkInstance instance;
    VkResult err = vk_CreateInstance(&ici, NULL, &instance);
+   zink_record_instance_call(&instance_info->diagnostics, ZINK_INSTANCE_CREATE, err, 0);
+   instance_info->create_result = err;
    if (err != VK_SUCCESS) {
       if (!screen->driver_name_is_inferred)
           mesa_loge("ZINK: vkCreateInstance failed (%s)", vk_Result_to_str(err));

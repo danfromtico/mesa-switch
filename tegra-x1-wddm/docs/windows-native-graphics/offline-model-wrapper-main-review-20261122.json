@@ -1,0 +1,291 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T09:01:51.224598+00:00",
+  "review_thread": "01a2026b-02b8-7ea3-996a-e5472b0bde3f",
+  "execution_thread": "01a2026d-3f59-7041-8676-a9267b034280",
+  "status": "本地夹具修正/重跑及比较映像同步路径审核通过；仅限所述证据范围",
+  "root_cause_found": false,
+  "driver_fix_accepted": false,
+  "full_goal_status": "active",
+  "archive": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-offline-20261122/batch-review.zip",
+    "sha256": "1f389d5f4e7a6b8980118ae6eff82709509a563de187f3c96f131fc1380037f6",
+    "bytes": 86487
+  },
+  "manifest_sha256": "9b19216969b458e2819ad50de29bdb356efa225da5baba31dd0f5af494a6edcc",
+  "independent_proof": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/offline-model-and-wrapper-independent-20261122.json",
+    "sha256": "365939777930af21c162874407b22d0ea944bca56d188f85acf999f08d0b5f9c",
+    "bytes": 23053
+  },
+  "checks": {
+    "archive_members_verified": 45,
+    "retained_original_input_hashes_verified": 36,
+    "frozen_review_inputs_verified": 4,
+    "driver_excerpts_equal_frozen_source": 2,
+    "actual_executor_command": "exec-27f10dd0-8ad8-4b27-81bb-cb6cdcbd737e",
+    "actual_executor_tool_exit": 0,
+    "actual_tool_output_matches_archived_run_and_cases": true,
+    "reviewer_model_reruns": 0
+  },
+  "fixture": {
+    "only_change": "第252行free(entry)改为if(entry->Owned)free(entry)，按模型的Owned字段区分借用栈项和拥有堆项。",
+    "original_sha256": "fcf0801b695266ffdc356dc7e12158d7a3516b810444404886d6a0e9b16edf6e",
+    "reviewed_source_sha256": "cdf913186db1b4bb92bf97402a5d4003bbe93b2849e4472d859f1290a059ad42",
+    "executable_sha256": "0bfd041a13f029c8003c982b27266446eb4231e24f70ea5eb8ab18e2f77f22cb",
+    "independent_review": {
+      "model": "gemini-4-neon-high",
+      "conversation_id": "2c398c3f-4679-4164-beac-92a183d56b43",
+      "exit_code": 0,
+      "covers": "完整255行夹具与唯一清理差异，未重复原11文件审核",
+      "completed_before_run": true,
+      "source_changed_after_review": false
+    },
+    "compile_exit": 0,
+    "run_exit": 0,
+    "dispatches": 1,
+    "sanitizers": "address,undefined",
+    "stderr_bytes": 0,
+    "observed_cases": [
+      {
+        "case": 0,
+        "null_rendering": 1,
+        "dma_bytes": 52,
+        "umd_private_bytes": 0,
+        "returned_status": "0x00000000",
+        "software": 1,
+        "rejected": 0,
+        "owned": 0,
+        "drain_calls": 0,
+        "trace_failures": 0,
+        "unexpected_calls": 0,
+        "creating_after": 0
+      },
+      {
+        "case": 1,
+        "null_rendering": 1,
+        "dma_bytes": 52,
+        "umd_private_bytes": 48,
+        "returned_status": "0xc000000d",
+        "software": 1,
+        "rejected": 1,
+        "owned": 1,
+        "drain_calls": 1,
+        "trace_failures": 1,
+        "unexpected_calls": 0,
+        "creating_after": 0
+      },
+      {
+        "case": 2,
+        "null_rendering": 0,
+        "dma_bytes": 0,
+        "umd_private_bytes": 48,
+        "returned_status": "0xc000000d",
+        "software": 1,
+        "rejected": 1,
+        "owned": 1,
+        "drain_calls": 1,
+        "trace_failures": 1,
+        "unexpected_calls": 0,
+        "creating_after": 0
+      }
+    ],
+    "interpretation": "修复了夹具栈地址bad-free，三组输入按冻结函数分支完成。48仅为长度，全零模型存储不是已证合法UMD载荷；case2没有ContextSwitch，不能用其零DMA结果替代合法上下文切换验收。",
+    "not_proven": [
+      "真实UMD/KMD私有ABI有效性",
+      "真实围栏送达与worker排空",
+      "抢占并发合法性或安全性",
+      "Windows内核或GPU行为",
+      "历史故障实际输入或根因"
+    ]
+  },
+  "comparator": {
+    "board_identity": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/board-file-identity.json",
+      "sha256": "4163c811595e78d5e83e72c6ca6d662dfa94e86569aa01b359555cb8372d8859",
+      "bytes": 650
+    },
+    "board_identity_boot": 91918,
+    "local_dxgkrnl_original_capture_boot": 88341,
+    "note": "复用88341保存的dxgkrnl字节，其完整哈希与91918独立设备回执相同；没有借此补齐91476映像身份。",
+    "binary_identity": [
+      {
+        "module": "dxgmms2",
+        "pe_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.sys",
+        "pe_sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5",
+        "pdb_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.pdb",
+        "pdb_sha256": "54ed9eab4bff5bdcec9c5571ab05fe415052a106ad39ad9f713e939f87b65f3a",
+        "machine": "0xaa64",
+        "codeview": [
+          {
+            "guid": "af63a8a4-9d01-fa37-1a26-6959e133eb0b",
+            "age": 1,
+            "pdb_name": "dxgmms2.pdb"
+          }
+        ],
+        "pdb_guid": "af63a8a4-9d01-fa37-1a26-6959e133eb0b",
+        "pdb_info_age": 2,
+        "pdb_dbi_age": 1,
+        "validated": true
+      },
+      {
+        "module": "dxgkrnl",
+        "pe_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/startup-diagnostic-01a1fc19/activation/windows-kernel-contract/dxgkrnl.sys",
+        "pe_sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "pdb_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/startup-diagnostic-01a1fc19/activation/windows-kernel-contract/dxgkrnl.pdb",
+        "pdb_sha256": "7f0a811d1c74569f9dbe428cc2d73355beb4e0864b7b77c81e1bbf3540fa74e9",
+        "machine": "0xaa64",
+        "codeview": [
+          {
+            "guid": "797f457a-6488-c67c-8e55-b0f3e771dc32",
+            "age": 1,
+            "pdb_name": "dxgkrnl.pdb"
+          }
+        ],
+        "pdb_guid": "797f457a-6488-c67c-8e55-b0f3e771dc32",
+        "pdb_info_age": 2,
+        "pdb_dbi_age": 1,
+        "validated": true
+      }
+    ],
+    "public_symbol_records_verified": 32,
+    "assembly_files_verified": 8,
+    "listed_32bit_words_verified": 692,
+    "word_count_limit": "反汇编列出的32位字含字面量数据及填充，不能将692都称为已执行或可执行指令；至少dxgkrnl 0x1d2a8..0x1d2ac及dxgmms2 0x66aa8..0x66ab0为载入的字面量。",
+    "shared_acquire": {
+      "preempt_mode_rva": "0x20070",
+      "preempt_call_rva": "0x20074",
+      "virtual_submit_mode_rva": "0x15d45c",
+      "virtual_submit_call_rva": "0x15d460",
+      "w1": 1,
+      "helper_rva": "0xbae8",
+      "ordinary_branch": "0xbb78-0xbb94",
+      "iat_rva": "0xd4160",
+      "import": "ExAcquireResourceSharedLite",
+      "finding": "两个包装器向相同辅助函数传w1=1，已读普通分支请求共享资源。不能仅凭这次请求认定互斥；也没有证明调度器无额外串行或调用者没有既有独占所有权。"
+    },
+    "synchronize_execution": {
+      "function_rva": "0x1d100",
+      "iat_imports": {
+        "0xd4160": {
+          "dll": "ntoskrnl.exe",
+          "name": "ExAcquireResourceSharedLite"
+        },
+        "0xd4170": {
+          "dll": "ntoskrnl.exe",
+          "name": "ExReleaseResourceLite"
+        },
+        "0xd4d00": {
+          "dll": "ntoskrnl.exe",
+          "name": "KeSynchronizeExecution"
+        },
+        "0xd40a0": {
+          "dll": "ntoskrnl.exe",
+          "name": "KeAcquireInStackQueuedSpinLockAtDpcLevel"
+        },
+        "0xd40b0": {
+          "dll": "ntoskrnl.exe",
+          "name": "KeReleaseInStackQueuedSpinLockFromDpcLevel"
+        }
+      },
+      "finding": "已读普通路径使用KeSynchronizeExecution或排队自旋锁，再调用目标回调；不能外推未读冷分支、回调本体或全局死锁性质。"
+    },
+    "incident_binding": "91476实际分支、DDI入返及同包完成/退役仍未知。"
+  },
+  "source_check": {
+    "frozen_commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "context_c": "522-617：完成前提检查、释放e->Lock后调用SynchronizeExecution、Signaling和Notification状态分开处理。",
+    "reset_backend_c": "12-31：设置Paused/Resetting并释放自旋锁后，先StopWorker再等待DispatchGate。",
+    "limit": "已读路径事实，不是所有调用者、回调或恢复交错的无死锁/UAF证明。"
+  },
+  "primary_references": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/references/windows-ddi-sync-pdb-20261122.json",
+    "sha256": "0626084e2c354b80aa579992030e02d4427dafc332983a0028d4773474d0d13a",
+    "bytes": 1065
+  },
+  "prior_interruption": {
+    "message": "This content was flagged for possible cybersecurity risk.",
+    "user_clarification_retained": true,
+    "current_run": "经当前平台正常工具完成，无新的拒绝；原失败程序和日志保留。"
+  },
+  "hardware_scope": {
+    "new_main_device_operations": 0,
+    "new_executor_device_operations_this_batch": 0,
+    "request_f6264ee11289_consumed": true,
+    "original_application_executions": 1,
+    "new_request_dispatches": 0,
+    "normal_94382_94557_retest": false,
+    "last_complete_formal_boot": 96251,
+    "formal_restoration_review_reused": "lifecycle-preservation-main-review-20261122.json",
+    "new_driver_or_baseline_change": false,
+    "lease_transferred": false
+  },
+  "historical_faults": {
+    "91476_DMA152586": "保持独立历史缺口；新模型和比较包装器不能补写原事故。",
+    "95090": "保持独立早期候选启动失败，Code0、实载、会话就绪及首因仍无原次证据。",
+    "later_preparation_failures": "另列，不并入91476或成功96075。",
+    "96075_DMA5406": "沿用已验收完整正常链，只能称未复现。"
+  },
+  "deferred_contracts": {
+    "policy_commit": "470e1dbc4ff65affe8ee6395a12bf8e2060cd338",
+    "previous_checkpoint": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/first-present-deferred-contracts-review-20261122.json",
+      "sha256": "864ec6e03b0d0440316e9f50a76fb407056588cf69dea11b44d1125c7892c97a",
+      "bytes": 6852
+    },
+    "items": [
+      {
+        "contract_id": "dxgkrnl.h:231:1",
+        "status": "未知",
+        "original_receipt": {
+          "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+          "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+        },
+        "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+        "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。",
+        "batch_assessment": "本地模型及比较映像的同步路径均未提供所缺Windows同对象动态字段；沿用已核原回执，不重测。"
+      },
+      {
+        "contract_id": "dxgkrnl.h:684:4",
+        "status": "未知",
+        "original_receipt": {
+          "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+          "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+        },
+        "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+        "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。",
+        "batch_assessment": "本地模型及比较映像的同步路径均未提供所缺Windows同对象动态字段；沿用已核原回执，不重测。"
+      },
+      {
+        "contract_id": "dxgkrnl.h:759:2",
+        "status": "未知",
+        "original_receipt": {
+          "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+          "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+        },
+        "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+        "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。",
+        "batch_assessment": "本地模型及比较映像的同步路径均未提供所缺Windows同对象动态字段；沿用已核原回执，不重测。"
+      },
+      {
+        "contract_id": "dxgvmbus.c:3651:2",
+        "status": "未知",
+        "original_receipt": {
+          "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+          "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+        },
+        "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+        "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。",
+        "batch_assessment": "本地模型及比较映像的同步路径均未提供所缺Windows同对象动态字段；沿用已核原回执，不重测。"
+      }
+    ],
+    "classification_changed": false,
+    "overall_closeout": false
+  },
+  "next": "执行会话继续合法UMD输入适用性和调度器额外串行的具体证据分析；需要故障因果和对应实机修复验收才能完成，当前两项审阅意见均未晋升为历史根因。",
+  "publication": {
+    "pushed": false,
+    "new_baseline_promoted": false,
+    "full_publication_checks_deferred_until_actual_release": true
+  }
+}

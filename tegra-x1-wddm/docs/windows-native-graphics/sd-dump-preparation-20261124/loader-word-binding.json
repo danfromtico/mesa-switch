@@ -1,0 +1,56 @@
+{
+  "utc": "2026-11-24T01:39:07.369085+00:00",
+  "scope": "Retained static instructions mapped to pinned ARM64 images; not a runtime path observation",
+  "prior_local_path_error": {
+    "type": "FileNotFoundError",
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/classic-dump-runtime-abi-r2/crashdmp.sys/crashdmp.pdb",
+    "resolution": "Located existing PDB with rg --files; used dump-module-symbols-r1 path without downloading or changing originals."
+  },
+  "modules": [
+    {
+      "module": "crashdmp.sys",
+      "image_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-module-originals-r1/crashdmp.sys",
+      "image_sha256": "f4548421b9d7a087ed6c22d809b64442f28ed85f8eeaf9a56536a88a8abd3f8b",
+      "pdb_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-module-symbols-r1/crashdmp.sys/crashdmp.pdb",
+      "pdb_sha256": "a68c0d9985752315a0d2cef26eb8a2013e26c307037fc8d53ac65aa72d38d4e3",
+      "existing_identity_record": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/classic-dump-runtime-abi-r2/crashdmp.sys/validated-identity.json",
+      "existing_identity_record_sha256": "415a2d0279e76beb360025a1fb0af9f6c4a6f220b7d1555db04475fabf70d588",
+      "PDB_identity_scope": "Existing parsed PE RSDS/PDB GUID and DBI-age comparison retained; native DIA not invoked. Exact image/PDB hashes independently rechecked.",
+      "files": [
+        {
+          "asm": "DumpPreInitialize.asm",
+          "matched_instruction_words": 22,
+          "sha256": "740bf2777157b64a8914963b2404fd384005a7ad4afb94de5607209e362124c1"
+        },
+        {
+          "asm": "LoadPortDriver.asm",
+          "matched_instruction_words": 274,
+          "sha256": "72ea23f7b701d8789581669f2822657e66398177b09be175577947d9e0eac8b9"
+        },
+        {
+          "asm": "UnloadPortDriver.asm",
+          "matched_instruction_words": 72,
+          "sha256": "28a9de705a7a6e98d1361c9392d73ae5dfd3ff9a9a9caf99e23b81097dce87bf"
+        }
+      ]
+    },
+    {
+      "module": "dumpsdport.sys",
+      "image_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/classic-dump-runtime-abi-r2/dump-port-original-r1/dumpsdport.sys",
+      "image_sha256": "3991440a1de5d43d44eda4dd13b627fc08b6400c69b57b52f27e07f49d919424",
+      "pdb_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/classic-dump-runtime-abi-r2/dumpsdport.sys/dumpsdport.pdb",
+      "pdb_sha256": "efd1551f6902d51fdf56b9788b9520e132d84789425abd3ee0e1c8030e3cc7ec",
+      "existing_identity_record": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/classic-dump-runtime-abi-r2/dumpsdport.sys/validated-identity.json",
+      "existing_identity_record_sha256": "7fa12f1276f9d503dba6472709196fbb5375f904770ade3eff276153c2ad9ddd",
+      "PDB_identity_scope": "Existing parsed PE RSDS/PDB GUID and DBI-age comparison retained; native DIA not invoked. Exact image/PDB hashes independently rechecked.",
+      "files": [
+        {
+          "asm": "dumpsdport-SdPortInitialize.asm",
+          "matched_instruction_words": 36,
+          "sha256": "c6dbf5a031ca354bccbf86d918a2c011b125aebbfffd410f810307acf008164a"
+        }
+      ]
+    }
+  ],
+  "native_actions": 0
+}

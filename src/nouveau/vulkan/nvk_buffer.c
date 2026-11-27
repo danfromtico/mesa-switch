@@ -237,6 +237,12 @@ nvk_GetPhysicalDeviceExternalBufferProperties(
       goto unsupported;
 
    switch (pExternalBufferInfo->handleType) {
+   case VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT:
+      if (!pdev->nvkmd->kmd_info.has_win32_memory)
+         goto unsupported;
+      pExternalBufferProperties->externalMemoryProperties =
+         nvk_opaque_win32_mem_props;
+      return;
    case VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT:
    case VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT:
       if (!pdev->nvkmd->kmd_info.has_dma_buf)

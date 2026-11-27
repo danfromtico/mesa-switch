@@ -38,6 +38,8 @@
 #endif
 
 #include "vk_format.h"
+#include "vk_internal_exts.h"
+#include "vk_wsi_win32_memory.h"
 #include "util/u_blitter.h"
 #include "util/u_debug.h"
 #include "util/format/u_format.h"
@@ -998,9 +1000,24 @@ struct mem_alloc_info {
    VkExternalMemoryHandleTypeFlags export_types;
 };
 
+static bool
+is_wddm_allocation(const struct winsys_handle *handle)
+{
+#ifdef _WIN32
+   return handle && handle->type == WINSYS_HANDLE_TYPE_WDDM_ALLOCATION;
+#else
+   return false;
+#endif
+}
+
 static inline bool
 get_export_flags(struct zink_screen *screen, const struct pipe_resource *templ, struct mem_alloc_info *alloc_info)
 {
+   if (is_wddm_allocation(alloc_info->whandle)) {
+      alloc_info->shared = false;
+      alloc_info->need_dedicated = true;
+      return true;
+   }
    bool needs_export = (templ->bind & (ZINK_BIND_VIDEO | ZINK_BIND_DMABUF)) != 0;
    if (alloc_info->whandle) {
       if (alloc_info->whandle->type == WINSYS_HANDLE_TYPE_FD ||
@@ -1012,6 +1029,11 @@ get_export_flags(struct zink_screen *screen, const struct pipe_resource *templ, 
    if (needs_export) {
       if (alloc_info->whandle && alloc_info->whandle->type == ZINK_EXTERNAL_MEMORY_HANDLE) {
          alloc_info->external = ZINK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_BIT;
+#ifdef _WIN32
+      } else if (screen->info.have_KHR_external_memory_win32 && alloc_info->whandle &&
+                 alloc_info->whandle->type == WINSYS_HANDLE_TYPE_WIN32_HANDLE) {
+         alloc_info->external = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+#endif
       } else if (screen->info.have_EXT_external_memory_dma_buf) {
          alloc_info->external = VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
          alloc_info->export_types |= VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
@@ -1102,26 +1124,30 @@ allocate_bo(struct zink_screen *screen, const struct pipe_resource *templ,
       NULL,
    };
 
-   if (alloc_info->whandle) {
-      HANDLE source_target = GetCurrentProcess();
-      HANDLE out_handle;
-
-      bool result = DuplicateHandle(source_target, alloc_info->whandle->handle, source_target, &out_handle, 0, false, DUPLICATE_SAME_ACCESS);
-
-      if (!result || !out_handle) {
-         mesa_loge("ZINK: failed to DuplicateHandle with winerr: %08x\n", (int)GetLastError());
-         return roc_fail_and_cleanup_object;
-      }
-
+   if (alloc_info->whandle && !is_wddm_allocation(alloc_info->whandle)) {
       imfi.pNext = NULL;
       imfi.handleType = alloc_info->external;
-      imfi.handle = out_handle;
+      /* Win32 imports retain the payload without consuming the handle. */
+      imfi.handle = alloc_info->whandle->handle;
 
       imfi.pNext = mai.pNext;
       mai.pNext = &imfi;
    }
 #endif
 
+#endif
+
+   bool runtime_imported = false;
+#ifdef _WIN32
+   struct wsi_memory_allocate_info wsi_memory = {
+      .sType = VK_STRUCTURE_TYPE_WSI_MEMORY_ALLOCATE_INFO_MESA,
+      .pNext = mai.pNext,
+   };
+   if (is_wddm_allocation(alloc_info->whandle)) {
+      wsi_memory.win32_memory = alloc_info->whandle->com_obj;
+      wsi_memory.win32_imported = &runtime_imported;
+      mai.pNext = &wsi_memory;
+   }
 #endif
 
    VkImportMemoryHostPointerInfoEXT imhpi = {
@@ -1175,6 +1201,12 @@ allocate_bo(struct zink_screen *screen, const struct pipe_resource *templ,
           heap = ZINK_HEAP_DEVICE_LOCAL;
    };
 
+   /* An ICD that ignores the Mesa-internal import must not silently give
+    * the frontend unrelated memory for its runtime primary. */
+   if (obj->bo && is_wddm_allocation(alloc_info->whandle) && !runtime_imported) {
+      zink_bo_unref(screen, obj->bo);
+      obj->bo = NULL;
+   }
    return obj->bo ? roc_success : roc_fail_and_cleanup_object;
 }
 
@@ -1285,7 +1317,7 @@ create_buffer(struct zink_screen *screen, struct zink_resource_object *obj,
    VkMemoryRequirements reqs = {0};
 
    embci.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
-   if (alloc_info->external) {
+   if (alloc_info->external || alloc_info->shared) {
       embci.pNext = bci.pNext;
       embci.handleTypes = alloc_info->export_types;
       bci.pNext = &embci;
@@ -1445,6 +1477,7 @@ struct image_pnext_state {
    VkImageDrmFormatModifierExplicitCreateInfoEXT idfmeci;
    VkImageDrmFormatModifierListCreateInfoEXT idfmlci;
    VkSubresourceLayout plane_layouts[4];
+   struct wsi_image_create_info wsi;
 };
 
 static void
@@ -1462,6 +1495,20 @@ setup_image_pnext(struct zink_screen *screen, const struct pipe_resource *templ,
    };
 
    obj->render_target = (ici->usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) != 0;
+
+#ifdef _WIN32
+   if (is_wddm_allocation(alloc_info->whandle)) {
+      ici->initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
+      s->wsi = (struct wsi_image_create_info) {
+         .sType = VK_STRUCTURE_TYPE_WSI_IMAGE_CREATE_INFO_MESA,
+         .pNext = ici->pNext,
+         .scanout = !(templ->bind & PIPE_BIND_SHARED),
+         .win32_row_pitch = alloc_info->whandle->stride,
+      };
+      ici->pNext = &s->wsi;
+      return;
+   }
+#endif
 
    if (ici->tiling == VK_IMAGE_TILING_OPTIMAL) {
       alloc_info->external &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT;
@@ -1613,7 +1660,54 @@ create_image(struct zink_screen *screen, struct zink_resource_object *obj,
 
    bool success = false;
    VkImageFormatListCreateInfo *fmtlist = (formats[0] && formats[1]) ? &format_list : NULL;
-   uint64_t mod = negotiate_image_config(screen, &ici, templ, templ->bind, ici_modifier_count, ici_modifiers, fmtlist, &success);
+   uint64_t mod = DRM_FORMAT_MOD_INVALID;
+#ifdef _WIN32
+   if (is_wddm_allocation(alloc_info->whandle)) {
+      /* A runtime allocation cannot be replaced later to add a view format,
+       * so its one legitimate reinterpretation, the sRGB twin, is declared
+       * now. Direct3D sRGB views of UNORM back buffers then use this image.
+       */
+      formats[0] = ici.format;
+      formats[1] = wsi_win32_srgb_twin(ici.format);
+      format_list = (VkImageFormatListCreateInfo) {
+         .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO,
+         .viewFormatCount = 2,
+         .pViewFormats = formats,
+      };
+      ici.flags = formats[1] ? VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT : 0;
+      ici.pNext = formats[1] ? &format_list : NULL;
+      /* init_ici leaves usage for format negotiation, which this internal
+       * import path bypasses. Views inherit these bits: a zero usage leaves
+       * NVK without a sampled-image descriptor for shared textures. */
+      ici.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+      if (templ->bind & PIPE_BIND_SAMPLER_VIEW)
+         ici.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+      if (templ->bind & PIPE_BIND_RENDER_TARGET)
+         ici.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+      struct wsi_image_create_info wsi = {
+         .sType = VK_STRUCTURE_TYPE_WSI_IMAGE_CREATE_INFO_MESA,
+         .pNext = ici.pNext,
+         .scanout = !(templ->bind & PIPE_BIND_SHARED),
+         .win32_row_pitch = alloc_info->whandle->stride,
+      };
+      VkPhysicalDeviceImageFormatInfo2 info = {
+         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2,
+         .pNext = &wsi,
+         .format = ici.format,
+         .type = ici.imageType,
+         .tiling = ici.tiling,
+         .usage = ici.usage,
+         .flags = ici.flags,
+      };
+      VkImageFormatProperties2 properties = {
+         .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2,
+      };
+      success = VKSCR(GetPhysicalDeviceImageFormatProperties2)(screen->pdev, &info, &properties) == VK_SUCCESS &&
+         ici.extent.width <= properties.imageFormatProperties.maxExtent.width &&
+         ici.extent.height <= properties.imageFormatProperties.maxExtent.height;
+   } else
+#endif
+      mod = negotiate_image_config(screen, &ici, templ, templ->bind, ici_modifier_count, ici_modifiers, fmtlist, &success);
    if (ici.format == VK_FORMAT_A8_UNORM_KHR && !success) {
       ici.format = zink_get_format(screen, zink_format_get_emulated_alpha(templ->format));
       mod = negotiate_image_config(screen, &ici, templ, templ->bind, ici_modifier_count, ici_modifiers, fmtlist, &success);
@@ -1659,7 +1753,10 @@ create_image(struct zink_screen *screen, struct zink_resource_object *obj,
 #endif
 
    if (!(templ->bind & ZINK_BIND_VIDEO)) {
-      obj->vkfeats = get_format_feature_flags(ici, screen, templ);
+      VkImageCreateInfo feature_info = ici;
+      if (is_wddm_allocation(alloc_info->whandle))
+         feature_info.tiling = VK_IMAGE_TILING_OPTIMAL; /* NVK renders through its tiled shadow. */
+      obj->vkfeats = get_format_feature_flags(feature_info, screen, templ);
       if (obj->vkfeats & VK_FORMAT_FEATURE_DISJOINT_BIT)
          ici.flags |= VK_IMAGE_CREATE_DISJOINT_BIT;
    }
@@ -1694,7 +1791,7 @@ create_image(struct zink_screen *screen, struct zink_resource_object *obj,
       assert(num_dmabuf_planes <= 4);
    }
 
-   alloc_info->need_dedicated = get_image_memory_requirement(screen, obj, num_planes, &reqs);
+   alloc_info->need_dedicated |= get_image_memory_requirement(screen, obj, num_planes, &reqs);
    if (templ->usage == PIPE_USAGE_STAGING && ici.tiling == VK_IMAGE_TILING_LINEAR)
       alloc_info->flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
    else
@@ -1905,7 +2002,8 @@ resource_create(struct pipe_screen *pscreen,
       res->dmabuf = whandle && whandle->type == WINSYS_HANDLE_TYPE_FD;
       if (res->dmabuf)
          res->queue = VK_QUEUE_FAMILY_FOREIGN_EXT;
-      res->layout = res->dmabuf ? VK_IMAGE_LAYOUT_PREINITIALIZED : VK_IMAGE_LAYOUT_UNDEFINED;
+      res->layout = (res->dmabuf || is_wddm_allocation(whandle)) ?
+         VK_IMAGE_LAYOUT_PREINITIALIZED : VK_IMAGE_LAYOUT_UNDEFINED;
       res->linear = linear;
       res->aspect = aspect_from_format(templ->format);
    }
@@ -2318,6 +2416,21 @@ zink_resource_from_handle(struct pipe_screen *pscreen,
                  struct winsys_handle *whandle,
                  unsigned usage)
 {
+   if (is_wddm_allocation(whandle)) {
+      if (!whandle->com_obj || !whandle->stride || whandle->offset || whandle->plane ||
+          templ->target != PIPE_TEXTURE_2D || templ->array_size != 1 ||
+          templ->last_level || util_res_sample_count(templ) != 1 ||
+          (templ->format != PIPE_FORMAT_B8G8R8A8_UNORM &&
+           templ->format != PIPE_FORMAT_R8G8B8A8_UNORM))
+         return NULL;
+      struct pipe_resource linear = *templ;
+      linear.bind |= PIPE_BIND_LINEAR;
+      struct pipe_resource *resource = resource_create(pscreen, &linear, whandle,
+         usage, NULL, 0, NULL, NULL);
+      if (resource)
+         zink_resource(resource)->obj->immutable_handle = true;
+      return resource;
+   }
 #ifdef ZINK_USE_DMABUF
    struct zink_screen *screen = zink_screen(pscreen);
 
@@ -3451,6 +3564,15 @@ resource_object_add_bind(struct zink_context *ctx, struct zink_resource *res, un
       return true;
    }
    assert(!res->obj->dt);
+#ifdef _WIN32
+   /* Adding a bind allocates new storage and copies into it. For a runtime
+    * allocation that would leave this resource rendering to private memory
+    * while every other owner keeps reading the original. */
+   if (res->obj->immutable_handle) {
+      mesa_loge("ZINK: cannot add bind 0x%x to an imported runtime allocation", bind);
+      return false;
+   }
+#endif
    zink_fb_clears_apply(ctx, &res->base.b, 0, INT32_MAX);
    bool ret = add_resource_bind(ctx, res, bind);
    if (ret)

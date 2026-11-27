@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-natural-standby-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "question": "在同一原场景入口触发前，完整候选的独立控制端是否实际监听并可接到真实门控信号？",
+  "method": "配置完整一次性 GM20B 诊断候选和原始旧式 SEQUENTIAL 窗口启动门。实际执行同一门控的只读探针，不启动窗口应用，不制造意外重启。",
+  "device_executions": 0,
+  "status": "待验收",
+  "fallback": {
+    "once_only_candidate": true,
+    "permanent_candidate_permission": false,
+    "watchdog_no_contact_minutes": 14,
+    "ssh_retry_seconds": 180,
+    "continuous_ssh_pause_seconds": 1800,
+    "unattended_approved_recovery": "仅 SYSTEM 启动恢复任务的受控恢复阶段，先写本机启动/相位/原因，再请求已批准正式档重启。交流供电检查沿用。"
+  },
+  "pass_condition": "实际注册入口、实际监听、同入口探针验证、完整诊断 KMD 的实载回执、候选一次性许可、无原应用执行。短窗采集只有实际请求时才开始。",
+  "inputs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/installed/standby-receipt.json",
+      "sha256": "de76e02939768ed5b6fd55a66eef53d685df212b1b2948d5773b120117900d8b"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/review-handoff.json",
+      "sha256": "27d7c5cb4603eddd737e1e4353885239d86fb7be4cea71912f74206a80181384"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/dma-packet-drill-formal-restored.json",
+      "sha256": "2ca835509079f05cdfca7541cd45970b5833ec8b8b0faafd290cc90ef46604c3"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/Cycle.ps1",
+      "sha256": "27f03ace06598776b73219b0f21a0805378fc13d6bf4f137d87e88a0e7d95232"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/cycle.py",
+      "sha256": "578059b0bf421334324cfd8ba527064f01165db1a98c40112dd7ad29b1a5d377"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/candidate/package/tegragpurender.sys",
+      "sha256": "bfbc849f36b5a67b985f8ff4489d6200b3befda1a8c27be2fd8159744c50dbfa"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/dma-attempt-trace-rundown.exe",
+      "sha256": "12fa9486c916540d712639b79fd5b9a5572b738a63e3126ad09ccde3c31421e6"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/installed/disarmed.json",
+      "sha256": "d80e635ea8700fcc66e2fcb60ade37d79afccdeb6626f8a999367604418d297c"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/install_candidate.py",
+      "sha256": "93e604ccd7594d57ed79012810c46fec1e99c711be8f5827f5a3958c1816484c"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/Board-Natural-Gate.ps1",
+      "sha256": "97bfaba8c4c0ecc9a6e5bbcad670abeeb858ac8ba69afc18bc28fd15a93307f2"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/watch_candidate.py",
+      "sha256": "809a56dc1c49a09bf2b0fdbc5de050d08ec16ea67a5b7368922fce22ddf672e1"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/verify_candidate.py",
+      "sha256": "98ed5422d3a859ebbca1530904133909877b03ddcc5d879f62dba4011903f48c"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/check_restore_policy.ps1",
+      "sha256": "7668fa39651f3b0c3bb35e8d8028fda9b74e0ef681a7a5f1fdf602283dc9d592"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/restore-policy-mock.txt",
+      "sha256": "6543c465965b254fe7d4edf2659774b8b697469bdcc79d43bd70e9883458e19e"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural-board/activation/cycle-config.json",
+      "sha256": "a6d03735d4c717a4d4b44d961ae2b5b1d8bfa827bbbcb4f7611b3631c431ab95"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/original_sequential_entry.py",
+      "sha256": "7d5f6a57eab49699ecaec478126e7fe2bb87ccd4fe2be20f45eb6b0354c89ebd"
+    }
+  ],
+  "gate_verification": "启动和自然使用相同的已注册任务，但仅持有校验 nonce 的验证请求进入原门控的探针分支；只创建启动前回执、接独立 ACK 后退出。正常启动由同一门控等待真实收集器 ACK。",
+  "original_entry": {
+    "old": "board_local_cdd_controller.py 的一次性 issue；历史任务、应用目录和收集器已清理",
+    "old_cleanup": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/incident-cleanup.json",
+    "current": "显式按需的原场景启动入口。正常用途和门控探针复用同一个 dispatch 到独立监听；不拦截直接 EXE 或其他图形程序。",
+    "trigger_script": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/original_sequential_entry.py"
+  }
+}

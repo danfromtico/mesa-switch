@@ -39,7 +39,14 @@ struct wsi_image_create_info {
 
     /* if true, the image is a blit source */
     bool blit_src;
+#ifdef _WIN32
+    /* Explicit pitch of a runtime-owned linear scanout allocation. Zero
+     * leaves ordinary Vulkan/WSI image layout selection unchanged. */
+    uint32_t win32_row_pitch;
+#endif
 };
+
+struct wsi_win32_memory;
 
 struct wsi_memory_allocate_info {
     VkStructureType sType;
@@ -61,6 +68,16 @@ struct wsi_memory_allocate_info {
      * GL driver in the X server).
      */
     bool dma_buf_sync_file;
+
+#ifdef _WIN32
+    /* Optional runtime-owned WDDM memory, not a public external handle.
+     * The importing driver retains this owner through its callbacks. */
+    const struct wsi_win32_memory *win32_memory;
+    bool *win32_imported;
+    /* Read only for a v2 displayable owner. Written on successful import with
+     * an allocation belonging to the ICD's submitting device. */
+    uint32_t *win32_written_allocation;
+#endif
 };
 
 /* To be chained into VkSurfaceCapabilities2KHR */
@@ -88,6 +105,75 @@ struct wsi_surface_supported_counters {
    struct wsi_memory_allocate_info
 #define VK_STRUCTURE_TYPE_WSI_SURFACE_SUPPORTED_COUNTERS_MESA_cast \
    struct wsi_surface_supported_counters
+
+#ifdef _WIN32
+/* Private tgd3d/NVK contract. Handles belong to NVK's submitting device and
+ * their VkDeviceMemory owners outlive actual GPU completion. The runtime
+ * copies the inline array; it never retains the caller's stack pointer. */
+#define WSI_WIN32_MAX_WRITTEN_PRIMARIES 16u
+struct wsi_win32_written_primaries {
+   VkStructureType sType;
+   const void *pNext;
+   uint32_t version;
+   uint32_t count;
+   uint32_t allocations[WSI_WIN32_MAX_WRITTEN_PRIMARIES];
+};
+#define VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA (VkStructureType)1000001007
+#define VK_STRUCTURE_TYPE_WSI_WIN32_WRITTEN_PRIMARIES_MESA_cast struct wsi_win32_written_primaries
+
+struct wsi_win32_runtime;
+struct wsi_win32_runtime_device_info {
+   VkStructureType sType;
+   const void *pNext;
+   const struct wsi_win32_runtime *runtime;
+   bool *accepted;
+};
+#define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_DEVICE_INFO_MESA (VkStructureType)1000001008
+#define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_DEVICE_INFO_MESA_cast struct wsi_win32_runtime_device_info
+
+struct wsi_win32_runtime_fence_import {
+   VkStructureType sType;
+   const void *pNext;
+   uint32_t version;
+   void *device_cookie;
+   void *fence_token;
+};
+#define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA (VkStructureType)1000001009
+#define VK_STRUCTURE_TYPE_WSI_WIN32_RUNTIME_FENCE_IMPORT_MESA_cast struct wsi_win32_runtime_fence_import
+#endif
+
+/* In-tree GM20B pixel-frequency rasterization with UAVs only. The public
+ * Vulkan pipeline stays single-sampled and no attachments can be bound. A paired frontend first queries the
+ * available raster sample counts on its selected physical device. */
+struct nvk_tir_properties {
+   VkStructureType sType;
+   void *pNext;
+   VkSampleCountFlags rasterSamples;
+};
+#define VK_STRUCTURE_TYPE_NVK_TIR_PROPERTIES_MESA (VkStructureType)1000001010
+#define VK_STRUCTURE_TYPE_NVK_TIR_PROPERTIES_MESA_cast struct nvk_tir_properties
+
+struct nvk_tir_rendering_info {
+   VkStructureType sType;
+   const void *pNext;
+   VkSampleCountFlagBits rasterSamples;
+};
+#define VK_STRUCTURE_TYPE_NVK_TIR_RENDERING_INFO_MESA (VkStructureType)1000001011
+#define VK_STRUCTURE_TYPE_NVK_TIR_RENDERING_INFO_MESA_cast struct nvk_tir_rendering_info
+
+/* The Windows tgd3d frontend supplies this marker when it creates its
+ * embedded NVK instance. NVK uses it to attribute device telemetry.
+ */
+struct nvk_embedded_instance_info {
+    VkStructureType sType;
+    const void *pNext;
+    bool allow_experimental_device;
+};
+
+#define VK_STRUCTURE_TYPE_NVK_EMBEDDED_INSTANCE_INFO_MESA \
+   (VkStructureType)1000001006
+#define VK_STRUCTURE_TYPE_NVK_EMBEDDED_INSTANCE_INFO_MESA_cast \
+   struct nvk_embedded_instance_info
 
 /**
  * Pseudo-extension struct that may be chained into VkRenderingAttachmentInfo

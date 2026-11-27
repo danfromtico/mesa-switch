@@ -21,21 +21,21 @@ void
 nvk_mme_clear(struct mme_builder *b)
 {
    struct mme_value payload = mme_load(b);
+   /* Keep the parameter count independent of the context's view mask. */
+   struct mme_value layer_count = mme_load(b);
    struct mme_value view_mask = nvk_mme_load_scratch(b, VIEW_MASK);
 
    const uint32_t arr_idx = 1 << DRF_LO(NV9097_CLEAR_SURFACE_RT_ARRAY_INDEX);
 
    mme_if(b, ieq, view_mask, mme_zero()) {
-      struct mme_value layer_count = mme_load(b);
-
       mme_loop(b, layer_count) {
          mme_mthd(b, NV9097_CLEAR_SURFACE);
          mme_emit(b, payload);
 
          mme_add_to(b, payload, payload, mme_imm(arr_idx));
       }
-      mme_free_reg(b, layer_count);
    }
+   mme_free_reg(b, layer_count);
 
    mme_if(b, ine, view_mask, mme_zero()) {
       struct mme_value bit = mme_mov(b, mme_imm(1));
@@ -75,7 +75,7 @@ const struct nvk_mme_test_case nvk_mme_clear_tests[] = {{
       { NVK_SET_MME_SCRATCH(VIEW_MASK), 0xb },
       { }
    },
-   .params = (uint32_t[]) { 0x3c },
+   .params = (uint32_t[]) { 0x3c, 1 },
    .expected = (struct nvk_mme_mthd_data[]) {
       { NV9097_CLEAR_SURFACE, 0x03c },
       { NV9097_CLEAR_SURFACE, 0x43c },
@@ -107,8 +107,6 @@ emit_clear_rects(struct nvk_cmd_buffer *cmd,
                  uint32_t rect_count,
                  const VkClearRect *rects)
 {
-   struct nvk_rendering_state *render = &cmd->state.gfx.render;
-
    struct nv_push *p = nvk_cmd_buffer_push(cmd, rect_count * 6);
 
    for (uint32_t r = 0; r < rect_count; r++) {
@@ -136,9 +134,7 @@ emit_clear_rects(struct nvk_cmd_buffer *cmd,
 
       P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_CLEAR));
       P_INLINE_DATA(p, payload);
-      if (render->view_mask == 0) {
-         P_INLINE_DATA(p, rects[r].layerCount);
-      }
+      P_INLINE_DATA(p, rects[r].layerCount);
    }
 }
 

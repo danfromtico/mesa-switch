@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T19:02:57.834426+00:00",
+  "scope": "One controlled small-dump attempt and retained recovery evidence",
+  "disposition": "negative observation and bounded cleanup evidence accepted; dump capture qualification failed",
+  "archive": {
+    "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/small-dump-control-97176-delivery-20261122.zip",
+    "bytes": 3112116,
+    "members": 253,
+    "sha256": "13792872f387ba4fd7d011b439e75b58c740aa9c0f0205d9a888293abb40644e",
+    "manifest": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/tdr-reset-dump-20261122/small-dump-delivery-manifest.json",
+    "manifest_sha256": "9a38b778f0a1ac94c2617b3a9c21e557e9cfabc962ecc3351977d41e1a122fae",
+    "all_members_verified": true,
+    "whole_goal_complete": false
+  },
+  "native_control": {
+    "before_boot": 97098,
+    "after_boot": 97176,
+    "durable_consumption_records": 1,
+    "launcher_startprocess_calls": 1,
+    "tool_machine": "ARM64",
+    "staged_signature": "Valid",
+    "tool_sha256": "e5d8a99b609bb7b5015a8e1f8ca901e68066ebe73e2c0c1c07b6d0d35821f2d5",
+    "tool_banner_retained": true,
+    "NT_bugcheck_reached": "unknown",
+    "returned_or_bugcheck_code_receipt": "unobserved",
+    "operator_reset_report": "executor reports none; attributed observation"
+  },
+  "system_interval": {
+    "start_record_exclusive": 97175,
+    "read_through_record": 97254,
+    "events": [
+      {
+        "id": 12,
+        "record": 97176,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T17:18:02.7684511Z",
+        "data": {
+          "StartTime": "2026-11-22T17:18:01.0567119Z"
+        }
+      },
+      {
+        "id": 6008,
+        "record": 97185,
+        "provider": "EventLog",
+        "utc": "2026-11-22T17:40:18.8056759Z",
+        "data": {}
+      },
+      {
+        "id": 41,
+        "record": 97194,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "utc": "2026-11-22T17:18:06.5904708Z",
+        "data": {
+          "BugcheckCode": "0"
+        }
+      },
+      {
+        "id": 7000,
+        "record": 97219,
+        "provider": "Service Control Manager",
+        "utc": "2026-11-22T17:39:59.2863672Z",
+        "data": {
+          "param1": "luafv",
+          "param2": "%%1275"
+        }
+      }
+    ],
+    "clock_boundary": "New-boot UTC precedes old-boot consumption UTC. Boot identity and durable records order the episode; cross-boot wall-clock durations remain unknown."
+  },
+  "dump_evidence": {
+    "new_dump_files": 0,
+    "preexisting_watchdog_files": 11,
+    "pre_and_post_inventory_sizes_and_hashes_equal": true,
+    "CrashDumpEnabled": 3,
+    "kernel_dump_event": {
+      "channel": "Microsoft-Windows-Kernel-Dump/Operational",
+      "record": 1742,
+      "id": 10,
+      "observed_message": "已禁用故障转储。 ",
+      "event_utc": "2026-11-22T17:39:53.9912757Z",
+      "collection_boot": 97176,
+      "producer_path_and_disable_cause": "unknown"
+    },
+    "sd_static_registration": {
+      "image_member": "evidence/nvtsdhc-installed-97176.sys",
+      "sha256": "5389b30d3a04fad330b9afef36b0d500ad363c6c5b39c55c9b60096669bfd945",
+      "table_file_offset": 43520,
+      "structure_size": 144,
+      "crashdump_supported": 1,
+      "actual_dump_initialization_and_write": "unobserved"
+    },
+    "capture_and_cross_boot_dump_readback_passed": false
+  },
+  "restoration_and_cleanup": {
+    "profile_utc": "2026-11-22T17:47:30.2067120Z",
+    "profile_boot": 97176,
+    "code": 0,
+    "ac": "Online",
+    "mode": 1,
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "actual_loads": {
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    },
+    "loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_nvk_arm64.dll"
+    },
+    "permanent_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f",
+    "trial_token": false,
+    "cleanup_final_boot": 97176,
+    "cleanup_final_last_record": 97255,
+    "root_removed": true,
+    "task_removed": true,
+    "processes": [],
+    "temporary_services": [],
+    "residue_preserved_bytes": 27640,
+    "residue_all_zero": true,
+    "residue_absence_observed": "inline recovery before final root/task/process/service readback",
+    "registry_eula_final_independent_recheck": "unobserved",
+    "prior_dump_hash_observation": "post-reboot inventory before temporary-root cleanup"
+  },
+  "review_findings": {
+    "independent_review": "changes_required",
+    "findings": 4,
+    "later_summary_evidence": "final delivery includes later disabled event and cleanup references",
+    "two_object_output": "executed stdout is two NDJSON records matching the saved result array",
+    "observation_scopes": "inline residue check, post-reboot dump inventory and final cleanup readback each have their own observation times",
+    "payload_limit": "retained residue is 27640 bytes; future collector changes require their own review"
+  },
+  "historical_attribution": {
+    "legacy_first_present": "unknown",
+    "91476_DWM_152586": "unknown",
+    "95090": "unknown",
+    "TDR_CollectDbgInfo_and_vendor_payload": "unobserved",
+    "same_reset_last_submitted_and_QueryCurrentFence": "unobserved",
+    "470e1dbc_new_direct_evidence": 0
+  },
+  "original_members_verified": {
+    "results/native/tdr-dump-174336477212-collect/records-0-staged.json": "ea77cd8c2f9feb13d345c52003bd267edf09f160c9ec818607f382519dc4627c",
+    "results/native/tdr-dump-174336477212-collect/records-1-control.json": "7ffbac8fd706919aa8a8470640ceff21a375f7a8539a60e36c08e69f1f4b36f0",
+    "results/native/tdr-dump-174336477212-collect/records-2-queued.json": "10abed4935f5d02b6e72741f3d838eb521f3c24639bdf0c7d1003c3f889462a2",
+    "results/native/tdr-dump-174336477212-collect/records-3-consumed.json": "270fe0d0b80f21aecd6abc542727139b4cf1f8907e2c6f36e8115dca3820ad8c",
+    "collected-control.json": "a4c47e2f2484780c06b7d271599206b1ce0f3964ec4f6bfd888561c8788ac87e",
+    "inputs/notmyfaultc64a.exe": "e5d8a99b609bb7b5015a8e1f8ca901e68066ebe73e2c0c1c07b6d0d35821f2d5",
+    "inputs/Run-DumpControl.ps1": "e91f48160370e90b27ebda7d90cef8d55eae95590a6f295c6c949275b5cc8a41",
+    "results/native/tdr-dump-174336477212-collect/records-4-tool-output.txt": "df7282a0979ef46105fefe45d75548090703b96fee84b69d509e9676c38121d3",
+    "results/native/tdr-dump-174336477212-collect/records-5-tool-error.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/tdr-dump-165234324284-inventory.json": "cc5712d2fbcfa49f284a0aafcb1d728d784be80fb31afd9b34fc104312202517",
+    "results/tdr-dump-174631737888-inventory.json": "840a6770df1a1b2413c699c64db6f8184f5b8533b9663787734281bad9e13fc0",
+    "results/tdr-dump-174708496109-profile.json": "797ae0322cbf19551113ba5a33d69c55be7b17d29a9c887352b0588682ccaf06",
+    "results/tdr-dump-181311809135-final-cleanup-readback.json": "224a38268d080e0bab9c59967e902cb285e8eef8bca204d7579c3f612401b01c",
+    "results/tdr-dump-175824079121-cleanup-recovery.json": "576a2a5ba0df2aefbe6b67f0c7813ea839dbbb92327dce60aedb7983ad6c0d26",
+    "transport/tdr-dump-175824079121-cleanup-recovery.stdout": "63e92517446f706f50ee7167474a18068db619f96de632fe18c3f72034b44942",
+    "evidence/myfault-observed-97176.sys": "8407400b06e4c26f144db16bc792b55957a9c2d974b6800051a56b2007eea5b5",
+    "results/tdr-dump-181510154519-kernel-dump-description.json": "d62d081f0009c66e40bcb2da8dcee80f6c5e9b4b1d2e3f9a5e2d935c5e5ebeb6",
+    "evidence/sdport-registration/result.json": "439fe8e51ac9ac63290ec4bd5d642c54359fe1abdc4191c413d2a6adad17295f",
+    "evidence/nvtsdhc-installed-97176.sys": "5389b30d3a04fad330b9afef36b0d500ad363c6c5b39c55c9b60096669bfd945",
+    "control-closeout-review/parsed-review.json": "35f0e7698ab550d4e4e17d418ec08d81f9e2af4c68bdcc6cfde52e0e3221da0e"
+  },
+  "source_review_record": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/small-dump-control-main-review-20261122.json",
+    "sha256": "eefc27a635d3dcea183c145573302f60e447f86ba474ef730b060333dc60c497"
+  },
+  "independent_archive_verification": {
+    "sha256": "13792872f387ba4fd7d011b439e75b58c740aa9c0f0205d9a888293abb40644e",
+    "manifest_sha256": "9a38b778f0a1ac94c2617b3a9c21e557e9cfabc962ecc3351977d41e1a122fae",
+    "verified_originals": 252,
+    "verified_members": 253,
+    "CRC_verified": true
+  }
+}

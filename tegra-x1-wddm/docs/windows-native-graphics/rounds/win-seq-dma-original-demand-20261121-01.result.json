@@ -1,0 +1,242 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-original-demand-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "282db6439d9fc2d35071439978601eb78af478183962de993814453c59db16f3",
+  "request_id": "f6264ee11289",
+  "status": "候选启动发生异常，原场景待取证",
+  "finding": "请求 f6264ee11289 的候选启动 95090 在原窗口门控前非正常重启。用户看到蓝屏。恢复启动 95099 留有 Kernel-Power 41 和 EventLog 6008。原场景执行零次，控制端无本次 DMA 日志。随后 Windows 托管恢复到正式启动 95192。",
+  "missing_observation": "早期启动日志未给出停止码或故障模块。事件 41 的 BugcheckCode 为 0，无 BugCheck 1001 或本次转储。95090 缺候选 Code 0、实载和会话就绪回执。需有针对候选启动异常的可验证修正或能跨该启动丢失的独立启动证据，方能接续这次真实请求。91476 的历史同包缺口仍开放。",
+  "device_executions": 0,
+  "evidence": {
+    "operator_observation": {
+      "display": "蓝屏",
+      "has_confirmed_stop_code": false
+    },
+    "original_application_executions": 0,
+    "capture_started": false,
+    "request_remains_pending": true,
+    "one_use_candidate_reached_code0": null,
+    "offline_capture": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/capture-readback.json",
+      "sha256": "e137788463c04b7bf5efe2167bf488d98750492327394b294ac1995bf51706c7"
+    },
+    "pre_dispatch_recovery": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/pre-dispatch-interruption.json",
+      "sha256": "cd260a309da05093eb51d65ed7f837e5c12d5d74d70df4fc7a8034b63d1af66b"
+    },
+    "controlled_boot_chain": {
+      "boots": [
+        {
+          "record": 94912,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "id": 12,
+          "utc": "2026-11-22T04:26:21.1141712Z"
+        },
+        {
+          "record": 95002,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "id": 12,
+          "utc": "2026-11-22T04:59:24.3819151Z"
+        },
+        {
+          "record": 95090,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "id": 12,
+          "utc": "2026-11-22T05:02:55.7399799Z"
+        },
+        {
+          "record": 95099,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "id": 12,
+          "utc": "2026-11-22T05:03:56.0465290Z"
+        },
+        {
+          "record": 95192,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "id": 12,
+          "utc": "2026-11-22T05:07:30.0690980Z"
+        }
+      ],
+      "planned_pairs": [
+        {
+          "source_boot": 94912,
+          "destination_boot": 95002,
+          "control_receipt": {
+            "boot": 94912,
+            "phase": "ClosedForTrial",
+            "reason": "enter closed gate before selecting candidate",
+            "utc": "2026-11-22T04:58:58.7858165Z",
+            "queued": true
+          },
+          "system_1074": {
+            "record": 94985,
+            "provider": "User32",
+            "id": 1074,
+            "utc": "2026-11-22T04:58:58.9889470Z"
+          }
+        },
+        {
+          "source_boot": 95002,
+          "destination_boot": 95090,
+          "control_receipt": {
+            "boot": 95002,
+            "phase": "CandidateArmed",
+            "reason": "one-time candidate boot",
+            "utc": "2026-11-22T05:02:31.4519000Z",
+            "queued": true
+          },
+          "system_1074": {
+            "record": 95074,
+            "provider": "User32",
+            "id": 1074,
+            "utc": "2026-11-22T05:02:31.6393999Z"
+          }
+        },
+        {
+          "source_boot": 95099,
+          "destination_boot": 95192,
+          "control_receipt": {
+            "boot": 95099,
+            "route": "owned SYSTEM unattended diagnostic restore",
+            "utc": "2026-11-22T05:07:05.3313730Z",
+            "phase": "BaselineArmed",
+            "reason": "restore verified permanent baseline",
+            "queued": true
+          },
+          "system_1074": {
+            "record": 95172,
+            "provider": "User32",
+            "id": 1074,
+            "utc": "2026-11-22T05:07:05.6907501Z"
+          }
+        }
+      ],
+      "unplanned_transition": {
+        "candidate_boot": 95090,
+        "recovery_boot": 95099,
+        "last_retained_candidate_record": {
+          "record": 95098,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "id": 20,
+          "utc": "2026-11-22T05:02:55.7555607Z"
+        },
+        "independent_first_unexpected_shutdown_marker": {
+          "record": 95117,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "id": 41,
+          "utc": "2026-11-22T05:04:00.3470599Z"
+        },
+        "recovery_unexpected_shutdown_event": {
+          "record": 95108,
+          "provider": "EventLog",
+          "id": 6008,
+          "utc": "2026-11-22T05:05:32.8050272Z"
+        },
+        "event41_fields": {
+          "BugcheckCode": "0",
+          "BugcheckParameter1": "0x0",
+          "BugcheckParameter2": "0x0",
+          "BugcheckParameter3": "0x0",
+          "BugcheckParameter4": "0x0",
+          "SleepInProgress": "0",
+          "PowerButtonTimestamp": "0",
+          "BootAppStatus": "0",
+          "Checkpoint": "0",
+          "ConnectedStandbyInProgress": "false",
+          "SystemSleepTransitionsToOn": "0",
+          "CsEntryScenarioInstanceId": "0",
+          "BugcheckInfoFromEFI": "false",
+          "CheckpointStatus": "0",
+          "CsEntryScenarioInstanceIdV2": "0",
+          "LongPowerButtonPressDetected": "false",
+          "LidReliability": "false",
+          "InputSuppressionState": "0",
+          "PowerButtonSuppressionState": "0",
+          "LidState": "3"
+        },
+        "reported_bugcheck_code": null,
+        "first_missing_stage": "CandidateActive/Code 0 and loaded driver observations. The scene and its DMA do not exist in this run."
+      }
+    },
+    "system_interval": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/windows-system-interval.json",
+      "sha256": "7accb3d5929671b7feccfb5ef21454478e7faa54c01e63c4a3bac02d3f868161"
+    },
+    "dump_inventory": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/candidate-boot-dump-inventory.json",
+      "sha256": "4c28022990ea002fc3e4eafdaf042d8987a1ea2f738651789361d47d9f22ca20"
+    },
+    "boot_channels": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/candidate-boot-extra-records.json",
+      "sha256": "96da501ca31af2376eea19b61a213016710e273855ce4047e730b294f192880c"
+    },
+    "boot_channel_comparison": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/kernel-boot-comparison.json",
+      "sha256": "b750e73614aaa1c6cc9f8abd314b0429acb6cacb161100820c8d26670ad28a46"
+    },
+    "boot_channel_disposition": "The Kernel-Boot 208/235 pair also occurred in many prior boots. No event was found linking it to the 95090 reset.",
+    "diagnostic_source_commit": "ef790ec99d5b8c508bf232e40faa04b4cd9df1bf",
+    "candidate_provenance": "The staged candidate, its one-use grant and planned boot are proven on 95002. No installed-code execution claim is made for 95090.",
+    "restoration": {
+      "formal_boot": 95192,
+      "dwm": 1420,
+      "code": 0,
+      "AC": "Online",
+      "power_mode": 1,
+      "dfll_active": 1,
+      "gpu_policy": 1,
+      "battery_limit": 85,
+      "components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "loaded": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+      },
+      "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+      "trial": false,
+      "formal_readback": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/formal-restored.json",
+        "sha256": "488beb03da78f4cc267f2ac1122f2cac58129957849b0f85e4f0048b24f15124"
+      },
+      "full_power_readback": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/formal-power-verified.json",
+        "sha256": "ee966e957cef3eaf9dff19cc72cb2d8553f21012a7e1b173a7084f4ee1f67063"
+      },
+      "cycle_history": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-board-f6264ee11289/activation/cycle-history.json",
+        "sha256": "23568bd66cbc897633c92fbeb1203086fa2588e0f8b70bb5efe96e6f57a17801"
+      },
+      "cycle_cleanup": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-board-f6264ee11289/activation/cleanup.json",
+        "sha256": "03ffaf8212a183cd5c3c12e7320d9f3b941ce0ef2fd284a28803037f7fcadc30"
+      },
+      "daily_cleanup": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-board-f6264ee11289/activation/daily-cleanup.json",
+        "sha256": "8226d7fc0adbe0496661c10d4acc24f249a645e43e1de8b834a33ae73f95f2c9"
+      },
+      "diagnostic_gate_was_never_installed": true
+    },
+    "stopped_obsolete_observer_after_verified_baseline_active": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/ended-obsolete-candidate-wait.json",
+      "sha256": "c6b2376e091bb0cc281ce895717ffef17bcfea6a75bb01cdf98b58bcbc81ea28"
+    },
+    "resumed_same_request_after_pre_dispatch_host_interruption": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289/resume-controller-process.json",
+      "sha256": "d632c079c0c6155a7db13e91941a1ee35cafa7ac00efc75b0d2c5496fa410a02"
+    },
+    "history_91476_root_cause": "未知，未用本次启动异常作旧事故归因。"
+  }
+}

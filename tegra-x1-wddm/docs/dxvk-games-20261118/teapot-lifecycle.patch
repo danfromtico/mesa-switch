@@ -1,0 +1,223 @@
+--- a/tegra-x1-wddm/tools/dxvk/dxvk_teapot.cpp
++++ b/tegra-x1-wddm/tools/dxvk/dxvk_teapot.cpp
+@@ -8,2 +8,4 @@
+ #include <d3dcompiler.h>
++#include <dwmapi.h>
++#include <psapi.h>
+ #include <wrl/client.h>
+@@ -22,3 +24,38 @@
+ namespace {
+-constexpr UINT width = 384, height = 256;
++UINT width = 768, height = 432;
++bool bgra = false;
++HANDLE journal = INVALID_HANDLE_VALUE;
++bool journalHealthy = true;
++
++bool startJournal() {
++    wchar_t path[1024];
++    DWORD count = GetEnvironmentVariableW(L"SWITCHWOA_EXIT_JOURNAL",path,1024);
++    if (!count || count >= 1024) return false;
++    journal = CreateFileW(path,GENERIC_WRITE,FILE_SHARE_READ,nullptr,CREATE_NEW,
++                          FILE_ATTRIBUTE_NORMAL|FILE_FLAG_WRITE_THROUGH,nullptr);
++    return journal != INVALID_HANDLE_VALUE;
++}
++
++void milestone(const char* label) {
++    if (!journalHealthy || journal == INVALID_HANDLE_VALUE) return;
++    LARGE_INTEGER qpc;
++    FILETIME clock;
++    QueryPerformanceCounter(&qpc);
++    GetSystemTimeAsFileTime(&clock);
++    const uint64_t time = (uint64_t(clock.dwHighDateTime)<<32) | clock.dwLowDateTime;
++    char text[192];
++    const int n = std::snprintf(text,sizeof(text),"%llu,%lld,%lu,%s\r\n",
++                              (unsigned long long)time,qpc.QuadPart,GetCurrentProcessId(),label);
++    DWORD written = 0;
++    journalHealthy = n>0 && (size_t)n<sizeof(text) &&
++                     WriteFile(journal,text,DWORD(n),&written,nullptr) && written==DWORD(n) &&
++                     FlushFileBuffers(journal);
++}
++
++struct AfterRelease {
++    const char* label;
++    ~AfterRelease() { milestone(label); }
++};
++
++std::vector<uint8_t> referenceRgb;
+ constexpr float clearColor[] = {0.04f, 0.07f, 0.12f, 1.0f};
+@@ -172,5 +209,6 @@
+             const auto* pixel = row + 4*x;
+-            std::memcpy(&rgb[(width*y+x)*3], pixel, 3);
+-            for (unsigned c=0; c<3; ++c) hash = (hash ^ pixel[c]) * UINT64_C(1099511628211);
+-            if (pixel[1] > 30 && pixel[1] > pixel[0]+12) {
++            uint8_t *color = &rgb[(width*y+x)*3];
++            color[0] = pixel[bgra ? 2 : 0]; color[1] = pixel[1]; color[2] = pixel[bgra ? 0 : 2];
++            for (unsigned c=0; c<3; ++c) hash = (hash ^ color[c]) * UINT64_C(1099511628211);
++            if (color[1] > 30 && color[1] > color[0]+12) {
+                 ++coverage; lo=std::min(lo, unsigned(pixel[1])); hi=std::max(hi, unsigned(pixel[1]));
+@@ -180,9 +218,3 @@
+     ctx->Unmap(stage, 0);
+-    std::string name = "teapot-"+std::to_string(scene.revision)+".ppm";
+-    FILE* image = std::fopen(name.c_str(), "wb");
+-    if (!image) throw std::runtime_error("open readback image");
+-    const bool header = std::fprintf(image, "P6\n%u %u\n255\n", width, height) > 0;
+-    const auto bytes = std::fwrite(rgb.data(), 1, rgb.size(), image);
+-    const auto closed = std::fclose(image);
+-    if (!header || bytes != rgb.size() || closed) throw std::runtime_error("save readback image");
++    referenceRgb = std::move(rgb);
+     std::printf("READBACK revision=%u pixels=%u green_min=%u green_max=%u fnv64=%016llx\n",
+@@ -193,2 +225,36 @@
+
++void checkWindowImage(HWND window) {
++    HDC dc = GetDC(window);
++    HDC memory = CreateCompatibleDC(dc);
++    BITMAPINFO bitmap = {};
++    bitmap.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
++    bitmap.bmiHeader.biWidth=width; bitmap.bmiHeader.biHeight=-int(height);
++    bitmap.bmiHeader.biPlanes=1; bitmap.bmiHeader.biBitCount=32; bitmap.bmiHeader.biCompression=BI_RGB;
++    void *bits = nullptr;
++    HBITMAP dib=CreateDIBSection(memory,&bitmap,DIB_RGB_COLORS,&bits,nullptr,0);
++    HGDIOBJ old=dib ? SelectObject(memory,dib) : nullptr;
++    BOOL copied=old && old!=HGDI_ERROR && BitBlt(memory,0,0,width,height,dc,0,0,SRCCOPY) && GdiFlush();
++    unsigned matched=0;
++    if (copied) {
++        const uint8_t *color=static_cast<const uint8_t *>(bits);
++        for (unsigned i=0;i<width*height;i++) {
++            const uint8_t *ref=&referenceRgb[3*i];
++            matched+=std::abs(int(ref[0])-color[4*i+2])<=2 &&
++                     std::abs(int(ref[1])-color[4*i+1])<=2 &&
++                     std::abs(int(ref[2])-color[4*i])<=2;
++        }
++    }
++    if (old && old!=HGDI_ERROR) SelectObject(memory,old);
++    if (dib) DeleteObject(dib);
++    if (memory) DeleteDC(memory);
++    if (dc) ReleaseDC(window,dc);
++    std::printf("WINDOW matched=%u total=%u\n",matched,width*height);
++    if (!copied || matched < width*height*99/100) throw std::runtime_error("window differs from rendered teapot");
++}
++uint64_t clockTicks() { LARGE_INTEGER t; QueryPerformanceCounter(&t); return t.QuadPart; }
++uint64_t cpuTicks() {
++    FILETIME c,e,k,u;
++    if (!GetProcessTimes(GetCurrentProcess(),&c,&e,&k,&u)) throw std::runtime_error("CPU times");
++    return (uint64_t(k.dwHighDateTime)<<32)+k.dwLowDateTime+(uint64_t(u.dwHighDateTime)<<32)+u.dwLowDateTime;
++}
+ void render(HWND window, Scene& scene) {
+@@ -199,3 +265,5 @@
+     if (!create) throw std::runtime_error("D3D11CreateDevice export");
++    AfterRelease afterDevice{"device-released"};
+     ComPtr<ID3D11Device> device;
++    AfterRelease afterContext{"context-released"};
+     ComPtr<ID3D11DeviceContext> ctx;
+@@ -205,11 +273,18 @@
+                  &device,&level,&ctx), "create D3D11 hardware device");
++    milestone("d3d-device-created");
++    AfterRelease afterDxgi{"dxgi-device-interface-released"};
+     ComPtr<IDXGIDevice> dxgi; check(device.As(&dxgi),"DXGI device");
++    AfterRelease afterAdapter{"adapter-interface-released"};
+     ComPtr<IDXGIAdapter> adapter; check(dxgi->GetAdapter(&adapter),"device adapter");
+     verifyAdapter(adapter.Get());
++    milestone("physical-nvk-verified");
++    AfterRelease afterFactory{"factory-interface-released"};
+     ComPtr<IDXGIFactory> factory; check(adapter->GetParent(IID_PPV_ARGS(&factory)),"device factory");
+     DXGI_SWAP_CHAIN_DESC swap{};
+-    swap.BufferDesc.Width=width; swap.BufferDesc.Height=height; swap.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;
++    swap.BufferDesc.Width=width; swap.BufferDesc.Height=height; swap.BufferDesc.Format=bgra ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM;
+     swap.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT; swap.SampleDesc.Count=1; swap.BufferCount=2;
+     swap.OutputWindow=window; swap.Windowed=TRUE; swap.SwapEffect=DXGI_SWAP_EFFECT_DISCARD;
++    AfterRelease afterChain{"swapchain-released"};
+     ComPtr<IDXGISwapChain> chain; check(factory->CreateSwapChain(device.Get(),&swap,&chain),"window swapchain");
++    AfterRelease afterResources{"scene-resources-released"};
+     ComPtr<ID3D11Texture2D> back; check(chain->GetBuffer(0,IID_PPV_ARGS(&back)),"back buffer");
+@@ -250,3 +325,9 @@
+     std::printf("READY feature_level=0x%x vertices=%zu triangles=%zu\n",unsigned(level),std::size(vertices),std::size(indices)/3);
+-    while (scene.running) {
++    LARGE_INTEGER hz; QueryPerformanceFrequency(&hz);
++    constexpr unsigned warm=20, count=96, tail=8;
++    uint64_t elapsed[count]={}, presents[count]={};
++    uint64_t cpuStart=0, cpuEnd=0;
++    std::printf("TIMING width=%u height=%u requested=%s frequency=%lld warm=%u measured=%u\n",
++                width,height,bgra ? "BGRA" : "RGBA",hz.QuadPart,warm,count);
++    while (scene.running && scene.presents < warm+count+tail) {
+         MSG message;
+@@ -256,2 +337,4 @@
+         if (!scene.running) break;
++        if(scene.presents==warm) cpuStart=cpuTicks();
++        uint64_t start=clockTicks();
+         const float rotation[4]={std::cos(scene.angle),std::sin(scene.angle),0,0};
+@@ -262,17 +345,42 @@
+         ctx->DrawIndexed(UINT(std::size(indices)),0,0);
+-        const bool sampled=scene.capture;
+-        if (sampled) { capture(ctx.Get(),stage.Get(),back.Get(),scene); scene.capture=false; }
++        const unsigned frame=scene.presents;
++        bool sampled=frame==warm-1 || frame==warm+count+tail-1;
++        if (sampled) { scene.revision=frame; capture(ctx.Get(),stage.Get(),back.Get(),scene); }
++        uint64_t beginPresent=clockTicks();
+         check(chain->Present(1,0),"present teapot");
++        uint64_t end=clockTicks();
+         ++scene.presents;
+-        if (sampled) std::printf("PRESENT revision=%u frames=%u\n",scene.revision,scene.presents);
+-        if (!scene.paused) scene.angle+=0.025f;
+-        MsgWaitForMultipleObjects(0,nullptr,FALSE,85,QS_ALLINPUT);
+-    }
+-    ctx->ClearState(); ctx->Flush();
+-}
+-}
+-
+-int main() {
++        if (frame>=warm && frame<warm+count) {
++            elapsed[frame-warm]=end-start; presents[frame-warm]=end-beginPresent;
++            if (frame+1==warm+count) cpuEnd=cpuTicks();
++            scene.angle+=0.025f;
++        }
++        if (sampled) {
++            check(DwmFlush(),"flush compositor"); Sleep(80); checkWindowImage(window);
++            milestone(frame==warm-1 ? "warm-window-verified" : "final-window-verified");
++        }
++    }
++    if (scene.presents!=warm+count+tail) throw std::runtime_error("benchmark interrupted");
++    PROCESS_MEMORY_COUNTERS pm={};pm.cb=sizeof(pm);
++    if(!GetProcessMemoryInfo(GetCurrentProcess(),&pm,sizeof(pm))) throw std::runtime_error("peak working set");
++    std::printf("PROCESS cpu_100ns=%llu peak_ws=%llu\n",(unsigned long long)(cpuEnd-cpuStart),(unsigned long long)pm.PeakWorkingSetSize);
++    for(unsigned i=0;i<count;i++) std::printf("FRAME %u %llu %llu\n",i,(unsigned long long)elapsed[i],(unsigned long long)presents[i]);
++    milestone("frame-report-printed");
++    ctx->ClearState();
++    milestone("context-cleared");
++    ctx->Flush();
++    milestone("context-flushed");
++}
++}
++
++int main(int argc,char **argv) {
++    for(int i=1;i<argc;i++){
++        if(!std::strcmp(argv[i],"--bgra")) bgra=true;
++        else if(!std::strcmp(argv[i],"--padded")) {width=769;height=433;}
++        else return 2;
++    }
+     std::setvbuf(stdout,nullptr,_IONBF,0);
+     SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
++    if (!startJournal()) return 3;
++    milestone("process-start");
+     Scene scene;
+@@ -289,7 +397,11 @@
+     int result=0;
+-    try { render(window,scene); }
++    try { render(window,scene); milestone("render-returned"); }
+     catch (const std::exception& e) { std::fprintf(stderr,"FAIL %s\n",e.what()); result=1; }
++    milestone("before-destroy-window");
+     DestroyWindow(window);
++    milestone("window-destroyed");
+     std::printf("EXIT frames=%u input_events=%u code=%d\n",scene.presents,scene.revision,result);
+-    return result;
+-}
++    milestone("before-main-return");
++    CloseHandle(journal);
++    return journalHealthy ? result : 4;
++}
+--- a/tegra-x1-wddm/tools/dxvk/build_teapot.py
++++ b/tegra-x1-wddm/tools/dxvk/build_teapot.py
+@@ -84,3 +84,3 @@
+                         "-I"+str(HERE.parents[2]/"include"), str(HERE/"dxvk_teapot.cpp"),
+-                        "-o", args.out, "-ld3dcompiler", "-ldxguid", "-luuid", "-luser32"], check=True)
++                        "-o", args.out, "-ld3dcompiler", "-ldxguid", "-luuid", "-luser32", "-lgdi32", "-ldwmapi", "-lpsapi"], check=True)
+     print(f"{len(vertices)} vertices, {len(indices)//3} triangles, {args.out}")

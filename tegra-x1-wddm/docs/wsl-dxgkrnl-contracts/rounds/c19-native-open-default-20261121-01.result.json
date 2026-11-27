@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "round_id": "c19-native-open-default-20261121-01",
+  "contract_id": "dxgvmbus.c:900:3",
+  "declaration_sha256": "f60db8d044d802a05a716296473a8060d195f5953c15b509946edcb0c9325d5d",
+  "started_utc": "2026-11-22T02:54:00.701605+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "本条原次对 GM20B 的能力查询成功，WDDM=2600，NativeGpuFenceSupported=0；创建和打开入口有导出。已验收的 94176 平台仍为 Windows 22631／WDDM 2.6，未达到官方原生围栏 Windows 11 24H2／WDDM 3.2 适用条件。",
+  "gap": "缺DEFAULT 打开返回产生的同一当前值 CPU 映射与页保护。当前设备未满足原生围栏条件。",
+  "observation": {
+    "original_capability": {
+      "boot": 91476,
+      "adapter_luid": "0000000000005c10",
+      "qpc": 73479024520,
+      "pid": 552,
+      "tid": 368,
+      "version": 2600,
+      "native_gpu_fence_supported": false,
+      "creation_export_present": true,
+      "opening_export_present": true
+    },
+    "selected_platform": {
+      "last_verified_boot": 94176,
+      "build": 22631,
+      "wddm": "2.6",
+      "source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9"
+    },
+    "missing_target": "DEFAULT 打开返回产生的同一当前值 CPU 映射与页保护。",
+    "official_api": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtopennativefencefromnthandle"
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-default-20261121-01.result.json",
+      "sha256": "d82e5ee44e3ad990746bf42e71be3cf21fa4913f54099b0cddea4eba91c03954"
+    },
+    {
+      "path": "windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    }
+  ]
+}

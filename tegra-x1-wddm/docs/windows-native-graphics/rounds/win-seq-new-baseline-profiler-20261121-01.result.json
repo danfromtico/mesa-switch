@@ -1,0 +1,1472 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-new-baseline-profiler-20261121-01",
+  "contract_id": "WIN-SEQ-SELECTED-BASELINE-DMA",
+  "windows_question": "WIN-SEQ-SELECTED-BASELINE-DMA",
+  "plan_sha256": "e2783c85b985b025262337df740a8b09d64b567c2c629f5bfd167d2963f86db8",
+  "status": "实机通过",
+  "finding": "启动 92083 的原签名窗口首次 Present(1,0) 用时 14.302 ms，返回 S_OK。画面、输入、退出和桌面连续。DWM 同一 GM20B 节点 0 的 DMA 9652 / 队列序号 4444 有同线程 5063 进入与返回，以及同包中断、完成与退役。",
+  "missing_observation": "5063 原始载荷只有函数号。同调度线程由 175 与同对象序号绑定，完成由 Windows 回执核实。DWM 包与窗口处于同一时间区间，仍缺窗口表面与该 DWM 包的直接令牌。91476 DMA 152586 继续缺该次提交的 KMD 进入、返回及完成。手持实测未覆盖 PL=1 高频。",
+  "device_executions": 1,
+  "evidence": {
+    "boundaries": {
+      "last_entry": {
+        "first_present_qpc": 17575906896,
+        "first_dxgi_event": {
+          "id": 42,
+          "version": 0,
+          "qpc": 17575970307,
+          "fields": {
+            "pIDXGISwapChain": 2319578873760,
+            "Flags": 0,
+            "SyncInterval": 1,
+            "DirtyRects": 0,
+            "ScrollRects": 0
+          }
+        },
+        "wrapper_enter": {
+          "qpc": 17576122843,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 105,
+          "version": 0,
+          "fields": {
+            "Function": 5063
+          }
+        }
+      },
+      "last_return": {
+        "first_present_qpc": 17576181494,
+        "wrapper_return": {
+          "qpc": 17576124727,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 106,
+          "version": 0,
+          "fields": {
+            "Function": 5063
+          }
+        },
+        "latest_live_source": {
+          "sequence": 3209,
+          "id": 180,
+          "version": 1,
+          "pid": 4,
+          "tid": 936,
+          "source_qpc": 17646726791,
+          "callback_qpc": 17646803050,
+          "payload_hex": "80fc0a580883ffff00000000ed0500000000000000000000208b906881a1ffff",
+          "host_receive_ns": 51746183395541,
+          "confirmed_qpc": 17647053674,
+          "host_ack_return_ns": 51746194823791,
+          "host_fsynced_ns": 51746183511916
+        }
+      },
+      "first_anomaly_or_missing": "5063 原始载荷只有函数号。同调度线程由 175 与同对象序号绑定，完成由 Windows 回执核实。DWM 包与窗口处于同一时间区间，仍缺窗口表面与该 DWM 包的直接令牌。91476 DMA 152586 继续缺该次提交的 KMD 进入、返回及完成。手持实测未覆盖 PL=1 高频。"
+    },
+    "application": {
+      "present_call_qpc": 17575906896,
+      "present_return_qpc": 17576181494,
+      "api_start": {
+        "id": 42,
+        "version": 0,
+        "qpc": 17575970307,
+        "fields": {
+          "pIDXGISwapChain": 2319578873760,
+          "Flags": 0,
+          "SyncInterval": 1,
+          "DirtyRects": 0,
+          "ScrollRects": 0
+        }
+      },
+      "api_return": {
+        "id": 43,
+        "version": 0,
+        "qpc": 17576180847,
+        "fields": {
+          "Result": 0
+        }
+      },
+      "umd_create": [
+        {
+          "id": 4,
+          "qpc": 17545970491,
+          "tid": 3232,
+          "status": 0,
+          "arg0": 720911,
+          "arg1": 0
+        }
+      ],
+      "kmt": {
+        "qpc": 17576176825,
+        "pid": 4924,
+        "tid": 3232,
+        "provider": "kernel",
+        "id": 184,
+        "version": 1,
+        "fields": {
+          "hContext": 1073742144,
+          "hWindow": 262668,
+          "VidPnSourceId": 4294967295,
+          "FlipInterval": 1,
+          "Flags": 67178625,
+          "ReturnStatus": 0,
+          "hSrcAllocHandle": 1073743680,
+          "hDstAllocHandle": 0
+        }
+      },
+      "blt": {
+        "cdd": {
+          "qpc": 17576035323,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 286,
+          "version": 0,
+          "fields": {
+            "pDxgAdapterAllocation": 18446606670585994512,
+            "Flags": 0,
+            "Width": 640,
+            "Height": 360,
+            "Pitch": 2560
+          }
+        },
+        "blt": {
+          "qpc": 17576071858,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 166,
+          "version": 0,
+          "fields": {
+            "hwnd": 262668,
+            "pDmaBuffer": 18446640175921325216,
+            "PresentHistoryToken": 0,
+            "hSourceAllocation": 18446640175919830288,
+            "hDestAllocation": 18446640175919818768,
+            "bSubmit": 1,
+            "bRedirectedPresent": 0,
+            "Flags": 1,
+            "Source.Left": 0,
+            "Source.Right": 640,
+            "Source.Top": 0,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Right": 640,
+            "Dest.Top": 0,
+            "Dest.Bottom": 360,
+            "SubRectCount": 1
+          }
+        },
+        "source": {
+          "qpc": 17549748962,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 4924,
+            "hDevice": 18446606670508881952,
+            "pDxgAdapter": 18446640175876464640,
+            "hVidMmAlloc": 18446640175919830288,
+            "hVidMmGlobalAlloc": 18446606670538591648,
+            "hDxgResource": 18446606670559052304,
+            "hDxgSharedResource": 18446640175907442416,
+            "hThunkAllocation": 1073743680,
+            "hThunkResource": 1073743616,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2319634931712,
+            "hProcessAllocDetails": 18446606670557252368,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "target": {
+          "qpc": 17576036380,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 4924,
+            "hDevice": 18446606670508881952,
+            "pDxgAdapter": 18446640175876464640,
+            "hVidMmAlloc": 18446640175919818768,
+            "hVidMmGlobalAlloc": 18446606670528916896,
+            "hDxgResource": 18446606670559027392,
+            "hDxgSharedResource": 18446640175878122528,
+            "hThunkAllocation": 1073743936,
+            "hThunkResource": 1073743872,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2319636774912,
+            "hProcessAllocDetails": 18446606670557253648,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "context": {
+          "qpc": 17545223057,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 30,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446606670508881952,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446606670532537760,
+            "ContextHandle": 1073742144,
+            "ParentDxgContext": 0
+          }
+        },
+        "submit": {
+          "qpc": 17576072966,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "DmaBufferSize": 52,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0,
+            "bPresent": 1,
+            "hDmaBuffer": 18446640175921325216,
+            "pQueuePacket": 18446640175899750480,
+            "ProgressFenceValue": 0
+          }
+        },
+        "retire": {
+          "qpc": 17576119852,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175899750480
+          }
+        }
+      },
+      "paging": [
+        {
+          "qpc": 17549750604,
+          "stage": 2,
+          "allocation": 1073743680,
+          "hresult": "0x8000000a",
+          "value": 7001
+        },
+        {
+          "qpc": 17549784888,
+          "stage": 3,
+          "allocation": 1073743680,
+          "hresult": "0x00000000",
+          "value": 7001
+        },
+        {
+          "qpc": 17549789964,
+          "stage": 4,
+          "allocation": 1073743680,
+          "hresult": "0x8000000a",
+          "value": 921600
+        },
+        {
+          "qpc": 17549801207,
+          "stage": 3,
+          "allocation": 1073743680,
+          "hresult": "0x00000000",
+          "value": 7002
+        }
+      ],
+      "initial_value1": {
+        "signal": {
+          "qpc": 17545843043,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446606670593027536,
+            "SubmitSequence": 2,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446640175893314480
+            ],
+            "FenceValue": [
+              1
+            ],
+            "pQueuePacket": 18446640175902111824
+          }
+        },
+        "retired": {
+          "qpc": 17545891565,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670593027536,
+            "PacketType": 5,
+            "SubmitSequence": 2,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175902111824
+          }
+        },
+        "app_same_object_waits": []
+      },
+      "observation": {
+        "window_handle": 262668,
+        "visibility": [
+          {
+            "first_qpc": 17548876644,
+            "last_qpc": 17552834688,
+            "flags": 8,
+            "owned_points": 0
+          },
+          {
+            "first_qpc": 17557361345,
+            "last_qpc": 17565222557,
+            "flags": 11,
+            "owned_points": 5
+          },
+          {
+            "first_qpc": 17565489221,
+            "last_qpc": 17566699562,
+            "flags": 11,
+            "owned_points": 4
+          },
+          {
+            "first_qpc": 17567746269,
+            "last_qpc": 17581220348,
+            "flags": 11,
+            "owned_points": 5
+          },
+          {
+            "first_qpc": 17582232432,
+            "last_qpc": 17583901076,
+            "flags": 8,
+            "owned_points": 0
+          }
+        ],
+        "pid": 4924,
+        "tid": 3232,
+        "client_width": 640,
+        "client_height": 360,
+        "owned_points": 5,
+        "visible_qpc": 17562411179,
+        "system_menu_qpc": 17562484526,
+        "escape_input_qpc": 17565251614,
+        "menu_dismissed_qpc": 17570646024,
+        "post_present_capture_qpc": 17578030723,
+        "exit_qpc": 17587568550,
+        "system_menu_flags": 12,
+        "menu_cancelled_by_cleanup": false,
+        "second_escape_qpc": 17570348801,
+        "client_click_qpc": 0,
+        "click_x": 0,
+        "click_y": 0,
+        "capture_changed_samples": 9216,
+        "window_visible": true,
+        "input_verified": true,
+        "window_closed": true,
+        "desktop_available": true
+      },
+      "client_exit": 0,
+      "dwm_flush": true,
+      "normal": true
+    },
+    "input_image": {
+      "tested": 4508,
+      "matched": 4508,
+      "measured_sha256": "53bc2b070a30050b71eaa27ccdc07833d258646f5af866876dc97e6bdb62f7e4",
+      "warp_control_5_sha256": "53bc2b070a30050b71eaa27ccdc07833d258646f5af866876dc97e6bdb62f7e4",
+      "rgb": "000000",
+      "sample_qpc": 17578030723,
+      "no_optical_measurement": true
+    },
+    "phase_ms": {
+      "ready_to_call": 8301.011823,
+      "call_to_return": 14.301979,
+      "release_to_call": 4416.843542,
+      "call_to_capture": 110.61599,
+      "call_to_latest_live_source": 3688.536198
+    },
+    "dwm_matching_chain": {
+      "owner": {
+        "context": {
+          "qpc": 17416392410,
+          "pid": 7196,
+          "tid": 7020,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446606670516478624,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446606670523476880,
+            "ContextHandle": 1073744704,
+            "ParentDxgContext": 0
+          }
+        },
+        "device": {
+          "qpc": 17416392344,
+          "pid": 7196,
+          "tid": 7020,
+          "provider": "kernel",
+          "id": 29,
+          "version": 2,
+          "fields": {
+            "hProcessId": 1456,
+            "pDxgAdapter": 18446640175876464640,
+            "ClientType": 1,
+            "hDevice": 18446606670516478624,
+            "RequestVSync": 0,
+            "DisableGpuTimeout": 0,
+            "hThunkHandle": 1073744064,
+            "DxgProcess": 18446606670486703328,
+            "HostDeviceHandle": 0,
+            "VirtualGpu": 0
+          }
+        },
+        "adapter": {
+          "qpc": 17416355869,
+          "pid": 7196,
+          "tid": 7020,
+          "provider": "kernel",
+          "id": 110,
+          "version": 1,
+          "fields": {
+            "pDxgAdapter": 18446640175876464640,
+            "ConfigSpaceSize": 0,
+            "ChainUid": 0,
+            "NumberOfLinksInChain": 0,
+            "LeadLink": 0,
+            "BusType": 2,
+            "VendorID": 1095718739,
+            "DeviceID": 825247280,
+            "SubVendorID": 0,
+            "SubSystemID": 0,
+            "RevisionID": 0,
+            "AdapterLuid": 23292
+          }
+        }
+      },
+      "events": [
+        {
+          "qpc": 17576122767,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 9652,
+            "ulQueueSubmitSequence": 4444,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 3
+          }
+        },
+        {
+          "qpc": 17576122843,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 105,
+          "version": 0,
+          "fields": {
+            "Function": 5063
+          }
+        },
+        {
+          "qpc": 17576124727,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 106,
+          "version": 0,
+          "fields": {
+            "Function": 5063
+          }
+        },
+        {
+          "qpc": 17576182305,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 177,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 0,
+            "uliCompletionId": 9652,
+            "ulQueueSubmitSequence": 4444,
+            "InterruptType": 1,
+            "QuantumStatus": 3,
+            "FaultedVirtualAddress": 0,
+            "PageFaultFlags": 0,
+            "FaultedProcessHandle": 0
+          }
+        },
+        {
+          "qpc": 17576182896,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 176,
+          "version": 0,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 0,
+            "uliCompletionId": 9652,
+            "ulQueueSubmitSequence": 4444,
+            "bPreempted": 0
+          }
+        },
+        {
+          "qpc": 17576183108,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 0,
+            "SubmitSequence": 4444,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175883356960
+          }
+        }
+      ],
+      "live": [
+        {
+          "sequence": 1462,
+          "id": 175,
+          "version": 1,
+          "pid": 4,
+          "tid": 924,
+          "source_qpc": 17576122767,
+          "callback_qpc": 17576148729,
+          "payload_hex": "902be7530883ffff000000000000000000000000b4250000000000005c110000000000000000000003000000",
+          "host_receive_ns": 51742502035416,
+          "confirmed_qpc": 17576400273,
+          "host_ack_return_ns": 51742511980583,
+          "host_fsynced_ns": 51742502103583,
+          "source_to_callback_us": 1352.1875,
+          "source_to_confirmed_us": 14453.4375
+        },
+        {
+          "sequence": 1463,
+          "id": 105,
+          "version": 0,
+          "pid": 4,
+          "tid": 924,
+          "source_qpc": 17576122843,
+          "callback_qpc": 17576149070,
+          "payload_hex": "c7130000",
+          "host_receive_ns": 51742502177833,
+          "confirmed_qpc": 17576400479,
+          "host_ack_return_ns": 51742512040041,
+          "host_fsynced_ns": 51742502242750,
+          "source_to_callback_us": 1365.9895833333333,
+          "source_to_confirmed_us": 14460.208333333334
+        },
+        {
+          "sequence": 1464,
+          "id": 106,
+          "version": 0,
+          "pid": 4,
+          "tid": 924,
+          "source_qpc": 17576124727,
+          "callback_qpc": 17576149355,
+          "payload_hex": "c7130000",
+          "host_receive_ns": 51742502310291,
+          "confirmed_qpc": 17576407775,
+          "host_ack_return_ns": 51742512118083,
+          "host_fsynced_ns": 51742502374500,
+          "source_to_callback_us": 1282.7083333333333,
+          "source_to_confirmed_us": 14742.083333333334
+        },
+        {
+          "sequence": 1465,
+          "id": 177,
+          "version": 1,
+          "pid": 4,
+          "tid": 920,
+          "source_qpc": 17576182305,
+          "callback_qpc": 17576314006,
+          "payload_hex": "902be7530883ffff00000000b4250000000000005c11000001000000030000000000000000000000000000000000000000000000",
+          "host_receive_ns": 51742510024625,
+          "confirmed_qpc": 17576563124,
+          "host_ack_return_ns": 51742520358125,
+          "host_fsynced_ns": 51742510096166,
+          "source_to_callback_us": 6859.427083333333,
+          "source_to_confirmed_us": 19834.322916666668
+        },
+        {
+          "sequence": 1466,
+          "id": 176,
+          "version": 0,
+          "pid": 4,
+          "tid": 920,
+          "source_qpc": 17576182896,
+          "callback_qpc": 17576314746,
+          "payload_hex": "902be7530883ffff00000000b4250000000000005c11000000000000",
+          "host_receive_ns": 51742510170875,
+          "confirmed_qpc": 17576575999,
+          "host_ack_return_ns": 51742522360083,
+          "host_fsynced_ns": 51742510254208,
+          "source_to_callback_us": 6867.1875,
+          "source_to_confirmed_us": 20474.114583333332
+        },
+        {
+          "sequence": 1467,
+          "id": 180,
+          "version": 1,
+          "pid": 4,
+          "tid": 920,
+          "source_qpc": 17576183108,
+          "callback_qpc": 17576315128,
+          "payload_hex": "902be7530883ffff000000005c1100000000000000000000200bfa6681a1ffff",
+          "host_receive_ns": 51742510320291,
+          "confirmed_qpc": 17576576509,
+          "host_ack_return_ns": 51742522547833,
+          "host_fsynced_ns": 51742510384416,
+          "source_to_callback_us": 6876.041666666667,
+          "source_to_confirmed_us": 20489.635416666668
+        }
+      ]
+    },
+    "dwm_display_file_confirmation": {
+      "records": {
+        "submit": {
+          "qpc": 17576122751,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 9652,
+            "ulQueueSubmitSequence": 4444,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 3
+          }
+        },
+        "irq": {
+          "qpc": 17576182285,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 177,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 0,
+            "uliCompletionId": 9652,
+            "ulQueueSubmitSequence": 4444,
+            "InterruptType": 1,
+            "QuantumStatus": 3,
+            "FaultedVirtualAddress": 0,
+            "PageFaultFlags": 0,
+            "FaultedProcessHandle": 0
+          }
+        },
+        "complete": {
+          "qpc": 17576182882,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 176,
+          "version": 0,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 0,
+            "uliCompletionId": 9652,
+            "ulQueueSubmitSequence": 4444,
+            "bPreempted": 0
+          }
+        },
+        "retire": {
+          "qpc": 17576183094,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 0,
+            "SubmitSequence": 4444,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175883356960
+          }
+        },
+        "luid": 23292,
+        "node": 0
+      },
+      "profiler_minus_display_qpc": {
+        "submit": 16,
+        "irq": 20,
+        "complete": 14,
+        "retire": 14
+      }
+    },
+    "dwm_gm20b_matches_within_observation": 6,
+    "dwm_independent_display_matches": 6,
+    "dwm_independent_display_packet_keys": [
+      {
+        "context": 18446606670523476880,
+        "submission": 9652,
+        "queue_sequence": 4444,
+        "qpc_deltas": {
+          "submit": 16,
+          "irq": 20,
+          "complete": 14,
+          "retire": 14
+        }
+      },
+      {
+        "context": 18446606670523476880,
+        "submission": 9658,
+        "queue_sequence": 4446,
+        "qpc_deltas": {
+          "submit": 17,
+          "irq": 25,
+          "complete": 14,
+          "retire": 15
+        }
+      },
+      {
+        "context": 18446606670523476880,
+        "submission": 9666,
+        "queue_sequence": 4448,
+        "qpc_deltas": {
+          "submit": 18,
+          "irq": 19,
+          "complete": 15,
+          "retire": 14
+        }
+      },
+      {
+        "context": 18446606670523476880,
+        "submission": 9667,
+        "queue_sequence": 4450,
+        "qpc_deltas": {
+          "submit": 21,
+          "irq": 25,
+          "complete": 16,
+          "retire": 17
+        }
+      },
+      {
+        "context": 18446606670523476880,
+        "submission": 9673,
+        "queue_sequence": 4452,
+        "qpc_deltas": {
+          "submit": 22,
+          "irq": 27,
+          "complete": 18,
+          "retire": 18
+        }
+      },
+      {
+        "context": 18446606670523476880,
+        "submission": 9678,
+        "queue_sequence": 4454,
+        "qpc_deltas": {
+          "submit": 21,
+          "irq": 27,
+          "complete": 17,
+          "retire": 17
+        }
+      }
+    ],
+    "gate": {
+      "hold": {
+        "nonce": "575a44842b4e48c0990e24ac07127824",
+        "dwm": 1456,
+        "boot": 92083,
+        "desktop_start": "2026-11-21T17:38:27.7857199Z",
+        "qpc": 17375252106
+      },
+      "release": {
+        "release_qpc": 17491103500,
+        "boot": 92083,
+        "receiver_ready_qpc": 17416527469,
+        "pid": 7196,
+        "nonce": "575a44842b4e48c0990e24ac07127824",
+        "dwm": 1456
+      },
+      "windows": {
+        "collector_ready_qpc": 17416527469,
+        "release_seen_qpc": 17529451324,
+        "ready_qpc": 17375252106
+      }
+    },
+    "kmd_positive_snapshots": [],
+    "dwm_fence_signal_wait_pairs": [
+      {
+        "identity": [
+          [
+            18446640175887021104,
+            2156
+          ]
+        ],
+        "luid": 23292,
+        "signal": {
+          "qpc": 17576112651,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "SubmitSequence": 4445,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446640175887021104
+            ],
+            "FenceValue": [
+              2156
+            ],
+            "pQueuePacket": 18446640175883369248
+          }
+        },
+        "signal_retired": {
+          "qpc": 17576183725,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 5,
+            "SubmitSequence": 4445,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175883369248
+          }
+        },
+        "wait": {
+          "qpc": 17576113957,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 244,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "SubmitSequence": 6713,
+            "Flags": 4,
+            "hSyncObject": 18446640175887021104,
+            "FenceValue": 2156,
+            "pQueuePacket": 18446640175897142496
+          }
+        },
+        "wait_retired": {
+          "qpc": 17576184430,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "PacketType": 4,
+            "SubmitSequence": 6713,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175897142496
+          }
+        },
+        "signal_device": 18446606670516478624,
+        "wait_device": 18446606670520935072,
+        "same_device": false
+      },
+      {
+        "identity": [
+          [
+            18446640175887021104,
+            2157
+          ]
+        ],
+        "luid": 23292,
+        "signal": {
+          "qpc": 17576623843,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "SubmitSequence": 4447,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446640175887021104
+            ],
+            "FenceValue": [
+              2157
+            ],
+            "pQueuePacket": 18446640175883356960
+          }
+        },
+        "signal_retired": {
+          "qpc": 17576708922,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 5,
+            "SubmitSequence": 4447,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175883356960
+          }
+        },
+        "wait": {
+          "qpc": 17576625036,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 244,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "SubmitSequence": 6716,
+            "Flags": 4,
+            "hSyncObject": 18446640175887021104,
+            "FenceValue": 2157,
+            "pQueuePacket": 18446640175888648992
+          }
+        },
+        "wait_retired": {
+          "qpc": 17576709506,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "PacketType": 4,
+            "SubmitSequence": 6716,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175888648992
+          }
+        },
+        "signal_device": 18446606670516478624,
+        "wait_device": 18446606670520935072,
+        "same_device": false
+      },
+      {
+        "identity": [
+          [
+            18446640175887021104,
+            2158
+          ]
+        ],
+        "luid": 23292,
+        "signal": {
+          "qpc": 17577068007,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "SubmitSequence": 4449,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446640175887021104
+            ],
+            "FenceValue": [
+              2158
+            ],
+            "pQueuePacket": 18446640175898092768
+          }
+        },
+        "signal_retired": {
+          "qpc": 17577121960,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 5,
+            "SubmitSequence": 4449,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175898092768
+          }
+        },
+        "wait": {
+          "qpc": 17577069263,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 244,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "SubmitSequence": 6719,
+            "Flags": 4,
+            "hSyncObject": 18446640175887021104,
+            "FenceValue": 2158,
+            "pQueuePacket": 18446640175898361872
+          }
+        },
+        "wait_retired": {
+          "qpc": 17577122586,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "PacketType": 4,
+            "SubmitSequence": 6719,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175898361872
+          }
+        },
+        "signal_device": 18446606670516478624,
+        "wait_device": 18446606670520935072,
+        "same_device": false
+      },
+      {
+        "identity": [
+          [
+            18446640175887021104,
+            2159
+          ]
+        ],
+        "luid": 23292,
+        "signal": {
+          "qpc": 17577381763,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "SubmitSequence": 4451,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446640175887021104
+            ],
+            "FenceValue": [
+              2159
+            ],
+            "pQueuePacket": 18446640175879080736
+          }
+        },
+        "signal_retired": {
+          "qpc": 17577439843,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 5,
+            "SubmitSequence": 4451,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175879080736
+          }
+        },
+        "wait": {
+          "qpc": 17577383133,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 244,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "SubmitSequence": 6722,
+            "Flags": 4,
+            "hSyncObject": 18446640175887021104,
+            "FenceValue": 2159,
+            "pQueuePacket": 18446640175898210320
+          }
+        },
+        "wait_retired": {
+          "qpc": 17577440617,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "PacketType": 4,
+            "SubmitSequence": 6722,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175898210320
+          }
+        },
+        "signal_device": 18446606670516478624,
+        "wait_device": 18446606670520935072,
+        "same_device": false
+      },
+      {
+        "identity": [
+          [
+            18446640175887021104,
+            2160
+          ]
+        ],
+        "luid": 23292,
+        "signal": {
+          "qpc": 17577662750,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "SubmitSequence": 4453,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446640175887021104
+            ],
+            "FenceValue": [
+              2160
+            ],
+            "pQueuePacket": 18446640175883365152
+          }
+        },
+        "signal_retired": {
+          "qpc": 17577721569,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 5,
+            "SubmitSequence": 4453,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175883365152
+          }
+        },
+        "wait": {
+          "qpc": 17577664303,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 244,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "SubmitSequence": 6725,
+            "Flags": 4,
+            "hSyncObject": 18446640175887021104,
+            "FenceValue": 2160,
+            "pQueuePacket": 18446640175898121552
+          }
+        },
+        "wait_retired": {
+          "qpc": 17577722556,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "PacketType": 4,
+            "SubmitSequence": 6725,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175898121552
+          }
+        },
+        "signal_device": 18446606670516478624,
+        "wait_device": 18446606670520935072,
+        "same_device": false
+      },
+      {
+        "identity": [
+          [
+            18446640175887021104,
+            2161
+          ]
+        ],
+        "luid": 23292,
+        "signal": {
+          "qpc": 17577988740,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 245,
+          "version": 2,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "SubmitSequence": 4455,
+            "Flags": 0,
+            "ObjectCount": 1,
+            "ObjectArray": [
+              18446640175887021104
+            ],
+            "FenceValue": [
+              2161
+            ],
+            "pQueuePacket": 18446640175888644896
+          }
+        },
+        "signal_retired": {
+          "qpc": 17578048524,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670523476880,
+            "PacketType": 5,
+            "SubmitSequence": 4455,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175888644896
+          }
+        },
+        "wait": {
+          "qpc": 17577990287,
+          "pid": 1456,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 244,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "SubmitSequence": 6726,
+            "Flags": 4,
+            "hSyncObject": 18446640175887021104,
+            "FenceValue": 2161,
+            "pQueuePacket": 18446640175889352128
+          }
+        },
+        "wait_retired": {
+          "qpc": 17578049269,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670510996272,
+            "PacketType": 4,
+            "SubmitSequence": 6726,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175889352128
+          }
+        },
+        "signal_device": 18446606670516478624,
+        "wait_device": 18446606670520935072,
+        "same_device": false
+      }
+    ],
+    "normalized_profiler": {
+      "host_fsync_count": 3209,
+      "windows_ack_count": 3209,
+      "delivery_failure": null,
+      "trace_quality": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      },
+      "header": {
+        "READY": [
+          "7196",
+          "19200000",
+          "17416527469"
+        ],
+        "DRAINED": [
+          "3209"
+        ],
+        "END": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "1866",
+          "3209",
+          "3209",
+          "0"
+        ]
+      }
+    },
+    "application_trace_quality": {
+      "display.etl": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      },
+      "scene/video.etl": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      }
+    },
+    "actual_baseline": {
+      "source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+      "manifest_sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289",
+      "components": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "loaded": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "loaded_paths": {
+        "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+        "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57\\app\\libvulkan_nouveau.dll",
+        "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57\\app\\tg_d3d_arm64.dll",
+        "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57\\app\\TegraGpuD3DVk.dll",
+        "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57\\app\\tg_nvk_arm64.dll"
+      },
+      "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57"
+    },
+    "hardware": {
+      "boot": 92083,
+      "boot_utc": "2026-11-21T17:37:34.2055939Z",
+      "dwm": 1456,
+      "dwm_start": "2026-11-21T17:38:27.7857199Z",
+      "ac": "Online",
+      "mode": 1,
+      "code": 0
+    },
+    "final_snapshot": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/resumed-seq-end.json",
+      "sha256": "1a462676a293c7b6d6d41ec2d3396032a6038d76a96bb6a16968e08bb39b6b91",
+      "bytes": 10822
+    },
+    "raw": {
+      "application_archive": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/collected.zip",
+        "sha256": "74cf505209ff02f61e63ef107ca92c9d8e15c0a5cca1fff233035c7ef32e336e",
+        "bytes": 1706350
+      },
+      "profiler_etl": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/live/profiler.etl",
+        "sha256": "44a1c9dc0c4a9b69c83b9e7f6cc1b7926569030c762a34459de5c986e5107cc7",
+        "bytes": 30277632
+      },
+      "wire": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/live/wire.jsonl",
+        "sha256": "1cbbee816faeac65296d1a3048e5a078d7367a18f8fd9ea30257c13f8934be3c",
+        "bytes": 1487603
+      },
+      "both_decodes": [
+        {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/seq-rundown-decoded.json",
+          "sha256": "5ef8a86fe3da43b949797c1ce11b12c8568b58d6954c824b64bb03261f35e7b1",
+          "bytes": 54002
+        },
+        {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/live/interpreted.json",
+          "sha256": "4e2b30a7c8e613e29770eab3dc7ea54044289030db0ce61142f89c8761426921",
+          "bytes": 2346446
+        }
+      ]
+    },
+    "cleanup": {
+      "application": {
+        "owned_case_removed": true
+      },
+      "profiler": {
+        "removed": true,
+        "session_query": 4201
+      },
+      "display": {
+        "query_after": 4201,
+        "session_already_ended": false,
+        "exit": 0
+      }
+    },
+    "historical_faults": {
+      "91476": "DMA 152586 历史判定保持开放",
+      "91989": "切换前旧驱动闭门退出，保留独立开放故障"
+    }
+  }
+}

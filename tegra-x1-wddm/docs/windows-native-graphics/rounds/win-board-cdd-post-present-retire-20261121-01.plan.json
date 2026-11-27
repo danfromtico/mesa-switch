@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "round_id": "win-board-cdd-post-present-retire-20261121-01",
+  "contract_id": "WIN-POST-PRESENT-RETIRE",
+  "windows_question": "WIN-POST-PRESENT-RETIRE",
+  "owner": "Windows VidSch、GM20B miniport 与 DWM",
+  "question": "启动 91476 中应用首次 Present 已返回后，KMD 所见非空 GPU 提交围栏是否属于 DWM，并有同包完成与退役回执？",
+  "method": "同一次异常启动留存 ZIP 双 ETL 离线重解，无新实机执行",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "同一启动的两路原始 ETL 以提交围栏、内核上下文、队列序号和包指针匹配，同一 DWM 线程提交，按时序取得 GPU 完成中断和无超时退役。",
+  "observations": [
+    "校验 ZIP 与两个原始 ETL 哈希、同一开机的 QPC 频率、应用首次 Present 返回及 DWM 执行身份。",
+    "重解 KMD 遥测请求来源、阶段、围栏和 DMA 字节数。按提交围栏、上下文、队列序号和包指针跨两路 DxgKrnl ETL 匹配提交、完成中断与退役。",
+    "单独查末端通知的实际身份，标出最后可证已完成包及未留存范围。保留受监控围栏、画面、复位初因的独立判定。"
+  ],
+  "inputs": {
+    "raw_archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+    },
+    "previous_rounds": [
+      {
+        "path": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+        "sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+        "sha256": "88276f1c69708d28dbc676b2be1d80cf70e095206fd6d55ddc0e3402fde2b586"
+      }
+    ],
+    "windows_contract": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkargcb_notify_interrupt_data"
+  }
+}

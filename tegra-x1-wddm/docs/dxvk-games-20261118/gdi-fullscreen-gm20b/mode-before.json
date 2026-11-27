@@ -1,0 +1,122 @@
+{
+  "issue": "GM20B-GDI-EXCLUSIVE-MODE",
+  "operation": "IDXGISwapChain::SetFullscreenState(TRUE, explicit output)",
+  "swap_effect": "FLIP_SEQUENTIAL",
+  "format": "BGRA8 UNORM",
+  "output": {
+    "logical": [
+      1280,
+      720
+    ],
+    "native": [
+      720,
+      1280
+    ],
+    "refresh": [
+      60,
+      1
+    ],
+    "rotation_degrees": 90
+  },
+  "accepted_control": {
+    "boot": 84936,
+    "kmd": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "signed_client": "96769c013089b24a8c8c828d3ccf3502f9696d78e54561feb1df5f53cebea07e",
+    "receipt_sha256": "4e9d6cba6d85fe85ac0656174e5ae92391917bc7ac2560f5ba20f09f8abfb42e",
+    "public_hresult": "0x80004005",
+    "fullscreen": false,
+    "reason_removed": "S_OK",
+    "same_compositor": true
+  },
+  "combined_control": {
+    "boot": 85123,
+    "kmd": "8e0e8e407fbb9419bfbbea92e2297ad37a747ac610efc5b95589f90798d8e1f0",
+    "signed_client": "e2f2bb8c998d3301f163b28e14daa17a53316230460a84ea551ad77c9bbe2426",
+    "receipt_sha256": "73bcb5e20ab996ac1898d7eef3446eb44ad3df56ca71dcc4b8a438e1cc901f5e",
+    "etl_sha256": "bca162ffb68a31e17bd0adbf2f95e2a1498891b1b34a67a880267ab0a1315efc",
+    "external_power": "Online",
+    "gpu": 0,
+    "public_hresult": "0x80004005",
+    "fullscreen": false,
+    "same_compositor": true
+  },
+  "windows": {
+    "dxgi": {
+      "sha256": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+      "bytes": 1791792,
+      "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+    },
+    "cdd": {
+      "dll_sha256": "8130843f86a0b27273ce1c454e3747ce20b7d41feeb160891febbdab72ef4815",
+      "version": "10.0.22621.2792 (WinBuild.160101.0800)",
+      "guid": "88722627-16d9-bdcc-3ea0-99d7e921b9a8",
+      "age": 1,
+      "pdb": "cdd.pdb",
+      "url": "https://msdl.microsoft.com/download/symbols/cdd.pdb/8872262716D9BDCC3EA099D7E921B9A81/cdd.pdb",
+      "pdb_sha256": "4155ce3200f2186f59aef8a5d39d8dfb24568bc1831e31cb9b6d8bd19f8f79ff"
+    },
+    "first_error": "CDXGISwapChain::CPrepWin32Sentinel::PrepUser called ChangeDisplaySettingsExW with CDS_FULLSCREEN. The call returned a nonzero result on both attempts. The separate CDS_TEST reported DISP_CHANGE_BADMODE (−2).",
+    "public_device_and_output": [
+      "FORMAT format=87 hr=00000000 flags=11def3f3 display=1 modes_hr=00000000 modes=1",
+      "WINDOW_STATE pid=3752 foreground_pid=3752 foreground=1 active=1 visible=1 iconic=0 cloaked=0 cloak_hr=00000000 session=1 console=1 remote=0",
+      "CONTAINING hr=00000000 same_monitor=1 window_monitor=1 state_hr=00000000 already_full=0 full_desc_hr=00000000 windowed=1 refresh=0/1 scaling=0 scan=0",
+      "RETURN_QPC qpc=4985592034 reason=00000000",
+      "GDI_CURRENT size=1280x720 orientation=1 refresh=60 bits=32 fields=207c00a0 test=-2 fullscreen_test=-2",
+      "CCD_ACTIVE paths=1 modes=2 validate=1610 validate_allow_changes=0"
+    ]
+  },
+  "active_adapter_gdi_name": "\\\\.\\DISPLAY1",
+  "native_kmt_view": {
+    "sha256": "71111fc8e5725c0d579a847f3ffb5b9961bac0df3c3faf5f6d6bb43a16915911",
+    "state": "Code 0 on the same candidate boot after its 14-minute recovery controller disarmed the next boot. Read-only mode query.",
+    "result": [
+      "ADAPTER index=0 name=\\\\.\\DISPLAY1 desc=Tegra X1 (GM20B) .158 GM20B combined display contracts 8e0e8e407fbb id=ACPI\\VEN_SWOA&DEV_0F01 state=08000005 is_output=1",
+      "MONITOR name=\\\\.\\DISPLAY1\\Monitor0 description=Generic Non-PnP Monitor id=MONITOR\\Default_Monitor\\{4d36e96e-e325-11ce-bfc1-08002be10318}\\0001 state=00000003",
+      "CCD_SOURCE_ONLY os_source_status=87 count=2 target_idx=0",
+      "KMT_OPEN name=\\\\.\\DISPLAY1 status=00000000 source=0 luid=0000000000005a4f",
+      "KMT_MODES status=00000000 count=4",
+      "KMT_MODE i=0 size=720x1280 format=22 refresh=60/1 int_refresh=60 orient=1 fixed=0 valid=1 reason=7",
+      "KMT_MODE i=1 size=720x1280 format=22 refresh=60/1 int_refresh=60 orient=2 fixed=0 valid=1 reason=7",
+      "KMT_MODE i=2 size=720x1280 format=22 refresh=60/1 int_refresh=60 orient=3 fixed=0 valid=1 reason=7",
+      "KMT_MODE i=3 size=720x1280 format=22 refresh=60/1 int_refresh=60 orient=4 fixed=0 valid=1 reason=7"
+    ]
+  },
+  "win32_gdi_view": [
+    "GDI_FIELDS request=none fields=00000000 result=-2",
+    "GDI_FIELDS request=size fields=00180000 result=-2",
+    "GDI_FIELDS request=bits fields=00040000 result=-2",
+    "GDI_FIELDS request=frequency fields=00400000 result=-2",
+    "GDI_FIELDS request=orientation fields=00000080 result=-2",
+    "GDI_FIELDS request=size-bits fields=001c0000 result=-2",
+    "GDI_FIELDS request=size-frequency fields=00580000 result=-2",
+    "GDI_FIELDS request=size-orientation fields=00180080 result=-2",
+    "GDI_FIELDS request=common fields=005c0000 result=-2",
+    "GDI_FIELDS request=common-orientation fields=005c0080 result=-2",
+    "GDI_FIELDS request=dxgi fields=207c0080 result=-2",
+    "GDI_FIELDS request=all fields=207c00a0 result=-2",
+    "GDI_ENUM_COUNT flags=0 count=0",
+    "GDI_ENUM_COUNT flags=4 count=0",
+    "GDI_ENUM flags=2 item=0 size=800x600 bpp=32 freq=60 orientation=1 fixed=0 fields=007c0080",
+    "GDI_ENUM_COUNT flags=2 count=1",
+    "GDI_ENUM flags=6 item=0 size=800x600 bpp=32 freq=60 orientation=0 fixed=0 fields=007c0080",
+    "GDI_ENUM flags=6 item=1 size=800x600 bpp=32 freq=60 orientation=1 fixed=0 fields=007c0080",
+    "GDI_ENUM flags=6 item=2 size=800x600 bpp=32 freq=60 orientation=2 fixed=0 fields=007c0080",
+    "GDI_ENUM flags=6 item=3 size=800x600 bpp=32 freq=60 orientation=3 fixed=0 fields=007c0080",
+    "GDI_ENUM_COUNT flags=6 count=4",
+    "CCD_FIELD aware=0 request=as-returned result=1610",
+    "CCD_FIELD aware=0 request=logical-source result=1610",
+    "CCD_FIELD aware=0 request=os-target result=1610",
+    "CCD_FIELD aware=0 request=os-both result=0",
+    "CCD_FIELD aware=16 request=as-returned result=1610",
+    "CCD_FIELD aware=16 request=os-target result=1610",
+    "CCD_FIELD aware=16 request=os-both result=87"
+  ],
+  "finding": "该机的 KMT 模式列表为四个已通过面板校验的 720×1280、60 Hz、格式 22（X8R8G8B8）模式。Windows CDD 的 DrvGetModes 筛选格式 20、21、23、41 并在没有可输出模式时构造 800×600。逐项 GDI 查询与这一结果一致。项目的 WinX 显示示例提供格式 21（A8R8G8B8）。",
+  "candidate": {
+    "commit": "c05e254932dd975bdf69e7046949596dbeb84561",
+    "kmd": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+    "delta": "为同一原生几何和 pitch 增加格式 21，同时保留固件的格式 22。专项结果另行登记。",
+    "source_comparison": "https://github.com/ruje0504-2/winx/blob/36197a348995329d8f32357a57fb1b92dc301067/winx-display/winx-display/bdd_dmm.cxx"
+  },
+  "row_scan_scope": "这里的公共 API 故障在 Win32 切换模式时发生。旧式 SEQUENTIAL 首次 Present 后重启另有开放故障及原始记录。"
+}

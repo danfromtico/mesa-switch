@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "round_id": "win-board-cdd-dwm-preempt-control-20261121-01",
+  "contract_id": "WIN-DWM-TAIL-PREEMPT",
+  "windows_question": "WIN-DWM-TAIL-PREEMPT",
+  "owner": "DWM、Windows VidSch 与 GM20B miniport",
+  "question": "启动 91476 的末端 DWM 3524 字节包两次被抢占、第三次提交的模式，是否也发生在同启动同上下文的正常普通窗口对照中？",
+  "method": "原样重解异常轮与同启动三轮健康原始 ETL，无新实机执行",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "按上下文、队列序号和包指针核对正常对照能否出现成对正常抢占、重发、完成中断与同包退役。按实际 245/294/295 记录区分提交围栏与同步对象。",
+  "observations": [
+    "验证三轮同启动同硬件组件、DWM 进程起始时间、相同线程上下文、正常首帧及输入退出。按每轮的公开返回 QPC 截取后 250 ms，同时保留同档案完整时段作为额外样本。",
+    "查与异常相同上下文、3524 字节、包类型和队列结构。逐次以提交围栏匹配抢占与完成中断，按包指针配对退役。报告严格样本和放宽包大小的对照数量。",
+    "按 Windows 记录的具体对象及值查异常包的相邻同步操作，保留原窗口归属、强制等待和复位原因各自的缺失。"
+  ],
+  "inputs": {
+    "incident": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+    },
+    "control_archives": {
+      "win-present-preallocated-cdd-20261121-01": {
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-preallocated-cdd-20261121-01/collected.zip",
+        "sha256": "424c68463a164b7afc967cf8882a0c2af68c8565a568f906ce4ddc8c20e53a02"
+      },
+      "win-present-preallocated-blt-20261121-01": {
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-preallocated-blt-20261121-01/collected.zip",
+        "sha256": "df24f085aa7006667e9c1a4d168a1ab6c39d14cf06bc39dfbf2ee478e2f33308"
+      },
+      "win-present-focused-20261121-01": {
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-focused-20261121-01/collected.zip",
+        "sha256": "26d9aa874b04112779b8e02c4e27cdeb1239b78b94df10fbae91c5f24c47befd"
+      }
+    },
+    "prior_rounds": [
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+        "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+        "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+        "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+        "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+      }
+    ],
+    "interrupt_reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ne-d3dkmddi-_dxgk_interrupt_type"
+  }
+}

@@ -31,12 +31,17 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "DxgiFns.h"
 #include "Format.h"
 #include "State.h"
 
 #include "Debug.h"
+#include "Trace.h"
+#ifdef D3D10_UMD_HARDWARE
+#include "RuntimeMemory.h"
+#endif
 
 #include "util/format/u_format.h"
 
@@ -58,6 +63,12 @@ _Present(DXGI_DDI_ARG_PRESENT *pPresentData)
 
    LOG_ENTRYPOINT();
 
+#ifdef D3D10_UMD_HARDWARE
+   HRESULT hr = RuntimePresent(pPresentData);
+   D3D10Trace(D3D10_TRACE_PRESENT, hr, pPresentData ? pPresentData->Flags.Value : 0,
+              pPresentData ? pPresentData->FlipInterval : 0);
+   return hr;
+#else
    struct Device *device = CastDevice(pPresentData->hDevice);
    Resource *pSrcResource = CastResource(pPresentData->hSurfaceToPresent);
 
@@ -66,6 +77,7 @@ _Present(DXGI_DDI_ARG_PRESENT *pPresentData)
       pSrcResource->resource, 0, 0, pPresentData->pDXGIContext, 0, NULL);
 
    return S_OK;
+#endif
 }
 
 
@@ -114,9 +126,24 @@ _GetGammaCaps( DXGI_DDI_ARG_GET_GAMMA_CONTROL_CAPS *GetCaps )
 HRESULT APIENTRY
 _SetDisplayMode( DXGI_DDI_ARG_SETDISPLAYMODE *SetDisplayMode )
 {
-   LOG_UNSUPPORTED_ENTRYPOINT();
+   LOG_ENTRYPOINT();
 
+#ifdef D3D10_UMD_HARDWARE
+   if (!SetDisplayMode || !SetDisplayMode->hDevice || !SetDisplayMode->hResource)
+      return E_INVALIDARG;
+   Device *device = CastDevice(SetDisplayMode->hDevice);
+   Resource *resource = CastResource(SetDisplayMode->hResource);
+   HRESULT hr = RuntimeResourceFinish(device, resource);
+   if (SUCCEEDED(hr))
+      hr = RuntimePrimarySetMode(resource->runtime_memory, device->hDevice,
+                                 SetDisplayMode->SubResourceIndex);
+   D3D10Trace(D3D10_TRACE_SET_DISPLAY_MODE, hr,
+      resource->runtime_memory ? RuntimeResourceMemory(resource->runtime_memory)->allocation : 0,
+      SetDisplayMode->SubResourceIndex);
+   return hr;
+#else
    return S_OK;
+#endif
 }
 
 
@@ -171,10 +198,124 @@ _QueryResourceResidency( DXGI_DDI_ARG_QUERYRESOURCERESIDENCY *QueryResourceResid
  * ----------------------------------------------------------------------
  */
 
+#ifdef D3D10_UMD_HARDWARE
+static HRESULT
+rotate_hardware_resources(const DXGI_DDI_ARG_ROTATE_RESOURCE_IDENTITIES *args)
+{
+   if (!args || !args->hDevice || (args->Resources && !args->pResources))
+      return E_INVALIDARG;
+   if (args->Resources <= 1) return S_OK;
+   Device *device = CastDevice(args->hDevice);
+   auto pipe = device->pipe;
+   const UINT count = args->Resources;
+   auto resources = static_cast<Resource **>(calloc(count, sizeof(Resource *)));
+   if (!resources) return E_OUTOFMEMORY;
+   HRESULT hr = S_OK;
+   for (UINT i = 0; i < count; ++i) {
+      Resource *r = resources[i] = CastResource(args->pResources[i]);
+      if (!r || r->device != device || !r->resource || r->buffer || r->NumSubResources != 1 ||
+          (r->transfers && r->transfers[0])) {
+         hr = E_INVALIDARG; goto done;
+      }
+      for (UINT j = 0; j < i; ++j) {
+         if (r == resources[j] || r->resource == resources[j]->resource) {
+            hr = E_INVALIDARG; goto done;
+         }
+      }
+      const pipe_resource *a = resources[0]->resource, *b = r->resource;
+      if (!!r->runtime_memory != !!resources[0]->runtime_memory ||
+          r->Format != resources[0]->Format || a->target != PIPE_TEXTURE_2D ||
+          b->target != a->target || b->format != a->format ||
+          b->width0 != a->width0 || b->height0 != a->height0 || b->depth0 != a->depth0 ||
+          b->array_size != a->array_size || b->last_level != a->last_level ||
+          b->nr_samples != a->nr_samples || b->nr_storage_samples != a->nr_storage_samples) {
+         hr = DXGI_ERROR_UNSUPPORTED; goto done;
+      }
+   }
+   hr = RuntimeDeviceFinish(device);
+   if (FAILED(hr)) goto done;
+
+   /* Prepare all immutable sampler views before changing any identities.
+    * Failure leaves the original resources, views and bindings intact. */
+   for (UINT i = 0; i < count; ++i) {
+      pipe_resource *next = resources[(i + 1) % count]->resource;
+      for (auto view = resources[i]->views; view; view = view->next) {
+         if (view->sampler) {
+            view->replacement = pipe->create_sampler_view(pipe, next, *view->sampler);
+            if (!view->replacement) { hr = E_OUTOFMEMORY; goto release_views; }
+         }
+      }
+   }
+   hr = RuntimeRotateOwnership(device, resources, count);
+   if (FAILED(hr)) goto release_views;
+   {
+      bool framebuffer_changed = false;
+      bool samplers_changed[MESA_SHADER_STAGES] = {};
+      auto replace_texture = [&](pipe_resource **texture) {
+         for (UINT i = 0; i < count; ++i) {
+            if (*texture == resources[i]->resource) {
+               pipe_resource_reference(texture, resources[(i + 1) % count]->resource);
+               framebuffer_changed = true;
+               break;
+            }
+         }
+      };
+      for (UINT i = 0; i < PIPE_MAX_COLOR_BUFS; ++i) replace_texture(&device->fb.cbufs[i].texture);
+      replace_texture(&device->fb.zsbuf.texture);
+      replace_texture(&device->fb.resolve);
+
+      for (UINT i = 0; i < count; ++i) {
+         pipe_resource *next = resources[(i + 1) % count]->resource;
+         for (auto view = resources[i]->views; view; view = view->next) {
+            if (view->surface) pipe_resource_reference(&view->surface->texture, next);
+            if (view->sampler) {
+               pipe_sampler_view *old = *view->sampler;
+               *view->sampler = view->replacement;
+               view->replacement = old; /* Release only after rebinding. */
+               for (UINT stage = 0; stage < MESA_SHADER_STAGES; ++stage) {
+                  for (UINT slot = 0; slot < PIPE_MAX_SHADER_SAMPLER_VIEWS; ++slot) {
+                     if (device->sampler_views[stage][slot] == old) {
+                        device->sampler_views[stage][slot] = *view->sampler;
+                        samplers_changed[stage] = true;
+                     }
+                  }
+               }
+            }
+         }
+      }
+      pipe_resource *first = resources[0]->resource;
+      for (UINT i = 0; i + 1 < count; ++i) resources[i]->resource = resources[i + 1]->resource;
+      resources[count - 1]->resource = first;
+      if (framebuffer_changed) pipe->set_framebuffer_state(pipe, &device->fb);
+      for (UINT stage = 0; stage < MESA_SHADER_STAGES; ++stage)
+         if (samplers_changed[stage])
+            pipe->set_sampler_views(pipe, (mesa_shader_stage)stage, 0,
+                                    PIPE_MAX_SHADER_SAMPLER_VIEWS, 0, device->sampler_views[stage]);
+   }
+release_views:
+   for (UINT i = 0; i < count; ++i)
+      for (auto view = resources[i]->views; view; view = view->next)
+         if (view->replacement) {
+            pipe->sampler_view_release(pipe, view->replacement);
+            view->replacement = NULL;
+         }
+done:
+   free(resources);
+   return hr;
+}
+#endif
+
 HRESULT APIENTRY
 _RotateResourceIdentities( DXGI_DDI_ARG_ROTATE_RESOURCE_IDENTITIES *RotateResourceIdentities )
 {
    LOG_ENTRYPOINT();
+
+#ifdef D3D10_UMD_HARDWARE
+   HRESULT hr = rotate_hardware_resources(RotateResourceIdentities);
+   D3D10Trace(D3D10_TRACE_ROTATE_IDENTITIES, hr,
+              RotateResourceIdentities ? RotateResourceIdentities->Resources : 0, 0);
+   return hr;
+#else
 
    if (RotateResourceIdentities->Resources <= 1) {
       return S_OK;
@@ -239,6 +380,7 @@ _RotateResourceIdentities( DXGI_DDI_ARG_ROTATE_RESOURCE_IDENTITIES *RotateResour
    pipe_resource_reference(&temp_resource, NULL);
 
    return S_OK;
+#endif
 }
 
 
@@ -257,6 +399,7 @@ HRESULT APIENTRY
 _Blt(DXGI_DDI_ARG_BLT *Blt)
 {
    LOG_UNSUPPORTED_ENTRYPOINT();
+   D3D10Trace(D3D10_TRACE_BLT, S_OK, Blt->Flags.Value, Blt->Rotate);
 
    return S_OK;
 }

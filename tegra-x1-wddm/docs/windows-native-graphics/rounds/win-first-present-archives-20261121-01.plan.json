@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "round_id": "win-first-present-archives-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "owner": "历史应用、Windows 内核及早期复位记录",
+  "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+  "method": "复核已有 Windows 本机原始归档",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+  "observations": [
+    "按实际公开客户端全哈希、无应用写入、旧式 DDI 与 SEQUENTIAL、同一开机和绘图线程筛选可比记录。核对实际成功、返回错误及异常开机。",
+    "复核其他已有异常启动是否留下同次 CALL 之后的内核或 KMD 回执。不同客户端、组件和模型分别标明能够证明的边界。"
+  ],
+  "inputs": {
+    "expected_original_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "receipt_archives": 155,
+    "archive_name_size_inventory_sha256": "cf6b015daa2c05b5e6e36d8881f9d2ca8492f7c8ed924fade51654ac2ed0d850",
+    "source_folders": {
+      "prior-step4-out": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/step4-reset-evidence",
+      "prior-step4-work": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dxvk-games-01a1ec52/step4-reset-evidence",
+      "legacy-sequential-step4-01a1facf": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/legacy-sequential-step4-01a1facf",
+      "legacy-sequential-step4-01a1fae9": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/legacy-sequential-step4-01a1fae9",
+      "legacy-sequential-step4-01a1fbd1": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/legacy-sequential-step4-01a1fbd1"
+    },
+    "published_study_indices": {
+      "legacy-kmd-receipt-current/case-index.json": "2da15bec3dc34ab6b08fe63204ca08c45b11caa83ff2aeb30a34692333eff233",
+      "legacy-present-durable-boundaries/case-index.json": "7d1679e29786304d43f694dc80646bc0aa5c6c44a21ef86b2ec88e144a7b4bd8",
+      "process-ddi20-device-reason/case-index.json": "468ecc492ec54d80abc9aa4c742ee79c14002ee469d91a971dfb976daa498163",
+      "process-ddi20-dxgi-dispatch-v2/case-index.json": "c35272f6c111ea1d410da434900842bbf4e36b85882ec578b02905a15b281591",
+      "process-ddi20-on-present1/case-index.json": "e691df6053eecea455fcd0302bae73bf5635b52f4d787ad2ebee209a7a7af333",
+      "process-ddi20-present1-compat/case-index.json": "5e85d2028023cf655826c6c597ad318e77334e251b3abee8fbfc248585363f31"
+    },
+    "known_historical_group": {
+      "path": "legacy-sequential-step4/historical-first-present-fence.json",
+      "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+    }
+  }
+}

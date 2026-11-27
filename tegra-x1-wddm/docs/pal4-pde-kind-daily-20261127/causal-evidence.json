@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "scope": "gpu-physical-directory-known-kind",
+  "source_commit": "d1c07b6a8c4cc812ba8fdbdd53a3780dcac9c7a2",
+  "root_cause_confirmed": true,
+  "diagnostic_capture": {
+    "received_utc": "2026-11-27T20:23:36.552423+00:00",
+    "photo_sha256": "956c2762058a5c2a532d8429464794260b56a0d4015e7a8b2267911903ee60d6",
+    "stop_code": "0xE0535751",
+    "parameters": [
+      "0x000000000000000b",
+      "0x00000000c00000bb",
+      "0x0000020100000005",
+      "0x00000000000000fe"
+    ],
+    "decoded": {
+      "Operation": 11,
+      "Status": "0xc00000bb",
+      "Site": 5,
+      "PageTableLevel": 1,
+      "UpdateMode": 2,
+      "HasAllocation": false,
+      "DriverProtection": "0xfe"
+    },
+    "interpretation": "Known leaf kind 0xfe rejected because PageTableLevel==1; GPU_PHYSICAL mode 2 is supported. hAllocation is NULL, so the directory-allocation rejection is not involved.",
+    "planned_stop": true
+  },
+  "hardware_before_after_unit": {
+    "BootRecord": 106117,
+    "GpuProblemCode": 43,
+    "Tests": [
+      {
+        "Name": "test-paging-before.exe",
+        "ExitCode": 44327,
+        "Stdout": "",
+        "Stderr": "FAIL paging/resource control line 739\n"
+      },
+      {
+        "Name": "test-paging-after.exe",
+        "ExitCode": 0,
+        "Stdout": "PASS: WDK physical system/table PTEs, multipass ordering, alias bounds and TLB failures\r\n",
+        "Stderr": ""
+      }
+    ],
+    "Catalog": {
+      "ExitCode": 0,
+      "Stdout": "..................................\nSignability test complete.\r\n\nErrors:\r\nNone\r\n\nWarnings:\r\nNone\r\n\nCatalog generation complete.\r\nC:\\ProgramData\\SwitchWOA\\Pal4PdeKind-20261127\\package\\tegragpurender.cat\r\n",
+      "Stderr": ""
+    },
+    "CatalogSha256": "B12C161819F7D346699D04BD66F0563DB3DDF74317AF663CC94EE625D4D74651"
+  },
+  "interpretation": "Known kind 0xfe was rejected solely because PageTableLevel was 1 on a GPU_PHYSICAL request with NULL hAllocation. The fix retains a pure PDE and two-level hierarchy, whitelist, CPU restriction, PTE flag and bounds validation.",
+  "original_fault": "GM20B-PAL4-PDE-KIND-20261127",
+  "broader_game_acceptance": "Remains open: launch observed once, poor performance and absent PAL4 sound; no full three-run closure is asserted."
+}

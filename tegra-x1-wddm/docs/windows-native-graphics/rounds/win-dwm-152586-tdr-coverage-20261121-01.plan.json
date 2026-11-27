@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-152586-tdr-coverage-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "owner": "Windows VidSch、DxgKrnl遥测与原事故诊断材料",
+  "question": "提交抑制字段的TDR路径是否在原事故中有直接记录，设备现存诊断归档是否还能补足原次触发证据？",
+  "method": "核对91918比较映像的0xbc4直接写入、ResetAdapterStart元数据及私有provider；重读91476双ETL；在排他租约下用4个只读RPC查现存日志/转储/SQLite，再在本地分析快照。",
+  "pass_condition": "如存在原次TDR/复位材料，须直接绑定原启动、适配器、时间及状态；比较代码、当前空快照或无记录不替代原次实际分支。",
+  "device_executions": 1,
+  "execution_scope": "一次只读现存诊断调查，4个RPC；新增图形工作负载/原应用派发/部署/许可/重启/ETW启停均0。",
+  "origin_boot": 91476,
+  "comparison_boot": 91918,
+  "read_only_board_boot": 96251,
+  "inputs": {
+    "prior_boundary": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dwm-152586-select-callflow-20261121-01.result.json",
+      "sha256": "85dcfd54eac9a04bac95129b2e14780884a06ed5aee91653d76f6ea2021c3ddf"
+    },
+    "comparison_identity": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/verified-call-order.json",
+      "sha256": "1b48f398c2a91689706ba06ab421d05459a82f4165155e8c1a7d84fb1733f622"
+    }
+  },
+  "request_f6264ee11289_consumed": true,
+  "explorer_is_prerequisite": false,
+  "publication_check_only_on_release": true
+}

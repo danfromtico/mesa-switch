@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "round_id": "win-post-seq-gap-93818-20261121-01",
+  "contract_id": "WIN-UNEXPECTED-BOOT",
+  "windows_question": "WIN-UNEXPECTED-BOOT",
+  "owner": "Windows 电源、故障转储和 GPU 恢复",
+  "question": "每个意外开机前最后一次可证实的本机操作及恢复状态是什么？",
+  "method": "离线复核在正式启动 93748 的正常窗口退出及收集空档与下一启动 93818",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "按启动号分清负载、准备和恢复，相关故障有直接原因或保留缺口，新异常按同条件三次约定登记。",
+  "observations": [
+    "用封口 ETL / QPC 求 Windows 时钟下公开调用、退出和每条采集停止边界。",
+    "单列 Mac 本地清理回执接收时间、回写时间及主会话随后读回时间。不要将异步写入等同于实机的活跃时间。",
+    "核对新启动号、Code 0、正式配置身份、系统事件及仍缺的复位源。"
+  ],
+  "inputs": {
+    "inputs": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-arm64ec-5063-realigned-20261121-01/evidence/scene/video.etl",
+        "sha256": "e38055b322ea5b6c474c74eb429a7634da1a4a648cf55fe9ef8a1f508a6723e7"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-arm64ec-5063-realigned-20261121-01/live/profiler.etl",
+        "sha256": "42c9da1059d07f89b744fc4e6d3cc151a12e42b2182b1fa2b20ef4f4ae2fafe8"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-arm64ec-5063-realigned-20261121-01/evidence/display.etl",
+        "sha256": "58e98c3229725dd8fbb9ecccfc103fb038642e70825cfd74edd168395b96cd95"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-arm64ec-5063-realigned-20261121-01/cleanup.json",
+        "sha256": "c8f4114b97ca00927f52c9f30db2b111280a540a7f198513ed52659f72159608"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-arm64ec-5063-realigned-20261121-01/seq-rundown-decoded.json",
+        "sha256": "7a7971fba4cabae83987e09905b5d3e36a7e20aa9d36a0485d96e81adc674aa4"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/seq-arm64ec-realigned-after.json",
+        "sha256": "07e7943248ab4a2cb01671d16cd688450ef3fd84739b22f0123a5ec049177799"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/nvk-ec-only-d31b8620/present-native-followup.json",
+        "sha256": "6ab7285dd2fa4e8ef9d9c8f2c77a435196b8234ed1a2ef470196a4f458919c65"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/nvk-ec-only-d31b8620/explorer-lease-return.json",
+        "sha256": "6e0bd07f66a14e443659367030a64c8a4c77fee69b2f3850599e68843fbb4ea7"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/explorer-home-20261121/intervening-boot.json",
+        "sha256": "ceecc51f880933243a5cb1721b97e41572eb236787c1bd25f5fd82fa5f0e91a7"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/explorer-home-20261121/boot-details.json",
+        "sha256": "f3036f6bcf06599b42092104d59928ebb7ad986aa255ed3f332e7a543d12c9a3"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/seq-93818-resume-preflight.json",
+        "sha256": "79f18b09962591caafdf2f9fd32cea8eb990be58ff6362a2aa1ce449330e2300"
+      }
+    ],
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-seq-arm64ec-5063-realigned-20261121-01.result.json",
+      "sha256": "e38651b186dd33856463f91cdbb2bf26424a02ca7a6496e9a3bdcbea29fe8be0"
+    }
+  }
+}

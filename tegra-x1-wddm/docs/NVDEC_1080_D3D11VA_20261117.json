@@ -1,0 +1,394 @@
+{
+  "stage": "Accepted native 1080p H.264 six-frame paced window on Switch",
+  "physical_accepted": true,
+  "higher_resolutions": {
+    "2K": "Independent delivery available; native evaluation deferred",
+    "4K": "Independent delivery available; native evaluation deferred"
+  },
+  "implementation_commit": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+  "controller_commit": "f90d3be2ed5038c709633fdfdeb925d30a2334d0",
+  "upstream_1080_commit": "70807999107c554d87364c40c8933cc945c20c8d",
+  "functional_720_baseline": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+  "candidate": {
+    "kmd": {
+      "Length": 243712,
+      "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+    },
+    "kmd_previous_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "kmd_patch_sha256": "056cf4b048926d7868f71de1c174e4b3fd5ccfa65475a1467add2b72c9294171",
+    "umd": {
+      "Length": 3335688,
+      "Sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+    },
+    "umd_source_inputs": {
+      "base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+      "patch_commits": [
+        "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+        "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+        "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9"
+      ],
+      "delta": {
+        "Length": 17332,
+        "Sha256": "465f70dc0b6117274752ae7295f239ad9158d39f8c426c9a03a2b6b380ef56ed"
+      }
+    },
+    "retained_icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "native_arm64_contracts": {
+      "Length": 3926528,
+      "Sha256": "00a4495f5574b1be93e972a5241d6d70d4309ab9428e8b7f2b7cb9ebc85c8de9"
+    },
+    "catalog_sha256": "301a7b8365876b207a73f0a17e8deffbb52e744b4df42daf33d1ec2032cb24aa",
+    "windows_catalog_verified_members": 13,
+    "full_branch_control_only": {
+      "source": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+      "branch_control_only": true,
+      "arm64_dll": "d50e3b29cdd8e318a1a54ae12375b0c32dc1928c654efcb64b050e1417c5d8f6",
+      "x64_controls": "91b3812fa61069bcc1fd4400791fc53ff07e4b3eecb07fb5e5612d2eff031429",
+      "cpu_log": "2b6dd315cb00d960d649b2c089a9e7771418ce57ddcdd000d1052292458276ce"
+    }
+  },
+  "sample": {
+    "codec": "H.264 Main, level 4.0, progressive 8-bit 4:2:0",
+    "visible": [
+      1920,
+      1080
+    ],
+    "coded": [
+      1920,
+      1088
+    ],
+    "pitch": 2048,
+    "linear_nv12_bytes": 3342336,
+    "source_annexb_sha256": "1ee184ba341a5b93850d0081431854b5808b6cc260f0a543c477a119f32ff135",
+    "remux_mp4_sha256": "6395a2c6ff999357a572b8b1fd9300978b635c8e0cc93c43e80b835c00d296b0",
+    "decode_order_display_ticks": [
+      0,
+      3,
+      1,
+      2,
+      5,
+      4
+    ],
+    "canonical_visible_i420_sha256": [
+      "d9368ffd4722e6f05b0265a72f56764d3044ebd098b6ba3dbf388052fe3e84f3",
+      "f3fc4fd14479a9dbadefe6cda9d9a78d827d07b1bf482e4ef04f4b6913e42838",
+      "f0f100a93e40b14ad4d20f9dd00c1e42bb92ccb064bdfa7832980b56b4d6c8bc",
+      "b05651982e6d54528be2fedb5e5242e0a492b1a8c31df0d5ff73f23c0921b6a1",
+      "f4b944beb06c97abc5084f9bd3d81515592046341b6b3785f6bb5dcb329c8902",
+      "27f3a47c090c944c3008a351e359d3768af74c4c9b4c8c0bfb00c5cc01816272"
+    ],
+    "delivered_reference_sha256": "ab5f05b224214e5c4673e78c760ce1321a02d4d2b086e28feb2795f733385aa9",
+    "matching_delivered_frames": 0,
+    "reference_verification": "Two FFmpeg software versions and a forced macOS VideoToolbox decode agree on all six visible frames. The supplied YUV/hash list differs on all six. Original media and reference retained.",
+    "last_640x360_rgb_reference_ppm_sha256": "b4410fb52f697a891f8b61fd99e4eeba5fbd56497331a1d0aba431b665a9419b"
+  },
+  "host_controls": "H.264 parsing and DPB order, DXVA coded and visible extents, NV12 plane bounds and full tiled readback; AddressSanitizer and UndefinedBehaviorSanitizer passed.",
+  "native_controls": {
+    "arm64_cpu_controls_exit": 0,
+    "candidate_selected_by_cpu_controls": false,
+    "window_client_sha256": "67f4e6db0d9ddc3ec88ee438e2cfa80eae6e75a6001ca00a0b6c4ef50a294c3c"
+  },
+  "acceptance": {
+    "native_input": "H.264 Main level 4.0",
+    "native_format": "D3D11VA NV12",
+    "native_pool": {
+      "count": 17,
+      "width": 1920,
+      "height": 1088
+    },
+    "window": [
+      640,
+      360
+    ],
+    "adapter_luid": "000000000009f1ef",
+    "decoder_client_session": 1,
+    "canonical_nv12_matches": [
+      {
+        "index": 0,
+        "sha256": "d9368ffd4722e6f05b0265a72f56764d3044ebd098b6ba3dbf388052fe3e84f3",
+        "match": true
+      },
+      {
+        "index": 1,
+        "sha256": "f3fc4fd14479a9dbadefe6cda9d9a78d827d07b1bf482e4ef04f4b6913e42838",
+        "match": true
+      },
+      {
+        "index": 2,
+        "sha256": "f0f100a93e40b14ad4d20f9dd00c1e42bb92ccb064bdfa7832980b56b4d6c8bc",
+        "match": true
+      },
+      {
+        "index": 3,
+        "sha256": "b05651982e6d54528be2fedb5e5242e0a492b1a8c31df0d5ff73f23c0921b6a1",
+        "match": true
+      },
+      {
+        "index": 4,
+        "sha256": "f4b944beb06c97abc5084f9bd3d81515592046341b6b3785f6bb5dcb329c8902",
+        "match": true
+      },
+      {
+        "index": 5,
+        "sha256": "27f3a47c090c944c3008a351e359d3768af74c4c9b4c8c0bfb00c5cc01816272",
+        "match": true
+      }
+    ],
+    "decoded_frames": 6,
+    "present_calls": 6,
+    "successful_presents": 6,
+    "display_order": [
+      {
+        "index": 0,
+        "subresource": 16,
+        "pts": 0
+      },
+      {
+        "index": 1,
+        "subresource": 14,
+        "pts": 256
+      },
+      {
+        "index": 2,
+        "subresource": 13,
+        "pts": 512
+      },
+      {
+        "index": 3,
+        "subresource": 15,
+        "pts": 768
+      },
+      {
+        "index": 4,
+        "subresource": 13,
+        "pts": 1024
+      },
+      {
+        "index": 5,
+        "subresource": 12,
+        "pts": 1280
+      }
+    ],
+    "sync_evidence": "Each completed frame passed the signed UMD checks on the KMD result, hardware syncpoint and 8160 decoded macroblocks. The paced run used no ETW capture of individual counter values.",
+    "gpu_conversion": "Decoded NV12 planes were read back and uploaded to two D3D11 textures. The native pixel shader applied limited-range BT.601 for the untagged sample.",
+    "rendered_last_frame": {
+      "width": 640,
+      "height": 360,
+      "pixels": 230400,
+      "different_pixels": 36979,
+      "pixels_over_one": 0,
+      "max_channel_difference": 1,
+      "mean_absolute_channel_difference": 0.05353877314814815,
+      "gpu_ppm_sha256": "48613254388eefd5d5fbae35f217a5f28e65a31b3a27d2989dcd1a6e67e211a3",
+      "software_ppm_sha256": "b4410fb52f697a891f8b61fd99e4eeba5fbd56497331a1d0aba431b665a9419b"
+    },
+    "client_elapsed_ms": 16093,
+    "process_elapsed_ms": 17230,
+    "frame_holds": 5,
+    "final_hold_ms": 8000,
+    "event_query_completed": true,
+    "dwm_flush_returned": true,
+    "decoder_closed": true,
+    "preview_released": true,
+    "final_device_hresult": 0,
+    "process_exit": 0,
+    "dwm_pid_before_after": [
+      1404,
+      1404
+    ],
+    "boot_utc": "2026-11-18T01:17:41.2840670Z",
+    "physical_observation": "The color-bar pattern was visible in the window on the physical panel. The desktop was visible after the window closed.",
+    "regular_unpaced_playback": "Deferred with the load-reset investigation",
+    "process_local_opt_in": true
+  },
+  "activation": {
+    "candidate_driver_store": "oem11.inf",
+    "recovery_driver_store": "oem10.inf",
+    "gated_boot": "2026-11-18T01:17:41.2840670Z",
+    "native_video_adapter_luid": "000000000009f1ef",
+    "retained_clock_provider": true,
+    "retained_acpi": true
+  },
+  "checked_utc": "2026-11-18T01:26:41.9873984Z",
+  "source_inputs": {
+    "previous_720p_record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "previous_720p_record_sha256": "2ff2eff8752b1a679156e393b34dd8c28313a1de7f2768f41fa54274f44d3823",
+    "previous_kmd_source_record": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+    "staged_kmd_sources": {
+      "src/nouveau/nvdec/nvdec.h": "c9470d2a18ff1e7d5efc92d4aa0b8faa351a8d262f10e8d182fa04e3c082bc61",
+      "tegra-x1-wddm/windows/nvdec_backend.c": "1b625039b9508d65eafb74ee69ce08d548485a1b74f6da78e428edde4d909cfe",
+      "tegra-x1-wddm/windows/nvdec_control.h": "49e7224dc9b5072681beea8aa9caa118e22d149edd1d3d5200733e65ff22f818"
+    },
+    "staged_umd_sources": {
+      "src/nouveau/nvdec/nvdec.h": {
+        "base": "e39269a62840eb045c3eb7889c4b7b49fa5a5f86204a177bf43d1fe948b75972",
+        "candidate": "c9470d2a18ff1e7d5efc92d4aa0b8faa351a8d262f10e8d182fa04e3c082bc61"
+      },
+      "tegra-x1-wddm/windows/nvdec_control.h": {
+        "base": "df1c63a19af5f603a408738073646cc278f16f02f94fc6c36a73b495e5ec56fb",
+        "candidate": "49e7224dc9b5072681beea8aa9caa118e22d149edd1d3d5200733e65ff22f818"
+      },
+      "src/nouveau/tgd3d/tgd3d_h264_map.c": {
+        "base": "47227e6bd44bd18697d36b9f910362b878430d5b8da33f083897080c3d671b2f",
+        "candidate": "9ea3a2e5394cc9ad9152ae0aa27b0f52426a7c265945ccb1d8bcab7f38945845"
+      },
+      "src/nouveau/tgd3d/tgd3d_h264_map.h": {
+        "base": "91bb2ab585d86fd9e4495b31b9e59e01d9ac49708389cc10cfe931d421b48797",
+        "candidate": "460489c31efba3d50da3ba58ceb2144f9f302b7e7500bfa1bdcbb5b67d8706df"
+      },
+      "src/nouveau/tgd3d/tgd3d_resource.cpp": {
+        "base": "65492a9a1bc33606f1e467962a1c9310d480d908018e8795b770b3cc8bf03295",
+        "candidate": "ffe5e953cfeba3cb137e7eede8f43ac9448292b09ad47b1f2899c7f28920a01a"
+      },
+      "src/nouveau/tgd3d/tgd3d_video.cpp": {
+        "base": "bf63386a76ca0375dc8bc7cc944547d427c040841f47df78bbaa23893064c857",
+        "candidate": "722fbc9b718bc5c71be9c46812beffebcfa03c801219646d27dbfef1b7271ce8"
+      },
+      "src/nouveau/tgd3d/tests/video_contracts.cpp": {
+        "base": "0dff44eeb35831ac85e6e0c31b3b95074fef87800cf0eef5089f02f1b2926cb8",
+        "candidate": "57950dcd1aa4abc4b51f86d9cf157136822446e0ccabfb7bf72a9cdb69f9707f"
+      }
+    },
+    "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "main_review": "Source and contracts reviewed locally. No external review performed."
+  },
+  "retained_configuration": {
+    "current_mode": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "saved_mode": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "physical_signal": {
+      "width": 720,
+      "height": 1280
+    },
+    "active_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation",
+    "driver_inf": "oem11.inf",
+    "dwm_modules": [
+      {
+        "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\TegraGpuD3DVk.dll",
+        "sha256": "C8A8EB9AAB7E8DA0EDDBFD33052B51C945FF799A7765B86295303D9E5F65C12E",
+        "name": "TegraGpuD3DVk.dll"
+      },
+      {
+        "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\libvulkan_nouveau.dll",
+        "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "name": "libvulkan_nouveau.dll"
+      }
+    ],
+    "eleven_files": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Length": 32264,
+        "Sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Length": 243712,
+        "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Length": 138,
+        "Sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Length": 4993,
+        "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Length": 42440,
+        "Sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Length": 1517568,
+        "Sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Length": 921600,
+        "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\libvulkan_nouveau.dll",
+        "Length": 17656776,
+        "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Length": 104456,
+        "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\TegraGpuD3DVk.dll",
+        "Length": 3335688,
+        "Sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Length": 60416,
+        "Sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "handheld_mode": 1,
+    "cpu_dfll": 1,
+    "emc_error": 0,
+    "fan_mode": 1,
+    "charge_limit_pct": 85,
+    "logon_task_delay": "PT5S"
+  },
+  "recovery_and_cleanup": {
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736",
+    "oem_inf": "oem10.inf",
+    "kmd_sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+    "umd_sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
+    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "embedded_recovery_files": 15,
+    "retained_pair_inputs": 33,
+    "remaining_test_tasks": [],
+    "remaining_observers": [],
+    "remaining_uploads": [],
+    "remaining_observation_paths": [],
+    "confirmation": "The cleanup SSH session timed out. Subsequent read-only inventories confirmed the same boot and DWM, Code 0, the enabled package, the removal of temporary files and all recovery entries.",
+    "native_archive_sha256": "6d47b40cdaecbd833385d8255d5fd926457717de69853d0901f1cae464526f48",
+    "native_archive_length": 65714,
+    "verified_utc": "2026-11-18T01:26:41.9873984Z"
+  },
+  "evidence_sha256": {
+    "first-window.stdout": "6c4363acf97b2890221fa7ed9fb5b68f2f7962c4714cec42ff3a2b48cc171161",
+    "dispatch-1080-window.stdout": "9690e5ef61b2148f43f4b150b42e51a7b5fabdc80e8e5dc4651e6f12ff219740",
+    "final-health.stdout": "5c55ea9ef7cffe3760b11c0f7eff240178e45017b8f7434b71b6d1861c802586",
+    "final-display.stdout": "93f6995a4103d80ad2f08eb1991136a12f11e2f7bf71586959805ab4368c5c2d",
+    "prep-with-exit.stdout": "6c35bc40da8b3d232274695114cf09cd4736f7f66febdbd440d883063ff49503",
+    "stage-state-2.stdout": "e47f452d63f2a9ef44bfb6a6eae119446b6c15eb63d8a71dc1c097f98d8a8303",
+    "read-cleanup-after-timeout.stdout": "86a60f6366350eb21ce391637e363d2ff657db7a13275d35b59ce12c5c351f98",
+    "verified-after.stdout": "9e84855a66d7d53093e9d95a59777aee612ee08e9157cb2ea7b3db03e5e5af14"
+  },
+  "ported_decode_sources_license": "MIT",
+  "review": {
+    "reviewer": "Main integration",
+    "external_review_performed": false,
+    "scope": "Ported 1080p admission and pixel layout. The public evidence uses the immutable component hashes and the six-frame observation."
+  }
+}

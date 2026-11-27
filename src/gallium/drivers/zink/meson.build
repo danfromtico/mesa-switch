@@ -120,6 +120,14 @@ driver_zink = declare_dependency(
 )
 
 if with_tests
+  if with_platform_windows
+    test('zink_win32_sync', executable('test-zink-win32-sync',
+      'zink_win32_sync_test.c',
+      include_directories : [inc_include, inc_src, inc_gallium, inc_gallium_aux, inc_vulkan_util, inc_zink_vk],
+      dependencies : [driver_zink, idep_nir, idep_mesautil, idep_vulkan_util, idep_vulkan_wsi_defines, idep_xmlconfig],
+      link_with : [libgallium],
+      c_args : zink_c_args), suite : ['zink'])
+  endif
   test(
     'zink_format_test',
     executable(

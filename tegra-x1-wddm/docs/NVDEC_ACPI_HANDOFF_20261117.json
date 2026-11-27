@@ -1,0 +1,506 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T01:46:45.776781+00:00",
+  "source_base": "034be3ffa5e6a9994669a4c2db14eb81b1946329",
+  "files": {
+    "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "da25c261bfc70c671258a57c4952aad984ada8e49c6b1286c0013be061f83472",
+    "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-EmcGuard.ps1": "7f7bf63087415e7c304ae0c286b55bdcd626938bfb07050299aa50453ada04b8",
+    "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "eed15b9a31b9154e8ee81b9f18dc9284ddb464f26ec16030ed54a341a2be5a6e"
+  },
+  "problem": "b7 preselection guard required dynamic EMC/QoS before the GPU handshake could exist; previous failed candidate boot also lacked loaded-DSDT evidence.",
+  "source_association": {
+    "source_repository": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers",
+    "published_commit": "06614ee6b9bbe80682f3f45e2c84a5cdd9f69133",
+    "installed_fan_sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437",
+    "source_identity_matches": [
+      {
+        "path": "drivers/SwitchFan/src/t214/actmon.h",
+        "expected_sha256": "1b858f529c79dc9fbaac5a8f41587f948abf21109744a60b3f4e8fc3e30d0744",
+        "actual_sha256": "1b858f529c79dc9fbaac5a8f41587f948abf21109744a60b3f4e8fc3e30d0744",
+        "matches": true
+      },
+      {
+        "path": "drivers/SwitchFan/src/t214/emc_control.h",
+        "expected_sha256": "22b45163199f96ec50c4ca34d9230ce6ce5a4b27b32adcac62a4330da1f69007",
+        "actual_sha256": "22b45163199f96ec50c4ca34d9230ce6ce5a4b27b32adcac62a4330da1f69007",
+        "matches": true
+      },
+      {
+        "path": "drivers/SwitchFan/src/t214/emc_windows.h",
+        "expected_sha256": "44df62a404344361568a0ac6e09a75c6e13200018ee6059f972dfdd651ef2e38",
+        "actual_sha256": "44df62a404344361568a0ac6e09a75c6e13200018ee6059f972dfdd651ef2e38",
+        "matches": true
+      },
+      {
+        "path": "drivers/SwitchFan/src/t214/emc_windows_types.h",
+        "expected_sha256": "86a34dd9b6f9460f5b00623f15f412f68acf7b34cdcb411e689f1f0133f63c6d",
+        "actual_sha256": "86a34dd9b6f9460f5b00623f15f412f68acf7b34cdcb411e689f1f0133f63c6d",
+        "matches": true
+      }
+    ],
+    "findings": [
+      "Dynamic and QoS flags require GPU live counter and fresh voltage-floor handshake; unavailable before GPU activation is expected, not proof of a fault.",
+      "SwEmcNotReady -6 can mean CPU, core or GPU floor provider not ready; telemetry alone does not identify which one.",
+      "ACTMON -1 can mean missing interrupt/maps or invalid initialization parameters; retain as failure, not a pending GPU handshake.",
+      "Before activation accept -6 only with working ACTMON, fresh enumerated rate, unchanged high boot rate, no transitions, no dynamic/QoS flags and no fault flags. After activation require all error fields zero and full dynamic/QoS readiness."
+    ],
+    "limits": [
+      "Source alone is not native proof; the original-baseline closed-start observation now independently verifies the pending-state pattern.",
+      "No FAN or KMD code changed."
+    ],
+    "native_baseline_closed": {
+      "record": "native-control/closed-boot-observe3.json",
+      "utc": "2026-11-17T01:39:31.9056806Z",
+      "gpu_present": true,
+      "gpu_problem_code": 43,
+      "loaded_dsdt_matches_original": true,
+      "emc_flags": 327,
+      "last_error": -6,
+      "actmon_error": 0,
+      "qos_error": 0,
+      "transitions": 0,
+      "rate_khz": 2500000,
+      "dynamic_or_qos_flags": false
+    }
+  },
+  "changes": [
+    "Phase-specific preselection and post-activation EMC checks, preserving error/fault rejection.",
+    "Persist the first loaded DSDT via public GetSystemFirmwareTable and require exact expected identity; also require GPU presence before selection.",
+    "Reject post-activation pending/faulted EMC before the resource query; preserve recoverable failure state."
+  ],
+  "native_baseline_control": {
+    "scope": "Original E95/5b/95b/0502 only. One planned restart with automatic GPU activation closed, read actual firmware/PNP/EMC, then restore the same installed activation task without another restart. No package/ACPI/driver/power-policy/rotation changes.",
+    "request": {
+      "Phase": "BaselineClosedBootRequested",
+      "Boot": "2026-11-17T00:33:13.2278110Z",
+      "Begin": "2026-11-17T01:35:47.7909322Z",
+      "Updated": "2026-11-17T01:36:09.7909312Z",
+      "RestartRequested": "2026-11-17T01:36:09.7909312Z"
+    },
+    "closed": {
+      "Utc": "2026-11-17T01:39:31.9056806Z",
+      "Boot": "2026-11-17T01:36:51.6977990Z",
+      "DiskDsdt": {
+        "Sha256": "0502BD0AED0AA3E236D24B0977D389BF04C64D777BA94CAD4C5C27A188B9E438",
+        "Length": 4848
+      },
+      "Kmd": {
+        "Sha256": "E95287CBEB1D2C325BAACB9685AFFD1D24783B22ECADC1801BA1DFFCFE7CC25E",
+        "Length": 204808
+      },
+      "LoadedDsdt": {
+        "Sha256": "0502BD0AED0AA3E236D24B0977D389BF04C64D777BA94CAD4C5C27A188B9E438",
+        "Length": 4848
+      },
+      "Present": true,
+      "Node": {
+        "InstanceId": "ACPI\\SWOA0F01\\0",
+        "Present": true,
+        "Problem": 43,
+        "Status": "Error"
+      },
+      "Code": 43,
+      "Parameters": {
+        "StartGateStatus": 3221225635,
+        "HardwareStatus": 4294967295,
+        "ResourceStatus": 0
+      },
+      "Power": {
+        "Utc": "2026-11-17T01:39:35.7338077Z",
+        "Power": {
+          "Version": 2,
+          "IsLite": 1,
+          "CpuConfigured": 1,
+          "PowerMode": 7,
+          "CpuTargetKhz": 1497600,
+          "CpuActualKhz": 1497600,
+          "CpuBootKhz": 998400,
+          "CpuMv": 1120,
+          "RamActualKhz": 2500000,
+          "GpuPolicyMode": 0,
+          "GpuPolicyMinKhz": 460800,
+          "GpuPolicyMaxKhz": 460800,
+          "GpuReportedKhz": 0,
+          "GpuReportedUv": 650000,
+          "GpuStatusWord": 0,
+          "TempC": 44,
+          "TempValid": 1,
+          "FanDuty": 51,
+          "Flags": 1,
+          "CpuPolicyMinKhz": 0,
+          "CpuPolicyMaxKhz": 0,
+          "CpuRequestedMaxKhz": 0,
+          "GpuRequestedMaxKhz": 460800,
+          "CpuSpeedo": 1630,
+          "CpuProcessId": 0,
+          "CpuDfllAvailable": 1,
+          "CpuDfllActive": 0,
+          "CpuLastError": 0,
+          "CpuLoadPermille": 0,
+          "GpuSampleAgeMs": 4294967295,
+          "SocTempC": 44,
+          "BoardTempC": 42,
+          "TempSampleAgeMs": 1687
+        },
+        "Battery": {
+          "Version": 1,
+          "LimitCenter": 85,
+          "BandMin": 80,
+          "BandMax": 90,
+          "CapacityPercent": 89,
+          "VoltageMv": 3929,
+          "Reg00InputSrc": 2,
+          "Reg01PwrOn": 16,
+          "Reg08SysStat": 108,
+          "LastApplyStatus": 0,
+          "Flags": 13
+        }
+      },
+      "Emc": {
+        "Utc": "2026-11-17T01:39:35.8119327Z",
+        "Emc": {
+          "Version": 1,
+          "Flags": 327,
+          "ActualKhz": 2500000,
+          "BootKhz": 2500000,
+          "SampleAgeMs": 109,
+          "LastError": -6,
+          "EnumerationError": 0,
+          "RateCount": 4,
+          "RatesKhz": [
+            204000,
+            1331200,
+            1600000,
+            2500000
+          ],
+          "ActmonError": 0,
+          "AverageActiveKhz": 50428,
+          "RawActiveKhz": 39987,
+          "TargetKhz": 1600000,
+          "DisplayFloorKhz": 38304,
+          "QosError": 0,
+          "TransitionCount": 0
+        }
+      },
+      "Fan": {
+        "Utc": "2026-11-17T01:39:35.8275552Z",
+        "Fan": {
+          "Version": 1,
+          "Mode": 1,
+          "Duty": 51,
+          "TargetPwm": 49,
+          "Flags": 1,
+          "SampleAgeMs": 1843,
+          "FilteredTempMc": 42831
+        }
+      },
+      "Task": {
+        "Enabled": false,
+        "LastResult": 0,
+        "State": 1
+      },
+      "Dwm": [
+        {
+          "Modules": [],
+          "Id": 1404,
+          "Start": "2026-11-17T01:37:24.2112275Z"
+        }
+      ]
+    },
+    "restored": {
+      "Utc": "2026-11-17T01:41:07.7201177Z",
+      "Boot": "2026-11-17T01:36:51.6977990Z",
+      "DiskDsdt": {
+        "Sha256": "0502BD0AED0AA3E236D24B0977D389BF04C64D777BA94CAD4C5C27A188B9E438",
+        "Length": 4848
+      },
+      "Kmd": {
+        "Sha256": "E95287CBEB1D2C325BAACB9685AFFD1D24783B22ECADC1801BA1DFFCFE7CC25E",
+        "Length": 204808
+      },
+      "LoadedDsdt": {
+        "Sha256": "0502BD0AED0AA3E236D24B0977D389BF04C64D777BA94CAD4C5C27A188B9E438",
+        "Length": 4848
+      },
+      "Present": true,
+      "Node": {
+        "InstanceId": "ACPI\\SWOA0F01\\0",
+        "Present": true,
+        "Problem": 0,
+        "Status": "OK"
+      },
+      "Code": 0,
+      "Parameters": {
+        "StartGateStatus": 0,
+        "HardwareStatus": 0,
+        "ResourceStatus": 0
+      },
+      "Power": {
+        "Utc": "2026-11-17T01:41:12.1732423Z",
+        "Power": {
+          "Version": 2,
+          "IsLite": 1,
+          "CpuConfigured": 1,
+          "PowerMode": 1,
+          "CpuTargetKhz": 1020000,
+          "CpuActualKhz": 1007250,
+          "CpuBootKhz": 998400,
+          "CpuMv": 620,
+          "RamActualKhz": 1600000,
+          "GpuPolicyMode": 1,
+          "GpuPolicyMinKhz": 76800,
+          "GpuPolicyMaxKhz": 537600,
+          "GpuReportedKhz": 307200,
+          "GpuReportedUv": 590000,
+          "GpuStatusWord": 17246989,
+          "TempC": 43,
+          "TempValid": 1,
+          "FanDuty": 51,
+          "Flags": 20,
+          "CpuPolicyMinKhz": 102000,
+          "CpuPolicyMaxKhz": 1581000,
+          "CpuRequestedMaxKhz": 1581000,
+          "GpuRequestedMaxKhz": 537600,
+          "CpuSpeedo": 1630,
+          "CpuProcessId": 0,
+          "CpuDfllAvailable": 1,
+          "CpuDfllActive": 1,
+          "CpuLastError": 0,
+          "CpuLoadPermille": 562,
+          "GpuSampleAgeMs": 109,
+          "SocTempC": 43,
+          "BoardTempC": 42,
+          "TempSampleAgeMs": 1546
+        },
+        "Battery": {
+          "Version": 1,
+          "LimitCenter": 85,
+          "BandMin": 80,
+          "BandMax": 90,
+          "CapacityPercent": 89,
+          "VoltageMv": 3963,
+          "Reg00InputSrc": 2,
+          "Reg01PwrOn": 16,
+          "Reg08SysStat": 108,
+          "LastApplyStatus": 0,
+          "Flags": 13
+        }
+      },
+      "Emc": {
+        "Utc": "2026-11-17T01:41:12.2669933Z",
+        "Emc": {
+          "Version": 1,
+          "Flags": 367,
+          "ActualKhz": 1600000,
+          "BootKhz": 2500000,
+          "SampleAgeMs": 46,
+          "LastError": 0,
+          "EnumerationError": 0,
+          "RateCount": 4,
+          "RatesKhz": [
+            204000,
+            1331200,
+            1600000,
+            2500000
+          ],
+          "ActmonError": 0,
+          "AverageActiveKhz": 42782,
+          "RawActiveKhz": 38860,
+          "TargetKhz": 1600000,
+          "DisplayFloorKhz": 38304,
+          "QosError": 0,
+          "TransitionCount": 133
+        }
+      },
+      "Fan": {
+        "Utc": "2026-11-17T01:41:12.2982422Z",
+        "Fan": {
+          "Version": 1,
+          "Mode": 1,
+          "Duty": 51,
+          "TargetPwm": 50,
+          "Flags": 1,
+          "SampleAgeMs": 1750,
+          "FilteredTempMc": 42902
+        }
+      },
+      "Task": {
+        "Enabled": true,
+        "LastResult": 0,
+        "State": 3
+      },
+      "Dwm": [
+        {
+          "Modules": [
+            "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+            "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+          ],
+          "Id": 1404,
+          "Start": "2026-11-17T01:37:24.2112275Z"
+        }
+      ]
+    },
+    "cleanup": {
+      "Exists": false,
+      "Code": 0,
+      "Root": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-baseline-handoff-20261117",
+      "TaskState": 3,
+      "TaskEnabled": true,
+      "Utc": "2026-11-17T01:43:02.9388608Z"
+    },
+    "all_11_original_files_verified_before_and_after": true,
+    "physical_screen_reaccepted": false,
+    "connection_failures": "Two initial TCP timeouts and one banner timeout preceded successful authenticated observation. They are not evidence of extra reboots."
+  },
+  "control_validation": {
+    "powershell": "5.1.22621.2506",
+    "selection_cases": 26,
+    "post_activation_cases": 5,
+    "native_operations_replaced": true,
+    "result": "PASS: 26 selection and 5 active controls; native operations replaced, no hardware validation\n5.1.22621.2506",
+    "result_sha256": "e75ab51832fcb67bc2fe87528a144bd49b4826b6cff5b27c6e3e6abd3dd0029a"
+  },
+  "aml_interpreter_controls": {
+    "observations": [
+      {
+        "name": "baseline",
+        "objects": {
+          "\\_SB.GPU0._HID": [
+            "[String] Length 08 = \"SWOA0F01\""
+          ],
+          "\\_SB.GPU0._UID": [
+            "[Integer] = 0000000000000000"
+          ],
+          "\\_SB.GPU0._STA": [
+            "[Integer] = 000000000000000F"
+          ],
+          "\\_SB.GPU0._CRS": {
+            "length": 197,
+            "declared": 197,
+            "sha256": "c3aacea6e1d45709ab9e3bcf27abab41bfc877602c8c8f11bffe8896b260b111"
+          },
+          "\\_SB.FAN0._CRS": {
+            "length": 1271,
+            "declared": 1271,
+            "sha256": "54fc9a7a2f8892b4d5f71e9f9ea90cbc38ce68cef8cedc4cc02127495136ab4a"
+          }
+        },
+        "evaluation_failed": false,
+        "shutdown_cache_allocations": [
+          "ACPI Error: 4 (0x4) Outstanding cache allocations (20260408/uttrack-794)"
+        ]
+      },
+      {
+        "name": "nine",
+        "objects": {
+          "\\_SB.GPU0._HID": [
+            "[String] Length 08 = \"SWOA0F01\""
+          ],
+          "\\_SB.GPU0._UID": [
+            "[Integer] = 0000000000000000"
+          ],
+          "\\_SB.GPU0._STA": [
+            "[Integer] = 000000000000000F"
+          ],
+          "\\_SB.GPU0._CRS": {
+            "length": 305,
+            "declared": 305,
+            "sha256": "8cd66db8a089feb394843ecbb160022a516f8c1dda537ce156c1539792353752"
+          },
+          "\\_SB.FAN0._CRS": {
+            "length": 1271,
+            "declared": 1271,
+            "sha256": "54fc9a7a2f8892b4d5f71e9f9ea90cbc38ce68cef8cedc4cc02127495136ab4a"
+          }
+        },
+        "evaluation_failed": false,
+        "shutdown_cache_allocations": [
+          "ACPI Error: 4 (0x4) Outstanding cache allocations (20260408/uttrack-794)"
+        ]
+      },
+      {
+        "name": "eleven",
+        "objects": {
+          "\\_SB.GPU0._HID": [
+            "[String] Length 08 = \"SWOA0F01\""
+          ],
+          "\\_SB.GPU0._UID": [
+            "[Integer] = 0000000000000000"
+          ],
+          "\\_SB.GPU0._STA": [
+            "[Integer] = 000000000000000F"
+          ],
+          "\\_SB.GPU0._CRS": {
+            "length": 329,
+            "declared": 329,
+            "sha256": "be767f648503c1339c7311e95b3c8d5ce844f02c679ffb3c8386e9c4b009efbb"
+          },
+          "\\_SB.FAN0._CRS": {
+            "length": 1271,
+            "declared": 1271,
+            "sha256": "54fc9a7a2f8892b4d5f71e9f9ea90cbc38ce68cef8cedc4cc02127495136ab4a"
+          }
+        },
+        "evaluation_failed": false,
+        "shutdown_cache_allocations": [
+          "ACPI Error: 4 (0x4) Outstanding cache allocations (20260408/uttrack-794)"
+        ]
+      }
+    ],
+    "conversion": [
+      {
+        "name": "baseline",
+        "exit": 0,
+        "command": [
+          "/opt/homebrew/bin/acpiexec",
+          "-di",
+          "-dr",
+          "-r",
+          "-b",
+          "resources \\_SB.GPU0",
+          "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/client-route/native-input/baseline-acpi.dat"
+        ],
+        "log_sha256": "4172d20ce9c392aa52f184b4bca60d0c80624a4739d2f6014eef8b9850ab6d00",
+        "errors": [
+          "AcpiSetCurrentResources failed: AE_NOT_FOUND",
+          "ACPI Error: 4 (0x4) Outstanding cache allocations (20260408/uttrack-794)"
+        ]
+      },
+      {
+        "name": "eleven",
+        "exit": 0,
+        "command": [
+          "/opt/homebrew/bin/acpiexec",
+          "-di",
+          "-dr",
+          "-r",
+          "-b",
+          "resources \\_SB.GPU0",
+          "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/client-route/candidate-acpi-r2.dat"
+        ],
+        "log_sha256": "6d71784b35ec54ee8c95b822d22dd489556e90b842686b3fc5a218f4d8063cd3",
+        "errors": [
+          "AcpiSetCurrentResources failed: AE_NOT_FOUND",
+          "ACPI Error: 4 (0x4) Outstanding cache allocations (20260408/uttrack-794)"
+        ]
+      }
+    ],
+    "scope": "ACPICA 20260408, no real hardware or Windows AML execution. Each GPU0 _HID/_UID/_STA and raw _CRS evaluates; FAN0 _CRS is identical. Resource conversions report no comparison mismatch. _SRS is absent in both baseline and candidate; debugger SetCurrentResources therefore returns AE_NOT_FOUND. All inputs show the same four shutdown cache allocations. Initial incorrectly double-escaped paths failed lookup and are excluded."
+  },
+  "limits": [
+    "The historical 827b boot still lacks its loaded DSDT. Baseline control does not prove which table was loaded in that failed boot.",
+    "Baseline closed-state ACTMON is healthy. Historical ACTMON -1 and absent GPU remain a separate unresolved anomaly, not normal -6 waiting.",
+    "Resource query, NVDEC firmware, DMA and 720p/1080p decode were not executed in the baseline control.",
+    "The subsequent ACPI-only observation is recorded separately after completion."
+  ],
+  "review": {
+    "status": "Pending Gemini4 Carbon High",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "retried": false,
+    "frozen_patch_sha256": "6c611ffb28661c237e8a865f8e9279c1651f03aff48b0629aafdd0075aa0870e",
+    "frozen_patch": "OUT/nvdec-integration-20261116/acpi-enumeration-20261117/phase-guard-review.patch"
+  },
+  "driver_components_changed": false,
+  "real_720p_decode_accepted": false,
+  "public_api_reference": "https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemfirmwaretable"
+}

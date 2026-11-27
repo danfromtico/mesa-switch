@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-post-exit-ungated-93818-20261121-01",
+  "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+  "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+  "plan_sha256": "6d2bf1b42b9457aa42eb21def4838463b5c9e98d02b4851c0f4009eb50412b7b",
+  "status": "观测缺口",
+  "finding": "客户端及观察器在启动 93818 已启动。签名应用创建原交换链、回缓冲和 RTV，并完成应用 Flush。测试专用 ETW 在公开 Present 前的刷新返回 0x80071069，应用退出码 4。无公开 CALL。清理后正式启动和 DWM 1384 仍可读。",
+  "missing_observation": "场景文件达到 8 MiB，ETW 刷新返回 ERROR_WMI_INSTANCE_NOT_FOUND。此采集失败对 GPU Present 和退出后持续性都没有裁决。",
+  "device_executions": 1,
+  "evidence": {
+    "application_launched": true,
+    "public_present_called": false,
+    "cleanup": {
+      "owned_case_removed": true,
+      "frequency": 19200000,
+      "utc": "2026-11-21T22:34:21.5660223Z",
+      "boot": 93818,
+      "action": "removed",
+      "qpc": 25131667769
+    },
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-ungated-93818-20261121-01/collected.zip",
+        "sha256": "18a0dd66bac9c694a2feb59725966827234fbfee95b0083bcc98f3994c515cce",
+        "bytes": 8747644
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-ungated-93818-20261121-01/evidence/result.json",
+        "sha256": "5a3e6f76ebacc0f1f29c22ad49981862a540630607467ec420a2b632225371c7",
+        "bytes": 3664
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-ungated-93818-20261121-01/cleanup.json",
+        "sha256": "6e85745b12c607b742aa77918826cc5e738b534a43f8bcc57493421eca6af68b",
+        "bytes": 161
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-ungated-93818-20261121-01/evidence/scene/journal.txt",
+        "sha256": "f9dc1dfe143177629162f055d7f776a5283524a74478c3d45cd89f4b2f8fd0f9",
+        "bytes": 1725
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-ungated-93818-20261121-01/evidence/scene/video.etl",
+        "sha256": "3cba0762e20126eac3258d925beee7ead1dac1b0df284e73c4a750806a98be5d",
+        "bytes": 8388608
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-ungated-93818-20261121-01/evidence/trace-stop.json",
+        "sha256": "bb487a7203266a7932a738874a6e80ae94217fc4afa7221aaff82f06b8303410",
+        "bytes": 61
+      }
+    ],
+    "boundaries": {
+      "last_entry": "FlushTraceBeforePresent",
+      "last_return": "0x80071069",
+      "first_anomaly_or_missing": "场景文件达到 8 MiB，ETW 刷新返回 ERROR_WMI_INSTANCE_NOT_FOUND。此采集失败对 GPU Present 和退出后持续性都没有裁决。"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-dwm-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "owner": "Windows DWM、Win32k 和 dxgkrnl 的重定向表面",
+  "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
+  "observations": [
+    "按首个公开调用至客户区采样的 QPC 检查 DWM-Core、Win32k 及 DxgKrnl 令牌，保存匹配到的窗口/表面标识及事件覆盖。",
+    "对照独立正常翻转窗口的已归档消费回执，记录本次实际能到达的边界。"
+  ],
+  "inputs": {
+    "empty_receipt": {
+      "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+      "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+    },
+    "composition_templates_sha256": "594a16e069e2e10846b7a8a99dbc0553e2343b4648a52df19ea506fdc4edffd0"
+  }
+}

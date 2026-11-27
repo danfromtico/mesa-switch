@@ -548,8 +548,7 @@ static void
 util_queue_finish_execute(void *data, void *gdata, int num_thread)
 {
    util_barrier *barrier = data;
-   if (util_barrier_wait(barrier))
-      util_barrier_destroy(barrier);
+   util_barrier_wait(barrier);
 }
 
 void
@@ -755,6 +754,10 @@ util_queue_finish(struct util_queue *queue)
       util_queue_fence_destroy(&fences[i]);
    }
 
+   /* Every worker has left the barrier, including the emulated barrier's
+    * condition waiters that must reacquire its mutex before returning.
+    */
+   util_barrier_destroy(&barrier);
    free(fences);
 }
 

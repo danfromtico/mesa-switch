@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "fault_id": "GM20B-TDR-ENGINE-CANDIDATE-RESTART-97437",
+  "scope": "adapter-reset-system-paging-recovery",
+  "confirmed_cause": "The previous full-adapter reset invalidated the surviving system paging context authoritative OS root and retained a stale nonzero private graphics generation. A live eligible SystemContext/SystemProcess must retain its current authoritative root state and rebuild private graphics state after successful isolation.",
+  "confirmed_scope": "Source-level recovery contract defect and its matching system paging recovery behavior; not the historical reset initiator or final restart/bugcheck cause.",
+  "prior_main_review": {
+    "path": "tegra-x1-wddm/docs/windows-native-graphics/tdr-cold-trace-system-paging-main-review-20261122.json",
+    "sha256": "6939fb3f1a74d0e3c62c58953cbae51e889c1cc7537bfbabdac959499b27d3a9"
+  },
+  "production_fix": "e1d34c6165b00bda047f448075e5318d740bfef2",
+  "tested_producer": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+  "release_source": "6a5a999ff9b7cd540a3167baa0cbf64d14b43725",
+  "CPU_comparison": {
+    "fixtures": [
+      {
+        "variant": "red",
+        "sha256": "679182604e46786b6ab4f5ba0988d15296ceed432b98a058fea5c04b757fbf4d",
+        "bytes": 311808,
+        "pid": 6812,
+        "exit": 1641,
+        "imports": [
+          [
+            "kernel32.dll",
+            "ExitProcess"
+          ],
+          [
+            "kernel32.dll",
+            "GetStdHandle"
+          ],
+          [
+            "kernel32.dll",
+            "WriteFile"
+          ]
+        ],
+        "consumption_before_start": true,
+        "stdout_bytes": 83
+      },
+      {
+        "variant": "green",
+        "sha256": "055fa3c6c1d92b47ffb03a74b1497b0b44d00663d9d1e0d43f9140ab274effd7",
+        "bytes": 311808,
+        "pid": 4376,
+        "exit": 0,
+        "imports": [
+          [
+            "kernel32.dll",
+            "ExitProcess"
+          ],
+          [
+            "kernel32.dll",
+            "GetStdHandle"
+          ],
+          [
+            "kernel32.dll",
+            "WriteFile"
+          ]
+        ],
+        "consumption_before_start": true,
+        "stdout_bytes": 228
+      }
+    ],
+    "native_before_wire_local_originals_verified": 16,
+    "program_starts": 2,
+    "old_composite_check_line": 1641,
+    "failed_check_operand_values_not_recorded": true,
+    "counterfactual_scope": "Same final CPU fixture linked against72-member old/new production libraries;only reset_backend.obj changes apart from COFF timestamps. Hardware isolation/startup are controlled substitutes;not real VidMm/root relocation/GPU recovery.",
+    "root_removed": true,
+    "formal_boot": 97530,
+    "code": 0,
+    "components": 8,
+    "actual_loaded_paths_hashes": 5,
+    "dwm": 1420,
+    "dwm_start_unchanged": true,
+    "boot_events_unchanged": true,
+    "registry_session_GPU_TDR_mutations": 0
+  },
+  "unchanged_constraints": [
+    "SetRootPageTable remains the authoritative root update path;failed or invalid root updates are never revived from a saved descriptor.",
+    "Resetting/RecoveryPending block admission during cleanup and cold startup.",
+    "Ordinary application contexts retain root invalidation and stale-generation rejection,even after a fresh root update.",
+    "Existing suspend behavior remains;failed isolation returns before this context-state change."
+  ],
+  "native_confirmation": {
+    "boot": 99215,
+    "system_context_id": 1,
+    "generation_before": 1,
+    "generation_after": 2,
+    "root_entries": 16384,
+    "root_segment": 1,
+    "root_offset": 0,
+    "submission_fence": 25519,
+    "GPU_expected_observed": 8185,
+    "windows_submit_sequence": 31722
+  },
+  "historical_unknowns": [
+    "The precise first failed native predicate during97365 remains unknown.",
+    "97437 NT bugcheck arrival and dump failure stage remain unknown.",
+    "91476/DWM152586,95090 and legacy SEQUENTIAL first-Present causes remain unknown."
+  ]
+}

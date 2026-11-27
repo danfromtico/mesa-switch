@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T00:15:04.332579+00:00",
+  "source_base": "80dfad47b0afa361c752f1163b44735e66af870f",
+  "files": {
+    "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "b5ee0a6791c2212849f77793afcb62e879850b33444628877a19efa620e21bbd",
+    "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "d453894fbcbc580645c320db22117a8f228670a19e90a5cbe25ec4be72a2c859",
+    "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-EmcGuard.ps1": "02cb9f93858fa94b8716b03f8120eda6a820d6a294cddbc5c3854d3c4fd9f077"
+  },
+  "problem": "The earlier controller saved a pre-selection EMC snapshot but still selected the candidate on known ACTMON failure.",
+  "change": "Require EMCv1 error fields clear, identified/rate/enumerated/dynamic/QoS/ACTMON flags present, and mailbox/transition fault bits clear. Preserve observation and enter CandidatePlatformRejected before selection on failure; do not retry selection. Existing Recover remains available. Baseline Prepare also checks EMC.",
+  "validation": {
+    "native_powershell_control": {
+      "Utc": "2026-11-17T00:13:29.6958390Z",
+      "Version": "5.1.22621.2506",
+      "NativeOperationsMocked": true,
+      "RedRejected": true,
+      "RedError": "actmon: candidate selection must not run",
+      "GreenOutput": "PASS: 10 EMC selection controls; native operations replaced, no hardware validation",
+      "GreenPassed": true
+    },
+    "scope": "Real Windows PowerShell parser and execution of the actual SelectCandidate branch with every native command replaced by explicit model functions; no native install, policy write or reboot in this control.",
+    "result_sha256": "37ccfb14ae8b6eee10f1386d327c78a8a631c9a0fd9cb05ebcd1f5b24cc524ad",
+    "prior_candidate_failure_record": "NVDEC_RESOURCE_PREFLIGHT_20261116.json"
+  },
+  "baseline_read": {
+    "utc": "2026-11-17T00:10:37.2502262Z",
+    "boot": "2026-11-17T00:05:36.3763920Z",
+    "file_hashes_match": 11,
+    "dwm_pid": 1352,
+    "external_power": "Online",
+    "actmon_error": 0,
+    "emc_flags": 367,
+    "emc_transition_count": 392,
+    "state_sha256": "57c41c97124fdd16c0b437ff81d35dd0e75731f535e9de2a3d2caa4cec907dba",
+    "restart_attribution": "Boot is newer than last Nov16 recovery. No main-chat reboot command was sent between those reads; cause not inferred."
+  },
+  "review": {
+    "status": "Pending Gemini4 Carbon High",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "retry_performed": false
+  },
+  "driver_components_changed": false,
+  "real_720p_decode_accepted": false,
+  "superseded_by": "NVDEC_ACPI_HANDOFF_20261117.json",
+  "historical_rule_limitation": "Requiring dynamic/QoS flags before GPU activation was too strict. The newer phase-specific guard retains fault rejection and verifies loaded DSDT/GPU presence."
+}

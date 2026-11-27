@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-one-time-start-20261121-03",
+  "contract_id": "WIN-COMBINED-13-ONE-TIME-START",
+  "windows_question": "WIN-COMBINED-13-ONE-TIME-START",
+  "plan_sha256": "be6c95d1a012ab5c5d2b66075e3106a6d109e8c85a88f6bf13b6c81af4fd4450",
+  "status": "实机通过",
+  "finding": "候选在启动 92336 以一次性许可进入 Code 0，实载 KMD 和 DWM ARM64 NVK 与联合包完全吻合。",
+  "missing_observation": "启动验收范围。后续 NVDEC、WSI、DIB 为单独物理记录。",
+  "device_executions": 1,
+  "evidence": {
+    "source": "4ab7804d0fe4bef4aa26ea1b6938ab0795a9312f",
+    "expected_components": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "staged": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/nvgpu-13-board-20261121/daily-staged.json",
+      "sha256": "3d4ae730d2ffbb56d2d7b5841d58edfb772a5530dd99e73214a0d1eb6dec59ba"
+    },
+    "catalog": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/nvgpu-13-board-20261121/catalog-result.json",
+      "sha256": "ee0e268844c9c525a703c1a43dcf3bada3985b12b0a03c9eca9d87db4f1bf8e4"
+    },
+    "plan_controller": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/nvgpu-13-board-20261121/activation/cycle-config.json",
+      "sha256": "7ea5ba52df31d154f577f83489ab7e822faa45bfa52e9789cb74edf3791f04a0"
+    },
+    "last_state": {
+      "trial": "Trial",
+      "task": true,
+      "code": 0,
+      "phase_boot": 92336,
+      "utc": "2026-11-21T19:03:18.0275966Z",
+      "boot": 92336,
+      "token": 0,
+      "inf": "oem29.inf",
+      "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+      "phase": "CandidateActive",
+      "last_error": null,
+      "kmd": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "permanent": null
+    },
+    "desktop": {
+      "selected": "trial",
+      "dwm": 1444,
+      "boot_record": 92336,
+      "inf": "oem29.inf",
+      "loaded": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+      },
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+      "gpu_code": 0,
+      "dwm_start": "2026-11-21T19:01:34.3867526Z",
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "power": "Online",
+      "one_time": true,
+      "utc": "2026-11-21T19:03:07.5117668Z"
+    },
+    "power": {
+      "power_state": {
+        "Utc": "2026-11-21T19:03:10.9048136Z",
+        "Power": {
+          "Version": 2,
+          "IsLite": 1,
+          "CpuConfigured": 1,
+          "PowerMode": 1,
+          "CpuTargetKhz": 714000,
+          "CpuActualKhz": 705632,
+          "CpuBootKhz": 998400,
+          "CpuMv": 620,
+          "RamActualKhz": 1331200,
+          "GpuPolicyMode": 1,
+          "GpuPolicyMinKhz": 76800,
+          "GpuPolicyMaxKhz": 537600,
+          "GpuReportedKhz": 76800,
+          "GpuReportedUv": 590000,
+          "GpuStatusWord": 14166017,
+          "TempC": 40,
+          "TempValid": 1,
+          "FanDuty": 51,
+          "Flags": 20,
+          "CpuPolicyMinKhz": 102000,
+          "CpuPolicyMaxKhz": 1581000,
+          "CpuRequestedMaxKhz": 1581000,
+          "GpuRequestedMaxKhz": 537600,
+          "CpuSpeedo": 1630,
+          "CpuProcessId": 0,
+          "CpuDfllAvailable": 1,
+          "CpuDfllActive": 1,
+          "CpuLastError": 0,
+          "CpuLoadPermille": 411,
+          "GpuSampleAgeMs": 531,
+          "SocTempC": 40,
+          "BoardTempC": 39,
+          "TempSampleAgeMs": 1797
+        }
+      },
+      "ac": "Online",
+      "boot": 92336,
+      "mode": 1,
+      "utc": "2026-11-21T19:03:11.3891865Z"
+    },
+    "boot_intents": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/nvgpu-13-board-20261121/activation/requested-92154-ClosedForTrial.json",
+        "sha256": "802bb1292b878c77b9cd5411dc73bccdb12a1b30eb9dbc780172b8a35330604f"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/nvgpu-13-board-20261121/activation/requested-92247-CandidateArmed.json",
+        "sha256": "3b8320a90e636afc7f99f8cfd34b65c1962fd180ea4df0fa5a0d574f71500468"
+      }
+    ],
+    "boundaries": {
+      "last_entry": "受控 CandidateArmed",
+      "last_return": {
+        "trial": "Trial",
+        "task": true,
+        "code": 0,
+        "phase_boot": 92336,
+        "utc": "2026-11-21T19:03:18.0275966Z",
+        "boot": 92336,
+        "token": 0,
+        "inf": "oem29.inf",
+        "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+        "phase": "CandidateActive",
+        "last_error": null,
+        "kmd": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "permanent": null
+      },
+      "first_anomaly_or_missing": "启动验收范围。后续 NVDEC、WSI、DIB 为单独物理记录。"
+    }
+  }
+}

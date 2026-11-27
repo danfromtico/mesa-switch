@@ -94,6 +94,12 @@ if with_platform_switch
     'nvkmd/switch/nvkmd_switch_dev.c',
     'nvkmd/switch/nvkmd_switch_pdev.c',
   )
+elif with_platform_windows
+  nvk_files += files(
+    'nvkmd/windows/nvkmd_windows.c',
+    'nvkmd/windows/nvkmd_windows_queue.c',
+    'nvkmd/windows/kmt.c',
+  )
 else
   nvk_files += files(
     'nvkmd/nouveau/nvkmd_nouveau.h',
@@ -309,8 +315,21 @@ if host_machine.system() == 'horizon'
     requires_private : ['libelf', 'expat', 'zlib', 'libzstd'],
   )
 else
+  nvk_shared_kwargs = {}
+  if with_platform_windows
+    nvk_kmt_object = get_option('nvk-windows-kmt-object')
+    if nvk_kmt_object == ''
+      error('Build the Windows SDK KMT bridge with src/nouveau/vulkan/nvkmd/windows/build_icd.py')
+    endif
+    nvk_shared_kwargs += {
+      'vs_module_defs' : vulkan_api_def,
+      'objects' : files(nvk_kmt_object),
+      'dependencies' : cc.find_library('gdi32'),
+    }
+  endif
   libvulkan_nouveau = shared_library(
     'vulkan_nouveau',
+    kwargs : nvk_shared_kwargs,
     link_whole : [libnvk],
     link_args: [ld_args_build_id, ld_args_bsymbolic, ld_args_gc_sections],
     gnu_symbol_visibility : 'hidden',
@@ -320,18 +339,32 @@ endif
 
 icd_file_name = libname_prefix + 'vulkan_nouveau.' + libname_suffix
 
+nouveau_icd_command = [
+  prog_python, '@INPUT0@',
+  '--api-version', '1.4', '--xml', '@INPUT1@',
+  '--sizeof-pointer', sizeof_pointer,
+  '--icd-lib-path', vulkan_icd_lib_path,
+  '--icd-filename', icd_file_name,
+  '--out', '@OUTPUT@',
+]
+nouveau_dev_icd_command = [
+  prog_python, '@INPUT0@',
+  '--api-version', '1.4', '--xml', '@INPUT1@',
+  '--sizeof-pointer', sizeof_pointer,
+  '--icd-lib-path', meson.current_build_dir(),
+  '--icd-filename', icd_file_name,
+  '--out', '@OUTPUT@',
+]
+if with_platform_windows
+  nouveau_icd_command += '--use-backslash'
+  nouveau_dev_icd_command += '--use-backslash'
+endif
+
 nouveau_icd = custom_target(
   'nouveau_icd',
   input : [vk_icd_gen, vk_api_xml],
   output : 'nouveau_icd.' + vulkan_manifest_suffix,
-  command : [
-    prog_python, '@INPUT0@',
-    '--api-version', '1.4', '--xml', '@INPUT1@',
-    '--sizeof-pointer', sizeof_pointer,
-    '--icd-lib-path', vulkan_icd_lib_path,
-    '--icd-filename', icd_file_name,
-    '--out', '@OUTPUT@',
-  ],
+  command : nouveau_icd_command,
   build_by_default : true,
   install_dir : with_vulkan_icd_dir,
   install_tag : 'runtime',
@@ -343,18 +376,54 @@ _dev_icd = custom_target(
   'nouveau_devenv_icd',
   input : [vk_icd_gen, vk_api_xml],
   output : _dev_icdname,
-  command : [
-    prog_python, '@INPUT0@',
-    '--api-version', '1.4', '--xml', '@INPUT1@',
-    '--sizeof-pointer', sizeof_pointer,
-    '--icd-lib-path', meson.current_build_dir(),
-    '--icd-filename', icd_file_name,
-    '--out', '@OUTPUT@',
-  ],
+  command : nouveau_dev_icd_command,
   build_by_default : true,
 )
 
 devenv.append('VK_DRIVER_FILES', _dev_icd.full_path())
+
+if with_tests and with_platform_windows
+  executable('nvk-meta-state-check', 'test_nvk_meta_state.c',
+    include_directories : [inc_include, inc_src, include_directories('.')],
+    dependencies : [
+      declare_dependency(dependencies : nvk_deps).partial_dependency(
+        compile_args : true, includes : true),
+      cc.find_library('gdi32'),
+    ],
+    link_whole : libnvk,
+    objects : files(nvk_kmt_object),
+    link_args : ld_args_gc_sections)
+  # Manual CPU compiler control for SPIR-V exported by tgd3d-contracts.
+  executable('nvk-tgd3d-shader-check', 'test_tgd3d_shader.c',
+    include_directories : [inc_include, inc_src, include_directories('.')],
+    dependencies : [
+      declare_dependency(dependencies : nvk_deps).partial_dependency(
+        compile_args : true, includes : true),
+      cc.find_library('gdi32'),
+    ],
+    # Vulkan entrypoints are weak: ordinary archive linking can leave them null.
+    link_whole : libnvk,
+    objects : files(nvk_kmt_object),
+    link_args : ld_args_gc_sections)
+  test('nvk_win32_sync', executable('test-nvk-win32-sync',
+    'nvkmd/windows/test-win32-sync.c',
+    include_directories : [inc_include, inc_src, include_directories('.')],
+    dependencies : nvk_deps,
+    link_with : libnvk,
+    link_args : ld_args_gc_sections), suite : ['nouveau'])
+  test('nvk_win32_owner', executable('test-nvk-win32-owner',
+    'nvkmd/windows/test-win32-owner.c',
+    include_directories : [inc_include, inc_src, include_directories('.')],
+    dependencies : nvk_deps,
+    link_with : libnvk,
+    link_args : ld_args_gc_sections), suite : ['nouveau'])
+  test('nvk_win32_written', executable('test-nvk-win32-written',
+    'nvkmd/windows/test-win32-written.c',
+    include_directories : [inc_include, inc_src, include_directories('.')],
+    dependencies : nvk_deps,
+    link_with : libnvk,
+    link_args : ld_args_gc_sections), suite : ['nouveau'])
+endif
 
 if with_tests and not with_platform_android
   test(

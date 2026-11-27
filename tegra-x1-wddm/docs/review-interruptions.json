@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "purpose": "记录工程语境、实际动作和服务中断，供人工复核；不是推断或规避审核规则",
+  "service_message": "This content was flagged for possible cybersecurity risk. If this seems wrong, try rephrasing your request. If you’re doing authorized security work that requires more cyber permissive safeguards, apply for Daybreak access via https://platform.openai.com/settings/organization/status-and-access before retrying.",
+  "review_request": "这是对合法驱动开发内容的误判，请复核",
+  "review_status": "owner_reviewed_continuation_authorized; platform_approval_not_independently_verified",
+  "review_submission_capability": "No human-review submission interface was found among available tools; no platform submission or approval was independently verified by main review. The subsequent user report is tracked separately.",
+  "records": [
+    {
+      "thread": "01a201d2-60fa-7bb1-a0d7-0264756995d2",
+      "turn": "01a2023c-7406-77a2-ac16-a4687d11515d",
+      "topic": "旧版本生命周期与本地提交模型验证",
+      "last_observed_result": "本地模型只完成case0，夹具错误释放栈对象后退出-6；case1/2未执行。",
+      "evidence": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/lifecycle-interruption-20261122.json",
+      "classifier_trigger": "unknown",
+      "later_state": "原件保留；用户澄清后的两批独立复核模型由正常工具执行完成，不能把其结果外推为所有后续动作已获放行。"
+    },
+    {
+      "thread": "01a201d2-60fa-7bb1-a0d7-0264756995d2",
+      "turn": "01a20259-fe79-74f2-8638-eda59bb13bed",
+      "topic": "既有材料只读核对与保全报告整理",
+      "last_observed_result": "保全文件已生成；会话再次以同类服务中断结束。",
+      "evidence": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/preservation-20261122/",
+      "classifier_trigger": "unknown"
+    },
+    {
+      "thread": "01a2026d-3f59-7041-8676-a9267b034280",
+      "turn": "01a20290-b7a3-7a81-936a-8d94603c02ef",
+      "topic": "公开KMT接口的独立Windows ARM64验证程序交叉编译准备",
+      "last_tool": "exec-5608114a-7650-42bf-a314-bff4406059ef",
+      "last_observed_result": "本地build.py编译退出1，snprintf声明缺失；会话随后出现服务级中断。",
+      "evidence": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/null-submit/build-result.json",
+      "native_state": "原中断时已完成正式96251只读预检，未取得新验证程序成功构建或实机运行回执；后续进行中构建不在本批交验范围。",
+      "classifier_trigger": "unknown",
+      "review_status": "user_reported_permission_not_independently_verified",
+      "review_status_at_delivery": "prepared_not_submitted",
+      "subsequent_user_report_reference": "subsequent_user_report"
+    },
+    {
+      "thread": "01a2094a-b8e6-74a0-83be-8c535979363c",
+      "turn": "01a20aeb-1eff-7ab3-abca-ff45512bf929",
+      "topic": "Windows ARM64 SD/NT 转储验收准备；本地诊断工具编译后的服务续接",
+      "last_tool": "exec-7ec11f85-1722-4681-af88-d00a4b0d14e6",
+      "last_observed_result": "本地 ARM64 编译和链接已退出0；随后会话以服务拒绝终止。服务没有标明某条具体工具命令被拒，不能将其写成编译失败。",
+      "service_error": "This content was flagged for possible cybersecurity risk. If this seems wrong, try rephrasing your request. If you’re doing authorized security work that requires more cyber permissive safeguards, apply for Daybreak access via https://platform.openai.com/settings/organization/status-and-access before retrying.",
+      "evidence": "tegra-x1-wddm/docs/windows-native-graphics/executor-interruption-main-review-20261124.json",
+      "evidence_sha256": "81a59df48b1f3164a0044eeb41f6f8cd453db9665467f318e1517e1200005576",
+      "native_state": "本批保留边界为 SD 候选已签名但未安装、诊断工具未签名或加载；没有真实转储验收。",
+      "classifier_trigger": "unknown",
+      "review_status": "owner_reviewed_continuation_authorized; platform_approval_not_independently_verified",
+      "later_state": "项目所有者完成项目审核并明确授权继续；主审已通知其指定的新执行会话，沿用原件和未消费步骤，后续仍接受正常平台工具审核。",
+      "platform_approval_independently_verified": false
+    }
+  ],
+  "observed_record_count": 4,
+  "pattern_assessment": "现有四条中断记录保留主题、服务原文与实际执行边界；没有证据确定触发关键词或分类器因果。项目所有者继续授权与平台独立审核结论分别记录，不推断其他步骤自动获批。",
+  "review_status_at_creation": "prepared_not_submitted",
+  "subsequent_user_report": {
+    "source_thread": "01a202a1-7c8c-70c1-8363-52cc06d2708b",
+    "user_message_id": "01a202a8-d5cb-73e1-a4ff-cb2f7dcc0d4a",
+    "question_scope": "受中断的Windows ARM64验证程序编译",
+    "answer": "已取得平台允许继续的回执",
+    "read_from_original_thread": true,
+    "assessment": "原问题明确指向受中断的Windows ARM64编译；已独立读到用户报告，但未独立核验平台回执内容或覆盖范围。记录用户报告与平台工具实际结果，不把编号缺失另设为常规工作门槛，不把该报告或新会话当成规避拒绝的依据。"
+  },
+  "naming_suggestion": {
+    "requested_names": [
+      "dma-empty-submit-probe",
+      "空提交验证"
+    ],
+    "user_reason": "降低分类器误判率；此因果未经核验。",
+    "disposition": "仅记录建议；未为影响安全审核而改名、改路径或重提被中断流程。准确API/功能、原名和原中断记录保留。",
+    "executor_notified": true,
+    "renamed_by_main": false
+  },
+  "owner_review_statement": {
+    "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/owner-review-statement-20261122.json",
+    "bytes": 2310,
+    "sha256": "44de6545ca7920ad370ed3eed9fadb95d40cda56622c034bcf945a259742c47a"
+  },
+  "later_normal_build_evidence": {
+    "path": "windows-native-graphics/arm64-probe-build-main-review-20261122.json",
+    "sha256": "c8c2323df75df9d174e87ed1f6e6ea45e84942f242ddd2f67aca20c77aedc4ca",
+    "actual_tool_exit": 0,
+    "scope": "Existing r2 cross-build and static PE only; no new run by reviewer and no claim of independent platform appeal approval."
+  },
+  "latest_review": {
+    "path": "tegra-x1-wddm/docs/windows-native-graphics/executor-interruption-main-review-20261124.json",
+    "sha256": "81a59df48b1f3164a0044eeb41f6f8cd453db9665467f318e1517e1200005576",
+    "bytes": 5997
+  }
+}

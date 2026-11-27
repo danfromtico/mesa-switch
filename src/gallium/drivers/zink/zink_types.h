@@ -40,6 +40,7 @@
 #include "util/pb_slab.h"
 
 #include "util/blob.h"
+#include "util/u_graphics_api_marker.h"
 
 #ifdef HAVE_LIBDRM
 #include "renderonly/renderonly.h"
@@ -196,6 +197,7 @@ extern enum zink_descriptor_mode zink_descriptor_mode;
 enum zink_descriptor_size_index {
    ZDS_INDEX_UBO,
    ZDS_INDEX_COMBINED_SAMPLER,
+   ZDS_INDEX_SAMPLED_IMAGE,
    ZDS_INDEX_UNIFORM_TEXELS,
    ZDS_INDEX_SAMPLER,
    ZDS_INDEX_STORAGE_BUFFER,
@@ -209,6 +211,7 @@ enum zink_descriptor_size_index_compact {
    ZDS_INDEX_COMP_UBO,
    ZDS_INDEX_COMP_STORAGE_BUFFER,
    ZDS_INDEX_COMP_COMBINED_SAMPLER,
+   ZDS_INDEX_COMP_SAMPLED_IMAGE,
    ZDS_INDEX_COMP_UNIFORM_TEXELS,
    ZDS_INDEX_COMP_SAMPLER,
    ZDS_INDEX_COMP_STORAGE_IMAGE,
@@ -291,6 +294,7 @@ struct zink_tc_fence {
    struct zink_fence *fence;
    /* for use with semaphore/imported fences */
    VkSemaphore sem;
+   bool is_timeline;
 };
 
 /* a fence is actually a zink_batch_state, but these are split out for logical consistency */
@@ -427,7 +431,8 @@ struct zink_descriptor_pool_key {
    unsigned use_count;
    unsigned num_type_sizes;
    unsigned id;
-   VkDescriptorPoolSize sizes[4];
+   /* Combined/image/sampler/texel descriptors plus compact storage types. */
+   VkDescriptorPoolSize sizes[6];
    struct zink_descriptor_layout_key *layout;
 };
 
@@ -1367,6 +1372,7 @@ struct zink_format_props {
 
 struct zink_screen {
    struct pipe_screen base;
+   struct util_graphics_api_marker graphics_api_marker;
 
    const char *vendor_name;
    const char *device_name;

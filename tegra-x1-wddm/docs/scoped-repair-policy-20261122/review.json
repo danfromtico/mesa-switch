@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "scope": "Repository qualification and publication policy for a specifically registered confirmed repair; this is not hardware acceptance or a GPU baseline change.",
+  "verdict": "accepted",
+  "implementation_commit": "6a7f9db70b6ec98955a142e029d174f62bd8423c",
+  "files": [
+    {
+      "path": "tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1",
+      "sha256": "7716d0b33f824ab42950826f79a18e82fbe71425bad877c39b34fd01b36f2114",
+      "matches_independent_frozen_input": true
+    },
+    {
+      "path": "tegra-x1-wddm/tools/check_graphics_baseline_push.py",
+      "sha256": "ff40c44527bb7fb3053e95a5319f200abd47166a719d6b341ab2ecdd2adac695",
+      "matches_independent_frozen_input": true
+    },
+    {
+      "path": "tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1",
+      "sha256": "249f05a5117bf3e0629902b8b0486144555f223b6bb893f6e671b8368a8a0b0e",
+      "matches_independent_frozen_input": true
+    },
+    {
+      "path": "tegra-x1-wddm/tools/tgd3d-default/tests/Test-BaselinePromotion.ps1",
+      "sha256": "f3e2467cb28447465c0cadd487e0de6c481060d8c906641fee6360d1f594aed5",
+      "matches_independent_frozen_input": true
+    },
+    {
+      "path": "tegra-x1-wddm/tools/tgd3d-default/tests/test_baseline_publication.py",
+      "sha256": "1c9d517ab6a5d020a2633a4b8cb039bf5d67d2f5a227d183b0ca03135046487c",
+      "matches_independent_frozen_input": true
+    }
+  ],
+  "behavior": [
+    "A scoped verified-fix may be qualified by one matching native case while its broader causal fault remains open.",
+    "The registered cause, source commit, exact component profile, independent code review and signed build are bound to three distinct retained proof files and full hashes.",
+    "The native case must be a separate evidence file on the one-time candidate boot and must actually load the repaired component.",
+    "An explicitly nonvisual empty-window scope may use output_required=false; normal exit and desktop continuity remain required. Visual scopes retain output verification.",
+    "A scoped repair cannot enter baseline_comparisons to omit open-fault accounting. Each open fault still requires its existing independent qualification record.",
+    "Historical closure-based verified-fix rules, their three original-scenario receipts and separate working control remain unchanged.",
+    "Support proof files remain hash-bound across later baseline selections and publication. Windows hash letter case is accepted."
+  ],
+  "independent_review": {
+    "model": "gemini-4-neon-high",
+    "conversation": "95c52789-4040-4bec-8698-67d77f457f83",
+    "r1_file": "independent-review-r1.json",
+    "r1_sha256": "22922a3fe63ea12f604e5f4b69ae4d319491e7a7f239bf507cbde54ca2b9ea4b",
+    "r2_file": "independent-review-r2.json",
+    "r2_sha256": "7c7b0670c1fa6df8f72634838e780dcbc62cfdc923e7abb3fd3bcbd5911c5d3b",
+    "r1_findings_resolved": [
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5",
+      "F6",
+      "F7"
+    ],
+    "r2_verdict": "approve",
+    "r2_findings": 0
+  },
+  "validation": {
+    "powershell_unit_passes": 70,
+    "powershell_exit_code": 0,
+    "isolated_publication_groups_passed": 3,
+    "isolated_publication_exit_code": 0,
+    "relevant_negative_cases": [
+      "Scoped repair cannot omit per-fault independent accounting",
+      "Static proof cannot substitute for native receipt",
+      "Incorrect source, input scope, component loading or support proof is rejected",
+      "Unexplained shutdown still rejects qualification",
+      "Tampering with retained review after later baseline replacement is rejected"
+    ]
+  },
+  "baseline_preserved": {
+    "file": "tegra-x1-wddm/docs/graphics-baseline.json",
+    "sha256": "2b3a2624cd826fa41f47e4c621e6fdee9cd0e6a25161fab78eb9ec3ca5ef9154",
+    "source_commit": "54ea32fb3e1c714f8f83cd108f2615e37119ec84",
+    "components_changed": false,
+    "open_fault_count": 18,
+    "fault_closures_added": 0
+  },
+  "not_accepted_by_this_publication": [
+    "Present1 candidate native Windows entry or hardware validation",
+    "Neon NVK candidate physical loading, rendering, desktop acceptance or measured performance",
+    "TDR/dump evidence chain or historical first-Present root cause"
+  ],
+  "deployment_limits": [
+    "Local pre-push installation completed through the normal --install command.",
+    "This main-review task made no device connection, immutable on-device policy update, permit change or hardware dispatch.",
+    "A hardware executor must use actual candidate receipts and the normal immutable policy workflow before promotion."
+  ]
+}

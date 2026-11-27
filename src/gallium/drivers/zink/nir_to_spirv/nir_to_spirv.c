@@ -1309,7 +1309,8 @@ get_image_type(struct ntv_context *ctx, struct nir_variable *var,
                bool is_sampler, bool is_buffer)
 {
    SpvId image_type = get_bare_image_type(ctx, var, is_sampler);
-   return is_sampler && ctx->stage != MESA_SHADER_KERNEL && !is_buffer ?
+   return is_sampler && ctx->stage != MESA_SHADER_KERNEL && !is_buffer &&
+          !glsl_type_is_texture(glsl_without_array(var->type)) ?
           spirv_builder_type_sampled_image(&ctx->builder, image_type) :
           image_type;
 }
@@ -1390,7 +1391,7 @@ emit_sampler(struct ntv_context *ctx, nir_variable *var)
    snprintf(buf, sizeof(buf), "sampler_%u", var->data.driver_location);
    spirv_builder_emit_name(&ctx->builder, var_id, buf);
    spirv_builder_emit_descriptor_set(&ctx->builder, var_id, var->data.descriptor_set);
-   spirv_builder_emit_binding(&ctx->builder, var_id, var->data.driver_location);
+   spirv_builder_emit_binding(&ctx->builder, var_id, var->data.binding);
    _mesa_hash_table_insert(ctx->vars, var, (void *)(intptr_t)var_id);
    if (ctx->spirv_1_4_interfaces) {
       assert(ctx->num_entry_ifaces < ARRAY_SIZE(ctx->entry_ifaces));
@@ -4676,7 +4677,7 @@ emit_deref_array(struct ntv_context *ctx, nir_deref_instr *deref)
          type = spirv_builder_type_sampler(&ctx->builder);
       else
          type = get_image_type(ctx, var,
-                               glsl_type_is_sampler(gtype),
+                               glsl_type_is_sampler(gtype) || glsl_type_is_texture(gtype),
                                glsl_get_sampler_dim(gtype) == GLSL_SAMPLER_DIM_BUF);
       break;
    }

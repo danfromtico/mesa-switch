@@ -1,0 +1,715 @@
+{
+  "scope": "Historical signed KMD hardware initialization comparison. Static evidence only, with no additional physical acceptance round. Addresses are GPU BAR-relative byte offsets.",
+  "comparison": {
+    "fault": "GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557",
+    "status": "open",
+    "decision": "Keep the historical restart open. Station timeout alignment controls one experimental variable; no causal conclusion."
+  },
+  "identity": {
+    "historical_kmd": {
+      "Length": 243712,
+      "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+    },
+    "base_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "nvdec_delivery": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+    "actual_boot_91476_kmd": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "upstream": "1ae0167d360287ca78f5a2572f0de42594140312",
+    "mirror": {
+      "repo": "https://github.com/OE4T/linux-nvgpu",
+      "ref": "patches-rel-36",
+      "commit": "21d928824dc7ca3dc17603a53b11edc6641ace2d",
+      "gm20b_priv_ring_paths": [
+        "drivers/gpu/nvgpu/hal/priv_ring/priv_ring_gm20b.c",
+        "drivers/gpu/nvgpu/hal/priv_ring/priv_ring_gm20b.h",
+        "drivers/gpu/nvgpu/hal/priv_ring/priv_ring_gm20b_fusa.c",
+        "userspace/units/priv_ring/nvgpu-priv_ring.c"
+      ],
+      "fallback": "https://gitlab.com/switchroot/l4t-kernel-nvgpu",
+      "comparison_copy": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/tree/1ae0167d360287ca78f5a2572f0de42594140312"
+    }
+  },
+  "criteria": [
+    "Resolve the register through the actual function and version-matched register header.",
+    "Trace KMD callers, computed addresses, generated constants, tables and firmware before asserting a missing write.",
+    "Separate explicit upstream rationale from inferred effects. Windows behavior without independent evidence is 待实机验证. Exclude Horizon-only and winsys-specific workarounds."
+  ],
+  "priv_station_timeout": {
+    "upstream_function": "gm20b_priv_set_timeout_settings",
+    "upstream_implementation": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/priv_ring/priv_ring_gm20b.c#L109-L117",
+    "hal": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gm20b/hal_gm20b.c#L670-L675",
+    "call_site": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4578-L4589",
+    "call_phase": "After ZCULL initialization and before GR FIFO/semaphore access enable in gk20a_init_gr_setup_hw.",
+    "registers": [
+      {
+        "station": "SYS",
+        "index": "0x15",
+        "offset": "0x122354",
+        "derivation": "0x122300 + 0x15 * 4",
+        "header": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_pri_ringstation_sys_gm20b.h#L59-L62"
+      },
+      {
+        "station": "GPC",
+        "index": "0xa",
+        "offset": "0x128328",
+        "derivation": "0x128300 + 0xa * 4",
+        "header": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_pri_ringstation_gpc_gm20b.h#L59-L62"
+      }
+    ],
+    "write": "Both receive the full word 0x800. The default 0x400 is documented in the upstream comment, not measured on boot 91476.",
+    "upstream_reason": "NVIDIA bug 1340570. The stated purpose is to avoid a possible operation failure at high GPC clock rates.",
+    "windows_evidence": "Neither historical KMD nor candidate parent implements the two indexed station writes. Priv-ring enable and FECS station error reads use different offsets. Checked platform/core/windows, the compiled Horizon encoder, both byte offsets and array base addresses, and the non-context and context register lists of NETB 5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3 (176 and 451 entries). Firmware internals and signed historical machine code were not individually disassembled.",
+    "impact": "Upstream purpose documented. Actual Windows board effect and any relation to fault 91557: 待实机验证."
+  },
+  "focus": {
+    "ptimer": "GM20B platform supplies 19.2 MHz (os/linux/platform_gk20a_tegra.c:906). include/nvgpu/ptimer.h converts in software against 31.25 MHz. gk20a_read_ptimer samples high/low/high; the read has no calibration write. The FIFO uses a separately scaled timeout at 0x2a0c. The default TSG timeslice of 128 with shift 3 is present in the KMD runlist. Historical DxgkDdiCalibrateGpuClock returns STATUS_NOT_SUPPORTED; that is a distinct Windows API contract.",
+    "semaphore": "gk20a_channel_abort_clean_up dispatches channel_sync_semaphore_set_min_eq_max to nvgpu_semaphore_reset (common/fifo/channel.c:189; common/sync/channel_sync.c:542; common/semaphore.c:582). It fast-forwards a mapped memory word to next_value and wakes waiters only when required. The Tegra syncpoint backend is a separate branch. Neither operation is a universal physical GPU register write. Windows reset_backend.c isolates hardware, detaches work, zeros the private command store and reconstructs the channel. No inference that Windows may complete unretired work.",
+    "environment": "Treat NVIDIA secure-firmware access restrictions according to the actual boot and privilege mode. Horizon-only FECS write constraints or winsys workarounds are outside the native KMD absence list."
+  },
+  "register_rows": [
+    {
+      "function": "gk20a_init_fifo_reset_enable_hw",
+      "reg": "fifo_eng_timeout_r()",
+      "address": "0x2a0c",
+      "source": "gk20a/fifo_gk20a.c:858",
+      "value": "timeout",
+      "kmd": "platform/t214_frontend.c:82; core/execute.c:390; windows/adapter_reset.c",
+      "impact": "Configures engine context-switch timeout detection on the upstream scheduler. Effect of enabling it alongside WDDM recovery is unknown.",
+      "upstream_basis": "gk20a/fifo_gk20a.c:850-858; gk20a/fifo_gk20a.h:56; os/linux/driver_common.c:126. No upstream justification found for a causal connection to the Windows reboot.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_fifo_gk20a.h#L151",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/fifo_gk20a.c#L858"
+    },
+    {
+      "function": "gk20a_ptimer_isr",
+      "reg": "timer_pri_timeout_save_0_r()",
+      "address": "0x9084",
+      "source": "common/ptimer/ptimer_gk20a.c:52",
+      "value": "0",
+      "kmd": "platform/t214_frontend.c:41-55 records PBUS and PRIV ring info; its different source registers are not the timer save registers.",
+      "impact": "Clears saved timeout information after it has been sampled by the upstream ISR. Effect on later WDDM diagnostics or restart is unknown.",
+      "upstream_basis": "common/ptimer/ptimer_gk20a.c:31-61 cautions that saved write/address may be unreliable for a FECS target. common/bus/bus_gk20a.c dispatches PRI squash, FECS error and timeout.",
+      "disposition": "条件差异，仅在故障 ISR 路径；待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_timer_gk20a.h#L95",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/ptimer/ptimer_gk20a.c#L52"
+    },
+    {
+      "function": "gk20a_ptimer_isr",
+      "reg": "timer_pri_timeout_save_1_r()",
+      "address": "0x9088",
+      "source": "common/ptimer/ptimer_gk20a.c:53",
+      "value": "0",
+      "kmd": "platform/t214_frontend.c:41-55 records PBUS and PRIV ring info; its different source registers are not the timer save registers.",
+      "impact": "Clears saved timeout information after it has been sampled by the upstream ISR. Effect on later WDDM diagnostics or restart is unknown.",
+      "upstream_basis": "common/ptimer/ptimer_gk20a.c:31-61 cautions that saved write/address may be unreliable for a FECS target. common/bus/bus_gk20a.c dispatches PRI squash, FECS error and timeout.",
+      "disposition": "条件差异，仅在故障 ISR 路径；待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_timer_gk20a.h#L111",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/ptimer/ptimer_gk20a.c#L53"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_evt_ext_therm_0_r()",
+      "address": "0x20700",
+      "source": "common/therm/therm_gm20b.c:42",
+      "value": "therm_evt_ext_therm_0_slow_factor_f(0x2)",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L75",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L42"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_evt_ext_therm_1_r()",
+      "address": "0x20704",
+      "source": "common/therm/therm_gm20b.c:44",
+      "value": "therm_evt_ext_therm_1_slow_factor_f(0x6)",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L87",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L44"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_evt_ext_therm_2_r()",
+      "address": "0x20708",
+      "source": "common/therm/therm_gm20b.c:46",
+      "value": "therm_evt_ext_therm_2_slow_factor_f(0xe)",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L99",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L46"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_grad_stepping_table_r(0)",
+      "address": "0x202c8",
+      "source": "common/therm/therm_gm20b.c:49",
+      "value": "therm_grad_stepping_table_slowdown_factor0_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by1p5_f()) | therm_grad_stepping_table_slowdown_factor1_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by2_f()) | therm_grad_stepping_table_slowdown_factor2_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by4_f()) | therm_grad_stepping_table_slowdown_factor3_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by8_f()) | therm_grad_stepping_table_slowdown_factor4_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by8_f())",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L247",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L49"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_grad_stepping_table_r(1)",
+      "address": "0x202cc",
+      "source": "common/therm/therm_gm20b.c:55",
+      "value": "therm_grad_stepping_table_slowdown_factor0_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by8_f()) | therm_grad_stepping_table_slowdown_factor1_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by8_f()) | therm_grad_stepping_table_slowdown_factor2_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by8_f()) | therm_grad_stepping_table_slowdown_factor3_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by8_f()) | therm_grad_stepping_table_slowdown_factor4_f(therm_grad_stepping_table_slowdown_factor0_fpdiv_by8_f())",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L247",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L55"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_clk_timing_r(0)",
+      "address": "0x203c0",
+      "source": "common/therm/therm_gm20b.c:64",
+      "value": "v",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L339",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L64"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_config2_r()",
+      "address": "0x20130",
+      "source": "common/therm/therm_gm20b.c:69",
+      "value": "v",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L119",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L69"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_grad_stepping1_r()",
+      "address": "0x202c4",
+      "source": "common/therm/therm_gm20b.c:71",
+      "value": "therm_grad_stepping1_pdiv_duration_f(32)",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L331",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L71"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_grad_stepping0_r()",
+      "address": "0x202c0",
+      "source": "common/therm/therm_gm20b.c:76",
+      "value": "v",
+      "kmd": "platform/t214_clock.c handles PLL and temporarily gates THERM_USE_A; windows/dvfs.c supplies Windows temperature/clock policy.",
+      "impact": "Upstream selects external thermal event slowdown factors and programs the gradual slowdown table/timing. Board behavior under the Windows power policy remains unmeasured.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L307",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L76"
+    },
+    {
+      "function": "gm20b_init_therm_setup_hw",
+      "reg": "therm_use_a_r()",
+      "address": "0x20798",
+      "source": "common/therm/therm_gm20b.c:39",
+      "value": "therm_use_a_ext_therm_0_enable_f() | therm_use_a_ext_therm_1_enable_f() | therm_use_a_ext_therm_2_enable_f()",
+      "kmd": "platform/t214_clock.c:59 temporarily clears THERM_USE_A before restoring its inherited value.",
+      "impact": "The address is written in KMD. Upstream explicitly enables three external thermal inputs. Their Windows configuration is unverified.",
+      "upstream_basis": "common/therm/therm_gm20b.c:38-76 labels NV_THERM programming; register names and values establish the configured function. No Windows hang or performance rationale is given.",
+      "disposition": "部分等效，不能列为缺少寄存器写入",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L59",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L39"
+    },
+    {
+      "function": "gm20b_elcg_init_idle_filters",
+      "reg": "therm_fecs_idle_filter_r()",
+      "address": "0x20288",
+      "source": "common/therm/therm_gm20b.c:113",
+      "value": "idle_filter",
+      "kmd": "platform/t214_frontend.c:194-202 sets RUN and preserves filter fields. No matching explicit filter reset in the driver or sampled NETB data.",
+      "impact": "Upstream explicitly resets the two idle filters to zero. Relevance under forced RUN needs hardware evidence.",
+      "upstream_basis": "common/therm/therm_gm20b.c:100-118 comments describe the zero defaults and the 1024-clock gate filter.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L211",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L113"
+    },
+    {
+      "function": "gm20b_elcg_init_idle_filters",
+      "reg": "therm_hubmmu_idle_filter_r()",
+      "address": "0x2028c",
+      "source": "common/therm/therm_gm20b.c:117",
+      "value": "idle_filter",
+      "kmd": "platform/t214_frontend.c:194-202 sets RUN and preserves filter fields. No matching explicit filter reset in the driver or sampled NETB data.",
+      "impact": "Upstream explicitly resets the two idle filters to zero. Relevance under forced RUN needs hardware evidence.",
+      "upstream_basis": "common/therm/therm_gm20b.c:100-118 comments describe the zero defaults and the 1024-clock gate filter.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_therm_gm20b.h#L219",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/therm/therm_gm20b.c#L117"
+    },
+    {
+      "function": "gm20b_fb_set_mmu_debug_mode",
+      "reg": "fb_mmu_debug_ctrl_r()",
+      "address": "0x100cc4",
+      "source": "common/fb/fb_gm20b.c:329",
+      "value": "reg_val",
+      "kmd": "platform/t214_gr.c:261-283 reads FB and mirrors it into the GPC debug configuration.",
+      "impact": "Linux explicitly sets the debug bit at the FB source. Windows inherits it while constructing GPC state. Observable effect depends on initial state.",
+      "upstream_basis": "common/fb/fb_gm20b.c:311-335; paired with gm20b_gr_set_debug_mode. No upstream rationale linking it to the reported reboot.",
+      "disposition": "待实机验证",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_fb_gm20b.h#L231",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/fb/fb_gm20b.c#L329"
+    },
+    {
+      "function": "gm20b_gr_set_debug_mode",
+      "reg": "gr_gpcs_pri_mmu_debug_ctrl_r()",
+      "address": "0x4188b0",
+      "source": "gm20b/gr_gm20b.c:1497",
+      "value": "reg_val",
+      "kmd": "platform/t214_gr.c:261-283 writes the GPC target via indexed source/target arrays.",
+      "impact": "Target already receives FB debug configuration; policy source differs.",
+      "upstream_basis": "gm20b/gr_gm20b.c:1484-1499.",
+      "disposition": "排除目标寄存器缺失；源策略另列",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_gr_gm20b.h#L3835",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gm20b/gr_gm20b.c#L1497"
+    },
+    {
+      "function": "gm20b_ltc_init_cbc",
+      "reg": "ltc_ltcs_ltss_cbc_base_r()",
+      "address": "0x17e278",
+      "source": "common/ltc/ltc_gm20b.c:472",
+      "value": "compbit_base_post_divide",
+      "kmd": "core/gm20b_mmu.c:28 and windows/paging_dispatch.c restrict allocations to uncompressed layouts.",
+      "impact": "Programs the compression backing-store base after allocation; upstream bug 1477079 concerns base adjustment.",
+      "upstream_basis": "common/ltc/ltc_gm20b.c:435-474.",
+      "disposition": "不适用：没有相应压缩资源，排除",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_ltc_gm20b.h#L167",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/ltc/ltc_gm20b.c#L472"
+    },
+    {
+      "function": "gm20b_mc_intr_enable",
+      "reg": "mc_intr_mask_0_r()",
+      "address": "0x640",
+      "source": "common/mc/mc_gm20b.c:144",
+      "value": "mc_intr_pfifo_pending_f() | mc_intr_priv_ring_pending_f() | mc_intr_ltc_pending_f() | mc_intr_pbus_pending_f() | eng_intr_mask",
+      "kmd": "platform/t214_frontend.c:75 masks CPU IRQ lines at startup. platform/t214_interrupt.c later arms the nonstall FIFO line under Windows interrupt ownership.",
+      "impact": "Enables the upstream stall interrupt source set. Windows interrupt ownership and handlers differ.",
+      "upstream_basis": "common/mc/mc_gm20b.c:133-151; platform/t214_interrupt.c:4-7 locally documents Windows GIC ownership.",
+      "disposition": "不同中断策略；不能直接移植",
+      "address_definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_mc_gm20b.h#L103",
+      "upstream_write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/mc/mc_gm20b.c#L144"
+    }
+  ],
+  "coverage": "Reviewed rows only. Duplicate aliases and IRQ/resume-only entries are distinguished. Conditional GR firmware, secure PMU/ACR and dynamically computed addresses require matching execution context. No completeness claim from literal search.",
+  "review_basis": {
+    "model": "gemini-4-neon-high",
+    "handback_sha256": "24df8481d07cc2b2b340cc1821814470ccffb320f03a9ce95719de51c6c02925",
+    "address_authority": "On the complete OE4T patches-rel-36 tree at 21d928824dc7ca3dc17603a53b11edc6641ace2d the two gm20b station headers retain the address formulas, but the legacy function and its two-write call are absent by name. The pinned T210 implementation and both matching T210 headers supply the values, indices and rationale. Other MMIO entries use their own register headers.",
+    "independent_review": "Matched named writes and header offsets; checked what the actual NETB tables replay by value and geometry. NETB is a retained matching hash from the historical rollback package. The opaque microcode itself is outside this static-side audit.",
+    "mirror_header_crosscheck": {
+      "sys": "https://github.com/OE4T/linux-nvgpu/blob/21d928824dc7ca3dc17603a53b11edc6641ace2d/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_pri_ringstation_sys_gm20b.h#L62-L63",
+      "gpc": "https://github.com/OE4T/linux-nvgpu/blob/21d928824dc7ca3dc17603a53b11edc6641ace2d/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_pri_ringstation_gpc_gm20b.h#L62-L63"
+    },
+    "source_supplement_gemini": "SUCCESS",
+    "read_coalescing_correction": "NETB region 5 executes {addr, index, value} records. For 0x419a3c its stored value is 0x181e, including both bits 2 and 4. gk20a_init_gr_setup_hw calls gm20a_gr_disable_rd_coalesce before sw_ctx_load, so the upstream transient field clear is distinct from the final replayed value. A persistent clear after replay would introduce an unverified policy."
+  },
+  "gr_status_and_exception_writes": [
+    {
+      "register": "gr_exception_r",
+      "address": "0x400108",
+      "upstream_function": "gk20a_gr_enable_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4514",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L175",
+      "netb_writes": [],
+      "kmd_literal_locations": [
+        "tegra-x1-wddm/core/execute.c:285",
+        "tegra-x1-wddm/windows/diagnostic_backend.c:378"
+      ],
+      "review": "Windows 历史源码未发现同阶段同掩码的显式写入，影响待实机验证",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_exception_en_r",
+      "address": "0x400138",
+      "upstream_function": "gk20a_gr_enable_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4515",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L227",
+      "netb_writes": [
+        [
+          6,
+          "0x0"
+        ]
+      ],
+      "kmd_literal_locations": [],
+      "review": "有 NETB 写入，根据数值和阶段比较；排除整寄存器缺失",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_exception1_r",
+      "address": "0x400118",
+      "upstream_function": "gk20a_gr_enable_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4516",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L215",
+      "netb_writes": [],
+      "kmd_literal_locations": [],
+      "review": "Windows 历史源码未发现同阶段同掩码的显式写入，影响待实机验证",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_exception1_en_r",
+      "address": "0x400130",
+      "upstream_function": "gk20a_gr_enable_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4517",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L235",
+      "netb_writes": [
+        [
+          6,
+          "0x0"
+        ]
+      ],
+      "kmd_literal_locations": [],
+      "review": "有 NETB 写入，根据数值和阶段比较；排除整寄存器缺失",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_exception2_r",
+      "address": "0x40011c",
+      "upstream_function": "gk20a_gr_enable_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4518",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L223",
+      "netb_writes": [],
+      "kmd_literal_locations": [],
+      "review": "Windows 历史源码未发现同阶段同掩码的显式写入，影响待实机验证",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_exception2_en_r",
+      "address": "0x400134",
+      "upstream_function": "gk20a_gr_enable_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4519",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L239",
+      "netb_writes": [
+        [
+          6,
+          "0x0"
+        ]
+      ],
+      "kmd_literal_locations": [],
+      "review": "有 NETB 写入，根据数值和阶段比较；排除整寄存器缺失",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_gpcs_tpcs_tpccs_tpc_exception_en_r",
+      "address": "0x419d0c",
+      "upstream_function": "gk20a_gr_enable_gpc_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4527",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L3103",
+      "netb_writes": [],
+      "kmd_literal_locations": [],
+      "review": "Windows 历史源码未发现同阶段同掩码的显式写入，影响待实机验证",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_gpcs_gpccs_gpc_exception_en_r",
+      "address": "0x41ac94",
+      "upstream_function": "gk20a_gr_enable_gpc_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4534",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L3127",
+      "netb_writes": [],
+      "kmd_literal_locations": [],
+      "review": "Windows 历史源码未发现同阶段同掩码的显式写入，影响待实机验证",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_fe_hww_esr_r",
+      "address": "0x404000",
+      "upstream_function": "gr_gk20a_enable_hww_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4541",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L551",
+      "netb_writes": [],
+      "kmd_literal_locations": [
+        "tegra-x1-wddm/core/execute.c:286",
+        "tegra-x1-wddm/windows/diagnostic_backend.c:378"
+      ],
+      "review": "Windows 历史源码未发现同阶段同掩码的显式写入，影响待实机验证",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_memfmt_hww_esr_r",
+      "address": "0x404600",
+      "upstream_function": "gr_gk20a_enable_hww_exceptions",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4544",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L619",
+      "netb_writes": [],
+      "kmd_literal_locations": [],
+      "review": "Windows 历史源码未发现同阶段同掩码的显式写入，影响待实机验证",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_fecs_host_int_enable_r",
+      "address": "0x409c24",
+      "upstream_function": "gr_gk20a_fecs_host_int_enable",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gk20a/gr_gk20a.c#L4551",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gk20a/hw_gr_gk20a.h#L1019",
+      "netb_writes": [],
+      "kmd_literal_locations": [],
+      "review": "Windows 历史源码未发现同阶段同掩码的显式写入，影响待实机验证",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_gpcs_tpcs_sm_hww_warp_esr_report_mask_r",
+      "address": "0x419e44",
+      "upstream_function": "gr_gm20b_set_hww_esr_report_mask",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gm20b/gr_gm20b.c#L442",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_gr_gm20b.h#L3051",
+      "netb_writes": [
+        [
+          5,
+          "0xd3eff2"
+        ]
+      ],
+      "kmd_literal_locations": [
+        "tegra-x1-wddm/platform/t214_gr_context.c:294"
+      ],
+      "review": "有 NETB 写入，根据数值和阶段比较；排除整寄存器缺失",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_gpcs_tpcs_sm_hww_global_esr_report_mask_r",
+      "address": "0x419e4c",
+      "upstream_function": "gr_gm20b_set_hww_esr_report_mask",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gm20b/gr_gm20b.c#L467",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_gr_gm20b.h#L3147",
+      "netb_writes": [
+        [
+          5,
+          "0x7f"
+        ]
+      ],
+      "kmd_literal_locations": [],
+      "review": "有 NETB 写入，根据数值和阶段比较；排除整寄存器缺失",
+      "impact": "Programs or clears an exception status/mask. Hardware error visibility on this board is unverified."
+    },
+    {
+      "register": "gr_gpcs_tpcs_tex_m_dbg2_r",
+      "address": "0x419a3c",
+      "upstream_function": "gm20a_gr_disable_rd_coalesce",
+      "write": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gm20b/gr_gm20b.c#L1451",
+      "definition": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_gr_gm20b.h#L2327",
+      "netb_writes": [
+        [
+          5,
+          "0x181e"
+        ]
+      ],
+      "kmd_literal_locations": [],
+      "review": "有 NETB 写入，根据数值和阶段比较；排除整寄存器缺失",
+      "impact": "Upstream clears surface and LG read coalescing before replay; the KMD NETB record later sets both bits."
+    }
+  ],
+  "gating_tables": {
+    "windows_policy": "Upstream conditionally selects prod or disable values. KMD uses force-run in selected blocks. No assumption that an omitted profile is a correctness bug, or that a gating state can be changed without matching Windows power/IRQ ownership. Effect: 待实机验证.",
+    "rows": [
+      {
+        "table": "gm20b_slcg_bus",
+        "function": "gm20b_slcg_bus_load_gating_prod",
+        "offset": "0x1c04",
+        "prod": "0x0",
+        "disable": "0x3fe",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L36",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_chiplet",
+        "function": "gm20b_slcg_chiplet_load_gating_prod",
+        "offset": "0x10c07c",
+        "prod": "0x0",
+        "disable": "0x7",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L46",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_chiplet",
+        "function": "gm20b_slcg_chiplet_load_gating_prod",
+        "offset": "0x10e07c",
+        "prod": "0x0",
+        "disable": "0x7",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L47",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_chiplet",
+        "function": "gm20b_slcg_chiplet_load_gating_prod",
+        "offset": "0x10d07c",
+        "prod": "0x0",
+        "disable": "0x7",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L48",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_chiplet",
+        "function": "gm20b_slcg_chiplet_load_gating_prod",
+        "offset": "0x10e17c",
+        "prod": "0x0",
+        "disable": "0x7",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L49",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_perf",
+        "function": "gm20b_slcg_perf_load_gating_prod",
+        "offset": "0x1be018",
+        "prod": "0x1ff",
+        "disable": "0x0",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L133",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_perf",
+        "function": "gm20b_slcg_perf_load_gating_prod",
+        "offset": "0x1bc018",
+        "prod": "0x1ff",
+        "disable": "0x0",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L134",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_perf",
+        "function": "gm20b_slcg_perf_load_gating_prod",
+        "offset": "0x1b8018",
+        "prod": "0x1ff",
+        "disable": "0x0",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L135",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_perf",
+        "function": "gm20b_slcg_perf_load_gating_prod",
+        "offset": "0x1b4124",
+        "prod": "0x1",
+        "disable": "0x0",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L136",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_priring",
+        "function": "gm20b_slcg_priring_load_gating_prod",
+        "offset": "0x1200a8",
+        "prod": "0x0",
+        "disable": "0x1",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L141",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_therm",
+        "function": "gm20b_slcg_therm_load_gating_prod",
+        "offset": "0x206b8",
+        "prod": "0x0",
+        "disable": "0xf",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L161",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_xbar",
+        "function": "gm20b_slcg_xbar_load_gating_prod",
+        "offset": "0x13cbe4",
+        "prod": "0x0",
+        "disable": "0x1ffffffe",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L166",
+        "netb": []
+      },
+      {
+        "table": "gm20b_slcg_xbar",
+        "function": "gm20b_slcg_xbar_load_gating_prod",
+        "offset": "0x13cc04",
+        "prod": "0x0",
+        "disable": "0x1ffffffe",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L167",
+        "netb": []
+      },
+      {
+        "table": "gm20b_blcg_bus",
+        "function": "gm20b_blcg_bus_load_gating_prod",
+        "offset": "0x1c00",
+        "prod": "0x42",
+        "disable": "0x0",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L172",
+        "netb": []
+      },
+      {
+        "table": "gm20b_blcg_xbar",
+        "function": "gm20b_blcg_xbar_load_gating_prod",
+        "offset": "0x13cbe0",
+        "prod": "0x42",
+        "disable": "0x0",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L280",
+        "netb": []
+      },
+      {
+        "table": "gm20b_blcg_xbar",
+        "function": "gm20b_blcg_xbar_load_gating_prod",
+        "offset": "0x13cc00",
+        "prod": "0x42",
+        "disable": "0x0",
+        "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/common/clock_gating/gm20b_gating_reglist.c#L281",
+        "netb": []
+      }
+    ]
+  },
+  "transition_difference": {
+    "register": "trim_sys_gpc2clk_out_r",
+    "address": "0x137250",
+    "header": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/include/nvgpu/hw/gm20b/hw_trim_gm20b.h#L191",
+    "upstream_function": "clk_program_gpc_pll",
+    "source": "https://github.com/CTCaer/switch-l4t-kernel-nvgpu/blob/1ae0167d360287ca78f5a2572f0de42594140312/drivers/gpu/nvgpu/gm20b/clk_gm20b.c#L941",
+    "kmd": "platform/t214_clock.c sets OUT during startup. The historical bypass/relock path lacks the two identical intermediate vcodiv=2 writes when the old or new PL is below 2. This is a sequence difference.",
+    "documented_reason": "Upstream explains that this transition can glitch and intentionally doubles the write to engage the linear divider. Windows high-load reboot and voltage effects are 待实机验证."
+  },
+  "exclusions": {
+    "protected_firmware": "Horizon or winsys workarounds and its FECS access restrictions are excluded as environmental differences. Secure boot and supported native PMU/ACR flows should be checked on their own terms.",
+    "compressed_resources": "No native uncompressed-only KMD equivalent is required for Linux comptag backing store or ZBC compression programming.",
+    "irq_ownership": "Linux stall IRQ routing, interrupt-time W1C acknowledgements and per-TSG recovery are not unconditional cold-start writes. Deliberately retained WDDM completion/abort and interrupt ownership rules.",
+    "retained_coverage_limit": "All upstream functions and values in admitted rows are source-backed. Indirect firmware execution and physical reset defaults remain unresolved; the broad generated candidate-site count is not a missing-write count."
+  },
+  "coverage_by_component": {
+    "MC/PRIV/BUS": "Historical station writes admitted. Stall and nonstall masks have different owners on Windows. The unconditional WDDM W1C of pending interrupts during initialization differs from an interrupt-time acknowledgement.",
+    "FB/MMU/LTC": "Compared active LTC count, TLB/flush, and FB/GPC debug state. Compression/comptag allocation, protected-region setup and IRQ-only operations are conditional.",
+    "FIFO/PBDMA/CE2": "Compared timeout, status clears, enable masks, runlist, channel and CE2 initialization across core/execute.c and platform/t214_frontend.c. The local abort model does not synthesize a Linux per-TSG MMU fault.",
+    "GR": "Compared NETB firmware replay, saved configuration, exception masks, pre-replay coalescing and station timeout placement. Opaque FECS/GPCCS firmware execution remains unverified.",
+    "ACR/PMU": "The native secure ACR/WPR and polling bootstrap are separate from Linux ELPG and runtime PMU interrupt/queue service. PMU firmware contents and hardware defaults remain open.",
+    "Clocks/THERM": "Compared clock profiles and the conditional old/new PL transition with the KMD C1 NA path. SLCG/BLCG profile presence does not establish an observed on-board power or thermal effect.",
+    "PTIMER/semaphore": "Register reads, software conversion, mapped semaphore memory and the abort/wake path are separated from cold initialization and IRQ-only writes."
+  },
+  "local_timeout_candidate": {
+    "source": "9b7be48a1895b5d55b94bb7d86f1ad7a6aa38bcc",
+    "parent": "794958f69d5185936afde4e6fcf2e6f3d5a31999",
+    "scope": "Single source change to the production graphics setup. Full word 0x800 to SYS then GPC immediately after ZCULL, before the initial graphics context stream and publication of boot-ready state. The copy-only path does not acquire this graphics state. Windows enables GR FIFO access earlier during boot, so the global sequence is not identical. Cold restart calls TgGpuStartHardware again.",
+    "test": "Built and linked production ARM64 display KMD locally. Host model ran source-order and negative/ownership checks, full graphics bring-up, and GR context replay with NETB_img.bin. The final real-NETB model passed after correcting a premature ZCULL ordering assumption in an intermediate test.",
+    "unsigned_sys_sha256": "827d320ab6a75671198c0d1bc6c6672c4b56402312c57a24aeac7faa0f2b8fbe",
+    "unsigned_sys_bytes": 248832,
+    "hardware": "No deployment or hardware register readback in this audit. No promotion and no attribution of the historical reboot."
+  },
+  "combined_hardware": {
+    "qualified_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "kmd_sha256": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+    "once_and_permanent_boot": 92083,
+    "status": "Qualified native handheld desktop. The legacy 91476 scene and a physical PL=1 high-frequency transition were not run in this acceptance.",
+    "qualification": "tegra-x1-wddm/docs/nvgpu-init-30331aa3cb57/qualification.json",
+    "inventory": "tegra-x1-wddm/docs/nvgpu-init-30331aa3cb57/diff-inventory.md",
+    "closed_gate_prior_shutdown_fault": "GM20B-CLOSED-GATE-SHUTDOWN-91989"
+  }
+}

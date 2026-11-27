@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-live-kmd-fence-cache-20261121-01",
+  "contract_id": "WIN-SEQ-LIVE-KMD-FENCE-CACHE",
+  "windows_question": "WIN-SEQ-LIVE-KMD-FENCE-CACHE",
+  "owner": "Windows VidSch、DxgKrnl、DWM、GM20B KMD",
+  "question": "现行正式 KMD 的同包 GPU 围栏缓存快照，能否在首次 Present 期间通过实时 ETW 传输并绑定 Windows 调度与完成？",
+  "method": "用生产 KMD 既有 ETW 事件 1/2 校准原空窗口同包围栏进度的实时持久接收",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289"
+    },
+    "driver_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+      "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+    }
+  },
+  "pass_condition": "在原空窗的一次自然活动中，生产 KMD 同围栏的事件 2 与两路 Windows 记录吻合，或保留未触发和数据质量的证据。",
+  "observations": [
+    "核对正式启动、DWM、供电、手持模式、Code 0、永久许可、七组件及实际加载文件。使用与旧窗口同签名、同双 BGRA SEQUENTIAL 空窗口。",
+    "预设 12 s、4096 条实时事件及两路各 64 MiB 文件，同时启用 Windows 以及生产 KMD 既有事件 1/2。保持现行永久许可和组件，持久写入 READY 后只放行一次。",
+    "严格比较事件 1/2 原始载荷与封口 ETL，按适配器、提交围栏、时间以及 Windows 对象身份与 175/5063/177/176/180 配对。成功提交由操作系统回执证明；KMD 事件 2 依赖自然预抢占或故障，不人为触发。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "3ab11b187c323fe677839c9e2ff73490a907e061c120f7fcf3c1cb57e966ae18",
+      "Capture-State.cs": "c3160e7b79c326194582ead5de44e9d6d685038f7486257f4cedade027fd0d6b",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d"
+    },
+    "fixture_runner_sha256": "087d318ac9139696a0c1e4092631d6594948c86335aa314af7a66764c32f553f",
+    "profiler_runner_sha256": "ff9a1d7a7b91616339dc1f0ac6bf677e607e83b76752894f3a820cfea9ab31b0",
+    "orchestration_sha256": "c9148310388e585e2f0186d8af44640548eb6154cff4d9cf0cb6810316b5185f",
+    "source_sha256": "30b1436fa6406f3a0e6111628b7eb35f925b25df88c67b769df3d3ba0907eb2c",
+    "exe_sha256": "9162b4275dbd793688839c5490da9b4c4b09455d3a51f65174719c057306ad57",
+    "receiver_sha256": "dcbcc13146e3421cb48a919ae1b5137e9cb95e3d719d8d111741cb61efd50314",
+    "baseline_manifest_sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289",
+    "before_sha256": "ca13d1f5ed8cc368e037ffd8f0aa4e0c14f8cc32447466a6a87f714b820c1463",
+    "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-gated-seq-profiler-present-20261121-01.result.json",
+        "sha256": "f600f46c61ce3dd658fa4c7ad8ca4ed9021ca9dbee288159cba3e6c9f55afcd5"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-seq-application-blt-fence-20261121-01.result.json",
+        "sha256": "7912f01b92a41854e52a7fbf490f147f03a8ca34c3aee6bd6bda33b49bdd27ad"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json",
+        "sha256": "922cd6aaedaf958c38827db41c0d2fb297a179469f3f7e94cbf7612d674ab6a6"
+      },
+      {
+        "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+        "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+      }
+    ],
+    "boot": 92083,
+    "dwm": 1456,
+    "duration": 12000,
+    "wire_limit": 4096,
+    "etl_file_limit_mib": 64,
+    "kmd_event_layout": {
+      "1": 72,
+      "2": 152
+    }
+  }
+}

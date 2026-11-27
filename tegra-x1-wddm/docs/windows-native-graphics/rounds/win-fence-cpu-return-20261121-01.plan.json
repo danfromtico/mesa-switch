@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "round_id": "win-fence-cpu-return-20261121-01",
+  "contract_id": "WIN-FENCE-WAIT",
+  "windows_question": "WIN-FENCE-WAIT",
+  "owner": "提交方、Windows VidSch 和 GM20B 上下文",
+  "question": "受监控围栏的 GPU 信号、同值上下文等待与等待完成能否逐包关联？",
+  "method": "按实载组件及两路 ETL 复核值 1 CPU 通知所在初始化阶段",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "解析安装版本事件模板，按上下文、对象、值和队列包身份匹配 signal 与 wait，证明依赖获满足后等待完成。",
+  "observations": [
+    "逐个校验六份已归档签名空窗口的 ZIP、两个 ETL 和正式应用组件全哈希。以 DxgKrnl 1069、245、297、180 绑定同一设备、对象、上下文、值、请求和退役。",
+    "在应用的分离 ETL 读取相同绘图 PID/TID 和进程创建时间的 UMD 原始事件 14、22、4 和 30。将协商、GPU 信号、CPU 异步登记、信号退役与初始化成功配对，检查 297 原始事件头是否带调用栈。",
+    "按本机组件对应固定源码核对初始化是否传播等待失败。另回读三次原异常的保留范围，记录可见阶段和仍缺的 CPU 事件句柄或公开调用后的回执。"
+  ],
+  "inputs": {
+    "archive_input_sha256": "969a0606a2f461fe1f1d699a9b8f8cee494b74ab4c9bf6e5e855e1dd25288caa",
+    "all_process_waits": {
+      "path": "windows-native-graphics/rounds/win-fence-all-owners-20261121-01.result.json",
+      "sha256": "c24a31504ff6dead5b01ea833bcf58ede36173ec78f8fbcb03af9d890f29cc96"
+    },
+    "original": {
+      "path": "legacy-sequential-step4/historical-first-present-fence.json",
+      "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+    },
+    "baseline": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "code_commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "code_sha256": {
+      "src/nouveau/tgd3d/tgd3d_device.cpp": "eb2dd3100bc307daa1e942772fb06fcfce3e4602f3b570264fc554743f3d0a5a",
+      "src/nouveau/tgd3d/tgd3d_runtime_queue.cpp": "bc116e5d7fffa88e45d736a7b31c92441ae499f89eb9b61f11e74b4e3893a5dc",
+      "src/nouveau/tgd3d/tgd3d_trace.h": "48915ebe00d2091d7ef74be3416dcc7badfd0130dd831c2704cdadfe3a0df681",
+      "src/nouveau/vulkan/nvk_queue.c": "fac676b4e5adedf83eb7f7b9ab1975daf12b782ac261d5bb2420aa41fcfcc0d5",
+      "src/nouveau/vulkan/nvk_mem_stream.c": "3588bd78dcaefdcaa0781f8038ab3896737bc5ed13b2e887f7bcac09be5a47d8",
+      "src/nouveau/vulkan/nvkmd/windows/nvkmd_windows_queue.c": "11dbf4e6ec77d2208af318e63741117d437b01fbffabd2a1a6dac873fe798fea"
+    },
+    "verifier_sha256": "b638399ee9c85d40b514c42094cfe20b4f1fe5e24049166fc6578ce936d0301d",
+    "microsoft": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/ns-d3dumddi-d3dddicb_waitforsynchronizationobjectfromcpu",
+      "https://learn.microsoft.com/en-us/windows/win32/api/evntcons/ns-evntcons-event_header"
+    ]
+  }
+}

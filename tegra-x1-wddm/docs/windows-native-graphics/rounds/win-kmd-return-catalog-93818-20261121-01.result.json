@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-return-catalog-93818-20261121-01",
+  "contract_id": "WIN-KMD-RETURN-CATALOG",
+  "windows_question": "WIN-KMD-RETURN-CATALOG",
+  "plan_sha256": "84356698ff15214398b17ecf3b850f63a4de9d322896f80a7c9cad1e47fd2e53",
+  "status": "观测缺口",
+  "finding": "签名 ARM64 模型输出完整 PASS 信息，Start-Process 退出码字段为空。Windows 目录步骤未发出，正式驱动和开机回读一致，暂存目录已清理。",
+  "missing_observation": "本轮未获得独立的进程退出码、候选目录或签名成员结果。使用可持续持有进程句柄的调用方式补采。",
+  "device_executions": 1,
+  "evidence": {
+    "native_report": {
+      "output": "WINDOW_COPY 640x360 to 641x361 passed, 2560/2688 pitches, one complete DDI packet\r\nPASS: WDK private GR images/mappings/reset epochs, adapter/LUID/512MiB ABI and ordered queue (controlled substitutes; no live WDDM or GPU pass)\r\n",
+      "boot": 93818,
+      "catalog_started": false,
+      "model": {
+        "code": null,
+        "pid": 3612
+      },
+      "utc": "2026-11-21T22:41:38.8172875Z",
+      "exe_sha256": "ea74a95d9249639ed6172ae341939833e273698d51e5844cf37c584ec51dd16f"
+    },
+    "cleanup": {
+      "removed": true,
+      "utc": "2026-11-21T22:42:16.5575521Z"
+    },
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-return-observer/calibration-local/windows-catalog/catalog-native-model-observed.json",
+        "sha256": "0ec023cbb8706f94b8fb96692857a73f318b0752739431ee4f205bed720ff743",
+        "bytes": 473
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-return-observer/calibration-local/windows-catalog/first-cleanup.json",
+        "sha256": "c4079dd2e50d6d7554952381cb5434060e36b540a08cc748e6fe9eb58586c763",
+        "bytes": 63
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/seq-93818-catalog-retry-preflight.json",
+        "sha256": "8991d61e9600fc5f36eb50b0fd3cc1fa8d4d2e8b3efe716340c99a71b396d15a",
+        "bytes": 10886
+      }
+    ],
+    "boundaries": {
+      "last_entry": 3612,
+      "last_return": "WINDOW_COPY 640x360 to 641x361 passed, 2560/2688 pitches, one complete DDI packet\r\nPASS: WDK private GR images/mappings/reset epochs, adapter/LUID/512MiB ABI and ordered queue (controlled substitutes; no live WDDM or GPU pass)\r\n",
+      "first_anomaly_or_missing": "本轮未获得独立的进程退出码、候选目录或签名成员结果。使用可持续持有进程句柄的调用方式补采。"
+    }
+  }
+}

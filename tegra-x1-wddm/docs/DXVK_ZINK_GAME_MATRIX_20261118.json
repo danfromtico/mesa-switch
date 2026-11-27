@@ -1,0 +1,1353 @@
+{
+  "platform": "Switch Lite, Windows ARM64, native NVK GM20B",
+  "icd_baseline_source": "3dc62b5a5a6dc51f42ad0c51bd9bfc5fc4b8e34d",
+  "pacecar_source": "264fca5fc55ad3fc2d49bc54bf576e798a85ee54",
+  "engine_commit": "c781d13255ce72fcd24e47567244f970e1ba7c50",
+  "data": "LibreQuake v0.09-beta / lq_e0m1",
+  "method": "Foreground input moved the camera. The map acknowledged the input and quit command. The capture compared a 500 by 180 world crop before and after movement. Rates use independent target-process Win32k producer events, DWM updates for the game window or surface, and sampled screen image changes. Timing percentiles describe the sampled scene and test duration.",
+  "runs": [
+    {
+      "game_engine": "FTEQW",
+      "backend": "DXVK D3D9",
+      "game_process": "x86",
+      "dxvk_directory": "DXVK-x86",
+      "case": "dxvk-x86",
+      "boot_utc": "2026-11-18T07:31:47.5962910Z",
+      "map_joined_utc": "2026-11-18T07:49:04.3391397Z",
+      "exit_utc": "2026-11-18T07:49:33.4013753Z",
+      "exit_code": 0,
+      "dwm_pid_before_after": [
+        1260,
+        1260
+      ],
+      "game_pid": 7120,
+      "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+      "pacecar_sha256": "0bb94b678ac1778db3ffc24c2ad131dd2b8f7306d9917b8644a9bd15a70db8eb",
+      "exe_sha256": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+      "loaded_modules_sha256": {
+        "vulkan-1.dll": "0cb8619a4a4ba0acceba1f75a2dc0c8e251ab75d4a3c3e9640262c4c650c18af",
+        "dxgi.dll": "20fb6a468f97e00e76b0e467982ef04c16718b8a8c0f2e6db5ef2446095c900a",
+        "d3d9.dll": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+        "libvulkan_nouveau.dll": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b"
+      },
+      "renderer_log": "NVIDIA Tegra X1 (GM20B) (NVK GM20B)",
+      "power_mode": 1,
+      "display_size": [
+        640,
+        360
+      ],
+      "logged_input": "SWITCH_INPUT_ACK",
+      "crop_pixels": 90000,
+      "crop_pixels_changed_after_movement": 80000,
+      "screenshots_sha256": {
+        "map-before": "bec3c813efae0c22fdb1ea50e0fa47c49a5a352bbad5a44c9c6bbb85668e9588",
+        "map-after-input": "1a3f2f9a614dbc64990c22f7bac1d28bbe005a8a5f77d67e72bc2400233b75f7",
+        "map-final": "922b700d5e968df230fc16e3c495dc9e38a3b0d431f33be10d3041090e683f0d"
+      },
+      "peak_sampled_working_set": 363659264,
+      "fps": {
+        "cap15": {
+          "seconds": 3.635,
+          "game_gdi_tokens": {
+            "n": 38,
+            "fps": 10.33,
+            "p95_ms": 105.048,
+            "p99_ms": 114.255
+          },
+          "game_window_compositor_updates": {
+            "n": 38,
+            "fps": 10.339,
+            "p95_ms": 106.987,
+            "p99_ms": 109.679
+          },
+          "distinct_screen_samples": {
+            "n": 37,
+            "fps": 10.37,
+            "p95_ms": 118.479,
+            "p99_ms": 129.883
+          },
+          "same_pid_steady_samples": 2,
+          "median_absolute_pacecar_difference_fps": 0.076,
+          "pacecar_samples": [
+            {
+              "s": 0.458,
+              "fps": 10.44031,
+              "independent_preceding_second_fps": 10.278
+            },
+            {
+              "s": 1.483,
+              "fps": 9.85024,
+              "independent_preceding_second_fps": 10.207
+            },
+            {
+              "s": 2.504,
+              "fps": 10.65855,
+              "independent_preceding_second_fps": 10.669
+            },
+            {
+              "s": 3.539,
+              "fps": 10.2792,
+              "independent_preceding_second_fps": 10.42
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 37,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 21.282,
+            "gdi33_to_dwm88_p95_ms": 29.682,
+            "dwm88_to_window46_median_ms": 0.082,
+            "dwm88_to_window46_p95_ms": 0.126
+          }
+        },
+        "cap8": {
+          "seconds": 4.837,
+          "game_gdi_tokens": {
+            "n": 40,
+            "fps": 8.217,
+            "p95_ms": 140.157,
+            "p99_ms": 143.471
+          },
+          "game_window_compositor_updates": {
+            "n": 40,
+            "fps": 8.24,
+            "p95_ms": 133.439,
+            "p99_ms": 133.501
+          },
+          "distinct_screen_samples": {
+            "n": 40,
+            "fps": 8.257,
+            "p95_ms": 151.321,
+            "p99_ms": 160.703
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.038,
+          "pacecar_samples": [
+            {
+              "s": 0.707,
+              "fps": 10.66739,
+              "independent_preceding_second_fps": 10.008
+            },
+            {
+              "s": 1.742,
+              "fps": 8.52624,
+              "independent_preceding_second_fps": 8.064
+            },
+            {
+              "s": 2.755,
+              "fps": 8.09632,
+              "independent_preceding_second_fps": 8.128
+            },
+            {
+              "s": 3.787,
+              "fps": 8.02334,
+              "independent_preceding_second_fps": 8.071
+            },
+            {
+              "s": 4.8,
+              "fps": 7.97383,
+              "independent_preceding_second_fps": 8.012
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 39,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 13.576,
+            "gdi33_to_dwm88_p95_ms": 25.99,
+            "dwm88_to_window46_median_ms": 0.081,
+            "dwm88_to_window46_p95_ms": 0.11
+          }
+        },
+        "hitch": {
+          "seconds": 4.533,
+          "game_gdi_tokens": {
+            "n": 9,
+            "fps": 1.954,
+            "p95_ms": 572.226,
+            "p99_ms": 596.921
+          },
+          "game_window_compositor_updates": {
+            "n": 9,
+            "fps": 1.951,
+            "p95_ms": 640.811,
+            "p99_ms": 701.416
+          },
+          "distinct_screen_samples": {
+            "n": 10,
+            "fps": 2.045,
+            "p95_ms": 664.603,
+            "p99_ms": 736.739
+          },
+          "same_pid_steady_samples": 2,
+          "median_absolute_pacecar_difference_fps": 0.054,
+          "pacecar_samples": [
+            {
+              "s": 0.462,
+              "fps": 7.82864,
+              "independent_preceding_second_fps": 3.972
+            },
+            {
+              "s": 1.486,
+              "fps": 1.9854,
+              "independent_preceding_second_fps": 2.065
+            },
+            {
+              "s": 2.523,
+              "fps": 1.9905,
+              "independent_preceding_second_fps": 2.082
+            },
+            {
+              "s": 3.549,
+              "fps": 2.00517,
+              "independent_preceding_second_fps": 1.988
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 8,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 16.835,
+            "gdi33_to_dwm88_p95_ms": 229.277,
+            "dwm88_to_window46_median_ms": 0.074,
+            "dwm88_to_window46_p95_ms": 0.105
+          }
+        },
+        "recovery": {
+          "seconds": 4.246,
+          "game_gdi_tokens": {
+            "n": 52,
+            "fps": 12.204,
+            "p95_ms": 102.244,
+            "p99_ms": 171.623
+          },
+          "game_window_compositor_updates": {
+            "n": 52,
+            "fps": 12.144,
+            "p95_ms": 116.596,
+            "p99_ms": 174.98
+          },
+          "distinct_screen_samples": {
+            "n": 48,
+            "fps": 11.229,
+            "p95_ms": 166.457,
+            "p99_ms": 207.168
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.557,
+          "pacecar_samples": [
+            {
+              "s": 0.01,
+              "fps": 2.01677,
+              "independent_preceding_second_fps": 5.435
+            },
+            {
+              "s": 1.035,
+              "fps": 9.0227,
+              "independent_preceding_second_fps": 12.667
+            },
+            {
+              "s": 2.059,
+              "fps": 12.48558,
+              "independent_preceding_second_fps": 10.629
+            },
+            {
+              "s": 3.077,
+              "fps": 12.56289,
+              "independent_preceding_second_fps": 13.12
+            },
+            {
+              "s": 4.111,
+              "fps": 12.71116,
+              "independent_preceding_second_fps": 12.766
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 51,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 17.926,
+            "gdi33_to_dwm88_p95_ms": 30.22,
+            "dwm88_to_window46_median_ms": 0.075,
+            "dwm88_to_window46_p95_ms": 0.124
+          }
+        }
+      },
+      "post_exit_first_clear_s": 0.553,
+      "fps_preference_restored": true,
+      "independent_trace_exit": 0,
+      "input_and_lifecycle_sha256": "783759c9d14ab5703ef207f39b19b0583c7fd93f76b2cee38f68cf3717a9c535",
+      "frame_trace_csv_sha256": "015c2e327913849628bbb6859b389609af4cc3e6aa8167d796d94a1b2be813f1",
+      "pacecar_csv_sha256": "9ffa7cf5270897fd2c928013fa7e274cb56959f3402af076c554c14d07276f3c",
+      "screen_sampler_csv_sha256": "060359e9e6184a07f5fa8194a4340f25130b87b8ee2e3af1d7788e97afc66b47"
+    },
+    {
+      "game_engine": "FTEQW",
+      "backend": "DXVK D3D9",
+      "game_process": "x64",
+      "dxvk_directory": "DXVK-x86_64",
+      "case": "dxvk-x64",
+      "boot_utc": "2026-11-18T07:31:47.5962910Z",
+      "map_joined_utc": "2026-11-18T07:51:33.9049582Z",
+      "exit_utc": "2026-11-18T07:52:08.3354174Z",
+      "exit_code": 0,
+      "dwm_pid_before_after": [
+        1260,
+        1260
+      ],
+      "game_pid": 4616,
+      "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+      "pacecar_sha256": "0bb94b678ac1778db3ffc24c2ad131dd2b8f7306d9917b8644a9bd15a70db8eb",
+      "exe_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+      "loaded_modules_sha256": {
+        "vulkan-1.dll": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+        "dxgi.dll": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+        "d3d9.dll": "f73d5b3b4fb702ec340bbd21bf0840ab2186030e72aa9b599d28f20f611ecbf7",
+        "libvulkan_nouveau.dll": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910"
+      },
+      "renderer_log": "NVIDIA Tegra X1 (GM20B) (NVK GM20B)",
+      "power_mode": 1,
+      "display_size": [
+        640,
+        360
+      ],
+      "logged_input": "SWITCH_INPUT_ACK",
+      "crop_pixels": 90000,
+      "crop_pixels_changed_after_movement": 79688,
+      "screenshots_sha256": {
+        "map-before": "21c96bd020a55d682af7b4ff2f26193b6abdb45116250eeaf69479ebeafde2f4",
+        "map-after-input": "39423cf2ac6c6b92dc5970f6ac451ba637ae0de9aafe09d71d20d118a9864f1c",
+        "map-final": "2d43d8ebfb21599f5e947c72e2dc0161d08eb4bf19b808fe3422b59066d19e5f"
+      },
+      "peak_sampled_working_set": 407240704,
+      "fps": {
+        "cap15": {
+          "seconds": 3.624,
+          "game_gdi_tokens": {
+            "n": 37,
+            "fps": 10.091,
+            "p95_ms": 108.153,
+            "p99_ms": 118.67
+          },
+          "game_window_compositor_updates": {
+            "n": 37,
+            "fps": 10.093,
+            "p95_ms": 107.927,
+            "p99_ms": 124.795
+          },
+          "distinct_screen_samples": {
+            "n": 37,
+            "fps": 10.099,
+            "p95_ms": 125.84,
+            "p99_ms": 132.692
+          },
+          "same_pid_steady_samples": 1,
+          "median_absolute_pacecar_difference_fps": 0.406,
+          "pacecar_samples": [
+            {
+              "s": 0.693,
+              "fps": 10.1342,
+              "independent_preceding_second_fps": 10.539
+            },
+            {
+              "s": 1.725,
+              "fps": 10.52239,
+              "independent_preceding_second_fps": 10.36
+            },
+            {
+              "s": 2.738,
+              "fps": 9.68952,
+              "independent_preceding_second_fps": 10.096
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 36,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 21.546,
+            "gdi33_to_dwm88_p95_ms": 30.578,
+            "dwm88_to_window46_median_ms": 0.078,
+            "dwm88_to_window46_p95_ms": 0.096
+          }
+        },
+        "cap8": {
+          "seconds": 4.833,
+          "game_gdi_tokens": {
+            "n": 38,
+            "fps": 7.987,
+            "p95_ms": 142.755,
+            "p99_ms": 144.008
+          },
+          "game_window_compositor_updates": {
+            "n": 38,
+            "fps": 7.985,
+            "p95_ms": 133.489,
+            "p99_ms": 143.898
+          },
+          "distinct_screen_samples": {
+            "n": 39,
+            "fps": 8.058,
+            "p95_ms": 162.842,
+            "p99_ms": 204.472
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.155,
+          "pacecar_samples": [
+            {
+              "s": 0.596,
+              "fps": 10.24656,
+              "independent_preceding_second_fps": 9.131
+            },
+            {
+              "s": 1.625,
+              "fps": 8.57704,
+              "independent_preceding_second_fps": 7.932
+            },
+            {
+              "s": 2.642,
+              "fps": 8.07855,
+              "independent_preceding_second_fps": 8.097
+            },
+            {
+              "s": 3.67,
+              "fps": 8.07026,
+              "independent_preceding_second_fps": 7.901
+            },
+            {
+              "s": 4.688,
+              "fps": 7.91972,
+              "independent_preceding_second_fps": 8.075
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 37,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 13.443,
+            "gdi33_to_dwm88_p95_ms": 25.698,
+            "dwm88_to_window46_median_ms": 0.079,
+            "dwm88_to_window46_p95_ms": 0.119
+          }
+        },
+        "hitch": {
+          "seconds": 4.537,
+          "game_gdi_tokens": {
+            "n": 9,
+            "fps": 1.969,
+            "p95_ms": 654.512,
+            "p99_ms": 716.346
+          },
+          "game_window_compositor_updates": {
+            "n": 8,
+            "fps": 1.953,
+            "p95_ms": 673.299,
+            "p99_ms": 721.259
+          },
+          "distinct_screen_samples": {
+            "n": 9,
+            "fps": 2.0,
+            "p95_ms": 662.92,
+            "p99_ms": 718.429
+          },
+          "same_pid_steady_samples": 1,
+          "median_absolute_pacecar_difference_fps": 0.702,
+          "pacecar_samples": [
+            {
+              "s": 0.34,
+              "fps": 7.91958,
+              "independent_preceding_second_fps": 7.795
+            },
+            {
+              "s": 1.354,
+              "fps": 4.96548,
+              "independent_preceding_second_fps": 2.068
+            },
+            {
+              "s": 2.577,
+              "fps": 2.01754,
+              "independent_preceding_second_fps": null
+            },
+            {
+              "s": 3.604,
+              "fps": 1.6456,
+              "independent_preceding_second_fps": 2.348
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 8,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 8.362,
+            "gdi33_to_dwm88_p95_ms": 31.541,
+            "dwm88_to_window46_median_ms": 0.08,
+            "dwm88_to_window46_p95_ms": 0.094
+          }
+        },
+        "recovery": {
+          "seconds": 4.264,
+          "game_gdi_tokens": {
+            "n": 47,
+            "fps": 10.916,
+            "p95_ms": 113.324,
+            "p99_ms": 120.474
+          },
+          "game_window_compositor_updates": {
+            "n": 47,
+            "fps": 10.953,
+            "p95_ms": 114.505,
+            "p99_ms": 116.582
+          },
+          "distinct_screen_samples": {
+            "n": 46,
+            "fps": 10.891,
+            "p95_ms": 123.669,
+            "p99_ms": 131.493
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.212,
+          "pacecar_samples": [
+            {
+              "s": 0.124,
+              "fps": 2.00998,
+              "independent_preceding_second_fps": 3.202
+            },
+            {
+              "s": 1.142,
+              "fps": 7.08204,
+              "independent_preceding_second_fps": 11.122
+            },
+            {
+              "s": 2.17,
+              "fps": 10.42273,
+              "independent_preceding_second_fps": 10.326
+            },
+            {
+              "s": 3.185,
+              "fps": 10.35852,
+              "independent_preceding_second_fps": 10.571
+            },
+            {
+              "s": 4.209,
+              "fps": 10.71598,
+              "independent_preceding_second_fps": 12.154
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 46,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 20.844,
+            "gdi33_to_dwm88_p95_ms": 28.453,
+            "dwm88_to_window46_median_ms": 0.078,
+            "dwm88_to_window46_p95_ms": 0.106
+          }
+        }
+      },
+      "post_exit_first_clear_s": 0.674,
+      "fps_preference_restored": true,
+      "independent_trace_exit": 0,
+      "input_and_lifecycle_sha256": "af45304b93b3b712d5dbda33daee66ade6f4205b25830f87b98d95b2b558e3f5",
+      "frame_trace_csv_sha256": "d402b34f999df75cc99c1154cdd70d0e3dea5e7690e08c2714db6ad785773d14",
+      "pacecar_csv_sha256": "735f34086b7071efe067c899206bd8d78c181ff49f5ff7e63905affc59eb29e6",
+      "screen_sampler_csv_sha256": "16e9f8538ff08d39cdea5fa9e50c2c70c06c5f2d116fe1f4ddd4451c6bdc9adc"
+    },
+    {
+      "game_engine": "FTEQW",
+      "backend": "zink",
+      "game_process": "x86",
+      "dxvk_directory": null,
+      "case": "zink-x86",
+      "boot_utc": "2026-11-18T07:31:47.5962910Z",
+      "map_joined_utc": "2026-11-18T07:44:42.7648620Z",
+      "exit_utc": "2026-11-18T07:45:08.4506853Z",
+      "exit_code": 0,
+      "dwm_pid_before_after": [
+        1260,
+        1260
+      ],
+      "game_pid": 2628,
+      "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+      "pacecar_sha256": "0bb94b678ac1778db3ffc24c2ad131dd2b8f7306d9917b8644a9bd15a70db8eb",
+      "exe_sha256": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+      "loaded_modules_sha256": {
+        "vulkan-1.dll": "0cb8619a4a4ba0acceba1f75a2dc0c8e251ab75d4a3c3e9640262c4c650c18af",
+        "dxgi.dll": "20fb6a468f97e00e76b0e467982ef04c16718b8a8c0f2e6db5ef2446095c900a",
+        "zink-wgl.dll": "d608d48932eb86bdd65b8d74c69763cc1366b36a212783c32ad42638e148434f",
+        "libgallium_wgl.dll": "3ce862968cd5878b278dc67d8fa2d04e6af34bfe098c612d964e6cbb20f98998",
+        "libvulkan_nouveau.dll": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b"
+      },
+      "renderer_log": "zink Vulkan 1.4(NVIDIA Tegra X1 (GM20B) (NVK GM20B) (MESA_NVK))",
+      "power_mode": 1,
+      "display_size": [
+        640,
+        360
+      ],
+      "logged_input": "SWITCH_INPUT_ACK",
+      "crop_pixels": 90000,
+      "crop_pixels_changed_after_movement": 84972,
+      "screenshots_sha256": {
+        "map-before": "0800d3819a34e3405b279b4458dd06e4be6705e9ba95a3b47009243f85bc3276",
+        "map-after-input": "be9adc139c21db2bf2434edf9579ebcf90eac33ac60f1cc32f77c00c59fd89f8",
+        "map-final": "97e5edfd7d45dda2138fa5e1b5ab556609249533abe1938b475a5fb8a5a0e2ce"
+      },
+      "peak_sampled_working_set": 279633920,
+      "fps": {
+        "cap15": {
+          "seconds": 3.633,
+          "game_gdi_tokens": {
+            "n": 48,
+            "fps": 13.208,
+            "p95_ms": 93.75,
+            "p99_ms": 94.508
+          },
+          "game_window_compositor_updates": {
+            "n": 49,
+            "fps": 13.29,
+            "p95_ms": 100.183,
+            "p99_ms": 108.945
+          },
+          "distinct_screen_samples": {
+            "n": 40,
+            "fps": 10.939,
+            "p95_ms": 150.26,
+            "p99_ms": 151.106
+          },
+          "same_pid_steady_samples": 1,
+          "median_absolute_pacecar_difference_fps": 0.854,
+          "pacecar_samples": [
+            {
+              "s": 0.948,
+              "fps": 11.99253,
+              "independent_preceding_second_fps": 12.826
+            },
+            {
+              "s": 1.973,
+              "fps": 12.62217,
+              "independent_preceding_second_fps": 13.65
+            },
+            {
+              "s": 2.995,
+              "fps": 14.06666,
+              "independent_preceding_second_fps": 13.213
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 47,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 12.808,
+            "gdi33_to_dwm88_p95_ms": 32.178,
+            "dwm88_to_window46_median_ms": 0.09,
+            "dwm88_to_window46_p95_ms": 0.118
+          }
+        },
+        "cap8": {
+          "seconds": 4.842,
+          "game_gdi_tokens": {
+            "n": 37,
+            "fps": 7.599,
+            "p95_ms": 141.652,
+            "p99_ms": 343.502
+          },
+          "game_window_compositor_updates": {
+            "n": 37,
+            "fps": 7.633,
+            "p95_ms": 150.31,
+            "p99_ms": 324.213
+          },
+          "distinct_screen_samples": {
+            "n": 38,
+            "fps": 7.746,
+            "p95_ms": 210.539,
+            "p99_ms": 299.083
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.056,
+          "pacecar_samples": [
+            {
+              "s": 0.176,
+              "fps": 12.86491,
+              "independent_preceding_second_fps": 12.568
+            },
+            {
+              "s": 1.206,
+              "fps": 9.98351,
+              "independent_preceding_second_fps": 7.998
+            },
+            {
+              "s": 2.223,
+              "fps": 8.03817,
+              "independent_preceding_second_fps": 7.982
+            },
+            {
+              "s": 3.259,
+              "fps": 7.86165,
+              "independent_preceding_second_fps": 8.134
+            },
+            {
+              "s": 4.278,
+              "fps": 8.09294,
+              "independent_preceding_second_fps": 8.114
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 36,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 17.834,
+            "gdi33_to_dwm88_p95_ms": 31.822,
+            "dwm88_to_window46_median_ms": 0.107,
+            "dwm88_to_window46_p95_ms": 0.219
+          }
+        },
+        "hitch": {
+          "seconds": 4.527,
+          "game_gdi_tokens": {
+            "n": 9,
+            "fps": 1.993,
+            "p95_ms": 518.015,
+            "p99_ms": 518.561
+          },
+          "game_window_compositor_updates": {
+            "n": 9,
+            "fps": 2.0,
+            "p95_ms": 516.776,
+            "p99_ms": 516.806
+          },
+          "distinct_screen_samples": {
+            "n": 10,
+            "fps": 2.118,
+            "p95_ms": 546.789,
+            "p99_ms": 562.975
+          },
+          "same_pid_steady_samples": 2,
+          "median_absolute_pacecar_difference_fps": 0.011,
+          "pacecar_samples": [
+            {
+              "s": 0.924,
+              "fps": 4.98081,
+              "independent_preceding_second_fps": 2.119
+            },
+            {
+              "s": 1.947,
+              "fps": 2.69265,
+              "independent_preceding_second_fps": 1.928
+            },
+            {
+              "s": 2.974,
+              "fps": 1.99108,
+              "independent_preceding_second_fps": 1.992
+            },
+            {
+              "s": 4.012,
+              "fps": 1.99377,
+              "independent_preceding_second_fps": 1.972
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 8,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 19.134,
+            "gdi33_to_dwm88_p95_ms": 25.435,
+            "dwm88_to_window46_median_ms": 0.093,
+            "dwm88_to_window46_p95_ms": 0.112
+          }
+        },
+        "recovery": {
+          "seconds": 4.226,
+          "game_gdi_tokens": {
+            "n": 54,
+            "fps": 12.772,
+            "p95_ms": 95.37,
+            "p99_ms": 103.402
+          },
+          "game_window_compositor_updates": {
+            "n": 53,
+            "fps": 12.944,
+            "p95_ms": 101.687,
+            "p99_ms": 110.787
+          },
+          "distinct_screen_samples": {
+            "n": 43,
+            "fps": 10.368,
+            "p95_ms": 151.733,
+            "p99_ms": 162.482
+          },
+          "same_pid_steady_samples": 2,
+          "median_absolute_pacecar_difference_fps": 0.202,
+          "pacecar_samples": [
+            {
+              "s": 0.313,
+              "fps": 1.98388,
+              "independent_preceding_second_fps": 14.116
+            },
+            {
+              "s": 1.336,
+              "fps": 6.7475,
+              "independent_preceding_second_fps": 12.765
+            },
+            {
+              "s": 2.372,
+              "fps": 13.34286,
+              "independent_preceding_second_fps": 13.59
+            },
+            {
+              "s": 3.389,
+              "fps": 12.93433,
+              "independent_preceding_second_fps": 12.778
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 53,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 11.358,
+            "gdi33_to_dwm88_p95_ms": 30.802,
+            "dwm88_to_window46_median_ms": 0.091,
+            "dwm88_to_window46_p95_ms": 0.132
+          }
+        }
+      },
+      "post_exit_first_clear_s": 0.038,
+      "fps_preference_restored": true,
+      "independent_trace_exit": 0,
+      "input_and_lifecycle_sha256": "0f98f27c7d8dd8f158e0fbc79ae5ba3be9dcf944a4ff1d64ffb78838bf412cab",
+      "frame_trace_csv_sha256": "fe6067184f49611de69084237f4fb08c03b6e762d74de5c8897326cd3699d211",
+      "pacecar_csv_sha256": "a68640a2b3024de9c982c73ea260606dabce74fbf06aa5729bf5800609f5a6dd",
+      "screen_sampler_csv_sha256": "86d47fa04132b2c4bdebde952bf667ea3611ebb90195ecdad684fa4dda2c8461"
+    },
+    {
+      "game_engine": "FTEQW",
+      "backend": "zink",
+      "game_process": "x64",
+      "dxvk_directory": null,
+      "case": "zink-x64",
+      "boot_utc": "2026-11-18T07:31:47.5962910Z",
+      "map_joined_utc": "2026-11-18T07:47:07.3499510Z",
+      "exit_utc": "2026-11-18T07:47:34.0189071Z",
+      "exit_code": 0,
+      "dwm_pid_before_after": [
+        1260,
+        1260
+      ],
+      "game_pid": 2988,
+      "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+      "pacecar_sha256": "0bb94b678ac1778db3ffc24c2ad131dd2b8f7306d9917b8644a9bd15a70db8eb",
+      "exe_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+      "loaded_modules_sha256": {
+        "vulkan-1.dll": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+        "dxgi.dll": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+        "zink-wgl.dll": "82b897cde5cb1691d592e2cb9fa9ebeb3c3044f279e5afe40ada31faefd595fe",
+        "libgallium_wgl.dll": "7a95240e9cfe376ae66517218058243495f17d43ddf89dc186cd01f23da9c644",
+        "libvulkan_nouveau.dll": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910"
+      },
+      "renderer_log": "zink Vulkan 1.4(NVIDIA Tegra X1 (GM20B) (NVK GM20B) (MESA_NVK))",
+      "power_mode": 1,
+      "display_size": [
+        640,
+        360
+      ],
+      "logged_input": "SWITCH_INPUT_ACK",
+      "crop_pixels": 90000,
+      "crop_pixels_changed_after_movement": 80848,
+      "screenshots_sha256": {
+        "map-before": "917e3e015f518fc369c13879c2f4decc3e1bdd0e29fca344f2333362976d62a9",
+        "map-after-input": "2cfe8c69b73d4b7a8d7b7ddaeaaa3d4b279af5b86c0ec5ec9ac205d7970d4eb3",
+        "map-final": "93cbdea8df47501b19e37120df13f8d42a3b7ef227b907e4485d5d86b0e62583"
+      },
+      "peak_sampled_working_set": 328146944,
+      "fps": {
+        "cap15": {
+          "seconds": 3.642,
+          "game_gdi_tokens": {
+            "n": 46,
+            "fps": 12.879,
+            "p95_ms": 96.976,
+            "p99_ms": 103.688
+          },
+          "game_window_compositor_updates": {
+            "n": 46,
+            "fps": 12.795,
+            "p95_ms": 113.351,
+            "p99_ms": 116.705
+          },
+          "distinct_screen_samples": {
+            "n": 37,
+            "fps": 10.12,
+            "p95_ms": 150.35,
+            "p99_ms": 160.285
+          },
+          "same_pid_steady_samples": 2,
+          "median_absolute_pacecar_difference_fps": 0.575,
+          "pacecar_samples": [
+            {
+              "s": 0.42,
+              "fps": 11.39168,
+              "independent_preceding_second_fps": 12.796
+            },
+            {
+              "s": 1.445,
+              "fps": 12.56782,
+              "independent_preceding_second_fps": 12.851
+            },
+            {
+              "s": 2.466,
+              "fps": 12.86257,
+              "independent_preceding_second_fps": 13.535
+            },
+            {
+              "s": 3.49,
+              "fps": 13.81392,
+              "independent_preceding_second_fps": 13.336
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 45,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 13.326,
+            "gdi33_to_dwm88_p95_ms": 31.256,
+            "dwm88_to_window46_median_ms": 0.082,
+            "dwm88_to_window46_p95_ms": 0.131
+          }
+        },
+        "cap8": {
+          "seconds": 4.833,
+          "game_gdi_tokens": {
+            "n": 36,
+            "fps": 7.569,
+            "p95_ms": 155.907,
+            "p99_ms": 305.829
+          },
+          "game_window_compositor_updates": {
+            "n": 36,
+            "fps": 7.554,
+            "p95_ms": 171.742,
+            "p99_ms": 304.255
+          },
+          "distinct_screen_samples": {
+            "n": 36,
+            "fps": 7.368,
+            "p95_ms": 198.569,
+            "p99_ms": 305.518
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.331,
+          "pacecar_samples": [
+            {
+              "s": 0.315,
+              "fps": 12.3366,
+              "independent_preceding_second_fps": 10.266
+            },
+            {
+              "s": 1.337,
+              "fps": 7.88115,
+              "independent_preceding_second_fps": 7.983
+            },
+            {
+              "s": 2.362,
+              "fps": 7.98313,
+              "independent_preceding_second_fps": 7.728
+            },
+            {
+              "s": 3.392,
+              "fps": 7.78604,
+              "independent_preceding_second_fps": 8.117
+            },
+            {
+              "s": 4.411,
+              "fps": 8.08301,
+              "independent_preceding_second_fps": 8.55
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 35,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 15.165,
+            "gdi33_to_dwm88_p95_ms": 34.437,
+            "dwm88_to_window46_median_ms": 0.088,
+            "dwm88_to_window46_p95_ms": 0.168
+          }
+        },
+        "hitch": {
+          "seconds": 4.532,
+          "game_gdi_tokens": {
+            "n": 9,
+            "fps": 1.967,
+            "p95_ms": 707.209,
+            "p99_ms": 785.594
+          },
+          "game_window_compositor_updates": {
+            "n": 8,
+            "fps": 1.972,
+            "p95_ms": 703.213,
+            "p99_ms": 767.145
+          },
+          "distinct_screen_samples": {
+            "n": 10,
+            "fps": 2.007,
+            "p95_ms": 683.388,
+            "p99_ms": 763.015
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.109,
+          "pacecar_samples": [
+            {
+              "s": 0.047,
+              "fps": 6.63019,
+              "independent_preceding_second_fps": 7.768
+            },
+            {
+              "s": 1.078,
+              "fps": 7.76395,
+              "independent_preceding_second_fps": 2.07
+            },
+            {
+              "s": 2.104,
+              "fps": 2.01341,
+              "independent_preceding_second_fps": 1.904
+            },
+            {
+              "s": 3.116,
+              "fps": 1.94444,
+              "independent_preceding_second_fps": 1.938
+            },
+            {
+              "s": 4.151,
+              "fps": 1.98557,
+              "independent_preceding_second_fps": 4.512
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 8,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 22.698,
+            "gdi33_to_dwm88_p95_ms": 29.988,
+            "dwm88_to_window46_median_ms": 0.089,
+            "dwm88_to_window46_p95_ms": 0.102
+          }
+        },
+        "recovery": {
+          "seconds": 4.231,
+          "game_gdi_tokens": {
+            "n": 52,
+            "fps": 12.286,
+            "p95_ms": 100.352,
+            "p99_ms": 224.392
+          },
+          "game_window_compositor_updates": {
+            "n": 52,
+            "fps": 12.289,
+            "p95_ms": 126.391,
+            "p99_ms": 211.564
+          },
+          "distinct_screen_samples": {
+            "n": 44,
+            "fps": 10.279,
+            "p95_ms": 165.357,
+            "p99_ms": 262.895
+          },
+          "same_pid_steady_samples": 2,
+          "median_absolute_pacecar_difference_fps": 0.714,
+          "pacecar_samples": [
+            {
+              "s": 0.716,
+              "fps": 4.61291,
+              "independent_preceding_second_fps": 13.021
+            },
+            {
+              "s": 1.786,
+              "fps": 12.77977,
+              "independent_preceding_second_fps": 12.914
+            },
+            {
+              "s": 2.814,
+              "fps": 12.62242,
+              "independent_preceding_second_fps": 13.044
+            },
+            {
+              "s": 3.893,
+              "fps": 12.72883,
+              "independent_preceding_second_fps": 13.735
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 51,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 20.589,
+            "gdi33_to_dwm88_p95_ms": 33.69,
+            "dwm88_to_window46_median_ms": 0.09,
+            "dwm88_to_window46_p95_ms": 0.163
+          }
+        }
+      },
+      "post_exit_first_clear_s": 0.995,
+      "fps_preference_restored": true,
+      "independent_trace_exit": 0,
+      "input_and_lifecycle_sha256": "45c761402cc775dccabc18e7c49409d9fc41348b1fbc837edd0ba53fe1c54512",
+      "frame_trace_csv_sha256": "ad2fa70c7fead8f116512f01c63b6e8469f650904fede09b3ea653a891fc3d10",
+      "pacecar_csv_sha256": "3023fc18c127ad8ffc17c417af4faa9f785239860e20fa84a68e2cf2620df2c0",
+      "screen_sampler_csv_sha256": "4ae29445a98d54be6a38d51e2b7a9e3997923b2df73dcd4f06cd3a66f6a427c3"
+    },
+    {
+      "game_engine": "FTEQW",
+      "backend": "DXVK D3D9",
+      "game_process": "x64",
+      "dxvk_directory": "DXVK-ARM64EC",
+      "case": "dxvk-ec",
+      "boot_utc": "2026-11-18T07:31:47.5962910Z",
+      "map_joined_utc": "2026-11-18T07:53:56.2691177Z",
+      "exit_utc": "2026-11-18T07:54:29.9270571Z",
+      "exit_code": 0,
+      "dwm_pid_before_after": [
+        1260,
+        1260
+      ],
+      "game_pid": 2924,
+      "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+      "pacecar_sha256": "0bb94b678ac1778db3ffc24c2ad131dd2b8f7306d9917b8644a9bd15a70db8eb",
+      "exe_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+      "loaded_modules_sha256": {
+        "vulkan-1.dll": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+        "dxgi.dll": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+        "d3d9.dll": "8ed879d81b1c8c014a0c52549a675bc3fa486556ae001ec0f6421ec90b8c4490",
+        "libvulkan_nouveau.dll": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910"
+      },
+      "renderer_log": "NVIDIA Tegra X1 (GM20B) (NVK GM20B)",
+      "power_mode": 1,
+      "display_size": [
+        640,
+        360
+      ],
+      "logged_input": "SWITCH_INPUT_ACK",
+      "crop_pixels": 90000,
+      "crop_pixels_changed_after_movement": 80587,
+      "screenshots_sha256": {
+        "map-before": "b423db95ed0464de0250c902d4822d644156ca03f0d71bfd64022b2268a6412f",
+        "map-after-input": "8b58f61eeeabc79ed92d424e4c68b7684a2b1e79abc19e7fece55e963c22e40f",
+        "map-final": "e50fabd273a3aad99027d495aa6904f451e45f835ae8d64d585cf400babe2987"
+      },
+      "peak_sampled_working_set": 405827584,
+      "fps": {
+        "cap15": {
+          "seconds": 3.627,
+          "game_gdi_tokens": {
+            "n": 37,
+            "fps": 10.09,
+            "p95_ms": 108.807,
+            "p99_ms": 118.895
+          },
+          "game_window_compositor_updates": {
+            "n": 37,
+            "fps": 10.093,
+            "p95_ms": 116.585,
+            "p99_ms": 119.088
+          },
+          "distinct_screen_samples": {
+            "n": 36,
+            "fps": 10.091,
+            "p95_ms": 113.769,
+            "p99_ms": 125.61
+          },
+          "same_pid_steady_samples": 2,
+          "median_absolute_pacecar_difference_fps": 0.331,
+          "pacecar_samples": [
+            {
+              "s": 0.39,
+              "fps": 9.85186,
+              "independent_preceding_second_fps": 10.678
+            },
+            {
+              "s": 1.421,
+              "fps": 10.28868,
+              "independent_preceding_second_fps": 10.491
+            },
+            {
+              "s": 2.434,
+              "fps": 10.31021,
+              "independent_preceding_second_fps": 10.015
+            },
+            {
+              "s": 3.461,
+              "fps": 9.93663,
+              "independent_preceding_second_fps": 10.304
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 36,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 22.004,
+            "gdi33_to_dwm88_p95_ms": 28.9,
+            "dwm88_to_window46_median_ms": 0.085,
+            "dwm88_to_window46_p95_ms": 0.11
+          }
+        },
+        "cap8": {
+          "seconds": 4.829,
+          "game_gdi_tokens": {
+            "n": 39,
+            "fps": 8.166,
+            "p95_ms": 141.821,
+            "p99_ms": 142.6
+          },
+          "game_window_compositor_updates": {
+            "n": 39,
+            "fps": 8.172,
+            "p95_ms": 136.02,
+            "p99_ms": 149.924
+          },
+          "distinct_screen_samples": {
+            "n": 40,
+            "fps": 8.239,
+            "p95_ms": 159.708,
+            "p99_ms": 176.656
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.034,
+          "pacecar_samples": [
+            {
+              "s": 0.302,
+              "fps": 10.29648,
+              "independent_preceding_second_fps": 10.522
+            },
+            {
+              "s": 1.336,
+              "fps": 9.66035,
+              "independent_preceding_second_fps": 8.206
+            },
+            {
+              "s": 2.346,
+              "fps": 8.29145,
+              "independent_preceding_second_fps": 7.797
+            },
+            {
+              "s": 3.381,
+              "fps": 8.07631,
+              "independent_preceding_second_fps": 8.054
+            },
+            {
+              "s": 4.395,
+              "fps": 8.06568,
+              "independent_preceding_second_fps": 8.1
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 38,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 14.758,
+            "gdi33_to_dwm88_p95_ms": 28.544,
+            "dwm88_to_window46_median_ms": 0.087,
+            "dwm88_to_window46_p95_ms": 0.118
+          }
+        },
+        "hitch": {
+          "seconds": 4.537,
+          "game_gdi_tokens": {
+            "n": 10,
+            "fps": 2.004,
+            "p95_ms": 511.891,
+            "p99_ms": 514.204
+          },
+          "game_window_compositor_updates": {
+            "n": 10,
+            "fps": 2.0,
+            "p95_ms": 516.708,
+            "p99_ms": 516.77
+          },
+          "distinct_screen_samples": {
+            "n": 9,
+            "fps": 2.008,
+            "p95_ms": 527.681,
+            "p99_ms": 532.376
+          },
+          "same_pid_steady_samples": 3,
+          "median_absolute_pacecar_difference_fps": 0.046,
+          "pacecar_samples": [
+            {
+              "s": 0.049,
+              "fps": 8.10074,
+              "independent_preceding_second_fps": 7.907
+            },
+            {
+              "s": 1.061,
+              "fps": 4.97451,
+              "independent_preceding_second_fps": 2.011
+            },
+            {
+              "s": 2.088,
+              "fps": 2.70164,
+              "independent_preceding_second_fps": 2.032
+            },
+            {
+              "s": 3.105,
+              "fps": 1.98643,
+              "independent_preceding_second_fps": 2.032
+            },
+            {
+              "s": 4.123,
+              "fps": 1.99512,
+              "independent_preceding_second_fps": 1.996
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 9,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 13.011,
+            "gdi33_to_dwm88_p95_ms": 27.5,
+            "dwm88_to_window46_median_ms": 0.094,
+            "dwm88_to_window46_p95_ms": 0.107
+          }
+        },
+        "recovery": {
+          "seconds": 4.23,
+          "game_gdi_tokens": {
+            "n": 48,
+            "fps": 11.206,
+            "p95_ms": 106.706,
+            "p99_ms": 114.546
+          },
+          "game_window_compositor_updates": {
+            "n": 47,
+            "fps": 11.22,
+            "p95_ms": 106.208,
+            "p99_ms": 113.277
+          },
+          "distinct_screen_samples": {
+            "n": 47,
+            "fps": 10.912,
+            "p95_ms": 120.286,
+            "p99_ms": 142.558
+          },
+          "same_pid_steady_samples": 2,
+          "median_absolute_pacecar_difference_fps": 0.618,
+          "pacecar_samples": [
+            {
+              "s": 0.62,
+              "fps": 1.97796,
+              "independent_preceding_second_fps": 11.011
+            },
+            {
+              "s": 1.644,
+              "fps": 10.79726,
+              "independent_preceding_second_fps": 11.089
+            },
+            {
+              "s": 2.665,
+              "fps": 10.34905,
+              "independent_preceding_second_fps": 10.482
+            },
+            {
+              "s": 3.69,
+              "fps": 10.63678,
+              "independent_preceding_second_fps": 11.74
+            }
+          ],
+          "gdi_compositor_timing": {
+            "matched": 47,
+            "excluded": 0,
+            "gdi33_to_dwm88_median_ms": 20.429,
+            "gdi33_to_dwm88_p95_ms": 25.107,
+            "dwm88_to_window46_median_ms": 0.085,
+            "dwm88_to_window46_p95_ms": 0.132
+          }
+        }
+      },
+      "post_exit_first_clear_s": 0.529,
+      "fps_preference_restored": true,
+      "independent_trace_exit": 0,
+      "input_and_lifecycle_sha256": "0733ccb3856c756e6039084c9ca0f291063133a0eb6401fdbfdd9897208a76ea",
+      "frame_trace_csv_sha256": "c8c822f2fde7619b5adcfeded7d44ffa36f0f32792faea57c7e852998bdf6fc3",
+      "pacecar_csv_sha256": "86006a9cf1bbd54e54647af3e929b47d8e83dce0c38b689e9b6331f8310e7e91",
+      "screen_sampler_csv_sha256": "3bb28988c20e1f7f84c04d265a39323505c143329c7f91a49933326366ec99f4"
+    }
+  ],
+  "gdi_timing_method": "For each pair of successive target-process Win32k event 33 records with a pending update, use DWM event 88 on the same logical surface and cookie and DWM event 46 for the target window. Count an interval only when it contains exactly one of each, in that order. The cookie is shared across frames on the same surface. These durations end at the recorded compositor events. Measuring physical scanout and input latency requires a separate observation."
+}

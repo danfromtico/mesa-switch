@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-packet-checkpoint-board-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "71d1723e3e0ad0b1bf76ce9d4cf1ddb110c5ca395669f976f15117bc81676fc3",
+  "status": "实机通过",
+  "finding": "同一真实应用 DMA 6763 在候选启动 94382 以独立日志提交完整包，恢复正式启动 94557 后的新进程仅读日志，完整版本身份及 SHA-256 均一致。",
+  "missing_observation": "同轮 DWM 可关联尝试 115 条，完整 110 条，有抢占回执 5 条。原场景自然重启及历史根因仍待证据。",
+  "device_executions": 1,
+  "historical_root_cause": "未知",
+  "controlled_restart_is_reproduction": false,
+  "natural_reproduction_observed": false,
+  "evidence": {
+    "boot_receipts": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/one-time-desktop.json",
+        "sha256": "8f3fd0f9dbf7338f41e6e6bb4b13710b8dc8a643bfd355f25dedddee2c1f4cb5"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/dma-packet-drill-formal-restored.json",
+        "sha256": "2ca835509079f05cdfca7541cd45970b5833ec8b8b0faafd290cc90ef46604c3"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/cycle-history.json",
+        "sha256": "f0ee67ebaaf4e90079d05dd888b6b84ab4f400239b15c736b0b83b8a96d0ed31"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/cleanup.json",
+        "sha256": "9bea7e3514ad33320568a88b0784169ef0ecc22be6b43b6f58f551e2e21d7aa2"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/daily-cleanup.json",
+        "sha256": "74f880772908a41fcfdd8237a5e67ddda6916b10025074609ae5bc1ddd000261"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/requested-94176-ClosedForTrial.json",
+        "sha256": "10517dfb4ec7d6174c5f0c5b83ff0bf08a012d8a7e6cf7c079e0614b9de9cabe"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/requested-94293-CandidateArmed.json",
+        "sha256": "fe4c31cf6da43f6344840280efcdec4ae6bc92da050af1b6011f92c92b5e4bfd"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/requested-94382-ClosedForRestore.json",
+        "sha256": "456dbf1be613717a245ad66116087ad6662b2616585644598e9c21fbe57b1d77"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/activation/requested-94472-BaselineArmed.json",
+        "sha256": "6412f3556c31d174dc275c184835070b971e2022b7c4f50e1a4fc7c9893392cb"
+      }
+    ],
+    "window_and_capture": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/config.json",
+        "sha256": "692622c130cf8c17dbdd3e461806de1f0295608de1edf5a4cadb86df86262e70"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/stage.json",
+        "sha256": "880ee4b9858bc18bad9ada136bbc580dbe3d1bfae7daabed8707322662a2ac41"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/release.json",
+        "sha256": "af434cf6b55f762aab13fb2a41851e3ca4d1c7c76db183ba599d0c7837ce1e3b"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/board/result.json",
+        "sha256": "db59b73713e8d82c48e620f9a741e28f677207928532588b1686ac2ee4f1e876"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/collection.json",
+        "sha256": "dd1c078b830b8934c0cdd502c3cb887beb088e97111ff78fd548487d719e3716"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/cleanup.json",
+        "sha256": "f1b61f9cc1ac7ef43401150b97ade6b9ff7f799777c27549bb51dd9fd2ec0e80"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/attempts.journal",
+        "sha256": "d5efb09c9da958f55a98057f79fa02c69c2e823184f5d52dea6253089b8ea9cd"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/wire.jsonl",
+        "sha256": "fa544f2672ffe46d293947dc0cdb0cc808f38fb2f4ee09ce512a8a1c68ebead7"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/before-restore.json",
+        "sha256": "0a449186cfbeb5a0e401d35f4fa1234d279e486f49e8dd64d9f8cd973796778e"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/readback-after-restore.json",
+        "sha256": "d4ce06c4874620bb4baabcfc1b3ec35cca75cc0ef1f5aaef3853dba3caec8987"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/reboot-readback-proof.json",
+        "sha256": "bd7059f94e1fe0e4d2ba71ed494372c9cbd31a2b925d21472b503a64c834bebc"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/delivery.json",
+        "sha256": "ba4a4bbaa246a201f988236afe9a42cf0a110a37d53933c8a70e0d7741725340"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/capacity-and-dwm-scope.json",
+        "sha256": "c215b7a144c311ff1b4a5d9e74c764ff9498cc022eda9316af4a01675ae11d39"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/dwm-retry-bindings.json",
+        "sha256": "43b97b1f10ec3593329598c732daac7240f069f6c611a85d0c4629cc947f4572"
+      }
+    ],
+    "prelaunch_failure": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/prelaunch-acr-path-94382/board/result.json",
+        "sha256": "6fa338467880ba6241b74e777d927a83d776e2e733a1a5d0c0426b593ce0559c"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/prelaunch-acr-path-94382/final-status.json",
+        "sha256": "fb1bb8ab835ebd1fe38960d5b0dfbdbe1b67d4f13bbd8c5a598ee98cdfdad09f"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/prelaunch-acr-path-94382/cleanup.json",
+        "sha256": "f1b61f9cc1ac7ef43401150b97ade6b9ff7f799777c27549bb51dd9fd2ec0e80"
+      }
+    ],
+    "before_restore_bounds": {
+      "original_boot": 94382,
+      "collection_boot": 94382,
+      "board_passed": true,
+      "board_result": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/board/result.json",
+      "journal": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt-board/drill/attempts.journal",
+        "sha256": "d5efb09c9da958f55a98057f79fa02c69c2e823184f5d52dea6253089b8ea9cd"
+      },
+      "complete_app": [
+        {
+          "serial": 342,
+          "identity": {
+            "boot": 94382,
+            "capture": "2a752744ad8744c7b1db76cf74b35910",
+            "context": 18446646822753717712,
+            "context_start_qpc": 6456721137,
+            "dma": 6763,
+            "dma_bytes": 52,
+            "kmd_context": 18446612197398267008,
+            "luid": 23639,
+            "node": 0,
+            "owner_pid": 7512,
+            "queue": 1,
+            "queue_packet": 18446612197383241744
+          },
+          "complete_record_sha256": "d60f4ed3e4f3b854dd5e74b3514a15ba3b1ce80b9faac4c32def76c422197254"
+        }
+      ],
+      "dwm_attempts": 115,
+      "dwm_complete": 110,
+      "terminal": {
+        "capture": {
+          "adapter_luid": 23639,
+          "boot": 94382,
+          "candidate_one_time": true,
+          "capture": "2a752744ad8744c7b1db76cf74b35910",
+          "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+          "collector_pid": 1440,
+          "collector_ready_qpc": 6343027312,
+          "collector_sha256": "12fa9486c916540d712639b79fd5b9a5572b738a63e3126ad09ccde3c31421e6",
+          "components": {
+            "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+            "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+            "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+            "tegragpurender.sys": "bfbc849f36b5a67b985f8ff4489d6200b3befda1a8c27be2fd8159744c50dbfa",
+            "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+            "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+            "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+            "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590"
+          },
+          "dwm": 1428,
+          "dwm_start": "2026-11-22T03:36:19.3435726Z",
+          "qpc_hz": 19200000,
+          "selected_profile": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dma-return-diagnostic-bfbc849f36b5"
+        },
+        "clean": true,
+        "exit": 0,
+        "kind": "capture_end",
+        "terminal": {
+          "collector_error": 0,
+          "events_lost": 0,
+          "file_buffers_lost": 0,
+          "flushes": 2429,
+          "process_trace": 0,
+          "realtime_buffers_lost": 0,
+          "sent": 1702,
+          "status": 0,
+          "stop": 0,
+          "windows_acknowledged": 1702
+        }
+      },
+      "unconfirmed_tail": null
+    },
+    "dwm_coverage": {
+      "pid": 1428,
+      "attempts": 115,
+      "complete": 110,
+      "sources": [
+        {
+          "ids": [
+            110,
+            29,
+            32,
+            433,
+            178
+          ],
+          "attempts": 115
+        }
+      ],
+      "same_queue_retries_rechecked": 5,
+      "preempted": 5
+    },
+    "independent_code_review": {
+      "state": "pending",
+      "artifacts": [
+        {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/gemini-review/response.json",
+          "sha256": "7eaf69948f49bcce808924ea954c2ab47e58af73182c5b35fb0da23397a98459"
+        },
+        {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/gemini-review/sources.sha256",
+          "sha256": "011c2cfa593ea281b3991427a79f7156191b573540c1fabf7162a66af8948c6f"
+        },
+        {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/claude-review.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-attempt/claude-review.stderr",
+          "sha256": "7f369a8ac8a1b8edf758fe71c1d9e44cedb78c50b75cb38cae2063ee09d1c053"
+        }
+      ]
+    },
+    "waiting_for_recurrence": {
+      "armed": false,
+      "new_incident": false,
+      "trigger": "正常旧式 SEQUENTIAL 首次 Present"
+    }
+  }
+}

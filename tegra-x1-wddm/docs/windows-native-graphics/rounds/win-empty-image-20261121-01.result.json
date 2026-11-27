@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-image-20261121-01",
+  "contract_id": "WIN-PRESENT-IMAGE",
+  "windows_question": "WIN-PRESENT-IMAGE",
+  "plan_sha256": "ebd61f04d1befaeaf79b3a6c384575dc4488fb8db2d0d0007c37aa3af41ae5c2",
+  "status": "实机通过",
+  "finding": "原空窗口在公开返回后由同 PID 客户区采样，4508/4508 个像素与空帧对照匹配，输入有效、正常退出并回到同一 DWM。应用 PresentHistory 令牌另有 0 条同令牌 DWM PID 记录。",
+  "missing_observation": null,
+  "device_executions": 0,
+  "evidence": {
+    "boot": 91476,
+    "pid": 5992,
+    "tid": 5988,
+    "hwnd": 524312,
+    "luid": "0000000000005c10",
+    "dwm": 1400,
+    "qpc_frequency": 19200000,
+    "raw_archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-empty-present-20261121-01/collected.zip",
+    "raw_archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+    "trace_sha256": {
+      "display.etl": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+      "scene/video.etl": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a"
+    },
+    "device_state": {
+      "boot": 91476,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0,
+      "KMD": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "tgd3d": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "NVK": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "reference": "legacy-sequential-step4/warp-control-5.json",
+    "reference_bitmap_sha256": "53bc2b070a30050b71eaa27ccdc07833d258646f5af866876dc97e6bdb62f7e4",
+    "actual_bitmap_sha256": "53bc2b070a30050b71eaa27ccdc07833d258646f5af866876dc97e6bdb62f7e4",
+    "tested": 4508,
+    "matched": 4508,
+    "reference_rgb": "000000",
+    "input": {
+      "window_handle": 524312,
+      "visibility": [
+        {
+          "first_qpc": 94846148418,
+          "last_qpc": 94846738644,
+          "flags": 8,
+          "owned_points": 0
+        },
+        {
+          "first_qpc": 94848915937,
+          "last_qpc": 94848915937,
+          "flags": 11,
+          "owned_points": 5
+        },
+        {
+          "first_qpc": 94852461616,
+          "last_qpc": 94855178101,
+          "flags": 11,
+          "owned_points": 4
+        },
+        {
+          "first_qpc": 94855475769,
+          "last_qpc": 94863953776,
+          "flags": 11,
+          "owned_points": 5
+        },
+        {
+          "first_qpc": 94864399120,
+          "last_qpc": 94865740591,
+          "flags": 8,
+          "owned_points": 0
+        }
+      ],
+      "pid": 5992,
+      "tid": 5988,
+      "client_width": 640,
+      "client_height": 360,
+      "owned_points": 5,
+      "visible_qpc": 94852390352,
+      "system_menu_qpc": 94852462035,
+      "escape_input_qpc": 94855287685,
+      "menu_dismissed_qpc": 94860617827,
+      "post_present_capture_qpc": 94863412892,
+      "exit_qpc": 94867588333,
+      "system_menu_flags": 12,
+      "menu_cancelled_by_cleanup": false,
+      "second_escape_qpc": 94860326795,
+      "client_click_qpc": 0,
+      "click_x": 0,
+      "click_y": 0,
+      "capture_changed_samples": 137,
+      "window_visible": true,
+      "input_verified": true,
+      "window_closed": true,
+      "desktop_available": true
+    },
+    "client_exit": 0,
+    "dxg_token": {
+      "hAdapter": 18446706169586577424,
+      "Token": 18446611100095384064
+    },
+    "dwm_same_token": [],
+    "boundaries": {
+      "last_entry": "DXGI 首个 Present 的应用 CALL",
+      "last_return": {
+        "public_return_qpc": 94861380548,
+        "desktop_capture_qpc": 94863412892,
+        "window_exit_qpc": 94867588333
+      },
+      "first_anomaly_or_missing": "实体面板锁存与逐像素光学输出没有同轮回执。 同一令牌的 DWM 消费时间也缺回执。"
+    }
+  }
+}

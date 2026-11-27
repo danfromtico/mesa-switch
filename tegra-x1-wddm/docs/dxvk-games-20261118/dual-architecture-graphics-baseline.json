@@ -1,0 +1,122 @@
+{
+  "scope": "User-selected GM20B system graphics baseline for ARM64 and x64 applications on Windows ARM64.",
+  "accepted_utc": "2026-11-19T13:48:14.9852452Z",
+  "boot_utc": "2026-11-19T13:45:58.4599330Z",
+  "device_problem_code": 0,
+  "dwm_pid": 1436,
+  "package": "dual-abi-6c1ac9f65a67",
+  "previous_package": "fl11-level-7dcbc53c55dd",
+  "native_boot": {
+    "permanent": true,
+    "one_time_permit": false,
+    "approved_image_order": [
+      "KMD",
+      "common UMD",
+      "common ICD"
+    ],
+    "approved_image_sha256": [
+      "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+    ]
+  },
+  "signed_files_sha256": {
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "7dcbc53c55dd46ab8ab405884664193e904adb21a408ce169aeb75b390fce4c6",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_d3d_x64.dll": "2c8e43dda48b40910d81f2ecf030c48db4474d0434dd4cff8d2e9cd5da5cb3c9"
+  },
+  "windows_authenticode_passes": 6,
+  "icd_same_package": true,
+  "mesa_x64_umd_source": "a88217bac76325ef693d1608be667b5134432c23",
+  "arm64x": {
+    "inputs": "tegra-x1-wddm/tools/arm64x-graphics",
+    "llvm_mingw_clang": "23.1.5",
+    "compile": [
+      "aarch64-w64-mingw32-clang -O2 -c empty.c -o native.obj",
+      "arm64ec-w64-mingw32-clang -O2 -c empty.c -o ec.obj"
+    ],
+    "link_template": "lld-link /dll /noentry /machine:arm64x /nodefaultlib /timestamp:0 /defarm64native:{name}-arm64.def /def:{name}-x64.def native.obj ec.obj /include:_load_config_used {toolchain}/aarch64-w64-mingw32/lib/libmingwex.a /out:{name}-raw.dll",
+    "unsigned_sha256": {
+      "TegraGpuD3DVk": "7b8d03ade360f7ef74204775b99d122f8401ae94c155513154da56186dcb2b5e",
+      "libvulkan_nouveau": "0c5752c3d6168600774929485ca882db309fbb9a55e13c0ae02bed83c4da057e"
+    }
+  },
+  "private_ddi": {
+    "logic_verified": {
+      "arm64": 180,
+      "x64": 180
+    },
+    "etl_sha256": "d3a969cf3f182d67b23d858f40317a9fe17db9e711c004ed420fa82f86190bda"
+  },
+  "public_arm64_fl11_1": {
+    "requested": [
+      "0xb100"
+    ],
+    "returned": "0xb100",
+    "drawn_pixels": 280,
+    "background_pixels": 309,
+    "exit_code": 0,
+    "etl_sha256": "1e5605aa4f66c73c5b6fb4a700944e691786c151f3ee1eff0b9b5154883cfae4"
+  },
+  "public_x64": {
+    "default_video_device_level": "0xb000",
+    "H264_NV12": true,
+    "etl_sha256": "c52a09c9734a0f0cc81346aaef949e153941998506f6c05675eb836819b7e091"
+  },
+  "h264_720p_decode_only": {
+    "arm64": {
+      "boot_utc": "2026-11-19T13:19:33.5031460Z",
+      "pid": 5880,
+      "luid": "00000000000059aa",
+      "completed_nvdec_decodes": 6,
+      "matched_reference_frames": 6,
+      "window_frames": 0,
+      "exit_code": 0,
+      "etl_sha256": "b3f49a862cf9ffe18b62635167f192daa31aba8271c44301852fe5354b7403d4"
+    },
+    "x64": {
+      "boot_utc": "2026-11-19T13:19:33.5031460Z",
+      "pid": 2228,
+      "luid": "00000000000059aa",
+      "completed_nvdec_decodes": 6,
+      "matched_reference_frames": 6,
+      "window_frames": 0,
+      "exit_code": 0,
+      "etl_sha256": "c431e6a34a52311e730c2e2e22e723ad9aaa3bee5514e24b45cc0c97db20984b"
+    }
+  },
+  "reference_i420_sha256": [
+    "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+    "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+    "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+    "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+    "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+    "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+  ],
+  "public_x64_flip": [
+    {
+      "boot_utc": "2026-11-19T13:19:33.5074630Z",
+      "process_window_queue": false,
+      "native_create_swapchain_hr": "887a0005",
+      "native_get_buffer_succeeded": false,
+      "etl_sha256": "a7c75ff488b5a2816b86513e3c90649213e0bc8dece6d78804ce3fbcc50fc7ab"
+    },
+    {
+      "boot_utc": "2026-11-19T13:19:33.5074630Z",
+      "process_window_queue": true,
+      "native_create_swapchain_hr": "00000000",
+      "native_get_buffer_succeeded": true,
+      "etl_sha256": "156dba9c64c422c677a10529e66f394f38847434bb884a1aaa191faa320ab0e5"
+    }
+  ],
+  "recovery_test": {
+    "previous_package_restored_before_selection": true
+  },
+  "limits": [
+    "Official x64 wiliwili reached window creation with the per-process Windows queue. A later unexpected reset had no dump and bugcheck code 0. Cause remains open.",
+    "Direct FFmpeg readback and flip creation cover different operations. Neither measures end-to-end wiliwili playback, browser HTML video, x86 support or ARM64EC application compatibility."
+  ]
+}

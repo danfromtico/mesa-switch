@@ -1,0 +1,32 @@
+{
+  "round_id": "c27-native-open-type-20261121-01",
+  "contract_id": "dxgvmbus.c:825:2",
+  "declared_utc": "2026-11-21T13:19:20.600071+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "4fe4dda0c4d483f3b2f0b0f21770c139b3616b0d1c7839b78c8f5f30a429cf60",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Lite GM20B 的 Windows VidMm / VidSch 与交互桌面中的独立 ARM64 调用方。",
+  "predicate": "NT 打开的对象是 D3DDDI_NATIVE_FENCE 类型。",
+  "required_observation": "对本申请的 GM20B 适配器读取公开 DRIVERVERSION 和 WDDM_3_1_CAPS.NativeGpuFenceSupported，保存查询 NTSTATUS、API 导出情况与 OS 版本。能力允许时继续在对应创建/打开区间取证。需要的观测为NT 对象类型。",
+  "satisfied_if": "设备实际支持该特性且有本条类型、对象、调用区间以及NT 对象类型的直接回执。能力查询本身不判满足或违反。",
+  "violated_if": "在本调用的适用条件、责任方、对象、时间和输出完整匹配时，取得直接否定原生子句的结果。自然不支持、同步返回或缺失观测均单列。",
+  "unknown_if": "能力不足、实际对象或触发条件未命中、记录有缺口、只见间接现象或发生未解释重启时保留未知。",
+  "scope_limit": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "涉及原生围栏的NT 对象类型。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。",
+  "prior_catalog_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+  "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "selected_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+  "boot": 91476,
+  "dwm": 1400,
+  "ordinal": 17,
+  "nonce": "efced0b0cce982c19f251378",
+  "mode": "caps",
+  "trace": false,
+  "os_build": "10.0.22631.0",
+  "files_sha256": {
+    "contracts-arm64.exe": "bd339ec912bc6121b989da5de1799c51b5e980a4860301d6805c2bf8c8a2214c",
+    "contract-trace.exe": "ae6fd30d576521ebb2300d2b07a35106ba972d23d3f6bdf60c1454c2b97b8bad",
+    "Measure.ps1": "e3f5153d08fe3b81cec941dba4556859f4c9a264c620d8d75b5a755ad2edb973",
+    "Power-State.ps1": "f136146792b5a80c6016dbae04668831bee87f0f2f5390017bfb1669cd3cab9f"
+  }
+}

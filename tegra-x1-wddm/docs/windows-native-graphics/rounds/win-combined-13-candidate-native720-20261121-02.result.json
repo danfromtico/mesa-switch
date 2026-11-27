@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-candidate-native720-20261121-02",
+  "contract_id": "WIN-COMBINED-13-CANDIDATE-NATIVE720",
+  "windows_question": "WIN-COMBINED-13-CANDIDATE-NATIVE720",
+  "plan_sha256": "20bb6f799385a2b7b57b92ee47272ad5d235732d7a70b77b6ddfe0fb370d2d7f",
+  "status": "实机通过",
+  "finding": "一次性许可启动 92336 的原生 KMT NVDEC 提交六次，六个 Host1x 目标达成，按整数 POC 的六张参考帧完全一致。父进程取得退出码 0，DWM 与开机连续。",
+  "missing_observation": "该专项覆盖原生 KMT NVDEC 解码。其他异常、热或电源分支需各自证据。",
+  "device_executions": 0,
+  "evidence": {
+    "boundaries": {
+      "last_entry": "2026-11-21T19:04:04.2537344Z",
+      "last_return": "2026-11-21T19:04:11.3710439Z",
+      "first_anomaly_or_missing": "Windows PowerShell 的 Sort-Object poc 误排哈希表。这次复核直接对原始整数 POC 排序。"
+    },
+    "actual_before": {
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "dwm": 1444,
+      "boot": 92336,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+      "gpu_code": 0,
+      "power": "Online",
+      "dwm_start": "2026-11-21T19:01:34.3867526Z"
+    },
+    "actual_after": {
+      "components": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "dwm": 1444,
+      "boot": 92336,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+      "gpu_code": 0,
+      "power": "Online",
+      "dwm_start": "2026-11-21T19:01:34.3867526Z"
+    },
+    "case": {
+      "passed": true,
+      "begin": "2026-11-21T19:04:04.2537344Z",
+      "mode": "native KMT NVDEC decoded frames",
+      "before": {
+        "components": {
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1444,
+        "boot": 92336,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T19:01:34.3867526Z"
+      },
+      "luid": "0000000000005c5c",
+      "pid": 2348,
+      "client_exit": 0,
+      "after": {
+        "components": {
+          "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1444,
+        "boot": 92336,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-69ba174ebe17",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T19:01:34.3867526Z"
+      },
+      "submissions": [
+        {
+          "observed": 654909859,
+          "macroblocks": 3600,
+          "sha256": "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+          "decode": 0,
+          "expected": 654909859,
+          "poc": 0
+        },
+        {
+          "observed": 654909860,
+          "macroblocks": 3600,
+          "sha256": "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+          "decode": 1,
+          "expected": 654909860,
+          "poc": 2
+        },
+        {
+          "observed": 654909861,
+          "macroblocks": 3600,
+          "sha256": "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+          "decode": 2,
+          "expected": 654909861,
+          "poc": 4
+        },
+        {
+          "observed": 654909862,
+          "macroblocks": 3600,
+          "sha256": "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+          "decode": 3,
+          "expected": 654909862,
+          "poc": 8
+        },
+        {
+          "observed": 654909863,
+          "macroblocks": 3600,
+          "sha256": "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+          "decode": 4,
+          "expected": 654909863,
+          "poc": 6
+        },
+        {
+          "observed": 654909864,
+          "macroblocks": 3600,
+          "sha256": "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277",
+          "decode": 5,
+          "expected": 654909864,
+          "poc": 10
+        }
+      ],
+      "hashes": [
+        "0 1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+        "1 37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+        "2 504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+        "3 ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+        "4 a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+        "5 f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+      ],
+      "end": "2026-11-21T19:04:11.3710439Z"
+    },
+    "analysis": {
+      "parent_exit": {
+        "pid": 2348,
+        "utc": "2026-11-21T19:04:09.6653690Z",
+        "qpc": 3726024996,
+        "exit": 0
+      },
+      "raw_bytes": {
+        "result.json": "caff3729ad8b64f9ccd03478d2f584af13817dff0e6a3a6c96d0db302ec4f3c8",
+        "observer.json": "3708134859d6ebe921512e992f01bdf470fabb33f1a473c5a428950e088b8823",
+        "scene/stdout.txt": "f1bb7c9ec4277a4426a719f578796b907cfc7dd01da6177c3cd695c19fa2e99a",
+        "scene/stderr.txt": "540db4fef4f6a66dd89915f9d5a2dd4a9e3c11aed7e2f58e77590351de68e4e9"
+      },
+      "initial_wrapper_error": "Decoded reference hashes differ",
+      "retest_count": 0,
+      "disposition": "Windows PowerShell 的 Sort-Object poc 误排哈希表。这次复核直接对原始整数 POC 排序。"
+    },
+    "collection": {
+      "sha256": "4c35dcc5d0a40b0721b0d9166937f1450608f7f35ea878485836153ff6845b81",
+      "boot": 92336,
+      "bytes": 3737
+    },
+    "archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/combined-13/runs/win-combined-13-candidate-native720-20261121-01/collected.zip",
+      "sha256": "4c35dcc5d0a40b0721b0d9166937f1450608f7f35ea878485836153ff6845b81"
+    },
+    "cleanup": {
+      "owned_case_removed": true
+    },
+    "original": {
+      "path": "windows-native-graphics/rounds/win-combined-13-candidate-native720-20261121-01.result.json",
+      "sha256": "d41aa17aae051c112101a8b08b9d799e2fdc25a056db2a915bb6f5bc78a831dc"
+    }
+  }
+}

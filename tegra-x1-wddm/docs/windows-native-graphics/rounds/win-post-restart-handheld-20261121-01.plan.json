@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "round_id": "win-post-restart-handheld-20261121-01",
+  "contract_id": "WIN-POST-RESTART-HANDHELD",
+  "windows_question": "WIN-POST-RESTART-HANDHELD",
+  "owner": "SwitchFan、Windows 电源与当前正式 GPU 桌面",
+  "question": "可否在当前正常重启后的正式桌面上恢复 Handheld1 并证明同启动、同 DWM、完整实载和有效功耗策略？",
+  "method": "沿用已审核的 Switch Lite 手持恢复工具，在同一正式 Windows 桌面进行一次恢复并短间隔读回",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "完整匹配正式目录、组件和永久许可，恢复后保持同次开机、同 DWM、Code 0、交流及原电池充电设置，短间隔复查 Handheld1。",
+  "observations": [
+    "重新核对租约、启动 91918、DWM 启动、交流、GPU Code 0 和七份正式组件、五份实载、永久许可及无试用。",
+    "在同次桌面用仓库固定脚本恢复 Handheld1；保留 before、after、电池区间和首个错误。只执行一次，不重启、不启用候选、不发图形负载。",
+    "再次读取同启动、DWM 及完整哈希。若功耗未稳定或出现独立异常，保留原记录并保持取证前置条件开放。"
+  ],
+  "inputs": {
+    "restart": {
+      "path": "windows-native-graphics/rounds/win-wifi-recovery-20261121-01.result.json",
+      "sha256": "bc056045e70eefb868878c981b855e2312f2d8dc625ea4969447d82ecec78d4b"
+    },
+    "retained_after_restart": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/late-adapter-power-detail.json",
+      "sha256": "1756cd71c26aac2da72840473f7c23bb0c02175633d439237d6101802b254908"
+    },
+    "approved_baseline": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "frozen_tools_revision": "2964e2524fba480a6155c3fec7734eae7d092c70",
+    "script_sha256": {
+      "Power-State.ps1": "f136146792b5a80c6016dbae04668831bee87f0f2f5390017bfb1669cd3cab9f",
+      "Restore-Handheld.ps1": "273307d586bf95c63d51553097742a57af2f364772770f761da37f10ba2f23c0"
+    }
+  }
+}

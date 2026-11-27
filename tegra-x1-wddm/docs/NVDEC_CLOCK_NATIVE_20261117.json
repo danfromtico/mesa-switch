@@ -1,0 +1,391 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T08:53:11.167757+00:00",
+  "status": "Real KMT clock-acquisition failure; original display/power baseline restored and cleaned;720p/1080p not accepted",
+  "executed_components": {
+    "utc": "2026-11-17T07:47:10.382238+00:00",
+    "source_head": "91c540b494d981abfc60a7ef5ad5b503c341355d",
+    "controller_source": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+    "archive": "nvdec-deferred-20261117.zip",
+    "bytes": 716164,
+    "sha256": "51865f60acf21043fcb48e6eec18168d5891789ff3d52f55adb11e9cb452892a",
+    "native_signature_receipt_reused": true,
+    "signed_members_unchanged": 32,
+    "candidate": {
+      "Length": 239616,
+      "Sha256": "372ec2a93c23b9744ad256bb2e7c10f70f91043272bee209bc56e31f0ea8669f"
+    },
+    "provider": {
+      "Candidate": {
+        "Length": 102400,
+        "Sha256": "9e2d4826af07a82d083aca6178608d71e983dd5295a1a2175ff38e555a2df7c7"
+      },
+      "Baseline": {
+        "Length": 98832,
+        "Sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+      },
+      "Source": "WindowsDrivers7ecce6c with Mesa259c825d lease implementation",
+      "Abi": "0x00010001"
+    },
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    }
+  },
+  "executed_source": {
+    "adapter_transport": "259c825dec8421d34d5e08e33b9d109d9cd89770",
+    "host_mux": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5",
+    "client_trace": "30fabbae0f4ff789b032e8d76dd1f42f20d6811d",
+    "controller": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+    "provider_hook": "7ecce6c083df1f33def014445f3cacd1c3301095"
+  },
+  "native_install": {
+    "provider_deferred_exit": 0,
+    "provider_verified_after_planned_boot": true,
+    "candidate_kmd_activated": true,
+    "planned_windows_restarts": 4,
+    "unexpected_restarts_observed": 0,
+    "live_provider_replacement_used": false,
+    "dwm_original_umd_icd_loaded": true,
+    "adapter_luid": "00000000000b3de6",
+    "resource_query": {
+      "scope": "adapter-start resource snapshot; not live DMA readiness",
+      "decode_tested": false,
+      "adapters": [
+        {
+          "luid": "00000000000b3de6",
+          "query_status": "00000000",
+          "snapshot_available": true,
+          "version": 65537,
+          "size": 64,
+          "flags": 3,
+          "resource_mask": 4095,
+          "resource_status": 4,
+          "map_status": "00000000",
+          "hidrev": "00012127",
+          "powergate_status": "3ffecf4d",
+          "clock_y": "00000342",
+          "reset_y": "0fe9d09d",
+          "nvdec_clock_source": "e0000000",
+          "nvjpg_clock_source": "e0000000",
+          "smmu_config": "ffffffff",
+          "smmu_host1x_asid": "00000000",
+          "smmu_nvdec_asid": "00000000",
+          "smmu_nvjpg_asid": "00000000",
+          "clients_available": true,
+          "client_flags": 3,
+          "smmu_translation_enable0": "ffffffff",
+          "smmu_translation_enable1": "ffffffff",
+          "smmu_translation_enable3": "ffffffff",
+          "mc_flush": "00000000",
+          "mc_flush_status": "00000004",
+          "pmc_clamp_status": "00000000",
+          "pmc_toggle": "0000000b"
+        }
+      ],
+      "enumerate_status": "00000000",
+      "close_status": "00000000",
+      "matching_adapters": 1,
+      "supported_queries": 1
+    },
+    "query_scope": "Actual resource mapping and SWGROUP precondition checks; no proof of DMA or decode"
+  },
+  "native_decode_attempt": {
+    "begin_utc": "2026-11-17T08:01:31.9808622Z",
+    "process_start_utc": "2026-11-17T08:01:32.7730015Z",
+    "observed_exit_utc": "2026-11-17T08:01:34.3714851Z",
+    "process_exited": true,
+    "process_exit_code": null,
+    "exit_code_limit": "PowerShell Process.ExitCode was null; outer PowerShell exit0 is not the decoder exit status",
+    "input_frames": 6,
+    "decoded_frames": 0,
+    "open_adapter_status": "0x00000000",
+    "create_device_status": "0x00000000",
+    "load_escape_delivery_status": "0x00000000",
+    "load_result": "0xc0000010",
+    "last_stage": "Host1x clock lease",
+    "destroy_device_status": "0x00000000",
+    "firmware_boot_reached": false,
+    "dma_started": false,
+    "remaining_decoder_processes": [],
+    "stdout": "NVDEC stage-1 tool: 1280x720 coded 1280x720 profile 77 level 31 refs 2 frames 6\r\nfirmware: 128000 bytes sha256 7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909\r\nnative NVK LUID=00000000000b3de6\r\n",
+    "stderr": "NVDEC_CALL OpenAdapterFromLuid\r\nNVDEC_RETURN OpenAdapterFromLuid 0x00000000\r\nNVDEC_CALL CreateDevice\r\nNVDEC_RETURN CreateDevice 0x00000000\r\nNVDEC_CALL Escape command=1 session=0\r\nNVDEC_RETURN Escape command=1 delivery=0x00000000 result=0xc0000010\r\nNVDEC_LOAD failed: 0xc0000010 Host1x clock lease: NVDEC backend is absent; PLLP=0x00000000 HostSource=0x00000000\r\nNVDEC_CALL DestroyDevice\r\nNVDEC_RETURN DestroyDevice 0x00000000\r\n",
+    "root_cause": "Not yet established. The acquisition path returned INVALID_DEVICE_REQUEST; existing diagnostics do not distinguish every internal API."
+  },
+  "provider_contract_evidence": {
+    "binary_dispatch_code": "ARM64 object contains0x00222414 dispatch and acquisition callbacks; unsigned image matches the signed9e2d artifact input",
+    "user_mode_denial": {
+      "ReturnedBytes": 0,
+      "ServiceImage": "\\SystemRoot\\System32\\drivers\\switchfan.sys",
+      "OutputBytes": 0,
+      "Utc": "2026-11-17T08:09:33.9230970Z",
+      "UserMode": true,
+      "Success": false,
+      "Win32Error": 5,
+      "Ioctl": "0x00222414",
+      "InputBytes": 0,
+      "HardwareSubmissionRequested": false
+    },
+    "scope": "User-mode access denied5 confirms the guarded endpoint; it does not prove a successful kernel power lease"
+  },
+  "system_reference": {
+    "identity": {
+      "Files": [
+        {
+          "Path": "C:\\Windows\\System32\\ntoskrnl.exe",
+          "Sha256": "DB84703895BBC9F10771DABC117F7B3D3A7F8BC66D0D3E1918F01983E77E7AAD",
+          "Version": "10.0.22621.2861 (WinBuild.160101.0800)",
+          "Length": 10442216
+        },
+        {
+          "Path": "C:\\Windows\\System32\\drivers\\Wdf01000.sys",
+          "Sha256": "BEE6CE7C9AFB63C106FE7D9AA4AF1696F866B5B9E302EBE54979773279BA67CB",
+          "Version": "1.33.22621.4745 (WinBuild.160101.0800)",
+          "Length": 766832
+        }
+      ],
+      "Utc": "2026-11-17T08:22:43.8819743Z",
+      "OS": "Microsoft Windows NT 10.0.22631.0"
+    },
+    "ntoskrnl_export": "IoSetCompletionRoutineEx at RVA0x25cf50; actual image disassembled, callback flags all true in caller",
+    "ntoskrnl_pdb_identity": {
+      "name": "ntkrnlmp.pdb",
+      "guid": "CF565819-499F-5408-528D-875889C0CB13",
+      "age": 1,
+      "downloaded": false
+    },
+    "wdf_pdb": {
+      "url": "https://msdl.microsoft.com/download/symbols/Wdf01000.pdb/FA235C4D32BF95B9ED30126C13FBA08D1/Wdf01000.pdb",
+      "guid": "FA235C4D32BF95B9ED30126C13FBA08D",
+      "age": 1,
+      "name": "Wdf01000.pdb",
+      "downloaded_sha256": "6fc919845c112e0b12cdf491522d3e9044dd8bfb7778f56631b2782b67ad20bd",
+      "info_stream_age": 3,
+      "status": "matching GUID/DBI age verified; Info age3 is a later PDB update, image and DBI age1",
+      "dbi_age": 1,
+      "guid_matches": true,
+      "matching_rule": "GUID equal, PDB Info age >= image age, DBI age equal to image age; Microsoft PDB validation implementation",
+      "rule_source": "https://github.com/microsoft/microsoft-pdb/blob/master/PDB/dbi/pdb.cpp"
+    },
+    "wdf_reference_repository": "https://github.com/microsoft/Windows-Driver-Frameworks",
+    "wdf_reference_commit": "b6191d9543441329154da32f7ab9bdd97228dd3c",
+    "scope": "Public contracts and file/PDB identities; no runtime-private object reads or OS patches"
+  },
+  "recovery": {
+    "completed_utc": "2026-11-17T08:20:40.0130434Z",
+    "last_read_utc": "2026-11-17T08:41:52.2909514Z",
+    "boot": "2026-11-17T08:12:56.8055110Z",
+    "code": 0,
+    "dwm": {
+      "pid": 1444,
+      "start_utc": "2026-11-17T08:13:38.1031758Z",
+      "modules": [
+        "TegraGpuD3DVk.dll",
+        "libvulkan_nouveau.dll"
+      ]
+    },
+    "files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 204808,
+        "sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4848,
+        "sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17652224,
+        "sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 98832,
+        "sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3274240,
+        "sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "display": {
+      "current": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "registry": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "source_mode": {
+        "width": 720,
+        "height": 1280
+      },
+      "target_signal": {
+        "width": 720,
+        "height": 1280
+      },
+      "path_rotation": 2,
+      "changed": false
+    },
+    "power_mode": 1,
+    "cpu_dfll_active": 1,
+    "cpu_error": 0,
+    "gpu_policy_khz": [
+      76800,
+      537600
+    ],
+    "emc": {
+      "Version": 1,
+      "Flags": 367,
+      "ActualKhz": 1331200,
+      "BootKhz": 2500000,
+      "SampleAgeMs": 46,
+      "LastError": 0,
+      "EnumerationError": 0,
+      "RateCount": 4,
+      "RatesKhz": [
+        204000,
+        1331200,
+        1600000,
+        2500000
+      ],
+      "ActmonError": 0,
+      "AverageActiveKhz": 50006,
+      "RawActiveKhz": 47769,
+      "TargetKhz": 1331200,
+      "DisplayFloorKhz": 38304,
+      "QosError": 0,
+      "TransitionCount": 2627
+    },
+    "charge_limit": 85,
+    "fan_mode": 1,
+    "task": {
+      "State": 3,
+      "Result": 0,
+      "Delay": "PT5S",
+      "Enabled": true
+    },
+    "unused_candidate_packages_removed": [
+      "oem0.inf",
+      "oem2.inf"
+    ],
+    "temporary_tasks": 0,
+    "trial_root_and_archive_removed": true,
+    "cleanup_receipt_removed": true,
+    "new_physical_screen_acceptance": false
+  },
+  "next_local_candidate": {
+    "source_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+    "components": {
+      "unsigned_kmd": {
+        "bytes": 237568,
+        "sha256": "59308faf36c15386230605f17f184134841cc910b4acfbe08b67d859b617b6b3"
+      },
+      "unsigned_provider": {
+        "bytes": 100352,
+        "sha256": "98c7408526b5b53afb00216941b43d03bbf3ee71022340db57876576019de6e5"
+      }
+    },
+    "source_manifest_sha256": "304853fdafed4313cbe0bd36104dfb2b892db8b4f8aae242ea85f65a2827c142",
+    "signed": false,
+    "installed": false,
+    "purpose": "Preserve failed consumer API boundary and exact failed provider WDF step/status; no completion, clock or ownership semantics changed",
+    "provider_registry_stage_map": {
+      "1": "WdfRequestForwardToIoQueue",
+      "2": "input/output lengths",
+      "3": "WdfRequestRetrieveInputBuffer",
+      "4": "WdfRequestRetrieveOutputBuffer",
+      "5": "request ABI and callbacks",
+      "6": "provider availability",
+      "7": "exclusive clock claim",
+      "8": "inherited clock registers",
+      "9": "WdfObjectAllocateContext",
+      "10": "IoAllocateWorkItem",
+      "11": "WdfDeviceStopIdle",
+      "12": "WdfRequestMarkCancelableEx"
+    },
+    "provider_diagnostic_scope": "Reset at provider creation; failed kernel requests only, using existing passive registry trace; no kernel pointers recorded",
+    "validation": {
+      "full_arm64_kmd_build": 0,
+      "arm64_provider_build": 0,
+      "clock_lifetime_and_adapter_controls": true
+    }
+  },
+  "review": {
+    "mode": "main-agent self-review",
+    "external_review_required": false,
+    "external_review_performed": false
+  },
+  "remaining": [
+    "Sign one paired diagnostic KMD/provider candidate and collect the exact failing clock call once using the verified deferred installer",
+    "Fix the demonstrated clock contract failure without synthesizing ownership or success",
+    "Execute real firmware boot, DMA and720p H264 output; then ordinary D3D11VA/NV12/window presentation",
+    "After720p acceptance validate1080p;2K/4K remain independently retained and untested"
+  ],
+  "evidence": {
+    "native720.json": "5aa23ea17ce65e7b4c2cdc122f65c5ee108c950dbc7238299449e4ba0934a192",
+    "decode-failure.json": "e8f7a028fe49cd20624ec744e12844a2b498e5eb7290b20e3220d17ece12db9d",
+    "provider-deferred.json": "42ad18b223b5c5260ffb48be422431bdb080741f0f1288f512e91a06203f45d0",
+    "provider-boot.json": "f70e0fc64d4f18e5f6ac3ac0e0bb6dc320c3b9fb69b974fed329c04209b6b762",
+    "provider-dispatch-denial.json": "765e64824d1e46dcbf21c98e95b2324391f574aeaebb8d8c44048d5ec471a6db",
+    "restored-state.json": "1e961f31d43291e8e72af5ef459c988f830de2c488f79c186f9a6f21ac01eb11",
+    "restored-display.json": "77e28b1a6acf8541166eaa7c9c578e99024dc0c1898e19a41cce0d41805abbaa",
+    "native-cleanup.json": "92179b230e89d12762fd0cdaefda22100d2b0ac055b2f2b2c0aa44967fa889f6",
+    "final-native-cleanup.json": "50bf3f999fd0e09dd959d515e8801df24daac85ce861b7118656d13097c6c557",
+    "system-identity.json": "426eed9d5675974d35368d7a26a638744b86354a0e8695ce9dee32b999081d42"
+  },
+  "interpretation_update": {
+    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
+    "utc": "2026-11-17T09:50:29.6964673Z",
+    "finding": "Subsequent native ETW proved deferred provider disk/live image mismatch. This earlier round did not capture the provider loaded image in the decode boot; the0xc0000010 result does not prove a failure inside the newly built provider.",
+    "next": "Verify actual loaded candidate image before another LOAD call; retain the original return/status and recovery evidence."
+  }
+}

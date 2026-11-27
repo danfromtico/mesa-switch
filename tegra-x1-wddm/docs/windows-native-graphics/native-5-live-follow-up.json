@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "objective": "补齐 5 条 Windows 本机契约的实机证据，优先首次 Present 与 GPU fence",
+  "previous_review": {
+    "path": "windows-native-graphics/native-19-follow-up.json",
+    "sha256": "d16875ce7bca863e559385f0e7182c78c82692dec10e53c58134d679d601939b"
+  },
+  "scope": "五条应用场景在 Switch Windows ARM64 实测。保留原始 WSL 注释边界和历史重启故障。",
+  "counts": {
+    "verified_questions": 5,
+    "applicable_windows_question_satisfied": 1,
+    "violated": 0,
+    "unknown": 4,
+    "new_device_executions": 6
+  },
+  "native_desktop": {
+    "boot": 94176,
+    "dwm": 1428,
+    "code": 0,
+    "ac": "Online",
+    "baseline_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "actual_loaded": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    }
+  },
+  "history": "新增正常窗口的监控围栏证据限于 94176。历史重启各自保留原先未知，91476 DMA 152586 仍缺同次提交返回与完成。",
+  "rows": [
+    {
+      "contract_id": "dxgkrnl.h:145:1",
+      "prior": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-old-first-present-sync-owner-20261121-01.result.json",
+        "sha256": "4c8076b76b090e404f29dceaa46ba485830fe66beb94d7d056177834e2d6d4ac"
+      },
+      "windows_questions": [
+        "WIN-SCHEDULER-CAPS",
+        "WIN-MONITORED-CPU"
+      ],
+      "rounds": [
+        {
+          "plan": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-first-present-fence-20261121-01.plan.json",
+            "sha256": "3501063bf6a039261a18645bfcf97e2b1fd124f994aa20839623ab4f404e88d8"
+          },
+          "result": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-first-present-fence-20261121-01.result.json",
+            "sha256": "330554794c8da2cbd4d36b0af523640ad49fa88b2478bd81a3a42fdc99727d8f"
+          },
+          "id": "c5live-first-present-fence-20261121-01",
+          "status": "未知"
+        },
+        {
+          "plan": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-first-present-fence-20261121-02.plan.json",
+            "sha256": "0093c179c00d6f37d6f958f93f944df41696fe152f7370a588353b1ae9dd0342"
+          },
+          "result": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-first-present-fence-20261121-02.result.json",
+            "sha256": "7950cbb0c71e082752b8171879bb6165b747d0b20970b5b3f43f9c0447fab408"
+          },
+          "id": "c5live-first-present-fence-20261121-02",
+          "status": "已满足"
+        }
+      ],
+      "latest_verdict": "已满足",
+      "finding": "正式启动 94176 的 PID 5284／TID 6060，同一对象的两条 1069 匹配两个设备和不同局部句柄。294 的值 1 信号与 297 的事件 428 均归同对象。事件等待返回 WAIT_OBJECT_0 并读回值 1，随后同 HWND 首次 SEQUENTIAL Present 的事件 184、公开返回均为 0，耗时 25.313 ms。应用退出 0，桌面连续。",
+      "remaining_observation": "本次已补齐目标对象链。它覆盖应用自有共享监控围栏和 CPU 事件完成；未观察到该对象的独立同对象 DMA 包、GPU 等待方、历史三次 CALL 后事件，以及 91476 的 DWM DMA 152586 完成。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "prior": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-shared-fence-parent-20261121-01.result.json",
+        "sha256": "e923c8e61e03ded3972857af815111680c7c31ce6b294a31389e663197b91092"
+      },
+      "windows_questions": [
+        "WIN-SHARED-FENCE"
+      ],
+      "rounds": [
+        {
+          "plan": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.plan.json",
+            "sha256": "ba4c6aa54ca19837eba3b816b752e78331e6b487f9f84159e785b08686e8671e"
+          },
+          "result": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+            "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+          },
+          "id": "c5live-shared-parent-20261121-01",
+          "status": "未知"
+        }
+      ],
+      "latest_verdict": "未知",
+      "finding": "同启动的传统非 NT 共享入口创建与打开都成功。PID 4984 与 1824 的 1069 把各自局部句柄连到同一同步对象。新 ETW 覆盖这次打开。同层事件模板只给 pSyncObject 和局部句柄，缺全局表项到父对象的字段。",
+      "remaining_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "prior": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-sealed-members-20261121-01.result.json",
+        "sha256": "dfc1b73b62756699772398e712866ead51732cc4700967cd76d1a4d40a75dd84"
+      },
+      "windows_questions": [
+        "WIN-RESOURCE-MEMBERS"
+      ],
+      "rounds": [
+        {
+          "plan": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.plan.json",
+            "sha256": "b847f21e38f9d3e5898c2e506208df2a808960d57683f72c402778bc84045f7f"
+          },
+          "result": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+            "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+          },
+          "id": "c5live-sealed-resource-20261121-01",
+          "status": "未知"
+        }
+      ],
+      "latest_verdict": "未知",
+      "finding": "正式启动新采集的同资源成员查询为 1, 1, 1。创建与打开的 36 对同一共享／全局分配已匹配。本轮按合法创建、共享、打开、关闭走完整生命周期。",
+      "remaining_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "prior": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-mapped-cache-attribute-20261121-01.result.json",
+        "sha256": "c4f9534a614b436fb36abd822fcb536fe7996b746879c8cf53b50c352acc98d9"
+      },
+      "windows_questions": [
+        "WIN-ALLOCATION-MAP"
+      ],
+      "rounds": [
+        {
+          "plan": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.plan.json",
+            "sha256": "d48a0e3e31b73453af0a597f79dc00bfd7d02eb9ec6314118612bfc88aa3e694"
+          },
+          "result": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+            "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+          },
+          "id": "c5live-allocation-cache-20261121-01",
+          "status": "未知"
+        }
+      ],
+      "latest_verdict": "未知",
+      "finding": "本次 Lock2 返回 0x00000000，已分配地址的 VirtualQuery.Protect 为 0x404。已采集的同分配 33/36 与锁定绑定成功；无具名 Cached 位的回执。",
+      "remaining_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "prior": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c19-update-allocation-property-20261121-01.result.json",
+        "sha256": "cd284f26bca4ba985629aa8a661ee0bc95463e88163c437ca8ad6375b6b478b5"
+      },
+      "windows_questions": [
+        "WIN-ALLOCATION-UPDATE"
+      ],
+      "rounds": [
+        {
+          "plan": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.plan.json",
+            "sha256": "d3e350bc1ec49f19bf3cb27ddf67bdaee2d2e1f65ccfa5c1f54c05c9db638396"
+          },
+          "result": {
+            "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+            "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+          },
+          "id": "c5live-allocation-property-20261121-01",
+          "status": "未知"
+        }
+      ],
+      "latest_verdict": "未知",
+      "finding": "本轮自有 64 KiB 分配的合法属性更新，入口与返回已匹配。实际 NTSTATUS 为 0xc0000002，输出 PagingFenceValue 为 0。",
+      "remaining_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。"
+    }
+  ]
+}

@@ -16,6 +16,8 @@
 #include "vk_format.h"
 #include "nil.h"
 #include "vk_enum_defines.h"
+#include "vk_internal_exts.h"
+#include "vk_wsi_win32_memory.h"
 
 #include "clb097.h"
 #include "clb197.h"
@@ -364,6 +366,24 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
 
    uint64_t drm_format_mod =
       get_explicit_drm_format_mod(pImageFormatInfo->pNext);
+   bool win32_scanout = false;
+#ifdef _WIN32
+   const struct wsi_image_create_info *wsi =
+      vk_find_struct_const(pImageFormatInfo->pNext, WSI_IMAGE_CREATE_INFO_MESA);
+   if (wsi && wsi->win32_row_pitch) {
+      if (pImageFormatInfo->type != VK_IMAGE_TYPE_2D ||
+          pImageFormatInfo->tiling != VK_IMAGE_TILING_LINEAR ||
+          (pImageFormatInfo->format != VK_FORMAT_B8G8R8A8_UNORM &&
+           pImageFormatInfo->format != VK_FORMAT_R8G8B8A8_UNORM) ||
+          !wsi_win32_image_flags_supported(
+             pImageFormatInfo->flags, pImageFormatInfo->format,
+             vk_find_struct_const(pImageFormatInfo->pNext,
+                                  IMAGE_FORMAT_LIST_CREATE_INFO)) ||
+          (wsi->win32_row_pitch & 31))
+         return VK_ERROR_FORMAT_NOT_SUPPORTED;
+      win32_scanout = true;
+   }
+#endif
    const struct vk_format_ycbcr_info *ycbcr_info =
       vk_format_get_ycbcr_info(pImageFormatInfo->format);
 
@@ -374,8 +394,9 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
    VkFormatFeatureFlags2 features;
    if (ycbcr_info == NULL) {
       features = nvk_get_image_plane_format_features(
-         pdev, pImageFormatInfo->format, pImageFormatInfo->tiling,
-         drm_format_mod);
+         pdev, pImageFormatInfo->format,
+         win32_scanout ? VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT : pImageFormatInfo->tiling,
+         win32_scanout ? DRM_FORMAT_MOD_LINEAR : drm_format_mod);
    } else {
       features = ~0ull;
       assert(ycbcr_info->n_planes > 0);
@@ -559,6 +580,12 @@ nvk_GetPhysicalDeviceImageFormatProperties2(
       }
 
       switch (external_info->handleType) {
+      case VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT:
+         if (!pdev->nvkmd->kmd_info.has_win32_memory)
+            return VK_ERROR_FORMAT_NOT_SUPPORTED;
+         ext_mem_props = &nvk_opaque_win32_mem_props;
+         break;
+
       case VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT:
          if (!pdev->nvkmd->kmd_info.has_dma_buf)
             return VK_ERROR_FORMAT_NOT_SUPPORTED;
@@ -945,6 +972,27 @@ nvk_image_init(struct nvk_device *dev,
       usage |= NIL_IMAGE_USAGE_UNCOMPRESSED_BIT;
 
    uint32_t explicit_row_stride_B[NVK_MAX_IMAGE_PLANES] = { 0 };
+   uint32_t win32_row_pitch = 0;
+#ifdef _WIN32
+   const struct wsi_image_create_info *wsi =
+      vk_find_struct_const(pCreateInfo->pNext, WSI_IMAGE_CREATE_INFO_MESA);
+   if (wsi && wsi->win32_row_pitch) {
+      if (image->vk.image_type != VK_IMAGE_TYPE_2D ||
+          image->vk.tiling != VK_IMAGE_TILING_LINEAR ||
+          (image->vk.format != VK_FORMAT_B8G8R8A8_UNORM &&
+           image->vk.format != VK_FORMAT_R8G8B8A8_UNORM) ||
+          image->vk.array_layers != 1 || image->vk.mip_levels != 1 ||
+          image->vk.samples != VK_SAMPLE_COUNT_1_BIT ||
+          !wsi_win32_image_flags_supported(
+             pCreateInfo->flags, image->vk.format,
+             vk_find_struct_const(pCreateInfo->pNext,
+                                  IMAGE_FORMAT_LIST_CREATE_INFO)) ||
+          (wsi->win32_row_pitch & 31) ||
+          wsi->win32_row_pitch < (uint64_t)image->vk.extent.width * 4)
+         return vk_error(dev, VK_ERROR_FORMAT_NOT_SUPPORTED);
+      win32_row_pitch = explicit_row_stride_B[0] = wsi->win32_row_pitch;
+   }
+#endif
    int64_t explicit_offsets_B[NVK_MAX_IMAGE_PLANES];
    for (uint8_t plane = 0; plane < NVK_MAX_IMAGE_PLANES; plane++)
       explicit_offsets_B[plane] = -1;
@@ -957,6 +1005,9 @@ nvk_image_init(struct nvk_device *dev,
    uint64_t _local_drm_format_mod = DRM_FORMAT_MOD_INVALID;
 #define IMAGE_DRM_FORMAT_MOD(img) (_local_drm_format_mod)
 #endif
+
+   if (win32_row_pitch)
+      IMAGE_DRM_FORMAT_MOD(image) = DRM_FORMAT_MOD_LINEAR;
 
    /* This section is removed by the optimizer for non-ANDROID builds */
    if (vk_image_is_android_native_buffer(&image->vk)) {
@@ -1017,45 +1068,50 @@ nvk_image_init(struct nvk_device *dev,
          assert(IMAGE_DRM_FORMAT_MOD(image) != DRM_FORMAT_MOD_INVALID);
       }
 
-      if (IMAGE_DRM_FORMAT_MOD(image) == DRM_FORMAT_MOD_LINEAR) {
-         for (uint8_t plane = 0; plane < image->plane_count; plane++) {
-            VkFormat format = ycbcr_info ?
-               ycbcr_info->planes[plane].format : image->vk.format;
-            const uint8_t width_scale = ycbcr_info ?
-               ycbcr_info->planes[plane].denominator_scales[0] : 1;
-            const uint8_t height_scale = ycbcr_info ?
-               ycbcr_info->planes[plane].denominator_scales[1] : 1;
+   }
 
-            struct nil_image_init_info tiled_shadow_nil_info = {
-               .dim = vk_image_type_to_nil_dim(image->vk.image_type),
-               .format = nil_format(nvk_format_to_pipe_format(format)),
-               .modifier = DRM_FORMAT_MOD_INVALID,
-               .extent_px = {
-                  .width = image->vk.extent.width / width_scale,
-                  .height = image->vk.extent.height / height_scale,
-                  .depth = image->vk.extent.depth,
-                  .array_len = image->vk.array_layers,
-               },
-               .levels = image->vk.mip_levels,
-               .samples = image->vk.samples,
-               .usage = usage & ~NIL_IMAGE_USAGE_LINEAR_BIT,
-            };
+   /* Runtime primaries use the same GPU tiled-shadow rendering and
+    * resolve path as imported linear DRM images, without advertising a
+    * public linear-rendering or DRM-modifier extension on Windows. */
+   if ((image->vk.tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT || win32_row_pitch) &&
+       IMAGE_DRM_FORMAT_MOD(image) == DRM_FORMAT_MOD_LINEAR) {
+      for (uint8_t plane = 0; plane < image->plane_count; plane++) {
+         VkFormat format = ycbcr_info ?
+            ycbcr_info->planes[plane].format : image->vk.format;
+         const uint8_t width_scale = ycbcr_info ?
+            ycbcr_info->planes[plane].denominator_scales[0] : 1;
+         const uint8_t height_scale = ycbcr_info ?
+            ycbcr_info->planes[plane].denominator_scales[1] : 1;
 
-            bool ok = nil_image_init(&pdev->info,
-                                     &image->linear_tiled_shadows[plane].nil,
-                                     &tiled_shadow_nil_info);
-            if (!ok)
-               return vk_errorf(dev, VK_ERROR_UNKNOWN,
-                                "Invalid image creation parameters");
+         struct nil_image_init_info tiled_shadow_nil_info = {
+            .dim = vk_image_type_to_nil_dim(image->vk.image_type),
+            .format = nil_format(nvk_format_to_pipe_format(format)),
+            .modifier = DRM_FORMAT_MOD_INVALID,
+            .extent_px = {
+               .width = image->vk.extent.width / width_scale,
+               .height = image->vk.extent.height / height_scale,
+               .depth = image->vk.extent.depth,
+               .array_len = image->vk.array_layers,
+            },
+            .levels = image->vk.mip_levels,
+            .samples = image->vk.samples,
+            .usage = usage & ~NIL_IMAGE_USAGE_LINEAR_BIT,
+         };
 
-            /* These are always allocated by the driver so the offset
-             * doesn't matter.
-             */
-            image->linear_tiled_shadows[plane].plane_offset_B = 0;
-            image->linear_tiled_shadows[plane].plane_align_B =
-               MAX2(image->linear_tiled_shadows[plane].nil.align_B,
-                    pdev->nvkmd->bind_align_B);
-         }
+         bool ok = nil_image_init(&pdev->info,
+                                  &image->linear_tiled_shadows[plane].nil,
+                                  &tiled_shadow_nil_info);
+         if (!ok)
+            return vk_errorf(dev, VK_ERROR_UNKNOWN,
+                             "Invalid image creation parameters");
+
+         /* These are always allocated by the driver so the offset
+          * doesn't matter.
+          */
+         image->linear_tiled_shadows[plane].plane_offset_B = 0;
+         image->linear_tiled_shadows[plane].plane_align_B =
+            MAX2(image->linear_tiled_shadows[plane].nil.align_B,
+                 pdev->nvkmd->bind_align_B);
       }
    }
 
@@ -1443,16 +1499,18 @@ nvk_get_image_memory_requirements(struct nvk_device *dev,
       switch (ext->sType) {
       case VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS: {
          VkMemoryDedicatedRequirements *dedicated = (void *)ext;
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(_WIN32)
          if (image->vk.tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT &&
              image->vk.drm_format_mod != DRM_FORMAT_MOD_LINEAR) {
             dedicated->prefersDedicatedAllocation = true;
             dedicated->requiresDedicatedAllocation = true;
          } else if (image->can_compress) {
-#else
+#elif defined(__SWITCH__)
          /* No DRM format modifiers on Switch; struct vk_image has no
           * drm_format_mod field on this platform. */
          if (image->can_compress && size_B > (1u << 20)) {
+#else
+         if (image->can_compress) {
 #endif
             /* We need dedicated allocations as compressed images have to be
              * pinned to VRAM due to nouveau, and we can't have a separate

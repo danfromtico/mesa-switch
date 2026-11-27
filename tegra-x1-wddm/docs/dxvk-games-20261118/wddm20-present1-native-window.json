@@ -1,0 +1,566 @@
+{
+  "scope": "Process-scoped GM20B WDDM 2.0 window presentation with a normal system DXGI client.",
+  "accepted_source": "86b11bff561ea8107aadd060249eb14a226bd1c0",
+  "signed_public_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+  "immediate_comparison_umd_sha256": "b79145e2d76774a89420b772c45b69a2df2b71f140086d6dcc4983c5178f194b",
+  "candidate_arm64_umd_sha256": "9fb6cef7df10a3bb96d888e6e6d5e658bd798ccdd9e260bf5702e5f6c1666d26",
+  "changed_driver_source_delta_sha256": "b399a92aa97fa0856ebcc7c1a2d23bfc006c410a971ddd85ac713cefde159b40",
+  "comparison_PE_sections_differing_after_rebuild": [
+    ".buildid"
+  ],
+  "test_host_contracts": {
+    "ordinary-client": 93,
+    "step4-present": 93
+  },
+  "accepted_gpu_boot": 82805,
+  "candidate_trial": {
+    "boot": 82986,
+    "power": "Online",
+    "problem_code": 0,
+    "one_use_consumed": true,
+    "permanent_grant_present": false,
+    "installed_kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "dwm_loaded_components_sha256": {
+      "tg_d3d_arm64.dll": "9fb6cef7df10a3bb96d888e6e6d5e658bd798ccdd9e260bf5702e5f6c1666d26",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+    },
+    "boot_events_during_admission": [
+      {
+        "id": 12,
+        "record": 82986
+      },
+      {
+        "id": 1074,
+        "record": 82969
+      },
+      {
+        "id": 12,
+        "record": 82893
+      },
+      {
+        "id": 1074,
+        "record": 82877
+      }
+    ]
+  },
+  "comparison_cases": [
+    {
+      "case": "Ddi20Case-261120-125910153936",
+      "public_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "d39296d8205559cdaebd30092b9f1ca730b04984d14a4be5f9af2ce8875bfe51",
+      "arm64_umd_sha256": "b79145e2d76774a89420b772c45b69a2df2b71f140086d6dcc4983c5178f194b",
+      "effect": "Sequential",
+      "mode": "native-modern-empty",
+      "drawing_device": "NativeGM20BDrawingDevice",
+      "interfaces": [
+        "0x000b0020"
+      ],
+      "trial_boot": 82717,
+      "collection_boot": 82717,
+      "dwm_before": 1424,
+      "dwm_after": 1424,
+      "problem_code": 0,
+      "case_exit": 4,
+      "outcome": "case failed",
+      "device_reason_before": "0x00000000",
+      "public_present_results": [
+        "0x887a0005"
+      ],
+      "device_reason_after": "0x887a0020",
+      "measured_public_interval_ms": 1.572,
+      "reserved_words": [
+        1
+      ],
+      "argument_presence_masks": [
+        11
+      ],
+      "present1_forward_records": 0,
+      "present1_returns": [
+        "0x80070057"
+      ],
+      "runtime_present_callbacks": [],
+      "display_samples": null,
+      "runtime_submit_successes": 1,
+      "vulkan_submit_successes": 0,
+      "complete_trace": true,
+      "damaged_kernel_buffers": [],
+      "scoped_table": true,
+      "present_calls": 1
+    },
+    {
+      "case": "Ddi20Case-261120-130011507971",
+      "public_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "b637714bb29f757bc5b1cbee7561bd3615c90454dca778af22fb81e2a3131f09",
+      "arm64_umd_sha256": "b79145e2d76774a89420b772c45b69a2df2b71f140086d6dcc4983c5178f194b",
+      "effect": "FlipSequential",
+      "mode": "native-modern-empty",
+      "drawing_device": "NativeGM20BDrawingDevice",
+      "interfaces": [
+        "0x000b0020"
+      ],
+      "trial_boot": 82717,
+      "collection_boot": 82717,
+      "dwm_before": 1424,
+      "dwm_after": 1424,
+      "problem_code": 0,
+      "case_exit": 4,
+      "outcome": "case failed",
+      "device_reason_before": "0x00000000",
+      "public_present_results": [
+        "0x887a0005"
+      ],
+      "device_reason_after": "0x887a0020",
+      "measured_public_interval_ms": 0.481,
+      "reserved_words": [
+        1
+      ],
+      "argument_presence_masks": [
+        11
+      ],
+      "present1_forward_records": 0,
+      "present1_returns": [
+        "0x80070057"
+      ],
+      "runtime_present_callbacks": [],
+      "display_samples": null,
+      "runtime_submit_successes": 1,
+      "vulkan_submit_successes": 0,
+      "complete_trace": true,
+      "damaged_kernel_buffers": [],
+      "scoped_table": true,
+      "present_calls": 1
+    }
+  ],
+  "observed_candidate_cases": [
+    {
+      "case": "Ddi20Case-261120-142236379776",
+      "public_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "75c9ce9d94e00c1a363248ad1111f6d4b8f38cd356e49e80e5e0e5c4e2f6725b",
+      "arm64_umd_sha256": "9fb6cef7df10a3bb96d888e6e6d5e658bd798ccdd9e260bf5702e5f6c1666d26",
+      "effect": "FlipSequential",
+      "mode": "native-modern-empty",
+      "drawing_device": "NativeGM20BDrawingDevice",
+      "interfaces": [
+        "0x000b0020"
+      ],
+      "trial_boot": 82986,
+      "collection_boot": 82986,
+      "dwm_before": 1432,
+      "dwm_after": 1432,
+      "problem_code": 0,
+      "case_exit": 0,
+      "outcome": "completed",
+      "device_reason_before": "0x00000000",
+      "public_present_results": [
+        "0x00000000"
+      ],
+      "measured_public_interval_ms": 0.668,
+      "reserved_words": [
+        1
+      ],
+      "argument_presence_masks": [
+        11
+      ],
+      "present1_forward_records": 1,
+      "present1_returns": [
+        "0x00000000"
+      ],
+      "runtime_present_callbacks": [
+        "0x00000000"
+      ],
+      "display_samples": null,
+      "runtime_submit_successes": 1,
+      "vulkan_submit_successes": 0,
+      "complete_trace": true,
+      "damaged_kernel_buffers": [],
+      "scoped_table": true,
+      "present_calls": 1,
+      "actual_swap_effect_confirmed": true,
+      "device_reason_after_first_return": "0x00000000",
+      "normal_exit_observed": true,
+      "on_screen_observation": null
+    },
+    {
+      "case": "Ddi20Case-261120-142409259798",
+      "public_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "575a00f2b86b35528297f6006c4356c8cacfa62452841e818039caa90d6b3e8c",
+      "arm64_umd_sha256": "9fb6cef7df10a3bb96d888e6e6d5e658bd798ccdd9e260bf5702e5f6c1666d26",
+      "effect": "FlipSequential",
+      "mode": "native-modern-clear",
+      "drawing_device": "NativeGM20BDrawingDevice",
+      "interfaces": [
+        "0x000b0020"
+      ],
+      "trial_boot": 82986,
+      "collection_boot": 82986,
+      "dwm_before": 1432,
+      "dwm_after": 1432,
+      "problem_code": 0,
+      "case_exit": 0,
+      "outcome": "completed",
+      "device_reason_before": "0x00000000",
+      "public_present_results": [
+        "0x00000000"
+      ],
+      "measured_public_interval_ms": 0.399,
+      "reserved_words": [
+        1
+      ],
+      "argument_presence_masks": [
+        11
+      ],
+      "present1_forward_records": 1,
+      "present1_returns": [
+        "0x00000000"
+      ],
+      "runtime_present_callbacks": [
+        "0x00000000"
+      ],
+      "display_samples": 5,
+      "runtime_submit_successes": 4,
+      "vulkan_submit_successes": 1,
+      "complete_trace": true,
+      "damaged_kernel_buffers": [],
+      "scoped_table": true,
+      "present_calls": 1,
+      "actual_swap_effect_confirmed": true,
+      "device_reason_after_first_return": "0x00000000",
+      "normal_exit_observed": true,
+      "on_screen_observation": {
+        "source": "independent desktop capture",
+        "result_lines": [
+          "CLEAR_SCREEN matched=5 tested=5"
+        ]
+      }
+    },
+    {
+      "case": "Ddi20Case-261120-142509837272",
+      "public_client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "262ea02a2f156ddb9b4a2557c3206bd4f565064ee7dbf733c7ad6942fdd2cb99",
+      "arm64_umd_sha256": "9fb6cef7df10a3bb96d888e6e6d5e658bd798ccdd9e260bf5702e5f6c1666d26",
+      "effect": "FlipSequential",
+      "mode": "native-modern-full",
+      "drawing_device": "NativeGM20BDrawingDevice",
+      "interfaces": [
+        "0x000b0020"
+      ],
+      "trial_boot": 82986,
+      "collection_boot": 83056,
+      "dwm_before": 1432,
+      "dwm_after": null,
+      "problem_code": 43,
+      "case_exit": null,
+      "outcome": "boot changed",
+      "device_reason_before": "0x00000000",
+      "public_present_results": [
+        "0x00000000",
+        "0x00000000"
+      ],
+      "measured_public_interval_ms": 1.29,
+      "reserved_words": [
+        1,
+        1
+      ],
+      "argument_presence_masks": [
+        11,
+        11
+      ],
+      "present1_forward_records": 2,
+      "present1_returns": [
+        "0x00000000",
+        "0x00000000"
+      ],
+      "runtime_present_callbacks": [
+        "0x00000000",
+        "0x00000000"
+      ],
+      "display_samples": null,
+      "runtime_submit_successes": 7,
+      "vulkan_submit_successes": 4,
+      "complete_trace": false,
+      "damaged_kernel_buffers": [],
+      "scoped_table": true,
+      "present_calls": 3,
+      "actual_swap_effect_confirmed": true,
+      "device_reason_after_first_return": "0x00000000",
+      "normal_exit_observed": false,
+      "on_screen_observation": null,
+      "returned_public_calls": 2,
+      "last_persisted_client_marks": [
+        "272281 5004 RETURN DrawCSC 00000000",
+        "272281 5004 CALL FlushAfterDraw 00000000",
+        "272296 5004 RETURN FlushAfterDraw 00000000",
+        "272343 5004 CALL Present 00000000 qpc=5232328495"
+      ],
+      "runtime_trace_tail_ms_relative_to_last_present_entry": -8.643,
+      "final_call_driver_entry_observed": false,
+      "forensic_limit": "The trace ended before the last journaled call. Its path inside Windows or either driver is unknown."
+    }
+  ],
+  "selected_as_gpu_baseline": false,
+  "field_reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi_ddi_arg_present1",
+  "unexpected_restart": {
+    "previous_boot": 82986,
+    "next_boot": 83056,
+    "next_gpu_problem_code": 43,
+    "system_records": [
+      {
+        "record": 83074,
+        "id": 41,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "bugcheck": "0"
+      },
+      {
+        "record": 83065,
+        "id": 6008,
+        "provider": "EventLog",
+        "bugcheck": null
+      },
+      {
+        "record": 83056,
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "bugcheck": null
+      }
+    ],
+    "controlled_shutdown_intent_observed": false,
+    "dump_inventory_count": 11,
+    "dump_inventory_changed": false,
+    "cause": "Open. The third public Present was the last durable operation in the six-frame trial."
+  },
+  "recovery": {
+    "boot": 83151,
+    "power": "Online",
+    "problem_code": 0,
+    "permanent_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-hints-57dc16b4ef25",
+    "dwm_loaded_components_sha256": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "57dc16b4ef252393f2c9a8d2428d26ccb7d55166d0f553b6d937eae9788f1046",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "remaining_test_tasks": 0,
+    "remaining_test_processes": 0,
+    "remaining_transfer_directories": 0,
+    "retired_trace_sessions": 6,
+    "inactive_trial_removed": true
+  },
+  "system_boot_history": [
+    {
+      "kind": 1074,
+      "system_record": 82877
+    },
+    {
+      "kind": 12,
+      "system_record": 82893
+    },
+    {
+      "kind": 1074,
+      "system_record": 82969
+    },
+    {
+      "kind": 12,
+      "system_record": 82986
+    },
+    {
+      "kind": 12,
+      "system_record": 83056
+    },
+    {
+      "kind": 6008,
+      "system_record": 83065
+    },
+    {
+      "kind": 41,
+      "system_record": 83074
+    },
+    {
+      "kind": 1074,
+      "system_record": 83134
+    },
+    {
+      "kind": 12,
+      "system_record": 83151
+    }
+  ],
+  "installed_fault_register": {
+    "ledger_sha256": "77a016573dbb357d4a25e0c937518551a8380417bb3b3ce1f433dec79f871d64",
+    "policy_manifest_sha256": "e1e68e65e1a0570449964a68a1b3429236efd0bb29b44d3195cb6ab1dcf9eee9",
+    "open_faults": 5,
+    "verified_restore_components": 7,
+    "denied_test_qualification": "Open faults block presentation promotion: GM20B-LEGACY-SEQUENTIAL-RESTART, GM20B-WDDM20-PRESENT1-REMOVAL, GM20B-WDDM20-FLIP-RESTART, SWITCH-LOAD-TRANSITION-RESTART",
+    "approval_preserved_after_denial": true
+  },
+  "host_rotation_control": {
+    "environment": "x64 user-mode WDK contracts on the build host",
+    "executable_sha256": "cbdf179e10172213d19755dab7e9c6ca6d05ac3a2f15378a167c664196fc0ae3",
+    "test_delta_sha256": "91ba601f10a1e63a9ecf7be7e1c0213dc258b1880b5f371791d80b94ab3a0913",
+    "completed_contracts": {
+      "ordinary-client": 94,
+      "step4-present": 94
+    },
+    "observation": "With one and two rotations, distinct runtime allocation handles, written-allocation handles, last-use and acquire sequences followed their backing images. Both logical render-target views selected their cached view for the current image, and teardown returned each current logical runtime resource handle.",
+    "coverage_limit": "Windows callbacks were modeled in this control. The timing of a real DWM read and the first safe reuse of its source surface remain open."
+  },
+  "passive_submit_review": {
+    "phase_order": [
+      "Windows producer-to-renderer signal accepted",
+      "Vulkan submit returned",
+      "Windows renderer-to-presentation wait accepted"
+    ],
+    "cases": [
+      {
+        "case": "Ddi20Case-261120-142236379776",
+        "mode": "native-modern-empty",
+        "etl_sha256": "23ef0e98c3d5ae44dc1b65c2276522e4547f1d224e94aed9bcc82fabcfbde5c2",
+        "trace_finalized": true,
+        "complete_same_thread_signal_submit_wait_sequences": {
+          "draw": 0,
+          "dwm": 58
+        },
+        "successful_present_source_labels": [
+          {
+            "successful_kmt_presents": 1,
+            "source_allocation_labels": [
+              "A"
+            ]
+          }
+        ],
+        "kernel_written_allocation_records": 0,
+        "kernel_allocation_reference_records": 0,
+        "application_write_scheduler_receipts": [
+          {
+            "ordinal": 1,
+            "public_call_recorded": true,
+            "public_return_recorded": true,
+            "written_submissions": 0,
+            "kernel_pairs": false,
+            "join_limit": "no unique client write submission"
+          }
+        ]
+      },
+      {
+        "case": "Ddi20Case-261120-142409259798",
+        "mode": "native-modern-clear",
+        "etl_sha256": "230f5cacdda90a728e6ff5bf5208a3f67c416b7f85d717e67d8ee201c2edb84d",
+        "trace_finalized": true,
+        "complete_same_thread_signal_submit_wait_sequences": {
+          "draw": 1,
+          "dwm": 38
+        },
+        "successful_present_source_labels": [
+          {
+            "successful_kmt_presents": 1,
+            "source_allocation_labels": [
+              "A"
+            ]
+          }
+        ],
+        "kernel_written_allocation_records": 0,
+        "kernel_allocation_reference_records": 0,
+        "application_write_scheduler_receipts": [
+          {
+            "ordinal": 1,
+            "public_call_recorded": true,
+            "public_return_recorded": true,
+            "written_submissions": 1,
+            "kernel_pairs": true,
+            "submission_sequence": 1,
+            "two_distinct_fences": true,
+            "two_distinct_contexts": true,
+            "ingress_signal_retired": null,
+            "ingress_wait_retired": null,
+            "egress_signal_retired": true,
+            "egress_wait_retired": true,
+            "gpu_begin_ms_relative_to_public_entry": -48.353,
+            "gpu_end_ms_relative_to_public_entry": -46.24,
+            "scheduler_end_ms_relative_to_public_entry": -46.229
+          }
+        ]
+      },
+      {
+        "case": "Ddi20Case-261120-142509837272",
+        "mode": "native-modern-full",
+        "etl_sha256": "ef4d9ed654249f7156d4459947e28850c77fd1b35ebb8323996200911d6f6324",
+        "trace_finalized": false,
+        "complete_same_thread_signal_submit_wait_sequences": {
+          "draw": 4,
+          "dwm": 16
+        },
+        "successful_present_source_labels": [
+          {
+            "successful_kmt_presents": 1,
+            "source_allocation_labels": [
+              "A"
+            ]
+          },
+          {
+            "successful_kmt_presents": 1,
+            "source_allocation_labels": [
+              "B"
+            ]
+          }
+        ],
+        "kernel_written_allocation_records": 0,
+        "kernel_allocation_reference_records": 0,
+        "application_write_scheduler_receipts": [
+          {
+            "ordinal": 1,
+            "public_call_recorded": true,
+            "public_return_recorded": true,
+            "written_submissions": 1,
+            "kernel_pairs": true,
+            "submission_sequence": 1,
+            "two_distinct_fences": true,
+            "two_distinct_contexts": true,
+            "ingress_signal_retired": null,
+            "ingress_wait_retired": null,
+            "egress_signal_retired": true,
+            "egress_wait_retired": true,
+            "gpu_begin_ms_relative_to_public_entry": -49.584,
+            "gpu_end_ms_relative_to_public_entry": -44.54,
+            "scheduler_end_ms_relative_to_public_entry": -44.526
+          },
+          {
+            "ordinal": 2,
+            "public_call_recorded": true,
+            "public_return_recorded": true,
+            "written_submissions": 1,
+            "kernel_pairs": true,
+            "submission_sequence": 2,
+            "two_distinct_fences": true,
+            "two_distinct_contexts": true,
+            "ingress_signal_retired": null,
+            "ingress_wait_retired": null,
+            "egress_signal_retired": true,
+            "egress_wait_retired": true,
+            "gpu_begin_ms_relative_to_public_entry": null,
+            "gpu_end_ms_relative_to_public_entry": -0.696,
+            "scheduler_end_ms_relative_to_public_entry": -0.684
+          },
+          {
+            "ordinal": 3,
+            "public_call_recorded": true,
+            "public_return_recorded": false,
+            "written_submissions": 1,
+            "kernel_pairs": true,
+            "submission_sequence": 4,
+            "two_distinct_fences": true,
+            "two_distinct_contexts": true,
+            "ingress_signal_retired": null,
+            "ingress_wait_retired": null,
+            "egress_signal_retired": true,
+            "egress_wait_retired": true,
+            "gpu_begin_ms_relative_to_public_entry": -64.021,
+            "gpu_end_ms_relative_to_public_entry": -61.899,
+            "scheduler_end_ms_relative_to_public_entry": -61.881
+          }
+        ]
+      }
+    ],
+    "finding": "All retained application and DWM Vulkan submit returns had both flanking runtime operations on the same thread and sequence. For the final application write before the third Present, the GPU end was observed 61.899 ms before the client entry; the scheduler packet retired 61.881 ms before entry.",
+    "remaining_question": "The first two presented allocations were distinct. The archive contains no per-allocation Windows reference events that would establish the third presentation source or the completion of the DWM read of that allocation."
+  }
+}

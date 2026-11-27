@@ -1,0 +1,321 @@
+{
+  "scope": "Objective 5 game frame pacing and the physical storage state recovered after an intervening restart. Source runtime remains selected.",
+  "game": {
+    "name": "FTE LibreQuake",
+    "architecture": "x64",
+    "api": "D3D9",
+    "version": "DXVK v3.1.1",
+    "device_from_game_log": "NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)",
+    "dimensions": [
+      320,
+      240
+    ],
+    "start_boot": "2026-11-18T19:07:27.5697220Z",
+    "power_before": {
+      "Utc": "2026-11-18T19:32:09.4528604Z",
+      "Power": {
+        "Version": 2,
+        "IsLite": 1,
+        "CpuConfigured": 1,
+        "PowerMode": 1,
+        "CpuTargetKhz": 918000,
+        "CpuActualKhz": 916804,
+        "CpuBootKhz": 998400,
+        "CpuMv": 615,
+        "RamActualKhz": 1331200,
+        "GpuPolicyMode": 1,
+        "GpuPolicyMinKhz": 76800,
+        "GpuPolicyMaxKhz": 537600,
+        "GpuReportedKhz": 76800,
+        "GpuReportedUv": 590000,
+        "GpuStatusWord": 382281473,
+        "TempC": 39,
+        "TempValid": 1,
+        "FanDuty": 51,
+        "Flags": 20,
+        "CpuPolicyMinKhz": 102000,
+        "CpuPolicyMaxKhz": 1581000,
+        "CpuRequestedMaxKhz": 1581000,
+        "GpuRequestedMaxKhz": 537600,
+        "CpuSpeedo": 1630,
+        "CpuProcessId": 0,
+        "CpuDfllAvailable": 1,
+        "CpuDfllActive": 1,
+        "CpuLastError": 0,
+        "CpuLoadPermille": 500,
+        "GpuSampleAgeMs": 312,
+        "SocTempC": 39,
+        "BoardTempC": 36,
+        "TempSampleAgeMs": 1532
+      },
+      "Battery": {
+        "Version": 1,
+        "LimitCenter": 85,
+        "BandMin": 80,
+        "BandMax": 90,
+        "CapacityPercent": 80,
+        "VoltageMv": 3863,
+        "Reg00InputSrc": 2,
+        "Reg01PwrOn": 16,
+        "Reg08SysStat": 108,
+        "LastApplyStatus": 0,
+        "Flags": 13
+      }
+    },
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "session_dwm_pid": [
+      1424
+    ],
+    "dwm_tgd3d_marker": 1,
+    "fps_capture": false,
+    "application_inputs": {
+      "fteqw64.exe": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+      "vulkan-1.dll": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+      "d3d9.dll": "f73d5b3b4fb702ec340bbd21bf0840ab2186030e72aa9b599d28f20f611ecbf7",
+      "libvulkan_nouveau.dll": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+      "modules-x64.exe": "c11a9cf9c8b18683ba7c8c8d14ffda38f70287eda89b3a19a1b5c27155349102"
+    },
+    "x64_module_list_from_this_run": false,
+    "initial_private_cache_entries": 0,
+    "initial_process_config_sha256": "90b987ec61e550005389032227ad79933fd29f5bd32ce61e935f8d41b301b91b",
+    "config_confirmed_by_dxvk_log": {
+      "dxvk.maxFrameRate": 15,
+      "dxvk.numCompilerThreads": 1
+    },
+    "engine_command_line_cap": 15,
+    "last_durable_stages": [
+      {
+        "utc": "2026-11-18T19:32:11.0321539Z",
+        "stage": "BeforeFte",
+        "qpc": 28518686996
+      },
+      {
+        "utc": "2026-11-18T19:32:11.4548905Z",
+        "stage": "Launched",
+        "qpc": 28526720024
+      },
+      {
+        "utc": "2026-11-18T19:32:16.2414041Z",
+        "stage": "Window",
+        "qpc": 28618781333
+      }
+    ],
+    "window_class_and_title": "FTED3D9QUAKE LibreQuake: disconnected",
+    "last_persisted_dxvk_log_operation": "D3D9DeviceEx::ResetSwapChain logged the requested 320 by 240 windowed presentation parameters.",
+    "map_input_frames_exit_verified": false,
+    "frame_sampler_started": false,
+    "saved_frame_intervals": 0,
+    "second_profile_executed": false,
+    "performance_comparison": null,
+    "comparison_context": "An earlier x64 640 by 360 run reached gameplay and exited on the earlier b94248bc KMD. Its private shader cache supplied the intact copies used below."
+  },
+  "event_order": [
+    {
+      "record": 67221,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-18T19:24:44.0487230Z",
+      "id": 12,
+      "fields": {}
+    },
+    {
+      "record": 67230,
+      "provider": "EventLog",
+      "utc": "2026-11-18T19:33:34.2426620Z",
+      "id": 6008,
+      "fields": {}
+    },
+    {
+      "record": 67232,
+      "provider": "EventLog",
+      "utc": "2026-11-18T19:33:34.2455800Z",
+      "id": 6005,
+      "fields": {}
+    },
+    {
+      "record": 67239,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "utc": "2026-11-18T19:24:48.3911105Z",
+      "id": 41,
+      "fields": {
+        "BugcheckCode": "0",
+        "LongPowerButtonPressDetected": "false",
+        "BootAppStatus": "0",
+        "PowerButtonTimestamp": "0",
+        "BugcheckParameter3": "0x0",
+        "BugcheckParameter4": "0x0",
+        "BugcheckParameter1": "0x0",
+        "BugcheckParameter2": "0x0",
+        "Checkpoint": "0",
+        "SleepInProgress": "0"
+      }
+    }
+  ],
+  "after_boot": {
+    "utc": "2026-11-18T19:36:35.7423101Z",
+    "boot": "2026-11-18T19:32:39.9237480Z",
+    "dwm": [
+      1356
+    ],
+    "rtc_correction_s": 477,
+    "sd": {
+      "actual_khz": 199680,
+      "ddr200": 0,
+      "adma_errors": 0
+    },
+    "i2c": {
+      "timeouts": 0,
+      "nacks": 0,
+      "errors": 0,
+      "version": 7
+    },
+    "devices": [
+      {
+        "instance": "ACPI\\SWOA0201\\1",
+        "code": 0,
+        "service": "tegra210i2c"
+      },
+      {
+        "instance": "ACPI\\SWOA0201\\3",
+        "code": 0,
+        "service": "tegra210i2c"
+      },
+      {
+        "instance": "ACPI\\SWOA0201\\5",
+        "code": 0,
+        "service": "tegra210i2c"
+      },
+      {
+        "instance": "ACPI\\SWOA0F01\\0",
+        "code": 0,
+        "service": "tegragpurender"
+      },
+      {
+        "instance": "ACPI\\NVDA0101\\0",
+        "code": 0,
+        "service": "nvtsdhc"
+      },
+      {
+        "instance": "ACPI\\SWOA0D01\\0",
+        "code": 0,
+        "service": "switchwifi"
+      }
+    ],
+    "fps": false,
+    "storage_or_display_errors": [],
+    "dump_times": [],
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "native_dwm_modules": {
+      "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "pacecar_ui_sha256": "135285da2255e087c8b37e5034b023035a01d3990ab2b10e4e0220bdc56c7d24",
+    "pacecar_selected_settings_sha256": "9b44f2e1666c9d603180972b551797a2dec76326f73bc6693db0d3626a37bfa7",
+    "pacecar_prior_backup_sha256": "710c6b79e1e5e7cb82311732d4d34adef76a6bf721573dd6bbd470eca95bbf35",
+    "interactive_pacecar_instances": 1,
+    "power_mode": 1,
+    "battery_percent": 81,
+    "external": true
+  },
+  "write_retention": {
+    "private_files_whose_complete_contents_read_zero": [
+      {
+        "name": "dxvk.conf",
+        "file_bytes": 51,
+        "ntfs_valid_bytes": 51,
+        "after_sha256": "8e8fe47e4a33b178bf0433d8050cb0ad7ec323fbdeeab3ecfd857b4ce1805b7a"
+      },
+      {
+        "name": "home/lq1/qconsole.log",
+        "file_bytes": 545,
+        "ntfs_valid_bytes": 545,
+        "after_sha256": "9f46377c35c839541cedfa8ca804ab0c5ea4f22ddaa7e89fd3e9ff938c3425fc"
+      },
+      {
+        "name": "game.err",
+        "file_bytes": 150,
+        "ntfs_valid_bytes": 150,
+        "after_sha256": "1d83518b897b14e2943990eff655838246cc0207a7c95a5f3dfccc2e395f8bbf"
+      },
+      {
+        "name": "home/lq1/frame-cap.cfg",
+        "file_bytes": 208,
+        "ntfs_valid_bytes": 208,
+        "after_sha256": "46f531b7ea0428fbf2c3ca2b60e8dc33d6bbfa000e0fd1b489c5e39140a47006"
+      },
+      {
+        "name": "home/installed.lst",
+        "file_bytes": 102,
+        "ntfs_valid_bytes": 102,
+        "after_sha256": "c419a92c7dce5225606f604f79d0d07009ebd882b5d5d41d234b71617b691774"
+      }
+    ],
+    "dxvk_data_log_bytes": 13476,
+    "durable_marker_after_reset": "Window",
+    "prior_marker_after_reset": "Launched",
+    "installed_app_config_sha256_after": "90b987ec61e550005389032227ad79933fd29f5bd32ce61e935f8d41b301b91b",
+    "ntfs_query": "fsutil file queryvaliddata /D",
+    "ntfs_reference": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-file",
+    "interpretation": "NTFS reported exactly 80 valid bytes for each of the six damaged blobs. The first WriteFile stores the 80-byte header. The second stores the payload. NTFS returned zeroes for the entire uninitialized payload range. The 18 intact blobs and the five small zero-filled files all had valid data through EOF. The reason the five files read as zero and the cause of the restart remain open."
+  },
+  "recovered_cache": {
+    "envelope": "MSCACHE1 with length, 32-byte key and BLAKE3 payload digest. All 24 headers matched their filenames and sizes.",
+    "blob_count": 24,
+    "total_file_bytes": 39476,
+    "total_payload_bytes": 37556,
+    "matching_payload_digests": 18,
+    "all_zero_payloads_with_digest_mismatch": 6,
+    "ntfs_valid_data_length_each_unusable_blob": 80,
+    "complete_historic_cache_sets_with_the_same_24_reference_hashes": [
+      "fte-default-dxvk-x64-01",
+      "fte-kmd-reference-dxvk-x64-01",
+      "fte-perf-cache-baseline-02",
+      "fte-perf-cache-baseline-03",
+      "fte-perf-cache-candidate-02",
+      "fte-perf-cache-candidate-03",
+      "fte-x64-02",
+      "fte-x64-04"
+    ],
+    "intact_reference_used": "fte-default-dxvk-x64-01",
+    "prior_reference_had_rendered_gameplay_and_exit": true,
+    "index_before_bytes": 2097160,
+    "index_before_sha256": "e33aed84c876e17146c31c9e035983814d8f1c8817144ec34630bba6c53991f3",
+    "index_accounted_bytes_before": 0,
+    "index_accounted_bytes_on_open": 39476,
+    "index_accounted_bytes_after_rewrite": 39476,
+    "native_reader": {
+      "reader_sha256": "e14b0dc4ada1b64bb8ce96ca2659988c4a60dd6174f399d5e2901a594e85c56c",
+      "source_commit": "3dc62b5a5a6dc51f42ad0c51bd9bfc5fc4b8e34d",
+      "backend_source_sha256": "aa3456d27c3a3a7ed36a3938b26a293d737b053c97db5c6381a0fb1332b0fd88",
+      "backend_object_sha256": "dd6de634af361e9a969ec90bab9235b051f4d5111634407fa60c3ceb18bcb1fb",
+      "reader_source_sha256": "a0a62cd7e12e9f7b383c5d2b0dfd9644dd889574acabdf879718ac6e4be548a7",
+      "icd_signed_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+      "icd_unsigned_sha256": "0fd74f2e1330fc1cbd11556a4a1af2209dfc95e4b8e39de93187918803d4c62e"
+    },
+    "procedure": "On the Switch, copy the interrupted cache into a private directory, open it with the x64 disk_cache_get object linked by the deployed NVK build, check all keys, refill misses through disk_cache_put using payloads with identical keys and BLAKE3 digests from a previous completed run, and read all keys again in a fresh process.",
+    "initial_lookup": "total=24 hits=18 misses=6 rewritten=0 disagreements=0",
+    "rewrite": "total=24 hits=18 misses=6 rewritten=6 disagreements=0",
+    "fresh_lookup": "total=24 hits=24 misses=0 rewritten=0 disagreements=0",
+    "final_files_matching_intact_reference": 24,
+    "original_incident_files_unchanged_during_check": 24,
+    "replayed_gpu_execution": false,
+    "analysis": "A damaged entry returned a cache miss with zero bytes. A matching verified payload restored that entry. This trial began with an empty cache, so stale disk entries from an earlier launch could not explain its first failure. The timing of individual writes relative to the reset and the reset cause remain unresolved.",
+    "reader_source": "tegra-x1-wddm/docs/dxvk-games-20261118/recovered-cache-reader.c",
+    "rows": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-game-recovered-cache.csv",
+    "rows_sha256": "ff57b66ecf3ac8e2a86d79c676ac871192f0d5c71b18c201c67c2ff3c7c1911a"
+  },
+  "cleanup": {
+    "temporary_windows_files": 75,
+    "temporary_windows_directories": 11,
+    "one_shot_task_already_absent_after_reset": true,
+    "transfer_archives_removed": true
+  },
+  "receipt_sha256": {
+    "trial_state": "d4e36fc98cd17c7161b2bce0f2ee3126b7ab68865a624f81678834f2d14b1c8b",
+    "previous_state": "0666bc880f509700211722a80ecb3e07ff214542f73b26b0cc0aec66ac03ffa4",
+    "game_log": "8c6c41dbcb30f0a4eca73511a08d9b0c837642a0f3293f586672bd99595426dd",
+    "post_boot_receipt": "730c3ee6ab614a874b48bcbe87e94b689c7d153b928014019cdf3caf96cda33a",
+    "historical_hash_receipt": "ae9c609715c13e400034e1aa1219d2aeeb68bf16b73ccbfafab97cc7e2094df9",
+    "native_reader_receipt": "a8a5dc44b46ec413f609304b8bbe9b4a523398cfb7f0c536125d1c6f8176d7e7",
+    "cleanup_receipt": "c75577c1fc28974cf9482bf3d08316bb9b182636c1208309dec737d2b6277cfb"
+  }
+}

@@ -1,0 +1,1636 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-11-16T14:02:09.076862+00:00",
+  "branch": "tgd3d-vulkan",
+  "decision": "Selected repaired tgd3d 49fa08a2 with the 6c86354e kernel and e563a81d NVK ICD. Native GPU startup remains manual pending FL11_1. Previous video acceptance applies to its recorded components.",
+  "display_default": {
+    "logical_width": 1280,
+    "logical_height": 720,
+    "windows_angle": 90,
+    "physical_width": 720,
+    "physical_height": 1280,
+    "scan": "row",
+    "gpu_prerotation": "existing implementation reused",
+    "persisted_registry_orientation": 1,
+    "one_user_requested_reboot_verified": true
+  },
+  "gpu_source": {
+    "KMD": {
+      "input": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json"
+    },
+    "UMD": {
+      "commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+      "frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+      "prior_patch": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+      "prior_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a",
+      "isolated_diff_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
+      "signed_sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
+      "record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json"
+    },
+    "ICD": {
+      "commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4"
+    }
+  },
+  "baseline_files": [
+    {
+      "name": "switchpwrbtn.sys",
+      "bytes": 32280,
+      "sha256": "879550e4eb292619f45de86eb458fc94f07149ca3de95bc88369166fcd64914e"
+    },
+    {
+      "name": "tegragpurender.sys",
+      "bytes": 249352,
+      "sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0"
+    },
+    {
+      "name": "woa-lite-home.ini",
+      "bytes": 138,
+      "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+    },
+    {
+      "name": "acpitabl.dat",
+      "bytes": 4993,
+      "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    {
+      "name": "switchbattery.sys",
+      "bytes": 42440,
+      "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+    },
+    {
+      "name": "Pacecar.Switch.exe",
+      "bytes": 1537544,
+      "sha256": "135285da2255e087c8b37e5034b023035a01d3990ab2b10e4e0220bdc56c7d24"
+    },
+    {
+      "name": "bl33.bin",
+      "bytes": 921600,
+      "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+    },
+    {
+      "name": "libvulkan_nouveau.dll",
+      "bytes": 17656776,
+      "sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    {
+      "name": "switchfan.sys",
+      "bytes": 104456,
+      "sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    {
+      "name": "TegraGpuD3DVk.dll",
+      "bytes": 3339272,
+      "sha256": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e"
+    },
+    {
+      "name": "SwitchPowerTray.exe",
+      "bytes": 60416,
+      "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+    }
+  ],
+  "power_policy": {
+    "Handheld": 1,
+    "fan_mode": 1,
+    "charge_limit_center": 85,
+    "charge_band": [
+      80,
+      90
+    ],
+    "emc_rates_khz": [
+      204000,
+      1331200,
+      1600000,
+      2500000
+    ],
+    "emc_errors": [
+      0,
+      0
+    ],
+    "cpu_policy_khz": [
+      102000,
+      1581000
+    ],
+    "gpu_policy_khz": [
+      76800,
+      537600
+    ],
+    "default_logon_delay": "PT5S",
+    "existing_dynamic_gpu_budget_mib": 512,
+    "SC7": "off"
+  },
+  "normal_observations": [
+    {
+      "case": "entry90",
+      "angle": 90,
+      "begin_utc": "2026-11-16T13:26:44.7701258Z",
+      "end_utc": "2026-11-16T13:26:51.0513764Z",
+      "mode": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "row_scanout": {
+        "width": 720,
+        "height": 1280,
+        "pitch": 2880,
+        "rotation": 0
+      },
+      "pattern_elapsed_ms": null,
+      "boot_unchanged": true,
+      "dwm_unchanged": true,
+      "host_stream_sha256": "9e83c659b2beae8de004db0fd8db0c3fb3ab06c4108cb98ca10ae0b5bfbc47da",
+      "software_checks_passed": true
+    },
+    {
+      "case": "turn270",
+      "angle": 270,
+      "begin_utc": "2026-11-16T13:50:30.8584574Z",
+      "end_utc": "2026-11-16T13:50:58.4365832Z",
+      "mode": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 3,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "row_scanout": {
+        "width": 720,
+        "height": 1280,
+        "pitch": 2880,
+        "rotation": 0
+      },
+      "pattern_elapsed_ms": 20234,
+      "boot_unchanged": true,
+      "dwm_unchanged": true,
+      "host_stream_sha256": "96a60aac7262f06235565208745f1339ee5ec42ff4a7ba7de48f8fae9d2b9e19",
+      "software_checks_passed": true
+    },
+    {
+      "case": "return90-from270",
+      "angle": 90,
+      "begin_utc": "2026-11-16T13:52:04.1533967Z",
+      "end_utc": "2026-11-16T13:52:31.4502748Z",
+      "mode": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "row_scanout": {
+        "width": 720,
+        "height": 1280,
+        "pitch": 2880,
+        "rotation": 0
+      },
+      "pattern_elapsed_ms": 20187,
+      "boot_unchanged": true,
+      "dwm_unchanged": true,
+      "host_stream_sha256": "75d355f623f8deb0e1ae65e30181158f45d660371c4e5ecac0687f7913531ecd",
+      "software_checks_passed": true
+    },
+    {
+      "case": "turn180",
+      "angle": 180,
+      "begin_utc": "2026-11-16T13:53:20.6211595Z",
+      "end_utc": "2026-11-16T13:53:48.6367815Z",
+      "mode": {
+        "width": 720,
+        "height": 1280,
+        "orientation": 2,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "row_scanout": {
+        "width": 720,
+        "height": 1280,
+        "pitch": 2880,
+        "rotation": 0
+      },
+      "pattern_elapsed_ms": 20234,
+      "boot_unchanged": true,
+      "dwm_unchanged": true,
+      "host_stream_sha256": "25f6416ca6d12884f7dec7e1b76853e0cb979b98ad22c6f3fed63ee2e6c59f8e",
+      "software_checks_passed": true
+    }
+  ],
+  "physical_feedback": {
+    "user": "嗯，都正常的画面",
+    "scope": "Observed90/270/180 pictures; feedback preceded the failed final return90, so it does not validate that return"
+  },
+  "known_failure": {
+    "case": "return90-from180",
+    "state": "Abnormal Windows reboot confirmed; user requested no further investigation",
+    "dispatch_utc": "2026-11-16T13:54:22.8086600Z",
+    "boot_before": "2026-11-16T13:37:51.5364340Z",
+    "boot_after": "2026-11-16T13:54:51.6448820Z",
+    "driver_changed": false,
+    "reboot_requested_by_agent_for_this_case": false,
+    "child_case_receipt_missing": true,
+    "no_trace_end": true,
+    "host_stream_sha256": "3f95e690e7d82ae874dbd46b3fd6f9688a989aa571a8e309aada4e04fe03a1e5",
+    "root_cause": "Not established; retained trace does not prove complete fault coverage"
+  },
+  "last_postfailure_readback": {
+    "utc": "2026-11-16T14:04:39.0400022Z",
+    "device_codes": [
+      0
+    ],
+    "default_task": "Ready",
+    "dwm": [
+      {
+        "Id": 1276,
+        "Start": "2026-11-16T13:55:27.1864947Z"
+      }
+    ],
+    "scope": "Cleanup receipt only; no new mode operation or physical acceptance"
+  },
+  "not_accepted": [
+    "DC column scan",
+    "All direction-transition stability",
+    "0-degree fresh pattern acceptance",
+    "Long-term stability"
+  ],
+  "review": "Current integration changes: main-agent source review. Historical independent review was not completed; external review is not a current requirement.",
+  "user_stop": "180-to90 investigation/replay remains stopped. User returned device for vkcube acceptance; completed without direction/driver/power changes. Continue authorized decode integration locally.",
+  "cleanup": {
+    "native_files_archived_and_hash_checked": 190,
+    "receipt": {
+      "Dwm": [
+        {
+          "Id": 1276,
+          "Start": "2026-11-16T13:55:27.1864947Z"
+        }
+      ],
+      "RebootRequested": false,
+      "ModeChanged": false,
+      "RemovedTasks": [
+        "Tgd3dRowPostbootRead_20261116",
+        "Tgd3d-turn270-20261116",
+        "Tgd3d-return90-from270-20261116",
+        "Tgd3d-turn180-20261116"
+      ],
+      "RootAbsent": true,
+      "Utc": "2026-11-16T14:04:39.0400022Z",
+      "Phase": "Cleaned",
+      "DriverChanged": false,
+      "ArchivedFileCount": 190,
+      "Code": [
+        0
+      ],
+      "DefaultTask": "Ready"
+    },
+    "receipt_sha256": "8a441e3ebdc68a5e3f3d5653917263ce3d8bceabd8f4064ee56d9ff1e176477b",
+    "native_trace_root_removed": true,
+    "user_requested_no_further_testing": true
+  },
+  "initial_postfailure_readback": {
+    "utc": "2026-11-16T13:56:23.6114015Z",
+    "default_task": "Running",
+    "device_codes": [
+      43
+    ],
+    "note": "During automatic startup; complete postfailure recovery not claimed from this readback"
+  },
+  "updated_utc": "2026-11-19T09:50:05.9621060Z",
+  "device_access": {
+    "updated_utc": "2026-11-17T22:27:37.5428473Z",
+    "owner": "main",
+    "purpose": "Flip client exited with device removal; later reboot and retained baseline verified. No observer remains.",
+    "main_local_work_allowed": true,
+    "main_native_access": "Exclusive for this observation",
+    "current_recovery_record": "TGD3D_PRESENT_BASELINE_20261117.json"
+  },
+  "last_readback_before_user_box64_hold": {
+    "utc": "2026-11-16T14:15:38.3503583Z",
+    "boot": "2026-11-16T13:54:51.6476840Z",
+    "device_codes": [
+      0
+    ],
+    "default_task": "Ready",
+    "dwm": [
+      {
+        "Modules": [
+          {
+            "ModuleName": "TegraGpuD3DVk.dll",
+            "FileName": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll"
+          },
+          {
+            "ModuleName": "libvulkan_nouveau.dll",
+            "FileName": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+          }
+        ],
+        "Id": 1276,
+        "Start": "2026-11-16T13:55:27.1864947Z"
+      }
+    ],
+    "files": [
+      {
+        "Sha256": "E95287CBEB1D2C325BAACB9685AFFD1D24783B22ECADC1801BA1DFFCFE7CC25E",
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys"
+      },
+      {
+        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll"
+      },
+      {
+        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+      }
+    ],
+    "orientation_rechecked": false,
+    "physical_acceptance": false,
+    "scope": "Read-only state before user hold; not current device state during user testing"
+  },
+  "local_vkcube_candidate": {
+    "upstream": {
+      "Vulkan-Tools": {
+        "url": "https://github.com/KhronosGroup/Vulkan-Tools",
+        "tag": "v1.4.354",
+        "commit": "ec6931a360d89d08f1c7578fa43958fb3829b10a",
+        "clean": true
+      },
+      "Vulkan-Loader": {
+        "url": "https://github.com/KhronosGroup/Vulkan-Loader",
+        "tag": "v1.4.354",
+        "commit": "92f42301839b406b7d47d92b279db8f8744d8dcf",
+        "clean": true
+      },
+      "Vulkan-Headers": {
+        "url": "https://github.com/KhronosGroup/Vulkan-Headers",
+        "tag": "v1.4.354",
+        "commit": "01393c3df0e5285b54ee6527466513f9e614be94",
+        "clean": true
+      }
+    },
+    "helper_source_commit": "6fe28b2c369b65daae23e582069d3dc289ac14eb",
+    "helper_source_modified": false,
+    "gpu_source_modified": false,
+    "files": {
+      "vkcube.exe": {
+        "bytes": 599040,
+        "sha256": "7474369ec0c723b6aba05b9a6e87a778c251c7375ad77f1cd90cc2739a50688f"
+      },
+      "nvk-windows-check.exe": {
+        "bytes": 63488,
+        "sha256": "0d6c14827260eb6987d9cee20adb06f5f84d3d2e9b55e2d76d7202db092991bf"
+      },
+      "vulkan-1.dll": {
+        "bytes": 692736,
+        "sha256": "8b87b317a88d50491f695b97c4ac2ff3c85e944ea0a306213cae871fe48b806e"
+      }
+    },
+    "vulkan_core_h_sha256": "55c06a17793bb1a9d752aa0906116fff9d1fb74f5dd3896777b92f124c9637aa",
+    "headers_identical_to_mesa": true,
+    "loader_assembly": "Upstream ARM64 GAS unknown-extension trampoline compiled; no disabled assembly fallback",
+    "local_checks": [
+      "ARM64 PE for cube and loader",
+      "Cube Windows GUI and dynamically loaded Vulkan loader",
+      "Loader required Win32/swapchain exports present",
+      "Unmodified pinned upstream sources",
+      "Identity utility built with -Wall -Wextra -Werror"
+    ],
+    "desktop_directory": "C:\\Users\\ruje\\Desktop\\vkcube-native-arm64-20261116-142245",
+    "staged_utc": "2026-11-16T14:23:56.2240108Z",
+    "shortcut": "C:\\Users\\ruje\\Desktop\\vkcube-native-arm64-20261116-142245\\vkcube-320x240.lnk",
+    "arguments": "--width 320 --height 240 --gpu_number 0 --present_mode 2",
+    "package_manifest_sha256": "6c50c060e0408d9f1f7aa5d2a41549a3ec43da02b905cae8139435ff01f3208c",
+    "archive_sha256": "64c8f91290ab96a4c58edce3be8c94333b317ffc1ea08032c94514093f5caf4e",
+    "uploaded_archive_removed": true,
+    "gpu_acceptance": true,
+    "driver_changed": false,
+    "display_changed": false,
+    "reboot_requested": false,
+    "baseline_replaced": false,
+    "native_pending": [],
+    "ordinary_desktop_seconds": 40,
+    "ordinary_desktop_five_minutes": false,
+    "offscreen_gpu_test": false,
+    "existing_review_status": "No driver or helper source changes. Existing pending Gemini review remains pending until 2026-11-20T23:53:18Z; upstream binaries not independently approved",
+    "evidence_directory": "OUT/fixed90-wsi-20261116",
+    "native_executed_at_staging": false,
+    "startup_repair": {
+      "photo": "CRT assertion cube.c:4251 !err after vkEnumeratePhysicalDevices; not evidence of missing VC runtime",
+      "enumeration_utc": "2026-11-16T15:06:51.1459813Z",
+      "unset": {
+        "result": -3,
+        "physical_devices": 0,
+        "helper_exit": 10
+      },
+      "process_opt_in": {
+        "name": "NVK_I_WANT_A_BROKEN_VULKAN_DRIVER",
+        "value": "1",
+        "result": 0,
+        "physical_devices": 1,
+        "helper_exit": 0,
+        "matching_native_luid": "000000000007ac5d"
+      },
+      "enumeration_scope": "No VkDevice, queue or rendering; does not prove WSI",
+      "repair_confirmed_utc": "2026-11-16T15:09:18.5366084Z",
+      "deployed_launcher": "Run-vkcube.ps1",
+      "deployed_launcher_sha256": "4e42e0fbe594e89bca8309098f8424c305a5885a7add74eb699a34f78491453a",
+      "shortcut_updated": true,
+      "persistent_environment_changed": false,
+      "vc_runtime_installed": false,
+      "startup_observer": "One 60-frame startup check dispatch timed out after 50 seconds. No completion receipt. Execution and outcome unknown; no subsequent native read.",
+      "pending_cleanup": {
+        "task": "Tgd3dCubeStartup_20261116",
+        "status": "Resolved: startup task absent at15:24readback and COM task check15:43:10",
+        "recurring_trigger": false,
+        "configured_limit_seconds": 120,
+        "action": "No action required"
+      },
+      "ssh_reboot_causality": "Not established",
+      "local_packaging_fix": "build_vkcube.py copies the same PS1 plus a CMD entry point and records launcher hashes; new CMD has not been uploaded",
+      "review": "Pending Gemini4 Carbon High, quota recovery 2026-11-20T23:53:18Z; not retried",
+      "evidence_directory": "OUT/vkcube-startup-20261116",
+      "later_observation": "Readback15:24:09 showed boot15:10:28, proving a reboot after prior15:09 repair. Cause not established. Manual cube later ran218.81seconds and exited0; controlled acceptance completed on the same new boot."
+    },
+    "acceptance_reference": "win32_vulkan_acceptance (timing-instrumented test copy; original desktop executable preserved)",
+    "original_startup_dispatch_execution": null,
+    "manual_native_run": {
+      "seconds": 218.8098971,
+      "exit": 0,
+      "render_timing_recorded": false
+    }
+  },
+  "win32_vulkan_acceptance": {
+    "status": "Fixed90 row-scan DWM and native Win32 Vulkan functional acceptance passed for this observed run; known180-to90 failure unchanged",
+    "begin_utc": "2026-11-16T15:28:27.7689646Z",
+    "end_utc": "2026-11-16T15:35:09.9891234Z",
+    "boot": "2026-11-16T15:10:28.9832050Z",
+    "dwm_pid": 1184,
+    "native_luid": "0000000000079305",
+    "desktop": [
+      1280,
+      720
+    ],
+    "initial_swapchain": [
+      320,
+      240
+    ],
+    "driver_combination": "Same baseline_files KMD E95 / UMD5b / ICD95b; no driver/power/display modification",
+    "test_executable_sha256": "203d603151fe713c3272d9634dad7ada5a32c1351bf0c2649985c524206e6127",
+    "test_executable_bytes": 600576,
+    "upstream_tools_commit": "ec6931a360d89d08f1c7578fa43958fb3829b10a",
+    "local_source_base_commit": "fe2c3fbb24e54cfc1f305d0818191734f2da23cd",
+    "instrumentation": "Optional Present return timing and swapchain creation events; no renderer algorithm or driver changes",
+    "code_sha256": {
+      "build_vkcube.py": "4362b70fc556b6d17b64c1e6245877bbe76f963c8d38f93f10bad539e962975f",
+      "vkcube_timing.h": "7b9fbecba25c3fcaa0503ed8163fd5e876db8449c4a1aacf8f41a0eed97356eb",
+      "Observe-Vkcube.ps1": "446dcf9a554de9655fa273f424721888367264501346e94957b696f12b0b60c3",
+      "Observe-CubeOcclusion.ps1": "ab85b0f2808c50b74127b9a9fd3f7948930b51a96fdb32f08696b054d1fafbea"
+    },
+    "timing": {
+      "scope": "vkQueuePresentKHR return cadence; not guaranteed panel frame rate",
+      "qpc_frequency": 19200000,
+      "steady_seconds": 300.28867598958334,
+      "steady_present_count": 5937,
+      "steady_interval_fps": 19.77058246719055,
+      "steady_interval_ms": {
+        "mean": 50.58019922576932,
+        "median": 42.947031249999995,
+        "p95_nearest_rank": 92.61713541666667,
+        "p99_nearest_rank": 114.14494791666667,
+        "max": 2162.3296875
+      },
+      "all_present_count": 7769,
+      "present_results": {
+        "0": 7769
+      },
+      "swapchains": [
+        {
+          "kind": "swapchain",
+          "qpc": 20927869789,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 240
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 22247177273,
+          "begin": 0,
+          "result": 0,
+          "a": 404,
+          "b": 301
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 22516127317,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 240
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27561105274,
+          "begin": 0,
+          "result": 0,
+          "a": 1280,
+          "b": 649
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27597998599,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 240
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27626201230,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 220
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27628849407,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 176
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27630659657,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 136
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27632101567,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 129
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27634655493,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 124
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27635937308,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 98
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27637871152,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 93
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27639643438,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 102
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27641466730,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 129
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27642959841,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 149
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27644637640,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 171
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27646861597,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 190
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27648631747,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 200
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27650133738,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 206
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27652303413,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 215
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27653732018,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 222
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27655509656,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 227
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27657322356,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 228
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27675907635,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 224
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27677432618,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 222
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27679525964,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 223
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27681326211,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 228
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27682825767,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 229
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 27952491893,
+          "begin": 0,
+          "result": 0,
+          "a": 1280,
+          "b": 649
+        },
+        {
+          "kind": "swapchain",
+          "qpc": 28014084431,
+          "begin": 0,
+          "result": 0,
+          "a": 320,
+          "b": 229
+        }
+      ],
+      "trace_exit_seen": true,
+      "observer_exit": 0,
+      "cube_exit": 0,
+      "same_boot": true,
+      "dwm_same": true,
+      "code_after": 0,
+      "native_luid": "0000000000079305",
+      "measurement_conditions": "Five-minute run includes user-reported moving, resizing and maximizing; not a fixed320x240 benchmark.",
+      "longest_gap_context": {
+        "previous_present": {
+          "kind": "present",
+          "qpc": "27877662449",
+          "begin": "27876580160",
+          "result": "0",
+          "a": "0",
+          "b": "0"
+        },
+        "next_present": {
+          "kind": "present",
+          "qpc": "27919179179",
+          "begin": "27918530416",
+          "result": "0",
+          "a": "0",
+          "b": "0"
+        },
+        "swapchains_inside": []
+      }
+    },
+    "desktop_interaction": {
+      "Begin": "2026-11-16T15:29:04.2082519Z",
+      "Pid": 4940,
+      "Session": 1,
+      "Moves": 6,
+      "Resizes": 6,
+      "Minimizes": 1,
+      "Restores": 1,
+      "Occlusions": 1,
+      "Exit": 0,
+      "Scope": "Owned GDI/WinForms window exercises DWM composition; no native pixel-readback claim",
+      "End": "2026-11-16T15:29:45.0913195Z",
+      "ElapsedSeconds": 40.2431601,
+      "CloseReason": "DurationReached"
+    },
+    "physical_observations": {
+      "physical_feedback": "正常旋转，缩放和遮挡恢复正常",
+      "scope": "Five-minute run and manual window interaction physically confirmed; initial missed occlusion repeated alone for15seconds and user confirmed normal.",
+      "native_permission": "交回 Switch，继续 vkcube 验收",
+      "recorded_utc": "2026-11-16T15:34:37.738800+00:00",
+      "earlier_5s_occlusion": "User later clarified they were looking at their phone and did not see this phase; superseded by15second focused repeat",
+      "five_minute_user_confirmation": "刚才已经5分钟了，并且我移动 放大都正常",
+      "focused_occlusion_user_confirmation": "正常的，继续吧",
+      "focused_occlusion_native_times": {
+        "Preflight": "2026-11-16T15:38:47.3647593Z",
+        "OrangeVisible15s": "2026-11-16T15:38:57.9426479Z",
+        "Restored": "2026-11-16T15:39:13.3700631Z",
+        "Completed": "2026-11-16T15:39:21.8617311Z"
+      }
+    },
+    "focused_occlusion": {
+      "Begin": "2026-11-16T15:38:47.2866364Z",
+      "Exit": 0,
+      "OwnsCube": true,
+      "PhysicalAcceptance": false,
+      "Events": [
+        {
+          "Phase": "Preflight",
+          "Utc": "2026-11-16T15:38:47.3647593Z"
+        },
+        {
+          "Phase": "OrangeVisible15s",
+          "Utc": "2026-11-16T15:38:57.9426479Z"
+        },
+        {
+          "Phase": "Restored",
+          "Utc": "2026-11-16T15:39:13.3700631Z"
+        },
+        {
+          "Phase": "Completed",
+          "Utc": "2026-11-16T15:39:21.8617311Z"
+        }
+      ],
+      "Phase": "Completed",
+      "CubePid": 5008,
+      "LastTitle": "Vulkan Cube - 13.9 FPS (Present)",
+      "CubeExit": 0,
+      "End": "2026-11-16T15:39:22.2523563Z"
+    },
+    "review": "Gemini4 Carbon High pending until2026-11-20T23:53:18Z; not retried or claimed approved",
+    "evidence_zip_sha256": "3173137fda7e5659dcc0ed368b79f9011fb373d937f048fb36692da39826e52e",
+    "evidence_files": [
+      {
+        "Name": "result.json",
+        "Bytes": 4600,
+        "Sha256": "50B9748726D9A25282AE3A6E16A57D3AB1ECA332CBAC338A40023AD5341B97B4"
+      },
+      {
+        "Name": "progress.json",
+        "Bytes": 4555,
+        "Sha256": "34E9E8E5037242B986F1404BCDB74875E6A8AC81F41CDCA5D722A9F40F5256FC"
+      },
+      {
+        "Name": "dispatch.json",
+        "Bytes": 232,
+        "Sha256": "874A57CC198B6E6369B71425D3A0B1A62E898659AE5F7F501FC8158B47EFE8A6"
+      },
+      {
+        "Name": "identity.stdout",
+        "Bytes": 245,
+        "Sha256": "4BD41EDECC20A0FA73BF3567BB06E622E662E82AA320D6E088F39BD9A01B10C8"
+      },
+      {
+        "Name": "identity.stderr",
+        "Bytes": 75,
+        "Sha256": "99770779343BFAF3D19B96117FFE71B6B7340233B36559854CF049518418931D"
+      },
+      {
+        "Name": "cube.stdout",
+        "Bytes": 0,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "Name": "cube.stderr",
+        "Bytes": 246,
+        "Sha256": "C4DF297577890CA9B5C2D13FB6ABAA9EF78C72845A7BA3AE02D967EBE1CF9E4F"
+      },
+      {
+        "Name": "desktop.json",
+        "Bytes": 433,
+        "Sha256": "6A2B99031B557F8A95FB3BA1B54F028EF2981670AD485E18AA49B327C4EF6481"
+      },
+      {
+        "Name": "desktop.ready.json",
+        "Bytes": 163,
+        "Sha256": "C09C58B1BDF19090E12DFA392A8170B897C70C89FD0024113A786F912FE2D356"
+      },
+      {
+        "Name": "desktop.position.json",
+        "Bytes": 255,
+        "Sha256": "B80E76FEBBFCE7099EB105CBE8B5E9DB05535C16F6C2EB3AACE5A9418A45D1FC"
+      },
+      {
+        "Name": "small.png",
+        "Bytes": 27998,
+        "Sha256": "59E613F6725EFA5F5EF3A816070371D1FF89E1E005E00B0987493FB0CF854440"
+      },
+      {
+        "Name": "resized.png",
+        "Bytes": 47997,
+        "Sha256": "1AAC3CE64F016E1B4AF0F08133FB54AB7218E26803D5C1F9C703C2A819EC1BC5"
+      },
+      {
+        "Name": "occluded.png",
+        "Bytes": 5420,
+        "Sha256": "0C147C4A30F77D91E66743C406A02885EAE8BB6E4459F6533FFB6794D5FA2D0B"
+      },
+      {
+        "Name": "restored.png",
+        "Bytes": 27585,
+        "Sha256": "A178B164003D3A2598C4F8A286059CA0F1D585DA1A61E90D284214CC04938151"
+      },
+      {
+        "Name": "five-minutes.png",
+        "Bytes": 34613,
+        "Sha256": "F7E69799491D9CA1AF5D10BA2A93B89BAB80CB9B038C09A7E02A06EBEE4A6D89"
+      },
+      {
+        "Name": "timing.csv",
+        "Bytes": 296320,
+        "Sha256": "13CAB8E157AC0A6BAD6E0EAB5F6C15F5537CEDFA2EB9F1984AEAFE65B1A82B35"
+      },
+      {
+        "Name": "occlusion-only-state.json",
+        "Bytes": 899,
+        "Sha256": "A002138B450967F1D7CC33A7717663C1CF9DF810240651AECD96D83368A95B6E"
+      },
+      {
+        "Name": "occlusion-only-result.json",
+        "Bytes": 965,
+        "Sha256": "9CC9FA154FCA9762C6FDB959201C6B97EF64D56245B0E9B2265BC71BA37B96F9"
+      },
+      {
+        "Name": "occlusion-only-before.png",
+        "Bytes": 30711,
+        "Sha256": "035DA77B7CEB22B6F88C985E4494BCED932693C3F548E2E963D821923F122933"
+      },
+      {
+        "Name": "occlusion-only-covered.png",
+        "Bytes": 19844,
+        "Sha256": "0BC8A1F36C23214F0FBA9B4AEB167346E40490817128D0325A7F4CF254842AA3"
+      },
+      {
+        "Name": "occlusion-only-restored.png",
+        "Bytes": 91602,
+        "Sha256": "A85272A8DA51911880376517C79A7195BF3FB3F870428C2815575DABD144A0A7"
+      },
+      {
+        "Name": "occlusion-only-timing.csv",
+        "Bytes": 23897,
+        "Sha256": "001867FF88A07A9FE6969E3680A4F921D5E1DDA996F2D4B2CCE4C48B77301AB8"
+      },
+      {
+        "Name": "occlusion-only.stdout",
+        "Bytes": 0,
+        "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+      },
+      {
+        "Name": "occlusion-only.stderr",
+        "Bytes": 246,
+        "Sha256": "C4DF297577890CA9B5C2D13FB6ABAA9EF78C72845A7BA3AE02D967EBE1CF9E4F"
+      }
+    ],
+    "archive_verified": true,
+    "evidence_directory": "OUT/vkcube-acceptance-20261116",
+    "gpu_baseline_promoted": false,
+    "performance_followup": "Application Present return gaps include one2.162s interval; not a fixed-size benchmark or long-term stability claim",
+    "scope_excludes": [
+      "Tegra DC column scan",
+      "Complete direction-transition stability",
+      "D3D application compatibility",
+      "NVDEC/D3D11VA hardware acceptance",
+      "FPS optimization"
+    ],
+    "cleanup": {
+      "Utc": "2026-11-16T15:43:10.4242296Z",
+      "RemainingTrialTasks": [],
+      "DesktopPackagePreserved": true,
+      "Dwm": [
+        {
+          "Id": 1184,
+          "StartTime": "/Date(1794841863905)/"
+        }
+      ],
+      "TrialDirectoryAbsent": true,
+      "ArchiveAbsent": true,
+      "Observer": "Original cleanup query timed out; subsequent read-only filesystem and COM task checks confirmed completion without repeating deletion",
+      "LastCode": 0,
+      "LastCodeUtc": "2026-11-16T15:40:17.3461023Z"
+    }
+  },
+  "decode_integration": {
+    "updated_utc": "2026-11-18T01:26:41.9873984Z",
+    "state": "Native 1080p H.264 functional acceptance passed. All six visible NV12 frames matched the independent decoded reference. GPU conversion, presentation in the physical window and normal close were observed over 16.093 seconds including an eight-second final hold.",
+    "active_sequence": [
+      {
+        "resolution": "720p",
+        "record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json"
+      },
+      {
+        "resolution": "1080p",
+        "record": "NVDEC_1080_D3D11VA_20261117.json"
+      }
+    ],
+    "2k_4k": "Independent implementation exists; untested; integration undecided",
+    "external_source_head": "280440f3fc8dbcd00e9afc0152820bf1bd1eafb4",
+    "selected_720p_head": "96e24579a02b5c041be4f8871f67a1818917475e",
+    "resource_preflight": {
+      "directory": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/resource-preflight",
+      "source_base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+      "emc_input_identity": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
+      "patch_sha256": "db088ba8220c54667dc09bdb40117c0bf03db2c6b4b2d2b167b3e29bb4534a2c",
+      "signed_kmd_sha256": "e340ffcceb68b17693854b26a8d581e6b0944c6a58e763f67609ddd66f2b678c",
+      "acpi_sha256": "6b058b409beda750473fa61430cb5196c6191d3801167d7f3c13846077fdcf49",
+      "query_tool_sha256": "5015d34e22878b225b58dcfb29fd484161f4412aec9d46ed99adb9371dda8a5d",
+      "scope": "Optional resources plus immutable always-on state snapshot only; no NVDEC power-up, firmware, DMA, node or capability enabled",
+      "catalog_generated": false,
+      "windows_signature_verified": false,
+      "native_installed": false,
+      "signature_verified_local": true,
+      "review": "Pending Gemini4 Carbon High; not before2026-11-20T23:53:18Z",
+      "controls": "Missing/partial/malformed resources, each map failure, null-success map, retained failed unmaps, snapshot and legacy/extended query guards/alias forms pass CPU controls; release masking regression red-before/green-after; real-WDK ARM64 objects and full render package build",
+      "pairing": "Candidate KMD+extended ACPI must be installed/restored as a pair; baseline E95 alone rejects the additional resource descriptors"
+    },
+    "native_decode_accepted": true,
+    "resource_native_result": {
+      "record": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
+      "date": "2026-11-16",
+      "resources_mapped": 9,
+      "snapshot_valid": false,
+      "smmu_config": "ffffffff",
+      "actmon_candidate_error": -3,
+      "actmon_restored_error": 0,
+      "baseline_restored": true,
+      "cleanup_complete": true,
+      "candidate_promoted": false
+    },
+    "client_route_candidate": {
+      "record": "NVDEC_CLIENT_ROUTE_20261116.json",
+      "kmd_sha256": "ed09a227cd25bd1604ea4b8de1fdd8f725a7bf927fe275a3830ed1f1db381bf4",
+      "acpi_sha256": "827b81c385963153aef6ce73f891603d546511c4672595e699f5cfed9c648ee9",
+      "query_sha256": "dfd5285857615c6497d0726c9a117af1563b1fc83c6b07ae5893b1bc0aa4cc73",
+      "installed": false,
+      "baseline_promoted": false
+    },
+    "inherited_power_correction": {
+      "record": "NVDEC_INHERITED_POWER_20261116.json",
+      "local_code_only": true,
+      "installed": false,
+      "baseline_promoted": false
+    },
+    "tracked_dma": {
+      "record": "NVDEC_TRACKED_DMA_20261116.json",
+      "local_controls_passed": true,
+      "native_tested": false,
+      "baseline_promoted": false
+    },
+    "scratch_capacity": {
+      "record": "NVDEC_SCRATCH_CAPACITY_20261116.json",
+      "local_controls_passed": true,
+      "native_tested": false,
+      "baseline_promoted": false
+    },
+    "firmware_provenance": {
+      "record": "NVDEC_FIRMWARE_PROVENANCE_20261116.json",
+      "matches_upstream": true,
+      "native_tested": true,
+      "public_windows_redistribution_confirmed": false,
+      "hardware_record": "NVDEC_1080_D3D11VA_20261117.json"
+    },
+    "client_route_native_result": {
+      "record": "NVDEC_CLIENT_ROUTE_NATIVE_20261117.json",
+      "acpi_file_staged": true,
+      "loaded_candidate_dsdt_verified": false,
+      "candidate_kmd_selected": false,
+      "client_route_measured": false,
+      "gpu_node_present_in_failed_boot": false,
+      "baseline_restored": true,
+      "cleanup_complete": true,
+      "native_decode_accepted": false,
+      "candidate_promoted": false
+    },
+    "emc_preselection_guard": {
+      "record": "NVDEC_ACPI_HANDOFF_20261117.json",
+      "commit": "648c72d075d75412209bcc17799def8bf39bb46b",
+      "selection_controls": 26,
+      "post_activation_controls": 5,
+      "native_operations_in_controls_replaced": true,
+      "native_closed_baseline_pending_state_observed": true,
+      "native_bad_state_guard_exercised": false,
+      "review_pending": true
+    },
+    "acpi_only_native_result": {
+      "record": "NVDEC_ACPI_ENUMERATION_NATIVE_20261117.json",
+      "candidate_table_loaded": true,
+      "gpu_present_with_closed_gate": true,
+      "actmon_error": 0,
+      "candidate_kmd_activated": false,
+      "native_decode_accepted": false,
+      "baseline_restored": true,
+      "temporary_files_removed": true,
+      "historical_failure_root_cause": "unresolved; not reproduced in this ACPI-only boot"
+    },
+    "client_route_query_result": {
+      "record": "NVDEC_CLIENT_QUERY_20261117.json",
+      "controller_commit": "1e2ecbc2c478593c416c9ac653d087a79aff4f9b",
+      "native_query_reached": true,
+      "mapped_optional_resources": 11,
+      "native_luid": "00000000000a9805",
+      "smmu_config_and_client_enables": "ffffffff",
+      "client_flags": 0,
+      "dma_route_proven": false,
+      "candidate_promoted": false,
+      "baseline_restored": true,
+      "native_cleanup_complete": true,
+      "native_decode_accepted": false
+    },
+    "record": "NVDEC_1080_D3D11VA_20261117.json",
+    "latest_native_result": "NVDEC_1080_D3D11VA_20261117.json",
+    "baseline_promoted": true,
+    "display_scope": "Current and saved desktop 1280x720 at 90 degrees. Active panel signal 720x1280.",
+    "loaded_provider_verification": {
+      "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+      "baseline_provider_and_kmd_pe_verified": true,
+      "native_decode_accepted": false
+    },
+    "next_local_candidate": null,
+    "loaded_provider_identity": {
+      "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+      "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+      "native_loaded_mismatch_proven": true,
+      "candidate_provider_loaded_verified": true,
+      "restored_provider_and_kmd_loaded_verified": true,
+      "new_controller_complete_candidate_round_pending": false,
+      "native_decode_accepted": false,
+      "baseline_promoted": false
+    },
+    "loaded_provider_identity_history": [
+      {
+        "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+        "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+        "native_loaded_mismatch_proven": true,
+        "candidate_provider_loaded_verified": true,
+        "restored_provider_and_kmd_loaded_verified": true,
+        "new_controller_complete_candidate_round_pending": false,
+        "native_decode_accepted": false,
+        "baseline_promoted": false
+      }
+    ],
+    "acpi_override_recurrence": {
+      "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+      "loaded_dsdt_matches_disk": false,
+      "gpu_present": false,
+      "candidate_kmd_activated": false,
+      "candidate_provider_activated": false,
+      "native_decode_request": false,
+      "baseline_restored": true,
+      "cleanup_complete": true
+    },
+    "incremental_baseline_policy": "Retain the verified five fixes and runtime submission update. Scope each result to its measured module, installation and run.",
+    "historical_current_snapshots": [
+      {
+        "updated_utc": "2026-11-17T13:20:26.4960102Z",
+        "state": "Candidate ACPI boot loaded the4568-byte74070d7c table instead of the4993-byte9eb6a7e1 file. GPU was absent with native startup closed. The signed2aa4aba4 KMD and0453418e provider were staged only; neither was selected or executed and no decode request ran. Original11-file90-degree display/power baseline restored; temporary packages/tasks/files cleaned. Channel-scoped KMD native validation and720p/1080p acceptance remain open.",
+        "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+        "latest_native_result": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+        "next_local_candidate": {
+          "source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+          "base_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+          "source_manifest_sha256": "beccfcbdcc752d1c42fd12aebccded9004714762d6028ceeb884ab7262a91aca",
+          "changed_source_sha256": {
+            "windows/nvdec_adapter.c": "686dd2085276085ae3f65b9e40e8e152e55b3ddd8f3624f047dc60dd97e52ebb",
+            "tests/test_nvdec_adapter_windows.c": "21ec9fbbe3b9c75497de1a0c464195a6f8345fd9b596ae29e1b51f9de53569af",
+            "tests/test_nvdec_platform.c": "199fcabd64e675b3aca76c2c51befa6fd7540ffecdc654d5fccfda50124bbb80"
+          },
+          "unsigned_kmd": {
+            "Length": 239104,
+            "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
+          },
+          "reuse_provider": {
+            "Length": 104456,
+            "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+          },
+          "clock_abi": "0x00010002",
+          "signed_kmd": true,
+          "native_tested": false,
+          "purpose": "Only reserved channel11 participates in decoder channel admission. Keep selected-channel checks, DC/syncpoint conflicts, clock lease and retirement. Other channels are not reset or modified.",
+          "arm64_build_exit": 0,
+          "controls": [
+            {
+              "name": "adapter-nvdec_adapter",
+              "exit": 0
+            },
+            {
+              "name": "adapter-device_lifetime",
+              "exit": 0
+            },
+            {
+              "name": "adapter-t214_nvdec",
+              "exit": 0
+            },
+            {
+              "name": "adapter-test_nvdec_adapter_windows",
+              "exit": 0
+            },
+            {
+              "name": "adapter-link",
+              "exit": 0
+            },
+            {
+              "name": "adapter-run",
+              "exit": 0
+            }
+          ],
+          "old_driver_regression": {
+            "exit": 153,
+            "expected_assertion": 153,
+            "description": "New foreign-channel fixture rejects under the old whole-host scan, then passes with the reserved-channel scope."
+          },
+          "platform_asan_ubsan": {
+            "exit": 0,
+            "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+            "stderr": ""
+          },
+          "references": [
+            "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/channel.c",
+            "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/cdma_hw.c"
+          ],
+          "license_scope": "GPL references inspected for per-channel allocation and register isolation; no implementation copied. CPU syncpoint increments/NOP timeout recovery are not used.",
+          "main_self_review": "Selected channel11 predicate unchanged; callback/clock ABI unchanged; foreign-channel and unrelated shared-bit preservation checked through initialization, successful submit, timeout, shutdown and reacquisition.",
+          "signed_kmd_component": {
+            "Length": 242184,
+            "Sha256": "bbf65e41b617aaed846f94a8ad6de06a6de6fca19a35d983795d0280b52f1d98"
+          },
+          "native_boot_attempt": {
+            "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+            "loaded_dsdt_matches_disk": false,
+            "gpu_present": false,
+            "candidate_kmd_activated": false,
+            "candidate_provider_activated": false,
+            "native_decode_request": false,
+            "baseline_restored": true,
+            "cleanup_complete": true
+          }
+        },
+        "baseline_restored_and_cleanup_verified_utc": "2026-11-17T13:20:26.4960102Z"
+      },
+      {
+        "updated_utc": "2026-11-17T15:46:25.0707641Z",
+        "state": "Corrected374b KMD is active with the retained045 provider,9eb resource table and original5b/95b userspace. DWM, all11 component identities,90-degree saved/current configuration and Handheld/DFLL/GPU/EMC/fan/85-percent policy are verified. One gated replacement boot; unchanged packages/files reused. The absolute-DMAEND regression from58dc was corrected using NVIDIA upstream0e43b8da; it had never reached hardware submission. Decoder was not rerun because the preceding channel11 ownership guard is unchanged.720p/1080p remain unaccepted.",
+        "record": "NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json",
+        "latest_native_result": "NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json",
+        "remaining": [
+          "Resolve the inherited reserved-channel11 state recorded in NVDEC_INCREMENTAL_POINTER_NATIVE_20261117.json: GET differs from PUT and START/END are nonzero. Establish a valid ownership/initialization contract; do not reset merely to pass admission or infer completion.",
+          "Complete real firmware/DMA/syncpoint completion/output and safe retirement, then720p H.264 D3D11VA/NV12/window presentation.1080p follows720p;2K/4K remain independent implementation, untested and undecided.",
+          "Optional ACPI table loss remains an unresolved historical boot issue. Current loaded tables match; no unchanged failed combination replay. Preserve accepted90-degree display/power and deferred load/browser/weather/180-degree-return boundaries."
+        ]
+      }
+    ],
+    "installed_development_combination": {
+      "classification": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+      "observed_utc": "2026-11-18T01:23:28.0679279Z",
+      "boot": "2026-11-18T01:17:41.2840670Z",
+      "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation",
+      "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app",
+      "kmd": {
+        "Length": 243712,
+        "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+      },
+      "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json + fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9 1080p surface extent",
+      "provider": {
+        "Length": 104456,
+        "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+      },
+      "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+      "acpi": {
+        "Length": 4993,
+        "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+      },
+      "umd": {
+        "Length": 3335688,
+        "Sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+      },
+      "umd_source": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+      "icd": {
+        "Length": 17656776,
+        "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+      "all11_files": [
+        {
+          "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+          "Length": 32264,
+          "Sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+        },
+        {
+          "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+          "Length": 243712,
+          "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+        },
+        {
+          "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+          "Length": 138,
+          "Sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+        },
+        {
+          "Path": "C:\\Windows\\System32\\acpitabl.dat",
+          "Length": 4993,
+          "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        },
+        {
+          "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+          "Length": 42440,
+          "Sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+        },
+        {
+          "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+          "Length": 1517568,
+          "Sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+        },
+        {
+          "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+          "Length": 921600,
+          "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+        },
+        {
+          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\libvulkan_nouveau.dll",
+          "Length": 17656776,
+          "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+        },
+        {
+          "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        },
+        {
+          "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\TegraGpuD3DVk.dll",
+          "Length": 3335688,
+          "Sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+        },
+        {
+          "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+          "Length": 60416,
+          "Sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+        }
+      ],
+      "external_review_performed": false,
+      "source_record": "NVDEC_1080_D3D11VA_20261117.json",
+      "platform_file_evidence": "Eleven installed files, both DWM modules, the selected INF and the previous 720p recovery tuple were verified after the 1080p window closed.",
+      "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+      "umd_isolated_patch_sha256": "465f70dc0b6117274752ae7295f239ad9158d39f8c426c9a03a2b6b380ef56ed",
+      "umd_prior_patch_commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+      "umd_prior_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d"
+    },
+    "review": {
+      "external_review_required": false,
+      "external_review_performed": false,
+      "mode": "main source/contract review, ASAN/UBSAN controls, ARM64 builds and native pixel verification"
+    },
+    "remaining": [
+      "Investigate load-related unpaced resets separately. Shared cause with other reset cases remains unconfirmed.",
+      "2K and 4K remain untested external delivery."
+    ],
+    "decode_blocker_record": "LOAD_STABILITY_FOLLOWUP_20261116.json",
+    "current_combination_restored_to_original": false,
+    "installation_retained": true,
+    "source_modules_merged": [
+      "5f9ab480e5c2ded25220964170f9b09e056ab253",
+      "374b9ee5624cd1aea063398fd413fe3c73ff6501",
+      "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+      "f90d3be2ed5038c709633fdfdeb925d30a2334d0"
+    ],
+    "promotion_scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+    "native_decode_accepted_scope": "Native 1080p H.264 functional acceptance passed. All six visible NV12 frames matched the independent decoded reference. GPU conversion, presentation in the physical window and normal close were observed over 16.093 seconds including an eight-second final hold.",
+    "baseline_promoted_scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+    "acceptance_scope": {
+      "native_backend_720p_fixture_accepted": true,
+      "accepted_720p_record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+      "native_1080p_fixture_accepted": true,
+      "d3d11va_accepted": true,
+      "accepted_client_scope": "Process-scoped native FFmpeg D3D11VA on the NVK adapter",
+      "frames": 6,
+      "decoded_nv12_byte_exact": true,
+      "media_foundation_source_reader_accepted": false,
+      "window_presentation_accepted": true,
+      "gpu_csc_pixels_accepted": true,
+      "full_decode_stage_complete": true,
+      "public_video_enabled": false,
+      "new_physical_screen_acceptance": true,
+      "gpu_csc_pixels_scope": "Complete 640x360 final backbuffer compared with software reference",
+      "windows_redirected_flip_accepted": true,
+      "window_normal_release_verified": true,
+      "physical_replay_status": "Window visible on the physical panel and normal return to the desktop",
+      "stage_scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+      "regular_playback_stability_accepted": false,
+      "ordinary_unpaced_window_accepted": false,
+      "deferred_native_resolutions": [
+        "2K",
+        "4K"
+      ]
+    },
+    "latest_native_round": "NVDEC_1080_D3D11VA_20261117.json",
+    "restart_followup": {
+      "record": "LOAD_STABILITY_FOLLOWUP_20261116.json",
+      "sha256": "20afd19fe5939ba306fd3d7eccc59a488eac13ebdd8f53c37f22ef4c66199abd",
+      "scope": "Two unpaced Windows video-window restarts; root cause remains open."
+    }
+  },
+  "baseline_promotion_policy": "After each module is fixed, required validation passes and no material regression remains, integrate and record exact source/component/rollback identities; do not wait for the whole phase.",
+  "deferred_load_stability": "LOAD_STABILITY_FOLLOWUP_20261116.json; includes separate video, widget, browser and load-exit cases. A shared cause is unconfirmed.",
+  "device_access_after_cube_acceptance": {
+    "owner": "user",
+    "purpose": "Native cube acceptance completed; device returned to user",
+    "main_local_work_allowed": true,
+    "main_native_access": "No further native tests planned; continue local decode integration",
+    "user_instructions": [
+      "你先做本地吧，我要测试switch win box64",
+      "你先传进去",
+      "放桌面",
+      "不用校验",
+      "你补进去我来打开就行，连着ssh似乎容易重启",
+      "交回 Switch，继续 vkcube 验收",
+      "刚才已经5分钟了，并且我移动 放大都正常",
+      "所以只要测一个橙色遮挡就可以记为完成",
+      "正常的，继续吧"
+    ],
+    "additional_checks_after_last_instruction": false
+  },
+  "installed_development_combination": {
+    "classification": "Selected on GM20B after repaired DDI copy acceptance",
+    "observed_utc": "2026-11-19T09:48:13.5755022Z",
+    "boot": "2026-11-19T09:08:05.0393220Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\app",
+    "source_record": "dxvk-games-20261118/native-code0-copy-flags.json",
+    "kmd_source": "8e9f265f7d0ebb9deab6b57dd576d76e2d0c736f",
+    "umd_source": "8e7a1bf85785a84cc26ceebaca8c82854d77af88",
+    "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "all11_files": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Sha256": "879550E4EB292619F45DE86EB458FC94F07149CA3DE95BC88369166FCD64914E",
+        "Length": 32280
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Sha256": "6C86354E781E76D671C20BF14B124248A6E1AA264DCAB6D459A6B14D551469B0",
+        "Length": 249352
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+        "Length": 138
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Length": 4993
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+        "Length": 42440
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Sha256": "135285DA2255E087C8B37E5034B023035A01D3990AB2B10E4E0220BDC56C7D24",
+        "Length": 1537544
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+        "Length": 921600
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\app\\libvulkan_nouveau.dll",
+        "Sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "Length": 17656776
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+        "Length": 104456
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "49FA08A2731C083C59F23BA5A5A3DB9E82C40613EF7A0FA4DF233CC20BCCD20E",
+        "Length": 3339272
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+        "Length": 60416
+      }
+    ],
+    "kmd": {
+      "Length": 249352,
+      "Sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0"
+    },
+    "umd": {
+      "Length": 3339272,
+      "Sha256": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e"
+    },
+    "icd": {
+      "Length": 17656776,
+      "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849"
+    },
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5"
+    }
+  },
+  "original_fixed90_acceptance_identity": {
+    "baseline_files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 204808,
+        "sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4848,
+        "sha256": "0502bd0aed0aa3e236d24b0977d389bf04c64d777ba94cad4c5c27a188b9e438"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17652224,
+        "sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 98832,
+        "sha256": "639a28de7c9d2da157e8b47e88a8ddd7400651c352d3c4ca3c403bae52af7437"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3274240,
+        "sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "gpu_source": {
+      "KMD": {
+        "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+        "emc_diff_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852"
+      },
+      "UMD": {
+        "commit": "c1f25986eee51c0ee01088c3ecb3c9508dea2479"
+      },
+      "ICD": {
+        "commit": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+        "scope": "Recorded c0-based working-tree build; use full binary SHA256, not a clean-commit assumption."
+      }
+    },
+    "scope": "Component identities for the November 16 fixed-angle, physical screen and five-minute vkcube acceptance."
+  },
+  "selected_presentation_baseline": {
+    "selected": true,
+    "record": "dxvk-games-20261118/native-code0-copy-flags.json",
+    "record_sha256": "e3556a037916db86e2ae4c2a3d9b5e0c4b19e8cdd13ecf9f71da80e8dc8f089e",
+    "source_commit": "8e7a1bf85785a84cc26ceebaca8c82854d77af88",
+    "kmd_sha256": "umd",
+    "umd_sha256": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e",
+    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "icd_source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "previous_umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "physical_copy_accepted": true,
+    "post_restart_pair_confirmed": false,
+    "physical_video_accepted": false,
+    "physical_video_scope": "Video was not retested for this UMD selection. See the earlier video records for their tested tuples.",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2",
+    "startup": "manual",
+    "recovery_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\tgd3d-video-ddi-ded6fa4a-20261118-230849"
+  },
+  "latest_video_window_observation": {
+    "record": "NVDEC_1080_D3D11VA_20261117.json",
+    "record_sha256": "c49ddfb308c5b876abd092f1e9d7de326ad65a65b6a81e5fe3ee3c73145a6cad",
+    "previous_record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "previous_record_sha256": "2ff2eff8752b1a679156e393b34dd8c28313a1de7f2768f41fa54274f44d3823",
+    "physical_window_accepted": true,
+    "functional_1080p_accepted": true,
+    "functional_720p_reference": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "physical_scope": "Six-frame paced H.264 window",
+    "frames": 6,
+    "successful_presents": 6,
+    "elapsed_ms": 16093,
+    "final_frame_hold_ms": 8000,
+    "rgb_max_abs_error": 1,
+    "last_confirmed_boot_utc": "2026-11-18T01:17:41.2840670Z",
+    "dwm_pid": 1404,
+    "ordinary_unpaced_accepted": false,
+    "continuous_playback_stability_verified": false
+  }
+}

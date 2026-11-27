@@ -1,0 +1,1161 @@
+{
+  "date_utc": "2026-11-20",
+  "scope": "Scoped Switch Lite tests of the historic no-DMA MMIO context and rotated-primary mode descriptor fixes using the selected native tgd3d/NVK user modules. The exclusive case retains the current desktop orientation.",
+  "historic_kmd_sha256": {
+    "no_dma_mmio": "102218b0d69af15e1259a9f4047dec049eb8a61228b10eaf3551898cea8172b7",
+    "rotated_primary_mode": "a82f2510be5b6718f91349956e1eea706cf60c4012e11c16865d1426389ce32c"
+  },
+  "scope_and_release_trial": {
+    "reference_release": {
+      "boot": 84195,
+      "receipt_sha256": "dd96bc1c4033b04910848049bce901bc40972c6898218c96e23e3975002c7a14",
+      "caps": [
+        "IDENTITY luid=0000000000005b39 vendor=414f5753 device=31304630 flags=0",
+        "KMT source=0 mode=00000000 width=720 height=1280 orientation=2 overlay=00000000 max_planes=1 rgb=0 yuv=0 flags=00000000",
+        "DEVICE luid=0000000000005b39 vendor=414f5753 device=31304630 hr=00000000 level=b100",
+        "DESKTOP dxgi_rotation=2 orientation=1 logical=1280x720 attached=1",
+        "OUTPUT2 hr=00000000 supports_overlays=0",
+        "OVERLAY format=87 hr=00000000 flags=0",
+        "OVERLAY format=28 hr=00000000 flags=0",
+        "OVERLAY format=103 hr=00000000 flags=0",
+        "COMPOSITION hr=00000000 flags=0",
+        "END reason=00000000 kmt=1"
+      ],
+      "visible_window_exit": 0,
+      "visible_samples": 5,
+      "source_vendor_alias": "DXGI reports the ACPI hardware ID. The KMT adapter query independently identifies Tegra GM20B and both clients require its boot-local LUID."
+    },
+    "historical_candidate_models": {
+      "cpu_on_switch": [
+        {
+          "expected": 0,
+          "match": true,
+          "name": "mpo-green.exe",
+          "hash": "f272c726ad856f98a8c4838052624007f7194a3c940f57ee277578f1a79467ba",
+          "exit": 0
+        },
+        {
+          "expected": 0,
+          "match": true,
+          "name": "rotation-green.exe",
+          "hash": "8f207579c08bfb2eff5a5ad1784d05ca87c8dc967220fcd116a2d3df30f1bf44",
+          "exit": 0
+        },
+        {
+          "expected": 890,
+          "match": true,
+          "name": "rotation-red.exe",
+          "hash": "31d64ef917933301d47f8a51f20bbb686cd74b0dee0e3dfc12aaa87268f392e4",
+          "exit": 890
+        }
+      ],
+      "first_public_collector_exit": 6,
+      "first_public_collector_scope": "The first client expected PCI-formatted IDs from DXGI. The corrected client accepted the known ACPI PnP ID only after cross-checking the actual KMT LUID; the reference window then ran and exited on the same boot."
+    },
+    "release_kmd_trial": {
+      "boot": 84377,
+      "code": 0,
+      "external_power": "Online",
+      "dwm_before": 1484,
+      "dwm_after": 1484,
+      "driver_receipt": "ffad6e4f0d12cd8af2763f73d53aa4f302a7d5773ee8e65cd3168ceeda3e2181",
+      "signed_components": {
+        "tegragpurender.sys": "1e7b81871656c7dcc5f89fb7fef66e98212b7bae5912340977b71fbd47676f63",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+      },
+      "loaded": {
+        "tegragpurender.sys": "1e7b81871656c7dcc5f89fb7fef66e98212b7bae5912340977b71fbd47676f63",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+      },
+      "time_interval": {
+        "first": 84356,
+        "last": 84446,
+        "events": [
+          {
+            "record": 84361,
+            "provider": "User32",
+            "utc": "2026-11-20T18:36:15.4507300Z",
+            "id": 1074,
+            "detail": "SwitchWOA graphics receipt one-time candidate boot"
+          },
+          {
+            "record": 84377,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "utc": "2026-11-20T18:36:47.7654624Z",
+            "id": 12,
+            "detail": {}
+          }
+        ]
+      },
+      "physical_model_results": [
+        {
+          "expected": 0,
+          "match": true,
+          "name": "current-mmio.exe",
+          "hash": "23e048f534ae41ee83c8c4ffec99930a55bb696bcf67ccd89d43c0239b312fba",
+          "exit": 0
+        },
+        {
+          "expected": 336,
+          "match": true,
+          "name": "reference-mmio.exe",
+          "hash": "05cf03c0b371cbf98c61981af0eb80349405475b7c5947369dd0bb4d9d837a7a",
+          "exit": 336
+        },
+        {
+          "expected": 0,
+          "match": true,
+          "name": "current-rotated-mode.exe",
+          "hash": "7890324eb37c8ced41140a5dca5e7f632b1d3ce3498520ec5aa951f66e815a7d",
+          "exit": 0
+        }
+      ],
+      "caps": [
+        "IDENTITY luid=0000000000005613 vendor=414f5753 device=31304630 flags=0",
+        "KMT source=0 mode=00000000 width=720 height=1280 orientation=2 overlay=00000000 max_planes=1 rgb=0 yuv=0 flags=00000000",
+        "DEVICE luid=0000000000005613 vendor=414f5753 device=31304630 hr=00000000 level=b100",
+        "DESKTOP dxgi_rotation=2 orientation=1 logical=1280x720 attached=1",
+        "OUTPUT2 hr=00000000 supports_overlays=0",
+        "OVERLAY format=87 hr=00000000 flags=0",
+        "OVERLAY format=28 hr=00000000 flags=0",
+        "OVERLAY format=103 hr=00000000 flags=0",
+        "COMPOSITION hr=00000000 flags=0",
+        "END reason=00000000 kmt=1"
+      ],
+      "flip_window": {
+        "exit": 0,
+        "matched_desktop_samples": 5
+      },
+      "borderless_90": [
+        "WINDOW luid=0000000000005613 width=1280 height=720 rotation=2 level=b100 hr=00000000",
+        "PRESENT frame=0 hr=00000000",
+        "DESKTOP frame=0 samples=5 expected=5",
+        "PRESENT frame=1 hr=00000000",
+        "DESKTOP frame=1 samples=5 expected=5",
+        "PRESENT frame=2 hr=00000000",
+        "DESKTOP frame=2 samples=5 expected=5",
+        "CLOSE keys=1 alive=0 rc=0"
+      ],
+      "system_etw": {
+        "sha256": "1561478067da0a7551d3818fd250b0d3b0f908b6aac9ee02b9b24fa8f51aee02",
+        "quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": true
+        },
+        "counts": {
+          "vsync-mpo": 1725,
+          "present-history-start": 66,
+          "present-history-end": 70,
+          "flip": 156,
+          "panel-mpo3-start": 156,
+          "panel-mpo3-end": 156,
+          "mmio-flip-mpo3": 156,
+          "mmio-flip-mpo": 156,
+          "mpo-dirty": 156
+        },
+        "fields": {
+          "flip/VidPnSourceId/0": 156,
+          "flip/FlipWithNoWait/1": 156,
+          "flip/MMIOFlip/1": 156,
+          "flip/pDmaBuffer/zero": 156,
+          "panel-mpo3-start/VidPnSourceId/0": 156,
+          "panel-mpo3-end/VidPnSourceId/0": 156,
+          "mmio-flip-mpo3/VidPnSourceId/0": 156,
+          "mmio-flip-mpo3/PlaneCount/1": 156,
+          "mmio-flip-mpo/VidPnSourceId/0": 156,
+          "mmio-flip-mpo/Enabled/1": 156
+        },
+        "processes": {
+          "flip pid=1484": 156,
+          "panel-mpo3-start pid=4": 154,
+          "panel-mpo3-end pid=4": 154,
+          "mmio-flip-mpo3 pid=4": 154,
+          "mmio-flip-mpo pid=4": 154,
+          "panel-mpo3-start pid=4996": 1,
+          "panel-mpo3-end pid=4996": 1,
+          "mmio-flip-mpo3 pid=4996": 1,
+          "mmio-flip-mpo pid=4996": 1,
+          "panel-mpo3-start pid=5404": 1,
+          "panel-mpo3-end pid=5404": 1,
+          "mmio-flip-mpo3 pid=5404": 1,
+          "mmio-flip-mpo pid=5404": 1
+        },
+        "kernel_provider_events": 61333
+      },
+      "system_etw_identity": {
+        "boot": 84377,
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)",
+        "bytes": 8060928,
+        "dxgkrnl": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "trace": "1561478067da0a7551d3818fd250b0d3b0f908b6aac9ee02b9b24fa8f51aee02",
+        "file": "display.etl"
+      },
+      "trigger_scope": "Three frames drawn through the native system D3D11 device, desktop samples, one posted key, normal exit, same DWM. The Windows trace identifies the panel callbacks and final MMIO flips; the render miniport context belongs to a distinct call."
+    },
+    "scope_audit": {
+      "selected_reference": "e6852733640f4dc114042796477671ca54c1f3c6",
+      "source_files_identical_to_git": {
+        "tegra-x1-wddm/windows/present.c": "1761b3f302cb5b86558f17e7de30e71a46016814e3d3d83d6dc9e43cf7d1958d",
+        "tegra-x1-wddm/windows/allocation.c": "a29cf200ba605c006dfc645e0010b468e31c12ede0fddf761416e31724200734",
+        "tegra-x1-wddm/windows/panel_scanout.c": "5ab785c4712407a6b2d6ad4de89383ccd03026628b30c7c5001f38f9bbb74094",
+        "tegra-x1-wddm/tests/test_context_windows.c": "516371ed650be0306ee31c44c25da0b8b433c29f645eb5ac89ffe862974aea35"
+      },
+      "relinked_base_unsigned": "4a50643e66f1ed08557fbf114e65c2db808f38ad1b466e058306f4ad3eab6473",
+      "mmio": {
+        "historical_patch_sha256": "7a8efd0afce5fa04048d6e9b974a7cefb6ac79adc442d2bc534ea704c1342263",
+        "release_source_sha256": "5df4db38a09afa40e17158d90f0de5183a0de13f004fb25b25f267e7c4324711",
+        "candidate_signed": "1e7b81871656c7dcc5f89fb7fef66e98212b7bae5912340977b71fbd47676f63",
+        "candidate_unsigned": "e1c8094c06a496d860596469b7e18197b241698c24e230c3079ade328539fd29",
+        "reference_model_expected_exit": 336
+      },
+      "rotated_mode": {
+        "historical_patch_sha256": "a60c1b0f02fe108b567ea7529d854ce2352bd2c79b706ed5121f1eca8e4055c1",
+        "source_after_patch_sha256": "85a6272754a151f83cc013f9a5b62fa3d87275171211e76fb72369d3597ca06e",
+        "arm64_candidate_unsigned": "aefc90f03f56a88396d090e853e9a11667a971b166b8b7904b3ae88047fc4c93",
+        "host_contracts_exit": 0,
+        "valid_current_storage": "The selected allocation creation validates both passes and admits identity storage rotation only for a display primary. Standard primaries are constructed with identity storage; the display mode may still be 90 degrees. The selected panel also tests identity storage and portrait dimensions. The isolated historic change adds a mode-size adjustment only for a quarter-turned primary allocation. Its positive case needs independently supported rotated storage."
+      }
+    },
+    "references": {
+      "present": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_present",
+      "mode": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkarg_describeallocation"
+    }
+  },
+  "observed_kmd_trial": {
+    "driver_receipts": {
+      "etl_sha256": "1699d1649f84df1882d1ae0d9a9dd5c292977cb7cfb16b0972b1b894980eff95",
+      "session_complete": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      },
+      "native_receipts": 342,
+      "installed_observation_kmd": "b646fa114594fc4dec3e918768d34bb2d9a88801a25d4a8ec67170136b866ead",
+      "no_dma_flip_context": {
+        "context-supplied": 171
+      },
+      "window_owners": {
+        "dwm/context=1/flags=0xc": 171
+      },
+      "primary_queries": {
+        "CheckDisplayMode=0,storage=1,mode=2,backing=720x1280,reported=720x1280": 171
+      },
+      "public_results": {
+        "rc": 0,
+        "flip_exit": 0,
+        "borderless_exit": 0,
+        "exclusive_exit": 16,
+        "before": {
+          "dwm": 1436,
+          "power": "Online",
+          "code": 0,
+          "boot": 84738,
+          "package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\display-observed-b646fa114594"
+        },
+        "after": {
+          "dwm": 1436,
+          "power": "Online",
+          "code": 0,
+          "boot": 84738,
+          "package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\display-observed-b646fa114594"
+        }
+      },
+      "scope": "Valid context and DMA booleans were emitted by the miniport at its successful no-DMA path. Mode fields were emitted by DescribeAllocation only for accepted display primaries."
+    },
+    "windows_flip_events": {
+      "sha256": "1699d1649f84df1882d1ae0d9a9dd5c292977cb7cfb16b0972b1b894980eff95",
+      "quality": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 0,
+        "complete": true
+      },
+      "counts": {
+        "vsync-mpo": 1675,
+        "present-history-start": 69,
+        "present-history-end": 73,
+        "flip": 171,
+        "panel-mpo3-start": 171,
+        "panel-mpo3-end": 171,
+        "mmio-flip-mpo3": 171,
+        "mmio-flip-mpo": 171,
+        "mpo-dirty": 171
+      },
+      "fields": {
+        "flip/VidPnSourceId/0": 171,
+        "flip/FlipWithNoWait/1": 171,
+        "flip/MMIOFlip/1": 171,
+        "flip/pDmaBuffer/zero": 171,
+        "panel-mpo3-start/VidPnSourceId/0": 171,
+        "panel-mpo3-end/VidPnSourceId/0": 171,
+        "mmio-flip-mpo3/VidPnSourceId/0": 171,
+        "mmio-flip-mpo3/PlaneCount/1": 171,
+        "mmio-flip-mpo/VidPnSourceId/0": 171,
+        "mmio-flip-mpo/Enabled/1": 171
+      },
+      "processes": {
+        "flip pid=1436": 171,
+        "panel-mpo3-start pid=4": 170,
+        "panel-mpo3-end pid=4": 170,
+        "mmio-flip-mpo3 pid=4": 170,
+        "mmio-flip-mpo pid=4": 170,
+        "panel-mpo3-start pid=0": 1,
+        "panel-mpo3-end pid=0": 1,
+        "mmio-flip-mpo3 pid=0": 1,
+        "mmio-flip-mpo pid=0": 1
+      },
+      "kernel_provider_events": 69799
+    },
+    "actual_system_workload": {
+      "archive_receipt_sha256": "c2b2bcd5c15bff54b49362b2c053deaa420fc8c5aff3ba897459818d0fc10dc2",
+      "boot_record": 84738,
+      "ac": "Online",
+      "gpu_code": 0,
+      "compositor_pid": 1436,
+      "query": [
+        "IDENTITY luid=0000000000005b95 vendor=414f5753 device=31304630 flags=0",
+        "KMT source=0 mode=00000000 width=720 height=1280 orientation=2 overlay=00000000 max_planes=1 rgb=0 yuv=0 flags=00000000",
+        "DEVICE luid=0000000000005b95 vendor=414f5753 device=31304630 hr=00000000 level=b100",
+        "DESKTOP dxgi_rotation=2 orientation=1 logical=1280x720 attached=1",
+        "OUTPUT2 hr=00000000 supports_overlays=0",
+        "OVERLAY format=87 hr=00000000 flags=0",
+        "OVERLAY format=28 hr=00000000 flags=0",
+        "OVERLAY format=103 hr=00000000 flags=0",
+        "COMPOSITION hr=00000000 flags=0",
+        "END reason=00000000 kmt=1"
+      ],
+      "matched_ordinary_flip_exit": 0,
+      "matched_ordinary_flip_desktop_samples": 5,
+      "borderless_exit": 0,
+      "borderless": [
+        "WINDOW luid=0000000000005b95 width=1280 height=720 rotation=2 level=b100 hr=00000000",
+        "PRESENT frame=0 hr=00000000",
+        "DESKTOP frame=0 samples=5 expected=5",
+        "PRESENT frame=1 hr=00000000",
+        "DESKTOP frame=1 samples=5 expected=5",
+        "PRESENT frame=2 hr=00000000",
+        "DESKTOP frame=2 samples=5 expected=5",
+        "CLOSE keys=1 alive=0 rc=0"
+      ],
+      "exclusive_exit": 16,
+      "exclusive": [
+        "WINDOW luid=0000000000005b95 width=1280 height=720 rotation=2 level=b100 hr=00000000",
+        "EXCLUSIVE_ENTER hr=80004005 query=00000000 active=0",
+        "CLOSE keys=0 alive=0 rc=16"
+      ],
+      "exclusive_stages": [
+        "156078 EnterFullscreen",
+        "156109 EnterFullscreen-returned"
+      ],
+      "exclusive_client_sha256": "ec536566f509192d71880e23f94849d44f53921f6bc004d8798f949e0ebe07c3",
+      "borderless_client_sha256": "0cad6852355aedb6641780155ea71adadb2d56e7918301bdc5772309d3fab4db",
+      "kernel_sha256": "b646fa114594fc4dec3e918768d34bb2d9a88801a25d4a8ec67170136b866ead",
+      "trace": {
+        "boot": 84738,
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)",
+        "bytes": 8978432,
+        "dxgkrnl": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "trace": "1699d1649f84df1882d1ae0d9a9dd5c292977cb7cfb16b0972b1b894980eff95",
+        "file": "display.etl"
+      }
+    },
+    "interval": {
+      "boot": 84738,
+      "checked": "2026-11-20T19:07:13.3739991Z",
+      "prior": 84645,
+      "loaded": {
+        "tegragpurender.sys": "b646fa114594fc4dec3e918768d34bb2d9a88801a25d4a8ec67170136b866ead",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "last": 84807,
+      "dwm": 1436,
+      "events": [
+        {
+          "record": 84721,
+          "provider": "User32",
+          "utc": "2026-11-20T19:02:45.4712394Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt one-time candidate boot"
+        },
+        {
+          "record": 84738,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T19:03:15.1791994Z",
+          "id": 12,
+          "detail": {}
+        }
+      ],
+      "components": {
+        "tegragpurender.sys": "b646fa114594fc4dec3e918768d34bb2d9a88801a25d4a8ec67170136b866ead",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+      },
+      "token": 0,
+      "code": 0,
+      "first": 84716,
+      "power": "Online"
+    }
+  },
+  "user_visible_recovery": {
+    "recorded_utc": "2026-11-20T19:15:01.299448+00:00",
+    "operation": "final controlled recovery",
+    "user_observation": "\u8fdb\u5165\u684c\u9762\u4e86",
+    "observed_through": "user looking at the device",
+    "qualified_by_this_observation": "desktop visible; driver selection and boot permission checked separately"
+  },
+  "confirmed_ssh_after_visible_desktop": true,
+  "matched_selected_baseline": {
+    "archive_receipt_sha256": "2b928cc9186a709a635720e11d39a108fbf43bd2b0bd3ddff474f989b670139a",
+    "boot_record": 84936,
+    "ac": "Online",
+    "gpu_code": 0,
+    "compositor_pid": 1396,
+    "query": [
+      "IDENTITY luid=0000000000005ae7 vendor=414f5753 device=31304630 flags=0",
+      "KMT source=0 mode=00000000 width=720 height=1280 orientation=2 overlay=00000000 max_planes=1 rgb=0 yuv=0 flags=00000000",
+      "DEVICE luid=0000000000005ae7 vendor=414f5753 device=31304630 hr=00000000 level=b100",
+      "DESKTOP dxgi_rotation=2 orientation=1 logical=1280x720 attached=1",
+      "OUTPUT2 hr=00000000 supports_overlays=0",
+      "OVERLAY format=87 hr=00000000 flags=0",
+      "OVERLAY format=28 hr=00000000 flags=0",
+      "OVERLAY format=103 hr=00000000 flags=0",
+      "COMPOSITION hr=00000000 flags=0",
+      "END reason=00000000 kmt=1"
+    ],
+    "matched_ordinary_flip_exit": 0,
+    "matched_ordinary_flip_desktop_samples": 5,
+    "borderless_exit": 0,
+    "borderless": [
+      "WINDOW luid=0000000000005ae7 width=1280 height=720 rotation=2 level=b100 hr=00000000",
+      "PRESENT frame=0 hr=00000000",
+      "DESKTOP frame=0 samples=5 expected=5",
+      "PRESENT frame=1 hr=00000000",
+      "DESKTOP frame=1 samples=5 expected=5",
+      "PRESENT frame=2 hr=00000000",
+      "DESKTOP frame=2 samples=5 expected=5",
+      "CLOSE keys=1 alive=0 rc=0"
+    ],
+    "exclusive_exit": 16,
+    "exclusive": [
+      "WINDOW luid=0000000000005ae7 width=1280 height=720 rotation=2 level=b100 hr=00000000",
+      "EXCLUSIVE_ENTER hr=80004005 query=00000000 active=0",
+      "CLOSE keys=0 alive=0 rc=16"
+    ],
+    "exclusive_stages": [
+      "245390 EnterFullscreen",
+      "245437 EnterFullscreen-returned"
+    ],
+    "exclusive_client_sha256": "ec536566f509192d71880e23f94849d44f53921f6bc004d8798f949e0ebe07c3",
+    "borderless_client_sha256": "0cad6852355aedb6641780155ea71adadb2d56e7918301bdc5772309d3fab4db",
+    "kernel_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "trace": {
+      "boot": 84936,
+      "version": "10.0.22621.2792 (WinBuild.160101.0800)",
+      "bytes": 9109504,
+      "dxgkrnl": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+      "trace": "4f66d7f431c7c60baab85883851c4cbe798c19b2672a3f01fec1720bc33e3c4b",
+      "file": "display.etl"
+    }
+  },
+  "matched_baseline_windows_trace": {
+    "sha256": "4f66d7f431c7c60baab85883851c4cbe798c19b2672a3f01fec1720bc33e3c4b",
+    "quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "counts": {
+      "vsync-mpo": 1728,
+      "present-history-start": 67,
+      "present-history-end": 71,
+      "flip": 174,
+      "panel-mpo3-start": 174,
+      "panel-mpo3-end": 174,
+      "mmio-flip-mpo3": 174,
+      "mmio-flip-mpo": 174,
+      "mpo-dirty": 174
+    },
+    "fields": {
+      "flip/VidPnSourceId/0": 174,
+      "flip/FlipWithNoWait/1": 174,
+      "flip/MMIOFlip/1": 174,
+      "flip/pDmaBuffer/zero": 174,
+      "panel-mpo3-start/VidPnSourceId/0": 174,
+      "panel-mpo3-end/VidPnSourceId/0": 174,
+      "mmio-flip-mpo3/VidPnSourceId/0": 174,
+      "mmio-flip-mpo3/PlaneCount/1": 174,
+      "mmio-flip-mpo/VidPnSourceId/0": 174,
+      "mmio-flip-mpo/Enabled/1": 174
+    },
+    "processes": {
+      "flip pid=1396": 174,
+      "panel-mpo3-start pid=4": 173,
+      "panel-mpo3-end pid=4": 173,
+      "mmio-flip-mpo3 pid=4": 173,
+      "mmio-flip-mpo pid=4": 173,
+      "panel-mpo3-start pid=0": 1,
+      "panel-mpo3-end pid=0": 1,
+      "mmio-flip-mpo3 pid=0": 1,
+      "mmio-flip-mpo pid=0": 1
+    },
+    "kernel_provider_events": 69311
+  },
+  "selected_profile_after_comparison": {
+    "loaded": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "trial": false,
+    "power": "Online",
+    "token": false,
+    "revision": "9fa4255bb38cb48d5a042712d1754c7948671137873cc858aaeeb573832ff6de",
+    "components": {
+      "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "boot": 84936,
+    "source": "e6852733640f4dc114042796477671ca54c1f3c6",
+    "signed": true,
+    "utc": "2026-11-20T19:18:26.3437431Z",
+    "qualification": "7bc6185d0c66fa60823ddfd6eecdf0808a0354ce6cfd8ba39b44c1dadee30c77",
+    "dwm": 1396,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+    "code": 0
+  },
+  "same_exclusive_api_result": true,
+  "selected_profile": {
+    "loaded": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "trial": false,
+    "power": "Online",
+    "token": false,
+    "revision": "9fa4255bb38cb48d5a042712d1754c7948671137873cc858aaeeb573832ff6de",
+    "components": {
+      "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "boot": 84936,
+    "source": "e6852733640f4dc114042796477671ca54c1f3c6",
+    "signed": true,
+    "utc": "2026-11-20T19:16:46.9299255Z",
+    "qualification": "7bc6185d0c66fa60823ddfd6eecdf0808a0354ce6cfd8ba39b44c1dadee30c77",
+    "dwm": 1396,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+    "code": 0
+  },
+  "known_rotation_trial": {
+    "archived_report_sha256": "79f4fd164b428cda4281cdc100ff6a6e54072e7cf1afb5dfac068f874a2a88e8",
+    "last_phase": "Applying",
+    "physical_acceptance": false,
+    "result": "FAILED: unexpected reboot during90-degree mode application"
+  },
+  "restart_accounting": {
+    "raw_window": {
+      "last": 85010,
+      "oldest": 35958,
+      "first": 84269,
+      "events": [
+        {
+          "record": 84272,
+          "provider": "User32",
+          "utc": "2026-11-20T18:32:03.6678950Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt enter closed gate before selecting candidate"
+        },
+        {
+          "record": 84289,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T18:32:28.3193311Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84361,
+          "provider": "User32",
+          "utc": "2026-11-20T18:36:15.4507300Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt one-time candidate boot"
+        },
+        {
+          "record": 84377,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T18:36:47.7654624Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84447,
+          "provider": "User32",
+          "utc": "2026-11-20T18:47:58.6569229Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt close native gate for baseline restore"
+        },
+        {
+          "record": 84463,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T18:48:23.5811451Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84540,
+          "provider": "User32",
+          "utc": "2026-11-20T18:53:31.0365971Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt restore verified permanent baseline"
+        },
+        {
+          "record": 84557,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T18:53:54.8668022Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84628,
+          "provider": "User32",
+          "utc": "2026-11-20T18:59:18.7840806Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt enter closed gate before selecting candidate"
+        },
+        {
+          "record": 84645,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T18:59:43.1935750Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84721,
+          "provider": "User32",
+          "utc": "2026-11-20T19:02:45.4712394Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt one-time candidate boot"
+        },
+        {
+          "record": 84738,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T19:03:15.1791994Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84808,
+          "provider": "User32",
+          "utc": "2026-11-20T19:07:53.5366478Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt close native gate for baseline restore"
+        },
+        {
+          "record": 84825,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T19:08:17.9659014Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84897,
+          "provider": "User32",
+          "utc": "2026-11-20T19:11:06.1310840Z",
+          "id": 1074,
+          "detail": "SwitchWOA graphics receipt restore verified permanent baseline"
+        },
+        {
+          "record": 84914,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T19:11:39.8389532Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84936,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-20T19:12:26.8593723Z",
+          "id": 12,
+          "detail": {}
+        },
+        {
+          "record": 84945,
+          "provider": "EventLog",
+          "utc": "2026-11-20T19:13:55.3210264Z",
+          "id": 6008,
+          "detail": {}
+        },
+        {
+          "record": 84954,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-20T19:12:31.0100986Z",
+          "id": 41,
+          "detail": {}
+        }
+      ]
+    },
+    "controller_intents": [
+      {
+        "boot": 84195,
+        "phase": "ClosedForTrial",
+        "reason": "enter closed gate before selecting candidate",
+        "utc": "2026-11-20T18:32:03.4017039Z",
+        "queued": true
+      },
+      {
+        "boot": 84289,
+        "phase": "CandidateArmed",
+        "reason": "one-time candidate boot",
+        "utc": "2026-11-20T18:36:15.2632299Z",
+        "queued": true
+      },
+      {
+        "boot": 84377,
+        "phase": "ClosedForRestore",
+        "reason": "close native gate for baseline restore",
+        "utc": "2026-11-20T18:47:58.4538017Z",
+        "queued": true
+      },
+      {
+        "boot": 84463,
+        "phase": "BaselineArmed",
+        "reason": "restore verified permanent baseline",
+        "utc": "2026-11-20T18:53:30.8647212Z",
+        "queued": true
+      },
+      {
+        "boot": 84557,
+        "phase": "ClosedForTrial",
+        "reason": "enter closed gate before selecting candidate",
+        "utc": "2026-11-20T18:59:18.5809560Z",
+        "queued": true
+      },
+      {
+        "boot": 84645,
+        "phase": "CandidateArmed",
+        "reason": "one-time candidate boot",
+        "utc": "2026-11-20T19:02:45.2993627Z",
+        "queued": true
+      },
+      {
+        "boot": 84738,
+        "phase": "ClosedForRestore",
+        "reason": "close native gate for baseline restore",
+        "utc": "2026-11-20T19:07:53.3335222Z",
+        "queued": true
+      },
+      {
+        "boot": 84825,
+        "phase": "BaselineArmed",
+        "reason": "restore verified permanent baseline",
+        "utc": "2026-11-20T19:11:05.9435838Z",
+        "queued": true
+      }
+    ],
+    "controlled_boots": [
+      {
+        "previous_boot": 84195,
+        "request_record": 84272,
+        "boot_event_12": 84289,
+        "phase": "ClosedForTrial",
+        "reason": "enter closed gate before selecting candidate"
+      },
+      {
+        "previous_boot": 84289,
+        "request_record": 84361,
+        "boot_event_12": 84377,
+        "phase": "CandidateArmed",
+        "reason": "one-time candidate boot"
+      },
+      {
+        "previous_boot": 84377,
+        "request_record": 84447,
+        "boot_event_12": 84463,
+        "phase": "ClosedForRestore",
+        "reason": "close native gate for baseline restore"
+      },
+      {
+        "previous_boot": 84463,
+        "request_record": 84540,
+        "boot_event_12": 84557,
+        "phase": "BaselineArmed",
+        "reason": "restore verified permanent baseline"
+      },
+      {
+        "previous_boot": 84557,
+        "request_record": 84628,
+        "boot_event_12": 84645,
+        "phase": "ClosedForTrial",
+        "reason": "enter closed gate before selecting candidate"
+      },
+      {
+        "previous_boot": 84645,
+        "request_record": 84721,
+        "boot_event_12": 84738,
+        "phase": "CandidateArmed",
+        "reason": "one-time candidate boot"
+      },
+      {
+        "previous_boot": 84738,
+        "request_record": 84808,
+        "boot_event_12": 84825,
+        "phase": "ClosedForRestore",
+        "reason": "close native gate for baseline restore"
+      },
+      {
+        "previous_boot": 84825,
+        "request_record": 84897,
+        "boot_event_12": 84914,
+        "phase": "BaselineArmed",
+        "reason": "restore verified permanent baseline"
+      }
+    ]
+  },
+  "baseline_recovery_interruption": {
+    "fault_id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+    "status": "open",
+    "source": "Read-only Windows System events and protected GPU boot readback. The user separately observed the recovered desktop.",
+    "last_controller_request": {
+      "previous_boot": 84825,
+      "request_record": 84897,
+      "boot_event_12": 84914,
+      "phase": "BaselineArmed",
+      "reason": "restore verified permanent baseline"
+    },
+    "controlled_start": {
+      "record": 84914,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T19:11:39.8389532Z",
+      "id": 12,
+      "detail": {}
+    },
+    "unrequested_start": {
+      "record": 84936,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T19:12:26.8593723Z",
+      "id": 12,
+      "detail": {}
+    },
+    "seconds_between_kernel_starts": 47.02,
+    "shutdown_requests_in_between": [],
+    "abnormal_shutdown_records": [
+      {
+        "id": 41,
+        "data": {
+          "BugcheckParameter2": "0x0",
+          "Checkpoint": "0",
+          "PowerButtonTimestamp": "0",
+          "CheckpointStatus": "0",
+          "BugcheckInfoFromEFI": "false",
+          "BootAppStatus": "0",
+          "LongPowerButtonPressDetected": "false",
+          "CsEntryScenarioInstanceId": "0",
+          "BugcheckParameter4": "0x0",
+          "BugcheckCode": "0",
+          "SleepInProgress": "0",
+          "SystemSleepTransitionsToOn": "0",
+          "ConnectedStandbyInProgress": "false",
+          "BugcheckParameter1": "0x0",
+          "BugcheckParameter3": "0x0"
+        },
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "level": 1,
+        "record": 84954,
+        "utc": "2026-11-20T19:12:31.0100986Z"
+      },
+      {
+        "id": 6008,
+        "data": {},
+        "provider": "EventLog",
+        "level": 2,
+        "record": 84945,
+        "utc": "2026-11-20T19:13:55.3210264Z"
+      }
+    ],
+    "last_persisted_event_in_previous_boot": {
+      "id": 14,
+      "data": {},
+      "provider": "Microsoft-Windows-Wininit",
+      "level": 4,
+      "record": 84935,
+      "utc": "2026-11-20T19:12:25.9355779Z"
+    },
+    "previous_boot_inventory": [
+      {
+        "record": 84914,
+        "utc": "2026-11-20T19:11:39.8389532Z",
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 12
+      },
+      {
+        "record": 84915,
+        "utc": "2026-11-20T19:11:39.8397906Z",
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "id": 153
+      },
+      {
+        "record": 84916,
+        "utc": "2026-11-20T19:11:39.8400485Z",
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "id": 20
+      },
+      {
+        "record": 84917,
+        "utc": "2026-11-20T19:11:39.8404637Z",
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "id": 238
+      },
+      {
+        "record": 84918,
+        "utc": "2026-11-20T19:11:39.8404665Z",
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "id": 25
+      },
+      {
+        "record": 84919,
+        "utc": "2026-11-20T19:11:39.8404692Z",
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "id": 27
+      },
+      {
+        "record": 84920,
+        "utc": "2026-11-20T19:11:39.8407026Z",
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "id": 18
+      },
+      {
+        "record": 84921,
+        "utc": "2026-11-20T19:11:39.8407980Z",
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "id": 32
+      },
+      {
+        "record": 84922,
+        "utc": "2026-11-20T19:11:39.8543470Z",
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 20
+      },
+      {
+        "record": 84923,
+        "utc": "2026-11-20T19:11:40.3135011Z",
+        "provider": "Microsoft-Windows-FilterManager",
+        "id": 6
+      },
+      {
+        "record": 84924,
+        "utc": "2026-11-20T19:11:40.3152841Z",
+        "provider": "Microsoft-Windows-FilterManager",
+        "id": 6
+      },
+      {
+        "record": 84925,
+        "utc": "2026-11-20T19:11:41.6007625Z",
+        "provider": "Microsoft-Windows-Ntfs",
+        "id": 98
+      },
+      {
+        "record": 84926,
+        "utc": "2026-11-20T19:11:41.8409419Z",
+        "provider": "Microsoft-Windows-FilterManager",
+        "id": 6
+      },
+      {
+        "record": 84927,
+        "utc": "2026-11-20T19:11:43.3939574Z",
+        "provider": "Microsoft-Windows-FilterManager",
+        "id": 6
+      },
+      {
+        "record": 84928,
+        "utc": "2026-11-20T19:11:43.9767250Z",
+        "provider": "Microsoft-Windows-Kernel-Processor-Power",
+        "id": 55
+      },
+      {
+        "record": 84929,
+        "utc": "2026-11-20T19:11:43.9788344Z",
+        "provider": "Microsoft-Windows-Kernel-Processor-Power",
+        "id": 55
+      },
+      {
+        "record": 84930,
+        "utc": "2026-11-20T19:11:43.9808539Z",
+        "provider": "Microsoft-Windows-Kernel-Processor-Power",
+        "id": 55
+      },
+      {
+        "record": 84931,
+        "utc": "2026-11-20T19:11:43.9827568Z",
+        "provider": "Microsoft-Windows-Kernel-Processor-Power",
+        "id": 55
+      },
+      {
+        "record": 84932,
+        "utc": "2026-11-20T19:12:23.3419164Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "id": 521
+      },
+      {
+        "record": 84933,
+        "utc": "2026-11-20T19:12:23.3474376Z",
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 24
+      },
+      {
+        "record": 84934,
+        "utc": "2026-11-20T19:12:23.3476411Z",
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 24
+      },
+      {
+        "record": 84935,
+        "utc": "2026-11-20T19:12:25.9355779Z",
+        "provider": "Microsoft-Windows-Wininit",
+        "id": 14
+      }
+    ],
+    "application_errors_in_window": [],
+    "dumps_written_in_window": [],
+    "selected_before_the_requested_restart": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+    "kmd_selected_before_restart": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "post_recovery_boot": 84936,
+    "post_recovery_code": 0,
+    "post_recovery_components": {
+      "tegragpurender.sys": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "qualified_source": "e6852733640f4dc114042796477671ca54c1f3c6",
+    "direct_dwm_observation_on_84914": false,
+    "interpretation": "Windows logged the requested recovery boot and then a second kernel start without a shutdown request. The Wininit event identifies the last retained record. The initiating operation, a shared cause with SEQUENTIAL, and the driver state on boot 84914 are unknown.",
+    "original_trigger_repetitions": "The earlier release trial returned to the same seven-component profile on boot 84557. No intervening unrequested boot was recorded for that separate restore.",
+    "pre_restart_readback": {
+      "phase": "BaselineArmed",
+      "boot": 84825,
+      "code": 43,
+      "inf": "oem19.inf",
+      "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+      "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+      "kmd": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+      "utc": "2026-11-20T19:10:49.6154636Z",
+      "sha256": "80da47ea18b8db43b0b9579a1140b8accedb513c4adfd1e0b26d32f43558dbd1"
+    }
+  },
+  "temporary_driver_cleanup": {
+    "mmio": {
+      "controller": {
+        "accepted": {
+          "trial": null,
+          "task": false,
+          "code": 0,
+          "phase_boot": 84557,
+          "utc": "2026-11-20T18:56:31.0246300Z",
+          "boot": 84557,
+          "token": null,
+          "inf": "oem19.inf",
+          "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+          "phase": "Finished",
+          "last_error": null,
+          "kmd": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+          "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009"
+        },
+        "removed_trial_root": true,
+        "candidate_package_removed": "oem20.inf",
+        "recovery_task_removed": true
+      },
+      "driver_package": {
+        "transfer_removed": true,
+        "active": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+        "candidate_removed": true
+      }
+    },
+    "observed": {
+      "controller": {
+        "accepted": {
+          "trial": null,
+          "task": false,
+          "code": 0,
+          "phase_boot": 84936,
+          "utc": "2026-11-20T19:16:24.9447159Z",
+          "boot": 84936,
+          "token": null,
+          "inf": "oem19.inf",
+          "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+          "phase": "Finished",
+          "last_error": null,
+          "kmd": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+          "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009"
+        },
+        "removed_trial_root": true,
+        "candidate_package_removed": "oem20.inf",
+        "recovery_task_removed": true
+      },
+      "driver_package": {
+        "transfer_removed": true,
+        "active": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+        "candidate_removed": true
+      }
+    }
+  },
+  "decision": {
+    "daily_source": "e6852733640f4dc114042796477671ca54c1f3c6",
+    "mmio": "The signed ARM64 model on the Switch distinguished the reference rejection and the corrected result. In the live Windows miniport trace every observed no-DMA flip supplied a context. Ordinary graphics regression passed; the system-originated NULL-context path still lacks a hardware case.",
+    "rotated_primary": "The historic mode-check model failed at the known assertion without the fix and passed with it. The daily driver admits identity storage. The captured 90-degree desktop used portrait storage; no quarter-turned CheckDisplayMode query entered the candidate. An independent-flip or column-scan implementation needs its own qualified input before this can be selected as a runtime fix.",
+    "remaining": "Carry both exact patches in the local candidate inventory for the fourth-step closing review. Use the same source, input and signed profile to qualify a live repaired path when available. The historic SEQUENTIAL first-Present fault remains open.",
+    "recovery_gate": "The extra native recovery boot has its own open fault. The protected Switch policy and the repository both reject a fresh promotion using the prior qualification. The accepted cd352fa8 grant is retained."
+  },
+  "protected_open_fault_check": {
+    "boot": 84936,
+    "active_policy": "3770f769a6fda7adcbc1e19aca844c20a162e62c802ec65f3bf641967690770f",
+    "grant_policy": "9fa4255bb38cb48d5a042712d1754c7948671137873cc858aaeeb573832ff6de",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxgi-copy-cd352fa8f009",
+    "utc": "2026-11-20T19:23:32.8131209Z",
+    "ledger": "44b408b5f77afe4f3f888bf3b9a92a4498bf01b241f092e8c8044331d081ee5d",
+    "retained_approval_receipt": "bdd3894850656abea397bb0183ef23b9d5539cbbb3e9ad0c3d3a6c7e5a220515",
+    "open_faults": 6,
+    "fresh_promotion_denied": true,
+    "permission_modified": false,
+    "code": 0,
+    "reason": "Missing independently tested separation from GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+    "owned_transfer_removed": true
+  }
+}

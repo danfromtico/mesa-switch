@@ -1,0 +1,1083 @@
+{
+  "schema": 1,
+  "round_id": "win-present-board-only-cdd-20261121-01",
+  "contract_id": "WIN-CDD-BOARD-RECOVERY",
+  "windows_question": "WIN-CDD-BOARD-RECOVERY",
+  "plan_sha256": "ecc08187924cef3f08692d18472aa5036c1b7dec2c059c364d4dbd9eb927b90a",
+  "status": "故障开放",
+  "finding": "正式 GM20B 基线的普通双缓冲空窗口在启动 91476 运行一次，绘图 PID/TID 3376/3236。CDD 286 的 84 字节原始记录在恢复启动 91557 完整回读，同次 Windows ETL 和同一 HWND 的 Blt 目标分配吻合。52 字节复制包正常退役，KMT 及首次公开 Present 返回 S_OK，公开调用耗时 58.688 ms。其后设备状态查询、DwmFlush 与首帧对象释放都留下成功回执。绘图线程的最后一条内核事件晚于公开返回 138.531 ms。下次启动 91557 有 6008 和 41，BugcheckCode=0。",
+  "missing_observation": "新次在首帧对象释放与正常退出确认之间缺少后续可证应用边界。板端控制器退出摘要、FlushFileBuffers 返回时点、两路 ETL 关闭记录和可用的故障首因记录均缺失。这是正式基线上一次已成功返回后出现的独立异常。旧三次 CALL 后的图形和板级证据仍各自缺失。",
+  "device_executions": 1,
+  "evidence": {
+    "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+    "archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+    "windows_collection": {
+      "nonce": "c653e6ff6b4c4c17ad4df0f4959ebbdf",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+      "boot": 91557,
+      "bytes": 577401,
+      "utc": "2026-11-21T15:36:20.2627598Z"
+    },
+    "board_start": {
+      "began_qpc": 222953552589,
+      "freq": 19200000,
+      "boot": 91476,
+      "nonce": "c653e6ff6b4c4c17ad4df0f4959ebbdf",
+      "utc": "2026-11-21T15:30:34.1295497Z",
+      "controller_pid": 6428
+    },
+    "launch_accept": {
+      "nonce": "c653e6ff6b4c4c17ad4df0f4959ebbdf",
+      "recovered": false,
+      "boot": 91476,
+      "last_host_request_qpc": 222860226927
+    },
+    "application_issue": {
+      "nonce": "c653e6ff6b4c4c17ad4df0f4959ebbdf",
+      "parent": 6428,
+      "boot": 91476,
+      "qpc": 223071115430
+    },
+    "application_intent": {
+      "nonce": "c653e6ff6b4c4c17ad4df0f4959ebbdf",
+      "before": {
+        "components": {
+          "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1400,
+        "boot": 91476,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T12:17:38.1187736Z"
+      },
+      "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "boot": 91476,
+      "utc": "2026-11-21T15:30:46.5280840Z"
+    },
+    "application_stdout_pid": 3376,
+    "raw_client_pid_bytes_hex": "00000000",
+    "actual_dwm_modules": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+    },
+    "windows_binaries": {
+      "gdi32.dll": {
+        "path": "C:\\Windows\\System32\\gdi32.dll",
+        "sha256": "16296352c617d83dda1ccce5ad0048cef8ee30d22b9960681e833b5767f8a5bb",
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+      },
+      "d3d11.dll": {
+        "path": "C:\\Windows\\System32\\d3d11.dll",
+        "sha256": "ccc352f7097d0320368000dbe9ff92772d8fc909185d95c8a0753cb8f115f880",
+        "version": "10.0.22621.2715 (WinBuild.160101.0800)"
+      },
+      "dxgkrnl.sys": {
+        "path": "C:\\Windows\\System32\\drivers\\dxgkrnl.sys",
+        "sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+      },
+      "dxgi.dll": {
+        "path": "C:\\Windows\\System32\\dxgi.dll",
+        "sha256": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      }
+    },
+    "desktop_pid_before": 1400,
+    "desktop_pid_after": 1392,
+    "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "recovery_boot": 91557,
+    "recovery_power_mode": 6,
+    "recovery_code": 0,
+    "app_clock_anchor_utc": "2026-11-21T15:30:47.899369+00:00",
+    "clock_hz": 19200000,
+    "drawing_pid": 3376,
+    "drawing_tid": 3236,
+    "hwnd": 328302,
+    "journal_utf8": "11624718 3236 ENTER wmain 00000000\n11624734 3236 VERIFIED RuntimeQueueOptionSet 00000000\n11624734 3236 CALL TraceCurrentProcess 00000000\n11624765 3236 RETURN TraceCurrentProcess 00000000\n11624796 3236 CALL CreateDXGIFactory1 00000000\n11624812 3236 RETURN CreateDXGIFactory1 00000000\n11624828 3236 CALL CreatePublicD3D11Device 00000000\n11624921 3236 RETURN CreatePublicD3D11Device 00000000\n11624953 3236 VERIFIED LoadedCandidateUMD 00000000\n11624968 3236 VERIFIED NativeGM20BDrawingDevice 00000000\n11624984 3236 CALL GetDecodeAdapterFactory 00000000\n11624984 3236 RETURN GetDecodeAdapterFactory 00000000\n11624984 3236 CALL CreatePreviewWindow 00000000\n11625000 3236 RETURN CreatePreviewWindow 00000000\n11625015 3236 CALL CreateSwapChainForHwnd 00000000\n11625015 3236 RETURN CreateSwapChainForHwnd 00000000\n11625046 3236 CALL GetWindowSwapChainDesc 00000000\n11625046 3236 RETURN GetWindowSwapChainDesc 00000000\n11625046 3236 VERIFIED RequestedPresentModel 00000000\n11625046 3236 MODEL Sequential 00000000\n11625062 3236 CALL MakeWindowAssociation 00000000\n11625062 3236 RETURN MakeWindowAssociation 00000000\n11625062 3236 CALL GetBackBuffer 00000000\n11625062 3236 RETURN GetBackBuffer 00000000\n11625062 3236 CALL CreateRenderTargetView 00000000\n11625078 3236 RETURN CreateRenderTargetView 00000000\n11625718 3236 CALL WindowCloakingBeforePresent 00000000\n11625718 3236 RETURN WindowCloakingBeforePresent 00000000\n11625718 3236 CALL FlushBeforeFirstPresent 00000000\n11625750 3236 RETURN FlushBeforeFirstPresent 00000000\n11625750 3236 VERIFIED NoApplicationWrites 00000000\n11625750 3236 CALL FlushTraceBeforePresent 00000000\n11625765 3236 RETURN FlushTraceBeforePresent 00000000\n11625765 3236 CLOCK FirstPresentUtcFiletime_134397486478993697 00000000\n11625765 3236 OBSERVE RemovedReasonBeforePresent 00000000\n11625765 3236 CALL Present 00000000 qpc=223218033325\n11625828 3236 RETURN Present 00000000 qpc=223219160141\n11625875 3236 OBSERVE RemovedReasonAfterPresent 00000000\n11625875 3236 CALL DwmFlushAfterFirstPresent 00000000\n11625937 3236 RETURN DwmFlushAfterFirstPresent 00000000\n11625953 3236 VERIFIED EmptyPresentReturned 00000000\n11625953 3236 CALL DeviceAfterFirstPresent 00000000\n11625968 3236 RETURN DeviceAfterFirstPresent 00000000\n11626000 3236 RETURN ReleaseFirstFrameObjects 00000000\n",
+    "manifest": {
+      "display.etl": {
+        "sha256": "b6026077eb2ea0707bfc30118ac5ffca819314ea8b4bb51debdd4434b3fb5fb8",
+        "bytes": 4718592,
+        "quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": false
+        },
+        "rows": 35579,
+        "last_qpc": 223221953112,
+        "last_record": {
+          "qpc": 223221953112,
+          "pid": 4,
+          "tid": 892,
+          "provider": "kernel",
+          "id": 281,
+          "version": 0,
+          "fields": {
+            "pDmaBuffer": 18446706169587786096
+          }
+        },
+        "last_app_qpc": 223221819942,
+        "last_app_record": {
+          "qpc": 223221819942,
+          "pid": 3376,
+          "tid": 3236,
+          "provider": "kernel",
+          "id": 329,
+          "version": 0,
+          "fields": {
+            "EProcess": 18446706169649672448,
+            "ProcessStatus": 0
+          }
+        }
+      },
+      "scene/video.etl": {
+        "sha256": "6ec11c2e135e3204048b85be09fc7e8b519465cc8b39fba51cdf3ec0fe9c5596",
+        "bytes": 983040,
+        "quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": false
+        },
+        "rows": 4750,
+        "last_qpc": 223222129880,
+        "last_record": {
+          "qpc": 223222129880,
+          "pid": 4,
+          "tid": 904,
+          "provider": "kernel",
+          "id": 179,
+          "version": 0,
+          "fields": {
+            "hContext": 18446611100088172560,
+            "PacketType": 7,
+            "SubmitSequence": 741
+          }
+        },
+        "last_app_qpc": 223219159535,
+        "last_app_record": {
+          "qpc": 223219159535,
+          "pid": 3376,
+          "tid": 3236,
+          "provider": "dxgi",
+          "id": 179,
+          "version": 0,
+          "fields": {}
+        }
+      }
+    },
+    "local_cdd": {
+      "origin_boot": 91476,
+      "retrieval_boot": 91557,
+      "frame_hex": "535743444431000063363533653666663662346301000000300d0000a40c00001e0100001800380052b4e1f83300000002bee3f83300000050b9b1b00f87ffff000000008002000068010000000a00007a897283",
+      "slot_sha256": "3434dc40d2b9f47a60ba2ade53655b064d1710c686e722dc7d1a1fd568387340",
+      "record": {
+        "sequence": 1,
+        "pid": 3376,
+        "tid": 3236,
+        "event": 286,
+        "version": 0,
+        "source_qpc": 223218873426,
+        "callback_qpc": 223219006978,
+        "payload_size": 24,
+        "payload_sha256": "3c913233644fc4aa51be1f8be917783020ad1360fa34746b01e506fd06697724",
+        "crc_valid": true
+      },
+      "verdict": {
+        "boot": 91476,
+        "first_call_qpc": 223218033325,
+        "public_return_qpc": 223219160141,
+        "local_record": "valid",
+        "source_qpc": 223218873426,
+        "callback_qpc": 223219006978,
+        "tid": 3236,
+        "pid": 3376,
+        "after_call": true,
+        "source_inside_public_interval": true,
+        "local_flush_return_qpc": null,
+        "flush_before_public_return": false,
+        "flush_before_dxgi_stop": false,
+        "file_etl_matches": true,
+        "downstream_allocation_chain": true,
+        "payload_sha256": "3c913233644fc4aa51be1f8be917783020ad1360fa34746b01e506fd06697724"
+      }
+    },
+    "stages": {
+      "dxgi_start": {
+        "qpc": 223218801252,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "dxgi",
+        "id": 42,
+        "version": 0,
+        "fields": {}
+      },
+      "cdd": {
+        "qpc": 223218873117,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 286,
+        "version": 0,
+        "fields": {
+          "pDxgAdapterAllocation": 18446611100191537488,
+          "Flags": 0,
+          "Width": 640,
+          "Height": 360,
+          "Pitch": 2560
+        }
+      },
+      "blt": {
+        "qpc": 223218979581,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 166,
+        "version": 0,
+        "fields": {
+          "hwnd": 328302,
+          "pDmaBuffer": 18446706169658958480,
+          "PresentHistoryToken": 0,
+          "hSourceAllocation": 18446706169574466576,
+          "hDestAllocation": 18446706169574466064,
+          "bSubmit": 1,
+          "bRedirectedPresent": 0,
+          "Flags": 1,
+          "Source.Left": 0,
+          "Source.Right": 640,
+          "Source.Top": 0,
+          "Source.Bottom": 360,
+          "Dest.Left": 0,
+          "Dest.Right": 640,
+          "Dest.Top": 0,
+          "Dest.Bottom": 360,
+          "SubRectCount": 1
+        }
+      },
+      "allocation_33": {
+        "qpc": 223218873004,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 33,
+        "version": 3,
+        "fields": {
+          "hProcessId": 3376,
+          "hDevice": 18446611100215907360,
+          "pDxgAdapter": 18446706169594454016,
+          "Flags": 129,
+          "allocSize": 921600,
+          "ulAlignment": 4096,
+          "dwReadSegment": 0,
+          "dwWriteSegment": 2,
+          "PreferredSegment": 2,
+          "HintedBank": 0,
+          "dwEvictionSegment": 0,
+          "Priority": 2013265920,
+          "hVidMmGlobalAlloc": 18446611100140946848,
+          "hDxgGlobalAlloc": 18446611100191537488,
+          "hDxgSharedResource": 0,
+          "UsageVersion": 0,
+          "UsageFlags": 0,
+          "Format": 0,
+          "SwizzledFormat": 0,
+          "ByteOffset": 0,
+          "Width": 0,
+          "Height": 0,
+          "Pitch": 0,
+          "Depth": 0,
+          "SlicePitch": 0,
+          "BackingStoreWasPinned": 0,
+          "pSectionObject": 0,
+          "PhysicalAdapterIndex": 0,
+          "PageTableOrDirectory": 0
+        }
+      },
+      "destination_36": {
+        "qpc": 223218874571,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 36,
+        "version": 2,
+        "fields": {
+          "hProcessId": 3376,
+          "hDevice": 18446611100215907360,
+          "pDxgAdapter": 18446706169594454016,
+          "hVidMmAlloc": 18446706169574466064,
+          "hVidMmGlobalAlloc": 18446611100140946848,
+          "hDxgResource": 18446611100211781680,
+          "hDxgSharedResource": 18446706169653124224,
+          "hThunkAllocation": 1073743936,
+          "hThunkResource": 1073743872,
+          "PrivateRuntimeResourceHandle": 0,
+          "pVirtualAddress": 2171963719680,
+          "hProcessAllocDetails": 18446611100177860112,
+          "hOtherPartitionHandle": 0
+        }
+      },
+      "source_36": {
+        "qpc": 223203477336,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 36,
+        "version": 2,
+        "fields": {
+          "hProcessId": 3376,
+          "hDevice": 18446611100215907360,
+          "pDxgAdapter": 18446706169594454016,
+          "hVidMmAlloc": 18446706169574466576,
+          "hVidMmGlobalAlloc": 18446611100209046944,
+          "hDxgResource": 18446611100211777648,
+          "hDxgSharedResource": 18446706169653121344,
+          "hThunkAllocation": 1073743680,
+          "hThunkResource": 1073743616,
+          "PrivateRuntimeResourceHandle": 0,
+          "pVirtualAddress": 2171961876480,
+          "hProcessAllocDetails": 18446611100177859088,
+          "hOtherPartitionHandle": 0
+        }
+      },
+      "context": {
+        "qpc": 223200990980,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 30,
+        "version": 0,
+        "fields": {
+          "hDevice": 18446611100215907360,
+          "NodeOrdinal": 0,
+          "EngineAffinity": 1,
+          "DmaBufferSize": 65536,
+          "DmaBufferSegmentSet": 2,
+          "DmaBufferPrivateDataSize": 65864,
+          "AllocationListSize": 0,
+          "PatchLocationListSize": 0,
+          "Flags": 0,
+          "hContext": 18446611100182568400,
+          "ContextHandle": 1073742144,
+          "ParentDxgContext": 0
+        }
+      },
+      "dma_76": {
+        "qpc": 223218866204,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 76,
+        "version": 0,
+        "fields": {
+          "hContext": 18446611100182568400,
+          "pDxgAdapter": 18446706169594454016,
+          "pDmaBuffer": 18446706169658958480,
+          "DmaSize": 65536,
+          "AllocationListSize": 3,
+          "PatchLocationListSize": 0,
+          "hAllocationGlobalHandle": 18446611100137530784
+        }
+      },
+      "packet_178": {
+        "qpc": 223218981194,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 178,
+        "version": 1,
+        "fields": {
+          "hContext": 18446611100182568400,
+          "PacketType": 0,
+          "SubmitSequence": 1,
+          "DmaBufferSize": 52,
+          "AllocationListSize": 3,
+          "PatchLocationListSize": 0,
+          "bPresent": 1,
+          "hDmaBuffer": 18446706169658958480,
+          "pQueuePacket": 18446706169622742496,
+          "ProgressFenceValue": 0
+        }
+      },
+      "retirement_180": {
+        "qpc": 223219110360,
+        "pid": 4,
+        "tid": 884,
+        "provider": "kernel",
+        "id": 180,
+        "version": 1,
+        "fields": {
+          "hContext": 18446611100182568400,
+          "PacketType": 0,
+          "SubmitSequence": 1,
+          "bPreempted": 0,
+          "bTimeouted": 0,
+          "pQueuePacket": 18446706169622742496
+        }
+      },
+      "kmt_184": {
+        "qpc": 223219156385,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 184,
+        "version": 1,
+        "fields": {
+          "hContext": 1073742144,
+          "hWindow": 328302,
+          "VidPnSourceId": 4294967295,
+          "FlipInterval": 1,
+          "Flags": 67178625,
+          "ReturnStatus": 0,
+          "hSrcAllocHandle": 1073743680,
+          "hDstAllocHandle": 0
+        }
+      },
+      "dxgi_stop": {
+        "qpc": 223219159466,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "dxgi",
+        "id": 43,
+        "version": 0,
+        "fields": {}
+      }
+    },
+    "after_public_return": [
+      {
+        "qpc": 223221630362,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 182,
+        "version": 0,
+        "fields": {
+          "hDevice": 18446611100215907360,
+          "DeviceState": 1
+        }
+      },
+      {
+        "qpc": 223221728181,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 323,
+        "version": 1,
+        "fields": {
+          "DxgAdapter": 18446706169594454016,
+          "PagingQueue": 18446611100067124616,
+          "PagingQueuePacket": 18446611100042011456,
+          "SequenceId": 45133,
+          "VidMmOpType": 120,
+          "PagingQueueType": 2
+        }
+      },
+      {
+        "qpc": 223221739265,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 39,
+        "version": 0,
+        "fields": {
+          "hVidMmAlloc": 18446706169642321680
+        }
+      },
+      {
+        "qpc": 223221740857,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 323,
+        "version": 1,
+        "fields": {
+          "DxgAdapter": 18446706169594454016,
+          "PagingQueue": 18446611100067124616,
+          "PagingQueuePacket": 18446611100164849904,
+          "SequenceId": 45134,
+          "VidMmOpType": 120,
+          "PagingQueueType": 2
+        }
+      },
+      {
+        "qpc": 223221752045,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 39,
+        "version": 0,
+        "fields": {
+          "hVidMmAlloc": 18446706169574466576
+        }
+      },
+      {
+        "qpc": 223221795921,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 329,
+        "version": 0,
+        "fields": {
+          "EProcess": 18446706169649672448,
+          "ProcessStatus": 1
+        }
+      },
+      {
+        "qpc": 223221819351,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 329,
+        "version": 0,
+        "fields": {
+          "EProcess": 18446706169649463552,
+          "ProcessStatus": 3
+        }
+      },
+      {
+        "qpc": 223221819942,
+        "pid": 3376,
+        "tid": 3236,
+        "provider": "kernel",
+        "id": 329,
+        "version": 0,
+        "fields": {
+          "EProcess": 18446706169649672448,
+          "ProcessStatus": 0
+        }
+      }
+    ],
+    "kmd_after_call": [
+      {
+        "qpc": 223218984739,
+        "owner_pid": 4,
+        "owner_tid": 888,
+        "source": 1,
+        "source_name": "preempt",
+        "status": 0,
+        "stage": "idle",
+        "context": 0,
+        "payload_sha256": "599b71716ac035231965b64f213c00830f80d2ad8969fa05fcaecfa8be0830a2",
+        "submission_fence": 0,
+        "last_completed_fence": 152548,
+        "expected": 0,
+        "observed": 0,
+        "dma_bytes": 0,
+        "work_flags": 0,
+        "queue_flags": 281,
+        "queue_failure": 0,
+        "graphics_generation": 1,
+        "channel_stage": 7,
+        "channel_register": 8388608,
+        "channel_value": 0,
+        "cached_fifo": 0,
+        "cached_mmu": 0,
+        "cached_pbdma": 0,
+        "cached_pbdma1": 0,
+        "cached_mc": 0,
+        "cached_gr": 0,
+        "cached_fecs_error": 0,
+        "cached_fecs_host": 0,
+        "poll_count": 0,
+        "request_dma_bytes": 0,
+        "private_bytes": 0,
+        "umd_private_bytes": 0
+      },
+      {
+        "qpc": 223219940241,
+        "owner_pid": 4,
+        "owner_tid": 888,
+        "source": 1,
+        "source_name": "preempt",
+        "status": 0,
+        "stage": "gpu_fence",
+        "context": 18446706169619967024,
+        "payload_sha256": "f5a97a29bbc5c783b3f9f00b88e9a6f15eaaa547039695d482a4e6b36be6d3b0",
+        "submission_fence": 152558,
+        "last_completed_fence": 152557,
+        "expected": 40184,
+        "observed": 0,
+        "dma_bytes": 3892,
+        "work_flags": 426401,
+        "queue_flags": 281,
+        "queue_failure": 0,
+        "graphics_generation": 1,
+        "channel_stage": 4,
+        "channel_register": 1476472972,
+        "channel_value": 2,
+        "cached_fifo": 0,
+        "cached_mmu": 0,
+        "cached_pbdma": 0,
+        "cached_pbdma1": 0,
+        "cached_mc": 3626053920,
+        "cached_gr": 0,
+        "cached_fecs_error": 0,
+        "cached_fecs_host": 0,
+        "poll_count": 1,
+        "request_dma_bytes": 0,
+        "private_bytes": 0,
+        "umd_private_bytes": 0
+      },
+      {
+        "qpc": 223221841126,
+        "owner_pid": 4,
+        "owner_tid": 888,
+        "source": 1,
+        "source_name": "preempt",
+        "status": 0,
+        "stage": "idle",
+        "context": 0,
+        "payload_sha256": "41c843a012e5bdc903f58dbed7dc564a6edb20244c474c0fdf5f9722d62b7baa",
+        "submission_fence": 0,
+        "last_completed_fence": 152582,
+        "expected": 0,
+        "observed": 0,
+        "dma_bytes": 0,
+        "work_flags": 0,
+        "queue_flags": 281,
+        "queue_failure": 0,
+        "graphics_generation": 1,
+        "channel_stage": 7,
+        "channel_register": 8388608,
+        "channel_value": 0,
+        "cached_fifo": 0,
+        "cached_mmu": 0,
+        "cached_pbdma": 0,
+        "cached_pbdma1": 0,
+        "cached_mc": 0,
+        "cached_gr": 0,
+        "cached_fecs_error": 0,
+        "cached_fecs_host": 0,
+        "poll_count": 0,
+        "request_dma_bytes": 0,
+        "private_bytes": 0,
+        "umd_private_bytes": 0
+      },
+      {
+        "qpc": 223221945396,
+        "owner_pid": 4,
+        "owner_tid": 888,
+        "source": 1,
+        "source_name": "preempt",
+        "status": 0,
+        "stage": "notify",
+        "context": 0,
+        "payload_sha256": "9a76d4b1c0de037b2154c73d3e8ef79458f22b7ed77828e235c636b904b71398",
+        "submission_fence": 152584,
+        "last_completed_fence": 152584,
+        "expected": 0,
+        "observed": 0,
+        "dma_bytes": 0,
+        "work_flags": 28675,
+        "queue_flags": 285,
+        "queue_failure": 0,
+        "graphics_generation": 1,
+        "channel_stage": 7,
+        "channel_register": 8388608,
+        "channel_value": 0,
+        "cached_fifo": 0,
+        "cached_mmu": 0,
+        "cached_pbdma": 0,
+        "cached_pbdma1": 0,
+        "cached_mc": 0,
+        "cached_gr": 0,
+        "cached_fecs_error": 0,
+        "cached_fecs_host": 0,
+        "poll_count": 0,
+        "request_dma_bytes": 0,
+        "private_bytes": 0,
+        "umd_private_bytes": 0
+      }
+    ],
+    "timing": {
+      "public_call_ms": 58.688,
+      "packet_retired_before_return_ms": 2.593,
+      "last_trace_relative_to_return_ms": 154.674,
+      "last_drawing_thread_relative_to_return_ms": 138.531
+    },
+    "saved_bitmaps": {
+      "window.bmp": {
+        "sha256": "ab9bea4a5cf7f9b731d936d72b1c759db0647d101fee451b6029a8a5b9e67b72",
+        "bytes": 36918,
+        "valid_bmp": true,
+        "zero_bytes": 9282,
+        "dimensions": [
+          128,
+          -72
+        ]
+      },
+      "present.bmp": {
+        "sha256": "8fb30181e268a625a75792d881a1d53356df56dcca807640bc2b08bf362dd774",
+        "bytes": 36918,
+        "valid_bmp": false,
+        "zero_bytes": 36918,
+        "dimensions": null
+      }
+    },
+    "system": {
+      "records": [
+        {
+          "record": 91557,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-21T15:31:45.6459831Z",
+          "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-General' Guid='{a68ca8b7-004f-d7b6-a698-07e2de0f1f5d}'/><EventID>12</EventID><Version>0</Version><Level>4</Level><Task>1</Task><Opcode>0</Opcode><Keywords>0x8000000000000080</Keywords><TimeCreated SystemTime='2026-11-21T15:31:45.6459831Z'/><EventRecordID>91557</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='MajorVersion'>10</Data><Data Name='MinorVersion'>0</Data><Data Name='BuildVersion'>22621</Data><Data Name='QfeVersion'>2861</Data><Data Name='ServiceVersion'>0</Data><Data Name='BootMode'>0</Data><Data Name='StartTime'>2026-11-21T15:31:43.9795048Z</Data></EventData></Event>",
+          "id": 12
+        },
+        {
+          "record": 91566,
+          "provider": "EventLog",
+          "utc": "2026-11-21T15:33:21.7664645Z",
+          "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='EventLog'/><EventID Qualifiers='32768'>6008</EventID><Version>0</Version><Level>2</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x80000000000000</Keywords><TimeCreated SystemTime='2026-11-21T15:33:21.7664645Z'/><EventRecordID>91566</EventRecordID><Correlation/><Execution ProcessID='1900' ThreadID='1940'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security/></System><EventData><Data>23:32:08</Data><Data>‎2026/‎11/‎21</Data><Data></Data><Data></Data><Data>58</Data><Data></Data><Data></Data><Binary>EA070B00060015001700200008005102EA070B00060015000F002000080051023C0000003C000000000000000000000000000000000000000100000000000000</Binary></EventData></Event>",
+          "id": 6008
+        },
+        {
+          "record": 91575,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-21T15:31:51.9496938Z",
+          "xml": "<Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Kernel-Power' Guid='{331c3b3a-2005-44c2-ac5e-77220c37d6b4}'/><EventID>41</EventID><Version>9</Version><Level>1</Level><Task>63</Task><Opcode>0</Opcode><Keywords>0x8000400000000002</Keywords><TimeCreated SystemTime='2026-11-21T15:31:51.9496938Z'/><EventRecordID>91575</EventRecordID><Correlation/><Execution ProcessID='4' ThreadID='8'/><Channel>System</Channel><Computer>DESKTOP-5RCUK3G</Computer><Security UserID='S-1-5-18'/></System><EventData><Data Name='BugcheckCode'>0</Data><Data Name='BugcheckParameter1'>0x0</Data><Data Name='BugcheckParameter2'>0x0</Data><Data Name='BugcheckParameter3'>0x0</Data><Data Name='BugcheckParameter4'>0x0</Data><Data Name='SleepInProgress'>0</Data><Data Name='PowerButtonTimestamp'>0</Data><Data Name='BootAppStatus'>0</Data><Data Name='Checkpoint'>0</Data><Data Name='ConnectedStandbyInProgress'>false</Data><Data Name='SystemSleepTransitionsToOn'>0</Data><Data Name='CsEntryScenarioInstanceId'>0</Data><Data Name='BugcheckInfoFromEFI'>false</Data><Data Name='CheckpointStatus'>0</Data><Data Name='CsEntryScenarioInstanceIdV2'>0</Data><Data Name='LongPowerButtonPressDetected'>false</Data><Data Name='LidReliability'>false</Data><Data Name='InputSuppressionState'>0</Data><Data Name='PowerButtonSuppressionState'>0</Data><Data Name='LidState'>3</Data></EventData></Event>",
+          "id": 41
+        }
+      ],
+      "interval": [
+        {
+          "record": 91477,
+          "provider": "EventLog",
+          "utc": "2026-11-21T12:17:58.2201482Z",
+          "id": 6008
+        },
+        {
+          "record": 91494,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-21T12:01:35.4199709Z",
+          "id": 41
+        },
+        {
+          "record": 91566,
+          "provider": "EventLog",
+          "utc": "2026-11-21T15:33:21.7664645Z",
+          "id": 6008
+        },
+        {
+          "record": 91575,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-21T15:31:51.9496938Z",
+          "id": 41
+        }
+      ],
+      "task_channel_enabled": false,
+      "utc": "2026-11-21T15:38:23.2985641Z"
+    },
+    "kernel_power_data": {
+      "BugcheckCode": "0",
+      "BugcheckParameter1": "0x0",
+      "BugcheckParameter2": "0x0",
+      "BugcheckParameter3": "0x0",
+      "BugcheckParameter4": "0x0",
+      "SleepInProgress": "0",
+      "PowerButtonTimestamp": "0",
+      "BootAppStatus": "0",
+      "Checkpoint": "0",
+      "ConnectedStandbyInProgress": "false",
+      "SystemSleepTransitionsToOn": "0",
+      "CsEntryScenarioInstanceId": "0",
+      "BugcheckInfoFromEFI": "false",
+      "CheckpointStatus": "0",
+      "CsEntryScenarioInstanceIdV2": "0",
+      "LongPowerButtonPressDetected": "false",
+      "LidReliability": "false",
+      "InputSuppressionState": "0",
+      "PowerButtonSuppressionState": "0",
+      "LidState": "3"
+    },
+    "recovery_verified": {
+      "policy": {
+        "Before": {
+          "Utc": "2026-11-21T15:40:18.2234991Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 7,
+            "CpuTargetKhz": 1497600,
+            "CpuActualKhz": 998400,
+            "CpuBootKhz": 998400,
+            "CpuMv": 810,
+            "RamActualKhz": 2500000,
+            "GpuPolicyMode": 0,
+            "GpuPolicyMinKhz": 460800,
+            "GpuPolicyMaxKhz": 460800,
+            "GpuReportedKhz": 460800,
+            "GpuReportedUv": 800000,
+            "GpuStatusWord": 153299732,
+            "TempC": 42,
+            "TempValid": 1,
+            "FanDuty": 102,
+            "Flags": 22,
+            "CpuPolicyMinKhz": 1224000,
+            "CpuPolicyMaxKhz": 2397000,
+            "CpuRequestedMaxKhz": 3000000,
+            "GpuRequestedMaxKhz": 460800,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 0,
+            "CpuLastError": 3221225635,
+            "CpuLoadPermille": 1000,
+            "GpuSampleAgeMs": 859,
+            "SocTempC": 42,
+            "BoardTempC": 39,
+            "TempSampleAgeMs": 1640
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 86,
+            "VoltageMv": 3802,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        },
+        "Fixed": {
+          "Utc": "2026-11-21T15:40:18.4425643Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 7,
+            "CpuTargetKhz": 1497600,
+            "CpuActualKhz": 1497600,
+            "CpuBootKhz": 998400,
+            "CpuMv": 1120,
+            "RamActualKhz": 2500000,
+            "GpuPolicyMode": 0,
+            "GpuPolicyMinKhz": 460800,
+            "GpuPolicyMaxKhz": 460800,
+            "GpuReportedKhz": 460800,
+            "GpuReportedUv": 800000,
+            "GpuStatusWord": 153299732,
+            "TempC": 42,
+            "TempValid": 1,
+            "FanDuty": 102,
+            "Flags": 21,
+            "CpuPolicyMinKhz": 1224000,
+            "CpuPolicyMaxKhz": 2397000,
+            "CpuRequestedMaxKhz": 3000000,
+            "GpuRequestedMaxKhz": 460800,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 0,
+            "CpuLastError": 0,
+            "CpuLoadPermille": 1000,
+            "GpuSampleAgeMs": 12,
+            "SocTempC": 42,
+            "BoardTempC": 39,
+            "TempSampleAgeMs": 1981
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 86,
+            "VoltageMv": 3820,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        },
+        "After": {
+          "Utc": "2026-11-21T15:40:18.4425643Z",
+          "Power": {
+            "Version": 2,
+            "IsLite": 1,
+            "CpuConfigured": 1,
+            "PowerMode": 1,
+            "CpuTargetKhz": 1581000,
+            "CpuActualKhz": 1593750,
+            "CpuBootKhz": 998400,
+            "CpuMv": 875,
+            "RamActualKhz": 2500000,
+            "GpuPolicyMode": 1,
+            "GpuPolicyMinKhz": 76800,
+            "GpuPolicyMaxKhz": 537600,
+            "GpuReportedKhz": 460800,
+            "GpuReportedUv": 800000,
+            "GpuStatusWord": 153299732,
+            "TempC": 42,
+            "TempValid": 1,
+            "FanDuty": 102,
+            "Flags": 20,
+            "CpuPolicyMinKhz": 102000,
+            "CpuPolicyMaxKhz": 1581000,
+            "CpuRequestedMaxKhz": 1581000,
+            "GpuRequestedMaxKhz": 537600,
+            "CpuSpeedo": 1630,
+            "CpuProcessId": 0,
+            "CpuDfllAvailable": 1,
+            "CpuDfllActive": 1,
+            "CpuLastError": 0,
+            "CpuLoadPermille": 1000,
+            "GpuSampleAgeMs": 15,
+            "SocTempC": 42,
+            "BoardTempC": 39,
+            "TempSampleAgeMs": 1984
+          },
+          "Battery": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 86,
+            "VoltageMv": 3820,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          }
+        }
+      },
+      "utc": "2026-11-21T15:40:18.6145823Z",
+      "boot": 91557,
+      "pre_boot": 91557
+    },
+    "live_after_recovery": {
+      "boot": 91557,
+      "dwm": 1392,
+      "dwm_start": "2026-11-21T15:33:18.1273749Z",
+      "ac": "Online",
+      "code": 0,
+      "mode": 1,
+      "components": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "loaded": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+      "trial": false
+    },
+    "independent_code_review": {
+      "model": "gemini-4-neon-high",
+      "effort": "high",
+      "inputs": {
+        "Board-CddCapture.ps1": "277f838854cdb1ed11c4a324848fc5c4a4635c61668be165dadd3c6559a38d6b",
+        "board_local_cdd_controller.py": "6b66c80ec85ea32dba7dfb69cb1bf48873d51776fd837c2a26bf2394adfc78d8",
+        "board_local_fixture.py": "904039143cc4f29fbd239a8ab7fdc826c2f0434e1d163468ce3fca3af9bd8579"
+      },
+      "response_sha256": "5682d2bcad471c858a7503821bfa078acaeba08e6e6ab4213a7e25f5aca19aaa",
+      "disposition": "板端临时代码与复核留在本机档案。复核指出协议日志缓冲、异常收尾和恢复重入需要修正。实机独立归档证实已发出唯一应用并成功返回首帧，这些代码审阅发现未给出板级复位原因。"
+    },
+    "loss_scope": "Mac 首次回读 SSH 报 Host is down。重连得到新开机和任务缺失，随后直接从两份已归属目录采集。应用 client-pid 文件保留四个零字节，实际进程由应用独立 START、CDD 原始头及两路 ETL 相互验证。",
+    "comparison_scope": "同一签名应用和公开参数。启动 91476 的正式 KMD 与 tgd3d 组件不同于旧三次，另有本次板端采集与调度条件。原三次的证据界限保持各自归属。",
+    "raw_hashes": {
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/incident-analysis.json": "b1aa491cfe5d24996d9549c47bf0328d82b3b39cfbf872e4bf3d32fe174c2c99",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/exact-windows-reboot.json": "9e96882bdb82f7ad0caf34b51e7788748143cf7360872dfdaf162fe067bde2b0",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted-collection.json": "ee205eab8e59b555fae93ce444cd0e58d5278c5d1b41e17995fc86fb279a1150",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/focused-archive-inventory.json": "b6a77cd0f04cf90e61dbc48dd707f002b1d272f857429004d19e2e135acc3200",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/recovered-inventory.json": "8adf9f503fd1f0a24044246ceab27b017c31729f0d5f33ce12370640aa352b4a",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/incident-cleanup.json": "c520b6fc3e9cd4630d78efb78c98b5f9a9291baed3a73952d660b7f3ccdfe39b",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/local-input-cleanup.json": "561d216e29a742aaecc8163aadd197677d6a20cdb21dc1f94da6af64a8e3c323",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/before-board-only-cdd.json": "cb20a139d8cb93a2186ec2127f7b14001c3ba256acd269b1ad78d23ee10ef3ec",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/recovered-board-only-cdd.json": "0194e4b98a81e650d08bbc69b6c2d8233ffb8045e46d4cf74063db8af53af717",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/handheld-restore.json": "948290d53214b0c5ebb7e088ec816d5124193c27a548bd2774cecfd5227fd273",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/recovered-board-only-cdd-restored.json": "6c0b0f23e6059f1c0376a1e1a71802b4d0718b8ba1213fa8d735b14b80d4a6e1"
+    },
+    "cleanup": {
+      "app_path_exists": false,
+      "collector_path_exists": false,
+      "trace_query": {
+        "Nvdec720Preview-3376": 4201,
+        "SwitchPresentLive-c653e6ff6b4c": 4201,
+        "SwitchDisplay-c653e6ff6b4c": 4201
+      },
+      "preserved_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+      "utc": "2026-11-21T15:39:30.9010982Z",
+      "owned_process_count": 0,
+      "remaining_tasks": [],
+      "boot": 91557
+    },
+    "boundaries": {
+      "last_entry": {
+        "boot": 91476,
+        "pid": 3376,
+        "tid": 3236,
+        "hwnd": 328302,
+        "first_dxgi_start_qpc": 223218801252,
+        "cdd": {
+          "sequence": 1,
+          "pid": 3376,
+          "tid": 3236,
+          "event": 286,
+          "version": 0,
+          "source_qpc": 223218873426,
+          "callback_qpc": 223219006978,
+          "payload_size": 24,
+          "payload_sha256": "3c913233644fc4aa51be1f8be917783020ad1360fa34746b01e506fd06697724",
+          "crc_valid": true
+        }
+      },
+      "last_return": {
+        "public_present": "S_OK",
+        "first_copy_retired": true,
+        "last_application_journal": "11626000 3236 RETURN ReleaseFirstFrameObjects 00000000",
+        "last_drawing_thread_etw": {
+          "qpc": 223221819942,
+          "pid": 3376,
+          "tid": 3236,
+          "provider": "kernel",
+          "id": 329,
+          "version": 0,
+          "fields": {
+            "EProcess": 18446706169649672448,
+            "ProcessStatus": 0
+          }
+        },
+        "last_raw_graphics_event": {
+          "qpc": 223222129880,
+          "pid": 4,
+          "tid": 904,
+          "provider": "kernel",
+          "id": 179,
+          "version": 0,
+          "fields": {
+            "hContext": 18446611100088172560,
+            "PacketType": 7,
+            "SubmitSequence": 741
+          }
+        }
+      },
+      "first_anomaly_or_missing": "新次在首帧对象释放与正常退出确认之间缺少后续可证应用边界。板端控制器退出摘要、FlushFileBuffers 返回时点、两路 ETL 关闭记录和可用的故障首因记录均缺失。这是正式基线上一次已成功返回后出现的独立异常。旧三次 CALL 后的图形和板级证据仍各自缺失。"
+    }
+  }
+}

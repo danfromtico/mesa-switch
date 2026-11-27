@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "scope": "explorer-winui-a8-shared-and-fl11-1-tir-gate",
+  "source_commit": "76f6bcd1a07eb0ef15207a04997fb9bea46ee7bf",
+  "original_fault": "SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+  "root_cause_confirmed": true,
+  "pre_fix_etw_capture": {
+    "explorer_resource_fails": 119,
+    "failing_format": "DXGI_FORMAT_A8_UNORM (65)",
+    "failing_misc_flags": "0x2 (D3D10_DDI_RESOURCE_MISC_SHARED)",
+    "failing_extent": "32x32",
+    "failing_bind_flags": "0x28 (SHADER_RESOURCE | RENDER_TARGET)",
+    "failing_status": "0x887a0004 (DXGI_ERROR_UNSUPPORTED) -> D3DDDIERR_DEVICEREMOVED",
+    "failing_location": "tgd3d_resource.cpp:470 / runtime_shared_tiled_validate",
+    "explorer_device_recreations": 122,
+    "dwm_tir_drop_messages": 91,
+    "dwm_tir_message": "Forced multisampling with an attachment is unsupported"
+  },
+  "post_fix_etw_capture_boot_106676": {
+    "boot_record": 106676,
+    "matched_events": 7598,
+    "events_lost": 0,
+    "buffers_lost": 0,
+    "vulkan_caps": {
+      "nvk": true,
+      "maintenance5": true,
+      "formatA8": true
+    },
+    "advertised_pipeline_levels": 7,
+    "resource_fails": 0,
+    "device_removed_errors": 0,
+    "dwm_tir_drop_messages": 0,
+    "explorer_submits": 140,
+    "explorer_draws": 610,
+    "explorer_render_passes": 353,
+    "explorer_tiled_shared_opens_ok": [
+      "32x32",
+      "640x384",
+      "672x544"
+    ],
+    "dwm_draws": 3504
+  },
+  "interpretation": "Explorer WinUI XAML Islands failed on two combined tgd3d defects introduced on 2026-11-19: (1) Device::hasA8 was hardcoded false without VK_KHR_maintenance5 and runtime_shared_tiled_validate rejected D3D11.1 shared DXGI_FORMAT_A8_UNORM textures, triggering a 119x DEVICEREMOVED recreation loop; (2) unconditional D3D_FEATURE_LEVEL_11_1 caused DWM/D2D to emit attachment-bound TIR draws dropped by tgd3d/NVK. Enabling VK_KHR_maintenance5 + native VK_FORMAT_A8_UNORM, allowing D3D11.1 non-displayable tiled shared A8_UNORM/R8_UNORM, and gating FL11_1 behind TGD3D_FL11_1_APPLICATION=1 eliminates all failures."
+}

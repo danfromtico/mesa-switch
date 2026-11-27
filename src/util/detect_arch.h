@@ -58,9 +58,12 @@
 #define DETECT_ARCH_X86 1
 #endif
 
-#if defined(__x86_64__) /* gcc */ || \
-    ((defined(_M_X64) || defined(_M_AMD64)) && !defined(_M_ARM64EC)) /* msvc */ || \
-    defined(__x86_64) /* Sun cc */
+/* ARM64EC reports AMD64 ABI macros while executing Arm instructions. */
+#if defined(_M_ARM64EC) || defined(__arm64ec__)
+#define DETECT_ARCH_ARM64EC 1
+#endif
+
+#if !defined(DETECT_ARCH_ARM64EC) && (defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || defined(__x86_64))
 #define DETECT_ARCH_X86_64 1
 #endif
 
@@ -87,13 +90,10 @@
 #define DETECT_ARCH_ARM 1
 #endif
 
-#if defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
+#if defined(__aarch64__) || defined(_M_ARM64) || defined(DETECT_ARCH_ARM64EC)
 #define DETECT_ARCH_AARCH64 1
 #endif
 
-#if defined(_M_ARM64EC)
-#define DETECT_ARCH_ARM64EC 1
-#endif
 
 #if defined(__mips64) && defined(__LP64__)
 #define DETECT_ARCH_MIPS64 1

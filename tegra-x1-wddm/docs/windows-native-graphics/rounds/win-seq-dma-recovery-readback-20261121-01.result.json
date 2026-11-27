@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-dma-recovery-readback-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "e8cf5b0dba0d5200abd3f18fdba57cf8ee7b11b32700578c3d97dab90a2485e4",
+  "status": "观测缺口",
+  "finding": "独立接收端用 94004 的 11 条原始 DWM 事件完成本地回放。终止接收进程并打开新读进程后，9 条已 fsync 的同包回执留存至 Windows 177 通知。额外输入一条完整事件加半条 fsync 标记时，恢复 10 条事件，确认落盘仍为 9 条。没有 END，最终丢失计数未知。",
+  "missing_observation": "尚无新自然故障回执，实机未布防。待自然使用窗口确认 8192 条版本的实际覆盖，并预先持久保存同启动 178 入队和 433 上下文映射。正式 KMD 缺同包 7.2 入返及 GPU 围栏读回。",
+  "root_cause": "未知",
+  "device_executions": 0,
+  "reproduction_observation": "no-new-device-observation",
+  "evidence": {
+    "recovery_proof": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-recovery/recovery-proof.json",
+      "sha256": "8bcacaf5e166baee28e14a1814b158cda5c4e06fc74c670e297d86ed03e7e3aa"
+    },
+    "local_readback_tool": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/tools/recover_dma_receipts.py",
+      "sha256": "c7d7b884c5aa6545a0789d60645c2d765a569a2b3fcd8953c1a5377ff09a8077"
+    },
+    "runbook": {
+      "path": "windows-native-graphics/sequential-dma-recovery.md",
+      "sha256": "a045f71cb39b4ae32dd54bad30623c9138b8f2e1370e5c5f83f960c8b4a52d38"
+    },
+    "collector_prior_review": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-return-observer/candidate-handoff.json",
+      "sha256": "bbf86225e7f981d216717be60ec8719646811ba272decf36fc8543b8e1d0b41b"
+    },
+    "timing_calibration": {
+      "path": "windows-native-graphics/rounds/win-controller-fsync-order-20261121-01.result.json",
+      "sha256": "7efbad357fd730ec1f4d439cb27b9c83a7733f53e32aeda6d7862d90463e9040"
+    },
+    "actual_prior_normal_boot": {
+      "path": "windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    },
+    "last_verified_device_receipt": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/review-handoff.json",
+      "sha256": "fffe5744a6c944fd4fc897ff6c247c7597142de1310f7dde72eb4b3bac8e7ed2"
+    },
+    "bounds_for_local_replay": {
+      "last_entry": "本地回放入口是启动 94004 的 DWM 队列 2232、DMA 4321 的原始 175.1 源事件。",
+      "last_return": "以本地进程终止边界读回 177.1。KMD 的 7.2 返回及命令完成字读回均处于已 fsync 前缀。",
+      "first_anomaly_or_missing": "回放截断后的同包 176.0、180.1 缺失。无 END 时丢失计数未知。原现场未出现新的事故回执。"
+    },
+    "readiness": {
+      "receiver_readback": "verified-local",
+      "windows_collector": "retained-candidate-not-armed",
+      "candidate_kmd": "retained-one-time-calibration-only",
+      "new_board_window": "none",
+      "last_verified_board_boot": 94176,
+      "prior_natural_source_matches_91476_third_attempt": false,
+      "collector_max_window_ms": 12000,
+      "collector_max_events": 8192,
+      "collector_limits_validation": "本地压力验证。旧版在仅桌面背景活动时约 1.016 秒触达 4096。",
+      "independent_context_and_queue_capture": "需保存同一次启动的 178、433 原料。当前实时流未持久化这些 ID。"
+    },
+    "independent_review": {
+      "model": "gemini-4-neon-high",
+      "state": "pending",
+      "provider_status": "ERROR",
+      "response": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-recovery/gemini-review/retry/response.json",
+        "sha256": "1d521a30bd7d4248130d18f399f165ea8159df65592e6c56dc6ea5d1434aa756"
+      },
+      "reviewed_inputs": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-recovery/gemini-review/retry/input-sha256.txt",
+        "sha256": "f58a0be72406bb9da80b78d5c5a438c95f89f4ab8825b7e4fa5afd85139589b6"
+      },
+      "first_attempt": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-recovery/gemini-review/response.json",
+        "sha256": "c1595ba2e65cf0137642b938239b3d33206558c7cb5d81f83874383b356a106b"
+      }
+    }
+  }
+}

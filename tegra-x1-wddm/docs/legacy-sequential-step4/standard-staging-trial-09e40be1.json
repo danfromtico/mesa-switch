@@ -1,0 +1,554 @@
+{
+  "schema": 1,
+  "fault_id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "original_qualifying_runs": 0,
+  "promoted": false,
+  "candidate": {
+    "commit": "aa49f69c8362ddb6e0547ad8f30bb951c9548a5e",
+    "parent": "e1314a2c769b92e971640caf67e1a67db270a5ad",
+    "patch_sha256": "444f5cda90894cc6dafe41c40a8d01fe15a35d6a8fa15eafbfc517d0c1abdad0"
+  },
+  "selected_source": "c05e254932dd975bdf69e7046949596dbeb84561",
+  "change": "Handle D3DKMDT_STANDARDALLOCATION_STAGINGSURFACE using the existing linear X8R8G8B8 allocation path. The first query reports the required private size. The second validates dimensions, returns pitch and fills the descriptor.",
+  "wdk": [
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmdt/ns-d3dkmdt-_d3dkmdt_stagingsurfacedata",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkarg_getstandardallocationdriverdata"
+  ],
+  "build_comparison": {
+    "parent_source": "e1314a2c769b92e971640caf67e1a67db270a5ad",
+    "frozen_kmd_parent": "60220e9e72dfd1a4afe234bf5e4171e30f0f6dd6",
+    "objects": 90,
+    "comparison": "COFF object bytes except the four-byte timestamp in the fixed header",
+    "changed": [
+      "allocation.obj",
+      "test_context_windows.obj"
+    ],
+    "parent_unsigned": "85be29d022a1f62543003f56d82d9ede36d5d7bb4da23caf9aaff978deffb328",
+    "new_unsigned": "9999313c9d9358078d7b91d7d68d1df4d7d2c4c33d54414ab2b4ebcafdeb189d"
+  },
+  "host_model": {
+    "reference": {
+      "exit": 623,
+      "allocation_source_sha256": "85a6272754a151f83cc013f9a5b62fa3d87275171211e76fb72369d3597ca06e",
+      "exe_sha256": "e7890f55a8287db9b62143d18a0ccbb8b00fd9964d29e8decb526b209ea86068",
+      "test_source_sha256": "aca34778270c3558e46e9e99e29789255615722e3699e401fdd2d68cba033c6a",
+      "assertion": "CHECK(TgGpuDdiGetStandardAllocationDriverData(adapter, &standard) == STATUS_SUCCESS);"
+    },
+    "candidate": {
+      "exit": 0,
+      "allocation_source_sha256": "32d87c503325c92547506a9e38f3fcdfccc693d3dd3fd8eb4001f027f1c76292",
+      "exe_sha256": "3c9232d33493d5e7b2a5a629b0937974b0a411d70119015547f6d10bb3d63fc2",
+      "test_source_sha256": "aca34778270c3558e46e9e99e29789255615722e3699e401fdd2d68cba033c6a"
+    }
+  },
+  "arm64_model": {
+    "reference": {
+      "output": "WINDOW_COPY 640x360 to 641x361 passed, 2560/2688 pitches, one complete DDI packet\r\n",
+      "sha256": "984641088bf1e46880914539c0b64aba5b839ca6c16e8ebdf2f21b44bfdd5b37",
+      "exit": 623
+    },
+    "utc": "2026-11-20T23:12:13.7906323Z",
+    "candidate": {
+      "output": "WINDOW_COPY 640x360 to 641x361 passed, 2560/2688 pitches, one complete DDI packet\r\nPASS: WDK private GR images/mappings/reset epochs, adapter/LUID/512MiB ABI and ordered queue (controlled substitutes; no live WDDM or GPU pass)\r\n",
+      "sha256": "0d15f65715633f8116d543e1a054e1df6aa89a9c9c2595286b46145299fe58d9",
+      "exit": 0
+    },
+    "kmd": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+    "boot": 86272
+  },
+  "model_scope": "The signed ARM64 models call the production KMD functions in user mode. They check sizing, pitch, CPU visibility, allocation, description and release at 640x360 and 641x361.",
+  "saved_warp": {
+    "rerun": false,
+    "passed": false,
+    "kmt": {
+      "drawing_pid": 1268,
+      "drawing_tid": 4120,
+      "kernel_status": "0x00000000",
+      "flags": "0x00011081",
+      "cross_adapter": false,
+      "source_handle_present": true,
+      "destination_handle_present": false,
+      "window_handle_present": true,
+      "vidpn_source_id": 4294967295,
+      "flip_interval": 1,
+      "complete": true,
+      "blit_events": 1
+    },
+    "positive_staging_event": {
+      "case": "warp-control-5",
+      "first_present_qpc": [
+        18352362238,
+        18352849510
+      ],
+      "client_pid": 1268,
+      "drawing_tid": 4120,
+      "cdd": [
+        {
+          "event": 286,
+          "qpc": 18352577262,
+          "same_drawing_thread": true,
+          "within_first_present": true,
+          "keyword": "0x4000000000000001",
+          "width": 640,
+          "height": 360,
+          "pitch": 2560
+        }
+      ],
+      "windowed_events": [
+        [
+          18352577262,
+          286
+        ],
+        [
+          18352587382,
+          166
+        ],
+        [
+          18352833249,
+          215
+        ],
+        [
+          18352835175,
+          184
+        ]
+      ],
+      "quality": {
+        "damaged": [],
+        "zero_buffers": 0,
+        "lost_events": 0,
+        "lost_buffers": 1,
+        "complete": false
+      }
+    }
+  },
+  "prior_native_trial": "linear-aperture-trial-b4f6c7bf.json",
+  "entry_boot": 86272,
+  "trial": {
+    "boot": 86457,
+    "power": "Online",
+    "code": 0,
+    "dwm": [
+      {
+        "started": "2026-11-20T23:22:40.4056168Z",
+        "id": 1464,
+        "session": 1
+      }
+    ],
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\window-staging-09e40be1b2e6",
+    "trial": true,
+    "token_value": 0,
+    "permanent": null,
+    "files": {
+      "tegragpurender.sys": "09e40be1b2e634c2944b0d852f0fa48ada7ebe2aed56971f5ef76c451508f344",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "loaded": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "driver_inf": "oem20.inf"
+  },
+  "catalog_sha256": "5dfb8644542f4e2542a17f15d6da8650845bfa1bd54163cfc58663331ca1c7fb",
+  "cases": [
+    {
+      "case": "staging-flip-1",
+      "effect": [
+        "PRESENT_MODEL buffers=2 effect=3"
+      ],
+      "fixture_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "df3ea92e130fb620b03665a4a277832ca1b1aa5b287f62e5bfecc8533b67a59d",
+      "raw_result_sha256": "86de7a6bd8138da3f5f28ec8773e9ccc297061442c5941c337107710a3ab0393",
+      "before_and_after_boot": 86457,
+      "same_dwm": 1464,
+      "actual_application_modules": {
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "public_status": "0x00000000",
+      "healthy_device": true,
+      "kmt": {
+        "flags": "0x00009000",
+        "status": "0x00000000",
+        "cross_adapter": false,
+        "source_handle": true,
+        "destination_handle": false,
+        "window_handle_matched": true
+      },
+      "client_dimensions": [
+        640,
+        360
+      ],
+      "window_observed_frontmost_and_uncloaked_during_call": true,
+      "input_verified": true,
+      "menu_cancelled_by_cleanup": false,
+      "client_exit": 0,
+      "observer_exit": 0,
+      "normal_exit": true,
+      "window_closed": true,
+      "desktop_available": true,
+      "post_success_capture_qpc": 2920797794,
+      "passed": true,
+      "staging": {
+        "complete": true,
+        "provider_all_counts": {},
+        "drawing_thread_during_first_present": []
+      },
+      "matching_dwm_events": [
+        {
+          "event": "Windowed_Dx_Flip_Consumed",
+          "qpc": 2920173352,
+          "display_luid": 23143,
+          "render_luid": 23143,
+          "source": 0,
+          "target": 0
+        }
+      ],
+      "traces": {
+        "scene/video.etl": {
+          "sha256": "32e11b2be11977a81a6dd6c56bfc364294c2767fe79263ce40f9b1a33818ba71",
+          "complete": true,
+          "drawing_thread_blits": 0,
+          "drawing_thread_present_packets": 1
+        },
+        "display.etl": {
+          "sha256": "97a30ccc6a37e5e3a6f07507a494b4aa0af4fdb74e3d582465a9e685baa80b29",
+          "complete": true,
+          "drawing_thread_blits": 0,
+          "drawing_thread_present_packets": 1
+        }
+      },
+      "frame": {
+        "reference_file": "legacy-sequential-step4-01a1facf/runs/warp-control-5/evidence/present.bmp",
+        "reference_sha256": "53bc2b070a30050b71eaa27ccdc07833d258646f5af866876dc97e6bdb62f7e4",
+        "observed_sha256": "7dac2e59409a3a6127e5423e99c57937a55ddc5fef0e7897317e4e2017add073",
+        "top_left_inclusive": [
+          15,
+          16
+        ],
+        "bottom_right_exclusive": [
+          113,
+          62
+        ],
+        "samples": 4508,
+        "matched": 4508,
+        "reference_rgb": "000000",
+        "sample_source": "Local composed desktop capture of the original window after the public return",
+        "normal_exit": true,
+        "input": true,
+        "window_closed": true,
+        "desktop_available": true,
+        "public_return_qpc": 2919739939,
+        "post_return_capture_qpc": 2920797794,
+        "passed": true
+      }
+    },
+    {
+      "case": "staging-sequential-1",
+      "effect": [
+        "PRESENT_MODEL buffers=2 effect=1"
+      ],
+      "fixture_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "2b52e81c7f1a109d45a59dd87dc4874d89f14eed7996b2929d612a4e4de61a14",
+      "raw_result_sha256": "9683d7e6a8ab6a1574a08ab703a89ad8cab16739b525a095982608628746045f",
+      "before_and_after_boot": 86457,
+      "same_dwm": 1464,
+      "actual_application_modules": {
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "tegragpud3dvk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "public_status": "0x087a0001",
+      "healthy_device": true,
+      "kmt": {
+        "flags": "0x04011081",
+        "status": "0xc01e0006",
+        "cross_adapter": true,
+        "source_handle": true,
+        "destination_handle": false,
+        "window_handle_matched": true
+      },
+      "client_dimensions": [
+        640,
+        360
+      ],
+      "window_observed_frontmost_and_uncloaked_during_call": true,
+      "input_verified": true,
+      "menu_cancelled_by_cleanup": false,
+      "client_exit": 4,
+      "observer_exit": 9,
+      "normal_exit": false,
+      "window_closed": true,
+      "desktop_available": true,
+      "post_success_capture_qpc": 0,
+      "passed": false,
+      "staging": {
+        "complete": true,
+        "provider_all_counts": {
+          "286": 1
+        },
+        "drawing_thread_during_first_present": [
+          {
+            "qpc": 4252387328,
+            "event": 286,
+            "size": [
+              640,
+              360
+            ],
+            "pitch": 2560,
+            "format": null,
+            "gdi_type": null
+          }
+        ]
+      },
+      "matching_dwm_events": [],
+      "traces": {
+        "scene/video.etl": {
+          "sha256": "491d70dab679207fddea449ddd69985fb3e65d3d0888dbec1a8089edebfd784f",
+          "complete": true,
+          "drawing_thread_blits": 1,
+          "drawing_thread_present_packets": 0
+        },
+        "display.etl": {
+          "sha256": "e70683d88c4c0ebb01ae0de050bf012f18dfd448393513c3d16073852567c15f",
+          "complete": true,
+          "drawing_thread_blits": 1,
+          "drawing_thread_present_packets": 0
+        }
+      },
+      "blit": {
+        "events_in_order": [
+          [
+            286,
+            4252387328
+          ],
+          [
+            166,
+            4252439962
+          ],
+          [
+            167,
+            4252440060
+          ],
+          [
+            184,
+            4252442729
+          ]
+        ],
+        "blit_dma_buffer_owner": {
+          "drawing_process_created_context": true,
+          "context_handle_matches_kmt": true,
+          "device_matches_back_buffer": true,
+          "adapter_matches_back_buffer": true,
+          "context_allocation_list": 0,
+          "context_private_bytes": 65864,
+          "buffer_bytes": 65536,
+          "buffer_allocation_list": 3
+        },
+        "destination_backed_by_cdd_staging": true,
+        "blit_source": [
+          {
+            "scope": "device",
+            "matching_field": "hVidMmAlloc",
+            "creation_owner_is_app": true,
+            "app_device": true,
+            "app_adapter": true,
+            "app_back_buffer": true,
+            "global_bytes": 921600
+          }
+        ],
+        "blit_destination": [
+          {
+            "scope": "device",
+            "matching_field": "hVidMmAlloc",
+            "creation_owner_is_app": true,
+            "app_device": true,
+            "app_adapter": true,
+            "app_back_buffer": false,
+            "global_bytes": 921600
+          }
+        ],
+        "cdd_staging_allocation": [
+          {
+            "scope": "global",
+            "matching_field": "hDxgGlobalAlloc",
+            "creation_owner_is_app": true,
+            "app_device": true,
+            "app_adapter": true,
+            "app_back_buffer": false,
+            "global_bytes": 921600
+          }
+        ],
+        "submitted_blit_requested": true,
+        "clip_rectangles": 1,
+        "redirected": false,
+        "flags": 1,
+        "kernel_status": "0xc01e0006",
+        "complete": true
+      },
+      "source_and_destination_rectangles": [
+        {
+          "bSubmit": 1,
+          "Source.Left": 0,
+          "Source.Top": 0,
+          "Source.Right": 640,
+          "Source.Bottom": 360,
+          "Dest.Left": 0,
+          "Dest.Top": 0,
+          "Dest.Right": 640,
+          "Dest.Bottom": 360
+        }
+      ]
+    }
+  ],
+  "system_events": [
+    {
+      "record": 86347,
+      "provider": "User32",
+      "utc": "2026-11-20T23:17:47.7923285Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt enter closed gate before selecting candidate"
+      },
+      "id": 1074
+    },
+    {
+      "record": 86364,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T23:18:12.7772299Z",
+      "details": {},
+      "id": 12
+    },
+    {
+      "record": 86440,
+      "provider": "User32",
+      "utc": "2026-11-20T23:21:15.6377125Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt one-time candidate boot"
+      },
+      "id": 1074
+    },
+    {
+      "record": 86457,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T23:21:49.8364469Z",
+      "details": {},
+      "id": 12
+    },
+    {
+      "record": 86532,
+      "provider": "User32",
+      "utc": "2026-11-20T23:27:50.8658908Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt close native gate for baseline restore"
+      },
+      "id": 1074
+    },
+    {
+      "record": 86549,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T23:28:15.0007440Z",
+      "details": {},
+      "id": 12
+    },
+    {
+      "record": 86621,
+      "provider": "User32",
+      "utc": "2026-11-20T23:31:10.1418161Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt restore verified permanent baseline"
+      },
+      "id": 1074
+    },
+    {
+      "record": 86638,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T23:31:33.9833245Z",
+      "details": {},
+      "id": 12
+    }
+  ],
+  "unexplained_restarts_this_cycle": [],
+  "recovery": {
+    "boot": 86638,
+    "utc": "2026-11-20T23:34:39.7857600Z",
+    "code": 0,
+    "power": "Online",
+    "source": "c05e254932dd975bdf69e7046949596dbeb84561",
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+    "files": {
+      "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "loaded": {
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    },
+    "dwm": [
+      {
+        "started": "2026-11-20T23:32:21.9879694Z",
+        "id": 1432,
+        "session": 1
+      }
+    ],
+    "driver_inf": "oem25.inf",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+    "trial": false,
+    "token": false,
+    "revision": "7a257371a5cd0a0e2febc322d141e543f6f61b7585c9f230e5c58963fd7a4875",
+    "qualification": "ea62b1044e413c21ed316fda6b0fa89b95f81be91cc50ecd46bb5b298c9b2768"
+  },
+  "cleanup": {
+    "candidate_package_removed": "oem20.inf",
+    "recovery_task_removed": true,
+    "removed_trial_root": true
+  },
+  "historical_trace_coverage": [
+    {
+      "boot": 82058,
+      "collection_boot": 82128,
+      "archive": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+      "all_provider_records_at_or_after_call": {
+        "evidence/scene/video.etl": 0,
+        "evidence/miniport.etl": 0
+      },
+      "last_kmd_ms_before_call": -47.083
+    },
+    {
+      "boot": 82221,
+      "collection_boot": 82289,
+      "archive": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+      "all_provider_records_at_or_after_call": {
+        "evidence/scene/video.etl": 0,
+        "evidence/miniport.etl": 0
+      },
+      "last_kmd_ms_before_call": -94.704
+    },
+    {
+      "boot": 82382,
+      "collection_boot": 82448,
+      "archive": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+      "all_provider_records_at_or_after_call": {
+        "evidence/scene/video.etl": 0,
+        "evidence/miniport.etl": 0
+      },
+      "last_kmd_ms_before_call": -84.342
+    }
+  ],
+  "interpretation": "The new KMD enabled the native client to create its standard staging destination and request one full-size blit on GM20B. The destination and original back buffer were distinct allocations of the same application device and adapter. The kernel returned occluded before an application present packet was observed. The public call returned, with a healthy device. A precise miniport rejection and the initiating cause of the three earlier system resets are still open."
+}

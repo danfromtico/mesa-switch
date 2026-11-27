@@ -1,0 +1,1409 @@
+{
+  "schema": 1,
+  "scope": "PAL4 x86 in its Documents directory, using the ordinary DXVK window shortcut on Switch Lite.",
+  "fault_id": "SWITCH-LOAD-TRANSITION-RESTART",
+  "selected_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "wddm": "2.6",
+  "components": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "windowed_size": [
+    800,
+    600
+  ],
+  "game_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+  "config_sha256": "9c10ee25076317f4ceed4a7af14309b1821ec69dfdf85866ed3e44e1a12b9dc1",
+  "dxvk_x86_d3d9_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+  "loader": {
+    "game_loader_sha256": "0cb8619a4a4ba0acceba1f75a2dc0c8e251ab75d4a3c3e9640262c4c650c18af",
+    "manifest_sha256": "fef85ef0ac9773a3e96192e762a7d91adf1a38dbd64249fb1d3341930187fccf",
+    "icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+    "before_app_keys_match_documents": false,
+    "system_x86_icd_registered": false,
+    "controls": [
+      {
+        "mode": "registered_path",
+        "exit_code": 0,
+        "physical_devices": 1,
+        "matching_luid": true,
+        "kmt_luid": "0000000000005bcd"
+      },
+      {
+        "mode": "unregistered_path",
+        "exit_code": 8
+      },
+      {
+        "mode": "explicit_manifest",
+        "exit_code": 8
+      },
+      {
+        "mode": "direct_icd",
+        "exit_code": 0,
+        "physical_devices": 1,
+        "matching_luid": true,
+        "kmt_luid": "0000000000005bcd"
+      }
+    ],
+    "unregistered_vkCreateInstance_result": -9,
+    "per_process_environment_control_result": -9,
+    "settings_before": "e273b17805e5df8e8f0709d9cf3e4bb70a624e2c644cb40899cc7baf60b332d6",
+    "settings_after": "2d30f3102c1c3ab8399295d8ac6efd12ab013416031f0d0b2f19dcc2b92db6e0",
+    "change": "Added the canonical and lower-case Documents executable paths to the existing PAL4 group and updated its registration receipt.",
+    "registration_receipt_before": "712f44cdf708cb37ef837542dc767908bc3adae506c1f5d628da644bb6253626",
+    "registration_receipt_after": "71048e4d331cd6c23b76f533f7d703d10abd1e4a43bf1729a4895109cd7c3561",
+    "registry_view": "HKLM 32-bit Vulkan LoaderSettings with active entry value 0",
+    "upstream_per_application_match": "https://github.com/KhronosGroup/Vulkan-Loader/blob/v1.4.354/loader/settings.c#L768"
+  },
+  "default_shortcut": {
+    "before_boot": 90173,
+    "after_boot": 90173,
+    "before_dwm": 1452,
+    "after_dwm": [
+      1452
+    ],
+    "collection_boot": 90257,
+    "ac": "Online",
+    "before_problem_code": 0,
+    "after_problem_code": 0,
+    "start_utc": "2026-11-21T07:58:42.3522598Z",
+    "observed_windows": [
+      {
+        "title": "PAL4-Application",
+        "class": "rwc",
+        "size": [
+          800,
+          600
+        ],
+        "foreground": true,
+        "first_sec": 4.53,
+        "last_sec": 10.32,
+        "observations": 2
+      }
+    ],
+    "completed_receipt": true,
+    "forced_process_cleanup": true,
+    "exit_code": -1,
+    "start_sha256": "fffed0a245c5075729b543a202ef4e129139df96aca1c966d97fe5bc9fd4d3c5",
+    "collection_sha256": "d2e80b4599ef9e811fce34df74a90f3c0443ba25591925de78da66816d44a5ea",
+    "power_mode": null,
+    "dfll_active": null,
+    "gpu_policy": null,
+    "dxvk_error": [
+      "err:   DxvkInstance::createInstance: Failed to create Vulkan instance"
+    ],
+    "application_event": [
+      {
+        "id": 1000,
+        "record": 41831,
+        "utc": "2026-11-21T07:59:01.8457035Z",
+        "module": "ucrtbase.dll",
+        "exception": "40000015"
+      }
+    ]
+  },
+  "first_registered_native_shortcut": {
+    "before_boot": 90173,
+    "after_boot": 90257,
+    "before_dwm": 1452,
+    "after_dwm": [
+      1368
+    ],
+    "collection_boot": 90257,
+    "ac": "Online",
+    "before_problem_code": 0,
+    "after_problem_code": 0,
+    "start_utc": "2026-11-21T07:59:58.8500689Z",
+    "observed_windows": [
+      {
+        "title": "PAL4-Application",
+        "class": "rwc",
+        "size": [
+          800,
+          600
+        ],
+        "foreground": true,
+        "first_sec": 1.46,
+        "last_sec": 4.57,
+        "observations": 2
+      }
+    ],
+    "completed_receipt": false,
+    "forced_process_cleanup": null,
+    "exit_code": null,
+    "start_sha256": "a564405bc2aba540569fcc3bd703a7968a68904c2fa4cb8ffda28cfe05a796ee",
+    "collection_sha256": "a82fbb52b93e47bb06186a816804c563215b5205dc31587173a9c6d30ad71733",
+    "power_mode": null,
+    "dfll_active": null,
+    "gpu_policy": null,
+    "post_exit_logs": {
+      "dxvk_sha256": "504617aa41c55183cc97936f3454d58ea2359e08bb0533d3c53d5d63c38e2736",
+      "dxvk_found_gm20b": true,
+      "dxvk_found_llvmpipe": false,
+      "d3d9_reset_parameters_logged": true,
+      "actual_swapchain_logged": false,
+      "game_log": {
+        "file_bytes": 26924,
+        "trailing_zero_bytes": 25103,
+        "last_recorded_info": "INFO:  palGameData initialize ok",
+        "sha256": "2612ac007b186e55e7c624fe9c03eb4a5410fd79d45ca74ae5007a763f14f5f8"
+      },
+      "game_exception_bytes": 295,
+      "game_exception_has_fault": false
+    },
+    "system": {
+      "boot_record": 90257,
+      "events": [
+        {
+          "id": 41,
+          "record": 90275,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "fields": {
+            "BugcheckCode": "0",
+            "SleepInProgress": "0",
+            "PowerButtonTimestamp": "0",
+            "BugcheckInfoFromEFI": "false",
+            "LongPowerButtonPressDetected": "false"
+          }
+        },
+        {
+          "id": 6008,
+          "record": 90266,
+          "provider": "EventLog",
+          "fields": {}
+        },
+        {
+          "id": 12,
+          "record": 90257,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "fields": {}
+        }
+      ],
+      "bugcheck_code": "0",
+      "new_dump_count": 0,
+      "ac": "Online",
+      "problem_code": 0,
+      "seven_component_hashes_match": true,
+      "kernel_image_and_four_dwm_modules_match": true,
+      "permanent_baseline_matches": true
+    },
+    "evidence_limit": "The game log contains a long zero-filled suffix after the reset. The last readable milestone does not locate the failing instruction. No usable client pixels were recovered from its incomplete JPEG."
+  },
+  "recovered_baseline": {
+    "boot": 90257,
+    "gpu_code": 0,
+    "seven_components_match": true,
+    "loaded_modules_match": true,
+    "permanent_profile_matches": true
+  },
+  "older_controls": [
+    {
+      "run": "pal4-game-cpuboot-nolog-14",
+      "same_initial_messages_as_software": 181,
+      "last_native": "INFO:  palPlayerManager initializing begin...",
+      "next_software": "INFO:  palPlayerManager initialize ok",
+      "completed_game_queue_records": 11,
+      "game_present_events": 0
+    },
+    {
+      "run": "pal4-game-cpuboot-nocache-15",
+      "same_initial_messages_as_software": 181,
+      "last_native": "INFO:  palPlayerManager initializing begin...",
+      "next_software": "INFO:  palPlayerManager initialize ok",
+      "completed_game_queue_records": 11,
+      "game_present_events": 0
+    }
+  ],
+  "interpretation": "The moved executable missed the registered loader rule. After matching that rule DXVK found GM20B and logged D3D9 reset parameters. The subsequent unexpected system reset is unresolved. The PAL4 window had already been created in both cases.",
+  "handheld_cases": {
+    "handheld-1": {
+      "before_boot": 90257,
+      "after_boot": 90332,
+      "before_dwm": 1368,
+      "after_dwm": [
+        1240
+      ],
+      "collection_boot": 90332,
+      "ac": "Online",
+      "before_problem_code": 0,
+      "after_problem_code": 0,
+      "start_utc": "2026-11-21T08:10:16.8437360Z",
+      "observed_windows": [
+        {
+          "title": "PAL4-Application",
+          "class": "rwc",
+          "size": [
+            800,
+            600
+          ],
+          "foreground": true,
+          "first_sec": 4.78,
+          "last_sec": 4.78,
+          "observations": 1
+        }
+      ],
+      "completed_receipt": false,
+      "forced_process_cleanup": null,
+      "exit_code": null,
+      "start_sha256": "dee269545929f1fd7da6002192c197e1d830e48e4d9feb5f945f123a01ba4cc6",
+      "collection_sha256": "6711bb9995e6cef20761d94e056c2e299da179752f0e5a84494d2a6d0ed1dcbb",
+      "power_mode": 1,
+      "dfll_active": 1,
+      "gpu_policy": 1,
+      "post_exit_logs": {
+        "dxvk_sha256": "cdf5239d7d12ea523b75d4fec13dfd9e28a73e3fa501cf755a6b232458d0c869",
+        "dxvk_found_gm20b": true,
+        "dxvk_found_llvmpipe": false,
+        "d3d9_reset_parameters_logged": true,
+        "actual_swapchain_logged": false,
+        "game_log": {
+          "file_bytes": 26924,
+          "trailing_zero_bytes": 1261,
+          "last_recorded_info": "INFO:  dbLog:\t endLoadTable, table:Good",
+          "sha256": "76b347a6dc7120dbcd6d7ecb8fee3470c250c1eefb188ea910a473fae405cba8"
+        },
+        "game_exception_bytes": 295,
+        "game_exception_has_fault": false
+      },
+      "durable_log_files": [
+        {
+          "kind": "game",
+          "sha256": "76b347a6dc7120dbcd6d7ecb8fee3470c250c1eefb188ea910a473fae405cba8",
+          "last_write_utc": "2026-11-21T08:10:26.4214325Z"
+        },
+        {
+          "kind": "dxvk",
+          "sha256": "cdf5239d7d12ea523b75d4fec13dfd9e28a73e3fa501cf755a6b232458d0c869",
+          "last_write_utc": "2026-11-21T08:10:21.4604780Z"
+        }
+      ],
+      "system": {
+        "boot_record": 90332,
+        "events": [
+          {
+            "id": 41,
+            "record": 90350,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "fields": {
+              "BugcheckCode": "0",
+              "SleepInProgress": "0",
+              "PowerButtonTimestamp": "0",
+              "BugcheckInfoFromEFI": "false",
+              "LongPowerButtonPressDetected": "false"
+            }
+          },
+          {
+            "id": 6008,
+            "record": 90341,
+            "provider": "EventLog",
+            "fields": {}
+          },
+          {
+            "id": 12,
+            "record": 90332,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "fields": {}
+          }
+        ],
+        "bugcheck_code": "0",
+        "new_dump_count": 0,
+        "ac": "Online",
+        "problem_code": 0,
+        "seven_component_hashes_match": true,
+        "kernel_image_and_four_dwm_modules_match": true,
+        "permanent_baseline_matches": true
+      }
+    },
+    "handheld-2": {
+      "before_boot": 90332,
+      "after_boot": 90407,
+      "before_dwm": 1240,
+      "after_dwm": [
+        1180
+      ],
+      "collection_boot": 90407,
+      "ac": "Online",
+      "before_problem_code": 0,
+      "after_problem_code": 0,
+      "start_utc": "2026-11-21T08:13:47.3113971Z",
+      "observed_windows": [
+        {
+          "title": "PAL4-Application",
+          "class": "rwc",
+          "size": [
+            800,
+            600
+          ],
+          "foreground": true,
+          "first_sec": 5.11,
+          "last_sec": 5.11,
+          "observations": 1
+        }
+      ],
+      "completed_receipt": false,
+      "forced_process_cleanup": null,
+      "exit_code": null,
+      "start_sha256": "c6cce60f5dc1f01116fb75badcd6116aeb4877b5b644c068569a389e50814f4e",
+      "collection_sha256": "6ab19d330ed5c3a6d909bbf82aefd97c3cdb4d9bdcfc9b5ea144bfec427ed206",
+      "power_mode": 1,
+      "dfll_active": 1,
+      "gpu_policy": 1,
+      "post_exit_logs": {
+        "dxvk_sha256": "accb77070f45d3d70c51637c265776bc6aeb1f43ac4f02fee75e22baa0010bd6",
+        "dxvk_found_gm20b": true,
+        "dxvk_found_llvmpipe": false,
+        "d3d9_reset_parameters_logged": true,
+        "actual_swapchain_logged": false,
+        "game_log": {
+          "file_bytes": 26924,
+          "trailing_zero_bytes": 0,
+          "last_recorded_info": "INFO:  palPlayerManager initializing begin...",
+          "sha256": "82f2cbd407e66cd10f55859de59bcbd6ec1be39fa202ce02edaa8b4612232a40"
+        },
+        "game_exception_bytes": 295,
+        "game_exception_has_fault": false
+      },
+      "durable_log_files": [
+        {
+          "kind": "game",
+          "sha256": "82f2cbd407e66cd10f55859de59bcbd6ec1be39fa202ce02edaa8b4612232a40",
+          "last_write_utc": "2026-11-21T08:13:57.7270236Z"
+        },
+        {
+          "kind": "dxvk",
+          "sha256": "accb77070f45d3d70c51637c265776bc6aeb1f43ac4f02fee75e22baa0010bd6",
+          "last_write_utc": "2026-11-21T08:13:52.3498794Z"
+        }
+      ],
+      "system": {
+        "boot_record": 90407,
+        "events": [
+          {
+            "id": 41,
+            "record": 90425,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "fields": {
+              "BugcheckCode": "0",
+              "SleepInProgress": "0",
+              "PowerButtonTimestamp": "0",
+              "BugcheckInfoFromEFI": "false",
+              "LongPowerButtonPressDetected": "false"
+            }
+          },
+          {
+            "id": 6008,
+            "record": 90416,
+            "provider": "EventLog",
+            "fields": {}
+          },
+          {
+            "id": 12,
+            "record": 90407,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "fields": {}
+          }
+        ],
+        "bugcheck_code": "0",
+        "new_dump_count": 0,
+        "ac": "Online",
+        "problem_code": 0,
+        "seven_component_hashes_match": true,
+        "kernel_image_and_four_dwm_modules_match": true,
+        "permanent_baseline_matches": true
+      }
+    },
+    "handheld-3": {
+      "before_boot": 90407,
+      "after_boot": 90482,
+      "before_dwm": 1180,
+      "after_dwm": [
+        1396
+      ],
+      "collection_boot": 90482,
+      "ac": "Online",
+      "before_problem_code": 0,
+      "after_problem_code": 0,
+      "start_utc": "2026-11-21T08:17:27.6688436Z",
+      "observed_windows": [
+        {
+          "title": "PAL4-Application",
+          "class": "rwc",
+          "size": [
+            800,
+            600
+          ],
+          "foreground": true,
+          "first_sec": 4.78,
+          "last_sec": 4.78,
+          "observations": 1
+        }
+      ],
+      "completed_receipt": false,
+      "forced_process_cleanup": null,
+      "exit_code": null,
+      "start_sha256": "7f410ba2a0f9201065ea5c66743cd18b87f27a63c512e4a16f23ffb45037b081",
+      "collection_sha256": "db7833bb6cf6d9369595ab90d7b3163de9e0f1e327200158232242c3cfd44a77",
+      "power_mode": 1,
+      "dfll_active": 1,
+      "gpu_policy": 1,
+      "post_exit_logs": {
+        "dxvk_sha256": "392b4c4b421df5dbbab0817afd9502c72f2f728e98204e4f2eb7da70fa1fb118",
+        "dxvk_found_gm20b": true,
+        "dxvk_found_llvmpipe": false,
+        "d3d9_reset_parameters_logged": true,
+        "actual_swapchain_logged": false,
+        "game_log": {
+          "file_bytes": 26637,
+          "trailing_zero_bytes": 567,
+          "last_recorded_info": "INFO:  palFontManagerA initializing begin...",
+          "sha256": "574ec437a14695a27c7589fb28ecb9d8a985ee5015810c365c233e2631494491"
+        },
+        "game_exception_bytes": 295,
+        "game_exception_has_fault": false
+      },
+      "durable_log_files": [
+        {
+          "kind": "game",
+          "sha256": "574ec437a14695a27c7589fb28ecb9d8a985ee5015810c365c233e2631494491",
+          "last_write_utc": "2026-11-21T08:17:36.8321190Z"
+        },
+        {
+          "kind": "dxvk",
+          "sha256": "392b4c4b421df5dbbab0817afd9502c72f2f728e98204e4f2eb7da70fa1fb118",
+          "last_write_utc": "2026-11-21T08:17:32.1185822Z"
+        }
+      ],
+      "system": {
+        "boot_record": 90482,
+        "events": [
+          {
+            "id": 41,
+            "record": 90500,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "fields": {
+              "BugcheckCode": "0",
+              "SleepInProgress": "0",
+              "PowerButtonTimestamp": "0",
+              "BugcheckInfoFromEFI": "false",
+              "LongPowerButtonPressDetected": "false"
+            }
+          },
+          {
+            "id": 6008,
+            "record": 90483,
+            "provider": "EventLog",
+            "fields": {}
+          },
+          {
+            "id": 12,
+            "record": 90482,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "fields": {}
+          }
+        ],
+        "bugcheck_code": "0",
+        "new_dump_count": 0,
+        "ac": "Online",
+        "problem_code": 0,
+        "seven_component_hashes_match": true,
+        "kernel_image_and_four_dwm_modules_match": true,
+        "permanent_baseline_matches": true
+      }
+    },
+    "handheld-software": {
+      "before_boot": 90482,
+      "after_boot": 90558,
+      "before_dwm": 1396,
+      "after_dwm": [
+        1356
+      ],
+      "collection_boot": 90558,
+      "ac": "Online",
+      "before_problem_code": 0,
+      "after_problem_code": 0,
+      "start_utc": "2026-11-21T08:43:13.0047653Z",
+      "observed_windows": [
+        {
+          "title": "PAL4-Application",
+          "class": "rwc",
+          "size": [
+            800,
+            600
+          ],
+          "foreground": true,
+          "first_sec": 4.58,
+          "last_sec": 145.39,
+          "observations": 8
+        }
+      ],
+      "completed_receipt": false,
+      "forced_process_cleanup": null,
+      "exit_code": null,
+      "start_sha256": "0c8fdcc2711ebdda1cec240d85946fff655f76c25dc4332ea28d3d4965c3ce5b",
+      "collection_sha256": "f7f3c8cc643f1f9f33894ca926b00347174442ba58b7067a8b97d89fb11c3697",
+      "power_mode": 1,
+      "dfll_active": 1,
+      "gpu_policy": 1,
+      "post_exit_logs": {
+        "dxvk_sha256": "5c54015bc90671a8ef28179cd01cf51ea002524cc8ea5b548a25f506664ae8a4",
+        "dxvk_found_gm20b": false,
+        "dxvk_found_llvmpipe": true,
+        "d3d9_reset_parameters_logged": true,
+        "actual_swapchain_logged": true,
+        "game_log": {
+          "file_bytes": 42545,
+          "trailing_zero_bytes": 0,
+          "last_recorded_info": "INFO:  InitializePalGame \tdone",
+          "sha256": "c50601553b47cb4945d02fecf04cb537e340f63d0fbfa056937f5c4c990dfa5c"
+        },
+        "game_exception_bytes": 295,
+        "game_exception_has_fault": false
+      },
+      "durable_log_files": [
+        {
+          "kind": "game",
+          "sha256": "c50601553b47cb4945d02fecf04cb537e340f63d0fbfa056937f5c4c990dfa5c",
+          "last_write_utc": "2026-11-21T08:44:01.7494912Z"
+        },
+        {
+          "kind": "dxvk",
+          "sha256": "5c54015bc90671a8ef28179cd01cf51ea002524cc8ea5b548a25f506664ae8a4",
+          "last_write_utc": "2026-11-21T08:43:16.7409926Z"
+        }
+      ],
+      "system": {
+        "boot_record": 90558,
+        "events": [
+          {
+            "id": 41,
+            "record": 90576,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "fields": {
+              "BugcheckCode": "0",
+              "SleepInProgress": "0",
+              "PowerButtonTimestamp": "0",
+              "BugcheckInfoFromEFI": "false",
+              "LongPowerButtonPressDetected": "false"
+            }
+          },
+          {
+            "id": 6008,
+            "record": 90567,
+            "provider": "EventLog",
+            "fields": {}
+          },
+          {
+            "id": 12,
+            "record": 90558,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "fields": {}
+          }
+        ],
+        "bugcheck_code": "0",
+        "new_dump_count": 0,
+        "ac": "Online",
+        "problem_code": 0,
+        "seven_component_hashes_match": true,
+        "kernel_image_and_four_dwm_modules_match": true,
+        "permanent_baseline_matches": true
+      },
+      "software_control": {
+        "original_x86_dll_sha256": "c65488e6172ca7347bf91a7013e00121f1e627e10b5d16a4d589315ffefda8af",
+        "test_signed_dll_sha256": "858481db1c275c07b2560f1a5af1848e9a1ed2c1d77e53c3ad897417f32eaff0",
+        "unchanged_pe_section_count": 7,
+        "devices_from_game_loader": [
+          "create=0",
+          "count=1 type=4 name=llvmpipe (LLVM 23.1.2, 128 bits)"
+        ],
+        "cpu_threads": 2,
+        "game_device_filter": "llvmpipe",
+        "launch": "The diagnostic selected the CPU renderer and used the executable, working directory and arguments of the normal Documents shortcut.",
+        "driver_change": "Only the scoped Vulkan application mapping changed. The GM20B desktop and boot permission used the selected profile.",
+        "visible_outcome": {
+          "capture_count": 9,
+          "all_pixel_captures_identical_to_control_desktop": true,
+          "jpeg_sha256": "666863153e54fd1bc50bd141f5dab490a3c7073c2c5eb9e6974cabdd3d12c6a3",
+          "last_completed_window_sample_sec": 145.39,
+          "last_image_schedule_sec": 170,
+          "window_foreground": true,
+          "visible_game_frame_confirmed": false,
+          "game_exit_confirmed": false,
+          "game_log_completed_initialization": true,
+          "controlled_task_timed_out_before_an_exit_receipt": true,
+          "scheduler_result": 267014,
+          "observer_limitation": "The final JPEG was saved before the blocking SendKeys call. No subsequent input receipt was written. The game PID was still present on this boot after the test task ended. The later unexpected system restart is unassigned."
+        }
+      }
+    },
+    "handheld-software-2": {
+      "before_boot": 90629,
+      "after_boot": 90629,
+      "before_dwm": 1408,
+      "after_dwm": [
+        1408
+      ],
+      "collection_boot": 90629,
+      "ac": "Online",
+      "before_problem_code": 0,
+      "after_problem_code": 0,
+      "start_utc": "2026-11-21T09:01:30.2215664Z",
+      "observed_windows": [
+        {
+          "title": "PAL4-Application",
+          "class": "rwc",
+          "size": [
+            800,
+            600
+          ],
+          "foreground": true,
+          "first_sec": 4.78,
+          "last_sec": 235.42,
+          "observations": 15
+        }
+      ],
+      "completed_receipt": true,
+      "forced_process_cleanup": true,
+      "exit_code": -1,
+      "start_sha256": "e837a83198b57d6ea8d31a6c24f42708f1eb41c1310672cf1344fd24e5a2f872",
+      "collection_sha256": "e0178e23e1ecbe210121f114bfefea789020ae035dc6005505236f9e9bd0d17f",
+      "power_mode": 1,
+      "dfll_active": 1,
+      "gpu_policy": 1,
+      "post_exit_logs": {
+        "dxvk_sha256": "7798ae35444c768d6875f370fe6df77f22928ba93d8b8f8f7f71236fecc9fb58",
+        "dxvk_found_gm20b": false,
+        "dxvk_found_llvmpipe": true,
+        "d3d9_reset_parameters_logged": true,
+        "actual_swapchain_logged": true,
+        "game_log": {
+          "file_bytes": 42545,
+          "trailing_zero_bytes": 0,
+          "last_recorded_info": "INFO:  InitializePalGame \tdone",
+          "sha256": "3108655d722b7061aafa15fd99df5a43e6514f009c10d2a5e918e24a49507447"
+        },
+        "game_exception_bytes": 295,
+        "game_exception_has_fault": false
+      },
+      "durable_log_files": [
+        {
+          "kind": "game",
+          "sha256": "3108655d722b7061aafa15fd99df5a43e6514f009c10d2a5e918e24a49507447",
+          "last_write_utc": "2026-11-21T09:02:13.3451898Z"
+        },
+        {
+          "kind": "dxvk",
+          "sha256": "7798ae35444c768d6875f370fe6df77f22928ba93d8b8f8f7f71236fecc9fb58",
+          "last_write_utc": "2026-11-21T09:02:14.7513727Z"
+        }
+      ],
+      "same_boot_recovery": {
+        "boot": 90629,
+        "dwm": [
+          1408
+        ],
+        "external_power": "Online",
+        "gpu_code": 0,
+        "seven_components_match": true,
+        "permanent_profile_matches": true
+      },
+      "software_control": {
+        "original_x86_dll_sha256": "c65488e6172ca7347bf91a7013e00121f1e627e10b5d16a4d589315ffefda8af",
+        "test_signed_dll_sha256": "858481db1c275c07b2560f1a5af1848e9a1ed2c1d77e53c3ad897417f32eaff0",
+        "unchanged_pe_section_count": 7,
+        "devices_from_game_loader": [
+          "create=0",
+          "count=1 type=4 name=llvmpipe (LLVM 23.1.2, 128 bits)"
+        ],
+        "cpu_threads": 2,
+        "game_device_filter": "llvmpipe",
+        "launch": "The diagnostic selected the CPU renderer and used the executable, working directory and arguments of the normal Documents shortcut.",
+        "driver_change": "Only the scoped Vulkan application mapping changed. The GM20B desktop and boot permission used the selected profile.",
+        "visible_outcome": {
+          "different_complete_screen_samples": [],
+          "all_complete_samples_match_saved_desktop": true,
+          "last_completed_window_sample_sec": 235.42,
+          "keys_sent": [
+            {
+              "sec": 170.8,
+              "key": "{ESC}",
+              "submitted": 2
+            },
+            {
+              "sec": 208.72,
+              "key": "{DOWN}",
+              "submitted": 2
+            },
+            {
+              "sec": 216.2,
+              "key": "{UP}",
+              "submitted": 2
+            }
+          ],
+          "game_log_completed_initialization": true,
+          "normal_exit": false,
+          "exit_receipt": true,
+          "forced_process_cleanup": true,
+          "game_exit_code": -1,
+          "visible_game_frame_confirmed": false,
+          "capture_count": 15,
+          "scheduled_capture_seconds": [
+            4,
+            10,
+            20,
+            40,
+            65,
+            90,
+            115,
+            145,
+            170,
+            175,
+            192,
+            197,
+            215,
+            220,
+            235
+          ],
+          "distinct_jpeg_sha256": [
+            "666863153e54fd1bc50bd141f5dab490a3c7073c2c5eb9e6974cabdd3d12c6a3"
+          ],
+          "complete_capture_count": 15
+        }
+      }
+    },
+    "handheld-software-3": {
+      "before_boot": 90629,
+      "after_boot": 90629,
+      "before_dwm": 1408,
+      "after_dwm": [
+        1408
+      ],
+      "collection_boot": 90629,
+      "ac": "Online",
+      "before_problem_code": 0,
+      "after_problem_code": 0,
+      "start_utc": "2026-11-21T09:08:49.2987913Z",
+      "observed_windows": [
+        {
+          "title": "PAL4-Application",
+          "class": "rwc",
+          "size": [
+            800,
+            600
+          ],
+          "foreground": true,
+          "first_sec": 4.73,
+          "last_sec": 235.59,
+          "observations": 15
+        }
+      ],
+      "completed_receipt": true,
+      "forced_process_cleanup": true,
+      "exit_code": -1,
+      "start_sha256": "1f2a9d38feae3ab5a22034f8b1b64919d7ee04d7f0d7f35081f5119f37c75496",
+      "collection_sha256": "6f3707032289fbe1d3d1386c4af108b4e7328d9b1177b9574d4d5cbfa7580b85",
+      "power_mode": 1,
+      "dfll_active": 1,
+      "gpu_policy": 1,
+      "post_exit_logs": {
+        "dxvk_sha256": "7798ae35444c768d6875f370fe6df77f22928ba93d8b8f8f7f71236fecc9fb58",
+        "dxvk_found_gm20b": false,
+        "dxvk_found_llvmpipe": true,
+        "d3d9_reset_parameters_logged": true,
+        "actual_swapchain_logged": true,
+        "game_log": {
+          "file_bytes": 42545,
+          "trailing_zero_bytes": 0,
+          "last_recorded_info": "INFO:  InitializePalGame \tdone",
+          "sha256": "8012f60132346bacf208eb016a02499e84259bd7c6942599ca11388e74f31bcd"
+        },
+        "game_exception_bytes": 295,
+        "game_exception_has_fault": false
+      },
+      "durable_log_files": [
+        {
+          "kind": "game",
+          "sha256": "8012f60132346bacf208eb016a02499e84259bd7c6942599ca11388e74f31bcd",
+          "last_write_utc": "2026-11-21T09:09:28.3123360Z"
+        },
+        {
+          "kind": "dxvk",
+          "sha256": "7798ae35444c768d6875f370fe6df77f22928ba93d8b8f8f7f71236fecc9fb58",
+          "last_write_utc": "2026-11-21T09:09:29.4498240Z"
+        }
+      ],
+      "same_boot_recovery": {
+        "boot": 90629,
+        "dwm": [
+          1408
+        ],
+        "external_power": "Online",
+        "gpu_code": 0,
+        "seven_components_match": true,
+        "permanent_profile_matches": true
+      },
+      "software_control": {
+        "original_x86_dll_sha256": "c65488e6172ca7347bf91a7013e00121f1e627e10b5d16a4d589315ffefda8af",
+        "test_signed_dll_sha256": "858481db1c275c07b2560f1a5af1848e9a1ed2c1d77e53c3ad897417f32eaff0",
+        "unchanged_pe_section_count": 7,
+        "devices_from_game_loader": [
+          "create=0",
+          "count=1 type=4 name=llvmpipe (LLVM 23.1.2, 128 bits)"
+        ],
+        "cpu_threads": 2,
+        "game_device_filter": "llvmpipe",
+        "launch": "The diagnostic selected the CPU renderer and used the executable, working directory and arguments of the normal Documents shortcut.",
+        "driver_change": "Only the scoped Vulkan application mapping changed. The GM20B desktop and boot permission used the selected profile.",
+        "visible_outcome": {
+          "different_complete_screen_samples": [],
+          "all_complete_samples_match_saved_desktop": true,
+          "last_completed_window_sample_sec": 235.59,
+          "keys_sent": [
+            {
+              "sec": 170.36,
+              "key": "{ESC}",
+              "submitted": 2
+            },
+            {
+              "sec": 192.36,
+              "key": "{DOWN}",
+              "submitted": 2
+            },
+            {
+              "sec": 215.23,
+              "key": "{UP}",
+              "submitted": 2
+            }
+          ],
+          "game_log_completed_initialization": true,
+          "normal_exit": false,
+          "exit_receipt": true,
+          "forced_process_cleanup": true,
+          "game_exit_code": -1,
+          "visible_game_frame_confirmed": false,
+          "direct_window_close_posted": true,
+          "extra_reads": [
+            {
+              "source": "client",
+              "schedule_sec": 235,
+              "sha256": "666863153e54fd1bc50bd141f5dab490a3c7073c2c5eb9e6974cabdd3d12c6a3",
+              "matches_saved_desktop": true
+            },
+            {
+              "source": "client",
+              "schedule_sec": 115,
+              "sha256": "666863153e54fd1bc50bd141f5dab490a3c7073c2c5eb9e6974cabdd3d12c6a3",
+              "matches_saved_desktop": true
+            },
+            {
+              "source": "layered",
+              "schedule_sec": 235,
+              "sha256": "666863153e54fd1bc50bd141f5dab490a3c7073c2c5eb9e6974cabdd3d12c6a3",
+              "matches_saved_desktop": true
+            },
+            {
+              "source": "layered",
+              "schedule_sec": 115,
+              "sha256": "666863153e54fd1bc50bd141f5dab490a3c7073c2c5eb9e6974cabdd3d12c6a3",
+              "matches_saved_desktop": true
+            }
+          ],
+          "visibility_samples": [
+            {
+              "sec": 115.57,
+              "cloaked": 0,
+              "layered": true,
+              "client": true
+            },
+            {
+              "sec": 235.59,
+              "cloaked": 0,
+              "layered": true,
+              "client": true
+            }
+          ],
+          "capture_count": 15,
+          "scheduled_capture_seconds": [
+            4,
+            10,
+            20,
+            40,
+            65,
+            90,
+            115,
+            145,
+            170,
+            175,
+            192,
+            197,
+            215,
+            220,
+            235
+          ],
+          "distinct_jpeg_sha256": [
+            "666863153e54fd1bc50bd141f5dab490a3c7073c2c5eb9e6974cabdd3d12c6a3"
+          ],
+          "complete_capture_count": 15
+        }
+      }
+    },
+    "handheld-no-readback": {
+      "before_boot": 90558,
+      "after_boot": 90629,
+      "before_dwm": 1356,
+      "after_dwm": [
+        1408
+      ],
+      "collection_boot": 90629,
+      "ac": "Online",
+      "before_problem_code": 0,
+      "after_problem_code": 0,
+      "start_utc": "2026-11-21T08:57:32.7130286Z",
+      "observed_windows": [
+        {
+          "title": "PAL4-Application",
+          "class": "rwc",
+          "size": [
+            800,
+            600
+          ],
+          "foreground": true,
+          "first_sec": 4.26,
+          "last_sec": 4.26,
+          "observations": 1
+        }
+      ],
+      "completed_receipt": false,
+      "forced_process_cleanup": null,
+      "exit_code": null,
+      "start_sha256": "bcc06a8d00cbb4c7a0ec811f3db602aa858efc9132eaa03b41114349eb2c6cc4",
+      "collection_sha256": "fa0b156f262341b6e73295c775d4a925bdf97eb264b24ac08ad868069050be05",
+      "power_mode": 1,
+      "dfll_active": 1,
+      "gpu_policy": 1,
+      "post_exit_logs": {
+        "dxvk_sha256": "55135e5e1e672a60e7e07643288ceb81c17e26d38731d58014952f4b6cdafaf2",
+        "dxvk_found_gm20b": true,
+        "dxvk_found_llvmpipe": false,
+        "d3d9_reset_parameters_logged": true,
+        "actual_swapchain_logged": false,
+        "game_log": {
+          "file_bytes": 26924,
+          "trailing_zero_bytes": 25103,
+          "last_recorded_info": "INFO:  palGameData initialize ok",
+          "sha256": "3a920ef7989be99ca3323c324169d4dccdf4aece89f799835e17695b85397120"
+        },
+        "game_exception_bytes": 295,
+        "game_exception_has_fault": false
+      },
+      "durable_log_files": [
+        {
+          "kind": "game",
+          "sha256": "3a920ef7989be99ca3323c324169d4dccdf4aece89f799835e17695b85397120",
+          "last_write_utc": "2026-11-21T08:57:42.3980157Z"
+        },
+        {
+          "kind": "dxvk",
+          "sha256": "55135e5e1e672a60e7e07643288ceb81c17e26d38731d58014952f4b6cdafaf2",
+          "last_write_utc": "2026-11-21T08:57:38.1373254Z"
+        }
+      ],
+      "system": {
+        "boot_record": 90629,
+        "events": [
+          {
+            "id": 41,
+            "record": 90647,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "fields": {
+              "BugcheckCode": "0",
+              "SleepInProgress": "0",
+              "PowerButtonTimestamp": "0",
+              "BugcheckInfoFromEFI": "false",
+              "LongPowerButtonPressDetected": "false"
+            }
+          },
+          {
+            "id": 6008,
+            "record": 90638,
+            "provider": "EventLog",
+            "fields": {}
+          },
+          {
+            "id": 12,
+            "record": 90629,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "fields": {}
+          }
+        ],
+        "bugcheck_code": "0",
+        "new_dump_count": 0,
+        "ac": "Online",
+        "problem_code": 0,
+        "seven_component_hashes_match": true,
+        "kernel_image_and_four_dwm_modules_match": true,
+        "permanent_baseline_matches": true
+      },
+      "observer_control": {
+        "single_change": "Removed CopyFromScreen and its image conversion from the matched native window observer. Window and thread samples were retained.",
+        "issued_fixture_sha256": "417bb57c19fa342cee58b169a89ba681164cf6f30bcdf42a372837d4df0ec21c",
+        "matched_fixture_sha256": "1a603b88919cdb0d55be92a2d10e8c1908709e492f3692670877a57de9368800",
+        "desktop_capture_calls": 0,
+        "restarts_observed": 1
+      }
+    }
+  },
+  "handheld_summary": {
+    "trials": 3,
+    "unexpected_system_restarts": 3,
+    "normal_game_exits": 0,
+    "confirmed_game_frames": 0,
+    "workload": "Same 800x600 Documents shortcut, executable, x86 DXVK, native GM20B ICD and permanent desktop profile. The interactive task ran independently of the dispatch SSH command. Power mode 1, GPU policy 1 and CPU DFLL were sampled before launch.",
+    "measurement_limits": "The observer sampled the window and copied desktop pixels. A window snapshot is not proof that the game rendered. Modules from cross-architecture sampling are incomplete. The retained logs give the last written milestones. No run identifies the faulting instruction or establishes whether a first Present was entered.",
+    "event_order": "Kernel-General 12 record IDs identify boots. Use record IDs for sequencing because the Windows wall clock changes around startup.",
+    "comparison": "Two archived native runs also reached player-manager initialization. A historical x86 software control went on to the menu. That control used a different boot and power policy."
+  },
+  "software_summary": {
+    "runs": 3,
+    "unexpected_restarts": 1,
+    "normal_game_exits": 0,
+    "confirmed_menu_captures": 0,
+    "workload": "Same x86 game, 800x600 window, external power and Handheld desktop. The software Vulkan device used two LLVM threads. All driver boot components were unchanged.",
+    "observation_differences": "In the first run the blocking keyboard observer timed out and the game continued running. The next runs requested the same keys with nonblocking Windows input. The third also sampled the client DC and layered desktop and posted WM_CLOSE to the actual game window.",
+    "relationship_to_earlier_native_restarts": "Unknown. The first software run reached full game initialization and remained alive for several minutes before a later unexpected shutdown.",
+    "scope": "DXVK v3.1.1 logs its chosen swapchain parameters before calling vkCreateSwapchainKHR. This message supplies no return status. Use the captures for visible output and the process receipt for normal exit.",
+    "swapchain_log_source": "https://github.com/doitsujin/dxvk/blob/b1a1c99ab52b687cf950d62c88bc2fa316b41663/src/dxvk/dxvk_presenter.cpp#L778-L790",
+    "historical_comparison": {
+      "historical_software_case": "pal4-game-fixed-06",
+      "documents_software_case": "handheld-software",
+      "old_info_count": 281,
+      "current_info_count": 281,
+      "equal_initial_info_entries": 281,
+      "older_first_extra_info": [],
+      "last_current_info": "INFO:  InitializePalGame \tdone",
+      "current_swapchain": [
+        "Found device: llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+        "D3D9DeviceEx::ResetSwapChain:",
+        "Presenter: Actual swapchain properties:",
+        "Format:       VK_FORMAT_B8G8R8A8_UNORM",
+        "Color space:  VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+        "Present mode: VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+        "Buffer size:  800x600",
+        "Image count:  2"
+      ],
+      "old_swapchain": [
+        "Found device: llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+        "D3D9DeviceEx::ResetSwapChain:",
+        "Presenter: Actual swapchain properties:",
+        "Format:       VK_FORMAT_B8G8R8A8_UNORM",
+        "Color space:  VK_COLOR_SPACE_SRGB_NONLINEAR_KHR",
+        "Present mode: VK_PRESENT_MODE_FIFO_KHR (dynamic: yes)",
+        "Buffer size:  800x600",
+        "Image count:  2"
+      ],
+      "same_filtered_swapchain_parameters": true,
+      "case_results": {
+        "handheld-software": {
+          "initialization_info_entries_matching_historical_visible_menu": 281,
+          "found_llvmpipe": true,
+          "actual_swapchain_properties_logged": true
+        },
+        "handheld-software-2": {
+          "initialization_info_entries_matching_historical_visible_menu": 281,
+          "found_llvmpipe": true,
+          "actual_swapchain_properties_logged": true
+        },
+        "handheld-software-3": {
+          "initialization_info_entries_matching_historical_visible_menu": 281,
+          "found_llvmpipe": true,
+          "actual_swapchain_properties_logged": true
+        }
+      }
+    },
+    "archived_capture_timing_and_thread_cpu": {
+      "historical_case": "pal4-game-fixed-06",
+      "last_saved_desktop": {
+        "file": "screen-3.png",
+        "sha256": "27aa3ca80af38907e02897ce7ff2bcaf83f0254b002721d412afab09a9d5c0b0",
+        "seconds_from_process_start": 31.822
+      },
+      "first_saved_menu": {
+        "file": "006-window.png",
+        "sha256": "e4bc77f79be44ab756a8f746ec8da720b345c6d47368518210addc819f53dce7",
+        "seconds_from_process_start": 242.273
+      },
+      "process_cpu_ms_bracketing_menu_capture": [
+        249078,
+        251266
+      ],
+      "onset_limit": "The unsampled interval is not a measured time to first frame.",
+      "handheld_software": {
+        "handheld-software": {
+          "pid": 812,
+          "samples_in_interval": 4,
+          "interval_sec": [
+            65.57,
+            145.39
+          ],
+          "tid": 3036,
+          "thread_cpu_sec": 75.625,
+          "process_cpu_sec": 83.766,
+          "one_core_fraction": 0.947,
+          "share_of_process_cpu": 0.903,
+          "process_cpu_at_last_sample": 140.53125
+        },
+        "handheld-software-2": {
+          "pid": 7332,
+          "samples_in_interval": 11,
+          "interval_sec": [
+            65.15,
+            235.42
+          ],
+          "tid": 7728,
+          "thread_cpu_sec": 150.281,
+          "process_cpu_sec": 173.703,
+          "one_core_fraction": 0.883,
+          "share_of_process_cpu": 0.865,
+          "process_cpu_at_last_sample": 232.609375
+        },
+        "handheld-software-3": {
+          "pid": 7772,
+          "samples_in_interval": 11,
+          "interval_sec": [
+            65.21,
+            235.59
+          ],
+          "tid": 3028,
+          "thread_cpu_sec": 157.078,
+          "process_cpu_sec": 182.922,
+          "one_core_fraction": 0.922,
+          "share_of_process_cpu": 0.859,
+          "process_cpu_at_last_sample": 247.53125
+        }
+      },
+      "limits": "Sampled thread IDs and cumulative CPU times do not identify the executing function. The earlier successful case used a different power policy and desktop baseline.",
+      "cross_run_limit": "The last timed window samples in runs two and three preceded the first saved menu image in the historical Code 0 control. Absolute CPU seconds are not equivalent amounts of work across power policies. No thread name or call stack is present in the three captured runs."
+    }
+  },
+  "returned_desktop": {
+    "boot": 90629,
+    "dwm": [
+      1408
+    ],
+    "gpu_code": 0,
+    "power": "Online",
+    "handheld_mode": 1,
+    "cpu_dfll_active": 1,
+    "permanent_baseline_hashes_match": true,
+    "native_documents_rule_restored": true,
+    "diagnostic_tasks_and_files_removed": true,
+    "game_processes_remaining": 0
+  },
+  "extended_software_observation": {
+    "boot_before": 90629,
+    "boot_after": 90629,
+    "dwm_before": 1408,
+    "dwm_after": [
+      1408
+    ],
+    "ac": "Online",
+    "gpu_code": 0,
+    "handheld": 1,
+    "software_driver": "info:  Found device: llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+    "swapchain_properties_logged": true,
+    "game_init_finished": true,
+    "exit": {
+      "exit_receipt": true,
+      "forced": true,
+      "exit_code": -1,
+      "close_posted": true
+    },
+    "thread_names": [
+      "dxvk-cache",
+      "dxvk-cs",
+      "dxvk-descriptor",
+      "dxvk-queue",
+      "dxvk-shader-l",
+      "dxvk-submit"
+    ],
+    "collection_sha256": "c1a7e6b33ed92e964345dde762c080fbbb76a61ed2ccee2f1c96c930b2dd74d8",
+    "control": "360-second x86 software-rendered PAL4 startup, using the existing Documents installation and native Code 0 desktop.",
+    "last_wallpaper_seconds": 330.15,
+    "first_captured_title_menu_seconds": 355.45,
+    "title_image_sha256": {
+      "frame-21.jpg": "1204f6ed829c9e11accbd8ecaf8b3a49ef4807c51b429893a75f5039119c250c",
+      "layered-21.jpg": "1204f6ed829c9e11accbd8ecaf8b3a49ef4807c51b429893a75f5039119c250c",
+      "client-21.jpg": "f81c49b510acd0d94d8acac0aa262d95d9090f5a22a858bc2c6fddd82714c708"
+    },
+    "last_wallpaper_sha256": "666863153e54fd1bc50bd141f5dab490a3c7073c2c5eb9e6974cabdd3d12c6a3",
+    "hot_thread": {
+      "id": 5688,
+      "window_owner": false,
+      "description_status": "unnamed",
+      "interval_seconds": [
+        65.58,
+        355.45
+      ],
+      "cpu_seconds": 269.641,
+      "equivalent_single_core_fraction": 0.93,
+      "intervals": [
+        {
+          "seconds": [
+            65.58,
+            115.57
+          ],
+          "tid": 5688,
+          "observed_name": "",
+          "name_status": "unnamed",
+          "owns_window": false,
+          "cpu_s": 49.125,
+          "process_cpu_s": 54.234
+        },
+        {
+          "seconds": [
+            115.57,
+            235.41
+          ],
+          "tid": 5688,
+          "observed_name": "",
+          "name_status": "unnamed",
+          "owns_window": false,
+          "cpu_s": 106.125,
+          "process_cpu_s": 125.922
+        },
+        {
+          "seconds": [
+            235.41,
+            245.41
+          ],
+          "tid": 5688,
+          "observed_name": "",
+          "name_status": "unnamed",
+          "owns_window": false,
+          "cpu_s": 9.094,
+          "process_cpu_s": 9.438
+        },
+        {
+          "seconds": [
+            245.41,
+            255.46
+          ],
+          "tid": 5688,
+          "observed_name": "",
+          "name_status": "unnamed",
+          "owns_window": false,
+          "cpu_s": 9.609,
+          "process_cpu_s": 11.562
+        },
+        {
+          "seconds": [
+            255.46,
+            270.41
+          ],
+          "tid": 5688,
+          "observed_name": "",
+          "name_status": "unnamed",
+          "owns_window": false,
+          "cpu_s": 14.829,
+          "process_cpu_s": 16.609
+        },
+        {
+          "seconds": [
+            270.41,
+            300.48
+          ],
+          "tid": 5688,
+          "observed_name": "",
+          "name_status": "unnamed",
+          "owns_window": false,
+          "cpu_s": 29.703,
+          "process_cpu_s": 33.578
+        },
+        {
+          "seconds": [
+            300.48,
+            330.15
+          ],
+          "tid": 5688,
+          "observed_name": "",
+          "name_status": "unnamed",
+          "owns_window": false,
+          "cpu_s": 28.031,
+          "process_cpu_s": 30.938
+        },
+        {
+          "seconds": [
+            330.15,
+            355.45
+          ],
+          "tid": 5688,
+          "observed_name": "",
+          "name_status": "unnamed",
+          "owns_window": false,
+          "cpu_s": 23.125,
+          "process_cpu_s": 31.156
+        }
+      ]
+    },
+    "fixture_sha256": "02a30ff58cd056eb27b2b90a46af8425ea24d8b59a10dac8e0bc33f4003d5f3b",
+    "thread_reader_sha256": "97463ed23eb32132358faa4499bed7d7fec2b868938d5052b49b6464f481882a",
+    "software_icd_sha256": "a2d8fb06808affcd0dc1e4315d1e2b206d0328bac6d2d8abfa911e8dcd17e4ce",
+    "limit": "Title pixels were confirmed in the client DC and desktop image. The three keyboard actions preceded the first captured menu. The window-close request was posted and the process ultimately required force cleanup. Thread time and names do not establish a faulting module."
+  },
+  "in_game_exit_control": {
+    "boot_before": 90629,
+    "boot_after": 90707,
+    "dwm_before": 1408,
+    "dwm_after": [
+      1360
+    ],
+    "power": "Online",
+    "power_mode": 1,
+    "gpu_code_after": 0,
+    "software_dxvk_log_sha256": "7798ae35444c768d6875f370fe6df77f22928ba93d8b8f8f7f71236fecc9fb58",
+    "fixture_sha256": "0fe270d8341ebbb8a7362eb90a582ef245a2f11ecb72a93b719330a52b40fe62",
+    "collection_sha256": "1a2c82cb2f008503d653efcbeeaea4d42c070b3e10afe04cdccc272c75aa828d",
+    "first_observed_menu_and_exit_click_sec": 315.61,
+    "template_votes_out_of_24": [
+      24,
+      24
+    ],
+    "exit_click_events_sent": 2,
+    "captured_menu_sha256": "cf7edc9e51651c89fec36917ca7fd92e80f8b6f15d03514dda45cc8d49d177d3",
+    "later_confirmed_menu_sec": 335.11,
+    "later_menu_sha256": "cf7edc9e51651c89fec36917ca7fd92e80f8b6f15d03514dda45cc8d49d177d3",
+    "windows_close_receipt": false,
+    "normal_exit": false,
+    "forced": null,
+    "additional_click_delivery": "Unknown after transport timeout. It was not repeated.",
+    "restart_event_records": [
+      {
+        "id": 41,
+        "record": 90725,
+        "fields": {
+          "BugcheckCode": "0",
+          "SleepInProgress": "0",
+          "PowerButtonTimestamp": "0",
+          "BugcheckInfoFromEFI": "false",
+          "LongPowerButtonPressDetected": "false"
+        }
+      },
+      {
+        "id": 6008,
+        "record": 90708,
+        "fields": {}
+      },
+      {
+        "id": 12,
+        "record": 90707,
+        "fields": {}
+      }
+    ],
+    "new_dump_count": 0,
+    "scope": "Software renderer in PAL4 with the native desktop GPU still active. The first SendInput succeeded. A game response or a shutdown caused by the click cannot be inferred from the input receipt."
+  }
+}

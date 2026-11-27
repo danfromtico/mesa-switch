@@ -9,6 +9,7 @@
 #include "nvk_mme.h"
 #include "nvk_physical_device.h"
 #include "nvk_shader.h"
+#include "nvkmd/windows/submit_abi.h"
 
 #include "cl906f.h"
 #include "cla0b5.h"
@@ -27,6 +28,12 @@
 #include "nv_push_clc6c0.h"
 #include "nv_push_clc7c0.h"
 #include "nv_push_clc86f.h"
+
+#ifdef _WIN32
+#define NVK_CAPTURE_DIRECT_QMD true
+#else
+#define NVK_CAPTURE_DIRECT_QMD false
+#endif
 
 VkResult
 nvk_push_dispatch_state_init(struct nvk_queue *queue, struct nv_push *p)
@@ -168,7 +175,8 @@ nvk_cmd_upload_qmd(struct nvk_cmd_buffer *cmd,
                    size_t root_size,
                    uint32_t global_size[3],
                    uint64_t *qmd_addr_out,
-                   uint64_t *root_desc_addr_out)
+                   uint64_t *root_desc_addr_out,
+                   uint32_t *inline_qmd)
 {
    struct nvk_device *dev = nvk_cmd_buffer_device(cmd);
    const struct nvk_physical_device *pdev = nvk_device_physical(dev);
@@ -234,15 +242,17 @@ nvk_cmd_upload_qmd(struct nvk_cmd_buffer *cmd,
 
       uint32_t qmd[NAK_MAX_QMD_DWORDS];
       assert(qmd_size_B <= sizeof(qmd));
-      nak_fill_qmd(&pdev->info, &shader->info, &qmd_info, qmd, qmd_size_B);
-
-      void *qmd_map;
-      result = nvk_cmd_buffer_alloc_qmd(cmd, qmd_size_B, 0x100,
-                                        &qmd_addr, &qmd_map);
-      if (unlikely(result != VK_SUCCESS))
-         return result;
-
-      memcpy(qmd_map, qmd, qmd_size_B);
+      assert(!inline_qmd || qmd_size_B == TG_GPU_QMD_WORDS * sizeof(uint32_t));
+      nak_fill_qmd(&pdev->info, &shader->info, &qmd_info,
+                   inline_qmd ? inline_qmd : qmd, qmd_size_B);
+      if (!inline_qmd) {
+         void *qmd_map;
+         result = nvk_cmd_buffer_alloc_qmd(cmd, qmd_size_B, 0x100,
+                                           &qmd_addr, &qmd_map);
+         if (unlikely(result != VK_SUCCESS))
+            return result;
+         memcpy(qmd_map, qmd, qmd_size_B);
+      }
    }
 
    *qmd_addr_out = qmd_addr;
@@ -257,7 +267,8 @@ nvk_cmd_flush_cs_qmd(struct nvk_cmd_buffer *cmd,
                      const struct nvk_cmd_state *state,
                      uint32_t global_size[3],
                      uint64_t *qmd_addr_out,
-                     uint64_t *root_desc_addr_out)
+                     uint64_t *root_desc_addr_out,
+                     uint32_t *inline_qmd)
 {
    const struct nvk_descriptor_state *desc = &state->cs.descriptors;
    STATIC_ASSERT((sizeof(desc->root) & 0xff) == 0);
@@ -265,7 +276,7 @@ nvk_cmd_flush_cs_qmd(struct nvk_cmd_buffer *cmd,
    return nvk_cmd_upload_qmd(cmd, state->cs.shader, desc,
                              desc->root, sizeof(desc->root),
                              global_size,
-                             qmd_addr_out, root_desc_addr_out);
+                             qmd_addr_out, root_desc_addr_out, inline_qmd);
 }
 
 static void
@@ -296,6 +307,44 @@ nvk_mme_add_cs_invocations(struct mme_builder *b)
    nvk_build_mme_add_cs_invocations(b, count);
 }
 
+static void
+nvk_push_direct_dispatch(struct nvk_cmd_buffer *cmd, uint64_t qmd_addr,
+                         const uint32_t *inline_qmd, bool internal)
+{
+   uint32_t words = internal ? 8 : 4;
+   if (inline_qmd)
+      words += 1 + TG_GPU_QMD_RECORD_WORDS;
+   struct nv_push *p = nvk_cmd_buffer_push(cmd, words);
+
+   /* Internal shaders bypass conditional rendering. */
+   if (internal)
+      P_IMMD(p, NVA0C0, SET_RENDER_ENABLE_OVERRIDE, MODE_ALWAYS_RENDER);
+
+   if (inline_qmd) {
+      /* Windows KMD aligns the QMD in this payload and patches PCAS_A. */
+      P_0INC(p, NVA0C0, NO_OPERATION);
+      P_INLINE_ARRAY(p, inline_qmd, TG_GPU_QMD_WORDS);
+      for (unsigned i = TG_GPU_QMD_WORDS; i < TG_GPU_QMD_RECORD_WORDS; i++)
+         P_INLINE_DATA(p, 0);
+   }
+
+   P_MTHD(p, NVA0C0, SEND_PCAS_A);
+   P_NVA0C0_SEND_PCAS_A(p, qmd_addr >> 8);
+
+   if (nvk_cmd_buffer_compute_cls(cmd) <= TURING_COMPUTE_A) {
+      P_IMMD(p, NVA0C0, SEND_SIGNALING_PCAS_B, {
+            .invalidate = INVALIDATE_TRUE,
+            .schedule = SCHEDULE_TRUE
+      });
+   } else {
+      P_IMMD(p, NVC6C0, SEND_SIGNALING_PCAS2_B,
+             PCAS_ACTION_INVALIDATE_COPY_SCHEDULE);
+   }
+
+   if (internal)
+      P_IMMD(p, NVA0C0, SET_RENDER_ENABLE_OVERRIDE, MODE_USE_RENDER_ENABLE);
+}
+
 VKAPI_ATTR void VKAPI_CALL
 nvk_CmdDispatchBase(VkCommandBuffer commandBuffer,
                     uint32_t baseGroupX,
@@ -311,9 +360,11 @@ nvk_CmdDispatchBase(VkCommandBuffer commandBuffer,
    uint32_t global_size[3] = { groupCountX, groupCountY, groupCountZ };
    nvk_flush_compute_state(cmd, base_workgroup, global_size);
 
+   uint32_t qmd[TG_GPU_QMD_WORDS] = {0};
+   uint32_t *inline_qmd = NVK_CAPTURE_DIRECT_QMD ? qmd : NULL;
    uint64_t qmd_addr = 0;
    VkResult result = nvk_cmd_flush_cs_qmd(cmd, &cmd->state, global_size,
-                                          &qmd_addr, NULL);
+                                          &qmd_addr, NULL, inline_qmd);
    if (result != VK_SUCCESS) {
       vk_command_buffer_set_error(&cmd->vk, result);
       return;
@@ -337,19 +388,7 @@ nvk_CmdDispatchBase(VkCommandBuffer commandBuffer,
       P_INLINE_DATA(p, cs_invocations);
    }
 
-   struct nv_push *p = nvk_cmd_buffer_push(cmd, 4);
-   P_MTHD(p, NVA0C0, SEND_PCAS_A);
-   P_NVA0C0_SEND_PCAS_A(p, qmd_addr >> 8);
-
-   if (nvk_cmd_buffer_compute_cls(cmd) <= TURING_COMPUTE_A) {
-      P_IMMD(p, NVA0C0, SEND_SIGNALING_PCAS_B, {
-            .invalidate = INVALIDATE_TRUE,
-            .schedule = SCHEDULE_TRUE
-      });
-   } else {
-      P_IMMD(p, NVC6C0, SEND_SIGNALING_PCAS2_B,
-             PCAS_ACTION_INVALIDATE_COPY_SCHEDULE);
-   }
+   nvk_push_direct_dispatch(cmd, qmd_addr, inline_qmd, false);
 }
 
 void
@@ -365,40 +404,28 @@ nvk_cmd_dispatch_with_root(struct nvk_cmd_buffer *cmd,
 
    uint32_t group_count[3] = { groupCountX, groupCountY, groupCountZ };
 
+   uint32_t qmd[TG_GPU_QMD_WORDS] = {0};
+   uint32_t *inline_qmd = NVK_CAPTURE_DIRECT_QMD ? qmd : NULL;
    uint64_t qmd_addr;
    VkResult result = nvk_cmd_upload_qmd(cmd, shader, NULL,
                                         root, root_size,
                                         group_count,
-                                        &qmd_addr, NULL);
+                                        &qmd_addr, NULL, inline_qmd);
    if (result != VK_SUCCESS) {
       vk_command_buffer_set_error(&cmd->vk, result);
       return;
    }
 
    if (shader != NULL) {
-      nvk_device_ensure_slm(dev, shader->info.slm_size,
-                                 shader->info.crs_size);
+      result = nvk_device_ensure_slm(dev, shader->info.slm_size,
+                                        shader->info.crs_size);
+      if (result != VK_SUCCESS) {
+         vk_command_buffer_set_error(&cmd->vk, result);
+         return;
+      }
    }
 
-   struct nv_push *p = nvk_cmd_buffer_push(cmd, 8);
-
-   /* Internal shaders don't want conditional rendering */
-   P_IMMD(p, NVA0C0, SET_RENDER_ENABLE_OVERRIDE, MODE_ALWAYS_RENDER);
-
-   P_MTHD(p, NVA0C0, SEND_PCAS_A);
-   P_NVA0C0_SEND_PCAS_A(p, qmd_addr >> 8);
-
-   if (nvk_cmd_buffer_compute_cls(cmd) <= TURING_COMPUTE_A) {
-      P_IMMD(p, NVA0C0, SEND_SIGNALING_PCAS_B, {
-            .invalidate = INVALIDATE_TRUE,
-            .schedule = SCHEDULE_TRUE
-      });
-   } else {
-      P_IMMD(p, NVC6C0, SEND_SIGNALING_PCAS2_B,
-             PCAS_ACTION_INVALIDATE_COPY_SCHEDULE);
-   }
-
-   P_IMMD(p, NVA0C0, SET_RENDER_ENABLE_OVERRIDE, MODE_USE_RENDER_ENABLE);
+   nvk_push_direct_dispatch(cmd, qmd_addr, inline_qmd, true);
 }
 
 void
@@ -589,9 +616,14 @@ nvk_CmdDispatchIndirect2KHR(VkCommandBuffer commandBuffer,
    uint32_t global_size[3] = { 0, 0, 0 };
    nvk_flush_compute_state(cmd, base_workgroup, global_size);
 
+   uint32_t qmd[TG_GPU_QMD_WORDS] = {0};
+   uint32_t *inline_qmd =
+      (NVK_CAPTURE_DIRECT_QMD &&
+       nvk_cmd_buffer_compute_cls(cmd) < TURING_COMPUTE_A) ? qmd : NULL;
    uint64_t qmd_addr = 0, root_desc_addr = 0;
    VkResult result = nvk_cmd_flush_cs_qmd(cmd, &cmd->state, global_size,
-                                          &qmd_addr, &root_desc_addr);
+                                          &qmd_addr, &root_desc_addr,
+                                          inline_qmd);
    if (result != VK_SUCCESS) {
       vk_command_buffer_set_error(&cmd->vk, result);
       return;
@@ -624,16 +656,18 @@ nvk_CmdDispatchIndirect2KHR(VkCommandBuffer commandBuffer,
       P_INLINE_DATA(p, qmd_addr);
       P_INLINE_DATA(p, nvk_compute_local_size(cmd));
    } else {
-      p = nvk_cmd_buffer_push(cmd, 5);
+      const uint32_t reserve_dw =
+         16 + (inline_qmd ? TG_GPU_QMD_RECORD_WORDS : 0);
+      p = nvk_cmd_buffer_push(cmd, reserve_dw);
       /* Stall the command streamer */
       if (pdev->info.cls_compute >= HOPPER_COMPUTE_A) {
          P_IMMD(p, NVC86F, WFI, 0);
       } else {
 #ifdef HAVE_SWITCH_PLATFORM
          nvk_cmd_buffer_switch_sync_host(cmd);
-         p = nvk_cmd_buffer_push(cmd, 5);
+         p = nvk_cmd_buffer_push(cmd, reserve_dw);
 #else
-         __push_immd(p, SUBC_NV9097, NV906F_SET_REFERENCE, 0);
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
 #endif
       }
 
@@ -646,6 +680,12 @@ nvk_CmdDispatchIndirect2KHR(VkCommandBuffer commandBuffer,
       P_INLINE_DATA(p, qmd_addr >> 32);
       P_INLINE_DATA(p, qmd_addr);
       P_INLINE_DATA(p, nvk_compute_local_size(cmd));
+      if (inline_qmd) {
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+         nvk_push_direct_dispatch(cmd, qmd_addr, inline_qmd, false);
+         nvk_cmd_buffer_flush_indirect_continuation(cmd);
+         return;
+      }
    }
 
    P_MTHD(p, NVA0C0, SEND_PCAS_A);

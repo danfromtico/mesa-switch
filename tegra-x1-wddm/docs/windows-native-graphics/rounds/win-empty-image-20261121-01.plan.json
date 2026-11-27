@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-image-20261121-01",
+  "contract_id": "WIN-PRESENT-IMAGE",
+  "windows_question": "WIN-PRESENT-IMAGE",
+  "owner": "应用、Windows DWM 与扫描输出",
+  "question": "首个成功返回的普通窗口帧是否在合成桌面对应客户区显示预期颜色？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "前台窗口归属及呈现后图像时间匹配，预期颜色在客户区逐点命中，同时记录输入、退出、同桌面。",
+  "observations": [
+    "在公开返回之后以相同原空窗口、所属客区、观察器图像和留存 WARP 空帧区域核对桌面显示。另查 DWM 消费能否按同令牌归属。",
+    "复核同一开机、进程、线程、设备、对象与时钟；本轮新增设备执行数为 0。"
+  ],
+  "inputs": {
+    "win-empty-present-20261121-01": {
+      "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+      "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+    }
+  }
+}

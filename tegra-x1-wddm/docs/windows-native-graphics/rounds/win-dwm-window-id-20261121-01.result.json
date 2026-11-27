@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-window-id-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "plan_sha256": "d4442bd36b4c626c83120aba484ccd2b2d9f1a7fdc2425eb2461b62ef63d786a",
+  "status": "观测缺口",
+  "finding": "原空窗口的 DWM 91 在 QPC 94861443540 记录 EventId=524312，与应用/Windows HWND 相等。五份 Blt 归档中有 5 份得到同样的数值与时序对应。",
+  "missing_observation": "各受测 Blt 窗口的 DWM 调度已按 EventId 与 HWND 的实际数值和时序对齐。事件 91 的两个表面句柄为零；仍缺同提交的消费或面板扫描标识。",
+  "device_executions": 0,
+  "evidence": {
+    "cases": [
+      {
+        "case": "win-empty-present-20261121-01",
+        "kind": "无写入正式基线",
+        "boot": 91476,
+        "drawing_pid": 5992,
+        "drawing_tid": 5988,
+        "dwm": 1400,
+        "hwnd": 524312,
+        "call_qpc": 94861147189,
+        "return_qpc": 94861380548,
+        "sample_qpc": 94863412892,
+        "archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+        "etl_sha256": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+        "schedule": [
+          {
+            "qpc": 94861443540,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2252,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 524312,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_schedule": [
+          {
+            "qpc": 94861443540,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2252,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 524312,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_consumed": []
+      },
+      {
+        "case": "win-first-present-20261121-01",
+        "kind": "清屏正式基线",
+        "boot": 91476,
+        "drawing_pid": 5364,
+        "drawing_tid": 3528,
+        "dwm": 1400,
+        "hwnd": 458858,
+        "call_qpc": 92572521356,
+        "return_qpc": 92572981150,
+        "sample_qpc": 92574542876,
+        "archive_sha256": "e2c65e8f0b47d65fc3af8717ea2c78e4d1ca62994c1e59a75006b0cbe07d4634",
+        "etl_sha256": "e7f04ea3af7938dfb867e89576fa1a29815a4fb093b4c2ada9bb56c701ca1471",
+        "schedule": [
+          {
+            "qpc": 92573126169,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2252,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 458858,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_schedule": [
+          {
+            "qpc": 92573126169,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2252,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 458858,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_consumed": []
+      },
+      {
+        "case": "copy-sequential-1",
+        "kind": "已归档普通窗口",
+        "boot": 87268,
+        "drawing_pid": 6212,
+        "drawing_tid": 7472,
+        "dwm": 1468,
+        "hwnd": 197132,
+        "call_qpc": 3510841199,
+        "return_qpc": 3512056690,
+        "sample_qpc": 3513486653,
+        "archive_sha256": "09bc540a153902c33bf25fa6d608ea52c68ca7fabc850119ae8e1fd81f5e715a",
+        "etl_sha256": "34d77236006c9fa9b1a4fdea38c04e9c51bf15ddde13577659c57a471b8cd2d2",
+        "schedule": [
+          {
+            "qpc": 3512319288,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2316,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 197132,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_schedule": [
+          {
+            "qpc": 3512319288,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2316,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 197132,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_consumed": []
+      },
+      {
+        "case": "copy-sequential-2",
+        "kind": "已归档普通窗口",
+        "boot": 87268,
+        "drawing_pid": 6036,
+        "drawing_tid": 5704,
+        "dwm": 1468,
+        "hwnd": 196818,
+        "call_qpc": 5180746623,
+        "return_qpc": 5181126891,
+        "sample_qpc": 5182540316,
+        "archive_sha256": "543562f0f57bab939fd8b6fa8cce22b014da8bfcc88b47c9c1877decaef500dc",
+        "etl_sha256": "d8355507a568b1ec459484f371e8cbf4f91db5d2b49c61ffb79efb567ebceba0",
+        "schedule": [
+          {
+            "qpc": 5181130534,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2316,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 196818,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_schedule": [
+          {
+            "qpc": 5181130534,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2316,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 196818,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_consumed": []
+      },
+      {
+        "case": "copy-sequential-3",
+        "kind": "已归档普通窗口",
+        "boot": 87268,
+        "drawing_pid": 1500,
+        "drawing_tid": 3232,
+        "dwm": 1468,
+        "hwnd": 131666,
+        "call_qpc": 6427809546,
+        "return_qpc": 6428196950,
+        "sample_qpc": 6429061426,
+        "archive_sha256": "4eb3b503b4d14f1b4262c23e38394a1191dce1fe42ca5fcd06f2f202d7222a24",
+        "etl_sha256": "e912d1de1633a374df3e09c4c56d824b2ca3495edf7be89743c6ce001716f365",
+        "schedule": [
+          {
+            "qpc": 6428473627,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2316,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 131666,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_schedule": [
+          {
+            "qpc": 6428473627,
+            "event": 91,
+            "task": "SCHEDULE_PRESENTHISTORYTOKEN_BLT",
+            "tid": 2316,
+            "fields": {
+              "hLogicalSurface": 0,
+              "hDxSharedSurface": 0,
+              "EventId": 131666,
+              "NumRects": 0
+            }
+          }
+        ],
+        "target_consumed": []
+      },
+      {
+        "case": "copy-flip-1",
+        "kind": "已归档翻转窗口",
+        "boot": 87268,
+        "drawing_pid": 5872,
+        "drawing_tid": 6600,
+        "dwm": 1468,
+        "hwnd": 262332,
+        "call_qpc": 9900973780,
+        "return_qpc": 9901056781,
+        "sample_qpc": 9902308515,
+        "archive_sha256": "1e096b5215c2a539e0c09745700c86df16df8f4b13584e9511e99ab209749527",
+        "etl_sha256": "baad5d18dda92cdcc24ac0e83f8ff45dac96d735b647f12ba24d47b1e4a7d9c8",
+        "schedule": [],
+        "target_schedule": [],
+        "target_consumed": [
+          {
+            "qpc": 9901506303,
+            "event": 467,
+            "task": "Windowed_Dx_Flip_Consumed",
+            "tid": 2316,
+            "fields": {
+              "hWnd": 262332,
+              "displayAdapterLuid": 21904,
+              "renderAdapterLuid": 21904,
+              "vidPnSourceId": 0,
+              "vidPnTargetId": 0,
+              "uniqueId": 1,
+              "surfaceLuid": 1844512,
+              "bindId": 1,
+              "presentCount": 1
+            }
+          }
+        ]
+      }
+    ],
+    "observed_matching_windows": 5,
+    "distinct_hwnds": 5,
+    "field_semantics": "安装版本的事件 91 字段名为 EventId。窗口对应为多份实机样本的数值与时序归属；事件语义为调度。",
+    "boundaries": {
+      "last_entry": "DWM SCHEDULE_PRESENTHISTORYTOKEN_BLT 与原窗口身份数值相同。",
+      "last_return": "应用首次 Present 返回，随后客户区像素匹配。",
+      "first_anomaly_or_missing": "各受测 Blt 窗口的 DWM 调度已按 EventId 与 HWND 的实际数值和时序对齐。事件 91 的两个表面句柄为零；仍缺同提交的消费或面板扫描标识。"
+    }
+  }
+}

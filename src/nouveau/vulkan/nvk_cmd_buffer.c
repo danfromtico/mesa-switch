@@ -41,6 +41,19 @@ static uint8_t
 nvk_cmd_buffer_subchannel_mask(struct nvk_cmd_buffer *cmd);
 
 void
+nvk_push_legacy_host_wfi(struct nv_push *p, uint32_t subchannel)
+{
+#ifdef _WIN32
+   /* The GM20B KMD owns USERD.Reference for submission retirement.  A user
+    * barrier must wait without overwriting that completion marker.
+    */
+   __push_immd(p, subchannel, NVB06F_WFI, NVB06F_WFI_SCOPE_ALL);
+#else
+   __push_immd(p, subchannel, NV906F_SET_REFERENCE, 0);
+#endif
+}
+
+void
 nvk_descriptor_state_fini(struct nvk_cmd_buffer *cmd,
                           struct nvk_descriptor_state *desc)
 {
@@ -316,6 +329,23 @@ nvk_cmd_buffer_push_indirect(struct nvk_cmd_buffer *cmd,
    };
 
    util_dynarray_append(&cmd->pushes, push);
+}
+
+void
+nvk_cmd_buffer_flush_indirect_continuation(struct nvk_cmd_buffer *cmd)
+{
+   nvk_cmd_buffer_flush_push(cmd, false);
+
+   /* Leave a 4-byte gap in push_mem so subsequent commands in the same
+    * VkCommandBuffer start a separate nvk_cmd_push rather than merging into
+    * this DispatchIndirect continuation suffix.
+    */
+   if (cmd->push_mem != NULL && cmd->push.end < cmd->push_mem_limit) {
+      *cmd->push.end++ = 0;
+      cmd->push.start = cmd->push.end;
+      cmd->push.last_hdr = NULL;
+      cmd->push.last_hdr_dw = 0;
+   }
 }
 
 VkResult
@@ -986,10 +1016,14 @@ nvk_cmd_flush_wait_dep(struct nvk_cmd_buffer *cmd,
          P_NVC86F_MEM_OP_C(p, { .membar_type = 0 });
          P_NVC86F_MEM_OP_D(p, { .operation = OPERATION_MEMBAR });
       } else {
-         __push_immd(p, last_subchannel, NV906F_SET_REFERENCE, 0);
+         nvk_push_legacy_host_wfi(p, last_subchannel);
       }
 
-      /* MEM_OP_D path is really usable starting with Maxwell B */
+#ifndef _WIN32
+      /* MEM_OP_D/MEM_OP_B (< 0x100) are privileged host operations rejected
+       * by the GM20B WDDM command-stream validator; unified SoC DRAM relies on
+       * the host WFI and engine cache invalidations emitted around this block.
+       */
       if (pdev->info.cls_eng3d >= MAXWELL_B) {
          __push_mthd(p, last_subchannel, NVC86F_MEM_OP_D);
          P_NVC86F_MEM_OP_D(p, {.operation = OPERATION_L2_SYSMEM_INVALIDATE});
@@ -997,6 +1031,7 @@ nvk_cmd_flush_wait_dep(struct nvk_cmd_buffer *cmd,
          __push_mthd(p, last_subchannel, NV906F_MEM_OP_B);
          P_NV906F_MEM_OP_B(p, {.operation = OPERATION_L2_SYSMEM_INVALIDATE});
       }
+#endif
    }
 }
 
@@ -1143,7 +1178,7 @@ nvk_cmd_invalidate_deps(struct nvk_cmd_buffer *cmd,
          P_NVC86F_MEM_OP_C(p, { .membar_type = 0 });
          P_NVC86F_MEM_OP_D(p, { .operation = OPERATION_MEMBAR });
       } else {
-         __push_immd(p, last_subchannel, NV906F_SET_REFERENCE, 0);
+         nvk_push_legacy_host_wfi(p, last_subchannel);
       }
    }
 
@@ -1158,7 +1193,7 @@ nvk_cmd_invalidate_deps(struct nvk_cmd_buffer *cmd,
          P_NVC86F_MEM_OP_D(p, { .operation = OPERATION_MEMBAR });
 
       } else {
-         __push_immd(p, SUBC_NV9097, NV906F_SET_REFERENCE, 0);
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
 
          if (pdev->info.cls_eng3d >= TURING_A)
             P_IMMD(p, NVC597, MME_DMA_SYSMEMBAR, 0);
@@ -1234,8 +1269,12 @@ nvk_cmd_bind_shaders(struct vk_command_buffer *vk_cmd,
          container_of(shaders[i], struct nvk_shader, vk);
 
       if (shader != NULL) {
-         nvk_device_ensure_slm(dev, shader->info.slm_size,
-                                    shader->info.crs_size);
+         VkResult result = nvk_device_ensure_slm(dev, shader->info.slm_size,
+                                                 shader->info.crs_size);
+         if (result != VK_SUCCESS) {
+            vk_command_buffer_set_error(vk_cmd, result);
+            return;
+         }
       }
 
       if (stages[i] == MESA_SHADER_COMPUTE ||
@@ -1768,12 +1807,19 @@ nvk_cmd_buffer_get_cbuf_addr(struct nvk_cmd_buffer *cmd,
    }
 
    case NVK_CBUF_TYPE_UBO_DESC: {
+      if (desc->sets[cbuf->desc_set].type == NVK_DESCRIPTOR_SET_TYPE_NONE) {
+         *addr_out = (struct nvk_buffer_address) { .size = 0 };
+         return true;
+      }
+
       if (desc->sets[cbuf->desc_set].type != NVK_DESCRIPTOR_SET_TYPE_PUSH)
          return false;
 
       struct nvk_push_descriptor_set *push = desc->sets[cbuf->desc_set].push;
-      if (push == NULL)
-         return false;
+      if (push == NULL) {
+         *addr_out = (struct nvk_buffer_address) { .size = 0 };
+         return true;
+      }
 
       assert(cbuf->desc_offset < NVK_PUSH_DESCRIPTOR_SET_SIZE);
       union nvk_buffer_descriptor desc;

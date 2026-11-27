@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "change_kind": "verified-fix",
+  "base_commit": "e6852733640f4dc114042796477671ca54c1f3c6",
+  "source_commit": "c05e254932dd975bdf69e7046949596dbeb84561",
+  "changed_paths": [
+    "tegra-x1-wddm/tests/test_context_windows.c",
+    "tegra-x1-wddm/tests/test_panel_timings_windows.c",
+    "tegra-x1-wddm/windows/allocation.c",
+    "tegra-x1-wddm/windows/panel_vidpn.c",
+    "tegra-x1-wddm/windows/present.c"
+  ],
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0",
+  "components": {
+    "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+  },
+  "trial": {
+    "one_time": true,
+    "power": "Online",
+    "gpu_code": 0,
+    "boot_record": 85471,
+    "loaded": {
+      "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+    }
+  },
+  "system_log": {
+    "complete": true,
+    "first_record": 85453,
+    "last_record": 85544,
+    "boot_records": [
+      85471
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "kind": "controlled",
+        "explained": true,
+        "cause": "Windows recorded the requested candidate start after the Code 43 closed-gate desktop.",
+        "boot_record": 85471,
+        "system_records": [
+          85454,
+          85471
+        ],
+        "evidence_file": "trial-boot.json",
+        "evidence_sha256": "5ed12256dc12d35cee4d9271a9ea8879ab5fd8be35580b9fee5b816b98b06e6e"
+      }
+    ]
+  },
+  "verified_fix": {
+    "fault_id": "GM20B-GDI-EXCLUSIVE-MODE",
+    "causal_evidence_sha256": "ab63e81a3eb634bff5e9f4e4e3f432c593820c101b06f548be9dd16e5fa6f29e",
+    "control_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c"
+  },
+  "cases": [
+    {
+      "name": "exclusive-1",
+      "passed": true,
+      "before_boot": 85471,
+      "after_boot": 85471,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "exclusive-1.json",
+      "evidence_sha256": "e1eadc1f9b77ce113cff4eb63c282b07339a653b14bbb051c4dbf9c6788a620b"
+    },
+    {
+      "name": "exclusive-2",
+      "passed": true,
+      "before_boot": 85471,
+      "after_boot": 85471,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "exclusive-2.json",
+      "evidence_sha256": "7b0a0209b82a7cd908eb7e1b6c40c1d6febd2a611f4f444ba2a4631dfafc881f"
+    },
+    {
+      "name": "exclusive-3",
+      "passed": true,
+      "before_boot": 85471,
+      "after_boot": 85471,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "exclusive-3.json",
+      "evidence_sha256": "87800c7cdb04237bbab8cd50e2a1ac6c1721cd7709a2536fe18b5f3cb6c0bd92"
+    },
+    {
+      "name": "window-control",
+      "passed": true,
+      "before_boot": 85471,
+      "after_boot": 85471,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "evidence_file": "window-control.json",
+      "evidence_sha256": "e8c0a66114de0861a54c88d76f6017a8bb3e369f99963fb043f89005bd4e8f9c"
+    }
+  ]
+}

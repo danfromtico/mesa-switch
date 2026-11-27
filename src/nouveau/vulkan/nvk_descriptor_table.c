@@ -7,12 +7,6 @@
 #include "nvk_device.h"
 #include "nvk_physical_device.h"
 
-#ifndef __SWITCH__
-#include <sys/mman.h>
-#else
-#include <util/switch_mman.h>
-#endif
-
 static VkResult
 nvk_descriptor_table_grow_locked(struct nvk_device *dev,
                                  struct nvk_descriptor_table *table,
@@ -75,6 +69,9 @@ nvk_descriptor_table_init(struct nvk_device *dev,
    enum nvkmd_mem_flags mem_flags = NVKMD_MEM_LOCAL;
    if (dev->cpu_write_mem_uncached)
       mem_flags |= NVKMD_MEM_COHERENT;
+#ifdef _WIN32
+   mem_flags |= NVKMD_MEM_GPU_READ_ONLY;
+#endif
 
    result = nvk_mem_arena_init(dev, &table->arena, mem_flags,
                                NVKMD_MEM_MAP_WR, true /* contiguous */,

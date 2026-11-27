@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-16T20:13:19.050488+00:00",
+  "state": "Pinned firmware bytes match upstream Tegra210 L4T-r32.7.6 firmware; B01 native execution not tested",
+  "firmware": {
+    "repository": "https://gitlab.com/kernel-firmware/linux-firmware",
+    "commit": "bdeb9f0f93f18d10b281217e66e81838527ce55a",
+    "path": "nvidia/tegra210/nvdec.bin",
+    "version_from_whence": "l4t-r32.7.6",
+    "bytes": 128000,
+    "sha256": "7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909",
+    "matches_existing_delivery_byte_for_byte": true,
+    "pin_changed": false,
+    "whence": {
+      "path": "WHENCE",
+      "url": "https://kernel.googlesource.com/pub/scm/linux/kernel/git/firmware/linux-firmware/+/bdeb9f0f93f18d10b281217e66e81838527ce55a/WHENCE?format=TEXT",
+      "bytes": 511800,
+      "sha256": "e90a48202c5eb5f924752ef4aedd5524ca13e2af6dcacdbc4e0a479efe725008"
+    }
+  },
+  "license": {
+    "path": "LICENSES/LICENCE.nvidia",
+    "url": "https://kernel.googlesource.com/pub/scm/linux/kernel/git/firmware/linux-firmware/+/bdeb9f0f93f18d10b281217e66e81838527ce55a/LICENSES/LICENCE.nvidia?format=TEXT",
+    "sha256": "bc5225a57f49c5249dcf238e4ae6437811677a2a8a7f579c3d839e058653ee44",
+    "bytes": 6212,
+    "spdx": "LicenseRef-LICENCE.nvidia",
+    "readme_scope": "External binary is not MIT and is not committed with the source. Section2.1.2 includes an OSI-open-source-operating-system condition on redistribution; Windows redistribution rights must be resolved before including this blob in a public Windows package.",
+    "public_windows_firmware_redistribution_confirmed": false,
+    "blob_committed": false
+  },
+  "reference_sources": {
+    "vendor_kernel": {
+      "repository": "CTCaer/switch-l4t-kernel-nvidia",
+      "branch": "linux-dev",
+      "commit": "76e6d48970b451c242c20f298b8d63027836bb0b",
+      "date": "2024-01-18T18:04:11Z",
+      "matches_installed_noble": false,
+      "files": [
+        {
+          "path": "drivers/video/tegra/host/nvdec/nvdec.c",
+          "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-nvidia/76e6d48970b451c242c20f298b8d63027836bb0b/drivers/video/tegra/host/nvdec/nvdec.c",
+          "sha256": "fd0ae827901763bb3698ef60eb0065aeb63f3cabdde650d76a063d85a7ddf430"
+        },
+        {
+          "path": "drivers/video/tegra/host/nvdec/nvdec.h",
+          "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-nvidia/76e6d48970b451c242c20f298b8d63027836bb0b/drivers/video/tegra/host/nvdec/nvdec.h",
+          "sha256": "00051d380534b4ecd5d164af0d355b8ef7be387663effbe747aee59790cd7e57"
+        },
+        {
+          "path": "drivers/video/tegra/host/nvdec/hw_nvdec.h",
+          "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-nvidia/76e6d48970b451c242c20f298b8d63027836bb0b/drivers/video/tegra/host/nvdec/hw_nvdec.h",
+          "sha256": "ba5b95762174ad29a1d428cdc1fed7e6dae4ab01e7e9237117a69dde1092ab98"
+        },
+        {
+          "path": "drivers/video/tegra/host/t210/t210.c",
+          "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-nvidia/76e6d48970b451c242c20f298b8d63027836bb0b/drivers/video/tegra/host/t210/t210.c",
+          "sha256": "fb30ceb4733fc90d57882e56f37a549e80cea30cbdb9654dd94949708b2efaac"
+        }
+      ]
+    },
+    "linux": {
+      "tag": "v6.8",
+      "files": [
+        {
+          "path": "drivers/gpu/drm/tegra/nvdec.c",
+          "url": "https://raw.githubusercontent.com/torvalds/linux/v6.8/drivers/gpu/drm/tegra/nvdec.c",
+          "sha256": "ebcc7a03628f75064681be7cb6886129dd5c1c6fb225adfcac1b8daec5d2eb26"
+        },
+        {
+          "path": "drivers/gpu/drm/tegra/falcon.c",
+          "url": "https://raw.githubusercontent.com/torvalds/linux/v6.8/drivers/gpu/drm/tegra/falcon.c",
+          "sha256": "e5c63dc10ad360e9659e03325857322b49f40564e7530eeeb221048c084042e3"
+        }
+      ]
+    },
+    "nvidia_manifest": {
+      "url": "https://docs.nvidia.com/jetson/l4t/Tegra%20Linux%20Driver%20Package%20Development%20Guide/manifest_jetson_nano.html",
+      "document_release": "R32.6.1",
+      "finding": "Names tegra21x/nvhost_nvdec020_ns.fw as the no-bootloader NVDEC firmware; this older manifest is a naming/selection reference, not proof of byte identity with R32.7.6."
+    }
+  },
+  "findings": [
+    "The vendor t21_nvdec_info encodes NVDEC2.0; no separateB01 firmware selection branch appears in the reviewed t210/nvdec files. Absence of a branch is not proof of B01 execution.",
+    "The vendor no-bootloader branch selects nvhost_nvdec020_ns.fw. The bootloader-enabled path instead selects debug/prod bootloader and firmware using SCP state and WPR information. Do not mix these loading contracts.",
+    "Linuxv6.8 selects nvidia/tegra210/nvdec.bin for nvidia,tegra210-nvdec and uses the Falcon path without the newer-SoC stream-ID setup. Its physical/IOMMU ownership still comes from Linux and is not inherited by Windows.",
+    "Existing loader uses256-byte Falcon transfers, one OS-data base adjustment, relative code/data offsets, then STARTCPU/idle polling. These steps match the reviewed single-image Falcon path; runtime DMA, security state and actual completion remain unverified."
+  ],
+  "limits": [
+    "The actual installed Noble kernel build/config, nvdec_enabled boot argument and selected firmware have not been retrieved in this round; the pinned vendor source is a reference only.",
+    "No actual Windows NVDEC SCP/firmware-idle/client-route measurements or decoded pixels exist yet.",
+    "Do not bypass secure/WPR firmware selection or assume Linux memory isolation equals the Windows route.",
+    "Firmware provenance does not validate the local scratch capacity fix on hardware."
+  ],
+  "native_actions": {
+    "uploaded": false,
+    "installed": false,
+    "restart_requested": false,
+    "baseline_promoted": false
+  },
+  "next": "Restore authenticated device access; use the frozen client-route/PMC query and pre-selection EMC snapshot before connecting clock ownership and attempting real720p firmware/decode."
+}

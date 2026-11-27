@@ -1,0 +1,464 @@
+{
+  "work_item": 5,
+  "case": "Native ARM64 FFmpeg D3D11VA 1080p H.264 six-frame benchmark on Switch Lite",
+  "source": "tegra-x1-wddm/tools/nvdec720_av_window.cpp",
+  "component": {
+    "bytes": 2949648,
+    "unsigned": "a146a7022b60ca75b7d87051a9790bb10563860f2eb1be7331c64984a75da982",
+    "sha256": "b86a4acf6c9d8c0d5781b7dea6f6c528bf0a940966871c0e76040df214ada266",
+    "source_sha256": "4b70fac146722ad47c8771196c7641185697263af08f42d0b9aca168648a8202",
+    "inputs": {
+      "libavformat.a": "cbf855ed982363d27ca21128e20a50505228a9f49b428ed3df941df978612076",
+      "libavcodec.a": "1cf3a8ec1392b81eec725011a4ef69c2959e1db0d348a9610843565385f95f5b",
+      "libavutil.a": "6394538d9af9313ad8968bdbe0d484fb8f2ed123aebbc48b0575b1bdc16ec83c",
+      "libswresample.a": "46491238dbc0eae93093c851a17da0b4936d3b4239ad347473db3e58158be8ef",
+      "nvdec720_preview_vs.h": "8eb9d606708057b851dc77312f2f114ce827dfb48497aa990bc154e2f16f7066",
+      "nvdec720_preview_ps.h": "0890586ff496a7c1408fe192dc25a16849f32add7656b76e7d0ea0d857de9d10",
+      "sample1080.mp4": "6395a2c6ff999357a572b8b1fd9300978b635c8e0cc93c43e80b835c00d296b0",
+      "sample1080.sha256": "9e1cb874492c76f189d147e535fbd2e52635ade0296c7b9feb4676791172ccc1"
+    }
+  },
+  "active_native": {
+    "kmd": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+    "umd": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "luid": "000000000007ae10",
+    "boot_start": "2026-11-18T11:22:09.2175570Z",
+    "boot_after_interruption": "2026-11-18T11:54:35.1814060Z",
+    "dwm_before": 1376,
+    "dwm_after_recovery": 1356,
+    "gpu_problem_code": 0
+  },
+  "source_projection": {
+    "width": 1920,
+    "height": 1080,
+    "coded_height": 1088,
+    "frames_per_process": 6,
+    "visible_NV12_frames_sha256_after_canonical_I420_conversion": [
+      "d9368ffd4722e6f05b0265a72f56764d3044ebd098b6ba3dbf388052fe3e84f3",
+      "f3fc4fd14479a9dbadefe6cda9d9a78d827d07b1bf482e4ef04f4b6913e42838",
+      "f0f100a93e40b14ad4d20f9dd00c1e42bb92ccb064bdfa7832980b56b4d6c8bc",
+      "b05651982e6d54528be2fedb5e5242e0a492b1a8c31df0d5ff73f23c0921b6a1",
+      "f4b944beb06c97abc5084f9bd3d81515592046341b6b3785f6bb5dcb329c8902",
+      "27f3a47c090c944c3008a351e359d3768af74c4c9b4c8c0bfb00c5cc01816272"
+    ],
+    "window_size": [
+      640,
+      360
+    ],
+    "display": "fixed 90 degrees, Handheld AC with active DFLL",
+    "procedure": "Three decode-only processes and one normal preview completed. The second preview was interrupted. Each completed process used the same bitstream and six reference frames. The window uses the normal unpaced client draw path. No --visual-check, --evidence or ETW recording during timed samples. The prior visual acceptance had explicit pacing.",
+    "timed_loop": "Packet read, avcodec_send_packet/receive_frame, D3D11 readback, verification, optional preview and drain. Measured throughput is verified frame throughput including readback and SHA-256. Driver initialization and final teardown are outside the loop. Send/receive are host API intervals, not engine-only cycle counts.",
+    "preview": "The process validates the native UMD and adapter, native D3D11 NV12 texture ownership, reference NV12 frame hashes after conversion to canonical planar I420, six presents and the final read-back image when preview is enabled.",
+    "first_attempt": "The initial timing probe requested the process-local video validation opt-in only when write-through evidence was enabled. Direct3D device creation returned DXGI_ERROR_UNSUPPORTED before any decode. The published --timings path enables the same device creation selection without in-loop evidence writes."
+  },
+  "interrupted_window": {
+    "checkpoint": "window-2",
+    "events": [
+      {
+        "record": 64587,
+        "time": "2026-11-18T11:55:30.6709061Z",
+        "id": 6005
+      },
+      {
+        "record": 64585,
+        "time": "2026-11-18T11:55:30.6679452Z",
+        "id": 6008
+      }
+    ],
+    "boot_changed": true,
+    "complete_window_count": 1,
+    "complete_decode_only_count": 3,
+    "physical_cause": "Undetermined. No candidate cache or rendering driver was loaded in the affected test.",
+    "following_windows": "Stopped after the observed restart. A single completed preview supplies one sample.",
+    "recovered_desktop": {
+      "interactive_response": "5600,True,0,1280,720,45,45,44",
+      "display": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "umd_icd": [
+        {
+          "sha256": "C8A8EB9AAB7E8DA0EDDBFD33052B51C945FF799A7765B86295303D9E5F65C12E",
+          "name": "TegraGpuD3DVk.dll"
+        },
+        {
+          "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+          "name": "libvulkan_nouveau.dll"
+        }
+      ],
+      "gpu_problem_code": 0,
+      "soc_c": 40,
+      "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438"
+    },
+    "tail_of_last_window_stdout": [
+      "FRAME_POOL count=17 width=1920 height=1088 format=nv12",
+      "NV12_FRAME index=0 sha256=d9368ffd4722e6f05b0265a72f56764d3044ebd098b6ba3dbf388052fe3e84f3",
+      "CSC matrix=BT601 range=limited input_matrix=2 input_range=0 untagged_default=BT601-limited transfer=readback-upload",
+      "SAMPLE index=0 subresource=16 pts=0",
+      "RETURN Present=0x00000000",
+      "NV12_FRAME index=1 sha256=f3fc4fd14479a9dbadefe6cda9d9a78d827d07b1bf482e4ef04f4b6913e42838",
+      "SAMPLE index=1 subresource=14 pts=256",
+      "RETURN Present=0x0000"
+    ],
+    "post_recovery_login_task_delay": "PT5S",
+    "restored_loader_selection_sha256": "362d6e4cf8b9876309b01b65e62d95631bcb2aa6b407c3c036b9b8a29d98797a"
+  },
+  "hardware_medians": {
+    "decode": {
+      "verified_fps": 1.573,
+      "loop_ms": 3813.788,
+      "send_receive_ms": 931.907,
+      "readback_ms": 173.672,
+      "verify_ms": 2105.752,
+      "window_draw_ms": 0.0
+    },
+    "window": {
+      "verified_fps": 1.188,
+      "loop_ms": 5050.694,
+      "send_receive_ms": 848.339,
+      "readback_ms": 138.038,
+      "verify_ms": 2036.069,
+      "window_draw_ms": 1168.83
+    }
+  },
+  "rows": [
+    {
+      "variant": "decode-1",
+      "loop_ms": 3813.788,
+      "verified_fps": 1.5732,
+      "send_receive_ms": 1014.621,
+      "readback_ms": 173.672,
+      "verify_ms": 2072.496,
+      "window_draw_ms": 0.0,
+      "process_exit": 0,
+      "platform_before": {
+        "utc": "2026-11-18T11:53:02.8227642Z",
+        "ac": "Online",
+        "cpu_khz": 805341,
+        "cpu_mv": 615,
+        "gpu_khz": 76800,
+        "gpu_uv": 630000,
+        "emc_khz": 2500000,
+        "emc_changes": 3666,
+        "soc_c": 39,
+        "board_c": 37,
+        "battery_mv": 3846,
+        "fan": 51,
+        "cpu_load_permille": 437
+      },
+      "platform_after": {
+        "utc": "2026-11-18T11:53:11.5258915Z",
+        "ac": "Online",
+        "cpu_khz": 805341,
+        "cpu_mv": 620,
+        "gpu_khz": 537600,
+        "gpu_uv": 590000,
+        "emc_khz": 1331200,
+        "emc_changes": 3685,
+        "soc_c": 39,
+        "board_c": 37,
+        "battery_mv": 3851,
+        "fan": 51,
+        "cpu_load_permille": 437
+      },
+      "preview_sha256": {}
+    },
+    {
+      "variant": "decode-2",
+      "loop_ms": 3575.058,
+      "verified_fps": 1.6783,
+      "send_receive_ms": 720.269,
+      "readback_ms": 111.67,
+      "verify_ms": 2226.286,
+      "window_draw_ms": 0.0,
+      "process_exit": 0,
+      "platform_before": {
+        "utc": "2026-11-18T11:53:11.7290103Z",
+        "ac": "Online",
+        "cpu_khz": 1211250,
+        "cpu_mv": 705,
+        "gpu_khz": 460800,
+        "gpu_uv": 590000,
+        "emc_khz": 1600000,
+        "emc_changes": 3686,
+        "soc_c": 39,
+        "board_c": 37,
+        "battery_mv": 3840,
+        "fan": 51,
+        "cpu_load_permille": 705
+      },
+      "platform_after": {
+        "utc": "2026-11-18T11:53:19.8227656Z",
+        "ac": "Online",
+        "cpu_khz": 815800,
+        "cpu_mv": 615,
+        "gpu_khz": 537600,
+        "gpu_uv": 590000,
+        "emc_khz": 1331200,
+        "emc_changes": 3698,
+        "soc_c": 39,
+        "board_c": 37,
+        "battery_mv": 3816,
+        "fan": 51,
+        "cpu_load_permille": 437
+      },
+      "preview_sha256": {}
+    },
+    {
+      "variant": "window-1",
+      "loop_ms": 5050.694,
+      "verified_fps": 1.188,
+      "send_receive_ms": 848.339,
+      "readback_ms": 138.038,
+      "verify_ms": 2036.069,
+      "window_draw_ms": 1168.83,
+      "process_exit": 0,
+      "platform_before": {
+        "utc": "2026-11-18T11:53:19.9321370Z",
+        "ac": "Online",
+        "cpu_khz": 836718,
+        "cpu_mv": 615,
+        "gpu_khz": 537600,
+        "gpu_uv": 590000,
+        "emc_khz": 1331200,
+        "emc_changes": 3698,
+        "soc_c": 39,
+        "board_c": 37,
+        "battery_mv": 3836,
+        "fan": 51,
+        "cpu_load_permille": 437
+      },
+      "platform_after": {
+        "utc": "2026-11-18T11:53:34.1346335Z",
+        "ac": "Online",
+        "cpu_khz": 916804,
+        "cpu_mv": 620,
+        "gpu_khz": 537600,
+        "gpu_uv": 590000,
+        "emc_khz": 1331200,
+        "emc_changes": 3727,
+        "soc_c": 39,
+        "board_c": 37,
+        "battery_mv": 3828,
+        "fan": 51,
+        "cpu_load_permille": 500
+      },
+      "preview_sha256": "48613254388EEFD5D5FBAE35F217A5F28E65A31B3A27D2989DCD1A6E67E211A3"
+    },
+    {
+      "variant": "decode-3",
+      "loop_ms": 3903.79,
+      "verified_fps": 1.537,
+      "send_receive_ms": 931.907,
+      "readback_ms": 211.577,
+      "verify_ms": 2105.752,
+      "window_draw_ms": 0.0,
+      "process_exit": 0,
+      "platform_before": {
+        "utc": "2026-11-18T11:53:34.2752591Z",
+        "ac": "Online",
+        "cpu_khz": 916804,
+        "cpu_mv": 615,
+        "gpu_khz": 537600,
+        "gpu_uv": 590000,
+        "emc_khz": 1331200,
+        "emc_changes": 3727,
+        "soc_c": 39,
+        "board_c": 37,
+        "battery_mv": 3833,
+        "fan": 51,
+        "cpu_load_permille": 500
+      },
+      "platform_after": {
+        "utc": "2026-11-18T11:53:42.5877605Z",
+        "ac": "Online",
+        "cpu_khz": 714796,
+        "cpu_mv": 620,
+        "gpu_khz": 537600,
+        "gpu_uv": 590000,
+        "emc_khz": 1331200,
+        "emc_changes": 3744,
+        "soc_c": 39,
+        "board_c": 38,
+        "battery_mv": 3829,
+        "fan": 51,
+        "cpu_load_permille": 411
+      },
+      "preview_sha256": {}
+    }
+  ],
+  "sample_table": {
+    "file": "nvdec-1080p-process-timings.csv",
+    "sha256": "13859ce29e3852141ad554379fe0afccf617a14500dc97ea0303d8e3e298f13a"
+  },
+  "native_receipt_sha256": "7f1aee7601e57418aa6e234d11ff2fc2b1dc442b99c6cf25bb4826771561a24d",
+  "verification_code_comparison": {
+    "change": "Use Windows BCryptHash with its SHA-256 algorithm handle for canonicalized frame bytes. The reference bytes and all 48 expected digests are identical across runs.",
+    "scope": "Only the standalone verification client changed. The FFmpeg libraries, bitstream, KMD, UMD and NVDEC decode path were identical in all eight processes. The measured full-loop rate includes reference digest validation.",
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline",
+      "candidate",
+      "baseline",
+      "baseline",
+      "candidate"
+    ],
+    "paired_decode_only": true,
+    "adapter_luid": "00000000000821fa",
+    "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+    "umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "boot_utc": "2026-11-18T11:54:35.1855130Z",
+    "boot_after": "2026-11-18T11:54:35.1855130Z",
+    "dwm_pid": 1356,
+    "dwm_after": 1356,
+    "builds": {
+      "baseline": {
+        "bytes": 2949648,
+        "unsigned": "a146a7022b60ca75b7d87051a9790bb10563860f2eb1be7331c64984a75da982",
+        "sha256": "b86a4acf6c9d8c0d5781b7dea6f6c528bf0a940966871c0e76040df214ada266",
+        "source_sha256": "4b70fac146722ad47c8771196c7641185697263af08f42d0b9aca168648a8202",
+        "inputs": {
+          "libavformat.a": "cbf855ed982363d27ca21128e20a50505228a9f49b428ed3df941df978612076",
+          "libavcodec.a": "1cf3a8ec1392b81eec725011a4ef69c2959e1db0d348a9610843565385f95f5b",
+          "libavutil.a": "6394538d9af9313ad8968bdbe0d484fb8f2ed123aebbc48b0575b1bdc16ec83c",
+          "libswresample.a": "46491238dbc0eae93093c851a17da0b4936d3b4239ad347473db3e58158be8ef",
+          "nvdec720_preview_vs.h": "8eb9d606708057b851dc77312f2f114ce827dfb48497aa990bc154e2f16f7066",
+          "nvdec720_preview_ps.h": "0890586ff496a7c1408fe192dc25a16849f32add7656b76e7d0ea0d857de9d10",
+          "sample1080.mp4": "6395a2c6ff999357a572b8b1fd9300978b635c8e0cc93c43e80b835c00d296b0",
+          "sample1080.sha256": "9e1cb874492c76f189d147e535fbd2e52635ade0296c7b9feb4676791172ccc1"
+        }
+      },
+      "candidate": {
+        "bytes": 2950160,
+        "unsigned": "a39d93199618ad9d4d97f6fccda403058ba21a648b2dd1d7d341f5c35fcb9fdb",
+        "sha256": "b13e2c11bb6a00bc1f203f5391adff7978804c7c6ff86b8ee7b18ed4becddd1c",
+        "source_sha256": "5f235f394216b42757c3e95b3c48399004223aa6f38f94dc4a6f04a46b212023",
+        "inputs": {
+          "libavformat.a": "cbf855ed982363d27ca21128e20a50505228a9f49b428ed3df941df978612076",
+          "libavcodec.a": "1cf3a8ec1392b81eec725011a4ef69c2959e1db0d348a9610843565385f95f5b",
+          "libavutil.a": "6394538d9af9313ad8968bdbe0d484fb8f2ed123aebbc48b0575b1bdc16ec83c",
+          "libswresample.a": "46491238dbc0eae93093c851a17da0b4936d3b4239ad347473db3e58158be8ef",
+          "nvdec720_preview_vs.h": "8eb9d606708057b851dc77312f2f114ce827dfb48497aa990bc154e2f16f7066",
+          "nvdec720_preview_ps.h": "0890586ff496a7c1408fe192dc25a16849f32add7656b76e7d0ea0d857de9d10",
+          "sample1080.mp4": "6395a2c6ff999357a572b8b1fd9300978b635c8e0cc93c43e80b835c00d296b0",
+          "sample1080.sha256": "9e1cb874492c76f189d147e535fbd2e52635ade0296c7b9feb4676791172ccc1"
+        }
+      }
+    },
+    "metrics": {
+      "baseline": {
+        "six_frame_validation_ms": {
+          "samples": [
+            1975.9793,
+            1963.9413,
+            1825.0107,
+            2087.1842
+          ],
+          "median": 1969.9603
+        },
+        "full_loop_ms": {
+          "samples": [
+            3604.5548,
+            3726.9237,
+            4373.6862,
+            4226.7052
+          ],
+          "median": 3976.8145
+        },
+        "verified_fps": {
+          "samples": [
+            1.6646,
+            1.6099,
+            1.3718,
+            1.4195
+          ],
+          "median": 1.5147
+        },
+        "send_receive_ms": {
+          "samples": [
+            819.8746,
+            983.3993,
+            872.1289,
+            1396.7479
+          ],
+          "median": 927.7641
+        },
+        "readback_ms": {
+          "samples": [
+            108.3276,
+            188.9972,
+            141.8983,
+            141.2371
+          ],
+          "median": 141.5677
+        }
+      },
+      "candidate": {
+        "six_frame_validation_ms": {
+          "samples": [
+            1466.3686,
+            1486.0114,
+            1495.8603,
+            1430.2006
+          ],
+          "median": 1476.19
+        },
+        "full_loop_ms": {
+          "samples": [
+            3294.3696,
+            3201.3096,
+            3000.519,
+            2725.0403
+          ],
+          "median": 3100.9143
+        },
+        "verified_fps": {
+          "samples": [
+            1.8213,
+            1.8742,
+            1.9997,
+            2.2018
+          ],
+          "median": 1.9369
+        },
+        "send_receive_ms": {
+          "samples": [
+            1041.4926,
+            979.8512,
+            828.571,
+            683.7609
+          ],
+          "median": 904.2111
+        },
+        "readback_ms": {
+          "samples": [
+            199.7267,
+            126.6559,
+            133.846,
+            111.7345
+          ],
+          "median": 130.251
+        }
+      }
+    },
+    "percent_changes": {
+      "six_frame_validation_ms": -25.06,
+      "full_loop_ms": -22.03,
+      "verified_fps": 27.87,
+      "send_receive_ms": -2.54,
+      "readback_ms": -7.99
+    },
+    "raw_qpc_table": "nvdec-1080p-verification-ab.csv",
+    "raw_qpc_sha256": "f574aa242618532f21896850c599b8e11c1d570b56d804e385ff6d326e77e1c2",
+    "receipt_sha256": "89b74a93ce3c5ce42c520e397b635925193fc4b06507ed7dbb03022743e3c52d"
+  }
+}

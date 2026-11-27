@@ -1,0 +1,140 @@
+{
+  "scope": "Windows ARM64, 32-bit x86 system D3D9 HAL. Both runs use Direct3DCreate9 and identify the same GM20B LUID with Direct3DCreate9Ex. Windowed 96x64 X8R8G8B8, software vertex processing with HAL rasterization, no automatic depth stencil.",
+  "baseline_source": "701e579c7c90e118c242eca8182a57c8e76829d6",
+  "native_package": "queue-finish-6b36641bb429",
+  "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+  "x86_nvk_sha256": "1064131dcda0ee441b7b1dab86838a612546f6bdad4265a8d6e7c8ed2277101e",
+  "x86_slots": {
+    "DX9": "registered and cached",
+    "DX10": "absent",
+    "DX11": "absent",
+    "DX12": "absent",
+    "persistent_state_after": "restored to absent"
+  },
+  "public_retests": {
+    "gamma_query": {
+      "pid": 3764,
+      "boot_utc": "2026-11-19T16:42:36.5669500Z",
+      "image_sha256": "c55d81f51fc732757b666a1e56091b93024583ecc4c28dc459e3c3d721b4773d",
+      "trace_sha256": "34d7cd8240b536d8f6c96fd0ccb71335c1d5797217c39dd65bc434b94424feb8",
+      "x86_system_runtime": "SyChpe32\\d3d9.dll",
+      "loaded_umd": true,
+      "loaded_nvk": true,
+      "public": {
+        "classic": "1",
+        "create9ex": "00000000",
+        "luid-match": "1",
+        "display-mode": "00000000",
+        "hal-caps": "8876086a",
+        "check-windowed": "8876086a",
+        "create-hal": "8876086a"
+      },
+      "ddi_caps": [
+        {
+          "selector": 3,
+          "hr": "0x0",
+          "bytes": 4,
+          "count": 6
+        },
+        {
+          "selector": 6,
+          "hr": "0x0",
+          "bytes": 4,
+          "count": 6
+        },
+        {
+          "selector": 34,
+          "hr": "0x0",
+          "bytes": 4,
+          "count": 6
+        },
+        {
+          "selector": 13,
+          "hr": "0x0",
+          "bytes": 304,
+          "count": 6
+        },
+        {
+          "selector": 4,
+          "hr": "0x0",
+          "bytes": 40,
+          "count": 3
+        }
+      ],
+      "create_device_ddi_calls": 0,
+      "process_exit": 5,
+      "gpu_code_after": 0
+    },
+    "gamma_query_plus_hw_rasterization": {
+      "pid": 1728,
+      "boot_utc": "2026-11-19T16:42:36.5669500Z",
+      "image_sha256": "bfd2463d6161e49df19e5868b1f66a049ae9d7124ffae1a344d0f239d9c6f8da",
+      "trace_sha256": "6f02496d365396378f34c2f7ac57839a6b71444cb2c43cc9fbb66039a84f4446",
+      "x86_system_runtime": "SyChpe32\\d3d9.dll",
+      "loaded_umd": true,
+      "loaded_nvk": true,
+      "public": {
+        "classic": "1",
+        "create9ex": "00000000",
+        "luid-match": "1",
+        "display-mode": "00000000",
+        "hal-caps": "8876086a",
+        "check-windowed": "8876086a",
+        "create-hal": "8876086a"
+      },
+      "ddi_caps": [
+        {
+          "selector": 13,
+          "hr": "0x0",
+          "bytes": 304,
+          "count": 6
+        },
+        {
+          "selector": 3,
+          "hr": "0x0",
+          "bytes": 4,
+          "count": 6
+        },
+        {
+          "selector": 6,
+          "hr": "0x0",
+          "bytes": 4,
+          "count": 6
+        },
+        {
+          "selector": 34,
+          "hr": "0x0",
+          "bytes": 4,
+          "count": 6
+        },
+        {
+          "selector": 4,
+          "hr": "0x0",
+          "bytes": 40,
+          "count": 3
+        }
+      ],
+      "create_device_ddi_calls": 0,
+      "process_exit": 5,
+      "gpu_code_after": 0
+    }
+  },
+  "private_ddi_control": {
+    "image_sha256": "ac62c2cb1e0d3affc229754be3957769c449b34ffa20d7d74208e08ef655dfab",
+    "gpu_identity": "10de / 12e / SM53",
+    "clear_lock_unlock_readback": "passed",
+    "draw_pixels": {
+      "width": 34,
+      "height": 22,
+      "gradient": 45,
+      "solid": 80,
+      "background": 623
+    },
+    "close_device": 0,
+    "close_adapter": 0,
+    "close_kernel": 0,
+    "exit": 0
+  },
+  "finding": "All observed GetCaps queries succeeded, including the 4-byte gamma-ramp query returning no supported user-mode gamma ramp. The system HAL GetDeviceCaps, CheckDeviceType and CreateDevice still returned 0x8876086a before the driver CreateDevice callback. Advertising hardware rasterization alone did not change this result. Neither public test reached drawing or Present.",
+  "stability": "Both final test processes returned exit code 5 on the same boot, with a complete ETW file and GPU Code 0. An earlier gamma run ended in an unexpected reboot; its partial trace showed successful gamma queries but did not establish a process exit or the cause."
+}

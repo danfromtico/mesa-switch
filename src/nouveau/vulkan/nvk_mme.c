@@ -7,6 +7,8 @@
 #include "nvk_private.h"
 
 #include "mme_sim.h"
+#include "nv_push.h"
+#include "nv_push_cl9097.h"
 
 static const nvk_mme_builder_func mme_builders[NVK_MME_COUNT] = {
    [NVK_MME_SELECT_CB0]                    = nvk_mme_select_cb0,
@@ -62,6 +64,40 @@ nvk_build_mme(const struct nv_device_info *devinfo,
    mme_builders[mme](&b);
 
    return mme_builder_finish(&b, size_out);
+}
+
+bool
+nvk_push_mme_programs(struct nv_push *push,
+                      const struct nv_device_info *devinfo,
+                      bool allow_privileged)
+{
+   for (uint32_t mme = 0, mme_pos = 0; mme < NVK_MME_COUNT; mme++) {
+      if (!allow_privileged &&
+          (mme == NVK_MME_SET_PRIV_REG ||
+           mme == NVK_MME_SET_CONSERVATIVE_RASTER_STATE))
+         continue;
+
+      size_t size;
+      uint32_t *dw = nvk_build_mme(devinfo, mme, &size);
+      if (dw == NULL)
+         return false;
+
+      assert(size % sizeof(uint32_t) == 0);
+      const uint32_t num_dw = size / sizeof(uint32_t);
+
+      P_MTHD(push, NV9097, LOAD_MME_START_ADDRESS_RAM_POINTER);
+      P_NV9097_LOAD_MME_START_ADDRESS_RAM_POINTER(push, mme);
+      P_NV9097_LOAD_MME_START_ADDRESS_RAM(push, mme_pos);
+
+      P_1INC(push, NV9097, LOAD_MME_INSTRUCTION_RAM_POINTER);
+      P_NV9097_LOAD_MME_INSTRUCTION_RAM_POINTER(push, mme_pos);
+      P_INLINE_ARRAY(push, dw, num_dw);
+
+      mme_pos += num_dw;
+      free(dw);
+   }
+
+   return true;
 }
 
 struct nvk_mme_test_state {

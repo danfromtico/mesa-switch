@@ -1,0 +1,230 @@
+{
+  "status": "Switch Lite D3D11 vertex-stream and indirect-draw controls",
+  "kernel_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+  "boot_utc": "2026-11-18T08:32:33.8938970Z",
+  "probe_source_sha256": "c6690fc1a3ec0f9230db42ae90b256d58f8f119600d1914a3f9f7ac087aa9cb0",
+  "signed_probe_sha256": {
+    "arm64": "6f351b816e87c52eb62c094b01206c5a4e58be6b16b111f16ab061000f91177e",
+    "x64": "f6cd804e76d209ae020f6fe69a186a8e434caeabb69e62303db10bc579914fdd",
+    "x86": "0aa08a9f034f8b39795cd69a1ddd4a096146a81a84294e31dbdcf24de77c5eeb"
+  },
+  "dxvk_source": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+  "dxbc_spirv_source": "bf14419e5fa7eacb817b7b632f03cb61d61bbad7",
+  "application_packages": {
+    "DXVK-ARM64EC": {
+      "bytes": 8470528,
+      "sha256": "c86da9ad9f59dec24f49a691fa7994e179321bc2b8916ba3586ce028e2ce9d54",
+      "pe_machine": "0x8664"
+    },
+    "DXVK-x86": {
+      "bytes": 8527872,
+      "sha256": "ec217fcc19f848c82bd8086eb7e8a495b2d669a2356841f8713589c3b4b96e35",
+      "pe_machine": "0x014C"
+    },
+    "DXVK-x86_64": {
+      "bytes": 8167424,
+      "sha256": "45dec03c2be5e499604ddcfc48064821542b7d5b9642a6ea79161fcb1ce4b4c8",
+      "pe_machine": "0x8664"
+    }
+  },
+  "test": "Two triangle-list draws each supply three vertices. The second starts at a different corner and appends into the same stream buffer. Each unwritten float begins at -1234. The probe checks six float4 positions, both SO primitive counts, and all 4096 DrawAuto pixels.",
+  "runs": [
+    {
+      "case": "warp-arm64-implicit",
+      "utc": "2026-11-18T08:53:33.9700362Z",
+      "exit": 0,
+      "adapter": "Microsoft Basic Render Driver",
+      "host": "arm64",
+      "d3d11_runtime": "Windows system WARP",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 6,
+      "correct_positions_in_sequence": 6,
+      "untouched_tail_records": 0,
+      "drawauto_full_image": true,
+      "indirect_compute_pass": true
+    },
+    {
+      "case": "nvk-x86-explicit",
+      "utc": "2026-11-18T08:53:38.1887862Z",
+      "exit": 0,
+      "adapter": "NVK GM20B",
+      "host": "x86",
+      "d3d11_runtime": "desktop x86 package",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 6,
+      "correct_positions_in_sequence": 6,
+      "untouched_tail_records": 0,
+      "drawauto_full_image": true,
+      "indirect_compute_pass": true
+    },
+    {
+      "case": "nvk-x64-explicit",
+      "utc": "2026-11-18T08:53:43.3250925Z",
+      "exit": 0,
+      "adapter": "NVK GM20B",
+      "host": "x64",
+      "d3d11_runtime": "desktop x64 package",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 6,
+      "correct_positions_in_sequence": 6,
+      "untouched_tail_records": 0,
+      "drawauto_full_image": true,
+      "indirect_compute_pass": true
+    },
+    {
+      "case": "nvk-ec-explicit",
+      "utc": "2026-11-18T08:53:47.6370518Z",
+      "exit": 0,
+      "adapter": "NVK GM20B",
+      "host": "x64",
+      "d3d11_runtime": "desktop ARM64EC package",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 6,
+      "correct_positions_in_sequence": 6,
+      "untouched_tail_records": 0,
+      "drawauto_full_image": true,
+      "indirect_compute_pass": true
+    },
+    {
+      "case": "nvk-x86-implicit",
+      "utc": "2026-11-18T08:53:52.4339225Z",
+      "exit": 14,
+      "adapter": "NVK GM20B",
+      "host": "x86",
+      "d3d11_runtime": "desktop x86 package",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 2,
+      "correct_positions_in_sequence": 1,
+      "untouched_tail_records": 4,
+      "drawauto_full_image": false,
+      "indirect_compute_pass": true
+    },
+    {
+      "case": "nvk-x64-implicit",
+      "utc": "2026-11-18T08:53:57.5745525Z",
+      "exit": 14,
+      "adapter": "NVK GM20B",
+      "host": "x64",
+      "d3d11_runtime": "desktop x64 package",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 2,
+      "correct_positions_in_sequence": 1,
+      "untouched_tail_records": 4,
+      "drawauto_full_image": false,
+      "indirect_compute_pass": true
+    },
+    {
+      "case": "nvk-ec-implicit",
+      "utc": "2026-11-18T08:54:02.1839244Z",
+      "exit": 14,
+      "adapter": "NVK GM20B",
+      "host": "x64",
+      "d3d11_runtime": "desktop ARM64EC package",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 2,
+      "correct_positions_in_sequence": 1,
+      "untouched_tail_records": 4,
+      "drawauto_full_image": false,
+      "indirect_compute_pass": true
+    },
+    {
+      "case": "warp-x64-implicit",
+      "utc": "2026-11-18T08:54:04.7308026Z",
+      "exit": 0,
+      "adapter": "Microsoft Basic Render Driver",
+      "host": "x64",
+      "d3d11_runtime": "Windows system WARP",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 6,
+      "correct_positions_in_sequence": 6,
+      "untouched_tail_records": 0,
+      "drawauto_full_image": true,
+      "indirect_compute_pass": true
+    },
+    {
+      "case": "warp-x86-implicit",
+      "utc": "2026-11-18T08:55:28.1215338Z",
+      "exit": 0,
+      "adapter": "Microsoft Basic Render Driver",
+      "host": "x86",
+      "d3d11_runtime": "Windows system WARP",
+      "so_primitives": [
+        2,
+        2
+      ],
+      "written_vertices": 6,
+      "correct_positions_in_sequence": 6,
+      "untouched_tail_records": 0,
+      "drawauto_full_image": true,
+      "indirect_compute_pass": true
+    }
+  ],
+  "software_vulkan_control": {
+    "case": "x86 desktop DXVK with x86 lavapipe",
+    "d3d11_sha256": "ec217fcc19f848c82bd8086eb7e8a495b2d669a2356841f8713589c3b4b96e35",
+    "probe_sha256": "574a12450ba85459f68ed4d00ffbe436aa1a6e321c27ea509f7393e63fd0123c",
+    "icd_sha256": "c65488e6172ca7347bf91a7013e00121f1e627e10b5d16a4d589315ffefda8af",
+    "device": "info:  Found device: llvmpipe (LLVM 23.1.2, 128 bits) (llvmpipe 26.2.4)",
+    "exit": 14,
+    "first_pixel": [
+      64,
+      128,
+      191,
+      255
+    ],
+    "so_primitives": [
+      2,
+      2
+    ]
+  },
+  "shader": {
+    "synthetic_shader_sha256": "864844c014e0347f92c0d056f3984573992b652c11f0cee31be7ba4c4268a1ea",
+    "spirv_validation_target": "vulkan1.3",
+    "dump_stage": "DXVK getCode(nullptr, nullptr) before pipeline linkage",
+    "execution_modes": [
+      "Xfb",
+      "InputPoints",
+      "OutputPoints",
+      "OutputVertices 1"
+    ],
+    "emit_vertex_instructions": 1,
+    "source": [
+      "https://github.com/doitsujin/dxbc-spirv/blob/bf14419e5fa7eacb817b7b632f03cb61d61bbad7/dxbc/dxbc_converter.cpp#L45-L62",
+      "https://github.com/doitsujin/dxbc-spirv/blob/bf14419e5fa7eacb817b7b632f03cb61d61bbad7/dxbc/dxbc_io_map.cpp#L365-L395",
+      "https://github.com/doitsujin/dxbc-spirv/blob/bf14419e5fa7eacb817b7b632f03cb61d61bbad7/ir/passes/ir_pass_lower_io.cpp#L320-L364",
+      "https://github.com/doitsujin/dxvk/blob/b1a1c99ab52b687cf950d62c88bc2fa316b41663/src/dxvk/dxvk_shader_ir.cpp#L2038-L2039",
+      "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11device-creategeometryshaderwithstreamoutput"
+    ],
+    "interpretation": "The generated shader copies vertex zero once per primitive. DXVK changes the geometry input type during linkage. The two written records on hardware match the first vertex of each triangle. Explicit triangulated stream output and DrawAuto pass on all three desktop DXVK packages."
+  },
+  "controls": {
+    "initial_system_control": "The native D3D runtime rejected the previous immutable indirect-argument buffer. The verified probe uses D3D11_USAGE_DEFAULT for that resource.",
+    "loader_restored_sha256": "362d6e4cf8b9876309b01b65e62d95631bcb2aa6b407c3c036b9b8a29d98797a",
+    "cleanup": "Windows held a temporary x64 WARP executable open after exit. The last x86 WARP control then ran independently. All ten tracked executable paths were checked and all temporary images retired.",
+    "scope": "Stock application-local DLLs were used throughout. The automatically generated DXVK stream shader remains a limitation of the tested packages."
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "platform": "Switch GM20B (10de:012e, SM53), Windows on ARM64",
+  "scope": "Strict public FL11_1 device, immediate context and offscreen Draw with a full pixel readback",
+  "api": "System32/d3d11.dll!D3D11CreateDevice with explicit DXGI adapter, UNKNOWN driver type, feature level array [0xb100], count 1",
+  "baseline": {
+    "umd": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e",
+    "native_result": "DXGI_ERROR_UNSUPPORTED",
+    "warp": [
+      "runtime\tWARP\tb100\t1414\t8c\t2\t0000000000005a34",
+      "triangle-readback\t280\t309",
+      "complete\t1"
+    ]
+  },
+  "trial": {
+    "signed_kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "signed_umd": "7dcbc53c55dd46ab8ab405884664193e904adb21a408ce169aeb75b390fce4c6",
+    "signed_icd": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "probe_sha256": "1f45a6784afba24396a799ee8d7b1b6830962ec057a4ff555de650ba0b93728f",
+    "boot_utc": "2026-11-19T10:38:08.8915300Z",
+    "end_utc": "2026-11-19T10:40:03.2657684Z",
+    "process_exit": 0,
+    "gpu_problem_code": 0,
+    "readback": {
+      "drawn": 280,
+      "background": 309,
+      "mismatch": 0
+    },
+    "runtime": [
+      "hardware-adapter\t0000000000005957\t10de\t12e\t53",
+      "runtime\thardware\tb100\t414f5753\t31304630\t0\t0000000000005957",
+      "hardware-module\tC:\\ProgramData\\SwitchWOA\\GpuUpdate\\fl11-level-7dcbc53c55dd\\app\\TegraGpuD3DVk.dll",
+      "hardware-module\tC:\\ProgramData\\SwitchWOA\\GpuUpdate\\fl11-level-7dcbc53c55dd\\app\\libvulkan_nouveau.dll",
+      "triangle-readback\t280\t309",
+      "complete\t1"
+    ],
+    "etw": {
+      "sha256": "fec3af400f2044d4ef9af46929e253b90018e121fc4d13c4b99bc67fdeb298ef",
+      "process": "strict.exe",
+      "native_pipeline_level_bits": 15,
+      "graphics_uav_slots": 64,
+      "ddi_create_successes": 1,
+      "successful_submissions": 1
+    }
+  },
+  "coverage_limits": [
+    "The draw uses an offscreen target. Game presentation, full feature-level conformance and browser video decoding have separate acceptance cases."
+  ],
+  "promotion": {
+    "approved_utc": "2026-11-19T10:44:12.1160386Z",
+    "boot_permission": "permanent",
+    "one_use_token": false,
+    "automatic_renewal": false,
+    "previous_verified_umd": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e",
+    "previous_verified_icd": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+  }
+}

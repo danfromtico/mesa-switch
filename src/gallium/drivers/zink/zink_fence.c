@@ -247,6 +247,10 @@ zink_fence_server_signal(struct pipe_context *pctx, struct pipe_fence_handle *pf
 
    util_dynarray_append(&ctx->bs->user_signal_semaphores, mfence->sem);
    util_dynarray_append(&ctx->bs->user_signal_semaphore_values, value);
+   /* Submission may finish before GPU execution. Keep the imported payload
+    * alive until the batch completes, even if the caller releases its fence. */
+   pipe_reference(NULL, &mfence->reference);
+   util_dynarray_append(&bs->fences, mfence);
    bs->has_work = true;
 
 
@@ -262,8 +266,25 @@ zink_fence_server_sync(struct pipe_context *pctx, struct pipe_fence_handle *pfen
    struct zink_context *ctx = zink_context(pctx);
    struct zink_tc_fence *mfence = (struct zink_tc_fence *)pfence;
 
-   if (mfence->deferred_ctx == pctx || !mfence->sem)
+   if (!mfence->sem)
       return;
+
+   if (mfence->is_timeline) {
+      /* Waiting twice in one batch must retain the later timeline point.
+       * Look in this batch: an older asynchronous submit may still own the
+       * fence's deferred_ctx while this batch is already recording. */
+      unsigned count = util_dynarray_num_elements(&ctx->bs->wait_semaphores, VkSemaphore);
+      VkSemaphore *semaphores = ctx->bs->wait_semaphores.data;
+      uint64_t *values = ctx->bs->wait_semaphore_values.data;
+      for (unsigned i = 0; i < count; i++) {
+         if (semaphores[i] == mfence->sem) {
+            values[i] = MAX2(values[i], value);
+            return;
+         }
+      }
+   } else if (mfence->deferred_ctx == pctx) {
+      return;
+   }
 
    mfence->deferred_ctx = pctx;
    /* this will be applied on the next submit */
@@ -284,6 +305,7 @@ zink_semaphore_fence_create(struct pipe_screen *pscreen, VkSemaphoreType sema_ty
    struct zink_tc_fence *mfence = zink_create_tc_fence();
    if (!mfence)
       return NULL;
+   mfence->is_timeline = sema_type == VK_SEMAPHORE_TYPE_TIMELINE;
 
    const VkSemaphoreTypeCreateInfo tci = {
       VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
@@ -367,33 +389,40 @@ void
 zink_create_fence_win32(struct pipe_screen *pscreen, struct pipe_fence_handle **pfence, void *handle, const void *name, enum pipe_fd_type type)
 {
    struct zink_screen *screen = zink_screen(pscreen);
-   VkResult ret = VK_ERROR_UNKNOWN;
-   VkSemaphoreCreateInfo sci = {
-      VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-      NULL,
-      0
-   };
-   struct zink_tc_fence *mfence = zink_create_tc_fence();
-   VkExternalSemaphoreHandleTypeFlagBits flags[] = {
-      [PIPE_FD_TYPE_NATIVE_SYNC] = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT,
-      [PIPE_FD_TYPE_SYNCOBJ] = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT,
-   };
-   VkImportSemaphoreWin32HandleInfoKHR sdi = {0};
-   assert(type < ARRAY_SIZE(flags));
-
-   *pfence = NULL;
-
-   if (VKSCR(CreateSemaphore)(screen->dev, &sci, NULL, &mfence->sem) != VK_SUCCESS) {
-      FREE(mfence);
+   fence_reference(pscreen, pfence, NULL);
+   if (!screen->info.have_KHR_external_semaphore_win32)
+      return;
+   VkSemaphoreType sema_type;
+   VkExternalSemaphoreHandleTypeFlagBits handle_type;
+   switch (type) {
+   case PIPE_FD_TYPE_NATIVE_SYNC:
+   case PIPE_FD_TYPE_SYNCOBJ:
+      sema_type = VK_SEMAPHORE_TYPE_BINARY;
+      handle_type = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+      break;
+   case PIPE_FD_TYPE_TIMELINE_SEMAPHORE_D3D12:
+      sema_type = VK_SEMAPHORE_TYPE_TIMELINE;
+      handle_type = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_D3D12_FENCE_BIT;
+      break;
+   case PIPE_FD_TYPE_TIMELINE_SEMAPHORE_VK:
+      sema_type = VK_SEMAPHORE_TYPE_TIMELINE;
+      handle_type = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+      break;
+   default:
       return;
    }
 
-   sdi.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR;
-   sdi.semaphore = mfence->sem;
-   sdi.handleType = flags[type];
-   sdi.handle = handle;
-   sdi.name = (LPCWSTR)name;
-   ret = VKSCR(ImportSemaphoreWin32HandleKHR)(screen->dev, &sdi);
+   struct zink_tc_fence *mfence = zink_semaphore_fence_create(pscreen, sema_type);
+   if (!mfence)
+      return;
+   const VkImportSemaphoreWin32HandleInfoKHR sdi = {
+      .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR,
+      .semaphore = mfence->sem,
+      .handleType = handle_type,
+      .handle = handle,
+      .name = name,
+   };
+   VkResult ret = VKSCR(ImportSemaphoreWin32HandleKHR)(screen->dev, &sdi);
 
    if (!zink_screen_handle_vkresult(screen, ret))
       goto fail;

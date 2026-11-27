@@ -56,8 +56,9 @@ specific to NVK:
    a comma-separated list of named flags, which do various things:
 
    ``push``
-      Dumps all pushbufs to stderr on submit.  This requires that
-      ``push_sync`` also be set.
+      Dumps the submitted batch's push buffers to stderr after the submission
+      attempt, including buffers later in a batch that failed partway through.
+      It does not wait for completion.
    ``push_sync``
       Waits for submit to complete before continuing
    ``zero_memory``
@@ -78,6 +79,10 @@ specific to NVK:
       applies to Tegra devices.
    ``no_compression``
       Disables image compression.
+   ``log``
+      Enables Vulkan diagnostic logging in release builds even without an
+      application debug callback.  For example, ``NVK_DEBUG=push,log`` includes
+      transport error messages and their source locations alongside push dumps.
 
 .. envvar:: NVK_EXPERIMENTAL
 
@@ -88,13 +93,6 @@ specific to NVK:
 
    ``dlss_backwards_compat``
       Allow using DLSS bytecode intended for earlier architectures if compatible.
-
-.. envvar:: NVK_I_WANT_A_BROKEN_VULKAN_DRIVER
-
-   If defined to ``1`` or ``true``, this will enable enumeration of all
-   GPUs Kepler and later, including GPUs for which hardware support is
-   poorly tested or completely broken.  This is intended for developer use
-   only.
 
 Developer info
 --------------

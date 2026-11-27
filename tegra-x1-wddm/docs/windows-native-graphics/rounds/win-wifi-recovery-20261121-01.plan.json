@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "round_id": "win-wifi-recovery-20261121-01",
+  "contract_id": "WIN-WIFI-RECOVERY",
+  "windows_question": "WIN-WIFI-RECOVERY",
+  "owner": "Windows WLAN、SSH 传输和启动事件",
+  "question": "一次连接中断属于 Wi-Fi/SSH、受控重启还是意外重启？",
+  "method": "记录真实 SSH 失联边界，恢复后只读核对本机启动、桌面、功耗档位和网络日志",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "有重连前后启动和 WLAN 证据；只设置 SSH 重试间隔的区间继续标为网络观测缺口。",
+  "observations": [
+    "先保留同启动的正式组件实载、Code 0、交流状态、功耗档位和首个 SSH 超时回执。",
+    "沿同一端点每 180 秒重试，连续 1800 秒失联按约定暂停。恢复后按同一事件时间窗读取 System、WLAN-AutoConfig 和 OpenSSH，保留原始 XML 和各通道可用状态。",
+    "按断线前后 Boot 与 DWM 启动时间、计划/异常启动事件及无线事件裁决，留存原因或缺失。该轮只执行正常只读 Windows 查询，不启动应用、不更改功耗档位。"
+  ],
+  "inputs": {
+    "before": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/late-adapter-current-formal.json",
+      "sha256": "bed8e9090cce2a7f2489c316bb5460b271f04cd7d75119561726fb99aee284e0"
+    },
+    "first_ssh_rpc": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dxvk-games-01a1ec52/chromium-copyout-c27-win-late-adapter-power-detail-162721339688-result.json",
+      "sha256": "f9d956bce694844d8c89d146c6db7795b24072d06ad2ab36497b39298d09a451"
+    },
+    "first_ssh_stderr": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dxvk-games-01a1ec52/chromium-copyout-c27-win-late-adapter-power-detail-162721339688.stderr",
+      "sha256": "80b4ad6c55ad45905c440f4a027af032d141ba7fb063900b715538a11973c9fa"
+    },
+    "last_dwm_scheduler_round": {
+      "path": "windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json",
+      "sha256": "b394a991ddc86d9dd7bc8d918b4708487fb36721459ba5b0e914a47f5ad7f8c3"
+    }
+  }
+}

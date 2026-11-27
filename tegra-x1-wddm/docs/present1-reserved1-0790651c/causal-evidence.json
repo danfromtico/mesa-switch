@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "fault_id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+  "scope": "wddm20-flip-sequential-empty-reserved1",
+  "confirmed_cause": "The Present1 Reserved input guard rejects the runtime-observed value 1 before forwarding on the NVK WDDM2.0 path.",
+  "existing_native_report": {
+    "path": "tegra-x1-wddm/docs/dxvk-games-20261118/wddm20-present1-native-window.json",
+    "sha256": "2b43c0a510ebe9496923ffe3c724e308582ba3c19515f77b40cee331471ee1d9"
+  },
+  "causal_limit": "Existing process-scoped trial establishes the observed Reserved=1 input guard rejection only. This file is supporting causal evidence, not the new signed production DLL hardware receipt. Legacy first-Present, alternate swap effect and six-frame restart faults remain open.",
+  "production_fix": "abd9f213594ae056a9d8b01d560d7b20eb455560",
+  "prepared_previous_release_source_commit": "d64b5f8045ce8c9ad463194fc03a0e33e10625ad",
+  "release_source_commit": "df08e8583abc202732036597f5cb7f0519ba11a5",
+  "production_source_commit": "b02c99e37a9c11c942e237af5fc4642598946c76",
+  "entry_delta": "Exact TGD3D_WDDM20_APPLICATION=1 process opt-in adds the WDDM2.0 offer only to NVK, with default four offers unchanged. Event34 marks valid forwarding after parameter/interface/surface validation; absence alone does not prove no callback."
+}

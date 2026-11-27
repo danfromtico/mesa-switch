@@ -1,0 +1,1392 @@
+{
+  "inputs": {
+    "DXVK": "d490930920a24fb9ac4a0585c68042929acd7e700e04d0a032c79d9fddf1c462",
+    "Zink": "ef9ab476005ca4e8d7568537bc4ad9e06224880411f1e1ea86c0f5e9eda2ad60",
+    "x64": "86dd05e5956862fa90a31154598c339db89504618f50ab6c575d64a1f9494acd",
+    "x86": "53a200166cd9511a14220fa47cf6ec968d8b0d6a596ea9d11650671a21b739d7"
+  },
+  "architectures": {
+    "x64": {
+      "DXVK": {
+        "profiles": {
+          "VP_DXVK_d3d9_baseline": {
+            "meets_reported_requirements": true,
+            "failed_capability_groups": [],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d9_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "dxvk_common_optional"
+              ],
+              [
+                "d3d9_optional"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206816
+          },
+          "VP_DXVK_d3d10_level_10_1_baseline": {
+            "meets_reported_requirements": true,
+            "failed_capability_groups": [],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_11_0_baseline": {
+            "meets_reported_requirements": true,
+            "failed_capability_groups": [],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_11_1_baseline": {
+            "meets_reported_requirements": true,
+            "failed_capability_groups": [],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_11_1_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "dxvk_common_optional"
+              ],
+              [
+                "d3d11_baseline_optional"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_12_0_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "dxvk_common_optional"
+              ],
+              [
+                "d3d11_baseline_optional"
+              ],
+              [
+                "d3d11_level12_0"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_12_1_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "dxvk_common_optional"
+              ],
+              [
+                "d3d11_baseline_optional"
+              ],
+              [
+                "d3d11_level12_0"
+              ],
+              [
+                "d3d11_level12_1"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          }
+        },
+        "capability_mismatches": {
+          "vulkan10requirements": [],
+          "vulkan11requirements": [],
+          "vulkan12requirements": [],
+          "vulkan13requirements": [],
+          "dxvk_common_required": [],
+          "dxvk_common_optional": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_maintenance11",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_present_id2",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_present_wait2",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_descriptor_heap",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_pageable_device_local_memory",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceMaintenance11FeaturesKHR",
+              "field": "maintenance11",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDevicePresentId2FeaturesKHR",
+              "field": "presentId2",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDevicePresentWait2FeaturesKHR",
+              "field": "presentWait2",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceDescriptorHeapFeaturesEXT",
+              "field": "descriptorHeap",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT",
+              "field": "pageableDeviceLocalMemory",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            }
+          ],
+          "d3d9_baseline": [],
+          "d3d9_optional": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_memory_priority",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceMemoryPriorityFeaturesEXT",
+              "field": "memoryPriority",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceDepthBiasControlFeaturesEXT",
+              "field": "floatRepresentation",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "d3d11_baseline": [],
+          "d3d11_baseline_optional": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_memory_priority",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_swapchain_colorspace",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceMemoryPriorityFeaturesEXT",
+              "field": "memoryPriority",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            }
+          ],
+          "d3d11_level11_0": [],
+          "d3d11_level11_0_optional": [],
+          "d3d11_level11_1": [],
+          "d3d11_level12_0": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "shaderResourceResidency",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "shaderResourceMinLod",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseBinding",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyBuffer",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyAliased",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyImage2D",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "d3d11_level12_1": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_conservative_rasterization",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "properties",
+              "structure": "VkPhysicalDeviceConservativeRasterizationPropertiesEXT",
+              "field": "degenerateTrianglesRasterized",
+              "required": true,
+              "reported": null,
+              "limit_rule": "exact"
+            },
+            {
+              "group": "properties",
+              "structure": "VkPhysicalDeviceConservativeRasterizationPropertiesEXT",
+              "field": "fullyCoveredFragmentShaderInputVariable",
+              "required": true,
+              "reported": null,
+              "limit_rule": "max"
+            }
+          ]
+        }
+      },
+      "Zink": {
+        "profiles": {
+          "VP_ZINK_gl21_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl30_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl31_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl32_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl33_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl40_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl41_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl42_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl43_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          },
+          "VP_ZINK_gl44_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          },
+          "VP_ZINK_gl45_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          },
+          "VP_ZINK_gl46_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ],
+              [
+                "gl46_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          },
+          "VP_ZINK_gl46_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ],
+              [
+                "gl46_baseline"
+              ],
+              [
+                "gl46_optimal"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          }
+        },
+        "capability_mismatches": {
+          "vulkan10requirements": [],
+          "gl21_baseline": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceBorderColorSwizzleFeaturesEXT",
+              "field": "borderColorSwizzleFromImage",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "gl21_baseline_vk10": [],
+          "gl21_baseline_vk12": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceVulkan12Features",
+              "field": "drawIndirectCount",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "gl21_baseline_line_bresenham": [],
+          "gl21_baseline_line_non_strict": [
+            {
+              "group": "properties",
+              "structure": "VkPhysicalDeviceProperties",
+              "field": "limits.strictLines",
+              "required": false,
+              "reported": true,
+              "limit_rule": "max"
+            }
+          ],
+          "gl21_optional": [],
+          "gl30_baseline": [],
+          "gl31_baseline": [],
+          "gl32_baseline": [],
+          "gl33_baseline": [],
+          "gl40_baseline": [],
+          "gl41_baseline": [],
+          "gl42_baseline": [],
+          "gl42_baseline_vk10": [],
+          "gl42_baseline_vk12": [],
+          "gl43_baseline_rb2": [],
+          "gl43_baseline_rb_image_vk13": [],
+          "gl43_baseline_rb_image_ext": [],
+          "gl43_baseline": [],
+          "gl44_baseline": [],
+          "gl44_baseline_ext": [],
+          "gl44_baseline_vk12": [],
+          "gl45_baseline": [],
+          "gl46_baseline": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_draw_indirect_count",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            }
+          ],
+          "gl46_optimal": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_attachment_feedback_loop_dynamic_state",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_device_address_commands",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceDeviceAddressCommandsFeaturesKHR",
+              "field": "deviceAddressCommands",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceAttachmentFeedbackLoopDynamicStateFeaturesEXT",
+              "field": "attachmentFeedbackLoopDynamicState",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            }
+          ],
+          "gl46_optimal_ext": [],
+          "gl46_optimal_vk13": [],
+          "gl46_optional": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_primitive_restart_index",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDevicePrimitiveRestartIndexFeaturesEXT",
+              "field": "primitiveRestartIndex",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            }
+          ],
+          "gl46_optional_ext": [],
+          "gl46_optional_vk13": [],
+          "GL_ARB_bindless_texture": [],
+          "GL_ARB_sparse_texture": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyImage2D",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyImage3D",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture2": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency2Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture_clamp_2s": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency2Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture_clamp_4s": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency4Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture_clamp_8s": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency8Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture_clamp_16s": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency16Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_buffer": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseBinding",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyBuffer",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_shader_viewport_layer_array_ext": [],
+          "GL_ARB_shader_viewport_layer_array_vk12": [],
+          "GL_ARB_fragment_shader_interlock": [],
+          "GL_ARB_shader_clock": [],
+          "GL_ARB_shader_ballot_ext": [],
+          "GL_ARB_shader_ballot_vk11": [
+            {
+              "group": "properties",
+              "structure": "VkPhysicalDeviceSubgroupProperties",
+              "field": "subgroupSize",
+              "required": 64,
+              "reported": 32,
+              "limit_rule": "max,pot"
+            }
+          ],
+          "GL_ARB_sample_locations": [],
+          "GL_ARB_shader_stencil_export": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_shader_stencil_export",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            }
+          ],
+          "GL_EXT_depth_bounds_test": [],
+          "GL_EXT_texture_filter_minmax_ext": [],
+          "GL_EXT_texture_filter_minmax_vk12": []
+        }
+      }
+    },
+    "x86": {
+      "DXVK": {
+        "profiles": {
+          "VP_DXVK_d3d9_baseline": {
+            "meets_reported_requirements": true,
+            "failed_capability_groups": [],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d9_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "dxvk_common_optional"
+              ],
+              [
+                "d3d9_optional"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206816
+          },
+          "VP_DXVK_d3d10_level_10_1_baseline": {
+            "meets_reported_requirements": true,
+            "failed_capability_groups": [],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_11_0_baseline": {
+            "meets_reported_requirements": true,
+            "failed_capability_groups": [],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_11_1_baseline": {
+            "meets_reported_requirements": true,
+            "failed_capability_groups": [],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_11_1_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "dxvk_common_optional"
+              ],
+              [
+                "d3d11_baseline_optional"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_12_0_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "dxvk_common_optional"
+              ],
+              [
+                "d3d11_baseline_optional"
+              ],
+              [
+                "d3d11_level12_0"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          },
+          "VP_DXVK_d3d11_level_12_1_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "dxvk_common_optional"
+              ],
+              [
+                "d3d11_baseline_optional"
+              ],
+              [
+                "d3d11_level12_0"
+              ],
+              [
+                "d3d11_level12_1"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206796
+          }
+        },
+        "capability_mismatches": {
+          "vulkan10requirements": [],
+          "vulkan11requirements": [],
+          "vulkan12requirements": [],
+          "vulkan13requirements": [],
+          "dxvk_common_required": [],
+          "dxvk_common_optional": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_maintenance11",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_present_id2",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_present_wait2",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_descriptor_heap",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_pageable_device_local_memory",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceMaintenance11FeaturesKHR",
+              "field": "maintenance11",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDevicePresentId2FeaturesKHR",
+              "field": "presentId2",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDevicePresentWait2FeaturesKHR",
+              "field": "presentWait2",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceDescriptorHeapFeaturesEXT",
+              "field": "descriptorHeap",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT",
+              "field": "pageableDeviceLocalMemory",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            }
+          ],
+          "d3d9_baseline": [],
+          "d3d9_optional": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_memory_priority",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceMemoryPriorityFeaturesEXT",
+              "field": "memoryPriority",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceDepthBiasControlFeaturesEXT",
+              "field": "floatRepresentation",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "d3d11_baseline": [],
+          "d3d11_baseline_optional": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_memory_priority",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_swapchain_colorspace",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceMemoryPriorityFeaturesEXT",
+              "field": "memoryPriority",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            }
+          ],
+          "d3d11_level11_0": [],
+          "d3d11_level11_0_optional": [],
+          "d3d11_level11_1": [],
+          "d3d11_level12_0": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "shaderResourceResidency",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "shaderResourceMinLod",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseBinding",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyBuffer",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyAliased",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyImage2D",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "d3d11_level12_1": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_conservative_rasterization",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "properties",
+              "structure": "VkPhysicalDeviceConservativeRasterizationPropertiesEXT",
+              "field": "degenerateTrianglesRasterized",
+              "required": true,
+              "reported": null,
+              "limit_rule": "exact"
+            },
+            {
+              "group": "properties",
+              "structure": "VkPhysicalDeviceConservativeRasterizationPropertiesEXT",
+              "field": "fullyCoveredFragmentShaderInputVariable",
+              "required": true,
+              "reported": null,
+              "limit_rule": "max"
+            }
+          ]
+        }
+      },
+      "Zink": {
+        "profiles": {
+          "VP_ZINK_gl21_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl30_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl31_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl32_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl33_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl40_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl41_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl42_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4202496
+          },
+          "VP_ZINK_gl43_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          },
+          "VP_ZINK_gl44_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          },
+          "VP_ZINK_gl45_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          },
+          "VP_ZINK_gl46_baseline": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ],
+              [
+                "gl46_baseline"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          },
+          "VP_ZINK_gl46_optimal": {
+            "meets_reported_requirements": false,
+            "failed_capability_groups": [
+              [
+                "gl21_baseline"
+              ],
+              [
+                "gl46_baseline"
+              ],
+              [
+                "gl46_optimal"
+              ]
+            ],
+            "reported_api_version": 4211042,
+            "required_api_version": 4206592
+          }
+        },
+        "capability_mismatches": {
+          "vulkan10requirements": [],
+          "gl21_baseline": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceBorderColorSwizzleFeaturesEXT",
+              "field": "borderColorSwizzleFromImage",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "gl21_baseline_vk10": [],
+          "gl21_baseline_vk12": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceVulkan12Features",
+              "field": "drawIndirectCount",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "gl21_baseline_line_bresenham": [],
+          "gl21_baseline_line_non_strict": [
+            {
+              "group": "properties",
+              "structure": "VkPhysicalDeviceProperties",
+              "field": "limits.strictLines",
+              "required": false,
+              "reported": true,
+              "limit_rule": "max"
+            }
+          ],
+          "gl21_optional": [],
+          "gl30_baseline": [],
+          "gl31_baseline": [],
+          "gl32_baseline": [],
+          "gl33_baseline": [],
+          "gl40_baseline": [],
+          "gl41_baseline": [],
+          "gl42_baseline": [],
+          "gl42_baseline_vk10": [],
+          "gl42_baseline_vk12": [],
+          "gl43_baseline_rb2": [],
+          "gl43_baseline_rb_image_vk13": [],
+          "gl43_baseline_rb_image_ext": [],
+          "gl43_baseline": [],
+          "gl44_baseline": [],
+          "gl44_baseline_ext": [],
+          "gl44_baseline_vk12": [],
+          "gl45_baseline": [],
+          "gl46_baseline": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_draw_indirect_count",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            }
+          ],
+          "gl46_optimal": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_attachment_feedback_loop_dynamic_state",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_KHR_device_address_commands",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceDeviceAddressCommandsFeaturesKHR",
+              "field": "deviceAddressCommands",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceAttachmentFeedbackLoopDynamicStateFeaturesEXT",
+              "field": "attachmentFeedbackLoopDynamicState",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            }
+          ],
+          "gl46_optimal_ext": [],
+          "gl46_optimal_vk13": [],
+          "gl46_optional": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_primitive_restart_index",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDevicePrimitiveRestartIndexFeaturesEXT",
+              "field": "primitiveRestartIndex",
+              "required": true,
+              "reported": null,
+              "limit_rule": ""
+            }
+          ],
+          "gl46_optional_ext": [],
+          "gl46_optional_vk13": [],
+          "GL_ARB_bindless_texture": [],
+          "GL_ARB_sparse_texture": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyImage2D",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyImage3D",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture2": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency2Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture_clamp_2s": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency2Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture_clamp_4s": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency4Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture_clamp_8s": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency8Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_texture_clamp_16s": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidency16Samples",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_sparse_buffer": [
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseBinding",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            },
+            {
+              "group": "features",
+              "structure": "VkPhysicalDeviceFeatures",
+              "field": "sparseResidencyBuffer",
+              "required": true,
+              "reported": false,
+              "limit_rule": ""
+            }
+          ],
+          "GL_ARB_shader_viewport_layer_array_ext": [],
+          "GL_ARB_shader_viewport_layer_array_vk12": [],
+          "GL_ARB_fragment_shader_interlock": [],
+          "GL_ARB_shader_clock": [],
+          "GL_ARB_shader_ballot_ext": [],
+          "GL_ARB_shader_ballot_vk11": [
+            {
+              "group": "properties",
+              "structure": "VkPhysicalDeviceSubgroupProperties",
+              "field": "subgroupSize",
+              "required": 64,
+              "reported": 32,
+              "limit_rule": "max,pot"
+            }
+          ],
+          "GL_ARB_sample_locations": [],
+          "GL_ARB_shader_stencil_export": [
+            {
+              "group": "extensions",
+              "structure": "",
+              "field": "VK_EXT_shader_stencil_export",
+              "required": 1,
+              "reported": null,
+              "limit_rule": "max"
+            }
+          ],
+          "GL_EXT_depth_bounds_test": [],
+          "GL_EXT_texture_filter_minmax_ext": [],
+          "GL_EXT_texture_filter_minmax_vk12": []
+        }
+      }
+    }
+  }
+}

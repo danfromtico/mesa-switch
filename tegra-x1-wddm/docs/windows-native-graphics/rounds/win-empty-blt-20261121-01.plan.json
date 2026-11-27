@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "round_id": "win-empty-blt-20261121-01",
+  "contract_id": "WIN-PRESENT-BLT",
+  "windows_question": "WIN-PRESENT-BLT",
+  "owner": "Windows dxgkrnl、GM20B KMD 和 VidSch",
+  "question": "同一次普通窗口 Present 有无匹配源、目标和普通上下文的 Blt、调度提交及完成？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "同一次调用取得 Blt，源及目标归属正确，关联到应用上下文的复制提交和同包完成。若 DDI 返回未被记录，单列该边界。",
+  "observations": [
+    "核对 CDD 暂存、VidMm 分配身份、Blt 源目标、上下文、提交序号和对应包的真实退役。",
+    "复核同一开机、进程、线程、设备、对象与时钟；本轮新增设备执行数为 0。"
+  ],
+  "inputs": {
+    "win-empty-present-20261121-01": {
+      "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+      "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+    }
+  }
+}

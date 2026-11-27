@@ -1,0 +1,307 @@
+{
+  "branch": "tgd3d-vulkan",
+  "status": "Original five-patch activation history and selected native 1080p decoder package",
+  "observed_utc": "2026-11-18T00:49:22.8988998Z",
+  "components": {
+    "kmd": {
+      "Length": 243720,
+      "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+    },
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "umd": {
+      "Length": 3334600,
+      "Sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
+    },
+    "icd": {
+      "Length": 17656776,
+      "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "umd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    }
+  },
+  "five_patches": [
+    {
+      "number": 1,
+      "component": "UMD",
+      "commit": "51743c0227d813ae931933f38dc95d2afe0ba6f8",
+      "patch_sha256": "6c0d139dfaac6f1b01d02041bb65c302c509f06e790208bab578bcae695e5e76",
+      "change": "Allocate the submission record before calling either queue. Preserve the command and pools if host allocation fails.",
+      "windows_arm64_control": "Injected allocation failure before submission and allocation-free publication after queue acceptance."
+    },
+    {
+      "number": 2,
+      "component": "UMD",
+      "commit": "8e0db6e444f09e466c42dbaccf8dfd5120536a1c",
+      "patch_sha256": "ba91dc976a6cfaf286d078797844f47688b2e1417073b3a10c575ef075c06b78",
+      "change": "Skip descriptor update scratch allocation when the relevant bindings are clean.",
+      "windows_arm64_control": "Clean draw reports zero C++ scratch allocations."
+    },
+    {
+      "number": 3,
+      "component": "UMD",
+      "commit": "ff8fa879cc81a24e62850e9aebed272157bc2004",
+      "patch_sha256": "8900d6ad047327a548d3497ea6a2bf5c51d8981eaf54479ea45e617dbd5edb62",
+      "change": "Reuse immediate-context host scratch for dirty descriptors while allocating fresh GPU descriptor sets.",
+      "windows_arm64_control": "Eight updates in each of three descriptor mixes report zero scratch allocations after warm-up."
+    },
+    {
+      "number": 4,
+      "component": "ICD",
+      "commit": "6599df9b39d3cbb7d6cb8fe5a64a9cc2d646167c",
+      "patch_sha256": "ecd4474a602bf4d7278f9a9730424c56a26f6c4fd8793053cc7f3e43bc5c6ed3",
+      "change": "Report the D3D12 removal sentinel on imported fences. Preserve the full direct Vulkan timeline value range.",
+      "windows_arm64_control": "Win32 Vulkan entrypoint controls cover import, re-import, wait, timeout and a simulated removed device. The signed ICD also passed 120 native Win32 Presents."
+    },
+    {
+      "number": 5,
+      "component": "UMD",
+      "commit": "3ebd7e00a4e922661f0d7fe7fe798c20d52c1f40",
+      "patch_sha256": "cf8641c21bc9bd8e127e850b5d957cf3759394828c4a3d3912643060c097c166",
+      "change": "Preserve failed VA, CPU lock and allocation cleanup state and report failed creation unwind.",
+      "windows_arm64_control": "Tracked VA release failure, failed deallocation and late cleanup validated with runtime callback substitutes."
+    }
+  ],
+  "supporting_frontend_marker_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+  "staging_helper_commit": "4f26ceb92fab58c4a25a5fb73745ea79879445d5",
+  "package": {
+    "previous_umd_sha256": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928",
+    "previous_icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff",
+    "planned_restart_utc": "2026-11-17T20:30:27.9055142Z",
+    "boot_utc": "2026-11-17T20:31:05.3544980Z",
+    "dwm_pid": 1404,
+    "dwm_session": 1,
+    "pnp_problem_code": 0,
+    "loaded_dwm_modules": {
+      "TegraGpuD3DVk.dll": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "restore_inputs_preserved": true
+  },
+  "configuration": {
+    "desktop_policy": "Fixed handheld 90 degrees, 1280x720 with row scan on the 720x1280 panel",
+    "platform_policy": "Retained Handheld, DFLL, EMC, fan, 85 percent charge limit and delayed logon enable",
+    "video_opt_in": "TGD3D_VIDEO_VALIDATE, process scope",
+    "post_incident_readback": {
+      "utc": "2026-11-17T20:39:19.6798718Z",
+      "handheld_mode": 1,
+      "cpu_dfll": 1,
+      "gpu_policy_min_khz": 76800,
+      "gpu_policy_max_khz": 537600,
+      "emc_last_error": 0,
+      "emc_actmon_error": 0,
+      "emc_qos_error": 0,
+      "fan_mode": 1,
+      "charge_limit_percent": 85,
+      "display_controller_readback": [
+        {
+          "CurrentHorizontalResolution": 720,
+          "CurrentVerticalResolution": 1280,
+          "ConfigManagerErrorCode": 0
+        }
+      ],
+      "display_scope": "Controller mode only. Several saved display configurations exist. The active desktop angle and physical image were not rechecked after the restart.",
+      "global_video_opt_in": false
+    }
+  },
+  "evidence": {
+    "patch_controls_and_candidate_wsi": "TGD3D_PRESENT_OWNERSHIP_20261117.json",
+    "earlier_720p_decode": "NVDEC_D3D11VA_720_20261117.json",
+    "gpu_execution_of_injected_failures": false
+  },
+  "operational_policy": "Keep the verified five-patch package as a recovery source. The selected package and its targeted video acceptance are recorded in current_selection.",
+  "validation": {
+    "actual_dwm_pair_loaded": true,
+    "ordinary_window_result": "Interrupted by unexpected restart. No passing ordinary-window observation on this pair.",
+    "six_frame_decode_on_this_pair": "Accepted: 6 native D3D11VA/NVDEC frames with matching syncpoints and canonical NV12 pixel hashes.",
+    "gpu_csc_and_decoded_window": "Two DISCARD trials verified the first GPU-converted image and stopped inside first Present. On the same component hashes, FLIP_SEQUENTIAL setup returned device removed during first-buffer allocation before decode or Present.",
+    "physical_screen_on_this_pair": "Unobserved",
+    "unexpected_reboot_root_cause": "Unresolved",
+    "external_review": false
+  },
+  "retained_after_restart": {
+    "boot_utc": "2026-11-17T20:34:18.7492440Z",
+    "dwm_pid": 1388,
+    "problem_code": 0,
+    "dwm_module_sha256": {
+      "TegraGpuD3DVk.dll": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "all11_checked_utc": "2026-11-17T20:38:45.5861209Z",
+    "files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 243720,
+        "sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4993,
+        "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17656776,
+        "sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 104456,
+        "sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3334600,
+        "sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "restore_script_sha256": "5d5552b29e1b899233a4b0709f9a08c19395ea63a73fe0c0d279ed947520bdff",
+    "prior_task_snapshot_sha256": "d22d6e0ca6602adf5664fca2471ff290132ccbf184b41449e5065b4338dc0b0e"
+  },
+  "ordinary_desktop_trial": {
+    "attempt_utc": "2026-11-17T20:33:46.4994459Z",
+    "on_boot": "2026-11-17T20:31:05.3544980Z",
+    "prior_dwm_pid": 1404,
+    "dispatch_accepted": true,
+    "last_saved_phase": "Launching",
+    "window_ready_recorded": false,
+    "window_exit_recorded": false,
+    "interactive_workload_execution": "Unconfirmed. No window-ready, move or exit receipt was recovered.",
+    "result": "An unexpected system restart interrupted observation after the scheduled task was dispatched. Its cause is unresolved.",
+    "event_records": [
+      {
+        "id": 1074,
+        "record_id": 60435,
+        "logged_utc": "2026-11-17T20:30:28.0930170Z",
+        "provider": "User32",
+        "bugcheck_code": null
+      },
+      {
+        "id": 6008,
+        "record_id": 60534,
+        "logged_utc": "2026-11-17T20:35:18.5248967Z",
+        "provider": "EventLog",
+        "bugcheck_code": null
+      },
+      {
+        "id": 41,
+        "record_id": 60543,
+        "logged_utc": "2026-11-17T20:31:43.3207143Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "bugcheck_code": 0
+      }
+    ],
+    "event_time_note": "System time changes across boot. Use event record ordering and independent OS boot readbacks to separate the planned activation from the later unexpected restart.",
+    "new_dump_count": 0,
+    "matching_wer_count": 0,
+    "scheduler_operational_log_enabled": false,
+    "etl_bytes": 131072,
+    "etl_sha256": "064418ba7f460ec8d1b8d75e262b892b39cac2fe861bcc9e2f8b42e2bdca6606",
+    "trace_export_exit": 1,
+    "matched_tgd3d_events": 0,
+    "trace_diagnostic": "ProcessTrace=0 matched=0 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "archive_sha256": "af2bbc477aa03586d80e268118c4ce5a96d508705e076255a386cc4573c37d05",
+    "archive_bytes": 4592,
+    "archived_file_count": 8
+  },
+  "observation_cleanup": {
+    "utc": "2026-11-17T20:42:50.4671539Z",
+    "removed_uploads_or_probe_inputs": 6,
+    "remaining_test_tasks": 0,
+    "remaining_test_traces": 0,
+    "retained_device_incident_archive": true,
+    "retained_device_receipt": true,
+    "rollback_performed": false
+  },
+  "latest_video_observation": {
+    "record": "NVDEC_1080_D3D11VA_20261117.json",
+    "record_sha256": "c49ddfb308c5b876abd092f1e9d7de326ad65a65b6a81e5fe3ee3c73145a6cad",
+    "previous_record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "previous_record_sha256": "2ff2eff8752b1a679156e393b34dd8c28313a1de7f2768f41fa54274f44d3823",
+    "physical_window_accepted": true,
+    "functional_1080p_accepted": true,
+    "functional_720p_reference": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "physical_scope": "Six-frame paced H.264 window",
+    "frames": 6,
+    "successful_presents": 6,
+    "elapsed_ms": 16093,
+    "final_frame_hold_ms": 8000,
+    "rgb_max_abs_error": 1,
+    "last_confirmed_boot_utc": "2026-11-18T01:17:41.2840670Z",
+    "dwm_pid": 1404,
+    "ordinary_unpaced_accepted": false,
+    "continuous_playback_stability_verified": false
+  },
+  "source_only_followups": {
+    "gpu_wait_and_retirement": "ccfc48f4a32c890bede65bd8b07af61d68aa0eea",
+    "per_submit_residency_stats": "a8301b32729e415e7561f11dcb9ff20f8ff9a975",
+    "installed_in_this_observation": false,
+    "dwm_residency_sample": null
+  },
+  "five_patch_activation_utc": "2026-11-17T21:13:35.5466349Z",
+  "current_selection": {
+    "record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "source_commit": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+    "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "umd_patch_sha256": "465f70dc0b6117274752ae7295f239ad9158d39f8c426c9a03a2b6b380ef56ed",
+    "icd_source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "kmd_sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662",
+    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "inherited_patch_count": 5,
+    "selected": true,
+    "post_restart_pair_confirmed": true,
+    "latest_video_observation": "NVDEC_1080_D3D11VA_20261117.json",
+    "physical_video_accepted": true,
+    "umd_prior_patch_commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+    "umd_prior_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
+    "physical_video_scope": "1080p six-frame paced observation",
+    "functional_720p_accepted": true,
+    "ordinary_unpaced_accepted": false,
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation",
+    "previous_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736",
+    "installed_evidence_sha256": "c49ddfb308c5b876abd092f1e9d7de326ad65a65b6a81e5fe3ee3c73145a6cad",
+    "scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+    "functional_1080p_accepted": true,
+    "previous_720p_acceptance": "NVDEC_720_COMPOSITOR_OPEN_20261117.json"
+  },
+  "historical_fields": "components, package, configuration, validation, retained_after_restart and ordinary_desktop_trial describe the original five-patch activation. current_selection identifies the selected UMD and current component combination."
+}

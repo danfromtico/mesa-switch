@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "change_kind": "independent",
+  "source_commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "base_commit": "a7c422add36e2d6b2444a7767bafcaef81b4a041",
+  "changed_paths": [
+    "tegra-x1-wddm/tests/test_context_windows.c",
+    "tegra-x1-wddm/tests/test_startup_diagnostic_windows.c",
+    "tegra-x1-wddm/tools/build.py",
+    "tegra-x1-wddm/windows/adapter.c",
+    "tegra-x1-wddm/windows/adapter.h",
+    "tegra-x1-wddm/windows/diagnostic_events.c",
+    "tegra-x1-wddm/windows/diagnostic_events.h",
+    "tegra-x1-wddm/windows/render_miniport.c",
+    "tegra-x1-wddm/windows/startup_diagnostic.c"
+  ],
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+  "components": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "trial": {
+    "selected": "trial",
+    "dwm": 1412,
+    "boot_record": 88430,
+    "inf": "oem27.inf",
+    "loaded": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "gpu_code": 0,
+    "dwm_start": "2026-11-21T05:18:05.7004570Z",
+    "components": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "power": "Online",
+    "one_time": true,
+    "utc": "2026-11-21T05:19:35.4928932Z"
+  },
+  "cases": [
+    {
+      "name": "Native WDDM 2.6 desktop and GDI shared-resource regression",
+      "evidence_file": "one-time-native-desktop.json",
+      "evidence_sha256": "88bdb74e2b2de672711d3b353341bc3d4ecef942b2a7bd61378e9d793502f0fd",
+      "passed": true,
+      "before_boot": 88430,
+      "after_boot": 88430,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true
+    },
+    {
+      "name": "Windows STARTDEVICE startup diagnostic through the installed signed miniport",
+      "evidence_file": "windows-startdevice-callback.json",
+      "evidence_sha256": "4e374cc7a166e92d0139c438fd4d5005d98c5e9eeeed49d911fe9f177465433d",
+      "passed": true,
+      "before_boot": 88512,
+      "after_boot": 88512
+    }
+  ],
+  "system_log": {
+    "complete": true,
+    "first_record": 88267,
+    "last_record": 88583,
+    "boot_records": [
+      88341,
+      88430,
+      88512
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "explained": true,
+        "kind": "controlled",
+        "boot_record": 88341,
+        "cause": "SwitchWOA graphics receipt enter closed gate before selecting candidate",
+        "system_records": [
+          88324,
+          88327,
+          88341
+        ],
+        "evidence_file": "system-interval.json",
+        "evidence_sha256": "e508dddd3c6fc2527b1e816e5f9c3c1f728255a6466d895b1222cbe50338f38e"
+      },
+      {
+        "explained": true,
+        "kind": "controlled",
+        "boot_record": 88430,
+        "cause": "SwitchWOA graphics receipt one-time candidate boot",
+        "system_records": [
+          88414,
+          88416,
+          88430
+        ],
+        "evidence_file": "system-interval.json",
+        "evidence_sha256": "e508dddd3c6fc2527b1e816e5f9c3c1f728255a6466d895b1222cbe50338f38e"
+      },
+      {
+        "explained": true,
+        "kind": "controlled",
+        "boot_record": 88512,
+        "cause": "SwitchWOA graphics receipt close native gate for baseline restore",
+        "system_records": [
+          88496,
+          88497,
+          88512
+        ],
+        "evidence_file": "system-interval.json",
+        "evidence_sha256": "e508dddd3c6fc2527b1e816e5f9c3c1f728255a6466d895b1222cbe50338f38e"
+      }
+    ]
+  }
+}

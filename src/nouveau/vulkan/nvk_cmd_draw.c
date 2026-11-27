@@ -5,6 +5,7 @@
 #include "nvk_buffer.h"
 #include "nvk_entrypoints.h"
 #include "nvk_cmd_buffer.h"
+#include "util/detect_os.h"
 #include "nvk_device.h"
 #include "nvk_format.h"
 #include "nvk_image.h"
@@ -16,6 +17,7 @@
 #include "util/bitpack_helpers.h"
 #include "util/compiler.h"
 #include "vk_format.h"
+#include "vk_internal_exts.h"
 #include "vk_render_pass.h"
 #include "vk_standard_sample_locations.h"
 
@@ -140,6 +142,21 @@ nvk_mme_select_cb0(struct mme_builder *b)
 
 static uint32_t nvk_mme_anti_alias_init(void);
 
+static void
+nvk_push_select_cb0(struct nv_push *p)
+{
+   P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SELECT_CB0));
+   P_INLINE_DATA(p, 0);
+}
+
+static void
+nvk_push_mme_zero_addr(struct nv_push *p, uint64_t addr)
+{
+   P_MTHD(p, NV9097, SET_MME_SHADOW_SCRATCH(NVK_MME_SCRATCH_ZERO_ADDR_HI));
+   P_NV9097_SET_MME_SHADOW_SCRATCH(p, NVK_MME_SCRATCH_ZERO_ADDR_HI, addr >> 32);
+   P_NV9097_SET_MME_SHADOW_SCRATCH(p, NVK_MME_SCRATCH_ZERO_ADDR_LO, addr);
+}
+
 VkResult
 nvk_push_draw_state_init(struct nvk_queue *queue, struct nv_push *p)
 {
@@ -153,27 +170,8 @@ nvk_push_draw_state_init(struct nvk_queue *queue, struct nv_push *p)
       .engine_id = 0,
    });
 
-   for (uint32_t mme = 0, mme_pos = 0; mme < NVK_MME_COUNT; mme++) {
-      size_t size;
-      uint32_t *dw = nvk_build_mme(&pdev->info, mme, &size);
-      if (dw == NULL)
-         return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
-
-      assert(size % sizeof(uint32_t) == 0);
-      const uint32_t num_dw = size / sizeof(uint32_t);
-
-      P_MTHD(p, NV9097, LOAD_MME_START_ADDRESS_RAM_POINTER);
-      P_NV9097_LOAD_MME_START_ADDRESS_RAM_POINTER(p, mme);
-      P_NV9097_LOAD_MME_START_ADDRESS_RAM(p, mme_pos);
-
-      P_1INC(p, NV9097, LOAD_MME_INSTRUCTION_RAM_POINTER);
-      P_NV9097_LOAD_MME_INSTRUCTION_RAM_POINTER(p, mme_pos);
-      P_INLINE_ARRAY(p, dw, num_dw);
-
-      mme_pos += num_dw;
-
-      free(dw);
-   }
+   if (!nvk_push_mme_programs(p, &pdev->info, !DETECT_OS_WINDOWS))
+      return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
 
    if (pdev->info.cls_eng3d >= TURING_A && pdev->info.cls_eng3d < BLACKWELL_A)
       P_IMMD(p, NVC597, SET_MME_DATA_FIFO_CONFIG, FIFO_SIZE_SIZE_4KB);
@@ -200,7 +198,7 @@ nvk_push_draw_state_init(struct nvk_queue *queue, struct nv_push *p)
     * occasionally fail.
     */
    /* Horizon does not expose the private-register MME path. */
-#ifndef HAVE_SWITCH_PLATFORM
+#if !defined(HAVE_SWITCH_PLATFORM) && !defined(_WIN32)
    if (pdev->info.cls_eng3d >= MAXWELL_B) {
       unsigned reg = get_sm_disp_ctrl_reg(&pdev->info);
       P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SET_PRIV_REG));
@@ -256,7 +254,7 @@ nvk_push_draw_state_init(struct nvk_queue *queue, struct nv_push *p)
     *
     * This clears bit 14 of gr_gpcs_tpcs_sms_hww_warp_esr_report_mask
     */
-#ifndef HAVE_SWITCH_PLATFORM
+#if !defined(HAVE_SWITCH_PLATFORM) && !defined(_WIN32)
    if (pdev->info.cls_eng3d >= MAXWELL_B) {
       unsigned reg = get_sms_hww_warp_esp_report_mask_reg(&pdev->info);
       P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SET_PRIV_REG));
@@ -709,13 +707,10 @@ nvk_push_draw_state_init(struct nvk_queue *queue, struct nv_push *p)
    P_NV9097_SET_MME_SHADOW_SCRATCH(p, NVK_MME_SCRATCH_CB0_ADDR_LO, cb0_addr);
 
    /* Store the address to the zero page in a pair of state registers */
-   P_MTHD(p, NV9097, SET_MME_SHADOW_SCRATCH(NVK_MME_SCRATCH_ZERO_ADDR_HI));
-   P_NV9097_SET_MME_SHADOW_SCRATCH(p, NVK_MME_SCRATCH_ZERO_ADDR_HI, zero_addr >> 32);
-   P_NV9097_SET_MME_SHADOW_SCRATCH(p, NVK_MME_SCRATCH_ZERO_ADDR_LO, zero_addr);
+   nvk_push_mme_zero_addr(p, zero_addr);
 
    /* We leave CB0 selected by default */
-   P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SELECT_CB0));
-   P_INLINE_DATA(p, 0);
+   nvk_push_select_cb0(p);
 
    /* Bind CB0 to all shader groups */
    for (uint32_t group = 0; group < 5; group++) {
@@ -1234,6 +1229,22 @@ nvk_CmdBeginRendering(VkCommandBuffer commandBuffer,
    render->view_mask = pRenderingInfo->viewMask;
    render->layer_count = pRenderingInfo->layerCount;
    render->samples = 0;
+
+#ifdef _WIN32
+   const struct nvk_tir_rendering_info *tir =
+      vk_find_struct_const(pRenderingInfo->pNext, NVK_TIR_RENDERING_INFO_MESA);
+   if (tir) {
+      if (pdev->info.chipset != 0x12e || pdev->info.cls_eng3d != MAXWELL_B ||
+          tir->rasterSamples != VK_SAMPLE_COUNT_16_BIT || pRenderingInfo->colorAttachmentCount ||
+          pRenderingInfo->pDepthAttachment || pRenderingInfo->pStencilAttachment || render->flags) {
+         vk_command_buffer_set_error(&cmd->vk, VK_ERROR_FEATURE_NOT_PRESENT);
+         return;
+      }
+      render->tir_samples = tir->rasterSamples;
+      struct vk_dynamic_graphics_state *dyn = &cmd->vk.dynamic_graphics_state;
+      BITSET_SET(dyn->dirty, MESA_VK_DYNAMIC_MS_RASTERIZATION_SAMPLES);
+   }
+#endif
 
    const uint32_t layer_count =
       render->view_mask ? util_last_bit(render->view_mask) :
@@ -1852,6 +1863,10 @@ nvk_CmdEndRendering2KHR(VkCommandBuffer commandBuffer,
    VK_FROM_HANDLE(nvk_cmd_buffer, cmd, commandBuffer);
    struct nvk_rendering_state *render = &cmd->state.gfx.render;
 
+   if (render->tir_samples) {
+      render->tir_samples = 0;
+      BITSET_SET(cmd->vk.dynamic_graphics_state.dirty, MESA_VK_DYNAMIC_MS_RASTERIZATION_SAMPLES);
+   }
    struct nvk_image *zcull_image = nvk_get_zcull_image(render);
    if (render->zcull_enabled && zcull_image && zcull_image->zcull.addr != 0 &&
        !(render->flags & VK_RENDERING_SUSPENDING_BIT) &&
@@ -3216,7 +3231,7 @@ nvk_flush_rs_state(struct nvk_cmd_buffer *cmd)
 
    if (BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_RS_CONSERVATIVE_MODE) ||
        BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_RS_EXTRA_PRIMITIVE_OVERESTIMATION_SIZE)) {
-      if (nvk_cmd_buffer_3d_cls(cmd) < MAXWELL_B) {
+      if (DETECT_OS_WINDOWS || nvk_cmd_buffer_3d_cls(cmd) < MAXWELL_B) {
          assert(dyn->rs.conservative_mode == VK_CONSERVATIVE_RASTERIZATION_MODE_DISABLED_EXT);
       } else if (dyn->rs.conservative_mode == VK_CONSERVATIVE_RASTERIZATION_MODE_DISABLED_EXT) {
          P_IMMD(p, NVB197, SET_CONSERVATIVE_RASTER, ENABLE_FALSE);
@@ -3798,7 +3813,16 @@ nvk_flush_ms_state(struct nvk_cmd_buffer *cmd)
           * the hardware so always use at least one sample.
           */
          const uint32_t samples = MAX2(1, dyn->ms.rasterization_samples);
-         nvk_cmd_set_sample_layout(cmd, nil_choose_sample_layout(samples));
+         if (render->tir_samples) {
+            /* No storage sample layout exists for an attachmentless draw.
+             * D3D selects pixel-frequency shading for this mode. */
+            struct nv_push *p = nvk_cmd_buffer_push(cmd, 3);
+            P_IMMD(p, NV9097, SET_ANTI_ALIAS, SAMPLES_MODE_4X4);
+            P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SET_ANTI_ALIAS));
+            P_INLINE_DATA(p, nvk_mme_anti_alias_samples(16));
+         } else {
+            nvk_cmd_set_sample_layout(cmd, nil_choose_sample_layout(samples));
+         }
       } else {
          /* Multisample information MAY be missing (rasterizationSamples == 0)
           * if rasterizer discard is enabled.
@@ -3821,20 +3845,25 @@ nvk_flush_ms_state(struct nvk_cmd_buffer *cmd)
        BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_SAMPLE_LOCATIONS) ||
        BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_SAMPLE_LOCATIONS_ENABLE)) {
       const struct vk_sample_locations_state *sl;
-      if (dyn->ms.sample_locations_enable) {
+      if (render->tir_samples) {
+         sl = vk_standard_sample_locations_state(render->tir_samples);
+      } else if (dyn->ms.sample_locations_enable) {
          sl = dyn->ms.sample_locations;
       } else {
          const uint32_t samples = MAX2(1, dyn->ms.rasterization_samples);
          sl = vk_standard_sample_locations_state(samples);
       }
 
-      struct nak_sample_location push_sl[NVK_MAX_SAMPLES];
+      struct nak_sample_location push_sl[16] = {0};
       for (uint32_t i = 0; i < sl->per_pixel; i++)
          push_sl[i] = vk_to_nak_sample_location(sl->locations[i]);
 
       nvk_descriptor_state_set_root_array(cmd, &cmd->state.gfx.descriptors,
                                           draw.sample_locations,
                                           0, NVK_MAX_SAMPLES, push_sl);
+      if (render->tir_samples)
+         nvk_descriptor_state_set_root_array(cmd, &cmd->state.gfx.descriptors,
+                                             tir_high_locations, 0, 8, &push_sl[8]);
 
       if (nvk_cmd_buffer_3d_cls(cmd) >= MAXWELL_B) {
          struct nak_sample_location loc[16];
@@ -3865,13 +3894,17 @@ nvk_flush_ms_state(struct nvk_cmd_buffer *cmd)
       }
    }
 
-   if (BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_SAMPLE_MASK)) {
+   if (BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_SAMPLE_MASK) ||
+       BITSET_TEST(dyn->dirty, MESA_VK_DYNAMIC_MS_RASTERIZATION_SAMPLES)) {
       struct nv_push *p = nvk_cmd_buffer_push(cmd, 5);
+      uint32_t mask = dyn->ms.sample_mask & 0xffff;
+      if (render->tir_samples)
+         mask = 0xffff;
       P_MTHD(p, NV9097, SET_SAMPLE_MASK_X0_Y0);
-      P_NV9097_SET_SAMPLE_MASK_X0_Y0(p, dyn->ms.sample_mask & 0xffff);
-      P_NV9097_SET_SAMPLE_MASK_X1_Y0(p, dyn->ms.sample_mask & 0xffff);
-      P_NV9097_SET_SAMPLE_MASK_X0_Y1(p, dyn->ms.sample_mask & 0xffff);
-      P_NV9097_SET_SAMPLE_MASK_X1_Y1(p, dyn->ms.sample_mask & 0xffff);
+      P_NV9097_SET_SAMPLE_MASK_X0_Y0(p, mask);
+      P_NV9097_SET_SAMPLE_MASK_X1_Y0(p, mask);
+      P_NV9097_SET_SAMPLE_MASK_X0_Y1(p, mask);
+      P_NV9097_SET_SAMPLE_MASK_X1_Y1(p, mask);
    }
 }
 
@@ -4395,7 +4428,7 @@ nvk_cmd_flush_gfx_cbufs(struct nvk_cmd_buffer *cmd)
       }
    }
 
-   bool bound_any_cbuf = false;
+   bool restore_cb0_at_end = false;
    for (uint32_t g = 0; g < ARRAY_SIZE(cbuf_shaders); g++) {
       if (cbuf_shaders[g] == NULL)
          continue;
@@ -4417,15 +4450,16 @@ nvk_cmd_flush_gfx_cbufs(struct nvk_cmd_buffer *cmd)
          if (cbuf->type == NVK_CBUF_TYPE_ROOT_DESC)
             continue;
 
-         bound_any_cbuf = true;
-
          struct nvk_buffer_address ba;
          if (nvk_cmd_buffer_get_cbuf_addr(cmd, desc, shader, cbuf, &ba)) {
             assert(ba.base_addr % min_cbuf_alignment == 0);
             ba.size = align(ba.size, min_cbuf_alignment);
             ba.size = MIN2(ba.size, NVK_MAX_CBUF_SIZE);
 
-            struct nv_push *p = nvk_cmd_buffer_push(cmd, 6);
+            /* Keep the selector restored at every Windows push boundary. */
+            const bool restore_here = DETECT_OS_WINDOWS && ba.size > 0;
+            restore_cb0_at_end |= !DETECT_OS_WINDOWS;
+            struct nv_push *p = nvk_cmd_buffer_push(cmd, restore_here ? 8 : 6);
 
             if (ba.size > 0) {
                P_MTHD(p, NV9097, SET_CONSTANT_BUFFER_SELECTOR_A);
@@ -4438,7 +4472,10 @@ nvk_cmd_flush_gfx_cbufs(struct nvk_cmd_buffer *cmd)
                .valid = ba.size > 0,
                .shader_slot = c,
             });
+            if (restore_here)
+               nvk_push_select_cb0(p);
          } else {
+            restore_cb0_at_end = true;
             uint64_t desc_addr =
                nvk_cmd_buffer_get_cbuf_descriptor_addr(cmd, desc, cbuf);
 
@@ -4472,10 +4509,9 @@ nvk_cmd_flush_gfx_cbufs(struct nvk_cmd_buffer *cmd)
     * parameters and similar MME root table updates always hit the root
     * descriptor table and not some random UBO.
     */
-   if (bound_any_cbuf) {
+   if (restore_cb0_at_end) {
       struct nv_push *p = nvk_cmd_buffer_push(cmd, 2);
-      P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_SELECT_CB0));
-      P_INLINE_DATA(p, 0);
+      nvk_push_select_cb0(p);
    }
 }
 
@@ -4583,6 +4619,20 @@ nvk_mme_bind_ib(struct mme_builder *b)
    mme_emit(b, index_type);
 }
 
+static struct nv_push *
+nvk_push_vertex_binding(struct nvk_cmd_buffer *cmd, VkDeviceAddressRangeKHR range)
+{
+   /* GM20B uses the scratch address for empty bindings. Keep its setup in
+    * the same push on Windows so the KMD can validate the fallback.
+    */
+   const bool zero_addr = DETECT_OS_WINDOWS && (!range.address || !range.size) &&
+                         nvk_cmd_buffer_3d_cls(cmd) < TURING_A;
+   struct nv_push *p = nvk_cmd_buffer_push(cmd, zero_addr ? 8 : 5);
+   if (zero_addr)
+      nvk_push_mme_zero_addr(p, nvk_cmd_buffer_device(cmd)->zero_page->va->addr);
+   return p;
+}
+
 VKAPI_ATTR void VKAPI_CALL
 nvk_CmdBindIndexBuffer3KHR(VkCommandBuffer commandBuffer,
                            const VkBindIndexBuffer3InfoKHR* pInfo)
@@ -4590,7 +4640,7 @@ nvk_CmdBindIndexBuffer3KHR(VkCommandBuffer commandBuffer,
    VK_FROM_HANDLE(nvk_cmd_buffer, cmd, commandBuffer);
    const VkDeviceAddressRangeKHR addr_range = pInfo->addressRange;
 
-   struct nv_push *p = nvk_cmd_buffer_push(cmd, 5);
+   struct nv_push *p = nvk_push_vertex_binding(cmd, addr_range);
    P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_BIND_IB));
    P_INLINE_DATA(p, addr_range.address >> 32);
    P_INLINE_DATA(p, addr_range.address);
@@ -4711,7 +4761,7 @@ nvk_cmd_bind_vertex_buffer(struct nvk_cmd_buffer *cmd, uint32_t vb_idx,
    if (vb_idx == 0)
       cmd->state.gfx.vb0 = addr_range;
 
-   struct nv_push *p = nvk_cmd_buffer_push(cmd, 5);
+   struct nv_push *p = nvk_push_vertex_binding(cmd, addr_range);
    P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_BIND_VB));
    P_INLINE_DATA(p, vb_idx);
    P_INLINE_DATA(p, addr_range.address >> 32);
@@ -5288,7 +5338,7 @@ nvk_CmdDrawIndirect2KHR(VkCommandBuffer commandBuffer,
       nvk_cmd_buffer_switch_mme_consumer(cmd);
 #endif
       const uint32_t max_draws_per_push =
-         MAX2(((NV_PUSH_MAX_COUNT - 3) * 4) / stride, 1);
+         MAX2(((NV_PUSH_MAX_COUNT - 4) * 4) / stride, 1);
 
       uint64_t draw_addr = pInfo->addressRange.address;
       uint32_t draw_count = pInfo->drawCount;
@@ -5305,7 +5355,10 @@ nvk_CmdDrawIndirect2KHR(VkCommandBuffer commandBuffer,
             ignored = 0;
          }
 
-         struct nv_push *p = nvk_cmd_buffer_push(cmd, 3);
+         struct nv_push *p = nvk_cmd_buffer_push(cmd, 4);
+#ifdef _WIN32
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+#endif
          P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_DRAW_INDIRECT));
          P_INLINE_DATA(p, count);
          P_INLINE_DATA(p, ignored);
@@ -5400,7 +5453,7 @@ nvk_CmdDrawIndexedIndirect2KHR(VkCommandBuffer commandBuffer,
          nvk_cmd_buffer_switch_mme_consumer(cmd);
 #endif
       const uint32_t max_draws_per_push =
-         MAX2(((NV_PUSH_MAX_COUNT - 3) * 4) / stride, 1);
+         MAX2(((NV_PUSH_MAX_COUNT - 4) * 4) / stride, 1);
 
       uint64_t draw_addr = pInfo->addressRange.address;
       uint32_t draw_count = pInfo->drawCount;
@@ -5417,7 +5470,10 @@ nvk_CmdDrawIndexedIndirect2KHR(VkCommandBuffer commandBuffer,
             ignored = 0;
          }
 
-         struct nv_push *p = nvk_cmd_buffer_push(cmd, 3);
+         struct nv_push *p = nvk_cmd_buffer_push(cmd, 4);
+#ifdef _WIN32
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+#endif
          P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_DRAW_INDEXED_INDIRECT));
          P_INLINE_DATA(p, count);
          P_INLINE_DATA(p, ignored);
@@ -5655,10 +5711,13 @@ nvk_CmdDrawIndirectByteCount2EXT(VkCommandBuffer commandBuffer,
 #ifdef HAVE_SWITCH_PLATFORM
       nvk_cmd_buffer_switch_mme_consumer(cmd);
 #endif
-      struct nv_push *p = nvk_cmd_buffer_push(cmd, 8);
+      struct nv_push *p = nvk_cmd_buffer_push(cmd, 9);
       P_IMMD(p, NV9097, SET_DRAW_AUTO_START, counterOffset);
       P_IMMD(p, NV9097, SET_DRAW_AUTO_STRIDE, vertexStride);
 
+#ifdef _WIN32
+      nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+#endif
       P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_XFB_DRAW_INDIRECT));
       P_INLINE_DATA(p, instanceCount);
       P_INLINE_DATA(p, firstInstance);
@@ -5936,13 +5995,18 @@ nvk_CmdBindTransformFeedbackBuffers2EXT(VkCommandBuffer commandBuffer,
       struct nv_push *p = nvk_cmd_buffer_push(cmd, 5);
 
       P_MTHD(p, NV9097, SET_STREAM_OUT_BUFFER_ENABLE(idx));
-      P_NV9097_SET_STREAM_OUT_BUFFER_ENABLE(p, idx, V_TRUE);
-      P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_A(p, idx, addr_range.address >> 32);
-      P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_B(p, idx, addr_range.address);
-      P_NV9097_SET_STREAM_OUT_BUFFER_SIZE(p, idx, (uint32_t)addr_range.size);
+      if (addr_range.address == 0 || addr_range.size == 0) {
+         P_NV9097_SET_STREAM_OUT_BUFFER_ENABLE(p, idx, V_FALSE);
+         P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_A(p, idx, 0);
+         P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_B(p, idx, 0);
+         P_NV9097_SET_STREAM_OUT_BUFFER_SIZE(p, idx, 0);
+      } else {
+         P_NV9097_SET_STREAM_OUT_BUFFER_ENABLE(p, idx, V_TRUE);
+         P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_A(p, idx, addr_range.address >> 32);
+         P_NV9097_SET_STREAM_OUT_BUFFER_ADDRESS_B(p, idx, addr_range.address);
+         P_NV9097_SET_STREAM_OUT_BUFFER_SIZE(p, idx, (uint32_t)addr_range.size);
+      }
    }
-
-   // TODO: do we need to SET_STREAM_OUT_BUFFER_ENABLE V_FALSE ?
 }
 
 void
@@ -6005,7 +6069,10 @@ nvk_CmdBeginTransformFeedback2EXT(VkCommandBuffer commandBuffer,
 #ifdef HAVE_SWITCH_PLATFORM
          nvk_cmd_buffer_switch_mme_consumer(cmd);
 #endif
-         struct nv_push *p = nvk_cmd_buffer_push(cmd, 2);
+         struct nv_push *p = nvk_cmd_buffer_push(cmd, 3);
+#ifdef _WIN32
+         nvk_push_legacy_host_wfi(p, SUBC_NV9097);
+#endif
          P_1INC(p, NV9097, CALL_MME_MACRO(NVK_MME_XFB_COUNTER_LOAD));
          P_INLINE_DATA(p, cr_idx);
          nv_push_update_count(p, 1);

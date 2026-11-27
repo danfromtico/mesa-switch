@@ -1,0 +1,473 @@
+{
+  "schema": 1,
+  "disposition": "accept_C4_formal_activation_and_publish_scoped_baseline",
+  "scope": "adapter-reset-system-paging-recovery",
+  "release_source": "6a5a999ff9b7cd540a3167baa0cbf64d14b43725",
+  "tested_producer": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+  "qualification_sha256": "a5b76504fc48e1f4a51db18ca2b87ecdbc31816047faa3d5e702f43b9c8256b0",
+  "qualified_native_boot": 99215,
+  "actual_later_activation_boot": 99580,
+  "permanent_grant_verified": true,
+  "independent_review": {
+    "archive_report": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-formal-99580-main-review-20261124/archive-verification.json",
+      "sha256": "a9cfd785727c90e9e8170b7ec3219aaa354cefe9ce2e8ce3103ab9350238174b",
+      "bytes": 394813
+    },
+    "formal_report": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-formal-99580-main-review-20261124/formal-independent-verification.json",
+      "sha256": "f0a0b97bdbc213c99eea4c671cb762b8410b1239e568b16c6af7cd168bd4c0b6",
+      "bytes": 30072
+    },
+    "archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/continuation-01a2094a/c4-formal-99580-delivery-r1/c4-formal-99580-complete.zip",
+      "sha256": "cfd98307c8e56d74f82e0213be12153e033f472fba49e71e47dc17a928bbf596",
+      "compressed_bytes": 2262078
+    },
+    "members": 750,
+    "original_members": 749,
+    "source_backed_members": 748,
+    "generated_scope_member": "SCOPE_AND_REMAINING.json is generated inside the archive and intentionally has no external source path.",
+    "native_content_objects": 67,
+    "native_path_versions": 76,
+    "raw_result_and_read_bindings": 17,
+    "native_policy_and_receipt_original_files": 13,
+    "source_control_review": {
+      "provider": "Kimi",
+      "native_session": "session_91ebbde4-6856-4172-91e2-da7b8a2d2847",
+      "exit_code": 0,
+      "findings": 0,
+      "frozen_inputs": 10,
+      "stdout": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/continuation-01a2094a/c4-Kimi-policy-compatibility-R4-review-originals-r1/stdout.jsonl",
+        "bytes": 59873,
+        "sha256": "e93a9130efdf6fe360f7971802007d97be6b8c7c8c7e5708e5bb6d6cdc5159b8"
+      },
+      "decision_sha256": "1c71c0a69218127547975d9fe0a0c9e7be11b8ab19b72345cc3d589159d83b6d"
+    }
+  },
+  "activation": {
+    "qualification_boot": 99215,
+    "activation_boot": 99580,
+    "permanent_grant_verified": true,
+    "actual_post_permanent_boot_not_requested": true,
+    "Code": 0,
+    "AC": "Online",
+    "target": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a",
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+    },
+    "loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\TegraGpuD3DVk.dll",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\tg_d3d_arm64.DLL",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\tg_nvk_arm64.DLL"
+    },
+    "private_x86": {
+      "path": "C:\\Program Files\\SwitchWOA-GpuBoot\\NeonAcceptance-01a20660\\private-x86\\libvulkan_nouveau.dll",
+      "bytes": 18596880,
+      "sha256": "5ac50269abb761c9e77dabfb71da035f211263c9609adff056dd6a1cec79cd69"
+    },
+    "candidate_driverstore": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230",
+    "candidate_oem": "oem32.inf",
+    "candidate_members": 13,
+    "recovery_driverstore": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_26a3faa50d85936f",
+    "recovery_oem": "oem31.inf",
+    "recovery_members": 13,
+    "observed_formal_utc": "2026-11-24T00:06:14.7196111Z",
+    "receipt_original": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-formal-99580-main-review-20261124/frozen/work-records/c4-normal-final-artifact-native-read-r1/file-originals/last-accepted.json",
+      "bytes": 1397,
+      "sha256": "5a23e91f461fc36fb61fe8b127d4f236035dd3dcd1c32f6c480113303490ebe1"
+    },
+    "permanent_gate": {
+      "allow_native_boot_exists": true,
+      "allow_native_boot": {
+        "ApprovedDirectory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a",
+        "ApprovalPolicy": "5f41eba816d6c8be45ec6bb0ab3a09a825916cb5f0ebf1f3508d2a631e7ad495",
+        "ApprovedImages": "C4F04A10E86AE32780997E1FCF51C0D7465DD6A8F01A9F887575D43CBA931164/9FF198AEABF1BCFAD98410733D19BACD85E580E65023738BE5641826936BA3FF/3CA2D9EB0FDFD6AFF8A7B667CB364F605629CB3E97DD7A4FE9AC924B10A6A8AB",
+        "ApprovalTransaction": "d2d58134fd18499eae5af50bb6475c76",
+        "ApprovedComponents": "{\"nv_acr_ucode_prod.bin\":\"f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841\",\"tegragpurender.sys\":\"c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164\",\"libvulkan_nouveau.dll\":\"3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab\",\"tg_d3d_x64.dll\":\"d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7\",\"tg_nvk_x64.dll\":\"4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2\",\"TegraGpuD3DVk.dll\":\"9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff\",\"tg_nvk_arm64.dll\":\"13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8\",\"tg_d3d_arm64.dll\":\"0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334\"}"
+      },
+      "allow_desktop_start_exists": false,
+      "trial_policy_mode": null,
+      "token_exists": false,
+      "token_length": null,
+      "token_word0": null,
+      "start_gate_status": 0,
+      "hardware_status": 0
+    },
+    "profile_read_DWM": [
+      {
+        "pid": 1424,
+        "session_id": 1,
+        "start_utc": "2026-11-23T23:56:04.8249303Z",
+        "dwm_continuity_claimed": false,
+        "rendering_acceptance_claimed": false
+      },
+      {
+        "pid": 1424,
+        "session_id": 1,
+        "start_utc": "2026-11-23T23:56:04.8249303Z",
+        "dwm_continuity_claimed": false,
+        "rendering_acceptance_claimed": false
+      },
+      {
+        "pid": 1424,
+        "session_id": 1,
+        "start_utc": "2026-11-23T23:56:04.8249303Z",
+        "dwm_continuity_claimed": false,
+        "rendering_acceptance_claimed": false
+      },
+      {
+        "pid": 1424,
+        "session_id": 1,
+        "start_utc": "2026-11-23T23:56:04.8249303Z",
+        "dwm_continuity_claimed": false,
+        "rendering_acceptance_claimed": false
+      }
+    ],
+    "no_new_rendering_acceptance": true
+  },
+  "System": {
+    "first_record": 99473,
+    "last_record": 99652,
+    "previous_complete_end": 99472,
+    "query_begin": "2026-11-24T00:10:20.5993306Z",
+    "query_end": "2026-11-24T00:10:21.6469411Z",
+    "oldest_available": 49921,
+    "selected_events": [
+      {
+        "record": 99473,
+        "id": 1074,
+        "provider": "User32",
+        "utc": "2026-11-23T23:31:33.1603064Z",
+        "data": {
+          "param1": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+          "param2": "DESKTOP-5RCUK3G",
+          "param3": "没有找到这个原因的标题",
+          "param4": "0x80010000",
+          "param5": "重启",
+          "param6": "SwitchWOA C4 formal later-activation: enter closed boot gate before candidate KMD selection (op=c4-normal-rebootclosed-eda15ef1c72d from_boot=99402)",
+          "param7": "DESKTOP-5RCUK3G\\ruje"
+        }
+      },
+      {
+        "record": 99490,
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T23:31:51.6127472Z",
+        "data": {
+          "MajorVersion": "10",
+          "MinorVersion": "0",
+          "BuildVersion": "22621",
+          "QfeVersion": "2861",
+          "ServiceVersion": "0",
+          "BootMode": "0",
+          "StartTime": "2026-11-23T23:31:49.8899345Z"
+        }
+      },
+      {
+        "record": 99563,
+        "id": 1074,
+        "provider": "User32",
+        "utc": "2026-11-23T23:54:49.1440286Z",
+        "data": {
+          "param1": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+          "param2": "DESKTOP-5RCUK3G",
+          "param3": "没有找到这个原因的标题",
+          "param4": "0x80010000",
+          "param5": "重启",
+          "param6": "SwitchWOA C4 formal later-activation: one-time candidate trial boot (op=c4-normal-reboottrial-326511381a4a from_boot=99490)",
+          "param7": "DESKTOP-5RCUK3G\\ruje"
+        }
+      },
+      {
+        "record": 99580,
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-23T23:55:07.8009976Z",
+        "data": {
+          "MajorVersion": "10",
+          "MinorVersion": "0",
+          "BuildVersion": "22621",
+          "QfeVersion": "2861",
+          "ServiceVersion": "0",
+          "BootMode": "0",
+          "StartTime": "2026-11-23T23:55:06.0890301Z"
+        }
+      }
+    ],
+    "reboots": [
+      {
+        "operation": "c4-normal-rebootclosed-eda15ef1c72d",
+        "from_boot": 99402,
+        "to_boot": 99490,
+        "event1074": {
+          "record": 99473,
+          "id": 1074,
+          "provider": "User32",
+          "utc": "2026-11-23T23:31:33.1603064Z",
+          "data": {
+            "param1": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+            "param2": "DESKTOP-5RCUK3G",
+            "param3": "没有找到这个原因的标题",
+            "param4": "0x80010000",
+            "param5": "重启",
+            "param6": "SwitchWOA C4 formal later-activation: enter closed boot gate before candidate KMD selection (op=c4-normal-rebootclosed-eda15ef1c72d from_boot=99402)",
+            "param7": "DESKTOP-5RCUK3G\\ruje"
+          }
+        },
+        "boot12": {
+          "record": 99490,
+          "id": 12,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-23T23:31:51.6127472Z",
+          "data": {
+            "MajorVersion": "10",
+            "MinorVersion": "0",
+            "BuildVersion": "22621",
+            "QfeVersion": "2861",
+            "ServiceVersion": "0",
+            "BootMode": "0",
+            "StartTime": "2026-11-23T23:31:49.8899345Z"
+          }
+        },
+        "queued_utc": "2026-11-23T23:31:33.3947678Z"
+      },
+      {
+        "operation": "c4-normal-reboottrial-326511381a4a",
+        "from_boot": 99490,
+        "to_boot": 99580,
+        "event1074": {
+          "record": 99563,
+          "id": 1074,
+          "provider": "User32",
+          "utc": "2026-11-23T23:54:49.1440286Z",
+          "data": {
+            "param1": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+            "param2": "DESKTOP-5RCUK3G",
+            "param3": "没有找到这个原因的标题",
+            "param4": "0x80010000",
+            "param5": "重启",
+            "param6": "SwitchWOA C4 formal later-activation: one-time candidate trial boot (op=c4-normal-reboottrial-326511381a4a from_boot=99490)",
+            "param7": "DESKTOP-5RCUK3G\\ruje"
+          }
+        },
+        "boot12": {
+          "record": 99580,
+          "id": 12,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-23T23:55:07.8009976Z",
+          "data": {
+            "MajorVersion": "10",
+            "MinorVersion": "0",
+            "BuildVersion": "22621",
+            "QfeVersion": "2861",
+            "ServiceVersion": "0",
+            "BootMode": "0",
+            "StartTime": "2026-11-23T23:55:06.0890301Z"
+          }
+        },
+        "queued_utc": "2026-11-23T23:54:49.2534033Z"
+      }
+    ],
+    "selected_41_6008_1001_4101": 0
+  },
+  "immutable_policy": {
+    "files": [
+      {
+        "name": "Baseline-Device.ps1",
+        "sha256": "2daa42faea42a2be4913738b8d97aed138b718a558eaa99ee8e538bb6351d74c",
+        "repository_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/c4-99215-promotion-main-20261123/tegra-x1-wddm/tools/tgd3d-default/Baseline-Device.ps1"
+      },
+      {
+        "name": "Baseline-Promotion.ps1",
+        "sha256": "249f05a5117bf3e0629902b8b0486144555f223b6bb893f6e671b8368a8a0b0e",
+        "repository_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/c4-99215-promotion-main-20261123/tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1"
+      },
+      {
+        "name": "Install-GraphicsBootPolicy.ps1",
+        "sha256": "5ecebad470d243814b2ce90354f2e09dcd947715babda834152a59c074c5d505",
+        "repository_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/c4-99215-promotion-main-20261123/tegra-x1-wddm/tools/tgd3d-default/Install-GraphicsBootPolicy.ps1"
+      },
+      {
+        "name": "Invoke-GraphicsBootPolicy.ps1",
+        "sha256": "b366e79db9c0f55aed09a9c7d19bf71df63b5c361e2cf7f8b48f517c3f62f0a2",
+        "repository_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/c4-99215-promotion-main-20261123/tegra-x1-wddm/tools/tgd3d-default/Invoke-GraphicsBootPolicy.ps1"
+      },
+      {
+        "name": "Native-Boot.ps1",
+        "sha256": "d2b3224084221321be52fe4440f1e67008a1b955ae2d1c3c1fe80e62da26ebfe",
+        "repository_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/c4-99215-promotion-main-20261123/tegra-x1-wddm/tools/tgd3d-default/Native-Boot.ps1"
+      },
+      {
+        "name": "graphics-baseline.json",
+        "sha256": "90930ffdaadcdfe04abe77a497b96894b8ee7bf1fd2b9a8df91ff13fc41b5ad6",
+        "repository_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/c4-99215-promotion-main-20261123/tegra-x1-wddm/docs/graphics-baseline.json"
+      },
+      {
+        "name": "open-faults.json",
+        "sha256": "b489dfa75ac3c926bbd4c03fb152a6b3380d1aa7ed1756c0d136704835058ef1",
+        "repository_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/c4-99215-promotion-main-20261123/tegra-x1-wddm/docs/open-faults.json"
+      }
+    ],
+    "manifest_sha256": "5f41eba816d6c8be45ec6bb0ab3a09a825916cb5f0ebf1f3508d2a631e7ad495",
+    "native_original_file_count": 13,
+    "all_base64_original_bytes_verified": true
+  },
+  "control_failures": {
+    "policy_operation": "c4-normal-installpolicy-c32200e62608",
+    "policy_result_sha256": "71710cf0659bd9d61bd8f70947f50b49d70d94096da7340a4c56eb1ecc6329b5",
+    "policy_failure": {
+      "message": "在此对象上找不到属性“none_accepted”。请确认该属性存在。",
+      "type": "System.Management.Automation.PropertyNotFoundException",
+      "position": "所在位置 C:\\Program Files\\SwitchWOA-C4FormalActivation-01a2094a-r1\\Native-Activation.ps1:2036 字符: 17\r\n+ ... $rawOut = @(& $installScript -ManifestSha256 $Cfg.policy_revision -So ...\r\n+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+      "script_stack": "在 <ScriptBlock>、C:\\Program Files\\SwitchWOA-C4FormalActivation-01a2094a-r1\\policy\\Install-GraphicsBootPolicy.ps1 中: 第 67 行\r\n在 Invoke-InstallPolicy、C:\\Program Files\\SwitchWOA-C4FormalActivation-01a2094a-r1\\Native-Activation.ps1 中: 第 2036 行\r\n在 <ScriptBlock>、C:\\Program Files\\SwitchWOA-C4FormalActivation-01a2094a-r1\\Native-Activation.ps1 中: 第 2896 行\r\n在 <ScriptBlock>、<无文件> 中: 第 2 行\r\n在 <ScriptBlock>、<无文件> 中: 第 1 行"
+    },
+    "failed_policy_state_reconciled_before_continuation": true,
+    "resume_operation": "c4-normal-resumepolicy-5e2b37300a89",
+    "scoped_call_semantics": "StrictMode Off only inside child invocation scope for the unchanged trusted policy script; outer controller strictness and all policy checks remain.",
+    "first_Finish_id": "c4-normal-finish-f48d5963e1f3",
+    "first_Finish_status": "banner-exchange timeout before SSH command submission; same-ID observation found no native intent/result/error/process",
+    "actual_Finish_id": "c4-normal-finish-a63c8d993e61",
+    "actual_Finish_raw": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-formal-99580-main-review-20261124/frozen/native-originals/objects/3d04d248e1fbec8ae274048bbdfe197dfd36a4d5867346a922fdbc0ec626384f",
+      "bytes": 62529,
+      "sha256": "3d04d248e1fbec8ae274048bbdfe197dfd36a4d5867346a922fdbc0ec626384f"
+    }
+  },
+  "drain": {
+    "other_controller_processes": [],
+    "active_owned_child_processes": [],
+    "ps_jobs_count": 0,
+    "unexpected_autologgers": [],
+    "no_new_capture_or_task": true
+  },
+  "deferred_470e1dbc_contracts": [
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+        "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+      },
+      "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+      "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。",
+      "new_batch_disposition": "未取得该具名条件的新直接证据。适配器复位及系统分页包退役不替代此契约；原重入条件保持。",
+      "formal_activation_disposition": "正常启用与永久许可回执不包含该项具名契约条件；保持未知及原重入条件，不重发原用例。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+        "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+      },
+      "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+      "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。",
+      "new_batch_disposition": "未取得该具名条件的新直接证据。适配器复位及系统分页包退役不替代此契约；原重入条件保持。",
+      "formal_activation_disposition": "正常启用与永久许可回执不包含该项具名契约条件；保持未知及原重入条件，不重发原用例。"
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+        "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+      },
+      "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+      "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。",
+      "new_batch_disposition": "未取得该具名条件的新直接证据。适配器复位及系统分页包退役不替代此契约；原重入条件保持。",
+      "formal_activation_disposition": "正常启用与永久许可回执不包含该项具名契约条件；保持未知及原重入条件，不重发原用例。"
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+        "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+      },
+      "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+      "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。",
+      "new_batch_disposition": "未取得该具名条件的新直接证据。适配器复位及系统分页包退役不替代此契约；原重入条件保持。",
+      "formal_activation_disposition": "正常启用与永久许可回执不包含该项具名契约条件；保持未知及原重入条件，不重发原用例。"
+    }
+  ],
+  "runtime_artifacts": {
+    "rebuilt": false,
+    "resigned": false,
+    "new_GPU_TDR_or_rendering_probe_requests": 0,
+    "runtime_component_change": "Only KMD ce54 -> c4. Native079 UMD, native/EC/x86 Neon implementations, both ARM64X forwarding DLLs, all firmware and native ARM64 desktop DXVK retain accepted bytes.",
+    "signed_package_members": 13,
+    "preserved_recovery_driverstore": "oem31.inf",
+    "new_formal_driverstore": "oem32.inf"
+  },
+  "repository": {
+    "prior_selected_commit": "812a3ef7aae3f3feec3401caa15e33df4fa65e36",
+    "qualification_and_selected_manifest_unchanged": true,
+    "installed_policy_revision": "5f41eba816d6c8be45ec6bb0ab3a09a825916cb5f0ebf1f3508d2a631e7ad495",
+    "installed_policy_ledger_sha256": "b489dfa75ac3c926bbd4c03fb152a6b3380d1aa7ed1756c0d136704835058ef1",
+    "current_ledger_update": "Only this formal activation evidence is appended to the existing open fault.20open/3closed and all qualification bindings remain unchanged; installed immutable policy is not reinstalled for review metadata."
+  },
+  "native_originals": {
+    "native-finish-original.json": {
+      "path": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/formal-99580/native-finish-original.json",
+      "sha256": "3d04d248e1fbec8ae274048bbdfe197dfd36a4d5867346a922fdbc0ec626384f"
+    },
+    "accepted-receipt-original.json": {
+      "path": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/formal-99580/accepted-receipt-original.json",
+      "sha256": "5a23e91f461fc36fb61fe8b127d4f236035dd3dcd1c32f6c480113303490ebe1"
+    },
+    "previous-accepted-receipt-original.json": {
+      "path": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/formal-99580/previous-accepted-receipt-original.json",
+      "sha256": "e339f33c9786890216add83898ab9f4b9f8c2ccc5e001bd972fa10aa974ab7dd"
+    },
+    "policy-manifest-original.json": {
+      "path": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/formal-99580/policy-manifest-original.json",
+      "sha256": "5f41eba816d6c8be45ec6bb0ab3a09a825916cb5f0ebf1f3508d2a631e7ad495"
+    },
+    "host-drain-original.json": {
+      "path": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/formal-99580/host-drain-original.json",
+      "sha256": "a3253422ca056309bd95de0a190f009e95063ddc2f1401b0a56e4fd3bf777e3f"
+    }
+  },
+  "new_System_originals": {
+    "path": "tegra-x1-wddm/docs/c4-system-paging-c4f04a10/formal-99580/system-interval.json",
+    "sha256": "b7d10e24c172b109e0248264cf1080dfcc5974337533841ce6a23edbd3b4135a"
+  },
+  "metadata_narrowings": [
+    "Archive identity SHA in the delivery entry identifies the ZIP, not the adjacent identity JSON. Main independently records both.",
+    "Raw read-only Info operation IDs identify the inspected request. Their successful observation status does not replace that original failed result.",
+    "Historical read envelopes retain phase-state boot fields; current boot is bound from nested actual reads and System12.",
+    "The older top-level UMD/video labels in the retained production manifest are historical. Exact component hashes and formal_activation/tested_producer determine this release."
+  ],
+  "limits": [
+    "Info envelopes use the inspected original operation_id; their successful read status is not the outcome of that original action or a duplicate execution.",
+    "ReadClosed/ReadCandidate envelope boot is controller phase state; actual observation boot is the nested closed/candidate record and raw System12/read snapshot.",
+    "Five loaded identities mean four exact DWM module paths plus the Code0 active OEM-bound KMD installed file; no complete in-memory image hashing claim.",
+    "Drain is scoped to related controllers, recorded child PIDs/start times, this PowerShell session jobs and named unexpected autologger keys. The old Tgd3dDefaultEnable task remains disabled; this is not global absence of every task or ETW session.",
+    "Inactive control/recovery/original directories remain preserved. No blanket deletion of all diagnostic files is claimed.",
+    "The production manifest retains older informational scope/UMD labels; exact current components, tested producer and formal_activation are the authoritative identity bindings.",
+    "No reboot after granting permanent permission and no new GPU/TDR/rendering probe is claimed.",
+    "Classic NT/SD dump, legacy first-Present causality, WDDM2.6 native acceptance and four470e contracts remain unknown.20open/3closed unchanged."
+  ],
+  "open_faults": 20,
+  "closed_unchanged": 3,
+  "history_root_causes_closed": false,
+  "next_stage_order": [
+    "dump repair and verifiable dump chain",
+    "WDDM2.6 after the preceding accepted stages"
+  ],
+  "legacy_first_Present_investigation_remains_open": true,
+  "main_device_operations": 0,
+  "goal_complete": false
+}

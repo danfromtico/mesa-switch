@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "round_id": "win-original-etl-bytes-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "owner": "历史应用、Windows 内核及早期复位记录",
+  "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+  "method": "原三次异常启动的 ETL 文件字节复核",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+  "observations": [
+    "按已归档的原客户端 SHA-256、启动、PID、绘图 TID 与 CALL QPC 固定三份原始 ZIP、六个 ETL 成员。",
+    "对照正常样本，对每一物理缓冲按 FilledBytes 解码，再检查余下的实际文件字节。扫描图形提供程序标识并复核标记、对齐、长度、同一启动和请求，可疑的残片分别登记。",
+    "将完整的 CALL 后记录与同一 HWND、线程及源分配核对。缺少对象或只剩填充值时明确恢复界限。"
+  ],
+  "inputs": {
+    "archives": {
+      "Ddi20Case-261120-122121366257": {
+        "boot": 82058,
+        "next_boot": 82128,
+        "pid": 1812,
+        "tid": 6340,
+        "call_qpc": 13070969930,
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/step4-reset-evidence/process-ddi20-device-reason/cases/Ddi20Case-261120-122121366257/result.zip",
+        "sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "streams": {
+          "scene": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+          "miniport": "448d78b1d7806769b77d9bc745c65b7cf07e038e1451f8f7fcec2ab1f28bf7df"
+        }
+      },
+      "Ddi20Case-261120-122937785753": {
+        "boot": 82221,
+        "next_boot": 82289,
+        "pid": 4672,
+        "tid": 4712,
+        "call_qpc": 2352403757,
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/step4-reset-evidence/process-ddi20-device-reason/cases/Ddi20Case-261120-122937785753/result.zip",
+        "sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "streams": {
+          "scene": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+          "miniport": "ae2b064bc83935332746787fdd42cbc661ed4291020ff93a10e167f254bc4fa0"
+        }
+      },
+      "Ddi20Case-261120-123625091734": {
+        "boot": 82382,
+        "next_boot": 82448,
+        "pid": 5828,
+        "tid": 7656,
+        "call_qpc": 2361927374,
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/step4-reset-evidence/process-ddi20-device-reason/cases/Ddi20Case-261120-123625091734/result.zip",
+        "sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "streams": {
+          "scene": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+          "miniport": "6457ad2897be7679e1a140cb12b6c51f93167ad6a31f6cca2b2a006fd0b65cf6"
+        }
+      }
+    },
+    "prior": {
+      "path": "legacy-sequential-step4/historical-first-present-fence.json",
+      "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+    },
+    "archive_inventory": {
+      "path": "windows-native-graphics/rounds/win-first-present-archives-20261121-01.result.json",
+      "sha256": "affb163ba077597729188daca40c106b9a00d8829c0f63e669945d0ffc5edb15"
+    },
+    "healthy_control": {
+      "path": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+      "sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701"
+    },
+    "control_zip_sha256": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b",
+    "providers": [
+      "802ec45a-1e99-4b83-9920-87c98277ba9d",
+      "ca11c036-0102-4a2d-a6ad-f03cfed5d3c9",
+      "5f0c4c6e-7a0b-4b52-9d3a-2f6d1e8b4a11",
+      "c27c1f9b-62e8-4e21-b29b-6bb2d585c6d0",
+      "9e9bba3c-2e38-40cb-99f4-9e8281425164"
+    ]
+  }
+}

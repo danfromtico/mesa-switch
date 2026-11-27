@@ -1,0 +1,500 @@
+{
+  "graphics_commit": "a88217bac76325ef693d1608be667b5134432c23",
+  "feature_level": "11_1",
+  "components": {
+    "umd": "7dcbc53c55dd46ab8ab405884664193e904adb21a408ce169aeb75b390fce4c6",
+    "icd": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+  },
+  "fixture": {
+    "codec": "H.264 Main, level 3.2",
+    "width": 1280,
+    "height": 720,
+    "fps": 60,
+    "frames": 360,
+    "sha256": "13b56f66927e97fcc8050336b70daf2482640fd8f1ae57edb7ab6d0ddfccd164"
+  },
+  "method": "Stock ARM64 browsers in unique temporary standard-user profiles. CDP Media events, video element counters and tgd3d ETW events. No graphics or video feature override.",
+  "browsers": {
+    "edge": {
+      "version": "157.0.4341.60",
+      "boot_utc": "2026-11-19T10:38:08.8915300Z",
+      "decoder": "FFmpegVideoDecoder",
+      "hardware_decoder": false,
+      "reported_video_decode": "disabled_software",
+      "video_ended": true,
+      "total_frames": 360,
+      "dropped_frames": 140,
+      "gpu_adapter_opens": 3,
+      "video_operations": [
+        10,
+        11,
+        12
+      ],
+      "nvdec_submissions": 0,
+      "etw_lost_events": 0,
+      "etw_sha256": "90be4c0f8e2ae3f26e2d31b97b3346d8f465571bf3a8df17e0a82fc4e3daf9c8",
+      "hidden_webcodecs_hardware_request": {
+        "case": "hidden target, stock Edge, six-frame H.264 sample, prefer-hardware",
+        "version": "157.0.4341.60",
+        "browser_gpu_pid": 2400,
+        "selected_decoder": "D3D11",
+        "frames": 0,
+        "completed_nvdec_submissions": 0,
+        "completed_first_load_and_configure": true,
+        "second_load_hresult": "0x90000011",
+        "trace_sha256": "37230a2410b3b417af155d5a3a1f8b97d3777cfcdec572d5d53daaa96a3d11c8",
+        "public_api_replay": "luid=0000000000005967 level=b100 raw=2 first=00000000 overlap=90000011 after_release=00000000 removed=00000000",
+        "replay_etl_sha256": "a5a67dc964fc468f65f9c014f7625731c5b5628673a1566cad707293dd6d65d1"
+      }
+    },
+    "chrome": {
+      "version": "158.0.8127.37",
+      "boot_utc": "2026-11-19T10:38:08.9024190Z",
+      "decoder": "FFmpegVideoDecoder",
+      "hardware_decoder": false,
+      "reported_video_decode": "disabled_software",
+      "video_ended": true,
+      "total_frames": 360,
+      "dropped_frames": 13,
+      "gpu_adapter_opens": 3,
+      "video_operations": [
+        10,
+        11,
+        12
+      ],
+      "nvdec_submissions": 0,
+      "etw_lost_events": 0,
+      "etw_sha256": "8273d215cf02bc2ab6fc320e4a7db5a2c89d695b82a981dfa3e891c8c9c14c71"
+    }
+  },
+  "chrome_gpu_failure": {
+    "processes": 3,
+    "process_exit_code": "0x80000003",
+    "previous_message": "DirectComposition CheckFormatSupport returned 0x80004005.",
+    "fatal_site": "components/viz/service/display_embedder/skia_output_surface_impl.cc:1218",
+    "size": [
+      784,
+      592
+    ],
+    "format": 4,
+    "color_type": 4,
+    "backend_format_valid": false,
+    "gl_format": 0,
+    "will_gl_fbo0": true,
+    "interpretation": "The initial GPU processes failed in Skia output-surface setup before native decode submitted any picture. The failed format query and the fatal surface setup have not been shown to have a common cause."
+  },
+  "public_d3d11_format_control": {
+    "utc": "2026-11-19T10:57:02.6465577Z",
+    "create_flags": [
+      "BGRA_SUPPORT",
+      "VIDEO_SUPPORT"
+    ],
+    "requested_level": [
+      "11_1"
+    ],
+    "obtained_level": "11_1",
+    "video_device_profiles": 1,
+    "render_texture_size": [
+      784,
+      592
+    ],
+    "formats": {
+      "R8G8B8A8_UNORM": {
+        "hresult": "00000000",
+        "support_bits": "13def3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        },
+        "create_texture_rtv_srv_hresult": [
+          "00000000",
+          "00000000",
+          "00000000"
+        ]
+      },
+      "R8G8B8A8_UNORM_SRGB": {
+        "hresult": "00000000",
+        "support_bits": "11def3f0",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "B8G8R8A8_UNORM": {
+        "hresult": "00000000",
+        "support_bits": "11def3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        },
+        "create_texture_rtv_srv_hresult": [
+          "00000000",
+          "00000000",
+          "00000000"
+        ]
+      },
+      "B8G8R8A8_UNORM_SRGB": {
+        "hresult": "00000000",
+        "support_bits": "11def3f0",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "B8G8R8X8_UNORM": {
+        "hresult": "00000000",
+        "support_bits": "00d6f3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "R10G10B10A2_UNORM": {
+        "hresult": "00000000",
+        "support_bits": "13def3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "R16G16B16A16_FLOAT": {
+        "hresult": "00000000",
+        "support_bits": "12def3f3",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "NV12": {
+        "hresult": "00000000",
+        "support_bits": "3a82c320",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "P010": {
+        "hresult": "80004005",
+        "support_bits": "00000000",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      },
+      "YUY2": {
+        "hresult": "00000000",
+        "support_bits": "22820320",
+        "quality_levels": {
+          "1": 1,
+          "2": 0,
+          "4": 0,
+          "8": 0
+        }
+      }
+    },
+    "process_exit": 0,
+    "etw_sha256": "bd58dfc3bf9837c187c143f44d0f76a56d00f19f1f4346a215dd7394796777fd",
+    "scope": "Single-sample RGBA8 and BGRA8 textures, RTVs and SRVs were created. P010 format support returned E_FAIL. No causal link between this optional video format and the Skia failure has been established."
+  },
+  "switchroot_noble_reference": {
+    "local_reference": {
+      "saved_package_index": "emc-runtime/noble-profile-tools-20261115/reference/noble-packages.txt",
+      "index_sha256": "d5a39deb3f126c4fc65989d466b744256d605f9183f27370d1371a52dc937d42",
+      "package_index_entries": [
+        {
+          "Package": "chromium-browser",
+          "Version": "9:126.0.6478.234-1",
+          "Architecture": "arm64",
+          "SHA256": "7643529f55e554c42252e00d824bba2f69938b7a49a9f017d12c64cef394a52b"
+        },
+        {
+          "Package": "ffmpeg",
+          "Version": "9:6.1.1-3ubuntu5l4t3",
+          "Architecture": "arm64",
+          "SHA256": "3db24c6ebafe9dae3a29b3748458c11a0821b64b9542e1c509cdd725312016ca"
+        },
+        {
+          "Package": "libavcodec60",
+          "Version": "9:6.1.1-3ubuntu5l4t3",
+          "Architecture": "arm64",
+          "SHA256": "3876b718b292c772485d077c75bebac0371d0f2cf1dbd7fc7eb6b861d66f062b"
+        }
+      ],
+      "previous_same_board_clock_and_transport_record": "tegra-x1-wddm/docs/NVDEC_COEXISTING_TRANSPORT_20261117.json#noble_evidence",
+      "measurement_scope": "The earlier same-board Noble capture covers clocks and host transport. It contains no active browser playback measurement."
+    },
+    "chromium": {
+      "scope": "Archived Switchroot build, maintained through Chromium 126.",
+      "build_and_package": "https://github.com/theofficialgman/chromium-tegra-scripts/blob/2bfd5683a807bbba4a3bc19c753a5e4d55ddee89/chromium/build_and_pack.sh#L138",
+      "decoder_allowlist": "https://github.com/theofficialgman/chromium-tegra-scripts/blob/2bfd5683a807bbba4a3bc19c753a5e4d55ddee89/chromium/patches/multi-patch-v10.patch#L193-L202",
+      "capture_and_export": "https://github.com/theofficialgman/chromium-tegra-scripts/blob/2bfd5683a807bbba4a3bc19c753a5e4d55ddee89/ffmpeg-chroot-script/nvv4l2-chrome-125.0-dynamic.patch#L2777-L2817",
+      "data_flow": [
+        "Chromium FFmpeg media path selects the permitted h264_nvv4l2 decoder from its packaged libffmpeg.so",
+        "NVIDIA V4L2 receives compressed data through /dev/nvhost-nvdec",
+        "The decoder exports output plane data into an ordinary AVFrame with NvBuffer2Raw for subsequent presentation"
+      ]
+    },
+    "firefox": {
+      "scope": "The Noble-maintainer-reported Firefox path uses the system FFmpeg decoder resolver. Mozilla separately fixed device access for the media process. A later Firefox selection regression was worked around in the FFmpeg fork.",
+      "fix_for_media_process": "https://bugzilla.mozilla.org/show_bug.cgi?id=1903688",
+      "selection_regression": "https://bugzilla.mozilla.org/show_bug.cgi?id=2016587#c9",
+      "downstream_change": "https://github.com/theofficialgman/FFmpeg/commit/65445e23ebc92e6f5e333065e93eb705cb67aac8",
+      "decoder_source": "https://github.com/theofficialgman/FFmpeg/blob/65445e23ebc92e6f5e333065e93eb705cb67aac8/libavcodec/nvv4l2_dec.c#L1212-L1240",
+      "downstream_change_scope": "Removing AV_CODEC_CAP_HARDWARE changes decoder selection metadata. The decoder implementation still dispatches to NVDEC. The archived package index alone cannot identify which later downstream changes an installed binary contains."
+    },
+    "windows_comparison": {
+      "target": "Stock ARM64 Edge and Chrome on tgd3d",
+      "existing_windows_decode_record": "tegra-x1-wddm/docs/NVDEC_720_NATIVE_BACKEND_20261117.json#nv12_byte_comparison",
+      "diagnostic_order": [
+        "On the selected Windows tuple, isolate public D3D11VA H.264 decode and CPU-readable NV12 output with a known clip, frame hashes and completed NVDEC submissions.",
+        "In each browser identify the chosen decoder, submissions from its processes, and the output handoff to the compositor. Compare decoder selection and presentation independently."
+      ],
+      "current_result": "The tested stock browsers played the clip using FFmpegVideoDecoder with zero native decoder submissions. The Noble browser connector is Linux-specific.",
+      "baseline_copyout_control": {
+        "mode": "public ARM64 FFmpeg D3D11VA, decode-only with av_hwframe_transfer_data, separate six-frame 720p reference clip",
+        "tested_utc": "2026-11-19T11:37:58.6301947Z",
+        "native_luid": "0000000000005967",
+        "signed_client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+        "clip_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "reference_sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "successful_nvdec_submits": 6,
+        "trace_sha256": "bd4c3d201bcb161e4d230fb20671c39fa59e19742ac1aaff7ed209cfd3a73ed8",
+        "drawn_window_frames": 0,
+        "native_process_exit": 0,
+        "gpu_problem_code": 0,
+        "readback_i420_sha256": [
+          "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+          "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+          "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+          "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+          "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+          "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+        ],
+        "readback_hash_layout": "NV12 decoded surface, Y rows followed by deinterleaved U and V for the published planar I420 hashes"
+      }
+    }
+  },
+  "custom_chromium_ffmpeg_copyout": {
+    "scope": "Local H.264 player in a Windows ARM64 Electron Chromium shell. A Chromium utility process hosts an application FFmpeg decoder; website HTML video is a separate path. Software-composited canvas displays CPU-readable NV12.",
+    "chromium": "156.0.8078.100",
+    "electron": "45.4.1",
+    "video": "1280x720 H.264 60 fps, six frames",
+    "sample_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "decoder_component_sha256": "ee9031cf1d11831c20ee94a4363e9331a583255cad0c1ebbc895899a64af69d6",
+    "decoder_process": {
+      "image": "electron.exe",
+      "pid": 3452,
+      "completed_nvdec_submissions": 6
+    },
+    "copied_nv12_sha256": [
+      "ea284b1304d223f09b082206d5cb2228448c132d47cf4e967333792c9ac4c66b",
+      "c33785f08f120f71a7d14d704771cf4c16ba8be94523b38165ed12208894d0d6",
+      "6678800318924a76ccf3d235f3c24f70e1dc82cf98ea9228ceeb01b07b041b11",
+      "1668b84351940ca9858c11d8fc7784ea0d1f0a16c3f7418e2dbcef67ac50511b",
+      "4d7a089ab602cc9f582ed275d0a2cbcd2b7172248bb54c230fa4005e33c227b2",
+      "b7a7465358fba2f2f593777fc2471393c2fbc8bdea5c456eae6c574a66a80c64"
+    ],
+    "matching_reference_frames": 6,
+    "canvas_draws": 6,
+    "first_to_last_draw_ms": 161.112,
+    "capture_stream_video_quality": {
+      "width": 1280,
+      "height": 720,
+      "readyState": 4,
+      "total": 6,
+      "dropped": 5
+    },
+    "capture_stream_callback_counts": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "presentation_scope": "Browser window capture contains the color pattern. Canvas capture stream counters measure the auxiliary video sink. Physical panel frames and sustained real-time playback have not been measured.",
+    "window_png_sha256": "dddcc13fb374c5075cbc9c5be15ca5b91efdef63f62455e105068bce5af217f0",
+    "trace_sha256": "ea548b2eb95575e4f9ac1b82ba49d1915c71f6c8e67d69cb483fa5c4e43ddaf0",
+    "trace_stop": [
+      "stop=0 lost=0 lost_buffers=0 buffers=5"
+    ],
+    "exit_code": 0,
+    "previous_black_window": "MediaStreamTrackGenerator wrote first frame, then video.play waited at readyState 0. Six native decodes and six matching NV12 frames were confirmed in the instrumented run.",
+    "desktop_shortcut_trial": {
+      "chromium": "156.0.8078.100",
+      "shortcut": "Switch Chromium.lnk",
+      "decoder_sha256": "0d65a8573e50ad85775d9f70ab5250639d620f45dddd2d078bd22147bbef73ea",
+      "test": "Desktop shortcut launched through the interactive shell with acceptance argument. Local H.264 file playback using FFmpeg and a software-composited canvas. File selection, sample playback and separate website navigation are available.",
+      "decoder_process_id": 5900,
+      "completed_nvdec_submissions": 6,
+      "matching_nv12_frames": 6,
+      "browser_window_visible": true,
+      "window_capture_sha256": "09999aaa1dab4929896c19336beb6e31374e7f9605cf60a7dfd76cf94b4e1fcd",
+      "etw_sha256": "76edcdcf3a6f35364eea53df8a53340be098afa96ad4e60e0a13ee227bc918b1",
+      "processes_remaining": [],
+      "instrumented_first_to_last_draw_ms": 393.8,
+      "measurement": "includes per-frame SHA256 and IPC; no sustained playback performance claim"
+    },
+    "installed_revision": {
+      "chromium": "156.0.8078.100",
+      "decoder_sha256": "77ee04de428f833431915ad141fa17c302dc387e31f6752346e3c27d993d1669",
+      "official_runtime_package_sha256": "5ad2f09093cba71ad7dc8ddb2ef7261978c9130aa07e492556efe802f6ca74e9",
+      "matching_nv12_frames": 6,
+      "completed_nvdec_submissions": 6,
+      "shortcut": "Switch Chromium.lnk",
+      "trace_sha256": "1aba4719f9e71b178f0a2ca5c44e0d3f0a486d4f0ec4e693cfe60455b4dca4d6",
+      "window_capture_sha256": "09999aaa1dab4929896c19336beb6e31374e7f9605cf60a7dfd76cf94b4e1fcd",
+      "review": "Gemini 4 Neon High reviewed the decoder and shell source changes before final shortcut testing."
+    }
+  },
+  "wiliwili_windows": {
+    "upstream": "https://github.com/xfangfang/wiliwili/releases/tag/v1.6.0",
+    "version": "1.6.0",
+    "arm64": {
+      "archive_sha256": "778c8c52b98524188bbbd71bb7312bbfed1abb4cf7e461ad8bccb8e8ce3f4c02",
+      "exe_sha256": "461956614db5cdd27ba5d20721bb1d37a1389fd10093839358d63c74572079d4",
+      "hardware_setting": true,
+      "error": "0xc000001d after GLFW platform initialization, before playback. No NVDEC events.",
+      "etw_sha256": "13177a4636ffb9b0e2ef3c748146bdb3a4f96729fa7ec224db2fe3fc946f1f64",
+      "windows_event_1000": {
+        "exception_code": "0xc000001d",
+        "fault_rva": "0x5221d0",
+        "instruction": "casal x8, x0, [x19]",
+        "isa": "FEAT_LSE; absent on Cortex-A57",
+        "official_package_retired": true
+      }
+    },
+    "x64_on_arm": {
+      "archive_sha256": "e98bdbbbc0ab0ac5860c50e35c6414bcd093d0b695e5cce31ccc52b85155d760",
+      "hardware_setting": true,
+      "result": "Created its window and reached home. mpv was not initialized in this home-only capture.",
+      "etw_sha256": "7228a6e5594e5e15619f81e2c0a90a3d0118adb214e7b3a41bd38bb92055e6d4"
+    },
+    "subsequent_video_attempt": {
+      "user_observation": "Video remained black, then Windows rebooted. The test controller issued no reboot command.",
+      "recovered_boot_utc": "2026-11-19T12:17:45.7849810Z",
+      "recovered_gpu_problem_code": 0,
+      "hardware_setting_after_reboot": true,
+      "custom_hwdec_method": null,
+      "app_reported_hw": "no",
+      "selected_video": "H.264, 640x360, 8-bit yuv420p",
+      "mpv_d3d11va": "Failed to create hwdevice_ctx",
+      "mpv_d3d11va_copy_hresult": "0x887a0004",
+      "mpv_dxva2_copy_hresult": "0x8876086a",
+      "selected_decoder": "software",
+      "render_callback": "mpv_render_context_render() not being called or stuck",
+      "unexpected_shutdown_events": [
+        {
+          "Id": 41,
+          "utc": "2026-11-19T12:16:57.8963045Z"
+        },
+        {
+          "Id": 6008,
+          "utc": "2026-11-19T12:18:25.7034120Z"
+        }
+      ],
+      "causality": "Logs establish fallback and a stalled or uncalled render callback before the black screen. The unclosed ETL and shutdown events cannot attribute the system reset.",
+      "mpv_log_sha256": "3b4dafe2df58a8618e027f6dd1059debf555757daff55c4d5854a4f9ce903b41",
+      "app_log_sha256": "459780bd1a9c1fc290e93776a020f54a63ba9319a9fe77ce0913faf1bc52118b",
+      "desktop_shortcut": "wiliwili.lnk, official x64 1.6.0 under Windows ARM64 emulation",
+      "desktop_target_sha256": "4ba00c63573ae82ff5eec41bab0bae630d5598fcfbea01cbf7700bf49937a55f"
+    },
+    "official_x64_authenticated_retest": {
+      "version": "1.6.0",
+      "exe_sha256": "4ba00c63573ae82ff5eec41bab0bae630d5598fcfbea01cbf7700bf49937a55f",
+      "boot_utc": "2026-11-19T12:44:06.7579660Z",
+      "gpu_problem_code": 0,
+      "app_hwdec_setting": true,
+      "player_pid": 3264,
+      "local_720p": {
+        "auto_safe": {
+          "hwdec": "auto-safe",
+          "hwdec-current": "no",
+          "video-format": "h264",
+          "width": 1280,
+          "height": 720,
+          "time-pos": 0.083333,
+          "eof-reached": true,
+          "decoder-frame-drop-count": 0,
+          "frame-drop-count": 9
+        },
+        "d3d11va_copy": {
+          "hwdec": "d3d11va-copy",
+          "hwdec-current": "no",
+          "video-format": "h264",
+          "width": 1280,
+          "height": 720,
+          "time-pos": 0.083333,
+          "eof-reached": true,
+          "decoder-frame-drop-count": 0,
+          "frame-drop-count": 9
+        },
+        "previous_hwdec_option_restored": true
+      },
+      "online": {
+        "source": "Normal recommended video selected in the signed-in app. No account identifiers or stream URLs retained in this record.",
+        "samples": [
+          {
+            "hwdec": "auto-safe",
+            "hwdec-current": "no",
+            "video-format": "h264",
+            "width": 1920,
+            "height": 1080,
+            "time-pos": 3.566688,
+            "eof-reached": false,
+            "decoder-frame-drop-count": 0,
+            "frame-drop-count": 92
+          },
+          {
+            "hwdec": "auto-safe",
+            "hwdec-current": "no",
+            "video-format": "h264",
+            "width": 1920,
+            "height": 1080,
+            "time-pos": 4.6,
+            "eof-reached": false,
+            "decoder-frame-drop-count": 0,
+            "frame-drop-count": 122
+          },
+          {
+            "hwdec": "auto-safe",
+            "hwdec-current": "no",
+            "video-format": "h264",
+            "width": 1920,
+            "height": 1080,
+            "time-pos": 6.2,
+            "eof-reached": false,
+            "decoder-frame-drop-count": 0,
+            "frame-drop-count": 160
+          }
+        ],
+        "user_observation": "Playback was too choppy and the user closed the video."
+      },
+      "mpv_log_result": "D3D11 hardware-device creation returned DXGI_ERROR_UNSUPPORTED (0x887a0004); mpv selected software decoding.",
+      "completed_nvdec_submissions_from_player": 0,
+      "trace_lost_events": 0,
+      "trace_lost_buffers": 0,
+      "trace_sha256": "7ad65cc3450f8936a223568c1cfd86dcb77fbf8012dce2b06ee4953f07e790f8",
+      "temporary_player_config_removed": true,
+      "installed_desktop_architecture": "x64",
+      "a57_rebuild_retired_at_user_request": true
+    }
+  }
+}

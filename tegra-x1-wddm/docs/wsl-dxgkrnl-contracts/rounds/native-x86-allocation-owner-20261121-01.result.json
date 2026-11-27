@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "round_id": "native-x86-allocation-owner-20261121-01",
+  "contract_id": "dxgkrnl.h:746:2",
+  "declaration_sha256": "91b26d87783bb6eb30822489b5e1e8876e1e05cac16d179c1eadb0c8607acd3a",
+  "board_issuance_sha256": "6fced26b88b1cb2f8fa75f856edc2177e2036b53eb8bddb175bc52e32f932021",
+  "chronology": "设备签发记录绑定计划哈希。同一启动中的调用、设备创建与两份分配回执按 QPC 匹配。",
+  "started_utc": "2026-11-21T12:31:12.4045433Z",
+  "before": {
+    "utc": "2026-11-21T12:31:12.4045433Z",
+    "boot": 91476,
+    "dwm": 1400,
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "session": 1,
+    "ac": "Online",
+    "code": 0,
+    "mode": 1
+  },
+  "after": {
+    "utc": "2026-11-21T12:31:29.9852982Z",
+    "boot": 91476,
+    "dwm": 1400,
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "session": 1,
+    "ac": "Online",
+    "code": 0,
+    "mode": 1
+  },
+  "target_hit": true,
+  "unexplained_restart": false,
+  "status": "已满足",
+  "observation": {
+    "pid": 5340,
+    "client_exit": 0,
+    "adapter": "DEVICE luid=0000000000005c10 vendor=10de chip=12e sm=53 bytes=4194304",
+    "caller_log_sha256": "2cffe8ce99e540daff3d386ebafe96f734546e4407799f66a62f75f81f49b4e0",
+    "etl_sha256": "25df233ac64f26655e4b15cc3753a0089d7cad7efe0a97f18af52edc49bc7279",
+    "manifest_sha256": {
+      "allocation-owner-event-layout.json": "f0b6a40bae02e49922472e206dfc302fc590b23722507663a8d79d76208cc569",
+      "preimage-context-event-layout.json": "ce70a39f72b595f9b4c92b3665eb5f31c41850641ff1d65bcc948a397fa7b24d"
+    },
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=4"
+      ]
+    },
+    "joins": [
+      {
+        "caller": {
+          "pid": 5340,
+          "tid": 1332,
+          "shared": 0,
+          "device": 1073742016,
+          "allocation": 1073742208,
+          "resource": 0,
+          "status": 0,
+          "begin": 16495094676,
+          "end": 16495223135
+        },
+        "device_create_matches": 1,
+        "event33_count": 1,
+        "event36_count": 1,
+        "device_create_qpc": 16495086731,
+        "adapter_allocation_qpc": 16495103631,
+        "device_allocation_qpc": 16495105287,
+        "same_adapter": true,
+        "same_device": true,
+        "same_global_allocation": true,
+        "bytes": 4194304,
+        "kernel_thunk_allocation": 1073742208,
+        "kernel_thunk_resource": 0,
+        "kernel_resource_present": false,
+        "kernel_shared_resource_present": false,
+        "caller_allocation_matches": true,
+        "caller_resource_matches": true,
+        "matched": true
+      },
+      {
+        "caller": {
+          "pid": 5340,
+          "tid": 1332,
+          "shared": 1,
+          "device": 1073742016,
+          "allocation": 1073742336,
+          "resource": 1073742272,
+          "status": 0,
+          "begin": 16495266006,
+          "end": 16495421045
+        },
+        "device_create_matches": 1,
+        "event33_count": 1,
+        "event36_count": 1,
+        "device_create_qpc": 16495086731,
+        "adapter_allocation_qpc": 16495272091,
+        "device_allocation_qpc": 16495272780,
+        "same_adapter": true,
+        "same_device": true,
+        "same_global_allocation": true,
+        "bytes": 4194304,
+        "kernel_thunk_allocation": 1073742336,
+        "kernel_thunk_resource": 1073742272,
+        "kernel_resource_present": true,
+        "kernel_shared_resource_present": true,
+        "caller_allocation_matches": true,
+        "caller_resource_matches": true,
+        "matched": true
+      }
+    ],
+    "release_and_close": [
+      "FREE shared=0 status=00000000",
+      "FREE shared=1 status=00000000",
+      "CLOSE status=00000000"
+    ]
+  },
+  "baseline_verified_after": true,
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "loaded_desktop_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "caller": {
+    "bytes": 70664,
+    "unsigned": "abad091da77d445966d1c414d7bcb2a8ef5c8a04a94ad3186b563fb97f3e59d7",
+    "sha256": "d4a4b0b5dc57ddb50c6878ac276a3c8c1dca679114bc1cc1139c19332e3da7c2",
+    "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "original_sources": {
+      "kmt_native.c": "72e4935a1cfad56ac9bc4415859c900dd66ff78739da7cc7276cb321a165a397",
+      "kmt.c": "97180a7cfcdb53c1412fdc2b625ab5c7e52a570cb3d63248cdf319f08a320949",
+      "kmt.h": "61558590186b35dc78f10aeae564139c9cb67578c14158941a4ab6d108a6a22a",
+      "kmt_native.h": "bc11685831906bdf75f5be57185977927937fdd0e3e19b177ace347a3693e610",
+      "kmt_abi.h": "23f93d58cde3f893463270d263ba07ef3ad5523dbf2692b93fd7b2a2a1255a41",
+      "adapter_abi.h": "9cf36e45dac585d0456acf63fb7c441e3be6eb0582dae3fd222263b28719b3ae",
+      "allocation_abi.h": "860bbf9c80475c7a853d182cea53ef70a03ef9a5e662aa06c04cf9001aa31ecd",
+      "submit_abi.h": "9359c37d2474e67363d24f1f87573015b5cf73ed1d926f55aac7876071de5d9f",
+      "memory_budget.h": "9c943e1a93ea14be7980f7ca366be50587a3b4f9eab410ff82428ef21ffaeddd"
+    },
+    "instrumented_source": "72e4935a1cfad56ac9bc4415859c900dd66ff78739da7cc7276cb321a165a397",
+    "program_source": "418685915bcdfc17d9c7e5ce47dc1f42a69893aeafc2bbfc610b75f8ae3cffbb",
+    "build_source": "8fc6344fe1b7503ee18af34f2e09b7fb38d18743e3ff9182e2824b33e1262536"
+  },
+  "collector": {
+    "bytes": 65048,
+    "unsigned": "fee07084bf2105c59532284d49d75c550abc1eafd241fe0499b10ec67636127f",
+    "sha256": "1244e7f4d4100c34ccb4dad70de0146989cdc1d4fbaa4b3a156c53c2d188709b",
+    "source_sha256": "029fdbb138da231fe0e55c3b6fb87bc8eedf5336fbe5ee307a4ee88b039e52c2"
+  },
+  "decode_script_sha256": "2927f665b22aaf710a4a49875970bbd71e11f3351e0a1656974892349e171aac",
+  "controller_result_sha256": "79b1ea6abcc2d9aeecc7461683e19a3d062abfabbf24f5dd4d0c4776fff43c01",
+  "cleanup": {
+    "task_count": 0,
+    "file_count": 12,
+    "directory_removed": true
+  },
+  "applicability": "独立 x86 客户端在 GM20B 上各创建并正常释放一份 4 MiB 分配。两次公开调用的设备句柄均匹配事件 27，事件 33 和 36 的适配器、设备和全局分配身份相同。普通分配的资源字段为空，共享分配的资源字段及句柄匹配创建方。第七张游戏纹理及 WSL 来宾字段仍缺各自的观测。"
+}

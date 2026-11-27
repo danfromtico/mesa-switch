@@ -1,0 +1,1253 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-context-state-capture-20261121-01",
+  "contract_id": "WIN-DWM-CONTEXT-STATE-CAPTURE",
+  "windows_question": "WIN-DWM-CONTEXT-STATE-CAPTURE",
+  "plan_sha256": "4aeb9037a98b3740aaedc64f455acce2cad12a9f0e623760ef86bd1931280bb5",
+  "status": "实机通过",
+  "finding": "正式启动 91918 的 Windows ETW CAPTURE_STATE 把正在运行的 DWM 的 7 个上下文经 32/29/110 直接配对到两个适配器与节点。GM20B LUID 0x5601 有 4 个上下文，Microsoft 1414:008c LUID 0x56f8 有 3 个。7 个均关联事件 433。正式适配器上有两条同包提交、完成中断、完成与退役的正常样本。",
+  "missing_observation": "实机确认了各上下文在 91918 的采集和归属。启动 91476 的旧对象缺本次类型的快照。其 152586 仍需原次或新同场景的同号 KMD 准入、完成与异常边界。",
+  "device_executions": 0,
+  "evidence": {
+    "boundaries": {
+      "last_entry": {
+        "qpc": 10879215628,
+        "pid": 4,
+        "tid": 932,
+        "provider": "kernel",
+        "id": 175,
+        "version": 1,
+        "fields": {
+          "hContext": 18446659461286034880,
+          "hQueuePacketContext": 0,
+          "PacketType": 0,
+          "uliSubmissionId": 9244,
+          "ulQueueSubmitSequence": 3654,
+          "pDmaBuffer": 0,
+          "QuantumStatus": 3
+        }
+      },
+      "last_return": {
+        "qpc": 10879297392,
+        "pid": 4,
+        "tid": 928,
+        "provider": "kernel",
+        "id": 180,
+        "version": 1,
+        "fields": {
+          "hContext": 18446659461286034880,
+          "PacketType": 0,
+          "SubmitSequence": 3654,
+          "bPreempted": 0,
+          "bTimeouted": 0,
+          "pQueuePacket": 18446607229195537184
+        }
+      },
+      "first_anomaly_or_missing": "实机确认了各上下文在 91918 的采集和归属。启动 91476 的旧对象缺本次类型的快照。其 152586 仍需原次或新同场景的同号 KMD 准入、完成与异常边界。"
+    },
+    "boot": 91918,
+    "dwm": 1472,
+    "dwm_start": "2026-11-21T16:28:05.1778623Z",
+    "ac": "Online",
+    "mode": 1,
+    "code": 0,
+    "actual_component_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "permanent_component_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "capture_api_call_ms": 17.660521,
+    "trace": {
+      "StartStatus": 0,
+      "EnableStatus": 0,
+      "CaptureStatus": 0,
+      "StopStatus": 0,
+      "EventsLost": 0,
+      "BuffersLost": 0,
+      "BuffersWritten": 10,
+      "Frequency": 19200000,
+      "StartQpc": 10873341107,
+      "EnabledQpc": 10873593397,
+      "CaptureBeginQpc": 10876574883,
+      "CaptureReturnQpc": 10876913965,
+      "StopQpc": 10881991078,
+      "Created": true,
+      "CaptureCalled": true,
+      "StopCalled": true
+    },
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "session_query_control_result_before_after": [
+      4201,
+      4201
+    ],
+    "session_cleanup": true,
+    "event_counts": [
+      {
+        "id": 26,
+        "version": 0,
+        "after_capture_start": true,
+        "count": 2
+      },
+      {
+        "id": 29,
+        "version": 2,
+        "after_capture_start": true,
+        "count": 34
+      },
+      {
+        "id": 32,
+        "version": 0,
+        "after_capture_start": true,
+        "count": 47
+      },
+      {
+        "id": 110,
+        "version": 1,
+        "after_capture_start": true,
+        "count": 2
+      },
+      {
+        "id": 175,
+        "version": 1,
+        "after_capture_start": true,
+        "count": 18
+      },
+      {
+        "id": 176,
+        "version": 0,
+        "after_capture_start": true,
+        "count": 18
+      },
+      {
+        "id": 177,
+        "version": 1,
+        "after_capture_start": true,
+        "count": 18
+      },
+      {
+        "id": 178,
+        "version": 1,
+        "after_capture_start": true,
+        "count": 15
+      },
+      {
+        "id": 433,
+        "version": 1,
+        "after_capture_start": true,
+        "count": 39
+      }
+    ],
+    "dwm_context_records": [
+      {
+        "context": {
+          "qpc": 10876624192,
+          "pid": 2100,
+          "tid": 5000,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446659461336367120,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 0,
+            "DmaBufferSegmentSet": 0,
+            "DmaBufferPrivateDataSize": 0,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446659461290826640,
+            "ContextHandle": 3221233600,
+            "ParentDxgContext": 0
+          }
+        },
+        "devices": [
+          {
+            "qpc": 10876624136,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 29,
+            "version": 2,
+            "fields": {
+              "hProcessId": 1472,
+              "pDxgAdapter": 18446607229170921472,
+              "ClientType": 1,
+              "hDevice": 18446659461336367120,
+              "RequestVSync": 0,
+              "DisableGpuTimeout": 1,
+              "hThunkHandle": 3221233280,
+              "DxgProcess": 18446659461269970192,
+              "HostDeviceHandle": 0,
+              "VirtualGpu": 0
+            }
+          }
+        ],
+        "adapters": [
+          {
+            "qpc": 10876605870,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 26,
+            "version": 0,
+            "fields": {
+              "pDeviceObject": 18446607229163536432,
+              "pDxgAdapter": 18446607229170921472,
+              "NbVidPnSources": 0,
+              "HighestAcceptableAddress": 18446744073709551615,
+              "MaxSlotId": 0,
+              "ApertureSegmentCommitLimit": 0,
+              "MaxPointerWidth": 0,
+              "MaxPointerHeight": 0,
+              "InterruptMessageNumber": 0,
+              "NumberOfSwizzlingRanges": 0,
+              "MaxOverlays": 0,
+              "MaxQueuedFlipOnVSync": 0,
+              "PointerCaps": 0,
+              "GammaRampCaps": 0,
+              "PresentationCaps": 268435459,
+              "AlignmentShift": 0,
+              "MaxTextureWidthShift": 3,
+              "MaxTextureHeightShift": 3,
+              "Reserved": 0,
+              "FlipCaps": 10,
+              "SchedulingCaps": 21,
+              "ReservedMemoryManagementCaps": 0,
+              "PagingNode": 0,
+              "NbAsymetricProcessingNodes": 5,
+              "ReservedTopology": [
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "NumPowerComponents": 0,
+              "AdapterType": 261,
+              "pMiniportContext": 18446607229163524096,
+              "VirtualGpuLuid": 0
+            }
+          },
+          {
+            "qpc": 10876607441,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 110,
+            "version": 1,
+            "fields": {
+              "pDxgAdapter": 18446607229170921472,
+              "ConfigSpaceSize": 0,
+              "ChainUid": 0,
+              "NumberOfLinksInChain": 0,
+              "LeadLink": 0,
+              "BusType": 3,
+              "VendorID": 5140,
+              "DeviceID": 140,
+              "SubVendorID": 0,
+              "SubSystemID": 0,
+              "RevisionID": 0,
+              "AdapterLuid": 22264
+            }
+          }
+        ],
+        "luid": "0x56f8",
+        "observed_queue_count": 0,
+        "observed_queue_packet": null,
+        "scheduler_handle_events": [
+          {
+            "qpc": 10876624302,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 433,
+            "version": 1,
+            "fields": {
+              "pDxgObject": 18446659461290826640,
+              "pSchObject": 18446607229219097408,
+              "hKmdHandle": 0,
+              "hOsHandle": 18446607229213723280
+            }
+          }
+        ],
+        "ordinary_dma_completion_count": 0,
+        "paired_completion_sample": []
+      },
+      {
+        "context": {
+          "qpc": 10876624925,
+          "pid": 2100,
+          "tid": 5000,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446659461336176608,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 4096,
+            "DmaBufferSegmentSet": 1,
+            "DmaBufferPrivateDataSize": 304,
+            "AllocationListSize": 16,
+            "PatchLocationListSize": 16,
+            "Flags": 0,
+            "hContext": 18446659461290827184,
+            "ContextHandle": 3221232384,
+            "ParentDxgContext": 0
+          }
+        },
+        "devices": [
+          {
+            "qpc": 10876624872,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 29,
+            "version": 2,
+            "fields": {
+              "hProcessId": 1472,
+              "pDxgAdapter": 18446607229170921472,
+              "ClientType": 1,
+              "hDevice": 18446659461336176608,
+              "RequestVSync": 0,
+              "DisableGpuTimeout": 1,
+              "hThunkHandle": 2147497024,
+              "DxgProcess": 18446659461269970192,
+              "HostDeviceHandle": 0,
+              "VirtualGpu": 0
+            }
+          }
+        ],
+        "adapters": [
+          {
+            "qpc": 10876605870,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 26,
+            "version": 0,
+            "fields": {
+              "pDeviceObject": 18446607229163536432,
+              "pDxgAdapter": 18446607229170921472,
+              "NbVidPnSources": 0,
+              "HighestAcceptableAddress": 18446744073709551615,
+              "MaxSlotId": 0,
+              "ApertureSegmentCommitLimit": 0,
+              "MaxPointerWidth": 0,
+              "MaxPointerHeight": 0,
+              "InterruptMessageNumber": 0,
+              "NumberOfSwizzlingRanges": 0,
+              "MaxOverlays": 0,
+              "MaxQueuedFlipOnVSync": 0,
+              "PointerCaps": 0,
+              "GammaRampCaps": 0,
+              "PresentationCaps": 268435459,
+              "AlignmentShift": 0,
+              "MaxTextureWidthShift": 3,
+              "MaxTextureHeightShift": 3,
+              "Reserved": 0,
+              "FlipCaps": 10,
+              "SchedulingCaps": 21,
+              "ReservedMemoryManagementCaps": 0,
+              "PagingNode": 0,
+              "NbAsymetricProcessingNodes": 5,
+              "ReservedTopology": [
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "NumPowerComponents": 0,
+              "AdapterType": 261,
+              "pMiniportContext": 18446607229163524096,
+              "VirtualGpuLuid": 0
+            }
+          },
+          {
+            "qpc": 10876607441,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 110,
+            "version": 1,
+            "fields": {
+              "pDxgAdapter": 18446607229170921472,
+              "ConfigSpaceSize": 0,
+              "ChainUid": 0,
+              "NumberOfLinksInChain": 0,
+              "LeadLink": 0,
+              "BusType": 3,
+              "VendorID": 5140,
+              "DeviceID": 140,
+              "SubVendorID": 0,
+              "SubSystemID": 0,
+              "RevisionID": 0,
+              "AdapterLuid": 22264
+            }
+          }
+        ],
+        "luid": "0x56f8",
+        "observed_queue_count": 0,
+        "observed_queue_packet": null,
+        "scheduler_handle_events": [
+          {
+            "qpc": 10876625031,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 433,
+            "version": 1,
+            "fields": {
+              "pDxgObject": 18446659461290827184,
+              "pSchObject": 18446607229219096368,
+              "hKmdHandle": 18446607229217965232,
+              "hOsHandle": 18446607229213722832
+            }
+          }
+        ],
+        "ordinary_dma_completion_count": 0,
+        "paired_completion_sample": []
+      },
+      {
+        "context": {
+          "qpc": 10876635583,
+          "pid": 2100,
+          "tid": 5000,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446659461276643344,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 4096,
+            "DmaBufferSegmentSet": 1,
+            "DmaBufferPrivateDataSize": 304,
+            "AllocationListSize": 16,
+            "PatchLocationListSize": 16,
+            "Flags": 0,
+            "hContext": 18446659461266007664,
+            "ContextHandle": 1073742528,
+            "ParentDxgContext": 0
+          }
+        },
+        "devices": [
+          {
+            "qpc": 10876635526,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 29,
+            "version": 2,
+            "fields": {
+              "hProcessId": 1472,
+              "pDxgAdapter": 18446607229170921472,
+              "ClientType": 1,
+              "hDevice": 18446659461276643344,
+              "RequestVSync": 0,
+              "DisableGpuTimeout": 1,
+              "hThunkHandle": 1073742336,
+              "DxgProcess": 18446659461269970192,
+              "HostDeviceHandle": 0,
+              "VirtualGpu": 0
+            }
+          }
+        ],
+        "adapters": [
+          {
+            "qpc": 10876605870,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 26,
+            "version": 0,
+            "fields": {
+              "pDeviceObject": 18446607229163536432,
+              "pDxgAdapter": 18446607229170921472,
+              "NbVidPnSources": 0,
+              "HighestAcceptableAddress": 18446744073709551615,
+              "MaxSlotId": 0,
+              "ApertureSegmentCommitLimit": 0,
+              "MaxPointerWidth": 0,
+              "MaxPointerHeight": 0,
+              "InterruptMessageNumber": 0,
+              "NumberOfSwizzlingRanges": 0,
+              "MaxOverlays": 0,
+              "MaxQueuedFlipOnVSync": 0,
+              "PointerCaps": 0,
+              "GammaRampCaps": 0,
+              "PresentationCaps": 268435459,
+              "AlignmentShift": 0,
+              "MaxTextureWidthShift": 3,
+              "MaxTextureHeightShift": 3,
+              "Reserved": 0,
+              "FlipCaps": 10,
+              "SchedulingCaps": 21,
+              "ReservedMemoryManagementCaps": 0,
+              "PagingNode": 0,
+              "NbAsymetricProcessingNodes": 5,
+              "ReservedTopology": [
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "NumPowerComponents": 0,
+              "AdapterType": 261,
+              "pMiniportContext": 18446607229163524096,
+              "VirtualGpuLuid": 0
+            }
+          },
+          {
+            "qpc": 10876607441,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 110,
+            "version": 1,
+            "fields": {
+              "pDxgAdapter": 18446607229170921472,
+              "ConfigSpaceSize": 0,
+              "ChainUid": 0,
+              "NumberOfLinksInChain": 0,
+              "LeadLink": 0,
+              "BusType": 3,
+              "VendorID": 5140,
+              "DeviceID": 140,
+              "SubVendorID": 0,
+              "SubSystemID": 0,
+              "RevisionID": 0,
+              "AdapterLuid": 22264
+            }
+          }
+        ],
+        "luid": "0x56f8",
+        "observed_queue_count": 0,
+        "observed_queue_packet": null,
+        "scheduler_handle_events": [
+          {
+            "qpc": 10876635688,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 433,
+            "version": 1,
+            "fields": {
+              "pDxgObject": 18446659461266007664,
+              "pSchObject": 18446607229194623776,
+              "hKmdHandle": 18446607229194569776,
+              "hOsHandle": 18446607229171388080
+            }
+          }
+        ],
+        "ordinary_dma_completion_count": 0,
+        "paired_completion_sample": []
+      },
+      {
+        "context": {
+          "qpc": 10876710002,
+          "pid": 2100,
+          "tid": 5000,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446659461306132320,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 0,
+            "DmaBufferSegmentSet": 0,
+            "DmaBufferPrivateDataSize": 0,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446659461293718992,
+            "ContextHandle": 1073746688,
+            "ParentDxgContext": 0
+          }
+        },
+        "devices": [
+          {
+            "qpc": 10876709780,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 29,
+            "version": 2,
+            "fields": {
+              "hProcessId": 1472,
+              "pDxgAdapter": 18446607229161803776,
+              "ClientType": 1,
+              "hDevice": 18446659461306132320,
+              "RequestVSync": 0,
+              "DisableGpuTimeout": 1,
+              "hThunkHandle": 1073746624,
+              "DxgProcess": 18446659461269970192,
+              "HostDeviceHandle": 0,
+              "VirtualGpu": 0
+            }
+          }
+        ],
+        "adapters": [
+          {
+            "qpc": 10876653991,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 26,
+            "version": 0,
+            "fields": {
+              "pDeviceObject": 18446607229169500208,
+              "pDxgAdapter": 18446607229161803776,
+              "NbVidPnSources": 1,
+              "HighestAcceptableAddress": 1099511627775,
+              "MaxSlotId": 0,
+              "ApertureSegmentCommitLimit": 0,
+              "MaxPointerWidth": 0,
+              "MaxPointerHeight": 0,
+              "InterruptMessageNumber": 0,
+              "NumberOfSwizzlingRanges": 0,
+              "MaxOverlays": 0,
+              "MaxQueuedFlipOnVSync": 0,
+              "PointerCaps": 0,
+              "GammaRampCaps": 0,
+              "PresentationCaps": 536870915,
+              "AlignmentShift": 0,
+              "MaxTextureWidthShift": 0,
+              "MaxTextureHeightShift": 0,
+              "Reserved": 0,
+              "FlipCaps": 10,
+              "SchedulingCaps": 69,
+              "ReservedMemoryManagementCaps": 0,
+              "PagingNode": 0,
+              "NbAsymetricProcessingNodes": 1,
+              "ReservedTopology": [
+                0
+              ],
+              "NumPowerComponents": 0,
+              "AdapterType": 779,
+              "pMiniportContext": 18446607229169410048,
+              "VirtualGpuLuid": 0
+            }
+          },
+          {
+            "qpc": 10876655033,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 110,
+            "version": 1,
+            "fields": {
+              "pDxgAdapter": 18446607229161803776,
+              "ConfigSpaceSize": 0,
+              "ChainUid": 0,
+              "NumberOfLinksInChain": 0,
+              "LeadLink": 0,
+              "BusType": 2,
+              "VendorID": 1095718739,
+              "DeviceID": 825247280,
+              "SubVendorID": 0,
+              "SubSystemID": 0,
+              "RevisionID": 0,
+              "AdapterLuid": 22017
+            }
+          }
+        ],
+        "luid": "0x5601",
+        "observed_queue_count": 0,
+        "observed_queue_packet": null,
+        "scheduler_handle_events": [
+          {
+            "qpc": 10876710109,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 433,
+            "version": 1,
+            "fields": {
+              "pDxgObject": 18446659461293718992,
+              "pSchObject": 18446607229208054560,
+              "hKmdHandle": 0,
+              "hOsHandle": 18446607229201311568
+            }
+          }
+        ],
+        "ordinary_dma_completion_count": 0,
+        "paired_completion_sample": []
+      },
+      {
+        "context": {
+          "qpc": 10876710558,
+          "pid": 2100,
+          "tid": 5000,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446659461286286000,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446659461286034880,
+            "ContextHandle": 1073744704,
+            "ParentDxgContext": 0
+          }
+        },
+        "devices": [
+          {
+            "qpc": 10876710504,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 29,
+            "version": 2,
+            "fields": {
+              "hProcessId": 1472,
+              "pDxgAdapter": 18446607229161803776,
+              "ClientType": 1,
+              "hDevice": 18446659461286286000,
+              "RequestVSync": 0,
+              "DisableGpuTimeout": 0,
+              "hThunkHandle": 1073744064,
+              "DxgProcess": 18446659461269970192,
+              "HostDeviceHandle": 0,
+              "VirtualGpu": 0
+            }
+          }
+        ],
+        "adapters": [
+          {
+            "qpc": 10876653991,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 26,
+            "version": 0,
+            "fields": {
+              "pDeviceObject": 18446607229169500208,
+              "pDxgAdapter": 18446607229161803776,
+              "NbVidPnSources": 1,
+              "HighestAcceptableAddress": 1099511627775,
+              "MaxSlotId": 0,
+              "ApertureSegmentCommitLimit": 0,
+              "MaxPointerWidth": 0,
+              "MaxPointerHeight": 0,
+              "InterruptMessageNumber": 0,
+              "NumberOfSwizzlingRanges": 0,
+              "MaxOverlays": 0,
+              "MaxQueuedFlipOnVSync": 0,
+              "PointerCaps": 0,
+              "GammaRampCaps": 0,
+              "PresentationCaps": 536870915,
+              "AlignmentShift": 0,
+              "MaxTextureWidthShift": 0,
+              "MaxTextureHeightShift": 0,
+              "Reserved": 0,
+              "FlipCaps": 10,
+              "SchedulingCaps": 69,
+              "ReservedMemoryManagementCaps": 0,
+              "PagingNode": 0,
+              "NbAsymetricProcessingNodes": 1,
+              "ReservedTopology": [
+                0
+              ],
+              "NumPowerComponents": 0,
+              "AdapterType": 779,
+              "pMiniportContext": 18446607229169410048,
+              "VirtualGpuLuid": 0
+            }
+          },
+          {
+            "qpc": 10876655033,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 110,
+            "version": 1,
+            "fields": {
+              "pDxgAdapter": 18446607229161803776,
+              "ConfigSpaceSize": 0,
+              "ChainUid": 0,
+              "NumberOfLinksInChain": 0,
+              "LeadLink": 0,
+              "BusType": 2,
+              "VendorID": 1095718739,
+              "DeviceID": 825247280,
+              "SubVendorID": 0,
+              "SubSystemID": 0,
+              "RevisionID": 0,
+              "AdapterLuid": 22017
+            }
+          }
+        ],
+        "luid": "0x5601",
+        "observed_queue_count": 15,
+        "observed_queue_packet": {
+          "qpc": 10879193812,
+          "pid": 1472,
+          "tid": 2348,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446659461286034880,
+            "PacketType": 0,
+            "SubmitSequence": 3654,
+            "DmaBufferSize": 3052,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "bPresent": 0,
+            "hDmaBuffer": 0,
+            "pQueuePacket": 18446607229195537184,
+            "ProgressFenceValue": 0
+          }
+        },
+        "scheduler_handle_events": [
+          {
+            "qpc": 10876710669,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 433,
+            "version": 1,
+            "fields": {
+              "pDxgObject": 18446659461286034880,
+              "pSchObject": 18446607229196817264,
+              "hKmdHandle": 18446607229198694864,
+              "hOsHandle": 18446607229195901712
+            }
+          }
+        ],
+        "ordinary_dma_completion_count": 2,
+        "paired_completion_sample": [
+          {
+            "submit": {
+              "qpc": 10879215628,
+              "pid": 4,
+              "tid": 932,
+              "provider": "kernel",
+              "id": 175,
+              "version": 1,
+              "fields": {
+                "hContext": 18446659461286034880,
+                "hQueuePacketContext": 0,
+                "PacketType": 0,
+                "uliSubmissionId": 9244,
+                "ulQueueSubmitSequence": 3654,
+                "pDmaBuffer": 0,
+                "QuantumStatus": 3
+              }
+            },
+            "irq": {
+              "qpc": 10879295590,
+              "pid": 4,
+              "tid": 928,
+              "provider": "kernel",
+              "id": 177,
+              "version": 1,
+              "fields": {
+                "hContext": 18446659461286034880,
+                "PacketType": 0,
+                "uliCompletionId": 9244,
+                "ulQueueSubmitSequence": 3654,
+                "InterruptType": 1,
+                "QuantumStatus": 3,
+                "FaultedVirtualAddress": 0,
+                "PageFaultFlags": 0,
+                "FaultedProcessHandle": 0
+              }
+            },
+            "complete": {
+              "qpc": 10879296880,
+              "pid": 4,
+              "tid": 928,
+              "provider": "kernel",
+              "id": 176,
+              "version": 0,
+              "fields": {
+                "hContext": 18446659461286034880,
+                "PacketType": 0,
+                "uliCompletionId": 9244,
+                "ulQueueSubmitSequence": 3654,
+                "bPreempted": 0
+              }
+            },
+            "queue_retire": {
+              "qpc": 10879297392,
+              "pid": 4,
+              "tid": 928,
+              "provider": "kernel",
+              "id": 180,
+              "version": 1,
+              "fields": {
+                "hContext": 18446659461286034880,
+                "PacketType": 0,
+                "SubmitSequence": 3654,
+                "bPreempted": 0,
+                "bTimeouted": 0,
+                "pQueuePacket": 18446607229195537184
+              }
+            }
+          }
+        ]
+      },
+      {
+        "context": {
+          "qpc": 10876710794,
+          "pid": 2100,
+          "tid": 5000,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446659461286286000,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446659461290342624,
+            "ContextHandle": 1073744256,
+            "ParentDxgContext": 0
+          }
+        },
+        "devices": [
+          {
+            "qpc": 10876710504,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 29,
+            "version": 2,
+            "fields": {
+              "hProcessId": 1472,
+              "pDxgAdapter": 18446607229161803776,
+              "ClientType": 1,
+              "hDevice": 18446659461286286000,
+              "RequestVSync": 0,
+              "DisableGpuTimeout": 0,
+              "hThunkHandle": 1073744064,
+              "DxgProcess": 18446659461269970192,
+              "HostDeviceHandle": 0,
+              "VirtualGpu": 0
+            }
+          }
+        ],
+        "adapters": [
+          {
+            "qpc": 10876653991,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 26,
+            "version": 0,
+            "fields": {
+              "pDeviceObject": 18446607229169500208,
+              "pDxgAdapter": 18446607229161803776,
+              "NbVidPnSources": 1,
+              "HighestAcceptableAddress": 1099511627775,
+              "MaxSlotId": 0,
+              "ApertureSegmentCommitLimit": 0,
+              "MaxPointerWidth": 0,
+              "MaxPointerHeight": 0,
+              "InterruptMessageNumber": 0,
+              "NumberOfSwizzlingRanges": 0,
+              "MaxOverlays": 0,
+              "MaxQueuedFlipOnVSync": 0,
+              "PointerCaps": 0,
+              "GammaRampCaps": 0,
+              "PresentationCaps": 536870915,
+              "AlignmentShift": 0,
+              "MaxTextureWidthShift": 0,
+              "MaxTextureHeightShift": 0,
+              "Reserved": 0,
+              "FlipCaps": 10,
+              "SchedulingCaps": 69,
+              "ReservedMemoryManagementCaps": 0,
+              "PagingNode": 0,
+              "NbAsymetricProcessingNodes": 1,
+              "ReservedTopology": [
+                0
+              ],
+              "NumPowerComponents": 0,
+              "AdapterType": 779,
+              "pMiniportContext": 18446607229169410048,
+              "VirtualGpuLuid": 0
+            }
+          },
+          {
+            "qpc": 10876655033,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 110,
+            "version": 1,
+            "fields": {
+              "pDxgAdapter": 18446607229161803776,
+              "ConfigSpaceSize": 0,
+              "ChainUid": 0,
+              "NumberOfLinksInChain": 0,
+              "LeadLink": 0,
+              "BusType": 2,
+              "VendorID": 1095718739,
+              "DeviceID": 825247280,
+              "SubVendorID": 0,
+              "SubSystemID": 0,
+              "RevisionID": 0,
+              "AdapterLuid": 22017
+            }
+          }
+        ],
+        "luid": "0x5601",
+        "observed_queue_count": 0,
+        "observed_queue_packet": null,
+        "scheduler_handle_events": [
+          {
+            "qpc": 10876710898,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 433,
+            "version": 1,
+            "fields": {
+              "pDxgObject": 18446659461290342624,
+              "pSchObject": 18446607229172445872,
+              "hKmdHandle": 18446607229198697296,
+              "hOsHandle": 18446607229195901840
+            }
+          }
+        ],
+        "ordinary_dma_completion_count": 0,
+        "paired_completion_sample": []
+      },
+      {
+        "context": {
+          "qpc": 10876720488,
+          "pid": 2100,
+          "tid": 5000,
+          "provider": "kernel",
+          "id": 32,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446659461282800304,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446659461289669296,
+            "ContextHandle": 1073743808,
+            "ParentDxgContext": 0
+          }
+        },
+        "devices": [
+          {
+            "qpc": 10876720434,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 29,
+            "version": 2,
+            "fields": {
+              "hProcessId": 1472,
+              "pDxgAdapter": 18446607229161803776,
+              "ClientType": 1,
+              "hDevice": 18446659461282800304,
+              "RequestVSync": 1,
+              "DisableGpuTimeout": 0,
+              "hThunkHandle": 1073743744,
+              "DxgProcess": 18446659461269970192,
+              "HostDeviceHandle": 0,
+              "VirtualGpu": 0
+            }
+          }
+        ],
+        "adapters": [
+          {
+            "qpc": 10876653991,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 26,
+            "version": 0,
+            "fields": {
+              "pDeviceObject": 18446607229169500208,
+              "pDxgAdapter": 18446607229161803776,
+              "NbVidPnSources": 1,
+              "HighestAcceptableAddress": 1099511627775,
+              "MaxSlotId": 0,
+              "ApertureSegmentCommitLimit": 0,
+              "MaxPointerWidth": 0,
+              "MaxPointerHeight": 0,
+              "InterruptMessageNumber": 0,
+              "NumberOfSwizzlingRanges": 0,
+              "MaxOverlays": 0,
+              "MaxQueuedFlipOnVSync": 0,
+              "PointerCaps": 0,
+              "GammaRampCaps": 0,
+              "PresentationCaps": 536870915,
+              "AlignmentShift": 0,
+              "MaxTextureWidthShift": 0,
+              "MaxTextureHeightShift": 0,
+              "Reserved": 0,
+              "FlipCaps": 10,
+              "SchedulingCaps": 69,
+              "ReservedMemoryManagementCaps": 0,
+              "PagingNode": 0,
+              "NbAsymetricProcessingNodes": 1,
+              "ReservedTopology": [
+                0
+              ],
+              "NumPowerComponents": 0,
+              "AdapterType": 779,
+              "pMiniportContext": 18446607229169410048,
+              "VirtualGpuLuid": 0
+            }
+          },
+          {
+            "qpc": 10876655033,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 110,
+            "version": 1,
+            "fields": {
+              "pDxgAdapter": 18446607229161803776,
+              "ConfigSpaceSize": 0,
+              "ChainUid": 0,
+              "NumberOfLinksInChain": 0,
+              "LeadLink": 0,
+              "BusType": 2,
+              "VendorID": 1095718739,
+              "DeviceID": 825247280,
+              "SubVendorID": 0,
+              "SubSystemID": 0,
+              "RevisionID": 0,
+              "AdapterLuid": 22017
+            }
+          }
+        ],
+        "luid": "0x5601",
+        "observed_queue_count": 7,
+        "observed_queue_packet": {
+          "qpc": 10879313215,
+          "pid": 4,
+          "tid": 932,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446659461289669296,
+            "PacketType": 4,
+            "SubmitSequence": 5420,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446607229200599840
+          }
+        },
+        "scheduler_handle_events": [
+          {
+            "qpc": 10876720602,
+            "pid": 2100,
+            "tid": 5000,
+            "provider": "kernel",
+            "id": 433,
+            "version": 1,
+            "fields": {
+              "pDxgObject": 18446659461289669296,
+              "pSchObject": 18446607229199429648,
+              "hKmdHandle": 18446607229198289968,
+              "hOsHandle": 18446607229195901392
+            }
+          }
+        ],
+        "ordinary_dma_completion_count": 0,
+        "paired_completion_sample": []
+      }
+    ],
+    "native_device_id": {
+      "vendor": "414f5753",
+      "device": "31304630",
+      "acpi": "SWOA0F01",
+      "luid": "0x5601"
+    },
+    "kmd_boot_scope": "正式实载；WDDM 2.6；未启动图形用例，正常 DWM 动作为正对照。",
+    "artifacts": {
+      "source_manifest": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/native-submit-event-catalog.raw.json",
+        "sha256": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357"
+      },
+      "raw": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/rundown-91918/state.etl",
+        "sha256": "d2f5b1bf7d5d643eb5e2b4b40567eaca9954353bffe1b032b1821084208de255"
+      },
+      "receipt": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/rundown-91918/receipt.json",
+        "sha256": "f412519c785679a7739e3e27cc5109d67082bffb311488659750849bd141b036"
+      },
+      "device_before": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/context-rundown-before.json",
+        "sha256": "33b5058a5921e95404da643d6e1f0e05d3f326b8f565560be0579e1b8a3351ba"
+      },
+      "device_after": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/context-rundown-after.json",
+        "sha256": "cfc1054d62a51671d5cedf21dc8fa2c096bdc44e89f2e62063855defe87af38c"
+      }
+    },
+    "decoded_report": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/rundown-91918/decoded.json",
+      "sha256": "f1c2209abce1a2de16433fe684d4e79ece2a33dfcc58605f3417815119446775"
+    },
+    "runner_adjustments": {
+      "initial_preflight": "目标机未安装 logman.exe。首次命令未创建会话。用 ControlTraceW 对同一专用会话完成查询及定向清理。",
+      "raw_initial_preflight": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/rundown-91918/rpc-error.json",
+        "sha256": "cd40847a3798aeb3fb8fad6abeec6891397916c6dd3d8b2207a1b8d354de06c5"
+      },
+      "fallback_source": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/etw_session_check.cs",
+        "sha256": "0db1735e17641e8f8f6fde8bae5dbbae75fafa0f6e9c88f5d89e9d39ad09ff8b"
+      }
+    },
+    "controller": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/etw_context_snapshot.cs",
+      "sha256": "9b0e210bdec3b175881f6f7cf7fc1788052aacfd733968f82efab109ca932ff3"
+    },
+    "decoder": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/decode_etw_context_snapshot.py",
+      "sha256": "4d9daf350dbd54db2bf436bd81a0a37d833bf6199ac02488b1495d23a61393bb"
+    },
+    "official_reference": "https://learn.microsoft.com/en-us/windows/win32/api/evntprov/nc-evntprov-penablecallback"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "complete": true,
+  "first_record": 92229,
+  "last_record": 92405,
+  "boot_records": [
+    92247,
+    92336
+  ],
+  "abnormal_events": [],
+  "restarts": [
+    {
+      "explained": true,
+      "kind": "controlled",
+      "boot_record": 92247,
+      "cause": "enter closed gate before selecting candidate",
+      "system_records": [
+        92230,
+        92247
+      ],
+      "evidence_file": "system-pre-workloads.json",
+      "evidence_sha256": "e3b7713446cda0a13f3bd2848c9ad8c75eabf80f927ef9389602c96ef9166ab3"
+    },
+    {
+      "explained": true,
+      "kind": "controlled",
+      "boot_record": 92336,
+      "cause": "one-time candidate boot",
+      "system_records": [
+        92319,
+        92336
+      ],
+      "evidence_file": "system-pre-workloads.json",
+      "evidence_sha256": "e3b7713446cda0a13f3bd2848c9ad8c75eabf80f927ef9389602c96ef9166ab3"
+    }
+  ]
+}

@@ -85,6 +85,7 @@ CreateRenderTargetView(
 
    struct pipe_resource *resource = CastPipeResource(pCreateRenderTargetView->hDrvResource);
    RenderTargetView *pRTView = CastRenderTargetView(hRenderTargetView);
+   pRTView->link = {};
 
    struct pipe_surface desc;
 
@@ -130,6 +131,8 @@ CreateRenderTargetView(
    }
 
    pRTView->surface = desc;
+   AttachResourceView(CastResource(pCreateRenderTargetView->hDrvResource),
+                      &pRTView->link, &pRTView->surface, NULL);
 }
 
 
@@ -154,6 +157,7 @@ DestroyRenderTargetView(D3D10DDI_HDEVICE hDevice,                       // IN
    RenderTargetView *pRTView = CastRenderTargetView(hRenderTargetView);
 
    pipe_resource_reference(&pRTView->surface.texture, NULL);
+   DetachResourceView(&pRTView->link);
 }
 
 
@@ -283,6 +287,7 @@ CreateDepthStencilView(
 
    struct pipe_resource *resource = CastPipeResource(pCreateDepthStencilView->hDrvResource);
    DepthStencilView *pDSView = CastDepthStencilView(hDepthStencilView);
+   pDSView->link = {};
 
    struct pipe_surface desc;
 
@@ -318,6 +323,8 @@ CreateDepthStencilView(
    }
 
    pDSView->surface = desc;
+   AttachResourceView(CastResource(pCreateDepthStencilView->hDrvResource),
+                      &pDSView->link, &pDSView->surface, NULL);
 }
 
 
@@ -342,6 +349,7 @@ DestroyDepthStencilView(D3D10DDI_HDEVICE hDevice,                       // IN
    DepthStencilView *pDSView = CastDepthStencilView(hDepthStencilView);
 
    pipe_resource_reference(&pDSView->surface.texture, NULL);
+   DetachResourceView(&pDSView->link);
 }
 
 

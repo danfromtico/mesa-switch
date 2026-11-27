@@ -1,0 +1,121 @@
+{
+  "scope": "Offline controller-side readback for the next genuine original SEQUENTIAL request. No new Switch execution or reference to a new incident.",
+  "old_entry_sha256": "7d700e5cd643a9ff4db139cc129fb003a52e691b739d98ec585ef2c5db2eff6d",
+  "entry": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-natural/request_original_sequential_v2.py",
+    "sha256": "1214e10318313a33db3ae37c350daa4735efa320907532e6a9595d574c630cfd"
+  },
+  "controller_handoff_sha256": "737d2896f49d21f3f3edac0023c7cec280e5e7149e03fdf236dfb9965c9fc687",
+  "controller_test_receipt_sha256": "6ef069166ef14812987a9e025b021424121b855da4d5dca633aaa0bc42098b4f",
+  "checks": {
+    "complete": {
+      "state": "confirmed-prefixes",
+      "order": [
+        "receiver-stopped",
+        "reader-spawned",
+        "first-remote-collect",
+        "first-remote-restore"
+      ],
+      "reader_exit": 0,
+      "journal_sha256": "d5efb09c9da958f55a98057f79fa02c69c2e823184f5d52dea6253089b8ea9cd",
+      "confirmed_checkpoints": 799,
+      "attempts": 116,
+      "complete_attempts": 111,
+      "capture_end_present": true,
+      "unconfirmed_tail": false,
+      "app_dma": 6763
+    },
+    "disconnected-truncation": {
+      "state": "confirmed-prefixes",
+      "order": [
+        "receiver-stopped",
+        "reader-spawned",
+        "first-remote-collect",
+        "first-remote-restore"
+      ],
+      "reader_exit": 0,
+      "journal_sha256": "aca1f7a12b6cb5e410a0abd4e776a9493634e4ca5f8d1fa863c51850343766ee",
+      "confirmed_checkpoints": 7,
+      "attempts": 1,
+      "complete_attempts": 0,
+      "capture_end_present": false,
+      "unconfirmed_tail": true
+    },
+    "worker-timeout": {
+      "state": "confirmed-prefixes",
+      "order": [
+        "receiver-SIGTERM",
+        "receiver-SIGKILL",
+        "receiver-stopped",
+        "reader-spawned",
+        "first-remote-restore"
+      ],
+      "reader_exit": 0,
+      "journal_sha256": "aca1f7a12b6cb5e410a0abd4e776a9493634e4ca5f8d1fa863c51850343766ee",
+      "confirmed_checkpoints": 7,
+      "attempts": 1,
+      "complete_attempts": 0,
+      "capture_end_present": false,
+      "unconfirmed_tail": true
+    },
+    "dispatch-exception": {
+      "state": "confirmed-prefixes",
+      "order": [
+        "receiver-SIGTERM",
+        "receiver-stopped",
+        "reader-spawned",
+        "first-remote-restore"
+      ],
+      "reader_exit": 0,
+      "journal_sha256": "aca1f7a12b6cb5e410a0abd4e776a9493634e4ca5f8d1fa863c51850343766ee",
+      "confirmed_checkpoints": 7,
+      "attempts": 1,
+      "complete_attempts": 0,
+      "capture_end_present": false,
+      "unconfirmed_tail": true
+    },
+    "reader-failure": {
+      "state": "readback-failed",
+      "order": [
+        "receiver-stopped",
+        "reader-spawned",
+        "first-remote-collect",
+        "first-remote-restore",
+        "formal-finish-reached",
+        "formal-cleanup-reached"
+      ],
+      "reader_exit": 1,
+      "journal_sha256": "bf29333c8eed387e23b8df540652aac9e56f77cf3016d000c4f8b9e2c7ced9ac"
+    },
+    "no-journal": {
+      "state": "journal-absent",
+      "order": [
+        "receiver-stopped",
+        "first-remote-collect",
+        "first-remote-restore"
+      ],
+      "reader_exit": null,
+      "journal_sha256": null
+    },
+    "foreign-capture": {
+      "state": "readback-failed",
+      "order": [
+        "receiver-stopped",
+        "reader-spawned",
+        "first-remote-collect",
+        "first-remote-restore"
+      ],
+      "reader_exit": 0,
+      "journal_sha256": "aca1f7a12b6cb5e410a0abd4e776a9493634e4ca5f8d1fa863c51850343766ee"
+    }
+  },
+  "main_review": {
+    "original_boot": 94382,
+    "dma": 6763,
+    "journal_sha256": "d5efb09c9da958f55a98057f79fa02c69c2e823184f5d52dea6253089b8ea9cd",
+    "prefix_cuts": 21,
+    "results": "Three cuts at each of seven actual stage revisions. Only a whole committed revision 7 proves all four stages. Truncation within the GPU-complete confirmation preserves the submit, KMD entry and KMD return only.",
+    "scope": "Independent, local recorded-data checks",
+    "saved_prefix_matrix_sha256": "fe0400ffe99ef07261bc23c173a89b1153c3118618c712191bf622b973bc6d77"
+  }
+}

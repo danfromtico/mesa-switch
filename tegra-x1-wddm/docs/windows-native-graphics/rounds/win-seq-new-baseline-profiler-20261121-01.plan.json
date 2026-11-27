@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-new-baseline-profiler-20261121-01",
+  "contract_id": "WIN-SEQ-SELECTED-BASELINE-DMA",
+  "windows_question": "WIN-SEQ-SELECTED-BASELINE-DMA",
+  "owner": "Windows VidSch、DxgKrnl、DWM、GM20B KMD",
+  "question": "在已选 7f626083 基线上，原签名空窗口首次 Present 区间是否有同一 GM20B DWM 提交的 5063 进入、返回和完成持久回执？",
+  "method": "以 12 秒有界实时及文件 ETW 观察现行基线原空窗口首次 Present",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289"
+    },
+    "driver_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+      "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+    }
+  },
+  "pass_condition": "现行基线有原始应用 CALL 和返回；同一采集期间至少一个经完整状态确认的 GM20B DWM 包，实时记录与封口 ETL 及同包完成一致。",
+  "observations": [
+    "核对正式启动、DWM、供电、手持模式、Code 0、永久许可、七组件及实际加载文件。使用与旧窗口同签名、同双 BGRA SEQUENTIAL 空窗口。",
+    "上一轮 READY 到首次 CALL 约 7.87 s。预设 12 s、最多 4096 条实时事件及两路各 64 MiB 文件。持久写入 READY 后只放行一次。",
+    "同线程 175/105/106 分析全部提交以避免歧义，用设备、上下文、序号绑定 177/176/180。观察同窗画面、输入、退出与同桌面；历史 152586 单独留档。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "3ab11b187c323fe677839c9e2ff73490a907e061c120f7fcf3c1cb57e966ae18",
+      "Capture-State.cs": "c3160e7b79c326194582ead5de44e9d6d685038f7486257f4cedade027fd0d6b",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d"
+    },
+    "fixture_runner_sha256": "c1b11b3636109799aa6a8d2da85548f518c735754ab99637756858b685352c0b",
+    "profiler_runner_sha256": "f4c2877104f8d5ca74ba6f2973360fa399abe696da3073e2b1c8148931908c15",
+    "orchestration_sha256": "366f9aec70fc77ffe75fab7258a5edd13593481d2e299c7f180a5ea2bb3eaf69",
+    "source_sha256": "3dbeca4d6d5ee20283d7e443483b828d7d836a065272e4cf8c943fe8d5242ef0",
+    "exe_sha256": "b79a1da93bbcadfa256da06b8d71b0ec2ecb9142436a05e44a395643f9a91d7f",
+    "receiver_sha256": "59dec5bf4fb073de0d0b0bcac0743972a4bdcc4efe2c0bc5038685f6524cd22f",
+    "baseline_manifest_sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289",
+    "before_sha256": "bc2537facd42e83cc8ccfa8dac9c73fae387542e3dc1d8f4108afba1a6edd2b9",
+    "client": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-gated-seq-profiler-present-20261121-01.result.json",
+        "sha256": "f600f46c61ce3dd658fa4c7ad8ca4ed9021ca9dbee288159cba3e6c9f55afcd5"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-dma175-ddi-order-20261121-01.result.json",
+        "sha256": "f360eb0249210e9b1b4573de8dbf6ae4ae859d3b2a6b39c171780fe3eb42c33c"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+        "sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf"
+      },
+      {
+        "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+        "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+      }
+    ],
+    "boot": 92083,
+    "dwm": 1456,
+    "duration": 12000,
+    "wire_limit": 4096,
+    "etl_file_limit_mib": 64
+  }
+}

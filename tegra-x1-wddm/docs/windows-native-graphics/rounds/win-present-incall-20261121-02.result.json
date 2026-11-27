@@ -1,0 +1,413 @@
+{
+  "schema": 1,
+  "round_id": "win-present-incall-20261121-02",
+  "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+  "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+  "plan_sha256": "f92189c4b7da0bdb4d8eeee364f015ee40a97293d856bab200d697b3a7c0898b",
+  "status": "观测缺口",
+  "finding": "正式原空窗口首次公开调用历时 15.363 ms。绑定进程后的短刷新区间累计 511 次，采集到 4 条匹配事件。公开 RETURN 之前，Windows 已消费的内核事件为 [166]，控制端在该时限内已获确认的内核事件为 []，DXGI 事件为 [42]。",
+  "missing_observation": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。",
+  "device_executions": 1,
+  "evidence": {
+    "boot": 91476,
+    "dwm": 1400,
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "pid": 7924,
+    "tid": 1936,
+    "luid": "0000000000005c10",
+    "hwnd": 721498,
+    "successful_umd_ddi": "0x000b000f",
+    "swap_model": [
+      "PRESENT_MODEL buffers=2 effect=1"
+    ],
+    "drawing_adapter": [
+      "DRAW_DEVICE software=0 luid=0000000000005c10 display_luid=0000000000005c10 vendor=414f5753 device=31304630 fl=b000 name=Tegra X1 (GM20B) .158 b27ef5100818"
+    ],
+    "running_observer": {
+      "early_flush": true,
+      "pid": 4376,
+      "utc": "2026-11-21T14:23:27.9151901Z",
+      "sha256": "70c5a017a682864375665c14676f8684824d0a3bdf639182cde585f57bd16cba",
+      "image": "C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\WinPresentLive-dcb20a32e3c2\\live-present.exe"
+    },
+    "registered_inputs": {
+      "app": {
+        "Board-Case.ps1": "2c7a91f6a636833fbd4312708061843e37c90029ae89ce27be636013047340b1",
+        "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+        "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+        "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+        "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+        "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0"
+      },
+      "client_input_source_sha256": "863f388517cd989d5ef8278b5f7a680e787a1e681a9bc0e4086518b55f3938c3",
+      "observer_source_sha256": "6a6a38212f85a33853a1e25021f99fcc7b9a109edaa6603c817c1458acfa4fbd",
+      "observer_exe_sha256": "70c5a017a682864375665c14676f8684824d0a3bdf639182cde585f57bd16cba",
+      "host_receiver_sha256": "b19472bf5157495b25cbcd7b04ea06012db15456c1b004aa6f044e6297ee3fa8",
+      "approved_diff_sha256": "e53f383bef398baa1878947145d9551e9065db57c247b842d99e1de6f62eec29",
+      "nonce": "dcb20a32e3c24792b3faa36906511b95",
+      "nominal_early_interval_ms": 2,
+      "early_window_ms": 2000,
+      "fallback_interval_ms": 40,
+      "previous_control": {
+        "path": "windows-native-graphics/rounds/win-present-incall-20261121-01.result.json",
+        "sha256": "b345beaef3d845873136e56b83967e7bd678ded5a2b31425a4aac22017ef1703"
+      },
+      "timer_api": "CreateWaitableTimerExW(CREATE_WAITABLE_TIMER_HIGH_RESOLUTION), SetWaitableTimerEx(relative -20000, period=0, tolerable delay=0)",
+      "official_timer_reference": "https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createwaitabletimerexw",
+      "diagnostic_event_semantics": {
+        "path": "windows-native-graphics/rounds/win-blt-ddi-order-20261121-01.result.json",
+        "sha256": "9ed079ccf3df6b1455c9aeaa7b50b936fd26e1c183db5ee0798f5c96d5df08e0"
+      }
+    },
+    "component_sha256": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "loaded_driver_and_desktop": {
+      "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "application_modules": {
+      "libvulkan_nouveau.dll": {
+        "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\libvulkan_nouveau.dll"
+      },
+      "tg_d3d_arm64.DLL": {
+        "sha256": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\tg_d3d_arm64.DLL"
+      },
+      "TegraGpuD3DVk.dll": {
+        "sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\TegraGpuD3DVk.dll"
+      },
+      "tg_nvk_arm64.DLL": {
+        "sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "file": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b\\app\\tg_nvk_arm64.DLL"
+      }
+    },
+    "code": 0,
+    "ac": "Online",
+    "power_mode": 1,
+    "public_call_qpc": 146154976455,
+    "public_return_qpc": 146155271427,
+    "client_exit": 0,
+    "observer_exit": 146163634173,
+    "trace_stop": {
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=116"
+      ],
+      "session_already_ended": false,
+      "exit": 0
+    },
+    "session_end": "END 0 0 0 0 0 0 4 4",
+    "record_clock_hz": 19200000,
+    "raw_archive_dir": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-incall-20261121-02",
+    "raw_sha256": {
+      "wire.jsonl": "da281dcf2ce9192d68b645baae31dff061628e110354dce551d615c7a84fef37",
+      "collected.zip": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b",
+      "observer-stage.json": "5519c72d7375654b5f1228ae0135b27e8c9e97061189fb1df380b4da6ffe4753",
+      "observer-binding.json": "3265a54e925d26ef885a819fc6fe0b1e364a7858cd7cc1465a7ca5e1a501b024",
+      "live-cleanup.json": "bcadcc3443096a2e1441bcce3bd0f6d933799e797f743013785c2a9e9a219c7f",
+      "evidence/scene/journal.txt": "9aeac259bdcf0b81acb46b4d736377c6399a5dc115cffe23e98a7c99a0c10893",
+      "evidence/scene/video.etl": "fe0437513bf92b9d528b61b458bc59c3d6b15a581d6415ac252149dbe7a7bb74",
+      "evidence/display.etl": "8f80c9125966dabe5fc425af9b23291802572730423c2567f250990993154d57"
+    },
+    "controller_raw_jsonl": [
+      {
+        "wire": "READY 4376 19200000 145585966629",
+        "host_monotonic_ns": 39160917954958,
+        "host_utc": "2026-11-21T14:23:24.477854+00:00"
+      },
+      {
+        "wire": "EVENT 1 DXGI 42 0 7924 1936 146155038226 146155068623 24 e0bdecf3fb01000000000000010000000000000000000000",
+        "host_monotonic_ns": 39190558975208,
+        "host_utc": "2026-11-21T14:23:54.118743+00:00"
+      },
+      {
+        "event_fsynced": 1,
+        "host_monotonic_ns": 39190559944125,
+        "host_utc": "2026-11-21T14:23:54.119708+00:00"
+      },
+      {
+        "wire": "EVENT 2 DxgKrnl 166 0 7924 1936 146155158456 146155194385 88 5a020b0000000000e091cac586ddffff00000000000000001029cec586ddffff101ccfc586ddffff010000000000000001000000000000008002000000000000680100000000000080020000000000006801000001000000",
+        "host_monotonic_ns": 39190566006333,
+        "host_utc": "2026-11-21T14:23:54.125769+00:00"
+      },
+      {
+        "event_fsynced": 2,
+        "host_monotonic_ns": 39190566289291,
+        "host_utc": "2026-11-21T14:23:54.126050+00:00"
+      },
+      {
+        "wire": "RECEIVED 1 146155261011 258",
+        "host_monotonic_ns": 39190569814666,
+        "host_utc": "2026-11-21T14:23:54.129577+00:00"
+      },
+      {
+        "wire": "EVENT 3 DxgKrnl 184 1 7924 1936 146155268328 146155304690 44 400100405a020b0000000000ffffffff01000000811001040000000040070040000000000000000000000000",
+        "host_monotonic_ns": 39190571060833,
+        "host_utc": "2026-11-21T14:23:54.130822+00:00"
+      },
+      {
+        "event_fsynced": 3,
+        "host_monotonic_ns": 39190571228416,
+        "host_utc": "2026-11-21T14:23:54.130989+00:00"
+      },
+      {
+        "wire": "EVENT 4 DXGI 43 0 7924 1936 146155270919 146155306012 4 00000000",
+        "host_monotonic_ns": 39190571396625,
+        "host_utc": "2026-11-21T14:23:54.131157+00:00"
+      },
+      {
+        "event_fsynced": 4,
+        "host_monotonic_ns": 39190571497125,
+        "host_utc": "2026-11-21T14:23:54.131258+00:00"
+      },
+      {
+        "wire": "RECEIVED 2 146155347905 258",
+        "host_monotonic_ns": 39190578225541,
+        "host_utc": "2026-11-21T14:23:54.137991+00:00"
+      },
+      {
+        "wire": "RECEIVED 3 146155512194 258",
+        "host_monotonic_ns": 39190581668708,
+        "host_utc": "2026-11-21T14:23:54.141432+00:00"
+      },
+      {
+        "wire": "RECEIVED 4 146155513370 258",
+        "host_monotonic_ns": 39190582951333,
+        "host_utc": "2026-11-21T14:23:54.142713+00:00"
+      },
+      {
+        "wire": "DRAINED 4",
+        "host_monotonic_ns": 39190592481250,
+        "host_utc": "2026-11-21T14:23:54.152244+00:00"
+      },
+      {
+        "wire": "END 0 0 0 0 0 0 4 4",
+        "host_monotonic_ns": 39190606096333,
+        "host_utc": "2026-11-21T14:23:54.165862+00:00"
+      }
+    ],
+    "verify_each_event": [
+      {
+        "seq": 1,
+        "provider": "DXGI",
+        "event": 42,
+        "version": 0,
+        "pid": 7924,
+        "tid": 1936,
+        "source_qpc": 146155038226,
+        "callback_qpc": 146155068623,
+        "decoded_file_fields": {
+          "pIDXGISwapChain": 2181640797664,
+          "Flags": 0,
+          "SyncInterval": 1,
+          "DirtyRects": 0,
+          "ScrollRects": 0
+        },
+        "file_etl_records": {
+          "scene/video.etl": {
+            "qpc": 146155038258,
+            "version": 0,
+            "payload_sha256": "2807d421a72a81bc90d048aebd7c2da8f8c24e1f75ca5c3a431d04932f0ec9db"
+          }
+        },
+        "same_call_and_payload": true,
+        "payload_sha256": "2807d421a72a81bc90d048aebd7c2da8f8c24e1f75ca5c3a431d04932f0ec9db",
+        "delivery_to_consumer_ms": 1.583,
+        "controller_fsync_checkpoint_ns": 39190559944125,
+        "windows_ack_qpc": 146155261011,
+        "process_wait_code": 258,
+        "alive_at_ack": true,
+        "persistence_roundtrip_upper_bound_ms": 11.603,
+        "ack_relative_to_public_return_ms": -0.542,
+        "ack_relative_to_observed_window_exit_ms": -436.102,
+        "return_boundary": "已在公开 RETURN 前取得控制端持久确认",
+        "consumer_relative_to_return_ms": -10.563
+      },
+      {
+        "seq": 2,
+        "provider": "DxgKrnl",
+        "event": 166,
+        "version": 0,
+        "pid": 7924,
+        "tid": 1936,
+        "source_qpc": 146155158456,
+        "callback_qpc": 146155194385,
+        "decoded_file_fields": {
+          "hwnd": 721498,
+          "pDmaBuffer": 18446706169646584288,
+          "PresentHistoryToken": 0,
+          "hSourceAllocation": 18446706169646819600,
+          "hDestAllocation": 18446706169646881808,
+          "bSubmit": 1,
+          "bRedirectedPresent": 0,
+          "Flags": 1,
+          "Source.Left": 0,
+          "Source.Right": 640,
+          "Source.Top": 0,
+          "Source.Bottom": 360,
+          "Dest.Left": 0,
+          "Dest.Right": 640,
+          "Dest.Top": 0,
+          "Dest.Bottom": 360,
+          "SubRectCount": 1
+        },
+        "file_etl_records": {
+          "display.etl": {
+            "qpc": 146155158495,
+            "version": 0,
+            "payload_sha256": "322af733923998fd832464cdea84536c0cdaab04b7166cd8b12e1aa35376b2d8"
+          },
+          "scene/video.etl": {
+            "qpc": 146155158536,
+            "version": 0,
+            "payload_sha256": "322af733923998fd832464cdea84536c0cdaab04b7166cd8b12e1aa35376b2d8"
+          }
+        },
+        "same_call_and_payload": true,
+        "payload_sha256": "322af733923998fd832464cdea84536c0cdaab04b7166cd8b12e1aa35376b2d8",
+        "delivery_to_consumer_ms": 1.871,
+        "controller_fsync_checkpoint_ns": 39190566289291,
+        "windows_ack_qpc": 146155347905,
+        "process_wait_code": 258,
+        "alive_at_ack": true,
+        "persistence_roundtrip_upper_bound_ms": 9.867,
+        "ack_relative_to_public_return_ms": 3.983,
+        "ack_relative_to_observed_window_exit_ms": -431.576,
+        "return_boundary": "Windows 消费回调在调用内，控制端持久确认上界晚于公开 RETURN",
+        "consumer_relative_to_return_ms": -4.013
+      },
+      {
+        "seq": 3,
+        "provider": "DxgKrnl",
+        "event": 184,
+        "version": 1,
+        "pid": 7924,
+        "tid": 1936,
+        "source_qpc": 146155268328,
+        "callback_qpc": 146155304690,
+        "decoded_file_fields": {
+          "hContext": 1073742144,
+          "hWindow": 721498,
+          "VidPnSourceId": 4294967295,
+          "FlipInterval": 1,
+          "Flags": 67178625,
+          "ReturnStatus": 0,
+          "hSrcAllocHandle": 1073743680,
+          "hDstAllocHandle": 0
+        },
+        "file_etl_records": {
+          "display.etl": {
+            "qpc": 146155268352,
+            "version": 1,
+            "payload_sha256": "97259d47f0c1923df24c2cdb7dd8f300fcc72542df2d9979f060b1306d8d5392"
+          },
+          "scene/video.etl": {
+            "qpc": 146155268376,
+            "version": 1,
+            "payload_sha256": "97259d47f0c1923df24c2cdb7dd8f300fcc72542df2d9979f060b1306d8d5392"
+          }
+        },
+        "same_call_and_payload": true,
+        "payload_sha256": "97259d47f0c1923df24c2cdb7dd8f300fcc72542df2d9979f060b1306d8d5392",
+        "delivery_to_consumer_ms": 1.894,
+        "controller_fsync_checkpoint_ns": 39190571228416,
+        "windows_ack_qpc": 146155512194,
+        "process_wait_code": 258,
+        "alive_at_ack": true,
+        "persistence_roundtrip_upper_bound_ms": 12.701,
+        "ack_relative_to_public_return_ms": 12.54,
+        "ack_relative_to_observed_window_exit_ms": -423.02,
+        "return_boundary": "Windows 消费回调晚于公开 RETURN",
+        "consumer_relative_to_return_ms": 1.732
+      },
+      {
+        "seq": 4,
+        "provider": "DXGI",
+        "event": 43,
+        "version": 0,
+        "pid": 7924,
+        "tid": 1936,
+        "source_qpc": 146155270919,
+        "callback_qpc": 146155306012,
+        "decoded_file_fields": {
+          "Result": 0
+        },
+        "file_etl_records": {
+          "scene/video.etl": {
+            "qpc": 146155270944,
+            "version": 0,
+            "payload_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+          }
+        },
+        "same_call_and_payload": true,
+        "payload_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+        "delivery_to_consumer_ms": 1.828,
+        "controller_fsync_checkpoint_ns": 39190571497125,
+        "windows_ack_qpc": 146155513370,
+        "process_wait_code": 258,
+        "alive_at_ack": true,
+        "persistence_roundtrip_upper_bound_ms": 12.628,
+        "ack_relative_to_public_return_ms": 12.601,
+        "ack_relative_to_observed_window_exit_ms": -422.958,
+        "return_boundary": "Windows 消费回调晚于公开 RETURN",
+        "consumer_relative_to_return_ms": 1.801
+      }
+    ],
+    "live_cleanup": {
+      "remaining_tasks": [],
+      "boot": 91476,
+      "fixture_directory": false,
+      "trace_query": {
+        "SwitchPresentLive-dcb20a32e3c2": 4201,
+        "Nvdec720Preview-7924": 4201,
+        "SwitchDisplay-dcb20a32e3c2": 4201
+      },
+      "collector_processes": [],
+      "utc": "2026-11-21T14:24:42.9674690Z",
+      "collector_directory": false
+    },
+    "scope": "实测延迟包含 Windows 交付、SSH、控制端 fsync 和确认返回。只给本轮持久化时间上界。未获确认的事件及快速复位前未交付的 ETW 缓冲仍可能缺失。",
+    "boundaries": {
+      "last_entry": "同一绘图线程首次 DXGI Present Start，独立文件及实时提供程序时间见 verify_each_event。",
+      "last_return": {
+        "public_hresult": "00000000",
+        "public_qpc": 146155271427,
+        "last_durable_ack_qpc": 146155513370
+      },
+      "first_anomaly_or_missing": "本次正式空窗口缺可定位到公开 RETURN 之前的内核 166/184 控制端确认。原次异常启动仍需对应启动的持久故障证据。"
+    },
+    "timer_mode": "high_resolution",
+    "flush_summary": "EARLY_FLUSH 2 2000 511 146129919298 146155876670",
+    "flush_summary_file_sha256": "139eef4a028c1dc39f5226a76db8050b564e2aa3c8718792386d8c65ac75ac74",
+    "fast_window_qpc": [
+      146129919298,
+      146155876670
+    ],
+    "nominal_interval_ms": 2,
+    "fast_flush_calls": 511,
+    "average_flush_spacing_ms": 2.651,
+    "dxgi_events_consumed_before_public_return": [
+      42
+    ],
+    "kernel_events_consumed_before_public_return": [
+      166
+    ],
+    "kernel_events_host_confirmed_before_public_return": [],
+    "dxgi_events_host_confirmed_before_public_return": [
+      42
+    ]
+  }
+}

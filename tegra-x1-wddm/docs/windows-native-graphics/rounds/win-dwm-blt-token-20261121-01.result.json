@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-blt-token-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "plan_sha256": "2afff43437eeba7e3aa4a20216eee1a711fabe428dd4b0d80303042f47d041d2",
+  "status": "观测缺口",
+  "finding": "同一窗口公开返回附近有 DWM 91 的 Blt 调度，但应用事件 215 的 TokenData 为 0，目标分配的共享资源身份与 DWM 表面未建立同对象联系。保留 DWM 接收缺口。",
+  "missing_observation": "需要将 DWM 的逻辑表面或共享表面明确绑定到本次 HWND 的重定向资源，或者在生产 ETW 中取得同窗口及提交标识的消费回执。",
+  "device_executions": 0,
+  "evidence": {
+    "boot": 91476,
+    "pid": 5992,
+    "tid": 5988,
+    "hwnd": 524312,
+    "luid": "0000000000005c10",
+    "dwm": 1400,
+    "qpc_frequency": 19200000,
+    "raw_archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-empty-present-20261121-01/collected.zip",
+    "raw_archive_sha256": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+    "trace_sha256": {
+      "display.etl": "01be77f7d309b8b2fcf5b4cc83eda5ccf88797b2378f7dbb8a70783959d7f014",
+      "scene/video.etl": "9b0b1d265dfbff95e8bf7cce910f2275523334bb658953f08b45e6e54535f83a"
+    },
+    "device_state": {
+      "boot": 91476,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0,
+      "KMD": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "tgd3d": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "NVK": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "source": {
+      "hProcessId": 5992,
+      "hDevice": 18446611100200693776,
+      "pDxgAdapter": 18446706169594454016,
+      "hVidMmAlloc": 18446706169646883344,
+      "hVidMmGlobalAlloc": 18446611100182502816,
+      "hDxgResource": 18446611100200920800,
+      "hDxgSharedResource": 18446706169653085024,
+      "hThunkAllocation": 1073743680,
+      "hThunkResource": 1073743616,
+      "PrivateRuntimeResourceHandle": 0,
+      "pVirtualAddress": 2075107008512,
+      "hProcessAllocDetails": 18446611100193433616,
+      "hOtherPartitionHandle": 0
+    },
+    "target": {
+      "hProcessId": 5992,
+      "hDevice": 18446611100200693776,
+      "pDxgAdapter": 18446706169594454016,
+      "hVidMmAlloc": 18446706169636830992,
+      "hVidMmGlobalAlloc": 18446611100108393888,
+      "hDxgResource": 18446611100200890992,
+      "hDxgSharedResource": 18446706169653087904,
+      "hThunkAllocation": 1073743936,
+      "hThunkResource": 1073743872,
+      "PrivateRuntimeResourceHandle": 0,
+      "pVirtualAddress": 2075108851712,
+      "hProcessAllocDetails": 18446611100193443344,
+      "hOtherPartitionHandle": 0
+    },
+    "kernel_present_history": {
+      "qpc": 94861377851,
+      "pid": 5992,
+      "tid": 5988,
+      "provider": "kernel",
+      "id": 215,
+      "version": 2,
+      "fields": {
+        "hAdapter": 18446706169586577424,
+        "Token": 18446611100095384064,
+        "Model": 3,
+        "TokenSize": 48,
+        "TokenData": 0,
+        "Flags": 0,
+        "CustomDuration": 0,
+        "ScrollRect.left": 0,
+        "ScrollRect.right": 0,
+        "ScrollRect.top": 0,
+        "ScrollRect.bottom": 0,
+        "ScrollOffset.X": 0,
+        "ScrollOffset.Y": 0,
+        "DirtyRectCount": 0,
+        "Left": [],
+        "Right": [],
+        "Top": [],
+        "Bottom": [],
+        "SourceRect.left": 0,
+        "SourceRect.right": 0,
+        "SourceRect.top": 0,
+        "SourceRect.bottom": 0,
+        "DestWidth": 0,
+        "DestHeight": 0,
+        "TargetRect.left": 0,
+        "TargetRect.right": 0,
+        "TargetRect.top": 0,
+        "TargetRect.bottom": 0,
+        "VmBusChannel": 0
+      }
+    },
+    "dwm_schedule_blt": {
+      "qpc": 94861443540,
+      "pid": 1400,
+      "tid": 2252,
+      "fields": {
+        "hLogicalSurface": 0,
+        "hDxSharedSurface": 0,
+        "EventId": 524312,
+        "NumRects": 0
+      }
+    },
+    "matching_shared_resource": false,
+    "boundaries": {
+      "last_entry": "DWM 的 SCHEDULE_PRESENTHISTORYTOKEN_BLT 事件 91 有独立时间与表面字段。",
+      "last_return": {
+        "app_return_qpc": 94861380548,
+        "desktop_sample_qpc": 94863412892
+      },
+      "first_anomaly_or_missing": "需要将 DWM 的逻辑表面或共享表面明确绑定到本次 HWND 的重定向资源，或者在生产 ETW 中取得同窗口及提交标识的消费回执。"
+    }
+  }
+}

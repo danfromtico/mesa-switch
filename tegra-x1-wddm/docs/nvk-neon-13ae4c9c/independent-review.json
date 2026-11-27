@@ -1,0 +1,226 @@
+{
+  "schema": 1,
+  "reviewer": "independent main review",
+  "decision": "accepted_independent_baseline_promotion",
+  "date": "2026-11-22",
+  "scope": "NVK Windows same-BO submission coalescing and batched synchronization, with all three implementations and four process ABI entry points verified",
+  "source": {
+    "integration_commit": "d591833c3451d3f2f8e116d8969d9525eb9979ed",
+    "release_commit": "e5a6c44376e4041c26ac464ff845c31dcdffdd65",
+    "production_commit": "23f98f0c710a9f09da91235e24e966107c5edbc5",
+    "changed_paths": [
+      "src/nouveau/vulkan/nvk_queue.c",
+      "src/nouveau/vulkan/nvkmd/windows/nvkmd_windows_queue.c",
+      "src/nouveau/vulkan/nvkmd/windows/test-win32-sync.c"
+    ],
+    "source_blobs_match_reviewed_release": true
+  },
+  "qualification_sha256": "3ba0fa9673d513206e74b334738d566c19ea4bc15ff0a330ea3a5dff7c8ea847",
+  "native_archive": {
+    "sha256": "6953f3d7806d0bc63f4fbce22fa957708acef32c2cd89cf1bed2454d6f219b9d",
+    "bytes": 23190185,
+    "originals": 76,
+    "members": 77,
+    "all_SHA_bytes_CRC_paths_verified": true
+  },
+  "formal_archive": {
+    "sha256": "cf5665eec67c5b4c089f3427feebcf64d569e398023c6598cbdaebab944e5a4e",
+    "bytes": 23215366,
+    "originals": 25,
+    "members": 26,
+    "all_SHA_bytes_CRC_paths_verified": true
+  },
+  "previous_code_build_review_archive_sha256": "5a0e7b19b744dd6519b477fcc8503d0d29bdb954ad6aa69442e22db1e9188e86",
+  "independent_audit_sha256": "e425940142619ac342fdd6129ed772edf615c235042a8e4633cb86300c1f4ed1",
+  "local_reproduction_script_sha256": "2f4e87aa2505ca4c8ff8c130619b041731974b0b486307ddd7aff244e61482e6",
+  "verified": {
+    "originals": "Native and formal manifests, all archive members and CRCs; embedded prior code/build review archive unchanged; 12 readback members decoded and hash-bound to retained case receipts.",
+    "implementations": "Native ARM64 remains ARM64; x64 and ARM64EC clients load the same ARM64EC tg_nvk_x64.dll. CHPE metadata and code maps independently read from the actual DLL and ARM64EC client. x86 remains its private i386 ICD.",
+    "new_harness": "Reviewed dynamic private-ICD dispatch, target NVK LUID selection, GPU triangle/copy, fence wait, exact 1024-pixel readback and 128 guard bytes, destruction and exit. Neither preview nor timing mode was invoked.",
+    "cases": [
+      {
+        "abi": "arm64",
+        "pid": 6380,
+        "exit": 0,
+        "boot": 97726,
+        "dwm": 1440,
+        "receipt_sha256": "80f2df5ee302d9d21790b16e9bc0eb20876673e5e238aa76732703ebc88a92ad",
+        "actual_path_hash_and_pixels_verified": true,
+        "issued_markers": 1
+      },
+      {
+        "abi": "x64",
+        "pid": 3492,
+        "exit": 0,
+        "boot": 97726,
+        "dwm": 1440,
+        "receipt_sha256": "f3998875c8d486a607878ad66da24f99a28ceb7d5b0d7121b521e7d8ba4b0c64",
+        "actual_path_hash_and_pixels_verified": true,
+        "issued_markers": 1
+      },
+      {
+        "abi": "arm64ec",
+        "pid": 456,
+        "exit": 0,
+        "boot": 97726,
+        "dwm": 1440,
+        "receipt_sha256": "4fe819280f86bfcd66b5b594d018494c6f9cfe798b1b0f21ba819f890a092096",
+        "actual_path_hash_and_pixels_verified": true,
+        "issued_markers": 1
+      },
+      {
+        "abi": "x86",
+        "pid": 2940,
+        "exit": 0,
+        "boot": 97726,
+        "dwm": 1440,
+        "receipt_sha256": "358b204440b55a41367fdc8a9ecc1919ae1a83c5dce056b56f78e11c8b0b859d",
+        "actual_path_hash_and_pixels_verified": true,
+        "issued_markers": 1
+      }
+    ],
+    "system_interval": {
+      "first": 97615,
+      "last": 97806,
+      "selected_ids": [
+        12,
+        13,
+        41,
+        6005,
+        6006,
+        6008,
+        1074,
+        1001,
+        4101
+      ],
+      "xml_records": 10,
+      "events": [
+        {
+          "record": 97615,
+          "id": 1074,
+          "provider": "User32"
+        },
+        {
+          "record": 97619,
+          "id": 6006,
+          "provider": "EventLog"
+        },
+        {
+          "record": 97628,
+          "id": 6005,
+          "provider": "EventLog"
+        },
+        {
+          "record": 97633,
+          "id": 13,
+          "provider": "Microsoft-Windows-Kernel-General"
+        },
+        {
+          "record": 97634,
+          "id": 12,
+          "provider": "Microsoft-Windows-Kernel-General"
+        },
+        {
+          "record": 97710,
+          "id": 1074,
+          "provider": "User32"
+        },
+        {
+          "record": 97712,
+          "id": 6006,
+          "provider": "EventLog"
+        },
+        {
+          "record": 97720,
+          "id": 6005,
+          "provider": "EventLog"
+        },
+        {
+          "record": 97725,
+          "id": 13,
+          "provider": "Microsoft-Windows-Kernel-General"
+        },
+        {
+          "record": 97726,
+          "id": 12,
+          "provider": "Microsoft-Windows-Kernel-General"
+        }
+      ],
+      "abnormal_events": [],
+      "scope": "Complete selected-ID query, not every System event"
+    },
+    "formal": {
+      "boot": 97726,
+      "code": 0,
+      "ac": "Online",
+      "dwm": 1440,
+      "components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "loaded_paths": {
+        "tegragpurender.sys": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-neon-13ae4c9c5c34\\app\\libvulkan_nouveau.dll",
+        "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-neon-13ae4c9c5c34\\app\\tg_d3d_arm64.dll",
+        "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-neon-13ae4c9c5c34\\app\\TegraGpuD3DVk.dll",
+        "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-neon-13ae4c9c5c34\\app\\tg_nvk_arm64.dll"
+      },
+      "qualification_sha256": "3ba0fa9673d513206e74b334738d566c19ea4bc15ff0a330ea3a5dff7c8ea847",
+      "permanent_matches_selected": true,
+      "trial_token_tasks_processes_absent": true,
+      "policy_revision": "2aff9ce351b6441c5a9f1891affdc9193cdfd8a37e97e3d63da9dbab7aa2af36",
+      "same_boot_acceptance": true,
+      "additional_permanent_boot_test": false
+    },
+    "permission": "Exact repository policy code retained. Native-Boot Accept returned QualifiedPromotion; selected directory, permanent grant, last-accepted source, qualification and all component hashes agree. Trial/token and owned tasks/processes absent in final readback.",
+    "source_blobs": "Three changed source/test blobs exactly match the reviewed release e5a6c443; merged source is not a rebuild or a new binary.",
+    "faults": {
+      "open": 19,
+      "new": 0,
+      "closed": 0,
+      "all_independent_reasons_read": true
+    },
+    "prior_boot_cold_originals": {
+      "count": 4,
+      "bytes": 181796864,
+      "all_local_full_hashes_verified": true
+    }
+  },
+  "separate_private_x86_baseline": "tegra-x1-wddm/docs/nvk-neon-13ae4c9c/private-x86-baseline.json",
+  "unchanged_components": [
+    "KMD ce54",
+    "tgd3d UMD implementations",
+    "ARM64X forwarders",
+    "ACR firmware",
+    "desktop native ARM64 DXVK"
+  ],
+  "handoff": {
+    "to_thread": "01a204e6-bb5e-7a63-b829-4718f86cbd1e",
+    "utc": "2026-11-23T04:19:19.540386+00:00",
+    "both_locks": true,
+    "prior_owned_jobs": 0,
+    "receipt_sha256": "eccb4b5221fad380b93fe74777bc6a23e9db0b06d5f32749a588bc2b47b2b003",
+    "receiver_new_readback_not_in_this_batch": true
+  },
+  "limits": [
+    "Only the four recorded ABI hardware drawing/load/normal-exit paths are qualified; no game FPS improvement is measured.",
+    "x86 remains the recorded protected private ICD path, not a new system-wide ICD or D3D9 HAL.",
+    "Permanent permission was selected on the already qualified boot97726; no additional permanent-boot run is claimed.",
+    "An SSH banner timeout is preserved; later original results and System interval show the same boot, not an inferred restart.",
+    "Historical first-Present, 91476/152586, 95090, TDR/dump failures and all four470e1dbc deferred contracts remain open or unknown.",
+    "The local main review performed no device operations and did not repeat any consumed control."
+  ],
+  "historical_contracts": "470e1dbc four deferred items retain their prior unknown states and re-entry requirements; this ordinary rendering batch adds no direct contract proof.",
+  "publication_branch": "tgd3d-vulkan",
+  "main_device_operations": 0,
+  "workspace_preservation": {
+    "existing_dirty_files": 42,
+    "all_hashes_unchanged": true
+  }
+}

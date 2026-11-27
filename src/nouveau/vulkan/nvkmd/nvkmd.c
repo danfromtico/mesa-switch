@@ -4,10 +4,10 @@
  */
 
 #include "nvkmd.h"
-#ifndef HAVE_SWITCH_PLATFORM
-#include "nouveau/nvkmd_nouveau.h"
-#else
+#ifdef HAVE_SWITCH_PLATFORM
 #include "switch/nvkmd_switch.h"
+#elif !defined(_WIN32)
+#include "nouveau/nvkmd_nouveau.h"
 #endif
 #include "nv_push.h"
 #include "util/cache_ops.h"
@@ -86,7 +86,7 @@ nvkmd_mem_init(struct nvkmd_dev *dev,
    simple_mtx_init(&mem->map_mutex, mtx_plain);
 }
 
-#ifndef HAVE_SWITCH_PLATFORM
+#if !defined(HAVE_SWITCH_PLATFORM) && !defined(_WIN32)
 VkResult
 nvkmd_try_create_pdev_for_drm(struct _drmDevice *drm_device,
                               struct vk_object_base *log_obj,
@@ -159,7 +159,7 @@ nvkmd_dev_alloc_mapped_mem(struct nvkmd_dev *dev,
    assert(!(map_flags & NVKMD_MEM_MAP_FIXED));
    result = nvkmd_mem_map(mem, log_obj, map_flags, NULL, NULL);
    if (result != VK_SUCCESS) {
-      mem->ops->free(mem);
+      nvkmd_mem_unref(mem);
       return result;
    }
 
@@ -174,6 +174,43 @@ nvkmd_dev_import_dma_buf(struct nvkmd_dev *dev,
                          int fd, struct nvkmd_mem **mem_out)
 {
    VkResult result = dev->ops->import_dma_buf(dev, log_obj, fd, mem_out);
+   if (result == VK_SUCCESS)
+      nvkmd_dev_add_mem(dev, *mem_out);
+
+   return result;
+}
+
+VkResult MUST_CHECK
+nvkmd_dev_import_wsi_win32_memory(struct nvkmd_dev *dev,
+                                 struct vk_object_base *log_obj,
+                                 const struct wsi_win32_memory *memory,
+                                 uint64_t size_B, uint64_t align_B,
+                                 uint8_t pte_kind, enum nvkmd_mem_flags flags,
+                                 struct nvkmd_mem **mem_out)
+{
+   if (!dev->ops->import_wsi_win32_memory)
+      return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+   VkResult result = dev->ops->import_wsi_win32_memory(dev, log_obj, memory,
+                                                      size_B, align_B, pte_kind,
+                                                      flags, mem_out);
+   if (result == VK_SUCCESS)
+      nvkmd_dev_add_mem(dev, *mem_out);
+   return result;
+}
+
+VkResult MUST_CHECK
+nvkmd_dev_import_win32_handle(struct nvkmd_dev *dev,
+                             struct vk_object_base *log_obj,
+                             void *handle, uint64_t size_B, uint64_t align_B,
+                             uint8_t pte_kind, enum nvkmd_mem_flags flags,
+                             struct nvkmd_mem **mem_out)
+{
+   if (dev->ops->import_win32_handle == NULL)
+      return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+
+   VkResult result = dev->ops->import_win32_handle(dev, log_obj, handle,
+                                                 size_B, align_B, pte_kind,
+                                                 flags, mem_out);
    if (result == VK_SUCCESS)
       nvkmd_dev_add_mem(dev, *mem_out);
 
@@ -439,7 +476,6 @@ nvkmd_mem_map(struct nvkmd_mem *mem, struct vk_object_base *log_obj,
       simple_mtx_lock(&mem->map_mutex);
 
       assert((mem->map_cnt == 0) == (mem->map == NULL));
-      mem->map_cnt++;
 
       VkResult result = VK_SUCCESS;
       if (mem->map == NULL) {
@@ -453,6 +489,8 @@ nvkmd_mem_map(struct nvkmd_mem *mem, struct vk_object_base *log_obj,
       } else {
          map = mem->map;
       }
+      if (result == VK_SUCCESS)
+         mem->map_cnt++;
 
       simple_mtx_unlock(&mem->map_mutex);
 

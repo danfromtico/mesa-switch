@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-post-exit-readback-93818-20261121-01",
+  "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+  "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+  "owner": "Windows 电源、DWM、GM20B KMD 与原普通窗口客户端",
+  "question": "正式基线下原窗口正常退出并清理后，能否跨过 93818 异常启动前未覆盖的时间区间，持续观察同一 DWM 与开机？",
+  "method": "复用已实际返回 S_OK 的同次签名应用，补清理时间锚及只读尾部观测",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "相同输入正常退出、清理完成后，至少 125 秒连续有同一正式启动、DWM、Code 0 回执，保存新增故障事件及前后哈希；一次正常样本仅验证本轮。",
+  "observations": [
+    "应用已退出，不重新派发。读取同一启动、DWM 进程起始时间、Code 0 和供电，并将每一份返回同步持久保存。",
+    "使用相同设备 QPC 证明首次尾部采样与已确认清理之间的间隔。持续读取至少 125 秒，如实记录之前任何采样空档。",
+    "采样结束后仍需核对实际加载哈希和新增系统事件。原轮没有画面确认，保持开放。"
+  ],
+  "inputs": {
+    "tail_runner_sha256": "369e60b7b905244b14945ecad7a54a8f2fafa50cac2c6ed94ba53d4126cda24b",
+    "minimum_observation_seconds": 125,
+    "boot": 93818,
+    "dwm": 1384,
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-seq-post-exit-plain-93818-20261121-01.result.json",
+      "sha256": "c9ffedc6f21a536dc1845ee6b1659015c99d170415331fab1fdf145d8b7ff39c"
+    },
+    "cleanup": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-post-exit-plain-93818-20261121-01/cleanup.json",
+      "sha256": "4da455695bb4501f28a3ab6a2612531b2e2dc7777dee93df8baae45fc511fe73",
+      "bytes": 161
+    }
+  }
+}

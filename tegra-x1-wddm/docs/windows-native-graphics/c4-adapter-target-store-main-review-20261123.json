@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "date": "2026-11-23",
+  "scope": "Independent review of completed C4 adapter-target normal Driver Store staging only",
+  "result": "accepted_normal_staging_only",
+  "main_reviewer_device_operations": 0,
+  "executor_thread": "01a2094a-b8e6-74a0-83be-8c535979363c",
+  "delivery": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-normal-stage-01a2094a-20261123/frozen/normal-stage-delivery-r1/delivery.json",
+    "bytes": 3387,
+    "sha256": "58b08d5856d4bcdd1020ba3bde34653acb35badda8a0a301a0c6506bb80380fe"
+  },
+  "frozen_originals": {
+    "manifest": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-normal-stage-01a2094a-20261123/frozen-manifest.json",
+      "bytes": 32576,
+      "sha256": "1fcc7ee5b151efe1b4a159f345fc2de82cd4167f316b676d31d32cd81ac43e2e"
+    },
+    "files": 82,
+    "bytes": 6234346
+  },
+  "independent_verification": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-normal-stage-01a2094a-20261123/independent-verification.json",
+    "bytes": 6535,
+    "sha256": "395ea2ebc17c890189f128f0e4c6e4931b03c5b08ecab3500baf5f1188680719"
+  },
+  "package": {
+    "source": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+    "manifest_sha256": "23af0c9fc21515c4a4c58888ce998caff2439ec167a9c1300f2bb97d971a7455",
+    "members": 13,
+    "same_as_previously_reviewed_package": true,
+    "KMD_sha256": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+    "CAT_sha256": "a3058b2eae1973c594feeceb69eb638bc550c7fb02757c085b413f315fc61c11",
+    "ACR_sha256": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841"
+  },
+  "actual_transaction": {
+    "command_scope": "pnputil /add-driver only; no /install or /reboot",
+    "pid": 4000,
+    "started_utc": "2026-11-23T18:09:21.8859252Z",
+    "exit": 0,
+    "process_terminal": true,
+    "output_drained": true,
+    "consumed_intents": 1,
+    "published_inf": "oem32.inf",
+    "store_directory": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230",
+    "store_members_full_sha_verified": 13,
+    "native_originals_byte_matched_to_transport": 28,
+    "input_zip_members_bytes_and_crc_verified": 16,
+    "transport_exit": 0
+  },
+  "windows_import_evidence": {
+    "setupapi_after": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-normal-stage-01a2094a-20261123/frozen/normal-stage-native-r1/originals/setupapi.dev.after.log",
+      "bytes": 1473399,
+      "sha256": "10ad2f98b5fd87a290d70d10297c9bd72b1933c2ba03ca7ce20a5d207119b33c"
+    },
+    "before_prefix_sha_matches": true,
+    "new_bytes": 12641,
+    "new_import_sections": 1,
+    "observed_status_sequence": [
+      "0x800b0109 catalog chain check",
+      "0xe0000241 Authenticode trusted publisher",
+      "DRIVERSTORE IMPORT VALIDATE=0",
+      "section SUCCESS"
+    ],
+    "signer_score": "0x0F000000",
+    "signer_name": "Switch Lite GPU Test Code",
+    "conclusion": "Actual normal Windows Driver Store acceptance. No Microsoft/WHQL or candidate load claim.",
+    "clock_scope": "SetupAPI retains its local clock text; UTC comes from the native process/result records. No reboot-delay inference."
+  },
+  "formal_identity_during_transaction": {
+    "boot": 99039,
+    "before_utc": "2026-11-23T18:09:16.3793914Z",
+    "after_utc": "2026-11-23T18:09:32.8300379Z",
+    "Code": 0,
+    "AC": "Online",
+    "component_file_hashes_verified": 8,
+    "loaded_record_entries": 5,
+    "loaded_identity_scope": "Four DWM module paths are enumerated; the KMD has running service/device binding plus designated disk-file identity. Not an in-memory image hash.",
+    "private_x86_path_and_full_sha_verified": true,
+    "dwm_pid": 748,
+    "dwm_start_utc": "2026-11-23T14:25:18.5741282Z",
+    "selected_equals_permanent": true,
+    "source": "df08e8583abc202732036597f5cb7f0519ba11a5",
+    "policy_revision": "605644880f1a4c183121cfb645a6a9e775aa2dac2e5fcb707ed9ddfe4eb300eb",
+    "trial": false,
+    "candidate_token": false,
+    "selected_System_records": [
+      [
+        99039,
+        12
+      ]
+    ],
+    "new_selected_System_anomalies": 0,
+    "device_installations": 0,
+    "permission_changes": 0,
+    "TDR_requests": 0
+  },
+  "review_boundaries": {
+    "declared_preexecution_frozen_inputs_verified": 23,
+    "secondary_parsed_review": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-normal-stage-01a2094a-20261123/frozen/normal-stage-review-r1/parsed-review.json",
+      "bytes": 3606,
+      "sha256": "935c74a4346a21de3635a42683b59cecf7f5d4b3a2384acfda6c0b9347fd62f2"
+    },
+    "secondary_scope": "Submitted stage-only review; no new review/approval of corrected F1-F5 or full cycle inferred. The main reviewer independently checked the actual original chain.",
+    "exclusive_owner_and_two_lock_receipt_checked": true,
+    "same_signature_helpers_reused": true,
+    "standalone_signature_probe_replayed": false,
+    "candidate_installed": false,
+    "candidate_GPU_qualified": false,
+    "system_paging_fix_qualified": false,
+    "promotion": false,
+    "fault_closure": false
+  },
+  "limits": [
+    "Windows normal Driver Store import is not WHQL/Microsoft signing or candidate kernel load qualification.",
+    "Originals are native read snapshots plus exact persisted host readback; no whole-system snapshot or new reboot is claimed.",
+    "DWM actual module paths are enumerated. KMD evidence here is running service/device binding plus the designated disk-file identity; it is not an in-memory image hash.",
+    "The stage-only secondary parsed review is included and hashed; no fresh secondary review of corrected F1-F5/full cycle is inferred.",
+    "Final stage controller exited and pnputil output drained; no independent after-stage global task/ETW/process inventory is claimed.",
+    "C4 full Reset/Restart, system-context lifetime/root/generation/paging retirement, dump repair and historical first-Present root cause remain unproved."
+  ],
+  "remaining": [
+    "Complete independently reviewed startup collector/context-and-stack binding and the distinct adapter-target cycle.",
+    "Same verified candidate boot: actual Reset/Restart, system-context lifetime/root/generation and post-reset paging submission through valid fence and Windows retirement.",
+    "Historical SEQUENTIAL first-Present/91476/95090 causes and dump-chain unknowns remain separate."
+  ],
+  "order": [
+    "c4",
+    "dump-repair",
+    "WDDM2.6"
+  ],
+  "historical_controls_replayed": false,
+  "deferred_470e_contracts": "No new direct contract witness; existing unknowns and re-entry conditions preserved."
+}

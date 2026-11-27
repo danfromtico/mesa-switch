@@ -1,0 +1,66 @@
+;
+; switchfan.inf - Nintendo Switch fan control (TMP451 on I2C1 + PWM1)
+;
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = System
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider    = %Mfg%
+CatalogFile = switchfan.cat
+DriverVer   = 11/11/2026,1.0.0.12
+PnpLockdown = 1
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+[SourceDisksNames]
+1 = %DiskName%
+
+[SourceDisksFiles]
+switchfan.sys = 1
+
+[Manufacturer]
+%Mfg% = Std, NTarm64
+
+[Std.NTarm64]
+%DeviceDesc% = SwFan_Inst, ACPI\SWOA0401
+%LiteDeviceDesc% = SwFan_Inst, ACPI\SWOA0402
+
+[SwFan_Inst.NT]
+CopyFiles = SwFan_Copy
+
+[SwFan_Copy]
+switchfan.sys
+
+; \\.\SwitchBacklight: SYSTEM and Administrators full, the logged-on
+; (interactive) user read/write so the tray app can set the brightness.
+[SwFan_Inst.NT.HW]
+AddReg = SwFan_HW_AddReg
+
+[SwFan_HW_AddReg]
+HKR,,Security,,"D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GRGW;;;IU)"
+
+[SwFan_Inst.NT.Services]
+AddService = switchfan, 0x00000002, SwFan_Service
+
+[SwFan_Service]
+DisplayName   = %ServiceDesc%
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 1
+ServiceBinary = %12%\switchfan.sys
+
+[SwFan_Inst.NT.Wdf]
+KmdfService = switchfan, SwFan_WdfSection
+
+[SwFan_WdfSection]
+KmdfLibraryVersion = 1.15
+
+[Strings]
+Mfg         = "SwitchWOA"
+DiskName    = "SwitchWOA Fan"
+DeviceDesc  = "Nintendo Switch Fan and Backlight Control"
+ServiceDesc = "Nintendo Switch Fan Control"
+
+LiteDeviceDesc = "Nintendo Switch Lite Fan, Backlight and CPU Control"

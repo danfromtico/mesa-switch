@@ -16,7 +16,11 @@
 #include "nvk_shader.h"
 #include "nvk_wsi.h"
 #include "nvkmd/nvkmd.h"
+#ifdef _WIN32
+#include "nvkmd/windows/nvkmd_windows.h"
+#else
 #include "nvkmd/nouveau/nvkmd_nouveau.h"
+#endif
 #include "git_sha1.h"
 #include "util/detect_os.h"
 #include "util/disk_cache.h"
@@ -25,6 +29,7 @@
 #include "util/os_misc.h"
 
 #include "vk_android.h"
+#include "vk_internal_exts.h"
 #include "vk_common_entrypoints.h"
 #include "vk_device.h"
 #include "vk_drm_syncobj.h"
@@ -32,7 +37,7 @@
 #include "vk_shader_module.h"
 #include "vulkan/wsi/wsi_common.h"
 
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(_WIN32)
 #include <sys/sysmacros.h>
 #else
 /* Switch has no DRM device files; render_dev/primary_dev are always 0,
@@ -130,11 +135,11 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
       .KHR_16bit_storage = true,
       .KHR_bind_memory2 = true,
       .KHR_buffer_device_address = true,
-      .KHR_calibrated_timestamps = true,
+      .KHR_calibrated_timestamps = !DETECT_OS_WINDOWS,
       .KHR_compute_shader_derivatives = info->cls_eng3d >= TURING_A,
       .KHR_cooperative_matrix = info->cls_eng3d >= TURING_A,
       .KHR_copy_commands2 = true,
-      .KHR_copy_memory_indirect = true,
+      .KHR_copy_memory_indirect = !DETECT_OS_WINDOWS,
       .KHR_create_renderpass2 = true,
       .KHR_dedicated_allocation = true,
       .KHR_depth_clamp_zero_one = true,
@@ -146,11 +151,13 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
       .KHR_dynamic_rendering = true,
       .KHR_dynamic_rendering_local_read = true,
       .KHR_external_fence = true,
-      .KHR_external_fence_fd = true,
+      .KHR_external_fence_fd = !DETECT_OS_WINDOWS,
       .KHR_external_memory = true,
       .KHR_external_memory_fd = kmd_info->has_dma_buf,
+      .KHR_external_memory_win32 = kmd_info->has_win32_memory,
       .KHR_external_semaphore = true,
-      .KHR_external_semaphore_fd = true,
+      .KHR_external_semaphore_fd = !DETECT_OS_WINDOWS,
+      .KHR_external_semaphore_win32 = DETECT_OS_WINDOWS,
       .KHR_format_feature_flags2 = true,
       .KHR_fragment_shader_barycentric = info->cls_eng3d >= TURING_A,
       .KHR_fragment_shading_rate = info->cls_eng3d >= TURING_A,
@@ -180,7 +187,7 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
       .KHR_pipeline_executable_properties = true,
       .KHR_pipeline_library = true,
 #ifdef NVK_USE_WSI_PLATFORM
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(VK_USE_PLATFORM_WIN32_KHR)
       .KHR_present_id = true,
       .KHR_present_id2 = true,
       .KHR_present_wait = true,
@@ -231,9 +238,9 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
       .EXT_attachment_feedback_loop_layout = true,
       .EXT_border_color_swizzle = true,
       .EXT_buffer_device_address = true,
-      .EXT_calibrated_timestamps = true,
+      .EXT_calibrated_timestamps = !DETECT_OS_WINDOWS,
       .EXT_conditional_rendering = true,
-      .EXT_conservative_rasterization = info->cls_eng3d >= MAXWELL_B,
+      .EXT_conservative_rasterization = !DETECT_OS_WINDOWS && info->cls_eng3d >= MAXWELL_B,
       .EXT_color_write_enable = true,
       .EXT_custom_border_color = true,
       .EXT_debug_marker = true,
@@ -245,7 +252,7 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
       .EXT_depth_range_unrestricted = info->cls_eng3d >= VOLTA_A,
       .EXT_descriptor_buffer = info->cls_eng3d >= MAXWELL_A,
       .EXT_descriptor_indexing = true,
-      .EXT_device_generated_commands = info->cls_eng3d >= MAXWELL_B,
+      .EXT_device_generated_commands = !DETECT_OS_WINDOWS && info->cls_eng3d >= MAXWELL_B,
       .EXT_discard_rectangles = true,
 #ifdef VK_USE_PLATFORM_DISPLAY_KHR
       .EXT_display_control = true,
@@ -285,9 +292,9 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
       .EXT_pipeline_creation_cache_control = true,
       .EXT_pipeline_creation_feedback = true,
       .EXT_pipeline_robustness = true,
-      .EXT_physical_device_drm = true,
+      .EXT_physical_device_drm = !DETECT_OS_WINDOWS,
       .EXT_post_depth_coverage = info->cls_eng3d >= MAXWELL_B,
-#ifdef NVK_USE_WSI_PLATFORM
+#if defined(NVK_USE_WSI_PLATFORM) && !defined(VK_USE_PLATFORM_WIN32_KHR)
       .EXT_present_timing = true,
 #endif
       .EXT_primitive_topology_list_restart = true,
@@ -348,10 +355,8 @@ nvk_get_device_extensions(const struct nvk_instance *instance,
 static bool
 nvk_sparse_binding_supported(const struct nv_device_info *info)
 {
-#ifdef __SWITCH__
-   /* Switch has no ctx_bind implementation; disable sparse features until
-    * vkQueueBindSparse can be supported.
-    */
+#if defined(__SWITCH__) || defined(_WIN32)
+   /* Sparse page replacement is unavailable on these backends. */
    (void)info;
    return false;
 #else
@@ -524,7 +529,7 @@ nvk_get_device_features(const struct nv_device_info *info,
       .pushDescriptor = true,
 
       /* VK_KHR_copy_memory_indirect */
-      .indirectMemoryCopy = true,
+      .indirectMemoryCopy = !DETECT_OS_WINDOWS,
 
       /* VK_KHR_cooperative_matrix */
       /* TU11X can run coop matrix but the performances are abysal */
@@ -562,7 +567,7 @@ nvk_get_device_features(const struct nv_device_info *info,
       .pipelineExecutableInfo = true,
 
 #ifdef NVK_USE_WSI_PLATFORM
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(VK_USE_PLATFORM_WIN32_KHR)
       /* VK_KHR_present_id */
       .presentId = true,
 
@@ -661,8 +666,8 @@ nvk_get_device_features(const struct nv_device_info *info,
        *
        * See also nvk_cmd_buffer_alloc_qmd().
        */
-      .deviceGeneratedCommands = info->cls_eng3d >= MAXWELL_B,
-      .dynamicGeneratedPipelineLayout = info->cls_eng3d >= MAXWELL_B,
+      .deviceGeneratedCommands = !DETECT_OS_WINDOWS && info->cls_eng3d >= MAXWELL_B,
+      .dynamicGeneratedPipelineLayout = !DETECT_OS_WINDOWS && info->cls_eng3d >= MAXWELL_B,
 
       /* VK_EXT_dynamic_rendering_unused_attachments */
       .dynamicRenderingUnusedAttachments = true,
@@ -838,7 +843,7 @@ nvk_get_device_features(const struct nv_device_info *info,
       .shaderSMBuiltins = true,
 
 #ifdef NVK_USE_WSI_PLATFORM
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(VK_USE_PLATFORM_WIN32_KHR)
       /* VK_KHR_present_id2 */
       .presentId2 = true,
 
@@ -993,7 +998,7 @@ nvk_get_device_properties(const struct nvk_instance *instance,
       .sampledImageStencilSampleCounts = sample_counts,
       .storageImageSampleCounts = sample_counts,
       .maxSampleMaskWords = 1,
-      .timestampComputeAndGraphics = true,
+      .timestampComputeAndGraphics = !DETECT_OS_WINDOWS,
       /* FIXME: Is timestamp period actually 1? */
       .timestampPeriod = 1.0f,
       .maxClipDistances = 8,
@@ -1542,22 +1547,6 @@ nvk_create_physical_device_from_nvkmd(struct nvk_instance *instance,
       goto fail_nvkmd;
    }
 
-#ifndef __SWITCH__
-   if (!nvk_is_conformant(&nvkmd->dev_info) &&
-       !debug_get_bool_option("NVK_I_WANT_A_BROKEN_VULKAN_DRIVER", false)) {
-#ifdef NDEBUG
-      result = VK_ERROR_INCOMPATIBLE_DRIVER;
-#else
-      result = vk_errorf(instance, VK_ERROR_INCOMPATIBLE_DRIVER,
-                         "WARNING: NVK is not well-tested on %s, pass "
-                         "NVK_I_WANT_A_BROKEN_VULKAN_DRIVER=1 "
-                         "if you know what you're doing.",
-                         nvkmd->dev_info.device_name);
-#endif
-      goto fail_nvkmd;
-   }
-#endif
-
    if (!nvk_is_conformant(&nvkmd->dev_info))
       vk_warn_non_conformant_implementation("NVK");
 
@@ -1587,6 +1576,14 @@ nvk_create_physical_device_from_nvkmd(struct nvk_instance *instance,
 
    struct vk_properties properties;
    nvk_get_device_properties(instance, &nvkmd->dev_info, &properties);
+#ifdef _WIN32
+   const struct tg_gpu_adapter_info *adapter = nvkmd_windows_adapter(nvkmd);
+   memcpy(properties.deviceLUID, &adapter->luid_low, sizeof(adapter->luid_low));
+   memcpy(properties.deviceLUID + sizeof(adapter->luid_low), &adapter->luid_high,
+          sizeof(adapter->luid_high));
+   properties.deviceLUIDValid = VK_TRUE;
+   properties.deviceNodeMask = 1;
+#endif
 
    if (nvkmd->drm.render_dev) {
       properties.drmHasRender = true;
@@ -1623,6 +1620,9 @@ nvk_create_physical_device_from_nvkmd(struct nvk_instance *instance,
    uint64_t heap_size =
       os_get_gpu_heap_size(instance->drirc.misc.heap_memory_percent,
                            &instance->drirc.misc.heap_memory_percent);
+#ifdef _WIN32
+   heap_size = MIN2(heap_size, adapter->memory_budget_bytes);
+#endif
    if (heap_size == 0) {
       result = vk_errorf(instance, VK_ERROR_INITIALIZATION_FAILED,
                          "Failed to query total system memory");
@@ -1682,12 +1682,14 @@ nvk_create_physical_device_from_nvkmd(struct nvk_instance *instance,
       assert(pdev->mem_heap_count == 1);
       pdev->mem_heaps[sysmem_heap_idx].flags |= VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
 
+#ifndef _WIN32
       pdev->mem_types[pdev->mem_type_count++] = (VkMemoryType) {
          .propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                           VK_MEMORY_PROPERTY_HOST_CACHED_BIT,
          .heapIndex = sysmem_heap_idx,
       };
+#endif
       pdev->mem_types[pdev->mem_type_count++] = (VkMemoryType) {
          .propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -1753,6 +1755,7 @@ fail_nvkmd:
 }
 
 #ifndef HAVE_SWITCH_PLATFORM
+#ifndef _WIN32
 VkResult
 nvk_create_drm_physical_device(struct vk_instance *_instance,
                                struct _drmDevice *drm_device,
@@ -1769,6 +1772,8 @@ nvk_create_drm_physical_device(struct vk_instance *_instance,
 
    return nvk_create_physical_device_from_nvkmd(instance, nvkmd, pdev_out);
 }
+#endif
+
 #endif
 
 void
@@ -1889,6 +1894,13 @@ nvk_GetPhysicalDeviceProperties2(
    VkPhysicalDeviceProperties2 *pProperties)
 {
    vk_common_GetPhysicalDeviceProperties2(physicalDevice, pProperties);
+#ifdef _WIN32
+   VK_FROM_HANDLE(nvk_physical_device, pdev, physicalDevice);
+   struct nvk_tir_properties *tir = vk_find_struct(pProperties->pNext, NVK_TIR_PROPERTIES_MESA);
+   if (tir)
+      tir->rasterSamples = pdev->info.chipset == 0x12e && pdev->info.cls_eng3d == MAXWELL_B ?
+                           VK_SAMPLE_COUNT_16_BIT : 0;
+#endif
 }
 
 VKAPI_ATTR void VKAPI_CALL
@@ -1950,6 +1962,23 @@ nvk_GetPhysicalDeviceMemoryProperties2(
             p->heapBudget[i] =
                vk_physical_device_heap_budget(available, percent, heap->size,
                                               used);
+
+#ifdef _WIN32
+            /* The values above are estimates: free system RAM and this
+             * process's vkAllocateMemory total. Once the segment group that
+             * VidMm charges for this heap has been measured on the device
+             * and selected, report VidMm's own budget and usage instead,
+             * bounded by the adapter ceiling.
+             */
+            struct tg_kmt_video_memory vidmm;
+            const bool measured =
+               nvkmd_windows_measured_memory(pdev->nvkmd, &pdev->vk.base, &vidmm);
+            const struct tg_gpu_heap_budget budget =
+               tg_gpu_heap_budget(heap->size, measured ? &vidmm : NULL,
+                                  p->heapBudget[i], used);
+            p->heapBudget[i] = budget.budget;
+            p->heapUsage[i] = budget.usage;
+#endif
          }
 
          /* From the Vulkan 1.3.278 spec:
@@ -1992,7 +2021,7 @@ nvk_GetPhysicalDeviceQueueFamilyProperties2(
          if (queue_family->queue_flags &
              (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT |
               VK_QUEUE_TRANSFER_BIT)) {
-            p->queueFamilyProperties.timestampValidBits = 64;
+            p->queueFamilyProperties.timestampValidBits = DETECT_OS_WINDOWS ? 0 : 64;
          } else {
             p->queueFamilyProperties.timestampValidBits = 0;
          }

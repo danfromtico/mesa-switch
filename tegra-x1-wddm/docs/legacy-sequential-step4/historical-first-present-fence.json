@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "evidence_basis": "Retrospective decoding of the four existing Switch Lite scene archives on AC and GPU Code 0.",
+  "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+  "kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+  "umd_arm64_sha256": "a66401b10105de8557db52a070c9fcdab17bf891b884dc71566dbb5c956947f2",
+  "nvk_arm64_sha256": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+  "installed_manifest_exports_sha256": {
+    "installed-owner-catalog.json": "6eff0b7424332f43506f3ccdf5b874aab285fe7e8fd01b6a08ed52046fe448e2",
+    "installed-dxg-schema.stdout": "22459e32f4b295d0f5c6e67bc848281b311346052b796e7c1b4cc42ea4f714bd"
+  },
+  "api_match": "DxgKrnl QueuePacket/Start 245 v2 and SignalSynchronizationObjectFromGpu 294 v1 on the drawing PID and TID, with the same context, synchronization object and value.",
+  "retirement_match": "QueuePacket/Stop 180 v1 matched the context, submit sequence and queue packet identity from Start. PacketType 5 is SIGNAL_COMMAND_BUFFER. Type 4 denotes WAIT_COMMAND_BUFFER.",
+  "normal_flip_control": {
+    "case": "Ddi20Case-261120-121855717865",
+    "effect": "FlipSequential",
+    "boot": 82058,
+    "archive_sha256": "6677a160e0f23a3618a3ff1d7dd3db0aea21c91c2315caba9a6d7d65000b8a2a",
+    "journal_sha256": "d27a4b9668bdda27ff9b893928f4c3ca7d6f1ee4246d28b041e05340c12e4421",
+    "streams": {
+      "scene": {
+        "sha256": "2d5b3e1a8cc96a295cf37f28a7d605848413b32204d0b87c5cb933ca7a817b9f",
+        "finalized": true,
+        "records_at_or_after_present": 2641
+      },
+      "miniport": {
+        "sha256": "0f447582d7a6c933fcaff34e643f97ff80fe799028eeb0e1b05ca480c4c509b7",
+        "finalized": true,
+        "records_at_or_after_present": 2
+      }
+    },
+    "pid": 5712,
+    "drawing_tid": 4692,
+    "queue_sequence": 2,
+    "fence_value": 1,
+    "queue_start_qpc": 10303343853,
+    "signal_api_qpc": 10303344095,
+    "queue_stop_qpc": 10303384993,
+    "stop_packet_type": 5,
+    "stop_timeout": false,
+    "stop_preemption": false,
+    "present_call_qpc": 10314713895,
+    "qpc_ticks_per_second": 19200000,
+    "retired_before_present_ms": 590.047
+  },
+  "historical_sequential": [
+    {
+      "case": "Ddi20Case-261120-122121366257",
+      "effect": "Sequential",
+      "boot": 82058,
+      "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+      "journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+      "streams": {
+        "scene": {
+          "sha256": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+          "finalized": false,
+          "records_at_or_after_present": 0
+        },
+        "miniport": {
+          "sha256": "448d78b1d7806769b77d9bc745c65b7cf07e038e1451f8f7fcec2ab1f28bf7df",
+          "finalized": false,
+          "records_at_or_after_present": 0
+        }
+      },
+      "pid": 1812,
+      "drawing_tid": 6340,
+      "queue_sequence": 2,
+      "fence_value": 1,
+      "queue_start_qpc": 13064001407,
+      "signal_api_qpc": 13064001872,
+      "queue_stop_qpc": 13064048487,
+      "stop_packet_type": 5,
+      "stop_timeout": false,
+      "stop_preemption": false,
+      "present_call_qpc": 13070969930,
+      "qpc_ticks_per_second": 19200000,
+      "retired_before_present_ms": 360.492
+    },
+    {
+      "case": "Ddi20Case-261120-122937785753",
+      "effect": "Sequential",
+      "boot": 82221,
+      "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+      "journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+      "streams": {
+        "scene": {
+          "sha256": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+          "finalized": false,
+          "records_at_or_after_present": 0
+        },
+        "miniport": {
+          "sha256": "ae2b064bc83935332746787fdd42cbc661ed4291020ff93a10e167f254bc4fa0",
+          "finalized": false,
+          "records_at_or_after_present": 0
+        }
+      },
+      "pid": 4672,
+      "drawing_tid": 4712,
+      "queue_sequence": 2,
+      "fence_value": 1,
+      "queue_start_qpc": 2331215182,
+      "signal_api_qpc": 2331216126,
+      "queue_stop_qpc": 2331262737,
+      "stop_packet_type": 5,
+      "stop_timeout": false,
+      "stop_preemption": false,
+      "present_call_qpc": 2352403757,
+      "qpc_ticks_per_second": 19200000,
+      "retired_before_present_ms": 1101.095
+    },
+    {
+      "case": "Ddi20Case-261120-123625091734",
+      "effect": "Sequential",
+      "boot": 82382,
+      "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+      "journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+      "streams": {
+        "scene": {
+          "sha256": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+          "finalized": false,
+          "records_at_or_after_present": 0
+        },
+        "miniport": {
+          "sha256": "6457ad2897be7679e1a140cb12b6c51f93167ad6a31f6cca2b2a006fd0b65cf6",
+          "finalized": false,
+          "records_at_or_after_present": 0
+        }
+      },
+      "pid": 5828,
+      "drawing_tid": 7656,
+      "queue_sequence": 2,
+      "fence_value": 1,
+      "queue_start_qpc": 2354181618,
+      "signal_api_qpc": 2354181827,
+      "queue_stop_qpc": 2354229276,
+      "stop_packet_type": 5,
+      "stop_timeout": false,
+      "stop_preemption": false,
+      "present_call_qpc": 2361927374,
+      "qpc_ticks_per_second": 19200000,
+      "retired_before_present_ms": 400.943
+    }
+  ],
+  "finding": "The sequence-2 queue packet signaled fence value 1 and retired before the first public Present on all three historical boots. The retained records do not establish completion of a GPU wait, CPU observation of the fence, or the initiating reset.",
+  "references": [
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/nf-d3dkmthk-d3dkmtsignalsynchronizationobjectfromgpu",
+    "https://docs.nvidia.com/nsight-systems/AnalysisGuide/#wddm-queues"
+  ],
+  "neon_xhigh_review": {
+    "model": "gemini-4-neon-xhigh",
+    "effort": "xhigh",
+    "request_sha256": "3dd0de90b70e79cc9c23ae31fb4431a0ff8a51787e348871763817b42fad5b16",
+    "native_response_sha256": "e67ea577920818a38a44a173f3edff05e06424d3cd26d0f31c396b72ae991de1",
+    "physical_input_summary_sha256": "7229f6424dfac706cfe79f8be8fe54a73ca4ebe02d74b6c42c0f3aad4be7bcb8",
+    "comment_verdicts": {
+      "dxgkrnl.h:145:1": "未知",
+      "dxgsyncfile.c:406:2": "未知"
+    },
+    "scope": "The decoded signal gives no observation of the synchronization object creation type, cross-process opening, destruction or release of a waiter.",
+    "initiating_reset_established": false
+  }
+}

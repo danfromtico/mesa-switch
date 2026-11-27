@@ -1,0 +1,35 @@
+{
+  "boot": 100134,
+  "operation_id": "sd-normalio-48a9526b426a",
+  "ordinary_storage_IO_passed": true,
+  "bytes": 8388608,
+  "expected_SHA256": "c6baa6c50782e8e0c89baf017327646dd379eb076dff4ccfed6a4e73170f91b9",
+  "actual_unbuffered_read": {
+    "logical_sector_bytes": 512,
+    "path": "C:\\Program Files\\SwitchWOA-SDNative-0513-01a2094a-r1\\originals\\candidate-normal-io.bin",
+    "sha256": "c6baa6c50782e8e0c89baf017327646dd379eb076dff4ccfed6a4e73170f91b9",
+    "bytes": 8388608,
+    "method": "CreateFileW FILE_FLAG_NO_BUFFERING; VirtualAlloc aligned buffer; exact ReadFile byte count"
+  },
+  "host_original": {
+    "path": "C:\\Program Files\\SwitchWOA-SDNative-0513-01a2094a-r1\\originals\\candidate-normal-io.bin",
+    "sha256": "c6baa6c50782e8e0c89baf017327646dd379eb076dff4ccfed6a4e73170f91b9",
+    "bytes": 8388608,
+    "relative": "originals/candidate-normal-io.bin",
+    "local": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/storage-native-r2/collection-work/native-original-archive/objects/c6baa6c50782e8e0c89baf017327646dd379eb076dff4ccfed6a4e73170f91b9",
+    "download_partial": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/continuation-01a20b38/sd-normalio-48a9526b426a/native-originals-incoming/c6baa6c50782e8e0c89baf017327646dd379eb076dff4ccfed6a4e73170f91b9.part"
+  },
+  "native_result": {
+    "path": "C:\\Program Files\\SwitchWOA-SDNative-0513-01a2094a-r1\\operations\\sd-normalio-48a9526b426a.result.json",
+    "sha256": "8739833be93cf4c0f1690bbc990631b97730848bac45323c73e37647ca729377",
+    "bytes": 24249,
+    "relative": "operations/sd-normalio-48a9526b426a.result.json",
+    "local": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/storage-native-r2/collection-work/native-original-archive/objects/8739833be93cf4c0f1690bbc990631b97730848bac45323c73e37647ca729377",
+    "download_partial": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/continuation-01a20b38/sd-normalio-48a9526b426a/native-originals-incoming/8739833be93cf4c0f1690bbc990631b97730848bac45323c73e37647ca729377.part"
+  },
+  "write_method": "Native WriteThrough FileStream and Flush(true), verified against aligned native FILE_FLAG_NO_BUFFERING ReadFile exact byte count",
+  "scope": "Ordinary storage I/O on this boot only; not clean lifecycle, root cause, full/kernel dump or baseline promotion",
+  "NT_request_still_unconsumed": true,
+  "boot100134_fault_remains_open": true,
+  "restore_permitted": false
+}

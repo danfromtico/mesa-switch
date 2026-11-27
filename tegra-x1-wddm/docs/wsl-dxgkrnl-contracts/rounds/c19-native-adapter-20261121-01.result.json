@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "round_id": "c19-native-adapter-20261121-01",
+  "contract_id": "ioctl.c:3310:2",
+  "declaration_sha256": "45a3c7bb8bfcbc358638301cf2f7b03338d022fcb8782ff7e59428ae39bdfbe5",
+  "started_utc": "2026-11-22T02:54:00.757330+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "本条原次对 GM20B 的能力查询成功，WDDM=2600，NativeGpuFenceSupported=0；创建和打开入口有导出。已验收的 94176 平台仍为 Windows 22631／WDDM 2.6，未达到官方原生围栏 Windows 11 24H2／WDDM 3.2 适用条件。",
+  "gap": "缺受支持类型的合法共享关系、适配器身份及对应的约束回执。当前设备未满足原生围栏条件。",
+  "observation": {
+    "original_capability": {
+      "boot": 91476,
+      "adapter_luid": "0000000000005c10",
+      "qpc": 76812044339,
+      "pid": 3244,
+      "tid": 7624,
+      "version": 2600,
+      "native_gpu_fence_supported": false,
+      "creation_export_present": true,
+      "opening_export_present": true
+    },
+    "selected_platform": {
+      "last_verified_boot": 94176,
+      "build": 22631,
+      "wddm": "2.6",
+      "source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9"
+    },
+    "missing_target": "受支持类型的合法共享关系、适配器身份及对应的约束回执。",
+    "official_api": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/native-gpu-fence-objects"
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-native-adapter-20261121-01.result.json",
+      "sha256": "e3bd575cd5dea031a2653d354062f06b8c86e8cc3328f3cfb58549f5938570ab"
+    },
+    {
+      "path": "windows-native-graphics/dma-return-calibration-94004.json",
+      "sha256": "9743e495388690be6e27a63d6567f67e380c8fc9c284fa72d57155113c361ae3"
+    }
+  ]
+}

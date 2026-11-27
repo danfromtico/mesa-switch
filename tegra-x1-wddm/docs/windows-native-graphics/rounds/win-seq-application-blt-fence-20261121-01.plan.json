@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-application-blt-fence-20261121-01",
+  "contract_id": "WIN-SEQ-APP-BLT-DMA-NATIVE",
+  "windows_question": "WIN-SEQ-APP-BLT-DMA-NATIVE",
+  "owner": "调用进程、Windows VidSch、GM20B KMD",
+  "question": "正式基线原窗口自己的第一笔 52 字节 Blt 能否关联到同一个 Windows 提交围栏和 KMD 缓存快照？",
+  "method": "只读重解 92083 一轮留存文件，检查应用首个 Blt 的 DMA ID 与有效的 KMD 缓存快照",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289"
+    },
+    "driver_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+      "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+    }
+  },
+  "pass_condition": "应用 178/180 同对象，175/177/176 同上下文、队列序号和 DMA ID；KMD 回执提交值、适配器、长度和有效状态匹配。",
+  "observations": [
+    "从应用的窗口、线程和 KMT Present 绑定的 hContext 查找唯一的 bPresent 52 字节排队事件。",
+    "在 Profiler/display ETL 分别沿上下文和 queue version 1 匹配 175/105/106/177/176/180；核对同 QPC 时序及控制端原始回执。",
+    "在应用视频 ETL 用生产 KMD 的精确载荷版本、适配器 LUID、围栏和数据长度定位有效缓存。当某个值只有快照时，保留快照时点和归属。"
+  ],
+  "inputs": {
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-seq-new-baseline-profiler-20261121-01.result.json",
+      "sha256": "922cd6aaedaf958c38827db41c0d2fb297a179469f3f7e94cbf7612d674ab6a6"
+    },
+    "source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "source_manifest_sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289",
+    "files": {
+      "video.etl": "cf567c19c9976b4fa896517165c47fc39548ab0ffadc66b53f7a253af3fb96d9",
+      "display.etl": "dc86c42bd8075bc0d325c2b8243f6e695f779dc165bd48d8589a920ccfdfed0b",
+      "profiler.etl": "44a1c9dc0c4a9b69c83b9e7f6cc1b7926569030c762a34459de5c986e5107cc7",
+      "interpreted.json": "4e2b30a7c8e613e29770eab3dc7ea54044289030db0ce61142f89c8761426921",
+      "native-submit-event-catalog.raw.json": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357"
+    },
+    "local_analysis_sha256": "2729c991d4740aa6e2e9305adb87cb1884f6827f6ace4952b76490940445f10f",
+    "boot": 92083
+  }
+}

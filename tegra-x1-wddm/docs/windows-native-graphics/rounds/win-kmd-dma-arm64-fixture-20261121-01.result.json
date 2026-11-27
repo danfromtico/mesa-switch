@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-dma-arm64-fixture-20261121-01",
+  "contract_id": "WIN-KMD-DMA-ARM64-REHEARSAL",
+  "windows_question": "WIN-KMD-DMA-ARM64-REHEARSAL",
+  "plan_sha256": "0ce0593ee661cd24b21e755d041b64a17e6146ee286a9f487f2edbecda3edc6f",
+  "status": "实机通过",
+  "finding": "Switch 启动 91557 上运行已签名 ARM64 队列夹具并以 0 退出。Inf2Cat 输出的新目录签名在 Switch 上验证有效，逐一核过 12 个文件。已清理临时目录，前后同启动、同 DWM、GPU Code 0，实载正式组件哈希一致。",
+  "missing_observation": "此项覆盖 ARM64 原生模型和签名包。真实 KMD 准入、GP_PUT 与 GPU 完成信号仍需用已知正常负载配对，事故 152586 的观测缺口仍开放。",
+  "device_executions": 0,
+  "evidence": {
+    "model_result": {
+      "boot": 91557,
+      "os_arch": "ARM64",
+      "desktop": 1392,
+      "loaded": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "fixture": {
+        "output": "WINDOW_COPY 640x360 to 641x361 passed, 2560/2688 pitches, one complete DDI packet\r\nPASS: WDK private GR images/mappings/reset epochs, adapter/LUID/512MiB ABI and ordered queue (controlled substitutes; no live WDDM or GPU pass)\r\n",
+        "start_utc": "2026-11-21T16:00:50.3046463Z",
+        "pid": 5096,
+        "stderr": "",
+        "exit": 0
+      },
+      "gpu_code": 0,
+      "archive_hash": "bf0ace9be0ba5e18befe767f836a40e64687262c562f3a63197a8a4608820ac9",
+      "exe_hash": "3f0bd95a1649644c941959b3c4722f8f8cf58dd3ccff9faccac00675fae06d1d",
+      "sys_hash": "ba56e4350720a262804e669787f7f431fd65e1b0250183266bc850122dcf2171",
+      "ac": "Online",
+      "catalog": {
+        "Begin": "2026-11-21T16:00:51.0850426Z",
+        "Phase": "CatalogCreated",
+        "ToolSha256": "B594728D38B271979367ABC8060A971B8E42422738009BE126710B1F5DD0FCBC",
+        "DriversInstalled": false,
+        "RestartRequested": false,
+        "ChildPid": 3020,
+        "ChildStart": "2026-11-21T16:00:51.2537045Z",
+        "Exit": 0,
+        "Output": "..................................\nSignability test complete.\r\n\nErrors:\r\nNone\r\n\nWarnings:\r\nNone\r\n\nCatalog generation complete.\r\nC:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\SwitchDmaBoundary-311a8a4cb0c34034\\package\\tegragpurender.cat\r\n",
+        "ErrorOutput": "",
+        "CatalogSha256": "533338FCBE291AA340BC248159E975CE53DEA79C857C43BFC6451E025A8FA597",
+        "End": "2026-11-21T16:01:02.6327026Z"
+      }
+    },
+    "verified_catalog": {
+      "status": "Valid",
+      "sha256": "0718352b0b39ad9ebeb11bc94bbeb9fb55f84de4d6cb18f8abb99df5bc202e6d",
+      "members": {
+        "nv_acr_ucode_prod.bin": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+        "fecs_sig.bin": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+        "tegragpurender.sys": "ba56e4350720a262804e669787f7f431fd65e1b0250183266bc850122dcf2171",
+        "gpccs.bin": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+        "pmu_sig.bin": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+        "NETB_img.bin": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+        "tegragpurender.inf": "7e9279bb8c031b239663880adbc7967d23b231458755041e13cf230f3e7f8a09",
+        "pmu_bl.bin": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+        "gpmu_ucode_desc.bin": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+        "fecs.bin": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+        "tegragpuno3d.dll": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+        "gpmu_ucode_image.bin": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699"
+      },
+      "tool_sha256": "29955332740f64db0d2cd67d787fef0ddc0a77525337f966e34e77d8d9a6002e"
+    },
+    "source": "942fd339482886a1696efcb9723cce77f7538702",
+    "control_script_sha256": "914f61be4db8bc4460679fe32732c816effeb9b00abb4230969d38f7d2905267",
+    "first_runner": {
+      "sha256": "512384224a6f46280940e832e00bc14de0ea05075eabc14ab98a69a2ac638e10",
+      "outcome": "Start-Process process object returned a missing ExitCode; owned directory cleaned"
+    },
+    "before_receipt": "f217e28b65656d6c1e2d599a1f4a0c485ea29e67ba7eef11adb427f00cf0912d",
+    "after_receipt": "9bd1cdd2fbf63f7e61a96266b1266160bbd7a6707bfdd12c6b1ef761af87e73b",
+    "local_signed_package": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/calibration-package/package",
+    "raw_verified_receipt": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/calibration-package-verified.json",
+      "sha256": "6f37fa63413bd6edf47dd027d99bdc8e8059195455d3f5df7e0f4402b6ed7370"
+    },
+    "cleanup": "61ac8cab782f2bd0739b179001b344f34030b6cf1027ebbd05c3132dc6a2d5e9",
+    "hardware_scope": "真实 Switch ARM64 Windows 上运行的受控替代模型。无候选驱动安装、重启或图形负载。",
+    "boundaries": {
+      "last_entry": "2026-11-21T16:00:50.3046463Z",
+      "last_return": 0,
+      "first_anomaly_or_missing": "尚缺正式许可下加载候选后，真实队列的 Windows、KMD 与设备回执。"
+    }
+  }
+}

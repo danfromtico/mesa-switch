@@ -70,6 +70,9 @@ struct vk_queue {
     */
    VkResult (*driver_submit)(struct vk_queue *queue,
                              struct vk_queue_submit *submit);
+#ifdef _WIN32
+   bool supports_wsi_written_primaries;
+#endif
 
    struct {
       /** Current submit mode
@@ -299,6 +302,10 @@ struct vk_queue_submit {
    struct vk_sync_timeline_point **_wait_points;
    struct vk_sync_timeline_point **_signal_points;
    bool is_protected;
+#ifdef _WIN32
+   uint32_t win32_written_count;
+   uint32_t win32_written_allocations[16];
+#endif
 };
 
 static inline bool

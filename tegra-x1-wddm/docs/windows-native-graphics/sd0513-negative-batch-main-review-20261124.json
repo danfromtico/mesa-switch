@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "utc": "2026-11-24T05:21:38.212542+00:00",
+  "reviewer_thread": "01a20b2b-9760-7e92-a0e1-19deb1db9a47",
+  "source_executor": "01a20b38-b0b4-73a2-83bb-55540ceef451",
+  "status": "ordinary_IO_accepted_with_scope_direct_NT_dump_not_qualified",
+  "batch_sha256": "e06f9ad806a2f0ff84a12a5382520fc18ee5028da4f207dc2d56751f5676e3ef",
+  "input_verification": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/sd0513-negative-batch-main-review-20261124/input-verification.json",
+    "sha256": "c06c4a404967bbd2619d56ff5e8b90648a2d567afe4cf0c65ada95663fbeac94"
+  },
+  "independent_verification": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/sd0513-negative-batch-main-review-20261124/independent-verification.json",
+    "sha256": "debb0feeebae75f9bf9cf41d3826cdaca951ca652ec8115bffa8cf0c8f76c10f"
+  },
+  "ordinary_IO": {
+    "operation": "sd-normalio-48a9526b426a",
+    "boot": 100134,
+    "bytes": 8388608,
+    "full_SHA256": "c6baa6c50782e8e0c89baf017327646dd379eb076dff4ccfed6a4e73170f91b9",
+    "actual_unbuffered_read_matches_host_original": true,
+    "source_WriteThrough_flush_and_no_buffering_exact_read_reviewed": true,
+    "scope": "Only the original C-volume ordinary file IO operation; no dump/lifecycle qualification."
+  },
+  "entry_marker": {
+    "bytes": 80,
+    "sha256": "7b8f40cfd7d971c64b6e0f79849c92560e953afd023523be9db72339ae94dade",
+    "magic": "0x3143454144535753",
+    "parameters": [
+      "0x9e5d1b3862a740c1",
+      "0x3a607f92c8d145be",
+      "0x6c8ade348ce377dc",
+      "0x50103"
+    ],
+    "FILETIME": 134399687154373025,
+    "version": 1,
+    "IRQL": 0,
+    "scope": "Driver entry and intended next call; no proof of KeBugCheckEx execution or writer completion."
+  },
+  "consumed_operations": {
+    "InstallCandidate": "sd-installcandidate-2237d7492a49",
+    "RestartCandidate": "sd-restartcandidate-e9ecbf774f23",
+    "NormalIO": "sd-normalio-48a9526b426a",
+    "DumpAcceptance": "sd-dumpacceptance-41e4614b9533"
+  },
+  "cross_boot": {
+    "before": 100134,
+    "after": 100210,
+    "full_System_export_records": 151,
+    "full_System_record_range": [
+      100134,
+      100284
+    ],
+    "selected_events": [
+      {
+        "record": 100210,
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-24T04:16:03.8087742Z",
+        "fields": {
+          "MajorVersion": "10",
+          "MinorVersion": "0",
+          "BuildVersion": "22621",
+          "QfeVersion": "2861",
+          "ServiceVersion": "0",
+          "BootMode": "0",
+          "StartTime": "2026-11-24T04:16:02.0605598Z"
+        }
+      },
+      {
+        "record": 100219,
+        "id": 6008,
+        "provider": "EventLog",
+        "utc": "2026-11-24T04:40:04.8906928Z",
+        "fields": {
+          "0": "12:37:00",
+          "1": "‎2026/‎11/‎24",
+          "2": null,
+          "3": null,
+          "4": "1556",
+          "5": null,
+          "6": null,
+          "7": "EA070B00020018000C0025000000CF02EA070B0002001800040025000000CF02DC0500003C00000001000000DC050000010000001E0000000100000000000000"
+        }
+      },
+      {
+        "record": 100228,
+        "id": 41,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "utc": "2026-11-24T04:16:07.9254656Z",
+        "fields": {
+          "BugcheckCode": "0",
+          "BugcheckParameter1": "0x0",
+          "BugcheckParameter2": "0x0",
+          "BugcheckParameter3": "0x0",
+          "BugcheckParameter4": "0x0",
+          "SleepInProgress": "0",
+          "PowerButtonTimestamp": "0",
+          "BootAppStatus": "0",
+          "Checkpoint": "0",
+          "ConnectedStandbyInProgress": "false",
+          "SystemSleepTransitionsToOn": "0",
+          "CsEntryScenarioInstanceId": "0",
+          "BugcheckInfoFromEFI": "false",
+          "CheckpointStatus": "0",
+          "CsEntryScenarioInstanceIdV2": "0",
+          "LongPowerButtonPressDetected": "false",
+          "LidReliability": "false",
+          "InputSuppressionState": "0",
+          "PowerButtonSuppressionState": "0",
+          "LidState": "3"
+        }
+      }
+    ],
+    "wall_clock_not_used_to_prove_causality": true,
+    "standard_dump_inventory_empty": true,
+    "NT_entry": "unknown",
+    "dump_failure_stage": "unknown",
+    "overlap_with_prior_export": {
+      "canonical_complete_events_equal": 75,
+      "new_record_count": 76,
+      "new_record_range": [
+        100209,
+        100284
+      ]
+    }
+  },
+  "current_identity": {
+    "observed_utc": "2026-11-24T04:50:53.7786282Z",
+    "SD_version": "0.5.1.3",
+    "SD_sha256": "7100cc604cdce194afe7b6bb19f7f51ac29aa54784e53ac7de6adfbc6e021470",
+    "SD_selected_INF": "oem35.inf",
+    "SD_Code": 0,
+    "SD_loaded_identity_scope": "Enumerated module path plus corresponding disk SHA; no relocated kernel memory image hash.",
+    "GPU_path_hashes_match_C4": 9,
+    "DWM_path_disk_hashes_match_C4": 4,
+    "DWM_pid": 1056,
+    "GPU_policy_and_permanent_directory_unchanged": true,
+    "acceptance_service": {
+      "Name": "SwitchSDAcceptance0513",
+      "State": "Stopped",
+      "Started": false,
+      "StartMode": "Manual",
+      "PathName": "\\??\\C:\\Program Files\\SwitchWOA-SDNative-0513-01a2094a-r1\\StorageDumpAcceptance.sys",
+      "ExitCode": 1077,
+      "ServiceSpecificExitCode": 0
+    }
+  },
+  "dump_state_boundary": {
+    "Kernel_Dump_Event10": "Native provider metadata identifies CrashDump Config / CrashDumpDisabled, not TDR-disabled.",
+    "virtual_loaded_aliases": [
+      "dump_dumpsdport.sys",
+      "dump_nvtsdhc.sys"
+    ],
+    "alias_file_absence": "A missing disk file at a generated dump alias does not establish missing original driver package.",
+    "final_effective_dump_readiness": "unknown; config3, preparation receipts, historical disable events and module enumeration are insufficient individually or together to prove a usable writer.",
+    "invalid_query": {
+      "kernel_sha256": "db84703895bbc9f10771dabc117f7b3d3a7f8bc66d0d3e1918f01983e77e7aad",
+      "dispatch_selected_instruction_words_matched": 15,
+      "selector_addresses_matched": [
+        "0x8bfc6c",
+        "0x8bfcec",
+        "0x8bfcf0",
+        "0x8bfcfc",
+        "0x8bfd00",
+        "0x8c16b0",
+        "0x8c16bc",
+        "0x8bfd18",
+        "0x8bfc94",
+        "0x8bfcbc",
+        "0x8bfcc0",
+        "0x8bfcc4",
+        "0x8bfcc8",
+        "0x8bfccc",
+        "0x8bfcd0"
+      ],
+      "table_entry": 3541,
+      "target_RVA": "0x8c38f0",
+      "decoded_return": "0xc0000003",
+      "native_query_performed": false,
+      "limits": "Exact pinned-image class34 selector only; no conclusion about other classes or effective runtime dump readiness."
+    }
+  },
+  "qualification": {
+    "ordinary_IO_on_boot100134": true,
+    "clean_candidate_install_restart_lifecycle": false,
+    "real_readable_small_dump": false,
+    "full_or_kernel_dump": false,
+    "candidate_promotion": false,
+    "SD_stage_complete": false
+  },
+  "open_faults": [
+    {
+      "id": "GM20B-SD0513-CANDIDATE-UNCLEAN-BOOT-100134",
+      "status": "open"
+    },
+    {
+      "id": "SWITCH-SD0513-DIRECT-NT-DUMP-ABSENT-100210",
+      "status": "open"
+    }
+  ],
+  "coordination": {
+    "retain_current_SD0513": true,
+    "restoration_authorized_now": false,
+    "restoration_started": false,
+    "no_consumed_control_replay": true,
+    "device_owner": "01a20b38-b0b4-73a2-83bb-55540ceef451",
+    "device_lease_transfer_completed": false,
+    "main_device_actions": 0,
+    "other_application_UI_episodes_remain_separate": true,
+    "WDDM26_remains_after_SD": true
+  },
+  "remaining": [
+    "Determine the actual NT/dump missing boundary and justified cause using direct evidence.",
+    "Review any necessary production correction and appropriately scoped new acceptance; do not replay original consumed controls.",
+    "Complete SD evidence/restoration requirements subject to current owner direction before WDDM2.6 scheduling."
+  ],
+  "source_or_binary_changes_by_main": 0,
+  "new_agent_jobs_by_main": 0,
+  "faults_closed": 0,
+  "goal_complete": false,
+  "native_partial_failure_preserved": {
+    "operation_id": "sd-NT-postboot-evidence-163a1ca2a9c4",
+    "ok": false,
+    "source_sha256": "3c3739118b698364628058f944afce3a2979fe35c19549dbce4af2ed4664b631",
+    "error": {
+      "position": "所在位置 行:50 字符: 7\r\n+  $key=Get-Item -LiteralPath 'HKLM:SYSTEMCurrentControlSetControlCrash ...\r\n+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+      "message": "找不到路径“HKLM:SYSTEMCurrentControlSetControlCrashControl”，因为该路径不存在。",
+      "stack": "在 <ScriptBlock>、<无文件> 中: 第 50 行\r\n在 <ScriptBlock>、<无文件> 中: 第 1 行"
+    },
+    "retained_usable_fields": [
+      "full_System original and highwater",
+      "System_evtx",
+      "Kernel-Boot/Kernel-Dump channel originals",
+      "dump_provider metadata",
+      "state"
+    ],
+    "limits": "Only saved fields and independently hashed originals are used; the failed registry read is not considered success.",
+    "later_independent_read": {
+      "operation_id": "sd-NT-remaining-state-529c4ed2ad9c",
+      "ok": true,
+      "source_sha256": "0c48da6b9a8d1b1290ed74c3039209de930f52e8451981cf2f3df81cd439d1ef"
+    }
+  }
+}

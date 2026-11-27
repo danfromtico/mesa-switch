@@ -1,0 +1,99 @@
+{
+  "archive_sha256": "6deee731e5b3fd3cea87ffeda861e26c6abdf5c7160ee77b83134a3425cff3a5",
+  "manifest_sha256": "85462a9cb6f5ff1e1f57be360627c6125edaf735f00c23104b2b0feb99f7ce3c",
+  "members": 33,
+  "all_SHA_bytes_CRC_paths_verified": true,
+  "main_device_operations": 0,
+  "schema": 1,
+  "reviewer": "independent main local source and artifact review",
+  "decision": "approve_scoped_local_entry_candidate_no_native_qualification",
+  "source_commit": "b02c99e37a9c11c942e237af5fc4642598946c76",
+  "composition_commit": "df08e8583abc202732036597f5cb7f0519ba11a5",
+  "composition_UMD_inputs_unchanged": true,
+  "source_review": [
+    "Exact process environment value1 plus NVK adds the WDDM2.0 offer; other values, default and non-NVK retain four versions. Count/capacity behavior and canaries were checked.",
+    "Existing typed WDDM2.0 create path and1.4 presentation table reach the same Present1 handler; Reserved1 remains restricted to NVK/WDDM2.0 and one validated surface, with opaque DXGI context forwarded unchanged.",
+    "Event34 uses unchanged version2/level4/keyword1 writer and96-byte payload, recording E_PENDING marker then actual Present return, Reserved and interface.",
+    "Model CHECK is active despite NDEBUG; main calls both ddi11_contracts and runtime_contracts with actual recompiled entry/dxgi. These are x64 Wine CPU models, not Switch acceptance."
+  ],
+  "source_identity": {
+    "production_inputs": 86,
+    "changed": [
+      "src/nouveau/tgd3d/tgd3d_trace.h",
+      "src/nouveau/tgd3d/tgd3d_dxgi.cpp",
+      "src/nouveau/tgd3d/tgd3d_entry.cpp"
+    ],
+    "all_Git_and_build_source_hashes_match": true,
+    "dependency_headers_matching_preserved_producer_build": 52,
+    "producer_source": "329d0d21a96f0dc2958b954723fc2984c07b4613",
+    "preserved_producer_identity_sha256": "1a25af35f834affbd13120a45932b5778d9b7538ab7f59a64e9ef2fe1f287636"
+  },
+  "build": {
+    "recipe_units": 29,
+    "recompiled_tgd3d_units": 27,
+    "retained_reference_objects": [
+      "../source/src/nouveau/nvdec/nvdec_sha256.c",
+      "../source/src/nouveau/vulkan/nvkmd/windows/nvdec_native.c"
+    ],
+    "exit": 0,
+    "first_missing_header_failure_retained": true,
+    "unsigned_sha256": "400ba8e37fb92f0c29700d36380840b3352645a0d0680f8ddee756219a6ee706",
+    "signed_sha256": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+    "signed_bytes": 3403272,
+    "PE_machine": "ARM64",
+    "signing_only_changes": [
+      "checksum",
+      "security directory",
+      "aligned certificate append"
+    ],
+    "local_signer_verify_passed": true,
+    "Windows_trust_and_native_load": "pending"
+  },
+  "CPU_models": {
+    "commands": [
+      {
+        "name": "compile-tgd3d_entry.cpp",
+        "exit": 0
+      },
+      {
+        "name": "compile-tgd3d_dxgi.cpp",
+        "exit": 0
+      },
+      {
+        "name": "compile-ddi11_contracts.cpp",
+        "exit": 0
+      },
+      {
+        "name": "compile-main",
+        "exit": 0
+      },
+      {
+        "name": "link",
+        "exit": 0
+      },
+      {
+        "name": "models",
+        "exit": 0
+      }
+    ],
+    "exe_sha256": "7eb41e7dfa0a71477822fccdca08e7522935b9ffc81394198196d11fbc0b42fb",
+    "scope": "Actual adapter negotiation and Present1 runtime contracts with mocked callbacks/Vulkan under x64 Wine; no Switch test",
+    "stderr_bytes": 10748,
+    "stderr": "Retained Vulkan/MoltenVK informational output, not empty"
+  },
+  "nonblocking_evidence_limits": [
+    "Event34 begins after argument/version/surface ownership/subresource validation. It covers validated forwarding, not every DDI entry; its absence does not prove no Present1 invocation.",
+    "Correlate target PID/TID/process-start identity and ordered entry/return for the single-call case; Event34 has no unique call sequence field.",
+    "29 recipe units comprise27 freshly compiled tgd3d units and2 retained NVDEC reference objects.",
+    "Reserved is publicly documented as0; actual Reserved1 is the specific compatibility case, not evidence that this field is BackBufferMultiplicity.",
+    "No Switch deployment, Windows trust check, actual callback, visible output or promotion is established by this local batch."
+  ],
+  "next_scope": "Already authorized single system-DXGI FLIP_SEQUENTIAL empty-window Reserved1 case with actual signed leaf identity, callback return, normal exit and desktop/boot continuity; exclusive executor and latest selected Neon profile.",
+  "new_Gemini_calls": 0,
+  "historical_first_Present_root_cause": "unknown",
+  "public_docs": [
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/nc-d3d10umddi-pfnd3d10_2ddi_getsupportedversions",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi_ddi_arg_present1",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dxgiddi/ns-dxgiddi-dxgi1_3_ddi_base_functions"
+  ]
+}

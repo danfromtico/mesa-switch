@@ -43,6 +43,10 @@
 #include "Format.h"
 
 #include "Debug.h"
+#include "Trace.h"
+#ifdef D3D10_UMD_HARDWARE
+#include "RuntimeMemory.h"
+#endif
 
 #include "util/u_sampler.h"
 #include "util/u_framebuffer.h"
@@ -98,6 +102,7 @@ CreateDevice(D3D10DDI_HADAPTER hAdapter,                 // IN
              __in D3D10DDIARG_CREATEDEVICE *pCreateData) // IN
 {
    LOG_ENTRYPOINT();
+   D3D10Trace(D3D10_TRACE_CREATE_DEVICE_BEGIN, S_OK, pCreateData->Interface, pCreateData->Flags);
 
    if (0) {
       DebugPrintf("hAdapter = %p\n", hAdapter);
@@ -122,6 +127,7 @@ CreateDevice(D3D10DDI_HADAPTER hAdapter,                 // IN
    default:
       DebugPrintf("%s: unsupported interface version 0x%08x\n",
                   __func__, pCreateData->Interface);
+      D3D10Trace(D3D10_TRACE_CREATE_DEVICE_RESULT, E_FAIL, pCreateData->Interface, 0);
       return E_FAIL;
    }
 
@@ -132,11 +138,35 @@ CreateDevice(D3D10DDI_HADAPTER hAdapter,                 // IN
 
    struct pipe_screen *screen = pAdapter->screen;
    struct pipe_context *pipe = screen->context_create(screen, NULL, 0);
+   if (!pipe) {
+      D3D10Trace(D3D10_TRACE_CREATE_DEVICE_RESULT, E_OUTOFMEMORY, pCreateData->Interface, 1);
+      return E_OUTOFMEMORY;
+   }
    pDevice->pipe = pipe;
-   pDevice->cso = cso_create_context(pipe, CSO_NO_VBUF);
+   /* Null D3D vertex bindings use CPU-backed zero values. Let CSO upload
+    * those (and translate unsupported formats) for hardware backends.
+    */
+   pDevice->cso = cso_create_context(pipe, 0);
+   if (!pDevice->cso) {
+      pipe->destroy(pipe);
+      pDevice->pipe = NULL;
+      D3D10Trace(D3D10_TRACE_CREATE_DEVICE_RESULT, E_OUTOFMEMORY, pCreateData->Interface, 2);
+      return E_OUTOFMEMORY;
+   }
 
    pDevice->empty_vs = CreateEmptyShader(pDevice, MESA_SHADER_VERTEX);
    pDevice->empty_fs = CreateEmptyShader(pDevice, MESA_SHADER_FRAGMENT);
+   if (!pDevice->empty_vs || !pDevice->empty_fs) {
+      if (pDevice->empty_vs)
+         DeleteEmptyShader(pDevice, MESA_SHADER_VERTEX, pDevice->empty_vs);
+      if (pDevice->empty_fs)
+         DeleteEmptyShader(pDevice, MESA_SHADER_FRAGMENT, pDevice->empty_fs);
+      cso_destroy_context(pDevice->cso);
+      pipe->destroy(pipe);
+      memset(pDevice, 0, sizeof *pDevice);
+      D3D10Trace(D3D10_TRACE_CREATE_DEVICE_RESULT, E_OUTOFMEMORY, pCreateData->Interface, 3);
+      return E_OUTOFMEMORY;
+   }
 
    pipe->bind_vs_state(pipe, pDevice->empty_vs);
    pipe->bind_fs_state(pipe, pDevice->empty_fs);
@@ -149,6 +179,16 @@ CreateDevice(D3D10DDI_HADAPTER hAdapter,                 // IN
    pDevice->KTCallbacks = *pCreateData->pKTCallbacks;
    pDevice->UMCallbacks = *pCreateData->pUMCallbacks;
    pDevice->pDXGIBaseCallbacks = pCreateData->DXGIBaseDDI.pDXGIBaseCallbacks;
+
+#ifdef D3D10_UMD_HARDWARE
+   HRESULT runtime_context = RuntimeDeviceCreateContext(pDevice);
+   if (FAILED(runtime_context)) {
+      DestroyDevice(pCreateData->hDrvDevice);
+      memset(pDevice, 0, sizeof *pDevice);
+      D3D10Trace(D3D10_TRACE_CREATE_DEVICE_RESULT, runtime_context, pCreateData->Interface, 4);
+      return runtime_context;
+   }
+#endif
 
    pDevice->draw_so_target = NULL;
 
@@ -294,14 +334,14 @@ CreateDevice(D3D10DDI_HADAPTER hAdapter,                 // IN
    pCreateData->DXGIBaseDDI.pDXGIDDIBaseFunctions->pfnBlt =
       _Blt;
 
-   if (0) {
-      return S_OK;
-   } else {
-      // Tell DXGI to not use the shared resource presentation path when
-      // communicating with DWM:
-      // http://msdn.microsoft.com/en-us/library/windows/hardware/ff569887(v=vs.85).aspx
-      return DXGI_STATUS_NO_REDIRECTION;
-   }
+#ifdef D3D10_UMD_HARDWARE
+   D3D10Trace(D3D10_TRACE_CREATE_DEVICE_RESULT, S_OK, pCreateData->Interface, 0);
+   return S_OK;
+#else
+   D3D10Trace(D3D10_TRACE_CREATE_DEVICE_RESULT, DXGI_STATUS_NO_REDIRECTION, pCreateData->Interface, 0);
+   // The GDI software target does not use DWM's shared-resource presentation.
+   return DXGI_STATUS_NO_REDIRECTION;
+#endif
 }
 
 
@@ -321,11 +361,18 @@ DestroyDevice(D3D10DDI_HDEVICE hDevice)   // IN
    unsigned i;
 
    LOG_ENTRYPOINT();
+   D3D10Trace(D3D10_TRACE_DESTROY_DEVICE_BEGIN, S_OK, 0, 0);
 
    Device *pDevice = CastDevice(hDevice);
    struct pipe_context *pipe = pDevice->pipe;
 
-   pipe->flush(pipe, NULL, 0);
+#ifdef D3D10_UMD_HARDWARE
+   if (pDevice->hContext) {
+      HRESULT hr = RuntimeDeviceFinish(pDevice);
+      if (FAILED(hr)) SetError(hDevice, hr);
+   } else
+#endif
+      pipe->flush(pipe, NULL, 0);
 
    for (i = 0; i < PIPE_MAX_SO_BUFFERS; ++i) {
       pipe_so_target_reference(&pDevice->so_targets[i], NULL);
@@ -352,8 +399,7 @@ DestroyDevice(D3D10DDI_HDEVICE hDevice)   // IN
 
    pipe_resource_reference(&pDevice->index_buffer, NULL);
 
-   static struct pipe_sampler_view * sampler_views[PIPE_MAX_SHADER_SAMPLER_VIEWS];
-   memset(sampler_views, 0, sizeof sampler_views);
+   struct pipe_sampler_view *sampler_views[PIPE_MAX_SHADER_SAMPLER_VIEWS] = {};
    pipe->set_sampler_views(pipe, MESA_SHADER_FRAGMENT, 0,
                            PIPE_MAX_SHADER_SAMPLER_VIEWS, 0, sampler_views);
    pipe->set_sampler_views(pipe, MESA_SHADER_VERTEX, 0,
@@ -361,7 +407,12 @@ DestroyDevice(D3D10DDI_HDEVICE hDevice)   // IN
    pipe->set_sampler_views(pipe, MESA_SHADER_GEOMETRY, 0,
                            PIPE_MAX_SHADER_SAMPLER_VIEWS, 0, sampler_views);
 
+#ifdef D3D10_UMD_HARDWARE
+   HRESULT released = RuntimeDeviceDestroyContext(pDevice);
+   if (FAILED(released)) SetError(hDevice, released);
+#endif
    pipe->destroy(pipe);
+   D3D10Trace(D3D10_TRACE_DESTROY_DEVICE_END, S_OK, 0, 0);
 }
 
 
@@ -427,9 +478,14 @@ Flush(D3D10DDI_HDEVICE hDevice)  // IN
 {
    LOG_ENTRYPOINT();
 
+#ifdef D3D10_UMD_HARDWARE
+   HRESULT hr = RuntimeDeviceFinish(CastDevice(hDevice));
+   if (FAILED(hr)) SetError(hDevice, hr);
+#else
    struct pipe_context *pipe = CastPipeContext(hDevice);
 
    pipe->flush(pipe, NULL, 0);
+#endif
 }
 
 
@@ -449,7 +505,7 @@ CheckFormatSupport(D3D10DDI_HDEVICE hDevice, // IN
                    DXGI_FORMAT Format,       // IN
                    __out UINT *pFormatCaps)  // OUT
 {
-   //LOG_ENTRYPOINT();
+   D3D10Trace(D3D10_TRACE_FORMAT_BEGIN, S_OK, Format, 0);
 
    struct pipe_context *pipe = CastPipeContext(hDevice);
    struct pipe_screen *screen = pipe->screen;
@@ -459,6 +515,7 @@ CheckFormatSupport(D3D10DDI_HDEVICE hDevice, // IN
    enum pipe_format format = FormatTranslate(Format, false);
    if (format == PIPE_FORMAT_NONE) {
       *pFormatCaps = D3D10_DDI_FORMAT_SUPPORT_NOT_SUPPORTED;
+      D3D10Trace(D3D10_TRACE_FORMAT_END, S_OK, Format, *pFormatCaps);
       return;
    }
 
@@ -467,6 +524,7 @@ CheckFormatSupport(D3D10DDI_HDEVICE hDevice, // IN
        * We only need to support creation.
        * http://msdn.microsoft.com/en-us/library/windows/hardware/ff552818.aspx
        */
+      D3D10Trace(D3D10_TRACE_FORMAT_END, S_OK, Format, *pFormatCaps);
       return;
    }
 
@@ -494,6 +552,7 @@ CheckFormatSupport(D3D10DDI_HDEVICE hDevice, // IN
       }
 #endif
    }
+   D3D10Trace(D3D10_TRACE_FORMAT_END, S_OK, Format, *pFormatCaps);
 }
 
 
@@ -519,6 +578,8 @@ CheckMultisampleQualityLevels(D3D10DDI_HDEVICE hDevice,        // IN
 
    /* XXX: Disable MSAA */
    *pNumQualityLevels = 0;
+   D3D10Trace(D3D10_TRACE_MULTISAMPLE, S_OK, Format,
+              (uint64_t)SampleCount << 32 | *pNumQualityLevels);
 }
 
 

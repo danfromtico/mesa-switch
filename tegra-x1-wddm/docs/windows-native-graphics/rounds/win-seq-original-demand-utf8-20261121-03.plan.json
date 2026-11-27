@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-original-demand-utf8-20261121-03",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "method": "在同一 f6264ee11289 的前三次零应用执行证据和正式 95892 回执上，沿用已签 cb640495 候选，显式 UTF-8 读取探针结果，经同一门验证后至多派发一次原生旧式 SEQUENTIAL，保全同次 DMA 并恢复正式档。",
+  "request_id": "f6264ee11289",
+  "preparation": 4,
+  "question": "明确修正已证实的探针编码读取后，原场景一次执行能否留下首次 Present 返回、窗口/退出/DWM 及同次 DMA 的完整独立日志？",
+  "previous_original_application_executions": 0,
+  "maximum_original_application_executions": 1,
+  "candidate_source": "cb6404953a76f9a50a03ae6c5deea52c2c833097",
+  "candidate_kmd_sha256": "98bd917941d6505436b85ec07d1aaa47d58529a2912a3b8b7bb6cdafae6201f0",
+  "original_application_and_gate_changed": false,
+  "correction": "Five verifier JSON file reads explicitly use UTF8; collection also runs after a failed prelaunch probe.",
+  "observations": [
+    "same boot/capture/LUID/context/queue packet/DMA identity",
+    "scheduler submit, KMD entry/return, GPU completion, Windows retirement retained separately",
+    "first Present call/return, window samples/input/exit and DWM continuity",
+    "raw System planned/unplanned boot evidence; restore Code 0, permanent grant, all eight component hashes and actual loads, Handheld",
+    "independent post-restoration journal readback; no old boot is completed with new evidence"
+  ],
+  "inputs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/gate-v4-utf8-local-proof.json",
+      "sha256": "f627d914771a928f3ddb12faa05a43c7477ff43d73ab8a8d72f8ba0000359a52"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/lease-acceptance.json",
+      "sha256": "c5d6983d5994386a371de52d1f74b5a9e2c84dcc2b196b522471b309799c9497"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/startup3-probe-encoding-readback.json",
+      "sha256": "66a0441c1bf3e92387f881a0675283067418d5bc1e6dc2d025c5651c0817f614"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/utf8-review/review-response.md",
+      "sha256": "e5f95646cf6b65ad4d9658995f04166f21009ba80f9b8853329875326dfe0465"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/utf8-review/review-resolution.md",
+      "sha256": "411037327745f3767708cc3ec53910d69d3dc30e853b1f8988d0dbac40b406d8"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/utf8-review/source-hashes.json",
+      "sha256": "388b6938296aab95354996fdf96dce58fbb9e78b77f3bfd7d1bd6762713f4db3"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup3/formal-power-verified.json",
+      "sha256": "a4977e213100dd80004ba157928247e66d6774ac1dfd7e2ff9973408f66fe613"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/docs/windows-native-graphics/rounds/win-seq-original-demand-once-20261121-02.result.json",
+      "sha256": "4528cf4dc64ab212308e2a2fd9368f0e7d7b4850dbfc85badd2a23e3746ec556"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/docs/acr-noble-f948c259/qualification.json",
+      "sha256": "c0075d940d4f6d34b7eb7e5409ee7c3628bf525c6112e984995279c77f251d28"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/native-27.json",
+      "sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+    }
+  ],
+  "references": [
+    {
+      "title": "DXGKDDI_PRESENT",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_present"
+    },
+    {
+      "title": "Selections in GPU Hardware Queue",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/selections-in-the-gpu-hardware-queue"
+    }
+  ],
+  "registered_utc": "2026-11-22T06:21:45.249809+00:00",
+  "device_executions": 0
+}

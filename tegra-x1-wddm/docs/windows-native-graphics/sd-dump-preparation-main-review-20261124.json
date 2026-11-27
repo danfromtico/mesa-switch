@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-24T01:40:22.493362+00:00",
+  "review_thread": "01a20b2b-9760-7e92-a0e1-19deb1db9a47",
+  "scope": "Independent local source/retained-build/signed-image review of frozen SD0513; no native installation, dispatch, new build, signing or promotion.",
+  "verdict": "local_conditional_source_review_complete; native dump repair not accepted",
+  "source": {
+    "worktree": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/sd-driver-candidate-worktree",
+    "commit": "a041ca8c8ff5347235a2ac57d71c85a19b5e4eb1",
+    "parent": "5345692e4b7ec0d52e80937ae451bb2c52750fe8",
+    "changed_files": 7
+  },
+  "evidence": {
+    "identity_verification": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-preparation-20261124/source-input-identity.json",
+      "sha256": "2bde197fd36a2acb8e823b3a59b1546c99424cacceac87012435d58d99f7c2bd",
+      "bytes": 3242
+    },
+    "loader_instruction_binding": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-preparation-20261124/loader-word-binding.json",
+      "sha256": "9a029adec832f30897ffc11d368b97e955b7f9ca8dae9b407488c904b0dc6c29",
+      "bytes": 3466
+    },
+    "frozen_manifest": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/continuation-01a2094a/SD-corrected-review-freeze-r1/frozen-manifest.json",
+      "sha256": "912dac738bc5e027c4b01cdab75c5ddcd2d3522765af0dee252da1daca2c82b9",
+      "bytes": 17502
+    },
+    "conditional_contracts": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/continuation-01a2094a/SD-corrected-review-freeze-r1/frozen/conditional-contracts.json",
+      "sha256": "fb975367edd9ae13d11a5208b38f5498724dbc0c3d669c4099b3f872d9140ff7",
+      "bytes": 5171
+    },
+    "existing_source_reviews": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/continuation-01a2094a/SD-Gemini-corrected-delta-decision-r1/parsed-review.json",
+        "sha256": "d0c2279fe677f04dfd688ebba90d357462df8a2005e30805f4863c0714451abf",
+        "bytes": 5693
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/continuation-01a2094a/SD-Kimi-independent-source-decision-r1/parsed-review.json",
+        "sha256": "05cac6d708ba8c3583a69eb548851b7012b9fd0bd39c1ce66cb22da16a20f118",
+        "bytes": 7043
+      }
+    ],
+    "public_contracts": {
+      "path": "tegra-x1-wddm/docs/windows-native-graphics/sd-dump-preparation-20261124/public-ddi-contracts.json",
+      "sha256": "1860cf734eb7f52b020ef4b985aaa042b617805230d0352c24a2beddec3ac086",
+      "bytes": 1428
+    }
+  },
+  "manual_checks": [
+    {
+      "id": "SD-SLOT-READY",
+      "source": "drivers/Tegra210Sdhc/src/nvtsdhc.c:1018;1057;1136",
+      "conclusion": "Crash slot validates retained platform resource bounds and READY, borrows the CAR mapping and shared mappings. NV_T214_SDR104 crash branch no longer executes the previous passive-only rejection or CAR map/unmap. Normal-mode branch preserved.",
+      "limit": "This removes the retained conditional source-path gap; no historical execution claim."
+    },
+    {
+      "id": "SD-MAPPING-LIFETIME",
+      "source": "drivers/Tegra210Sdhc/src/t214_dump_resources.h:61;104",
+      "conclusion": "Combined 64-bit reference/READY state, protected preparation/rollback/final release and borrowed high-IRQL consumers match the inspected lifecycle. Failed preparation remains counted for its paired unload. Late high-IRQL preparation does not map or wait on the lock.",
+      "limit": "Retained single-thread model and two deterministic interleavings do not establish actual SMP scheduling or full memory-order behavior."
+    },
+    {
+      "id": "SD-SLOT-CLEANUP",
+      "source": "drivers/Tegra210Sdhc/src/t214_crashdump.h:12;drivers/Tegra210Sdhc/src/t214_sdmmc.h:367",
+      "conclusion": "Crash slot attachment owns no mapping; cleanup clears its borrowed pointers and leaves unmapping to the image unload callback. Error paths before attachment hold no borrowed mapping."
+    },
+    {
+      "id": "SD-PREPARATION-RECEIPT",
+      "source": "drivers/Tegra210Sdhc/src/nvtsdhc.c:685;drivers/Tegra210Sdhc/src/t214_dump_resources.h:96;125",
+      "conclusion": "Registry diagnostics run only after releasing T214DumpLock and at PASSIVE_LEVEL. They record preparation/release state, not a completed SD write. ZwFlushKey return is discarded; durable acceptance therefore needs actual cross-boot readback.",
+      "limit": "Caller APC state, any external caller lock, and original caller reachability remain runtime obligations; not reported as a newly proven defect."
+    },
+    {
+      "id": "SD-LOADER-PAIR",
+      "source": "crashdmp LoadPortDriver RVA0x1cb50/0x1cb60;DumpPreInitialize RVA0x3b38;UnloadPortDriver RVA0x50c8",
+      "conclusion": "Pinned loader bytes support the conditional export lookup, failed-prepare status masking and later paired unload traversal. Four retained disassemblies match404 instruction words in two hashed ARM64 images; existing PDB GUID/DBI-age validation is carried with independently matched file hashes.",
+      "limit": "No native DIA or dynamic caller observation claimed."
+    }
+  ],
+  "verification_summary": {
+    "frozen_files": 42,
+    "source_files_equal_to_git_and_freeze": 25,
+    "private_build_input_hash_verified": true,
+    "signed_package_members": 3,
+    "retained_native_signature_and_catalog_results": 4,
+    "retained_native_signature_result_exits": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "unsigned_signed_sections_and_exports_identical": true,
+    "signature_change_scope": "checksum/security-directory/certificate only",
+    "exports": {
+      "DumpPreInitialize": {
+        "rva": 4096,
+        "section": ".text",
+        "not_paged": true
+      },
+      "DumpUninitialize": {
+        "rva": 5416,
+        "section": ".text",
+        "not_paged": true
+      }
+    },
+    "model_result_reused": {
+      "helper_cases": 12,
+      "integration_PASS_lines": 6,
+      "kind": "CPU-only",
+      "rerun": false
+    },
+    "new_source_findings": []
+  },
+  "remaining_acceptance": [
+    "Executor completed installation/recovery/one-use storage and dump batch, with exact signed SYS/INF/CAT and actual loaded path/hash/boot identities.",
+    "Actual preparation and failing/successful dump path evidence; a registry hook receipt alone is not a completed dump.",
+    "Readable durable classic dump from the authorized request, linked to trigger/bugcheck/boot and independently read back after restart; preserve failures and no-replay boundaries.",
+    "Normal storage behavior and formal restoration or qualified selection receipts. Existing GPU C4 and all accepted other components retain their scoped baselines.",
+    "Historical SEQUENTIAL first-Present root cause and four deferred contracts require their own direct evidence; this source review supplies none."
+  ],
+  "no_new_stage_approval_requested": true,
+  "publications": 0,
+  "source_changes_by_main": 0,
+  "native_actions": 0,
+  "classic_dump_repair_qualified": false,
+  "faults_closed": 0,
+  "historical_first_present_cause_proved": false,
+  "goal_complete": false,
+  "local_original_review": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/sd-0513-local-main-review-20261124/SOURCE_REVIEW.json",
+    "sha256": "73038171e33ce216b9d584e93dc4af01bdf655e55a79da63716cbbee6888a1ec"
+  },
+  "main_did_not_interrupt_or_operate_executor": true,
+  "later_execution_disposition": "tegra-x1-wddm/docs/windows-native-graphics/executor-interruption-main-review-20261124.json",
+  "publication_scope": "Review metadata only. Candidate source, binaries, actual native qualification and baseline selection are not published or changed by this record."
+}

@@ -20,12 +20,17 @@ struct nvk_device_memory {
    struct nvk_image *dedicated_image;
 
    struct nvkmd_mem *mem;
+#ifdef _WIN32
+   HANDLE export_handle;
+   bool export_inherit;
+#endif
 };
 
 VK_DEFINE_NONDISP_HANDLE_CASTS(nvk_device_memory, vk.base, VkDeviceMemory,
                                VK_OBJECT_TYPE_DEVICE_MEMORY)
 
 extern const VkExternalMemoryProperties nvk_opaque_fd_mem_props;
+extern const VkExternalMemoryProperties nvk_opaque_win32_mem_props;
 extern const VkExternalMemoryProperties nvk_dma_buf_mem_props;
 extern const VkExternalMemoryProperties nvk_host_allocation_mem_props;
 

@@ -1,0 +1,448 @@
+{
+  "schema": 1,
+  "reviewer": "Gemini 4 Neon XHigh",
+  "model": "gemini-4-neon-xhigh",
+  "reasoning": "xhigh",
+  "completed_utc": "2026-11-21T12:17:38.891224+00:00",
+  "reviewed_source": {
+    "commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+    "tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
+    "files": 15,
+    "bytes": 446360,
+    "comments": 452,
+    "canonical_locations_sha256": "de550648d07f2be604c9e216e7b2300a933a6c1430ff16b721f9d7a63afd850d"
+  },
+  "catalog_sha256": "5c201dcf40a097a279ba4bca2a58da2c0d93796bdcaa701d55d86c45ba2cd958",
+  "classification": {
+    "已满足": 11,
+    "已违反": 0,
+    "未知": 441
+  },
+  "scopes": {
+    "源码元信息": 124,
+    "WSL专属": 298,
+    "原生可比": 30
+  },
+  "complete_reviewer_packets": 20,
+  "native_response_sha256": [
+    "f6c59ab164dba02cfe7918b9d6f33853148932f8db16e8493a118fd78157c02b",
+    "11b8db2bbfb39a9cc28b0551e2cb2153f888baa7cdde2cad2505209dd693536e",
+    "7e4de7e4bce2de829bd0362f772ceaad05852651de630103bf01eeada5f2a893",
+    "e5c764d7a5fe07ebed6871c7acf76cade3b9aa43deaae00bd31c9955d70141a2",
+    "3b1573701d5ac94847846e26b0fce9fd712b46e94a175c95339714094595b387",
+    "f9a10b01d9583efc46516f95156ce87cc5f12501bb0c81ffbee24d6221e840b8",
+    "19040da8ae18b870fd0164272e0364a2a8b88ad52237807b5287f638987be4ef",
+    "427e18960cbf0551717f05d3cf264e17f44a9c4cfca604896f814e0d699d5395",
+    "1004ee3cfacfbca2dab453a4919fe685a2ee5c68292573c8ea2e6cbab234fd26",
+    "d84b62949b2781427b24ff7df46bea738f191ecbcd3f9feb88c9055f5c53548d",
+    "3363f02dda13edd52e31ac1f166dd308f62d0bbc6cb37f3140d9fbe16b658ce4",
+    "5d7d78a5696b8319a61c182b46caa41d3902c1446e8d537ed0704f513c341f6b",
+    "6fc3867c648208a7eb40f4031dc4040205e29e55786b4b1a757b7b2319021f23",
+    "dce5a5242e333013e9bfe95049fc39d2a10711c66aaf81b5275c6cfde55cb09e",
+    "a273ef3b1fd6da2e80def5d9dc34feb14d919114eb5b650ec5bee3940da6e5ce",
+    "94a70b65461e110834bf08096c9f12b91db8f040e4fba35fa4da2f3b08613e9a",
+    "c32ab4a801be213c3eb647e0c9f7d42dfd394dd8ef49e31d327e04dd93ddfdd9",
+    "6059e3517d7178bc347082ca347c6fd5631a889fa4586f062c250253577b5590",
+    "adba234c9e04b626503f5ded7454c61e86e33341fc6694d85ecec2083c751692",
+    "196d6af8d7bb0d0e2b92cb30afd7896bc450ae3148c37722d9ce65d96370a73f"
+  ],
+  "main_review": {
+    "source_coverage": "All 452 locations match compiler-checked tokens at the frozen Git tree.",
+    "conclusive_findings": "All affirmative native findings are bound to their own actors, conditions, object identities and measured hardware intervals.",
+    "corrected_rows": 11,
+    "recorded_physical_rounds": 36,
+    "waiting_physical_rounds": 0,
+    "unrelated_unobserved_recovery_intervals": 2
+  },
+  "validator": {
+    "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+    "source_tree": "86ecf45ab7912fea6ca45ce178765ff8b1ea9582",
+    "comment_count": 452,
+    "hardware_rounds": 36,
+    "checker_sha256": "1e90e74e7bd258266ec03aeb987092688480b4d3c306aca9bd5268c5241c6176",
+    "source_bytes_verified": true,
+    "all_evidence_hashes_and_fields_verified": true,
+    "negative_cases": [
+      {
+        "case": "missing source comment",
+        "rejected": true,
+        "reason": "Comment inventory coverage differs"
+      },
+      {
+        "case": "duplicate source location",
+        "rejected": true,
+        "reason": "Duplicate or invalid location Kconfig:2:1"
+      },
+      {
+        "case": "changed comment bytes",
+        "rejected": true,
+        "reason": "Kconfig:1:1 source bytes differ"
+      },
+      {
+        "case": "two questions in one trial",
+        "rejected": true,
+        "reason": "pal4-residency-x86-20261121-01 needs one declared source location"
+      },
+      {
+        "case": "WSL-internal claim without native applicability",
+        "rejected": true,
+        "reason": "dxgadapter.c:65:2 lacks evidence for a native verdict"
+      },
+      {
+        "case": "nonexistent hardware evidence pointer",
+        "rejected": true,
+        "reason": "'missing-proof-field'"
+      },
+      {
+        "case": "promotion of an unexplained restart",
+        "rejected": true,
+        "reason": "pal4-texture7-allocation-owner-20261121-01 conclusive verdict requires a measured target"
+      }
+    ]
+  },
+  "existing_publication_regression": {
+    "source": "tegra-x1-wddm/tools/tgd3d-default/tests/test_baseline_publication.py",
+    "source_sha256": "c6a0ccb99fd953c5c19a431270dcea3e3c0d4bbdde2965a4b2aa60026ec42cf2",
+    "checker_sha256": "583d0377d4f210db837010a19bb8b10063ba8effc9de91e130b557b6a2b989f3",
+    "exit_code": 0,
+    "stdout": "PASS blocked selection and push, qualified independent publication, new fault registration and deletion guard"
+  },
+  "interpretation": "The current Windows-only hardware records cannot grade WSL-only state. Unknown findings and interrupted traces retain that status.",
+  "user_deferred_application": "deferred-by-user",
+  "followup_review": {
+    "model": "gemini-4-neon-xhigh",
+    "effort": "xhigh",
+    "prior_catalog_commit": "9ccbc5492c1a2019edaf3cae0d1a7ac38d45110d",
+    "completed_utc": "2026-11-21T12:57:16.750244+00:00",
+    "checked_locations": 452,
+    "changed_rows": 265,
+    "original_prompt_hashes_recomputed": 20,
+    "original_raw_responses_matched": 20,
+    "packet_reviews": [
+      {
+        "packet": "001",
+        "checked": 23,
+        "suggested": 7,
+        "request_sha256": "435963260e279a3da81f51afd3ae555a3ce83502e15ef8c3e50f3330acca4da1",
+        "native_response_sha256": "d62d4035a2accfebf4ec2c2f3efd9eb9e8fcee00ccbce198ac6139a588cc3b85"
+      },
+      {
+        "packet": "002",
+        "checked": 23,
+        "suggested": 22,
+        "request_sha256": "69d37b53018bd021962763c369accc6fa5be4af701e0f7edf11b645748bb4969",
+        "native_response_sha256": "60f913e3c7e143d2a5411f2c75d32331118211e97a131a6be7075a35105c4396"
+      },
+      {
+        "packet": "003",
+        "checked": 23,
+        "suggested": 20,
+        "request_sha256": "e94f80c95c943e16c95ecc9a241b8c179993264217f507632368a477322b7841",
+        "native_response_sha256": "34f5c06f168f3468d8b9eb90dd9bf3c28e0ea5a667d9e4c0060e035cb2a96114"
+      },
+      {
+        "packet": "004",
+        "checked": 23,
+        "suggested": 16,
+        "request_sha256": "e20922e61b7482834860d080012d10b05b7146ec3cc64bf20f6b6516644aeb24",
+        "native_response_sha256": "420356e7499ae6c33e123369e694a5c766b57aa2fa8df458b0d6871e5633363e"
+      },
+      {
+        "packet": "005",
+        "checked": 23,
+        "suggested": 7,
+        "request_sha256": "c21e8000a2660e416f923356cb65aa50d0df8feffd328ab7a10ddc643d632395",
+        "native_response_sha256": "26e86371c2717ae721378b603454c60e0995f586a1a1b6bf7ed2834b2d5b3046"
+      },
+      {
+        "packet": "006",
+        "checked": 23,
+        "suggested": 7,
+        "request_sha256": "d5d95df6e68c2da48812b2d5e8e4a445fe491fd20c26db20ac24355fe4740ec2",
+        "native_response_sha256": "c07055c38b42ba626e9395ceab793503e82429983b2347196573e52fccbfffd5"
+      },
+      {
+        "packet": "007",
+        "checked": 23,
+        "suggested": 4,
+        "request_sha256": "559f6a429206c967a2ccc4dbb3af2321da95ed285d3e33a4ed41300e285c71a1",
+        "native_response_sha256": "f504aa6ae6f39b24890ab3e7e579258ac05d528153ed2fb8a1add5bc3ca708b1"
+      },
+      {
+        "packet": "008",
+        "checked": 23,
+        "suggested": 13,
+        "request_sha256": "a4d9153158abe418ba307e066da08dd3fb3694aa6462276e8c5b96ff456f4e1a",
+        "native_response_sha256": "6cbe84427355e65ef5903d42248e0322d71c71ff2260b0ed808e3e15b13aead9"
+      },
+      {
+        "packet": "009",
+        "checked": 23,
+        "suggested": 12,
+        "request_sha256": "9a879c8362b95195bb6a49bfba54375365f6b914906e97031f2ce921ffbb0c8a",
+        "native_response_sha256": "f538b8893653a1afb8f37ec528257c9ca6cfcd5b768565e27b13101fbeba3808"
+      },
+      {
+        "packet": "010",
+        "checked": 23,
+        "suggested": 4,
+        "request_sha256": "ce980277fdc00cec358e12ae927043825402c7eee99dde6e0753b3aea2d77294",
+        "native_response_sha256": "81dcdb1617af7da67a8b89d8045151a88621c54795e651e45a4b004651866104"
+      },
+      {
+        "packet": "011",
+        "checked": 23,
+        "suggested": 9,
+        "request_sha256": "dba4f99bed2a5d64b5a18100ed7c89f57e578799cd64bb27d2a9ffa6da7f1b97",
+        "native_response_sha256": "6da5c9ad6ff1eea8088ce469ba80073ff061af2f5d319295a4c1264070147eec"
+      },
+      {
+        "packet": "012",
+        "checked": 23,
+        "suggested": 14,
+        "request_sha256": "64aea9352ed9290929f9a448f674cb4483b593735d76d3c8866cd9921acb2cec",
+        "native_response_sha256": "2e06f5c8604b58a0797f298fe7d3f2b4049aa6fcbb9fddc19f968faa7b9768a4"
+      },
+      {
+        "packet": "013",
+        "checked": 23,
+        "suggested": 17,
+        "request_sha256": "9771f42ab009826678dcbfe0d2073b775c41f13ce3abaf918fd7e33b37874312",
+        "native_response_sha256": "aeec609b08447ea0831454a52256c1e293c0a79b6f5b21c2c956eea159cd2aba"
+      },
+      {
+        "packet": "014",
+        "checked": 23,
+        "suggested": 3,
+        "request_sha256": "b0e67e1cd37884de21f7b2918ce9de245cefd570abdf26f259a523fe8db58c2b",
+        "native_response_sha256": "6dc96f49cc140ee9edb495e4badcd372db819dffacac7f96cd24708125bad691"
+      },
+      {
+        "packet": "015",
+        "checked": 23,
+        "suggested": 15,
+        "request_sha256": "41ee1a1f4d1a1489c2b574c4aa6479a93bd560a9b7e6246d746ff8d1836804d6",
+        "native_response_sha256": "cd46c205d9f4f890855d1a2a94fdbec6609d0c44b64c9f76868d9c3e7936908a"
+      },
+      {
+        "packet": "016",
+        "checked": 23,
+        "suggested": 12,
+        "request_sha256": "ef88fd80dbae72dcb4300cb5ed66139778270c2be502632fd796b77980ff793f",
+        "native_response_sha256": "d45141e4d3be285360ecc71beb311e3591ddf778dff17ab3b75a9c2e54fac64c"
+      },
+      {
+        "packet": "017",
+        "checked": 23,
+        "suggested": 23,
+        "request_sha256": "78d8a8dccbd9d6285ebc51cc78847a1418483c6edfe535ffd1b5922da2157efa",
+        "native_response_sha256": "0f0688b9776b679e8e72b5ae1af02039de749b58f23a830078a759b8d9e8103d"
+      },
+      {
+        "packet": "018",
+        "checked": 23,
+        "suggested": 23,
+        "request_sha256": "51f3dfd53c61067d4f853368d981c8ae3d3f99539e7cbcfa53fae274da24ece8",
+        "native_response_sha256": "97d071e2f1d0800633b9055d85a95caf38d51f6f2d894a84d19ef517522d3822"
+      },
+      {
+        "packet": "019",
+        "checked": 23,
+        "suggested": 23,
+        "request_sha256": "073e5e5e8db235a50ef7d3bf0321d863868b764ac7071318f98b82fdd4dd7006",
+        "native_response_sha256": "fe7cbfc09c41e5fb365dab307bdb7d4cb41c9a0c98d6de29631f89e80f60fbbe"
+      },
+      {
+        "packet": "020",
+        "checked": 15,
+        "suggested": 9,
+        "request_sha256": "5fde26bda3081ef6fbd28bbc287db38859c77305e1e6f022c492c884431588a8",
+        "native_response_sha256": "39aac18f5d48f218c75b24beb9fdea0d343538e59d253e4aa322d1c0e69308d7"
+      }
+    ],
+    "allocation_owner_followup": {
+      "contract_id": "dxgkrnl.h:746:2",
+      "round_id": "native-x86-allocation-owner-20261121-01",
+      "request_sha256": "a83a933035d81ef8f8398391944fbb278b6b62f42498404ac415a6b05ba68d23",
+      "native_response_sha256": "308eb372129aa0a780f205addd10347f93af99e99101d3dc3d720192b375d1d7"
+    },
+    "same_boot_kernel_service": {
+      "boot": 91476,
+      "driver_state": "Running",
+      "dwm": [
+        1400
+      ],
+      "service_image": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "dwm_start": "2026-11-21T12:17:38.1187736Z",
+      "utc": "2026-11-21T12:43:23.4298827Z",
+      "kmd_sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "started": true,
+      "service": "tegragpurender",
+      "code": 0
+    },
+    "field_scope_followup": {
+      "contract_ids": [
+        "dxgkrnl.h:677:2",
+        "dxgkrnl.h:752:2",
+        "dxgkrnl.h:755:2",
+        "dxgkrnl.h:746:2"
+      ],
+      "request_sha256": "156142390cb74276b02493ceb3a57aff6e76ccd35bf1becc2431b78de619fb54",
+      "native_response_sha256": "1920795c6f6df8195d6a356613fde309eeef9e29ee2f2c193da2862b0203f495"
+    },
+    "fence_followup": {
+      "model": "gemini-4-neon-xhigh",
+      "effort": "xhigh",
+      "request_sha256": "3dd0de90b70e79cc9c23ae31fb4431a0ff8a51787e348871763817b42fad5b16",
+      "native_response_sha256": "e67ea577920818a38a44a173f3edff05e06424d3cd26d0f31c396b72ae991de1",
+      "physical_input_summary_sha256": "7229f6424dfac706cfe79f8be8fe54a73ca4ebe02d74b6c42c0f3aad4be7bcb8",
+      "comment_verdicts": {
+        "dxgkrnl.h:145:1": "未知",
+        "dxgsyncfile.c:406:2": "未知"
+      },
+      "scope": "The decoded signal gives no observation of the synchronization object creation type, cross-process opening, destruction or release of a waiter.",
+      "initiating_reset_established": false
+    },
+    "prior_pal4_reports": {
+      "PAL4_DEFERRED_PIXEL_COMPILATION_20261121.json": "493ea0644237be824c023c7c55d34a0132dfd461e79d68f7290fce0a04d3df12",
+      "PAL4_DOCUMENTS_STARTUP_20261121.json": "d86869d26e5ecaa7a9acd9b58dc338a0654d4e0bba6366699cacde611f8ac3c0",
+      "PAL4_IMAGE_BIND_BOUNDARY_20261121.json": "37dc1b30aaf8c7636de9ac91cb873119b87efe0351d210d0e61c8854fc81169c",
+      "PAL4_LOAD_CONTROLS_20261118.json": "eacce54a0b60107fd216b7eef8179f2335615c7fde6858a8463a8ba8e19ec560",
+      "PAL4_NATIVE_RESIDENCY_20261121.json": "dec9f7d449caf53eaf6b8516330624cadeb8e8d769e6f3e25210ca5d420cd35e",
+      "PAL4_PREIMAGE_CONTEXT_20261121.json": "93b2bdbdf5d0047436ff8d26af8f99836172beb1826f1d24a33e3bfe0bde5829",
+      "PAL4_SHADER_REPLAY_20261121.json": "b3efe2af4e0dae1493c68422fa3b9de66cf20130defd688bfaaa3e445977c08e",
+      "PAL4_TEXTURE_CHECKPOINT_20261121.json": "585863a96d6c63caeb88b73b140b68291bbd58550c40d9b894d84a9b2cad101b",
+      "PAL4_TEXTURE_CONSTRUCTOR_BOUNDARY_20261121.json": "0e4cc32de50c72da555321b08e4fbb9099c0478c3a22b29178c194eaf52739aa"
+    }
+  },
+  "windows_output_check": {
+    "original_run": "https://github.com/ruje0504-2/mesa-switch-woa/actions/runs/44906444435",
+    "original_error": "UnicodeEncodeError at final status printing under CP1252",
+    "cp1252_summary": "452 comment records, 9 single-question hardware rounds, 3 satisfied, 0 violated, 449 unknown",
+    "historical_range_rechecked": [
+      "9ccbc5492c1a2019edaf3cae0d1a7ac38d45110d",
+      "560635688fbcc77d7d2fe2f1ce5e3ad90b67ac2f"
+    ],
+    "historical_stdout_encoding": "utf-8",
+    "reviewed_files_sha256": {
+      "tegra-x1-wddm/tools/check_dxgkrnl_contracts.py": "1e90e74e7bd258266ec03aeb987092688480b4d3c306aca9bd5268c5241c6176",
+      ".github/workflows/switch-graphics-baseline.yml": "33acf17afada0f27b6a3c1a2062d5135dbf18cc99add95c519862ce4eff44dee"
+    },
+    "reviewer": "gemini-4-neon-xhigh",
+    "effort": "xhigh",
+    "request_sha256": "74ed44f258713357515600b786747fab197ffb4da564cfff8ecea92a654dd679",
+    "native_response_sha256": "1e31fc45eb3f8d5f3ac81a0c51c1fc776bf7b68291919dfa9f21fef684a9bac0",
+    "verdict": "PASS"
+  },
+  "native_27": {
+    "starting_catalog_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+    "initial_status": "未知",
+    "completed_utc": "2026-11-21T13:24:40.486962+00:00",
+    "assessment": "wsl-dxgkrnl-contracts/native-27.json",
+    "assessment_sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350",
+    "classification": {
+      "已满足": 8,
+      "已违反": 0,
+      "未知": 19
+    },
+    "physical_rounds": 27,
+    "verified_boot": 91476,
+    "unexplained_restarts": 0,
+    "handbacks": {
+      "probe-review": {
+        "model": "gemini-4-neon-xhigh",
+        "effort": "xhigh",
+        "request_sha256": "68666082130c51318b3dc8a76a7b88efa65e2f5f16ddfb2c5595319885e34873",
+        "native_response_sha256": "6e023308e31df27cfae624993e0542051e2f12c1e9eaf02281e7b02f6c00ba86",
+        "files_sha256": {
+          "client.c": "87c692edeaaa020ef1aedf081d97a5d44ecca3a03e3f5a77255491c3bf6ee070",
+          "actions.c": "8518b5611849084cdb599f985d025c343e8d4d31d2a1dc1be6d3830ca0f1431d",
+          "collector.c": "4a24d581969af1a93c4cd8a1a61e82287ede88c9c9f61c154f08ad89c4ffcc5c"
+        }
+      },
+      "evidence-review-active": {
+        "model": "gemini-4-neon-xhigh",
+        "effort": "xhigh",
+        "request_sha256": "af3855423c5509cca223c53876c289c99ba133f77a165f600f12d4b268eb103b",
+        "native_response_sha256": "2320a7036ac8bd6d84654e710b6ddf1daf1cb8e025f5804a54e00e4b615f8b53",
+        "contract_ids": [
+          "dxgkrnl.h:145:1",
+          "dxgkrnl.h:197:2",
+          "dxgkrnl.h:199:2",
+          "dxgkrnl.h:231:1",
+          "dxgkrnl.h:615:1",
+          "dxgkrnl.h:684:4",
+          "dxgkrnl.h:723:2",
+          "dxgkrnl.h:759:2",
+          "dxgsyncfile.c:266:2",
+          "dxgsyncfile.c:381:2",
+          "dxgvmbus.c:3651:2",
+          "ioctl.c:1630:4",
+          "ioctl.c:1710:4",
+          "ioctl.c:2581:2"
+        ],
+        "reviewer_wording": {}
+      },
+      "evidence-review-limits": {
+        "model": "gemini-4-neon-xhigh",
+        "effort": "xhigh",
+        "request_sha256": "606771960da6968fd25f35e1f49aaa3ffafab8032197b5caff67b7a1286f439d",
+        "native_response_sha256": "51499d085d15cc66bc9bcce19102a798fa18b9612b2764fb9f1893e01507641b",
+        "contract_ids": [
+          "dxgkrnl.h:218:2",
+          "dxgkrnl.h:256:2",
+          "dxgvmbus.c:825:2",
+          "dxgvmbus.c:889:2",
+          "dxgvmbus.c:896:3",
+          "dxgvmbus.c:900:3",
+          "dxgvmbus.c:3147:2",
+          "dxgvmbus.c:3152:3",
+          "dxgvmbus.c:3156:3",
+          "ioctl.c:2888:2",
+          "ioctl.c:3243:2",
+          "ioctl.c:3302:2",
+          "ioctl.c:3310:2"
+        ],
+        "reviewer_wording": {
+          "dxgkrnl.h:218:2": "维持未知（理由需补正）",
+          "dxgkrnl.h:256:2": "维持未知（理由需补正）",
+          "dxgvmbus.c:825:2": "维持未知（理由需补正）",
+          "dxgvmbus.c:889:2": "维持未知（理由需补正）",
+          "dxgvmbus.c:896:3": "维持未知（理由需补正）",
+          "dxgvmbus.c:900:3": "维持未知（理由需补正）",
+          "dxgvmbus.c:3147:2": "维持未知（理由需补正）",
+          "dxgvmbus.c:3152:3": "维持未知（理由需补正）",
+          "dxgvmbus.c:3156:3": "维持未知（理由需补正）",
+          "ioctl.c:2888:2": "维持未知（理由需补正）",
+          "ioctl.c:3243:2": "维持未知（理由需补正）",
+          "ioctl.c:3302:2": "维持未知（理由需补正）",
+          "ioctl.c:3310:2": "维持未知（理由需补正）"
+        }
+      },
+      "archive-followup": {
+        "model": "gemini-4-neon-xhigh",
+        "effort": "xhigh",
+        "request_sha256": "fd531618bf96589e4379a43ac88bb6e76c7ea3da21b6c1fd70069c270f846c65",
+        "native_response_sha256": "322ae475e2e3c233d1a93f6a87daf92a13c74dfc33a5b7444b4eead358420b4c",
+        "assessment_sha256": "ea0e6515446471735e25c501ba261dad2b64f5a2ad469397d515f07e84e95350"
+      }
+    },
+    "main_review_notes": [
+      "8 项肯定结论均限于原生 Windows 已测对象。按原始 PID、TID、QPC、局部句柄、公开返回值和同层事件逐项核对。13 份跟踪均正常封口，实际大小为 524288 至 720896 字节，事件和缓冲丢失计数均为零。",
+      "源码复核提出的九项问题涵盖采集器过滤与极端错误清理、编译可移植性、日志刷盘和时间锚、导出探测、固定资源格式以及超时和所有权处理。发布判定核对实际接口返回、原始 journal/ETL、结束记录及清理回执。退出码只作为完整性的前提。通用复用时仍须另行处理异常分支。",
+      "27 个父进程和实际启动的子进程均有持久结束记录。跨进程关联用合法传递、实际打开、各进程对应的局部句柄和对象证据；不依赖父进程记录 child_started 的先后时刻。13 个 ETL 文件头均报 19200000 Hz，QPC 同设备同启动配对。",
+      "实际共享资源的公开查询均返回单个分配、16 字节逐分配数据并确实打开；追加轮的两次成功调用返回同一资源及不同分配，按该资源正常销毁。NoSignal 只裁决合法等待专用打开与等待回执。能力依据来自适配器查询，系统导出信息单列，OS 构建来自同一启动读回。",
+      "监控围栏按创建、同一 CPU 映射、事件 30/1069/294、成功等待和读值确认，本轮没有可配对的调度包退役事件。传统全局共享可配对到同一 pSyncObject，仍缺全局表项指向父对象的字段。成员数稳定、写合并页和 STATUS_NOT_IMPLEMENTED 分别保留各自的观测边界。",
+      "14 个能力查询轮次以公开 API 输入输出裁决前置条件。HwSchSupported、HwSchEnabled 和 NativeGpuFenceSupported 均实测为 0。源码中的 HwQueueSupported 入口限制按静态依据记载。能力缺失不产生已违反结论。",
+      "历史绘图线程回调返回 HRESULT，独立 MapGpuVirtualAddress 调用返回 NTSTATUS，Present CALL 标记没有返回语义。三次旧启动的源分配及调用后边界仍未确定。后续诊断与功能控制的数据只绑定到各自启动和组件。"
+    ],
+    "trace_integrity": {
+      "finalized": 13,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "clock_frequency": 19200000,
+      "source_sha256": "98c2da7ae241f0cbb73cba3b497e74aa89fc7da41fb74cce82a32218c4ef5bc7"
+    },
+    "source_review_limit": "第一版通用探针存在收尾和日志完整性风险，已对实际 27 轮回执逐项核过。第二版源码补审中断。Windows 本轮沿用已经封口的实机事实。"
+  }
+}

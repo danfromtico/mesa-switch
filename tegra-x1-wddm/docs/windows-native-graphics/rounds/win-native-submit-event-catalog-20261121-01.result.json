@@ -1,0 +1,661 @@
+{
+  "schema": 1,
+  "round_id": "win-native-submit-event-catalog-20261121-01",
+  "contract_id": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+  "windows_question": "WIN-KMD-SUBMIT-TRACE-AVAILABILITY",
+  "plan_sha256": "0cf3be7931e4fbbfec751bca8d4f7dd7422f4041b2754e23aaaf41dd2ab66bb1",
+  "status": "观测缺口",
+  "finding": "同哈希 Windows dxgkrnl.sys 的主发布者可读 640 份事件模板。启动 91476 的三份健康样本均可见 175/176/177。对同上下文 138354，两路记录到完成中断和队列退役。八份健康与异常 ETL 中均无 185 队列时间戳、262/431 GPU 时钟校准、263 历史缓冲或 450/451 硬件队列进度事件。",
+  "missing_observation": "基线源码返回零位宽的历史缓冲能力，时钟校准与历史格式化均返回不支持。已归档本机能力报告 WDDM 2.6、HwSchSupported=0。SysMm 元数据读取失败，当前结论限于主发布者、现有归档及实载基线源码。仍需同号 KMD 准入与硬件发布回执。",
+  "device_executions": 0,
+  "evidence": {
+    "device": {
+      "boot": 91557,
+      "kernel_hash": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+      "dxgkrnl_hash": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+      "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+      "ac": "Online",
+      "mode": 1,
+      "problem_code": 0,
+      "raw_snapshot_sha256": "f217e28b65656d6c1e2d599a1f4a0c485ea29e67ba7eef11adb427f00cf0912d"
+    },
+    "metadata": {
+      "raw_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/native-submit-event-catalog.raw.json",
+      "sha256": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357",
+      "publisher": "Microsoft-Windows-DxgKrnl",
+      "publisher_guid": "802ec45a-1e99-4b83-9920-87c98277ba9d",
+      "event_count": 640,
+      "provider_names": [
+        "Microsoft-Windows-DxgKrnl",
+        "Microsoft-Windows-DxgKrnl-SysMm"
+      ],
+      "sysmm": [
+        {
+          "detail": "无法检索到有关 Microsoft-Windows-DxgKrnl-SysMm 提供程序的信息。错误: The data is invalid。",
+          "metadata_error": "ProviderMetadataUnavailable,Microsoft.PowerShell.Commands.GetWinEventCommand",
+          "events": [],
+          "name": "Microsoft-Windows-DxgKrnl-SysMm",
+          "hresult": -2146233088
+        }
+      ],
+      "reading_attempts": [
+        {
+          "script_sha256": "da08c50a478299d082acf336b58f1c800ef233ce849dee07bfc9be191e09c780",
+          "outcome": "System32 logman.exe unavailable, SSH transport returned a command result"
+        },
+        {
+          "script_sha256": "faf0e76989f31f2d66b286eab3848938b0373b14d8d0859043cbf7b5bbd793b4",
+          "outcome": "SysMm publisher metadata unavailable"
+        },
+        {
+          "script_sha256": "654475db1eb6169380c44f42e3a92619d56ec292241b6c5c1e2eb6c68c4048d0",
+          "outcome": "read main publisher, preserve individual SysMm error"
+        }
+      ]
+    },
+    "relevant_templates": [
+      {
+        "id": 175,
+        "version": 1,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"hQueuePacketContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PacketType\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"uliSubmissionId\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"ulQueueSubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"pDmaBuffer\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"QuantumStatus\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n</template>\r\n",
+        "opcode": "win:Start",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Base",
+            "hex": "0000000000000001"
+          }
+        ],
+        "task": "DmaPacket"
+      },
+      {
+        "id": 176,
+        "version": 0,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PacketType\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"uliCompletionId\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"ulQueueSubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"bPreempted\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n</template>\r\n",
+        "opcode": "win:Stop",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Base",
+            "hex": "0000000000000001"
+          }
+        ],
+        "task": "DmaPacket"
+      },
+      {
+        "id": 177,
+        "version": 1,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PacketType\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"uliCompletionId\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"ulQueueSubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"InterruptType\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"QuantumStatus\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"FaultedVirtualAddress\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PageFaultFlags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"FaultedProcessHandle\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n</template>\r\n",
+        "opcode": "win:Info",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Base",
+            "hex": "0000000000000001"
+          }
+        ],
+        "task": "DmaPacket"
+      },
+      {
+        "id": 178,
+        "version": 1,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PacketType\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"SubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"DmaBufferSize\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"AllocationListSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"PatchLocationListSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"bPresent\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n  <data name=\"hDmaBuffer\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"pQueuePacket\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"ProgressFenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n</template>\r\n",
+        "opcode": "win:Start",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Base",
+            "hex": "0000000000000001"
+          }
+        ],
+        "task": "QueuePacket"
+      },
+      {
+        "id": 180,
+        "version": 1,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"PacketType\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"SubmitSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"bPreempted\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n  <data name=\"bTimeouted\" inType=\"win:Boolean\" outType=\"xs:boolean\"/>\r\n  <data name=\"pQueuePacket\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n</template>\r\n",
+        "opcode": "win:Stop",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Base",
+            "hex": "0000000000000001"
+          }
+        ],
+        "task": "QueuePacket"
+      },
+      {
+        "id": 185,
+        "version": 0,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"FenceId\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"ProcessorFrequencyInMHz\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"NumberOfTimestamps\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Timestamps\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\" count=\"NumberOfTimestamps\"/>\r\n</template>\r\n",
+        "opcode": "win:Info",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Base",
+            "hex": "0000000000000001"
+          }
+        ],
+        "task": "RecordQueuePacketTimestamps"
+      },
+      {
+        "id": 262,
+        "version": 0,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hAdapter\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"NodeOrdinal\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"EngineOrdinal\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"GpuFrequency\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"GpuClock\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"CpuClock\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n</template>\r\n",
+        "opcode": "win:Info",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Profiler",
+            "hex": "0000000000000002"
+          }
+        ],
+        "task": "CalibrateGpuClockTask"
+      },
+      {
+        "id": 263,
+        "version": 0,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hContext\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"RenderCbSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"DmaSubmissionSequence\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"Precision\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"HistoryBufferSize\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"HistoryBuffer\" inType=\"win:UInt8\" outType=\"xs:unsignedByte\" count=\"HistoryBufferSize\"/>\r\n</template>\r\n",
+        "opcode": "win:Info",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Profiler",
+            "hex": "0000000000000002"
+          }
+        ],
+        "task": "HistoryBuffer"
+      },
+      {
+        "id": 431,
+        "version": 0,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hAdapter\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"NodeOrdinal\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"EngineOrdinal\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"GpuFrequency\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"GpuClock\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"CpuClock\" inType=\"win:UInt64\" outType=\"win:HexInt64\"/>\r\n  <data name=\"Flags\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n</template>\r\n",
+        "opcode": "win:Info",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Profiler",
+            "hex": "0000000000000002"
+          }
+        ],
+        "task": "CalibrateGpuClockTask2"
+      },
+      {
+        "id": 450,
+        "version": 0,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hHwQueue\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"ProgressFenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n  <data name=\"pDmaBuffer\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"ntStatus\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n  <data name=\"NumberOfQueuedPendingFlip\" inType=\"win:UInt32\" outType=\"xs:unsignedInt\"/>\r\n</template>\r\n",
+        "opcode": "win:Info",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Base",
+            "hex": "0000000000000001"
+          }
+        ],
+        "task": "DmaPacket"
+      },
+      {
+        "id": 451,
+        "version": 0,
+        "description": null,
+        "template": "<template xmlns=\"http://schemas.microsoft.com/win/2004/08/events\">\r\n  <data name=\"hHwQueue\" inType=\"win:Pointer\" outType=\"win:HexInt64\"/>\r\n  <data name=\"ProgressFenceValue\" inType=\"win:UInt64\" outType=\"xs:unsignedLong\"/>\r\n</template>\r\n",
+        "opcode": "win:Info",
+        "keywords": [
+          {
+            "name": null,
+            "hex": "4000000000000000"
+          },
+          {
+            "name": "Base",
+            "hex": "0000000000000001"
+          }
+        ],
+        "task": "DmaPacket"
+      }
+    ],
+    "qualified_driver_source": {
+      "const DXGKARG_HISTORYBUFFERPRECISION precision={0}": {
+        "source": "c137ce757b055557cff4b70068e8e2500dd92962",
+        "path": "tegra-x1-wddm/windows/query.c",
+        "sha256": "db7b45113a2b10cf39c019152397756983f7313d7026e0a66e533ad228973050",
+        "line": 119
+      },
+      "static NTSTATUS APIENTRY calibrate_clock": {
+        "source": "c137ce757b055557cff4b70068e8e2500dd92962",
+        "path": "tegra-x1-wddm/windows/render_miniport.c",
+        "sha256": "bc548d8f1e34382d7a7731672a4a788d691abb082da5ab2eb685a9e6a0353e34",
+        "line": 168
+      },
+      "static NTSTATUS APIENTRY format_history": {
+        "source": "c137ce757b055557cff4b70068e8e2500dd92962",
+        "path": "tegra-x1-wddm/windows/render_miniport.c",
+        "sha256": "bc548d8f1e34382d7a7731672a4a788d691abb082da5ab2eb685a9e6a0353e34",
+        "line": 178
+      }
+    },
+    "controls": {
+      "win-present-preallocated-blt-20261121-01": {
+        "archive_sha256": "df24f085aa7006667e9c1a4d168a1ab6c39d14cf06bc39dfbf2ee478e2f33308",
+        "streams": {
+          "display.etl": {
+            "etl_sha256": "828477a87275665be29289e49a3153525aa59004f34301103caa51b4b4814521",
+            "quality": {
+              "damaged": [],
+              "zero_buffers": 0,
+              "lost_events": 0,
+              "lost_buffers": 0,
+              "complete": true
+            },
+            "selected_counts": {
+              "175.1": 1528,
+              "176.0": 1528,
+              "177.1": 1528,
+              "178.1": 1622,
+              "180.1": 3378,
+              "185.0": 0,
+              "262.0": 0,
+              "263.0": 0,
+              "431.0": 0,
+              "450.0": 0,
+              "451.0": 0
+            },
+            "verified_dma_138354": [
+              {
+                "qpc": 204761969604,
+                "pid": 4,
+                "tid": 888,
+                "provider": "kernel",
+                "id": 175,
+                "version": 1,
+                "fields": {
+                  "hContext": 18446611100088564464,
+                  "hQueuePacketContext": 0,
+                  "PacketType": 0,
+                  "uliSubmissionId": 138354,
+                  "ulQueueSubmitSequence": 44472,
+                  "pDmaBuffer": 0,
+                  "QuantumStatus": 3
+                }
+              },
+              {
+                "qpc": 204762097910,
+                "pid": 4,
+                "tid": 884,
+                "provider": "kernel",
+                "id": 177,
+                "version": 1,
+                "fields": {
+                  "hContext": 18446611100088564464,
+                  "PacketType": 0,
+                  "uliCompletionId": 138354,
+                  "ulQueueSubmitSequence": 44472,
+                  "InterruptType": 1,
+                  "QuantumStatus": 3,
+                  "FaultedVirtualAddress": 0,
+                  "PageFaultFlags": 0,
+                  "FaultedProcessHandle": 0
+                }
+              },
+              {
+                "qpc": 204762098429,
+                "pid": 4,
+                "tid": 884,
+                "provider": "kernel",
+                "id": 176,
+                "version": 0,
+                "fields": {
+                  "hContext": 18446611100088564464,
+                  "PacketType": 0,
+                  "uliCompletionId": 138354,
+                  "ulQueueSubmitSequence": 44472,
+                  "bPreempted": 0
+                }
+              },
+              {
+                "qpc": 204762098602,
+                "pid": 4,
+                "tid": 884,
+                "provider": "kernel",
+                "id": 180,
+                "version": 1,
+                "fields": {
+                  "hContext": 18446611100088564464,
+                  "PacketType": 0,
+                  "SubmitSequence": 44472,
+                  "bPreempted": 0,
+                  "bTimeouted": 0,
+                  "pQueuePacket": 18446706169623595808
+                }
+              }
+            ]
+          },
+          "scene/video.etl": {
+            "etl_sha256": "161691a0e9f0fe4d01b199cfbc564467c1c099d572d8f3eb38ce85a247984e90",
+            "quality": {
+              "damaged": [],
+              "zero_buffers": 0,
+              "lost_events": 0,
+              "lost_buffers": 0,
+              "complete": true
+            },
+            "selected_counts": {
+              "175.1": 395,
+              "176.0": 395,
+              "177.1": 395,
+              "178.1": 402,
+              "180.1": 822,
+              "185.0": 0,
+              "262.0": 0,
+              "263.0": 0,
+              "431.0": 0,
+              "450.0": 0,
+              "451.0": 0
+            },
+            "verified_dma_138354": [
+              {
+                "qpc": 204761969616,
+                "pid": 4,
+                "tid": 888,
+                "provider": "kernel",
+                "id": 175,
+                "version": 1,
+                "fields": {
+                  "hContext": 18446611100088564464,
+                  "hQueuePacketContext": 0,
+                  "PacketType": 0,
+                  "uliSubmissionId": 138354,
+                  "ulQueueSubmitSequence": 44472,
+                  "pDmaBuffer": 0,
+                  "QuantumStatus": 3
+                }
+              },
+              {
+                "qpc": 204762097941,
+                "pid": 4,
+                "tid": 884,
+                "provider": "kernel",
+                "id": 177,
+                "version": 1,
+                "fields": {
+                  "hContext": 18446611100088564464,
+                  "PacketType": 0,
+                  "uliCompletionId": 138354,
+                  "ulQueueSubmitSequence": 44472,
+                  "InterruptType": 1,
+                  "QuantumStatus": 3,
+                  "FaultedVirtualAddress": 0,
+                  "PageFaultFlags": 0,
+                  "FaultedProcessHandle": 0
+                }
+              },
+              {
+                "qpc": 204762098441,
+                "pid": 4,
+                "tid": 884,
+                "provider": "kernel",
+                "id": 176,
+                "version": 0,
+                "fields": {
+                  "hContext": 18446611100088564464,
+                  "PacketType": 0,
+                  "uliCompletionId": 138354,
+                  "ulQueueSubmitSequence": 44472,
+                  "bPreempted": 0
+                }
+              },
+              {
+                "qpc": 204762098614,
+                "pid": 4,
+                "tid": 884,
+                "provider": "kernel",
+                "id": 180,
+                "version": 1,
+                "fields": {
+                  "hContext": 18446611100088564464,
+                  "PacketType": 0,
+                  "SubmitSequence": 44472,
+                  "bPreempted": 0,
+                  "bTimeouted": 0,
+                  "pQueuePacket": 18446706169623595808
+                }
+              }
+            ]
+          }
+        }
+      },
+      "win-present-preallocated-cdd-20261121-01": {
+        "archive_sha256": "424c68463a164b7afc967cf8882a0c2af68c8565a568f906ce4ddc8c20e53a02",
+        "streams": {
+          "display.etl": {
+            "etl_sha256": "a9ee5d9fa4368df21d74bd44caaddf1e4b470b5becc054de46e713e1c218243e",
+            "quality": {
+              "damaged": [],
+              "zero_buffers": 0,
+              "lost_events": 0,
+              "lost_buffers": 0,
+              "complete": true
+            },
+            "selected_counts": {
+              "175.1": 1563,
+              "176.0": 1563,
+              "177.1": 1563,
+              "178.1": 1670,
+              "180.1": 3475,
+              "185.0": 0,
+              "262.0": 0,
+              "263.0": 0,
+              "431.0": 0,
+              "450.0": 0,
+              "451.0": 0
+            }
+          },
+          "scene/video.etl": {
+            "etl_sha256": "9470dffb38c2b44d529841772658e358d0bef0db782e3266a63f5a8fb7831f15",
+            "quality": {
+              "damaged": [],
+              "zero_buffers": 0,
+              "lost_events": 0,
+              "lost_buffers": 0,
+              "complete": true
+            },
+            "selected_counts": {
+              "175.1": 372,
+              "176.0": 372,
+              "177.1": 372,
+              "178.1": 401,
+              "180.1": 821,
+              "185.0": 0,
+              "262.0": 0,
+              "263.0": 0,
+              "431.0": 0,
+              "450.0": 0,
+              "451.0": 0
+            }
+          }
+        }
+      },
+      "win-present-focused-20261121-01": {
+        "archive_sha256": "26d9aa874b04112779b8e02c4e27cdeb1239b78b94df10fbae91c5f24c47befd",
+        "streams": {
+          "display.etl": {
+            "etl_sha256": "13b09d8ed69e66a0f795842e841f6029639881467cc4dd524b16b542381217db",
+            "quality": {
+              "damaged": [],
+              "zero_buffers": 0,
+              "lost_events": 0,
+              "lost_buffers": 0,
+              "complete": true
+            },
+            "selected_counts": {
+              "175.1": 1441,
+              "176.0": 1441,
+              "177.1": 1441,
+              "178.1": 1544,
+              "180.1": 3220,
+              "185.0": 0,
+              "262.0": 0,
+              "263.0": 0,
+              "431.0": 0,
+              "450.0": 0,
+              "451.0": 0
+            }
+          },
+          "scene/video.etl": {
+            "etl_sha256": "966da5a186391c749ffe3cce65eb7eeeb87837a95026824b8effa95ef94b52b2",
+            "quality": {
+              "damaged": [],
+              "zero_buffers": 0,
+              "lost_events": 0,
+              "lost_buffers": 0,
+              "complete": true
+            },
+            "selected_counts": {
+              "175.1": 333,
+              "176.0": 333,
+              "177.1": 333,
+              "178.1": 364,
+              "180.1": 750,
+              "185.0": 0,
+              "262.0": 0,
+              "263.0": 0,
+              "431.0": 0,
+              "450.0": 0,
+              "451.0": 0
+            }
+          }
+        }
+      },
+      "win-present-board-only-cdd-20261121-01": {
+        "archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+        "streams": {
+          "display.etl": {
+            "etl_sha256": "b6026077eb2ea0707bfc30118ac5ffca819314ea8b4bb51debdd4434b3fb5fb8",
+            "quality": {
+              "damaged": [],
+              "zero_buffers": 0,
+              "lost_events": 0,
+              "lost_buffers": 0,
+              "complete": false
+            },
+            "selected_counts": {
+              "175.1": 960,
+              "176.0": 959,
+              "177.1": 959,
+              "178.1": 1044,
+              "180.1": 2161,
+              "185.0": 0,
+              "262.0": 0,
+              "263.0": 0,
+              "431.0": 0,
+              "450.0": 0,
+              "451.0": 0
+            }
+          },
+          "scene/video.etl": {
+            "etl_sha256": "6ec11c2e135e3204048b85be09fc7e8b519465cc8b39fba51cdf3ec0fe9c5596",
+            "quality": {
+              "damaged": [],
+              "zero_buffers": 0,
+              "lost_events": 0,
+              "lost_buffers": 0,
+              "complete": false
+            },
+            "selected_counts": {
+              "175.1": 388,
+              "176.0": 386,
+              "177.1": 386,
+              "178.1": 403,
+              "180.1": 819,
+              "185.0": 0,
+              "262.0": 0,
+              "263.0": 0,
+              "431.0": 0,
+              "450.0": 0,
+              "451.0": 0
+            }
+          }
+        }
+      }
+    },
+    "sdk_history_buffer": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_history_buffer",
+    "native_hardware_queue_caps": {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-hardware-queue-20261121-01.result.json",
+      "sha256": "f241979df03d5fa93d9a8b42b13a3b4d9bd5d17accea096b8ff4637da829d1a3"
+    },
+    "boundaries": {
+      "last_entry": {
+        "qpc": 204761969616,
+        "pid": 4,
+        "tid": 888,
+        "provider": "kernel",
+        "id": 175,
+        "version": 1,
+        "fields": {
+          "hContext": 18446611100088564464,
+          "hQueuePacketContext": 0,
+          "PacketType": 0,
+          "uliSubmissionId": 138354,
+          "ulQueueSubmitSequence": 44472,
+          "pDmaBuffer": 0,
+          "QuantumStatus": 3
+        }
+      },
+      "last_return": {
+        "qpc": 204762098614,
+        "pid": 4,
+        "tid": 884,
+        "provider": "kernel",
+        "id": 180,
+        "version": 1,
+        "fields": {
+          "hContext": 18446611100088564464,
+          "PacketType": 0,
+          "SubmitSequence": 44472,
+          "bPreempted": 0,
+          "bTimeouted": 0,
+          "pQueuePacket": 18446706169623595808
+        }
+      },
+      "first_anomaly_or_missing": "健康样本可验证 Windows 同号 DMA 完成。没有与目标上下文提交号匹配的独立 KMD 准入或硬件起始事件。"
+    }
+  }
+}

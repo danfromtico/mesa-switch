@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "scope": "Independent review of the successor exclusive-lease acceptance, preservation and cleanup of already-consumed predecessor diagnostic controls.",
+  "verdict": "accepted_for_preservation_cleanup_and_formal_baseline_identity_only",
+  "archive": {
+    "sha256": "2d7fd75667e18d2c31bfb969d8a8e0c9bf1fb0af7bcb5833b41c7b21d4dde1e8",
+    "bytes": 270305,
+    "members": 69,
+    "originals": 68,
+    "full_member_sha256_size_crc_verified": true
+  },
+  "executor": "01a204e6-bb5e-7a63-b829-4718f86cbd1e",
+  "source_delivery_sha256": "8376e72cc0d1fc034df8cb7832f2e531c1355b8d0ebb0286812db6b6018c2399",
+  "lease": {
+    "before_owner": "01a202a1-7c8c-70c1-8363-52cc06d2708b",
+    "after_owner": "01a204e6-bb5e-7a63-b829-4718f86cbd1e",
+    "both_locks": true,
+    "known_prior_local_jobs": 0,
+    "matching_native_processes": 0,
+    "owned_task": "Ready",
+    "owned_service": "Stopped",
+    "queried_owned_ETW_session_absent": true,
+    "accepted_utc": "2026-11-22T20:23:10.458013+00:00",
+    "before_after_snapshots_and_receipt_bound": true
+  },
+  "original_preservation": {
+    "observed_members": 9,
+    "transported_members": 9,
+    "persisted_members": 9,
+    "all_top_level": true,
+    "native_path_length_sha256_matches_base64_and_local_bytes": true,
+    "members": [
+      {
+        "name": "consumed.json",
+        "bytes": 288,
+        "sha256": "6c4a91a463391fcd6f20b5dc7c16ab2e753d8e2b38335518604446b6631e4ccd"
+      },
+      {
+        "name": "control.json",
+        "bytes": 291,
+        "sha256": "05237dd37ac9c9a6d7bc2cef1dd91ac2b8341e84708351e2a77084e314cd736d"
+      },
+      {
+        "name": "queued.json",
+        "bytes": 250,
+        "sha256": "89d833c1f4b58a00b30173359405c6be8210268ac77335ef6a6e0ac3615dc686"
+      },
+      {
+        "name": "returned.json",
+        "bytes": 308,
+        "sha256": "43cb50709717317a53dadcece160c69493dc45ade3e06f64ac3bef7cbda87216"
+      },
+      {
+        "name": "Run-Control.ps1",
+        "bytes": 3844,
+        "sha256": "8fce4d2b46a418397c3ecd93a89d6166e392f923997651296362c00cf155bccc"
+      },
+      {
+        "name": "staged.json",
+        "bytes": 535,
+        "sha256": "207729bb3c3836d2fd9b2d6f3543a3886817641f3996b608097d5a6ff0bcee4b"
+      },
+      {
+        "name": "switch-dump-control.sys",
+        "bytes": 6168,
+        "sha256": "43a918ab011087bc299b2125144a391c325cd315db73a1387f461092522b3994"
+      },
+      {
+        "name": "trace-closed.json",
+        "bytes": 406,
+        "sha256": "af6dc34f80130c7b222ac907728b9ba7dcf0e2fc60cbfc2534b1d5f976973d57"
+      },
+      {
+        "name": "trace-prepared.json",
+        "bytes": 154,
+        "sha256": "86a20bd8e752ef2461c19146de769ccd876011540feb2f298eb9e04a454f0ba0"
+      }
+    ],
+    "collection_transport_exit": 0,
+    "no_deferred_dump_members": true
+  },
+  "diagnostic_failure_boundary": {
+    "boot": 97176,
+    "system_interval_anchor_record": 97257,
+    "system_events": [
+      {
+        "record": 97259,
+        "event_id": 7000,
+        "provider": "Service Control Manager",
+        "utc": "2026-11-22T19:58:23.1054794Z",
+        "data": {
+          "param1": "SwitchExplicitDumpControl",
+          "param2": "%%487"
+        }
+      },
+      {
+        "record": 97258,
+        "event_id": 7045,
+        "provider": "Service Control Manager",
+        "utc": "2026-11-22T19:57:24.4566917Z",
+        "data": {
+          "ServiceName": "SwitchExplicitDumpControl",
+          "ImagePath": "\\??\\C:\\Program Files\\SwitchWOA-ExplicitDumpControl-01a202a1\\switch-dump-control.sys",
+          "ServiceType": "内核模式驱动程序",
+          "StartType": "按需启动",
+          "AccountName": null
+        }
+      },
+      {
+        "record": 97257,
+        "event_id": 7000,
+        "provider": "Service Control Manager",
+        "utc": "2026-11-22T19:41:31.8296854Z",
+        "data": {
+          "param1": "SwitchExplicitDumpControl",
+          "param2": "%%487"
+        }
+      }
+    ],
+    "SCM_error": 487,
+    "SCM_error_domain": "Win32 service start result, not an observed NT loader return or bugcheck code",
+    "current_retained_driver_sha256": "43a918ab011087bc299b2125144a391c325cd315db73a1387f461092522b3994",
+    "current_consumed_utc": "2026-11-22T19:58:22.9174161Z",
+    "current_returned_utc": "2026-11-22T19:58:23.1368249Z",
+    "record97257_precedes_retained_staging": true,
+    "record97257_bound_to_current_driver_bytes": false,
+    "record97259_matches_retained_consumed_returned_interval": true,
+    "NT_bugcheck_arrival": "unknown",
+    "specific_loader_failure_layer": "unknown",
+    "control_replayed_by_successor": false,
+    "new_gpu_dispatches_by_successor": 0,
+    "new_crash_requests_by_successor": 0,
+    "new_boots_observed": 0,
+    "new_dump_members": 0,
+    "qualified_dump_control": false
+  },
+  "event_evidence": {
+    "raw_xml_records_parsed": 42,
+    "parse_failures": 0,
+    "system": 3,
+    "application": 7,
+    "kernel_dump_history": 32,
+    "kernel_dump_history_boot_filtered": false,
+    "limits": {
+      "kernel_dump": 32,
+      "system": 2000,
+      "application": 500
+    },
+    "new_boot_tdr_or_abnormal_shutdown_in_collected_system_interval": false,
+    "historical_kernel_dump_events_are_not_all_assigned_to_boot97176": true
+  },
+  "cleanup": {
+    "reviewed_source_sha256": "3add4a33f799bfd31fa61b05e7a44db3fe955447b511f8f9368520c87f06259d",
+    "expanded_operation_sha256": "ec6acd5599402cbbbc8f41239d6f81660f777d4326a068f15b2ef4992690f37d",
+    "only_template_expansion": "nine observed names and hashes",
+    "predecessor_review_freeze_hash_verified": true,
+    "transport_exit": 0,
+    "root_task_service_autologger_removal_inline_readback": true,
+    "cleanup_utc": "2026-11-22T20:27:07.4718667Z",
+    "later_independent_profile_checks": "components, loaded paths, tasks, processes, boot and desktop identity; not a second complete root/service/autologger absence scan"
+  },
+  "formal_baseline": {
+    "utc": "2026-11-22T20:27:48.2574777Z",
+    "boot": 97176,
+    "boot_after": 97176,
+    "code": 0,
+    "ac": "Online",
+    "mode": 1,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f",
+    "trial": false,
+    "trial_token_exists": false,
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "actual_loads": {
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    },
+    "actual_load_paths": {
+      "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_nvk_arm64.dll"
+    },
+    "dwm_pid": 1400,
+    "dwm_start": "2026-11-22T17:39:58.7912556Z",
+    "same_dwm_as_acceptance": true,
+    "component_changes": 0,
+    "policy_changes": false
+  },
+  "independent_review": {
+    "model": "gemini-4-neon-high",
+    "conversation": "1e0948b0-62fe-46e3-b510-1b4361f7673e",
+    "native_init_result_and_exit_verified": true,
+    "r1": "changes_required",
+    "r1_findings": 5,
+    "r2": "approve",
+    "r2_findings": 0,
+    "resolution": "Existing primary receipts, raw events and nine preserved originals supplied without modifying historical scripts or re-executing device work.",
+    "historical_controller_limitations": [
+      "Acceptance session query names one owned ETW session; final profile names three historical sessions, not all system ETW sessions.",
+      "32 Kernel-Dump events are unfiltered history; no boot attribution or new disable event is inferred.",
+      "Record97257 precedes this retained control staging; record97259 is consistent with the current consumed/returned window. This batch alone does not bind record97257 to the later driver bytes.",
+      "Cleanup absence is directly checked by the executed cleanup script. The subsequent profile independently checks baseline, tasks and processes but does not separately repeat all root/service/autologger absence checks."
+    ]
+  },
+  "scope_not_proven": [
+    "Readable crash dump capture, dump initialization or storage-write chain",
+    "Actual OS TDR invocation, same-reset scheduler fence reconciliation or CollectDbgInfo payload",
+    "Any new same-DMA submit/KMD entry-return/GPU-completion/Windows-retirement evidence",
+    "Historical legacy first Present,91476/DWM152586 or95090 root cause",
+    "Present1 or NVK candidate native acceptance",
+    "New evidence satisfying any of the four470e1dbc deferred contracts"
+  ],
+  "historical_faults_remain_open": true
+}

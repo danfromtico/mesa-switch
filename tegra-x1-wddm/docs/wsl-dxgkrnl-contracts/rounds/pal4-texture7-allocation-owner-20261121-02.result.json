@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "round_id": "pal4-texture7-allocation-owner-20261121-02",
+  "contract_id": "dxgkrnl.h:746:2",
+  "declaration_sha256": "164f91975f5fefb81b141399908289b16178335f57e60b8ccb86685a7bcbcbae",
+  "board_issuance_sha256": "6a396426350177b18a3efcf82b96f04afc250424191b3284bd0c3d28597702aa",
+  "status": "未知",
+  "target_hit": false,
+  "unexplained_restart": true,
+  "started_utc": "2026-11-21T11:47:51.2913647Z",
+  "before": {
+    "utc": "2026-11-21T11:47:51.2913647Z",
+    "boot": 91083,
+    "dwm": 1224,
+    "dwm_start": "2026-11-21T11:44:33.4388848Z",
+    "session": 1,
+    "ac": "Online",
+    "code": 0,
+    "mode": 1
+  },
+  "after": {
+    "boot": 91251,
+    "dwm": 1368,
+    "dwm_start": null,
+    "ac": "Online",
+    "code": 0,
+    "mode": null
+  },
+  "observation": {
+    "actor": "仙剑四原 x86 进程",
+    "game_pid": 3564,
+    "native_renderer": true,
+    "renderer_log": [
+      "info:  Found device: NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)"
+    ],
+    "renderer_log_sha256": "31bf8038084954ca8cd2ae84de00ee2348de83a1550980be30f5f0b2d7b5b15a",
+    "observed_modules": {},
+    "verified_app_and_icd": false,
+    "target_interval_complete": false,
+    "target_markers": [
+      {
+        "qpc": 5285170610,
+        "tid": 4560,
+        "site": "Texture.w512.h512.levels0.usage00000400.format00000016.pool1.shared0",
+        "ordinal": 7,
+        "edge": "enter",
+        "value": 0
+      },
+      {
+        "qpc": 5285215805,
+        "tid": 4560,
+        "site": "Texture7.construct",
+        "ordinal": 7,
+        "edge": "enter",
+        "value": 0
+      }
+    ],
+    "next_observed_api": null,
+    "game_event_counts": {
+      "33": 17,
+      "36": 17
+    },
+    "target_allocations": [],
+    "unmatched": [],
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": false
+    },
+    "last_retained_trace_qpc": 5273902446,
+    "open_interval_same_thread_prefix_counts": {},
+    "etl_sha256": "47f8bb23d1d9a3819f389ec341798dc7faa4650adbe1e5e6b127769ed7737206",
+    "journal_sha256": "8193e9286cfac1411c45fb47a47125fdd757c80f7a3a6ed54ac64f70477975c2",
+    "journal_parsed_prefix_bytes": 754,
+    "journal_issue_count": 0,
+    "trace_stop": {},
+    "intentional_process_stop": null,
+    "process_exit": null,
+    "stop_reason": null,
+    "fixture_error": null
+  },
+  "actual_original_application_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+  "api_observer": {
+    "bytes": 7744536,
+    "unsigned": "40dd6bec9803bf734cf4f8b1b6d1f049658034684a56e82d787e244e6f2bf4ca",
+    "sha256": "034e0d5d60bce42228af37f34b642529d7de1adc6d77f0f6cb278a79f7c44b94",
+    "stock_source": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+    "patch_sha256": "0a5fcf6d168c035f67c0e1e443df5d6bc8031f2b097a53afba8161dee8f8f75c",
+    "prior_journal_patch_sha256": "ae70210d45adabcc3f8d2215113ce28b7377bcc2108cfe197c34bd58f736b316"
+  },
+  "trace_filter": {
+    "bytes": 65048,
+    "unsigned": "549fd3782242404708320e006532c337716e2cbbde7e23f709cd142499f0433a",
+    "sha256": "7551fad4bc2784f7e8177a6675abcaaa4c9bb45a23d815464b154a451ef8fa8c",
+    "source_sha256": "eb88e730dc143d12cc30fe8b6d8d11e9ee3974c438a593d61dad20bab0f9c246"
+  },
+  "gpu_baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "selected_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "loaded_desktop_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "post_baseline_verified": true,
+  "post_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "post_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "previous_game_coverage": [
+    {
+      "case": "pal4-game-cpuboot-12",
+      "pid": 7320,
+      "complete": true,
+      "same_owner_allocation_events": 16,
+      "distinct_devices": 1,
+      "distinct_adapters": 1,
+      "classes": [
+        {
+          "device": true,
+          "resource": false,
+          "thunk_resource": false,
+          "shared_resource": false,
+          "allocation": true,
+          "count": 16
+        }
+      ]
+    },
+    {
+      "case": "pal4-game-memory-10",
+      "pid": 4644,
+      "complete": false,
+      "same_owner_allocation_events": 16,
+      "distinct_devices": 1,
+      "distinct_adapters": 1,
+      "classes": [
+        {
+          "device": true,
+          "resource": false,
+          "thunk_resource": false,
+          "shared_resource": false,
+          "allocation": true,
+          "count": 16
+        }
+      ]
+    },
+    {
+      "case": "pal4-game-emclow-11",
+      "pid": 4292,
+      "complete": false,
+      "same_owner_allocation_events": 17,
+      "distinct_devices": 1,
+      "distinct_adapters": 1,
+      "classes": [
+        {
+          "device": true,
+          "resource": false,
+          "thunk_resource": false,
+          "shared_resource": false,
+          "allocation": true,
+          "count": 17
+        }
+      ]
+    },
+    {
+      "case": "pal4-game-cpuboot-nolog-14",
+      "pid": 2336,
+      "complete": false,
+      "same_owner_allocation_events": 16,
+      "distinct_devices": 1,
+      "distinct_adapters": 1,
+      "classes": [
+        {
+          "device": true,
+          "resource": false,
+          "thunk_resource": false,
+          "shared_resource": false,
+          "allocation": true,
+          "count": 16
+        }
+      ]
+    },
+    {
+      "case": "pal4-game-cpuboot-nocache-15",
+      "pid": 7024,
+      "complete": false,
+      "same_owner_allocation_events": 17,
+      "distinct_devices": 1,
+      "distinct_adapters": 1,
+      "classes": [
+        {
+          "device": true,
+          "resource": false,
+          "thunk_resource": false,
+          "shared_resource": false,
+          "allocation": true,
+          "count": 17
+        }
+      ]
+    }
+  ],
+  "case_scope": "窗口模式。解码保留 Windows 公开 ETW 中的设备与资源关联，并用本轮匿名标识记录。应用对象创建可复用已有 VidMm 分配。本次短观察不会验收菜单、游戏正常退出或 WSL 来宾内存结构。",
+  "recovered_original_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+  "cleanup": {
+    "original": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "removed": true,
+    "files": 18
+  },
+  "system_events_after": [
+    {
+      "id": 41,
+      "record": 91269,
+      "utc": "2026-11-21T11:51:08.8778542Z",
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "fields": {
+        "BugcheckCode": "0",
+        "SleepInProgress": "0",
+        "PowerButtonTimestamp": "0",
+        "BugcheckInfoFromEFI": "false",
+        "LongPowerButtonPressDetected": "false"
+      }
+    },
+    {
+      "id": 6008,
+      "record": 91260,
+      "utc": "2026-11-21T11:53:18.5805697Z",
+      "provider": "EventLog",
+      "fields": {}
+    }
+  ],
+  "chronology": "本次开启与下一次启动按 System Event 12 的 RecordId 关联。单次启动内的数据按 QPC 配对。设备重启时的 RTC 校时可改变事件的墙钟时间。"
+}

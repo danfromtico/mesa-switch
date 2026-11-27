@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "round_id": "win-original-kmd-telemetry-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "owner": "历史应用、Windows 内核及早期复位记录",
+  "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+  "method": "核对原次已实载 KMD 的恢复记录与启动状态归属",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+  "observations": [
+    "将原三个故障归档的 KMD 签名全哈希对应到已有签名包、未签名产物与冻结的 90 个 ARM64 对象。核实驱动自己的 ETW 恢复、执行、复位及显示事件格式，以及其文件/注册表写入的用途。",
+    "重新解码六个原始 ETL 中所有 miniport 记录，包括工作线程或 DWM 引起的操作。分别记录版本、来源、状态、LUID、上下文、围栏或提交和相对 CALL 时间。缺少同一图形对象关联时保留缺口。",
+    "使用原次与恢复次实际驱动注册表快照、Code 0/43 和启动记录，区分启动许可结果与运行时恢复或 GPU 故障。仅在同次留存的故障或重置回执指向本次提交时缩小原次复位边界。"
+  ],
+  "inputs": {
+    "signed_kmd_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "signed_package": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dxvk-games-01a1ec52/step4-reset-evidence/window-copy-geometry/package-stage/package/tegragpurender.sys",
+    "unsigned_kmd_sha256": "4a50643e66f1ed08557fbf114e65c2db808f38ad1b466e058306f4ad3eab6473",
+    "git_reference": "1a5cfb8a89734b345238d37851f40eeb0eb20d0f",
+    "object_manifest_sha256": "eea9eb85d66d70d8b3dec854496a9ae0679b9bcfb3a947dfb1e83f63c70fd5f8",
+    "archive_snapshot_sha256": "03abe3d2b6206c1c9e33ba201a24fab8f97a223923e1a038f18f2fa59e8bb8f3",
+    "archives": {
+      "Ddi20Case-261120-122121366257": {
+        "boot": 82058,
+        "next_boot": 82128,
+        "pid": 1812,
+        "tid": 6340,
+        "call_qpc": 13070969930,
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/step4-reset-evidence/process-ddi20-device-reason/cases/Ddi20Case-261120-122121366257/result.zip",
+        "sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "streams": {
+          "scene": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71",
+          "miniport": "448d78b1d7806769b77d9bc745c65b7cf07e038e1451f8f7fcec2ab1f28bf7df"
+        }
+      },
+      "Ddi20Case-261120-122937785753": {
+        "boot": 82221,
+        "next_boot": 82289,
+        "pid": 4672,
+        "tid": 4712,
+        "call_qpc": 2352403757,
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/step4-reset-evidence/process-ddi20-device-reason/cases/Ddi20Case-261120-122937785753/result.zip",
+        "sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "streams": {
+          "scene": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc",
+          "miniport": "ae2b064bc83935332746787fdd42cbc661ed4291020ff93a10e167f254bc4fa0"
+        }
+      },
+      "Ddi20Case-261120-123625091734": {
+        "boot": 82382,
+        "next_boot": 82448,
+        "pid": 5828,
+        "tid": 7656,
+        "call_qpc": 2361927374,
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/step4-reset-evidence/process-ddi20-device-reason/cases/Ddi20Case-261120-123625091734/result.zip",
+        "sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "streams": {
+          "scene": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d",
+          "miniport": "6457ad2897be7679e1a140cb12b6c51f93167ad6a31f6cca2b2a006fd0b65cf6"
+        }
+      }
+    },
+    "historical": {
+      "path": "legacy-sequential-step4/historical-first-present-fence.json",
+      "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+    },
+    "bytes_audit": {
+      "path": "windows-native-graphics/rounds/win-original-etl-bytes-20261121-01.result.json",
+      "sha256": "fd673ef012dd88a31dd110d9354efd0ddfc02ff0fc775873aa884fd429cc53ce"
+    },
+    "previous_recovery": {
+      "path": "windows-native-graphics/rounds/win-historical-reset-20261121-01.result.json",
+      "sha256": "f25542749cb21e1a6664ce81ea494d3cba9b50161ca943dcb888c405f1ed2059"
+    }
+  }
+}

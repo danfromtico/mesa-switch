@@ -1,0 +1,395 @@
+{
+  "fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "channel": "System",
+  "captured_system_record_range": [
+    82056,
+    82540
+  ],
+  "contiguous_system_records": 485,
+  "anchors_sha256": "0ff136795a64850982727a0eca9b2ffe63a954a28955574998106afb9ad82468",
+  "system_archive_sha256": "54dae7251acf46fa1e4b6d3857d8e66ead4774fe0fed0205779173c9cd66e5a7",
+  "cases": [
+    {
+      "case": "Ddi20Case-261120-122121366257",
+      "system_boot_record": 82058,
+      "last_system_record_before_next_boot": {
+        "record": 82127,
+        "utc": "2026-11-20T12:12:19.6390767Z",
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 1,
+        "level": 4,
+        "data": {
+          "NewTime": "2026-11-20T12:12:19.6381912Z",
+          "OldTime": "2026-11-20T12:12:19.6324691Z",
+          "TimeDeltaInMs": "5",
+          "Reason": "1",
+          "ProcessName": "\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe",
+          "ProcessID": "1252",
+          "CmosTime": "2026-11-20T20:12:19.6381912Z",
+          "TimeZoneBias": "-480",
+          "RealTimeIsUniversal": "false",
+          "SystemInCmosMode": "false"
+        }
+      },
+      "last_durable_client_operation": {
+        "operation": "First Present(1,0) call marker",
+        "pid": 1812,
+        "tid": 6340,
+        "qpc": 13070969930,
+        "utc": "2026-11-20T12:21:39.794670Z",
+        "journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+        "return": null,
+        "exit_code": null
+      },
+      "scene_etw": {
+        "qpc_frequency": 19200000,
+        "last_ms_relative_to_call_per_provider": {
+          "windows_graphics/application": -264.515,
+          "windows_graphics/other": -18.181,
+          "tgd3d/application": -259.932,
+          "miniport/other": -47.083,
+          "tgd3d/other": -18.303
+        },
+        "finalized": false,
+        "after_call_counts": {},
+        "sha256": "b57c6f24a1796749e7b4f59b368fc227840d44f6369035516c06c8be560f5b71"
+      },
+      "next_system_boot_record": 82128,
+      "next_boot_clock_utc": "2026-11-20T12:11:24.9309986Z",
+      "apparent_next_boot_minus_call_ms": -614863.672,
+      "next_boot_6008_record": 82129,
+      "next_boot_41_record": 82146,
+      "bugcheck": 0,
+      "power_button_timestamp": "0",
+      "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878"
+    },
+    {
+      "case": "Ddi20Case-261120-122937785753",
+      "system_boot_record": 82221,
+      "last_system_record_before_next_boot": {
+        "record": 82288,
+        "utc": "2026-11-20T12:29:13.1525709Z",
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 1,
+        "level": 4,
+        "data": {
+          "NewTime": "2026-11-20T12:29:13.1521131Z",
+          "OldTime": "2026-11-20T12:29:13.1434258Z",
+          "TimeDeltaInMs": "8",
+          "Reason": "1",
+          "ProcessName": "\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe",
+          "ProcessID": "4844",
+          "CmosTime": "2026-11-20T20:29:13.1521131Z",
+          "TimeZoneBias": "-480",
+          "RealTimeIsUniversal": "false",
+          "SystemInCmosMode": "false"
+        }
+      },
+      "last_durable_client_operation": {
+        "operation": "First Present(1,0) call marker",
+        "pid": 4672,
+        "tid": 4712,
+        "qpc": 2352403757,
+        "utc": "2026-11-20T12:30:01.225776Z",
+        "journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+        "return": null,
+        "exit_code": null
+      },
+      "scene_etw": {
+        "qpc_frequency": 19200000,
+        "last_ms_relative_to_call_per_provider": {
+          "windows_graphics/application": -127.05,
+          "windows_graphics/other": -27.066,
+          "tgd3d/application": -280.935,
+          "miniport/other": -94.704,
+          "tgd3d/other": -23.846
+        },
+        "finalized": false,
+        "after_call_counts": {},
+        "sha256": "07bd1e9340c37e136687827cec1dae2854c2392f670deaf2047bea0bb1a08bdc"
+      },
+      "next_system_boot_record": 82289,
+      "next_boot_clock_utc": "2026-11-20T12:29:13.9012973Z",
+      "apparent_next_boot_minus_call_ms": -47324.479,
+      "next_boot_6008_record": 82298,
+      "next_boot_41_record": 82307,
+      "bugcheck": 0,
+      "power_button_timestamp": "0",
+      "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8"
+    },
+    {
+      "case": "Ddi20Case-261120-123625091734",
+      "system_boot_record": 82382,
+      "last_system_record_before_next_boot": {
+        "record": 82447,
+        "utc": "2026-11-20T12:36:00.7313020Z",
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 1,
+        "level": 4,
+        "data": {
+          "NewTime": "2026-11-20T12:36:00.7308499Z",
+          "OldTime": "2026-11-20T12:36:00.7299308Z",
+          "TimeDeltaInMs": "0",
+          "Reason": "1",
+          "ProcessName": "\\Device\\HarddiskVolume1\\Windows\\System32\\svchost.exe",
+          "ProcessID": "5164",
+          "CmosTime": "2026-11-20T20:36:00.7308499Z",
+          "TimeZoneBias": "-480",
+          "RealTimeIsUniversal": "false",
+          "SystemInCmosMode": "false"
+        }
+      },
+      "last_durable_client_operation": {
+        "operation": "First Present(1,0) call marker",
+        "pid": 5828,
+        "tid": 7656,
+        "qpc": 2361927374,
+        "utc": "2026-11-20T12:36:48.259890Z",
+        "journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+        "return": null,
+        "exit_code": null
+      },
+      "scene_etw": {
+        "qpc_frequency": 19200000,
+        "last_ms_relative_to_call_per_provider": {
+          "windows_graphics/application": -403.414,
+          "windows_graphics/other": -25.203,
+          "tgd3d/application": -307.695,
+          "tgd3d/other": -22.624,
+          "miniport/other": -84.342
+        },
+        "finalized": false,
+        "after_call_counts": {},
+        "sha256": "38621207f614a4af5d22baedf94e239afd9ddf04c5e3a724579324941ae7e37d"
+      },
+      "next_system_boot_record": 82448,
+      "next_boot_clock_utc": "2026-11-20T12:35:51.3583074Z",
+      "apparent_next_boot_minus_call_ms": -56901.583,
+      "next_boot_6008_record": 82457,
+      "next_boot_41_record": 82466,
+      "bugcheck": 0,
+      "power_button_timestamp": "0",
+      "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65"
+    }
+  ],
+  "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+  "historical_kmd": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+  "retained_operational_channels": {
+    "collection_boot": 87084,
+    "xml_utc_window": [
+      "2026-11-20T12:08:52.5832410Z",
+      "2026-11-20T12:44:07.2949840Z"
+    ],
+    "archive_sha256": "8337342051c611441191056d7ee5d743df37fc67fd03e747c208318ada736e11",
+    "queries": [
+      {
+        "channel": "Application",
+        "result": "no_temporal_matches",
+        "matching_records": []
+      },
+      {
+        "channel": "Microsoft-Windows-Kernel-WHEA/Operational",
+        "result": "read",
+        "matching_records": [
+          3784,
+          3785,
+          3786,
+          3787,
+          3788,
+          3789,
+          3790,
+          3791,
+          3792,
+          3793,
+          3794,
+          3795,
+          3796,
+          3797,
+          3798,
+          3799,
+          3800,
+          3801,
+          3802,
+          3803,
+          3804,
+          3805,
+          3806,
+          3807,
+          3808,
+          3809,
+          3810,
+          3811
+        ]
+      },
+      {
+        "channel": "Microsoft-Windows-Kernel-WHEA/Errors",
+        "result": "empty",
+        "matching_records": []
+      },
+      {
+        "channel": "Microsoft-Windows-WerKernel/Operational",
+        "result": "read",
+        "matching_records": [
+          1099,
+          1100,
+          1101
+        ]
+      },
+      {
+        "channel": "Microsoft-Windows-WER-PayloadHealth/Operational",
+        "result": "no_temporal_matches",
+        "matching_records": []
+      },
+      {
+        "channel": "Microsoft-Windows-WER-Diag/Operational",
+        "result": "no_temporal_matches",
+        "matching_records": []
+      },
+      {
+        "channel": "Microsoft-Windows-Kernel-Boot/Operational",
+        "result": "read",
+        "matching_records": [
+          4734,
+          4735,
+          4736,
+          4737,
+          4738,
+          4739,
+          4740,
+          4741,
+          4742,
+          4743,
+          4744,
+          4745,
+          4746,
+          4747,
+          4748,
+          4749,
+          4750,
+          4751,
+          4752,
+          4753,
+          4754,
+          4755,
+          4756,
+          4757,
+          4758,
+          4759,
+          4760,
+          4761,
+          4762,
+          4763,
+          4764,
+          4765,
+          4766,
+          4767,
+          4768
+        ]
+      },
+      {
+        "channel": "Microsoft-Windows-DxgKrnl-Operational",
+        "result": "empty",
+        "matching_records": []
+      },
+      {
+        "channel": "Microsoft-Windows-DxgKrnl-Admin",
+        "result": "empty",
+        "matching_records": []
+      },
+      {
+        "channel": "Microsoft-Windows-Kernel-Power/Thermal-Operational",
+        "result": "empty",
+        "matching_records": []
+      },
+      {
+        "channel": "Microsoft-Windows-Diagnostics-Performance/Operational",
+        "result": "read",
+        "matching_records": [
+          605,
+          606
+        ]
+      }
+    ],
+    "watchdog_reports": [
+      {
+        "record": 1099,
+        "utc": "2026-11-20T12:22:40.0004840Z",
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "level": 4,
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        }
+      },
+      {
+        "record": 1100,
+        "utc": "2026-11-20T12:30:59.7085519Z",
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "level": 4,
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        }
+      },
+      {
+        "record": 1101,
+        "utc": "2026-11-20T12:38:10.6693320Z",
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "level": 4,
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "2",
+          "GrantedPolicy": "2",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "33"
+        }
+      }
+    ],
+    "matching_wer_folders": [],
+    "dump_request_check": {
+      "source_sha256": "8c916760dbf8d099cfddf6edfee8cf560d53c249607cf3c2df711f1a48c0e163",
+      "collection_boot": 87084,
+      "queried_locations": [
+        "Windows/MEMORY.DMP",
+        "Windows/Minidump/*.dmp",
+        "Windows/LiveKernelReports/*.dmp",
+        "Windows/LiveKernelReports/WATCHDOG/*.dmp"
+      ],
+      "retained_dumps": 11,
+      "latest_retained_dump_utc": "2026-11-11T18:04:24.9069499Z",
+      "matching_historical_dump_files": 0,
+      "wer_activity_ids": [
+        "",
+        "",
+        ""
+      ],
+      "status_hex": "0xc0000099",
+      "nearby_system_win32k_263": [
+        82154,
+        82183,
+        82315,
+        82344,
+        82474,
+        82503
+      ],
+      "finding": "The WATCHDOG records describe dump requests. No activity ID links them to the original drawing threads. System Win32k event 263 describes pointer-device monitor association. The sampled dump directories contain only older files."
+    }
+  },
+  "interpretation": "应用首次 Present 调用标记是三次各自最后留存的应用操作。System 事件仅按该通道 RecordId 分组。同次启动用 QPC 对齐的图形记录都止于调用标记前。后三次启动均留下异常关闭记录，但无对应 bugcheck 码。WerKernel 的三条 WATCHDOG 报告策略事件缺少与原调用对应的启动或提交标识。历史重启起因待查。",
+  "later_copy_finding": {
+    "boot": 86815,
+    "evidence": "staging-ddi-result-13286e3e.json",
+    "kmd_status": "STATUS_NOT_SUPPORTED",
+    "public_status": "DXGI_STATUS_OCCLUDED",
+    "historical_causality_established": false
+  }
+}

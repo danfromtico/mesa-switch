@@ -1,0 +1,460 @@
+{
+  "schema": 1,
+  "round_id": "win-local-receipt-storage-20261121-01",
+  "contract_id": "WIN-BLT-LOCAL-FLUSH",
+  "windows_question": "WIN-BLT-LOCAL-FLUSH",
+  "plan_sha256": "8653893d11f5a82c335c0ef9bd2a3fd4a9066cf67214be8ae278609a195dc1a5",
+  "status": "观测缺口",
+  "finding": "开机 91476 的同一 NTFS 卷，12 对 148 字节写透样本中，空文件组写入加刷新中位数为 8.130 ms，提前预写并刷新 64 KiB 后为 4.664 ms。预写组 5/12 低于既有 Blt 回调至 DXGI 返回的 4.481 ms，11/12 低于较早 CDD 回调的 6.793 ms。24 份均逐字节回读并核对 SHA-256，本轮卷上样本目录已移除。",
+  "missing_observation": "独立 I/O 测量表明提前预写有机会赶上，但 Blt 时间窗仍无可靠裕量。取得实际图形调用中同一个 CDD 或 Blt 原始载荷的本机写透成功时间、独立 ETL 匹配和公开返回顺序后，才能裁决调用内持久化。",
+  "device_executions": 0,
+  "evidence": {
+    "raw_local_file": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/win-local-receipt-storage-20261121-01.raw.json",
+    "raw_sha256": "d46c95f9c957243a98857f71cf18220acdb960bbdffa75c501c9a4f4311ce300",
+    "board_receipt": {
+      "samples": [
+        {
+          "Pair": 1,
+          "Ordinal": 1,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195303784110,
+          "AfterWrite": 195303857896,
+          "BeforeFlush": 195303857900,
+          "AfterFlush": 195303929402,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "1082dd7bc91f9eee1026694ea02351d97e17225acfbbf63ed6899e7752238bce"
+        },
+        {
+          "Pair": 1,
+          "Ordinal": 2,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195306809284,
+          "AfterWrite": 195306859711,
+          "BeforeFlush": 195306859716,
+          "AfterFlush": 195306882934,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "41f74d2d5661bca7eebd86e01ce963f4fa4922926e731055cc661c41697a2924"
+        },
+        {
+          "Pair": 2,
+          "Ordinal": 1,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195309791822,
+          "AfterWrite": 195309839794,
+          "BeforeFlush": 195309839798,
+          "AfterFlush": 195309863191,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "41f74d2d5661bca7eebd86e01ce963f4fa4922926e731055cc661c41697a2924"
+        },
+        {
+          "Pair": 2,
+          "Ordinal": 2,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195312490695,
+          "AfterWrite": 195312563748,
+          "BeforeFlush": 195312563752,
+          "AfterFlush": 195312640737,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "1f5806ef5778049331c072e8ad0f4576087fe3a6866ae354b478f88cabf89fe4"
+        },
+        {
+          "Pair": 3,
+          "Ordinal": 1,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195315203706,
+          "AfterWrite": 195315281221,
+          "BeforeFlush": 195315281226,
+          "AfterFlush": 195315344333,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "1f5806ef5778049331c072e8ad0f4576087fe3a6866ae354b478f88cabf89fe4"
+        },
+        {
+          "Pair": 3,
+          "Ordinal": 2,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195318208146,
+          "AfterWrite": 195318272421,
+          "BeforeFlush": 195318272431,
+          "AfterFlush": 195318305908,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "645f0e094eb30ea2f3bc89710eedba5023a80ba0fbca5c4637654857a0b48c0d"
+        },
+        {
+          "Pair": 4,
+          "Ordinal": 1,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195321803932,
+          "AfterWrite": 195321893811,
+          "BeforeFlush": 195321893824,
+          "AfterFlush": 195321934303,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "645f0e094eb30ea2f3bc89710eedba5023a80ba0fbca5c4637654857a0b48c0d"
+        },
+        {
+          "Pair": 4,
+          "Ordinal": 2,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195325105291,
+          "AfterWrite": 195325194715,
+          "BeforeFlush": 195325194723,
+          "AfterFlush": 195325269659,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "57dff6fa140f1b3ef148fc935397939c77b13dc0b30ff939bafd8ae87680e611"
+        },
+        {
+          "Pair": 5,
+          "Ordinal": 1,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195327855033,
+          "AfterWrite": 195327951134,
+          "BeforeFlush": 195327951143,
+          "AfterFlush": 195328032635,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "57dff6fa140f1b3ef148fc935397939c77b13dc0b30ff939bafd8ae87680e611"
+        },
+        {
+          "Pair": 5,
+          "Ordinal": 2,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195330804138,
+          "AfterWrite": 195330866085,
+          "BeforeFlush": 195330866094,
+          "AfterFlush": 195330895868,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "81e5fe20ce1a990bed4329320c7de7346469df120f49d5cdf1af7a6b1d8422c3"
+        },
+        {
+          "Pair": 6,
+          "Ordinal": 1,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195334108486,
+          "AfterWrite": 195334152725,
+          "BeforeFlush": 195334152731,
+          "AfterFlush": 195334176160,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "81e5fe20ce1a990bed4329320c7de7346469df120f49d5cdf1af7a6b1d8422c3"
+        },
+        {
+          "Pair": 6,
+          "Ordinal": 2,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195336812199,
+          "AfterWrite": 195336887131,
+          "BeforeFlush": 195336887135,
+          "AfterFlush": 195336951383,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "3a49078805f1cfeee315060f0d194a6c6fe0af4c1b89d499104cb578a4d36995"
+        },
+        {
+          "Pair": 7,
+          "Ordinal": 1,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195339518492,
+          "AfterWrite": 195339599510,
+          "BeforeFlush": 195339599512,
+          "AfterFlush": 195339680641,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "3a49078805f1cfeee315060f0d194a6c6fe0af4c1b89d499104cb578a4d36995"
+        },
+        {
+          "Pair": 7,
+          "Ordinal": 2,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195342517122,
+          "AfterWrite": 195342563490,
+          "BeforeFlush": 195342563493,
+          "AfterFlush": 195342585305,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "384d2672c0f195ef47c29b46daf29d13f431a72b7f67c51bba684db97a6931ec"
+        },
+        {
+          "Pair": 8,
+          "Ordinal": 1,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195345533668,
+          "AfterWrite": 195345636154,
+          "BeforeFlush": 195345636162,
+          "AfterFlush": 195345845431,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "384d2672c0f195ef47c29b46daf29d13f431a72b7f67c51bba684db97a6931ec"
+        },
+        {
+          "Pair": 8,
+          "Ordinal": 2,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195348821505,
+          "AfterWrite": 195348939319,
+          "BeforeFlush": 195348939329,
+          "AfterFlush": 195349022676,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "4417887faa660cba6948dccde4f5b87228bf41854f77bd3cb81e116bba8c46fe"
+        },
+        {
+          "Pair": 9,
+          "Ordinal": 1,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195351541862,
+          "AfterWrite": 195351804821,
+          "BeforeFlush": 195351804832,
+          "AfterFlush": 195351960325,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "4417887faa660cba6948dccde4f5b87228bf41854f77bd3cb81e116bba8c46fe"
+        },
+        {
+          "Pair": 9,
+          "Ordinal": 2,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195355121357,
+          "AfterWrite": 195355196297,
+          "BeforeFlush": 195355196309,
+          "AfterFlush": 195355236589,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "13e9a8b05f78d60a3a8265fa24a085fdb6d87fb872e82d33e50d8f9fff7b245f"
+        },
+        {
+          "Pair": 10,
+          "Ordinal": 1,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195361125235,
+          "AfterWrite": 195361177151,
+          "BeforeFlush": 195361177156,
+          "AfterFlush": 195361203250,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "13e9a8b05f78d60a3a8265fa24a085fdb6d87fb872e82d33e50d8f9fff7b245f"
+        },
+        {
+          "Pair": 10,
+          "Ordinal": 2,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195363824964,
+          "AfterWrite": 195363903463,
+          "BeforeFlush": 195363903467,
+          "AfterFlush": 195363962034,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "d4d8d7db69043f69b8fd2c3bc89d990b512b2d2041c23a087214e8ea3c1fb8db"
+        },
+        {
+          "Pair": 11,
+          "Ordinal": 1,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195366524327,
+          "AfterWrite": 195366591768,
+          "BeforeFlush": 195366591772,
+          "AfterFlush": 195366652453,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "d4d8d7db69043f69b8fd2c3bc89d990b512b2d2041c23a087214e8ea3c1fb8db"
+        },
+        {
+          "Pair": 11,
+          "Ordinal": 2,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195369231259,
+          "AfterWrite": 195369297769,
+          "BeforeFlush": 195369297778,
+          "AfterFlush": 195369340030,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "a8d951aeee509777f12a7a92718a5f9a070dfb32fd41dfc48a5dda5620c03008"
+        },
+        {
+          "Pair": 12,
+          "Ordinal": 1,
+          "Prefilled": true,
+          "Thread": 1040,
+          "BeforeWrite": 195372534093,
+          "AfterWrite": 195372592744,
+          "BeforeFlush": 195372592753,
+          "AfterFlush": 195372621468,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 65536,
+          "ReadbackSha256": "a8d951aeee509777f12a7a92718a5f9a070dfb32fd41dfc48a5dda5620c03008"
+        },
+        {
+          "Pair": 12,
+          "Ordinal": 2,
+          "Prefilled": false,
+          "Thread": 1040,
+          "BeforeWrite": 195375534705,
+          "AfterWrite": 195375630357,
+          "BeforeFlush": 195375630367,
+          "AfterFlush": 195375708192,
+          "Written": 148,
+          "Flushed": true,
+          "Length": 148,
+          "ReadbackSha256": "9225950a58af0dd1d910c2fa2440659ac6d2046dd04f8fc327a9018dae9ea3db"
+        }
+      ],
+      "nonce": "WinPresentStorage-bce3aceaa7064b0c8c9e7a5f006e469a",
+      "pid": 1524,
+      "drive": "C:\\",
+      "architecture": "ARM64",
+      "qpc_high_resolution": true,
+      "utc_start": "2026-11-21T15:06:33.5387010Z",
+      "utc_end": "2026-11-21T15:06:37.8075289Z",
+      "cleaned": true,
+      "qpc_frequency": 19200000,
+      "path": "C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\WinPresentStorage-bce3aceaa7064b0c8c9e7a5f006e469a",
+      "format": "NTFS",
+      "boot": 91476
+    },
+    "snapshots": {
+      "before-local-receipt-storage.json": "50d786da69e08b5c2c576b65ffca9902f3802630b0ed0438835ded1d8d654b77",
+      "after-local-receipt-storage.json": "ebaf28dd9d512f642663512bc291fb9ba04e48bf706ad214790e2d8d4c479034"
+    },
+    "device": {
+      "boot": 91476,
+      "dwm": 1400,
+      "dwm_start": "2026-11-21T12:17:38.1187736Z",
+      "components": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "loaded": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+      "trial": false,
+      "ac": "Online",
+      "mode": 1,
+      "code": 0
+    },
+    "measurements": {
+      "prefilled": {
+        "count": 12,
+        "latencies": {
+          "write_ms": {
+            "min": 2.304,
+            "median": 3.141,
+            "max": 5.338
+          },
+          "flush_ms": {
+            "min": 1.136,
+            "median": 1.523,
+            "max": 10.899
+          },
+          "both_ms": {
+            "min": 3.525,
+            "median": 4.664,
+            "max": 16.238
+          }
+        },
+        "both_under_prior_callback_windows": {
+          "4.481": 5,
+          "4.706": 6,
+          "6.793": 11
+        }
+      },
+      "empty": {
+        "count": 12,
+        "latencies": {
+          "write_ms": {
+            "min": 3.513,
+            "median": 4.154,
+            "max": 13.696
+          },
+          "flush_ms": {
+            "min": 3.05,
+            "median": 3.956,
+            "max": 8.099
+          },
+          "both_ms": {
+            "min": 6.673,
+            "median": 8.13,
+            "max": 21.795
+          }
+        },
+        "both_under_prior_callback_windows": {
+          "4.481": 0,
+          "4.706": 0,
+          "6.793": 1
+        }
+      }
+    },
+    "comparisons": {
+      "4.481": "另一已存档正式轮次的 Blt 166 实际消费至 DXGI 43",
+      "4.706": "既有 Blt 板端写透轮次的写入开始至 DXGI 43",
+      "6.793": "另一已存档正式轮次的 CDD 286 实际消费至 DXGI 43"
+    },
+    "scope": "独立文件探针，未启动图形客户端。API 返回及正常回读的结果不测试突发复位后的介质保留。",
+    "boundaries": {
+      "last_entry": "同一开机和进程线程的同步 148 字节 WriteFile，空文件或已写 64 KiB，时间为 Windows QPC。",
+      "last_return": "24 次 Windows FlushFileBuffers 均成功，数据全量回读后清除了唯一的本轮目录。",
+      "first_anomaly_or_missing": "独立 I/O 测量表明提前预写有机会赶上，但 Blt 时间窗仍无可靠裕量。取得实际图形调用中同一个 CDD 或 Blt 原始载荷的本机写透成功时间、独立 ETL 匹配和公开返回顺序后，才能裁决调用内持久化。"
+    }
+  }
+}

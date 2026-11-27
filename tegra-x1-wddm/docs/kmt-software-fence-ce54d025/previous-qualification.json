@@ -1,0 +1,248 @@
+{
+  "schema": 1,
+  "source_commit": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+  "base_commit": "e9e8a3a3c69379065467f5d86a5d5054e550b9ff",
+  "change_kind": "independent",
+  "changed_paths": [
+    "src/nouveau/vulkan/nvkmd/windows/build_icd.py",
+    "src/vulkan/util/vk_dispatch_table_gen.py",
+    "src/vulkan/util/vk_entrypoints_gen.py"
+  ],
+  "components": {
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+  "compatibility_slot": {
+    "format": "COFF-ARM64EC",
+    "chpe_metadata": "0x180D52F40",
+    "sha256": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590"
+  },
+  "previous_compatibility_sha256": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+  "native_implementation_sha256": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+  "trial": {
+    "selected": "trial",
+    "dwm": 1456,
+    "boot_record": 93748,
+    "inf": "oem30.inf",
+    "loaded": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    },
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "gpu_code": 0,
+    "dwm_start": "2026-11-21T22:00:05.9912509Z",
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "power": "Online",
+    "one_time": true,
+    "utc": "2026-11-21T22:01:41.9700897Z"
+  },
+  "system_log": {
+    "complete": true,
+    "first_record": 93726,
+    "last_record": 93817,
+    "boot_records": [
+      93748
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "kind": "controlled",
+        "explained": true,
+        "boot_record": 93748,
+        "cause": "Scheduled one-time boot after closing the native GPU gate",
+        "system_records": [
+          93731,
+          93747,
+          93748
+        ],
+        "evidence_file": "system-one-time.json",
+        "evidence_sha256": "3a854e111160471578662bdc5b998f586fdb35cad343b34f61ae46ef7586445a"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "candidate-aarch64",
+      "scenario": "system-d3d11-fl11_1-offscreen-triangle-aarch64",
+      "passed": true,
+      "before_boot": 93748,
+      "after_boot": 93748,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "process_abi": "arm64",
+      "hardware_render_verified": true,
+      "loaded_components": {
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+      },
+      "evidence_file": "candidate-aarch64.json",
+      "evidence_sha256": "c3483c93531e5ab81fd32c9c30324dec41f07dd3aeac9a13de291646a13ad573",
+      "baseline_case_sha256": "4b8311eba68bb9771e859f77b7b033c708a844dd2ab751d4c097970808858d99",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Identical client and pixel counts, hardware FL11_1, exit code zero and original DWM on each boot."
+    },
+    {
+      "name": "candidate-x86_64",
+      "scenario": "system-d3d11-fl11_1-offscreen-triangle-x86_64",
+      "passed": true,
+      "before_boot": 93748,
+      "after_boot": 93748,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "process_abi": "x64",
+      "hardware_render_verified": true,
+      "loaded_components": {
+        "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+      },
+      "evidence_file": "candidate-x86_64.json",
+      "evidence_sha256": "7f9e56ac05b45d8b5b6bad561992bdff7468177d047111e9d02fb894f1bc2362",
+      "baseline_case_sha256": "5ed4b5ee2378f55ee36da324c5541512715b2df36f3fc1970ebd0cd35d4f0806",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Identical client and pixel counts, hardware FL11_1, exit code zero and original DWM on each boot."
+    },
+    {
+      "name": "candidate-arm64ec",
+      "scenario": "system-d3d11-fl11_1-offscreen-triangle-arm64ec",
+      "passed": true,
+      "before_boot": 93748,
+      "after_boot": 93748,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "process_abi": "arm64ec",
+      "hardware_render_verified": true,
+      "loaded_components": {
+        "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+      },
+      "evidence_file": "candidate-arm64ec.json",
+      "evidence_sha256": "73e631abc318fbc4ebc2742769b8e6fc0473fa9e7d74f31d1d731f5d6633b277",
+      "baseline_case_sha256": "17df3b75b80959e7b384dbea1f114653c262be19f74a3f33030408c48df77b28",
+      "comparison_result": "no-regression",
+      "comparison_reason": "Identical client and pixel counts, hardware FL11_1, exit code zero and original DWM on each boot."
+    }
+  ],
+  "baseline_cases": [
+    {
+      "name": "baseline-aarch64",
+      "scenario": "system-d3d11-fl11_1-offscreen-triangle-aarch64",
+      "passed": true,
+      "before_boot": 93568,
+      "after_boot": 93568,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "process_abi": "arm64",
+      "hardware_render_verified": true,
+      "loaded_components": {
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+      },
+      "evidence_file": "baseline-aarch64.json",
+      "evidence_sha256": "4b8311eba68bb9771e859f77b7b033c708a844dd2ab751d4c097970808858d99",
+      "source_commit": "e9e8a3a3c69379065467f5d86a5d5054e550b9ff",
+      "components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      }
+    },
+    {
+      "name": "baseline-x86_64",
+      "scenario": "system-d3d11-fl11_1-offscreen-triangle-x86_64",
+      "passed": true,
+      "before_boot": 93568,
+      "after_boot": 93568,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "process_abi": "x64",
+      "hardware_render_verified": true,
+      "loaded_components": {
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+      },
+      "evidence_file": "baseline-x86_64.json",
+      "evidence_sha256": "5ed4b5ee2378f55ee36da324c5541512715b2df36f3fc1970ebd0cd35d4f0806",
+      "source_commit": "e9e8a3a3c69379065467f5d86a5d5054e550b9ff",
+      "components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      }
+    },
+    {
+      "name": "baseline-arm64ec",
+      "scenario": "system-d3d11-fl11_1-offscreen-triangle-arm64ec",
+      "passed": true,
+      "before_boot": 93568,
+      "after_boot": 93568,
+      "output_verified": true,
+      "normal_exit": true,
+      "desktop_available": true,
+      "process_abi": "arm64ec",
+      "hardware_render_verified": true,
+      "loaded_components": {
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+      },
+      "evidence_file": "baseline-arm64ec.json",
+      "evidence_sha256": "17df3b75b80959e7b384dbea1f114653c262be19f74a3f33030408c48df77b28",
+      "source_commit": "e9e8a3a3c69379065467f5d86a5d5054e550b9ff",
+      "components": {
+        "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      }
+    }
+  ]
+}

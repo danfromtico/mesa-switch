@@ -1,0 +1,890 @@
+{
+  "schema": 1,
+  "round_id": "win-board-cdd-post-present-retire-20261121-01",
+  "contract_id": "WIN-POST-PRESENT-RETIRE",
+  "windows_question": "WIN-POST-PRESENT-RETIRE",
+  "plan_sha256": "4cde9f2196677f78f1501254bb5b1acc01703fe03975f13cc59b3e28173ce1e3",
+  "status": "实机通过",
+  "finding": "启动 91476，两路原始 ETL 确认 DWM 1400/2252 的 3892 字节包序号 48648、提交围栏 152558 收到 DMA 完成中断并无抢占、无超时退役，在应用首次 Present 返回后 43.870–43.871 ms。尾部 KMD 通知提交围栏 152584 关联到独立的系统零字节包序号 209489，亦已正常退役。",
+  "missing_observation": "同一 DWM 上下文的较晚 3524 字节包序号 48660 在 +145.342 ms 第三次提交，当前档案未留 DMA 完成或队列退役，也没有能将该包、受监控围栏等待、原窗口实际可见帧与板级复位相连的记录。",
+  "device_executions": 0,
+  "evidence": {
+    "archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+    "origin_boot": 91476,
+    "recovery_boot": 91557,
+    "app_pid": 3376,
+    "app_tid": 3236,
+    "dwm_pid": 1400,
+    "dwm_tid": 2252,
+    "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "clock_hz": 19200000,
+    "public_return_qpc": 223219160141,
+    "kmd_snapshot": {
+      "qpc": 223219940241,
+      "owner_pid": 4,
+      "owner_tid": 888,
+      "source": 1,
+      "source_name": "preempt",
+      "status": 0,
+      "stage": "gpu_fence",
+      "context": 18446706169619967024,
+      "payload_sha256": "f5a97a29bbc5c783b3f9f00b88e9a6f15eaaa547039695d482a4e6b36be6d3b0",
+      "submission_fence": 152558,
+      "last_completed_fence": 152557,
+      "expected": 40184,
+      "observed": 0,
+      "dma_bytes": 3892,
+      "work_flags": 426401,
+      "queue_flags": 281,
+      "queue_failure": 0,
+      "graphics_generation": 1,
+      "channel_stage": 4,
+      "channel_register": 1476472972,
+      "channel_value": 2,
+      "cached_fifo": 0,
+      "cached_mmu": 0,
+      "cached_pbdma": 0,
+      "cached_pbdma1": 0,
+      "cached_mc": 3626053920,
+      "cached_gr": 0,
+      "cached_fecs_error": 0,
+      "cached_fecs_host": 0,
+      "poll_count": 1,
+      "request_dma_bytes": 0,
+      "private_bytes": 0,
+      "umd_private_bytes": 0
+    },
+    "kmd_notify": {
+      "qpc": 223221945396,
+      "owner_pid": 4,
+      "owner_tid": 888,
+      "source": 1,
+      "source_name": "preempt",
+      "status": 0,
+      "stage": "notify",
+      "context": 0,
+      "payload_sha256": "9a76d4b1c0de037b2154c73d3e8ef79458f22b7ed77828e235c636b904b71398",
+      "submission_fence": 152584,
+      "last_completed_fence": 152584,
+      "expected": 0,
+      "observed": 0,
+      "dma_bytes": 0,
+      "work_flags": 28675,
+      "queue_flags": 285,
+      "queue_failure": 0,
+      "graphics_generation": 1,
+      "channel_stage": 7,
+      "channel_register": 8388608,
+      "channel_value": 0,
+      "cached_fifo": 0,
+      "cached_mmu": 0,
+      "cached_pbdma": 0,
+      "cached_pbdma1": 0,
+      "cached_mc": 0,
+      "cached_gr": 0,
+      "cached_fecs_error": 0,
+      "cached_fecs_host": 0,
+      "poll_count": 0,
+      "request_dma_bytes": 0,
+      "private_bytes": 0,
+      "umd_private_bytes": 0
+    },
+    "streams": {
+      "display.etl": {
+        "sha256": "b6026077eb2ea0707bfc30118ac5ffca819314ea8b4bb51debdd4434b3fb5fb8",
+        "m3892": {
+          "submit": {
+            "qpc": 223219926278,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "kernel",
+            "id": 178,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 48648,
+              "DmaBufferSize": 3892,
+              "AllocationListSize": 0,
+              "PatchLocationListSize": 0,
+              "bPresent": 0,
+              "hDmaBuffer": 0,
+              "pQueuePacket": 18446706169623591712,
+              "ProgressFenceValue": 0
+            },
+            "payload_sha256": "31e38c61f94ab09ee2497f40b45104a836d4354cc6a0d1aa15cc1a754a72fe11"
+          },
+          "begin": {
+            "qpc": 223219928683,
+            "pid": 4,
+            "tid": 888,
+            "provider": "kernel",
+            "id": 175,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "hQueuePacketContext": 0,
+              "PacketType": 0,
+              "uliSubmissionId": 152558,
+              "ulQueueSubmitSequence": 48648,
+              "pDmaBuffer": 0,
+              "QuantumStatus": 3
+            },
+            "payload_sha256": "f56b0d83cebe6926a0e6c3a6e9caec90e463c1479e0dce7b09d1ca3078fda8d9"
+          },
+          "interrupt": {
+            "qpc": 223220001293,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 177,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152558,
+              "ulQueueSubmitSequence": 48648,
+              "InterruptType": 1,
+              "QuantumStatus": 3,
+              "FaultedVirtualAddress": 0,
+              "PageFaultFlags": 0,
+              "FaultedProcessHandle": 0
+            },
+            "payload_sha256": "7e55282e394113a1262c63433a41159a5732ff7100f4101f9311187d6d33c27d"
+          },
+          "dma_stop": {
+            "qpc": 223220001969,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152558,
+              "ulQueueSubmitSequence": 48648,
+              "bPreempted": 0
+            },
+            "payload_sha256": "e8528a2fcbbe3ef3e982c11ec3f1a71fce5053973295724b56bcb0eac21d7bd9"
+          },
+          "retire": {
+            "qpc": 223220002451,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 48648,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169623591712
+            },
+            "payload_sha256": "c2f1e0c765bd7769df3dd89ec57f2ed007d29b858502abb704f24a84d9961de4"
+          }
+        },
+        "fence152584": {
+          "submit": {
+            "qpc": 223221839975,
+            "pid": 4,
+            "tid": 892,
+            "provider": "kernel",
+            "id": 178,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 8,
+              "SubmitSequence": 209489,
+              "DmaBufferSize": 0,
+              "AllocationListSize": 0,
+              "PatchLocationListSize": 0,
+              "bPresent": 0,
+              "hDmaBuffer": 18446706169587786096,
+              "pQueuePacket": 18446706169626875104,
+              "ProgressFenceValue": 0
+            },
+            "payload_sha256": "0d9cf9b05be91edffd3c319511f3f18c355f5f47090a8b67533a34274783d7c3"
+          },
+          "begin": {
+            "qpc": 223221937838,
+            "pid": 4,
+            "tid": 888,
+            "provider": "kernel",
+            "id": 175,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "hQueuePacketContext": 18446706169594452800,
+              "PacketType": 1,
+              "uliSubmissionId": 152584,
+              "ulQueueSubmitSequence": 209489,
+              "pDmaBuffer": 18446706169587786096,
+              "QuantumStatus": 3
+            },
+            "payload_sha256": "701277e889d608f82a356c81895c858f1ec39cab29947c3fefed781dd0368841"
+          },
+          "interrupt": {
+            "qpc": 223221942571,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 177,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 1,
+              "uliCompletionId": 152584,
+              "ulQueueSubmitSequence": 209489,
+              "InterruptType": 1,
+              "QuantumStatus": 3,
+              "FaultedVirtualAddress": 0,
+              "PageFaultFlags": 0,
+              "FaultedProcessHandle": 0
+            },
+            "payload_sha256": "4150cac2d62ba6e90cc15a4914196b670c0d92493b5aef8c89c5084892cd6833"
+          },
+          "dma_stop": {
+            "qpc": 223221943014,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 1,
+              "uliCompletionId": 152584,
+              "ulQueueSubmitSequence": 209489,
+              "bPreempted": 0
+            },
+            "payload_sha256": "fe3470ac968b4fc0790430baaf982a6c3962b6eb69d1b58a751f4ce6b2684bcf"
+          },
+          "retire": {
+            "qpc": 223221943110,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 8,
+              "SubmitSequence": 209489,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169626875104
+            },
+            "payload_sha256": "c40a2d7c51203fac9f6d689e55a2919d313f1e58e34b55e3c4b5e388a77ff0b4"
+          }
+        },
+        "m3524": {
+          "submit": {
+            "qpc": 223221835143,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "kernel",
+            "id": 178,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 48660,
+              "DmaBufferSize": 3524,
+              "AllocationListSize": 0,
+              "PatchLocationListSize": 0,
+              "bPresent": 0,
+              "hDmaBuffer": 0,
+              "pQueuePacket": 18446706169623591712,
+              "ProgressFenceValue": 0
+            },
+            "payload_sha256": "f34060641e69ec6af7953919ae7faa44f893a498390feee323e45249196cb895"
+          },
+          "begins": [
+            {
+              "qpc": 223221836507,
+              "pid": 4,
+              "tid": 888,
+              "provider": "kernel",
+              "id": 175,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "hQueuePacketContext": 0,
+                "PacketType": 0,
+                "uliSubmissionId": 152583,
+                "ulQueueSubmitSequence": 48660,
+                "pDmaBuffer": 0,
+                "QuantumStatus": 3
+              },
+              "payload_sha256": "d9698c0461516599af2d8f7d20d6fad495f477c303d4fed68a39ac30a561bae7"
+            },
+            {
+              "qpc": 223221939191,
+              "pid": 4,
+              "tid": 888,
+              "provider": "kernel",
+              "id": 175,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "hQueuePacketContext": 0,
+                "PacketType": 0,
+                "uliSubmissionId": 152585,
+                "ulQueueSubmitSequence": 48660,
+                "pDmaBuffer": 0,
+                "QuantumStatus": 3
+              },
+              "payload_sha256": "41f50564ee1443408eb339ee94ad2d5ef1fce45bb377fe36b9bedbf4f6edc9ef"
+            },
+            {
+              "qpc": 223221950686,
+              "pid": 4,
+              "tid": 888,
+              "provider": "kernel",
+              "id": 175,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "hQueuePacketContext": 0,
+                "PacketType": 0,
+                "uliSubmissionId": 152586,
+                "ulQueueSubmitSequence": 48660,
+                "pDmaBuffer": 0,
+                "QuantumStatus": 3
+              },
+              "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d"
+            }
+          ],
+          "dma_stops": [
+            {
+              "qpc": 223221936870,
+              "pid": 4,
+              "tid": 884,
+              "provider": "kernel",
+              "id": 176,
+              "version": 0,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "PacketType": 0,
+                "uliCompletionId": 152583,
+                "ulQueueSubmitSequence": 48660,
+                "bPreempted": 1
+              },
+              "payload_sha256": "678b0f9d183aabc38c246ec077cf8758435f5ce6100f50c34d0a298c392b6644"
+            },
+            {
+              "qpc": 223221948464,
+              "pid": 4,
+              "tid": 884,
+              "provider": "kernel",
+              "id": 176,
+              "version": 0,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "PacketType": 0,
+                "uliCompletionId": 152585,
+                "ulQueueSubmitSequence": 48660,
+                "bPreempted": 1
+              },
+              "payload_sha256": "2bbc5e7f9e9a6a803576dde5ab6fffd105e8942f180731374dba1b26bdef7fb8"
+            }
+          ],
+          "interrupts": [
+            {
+              "qpc": 223221936262,
+              "pid": 4,
+              "tid": 884,
+              "provider": "kernel",
+              "id": 177,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "PacketType": 0,
+                "uliCompletionId": 152583,
+                "ulQueueSubmitSequence": 48660,
+                "InterruptType": 2,
+                "QuantumStatus": 3,
+                "FaultedVirtualAddress": 0,
+                "PageFaultFlags": 0,
+                "FaultedProcessHandle": 0
+              },
+              "payload_sha256": "6f7312968bcc8343c4b3eea15aa9758d55421651932cbecd3402699fbe1d5346"
+            },
+            {
+              "qpc": 223221947934,
+              "pid": 4,
+              "tid": 884,
+              "provider": "kernel",
+              "id": 177,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "PacketType": 0,
+                "uliCompletionId": 152585,
+                "ulQueueSubmitSequence": 48660,
+                "InterruptType": 2,
+                "QuantumStatus": 3,
+                "FaultedVirtualAddress": 0,
+                "PageFaultFlags": 0,
+                "FaultedProcessHandle": 0
+              },
+              "payload_sha256": "7942dbf682b21eb8274f3086588a28c6a6c56633363600407dc3d25e9a13c778"
+            }
+          ],
+          "retire": null
+        },
+        "elapsed_ms": {
+          "retire_3892": 43.870312,
+          "retire_152584": 144.946302,
+          "last_dwm_resubmit": 145.340885,
+          "last_selected_event": 145.46724
+        },
+        "trace_quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": false
+        }
+      },
+      "scene/video.etl": {
+        "sha256": "6ec11c2e135e3204048b85be09fc7e8b519465cc8b39fba51cdf3ec0fe9c5596",
+        "m3892": {
+          "submit": {
+            "qpc": 223219926309,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "kernel",
+            "id": 178,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 48648,
+              "DmaBufferSize": 3892,
+              "AllocationListSize": 0,
+              "PatchLocationListSize": 0,
+              "bPresent": 0,
+              "hDmaBuffer": 0,
+              "pQueuePacket": 18446706169623591712,
+              "ProgressFenceValue": 0
+            },
+            "payload_sha256": "31e38c61f94ab09ee2497f40b45104a836d4354cc6a0d1aa15cc1a754a72fe11"
+          },
+          "begin": {
+            "qpc": 223219928704,
+            "pid": 4,
+            "tid": 888,
+            "provider": "kernel",
+            "id": 175,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "hQueuePacketContext": 0,
+              "PacketType": 0,
+              "uliSubmissionId": 152558,
+              "ulQueueSubmitSequence": 48648,
+              "pDmaBuffer": 0,
+              "QuantumStatus": 3
+            },
+            "payload_sha256": "f56b0d83cebe6926a0e6c3a6e9caec90e463c1479e0dce7b09d1ca3078fda8d9"
+          },
+          "interrupt": {
+            "qpc": 223220001341,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 177,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152558,
+              "ulQueueSubmitSequence": 48648,
+              "InterruptType": 1,
+              "QuantumStatus": 3,
+              "FaultedVirtualAddress": 0,
+              "PageFaultFlags": 0,
+              "FaultedProcessHandle": 0
+            },
+            "payload_sha256": "7e55282e394113a1262c63433a41159a5732ff7100f4101f9311187d6d33c27d"
+          },
+          "dma_stop": {
+            "qpc": 223220001986,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "uliCompletionId": 152558,
+              "ulQueueSubmitSequence": 48648,
+              "bPreempted": 0
+            },
+            "payload_sha256": "e8528a2fcbbe3ef3e982c11ec3f1a71fce5053973295724b56bcb0eac21d7bd9"
+          },
+          "retire": {
+            "qpc": 223220002472,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 48648,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169623591712
+            },
+            "payload_sha256": "c2f1e0c765bd7769df3dd89ec57f2ed007d29b858502abb704f24a84d9961de4"
+          }
+        },
+        "fence152584": {
+          "submit": {
+            "qpc": 223221839993,
+            "pid": 4,
+            "tid": 892,
+            "provider": "kernel",
+            "id": 178,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 8,
+              "SubmitSequence": 209489,
+              "DmaBufferSize": 0,
+              "AllocationListSize": 0,
+              "PatchLocationListSize": 0,
+              "bPresent": 0,
+              "hDmaBuffer": 18446706169587786096,
+              "pQueuePacket": 18446706169626875104,
+              "ProgressFenceValue": 0
+            },
+            "payload_sha256": "0d9cf9b05be91edffd3c319511f3f18c355f5f47090a8b67533a34274783d7c3"
+          },
+          "begin": {
+            "qpc": 223221937850,
+            "pid": 4,
+            "tid": 888,
+            "provider": "kernel",
+            "id": 175,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "hQueuePacketContext": 18446706169594452800,
+              "PacketType": 1,
+              "uliSubmissionId": 152584,
+              "ulQueueSubmitSequence": 209489,
+              "pDmaBuffer": 18446706169587786096,
+              "QuantumStatus": 3
+            },
+            "payload_sha256": "701277e889d608f82a356c81895c858f1ec39cab29947c3fefed781dd0368841"
+          },
+          "interrupt": {
+            "qpc": 223221942588,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 177,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 1,
+              "uliCompletionId": 152584,
+              "ulQueueSubmitSequence": 209489,
+              "InterruptType": 1,
+              "QuantumStatus": 3,
+              "FaultedVirtualAddress": 0,
+              "PageFaultFlags": 0,
+              "FaultedProcessHandle": 0
+            },
+            "payload_sha256": "4150cac2d62ba6e90cc15a4914196b670c0d92493b5aef8c89c5084892cd6833"
+          },
+          "dma_stop": {
+            "qpc": 223221943025,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 176,
+            "version": 0,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 1,
+              "uliCompletionId": 152584,
+              "ulQueueSubmitSequence": 209489,
+              "bPreempted": 0
+            },
+            "payload_sha256": "fe3470ac968b4fc0790430baaf982a6c3962b6eb69d1b58a751f4ce6b2684bcf"
+          },
+          "retire": {
+            "qpc": 223221943122,
+            "pid": 4,
+            "tid": 884,
+            "provider": "kernel",
+            "id": 180,
+            "version": 1,
+            "fields": {
+              "hContext": 18446706169594452800,
+              "PacketType": 8,
+              "SubmitSequence": 209489,
+              "bPreempted": 0,
+              "bTimeouted": 0,
+              "pQueuePacket": 18446706169626875104
+            },
+            "payload_sha256": "c40a2d7c51203fac9f6d689e55a2919d313f1e58e34b55e3c4b5e388a77ff0b4"
+          }
+        },
+        "m3524": {
+          "submit": {
+            "qpc": 223221835173,
+            "pid": 1400,
+            "tid": 2252,
+            "provider": "kernel",
+            "id": 178,
+            "version": 1,
+            "fields": {
+              "hContext": 18446611100088564464,
+              "PacketType": 0,
+              "SubmitSequence": 48660,
+              "DmaBufferSize": 3524,
+              "AllocationListSize": 0,
+              "PatchLocationListSize": 0,
+              "bPresent": 0,
+              "hDmaBuffer": 0,
+              "pQueuePacket": 18446706169623591712,
+              "ProgressFenceValue": 0
+            },
+            "payload_sha256": "f34060641e69ec6af7953919ae7faa44f893a498390feee323e45249196cb895"
+          },
+          "begins": [
+            {
+              "qpc": 223221836521,
+              "pid": 4,
+              "tid": 888,
+              "provider": "kernel",
+              "id": 175,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "hQueuePacketContext": 0,
+                "PacketType": 0,
+                "uliSubmissionId": 152583,
+                "ulQueueSubmitSequence": 48660,
+                "pDmaBuffer": 0,
+                "QuantumStatus": 3
+              },
+              "payload_sha256": "d9698c0461516599af2d8f7d20d6fad495f477c303d4fed68a39ac30a561bae7"
+            },
+            {
+              "qpc": 223221939204,
+              "pid": 4,
+              "tid": 888,
+              "provider": "kernel",
+              "id": 175,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "hQueuePacketContext": 0,
+                "PacketType": 0,
+                "uliSubmissionId": 152585,
+                "ulQueueSubmitSequence": 48660,
+                "pDmaBuffer": 0,
+                "QuantumStatus": 3
+              },
+              "payload_sha256": "41f50564ee1443408eb339ee94ad2d5ef1fce45bb377fe36b9bedbf4f6edc9ef"
+            },
+            {
+              "qpc": 223221950698,
+              "pid": 4,
+              "tid": 888,
+              "provider": "kernel",
+              "id": 175,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "hQueuePacketContext": 0,
+                "PacketType": 0,
+                "uliSubmissionId": 152586,
+                "ulQueueSubmitSequence": 48660,
+                "pDmaBuffer": 0,
+                "QuantumStatus": 3
+              },
+              "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d"
+            }
+          ],
+          "dma_stops": [
+            {
+              "qpc": 223221936881,
+              "pid": 4,
+              "tid": 884,
+              "provider": "kernel",
+              "id": 176,
+              "version": 0,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "PacketType": 0,
+                "uliCompletionId": 152583,
+                "ulQueueSubmitSequence": 48660,
+                "bPreempted": 1
+              },
+              "payload_sha256": "678b0f9d183aabc38c246ec077cf8758435f5ce6100f50c34d0a298c392b6644"
+            },
+            {
+              "qpc": 223221948475,
+              "pid": 4,
+              "tid": 884,
+              "provider": "kernel",
+              "id": 176,
+              "version": 0,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "PacketType": 0,
+                "uliCompletionId": 152585,
+                "ulQueueSubmitSequence": 48660,
+                "bPreempted": 1
+              },
+              "payload_sha256": "2bbc5e7f9e9a6a803576dde5ab6fffd105e8942f180731374dba1b26bdef7fb8"
+            }
+          ],
+          "interrupts": [
+            {
+              "qpc": 223221936284,
+              "pid": 4,
+              "tid": 884,
+              "provider": "kernel",
+              "id": 177,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "PacketType": 0,
+                "uliCompletionId": 152583,
+                "ulQueueSubmitSequence": 48660,
+                "InterruptType": 2,
+                "QuantumStatus": 3,
+                "FaultedVirtualAddress": 0,
+                "PageFaultFlags": 0,
+                "FaultedProcessHandle": 0
+              },
+              "payload_sha256": "6f7312968bcc8343c4b3eea15aa9758d55421651932cbecd3402699fbe1d5346"
+            },
+            {
+              "qpc": 223221947999,
+              "pid": 4,
+              "tid": 884,
+              "provider": "kernel",
+              "id": 177,
+              "version": 1,
+              "fields": {
+                "hContext": 18446611100088564464,
+                "PacketType": 0,
+                "uliCompletionId": 152585,
+                "ulQueueSubmitSequence": 48660,
+                "InterruptType": 2,
+                "QuantumStatus": 3,
+                "FaultedVirtualAddress": 0,
+                "PageFaultFlags": 0,
+                "FaultedProcessHandle": 0
+              },
+              "payload_sha256": "7942dbf682b21eb8274f3086588a28c6a6c56633363600407dc3d25e9a13c778"
+            }
+          ],
+          "retire": null
+        },
+        "elapsed_ms": {
+          "retire_3892": 43.871406,
+          "retire_152584": 144.946927,
+          "last_dwm_resubmit": 145.34151,
+          "last_selected_event": 154.673906
+        },
+        "trace_quality": {
+          "damaged": [],
+          "zero_buffers": 0,
+          "lost_events": 0,
+          "lost_buffers": 0,
+          "complete": false
+        }
+      }
+    },
+    "local_raw_archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+    },
+    "local_decode": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/analyze_post_present_retire.py",
+      "sha256": "d0b90ca7f7ba2d7410e93158d6c1752d506e1e259580262ad1f95d993700533f",
+      "report_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/post-present-retire-verified.json",
+      "report_sha256": "f6c44f83e94f04b37774156dc4bbf185f7cb76718e87603a3b481ffb0519e0cf"
+    },
+    "boundaries": {
+      "last_entry": {
+        "qpc": 223221950698,
+        "pid": 4,
+        "tid": 888,
+        "provider": "kernel",
+        "id": 175,
+        "version": 1,
+        "fields": {
+          "hContext": 18446611100088564464,
+          "hQueuePacketContext": 0,
+          "PacketType": 0,
+          "uliSubmissionId": 152586,
+          "ulQueueSubmitSequence": 48660,
+          "pDmaBuffer": 0,
+          "QuantumStatus": 3
+        },
+        "payload_sha256": "cff30accdeac82710dc61dd2c5bd8559c008dad50529641e284ce6842a446a7d"
+      },
+      "last_return": {
+        "confirmed_dwm_packet_152558": {
+          "qpc": 223220002472,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446611100088564464,
+            "PacketType": 0,
+            "SubmitSequence": 48648,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169623591712
+          },
+          "payload_sha256": "c2f1e0c765bd7769df3dd89ec57f2ed007d29b858502abb704f24a84d9961de4"
+        },
+        "later_kernel_packet_152584": {
+          "qpc": 223221943122,
+          "pid": 4,
+          "tid": 884,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446706169594452800,
+            "PacketType": 8,
+            "SubmitSequence": 209489,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446706169626875104
+          },
+          "payload_sha256": "c40a2d7c51203fac9f6d689e55a2919d313f1e58e34b55e3c4b5e388a77ff0b4"
+        }
+      },
+      "first_anomaly_or_missing": "DWM 3524 字节包序号 48660 两次抢占后第三次发出提交围栏 152586。两路档案均未留其 DMA 完成或此队列包退役。该缺口本身不能证明卡死、超时或触发复位。"
+    },
+    "device_state": {
+      "new_execution": false,
+      "case_boot": 91476,
+      "recovery_boot": 91557,
+      "recovered_snapshot_sha256": "6c0b0f23e6059f1c0376a1e1a71802b4d0718b8ba1213fa8d735b14b80d4a6e1"
+    },
+    "signals_scope": "DxgKrnl DMA 完成中断和提交围栏核对。应用受监控围栏对象及等待另由 WIN-FENCE-WAIT 跟踪。",
+    "reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkargcb_notify_interrupt_data"
+  }
+}

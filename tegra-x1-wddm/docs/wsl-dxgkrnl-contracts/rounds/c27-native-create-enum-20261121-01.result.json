@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "round_id": "c27-native-create-enum-20261121-01",
+  "contract_id": "ioctl.c:2888:2",
+  "declaration_sha256": "a6ed80d961bf18980c5fee5d5b268ad45245e2e2ecaa6614a80a3740285307ed",
+  "board_issuance_sha256": "69f9bd59ad48341245a85e49fae0205eb73fbf71439cda87a9c30404329f08e5",
+  "chronology": "实机签发文件绑定已在故障表登记的计划哈希。程序 QPC 与 ETW 在同一次启动内比较，系统启动用 Event 12 RecordId 标识。",
+  "started_utc": "2026-11-21T13:22:21.3058151Z",
+  "before": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:22:21.3058151Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "after": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:22:37.1778599Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "status": "未知",
+  "target_hit": false,
+  "unexplained_restart": false,
+  "finding": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+  "gap": "GM20B 的 DRIVERVERSION=2600。WDDM_3_1_CAPS 返回 0x00000000，NativeGpuFenceSupported=0。系统创建/打开原生围栏入口导出分别为 1、1，本基线缺所需原生类型的实际调用回执。",
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 368,
+      "utc": "2026-11-21T13:22:28.4850045Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 75388054794,
+        "pid": 368,
+        "tid": 1528,
+        "event": "start",
+        "mode": "caps"
+      },
+      {
+        "qpc": 75388193322,
+        "pid": 368,
+        "tid": 1528,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 75388274246,
+        "pid": 368,
+        "tid": 1528,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 75388381668,
+        "pid": 368,
+        "tid": 1528,
+        "event": "caps_begin",
+        "adapter": "1073741952"
+      },
+      {
+        "qpc": 75388444169,
+        "pid": 368,
+        "tid": 1528,
+        "event": "caps",
+        "version_status": "00000000",
+        "version": "2600",
+        "mmu_status": "00000000",
+        "gpu_mmu": "1",
+        "io_mmu": "0",
+        "scheduler_status": "00000000",
+        "hw_supported": "0",
+        "hw_enabled": "0",
+        "fence_status": "00000000",
+        "native_fence": "0"
+      },
+      {
+        "qpc": 75388508269,
+        "pid": 368,
+        "tid": 1528,
+        "event": "exports",
+        "native_create": "1",
+        "native_open": "1",
+        "update_property": "1",
+        "hw_queue": "1"
+      },
+      {
+        "qpc": 75388634505,
+        "pid": 368,
+        "tid": 1528,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 75388699655,
+        "pid": 368,
+        "tid": 1528,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": null,
+    "trace_stop": null,
+    "actor_event_counts": {},
+    "devices": [],
+    "allocation_joins": [],
+    "gpu_signal_packets": [],
+    "cpu_sync": [],
+    "sync_identity": []
+  },
+  "raw_files_sha256": {
+    "result.json": "3e88bf094faa5fe58a9efe3507a0e1a98bfdbbb98c0d402a84938780dd78a240",
+    "issued.json": "69f9bd59ad48341245a85e49fae0205eb73fbf71439cda87a9c30404329f08e5",
+    "result.zip": "42ef06f7ab221bbf4631011407a5b4fead88b9da7ec0d6d7de0c668a946fc41b",
+    "journal.tsv": "2d9b5bf115bade5d8169f03eac7339c92a967cb97b4d1771605d3d211792309d",
+    "client.json": "17916d1addb59142009a96b4673791f49eff7d30304ef25677a33b71bb402e6f"
+  },
+  "installed_event_manifest_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_initial_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "evidence_scope": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "涉及原生围栏的创建子类型与共享。按本机能力决定是否能进入这条路径；与已观察到的普通监控围栏 GPU 信号分开。"
+}

@@ -1,0 +1,121 @@
+{
+  "api": "Direct3D 12",
+  "platform": "Switch GM20B, Windows ARM64",
+  "process_architecture": "ARM64",
+  "call": "D3D12CreateDevice with an explicit DXGI adapter, minimum feature level, and an ID3D12Device output.",
+  "system_runtime": "C:\\Windows\\SYSTEM32\\d3d12.dll",
+  "system32_d3d12_runtime_files": [
+    {
+      "name": "d3d12.dll",
+      "version": "10.0.22621.2506 (WinBuild.160101.0800)",
+      "sha": "8DE39701264FD1971CB947AE86271960D2B5478612C9188FB3B36EC8B67188CE"
+    },
+    {
+      "name": "D3D12Core.dll",
+      "version": "10.0.22621.2506 (WinBuild.160101.0800)",
+      "sha": "05C7B19E9A2054A8064FD36BE027E0659F4380A6A42135215BC128979157C86F"
+    },
+    {
+      "name": "d3d10warp.dll",
+      "version": "10.0.22621.2506 (WinBuild.160101.0800)",
+      "sha": "4A5098FDB986C724FDDD940F6336E97BE8F0968AA585AE7064B6C6CDCFE810CE"
+    }
+  ],
+  "native_adapter": {
+    "luid": "000000000008b20e",
+    "vendor": "10de",
+    "chipset": "12e",
+    "sm": "53"
+  },
+  "build": {
+    "bytes": 402440,
+    "unsigned": "31bb7d289568ccea6d0b6b7c7aca0b57bf18dc3aea085b9f18cd8dab220ca316",
+    "sha256": "bc2ec41caf51616b832ebb405cb360db46d5dc98e7fe51d4ec43e088da9d9262",
+    "source_sha256": "394fef03541fde95b258e4fd43f26219cb639b2f00898cb32ee8151b72f09cee"
+  },
+  "driver": {
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "dwm_umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d"
+  },
+  "results": [
+    {
+      "adapter": "tegra",
+      "minimum_feature_level": "11_0",
+      "requested_luid": "000000000008b20e",
+      "dxgi_flags": 0,
+      "hresult": "0x887a0004",
+      "device_created": false,
+      "device_luid": null
+    },
+    {
+      "adapter": "tegra",
+      "minimum_feature_level": "12_0",
+      "requested_luid": "000000000008b20e",
+      "dxgi_flags": 0,
+      "hresult": "0x887a0004",
+      "device_created": false,
+      "device_luid": null
+    },
+    {
+      "adapter": "warp",
+      "minimum_feature_level": "11_0",
+      "requested_luid": "00000000000058cb",
+      "dxgi_flags": 2,
+      "hresult": "0x00000000",
+      "device_created": true,
+      "device_luid": "00000000000058cb"
+    }
+  ],
+  "warp_enumeration_hresult": "0x00000000",
+  "desktop_before": 1388,
+  "desktop_after": [
+    1388
+  ],
+  "trace": {
+    "raw_etl_sha256": "d0b94f3c4c8903790ef5db2d900da3a87b95114c5be746f3c6f98cd637f6f5f3",
+    "events_lost": 0,
+    "buffers_lost": 0,
+    "buffers": 9,
+    "journal": "state.json",
+    "journal_sha256": "25b43dddcc9cf0ec3edf65b3d5aec7a35ffaf7d8506613f75b078ce70603b104",
+    "boot": "2026-11-18T22:30:32.5534620Z",
+    "end": "2026-11-18T22:34:23.2786594Z",
+    "children": {
+      "dx12": {
+        "pid": 3672,
+        "image_loads": 38,
+        "graphics_modules": {
+          "d3d10warp.dll": [
+            "\\Device\\HarddiskVolume1\\Windows\\System32\\d3d10warp.dll"
+          ],
+          "d3d12.dll": [
+            "\\Device\\HarddiskVolume1\\Windows\\System32\\D3D12.dll"
+          ],
+          "d3d12core.dll": [
+            "\\Device\\HarddiskVolume1\\Windows\\System32\\D3D12Core.dll"
+          ],
+          "dxgi.dll": [
+            "\\Device\\HarddiskVolume1\\Windows\\System32\\dxgi.dll"
+          ],
+          "tegragpuno3d.dll": [
+            "\\Device\\HarddiskVolume1\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_5f0ab6e9a95064e5\\tegragpuno3d.dll"
+          ]
+        },
+        "driver_events": []
+      }
+    }
+  },
+  "stdout_sha256": "f312ab2769528e82c80c35b2aa6d0979caf816de7048afb8fd1c3aa5f919ce77",
+  "previous_d3d11_negotiation": {
+    "scope": "Tegra D3D11 BGRA and VIDEO device query",
+    "level": "10_0",
+    "record": "tegra-x1-wddm/docs/BROWSER_H264_AND_D3D_FEATURE_LEVEL_20261118.json"
+  },
+  "microsoft_documentation": [
+    "https://learn.microsoft.com/en-us/windows/win32/direct3d12/hardware-feature-levels",
+    "https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-d3d12createdevice"
+  ],
+  "independent_probe_review": "Pending Gemini review.",
+  "outcome": "The selected Windows driver returned DXGI_ERROR_UNSUPPORTED for the GM20B at FL11_0 and FL12_0. WARP created an FL11_0 D3D12 device with the software adapter LUID.",
+  "source": "tegra-x1-wddm/tools/d3d12_device_probe.cpp"
+}

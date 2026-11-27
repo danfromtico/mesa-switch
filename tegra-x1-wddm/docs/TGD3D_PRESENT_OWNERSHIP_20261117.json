@@ -1,0 +1,176 @@
+{
+  "updated_utc": "2026-11-17T20:19:49.3057649Z",
+  "branch": "tgd3d-vulkan",
+  "integration_parent": "651ca9c295c2355f7f554cfa74671b70aaa1f8a0",
+  "delivery": {
+    "bundle": "presentation-review-batch-v3.zip",
+    "sha256": "1f9d84ed0074413f9d2aa78e28d2df1242c89767012c0b00fc74936f64e725a0",
+    "original_base": "daea9328c1c58d49cafc2d332b8ebb52510806bc",
+    "license": "MIT, the existing Mesa source-file licenses are retained",
+    "patches": [
+      {
+        "patch": "0001-submit-record-before-gpu.patch",
+        "sha256": "6c0d139dfaac6f1b01d02041bb65c302c509f06e790208bab578bcae695e5e76",
+        "source_commit": "51743c0227d813ae931933f38dc95d2afe0ba6f8",
+        "original_stable_patch_id": "08760e427b2f684965c6b1c1398e6b3e61fef5e0",
+        "commit_stable_patch_id": "d28bea8e1c9c37ba18d97e2c56c50a9e83b5429f",
+        "reapplied_tree": "2b14391b5a7f3fc84a147d157d205c710893d58f"
+      },
+      {
+        "patch": "0002-skip-clean-descriptor-scratch.patch",
+        "sha256": "ba91dc976a6cfaf286d078797844f47688b2e1417073b3a10c575ef075c06b78",
+        "source_commit": "8e0db6e444f09e466c42dbaccf8dfd5120536a1c",
+        "original_stable_patch_id": "bd92c7f6190653e789e01820d4694e6eb01ff538",
+        "commit_stable_patch_id": "fd3573e3f57522bb84077f7f7a14417152e7dc65",
+        "reapplied_tree": "15c64ce4d2d9b64b778ed1afc54eda06b94899b3"
+      },
+      {
+        "patch": "0003-reuse-descriptor-update-scratch.patch",
+        "sha256": "8900d6ad047327a548d3497ea6a2bf5c51d8981eaf54479ea45e617dbd5edb62",
+        "source_commit": "ff8fa879cc81a24e62850e9aebed272157bc2004",
+        "original_stable_patch_id": "6b5a6af5cab327060fcafc919f4c951288b837f9",
+        "commit_stable_patch_id": "6b5a6af5cab327060fcafc919f4c951288b837f9",
+        "reapplied_tree": "32ee40ca229abc1d7c85cdf7be684a3a8db8ee83"
+      },
+      {
+        "patch": "0004-preserve-d3d12-fence-removal.patch",
+        "sha256": "ecd4474a602bf4d7278f9a9730424c56a26f6c4fd8793053cc7f3e43bc5c6ed3",
+        "source_commit": "6599df9b39d3cbb7d6cb8fe5a64a9cc2d646167c",
+        "original_stable_patch_id": "08863d4ec088ac7df8fe9d5c27b9f3572375fc89",
+        "commit_stable_patch_id": "8d0163eef431cced5d4d24b635691bebe2c2881e",
+        "reapplied_tree": "09294cadf498e10ad26f3431d9ad7828bb67fab4"
+      },
+      {
+        "patch": "0005-preserve-failed-cleanup-state.patch",
+        "sha256": "cf8641c21bc9bd8e127e850b5d957cf3759394828c4a3d3912643060c097c166",
+        "source_commit": "3ebd7e00a4e922661f0d7fe7fe798c20d52c1f40",
+        "original_stable_patch_id": "fa3954a4467a6d75a5858182144398e315525304",
+        "commit_stable_patch_id": "afe62ac3d8d0085ceaea14a52e1e1e40cd89050e",
+        "reapplied_tree": "62c4bb2534b3588122c9f5994b1fd8d9f21b94f2"
+      }
+    ]
+  },
+  "retained_frontend_marker": {
+    "commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "installed_icd_build_base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+    "installed_build_input_patch_sha256": "5883de905ccbba28a96674dc46f4e803d453a85215c6ab1cb0d90406dd3895c2",
+    "verification": "Both marker hunks have identical added and removed lines to the archived input of the installed ICD."
+  },
+  "candidate": {
+    "source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "source_tree": "78514c308cb9be31182225c062ddf2471d733b29",
+    "build": "Windows ARM64 release, Meson, LLVM-MinGW. KMT bridge built with Windows SDK 10.0.26100.0. Both DLL signatures verified against the project certificate chain.",
+    "dxbc_spirv_tree_sha256": "4d5f053b63972a64863019369c931b7cca23981e57e21d14d18271df27263dfe",
+    "arm64_files": {
+      "TegraGpuD3DVk.dll": {
+        "unsigned": {
+          "bytes": 3331584,
+          "sha256": "8d24e8caa4d2981cb061238b0f0465eefb5543ef53dac29784c322565902be22"
+        },
+        "signed": {
+          "bytes": 3334600,
+          "sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3"
+        }
+      },
+      "libvulkan_nouveau.dll": {
+        "unsigned": {
+          "bytes": 17653760,
+          "sha256": "6d2c1e3f07de0acffaee7d965450f0136c64ee3c9a82be3e201fa3531d701e28"
+        },
+        "signed": {
+          "bytes": 17656776,
+          "sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+        }
+      },
+      "tgd3d-contracts.exe": {
+        "bytes": 3918336,
+        "sha256": "cc5190da71d12aa65f73aef1496a6a46a0f5b6e51cda8f5f302c2e51c9d504a7"
+      },
+      "test-nvk-win32-sync.exe": {
+        "bytes": 2038272,
+        "sha256": "f4c67e2d40fc4eab92fcb6e5d6374dfca663dc93ff67b3477a5071da77676620"
+      },
+      "nvk_windows_icd.json": {
+        "bytes": 128,
+        "sha256": "829706b27380ae3cc24ce89c85683d3c9377816e219d89e2ece8dd0242610bb3"
+      }
+    }
+  },
+  "controls": {
+    "x64_wine": {
+      "tgd3d": 0,
+      "nvk_win32_sync_final": 0
+    },
+    "windows_arm64": {
+      "tgd3d": 0,
+      "nvk_win32_sync": 0,
+      "substituted_callbacks": true
+    },
+    "assertions": [
+      "A submission ownership record exists before queue callbacks. Allocation failure keeps the command and descriptor pools with the device. Publication after queue acceptance performs no allocation.",
+      "Clean descriptor draws and eight repeated dirty updates in each full image, texel and mixed case allocate zero C++ scratch objects after warm-up. GPU descriptor sets remain distinct.",
+      "Explicitly imported D3D12 fences report removal for the monitored sentinel on query and wait. The ordinary direct Vulkan timeline retains its full value range.",
+      "Failed VA free is not replayed for the tracked mapping. Allocation identity stays with a retained import when deallocation fails. Failed create cleanup overrides recoverable OOM. Existing controlled video contracts also pass."
+    ]
+  },
+  "native_wsi": {
+    "scope": "Process-local native Win32 Vulkan on the candidate ICD. The desktop compositor used its installed UMD and ICD throughout.",
+    "application": "Instrumented Vulkan-Tools vkcube, Win32 FIFO, 320 by 240, finite 120 frames. Exclusive direct driver loading and Vulkan 1.1 identity queries were added to the existing timing build.",
+    "app_source_revision": "ec6931a360d89d08f1c7578fa43958fb3829b10a",
+    "app_sha256": "39ad5b3411bf822ffc97a9f532ffdcafec95bf7591a281deca543b210def870f",
+    "app_source_sha256": "a4affd403db5819583e7ed0cd451058b6b7bc5f8b30dd7e7cd72bb1b0da0f648",
+    "started_utc": "2026-11-17T20:15:58.7976848Z",
+    "finished_utc": "2026-11-17T20:16:09.4620152Z",
+    "process_duration_seconds": 8.192206,
+    "first_to_last_present_seconds": 6.353319,
+    "qpc_frequency": 19200000,
+    "gpu": "NVIDIA Tegra X1 (GM20B)",
+    "adapter_luid": "000000000007bc09",
+    "driver_uuid": "e5311976e508f653a02ca90b24b2d31b",
+    "loaded_icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "present_success": 120,
+    "swapchain_success": 1,
+    "exit_code": 0,
+    "interactive_window_handle_observed": true,
+    "physical_screen_rechecked": false,
+    "identity_control": "The first manifest-based launch observed the registered ICD and was stopped. Only the subsequent exclusive launch with a matching driver UUID, KMT LUID and signed module is counted."
+  },
+  "installed_desktop": {
+    "checked_utc": "2026-11-17T20:19:49.3057649Z",
+    "boot_utc": "2026-11-17T19:38:13.0446880Z",
+    "dwm_pid": 1372,
+    "pnp_problem_code": 0,
+    "desktop_pixels": [
+      1280,
+      720
+    ],
+    "installed_combination_record": "NVDEC_D3D11VA_720_20261117.json",
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "kmd_sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+    "umd_source": "0a46a5f5618e45593d54893ce7db88a6beeb8664",
+    "umd_sha256": "3a8ed9ff68b5e59e23c975fcbb20695e4e7c3e79ee9ebf3b2722541109897928",
+    "icd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f-based dirty frozen build; not clean current HEAD",
+    "icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff",
+    "restoration_files_present": true
+  },
+  "disposition": {
+    "source_merged": true,
+    "new_umd_in_dwm_accepted": false,
+    "candidate_pair_installed": false,
+    "ordinary_presentation_and_power_settings_changed": false,
+    "whole_failed_idle_teardown_resolved": false,
+    "load_reboot_root_cause_verified": false,
+    "review": "Integration review in the main chat. No external review performed.",
+    "pending": [
+      "Validate the integrated UMD through the real D3D runtime and ordinary DWM at the next controlled 720p window run. The new ICD also contains intervening runtime transport changes relative to the installed frozen ICD.",
+      "The legacy resource and device teardown fallback can continue after an unsuccessful DeviceWaitIdle. Establish completion or actual isolation before changing backing retirement."
+    ]
+  },
+  "evidence": {
+    "native_archive_sha256": "ce4e84ce1404c1c0a94d43a3614e58d87110e0303ad74a4f541aa5a6e05fdc77",
+    "native_archive_bytes": 8352,
+    "archived_files": 14,
+    "remaining_temporary_tasks": [],
+    "remaining_temporary_paths": []
+  }
+}

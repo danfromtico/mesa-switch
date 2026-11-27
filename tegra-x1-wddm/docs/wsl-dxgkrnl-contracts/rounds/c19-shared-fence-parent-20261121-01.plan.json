@@ -1,0 +1,20 @@
+{
+  "round_id": "c19-shared-fence-parent-20261121-01",
+  "contract_id": "dxgkrnl.h:231:1",
+  "declared_utc": "2026-11-22T02:52:48.598691+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "641d7bd04f0cec361dd57f663901db94aa437dd63ad0e2640c881925955be7c6",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "同一共享同步对象的各打开实例关联到同一父对象，非 NT 全局句柄指向该父对象。",
+  "question": "既有原生全局共享围栏记录能否直接将全局表项和两个进程局部打开实例配对到父对象？",
+  "method": "仅查正常共享和打开的已存 Windows 回执与同启动事件模板。",
+  "required_observation": "既有原生全局共享围栏记录能否直接将全局表项和两个进程局部打开实例配对到父对象？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-parent-20261121-01.result.json",
+    "sha256": "f0e2a76f89e0af3ed5a95be771d6cdd70bf8989e7cf255561f0eb12c64d21799"
+  }
+}

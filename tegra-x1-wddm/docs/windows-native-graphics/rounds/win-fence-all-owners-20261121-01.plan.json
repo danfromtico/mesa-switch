@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "round_id": "win-fence-all-owners-20261121-01",
+  "contract_id": "WIN-FENCE-WAIT",
+  "windows_question": "WIN-FENCE-WAIT",
+  "owner": "提交方、Windows VidSch 和 GM20B 上下文",
+  "question": "受监控围栏的 GPU 信号、同值上下文等待与等待完成能否逐包关联？",
+  "method": "复核应用值 1 围栏在全部进程及上下文中的 GPU 等待",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "解析安装版本事件模板，按上下文、对象、值和队列包身份匹配 signal 与 wait，证明依赖获满足后等待完成。",
+  "observations": [
+    "逐次从 245 值 1 信号、发送上下文和 180 退役锁定同一对象。当前样本核对 290/292 生命周期，统计至首帧采集的全部线程及进程。",
+    "按已安装模板对 295 的对象数组和值数组逐项配对，复核 244 队列等待及 180 匹配退役。保存同对象的其他句柄和 CPU 等待，独立清屏作为双上下文正对照。",
+    "原三次逐个复核当次已保存的图形缓冲和对象。只有采集覆盖到的时段及字段用于裁决。"
+  ],
+  "inputs": {
+    "archives": {
+      "win-empty-present-20261121-01": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+      "win-present-live-20261121-02": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308",
+      "win-present-incall-20261121-01": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4",
+      "win-present-incall-20261121-02": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b",
+      "win-present-local-blt-20261121-01": "61cb1ec4e568a2cf37ff874058725ec6ce6c6e140de4a4760d98b21d2c9f4570",
+      "win-present-focused-20261121-01": "26d9aa874b04112779b8e02c4e27cdeb1239b78b94df10fbae91c5f24c47befd",
+      "win-first-present-20261121-01": "e2c65e8f0b47d65fc3af8717ea2c78e4d1ca62994c1e59a75006b0cbe07d4634"
+    },
+    "original_boots": [
+      82058,
+      82221,
+      82382
+    ],
+    "historical": {
+      "path": "legacy-sequential-step4/historical-first-present-fence.json",
+      "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+    },
+    "historic_bytes": {
+      "path": "windows-native-graphics/rounds/win-original-etl-bytes-20261121-01.result.json",
+      "sha256": "fd673ef012dd88a31dd110d9354efd0ddfc02ff0fc775873aa884fd429cc53ce"
+    },
+    "manifest_sha256": "6e341d3a94fc1de3175e392d4144de599f60af689afd3c1e1ae8eb7a3b1b8535",
+    "source_binding": {
+      "path": "windows-native-graphics/rounds/win-empty-fence-identity-20261121-01.result.json",
+      "sha256": "65e88f1d74336120718852de8347b208f3b9c935cb083550544e4d6d3ac5b417"
+    },
+    "clear_control": {
+      "path": "windows-native-graphics/rounds/win-empty-fence-20261121-01.result.json",
+      "sha256": "0e9bfd69ff8f0616124ee0895033f703c2175bfee581294a57b9e19815d170a3"
+    },
+    "microsoft": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_waitforsynchronizationobjectfromgpu"
+  }
+}

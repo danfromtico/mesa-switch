@@ -1,0 +1,20 @@
+{
+  "round_id": "c19-native-open-object-20261121-01",
+  "contract_id": "ioctl.c:3302:2",
+  "declared_utc": "2026-11-22T02:54:00.745812+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "6848f0b45b374e02258979888e926ebf38b2fedb2760ddf75edfc4fe37216744",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "原生围栏 NT 打开路径核对目标同步对象类型。",
+  "question": "一次正常的原生 NT 打开是否核对目标同步对象的原生类型？",
+  "method": "只复用本条原来的 Windows 能力回执，并核对当前正式系统版本与该 API 的受支持条件。",
+  "required_observation": "一次正常的原生 NT 打开是否核对目标同步对象的原生类型？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-object-20261121-01.result.json",
+    "sha256": "425b733d2fbc42870110296eff61984d06d4658547e2581367a2dee7268f839f"
+  }
+}

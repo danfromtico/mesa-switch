@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "round_id": "win-reset-external-transport-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "owner": "历史应用、Windows 内核及早期复位记录",
+  "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+  "method": "只读核对当前 DBG2、Windows 启动调试配置与控制端物理取证路径",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+  "observations": [
+    "从 Windows 公共固件表 API 读取 DBG2 并验证 ACPI 校验和。核对其设备路径与当前 DSDT 读回能否对应。",
+    "通过 BCDEdit 的只读枚举记录当前启动项的显式调试设置。控制端只枚举 macOS 公布的串口设备及当前 WinDbg 工具可见性。",
+    "结合已经验证的 Hekate 重启原因寄存器清理顺序，确认是否已有独立于原 Windows ETL 的板级捕获，记录尚缺的物理或时序回执。"
+  ],
+  "inputs": {
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-platform-reset-path-20261121-01.result.json",
+      "sha256": "16f95a7e6354f93e6d3dfa66fea6de28f36e87d058dc5062481899b0190fdd6d"
+    },
+    "firmware_background": {
+      "path": "SWITCH_PLATFORM_REVIEW_20261118.json",
+      "sha256": "90e9457c6d92d8944dc3e77ca6451c3ca4c5fd81e348e09b7b69633d36b1d6bb"
+    },
+    "script_sha256": "18edd462e4560ffc9b3d109c26ebb2f3dcf302fd7ee96af2afce8615594b6a77",
+    "microsoft": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/bringup/acpi-debug-port-table",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/bcdedit--enum"
+    ]
+  }
+}

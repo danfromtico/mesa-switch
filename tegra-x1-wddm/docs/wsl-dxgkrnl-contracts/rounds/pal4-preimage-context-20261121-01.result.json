@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "round_id": "pal4-preimage-context-20261121-01",
+  "contract_id": "dxgkrnl.h:588:1",
+  "declaration_sha256": "038a00f37f63fa13b6fb0a5c096d1c2b8d8d178782b6df009a7dc97e91a28176",
+  "board_issuance_sha256": "a59870188f961c88418314eca5638a4f586e93479b1b6b48c1bc379e305e7033",
+  "started_utc": "2026-11-21T11:59:57.5205519Z",
+  "before": {
+    "utc": "2026-11-21T11:59:57.5205519Z",
+    "boot": 91326,
+    "dwm": 1408,
+    "dwm_start": "2026-11-21T11:57:15.7555142Z",
+    "session": 1,
+    "ac": "Online",
+    "code": 0,
+    "mode": 1
+  },
+  "after": {
+    "boot": 91401,
+    "dwm": 720,
+    "dwm_start": null,
+    "ac": "Online",
+    "code": 0
+  },
+  "status": "未知",
+  "target_hit": false,
+  "unexplained_restart": true,
+  "chronology": "本轮签发记录绑定计划哈希。单次启动内各事件按 Windows QPC 排序，启动切换以 System Event 12 的记录号为准。",
+  "observation": {
+    "game_pid": 2720,
+    "declared_stop_reached": false,
+    "game_trace_well_formed": true,
+    "x86_native_icd_path_matched_from_game": true,
+    "dxvk_device_discovery": [
+      "info:  Found device: NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)"
+    ],
+    "texture7_markers": [
+      {
+        "qpc": 4435432265,
+        "tid": 4916,
+        "site": "Texture.w512.h512.levels0.usage00000400.format00000016.pool1.shared0",
+        "edge": "enter",
+        "value": 0
+      },
+      {
+        "qpc": 4435546722,
+        "tid": 4916,
+        "site": "Texture7.expected-native-module",
+        "edge": "match",
+        "value": 1
+      },
+      {
+        "qpc": 4435591157,
+        "tid": 4916,
+        "site": "Texture7.construct",
+        "edge": "enter",
+        "value": 0
+      },
+      {
+        "qpc": 4435631468,
+        "tid": 4916,
+        "site": "Texture7.common",
+        "edge": "enter",
+        "value": 0
+      },
+      {
+        "qpc": 4435785842,
+        "tid": 4916,
+        "site": "Texture7.lookup",
+        "edge": "enter",
+        "value": 0
+      },
+      {
+        "qpc": 4435828083,
+        "tid": 4916,
+        "site": "Texture7.lookup",
+        "edge": "leave",
+        "value": 0
+      },
+      {
+        "qpc": 4435869799,
+        "tid": 4916,
+        "site": "Texture7.primary",
+        "edge": "enter",
+        "value": 0
+      },
+      {
+        "qpc": 4435909345,
+        "tid": 4916,
+        "site": "Texture7.vkCreateImage",
+        "edge": "enter",
+        "value": 0
+      },
+      {
+        "qpc": 4435951162,
+        "tid": 4916,
+        "site": "Texture7.vkCreateImage",
+        "edge": "leave",
+        "value": 0
+      },
+      {
+        "qpc": 4435993823,
+        "tid": 4916,
+        "site": "Texture7.image-requirements",
+        "edge": "enter",
+        "value": 0
+      },
+      {
+        "qpc": 4436035493,
+        "tid": 4916,
+        "site": "Texture7.image-requirements",
+        "edge": "leave",
+        "value": 0
+      }
+    ],
+    "owned_device_start_events": 2,
+    "owned_context_start_events": 2,
+    "device_context_joins": [
+      {
+        "context": "context1",
+        "device": "device1",
+        "adapter": "adapter1",
+        "device_qpc": 4349945967,
+        "context_qpc": 4350089218,
+        "tid": 4916,
+        "matched": true,
+        "node": 0
+      },
+      {
+        "context": "context2",
+        "device": "device1",
+        "adapter": "adapter1",
+        "device_qpc": 4349945967,
+        "context_qpc": 4350598602,
+        "tid": 4916,
+        "matched": true,
+        "node": 0
+      }
+    ],
+    "etw_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": false
+    },
+    "etw_stop": {},
+    "etl_sha256": "7daa67fc57a953cdd98cbc4745b98d7ffb9977da3e2a94d6bea984273fbe958e",
+    "journal_sha256": "120161b6390a6653c826843e3312b518bf91789bdbb276ba1747e551380f2089",
+    "scoped_dxvk_log_sha256": "07598bd06f23eab5bcdb6405e610d00a6d4b244d6aa8bb6674af436b941cc8eb",
+    "intentional_stop": null,
+    "stop_reason": null,
+    "fixture_error": null
+  },
+  "baseline_verified_after": true,
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "loaded_desktop_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "selected_x86_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+  "application_observer": {
+    "bytes": 7752712,
+    "unsigned": "c775c3c6ed2877b179549d45ca9e764975fc52076ad6d06fe205dc70c6a9a9a1",
+    "sha256": "bbec42816c41f19e57852a11625321007abd0195550f10495782d3a218ffaf68",
+    "stock_source": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+    "patch_sha256": "2c1ddf31e4937394dea14505b6bc5f76b0ba53e779299c8010b5b53566c2da07",
+    "comparison_observer_sha256": "034e0d5d60bce42228af37f34b642529d7de1adc6d77f0f6cb278a79f7c44b94"
+  },
+  "etw_filter": {
+    "bytes": 65048,
+    "unsigned": "6f0a650382bc542b7ea64f7b306a66a6362760512b0602cb16cc11b28123c4cb",
+    "sha256": "4f68044595176af9b2fcdb623f26a94b893984465709cd6f7967fa6e2417d98a",
+    "source_sha256": "b82d4a8657089600bae9f2cacce52ecde0506f863538e33d73e2897da9e2e7ed"
+  },
+  "original_game_dll_readback": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+  "cleanup": {
+    "original": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "removed": true,
+    "files": 18
+  },
+  "scope_limit": "只裁决该原生游戏进程的设备与执行上下文关系。计划早停点在第七张纹理交给 DXVK 创建 Vulkan 图像之前，实际命中及终止方式记录在 observation。",
+  "fixture_review": "这个版本将可选早停放在 CreateResolveImage。原游戏的第七张纹理走 CreatePrimaryImage，早停条件未执行。这轮仅采用已实际命中的用户态标记和系统记录。"
+}

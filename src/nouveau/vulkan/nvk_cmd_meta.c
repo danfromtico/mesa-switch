@@ -71,6 +71,7 @@ struct nvk_meta_save_gfx {
    struct vk_sample_locations_state _dynamic_sl;
    struct vk_dynamic_graphics_state dynamic;
    struct nvk_shader *shaders[MESA_SHADER_MESH + 1];
+   VkShaderStageFlags pipeline_shader_stages;
    VkDeviceAddressRangeKHR vb0;
    struct nvk_descriptor_set_binding desc0;
    struct nvk_buffer_address desc0_set_addr;
@@ -81,6 +82,7 @@ struct nvk_meta_save_gfx {
 
 struct nvk_meta_save_compute {
    struct nvk_compute_state state;
+   VkShaderStageFlags pipeline_shader_stages;
 };
 
 union nvk_meta_save_generic {
@@ -123,6 +125,7 @@ nvk_meta_begin_gfx(struct nvk_cmd_buffer *cmd,
 
    STATIC_ASSERT(sizeof(cmd->state.gfx.shaders) == sizeof(save->shaders));
    memcpy(save->shaders, cmd->state.gfx.shaders, sizeof(save->shaders));
+   save->pipeline_shader_stages = cmd->vk.pipeline_shader_stages;
 
    save->vb0 = cmd->state.gfx.vb0;
 
@@ -199,6 +202,13 @@ nvk_meta_end_gfx(struct nvk_cmd_buffer *cmd,
       nvk_cmd_bind_graphics_shader(cmd, stage, save->shaders[stage]);
    }
 
+   /* Meta binds pipelines, even when the application uses shader objects.
+    * Restore the common runtime's binding provenance with the shaders;
+    * otherwise a later partial CmdBindShadersEXT unbinds every graphics
+    * stage as if the temporary meta pipeline were still bound.
+    */
+   cmd->vk.pipeline_shader_stages = save->pipeline_shader_stages;
+
    nvk_cmd_bind_vertex_buffer(cmd, 0, save->vb0);
 
    nvk_descriptor_state_set_root_array(cmd, desc, push, 0, sizeof(save->push),
@@ -219,6 +229,7 @@ nvk_meta_begin_compute(struct nvk_cmd_buffer *cmd,
 {
    assert(cmd->state.cs.descriptors.flush_root == NULL);
    save->state = cmd->state.cs;
+   save->pipeline_shader_stages = cmd->vk.pipeline_shader_stages;
    nvk_cmd_invalidate_compute_state(cmd);
 
    struct nv_push *p = nvk_cmd_buffer_push(cmd, 1);
@@ -234,6 +245,7 @@ nvk_meta_end_compute(struct nvk_cmd_buffer *cmd,
 
    nvk_descriptor_state_fini(cmd, &cmd->state.cs.descriptors);
    cmd->state.cs = save->state;
+   cmd->vk.pipeline_shader_stages = save->pipeline_shader_stages;
 }
 
 static void

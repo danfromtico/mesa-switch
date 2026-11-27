@@ -131,7 +131,7 @@ enum ENUM_PACKED nak_ts_spacing {
    NAK_TS_SPACING_FRACT_EVEN = 2,
 };
 
-enum PACKED nak_mesh_topology {
+enum ENUM_PACKED nak_mesh_topology {
    NAK_MESH_TOPOLOGY_POINTS = 0,
    NAK_MESH_TOPOLOGY_LINES = 1,
    NAK_MESH_TOPOLOGY_TRIANGLES = 4,

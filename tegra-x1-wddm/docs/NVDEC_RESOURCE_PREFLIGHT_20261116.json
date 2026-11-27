@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-11-16T18:13:57.179812+00:00",
+  "scope": "Actual Windows PnP resource and KMT snapshot preflight, not NVDEC hardware decode",
+  "source": {
+    "integration_commit": "401d02d3ab87f446311dc8b8c0a1bd8920ab7a46",
+    "installed_base_commit": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+    "emc_input_identity": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
+    "complete_resource_patch_sha256": "db088ba8220c54667dc09bdb40117c0bf03db2c6b4b2d2b167b3e29bb4534a2c",
+    "controller_native_sha256": "cb6a427cf7b9f340d6c6ab6263e3528cc153e295fe7d4b783ba58f963eebe390",
+    "controller_current_sha256": "7c5af356643545d91fe130b623fd6988978899ac9f6d1e3c0ed622dfed188aa3",
+    "controller_delta": "Current source adds a timestamp/action to each state and a power/EMC capture before candidate selection; parsed by Windows, not used retrospectively in the completed native round"
+  },
+  "candidate": {
+    "kmd_sha256": "e340ffcceb68b17693854b26a8d581e6b0944c6a58e763f67609ddd66f2b678c",
+    "catalog_sha256": "ab65bfa4829691b7786870d259a23589ab100c8ba01b80bbff03c4e13ef8802a",
+    "acpi_sha256": "6b058b409beda750473fa61430cb5196c6191d3801167d7f3c13846077fdcf49",
+    "query_sha256": "5015d34e22878b225b58dcfb29fd484161f4412aec9d46ed99adb9371dda8a5d",
+    "retained_umd_sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a",
+    "retained_icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff",
+    "native_signature_verified_package_members": 26,
+    "promoted_to_baseline": false,
+    "currently_installed": false
+  },
+  "native_result": {
+    "utc": "2026-11-16T18:03:45.278584+00:00",
+    "resource_query": {
+      "luid": "000000000009b352",
+      "query_status": "00000000",
+      "snapshot_available": true,
+      "version": 65537,
+      "size": 64,
+      "flags": 3,
+      "resource_mask": 511,
+      "resource_status": 4,
+      "map_status": "00000000",
+      "hidrev": "00012127",
+      "powergate_status": "3ffecf4d",
+      "clock_y": "00000342",
+      "reset_y": "0fe9d09d",
+      "nvdec_clock_source": "e0000000",
+      "nvjpg_clock_source": "e0000000",
+      "smmu_config": "ffffffff",
+      "smmu_host1x_asid": "00000000",
+      "smmu_nvdec_asid": "00000000",
+      "smmu_nvjpg_asid": "00000000"
+    },
+    "finding": "All9resources mapped but SMMU_CONFIG read invalid; no DMA route may be assumed. NVDEC/NVJPG powergate bits are set at startup.",
+    "decode_enabled": false,
+    "next": "RestoreE95+originalACPI; identify firmware security and inherited domain ownership before choosing DMA/power lifecycle",
+    "decoded_power_bits": {
+      "nvdec_partition25_on": true,
+      "nvjpg_partition26_on": true
+    },
+    "readback_limits": [
+      "NVDEC/Host1x engine registers not accessed; only always-on PMC/CAR/MC/HIDREV snapshots",
+      "All ones SMMU_CONFIG is invalid/unknown, not a disabled or enabled state",
+      "Per-group ASID zeros do not alone prove complete DMA routing",
+      "No firmware boot, decode commands or syncpoint writes executed"
+    ],
+    "references": [
+      {
+        "url": "https://raw.githubusercontent.com/torvalds/linux/v6.8/drivers/iommu/tegra-smmu.c",
+        "sha256": "2508e2c10045caafb15612d5a088ba1e5d300efcd25407051665d1ab9f8a1a1a",
+        "usage": "GPL source consulted for register/DMA contract, no implementation copied"
+      },
+      {
+        "commit": "c6c89ce0b1dd3e46c23ba7defc2a5a515dc2497a",
+        "url": "https://raw.githubusercontent.com/CTCaer/hekate/c6c89ce0b1dd3e46c23ba7defc2a5a515dc2497a/bdk/mem/smmu.c",
+        "sha256": "f1e1cf1bab760f979b58adc975be540e4686c4b683875a396d2ff10d3c0c3a7a",
+        "license": "GPL-2.0-or-later",
+        "usage": "Hardware contract reference only; not copied into MIT implementation",
+        "finding": "Source uses EL3 secure write for MC_SMMU_CONFIG. This does not by itself prove why Windows reads all ones.",
+        "matches_installed_bootloader": false
+      }
+    ],
+    "inference": "Global register may be privilege-restricted; Hekate documents EL3 write requirement, but exact installed firmware read behavior remains unverified.",
+    "actmon_observation": {
+      "candidate_utc": "2026-11-16T18:03:43.7027234Z",
+      "candidate_flags": 7,
+      "candidate_error": -3,
+      "source_meaning": "SwActmonReadback in SwitchFan/src/t214/actmon.h",
+      "candidate_transition_count": 0,
+      "restored_utc": "2026-11-16T18:08:53.4062098Z",
+      "restored_flags": 367,
+      "restored_error": 0,
+      "restored_transition_count": 223,
+      "attribution": "Unresolved candidate-associated difference; do not classify as baseline behavior or promote candidate. No replay until analysis/fix."
+    }
+  },
+  "candidate_observation": {
+    "Utc": "2026-11-16T18:03:40.3433527Z",
+    "Code": 0,
+    "Dwm": [
+      {
+        "Modules": [
+          {
+            "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+            "Name": "TegraGpuD3DVk.dll",
+            "Hash": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A"
+          },
+          {
+            "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
+            "Name": "libvulkan_nouveau.dll",
+            "Hash": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
+          }
+        ],
+        "Id": 772,
+        "Start": "2026-11-16T18:00:21.9257713Z"
+      }
+    ],
+    "Power": {
+      "Utc": "2026-11-16T18:03:43.6402248Z",
+      "Power": {
+        "Version": 2,
+        "IsLite": 1,
+        "CpuConfigured": 1,
+        "PowerMode": 1,
+        "CpuTargetKhz": 1581000,
+        "CpuActualKhz": 1568250,
+        "CpuBootKhz": 998400,
+        "CpuMv": 875,
+        "RamActualKhz": 2500000,
+        "GpuPolicyMode": 1,
+        "GpuPolicyMinKhz": 76800,
+        "GpuPolicyMaxKhz": 537600,
+        "GpuReportedKhz": 537600,
+        "GpuReportedUv": 630000,
+        "GpuStatusWord": 21702169,
+        "TempC": 38,
+        "TempValid": 1,
+        "FanDuty": 51,
+        "Flags": 20,
+        "CpuPolicyMinKhz": 102000,
+        "CpuPolicyMaxKhz": 1581000,
+        "CpuRequestedMaxKhz": 1581000,
+        "GpuRequestedMaxKhz": 537600,
+        "CpuSpeedo": 1630,
+        "CpuProcessId": 0,
+        "CpuDfllAvailable": 1,
+        "CpuDfllActive": 1,
+        "CpuLastError": 0,
+        "CpuLoadPermille": 812,
+        "GpuSampleAgeMs": 499,
+        "SocTempC": 38,
+        "BoardTempC": 36,
+        "TempSampleAgeMs": 406
+      },
+      "Battery": {
+        "Version": 1,
+        "LimitCenter": 85,
+        "BandMin": 80,
+        "BandMax": 90,
+        "CapacityPercent": 87,
+        "VoltageMv": 3911,
+        "Reg00InputSrc": 2,
+        "Reg01PwrOn": 16,
+        "Reg08SysStat": 108,
+        "LastApplyStatus": 0,
+        "Flags": 13
+      }
+    },
+    "Fan": {
+      "Utc": "2026-11-16T18:03:43.6714775Z",
+      "Fan": {
+        "Version": 1,
+        "Mode": 1,
+        "Duty": 51,
+        "TargetPwm": 51,
+        "Flags": 1,
+        "SampleAgeMs": 515,
+        "FilteredTempMc": 37969
+      }
+    },
+    "Emc": {
+      "Utc": "2026-11-16T18:03:43.7027234Z",
+      "Emc": {
+        "Version": 1,
+        "Flags": 7,
+        "ActualKhz": 2500000,
+        "BootKhz": 2500000,
+        "SampleAgeMs": 46,
+        "LastError": 0,
+        "EnumerationError": 0,
+        "RateCount": 4,
+        "RatesKhz": [
+          204000,
+          1331200,
+          1600000,
+          2500000
+        ],
+        "ActmonError": -3,
+        "AverageActiveKhz": 0,
+        "RawActiveKhz": 0,
+        "TargetKhz": 0,
+        "DisplayFloorKhz": 0,
+        "QosError": 0,
+        "TransitionCount": 0
+      }
+    }
+  },
+  "recovery": {
+    "full11hashes_match": true,
+    "original_task_action_principal_settings_and5sdelay_match": true,
+    "mode": {
+      "operation": "show",
+      "session": 1,
+      "console_session": 1,
+      "desktop": "Default",
+      "input_desktop": "Default",
+      "input_desktop_error": 0,
+      "changed": false,
+      "status": 0,
+      "source_name": "\\\\.\\DISPLAY3",
+      "monitor_path": "\\\\?\\DISPLAY#Default_Monitor#3&1ef10c3b&0&UID0#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}",
+      "adapter_device_id": "ACPI\\VEN_SWOA&DEV_0F01",
+      "utc": "2026-11-16T18:09:16Z",
+      "system_dpi": 96,
+      "current": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "registry": {
+        "width": 1280,
+        "height": 720,
+        "orientation": 1,
+        "bpp": 32,
+        "hz": 60,
+        "x": 0,
+        "y": 0,
+        "flags": 0,
+        "fields": 544997536
+      },
+      "source_mode": {
+        "width": 720,
+        "height": 1280
+      },
+      "target_signal": {
+        "width": 720,
+        "height": 1280
+      },
+      "path_rotation": 2
+    },
+    "power_policy_restored": true,
+    "emc_actmon_error": 0,
+    "baseline_dwm": [
+      {
+        "Modules": [
+          {
+            "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+            "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll"
+          },
+          {
+            "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+            "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll"
+          }
+        ],
+        "Id": 1456,
+        "Start": "2026-11-16T18:05:23.6429055Z"
+      }
+    ],
+    "native_state": "Restored",
+    "physical_picture_confirmed_this_round": false,
+    "candidate_promoted": false
+  },
+  "cleanup": {
+    "RestartRequested": false,
+    "Dwm": [
+      {
+        "Id": 1456,
+        "Start": "2026-11-16T18:05:23.6429055Z"
+      }
+    ],
+    "DefaultTaskState": 3,
+    "Utc": "2026-11-16T18:12:24.0060013Z",
+    "CandidatePackageAbsent": true,
+    "TemporaryTasks": 0,
+    "ArchiveAbsent": true,
+    "TrialDirectoryAbsent": true,
+    "Code": 0,
+    "DefaultTaskResult": 0,
+    "Active": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524"
+  },
+  "planned_restart_count": 2,
+  "unexpected_restart_observed_this_round": false,
+  "tests_not_run": [
+    "NVDEC firmware/DMA/decode",
+    "Repeated five-minutevkcube",
+    "Old direction-return failure",
+    "vkpeak/CPU-Z/weather/browser restart reproduction"
+  ],
+  "physical_picture_confirmed_this_round": false,
+  "remaining": [
+    "Replace the unsupported assumption that Windows can read globalSMMU_CONFIG with a verified per-client/domain DMA contract; no treating all-ones as disabled",
+    "Account for already-powered NVDEC/NVJPG partitions, inherited reset/clock state and proper shared-clock ownership",
+    "Resolve ACTMON readback difference before promoting another candidate; before-selection status was missing in this round",
+    "Finish720p H.264 native execution,D3D11VA,NV12,real synchronization and GPU CSC/window output; then1080p"
+  ],
+  "review": {
+    "status": "Pending Gemini4 Carbon High quota",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "native_controls_not_independent_review": true
+  },
+  "evidence_directory": "mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/resource-preflight",
+  "native_evidence_manifest": {
+    "files": {
+      "native-results/Pair.ps1": {
+        "bytes": 17315,
+        "sha256": "cb6a427cf7b9f340d6c6ab6263e3528cc153e295fe7d4b783ba58f963eebe390"
+      },
+      "native-results/activation-default-state.json": {
+        "bytes": 254,
+        "sha256": "8efb4c8c5b5fa3c72246ac9c0c7ebc78c9a842664dca55b3f3eca21f2777c698"
+      },
+      "native-results/activation-trial-components.json": {
+        "bytes": 57620,
+        "sha256": "729a9776d93a24ada41980fcfe86b404ef4bb920bfb8e4bdfd6573549cd80ea8"
+      },
+      "native-results/baseline-selection.json": {
+        "bytes": 715,
+        "sha256": "92b8350657c3f0503c84e1ff4b394a4a1e8506ff21ace2e8d46e7998900297a1"
+      },
+      "native-results/baseline-verification.json": {
+        "bytes": 10557,
+        "sha256": "2069cf0bb1d6f846768e20eba79312fb8c88a5c28b489eeb363ced794c8189d4"
+      },
+      "native-results/candidate-observation.json": {
+        "bytes": 5442,
+        "sha256": "f82c41ae28b6d207fa2c801483241cc399ab0d2808cf87ce613a16d3941e0f47"
+      },
+      "native-results/candidate-package-cleanup.json": {
+        "bytes": 303,
+        "sha256": "4e0907dae62a875c4074c0172cbd4aeee9980a54dbb23c7a3c3f4dabcf35e53d"
+      },
+      "native-results/candidate-selection.json": {
+        "bytes": 715,
+        "sha256": "ef4c56586886e7f1301fedfff42dca71ab5abb732c0e2ca1d94c9272261f1621"
+      },
+      "native-results/candidate-staged.log": {
+        "bytes": 396,
+        "sha256": "bfd2261d294f458749bfdf152e957bde60e003427da0d931e324030503520a38"
+      },
+      "native-results/catalog-result.json": {
+        "bytes": 767,
+        "sha256": "731b9da152ae011f72bf3caddc27c63be10fbf3d146571f2ecef76009f293d53"
+      },
+      "native-results/display-state.err": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "native-results/display-state.exit": {
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      "native-results/display-state.json": {
+        "bytes": 708,
+        "sha256": "a46b085ee56a469937331dbcfb6462f483c4aa9b7504afbf27eb93f7c3a6638d"
+      },
+      "native-results/pair-backup.json": {
+        "bytes": 7589,
+        "sha256": "924c8c52194bc1640654e505bae2e1c40b34aff4939ff742e3afd46458213ad3"
+      },
+      "native-results/pair-config.json": {
+        "bytes": 3551,
+        "sha256": "a7e28a6ad13b94776fb779b4f55dacc377a8fbafbc50c0e9f1187f3493b28e19"
+      },
+      "native-results/pair-state.json": {
+        "bytes": 2018,
+        "sha256": "09e0cad1a8441768f672113eb0cbf255c861b7d02cbe437028924a720bfb3b20"
+      },
+      "native-results/resource-query.txt": {
+        "bytes": 651,
+        "sha256": "19dc78968202a04258bebfb9d978230180d0c8cbeb17c8f489d6fb503b7ae774"
+      },
+      "native-results/signature-result.json": {
+        "bytes": 9715,
+        "sha256": "383f55dc9e55f8dc8855f2fbe8b423e17ae5c94689b5fba1d15d724e1554dcb1"
+      }
+    },
+    "all_local_present": true,
+    "native_source": "downloaded original receipts before cleanup"
+  }
+}

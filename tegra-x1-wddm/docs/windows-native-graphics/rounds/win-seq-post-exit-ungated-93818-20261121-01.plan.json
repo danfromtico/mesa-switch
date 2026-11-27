@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-post-exit-ungated-93818-20261121-01",
+  "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+  "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+  "owner": "Windows 电源、DWM、GM20B KMD 与原普通窗口客户端",
+  "question": "正式基线下原窗口正常退出并清理后，能否跨过 93818 异常启动前未覆盖的时间区间，持续观察同一 DWM 与开机？",
+  "method": "原有签名负载及窗口跟踪，绕开额外实时 Profiler 放行控制，观察清理后同一桌面",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "相同输入正常退出、清理完成后，至少 125 秒连续有同一正式启动、DWM、Code 0 回执，保存新增故障事件及前后哈希；一次正常样本仅验证本轮。",
+  "observations": [
+    "同一正式 KMD、窗口参数和签名应用。先核对实际身份，然后派发一次原最小场景及封口跟踪。",
+    "获 Windows 时钟、QPC 和清理结果后，持续只读同一 Windows 启动、DWM、GPU Code 0 和供电，至少 125 秒。",
+    "重新检查完整实载哈希和新系统事件。若出现异常，保留末条同启动回执，停止扩大及重复操作。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "be8e234a30df6347d0ef3df22de0e975bca852d4794de0ec6f5e32dc89db75bd",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+      "Capture-State.cs": "c3160e7b79c326194582ead5de44e9d6d685038f7486257f4cedade027fd0d6b",
+      "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f"
+    },
+    "runner_sha256": "18be12e21c3a8e1b8efc637beab4f796e292543cfed3120b260c192bffdba627",
+    "tail_runner_sha256": "a29307441680898c5c952b15bad08e723662943e47b5bbc9759deb8c7d33de5e",
+    "before_sha256": "03397e045f455819bfd2d59f0e30baf54094cd32dbd45438bf8af353ea79b210",
+    "boot": 93818,
+    "dwm": 1384,
+    "minimum_observation_seconds": 125,
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-seq-post-exit-tail-93818-20261121-01.result.json",
+      "sha256": "b5e5e5620362d9698f30d60c1fa46bae7b8bd90c9c6ecd8220e2463c5b8402e4"
+    }
+  }
+}

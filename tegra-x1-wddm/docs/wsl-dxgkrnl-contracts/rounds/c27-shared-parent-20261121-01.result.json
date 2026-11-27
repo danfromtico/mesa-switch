@@ -1,0 +1,553 @@
+{
+  "schema": 1,
+  "round_id": "c27-shared-parent-20261121-01",
+  "contract_id": "dxgkrnl.h:231:1",
+  "declaration_sha256": "6958fbc6f797cadad754bc470033e7f0e0a8132a5ee61e792c356b3eb3dd7aad",
+  "board_issuance_sha256": "7bfbf8cdd7632d69e8b4aad0e81c67c81e3f471169f6cc48e3a65b7539f2dd67",
+  "chronology": "实机签发文件绑定已在故障表登记的计划哈希。程序 QPC 与 ETW 在同一次启动内比较，系统启动用 Event 12 RecordId 标识。",
+  "started_utc": "2026-11-21T13:17:18.9178615Z",
+  "before": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:17:18.9178615Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "after": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:17:35.8925049Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "status": "未知",
+  "target_hit": false,
+  "unexplained_restart": false,
+  "finding": "传统全局围栏创建返回 00000000，有效打开回执数为 1。合法全局等待之后的监控围栏读到 1（等待返回 0x00000000）。NT 共享路径打开返回 00000000。本次公开句柄及 ReportSyncObject 模板不提供全局表项指向的父对象。",
+  "gap": "传统全局围栏创建返回 00000000，有效打开回执数为 1。合法全局等待之后的监控围栏读到 1（等待返回 0x00000000）。NT 共享路径打开返回 00000000。本次公开句柄及 ReportSyncObject 模板不提供全局表项指向的父对象。",
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 1368,
+      "utc": "2026-11-21T13:17:27.3081894Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 69597441708,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "start",
+        "mode": "global"
+      },
+      {
+        "qpc": 69597580707,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 69597711283,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 69597977702,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "shared_fence",
+        "status": "00000000",
+        "device": "1073742016",
+        "local": "1073742208",
+        "mapped": "1",
+        "type": "monitored",
+        "nt_sharing": "1"
+      },
+      {
+        "qpc": 69598083832,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "export",
+        "status": "00000000",
+        "local": "1073742208",
+        "nt": "240"
+      },
+      {
+        "qpc": 69598150222,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "parent_signal",
+        "status": "00000000",
+        "local": "1073742208",
+        "value": "1"
+      },
+      {
+        "qpc": 69598489278,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "child_started",
+        "role": "child-fence",
+        "nt": "1",
+        "child_pid": "2696"
+      },
+      {
+        "qpc": 69600074159,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "start",
+        "mode": "child-fence"
+      },
+      {
+        "qpc": 69600375127,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 69600496552,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 69600602881,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "open_begin",
+        "device": "1073742016",
+        "nt": "244",
+        "no_signal": "0"
+      },
+      {
+        "qpc": 69600826968,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "open_return",
+        "status": "00000000",
+        "device": "1073742016",
+        "local": "1073742208",
+        "mapped": "1",
+        "no_signal": "0"
+      },
+      {
+        "qpc": 69600890837,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "child_wait",
+        "status": "00000000",
+        "value": "1",
+        "local": "1073742208"
+      },
+      {
+        "qpc": 69600953503,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "child_signal",
+        "status": "00000000",
+        "local": "1073742208",
+        "value": "2"
+      },
+      {
+        "qpc": 69601126973,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "opened_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69601242914,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69601503103,
+        "pid": 2696,
+        "tid": 2616,
+        "event": "exit",
+        "code": "0"
+      },
+      {
+        "qpc": 69601737243,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "child_exit",
+        "exit": "0",
+        "child_pid": "2696"
+      },
+      {
+        "qpc": 69601818157,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "parent_read",
+        "local": "1073742208",
+        "value": "2"
+      },
+      {
+        "qpc": 69601896111,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "fence_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69601960741,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "global_create",
+        "status": "00000000",
+        "local": "1073742272",
+        "global": "1073742018",
+        "device": "1073742016",
+        "type": "legacy_fence",
+        "initial": "1"
+      },
+      {
+        "qpc": 69602148910,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "child_started",
+        "role": "child-global",
+        "nt": "0",
+        "child_pid": "5552"
+      },
+      {
+        "qpc": 69603783278,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "start",
+        "mode": "child-global"
+      },
+      {
+        "qpc": 69603862622,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 69603943450,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 69604009136,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "global_open",
+        "status": "00000000",
+        "global": "1073742018",
+        "local": "1073742208"
+      },
+      {
+        "qpc": 69604261348,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "global_context",
+        "status": "00000000",
+        "context": "1073742272"
+      },
+      {
+        "qpc": 69604528232,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "global_wait",
+        "status": "00000000",
+        "context": "1073742272",
+        "local": "1073742208",
+        "value": "1"
+      },
+      {
+        "qpc": 69604598705,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "global_progress",
+        "signal_status": "00000000",
+        "wait_status": "00000000",
+        "observed": "1"
+      },
+      {
+        "qpc": 69604678763,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "global_progress_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69604767429,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "global_context_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69604838979,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "opened_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69604923880,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69604999204,
+        "pid": 5552,
+        "tid": 3256,
+        "event": "exit",
+        "code": "0"
+      },
+      {
+        "qpc": 69605452842,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "child_exit",
+        "exit": "0",
+        "child_pid": "5552"
+      },
+      {
+        "qpc": 69605542961,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "global_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69605797834,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 69605876528,
+        "pid": 1368,
+        "tid": 3720,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=9"
+      ]
+    },
+    "actor_event_counts": {
+      "27": 3,
+      "1069": 5,
+      "296": 2,
+      "297": 2,
+      "28": 3,
+      "30": 1,
+      "294": 1,
+      "31": 1
+    },
+    "devices": [
+      {
+        "pid": 1368,
+        "tid": 3720,
+        "qpc": 69597708094,
+        "caller_device": 1073742016,
+        "device": "device1",
+        "adapter": "adapter1"
+      },
+      {
+        "pid": 2696,
+        "tid": 2616,
+        "qpc": 69600493650,
+        "caller_device": 1073742016,
+        "device": "device2",
+        "adapter": "adapter1"
+      },
+      {
+        "pid": 5552,
+        "tid": 3256,
+        "qpc": 69603939666,
+        "caller_device": 1073742016,
+        "device": "device3",
+        "adapter": "adapter1"
+      }
+    ],
+    "allocation_joins": [],
+    "gpu_signal_packets": [],
+    "cpu_sync": [
+      {
+        "qpc": 69598149948,
+        "pid": 1368,
+        "tid": 3720,
+        "event": 296,
+        "device": "device1",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          1
+        ]
+      },
+      {
+        "qpc": 69600889852,
+        "pid": 2696,
+        "tid": 2616,
+        "event": 297,
+        "device": "device2",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          1
+        ]
+      },
+      {
+        "qpc": 69600953290,
+        "pid": 2696,
+        "tid": 2616,
+        "event": 296,
+        "device": "device2",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          2
+        ]
+      },
+      {
+        "qpc": 69604597233,
+        "pid": 5552,
+        "tid": 3256,
+        "event": 297,
+        "device": "device3",
+        "objects": [
+          "sync3"
+        ],
+        "values": [
+          1
+        ]
+      }
+    ],
+    "sync_identity": [
+      {
+        "qpc": 69597977249,
+        "pid": 1368,
+        "tid": 3720,
+        "event": 1069,
+        "device": "device1",
+        "local": 1073742208,
+        "object": "sync1"
+      },
+      {
+        "qpc": 69600826585,
+        "pid": 2696,
+        "tid": 2616,
+        "event": 1069,
+        "device": "device2",
+        "local": 1073742208,
+        "object": "sync1"
+      },
+      {
+        "qpc": 69601960490,
+        "pid": 1368,
+        "tid": 3720,
+        "event": 1069,
+        "device": "device1",
+        "local": 1073742272,
+        "object": "sync2"
+      },
+      {
+        "qpc": 69604008902,
+        "pid": 5552,
+        "tid": 3256,
+        "event": 1069,
+        "device": null,
+        "local": 1073742208,
+        "object": "sync2"
+      },
+      {
+        "qpc": 69604526785,
+        "pid": 5552,
+        "tid": 3256,
+        "event": 1069,
+        "device": "device3",
+        "local": 1073742336,
+        "object": "sync3"
+      }
+    ]
+  },
+  "raw_files_sha256": {
+    "result.json": "0647eb6b487e413496c0269f6fdd86a7799a28bfb37a6c10f5ca4e63552403cf",
+    "issued.json": "7bfbf8cdd7632d69e8b4aad0e81c67c81e3f471169f6cc48e3a65b7539f2dd67",
+    "result.zip": "5a668595d3425e5886e1d240cd95dcefc7a20c3121ad2220689bba73cdc51ae9",
+    "journal.tsv": "c850826e5f4ea3c9a62dc9da4aca2fb0fc1e382adcb1b88926490dc282b4dae1",
+    "trace.etl": "f5a8c343467b4d6314baa061783fe5eed5ee8d455501469e6955c74f803ca9af",
+    "client.json": "de01dfd2d4c2fb9dbb7d6bd244a44d9b5cbfc9a348cbd39a3acfaa4cb55d24e1"
+  },
+  "installed_event_manifest_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_initial_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "evidence_scope": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "帮助辨认同一个信号对象。只见值传播或共享句柄不足以辨认历史首次 Present 使用的内核父对象。"
+}

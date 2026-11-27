@@ -1,0 +1,899 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T17:48:29.5450388Z",
+  "status": "Real native KMT/NVDEC720p H.264 backend accepted for the six-frame fixture: all six completed through Host1x syncpoint191 and match software reference byte-for-byte. The de8 KMD/045 provider/9eb table and original5b/95b userspace remain installed. D3D11VA and window presentation remain incomplete.1080p/2K/4K acceptance is deferred together.",
+  "mesa_source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+  "switchfan_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
+  "changes": [
+    "Real KMT-device-owned decoder session in the coexisting render miniport; previous display escape preserved",
+    "Pending kernel Host1x clock request with actual power reference and passive quiesce callback",
+    "Session stop and retained failures linked to device destruction, adapter stop, power transition and TDR",
+    "Private lifetime gate followed by existing hardware/MC gate; clock-release wait drops the hardware gate to allow quiesce",
+    "Assigned read-only Host1x clock source appended as optional resource12; no global Host1x/PLLP/SMMU writes",
+    "Existing H264 codec/parser reused; acceptance client now uses the native adapter and verifies NV12 frame hashes and session retirement"
+  ],
+  "candidate_components": {
+    "scope": "Retained native720 backend repair",
+    "signed_kmd": {
+      "Length": 243720,
+      "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+    },
+    "signed_kmd_catalog": {
+      "Length": 8392,
+      "Sha256": "8ddc554442a4dfc1a5189dca22baa6fa90015f51be101ab91ce04c6eddb528ba"
+    },
+    "reuse_signed_provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "candidate_acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    }
+  },
+  "native_kmd_source": {
+    "record": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+    "commit": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "source_manifest": {
+      "Length": 1028,
+      "Sha256": "7f697f1786f35753a289cb76c661aeea668ae03a77c91818cab2bffb3066eee2"
+    },
+    "source_provenance": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "changed_files": {
+      "src/nouveau/nvdec/nvdec.h": "e39269a62840eb045c3eb7889c4b7b49fa5a5f86204a177bf43d1fe948b75972",
+      "src/nouveau/nvdec/nvdec_h264.c": "b53e051aef8e7d7e2527a3dee5ed5b44d436cd0a434fc92dcf28f988640b280e",
+      "tegra-x1-wddm/windows/nvdec_backend.c": "68b52f56c63cec8d32070a27567dac783702b6a71556c893be76fa9834dc2d86",
+      "tegra-x1-wddm/tests/test_nvdec_h264.c": "b59caaa9b587aafc047b539a237f46f586e78af5e3c45e1292ef699a1e36d0e5"
+    },
+    "scope": "Installed frozen KMD; backend720p fixture accepted. Parser/client latest38830972 is separate from KMD source.",
+    "full_development_worktree_built_for_installation": false
+  },
+  "installed_baseline": {
+    "record": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+    "classification": "retained development baseline; native720p backend module accepted, full video path unaccepted",
+    "observed_utc": "2026-11-17T17:34:12.8670683Z",
+    "boot": "2026-11-17T17:12:56.5106640Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\activation",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app",
+    "kmd": {
+      "Length": 243720,
+      "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+    },
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "umd": {
+      "Length": 3274240,
+      "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A"
+    },
+    "umd_source": "c1f25986eee51c0ee01088c3ecb3c9508dea2479",
+    "icd": {
+      "Length": 17652224,
+      "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
+    },
+    "icd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f-based dirty frozen build; not clean current HEAD",
+    "all11_files": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
+        "Matches": true,
+        "Length": 32264
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
+        "Matches": true,
+        "Length": 243720
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+        "Matches": true,
+        "Length": 138
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Matches": true,
+        "Length": 4993
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+        "Matches": true,
+        "Length": 42440
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
+        "Matches": true,
+        "Length": 1517568
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+        "Matches": true,
+        "Length": 921600
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
+        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+        "Matches": true,
+        "Length": 17652224
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+        "Matches": true,
+        "Length": 104456
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+        "Matches": true,
+        "Length": 3274240
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+        "Matches": true,
+        "Length": 60416
+      }
+    ],
+    "external_review_performed": false,
+    "restored": false
+  },
+  "validation": {
+    "native_record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "next_candidate_arm64_build_exit": 0,
+    "next_candidate_cpu_controls": [
+      {
+        "name": "adapter-nvdec_adapter",
+        "exit": 0
+      },
+      {
+        "name": "adapter-device_lifetime",
+        "exit": 0
+      },
+      {
+        "name": "adapter-t214_nvdec",
+        "exit": 0
+      },
+      {
+        "name": "adapter-test_nvdec_adapter_windows",
+        "exit": 0
+      },
+      {
+        "name": "adapter-link",
+        "exit": 0
+      },
+      {
+        "name": "adapter-run",
+        "exit": 0
+      }
+    ],
+    "old_driver_regression": {
+      "exit": 153,
+      "expected_assertion": 153,
+      "description": "New foreign-channel fixture rejects under the old whole-host scan, then passes with the reserved-channel scope."
+    },
+    "platform_asan_ubsan": {
+      "exit": 0,
+      "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+      "stderr": ""
+    },
+    "native_decode_accepted": false
+  },
+  "clock_policy": {
+    "candidate_nvdec_hz": 204000000,
+    "parent": "inherited locked PLLP408MHz divided by2",
+    "host1x": "Retained core floor>=637500uV for Host1x<=102MHz;>=650000uV for inherited Host1x<=204MHz. Keep NVDEC204MHz. Reject unknown/invalid floors, clock routes or an undersupplied rail.",
+    "gpu_emc_policy_changed": false,
+    "final_performance_policy": false
+  },
+  "noble_evidence": {
+    "capture_date": "2026-11-14",
+    "kernel": "4.9.140-l4t #5 Sep26 2024",
+    "nvdec_boot_parameter": "nvdec_enabled=0",
+    "nvdec_configured_hz": 480000000,
+    "nvdec_parent": "pll_c3",
+    "nvdec_enable_count": 0,
+    "host1x_hz": 81600000,
+    "vdd_core_mv": 775,
+    "active_decode_proved": false,
+    "reference_source_commit": "2d0059fd3167a8df756de2aa0489d4aa70a9fc15",
+    "reference_binary_match_verified": false,
+    "license_scope": "GPL references inspected for register/voltage contracts; no GPL implementation copied into MIT sources"
+  },
+  "review": {
+    "external_review_required": false,
+    "external_review_performed": false,
+    "mode": "main source/contract review, ASAN/UBSAN controls, ARM64 builds and native pixel verification"
+  },
+  "remaining": [
+    "Connect existing D3D11VA DDIs to the proven same-LUID KMT transport; replace historical exclusive-probe dependency.",
+    "Verify real runtime video table and buffer contracts, implement valid NV12 resources and GPU conversion/window presentation without broad modern-interface expansion.",
+    "Complete720p video-frame presentation and safe stop/close; no repeat of accepted fixed90/vkcube unless a new regression requires it.",
+    "1080p,2K,4K are jointly deferred. General load/browser/weather and180-to90 reboot investigations remain separate; no cause assigned from this decoder run."
+  ],
+  "latest_native_round": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+  "superseded_local_candidate_components": {
+    "unsigned_tegragpurender.sys": {
+      "bytes": 236544,
+      "sha256": "acecedf6234b41127e7fa232b8013e7b0f63b2c8ec9e6a606c53c83f47fbec04"
+    },
+    "unsigned_switchfan.sys": {
+      "bytes": 99328,
+      "sha256": "a51cc07b3ec5a174b70ad143f59ae503d944d511b3518ef194c80c9417dd0666"
+    },
+    "candidate_acpi.dat": {
+      "bytes": 4993,
+      "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "nvdec720-native.exe": {
+      "bytes": 94208,
+      "sha256": "664b20449aecd55929a2b85a5d41c0b2ec79b8ff8cebba2e79d07c51e0e5d83c"
+    }
+  },
+  "next_local_candidate": null,
+  "latest_native_result": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+  "loaded_provider_identity": {
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+    "native_loaded_mismatch_proven": true,
+    "candidate_provider_loaded_verified": true,
+    "restored_provider_and_kmd_loaded_verified": true,
+    "new_controller_complete_candidate_round_pending": false,
+    "native_decode_accepted": false,
+    "baseline_promoted": false
+  },
+  "core_clock_native": {
+    "record": "NVDEC_CORE_CLOCK_NATIVE_20261117.json",
+    "clock_lease_admitted": true,
+    "load_result": "0xc00000a3",
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "core_floor_native_result": {
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "core_owner_query_passed": true,
+    "core_floor_uv": 1050000,
+    "clock_admission_passed": true,
+    "host_ownership_accepted": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "historical_loaded_provider_identity": {
+    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
+    "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+    "native_loaded_mismatch_proven": true,
+    "new_controller_complete_candidate_round_pending": true,
+    "native_decode_accepted": false,
+    "baseline_promoted": false
+  },
+  "historical_transport_snapshots": [
+    {
+      "mesa_source_commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+      "switchfan_hook_commit": "7ecce6c083df1f33def014445f3cacd1c3301095",
+      "candidate_components": {
+        "signed_kmd": {
+          "bytes": 239616,
+          "sha256": "372ec2a93c23b9744ad256bb2e7c10f70f91043272bee209bc56e31f0ea8669f"
+        },
+        "signed_switchfan": {
+          "bytes": 102400,
+          "sha256": "9e2d4826af07a82d083aca6178608d71e983dd5295a1a2175ff38e555a2df7c7"
+        },
+        "candidate_acpi": {
+          "bytes": 4993,
+          "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        },
+        "native_acceptance_client": {
+          "bytes": 95232,
+          "sha256": "56c7edfeeb89758cf2758dbc7a6230eebe19d25c47e2d11d9f1d8b6fae9ae006"
+        },
+        "deferred_installer": {
+          "bytes": 72192,
+          "sha256": "74fa43ecf99194729a04293154679328eeba881c3aed90f26f989a24da378669"
+        }
+      },
+      "native_kmd_source": {
+        "base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+        "emc_patch_sha256": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
+        "resource_client_seed": "client-route/source-inputs.json",
+        "selected_transplant_manifest_sha256": "03834c302a01249163527c18b862f8130935226b0cb8e54cb8b2a7ae1cfe40f1",
+        "full_development_worktree_built_for_installation": false,
+        "host_mux_patch_commit": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5"
+      },
+      "validation": {
+        "arm64_full_kmd_build": "passed",
+        "arm64_switchfan_build": "passed",
+        "arm64_acceptance_client_build": "passed",
+        "arm64_adapter_control_link": "passed",
+        "cpu_adapter_ownership_and_stop_failures": "passed",
+        "cpu_native_packet_protocol_and_cleanup_failures": "passed",
+        "cpu_gpu_context_queue_regression": "passed",
+        "cpu_resource_mapping_and_cleanup": "passed",
+        "asan_ubsan_platform_control": "passed",
+        "acpi_unchanged_other_devices_and_gpu_nonresource_aml": true,
+        "native_install": "Paired provider/KMD activated via deferred installation; original baseline restored",
+        "native_host1x_clock_lease": "failed0xc0000010 before firmware/DMA",
+        "native_firmware_boot": false,
+        "native_720p_h264": false,
+        "d3d11va_nv12_presentation": false,
+        "native_provider_replacement": "Deferred install and planned boot verified in both directions"
+      }
+    },
+    {
+      "mesa_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+      "switchfan_hook_commit": "dd2ab04641df96fb7bcec42d6eb9211e496d7e23",
+      "candidate_components": {
+        "scope": "Local diagnostic candidate; unsigned KMD, unchanged paired ABI2 provider. Not installed.",
+        "unsigned_kmd": {
+          "Length": 239616,
+          "Sha256": "6e100afbcc2255f26899d4d0c37825dc06d7fd4e5ebdd861f291227be46da09f"
+        },
+        "reuse_signed_provider": {
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        },
+        "candidate_acpi": {
+          "Length": 4993,
+          "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        }
+      },
+      "native_kmd_source": {
+        "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+        "tested_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+        "frozen_inputs": {
+          "bytes": 1520,
+          "sha256": "b3494469db916a49fb76e984d0a7ecface17f8a9287f9d9cd82afe30e0583382"
+        },
+        "signed_kmd": {
+          "Length": 241672,
+          "Sha256": "252e8162a54fa26d7f961523ff112cc436c9032cb56da00ac70ae18166e8662a"
+        },
+        "full_development_worktree_built_for_installation": false
+      },
+      "validation": {
+        "native_record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+        "next_candidate_arm64_build_exit": 0,
+        "next_candidate_cpu_controls": [
+          {
+            "name": "adapter-nvdec_adapter",
+            "exit": 0
+          },
+          {
+            "name": "adapter-device_lifetime",
+            "exit": 0
+          },
+          {
+            "name": "adapter-t214_nvdec",
+            "exit": 0
+          },
+          {
+            "name": "adapter-test_nvdec_adapter_windows",
+            "exit": 0
+          },
+          {
+            "name": "adapter-link",
+            "exit": 0
+          },
+          {
+            "name": "adapter-run",
+            "exit": 0
+          }
+        ],
+        "native_decode_accepted": false
+      }
+    }
+  ],
+  "loaded_provider_identity_history": [
+    {
+      "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+      "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+      "native_loaded_mismatch_proven": true,
+      "candidate_provider_loaded_verified": true,
+      "restored_provider_and_kmd_loaded_verified": true,
+      "new_controller_complete_candidate_round_pending": false,
+      "native_decode_accepted": false,
+      "baseline_promoted": false
+    }
+  ],
+  "channel_scope_native_result": {
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "failed_check": 4,
+    "failed_channel": 0,
+    "reserved_channel": 11,
+    "selected_channel_state_observed": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "acpi_override_recurrence": {
+    "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+    "loaded_dsdt_matches_disk": false,
+    "gpu_present": false,
+    "candidate_kmd_activated": false,
+    "candidate_provider_activated": false,
+    "native_decode_request": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "incremental_baseline_policy": "Continue from a verified component combination after each completed module passes necessary native checks. An expected fail-closed optional decode preflight alone does not require reinstalling the original combination when display/power remain verified. Restore on an actual display, enumeration, power, ownership or lifecycle failure. An unexecuted candidate is not an installed baseline.",
+  "historical_current_snapshots": [
+    {
+      "updated_utc": "2026-11-17T13:20:26.4960102Z",
+      "status": "Candidate ACPI boot loaded the4568-byte74070d7c table instead of the4993-byte9eb6a7e1 file. GPU was absent with native startup closed. The signed2aa4aba4 KMD and0453418e provider were staged only; neither was selected or executed and no decode request ran. Original11-file90-degree display/power baseline restored; temporary packages/tasks/files cleaned. Channel-scoped KMD native validation and720p/1080p acceptance remain open.",
+      "latest_native_result": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+      "installed_baseline": {
+        "last_authenticated_read_utc": "2026-11-17T13:20:26.4960102Z",
+        "changed_this_round": true,
+        "kmd_sha256": "e95287cbeb1d2c325baacb9685affd1d24783b22ecadc1801ba1dffcfe7cc25e",
+        "umd_sha256": "5b66bbec86af299941812e8376cc1ac4a5630385828c895b7a52ec96d5c5ad7a",
+        "icd_sha256": "95b97df4e83a2a90315a8784d83e75771021093dec34f98362b584d1f546bdff",
+        "restored": true,
+        "current_display": "90-degree1280x720 logical,720x1280 row scan",
+        "current_power": "Handheld/DFLL active; dynamic GPU and EMC; errors0",
+        "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+        "driver_packages_changed_this_round": false,
+        "temporary_changes": [
+          "ACPI table",
+          "native startup gate"
+        ]
+      },
+      "candidate_components": {
+        "scope": "Signed channel-scoped candidate; staged only and cleaned after ACPI boot prerequisite failure. No new KMD/provider activation.",
+        "unsigned_kmd": {
+          "Length": 239104,
+          "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
+        },
+        "reuse_signed_provider": {
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        },
+        "candidate_acpi": {
+          "Length": 4993,
+          "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        },
+        "signed_kmd": {
+          "Length": 242184,
+          "Sha256": "bbf65e41b617aaed846f94a8ad6de06a6de6fca19a35d983795d0280b52f1d98"
+        },
+        "signed_kmd_catalog": {
+          "Length": 8332,
+          "Sha256": "0b748f4d34aba1b35bdbf8c95333bce7ab643dc2ccd237e293255b2b7fc255e3"
+        }
+      },
+      "native_kmd_source": {
+        "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+        "tested_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+        "frozen_inputs": {
+          "bytes": 599,
+          "sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87"
+        },
+        "signed_kmd": {
+          "Length": 242688,
+          "Sha256": "bc74bba77b247f8eae9a5285df1d2534bb2e9f3e1c12e44051f408a61b3d30bc"
+        },
+        "full_development_worktree_built_for_installation": false
+      },
+      "next_local_candidate": {
+        "source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+        "base_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+        "source_manifest_sha256": "beccfcbdcc752d1c42fd12aebccded9004714762d6028ceeb884ab7262a91aca",
+        "changed_source_sha256": {
+          "windows/nvdec_adapter.c": "686dd2085276085ae3f65b9e40e8e152e55b3ddd8f3624f047dc60dd97e52ebb",
+          "tests/test_nvdec_adapter_windows.c": "21ec9fbbe3b9c75497de1a0c464195a6f8345fd9b596ae29e1b51f9de53569af",
+          "tests/test_nvdec_platform.c": "199fcabd64e675b3aca76c2c51befa6fd7540ffecdc654d5fccfda50124bbb80"
+        },
+        "unsigned_kmd": {
+          "Length": 239104,
+          "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
+        },
+        "reuse_provider": {
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        },
+        "clock_abi": "0x00010002",
+        "signed_kmd": true,
+        "native_tested": false,
+        "purpose": "Only reserved channel11 participates in decoder channel admission. Keep selected-channel checks, DC/syncpoint conflicts, clock lease and retirement. Other channels are not reset or modified.",
+        "arm64_build_exit": 0,
+        "controls": [
+          {
+            "name": "adapter-nvdec_adapter",
+            "exit": 0
+          },
+          {
+            "name": "adapter-device_lifetime",
+            "exit": 0
+          },
+          {
+            "name": "adapter-t214_nvdec",
+            "exit": 0
+          },
+          {
+            "name": "adapter-test_nvdec_adapter_windows",
+            "exit": 0
+          },
+          {
+            "name": "adapter-link",
+            "exit": 0
+          },
+          {
+            "name": "adapter-run",
+            "exit": 0
+          }
+        ],
+        "old_driver_regression": {
+          "exit": 153,
+          "expected_assertion": 153,
+          "description": "New foreign-channel fixture rejects under the old whole-host scan, then passes with the reserved-channel scope."
+        },
+        "platform_asan_ubsan": {
+          "exit": 0,
+          "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+          "stderr": ""
+        },
+        "references": [
+          "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/channel.c",
+          "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/cdma_hw.c"
+        ],
+        "license_scope": "GPL references inspected for per-channel allocation and register isolation; no implementation copied. CPU syncpoint increments/NOP timeout recovery are not used.",
+        "main_self_review": "Selected channel11 predicate unchanged; callback/clock ABI unchanged; foreign-channel and unrelated shared-bit preservation checked through initialization, successful submit, timeout, shutdown and reacquisition.",
+        "signed_kmd_component": {
+          "Length": 242184,
+          "Sha256": "bbf65e41b617aaed846f94a8ad6de06a6de6fca19a35d983795d0280b52f1d98"
+        },
+        "native_boot_attempt": {
+          "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+          "loaded_dsdt_matches_disk": false,
+          "gpu_present": false,
+          "candidate_kmd_activated": false,
+          "candidate_provider_activated": false,
+          "native_decode_request": false,
+          "baseline_restored": true,
+          "cleanup_complete": true
+        }
+      },
+      "remaining": [
+        "Resolve the optional ACPI override failure before another decoder trial. The matching loader ignores the optional-table function return; post-boot disk bytes and BCD do not identify its live branch or I/O result. Retain the exact failed loaded table and avoid unchanged trial replay without new analysis or correction.",
+        "Keep the signed2aa4aba4 KMD, unchanged0453418e provider and existing controls. No decoder or modern UMD expansion is justified by this pre-activation failure. Once boot prerequisites hold, validate reserved channel11, true firmware/DMA completion and safe resource retirement.",
+        "Complete720p H.264 through D3D11VA/NV12/window presentation before1080p. 2K/4K remain independent implementation, untested and undecided. Preserve90-degree display/power and deferred stability boundaries."
+      ]
+    },
+    {
+      "updated_utc": "2026-11-17T15:46:25.0707641Z",
+      "status": "Corrected374b KMD is active with the retained045 provider,9eb resource table and original5b/95b userspace. DWM, all11 component identities,90-degree saved/current configuration and Handheld/DFLL/GPU/EMC/fan/85-percent policy are verified. One gated replacement boot; unchanged packages/files reused. The absolute-DMAEND regression from58dc was corrected using NVIDIA upstream0e43b8da; it had never reached hardware submission. Decoder was not rerun because the preceding channel11 ownership guard is unchanged.720p/1080p remain unaccepted.",
+      "latest_native_result": "NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json",
+      "installed_baseline": {
+        "record": "NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json",
+        "classification": "retained development combination; decode unaccepted; original physical display/vkcube acceptance remains scoped to its recorded combination",
+        "observed_utc": "2026-11-17T15:42:21.9924786Z",
+        "boot": "2026-11-17T15:34:48.7116310Z",
+        "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-dmaend-repair-20261117\\activation",
+        "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app",
+        "kmd": {
+          "Length": 242696,
+          "Sha256": "2b4fa06293df7e432f169a6fcc1149b5775c4e7b2466a424edf7331fb6ab3d3d"
+        },
+        "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json",
+        "provider": {
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        },
+        "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+        "acpi": {
+          "Length": 4993,
+          "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        },
+        "umd": {
+          "Length": 3274240,
+          "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A"
+        },
+        "umd_source": "c1f25986eee51c0ee01088c3ecb3c9508dea2479",
+        "icd": {
+          "Length": 17652224,
+          "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
+        },
+        "icd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f-based dirty build snapshot; frozen component identity retained",
+        "all11_files": [
+          {
+            "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+            "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
+            "Matches": true,
+            "Length": 32264
+          },
+          {
+            "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+            "Sha256": "2B4FA06293DF7E432F169A6FCC1149B5775C4E7B2466A424EDF7331FB6AB3D3D",
+            "Matches": true,
+            "Length": 242696
+          },
+          {
+            "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+            "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+            "Matches": true,
+            "Length": 138
+          },
+          {
+            "Path": "C:\\Windows\\System32\\acpitabl.dat",
+            "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+            "Matches": true,
+            "Length": 4993
+          },
+          {
+            "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+            "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+            "Matches": true,
+            "Length": 42440
+          },
+          {
+            "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+            "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
+            "Matches": true,
+            "Length": 1517568
+          },
+          {
+            "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+            "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+            "Matches": true,
+            "Length": 921600
+          },
+          {
+            "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
+            "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+            "Matches": true,
+            "Length": 17652224
+          },
+          {
+            "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+            "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+            "Matches": true,
+            "Length": 104456
+          },
+          {
+            "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+            "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+            "Matches": true,
+            "Length": 3274240
+          },
+          {
+            "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+            "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+            "Matches": true,
+            "Length": 60416
+          }
+        ],
+        "external_review_performed": false,
+        "restored": false,
+        "scope": "Current development combination; not full video acceptance"
+      },
+      "candidate_components": {
+        "scope": "Current installed repair; no new native decode request",
+        "signed_kmd": {
+          "Length": 242696,
+          "Sha256": "2b4fa06293df7e432f169a6fcc1149b5775c4e7b2466a424edf7331fb6ab3d3d"
+        },
+        "signed_kmd_catalog": {
+          "Length": 8393,
+          "Sha256": "e0eac9686d38632d51883ead1dc2933e7cfb5a779fc34d11a83d6220c7458a2f"
+        },
+        "reuse_signed_provider": {
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        },
+        "candidate_acpi": {
+          "Length": 4993,
+          "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+        }
+      },
+      "native_kmd_source": {
+        "record": "NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json",
+        "commit": "374b9ee5624cd1aea063398fd413fe3c73ff6501",
+        "source_manifest": {
+          "Length": 630,
+          "Sha256": "3d78108ed2ffc8e65299f4101abe8f382587e4b3242774ab44e75f905ec05dd9"
+        },
+        "source_provenance": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json",
+        "changed_files": {
+          "platform/t214_nvdec.c": "74a272e58af006656491822511ecc80a83a1f36f41df76b592e03c1bad973430",
+          "tests/test_nvdec_platform.c": "57c5d8bc0c397463b30f276bfb19ff77849306a5d3a2635ed0b2cfce904b7a57"
+        },
+        "scope": "Installed frozen KMD; DWM/resource/identity checks only. Native decode submission remains untested.",
+        "full_development_worktree_built_for_installation": false
+      },
+      "current_committed_source": {
+        "commit": "374b9ee5624cd1aea063398fd413fe3c73ff6501",
+        "source_manifest": {
+          "Length": 630,
+          "Sha256": "3d78108ed2ffc8e65299f4101abe8f382587e4b3242774ab44e75f905ec05dd9"
+        },
+        "source_provenance": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json",
+        "changed_files": {
+          "platform/t214_nvdec.c": "74a272e58af006656491822511ecc80a83a1f36f41df76b592e03c1bad973430",
+          "tests/test_nvdec_platform.c": "57c5d8bc0c397463b30f276bfb19ff77849306a5d3a2635ed0b2cfce904b7a57"
+        },
+        "scope": "Installed frozen KMD; DWM/resource/identity checks only. Native decode submission remains untested."
+      },
+      "remaining": [
+        "Resolve the inherited reserved-channel11 state recorded in NVDEC_INCREMENTAL_POINTER_NATIVE_20261117.json: GET differs from PUT and START/END are nonzero. Establish a valid ownership/initialization contract; do not reset merely to pass admission or infer completion.",
+        "Complete real firmware/DMA/syncpoint completion/output and safe retirement, then720p H.264 D3D11VA/NV12/window presentation.1080p follows720p;2K/4K remain independent implementation, untested and undecided.",
+        "Optional ACPI table loss remains an unresolved historical boot issue. Current loaded tables match; no unchanged failed combination replay. Preserve accepted90-degree display/power and deferred load/browser/weather/180-degree-return boundaries."
+      ]
+    }
+  ],
+  "installed_development_combination": {
+    "classification": "retained development baseline; native720p backend module accepted, full video path unaccepted",
+    "observed_utc": "2026-11-17T17:34:12.8670683Z",
+    "boot": "2026-11-17T17:12:56.5106640Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\activation",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app",
+    "kmd": {
+      "Length": 243720,
+      "Sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+    },
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "umd": {
+      "Length": 3274240,
+      "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A"
+    },
+    "umd_source": "c1f25986eee51c0ee01088c3ecb3c9508dea2479",
+    "icd": {
+      "Length": 17652224,
+      "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF"
+    },
+    "icd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f-based dirty frozen build; not clean current HEAD",
+    "all11_files": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Sha256": "54C5529E332EB472CB005C9C2ADCC0301BFBF4F8E9221C882225BB9EC2B8F787",
+        "Matches": true,
+        "Length": 32264
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Sha256": "DE8BB90B38F4F69BEBE68FBB1B40F52759E1FE4EFB321577EE507011EEB7B243",
+        "Matches": true,
+        "Length": 243720
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+        "Matches": true,
+        "Length": 138
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Matches": true,
+        "Length": 4993
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+        "Matches": true,
+        "Length": 42440
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Sha256": "99E59DBFE2DBED45C7D99C2A5B427B99109311BB59EB2A50F5946E98B9194EA2",
+        "Matches": true,
+        "Length": 1517568
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+        "Matches": true,
+        "Length": 921600
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\libvulkan_nouveau.dll",
+        "Sha256": "95B97DF4E83A2A90315A8784D83E75771021093DEC34F98362B584D1F546BDFF",
+        "Matches": true,
+        "Length": 17652224
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+        "Matches": true,
+        "Length": 104456
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tgd3d-copy-lifetime-5b66bbec-20261116-122524\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "5B66BBEC86AF299941812E8376CC1AC4A5630385828C895B7A52EC96D5C5AD7A",
+        "Matches": true,
+        "Length": 3274240
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+        "Matches": true,
+        "Length": 60416
+      }
+    ],
+    "external_review_performed": false
+  },
+  "current_committed_source": {
+    "commit": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "source_manifest": {
+      "Length": 1028,
+      "Sha256": "7f697f1786f35753a289cb76c661aeea668ae03a77c91818cab2bffb3066eee2"
+    },
+    "source_provenance": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+    "changed_files": {
+      "src/nouveau/nvdec/nvdec.h": "e39269a62840eb045c3eb7889c4b7b49fa5a5f86204a177bf43d1fe948b75972",
+      "src/nouveau/nvdec/nvdec_h264.c": "b53e051aef8e7d7e2527a3dee5ed5b44d436cd0a434fc92dcf28f988640b280e",
+      "tegra-x1-wddm/windows/nvdec_backend.c": "68b52f56c63cec8d32070a27567dac783702b6a71556c893be76fa9834dc2d86",
+      "tegra-x1-wddm/tests/test_nvdec_h264.c": "b59caaa9b587aafc047b539a237f46f586e78af5e3c45e1292ef699a1e36d0e5"
+    },
+    "scope": "Installed frozen KMD; backend720p fixture accepted. Parser/client latest38830972 is separate from KMD source."
+  },
+  "controller_source": {
+    "commit": "5f9ab480e5c2ded25220964170f9b09e056ab253",
+    "files": {
+      "Pair.ps1": {
+        "Length": 36319,
+        "Sha256": "0cb6f86cd6c19cb6f59c712d49ef967a4b2a81006551e11da2f3b1a0e9150a24"
+      },
+      "Provider.ps1": {
+        "Length": 17243,
+        "Sha256": "392b81c5fc1b214b0b5ade3841b6656f51f1f7b253ecf7bfa98caab9f974d262"
+      }
+    }
+  },
+  "native_decode_accepted": true,
+  "retained_channel_round": "NVDEC_RETAINED_CHANNEL_NATIVE_20261117.json",
+  "incremental_pointer_round": "NVDEC_INCREMENTAL_POINTER_NATIVE_20261117.json",
+  "dmaend_correction": "NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json",
+  "installation_retained": true,
+  "source_modules_merged": [
+    "5f9ab480e5c2ded25220964170f9b09e056ab253",
+    "374b9ee5624cd1aea063398fd413fe3c73ff6501"
+  ],
+  "promotion_scope": "Validated deployment/current display-power combination is retained for development. Full decoder acceptance remains false.",
+  "acceptance_scope": {
+    "native_backend_720p_fixture_accepted": true,
+    "frames": 6,
+    "d3d11va_accepted": false,
+    "window_presentation_accepted": false,
+    "full_decode_stage_complete": false,
+    "public_video_enabled": false,
+    "new_physical_screen_acceptance": false,
+    "deferred_joint_acceptance": [
+      "1080p",
+      "2K",
+      "4K"
+    ],
+    "higher_resolution_scope": "External implementation preserved; not integrated or hardware-accepted here",
+    "stability_scope": "Single six-frame successful run,1.5781264s including setup/cleanup; not FPS or long-duration stability"
+  },
+  "native_decode_accepted_scope": "Six-frame native KMT backend fixture only; D3D11VA/window incomplete",
+  "resolution_roadmap": {
+    "current": "720p H.264 full D3D11VA/window chain",
+    "deferred_joint_acceptance": [
+      "1080p",
+      "2K",
+      "4K"
+    ]
+  }
+}

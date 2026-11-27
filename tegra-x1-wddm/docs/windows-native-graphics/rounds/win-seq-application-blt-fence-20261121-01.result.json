@@ -1,0 +1,693 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-application-blt-fence-20261121-01",
+  "contract_id": "WIN-SEQ-APP-BLT-DMA-NATIVE",
+  "windows_question": "WIN-SEQ-APP-BLT-DMA-NATIVE",
+  "plan_sha256": "b8552ed882810ae97d3bea34afe20c4611e344a19e8ea963339212e315609d05",
+  "status": "实机通过",
+  "finding": "启动 92083 的首个 52 字节 Blt 对应同上下文队列 1、DMA 9651。实时及两份 ETL 核对了 5063 包装返回、KMD 同围栏等待阶段快照、中断和同包退役。快照记录有效的 GR/FECS 预抢占状态。",
+  "missing_observation": "GR、FECS 错误邮箱及主机中断状态为本次采样时点。逐 SM HWW 和 PRI 锁存仍缺。该 Blt 与历史 91476 的 DWM DMA 152586 是各自启动内的不同提交。",
+  "device_executions": 0,
+  "evidence": {
+    "boot": 92083,
+    "application": {
+      "api_start": {
+        "id": 42,
+        "version": 0,
+        "qpc": 17575970307,
+        "fields": {
+          "pIDXGISwapChain": 2319578873760,
+          "Flags": 0,
+          "SyncInterval": 1,
+          "DirtyRects": 0,
+          "ScrollRects": 0
+        }
+      },
+      "api_return": {
+        "id": 43,
+        "version": 0,
+        "qpc": 17576180847,
+        "fields": {
+          "Result": 0
+        }
+      },
+      "kmt": {
+        "qpc": 17576176825,
+        "pid": 4924,
+        "tid": 3232,
+        "provider": "kernel",
+        "id": 184,
+        "version": 1,
+        "fields": {
+          "hContext": 1073742144,
+          "hWindow": 262668,
+          "VidPnSourceId": 4294967295,
+          "FlipInterval": 1,
+          "Flags": 67178625,
+          "ReturnStatus": 0,
+          "hSrcAllocHandle": 1073743680,
+          "hDstAllocHandle": 0
+        }
+      },
+      "blt": {
+        "cdd": {
+          "qpc": 17576035323,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 286,
+          "version": 0,
+          "fields": {
+            "pDxgAdapterAllocation": 18446606670585994512,
+            "Flags": 0,
+            "Width": 640,
+            "Height": 360,
+            "Pitch": 2560
+          }
+        },
+        "blt": {
+          "qpc": 17576071858,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 166,
+          "version": 0,
+          "fields": {
+            "hwnd": 262668,
+            "pDmaBuffer": 18446640175921325216,
+            "PresentHistoryToken": 0,
+            "hSourceAllocation": 18446640175919830288,
+            "hDestAllocation": 18446640175919818768,
+            "bSubmit": 1,
+            "bRedirectedPresent": 0,
+            "Flags": 1,
+            "Source.Left": 0,
+            "Source.Right": 640,
+            "Source.Top": 0,
+            "Source.Bottom": 360,
+            "Dest.Left": 0,
+            "Dest.Right": 640,
+            "Dest.Top": 0,
+            "Dest.Bottom": 360,
+            "SubRectCount": 1
+          }
+        },
+        "source": {
+          "qpc": 17549748962,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 4924,
+            "hDevice": 18446606670508881952,
+            "pDxgAdapter": 18446640175876464640,
+            "hVidMmAlloc": 18446640175919830288,
+            "hVidMmGlobalAlloc": 18446606670538591648,
+            "hDxgResource": 18446606670559052304,
+            "hDxgSharedResource": 18446640175907442416,
+            "hThunkAllocation": 1073743680,
+            "hThunkResource": 1073743616,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2319634931712,
+            "hProcessAllocDetails": 18446606670557252368,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "target": {
+          "qpc": 17576036380,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 36,
+          "version": 2,
+          "fields": {
+            "hProcessId": 4924,
+            "hDevice": 18446606670508881952,
+            "pDxgAdapter": 18446640175876464640,
+            "hVidMmAlloc": 18446640175919818768,
+            "hVidMmGlobalAlloc": 18446606670528916896,
+            "hDxgResource": 18446606670559027392,
+            "hDxgSharedResource": 18446640175878122528,
+            "hThunkAllocation": 1073743936,
+            "hThunkResource": 1073743872,
+            "PrivateRuntimeResourceHandle": 0,
+            "pVirtualAddress": 2319636774912,
+            "hProcessAllocDetails": 18446606670557253648,
+            "hOtherPartitionHandle": 0
+          }
+        },
+        "context": {
+          "qpc": 17545223057,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 30,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446606670508881952,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446606670532537760,
+            "ContextHandle": 1073742144,
+            "ParentDxgContext": 0
+          }
+        },
+        "submit": {
+          "qpc": 17576072966,
+          "pid": 4924,
+          "tid": 3232,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "DmaBufferSize": 52,
+            "AllocationListSize": 3,
+            "PatchLocationListSize": 0,
+            "bPresent": 1,
+            "hDmaBuffer": 18446640175921325216,
+            "pQueuePacket": 18446640175899750480,
+            "ProgressFenceValue": 0
+          }
+        },
+        "retire": {
+          "qpc": 17576119852,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175899750480
+          }
+        }
+      }
+    },
+    "plan_scope": "复用既有单次实机，离线重解，没有额外实机执行",
+    "trace_files": {
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/evidence/scene/video.etl": "cf567c19c9976b4fa896517165c47fc39548ab0ffadc66b53f7a253af3fb96d9",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/evidence/display.etl": "dc86c42bd8075bc0d325c2b8243f6e695f779dc165bd48d8589a920ccfdfed0b",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/live/profiler.etl": "44a1c9dc0c4a9b69c83b9e7f6cc1b7926569030c762a34459de5c986e5107cc7",
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/live/interpreted.json": "4e2b30a7c8e613e29770eab3dc7ea54044289030db0ce61142f89c8761426921"
+    },
+    "candidate_175": [
+      {
+        "qpc": 17576074773,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 175,
+        "version": 1,
+        "fields": {
+          "hContext": 18446606670532537760,
+          "hQueuePacketContext": 0,
+          "PacketType": 0,
+          "uliSubmissionId": 9651,
+          "ulQueueSubmitSequence": 1,
+          "pDmaBuffer": 18446640175921325216,
+          "QuantumStatus": 1
+        }
+      }
+    ],
+    "same_thread_prefix": [
+      {
+        "qpc": 17576074773,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 175,
+        "version": 1,
+        "fields": {
+          "hContext": 18446606670532537760,
+          "hQueuePacketContext": 0,
+          "PacketType": 0,
+          "uliSubmissionId": 9651,
+          "ulQueueSubmitSequence": 1,
+          "pDmaBuffer": 18446640175921325216,
+          "QuantumStatus": 1
+        }
+      },
+      {
+        "qpc": 17576074860,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 105,
+        "version": 0,
+        "fields": {
+          "Function": 5063
+        }
+      },
+      {
+        "qpc": 17576075358,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 106,
+        "version": 0,
+        "fields": {
+          "Function": 5063
+        }
+      },
+      {
+        "qpc": 17576112372,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 175,
+        "version": 1,
+        "fields": {
+          "hContext": 18446640175877552992,
+          "hQueuePacketContext": 0,
+          "PacketType": 3,
+          "uliSubmissionId": 1124,
+          "ulQueueSubmitSequence": 0,
+          "pDmaBuffer": 0,
+          "QuantumStatus": 2
+        }
+      }
+    ],
+    "completion_candidates": [
+      [
+        {
+          "qpc": 17576118667,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 177,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "uliCompletionId": 9651,
+            "ulQueueSubmitSequence": 1,
+            "InterruptType": 1,
+            "QuantumStatus": 1,
+            "FaultedVirtualAddress": 0,
+            "PageFaultFlags": 0,
+            "FaultedProcessHandle": 0
+          }
+        }
+      ],
+      [
+        {
+          "qpc": 17576119389,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 176,
+          "version": 0,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "uliCompletionId": 9651,
+            "ulQueueSubmitSequence": 1,
+            "bPreempted": 0
+          }
+        }
+      ],
+      [
+        {
+          "qpc": 17576119867,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175899750480
+          }
+        }
+      ]
+    ],
+    "timeline": [
+      {
+        "qpc": 17576074773,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 175,
+        "version": 1,
+        "fields": {
+          "hContext": 18446606670532537760,
+          "hQueuePacketContext": 0,
+          "PacketType": 0,
+          "uliSubmissionId": 9651,
+          "ulQueueSubmitSequence": 1,
+          "pDmaBuffer": 18446640175921325216,
+          "QuantumStatus": 1
+        }
+      },
+      {
+        "qpc": 17576074860,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 105,
+        "version": 0,
+        "fields": {
+          "Function": 5063
+        }
+      },
+      {
+        "qpc": 17576075358,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 106,
+        "version": 0,
+        "fields": {
+          "Function": 5063
+        }
+      },
+      {
+        "qpc": 17576118667,
+        "pid": 4,
+        "tid": 920,
+        "provider": "kernel",
+        "id": 177,
+        "version": 1,
+        "fields": {
+          "hContext": 18446606670532537760,
+          "PacketType": 0,
+          "uliCompletionId": 9651,
+          "ulQueueSubmitSequence": 1,
+          "InterruptType": 1,
+          "QuantumStatus": 1,
+          "FaultedVirtualAddress": 0,
+          "PageFaultFlags": 0,
+          "FaultedProcessHandle": 0
+        }
+      },
+      {
+        "qpc": 17576119389,
+        "pid": 4,
+        "tid": 920,
+        "provider": "kernel",
+        "id": 176,
+        "version": 0,
+        "fields": {
+          "hContext": 18446606670532537760,
+          "PacketType": 0,
+          "uliCompletionId": 9651,
+          "ulQueueSubmitSequence": 1,
+          "bPreempted": 0
+        }
+      },
+      {
+        "qpc": 17576119867,
+        "pid": 4,
+        "tid": 920,
+        "provider": "kernel",
+        "id": 180,
+        "version": 1,
+        "fields": {
+          "hContext": 18446606670532537760,
+          "PacketType": 0,
+          "SubmitSequence": 1,
+          "bPreempted": 0,
+          "bTimeouted": 0,
+          "pQueuePacket": 18446640175899750480
+        }
+      }
+    ],
+    "wire": [
+      {
+        "sequence": 1455,
+        "id": 175,
+        "version": 1,
+        "pid": 4,
+        "tid": 924,
+        "source_qpc": 17576074773,
+        "callback_qpc": 17576146208,
+        "payload_hex": "a06d71540883ffff000000000000000000000000b32500000000000001000000a0643d6981a1ffff01000000",
+        "host_receive_ns": 51742500979041,
+        "confirmed_qpc": 17576398266,
+        "host_ack_return_ns": 51742511522500,
+        "host_fsynced_ns": 51742501064416
+      },
+      {
+        "sequence": 1456,
+        "id": 105,
+        "version": 0,
+        "pid": 4,
+        "tid": 924,
+        "source_qpc": 17576074860,
+        "callback_qpc": 17576146549,
+        "payload_hex": "c7130000",
+        "host_receive_ns": 51742501135250,
+        "confirmed_qpc": 17576398696,
+        "host_ack_return_ns": 51742511585250,
+        "host_fsynced_ns": 51742501215875
+      },
+      {
+        "sequence": 1457,
+        "id": 106,
+        "version": 0,
+        "pid": 4,
+        "tid": 924,
+        "source_qpc": 17576075358,
+        "callback_qpc": 17576146836,
+        "payload_hex": "c7130000",
+        "host_receive_ns": 51742501289666,
+        "confirmed_qpc": 17576398897,
+        "host_ack_return_ns": 51742511656375,
+        "host_fsynced_ns": 51742501357791
+      },
+      {
+        "sequence": 1459,
+        "id": 177,
+        "version": 1,
+        "pid": 4,
+        "tid": 920,
+        "source_qpc": 17576118667,
+        "callback_qpc": 17576147555,
+        "payload_hex": "a06d71540883ffff00000000b3250000000000000100000001000000010000000000000000000000000000000000000000000000",
+        "host_receive_ns": 51742501599666,
+        "confirmed_qpc": 17576399502,
+        "host_ack_return_ns": 51742511795333,
+        "host_fsynced_ns": 51742501681750
+      },
+      {
+        "sequence": 1460,
+        "id": 176,
+        "version": 0,
+        "pid": 4,
+        "tid": 920,
+        "source_qpc": 17576119389,
+        "callback_qpc": 17576147973,
+        "payload_hex": "a06d71540883ffff00000000b3250000000000000100000000000000",
+        "host_receive_ns": 51742501757583,
+        "confirmed_qpc": 17576399698,
+        "host_ack_return_ns": 51742511854583,
+        "host_fsynced_ns": 51742501829875
+      },
+      {
+        "sequence": 1461,
+        "id": 180,
+        "version": 1,
+        "pid": 4,
+        "tid": 920,
+        "source_qpc": 17576119867,
+        "callback_qpc": 17576148326,
+        "payload_hex": "a06d71540883ffff000000000100000000000000000000005030f46781a1ffff",
+        "host_receive_ns": 51742501901875,
+        "confirmed_qpc": 17576399890,
+        "host_ack_return_ns": 51742511915750,
+        "host_fsynced_ns": 51742501969333
+      }
+    ],
+    "display_crosscheck": {
+      "175": {
+        "raw": {
+          "qpc": 17576074758,
+          "pid": 4,
+          "tid": 924,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 9651,
+            "ulQueueSubmitSequence": 1,
+            "pDmaBuffer": 18446640175921325216,
+            "QuantumStatus": 1
+          }
+        },
+        "qpc_offset": 15
+      },
+      "177": {
+        "raw": {
+          "qpc": 17576118650,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 177,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "uliCompletionId": 9651,
+            "ulQueueSubmitSequence": 1,
+            "InterruptType": 1,
+            "QuantumStatus": 1,
+            "FaultedVirtualAddress": 0,
+            "PageFaultFlags": 0,
+            "FaultedProcessHandle": 0
+          }
+        },
+        "qpc_offset": 17
+      },
+      "176": {
+        "raw": {
+          "qpc": 17576119372,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 176,
+          "version": 0,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "uliCompletionId": 9651,
+            "ulQueueSubmitSequence": 1,
+            "bPreempted": 0
+          }
+        },
+        "qpc_offset": 17
+      },
+      "180": {
+        "raw": {
+          "qpc": 17576119852,
+          "pid": 4,
+          "tid": 920,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446606670532537760,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446640175899750480
+          }
+        },
+        "qpc_offset": 15
+      }
+    },
+    "kmd_same_submission": [
+      {
+        "event": "ExecutionState",
+        "qpc": 17576113027,
+        "id": 2,
+        "version": 1,
+        "pid": 4,
+        "tid": 924,
+        "offset": 819200,
+        "payload_sha256": "6edb14f645b2d926f8e669a3d28d6853f03a3841752538347088068cf668f54b",
+        "source": 1,
+        "source_name": "preempt",
+        "adapter_luid": "0000000000005afc",
+        "status": "0x00000000",
+        "request_fence": 1124,
+        "request_flags": "0x00000000",
+        "stage": 7,
+        "stage_name": "gpu_fence",
+        "request_context": "0x0000000000000000",
+        "context": "0xffffa181685fd950",
+        "dma_address": "0x0000000004004000",
+        "submission_fence": 9651,
+        "last_completed_fence": 9650,
+        "expected": 3272,
+        "observed": 0,
+        "dma_bytes": 52,
+        "work_flags": "0x000681a1",
+        "queue_flags": "0x00000119",
+        "queue_failure": "0x00000000",
+        "graphics_generation": 1,
+        "channel_stage": 4,
+        "channel_register": "0x5801308c",
+        "channel_value": "0x00000002",
+        "cached_fifo": "0x00000000",
+        "cached_mmu": "0x00000000",
+        "cached_pbdma": "0x00000000",
+        "cached_pbdma1": "0x00000000",
+        "cached_mc": "0xd8213120",
+        "cached_gr": "0x00000000",
+        "cached_fecs_error": "0x00000000",
+        "cached_fecs_host": "0x00000000",
+        "poll_count": 1,
+        "request_dma_bytes": 0,
+        "private_bytes": 0,
+        "umd_private_bytes": 0,
+        "work_state": [
+          "active",
+          "prepared",
+          "attempted",
+          "submitted",
+          "observed_valid",
+          "mc_valid",
+          "gr_valid"
+        ],
+        "queue_state": [
+          "engine",
+          "preemptions_pending",
+          "pending",
+          "channel_fields_valid"
+        ]
+      }
+    ],
+    "boundaries": {
+      "last_entry": {
+        "qpc": 17576074860,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 105,
+        "version": 0,
+        "fields": {
+          "Function": 5063
+        }
+      },
+      "last_return": {
+        "qpc": 17576075358,
+        "pid": 4,
+        "tid": 924,
+        "provider": "kernel",
+        "id": 106,
+        "version": 0,
+        "fields": {
+          "Function": 5063
+        }
+      },
+      "first_anomaly_or_missing": "GR、FECS 错误邮箱及主机中断状态为本次采样时点。逐 SM HWW 和 PRI 锁存仍缺。该 Blt 与历史 91476 的 DWM DMA 152586 是各自启动内的不同提交。"
+    },
+    "artifact": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-new-baseline-profiler-20261121-01/application-dma-fence-proof.json",
+      "sha256": "0480c4524958c1e2b7a09d8f3c41a4d2b7a62d1ca3293700cd596e192b6d8dc0"
+    }
+  }
+}

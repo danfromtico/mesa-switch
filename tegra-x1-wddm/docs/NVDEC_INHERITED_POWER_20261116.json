@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-16T19:22:01.948446+00:00",
+  "state": "Inherited-power correction built and controlled locally; real provider/transport not connected",
+  "source": {
+    "base": "3811fb5c6d43cc4952a83c319c5691184c329e2a",
+    "files": {
+      "tegra-x1-wddm/platform/t214_nvdec.c": "2783b7e3be9b36ec25e6aea2faada0fd05441c0dfe26dd29850681eb7bd5c4a2",
+      "tegra-x1-wddm/platform/t214_nvdec.h": "b6e684e92a5342e315eadfaccb02b2730e1cf0bea6c99f1dd459c79cc9330b64",
+      "tegra-x1-wddm/windows/nvdec_backend.c": "af9384cdd533dc24282ded454d6ff6cb7729884a36494ed88b5b81bb52b2499d",
+      "tegra-x1-wddm/windows/nvdec_backend.h": "8c5fb04f81ebeb4f5a80e05de95e20faddb552e16bc940e7ed46f37c405c63df",
+      "tegra-x1-wddm/windows/probe.c": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
+      "tegra-x1-wddm/tests/test_nvdec_platform.c": "0bb15ac75eba03840ece2d47c44b889e643d983f88a595fece4314baa5fa810e"
+    },
+    "patch_sha256": "ddf6b7f85b222822a790a6fb1342c5915bd9dc08bedbbd32165748a1e4f9a6d6"
+  },
+  "native_evidence_basis": {
+    "record": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
+    "hidrev": "00012127",
+    "powergate_status": "3ffecf4d",
+    "clock_y": "00000342",
+    "reset_y": "0fe9d09d",
+    "nvdec_clock_source": "e0000000",
+    "limit": "Power bits and CAR values observed natively. PMC clamps, Host1x FIFO/GET/PUT and actual clock lease have not been observed by this implementation. Model fixture values do not fill those gaps."
+  },
+  "changes": [
+    "Replace blanket rejection of powered NVDEC with explicit B01 inherited-idle checks; require NVJPG dependency already powered, both partitions unclamped, clocks gated and resets asserted. Reject cold/busy/unknown states without PMC writes.",
+    "Retain inherited partition power and NVJPG reset/clock/source. Do not execute the T210-only SLCG/MBIST workaround on B01.",
+    "Require parent-supplied Host1x/PLLP clock ownership callbacks. Never write CAR L or reset shared Host1x globally. Failed acquire/release retains the owner record for cleanup.",
+    "Do not zero live ownership on reinitialization. Stop only the reserved channel; require reset acknowledgement, stable MC drain and empty Host1x FIFO before retirement. Preserve other clients bits.",
+    "With the owned channel stopped and quiesced, clear DMA backing pointers and initialize empty GET/PUT; verify readback before releasing the clock. This enables retry after timeout and never writes a syncpoint.",
+    "Kernel backend accepts parent-owned register callbacks and explicit reserved channel/syncpoint instead of full raw apertures and hardcoded11/31; reject a mismatched submit syncpoint.",
+    "The retired replacement probe explicitly returns not-supported; it cannot manufacture a clock/resource owner."
+  ],
+  "validation": {
+    "cpu_control": {
+      "compile": [
+        "clang",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-g",
+        "-Itegra-x1-wddm/platform",
+        "tegra-x1-wddm/platform/t214_nvdec.c",
+        "tegra-x1-wddm/tests/test_nvdec_platform.c",
+        "-o",
+        "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/inherited-power/test-platform-asan"
+      ],
+      "compile_exit": 0,
+      "run_exit": 0,
+      "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+      "source_hashes": {
+        "tegra-x1-wddm/platform/t214_nvdec.c": "2783b7e3be9b36ec25e6aea2faada0fd05441c0dfe26dd29850681eb7bd5c4a2",
+        "tegra-x1-wddm/platform/t214_nvdec.h": "b6e684e92a5342e315eadfaccb02b2730e1cf0bea6c99f1dd459c79cc9330b64",
+        "tegra-x1-wddm/windows/nvdec_backend.c": "af9384cdd533dc24282ded454d6ff6cb7729884a36494ed88b5b81bb52b2499d",
+        "tegra-x1-wddm/windows/nvdec_backend.h": "8c5fb04f81ebeb4f5a80e05de95e20faddb552e16bc940e7ed46f37c405c63df",
+        "tegra-x1-wddm/windows/probe.c": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
+        "tegra-x1-wddm/tests/test_nvdec_platform.c": "0bb15ac75eba03840ece2d47c44b889e643d983f88a595fece4314baa5fa810e"
+      },
+      "scope": "CPU model with ASan/UBSan; no real clock provider, channel reservation or hardware DMA proof"
+    },
+    "arm64_objects": [
+      {
+        "source": "tegra-x1-wddm/windows/nvdec_backend.c",
+        "exit": 0,
+        "source_sha256": "af9384cdd533dc24282ded454d6ff6cb7729884a36494ed88b5b81bb52b2499d",
+        "object_sha256": "2c6648271e489c33f19ae99f326fbb7a72d54886d6879639cdd7f268481d91d2"
+      },
+      {
+        "source": "tegra-x1-wddm/windows/probe.c",
+        "exit": 0,
+        "source_sha256": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
+        "object_sha256": "26d84facbdc32812c66a1bc1d6e91ad55f252b3a24074323b460cb965f66046f"
+      },
+      {
+        "source": "tegra-x1-wddm/platform/t214_nvdec.c",
+        "exit": 0,
+        "source_sha256": "2783b7e3be9b36ec25e6aea2faada0fd05441c0dfe26dd29850681eb7bd5c4a2",
+        "object_sha256": "8b9f448ec69479139c4c3a24b8d5248520ffd0f5e8146ae93d68d4a7f2b9c2a9"
+      }
+    ],
+    "object_scope": "Three dependent real-WDK ARM64 objects /W4 /WX. No new complete KMD/UMD/ICD package is built or installed for this change.",
+    "controls_cover": [
+      "Inherited state restoration and unrelated shared-register bits",
+      "No PMC, shared CAR L or MBIST writes; no CPU syncpoint write",
+      "Reject foreign/unknown initial states and live reinitialization",
+      "Acquire failure after reference, release failure and retained retry state",
+      "Source failure, reset failure, transient/non-completing MC drain, gate-clear failure and GET-reset failure",
+      "Timeout retirement followed by successful reacquisition of the reserved channel"
+    ],
+    "scope_limit": "CPU fixtures and compilation establish program logic only; no native provider availability, firmware execution, DMA or decode result is claimed."
+  },
+  "native_attempt": {
+    "count": 1,
+    "exit": 255,
+    "outcome": "SSH connection closed by peer before command execution",
+    "error_sha256": "e90236a6fb2d8c780b5da65069afdd8434b33bdce97a84c17500ea54936d094a",
+    "uploaded": false,
+    "installed": false,
+    "restart_requested": false,
+    "last_confirmed_baseline": "2026-11-16T18:12:24.0060013Z preceding resource-round cleanup"
+  },
+  "candidate_separation": {
+    "client_route_record": "NVDEC_CLIENT_ROUTE_20261116.json",
+    "client_route_kmd_sha256": "ed09a227cd25bd1604ea4b8de1fdd8f725a7bf927fe275a3830ed1f1db381bf4",
+    "client_route_contains_this_power_code": false,
+    "installed_baseline_changed": false,
+    "baseline_promoted": false
+  },
+  "remaining": [
+    "Run the frozen client-route/PMC candidate when device access returns; capture pre-selection EMC and resolve the prior ACTMON -3 difference before promotion.",
+    "Connect a real FAN0 clock owner, explicit channel/syncpoint reservation, translated PnP register views, and serialized MC access to the coexisting transport.",
+    "Replace the retained Windows backend raw contiguous physical-address DMA allocator with the verified actual system mapping/ownership path; this allocator is still not production-wired.",
+    "Cold or clamped partition state remains unsupported by the inherited path; if observed, choose a genuine PMC-owned transition rather than forcing it through this mode.",
+    "Validate actual720p firmware, DPB/scratch bounds, NV12, video DDI and GPU CSC path, then1080p."
+  ],
+  "review": {
+    "status": "Pending Gemini4 Carbon High",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "retry_performed": false
+  },
+  "references": [
+    {
+      "url": "https://raw.githubusercontent.com/CTCaer/switch-l4t-kernel-4.9/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/platform/tegra/powergate/powergate-t21x.c",
+      "sha256": "870cf1cafdacb2a26fa43b02c0d1b04c16a2f2b2d17c496c29185ce2b6f8788e",
+      "applicability": "NVJPG dependency, initial powered-partition references, clamp register, and B01 SLCG exception. GPL source consulted for contract facts only; no implementation copied."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/torvalds/linux/v6.8/drivers/gpu/host1x/hw/cdma_hw.c",
+      "applicability": "Host1x HW5 CMDPROC_STOP/channel teardown and DMACTRL GET reset from PUT. Reference only; CPU timeout syncpoint increments are not adopted."
+    },
+    {
+      "repo_file": "tegra-x1-wddm/platform/t214_power.c",
+      "sha256": "ff783781fb2c1f9c3856a35591ca0ae458682ac3c0729831484a4208de8a4fbc",
+      "applicability": "Existing GPU stable MC-drain policy; NVDEC checks its own client bit. This is not new hardware validation."
+    }
+  ]
+}

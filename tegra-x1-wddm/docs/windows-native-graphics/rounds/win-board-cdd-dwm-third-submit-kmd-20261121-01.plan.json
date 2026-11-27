@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "round_id": "win-board-cdd-dwm-third-submit-kmd-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "owner": "Windows DxgKrnl 与 GM20B KMD 的提交入口和工作队列",
+  "question": "异常轮 DxgKrnl 为 48660 第三次提交的 DMA 围栏 152586，是否还有同一适配器 KMD 接收或硬件队列证据？",
+  "method": "回读正式基线 KMD 提交和抢占代码及事故双路 ETL 的原始 KMD 提供程序，无新实机执行",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "原始 KMD 负载按适配器和请求字段明确绑定 152586 至提交入口或返回、工作队列或硬件开始。",
+  "observations": [
+    "冻结并校验正式基线源文件、已加载 KMD 和两个事故 ETL 的 SHA-256。",
+    "重解 KMD 全事件的适配器、request_fence、submission_fence、任务状态和时间。按标识及时间与 DxgKrnl 针对最后两次抢占及第三次提交的记录核对。",
+    "用正式基线代码明确事件点所处的 DDI、准入和 worker 边界。缺真正 KMD 入口和执行证据时标为观测缺口。"
+  ],
+  "inputs": {
+    "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+    "archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+    "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "source_sha256": {
+      "tegra-x1-wddm/windows/submit_ddi.c": "b01cef642b9c660226fd24e468b861f9f21b3176fba6ae7ba6a3fcda0e2d1548",
+      "tegra-x1-wddm/windows/work_queue.c": "4a5c659465f757319d340af3cd0c2962c8131f5b6c1c85a8ea53d0ca23108a1e",
+      "tegra-x1-wddm/windows/diagnostic_events.c": "55f50c8818b30c39423cff59fb55d9b77669998c12c9c3f2ed59e73cc9644e0c",
+      "tegra-x1-wddm/tools/decode_recovery.py": "bea81ab0f8416492c7fff305a81cf31697396b304655350157cdfa830c8475d7"
+    },
+    "prior_results": [
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+        "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-completion-coverage-20261121-01.result.json",
+        "sha256": "21226aacabf0c345582ff142b88493e08746510cccaf2afcfafe61e1e7095dd2"
+      }
+    ]
+  }
+}

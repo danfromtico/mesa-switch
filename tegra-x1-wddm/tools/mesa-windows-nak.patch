@@ -1,0 +1,100 @@
+--- a/include/drm-uapi/drm_fourcc.h
++++ b/include/drm-uapi/drm_fourcc.h
+@@ -24,7 +24,14 @@
+ #ifndef DRM_FOURCC_H
+ #define DRM_FOURCC_H
+
++#ifdef _WIN32
++/* Format/modifier definitions are also used by Windows; no DRM ioctl ABI. */
++#include <stdint.h>
++typedef uint32_t __u32;
++typedef uint64_t __u64;
++#else
+ #include "drm.h"
++#endif
+
+ #if defined(__cplusplus)
+ extern "C" {
+--- a/src/nouveau/compiler/nak.h
++++ b/src/nouveau/compiler/nak.h
+@@ -131,7 +131,7 @@
+    NAK_TS_SPACING_FRACT_EVEN = 2,
+ };
+
+-enum PACKED nak_mesh_topology {
++enum ENUM_PACKED nak_mesh_topology {
+    NAK_MESH_TOPOLOGY_POINTS = 0,
+    NAK_MESH_TOPOLOGY_LINES = 1,
+    NAK_MESH_TOPOLOGY_TRIANGLES = 4,
+--- a/src/nouveau/compiler/nak_private.h
++++ b/src/nouveau/compiler/nak_private.h
+@@ -181,7 +181,14 @@
+
+ PRAGMA_DIAGNOSTIC_PUSH
+ PRAGMA_DIAGNOSTIC_ERROR(-Wpadded)
+-struct nak_nir_tex_flags {
++/* Preserve the four-byte NIR/GPU flag-word layout on Windows. */
++#ifdef __MINGW32__
++#define NAK_BITFIELD __attribute__((gcc_struct))
++#else
++#define NAK_BITFIELD
++#endif
++
++struct NAK_BITFIELD nak_nir_tex_flags {
+    enum nak_nir_tex_ref_type ref_type:2;
+    enum nak_nir_lod_mode lod_mode:3;
+    enum nak_nir_offset_mode offset_mode:2;
+@@ -210,7 +217,7 @@
+ bool nak_nir_lower_mesh_stages_shared_atomics(nir_shader *nir);
+ bool nak_nir_lower_f16vec2_shared_atomics(nir_shader *nir);
+
+-struct nak_nir_attr_io_flags {
++struct NAK_BITFIELD nak_nir_attr_io_flags {
+    bool output : 1;
+    bool patch : 1;
+    bool phys : 1;
+@@ -231,7 +238,7 @@
+    NAK_SUCLAMP_ROUND_R16,
+ };
+
+-struct nak_nir_suclamp_flags {
++struct NAK_BITFIELD nak_nir_suclamp_flags {
+    enum nak_suclamp_mode mode : 2;
+    enum nak_suclamp_round round : 3;
+    bool is_s32 : 1;
+@@ -257,7 +264,7 @@
+    NAK_IMAD_TYPE_S16_HI,
+ };
+
+-struct nak_nir_imadsp_flags {
++struct NAK_BITFIELD nak_nir_imadsp_flags {
+    enum nak_imad_src_type src0 : 3;
+    enum nak_imad_src_type src1 : 3;
+    enum nak_imad_src_type src2 : 3;
+@@ -274,7 +281,7 @@
+    NAK_ISBE_ACCESS_ATTR,
+ };
+
+-struct nak_nir_isbe_flags {
++struct NAK_BITFIELD nak_nir_isbe_flags {
+    enum nak_isbe_access access : 2;
+    bool output : 1;
+    bool skew : 1;
+@@ -376,7 +383,7 @@
+    NAK_INTERP_LOC_OFFSET,
+ };
+
+-struct nak_nir_ipa_flags {
++struct NAK_BITFIELD nak_nir_ipa_flags {
+    enum nak_interp_mode interp_mode:2;
+    enum nak_interp_freq interp_freq:2;
+    enum nak_interp_loc interp_loc:2;
+@@ -401,7 +408,7 @@
+    NAK_CMAT_TYPE_M16N16K16_FLOAT_SW,
+ };
+
+-struct nak_nir_cmat_mul_add_flags {
++struct NAK_BITFIELD nak_nir_cmat_mul_add_flags {
+    enum nak_cmat_type cmat_type:3;
+    enum glsl_base_type a_type:5;
+    enum glsl_base_type b_type:5;

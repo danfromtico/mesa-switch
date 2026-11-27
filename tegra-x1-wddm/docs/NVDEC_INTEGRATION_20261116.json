@@ -1,0 +1,906 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-18T01:26:41.9873984Z",
+  "state": "Native 1080p H.264 functional acceptance passed. All six visible NV12 frames matched the independent decoded reference. GPU conversion, presentation in the physical window and normal close were observed over 16.093 seconds including an eight-second final hold.",
+  "installed_baseline_changed": true,
+  "resolution_roadmap": {
+    "completed": [
+      {
+        "resolution": "720p",
+        "record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json"
+      },
+      {
+        "resolution": "1080p",
+        "record": "NVDEC_1080_D3D11VA_20261117.json"
+      }
+    ],
+    "current": "Paced 720p and 1080p H.264 functional acceptance complete on their recorded component combinations",
+    "deferred_native_acceptance": [
+      "2K",
+      "4K"
+    ],
+    "higher_resolution_delivery": "External implementation present. No native validation scheduled."
+  },
+  "external_delivery": {
+    "repository": "https://github.com/ruje0504-2/mesa-switch-woa",
+    "archive_branch": "nvdec-deepseek-delivery-20261116",
+    "archive_url": "https://github.com/ruje0504-2/mesa-switch-woa/tree/nvdec-deepseek-delivery-20261116",
+    "base": "aba2cd324d71cf925a799ae51e6fa43cdf192b93",
+    "head": "280440f3fc8dbcd00e9afc0152820bf1bd1eafb4",
+    "selected_720p": "96e24579a02b5c041be4f8871f67a1818917475e",
+    "1080p_commit": "70807999107c554d87364c40c8933cc945c20c8d",
+    "2k_commit": "1155632855723ed88f7427e33086db055b3fd183",
+    "4k_commit": "280440f3fc8dbcd00e9afc0152820bf1bd1eafb4",
+    "checked_files": 56,
+    "intake_hash_mismatches": [],
+    "archive_scope": "Original independent source preserved without changing its commits; not the installed baseline and not the corrected production integration",
+    "delivered_arm64_sha256": {
+      "arm64/README.txt": "e2977bc9c6ff0823c0d14352db4739617796bc26563f73ba77fcb3f93c3cfbf3",
+      "arm64/TegraGpuD3DVk.dll": "d73327a7af1c79419f8edac0fb04ae10900e17a097c2366c7193b17784582ec6",
+      "arm64/mf_dxgi_probe.exe": "8b430bebbe0cbdb34b7fd7ca67dd29bc725119ac36555f6a868b08c8332f993f",
+      "arm64/nvdec1080.exe": "d584bfee6cb527ef8eb043a762a5e04b41a374ec2b8a6686ea384f134a560d65",
+      "arm64/nvdec2k.exe": "a30aa63e08e9253e88fbc022b8f7309f8e7c9ff5891ff76dc48cbdff5a95f68e",
+      "arm64/nvdec4k.exe": "cd2bb017e43f204c4df23acf7c0558fa8ae8238931188698dc95fd08bb28a00a",
+      "arm64/nvdec720.exe": "373986c414629f209780481e9b99a7fda67e263d5a095658c3c035d42928353f",
+      "arm64/tegragpuprobe.inf": "b9b22117d8c12c705f1808001bd274af6321c7b4d4a9e02f86e98f86354bf83d",
+      "arm64/tegragpuprobe.sys": "51cd28cbac1e13504f72111a585f765005ca37597c6c595d284fe57b1f502c59",
+      "arm64/tgd3d-contracts.exe": "e30d61939752aedf9d40fae1c7ff9e3830c6489b7b5f94008d04013d74edc3fc"
+    }
+  },
+  "integration": {
+    "retained_work": "Selected720p core/parser/firmware/DDI mapper/CSC groundwork; external modern runtime-table negotiation patch not applied",
+    "local_fixes": [
+      "NVDEC address methods use256-byte units with alignment/range validation",
+      "Falcon DMA source offset relative to already-adjusted OS base",
+      "H264 mapper null check before dereference",
+      "Bounded mapper/parser error strings",
+      "Zero decode status on validation failure",
+      "METHOD_BUFFERED replies built separately until all input consumed; exact initialized reply lengths",
+      "Unaligned slice offsets copied into aligned local storage",
+      "Kernel firmware pin checked before powering backend",
+      "No extra NVDEC MMIO mapping during ordinary probe preparation",
+      "Persistent decoder-session coloc/history/MB workspace, separate from variable bitstream arena",
+      "DXVA short-slice configuration raw2 and create-time configuration rejection",
+      "Normalize valid progressive DXVA reference entries instead of looping SPS maximum",
+      "DXVA scan-order scaling matrices converted to NVDEC raster order; matrix mandatory at DDI boundary",
+      "Stop legacy probe raw NVDEC MMIO mapping; production must use translated GPU0 PnP resources",
+      "Optional decode resource failures retain the existing render resources and preserve failed-unmap ownership",
+      "Do not overwrite an earlier unmap failure with a later successful display unmap",
+      "Private adapter query extends48-byte legacy ABI with a64-byte immutable resource snapshot only when output is large enough"
+    ],
+    "runtime_video_table_advertised": false,
+    "legacy_probe_raw_mapping_enabled": false,
+    "decode_transport_connected": true,
+    "sc7_enabled": false,
+    "full_diff_source_parent": "da1bda2bb0fc5c825f298c8f35a37ac737bf5d30",
+    "source_sha256": {
+      "src/nouveau/nvdec/nvdec.h": "58bcc3b5a44ff70070e62571ee79d49e4db66d177b90979ec8b0ace0826d76b0",
+      "src/nouveau/nvdec/nvdec_engine.c": "ae1a1f6c297cffb308a0e388d4de127f8ee9daef90f696e5f47663d7f8fefc01",
+      "src/nouveau/nvdec/nvdec_fw.c": "bd6489e5361ec4624953d22b5465bda3f915f53c48d10154ef8e0a815af391b6",
+      "src/nouveau/nvdec/nvdec_h264.c": "ca82c68e101fb61dc68bcfc440cdf73687aad0a895b58eac90809fa3ec18125b",
+      "src/nouveau/nvdec/nvdec_parse.c": "655c3390dc9fc3f93a6fe788376edb865f186620e4a285ce5893ea2cde248754",
+      "src/nouveau/nvdec/nvdec_parse.h": "7411d3fd106b912b00218aee548facf9d715b671b05cd35a4bb36dd1c5cc880c",
+      "src/nouveau/nvdec/nvdec_sha256.c": "af82ac4dc6d08514b583916c2df8ccb44867ea5956f965d65584fe84f49ce96a",
+      "src/nouveau/tgd3d/meson.build": "33da05fac1f1539a60b1bcee0d22ce8641512db8ba7d824b04d61f60402a595c",
+      "src/nouveau/tgd3d/shaders/generate.py": "388344104e3f68c739b6e9dccfe12cbe399c3ba8254cb2370f5cd6cba9f116b1",
+      "src/nouveau/tgd3d/shaders/nv12.frag": "ff511f1661e15bd38e5033186dcf8e2c2ee47ca309ac6c1f3674606a61d789f2",
+      "src/nouveau/tgd3d/shaders/nv12.vert": "a7a5c28e5a2ebcaf76796a0fbf8eac3013109864ab8d70164cbbbc435b8c51aa",
+      "src/nouveau/tgd3d/shaders/nv12_spv.h": "422e75503a779eeba14e3c2f43a1a9da9f9e83e1d47df42c8a4fa529709c1e3f",
+      "src/nouveau/tgd3d/tgd3d.h": "c59e968149f2e53541c0ee4697e24452c4b22d4f4aea26e38afecba3d1a5629f",
+      "src/nouveau/tgd3d/tgd3d_csc.c": "a3eca105f10a5062444d4e78542e07a8b42ead45026768f9035ad6bc87b2945a",
+      "src/nouveau/tgd3d/tgd3d_csc.h": "fa506044275d4d5d0439cf821a990e0dcacd75e412f7b87340960a97daa3d3d5",
+      "src/nouveau/tgd3d/tgd3d_dxva_h264.h": "05448b41b26ed64fe1788806479a0f8ec07e3de637f2da28fdb361d96cd7b4bb",
+      "src/nouveau/tgd3d/tgd3d_h264_map.c": "8fdfa325e5e2da44b0c28b2b2e3d02d484c34451a88871d9b93a6cc8ab41039f",
+      "src/nouveau/tgd3d/tgd3d_h264_map.h": "91bb2ab585d86fd9e4495b31b9e59e01d9ac49708389cc10cfe931d421b48797",
+      "src/nouveau/tgd3d/tgd3d_video.cpp": "b03a6bfee9d83d56c3bc6d5210df42c330715648b34492a300a4bf9370b01aed",
+      "src/nouveau/vulkan/nvkmd/windows/build_icd.py": "60fa861535412f9f01b93f16b45012888854f9de6a715690158e247e0a9c1c0a",
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_abi.h": "627d0fceb28e7dbfb7c8658451f8b9730144d42437976d108bca7accb930e81a",
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_check.c": "937c8a3c7c19e4d6ac6ffe71d06cd7f616be1d45132e1eaf211eb071da8c1b20",
+      "tegra-x1-wddm/platform/t214_nvdec.c": "d9263eb968e5b71d93e6f3ae5ec0ee454602fef67f8f9981e004fb4288dbc730",
+      "tegra-x1-wddm/platform/t214_nvdec.h": "7a5b530eab64e7e598dbfc1a1f2dc245fdf6e73aa3c1e2a3e0ec55e40da0bd56",
+      "tegra-x1-wddm/platform/t214_resources.h": "a73eea9820024527e00fb418e58f075cacd6d079e16ae7b0f5112b825e9b3163",
+      "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "7f1582c744514a895842b2baa58f06b13ba42beadc5151f93b5121bac07ef458",
+      "tegra-x1-wddm/tests/test_nvdec.c": "96d8f9d943f0e61267eb6dd3c35648415b9596ed6b011192df0e88f045a896c4",
+      "tegra-x1-wddm/tests/test_nvdec_h264.c": "d508104db872875d286ede06160e90ad2a7940398fa22c6d49f24498a5e72e8d",
+      "tegra-x1-wddm/tests/test_nvdec_platform.c": "aee510f37014095d9ebca5a14360962ebc9d5ba5eac7bde04e96ce9f0f2cdf2b",
+      "tegra-x1-wddm/tests/test_paging_windows.c": "4208a031ba96925a7a5fb1906b910cc5baa9c154879d3442339eb97e0bd09ad1",
+      "tegra-x1-wddm/tests/test_tgd3d_csc.c": "9313bb4d88a42b6e6c5517aa9a63cad71a367ffe2408b8a930bee51fcba7eada",
+      "tegra-x1-wddm/tests/test_tgd3d_dxva_abi.c": "08b1dedc79499d32fd5c75bc1b568251715b060c17872d635976058fa92740ee",
+      "tegra-x1-wddm/tests/test_tgd3d_h264_map.c": "4457b66b6d4c0cfc8566b653e92d28db65395de42a469e7b954432a9a9f39ece",
+      "tegra-x1-wddm/tools/build.py": "1ddb80b6a0189e73b81387e9571f93f0871cc3da4a58c174ed88f35afb6e2ee2",
+      "tegra-x1-wddm/tools/build_nvdec_acpi.py": "7c47093a8ceab4f197b20191a2ae4d03163c9d7422183184dcc192388d0707bf",
+      "tegra-x1-wddm/tools/build_tgd3d.py": "86156fb18bdcf1fd323f8c2d31e1724ab5b07ae17fc78039c64c72179fea8183",
+      "tegra-x1-wddm/tools/mf_dxgi_probe.c": "07ffa45ea603bda19e4ce4cc015cc056433f4c88b801420ac42b299a7c34e14b",
+      "tegra-x1-wddm/tools/nvdec720.c": "8c78df2036379e9474589024567f2affb92f6ac196390336bfb27b52fa2bd49b",
+      "tegra-x1-wddm/windows/adapter.c": "bf28a4e488c84263506f457e1ae2331608940a0af93fbe950885b4e6252c494d",
+      "tegra-x1-wddm/windows/context.h": "69ca6a13f601918bc55fa5c97d673e95d435305387e6643d114f103a9f4b8769",
+      "tegra-x1-wddm/windows/nvdec_backend.c": "a49c592026e6b3b25385b95ad4b48c4a461da4ded1ca8f4617209d14ce01c42a",
+      "tegra-x1-wddm/windows/nvdec_backend.h": "e2d2e9b5958cf0d2b3ef049d9643f33d809354c60a7f9ac73110a7519f9fa2b4",
+      "tegra-x1-wddm/windows/nvdec_control.h": "a3f65f3c8527a27c2bc7e645b459f8bfe3dff466831cc29f03959bbb805b8425",
+      "tegra-x1-wddm/windows/probe.c": "71c6f958054d157e177ca54c73898b856d6fb3b8b25df31105fa9c10d8ae7aa8",
+      "tegra-x1-wddm/windows/resources.c": "ebd3c23727f86bf35a3a9fa97a04166c014ae95e33e530a3eb7525e8503ee7d3",
+      "tegra-x1-wddm/windows/resources.h": "7bd3f959c65c8ef77904924fdfda6bcffd027fcbfe72ca9fdb9b2f400541120a",
+      "tegra-x1-wddm/windows/query.c": "a52d5c80f09b2c69bd8b8f3c07ef5bd4e33bbcf3aa61af01c9411b6b4214bd06",
+      "tegra-x1-wddm/tests/test_context_windows.c": "b744d20bc27301a9fd1c4ca74d9a00d34a116079e39009d88c1d9346e205df74"
+    },
+    "source_set_sha256": "bd508394ce2a4c6376f0ae9863d212d7594339ad872848679ee47782dcef4103",
+    "source_snapshot_scope": "Initial selected720p import snapshot, not the current source tree. Later per-module records and current_committed_source supersede hashes for changed files.",
+    "decode_transport_scope": "Native KMT LOAD, CONFIGURE, DECODE and CLOSE on the display adapter. Hardware completion is checked before linear NV12 readback.",
+    "runtime_video_table_scope": "Opt-in per-process video DDI used by the native FFmpeg acceptance client. Public enablement remains deferred."
+  },
+  "licenses": {
+    "new_code_spdx": "MIT",
+    "existing_nvidia_picture_abi": "src/nouveau/headers/nvidia/video/nvdec_drv.h; NVIDIA MIT",
+    "vaapi_reference": "https://github.com/cyndis/vaapi-tegra-driver/tree/49a56d392a21ef3ff9ed848b6b98293572d14eba",
+    "linux_noble_reference": "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/platform/tegra/powergate/powergate-t21x.c",
+    "linux_noble_usage": "GPL sources consulted for hardware contracts; not copied into MIT modules",
+    "firmware": "External NVIDIA firmware not committed with this source import"
+  },
+  "validation": {
+    "cpu_only": [
+      "Address/firmware and malformed-input ASan/UBSan controls passed",
+      "Cancel-failure retention and reboot-before-reuse core model passed",
+      "MC/Host1x quiesce failure and ambiguous power command model passed",
+      "Seven changed ARM64 kernel objects compile with /W4 /WX",
+      "DXVA IDR/DPB holes/frame flags/matrix-order ASan+UBSan control passed",
+      "Microsoft SDK10.0.26100.0 public DXVA prefix/slice/matrix ABI compiled forARM64",
+      "Full ARM64 UMD and existing contract/tool executables built; not executed or installed",
+      "Optional resource failures and legacy/extended private-query guard/alias controls passed",
+      "Release error-masking regression failed before fix and passed after fix"
+    ],
+    "new_failures_and_limits": [
+      {
+        "failure": "Full current paging CPU fixture failed at display-model write allowlist",
+        "scope": "Inherited dirty DC geometry changes; isolated resources and query controls pass. E95 candidate uses frozen original DC, whose build controls pass. No new physical display failure observed."
+      },
+      {
+        "failure": "Frozen historical test-context lacked IRP/PnP trap substitutes needed by frozen EMC platform_io",
+        "resolution": "Reused current repository test-only trap substitutes; ARM64 context control links. Production sources unchanged by this test compatibility correction."
+      }
+    ],
+    "arm64_umd": {
+      "directory": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/umd-arm64",
+      "installed": false,
+      "public_video_advertised": false,
+      "log": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/umd-arm64-build.log",
+      "manifest": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/umd-arm64/manifest.json",
+      "dll": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/umd-arm64/TegraGpuD3DVk.dll",
+      "dll_sha256": "36645ff04478ac1caec71d5297dd23e6b25e7c9364c7ea66dbf4671af4b25dc5",
+      "bytes": 3322368,
+      "paired_icd_built_this_round": false,
+      "signed": false
+    },
+    "resource_candidate": {
+      "directory": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/nvdec-integration-20261116/resource-preflight",
+      "source_base": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f",
+      "emc_input_identity": "6942cee5eb41547e40ebada89a5a8e976caa09985fda3fee509d2f2451bd0852",
+      "patch_sha256": "db088ba8220c54667dc09bdb40117c0bf03db2c6b4b2d2b167b3e29bb4534a2c",
+      "signed_kmd_sha256": "e340ffcceb68b17693854b26a8d581e6b0944c6a58e763f67609ddd66f2b678c",
+      "acpi_sha256": "6b058b409beda750473fa61430cb5196c6191d3801167d7f3c13846077fdcf49",
+      "query_tool_sha256": "5015d34e22878b225b58dcfb29fd484161f4412aec9d46ed99adb9371dda8a5d",
+      "scope": "Optional resources plus immutable always-on state snapshot only; no NVDEC power-up, firmware, DMA, node or capability enabled",
+      "catalog_generated": true,
+      "windows_signature_verified": true,
+      "native_installed": false,
+      "signature_verified_local": true,
+      "review": "Main-agent self-review; no external review requirement",
+      "controls": "Missing/partial/malformed resources, each map failure, null-success map, retained failed unmaps, snapshot and legacy/extended query guards/alias forms pass CPU controls; release masking regression red-before/green-after; real-WDK ARM64 objects and full render package build",
+      "pairing": "Candidate KMD+extended ACPI must be installed/restored as a pair; baseline E95 alone rejects the additional resource descriptors",
+      "native_trial_completed": true,
+      "currently_installed": false,
+      "candidate_promoted": false,
+      "result": "All9resources mapped; globalSMMU read invalid; ACTMON readback difference unresolved; original pair restored and temporary files cleaned. No native decode."
+    },
+    "native_decode_executed": true,
+    "physical_video_verified": true,
+    "gemini_independent_review": {
+      "status": "not performed",
+      "required": false
+    },
+    "clock_native_result": "NVDEC_CLOCK_NATIVE_20261117.json",
+    "physical_video_scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred."
+  },
+  "remaining": [
+    "Investigate load-related unpaced resets separately. Shared cause with other reset cases remains unconfirmed.",
+    "2K and 4K remain untested external delivery."
+  ],
+  "resource_preflight_native_result": "NVDEC_RESOURCE_PREFLIGHT_20261116.json",
+  "client_route_candidate": {
+    "record": "NVDEC_CLIENT_ROUTE_20261116.json",
+    "installed": false,
+    "hardware_decode_tested": false,
+    "baseline_promoted": false
+  },
+  "inherited_power_correction": {
+    "record": "NVDEC_INHERITED_POWER_20261116.json",
+    "actual_clock_provider_connected": false,
+    "native_tested": false,
+    "baseline_promoted": false
+  },
+  "tracked_dma": {
+    "record": "NVDEC_TRACKED_DMA_20261116.json",
+    "local_controls_passed": true,
+    "native_tested": false,
+    "baseline_promoted": false
+  },
+  "scratch_capacity": {
+    "record": "NVDEC_SCRATCH_CAPACITY_20261116.json",
+    "local_controls_passed": true,
+    "native_tested": false,
+    "baseline_promoted": false
+  },
+  "firmware_provenance": {
+    "record": "NVDEC_FIRMWARE_PROVENANCE_20261116.json",
+    "matches_upstream": true,
+    "native_tested": true,
+    "public_windows_redistribution_confirmed": false,
+    "hardware_record": "NVDEC_1080_D3D11VA_20261117.json"
+  },
+  "current_committed_source": {
+    "commit": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+    "previous_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "source_provenance": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json + fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9 1080p surface extent",
+    "changed_files": [
+      "src/nouveau/nvdec/nvdec.h",
+      "tegra-x1-wddm/windows/nvdec_backend.c",
+      "tegra-x1-wddm/windows/nvdec_control.h"
+    ],
+    "delta_sha256": "056cf4b048926d7868f71de1c174e4b3fd5ccfa65475a1467add2b72c9294171",
+    "record": "NVDEC_1080_D3D11VA_20261117.json",
+    "scope": "Paired 1080p surface dimensions on the retained coexisting KMD and UMD"
+  },
+  "client_route_native_result": {
+    "record": "NVDEC_CLIENT_ROUTE_NATIVE_20261117.json",
+    "acpi_file_staged": true,
+    "loaded_candidate_dsdt_verified": false,
+    "candidate_kmd_selected": false,
+    "client_route_measured": false,
+    "gpu_node_present_in_failed_boot": false,
+    "baseline_restored": true,
+    "cleanup_complete": true,
+    "native_decode_accepted": false,
+    "candidate_promoted": false
+  },
+  "emc_preselection_guard": {
+    "record": "NVDEC_ACPI_HANDOFF_20261117.json",
+    "commit": "648c72d075d75412209bcc17799def8bf39bb46b",
+    "selection_controls": 26,
+    "post_activation_controls": 5,
+    "native_operations_in_controls_replaced": true,
+    "native_closed_baseline_pending_state_observed": true,
+    "native_bad_state_guard_exercised": false,
+    "review_pending": false
+  },
+  "acpi_only_native_result": {
+    "record": "NVDEC_ACPI_ENUMERATION_NATIVE_20261117.json",
+    "candidate_table_loaded": true,
+    "gpu_present_with_closed_gate": true,
+    "actmon_error": 0,
+    "candidate_kmd_activated": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "temporary_files_removed": true,
+    "historical_failure_root_cause": "unresolved; not reproduced in this ACPI-only boot"
+  },
+  "controller_source": {
+    "commit": "f90d3be2ed5038c709633fdfdeb925d30a2334d0",
+    "previous_commit": "5f9ab480e5c2ded25220964170f9b09e056ab253",
+    "files": {
+      "Pair.ps1": {
+        "Length": 38710,
+        "Sha256": "27f35560180356ed13a964a7142796453ff76df1a527637f1292d63bf8e16b63"
+      },
+      "Test-RetainedUserspace.ps1": {
+        "Length": 4271,
+        "Sha256": "d3381a86c4fbe71fdc84aa576524e5a3f16ea0921243abd587e0c7a02734d051"
+      }
+    },
+    "scope": "Paired KMD and UMD staging, loaded runtime registration and recovery with the retained display and power configuration."
+  },
+  "client_route_query_result": {
+    "record": "NVDEC_CLIENT_QUERY_20261117.json",
+    "controller_commit": "1e2ecbc2c478593c416c9ac653d087a79aff4f9b",
+    "native_query_reached": true,
+    "mapped_optional_resources": 11,
+    "native_luid": "00000000000a9805",
+    "smmu_config_and_client_enables": "ffffffff",
+    "client_flags": 0,
+    "dma_route_proven": false,
+    "candidate_promoted": false,
+    "baseline_restored": true,
+    "native_cleanup_complete": true,
+    "native_decode_accepted": false
+  },
+  "staging_controller": {
+    "record": "NVDEC_STAGING_REUSE_20261117.json",
+    "commit": "1e2ecbc2c478593c416c9ac653d087a79aff4f9b",
+    "native_trial_controller_sha256": "7a25d1ccdac42abf148a8ac277450314680d057d642c77e8eb4cc06672c3b6e6",
+    "final_source_files": {
+      "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "eb06841925419d0ae3e5f400ace3582a9c57e210d617c01be31b0e8d6447f8cb",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "cc1c2adcd91fcc7c191eeca8a02e5021636d8e1e30c19f9bbad568a6504b8028",
+      "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Staging.ps1": "d359efe35e92b66ad1769b807b647a8157658e92744a960c7ad751e796c2269d"
+    }
+  },
+  "smmu_bypass_correction": {
+    "record": "NVDEC_SMMU_BYPASS_20261117.json",
+    "commit": "659b8c324d893e6eac90e6feeb105d8bc62d4690",
+    "source_files": {
+      "src/nouveau/vulkan/nvkmd/windows/nvdec_abi.h": "4dc45cc8e525577f3684c2b96c42b4bbd6ad353f1bb054a83cc81a448ae95e39",
+      "tegra-x1-wddm/platform/t214_nvdec.c": "179800aa2a1d62b9be1f0f728ec459f59a9eee63608bdedfe139f3891895aecc",
+      "tegra-x1-wddm/windows/resources.c": "0e027ec91ddb56d73ad45c739e0834ad0481ab5bf06e45ef4c4de6392d43f69f",
+      "tegra-x1-wddm/tests/test_nvdec_platform.c": "12e00454707677ebeb83466dfb1e83b0c9b98260724b73b420629acc398f8e11",
+      "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "4dea4e6a5150b6511253cd4c02505239163f5cc0a7d6908bc919fec790c049a4"
+    },
+    "installed": false,
+    "review": "main-agent self-review; real decoder DMA still untested"
+  },
+  "temporary_candidate_components_restored": false,
+  "latest_native_result": "NVDEC_1080_D3D11VA_20261117.json",
+  "review": {
+    "external_review_required": false,
+    "external_review_performed": false,
+    "mode": "main source/contract review, ASAN/UBSAN controls, ARM64 builds and native pixel verification"
+  },
+  "coexisting_transport": {
+    "adapter_transport": "259c825dec8421d34d5e08e33b9d109d9cd89770",
+    "host_mux": "97171d5e1c1966e8acbc1787a44ba3bd37495fe5",
+    "client_trace": "30fabbae0f4ff789b032e8d76dd1f42f20d6811d",
+    "executed_trial_controller": "f0f1f02c7ccd2bbd8340be60178cdf1ed9983650",
+    "deferred_installer_and_controller": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+    "windowsdrivers_hook": "7ecce6c083df1f33def014445f3cacd1c3301095",
+    "frozen_native_manifest_sha256": "fffbae91a62453c121377070bec5716acfe7d28c0bea636f30e24ae5ed55c59e",
+    "build_full_dirty_worktree": false
+  },
+  "next_local_candidate": null,
+  "loaded_provider_identity": {
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+    "native_loaded_mismatch_proven": true,
+    "candidate_provider_loaded_verified": true,
+    "restored_provider_and_kmd_loaded_verified": true,
+    "new_controller_complete_candidate_round_pending": false,
+    "native_decode_accepted": false,
+    "baseline_promoted": false
+  },
+  "core_clock_native": {
+    "record": "NVDEC_CORE_CLOCK_NATIVE_20261117.json",
+    "clock_lease_admitted": true,
+    "load_result": "0xc00000a3",
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "core_floor_native_result": {
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "core_owner_query_passed": true,
+    "core_floor_uv": 1050000,
+    "clock_admission_passed": true,
+    "host_ownership_accepted": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "historical_loaded_provider_identity": {
+    "record": "NVDEC_PROVIDER_IMAGE_NATIVE_20261117.json",
+    "controller_commit": "948bd0c88a4220938261c924ce85d7ee1ce445ea",
+    "native_loaded_mismatch_proven": true,
+    "new_controller_complete_candidate_round_pending": true,
+    "native_decode_accepted": false,
+    "baseline_promoted": false
+  },
+  "latest_native_round": "NVDEC_1080_D3D11VA_20261117.json",
+  "historical_committed_sources": [
+    {
+      "commit": "2711362bf4983f9adaa63f267842a5c29c0087f9",
+      "files": {
+        "src/nouveau/nvdec/nvdec.h": "f7a8dcf3fbeaec80b04031d40db1477b91b764c56becd86d387848813654cf47",
+        "src/nouveau/nvdec/nvdec_engine.c": "50c921f591579713244e07c9b8f227b5fc925aaf61b48911aabd4fce1287f824",
+        "src/nouveau/nvdec/nvdec_fw.c": "56b90823837f75b3d4ac395460c513b03222b054e96d2cba2585b50a7e3d5a29",
+        "src/nouveau/nvdec/nvdec_h264.c": "ca82c68e101fb61dc68bcfc440cdf73687aad0a895b58eac90809fa3ec18125b",
+        "src/nouveau/nvdec/nvdec_parse.c": "655c3390dc9fc3f93a6fe788376edb865f186620e4a285ce5893ea2cde248754",
+        "src/nouveau/nvdec/nvdec_parse.h": "7411d3fd106b912b00218aee548facf9d715b671b05cd35a4bb36dd1c5cc880c",
+        "src/nouveau/nvdec/nvdec_sha256.c": "af82ac4dc6d08514b583916c2df8ccb44867ea5956f965d65584fe84f49ce96a",
+        "src/nouveau/tgd3d/meson.build": "33da05fac1f1539a60b1bcee0d22ce8641512db8ba7d824b04d61f60402a595c",
+        "src/nouveau/tgd3d/shaders/generate.py": "388344104e3f68c739b6e9dccfe12cbe399c3ba8254cb2370f5cd6cba9f116b1",
+        "src/nouveau/tgd3d/shaders/nv12.frag": "ff511f1661e15bd38e5033186dcf8e2c2ee47ca309ac6c1f3674606a61d789f2",
+        "src/nouveau/tgd3d/shaders/nv12.vert": "a7a5c28e5a2ebcaf76796a0fbf8eac3013109864ab8d70164cbbbc435b8c51aa",
+        "src/nouveau/tgd3d/shaders/nv12_spv.h": "422e75503a779eeba14e3c2f43a1a9da9f9e83e1d47df42c8a4fa529709c1e3f",
+        "src/nouveau/tgd3d/tgd3d.h": "c59e968149f2e53541c0ee4697e24452c4b22d4f4aea26e38afecba3d1a5629f",
+        "src/nouveau/tgd3d/tgd3d_csc.c": "a3eca105f10a5062444d4e78542e07a8b42ead45026768f9035ad6bc87b2945a",
+        "src/nouveau/tgd3d/tgd3d_csc.h": "fa506044275d4d5d0439cf821a990e0dcacd75e412f7b87340960a97daa3d3d5",
+        "src/nouveau/tgd3d/tgd3d_dxva_h264.h": "05448b41b26ed64fe1788806479a0f8ec07e3de637f2da28fdb361d96cd7b4bb",
+        "src/nouveau/tgd3d/tgd3d_h264_map.c": "8fdfa325e5e2da44b0c28b2b2e3d02d484c34451a88871d9b93a6cc8ab41039f",
+        "src/nouveau/tgd3d/tgd3d_h264_map.h": "91bb2ab585d86fd9e4495b31b9e59e01d9ac49708389cc10cfe931d421b48797",
+        "src/nouveau/tgd3d/tgd3d_video.cpp": "b03a6bfee9d83d56c3bc6d5210df42c330715648b34492a300a4bf9370b01aed",
+        "src/nouveau/vulkan/nvkmd/windows/build_icd.py": "60fa861535412f9f01b93f16b45012888854f9de6a715690158e247e0a9c1c0a",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_abi.h": "4dc45cc8e525577f3684c2b96c42b4bbd6ad353f1bb054a83cc81a448ae95e39",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_check.c": "aa96a24c60d15223ad9f7cfebfb53a857c2f9abcb2caf0113abfd2a112b3480a",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_escape_abi.h": "75bb8efd6e74f659682da51abe72e993249dfec9017abdb4abeb9121f0beeca0",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_native.c": "b9105ad1d5d03eb88baf34465cd481d26907ec7d74688f8b153becbb56172361",
+        "src/nouveau/vulkan/nvkmd/windows/nvdec_native.h": "163108e9fb172e7e306648d88f7f019ae8d1fc31953360391084f32621e5d954",
+        "tegra-x1-wddm/integration/switch-lite/windows/SwitchFan/src/t214/host1x_clock.h": "6d82831007dc510eadba089ac22232ee1aa7718f65a6b67009ff3698906e65d8",
+        "tegra-x1-wddm/platform/t214_nvdec.c": "38a5b726bbe2f20e692458f54c7fa0ebdffcc99eb5b58c0807edf119418ec908",
+        "tegra-x1-wddm/platform/t214_nvdec.h": "b308f5db5384b1b2f08dddb3434b71e4dd95b9754f5148dc2a80bf51b0cd3764",
+        "tegra-x1-wddm/platform/t214_resources.h": "ee3674a3ff12965ee66e11cf0e5149f6c51e17d4f02ebc17786eafbd83a8faa1",
+        "tegra-x1-wddm/tests/nvdec_inactive_fixture.c": "363426c25595f75862c93f8ab2efa7bc388f1e3463244c6d4e7b9e22cedb9c98",
+        "tegra-x1-wddm/tests/nvdec_resource_fixture.h": "4dea4e6a5150b6511253cd4c02505239163f5cc0a7d6908bc919fec790c049a4",
+        "tegra-x1-wddm/tests/test_context_windows.c": "2bbe82ae7bdc7d71d1d8624653cfe6b932bf401300533dcb6f0306f1afb29476",
+        "tegra-x1-wddm/tests/test_host1x_clock_windows.c": "c7e910535b3f7affb35815f6c406f7e8cc13fcb3b459b32102b2b90485f7f940",
+        "tegra-x1-wddm/tests/test_nvdec.c": "700997d449a4754ec3d83a2123fe5ea8ff172260350d52018189c4573dc70c98",
+        "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "8648aba14994c95068351c441536002a917e2f063b948ad10224c0b712e7d40a",
+        "tegra-x1-wddm/tests/test_nvdec_h264.c": "d508104db872875d286ede06160e90ad2a7940398fa22c6d49f24498a5e72e8d",
+        "tegra-x1-wddm/tests/test_nvdec_memory_windows.c": "bea37e848bcc3b470fc7cbb78d211939d6416a86a868b329bfc6d36c64883928",
+        "tegra-x1-wddm/tests/test_nvdec_native.c": "d1053ae13299bee7182d0e3f73e6282535ac118ab3142ad87b7be4590e096ffe",
+        "tegra-x1-wddm/tests/test_nvdec_platform.c": "63c71e9ff6f63db15ee0eb05461408a9ccd6138462ffb4a7086225628dc039c6",
+        "tegra-x1-wddm/tests/test_paging_windows.c": "4208a031ba96925a7a5fb1906b910cc5baa9c154879d3442339eb97e0bd09ad1",
+        "tegra-x1-wddm/tests/test_platform_windows.c": "1ac5e371c1d0d7e7a5c12a39d8082bb8e54aa3f9148d14a2f80ab7acb1370b5f",
+        "tegra-x1-wddm/tests/test_tgd3d_csc.c": "9313bb4d88a42b6e6c5517aa9a63cad71a367ffe2408b8a930bee51fcba7eada",
+        "tegra-x1-wddm/tests/test_tgd3d_dxva_abi.c": "08b1dedc79499d32fd5c75bc1b568251715b060c17872d635976058fa92740ee",
+        "tegra-x1-wddm/tests/test_tgd3d_h264_map.c": "4457b66b6d4c0cfc8566b653e92d28db65395de42a469e7b954432a9a9f39ece",
+        "tegra-x1-wddm/tools/build.py": "2bf2083e3a4c1777b3f421b200795ec4dc1f9b4f3add026f7ee1c68d18bb9d8d",
+        "tegra-x1-wddm/tools/build_nvdec_acpi.py": "a1b58fd98ce7eee385934e10e6e5e856485d280cb2d76e344d143553db42b7ba",
+        "tegra-x1-wddm/tools/build_tgd3d.py": "86156fb18bdcf1fd323f8c2d31e1724ab5b07ae17fc78039c64c72179fea8183",
+        "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
+        "tegra-x1-wddm/tools/mf_dxgi_probe.c": "07ffa45ea603bda19e4ce4cc015cc056433f4c88b801420ac42b299a7c34e14b",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "8b9819039fbd90018b3ae5759655da76474ec7619c1c02109dbd891adf8579a2",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "cfeb427fbbf98a457e0fe949d2617e38cfda58b0fb549836559d835b75a8ee69",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "d8c27baf570ab2e139c02e409aa2d207355890f24cf0a7e684ca0998e4e799b4",
+        "tegra-x1-wddm/tools/nvdec720.c": "1e4b72cfd55fbc1acc3d069779d22474e349b1b8698c5ccebe1e044862659aa8",
+        "tegra-x1-wddm/windows/adapter.c": "17f8df5e15d93e7d8dfe4bf21db6f32d7d7476f83017857ba723a8f5b26f1950",
+        "tegra-x1-wddm/windows/adapter.h": "97183f5833df6bce5f5e918b960a1fcc932b98c3d724929023b6e275da5583ba",
+        "tegra-x1-wddm/windows/adapter_reset.c": "71bb152704be995d5cd685638139080789bb8a9b9fe7429a8d01078dd7188b9f",
+        "tegra-x1-wddm/windows/context.c": "036eb0c379a9806154645bb79732bfa160b7a3bdb79bca523ea32a0134371029",
+        "tegra-x1-wddm/windows/context.h": "64de0c40c96a5d2b47f82ebce3b72da2666e1dfc3d332fc716f0acfb66b98817",
+        "tegra-x1-wddm/windows/device_lifetime.c": "c3db788f4bd1144e7c0a6e9c5d7b19e30057d081c97926d154a97e8862d50261",
+        "tegra-x1-wddm/windows/host1x_clock.c": "f06c780446a281642f447b26af6491adc1bf10fa5dc990cbbe013fb6d6c1144a",
+        "tegra-x1-wddm/windows/host1x_clock.h": "953fa066315c5c7160a8c9ca43406c5db8c300477050dac5b487a70800b1e347",
+        "tegra-x1-wddm/windows/host1x_clock_abi.h": "dc95b991fa8de7de4d505f30eb84ada3c7788e093b10214ad121d66fe6247a52",
+        "tegra-x1-wddm/windows/nvdec_adapter.c": "f09c71b15564599c61f3591c3169574d9a8a77bf7d568df10727c485da078601",
+        "tegra-x1-wddm/windows/nvdec_adapter.h": "6071a36e26e3a340a9358cd6be1812a418cca2a3d0ee9bd3ea32abead5e428a8",
+        "tegra-x1-wddm/windows/nvdec_backend.c": "cfe3b1d37b494383f97534a178c8f35166dac56b486d7984195ca1e362d26929",
+        "tegra-x1-wddm/windows/nvdec_backend.h": "a387b3f7c064c549ca6e846f46e99f7adda679376f8bf00766e3021a3c43dacf",
+        "tegra-x1-wddm/windows/nvdec_control.h": "df1c63a19af5f603a408738073646cc278f16f02f94fc6c36a73b495e5ec56fb",
+        "tegra-x1-wddm/windows/nvdec_memory.c": "dfecd1c7ba8558a7a07237dfe70901f065be352d3f9c65dc8d37fe669deab550",
+        "tegra-x1-wddm/windows/nvdec_memory.h": "8388db8a467397573838df44a8b6f3954adc98480f8b76a1208ad99371256ea2",
+        "tegra-x1-wddm/windows/platform_io.c": "fa91f53d75ac9099d7c62a324a672da49187df8f3925df7feb2a92821a4b6007",
+        "tegra-x1-wddm/windows/platform_io.h": "c7d18c04f69d99b39ed5fbf9c0f2ae5f945ca89290e1b5675ac382b896d14305",
+        "tegra-x1-wddm/windows/probe.c": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
+        "tegra-x1-wddm/windows/query.c": "db7b45113a2b10cf39c019152397756983f7313d7026e0a66e533ad228973050",
+        "tegra-x1-wddm/windows/render_miniport.c": "1292de03cbac65390c68627b47c76bbbb9b55eff72e72bcf9218d6c10378f202",
+        "tegra-x1-wddm/windows/resources.c": "0e027ec91ddb56d73ad45c739e0834ad0481ab5bf06e45ef4c4de6392d43f69f",
+        "tegra-x1-wddm/windows/resources.h": "969a69a00ce276f7ffa427c616b536b2379b5c358138885b4ed229b532b614df"
+      },
+      "native_build_scope": "Native KMD uses the frozen c0/EMC/resource/client/transplant snapshot; this current source list is not a claim that the full development tree was installed"
+    },
+    {
+      "commit": "0a0a167003bc6e7f827549167d447d324550f650",
+      "source_manifest_sha256": "798dc0a4681f1a691e11b25e0447455d814cdfe129c1cc1cd981cec79a094b87",
+      "changed_files": {
+        "tegra-x1-wddm/windows/nvdec_adapter.c": "6540b13d594d5eca45f41f1e142498f7261345d39d97eab919476054c9f9c996",
+        "tegra-x1-wddm/windows/nvdec_adapter.h": "9c1fe120ff270f1ce6acf1518e44fada80e24274864f094e6e6f46caed4a23c4",
+        "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "1e2bc785e91358e231e32f0f12257778d6828e6c59f42236ef5a3bfd0e2ddaa9"
+      },
+      "base_source_commit": "ab2a23a945faa7aac861da939939445c1379a356",
+      "scope": "Local frozen diagnostic KMD; not installed or accepted."
+    },
+    {
+      "commit": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+      "source_manifest": {
+        "Length": 1028,
+        "Sha256": "7f697f1786f35753a289cb76c661aeea668ae03a77c91818cab2bffb3066eee2"
+      },
+      "source_provenance": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json",
+      "changed_files": {
+        "src/nouveau/nvdec/nvdec.h": "e39269a62840eb045c3eb7889c4b7b49fa5a5f86204a177bf43d1fe948b75972",
+        "src/nouveau/nvdec/nvdec_h264.c": "b53e051aef8e7d7e2527a3dee5ed5b44d436cd0a434fc92dcf28f988640b280e",
+        "tegra-x1-wddm/windows/nvdec_backend.c": "68b52f56c63cec8d32070a27567dac783702b6a71556c893be76fa9834dc2d86",
+        "tegra-x1-wddm/tests/test_nvdec_h264.c": "b59caaa9b587aafc047b539a237f46f586e78af5e3c45e1292ef699a1e36d0e5"
+      },
+      "scope": "Installed frozen KMD; backend720p fixture accepted. Parser/client latest38830972 is separate from KMD source."
+    }
+  ],
+  "historical_controller_sources": [
+    {
+      "commit": "ca5ff0762fb2682f94ab4d795716a5650c4ce61b",
+      "files": {
+        "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "8b9819039fbd90018b3ae5759655da76474ec7619c1c02109dbd891adf8579a2",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "cfeb427fbbf98a457e0fe949d2617e38cfda58b0fb549836559d835b75a8ee69",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "d8c27baf570ab2e139c02e409aa2d207355890f24cf0a7e684ca0998e4e799b4",
+        "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "dd77b2f274d43fbae5cc264c2330a6e4dad370ffefe04caa6fa774e382a75512"
+      }
+    },
+    {
+      "commit": "5f9ab480e5c2ded25220964170f9b09e056ab253",
+      "files": {
+        "Pair.ps1": {
+          "Length": 36319,
+          "Sha256": "0cb6f86cd6c19cb6f59c712d49ef967a4b2a81006551e11da2f3b1a0e9150a24"
+        },
+        "Provider.ps1": {
+          "Length": 17243,
+          "Sha256": "392b81c5fc1b214b0b5ade3841b6656f51f1f7b253ecf7bfa98caab9f974d262"
+        }
+      }
+    }
+  ],
+  "loaded_provider_identity_history": [
+    {
+      "record": "NVDEC_HOST_OWNERSHIP_NATIVE_20261117.json",
+      "controller_commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+      "native_loaded_mismatch_proven": true,
+      "candidate_provider_loaded_verified": true,
+      "restored_provider_and_kmd_loaded_verified": true,
+      "new_controller_complete_candidate_round_pending": false,
+      "native_decode_accepted": false,
+      "baseline_promoted": false
+    }
+  ],
+  "channel_scope_native_result": {
+    "record": "NVDEC_CHANNEL_SCOPE_NATIVE_20261117.json",
+    "failed_check": 4,
+    "failed_channel": 0,
+    "reserved_channel": 11,
+    "selected_channel_state_observed": false,
+    "native_decode_accepted": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "acpi_override_recurrence": {
+    "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+    "loaded_dsdt_matches_disk": false,
+    "gpu_present": false,
+    "candidate_kmd_activated": false,
+    "candidate_provider_activated": false,
+    "native_decode_request": false,
+    "baseline_restored": true,
+    "cleanup_complete": true
+  },
+  "incremental_baseline_policy": "Retain the verified five fixes and runtime submission update. Scope each result to its measured module, installation and run.",
+  "historical_current_snapshots": [
+    {
+      "updated_utc": "2026-11-17T13:20:26.4960102Z",
+      "state": "Candidate ACPI boot loaded the4568-byte74070d7c table instead of the4993-byte9eb6a7e1 file. GPU was absent with native startup closed. The signed2aa4aba4 KMD and0453418e provider were staged only; neither was selected or executed and no decode request ran. Original11-file90-degree display/power baseline restored; temporary packages/tasks/files cleaned. Channel-scoped KMD native validation and720p/1080p acceptance remain open.",
+      "latest_native_result": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+      "current_committed_source": {
+        "commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+        "source_manifest_sha256": "beccfcbdcc752d1c42fd12aebccded9004714762d6028ceeb884ab7262a91aca",
+        "changed_files": {
+          "tegra-x1-wddm/windows/nvdec_adapter.c": "686dd2085276085ae3f65b9e40e8e152e55b3ddd8f3624f047dc60dd97e52ebb",
+          "tegra-x1-wddm/tests/test_nvdec_adapter_windows.c": "21ec9fbbe3b9c75497de1a0c464195a6f8345fd9b596ae29e1b51f9de53569af",
+          "tegra-x1-wddm/tests/test_nvdec_platform.c": "199fcabd64e675b3aca76c2c51befa6fd7540ffecdc654d5fccfda50124bbb80"
+        },
+        "base_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+        "scope": "Frozen signed channel-scoped KMD; staged only. Candidate boot failed before selection; native execution pending."
+      },
+      "controller_source": {
+        "commit": "b14b3438be5865aaade376f814d0e1d2973395e7",
+        "files": {
+          "tegra-x1-wddm/tools/defer_provider.c": "2050de5e40f6e97aad303bc84e08d3f1ac54953ae3395499861e1f395a047c97",
+          "tegra-x1-wddm/tools/loaded_image_identity.c": "df59ea77fc42122101be16fb1cbc41c0483795cdefe430ee38b77f7edcd29f05",
+          "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "9cb757f01e4c9d93f57e55cc21ff6d832b51e4458b121e8d3ef92d80da9015e9",
+          "tegra-x1-wddm/tools/nvdec-resource-trial/Provider.ps1": "4b65787c2c9f4e806e8dade59cf9465fee9cec0b684a1dbc555bcfb05091bb6c",
+          "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Provider.ps1": "edb28c030ad293b328987e164551ba1fe86bfabb2fc955d3b6333d2da6f6e2e0",
+          "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "3c90af299ab8c1f221bbefbdd5806ecef5add232e713c56f532e162566d793d6"
+        }
+      },
+      "next_local_candidate": {
+        "source_commit": "2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f",
+        "base_source_commit": "0a0a167003bc6e7f827549167d447d324550f650",
+        "source_manifest_sha256": "beccfcbdcc752d1c42fd12aebccded9004714762d6028ceeb884ab7262a91aca",
+        "changed_source_sha256": {
+          "windows/nvdec_adapter.c": "686dd2085276085ae3f65b9e40e8e152e55b3ddd8f3624f047dc60dd97e52ebb",
+          "tests/test_nvdec_adapter_windows.c": "21ec9fbbe3b9c75497de1a0c464195a6f8345fd9b596ae29e1b51f9de53569af",
+          "tests/test_nvdec_platform.c": "199fcabd64e675b3aca76c2c51befa6fd7540ffecdc654d5fccfda50124bbb80"
+        },
+        "unsigned_kmd": {
+          "Length": 239104,
+          "Sha256": "61ed228c982ef3484f180545f8d8b37956a869a18c3d30e1cc1a6bab8458c38a"
+        },
+        "reuse_provider": {
+          "Length": 104456,
+          "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+        },
+        "clock_abi": "0x00010002",
+        "signed_kmd": true,
+        "native_tested": false,
+        "purpose": "Only reserved channel11 participates in decoder channel admission. Keep selected-channel checks, DC/syncpoint conflicts, clock lease and retirement. Other channels are not reset or modified.",
+        "arm64_build_exit": 0,
+        "controls": [
+          {
+            "name": "adapter-nvdec_adapter",
+            "exit": 0
+          },
+          {
+            "name": "adapter-device_lifetime",
+            "exit": 0
+          },
+          {
+            "name": "adapter-t214_nvdec",
+            "exit": 0
+          },
+          {
+            "name": "adapter-test_nvdec_adapter_windows",
+            "exit": 0
+          },
+          {
+            "name": "adapter-link",
+            "exit": 0
+          },
+          {
+            "name": "adapter-run",
+            "exit": 0
+          }
+        ],
+        "old_driver_regression": {
+          "exit": 153,
+          "expected_assertion": 153,
+          "description": "New foreign-channel fixture rejects under the old whole-host scan, then passes with the reserved-channel scope."
+        },
+        "platform_asan_ubsan": {
+          "exit": 0,
+          "stdout": "PASS: B01 inherited power, shared-clock lease, failure retention and Host1x completion (CPU model only)\n",
+          "stderr": ""
+        },
+        "references": [
+          "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/channel.c",
+          "https://github.com/CTCaer/switch-l4t-kernel-4.9/blob/2d0059fd3167a8df756de2aa0489d4aa70a9fc15/drivers/gpu/host1x/hw/cdma_hw.c"
+        ],
+        "license_scope": "GPL references inspected for per-channel allocation and register isolation; no implementation copied. CPU syncpoint increments/NOP timeout recovery are not used.",
+        "main_self_review": "Selected channel11 predicate unchanged; callback/clock ABI unchanged; foreign-channel and unrelated shared-bit preservation checked through initialization, successful submit, timeout, shutdown and reacquisition.",
+        "signed_kmd_component": {
+          "Length": 242184,
+          "Sha256": "bbf65e41b617aaed846f94a8ad6de06a6de6fca19a35d983795d0280b52f1d98"
+        },
+        "native_boot_attempt": {
+          "record": "NVDEC_ACPI_OVERRIDE_RECURRENCE_20261117.json",
+          "loaded_dsdt_matches_disk": false,
+          "gpu_present": false,
+          "candidate_kmd_activated": false,
+          "candidate_provider_activated": false,
+          "native_decode_request": false,
+          "baseline_restored": true,
+          "cleanup_complete": true
+        }
+      },
+      "remaining": [
+        "Resolve the optional ACPI override failure before another decoder trial. The matching loader ignores the optional-table function return; post-boot disk bytes and BCD do not identify its live branch or I/O result. Retain the exact failed loaded table and avoid unchanged trial replay without new analysis or correction.",
+        "Keep the signed2aa4aba4 KMD, unchanged0453418e provider and existing controls. No decoder or modern UMD expansion is justified by this pre-activation failure. Once boot prerequisites hold, validate reserved channel11, true firmware/DMA completion and safe resource retirement.",
+        "Complete720p H.264 through D3D11VA/NV12/window presentation before1080p. 2K/4K remain independent implementation, untested and undecided. Preserve90-degree display/power and deferred stability boundaries."
+      ]
+    },
+    {
+      "updated_utc": "2026-11-17T15:46:25.0707641Z",
+      "state": "Corrected374b KMD is active with the retained045 provider,9eb resource table and original5b/95b userspace. DWM, all11 component identities,90-degree saved/current configuration and Handheld/DFLL/GPU/EMC/fan/85-percent policy are verified. One gated replacement boot; unchanged packages/files reused. The absolute-DMAEND regression from58dc was corrected using NVIDIA upstream0e43b8da; it had never reached hardware submission. Decoder was not rerun because the preceding channel11 ownership guard is unchanged.720p/1080p remain unaccepted.",
+      "latest_native_result": "NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json",
+      "current_committed_source": {
+        "commit": "374b9ee5624cd1aea063398fd413fe3c73ff6501",
+        "source_manifest": {
+          "Length": 630,
+          "Sha256": "3d78108ed2ffc8e65299f4101abe8f382587e4b3242774ab44e75f905ec05dd9"
+        },
+        "source_provenance": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json",
+        "changed_files": {
+          "platform/t214_nvdec.c": "74a272e58af006656491822511ecc80a83a1f36f41df76b592e03c1bad973430",
+          "tests/test_nvdec_platform.c": "57c5d8bc0c397463b30f276bfb19ff77849306a5d3a2635ed0b2cfce904b7a57"
+        },
+        "scope": "Installed frozen KMD; DWM/resource/identity checks only. Native decode submission remains untested."
+      },
+      "remaining": [
+        "Resolve the inherited reserved-channel11 state recorded in NVDEC_INCREMENTAL_POINTER_NATIVE_20261117.json: GET differs from PUT and START/END are nonzero. Establish a valid ownership/initialization contract; do not reset merely to pass admission or infer completion.",
+        "Complete real firmware/DMA/syncpoint completion/output and safe retirement, then720p H.264 D3D11VA/NV12/window presentation.1080p follows720p;2K/4K remain independent implementation, untested and undecided.",
+        "Optional ACPI table loss remains an unresolved historical boot issue. Current loaded tables match; no unchanged failed combination replay. Preserve accepted90-degree display/power and deferred load/browser/weather/180-degree-return boundaries."
+      ]
+    }
+  ],
+  "installed_development_combination": {
+    "classification": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+    "observed_utc": "2026-11-18T01:23:28.0679279Z",
+    "boot": "2026-11-18T01:17:41.2840670Z",
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation",
+    "userspace_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app",
+    "kmd": {
+      "Length": 243712,
+      "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+    },
+    "kmd_source": "c0c6647cec87fcc8d40951d8040ced5d1bbd5f2f + retained EMC/resource/client patches +259c825d coexisting transport +97171d5e Host1x mux correction +2711362bf4983f9adaa63f267842a5c29c0087f9 clock failure boundaries; frozen inputs in clock-boundary/source-inputs.json +ab2a23a945faa7aac861da939939445c1379a356 enforced core-floor query; frozen core-floor-20261117/source-inputs.json +0a0a167003bc6e7f827549167d447d324550f650 exact Host1x ownership rejection; frozen host-ownership-20261117/source-inputs.json +2aa4aba4f9bc174f5f21f4b4ff18556e14c0074f reserved-channel scope; frozen channel-scope-20261117/source-inputs.json +58dc7122f21ed3efc276036c5bd6ce172fb752b1 absolute DMAEND +f92f0606a6999bf9f9c7c10ac9eb3d37d42af06b reserved-channel ring bounds; frozen host-pointer-contract-20261117/source-inputs.json +374b9ee5624cd1aea063398fd413fe3c73ff6501 correct relative DMAEND per upstream0e43b8da; frozen host-dmaend-correction-20261117/source-inputs.json +88e0b05ad2210bcd3f7d1ec5d2a2bb8feba1db70 fresh reserved channel STOP/CFEMPTY and ring readback; frozen fresh-channel-20261117/source-inputs.json +e99bdb073af6c88ef8dd0688fbad0a75fa027c21 T210 syncpoint191 command admission; frozen syncpoint-range-20261117/source-inputs.json +4dd80c7920991d51462fc5ce1f120b4e2a23206a TBL plane capacity and completed linear NV12 readback; frozen surface-layout-20261117/source-r2 and source-inputs.json + fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9 1080p surface extent",
+    "provider": {
+      "Length": 104456,
+      "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+    },
+    "provider_source": "WindowsDriversdd2ab04641df96fb7bcec42d6eb9211e496d7e23 with Mesaab2a23a945faa7aac861da939939445c1379a356 paired core-floor ABI",
+    "acpi": {
+      "Length": 4993,
+      "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+    },
+    "umd": {
+      "Length": 3335688,
+      "Sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+    },
+    "umd_source": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+    "icd": {
+      "Length": 17656776,
+      "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "all11_files": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Length": 32264,
+        "Sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Length": 243712,
+        "Sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662"
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Length": 138,
+        "Sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Length": 4993,
+        "Sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Length": 42440,
+        "Sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Length": 1517568,
+        "Sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Length": 921600,
+        "Sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\libvulkan_nouveau.dll",
+        "Length": 17656776,
+        "Sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Length": 104456,
+        "Sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation\\app\\TegraGpuD3DVk.dll",
+        "Length": 3335688,
+        "Sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Length": 60416,
+        "Sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "external_review_performed": false,
+    "source_record": "NVDEC_1080_D3D11VA_20261117.json",
+    "platform_file_evidence": "Eleven installed files, both DWM modules, the selected INF and the previous 720p recovery tuple were verified after the 1080p window closed.",
+    "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "umd_isolated_patch_sha256": "465f70dc0b6117274752ae7295f239ad9158d39f8c426c9a03a2b6b380ef56ed",
+    "umd_prior_patch_commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+    "umd_prior_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d"
+  },
+  "native_decode_accepted": true,
+  "retained_channel_round": "NVDEC_RETAINED_CHANNEL_NATIVE_20261117.json",
+  "incremental_pointer_round": "NVDEC_INCREMENTAL_POINTER_NATIVE_20261117.json",
+  "dmaend_correction": "NVDEC_RELATIVE_DMAEND_NATIVE_20261117.json",
+  "installation_retained": true,
+  "source_modules_merged": [
+    "5f9ab480e5c2ded25220964170f9b09e056ab253",
+    "374b9ee5624cd1aea063398fd413fe3c73ff6501",
+    "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+    "f90d3be2ed5038c709633fdfdeb925d30a2334d0"
+  ],
+  "promotion_scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+  "acceptance_scope": {
+    "native_backend_720p_fixture_accepted": true,
+    "accepted_720p_record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "native_1080p_fixture_accepted": true,
+    "d3d11va_accepted": true,
+    "accepted_client_scope": "Process-scoped native FFmpeg D3D11VA on the NVK adapter",
+    "frames": 6,
+    "decoded_nv12_byte_exact": true,
+    "media_foundation_source_reader_accepted": false,
+    "window_presentation_accepted": true,
+    "gpu_csc_pixels_accepted": true,
+    "full_decode_stage_complete": true,
+    "public_video_enabled": false,
+    "new_physical_screen_acceptance": true,
+    "gpu_csc_pixels_scope": "Complete 640x360 final backbuffer compared with software reference",
+    "windows_redirected_flip_accepted": true,
+    "window_normal_release_verified": true,
+    "physical_replay_status": "Window visible on the physical panel and normal return to the desktop",
+    "stage_scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+    "regular_playback_stability_accepted": false,
+    "ordinary_unpaced_window_accepted": false,
+    "deferred_native_resolutions": [
+      "2K",
+      "4K"
+    ]
+  },
+  "native_decode_accepted_scope": "Native 1080p H.264 functional acceptance passed. All six visible NV12 frames matched the independent decoded reference. GPU conversion, presentation in the physical window and normal close were observed over 16.093 seconds including an eight-second final hold.",
+  "current_umd_source": {
+    "commit": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+    "base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "prior_patch": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+    "prior_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
+    "isolated_diff_sha256": "465f70dc0b6117274752ae7295f239ad9158d39f8c426c9a03a2b6b380ef56ed",
+    "signed_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "record": "NVDEC_1080_D3D11VA_20261117.json"
+  },
+  "presentation_ownership_integration": {
+    "record": "TGD3D_PRESENT_OWNERSHIP_20261117.json",
+    "record_sha256": "c2884fe5cf58339a67d8a439c12c26ea9ad78c69b140311a9a6dbf6009eda5de",
+    "source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "candidate_umd_sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+    "candidate_icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "installed": true,
+    "native_candidate_icd_presents": 120,
+    "native_dwm_candidate_umd": false,
+    "live_dwm_pair": true,
+    "baseline_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "ordinary_window_passed": false,
+    "incident_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "scope": "Earlier five-patch installation and its observations; the current component selection is recorded in selected_presentation_baseline."
+  },
+  "selected_presentation_baseline": {
+    "record": "TGD3D_PRESENT_BASELINE_20261117.json",
+    "source_commit": "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+    "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "umd_patch_sha256": "465f70dc0b6117274752ae7295f239ad9158d39f8c426c9a03a2b6b380ef56ed",
+    "icd_source_commit": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "kmd_sha256": "9ef86d7e206d302a44100e14b0f5a5374a0f3ce629f82bd474684fc913949662",
+    "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "inherited_patch_count": 5,
+    "selected": true,
+    "post_restart_pair_confirmed": true,
+    "latest_video_observation": "NVDEC_1080_D3D11VA_20261117.json",
+    "physical_video_accepted": true,
+    "umd_prior_patch_commit": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+    "umd_prior_patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
+    "physical_video_scope": "1080p six-frame paced observation",
+    "functional_720p_accepted": true,
+    "ordinary_unpaced_accepted": false,
+    "activation_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-1080-fddf6c6b\\activation",
+    "previous_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736",
+    "installed_evidence_sha256": "c49ddfb308c5b876abd092f1e9d7de326ad65a65b6a81e5fe3ee3c73145a6cad",
+    "scope": "Selected fixed 90-degree development baseline with native 1080p H.264 accepted in a six-frame paced window. The preceding package retains its 720p functional acceptance. Unpaced load stability is deferred.",
+    "functional_1080p_accepted": true,
+    "previous_720p_acceptance": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "record_sha256": "85891b75655ac4141027d9511a949ee06dd76d1452b19759ce51ac8285517cec"
+  },
+  "latest_video_window_observation": {
+    "record": "NVDEC_1080_D3D11VA_20261117.json",
+    "record_sha256": "c49ddfb308c5b876abd092f1e9d7de326ad65a65b6a81e5fe3ee3c73145a6cad",
+    "previous_record": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "previous_record_sha256": "2ff2eff8752b1a679156e393b34dd8c28313a1de7f2768f41fa54274f44d3823",
+    "physical_window_accepted": true,
+    "functional_1080p_accepted": true,
+    "functional_720p_reference": "NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+    "physical_scope": "Six-frame paced H.264 window",
+    "frames": 6,
+    "successful_presents": 6,
+    "elapsed_ms": 16093,
+    "final_frame_hold_ms": 8000,
+    "rgb_max_abs_error": 1,
+    "last_confirmed_boot_utc": "2026-11-18T01:17:41.2840670Z",
+    "dwm_pid": 1404,
+    "ordinary_unpaced_accepted": false,
+    "continuous_playback_stability_verified": false
+  },
+  "restart_followup": {
+    "record": "LOAD_STABILITY_FOLLOWUP_20261116.json",
+    "sha256": "20afd19fe5939ba306fd3d7eccc59a488eac13ebdd8f53c37f22ef4c66199abd",
+    "scope": "Two unpaced Windows video-window restarts; root cause remains open."
+  }
+}

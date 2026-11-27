@@ -1,0 +1,120 @@
+{
+  "observed_condition": "操作者报告 Wi-Fi 驱动挂起，之后重新进入桌面。",
+  "candidate_kmd": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+  "candidate_boot": 85304,
+  "candidate_stage": {
+    "phase": "CandidateActive",
+    "boot": 85304,
+    "utc": "2026-11-20T20:31:08.0342470Z"
+  },
+  "scope": "The sealed startup task checked Code 0, the installed KMD, its signed profile and the consumed trial token on boot 85304. No fullscreen application ran on this boot. DWM module load was not remotely sampled during the unconnected interval.",
+  "system_events": [
+    {
+      "record": 85210,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T20:23:44.5509426Z",
+      "details": {},
+      "id": 12
+    },
+    {
+      "record": 85287,
+      "provider": "User32",
+      "utc": "2026-11-20T20:28:43.8504111Z",
+      "details": {
+        "reason": "SwitchWOA graphics receipt one-time candidate boot"
+      },
+      "id": 1074
+    },
+    {
+      "record": 85304,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T20:29:09.4436476Z",
+      "details": {},
+      "id": 12
+    },
+    {
+      "record": 85366,
+      "provider": "User32",
+      "utc": "2026-11-20T20:38:08.1202625Z",
+      "details": {
+        "reason": ""
+      },
+      "id": 1074
+    },
+    {
+      "record": 85382,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-20T20:38:26.4312231Z",
+      "details": {},
+      "id": 12
+    }
+  ],
+  "additional_restart": {
+    "system_request": 85366,
+    "executable": "RuntimeBroker.exe",
+    "action": "重启",
+    "boot": 85382
+  },
+  "wireless": [
+    {
+      "version": "0.5.7.1",
+      "device": "Switch Lite BCM4356 Wireless Adapter",
+      "service": "switchwifi",
+      "problem": 0,
+      "bus": "ACPI",
+      "inf": "oem18.inf"
+    }
+  ],
+  "wlan_operational": [
+    {
+      "record": 15675,
+      "utc": "2026-11-20T20:29:01.6221734Z",
+      "id": 11004,
+      "codes": {}
+    },
+    {
+      "record": 15676,
+      "utc": "2026-11-20T20:39:42.8774205Z",
+      "id": 8000,
+      "codes": {}
+    },
+    {
+      "record": 15677,
+      "utc": "2026-11-20T20:39:43.0120799Z",
+      "id": 11000,
+      "codes": {}
+    },
+    {
+      "record": 15678,
+      "utc": "2026-11-20T20:39:43.1898436Z",
+      "id": 11001,
+      "codes": {}
+    },
+    {
+      "record": 15679,
+      "utc": "2026-11-20T20:39:43.1898653Z",
+      "id": 11010,
+      "codes": {}
+    },
+    {
+      "record": 15680,
+      "utc": "2026-11-20T20:39:43.2813766Z",
+      "id": 11005,
+      "codes": {}
+    },
+    {
+      "record": 15681,
+      "utc": "2026-11-20T20:39:43.2928958Z",
+      "id": 8001,
+      "codes": {}
+    }
+  ],
+  "recovered_state": {
+    "boot": 85382,
+    "code": 43,
+    "kmd": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "power": "Online"
+  },
+  "abnormal_shutdown_events": [],
+  "interpretation": "这段系统日志有两次已请求重启。原生候选启动后没有成功接网记录，后一次开机留下 WLAN 8001。Wi-Fi 驱动内部的失效原因仍待查。"
+}

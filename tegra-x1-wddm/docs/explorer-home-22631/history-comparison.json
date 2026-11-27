@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "fault_id": "SWITCH-EXPLORER-WINUI-HEADER-BLANK",
+  "scope": "仅核对本地已有图片、加载回执与源码。实机运行数为 0。",
+  "image_review": {
+    "catalog": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/explorer-home-20261121/history/catalog.json",
+      "sha256": "e2671eee22337378656ef02a7c34409d3b4ef5773d3bae93756491016267fcc7"
+    },
+    "unique_images": 214,
+    "contact_sheet_starts": [
+      0,
+      48,
+      96,
+      144,
+      192
+    ],
+    "relevant_catalog_entries": {
+      "normal_folder": 54,
+      "blank_home": 94,
+      "blank_this_pc": 97
+    },
+    "limits": "以能辨认的三个顶部控件和已标识的前景窗口为准。窗口探针的 128×72 桌面残片无法判定 Explorer 视图与顶部控件。"
+  },
+  "checkpoints": [
+    {
+      "kind": "Home 可打开的用户确认",
+      "operator_record": "tegra-x1-wddm/docs/TGD3D_NATIVE_20261113.md#修复icd从门控启动home通过天气仍失败",
+      "utc_approx": "2026-11-13T16:37:00Z",
+      "boot_utc_approx": "2026-11-13T16:05:59Z",
+      "dwm_pid": 492,
+      "gpu_code": 0,
+      "confirmed": "用户确认主文件目录恢复正常。",
+      "visual_header": "无对应顶部截图。",
+      "native_components": {
+        "tegragpurender.sys": "46d1757674ff156028ce5b729ba53671981ffab09948fcaf125751c46bb10088",
+        "TegraGpuD3DVk.dll": "7c7f88ccf83ad1a89f663c3205e6ba2cb6fec587d946efd3622839c9deb2b089",
+        "libvulkan_nouveau.dll": "dee3d5805af80696f87d094ec1c5f557d662f435336207992baf588e2dc1cee0"
+      },
+      "nvk_source": "d3423d269f9e716eadc1237beadbfb6aa6049dbe"
+    },
+    {
+      "kind": "普通目录顶部控件可见",
+      "capture_utc": "2026-11-18T06:27:16.7260565Z",
+      "boot_utc": "2026-11-18T06:00:18.0789340Z",
+      "explorer_pid_from_nearby_preflight": 5324,
+      "dwm_pid": 1384,
+      "gpu_code": 0,
+      "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+      "visible": [
+        "标签栏（目录标签、关闭和新建标签按钮）",
+        "导航按钮和地址栏",
+        "新建、剪切、复制、排序、查看及更多命令"
+      ],
+      "capture": {
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/evidence/pal4-game-shortcut-02/screen-0.png",
+        "sha256": "b139f40aca0687613779e46e820bcd602c245378d8b2a532d313241a5852348d"
+      },
+      "capture_metadata": {
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/evidence/pal4-game-shortcut-02/screen-0-window.json",
+        "sha256": "00931bb73cb45e2dc2b3fadef43b9a7a1eeda3e2d8d44aff15c7dc28c35f843d"
+      },
+      "boot_receipt": {
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan-out/dxvk-games-01a1ec52/evidence/pal4-game-shortcut-02/progress.json",
+        "sha256": "c17f5ea11c7aa153e6c0cd33c7557b883ea7520905bf5ebe92d7f9b51e773623"
+      },
+      "capture_limit": "实验归属是游戏启动诊断；画面中实际显示普通文件夹窗口。窗口元数据记录游戏采集目标。该图无 Home 或此电脑视图。",
+      "package_metadata": {
+        "anchor_commit": "df5bf680a522f8e5eb2fe49abf6c4fff8a607706",
+        "record": "tegra-x1-wddm/docs/dxvk-games-20261118/components.json",
+        "arm64_desktop_runtime": {
+          "TegraGpuD3DVk.dll": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+          "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+        },
+        "scope": "同 KMD 发布记录的桌面包哈希。缺这一启动的 Explorer/DWM 进程模块哈希，不能把包清单写成截图的实载回执。"
+      }
+    },
+    {
+      "kind": "Home 与此电脑顶部空白",
+      "boot": 93818,
+      "boot_utc": "2026-11-21T22:12:07.2599185Z",
+      "gpu_code": 0,
+      "os": "22631.2861",
+      "client_cbs_version": "1000.22681.1000.0",
+      "explorer_pid": 5416,
+      "dwm_pid": 1384,
+      "first_documented_by": "4d2493e8895cbcefa01f890cfa95707afe544c29",
+      "active_package_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+      "native_nvk_source": "e9e8a3a3c69379065467f5d86a5d5054e550b9ff",
+      "same_boot_display_driver_and_native_modules": {
+        "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+      },
+      "views": [
+        {
+          "view": "Home",
+          "capture_utc": "2026-11-21T22:25:24.5404968Z",
+          "pixels": {
+            "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/explorer-home-20261121/actual-home-0.png",
+            "sha256": "b98e934a17142740a1b08fdebae19d641ba8ba7544db0996024723c6fe93665b"
+          }
+        },
+        {
+          "view": "This PC",
+          "capture_utc": "2026-11-21T22:24:23.2315648Z",
+          "pixels": {
+            "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/explorer-home-20261121/stable-4.png",
+            "sha256": "04dc4c7f7d8d0619b99173df4f3d76d8be93322e076f11ed5c9c7dd3f5f74421"
+          }
+        }
+      ],
+      "capture_record": "tegra-x1-wddm/docs/explorer-home-22631/shell-header.json",
+      "same_boot_readback": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/seq-93818-resume-preflight.json",
+        "sha256": "79f18b09962591caafdf2f9fd32cea8eb990be58ff6362a2aa1ce449330e2300"
+      },
+      "explorer_module_receipt": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/explorer-home-20261121/live.json",
+        "sha256": "a6704562825b904911c694db280fccc27802586f49fa4da516b668ce9c9ff88b"
+      },
+      "observed": "下方导航和内容仍在，右上角窗口按钮可见，标签、地址与命令行所在的上部区域空白。"
+    }
+  ],
+  "source_comparison": {
+    "unchanged_meta_source": {
+      "path": "src/nouveau/vulkan/nvk_cmd_meta.c",
+      "git_blob": "506ccaaa8f7858648371e920a14946b8e1e8bb48",
+      "endpoints": [
+        "d3423d269f9e716eadc1237beadbfb6aa6049dbe",
+        "2c35ae83a7903df4b4c22821f45a816cf08b7ac9"
+      ]
+    },
+    "arm64ec_selection": {
+      "source_commit": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+      "qualification": "tegra-x1-wddm/docs/nvk-arm64ec-d31b8620/qualification.json",
+      "baseline_selection": "c684dd6ac8c3e2eaa5e16ff5ea5218bb2e685a2a",
+      "desktop_loaded_component_effect": "对比前一原生 WSI/DIB 发布回执，Explorer/DWM 实载的四个用户态组件与 KMD 哈希全部相同。兼容槽替换未改变这些原生二进制。"
+    },
+    "priority_for_future_attribution": [
+      {
+        "commits": [
+          "e6852733640f4dc114042796477671ca54c1f3c6",
+          "e1314a2c769b92e971640caf67e1a67db270a5ad"
+        ],
+        "area": "tgd3d 桌面呈现复制和窗口 BGRA 资源",
+        "reason": "分别改变 DXGI Blt 的格式、传输与资源选择，以及部分普通窗口 BGRA 目标的线性存储与运行时分配寿命。与顶部合成表面最相关。其 HWND 的格式、DDI、复制分支与提交结果缺回执。"
+      },
+      {
+        "commits": [
+          "aa49f69c8362ddb6e0547ad8f30bb951c9548a5e",
+          "02d4c018400dddf9914ec5a6925f8e4875189bfa",
+          "a7c422add36e2d6b2444a7767bafcaef81b4a041"
+        ],
+        "area": "KMD 普通窗口 staging 与退役",
+        "reason": "同一发布区间增加窗口 staging 复制和完成处理。待验证 WinUI 桥的表面是否实际走这些分支。"
+      },
+      {
+        "commit": "e9e8a3a3c69379065467f5d86a5d5054e550b9ff",
+        "area": "原生 NVK Win32 Vulkan WSI 节奏与直接 DIB",
+        "qualification": "tegra-x1-wddm/docs/nvk-wsi-dib-a143bee5/qualification.json",
+        "reason": "原生 NVK 哈希随此发布改变。tgd3d 的 DXGI 普通窗口呈现代码走 Windows PresentCb；现有 Explorer 回执尚无实际使用 Win32 Vulkan WSI 的证据。"
+      }
+    ],
+    "shell_version_limit": "空白端已知 Windows 22631.2861 与 MicrosoftWindows.Client.CBS 1000.22681.1000.0。可见端缺 shell/XAML 同启动版本和进程模块哈希，系统组件变化尚不能排除。"
+  },
+  "finding": "现有正常顶部画面为 2026-11-18T06:27:16.7260565Z 的普通文件夹；首份已归属 Home / 此电脑的空白画面来自 2026-11-21 启动 93818。两侧的视图和组件证据范围有差异。首次受影响的提交未知。",
+  "missing_observation": "缺同版 shell 的 Home / 此电脑顶部可见锚点、11 月 18–21 日中间版本的匹配截图及两端相同类型窗口的逐进程加载哈希和合成提交证据。"
+}

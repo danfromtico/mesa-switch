@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-dma-boundary-build-20261121-01",
+  "contract_id": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+  "windows_question": "WIN-KMD-DMA-BOUNDARY-CANDIDATE",
+  "owner": "GM20B Windows ARM64 KMD 与本机 ETW",
+  "question": "能否在不修改队列、寄存器操作或完成顺序的前提下，为同一提交号补出 KMD 进入、准入、GP_PUT 发布和 GPU 围栏回读的独立踪迹？",
+  "method": "在固定正式基线的独立工作树构建仅诊断的本地候选；无驱动切换与实机图形执行",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "隔离构建并通过主机与驱动夹具，再按正式许可规则用已知健康负载验证同号阶段和真实加载哈希。GP_PUT 发布与 GPU 实际完成分别记录。",
+  "observations": [
+    "沿用基线固定 WDK、SDK、功率和驱动构建参数。对常规非空提交在现有流程点发出固定布局 ETW；仅在新关键字启用时记录。",
+    "在 KMD 入口校验后、队列实际准入后、硬件 GP_PUT 发布并读回后、设备完成值首次匹配后记录。仅复用既有字段和读回，不增加 MMIO、轮询、等待、磁盘写入。",
+    "验证事件布局和 ARM64 驱动构建。用受控队列夹具分别覆盖准入后硬件发布与完成、准入拒绝、发布失败。保留候选、托管的补丁和构建回执。"
+  ],
+  "inputs": {
+    "recipe_sha256": "8ece6894aac855d60c02ce5799d3bb8e64cd72b6823ed1860da6bc4d09bdd7b0",
+    "qualified_baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "events_reference": [
+      {
+        "path": "windows-native-graphics/rounds/win-native-submit-event-catalog-20261121-01.result.json",
+        "sha256": "f45128522852e3460af5aa3f2760747ccb958c5e3ceb282bbb63af030e1aae25"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      }
+    ],
+    "device_release_scope": "本轮构建与模型验证，实机健康配对由后续独立轮次按许可执行"
+  }
+}

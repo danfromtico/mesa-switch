@@ -9,18 +9,18 @@
 #include "nvk_image.h"
 #include "nvk_physical_device.h"
 #include "nvkmd/nvkmd.h"
+#ifdef _WIN32
+#include "nvkmd/windows/nvkmd_windows.h"
+#endif
 #ifdef __SWITCH__
 #include "nvk_switch_wsi.h"
 #include "nvkmd/switch/nvkmd_switch.h"
 #endif
 #include "util/u_atomic.h"
+#include "vk_internal_exts.h"
+#include "vk_wsi_win32_memory.h"
 
 #include <inttypes.h>
-#ifndef __SWITCH__
-#include <sys/mman.h>
-#else
-#include <util/switch_mman.h>
-#endif
 
 /* Supports opaque fd only */
 const VkExternalMemoryProperties nvk_opaque_fd_mem_props = {
@@ -31,6 +31,16 @@ const VkExternalMemoryProperties nvk_opaque_fd_mem_props = {
       VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT,
    .compatibleHandleTypes =
       VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT,
+};
+
+const VkExternalMemoryProperties nvk_opaque_win32_mem_props = {
+   .externalMemoryFeatures =
+      VK_EXTERNAL_MEMORY_FEATURE_EXPORTABLE_BIT |
+      VK_EXTERNAL_MEMORY_FEATURE_IMPORTABLE_BIT,
+   .exportFromImportedHandleTypes =
+      VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT,
+   .compatibleHandleTypes =
+      VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT,
 };
 
 /* Supports opaque fd and dma_buf. */
@@ -172,7 +182,31 @@ nvk_allocate_memory(VkDevice device,
    if (fd_info != NULL)
       handle_types |= fd_info->handleType;
 
-   const bool not_shared = handle_types == 0 && !switch_shared;
+   bool is_win32_import = false;
+   bool is_wsi_win32_import = false;
+#ifdef _WIN32
+   const struct wsi_memory_allocate_info *wsi_info =
+      vk_find_struct_const(pAllocateInfo->pNext, WSI_MEMORY_ALLOCATE_INFO_MESA);
+   is_wsi_win32_import = wsi_info && wsi_info->win32_memory;
+   const VkImportMemoryWin32HandleInfoKHR *win32_import =
+      vk_find_struct_const(pAllocateInfo->pNext, IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR);
+   const VkExportMemoryWin32HandleInfoKHR *win32_export =
+      vk_find_struct_const(pAllocateInfo->pNext, EXPORT_MEMORY_WIN32_HANDLE_INFO_KHR);
+   if (win32_import != NULL) {
+      handle_types |= win32_import->handleType;
+      is_win32_import = win32_import->handleType != 0;
+   }
+   if (handle_types & ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT) {
+      result = vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+      goto fail_alloc;
+   }
+   if (is_wsi_win32_import && (handle_types || mem->vk.host_ptr)) {
+      result = vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+      goto fail_alloc;
+   }
+#endif
+
+   const bool not_shared = handle_types == 0 && !switch_shared && !is_wsi_win32_import;
    bool pinned_to_vram = false;
 
    /* Align to os page size (typically 4K) as a start as this works for
@@ -213,6 +247,7 @@ nvk_allocate_memory(VkDevice device,
       }
 #else
       mem->dedicated_image = image;
+#ifndef _WIN32
       if (image->vk.tiling == VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT &&
           image->vk.drm_format_mod != DRM_FORMAT_MOD_LINEAR) {
          /* This image might be shared with GL so we need to set the BO flags
@@ -222,7 +257,9 @@ nvk_allocate_memory(VkDevice device,
          alignment = MAX2(alignment, image->planes[0].nil.align_B);
          pte_kind = image->planes[0].nil.pte_kind;
          tile_mode = image->planes[0].nil.tile_mode;
-      } else if (image->can_compress && not_shared) {
+      } else
+#endif
+      if (image->can_compress && not_shared) {
          /* If it's a dedicated alloc and it's not modifiers or shared, then
           * it's marked for compression and larger pages, so we set the pinned
           * bit and up the alignment.
@@ -253,19 +290,50 @@ nvk_allocate_memory(VkDevice device,
    const uint64_t aligned_size =
       align64(pAllocateInfo->allocationSize, alignment);
 
-   const bool is_import = fd_info && fd_info->handleType;
+   const bool is_import = (fd_info && fd_info->handleType) || is_win32_import || is_wsi_win32_import;
    const bool is_host_import = mem->vk.host_ptr != NULL;
 #ifdef __SWITCH__
    const bool is_nvmap_import = switch_nvmap_id != 0;
 #else
    const bool is_nvmap_import = false;
 #endif
-   if (is_nvmap_import) {
+   if (is_wsi_win32_import) {
+#ifdef _WIN32
+      if (wsi_info->win32_memory->version >= WSI_WIN32_MEMORY_DISPLAYABLE_VERSION &&
+          !wsi_info->win32_written_allocation) {
+         result = vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+         goto fail_alloc;
+      }
+      result = nvkmd_dev_import_wsi_win32_memory(dev->nvkmd, &dev->vk.base,
+         wsi_info->win32_memory, aligned_size, alignment, pte_kind, flags, &mem->mem);
+      if (result != VK_SUCCESS)
+         goto fail_alloc;
+#endif
+   } else if (is_nvmap_import) {
 #ifdef __SWITCH__
       result = nvkmd_switch_dev_import_nvmap(dev->nvkmd, &dev->vk.base,
                                              switch_nvmap_id, aligned_size,
                                              alignment, pte_kind, tile_mode,
                                              flags, &mem->mem);
+      if (result != VK_SUCCESS)
+         goto fail_alloc;
+#endif
+   } else if (is_win32_import) {
+#ifdef _WIN32
+      HANDLE handle = win32_import->handle;
+      if (!handle) {
+         LONG status = tg_kmt_open_memory_name(win32_import->name, &handle);
+         result = nvkmd_windows_status(&dev->vk.base, "open named KMT storage",
+                                       status, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+         if (result != VK_SUCCESS)
+            goto fail_alloc;
+      }
+      result = nvkmd_dev_import_win32_handle(dev->nvkmd, &dev->vk.base,
+                                            handle, aligned_size, alignment,
+                                            pte_kind, flags, &mem->mem);
+      /* Imports retain the resource, not the application's NT handle. */
+      if (!win32_import->handle)
+         CloseHandle(handle);
       if (result != VK_SUCCESS)
          goto fail_alloc;
 #endif
@@ -359,6 +427,17 @@ nvk_allocate_memory(VkDevice device,
       }
    }
 
+#ifdef _WIN32
+   if (export_info && export_info->handleTypes) {
+      result = nvkmd_windows_export_memory(mem->mem, &dev->vk.base,
+                                           win32_export, &mem->export_handle);
+      if (result != VK_SUCCESS)
+         goto fail_mem;
+      mem->export_inherit = win32_export && win32_export->pAttributes &&
+                            win32_export->pAttributes->bInheritHandle;
+   }
+#endif
+
    if (fd_info && fd_info->handleType) {
       /* From the Vulkan spec:
        *
@@ -376,6 +455,12 @@ nvk_allocate_memory(VkDevice device,
    p_atomic_add(&heap->used, mem->mem->size_B);
 
    *pMem = nvk_device_memory_to_handle(mem);
+#ifdef _WIN32
+   if (is_wsi_win32_import && wsi_info->win32_imported)
+      *wsi_info->win32_imported = true;
+   if (is_wsi_win32_import && wsi_info->win32_memory->version >= WSI_WIN32_MEMORY_DISPLAYABLE_VERSION)
+      *wsi_info->win32_written_allocation = nvkmd_windows_written_allocation(mem->mem);
+#endif
 
    return VK_SUCCESS;
 
@@ -442,10 +527,51 @@ nvk_FreeMemory(VkDevice device,
    struct nvk_memory_heap *heap = &pdev->mem_heaps[type->heapIndex];
    p_atomic_add(&heap->used, -((int64_t)mem->mem->size_B));
 
+#ifdef _WIN32
+   if (mem->export_handle)
+      CloseHandle(mem->export_handle);
+#endif
    nvkmd_mem_unref(mem->mem);
 
    vk_device_memory_destroy(&dev->vk, pAllocator, &mem->vk);
 }
+
+#ifdef _WIN32
+VKAPI_ATTR VkResult VKAPI_CALL
+nvk_GetMemoryWin32HandleKHR(VkDevice device,
+                            const VkMemoryGetWin32HandleInfoKHR *pGetWin32HandleInfo,
+                            HANDLE *pHandle)
+{
+   VK_FROM_HANDLE(nvk_device, dev, device);
+   VK_FROM_HANDLE(nvk_device_memory, mem, pGetWin32HandleInfo->memory);
+   *pHandle = NULL;
+   if (pGetWin32HandleInfo->handleType != VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT ||
+       !mem->export_handle)
+      return vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+
+   if (!DuplicateHandle(GetCurrentProcess(), mem->export_handle,
+                        GetCurrentProcess(), pHandle, 0, mem->export_inherit,
+                        DUPLICATE_SAME_ACCESS))
+      return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
+   return VK_SUCCESS;
+}
+
+VKAPI_ATTR VkResult VKAPI_CALL
+nvk_GetMemoryWin32HandlePropertiesKHR(VkDevice device,
+                                      VkExternalMemoryHandleTypeFlagBits handleType,
+                                      HANDLE handle,
+                                      VkMemoryWin32HandlePropertiesKHR *pProperties)
+{
+   VK_FROM_HANDLE(nvk_device, dev, device);
+   /* OPAQUE_WIN32 is excluded by VUID-handleType-00666. Other handle types
+    * require a D3D layout/metadata contract and are not supported yet.
+    */
+   (void)handleType;
+   (void)handle;
+   pProperties->memoryTypeBits = 0;
+   return vk_error(dev, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+}
+#endif
 
 VKAPI_ATTR VkResult VKAPI_CALL
 nvk_MapMemory2KHR(VkDevice device,

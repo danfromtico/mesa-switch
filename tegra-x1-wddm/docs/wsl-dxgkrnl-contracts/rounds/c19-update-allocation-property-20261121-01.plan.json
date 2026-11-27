@@ -1,0 +1,20 @@
+{
+  "round_id": "c19-update-allocation-property-20261121-01",
+  "contract_id": "dxgvmbus.c:3651:2",
+  "declared_utc": "2026-11-22T02:53:36.487808+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "3a28917fde5321cebaf814c59f462ffcbd67a5a1bca64da88e30868763f9ad71",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "合法 UpdateAllocationProperty 自然异步处理时，返回正的 STATUS_PENDING 并输出同队列的分页围栏。",
+  "question": "现有 Windows 原件是否有同一次合法 UpdateAllocationProperty 返回 0x103 并输出对应分页围栏？",
+  "method": "只对照已存自然 API 结果及各自分页队列，按 API 名、设备、PID/TID、QPC 核对。",
+  "required_observation": "现有 Windows 原件是否有同一次合法 UpdateAllocationProperty 返回 0x103 并输出对应分页围栏？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-allocation-property-20261121-01.result.json",
+    "sha256": "ba604dac0173f12e594ce9b1ea42458074c4a14b4483774b774a4eab9520b9db"
+  }
+}

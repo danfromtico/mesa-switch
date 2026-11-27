@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-24T09:32:27.441979+00:00",
+  "status": "open_cause_unresolved",
+  "fault_id": "GM20B-C4-SD0515-DESKTOP-BLACK-SCREEN-100692",
+  "boot_record_id": 100692,
+  "native_observation_utc": "2026-11-24T09:22:59.2908607Z",
+  "owner_observation_technical_facts": {
+    "desktop_reached": true,
+    "subsequent_black_screen_reported": true,
+    "root_cause": "unknown",
+    "observation_is_not_a_bugcheck_or_reboot_proof": true
+  },
+  "system_original": {
+    "path": "tegra-x1-wddm/docs/windows-native-graphics/sd0515-boot100692-black-screen-20261124.System.xml",
+    "bytes": 65072,
+    "sha256": "348ab34f000a11d10319e723c01111815ba4429b944fdfacfc19b43403b9d8c0",
+    "record_id_range": [
+      100675,
+      100763
+    ],
+    "event_count": 89,
+    "matching_additional_41_6008_4101_1001_in_snapshot": [],
+    "boot_records": [
+      {
+        "record": 100692,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "id": 12
+      }
+    ]
+  },
+  "native_transport_original": {
+    "path": "tegra-x1-wddm/docs/windows-native-graphics/sd0515-boot100692-black-screen-20261124.native-original.bin",
+    "bytes": 606569,
+    "sha256": "2c6cfb7b5f1ebdd63c57c689b7effc5d79181ca6a8d9492925eafa06c3a0c6a1",
+    "text_codec": "gb18030",
+    "strict_exact_encode_roundtrip_verified": true,
+    "operation_id": "gem-sd0515-black-screen-readonly-diag-102b1f2983"
+  },
+  "current_loaded_paths_and_disk_hashes": {
+    "kernel": [
+      {
+        "raw": "\\SystemRoot\\System32\\drivers\\nvtsdhc.sys|0xfffff8035b4a0000|0x11000|36",
+        "disk_path": "C:\\Windows\\System32\\drivers\\nvtsdhc.sys",
+        "disk_sha256": "67cfecbdc3acf4b98bd3993d0275a34986f4bd2270bd159d7129f9b20966849e"
+      },
+      {
+        "raw": "\\SystemRoot\\System32\\drivers\\tegragpurender.sys|0xfffff80742200000|0x44000|121",
+        "disk_path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "disk_sha256": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164"
+      },
+      {
+        "raw": "\\SystemRoot\\System32\\drivers\\dump_nvtsdhc.sys|0xfffff80742350000|0x11000|130",
+        "disk_path": "C:\\Windows\\System32\\drivers\\dump_nvtsdhc.sys",
+        "disk_sha256": null
+      }
+    ],
+    "desktop_processes": [
+      {
+        "name": "dwm",
+        "pid": 1464,
+        "start_utc": "2026-11-24T09:15:34.3532143Z",
+        "session": 1,
+        "module_enumerated_paths_and_corresponding_disk_SHA": [
+          {
+            "name": "TegraGpuD3DVk.dll",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\TegraGpuD3DVk.dll",
+            "base": "0x7ff820670000",
+            "size": 28672,
+            "sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+          },
+          {
+            "name": "tg_d3d_arm64.DLL",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\tg_d3d_arm64.DLL",
+            "base": "0x7ff81ea00000",
+            "size": 2875392,
+            "sha256": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+          },
+          {
+            "name": "libvulkan_nouveau.dll",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\libvulkan_nouveau.dll",
+            "base": "0x7ff81f870000",
+            "size": 28672,
+            "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+          },
+          {
+            "name": "tg_nvk_arm64.DLL",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\tg_nvk_arm64.DLL",
+            "base": "0x7ff81d8f0000",
+            "size": 15659008,
+            "sha256": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+          }
+        ]
+      },
+      {
+        "name": "explorer",
+        "pid": 5448,
+        "start_utc": "2026-11-24T09:16:05.0398591Z",
+        "session": 1,
+        "module_enumerated_paths_and_corresponding_disk_SHA": [
+          {
+            "name": "TegraGpuD3DVk.dll",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\TegraGpuD3DVk.dll",
+            "base": "0x7ff820670000",
+            "size": 28672,
+            "sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+          },
+          {
+            "name": "tg_d3d_arm64.DLL",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\tg_d3d_arm64.DLL",
+            "base": "0x7ff81ea00000",
+            "size": 2875392,
+            "sha256": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+          },
+          {
+            "name": "libvulkan_nouveau.dll",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\libvulkan_nouveau.dll",
+            "base": "0x7ff81f870000",
+            "size": 28672,
+            "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+          },
+          {
+            "name": "tg_nvk_arm64.DLL",
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-system-paging-c4f04a10e86a\\app\\tg_nvk_arm64.DLL",
+            "base": "0x7ff81d8f0000",
+            "size": 15659008,
+            "sha256": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+          }
+        ]
+      }
+    ],
+    "identity_scope": "Actual module paths plus corresponding full disk file SHA256, not hashes of loaded memory bytes."
+  },
+  "bounded_findings": [
+    "System can respond to authenticated readonly query; DWM1464 and Explorer5448 are alive with starts09:15:34/09:16:05. Their responding flags do not prove working pixels or GPU completion.",
+    "The exact89 System-event snapshot has one planned boot100692 and no41/6008/4101/1001; this does not prove TDR never entered or close any previous reboot case.",
+    "C4 desktop vendor paths/disk hashes match previously accepted components. Native SD path corresponds to signed0515 disk67cf; no new R3 directNT request has been sent.",
+    "All powercfg subqueries in this first capture failed with invalid parameters. Display/lock/sleep policy remains unproved and must be read correctly; no Never-timeout conclusion is made.",
+    "Black-screen cause remains open separately from the continued independent SD qualification flow."
+  ],
+  "source_snapshot_limitations": [
+    "Active snapshots, clock basis and query bounds retained; no pixel/frame proof.",
+    "PowerData offset4 is the most recent reported device power state, not a direct current panel-power measurement.",
+    "The raw transport bytes and complete SystemXML are preserved; source photos and user chat quotes are not included."
+  ],
+  "disposition": {
+    "cause_fixed": false,
+    "fault_closed": false,
+    "native_SD_dump_qualified": false,
+    "GPU_baseline_changed": false,
+    "SD_main_flow_may_continue": true,
+    "specific_condition": "Collect/resolve any outstanding actual readonly job first; enforce actual new-boot/component/preparation and same-boot true unbuffered IO gates before the one unusedR3 request. Black-screen root investigation remains open; do not repeat consumed requests."
+  }
+}

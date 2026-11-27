@@ -1,0 +1,1134 @@
+{
+  "schema": 1,
+  "decision": "accept_native_control_boundary_new_live_dump_persistence_and_formal_restore;C4_repair_not_qualified",
+  "main_device_operations": 0,
+  "source": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+  "candidate_KMD": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+  "candidate_rebuilt_or_resigned": false,
+  "retained_package_members": 13,
+  "archive": {
+    "schema": 1,
+    "archive_sha256": "1ef9b0f6582cb70d2bf27904428ce033797414cb89af33b2cae53d4e846346e2",
+    "archive_bytes": 116546597,
+    "originals": 1134,
+    "members": 1135,
+    "original_content_bytes": 1575602561,
+    "manifest_bytes": 441526,
+    "all_member_uncompressed_bytes": 1576044087,
+    "manifest_sha256": "1c2568d456ede7adea01767f5d2f2e2c94cc2a76e6509d2c20188ca764ce99cd",
+    "all_archive_members_SHA_bytes_CRC_verified": true,
+    "source_files_independently_SHA_checked": 1134,
+    "source_differences": [],
+    "main_device_operations": 0
+  },
+  "candidate": {
+    "boot": 98860,
+    "Code": 0,
+    "AC": "Online",
+    "one_time_permission": true,
+    "components_full_SHA": 8,
+    "actual_loaded_paths_full_SHA": 5,
+    "private_x86_retained": true,
+    "same_installed_dxgkrnl_SHA_as_later_preserved_file": true
+  },
+  "control": {
+    "r1_requests": 0,
+    "r2_requests": 1,
+    "Type": 2,
+    "request": {
+      "event": "request",
+      "pid": 6820,
+      "tid": 6812,
+      "luid": "00000000000056bd",
+      "control": 0,
+      "node": 0,
+      "flags": 0,
+      "bytes": 4,
+      "qpc_stamp": 4525658004,
+      "qpc_frequency": 19200000,
+      "api_requests": 1
+    },
+    "return": {
+      "event": "return",
+      "pid": 6820,
+      "tid": 6812,
+      "luid": "00000000000056bd",
+      "control": 0,
+      "status": "00000000",
+      "qpc_stamp": 4525965070
+    },
+    "original_consumed": true,
+    "replay_allowed": false
+  },
+  "owned_observation": {
+    "records": 194842,
+    "events": 194769,
+    "states": 73,
+    "seconds": 45.00045229166667,
+    "journal_samples": 88,
+    "reported_loss_and_parse_errors": 0,
+    "ETL_bytes": 202047488,
+    "ETL_sha256": "0412658abe7a47d2c6a7159f45dcf47c9cfb18776e5f8e7eeaab4c5ad3c6d667",
+    "KMD_count": 147,
+    "ids": {
+      "2": 139,
+      "9": 8
+    },
+    "compared_fields": [
+      "id",
+      "version",
+      "opcode",
+      "task",
+      "pid",
+      "tid",
+      "qpc_stamp",
+      "bytes",
+      "data"
+    ],
+    "payload_multiset_equal": true,
+    "raw_flags": 0,
+    "live_flags": 576,
+    "all_context_records_user_virtual": true,
+    "general_ETL_parser_or_all_time_absence_proof": false
+  },
+  "dispatch_contract": {
+    "hot_fragment_to_cold_switch_verified": true,
+    "type2_table_target": "0x236be0",
+    "minimum_private_bytes": 4,
+    "external_control0_table_target": "0x236c1c",
+    "TdrDbgCtrl_RVA": "0x2f28a8",
+    "set_global_RVA": "0xb1004",
+    "set_value": 1,
+    "consumer": "TdrIsTimeoutForcedFlip",
+    "consumer_exchange_value": 0,
+    "leaf_adapter_argument_or_direct_reset": false,
+    "runtime_stack_or_global_observed": false,
+    "word_entries": [
+      {
+        "file": "DxgkEscape.asm",
+        "word_entries": 636,
+        "sha256": "88908e7d77ba60b20efe8345368ed68381afe54a9b088f529d3a094cda4b4c05"
+      },
+      {
+        "file": "Escape-TdrControl-cold.asm",
+        "word_entries": 124,
+        "sha256": "f7a7516761f50bf4e811662b94f5e88a82d7599f7a480e92804a4a26e4274ace"
+      },
+      {
+        "file": "Escape-TdrType-hot-fragment.asm",
+        "word_entries": 45,
+        "sha256": "f47fad5feb6042ba923200ee6d354c25f5646bf37e6d265c0029b38e9ce11386"
+      },
+      {
+        "file": "Escape-TypeDispatch-cold.asm",
+        "word_entries": 68,
+        "sha256": "2741954b0d7f34607184ebbe4f1f683893d9b8fb7bc0d02724d74b655b40c671"
+      },
+      {
+        "file": "TdrDbgCtrl.asm",
+        "word_entries": 48,
+        "sha256": "44dfe5e84d94a2fb3ae009c14fa92eee60b0d1297cec734d5b5ceda0466de118"
+      },
+      {
+        "file": "TdrIsRecoveryRequired.asm",
+        "word_entries": 168,
+        "sha256": "48f1d3fc6ed3446962b739391d75202e41c2853748b679daf85bf038b8d82ade"
+      },
+      {
+        "file": "TdrIsTestMode.asm",
+        "word_entries": 44,
+        "sha256": "286d654950d25a8f2274fe1ec2f46e8aab1711bab52ab4239bb1a6ef49771ca8"
+      },
+      {
+        "file": "TdrIsTimeoutForcedFlip.asm",
+        "word_entries": 12,
+        "sha256": "8345b9f4b860eba082a0bb0586fef7a07106279b5f0b7bf51a8cd918c9be86f2"
+      },
+      {
+        "file": "xref-00.asm",
+        "word_entries": 42,
+        "sha256": "bb1aab9782b00acb05f7eb823703e840861258c0810ed19201c0676f8ec755d2"
+      },
+      {
+        "file": "xref-01.asm",
+        "word_entries": 42,
+        "sha256": "a1707d5457aae35de2f1571a2d2ef0a5c6a00b7c84c5aaf6cee150dfcafd7f1d"
+      },
+      {
+        "file": "xref-02.asm",
+        "word_entries": 42,
+        "sha256": "68ebca6dffba15e41da8858dd8c210a63a261a2074fc7de0ad948bcc9f73cb33"
+      },
+      {
+        "file": "xref-03.asm",
+        "word_entries": 42,
+        "sha256": "1b57ae5ac72e774c677da97fe0371fa0c7f052d433c84184b9f0dbae1c297f7c"
+      },
+      {
+        "file": "xref-04.asm",
+        "word_entries": 42,
+        "sha256": "1c2cce86598163456bb5b2a79005525f857885ef3bafba9608588a3cede3d466"
+      },
+      {
+        "file": "xref-05.asm",
+        "word_entries": 42,
+        "sha256": "e9fde6b284b9b035e1350cc2eb13d2996190d98eb0578478a56ae5e8cf184d23"
+      }
+    ],
+    "word_entries_include_constants_or_data": true
+  },
+  "dxgkrnl_identity": {
+    "sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+    "bytes": 4590976,
+    "native_file_before_after_matches": true,
+    "same_SHA_in_candidate_boot98860": true,
+    "PE_RSDS": {
+      "guid": "797f457a-6488-c67c-8e55-b0f3e771dc32",
+      "age": 1
+    },
+    "PDB_sha256": "7f0a811d1c74569f9dbe428cc2d73355beb4e0864b7b77c81e1bbf3540fa74e9",
+    "PDB_bytes": 3592192,
+    "PDB_fields": {
+      "guid": "797f457a-6488-c67c-8e55-b0f3e771dc32",
+      "info_age": 2,
+      "DBI_age": 1,
+      "info_version": 20000404,
+      "DBI_signature": -1,
+      "DBI_version": 19990903
+    },
+    "exports_addresses_and_alias_mappings_checked": 319,
+    "export_names_verbatim_equal_public_names": false
+  },
+  "system": [
+    {
+      "record": 98684,
+      "id": 12,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-23T13:30:06.2127961Z"
+    },
+    {
+      "record": 98756,
+      "id": 1074,
+      "provider": "User32",
+      "utc": "2026-11-23T13:52:13.7511388Z"
+    },
+    {
+      "record": 98772,
+      "id": 12,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-23T13:52:38.7858979Z"
+    },
+    {
+      "record": 98844,
+      "id": 1074,
+      "provider": "User32",
+      "utc": "2026-11-23T14:01:45.3783482Z"
+    },
+    {
+      "record": 98860,
+      "id": 12,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-23T14:02:11.9241492Z"
+    },
+    {
+      "record": 98932,
+      "id": 4101,
+      "provider": "Display",
+      "utc": "2026-11-23T14:06:38.6561271Z"
+    },
+    {
+      "record": 98933,
+      "id": 1074,
+      "provider": "User32",
+      "utc": "2026-11-23T14:15:43.4405885Z"
+    },
+    {
+      "record": 98949,
+      "id": 12,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-23T14:16:08.4033219Z"
+    },
+    {
+      "record": 99022,
+      "id": 1074,
+      "provider": "User32",
+      "utc": "2026-11-23T14:24:01.3655332Z"
+    },
+    {
+      "record": 99039,
+      "id": 12,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-23T14:24:28.2805390Z"
+    }
+  ],
+  "system_scope": {
+    "selected_ID_query_first_record": 98684,
+    "owned_planned_restarts": 4,
+    "requests_match_original1074_receipts": true,
+    "observed41_6008_1001": false,
+    "BasicRender4101_record": 98932,
+    "BasicRender4101_UTC": "2026-11-23T14:06:38.6561271Z",
+    "EventData_driver": "BasicRender",
+    "unrelated_operational_queries": "Two exact operational queries returned NoMatchingEventsFound; this is not global absence."
+  },
+  "cold": {
+    "files": 32,
+    "r2_files": 16,
+    "r2_bytes": 638058496,
+    "source_copy_source_host_SHA_and_System12_BootTime_bound": true,
+    "rows": [
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98337,
+        "provider": "graphics",
+        "bytes": 67108864,
+        "sha256": "053f9337b260b79179b3ebbbad55afc346cf519b66e65bea2afedf2af2d1116a",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399120886742351,
+          "buffers_written": 56343,
+          "events_lost": 2,
+          "boot_time_filetime": 134398970755423726,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98337,
+        "provider": "kernel",
+        "bytes": 67108864,
+        "sha256": "f611ad55e22164a6a62f5747a12081ae7b76e856fae8342a9c4a73a0144c9726",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399120888559657,
+          "buffers_written": 52527,
+          "events_lost": 12579,
+          "boot_time_filetime": 134398970755423726,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98337,
+        "provider": "loader",
+        "bytes": 12255232,
+        "sha256": "8f0275c150c5ed3d061fd21a12bd90ea99a4cda802a049407769e96f061675f5",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399120886578197,
+          "buffers_written": 187,
+          "events_lost": 0,
+          "boot_time_filetime": 134398970755423726,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98337,
+        "provider": "tgd3d",
+        "bytes": 33554432,
+        "sha256": "6752ae991cd20ff953bc344fa5e33bb1094603a5555639018b9a18af4a504ff6",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399120886539337,
+          "buffers_written": 32272,
+          "events_lost": 0,
+          "boot_time_filetime": 134398970755423726,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98425,
+        "provider": "graphics",
+        "bytes": 67108864,
+        "sha256": "359fcc08a7e268f510c7a021a0182bb79dd6fc89312fd18df0dd6381dbdd8047",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399125171746314,
+          "buffers_written": 1237,
+          "events_lost": 0,
+          "boot_time_filetime": 134399120907320375,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98425,
+        "provider": "kernel",
+        "bytes": 67108864,
+        "sha256": "b5b3aa9192e2bac75ffe1d984252c298df5bf144780f96a7fd13f8d7daf6d03e",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399125173283040,
+          "buffers_written": 1755,
+          "events_lost": 16109,
+          "boot_time_filetime": 134399120907320375,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98425,
+        "provider": "loader",
+        "bytes": 8126464,
+        "sha256": "70a91027e8516853647d5cbf52be4549e77d73928c66b054807c9870a47438cd",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399125171674442,
+          "buffers_written": 124,
+          "events_lost": 0,
+          "boot_time_filetime": 134399120907320375,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98425,
+        "provider": "tgd3d",
+        "bytes": 65536,
+        "sha256": "b858cd19c187e4465417e8103408e5d848980365daf624a9680f378c176cdbfb",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399125171637463,
+          "buffers_written": 1,
+          "events_lost": 0,
+          "boot_time_filetime": 134399120907320375,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98509,
+        "provider": "graphics",
+        "bytes": 67108864,
+        "sha256": "76079c19f055b2b4f8dcd3bb5aae4eed1f5052c981b4d8e7887c99e98fcc41d1",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399137353489899,
+          "buffers_written": 5407,
+          "events_lost": 7,
+          "boot_time_filetime": 134399125192095145,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98509,
+        "provider": "kernel",
+        "bytes": 67108864,
+        "sha256": "c03627099150ff29b1752035afcb9a0e4d0452ba4d26cd1d2de6671c7df30aa3",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399137355161823,
+          "buffers_written": 4915,
+          "events_lost": 7698,
+          "boot_time_filetime": 134399125192095145,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98509,
+        "provider": "loader",
+        "bytes": 8454144,
+        "sha256": "f8ef9e81a69c34380df3ad2476b386a219aa2482750a4f2be1198585e26bfe61",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399137353363073,
+          "buffers_written": 129,
+          "events_lost": 0,
+          "boot_time_filetime": 134399125192095145,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98509,
+        "provider": "tgd3d",
+        "bytes": 33554432,
+        "sha256": "3307e10e2918d12d5abaa2300a7205bddf4a60b56a19c99f8b9cd056f8ca383c",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399137353334337,
+          "buffers_written": 3264,
+          "events_lost": 0,
+          "boot_time_filetime": 134399125192095145,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98596,
+        "provider": "graphics",
+        "bytes": 67108864,
+        "sha256": "b4ca025f86e3cbc318b300b0481770adfb20e894ebecba3151da9d2ba9ed84fa",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399142024091667,
+          "buffers_written": 1328,
+          "events_lost": 2,
+          "boot_time_filetime": 134399137374108573,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98596,
+        "provider": "kernel",
+        "bytes": 67108864,
+        "sha256": "4be87895e00b20f37e3b00c70a20874f832c5b0b7adcf8d9cac2129340137096",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399142025636510,
+          "buffers_written": 1889,
+          "events_lost": 7564,
+          "boot_time_filetime": 134399137374108573,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98596,
+        "provider": "loader",
+        "bytes": 7798784,
+        "sha256": "dfb1e59ad28c954df51848f35e9475c1eaef321a47fcb16bd785ab3f5528a515",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399142023992244,
+          "buffers_written": 119,
+          "events_lost": 0,
+          "boot_time_filetime": 134399137374108573,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r1",
+        "boot": 98596,
+        "provider": "tgd3d",
+        "bytes": 65536,
+        "sha256": "0922f31bd1855d56978cddc6f199c1520a3f3b16c4977f49fb99343fd5c8ff4f",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399142023953787,
+          "buffers_written": 1,
+          "events_lost": 0,
+          "boot_time_filetime": 134399137374108573,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98684,
+        "provider": "graphics",
+        "bytes": 67108864,
+        "sha256": "5e05c596b45218b7f8b0515e2f702aa9a1ae0e80c81009dbf579cb1fffba84ba",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399155549215147,
+          "buffers_written": 5439,
+          "events_lost": 4,
+          "boot_time_filetime": 134399142044925735,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98684,
+        "provider": "kernel",
+        "bytes": 67108864,
+        "sha256": "323c38370fa98cbe0b0bc44f054cfb6d59bf40e802b16b8516d220c0608cb329",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399155551240968,
+          "buffers_written": 5434,
+          "events_lost": 6147,
+          "boot_time_filetime": 134399142044925735,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98684,
+        "provider": "loader",
+        "bytes": 8388608,
+        "sha256": "4bacc130c3bcfbaed55fa9d72dbba07d23c9247389e8241043afc2c86ad3eaea",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399155549117948,
+          "buffers_written": 128,
+          "events_lost": 0,
+          "boot_time_filetime": 134399142044925735,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98684,
+        "provider": "tgd3d",
+        "bytes": 33554432,
+        "sha256": "6d12fdec17aceaae92abc4d925a7181d88779e25d77bda120768ce4928288144",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399155549088962,
+          "buffers_written": 3322,
+          "events_lost": 0,
+          "boot_time_filetime": 134399142044925735,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98772,
+        "provider": "graphics",
+        "bytes": 67108864,
+        "sha256": "c9daefc16bfd74d6cd921a187ddcd0cc521ba29d43291314874903f60da8d24a",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399161281372650,
+          "buffers_written": 1685,
+          "events_lost": 2,
+          "boot_time_filetime": 134399155570603463,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98772,
+        "provider": "kernel",
+        "bytes": 67108864,
+        "sha256": "5c4a798938edd7e514d06001ab3846cbd2db82d827bcd82a2d57e5fbf3e140ec",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399161283083672,
+          "buffers_written": 2286,
+          "events_lost": 7895,
+          "boot_time_filetime": 134399155570603463,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98772,
+        "provider": "loader",
+        "bytes": 9109504,
+        "sha256": "b0ee15858f8ae0888c8669efd128695fab8eb0d650ecc41734404c6c92f42831",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399161281265699,
+          "buffers_written": 139,
+          "events_lost": 0,
+          "boot_time_filetime": 134399155570603463,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98772,
+        "provider": "tgd3d",
+        "bytes": 65536,
+        "sha256": "fb96aa33fe7a1c726dd868aeece08fc192209414bfe824ba635c0373ed545c86",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399161281226460,
+          "buffers_written": 1,
+          "events_lost": 0,
+          "boot_time_filetime": 134399155570603463,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98860,
+        "provider": "graphics",
+        "bytes": 67108864,
+        "sha256": "96f7a7a844219031668b04ad32a77f7b81bdf8fd97fa6780472c83c156aa4525",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399169646292419,
+          "buffers_written": 3323,
+          "events_lost": 5199,
+          "boot_time_filetime": 134399161302010642,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98860,
+        "provider": "kernel",
+        "bytes": 67108864,
+        "sha256": "7cbb145ba0dcd6ec8f849925c5769f28dfe0584f4c1a0f2b60432acf0ef821ec",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399169647922428,
+          "buffers_written": 3235,
+          "events_lost": 9781,
+          "boot_time_filetime": 134399161302010642,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98860,
+        "provider": "loader",
+        "bytes": 8388608,
+        "sha256": "d63b29745a26b1e8b82c0bda8515a71e52ede6c26805405006c236c6f51a84dc",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399169646146974,
+          "buffers_written": 128,
+          "events_lost": 0,
+          "boot_time_filetime": 134399161302010642,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98860,
+        "provider": "tgd3d",
+        "bytes": 33554432,
+        "sha256": "1f741d961fbccabb5c8b512e26f30250e367002f33b56f4a6677f22ad900e97a",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399169646109618,
+          "buffers_written": 2074,
+          "events_lost": 0,
+          "boot_time_filetime": 134399161302010642,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98949,
+        "provider": "graphics",
+        "bytes": 67108864,
+        "sha256": "0c70ce950fd258b56aee3ba1efcf08c050949d208fa6a29ae35e1930c47c21c9",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399174644804528,
+          "buffers_written": 1387,
+          "events_lost": 0,
+          "boot_time_filetime": 134399169666804315,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98949,
+        "provider": "kernel",
+        "bytes": 67108864,
+        "sha256": "2411029ff20a15718df818354e51790c2d1e6083a44193243ca7571ef763539e",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399174646516209,
+          "buffers_written": 2011,
+          "events_lost": 26732,
+          "boot_time_filetime": 134399169666804315,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98949,
+        "provider": "loader",
+        "bytes": 8060928,
+        "sha256": "40136f1cecc1af8e1a6a174bf92527dc2c24d41d1db9c54a1d79f43c9d8060e1",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399174644703526,
+          "buffers_written": 123,
+          "events_lost": 0,
+          "boot_time_filetime": 134399169666804315,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      },
+      {
+        "round": "c4-adapter-recovery-r2",
+        "boot": 98949,
+        "provider": "tgd3d",
+        "bytes": 65536,
+        "sha256": "2ab5ea211d3b9b5fb7e5efbfd03b909a7122e0effbd3e60148905d1e906a3700",
+        "header": {
+          "buffer_size": 65536,
+          "end_time": 134399174644664962,
+          "buffers_written": 1,
+          "events_lost": 0,
+          "boot_time_filetime": 134399169666804315,
+          "qpc_frequency": 19200000,
+          "clock_context": 1,
+          "buffers_lost": 0
+        }
+      }
+    ],
+    "loss_retained": true,
+    "complete_tail_or_global_zero_loss_proved": false
+  },
+  "new_live_dumps": [
+    {
+      "name": "WATCHDOG-20261123-2153.dmp",
+      "bytes": 268204,
+      "sha256": "cdb5a2d765a35d33c83f5c6bbceecfe9f140ccdddbd00e9e24574ee26018f03d",
+      "code": "0x1b0",
+      "params": [
+        "0x2",
+        "0xffffffffc00000a3",
+        "0x108",
+        "0xfffff80645e01000"
+      ],
+      "creation_utc": "2026-11-23T13:53:27.0677681Z",
+      "modified_utc": "2026-11-23T13:53:27.0990139Z",
+      "module_count": 133,
+      "whole_array_and_pool_checked": true,
+      "bounded_owner": []
+    },
+    {
+      "name": "WATCHDOG-20261123-2206.dmp",
+      "bytes": 285178,
+      "sha256": "e8e977cfe9a4c9abf6869b9ca7a0da02c44a6491497f1e69e28db4d01fee0e2c",
+      "code": "0x117",
+      "params": [
+        "0xffffad0c69a8d010",
+        "0xfffff80b954b3b80",
+        "0x0",
+        "0x0"
+      ],
+      "creation_utc": "2026-11-23T14:06:21.9057711Z",
+      "modified_utc": "2026-11-23T14:06:22.4855643Z",
+      "module_count": 159,
+      "whole_array_and_pool_checked": true,
+      "bounded_owner": [
+        {
+          "name": "BasicRender.sys",
+          "index": 65,
+          "base": 18446735327365890048,
+          "entry_rva": 57344,
+          "size": 73728,
+          "checksum": 45189,
+          "timestamp": 923590754
+        }
+      ]
+    },
+    {
+      "name": "WATCHDOG-20261123-2216.dmp",
+      "bytes": 268204,
+      "sha256": "8f6b7f094e30dfbdab8eed9a0acb5c0823908c93541ce97b3770d2b2486e7dd7",
+      "code": "0x1b0",
+      "params": [
+        "0x2",
+        "0xffffffffc00000a3",
+        "0x108",
+        "0xfffff80ac1112000"
+      ],
+      "creation_utc": "2026-11-23T14:16:52.8738678Z",
+      "modified_utc": "2026-11-23T14:16:52.8894921Z",
+      "module_count": 133,
+      "whole_array_and_pool_checked": true,
+      "bounded_owner": []
+    }
+  ],
+  "installed_BasicRender": {
+    "sha256": "86103c07a48b234dad9d422c09bafc7ab4e3a8361e7c502b39de6beda13658bf",
+    "bytes": 43008,
+    "path": "C:\\Windows\\system32\\DriverStore\\FileRepository\\basicrender.inf_arm64_c4f004d96eb474d4\\BasicRender.sys",
+    "PE_fields": {
+      "image_size": 73728,
+      "entry_rva": 57344,
+      "checksum": 45189,
+      "timestamp": 923590754
+    }
+  },
+  "new_Mini_persistence": {
+    "files": 3,
+    "bytes": 821586,
+    "source_before_content_after_and_host_SHA_equal": true,
+    "cross_boot_readback_boot": 99039,
+    "new_files_actually_written": true,
+    "code_0x117": 1,
+    "code_0x1b0": 2,
+    "code_0x1b0_status": "Start-device failure,NTSTATUS0xc00000a3 in the two gate-closed boots",
+    "independent_Windows_debugger_or_stack": false,
+    "classic_bugcheck_or_SD_dump_repair_qualified": false
+  },
+  "formal": {
+    "boot": 99039,
+    "Code": 0,
+    "AC": "Online",
+    "source": "df08e8583abc202732036597f5cb7f0519ba11a5",
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+    },
+    "loaded": {
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+    },
+    "loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_nvk_arm64.dll"
+    },
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981",
+    "policy": "605644880f1a4c183121cfb645a6a9e775aa2dac2e5fcb707ed9ddfe4eb300eb",
+    "DWM_PID": 748,
+    "DWM_start": "2026-11-23T14:25:18.5741282Z",
+    "private_x86": {
+      "sha256": "5ac50269abb761c9e77dabfb71da035f211263c9609adff056dd6a1cec79cd69",
+      "path": "C:\\Program Files\\SwitchWOA-GpuBoot\\NeonAcceptance-01a20660\\private-x86\\libvulkan_nouveau.dll"
+    },
+    "private_x86_observation_utc": "2026-11-23T14:28:07.0913117Z",
+    "latest_module_preservation_profile_rehashes_private_x86": false,
+    "latest_native_utc": "2026-11-23T14:41:14.4079448Z",
+    "activity": {
+      "boot": 99039,
+      "processes": [],
+      "tasks": [],
+      "sessions": [],
+      "allowed_idle_recovery": []
+    },
+    "local_drain": {
+      "utc": "2026-11-23T14:48:13.033330+00:00",
+      "owner": "01a204e6-bb5e-7a63-b829-4718f86cbd1e",
+      "ssh_active": false,
+      "actual_device_jobs": [],
+      "last_native_drain_receipt": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-recovery-r2/basicrender-module-original-r2/verified.json",
+      "native_observation_utc": "2026-11-23T14:41:14.4079448Z",
+      "scope": "Observed local drain plus last read-only native activity/identity; not a lease transfer"
+    }
+  },
+  "restoration": {
+    "Finished": true,
+    "trial_token_absent": true,
+    "owned_task_removed": true,
+    "original_setting_memento": [
+      {
+        "path": "SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+        "name": "TdrTestMode",
+        "parent_exists": true,
+        "exists": false
+      },
+      {
+        "path": "SYSTEM\\CurrentControlSet\\Control\\CrashControl\\FullLiveKernelReports",
+        "name": "FullLiveReportsMax",
+        "parent_exists": true,
+        "exists": false
+      }
+    ],
+    "settings_checked_by_executed_Finish_AssertBase": true,
+    "actual_Cycle_matches_frozen_SHA": true,
+    "newer_module_profiles_repeat_8_components_5_loads_only": true
+  },
+  "review_provenance": [
+    {
+      "path": "c4-adapter-recovery-r1/native-dispatch-review-r1",
+      "model": "gemini-4-neon-high",
+      "conversation": "df6e7bc5-ee9d-4b0e-bc79-12e2a7fd12e4",
+      "frozen": 49,
+      "overall": "changes_required",
+      "findings": 3
+    },
+    {
+      "path": "c4-adapter-recovery-r1/native-dispatch-review-r2",
+      "model": "gemini-4-neon-high",
+      "conversation": "df6e7bc5-ee9d-4b0e-bc79-12e2a7fd12e4",
+      "frozen": 55,
+      "overall": "approve_adapter_recovery_native_case",
+      "findings": 0
+    },
+    {
+      "path": "c4-adapter-recovery-r2/native-dispatch-review-r1",
+      "model": "gemini-4-neon-high",
+      "conversation": "df6e7bc5-ee9d-4b0e-bc79-12e2a7fd12e4",
+      "frozen": 58,
+      "overall": "approve_adapter_recovery_native_case",
+      "findings": 0
+    }
+  ],
+  "review_provenance_scope": "Existing independent source/plan reviews, followed by this main local evidence review; no new Gemini final-native approval is claimed.",
+  "retained_r1_observation": {
+    "brief_blue_screen_observed": true,
+    "candidate_boot_subsequently_read": 98509,
+    "adapter_requests": 0,
+    "stop_code_or_progress": false,
+    "NT_bugcheck_proved": false,
+    "observation_reproduced": false,
+    "cause": "unknown"
+  },
+  "local_audits": [
+    {
+      "file": "c4-adapter-archive-independent-check-20261123.json",
+      "sha256": "26a1fd144d9aed793e795a6464cb0f671ab45e42548ada21c98f4db0ab393533"
+    },
+    {
+      "file": "c4-adapter-runtime-independent-check-20261123.json",
+      "sha256": "d1223146af9ce65ebb202607805bed5861061c624868d705e4999a79b74f6ac7"
+    },
+    {
+      "file": "c4-adapter-symbols-dumps-independent-check-20261123.json",
+      "sha256": "4b6d3216cb7c50540a85602d2860b5e70bb8e74e6766954815f66ca4e2e8895d"
+    },
+    {
+      "file": "audit_c4_adapter_runtime.py",
+      "sha256": "11c3e5c8a015bd8f8c2a3e414a51794a4662a81004ec3a12b3bfc24ff4402372"
+    },
+    {
+      "file": "audit_c4_adapter_symbols_dumps.py",
+      "sha256": "c2396ca6ca7b624a0554288d971ad4ad809a178e174af176a7419a6bf015a1c5"
+    }
+  ],
+  "deferred470e1dbc": [
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+        "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+      },
+      "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+      "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。",
+      "this_batch_new_direct_evidence": false
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+        "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+      },
+      "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+      "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。",
+      "this_batch_new_direct_evidence": false
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+        "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+      },
+      "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+      "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。",
+      "this_batch_new_direct_evidence": false
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+        "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+      },
+      "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+      "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。",
+      "this_batch_new_direct_evidence": false
+    }
+  ],
+  "workspace_preservation": {
+    "main_existing_changes": 42,
+    "changes_to_protected_files": 0,
+    "unqualified_candidate_source_integrated": false
+  },
+  "native_sequence": [
+    "c4",
+    "dump-repair",
+    "WDDM2.6"
+  ],
+  "next_stage_requires_current_stage_acceptance_and_qualification": true,
+  "C4_qualified": false,
+  "baseline_promoted": false,
+  "faults_closed": 0,
+  "goal_complete": false,
+  "remaining": [
+    "Find and verify a distinct supported adapter-bound full-reset entry and its downstream policy before an independent new case.",
+    "C4 full Reset/Restart, target system paging context creation/lifetime/root/generation, same DMA KMD entry/return, effective fence and Windows retirement remain unproved.",
+    "97176 classic NT bugcheck/dump failure and91476/DWM152586,95090,legacy SEQUENTIAL first-Present causes remain unknown.",
+    "Original windowf6264ee11289,rehearsal94382->94557,consumed KMT,engine and FORCETDR0 requests remain sealed."
+  ],
+  "limits": [
+    "All module records, names and pools were checked under a candidate triage layout; four BasicRender PE fields independently match.",
+    "No general kernel stack unwinding, Windows debugger run, or full recovery-context decode.",
+    "The BasicRender System4101 and0x117 corroborate a display path recovery, not an observed C4 full reset.",
+    "Three new files prove this live-report persistence path after report archival; they do not validate SD classic crash initialization or repair.",
+    "Delivery uncompressed_bytes counts1134 originals only; all1135 ZIP members include an additional441526-byte manifest.",
+    "Private x86 hash is directly read in the14:28 formal snapshot; the14:41 module-preservation profiles repeat8/5 without a new x86 field.",
+    "No candidate is promoted and no fault is closed. Actual c4 source remains isolated; these are evidence/documentation changes."
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ne-d3dkmthk-_d3dkmt_tdrdbgctrltype",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_tdrdbgctrl_escape",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x117---video-tdr-timeout-detected",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x1b0--video-miniport-failed-livedump"
+  ]
+}

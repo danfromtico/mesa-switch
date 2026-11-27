@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-post-exit-plain-93818-20261121-01",
+  "contract_id": "WIN-SEQ-POST-EXIT-STABILITY",
+  "windows_question": "WIN-SEQ-POST-EXIT-STABILITY",
+  "owner": "Windows 电源、DWM、GM20B KMD 与原普通窗口客户端",
+  "question": "正式基线下原窗口正常退出并清理后，能否跨过 93818 异常启动前未覆盖的时间区间，持续观察同一 DWM 与开机？",
+  "method": "关闭窗口夹具的测试专用 ETW，原签名应用和同场景尾部观察",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "相同输入正常退出、清理完成后，至少 125 秒连续有同一正式启动、DWM、Code 0 回执，保存新增故障事件及前后哈希；一次正常样本仅验证本轮。",
+  "observations": [
+    "保留现行正式组件、同一签名客户端及观察器、BGRA 双缓冲 SEQUENTIAL、无写入与 Present(1,0)。",
+    "去掉附加外部显示 ETW 和应用内部 --trace，保留应用 journal、可见窗口、输入和正常退出验证。",
+    "持续记录清理后至少 125 秒的同一设备启动、DWM、GPU Code 0 及供电。结束用完整实载哈希、系统事件和设备 QPC 验证。"
+  ],
+  "inputs": {
+    "fixture": {
+      "Board-Case.ps1": "2a449bddaad2eba045856ced6b2c907e9fe13e54d9b553d4a4ea2472586cc30e",
+      "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+      "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5"
+    },
+    "runner_sha256": "c3d1c17dada717699bb49766df93c1c7cb29d76132a9b65ab7e8027b04e2b28e",
+    "tail_runner_sha256": "dea453beb7f3d01f37dea7efab88a844a9945509816e0cf224d40a86db0abc02",
+    "before_sha256": "656ceb0362a087d85a85f50aa35bec5e3538f3bf2bfa95d99953c87dbfa4fc8f",
+    "boot": 93818,
+    "dwm": 1384,
+    "minimum_observation_seconds": 125,
+    "prior": {
+      "path": "windows-native-graphics/rounds/win-seq-post-exit-ungated-93818-20261121-01.result.json",
+      "sha256": "1b9325c94e68438cee7e36fd0b318cc3d20d50291a0398dc8c21818cab11411f"
+    }
+  }
+}

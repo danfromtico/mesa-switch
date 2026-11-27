@@ -1,0 +1,645 @@
+{
+  "status": "Ordinary 720p60 H.264 playback uses software in both browsers. Native 720p NVDEC remains qualified for the six-frame standalone test.",
+  "platform": {
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "dwm_umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "dwm_icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "handheld_mode": 1
+  },
+  "browser_tests": [
+    {
+      "case": "edge720-main32-01",
+      "version": "157.0.4341.60",
+      "browser_exe_sha256": "e0d2936d1e94ce1ddfe994cad8d8398ab6740bf066f79e9bf70a4c70fdd7203e",
+      "driver_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "test_clip_sha256": "13b56f66927e97fcc8050336b70daf2482640fd8f1ae57edb7ab6d0ddfccd164",
+      "browser_start_boot": "2026-11-18T21:16:14.0448630Z",
+      "desktop_before": 1236,
+      "revision": "@fbcb2989a6c61b72a4919fe1028e58e70131cd46",
+      "decoder": "FFmpegVideoDecoder",
+      "platform_decoder": false,
+      "gpu_video_decode_status": "disabled_software",
+      "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11-10.0.22621.2506)",
+      "profile_count": 0,
+      "video": {
+        "time": 6,
+        "ended": true,
+        "ready": 4,
+        "width": 1280,
+        "height": 720,
+        "total": 360,
+        "dropped": 5,
+        "callbacks": 324,
+        "err": 0,
+        "playError": ""
+      },
+      "end_of_playback_observed": true,
+      "process_exit": null,
+      "desktop_after": null,
+      "receipt_sha256": "33b20112cbd5fb4498192dc258582aaa90354201f87b0e06e8197f6313577d84",
+      "flags_changed_render_backend": false,
+      "trace": {
+        "sha256": "a32f54f863fa78a267f97b8136ddea8251e41be013139c20546fc10758a4cdc4",
+        "bytes": 720896,
+        "end_time": 0,
+        "buffers_written_header": 0,
+        "fully_closed": false,
+        "whole_run_count_available": false
+      },
+      "subsequent_boot": {
+        "boot": "2026-11-18T21:30:52.5038850Z",
+        "records": [
+          {
+            "record": 67991,
+            "id": 6008,
+            "data": {}
+          },
+          {
+            "record": 67993,
+            "id": 6005,
+            "data": {}
+          },
+          {
+            "record": 68000,
+            "id": 41,
+            "data": {
+              "PowerButtonTimestamp": "0",
+              "LongPowerButtonPressDetected": "false",
+              "BugcheckCode": "0",
+              "SleepInProgress": "0"
+            }
+          }
+        ],
+        "new_dump": false,
+        "cause": "undetermined"
+      },
+      "sampled_gpu_processes": [
+        {
+          "pid": 500,
+          "flags": [
+            "--use-gl=angle",
+            "--use-angle=d3d11-warp-webgl"
+          ],
+          "modules": [
+            "dxgi.dll",
+            "mfplat.dll",
+            "d3d11.dll",
+            "D3D10Warp.dll"
+          ]
+        }
+      ]
+    },
+    {
+      "case": "chrome720-main32-01",
+      "version": "158.0.8127.37",
+      "browser_exe_sha256": "07659a6cbc3ff60838795320873a894aa3edbe0be552b4abd490bf2d2e593854",
+      "driver_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "test_clip_sha256": "13b56f66927e97fcc8050336b70daf2482640fd8f1ae57edb7ab6d0ddfccd164",
+      "browser_start_boot": "2026-11-18T21:02:04.2824090Z",
+      "desktop_before": 1420,
+      "revision": "@b8c2be851f62f6a394ec57955d7f31335d7cb6d4",
+      "decoder": "FFmpegVideoDecoder",
+      "platform_decoder": false,
+      "gpu_video_decode_status": "disabled_software",
+      "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11-10.0.22621.2506)",
+      "profile_count": 0,
+      "video": {
+        "time": 6,
+        "ended": true,
+        "ready": 4,
+        "width": 1280,
+        "height": 720,
+        "total": 360,
+        "dropped": 29,
+        "callbacks": 327,
+        "err": 0,
+        "playError": ""
+      },
+      "end_of_playback_observed": true,
+      "process_exit": 0,
+      "desktop_after": [
+        1420
+      ],
+      "receipt_sha256": "185ae637d94fbb6a60b0cdd3a521ea4b89c504eeadfbcc8b74a75b01e150bdaf",
+      "flags_changed_render_backend": false,
+      "trace": {
+        "sha256": "5c3af37b42ca9720e03852ea18a7b37cd492201bf43c16321f6e38b3f3f9e05f",
+        "session_stop": [
+          "stop=0 lost=0 lost_buffers=0 buffers=7"
+        ],
+        "events": {
+          "1": 14
+        },
+        "by_image": {
+          "chrome.exe": 6,
+          "dwm.exe": 8
+        },
+        "complete_buffers": 7,
+        "events_lost": 0,
+        "buffers_lost": 0,
+        "browser_open_adapter_events": [
+          {
+            "pid": 1492,
+            "hresult": "0x00000000",
+            "count": 2
+          },
+          {
+            "pid": 1532,
+            "hresult": "0x00000000",
+            "count": 2
+          },
+          {
+            "pid": 4880,
+            "hresult": "0x00000000",
+            "count": 2
+          }
+        ],
+        "all_browser_image_video_events": [],
+        "browser_video_operations": [],
+        "browser_nvdec_successes": 0,
+        "browser_success_processes": [],
+        "other_video_operations": [],
+        "fully_closed": true
+      },
+      "subsequent_boot": {
+        "boot": "2026-11-18T21:16:14.0413490Z",
+        "records": [
+          {
+            "record": 67914,
+            "id": 6008,
+            "data": {}
+          },
+          {
+            "record": 67916,
+            "id": 6005,
+            "data": {}
+          },
+          {
+            "record": 67923,
+            "id": 41,
+            "data": {
+              "PowerButtonTimestamp": "0",
+              "LongPowerButtonPressDetected": "false",
+              "BugcheckCode": "0",
+              "SleepInProgress": "0"
+            }
+          }
+        ],
+        "new_dump": false,
+        "cause": "undetermined"
+      },
+      "sampled_gpu_processes": [
+        {
+          "pid": 2908,
+          "flags": [
+            "--use-gl=angle",
+            "--use-angle=d3d11-warp-webgl"
+          ],
+          "modules": [
+            "dxgi.dll",
+            "mfplat.dll",
+            "d3d11.dll",
+            "D3D10Warp.dll"
+          ]
+        }
+      ],
+      "native_context_error_pids": [
+        1532,
+        4880
+      ]
+    }
+  ],
+  "historical_edge_control": {
+    "case": "edge-stock-01",
+    "version": "157.0.4341.60",
+    "browser_exe_sha256": "e0d2936d1e94ce1ddfe994cad8d8398ab6740bf066f79e9bf70a4c70fdd7203e",
+    "driver_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "test_clip_sha256": "374eddd7825a15b777ae4c32665ddd3dfe1c7112d55b1ed3bd3724e24b8cd624",
+    "browser_start_boot": "2026-11-18T13:24:13.2694530Z",
+    "desktop_before": 1416,
+    "revision": null,
+    "decoder": "FFmpegVideoDecoder",
+    "platform_decoder": false,
+    "gpu_video_decode_status": "disabled_software",
+    "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11-10.0.22621.2506)",
+    "profile_count": 0,
+    "video": {
+      "time": 6,
+      "ended": true,
+      "ready": 4,
+      "width": 1280,
+      "height": 720,
+      "total": 360,
+      "dropped": 4,
+      "callbacks": 317,
+      "err": 0,
+      "playError": ""
+    },
+    "end_of_playback_observed": true,
+    "process_exit": 0,
+    "desktop_after": [
+      1416
+    ],
+    "receipt_sha256": "44c83260ebb3195c61993ed4db3e6b867b9798fdc28efc1c44303d12f2df70e2",
+    "flags_changed_render_backend": false,
+    "trace": {
+      "sha256": "53a13b5948ca8c2592cf71cfb4007e389d94eadb68102e56d6c12dc7dd19ceb9",
+      "session_stop": [
+        "stop=0 lost=0 lost_buffers=0 buffers=11"
+      ],
+      "events": {
+        "1": 12
+      },
+      "by_image": {
+        "msedge.exe": 12
+      },
+      "complete_buffers": 11,
+      "events_lost": 0,
+      "buffers_lost": 0,
+      "browser_open_adapter_events": [
+        {
+          "pid": 988,
+          "hresult": "0x00000000",
+          "count": 2
+        },
+        {
+          "pid": 1116,
+          "hresult": "0x00000000",
+          "count": 2
+        },
+        {
+          "pid": 4000,
+          "hresult": "0x00000000",
+          "count": 2
+        },
+        {
+          "pid": 5632,
+          "hresult": "0x00000000",
+          "count": 2
+        },
+        {
+          "pid": 6172,
+          "hresult": "0x00000000",
+          "count": 2
+        },
+        {
+          "pid": 6456,
+          "hresult": "0x00000000",
+          "count": 2
+        }
+      ],
+      "all_browser_image_video_events": [],
+      "browser_video_operations": [],
+      "browser_nvdec_successes": 0,
+      "browser_success_processes": [],
+      "other_video_operations": [],
+      "fully_closed": true
+    }
+  },
+  "fixture": {
+    "original": {
+      "sha256": "374eddd7825a15b777ae4c32665ddd3dfe1c7112d55b1ed3bd3724e24b8cd624",
+      "stream": {
+        "codec_name": "h264",
+        "profile": "Main",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuv420p",
+        "level": 31,
+        "r_frame_rate": "60/1",
+        "avg_frame_rate": "60/1",
+        "duration": "6.000000",
+        "bit_rate": "6567280",
+        "nb_frames": "360"
+      }
+    },
+    "corrected": {
+      "sha256": "13b56f66927e97fcc8050336b70daf2482640fd8f1ae57edb7ab6d0ddfccd164",
+      "stream": {
+        "codec_name": "h264",
+        "profile": "Main",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuv420p",
+        "level": 32,
+        "r_frame_rate": "60/1",
+        "avg_frame_rate": "60/1",
+        "duration": "6.000000",
+        "bit_rate": "6567280",
+        "nb_frames": "360"
+      }
+    },
+    "changed_bytes": 62,
+    "sps_in_media_payload": 60,
+    "mb_per_second": 216000,
+    "level_31_limit": 108000,
+    "level_32_limit": 216000,
+    "vcl_slices": 360,
+    "all_vcl_identical": true,
+    "decoded_yuv_frames": 360,
+    "decoded_framehash_rows_sha256": "b2cf10143a44240ca65627b2993a9b44ef6afcd3cf1a59a24fc9543e5fb68764",
+    "all_decoded_frames_and_timestamps_identical": true
+  },
+  "native_d3d11_feature_query": {
+    "tool": "tegra-x1-wddm/tools/d3d11_browser_levels.cpp",
+    "build": {
+      "bytes": 68624,
+      "unsigned": "3eca14a6e744b0ae2a9d8a51bd889f4ddf969332e338a0fa1fcf4f37a13063ca",
+      "sha256": "7c6b1037a7602f0a55896ccc96ac9018994e5a91a9428c6b79e2e136764cdecb",
+      "source_sha256": "12b28255bdfb6b8f94d589da098314da1f8112f3d24a1024b881a0901500e1c4",
+      "kmt_source_sha256": {
+        "kmt.c": "97180a7cfcdb53c1412fdc2b625ab5c7e52a570cb3d63248cdf319f08a320949",
+        "kmt.h": "61558590186b35dc78f10aeae564139c9cb67578c14158941a4ab6d108a6a22a",
+        "kmt_abi.h": "23f93d58cde3f893463270d263ba07ef3ad5523dbf2692b93fd7b2a2a1255a41",
+        "adapter_abi.h": "9cf36e45dac585d0456acf63fb7c441e3be6eb0582dae3fd222263b28719b3ae"
+      }
+    },
+    "underlying_gm20b_identity": {
+      "luid": "0000000000080e59",
+      "vendor_hex": "10de",
+      "chipset_hex": "12e",
+      "sm": 53
+    },
+    "rows": [
+      [
+        "kmt",
+        "0x00000000",
+        "1",
+        "0000000000080e59",
+        "10de",
+        "12e",
+        "53"
+      ],
+      [
+        "factory",
+        "0x00000000"
+      ],
+      [
+        "adapter",
+        "0",
+        "0000000000080e59",
+        "0x414f5753",
+        "0x31304630",
+        "0x0",
+        "0x00000000",
+        "Tegra X1 (GM20B) .158 GM20B fence 6c86354e781e"
+      ],
+      [
+        "adapter",
+        "1",
+        "00000000000051cf",
+        "0x1414",
+        "0x8c",
+        "0x2",
+        "0x887a0002",
+        "Microsoft Basic Render Driver"
+      ],
+      [
+        "preference",
+        "0",
+        "0x00000000",
+        "0000000000080e59"
+      ],
+      [
+        "preference",
+        "1",
+        "0x00000000",
+        "0000000000080e59"
+      ],
+      [
+        "preference",
+        "2",
+        "0x00000000",
+        "0000000000080e59"
+      ],
+      [
+        "query_enter",
+        "warp-11",
+        "0x20",
+        "0xb000",
+        "1"
+      ],
+      [
+        "query_result",
+        "warp-11",
+        "0x00000001",
+        "0xb000"
+      ],
+      [
+        "query_enter",
+        "tegra-video-11",
+        "0x820",
+        "0xb000",
+        "1"
+      ],
+      [
+        "query_result",
+        "tegra-video-11",
+        "0x887a0004",
+        "0x0"
+      ],
+      [
+        "query_enter",
+        "tegra-video-range",
+        "0x820",
+        "0xb100",
+        "4"
+      ],
+      [
+        "query_result",
+        "tegra-video-range",
+        "0x00000001",
+        "0xa000"
+      ],
+      [
+        "complete"
+      ]
+    ],
+    "native_csv_sha256": "16b0b1834f612a4db3a3958ec4281ef80927d177e3eff132d8f089ed690e688e",
+    "result": {
+      "boot": "2026-11-18T21:16:14.0413490Z",
+      "dwm": 1236,
+      "sha": "7C6B1037A7602F0A55896CCC96AC9018994E5A91A9428C6B79E2E136764CDECB",
+      "umd": "DED6FA4AFFEC0F18773503D282F9B44939090488202EF5F25EA1D879DD862F0D",
+      "utc": "2026-11-18T21:26:35.4755578Z",
+      "kmd": "6C86354E781E76D671C20BF14B124248A6E1AA264DCAB6D459A6B14D551469B0",
+      "phase": "returned",
+      "exit": 0,
+      "gpu": 0,
+      "dwm_after": [
+        1236
+      ],
+      "ended": "2026-11-18T21:26:50.6754361Z"
+    },
+    "method": "KMT LUID joined to all DXGI adapters and the first adapter in each power preference. Native D3D11 queries request BGRA and VIDEO support, with null device and context outputs. S_FALSE denotes successful query-only negotiation. The software WARP comparison requests BGRA and FL11_0."
+  },
+  "driver_and_browser_interpretation": {
+    "chromium_158_revision_verified_against_live_cdp": "b8c2be851f62f6a394ec57955d7f31335d7cb6d4",
+    "chromium_158_feature_check": "https://chromium.googlesource.com/chromium/src/+/b8c2be851f62f6a394ec57955d7f31335d7cb6d4/media/gpu/windows/d3d11_video_decoder_backend.cc#31",
+    "angle_feature_mapping": "https://chromium.googlesource.com/angle/angle/+/1f6526a566c27c7c33aa73a78517450a4a2a1714/src/libANGLE/renderer/d3d/d3d11/renderer11_utils.cpp#996",
+    "upstream_157_check": {
+      "upstream_tag": "157.0.8103.78",
+      "git": "4b3d0dabb8250b6f152d2d85d79e7706e309d087",
+      "url": "https://chromium.googlesource.com/chromium/src/+/4b3d0dabb8250b6f152d2d85d79e7706e309d087/media/gpu/windows/d3d11_video_decoder_backend.cc",
+      "sha256": "b849580ef5bcc8dd358c50ba8dd7f5d1f4c5b2bace71acbc01713cbb5c65b228",
+      "feature_checks": [
+        [
+          32,
+          "return device && device->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_0;"
+        ],
+        [
+          89,
+          "if (!IsFeatureLevelSupported(d3d11_device)) {"
+        ],
+        [
+          128,
+          "if (!IsFeatureLevelSupported(device_)) {"
+        ]
+      ],
+      "edge_binary_revision": "fbcb2989a6c61b72a4919fe1028e58e70131cd46",
+      "edge_revision_in_public_chromium": false,
+      "edge_path_reference": "https://learn.microsoft.com/en-us/troubleshoot/microsoft-edge/development/video-playback-issues"
+    },
+    "chrome": "The D3D11 backend checks FL11_0 during capability enumeration and initialization. Stock Chrome attempted native ES 3.0 context creation, recorded EGL_BAD_ATTRIBUTE and used WARP and FFmpeg.",
+    "edge": "The player reported FFmpeg and software video decode on ded6. Microsoft also documents a Media Foundation DXVA route in Edge. Upstream Chromium 157 requires FL11_0 for the D3D11 route; the revision of the installed Microsoft binary is unavailable in the public Chromium repository. The specific first failing call inside Edge and the minimum level of its Media Foundation route are unverified.",
+    "microsoft_edge": "https://learn.microsoft.com/en-us/troubleshoot/microsoft-edge/development/video-playback-issues",
+    "standalone": {
+      "record": "NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json",
+      "verified_hashes": 6,
+      "hardware": "Six NVDEC hardware decode completions. Both monitored fences were created. No tgd3d 3D bridge submission or CPU render-fence wait was recorded for this process.",
+      "client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+      "receipt_sha256": {
+        "journal.txt": "5b19647fd350a0553deab2670acaabd239130c292fde262d73a9df8ca4734f89",
+        "result.json": "4be5abf4a6f877c2627fe2f0890100c64d93936811e14f809178257367e4020a",
+        "result.json.bak": "10e7d7ad4556d7392b33d0f3741c7826a6ffd725fc5130f41b5fb18b17d323e1",
+        "started.txt": "c004a11898da33eef35568447b7fef2ca2ea023fe76f2fe928ecf9c7e0f315d1",
+        "stderr.txt": "6bd3749a368b56ead82399ee6d06456c94bde1edab4477a48d4b48ea5e032053",
+        "stdout.txt": "59c36929903cb6afde80fcede2093d5ddff9c39e7dfb011d0c7fc414b117563c",
+        "video.etl": "9e71ffc3bf6151d660b4e25c7184509e23398b34abdd724ffcbc54473cccc646"
+      }
+    }
+  },
+  "fl11_1_audit": {
+    "target": "FL11_1 for the system tgd3d D3D11 UMD",
+    "selected_level": "FL10_0",
+    "api_and_levels": "Microsoft defines FL11_0, FL11_1 and then FL12_0. Direct3D 11.2 names a runtime revision. Native D3D12 device creation is a separate driver/API contract.",
+    "authoritative_sources": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/d3dcommon/ne-d3dcommon-d3d_feature_level",
+      "https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-devices-downlevel-intro",
+      "https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-d3d12createdevice"
+    ],
+    "nvk_exports": [
+      {
+        "arch": "x86",
+        "path": "tegra-x1-wddm/docs/dxvk-games-20261118/vulkaninfo-x86.json",
+        "sha256": "9b61d5fa972e39e66cbbd13af4a54495807494643d5b1fee738d384833232586",
+        "features": {
+          "geometryShader": true,
+          "tessellationShader": true,
+          "logicOp": true,
+          "vertexPipelineStoresAndAtomics": true,
+          "fragmentStoresAndAtomics": true
+        },
+        "limits": {
+          "framebufferNoAttachmentsSampleCounts": [
+            "VK_SAMPLE_COUNT_1_BIT",
+            "VK_SAMPLE_COUNT_2_BIT",
+            "VK_SAMPLE_COUNT_4_BIT",
+            "VK_SAMPLE_COUNT_8_BIT"
+          ],
+          "maxComputeWorkGroupInvocations": 1024,
+          "maxTessellationPatchSize": 32,
+          "maxPerStageDescriptorStorageImages": 1048576,
+          "maxPerStageDescriptorStorageBuffers": 1048576
+        }
+      },
+      {
+        "arch": "x64",
+        "path": "tegra-x1-wddm/docs/dxvk-games-20261118/vulkaninfo-x64.json",
+        "sha256": "404b6ac63b7cae45f41dc5114c892d98173657296bbae05d1f76861f14bc56d8",
+        "features": {
+          "geometryShader": true,
+          "tessellationShader": true,
+          "logicOp": true,
+          "vertexPipelineStoresAndAtomics": true,
+          "fragmentStoresAndAtomics": true
+        },
+        "limits": {
+          "framebufferNoAttachmentsSampleCounts": [
+            "VK_SAMPLE_COUNT_1_BIT",
+            "VK_SAMPLE_COUNT_2_BIT",
+            "VK_SAMPLE_COUNT_4_BIT",
+            "VK_SAMPLE_COUNT_8_BIT"
+          ],
+          "maxComputeWorkGroupInvocations": 1024,
+          "maxTessellationPatchSize": 32,
+          "maxPerStageDescriptorStorageImages": 1048576,
+          "maxPerStageDescriptorStorageBuffers": 1048576
+        }
+      }
+    ],
+    "driver_gaps": [
+      {
+        "capability": "Shader Model 5 compute, hull and domain stages, resource mapping and dispatch",
+        "source": [
+          "src/nouveau/tgd3d/tgd3d.h",
+          "src/nouveau/tgd3d/tgd3d_shader.cpp",
+          "src/nouveau/tgd3d/tgd3d_ddi11.cpp"
+        ],
+        "observed": "The system DDI and shader translation currently bind vertex, geometry and pixel stages."
+      },
+      {
+        "capability": "UAV creation, binding, synchronization and readback, including 64 slots and all shader stages",
+        "source": [
+          "src/nouveau/tgd3d/tgd3d_ddi11.cpp",
+          "src/nouveau/tgd3d/tgd3d_shader.cpp"
+        ],
+        "observed": "resource_desc rejects unordered access, structured buffers and raw views. Shader-object descriptor mapping has no UAV entry."
+      },
+      {
+        "capability": "Output merger logic operations",
+        "source": [
+          "src/nouveau/tgd3d/tgd3d_ddi11.cpp",
+          "src/nouveau/tgd3d/tgd3d_draw.cpp"
+        ],
+        "observed": "The blend-state callback rejects LogicOpEnable. The draw path disables the Vulkan logic operation."
+      },
+      {
+        "capability": "ForcedSampleCount up to 16 for UAV-only rasterization",
+        "source": [
+          "src/nouveau/tgd3d/tgd3d_ddi11.cpp",
+          "src/nouveau/tgd3d/tgd3d_device.cpp"
+        ],
+        "observed": "tgd3d rejects a forced sample count above one. Both prior GM20B Vulkan exports report up to 8 for framebuffers with no attachments. The required 16-sample coverage needs an independently validated backend implementation."
+      }
+    ],
+    "verification": "System runtime negotiation on the KMT-identified GM20B, resource write/readback, shader-stage execution and pixel coverage. Browser acceptance separately requires a platform decoder and attributable successful NVDEC submissions."
+  },
+  "cleanup": {
+    "verified_absent": true,
+    "native_tasks_retired": 5,
+    "generated_portable_chrome_members": 264,
+    "portable_payload_bytes": 503736420,
+    "case_directories": [
+      {
+        "files": 292,
+        "label": "edge-stock-01"
+      },
+      {
+        "files": 320,
+        "label": "chrome720-main32-01"
+      },
+      {
+        "files": 299,
+        "label": "edge720-main32-01"
+      },
+      {
+        "files": 2,
+        "label": "s5-browser-levels-03"
+      }
+    ],
+    "host_expanded_and_transfer_zip_removed": true
+  },
+  "driver_deployed_by_this_review": false,
+  "independent_probe_review": "Pending Gemini review."
+}

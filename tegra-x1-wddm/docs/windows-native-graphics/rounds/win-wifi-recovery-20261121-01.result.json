@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "round_id": "win-wifi-recovery-20261121-01",
+  "contract_id": "WIN-WIFI-RECOVERY",
+  "windows_question": "WIN-WIFI-RECOVERY",
+  "plan_sha256": "bb049d38770c599dd018f48cc09d71243225595faaaa8922f306b030d8e6f252",
+  "status": "实机通过",
+  "finding": "SSH 断线跨 Windows 启动 91832 到 91918。RuntimeBroker 提交重启请求后，6006、109、13 均已留存，下一启动报告 LastShutdownGood=true。BCM4356 在新启动重新关联，SSH 在第一次三分钟重试恢复。",
+  "missing_observation": "本轮已区分正常关机重启与异常重启。1074 提供发起进程，具体交互来源未核对。恢复时功耗档位为 6，开展下一项图形取证前需独立核对 Handheld1。",
+  "device_executions": 0,
+  "evidence": {
+    "boundaries": {
+      "last_entry": {
+        "record": 91902,
+        "utc": "2026-11-21T16:26:43.9265100Z",
+        "id": 1074,
+        "provider": "User32",
+        "fields": {
+          "param1": "C:\\Windows\\System32\\RuntimeBroker.exe (DESKTOP-5RCUK3G)",
+          "param3": "其他(计划外)",
+          "param4": "0x0",
+          "param5": "重启"
+        }
+      },
+      "last_return": {
+        "record": 91920,
+        "utc": "2026-11-21T16:27:02.0026185Z",
+        "id": 20,
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "fields": {
+          "LastShutdownGood": "true",
+          "LastBootGood": "true"
+        }
+      },
+      "first_anomaly_or_missing": {
+        "connection_failure_utc": "2026-11-21T16:27:21.340114+00:00",
+        "scope": "本轮已区分正常关机重启与异常重启。1074 提供发起进程，具体交互来源未核对。恢复时功耗档位为 6，开展下一项图形取证前需独立核对 Handheld1。"
+      }
+    },
+    "boot_before": 91832,
+    "boot_after": 91918,
+    "same_desktop": false,
+    "dwm_before": {
+      "id": 1432,
+      "start": "2026-11-21T16:19:14.4526870Z"
+    },
+    "dwm_after": {
+      "id": 1472,
+      "start": "2026-11-21T16:28:05.1778623Z"
+    },
+    "windows_system": [
+      {
+        "record": 91902,
+        "utc": "2026-11-21T16:26:43.9265100Z",
+        "id": 1074,
+        "provider": "User32",
+        "fields": {
+          "param1": "C:\\Windows\\System32\\RuntimeBroker.exe (DESKTOP-5RCUK3G)",
+          "param3": "其他(计划外)",
+          "param4": "0x0",
+          "param5": "重启"
+        }
+      },
+      {
+        "record": 91904,
+        "utc": "2026-11-21T16:26:50.3413791Z",
+        "id": 6006,
+        "provider": "EventLog",
+        "fields": {}
+      },
+      {
+        "record": 91915,
+        "utc": "2026-11-21T16:26:55.4462392Z",
+        "id": 109,
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "fields": {
+          "ShutdownActionType": "5",
+          "ShutdownEventCode": "0",
+          "ShutdownReason": "5"
+        }
+      },
+      {
+        "record": 91917,
+        "utc": "2026-11-21T16:26:58.1566846Z",
+        "id": 13,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "fields": {
+          "StopTime": "2026-11-21T16:26:58.1566805Z"
+        }
+      },
+      {
+        "record": 91918,
+        "utc": "2026-11-21T16:27:02.0015058Z",
+        "id": 12,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "fields": {
+          "StartTime": "2026-11-21T16:27:00.3335658Z",
+          "BuildVersion": "22621",
+          "QfeVersion": "2861"
+        }
+      },
+      {
+        "record": 91920,
+        "utc": "2026-11-21T16:27:02.0026185Z",
+        "id": 20,
+        "provider": "Microsoft-Windows-Kernel-Boot",
+        "fields": {
+          "LastShutdownGood": "true",
+          "LastBootGood": "true"
+        }
+      }
+    ],
+    "wlan": [
+      {
+        "record": 17581,
+        "utc": "2026-11-21T16:26:51.2665552Z",
+        "id": 11004,
+        "provider": "Microsoft-Windows-WLAN-AutoConfig",
+        "fields": {
+          "Adapter": "Switch Lite BCM4356 Wireless Adapter",
+          "SecurityHintCode": "0"
+        }
+      },
+      {
+        "record": 17587,
+        "utc": "2026-11-21T16:28:31.7884036Z",
+        "id": 8001,
+        "provider": "Microsoft-Windows-WLAN-AutoConfig",
+        "fields": {
+          "InterfaceDescription": "Switch Lite BCM4356 Wireless Adapter",
+          "ConnectionMode": "使用配置文件自动连接"
+        }
+      }
+    ],
+    "openssh": [
+      {
+        "record": 57064,
+        "utc": "2026-11-21T16:28:15.4486801Z",
+        "id": 4,
+        "provider": "OpenSSH",
+        "fields": {
+          "process": "sshd"
+        }
+      },
+      {
+        "record": 57065,
+        "utc": "2026-11-21T16:28:15.4488638Z",
+        "id": 4,
+        "provider": "OpenSSH",
+        "fields": {
+          "process": "sshd"
+        }
+      }
+    ],
+    "new_41_or_6008_or_bugcheck": false,
+    "log_coverage": {
+      "System": {
+        "enabled": true,
+        "query_status": "ok",
+        "retained_count": 140,
+        "earliest_returned_utc": "2026-11-21T11:03:54.7582914Z",
+        "latest_returned_utc": "2026-11-21T16:29:49.6729179Z"
+      },
+      "Microsoft-Windows-WLAN-AutoConfig/Operational": {
+        "enabled": true,
+        "query_status": "ok",
+        "retained_count": 140,
+        "earliest_returned_utc": "2026-11-21T09:41:30.3125878Z",
+        "latest_returned_utc": "2026-11-21T16:28:31.7884036Z"
+      },
+      "OpenSSH/Operational": {
+        "enabled": true,
+        "query_status": "ok",
+        "retained_count": 140,
+        "earliest_returned_utc": "2026-11-21T16:00:18.9638907Z",
+        "latest_returned_utc": "2026-11-21T16:30:30.6719248Z"
+      }
+    },
+    "network_adapter": {
+      "ifIndex": 8,
+      "Status": "Up",
+      "InterfaceDescription": "Switch Lite BCM4356 Wireless Adapter",
+      "LinkSpeed": "117 Mbps",
+      "MediaType": "Native 802.11"
+    },
+    "before": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/late-adapter-current-formal.json",
+      "sha256": "bed8e9090cce2a7f2489c316bb5460b271f04cd7d75119561726fb99aee284e0"
+    },
+    "first_failed_ssh": {
+      "transport": {
+        "start_utc": "2026-11-21T16:27:21.340114+00:00",
+        "end_utc": "2026-11-21T16:27:37.355852+00:00",
+        "exit": 255,
+        "bytes": 0,
+        "errors": 65
+      },
+      "receipt": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dxvk-games-01a1ec52/chromium-copyout-c27-win-late-adapter-power-detail-162721339688-result.json",
+        "sha256": "f9d956bce694844d8c89d146c6db7795b24072d06ad2ab36497b39298d09a451"
+      },
+      "stderr": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dxvk-games-01a1ec52/chromium-copyout-c27-win-late-adapter-power-detail-162721339688.stderr",
+        "sha256": "80b4ad6c55ad45905c440f4a027af032d141ba7fb063900b715538a11973c9fa"
+      }
+    },
+    "first_retry_ssh": {
+      "transport": {
+        "start_utc": "2026-11-21T16:30:21.347714+00:00",
+        "end_utc": "2026-11-21T16:30:25.729189+00:00",
+        "exit": 0,
+        "bytes": 776,
+        "errors": 0
+      },
+      "receipt": {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dxvk-games-01a1ec52/chromium-copyout-c27-win-late-adapter-power-detail-163021347018-result.json",
+        "sha256": "bc18cc5c4ce7aa73693d58af26c451c1b41e56c2092dd1268f397d9e66f48597"
+      }
+    },
+    "read_only_windows_xml": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/wifi-recovery-1627-events.json",
+      "sha256": "89c68b0a659667ae788e573d908155f8894c9242521c69a753343c12422e9bdd"
+    },
+    "read_only_power_after": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/late-adapter-power-detail.json",
+      "sha256": "1756cd71c26aac2da72840473f7c23bb0c02175633d439237d6101802b254908"
+    },
+    "controller_source": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/read_wlan_recovery.py",
+      "sha256": "6943a213ca9aa4fe1579f0a99e04835db1e19184713a7bc7dee11e0accb4520c"
+    },
+    "power_modes": [
+      1,
+      7,
+      6
+    ],
+    "recovered_gpu_code": 0,
+    "graphics_execution_count": 0
+  }
+}

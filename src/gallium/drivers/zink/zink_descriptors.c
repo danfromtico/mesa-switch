@@ -36,6 +36,11 @@
 #define XXH_INLINE_ALL
 #include "util/xxhash.h"
 
+/* Compact sets can contain texture views, independent sampler states and
+ * storage images from every stage. */
+#define MAX_PROGRAM_BINDINGS \
+   (MESA_SHADER_STAGES * (2 * PIPE_MAX_SAMPLERS + ZINK_MAX_SHADER_IMAGES))
+
 static VkDescriptorSetLayout
 descriptor_layout_create(struct zink_screen *screen, enum zink_descriptor_type t, VkDescriptorSetLayoutBinding *bindings, unsigned num_bindings)
 {
@@ -44,7 +49,7 @@ descriptor_layout_create(struct zink_screen *screen, enum zink_descriptor_type t
    dcslci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
    dcslci.pNext = NULL;
    VkDescriptorSetLayoutBindingFlagsCreateInfo fci = {0};
-   VkDescriptorBindingFlags flags[ZINK_MAX_DESCRIPTORS_PER_TYPE];
+   VkDescriptorBindingFlags flags[MAX_PROGRAM_BINDINGS];
    /* TODO bindless */
    if (zink_descriptor_mode == ZINK_DESCRIPTOR_MODE_DB && t != ZINK_DESCRIPTOR_BINDLESS)
       dcslci.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
@@ -455,6 +460,7 @@ descriptor_program_num_sizes(VkDescriptorPoolSize *sizes, enum zink_descriptor_t
       return !!sizes[ZDS_INDEX_UBO].descriptorCount;
    case ZINK_DESCRIPTOR_TYPE_SAMPLER_VIEW:
       return !!sizes[ZDS_INDEX_COMBINED_SAMPLER].descriptorCount +
+             !!sizes[ZDS_INDEX_SAMPLED_IMAGE].descriptorCount +
              !!sizes[ZDS_INDEX_UNIFORM_TEXELS].descriptorCount +
              !!sizes[ZDS_INDEX_SAMPLER].descriptorCount;
    case ZINK_DESCRIPTOR_TYPE_SSBO:
@@ -475,6 +481,7 @@ descriptor_program_num_sizes_compact(VkDescriptorPoolSize *sizes, unsigned desc_
       return !!sizes[ZDS_INDEX_COMP_UBO].descriptorCount + !!sizes[ZDS_INDEX_COMP_STORAGE_BUFFER].descriptorCount;
    case ZINK_DESCRIPTOR_TYPE_SAMPLER_VIEW:
       return !!sizes[ZDS_INDEX_COMP_COMBINED_SAMPLER].descriptorCount +
+             !!sizes[ZDS_INDEX_COMP_SAMPLED_IMAGE].descriptorCount +
              !!sizes[ZDS_INDEX_COMP_UNIFORM_TEXELS].descriptorCount +
              !!sizes[ZDS_INDEX_COMP_SAMPLER].descriptorCount +
              !!sizes[ZDS_INDEX_COMP_STORAGE_IMAGE].descriptorCount +
@@ -494,8 +501,8 @@ bool
 zink_descriptor_program_init(struct zink_context *ctx, struct zink_program *pg)
 {
    struct zink_screen *screen = zink_screen(ctx->base.screen);
-   VkDescriptorSetLayoutBinding bindings[ZINK_DESCRIPTOR_BASE_TYPES][MESA_SHADER_STAGES * 64];
-   VkDescriptorUpdateTemplateEntry entries[ZINK_DESCRIPTOR_BASE_TYPES][MESA_SHADER_STAGES * 64];
+   VkDescriptorSetLayoutBinding bindings[ZINK_DESCRIPTOR_BASE_TYPES][MAX_PROGRAM_BINDINGS];
+   VkDescriptorUpdateTemplateEntry entries[ZINK_DESCRIPTOR_BASE_TYPES][MAX_PROGRAM_BINDINGS];
    unsigned num_bindings[ZINK_DESCRIPTOR_BASE_TYPES] = {0};
    uint8_t has_bindings = 0;
    unsigned push_count = 0;
@@ -605,21 +612,15 @@ zink_descriptor_program_init(struct zink_context *ctx, struct zink_program *pg)
                                                       zink_descriptor_type_to_size_idx(desc_type);
          /* some sets can have multiple descriptor types: ensure the size arrays for these types are contiguous for creating the pool key */
          VkDescriptorPoolSize *sz = &sizes[idx];
-         VkDescriptorPoolSize sz2[5];
-         if (screen->compact_descriptors || (pg->is_compute && stages[0]->info.stage == MESA_SHADER_KERNEL)) {
-            unsigned found = 0;
-            while (found < num_type_sizes[desc_type]) {
-               if (sz->descriptorCount) {
-                  memcpy(&sz2[found], sz, sizeof(VkDescriptorPoolSize));
-                  found++;
-               }
-               sz++;
+         VkDescriptorPoolSize sz2[6];
+         unsigned found = 0;
+         while (found < num_type_sizes[desc_type]) {
+            if (sz->descriptorCount) {
+               sz2[found++] = *sz;
             }
-            sz = sz2;
-         } else {
-            if (!sz->descriptorCount)
-               sz++;
+            sz++;
          }
+         sz = sz2;
          pg->dd.pool_key[desc_type] = descriptor_util_pool_key_get(screen, desc_type, key, sz, num_type_sizes[desc_type]);
          pg->dd.pool_key[desc_type]->use_count++;
          pg->dsl[pg->num_dsl] = pg->dd.layouts[pg->num_dsl]->layout;
@@ -705,16 +706,14 @@ zink_descriptor_program_init(struct zink_context *ctx, struct zink_program *pg)
 void
 zink_descriptor_shader_get_binding_offsets(const struct zink_shader *shader, unsigned *offsets)
 {
-   offsets[ZINK_DESCRIPTOR_TYPE_UBO] = 0;
-   offsets[ZINK_DESCRIPTOR_TYPE_SAMPLER_VIEW] = (shader->num_bindings[ZINK_DESCRIPTOR_TYPE_UBO] ?
-                                                shader->bindings[ZINK_DESCRIPTOR_TYPE_UBO][shader->num_bindings[ZINK_DESCRIPTOR_TYPE_UBO] - 1].binding + 1 :
-                                                1);
-   offsets[ZINK_DESCRIPTOR_TYPE_SSBO] = offsets[ZINK_DESCRIPTOR_TYPE_SAMPLER_VIEW] + (shader->num_bindings[ZINK_DESCRIPTOR_TYPE_SAMPLER_VIEW] ?
-                                                                                     shader->bindings[ZINK_DESCRIPTOR_TYPE_SAMPLER_VIEW][shader->num_bindings[ZINK_DESCRIPTOR_TYPE_SAMPLER_VIEW] - 1].binding + 1 :
-                                                                                     1);
-   offsets[ZINK_DESCRIPTOR_TYPE_IMAGE] = offsets[ZINK_DESCRIPTOR_TYPE_SSBO] + (shader->num_bindings[ZINK_DESCRIPTOR_TYPE_SSBO] ?
-                                                                              shader->bindings[ZINK_DESCRIPTOR_TYPE_SSBO][shader->num_bindings[ZINK_DESCRIPTOR_TYPE_SSBO] - 1].binding + 1 :
-                                                                              1);
+   unsigned next = 0;
+   for (unsigned type = 0; type < ZINK_DESCRIPTOR_BASE_TYPES; ++type) {
+      offsets[type] = next;
+      unsigned count = 1;
+      for (unsigned i = 0; i < shader->num_bindings[type]; ++i)
+         count = MAX2(count, shader->bindings[type][i].binding + 1);
+      next += count;
+   }
 }
 
 void
@@ -903,7 +902,7 @@ alloc_new_pool(struct zink_screen *screen, struct zink_descriptor_pool_multi *mp
    struct zink_descriptor_pool *pool = CALLOC_STRUCT(zink_descriptor_pool);
    if (!pool)
       return NULL;
-   const unsigned num_type_sizes = mpool->pool_key->sizes[1].descriptorCount ? 2 : 1;
+   const unsigned num_type_sizes = mpool->pool_key->num_type_sizes;
    pool->pool = create_pool(screen, num_type_sizes, mpool->pool_key->sizes, 0);
    if (!pool->pool) {
       FREE(pool);

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-17T03:16:55.186500+00:00",
+  "source_base": "0c9e6e168f3bd4eb4b9742834431e6fa68993211",
+  "files": {
+    "tegra-x1-wddm/tools/nvdec-resource-trial/Pair.ps1": "eb06841925419d0ae3e5f400ace3582a9c57e210d617c01be31b0e8d6447f8cb",
+    "tegra-x1-wddm/tools/nvdec-resource-trial/README.md": "cc1c2adcd91fcc7c191eeca8a02e5021636d8e1e30c19f9bbad568a6504b8028",
+    "tegra-x1-wddm/tools/nvdec-resource-trial/tests/Test-Staging.ps1": "d359efe35e92b66ad1769b807b647a8157658e92744a960c7ad751e796c2269d"
+  },
+  "review_patch_sha256": "1377a853f379c41581ccc87aeaaf01dca80860526e40aa91e32e64fbd7e7e9c7",
+  "native_controller_sha256": "7a25d1ccdac42abf148a8ac277450314680d057d642c77e8eb4cc06672c3b6e6",
+  "changes": [
+    "Separate StagePackage from StageCandidate: importing a package cannot also change the boot table or request a restart.",
+    "Reuse only a unique exact SYS match with all13signed members matching, published INF content verified and public SetupAPI round-trip resolving the same store.",
+    "Persist import intent before pnputil; an interrupted import is not automatically retried or rebooted.",
+    "Verify the loaded original DSDT before selecting the recovery KMD.",
+    "Reject Recover while StagingPackage has not changed ACPI or the native start gate."
+  ],
+  "validation": {
+    "powershell_orchestration_controls": {
+      "result": "PASS: 6 package, 5 boot-handoff, 2 restoration and 2 recovery controls; native operations replaced",
+      "sha256": "548b1539ac89dbff7747537c4147332c6b1983d18f3a44f4f5f41aaaf0bd68b8",
+      "native_side_effects_replaced": true,
+      "cases": 15
+    },
+    "actual_setupapi_read": {
+      "directory": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_c47423255d68e70d",
+      "published_inf": "C:\\Windows\\INF\\oem0.inf",
+      "verified_signed_members": 13,
+      "receipt_sha256": "61737733efff9f0bfa20de32c0453792b142586f3e78fd3538ab3862db8a06bb",
+      "read_only": true
+    },
+    "marshalling_correction": "A managed string for reserved LocaleName yielded native ERROR_INVALID_PARAMETER87. Both reserved arguments now use IntPtr.Zero; the actual Windows SetupAPI round-trip then succeeded.",
+    "native_reuse": {
+      "reused": true,
+      "import_requested": false,
+      "loaded_candidate_dsdt_matched": true,
+      "resource_query_reached": true,
+      "decode_tested": false
+    },
+    "post_freeze_delta": "Reject Recover in StagingPackage phase, where neither ACPI nor the activation gate changed; two additional real-branch controls passed. Native trial continues with its frozen unchanged controller."
+  },
+  "limits": [
+    "The first combined import/table boot loaded another DSDT. Its override omission and41/6008 time correlation are not root-caused by the successful reuse round.",
+    "Actual query mapped11resources, but all-ones SMMU config/client-enable reads still prevent proving the selected DMA route. No NVDEC firmware or decode executed.",
+    "Native trial used the frozen controller hash above; final source additionally rejects recovery from an import-only phase, verified by two extra branch controls."
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/setupapi/nf-setupapi-setupgetinfpublishednamew",
+    "https://learn.microsoft.com/en-us/windows/win32/api/setupapi/nf-setupapi-setupgetinfdriverstorelocationw"
+  ],
+  "review": {
+    "status": "Pending Gemini4 Carbon High",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "retry_performed": false
+  },
+  "driver_code_changed": false,
+  "real_720p_decode_accepted": false
+}

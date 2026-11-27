@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-152586-select-callflow-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "windows_question": "WIN-DWM-THIRD-KMD-BOUNDARY",
+  "owner": "Windows VidSch、DxgKrnl 与 GM20B KMD",
+  "question": "同线程信号队列选择能否补足91476 DMA152586的实际提交边界；175.1后是否存在绕过提交DDI的代码路径？",
+  "method": "只读原事故ZIP及91918留存的系统映像/匹配PDB，重读原事件与关键ARM64指令；独立审核冻结分析与限制。",
+  "pass_condition": "按原件哈希、描述符、上下文、队列与QPC关联原次事件；区分比较代码、实际分支、KMD入返、GPU完成和首条复位异常。",
+  "device_executions": 0,
+  "origin_boot": 91476,
+  "comparator_boot": 91918,
+  "incident_module_full_hash": null,
+  "request_replay_forbidden": "f6264ee11289已消费，新增应用派发0次；本轮无SSH、许可或驱动变更。",
+  "inputs": {
+    "archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+    },
+    "identity": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/verified-call-order.json",
+      "sha256": "1b48f398c2a91689706ba06ab421d05459a82f4165155e8c1a7d84fb1733f622"
+    },
+    "prior_boundary": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-seq-93818-evidence/tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dwm-152586-stage-boundary-20261121-01.result.json",
+      "sha256": "5ed702ae4feeb610d16b72159b44c821fe0ed3bfa33cb14b2e7e89cfff0626cc"
+    }
+  }
+}

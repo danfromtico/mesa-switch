@@ -4301,7 +4301,8 @@ zink_shader_compile_separate(struct zink_screen *screen, struct zink_shader *zs)
             var->data.binding = !!var->data.driver_location;
             break;
       case nir_var_uniform:
-         if (glsl_type_is_sampler(glsl_without_array(var->type)))
+         if (glsl_type_is_sampler(glsl_without_array(var->type)) ||
+             glsl_type_is_texture(glsl_without_array(var->type)))
             var->data.binding += offsets[1];
          break;
       case nir_var_mem_ssbo:
@@ -4701,8 +4702,6 @@ zink_binding(mesa_shader_stage stage, VkDescriptorType type, int index, bool com
          return base * 2 + !!index;
 
       case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-         assert(stage == MESA_SHADER_KERNEL);
-         FALLTHROUGH;
       case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
          if (stage == MESA_SHADER_KERNEL) {
             assert(index < PIPE_MAX_SHADER_SAMPLER_VIEWS);
@@ -4716,8 +4715,12 @@ zink_binding(mesa_shader_stage stage, VkDescriptorType type, int index, bool com
 
       case VK_DESCRIPTOR_TYPE_SAMPLER:
          assert(index < PIPE_MAX_SAMPLERS);
-         assert(stage == MESA_SHADER_KERNEL);
-         return index;
+         if (stage == MESA_SHADER_KERNEL)
+            return index;
+         /* Keep independent sampler states beyond both the texture and
+          * compact storage-image ranges, including other shader stages. */
+         return ZINK_GFX_SHADER_COUNT * (PIPE_MAX_SAMPLERS + ZINK_MAX_SHADER_IMAGES) +
+                base * PIPE_MAX_SAMPLERS + index;
 
       case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
          return base + (compact_descriptors * (ZINK_GFX_SHADER_COUNT * 2));
@@ -5454,7 +5457,8 @@ flatten_image_arrays_intr(struct nir_builder *b, nir_instr *instr, void *data)
       return false;
    nir_variable *var = nir_deref_instr_get_variable(deref);
    const struct glsl_type *type = glsl_without_array(var->type);
-   if (type == var->type || (!glsl_type_is_sampler(type) && !glsl_type_is_image(type)))
+   if (type == var->type || (!glsl_type_is_sampler(type) &&
+                            !glsl_type_is_texture(type) && !glsl_type_is_image(type)))
       return false;
 
    nir_deref_instr *parent_parent = nir_deref_instr_parent(parent);
@@ -5473,7 +5477,7 @@ flatten_image_arrays(nir_shader *nir)
    bool progress = false;
    nir_foreach_variable_with_modes(var, nir, nir_var_uniform | nir_var_image) {
       const struct glsl_type *type = glsl_without_array(var->type);
-      if (!glsl_type_is_sampler(type) && !glsl_type_is_image(type))
+      if (!glsl_type_is_sampler(type) && !glsl_type_is_texture(type) && !glsl_type_is_image(type))
          continue;
       if (type == var->type)
          continue;
@@ -5812,8 +5816,8 @@ zink_shader_init(struct zink_screen *screen, struct zink_shader *zs)
             if (var->data.bindless) {
                zs->bindless = true;
                handle_bindless_var(nir, var, type, &bindless);
-            } else if (glsl_type_is_sampler(type) || glsl_type_is_image(type)) {
-               VkDescriptorType vktype = glsl_type_is_image(type) ? zink_image_type(type) : glsl_type_is_bare_sampler(type) ? VK_DESCRIPTOR_TYPE_SAMPLER : zink_sampler_type(type);
+            } else if (glsl_type_is_sampler(type) || glsl_type_is_texture(type) || glsl_type_is_image(type)) {
+               VkDescriptorType vktype = glsl_type_is_image(type) ? zink_image_type(type) : zink_sampler_type(type);
                if (nir->info.stage == MESA_SHADER_KERNEL && vktype == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                   vktype = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
                ztype = zink_desc_type_from_vktype(vktype);
@@ -5935,6 +5939,21 @@ gfx_shader_prune(struct zink_screen *screen, struct zink_shader *shader)
       struct hash_entry *he = _mesa_hash_table_search(ht, prog->shaders);
       assert(he && he->data == prog);
       _mesa_hash_table_remove(ht, he);
+      /* Binding a replacement shader leaves the last program selected until
+       * the next draw. Deleting its old shaders can drop the final program
+       * reference first. Clear these non-owning context pointers while the
+       * program is still alive, including its contribution to the hash. */
+      struct zink_context *ctx = prog->base.ctx;
+      if (ctx->curr_program == prog) {
+         ctx->gfx_pipeline_state.final_hash ^= prog->last_variant_hash;
+         ctx->curr_program = NULL;
+         ctx->gfx_dirty = true;
+      }
+      if (ctx->mesh_program == prog) {
+         ctx->gfx_pipeline_state.mesh_final_hash ^= prog->last_variant_hash;
+         ctx->mesh_program = NULL;
+         ctx->mesh_dirty = true;
+      }
       prog->base.removed = true;
       simple_mtx_unlock(lock);
 
@@ -6138,7 +6157,8 @@ zink_shader_has_cubes(nir_shader *nir)
 {
    nir_foreach_variable_with_modes(var, nir, nir_var_uniform) {
       const struct glsl_type *type = glsl_without_array(var->type);
-      if (glsl_type_is_sampler(type) && glsl_get_sampler_dim(type) == GLSL_SAMPLER_DIM_CUBE)
+      if ((glsl_type_is_sampler(type) || glsl_type_is_texture(type)) &&
+          glsl_get_sampler_dim(type) == GLSL_SAMPLER_DIM_CUBE)
          return true;
    }
    return false;

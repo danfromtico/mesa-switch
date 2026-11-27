@@ -1,0 +1,472 @@
+/* SPDX-License-Identifier: MIT
+ * Public video DDIs with CPU KMT/Vulkan substitutes. Exercises retained
+ * failed cleanup, frame errors, array backing and decoder-buffer bounds.
+ * The generated pixels and counters are controls, never hardware evidence.
+ */
+#include "tgd3d.h"
+#include "tgd3d_dxva_h264.h"
+#include "nouveau/vulkan/nvkmd/windows/nvdec_escape_abi.h"
+#include "../../../../tegra-x1-wddm/windows/nvdec_control.h"
+#include <d3dkmthk.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <limits>
+
+using namespace tgd3d;
+#define CHECK(x) do { if (!(x)) { std::fprintf(stderr, "%s:%u: %s\n", __FILE__, __LINE__, #x); std::exit(1); } } while (0)
+namespace {
+struct Geometry {
+   UINT width, sample_height, texture_height, kmd_pitch, coded_height;
+   UINT transfer_bytes() const { return kmd_pitch * coded_height * 3 / 2; }
+   UINT texture_bytes() const { return width * texture_height * 3 / 2; }
+};
+constexpr Geometry hd720 = {1280, 720, 720, 1280, 720};
+const GUID h264 = {0x1b81be68,0xa0c7,0x11d3,{0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}};
+struct Memory { std::vector<uint8_t> bytes; };
+struct Buffer { VkDeviceSize size; };
+struct State {
+   Geometry geometry = hd720;
+   unsigned expected_slot = 2;
+   int expected_ref = -1;
+   LONG load_error = 0, close_error = 0, destroy_error = 0;
+   unsigned opens = 0, devices = 0, decodes = 0, destroys = 0, closes = 0;
+   unsigned buffers = 0, memories = 0, notifications = 0;
+   bool short_output = false;
+   HRESULT error = S_OK;
+   std::vector<uint8_t> freed;
+} state;
+template<typename T, typename H> T *object(H h) { return (T *)(uintptr_t)h; }
+template<typename H, typename T> H handle(T *p) { return (H)(uintptr_t)p; }
+}
+
+extern "C" NTSTATUS APIENTRY D3DKMTOpenAdapterFromLuid(const D3DKMT_OPENADAPTERFROMLUID *a)
+{
+   CHECK(a->AdapterLuid.LowPart == 0x1234 && !a->AdapterLuid.HighPart);
+   ++state.opens; const_cast<D3DKMT_OPENADAPTERFROMLUID *>(a)->hAdapter = 10; return 0;
+}
+extern "C" NTSTATUS APIENTRY D3DKMTCreateDevice(D3DKMT_CREATEDEVICE *d)
+{ CHECK(d->hAdapter == 10); ++state.devices; d->hDevice = 20; return 0; }
+extern "C" NTSTATUS APIENTRY D3DKMTDestroyDevice(const D3DKMT_DESTROYDEVICE *d)
+{ CHECK(d->hDevice == 20); ++state.destroys; return state.destroy_error; }
+extern "C" NTSTATUS APIENTRY D3DKMTCloseAdapter(const D3DKMT_CLOSEADAPTER *a)
+{ CHECK(a->hAdapter == 10); ++state.closes; return 0; }
+extern "C" NTSTATUS APIENTRY D3DKMTEscape(const D3DKMT_ESCAPE *e)
+{
+   CHECK(e->hAdapter == 10 && e->hDevice == 20 && e->Flags.Value == 1 && !e->hContext);
+   auto *h = static_cast<tg_nvdec_escape *>(e->pPrivateDriverData);
+   CHECK(h->size == e->PrivateDriverDataSize);
+   void *payload = h + 1;
+   switch (h->command) {
+   case TG_NVDEC_ESCAPE_LOAD: {
+      auto req = *static_cast<tg_nvdec_load_request *>(payload);
+      CHECK(req.version == 1 && req.size == 128000);
+      h->session = 31; h->result = state.load_error;
+      auto *out = static_cast<tg_nvdec_load_result *>(payload);
+      *out = {}; out->version = 1; out->booted = !state.load_error; out->firmware_bytes = 128000;
+      std::memcpy(out->sha256, req.sha256, 32); return 0;
+   }
+   case TG_NVDEC_ESCAPE_CONFIGURE: {
+      auto req = *static_cast<tg_nvdec_config_request *>(payload);
+      const auto &g = state.geometry;
+      CHECK(h->session == 31 && req.width == g.width && req.height == g.sample_height);
+      auto *out = static_cast<tg_nvdec_config_result *>(payload);
+      *out = {}; out->version = 1; out->pitch = g.kmd_pitch; out->aligned_height = g.coded_height;
+      out->frame_size = g.transfer_bytes();
+      return 0;
+   }
+   case TG_NVDEC_ESCAPE_DECODE: {
+      const auto &g = state.geometry;
+      const UINT frame_bytes = g.transfer_bytes();
+      auto *req = static_cast<tg_nvdec_decode_request *>(payload);
+      CHECK(h->session == 31 && req->pic.curr_slot == state.expected_slot && req->slice_count == 1);
+      CHECK(req->pic.dpb_count == (state.expected_ref < 0 ? 0 : 1));
+      if (state.expected_ref >= 0)
+         CHECK(req->pic.dpb[0].slot == (unsigned)state.expected_ref && req->pic.dpb[0].is_long_term);
+      CHECK(req->pic.scaling4x4[0][0] == 16 && req->output_size == frame_bytes);
+      ++state.decodes;
+      auto *out = static_cast<tg_nvdec_decode_result *>(payload);
+      CHECK(req->pic.width == g.width && req->pic.height == g.sample_height &&
+            req->pic.coded_width == g.width && req->pic.coded_height == g.coded_height);
+      *out = {}; out->version = 1; out->width = g.width; out->height = g.sample_height;
+      out->pitch = g.kmd_pitch; out->aligned_height = g.coded_height;
+      out->frame_size = frame_bytes; out->bytes_written = frame_bytes - state.short_output;
+      out->expected_syncpoint = out->observed_syncpoint = 40;
+      out->mbs_correctly_decoded = (g.width / 16) * (g.coded_height / 16);
+      auto *pixels = reinterpret_cast<uint8_t *>(out + 1);
+      std::memset(pixels, 0xcd, frame_bytes);
+      for (UINT row = 0; row < g.coded_height * 3 / 2; ++row)
+         std::memset(pixels + row * g.kmd_pitch, row < g.coded_height ? 0x3d : 0x78, g.width);
+      return 0;
+   }
+   case TG_NVDEC_ESCAPE_CLOSE:
+      h->result = state.close_error;
+      if (!h->result) h->session = 0;
+      return 0;
+   default: CHECK(false); return -1;
+   }
+}
+
+namespace {
+void init(Device &dev, Adapter &adapter)
+{
+   state = {};
+   adapter.videoEnabled = true; adapter.videoFirmware.resize(128000);
+   adapter.info.version = TG_GPU_ADAPTER_ABI; adapter.info.size = sizeof(adapter.info);
+   adapter.info.flags = TG_GPU_ADAPTER_LUID_VALID | TG_GPU_ADAPTER_NATIVE_SUBMIT;
+   adapter.info.luid_low = 0x1234;
+   adapter.vk.caps.memory.memoryTypeCount = 1;
+   adapter.vk.caps.memory.memoryTypes[0].propertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+   dev.adapter = &adapter; dev.caps = &adapter.vk.caps;
+   dev.interfaceVersion = D3D11_1_DDI_INTERFACE_VERSION;
+   dev.vkdev = (VkDevice)(uintptr_t)1;
+   dev.um.pfnSetErrorCb = [](D3D10DDI_HRTCORELAYER, HRESULT hr) APIENTRY { state.error = hr; ++state.notifications; };
+   dev.vk.CreateBuffer = [](VkDevice, const VkBufferCreateInfo *i, const VkAllocationCallbacks *, VkBuffer *out) VKAPI_CALL {
+      *out = handle<VkBuffer>(new Buffer{i->size}); ++state.buffers; return VK_SUCCESS;
+   };
+   dev.vk.GetBufferMemoryRequirements = [](VkDevice, VkBuffer b, VkMemoryRequirements *out) VKAPI_CALL {
+      *out = {object<Buffer>(b)->size, 256, 1};
+   };
+   dev.vk.AllocateMemory = [](VkDevice, const VkMemoryAllocateInfo *i, const VkAllocationCallbacks *, VkDeviceMemory *out) VKAPI_CALL {
+      auto *m = new Memory; m->bytes.resize(i->allocationSize, 0xa5);
+      *out = handle<VkDeviceMemory>(m); ++state.memories; return VK_SUCCESS;
+   };
+   dev.vk.BindBufferMemory = [](VkDevice, VkBuffer, VkDeviceMemory, VkDeviceSize) VKAPI_CALL { return VK_SUCCESS; };
+   dev.vk.MapMemory = [](VkDevice, VkDeviceMemory m, VkDeviceSize, VkDeviceSize, VkMemoryMapFlags, void **out) VKAPI_CALL {
+      *out = object<Memory>(m)->bytes.data(); return VK_SUCCESS;
+   };
+   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) VKAPI_CALL { CHECK(false); };
+   dev.vk.DestroyBuffer = [](VkDevice, VkBuffer b, const VkAllocationCallbacks *) VKAPI_CALL {
+      delete object<Buffer>(b); --state.buffers;
+   };
+   dev.vk.FreeMemory = [](VkDevice, VkDeviceMemory m, const VkAllocationCallbacks *) VKAPI_CALL {
+      auto *mem = object<Memory>(m); state.freed = mem->bytes; delete mem; --state.memories;
+   };
+}
+
+D3D11_1DDIARG_CREATEVIDEODECODER decoder_args(Device &dev, D3D11_1DDI_VIDEODEVICEFUNCS &video)
+{
+   D3D11_1DDIARG_CREATEVIDEODECODER a = {};
+   a.Desc = {h264, state.geometry.width, state.geometry.sample_height, DXGI_FORMAT_NV12};
+   UINT count = 0; video.pfnGetVideoDecoderConfigCount({&dev}, &a.Desc, &count); CHECK(count == 1);
+   video.pfnGetVideoDecoderConfig({&dev}, &a.Desc, 0, &a.Config);
+   CHECK(a.Config.ConfigBitstreamRaw == 2 && a.Config.ConfigMinRenderTargetBuffCount == 17);
+   return a;
+}
+
+void retained_cleanup()
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
+   auto args = decoder_args(dev, video);
+   std::vector<uint8_t> storage(video.pfnCalcPrivateVideoDecoderSize({&dev}, &args), 0xcc);
+   state.load_error = (LONG)0xc00000b5u; state.close_error = state.destroy_error = (LONG)0xc000009eu;
+   CHECK(FAILED(video.pfnCreateVideoDecoder({&dev}, &args, {storage.data()}, {})));
+   CHECK(storage[0] == 0xcc && dev.videoSessions && state.destroys == 1 && !state.closes);
+   CHECK(!video_device_destroy(&dev) && dev.videoSessions && state.destroys == 2 && !state.closes);
+   state.close_error = state.destroy_error = 0;
+   CHECK(video_device_destroy(&dev) && !dev.videoSessions && state.closes == 1);
+   CHECK(!state.notifications);
+}
+
+void processor_enumeration()
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
+   D3D11_1DDIARG_CREATEVIDEOPROCESSORENUM args = {};
+   args.Desc.InputWidth = args.Desc.OutputWidth = 720;
+   args.Desc.InputHeight = args.Desc.OutputHeight = 480;
+   CHECK(video.pfnCalcPrivateVideoProcessorEnumSize && video.pfnCreateVideoProcessorEnum &&
+         video.pfnGetVideoProcessorCaps && video.pfnCheckVideoProcessorFormat && video.pfnDestroyVideoProcessorEnum);
+   CHECK(video.pfnCalcPrivateVideoProcessorEnumSize({&dev}, &args) == 0);
+   CHECK(video.pfnCreateVideoProcessorEnum({&dev}, &args, {}, {}) == S_OK);
+   D3D11_1DDI_VIDEO_PROCESSOR_CAPS caps, empty = {};
+   std::memset(&caps, 0xff, sizeof(caps));
+   video.pfnGetVideoProcessorCaps({&dev}, {}, &caps);
+   CHECK(!std::memcmp(&caps, &empty, sizeof(caps)));
+   UINT format = ~0u;
+   video.pfnCheckVideoProcessorFormat({&dev}, {}, DXGI_FORMAT_NV12, &format);
+   CHECK(!format && !video.pfnVideoProcessorBlt && !video.pfnVideoProcessorSetStreamRotation);
+   video.pfnDestroyVideoProcessorEnum({&dev}, {});
+   CHECK(!state.opens && !state.devices && !state.notifications);
+}
+
+void decoder_input_buffers()
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   dev.vk.UnmapMemory = [](VkDevice, VkDeviceMemory) VKAPI_CALL {};
+   D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
+   D3D11_1DDI_DEVICEFUNCS ddi; device_fill_table11(&ddi);
+   const auto decoder = decoder_args(dev, video);
+   for (UINT i = 0; i < 4; ++i) {
+      D3D11_1DDI_VIDEO_DECODER_BUFFER_INFO info = {};
+      video.pfnGetVideoDecoderBufferInfo({&dev}, &decoder.Desc, i, &info);
+      D3D10DDI_MIPINFO mip = {};
+      mip.TexelWidth = mip.PhysicalWidth = info.Size;
+      mip.TexelHeight = mip.PhysicalHeight = mip.TexelDepth = mip.PhysicalDepth = 1;
+      D3D11DDIARG_CREATERESOURCE desc = {};
+      desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_BUFFER;
+      desc.Usage = info.Usage; desc.MapFlags = D3D10_DDI_CPU_ACCESS_WRITE;
+      desc.BindFlags = D3D11_DDI_BIND_DECODER; desc.DecoderBufferType = info.Type;
+      desc.MipLevels = desc.ArraySize = desc.SampleDesc.Count = 1;
+      alignas(Resource) uint8_t storage[sizeof(Resource)];
+      D3D10DDI_HRESOURCE h = {storage};
+      ddi.pfnCreateResource({&dev}, &desc, h, {(HANDLE)1});
+      CHECK(!state.notifications);
+      D3D10DDI_MAPPED_SUBRESOURCE mapped = {};
+      ddi.pfnDynamicResourceMapDiscard({&dev}, h, 0, D3D10_DDI_MAP_WRITE_DISCARD, 0, &mapped);
+      CHECK(!state.notifications && mapped.pData && mapped.RowPitch == info.Size);
+      std::memset(mapped.pData, 0x19, info.Size);
+      ddi.pfnDynamicResourceUnmap({&dev}, h, 0);
+      ddi.pfnDestroyResource({&dev}, h);
+      CHECK(!state.notifications);
+   }
+   upload_destroy(&dev);
+   CHECK(!state.buffers && !state.memories);
+}
+
+void nv12_copy_planes()
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   D3D10DDI_DEVICEFUNCS functions = {}; resource_fill_table(&functions);
+   std::vector<uint8_t> source(352), target(352, 0xa5);
+   for (size_t i=0;i<source.size();++i) source[i] = (i*37+i/13)&255;
+   Chunk a, b; a.cpu=source.data(); b.cpu=target.data();
+   Resource src, dst;
+   for (Resource *r : {&src,&dst}) {
+      r->dev=&dev; r->kind=ResKind::Staging; r->dim=D3D10DDIRESOURCE_TEXTURE2D;
+      r->format=DXGI_FORMAT_NV12; r->width=r->height=8; r->arraySize=2;
+      r->layout={{16,12,144,8,8,1},{176,12,144,8,8,1}};
+      r->maps.resize(2); r->size=352;
+   }
+   src.slice={&a,0,352}; dst.slice={&b,0,352};
+   auto expected=target;
+   D3D10_DDI_BOX box={2,2,0,6,6,1};
+   for (UINT y=0;y<4;++y) for (UINT x=0;x<4;++x)
+      expected[16+y*12+4+x]=source[176+(2+y)*12+2+x];
+   for (UINT y=0;y<2;++y) for (UINT x=0;x<4;++x)
+      expected[16+(8+y)*12+4+x]=source[176+(9+y)*12+2+x];
+   functions.pfnResourceCopyRegion({&dev},{&dst},0,4,0,0,{&src},1,&box);
+   CHECK(target==expected && !state.notifications);
+   const auto before=target;
+   box={0,0,0,4,4,1};
+   for (UINT y=0;y<4;++y) for (UINT x=0;x<4;++x)
+      expected[16+(2+y)*12+2+x]=before[16+y*12+x];
+   for (UINT y=0;y<2;++y) for (UINT x=0;x<4;++x)
+      expected[16+(9+y)*12+2+x]=before[16+(8+y)*12+x];
+   functions.pfnResourceCopyRegion({&dev},{&dst},0,2,2,0,{&dst},0,&box);
+   CHECK(target==expected && !state.notifications);
+   uint8_t upload[36]; for (UINT i=0;i<36;++i) upload[i]=(uint8_t)(i+0x30);
+   box={2,2,0,6,6,1};
+   for (UINT y=0;y<4;++y) for (UINT x=0;x<4;++x)
+      expected[16+(2+y)*12+2+x]=upload[y*6+x];
+   for (UINT y=0;y<2;++y) for (UINT x=0;x<4;++x)
+      expected[16+(9+y)*12+2+x]=upload[24+y*6+x];
+   functions.pfnResourceUpdateSubresourceUP({&dev},{&dst},0,&box,upload,6,36);
+   CHECK(target==expected && !state.notifications);
+   box.left=1;box.right=5;
+   functions.pfnResourceCopyRegion({&dev},{&dst},0,0,0,0,{&src},0,&box);
+   CHECK(state.notifications==1 && target==expected);
+   dev.lost=S_OK; a.videoWrites=1;
+   functions.pfnResourceCopyRegion({&dev},{&dst},0,0,0,0,{&src},0,nullptr);
+   CHECK(state.notifications==2 && target==expected);
+}
+
+void nv12_clear_output_view()
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
+   D3D11_1DDI_DEVICEFUNCS ddi; device_fill_table11(&ddi);
+   std::vector<uint8_t> bytes(328, 0xa5), expected = bytes;
+   Chunk chunk; chunk.cpu = bytes.data(); chunk.size = bytes.size();
+   Resource res; res.dev = &dev; res.kind = ResKind::Staging; res.bind = D3D11_DDI_BIND_DECODER;
+   res.format = DXGI_FORMAT_NV12; res.width = res.height = 8; res.arraySize = 2;
+   res.slice = {&chunk, 8, 312}; res.layout = {{0,12,144,8,8,1}, {160,12,144,8,8,1}};
+   res.maps.resize(2);
+   D3D11_1DDIARG_CREATEVIDEODECODEROUTPUTVIEW desc = {{&res}, h264, 0, 1, 1};
+   std::vector<uint8_t> storage(video.pfnCalcPrivateVideoDecoderOutputViewSize({&dev}, &desc));
+   D3D11_1DDI_HVIDEODECODEROUTPUTVIEW view = {storage.data()};
+   CHECK(video.pfnCreateVideoDecoderOutputView({&dev}, &desc, view, {}) == S_OK);
+   auto clear = [&](const float color[4], const RECT *rects, UINT count) {
+      ddi.pfnClearView({&dev}, D3D11_1DDI_HT_VIDEODECODEROUTPUTVIEW, view.pDrvPrivate, color, rects, count);
+   };
+   const float full[4] = {16.9f, 128, 128, 0};
+   clear(full, nullptr, 0);
+   const size_t plane = 8 + 160;
+   for (unsigned y = 0; y < 12; ++y)
+      std::memset(expected.data() + plane + y*12, y < 8 ? 16 : 128, 8);
+   CHECK(!state.notifications && bytes == expected);
+   const float color[4] = {std::numeric_limits<float>::quiet_NaN(), 240.75f,
+                           std::numeric_limits<float>::infinity(), 0};
+   const RECT rects[] = {{-2,2,4,6},{4,0,4,8}};
+   clear(color, rects, 2);
+   for (unsigned y = 2; y < 6; ++y) std::memset(expected.data() + plane + y*12, 0, 4);
+   for (unsigned y = 9; y < 11; ++y) {
+      uint8_t *uv = expected.data() + plane + y*12;
+      uv[0] = uv[2] = 240; uv[1] = uv[3] = 255;
+   }
+   CHECK(!state.notifications && bytes == expected);
+   const RECT invalid[] = {{0,0,8,8},{1,0,6,2}};
+   clear(full, invalid, 2);
+   CHECK(state.notifications == 1 && bytes == expected);
+   dev.lost = S_OK; chunk.videoWrites = 1;
+   clear(full, nullptr, 0);
+   CHECK(state.notifications == 2 && bytes == expected);
+   video.pfnDestroyVideoDecoderOutputView({&dev}, view);
+}
+
+void decode_frame(unsigned fault, bool release_target_early, Geometry geometry = hd720,
+                  UINT array_size = 3)
+{
+   Device dev; Adapter adapter; init(dev, adapter);
+   state.geometry = geometry;
+   const UINT output_slice = array_size - 1;
+   state.expected_slot = output_slice < TG_NVDEC_MAX_SURFACES ? output_slice : 0;
+   const UINT frame_bytes = geometry.texture_bytes();
+   D3D11_1DDI_VIDEODEVICEFUNCS video; video_fill_table(&video);
+   auto args = decoder_args(dev, video);
+   std::vector<uint8_t> storage(video.pfnCalcPrivateVideoDecoderSize({&dev}, &args));
+   D3D11_1DDI_HDECODE decode = {storage.data()};
+   CHECK(video.pfnCreateVideoDecoder({&dev}, &args, decode, {}) == S_OK);
+   CHECK(dev.videoSessions && state.opens == 1 && state.devices == 1);
+   for (UINT i = 0; i < 4; ++i) {
+      D3D11_1DDI_VIDEO_DECODER_BUFFER_INFO info = {};
+      video.pfnGetVideoDecoderBufferInfo({&dev}, &args.Desc, i, &info);
+      CHECK(info.Size && info.Usage == D3D10_DDI_USAGE_DYNAMIC);
+      if (i == 0) CHECK(info.Type == D3D11_1DDI_VIDEO_DECODER_BUFFER_PICTURE_PARAMETERS &&
+                        info.Size == sizeof(tgd3d_dxva_pic_h264_buffer));
+   }
+   D3D11_1DDI_DEVICEFUNCS functions = {}; device_fill_table11(&functions);
+   D3D10DDI_MIPINFO mip = {}; mip.TexelWidth = mip.PhysicalWidth = geometry.width;
+   mip.TexelHeight = mip.PhysicalHeight = geometry.texture_height; mip.TexelDepth = mip.PhysicalDepth = 1;
+   D3D11DDIARG_CREATERESOURCE desc = {};
+   desc.pMipInfoList = &mip; desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D;
+   desc.Usage = D3D10_DDI_USAGE_DEFAULT; desc.BindFlags = D3D11_DDI_BIND_DECODER;
+   desc.Format = DXGI_FORMAT_NV12; desc.SampleDesc.Count = 1; desc.MipLevels = 1; desc.ArraySize = array_size;
+   auto *res = static_cast<Resource *>(::operator new(sizeof(Resource)));
+   functions.pfnCreateResource({&dev}, &desc, {res}, {(HANDLE)1});
+   CHECK(!state.notifications && res->kind == ResKind::Staging && res->layout.size() == array_size);
+   CHECK(res->size == array_size * frame_bytes && res->layout[output_slice].offset == output_slice * frame_bytes);
+   D3D11_1DDIARG_CREATEVIDEODECODEROUTPUTVIEW v = {{res}, h264, 0, output_slice, 1};
+   std::vector<uint8_t> view_storage(video.pfnCalcPrivateVideoDecoderOutputViewSize({&dev}, &v));
+   D3D11_1DDI_HVIDEODECODEROUTPUTVIEW view = {view_storage.data()};
+   CHECK(video.pfnCreateVideoDecoderOutputView({&dev}, &v, view, {}) == S_OK);
+   D3D11_1DDIARG_VIDEODECODERBEGINFRAME begin = {}; begin.hOutputView = view;
+   CHECK(video.pfnVideoDecoderBeginFrame({&dev}, decode, &begin) == S_OK);
+   CHECK(res->slice.chunk->live == 2 && res->slice.chunk->videoWrites == 1);
+   CHECK(video.pfnVideoDecoderBeginFrame({&dev}, decode, &begin) == E_INVALIDARG);
+   slice_unmap(&dev, res->slice); CHECK(res->slice.cpu());
+   tgd3d_dxva_pic_h264_buffer picture_buffer = {};
+   auto &pic = picture_buffer.picture;
+   pic.wFrameWidthInMbsMinus1 = geometry.width / 16 - 1;
+   pic.wFrameHeightInMbsMinus1 = geometry.coded_height / 16 - 1;
+   pic.ContinuationFlag = 1;
+   pic.CurrPic.bPicEntry = (uint8_t)output_slice; pic.wBitFields = 0x1050;
+   std::memset(pic.RefFrameList, 0xff, sizeof(pic.RefFrameList));
+   tgd3d_dxva_qmatrix_h264 matrix; std::memset(&matrix, 16, sizeof(matrix));
+   const uint8_t stream[] = {0,0,1,0x65,0xaa};
+   tgd3d_dxva_slice_h264_short slice = {0, sizeof(stream), 0};
+   Resource buffers[4]; Chunk chunks[4];
+   const void *data[] = {&picture_buffer,&matrix,&slice,stream};
+   UINT lengths[] = {sizeof(picture_buffer),sizeof(matrix),sizeof(slice),sizeof(stream)};
+   const D3D11_1DDI_VIDEO_DECODER_BUFFER_TYPE types[] = {
+      D3D11_1DDI_VIDEO_DECODER_BUFFER_PICTURE_PARAMETERS,
+      D3D11_1DDI_VIDEO_DECODER_BUFFER_INVERSE_QUANTIZATION_MATRIX,
+      D3D11_1DDI_VIDEO_DECODER_BUFFER_SLICE_CONTROL,D3D11_1DDI_VIDEO_DECODER_BUFFER_BITSTREAM};
+   D3D11_1DDI_VIDEO_DECODER_BUFFER_DESC input[4] = {};
+   for (UINT i=0;i<4;++i) {
+      chunks[i].cpu = (uint8_t *)data[i]; chunks[i].size = lengths[i];
+      buffers[i].dev = &dev; buffers[i].size = lengths[i]; buffers[i].slice = {&chunks[i],0,lengths[i]};
+      buffers[i].bind = D3D11_DDI_BIND_DECODER;
+      input[i].hResource = {&buffers[i]}; input[i].BufferType = types[i]; input[i].DataSize = lengths[i];
+   }
+   if (fault == 1) input[2].DataSize--;
+   if (fault == 4) input[0].DataSize = sizeof(pic) - 1;
+   if (!fault && release_target_early) input[0].DataSize = sizeof(pic);
+   HRESULT submitted = video.pfnVideoDecoderSubmitBuffers({&dev}, decode, 4, input);
+   CHECK((fault == 1 || fault == 4) == FAILED(submitted));
+   if (fault == 2) { // a later invalid submission poisons already-complete inputs
+      CHECK(FAILED(video.pfnVideoDecoderSubmitBuffers({&dev}, decode, 1, input)));
+   }
+   state.short_output = fault == 3;
+   if (release_target_early) {
+      video.pfnDestroyVideoDecoderOutputView({&dev}, view); std::memset(view_storage.data(), 0xdd, view_storage.size());
+      functions.pfnDestroyResource({&dev}, {res}); std::memset(static_cast<void *>(res), 0xdd, sizeof(*res)); ::operator delete(res);
+      CHECK(state.memories == 1 && state.buffers == 1);
+   }
+   video.pfnVideoDecoderEndFrame({&dev}, decode);
+   CHECK(state.decodes == (fault == 0 || fault == 3 ? 1u : 0u));
+   CHECK(state.notifications == (fault ? 1u : 0u));
+   UINT first_written = output_slice;
+   if (array_size == 20 && !release_target_early && !fault) {
+      auto next_frame = [&](UINT index, int ref, bool reference_picture) {
+         video.pfnDestroyVideoDecoderOutputView({&dev}, view);
+         v.FirstArraySlice = index;
+         CHECK(video.pfnCreateVideoDecoderOutputView({&dev}, &v, view, {}) == S_OK);
+         pic.CurrPic.bPicEntry = index;
+         pic.RefPicFlag = reference_picture;
+         pic.num_ref_frames = ref < 0 ? 0 : 1;
+         pic.UsedForReferenceFlags = ref < 0 ? 0 : 3;
+         pic.RefFrameList[0].bPicEntry = ref < 0 ? 0xff : (0x80 | ref);
+         CHECK(video.pfnVideoDecoderBeginFrame({&dev}, decode, &begin) == S_OK);
+         CHECK(video.pfnVideoDecoderSubmitBuffers({&dev}, decode, 4, input) == S_OK);
+         video.pfnVideoDecoderEndFrame({&dev}, decode);
+      };
+      /* Public 19 lives in hardware slot 0. Public 18 gets slot 1 and
+       * is displayed, but is not retained as a reference picture. */
+      state.expected_slot = 1;
+      state.expected_ref = 0;
+      next_frame(18, 19, false);
+      CHECK(state.decodes == 2 && !state.notifications);
+      first_written = 18;
+      next_frame(17, 18, true);
+      CHECK(state.decodes == 2 && state.notifications == 1);
+      next_frame(19, 18, true); // invalid reference rejects overwrite before submission
+      CHECK(state.decodes == 2 && state.notifications == 2);
+      next_frame(17, 19, true);
+      CHECK(state.decodes == 2 && state.notifications == 3);
+      /* A failed overwrite must also invalidate the old reference. */
+      state.expected_slot = 0;
+      state.expected_ref = -1;
+      next_frame(19, -1, true);
+      CHECK(state.decodes == 3 && state.notifications == 3);
+      state.short_output = true;
+      next_frame(19, -1, true);
+      CHECK(state.decodes == 4 && state.notifications == 4);
+      next_frame(17, 19, true);
+      CHECK(state.decodes == 4 && state.notifications == 5);
+   }
+   if (!release_target_early) {
+      CHECK(!res->slice.chunk->videoWrites && res->slice.chunk->live == 1);
+      video.pfnDestroyVideoDecoderOutputView({&dev}, view);
+      functions.pfnDestroyResource({&dev}, {res}); ::operator delete(res);
+   }
+   CHECK(!state.buffers && !state.memories && state.freed.size() >= array_size * frame_bytes);
+   for (size_t i=0;i<state.freed.size();++i) {
+      uint8_t expected = 0xa5;
+      if (!fault && i >= first_written*frame_bytes && i < array_size*frame_bytes)
+         expected = i % frame_bytes < geometry.width * geometry.texture_height ? 0x3d : 0x78;
+      CHECK(state.freed[i] == expected);
+   }
+   video.pfnDestroyVideoDecoder({&dev}, decode);
+   CHECK(!dev.videoSessions && state.destroys == 1 && state.closes == 1);
+}
+}
+
+void video_contracts()
+{
+   processor_enumeration();
+   decoder_input_buffers();
+   retained_cleanup();
+   nv12_copy_planes();
+   nv12_clear_output_view();
+   decode_frame(0, false); decode_frame(0, true);
+   decode_frame(0, true, hd720, 20);
+   decode_frame(0, false, hd720, 20);
+   decode_frame(1, false); decode_frame(2, false); decode_frame(3, false);
+   decode_frame(4, false);
+   decode_frame(0, false, {1920,1088,1088,2048,1088}); // FFmpeg coded descriptor and pool
+   decode_frame(0, true,  {1920,1080,1088,2048,1088}); // visible descriptor, padded texture
+   decode_frame(0, false, {1920,1080,1080,2048,1088}); // cropped, tightly packed output
+   std::puts("PASS: video KMT cleanup failures retain ownership; bounded DXVA buffers, frame errors and NV12 array backing survive view/resource release (CPU substitutes only)");
+}

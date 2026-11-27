@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-baseline-wsi-20261121-01",
+  "contract_id": "WIN-COMBINED-13-BASELINE-WSI",
+  "windows_question": "WIN-COMBINED-13-BASELINE-WSI",
+  "owner": "原生 NVK、Win32 Vulkan WSI 和桌面合成",
+  "question": "原选基线用相同普通 Vulkan 窗口、Direct DIB OFF 的帧节奏、画面和退出如何？",
+  "method": "原选基线同尺寸、已签名 Vulkan 窗口和 Direct DIB OFF 固定采样",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289"
+    },
+    "driver_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+      "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+    }
+  },
+  "pass_condition": "同一次交流手持启动、真实 GM20B 原生 NVK 模块、同窗活动画面及输入退场，保存固定观察区间内的帧间隔。",
+  "observations": [
+    "同次启动先核对交流、手持、Code 0、七组件及所用 NVK，按固定夹具和时窗运行。",
+    "保留同进程的窗口前台、帧提交时序、实际桌面像素、Escape 正常退出及同一桌面。数据与新候选分别归档。"
+  ],
+  "inputs": {
+    "boot": 92154,
+    "baseline": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289",
+    "launcher": "ae832096dd940532f8899f0d5918a12c214429893936685205014734d48fda12",
+    "profile_sha256": "166e9af0a11647ed6fc38b8d32add8461c61391310f495f78b47e3185f0a3045",
+    "assumptions": {
+      "mode": "gdi",
+      "direct_dib": "off",
+      "skip_wgc": true,
+      "quiet_seconds": 50
+    },
+    "fixture": {
+      "vkcube.exe": "f3c7d43fa1c85b73807b7029ca03cdfd15edee6f95b9b36c9cbfee16bd2df4b9",
+      "Board-Case.ps1": "b621c6a233268b17d741b69199eec539dbdd10a2e17fabd8eaa70a0404d58ee7",
+      "capture-cadence.exe": "357a9786d8827d208554beab47d04ebdc791361c827bbee8af6cc743240b356a",
+      "Measure-Foreground.ps1": "60008ff7cee1cad0d10d32b0bd728fdb00004e1078777665535c22dde3334833",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "vulkan-1.dll": "d522870c1a11a11d5a61533ad9a959772b00cf10adc58966cee54c2ddad81cb9",
+      "os-trace.exe": "dc7fe4878fbfbdc8a9273640b5ee3548343edeecd2e7059479a8aeaf1e84de75"
+    }
+  }
+}

@@ -1,0 +1,532 @@
+{
+  "test": "32-bit FTEQW / LibreQuake using the Windows system D3D9 runtime",
+  "previous_source": "ce115c892dfdc6eb69743fbfd7053ea57e3cb563",
+  "setup": {
+    "process": "x86 under WOW64 on Windows ARM64",
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "desktop_component_sha256": {
+      "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "candidate_backend_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+    "reproduced_images": {
+      "reconstructed_utc": "2026-11-18T22:43:22.339266+00:00",
+      "original_pe_images_reproduced": true,
+      "mesa": "d8245413bce8964496e6b546e205382b6363fc75",
+      "patch": "3fedbd7a1fc8546d7f8d5b8a8191a7502cc384ca517b6401c36de3f69d4190d5",
+      "files": {
+        "TegraGpuD3D9.dll": {
+          "sha256": "168e1dc92dd064c5656ab59212553dba395bb2f159dfae5a6f4d3f8699f29166",
+          "unsigned": "84d49030cde50cb2d8eb7d76cba0ccbcb56d7eed96914321cfd492533f082710",
+          "bytes": 3640864
+        },
+        "names-x86.exe": {
+          "sha256": "fab107fe839339c444c3def6867b7e5d64df8fa28a0e186808b421bee0307e95",
+          "unsigned": "11d1cf5475e7ded79db9eb6f847b6f45852f2405591f6a5171321b36e13b65ae",
+          "bytes": 64528
+        },
+        "trace.exe": {
+          "sha256": "3ed6d95514983a95e8f66b4b748be1ca0db807ad4151b1848fe5dd13219acf7a",
+          "unsigned": "be685fef2238df8249e473a8b7cdc32d4bd7ca59d98ca0916c491f6ae2ca72e9",
+          "bytes": 409088
+        }
+      }
+    },
+    "game_sha256": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+    "data": [
+      {
+        "name": "pak0.pak",
+        "sha256": "0dd895a425e75d9908025dcfe340f75f5b8166ada68b2d7ee54d8d91d29378ff"
+      },
+      {
+        "name": "pak1.pak",
+        "sha256": "28423c01836341d9e3c6465b407a44ae94e4e29e954544a67739686850e39365"
+      }
+    ],
+    "application_directory_files": [
+      "fteqw.exe"
+    ],
+    "map": "lq_e0m1",
+    "requested_window": [
+      320,
+      240
+    ],
+    "source_arguments": "-librequake -basedir \"C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dxvk-games-b94248bc\\fte-libre\\data\" -usehome -homedir \"C:\\Users\\ruje\\s5-sysdx9-repeat-ce115c89\\osfte02\\game-home\" -condebug -window -width 320 -height 240 +set vid_fullscreen 0 +set vid_desktopsettings 0 +set vid_width 320 +set vid_height 240 +set vid_renderer d3d9 +set vid_multisample 0 +set r_bloom 0 +set r_shadow_realtime_world 0 +set r_shadow_realtime_dlight 0 +set gl_picmip 1 +set cl_maxfps 15 +set log_enable 1 +exec native-d3d9.cfg +map lq_e0m1",
+    "scheduled_action_sha256": "2ddc8c1400609a08ec88c02dd92e6cc1b79b6a8974ca01a102510163439349dd",
+    "persisted_before_planned_restart": true,
+    "game_launches_observed": 1
+  },
+  "selection_restart": {
+    "command_comment": "Switch native D3D9 32-bit graphics driver binding test",
+    "pre_game_events": [
+      {
+        "id": 1074,
+        "record": 68485,
+        "utc": "2026-11-18T22:47:59.8947303Z"
+      },
+      {
+        "id": 6006,
+        "record": 68486,
+        "utc": "2026-11-18T22:48:02.1441625Z"
+      },
+      {
+        "id": 6005,
+        "record": 68496,
+        "utc": "2026-11-18T22:49:14.7955415Z"
+      }
+    ],
+    "game_had_started_at_observation": false,
+    "operator_screen_observation": "Pacecar displayed its unconfirmed API label. The screen went black for several seconds before reboot.",
+    "widget": "Pacecar uses the sampled foreground process, including Explorer on the shell desktop. The unconfirmed label is displayed when it lacks a unique backend identity. The precise pre-restart sample PID was not recorded.",
+    "widget_source": "https://github.com/ruje0504-2/pacecar/blob/c0bf693d22f10d1b4001224dea04afa81ee1b51f/src/Pacecar.Core/src/metrics/GraphicsApiProvider.cpp",
+    "wake_boot": "2026-11-18T22:48:40.0043920Z"
+  },
+  "result": {
+    "game_pid": 6112,
+    "registered_dx9_x86_slot": "C:\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\TegraGpuD3D9.dll",
+    "kmt": [
+      "identity\t3144\t32\t014c\taa64\t00000000\t1\t00000000000890f5",
+      "open\t00000000",
+      "type\t00000000\t0000030b\t1\t1\t0",
+      "wddm\t00000000\t2600",
+      "slot\t0\t00000000\tC:\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\TegraGpuD3D9.dll",
+      "slot\t1\tc000000d\t",
+      "slot\t2\tc000000d\t",
+      "slot\t3\tc000000d\t",
+      "close\t00000000"
+    ],
+    "case_boundary": null,
+    "renderer_lines": [
+      "2026-11-19 06:51:44 Setting windowed mode 320*240 Direct3D9",
+      "2026-11-19 06:51:44 No suitable D3D9 device found",
+      "2026-11-19 06:51:44 Setting windowed mode 640*480 Direct3D9",
+      "2026-11-19 06:51:45 No suitable D3D9 device found",
+      "2026-11-19 06:51:45 Trying OpenGL",
+      "2026-11-19 06:51:45 Setting windowed mode 640*480 OpenGL"
+    ],
+    "software_or_alternate_renderer": null,
+    "opengl_renderer": [],
+    "native_adapter_open_observed": true,
+    "native_device_creation_succeeded": null,
+    "first_observed_driver_failure": {
+      "qpc": 3583101684,
+      "utc": "2026-11-18T22:51:44.750101+00:00",
+      "thread": 6644,
+      "id": 31,
+      "hresult": "0x8876086a",
+      "arg0": "0x20000000d",
+      "arg1": "0x130",
+      "operation": "GetCaps",
+      "query": "D3DDDICAPS_GETD3D9CAPS"
+    },
+    "game_loaded_modules": {
+      "fteqw.exe": [
+        "\\Device\\HarddiskVolume1\\Users\\ruje\\s5-sysdx9-repeat-ce115c89\\app\\fteqw.exe"
+      ],
+      "dxgi.dll": [
+        "\\Device\\HarddiskVolume1\\Windows\\SysWOW64\\dxgi.dll"
+      ],
+      "libvulkan_nouveau.dll": [
+        "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\libvulkan_nouveau.dll"
+      ],
+      "d3d9.dll": [
+        "\\Device\\HarddiskVolume1\\Windows\\SyChpe32\\d3d9.dll"
+      ],
+      "tegragpud3d9.dll": [
+        "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\TegraGpuD3D9.dll"
+      ]
+    },
+    "attempted_opengl_fallback": true,
+    "user_mode_driver_events_in_order": [
+      {
+        "qpc": 3580398343,
+        "utc": "2026-11-18T22:51:44.609303+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x8000000a",
+        "arg0": "0x100000009",
+        "arg1": "0x10000",
+        "operation": "OpenAdapter"
+      },
+      {
+        "qpc": 3580424547,
+        "utc": "2026-11-18T22:51:44.610666+00:00",
+        "thread": 6644,
+        "id": 2,
+        "hresult": "0x00000000",
+        "arg0": "0x3",
+        "arg1": "0x20000000"
+      },
+      {
+        "qpc": 3582847200,
+        "utc": "2026-11-18T22:51:44.736847+00:00",
+        "thread": 6644,
+        "id": 3,
+        "hresult": "0x00000000",
+        "arg0": "0x890f5",
+        "arg1": "0x100404162"
+      },
+      {
+        "qpc": 3582850348,
+        "utc": "2026-11-18T22:51:44.737011+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x00000000",
+        "arg0": "0x100000009",
+        "arg1": "0x890f5",
+        "operation": "OpenAdapter"
+      },
+      {
+        "qpc": 3583101684,
+        "utc": "2026-11-18T22:51:44.750101+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x8876086a",
+        "arg0": "0x20000000d",
+        "arg1": "0x130",
+        "operation": "GetCaps",
+        "query": "D3DDDICAPS_GETD3D9CAPS"
+      },
+      {
+        "qpc": 3583176388,
+        "utc": "2026-11-18T22:51:44.753992+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x00000000",
+        "arg0": "0x400000000",
+        "arg1": "0x890f5",
+        "operation": "CloseAdapter"
+      },
+      {
+        "qpc": 3584391479,
+        "utc": "2026-11-18T22:51:44.817278+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x8000000a",
+        "arg0": "0x100000009",
+        "arg1": "0x10000",
+        "operation": "OpenAdapter"
+      },
+      {
+        "qpc": 3584397035,
+        "utc": "2026-11-18T22:51:44.817568+00:00",
+        "thread": 6644,
+        "id": 2,
+        "hresult": "0x00000000",
+        "arg0": "0x3",
+        "arg1": "0x20000000"
+      },
+      {
+        "qpc": 3585547192,
+        "utc": "2026-11-18T22:51:44.877472+00:00",
+        "thread": 6644,
+        "id": 3,
+        "hresult": "0x00000000",
+        "arg0": "0x890f5",
+        "arg1": "0x100404162"
+      },
+      {
+        "qpc": 3585550829,
+        "utc": "2026-11-18T22:51:44.877661+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x00000000",
+        "arg0": "0x100000009",
+        "arg1": "0x890f5",
+        "operation": "OpenAdapter"
+      },
+      {
+        "qpc": 3585943187,
+        "utc": "2026-11-18T22:51:44.898096+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x00000000",
+        "arg0": "0x400000000",
+        "arg1": "0x890f5",
+        "operation": "CloseAdapter"
+      },
+      {
+        "qpc": 3587050374,
+        "utc": "2026-11-18T22:51:44.955763+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x8000000a",
+        "arg0": "0x100000009",
+        "arg1": "0x10000",
+        "operation": "OpenAdapter"
+      },
+      {
+        "qpc": 3587052269,
+        "utc": "2026-11-18T22:51:44.955860+00:00",
+        "thread": 6644,
+        "id": 2,
+        "hresult": "0x00000000",
+        "arg0": "0x3",
+        "arg1": "0x20000000"
+      },
+      {
+        "qpc": 3587687324,
+        "utc": "2026-11-18T22:51:44.988937+00:00",
+        "thread": 6644,
+        "id": 3,
+        "hresult": "0x00000000",
+        "arg0": "0x890f5",
+        "arg1": "0x100404162"
+      },
+      {
+        "qpc": 3587687736,
+        "utc": "2026-11-18T22:51:44.988958+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x00000000",
+        "arg0": "0x100000009",
+        "arg1": "0x890f5",
+        "operation": "OpenAdapter"
+      },
+      {
+        "qpc": 3587706014,
+        "utc": "2026-11-18T22:51:44.989910+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x8876086a",
+        "arg0": "0x20000000d",
+        "arg1": "0x130",
+        "operation": "GetCaps",
+        "query": "D3DDDICAPS_GETD3D9CAPS"
+      },
+      {
+        "qpc": 3587743941,
+        "utc": "2026-11-18T22:51:44.991886+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x00000000",
+        "arg0": "0x400000000",
+        "arg1": "0x890f5",
+        "operation": "CloseAdapter"
+      },
+      {
+        "qpc": 3588152418,
+        "utc": "2026-11-18T22:51:45.013161+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x8000000a",
+        "arg0": "0x100000009",
+        "arg1": "0x10000",
+        "operation": "OpenAdapter"
+      },
+      {
+        "qpc": 3588154345,
+        "utc": "2026-11-18T22:51:45.013260+00:00",
+        "thread": 6644,
+        "id": 2,
+        "hresult": "0x00000000",
+        "arg0": "0x3",
+        "arg1": "0x20000000"
+      },
+      {
+        "qpc": 3588644753,
+        "utc": "2026-11-18T22:51:45.038803+00:00",
+        "thread": 6644,
+        "id": 3,
+        "hresult": "0x00000000",
+        "arg0": "0x890f5",
+        "arg1": "0x100404162"
+      },
+      {
+        "qpc": 3588645071,
+        "utc": "2026-11-18T22:51:45.038818+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x00000000",
+        "arg0": "0x100000009",
+        "arg1": "0x890f5",
+        "operation": "OpenAdapter"
+      },
+      {
+        "qpc": 3588706499,
+        "utc": "2026-11-18T22:51:45.042019+00:00",
+        "thread": 6644,
+        "id": 31,
+        "hresult": "0x00000000",
+        "arg0": "0x400000000",
+        "arg1": "0x890f5",
+        "operation": "CloseAdapter"
+      }
+    ],
+    "target_image_loads_observed": 78,
+    "native_game_accepted": false,
+    "normal_game_exit_on_requested_backend": null,
+    "fallback_quit_key_sent": null,
+    "fallback_normal_exit": null,
+    "fallback_quit_marker": null,
+    "harness_terminated": false,
+    "processes": [],
+    "error": null,
+    "boot_at_test": "2026-11-18T22:48:40.0043920Z",
+    "boot_after_test": null,
+    "desktop_pid_before": 1412,
+    "desktop_pid_after": null,
+    "boot_at_collection": "2026-11-18T22:52:04.0374870Z",
+    "events_after_planned_reboot": [
+      {
+        "record": 68583,
+        "utc": "2026-11-18T22:53:04.0419602Z",
+        "id": 6008
+      },
+      {
+        "record": 68585,
+        "utc": "2026-11-18T22:53:04.0448971Z",
+        "id": 6005
+      },
+      {
+        "record": 68592,
+        "BugcheckCode": "0",
+        "id": 41,
+        "LongPowerButtonPressDetected": "false",
+        "utc": "2026-11-18T22:49:18.0167951Z",
+        "PowerButtonTimestamp": "0",
+        "SleepInProgress": "0"
+      }
+    ]
+  },
+  "evidence": {
+    "durable_journal_stages": [
+      "prepared",
+      "entered",
+      "ready",
+      "trace-started",
+      "before-fte",
+      "fte-started",
+      "window"
+    ],
+    "terminal_journal": "state.json",
+    "console_sha256": "fee5ac893a590c7c57365c6b9fe72b398631400321aa381080102f4529741468",
+    "durable_log_sha256": "fd842b5a61c072ce6cf013f4cccf1e3a8a91a5e8cffbc90f096ef3d64673d466",
+    "trace_fully_closed": false,
+    "etl_sha256": "3a3efc784f57363fe61e7629abf2d5dcd4034b89d97910bc25719f881b7187c6",
+    "trace_buffers": 12,
+    "events_lost": null,
+    "buffers_lost": null,
+    "etw_process_image_provider": "Microsoft-Windows-Kernel-Process",
+    "trace_scope": "Positive observations from surviving ETW buffers. Counts are lower bounds and absence cannot exclude a later operation.",
+    "graphics_image_paths": {
+      "fteqw.exe": [
+        "\\Device\\HarddiskVolume1\\Users\\ruje\\s5-sysdx9-repeat-ce115c89\\app\\fteqw.exe"
+      ],
+      "dxgi.dll": [
+        "\\Device\\HarddiskVolume1\\Windows\\SysWOW64\\dxgi.dll"
+      ],
+      "libvulkan_nouveau.dll": [
+        "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\libvulkan_nouveau.dll"
+      ],
+      "d3d9.dll": [
+        "\\Device\\HarddiskVolume1\\Windows\\SyChpe32\\d3d9.dll"
+      ],
+      "tegragpud3d9.dll": [
+        "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\TegraGpuD3D9.dll"
+      ]
+    },
+    "map_before_sha256": null,
+    "map_after_sha256": null
+  },
+  "existing_dxvk_control": {
+    "test": "Existing x86 game-local DXVK on the selected ARM64 KMD",
+    "gpu_problem_code": 0,
+    "dwm_pid": 1368,
+    "desktop_umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "existing_file_sha256": {
+      "fteqw.exe": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+      "d3d9.dll": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+      "vulkan-1.dll": "0cb8619a4a4ba0acceba1f75a2dc0c8e251ab75d4a3c3e9640262c4c650c18af",
+      "dxvk.conf": "90b987ec61e550005389032227ad79933fd29f5bd32ce61e935f8d41b301b91b"
+    },
+    "existing_x86_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+    "pid": 2548,
+    "registered_experimental_x86_umd": false,
+    "driver_management_commands_issued_for_this_launch": false,
+    "signed_system_files_replaced": false,
+    "loader_settings_sha256": "e273b17805e5df8e8f0709d9cf3e4bb70a624e2c644cb40899cc7baf60b332d6",
+    "game_reported": [
+      "info:  DXVK: v3.1.1",
+      "info:  Found device: NVIDIA Tegra X1 (GM20B) (NVK GM20B) (NVK 26.2.4)"
+    ],
+    "window": "FTED3D9QUAKE LibreQuake: disconnected",
+    "durable_stages": [
+      "prepared",
+      "entered",
+      "ready",
+      "trace-started",
+      "before-fte",
+      "fte-started",
+      "window"
+    ],
+    "game_modules": {
+      "d3d9.dll": [
+        "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\DxvkGames-01a1ec52\\x86\\app\\d3d9.dll"
+      ],
+      "vulkan-1.dll": [
+        "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\DxvkGames-01a1ec52\\x86\\app\\vulkan-1.dll"
+      ],
+      "libvulkan_nouveau.dll": [
+        "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-cache-path-33197ea452\\x86\\libvulkan_nouveau.dll"
+      ]
+    },
+    "etl_sha256": "81f7e2f474c249ec0185f195055bcc73324d25eaa19b3c5d29c820f1e4503e4b",
+    "surviving_trace_buffers": 16,
+    "whole_trace_closed": false,
+    "observed_target_image_loads_lower_bound": 75,
+    "game_log_sha256": "3eb0eb861884e61cd08fc59918c18e50de4ae1dcdcd10049c84e1e41de24e4fe",
+    "map_input_and_normal_exit_qualified": false,
+    "boot_before": "2026-11-18T22:52:04.0525820Z",
+    "boot_after": "2026-11-18T22:58:14.4912640Z",
+    "new_system_events": [
+      {
+        "record": 68660,
+        "utc": "2026-11-18T22:59:08.2185168Z",
+        "id": 6008
+      },
+      {
+        "record": 68662,
+        "utc": "2026-11-18T22:59:08.2218119Z",
+        "id": 6005
+      },
+      {
+        "record": 68669,
+        "BugcheckCode": "0",
+        "id": 41,
+        "LongPowerButtonPressDetected": "false",
+        "utc": "2026-11-18T22:55:02.7284555Z",
+        "PowerButtonTimestamp": "0",
+        "SleepInProgress": "0"
+      }
+    ],
+    "restart_cause": "undetermined"
+  },
+  "no_second_planned_restart": true,
+  "register_cleanup": {
+    "wow_value_removed_at": "2026-11-18T22:54:15.7903826Z",
+    "cached_before_next_boot": true,
+    "effective_restoration_followed_existing_unplanned_restart": true
+  },
+  "restoration": {
+    "date_utc": "2026-11-18T23:05:16.3210513Z",
+    "final_boot": "2026-11-18T22:58:14.4929040Z",
+    "tegra_problem_code": 0,
+    "desktop_pid": 1392,
+    "power_mode": 1,
+    "external_power": true,
+    "x86_dx9_slot_after_restore": "slot\t0\tc000000d\t",
+    "arm64_kernel_driver_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "system_x86_runtime_sha256": "0dc6b0fe142ef60ad01a655c08b34f076a5c16f7776c68141683626f649550db",
+    "disk_x86_game_machine": "0x14c",
+    "temporary_files_removed": 37,
+    "temporary_tasks_removed": 3,
+    "test_directories_removed": true
+  },
+  "runtime_documentation": [
+    "https://learn.microsoft.com/en-us/windows/arm/apps-on-arm-x86-emulation",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/microsoft-windows-vista-display-driver-64-bit-issues"
+  ],
+  "conclusion": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit."
+}

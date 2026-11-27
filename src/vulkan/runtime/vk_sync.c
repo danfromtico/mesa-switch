@@ -553,9 +553,13 @@ vk_sync_set_win32_export_params(struct vk_device *device,
                                 uint32_t access,
                                 const wchar_t *name)
 {
-   assert(sync->flags & VK_SYNC_IS_SHARED);
+   /* Called during semaphore creation, before the first handle export. */
+   assert(sync->flags & VK_SYNC_IS_SHAREABLE);
 
-   return sync->type->set_win32_export_params(device, sync, security_attributes, access, name);
+   VkResult result = sync->type->set_win32_export_params(device, sync, security_attributes, access, name);
+   if (result == VK_SUCCESS)
+      sync->flags |= VK_SYNC_IS_SHARED;
+   return result;
 }
 
 /**

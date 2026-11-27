@@ -1,0 +1,368 @@
+{
+  "schema": 1,
+  "decision": "accept_static_corrections_and_readonly_observations_with_limits",
+  "main_device_operations": 0,
+  "reviewed_utc": "2026-11-23T17:39:33.443730+00:00",
+  "execution_thread": "01a2094a-b8e6-74a0-83be-8c535979363c",
+  "source_delivery": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/continuation-01a2094a/static-batch-delivery-r3/delivery.json",
+    "sha256": "608844a4c5290c23d7ce148c82f515fd42457a00d30eafc548b0e268dae2d800"
+  },
+  "source_scope": "F2/F5/F6 corrective static increment and separate read-only native module/CI observations. This is not a full native dispatch, reset or recovery qualification.",
+  "independent_input_binding": {
+    "declared_files": 9,
+    "review_manifest_files": 35,
+    "PE_PDB": {
+      "dxgkrnl.sys": {
+        "image_sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "image_bytes": 4590976,
+        "PDB_sha256": "7f0a811d1c74569f9dbe428cc2d73355beb4e0864b7b77c81e1bbf3540fa74e9",
+        "PDB_bytes": 3592192,
+        "RSDS": {
+          "guid": "797f457a-6488-c67c-8e55-b0f3e771dc32",
+          "age": 1
+        },
+        "PDB": {
+          "guid": "797f457a-6488-c67c-8e55-b0f3e771dc32",
+          "info_age": 2,
+          "DBI_age": 1
+        },
+        "mapped_public_records_verified": 14434,
+        "public_records_total": 14440,
+        "unmapped_public_records": 6
+      },
+      "dxgmms1.sys": {
+        "image_sha256": "311e6a99eaab763ce685784c757c80725e1b74366e0e47c92d76a7284167d62e",
+        "image_bytes": 439776,
+        "PDB_sha256": "ea5defdadfde732a3c0db0e1ce8fec76cfa6b6cd3c27a8bff1df60cc5d1dfd60",
+        "PDB_bytes": 348160,
+        "RSDS": {
+          "guid": "da16ecaa-0789-c711-fc9e-5bce11cb6bcd",
+          "age": 1
+        },
+        "PDB": {
+          "guid": "da16ecaa-0789-c711-fc9e-5bce11cb6bcd",
+          "info_age": 2,
+          "DBI_age": 1
+        },
+        "mapped_public_records_verified": 1999,
+        "public_records_total": 2006,
+        "unmapped_public_records": 7
+      },
+      "dxgmms2.sys": {
+        "image_sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5",
+        "image_bytes": 1042408,
+        "PDB_sha256": "54ed9eab4bff5bdcec9c5571ab05fe415052a106ad39ad9f713e939f87b65f3a",
+        "PDB_bytes": 888832,
+        "RSDS": {
+          "guid": "af63a8a4-9d01-fa37-1a26-6959e133eb0b",
+          "age": 1
+        },
+        "PDB": {
+          "guid": "af63a8a4-9d01-fa37-1a26-6959e133eb0b",
+          "info_age": 2,
+          "DBI_age": 1
+        },
+        "mapped_public_records_verified": 3711,
+        "public_records_total": 3718,
+        "unmapped_public_records": 7
+      }
+    },
+    "contract_intervals": 65,
+    "word_entries": 12845,
+    "parent_asm_files": 10,
+    "parent_word_entries": 1115,
+    "candidate_sources_matching_84102": 9,
+    "limits": "Counts are byte-matched entries, may overlap and may include literals/data; not counts of valid reachable instructions or native GPU packets. PDB GUID/age/public-record identity is not a Windows DIA or runtime stack validation."
+  },
+  "static_corrections": {
+    "F2": {
+      "accepted": "For Type3, the two previously missing cold branches return directly to the main path; no extra rejection is present in these two fragments.",
+      "first_predispatch": {
+        "entry_RVA": "0x2388f8",
+        "signed_value": -359,
+        "base_RVA": "0x235b18",
+        "shift": 2,
+        "target_RVA": "0x23557c",
+        "direct_branch_target_RVA": "0x103774"
+      },
+      "internal_gate_enabled_veneer": {
+        "RVA": "0x238d78",
+        "target_RVA": "0x103668"
+      },
+      "limit": "Other request gates and downstream runtime predicates are not waived."
+    },
+    "F5": {
+      "accepted": "The inspected initialization chain derives the byte later mapped to DXGADAPTER+0x1b4 bit13 from a case-insensitive match of the exact driver name \\Driver\\VGPU. The inspected legacy waiter includes event+0x628 and remaps its ordinal only when that bit is set.",
+      "dataflow": [
+        "literal UTF16 name -> stack buffer -> UNICODE_STRING at sp+0xe0",
+        "RtlCompareUnicodeString via IAT RVA0xd4670, ignore-case=1; zero result sets sp+0x2d",
+        "sp+0x2d -> device extension+0xa86 -> output+0x9c bit13",
+        "DpiGetAdapterInfo output=adapter+0x118, yielding adapter+0x1b4",
+        "legacy wait inclusion and ordinal remapping both test bit13"
+      ],
+      "withdrawal": "The legacy branch is not evidence that an ordinary physical adapter is covered by both schedulers. Direct target-associated scheduler2 execution evidence remains needed.",
+      "limits": [
+        "This is the inspected initialization/wait chain, not proof of every possible field writer or every legacy recovery path.",
+        "The STR-W offset search and nearest public labels do not establish all writers or object types."
+      ]
+    },
+    "F6": {
+      "accepted": "The ARM64 client checks SystemCodeIntegrityInformation with the 8-byte ABI, NT_SUCCESS, returned length8, information.Length8 and TESTSIGN bit0x2 before its sole recovery escape call. TdrTestMode1 remains a separate precondition.",
+      "client_sha256": "fc088a3af37a049eb7333d4ba3e2171f90d5b7c231e749c59f6bbd94e6c22606",
+      "source_sha256": "abf537e8b3c2d401c584c8932c4b41e8436c5343dc8b028a98c41087dfea0930",
+      "ARM64_PE_bytes": 67584,
+      "build_exit": 0,
+      "packet_bytes": 48,
+      "source_escape_calls": 1,
+      "program_executions": 0,
+      "deployed": false,
+      "limits": [
+        "Local compilation does not prove the client ran on Windows.",
+        "The separate native CI observation does not directly read g_OSTestSigningEnabled or prove InternalEscapeEnabled accepted a request.",
+        "Existing OS checks and configuration are not changed by the client; no alternate policy path is used."
+      ]
+    }
+  },
+  "native_readonly_observation": {
+    "boot": 99039,
+    "utc": "2026-11-23T17:00:17.7782597Z",
+    "transport_exit": 0,
+    "module_api": "K32EnumDeviceDrivers",
+    "returned_bytes": 1272,
+    "pointer_bytes": 8,
+    "module_count": 159,
+    "nonempty_names": 159,
+    "null_image_bases": 0,
+    "enumerated_scheduler_images": [
+      "dxgmms2.sys"
+    ],
+    "dxgmms1_enumerated": false,
+    "target_loaded_backing_files": [
+      {
+        "image_base": "fffff80980200000",
+        "name": "dxgkrnl.sys",
+        "file_path": "C:\\Windows\\System32\\drivers\\dxgkrnl.sys",
+        "native_path": "\\SystemRoot\\System32\\drivers\\dxgkrnl.sys",
+        "file_sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6"
+      },
+      {
+        "image_base": "fffff80189f30000",
+        "name": "tegragpurender.sys",
+        "file_path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "native_path": "\\SystemRoot\\System32\\drivers\\tegragpurender.sys",
+        "file_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173"
+      },
+      {
+        "image_base": "fffff80189ab0000",
+        "name": "dxgmms2.sys",
+        "file_path": "C:\\Windows\\System32\\drivers\\dxgmms2.sys",
+        "native_path": "\\SystemRoot\\System32\\drivers\\dxgmms2.sys",
+        "file_sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5"
+      }
+    ],
+    "code_integrity": {
+      "status": 0,
+      "test_sign": true,
+      "options": 524803,
+      "returned_bytes": 8,
+      "length": 8
+    },
+    "TdrTestMode": null,
+    "interpretation": "Global loaded-module availability and backing-file identities; not a direct per-adapter scheduler pointer/table or callback observation. CI status0/length8/returned8 with TESTSIGN set is an observed public query result, not recovery execution.",
+    "new_recovery_requests": 0,
+    "driver_installs": 0,
+    "grant_changes": 0,
+    "registry_mutations": 0
+  },
+  "additional_module_names": {
+    "boot": 99039,
+    "names": [
+      "dump_dumpsdport.sys",
+      "dump_nvtsdhc.sys"
+    ],
+    "meaning": "These names occur in the same successful global module inventory.",
+    "not_proved": [
+      "dump-driver callback execution or successful initialization",
+      "new physical dump writes",
+      "classic NT bugcheck arrival or failure stage at97176",
+      "historical first-Present cause"
+    ]
+  },
+  "formal_snapshot": {
+    "before_utc": "2026-11-23T17:00:09.1477915Z",
+    "after_utc": "2026-11-23T17:00:13.6502830Z",
+    "boot": 99039,
+    "code": 0,
+    "ac": "Online",
+    "selected_equals_permanent": true,
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981",
+    "source_commit": "df08e8583abc202732036597f5cb7f0519ba11a5",
+    "policy_revision": "605644880f1a4c183121cfb645a6a9e775aa2dac2e5fcb707ed9ddfe4eb300eb",
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "4f2829a2a8723b7db226402eb0937e2e984705b8444966b711a273a5e2e118e2",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334"
+    },
+    "loaded": {
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+    },
+    "loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\present1-reserved1-0790651c6981\\app\\tg_nvk_arm64.dll"
+    },
+    "dwm_pid": 748,
+    "dwm_start": "2026-11-23T14:25:18.5741282Z",
+    "trial": false,
+    "one_use_permit": false,
+    "selected_System_events": [
+      {
+        "record": 99039,
+        "id": 12
+      }
+    ],
+    "related_activity_before_after": 0,
+    "limits": [
+      "Historical snapshot at the stated observation times, not an assertion about later execution state.",
+      "No new private-x86 or complete handheld/DFLL readback is claimed.",
+      "The installed policy revision still contains its earlier ledger; repository evidence updates do not reinstall policy."
+    ]
+  },
+  "first_read_failure": {
+    "status": "retained_unknown_no_JSON",
+    "cause": "Optional TdrTestMode property was absent; the first script terminated before emitting its observation JSON.",
+    "later_read": "A separately recorded read handled the optional property; its positive result does not retroactively complete the first read.",
+    "ordinary_local_writeback_error": "An incorrect local lease path interrupted disposition bookkeeping; same-action completion and original error retained, no extra native recovery call."
+  },
+  "lease_handoff": {
+    "receipt": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/c4-adapter-target-contract-r1/lease-successor-01a2094a/lease-acceptance.json",
+    "sha256": "e4de765a0fdd3bd7637332e694e3c8c4744000864bb704ca4e3491930e4454fc",
+    "from": "01a208f8-353e-7880-9289-4b398537283b",
+    "to": "01a2094a-b8e6-74a0-83be-8c535979363c",
+    "native_readback_sha256": "ae25ea67500a4929d93f3218adda9f0c786dfb5f69d4c0a8d99c83460f217520",
+    "both_lock_receipt_and_known_job_drain": true,
+    "main_lock_or_device_operations": 0
+  },
+  "review_provenance": {
+    "native_session": "7f56e815-db18-45e1-aae9-e891c6f19f8e",
+    "actual_model": "gemini-4-neon-high",
+    "status": "SUCCESS",
+    "process_exit": 0,
+    "read_file_calls": 28,
+    "other_tool_calls": 0,
+    "native_final_matches_parsed_report": true,
+    "classification": "static_contract_supported_with_limits",
+    "limits": "Reviewer output supports this limited static increment; it is not hardware qualification or an additional human approval requirement."
+  },
+  "local_audits": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-static-target-r3-01a2094a-20261123/independent-input-check.json",
+      "sha256": "02942b9f67e5b7f9e0793ca6be05a5aa20053be663c009d40d16ec30d107a7f1"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-static-target-r3-01a2094a-20261123/operation-binding-and-deferred-check.json",
+      "sha256": "18c13c69163da6f1ee00f8a332f7f66fab08148fe6b49327c44149bc41d13bd4"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-static-target-r3-01a2094a-20261123/audit_inputs.py",
+      "sha256": "3c0ae8b9651f31583e8da8fde3dcd237ee1b6be4df7fea0e56813273e733e342"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-static-target-r3-01a2094a-20261123/F5-selected-read.json",
+      "sha256": "3c09ea92228fa696937d25151c4ef20299876ad771cbc5e4177d787989c75e29"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-static-target-r3-01a2094a-20261123/manual-adjudication.json",
+      "sha256": "ac18a827e074fee02fb90e57910118ecb6f43e8e83a1ed6ef57f2dd4c862c4e6"
+    }
+  ],
+  "deferred470e1dbc": [
+    {
+      "contract_id": "dxgkrnl.h:231:1",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+        "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943"
+      },
+      "missing_observation": "仍缺能把这个合法全局共享表项直接指向父对象、并确认派生实例关系的 Windows 具名字段。",
+      "revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。",
+      "this_batch_new_direct_evidence": false
+    },
+    {
+      "contract_id": "dxgkrnl.h:684:4",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+        "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc"
+      },
+      "missing_observation": "仍缺 Windows 对本次已共享对象固定成员集合的明确事件或正常可见的等价约束结果。",
+      "revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。",
+      "this_batch_new_direct_evidence": false
+    },
+    {
+      "contract_id": "dxgkrnl.h:759:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+        "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d"
+      },
+      "missing_observation": "缺同一真实可缓存映射与 Windows 运行时分配 Cached=1 的明确配对。写合并映射只覆盖当前合法分配。",
+      "revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。",
+      "this_batch_new_direct_evidence": false
+    },
+    {
+      "contract_id": "dxgvmbus.c:3651:2",
+      "status": "未知",
+      "retained_result": {
+        "path": "wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+        "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409"
+      },
+      "missing_observation": "尚缺该 API 在合法适用条件下自然异步返回 0x103，并输出同队列的有效分页围栏。",
+      "revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。",
+      "this_batch_new_direct_evidence": false
+    }
+  ],
+  "workspace_preservation": {
+    "preexisting_files": 42,
+    "snapshot": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-static-target-r3-01a2094a-20261123/main-workspace-before-publication.json",
+    "candidate_and_main_existing_edits_retained": true
+  },
+  "native_sequence": [
+    "c4",
+    "dump repair",
+    "WDDM2.6"
+  ],
+  "C4_qualified": false,
+  "baseline_promoted": false,
+  "faults_closed": 0,
+  "goal_complete": false,
+  "remaining": [
+    "Direct target-associated scheduler callback evidence in the candidate boot, with actual downstream predicates.",
+    "Complete target Reset/Restart and system paging lifetime/root/generation, same packet KMD entry/return, effective fence and Windows retirement.",
+    "Classic NT bugcheck/dump failure stages and historical91476/DWM152586,95090 and original SEQUENTIAL first-Present cause remain separate unknowns."
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/psapi/nf-psapi-enumdevicedrivers",
+    "https://learn.microsoft.com/en-us/windows/win32/api/psapi/nf-psapi-getdevicedriverbasenamew",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation"
+  ],
+  "evidence_snapshot": {
+    "directory": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-static-target-r3-01a2094a-20261123",
+    "manifest": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/c4-static-target-r3-01a2094a-20261123/frozen-manifest.json",
+    "manifest_sha256": "090b720b36e10ac9acdb09501e8142e28209460dd16e8d84dba800de99755a0d",
+    "files": 355,
+    "bytes": 21152987
+  }
+}

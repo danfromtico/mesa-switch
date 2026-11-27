@@ -1,0 +1,154 @@
+{
+  "classified": {
+    "complete": true,
+    "first_record": 92585,
+    "last_record": 92765,
+    "boot": 92696,
+    "boot_records": [
+      92603,
+      92696
+    ],
+    "abnormal_events": [],
+    "other_anomalies": [],
+    "restarts": [
+      {
+        "explained": true,
+        "kind": "controlled",
+        "boot_record": 92603,
+        "previous_boot": 92516,
+        "system_records": [
+          92586,
+          92591,
+          92603
+        ],
+        "cause": "enter closed gate before selecting candidate"
+      },
+      {
+        "explained": true,
+        "kind": "controlled",
+        "boot_record": 92696,
+        "previous_boot": 92603,
+        "system_records": [
+          92679,
+          92682,
+          92696
+        ],
+        "cause": "one-time candidate boot"
+      }
+    ]
+  },
+  "raw": {
+    "complete": true,
+    "earliest_available": 43286,
+    "gpu_code": 0,
+    "first_record": 92585,
+    "last_record": 92765,
+    "events": [
+      {
+        "record": 92586,
+        "provider": "User32",
+        "utc": "2026-11-21T19:23:02.9654455Z",
+        "id": 1074,
+        "detail": {
+          "param5": "重启",
+          "param3": "没有找到这个原因的标题",
+          "param6": "SwitchWOA graphics receipt enter closed gate before selecting candidate",
+          "param1": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+          "param4": "0x81000000",
+          "param7": "DESKTOP-5RCUK3G\\ruje",
+          "param2": "DESKTOP-5RCUK3G"
+        }
+      },
+      {
+        "record": 92591,
+        "provider": "EventLog",
+        "utc": "2026-11-21T19:23:17.1997820Z",
+        "id": 6006,
+        "detail": {}
+      },
+      {
+        "record": 92594,
+        "provider": "EventLog",
+        "utc": "2026-11-21T19:24:25.6365470Z",
+        "id": 6005,
+        "detail": {}
+      },
+      {
+        "record": 92602,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T19:23:23.3308755Z",
+        "id": 13,
+        "detail": {}
+      },
+      {
+        "record": 92603,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T19:23:27.1660457Z",
+        "id": 12,
+        "detail": {}
+      },
+      {
+        "record": 92679,
+        "provider": "User32",
+        "utc": "2026-11-21T19:26:12.1981906Z",
+        "id": 1074,
+        "detail": {
+          "param5": "重启",
+          "param3": "没有找到这个原因的标题",
+          "param6": "SwitchWOA graphics receipt one-time candidate boot",
+          "param1": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+          "param4": "0x81000000",
+          "param7": "DESKTOP-5RCUK3G\\ruje",
+          "param2": "DESKTOP-5RCUK3G"
+        }
+      },
+      {
+        "record": 92682,
+        "provider": "EventLog",
+        "utc": "2026-11-21T19:26:26.2729281Z",
+        "id": 6006,
+        "detail": {}
+      },
+      {
+        "record": 92690,
+        "provider": "EventLog",
+        "utc": "2026-11-21T19:27:29.5234734Z",
+        "id": 6005,
+        "detail": {}
+      },
+      {
+        "record": 92695,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T19:26:33.3386716Z",
+        "id": 13,
+        "detail": {}
+      },
+      {
+        "record": 92696,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-21T19:26:37.1699789Z",
+        "id": 12,
+        "detail": {}
+      }
+    ],
+    "checked": "2026-11-21T19:29:40.8915553Z",
+    "boot": 92696
+  },
+  "intents": [
+    {
+      "boot": 92516,
+      "phase": "ClosedForTrial",
+      "reason": "enter closed gate before selecting candidate",
+      "utc": "2026-11-21T19:23:02.7302037Z",
+      "queued": true
+    },
+    {
+      "boot": 92603,
+      "phase": "CandidateArmed",
+      "reason": "one-time candidate boot",
+      "utc": "2026-11-21T19:26:12.0106866Z",
+      "queued": true
+    }
+  ],
+  "source": "e1b2208760dd88c2e11c86eceb60272cb3f16433"
+}

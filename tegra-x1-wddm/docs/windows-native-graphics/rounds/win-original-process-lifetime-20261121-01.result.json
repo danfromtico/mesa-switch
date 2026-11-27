@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "round_id": "win-original-process-lifetime-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "plan_sha256": "3139013227bec159b40ee5dbc86f89d1c368545f267a009ee74773d497772372",
+  "status": "故障开放",
+  "finding": "原三次启动的绘图 PID、正常查询 PID 和采集 PID 已与各自 ZIP 对齐。Switch 的 Security 环形日志最早留存记录 327248 的墙钟为 11 月 20 日 21:54 UTC，三个原次窗口均未查到 4688/4689 或 4608。Sysmon 通道未找到，内核进程分析通道在取证时关闭。系统事件归档目录及 246 份历史 ZIP 均未找到这些通道的归档。",
+  "missing_observation": "仍缺原绘图进程在首次 CALL 之后、复位之前的 Windows 进程退出回执或等效同启动记录。正常查询进程在应用归档中有退出记录，在原次 Security 范围内也缺对应审计条目。",
+  "device_executions": 0,
+  "evidence": {
+    "actual_switch_readback": {
+      "current_process_audit_policy": [
+        {
+          "output": [
+            "Machine Name,Policy Target,Subcategory,Subcategory GUID,Inclusion Setting,Exclusion Setting",
+            "",
+            "DESKTOP-5RCUK3G,System,,{0CCE922B-69AE-11D9-BED3-505054503030},No Auditing,",
+            ""
+          ],
+          "subcategory": "{0CCE922B-69AE-11D9-BED3-505054503030}",
+          "exit": 0
+        },
+        {
+          "output": [
+            "Machine Name,Policy Target,Subcategory,Subcategory GUID,Inclusion Setting,Exclusion Setting",
+            "",
+            "DESKTOP-5RCUK3G,System,,{0CCE922C-69AE-11D9-BED3-505054503030},No Auditing,",
+            ""
+          ],
+          "subcategory": "{0CCE922C-69AE-11D9-BED3-505054503030}",
+          "exit": 0
+        }
+      ],
+      "cases": [
+        {
+          "boot": 82058,
+          "channel": "Security",
+          "utc_from": "2026-11-20T12:10:17.899379+00:00",
+          "utc_to": "2026-11-20T12:22:04.428299+00:00",
+          "matching": [],
+          "startup": [],
+          "seen_by_id": {},
+          "query_result": "NoMatchingEventsFound,Microsoft.PowerShell.Commands.GetWinEventCommand"
+        },
+        {
+          "boot": 82221,
+          "channel": "Security",
+          "utc_from": "2026-11-20T12:27:57.583022+00:00",
+          "utc_to": "2026-11-20T12:30:32.501086+00:00",
+          "matching": [],
+          "startup": [],
+          "seen_by_id": {},
+          "query_result": "NoMatchingEventsFound,Microsoft.PowerShell.Commands.GetWinEventCommand"
+        },
+        {
+          "boot": 82382,
+          "channel": "Security",
+          "utc_from": "2026-11-20T12:34:44.132477+00:00",
+          "utc_to": "2026-11-20T12:37:41.089777+00:00",
+          "matching": [],
+          "startup": [],
+          "seen_by_id": {},
+          "query_result": "NoMatchingEventsFound,Microsoft.PowerShell.Commands.GetWinEventCommand"
+        }
+      ],
+      "collection_boot": 91476,
+      "channels": [
+        {
+          "name": "Security",
+          "enabled": true,
+          "count": 28092,
+          "mode": "Circular",
+          "oldest_record": 327248,
+          "first_utc": "2026-11-20T21:54:14.2253708Z",
+          "last_utc": "2026-11-21T14:36:20.5793038Z",
+          "first_record": 327248,
+          "last_record": 355339
+        },
+        {
+          "error": "NoMatchingLogsFound,Microsoft.PowerShell.Commands.GetWinEventCommand",
+          "name": "Microsoft-Windows-Sysmon/Operational"
+        },
+        {
+          "name": "Microsoft-Windows-Kernel-Process/Analytic",
+          "enabled": false,
+          "count": null,
+          "mode": "Retain",
+          "oldest_record": null
+        }
+      ],
+      "power": "Online",
+      "utc": "2026-11-21T14:36:26.4535923Z"
+    },
+    "automatic_archive_readback": {
+      "files": [],
+      "utc": "2026-11-21T14:36:39.0416791Z",
+      "boot": 91476,
+      "directory": "C:\\Windows\\System32\\Winevt\\Logs"
+    },
+    "local_archives": {
+      "named_members": [],
+      "direct_matches": [],
+      "verified_zip_directories": 246,
+      "retained_entry_count": 4122,
+      "missing": [],
+      "changed": [],
+      "directory_list_sha256": "f3c03aa8d7749ee6b9ad8083ffe07b9d07fdab53775f8f9989d6e08679598a68",
+      "roots": [
+        "mesa-switch-woa-tgd3d-vulkan-out",
+        "switch-gm20b-fullscreen-work",
+        "review-handoffs",
+        "switch-lite-woa"
+      ]
+    },
+    "raw_sha256": {
+      "historical-process-lifetimes.json": "44e066597ce5d2e6096e5afc8b5b0a1b066d467d8d60df9e47fe9cf24d8b5c41",
+      "historical-process-audit-archives.json": "48591386f42a6cf4ca0b6994ce737380ce77d7c8ebfb8caddc198609243ff79f",
+      "lifecycle-local-archives.json": "826fbc01dabc3577dcd097883717719ba8a0751e415a74b61f0bc100a7ba4b7a",
+      "historical-lifecycle.ps1": "144edf1662173f38085786450decaf17ec1d0151320facba0091915000396501",
+      "lifecycle_archives.py": "002e225363136dca0d4c451eb8bb0f200df0f1309f2ff87cf0e40abac1cf9a69",
+      "local_lifecycle_inventory.py": "5783255be8b469e767716d4f204fd6588d110e161e7ed011c99ea8fd70525a65"
+    },
+    "input_process_identities": {
+      "82058": {
+        "boot": 82058,
+        "recovery_boot": 82128,
+        "package_case": "Ddi20Case-261120-122121366257",
+        "registered_draw_image": "step4-present.exe",
+        "draw_pid": 1812,
+        "normal_query_pid": 4020,
+        "collector_pid": 5960,
+        "other_gpu_queue_pid": 5480,
+        "original_call_utc_sample": "2026-11-20T12:21:39.794670Z",
+        "raw_process_qpc_sha256": "4a49f1241b63f4a9d9675f9dc70a14fbf4479d6f60b03601fc33bd2d5d192d09",
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878"
+      },
+      "82221": {
+        "boot": 82221,
+        "recovery_boot": 82289,
+        "package_case": "Ddi20Case-261120-122937785753",
+        "registered_draw_image": "step4-present.exe",
+        "draw_pid": 4672,
+        "normal_query_pid": 484,
+        "collector_pid": 3160,
+        "other_gpu_queue_pid": 5604,
+        "original_call_utc_sample": "2026-11-20T12:30:01.225776Z",
+        "raw_process_qpc_sha256": "f45697011c2de64c565170566cb1ff36c5337af2e06832302516f90db0926913",
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8"
+      },
+      "82382": {
+        "boot": 82382,
+        "recovery_boot": 82448,
+        "package_case": "Ddi20Case-261120-123625091734",
+        "registered_draw_image": "step4-present.exe",
+        "draw_pid": 5828,
+        "normal_query_pid": 2692,
+        "collector_pid": 2128,
+        "other_gpu_queue_pid": 5624,
+        "original_call_utc_sample": "2026-11-20T12:36:48.259890Z",
+        "raw_process_qpc_sha256": "0364855daddc6d4eb854a8b08e4f9affc1ce4348fc72e975a83a045f099b6f85",
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65"
+      }
+    },
+    "collection_mode": "两次 Windows 只读查询。当前审计策略仅对应取证时间，跨启动按各自记录归属。",
+    "boundaries": {
+      "last_entry": "各原进程 draw_start 的 PID 与首次 Present CALL 均可核对。",
+      "last_return": "三个同轮正常查询进程的 query_exit 已入归档。原绘图进程的 CALL 前设备状态查询返回 S_OK。",
+      "first_anomaly_or_missing": "仍缺原绘图进程在首次 CALL 之后、复位之前的 Windows 进程退出回执或等效同启动记录。正常查询进程在应用归档中有退出记录，在原次 Security 范围内也缺对应审计条目。"
+    }
+  }
+}

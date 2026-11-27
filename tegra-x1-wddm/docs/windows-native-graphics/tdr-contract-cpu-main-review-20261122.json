@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "scope": "Independent review of the TDR contract candidate, bounded resident debug cache, trace tooling and one Windows ARM64 CPU fixture.",
+  "verdict": "candidate_source_build_and_CPU_evidence_accepted;live_OS_TDR_GPU_and_dump_acceptance_pending",
+  "source": {
+    "commit": "cd9b18eecbdbae82d3f831f8422e7b2dba3e2498",
+    "branch": "tdr-contracts-01a204e6",
+    "base": "39998019a0341e2c95e7ef62ba7023f7aa288afc",
+    "selected_KMD_producer": "b88d7dcc3b6f2b2fe48a8b9d7c0a0f2e41a0453e",
+    "changed_files": 15,
+    "all_changed_source_bytes_match_commit": true,
+    "implementation_published": false
+  },
+  "archive": {
+    "sha256": "d3a43b4c56aa26e46dfe4ed076a23578fae72f43993ed07567fbcc16acc623a9",
+    "bytes": 1870108,
+    "members": 330,
+    "original_members": 329,
+    "all_member_sha256_lengths_crc_and_extracted_bytes_verified": true
+  },
+  "contract_review": [
+    {
+      "area": "Engine progress and reset admission",
+      "implementation": "A healthy empty queue responds. With pending work, a changed completed scheduler fence since the sample reports progress. A new interval begins when work enters an idle queue. Queue pause/failure, recovery pending and resetting prevent a successful idle ResetEngine result. Pending work escalates with failure instead of inventing an aborted fence.",
+      "evidence": "TestResetAdmission exercises busy progress/no progress, rollover, paused/failed empty queues, output validity and unchanged memory-access counters.",
+      "reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_enginestatus",
+      "reset_reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_resetengine",
+      "limit": "This is completed-packet sampling, not proof of physical GPU health or real scheduler invocation."
+    },
+    {
+      "area": "Full adapter reset fence accounting",
+      "implementation": "The latest scheduler submission is recorded on normal and ordered malformed-submit returns before releasing the submit gate. Preemption identifiers are separate. The adapter-reset DDI updates completion only after successful backend isolation. Generic cleanup and failed isolation do not advance it.",
+      "evidence": "TestAdapterResetFences uses an already-isolated backend, drives successful21 then rejected22 through the production DDI, checks reset/query22, physical-submit23 bookkeeping, rollover and failure retention.",
+      "reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/tdr-changes-in-windows-8",
+      "rejected_submit_reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_submitcommandvirtual",
+      "limit": "The fixture substitutes hardware isolation; real same-reset scheduler IDs and QueryCurrentFence outputs remain required."
+    },
+    {
+      "area": "Resident TGDB evidence cache",
+      "implementation": "A bounded256-byte report uses independently coherent cached recovery/execution records, availability flags and an independently sampled completed fence. Collection does not acquire queue/engine locks, allocate, trace or access MMIO/private context objects. Cache publication is independent of ETW enablement. Owner initialization preserves used sequence generations across engine reinitialization.",
+      "evidence": "Production initial owners are zeroed nonpaged ExAllocatePool2 allocations in adapter.c and diagnostic_backend.c. Tests cover unaligned buffers, all capacities0..258, guards, held-model-lock/high-level collection and publication interruption. The same production helper counterfactual exits17 before the sequence fix and0 afterward.",
+      "reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_collectdbginfo",
+      "limit": "The counterfactual concerns the pre-release cache implementation, not the older signed KMD or historical restart. The two cached records are not an atomic pair or a live GPU snapshot. STATUS_SUCCESS does not prove OS dump inclusion."
+    },
+    {
+      "area": "Direct callback telemetry",
+      "implementation": "Event8/v1 records reset/restart entry and return. QueryEngineStatus, ResetEngine and QueryCurrentFence record output/return only after valid argument admission. ResetEngine output is marked available only on success. QueryCurrentFence emits only its actual output and avoids an engine-lock acquisition or inferred paired identity. Event7/v2 remains.",
+      "evidence": "The native CPU fixture checks the existing notification-lock reentry shape and Event8 flags with controlled callbacks.",
+      "reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-etwwrite",
+      "limit": "No real Event8 delivery, scheduler callback, capture loss or same-DMA success-path entry/return coverage has been established."
+    },
+    {
+      "area": "Offline trace exporter",
+      "implementation": "Offline --export-all preserves selected providers raw event bytes, requires a QPC-clock ETL and positive frequency, consistently labels raw counters qpc_stamp and emits loss/count/clock fields in stderr.",
+      "evidence": "Independent R3 clock findings resolved in R4; final ARM64 exporter build exits0.",
+      "limit": "Reader compilation is not real ETL validation. Offline output has no live TraceStart/TraceEnd; retain and evaluate its footer separately and do not fabricate a live-session start for decode_live."
+    }
+  ],
+  "independent_review": {
+    "model": "gemini-4-neon-high",
+    "conversation": "a48fd72a-67e3-4e89-b44b-2bdb7f7ce1f3",
+    "four_native_init_result_and_exit0_records_verified": true,
+    "frozen_rounds": [
+      {
+        "review": "r1",
+        "source_commit": null,
+        "files": 22,
+        "manifest_sha256": "79e8526b2131668bfc2efcc334782a49992530c70f4ce3f29d9ddb35a640f25f"
+      },
+      {
+        "review": "r2",
+        "source_commit": "0d24152106f26b8c70900594f7ed01e2569f6413",
+        "files": 22,
+        "manifest_sha256": "73fc787e0beca03e38285d0a08f9daf80d92a81c52d45e9897d8218097a71f5a"
+      },
+      {
+        "review": "r3",
+        "source_commit": "8f72b1609739355433fbb2610d20e283552b6ce7",
+        "files": 28,
+        "manifest_sha256": "a788f6ec0dbcde2664aa31fb4f50803b36d932e0c9fdb6021322ed56cab6346b"
+      },
+      {
+        "review": "r4",
+        "source_commit": "cd9b18eecbdbae82d3f831f8422e7b2dba3e2498",
+        "files": 32,
+        "manifest_sha256": "13c3c77b5cec99c3cba29569d40a083c0c056238e3186f9f3bc80d689a47c9b7"
+      }
+    ],
+    "latest_overall": "approve",
+    "remaining_nonblocking_notes": [
+      "Immediate exporter prototype and earlier ancestor have different hashes; preserve the two-step provenance.",
+      "Historical CPU controller creates its local output directory before locking and lacks an explicit review/manifest commit comparison; main independently verified the actual equal commit and exact files."
+    ],
+    "kernel_source_and_fixture_unchanged_from_R3_build_to_R4": true
+  },
+  "build": {
+    "kernel_exit": 0,
+    "reader_exit": 0,
+    "native_version": 158,
+    "gpu_khz": 460800,
+    "kernel": {
+      "bytes": 253440,
+      "sha256": "0d3f42c82fb40ea0971fd66ae8e1ceafb86442131f5cf907af9f71b309fd4f26",
+      "selected_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "matches_selected": false,
+      "machine": "0xaa64",
+      "certificate_table": [
+        0,
+        0
+      ]
+    },
+    "signed": false,
+    "deployed": false,
+    "runtime_firmware_caveat": {
+      "build_output_ACR": {
+        "bytes": 19200,
+        "sha256": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+        "selected_sha256": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "matches_selected": false
+      },
+      "future_package_must_preserve_selected_runtime_firmware_and_metadata": true,
+      "build_directory_is_not_a_release_package": true
+    }
+  },
+  "native_CPU_fixture": {
+    "source_commit": "cd9b18eecbdbae82d3f831f8422e7b2dba3e2498",
+    "fixture_sha256": "6ac9d48bcd7e0837afc8f51c6a6753f115aeec3854476e33a5a0c91b5892da23",
+    "fixture_bytes": 306176,
+    "machine": "ARM64",
+    "imports": [
+      "kernel32.dll"
+    ],
+    "program_starts": 1,
+    "pid": 2956,
+    "exit": 0,
+    "timed_out": false,
+    "boot_before": 97176,
+    "boot_after": 97176,
+    "dwm": 1400,
+    "members": [
+      {
+        "name": "consumed.json",
+        "bytes": 223,
+        "sha256": "6fe6cb1dac778911dab7f0ad8a01513ce89ce611b2e8b10539fe412cc231e402"
+      },
+      {
+        "name": "profile.json",
+        "bytes": 10272,
+        "sha256": "521db2005cc0878ca58628518d8c663a046db710a6c52a307f9051dba5c7604b"
+      },
+      {
+        "name": "result.json",
+        "bytes": 303,
+        "sha256": "8a280e3f1c2b22d83b4e43eb3b43fa59a7644a8014d643b2819a3cbc02180ee6"
+      },
+      {
+        "name": "started.json",
+        "bytes": 49,
+        "sha256": "f06562ad78b83c537d5c2b14a2e096d77534d7318f740dbedfac7de976f71a6f"
+      },
+      {
+        "name": "stderr.bin",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "stdout.bin",
+        "bytes": 228,
+        "sha256": "9e69be0f81d2aee08f8cae442296cf3b12b721b2bd1842c2b3c0f418ef31336f"
+      },
+      {
+        "name": "tdr-cpu-contract-check.exe",
+        "bytes": 306176,
+        "sha256": "6ac9d48bcd7e0837afc8f51c6a6753f115aeec3854476e33a5a0c91b5892da23"
+      }
+    ],
+    "transport_and_disk_identity": true,
+    "exact_embedded_program_matches": true,
+    "consumption_flush_before_start": true,
+    "transport_exits": [
+      0,
+      0
+    ],
+    "root_absent": true,
+    "removed_members": 7,
+    "components": 8,
+    "actual_loaded_hashes_and_paths": 5,
+    "formal_permanent_unchanged": true,
+    "cleanup_profile_utc": "2026-11-22T21:54:14.0646046Z",
+    "main_device_operations": 0,
+    "live_OS_TDR_qualified": false
+  },
+  "counterfactual": {
+    "original_exit": 17,
+    "fixed_exit": 0,
+    "fixed_header_sha256": "cd6de327cbc5d735a5b4e3d5406fbc754fc88b161cfb7ead4ae1533b88121341",
+    "same_production_helpers_used": true,
+    "scope": "deterministic host interruption model only"
+  },
+  "formal_closeout": {
+    "utc": "2026-11-22T21:54:14.0646046Z",
+    "boot": 97176,
+    "code": 0,
+    "ac": "Online",
+    "mode": 1,
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "actual_loads": {
+      "tegragpurender.sys": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    },
+    "actual_load_paths": {
+      "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f\\app\\tg_nvk_arm64.dll"
+    },
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\kmd-software-fence-ce54d025163f",
+    "trial": false,
+    "trial_token_exists": false,
+    "dwm": 1400,
+    "gpu_component_changes": 0
+  },
+  "remaining_required_evidence": [
+    "Signed intended KMD package with unchanged selected runtime firmware and complete member identities.",
+    "Real OS QueryEngineStatus/ResetEngine, adapter reset/restart and same-reset QueryCurrentFence receipts on the intended candidate.",
+    "Actual TGDB bytes in an OS-produced report/dump and durable cross-boot readback.",
+    "Corresponding GPU functional acceptance and formal recovery or reviewed promotion.",
+    "Historical legacy first Present,91476/DWM152586 and95090 causal boundaries remain separately unknown.",
+    "Four470e1dbc deferred contracts receive no new direct OS/GPU evidence from this CPU batch."
+  ],
+  "baseline_qualified": false,
+  "baseline_promoted": false,
+  "root_cause_found": false,
+  "open_faults_closed": 0,
+  "main_device_operations": 0
+}

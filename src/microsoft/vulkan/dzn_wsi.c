@@ -98,13 +98,15 @@ dzn_wsi_init(struct dzn_physical_device *physical_device)
                             dzn_wsi_proc_addr,
                             &physical_device->vk.instance->alloc,
                             -1, NULL,
-                            &(struct wsi_device_options){.sw_device = sw});
+                            &(struct wsi_device_options){
+                               .sw_device = sw,
+                               .win32_get_d3d12_command_queue =
+                                  dzn_wsi_get_d3d12_command_queue,
+                            });
 
    if (result != VK_SUCCESS)
       return result;
 
-   physical_device->wsi_device.win32.get_d3d12_command_queue =
-      dzn_wsi_get_d3d12_command_queue;
    physical_device->wsi_device.win32.requires_blits = dzn_wsi_needs_blits;
    physical_device->wsi_device.get_blit_queue = dzn_wsi_get_blit_queue;
    physical_device->wsi_device.win32.create_image_memory =

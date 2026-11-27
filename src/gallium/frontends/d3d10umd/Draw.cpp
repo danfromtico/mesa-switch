@@ -54,19 +54,27 @@ ClampedUAdd(unsigned a,
 
 /* stride is required in order to set the element data */
 static void
-update_velems(Device *pDevice)
+update_vertex_input(Device *pDevice)
 {
-   if (!pDevice->velems_changed)
+   if (!pDevice->velems_changed && !pDevice->vbuffers_changed)
       return;
 
-   if(pDevice->element_layout) {
-      struct cso_velems_state *state = &pDevice->element_layout->state;
-      for (unsigned i = 0; i < state->count; i++)
-         state->velems[i].src_stride = pDevice->vertex_strides[state->velems[i].vertex_buffer_index];
-      cso_set_vertex_elements(pDevice->cso, state);
-   }
+   struct cso_velems_state empty = {};
+   struct cso_velems_state *state = pDevice->element_layout ?
+                                   &pDevice->element_layout->state : &empty;
+   for (unsigned i = 0; i < state->count; i++)
+      state->velems[i].src_stride = pDevice->vertex_strides[state->velems[i].vertex_buffer_index];
+
+   bool uses_user_buffers = false;
+   for (unsigned i = 0; i < PIPE_MAX_ATTRIBS; i++)
+      uses_user_buffers |= pDevice->vertex_buffers[i].is_user_buffer;
+
+   /* Select u_vbuf when needed before any CPU pointer reaches the driver. */
+   cso_set_vertex_buffers_and_elements(pDevice->cso, state, PIPE_MAX_ATTRIBS,
+                                        uses_user_buffers, pDevice->vertex_buffers);
 
    pDevice->velems_changed = false;
+   pDevice->vbuffers_changed = false;
 }
 
 /*
@@ -102,12 +110,7 @@ ResolveState(Device *pDevice)
       }
       pipe->bind_gs_state(pipe, gs->handle);
    }
-   update_velems(pDevice);
-
-   if (pDevice->vbuffers_changed) {
-      cso_set_vertex_buffers(pDevice->cso, PIPE_MAX_ATTRIBS, pDevice->vertex_buffers);
-      pDevice->vbuffers_changed = false;
-   }
+   update_vertex_input(pDevice);
 }
 
 
@@ -157,7 +160,7 @@ Draw(D3D10DDI_HDEVICE hDevice,   // IN
    ResolveState(pDevice);
 
    assert(pDevice->primitive < MESA_PRIM_COUNT);
-   util_draw_arrays(pDevice->pipe,
+   cso_draw_arrays(pDevice->cso,
                     pDevice->primitive,
                     StartVertexLocation,
                     VertexCount);
@@ -212,7 +215,7 @@ DrawIndexed(D3D10DDI_HDEVICE hDevice,  // IN
    info.primitive_restart = true;
    info.restart_index = restart_index;
 
-   pDevice->pipe->draw_vbo(pDevice->pipe, &info, 0, NULL, &draw, 1);
+   cso_draw_vbo(pDevice->cso, &info, 0, NULL, &draw, 1);
 
    if (null_ib) {
       pipe_resource_reference(&null_ib, NULL);
@@ -249,7 +252,7 @@ DrawInstanced(D3D10DDI_HDEVICE hDevice,      // IN
    ResolveState(pDevice);
 
    assert(pDevice->primitive < MESA_PRIM_COUNT);
-   util_draw_arrays_instanced(pDevice->pipe,
+   cso_draw_arrays_instanced(pDevice->cso,
                               pDevice->primitive,
                               StartVertexLocation,
                               VertexCountPerInstance,
@@ -315,7 +318,7 @@ DrawIndexedInstanced(D3D10DDI_HDEVICE hDevice,   // IN
    info.primitive_restart = true;
    info.restart_index = restart_index;
 
-   pDevice->pipe->draw_vbo(pDevice->pipe, &info, 0, NULL, &draw, 1);
+   cso_draw_vbo(pDevice->cso, &info, 0, NULL, &draw, 1);
 
    if (null_ib) {
       pipe_resource_reference(&null_ib, NULL);
@@ -362,5 +365,5 @@ DrawAuto(D3D10DDI_HDEVICE hDevice)  // IN
    memset(&indirect, 0, sizeof indirect);
    indirect.count_from_stream_output = pDevice->draw_so_target;
 
-   pDevice->pipe->draw_vbo(pDevice->pipe, &info, 0, &indirect, NULL, 1);
+   cso_draw_vbo(pDevice->cso, &info, 0, &indirect, NULL, 1);
 }

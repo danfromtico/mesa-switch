@@ -1,0 +1,304 @@
+{
+  "schema": 1,
+  "round_id": "win-controller-fsync-order-20261121-01",
+  "contract_id": "WIN-KMT-PRE-RETURN-WITNESS",
+  "windows_question": "WIN-KMT-PRE-RETURN-WITNESS",
+  "plan_sha256": "31202a77b243819ce8847957bcd8a4fbf22db9fb2ef03d72b259ba6d4d8bcb24",
+  "status": "观测缺口",
+  "finding": "四份正式基线回执中，三次控制端 Blt 166 的 fsync 按消息或程序顺序确认发生在 DXGI 43 之后。高分辨率对照的同 QPC 因果范围为 DXGI 43 前 3.986 ms 至之后 4.010 ms。该次原始 Mac 写入时点仍横跨 DXGI 返回边界。",
+  "missing_observation": "还需同一次空窗口首次呈现里，由控制端完成 fsync 后的 Windows 确认先于 DXGI 43 或公开 RETURN。无法直接把 Mac 单调钟写入时间减去 Windows QPC。",
+  "device_executions": 0,
+  "evidence": {
+    "rows": [
+      {
+        "round": "win-present-live-20261121-02",
+        "boot": 91476,
+        "pid": 5540,
+        "tid": 7812,
+        "hwnd": 524400,
+        "timestamps": {
+          "public_call": 131646464982,
+          "public_return": 131646719229,
+          "dxgi_stop": 131646718817,
+          "blt_windows_timestamp": 131646640969,
+          "blt_controller_wire_ns": 38434916322625,
+          "blt_post_fsync_checkpoint_ns": 38434916476708,
+          "windows_ack_qpc": 131647431874,
+          "windows_local_flush_before_sending_qpc": null
+        },
+        "causal_only": {
+          "earliest_qpc": 131646944272.0,
+          "latest_qpc": 131647431874.0,
+          "relative_dxgi_stop_ms": [
+            11.742448,
+            37.138385
+          ],
+          "relative_public_return_ms": [
+            11.72099,
+            37.116927
+          ],
+          "earliest_source": "EVENT 2 callback",
+          "latest_source": "ACK 2 recorded on Windows"
+        },
+        "conditional_relative_rates_ppm": {
+          "0": {
+            "earliest_qpc": 131646961665.4064,
+            "latest_qpc": 131647415899.3936,
+            "relative_dxgi_stop_ms": [
+              12.648354,
+              36.306375
+            ],
+            "relative_public_return_ms": [
+              12.626896,
+              36.284916
+            ],
+            "earliest_source": "EVENT 1 callback",
+            "latest_source": "ACK 4 recorded on Windows"
+          },
+          "1000": {
+            "earliest_qpc": 131646961641.04799,
+            "latest_qpc": 131647415915.85121,
+            "relative_dxgi_stop_ms": [
+              12.647086,
+              36.307232
+            ],
+            "relative_public_return_ms": [
+              12.625627,
+              36.285774
+            ],
+            "earliest_source": "EVENT 1 callback",
+            "latest_source": "ACK 4 recorded on Windows"
+          }
+        },
+        "ground_truth_references": {
+          "wire_sha256": "c5489ae1d5300854061fac782b9438e9fd6bfe52a0fb9cde7f15c4e72e50161b",
+          "round": {
+            "path": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+            "sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86"
+          }
+        }
+      },
+      {
+        "round": "win-present-incall-20261121-01",
+        "boot": 91476,
+        "pid": 7576,
+        "tid": 2116,
+        "hwnd": 589944,
+        "timestamps": {
+          "public_call": 138481770248,
+          "public_return": 138482065231,
+          "dxgi_stop": 138482064725,
+          "blt_windows_timestamp": 138481954871,
+          "blt_controller_wire_ns": 38790918699583,
+          "blt_post_fsync_checkpoint_ns": 38790918836916,
+          "windows_ack_qpc": 138482257255,
+          "windows_local_flush_before_sending_qpc": null
+        },
+        "causal_only": {
+          "earliest_qpc": 138482069419.0,
+          "latest_qpc": 138482257255.0,
+          "relative_dxgi_stop_ms": [
+            0.244479,
+            10.027604
+          ],
+          "relative_public_return_ms": [
+            0.218125,
+            10.00125
+          ],
+          "earliest_source": "EVENT 2 callback",
+          "latest_source": "ACK 2 recorded on Windows"
+        },
+        "conditional_relative_rates_ppm": {
+          "0": {
+            "earliest_qpc": 138482131116.2064,
+            "latest_qpc": 138482235059.6,
+            "relative_dxgi_stop_ms": [
+              3.457875,
+              8.871594
+            ],
+            "relative_public_return_ms": [
+              3.431521,
+              8.84524
+            ],
+            "earliest_source": "RECEIVED 4 send",
+            "latest_source": "ACK 1 recorded on Windows"
+          },
+          "1000": {
+            "earliest_qpc": 138482130744.8456,
+            "latest_qpc": 138482235067.1816,
+            "relative_dxgi_stop_ms": [
+              3.438534,
+              8.871989
+            ],
+            "relative_public_return_ms": [
+              3.412179,
+              8.845634
+            ],
+            "earliest_source": "RECEIVED 4 send",
+            "latest_source": "ACK 1 recorded on Windows"
+          }
+        },
+        "ground_truth_references": {
+          "wire_sha256": "4f39c952f687982a9d5a32903c2705d8330844cec4d9a0c0447d49e9110f7694",
+          "round": {
+            "path": "windows-native-graphics/rounds/win-present-incall-20261121-01.result.json",
+            "sha256": "b345beaef3d845873136e56b83967e7bd678ded5a2b31425a4aac22017ef1703"
+          }
+        }
+      },
+      {
+        "round": "win-present-incall-20261121-02",
+        "boot": 91476,
+        "pid": 7924,
+        "tid": 1936,
+        "hwnd": 721498,
+        "timestamps": {
+          "public_call": 146154976455,
+          "public_return": 146155271427,
+          "dxgi_stop": 146155270919,
+          "blt_windows_timestamp": 146155158456,
+          "blt_controller_wire_ns": 39190566006333,
+          "blt_post_fsync_checkpoint_ns": 39190566289291,
+          "windows_ack_qpc": 146155347905,
+          "windows_local_flush_before_sending_qpc": null
+        },
+        "causal_only": {
+          "earliest_qpc": 146155194385.0,
+          "latest_qpc": 146155347905.0,
+          "relative_dxgi_stop_ms": [
+            -3.986146,
+            4.009688
+          ],
+          "relative_public_return_ms": [
+            -4.012604,
+            3.983229
+          ],
+          "earliest_source": "EVENT 2 callback",
+          "latest_source": "ACK 2 recorded on Windows"
+        },
+        "conditional_relative_rates_ppm": {
+          "0": {
+            "earliest_qpc": 146155211476.4,
+            "latest_qpc": 146155347905.0,
+            "relative_dxgi_stop_ms": [
+              -3.095969,
+              4.009688
+            ],
+            "relative_public_return_ms": [
+              -3.122427,
+              3.983229
+            ],
+            "earliest_source": "RECEIVED 3 send",
+            "latest_source": "ACK 2 recorded on Windows"
+          },
+          "1000": {
+            "earliest_qpc": 146155211175.6824,
+            "latest_qpc": 146155347905.0,
+            "relative_dxgi_stop_ms": [
+              -3.111631,
+              4.009688
+            ],
+            "relative_public_return_ms": [
+              -3.138089,
+              3.983229
+            ],
+            "earliest_source": "RECEIVED 3 send",
+            "latest_source": "ACK 2 recorded on Windows"
+          }
+        },
+        "ground_truth_references": {
+          "wire_sha256": "da281dcf2ce9192d68b645baae31dff061628e110354dce551d615c7a84fef37",
+          "round": {
+            "path": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+            "sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701"
+          }
+        }
+      },
+      {
+        "round": "win-present-local-blt-20261121-01",
+        "boot": 91476,
+        "pid": 584,
+        "tid": 1664,
+        "hwnd": 786538,
+        "timestamps": {
+          "public_call": 153054747396,
+          "public_return": 153055116440,
+          "dxgi_stop": 153055116021,
+          "blt_windows_timestamp": 153055020045,
+          "blt_controller_wire_ns": 39549948087416,
+          "blt_post_fsync_checkpoint_ns": 39549948183916,
+          "windows_ack_qpc": 153055372030,
+          "windows_local_flush_before_sending_qpc": 153055225655
+        },
+        "causal_only": {
+          "earliest_qpc": 153055225655.0,
+          "latest_qpc": 153055372030.0,
+          "relative_dxgi_stop_ms": [
+            5.710104,
+            13.333802
+          ],
+          "relative_public_return_ms": [
+            5.688281,
+            13.311979
+          ],
+          "earliest_source": "Local FlushFileBuffers before sending EVENT",
+          "latest_source": "ACK 2 recorded on Windows"
+        },
+        "conditional_relative_rates_ppm": {
+          "0": {
+            "earliest_qpc": 153055236231.7872,
+            "latest_qpc": 153055365499.9872,
+            "relative_dxgi_stop_ms": [
+              6.260979,
+              12.993697
+            ],
+            "relative_public_return_ms": [
+              6.239156,
+              12.971874
+            ],
+            "earliest_source": "EVENT 1 callback",
+            "latest_source": "ACK 4 recorded on Windows"
+          },
+          "1000": {
+            "earliest_qpc": 153055235924.86243,
+            "latest_qpc": 153055365507.29922,
+            "relative_dxgi_stop_ms": [
+              6.244993,
+              12.994078
+            ],
+            "relative_public_return_ms": [
+              6.22317,
+              12.972255
+            ],
+            "earliest_source": "EVENT 1 callback",
+            "latest_source": "ACK 4 recorded on Windows"
+          }
+        },
+        "ground_truth_references": {
+          "wire_sha256": "2e67daff2d8db4488d8d523d5b766daa61c7b7dba28c759dfb0249830a3274ad",
+          "round": {
+            "path": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
+            "sha256": "f8f893c4d9a450c4a28716403ce2cc45bbdc1777325420d108c4efd8c7ccec27"
+          }
+        }
+      }
+    ],
+    "failed_to_establish_before_return": [
+      "win-present-incall-20261121-02"
+    ],
+    "causally_after_dxgi_stop": [
+      "win-present-live-20261121-02",
+      "win-present-incall-20261121-01",
+      "win-present-local-blt-20261121-01"
+    ],
+    "local_raw_source": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/win-controller-fsync-order-20261121-01.raw.json",
+    "raw_sha256": "1685baf57390e3298aad3be92dc8a19093bba7361d9d71246ca5326cff3ed103",
+    "verifier_sha256": "baae142607ef8703cd77760ba170be2d5791eb3d25f13d3167349adaf3478576",
+    "clock_method": "Windows 产生消息至控制端接收和控制端 fsync 至 Windows ACK 均按因果顺序。条件性时钟推演使用名义频率或未校准的 ±1000 ppm，仅供复核。",
+    "boundaries": {
+      "last_entry": "四份回执均有和独立文件 ETL 原载荷核对一致的 Blt 166。",
+      "last_return": "三次可证实控制端写入在 DXGI 停止之后。另一次只有跨越该边界的范围。",
+      "first_anomaly_or_missing": "还需同一次空窗口首次呈现里，由控制端完成 fsync 后的 Windows 确认先于 DXGI 43 或公开 RETURN。无法直接把 Mac 单调钟写入时间减去 Windows QPC。"
+    }
+  }
+}

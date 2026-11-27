@@ -32,6 +32,7 @@
 
 
 #include "DriverIncludes.h"
+#include "Trace.h"
 #include "util/u_hash_table.h"
 #include "cso_cache/cso_context.h"
 
@@ -143,17 +144,46 @@ CastPipeDevice(DXGI_DDI_HDEVICE hDevice)
 
 
 static inline void
-SetError(D3D10DDI_HDEVICE hDevice, HRESULT hr)
+SetErrorAt(D3D10DDI_HDEVICE hDevice, HRESULT hr, const char *file,
+           const char *function, unsigned line)
 {
    if (FAILED(hr)) {
+      /* Record before entering the runtime: its callback may not return. */
+      D3D10TraceError(hr, file, function, line);
       Device *pDevice = CastDevice(hDevice);
       pDevice->UMCallbacks.pfnSetErrorCb(pDevice->hRTCoreLayer, hr);
    }
 }
 
+#define SetError(device, error) SetErrorAt(device, error, __FILE__, __func__, __LINE__)
+
+static inline bool
+CheckDeviceRemoved(D3D10DDI_HDEVICE hDevice)
+{
+   struct pipe_context *pipe = CastPipeContext(hDevice);
+   if (pipe->get_device_reset_status &&
+       pipe->get_device_reset_status(pipe) != PIPE_NO_RESET) {
+      SetError(hDevice, D3DDDIERR_DEVICEREMOVED);
+      return true;
+   }
+   return false;
+}
+
+
+struct RuntimeResource;
+struct Resource;
+struct ResourceViewLink {
+   Resource *owner;
+   ResourceViewLink *next;
+   pipe_surface *surface;
+   pipe_sampler_view **sampler;
+   pipe_sampler_view *replacement;
+};
 
 struct Resource
 {
+   Device *device;
+   HANDLE runtime_resource;
    DXGI_FORMAT Format;
    UINT MipLevels;
    UINT NumSubResources;
@@ -161,7 +191,28 @@ struct Resource
    struct pipe_resource *resource;
    struct pipe_transfer **transfers;
    struct pipe_stream_output_target *so_target;
+   RuntimeResource *runtime_memory;
+   ResourceViewLink *views;
 };
+
+static inline void
+AttachResourceView(Resource *owner, ResourceViewLink *view,
+                   pipe_surface *surface, pipe_sampler_view **sampler)
+{
+   *view = {owner, owner->views, surface, sampler, NULL};
+   owner->views = view;
+}
+
+static inline void
+DetachResourceView(ResourceViewLink *view)
+{
+   if (view->owner) {
+      auto link = &view->owner->views;
+      while (*link && *link != view) link = &(*link)->next;
+      if (*link) *link = view->next;
+   }
+   *view = {};
+}
 
 
 static inline Resource *
@@ -209,6 +260,7 @@ struct RenderTargetView
 {
    struct pipe_surface surface;
    D3D10DDI_HRTRENDERTARGETVIEW hRTRenderTargetView;
+   ResourceViewLink link;
 };
 
 
@@ -231,6 +283,7 @@ struct DepthStencilView
 {
    struct pipe_surface surface;
    D3D10DDI_HRTDEPTHSTENCILVIEW hRTDepthStencilView;
+   ResourceViewLink link;
 };
 
 
@@ -363,6 +416,7 @@ CastPipeSamplerState(D3D10DDI_HSAMPLER hSampler)
 struct ShaderResourceView
 {
    struct pipe_sampler_view *handle;
+   ResourceViewLink link;
 };
 
 

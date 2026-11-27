@@ -1,0 +1,1816 @@
+{
+  "module": "DXVK v3.1.1 Windows frame-limiter wait",
+  "version_source": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+  "source_sha256": {
+    "util_fps_limiter.cpp": "ba878e0a2d112ce5d706bd9b41f041d8d9135e564186f23880cbd1c4cd71a91b",
+    "util_fps_limiter.h": "de21a1766e8e6aedfd4ce21b2cf30a4dc8d887daee89dda20e0287b2bd08ff3b",
+    "util_sleep.cpp": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba",
+    "util_sleep.h": "6e73b8e23922aef851e31fdf78fdb578840b1b8bcde574d7d29889e6f2e03a3a",
+    "util_time.h": "c238cb172c9eefb5f664920017659cfcfe74c6f2e6cbab6e7d954d17e932caee",
+    "thread.h": "e5bc21307ad8fa49b0965fc08065f60b1ddd70b1d29ae10dc9ec1a8bfb3522d7"
+  },
+  "production_route": "D3D9 UpdateTargetFrameRate passes the configured limit to Presenter. Without present-wait, signalFrame calls FpsLimiter::delay before signaling frame latency. The existing desktop-package game logs establish the version, settings and features. The experiment compiles that source into separate timing executables.",
+  "archived_game_evidence": {
+    "fte-default-dxvk-ec-01": {
+      "log_sha256": "7b36d3de9142f09c71b0d98d96b4fbc9fc072ea7ba36ce240d2f6ddd2ba956b9",
+      "reported_dxvk_version": "3.1.1",
+      "rendered_game_exit": 0,
+      "configured_max_fps": 15,
+      "compiler_workers": 1,
+      "reported_present_wait": false
+    },
+    "fte-default-dxvk-x64-01": {
+      "log_sha256": "51307080e565b1d2e81291d910e8592d146b0b7644bac05aacb3c8264337c22f",
+      "reported_dxvk_version": "v3.1.1",
+      "rendered_game_exit": 0,
+      "configured_max_fps": 15,
+      "compiler_workers": 1,
+      "reported_present_wait": false
+    },
+    "fte-default-dxvk-x86-01": {
+      "log_sha256": "3d8bfe8f28098c93bed3365ba14968f056aefadf7708c07c0d2bd027fe3f3e9e",
+      "reported_dxvk_version": "v3.1.1",
+      "rendered_game_exit": 0,
+      "configured_max_fps": 15,
+      "compiler_workers": 1,
+      "reported_present_wait": false
+    }
+  },
+  "candidate_change": "On Windows the extra busy-wait margin is limited to one OS timer quantum, in addition to the existing four-quantum margin. The original adds one sixth of the requested sleep.",
+  "case_sha256": "0c8d7b9b128139e5c70dbf83260535842e2566ecb9804d8db624f8711c895b45",
+  "probe_source_sha256": "5897b07fef739a04c423ac5cf585876a642fc470b5a173f101546d4275bd58d7",
+  "images": {
+    "arm64-reference": {
+      "bytes": 738824,
+      "unsigned": "26744f4c5be90a0a46f97bd033f45ab0586105daabf766badc05c3b45c465130",
+      "sha256": "e82701fd90cf6f783d99d79eb376c4178ac265e5005bbf4ce30d70dd2aef52cc",
+      "machine": "0xaa64",
+      "architecture_target": "aarch64",
+      "sleep_source_sha256": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba"
+    },
+    "arm64-candidate": {
+      "bytes": 738824,
+      "unsigned": "5ea906edd0c171055ad2b1930ed7830ae3a14342ad29960ea55802b1ba9324e1",
+      "sha256": "1ac7b9b321e0378a1db629934961beb529abee432f4f6e95ff31f379b202ef59",
+      "machine": "0xaa64",
+      "architecture_target": "aarch64",
+      "sleep_source_sha256": "b3872f7197bf4bda88e7ea38bd7f8289b2eb8c0d4bf9c40fdd4dab1c133b702d"
+    },
+    "x86-reference": {
+      "bytes": 859656,
+      "unsigned": "b1f795614bfd7606e319f0b4972de137505382c02ca6b3cf7461b1ffbaff8efa",
+      "sha256": "57f1df24f6b64862c1ea16d704b7d2c47c0a8614d938bd6d632c1e7714caac74",
+      "machine": "0x14c",
+      "architecture_target": "i686",
+      "sleep_source_sha256": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba"
+    },
+    "x86-candidate": {
+      "bytes": 859656,
+      "unsigned": "eefacade73e559f4960a5f4d6eb25fdba8c68d2bcf828260f567a00f7ca13621",
+      "sha256": "5ee63d5a55dbdd38ab29a66c3db02a306685e334a1ceb9816dedd312442825c6",
+      "machine": "0x14c",
+      "architecture_target": "i686",
+      "sleep_source_sha256": "b3872f7197bf4bda88e7ea38bd7f8289b2eb8c0d4bf9c40fdd4dab1c133b702d"
+    },
+    "x64-reference": {
+      "bytes": 800264,
+      "unsigned": "397e3bf7aa5d940d73c874aa163ae17b36b645a02f05e7012c8e7e464757d723",
+      "sha256": "5271317ffba08a956058c62f0e9e4dca9e2085850ce72869d5cba809dde61f8c",
+      "machine": "0x8664",
+      "architecture_target": "x86_64",
+      "sleep_source_sha256": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba"
+    },
+    "x64-candidate": {
+      "bytes": 800264,
+      "unsigned": "67deae8afa5d06e087739c0e58cf7f7de497ee3097e088b7146c8c2185f07605",
+      "sha256": "ec580fb87291a8b41506442f5f17dfd046b82547ac6ea464e675dd61f61719b4",
+      "machine": "0x8664",
+      "architecture_target": "x86_64",
+      "sleep_source_sha256": "b3872f7197bf4bda88e7ea38bd7f8289b2eb8c0d4bf9c40fdd4dab1c133b702d"
+    },
+    "arm64ec-reference": {
+      "bytes": 826888,
+      "unsigned": "89dc176a199def373cf3576d123afe629a01e5d690530682a0bf2c6c47b759cf",
+      "sha256": "ca60c0d8764ff179e6a9d666581226ece4f14027293c5d8c4dee6350779fb5bc",
+      "machine": "0x8664",
+      "architecture_target": "arm64ec",
+      "sleep_source_sha256": "8507c15297b63af924fa0cf90fdd722638c876b191182d580d7771fb11db95ba"
+    },
+    "arm64ec-candidate": {
+      "bytes": 826888,
+      "unsigned": "d11ad0cf21b293476aaa621dfaa2373242f624b9cbe5ea72dc26b6afd58cb91c",
+      "sha256": "d59e665dacc4264ca1227c91593ee9233078eeb57f166cdcc01ae6babb143519",
+      "machine": "0x8664",
+      "architecture_target": "arm64ec",
+      "sleep_source_sha256": "b3872f7197bf4bda88e7ea38bd7f8289b2eb8c0d4bf9c40fdd4dab1c133b702d"
+    }
+  },
+  "architecture_verification": {
+    "arm64": {
+      "Format": "COFF-ARM64",
+      "Machine": "IMAGE_FILE_MACHINE_ARM64 (0xAA64)",
+      "CHPEMetadataPointer": "0x0"
+    },
+    "x86": {
+      "Format": "COFF-i386",
+      "Machine": "IMAGE_FILE_MACHINE_I386 (0x14C)",
+      "CHPEMetadataPointer": "0x0"
+    },
+    "x64": {
+      "Format": "COFF-x86-64",
+      "Machine": "IMAGE_FILE_MACHINE_AMD64 (0x8664)",
+      "CHPEMetadataPointer": "0x0"
+    },
+    "arm64ec": {
+      "Format": "COFF-ARM64EC",
+      "Machine": "IMAGE_FILE_MACHINE_ARM64EC (0xA641)",
+      "CHPEMetadataPointer": "0x1400A2710"
+    }
+  },
+  "time_source_frequency_hz": 19200000,
+  "windows_boot_utc": "2026-11-18T19:07:27.5697220Z",
+  "power_before": {
+    "cpu_khz": 1007250,
+    "cpu_error": 0,
+    "external": true,
+    "soc_c": 39,
+    "emc_khz": 1331200,
+    "mode": 1,
+    "board_c": 37,
+    "battery_pct": 79
+  },
+  "power_after": {
+    "cpu_khz": 1338750,
+    "cpu_error": 0,
+    "external": true,
+    "soc_c": 38,
+    "emc_khz": 1600000,
+    "mode": 1,
+    "board_c": 37,
+    "battery_pct": 79
+  },
+  "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+  "measurement_method": "Two counterbalanced pairs per architecture. Three warm-ups for each cap precede the local QPC samples. Thread CPU is kernel plus user time from GetThreadTimes, as a percentage of one logical processor. P95 is the absolute distance from the requested interval. No graphics context or game was created by the timing program.",
+  "timer_resolution_log": {
+    "arm64-1-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64-2-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64-3-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64-4-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "x86-1-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "x86-2-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "x86-3-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "x86-4-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "x64-1-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "x64-2-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "x64-3-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "x64-4-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64ec-1-candidate": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64ec-2-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64ec-3-reference": [
+      "Setting timer interval to 500 us"
+    ],
+    "arm64ec-4-candidate": [
+      "Setting timer interval to 500 us"
+    ]
+  },
+  "comparisons": [
+    {
+      "architecture": "arm64",
+      "target_fps": 8,
+      "reference": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 19.244,
+        "interval_rate_hz": 7.9887,
+        "p95_absolute_period_error_ms": 4.2555,
+        "p99_interval_ms": 130.0954,
+        "maximum_absolute_period_error_ms": 5.33
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 11.46,
+        "interval_rate_hz": 8.0013,
+        "p95_absolute_period_error_ms": 0.2906,
+        "p99_interval_ms": 125.2863,
+        "maximum_absolute_period_error_ms": 0.3
+      },
+      "one_core_percentage_points_saved": 7.784,
+      "p95_absolute_error_change_ms": -3.9649
+    },
+    {
+      "architecture": "arm64",
+      "target_fps": 15,
+      "reference": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 21.215,
+        "interval_rate_hz": 15.0863,
+        "p95_absolute_period_error_ms": 4.5841,
+        "p99_interval_ms": 71.1722,
+        "maximum_absolute_period_error_ms": 13.0358
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 3.571,
+        "interval_rate_hz": 15.2361,
+        "p95_absolute_period_error_ms": 26.1429,
+        "p99_interval_ms": 117.7508,
+        "maximum_absolute_period_error_ms": 76.8489
+      },
+      "one_core_percentage_points_saved": 17.644,
+      "p95_absolute_error_change_ms": 21.5588
+    },
+    {
+      "architecture": "arm64",
+      "target_fps": 60,
+      "reference": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 27.948,
+        "interval_rate_hz": 60.1001,
+        "p95_absolute_period_error_ms": 0.8205,
+        "p99_interval_ms": 17.5332,
+        "maximum_absolute_period_error_ms": 1.8455
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 13.397,
+        "interval_rate_hz": 60.0186,
+        "p95_absolute_period_error_ms": 0.2401,
+        "p99_interval_ms": 16.952,
+        "maximum_absolute_period_error_ms": 0.6296
+      },
+      "one_core_percentage_points_saved": 14.551,
+      "p95_absolute_error_change_ms": -0.5804
+    },
+    {
+      "architecture": "x86",
+      "target_fps": 8,
+      "reference": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 11.984,
+        "interval_rate_hz": 8.003,
+        "p95_absolute_period_error_ms": 2.2239,
+        "p99_interval_ms": 127.1592,
+        "maximum_absolute_period_error_ms": 2.4274
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 5.729,
+        "interval_rate_hz": 8.0002,
+        "p95_absolute_period_error_ms": 0.2424,
+        "p99_interval_ms": 125.2309,
+        "maximum_absolute_period_error_ms": 0.3376
+      },
+      "one_core_percentage_points_saved": 6.255,
+      "p95_absolute_error_change_ms": -1.9815
+    },
+    {
+      "architecture": "x86",
+      "target_fps": 15,
+      "reference": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 18.756,
+        "interval_rate_hz": 15.489,
+        "p95_absolute_period_error_ms": 3.0855,
+        "p99_interval_ms": 68.5681,
+        "maximum_absolute_period_error_ms": 64.1573
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 3.528,
+        "interval_rate_hz": 15.0537,
+        "p95_absolute_period_error_ms": 7.1801,
+        "p99_interval_ms": 71.5306,
+        "maximum_absolute_period_error_ms": 9.1261
+      },
+      "one_core_percentage_points_saved": 15.228,
+      "p95_absolute_error_change_ms": 4.0946
+    },
+    {
+      "architecture": "x86",
+      "target_fps": 60,
+      "reference": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 29.016,
+        "interval_rate_hz": 59.9961,
+        "p95_absolute_period_error_ms": 0.3584,
+        "p99_interval_ms": 19.068,
+        "maximum_absolute_period_error_ms": 11.6365
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 14.508,
+        "interval_rate_hz": 59.9981,
+        "p95_absolute_period_error_ms": 0.6687,
+        "p99_interval_ms": 17.4458,
+        "maximum_absolute_period_error_ms": 1.2851
+      },
+      "one_core_percentage_points_saved": 14.508,
+      "p95_absolute_error_change_ms": 0.3103
+    },
+    {
+      "architecture": "x64",
+      "target_fps": 8,
+      "reference": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 23.427,
+        "interval_rate_hz": 7.9964,
+        "p95_absolute_period_error_ms": 1.1357,
+        "p99_interval_ms": 126.116,
+        "maximum_absolute_period_error_ms": 1.3562
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 0.0,
+        "interval_rate_hz": 8.0027,
+        "p95_absolute_period_error_ms": 5.0085,
+        "p99_interval_ms": 129.5005,
+        "maximum_absolute_period_error_ms": 6.1102
+      },
+      "one_core_percentage_points_saved": 23.427,
+      "p95_absolute_error_change_ms": 3.8728
+    },
+    {
+      "architecture": "x64",
+      "target_fps": 15,
+      "reference": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 13.776,
+        "interval_rate_hz": 11.7559,
+        "p95_absolute_period_error_ms": 43.9345,
+        "p99_interval_ms": 589.6217,
+        "maximum_absolute_period_error_ms": 855.3949
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 2.346,
+        "interval_rate_hz": 15.0171,
+        "p95_absolute_period_error_ms": 1.5265,
+        "p99_interval_ms": 67.9197,
+        "maximum_absolute_period_error_ms": 2.5031
+      },
+      "one_core_percentage_points_saved": 11.43,
+      "p95_absolute_error_change_ms": -42.408
+    },
+    {
+      "architecture": "x64",
+      "target_fps": 60,
+      "reference": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 27.9,
+        "interval_rate_hz": 59.9969,
+        "p95_absolute_period_error_ms": 0.1916,
+        "p99_interval_ms": 20.2881,
+        "maximum_absolute_period_error_ms": 20.263
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 15.628,
+        "interval_rate_hz": 60.0118,
+        "p95_absolute_period_error_ms": 0.5972,
+        "p99_interval_ms": 19.0786,
+        "maximum_absolute_period_error_ms": 10.948
+      },
+      "one_core_percentage_points_saved": 12.272,
+      "p95_absolute_error_change_ms": 0.4056
+    },
+    {
+      "architecture": "arm64ec",
+      "target_fps": 8,
+      "reference": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 22.914,
+        "interval_rate_hz": 7.9989,
+        "p95_absolute_period_error_ms": 3.7164,
+        "p99_interval_ms": 128.6061,
+        "maximum_absolute_period_error_ms": 7.1447
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 24,
+        "one_core_percent": 1.563,
+        "interval_rate_hz": 8.0024,
+        "p95_absolute_period_error_ms": 90.2586,
+        "p99_interval_ms": 210.5963,
+        "maximum_absolute_period_error_ms": 109.0532
+      },
+      "one_core_percentage_points_saved": 21.351,
+      "p95_absolute_error_change_ms": 86.5422
+    },
+    {
+      "architecture": "arm64ec",
+      "target_fps": 15,
+      "reference": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 20.135,
+        "interval_rate_hz": 15.1604,
+        "p95_absolute_period_error_ms": 1.9556,
+        "p99_interval_ms": 68.1076,
+        "maximum_absolute_period_error_ms": 28.4825
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 40,
+        "one_core_percent": 2.865,
+        "interval_rate_hz": 14.6704,
+        "p95_absolute_period_error_ms": 32.4101,
+        "p99_interval_ms": 167.5071,
+        "maximum_absolute_period_error_ms": 145.7435
+      },
+      "one_core_percentage_points_saved": 17.27,
+      "p95_absolute_error_change_ms": 30.4545
+    },
+    {
+      "architecture": "arm64ec",
+      "target_fps": 60,
+      "reference": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 25.693,
+        "interval_rate_hz": 60.0548,
+        "p95_absolute_period_error_ms": 0.2636,
+        "p99_interval_ms": 16.9382,
+        "maximum_absolute_period_error_ms": 1.6158
+      },
+      "candidate": {
+        "runs": 2,
+        "frames": 84,
+        "one_core_percent": 15.626,
+        "interval_rate_hz": 60.0033,
+        "p95_absolute_period_error_ms": 1.6013,
+        "p99_interval_ms": 31.6726,
+        "maximum_absolute_period_error_ms": 16.7673
+      },
+      "one_core_percentage_points_saved": 10.067,
+      "p95_absolute_error_change_ms": 1.3377
+    }
+  ],
+  "trial_receipt_sha256": "bba728f265bc95403f60e1f702a37cb398e02a6f78eccd52adebc0bcbff607ea",
+  "cpu_microbenchmark_complete": true,
+  "changed_game_dll_selected": false,
+  "game_frame_or_battery_savings_measured": false,
+  "individual_runs": {
+    "path": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-frame-limiter-timings.csv",
+    "sha256": "c62863912440bfd47a5f65e31cb0866eead7ddaaacbef3760ac2d27c27cd004d"
+  },
+  "source_diff": {
+    "path": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-windows-sleep-margin.patch",
+    "sha256": "0c8d7b9b128139e5c70dbf83260535842e2566ecb9804d8db624f8711c895b45"
+  },
+  "acceptance": "This record covers the CPU timing control. The supplied app-local DXVK game binaries remain the physically accepted game configuration. The change has not been accepted for live gameplay.",
+  "observed_tradeoff": {
+    "comparisons": 12,
+    "lower_thread_cpu_share": 12,
+    "larger_p95_absolute_period_error": 8,
+    "decision": "Retain the existing game limiter. The bounded-spin candidate reduced measured thread CPU in every setting, but several timing tails worsened. On ARM64EC at 8 Hz, P95 absolute period error increased from 3.7164 ms to 90.2586 ms across the two short runs.",
+    "accounting": "GetThreadTimes has finite accounting granularity. One x64 group reported zero charged time despite nonzero thread-cycle counts. No system-wide CPU or power saving is inferred."
+  },
+  "high_resolution_timer_trial": {
+    "candidate_change": "Use a high-resolution waitable timer owned by the calling thread. After a confirmed timer creation, cap the extra spin margin at one timer quantum. If the Windows timer cannot be created or a wait fails, use the original system wait path.",
+    "measurement_method": "Two counterbalanced pairs per architecture. Three warm-ups for each cap precede the local QPC samples. Thread CPU is kernel plus user time from GetThreadTimes, as a percentage of one logical processor. P95 is the absolute distance from the requested interval. No graphics context or game was created by the timing program.",
+    "probe_logging": "The two timing builds increment one per-thread test counter after each completed blocking wait. The production patch excludes these counters. Waits inside the spin loop are not instrumented.",
+    "probe_source_sha256": "a02bfb1858d9d8725ac75210689258efa1945dbead80fcf81465ee639c3ec223",
+    "time_source_frequency_hz": 19200000,
+    "windows_boot_utc": "2026-11-18T19:07:27.5697220Z",
+    "power_before": {
+      "cpu_khz": 1211250,
+      "cpu_error": 0,
+      "external": true,
+      "soc_c": 38,
+      "emc_khz": 1600000,
+      "mode": 1,
+      "board_c": 37,
+      "battery_pct": 79
+    },
+    "power_after": {
+      "cpu_khz": 815800,
+      "cpu_error": 0,
+      "external": true,
+      "soc_c": 38,
+      "emc_khz": 1600000,
+      "mode": 1,
+      "board_c": 37,
+      "battery_pct": 80
+    },
+    "comparisons": [
+      {
+        "architecture": "arm64",
+        "target_fps": 8,
+        "reference": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 18.76,
+          "interval_rate_hz": 8.0041,
+          "p95_absolute_period_error_ms": 1.9861,
+          "p99_interval_ms": 126.8754,
+          "maximum_absolute_period_error_ms": 2.5266
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 0.0,
+          "interval_rate_hz": 7.9956,
+          "p95_absolute_period_error_ms": 1.3675,
+          "p99_interval_ms": 126.7416,
+          "maximum_absolute_period_error_ms": 1.8391
+        },
+        "one_core_percentage_points_saved": 18.76,
+        "p95_absolute_error_change_ms": -0.6186
+      },
+      {
+        "architecture": "arm64",
+        "target_fps": 15,
+        "reference": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 19.36,
+          "interval_rate_hz": 15.0187,
+          "p95_absolute_period_error_ms": 4.853,
+          "p99_interval_ms": 71.6101,
+          "maximum_absolute_period_error_ms": 5.4566
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 3.549,
+          "interval_rate_hz": 15.1443,
+          "p95_absolute_period_error_ms": 12.5343,
+          "p99_interval_ms": 77.4193,
+          "maximum_absolute_period_error_ms": 16.7081
+        },
+        "one_core_percentage_points_saved": 15.811,
+        "p95_absolute_error_change_ms": 7.6813
+      },
+      {
+        "architecture": "arm64",
+        "target_fps": 60,
+        "reference": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 27.91,
+          "interval_rate_hz": 60.0177,
+          "p95_absolute_period_error_ms": 0.5381,
+          "p99_interval_ms": 17.3963,
+          "maximum_absolute_period_error_ms": 1.2628
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 14.454,
+          "interval_rate_hz": 59.7723,
+          "p95_absolute_period_error_ms": 0.303,
+          "p99_interval_ms": 18.1955,
+          "maximum_absolute_period_error_ms": 6.1499
+        },
+        "one_core_percentage_points_saved": 13.456,
+        "p95_absolute_error_change_ms": -0.2351
+      },
+      {
+        "architecture": "x86",
+        "target_fps": 8,
+        "reference": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 16.666,
+          "interval_rate_hz": 7.9997,
+          "p95_absolute_period_error_ms": 2.0791,
+          "p99_interval_ms": 127.0167,
+          "maximum_absolute_period_error_ms": 2.1758
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 5.209,
+          "interval_rate_hz": 8.0005,
+          "p95_absolute_period_error_ms": 8.1769,
+          "p99_interval_ms": 132.4694,
+          "maximum_absolute_period_error_ms": 9.6479
+        },
+        "one_core_percentage_points_saved": 11.457,
+        "p95_absolute_error_change_ms": 6.0978
+      },
+      {
+        "architecture": "x86",
+        "target_fps": 15,
+        "reference": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 20.978,
+          "interval_rate_hz": 15.3438,
+          "p95_absolute_period_error_ms": 1.6775,
+          "p99_interval_ms": 67.6035,
+          "maximum_absolute_period_error_ms": 48.9502
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 3.628,
+          "interval_rate_hz": 15.4785,
+          "p95_absolute_period_error_ms": 2.1646,
+          "p99_interval_ms": 66.9043,
+          "maximum_absolute_period_error_ms": 43.8102
+        },
+        "one_core_percentage_points_saved": 17.35,
+        "p95_absolute_error_change_ms": 0.4871
+      },
+      {
+        "architecture": "x86",
+        "target_fps": 60,
+        "reference": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 29.019,
+          "interval_rate_hz": 60.0025,
+          "p95_absolute_period_error_ms": 0.2766,
+          "p99_interval_ms": 17.0406,
+          "maximum_absolute_period_error_ms": 0.8452
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 11.131,
+          "interval_rate_hz": 59.8397,
+          "p95_absolute_period_error_ms": 0.6563,
+          "p99_interval_ms": 18.1886,
+          "maximum_absolute_period_error_ms": 3.7453
+        },
+        "one_core_percentage_points_saved": 17.888,
+        "p95_absolute_error_change_ms": 0.3797
+      },
+      {
+        "architecture": "x64",
+        "target_fps": 8,
+        "reference": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 11.983,
+          "interval_rate_hz": 8.0027,
+          "p95_absolute_period_error_ms": 1.227,
+          "p99_interval_ms": 126.3031,
+          "maximum_absolute_period_error_ms": 1.3195
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 0.0,
+          "interval_rate_hz": 8.0005,
+          "p95_absolute_period_error_ms": 0.1921,
+          "p99_interval_ms": 125.2077,
+          "maximum_absolute_period_error_ms": 0.2286
+        },
+        "one_core_percentage_points_saved": 11.983,
+        "p95_absolute_error_change_ms": -1.0349
+      },
+      {
+        "architecture": "x64",
+        "target_fps": 15,
+        "reference": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 17.316,
+          "interval_rate_hz": 15.2863,
+          "p95_absolute_period_error_ms": 1.6354,
+          "p99_interval_ms": 67.162,
+          "maximum_absolute_period_error_ms": 27.8999
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 4.302,
+          "interval_rate_hz": 15.7338,
+          "p95_absolute_period_error_ms": 4.8935,
+          "p99_interval_ms": 67.9491,
+          "maximum_absolute_period_error_ms": 66.2577
+        },
+        "one_core_percentage_points_saved": 13.014,
+        "p95_absolute_error_change_ms": 3.2581
+      },
+      {
+        "architecture": "x64",
+        "target_fps": 60,
+        "reference": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 30.144,
+          "interval_rate_hz": 60.0194,
+          "p95_absolute_period_error_ms": 0.125,
+          "p99_interval_ms": 16.8838,
+          "maximum_absolute_period_error_ms": 0.5185
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 13.395,
+          "interval_rate_hz": 60.0081,
+          "p95_absolute_period_error_ms": 0.5205,
+          "p99_interval_ms": 17.203,
+          "maximum_absolute_period_error_ms": 0.5906
+        },
+        "one_core_percentage_points_saved": 16.749,
+        "p95_absolute_error_change_ms": 0.3955
+      },
+      {
+        "architecture": "arm64ec",
+        "target_fps": 8,
+        "reference": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 21.874,
+          "interval_rate_hz": 7.9996,
+          "p95_absolute_period_error_ms": 1.8461,
+          "p99_interval_ms": 126.9334,
+          "maximum_absolute_period_error_ms": 2.1431
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 24,
+          "one_core_percent": 4.689,
+          "interval_rate_hz": 8.0023,
+          "p95_absolute_period_error_ms": 1.2307,
+          "p99_interval_ms": 126.1201,
+          "maximum_absolute_period_error_ms": 1.7365
+        },
+        "one_core_percentage_points_saved": 17.185,
+        "p95_absolute_error_change_ms": -0.6154
+      },
+      {
+        "architecture": "arm64ec",
+        "target_fps": 15,
+        "reference": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 20.504,
+          "interval_rate_hz": 14.9971,
+          "p95_absolute_period_error_ms": 4.1937,
+          "p99_interval_ms": 80.117,
+          "maximum_absolute_period_error_ms": 19.993
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 40,
+          "one_core_percent": 2.384,
+          "interval_rate_hz": 15.2584,
+          "p95_absolute_period_error_ms": 10.1511,
+          "p99_interval_ms": 72.8188,
+          "maximum_absolute_period_error_ms": 31.1953
+        },
+        "one_core_percentage_points_saved": 18.12,
+        "p95_absolute_error_change_ms": 5.9574
+      },
+      {
+        "architecture": "arm64ec",
+        "target_fps": 60,
+        "reference": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 25.685,
+          "interval_rate_hz": 60.0352,
+          "p95_absolute_period_error_ms": 0.3319,
+          "p99_interval_ms": 17.0783,
+          "maximum_absolute_period_error_ms": 0.7067
+        },
+        "candidate": {
+          "runs": 2,
+          "frames": 84,
+          "one_core_percent": 17.867,
+          "interval_rate_hz": 60.0319,
+          "p95_absolute_period_error_ms": 0.261,
+          "p99_interval_ms": 17.4674,
+          "maximum_absolute_period_error_ms": 3.6545
+        },
+        "one_core_percentage_points_saved": 7.818,
+        "p95_absolute_error_change_ms": -0.0709
+      }
+    ],
+    "images": {
+      "arm64-reference": {
+        "bytes": 738824,
+        "unsigned": "d9a856af5452850a0a2999d08ede4927c99c2c9582ac45a27794aacc50a8574e",
+        "sha256": "508f9b21f67981965737b0595ed914bfbc1f40e6a473973df032664cd7ef2818",
+        "architecture_target": "aarch64",
+        "machine": "0xaa64",
+        "instrumented_source_sha256": "3c7778aa07c390462bd8d2711ed6926ea52f7496ee88faa789ec1c3143f778d3"
+      },
+      "arm64-candidate": {
+        "bytes": 740872,
+        "unsigned": "5f6a6e5b33f06663f3382138ed69665f6c331d0e9e6b087d9cb9bb6cf04f8fa3",
+        "sha256": "45de4880a6fa699d6e69ba66c1e55235683e966711cc5880d7f3728eef24bcf5",
+        "architecture_target": "aarch64",
+        "machine": "0xaa64",
+        "instrumented_source_sha256": "3d41855a04afdfd80c2acbfa60fc79954737262da6d8a00115464727c9aaafa8"
+      },
+      "x86-reference": {
+        "bytes": 859656,
+        "unsigned": "352d991467cbb4d7ced1ca58c0bd525d91efc4cf7412738f09c07954afa050b0",
+        "sha256": "bcdb21f8e38cfebe5232e0fe0edc049a668375b319af27d4806cfa329291d6a6",
+        "architecture_target": "i686",
+        "machine": "0x14c",
+        "instrumented_source_sha256": "3c7778aa07c390462bd8d2711ed6926ea52f7496ee88faa789ec1c3143f778d3"
+      },
+      "x86-candidate": {
+        "bytes": 862216,
+        "unsigned": "7be53e56c98b514a63cb5338b6b05543194f0f3c523dcc4122d6e851b2a8ec7a",
+        "sha256": "6a230a271cb9736f5841afb29ac14b235089db525dedb0e846d36bba9ea6bd23",
+        "architecture_target": "i686",
+        "machine": "0x14c",
+        "instrumented_source_sha256": "3d41855a04afdfd80c2acbfa60fc79954737262da6d8a00115464727c9aaafa8"
+      },
+      "x64-reference": {
+        "bytes": 800776,
+        "unsigned": "af8abf37d5860b447877d531ab3fab0eaa4b37c608e7035933f3f0937ceed7e2",
+        "sha256": "74232918ef062a7b87f4cb91eea5a1b025a795df87ae92c1a30f815cb07d0fae",
+        "architecture_target": "x86_64",
+        "machine": "0x8664",
+        "instrumented_source_sha256": "3c7778aa07c390462bd8d2711ed6926ea52f7496ee88faa789ec1c3143f778d3"
+      },
+      "x64-candidate": {
+        "bytes": 802312,
+        "unsigned": "13979aea3e37e38941b56c5b96a206a6d90c3f73f4322b5ffc6e4b6de4f5925f",
+        "sha256": "fee98ec3f5f681eaa045c3055351eb0eebd768ed8f100b63c0743b5b0a9c1537",
+        "architecture_target": "x86_64",
+        "machine": "0x8664",
+        "instrumented_source_sha256": "3d41855a04afdfd80c2acbfa60fc79954737262da6d8a00115464727c9aaafa8"
+      },
+      "arm64ec-reference": {
+        "bytes": 826888,
+        "unsigned": "e62b8c075c2035c5e141f21f9ae683da62cdb532df92a2737877374689997373",
+        "sha256": "900870a17b278774ba0ad935b717377e0b42ad84d19c88359e1057e70853ee48",
+        "architecture_target": "arm64ec",
+        "machine": "0x8664",
+        "instrumented_source_sha256": "3c7778aa07c390462bd8d2711ed6926ea52f7496ee88faa789ec1c3143f778d3"
+      },
+      "arm64ec-candidate": {
+        "bytes": 831496,
+        "unsigned": "56d6e254fb07890a1b27731b0be08f8d9a83abbc7c41164468120ca0eff5867b",
+        "sha256": "957711d33893047482cfac932c94546267001138c608a58a0fbd7bbc9657a9a8",
+        "architecture_target": "arm64ec",
+        "machine": "0x8664",
+        "instrumented_source_sha256": "3d41855a04afdfd80c2acbfa60fc79954737262da6d8a00115464727c9aaafa8"
+      }
+    },
+    "trial_receipt_sha256": "b09b11c1743ceb6b3ec8c15ac53ac4c825cd3a10a329b3d4b50bf73d312621e3",
+    "observed_tradeoff": {
+      "comparisons": 12,
+      "lower_thread_cpu_share": 12,
+      "larger_p95_absolute_period_error": 7
+    },
+    "completed_blocking_waits_by_api_including_warmup": {
+      "arm64-1-reference": {
+        "15": {
+          "nt_delay": 22,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "arm64-2-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "arm64-3-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "arm64-4-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "x86-1-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "x86-2-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "x86-3-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "x86-4-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "x64-1-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "x64-2-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 20,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "x64-3-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "x64-4-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "arm64ec-1-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      },
+      "arm64ec-2-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "arm64ec-3-reference": {
+        "15": {
+          "nt_delay": 21,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 14,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 44,
+          "high_resolution": 0,
+          "standard_sleep": 0
+        }
+      },
+      "arm64ec-4-candidate": {
+        "15": {
+          "nt_delay": 0,
+          "high_resolution": 21,
+          "standard_sleep": 0
+        },
+        "8": {
+          "nt_delay": 0,
+          "high_resolution": 14,
+          "standard_sleep": 0
+        },
+        "60": {
+          "nt_delay": 0,
+          "high_resolution": 44,
+          "standard_sleep": 0
+        }
+      }
+    },
+    "individual_runs": {
+      "path": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-highres-frame-limiter-timings.csv",
+      "sha256": "5ea78322d930a7c57b3615a0abc6f2a7bbd43c871f6ac3c75d342ac09f2f9dde"
+    },
+    "source_diff": {
+      "path": "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-windows-highres-wait.patch",
+      "sha256": "488a7a28e78492250af99e91260fb7ebe1f0800912c0a1875d78993ed47e4a68"
+    },
+    "selected_game_dll": false,
+    "decision": "The first recorded period in each old run includes setup outside the uninterrupted return-to-return window. The boundary correction below supersedes the original tail comparison; CPU time is aggregated over the original wall windows.",
+    "contiguous_boundary_correction": {
+      "method": "Each run allocated its timestamp array and queried thread accounting after the last warmup return. Exclude the first non-contiguous interval symmetrically. Original input rows are unchanged.",
+      "old_probe": "a02bfb1858d9d8725ac75210689258efa1945dbead80fcf81465ee639c3ec223",
+      "corrected_comparisons": {
+        "x86-8": {
+          "reference": {
+            "contiguous_intervals": 22,
+            "p95_original_absolute_error_ms": 2.079145749999996,
+            "p95_contiguous_absolute_error_ms": 2.070721249999996,
+            "one_core_cpu_percent_weighted": 16.666015936519088
+          },
+          "candidate": {
+            "contiguous_intervals": 22,
+            "p95_original_absolute_error_ms": 8.17690359999998,
+            "p95_contiguous_absolute_error_ms": 9.118169199999993,
+            "one_core_cpu_percent_weighted": 5.208663578230183
+          }
+        },
+        "x86-15": {
+          "reference": {
+            "contiguous_intervals": 38,
+            "p95_original_absolute_error_ms": 1.6774822499999575,
+            "p95_contiguous_absolute_error_ms": 0.5392213166666706,
+            "one_core_cpu_percent_weighted": 20.977811774527694
+          },
+          "candidate": {
+            "contiguous_intervals": 38,
+            "p95_original_absolute_error_ms": 2.1646480999998836,
+            "p95_contiguous_absolute_error_ms": 0.18278651666667747,
+            "one_core_cpu_percent_weighted": 3.62777372812245
+          }
+        },
+        "x86-60": {
+          "reference": {
+            "contiguous_intervals": 82,
+            "p95_original_absolute_error_ms": 0.276598533333334,
+            "p95_contiguous_absolute_error_ms": 0.2771297333333344,
+            "one_core_cpu_percent_weighted": 29.019087863101337
+          },
+          "candidate": {
+            "contiguous_intervals": 82,
+            "p95_original_absolute_error_ms": 0.6563179333333309,
+            "p95_contiguous_absolute_error_ms": 0.6879741999999999,
+            "one_core_cpu_percent_weighted": 11.130898139682914
+          }
+        },
+        "x64-8": {
+          "reference": {
+            "contiguous_intervals": 22,
+            "p95_original_absolute_error_ms": 1.227041500000009,
+            "p95_contiguous_absolute_error_ms": 1.1038253500000095,
+            "one_core_cpu_percent_weighted": 11.98314315688623
+          },
+          "candidate": {
+            "contiguous_intervals": 22,
+            "p95_original_absolute_error_ms": 0.1920809500000003,
+            "p95_contiguous_absolute_error_ms": 0.19847165000000042,
+            "one_core_cpu_percent_weighted": 0.0
+          }
+        },
+        "x64-15": {
+          "reference": {
+            "contiguous_intervals": 38,
+            "p95_original_absolute_error_ms": 1.6353669666666153,
+            "p95_contiguous_absolute_error_ms": 0.5415600833333236,
+            "one_core_cpu_percent_weighted": 17.316495703972983
+          },
+          "candidate": {
+            "contiguous_intervals": 38,
+            "p95_original_absolute_error_ms": 4.893546416666511,
+            "p95_contiguous_absolute_error_ms": 0.7148385166666674,
+            "one_core_cpu_percent_weighted": 4.3022214704943815
+          }
+        },
+        "x64-60": {
+          "reference": {
+            "contiguous_intervals": 82,
+            "p95_original_absolute_error_ms": 0.12499701666666539,
+            "p95_contiguous_absolute_error_ms": 0.12670011666666547,
+            "one_core_cpu_percent_weighted": 30.143656855336676
+          },
+          "candidate": {
+            "contiguous_intervals": 82,
+            "p95_original_absolute_error_ms": 0.5205439166666685,
+            "p95_contiguous_absolute_error_ms": 0.5214657500000023,
+            "one_core_cpu_percent_weighted": 13.394652562086565
+          }
+        },
+        "arm64-8": {
+          "reference": {
+            "contiguous_intervals": 22,
+            "p95_original_absolute_error_ms": 1.9860833000000004,
+            "p95_contiguous_absolute_error_ms": 1.9924791000000006,
+            "one_core_cpu_percent_weighted": 18.759661225531147
+          },
+          "candidate": {
+            "contiguous_intervals": 22,
+            "p95_original_absolute_error_ms": 1.36750240000001,
+            "p95_contiguous_absolute_error_ms": 1.3992368000000126,
+            "one_core_cpu_percent_weighted": 0.0
+          }
+        },
+        "arm64-15": {
+          "reference": {
+            "contiguous_intervals": 38,
+            "p95_original_absolute_error_ms": 4.852968283333339,
+            "p95_contiguous_absolute_error_ms": 3.3538094666666716,
+            "one_core_cpu_percent_weighted": 19.3600767157134
+          },
+          "candidate": {
+            "contiguous_intervals": 38,
+            "p95_original_absolute_error_ms": 12.534297049999989,
+            "p95_contiguous_absolute_error_ms": 8.707047183333318,
+            "one_core_cpu_percent_weighted": 3.5494562392814277
+          }
+        },
+        "arm64-60": {
+          "reference": {
+            "contiguous_intervals": 82,
+            "p95_original_absolute_error_ms": 0.5380783166666662,
+            "p95_contiguous_absolute_error_ms": 0.5537345500000008,
+            "one_core_cpu_percent_weighted": 27.910006088250324
+          },
+          "candidate": {
+            "contiguous_intervals": 82,
+            "p95_original_absolute_error_ms": 0.3029919833333324,
+            "p95_contiguous_absolute_error_ms": 0.31495555000000014,
+            "one_core_cpu_percent_weighted": 14.453875864397281
+          }
+        },
+        "arm64ec-8": {
+          "reference": {
+            "contiguous_intervals": 22,
+            "p95_original_absolute_error_ms": 1.8461354500000102,
+            "p95_contiguous_absolute_error_ms": 1.8599271500000105,
+            "one_core_cpu_percent_weighted": 21.87390858674846
+          },
+          "candidate": {
+            "contiguous_intervals": 22,
+            "p95_original_absolute_error_ms": 1.2307079999999935,
+            "p95_contiguous_absolute_error_ms": 1.3312079999999944,
+            "one_core_cpu_percent_weighted": 4.688876380587551
+          }
+        },
+        "arm64ec-15": {
+          "reference": {
+            "contiguous_intervals": 38,
+            "p95_original_absolute_error_ms": 4.193731866666625,
+            "p95_contiguous_absolute_error_ms": 5.581838733333307,
+            "one_core_cpu_percent_weighted": 20.503805451552505
+          },
+          "candidate": {
+            "contiguous_intervals": 38,
+            "p95_original_absolute_error_ms": 10.151099366666655,
+            "p95_contiguous_absolute_error_ms": 2.1213726166666533,
+            "one_core_cpu_percent_weighted": 2.3841264388689423
+          }
+        },
+        "arm64ec-60": {
+          "reference": {
+            "contiguous_intervals": 82,
+            "p95_original_absolute_error_ms": 0.33188831666666874,
+            "p95_contiguous_absolute_error_ms": 0.334935216666669,
+            "one_core_cpu_percent_weighted": 25.68469153626016
+          },
+          "candidate": {
+            "contiguous_intervals": 82,
+            "p95_original_absolute_error_ms": 0.2610394166666702,
+            "p95_contiguous_absolute_error_ms": 0.26295091666667064,
+            "one_core_cpu_percent_weighted": 17.866657784031435
+          }
+        }
+      },
+      "15_hz_p95_regressions": 2
+    }
+  },
+  "real_game_attempt": {
+    "record": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json",
+    "last_durable_stage": "Window",
+    "renderer": "NVK GM20B",
+    "actual_performance_intervals": 0,
+    "completed_frame_limiter_comparison": false,
+    "runtime_change": false
+  },
+  "x86_three_way_30_60": {
+    "scope": "CPU-only actual DXVK limiter returns; thread CPU aggregate and QPC. The game and its frame presentation are measured separately. GetThreadTimes CPU accounting is quantized; per-run cycles are included.",
+    "boot": "2026-11-18T21:30:52.5038850Z",
+    "before": {
+      "cpu_khz": 1147500,
+      "cpu_error": 0,
+      "external": true,
+      "soc_c": 40,
+      "emc_khz": 2500000,
+      "mode": 1,
+      "board_c": 38,
+      "battery_pct": 89
+    },
+    "after": {
+      "cpu_khz": 815800,
+      "cpu_error": 0,
+      "external": true,
+      "soc_c": 39,
+      "emc_khz": 1331200,
+      "mode": 1,
+      "board_c": 38,
+      "battery_pct": 89
+    },
+    "results": {
+      "30": {
+        "reference": {
+          "intervals": 480,
+          "cpu_percent_of_one_core": 21.784289848327077,
+          "thread_cycles_per_wall_second": 117519136.7005228,
+          "actual_limiter_fps": 29.999985742194276,
+          "p95_period_ms": 33.651653645833335,
+          "p99_period_ms": 33.985243749999995,
+          "p95_abs_error_ms": 0.4988333333333309,
+          "runs": [
+            {
+              "run": "x86-1-reference",
+              "thread_cpu_100ns": 18437500,
+              "cpu_window_s": 8.03348515625,
+              "thread_cycles": 1013975178,
+              "wait_counts": {
+                "nt": 241,
+                "highres": 0,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 22.950811063185625,
+              "fps": 29.999727150919078,
+              "p95_ms": 33.6624609375,
+              "p99_ms": 33.88878489583333,
+              "p95_error_ms": 0.4399973958333327,
+              "csv_sha256": "8e6fd377e8fb0620176727559a190853f69146dad3c228142955f4411bede5a4",
+              "log_sha256": "36b151d970a01dc4428767b8a1d4e7e2c14ece8d2d3630125f0f06075662fc0c"
+            },
+            {
+              "run": "x86-6-reference",
+              "thread_cpu_100ns": 16562500,
+              "cpu_window_s": 8.033139114583333,
+              "thread_cycles": 874160636,
+              "wait_counts": {
+                "nt": 241,
+                "highres": 0,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 20.617718383505267,
+              "fps": 30.00024433792752,
+              "p95_ms": 33.5121328125,
+              "p99_ms": 34.638339062499995,
+              "p95_error_ms": 0.5334505208333288,
+              "csv_sha256": "29fa83d728e95e71fe4f7decc4fe7b510ddbc7475ac2d3099f7f36c4bc269a76",
+              "log_sha256": "0764492a2b88d81c1d27d6795248412eba373c86ca1e2fa4e94995f97b3f687d"
+            }
+          ]
+        },
+        "candidate": {
+          "intervals": 480,
+          "cpu_percent_of_one_core": 5.640747118122846,
+          "thread_cycles_per_wall_second": 28843874.40019407,
+          "actual_limiter_fps": 30.000261330401433,
+          "p95_period_ms": 33.90041145833333,
+          "p99_period_ms": 35.75045885416666,
+          "p95_abs_error_ms": 1.147192708333331,
+          "runs": [
+            {
+              "run": "x86-2-candidate",
+              "thread_cpu_100ns": 4843750,
+              "cpu_window_s": 8.032865208333334,
+              "thread_cycles": 227385580,
+              "wait_counts": {
+                "nt": 0,
+                "highres": 241,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 6.029915695554147,
+              "fps": 30.00092444254809,
+              "p95_ms": 34.08293489583333,
+              "p99_ms": 37.2696427083333,
+              "p95_error_ms": 1.4319218749999973,
+              "csv_sha256": "b51286188915088fe5c04f9108ec1307d0ac081d7a03f8377da7e39016972a2a",
+              "log_sha256": "12490885ee7abffb1b217c8e7f979b363279fcd7d89852b4bd0ced0892dec0e6"
+            },
+            {
+              "run": "x86-5-candidate",
+              "thread_cpu_100ns": 4218750,
+              "cpu_window_s": 8.033268958333334,
+              "thread_cycles": 236023976,
+              "wait_counts": {
+                "nt": 0,
+                "highres": 241,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 5.251598100202618,
+              "fps": 29.99959824756774,
+              "p95_ms": 33.7540078125,
+              "p99_ms": 35.276256770833335,
+              "p95_error_ms": 0.7859817708333372,
+              "csv_sha256": "95aacd5a1e4e0ec0430b243765b46713706a7ef2dd289dbcb3a7a5e1a39e2dc8",
+              "log_sha256": "c4b0dea47c6b13499c6e8346fc7cade1fb035b439310b899883fb242be6ee038"
+            }
+          ]
+        },
+        "fixed500": {
+          "intervals": 480,
+          "cpu_percent_of_one_core": 1.6533166533782153,
+          "thread_cycles_per_wall_second": 5325546.21448936,
+          "actual_limiter_fps": 30.000054394629878,
+          "p95_period_ms": 34.86086718749999,
+          "p99_period_ms": 39.337109375,
+          "p95_abs_error_ms": 2.5295781250000013,
+          "runs": [
+            {
+              "run": "x86-3-fixed500",
+              "thread_cpu_100ns": 1093750,
+              "cpu_window_s": 8.032925885416667,
+              "thread_cycles": 42083549,
+              "wait_counts": {
+                "nt": 0,
+                "highres": 241,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 1.3615835818747473,
+              "fps": 30.000290627815456,
+              "p95_ms": 35.14194270833334,
+              "p99_ms": 39.508984375,
+              "p95_error_ms": 2.947299479166665,
+              "csv_sha256": "1ab30603dfea68de43c7f230bc7d4c71c7da3128e768945ca2bf1684d12176ac",
+              "log_sha256": "2defc0abefeadce5e9e26e2379babebf8eed268b076fdd9100daf1286fd88bd5"
+            },
+            {
+              "run": "x86-4-fixed500",
+              "thread_cpu_100ns": 1562500,
+              "cpu_window_s": 8.033264427083333,
+              "thread_cycles": 43477690,
+              "wait_counts": {
+                "nt": 0,
+                "highres": 241,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 1.9450374305272342,
+              "fps": 29.999818165164633,
+              "p95_ms": 34.100791666666666,
+              "p99_ms": 38.39982499999999,
+              "p95_error_ms": 1.9933255208333316,
+              "csv_sha256": "16ea67ece27a898413208921403f056f037bddd441458272521d8b230f3f14be",
+              "log_sha256": "a9a28c30b8620cedf432ae0da1b9ad71424b0c8f9b3c0533d4d964efea9a0d17"
+            }
+          ]
+        },
+        "fixed500_vs_highres": {
+          "percentage_points_saved": 3.9874304647446306,
+          "relative_percent_reduction": 70.68975760203175
+        }
+      },
+      "60": {
+        "reference": {
+          "intervals": 480,
+          "cpu_percent_of_one_core": 27.89649611695246,
+          "thread_cycles_per_wall_second": 168613432.43630293,
+          "actual_limiter_fps": 56.97663290356038,
+          "p95_period_ms": 16.8319765625,
+          "p99_period_ms": 17.105901041666666,
+          "p95_abs_error_ms": 0.2861145833333325,
+          "runs": [
+            {
+              "run": "x86-1-reference",
+              "thread_cpu_100ns": 11875000,
+              "cpu_window_s": 4.016773020833333,
+              "thread_cycles": 695796667,
+              "wait_counts": {
+                "nt": 241,
+                "highres": 0,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 29.56353256310304,
+              "fps": 59.995453469541765,
+              "p95_ms": 16.842765625,
+              "p99_ms": 17.000732291666665,
+              "p95_error_ms": 0.2824166666666657,
+              "csv_sha256": "8e6fd377e8fb0620176727559a190853f69146dad3c228142955f4411bede5a4",
+              "log_sha256": "36b151d970a01dc4428767b8a1d4e7e2c14ece8d2d3630125f0f06075662fc0c"
+            },
+            {
+              "run": "x86-6-reference",
+              "thread_cpu_100ns": 11718750,
+              "cpu_window_s": 4.440830364583333,
+              "thread_cycles": 730268870,
+              "wait_counts": {
+                "nt": 240,
+                "highres": 0,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 26.388645901585857,
+              "fps": 54.24705720309802,
+              "p95_ms": 16.768830729166666,
+              "p99_ms": 17.826430208333317,
+              "p95_error_ms": 0.292830729166667,
+              "csv_sha256": "29fa83d728e95e71fe4f7decc4fe7b510ddbc7475ac2d3099f7f36c4bc269a76",
+              "log_sha256": "0764492a2b88d81c1d27d6795248412eba373c86ca1e2fa4e94995f97b3f687d"
+            }
+          ]
+        },
+        "candidate": {
+          "intervals": 480,
+          "cpu_percent_of_one_core": 14.977107102777635,
+          "thread_cycles_per_wall_second": 69681204.6298608,
+          "actual_limiter_fps": 60.00088946631064,
+          "p95_period_ms": 16.8136796875,
+          "p99_period_ms": 18.007409895833327,
+          "p95_abs_error_ms": 0.6623854166666647,
+          "runs": [
+            {
+              "run": "x86-2-candidate",
+              "thread_cpu_100ns": 7187500,
+              "cpu_window_s": 4.016616927083334,
+              "thread_cycles": 302967022,
+              "wait_counts": {
+                "nt": 0,
+                "highres": 240,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 17.894412463224874,
+              "fps": 59.99930703925334,
+              "p95_ms": 16.796015625,
+              "p99_ms": 18.85241093749998,
+              "p95_error_ms": 0.6686249999999997,
+              "csv_sha256": "b51286188915088fe5c04f9108ec1307d0ac081d7a03f8377da7e39016972a2a",
+              "log_sha256": "12490885ee7abffb1b217c8e7f979b363279fcd7d89852b4bd0ced0892dec0e6"
+            },
+            {
+              "run": "x86-5-candidate",
+              "thread_cpu_100ns": 4843750,
+              "cpu_window_s": 4.016476458333333,
+              "thread_cycles": 256788602,
+              "wait_counts": {
+                "nt": 0,
+                "highres": 241,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 12.059699715033187,
+              "fps": 60.0024719768403,
+              "p95_ms": 16.819273437499998,
+              "p99_ms": 17.732249999999997,
+              "p95_error_ms": 0.6085494791666654,
+              "csv_sha256": "95aacd5a1e4e0ec0430b243765b46713706a7ef2dd289dbcb3a7a5e1a39e2dc8",
+              "log_sha256": "c4b0dea47c6b13499c6e8346fc7cade1fb035b439310b899883fb242be6ee038"
+            }
+          ]
+        },
+        "fixed500": {
+          "intervals": 480,
+          "cpu_percent_of_one_core": 0.0,
+          "thread_cycles_per_wall_second": 10222775.182655558,
+          "actual_limiter_fps": 60.00051562943119,
+          "p95_period_ms": 17.403158854166662,
+          "p99_period_ms": 23.062932812499998,
+          "p95_abs_error_ms": 1.3343151041666645,
+          "runs": [
+            {
+              "run": "x86-3-fixed500",
+              "thread_cpu_100ns": 0,
+              "cpu_window_s": 4.01660375,
+              "thread_cycles": 38050531,
+              "wait_counts": {
+                "nt": 0,
+                "highres": 241,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 0.0,
+              "fps": 60.00037500234376,
+              "p95_ms": 17.254867187499997,
+              "p99_ms": 18.0735578125,
+              "p95_error_ms": 1.0365755208333323,
+              "csv_sha256": "1ab30603dfea68de43c7f230bc7d4c71c7da3128e768945ca2bf1684d12176ac",
+              "log_sha256": "2defc0abefeadce5e9e26e2379babebf8eed268b076fdd9100daf1286fd88bd5"
+            },
+            {
+              "run": "x86-4-fixed500",
+              "thread_cpu_100ns": 0,
+              "cpu_window_s": 4.01659609375,
+              "thread_cycles": 44071065,
+              "wait_counts": {
+                "nt": 0,
+                "highres": 238,
+                "fallback": 0
+              },
+              "cpu_percent_of_one_core": 0.0,
+              "fps": 60.000656257177816,
+              "p95_ms": 17.54766927083333,
+              "p99_ms": 30.671296354166486,
+              "p95_error_ms": 2.28435156249997,
+              "csv_sha256": "16ea67ece27a898413208921403f056f037bddd441458272521d8b230f3f14be",
+              "log_sha256": "a9a28c30b8620cedf432ae0da1b9ad71424b0c8f9b3c0533d4d964efea9a0d17"
+            }
+          ]
+        },
+        "fixed500_vs_highres": {
+          "percentage_points_saved": 14.977107102777635,
+          "relative_percent_reduction": 100.0
+        }
+      }
+    },
+    "images": {
+      "reference": {
+        "bytes": 956432,
+        "unsigned": "c4d3762d53b174efee2c6c4dcf0304ac20bef25bb029561394adc9869d6deecb",
+        "sha256": "9e57f061ed7d5402020e842e5b87006ecd32f57badd9e71553157b81ef0e9982",
+        "independent_build_different_sections": [],
+        "section_count": 7,
+        "text_sha256": "726bd7bb1f1a21563a6ef50650952bdae52bd1744881488f9b9ceb76f1b2ef90"
+      },
+      "candidate": {
+        "bytes": 958480,
+        "unsigned": "41a6dff66f775352033b3f8c9429af1a77d9908885697d656af46e1a01848afd",
+        "sha256": "1caa8b0b7d6e747f11c4584562c7c6501bfa4128f4b00c0db6a3ab004a37d46d",
+        "independent_build_different_sections": [],
+        "section_count": 7,
+        "text_sha256": "73b7cc566b7012010d42b7b882122668331d34931fa4b2566178b2139512f7b1"
+      },
+      "fixed500": {
+        "bytes": 957968,
+        "unsigned": "5153c4d1f154b36e9a274657e6b09f6e8a72772e2d3178476c37203c6f5f674d",
+        "sha256": "7d8d5c13dacd5f4a4f3d2a9a2a561d10e2653194e111cec21d9fb42499dd41f2"
+      }
+    },
+    "instrumentation": {
+      "source": "tegra-x1-wddm/tools/dxvk/frame_timing_30_60.cpp",
+      "sha256": "9716e68b9f8ddf37ef0b532c93f5cf3488047e296664a18484ad2308fb48718c",
+      "sampling": "Store timestamps on return from 241 consecutive limiter calls to delimit 240 intervals. Query CPU and cycle counters once outside the frame interval array, run each side twice in the order reference, high-resolution, fixed500, fixed500, high-resolution, reference.",
+      "raw_intervals": "tegra-x1-wddm/docs/dxvk-games-20261118/x86-limiter-30-60-contiguous.csv",
+      "raw_sha256": "8990f557d79841569607fd8e657e090d098fee2c4c664645296d22b6c0fb82df",
+      "total_rows": 2880,
+      "source_patches": [
+        "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-windows-highres-wait.patch",
+        "tegra-x1-wddm/docs/dxvk-games-20261118/dxvk-highres-500us-tail.patch"
+      ],
+      "500us_patch_sha256": "0f8af5f36aa808a5161a178d7a0a6316342579f31ba77c6957efeed649e982b5",
+      "500us_reference": "https://github.com/stenzek/duckstation/blob/bb4e9ac5e6b3872126dc76f1fe4f46169c96b082/src/common/timer.cpp#L107-L145"
+    },
+    "time_accounting": "At 60 Hz the fixed-tail thread reported zero GetThreadTimes ticks in both 4-second windows, with nonzero thread cycles. Reported zero is below this measurement resolution. Tail latency worsened on both caps. No game or battery savings were qualified.",
+    "actual_game": {
+      "game": "x86 FTEQW / LibreQuake, lq_e0m1, 320x240 window",
+      "engine_launch_cap_hz": 120,
+      "warmup_dxvk_cap_hz": 30,
+      "source_game_exe_sha256": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+      "game_inputs": [
+        {
+          "name": "pak0.pak",
+          "sha256": "0dd895a425e75d9908025dcfe340f75f5b8166ada68b2d7ee54d8d91d29378ff"
+        },
+        {
+          "name": "pak1.pak",
+          "sha256": "28423c01836341d9e3c6465b407a44ae94e4e29e954544a67739686850e39365"
+        }
+      ],
+      "installed_game_dll_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+      "bench_game_candidate_sha256": {
+        "highres": "12eb510feb54f33a953e2acc7166df534055b73aa0396dc013cdc3cb60a1b580",
+        "fixed500": "22cc9b4155eaa411a951d639c7d47342099393150268e9077cad5e11a40a63d6"
+      },
+      "candidate_dll_used_in_the_restarted_run": false,
+      "first_private_run": "The high-integrity process ignored the child-only ICD environment variable. Both an ordinary registered-app loader query and a direct ICD query matched the native LUID; the private application paths required explicit selection.",
+      "private_query": {
+        "scope": "NVK Windows ICD identity",
+        "loader": true,
+        "icd_interface": 0,
+        "api_version": 4211042,
+        "kmt_adapters": 2,
+        "private_queries_ok": 2,
+        "matching_kmd": 1,
+        "native_ready_kmd": 1,
+        "enumerate_result": 0,
+        "physical_devices": 1,
+        "kmt_luid": "00000000000862f0",
+        "matching_luid": true
+      },
+      "warmup_progress": [
+        "Started",
+        "Ready",
+        "Launched",
+        "Window"
+      ],
+      "evidence": "Original desktop DLL opened the 320x240 D3D9 window. FTE logged GM20B, renderer initialization and client connection. A subsequent unexpected boot interrupted the warmup before durable map/input/measurement/exit acceptance.",
+      "boot_before": "2026-11-18T21:30:53.8282480Z",
+      "boot_after": "2026-11-18T21:51:40.7735870Z",
+      "subsequent_system_events": [
+        {
+          "record": 68079,
+          "utc": "2026-11-18T21:52:38.8871601Z",
+          "data": {},
+          "id": 6008
+        },
+        {
+          "record": 68081,
+          "utc": "2026-11-18T21:52:38.8954735Z",
+          "data": {},
+          "id": 6005
+        },
+        {
+          "record": 68088,
+          "utc": "2026-11-18T21:34:46.0598966Z",
+          "data": {
+            "PowerButtonTimestamp": "0",
+            "LongPowerButtonPressDetected": "false",
+            "BugcheckCode": "0",
+            "SleepInProgress": "0"
+          },
+          "id": 41
+        }
+      ],
+      "dump_available": false,
+      "game_cpu_and_p95_p99_qualified": false,
+      "selected_for_games": false,
+      "daily_loader_settings_restored_sha256": "e273b17805e5df8e8f0709d9cf3e4bb70a624e2c644cb40899cc7baf60b332d6",
+      "post_recovery": {
+        "gpu": 0,
+        "handheld": 1,
+        "external": true
+      },
+      "component_and_log_hashes": {
+        "state.json": "06f4a39adf770973e7cbffda3ef6aad4bdeb69a787a960068eae92ef44606df3",
+        "scope.json": "d4e23b838d03807ef1ae7c1128b9238fb0901d6aaadff45ab9e3c439592c47b7",
+        "game.err": "20ffb9ea9eb106cff725bf6d2d74a80ada1f7de229cf1222bb7143129cc95ca2",
+        "fteqw_d3d9.log": "503281018a175d1fc8cfb5a1770233e1a7e0b338b03b32ba40d2cf946b7a5f15",
+        "qconsole.log": "7c003a5b0925ef095c7de3d72c0d5920f6ab46b557afe906ea076c9251e2034f"
+      }
+    }
+  }
+}

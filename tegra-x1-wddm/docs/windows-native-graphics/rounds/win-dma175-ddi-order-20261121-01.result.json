@@ -1,0 +1,362 @@
+{
+  "schema": 1,
+  "round_id": "win-dma175-ddi-order-20261121-01",
+  "contract_id": "WIN-DMA175-DDI-CALL-ORDER",
+  "windows_question": "WIN-DMA175-DDI-CALL-ORDER",
+  "plan_sha256": "3b0e7dc1bd037d1d6c7f1aef00579520bf7dcbbd3f1f3bf4e6ec6757e20a400c",
+  "status": "观测缺口",
+  "finding": "匹配的 Windows ARM64 映像中，DxgKrnl 175.1 为 dxgmms2!EventDmaSubmit。VidSchiSendToExecutionQueue 在 RVA 0xd3b0 进入事件写点，之后 0xd3c4 释放 DPC 级队列锁，再按分支调用 DxgCoreInterface。虚拟提交调用点为 0xd5bc，直达 dxgkrnl 的虚拟提交包装。",
+  "missing_observation": "历史 152586 有相同事件描述符和原始载荷。该观察点在核验版本的提交 DDI 之前。原故障时缺 0xd3c4 锁释放、后续分支及调用进入或返回的实机回执，且未单独留存故障启动 91476 的 dxgmms2.sys 哈希。Windows 还留有别处调度活动。",
+  "device_executions": 0,
+  "evidence": {
+    "boundaries": {
+      "last_entry": {
+        "scope": "incident",
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+        "archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+        "member": "app/scene/video.etl",
+        "qpc": 223221950698,
+        "descriptor": "af000111000108000100000000000040",
+        "payload": "f07a8eaa0f87ffff0000000000000000000000000a5402000000000014be0000000000000000000003000000",
+        "pid": 4,
+        "tid": 888
+      },
+      "last_return": {
+        "context": "启动 91918 的相同事件描述符、不同提交号正常对照",
+        "windows_qpc": 16337644245,
+        "kmd": {
+          "submission": 12776,
+          "queue": 4941,
+          "source_field": "submission_fence",
+          "snapshot": {
+            "event": "ExecutionState",
+            "qpc": 16337653738,
+            "pid": 4,
+            "tid": 932,
+            "id": 2,
+            "version": 1,
+            "payload_sha256": "339a38480f5dae730cd0a2f905b5dc7f19f5b1f193e7da23e2173e9eb848e60a",
+            "source": 1,
+            "source_name": "preempt",
+            "adapter_luid": "0000000000005601",
+            "status": "0x00000000",
+            "request_fence": 1719,
+            "request_flags": "0x00000000",
+            "stage": 6,
+            "stage_name": "submit",
+            "request_context": "0x0000000000000000",
+            "context": "0xffff838a678a79d0",
+            "dma_address": "0x0000000004004000",
+            "submission_fence": 12776,
+            "last_completed_fence": 12775,
+            "expected": 4003,
+            "observed": 0,
+            "dma_bytes": 8052,
+            "work_flags": "0x000000e1",
+            "queue_flags": "0x0000001d",
+            "queue_failure": "0x00000000",
+            "graphics_generation": 1,
+            "channel_stage": 0,
+            "channel_register": "0x00000000",
+            "channel_value": "0x00000000",
+            "cached_fifo": "0x00000000",
+            "cached_mmu": "0x00000000",
+            "cached_pbdma": "0x00000000",
+            "cached_pbdma1": "0x00000000",
+            "cached_mc": "0x00000000",
+            "cached_gr": "0x00000000",
+            "cached_fecs_error": "0x00000000",
+            "cached_fecs_host": "0x00000000",
+            "poll_count": 0,
+            "request_dma_bytes": 0,
+            "private_bytes": 0,
+            "umd_private_bytes": 0,
+            "work_state": [
+              "active",
+              "prepared",
+              "hardware_busy",
+              "attempted"
+            ],
+            "queue_state": [
+              "engine",
+              "servicing",
+              "preemptions_pending",
+              "pending"
+            ]
+          },
+          "complete_qpc": 16337688290
+        }
+      },
+      "first_anomaly_or_missing": "历史 152586 有相同事件描述符和原始载荷。该观察点在核验版本的提交 DDI 之前。原故障时缺 0xd3c4 锁释放、后续分支及调用进入或返回的实机回执，且未单独留存故障启动 91476 的 dxgmms2.sys 哈希。Windows 还留有别处调度活动。"
+    },
+    "static_verdict": "匹配映像的事件写入和各 DDI 调用分支已核实",
+    "windows_identity": {
+      "dxgmms2": {
+        "board": {
+          "path": "C:\\Windows\\System32\\drivers\\dxgmms2.sys",
+          "sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5",
+          "bytes": 1042408,
+          "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+        },
+        "pe": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.sys",
+          "sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5"
+        },
+        "pdb": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.pdb",
+          "sha256": "54ed9eab4bff5bdcec9c5571ab05fe415052a106ad39ad9f713e939f87b65f3a",
+          "guid": "AF63A8A4-9D01-FA37-1A26-6959E133EB0B",
+          "codeview_age": 1,
+          "dbi_age": 1,
+          "info_header_age": 2,
+          "public_symbol_server_key": "AF63A8A49D01FA371A266959E133EB0B1"
+        }
+      },
+      "dxgkrnl": {
+        "board": {
+          "path": "C:\\Windows\\System32\\drivers\\dxgkrnl.sys",
+          "sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+          "bytes": 4590976,
+          "version": "10.0.22621.2792 (WinBuild.160101.0800)"
+        },
+        "pe": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/startup-diagnostic-01a1fc19/activation/windows-kernel-contract/dxgkrnl.sys",
+          "sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6"
+        },
+        "pdb": {
+          "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/startup-diagnostic-01a1fc19/activation/windows-kernel-contract/dxgkrnl.pdb",
+          "sha256": "7f0a811d1c74569f9dbe428cc2d73355beb4e0864b7b77c81e1bbf3540fa74e9",
+          "guid": "797F457A-6488-C67C-8E55-B0F3E771DC32",
+          "codeview_age": 1,
+          "dbi_age": 1,
+          "info_header_age": 2,
+          "public_symbol_server_key": "797F457A6488C67C8E55B0F3E771DC321"
+        }
+      }
+    },
+    "static_route": {
+      "scheduler": "VidSchiSendToExecutionQueue",
+      "scheduler_rva": "0xcbd0",
+      "before_log_lock_call": "0xcda0",
+      "event_selector": 7,
+      "profile_call_rva": "0xd3b0",
+      "event_writer_call_rva": "0x2a8a4",
+      "release_dpc_lock_rva": "0xd3c4",
+      "slot_selection_branch_rvas": [
+        "0xd500",
+        "0xd580"
+      ],
+      "slots": {
+        "PreemptCommand": {
+          "dxgmms2_call_rva": "0xd568",
+          "interface_offset": "0xe0",
+          "dxgkrnl_target_rva": "0x20000",
+          "dxgkrnl_public_symbol": "?ADAPTER_RENDER_DdiPreemptCommand@@YAJPEAVADAPTER_RENDER@@PEBU_DXGKARG_PREEMPTCOMMAND@@@Z"
+        },
+        "SubmitCommandVirtual": {
+          "dxgmms2_call_rva": "0xd5bc",
+          "interface_offset": "0x1a8",
+          "dxgkrnl_target_rva": "0x1cfc0",
+          "dxgkrnl_public_symbol": "?ADAPTER_RENDER_DdiSubmitCommandVirtual@@YAJPEAVADAPTER_RENDER@@PEBU_DXGKARG_SUBMITCOMMANDVIRTUAL@@@Z"
+        },
+        "SubmitCommand": {
+          "dxgmms2_call_rva": "0xd604",
+          "interface_offset": "0xd8",
+          "dxgkrnl_target_rva": "0x4f5d0",
+          "dxgkrnl_public_symbol": "?ADAPTER_RENDER_DdiSubmitCommand@@YAJPEAVADAPTER_RENDER@@PEBU_DXGKARG_SUBMITCOMMAND@@@Z"
+        }
+      },
+      "virtual_wrapper_guarantee": "Static wrapper contains a further indirect call. Runtime receipt determines whether it was reached."
+    },
+    "descriptor": "af000111000108000100000000000040",
+    "trace_events": [
+      {
+        "scope": "incident",
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+        "archive_sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab",
+        "member": "app/scene/video.etl",
+        "qpc": 223221950698,
+        "descriptor": "af000111000108000100000000000040",
+        "payload": "f07a8eaa0f87ffff0000000000000000000000000a5402000000000014be0000000000000000000003000000",
+        "pid": 4,
+        "tid": 888
+      },
+      {
+        "scope": "normal",
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-seq-first-present-dwm-rundown-20261121-01/collected.zip",
+        "archive_sha256": "31384a31f5babf20bc88d1590d5f01ca526560cbc6912129b02bdb370fe114af",
+        "member": "display.etl",
+        "qpc": 16337644245,
+        "descriptor": "af000111000108000100000000000040",
+        "payload": "c07d8da20bb3ffff000000000000000000000000e8310000000000004d130000000000000000000003000000",
+        "pid": 4,
+        "tid": 932
+      }
+    ],
+    "normal_same_submission_native_snapshot": {
+      "submission": 12776,
+      "queue": 4941,
+      "source_field": "submission_fence",
+      "snapshot": {
+        "event": "ExecutionState",
+        "qpc": 16337653738,
+        "pid": 4,
+        "tid": 932,
+        "id": 2,
+        "version": 1,
+        "payload_sha256": "339a38480f5dae730cd0a2f905b5dc7f19f5b1f193e7da23e2173e9eb848e60a",
+        "source": 1,
+        "source_name": "preempt",
+        "adapter_luid": "0000000000005601",
+        "status": "0x00000000",
+        "request_fence": 1719,
+        "request_flags": "0x00000000",
+        "stage": 6,
+        "stage_name": "submit",
+        "request_context": "0x0000000000000000",
+        "context": "0xffff838a678a79d0",
+        "dma_address": "0x0000000004004000",
+        "submission_fence": 12776,
+        "last_completed_fence": 12775,
+        "expected": 4003,
+        "observed": 0,
+        "dma_bytes": 8052,
+        "work_flags": "0x000000e1",
+        "queue_flags": "0x0000001d",
+        "queue_failure": "0x00000000",
+        "graphics_generation": 1,
+        "channel_stage": 0,
+        "channel_register": "0x00000000",
+        "channel_value": "0x00000000",
+        "cached_fifo": "0x00000000",
+        "cached_mmu": "0x00000000",
+        "cached_pbdma": "0x00000000",
+        "cached_pbdma1": "0x00000000",
+        "cached_mc": "0x00000000",
+        "cached_gr": "0x00000000",
+        "cached_fecs_error": "0x00000000",
+        "cached_fecs_host": "0x00000000",
+        "poll_count": 0,
+        "request_dma_bytes": 0,
+        "private_bytes": 0,
+        "umd_private_bytes": 0,
+        "work_state": [
+          "active",
+          "prepared",
+          "hardware_busy",
+          "attempted"
+        ],
+        "queue_state": [
+          "engine",
+          "servicing",
+          "preemptions_pending",
+          "pending"
+        ]
+      },
+      "complete_qpc": 16337688290
+    },
+    "boot_identity_scope": {
+      "current_file_hash_boot": 91918,
+      "other_prior_dxgmms2_revision": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5",
+      "historical_event_boot": 91476,
+      "historical_dxgmms2_direct_hash": null,
+      "artifact_scope": "同版系统样本、同事件描述符和正常提交用于核对日志位置。故障次没有模块哈希及分支执行回执。"
+    },
+    "verified_static_result": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/verified-call-order.json",
+      "sha256": "1b48f398c2a91689706ba06ab421d05459a82f4165155e8c1a7d84fb1733f622"
+    },
+    "board_binary_identity": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/board-file-identity.json",
+      "sha256": "4163c811595e78d5e83e72c6ca6d662dfa94e86569aa01b359555cb8372d8859"
+    },
+    "exact_disassembly_artifacts": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/lock-acquire.asm",
+        "sha256": "3bbb4ee31a673f50449bb581d93d62d00a626f5bcf5fda3675573c16a7833cb5",
+        "module": "dxgmms2",
+        "range_rva": [
+          "0xcd78",
+          "0xcda4"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/log-release.asm",
+        "sha256": "38d4261ed2c3350b6863e1949dbbf8eba086868d41dadb1460779dbdac9447e2",
+        "module": "dxgmms2",
+        "range_rva": [
+          "0xd390",
+          "0xd3c8"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/ddi-dispatch.asm",
+        "sha256": "04baf3c145e5be2034f8c8c43bb620954cb8ffd7612b5efe79062eba329d811a",
+        "module": "dxgmms2",
+        "range_rva": [
+          "0xd4f8",
+          "0xd610"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/profile-selector.asm",
+        "sha256": "a20d3eb7aae678842afc9e089ce7d01b8637cc6d24fb808a7870d14fabc816de",
+        "module": "dxgmms2",
+        "range_rva": [
+          "0x10610",
+          "0x106a4"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/event-call.asm",
+        "sha256": "5bedccbe4b9777a1a9d3f6bccf3d2288719cfd4cc060d4d20e629384b3f7c917",
+        "module": "dxgmms2",
+        "range_rva": [
+          "0x2a89c",
+          "0x2a8ac"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/descriptor-writer.asm",
+        "sha256": "be7a9c2aaa24816f420bbb8df2cecdbc53b536780f75832d8b56d4c5ed480bf1",
+        "module": "dxgmms2",
+        "range_rva": [
+          "0x3ab48",
+          "0x3ab80"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/virtual-wrapper-indirect.asm",
+        "sha256": "51cb7e2462d817d6ca043e70b1e86457bdc17b90c5d1fb00ffa26f8229e251a5",
+        "module": "dxgkrnl",
+        "range_rva": [
+          "0x15d4d0",
+          "0x15d4ec"
+        ]
+      }
+    ],
+    "verify_source": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/verify_dma175_static.py",
+      "sha256": "dc8455d85a3200aca30c638f0c47458c6c1ace15f015e6d3758addce83284201"
+    },
+    "descriptor_source": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175_descriptor.py",
+      "sha256": "a113cc7e9d67f6a0eb609de4548b854a0575c950ec5a46f9391cd68a54d95692"
+    },
+    "official_ddi": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_submitcommandvirtual",
+    "source_reports": [
+      {
+        "path": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+        "sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json",
+        "sha256": "b394a991ddc86d9dd7bc8d918b4708487fb36721459ba5b0e914a47f5ad7f8c3"
+      }
+    ]
+  }
+}

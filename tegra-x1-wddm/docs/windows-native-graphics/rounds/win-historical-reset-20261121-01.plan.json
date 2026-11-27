@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "round_id": "win-historical-reset-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "owner": "历史应用、Windows 内核及早期复位记录",
+  "question": "82058、82221、82382 上哪一步触发旧式首次 Present 后的整机重启？",
+  "method": "实机只读调查历史启动",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "将原次进入/返回位置直接关联到复位原因，并按故障表既定规程验收原场景修复。",
+  "observations": [
+    "按开机 82058/82221/82382 和下一开机 82128/82289/82448 读取 System 原始 XML、相关 WER/可靠性和 Windows 跟踪覆盖；保留通道内 RecordId。",
+    "列出原窗口区间覆盖的崩溃转储、滚动 ETL、Srt 与 WER 报告，核实可用候选的内容时钟和与旧启动/进程/对象的关系。",
+    "与旧客户端 CALL、已退役值 1 的信号、恢复开机和已计划的 WATCHDOG 对照逐项配对，最后进入/返回及首个缺口分列。"
+  ],
+  "inputs": {
+    "windows_scripts": {
+      "events": "3162d224388b3864201f81561d5d03d30bb7f85109bd5022a705c39484414f54",
+      "files": "628fc7f81db16d260b6ff469285b82fa64fb86a8d25ff6f05c383fb96d8cfb17",
+      "reports": "4a6ea6d21a7024e4901117a1ca55f08c71488b6550604913f449477dbd50812a"
+    },
+    "old_windows_evidence": [
+      {
+        "path": "legacy-sequential-step4/historical-first-present-fence.json",
+        "sha256": "528d8da981f2eb0ce38cd142b7aefb97c71fb75ac341114d1278f9124e65215f"
+      },
+      {
+        "path": "legacy-sequential-step4/historical-restart-order.json",
+        "sha256": "e00d8d476b7caf397a668444c51bb4fe8338bc016dbb4d46ec8cf42afac18097"
+      }
+    ],
+    "registered_empty_control": {
+      "path": "windows-native-graphics/rounds/win-empty-present-20261121-01.result.json",
+      "sha256": "75100f2dbd0176de353466df55a9d7c2798a65c875ac9acaa96893fb255bfe0c"
+    }
+  }
+}

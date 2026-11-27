@@ -1,0 +1,790 @@
+{
+  "schema": 1,
+  "round_id": "win-first-present-archives-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "plan_sha256": "3df44d66036acd43da7c38271cc77159c65c0e4c90f6d7250fb6e690e47063ab",
+  "status": "故障开放",
+  "finding": "五处历史目录的 155 份结果 ZIP 按内容去重得到 154 份，36 份配置对应原签名客户端。启动号变化的 4 份中，3 份为原先的无写入 SEQUENTIAL 故障，另一份为现代 DDI 翻转的第三次呈现。另一个签名客户端在三个较早启动也留下无写入 CALL、异常开机和零份 CALL 后图形事件；它把设备移除查询放在公开返回和 DwmFlush 之后。",
+  "missing_observation": "原三次公开 CALL 到复位之间，仍缺同启动同对象的内核接收、KMD 进入/返回或板级记录。早期不同客户端的独立现象只能裁决自身的调用顺序。",
+  "device_executions": 0,
+  "evidence": {
+    "unique_original_hash_cases": [
+      {
+        "root": "prior-step4-out",
+        "relative": "legacy-kmd-receipt-current/cases/Ddi20Case-261120-155527066735/result.zip",
+        "id": "Ddi20Case-261120-155527066735",
+        "archive_sha256": "8b355e5c08a32f822d2704447f2d3c0cd5ecbc701f123a9486dda80edaf67870",
+        "mode": "native-legacy-empty",
+        "boot": 83590,
+        "collected_boot": 83590,
+        "effect": "FlipSequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "9e6d67921e0624b2cbc5057987e1db25c698e898c220ddd012487304899ae999"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "legacy-kmd-receipt-current/cases/Ddi20Case-261120-155652555170/result.zip",
+        "id": "Ddi20Case-261120-155652555170",
+        "archive_sha256": "b2f04349f410b8c4c8fa9b0593e071d5e9dca1fdf33ee57a3674eec8e1fda849",
+        "mode": "native-legacy-clear",
+        "boot": 83590,
+        "collected_boot": 83590,
+        "effect": "FlipSequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": false,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "c62b9481e01e4d9cc3750246368413779ce4725634e9c73fa718f0dc830a2db0"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "legacy-kmd-receipt-current/cases/Ddi20Case-261120-155845253068/result.zip",
+        "id": "Ddi20Case-261120-155845253068",
+        "archive_sha256": "9e2eca6054a01b2e4951d60d40c1c8a87d747c22d61be4749c891d93ba002830",
+        "mode": "native-legacy-clear",
+        "boot": 83590,
+        "collected_boot": 83590,
+        "effect": "FlipSequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": false,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "75588f82c815173df55575ad232073ca36c4d1b09a26c94d868e3804d808c195"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "legacy-present-durable-boundaries/cases/Ddi20Case-261120-151602432340/result.zip",
+        "id": "Ddi20Case-261120-151602432340",
+        "archive_sha256": "7427f347f7a2213e8ba0320ae5549a9e4198b12a6c67ecfe849ca97de040541d",
+        "mode": "native-legacy-empty",
+        "boot": 83327,
+        "collected_boot": 83327,
+        "effect": "FlipSequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "9e3972a094ef2d5dc184ee15bceaba4dc40841cbb779bb9a195be6aa0a729ad0"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-device-reason/cases/Ddi20Case-261120-121438259710/result.zip",
+        "id": "Ddi20Case-261120-121438259710",
+        "archive_sha256": "19777eec5446c19ce5bfa231f3bfbf280dac17f64e2fb986085db58d7cf904e2",
+        "mode": "warp-legacy-empty",
+        "boot": 82058,
+        "collected_boot": 82058,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "a363828b47894b3e47fb2643bf26d9960059792696206bfb4785859654c694c1"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-device-reason/cases/Ddi20Case-261120-121544404110/result.zip",
+        "id": "Ddi20Case-261120-121544404110",
+        "archive_sha256": "4852b76b2ffa39aeefceef2a7680d1f030c226483bbf6ee65ebfa0024be2262f",
+        "mode": "native-modern-empty",
+        "boot": 82058,
+        "collected_boot": 82058,
+        "effect": "Sequential",
+        "ddi": [
+          720928
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "d189a5f24a527df0f2233261d6efd23c324bdc6d66927bece4b3a9b4d9d1d0eb"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-device-reason/cases/Ddi20Case-261120-121731511026/result.zip",
+        "id": "Ddi20Case-261120-121731511026",
+        "archive_sha256": "274d7da10ddc2eafc834625377b6ecb410c75bc95cbe8595199307d44519608b",
+        "mode": "native-modern-empty",
+        "boot": 82058,
+        "collected_boot": 82058,
+        "effect": "FlipSequential",
+        "ddi": [
+          720928
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "0c25df33e511c70b53c5737229668bb2133706fc15cea66efc3cde7c93052e95"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-device-reason/cases/Ddi20Case-261120-121855717865/result.zip",
+        "id": "Ddi20Case-261120-121855717865",
+        "archive_sha256": "6677a160e0f23a3618a3ff1d7dd3db0aea21c91c2315caba9a6d7d65000b8a2a",
+        "mode": "native-legacy-empty",
+        "boot": 82058,
+        "collected_boot": 82058,
+        "effect": "FlipSequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "cddfeb43dd83a987b3106caf023f748e2efeddf0769f2f74188eaea6053f7c1f"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-device-reason/cases/Ddi20Case-261120-121956129831/result.zip",
+        "id": "Ddi20Case-261120-121956129831",
+        "archive_sha256": "d6f0d94b337fce6c96d257e401346a51c990d025b1204560a768564a50c433d3",
+        "mode": "native-legacy-full",
+        "boot": 82058,
+        "collected_boot": 82058,
+        "effect": "FlipSequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": false,
+        "calls": 6,
+        "returns": 6,
+        "case_config_sha256": "04fc420381253947ca1a350688c08831ede2dbadf34dcf72805e288a3ecc98b4"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-device-reason/cases/Ddi20Case-261120-122121366257/result.zip",
+        "id": "Ddi20Case-261120-122121366257",
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "mode": "native-legacy-empty",
+        "boot": 82058,
+        "collected_boot": 82128,
+        "effect": "Sequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 0,
+        "case_config_sha256": "8433c1c2c59b76b789a2366c802d5f19664d44db5b47d36426a341b9913ca066"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-device-reason/cases/Ddi20Case-261120-122937785753/result.zip",
+        "id": "Ddi20Case-261120-122937785753",
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "mode": "native-legacy-empty",
+        "boot": 82221,
+        "collected_boot": 82289,
+        "effect": "Sequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 0,
+        "case_config_sha256": "982d1ef8c60ed4c72387d6a81befbc9f568eaa020674c60457d66be90837855a"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-device-reason/cases/Ddi20Case-261120-123625091734/result.zip",
+        "id": "Ddi20Case-261120-123625091734",
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "mode": "native-legacy-empty",
+        "boot": 82382,
+        "collected_boot": 82448,
+        "effect": "Sequential",
+        "ddi": [
+          720911
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 0,
+        "case_config_sha256": "4c619073145c7b51787b1d2d5645c6923d2c8e343735a62da7f740ba41c3d489"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-dxgi-dispatch-v2/cases/Ddi20Case-261120-125910153936/result.zip",
+        "id": "Ddi20Case-261120-125910153936",
+        "archive_sha256": "d39296d8205559cdaebd30092b9f1ca730b04984d14a4be5f9af2ce8875bfe51",
+        "mode": "native-modern-empty",
+        "boot": 82717,
+        "collected_boot": 82717,
+        "effect": "Sequential",
+        "ddi": [
+          720928
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "2981c1ed4e4f8c43b7bb0cea045b21d945f7c0037c23a8d98c6a84d56b52f282"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-dxgi-dispatch-v2/cases/Ddi20Case-261120-130011507971/result.zip",
+        "id": "Ddi20Case-261120-130011507971",
+        "archive_sha256": "b637714bb29f757bc5b1cbee7561bd3615c90454dca778af22fb81e2a3131f09",
+        "mode": "native-modern-empty",
+        "boot": 82717,
+        "collected_boot": 82717,
+        "effect": "FlipSequential",
+        "ddi": [
+          720928
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "caaba59d0a54470d645dfe11a005d966ba1fd52044e02022ace8beee90cd0582"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-present1-compat/cases/Ddi20Case-261120-142236379776/result.zip",
+        "id": "Ddi20Case-261120-142236379776",
+        "archive_sha256": "75c9ce9d94e00c1a363248ad1111f6d4b8f38cd356e49e80e5e0e5c4e2f6725b",
+        "mode": "native-modern-empty",
+        "boot": 82986,
+        "collected_boot": 82986,
+        "effect": "FlipSequential",
+        "ddi": [
+          720928
+        ],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "1078db6e07a78e7027e35ef896e892c6d9bd7d97b4fa7f9b3edc1e38b1aa3640"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-present1-compat/cases/Ddi20Case-261120-142409259798/result.zip",
+        "id": "Ddi20Case-261120-142409259798",
+        "archive_sha256": "575a00f2b86b35528297f6006c4356c8cacfa62452841e818039caa90d6b3e8c",
+        "mode": "native-modern-clear",
+        "boot": 82986,
+        "collected_boot": 82986,
+        "effect": "FlipSequential",
+        "ddi": [
+          720928
+        ],
+        "no_application_writes": false,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "0d43b8df23ab3c3bfa45a72c5abec4481a6495ceec41c2f8ec3b8e41d38cae4b"
+      },
+      {
+        "root": "prior-step4-out",
+        "relative": "process-ddi20-present1-compat/cases/Ddi20Case-261120-142509837272/result.zip",
+        "id": "Ddi20Case-261120-142509837272",
+        "archive_sha256": "262ea02a2f156ddb9b4a2557c3206bd4f565064ee7dbf733c7ad6942fdd2cb99",
+        "mode": "native-modern-full",
+        "boot": 82986,
+        "collected_boot": 83056,
+        "effect": "FlipSequential",
+        "ddi": [
+          720928
+        ],
+        "no_application_writes": false,
+        "calls": 3,
+        "returns": 2,
+        "case_config_sha256": "3b14778c29c7f3277a51e694e863cc62d247a6cead2a5b13a4ab38b93068e860"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1facf",
+        "relative": "runs/warp-control-1/collected.zip",
+        "id": "warp-control-1",
+        "archive_sha256": "424142b30672fda572281b8cd642f38d932fa6e76c1365a5dcdf33b90d5d95ab",
+        "mode": null,
+        "boot": 85554,
+        "collected_boot": 85554,
+        "effect": "sequential",
+        "ddi": [],
+        "no_application_writes": false,
+        "calls": 0,
+        "returns": 0,
+        "case_config_sha256": "bb0b16531eead74d7832a6e9ec93da337f22875495c4d62b82e37434c8eafe5d"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1facf",
+        "relative": "runs/warp-control-2/collected.zip",
+        "id": "warp-control-2",
+        "archive_sha256": "be1abbcb507ba4dfeb7498f9b2c3304dba9fde1e034502e88d2ab2691c66f6b8",
+        "mode": "warp",
+        "boot": 85554,
+        "collected_boot": 85554,
+        "effect": "sequential",
+        "ddi": [],
+        "no_application_writes": false,
+        "calls": 0,
+        "returns": 0,
+        "case_config_sha256": "a4d4c3bed421039eaedf4356b7302bf727b58953f9ff4a8c627390795907c000"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1facf",
+        "relative": "runs/warp-control-3/collected.zip",
+        "id": "warp-control-3",
+        "archive_sha256": "c8eb20e5223f44f2ff25d5b1eccd45f03ace8a07a65be8e1f311ee7bd964e7f4",
+        "mode": "warp",
+        "boot": 85554,
+        "collected_boot": 85554,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "a8366313386ad6f5c88ebfeff0286926bafbd7fa6351fd167a53847b7cf8c5b7"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1facf",
+        "relative": "runs/warp-control-4/collected.zip",
+        "id": "warp-control-4",
+        "archive_sha256": "b4ea6339366638cd31d4ecee295e33aa9023a6978fd51b024a4acf958f7c2441",
+        "mode": "warp",
+        "boot": 85554,
+        "collected_boot": 85554,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "969ff23b4b31cab107842faece1304a5a6e80138b69375fbd89ce9a25d7ac1a3"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1facf",
+        "relative": "runs/warp-control-5/collected.zip",
+        "id": "warp-control-5",
+        "archive_sha256": "64a3c25758fafb0ebefd5b04a7c6daf2966a2707677a3a28638c7168387563fe",
+        "mode": "warp",
+        "boot": 85554,
+        "collected_boot": 85554,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "0573ebc9103c81a4f8d92bcdd8f4116109f2c5bbcdc3fc3ac8135a1ea30dd2da"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/fixed-flip-1/collected.zip",
+        "id": "fixed-flip-1",
+        "archive_sha256": "9a26df42fed4cf09e86399f2e4d9b87faf8e7d4860344a585d9b01adb6d849ef",
+        "mode": "native",
+        "boot": 85737,
+        "collected_boot": 85737,
+        "effect": "FlipSequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "a61e899e93003ee1dac34808fa5cf4eb0821f07da8bca4b57c2f11dd5d24204d"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/observed-flip-1/collected.zip",
+        "id": "observed-flip-1",
+        "archive_sha256": "946c6749932d47428881c5400e9ddd08aecde35deae50c732876157d7f58f1b8",
+        "mode": "native",
+        "boot": 86815,
+        "collected_boot": 86815,
+        "effect": "FlipSequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "4cc7879cc56aefd9a3d907c56fa670c94fa75b1dbf158a28867817eef718a377"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/observed-sequential-1/collected.zip",
+        "id": "observed-sequential-1",
+        "archive_sha256": "63eb1f564ffb82cb98196f8e145d51ddbfc4745adafcef4d366a77440833adc1",
+        "mode": "native",
+        "boot": 86815,
+        "collected_boot": 86815,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "a5a3e6179f3913089a28ac80b0c52782dd3263bb5ec642abc6c7a3d4271bc356"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/paired-flip-1/collected.zip",
+        "id": "paired-flip-1",
+        "archive_sha256": "5b72296540afbb273814b6f2405a1eac5dc9470875420cdf4c00842e28359323",
+        "mode": "native",
+        "boot": 86096,
+        "collected_boot": 86096,
+        "effect": "FlipSequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "3969943db5413b5bb9ab982d54391fd2d452714694ef547993b626d541e7941b"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/paired-sequential-1/collected.zip",
+        "id": "paired-sequential-1",
+        "archive_sha256": "4b8c5e0abf91aca2eb21bf6ba36e4f96de5d75b3ec129d4e9d8bc87e3310af8e",
+        "mode": "native",
+        "boot": 86096,
+        "collected_boot": 86096,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "13824b91841bb8c13a5ef08ea7438384b726956914c8c9fefa790cfde774554a"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/repaired-empty-1/collected.zip",
+        "id": "repaired-empty-1",
+        "archive_sha256": "f672406eb5e7935cfacdc3383579343f8212681d701e7743ee7652827462dabf",
+        "mode": "native",
+        "boot": 85737,
+        "collected_boot": 85737,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "8a0b0ca96991eb647d485b0ba26406fa5b8d5d4c92b141279bd7690674ccd406"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/staging-flip-1/collected.zip",
+        "id": "staging-flip-1",
+        "archive_sha256": "df3ea92e130fb620b03665a4a277832ca1b1aa5b287f62e5bfecc8533b67a59d",
+        "mode": "native",
+        "boot": 86457,
+        "collected_boot": 86457,
+        "effect": "FlipSequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "4c59e960a9ad3e2cc70286179b1012dd9e1558b976d117e71570f1d0bb38d967"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/staging-sequential-1/collected.zip",
+        "id": "staging-sequential-1",
+        "archive_sha256": "2b52e81c7f1a109d45a59dd87dc4874d89f14eed7996b2929d612a4e4de61a14",
+        "mode": "native",
+        "boot": 86457,
+        "collected_boot": 86457,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "0829ebaa6f2b23101b20d06ba7df80c019bac3ac3f3332b594145803996b2824"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fae9",
+        "relative": "runs/visible-first-1/collected.zip",
+        "id": "visible-first-1",
+        "archive_sha256": "eabcd951ce1c8a663e8102f66e71e086d71c1055be6f06db6c6722bd305b8aa7",
+        "mode": "native",
+        "boot": 85737,
+        "collected_boot": 85737,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "3383cc688c1554778a489d066c8018fe2504c7362bbe7f801171063e2091de3e"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fbd1",
+        "relative": "runs/copy-clear-1/collected.zip",
+        "id": "copy-clear-1",
+        "archive_sha256": "17698dbf5d1a8503b8ae5b5c7889fc2189a44b7dc33e8d1603657d0dc522d70e",
+        "mode": "native",
+        "boot": 87268,
+        "collected_boot": 87268,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": false,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "6a7947c745a6cb8c2f1e61828022db4bb2d5dec77a0fb130b329a46dac2e3885"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fbd1",
+        "relative": "runs/copy-flip-1/collected.zip",
+        "id": "copy-flip-1",
+        "archive_sha256": "1e096b5215c2a539e0c09745700c86df16df8f4b13584e9511e99ab209749527",
+        "mode": "native",
+        "boot": 87268,
+        "collected_boot": 87268,
+        "effect": "FlipSequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "8162ae74bac5ffa068a6a71d34df8dc09dcce7acf961f8bb7c7f0c4388e9e0c8"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fbd1",
+        "relative": "runs/copy-sequential-1/collected.zip",
+        "id": "copy-sequential-1",
+        "archive_sha256": "09bc540a153902c33bf25fa6d608ea52c68ca7fabc850119ae8e1fd81f5e715a",
+        "mode": "native",
+        "boot": 87268,
+        "collected_boot": 87268,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "69f5e34a566ad24f10cc7f16d2f06bbf848331a97cb28d4a1b8c58831a0dbaa4"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fbd1",
+        "relative": "runs/copy-sequential-2/collected.zip",
+        "id": "copy-sequential-2",
+        "archive_sha256": "543562f0f57bab939fd8b6fa8cce22b014da8bfcc88b47c9c1877decaef500dc",
+        "mode": "native",
+        "boot": 87268,
+        "collected_boot": 87268,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "5f3fd14d371119a16a6937fa94ea096b892cc28cfeebb1fde76d02c48a406085"
+      },
+      {
+        "root": "legacy-sequential-step4-01a1fbd1",
+        "relative": "runs/copy-sequential-3/collected.zip",
+        "id": "copy-sequential-3",
+        "archive_sha256": "4eb3b503b4d14f1b4262c23e38394a1191dce1fe42ca5fcd06f2f202d7222a24",
+        "mode": "native",
+        "boot": 87268,
+        "collected_boot": 87268,
+        "effect": "Sequential",
+        "ddi": [],
+        "no_application_writes": true,
+        "calls": 1,
+        "returns": 1,
+        "case_config_sha256": "b95a574ffc5f08c163404d03c77a6e27426c00b644a042d202689c11c4e8db11"
+      }
+    ],
+    "scope": "只清点登记的五处历史目录下 result.zip、results.zip 和 collected.zip。配置中的客户端哈希包含准备阶段，运行由 journal 另证。已发布的开机 91476 两次应用运行另计。",
+    "archive_files": 155,
+    "distinct_archives": 154,
+    "same_client_config": 36,
+    "other_known": 103,
+    "no_step4_client_identity": 15,
+    "inventory_sha256": "4276d68a3db11cd3f1a8b4ea1da50c5886ebdfd60a1c094519f3d8024d503aed",
+    "unique_inventory_sha256": "603d5c6903f8f752cfa04303be63ca3d18621752d27122a3786483c88859ed42",
+    "same_client_later_flip": {
+      "id": "Ddi20Case-261120-142509837272",
+      "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "archive_sha256": "262ea02a2f156ddb9b4a2557c3206bd4f565064ee7dbf733c7ad6942fdd2cb99",
+      "boot": 82986,
+      "collected_boot": 83056,
+      "effect": "FlipSequential",
+      "ddi": [
+        720928
+      ],
+      "calls": 3,
+      "returns": 2
+    },
+    "earlier_native_cases": [
+      {
+        "case": "FirstFrame-261120-074832658239",
+        "boot": 79396,
+        "next_boot": 79467,
+        "pid": 3924,
+        "tid": 7160,
+        "source_sha256": "8ae5854bf41bf6b03b41f4904e585896e9b9be995d271de1608db8dfcd2f4880",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "loaded": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.DLL": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.DLL": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "call_qpc": 7217013038,
+        "call_marker": "375718 7160 CALL Present 00000000 qpc=7217013038",
+        "boot_evidence": [
+          {
+            "boot": 79467,
+            "events": [
+              {
+                "record": 79476,
+                "id": 6008
+              },
+              {
+                "record": 79485,
+                "id": 41,
+                "bugcheck_code": 0
+              }
+            ],
+            "planned_shutdown_events_before_boot": []
+          }
+        ],
+        "archive_sha256": "22194fe5f11e696e48019b5a2c800bded227d3341ed75210722454f754a692cd",
+        "traces": {
+          "evidence/miniport.etl": {
+            "member_sha256": "175d1b0edbcf285ca593ac7ce6f37294aa17a409ba19513a03bf024de14254d3",
+            "last_retained_qpc": 7204948997,
+            "records_at_or_after_call": 0,
+            "successful_app_ddis": [],
+            "last_event_ms_before_call": 628.335
+          },
+          "evidence/scene/video.etl": {
+            "member_sha256": "97c242f78caf67404b4bd2add0ae8da2fcaa935cfc4d2212bd05d3f5b9e6aeac",
+            "last_retained_qpc": 7216742721,
+            "records_at_or_after_call": 0,
+            "successful_app_ddis": [
+              720911
+            ],
+            "last_event_ms_before_call": 14.079
+          }
+        }
+      },
+      {
+        "case": "FirstFrame-261120-080215654708",
+        "boot": 79467,
+        "next_boot": 79542,
+        "pid": 1468,
+        "tid": 5016,
+        "source_sha256": "8ae5854bf41bf6b03b41f4904e585896e9b9be995d271de1608db8dfcd2f4880",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "loaded": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.DLL": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.DLL": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "call_qpc": 15450653348,
+        "call_marker": "804546 5016 CALL Present 00000000 qpc=15450653348",
+        "boot_evidence": [
+          {
+            "boot": 79542,
+            "events": [
+              {
+                "record": 79551,
+                "id": 6008
+              },
+              {
+                "record": 79560,
+                "id": 41,
+                "bugcheck_code": 0
+              }
+            ],
+            "planned_shutdown_events_before_boot": []
+          }
+        ],
+        "archive_sha256": "f4464d585ac884ab6543d706e9761ed279d36e19217be6ea56408a6db7ccd762",
+        "traces": {
+          "evidence/miniport.etl": {
+            "member_sha256": "92bd9396c91005d678fa75b4c6ed0f67f734f1528b199ac2eeef0c1ae741236d",
+            "last_retained_qpc": 15439870622,
+            "records_at_or_after_call": 0,
+            "successful_app_ddis": [],
+            "last_event_ms_before_call": 561.6
+          },
+          "evidence/scene/video.etl": {
+            "member_sha256": "427dd848c53eb114768f46692fa26f8e1d62f905a3febe8c826d846411f5e85e",
+            "last_retained_qpc": 15450248430,
+            "records_at_or_after_call": 0,
+            "successful_app_ddis": [
+              720911
+            ],
+            "last_event_ms_before_call": 21.089
+          }
+        }
+      },
+      {
+        "case": "FirstFrame-261120-082359137709",
+        "boot": 79692,
+        "next_boot": 79767,
+        "pid": 4836,
+        "tid": 6520,
+        "source_sha256": "8ae5854bf41bf6b03b41f4904e585896e9b9be995d271de1608db8dfcd2f4880",
+        "client_sha256": "7e3a32f8e1bf7e65bc0d4f718e1461c2b274947464d725149ae39e31ef90bbfb",
+        "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "loaded": {
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_arm64.DLL": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.DLL": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        },
+        "call_qpc": 4360424669,
+        "call_marker": "226937 6520 CALL Present 00000000 qpc=4360424669",
+        "boot_evidence": [
+          {
+            "boot": 79767,
+            "events": [
+              {
+                "record": 79776,
+                "id": 6008
+              },
+              {
+                "record": 79785,
+                "id": 41,
+                "bugcheck_code": 0
+              }
+            ],
+            "planned_shutdown_events_before_boot": []
+          }
+        ],
+        "archive_sha256": "bc51d525533616031c04f7e37d954d6ace761308b4a3999629098f8545b283fd",
+        "traces": {
+          "evidence/miniport.etl": {
+            "member_sha256": "7f4cef06ae17a2bb0415cd077543822597f19bf58225e1f8dc86589b991264fd",
+            "last_retained_qpc": 4348305610,
+            "records_at_or_after_call": 0,
+            "successful_app_ddis": [],
+            "last_event_ms_before_call": 631.201
+          },
+          "evidence/scene/video.etl": {
+            "member_sha256": "dc5b1f46d445bf19761105dae97c016c7ffd6d4aeecb209fa737f623e0514e43",
+            "last_retained_qpc": 4360110611,
+            "records_at_or_after_call": 0,
+            "successful_app_ddis": [
+              720911
+            ],
+            "last_event_ms_before_call": 16.357
+          }
+        }
+      }
+    ],
+    "earlier_client_source": {
+      "manifest_sha256": "80447e801f9973061fa7b6ce0cc31ce95ed4927a3bb90c9d3403859d40ad449a",
+      "source_patch_sha256": "b55e4baa0a96c8380eb3493a94461ca779abc2a5a9cfd9302461b34963c72cb2",
+      "control_archive_sha256": "5af552c1b8ca1b7a43df8d77928507632eff81ab0e8c8ac7860b6c0220be00de",
+      "ordered_control_markers": [
+        "260687 2824 CALL Present 00000000 qpc=5008587581",
+        "260718 2824 RETURN Present 00000000 qpc=5008945358",
+        "260718 2824 CALL DwmFlushAfterFirstPresent 00000000",
+        "260734 2824 RETURN DwmFlushAfterFirstPresent 00000000",
+        "260734 2824 CALL DeviceAfterFirstPresent 00000000"
+      ]
+    },
+    "device_executions": 0,
+    "boundaries": {
+      "last_entry": "原签名客户端三份异常启动仍止于公开 Present CALL。另一旧客户端的三份无写入异常启动也止于 CALL。",
+      "last_return": "原签名客户端紧前的设备移除原因是 S_OK；另一旧客户端完成了 FlushBeforeFirstPresent 并确认无应用写入。",
+      "first_anomaly_or_missing": "原三次公开 CALL 到复位之间，仍缺同启动同对象的内核接收、KMD 进入/返回或板级记录。早期不同客户端的独立现象只能裁决自身的调用顺序。"
+    }
+  }
+}

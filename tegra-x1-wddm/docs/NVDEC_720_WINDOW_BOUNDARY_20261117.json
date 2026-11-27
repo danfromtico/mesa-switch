@@ -1,0 +1,263 @@
+{
+  "observed_utc": "2026-11-17T21:17:14.7475883Z",
+  "branch": "tgd3d-vulkan",
+  "installed_kmd_sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+  "installed_umd_sha256": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+  "installed_icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+  "userspace_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+  "baseline_record": "TGD3D_PRESENT_BASELINE_20261117.json",
+  "native_luid": "000000000007a1a1",
+  "run_boot_utc": "2026-11-17T20:47:53.2997770Z",
+  "run_dwm_pid": 1360,
+  "client": {
+    "source_commit": "4b8a41b7897ae4cdcea6442fe9630e27f125d35f",
+    "source_sha256": {
+      "nvdec720_av_window.cpp": "0117bcab684002fb6365025c28e5d7a063a509182fdaac077f0e1948f1d9a0da",
+      "nvdec720_fixture.hpp": "e342fbdabeab9c661364e2a2820b13d5431d33effb6298941d080a9ef9856308",
+      "nvdec720_preview.hlsl": "f6766fa9d41190f2606ccb7a99951032a8c49c86d8ad18dc0b726b24def49a26",
+      "build_nvdec720_preview.py": "f2901abe90c97c990cffde3857aef3179e785162826c8069f3d96c1a9b3a9a7f"
+    },
+    "exe_sha256": "b823b9a8f7a581ab718e61b9448f951121cf152cd803265ae3556cfe0071f85d",
+    "bytes": 2935808,
+    "ffmpeg_commit": "894da5ca7d742e4429ffb2af534fcda0103ef593",
+    "trace_scope": "The application enables only its own tgd3d provider PID using the public ETW PID filter. Each retrieved trace has exactly that PID and one process creation identity.",
+    "trace_contract": "https://learn.microsoft.com/en-us/windows/win32/api/evntprov/ns-evntprov-event_filter_descriptor",
+    "color_path": "Checked NV12 hardware readback, upload of separate Y/UV textures and a D3D11 pixel shader on the selected adapter.",
+    "translation_control": {
+      "source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+      "frontend_control": "7f2c312e7b9a532f6f7ca5aec456babb9a9c1ad3a709b3b57e7b0ce37eacc753",
+      "sm53_control": "8d7c99e45b164e94801320a46a830cadb4c6c96196ad4ac8259e7f11aca4964b",
+      "shaders": [
+        {
+          "stage": "vs",
+          "dxbc": "b83c2aad979b38263bb3dfc3dea828a6ffad67110395eb8f6a33dcac38cbc120",
+          "spirv": "f33ae8dc1180aed5c52b76b33370d7b42d864a0d55fbff4bc32fe4e9b3cf3deb",
+          "native_sm53": "b2c5d1b1720fcfba5f2323636dcc20efa867b8d2e74dc3ae957a86d068a20894"
+        },
+        {
+          "stage": "ps",
+          "dxbc": "c4d87652718ac00e247e8fc828ef14d0c51c9b188a20cf7459b803834fcdef84",
+          "spirv": "a273e62ce020b281ec6ffb26e15ae0ed15045eae959306ea6a26f6c87fe31abc",
+          "native_sm53": "97f363d7386d4e97118cf24a95456f5bfbfad08d378e2401c1fbdf766838d2d7"
+        }
+      ],
+      "hardware_execution": false
+    },
+    "earlier_mf_fixture_body_preserved_and_rebuilt": true,
+    "external_review_performed": false
+  },
+  "fixture": {
+    "sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "profile": "H.264 Main level 3.1",
+    "dimensions": [
+      1280,
+      720
+    ],
+    "frames": 6,
+    "media_seconds": 0.1,
+    "media_rate": "60/1",
+    "software_yuv420p_sha256": "c3c1754f557d7375ed660034ef62b0e1d966b7ed7626662802c1609aba886179",
+    "independent_pixel_reference": "FFmpeg software H.264 decode with hardware acceleration disabled. Reference RGB uses limited-range BT.601 for this untagged sample.",
+    "expected_last_640x360_rgb_ppm_sha256": "8b23a1cc5dedbd6db25acfdab6af98cbe4af297d16797d52dc4aa6142fbc54a0"
+  },
+  "runs": {
+    "decode": {
+      "pid": 5940,
+      "process_creation_filetime": 134394230049667493,
+      "session": 0,
+      "driver_events": 121,
+      "etl_bytes": 458752,
+      "etl_sha256": "0a410be464e162fe3d51532d037858893f3b098e94df01681a09b0ed49e6cc00",
+      "events_sha256": "96753083865cb6c1bae60c1239ce183bb8d2299a22446b4638d38f74109428e2",
+      "journal_sha256": "3a4fadd390075665c27b32cb7a95ff698933ae65505764c0d9f46ae25cf9d847",
+      "last_journal_entry": "934750 5344 EXIT RunAndRelease 00000000",
+      "native_decode_target_observed": [
+        [
+          654844291,
+          654844291
+        ],
+        [
+          654844292,
+          654844292
+        ],
+        [
+          654844293,
+          654844293
+        ],
+        [
+          654844294,
+          654844294
+        ],
+        [
+          654844295,
+          654844295
+        ],
+        [
+          654844296,
+          654844296
+        ]
+      ],
+      "present_calls": 0,
+      "present_returns": 0,
+      "export_summary": "ProcessTrace=0 matched=121 invalid=0 events_lost=0 buffers_lost=0 end_time=134394230063411242 buffers_written=7",
+      "native_input": "Synchronous public libavcodec D3D11VA, 17 decoder surfaces",
+      "decode_close_status": "00000000",
+      "visible_nv12_bytes_compared": 8294400,
+      "canonical_layout": "Visible NV12 rows repacked losslessly to Y, U, V before SHA256. Row padding excluded.",
+      "canonical_frame_sha256": [
+        "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+        "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+        "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+        "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+        "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+        "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+      ],
+      "frames": 6,
+      "decode_loop_ms": 860,
+      "exit": 0
+    },
+    "objects": {
+      "pid": 6480,
+      "process_creation_filetime": 134394231340219108,
+      "session": 1,
+      "driver_events": 109,
+      "etl_bytes": 327680,
+      "etl_sha256": "9298c5a3dac8b27935f44c42b28f4a4dcd3889c270605e9774220c0e57d1be7c",
+      "events_sha256": "2236571428bda661000c9a31a8f8b5d5b4091f549e462fe73000d5c2a0a40be4",
+      "journal_sha256": "498762f02cdd1a5e5a4249e7587e44415b17e27ef8e0f1998a4e1b45269238e5",
+      "last_journal_entry": "1064140 1316 EXIT RunAndRelease 00000000",
+      "native_decode_target_observed": [],
+      "present_calls": 0,
+      "present_returns": 0,
+      "export_summary": "ProcessTrace=0 matched=109 invalid=0 events_lost=0 buffers_lost=0 end_time=134394231357023742 buffers_written=5",
+      "resources": [
+        "Win32 swapchain and BGRA back buffer/RTV",
+        "R8 luma and R8G8 chroma textures and shader views",
+        "DXBC vertex/pixel shaders, conversion constants, rasterizer state, event query and staging readback"
+      ],
+      "exit": 0
+    },
+    "present": {
+      "pid": 2564,
+      "process_creation_filetime": 134394232245773071,
+      "session": 1,
+      "driver_events": 154,
+      "etl_bytes": 262144,
+      "etl_sha256": "2aac134385b983a607a07ce044b4acc0576a7f6d0fe5e0e99f9326c73d526546",
+      "events_sha256": "5c27bef482136bad3d53bf46400ed6083731288e3478fa3d112cda5870650c85",
+      "journal_sha256": "79641dce2402819bd02ee47f9cd5954b1d23f7c49bab853c3f03e24c6d4f7fc1",
+      "last_journal_entry": "1154593 5624 CALL Present 00000000",
+      "native_decode_target_observed": [
+        [
+          654844297,
+          654844297
+        ],
+        [
+          654844298,
+          654844298
+        ]
+      ],
+      "present_calls": 1,
+      "present_returns": 0,
+      "export_summary": "ProcessTrace=0 matched=154 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+      "first_display_frame_hash_checked": true,
+      "draw_call_returned": true,
+      "gpu_csc_pixels_verified": false,
+      "gpu_submit_phase_events_recovered": 0,
+      "first_present_return": null,
+      "window_present_accepted": false,
+      "partial_trace": true,
+      "last_recovered_driver_event": {
+        "id": 17,
+        "status": "00000000",
+        "phase": 0
+      },
+      "cutoff": "The last persisted driver event was a successful resource DDI return. The separate write-through application journal reached the first IDXGISwapChain::Present(1, 0). GPU execution/completion and the runtime present callback cannot be identified from this partial trace."
+    }
+  },
+  "prelaunch_restart": {
+    "boot_utc": "2026-11-17T20:47:53.2997770Z",
+    "kernel_power_41_record": 60620,
+    "bugcheck_code": 0,
+    "unexpected_shutdown_6008_record": 60611,
+    "dump_count": 0,
+    "scope": "Additional unexpected boot after the previous observation had been cleaned up, before this client was uploaded or run. Other machine activity is unknown."
+  },
+  "present_restart": {
+    "boot_utc": "2026-11-17T21:07:29.4678150Z",
+    "kernel_power_41_record": 60698,
+    "bugcheck_code": 0,
+    "unexpected_shutdown_6008_record": 60689,
+    "dump_count": 0,
+    "scope": "Unexpected boot during the window run. No additional restart or rollback requested by this test."
+  },
+  "post_restart": {
+    "observed_utc": "2026-11-17T21:13:35.5466349Z",
+    "boot_utc": "2026-11-17T21:07:29.4678150Z",
+    "dwm": 1376,
+    "code": 0,
+    "dwm_module_sha256": {
+      "TegraGpuD3DVk.dll": "45683c2134c931bb559dfc51314377d75a2a41c35f0c30342379ff9d3a4fa3c3",
+      "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "power_mode": 1,
+    "cpu_dfll": 1,
+    "emc_error": 0,
+    "fan_mode": 1,
+    "charge_limit": 85,
+    "display_scope": "Selected fixed 90-degree policy retained. No new physical picture or direction confirmation."
+  },
+  "runtime_comparison": {
+    "observed_images": [
+      {
+        "sha256": "C0A20E80493B245D95D64185C363B090DD00D33B2FA8E690DCA59AE1D2B4CAC0",
+        "name": "dxgi.dll",
+        "bytes": 1791792,
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      },
+      {
+        "sha256": "CCC352F7097D0320368000DBE9FF92772D8FC909185D95C8A0753CB8F115F880",
+        "name": "d3d11.dll",
+        "bytes": 4932192,
+        "version": "10.0.22621.2715 (WinBuild.160101.0800)"
+      }
+    ],
+    "dxgi_pdb_guid": "DF57ECCF-C393-84E3-0F48-17CD2BB5BB71",
+    "dxgi_image_age": 1,
+    "dxgi_pdb_age": 2,
+    "dxgi_pdb_sha256": "0aeab42f3defaf693c7914e0549efa3db1dc2d268adb20727a1c035e109073f9",
+    "static_scope": "The cached public symbols identify PresentImpl and multiple synchronization, windowed Blt and flip branches. The PE/PDB GUIDs agree, with image age 1 and stripped PDB age 2. No specific branch is established by the native trace."
+  },
+  "next_control": {
+    "source_commit": "69ead832cbb42596720976017ba6a312a095bec1",
+    "arm64_sha256": "4579c0e3a14f4f1297f517026755f420d1ceaeb59ed5a813e94940dbd210f1ef",
+    "installed": false,
+    "executed": false,
+    "scope": "Optional first back-buffer GPU copy plus explicit Flush and blocking staging Map with RGB verification before the same Present. Distinguishes GPU submission/completion from the subsequent presentation handoff."
+  },
+  "cleanup": {
+    "local_verified_archive_sha256": "ff145ed168a31c9e726607b7a209566b7a8c99ec5fa61a46e6723865fa0bd007",
+    "archive_bytes": 26929,
+    "files": 30,
+    "remaining_input_files": [],
+    "remaining_test_tasks": [],
+    "remaining_test_traces": 0,
+    "raw_incident_retained": true,
+    "selected_driver_unchanged": true
+  },
+  "acceptance": {
+    "native_h264_720p_decode_on_selected_pair": true,
+    "decoded_nv12_on_selected_pair": true,
+    "interactive_window_preparation_on_selected_pair": true,
+    "gpu_csc_output": false,
+    "first_present_completed": false,
+    "physical_window": false,
+    "phase_complete": false,
+    "media_foundation_source_reader": "Previous first EndFrame failure remains open. This run used synchronous libavcodec.",
+    "deferred_resolutions": [
+      "1080p",
+      "2K",
+      "4K"
+    ]
+  }
+}

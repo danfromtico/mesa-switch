@@ -1,0 +1,837 @@
+{
+  "status": "The owner selected the signed ded6fa4a UMD as the next development baseline after verifying native 720p output. An unexpected restart after decode is open for objective 4.",
+  "components": {
+    "candidate_source": "474ef374510ff7a24e580455a646beefe72a8a64",
+    "baseline_source": "8d353d9bd6d62dec18a9ca770728c166302a99a5",
+    "deployed_signed_umd": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+    "reference_signed_umd": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "kernel": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "desktop_icd": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "firmware": "7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909",
+    "changed_production_translation_unit": "src/nouveau/tgd3d/tgd3d_video.cpp",
+    "reference_source_sha256": "722fbc9b718bc5c71be9c46812beffebcfa03c801219646d27dbfef1b7271ce8",
+    "candidate_source_sha256": "db687c651643a8223e97c47af2442e5c8393a0981d1459e47f5b342146c27d10",
+    "arm64_umd_object_comparison": {
+      "object_count": 25,
+      "changed": [
+        {
+          "name": "tgd3d_video.cpp.obj",
+          "before": "d264c879db316025d70bc8fa8381d48cdab9aee2a4736febd67bb9e1ccfa87d4",
+          "after": "ffbcac1bdcee75ca701a7ac8868980242996625ae34e49716562e61533eb1b85"
+        }
+      ]
+    }
+  },
+  "source_changes": {
+    "runtime": "Remove the process-environment early return from video_adapter_init. The existing adapter callback, GM20B NVDEC resources and client checks, and 128000-byte firmware verification then run for eligible processes. An eligible adapter offers the D3D11.1 interface through GetSupportedVersions.",
+    "hardware_start": "The adapter query copies the start-time KMD resource/client snapshot. Firmware upload to the engine starts in CreateVideoDecoder; capability discovery reads and verifies the firmware on the CPU.",
+    "other_source": "The ARM64 test fixture stops setting the video opt-in. The package updater accepts a default-enabled UMD and clears obsolete selection metadata.",
+    "prior_kernel_change": {
+      "commit": "8e9f265f7d0ebb9deab6b57dd576d76e2d0c736f",
+      "scope": "A high-resolution one-shot timer polls pending GPU fences. The unchanged signed kernel was used in both comparison arms."
+    },
+    "presentation_hypothesis": "CreateDevice prepares the runtime-device NVK submission transport for the Win7 DDI, and for a D3D11.1 video device only with the separate window diagnostic request. Ordinary D3D11.1 callers can negotiate a different path. Existing resource contract tests demonstrate a displayable-resource failure without runtime-queue ownership. The UMD hash loaded by DWM identifies the binary; it does not identify the DDI selected by DWM or prove the cause of a system reset.",
+    "locations": [
+      "src/nouveau/tgd3d/tgd3d_video.cpp:133",
+      "src/nouveau/tgd3d/tgd3d_video.cpp:231",
+      "src/nouveau/tgd3d/tgd3d_entry.cpp:42",
+      "src/nouveau/tgd3d/tgd3d_device.cpp:245",
+      "src/nouveau/tgd3d/tests/runtime_contracts.cpp:1097",
+      "tegra-x1-wddm/windows/query.c:145",
+      "tegra-x1-wddm/tools/nvdec720_av_window.cpp:600",
+      "src/nouveau/tgd3d/tgd3d_runtime.cpp:646"
+    ]
+  },
+  "previous_umd_restart": {
+    "last_completed_edge_boot": "2026-11-18T13:24:13.2694530Z",
+    "next_observed_boot": "2026-11-18T13:39:10.3616030Z",
+    "active_umd_after_restart": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+    "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "note": "This unplanned restart preceded staging the candidate. The prior Edge playback used software and had already exited."
+  },
+  "first_three_candidate_transitions": [
+    {
+      "input": "native 720p; initially clean process defaults",
+      "before_boot": "2026-11-18T13:43:45.8608240Z",
+      "following_boot": "2026-11-18T13:47:14.7055060Z",
+      "evidence": "The native executable reported startup, enumerated the Tegra adapter and entered the UMD identity output. The retained text ends mid-line. No verified frame or exit was captured.",
+      "stdout_prefix": "START pid=368 session=1\r\nRETURN CreateDXGIFactory1=0x00000000\r\nRETURN Find native adapter=0x00000000\r\nRETURN Describe adapter=0x00000000\r\nLOADED_U",
+      "last_receipt": "starting"
+    },
+    {
+      "input": "queued diagnostic retry",
+      "before_boot": "2026-11-18T13:47:14.7055060Z",
+      "following_boot": "2026-11-18T13:50:14.6404640Z",
+      "evidence": "Windows acknowledged the task. The test directory survived empty. Native client execution, decoder creation and frames are unverified."
+    },
+    {
+      "input": "shorter launcher",
+      "before_boot": "2026-11-18T13:50:14.6404640Z",
+      "following_boot": "2026-11-18T13:54:15.4611540Z",
+      "evidence": "The first marker used an ambiguous six-argument FileStream constructor in Windows PowerShell 5.1 before the Start-Process statement. The identical marker failed in a software-only replay, and the unchanged reference launcher returned task result 1 while Windows stayed on the same boot. The assigned workload cannot be credited with starting the decoder.",
+      "host_receipt_sha256": "6bbf459d9f715e4f76528a3115ee0b7f3efc3d11bad2f55f8486fadf18b2ecd1",
+      "reference_task_result": 1,
+      "tested_marker_has_ambiguous_overload": true
+    }
+  ],
+  "windows_evidence": {
+    "kernel_power_41_ids": [
+      65401,
+      65328,
+      65251
+    ],
+    "unexpected_6008_ids": [
+      65392,
+      65319,
+      65234
+    ],
+    "bugcheck_values": [
+      "0",
+      "0",
+      "0"
+    ],
+    "latest_available_watchdog_dump_utc": "2026-11-11T18:04:24.9069499Z",
+    "recent_graphics_wer": [],
+    "source": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart"
+  },
+  "paired_decode": {
+    "method": "Same signed ARM64 executable, Tegra adapter selected by LUID, hardware kernel, desktop ICD, clip and six-frame reference. Each headless video fixture ran in the interactive session with decode-only and UMD hash verification. Both controls set the historical environment variable in the child only; the candidate has no reader for it. No video-window override. Caller journal and stdout were streamed over the same SSH controller to persistent host storage.",
+    "reference_readiness_uptime_s": 336.84,
+    "candidate_readiness_uptime_s": 352.19,
+    "controls": [
+      {
+        "case": "video-ab-old-app-02",
+        "umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+        "process_video_setting": "on",
+        "boot_utc": "2026-11-18T13:59:02.0326280Z",
+        "ready_utc": "2026-11-18T14:04:38.8684314Z",
+        "device_problem_code": 0,
+        "desktop_umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+        "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+        "media_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "reference_sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "adapter_luid": "0000000000086fce",
+        "client_umd_verified": true,
+        "frames_matching_reference": 6,
+        "decode_complete": true,
+        "exit": 0,
+        "journal_tail": [
+          "351437 4560 CALL CloseDecoder 00000000",
+          "351468 4560 RETURN CloseDecoder 00000000",
+          "351500 4560 CALL FinalDeviceStatus 00000000",
+          "351500 4560 RETURN FinalDeviceStatus 00000000",
+          "351703 4560 EXIT RunAndRelease 00000000"
+        ],
+        "process_transcript": [
+          "entered 2026-11-18T14:04:45.8348205Z 4628",
+          "launching 2026-11-18T14:04:46.0223243Z probe settings on",
+          "child 2026-11-18T14:04:46.1316999Z 3980",
+          "exit 2026-11-18T14:04:52.1654104Z 0"
+        ],
+        "host_stream_sha256": "d26e99a97f634f7853c5cade6c117627d907570bd39d3b233c9d42c40ba09d1a"
+      },
+      {
+        "case": "video-ab-new-app-01",
+        "umd_sha256": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+        "process_video_setting": "on",
+        "boot_utc": "2026-11-18T14:06:50.3003050Z",
+        "ready_utc": "2026-11-18T14:12:42.4898161Z",
+        "device_problem_code": 0,
+        "desktop_umd_sha256": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+        "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+        "media_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "reference_sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "adapter_luid": "000000000007d89a",
+        "client_umd_verified": false,
+        "frames_matching_reference": 0,
+        "decode_complete": false,
+        "exit": null,
+        "journal_tail": [
+          "366593 5388 ENTER wmain 00000000",
+          "366937 5388 CALL CreateDXGIFactory1 00000000",
+          "366953 5388 RETURN CreateDXGIFactory1 00000000",
+          "367250 5388 CALL av_hwdevice_ctx_create_D3D11VA 00000000"
+        ],
+        "process_transcript": [
+          "entered 2026-11-18T14:12:53.1171786Z 8188",
+          "launching 2026-11-18T14:12:54.5305294Z probe settings on",
+          "child 2026-11-18T14:12:54.5863057Z 5308"
+        ],
+        "host_stream_sha256": "1e6a5603486f915fe1184d16c9e0176f2509766dacea7033b63e204639c360bd"
+      }
+    ],
+    "current_evidence": {
+      "target_pid": 5308,
+      "last_client_marker": "367250 5388 CALL av_hwdevice_ctx_create_D3D11VA 00000000",
+      "last_returned_boundary": "367890 5388 RETURN av_hwdevice_ctx_create_D3D11VA 00000000",
+      "host_ssh_exit": 255,
+      "sample_open_marker_seen": false,
+      "decoder_packets_submitted_confirmed": false,
+      "connection_observation": "SSH returned after the manually reported reboot. The preserved device journal advances one call beyond the host checkpoint.",
+      "registered_umd_vs_client": "The candidate was verified in DWM and the registered file. The native program recorded a successful D3D11VA device return; the subsequent loaded-UMD verification did not leave a completed marker.",
+      "uncontrolled": "Separate boots, background scheduling, temperature and instantaneous clocks. One paired completion provides no failure-rate estimate.",
+      "last_postincident_ssh_attempt_utc": "2026-11-18T14:23:50.828685+00:00",
+      "postincident_os_boot_verified": true,
+      "device_umd_before_workload": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+      "accepted_reference_umd": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+      "diagnosis": "D3D11VA creation returned S_OK on the device. No file-open, frame or native process exit marker survived this run. The separate Wi-Fi startup incident is deferred.",
+      "operator_reported_restart": "manual",
+      "wifi_on_reported_boot": "The operator reported that the wireless driver failed to start on that boot.",
+      "paired_trial_confirmed_automatic_restart": false,
+      "postincident_boot_utc": "2026-11-18T14:41:20.7380460Z",
+      "device_readback_utc": "2026-11-18T14:49:33.3748450Z",
+      "device_journal_tail": [
+        "366953 5388 RETURN CreateDXGIFactory1 00000000",
+        "367250 5388 CALL av_hwdevice_ctx_create_D3D11VA 00000000",
+        "367890 5388 RETURN av_hwdevice_ctx_create_D3D11VA 00000000"
+      ],
+      "device_receipt_sha256": "ff258367a191804dedb8d39bc7158705f67956b2ed4e56189678794da19bfd30",
+      "paired_process_exit_observed": false,
+      "last_host_returned_boundary": "366953 5388 RETURN CreateDXGIFactory1 00000000",
+      "accepted_reference_umd_during_comparison": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e"
+    }
+  },
+  "older_controls": {
+    "pal4": [
+      {
+        "case": "pal4-game-emclow-11",
+        "outcome": "unexpected reboot",
+        "trace_sha256": "fe426a937fac01f04a4145883d8ba58133bfbec791d6592cea19b2f3a84f022f",
+        "trace_finalized": false,
+        "tgd3d_video_events": 0,
+        "kernel_events": 6,
+        "preemption_samples_waiting_for_gpu_fence": 4,
+        "first_recovery_requests": 0,
+        "last_recorded_status": "0x00000000"
+      },
+      {
+        "case": "pal4-game-cpuboot-12",
+        "outcome": "application exception; OS continued",
+        "trace_sha256": "4358d48003f1b7c874bde2f29986453762c1c98ad4ef888a420c76d39278b566",
+        "trace_finalized": true,
+        "tgd3d_video_events": 0,
+        "kernel_events": 19,
+        "preemption_samples_waiting_for_gpu_fence": 7,
+        "first_recovery_requests": 0,
+        "last_recorded_status": "0x00000000"
+      },
+      {
+        "case": "pal4-game-cpuboot-nolog-14",
+        "outcome": "unexpected reboot",
+        "trace_sha256": "ae02bad0f4221d05892b077e7cec63d1fdf9fea2db1f2ae2d04ef21c13210e91",
+        "trace_finalized": false,
+        "tgd3d_video_events": 0,
+        "kernel_events": 7,
+        "preemption_samples_waiting_for_gpu_fence": 6,
+        "first_recovery_requests": 0,
+        "last_recorded_status": "0x00000000"
+      },
+      {
+        "case": "pal4-game-cpuboot-nocache-15",
+        "outcome": "unexpected reboot",
+        "trace_sha256": "dd40711cb4008111e7c9b5f25102e6db9a7a76d794bd8c991cd8aa5f7d360e43",
+        "trace_finalized": false,
+        "tgd3d_video_events": 0,
+        "kernel_events": 23,
+        "preemption_samples_waiting_for_gpu_fence": 12,
+        "first_recovery_requests": 0,
+        "last_recorded_status": "0x00000000"
+      }
+    ],
+    "trace_coverage": "The KMD and tgd3d providers used all event IDs at the chosen keyword; the separate DxgKrnl provider used an event-ID filter. Aborted captures have no final buffers. Polling at a fence is also visible in the control where Windows continued.",
+    "desktop_render_comparison": "With the same llvmpipe DLL, the verified Code 43 BasicDisplay run reached the PAL4 menu and closed. The Code 0 desktop trial restarted. Their power mode and EMC frequency differed.",
+    "cpu_control": "The matched prior PAL4 trials varied the CPU voltage/frequency together. One boot restarted at 1497.6 MHz, another returned a game exception at 998.4 MHz, with fixed GPU/EMC settings.",
+    "additional_cases": "The full game archive extraction and a desktop logon also have unclean-boot records. A second 7353-file archive completed six verification passes. These cases do not establish a common hardware fault.",
+    "sources": [
+      "tegra-x1-wddm/docs/PAL4_LOAD_CONTROLS_20261118.json",
+      "tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json",
+      "tegra-x1-wddm/docs/NVDEC_720_COMPOSITOR_OPEN_20261117.json",
+      "tegra-x1-wddm/docs/KMD_FENCE_POLL_20261118.json"
+    ],
+    "prior_watchdog_dumps": {
+      "last_dump_utc": "2026-11-11T18:04:24Z",
+      "last_dump_sha256": "322ba5f3a7b22649d7592740d5ec97ae61fcf7619691003c686488cd343a522c",
+      "code": "0x141",
+      "classification": "Prior Windows video-engine-timeout live dump; parameter 2 falls in tegragpurender.sys. It predates all the current boots. The current event 41 records contain bugcheck zero and there is no matching new dump.",
+      "debugger_log_sha256": "a5c325c6eeafc364067a32d0ae3246f51933d8062e693821872c2a31f916a55d",
+      "microsoft_reference": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x141---video-engine-timeout-detected"
+    }
+  },
+  "decision": "The original gate-only aebab8b0 and the manually interrupted comparison remain historical. The accepted ded6fa4a package combines default video discovery with checked completion and retirement. Continue objective 5 before investigating high-load restarts in objective 4.",
+  "independent_submission_sync": {
+    "scope": "Trace the skip path while retaining default H.264 capability discovery. The repair was built from the same frozen source as the candidate and keeps the D3D11.1 runtime-queue selection unchanged.",
+    "ordinary_submission": "The D3D runtime signals the ingress monitored fence. NVK waits on the imported ingress payload and signals its completion fence. The D3D runtime queues a wait on that completion value. The independent NVK context opens the fence through the NT handle; the runtime-owned context instead retains the explicit owner token.",
+    "low_level_wait": "The normal independent KMT semaphore wait re-reads the mapped fence value. The CPU fixture deliberately supplies an inconsistent successful Vulkan wait to check the outer UMD contract. The available hardware traces have no recorded example of that inconsistency.",
+    "cleanup_difference": "The frozen UMD trusted a successful Vulkan wait even if a second counter read was below the target, and forced retirement after an inconclusive native DeviceWaitIdle in independent-context teardown. The branch already contains checked wait and deferred teardown commit ccfc48f4a32c890bede65bd8b07af61d68aa0eea. Both originally compared UMDs were built without that retirement delta.",
+    "cpu_probe": {
+      "source": "tegra-x1-wddm/docs/dxvk-games-20261118/independent-queue-sync-checks.inc",
+      "sha256": "26c76a35b86af721065544a524894e32f7fc6f30a57e996eec275cd97a346a15",
+      "method": "Compile the same test-only source into the existing x64 tgd3d CPU contract executable. Use the original make_device fixture for runtime-private Device storage and init_device for the newer DeviceSlot. Invoke cross_queue_observations() in the main process. Both cases set nvk=true and assert runtimeQueue and runtimeQueueAccepted are clear. Mapped counters and Vulkan results are controlled inputs.",
+      "results": [
+        {
+          "build": "deployed",
+          "cpu_executable_sha256": "9dfbb45afcc3d813702698e12a3b7dedb87515413e0c77556de9e45b40a5bbd9",
+          "log_sha256": "d152cf7a55f827289d35c8d9bdefa05548b7e5baec5c298a42383713ecb0d85f",
+          "cases": [
+            {
+              "kind": "wait",
+              "advance": "1",
+              "target": "7",
+              "observed": "7",
+              "returned": "00000000",
+              "device": "00000000"
+            },
+            {
+              "kind": "wait",
+              "advance": "0",
+              "target": "7",
+              "observed": "6",
+              "returned": "00000000",
+              "device": "00000000"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "0",
+              "target": "3",
+              "observed": "3",
+              "idle_result": "0",
+              "idle_calls": "1",
+              "image_views_destroyed": "1",
+              "devices_destroyed": "1",
+              "retained": "0"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "1",
+              "target": "3",
+              "observed": "3",
+              "idle_result": "-2",
+              "idle_calls": "1",
+              "image_views_destroyed": "1",
+              "devices_destroyed": "1",
+              "retained": "0"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "2",
+              "target": "3",
+              "observed": "2",
+              "idle_result": "0",
+              "idle_calls": "1",
+              "image_views_destroyed": "1",
+              "devices_destroyed": "1",
+              "retained": "0"
+            }
+          ]
+        },
+        {
+          "build": "branch",
+          "cpu_executable_sha256": "f9aa1348d49855ee682c7d655ee369fcd6c1d72a26415050dfe925f963ec04c7",
+          "log_sha256": "ebafb65c924e3ca94e1d371714721d4d047d299646d713de62d86f84efe4672e",
+          "cases": [
+            {
+              "kind": "wait",
+              "advance": "1",
+              "target": "7",
+              "observed": "7",
+              "returned": "00000000",
+              "device": "00000000"
+            },
+            {
+              "kind": "wait",
+              "advance": "0",
+              "target": "7",
+              "observed": "6",
+              "returned": "887a0005",
+              "device": "887a0005"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "0",
+              "target": "3",
+              "observed": "3",
+              "idle_result": "0",
+              "idle_calls": "1",
+              "image_views_destroyed": "1",
+              "devices_destroyed": "1",
+              "retained": "0"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "1",
+              "target": "3",
+              "observed": "3",
+              "idle_result": "-2",
+              "idle_calls": "1",
+              "image_views_destroyed": "0",
+              "devices_destroyed": "0",
+              "retained": "1"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "2",
+              "target": "3",
+              "observed": "2",
+              "idle_result": "0",
+              "idle_calls": "1",
+              "image_views_destroyed": "0",
+              "devices_destroyed": "0",
+              "retained": "1"
+            }
+          ]
+        },
+        {
+          "build": "repair",
+          "cpu_executable_sha256": "36ed7adf19bea90b2c5e4d835512c1f676feeb3ba3661ab7ac3160265a48a6d3",
+          "log_sha256": "2b8ad3f565efaaa314df4f23b6b9fb56ec12823654a81db46d1e77038de69cd8",
+          "cases": [
+            {
+              "kind": "wait",
+              "advance": "1",
+              "target": "7",
+              "observed": "7",
+              "returned": "00000000",
+              "device": "00000000"
+            },
+            {
+              "kind": "wait",
+              "advance": "0",
+              "target": "7",
+              "observed": "6",
+              "returned": "887a0005",
+              "device": "887a0005"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "0",
+              "target": "3",
+              "observed": "3",
+              "idle_result": "0",
+              "idle_calls": "1",
+              "image_views_destroyed": "1",
+              "devices_destroyed": "1",
+              "retained": "0"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "1",
+              "target": "3",
+              "observed": "3",
+              "idle_result": "-2",
+              "idle_calls": "1",
+              "image_views_destroyed": "0",
+              "devices_destroyed": "0",
+              "retained": "1"
+            },
+            {
+              "kind": "teardown",
+              "scenario": "2",
+              "target": "3",
+              "observed": "2",
+              "idle_result": "0",
+              "idle_calls": "1",
+              "image_views_destroyed": "0",
+              "devices_destroyed": "0",
+              "retained": "1"
+            }
+          ]
+        }
+      ],
+      "limit": "A local failure condition is demonstrated. Its occurrence during the physical hang or WLAN failure is unestablished."
+    },
+    "historical_capture": {
+      "timing_record": "tgd3d event 30, kind 3. Compare HRESULT, completed, and value[1] target. Interrupted trace ends cannot cover the final failure interval.",
+      "summary": [
+        {
+          "set": "PAL4",
+          "files_read": 12,
+          "files_with_tgd3d_events": 11,
+          "successful_cpu_wait_returns": 24,
+          "successful_returns_with_counter_short_or_removed": 0,
+          "interrupted_files": 11
+        },
+        {
+          "set": "video",
+          "files_read": 12,
+          "files_with_tgd3d_events": 9,
+          "successful_cpu_wait_returns": 4,
+          "successful_returns_with_counter_short_or_removed": 0,
+          "interrupted_files": 2
+        }
+      ],
+      "input_sha256s": {
+        "evidence/pal4-game-basic-04/graphics.etl": "74d64bf0502e287087d303a47eebeef880689269f86159665b89b6bb52cfe3df",
+        "evidence/pal4-game-cpuboot-12/graphics.etl": "4358d48003f1b7c874bde2f29986453762c1c98ad4ef888a420c76d39278b566",
+        "evidence/pal4-game-cpuboot-nocache-15/graphics.etl": "dd40711cb4008111e7c9b5f25102e6db9a7a76d794bd8c991cd8aa5f7d360e43",
+        "evidence/pal4-game-cpuboot-nolog-14/graphics.etl": "ae02bad0f4221d05892b077e7cec63d1fdf9fea2db1f2ae2d04ef21c13210e91",
+        "evidence/pal4-game-emclow-11/graphics.etl": "fe426a937fac01f04a4145883d8ba58133bfbec791d6592cea19b2f3a84f022f",
+        "evidence/pal4-game-memory-10/graphics.etl": "cb959fbe6029a8d0bcd90ce47ef096e1a5647454113745d96b4f024370165bab",
+        "evidence/pal4-game-native-nogpl-08/graphics.etl": "c8e56ff01063760a612f3b123e1812609b9fcd4407d3e59c4c672ba2ad80d122",
+        "evidence/pal4-game-nativefixed-07/graphics.etl": "ad6a8854e33de9b514653010d572e39574fbe46573fc484d3b936a2583b0926c",
+        "evidence/pal4-game-postkmd-09/graphics.etl": "71dc8ada603f9a90cb7fb6e07ea33eec4777a193c19bdb7ec3934791daf808f1",
+        "evidence/pal4-game-shortcut-02/graphics.etl": "9583f1898a5119e06ed7493ee2b1b71f3a0bf2a8a81fc65492a792f7eb39e7c5",
+        "evidence/pal4-game-software-03/graphics.etl": "0b219cfef2531b864722bdd2e71febde1345131555cea5ed45329ea95f1bdb0e",
+        "evidence/pal4-game-window-01/graphics.etl": "e9015d1c5103da92db7c53b6756d0389bdaa041011edbd6a0f5d1c4d39416f99",
+        "perf-modules/kmd-fence/video-evidence/nvdec-kmd-fence-trace-02/video.etl": "18ca9201265dc605ca54bcf3c69bcc49b26fee14b12abe02ab8d2835e25e0bbb",
+        "perf-modules/kmd-fence/video-evidence/nvdec-kmd-fence-visible-01/video.etl": "cacd623c02a5ca7b7f8f8ce97555e7d5256ef177de68d689fc6e8b67ea8402cb",
+        "clock-boundary-native-20261117/recovery-receipts/provider-after-original-boot.etl": "25f2891aee6bde3c7b92982baa1620f3e122807812ca8fb4082bca3d2316a1ea",
+        "clock-boundary-native-20261117/recovery-receipts/provider-before-original-boot.etl": "e1dbd080885f6550e31013d913e92712eee1dbba5fb13e3127886b5a9030da4a",
+        "clock-boundary-native-20261117/recovery-receipts/provider-final-original-load.etl": "e5637fc1c3cabe922b4e88b277a5a8f45e2e4265b74eede182eb43bcb9a335bf",
+        "video-enumeration-20261117/avsync720.etl": "1790d9845d18cf7f9f72808ae98b1a426de768f903d73f050472375e4ddeab67",
+        "video-enumeration-20261117/libav720.etl": "9f8c768b6df960a9b7ab85ac7f8e565ccb60a47183ac997da4a8031d59a50d07",
+        "video-enumeration-20261117/mf720-enum.etl": "989d144249c2dc2304f1b10efe72ffd76f7856f3dd6c0f4a99e8a5bd119a552e",
+        "video-input-native-20261117/avsync-input.etl": "7f461c6d2a188132af2d6c67fb5cf00b1de470947c74e972289e7ffc165092d6",
+        "video-input-native-20261117/mf720-input.etl": "a3309961409646f409a2be31da1cf166a22a92b804025bda6742bb1f22f6b42e",
+        "video-input-native-20261117/window-recovery/window720.etl": "22004ef282d868be23e5eca2d928804165b1b02fb8aa8290f79331734d7920df",
+        "video-native-20261117/mf720.etl": "bff520aa43ff06301ca0ecaafd3ee70c338437e0b413c06a8e8a881d7f74a671"
+      },
+      "dwm_runtime_submit_success": {
+        "pal4-game-emclow-11": 30,
+        "pal4-game-cpuboot-12": 88,
+        "pal4-game-cpuboot-nolog-14": 46,
+        "pal4-game-cpuboot-nocache-15": 57
+      },
+      "submit_semantics": "Windows accepted these DWM submissions. Receipt of the callback alone does not establish execution of the command or ownership by a second client."
+    },
+    "repair_build": {
+      "previous_umd_sha256": "aebab8b02006f7f38c4e79e417c69a62439a3ea9c1673e8118e41353fffe5872",
+      "gate_removal_source": "474ef374510ff7a24e580455a646beefe72a8a64",
+      "reapplied_retirement_source": "ccfc48f4a32c890bede65bd8b07af61d68aa0eea",
+      "retirement_diff_sha256": "0b4a9d8421105cc0f7adfbf25e1a55785209e10bd29b7d8c674eed6e7fa2f307",
+      "source_files": {
+        "src/nouveau/tgd3d/tests/contracts.cpp": {
+          "before": "544bb44824415ae3d2eb70e22639df22125e6ef5f975fa201ba69fcbd5f5afb2",
+          "after": "bdfcc5406413ea234c5760a07333fb4c9a20a971d41c38e8aae4bf5b22649279"
+        },
+        "src/nouveau/tgd3d/tests/device_contracts.cpp": {
+          "before": "d16a25783edf0b324fb6e753676af60719139de08aac4559edde9f9b451661b2",
+          "after": "2dcee9c6b2d17d6cb68199fed92247b48f793f231f99198993733190d1244477"
+        },
+        "src/nouveau/tgd3d/tests/runtime_contracts.cpp": {
+          "before": "d73d47bc5591991ec0320afa4ec76ae8d31bce077d5e56f944ff934c17f67e5e",
+          "after": "59388ab06dc8113af80412284a398fe215fe504c14e6695a878e95120822d712"
+        },
+        "src/nouveau/tgd3d/tgd3d.h": {
+          "before": "0b08bddc2f07d3920254b4693bae3cf061f43c589a18fe9df1d0cc8dae776ab5",
+          "after": "0c75360a819fecca95786843fce2e9a8e488d68b9d043bb1cf92ecdae9d0f69f"
+        },
+        "src/nouveau/tgd3d/tgd3d_cmd.cpp": {
+          "before": "b02412a2fccf6befcf18f85c1cadde45dcf385e6716496ecabaac6685d9eacd1",
+          "after": "775422fd39349777df5a17bcd6fa29e37a67371a047010a2ab699c569881bd29"
+        },
+        "src/nouveau/tgd3d/tgd3d_device.cpp": {
+          "before": "fc6ef17b7f84111e39a730dfaa0a785e79881df754234f498d3b9b75a3bfde08",
+          "after": "a0d6fce907477b00896f017b044826d6f09676df45682e5c0a62c165a9cf9fc0"
+        },
+        "src/nouveau/tgd3d/tgd3d_dxgi.cpp": {
+          "before": "6ff5f34ab5695379a1aa3e14521e46a2a802db721ad911a4b706a12910998e4a",
+          "after": "711956859d3443fd0b2e73627100fd63ed8c7fea910505e6529dab7340ac88e4"
+        },
+        "src/nouveau/tgd3d/tgd3d_entry.cpp": {
+          "before": "503d5fa8a8a6ec8668fec29f478abf6dd7865c7f6ece5ac50e297d1ff96cfe1f",
+          "after": "fa7bb0c7a952dfb221e4370763d71f43d6b1506f4c5766ca01a42b6c591d0e4e"
+        },
+        "src/nouveau/tgd3d/tgd3d_offer.cpp": {
+          "before": "e63a9858d506c8d2ecc3c5627c3080bf7afdc422207123c28199c5c8d84d11df",
+          "after": "601483a2ca3d2a6f5ea6cb074906991c8d7fee9cd98e48a0fe6ada2aef73dda2"
+        },
+        "src/nouveau/tgd3d/tgd3d_resource.cpp": {
+          "before": "ffe5e953cfeba3cb137e7eede8f43ac9448292b09ad47b1f2899c7f28920a01a",
+          "after": "12bbd035fbd0ffbadbd8024416a3cf6e8407668209b3decb36d102c938b4f643"
+        },
+        "src/nouveau/tgd3d/tgd3d_runtime.cpp": {
+          "before": "658ab1fc82c17b75b219f35a409f8abbe62c4a678b3b247cef6fd1328557df36",
+          "after": "04283d453c8c171a7a89f4601ed621adea5b8044808f86bea7c8f41a3880d267"
+        }
+      },
+      "recompiled_objects": {
+        "arm64 src/nouveau/tgd3d/TegraGpuD3DVk.dll": 25,
+        "arm64 src/nouveau/tgd3d/tests/tgd3d-contracts.exe": 35,
+        "x64 src/nouveau/tgd3d/tests/tgd3d-contracts.exe": 35
+      },
+      "normalized_reference_rebuild": {
+        "arm64 src/nouveau/tgd3d/TegraGpuD3DVk.dll": {
+          "previous": "bf6270fff4d7c73f0cc346f021ada501c7e95e9cae3172e477f39786d4e0e810",
+          "rebuilt": "bf6270fff4d7c73f0cc346f021ada501c7e95e9cae3172e477f39786d4e0e810"
+        },
+        "arm64 src/nouveau/tgd3d/tests/tgd3d-contracts.exe": {
+          "previous": "f3f53d4ab090083ac85bff0ca4632106ca38505de9d6432c9489f6c0c3a726f4",
+          "rebuilt": "f3f53d4ab090083ac85bff0ca4632106ca38505de9d6432c9489f6c0c3a726f4"
+        },
+        "x64 src/nouveau/tgd3d/tests/tgd3d-contracts.exe": {
+          "previous": "5eb00c6a942cf1ee0dd1512177c197cf58d21dbbb9e24c15c5c9271ec8220146",
+          "rebuilt": "5eb00c6a942cf1ee0dd1512177c197cf58d21dbbb9e24c15c5c9271ec8220146"
+        }
+      },
+      "signed_files": {
+        "TegraGpuD3DVk.dll": {
+          "bytes": 3338792,
+          "sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d"
+        },
+        "tgd3d-contracts.exe": {
+          "bytes": 3951664,
+          "sha256": "fb4548d0ffa0d7395fd00db3544b754526064a2d7caa3d631a719a1ab2e1b0a4"
+        },
+        "tgd3d-contracts-x64.exe": {
+          "bytes": 4419120,
+          "sha256": "cc409e675c7067ab962d1c05e5907e218fb231cf9e8cbd871e9c29aa247f746a"
+        }
+      },
+      "code0_native_cpu_controls": {
+        "boot": "2026-11-18T14:41:20.7380460Z",
+        "exit_by_executable": {
+          "tgd3d-contracts.exe": 0,
+          "tgd3d-contracts-x64.exe": 0
+        },
+        "gpu_executed": false
+      },
+      "kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "desktop_icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+    },
+    "720p_on_device": {
+      "workload": "Six-frame 1280x720 H.264 decode-only on the actual Tegra adapter. Per-process video environment switches cleared. The signed client captures an ETW provider trace scoped to its PID and writes frame hashes, module path and exit results on the device.",
+      "client_sha256": "d8b848d908c5424a973c45405fc45e239ca6d9767bd09636c54da417060edb0d",
+      "media_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "candidate_umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "status": "All six NV12 frames verified; native resources released; subsequent unplanned OS restart.",
+      "boot": "2026-11-18T14:53:27.7277430Z",
+      "error": null,
+      "client_exit": null,
+      "frame_hash_matches": 6,
+      "client_module_verified": true,
+      "journal_tail": [
+        "353421 5196 CALL CloseDecoder 00000000",
+        "353437 5196 RETURN CloseDecoder 00000000",
+        "353468 5196 CALL FinalDeviceStatus 00000000",
+        "353468 5196 RETURN FinalDeviceStatus 00000000",
+        "353531 5196 EXIT RunAndRelease 00000000"
+      ],
+      "dwm_before": 1372,
+      "dwm_after": null,
+      "observation_sha256": "4be5abf4a6f877c2627fe2f0890100c64d93936811e14f809178257367e4020a",
+      "trace": {
+        "raw_sha256": "9e71ffc3bf6151d660b4e25c7184509e23398b34abdd724ffcbc54473cccc646",
+        "trace_stop": {
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "buffers_written": 5
+        },
+        "target_pid": 5060,
+        "event_counts": {
+          "14": 10,
+          "7": 5,
+          "4": 1,
+          "17": 12,
+          "8": 6,
+          "6": 54,
+          "23": 26,
+          "1": 2,
+          "2": 2,
+          "3": 2,
+          "5": 1
+        },
+        "other_pids": {},
+        "created_devices": [
+          {
+            "interface": "0xb000f",
+            "hresult": "00000000",
+            "stage": 0
+          }
+        ],
+        "queue_admission_events": [],
+        "negotiated_d3d11_1": true,
+        "default_d3d11_1_skips_owned_queue": true,
+        "runtime_context_success_counts": {
+          "3": 2,
+          "6": 1,
+          "1": 1,
+          "2": 1
+        },
+        "runtime_UMD_submit_phases": [],
+        "cpu_fence_wait_returns": [],
+        "stale_success_waits": 0,
+        "video_operations": [
+          {
+            "op": 1,
+            "hr": "00000000",
+            "count": 1
+          },
+          {
+            "op": 1,
+            "hr": "8000000a",
+            "count": 1
+          },
+          {
+            "op": 2,
+            "hr": "00000000",
+            "count": 1
+          },
+          {
+            "op": 2,
+            "hr": "8000000a",
+            "count": 1
+          },
+          {
+            "op": 3,
+            "hr": "00000000",
+            "count": 6
+          },
+          {
+            "op": 3,
+            "hr": "8000000a",
+            "count": 6
+          },
+          {
+            "op": 6,
+            "hr": "00000000",
+            "count": 1
+          },
+          {
+            "op": 7,
+            "hr": "00000000",
+            "count": 6
+          },
+          {
+            "op": 10,
+            "hr": "00000000",
+            "count": 1
+          },
+          {
+            "op": 11,
+            "hr": "00000000",
+            "count": 1
+          },
+          {
+            "op": 12,
+            "hr": "00000000",
+            "count": 1
+          }
+        ],
+        "successful_nvdec_decodes": 6,
+        "sessions": {
+          "1": 6
+        },
+        "failed_operations": [],
+        "verified_frame_hashes": [
+          "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4",
+          "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac",
+          "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2",
+          "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8",
+          "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2",
+          "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+        ]
+      },
+      "client_exit_source": "The application reached its final success marker. Its parent did not persist an OS process exit code.",
+      "client_stdout_sha256": "59c36929903cb6afde80fcede2093d5ddff9c39e7dfb011d0c7fc414b117563c",
+      "receipt_sha256": {
+        "journal.txt": "5b19647fd350a0553deab2670acaabd239130c292fde262d73a9df8ca4734f89",
+        "result.json": "4be5abf4a6f877c2627fe2f0890100c64d93936811e14f809178257367e4020a",
+        "result.json.bak": "10e7d7ad4556d7392b33d0f3741c7826a6ffd725fc5130f41b5fb18b17d323e1",
+        "started.txt": "c004a11898da33eef35568447b7fef2ca2ea023fe76f2fe928ecf9c7e0f315d1",
+        "stderr.txt": "6bd3749a368b56ead82399ee6d06456c94bde1edab4477a48d4b48ea5e032053",
+        "stdout.txt": "59c36929903cb6afde80fcede2093d5ddff9c39e7dfb011d0c7fc414b117563c",
+        "video.etl": "9e71ffc3bf6151d660b4e25c7184509e23398b34abdd724ffcbc54473cccc646"
+      },
+      "result_before_restart": "running",
+      "client_luid": "0000000000081b04",
+      "uptime_at_launch_ms": 351296,
+      "measured_decode_ms": 390,
+      "hardware_submissions": "Six NVDEC hardware decode completions. Both monitored fences were created. No tgd3d 3D bridge submission or CPU render-fence wait was recorded for this process.",
+      "subsequent_boot": "2026-11-18T15:00:04.1356980Z",
+      "operator_observation": "The operator reported a crash and restart during this trial.",
+      "relevant_event_records": [
+        {
+          "id": 41,
+          "record": 65902,
+          "fields": {
+            "BugcheckCode": "0",
+            "LongPowerButtonPressDetected": "false",
+            "BootAppStatus": "0",
+            "BugcheckParameter1": "0x0",
+            "PowerButtonTimestamp": "0",
+            "Checkpoint": "0",
+            "SleepInProgress": "0"
+          }
+        },
+        {
+          "id": 6008,
+          "record": 65885,
+          "fields": {}
+        }
+      ],
+      "clock_note": "Use distinct OS boot samples and event record ordering. Early-boot Windows event times shifted relative to the later clock.",
+      "matching_new_kernel_dump": false,
+      "scope": "The capture is limited to the decode client up to trace close. The reset cause and other clients remain unresolved."
+    },
+    "deferred_wifi": "https://github.com/ruje0504-2/mesa-switch-woa/blob/dcd2a11aa8722bc8ab38829f5983bc5f7d9fb6c2/tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json",
+    "submission_semantics": "Both queue selections retain the two monitored fences. The selection controls which Windows context receives the 3D submissions. Actual signal/wait operations require a 3D batch.",
+    "baseline_promotion": {
+      "policy": "Explicit owner decision after seeing both the native six-frame pass and the subsequent unexpected restart.",
+      "umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+      "firmware_sha256": "7b5ac5ad66dad47e77f2a056991e422dd2630fa17e0a57a5874af492efa0f909",
+      "umd_frozen_base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+      "umd_patch_commits": [
+        "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+        "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+        "fddf6c6b06de5cbf3aa6389b528a8b85dc6c42b9",
+        "474ef374510ff7a24e580455a646beefe72a8a64",
+        "ccfc48f4a32c890bede65bd8b07af61d68aa0eea"
+      ],
+      "activation": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\tgd3d-video-ddi-ded6fa4a-20261118-230849",
+      "recovery": {
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\activation",
+        "umd_sha256": "c8a8eb9aab7e8da0eddbfd33052b51c945ff799a7765b86295303d9e5f65c12e",
+        "script": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\tgd3d-video-ddi-ded6fa4a-20261118-230849\\Restore-ShaderCache.ps1"
+      },
+      "postboot": {
+        "boot": "2026-11-18T15:09:39.2884380Z",
+        "dwm_pid": 1396,
+        "code": 0,
+        "task": "Ready",
+        "task_result": 0,
+        "loaded_files": [
+          {
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\tgd3d-video-ddi-ded6fa4a-20261118-230849\\app\\TegraGpuD3DVk.dll",
+            "pid": 1396,
+            "name": "TegraGpuD3DVk.dll",
+            "sha": "DED6FA4AFFEC0F18773503D282F9B44939090488202EF5F25EA1D879DD862F0D"
+          },
+          {
+            "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\tgd3d-video-ddi-ded6fa4a-20261118-230849\\app\\libvulkan_nouveau.dll",
+            "pid": 1396,
+            "name": "libvulkan_nouveau.dll",
+            "sha": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934"
+          }
+        ],
+        "desktop_response_csv": "5304,True,0,1280,720,45,45,44",
+        "desktop_response_columns": "explorer_pid,responds_to_WM_NULL,dwm_flush_hresult,width,height,valid_samples,nonblack_samples,unique_colors",
+        "display": {
+          "width": 1280,
+          "height": 720,
+          "orientation": 1,
+          "bpp": 32,
+          "hz": 60,
+          "x": 0,
+          "y": 0,
+          "flags": 0,
+          "fields": 544997536
+        },
+        "rotation": 2,
+        "power_mode": 1,
+        "dfll_active": 1,
+        "verified_platform_files": 11
+      },
+      "sha256": {
+        "stage_receipt": "7e12670a6de002c42cb5333e0ad344ddd9b70e362fa1ff8d189a56f9a9dd0133",
+        "desktop": "275e942a34af6bec7fc8497fecdb29bcf2e8299cf2c0dcd3384f20a6b6ddcf41",
+        "device_pair": "f26f0a9a243c02b2c26ea30f23b559fdb298f65597e6eb69987e4a99d310af48",
+        "boot": "f25b229307e5b4a7ef8eb1ae815335417e5d566eb61798dd2b528801d6788139"
+      },
+      "scope": "Default 720p decode-only on GM20B and desktop readiness after reselection. Previous 1080p and windowed-video evidence belongs to its original UMD."
+    }
+  }
+}

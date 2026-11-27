@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-late-context-cross-archives-20261121-01",
+  "contract_id": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+  "windows_question": "WIN-DWM-LATE-ADAPTER-PROGRESS",
+  "owner": "Windows VidSch、DWM、GM20B 与可能并存的软件适配器",
+  "question": "启动 91476 在 DWM 152586 后还有 DxgKrnl 队列活动。其适配器、节点及实际完成属于哪条执行路径？",
+  "method": "在同启动与同 DWM 实例的完整正常档案寻找较晚上下文的适配器和完成对照",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "原始包按上下文、队列对象和适配器或节点明确配对，准确标注每个较晚队列的提交、实际完成和留存段。",
+  "observations": [
+    "锁定同一启动 91476、DWM PID 1400 及进程创建时间的全部七份可哈希正常归档。排除不同启动、进程或不匹配归档。",
+    "按安装模板在所有流检查上下文创建、设备、适配器、节点与调度对象的直接配对。 同值指针需有同实例所有权及时间证据。",
+    "对照 GPU 完成事件和正式 KMD 原始状态。在确认上下文、适配器与提交围栏可配对时标注。围栏号的大小、线程号或软件队列编号不能用作适配器身份。"
+  ],
+  "inputs": {
+    "prior_result": {
+      "path": "windows-native-graphics/rounds/win-dwm-late-adapter-152586-20261121-01.result.json",
+      "sha256": "b394a991ddc86d9dd7bc8d918b4708487fb36721459ba5b0e914a47f5ad7f8c3"
+    },
+    "incident_archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+      "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+    },
+    "same_dwm_normal_archives": [
+      {
+        "report": {
+          "path": "windows-native-graphics/rounds/win-present-focused-20261121-01.result.json",
+          "sha256": "900b76e7b33a760428c34158acae6aaad375ba8902a451aea83394cb9a05a000"
+        },
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-focused-20261121-01/collected.zip",
+        "sha256": "26d9aa874b04112779b8e02c4e27cdeb1239b78b94df10fbae91c5f24c47befd"
+      },
+      {
+        "report": {
+          "path": "windows-native-graphics/rounds/win-present-incall-20261121-01.result.json",
+          "sha256": "b345beaef3d845873136e56b83967e7bd678ded5a2b31425a4aac22017ef1703"
+        },
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-incall-20261121-01/collected.zip",
+        "sha256": "4a6da399df62c6f1b6191c7d5c261a65da3651bf3fe4ea3faa78cb18459fe6f4"
+      },
+      {
+        "report": {
+          "path": "windows-native-graphics/rounds/win-present-incall-20261121-02.result.json",
+          "sha256": "ab19dd6ee6a3b34c73123fa21ec7ab8cb6f7a0735d77227a2963531f244ea701"
+        },
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-incall-20261121-02/collected.zip",
+        "sha256": "39492369320c3bd15dc7523ba63c7e15bed677631242a01b39922f35b82e438b"
+      },
+      {
+        "report": {
+          "path": "windows-native-graphics/rounds/win-present-live-20261121-02.result.json",
+          "sha256": "af09f58d4943193837016a6f6d22f0a7b6985ee894857400950e10812474fe86"
+        },
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-live-20261121-02/collected.zip",
+        "sha256": "6b30aa805fe56c1baaf3a33127babd1c84349addb838cbfe85dd507b58ced308"
+      },
+      {
+        "report": {
+          "path": "windows-native-graphics/rounds/win-present-local-blt-20261121-01.result.json",
+          "sha256": "f8f893c4d9a450c4a28716403ce2cc45bbdc1777325420d108c4efd8c7ccec27"
+        },
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-local-blt-20261121-01/collected.zip",
+        "sha256": "61cb1ec4e568a2cf37ff874058725ec6ce6c6e140de4a4760d98b21d2c9f4570"
+      },
+      {
+        "report": {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-blt-20261121-01.result.json",
+          "sha256": "aa77f36b5d49f3c0d9b5b9ff1d2bee00c1207b6323ee3ac836d9b1dfc5239d4c"
+        },
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-preallocated-blt-20261121-01/collected.zip",
+        "sha256": "df24f085aa7006667e9c1a4d168a1ab6c39d14cf06bc39dfbf2ee478e2f33308"
+      },
+      {
+        "report": {
+          "path": "windows-native-graphics/rounds/win-present-preallocated-cdd-20261121-01.result.json",
+          "sha256": "d9a4bb2df09ab7bd9d81a41df8ec0a39c95abb8cfa491c3dc70b3b3c80e348e9"
+        },
+        "archive": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-preallocated-cdd-20261121-01/collected.zip",
+        "sha256": "424c68463a164b7afc967cf8882a0c2af68c8565a568f906ce4ddc8c20e53a02"
+      }
+    ],
+    "template_hash": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357",
+    "baseline_kmd_decoder_revision": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "microsoft_wddm": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkarg_submitcommandvirtual",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgkargcb_notify_interrupt_data"
+    ]
+  }
+}

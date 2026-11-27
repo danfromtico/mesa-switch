@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "round_id": "win-seq-original-demand-once-20261121-02",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "plan_sha256": "afa0d2d2829d5f769c7645f7ef4838c3146ef903538bd5b379664b0bba391737",
+  "status": "UTF-8 探针结果误读已定位，原窗口零启动，正式档已恢复",
+  "finding": "第三次准备在一次性候选启动 95719 完整保留 StartDevice、许可消费及成功返回。探针五项校验全部通过；无 BOM 的 UTF-8 结果含中文 probe_read_error，Windows PowerShell 5.1 默认代码页 936 读取后 JSON 解析失败。恢复正式启动 95892 后，从同一原始文件独立复现默认读取失败、显式 UTF-8 成功。原应用与捕获均未启动。本次各次重启均有计划记录，未见 41/6008。",
+  "missing_observation": "本次零应用执行，无首次 Present 或同包 DMA；不能用成功启动 95719 解释早期 95090 或历史 91476 的 DMA 152586。修正读取编码并保留身份反例控制后，接续同一请求的唯一原应用执行。",
+  "device_executions": 0,
+  "request_id": "f6264ee11289",
+  "preparation": 3,
+  "candidate_boot": 95719,
+  "restored_boot": 95892,
+  "application_executions": 0,
+  "unexplained_restart": false,
+  "evidence": {
+    "artifacts": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/lease-acceptance.json",
+        "sha256": "c5d6983d5994386a371de52d1f74b5a9e2c84dcc2b196b522471b309799c9497"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/startup3-probe-encoding-readback.json",
+        "sha256": "66a0441c1bf3e92387f881a0675283067418d5bc1e6dc2d025c5651c0817f614"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/startup3-system-interval.json",
+        "sha256": "ebf9f490dcf5211dbf0754fb35bf980244dae2a22cdcc95676ce523a207566ff"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup3/early-candidate-boot/verified.json",
+        "sha256": "9ef7430c50a4288194e1830a7284e29a01e8b94d47392a4d8edb7159cf866add"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup3/early-candidate-boot/inventory.json",
+        "sha256": "06755d7a6fce710479e15b6dcbf843636be8254f263f97b2e7ed261eca4c3ddd"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup3/capture-readback.json",
+        "sha256": "26ebaf217a3720718262540004fc4a57e1e2573067a278dee7fd3b7646df6809"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup3/diagnostic-installed/collection.json",
+        "sha256": "c12c707dc932a1bf04e3adbd1bdbb4b9ae8b465f917b3242907e80dcfef4d800"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup3/diagnostic-installed/outcome.zip",
+        "sha256": "3c1b337876b25b5580286b2edd98b49d2e6c3ae4e06dacecf631489ba018311c"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup3/diagnostic-installed/cleanup.json",
+        "sha256": "cc542a1dbe900613f54c11d8532ad15f4abac6c3193c122ed4c1c75ae5f2e0cf"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup3/formal-power-verified.json",
+        "sha256": "a4977e213100dd80004ba157928247e66d6774ac1dfd7e2ff9973408f66fe613"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-startup-observation/gate-v4-utf8-local-proof.json",
+        "sha256": "f627d914771a928f3ddb12faa05a43c7477ff43d73ab8a8d72f8ba0000359a52"
+      }
+    ],
+    "planned_boot_records": [
+      95548,
+      95634,
+      95719,
+      95807,
+      95892
+    ],
+    "unplanned_event_records": [],
+    "raw_result_sha256": "a3c64f1beaabae8c5ff737cbd2242da268116773c370585487012dbfb0099046",
+    "encoding_cause_confirmed_same_original_file": true,
+    "gate_validation": {
+      "token": true,
+      "nonce": true,
+      "boot": true,
+      "no_capture": true,
+      "no_application": true
+    },
+    "not_started": {
+      "present.bmp": true,
+      "capture.etl": true,
+      "observer.json": true,
+      "client-pid": true,
+      "scene": true,
+      "profiler-release.json": true
+    },
+    "formal_components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "formal_loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_nvk_arm64.dll"
+    },
+    "handheld_mode": 1,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe"
+  },
+  "sources": [
+    {
+      "title": "Microsoft: Character encoding in Windows PowerShell 5.1",
+      "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_character_encoding?view=powershell-5.1",
+      "relevance": "No-BOM Get-Content defaults to the ANSI code page; explicit UTF8 reads the original encoding."
+    }
+  ]
+}

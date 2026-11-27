@@ -829,9 +829,16 @@ if d3d_drivers_path == ''
   d3d_drivers_path = join_paths(get_option('prefix'), get_option('libdir'), 'd3d')
 endif
 
+with_tgd3d = get_option('tgd3d') \
+  .require(host_machine.system() == 'windows', error_message : 'tgd3d is a Windows user-mode driver.') \
+  .allowed()
+
 with_gallium_st_d3d10umd =  get_option('gallium-d3d10umd')
+d3d10_backend = get_option('gallium-d3d10-backend')
 if with_gallium_st_d3d10umd
-  if not with_gallium_swrast
+  if d3d10_backend == 'nvk' and (host_machine.system() != 'windows' or not with_gallium_zink)
+    error('The NVK d3d10umd target requires Windows and gallium zink.')
+  elif d3d10_backend == 'gdi' and not with_gallium_swrast
     error('The d3d10umd state tracker requires gallium softpipe/llvmpipe.')
   endif
 endif
@@ -1001,6 +1008,7 @@ endif
 with_gfx_compute = [
   with_any_opengl,
   with_any_vk,
+  with_gallium_st_d3d10umd,
   with_clc,
   with_gallium_va and with_video_encode,
   with_gallium_mediafoundation and with_video_encode,
@@ -1177,7 +1185,6 @@ if with_split_debug.allowed() and get_option('debug')
 endif
 
 with_shader_cache = get_option('shader-cache') \
-  .require(host_machine.system() != 'windows', error_message : 'Shader Cache does not currently work on Windows') \
   .allowed()
 
 if with_shader_cache
@@ -1833,7 +1840,7 @@ endif
 with_compression = dep_zlib.found() or dep_zstd.found()
 if with_compression
   pre_args += '-DHAVE_COMPRESSION'
-elif with_shader_cache
+elif with_shader_cache and host_machine.system() != 'windows'
   error('Shader Cache requires compression')
 endif
 
@@ -2168,7 +2175,7 @@ if dep_elf.found()
   pre_args += '-DUSE_LIBELF'
 elif with_gallium_radeonsi and with_gfx_compute
   error('Gallium driver radeonsi requires libelf')
-elif with_nouveau_vk and not with_platform_switch
+elif with_nouveau_vk and not with_platform_switch and not with_platform_windows
   error('NVK requires libelf')
 endif
 

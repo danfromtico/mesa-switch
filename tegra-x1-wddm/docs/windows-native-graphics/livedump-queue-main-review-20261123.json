@@ -1,0 +1,358 @@
+{
+  "schema": 1,
+  "decision": "accept_current_Mini_capacity_boundary_and_historical_file_preservation;per_attempt_cause_unproved",
+  "main_device_operations": 0,
+  "goal_complete": false,
+  "archive": {
+    "filename": "live-dump-queue-boundary-01a204e6.zip",
+    "bytes": 65946010,
+    "sha256": "e4b96299a23c1905d2945d5716caf8f2ee384c700856828803dbf2cff3cf5a76",
+    "originals": 131,
+    "members": 132,
+    "identity_sha256": "1f5eaa9b94b36f927d099d802a7e32e9209bf5f2f08e6a590d0f355b0c26820c",
+    "all_bytes_SHA_CRC_verified": true
+  },
+  "module_identity": {
+    "fresh_read_boot": 98337,
+    "retained_and_before_after_modules": [
+      {
+        "path": "C:\\Windows\\System32\\drivers\\werkernel.sys",
+        "sha256": "069a0a37f243341f75cf7bcbfb9e816b432b696cd0e59167ef46b05d5c887d4f",
+        "name": "werkernel.sys",
+        "bytes": 66928,
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      },
+      {
+        "path": "C:\\Windows\\System32\\drivers\\crashdmp.sys",
+        "sha256": "f4548421b9d7a087ed6c22d809b64442f28ed85f8eeaf9a56536a88a8abd3f8b",
+        "name": "crashdmp.sys",
+        "bytes": 120288,
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      },
+      {
+        "path": "C:\\Windows\\System32\\drivers\\dumpsd.sys",
+        "sha256": "1803fd913e6092d722224e60d206250bdea3e4677873f25363c84767c2d0c26b",
+        "name": "dumpsd.sys",
+        "bytes": 197992,
+        "version": "10.0.22621.1 (WinBuild.160101.0800)"
+      }
+    ],
+    "all_three_full_SHA_equal_retained_bytes": true,
+    "memory_image_identity_proved": false
+  },
+  "symbols": {
+    "PE_RSDS": {
+      "guid": "8cee1d17-04b4-820a-af20-2f1bee135894",
+      "age": 1
+    },
+    "PDB": {
+      "guid": "8cee1d17-04b4-820a-af20-2f1bee135894",
+      "info_age": 2,
+      "DBI_age": 1,
+      "info_version": 20000404,
+      "DBI_signature": -1,
+      "DBI_version": 19990903
+    },
+    "PDB_sha256": "b8e11f45995bfdb28e829203a79315a4b828664e40bb1336613731cd1e3cffef",
+    "MSF7": true,
+    "published_three_identity_comparisons_pass": true,
+    "Microsoft_source": {
+      "url": "https://raw.githubusercontent.com/microsoft/microsoft-pdb/805655a28bd8198004be2ac27e6e0290121a5e89/PDB/dbi/pdb.cpp",
+      "commit": "805655a28bd8198004be2ac27e6e0290121a5e89",
+      "path": "PDB/dbi/pdb.cpp",
+      "sha256": "a6f274f9b47abd875f2dbd2716c273bec7846be3d41e87c14fa815710896c898",
+      "bytes": 101304
+    },
+    "native_Windows_DIA_invoked": false,
+    "full_native_validator_result_claimed": false,
+    "exports_parsed_from_PE": [
+      {
+        "name": "DllUnload",
+        "rva": 48272,
+        "PDB_function": "DllUnload"
+      },
+      {
+        "name": "WerLiveKernelCancelReport",
+        "rva": 30064,
+        "PDB_function": "WerLiveKernelCancelReportExt"
+      },
+      {
+        "name": "WerLiveKernelCloseHandle",
+        "rva": 30304,
+        "PDB_function": "WerLiveKernelCloseHandleExt"
+      },
+      {
+        "name": "WerLiveKernelCreateReport",
+        "rva": 30544,
+        "PDB_function": "WerLiveKernelCreateReportExt"
+      },
+      {
+        "name": "WerLiveKernelInitSystem",
+        "rva": 69632,
+        "PDB_function": "WerLiveKernelInitSystemExt"
+      },
+      {
+        "name": "WerLiveKernelOpenDumpFile",
+        "rva": 31792,
+        "PDB_function": "WerLiveKernelOpenDumpFileExt"
+      },
+      {
+        "name": "WerLiveKernelSubmitReport",
+        "rva": 32080,
+        "PDB_function": "WerLiveKernelSubmitReportExt"
+      },
+      {
+        "name": "WerSubmitUserCrashReport",
+        "rva": 28672,
+        "PDB_function": "WerSubmitUserCrashReportExt"
+      }
+    ],
+    "Ext_aliases": 7,
+    "exact_DllUnload": 1
+  },
+  "binary_analysis": {
+    "disassembly_entries_byte_checked": 7296,
+    "all_entries_valid_instructions_claimed": false,
+    "ZwQueryKey_IAT_slot": "0x60c0",
+    "KeyFullInformation_class": 2,
+    "SubKeys_offset": 20,
+    "threshold": 10,
+    "size_probe_call": "0x8464",
+    "size_probe_expected_statuses": [
+      "0x80000005",
+      "0xc0000023"
+    ],
+    "data_read_call": "0x8510",
+    "data_read_success_branch": "NT_SUCCESS sign-bit check at0x8514",
+    "capacity_predicate": "SubKeys < 10",
+    "capacity_false_to_status": "0xc0000099",
+    "all_false_causes": [
+      "Unexpected size-query status",
+      "Pool allocation failure",
+      "Data-query failure",
+      "SubKeys >= 10"
+    ],
+    "dispatch": "GrantedPolicy==1 selects Mini after policy evaluation; full-dump throttling is skipped for this value.",
+    "event_semantics": "Failure clears caller Policy output. Event1001 uses the earlier stack GrantedPolicy value; Granted1 is not capture/write success.",
+    "independent_LLVM_disassembly": [
+      {
+        "name": "capacity-helper",
+        "exit": 0,
+        "stdout_bytes": 5073,
+        "stdout_sha256": "f9183ca7a217d83497710fd11421044e39d6c8bcdc986e9ce21bac5ea3b3d7a5",
+        "stderr_bytes": 0
+      },
+      {
+        "name": "mini-capacity-map",
+        "exit": 0,
+        "stdout_bytes": 5480,
+        "stdout_sha256": "6955a79fb50d0a39babbb65b491ecd16fc0bddfcf8ebf1d1609cc76815b87f34",
+        "stderr_bytes": 0
+      }
+    ]
+  },
+  "queue": {
+    "boot": 98337,
+    "key": "SYSTEM\\CurrentControlSet\\Control\\CrashControl\\LiveKernelReports\\WATCHDOG",
+    "native_RegQueryInfoKey_status": 0,
+    "subkeys": 10,
+    "last_write_filetime": 134388938644850761,
+    "last_write_utc": "2026-11-11T18:04:24.4850761Z",
+    "child_names_match_10_preserved_dump_basenames": true,
+    "all_child_write_times_precede_case": true,
+    "present_snapshot_fails_retained_path_capacity_predicate": true,
+    "per_attempt_executed_branch_proved": false,
+    "history_completeness_proved": false
+  },
+  "existing_events": {
+    "time_window": [
+      "2026-11-23T08:20:00Z",
+      "2026-11-23T08:31:00Z"
+    ],
+    "channels_read": 5,
+    "query_errors": 0,
+    "truncated": false,
+    "WER_XML_matches_prior_originals": 12,
+    "Kernel_LiveDump_Operational_matches": 0,
+    "Kernel_LiveDump_Analytic_enabled": false,
+    "earlier_boot_boundaries_from_previous_originals": true,
+    "classic_bugcheck_arrival_proved": false
+  },
+  "historical_dumps": {
+    "files": 11,
+    "bytes": 369612993,
+    "native_before_host_native_after_full_SHA_match": true,
+    "original_rows": [
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG-20261110-0146.dmp",
+        "last_write_utc": "2026-11-09T17:47:30.1713173Z",
+        "creation_utc": "2026-11-09T17:46:47.7371121Z",
+        "bytes": 366796800,
+        "sha256": "7165ccbd91df58f5111618098ef4a2a534139fa2bd64665250feeb497972de52",
+        "relative": "WATCHDOG-20261110-0146.dmp",
+        "host_sha256": "7165ccbd91df58f5111618098ef4a2a534139fa2bd64665250feeb497972de52",
+        "source_after_sha256": "7165ccbd91df58f5111618098ef4a2a534139fa2bd64665250feeb497972de52"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261110-0548.dmp",
+        "last_write_utc": "2026-11-09T21:48:47.2389039Z",
+        "creation_utc": "2026-11-09T21:48:46.8639076Z",
+        "bytes": 279238,
+        "sha256": "eccd5802cfc14daf604ab44666682d074b685974499bc046f9673c0027a8ab8e",
+        "relative": "WATCHDOG/WATCHDOG-20261110-0548.dmp",
+        "host_sha256": "eccd5802cfc14daf604ab44666682d074b685974499bc046f9673c0027a8ab8e",
+        "source_after_sha256": "eccd5802cfc14daf604ab44666682d074b685974499bc046f9673c0027a8ab8e"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261110-0601.dmp",
+        "last_write_utc": "2026-11-09T22:01:26.9078265Z",
+        "creation_utc": "2026-11-09T22:01:26.6109490Z",
+        "bytes": 279265,
+        "sha256": "a86e083dcd46d1159ed19a5ba9dcf5f68aab23084e8aa1fb1ae632bae0be367f",
+        "relative": "WATCHDOG/WATCHDOG-20261110-0601.dmp",
+        "host_sha256": "a86e083dcd46d1159ed19a5ba9dcf5f68aab23084e8aa1fb1ae632bae0be367f",
+        "source_after_sha256": "a86e083dcd46d1159ed19a5ba9dcf5f68aab23084e8aa1fb1ae632bae0be367f"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261110-2049.dmp",
+        "last_write_utc": "2026-11-10T12:49:24.0987123Z",
+        "creation_utc": "2026-11-10T12:49:23.8330870Z",
+        "bytes": 282049,
+        "sha256": "a92a77a4e906ebb2621f879ca693157f08f16bf53427d959e9e8d97639f8eb87",
+        "relative": "WATCHDOG/WATCHDOG-20261110-2049.dmp",
+        "host_sha256": "a92a77a4e906ebb2621f879ca693157f08f16bf53427d959e9e8d97639f8eb87",
+        "source_after_sha256": "a92a77a4e906ebb2621f879ca693157f08f16bf53427d959e9e8d97639f8eb87"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261111-0200.dmp",
+        "last_write_utc": "2026-11-10T18:00:57.8726508Z",
+        "creation_utc": "2026-11-10T18:00:57.6226540Z",
+        "bytes": 282001,
+        "sha256": "fdf5a68cb52ca364849191b826fcdbea1e0d3a682c18bf8ab82216d2ae5059cf",
+        "relative": "WATCHDOG/WATCHDOG-20261111-0200.dmp",
+        "host_sha256": "fdf5a68cb52ca364849191b826fcdbea1e0d3a682c18bf8ab82216d2ae5059cf",
+        "source_after_sha256": "fdf5a68cb52ca364849191b826fcdbea1e0d3a682c18bf8ab82216d2ae5059cf"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261111-0201.dmp",
+        "last_write_utc": "2026-11-10T18:01:00.9663989Z",
+        "creation_utc": "2026-11-10T18:01:00.7164013Z",
+        "bytes": 282259,
+        "sha256": "c610bdb075e7a9892cf84a070cd54d845a07e632e75b7e7a416202e8c38d9d88",
+        "relative": "WATCHDOG/WATCHDOG-20261111-0201.dmp",
+        "host_sha256": "c610bdb075e7a9892cf84a070cd54d845a07e632e75b7e7a416202e8c38d9d88",
+        "source_after_sha256": "c610bdb075e7a9892cf84a070cd54d845a07e632e75b7e7a416202e8c38d9d88"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261111-0214.dmp",
+        "last_write_utc": "2026-11-10T18:14:40.8616745Z",
+        "creation_utc": "2026-11-10T18:14:40.4085468Z",
+        "bytes": 282018,
+        "sha256": "7402373cb55ec8c771f9573ccc2e8118a4e88fd94715c7d5d935ce9b9adf113e",
+        "relative": "WATCHDOG/WATCHDOG-20261111-0214.dmp",
+        "host_sha256": "7402373cb55ec8c771f9573ccc2e8118a4e88fd94715c7d5d935ce9b9adf113e",
+        "source_after_sha256": "7402373cb55ec8c771f9573ccc2e8118a4e88fd94715c7d5d935ce9b9adf113e"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261112-0108.dmp",
+        "last_write_utc": "2026-11-11T17:08:56.1458489Z",
+        "creation_utc": "2026-11-11T17:08:55.3802209Z",
+        "bytes": 282292,
+        "sha256": "7d3442174168f4fed2e4f415c656526e04df248ca4297a6304cce8ffa3005fbe",
+        "relative": "WATCHDOG/WATCHDOG-20261112-0108.dmp",
+        "host_sha256": "7d3442174168f4fed2e4f415c656526e04df248ca4297a6304cce8ffa3005fbe",
+        "source_after_sha256": "7d3442174168f4fed2e4f415c656526e04df248ca4297a6304cce8ffa3005fbe"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261112-0109.dmp",
+        "last_write_utc": "2026-11-11T17:09:01.5364706Z",
+        "creation_utc": "2026-11-11T17:09:01.1145934Z",
+        "bytes": 282594,
+        "sha256": "0d3faf88eb28172eb81ecf260353fb9362bd4fe420bb78aa919482f885ac7ea1",
+        "relative": "WATCHDOG/WATCHDOG-20261112-0109.dmp",
+        "host_sha256": "0d3faf88eb28172eb81ecf260353fb9362bd4fe420bb78aa919482f885ac7ea1",
+        "source_after_sha256": "0d3faf88eb28172eb81ecf260353fb9362bd4fe420bb78aa919482f885ac7ea1"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261112-0133.dmp",
+        "last_write_utc": "2026-11-11T17:33:17.1501481Z",
+        "creation_utc": "2026-11-11T17:33:16.9157710Z",
+        "bytes": 282295,
+        "sha256": "673680ea2d6ba1619c495cf51d61670cd970f78e5bd2deda739d96d555fdc188",
+        "relative": "WATCHDOG/WATCHDOG-20261112-0133.dmp",
+        "host_sha256": "673680ea2d6ba1619c495cf51d61670cd970f78e5bd2deda739d96d555fdc188",
+        "source_after_sha256": "673680ea2d6ba1619c495cf51d61670cd970f78e5bd2deda739d96d555fdc188"
+      },
+      {
+        "path": "C:\\Windows\\LiveKernelReports\\WATCHDOG\\WATCHDOG-20261112-0204.dmp",
+        "last_write_utc": "2026-11-11T18:04:24.9069499Z",
+        "creation_utc": "2026-11-11T18:04:24.4850761Z",
+        "bytes": 282182,
+        "sha256": "322ba5f3a7b22649d7592740d5ec97ae61fcf7619691003c686488cd343a522c",
+        "relative": "WATCHDOG/WATCHDOG-20261112-0204.dmp",
+        "host_sha256": "322ba5f3a7b22649d7592740d5ec97ae61fcf7619691003c686488cd343a522c",
+        "source_after_sha256": "322ba5f3a7b22649d7592740d5ec97ae61fcf7619691003c686488cd343a522c"
+      }
+    ],
+    "all_first8_bytes": "PAGEDU64",
+    "full_dump_layout_interpretation": false,
+    "new_case_dump_attribution": false,
+    "earlier_metadata_only_snapshots_not_upgraded": true
+  },
+  "review": {
+    "model": "gemini-4-neon-high",
+    "R1_outcome": "accept_narrowed_facts",
+    "R1_findings": 6,
+    "frozen_members": 34,
+    "frozen_files_including_manifest": 35,
+    "new_Gemini_review_invoked_by_main": false,
+    "six_local_corrections_independently_accepted_by_main": true
+  },
+  "formal": {
+    "boot": 98337,
+    "Code": 0,
+    "selected_equals_permanent": true,
+    "read_scope": "Identity continuity only; full8/5/private-x86 proofs remain the previously accepted98337 batch.",
+    "candidate_c4_qualified": false,
+    "installed_policy": "605644880f1a4c183121cfb645a6a9e775aa2dac2e5fcb707ed9ddfe4eb300eb"
+  },
+  "new_native_actions": {
+    "GPU_TDR_dump_requests": 0,
+    "explicit_registry_changes": 0,
+    "channel_enables": 0,
+    "keys_or_source_files_deleted": 0
+  },
+  "wording_correction": "The initial size probe is expected to return BUFFER_OVERFLOW or BUFFER_TOO_SMALL. Only the subsequent data query follows the NT_SUCCESS check; do not describe both calls as STATUS_SUCCESS.",
+  "remaining": [
+    "No per-attempt proof of which false branch produced the08:22:47 results.",
+    "No new capture or writer success, and no current-queue cleanup in this batch.",
+    "Classic NT bugcheck arrival,97176 crash-dump failure stage and SD dump runtime path remain unknown.",
+    "Legacy SEQUENTIAL,91476/DWM152586,95090 and c4 system/paging repair qualification remain unresolved."
+  ],
+  "faults": {
+    "open": 20,
+    "new": 0,
+    "closed": 0
+  },
+  "references": [
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/ns-wdm-_key_full_information",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-zwquerykey",
+    "https://raw.githubusercontent.com/microsoft/microsoft-pdb/805655a28bd8198004be2ac27e6e0290121a5e89/PDB/dbi/pdb.cpp"
+  ],
+  "local_audit_sha256": "6e98ce3bfb51bb4b718a1d938a2711777a24d632eb8a752e475393861e2c4c93",
+  "local_audit_script_sha256": "75354b1130e7d7a7f8b3d34636c94b1ffca0d02229e9fa862ca82d16fb311ab6",
+  "publication_scope": "Evidence only: current WATCHDOG Mini capacity condition, bounded static mapping and11 historical dump originals. No cleanup, capture success, driver fix, fault closure or baseline change.",
+  "workspace_preservation": {
+    "main_preexisting_files_unchanged": 42,
+    "candidate_sources_not_integrated": true
+  },
+  "review_corrections": {
+    "six_R1_items": "Main independently verified the supplied corrections without modifying the original R1 review or34 frozen inputs. No second Gemini review/findings0 is claimed.",
+    "size_probe": "Its expected statuses are0x80000005 or0xc0000023, followed by allocation and a separate NT_SUCCESS data-read. The two queries are not both required to return STATUS_SUCCESS.",
+    "capacity_scope": "The registry snapshot is a current necessary admission condition in the retained file path. It is not an execution trace of the earlier12 WER events, nor a claim about classic crash-dump initialization."
+  },
+  "deferred_470e1dbc_contracts": {
+    "new_direct_evidence": false,
+    "status": "All four remain unknown with their original conditions; this Mini queue audit does not discharge any of them."
+  }
+}

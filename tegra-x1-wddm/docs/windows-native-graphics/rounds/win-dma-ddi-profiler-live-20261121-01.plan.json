@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "round_id": "win-dma-ddi-profiler-live-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER-LIVE",
+  "windows_question": "WIN-DMA-DDI-PROFILER-LIVE",
+  "owner": "Windows DxgKrnl Profiler、ETW 控制器和独立控制端",
+  "question": "正式 GM20B 桌面能否把同一提交的 175、5063 进入/返回及完成链实时保存到控制端？",
+  "method": "用同一 Windows 会话验证原始 ETL 与控制端实时 ACK，在正式桌面保留一条有限时序",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "自然桌面发生的一组 GM20B DWM 提交，Windows 105/106 剩余调用配对、完成及退出完整。实时与文件记录逐字节匹配，清除临时会话。",
+  "observations": [
+    "核对启动 91918 的交流、Handheld1、正式永久许可、全组件哈希及 DWM。使用新 nonce 的独立会话和目录。",
+    "对自然正常桌面活动采集 1600 ms，观察 PID 4 的全部 175、普通 DMA 176/177/180 及 105/106 Function 5063。保留逐条 fsync 和 Windows 确认 QPC。",
+    "比对同上下文、线程、提交号和原始载荷。只有同启动既有状态快照与该次上下文一一对应才标明 DWM/GM20B。归档并清理。"
+  ],
+  "inputs": {
+    "source_sha256": "cf4474a857b288d0743362679eecb7f5c9b8a117a742fa80c9be466eb3e8448a",
+    "exe_sha256": "adb87f9f9ad33ff0132230a2de0c86bdfc764d2cc0f65af7a3188d0e7e702784",
+    "receiver_sha256": "0bd52300d070a6402db32b212ef7d233a04c438a527e61a4028cf153d9727a2a",
+    "runner_sha256": "f3f637381a1a84d0d163ca5be9952d978cc149e7a4b49f62f7595c9793f011cb",
+    "review_request_sha256": "cf8cc10469bb461da19606c72e0d309430a40a6012f4cae6d37cff137d7f6bf7",
+    "owner": "311b9839e72b47e7983b0c522dc7c836",
+    "session": "SwitchDdiLive-311b9839e72b",
+    "timeout_ms": 1600,
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-dma-ddi-profiler-20261121-01.result.json",
+        "sha256": "2db3149650bdd65be093ea8c92b701ae4887e241933a4bb6a332a181d0bfcd4f"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+        "sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf"
+      }
+    ]
+  }
+}

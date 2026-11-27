@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "round_id": "win-dma-ddi-profiler-20261121-01",
+  "contract_id": "WIN-DMA-DDI-PROFILER",
+  "windows_question": "WIN-DMA-DDI-PROFILER",
+  "owner": "Windows DxgKrnl 内置 Profiler 与 VidSch",
+  "question": "正式驱动能否通过 Windows 自带 Profiler 按提交号校验虚拟提交包装的进入与返回？",
+  "method": "正式桌面进行一次 600 ms Windows Profiler 对照",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "同启动、同 LUID 及 hContext，以唯一同调度线程近邻序列串起 175 与两端 Profiler，再用同包完成号复核。否则保留具体缺口。",
+  "observations": [
+    "继续同一启动 91918 的正式手持状态。启动独立限时 ETW 观察，不派发任何额外应用。",
+    "启用 DxgKrnl Base/Resource/LongHaul/Profiler 0x843 和状态快照。核对封口、丢失计数以及七份正式组件和五份实载。",
+    "以已绑定的 GM20B 节点、同一 Windows 调度线程的 175.1、105/106 Function 0x13c7 和后续 177/176/180 配对。同线程有多个候选时保存歧义。"
+  ],
+  "inputs": {
+    "collector_sha256": "14771ec3e76f7e17d59bd0e3bf4abc3aa5d3c1c23a66dfdfd92236a844d83638",
+    "controller_sha256": "d74e7406423a10f59a8d1f274c41229fa5c3f61022dd719f03036f8e85fdaea4",
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-dma175-ddi-order-20261121-01.result.json",
+        "sha256": "f360eb0249210e9b1b4573de8dbf6ae4ae859d3b2a6b39c171780fe3eb42c33c"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-seq-first-present-dwm-rundown-20261121-01.result.json",
+        "sha256": "b5ff5dc2c5f7db73e776faa1c6b32f9f5584e767119f1fb65b9bcafbabb7ffcf"
+      }
+    ],
+    "installed_catalog_sha256": "e317d9ea57d35087835e6064bff83fd357fd31c0da8698b603ca5e0de8b04357",
+    "boot": 91918,
+    "dwm": 1472,
+    "session": "SwitchOwnedDdiProfile01a1fe13-91918"
+  }
+}

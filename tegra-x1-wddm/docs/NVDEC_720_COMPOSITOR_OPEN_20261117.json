@@ -1,0 +1,531 @@
+{
+  "branch": "tgd3d-vulkan",
+  "last_checked_utc": "2026-11-18T00:49:22.8988998Z",
+  "previous_observation": "NVDEC_720_RUNTIME_WINDOW_20261117.json",
+  "failure_under_test": "DWM 0xA0009 rejected six displayable surface opens before MakeResident on the preceding selected UMD.",
+  "repair": "The Windows 7 revision of the D3D10 DDI uses its real runtime-device virtual contexts and the existing NVK submission transport when the callback contract is available. Opened displayable backing and actual primaries retain the allocation handle of that device for writes. Missing legacy callbacks leave the earlier path available for its supported resources.",
+  "component_identity": {
+    "kmd": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243",
+    "kmd_last_source": "4dd80c7920991d51462fc5ce1f120b4e2a23206a",
+    "kmd_full_input_record": "NVDEC_720_NATIVE_BACKEND_20261117.json",
+    "umd": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
+    "icd": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "icd_source": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+    "umd_source": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+    "frozen_inputs": {
+      "base": "7823d6419de624bb7ba555fa6a5867b6f79607a4",
+      "prior_patch_commit": "358e0954ce38cca6052e97054e5ecfe2d54a6a0d",
+      "prior_patch_sha256": "8a3d72b8f6b922ca46660597b549ba55b8c33ffc750fecad9a2ac722fcbcad7a",
+      "source_parent": "0984d37187f77c965c3e13078de34ca600c4a1d8",
+      "patch_sha256": "ded980db65fc40c45bb60445231a97e74f26963ea8d8bbbe4ea80d6e0d02a09d",
+      "files": {
+        "src/nouveau/tgd3d/tests/runtime_contracts.cpp": {
+          "prior_sha256": "d7b5e2edc192a86d49b0702cb70e277f32533673d2e6bf45d939245dbe2ae7bf",
+          "candidate_sha256": "d73d47bc5591991ec0320afa4ec76ae8d31bce077d5e56f944ff934c17f67e5e"
+        },
+        "src/nouveau/tgd3d/tests/runtime_queue_contracts.cpp": {
+          "prior_sha256": "d4f4ef442c1d7950ceb9593e8b2b786d2cadbcc9e858ae56cac48945059ea361",
+          "candidate_sha256": "dc0c37e54cb77f4ef873f0501bc77609875a6d5f081ec77677c2f206806b2391"
+        },
+        "src/nouveau/tgd3d/tgd3d_device.cpp": {
+          "prior_sha256": "1adf6f187c5e34b3402e253a824350c50c6281d737c212d6405db2293b37f2e9",
+          "candidate_sha256": "fc6ef17b7f84111e39a730dfaa0a785e79881df754234f498d3b9b75a3bfde08"
+        },
+        "src/nouveau/tgd3d/tgd3d_runtime.cpp": {
+          "prior_sha256": "56e0b8f503613d6912d7541427483db85904b5237c77e4f50a9b431bd30840e8",
+          "candidate_sha256": "658ab1fc82c17b75b219f35a409f8abbe62c4a678b3b247cef6fd1328557df36"
+        },
+        "src/nouveau/tgd3d/tgd3d_runtime_queue.cpp": {
+          "prior_sha256": "9141302d73932b8e17d9fdb472bdf7b65e5a45613872307fe01d1da4e1a5070e",
+          "candidate_sha256": "ecf9db7a9710aaa4f4dc75f76d91cddab1d1717d9063fbcdb563ad3954d36afc"
+        },
+        "src/nouveau/tgd3d/tgd3d_trace.h": {
+          "prior_sha256": "11fa6442aee7f3b0bad384c72bccf27f707c33f3181114df4676fe6b8faefacf",
+          "candidate_sha256": "7a7b0fc556d121af55cc364e219ab5921841a098a0cfcc381365d6c7ac554559"
+        }
+      },
+      "side_patches_in_binary": false
+    },
+    "signature": {
+      "unsigned_sha256": "7e51064477a70f5fd2f3aea8363476a059e06cde1393f9c7ea29f10ca275a1d1",
+      "signed_sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
+      "signed_bytes": 3335184,
+      "public_chain_sha256": "460d3d9b2b84b0f486e41d1bbb9c34bf0489a4ed0347337aff6d279623a40031",
+      "local_authenticode_verified": true
+    },
+    "delivered_package_sha256": "d6aeb121c509270f767965a367b03da700942fb5756972e26a651862469e1538",
+    "frozen_client_source": "17ccb8fbd95cec7088eff420709ad736d163902c",
+    "client_sha256": "d1949b8f357e23d6282615966e61581c4df40d891f714ceb3658d1fdccc2e21f",
+    "media_sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "selected_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736",
+    "prior_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-864ff770-20261118-070621",
+    "prior_umd": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+    "all11_read_utc": "2026-11-18T00:17:49.0647337Z",
+    "files": [
+      {
+        "name": "switchpwrbtn.sys",
+        "bytes": 32264,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787"
+      },
+      {
+        "name": "tegragpurender.sys",
+        "bytes": 243720,
+        "sha256": "de8bb90b38f4f69bebe68fbb1b40f52759e1fe4efb321577ee507011eeb7b243"
+      },
+      {
+        "name": "woa-lite-home.ini",
+        "bytes": 138,
+        "sha256": "71a3b54ba6e31406e213b17f16054564716222b06bf6844ca63de065d7d86a7f"
+      },
+      {
+        "name": "acpitabl.dat",
+        "bytes": 4993,
+        "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849"
+      },
+      {
+        "name": "switchbattery.sys",
+        "bytes": 42440,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60"
+      },
+      {
+        "name": "Pacecar.Switch.exe",
+        "bytes": 1517568,
+        "sha256": "99e59dbfe2dbed45c7d99c2a5b427b99109311bb59eb2a50f5946e98b9194ea2"
+      },
+      {
+        "name": "bl33.bin",
+        "bytes": 921600,
+        "sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e"
+      },
+      {
+        "name": "libvulkan_nouveau.dll",
+        "bytes": 17656776,
+        "sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+      },
+      {
+        "name": "switchfan.sys",
+        "bytes": 104456,
+        "sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5"
+      },
+      {
+        "name": "TegraGpuD3DVk.dll",
+        "bytes": 3335184,
+        "sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
+      },
+      {
+        "name": "SwitchPowerTray.exe",
+        "bytes": 60416,
+        "sha256": "45b42d7847867098e9a1eccb4246ebb5dd00b21c838e717b24a8e1de8d96d637"
+      }
+    ],
+    "restore_script_sha256": "5d5552b29e1b899233a4b0709f9a08c19395ea63a73fe0c0d279ed947520bdff",
+    "prior_task_xml_sha256": "00be09220bc023781d1aafd2d905985c269a78d110c29203af207b7ffef644d8",
+    "recovery_umd_sha256": "864ff7706906a31081ed8687176f90a5baf5fdcfb3a116ab4806718597229fed",
+    "recovery_icd_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+  },
+  "controls": {
+    "frozen_x64_cpu_log_sha256": "2c61799e6086bcc9b7afe84e0e56565950d84a148ba4bd5bfc6f98fb0d93bd06",
+    "frozen_arm64_control_sha256": "1648159e35c816fc21f758e218c47718c43ab46d442d963b0eb1a8cfac214a16",
+    "real_windows_cpu_control": {
+      "Utc": "2026-11-18T00:06:59.2163851Z",
+      "GPUExecuted": false,
+      "LogSha256": "E3A2BB727A9B3F10BC2BA1FF8A1D8DCEC41A58CA88F9B0E44B6073BCBA4D2278",
+      "Exit": 0,
+      "Phase": "Passed",
+      "Candidate": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
+      "Pid": 2372
+    },
+    "branch_with_source_only_patches": {
+      "source": "8549e9e398f6cdb4e064fc30bd7c06a5243be893",
+      "hashes": {
+        "arm64": {
+          "TegraGpuD3DVk.dll": "4535463f5bd1dcd18af09297f6e055e8fa4486eee8099e8317aa7a60cbf2a508",
+          "tgd3d-contracts.exe": "e0dfe46990a0b044d0eae35f0460bd614546991aa2ea4cf0fe30df526150077b"
+        },
+        "x64": {
+          "tgd3d-contracts.exe": "3ba40b714e41507e2ac50210fe21bd843ac14b39ca58ecae4328d0c300e6081c"
+        }
+      },
+      "native_installed": false,
+      "x64_controls_sha256": "2b6dd315cb00d960d649b2c089a9e7771418ce57ddcdd000d1052292458276ce"
+    },
+    "external_review_performed": false
+  },
+  "activation": {
+    "prior_boot": "2026-11-17T23:45:24.4029320Z",
+    "prior_dwm": 1360,
+    "plan": {
+      "dwm": 1360,
+      "exit": 0,
+      "utc": "2026-11-18T00:08:44.8531944Z",
+      "prior_boot": "2026-11-17T23:45:24.4029320Z",
+      "state": "ActivationRequested"
+    },
+    "new_boot": "2026-11-18T00:09:16.3176230Z",
+    "dwm": [
+      1400
+    ],
+    "loaded_modules": [
+      {
+        "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736\\app\\TegraGpuD3DVk.dll",
+        "sha256": "C7EF263CD876E51B61BFB211D0CC433BE26E81940923682FDA73C3DFBF85681D",
+        "name": "TegraGpuD3DVk.dll"
+      },
+      {
+        "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvdec-surface-layout-20261117\\tgd3d-video-ddi-c7ef263c-20261118-080736\\app\\libvulkan_nouveau.dll",
+        "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "name": "libvulkan_nouveau.dll"
+      }
+    ],
+    "pnp": 0,
+    "luid": "00000000000801a8",
+    "startup_task": "Ready"
+  },
+  "traced_window": {
+    "selected_umd": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d",
+    "producer_syncpoints": [
+      [
+        654909827,
+        654909827
+      ],
+      [
+        654909828,
+        654909828
+      ]
+    ],
+    "presents": 2,
+    "redirected_model": [],
+    "return_codes": [],
+    "source_handles": [],
+    "client_timing": [],
+    "gpu_image_comparisons": {
+      "first": {
+        "gpu_ppm": "7d300743cf457afaaeeab0a5398315bfdb38faf5c772ed033fbb49b15fd291fc",
+        "reference_ppm": "148dce2216377c23e72d5c763553d55257f5a86500285442036d211ef50d9977",
+        "pixels": 230400,
+        "worst_error": 1,
+        "pixel_error_counts": {
+          "0": 194356,
+          "1": 36044
+        }
+      }
+    },
+    "decoder_close": false,
+    "normal_exit": false,
+    "device_destroy": [],
+    "client_journal_tail": [
+      "186609 4832 VERIFIED NV12Frame 00000000",
+      "186656 4832 CALL Present 00000000",
+      "186671 4832 RETURN Present 00000000"
+    ],
+    "dwm_opens": [
+      {
+        "status": "00000000",
+        "width": 640,
+        "height": 360,
+        "pitch": 2560
+      },
+      {
+        "status": "00000000",
+        "width": 640,
+        "height": 360,
+        "pitch": 2560
+      }
+    ],
+    "dwm_transport_counts": {
+      "(4, 1)": 39,
+      "(3, 1)": 13,
+      "(5, 1)": 13
+    },
+    "dwm_error_summary": {},
+    "desktop_color_samples": [],
+    "dwm_events_in_retained_trace": 329,
+    "original_boot": "2026-11-18T00:09:16.3176230Z",
+    "dwm_pid": 1400,
+    "latest_boot": "2026-11-18T00:13:14.6706570Z",
+    "latest_dwm": [
+      1392
+    ],
+    "archive_sha256": "ff51a436e6b6e9708f29ec5099b0814c73314dccd9fe05e2d14a266d0ffe38bb",
+    "driver_trace_summary": "ProcessTrace=0 matched=212 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "dwm_trace_summary": "ProcessTrace=0 matched=634 invalid=0 events_lost=0 buffers_lost=0 end_time=0 buffers_written=0",
+    "dwm_events_sha256": "b7405be38f916cb7ff6637196b977e32dd7787d0263b717bd0a48f64a9c430ad",
+    "dwm_etl_sha256": "fb3cbc6d8e79e50e1b79d546cd27785a27a4ba11e56e1ef087116954dd1122b5",
+    "bundle_bytes": 93350,
+    "observer_report_intact": false,
+    "observed_images": "first producer readback only",
+    "event_41": {
+      "record": 61494,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "utc": "2026-11-18T00:09:52.1152885Z",
+      "id": 41,
+      "fields": {
+        "PowerButtonTimestamp": "0",
+        "LongPowerButtonPressDetected": "false",
+        "BugcheckCode": "0",
+        "SleepInProgress": "0"
+      }
+    },
+    "unexpected_6008": 61477,
+    "dumps": [],
+    "root_cause": null
+  },
+  "low_overhead_replay": {
+    "archive_sha256": "e0049a139fdb5b356aed26a8825cdb70f8616059dbd027a7368f0f69240a78b8",
+    "archive_bytes": 4727,
+    "files": 8,
+    "trace_requested": false,
+    "desktop_sampling": false,
+    "extra_first_readback": false,
+    "planned_fixture_frames": 6,
+    "canonical_checks_journal": 5,
+    "present_enter": 5,
+    "present_returns": 4,
+    "gpu_event": false,
+    "dwm_flush": false,
+    "normal_exit": false,
+    "decoder_close": false,
+    "window_release": false,
+    "last_journal": "346156 2052 CALL Present 00000000",
+    "journal_span_ms": 2000,
+    "canonical_stdout": [],
+    "timing": [],
+    "loader": [
+      "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
+    ],
+    "original_boot": "2026-11-18T00:13:14.6706570Z",
+    "post_run_boot": "2026-11-18T00:21:19.1336760Z",
+    "dwm_before": 1392,
+    "dwm_after": [
+      1396
+    ],
+    "luid": "0000000000081fd0",
+    "instance": "{03D07B99-0C0F-4E47-BA00-959775464B8A}",
+    "dispatch_utc": "2026-11-18T00:18:46.7522297Z",
+    "terminal_utc": "2026-11-18T00:22:47.1729641Z",
+    "wrapper": {
+      "started": "2026-11-18T00:18:48.2364264Z",
+      "pid": 2068,
+      "exit": null,
+      "launch": "2026-11-18T00:18:57.0334533Z"
+    },
+    "task_state": "",
+    "event_41": {
+      "record": 61571,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "utc": "2026-11-18T00:14:20.3695909Z",
+      "id": 41,
+      "fields": {
+        "PowerButtonTimestamp": "0",
+        "LongPowerButtonPressDetected": "false",
+        "BugcheckCode": "0",
+        "SleepInProgress": "0"
+      }
+    },
+    "unexpected_6008": 61554,
+    "dumps": []
+  },
+  "display_and_power": {
+    "utc": "2026-11-18T00:47:12.7738983Z",
+    "boot": "2026-11-18T00:21:19.1378270Z",
+    "dwm": 1396,
+    "modules": [
+      {
+        "sha256": "C7EF263CD876E51B61BFB211D0CC433BE26E81940923682FDA73C3DFBF85681D",
+        "name": "TegraGpuD3DVk.dll"
+      },
+      {
+        "sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "name": "libvulkan_nouveau.dll"
+      }
+    ],
+    "code": 0,
+    "power_mode": 1,
+    "cpu_dfll": 1,
+    "emc_error": 0,
+    "fan_mode": 1,
+    "charge_limit": 85
+  },
+  "measured_display": {
+    "utc": "2026-11-18T00:47:49Z",
+    "adapter": "ACPI\\VEN_SWOA&DEV_0F01",
+    "current": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "saved": {
+      "width": 1280,
+      "height": 720,
+      "orientation": 1,
+      "bpp": 32,
+      "hz": 60,
+      "x": 0,
+      "y": 0,
+      "flags": 0,
+      "fields": 544997536
+    },
+    "signal": {
+      "width": 720,
+      "height": 1280
+    },
+    "path_rotation": 2,
+    "mode_written": false
+  },
+  "cleanup": {
+    "utc": "2026-11-18T00:49:22.8988998Z",
+    "tasks_left": [],
+    "traces_left": [],
+    "inputs_left": [],
+    "checked_archives": 3,
+    "restore_inputs_available": true,
+    "removed_test_inputs": 21,
+    "display_read_task_removed": true,
+    "display_read_command_removed": true
+  },
+  "acceptance": {
+    "targeted_consumer_open": true,
+    "end_to_end_720p_verified": true,
+    "physical_window_correct": true,
+    "higher_resolutions_deferred": [
+      "1080p",
+      "2K",
+      "4K"
+    ],
+    "paced_six_frame_path_accepted": true,
+    "ordinary_unpaced_window_accepted": false,
+    "verification_scope": "Native 1280x720 H.264 six-frame functional acceptance, 640x360 physical preview with one-second presentation holds and eight-second final hold.",
+    "regular_playback_stability_accepted": false,
+    "load_followup_record": "LOAD_STABILITY_FOLLOWUP_20261116.json",
+    "limit": "The paced six-frame observation passed. Two runs with the same driver and no added hold restarted; ordinary playback remains open."
+  },
+  "fixture": {
+    "sha256": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "profile": "H.264 Main level 3.1",
+    "dimensions": [
+      1280,
+      720
+    ],
+    "frames": 6,
+    "media_seconds": 0.1,
+    "media_rate": "60/1",
+    "software_yuv420p_sha256": "c3c1754f557d7375ed660034ef62b0e1d966b7ed7626662802c1609aba886179",
+    "independent_pixel_reference": "FFmpeg software H.264 decode with hardware acceleration disabled. Reference RGB uses limited-range BT.601 for this untagged sample.",
+    "expected_last_640x360_rgb_ppm_sha256": "8b23a1cc5dedbd6db25acfdab6af98cbe4af297d16797d52dc4aa6142fbc54a0"
+  },
+  "unpaced_physical_observation": {
+    "correct_picture": false,
+    "classification": "no visible video confirmed on the light replay",
+    "technical_summary": "Without added frame holds, the light client verified five NV12 frames, returned from four Presents and entered the fifth before an unexpected restart. Physical video was unconfirmed in that run.",
+    "zh_summary": "无人工间隔的轻量复测校验了五帧 NV12，四次 Present 返回，第五次进入后系统意外重启。"
+  },
+  "paced_visual_run": {
+    "archive_sha256": "8fef2bbf33f5b601669ebf418397ca56da4c47ac1c89e0c862687cab2c54476d",
+    "archive_bytes": 64059,
+    "files": 10,
+    "visual_frame_holds": 5,
+    "visual_pacing_ms": 1000,
+    "requested_final_frame_hold_ms": 8000,
+    "trace_requested": false,
+    "desktop_sampling": false,
+    "extra_first_readback": false,
+    "planned_fixture_frames": 6,
+    "canonical_checks_journal": 6,
+    "present_enter": 6,
+    "present_returns": 6,
+    "gpu_event": true,
+    "dwm_flush": true,
+    "normal_exit": true,
+    "decoder_close": true,
+    "window_release": true,
+    "last_journal": "1459125 4692 EXIT RunAndRelease 00000000",
+    "journal_span_ms": 16641,
+    "canonical_stdout": [
+      [
+        "0",
+        "1b9bf6e0b2e831ba692b06940a75ed252eff350cd3914e23a3a7f1fd6b444bd4"
+      ],
+      [
+        "1",
+        "37a86ebcb3aec8fd752c84de228e12b96319ddb722ce2701e41f8cef5de395ac"
+      ],
+      [
+        "2",
+        "504f7262cefe02b934845fddab2298450ffb3d390108632082ac79a8d2bd0cc2"
+      ],
+      [
+        "3",
+        "ef17a831bf0b4203e3618570ebaad4b96d2753446628e7540f7e4651acb008b8"
+      ],
+      [
+        "4",
+        "a9962ddf51c07f95b48ff1d092c1bcfc048d4fe6c3e6377bd00e696af165aed2"
+      ],
+      [
+        "5",
+        "f38533a0ab3e2ba34590a69fe7a574d13e37428743ed6185bc06a02853281277"
+      ]
+    ],
+    "timing": [
+      "PREVIEW_COMPLETE gpu_event=1 last_frame_hold_ms=8000",
+      "DECODED_FRAMES=6 WINDOW_FRAMES=6 elapsed_ms=15109"
+    ],
+    "loader": [
+      "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
+    ],
+    "last_image": {
+      "sha256": "2d4c4027c2a92bb9c738828c7b311da0a80f0bf2c0af530991f1e43f4b600eec",
+      "reference_sha256": "8b23a1cc5dedbd6db25acfdab6af98cbe4af297d16797d52dc4aa6142fbc54a0",
+      "pixels": 230400,
+      "max_rgb_error": 1,
+      "exact_pixels": 194112
+    },
+    "original_boot": "2026-11-18T00:21:19.1378270Z",
+    "post_run_boot": "2026-11-18T00:21:19.1378270Z",
+    "dwm_before": 1396,
+    "dwm_after": [
+      1396
+    ],
+    "luid": "000000000007ed4d",
+    "instance": "{9808DB73-5FFE-4869-A1F1-7D4DB308BDE7}",
+    "dispatch_utc": "2026-11-18T00:45:09.1526514Z",
+    "terminal_utc": "2026-11-18T00:45:57.7270262Z",
+    "wrapper": {
+      "started": "2026-11-18T00:45:11.0428214Z",
+      "pid": 3236,
+      "exit": 0,
+      "launch": "2026-11-18T00:45:19.7895270Z",
+      "end": "2026-11-18T00:45:36.5863990Z"
+    },
+    "task_state": "Ready",
+    "client": {
+      "sha256": "c7cbb5fd180a32d14b8c90f151cbc455edd1792f2f9f4c5b111ad6a5dc205f8d",
+      "bytes": 2945536,
+      "source_sha256": "4776fc9b5d4f3d62a517e77e4a69b5d434112c17f0053a9586cafb2714f04d87",
+      "inter_frame_ms": 1000,
+      "final_ms": 8000,
+      "unchanged_shader_headers": true,
+      "source_commit": "b528ae8d13a3b9282684f69278513de4989599fb",
+      "driver_sha256": "c7ef263cd876e51b61bfb211d0cc433be26e81940923682fda73c3dfbf85681d"
+    },
+    "physical_observation": {
+      "correct_picture": true,
+      "classification": "physical picture and return to desktop confirmed in paced mode",
+      "observed_features": [
+        "six vertical color bars",
+        "diagonal color stripe",
+        "short horizontal bar in the green area",
+        "upper-right dotted diagonal and lower-right checkerboard"
+      ],
+      "reference_evidence": "These features are visible at corresponding positions in the independent software reference frame and in the photographed native preview window.",
+      "photo_published": false,
+      "physical_duration_seconds": null
+    }
+  }
+}

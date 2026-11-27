@@ -1,0 +1,994 @@
+{
+  "change": "Win32 Mesa shader cache avoids retrying a missing file and sorts entries only during actual eviction. The file format, cache namespace, integrity validation and shared-size reconciliation are preserved.",
+  "tested_backend": "Real disk_cache_get(), disk_cache_create_custom(), and local Vulkan ICDs on Switch Lite with Code 0 and AC Handheld.",
+  "methods": {
+    "filesystem": "768 deterministic distinct missing keys and 768 valid blobs. Four old and four new processes in ABBA/BAAB order per architecture used the same populated isolated directory. Each process verified all 768 hits byte-for-byte and opened the under-budget directory eight more times. Per-entry times are process batch averages. Open percentiles describe the 32 observed opens.",
+    "graphics": "24 draws per process on the matched GM20B LUID, checking 1024 reference pixels and two 64-byte guards every time. Absent shader cache for cold process, same entries in warm sibling. First comparison used the existing installed baseline and newly signed candidate. Second comparison used freshly relinked and signed versions of both sources under sibling directories, identical DLL basenames. Host PE normalization verified that each pair of like-source unsigned images matched after removing linker timestamp fields. No system translation-cache flush.",
+    "interpretation": "Pipeline creation is reported independently of filesystem lookup. Neither a cache lookup speedup nor a change in a 32x32 offscreen fixture establishes a game FPS improvement.",
+    "thermal": "The controller verified AC online, Handheld, GPU Code 0 and active DFLL. Instantaneous clocks remained dynamic; their before/after samples are in the graphics table.",
+    "pipeline_cpu": "GetProcessTimes kernel plus user CPU time for the whole process during vkCreateGraphicsPipelines. Worker threads may run concurrently. CPU clocks before and after are outside the entire offscreen process, not inside its pipeline interval."
+  },
+  "same_boot_comparisons": [
+    {
+      "boot": "2026-11-18T11:54:35.1855130Z",
+      "boot_after": "2026-11-18T11:54:35.1855130Z",
+      "dwm": 1356,
+      "dwm_after": 1356,
+      "kernel": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438"
+    },
+    {
+      "boot": "2026-11-18T11:54:35.1855130Z",
+      "boot_after": "2026-11-18T11:54:35.1855130Z",
+      "dwm": 1356,
+      "dwm_after": 1356,
+      "kernel": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438"
+    }
+  ],
+  "cache_measurements": {
+    "arm64": {
+      "baseline": {
+        "miss_us_per_entry": {
+          "n": 4,
+          "median": 179.9346,
+          "p95": 224.0963,
+          "p99": 224.0963
+        },
+        "hit_us_per_entry": {
+          "n": 4,
+          "median": 383.6395,
+          "p95": 441.3328,
+          "p99": 441.3328
+        },
+        "open_ms": {
+          "n": 32,
+          "median": 11.1339,
+          "p95": 19.556,
+          "p99": 210.3418
+        }
+      },
+      "candidate": {
+        "miss_us_per_entry": {
+          "n": 4,
+          "median": 95.376,
+          "p95": 169.8008,
+          "p99": 169.8008
+        },
+        "hit_us_per_entry": {
+          "n": 4,
+          "median": 340.8941,
+          "p95": 514.594,
+          "p99": 514.594
+        },
+        "open_ms": {
+          "n": 32,
+          "median": 9.8572,
+          "p95": 14.1572,
+          "p99": 14.1898
+        }
+      }
+    },
+    "x86": {
+      "baseline": {
+        "miss_us_per_entry": {
+          "n": 4,
+          "median": 238.3169,
+          "p95": 299.1189,
+          "p99": 299.1189
+        },
+        "hit_us_per_entry": {
+          "n": 4,
+          "median": 519.5225,
+          "p95": 623.5581,
+          "p99": 623.5581
+        },
+        "open_ms": {
+          "n": 32,
+          "median": 12.2921,
+          "p95": 13.1972,
+          "p99": 13.6775
+        }
+      },
+      "candidate": {
+        "miss_us_per_entry": {
+          "n": 4,
+          "median": 124.5611,
+          "p95": 154.3296,
+          "p99": 154.3296
+        },
+        "hit_us_per_entry": {
+          "n": 4,
+          "median": 488.7279,
+          "p95": 569.1305,
+          "p99": 569.1305
+        },
+        "open_ms": {
+          "n": 32,
+          "median": 10.5177,
+          "p95": 16.3969,
+          "p99": 16.7615
+        }
+      }
+    },
+    "x64": {
+      "baseline": {
+        "miss_us_per_entry": {
+          "n": 4,
+          "median": 216.715,
+          "p95": 243.2361,
+          "p99": 243.2361
+        },
+        "hit_us_per_entry": {
+          "n": 4,
+          "median": 573.7689,
+          "p95": 790.8213,
+          "p99": 790.8213
+        },
+        "open_ms": {
+          "n": 32,
+          "median": 15.3817,
+          "p95": 18.0183,
+          "p99": 21.1977
+        }
+      },
+      "candidate": {
+        "miss_us_per_entry": {
+          "n": 4,
+          "median": 146.4028,
+          "p95": 153.991,
+          "p99": 153.991
+        },
+        "hit_us_per_entry": {
+          "n": 4,
+          "median": 529.9491,
+          "p95": 633.913,
+          "p99": 633.913
+        },
+        "open_ms": {
+          "n": 32,
+          "median": 11.9216,
+          "p95": 14.9098,
+          "p99": 14.9253
+        }
+      }
+    }
+  },
+  "candidate_minus_baseline_percent": {
+    "arm64": {
+      "miss_us_per_entry": -46.99,
+      "hit_us_per_entry": -11.14,
+      "open_ms": -11.47
+    },
+    "x86": {
+      "miss_us_per_entry": -47.73,
+      "hit_us_per_entry": -5.93,
+      "open_ms": -14.44
+    },
+    "x64": {
+      "miss_us_per_entry": -32.44,
+      "hit_us_per_entry": -7.64,
+      "open_ms": -22.49
+    }
+  },
+  "pipeline_wall_ms_in_observed_order": {
+    "accepted_and_first_candidate": {
+      "arm64": {
+        "baseline": {
+          "cold": [
+            47.5904,
+            26.2644
+          ],
+          "warm": [
+            8.9383,
+            8.4944
+          ]
+        },
+        "candidate": {
+          "cold": [
+            52.574,
+            23.877
+          ],
+          "warm": [
+            12.9097,
+            9.6489
+          ]
+        }
+      },
+      "x86": {
+        "baseline": {
+          "cold": [
+            135.5104,
+            54.6834
+          ],
+          "warm": [
+            18.3673,
+            13.1008
+          ]
+        },
+        "candidate": {
+          "cold": [
+            586.5856,
+            47.7979
+          ],
+          "warm": [
+            30.9529,
+            12.3373
+          ]
+        }
+      },
+      "x64": {
+        "baseline": {
+          "cold": [
+            100.488,
+            50.9103
+          ],
+          "warm": [
+            41.8397,
+            11.3314
+          ]
+        },
+        "candidate": {
+          "cold": [
+            627.5723,
+            59.1147
+          ],
+          "warm": [
+            29.3062,
+            16.3867
+          ]
+        }
+      }
+    },
+    "both_fresh_relinks": {
+      "arm64": {
+        "baseline": {
+          "cold": [
+            44.9663,
+            17.9087,
+            56.4644,
+            26.0429
+          ],
+          "warm": [
+            9.3933,
+            10.9905,
+            8.7364,
+            7.7057
+          ]
+        },
+        "candidate": {
+          "cold": [
+            72.2923,
+            24.0138,
+            36.9242,
+            29.7069
+          ],
+          "warm": [
+            20.882,
+            6.082,
+            14.1206,
+            8.4455
+          ]
+        }
+      },
+      "x86": {
+        "candidate": {
+          "cold": [
+            585.8717,
+            47.0422,
+            58.9992,
+            67.2792
+          ],
+          "warm": [
+            32.2435,
+            10.6498,
+            9.6917,
+            12.0447
+          ]
+        },
+        "baseline": {
+          "cold": [
+            469.5583,
+            27.5292,
+            60.7587,
+            69.4819
+          ],
+          "warm": [
+            52.0107,
+            7.2266,
+            13.5415,
+            12.6051
+          ]
+        }
+      },
+      "x64": {
+        "baseline": {
+          "cold": [
+            642.2975,
+            87.1196,
+            50.6335,
+            46.9183
+          ],
+          "warm": [
+            23.7978,
+            11.9607,
+            12.6946,
+            12.4712
+          ]
+        },
+        "candidate": {
+          "cold": [
+            757.2624,
+            30.2556,
+            51.4059,
+            53.8707
+          ],
+          "warm": [
+            27.7948,
+            25.308,
+            10.5426,
+            12.7461
+          ]
+        }
+      }
+    }
+  },
+  "cache_storage_regressions": [
+    {
+      "arch": "arm64",
+      "sha": "05ba42dfca338379d5134db8bde9d54b0895c7c258934366ea14e7ea42975402",
+      "lines": [
+        "PASS: cache hit in a fresh process",
+        "PASS: Windows cache persistence, concurrent writers, namespaces, integrity, key index, and eviction; no GPU execution"
+      ],
+      "exit": 0
+    },
+    {
+      "arch": "x86",
+      "sha": "ec64dbfc9d70bdd5517254716eaa98ae21301281f784bdb8fdae624d299b9afe",
+      "lines": [
+        "PASS: cache hit in a fresh process",
+        "PASS: Windows cache persistence, concurrent writers, namespaces, integrity, key index, and eviction; no GPU execution"
+      ],
+      "exit": 0
+    },
+    {
+      "arch": "x64",
+      "sha": "f32c2f06b53b1437d7a46dba6503f5a1fe78a61d3e55dbe0a22268b0ec32cb4f",
+      "lines": [
+        "PASS: cache hit in a fresh process",
+        "PASS: Windows cache persistence, concurrent writers, namespaces, integrity, key index, and eviction; no GPU execution"
+      ],
+      "exit": 0
+    }
+  ],
+  "storage_harness": {
+    "source": "src/util/tests/cache_win32_test.c",
+    "source_sha256": "6ea2326489ec2bcbd025bfc09bac85725192fc63aa4c5553e5db8459c0a500cc",
+    "built_source_sha256": "eeed2873278514b81faf7b73963e7b8a2ff15767ce8c3835dbe358382f3c5ac9",
+    "scope": "Existing persistence, namespace, integrity, key index, concurrent writes and over-budget eviction checks. The optional child test for disabling the cache was omitted from this storage run. The first long temporary root failed in the bounded custom namespace. The shorter task-owned root passed all three ABIs. Long-path storage is recorded separately.",
+    "initial_long_root": {
+      "arch": "arm64",
+      "error": "storage-arm64 exited 1 MESA: info: disk shader cache: hits = 1, misses = 1\r\nMESA: info: disk shader cache: hits = 1, misses = 0\r\nMESA: info: disk shader cache: hits = 0, misses = 1\r\nMESA: info: disk shader cache: hits = 0, misses = 1\r\nMESA: info: disk shader cache: hits = 1, misses = 2\r\nFAIL line 23: got && size == bytes && !memcmp(got, data, bytes) (Win32 3)",
+      "sha256": "de7aafc8c66d187dee8af54ca359cc4738ee663be9d8bb2343182e88f9322199",
+      "outcome": "Aborted on the first ABI. The same ARM64 binary subsequently passed using a shorter temporary root."
+    }
+  },
+  "build_components": {
+    "arm64": {
+      "arch": "arm64",
+      "shader_cache_build_id": "9a047a258c8f5e7d91435ff0e5120dee15eec26b1f881665d8320616557de4d2",
+      "baseline_icd": {
+        "bytes": 17672208,
+        "unsigned": "4b868727f5ac5fb564a56e122d2d3e02234e59e7a8a1bccf912ef9bf2868d12d",
+        "sha256": "350d59b164db796692ed2f0c006fc309d149fe534bd04721a3667b07168bec00"
+      },
+      "source": {
+        "src/util/disk_cache_win32.c": "1a74d44d0d1a2869e7fa3a80af807d14f692e0383d1f4405f11e5e91d129e44f",
+        "src/util/tests/bench_win32_shader_cache.c": "e7ebaad9746048bfe99b59d7ce22cddd06ce409093156db7c2fc53033364cdcf"
+      },
+      "tools": {
+        "baseline": {
+          "bytes": 545808,
+          "unsigned": "f6d1b3c80e9b4037e26785cda2dd3bbc64c31a74bb4a05b35e3e9ba30994332f",
+          "sha256": "84c0093a82d43ea5001730302471f562078e9fd0e4670c1ac3720afff20cb53d"
+        },
+        "candidate": {
+          "bytes": 545808,
+          "unsigned": "c4abd3b208cea48b3fa174bfe15e438f72bfd4ff2685ce7a9151f1b0be3655f7",
+          "sha256": "9acbe3bd5b2f2f5bc0c3b361b3cd74674d0e981833bc3b5e92890a4f8fa2bad9"
+        }
+      },
+      "bench_object": "d753a00d207cdcc22a322a0cc9383fdad4ae9a9d0f7a003a40f11232ca583324",
+      "candidate_normalized": "daead35f1c9edd5e88bff245b54e0297988461ef17333a64b2c96af042f8f356",
+      "baseline_normalized": "18b3acb6733c725df2b2371d42c07c6ebae8c926e19fbb3ce12bf440ff85cea1",
+      "icd": {
+        "bytes": 17672216,
+        "unsigned": "862ea7b3ad89343375676011441df7daabeaa2502e26bec0a8e2ae9b1b9ff56a",
+        "sha256": "c345a5bafd86b1fa056f5222246b2c5adfb91a6dc65c9f7515516e1780e952f5"
+      }
+    },
+    "x86": {
+      "arch": "x86",
+      "shader_cache_build_id": "d4b2467a524d334034d779b8ff8af342ca62a13d68ac024fb6e1f4859aa43142",
+      "baseline_icd": {
+        "bytes": 18599440,
+        "unsigned": "b464764d3f649558f477b80fa0a3b9b6ab919eeabc0fd6a4c8c2d74684cfb856",
+        "sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b"
+      },
+      "source": {
+        "src/util/disk_cache_win32.c": "1a74d44d0d1a2869e7fa3a80af807d14f692e0383d1f4405f11e5e91d129e44f",
+        "src/util/tests/bench_win32_shader_cache.c": "e7ebaad9746048bfe99b59d7ce22cddd06ce409093156db7c2fc53033364cdcf"
+      },
+      "tools": {
+        "baseline": {
+          "bytes": 512528,
+          "unsigned": "1d10b980ba884269bb573af5932099c2eef8df6a086b65ac4f5f21064d3926d2",
+          "sha256": "dd977362f59e7964179eabadb2e21964db26bde593ba6254ffd277606904d80b"
+        },
+        "candidate": {
+          "bytes": 512528,
+          "unsigned": "0d6818801ae5cafc0db3b95f11c16be26a0d59fcca7a45f02a6cf22dfa6ddcbc",
+          "sha256": "910b6b896efd0f61a110ce746810fb483baa3a51e45315ba872499bcc2c707cb"
+        }
+      },
+      "bench_object": "4ec92e6b609c8114d67a809d63f773df64bd6087b0957a8ad11b4d5e35323cb1",
+      "candidate_normalized": "f0a690d373505ad14f1201dbdd455505dad9957f6a00f91819ecc7336f7b5d39",
+      "baseline_normalized": "970beee2f91c65e8177e6e241771cc7a0399fcd667547eb5ebdf04475a2dc60e",
+      "icd": {
+        "bytes": 18599440,
+        "unsigned": "5a7b51bbd2d0f1536a5966e7789fc6b73c1df3ce403174622b30a408b78f2681",
+        "sha256": "d16de22657e6e60bc6af71d636696db8ccab18fdd81e1317a16c15e05b331ec8"
+      }
+    },
+    "x64": {
+      "arch": "x64",
+      "shader_cache_build_id": "3b8c84ea3b7e9853637203972c8af074f079decd17a884035a05c7c70295047a",
+      "baseline_icd": {
+        "bytes": 18642960,
+        "unsigned": "0fd74f2e1330fc1cbd11556a4a1af2209dfc95e4b8e39de93187918803d4c62e",
+        "sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910"
+      },
+      "source": {
+        "src/util/disk_cache_win32.c": "1a74d44d0d1a2869e7fa3a80af807d14f692e0383d1f4405f11e5e91d129e44f",
+        "src/util/tests/bench_win32_shader_cache.c": "e7ebaad9746048bfe99b59d7ce22cddd06ce409093156db7c2fc53033364cdcf"
+      },
+      "tools": {
+        "baseline": {
+          "bytes": 619536,
+          "unsigned": "c89d7f02643d34c57b3ad7e5205da5efe281f662e95bea7cf6db6e5fb3b48af2",
+          "sha256": "79833a15a2dda98c877a314080e8fd941d927005670ce095589744aa9e5bb15e"
+        },
+        "candidate": {
+          "bytes": 619536,
+          "unsigned": "f097c24460aa9e6defc8e4500b64bcc6e7ab22fcfb0043a55c0b839d159f238f",
+          "sha256": "609e70880d356adb2a50948e4bf36abb11d68dcb64de57bb1d5f2c9d2321c9c5"
+        }
+      },
+      "bench_object": "bdfa8cafca9780d9920d8b0f01bdd5fef1957a22a979d4719bb3be6e4ebad23e",
+      "candidate_normalized": "82e61c49fa4ed5d65607c6a64d20a6635fdc4dffca894c8460312e070150303c",
+      "baseline_normalized": "f33025554804e8e7b01a4602484b784888520da7ccf1cb3c2483c82bce112fc7",
+      "icd": {
+        "bytes": 18642960,
+        "unsigned": "ed09242d1fcf731148ee663df4ec8b02e97d63b46c2c4f64ca820eb64b00d6f1",
+        "sha256": "9a1985b6dd95542906a73bb2b30252d30561470a0147b3b21620a3a001bc450b"
+      }
+    }
+  },
+  "fresh_relinked_images": {
+    "arm64": {
+      "baseline": {
+        "bytes": 17672208,
+        "unsigned": "fefff02f375ab7fa7bb221dd27df4c421fd314da1d2ef5eac120d82a93d5ccda",
+        "sha256": "7ac2a384d7b7191bb57d9e5727d478af5e1d0b4feec6dbf65c112b01aadd7ffb",
+        "normalized": "18b3acb6733c725df2b2371d42c07c6ebae8c926e19fbb3ce12bf440ff85cea1",
+        "upload": "paired-nvk-arm64-7ac2a384.dll"
+      },
+      "candidate": {
+        "bytes": 17672208,
+        "unsigned": "981d08a075fe14e9acc8e509c599266084a10179c1844da40c497e1c04da2b97",
+        "sha256": "80b5d028906e835db08d735766dbbe6a76765c7f2c2fcaa5ae24de356b0469b9",
+        "normalized": "daead35f1c9edd5e88bff245b54e0297988461ef17333a64b2c96af042f8f356",
+        "upload": "paired-nvk-arm64-80b5d028.dll"
+      }
+    },
+    "x86": {
+      "baseline": {
+        "bytes": 18599440,
+        "unsigned": "d9eb2a7afbd8cee5bf898ceb52788f3dcb1de4d283348e8fbf50966d368c093e",
+        "sha256": "90389916827eb9139d18ae9f8b406a959107d874b88b083a4ce9d96094f6d173",
+        "normalized": "970beee2f91c65e8177e6e241771cc7a0399fcd667547eb5ebdf04475a2dc60e",
+        "upload": "paired-nvk-x86-90389916.dll"
+      },
+      "candidate": {
+        "bytes": 18599440,
+        "unsigned": "cf419900fc6be556a8d5408e9a958fb05a7e26cc8412a6a81169caa889df67ae",
+        "sha256": "f6156b9733171d6cc44d4ebf2bd9c66ec640dfe949197adb3139d90f3909808e",
+        "normalized": "f0a690d373505ad14f1201dbdd455505dad9957f6a00f91819ecc7336f7b5d39",
+        "upload": "paired-nvk-x86-f6156b97.dll"
+      }
+    },
+    "x64": {
+      "baseline": {
+        "bytes": 18642960,
+        "unsigned": "275696b153ead58f3037e77723ba36b0c183ac7ca6cce29e956a5e9051e932e4",
+        "sha256": "e869db886f15882b24ce0e8390999c2f590ede0bfbc9c0ad1d410eadd1924e41",
+        "normalized": "f33025554804e8e7b01a4602484b784888520da7ccf1cb3c2483c82bce112fc7",
+        "upload": "paired-nvk-x64-e869db88.dll"
+      },
+      "candidate": {
+        "bytes": 18642960,
+        "unsigned": "74c711a30e5ca379de9a31e97549d99031c8eade886f0a6ae0042a33f9e430ca",
+        "sha256": "2b0dfffec07eef71aec2f88d3248cbd8c0130dd0abd5fd949d05b51f2c501949",
+        "normalized": "82e61c49fa4ed5d65607c6a64d20a6635fdc4dffca894c8460312e070150303c",
+        "upload": "paired-nvk-x64-2b0dfffe.dll"
+      }
+    }
+  },
+  "receipt_sha256": {
+    "lookup_and_first_pipeline": "80712989b011d42e9e7c764e74991d8c5ffd05854bdbfe9badd23ea64bec83c0",
+    "fresh_images": "36270dde2d75af37177fd610b5e55489e1c0ba2f2db1a548917f72e6b1fae786",
+    "storage": "89b74a93ce3c5ce42c520e397b635925193fc4b06507ed7dbb03022743e3c52d"
+  },
+  "raw_tables": {
+    "win32-cache-lookup-timings.csv": "46d03b079fc1f69ed446f99b9eacc6897bf4ec2d3f3ae4a8f0c650f32d65a0a8",
+    "win32-cache-pipeline-ab.csv": "fe0b776546205f72475fd9d588a16e140795c702f9393ab08d96b06b51c9df5f"
+  },
+  "benchmarked_sources": {
+    "baseline": "5e48f6cd8c105a927f78d7265600f4d26b2c4828",
+    "candidate": "30cce3864da9108a4a71d5dc82deb4c046fefd55",
+    "source_file": "src/util/disk_cache_win32.c",
+    "candidate_branch": "codex/win32-shader-cache-ab-20261118",
+    "status": "The functional cache checks passed on short roots. Retain the existing game and desktop ICD selection while checking first pipeline creation on fresh emulated images."
+  },
+  "fresh_images_by_first_use": {
+    "arm64": {
+      "baseline": {
+        "cold": {
+          "first_ms": 44.9663,
+          "later_median_ms": 26.0429,
+          "later_n": 3,
+          "first_pipeline_process_cpu_ms": 62.5,
+          "first_sampled_cpu_khz_before": 705632,
+          "first_sampled_cpu_khz_after": 407900
+        },
+        "warm": {
+          "first_ms": 9.3933,
+          "later_median_ms": 8.7364,
+          "later_n": 3
+        }
+      },
+      "candidate": {
+        "cold": {
+          "first_ms": 72.2923,
+          "later_median_ms": 29.7069,
+          "later_n": 3,
+          "first_pipeline_process_cpu_ms": 78.125,
+          "first_sampled_cpu_khz_before": 815800,
+          "first_sampled_cpu_khz_after": 714796
+        },
+        "warm": {
+          "first_ms": 20.882,
+          "later_median_ms": 8.4455,
+          "later_n": 3
+        }
+      }
+    },
+    "x86": {
+      "candidate": {
+        "cold": {
+          "first_ms": 585.8717,
+          "later_median_ms": 58.9992,
+          "later_n": 3,
+          "first_pipeline_process_cpu_ms": 578.125,
+          "first_sampled_cpu_khz_before": 815800,
+          "first_sampled_cpu_khz_after": 705632
+        },
+        "warm": {
+          "first_ms": 32.2435,
+          "later_median_ms": 10.6498,
+          "later_n": 3
+        }
+      },
+      "baseline": {
+        "cold": {
+          "first_ms": 469.5583,
+          "later_median_ms": 60.7587,
+          "later_n": 3,
+          "first_pipeline_process_cpu_ms": 468.75,
+          "first_sampled_cpu_khz_before": 815800,
+          "first_sampled_cpu_khz_after": 1109250
+        },
+        "warm": {
+          "first_ms": 52.0107,
+          "later_median_ms": 12.6051,
+          "later_n": 3
+        }
+      }
+    },
+    "x64": {
+      "baseline": {
+        "cold": {
+          "first_ms": 642.2975,
+          "later_median_ms": 50.6335,
+          "later_n": 3,
+          "first_pipeline_process_cpu_ms": 671.875,
+          "first_sampled_cpu_khz_before": 1593750,
+          "first_sampled_cpu_khz_after": 1045500
+        },
+        "warm": {
+          "first_ms": 23.7978,
+          "later_median_ms": 12.4712,
+          "later_n": 3
+        }
+      },
+      "candidate": {
+        "cold": {
+          "first_ms": 757.2624,
+          "later_median_ms": 51.4059,
+          "later_n": 3,
+          "first_pipeline_process_cpu_ms": 531.25,
+          "first_sampled_cpu_khz_before": 205892,
+          "first_sampled_cpu_khz_after": 928558
+        },
+        "warm": {
+          "first_ms": 27.7948,
+          "later_median_ms": 12.7461,
+          "later_n": 3
+        }
+      }
+    }
+  },
+  "graphics_validation": {
+    "baseline_and_first_candidate": {
+      "processes": 24,
+      "verified_draws": 576
+    },
+    "fresh_images": {
+      "processes": 48,
+      "verified_draws": 1152
+    },
+    "pixels_per_draw": 1024,
+    "guards_bytes_per_draw": 128
+  },
+  "findings": {
+    "missing_keys": "The median of four per-process batch averages decreased on all three architectures. The 768 hits in every batch matched the bytes put by the seeding process.",
+    "first_use": "With a freshly relinked DLL on each side, the first observed x86 and x64 cold pipelines were slower with the candidate by 116.31 ms and 114.96 ms respectively. Each first-use observation is a single sample for that image. Both builds also paid a first-use cost relative to later cold starts. The experiment does not isolate the reason for the difference.",
+    "repeat_runs": "Excluding the first pair from each fresh image leaves three cold and three warm observations per build and architecture. All observations, including the first pair, are in the CSV. A game frame-rate gain has not been established."
+  },
+  "x64_dxvk_game_comparison": {
+    "scene": "FTEQW, LibreQuake lq_e0m1, 640 x 360, x64 DXVK D3D9 on GM20B, one fresh game directory per image. Candidate ran first in the completed pair. A verified title-bar activation was available in both runs. Both image binaries had been exercised by the prior offscreen experiment.",
+    "measurement": "Each phase used foreground movement and observed game-PID Win32k producer events and DWM event 46 attributed to the game window. One session per version, adaptive clocks. FPS capture in Pacecar remained off in both sessions. The first setup attempt stopped before starting the game while trying to toggle Pacecar. KMD preemption samples are system-wide boundary observations, including DWM. They do not measure time spent in a stage or isolate the game context.",
+    "game_selection_after_run": "Original loader settings restored and hash-verified after trials. Both temporary executable aliases retired.",
+    "receipt_sha256": "caeaa3f798347865a9c99230f90439c4bcf1912fd26f5e1876b3bbae386e24f1",
+    "rows": {
+      "baseline": {
+        "game_executable_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "boot_utc": "2026-11-18T11:54:35.1855130Z",
+        "same_desktop_pid": 1356,
+        "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+        "loaded_modules": {
+          "vulkan-1.dll": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+          "dxgi.dll": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+          "d3d9.dll": "f73d5b3b4fb702ec340bbd21bf0840ab2186030e72aa9b599d28f20f611ecbf7",
+          "libvulkan_nouveau.dll": "e869db886f15882b24ce0e8390999c2f590ede0bfbc9c0ad1d410eadd1924e41"
+        },
+        "game_start_to_observed_map_s": 31.299,
+        "game_exit_code": 0,
+        "renderer": "2026-11-18 20:39:29 D3D9 Driver: NVIDIA Tegra X1 (GM20B) (NVK GM20B)",
+        "changed_world_pixels_after_input": 81443,
+        "sampled_peak_working_set_bytes": 391581696,
+        "intervals": {
+          "cap15-interval": {
+            "gdi_updates": {
+              "n": 38,
+              "fps": 10.436,
+              "p95_ms": 109.074,
+              "p99_ms": 131.607
+            },
+            "compositor_updates": {
+              "n": 38,
+              "fps": 10.422,
+              "p95_ms": 116.587,
+              "p99_ms": 118.062
+            },
+            "distinct_captured_images": {
+              "n": 37,
+              "fps": 10.131,
+              "p95_ms": 128.231,
+              "p99_ms": 167.467
+            }
+          },
+          "cap8-interval": {
+            "gdi_updates": {
+              "n": 39,
+              "fps": 7.959,
+              "p95_ms": 140.292,
+              "p99_ms": 149.985
+            },
+            "compositor_updates": {
+              "n": 39,
+              "fps": 7.999,
+              "p95_ms": 150.002,
+              "p99_ms": 160.678
+            },
+            "distinct_captured_images": {
+              "n": 40,
+              "fps": 8.124,
+              "p95_ms": 167.778,
+              "p99_ms": 168.36
+            }
+          },
+          "hitch-interval": {
+            "gdi_updates": {
+              "n": 9,
+              "fps": 2.003,
+              "p95_ms": 518.049,
+              "p99_ms": 521.605
+            },
+            "compositor_updates": {
+              "n": 9,
+              "fps": 2.0,
+              "p95_ms": 510.845,
+              "p99_ms": 515.351
+            },
+            "distinct_captured_images": {
+              "n": 10,
+              "fps": 2.048,
+              "p95_ms": 535.701,
+              "p99_ms": 547.107
+            }
+          },
+          "recovery-interval": {
+            "gdi_updates": {
+              "n": 54,
+              "fps": 12.599,
+              "p95_ms": 99.102,
+              "p99_ms": 110.489
+            },
+            "compositor_updates": {
+              "n": 53,
+              "fps": 12.631,
+              "p95_ms": 100.136,
+              "p99_ms": 124.791
+            },
+            "distinct_captured_images": {
+              "n": 51,
+              "fps": 12.097,
+              "p95_ms": 100.768,
+              "p99_ms": 158.684
+            }
+          }
+        },
+        "kmd_provider_system_wide": {
+          "source_counts": {
+            "preempt": 1000
+          },
+          "stage_counts": {
+            "gpu_fence": 912,
+            "mappings": 46,
+            "prepare": 9,
+            "submit": 8,
+            "retire": 6,
+            "idle": 8,
+            "cpu_fence": 8,
+            "notify": 3
+          }
+        },
+        "sha256": {
+          "result.json": "c16c7e0d20db82b5cc898f7e361092d0c89eb3a37e67e7f1a9ef2308bc310b0d",
+          "frame-events.csv": "cf920c6ece95425a7af5a1cbd4ee30aded29745540e72d85d35930c2c1eb3a0e",
+          "kmd-events.csv": "549a1ef9e1392466d81dbaea35260b554d23beab4813b906f2d25f3f4bcec1a1",
+          "visible.csv": "e9ae023cbea048930e0e544dff54f7eca8ebfaa1202864903cd2d46af74caf8c",
+          "qconsole.log": "ffb9020cfbe22aa49a44fb653848ab69d772fb98aceba7178a1f2aa4589784e7",
+          "lifecycle.jsonl": "2cef44a4392f402d28d0d27cc320583038ceb459291afa1393f877cf8b0ef023",
+          "fte-cache-old_d3d9.log": "c3db9b97714794a653ec6954aeddbf189807778eed862eca9218b61b0aa43e74",
+          "map-before.png": "670dffc8455fff634f0d457e9d0391c6d78e13fc3087511dd4e6e549d4c8c4fb",
+          "map-after-input.png": "64f92ffdaeeb84e84c2c298edee1d61d5aad0e56719cd95d73d2427465fb9a6e",
+          "map-final.png": "093fab62aa719a88ac7c5882abdf980fb58b039507b4a2a8cc6f63e78de33020"
+        },
+        "platform": {
+          "power_before": {
+            "utc": "2026-11-18T12:39:23.3602144Z",
+            "ac": "Online",
+            "cpu_khz": 928558,
+            "gpu_khz": 537600,
+            "emc_khz": 1331200,
+            "soc_c": 40,
+            "board_c": 39,
+            "fan_duty": 51,
+            "battery_mv": 3859
+          },
+          "power_after": {
+            "utc": "2026-11-18T12:40:45.2182927Z",
+            "ac": "Online",
+            "cpu_khz": 1109250,
+            "gpu_khz": 537600,
+            "emc_khz": 204000,
+            "soc_c": 40,
+            "board_c": 39,
+            "fan_duty": 51,
+            "battery_mv": 3871
+          }
+        },
+        "title_bar_activation_observed": true
+      },
+      "candidate": {
+        "game_executable_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "boot_utc": "2026-11-18T11:54:35.1855130Z",
+        "same_desktop_pid": 1356,
+        "kmd_sha256": "52f47133ee332afb361c90daa7b0155da59ab3b1ed912e030da04bdd9889f438",
+        "loaded_modules": {
+          "vulkan-1.dll": "4f0e5e0ca9458d4d9542baae219c74816840cb90d7c15c224cabb37742ac45ca",
+          "dxgi.dll": "c0a20e80493b245d95d64185c363b090dd00d33b2fa8e690dca59ae1d2b4cac0",
+          "d3d9.dll": "f73d5b3b4fb702ec340bbd21bf0840ab2186030e72aa9b599d28f20f611ecbf7",
+          "libvulkan_nouveau.dll": "2b0dfffec07eef71aec2f88d3248cbd8c0130dd0abd5fd949d05b51f2c501949"
+        },
+        "game_start_to_observed_map_s": 27.981,
+        "game_exit_code": 0,
+        "renderer": "2026-11-18 20:38:14 D3D9 Driver: NVIDIA Tegra X1 (GM20B) (NVK GM20B)",
+        "changed_world_pixels_after_input": 80999,
+        "sampled_peak_working_set_bytes": 408371200,
+        "intervals": {
+          "cap15-interval": {
+            "gdi_updates": {
+              "n": 38,
+              "fps": 10.367,
+              "p95_ms": 103.488,
+              "p99_ms": 106.709
+            },
+            "compositor_updates": {
+              "n": 37,
+              "fps": 10.384,
+              "p95_ms": 104.834,
+              "p99_ms": 116.27
+            },
+            "distinct_captured_images": {
+              "n": 38,
+              "fps": 10.377,
+              "p95_ms": 113.671,
+              "p99_ms": 133.18
+            }
+          },
+          "cap8-interval": {
+            "gdi_updates": {
+              "n": 40,
+              "fps": 8.198,
+              "p95_ms": 139.712,
+              "p99_ms": 141.923
+            },
+            "compositor_updates": {
+              "n": 40,
+              "fps": 8.21,
+              "p95_ms": 150.028,
+              "p99_ms": 150.387
+            },
+            "distinct_captured_images": {
+              "n": 41,
+              "fps": 8.341,
+              "p95_ms": 163.256,
+              "p99_ms": 166.816
+            }
+          },
+          "hitch-interval": {
+            "gdi_updates": {
+              "n": 9,
+              "fps": 2.001,
+              "p95_ms": 520.995,
+              "p99_ms": 525.035
+            },
+            "compositor_updates": {
+              "n": 9,
+              "fps": 1.992,
+              "p95_ms": 527.534,
+              "p99_ms": 532.217
+            },
+            "distinct_captured_images": {
+              "n": 10,
+              "fps": 2.025,
+              "p95_ms": 539.827,
+              "p99_ms": 544.3
+            }
+          },
+          "recovery-interval": {
+            "gdi_updates": {
+              "n": 48,
+              "fps": 11.33,
+              "p95_ms": 109.15,
+              "p99_ms": 119.982
+            },
+            "compositor_updates": {
+              "n": 48,
+              "fps": 11.327,
+              "p95_ms": 109.441,
+              "p99_ms": 116.552
+            },
+            "distinct_captured_images": {
+              "n": 48,
+              "fps": 11.168,
+              "p95_ms": 119.049,
+              "p99_ms": 156.701
+            }
+          }
+        },
+        "kmd_provider_system_wide": {
+          "source_counts": {
+            "preempt": 659
+          },
+          "stage_counts": {
+            "submit": 4,
+            "gpu_fence": 609,
+            "mappings": 25,
+            "prepare": 6,
+            "idle": 8,
+            "cpu_fence": 2,
+            "retire": 3,
+            "notify": 2
+          }
+        },
+        "sha256": {
+          "result.json": "90a2efde51e0b0b87a12c5682fc8919b97fdeaff60fb8474775c7f8c87e5ce8c",
+          "frame-events.csv": "f325eb24769e59ce57546e52b7982c65206ce3650dd5cfc881b66828907ba6da",
+          "kmd-events.csv": "fdca5cbe90e7a192a9d5bca4bac4c61d591d59b6828f80c75cbc955ddf282a81",
+          "visible.csv": "b6ed8faa58e6acc9a5228ac0f3d746d5d4cb0e46253db263c15d0b40f1bb32e5",
+          "qconsole.log": "5aa7c5b4aeeb5ff6d7b0e684848487c63cdd4d051858bea3965f9c11af98c5ac",
+          "lifecycle.jsonl": "3d3f1be2374a4d3c7feae12322d7cc16a9734e3082c40a16f51c81fce156f4f9",
+          "fte-cache-new_d3d9.log": "bb3a2c49a790c86c0c5010f2b08788eb2aa6b889b372bd93cf247b24bdd854dc",
+          "map-before.png": "6b743a8e1fad159ea06fa6f37744adf7ab701d6b460baec3906dcbfcb4f04764",
+          "map-after-input.png": "6640efb52efb01ba634064f4a65bcd74c7349c7b9eceae7829ec3fe24b47a274",
+          "map-final.png": "32c055cfd59da5d71a51db85784cfd734278a577ad516d33fa9cdf438115e6a7"
+        },
+        "platform": {
+          "power_before": {
+            "utc": "2026-11-18T12:38:08.2595169Z",
+            "ac": "Online",
+            "cpu_khz": 1593750,
+            "gpu_khz": 76800,
+            "emc_khz": 1600000,
+            "soc_c": 40,
+            "board_c": 38,
+            "fan_duty": 51,
+            "battery_mv": 3853
+          },
+          "power_after": {
+            "utc": "2026-11-18T12:39:17.8133362Z",
+            "ac": "Online",
+            "cpu_khz": 916804,
+            "gpu_khz": 460800,
+            "emc_khz": 204000,
+            "soc_c": 41,
+            "board_c": 39,
+            "fan_duty": 51,
+            "battery_mv": 3865
+          }
+        },
+        "title_bar_activation_observed": false
+      }
+    },
+    "earlier_attempts": {
+      "setup": {
+        "summary": "FPS toggle timed out before the first game process was launched. The auxiliary overlay was left in its existing state for the subsequent comparison.",
+        "receipt_sha256": "28161ec15da17526c8c0349d230129079e6e36dca19e8f65c5613d4aa64605a3"
+      },
+      "first_game_pair": {
+        "summary": "The baseline completed with exit 0. The candidate joined the expected map but foreground ownership for sending input could not be established. Cleanup observed exit 0. The profile was restored.",
+        "receipt_sha256": "54dc9b1bd2e123b7fea239e3e55d413cf91f8fda4f1696ad7a6bdd3dd1a65cfc"
+      }
+    },
+    "temp_file_cleanup": {
+      "active_game_loader_settings_sha256": "362d6e4cf8b9876309b01b65e62d95631bcb2aa6b407c3c036b9b8a29d98797a",
+      "task_owned_files_removed": 47,
+      "one_shot_tasks_removed": 12,
+      "bytes_reclaimed_on_switch": 179340863,
+      "utc": "2026-11-18T12:43:32.3563854Z"
+    },
+    "interpretation": "In the 15 FPS capped interval, target-window composition ran at 10.422 FPS with the baseline and 10.384 FPS with the candidate. Recovery after the temporary 2 FPS cap reached 12.631 and 11.327 FPS. One run per image with dynamic clocks establishes functional operation on this map. The evidence supports no claim of higher game FPS."
+  },
+  "long_path_followup": {
+    "record": "tegra-x1-wddm/docs/WIN32_APPLICATION_CACHE_PATH_20261118.json",
+    "source": "70f0e7245e7ef40c1ced3430f37adf051910615a",
+    "record_sha256": "0987bd3f028a35ada941fc71a2cfd6061a41cfb28a8fdfeb5fa36caff672e495",
+    "selected_for_application_use": true,
+    "fixed_cases_per_process_architecture": 5,
+    "vulkan_warm_hits": 6,
+    "vulkan_warm_lookups": 6
+  }
+}

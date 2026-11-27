@@ -1,0 +1,370 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T08:50:41.926053+00:00",
+  "review_thread": "01a2026b-02b8-7ea3-996a-e5472b0bde3f",
+  "previous_execution_thread": "01a201d2-60fa-7bb1-a0d7-0264756995d2",
+  "execution_thread": "01a2026d-3f59-7041-8676-a9267b034280",
+  "status": "保全与证据范围审核通过；两项意见均未确认为驱动缺陷或历史首因",
+  "root_cause": "unknown",
+  "repair_accepted": false,
+  "reviewed_main_head": "777bb443",
+  "reviewed_evidence_head": "0b26b0ece1b79f24423011c13862c77ec485820c",
+  "source_commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "input_proof": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/lifecycle-preservation-inputs-20261122.json",
+    "sha256": "b339d46bb45d532ed64d9a01fe49847c626d989f963a6d29b4f51fba6085b45c",
+    "bytes": 29145
+  },
+  "preservation": {
+    "manifest": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/preservation-20261122/manifest.json",
+      "sha256": "5c7d2aedb6193688698fa1a574ff20d00f9af9748e839e0020d64f2b133523aa",
+      "bytes": 10519
+    },
+    "adjudication": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/preservation-20261122/review-adjudication.json",
+      "sha256": "60962bb6f6e8612c54e00598986972bccdce544820a8e3d4bf0f0fcf6abffb7f",
+      "bytes": 9124
+    },
+    "report": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/preservation-20261122/report.md",
+      "sha256": "f5a5939a5b3a1428c9ccf83793da33c64e95c7a0eed5b54ed7ad1c19c4b16490",
+      "bytes": 5383
+    },
+    "source_inputs_verified": 32,
+    "new_report_files_verified": 4,
+    "original_bytes_unchanged": true
+  },
+  "source_equality": [
+    {
+      "path": "tegra-x1-wddm/windows/context.c",
+      "sha256": "7aa0a007bc1a59b35eaccdcd9ff3e7ea054aa1f0a985e73545d585815225a4d8",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/context.h",
+      "sha256": "55a65f7b6353ccfbc94b39f3f4f083934382983b3f3bff1a8dab0ba464f89217",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/work_queue.c",
+      "sha256": "4a5c659465f757319d340af3cd0c2962c8131f5b6c1c85a8ea53d0ca23108a1e",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/work_queue.h",
+      "sha256": "b4a924148af57770034fd4457c4abd5ae93de9c78676d6424a3cf8104aa27770",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/submit_ddi.c",
+      "sha256": "b01cef642b9c660226fd24e468b861f9f21b3176fba6ae7ba6a3fcda0e2d1548",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/submit_worker.c",
+      "sha256": "4164d780de0d7362c5dad4112d3c8ff8bf30c63c0129cc9842880b9d4d1924b0",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/paging_submit.c",
+      "sha256": "145261f5b85f2d9d0c4a976e3053ef1bdc6c2756f97eff11e7400aea4a9dd500",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/reset_backend.c",
+      "sha256": "80de5157b6f708757c3954644efd8528062ce18d71bf923ce405add456827fa9",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/allocation.c",
+      "sha256": "4356ec3032f76dfea895dc461726401ee4628c2501a1fcce49744f6defdb8677",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/allocation.h",
+      "sha256": "4939c9b435137b2b744bf3aab6288bc11a990815ce0b59bb7215bc66dc10a4b1",
+      "frozen_matches_c137_and_evidence_head": true
+    },
+    {
+      "path": "tegra-x1-wddm/windows/device_lifetime.c",
+      "sha256": "c3db788f4bd1144e7c0a6e9c5d7b19e30057d081c97926d154a97e8862d50261",
+      "frozen_matches_c137_and_evidence_head": true
+    }
+  ],
+  "source_equality_limit": "仅11份冻结源码与两个Git提交相同，不证明主树脏源码、候选二进制、事故实际加载或全部生命周期等价。",
+  "source_path_review": [
+    {
+      "path": "tegra-x1-wddm/windows/context.c",
+      "lines": [
+        294,
+        333,
+        522,
+        576
+      ],
+      "finding": "已读捕获引用及完成检查后释放路径；没有据此证明所有路径安全。"
+    },
+    {
+      "path": "tegra-x1-wddm/windows/work_queue.c",
+      "lines": [
+        375,
+        384,
+        467,
+        475
+      ],
+      "finding": "Pending引用转交Current，完成回调前清除原OS私有缓冲指针；不补写原152586回执。"
+    },
+    {
+      "path": "tegra-x1-wddm/windows/allocation.c",
+      "lines": [
+        285,
+        414
+      ],
+      "finding": "已核Opens、Builders与关闭计数保护，未由已读路径建立提前释放。"
+    },
+    {
+      "path": "tegra-x1-wddm/windows/device_lifetime.c",
+      "lines": [
+        31,
+        47
+      ],
+      "finding": "销毁前检查上下文/打开计数与视频引用；完整VideoCloseDevice及全部调用者仍未证明。"
+    },
+    {
+      "path": "tegra-x1-wddm/windows/graphics.c",
+      "lines": [
+        83,
+        90
+      ],
+      "finding": "撤销映射先比较GraphicsPhysical与待销毁实例地址，不能沿用无条件撤去其他上下文PTE的猜测。"
+    },
+    {
+      "path": "tegra-x1-wddm/windows/worker.c",
+      "lines": [
+        70,
+        81
+      ],
+      "finding": "Stop发事件后等待并关闭线程；这不是全部回调等待关系的无死锁证明。"
+    }
+  ],
+  "nominated_findings": [
+    {
+      "id": "LC-OPINION-1",
+      "reviewer_claim": "NullRendering或零字节虚拟提交携带UMD私有数据被误拒绝。",
+      "assessment": "待验证的源码路径问题，未接受为本次已验证驱动缺陷或历史首因。",
+      "completed_reading": "现有源码在跳过快照后，对非GDI/非window_present且UMD私有字节非零的路径有INVALID_PARAMETER拒绝条件。官方NullRendering契约值得定向核对。",
+      "missing": "合法、完整私有ABI输入下的实际返回及围栏结果；零字节分支须单独确认合法契约；事故NullRendering标志和同次入返未留存。",
+      "witness_support": "case1/2未执行，因此本次运行没有验证该主张。",
+      "historical_attribution": "none"
+    },
+    {
+      "id": "LC-OPINION-2",
+      "reviewer_claim": "拒绝记录与抢占交错使DDI返回前报告围栏，属确定错误。",
+      "assessment": "确定缺陷标签不成立，保留为尚未证明的审阅意见。",
+      "completed_reading": "原意见把IRQL=DISPATCH_LEVEL与WDDM同步Level Two混同。work_queue.h:69-70只承诺不执行应用或分页项，没有禁止处理抢占标记。官方拒绝包围栏规则也未证明返回前更新一律违法。",
+      "missing": "具体合法并发调用约束和被违反的围栏/回调要求，或绑定事故的动态证据。",
+      "witness_support": "本程序没有执行并发/抢占验证，case0之后即因夹具清理失败退出。",
+      "historical_attribution": "none"
+    }
+  ],
+  "witness_original": {
+    "source": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/null-rendering-witness.c",
+      "sha256": "fcf0801b695266ffdc356dc7e12158d7a3516b810444404886d6a0e9b16edf6e",
+      "bytes": 17428
+    },
+    "run": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/witness-run.json",
+      "sha256": "a001bc538848affdd6986a74d2288c1bd99a5cf0760a104d8f4c023fce1091d9",
+      "bytes": 566
+    },
+    "stdout": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/witness-stdout.ndjson",
+      "sha256": "5abab47efa80fd13040b5430ff75068b15cdb34edad4eb7f62b3246fadcdad30",
+      "bytes": 209
+    },
+    "stderr": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-lifecycle-review/witness-stderr.log",
+      "sha256": "9e57149c1dfaca6cf0cd8466b3bfc28fbe26d4fb3727f95f668859dcdfe6f973",
+      "bytes": 1027
+    },
+    "compile_exit": 0,
+    "run_exit": -6,
+    "completed_cases": [
+      0
+    ],
+    "unexecuted_cases": [
+      1,
+      2
+    ],
+    "case0": {
+      "case": 0,
+      "null_rendering": 1,
+      "dma_bytes": 52,
+      "umd_private_bytes": 0,
+      "returned_status": "0x00000000",
+      "software": 1,
+      "rejected": 0,
+      "owned": 0,
+      "drain_calls": 0,
+      "trace_failures": 0,
+      "unexpected_calls": 0,
+      "creating_after": 0
+    },
+    "finding": "243行栈private_data在252行被无条件free；ASan所报bad-free属于夹具清理，不能认定驱动UAF。",
+    "limits": "模型类型和内核服务替代；没有真实WDDM ABI、围栏交付、并发、GPU或历史首因证明。"
+  },
+  "primary_sources_reviewed": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/ns-d3dkmddi-_dxgk_submitcommandflags",
+      "reading": "NullRendering要求模拟提交和围栏，不执行渲染；原事故未留存该位，静态语义不能证明它在事故中为0或1。"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_submitcommandvirtual",
+      "reading": "畸形DMA/私有数据可返回INVALID_PARAMETER，围栏在更早硬件包结束后计为完成；这条规则没有给出DDI返回前一律禁止更新的结论。"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/threading-and-synchronization-first-level",
+      "reading": "Level One按函数类禁止重入；页面列出PreemptCommand。不能将IRQL=DISPATCH_LEVEL视为WDDM同步Level Two，也不能据此补足SubmitCommandVirtual全部并发约束。"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/threading-and-synchronization-second-level",
+      "reading": "Level Two规定单一DDI线程、硬件空闲、无DMA处理；其编号不代表IRQL值。"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_setrootpagetable",
+      "reading": "更新目标根页表期间上下文空闲且未调度，不能只靠假定与在途工作相撞就认定合法路径缺陷。"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_closeallocation",
+      "reading": "销毁分配前先关闭设备绑定；已读Opens和OpenAllocations路径本身未建立合法调用下的提前释放。"
+    }
+  ],
+  "retained_hardware_review": {
+    "previous_review": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/first-present-main-review-20261121.json",
+      "sha256": "75ef64cbaf3c3fd0e19b3ab8f57d7742e8f493083c99ce1df7b81c53145b5cf0",
+      "bytes": 8236
+    },
+    "referenced_inputs_still_match": 36,
+    "method": "复核原件哈希后沿用既有独立DMA和系统事件审核，不重发或重跑已通过用例。",
+    "request": "f6264ee11289",
+    "consumed": true,
+    "original_application_executions": 1,
+    "may_dispatch_again": false,
+    "normal_rehearsal_repeated": false,
+    "capture_boot": 96075,
+    "application_dma": 5406,
+    "dma_bytes": 52,
+    "same_attempt_chain": [
+      "submit175",
+      "KMD7v2-entry",
+      "KMD7v2-return-success",
+      "GPU-complete",
+      "notification177",
+      "stop176",
+      "retire180"
+    ],
+    "interpretation": "原窗口本次未复现，非修复验收。"
+  },
+  "formal_restoration": {
+    "receipt": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/seq-dma-request-f6264ee11289-startup4/formal-power-verified.json",
+      "sha256": "bebe98a7ecf28100db030a21d61d5e2bacdea0c6fdb2abf4a78f6c4f1d4f9cd1",
+      "bytes": 12193
+    },
+    "selected_baseline": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7",
+      "bytes": 1100
+    },
+    "boot": 96251,
+    "code": 0,
+    "components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "approved_components_match": 8,
+    "loaded_hashes": {
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+    },
+    "loaded_paths": {
+      "tegragpurender.sys": "C:\\Windows\\system32\\drivers\\tegragpurender.sys",
+      "libvulkan_nouveau.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\libvulkan_nouveau.dll",
+      "tg_d3d_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_d3d_arm64.dll",
+      "TegraGpuD3DVk.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\TegraGpuD3DVk.dll",
+      "tg_nvk_arm64.dll": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_nvk_arm64.dll"
+    },
+    "loaded_matches": 5,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "trial": false,
+    "power_mode": 1,
+    "ac": "Online",
+    "scope": "现有完整恢复回执的本地复核，无新设备读取。"
+  },
+  "historical_faults": [
+    {
+      "boot": 91476,
+      "dma": 152586,
+      "review": {
+        "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/historical-91476-main-review-20261121.json",
+        "sha256": "14df820cf360549ba0e990ef44449a52544523e5a2c10d520563113395a00dbc",
+        "bytes": 5657
+      },
+      "remaining_unknowns": [
+        "原次dxgmms2完整哈希",
+        "实际分支",
+        "目标KMD入返",
+        "GPU完成",
+        "Windows退役",
+        "首个异常及独立复位首因"
+      ]
+    },
+    {
+      "boot": 95090,
+      "fault": "GM20B-ON-DEMAND-CANDIDATE-BOOT-95090-RESET",
+      "boundary": "原窗口门控尚未装载；原次候选Code0、实载、会话就绪、停止码及故障模块未补出，不能用后续成功启动填补。",
+      "cause": "unknown"
+    }
+  ],
+  "deferred_contracts": {
+    "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/first-present-deferred-contracts-review-20261122.json",
+    "sha256": "864ec6e03b0d0440316e9f50a76fb407056588cf69dea11b44d1125c7892c97a",
+    "bytes": 6852
+  },
+  "coordination": {
+    "main_goal_status": "active",
+    "executor_goal_status": "active",
+    "executor_goal_confirmation": "2026-11-22主审核收到执行会话create_goal/get_goal回执；完整目标未缩为本地模型。",
+    "old_execution_goal_status_at_interruption": "blocked",
+    "service_message": "This content was flagged for possible cybersecurity risk.",
+    "user_followup": [
+      "被自动审核中断的验证也要重跑",
+      "网络安全风险是误判",
+      "两边建立进行中的目标，要求自我完成"
+    ],
+    "current_direction": "用户澄清已交新会话，按平台正常审核路径处理最小夹具修正、独立复核及本地验证；原拒绝原文保留，再次拦截时不得规避。",
+    "new_witness_result_accepted": false,
+    "device_owner_transfer_completed": false,
+    "main_device_access": false
+  },
+  "scope": {
+    "main_device_calls": 0,
+    "new_driver_changes": 0,
+    "new_graphics_workloads": 0,
+    "baseline_selected_or_promoted": false,
+    "explorer": "最后单独处理，不作当前前置条件",
+    "publication": "本批仅本地文档接入；完整发布检查留到实际发布"
+  },
+  "next": "接收新执行会话的已审最小夹具差异和实际验证整批；模型命题与历史归因分别审核，继续取得可证根因和相应实机修复证据。"
+}

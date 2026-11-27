@@ -1,0 +1,695 @@
+{
+  "objective": "One installed driver serves legacy applications through the Windows system runtimes, including 32-bit callers.",
+  "ordered_acceptance": [
+    {
+      "runtime": "x86 system d3d9.dll",
+      "workload": "FTEQW / LibreQuake on lq_e0m1, matched to DXVK control",
+      "check": "GM20B through installed tgd3d / NVK, visible window, input and exit."
+    },
+    {
+      "runtime": "x86 system d3d8.dll",
+      "workload": "Device creation, drawing and visible presentation, then a representative game."
+    },
+    {
+      "runtime": "system DirectDraw and Direct3D 7",
+      "workload": "Indexed palette, color key, Blt and page flip, textured DX7 teapot, then a game.",
+      "software": "Record software emulation when observed."
+    }
+  ],
+  "game_directory": "No app-local translation DLL. Resolve the actual system runtimes, driver and backend by path, architecture, hash, target process and device identity.",
+  "measured_utc": "2026-11-18T21:46:35.5196884Z",
+  "boot": "2026-11-18T21:30:53.8282480Z",
+  "tegra_problem_code": 0,
+  "readback": [
+    {
+      "registry_view": "Registry64",
+      "user_mode_driver_names_in_order": [
+        "tegragpuno3d.dll",
+        "TegraGpuD3DVk.dll",
+        "TegraGpuD3DVk.dll",
+        "tegragpuno3d.dll"
+      ],
+      "separate_wow_driver_names_present": false
+    },
+    {
+      "registry_view": "Registry32",
+      "user_mode_driver_names_in_order": [
+        "tegragpuno3d.dll",
+        "TegraGpuD3DVk.dll",
+        "TegraGpuD3DVk.dll",
+        "tegragpuno3d.dll"
+      ],
+      "separate_wow_driver_names_present": false
+    }
+  ],
+  "registered_modules": [
+    {
+      "name": "TegraGpuD3DVk.dll",
+      "machine": "0xaa64",
+      "sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d"
+    },
+    {
+      "name": "tegragpuno3d.dll",
+      "machine": "0xaa64",
+      "sha256": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d"
+    }
+  ],
+  "installed_legacy_system_runtimes": [
+    {
+      "system_directory": "System32",
+      "name": "d3d9.dll",
+      "machine": "0xaa64",
+      "sha256": "6f053b30076a7ed8525bd0d5af736bbfb107e0553a55d3930e1ef467a23f70b9",
+      "version": "10.0.22621.2506"
+    },
+    {
+      "system_directory": "System32",
+      "name": "ddraw.dll",
+      "machine": "0xaa64",
+      "sha256": "686782573ab6d08defb88bce019c5e98932d4d8fa531b41896a940841a024195",
+      "version": "10.0.22621.4745"
+    },
+    {
+      "system_directory": "SysWOW64",
+      "name": "d3d9.dll",
+      "machine": "0x014c",
+      "sha256": "53083085224e2b64387614c35dd9aad2062ae04ada0d001044dc1e4301b8e3bf",
+      "version": "10.0.22621.2506"
+    },
+    {
+      "system_directory": "SysWOW64",
+      "name": "d3d8.dll",
+      "machine": "0x014c",
+      "sha256": "56418c454ff4b52be405dcfda59def522948bb0d243b3a701b6eaf4538448b9f",
+      "version": "10.0.22621.1"
+    },
+    {
+      "system_directory": "SysWOW64",
+      "name": "ddraw.dll",
+      "machine": "0x014c",
+      "sha256": "c1cd35ececb899ad25ed3d4d14a5993c485f8ccff7dec630b5b2ef093c6b6fa0",
+      "version": "10.0.22621.2506"
+    }
+  ],
+  "source": {
+    "package_stub": "tegra-x1-wddm/windows/no_d3d.c",
+    "open_adapter_result": "D3DERR_NOTAVAILABLE",
+    "package_registry": "tegra-x1-wddm/windows/tegragpurender.inf",
+    "desktop_exports": "src/nouveau/tgd3d/tgd3d.def",
+    "desktop_entrypoints": [
+      "OpenAdapter10",
+      "OpenAdapter10_2"
+    ]
+  },
+  "endpoint": "Each physical result describes the runtime, loaded driver, native device or software path, pixels, input, normal exit and desktop recovery.",
+  "status": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit.",
+  "physical_results": {
+    "baseline": {
+      "runtime": "C:\\Windows\\SyChpe32\\d3d9.dll",
+      "runtime_sha256": "0dc6b0fe142ef60ad01a655c08b34f076a5c16f7776c68141683626f649550db",
+      "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "desktop_umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "classic_adapter": "Tegra X1 (GM20B)",
+      "mode": [
+        1280,
+        720,
+        60
+      ],
+      "hal_GetDeviceCaps": "0x8876086a",
+      "hal_CheckDeviceType": "0x8876086a",
+      "Direct3DCreate9Ex": "0x8876086a",
+      "CreateDevice_HAL": "0x8876086a",
+      "offscreen_process_exit": 3,
+      "app_files": [
+        "dxvk-offscreen.exe",
+        "fteqw.exe",
+        "identity-x86.exe"
+      ],
+      "trace": {
+        "raw_etl_sha256": "9d8ff2a2cc44be6a96ca39f703e65800ebcf013cabd8d08d9d463ad339ae06db",
+        "events_lost": 0,
+        "buffers_lost": 0,
+        "buffers": 9,
+        "journal": "state.json",
+        "journal_sha256": "420f446827c757daacda296fd000a9b056867b44e1fc22a851bfd52700d3ab36",
+        "boot": "2026-11-18T21:51:40.7764170Z",
+        "end": "2026-11-18T22:03:55.1579387Z",
+        "children": {
+          "identity": {
+            "pid": 7780,
+            "image_loads": 29,
+            "graphics_modules": {
+              "d3d9.dll": [
+                "\\Device\\HarddiskVolume1\\Windows\\SyChpe32\\d3d9.dll"
+              ]
+            },
+            "driver_events": []
+          },
+          "offscreen": {
+            "pid": 4496,
+            "image_loads": 28,
+            "graphics_modules": {
+              "d3d9.dll": [
+                "\\Device\\HarddiskVolume1\\Windows\\SyChpe32\\d3d9.dll"
+              ]
+            },
+            "driver_events": []
+          }
+        }
+      }
+    },
+    "system_game": {
+      "program": "32-bit FTEQW / LibreQuake",
+      "requested_map": "lq_e0m1",
+      "requested_renderer": "system D3D9",
+      "d3d9_window_sizes": [
+        [
+          320,
+          240
+        ],
+        [
+          640,
+          480
+        ]
+      ],
+      "fallback_renderer": "Microsoft GDI Generic",
+      "fallback_version": "OpenGL 1.1.0",
+      "exit": -1,
+      "terminated_by_fixture": true,
+      "map_input_and_normal_exit_accepted": false,
+      "trace": {
+        "raw_etl_sha256": "2f26c06f4ebb9eac9419dadd3a0396282806399c2df4ac6e1fd8e1c505d18007",
+        "events_lost": 0,
+        "buffers_lost": 0,
+        "buffers": 24,
+        "journal": "state.json.new",
+        "journal_sha256": "0e2e7a3b1bf70dbd36cabc5bbaf28190f6562385e23f314aa7eed34fe38ffc1e",
+        "boot": "2026-11-18T21:51:40.7764170Z",
+        "end": "2026-11-18T22:05:25.0432601Z",
+        "children": {
+          "fte": {
+            "pid": 1392,
+            "image_loads": 81,
+            "graphics_modules": {
+              "d3d9.dll": [
+                "\\Device\\HarddiskVolume1\\Windows\\SyChpe32\\d3d9.dll"
+              ],
+              "dxgi.dll": [
+                "\\Device\\HarddiskVolume1\\Windows\\SysWOW64\\dxgi.dll"
+              ],
+              "opengl32.dll": [
+                "\\Device\\HarddiskVolume1\\Windows\\SyChpe32\\opengl32.dll"
+              ]
+            },
+            "driver_events": []
+          }
+        }
+      },
+      "following_unexpected_restart": {
+        "boot": "2026-11-18T22:05:46.1503270Z",
+        "events": [
+          {
+            "record": 68156,
+            "utc": "2026-11-18T22:06:42.2259036Z",
+            "data": {},
+            "id": 6008
+          },
+          {
+            "record": 68158,
+            "utc": "2026-11-18T22:06:42.9671310Z",
+            "data": {},
+            "id": 6005
+          },
+          {
+            "record": 68165,
+            "utc": "2026-11-18T21:56:47.8991782Z",
+            "data": {
+              "PowerButtonTimestamp": "0",
+              "LongPowerButtonPressDetected": "false",
+              "BugcheckCode": "0",
+              "SleepInProgress": "0"
+            },
+            "id": 41
+          }
+        ],
+        "dumps": 0,
+        "cause": "undetermined"
+      }
+    },
+    "x86_adapter_experiment": {
+      "signed_umd": {
+        "bytes": 3640864,
+        "unsigned": "84d49030cde50cb2d8eb7d76cba0ccbcb56d7eed96914321cfd492533f082710",
+        "sha256": "168e1dc92dd064c5656ab59212553dba395bb2f159dfae5a6f4d3f8699f29166",
+        "source_base": "d8245413bce8964496e6b546e205382b6363fc75",
+        "patch_sha256": "3fedbd7a1fc8546d7f8d5b8a8191a7502cc384ca517b6401c36de3f69d4190d5",
+        "translation_units": {
+          "tgd3d_entry.cpp": "d022daaee841a596ed403b321ca9b0c7f983013b725ca25c2a9c01311ca4d76e",
+          "tgd3d.h": "1bdffdf6e4fe335a25b7ed0d008e91e20a88f9dc2b01d30e0eb1511460181996",
+          "tgd3d_trace.h": "14617fbe6c735c72fac6839d9b1574408d971b8e3fa01270e510658d1eaaa8be",
+          "tgd3d.def": "48f1d24fc1b29e4d1694baf6f9f9bc18d0a9cac2c73eecccd054ab195e379db7",
+          "tgd3d_legacy9.cpp": "d8d4ddf41c1e5aebc52138c49da232057e09565e3af3acfbfe63a91e840d373f",
+          "meson.build": "cda0922f7869663c662543bcb963794627b906f4a8065fddc6d0cde6a2b70749"
+        },
+        "exports": [
+          "OpenAdapter",
+          "OpenAdapter10",
+          "OpenAdapter10_2"
+        ]
+      },
+      "source_patch": "tegra-x1-wddm/docs/dxvk-games-20261118/tgd3d-x86-d3d9-adapter-discovery.patch",
+      "sibling_device_local_nvk_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+      "direct_ddi_control": {
+        "steps": [
+          "kmt\t00000000000838f3\t10de\t12e\t53",
+          "private\t48\t00000000",
+          "open9\t00000000\t20482\t1",
+          "format\t00000000\t1\t00000000\t22\t00000400",
+          "caps9\t8876086a",
+          "icd\tC:\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\libvulkan_nouveau.dll",
+          "close9\t00000000",
+          "close_kmt\t00000000"
+        ],
+        "trace": {
+          "raw_etl_sha256": "a5be60c3a072bf4a0bf1bb63af16412f2570dc2b2097426d4da799b726ffb104",
+          "events_lost": 0,
+          "buffers_lost": 0,
+          "buffers": 9,
+          "journal": "state.json",
+          "journal_sha256": "a04d213d0f95a0d622a2c3f37c0bc55caebbb7669d692d37b44c459e551e086a",
+          "boot": "2026-11-18T22:05:46.1573980Z",
+          "end": "2026-11-18T22:18:39.3089602Z",
+          "children": {
+            "direct": {
+              "pid": 3556,
+              "image_loads": 33,
+              "graphics_modules": {
+                "libvulkan_nouveau.dll": [
+                  "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\libvulkan_nouveau.dll"
+                ],
+                "tegragpud3d9.dll": [
+                  "\\Device\\HarddiskVolume1\\ProgramData\\SwitchWOA\\DriverReview\\s5-native9-168e1dc92d\\TegraGpuD3D9.dll"
+                ]
+              },
+              "driver_events": [
+                {
+                  "image": "direct.exe",
+                  "id": 2,
+                  "status": "0x0",
+                  "arg0": "0x3",
+                  "arg1": "0x20000000",
+                  "count": 1
+                },
+                {
+                  "image": "direct.exe",
+                  "id": 3,
+                  "status": "0x0",
+                  "arg0": "0x838f3",
+                  "arg1": "0x100404162",
+                  "count": 1
+                },
+                {
+                  "image": "direct.exe",
+                  "id": 31,
+                  "status": "0x0",
+                  "arg0": "0x100000009",
+                  "arg1": "0x838f3",
+                  "count": 1
+                },
+                {
+                  "image": "direct.exe",
+                  "id": 31,
+                  "status": "0x0",
+                  "arg0": "0x200000003",
+                  "arg1": "0x4",
+                  "count": 1
+                },
+                {
+                  "image": "direct.exe",
+                  "id": 31,
+                  "status": "0x0",
+                  "arg0": "0x200000004",
+                  "arg1": "0x14",
+                  "count": 1
+                },
+                {
+                  "image": "direct.exe",
+                  "id": 31,
+                  "status": "0x0",
+                  "arg0": "0x400000000",
+                  "arg1": "0x838f3",
+                  "count": 1
+                },
+                {
+                  "image": "direct.exe",
+                  "id": 31,
+                  "status": "0x8000000a",
+                  "arg0": "0x100000009",
+                  "arg1": "0x5002",
+                  "count": 1
+                },
+                {
+                  "image": "direct.exe",
+                  "id": 31,
+                  "status": "0x8876086a",
+                  "arg0": "0x20000000d",
+                  "arg1": "0x130",
+                  "count": 1
+                }
+              ]
+            }
+          }
+        },
+        "process_exit": 0
+      },
+      "registration": "A single REG_MULTI_SZ entry in UserModeDriverNameWow selected this UMD for the x86 DX9 slot.",
+      "query_slot_order": [
+        "DX9",
+        "DX10",
+        "DX11",
+        "DX12"
+      ],
+      "query_phases": {
+        "names01": "original",
+        "names02": "written, same boot",
+        "names03": "after planned restart",
+        "names04": "removed, same boot",
+        "names05": "restored after planned restart"
+      },
+      "arm64_and_x64_slots_all_five_queries": [
+        {
+          "status": "0x00000000",
+          "name": "tegragpuno3d.dll"
+        },
+        {
+          "status": "0x00000000",
+          "name": "TegraGpuD3DVk.dll"
+        },
+        {
+          "status": "0x00000000",
+          "name": "TegraGpuD3DVk.dll"
+        },
+        {
+          "status": "0x00000000",
+          "name": "tegragpuno3d.dll"
+        }
+      ],
+      "driver_name_queries": {
+        "names01": {
+          "boot": "2026-11-18T22:05:46.1503270Z",
+          "native_luid": "00000000000838f3",
+          "x86": [
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            }
+          ],
+          "result_sha256": "ff9bec06e44d8354396a1e3910dd3b592e3ddcc767ea909a21746e4e550f88c0"
+        },
+        "names02": {
+          "boot": "2026-11-18T22:05:46.1573980Z",
+          "native_luid": "00000000000838f3",
+          "x86": [
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            }
+          ],
+          "result_sha256": "3793547b465ca5ed91997691978d0d92c134ed8278a0e1ee486bbf5bb42a85a7"
+        },
+        "names03": {
+          "boot": "2026-11-18T22:21:56.2500360Z",
+          "native_luid": "0000000000088c6a",
+          "x86": [
+            {
+              "status": "0x00000000",
+              "name": "TegraGpuD3D9.dll"
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            }
+          ],
+          "result_sha256": "20260f701ba4ef42d88ea4de2a798b6acdb8aec85f05ba78ea64481c32f1f67f"
+        },
+        "names04": {
+          "boot": "2026-11-18T22:25:36.0926940Z",
+          "native_luid": "000000000008814c",
+          "x86": [
+            {
+              "status": "0x00000000",
+              "name": "TegraGpuD3D9.dll"
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            }
+          ],
+          "result_sha256": "d483ac91c85717edc457507001be2ab833bd8285600f28c8515e327fa7bc6930"
+        },
+        "names05": {
+          "boot": "2026-11-18T22:30:32.5534620Z",
+          "native_luid": "000000000008b20e",
+          "x86": [
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            },
+            {
+              "status": "0xc000000d",
+              "name": null
+            }
+          ],
+          "result_sha256": "7c2afd8d891d491e59824b7552fe094b8a328c889864bf94bf38fe81b88c895f"
+        }
+      },
+      "system_runtime_trial": {
+        "scheduler_acknowledged": true,
+        "new_boot": "2026-11-18T22:25:36.0926940Z",
+        "unexpected_restart_events": [
+          {
+            "record": 68323,
+            "utc": "2026-11-18T22:26:25.1956270Z",
+            "data": {},
+            "id": 6008
+          },
+          {
+            "record": 68325,
+            "utc": "2026-11-18T22:26:25.1989139Z",
+            "data": {},
+            "id": 6005
+          },
+          {
+            "record": 68332,
+            "utc": "2026-11-18T22:22:33.3749686Z",
+            "data": {
+              "PowerButtonTimestamp": "0",
+              "LongPowerButtonPressDetected": "false",
+              "BugcheckCode": "0",
+              "SleepInProgress": "0"
+            },
+            "id": 41
+          }
+        ],
+        "surviving_case_directory": false,
+        "surviving_action_source": true,
+        "trace_and_dump_count": [
+          0,
+          0
+        ],
+        "scheduler_operational_log_enabled": false,
+        "matching_application_errors": [],
+        "application_entered_OpenAdapter": "unknown",
+        "cause": "undetermined"
+      },
+      "system_runtime_acceptance": false,
+      "daily_driver_selected": false,
+      "next_device_work": "Confirm OpenAdapter in the system runtime, implement HAL device and resource handling, then qualify drawing, input and exit.",
+      "static_binding_check": {
+        "kernel_version": "10.0.22621.2792",
+        "kernel_sha256": "99d425e1c997eae32909fa4f37d6c8e2e846a5374c602295546c8be2547aa5e6",
+        "pdb_guid": "797f457a-6488-c67c-8e55-b0f3e771dc32",
+        "codeview_age": 1,
+        "pdb_sha256": "7f0a811d1c74569f9dbe428cc2d73355beb4e0864b7b77c81e1bbf3540fa74e9",
+        "functions": [
+          "GetUMDFileName",
+          "InitializeUserModeDriverNames",
+          "CopyUmdFileName",
+          "GetDisplayUMDFileName"
+        ],
+        "finding": "Dxgkrnl reads per-architecture driver lists at adapter initialization. Empty x86 slots produced STATUS_INVALID_PARAMETER."
+      }
+    },
+    "diagnostic_images": {
+      "identity_x86": {
+        "bytes": 746520,
+        "unsigned": "7eb3893b23c628b680482b6db803a9a839b8f556107c7a6895bacdb648b5c870",
+        "sha256": "5238a2fdb8ec14b5eea89ecb539fe1b459592810e4068575a51e7e90d04f8a91",
+        "source_sha256": "297817907fec97a02413a9be9f19661e471cc4f3e414a60443e7e6dcd4b2f71f",
+        "kmt": {
+          "kmt.c": "97180a7cfcdb53c1412fdc2b625ab5c7e52a570cb3d63248cdf319f08a320949",
+          "kmt.h": "61558590186b35dc78f10aeae564139c9cb67578c14158941a4ab6d108a6a22a",
+          "kmt_abi.h": "23f93d58cde3f893463270d263ba07ef3ad5523dbf2692b93fd7b2a2a1255a41",
+          "adapter_abi.h": "9cf36e45dac585d0456acf63fb7c441e3be6eb0582dae3fd222263b28719b3ae"
+        }
+      },
+      "driver_name_probes": {
+        "images": {
+          "x86": {
+            "bytes": 64528,
+            "unsigned": "11d1cf5475e7ded79db9eb6f847b6f45852f2405591f6a5171321b36e13b65ae",
+            "sha256": "fab107fe839339c444c3def6867b7e5d64df8fa28a0e186808b421bee0307e95"
+          },
+          "arm64": {
+            "bytes": 66064,
+            "unsigned": "b9a9e57d7618015c8b3bcd2f038706cc19cd33591cfbfad9f0fa334c22c68fba",
+            "sha256": "ef4662276a377f5b2ec82beb046c93023b82a204a433c4ebb297116369e4fa55"
+          },
+          "x64": {
+            "bytes": 69136,
+            "unsigned": "18b7b0825f2db50688ef7be866de293431f9d37400bedddea08989f3882b3435",
+            "sha256": "069caf6e93db45da9ab9cf4a7d085c97ca0074521dbb71adb82fe5f0403cadbb"
+          }
+        },
+        "source_sha256": "32d4a900f29ac7a250238de2bb95053d14ea7f2db164bf74decaa27ce3e4b37b",
+        "windows_sdk_header": "e7df81476816d5112cd8c73be18dbaf9924c3af4af352ea2650b48dfc23ba40d"
+      },
+      "direct_ddi_x86": {
+        "bytes": 64528,
+        "unsigned": "7af7b047c93668238b17f0f8cf07c0fa089e8b7e2803486178b3c99bc38de107",
+        "sha256": "b1c1df0e97bc9f9a586708126497a4190dd1bf4f072cc21fa9af4b38e40c7a4c",
+        "source_sha256": "0f867d537ebb4371d9297d0ab2a033ca341d8865e719b9630154b5397f9066b1"
+      },
+      "initial_trace": {
+        "bytes": 409104,
+        "unsigned": "c7522119850bff495abf94c4a240005fb210a6753c9802c1c780c2e33de69a17",
+        "sha256": "58774a09bc8c0c59be615dc6ab54be25a467b4f66403276d6f37734f834deba1",
+        "source_sha256": "49f805c85169941ab36b7937b5060fb33206a6b47b04f3342f64396075900c18"
+      },
+      "extended_trace": {
+        "bytes": 409088,
+        "unsigned": "be685fef2238df8249e473a8b7cdc32d4bd7ca59d98ca0916c491f6ae2ca72e9",
+        "sha256": "3ed6d95514983a95e8f66b4b748be1ca0db807ad4151b1848fe5dd13219acf7a",
+        "source_sha256": "5180b6f6e9496dca61709a7791032a4487c7b27fc74d722909853af98d6ae5ef"
+      }
+    },
+    "restoration": {
+      "initial_native_slots_preserved": true,
+      "temporary_wow_value_removed": true,
+      "final_boot": "2026-11-18T22:30:32.5534620Z",
+      "planned_restarts": [
+        {
+          "operation": "select",
+          "events": [
+            {
+              "record": 68226,
+              "utc": "2026-11-18T22:21:20.4970517Z",
+              "id": 1074,
+              "source": "User32"
+            },
+            {
+              "record": 68228,
+              "utc": "2026-11-18T22:21:23.8840940Z",
+              "id": 6006,
+              "source": "EventLog"
+            },
+            {
+              "record": 68236,
+              "utc": "2026-11-18T22:22:31.2349647Z",
+              "id": 6005,
+              "source": "EventLog"
+            }
+          ]
+        },
+        {
+          "operation": "restore",
+          "events": [
+            {
+              "record": 68391,
+              "utc": "2026-11-18T22:29:54.0633778Z",
+              "id": 1074,
+              "source": "User32"
+            },
+            {
+              "record": 68393,
+              "utc": "2026-11-18T22:29:58.0830593Z",
+              "id": 6006,
+              "source": "EventLog"
+            },
+            {
+              "record": 68401,
+              "utc": "2026-11-18T22:31:06.5447607Z",
+              "id": 6005,
+              "source": "EventLog"
+            }
+          ]
+        }
+      ],
+      "gpu_problem_code": 0,
+      "handheld_mode": 1,
+      "external_power": true,
+      "cleanup_verified": true,
+      "temporary_tasks_removed": 10,
+      "temporary_scripts_removed": 12,
+      "temporary_files_removed": 51
+    },
+    "independent_code_review": "Pending Gemini review."
+  },
+  "x86_windowed_retest": {
+    "status": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit.",
+    "record": "tegra-x1-wddm/docs/dxvk-games-20261118/x86-system-d3d9-windowed-retest.json",
+    "record_sha256": "8fc7301526d42c9931d41d73edeca89a0473099b284a85f0d9340f3c32280bb9",
+    "native_game_accepted": false,
+    "native_adapter_open_observed": true,
+    "game_pid": 6112,
+    "original_registrations_restored": true
+  }
+}

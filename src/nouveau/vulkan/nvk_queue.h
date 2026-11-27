@@ -32,6 +32,10 @@ struct nvk_queue_state {
       uint32_t bytes_per_warp;
       uint32_t bytes_per_tpc;
    } slm;
+
+#ifdef _WIN32
+   struct list_head retired_slm;
+#endif
 };
 
 struct nvk_queue {
@@ -113,6 +117,16 @@ nvk_queue_subchannels_from_engines(enum nvkmd_engines engines)
 
    return subc_mask;
 }
+
+#ifdef _WIN32
+static inline void
+nvk_push_bind_copy(struct nv_push *push, uint16_t cls_copy)
+{
+   /* KMT context creation leaves the copy subchannel unbound. */
+   __push_mthd(push, SUBC_NV90B5, NV906F_SET_OBJECT);
+   P_INLINE_DATA(push, cls_copy);
+}
+#endif
 
 VkResult nvk_queue_create(struct nvk_device *dev,
                           const VkDeviceQueueCreateInfo *pCreateInfo,

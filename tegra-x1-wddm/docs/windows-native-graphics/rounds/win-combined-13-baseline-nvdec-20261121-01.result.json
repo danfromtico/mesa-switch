@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-baseline-nvdec-20261121-01",
+  "contract_id": "WIN-COMBINED-13-BASELINE-NVDEC",
+  "windows_question": "WIN-COMBINED-13-BASELINE-NVDEC",
+  "plan_sha256": "fc9e5aa4fdc504e856d3f37a012b68ce58b25fe32cddb4b28c08d74f908c45d5",
+  "status": "观测缺口",
+  "finding": "baseline decode 未通过，使用“1”个参数调用“ReadAllText”时发生异常:“未能找到路径“C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\SwitchForeground-c552ba3cdce0\\scene\\stdout.txt”的一部分。”。",
+  "missing_observation": "保留最后可证实的启动号和应用回执，核对是否与故障事件相邻。",
+  "device_executions": 1,
+  "evidence": {
+    "boundaries": {
+      "last_entry": "2026-11-21T18:33:37.1856550Z",
+      "last_return": "2026-11-21T18:33:43.9263031Z",
+      "first_anomaly_or_missing": "保留最后可证实的启动号和应用回执，核对是否与故障事件相邻。"
+    },
+    "actual_before": {
+      "components": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "dwm": 1432,
+      "boot": 92154,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+      "gpu_code": 0,
+      "power": "Online",
+      "dwm_start": "2026-11-21T18:06:31.3659927Z"
+    },
+    "actual_after": {
+      "components": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "dwm": 1432,
+      "boot": 92154,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+      "gpu_code": 0,
+      "power": "Online",
+      "dwm_start": "2026-11-21T18:06:31.3659927Z"
+    },
+    "case": {
+      "passed": false,
+      "begin": "2026-11-21T18:33:37.1856550Z",
+      "mode": "decode-only",
+      "before": {
+        "components": {
+          "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1432,
+        "boot": 92154,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T18:06:31.3659927Z"
+      },
+      "luid": "0000000000005bcb",
+      "pid": 8164,
+      "client_exit": 2,
+      "after": {
+        "components": {
+          "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+          "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+          "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+          "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+          "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+          "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+          "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+        },
+        "dwm": 1432,
+        "boot": 92154,
+        "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+        "gpu_code": 0,
+        "power": "Online",
+        "dwm_start": "2026-11-21T18:06:31.3659927Z"
+      },
+      "error": "使用“1”个参数调用“ReadAllText”时发生异常:“未能找到路径“C:\\Users\\ruje\\SwitchChromiumCopyout-45-5ad2f090\\SwitchForeground-c552ba3cdce0\\scene\\stdout.txt”的一部分。”",
+      "error_line": 68,
+      "end": "2026-11-21T18:33:43.9263031Z"
+    },
+    "analysis": {},
+    "collection": {
+      "sha256": "453de6d1969dcb798c75f488029dc6ad523f09a7f3bcd6c67c964fd1baa1bf34",
+      "boot": 92154,
+      "bytes": 2435
+    },
+    "archive": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/combined-13/runs/win-combined-13-baseline-nvdec-20261121-01/collected.zip",
+      "sha256": "453de6d1969dcb798c75f488029dc6ad523f09a7f3bcd6c67c964fd1baa1bf34"
+    },
+    "cleanup": {
+      "owned_case_removed": true
+    }
+  }
+}

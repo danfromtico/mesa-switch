@@ -1,0 +1,154 @@
+{
+  "integration_review_sha256": "d0fb5714d94b9505afa4f1019538884c1d55730baf01c02bd5d6f9c6bb05bcc4",
+  "main_tip": "e02af50fe74a9ea2ea746dc9f2c5c98d480d43a8",
+  "candidate": "a7c422add36e2d6b2444a7767bafcaef81b4a041",
+  "selected_source": "c05e254932dd975bdf69e7046949596dbeb84561",
+  "selected_components": {
+    "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+  },
+  "checks": [
+    {
+      "scope": "Context-free no-DMA flip and rotated primary mode query",
+      "commits": [
+        {
+          "commit": "40e857df71e9091fa494511f7f2f782e6c2da1cd",
+          "selected_kmd_lineage": true,
+          "candidate_lineage": true,
+          "tgd3d_vulkan_lineage": true
+        }
+      ],
+      "step4_result": "已选基线包含两项修复。常规 flip 对照再次通过。空上下文 MMIO 和旋转存储模式查询的特殊输入仍待实际调用。"
+    },
+    {
+      "scope": "Native GDI display mode and DXGI encoded color copy",
+      "commits": [
+        {
+          "commit": "c05e254932dd975bdf69e7046949596dbeb84561",
+          "selected_kmd_lineage": true,
+          "candidate_lineage": true,
+          "tgd3d_vulkan_lineage": true
+        },
+        {
+          "commit": "e6852733640f4dc114042796477671ca54c1f3c6",
+          "selected_kmd_lineage": true,
+          "candidate_lineage": true,
+          "tgd3d_vulkan_lineage": true
+        }
+      ],
+      "step4_result": "已选七文件基线包含 GDI 模式和 DXGI 编码颜色修复。恢复记录核对了同一组件组合。"
+    },
+    {
+      "scope": "WDDM 2.0 process-scoped Present1 input word",
+      "commits": [
+        {
+          "commit": "abd9f213594ae056a9d8b01d560d7b20eb455560",
+          "selected_kmd_lineage": false,
+          "candidate_lineage": false,
+          "tgd3d_vulkan_lineage": true
+        }
+      ],
+      "step4_result": "Present1 输入字已在 tgd3d-vulkan 源码中，所选 ARM64 UMD 和本轮 SEQUENTIAL 客户端使用旧式接口。另案的多帧移除和重启仍开放。"
+    },
+    {
+      "scope": "EMC failed vote delivery",
+      "commits": [
+        {
+          "commit": "84952aad731896ee97ba91d38a52d13f8cbbc2fe",
+          "selected_kmd_lineage": false,
+          "candidate_lineage": false,
+          "tgd3d_vulkan_lineage": true
+        }
+      ],
+      "step4_result": "EMC 投票修复在 tgd3d-vulkan 中，与本轮签名 KMD 的来源不同。相关退出稳定性仍待实机验收。"
+    },
+    {
+      "scope": "Ordinary virtual context DMA pool",
+      "commits": [
+        {
+          "commit": "60220e9e72dfd1a4afe234bf5e4171e30f0f6dd6",
+          "selected_kmd_lineage": false,
+          "candidate_lineage": true,
+          "tgd3d_vulkan_lineage": false
+        }
+      ],
+      "step4_result": "普通虚拟上下文 DMA 池包含在此次本地候选中，三个原场景均记录应用上下文的复制包提交及完成。"
+    },
+    {
+      "scope": "Typed linear window back-buffer association",
+      "commits": [
+        {
+          "commit": "e1314a2c769b92e971640caf67e1a67db270a5ad",
+          "selected_kmd_lineage": false,
+          "candidate_lineage": true,
+          "tgd3d_vulkan_lineage": false
+        }
+      ],
+      "step4_result": "ARM64 tgd3d 线性后缓冲归属修复与该 KMD 配套实测。三次原场景及一次确定颜色场景均验证了可见输出。"
+    },
+    {
+      "scope": "Standard allocation-only GDI texture import",
+      "commits": [],
+      "step4_result": "标准 GDI allocation-only import 的独立补丁 0662ebbff91a51e5ef3d2ce843f1c7abbd28e70748c5865556ce4ef2fd2fc6be 仍缺匹配的原生 open 和像素验收。"
+    },
+    {
+      "scope": "Display and boot/power changes already present in the working tree",
+      "commits": [],
+      "working_tree": [
+        "M AGENTS.md",
+        " M tegra-x1-wddm/platform/t214_dc.c",
+        " M tegra-x1-wddm/platform/t214_dc.h",
+        " M tegra-x1-wddm/tests/dc_model.h",
+        " M tegra-x1-wddm/tests/test_context_windows.c",
+        " M tegra-x1-wddm/tests/test_dc_portrait.c",
+        " M tegra-x1-wddm/tests/test_panel_scanout_windows.c",
+        " M tegra-x1-wddm/tests/test_panel_timings_windows.c",
+        " M tegra-x1-wddm/tools/dvfs-integration/Install-AfterBoot.ps1",
+        " M tegra-x1-wddm/tools/dvfs-integration/Merge-Common.ps1",
+        " M tegra-x1-wddm/tools/dvfs-integration/Power-State.ps1",
+        " M tegra-x1-wddm/tools/dvfs-integration/Restore-Dvfs.ps1",
+        " M tegra-x1-wddm/tools/dvfs-integration/Stage-Boot.ps1",
+        " M tegra-x1-wddm/tools/tgd3d-default/Default-Start.ps1",
+        " M tegra-x1-wddm/tools/tgd3d-trial/Common.ps1",
+        " M tegra-x1-wddm/tools/tgd3d-trial/Switch-Kmd.ps1",
+        " M tegra-x1-wddm/windows/allocation.c",
+        " M tegra-x1-wddm/windows/panel.c",
+        " M tegra-x1-wddm/windows/panel.h",
+        " M tegra-x1-wddm/windows/panel_scanout.c",
+        " M tegra-x1-wddm/windows/panel_vidpn.c",
+        " M tegra-x1-wddm/windows/query.c"
+      ],
+      "dirty_files": 22,
+      "step4_result": "主工作区原有的显示、扫描、供电、启动和许可脚本修改仍保留。其中 22 个已跟踪的修改文件与交接清单对应，各项保留自己的验收条件。"
+    },
+    {
+      "scope": "Standard CPU-readable window staging surfaces",
+      "commits": [
+        {
+          "commit": "aa49f69c8362ddb6e0547ad8f30bb951c9548a5e",
+          "selected_kmd_lineage": false,
+          "candidate_lineage": true,
+          "tgd3d_vulkan_lineage": false
+        }
+      ],
+      "step4_result": "标准 CPU 可读暂存表面、普通上下文复制和有序完成已在本地候选上联合验收。关联的历史重启根因仍待证实。"
+    },
+    {
+      "scope": "Miniport presentation-status diagnostics",
+      "commits": [
+        {
+          "commit": "961609375c3a45fb830d84b2f93c474767d3ef7d",
+          "selected_kmd_lineage": false,
+          "candidate_lineage": false,
+          "tgd3d_vulkan_lineage": false
+        }
+      ],
+      "step4_result": "旧观察版 96160937 的 DDI 诊断提供了此前的直接拒绝回执。本轮通过 Windows ETW 核对功能候选的提交和完成。"
+    }
+  ]
+}

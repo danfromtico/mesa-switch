@@ -1,0 +1,24 @@
+{
+  "case": "d11-ec-01",
+  "start_utc": "2026-11-18T03:06:11.5875155Z",
+  "process": "x64 dxvk-offscreen.exe on Windows ARM64",
+  "dxvk": "desktop ARM64EC package 3.1.1",
+  "graphics": "NVK 26.2.4, NVIDIA Tegra X1 (GM20B)",
+  "feature_level": "0xb000",
+  "exit": 14,
+  "stage_output": [
+    "STAGE d3d11 indirect draw: PASS",
+    "STAGE d3d11 indirect indexed draw: PASS",
+    "STAGE d3d11 so stats: PASS (written=2 needed=2)",
+    "STAGE d3d11 drawauto: FAIL first mismatch at (0,0) = 64,127,191,255",
+    "RESULT d3d11: FAIL (exit 14)"
+  ],
+  "drawauto_stream_output_slot": 0,
+  "dispatch_indirect": "not reached on this run",
+  "source_sha256": {
+    "indirect.out": "1cd9c4ee286103d60fde29bcf2ab6955b41147dd4b4d4e4856f1028d01b83c35",
+    "dxvk-offscreen_dxgi.log": "f30cbb3122b6adc996cfdca166d97e8fab22d31407ed4eb7e6a16a2cd05feaf2",
+    "dxvk-offscreen_d3d11.log": "cf6a2ff6dd716d366114860ecf490659f99e33eb820ff82fac491c962b4c356a",
+    "progress.json": "55f268dd7a6dba1464c44f4d0b55daf808849e7683394a64a30042859b3e6714"
+  }
+}

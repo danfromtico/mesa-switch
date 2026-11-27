@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-11-16T20:04:46.029302+00:00",
+  "state": "Tracked DMA ownership corrected locally; actual client routing and coexisting transport are not verified",
+  "source": {
+    "base": "b43d9b8d3ac6a09a2299d6a011a133dbee54765f",
+    "files": {
+      "tegra-x1-wddm/platform/t214_nvdec.c": "a58f6ada0ccf34dd850c2fb1a6e34813125884ad6e73b4335e4ee6b15a6c1571",
+      "tegra-x1-wddm/platform/t214_nvdec.h": "66ea8660005160222f0d9520f9168cc0ea0691ac420d8febd1d0445da3325ca9",
+      "tegra-x1-wddm/windows/nvdec_backend.c": "1707e8ab134d5261e4d8b4aa99ba59b06ecc4bf690c0406d6a08efb8ccf725d1",
+      "tegra-x1-wddm/windows/nvdec_backend.h": "7cc78743f44eb22bc886860195e5c9b4b6a558c91800db74a69d64b5248e2b01",
+      "tegra-x1-wddm/windows/nvdec_memory.c": "dfecd1c7ba8558a7a07237dfe70901f065be352d3f9c65dc8d37fe669deab550",
+      "tegra-x1-wddm/windows/nvdec_memory.h": "8388db8a467397573838df44a8b6f3954adc98480f8b76a1208ad99371256ea2",
+      "tegra-x1-wddm/tests/test_nvdec_memory_windows.c": "bea37e848bcc3b470fc7cbb78d211939d6416a86a868b329bfc6d36c64883928",
+      "tegra-x1-wddm/tests/test_nvdec_platform.c": "0689b51f32ed551d429f6d5b98643dcd45d284ede8eea7eb7931123b5fb3198f",
+      "tegra-x1-wddm/tools/build.py": "bca298f23cf6e4ccdf9ff89b4a24a8c5ea28c01cfa3b9c699f5957d6df5c033c"
+    },
+    "code_patch_sha256": "ca9fb6a7f43c8e258d142e15da95f216f66b00f518522602cfd6af940d390507"
+  },
+  "changes": [
+    "Use existing WDDM2.4+ DxgkCbAllocateContiguousMemory/FreeContiguousMemory helper instead of raw MmAllocateContiguousMemory in the NVDEC backend; retain each actual tracking handle.",
+    "On free failure retain the allocation in a retired list after the codec descriptor is cleared. Retry only already-retired allocations; Finish refuses to release an owner with active allocations. Reject foreign/mismatched descriptors.",
+    "Page-round uncached allocations, enforce low32 whole-buffer bounds required by this Host1x encoder, and retire rejected allocations through their real handles.",
+    "Recheck HC/NVDEC client enables and ASID_ENABLE before create, firmware boot and submission. Admit only explicitly untranslated clients; do not write SMMU routing or infer it from global SMMU_CONFIG.",
+    "Keep NVJPG out of the DMA predicate because this path retains its reset/gate state and does not submit it. Real NVJPG power dependency remains.",
+    "PASSIVE_LEVEL and serialized lifetime are caller requirements; callback failure does not fabricate completion or permit early hardware retirement."
+  ],
+  "contract": {
+    "os_interface": "Existing WDDM2.4 contiguous callbacks with WDDM2.6 build layout; not WDDM3 linear remapping",
+    "address_scope": "Windows legacy GPU isolation documents physical pages mapped at the same logical address. Tegra per-client direct routing must also be confirmed and owned; the physical address alone is insufficient.",
+    "native_availability": "Archived matched dxgkrnl static allocation/free callbacks and current shared KMD helper support this choice. New NVDEC allocations have not been called on the real runtime.",
+    "no_private_runtime_layout_access": true,
+    "references": [
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/iommu-based-gpu-isolation",
+      "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkcb_freecontiguousmemory",
+      "https://raw.githubusercontent.com/torvalds/linux/v6.8/drivers/memory/tegra/tegra210.c"
+    ],
+    "static_binary_record": "NVDEC_CLIENT_ROUTE_20261116.json; includes archived binary/PDB identity and age difference"
+  },
+  "validation": {
+    "windows_cpu_control": {
+      "exit": 0,
+      "environment": "x64 WDK layouts/helper with explicit fake OS callbacks, run under Wine",
+      "sha256": "e36b9b0e01125c8f090861e3632b4c06f16b00dac4d367d2c929964f466ed385",
+      "control_record_sha256": "60576ac682f1272815317b2f49b966f8a014ea2cd1a2795b08288b2f066a9615",
+      "coverage": [
+        "real helper callback arguments/cache/alignment",
+        "active allocation retention",
+        "free failure handle retention and retry",
+        "allocation failure metadata cleanup",
+        "low32 boundary rejection",
+        "owner isolation",
+        "missing callback/interface rejection"
+      ],
+      "native_runtime_proof": false
+    },
+    "platform_cpu_control": {
+      "exit": 0,
+      "sanitizers": [
+        "ASan",
+        "UBSan"
+      ],
+      "executable_sha256": "1372ab51a290004f50267f5db6cfe511fc9c14265a9f45d7db76de1f9b4cc15f",
+      "coverage": "Every HC/NVDEC enable, each ASID enable and all-ones readback rejected; unrelated NVJPG bits do not enable DMA; inherited-power controls remain. No register writes in route predicate.",
+      "scope": "CPU model only; successful prior execution recorded in this session, not a hardware DMA test"
+    },
+    "arm64_objects": [
+      {
+        "source": "tegra-x1-wddm/windows/nvdec_memory.c",
+        "exit": 0,
+        "source_sha256": "dfecd1c7ba8558a7a07237dfe70901f065be352d3f9c65dc8d37fe669deab550",
+        "object_sha256": "d4fb3e1e44c301fe69c8bb1fe2f2a9b17da1692be2fa28c2f892bb895375ef6e"
+      },
+      {
+        "source": "tegra-x1-wddm/windows/nvdec_backend.c",
+        "exit": 0,
+        "source_sha256": "1707e8ab134d5261e4d8b4aa99ba59b06ecc4bf690c0406d6a08efb8ccf725d1",
+        "object_sha256": "307176a7daa5532e8f11ac58e9479bd2ffee730f1ba3a1cb5180358e46ff59b4"
+      },
+      {
+        "source": "tegra-x1-wddm/windows/probe.c",
+        "exit": 0,
+        "source_sha256": "fb0289c0b1fd2c4f3d7a5feae9bfe18be9bba86b5de7d28bc92f7cb61bfb326a",
+        "object_sha256": "14cdd0f09608e23cddfbc02c132df17548021f2a6b154a6006917278837f6dbd"
+      },
+      {
+        "source": "tegra-x1-wddm/platform/t214_nvdec.c",
+        "exit": 0,
+        "source_sha256": "a58f6ada0ccf34dd850c2fb1a6e34813125884ad6e73b4335e4ee6b15a6c1571",
+        "object_sha256": "63922bb5b99b532b583aa3ddd1786df5eb4174ac04d5a2f12e2e85e210e0e072"
+      },
+      {
+        "source": "tegra-x1-wddm/tests/test_nvdec_memory_windows.c",
+        "exit": 0,
+        "source_sha256": "bea37e848bcc3b470fc7cbb78d211939d6416a86a868b329bfc6d36c64883928",
+        "object_sha256": "8671af0fd391c24e2e12609b40844618eac6144baf761db524557c1b46c965d9"
+      }
+    ],
+    "arm64_control_exe": {
+      "sha256": "1a9b0053e3f42bb331371f86ee44c95f73779197421e42453d9442a16731280c",
+      "link_exit": 0,
+      "native_executed": false
+    },
+    "full_new_driver_package_built": false,
+    "initial_fixture_failure": "The x64 fixture initially lacked memcpy; fixed the test shim and linked/reran successfully. No native driver failure occurred."
+  },
+  "connection": {
+    "physical_interface_record_sha256": "c08e90f70a48038fb33abd10780490a385a6698ac62cf0fa51110deb09943217",
+    "current_lan_candidates_record_sha256": "c63e93f27243b0044a9480807040969f2fd31364847d639cb7593d88ac4f1028",
+    "facts": "Mac Wi-Fi en0 is 192.168.124.6/24; no other physical IPv4 interface. Default route to old192.168.8.6 is the utun6 proxy. Direct en0 TCP22 to old address timed out. One bounded current-LAN port22 discovery found no candidates.",
+    "correction": "Previous SSH peer-close strings identify connection failures, not an authenticated response from Switch. Proxy routing means they cannot prove Switch SSH state, uptime or a reboot.",
+    "no_authenticated_device_command": true,
+    "uploaded": false,
+    "installed": false,
+    "restart_requested": false,
+    "last_verified_native_state": "2026-11-16T18:12:24.0060013Z baseline recovery/cleanup; current physical state unknown"
+  },
+  "baseline": {
+    "installed_changed_by_this_module": false,
+    "promoted": false,
+    "record": "ROW_SCAN_BASELINE_20261116.json"
+  },
+  "remaining": [
+    "Read real client/PMC values with the separately frozen client-route candidate and resolve the prior ACTMON difference before promotion.",
+    "Actual FAN0 clock ownership, Host1x channel/syncpoint reservation, MC serialization and coexisting production transport.",
+    "Verify progressive H.264 workspace capacity for all admitted surface indices; fixed upstream buffer sizes are not a maximum-DPB contract.",
+    "Real720p NVDEC output, D3D11VA/NV12/GPU CSC/window chain, then1080p."
+  ],
+  "review": {
+    "status": "Pending Gemini4 Carbon High",
+    "not_before_utc": "2026-11-20T23:53:18Z",
+    "retry_performed": false
+  }
+}

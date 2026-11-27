@@ -17,6 +17,13 @@
 #include "cl9097.h"
 #include "cl90c0.h"
 
+/* VA_FMT forwards these tokens to a token-pasting macro. Win32 defines
+ * them to integers before the second expansion, breaking class enum names. */
+#ifdef _WIN32
+#undef TRUE
+#undef FALSE
+#endif
+
 bool
 nvk_format_supports_atomics(const struct nvk_physical_device *pdev,
                             enum pipe_format p_format)

@@ -1,0 +1,73 @@
+{
+  "actual_model": "Gemini 4 Neon (High)",
+  "verdict": "approve",
+  "resolved_r1_ids": [
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F5",
+    "F6",
+    "F7"
+  ],
+  "coverage": {
+    "review_mode": "read-only incremental R2 review of frozen inputs under /Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/present1-verified-fix-20261122-main/review-r2",
+    "unchanged_from_r1": {
+      "production_present1_logic": "src/nouveau/tgd3d/tgd3d_dxgi.cpp unchanged from R1 (already passed static review)",
+      "signed_arm64_umd": "tg_d3d_arm64.dll sha256 dcc71e34e229c7090d05b424e03ef959b682170eb8fed7e2c77684d041426688 (unsigned 0a6e5305087a92f7406ee98c245aa06c6a8ff3820f7ccb58331be96e814183c3) unchanged from R1; release-identity.json records commit d64b5f8045ce8c9ad463194fc03a0e33e10625ad as a tests-only successor to production build commit 329d0d21a96f0dc2958b954723fc2984c07b4613"
+    },
+    "files_reviewed": [
+      "adjudication.json",
+      "incremental.patch",
+      "frozen-inputs.json",
+      "candidate/src/nouveau/tgd3d/tests/runtime_contracts.cpp",
+      "policy/tegra-x1-wddm/tools/tgd3d-default/Baseline-Promotion.ps1",
+      "policy/tegra-x1-wddm/tools/Select-GraphicsBaseline.ps1",
+      "policy/tegra-x1-wddm/tools/check_graphics_baseline_push.py",
+      "policy/tegra-x1-wddm/tools/tgd3d-default/tests/Test-BaselinePromotion.ps1",
+      "policy/tegra-x1-wddm/tools/tgd3d-default/tests/test_baseline_publication.py",
+      "evidence/release-identity.json",
+      "evidence/run_runtime_model.py",
+      "evidence/cpu-runtime-model-r2/main.cpp",
+      "evidence/cpu-runtime-model-r2/result.json",
+      "evidence/cpu-runtime-model-r2/runtime.stdout",
+      "evidence/cpu-runtime-model-r2/runtime.stderr",
+      "evidence/policy-tests-r2-result.json",
+      "evidence/policy-tests-r2.stdout",
+      "evidence/publication-tests-r2-result.json",
+      "evidence/publication-tests-r2.stdout"
+    ],
+    "r1_resolution_verification": {
+      "F1": "Resolved. runtime_contracts.cpp:786-819 now populates DXGI1_4_DDI_BASE_FUNCTIONS, asserts dxgi14.pfnPresent1 == dxgi.pfnPresent1, exercises all four Reserved combinations via dxgi14.pfnPresent1, and replaces the stale dirty-rect bounds check with the enforced SubResourceIndex >= surface.subresources() bound. evidence/cpu-runtime-model-r2/result.json and runtime.stdout confirm the entire runtime_contracts() entry point linked against actual x64 production objects ran under x64 Wine with exit code 0 and all 19 PASS lines (with host MoltenVK stderr retained in runtime.stderr and scope explicitly bounded to CPU/callback host model).",
+      "F2": "Resolved. Baseline-Promotion.ps1:305-324 evaluates Assert-SwitchVerifiedFix before checking baseline_comparisons and explicitly rejects scoped verified-fix qualifications in baseline_comparisons ('Scoped repair must account for open faults via independent_qualifications'). Regression passes in Test-BaselinePromotion.ps1:200-204 (policy-tests-r2.stdout:51).",
+      "F3": "Resolved. Baseline-Promotion.ps1:176-177 requires status -ceq 'open' on the target causal fault, and line 198 rejects any collision between binding.case_sha256 and the three supporting proof hashes ($proofHashes). Regressions pass in Test-BaselinePromotion.ps1:168-171 (policy-tests-r2.stdout:45-46). Legacy closure-based verified-fix path remains unchanged.",
+      "F4": "Resolved. Assert-SwitchScopedFix (Baseline-Promotion.ps1:70) and Assert-SwitchVerifiedFix (line 180) require matching boolean output_required on both ledger registration and qualification; Assert-SwitchPromotion:308-314 always requires normal_exit and desktop_available while requiring output_verified for presentation, closure-based verified-fix, and scoped repairs with output_required=true, allowing empty-window repairs with output_required=false without falsifying output_verified. Regressions pass in Test-BaselinePromotion.ps1:125,130,140,172-176 and test_baseline_publication.py:201-212.",
+      "F5": "Resolved. Assert-SwitchScopedFix (Baseline-Promotion.ps1:65-88) validates all scoped verified_fix fields, types, component profile, 3 distinct proof hashes, and repository-relative paths under tegra-x1-wddm/docs/ inside Assert-SwitchFaultLedger (line 103). Select-GraphicsBaseline.ps1:74-83 verifies all three proof files and SHA-256 hashes on every ledger check, and check_graphics_baseline_push.py:160,174-176 safely guards null verified_fix/evidence and retains causal_evidence_file, code_review_file, and build_file even after a later baseline replaces graphics-baseline.json. Historical verified_fix metadata may remain on a later-closed fault while line 176 prevents it from authorizing any new scoped promotion. Verified by Test-BaselinePromotion.ps1:166-169 and test_baseline_publication.py:235-267 (publication-tests-r2.stdout:3).",
+      "F6": "Resolved. evidence/release-identity.json authoritatively identifies release_source_commit d64b5f8045ce8c9ad463194fc03a0e33e10625ad, production_build_source_commit 329d0d21a96f0dc2958b954723fc2984c07b4613 (tests_only_after_build: true), selected_source_commit 54ea32fb3e1c714f8f83cd108f2615e37119ec84, policy_source_commit 0fb0d8cf8bf2849804909712e7750b4d32054b72, the full 20-file changed_paths list, and explicitly marks historical c0e source-identity.json non-authoritative and prohibited for qualification.",
+      "F7": "Resolved. Baseline-Promotion.ps1:183,189-190,198-199,207 compare commit/SHA-256 digests case-insensitively while preserving exact case-sensitive matching for fault_id, status, scope, and scenario. Verified by Test-BaselinePromotion.ps1:177-180 (policy-tests-r2.stdout:49)."
+    },
+    "test_results_verified_in_frozen_evidence": {
+      "powershell_policy_unit_tests": "70/70 PASS, exit_code 0, empty stderr (evidence/policy-tests-r2.stdout, policy-tests-r2-result.json)",
+      "isolated_git_publication_tests": "3/3 PASS (including scoped repair publication and post-later-baseline review tamper rejection), exit_code 0, empty stderr (evidence/publication-tests-r2.stdout, publication-tests-r2-result.json)",
+      "x64_wine_runtime_contracts": "19/19 PASS, exit_code 0 (evidence/cpu-runtime-model-r2/result.json, runtime.stdout; host MoltenVK stderr retained in runtime.stderr)"
+    }
+  },
+  "findings": [],
+  "native_acceptance_limits": {
+    "scope_of_this_approval": "This approval covers only the reviewed source code, host C++ runtime_contracts execution, release-identity metadata, and policy/release-gate scripts in review and review-r2. It is NOT physical Switch hardware acceptance.",
+    "host_model_and_build_limits": [
+      "evidence/cpu-runtime-model-r2 executed the runtime_contracts entry point under x64 Wine with mocked runtime/Vulkan callbacks (host MoltenVK loader initialization logged in runtime.stderr); it does not test ARM64 execution, real Windows dxgkrnl/DXGI/DWM, or GM20B hardware, and does not claim a full generic Vulkan contracts suite run (generated shader fixtures absent, as noted in adjudication.json).",
+      "signed-result.json remains local-CA verified only (local_CA_verify_exit: 0); Windows_trust_verified is false and deployed is false."
+    ],
+    "unresolved_native_entry_and_pending_hardware_acceptance": [
+      "As stated in evidence/release-identity.json:38, the current signed production ARM64 DLL (dcc71e34...) does not advertise WDDM 2.0 in GetSupportedVersions and does not contain the historical process-scoped WDDM 2.0 offer. How the real on-device empty-window Reserved=1 Present1 path is reached with this production package remains an unresolved prerequisite and must be resolved independently before native qualification can be claimed.",
+      "Actual Switch ARM64 one-time AC trial boot (Code 0, Windows Authenticode trust verification, one-use permit consumption, DWM loading the exact 5 components including dcc71e34... alongside KMD ce54d025..., empty-window Reserved=1 Present1 returning S_OK with normal exit and desktop continuity, and a clean complete System event interval without 41/6008/TDR) has NOT been executed yet.",
+      "Before live device acceptance and push, the reviewed policy commit (0fb0d8cf...) must be committed/installed into the pre-push verifier (--install) and on-device SwitchWOA-GpuBoot immutable snapshot, and the three supporting proof files must be staged alongside qualification.json."
+    ],
+    "faults_explicitly_remaining_open": [
+      "GM20B-WDDM20-PRESENT1-REMOVAL remains open (broader closure across SEQUENTIAL/FLIP_SEQUENTIAL swap effects, rendered output, and 3 consecutive runs still required).",
+      "GM20B-WDDM20-FLIP-RESTART (6-frame third-Present unexpected restart, Kernel-Power 41 / EventLog 6008) remains open with unknown root cause.",
+      "GM20B-LEGACY-SEQUENTIAL-RESTART, GM20B-POST-SELECTION-CONTROL-RESTART, GM20B-BOARD-CDD-POST-PRESENT-RESTART-91557, SWITCH-LOAD-TRANSITION-RESTART, and all other open restart/TDR/shutdown/Wi-Fi faults remain open."
+    ]
+  }
+}

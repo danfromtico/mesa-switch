@@ -140,6 +140,9 @@ struct wsi_device {
    } x11;
 
    struct {
+      /* Limit CPU/GDI presentation without changing the display mode. Zero
+       * leaves pacing to the platform. This does not affect DXGI swapchains. */
+      uint32_t cpu_present_fps;
       void *(*get_d3d12_command_queue)(VkDevice device);
       /* Needs to be per VkDevice, not VkPhysicalDevice, depends on queue config */
       bool (*requires_blits)(VkDevice device);
@@ -260,6 +263,7 @@ struct wsi_device_options {
    bool sw_device;
    bool extra_xwayland_image;
    bool emulate_24as32;
+   void *(*win32_get_d3d12_command_queue)(VkDevice device);
 };
 
 VkResult

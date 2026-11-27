@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "round_id": "win-combined-13-baseline-nvdec-20261121-04",
+  "contract_id": "WIN-COMBINED-13-BASELINE-NVDEC",
+  "windows_question": "WIN-COMBINED-13-BASELINE-NVDEC",
+  "owner": "Windows 图形、进程退出观察者及 GM20B",
+  "question": "同一签名 720p 解码夹具在原生 NVDEC 上是否得出六帧参考哈希、正常结束并回到同桌面？",
+  "method": "原生 D3D11VA 720p、六帧 NV12 哈希和子进程退出回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "d616249f503dedfefe207c67a742f3974f91d423dbd0f63c9d07ecd1fd623289"
+    },
+    "driver_source": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvgpu-init-30331aa3cb57/permanent-boot.json",
+      "sha256": "cc1701c7950609dfd636be79ef3cc23605f95c61d254fdf53a962ecd8b091a73"
+    }
+  },
+  "pass_condition": "原生 D3D11VA 720p、六帧 NV12 哈希和子进程退出回执。如无底层路线观测则注明。",
+  "observations": [
+    "核对交流、手持、Code 0、正确权限、实际组件和同一启动的桌面。",
+    "应用限时运行，原始输出和由父进程观测的退出码取回后清理。"
+  ],
+  "inputs": {
+    "boot": 92154,
+    "profile_sha256": "166e9af0a11647ed6fc38b8d32add8461c61391310f495f78b47e3185f0a3045",
+    "loaded_profile": {
+      "boot": 92154,
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+      "components": {
+        "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "selection": "accepted"
+    },
+    "inputs": {
+      "Board-Case.ps1": "7cc01ccfff1c4f2cf320f6f4d80fee149f4faccbc0ba396afd7bf25f4505c4b0",
+      "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+      "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+      "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+      "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5"
+    },
+    "runner_sha256": "364e7c29b6d9d6d7e6db9b51ee251d48b309ce3b1b096f6fdab00fd3f1570818",
+    "quiet_seconds": 6,
+    "mode": "decode",
+    "direct_dib": "off"
+  }
+}

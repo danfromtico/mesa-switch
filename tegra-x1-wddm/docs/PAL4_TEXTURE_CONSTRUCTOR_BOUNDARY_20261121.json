@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "date": "2026-11-21",
+  "title": "仙剑四第七次纹理创建，Windows VidMm 所有者观测",
+  "frozen_inputs": {
+    "contract_id": "dxgkrnl.h:746:2",
+    "predicate": "如果该调用在本线程新建原生且无共享资源的 VidMm 分配，Windows 记录能否将该分配唯一关联到游戏的原生设备，或明确记录其所属资源。",
+    "gpu_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "game_exe_sha256": "f815ccf98236ecb8fffc203b92c3470bf65575c04c94b8815da3d6148d782318",
+    "original_app_dxvk_sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab",
+    "private_app_observer_sha256": "034e0d5d60bce42228af37f34b642529d7de1adc6d77f0f6cb278a79f7c44b94",
+    "native_application_icd_sha256": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+    "etw_filter_sha256": "7551fad4bc2784f7e8177a6675abcaaa4c9bb45a23d815464b154a451ef8fa8c",
+    "expected_descriptor": {
+      "ordinal": 7,
+      "width": 512,
+      "height": 512,
+      "levels": 0,
+      "usage": 1024,
+      "format": 22,
+      "pool": 1,
+      "shared": false
+    }
+  },
+  "rounds": [
+    {
+      "attempt": 1,
+      "round_id": "pal4-texture7-allocation-owner-20261121-01",
+      "declaration_file": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-01.plan.json",
+      "result_file": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-01.result.json",
+      "result_sha256": "f431d256eb3ada500b184d6c750e082de8744a7b0b89b70c8fc2f2faa8ef2be9",
+      "verdict": "未知",
+      "boot_before": 91011,
+      "boot_after": 91083,
+      "native_dxvk_log": true,
+      "observed_boot_sequence": [
+        91011,
+        91083
+      ],
+      "system_receipts_by_new_boot": [
+        {
+          "boot": 91083,
+          "system_events": [
+            {
+              "id": 6008,
+              "record": 91092,
+              "bugcheck": null
+            },
+            {
+              "id": 41,
+              "record": 91101,
+              "bugcheck": "0"
+            }
+          ]
+        }
+      ],
+      "selected_icd_and_native_module_readback": false,
+      "unexpected_restart": true,
+      "case_pid": 2656,
+      "last_recorded_texture_site": "Texture7.construct",
+      "last_recorded_texture_edge": "enter",
+      "constructor_normal_return": false,
+      "output_pointer_assigned": false,
+      "next_observed_api": null,
+      "game_event_counts": {
+        "33": 17,
+        "36": 17
+      },
+      "captured_window_allocations": null,
+      "trace_complete": false,
+      "qpc_hz": 19200000,
+      "etw_last_retained_minus_texture_entry_ms": -457.923,
+      "event_ids": [
+        41,
+        6008
+      ],
+      "restored_gpu_baseline": true,
+      "restored_app": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab"
+    },
+    {
+      "attempt": 2,
+      "round_id": "pal4-texture7-allocation-owner-20261121-02",
+      "declaration_file": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-02.plan.json",
+      "result_file": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-02.result.json",
+      "result_sha256": "8d1cbbc9b0a0525ec5b8a09a5ef7ea5c14fe6c67402801b13e8e8b2e16a41183",
+      "verdict": "未知",
+      "boot_before": 91083,
+      "boot_after": 91251,
+      "native_dxvk_log": true,
+      "observed_boot_sequence": [
+        91083,
+        91158,
+        91184,
+        91251
+      ],
+      "system_receipts_by_new_boot": [
+        {
+          "boot": 91158,
+          "system_events": [
+            {
+              "id": 6008,
+              "record": 91167,
+              "bugcheck": null
+            },
+            {
+              "id": 41,
+              "record": 91176,
+              "bugcheck": "0"
+            }
+          ]
+        },
+        {
+          "boot": 91184,
+          "system_events": [
+            {
+              "id": 6008,
+              "record": 91185,
+              "bugcheck": null
+            },
+            {
+              "id": 41,
+              "record": 91202,
+              "bugcheck": "0"
+            }
+          ]
+        },
+        {
+          "boot": 91251,
+          "system_events": [
+            {
+              "id": 6008,
+              "record": 91260,
+              "bugcheck": null
+            },
+            {
+              "id": 41,
+              "record": 91269,
+              "bugcheck": "0"
+            }
+          ]
+        }
+      ],
+      "selected_icd_and_native_module_readback": false,
+      "unexpected_restart": true,
+      "case_pid": 3564,
+      "last_recorded_texture_site": "Texture7.construct",
+      "last_recorded_texture_edge": "enter",
+      "constructor_normal_return": false,
+      "output_pointer_assigned": false,
+      "next_observed_api": null,
+      "game_event_counts": {
+        "33": 17,
+        "36": 17
+      },
+      "captured_window_allocations": null,
+      "trace_complete": false,
+      "qpc_hz": 19200000,
+      "etw_last_retained_minus_texture_entry_ms": -586.884,
+      "event_ids": [
+        41,
+        6008
+      ],
+      "restored_gpu_baseline": true,
+      "restored_app": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab"
+    },
+    {
+      "attempt": 3,
+      "round_id": "pal4-texture7-allocation-owner-20261121-03",
+      "declaration_file": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-03.plan.json",
+      "result_file": "wsl-dxgkrnl-contracts/rounds/pal4-texture7-allocation-owner-20261121-03.result.json",
+      "result_sha256": "df61898b56c1fac71386ca978609f1353c4f0f2ce6a314c5404d84886d93b476",
+      "verdict": "未知",
+      "boot_before": 91251,
+      "boot_after": 91326,
+      "native_dxvk_log": true,
+      "observed_boot_sequence": [
+        91251,
+        91326
+      ],
+      "system_receipts_by_new_boot": [
+        {
+          "boot": 91326,
+          "system_events": [
+            {
+              "id": 6008,
+              "record": 91327,
+              "bugcheck": null
+            },
+            {
+              "id": 41,
+              "record": 91344,
+              "bugcheck": "0"
+            }
+          ]
+        }
+      ],
+      "selected_icd_and_native_module_readback": false,
+      "unexpected_restart": true,
+      "case_pid": 1676,
+      "last_recorded_texture_site": "Texture7.construct",
+      "last_recorded_texture_edge": "enter",
+      "constructor_normal_return": false,
+      "output_pointer_assigned": false,
+      "next_observed_api": null,
+      "game_event_counts": {
+        "33": 17,
+        "36": 17
+      },
+      "captured_window_allocations": null,
+      "trace_complete": false,
+      "qpc_hz": 19200000,
+      "etw_last_retained_minus_texture_entry_ms": -350.726,
+      "event_ids": [
+        41,
+        6008
+      ],
+      "restored_gpu_baseline": true,
+      "restored_app": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab"
+    }
+  ],
+  "aggregate": {
+    "runs": 3,
+    "unexpected_restarts": 3,
+    "normal_constructor_returns": 0,
+    "assigned_outputs": 0,
+    "last_sites": {
+      "Texture7.construct": 3
+    }
+  },
+  "observation_method": "每轮运行原 Documents 目录的游戏，窗口配置、原生 x86 NVK、系统 GPU 基线和手持供电策略固定。临时 app-local x86 DXVK 只写入本轮纹理的 QPC 标记并在下一次可识别 API 调用处短暂停留。",
+  "limitations": "构造后的标记只覆盖正常返回。遇到 C++ 异常时此版观察器并无单独的异常标记。日志的末条记录不能直接确定故障指令，未封口的 ETW 也不能证明之后没有分配。",
+  "restart_attribution": "按 Windows System 启动记录编号重建顺序。游戏测试只发起一次；后续只有系统记录、没有新的游戏启动回执的开机区间须单独记为原因未知。",
+  "previous_checkpoint": "先前在同一纹理的分配动作之前等待了 155 秒，原游戏进程保持存活；独立程序成功创建并释放相同七个纹理描述。",
+  "previous_checkpoint_receipt": "PAL4_TEXTURE_CHECKPOINT_20261121.json",
+  "independent_residency_receipt": "PAL4_NATIVE_RESIDENCY_20261121.json",
+  "open_fault": "SWITCH-LOAD-TRANSITION-RESTART",
+  "references": {
+    "wsl_allocation_owner": "https://github.com/microsoft/WSL2-Linux-Kernel/blob/a989171929bed4ea681be8d77333845ce1c1732a/drivers/hv/dxgkrnl/dxgkrnl.h#L746-L750",
+    "dxvk_creation": "https://github.com/doitsujin/dxvk/blob/b1a1c99ab52b687cf950d62c88bc2fa316b41663/src/d3d9/d3d9_device.cpp#L599-L675",
+    "windows_allocation": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/ns-d3dkmthk-_d3dkmt_createallocation",
+    "unclean_shutdown": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/event-id-41-restart"
+  }
+}

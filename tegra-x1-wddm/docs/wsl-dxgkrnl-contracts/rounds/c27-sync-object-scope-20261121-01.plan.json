@@ -1,0 +1,32 @@
+{
+  "round_id": "c27-sync-object-scope-20261121-01",
+  "contract_id": "dxgkrnl.h:145:1",
+  "declared_utc": "2026-11-21T13:18:03.199938+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "cbde4a5d6bda8fd51ff07d7192f8952728985908d73f747e9e48b8dcc059a6aa",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Lite GM20B 的 Windows VidMm / VidSch 与交互桌面中的独立 ARM64 调用方。",
+  "predicate": "同步对象在其支持的类型、共享与所有权范围内用于 GPU 进度和上下文间协调。",
+  "required_observation": "读取本机版本与 NativeGpuFenceSupported，核对普通监控围栏的 GPU 信号、CPU 读值及之前单项的共享打开回执。只在有同 LUID 活动显示目标时请求正常周期监控围栏并只读采样。",
+  "satisfied_if": "所有列出的原生子句均有同层身份、进度、类型和共享记录。来宾链表与 FD 语义单列。",
+  "violated_if": "在本调用的适用条件、责任方、对象、时间和输出完整匹配时，取得直接否定原生子句的结果。自然不支持、同步返回或缺失观测均单列。",
+  "unknown_if": "能力不足、实际对象或触发条件未命中、记录有缺口、只见间接现象或发生未解释重启时保留未知。",
+  "scope_limit": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "旧三次启动有围栏信号退役，整条还涉及类型、归属、跨进程与不同同步方式，需分别观测。",
+  "prior_catalog_commit": "a73e3b76d2ddf55401e05fefb0f9f6fba1518306",
+  "baseline": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "selected_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+  "boot": 91476,
+  "dwm": 1400,
+  "ordinal": 14,
+  "nonce": "efced0b0cce982c19f251378",
+  "mode": "broad",
+  "trace": true,
+  "os_build": "10.0.22631.0",
+  "files_sha256": {
+    "contracts-arm64.exe": "bd339ec912bc6121b989da5de1799c51b5e980a4860301d6805c2bf8c8a2214c",
+    "contract-trace.exe": "ae6fd30d576521ebb2300d2b07a35106ba972d23d3f6bdf60c1454c2b97b8bad",
+    "Measure.ps1": "e3f5153d08fe3b81cec941dba4556859f4c9a264c620d8d75b5a755ad2edb973",
+    "Power-State.ps1": "f136146792b5a80c6016dbae04668831bee87f0f2f5390017bfb1669cd3cab9f"
+  }
+}

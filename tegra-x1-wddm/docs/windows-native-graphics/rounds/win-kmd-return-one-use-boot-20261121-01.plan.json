@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-return-one-use-boot-20261121-01",
+  "contract_id": "WIN-KMD-RETURN-BOOT-IDENTITY",
+  "windows_question": "WIN-KMD-RETURN-BOOT-IDENTITY",
+  "owner": "Windows 启动许可、GPU PnP 和 DWM",
+  "question": "独立诊断 KMD 能否在一次性许可下到达 Code 0，且其余组件与正式基线一致？",
+  "method": "单次诊断许可和精确组件核对，无图形负载",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "交流手持。计划重启有 Windows 记录。候选已经加载、许可已消耗、Code 0、桌面可用，其余七个配置哈希一致，且无新增未解释的关机记录。",
+  "observations": [
+    "读回交流手持、系统启动、正式运行组件及旧许可。仅在已复核的回退包保留后开始试用。",
+    "登记 Windows 受控重启回执并核对各次新启动以及 41、6008、1001、4101。异常独立登记。",
+    "核对一次性许可已消耗、候选 KMD 运行、其余七个文件同正式配置、Code 0 和交互 DWM。"
+  ],
+  "inputs": {
+    "source": "ef790ec99d5b8c508bf232e40faa04b4cd9df1bf",
+    "candidate": "bfbc849f36b5a67b985f8ff4489d6200b3befda1a8c27be2fd8159744c50dbfa",
+    "approved": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "rollback": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/current-rollback.json",
+      "sha256": "03d7eeded269c7f656cfbe932d2b6c15b8812ac8fbb3a55174300a300606334b",
+      "bytes": 3699
+    },
+    "hashes": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/Cycle.ps1",
+        "sha256": "93297be1200d9ba7557a9e84ffdb73251d46d19dc61d242069fbdd70ec23cadf",
+        "bytes": 22996
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/cycle.py",
+        "sha256": "392f5d34ea03b7ac9ab38dc168f10765001bab8f970cb311a85e3b884d3e8002",
+        "bytes": 10300
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/planned_restart.py",
+        "sha256": "fc097c40d3c2e1ab23f606a2aa7a5e7bbf688b1490f67891124f0ab3ab784cf4",
+        "bytes": 3044
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-return-board-93818/active_candidate_profile.py",
+        "sha256": "27211316e3703d6a354a0e551a1ccadca628fb9f1537ded81de6614fab9b4949",
+        "bytes": 3551
+      }
+    ],
+    "controller_audit": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-return-observer/review-cycle-delta/response.json",
+      "sha256": "012c7b9069273f9aa08f387eafeacc8bc9340d05ba4b66a3efb911e80c25c4e3",
+      "bytes": 2935
+    },
+    "expected_staged_boot": 93818
+  }
+}

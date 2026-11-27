@@ -1,0 +1,2707 @@
+{
+  "status": "Objective 5 in progress. The selected GPIO driver passed physical touch-controller IRQ delivery, a real downgrade and reselection. The module status index describes runtime choices and remaining validation.",
+  "order": [
+    "Review the deployed KMD, firmware/ACPI, SD, Wi-Fi, Bluetooth and the other platform drivers used by Switch Lite.",
+    "Review power scheduling, the native NVDEC path, DXVK integration and Pacecar.",
+    "Review the participating Mesa paths last: NVK/NAK, tgd3d/WSI, Zink, user-mode NVDEC and common code included or called by these components.",
+    "Return to the separate load-related restart investigation in objective 4."
+  ],
+  "scope": "Use the actual Switch builds, runtime bindings and their dependencies irrespective of authorship. Keep scheduled work, static-analysis coverage, controlled tests and device acceptance distinct.",
+  "display_baseline": {
+    "commit": "585d651457305cf23c06e566d8041135f248c4f3",
+    "umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "scope": "Native six-frame H.264 720p decode, followed by an unexpected reboot; fixed-90 desktop subsequently verified.",
+    "record": "tegra-x1-wddm/docs/NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json"
+  },
+  "hardware_inventory": {
+    "utc": "2026-11-18T15:17:34.3087806Z",
+    "boot": "2026-11-18T15:09:39.2974230Z",
+    "inventory_sha256": "bad66a1f414885b40c705c1631b694dc329d8e617c5a026c48d1d239c9627397",
+    "components": {
+      "switchsio": {
+        "service": "switchsio",
+        "image": "switchsio.sys",
+        "version": "0.2.5.0",
+        "problem_code": 0,
+        "sha256": "2e475fb96ba7b72e383800b5f06f2b8138419d4ce006e100eeb700cd0ff6b770",
+        "matches_retained_signed_package": false
+      },
+      "tegra210i2c": {
+        "service": "tegra210i2c",
+        "image": "tegra210i2c.sys",
+        "version": "1.0.0.5",
+        "problem_code": 0,
+        "sha256": "61a7d83f635abca9bb891ad6625f8b1431f9f72cf2c5b515b7da9bfa88582445",
+        "matches_retained_signed_package": false
+      },
+      "switchpwrbtn": {
+        "service": "switchpwrbtn",
+        "image": "switchpwrbtn.sys",
+        "version": "1.0.0.7",
+        "problem_code": 0,
+        "sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787",
+        "matches_retained_signed_package": true
+      },
+      "switchbt": {
+        "service": "switchbt",
+        "image": "switchbt.sys",
+        "version": "1.0.0.19",
+        "problem_code": 0,
+        "sha256": "a106e3ac6f9594a64a294c46ce969e623c91f4e3745e8a49961205e29b317cee"
+      },
+      "tegragpurender": {
+        "service": "tegragpurender",
+        "image": "tegragpurender.sys",
+        "version": "0.1.0.158",
+        "problem_code": 0,
+        "sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0"
+      },
+      "nvtsdhc": {
+        "service": "nvtsdhc",
+        "image": "nvtsdhc.sys",
+        "version": "0.5.1.2",
+        "problem_code": 0,
+        "sha256": "5389b30d3a04fad330b9afef36b0d500ad363c6c5b39c55c9b60096669bfd945"
+      },
+      "switchbattery": {
+        "service": "switchbattery",
+        "image": "switchbattery.sys",
+        "version": "1.0.0.14",
+        "problem_code": 0,
+        "sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60",
+        "matches_retained_signed_package": true
+      },
+      "switchaudio": {
+        "service": "switchaudio",
+        "image": "switchaudio.sys",
+        "version": "1.0.0.9",
+        "problem_code": 0,
+        "sha256": "05fd4e2c9dd22d340942d26edfb5e1a83639fe4fff02d14b9a3bf5e95b86aeff",
+        "matches_retained_signed_package": true
+      },
+      "switchfan": {
+        "service": "switchfan",
+        "image": "switchfan.sys",
+        "version": "1.0.0.33",
+        "problem_code": 0,
+        "sha256": "0453418edc0f830007f9acf1ad6211d98d13a25f8fea664aeb85a86c6c331cb5",
+        "matches_retained_signed_package": true
+      },
+      "switchrtc": {
+        "service": "switchrtc",
+        "image": "switchrtc.sys",
+        "version": "1.0.0.3",
+        "problem_code": 0,
+        "sha256": "b9e7849cc71af7a7762a5b40a5cb29ca4410c5b156936ce6747fd29f2470d1b2",
+        "matches_retained_signed_package": false
+      },
+      "tegra210gpio": {
+        "service": "tegra210gpio",
+        "image": "tegra210gpio.sys",
+        "version": "1.0.0.4",
+        "problem_code": 0,
+        "sha256": "5f93b63a365c1bf4f5b914b466653035d1fcf1e33cc8dc7547878e416a504be3",
+        "matches_retained_signed_package": true
+      },
+      "switchwifi": {
+        "service": "switchwifi",
+        "image": "switchwifi.sys",
+        "version": "0.5.7.0",
+        "problem_code": 0,
+        "sha256": "61fa3cae2790e0e97fe6c94842cdf809f677fe91e7691e92d09d8e95cfb1d865"
+      },
+      "switchtouch": {
+        "service": "switchtouch",
+        "image": "switchtouch.sys",
+        "version": "1.0.1.2",
+        "problem_code": 0,
+        "sha256": "d0a056d2de17a3968d7a9340154516f132c0c69bbd3e99a393a5e6557cdb1a39",
+        "matches_retained_signed_package": false
+      }
+    },
+    "enumeration": "Target buses and platform services selected from present PnP devices. Microsoft inbox class drivers accompany these services.",
+    "unbound_uart": {
+      "hardware_id": "ACPI\\NVDA0100",
+      "problem_code": 28,
+      "source_identity": "UAR2, the separate UARTB device in the DSDT; Bluetooth is bound on ACPI\\SWOA0B01."
+    }
+  },
+  "kmd": {
+    "signed_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "build_source": "8e9f265f7d0ebb9deab6b57dd576d76e2d0c736f",
+    "translation_units_analyzed": 73,
+    "sources": "The analyzer used the 71 archive inputs plus the two driver entry objects with the target WDK defines. Relinking produced the exact accepted unsigned KMD. Its link map identifies 72 contributing units; t214_interrupt.c was an archive input only.",
+    "contributing_units_analyzed": 72,
+    "contributing_unit_names": [
+      "acr_firmware",
+      "adapter",
+      "adapter_reset",
+      "allocation",
+      "channel",
+      "command_snapshot",
+      "command_stream",
+      "context",
+      "copy_stream",
+      "device_lifetime",
+      "diagnostic_events",
+      "dvfs",
+      "execute",
+      "fault",
+      "gm20b_mmu",
+      "gpfifo",
+      "gr_clear",
+      "gr_draw",
+      "gr_firmware",
+      "gr_firmware_io",
+      "gr_image",
+      "gr_submit",
+      "graphics",
+      "hardware",
+      "host1x_clock",
+      "internal_va",
+      "native_start_test",
+      "nouveau_horizon_gm20b",
+      "nvdec_adapter",
+      "nvdec_backend",
+      "nvdec_engine",
+      "nvdec_fw",
+      "nvdec_h264",
+      "nvdec_memory",
+      "nvdec_sha256",
+      "paging",
+      "paging_buffer",
+      "paging_dispatch",
+      "paging_dma",
+      "paging_submit",
+      "panel",
+      "panel_scanout",
+      "panel_vidpn",
+      "platform_adapter",
+      "platform_io",
+      "present",
+      "present_blit",
+      "present_halfturn",
+      "private_memory",
+      "query",
+      "recovery",
+      "render_miniport",
+      "report",
+      "reset_backend",
+      "resources",
+      "root_table",
+      "submission",
+      "submit_ddi",
+      "submit_worker",
+      "t214_acr",
+      "t214_clock",
+      "t214_dc",
+      "t214_frontend",
+      "t214_gr",
+      "t214_gr_context",
+      "t214_mmu",
+      "t214_nvdec",
+      "t214_pmu",
+      "t214_power",
+      "table_segment",
+      "work_queue",
+      "worker"
+    ],
+    "unsigned_kmd_sha256": "c31055ff2a8e9a7711672b7727669d1b5b452297ba3a5ed511def2d21145f140",
+    "map_sha256": "32141b850cdb71e3fed635294e130a435b28fd50f401f6f8b20513e94e47f9c4",
+    "source_and_object_inventory_sha256": "c03c7ffeded096e64a6e67d8bce88b5848d6e97596310a4a6377a8dd6d636f27",
+    "clang_scan_sha256": "123fbccd4ce92ca90704ab7d012ad70deb724f9e1836fa902e4364a1436c5a4d",
+    "findings": [
+      {
+        "file": "tegra-x1-wddm/core/command_stream.c",
+        "line": 1121,
+        "class": "Dead store",
+        "disposition": "The assignment immediately precedes a break. Its value does not affect the parsed result."
+      },
+      {
+        "file": "tegra-x1-wddm/windows/paging_buffer.c",
+        "line": 266,
+        "class": "Potential null NextDma",
+        "disposition": "The production paging worker passes a local step by address. For callers passing NULL the first pass rejects immutable buffers containing a copy/fill before processing. The reported path requires different record kinds in the two passes."
+      },
+      {
+        "file": "tegra-x1-wddm/windows/work_queue.c",
+        "line": 86,
+        "class": "Potential null snapshot in ETW diagnostics",
+        "disposition": "CommandBytes starts at zero and is set only from a validated snapshot. The channel-register helper writes the separate Hardware member; with no snapshot the diagnostic record has zero payload."
+      }
+    ],
+    "manual_read": "Worker timer lifecycle, paging admission/execution and the sampled diagnostic paths. The complete KMD performance and semantic review is still open.",
+    "paging_record_validation": {
+      "tested_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+      "production_object": {
+        "name": "paging_buffer.obj",
+        "sha256": "5e7abda795e6905fe9ae7f9d9c1028108e9a70cdb088d4efbb4a40e2041a0f49"
+      },
+      "fixture_source_sha256": "747b5261fb9363a9dc6f1de644314eea8b37d4dc428975fd350bc54cb58d1026",
+      "tested_record_type": "64-byte copy-engine fill records in an immutable paging command buffer. The worker retires one copy-engine step at a time.",
+      "columns": [
+        "records",
+        "bytes",
+        "admission_record_visits",
+        "worker_record_visits"
+      ],
+      "host_x64_rows": [
+        [
+          1,
+          64,
+          1,
+          1
+        ],
+        [
+          2,
+          128,
+          2,
+          3
+        ],
+        [
+          4,
+          256,
+          4,
+          10
+        ],
+        [
+          8,
+          512,
+          8,
+          36
+        ]
+      ],
+      "host_control_sha256": "1ba186a68927dc62ccc545153520fe542f8b9c47257e6217e74859432cd31407",
+      "arm64_cpu_control_sha256": {
+        "count": "cc8bf7f9fbe1bf4d773ccedfd06bacfe181156836d9fc073fec166fe92401dc1",
+        "time": "36900e146e7e9e1cea8b939be3cf79183e69c6b53f44144672331d6845241876"
+      },
+      "native_trace_source": "https://github.com/GameTechDev/PresentMon/blob/main/PresentData/ETW/Microsoft_Windows_DxgKrnl.h",
+      "trace_reduction_sha256": "1cac5ab44b9dd1d506a27b8a111aa7b89c2ab7d3acbf982919e6cc82bf84da79",
+      "native_fixture_windows": {
+        "reference": {
+          "sha256": "5709798c40fb91468c427892f5bca21a53ad6781c8707ec9bd07f747754a0a30",
+          "events_lost": 0,
+          "fixture_window_seconds": 50.71988578125,
+          "os_paging_queue_starts": 300,
+          "matched_os_paging_queue_stops": 300,
+          "os_paging_queue_starts_per_second": 5.914839818328283,
+          "os_paging_queue_buffers_by_bytes": {
+            "0": 300
+          },
+          "os_paging_queue_elapsed_us": {
+            "median": 513.28125,
+            "p95": 5338.385416666667
+          }
+        },
+        "candidate": {
+          "sha256": "31fbfdf1161102b2092d22ff94d314fb31e4d8740e7d27aac73e85f712b9f215",
+          "events_lost": 0,
+          "fixture_window_seconds": 53.5190846875,
+          "os_paging_queue_starts": 301,
+          "matched_os_paging_queue_stops": 301,
+          "os_paging_queue_starts_per_second": 5.624161955637893,
+          "os_paging_queue_buffers_by_bytes": {
+            "0": 301
+          },
+          "os_paging_queue_elapsed_us": {
+            "median": 215.0,
+            "p95": 3703.8020833333335
+          }
+        }
+      },
+      "interpretation": "The eight-record case has 28 validation visits in the shortened suffixes. All 601 OS paging starts have a zero DmaBufferSize field. These ETLs give a request rate and scheduler duration; they do not identify the number of fill records or the validation CPU time. The reference and candidate ETLs compare a different, earlier worker timer change.",
+      "stage": "Complete on the physical Switch. The KMD retains full record validation.",
+      "physical_cpu_benchmark": {
+        "physical_switch": true,
+        "boot": "2026-11-18T16:53:45.9010870Z",
+        "dwm_pid": 1432,
+        "kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "umd": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+        "status_code": 0,
+        "power_mode": 1,
+        "count_rows": [
+          [
+            1,
+            64,
+            1,
+            1
+          ],
+          [
+            2,
+            128,
+            2,
+            3
+          ],
+          [
+            4,
+            256,
+            4,
+            10
+          ],
+          [
+            8,
+            512,
+            8,
+            36
+          ]
+        ],
+        "timing_us_per_batch": {
+          "1": {
+            "admission": {
+              "median_us": 0.041656,
+              "q1_us": 0.041555,
+              "q3_us": 0.074921
+            },
+            "later_suffix_checks": {
+              "median_us": 5.1e-05,
+              "q1_us": 5.1e-05,
+              "q3_us": 7.6e-05
+            },
+            "worker": {
+              "median_us": 0.102158,
+              "q1_us": 0.101598,
+              "q3_us": 0.186132
+            },
+            "admission_and_worker": {
+              "median_us": 0.146357,
+              "q1_us": 0.145671,
+              "q3_us": 0.264664
+            }
+          },
+          "2": {
+            "admission": {
+              "median_us": 0.067291,
+              "q1_us": 0.066376,
+              "q3_us": 0.082881
+            },
+            "later_suffix_checks": {
+              "median_us": 0.045293,
+              "q1_us": 0.044657,
+              "q3_us": 0.082067
+            },
+            "worker": {
+              "median_us": 0.192693,
+              "q1_us": 0.192591,
+              "q3_us": 0.193329
+            },
+            "admission_and_worker": {
+              "median_us": 0.262705,
+              "q1_us": 0.262248,
+              "q3_us": 0.361404
+            }
+          },
+          "4": {
+            "admission": {
+              "median_us": 0.138702,
+              "q1_us": 0.136795,
+              "q3_us": 0.23997
+            },
+            "later_suffix_checks": {
+              "median_us": 0.252889,
+              "q1_us": 0.245895,
+              "q3_us": 0.287374
+            },
+            "worker": {
+              "median_us": 0.563609,
+              "q1_us": 0.532354,
+              "q3_us": 0.631256
+            },
+            "admission_and_worker": {
+              "median_us": 0.693156,
+              "q1_us": 0.668615,
+              "q3_us": 0.802307
+            }
+          },
+          "8": {
+            "admission": {
+              "median_us": 0.24114,
+              "q1_us": 0.240987,
+              "q3_us": 0.322545
+            },
+            "later_suffix_checks": {
+              "median_us": 1.004181,
+              "q1_us": 0.998586,
+              "q3_us": 1.160685
+            },
+            "worker": {
+              "median_us": 1.539256,
+              "q1_us": 1.482951,
+              "q3_us": 1.941783
+            },
+            "admission_and_worker": {
+              "median_us": 1.817703,
+              "q1_us": 1.703211,
+              "q3_us": 3.112666
+            }
+          }
+        },
+        "timing_method": "Actual ARM64 paging_buffer.obj and a count-instrumented build, 13 rotated rounds of 2048 iterations per phase and batch size, native QPC at 19.2 MHz, CPU-only fill-record microbenchmark.",
+        "what_if_8_fills_every_recorded_os_paging_packet_cpu_us_per_second": {
+          "reference": 5.9396,
+          "candidate": 5.6477
+        },
+        "disposition": "Keep the complete admission checks. These traces do not expose record counts. For this ordinary allocation/draw workload even an assumed eight fills on every paging packet would save roughly six microseconds of one core per second in repeated suffix scans. End-to-end paging latency or gameplay throughput is not attributed to this control.",
+        "receipt_sha256": "4cb29de9497a1c4ed076ed6644fc71fdb5c4fb9e7bef6e067b7821814fa673f9",
+        "raw_qpc_csv_sha256": "401ae62c8a7a78fefa54c351c3816240e58886b281a3c71027d5754862052c53",
+        "count_sha256": "f86079de32af23c953372fcae760a123bd46a7d92126fdc7fdfa17e7144ef319",
+        "timing_sha256": "c63c261b2771feac3277ba98069e122bfe7fdfb8253e6b324f59d02442262b27"
+      },
+      "raw_qpc_file": {
+        "file": "dxvk-games-20261118/kmd-paging-batch-qpc.csv",
+        "published_sha256": "0bc01e15742b8bf07651191b1ac0198c2439a7e947be0d446498dd3cd072ddc0",
+        "rows": 208,
+        "raw_sha256": "401ae62c8a7a78fefa54c351c3816240e58886b281a3c71027d5754862052c53"
+      }
+    },
+    "emc_power_vote_record": "EMC_VOTE_DELIVERY_20261118.json"
+  },
+  "uefi": {
+    "reported_bios": "1.09 (winx-r402)",
+    "image_sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e",
+    "bytes": 921600,
+    "method": "Repacked the archived BL33 entry stub and original EDK2 firmware volume. Output bytes match the on-device image.",
+    "inputs_sha256": {
+      "stub": "8df88458841200af6e99f99e1ba848f10296e077c19a387c1b6cedbcdf0130c3",
+      "fd": "388de278828dcb2a706ade5ed9a9c3dc4688b036552359482bb771082a4f6176",
+      "map": "a9c02e534b808a8a2c231ff3486cc4b277e29738617b4e0c01b961d1139aac14"
+    },
+    "retained_main_volume_file_count": 57,
+    "platform_members": [
+      "RealTimeClock",
+      "AcpiTableDxe",
+      "AcpiPlatform",
+      "NintendoSwitchAcpiTables",
+      "ClockManagementDxe",
+      "LiteBluetoothDxe",
+      "LiteAudioDxe",
+      "LitePerformanceDxe",
+      "LiteResetDxe",
+      "LiteTouchPowerDxe",
+      "SdMmcDxe",
+      "LiteFanPowerDxe",
+      "UsbBusDxe",
+      "UsbMassStorageDxe",
+      "UsbKbDxe"
+    ],
+    "remaining": "Firmware initialization time and physical cold-boot sequencing require their own measurements.",
+    "windows_handoff": {
+      "original_volume_dsdt": {
+        "sha256": "0fa9a14fc30df52305b7ba855675a8f075d95e765d9f3ef5c35ebee2ca5f3e0f",
+        "bytes": 4568,
+        "markers": {
+          "WSTA": [
+            16
+          ],
+          "XSTA": [
+            16
+          ]
+        },
+        "unique_offset_in_retained_fvmain": 3037396
+      },
+      "first_loaded_windows_dsdt": {
+        "sha256": "9eb6a7e17cca34e4f7ddbfd55bf31fcb8e1ff2ab0b852574c0406ce1a5935849",
+        "bytes": 4993,
+        "same_as_disk_override": true,
+        "markers": {
+          "WSTA": [
+            15
+          ],
+          "XSTA": [
+            16
+          ]
+        },
+        "checked_at": "2026-11-18T15:40:19.1443673Z"
+      },
+      "readiness_tools_on_winarm": [
+        {
+          "sha256": "BB40A5843EC323E84620CC11C3FAD1DA5BB6D16B6E2E578891F0F3959175E939",
+          "name": "SwitchWOA\\Wifi\\WifiPrepare.efi",
+          "bytes": 40960
+        },
+        {
+          "sha256": "4A01FDD3D2BC76B7F99B8396269178170680CFF977AADF0BFDC39F0E262B0688",
+          "name": "SwitchWOA\\Usb\\UsbPrepare.efi",
+          "bytes": 24576
+        }
+      ],
+      "current_wifi_problem_code": 0,
+      "contract": "WinX starts WifiPrepare.efi before Windows Boot Manager. Successful preparation changes the firmware WSTA byte from 0x10 to 0x0f and fixes the DSDT checksum. On failure the firmware leaves the device hidden and continues booting. This build also uses a static Windows ACPI override for NVDEC. The loaded WSTA matches that saved image; reading it alone cannot establish that the firmware preparation succeeded on any individual boot.",
+      "scope": "The two layers have different source tables. The current radio is operational. A bypassed or failed firmware preparation on the earlier affected boot remains unverified.",
+      "receipt_sha256": "429f0fe88d57b0f9e05b649a6c9f700a09be93cdbf9a02b166992bfa546a9da0"
+    },
+    "lite_model_candidate": {
+      "finding": "R402 reports Switch HAC-001 for system product, SKU, version and baseboard on a verified Lite. The candidate sets system and retail model PCDs to HDH-001 for the existing Lite build profile.",
+      "feature_source": "https://github.com/ruje0504-2/winx/commit/f919fd747a6cdbb4766dcc60183c05bd796142b8",
+      "profiles_compiled": [
+        "original",
+        "lite"
+      ],
+      "original_and_rebuilt_baseline_match": true,
+      "archive_method": "Re-encoded the original nested volume, GUID-defined section and firmware file with EDK2 tools. The resulting full BL33 reproduces the image on the device byte for byte. In the candidate only the 24,576-byte SMBIOS PE payload in the inner volume was replaced.",
+      "inner_fv_members": 57,
+      "unchanged_inner_members": 56,
+      "target_guid": "50a15b6f-e3a9-4192-9640-369cb367c4de",
+      "stub_sha256": "8df88458841200af6e99f99e1ba848f10296e077c19a387c1b6cedbcdf0130c3",
+      "original_prepi_ffs_sha256": "824704f7e41ba77d46d83aae56ac022a5ae072f3ad48a11ead97251d96adbf30",
+      "reference": {
+        "bl33_sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e",
+        "bytes": 921600,
+        "outer_fv_sha256": "388de278828dcb2a706ade5ed9a9c3dc4688b036552359482bb771082a4f6176",
+        "main_fv_sha256": "7ea9f9edaede38a47fde85b6533c616855049c32075acaf953b7d408fc0b6081",
+        "smbios_pe_sha256": "fd5041de62f8ec143245c49ab279f5bea3b4ff8eb05de88245e56e1b1d5e033a",
+        "guided_ffs_bytes": 720571,
+        "inner_lzma_roundtrip": true
+      },
+      "candidate": {
+        "bl33_sha256": "6aadfb2fd3979532fca1302edfbc276a154aca84aa37481cdbc0476b6083511a",
+        "bytes": 921600,
+        "outer_fv_sha256": "731b48854ff37cbd84fe9123a01d0e0dbf0abaf0d19ac0bcd3c415dfd6c2f865",
+        "main_fv_sha256": "325c70c70b06ce154acf7822b72c7a9b69673c92aa5bcbb4bd63cdbe166805c2",
+        "smbios_pe_sha256": "d447729b3905ace773eb16e1ecb5f69a0908c81fc820f9beb410a9fabf5ffe8e",
+        "guided_ffs_bytes": 720811,
+        "inner_lzma_roundtrip": true
+      },
+      "selected_on_device": true,
+      "independent_review": "Pending separate Gemini review.",
+      "physical_acceptance_20261120": {
+        "windows_boot_record": 80338,
+        "registry": {
+          "bios": "1.09 (winx-r402)",
+          "version": "HDH-001",
+          "board": "Nintendo Switch Lite (HDH-001)",
+          "sku": "HDH-001",
+          "product": "Nintendo Switch Lite (HDH-001)"
+        },
+        "wmi": {
+          "version": "HDH-001",
+          "board": "Nintendo Switch Lite (HDH-001)",
+          "name": "Nintendo Switch Lite (HDH-001)",
+          "model": "Nintendo Switch Lite (HDH-001)",
+          "sku": "HDH-001"
+        },
+        "selected_bl33_sha256": "6aadfb2fd3979532fca1302edfbc276a154aca84aa37481cdbc0476b6083511a",
+        "original_image_retained_on_sd": true,
+        "previous_image_has_separate_menu_entry": false,
+        "updated_source_and_acceptance": "https://github.com/ruje0504-2/winx/commit/36197a348995329d8f32357a57fb1b92dc301067"
+      }
+    },
+    "rtc_at_boot": {
+      "firmware_image_sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e",
+      "edk2_as_built_module_inf_sha256": "063625a396b0bf6401b4d09e6f64e1247dfa43b693eb5834c9838a395f0044a3",
+      "firmware_library": "VirtualRealTimeClockLib",
+      "firmware_time_source": "Firmware build date plus generic timer elapsed time. The selected R402 runtime does not persist SetTime.",
+      "kernel_rtc_bound_source": "5f531e6f2ddb82570c0368eebbf2c73b9deaec03",
+      "windows_behavior": "The bound SwitchRtc driver reads the MAX77620 and records a signed wall-clock correction after Windows enters device initialization. Use event record IDs, observed boot IDs and per-boot QPC to order early events.",
+      "before_accepted_package_boot_correction_s": 17,
+      "accepted_boot_correction_s": 20,
+      "first_unexpected_boot_correction_s": 379,
+      "second_unexpected_boot_correction_s": 33
+    },
+    "hekate_reset_reason": {
+      "record": "tegra-x1-wddm/docs/WIN32_APPLICATION_CACHE_PATH_20261118.json",
+      "source": "https://github.com/CTCaer/hekate/blob/e487de8fdd6ca9c3f608d1d18c097a86355912b9/bdk/soc/hw_init.c#L293-L298",
+      "matched_payload_sha256": "61cb69d341c0b4363cfb392e9a182bb556ec656932e0e5176bb158c15ff1ad00",
+      "tag": "v6.5.3",
+      "scope": "The SD payload and bootloader/update.bin match the release. Its reset capture precedes Windows and clears the hardware source. The installed Nyx companion differs from that release."
+    }
+  },
+  "sd": {
+    "service": "nvtsdhc",
+    "source": "5345692e4b7ec0d52e80937ae451bb2c52750fe8",
+    "signed_image_matched": true,
+    "host_tests": [
+      "DDR200 mode and tap window",
+      "clock and power restoration",
+      "request/DMA bounds",
+      "context and diagnostics",
+      "crash dump interface"
+    ],
+    "physical_test": "Read the first 2 MiB of the same existing kernel image in sixteen 128-KiB aligned reads, twice without the Windows file cache and once with buffering. Hashing ran after timing. The card controller may still cache sectors. These are baseline measurements.",
+    "controller": "nvtsdhc",
+    "samples": [
+      {
+        "file_cache_enabled": false,
+        "bytes": 2097152,
+        "mib_per_second": 46.2,
+        "median_128kib_ms": 2.597,
+        "maximum_128kib_ms": 4.328,
+        "sha256": "f61afce8fd54faaa218491265a37ae4b1bfe4b75a40c2ddd1096700fe8fe83b0"
+      },
+      {
+        "file_cache_enabled": false,
+        "bytes": 2097152,
+        "mib_per_second": 48.01,
+        "median_128kib_ms": 2.599,
+        "maximum_128kib_ms": 2.831,
+        "sha256": "f61afce8fd54faaa218491265a37ae4b1bfe4b75a40c2ddd1096700fe8fe83b0"
+      },
+      {
+        "file_cache_enabled": true,
+        "bytes": 2097152,
+        "mib_per_second": 19.79,
+        "median_128kib_ms": 0.132,
+        "maximum_128kib_ms": 34.683,
+        "sha256": "f61afce8fd54faaa218491265a37ae4b1bfe4b75a40c2ddd1096700fe8fe83b0"
+      }
+    ],
+    "receipt_sha256": "8d1d550cdc740057e7c1fff1ef919dbeea52c92729c6fc1535835d6a0b007568",
+    "active_transport": {
+      "utc": "2026-11-18T15:40:24.4778461Z",
+      "mode": "SDR104",
+      "bus_width": 4,
+      "clock_khz": 199680,
+      "signaling_1_8v": true,
+      "ddr200_active": false,
+      "longest_passing_tap_window": 1,
+      "minimum_tap_window": 8,
+      "samples": 128,
+      "tuning_timeouts": 1,
+      "fallbacks": 1,
+      "fallback_recovery_status": 0,
+      "last_attempt_status": "0xc0000185",
+      "adma_errors": 0,
+      "interpretation": "The read sample was taken on a boot that fell back to SDR104. The single passing tap did not meet the eight-tap guard. It does not provide a DDR200 throughput measurement.",
+      "receipt_sha256": "eaa4365545484f639e3d798aedd385cc45990a32d872a3635aa2fa9599c40aa9"
+    },
+    "warm_restart_file_retention": {
+      "scope": "One 8 KiB disposable file on the SD system volume. The host required two known payloads and the Switch read each with unbuffered Windows file handles. A planned restart checked the replacement on the same volume.",
+      "service_and_mode": {
+        "ddr200": 0,
+        "service": "nvtsdhc",
+        "bus": "SD",
+        "code": 0,
+        "dma_errors": 0,
+        "actual_khz": 199680
+      },
+      "original_uncached": {
+        "read_ms": 2.6851041666666666,
+        "sha256": "31a5aca19043fc779e483d47992a6677730d27dadcb8d5d467244bc89fa90d3d",
+        "block_ms": [
+          2.1586458333333334,
+          0.5264583333333334
+        ],
+        "bytes": 8192
+      },
+      "replacement_uncached_before_restart": {
+        "read_ms": 0.9572916666666667,
+        "sha256": "a26679c9be7dea9a7d1423fb4c158b2e14760ba6ff596bf6d11f305d2edde827",
+        "block_ms": [
+          0.4276041666666667,
+          0.5296875
+        ],
+        "bytes": 8192
+      },
+      "replacement_uncached_after_restart": {
+        "read_ms": 3.059270833333333,
+        "sha256": "a26679c9be7dea9a7d1423fb4c158b2e14760ba6ff596bf6d11f305d2edde827",
+        "block_ms": [
+          2.672083333333333,
+          0.3871875
+        ],
+        "bytes": 8192
+      },
+      "system_request_record": 67130,
+      "no_unexpected_restart_in_this_control": true,
+      "sd_driver_source": "5345692e4b7ec0d52e80937ae451bb2c52750fe8",
+      "source_observation": "In the bound T214 ADMA path, CMD24/25 copies into a noncached bounce buffer. Completion requires command and transfer completion before T214DmaDone marks this request complete. The file-level test does not establish how the card handles abrupt loss of power."
+    },
+    "game_restart_observation": {
+      "record": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json",
+      "sha256": "9491c3d03a02d39004860d84f87bf3b327eb32d9e4b52748350b7926bbafe920",
+      "incident_files_read_entirely_as_zero": 5,
+      "unusable_shader_payloads": 6,
+      "total_shader_entries": 24,
+      "readable_after_real_reader_rewrite": 24,
+      "after_boot_adma_errors": 0,
+      "restart_root_cause": "open"
+    }
+  },
+  "wifi": {
+    "source": "125b618c366ff22863468057243278c2f60a36db",
+    "signed_image_matched": true,
+    "controlled_baseline": "Twelve portable test programs plus the reconnect and join-timeout cases passed; the ARM64 KMDF library built.",
+    "bug": "The diagnostic writer cleared Dirty before saving and ignored a failed registry write. A lone last report could go unrecorded.",
+    "fix": "Retry the registry write once. Keep the latest data dirty on persistent failure and allow a later flush to retry.",
+    "fix_commit": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/3c5723b2d0da61bdfb817f717778143b46f661b0",
+    "arm64_compared": [
+      {
+        "output": "normal=1 concurrent=1 transient=0 retry_pending=0 bounded_calls=1 recovered=0",
+        "signature": "Valid",
+        "sha256": "3C5C7FD0CED8698D6085E4449A0B3293849125BB32DF374089A9FF7920DA2EBB",
+        "mode": "reference",
+        "exit": 1
+      },
+      {
+        "output": "normal=1 concurrent=1 transient=1 retry_pending=1 bounded_calls=2 recovered=1",
+        "signature": "Valid",
+        "sha256": "AF12D3FCF8C084200EFDCA441CFDE2BD863A908F681F3E170F3A5AF2A0567621",
+        "mode": "candidate",
+        "exit": 0
+      }
+    ],
+    "native_test_scope": "The signed ARM64 fault controls exercise the production writer with a substituted registry. The physical station now runs 0.5.7.1. Both a hot rebind and Windows restart restored connectivity and passed all five bidirectional payload comparisons.",
+    "candidate_unsigned_sha256": "de01a99ae10e48cfdeb6bb77fbcca87fb03e9029f6c959eaf1129331b8799055",
+    "changed_translation_unit": "report.c",
+    "earlier_startup_issue": "The original driver recorded three transient driver-attributed WLAN disconnects on one boot. Each reconnected in under seven seconds. These observations leave the previously reported missing radio on startup unresolved.",
+    "startup_issue_history_sha256": "17367ba9d430c5d42389853017957c5d08e58d610209fc613dca0927922bf92f",
+    "startup_layers": "Check the pre-Windows firmware preparation and the Windows ACPI override alongside WDF initialization. A readiness byte from an override can agree with the saved file even when a prior boot has no surviving firmware report.",
+    "reference_unsigned_sha256": "660da9acc7a0b1224b0147a753b35235497deac37d4d61c6bfc755e9a165f357",
+    "fresh_reference_matches_deployed_signed_payload": true,
+    "fresh_reference_matches_archived_unsigned": true,
+    "build_provenance": "The archived compiler input order and original source-path spelling reproduce the released build. Normalized COFF comparison isolates report.obj.",
+    "build_receipt_sha256": "058d95511c4d4c945e1d753cc7f340c0948a4c5cc19ea2549ce5ca1a6fc50d8b",
+    "signed_candidate_sys_sha256": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
+    "candidate_inf_sha256": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
+    "candidate_package_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/7d7bf6806d4a22ea0cc9408b00307a281e488a40",
+    "candidate_version": "0.5.7.1",
+    "selected_package": {
+      "current_version": "0.5.7.1",
+      "previous_version": "0.5.7.0",
+      "signed_sys_sha256": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
+      "signed_cat_sha256": "3ac32fcba2c90eab2ab1ce1b1056868fcc6471e8f07e1b5036509aee92208f4b",
+      "inf_sha256": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
+      "source": "7d7bf6806d4a22ea0cc9408b00307a281e488a40",
+      "acceptance_commit": "6488e438e9f8a093839600ef6f49fd61db3474c7",
+      "hardware_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/6488e438e9f8a093839600ef6f49fd61db3474c7/drivers/SwitchWifi/tests/physical-report-20261118.json",
+      "record_sha256": "0d629afacaf7a7f7625ef35bb2975d8777bb65c038f0c3c1c51adfec8714686c",
+      "cold_power_on_verified": false,
+      "physical_hot_rebind": true,
+      "windows_restart_with_local_recovery_armed": true,
+      "payload_bytes_per_direction_per_session": 1310720,
+      "median_short_sftp_mbit_s": {
+        "reference": {
+          "up_mbit_s": 33.4704,
+          "down_mbit_s": 25.0732
+        },
+        "candidate_hot": {
+          "up_mbit_s": 35.0299,
+          "down_mbit_s": 29.1607
+        },
+        "candidate_after_restart": {
+          "up_mbit_s": 31.5928,
+          "down_mbit_s": 24.0862
+        }
+      },
+      "prior_short_wlan_disconnect_seconds": [
+        4.604,
+        6.25,
+        4.665
+      ],
+      "independent_review": "Main review and native acceptance completed. Separate Gemini review remains pending."
+    }
+  },
+  "bluetooth": {
+    "version_matched_source": "7f6c3cf9b35a63bfc721f78f0e3524ea41012cf7",
+    "checks": [
+      "UART host recovery and D0 entry/exit",
+      "in-flight cancellation and ownership",
+      "ARM64 cross-link"
+    ],
+    "provenance": "The rebuilt ARM64 image matches the installed driver byte for byte after excluding PE checksum, certificate directory and certificate data. The UART and cancellation controls cover its matching source. Physical pairing, traffic and suspend/resume are pending.",
+    "device_sha256": "a106e3ac6f9594a64a294c46ce969e623c91f4e3745e8a49961205e29b317cee",
+    "reference_unsigned_sha256": "20aafaa676752b2eb98ed968bbbf1df1fbf53468c564605631fe0a6b613b4aa2",
+    "compared_payload_bytes": 45044,
+    "link_receipt_sha256": "05c0e9bd51b4852794c9affccd8bdf8b382039e280279ab731a7dd5a7afd93c9",
+    "physical_radio": {
+      "device": "Switch Lite Bluetooth UART, ACPI/SWOA0B01",
+      "runtime_sha256": "a106e3ac6f9594a64a294c46ce969e623c91f4e3745e8a49961205e29b317cee",
+      "reference_pnp_code": 0,
+      "adapter_capabilities": {
+        "IsCentralRoleSupported": true,
+        "IsAdvertisementOffloadSupported": false,
+        "IsLowEnergySupported": true,
+        "IsClassicSupported": true,
+        "IsPeripheralRoleSupported": true
+      },
+      "test": "Temporarily enabled the original Off radio, ran a native passive BLE receive window for eight seconds, waited for the stopped callback, and restored Off. Only packet counts were retained.",
+      "boot_utc": "2026-11-18T19:07:27.5649700Z",
+      "start_utc": "2026-11-18T19:12:08.2158371Z",
+      "end_utc": "2026-11-18T19:12:19.8712878Z",
+      "original_radio": "Off",
+      "final_radio": "Off",
+      "receiver_exit": 0,
+      "received": 83,
+      "received_with_advertisement_data": 83,
+      "uart_driver_delta": {
+        "CmdsOut": 45,
+        "EventsIn": 79,
+        "AclOut": 0,
+        "AclIn": 0,
+        "ReadEventRequests": 79,
+        "WriteRequests": 45,
+        "TxBytes": 2230,
+        "RxBytes": 1742,
+        "Dropped": 0,
+        "RxOverflows": 0,
+        "LineErrors": 0,
+        "LineOverruns": 0,
+        "ChildForwardFailures": 0
+      },
+      "native_receiver_signed_sha256": "7c1d70d586b571ec0e370901b0805ef8cb77f7ce01d2703917c5995d66fb4e86",
+      "native_receiver_source_sha256": "26284bf807a0bdacb11aeb8fa699d187c4d22a2865422878a7c0b469202f5a95",
+      "receipt_sha256": "473c464b4d8d9f3deb737c63f92d97702c0d7a6ed678efd604fc0702c54bfeac",
+      "previous_probe": {
+        "received": 48,
+        "exit": 3,
+        "issue": "The first native test sampled status before asynchronous startup and did not issue its stop after startup. The revised test waited for startup and verified the stop event."
+      },
+      "paired_peer_acl_transfer_verified": false,
+      "suspend_resume_verified": false
+    }
+  },
+  "additional_peripherals": {
+    "checks": [
+      "SIO frame handling",
+      "power-button state and core voltage",
+      "battery charge limit, gauge, USB PD and request ownership",
+      "FTM4 touch parser and HID reports",
+      "existing DFLL, PMIC concurrency, EMC governor and display QoS models"
+    ],
+    "binding_note": "The inventory records the earlier I2C 1.0.0.5, RTC 1.0.0.3 and power-button 1.0.0.7. Current physical selections are I2C 1.0.0.7, RTC 1.0.0.4 and power-button 1.0.0.8.",
+    "pending": [
+      "Bluetooth transport with a connected peer",
+      "Physical volume/button/contact input, device sleep and RTC resume",
+      "Performance under the active CPU/GPU/EMC and NVDEC scheduling choices",
+      "DXVK, Pacecar, and the scoped Mesa code review"
+    ],
+    "gpio_source": {
+      "commit": "ca60e5d8112bb5883292c12af525f21ae72c1b2e",
+      "source_payload_matches_installed": true,
+      "reference_unsigned_sha256": "8808aa6994d09dde55ec2f7645573cd7906001b325492f558ffd30904e7cfe7f",
+      "installed_sha256": "5f93b63a365c1bf4f5b914b466653035d1fcf1e33cc8dc7547878e416a504be3"
+    },
+    "candidate_source_comparison": {
+      "i2c": {
+        "commit": "ca60e5d8112bb5883292c12af525f21ae72c1b2e",
+        "unsigned_sha256": "8804bbf87def9177f3d0a2793e439668362a22ed541f5f5a9f82980f1d33382b",
+        "normalized_sha256": "361a244cab6d7aa44f33fa20f75b8e25987f6d6af19909deb4ece433db505bdb"
+      },
+      "rtc-1107": {
+        "commit": "5f531e6f2ddb82570c0368eebbf2c73b9deaec03",
+        "unsigned_sha256": "872a5cc2eae0b1758cc860cf9f108683cfc90f3592c3311ed4a156f8afa7cf76",
+        "normalized_sha256": "da8e96b9c9daee33025cc093fd416b8df81c8a8333dd3dfeaedd493bdcf77ca7"
+      },
+      "rtc-1114": {
+        "commit": "b19f617e746eea20ff62aa6e50cb40d9d555fdae",
+        "unsigned_sha256": "ecc2716f2e8720630360074a60b793841442c39c4a03ad017a2701a08d118529",
+        "normalized_sha256": "4f071825ead685b225acde252871f201a8042c9b861ac545cb70a79343301512"
+      }
+    },
+    "bound_i2c_rtc": {
+      "tegra210i2c": {
+        "inf": "oem22.inf",
+        "inf_sha256": "eea7fed7fa5dbdbc8da995f5457b7056aa3bc17f2d0bced2bae91ea11c3990da",
+        "driver_ver": "DriverVer   = 11/06/2026,1.0.0.5",
+        "installed_signed_sha256": "61a7d83f635abca9bb891ad6625f8b1431f9f72cf2c5b515b7da9bfa88582445",
+        "build_comparison": {
+          "i2c": {
+            "compared_bytes": [
+              20980,
+              20980
+            ],
+            "normalized_equal": true,
+            "different_common_bytes": 0,
+            "source": "ca60e5d8112bb5883292c12af525f21ae72c1b2e"
+          }
+        }
+      },
+      "switchrtc": {
+        "inf": "oem28.inf",
+        "inf_sha256": "100bc32a4f1304a7218ce453e4a2b3a6a7a5827558509857bf12afac79a39057",
+        "driver_ver": "DriverVer   = 11/07/2026,1.0.0.3",
+        "installed_signed_sha256": "b9e7849cc71af7a7762a5b40a5cb29ca4410c5b156936ce6747fd29f2470d1b2",
+        "build_comparison": {
+          "rtc-1107": {
+            "compared_bytes": [
+              17908,
+              17908
+            ],
+            "normalized_equal": true,
+            "different_common_bytes": 0,
+            "source": "5f531e6f2ddb82570c0368eebbf2c73b9deaec03"
+          },
+          "rtc-1114": {
+            "compared_bytes": [
+              19444,
+              17908
+            ],
+            "normalized_equal": false,
+            "different_common_bytes": 11875,
+            "source": "b19f617e746eea20ff62aa6e50cb40d9d555fdae"
+          }
+        }
+      }
+    },
+    "i2c_fifo_timeout": {
+      "source": "ca60e5d8112bb5883292c12af525f21ae72c1b2e",
+      "unsigned_sha256": "a64f1cbac4b2bde94e605a94e925d47d924109df88c0c47390b8ebe0e45b8246",
+      "controls_sha256": "7e66eb593cfb87d2fce87f5b1ef44442f29bc6e625afe82e02a013eaa6d044ca",
+      "cases_per_build": 11,
+      "outcomes": {
+        "reference": {
+          "stuck_flush": {
+            "status": -4,
+            "simulated_wait_us": 40200,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 3,
+            "bus_clears": 1,
+            "request_timeouts": 1,
+            "gate_acquires": 0,
+            "gate_releases": 0
+          },
+          "prepare_config_stuck": {
+            "status": 0,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 0,
+            "request_timeouts": 0,
+            "gate_acquires": 1,
+            "gate_releases": 1
+          },
+          "prepare_fifo_stuck": {
+            "status": 0,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 0,
+            "request_timeouts": 0,
+            "gate_acquires": 1,
+            "gate_releases": 1
+          },
+          "arbitration_config_stuck": {
+            "status": -3,
+            "simulated_wait_us": 20000,
+            "tx_words_accepted": 3,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 1,
+            "request_timeouts": 0,
+            "gate_acquires": 0,
+            "gate_releases": 0
+          }
+        },
+        "candidate": {
+          "stuck_flush": {
+            "status": -4,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 1,
+            "request_timeouts": 1,
+            "gate_acquires": 0,
+            "gate_releases": 0
+          },
+          "prepare_config_stuck": {
+            "status": -4,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 0,
+            "request_timeouts": 0,
+            "gate_acquires": 1,
+            "gate_releases": 1
+          },
+          "prepare_fifo_stuck": {
+            "status": -4,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 0,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 0,
+            "request_timeouts": 0,
+            "gate_acquires": 1,
+            "gate_releases": 1
+          },
+          "arbitration_config_stuck": {
+            "status": -3,
+            "simulated_wait_us": 10000,
+            "tx_words_accepted": 3,
+            "tx_words_issued_while_flushing": 0,
+            "bus_clears": 1,
+            "request_timeouts": 0,
+            "gate_acquires": 0,
+            "gate_releases": 0
+          }
+        }
+      },
+      "scope": "Physical selection covers the three controllers and healthy client traffic. Stuck configuration and FIFO cases run against substituted controller registers.",
+      "feature_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/f4210eb0459ec1dfc7c7040f65b0665ca6adc21c",
+      "candidate_package_version": "1.0.0.7",
+      "signed_package_sha256": {
+        "tegra210i2c.inf": "93c4ca9c542f49b387151a5db05e2ed960f9320d6d7bc2829145c81076f973fb",
+        "tegra210i2c.cat": "8e0e93c11b5f6e148e5ab135a72d44074accccdff87dd1f488b0a49366472f44",
+        "tegra210i2c.sys": "c7bf8fe18a95d2d5b39d3c8137ea0751eae1471969fe7699f4712f033a45ea31"
+      },
+      "physical_candidate_selected": true,
+      "candidate_source_commit": "f4210eb0459ec1dfc7c7040f65b0665ca6adc21c",
+      "prior_candidate_1_0_0_6": {
+        "unsigned_sha256": "135612f67f69abf30854afa61215977944b859dbfe4c6efa30817ef44b1f95fc",
+        "signed_package_sha256": {
+          "tegra210i2c.inf": "f4ac5086129e7b81713ad9c1e76abfb72b942bf9b9b926ffb97c96d10cc91bb4",
+          "tegra210i2c.cat": "3db91642068eca50067fafa9610fffcb65cce498e8cfe22f80362e17fb6d97ef",
+          "tegra210i2c.sys": "0ebffc1778fbc0b60cf81b270c53458d266b7c4043424319265668482e332713"
+        },
+        "candidate_source_commit": "35ec44f8a35cc34b15b6bbfa04a55f43106eb5ec",
+        "patch_sha256": "d49dce8d25b3c03794b1ba9ce508c4fb539f46ba29dae50c428f60eca094f0b4",
+        "controls_sha256": "a875e2719f23d5c5a97e69f87a0f7ff04e3bd565d00afc5d3ad850ce31da2f90",
+        "physical_candidate_selected": false
+      }
+    },
+    "battery": {
+      "driver": {
+        "installed_sha256": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60",
+        "source": "06614ee6b9bbe80682f3f45e2c84a5cdd9f69133",
+        "builds": {
+          "provider-wdk": {
+            "unsigned_sha256": "a487496a8bdf03974ebe2adc7191967dbbe1d46e3996194039f3b9bb0527584e",
+            "payload_equal": true
+          }
+        },
+        "source_sha256": {
+          "charge_limit.h": "d4bcf7f76c97775e15a9cd2d395d7d2222cb0acb89acd065f60249a57bd36168",
+          "switchbattery.c": "c1c44ac850a929ad218954f53ed6fe2bf96c984a944dec1e65170ec5f8146e06",
+          "gauge_telemetry.h": "5922b3187520f786de155d0b4bf5d79272cd0dc2321cbd0650b9fd4693e75784",
+          "charge_limit_ioctl.h": "10ac91908eb1a2dd36237e60fadeb3b9c026ebb3896278dc62a5793ef7a242bc"
+        }
+      },
+      "controlled_gauge_reads": {
+        "fixture_sha256": "fe2e3605379b48554d1097fbd6639116efe2e399a06091d2e7638f4dec1ae8a2",
+        "active_charge_query_header_sha256": "d4bcf7f76c97775e15a9cd2d395d7d2222cb0acb89acd065f60249a57bd36168",
+        "source_test_sha256": "518b6d30cc31424541d19f3a9afae892a1d27542b3778a12d681ba031e7fc934",
+        "stdout_sha256": "4786fae106dde8be89357598404d357dd395204df3eb4aa4d06d15171fab877c",
+        "scope": "Synthetic raw registers consistent with the reported endpoint values, with changing input and independent failures at each live gauge read. The original raw registers and current at physical cutoff were not captured."
+      },
+      "hardware_observation": {
+        "last_verified_external_power_sample": {
+          "utc": "2026-11-18T15:12:17.0716236Z",
+          "capacity_percent": 72,
+          "cell_mv": 3621,
+          "charger_status": "0x6C",
+          "flags": "0x0D",
+          "external_online": 1,
+          "charging": 1,
+          "input_src": "0x02",
+          "charger_mode_reg": "0x10",
+          "limit_apply_status": 0,
+          "receipt_sha256": "275e942a34af6bec7fc8497fecdb29bcf2e8299cf2c0dcd3384f20a6b6ddcf41"
+        },
+        "last_verified_battery_sample": {
+          "utc": "2026-11-18T15:42:23.1853799Z",
+          "capacity_percent": 65,
+          "cell_mv": 3321,
+          "charger_status": "0x00",
+          "flags": "0x01",
+          "external_online": 0,
+          "charging": 0,
+          "input_src": "0x02",
+          "charger_mode_reg": "0x10",
+          "limit_apply_status": 0,
+          "receipt_sha256": "055f57499058bf022644ee5a008b0bb6e74bbcf6a1c994909a12ba24c41e0620"
+        },
+        "deduplicated_native_samples": 127,
+        "all_samples_csv_sha256": "bfe3cc596c8aff26263dc64f294bd73ba0f51771979628dc3c25cdbb197f954c",
+        "selected_driver_signed": "3db052e29ce3ea98f48704dd31222ab58cfbc9faccbb6cec278f732ef6772f60",
+        "offline_observation": "Owner reported the physical Switch battery was depleted during this investigation. This establishes the observed condition without an exact shutdown timestamp.",
+        "report_recorded_by_utc": "2026-11-18T16:54:13Z",
+        "first_unreachable_probe": {
+          "start_utc": "2026-11-18T15:48:35.209203+00:00",
+          "end_utc": "2026-11-18T15:48:51.226365+00:00",
+          "exit": 255,
+          "stdout_bytes": 0
+        },
+        "dispatch_status": "No remote output or command dispatch for the new paging batch fixture before loss of connectivity.",
+        "last_read_to_first_probe_minutes": 6.2,
+        "last_read_to_report_recorded_by_minutes": 71.83,
+        "interpretation": "The charge-limit IOCTL reads live RepSOC, VCELL and charger hardware status. With external power off, it last reported 65% at 3321 mV. No terminal sample or calibrated capacity measurement was captured at loss of power.",
+        "active_driver_charge_query": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/06614ee6b9bbe80682f3f45e2c84a5cdd9f69133/drivers/SwitchBattery/src/charge_limit.h",
+        "board_reference": "https://github.com/CTCaer/hekate/blob/master/bdk/power/max17050.c",
+        "charger_register_reference": "https://www.ti.com/lit/ds/symlink/bq24193.pdf",
+        "physical_return": {
+          "utc": "2026-11-18T17:01:09.5764027Z",
+          "boot": "2026-11-18T16:53:45.9010870Z",
+          "charge": {
+            "Version": 1,
+            "LimitCenter": 85,
+            "BandMin": 80,
+            "BandMax": 90,
+            "CapacityPercent": 64,
+            "VoltageMv": 3630,
+            "Reg00InputSrc": 2,
+            "Reg01PwrOn": 16,
+            "Reg08SysStat": 108,
+            "LastApplyStatus": 0,
+            "Flags": 13
+          },
+          "telemetry": {
+            "Version": 1,
+            "Flags": 1,
+            "VoltageUv": 3565625,
+            "CurrentUa": 92343,
+            "PowerUw": 329260,
+            "SampleAgeMs": 844,
+            "LastStatus": 0,
+            "RawCurrent": 591,
+            "Cgain": 32767,
+            "GaugeId": 172
+          },
+          "telemetry_valid": true,
+          "system_events": [
+            {
+              "utc": "2026-11-18T15:46:46.7875226Z",
+              "provider": "Microsoft-Windows-Kernel-Power",
+              "id": 41,
+              "record": 66158
+            },
+            {
+              "utc": "2026-11-18T16:54:37.7937116Z",
+              "provider": "EventLog",
+              "id": 6008,
+              "record": 66149
+            }
+          ]
+        },
+        "boot_evidence": {
+          "system_events": [
+            {
+              "record": 66158,
+              "provider": "Microsoft-Windows-Kernel-Power",
+              "id": 41,
+              "utc": "2026-11-18T15:46:46.7875226Z",
+              "fields": {
+                "BugcheckCode": "0",
+                "ConnectedStandbyInProgress": "false",
+                "LongPowerButtonPressDetected": "false",
+                "PowerButtonTimestamp": "0",
+                "BugcheckParameter3": "0x0",
+                "BugcheckParameter4": "0x0",
+                "BugcheckParameter1": "0x0",
+                "BugcheckParameter2": "0x0",
+                "Checkpoint": "0",
+                "SleepInProgress": "0",
+                "BugcheckInfoFromEFI": "false"
+              },
+              "previous_shutdown_local": null
+            },
+            {
+              "record": 66149,
+              "provider": "EventLog",
+              "id": 6008,
+              "utc": "2026-11-18T16:54:37.7937116Z",
+              "fields": {},
+              "previous_shutdown_local": [
+                "23:35:15",
+                "‎2026/‎11/‎18"
+              ]
+            },
+            {
+              "record": 66140,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "id": 12,
+              "utc": "2026-11-18T15:46:42.9235491Z",
+              "fields": {
+                "StartTime": "2026-11-18T15:46:41.4893880Z",
+                "BootMode": "0"
+              },
+              "previous_shutdown_local": null
+            }
+          ],
+          "interpretation": "Windows recorded an unexpected shutdown with zero bugcheck and power-button fields. The reported previous shutdown predates the last verified device read. Exact cutoff time and electrical cause remain unknown. Other crashes are tracked separately."
+        }
+      }
+    },
+    "selected_i2c_package": {
+      "selected_version": "1.0.0.7",
+      "previous_version": "1.0.0.5",
+      "source_commit": "f4210eb0459ec1dfc7c7040f65b0665ca6adc21c",
+      "acceptance_commit": "9b1544a7762ca6ca72314dcc6571eda3bf24592b",
+      "physical_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/9b1544a7762ca6ca72314dcc6571eda3bf24592b/drivers/Tegra210I2c/tests/physical-board-20261118.json",
+      "record_sha256": "bd44829d370d4b9a226eb2d213a21c6c8c4fc4c07a28e21978b9fe5569bc0817",
+      "package_sha256": {
+        "tegra210i2c.inf": "93c4ca9c542f49b387151a5db05e2ed960f9320d6d7bc2829145c81076f973fb",
+        "tegra210i2c.cat": "8e0e93c11b5f6e148e5ab135a72d44074accccdff87dd1f488b0a49366472f44",
+        "tegra210i2c.sys": "c7bf8fe18a95d2d5b39d3c8137ea0751eae1471969fe7699f4712f033a45ea31"
+      },
+      "physical_boot_utc": "2026-11-18T18:21:09.6142620Z",
+      "verified_utc": "2026-11-18T18:24:16.7170524Z",
+      "pnp_package": "oem23.inf",
+      "hardware_readback": {
+        "buses": [
+          1,
+          3,
+          5
+        ],
+        "hidrev": "0x12127",
+        "legacy_probe": "skipped on Tegra210B01",
+        "i2c5_errors_before_after": [
+          1,
+          0
+        ],
+        "i2c5_nacks_before_after": [
+          1,
+          0
+        ],
+        "charger_revision_result": "0x12f",
+        "pmic_status_result": "0x102",
+        "power_policy": "Handheld",
+        "consumers_code_zero": [
+          "switchrtc",
+          "switchbattery",
+          "switchfan",
+          "switchtouch",
+          "switchaudio",
+          "switchwifi"
+        ]
+      },
+      "independent_review": "Main source review completed. Separate Gemini review is pending."
+    },
+    "unexpected_restarts_after_i2c_acceptance": {
+      "runtime": {
+        "gpu_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "i2c_signed_sha256": "c7bf8fe18a95d2d5b39d3c8137ea0751eae1471969fe7699f4712f033a45ea31",
+        "i2c_version": "1.0.0.7",
+        "reference_pacecar_sha256": "0bb94b678ac1778db3ffc24c2ad131dd2b8f7306d9917b8644a9bd15a70db8eb",
+        "helper_sha256": "73CDDB34770B20EFDBF518AC2108B50F529ADC0D3F03B46A130586BF9BEFB245"
+      },
+      "first": {
+        "previous_boot_utc": "2026-11-18T18:21:09.6142620Z",
+        "next_boot_utc": "2026-11-18T18:27:58.8470560Z",
+        "last_confirmed_operation": "Retired the completed I2C staging and recovery task after physical selection. A subsequent connection for a radio information query timed out before SSH connected. No new game or decoding workload was submitted.",
+        "last_confirmed_operation_utc": "2026-11-18T18:26:51.5169966Z",
+        "after_boot": {
+          "i2c_bindings": [
+            {
+              "inf": "oem23.inf",
+              "code": 0,
+              "version": "1.0.0.7",
+              "id": "ACPI\\SWOA0201\\1",
+              "present": true
+            },
+            {
+              "inf": "oem23.inf",
+              "code": 0,
+              "version": "1.0.0.7",
+              "id": "ACPI\\SWOA0201\\3",
+              "present": true
+            },
+            {
+              "inf": "oem23.inf",
+              "code": 0,
+              "version": "1.0.0.7",
+              "id": "ACPI\\SWOA0201\\5",
+              "present": true
+            }
+          ],
+          "i2c5_errors": 0,
+          "battery_mv": 3811,
+          "battery_percent": 74,
+          "battery_flags": 13,
+          "handheld_policy": 1,
+          "gpu_code": 0,
+          "rtc_correction_seconds": 379
+        },
+        "receipt_sha256": "b107c5d0eca4390873f59079376c187e5332470bd4e55973be54dbb2b2b7b99e"
+      },
+      "second": {
+        "previous_boot_utc": "2026-11-18T18:27:58.8515770Z",
+        "next_boot_utc": "2026-11-18T18:39:10.9166110Z",
+        "active_test": "The installed reference Pacecar, its standard capture helper, a GDI window and a short independent ETW collector.",
+        "game_or_video_started": false,
+        "completed_producer_phases": 0,
+        "persisted_widget_samples": 0,
+        "persisted_win32k_pending_updates_from_test": 1,
+        "persisted_compositor_updates": 1,
+        "persisted_gpu_events": 5,
+        "last_gpu_event": {
+          "qpc": 12549944156,
+          "event": "ExecutionState",
+          "source_name": "preempt",
+          "status": "0x00000000",
+          "stage_name": "gpu_fence",
+          "submission_fence": 8264,
+          "last_completed_fence": 8263,
+          "expected": 1784,
+          "observed": 0,
+          "poll_count": 1,
+          "cached_fifo": "0x00000000",
+          "cached_mmu": "0x00000000",
+          "cached_pbdma": "0x00000000",
+          "cached_gr": "0x00000000"
+        },
+        "status_after_recovery": {
+          "one_original_pacecar_in_interactive_session": true,
+          "original_capture_preference": false,
+          "capture_restored": true,
+          "old_etw_session_present": false,
+          "gpu_code": 0,
+          "rtc_correction_seconds": 33,
+          "i2c5_errors": 0,
+          "battery_mv": 3822,
+          "battery_percent": 75,
+          "battery_flags": 13
+        },
+        "file_sha256": {
+          "widget.csv": "4f97759ebb97cae302b45599e7a0bfc06089c7e7f091693d8e86f1359e371ad7",
+          "producer.out": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "producer.csv": "0511cba45f325c8e30016b0929ce775c37e10e044829c447892d6fb383fd6568",
+          "events.csv": "14641def7635dd2a40e2f99ad52897c31651ebbf16ad845a8be003c90b9a093a",
+          "producer.err": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gpu.csv": "4619b01bd2bb64f1da9a7c7c35c206addbf5eb912dffb6d9f49f81265bf8f6e7"
+        },
+        "recovery_receipt_sha256": "54160624d6b9c4cbad609424cf0b456ad8b637930f25ab48feb587bb7513d806"
+      },
+      "system_log_record_order": [
+        {
+          "record": 66903,
+          "provider": "EventLog",
+          "utc": "2026-11-18T18:28:58.3526289Z",
+          "id": 6008,
+          "fields": {}
+        },
+        {
+          "record": 66912,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-18T18:21:44.4701584Z",
+          "id": 41,
+          "fields": {
+            "BugcheckCode": "0",
+            "LongPowerButtonPressDetected": "false",
+            "BootAppStatus": "0",
+            "PowerButtonTimestamp": "0",
+            "BugcheckParameter3": "0x0",
+            "BugcheckParameter4": "0x0",
+            "BugcheckParameter1": "0x0",
+            "BugcheckParameter2": "0x0",
+            "Checkpoint": "0",
+            "SleepInProgress": "0"
+          }
+        },
+        {
+          "record": 66980,
+          "provider": "EventLog",
+          "utc": "2026-11-18T18:40:07.8791802Z",
+          "id": 6008,
+          "fields": {}
+        },
+        {
+          "record": 66989,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-18T18:38:43.0591789Z",
+          "id": 41,
+          "fields": {
+            "BugcheckCode": "0",
+            "LongPowerButtonPressDetected": "false",
+            "BootAppStatus": "0",
+            "PowerButtonTimestamp": "0",
+            "BugcheckParameter3": "0x0",
+            "BugcheckParameter4": "0x0",
+            "BugcheckParameter1": "0x0",
+            "BugcheckParameter2": "0x0",
+            "Checkpoint": "0",
+            "SleepInProgress": "0"
+          }
+        }
+      ],
+      "dump_files_after_first": [],
+      "dump_files_after_second": [],
+      "interpretation": "There is one pending fence observation in the retained GDI trace, at poll 1. Earlier completed notifications are present. Later poll duration or completion is unknown. Unexpected restarts were also seen on the previous I2C package. Both incidents remain under objective 4.",
+      "clock_provenance": {
+        "firmware_image_sha256": "7f9457fbe3b4a789ea5eb64533006cea96689b78759608e8f4227cecf457904e",
+        "edk2_as_built_module_inf_sha256": "063625a396b0bf6401b4d09e6f64e1247dfa43b693eb5834c9838a395f0044a3",
+        "firmware_library": "VirtualRealTimeClockLib",
+        "firmware_time_source": "Firmware build date plus generic timer elapsed time. The selected R402 runtime does not persist SetTime.",
+        "kernel_rtc_bound_source": "5f531e6f2ddb82570c0368eebbf2c73b9deaec03",
+        "windows_behavior": "The bound SwitchRtc driver reads the MAX77620 and records a signed wall-clock correction after Windows enters device initialization. Use event record IDs, observed boot IDs and per-boot QPC to order early events.",
+        "before_accepted_package_boot_correction_s": 17,
+        "accepted_boot_correction_s": 20,
+        "first_unexpected_boot_correction_s": 379,
+        "second_unexpected_boot_correction_s": 33
+      },
+      "third": {
+        "boot_utc": "2026-11-18T18:49:39.1901340Z",
+        "operation": "Attempted the first Pacecar-only UI update. Windows acknowledged dispatch. At the following boot the installed executable still had its original hash; the trial task and a success receipt were absent. Transient installation cannot be determined from the surviving files.",
+        "confirmed_affected_file": "The 3,058-byte Pacecar profile contained only zero bytes. Its modification time coincided with the selection attempt.",
+        "profile_sha256_after_restart": "9d6b7fcc61fa6ca3e28c7dd922b04072d45bc4db484555a32dee8132f4efe73e",
+        "profile_sha256_after_recovery": "9b44f2e1666c9d603180972b551797a2dec76326f73bc6693db0d3626a37bfa7",
+        "system_records": [
+          {
+            "record": 67066,
+            "utc": "2026-11-18T18:48:19.1890759Z",
+            "id": 41
+          },
+          {
+            "record": 67057,
+            "utc": "2026-11-18T18:50:34.0653589Z",
+            "id": 6008
+          }
+        ],
+        "newer_pacecar_record": "https://github.com/ruje0504-2/pacecar/blob/bdabe5ad18f4d71dda39ce6dbdc14cf488935a18/docs/progress/switch-frame-history-and-settings-20261118.json"
+      },
+      "comparison_with_completed_game_runs": {
+        "interrupted_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "scope": "These five successful runs used an earlier KMD image. A later sampled completion provides an upper bound for that fence on the same adapter and graphics generation. The observed time includes trace sampling and is not a hardware wait time.",
+        "runs": [
+          {
+            "case": "fte-default-dxvk-ec-01",
+            "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+            "trace_sha256": "62efda5bcfdd250c17fcaee4ce30ba76029aa0185d4fdcbdc0c479d1be86e25a",
+            "game_exit": 0,
+            "sampled_records": 657,
+            "first_preempt_poll_zero_with_positive_expected": 379,
+            "later_completed_fence_same_adapter_and_generation": 378,
+            "median_ms_to_later_sample_at_or_past_fence": 44.344
+          },
+          {
+            "case": "fte-default-dxvk-x64-01",
+            "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+            "trace_sha256": "3301275b4042664c9f986bb5e181d3511474ab093924e2a863aa3c006672b0ea",
+            "game_exit": 0,
+            "sampled_records": 619,
+            "first_preempt_poll_zero_with_positive_expected": 358,
+            "later_completed_fence_same_adapter_and_generation": 357,
+            "median_ms_to_later_sample_at_or_past_fence": 45.018
+          },
+          {
+            "case": "fte-default-dxvk-x86-01",
+            "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+            "trace_sha256": "79438e276ff7a240b6924818d76e9a33ea2a07e9bb25d15394eb60b1986bdde2",
+            "game_exit": 0,
+            "sampled_records": 615,
+            "first_preempt_poll_zero_with_positive_expected": 362,
+            "later_completed_fence_same_adapter_and_generation": 361,
+            "median_ms_to_later_sample_at_or_past_fence": 44.714
+          },
+          {
+            "case": "fte-default-zink-x64-01",
+            "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+            "trace_sha256": "88fa71b46ff0c446066685aa1e23d2e5f6db8c76e0cefb31ce2ad5f7ed425a04",
+            "game_exit": 0,
+            "sampled_records": 477,
+            "first_preempt_poll_zero_with_positive_expected": 289,
+            "later_completed_fence_same_adapter_and_generation": 288,
+            "median_ms_to_later_sample_at_or_past_fence": 57.565
+          },
+          {
+            "case": "fte-default-zink-x86-01",
+            "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+            "trace_sha256": "c4101ffbce7342d4847c40c6a42a0baf348ef0ad788276474b8c33528a5cd940",
+            "game_exit": 0,
+            "sampled_records": 465,
+            "first_preempt_poll_zero_with_positive_expected": 268,
+            "later_completed_fence_same_adapter_and_generation": 268,
+            "median_ms_to_later_sample_at_or_past_fence": 43.202
+          }
+        ]
+      }
+    },
+    "pmic_button_and_clock": {
+      "utc": "2026-11-18T20:42:20.0780236Z",
+      "boot": "2026-11-18T20:39:29.8023230Z",
+      "drivers": {
+        "switchrtc": {
+          "version": "1.0.0.4",
+          "sha256": "169164193d731756791d476894c67751c87ceef27d5c14b7aa3a47b9556de797",
+          "package_sha256": {
+            "switchrtc.sys": "169164193d731756791d476894c67751c87ceef27d5c14b7aa3a47b9556de797",
+            "switchrtc.inf": "47af38fc654da719d1841c349dfa2704219a459615662eb879edeab89d9aee78",
+            "switchrtc.cat": "03aeeac0f696cd7f0d4f2cec50555348f0a37658c5cc1aa53a3772860106816e"
+          },
+          "source": "25cdc25a6948021ac21189ffe8172d8cfa69eb3c",
+          "path": "drivers/SwitchRtc/tests/physical-offset-20261118.json",
+          "physical_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/25cdc25a6948021ac21189ffe8172d8cfa69eb3c/drivers/SwitchRtc/tests/physical-offset-20261118.json",
+          "record_sha256": "501fd8e181af9cb6edafaf87d1a2a941a613c2e0b64369b30f4895d846b4b723",
+          "previous_sha256": "b9e7849cc71af7a7762a5b40a5cb29ca4410c5b156936ce6747fd29f2470d1b2",
+          "independent_review": "Pending separate Gemini review.",
+          "scope": "Physical selection 1.0.0.4 -> 1.0.0.3 -> 1.0.0.4, retained across two ordinary restarts. PMIC calendar read, system-time callback and naturally learned offset verified. Negative offset rounding covered by ARM64 controls."
+        },
+        "switchpwrbtn": {
+          "version": "1.0.0.8",
+          "sha256": "879550e4eb292619f45de86eb458fc94f07149ca3de95bc88369166fcd64914e",
+          "package_sha256": {
+            "switchpwrbtn.cat": "73019cb732881a144a375f93894134ba4f3ab3218e80aa9c26915e90272cafdb",
+            "switchpwrbtn.sys": "879550e4eb292619f45de86eb458fc94f07149ca3de95bc88369166fcd64914e",
+            "switchpwrbtn.inf": "7910afdcc5c93fba450df747fc1953df1b539af49dda75c2e4a47b9b043aa217"
+          },
+          "source": "25cdc25a6948021ac21189ffe8172d8cfa69eb3c",
+          "path": "drivers/SwitchPowerButton/tests/physical-poll-20261118.json",
+          "physical_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/25cdc25a6948021ac21189ffe8172d8cfa69eb3c/drivers/SwitchPowerButton/tests/physical-poll-20261118.json",
+          "record_sha256": "b5121547dc621434122dbc40ea77f9ca557202ae2514f70b70360ff877b67168",
+          "previous_sha256": "54c5529e332eb472cb005c9c2adcc0301bfbf4f8e9221c882225bb9ec2b8f787",
+          "independent_review": "Switch Power is under the user-directed main-chat review.",
+          "scope": "Physical 1.0.0.8 at orderly restart, MAX77620 startup reads, increasing hardware polls, two VHF System Control nodes and working power scheduling. Lost-edge handling after an I2C level-read error covered by ARM64 controls."
+        }
+      },
+      "controls": {
+        "platform": "Windows ARM64 on Switch with substituted I/O",
+        "previous": 15,
+        "candidate": 27,
+        "total": 27
+      },
+      "physical_button": {
+        "first_poll": 1200,
+        "last_poll": 1400,
+        "boot_irq_read_status": 0,
+        "direct_hid_press": false,
+        "system_wake_observed": false
+      },
+      "physical_rtc": {
+        "selection": [
+          "1.0.0.4",
+          "1.0.0.3",
+          "1.0.0.4"
+        ],
+        "naturally_learned_offsets_seconds": [
+          1,
+          0
+        ]
+      },
+      "daily_graphics_and_power": {
+        "kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+        "dwm_modules": {
+          "TegraGpuD3DVk.dll": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+          "libvulkan_nouveau.dll": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934"
+        },
+        "Handheld": true,
+        "emc_last_error": 0,
+        "i2c": {
+          "timeouts": 0,
+          "nacks": 0,
+          "errors": 0,
+          "version": 7
+        }
+      },
+      "abnormal_reset_attribution": "These ordinary restarts do not identify the cause of the separate load-related resets."
+    },
+    "gpio_irq_query": {
+      "version": "1.0.0.5",
+      "source": "c5ae935b59c6229db4be23c561d31088503f40e4",
+      "physical_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/c5ae935b59c6229db4be23c561d31088503f40e4/drivers/Tegra210Gpio/tests/physical-gpio-irq-20261118.json",
+      "record_sha256": "4eca2fccf7df317238fbc263551b2a0e4c6c820d7402ad1c009458ec34d32ec4",
+      "package_sha256": {
+        "tegra210gpio.cat": "2cb8c254241ebe4cec0d141e2e9984746a26c93ce49bfe9561c1b0c8644d8985",
+        "tegra210gpio.inf": "30a54b56fba6f394c82b28d93bc512d86ef0d12891acc0a1c49a2ccfe0597492",
+        "tegra210gpio.sys": "8a767c673b73d25ef209640f395ed78d99883942b58bed4f2c4a480b30dcca93"
+      },
+      "previous_sha256": "5f93b63a365c1bf4f5b914b466653035d1fcf1e33cc8dc7547878e416a504be3",
+      "tested_date_utc": "2026-11-18T21:03:54.5653781Z",
+      "actual_source_and_consumer": {
+        "commit": "ca891d9d9a36fd74417b768b1587f349e54e76ad",
+        "file": "drivers/SwitchLiteTouch/src/switchtouch.c",
+        "signed_sha256": "d0a056d2de17a3968d7a9340154516f132c0c69bbd3e99a393a5e6557cdb1a39",
+        "normalized_pe_sha256": "048b972e694aac40a50589c63d1507e574f94b5705d2c3a84b90c3f9da6271b4",
+        "exact_unsigned_sha256": "08beacd635d7ab94f90b597399d6a5b64fb7dbfb8ebd3ba1e607b1154b7ff528",
+        "matched": true
+      },
+      "board_qualified": "ACPI GPIO bank 5, pin 25, GSIV 119 / 1026, actual FTM4 ISR during normal panel reinitialization. Volume usages and SIO input enumerated.",
+      "query_timing": {
+        "reference": {
+          "cases": [
+            "irq-old-01",
+            "irq-old-02"
+          ],
+          "queries": 4,
+          "us": [
+            8.33333,
+            8.75,
+            8.64583,
+            8.33333
+          ],
+          "median_us": 8.48958,
+          "range_us": [
+            8.33333,
+            8.75
+          ]
+        },
+        "candidate": {
+          "cases": [
+            "irq-new-01",
+            "irq-new-02"
+          ],
+          "queries": 4,
+          "us": [
+            2.86458,
+            3.48958,
+            3.33333,
+            3.64583
+          ],
+          "median_us": 3.411455,
+          "range_us": [
+            2.86458,
+            3.64583
+          ]
+        }
+      },
+      "previous_register_reads_for_touch": 8,
+      "selected_register_reads_for_touch": 2,
+      "model_cases_per_arm64_build": 32776,
+      "active_after_forced_rollback_then_reselection": true,
+      "independent_review": "Pending separate Gemini review."
+    }
+  },
+  "local_control_receipts": {
+    "storage_wireless_bluetooth": [
+      {
+        "name": "host-and-arm64",
+        "exit": 0,
+        "log_sha256": "fdcc806a5a018785101946a9721c05e63b9722b66e06219d6b91cc0134386092"
+      },
+      {
+        "name": "test-crashdump",
+        "exit": 0,
+        "log_sha256": "329f4a6b9ad9793d1f46c6f77094a97d906d0803da28fddb07b3b98d5a8c8e93"
+      },
+      {
+        "name": "test-ddr200-transport",
+        "exit": 0,
+        "log_sha256": "819be7d6ec8f5f2d1cd0cb46fc8fa06dd4f40bfebd57f483ee00e4e1f89dc2c2"
+      },
+      {
+        "name": "test-ddr200",
+        "exit": 0,
+        "log_sha256": "818379c1fadbcee1a3553b1b1963c9bcd53a5aac3d69c5800f19689d05f40092"
+      },
+      {
+        "name": "test-diagnostics",
+        "exit": 0,
+        "log_sha256": "a04b7a3232f9322d8ef144440711871f798aa0816459e9357aed09ce2b466e62"
+      },
+      {
+        "name": "test-t214-context",
+        "exit": 0,
+        "log_sha256": "d141784312a07fec9cbea27f7dfabd11cf93b4d5ef5828cd1ad7e3d066765037"
+      },
+      {
+        "name": "test-t214-data",
+        "exit": 0,
+        "log_sha256": "ce7fc1284ac86032db78d604d332c9b6d8a9f77f75c8643dc27d7b1692b305da"
+      },
+      {
+        "name": "test-cancel",
+        "exit": 0,
+        "log_sha256": "2e9702b1168d7f66a3f1f04c99f2dc5c3020c5102687f7684a5765ca8c55f5ca"
+      },
+      {
+        "name": "test-probe",
+        "exit": 0,
+        "log_sha256": "6461001bd3c6bb373e86caa3be09ffdbf84b82279547e09765c9672dc861e51f"
+      }
+    ],
+    "power_input_board": [
+      {
+        "name": "test_sio",
+        "exit": 0,
+        "log_sha256": "b52152639f13e8f90d513c41d991bfac5353a0ca020982f515f2394789950bb2"
+      },
+      {
+        "name": "test_button_state",
+        "exit": 0,
+        "log_sha256": "074c4dd1a873ae68b8b5190f78ae5604e79b1f9b0fe523cc6f9f96ca97cf1e12"
+      },
+      {
+        "name": "test-core-voltage",
+        "exit": 0,
+        "log_sha256": "c15332874bb2a0193226f915b7076754077b313b24ebcdcdb836259ce5f61d7a"
+      },
+      {
+        "name": "test-charge-limit",
+        "exit": 0,
+        "log_sha256": "f9a4bbbd17a89b5531d57dc28db11c1acbe7fc53b9520c0de16fa17bc67e9262"
+      },
+      {
+        "name": "test_usb_pd",
+        "exit": 0,
+        "log_sha256": "b5bab428fcd7dacb7e423ed89be518d19340df9ff86c8dd3fdc72751e3617c3f"
+      },
+      {
+        "name": "test-gauge-telemetry",
+        "exit": 0,
+        "log_sha256": "0107cdc4898d82f409685bfef68d8a353c58c0806b46e7d7aef058059931768e"
+      },
+      {
+        "name": "test-charge-policy",
+        "exit": 0,
+        "log_sha256": "6efe9599de58de58c93ae89d9b7828f2f35d8937f5cabb471f875b97fd56cc97"
+      },
+      {
+        "name": "test-irp-ownership",
+        "exit": 0,
+        "log_sha256": "feaee020485aa89cd4a5d91e074cc4ca3e524e15d868b53b78673940e3dcf126"
+      },
+      {
+        "name": "test-ftm4",
+        "exit": 0,
+        "log_sha256": "aced759e90f6fe612bf2636baedc30573f4f598e16baf90311d08debb7db967d"
+      },
+      {
+        "name": "bluetooth-arm64",
+        "exit": 0,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "test-emc-governor-existing",
+        "exit": 0,
+        "log_sha256": "adbb04b4b13b4a433cfd9c849cdcf83f6bc8864037c44013d3d698ff28b678f0"
+      },
+      {
+        "name": "test-emc-ptsa-existing",
+        "exit": 0,
+        "log_sha256": "971fd5477f7c976eca3d007026402ca1ad90c11e659941253d3e649198e1dd1e"
+      },
+      {
+        "name": "test-emc-display-qos-existing",
+        "exit": 0,
+        "log_sha256": "36c291b5bdb19e1678a4b374bb7c6b712507df2ed2538b6174f70021bd84c73b"
+      },
+      {
+        "name": "test-pmic-concurrency-existing",
+        "exit": 0,
+        "log_sha256": "dbf676ac168dc037f37f723f083154d2fe2d1044140583385a217ece1e1bb4b6"
+      },
+      {
+        "name": "test-dfll-control-existing",
+        "exit": 0,
+        "log_sha256": "b38472e97137a9ed7deb8707bf1f763f9fb80613b3fd1076a44c08bac00fcb1c"
+      }
+    ]
+  },
+  "high_load_followup": "Keep the manual restart for Wi-Fi startup separate from the subsequent verified unexpected restart after the H.264 trial. Both are recorded without assigning a shared cause.",
+  "current_platform_readback": {
+    "utc": "2026-11-18T17:29:52.5612830Z",
+    "dwm_pid": 828,
+    "power_mode": 1,
+    "receipt_sha256": "eb08b84ebb6d39d7e1c584994bd402827c60f306cd87e52f2d19da13bcaf9ba4",
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "umd_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "wmi_video_modes": [
+      {
+        "y": 1280,
+        "hz": 60,
+        "code": 0,
+        "name": "Tegra X1 (GM20B) .158 GM20B fence 6c86354e781e",
+        "x": 720
+      }
+    ],
+    "selected_driver_after_trial": "Restored",
+    "wmi_and_loaded_components_verified": true,
+    "new_interactive_readback_verified": false
+  },
+  "audio": {
+    "installed_version": "1.0.0.10",
+    "candidate_version": "1.0.0.10",
+    "source_last_audio_change": "32b7d18807e7fbaa7cf999d1b50c954d0e39e7b1",
+    "installed_signed_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+    "fresh_reference_unsigned_sha256": "9d7db17a2412a5d9f49fb44691b0dda954640e07609cf5892aed0629238ea6e8",
+    "compared_payload_bytes": 29172,
+    "candidate_unsigned_sha256": "d8f8878c3f31f61fa7a236cca5b940d5360dd071faf3b7f685793c0e96921b65",
+    "signed_candidate_sys_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+    "candidate_inf_sha256": "27a30c89250f6019b1328ecdfc14114e4a48c6c4d1555020e17d41f6adbf8962",
+    "candidate_source": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/commit/32b7d18807e7fbaa7cf999d1b50c954d0e39e7b1",
+    "cause": "After starting DMA at passive IRQL, SetState(RUN) requests a -1,000,000 x 100 ns kernel delay between the Run0 and Run100 diagnostics. The installed ARM64 image resolves that call to ntoskrnl!KeDelayExecutionThread.",
+    "change": "Ordinary playback keeps the immediate register capture. Audio.ps1 -Mode Check requests the 100 ms registers and PCM sample for streams starting within the next 30 seconds.",
+    "control_columns": [
+      "hardware_starts",
+      "reported_starts",
+      "early_snapshots",
+      "late_snapshots",
+      "late_pcm",
+      "requested_sleep_ms",
+      "sample_utc",
+      "stops"
+    ],
+    "ordinary_start": {
+      "installed_source": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        100,
+        0,
+        1
+      ],
+      "candidate": [
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "explicit_check": {
+      "installed_source": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        100,
+        0,
+        1
+      ],
+      "candidate": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        100,
+        1800000000,
+        1
+      ]
+    },
+    "covered": [
+      "ordinary start",
+      "explicit 30-second window",
+      "final second",
+      "expired or invalid deadline",
+      "clock conversion failure",
+      "dispatch-level call",
+      "repeated RUN and pause/resume",
+      "stop"
+    ],
+    "test_scope": "The original host state-transition controls and ordinary_start / explicit_check rows use substituted waits. Native WASAPI timing, prefilled PCM and the expired request are recorded in native_start_timing.",
+    "control_sha256": "902a052bebe067c85df2437bd7be345c4059fef63fba03b59fa93aa6dca4fbc4",
+    "previous_installed_image": {
+      "version": "1.0.0.9",
+      "signed_sha256": "05fd4e2c9dd22d340942d26edfb5e1a83639fe4fff02d14b9a3bf5e95b86aeff",
+      "fresh_reference_unsigned_sha256": "9d7db17a2412a5d9f49fb44691b0dda954640e07609cf5892aed0629238ea6e8",
+      "fresh_reference_matches_original_installed_payload": true,
+      "compared_payload_bytes": 29172
+    },
+    "native_start_timing": {
+      "hardware_record": "https://github.com/ruje0504-2/Windows-for-Switch-Drivers/blob/a8677617316d4cc11e5e6db609fe0d446a72aa8e/drivers/SwitchAudio/tests/physical-start-20261118.json",
+      "hardware_record_sha256": "ab11179542db2e3ced43369894430f020fbc42b858f8ec27e1b2075a517fe8fa",
+      "accepted_source_commit": "a8677617316d4cc11e5e6db609fe0d446a72aa8e",
+      "runtime_source_commit": "32b7d18807e7fbaa7cf999d1b50c954d0e39e7b1",
+      "previous_version": "1.0.0.9",
+      "selected_version": "1.0.0.10",
+      "previous_signed_sha256": "05fd4e2c9dd22d340942d26edfb5e1a83639fe4fff02d14b9a3bf5e95b86aeff",
+      "selected_signed_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+      "selected_inf_sha256": "27a30c89250f6019b1328ecdfc14114e4a48c6c4d1555020e17d41f6adbf8962",
+      "selected_catalog_sha256": "7b0d5987d1972a2cc0e5af17665c07aec904f64298196ea9c660c31ae35daa92",
+      "package_recovery_available": true,
+      "status_package_version_verified": true,
+      "previous_start_ms": {
+        "min": 107.652,
+        "median": 121.866,
+        "max": 127.496
+      },
+      "selected_start_ms": {
+        "min": 4.627,
+        "median": 7.482,
+        "max": 21.879
+      },
+      "ordinary_start_median_reduction_ms": 114.384,
+      "previous_init_plus_start_median_ms": 139.823,
+      "selected_init_plus_start_median_ms": 42.292,
+      "hardware_cases": {
+        "silent_cycles_per_version": 7,
+        "clock_advanced_in_all": true,
+        "shared_signal_stop_nonzero": 2518,
+        "shared_signal_100ms_nonzero": 0,
+        "exclusive_prefilled_100ms_nonzero": 16384,
+        "exclusive_prefilled_100ms_peak": 32,
+        "expired_request_ignored": true,
+        "diagnostic_request_restored": true
+      },
+      "prior_to_measured_candidate_boot": {
+        "stage": "After selection, before candidate measurements",
+        "recorded_planned_reboot_request": false,
+        "event41": [
+          {
+            "record": 66568,
+            "bugcheck_code": "0",
+            "long_power_button": "false"
+          }
+        ],
+        "event6008": [
+          66559
+        ],
+        "conclusion": "Windows requested a restart when selecting the driver. The controller could not connect to issue its planned restart; the device subsequently recorded an unexpected shutdown. The cause is open. The candidate workload measurements came from the next boot."
+      },
+      "scope": "Ordinary stream startup, progressing device clock, digital PCM transport and explicit diagnostic capture. Acoustic quality was not measured. The unplanned reboot after PnP selection is tracked independently.",
+      "independent_review": "Main review and physical measurement completed. Separate Gemini review of the audio change remains pending."
+    }
+  },
+  "platform_driver_link": {
+    "package": "https://www.nuget.org/packages/Microsoft.Windows.WDK.ARM64/10.0.26100.2454",
+    "scope": "The 26100.2454 ARM64 static support and ntoskrnl import libraries plus the other recorded WDK inputs reproduce the Bluetooth and audio payloads. Their source, PE data and import hints all match. The early 26100.1 support libraries with the same ntoskrnl import library also reproduce the same payloads.",
+    "libraries": {
+      "ntoskrnl.lib": "184c643f74a93303a2cc37ea37281bf0c60d34e38332043af668411cfedca19b",
+      "libcntpr.lib": "ea87dc8eef1f646124fcac939c23d21364b17f648ad95d9f29d5a389d4a3249d",
+      "bufferoverflowfastfailk.lib": "9d759b0bf2a69ce8aea29d8465997744e575eeecd77c64a7a6bcd2ef6a3269ee"
+    },
+    "gpio_i2c_rtc_checks_sha256": "02abd66186a50baa10f355363fe214bb5cc6e2964a9aac9629d48e831db7d74f"
+  },
+  "candidate_package_verification": {
+    "environment": "Windows PE 22621 x64 running on QEMU. The Microsoft 26100 SDK MakeCat created a SHA-256 catalog for each ARM64 driver package. The system WinTrust policy verified the signed catalogs and embedded driver signatures using the project test CA in the temporary guest.",
+    "driver_packages": {
+      "switchwifi": {
+        "switchwifi.inf": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
+        "switchwifi.sys": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
+        "switchwifi.cat": "3ac32fcba2c90eab2ab1ce1b1056868fcc6471e8f07e1b5036509aee92208f4b"
+      },
+      "switchaudio": {
+        "switchaudio.inf": "27a30c89250f6019b1328ecdfc14114e4a48c6c4d1555020e17d41f6adbf8962",
+        "switchaudio.sys": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+        "switchaudio.cat": "7b0d5987d1972a2cc0e5af17665c07aec904f64298196ea9c660c31ae35daa92"
+      }
+    },
+    "embedded_signature_checks": 4,
+    "sha256_catalog_member_checks": 4,
+    "modified_inf_rejections": 2,
+    "modified_inf_wintrust_status": "0x800B0100",
+    "hardware_pnp_install": false,
+    "makecat_exe_sha256": "4126fa639ef895a2e1b9ce08e8495365a5486433aeafd244ae571b9cb2c6780d",
+    "wintrust_verifier_source_sha256": "3192db42e2a23fe062d2dbbf48aa5d5fd7c721cd6c145e2d3641267bb68f65e3",
+    "test_root_der_sha256": "13a0a1e2bd0752723a5fd6d7fb289430430d5beb3a6422e1eccf11d84fac2293",
+    "catalog_creation_log_sha256": "5a53d16368c71ae9948c913fa827f4638c9c835a50dc175de4d8d9970f927524",
+    "signature_and_membership_log_sha256": "14dc4c0fd5134d432508384a69a45de0c7651e9151e2f2c1ad0b8dd9472cc51c",
+    "api_reference": "https://learn.microsoft.com/en-us/windows/win32/api/wintrust/ns-wintrust-wintrust_catalog_info",
+    "hardware_status": "The last on-device inventory showed Wi-Fi 0.5.7.0 and audio 1.0.0.9. The prepared candidate packages require a live PnP and functional trial.",
+    "arm64_driver_store": {
+      "environment": "Windows PE ARM64 10.0.22621.2861 on a Cortex-A57 virtual machine",
+      "receipt_sha256": "913160063e4c56f13a69760a387dc249d3bb35fac229da147599cb1272a85da2",
+      "packages": {
+        "tegragpurender": {
+          "sha256": {
+            "tegragpurender.inf": "a74b0e6003910339afd499debca42f467eaf4d17b654e10d47732e88da9f4673",
+            "tegragpurender.sys": "34317683cf2864e9e104977a411acf070b2358fcba47ed20ff73ea2e2d76a2e7",
+            "tegragpuno3d.dll": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+            "NETB_img.bin": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+            "fecs.bin": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+            "gpccs.bin": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+            "nv_acr_ucode_prod.bin": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+            "pmu_bl.bin": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+            "gpmu_ucode_image.bin": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699",
+            "gpmu_ucode_desc.bin": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+            "pmu_sig.bin": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+            "fecs_sig.bin": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+            "tegragpurender.cat": "027edb4c451753a57c0a4cae851db350457a6d49b0536ebc5197bd2d8836b9e6"
+          },
+          "add_driver_exit": 0,
+          "modified_inf_exit": 1,
+          "all_fetched_hashes_match": true,
+          "member_checks": 12
+        },
+        "switchwifi": {
+          "sha256": {
+            "switchwifi.inf": "bebb98a9c357fba96fb3d45218072724b84cb082d9211e10dff492680f71cea5",
+            "switchwifi.sys": "600b5d4e9d465c0d51062e48a0ac9bfeb467ca09d911b1048115cc29be7a804c",
+            "switchwifi.cat": "3ac32fcba2c90eab2ab1ce1b1056868fcc6471e8f07e1b5036509aee92208f4b"
+          },
+          "add_driver_exit": 0,
+          "modified_inf_exit": 1,
+          "all_fetched_hashes_match": true,
+          "member_checks": 2
+        },
+        "switchaudio": {
+          "sha256": {
+            "switchaudio.inf": "27a30c89250f6019b1328ecdfc14114e4a48c6c4d1555020e17d41f6adbf8962",
+            "switchaudio.sys": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+            "switchaudio.cat": "7b0d5987d1972a2cc0e5af17665c07aec904f64298196ea9c660c31ae35daa92"
+          },
+          "add_driver_exit": 0,
+          "modified_inf_exit": 1,
+          "all_fetched_hashes_match": true,
+          "member_checks": 2
+        }
+      },
+      "scope": "Graphics, Wi-Fi and audio packages passed ARM64 Windows PE catalog and store checks. The physical audio and Wi-Fi operational receipts are linked under the selected components."
+    }
+  },
+  "game_frame_and_power": {
+    "scope": "Five retained successful FTE/LibreQuake sessions on one boot and one historical KMD. Both clock snapshots bracket the whole process. Windows clocks, temperatures and sample ages are endpoint observations and do not describe individual frame intervals. There is no continuously sampled power draw. No candidate KMD was running in these sessions.",
+    "metric_definitions": "Application updates use Win32k event 33 attributed to the game PID; DWM event 46 covers compositor updates in the timed interval. Distinct captured images count consecutive changes in the foreground game window. FPS is the inverse mean positive inter-event duration; percentiles use linear interpolation.",
+    "verified_interval_metrics": 60,
+    "intervals": {
+      "file": "dxvk-games-20261118/power-game-frame-intervals.csv",
+      "published_sha256": "b9b63fbfc4dc7f6af05d67088a513f9bf0217c4c6c55d6c5ae45a0a19fd589b0",
+      "rows": 20,
+      "raw_sha256": "37ed740f20ff7be651ff858d4f576c8d51f617f81574424f8551f3db74027fb1"
+    },
+    "runs": [
+      {
+        "path": "dxvk-x64",
+        "case_directory": "fte-default-dxvk-x64-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "game": "fteqw64.exe",
+        "icd_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "backend": "d3d9",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:50:51.3681951Z",
+            "CpuTargetKhz": 1122000,
+            "CpuActualKhz": 1120605,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 307200,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 625,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 36,
+            "SocTempC": 36,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 124,
+            "TempSampleAgeMs": 1296,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:52:11.5541693Z",
+            "CpuTargetKhz": 918000,
+            "CpuActualKhz": 929106,
+            "RamActualKhz": 204000,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 500,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 187,
+            "TempSampleAgeMs": 1062,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 407240704,
+        "inputs_sha256": {
+          "result.json": "c8ed7d85586c8eab6882b972ff61da4578b704106300517c725d0e3626f192ef",
+          "comparison.json": "e926a503a4ac87ddb3cabfe92d1ed1e938555ad5b488c291ca03b3e05ce4852e",
+          "frame-events.csv": "d402b34f999df75cc99c1154cdd70d0e3dea5e7690e08c2714db6ad785773d14",
+          "visible.csv": "16e9f8538ff08d39cdea5fa9e50c2c70c06c5f2d116fe1f4ddd4451c6bdc9adc"
+        }
+      },
+      {
+        "path": "dxvk-x86",
+        "case_directory": "fte-default-dxvk-x86-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+        "game": "fteqw.exe",
+        "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "backend": "d3d9",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:48:32.7220361Z",
+            "CpuTargetKhz": 918000,
+            "CpuActualKhz": 918896,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 307200,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 529,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 31,
+            "TempSampleAgeMs": 1359,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:49:36.5888810Z",
+            "CpuTargetKhz": 408000,
+            "CpuActualKhz": 412432,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 76800,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 176,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 0,
+            "TempSampleAgeMs": 937,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 363659264,
+        "inputs_sha256": {
+          "result.json": "30a3cd1ddebc5a1d97a85584fc2439eab7a746f064de48668586dba69b6cd5b2",
+          "comparison.json": "f2d1adf976504269fa737ec004145c77062ce93ba362d22c95a1963becbe9a55",
+          "frame-events.csv": "015c2e327913849628bbb6859b389609af4cc3e6aa8167d796d94a1b2be813f1",
+          "visible.csv": "060359e9e6184a07f5fa8194a4340f25130b87b8ee2e3af1d7788e97afc66b47"
+        }
+      },
+      {
+        "path": "dxvk-ec",
+        "case_directory": "fte-default-dxvk-ec-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "game": "fteqw64.exe",
+        "icd_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "backend": "d3d9",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:53:21.3639853Z",
+            "CpuTargetKhz": 1020000,
+            "CpuActualKhz": 1021992,
+            "RamActualKhz": 1600000,
+            "GpuReportedKhz": 307200,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 588,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 124,
+            "TempSampleAgeMs": 453,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:54:33.7395546Z",
+            "CpuTargetKhz": 1581000,
+            "CpuActualKhz": 1568250,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 936,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 421,
+            "TempSampleAgeMs": 515,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 405827584,
+        "inputs_sha256": {
+          "result.json": "ef5159a40727e75c923a4aabadb1167efa9b2dcab90668fbbf4817be8eff7e28",
+          "comparison.json": "75489f00ed34b304e9726c7da6c60080f952d888639df24cb17025d0e085d718",
+          "frame-events.csv": "c8c822f2fde7619b5adcfeded7d44ffa36f0f32792faea57c7e852998bdf6fc3",
+          "visible.csv": "3bb28988c20e1f7f84c04d265a39323505c143329c7f91a49933326366ec99f4"
+        }
+      },
+      {
+        "path": "zink-x64",
+        "case_directory": "fte-default-zink-x64-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "549b71a70c450252b5ed83748c8ac41a7a8d01280c7810be840c13badc321840",
+        "game": "fteqw64.exe",
+        "icd_sha256": "8db4e7f805127c7e9abd2e73b6a3a3447aafe424ed82b3b1a16d7f99a3fb7910",
+        "backend": "gl",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:46:46.3572870Z",
+            "CpuTargetKhz": 816000,
+            "CpuActualKhz": 815800,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 76800,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 437,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 36,
+            "SocTempC": 36,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 31,
+            "TempSampleAgeMs": 1546,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:47:37.3001801Z",
+            "CpuTargetKhz": 714000,
+            "CpuActualKhz": 712705,
+            "RamActualKhz": 204000,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 411,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 15,
+            "TempSampleAgeMs": 343,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 328146944,
+        "inputs_sha256": {
+          "result.json": "dca6a497f26bcb1563c9e17adfc9fb5cdd086991563fce14c88a56f8c7849f8d",
+          "comparison.json": "fd679c82f2094519627060fbd5b06bdef640968885b52f6828842070d245bb9e",
+          "frame-events.csv": "ad2fa70c7fead8f116512f01c63b6e8469f650904fede09b3ea653a891fc3d10",
+          "visible.csv": "4ae29445a98d54be6a38d51e2b7a9e3997923b2df73dcd4f06cd3a66f6a427c3"
+        }
+      },
+      {
+        "path": "zink-x86",
+        "case_directory": "fte-default-zink-x86-01",
+        "boot": "2026-11-18T07:31:47.5962910Z",
+        "qpc_hz": 19200000,
+        "kmd_sha256": "b94248bcb222271c79d8412ba5d21a2e1afaca9b421e182cdd16879dbabdd6b7",
+        "game_sha256": "7d162ac6c0ba140f292f11c04b42d8e0af895db994fbc0efe40ab72126be4add",
+        "game": "fteqw.exe",
+        "icd_sha256": "d584dd77174fbaff338d8f831702126cd6c9bf09790e37f525e7815280c91c1b",
+        "backend": "gl",
+        "dwm_same_process": true,
+        "kernel_runtime_presents_by_game": 0,
+        "power_mode": "Handheld",
+        "ac": "Online",
+        "width": 640,
+        "height": 360,
+        "before_after_only": {
+          "before": {
+            "utc": "2026-11-18T07:44:17.3717326Z",
+            "CpuTargetKhz": 816000,
+            "CpuActualKhz": 815800,
+            "RamActualKhz": 1331200,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 466,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 31,
+            "TempSampleAgeMs": 1265,
+            "FanDuty": 51
+          },
+          "after": {
+            "utc": "2026-11-18T07:45:11.6694333Z",
+            "CpuTargetKhz": 612000,
+            "CpuActualKhz": 620915,
+            "RamActualKhz": 204000,
+            "GpuReportedKhz": 537600,
+            "GpuReportedUv": 590000,
+            "CpuLoadPermille": 294,
+            "CpuLastError": 0,
+            "CpuDfllActive": 1,
+            "TempC": 37,
+            "SocTempC": 37,
+            "BoardTempC": 35,
+            "TempValid": 1,
+            "GpuSampleAgeMs": 31,
+            "TempSampleAgeMs": 1437,
+            "FanDuty": 51
+          }
+        },
+        "peak_observed_working_set": 279633920,
+        "inputs_sha256": {
+          "result.json": "3c0bf7ca2009c52d52c390b7d6bf1051d2fff8b07ba4b4a1a0a1b32a1676ef60",
+          "comparison.json": "28da9ad1c721cf6bcc9851ea4092bab24c2782d03d6f0e677197758e483a237f",
+          "frame-events.csv": "fe6067184f49611de69084237f4fb08c03b6e762d74de5c8897326cd3699d211",
+          "visible.csv": "86d47fa04132b2c4bdebde952bf667ea3611ebb90195ecdad684fa4dda2c8461"
+        }
+      }
+    ]
+  },
+  "high_load_followup_720p": {
+    "record": "EMC_VOTE_DELIVERY_20261118.json",
+    "result": "Both the baseline and candidate KMD reached six software-reference frame checks and the client success return, followed by an unplanned restart before durable parent exit. The candidate occurrence used external power with client ETW off.",
+    "restored_kmd_desktop_observation": "A later unplanned reboot also occurred with the accepted KMD after dispatch of a desktop check with no video or game. Its last operation is unknown."
+  },
+  "last_audio_hardware_state": {
+    "utc": "2026-11-18T17:37:39.9755770Z",
+    "boot": "2026-11-18T17:34:48.7725220Z",
+    "dwm": [
+      1360
+    ],
+    "gpu_code": 0,
+    "audio_code": 0,
+    "kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "audio_sha256": "36a62d088d2a04dbc5c7acb97f2b7528fb568cb996a6d2b9f92f27005bbbe81b",
+    "power_mode": 1
+  },
+  "pacecar": {
+    "selected_ui_sha256": "135285da2255e087c8b37e5034b023035a01d3990ab2b10e4e0220bdc56c7d24",
+    "selected_helper_sha256": "73cddb34770b20efdbf518ac2108b50f529adc0d3f03b46a130586bf9befb245",
+    "runtime_source": "cb52e1b008f9c440469379a0129e6004690834ce",
+    "acceptance_commit": "c0bf693d22f10d1b4001224dea04afa81ee1b51f",
+    "record_sha256": "81a2af18ffbecb2f94d689772a7047fc991885194f1b5fb95e56e2262c0f512d",
+    "physical_record": "https://github.com/ruje0504-2/pacecar/blob/c0bf693d22f10d1b4001224dea04afa81ee1b51f/docs/progress/switch-frame-history-and-settings-20261118.json",
+    "frame_math_and_pipe_cases": 21,
+    "settings_cases": 10,
+    "replayed_game_events": 1152,
+    "replayed_widget_samples": 147,
+    "fresh_multi_surface_gameplay_accepted": false,
+    "desktop_tgd3d_samples": 7,
+    "desktop_game_fps_samples_available": 0,
+    "selected_profile_sha256": "9b44f2e1666c9d603180972b551797a2dec76326f73bc6693db0d3626a37bfa7",
+    "post_reboot_utc": "2026-11-18T19:07:27.5649700Z",
+    "unexpected_restart_followup": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json"
+  },
+  "dxvk_frame_limiter": {
+    "record": "tegra-x1-wddm/docs/DXVK_FRAME_LIMITER_20261118.json",
+    "record_sha256": "548a67f8b23b9f4c67bbdb7290fe24b9415c5d2152c3c5eb69bd2e881e0ce079",
+    "source_tag": "v3.1.1",
+    "source": "b1a1c99ab52b687cf950d62c88bc2fa316b41663",
+    "arches_with_two_counterbalanced_pairs": [
+      "arm64",
+      "x86",
+      "x64",
+      "arm64ec"
+    ],
+    "caps_hz": [
+      8,
+      15,
+      60
+    ],
+    "physical_windows_timer_control": true,
+    "game_dll_changed": false,
+    "live_game_performance_verified": false,
+    "high_resolution_wait_control": true,
+    "high_resolution_15hz_p95_regressions": 2,
+    "live_game_trial": "tegra-x1-wddm/docs/DXVK_GAME_RESTART_CACHE_20261118.json",
+    "new_cpu_control_caps": [
+      30,
+      60
+    ],
+    "fixed_500us_tail_cpu_control": true
+  },
+  "application_nvk_cache_paths": {
+    "record": "tegra-x1-wddm/docs/WIN32_APPLICATION_CACHE_PATH_20261118.json",
+    "record_sha256": "0987bd3f028a35ada941fc71a2cfd6061a41cfb28a8fdfeb5fa36caff672e495",
+    "package_source": "70f0e7245e7ef40c1ced3430f37adf051910615a",
+    "source_tag": "nvk-application-cache-path-20261118",
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-cache-path-33197ea452",
+    "arch_sha256": {
+      "arm64": "c381a78178b13fb26e09f266248b8351f25053edb9ded2854f6279cfc17d1024",
+      "x86": "cc343903b674b61aeeee52708a32c9a75997bd082768c1a9e2626f825d7312d4",
+      "x64": "e200a5635c98f8624bf836f1d4f2ad8e6c1a307c30e22f73a5868f5360ca5554"
+    },
+    "registered_d3d9_checks": [
+      "x64",
+      "x86",
+      "x64 host with ARM64EC D3D9"
+    ],
+    "pixel_validated_submissions": 288,
+    "state_after_later_restart": "2026-11-18T20:07:14.7055600Z"
+  },
+  "objective5_runtime_status": {
+    "as_of_utc": "2026-11-18T21:04:36.0604569Z",
+    "physical_readback": {
+      "board": "Switch Lite",
+      "app_settings_sha": "E273B17805E5DF8E8F0709D9CF3E4BB70A624E2C644CB40899CC7BAF60B332D6",
+      "boot": "2026-11-18T21:02:04.2770480Z",
+      "drivers": {
+        "switchpwrbtn": {
+          "sys_sha": "879550E4EB292619F45DE86EB458FC94F07149CA3DE95BC88369166FCD64914E",
+          "version": "1.0.0.8",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchsio": {
+          "sys_sha": null,
+          "version": "0.2.5.0",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchtouch": {
+          "sys_sha": "D0A056D2DE17A3968D7A9340154516F132C0C69BBD3E99A393A5E6557CDB1A39",
+          "version": "1.0.1.2",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchwifi": {
+          "sys_sha": null,
+          "version": "0.5.7.1",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchrtc": {
+          "sys_sha": "169164193D731756791D476894C67751C87CEEF27D5C14B7AA3A47B9556DE797",
+          "version": "1.0.0.4",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchaudio": {
+          "sys_sha": "36A62D088D2A04DBC5C7ACB97F2B7528FB568CB996A6D2B9F92F27005BBBE81B",
+          "version": "1.0.0.10",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "nvtsdhc": {
+          "sys_sha": "5389B30D3A04FAD330B9AFEF36B0D500AD363C6C5B39C55C9B60096669BFD945",
+          "version": "0.5.1.2",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchfan": {
+          "sys_sha": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+          "version": "1.0.0.33",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "switchbt": {
+          "sys_sha": "A106E3AC6F9594A64A294C46CE969E623C91F4E3745E8A49961205E29B317CEE",
+          "version": "1.0.0.19",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "tegra210gpio": {
+          "sys_sha": "8A767C673B73D25EF209640F395ED78D99883942B58BED4F2C4A480B30DCCA93",
+          "version": "1.0.0.5",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "tegragpurender": {
+          "sys_sha": "6C86354E781E76D671C20BF14B124248A6E1AA264DCAB6D459A6B14D551469B0",
+          "version": "0.1.0.158",
+          "instances": 1,
+          "codes": [
+            0
+          ]
+        },
+        "tegra210i2c": {
+          "sys_sha": "C7BF8FE18A95D2D5B39D3C8137EA0751EAE1471969FE7699F4712F033A45EA31",
+          "version": "1.0.0.7",
+          "instances": 3,
+          "codes": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "pacecar": [
+        {
+          "sha": "135285DA2255E087C8B37E5034B023035A01D3990AB2B10E4E0220BDC56C7D24",
+          "session": 1
+        }
+      ],
+      "dwm": 1420,
+      "pacecar_settings": "9B44F2E1666C9D603180972B551797A2DEC76326F73BC6693DB0D3626A37BFA7",
+      "storage": {
+        "ClockKhzActual": 199680,
+        "AdmaErrors": 0,
+        "BusWidth": 4,
+        "Ddr200Fallbacks": 1,
+        "Ddr200RecoveryStatus": 0,
+        "Ddr200Active": 0,
+        "BusSpeed": 7,
+        "Ddr200Window": 1
+      },
+      "utc": "2026-11-18T21:04:36.0604569Z",
+      "pacecar_backup": "710C6B79E1E5E7CB82311732D4D34ADEF76A6BF721573DD6BBD470ECA95BBF35",
+      "loaded_dwm_module_sha": {
+        "libvulkan_nouveau.dll": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "TegraGpuD3DVk.dll": "DED6FA4AFFEC0F18773503D282F9B44939090488202EF5F25EA1D879DD862F0D"
+      },
+      "bios": "1.09 (winx-r402)",
+      "cpu_error": 0,
+      "app_icd_sha": {
+        "x64": "E200A5635C98F8624BF836F1D4F2AD8E6C1A307C30E22F73A5868F5360CA5554",
+        "x86": "CC343903B674B61AEEEE52708A32C9A75997BD082768C1A9E2626F825D7312D4",
+        "arm64": "C381A78178B13FB26E09F266248B8351F25053EDB9DED2854F6279CFC17D1024"
+      },
+      "emc_error": 0,
+      "emc_transitions": 113,
+      "handheld": true
+    },
+    "modules": {
+      "kmd_fence": {
+        "state": "daily",
+        "binary_prefix": "6c86354e",
+        "metric": "Offscreen submit to completion median, ms",
+        "reference_arm64_x86_x64": [
+          15.5264,
+          15.2566,
+          15.3181
+        ],
+        "selected_arm64_x86_x64": [
+          1.7842,
+          1.9505,
+          1.792
+        ],
+        "record": "KMD_FENCE_POLL_20261118.json"
+      },
+      "application_nvk": {
+        "state": "daily",
+        "source": "70f0e7245e7ef40c1ced3430f37adf051910615a",
+        "scope": "Opt-in removed, Mesa disk cache enabled; long application cache paths pass with ARM64, x86 and x64 ICDs, including the x64-host ARM64EC D3D9 route.",
+        "record": "WIN32_APPLICATION_CACHE_PATH_20261118.json"
+      },
+      "desktop_umd_and_video": {
+        "state": "daily",
+        "binary_prefix": "ded6fa4a",
+        "scope": "H.264 discovery enabled by default; independent-context completion recheck and teardown deferral. Six 720p hashes match on the selected UMD. Full window exit, 1080p in this combination and browser hardware use remain open. Stock Edge used software.",
+        "record": "NVDEC_DEFAULT_VIDEO_REGRESSION_20261118.json",
+        "browser": "Software H.264 decoding on both stock browsers with the selected UMD.",
+        "browser_record": "tegra-x1-wddm/docs/BROWSER_H264_AND_D3D_FEATURE_LEVEL_20261118.json",
+        "system_d3d11_feature_level": "10_0",
+        "target_feature_level": "11_1"
+      },
+      "pacecar": {
+        "state": "daily",
+        "scope": "Reusable FPS surface slots and durable settings accepted. Fresh live multi-surface workload remains open.",
+        "record": "https://github.com/ruje0504-2/pacecar/blob/c0bf693d22f10d1b4001224dea04afa81ee1b51f/docs/progress/switch-frame-history-and-settings-20261118.json"
+      },
+      "platform_drivers": {
+        "state": "daily",
+        "components": {
+          "audio": "1.0.0.10",
+          "wifi": "0.5.7.1",
+          "i2c": "1.0.0.7",
+          "rtc": "1.0.0.4",
+          "power_button": "1.0.0.8",
+          "gpio": "1.0.0.5"
+        },
+        "outstanding": "Cold Wi-Fi initialization, physical key and contact input, and system sleep/wake."
+      },
+      "dxvk_and_zink": {
+        "state": "original app-local runtime",
+        "scope": "Original app-local runtime selected. The x86 three-way 30/60 Hz CPU control reduced thread usage with a fixed 500-us tail and increased tail latency. LibreQuake restarted on the original DLL during warmup. Fresh game CPU and frame-period comparisons remain open.",
+        "records": [
+          "DXVK_ZINK_GAME_MATRIX_20261118.json",
+          "DXVK_FRAME_LIMITER_20261118.json"
+        ]
+      },
+      "wsi_rectangles_and_cache_microoptimization": {
+        "state": "tested candidates outside selection",
+        "scope": "The WSI rectangle control lacks a complete candidate exit. The separate missing-file and eviction sorting candidate passed short-root controls; first-use costs and game results did not justify selecting it. NAK has no independently qualified speedup.",
+        "record": "WIN32_SHADER_CACHE_PERFORMANCE_20261118.json"
+      },
+      "emc_voltage_delivery": {
+        "state": "tested candidate rolled back",
+        "scope": "Six reference-matched 720p frames, followed by an unexpected restart before the parent process captured exit. Daily Handheld scheduling retained.",
+        "record": "EMC_VOTE_DELIVERY_20261118.json"
+      },
+      "paging_and_nvdec_verifier": {
+        "state": "measured",
+        "scope": "Paging retains full validation. The 1080p test client uses a measured BCrypt verification variant; faster hashes do not demonstrate higher hardware decoder throughput.",
+        "record": "NVDEC_MODULE_TIMINGS_20261118.json"
+      },
+      "uefi_sd_bluetooth": {
+        "state": "platform baseline retained",
+        "scope": "HDH-001 SMBIOS candidate built, physical startup pending. This boot uses SDR104. Passive BLE receive passed; connected peer traffic and suspend/resume outstanding."
+      }
+    }
+  },
+  "browser_video_qualification": {
+    "status": "Software H.264 decoding on both stock browsers with the selected UMD.",
+    "record": "tegra-x1-wddm/docs/BROWSER_H264_AND_D3D_FEATURE_LEVEL_20261118.json",
+    "record_sha256": "f71899f26d86ba1fa847823920a5f35d3db4b9898f1521091a0e56d4099dbc0e",
+    "direct3d11_feature_level": "10_0",
+    "d3d11_target": "11_1",
+    "native_nvdec_control": {
+      "size": [
+        1280,
+        720
+      ],
+      "matching_frames": 6
+    },
+    "browsers": [
+      {
+        "version": "157.0.4341.60",
+        "decoder": "FFmpegVideoDecoder",
+        "total": 360,
+        "dropped": 5,
+        "exit": null,
+        "trace_closed": false
+      },
+      {
+        "version": "158.0.8127.37",
+        "decoder": "FFmpegVideoDecoder",
+        "total": 360,
+        "dropped": 29,
+        "exit": 0,
+        "trace_closed": true
+      }
+    ]
+  },
+  "system_legacy_directx": {
+    "status": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit.",
+    "order": [
+      "32-bit system D3D9 on FTEQW / LibreQuake",
+      "32-bit system D3D8, then game",
+      "DirectDraw 2D and Direct3D 7, then games"
+    ],
+    "record": "tegra-x1-wddm/docs/SYSTEM_LEGACY_DIRECTX_20261118.json",
+    "record_sha256": "1dc1a2564290ae209df10442e558b23d705b15d8a4b69fe30343918215404ebb",
+    "direct_ddi_adapter_control": true,
+    "system_game_accepted": false,
+    "temporary_driver_binding_restored": true,
+    "x86_system_d3d9_retest": {
+      "status": "The x86 Windows D3D9 runtime loaded the experimental UMD and NVK in FTEQW. The surviving trace records four successful opens of the GM20B and two D3DDDICAPS_GETD3D9CAPS queries rejected with D3DERR_NOTAVAILABLE. Both requested D3D9 window sizes failed, then FTE began its OpenGL fallback before an unexpected reboot. A separate run on the existing app-local x86 DXVK used the ordinary ARM64 KMD and identified native NVK GM20B before another reboot. Neither run recorded a normal exit.",
+      "record": "tegra-x1-wddm/docs/dxvk-games-20261118/x86-system-d3d9-windowed-retest.json",
+      "record_sha256": "8fc7301526d42c9931d41d73edeca89a0473099b284a85f0d9340f3c32280bb9",
+      "native_game_accepted": false,
+      "native_adapter_open_observed": true,
+      "game_pid": 6112,
+      "original_registrations_restored": true
+    }
+  },
+  "native_d3d12_device_creation": {
+    "record": "tegra-x1-wddm/docs/D3D12_DEVICE_CREATION_20261118.json",
+    "record_sha256": "361f62ef27e515b229dd5ba70685a3e3f38d040af204e43bbbcb8f9c0691c91c",
+    "process_arch": "ARM64",
+    "native_device_created": {
+      "11_0": false,
+      "12_0": false
+    },
+    "native_hresult": {
+      "11_0": "0x887a0004",
+      "12_0": "0x887a0004"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "round_id": "c19-native-create-default-20261121-01",
+  "contract_id": "dxgvmbus.c:3156:3",
+  "declared_utc": "2026-11-22T02:54:00.721787+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "72641e493d1f1a76ee732ea4029f189c0af120acaf71e360656b1c091e48bd2e",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "创建 DEFAULT 原生围栏时当前值 CPU 映射只读。",
+  "question": "合法创建 DEFAULT 后，当前值 CPU 映射是否只读？",
+  "method": "只复用本条原来的 Windows 能力回执，并核对当前正式系统版本与该 API 的受支持条件。",
+  "required_observation": "合法创建 DEFAULT 后，当前值 CPU 映射是否只读？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-native-create-default-20261121-01.result.json",
+    "sha256": "d583acc766759b65120a73052f037f03be37d80b06aeed265e2994236fd61a9d"
+  }
+}

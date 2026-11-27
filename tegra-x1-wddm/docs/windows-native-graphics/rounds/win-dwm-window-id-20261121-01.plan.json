@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-window-id-20261121-01",
+  "contract_id": "WIN-DWM-CONSUME",
+  "windows_question": "WIN-DWM-CONSUME",
+  "owner": "Windows DWM、Win32k 和 dxgkrnl 的重定向表面",
+  "question": "原空窗口首次 Blt 返回后，DWM 是否记录了与该 HWND、LUID 和本次表面提交成对的消费事件？",
+  "method": "复核已收回的本机 ETL 与应用回执",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "361edfcb06e74fe075eed22270cb12327c27e18be3d8a3b0eb9d4f29e0a0ab62"
+    },
+    "driver_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+    "power": "交流供电，手持模式"
+  },
+  "pass_condition": "在本次提交与可用画面之间将 DWM 的消费事件按窗口、适配器及提交或令牌身份与该次应用提交相连。",
+  "observations": [
+    "上轮 DWM 事件 91 的 EventId 与原窗口 HWND 数值相同。逐个核对独立窗口的 HWND、事件字段、Blt 与 KMT 返回及客户区采样时序；比较相同设备的正常翻转。",
+    "把 DWM 针对此 HWND 的调度与可证实的窗口消费、实体扫描区分。"
+  ],
+  "inputs": {
+    "previous": {
+      "path": "windows-native-graphics/rounds/win-dwm-blt-token-20261121-01.result.json",
+      "sha256": "4fba0db912a03d9b2071a45bf42434cb50f62922a54dbec0d06534c2d2ccdfc3"
+    },
+    "case_hashes": {
+      "win-empty-present-20261121-01": "85f7868bfb709ce41e4120e9af969233c93f302b20c1fc8f4b5872cf06d00961",
+      "win-first-present-20261121-01": "e2c65e8f0b47d65fc3af8717ea2c78e4d1ca62994c1e59a75006b0cbe07d4634",
+      "copy-sequential-1": "09bc540a153902c33bf25fa6d608ea52c68ca7fabc850119ae8e1fd81f5e715a",
+      "copy-sequential-2": "543562f0f57bab939fd8b6fa8cce22b014da8bfcc88b47c9c1877decaef500dc",
+      "copy-sequential-3": "4eb3b503b4d14f1b4262c23e38394a1191dce1fe42ca5fcd06f2f202d7222a24",
+      "copy-flip-1": "1e096b5215c2a539e0c09745700c86df16df8f4b13584e9511e99ab209749527"
+    },
+    "schema_sha256": "594a16e069e2e10846b7a8a99dbc0553e2343b4648a52df19ea506fdc4edffd0"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "fault_id": "GM20B-STALL-FAULT-ISR-AND-RAIL-OWNERSHIP",
+  "scope": "gm20b-stall-fault-isr-barriers-and-rail-ownership",
+  "source_commit": "4c0cb225526ef65a456a41c3f257db54d8abf14e",
+  "platform_drivers_commit": "728127d9561b7e593375be9847b92049605f4738",
+  "confirmed_cause": "GM20B lacked an armed stall-fault interrupt handler (SPI 157) with DIRQL MMIO commit gating and cold-reset 0xFFFFFFFF NV_PMC_INTR_MSK_0 / LIC_IER acceptance, leaving MMU/FIFO faults to rely solely on polling or 2s timeout; concurrently, platform_io.c needed single-owner state->Lock -> HandleLock atomic bridge publication, ordinary/deadline pending-CLAIM tracking, and atomic isolation-revocation ledger updates with SwitchFan versioned claim/handoff tokens.",
+  "host_and_wdk_tests_passed": {
+    "mesa_host_tests": 22,
+    "wdk_arm64_fixtures": 14,
+    "platform_driver_tests": 3
+  }
+}

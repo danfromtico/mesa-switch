@@ -1,0 +1,825 @@
+{
+  "schema": 1,
+  "decision": "accept_bounded_native_callback_and_formal_restoration_evidence;repair_not_qualified",
+  "main_device_operations": 0,
+  "goal_complete": false,
+  "archive": {
+    "filename": "context-native-idle-return-01a204e6.zip",
+    "bytes": 47771145,
+    "sha256": "640abef0b8362b7cb9aa04daacca7f76f30cfe4009302fa3bd9aad100f6c03de",
+    "members": 641,
+    "originals": 640,
+    "manifest_sha256": "cb9d6ad255310523c93636c4622516aeaf5a933f4793e439c83cc5e52551f2c2",
+    "all_bytes_SHA_CRC_verified": true
+  },
+  "producer": {
+    "source": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+    "parent_fix": "e1d34c6165b00bda047f448075e5318d740bfef2",
+    "SYS_sha256": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+    "adapter_reset_source_sha256": "9bfa594944fb6a5e6b82ae0aa97c3b423be016895b74a57887117c8b96839f90",
+    "reset_backend_unchanged_from_parent": true,
+    "same13_package_as_accepted_staging": true,
+    "new_add_driver_requests": 0
+  },
+  "review_provenance": {
+    "model": "gemini-4-neon-high",
+    "conversation": "84ffff64-cb7d-4af0-b3ab-0e20c5dc507d",
+    "R1_recovery_race_fixed": true,
+    "R2_outcome": "approve_new_fix_native_case",
+    "R2_findings": 0,
+    "frozen_manifest_members": 109,
+    "frozen_files_including_manifest": 110,
+    "initial_empty_response_not_approval": true,
+    "same_permissions_file_and_conversation": true
+  },
+  "candidate": {
+    "boot": 98157,
+    "Code": 0,
+    "AC": "Online",
+    "components": 8,
+    "actual_loaded_paths": 5,
+    "full_hashes_match": true,
+    "permanent_absent": true,
+    "one_use_token_armed": 1,
+    "one_use_token_observed": 0,
+    "token_file_still_present_on_candidate_boot": true,
+    "DWM_PID": 1468,
+    "DWM_start": "2026-11-23T08:14:51.1329183Z",
+    "private_x86_preserved": {
+      "sha256": "5ac50269abb761c9e77dabfb71da035f211263c9609adff056dd6a1cec79cd69",
+      "path": "C:\\Program Files\\SwitchWOA-GpuBoot\\NeonAcceptance-01a20660\\private-x86\\libvulkan_nouveau.dll"
+    },
+    "repair_qualified": false
+  },
+  "request": {
+    "event": "request",
+    "pid": 4736,
+    "tid": 3940,
+    "luid": "00000000000056df",
+    "control": 8,
+    "node": 0,
+    "flags": 0,
+    "bytes": 8,
+    "qpc_stamp": 9909747939,
+    "qpc_frequency": 19200000,
+    "api_requests": 1
+  },
+  "API_return": {
+    "event": "return",
+    "pid": 4736,
+    "tid": 3940,
+    "luid": "00000000000056df",
+    "control": 8,
+    "status": "00000000",
+    "qpc_stamp": 9910003738
+  },
+  "capture": {
+    "raw_JSONL_records": 187443,
+    "raw_events": 187368,
+    "state_records": 75,
+    "parse_errors": 0,
+    "live_sha256": "bfc177805c4600b63d9eca1505cb82b29add5e4db58eb288edd329adbb58a38d",
+    "reported_loss": 0,
+    "TraceEnd_query_status": 4201,
+    "TraceEnd_process_status": 0,
+    "host_fsynced_TraceStart_bound": true,
+    "observation_journal_samples": 89,
+    "observation": {
+      "qpc_frequency": 19200000,
+      "seconds": 45,
+      "deadline_reached": true,
+      "reader_exited_seen": false,
+      "recovery_completion_inferred": false,
+      "start_qpc": 9912218536,
+      "deadline_qpc": 10776218536,
+      "elapsed_seconds": 45.02291098958333,
+      "stop_reason": "bounded_observation_deadline",
+      "observed_qpc": 10776658427,
+      "journal": "C:\\Program Files\\SwitchWOA-ContextRecovery-95b73754e44f-01a204e6\\engine-observation.jsonl",
+      "samples": 89
+    },
+    "engine_etl_bytes": 208404480,
+    "engine_etl_sha256": "599b2b748d51863235d9d0fe0cf86389cc727cd5ad7d5e6ab6747e638d92c1c5",
+    "engine_etl_header": {
+      "buffer_size": 65536,
+      "end_time": 134398958115098345,
+      "buffers_written": 3180,
+      "events_lost": 0,
+      "boot_time_filetime": 134398952258907599,
+      "qpc_frequency": 19200000,
+      "clock_context": 1,
+      "buffers_lost": 0
+    },
+    "KMD_matching_selected_header_fields_and_payload_multiset": 139,
+    "matched_fields": [
+      "id",
+      "version",
+      "opcode",
+      "task",
+      "pid",
+      "tid",
+      "qpc_stamp",
+      "bytes",
+      "data"
+    ],
+    "header_flags_difference": {
+      "raw_C013_offset4": 0,
+      "Windows_EVENT_RECORD_export": 576,
+      "count": 139,
+      "SDK_export_bit_names": [
+        "EVENT_HEADER_FLAG_64_BIT_HEADER",
+        "EVENT_HEADER_FLAG_PROCESSOR_INDEX"
+      ],
+      "whole_header_bit_identity": false
+    },
+    "coverage_limit": "Independent parity covers the listed fields and payloads of139 complete recognizable C013 KMD frames; flags differ. This is not a general parser of all187368 events."
+  },
+  "callback": {
+    "event": 8,
+    "version": 1,
+    "QPC": 9964904625,
+    "PID": 4,
+    "TID": 924,
+    "operation": "reset_engine",
+    "phase": "return",
+    "adapter_LUID": "00000000000056df",
+    "node": 0,
+    "engine": 0,
+    "NTSTATUS": "0x00000000",
+    "flags": "0x00001037",
+    "healthy": true,
+    "idle": true,
+    "last_submitted_fence": 7451,
+    "last_completed_fence": 7451,
+    "LastAbortedFenceId_result": 7451,
+    "seconds_after_API_return": 2.859421197916667,
+    "backend_called_by_this_branch": false,
+    "physical_reset_proved": false,
+    "Windows_packet_retirement_proved": false,
+    "contract_boundary": "Microsoft documents an empty-queue LastAbortedFenceId equal to the last completed fence. This observation alone does not establish all hardware-reset postconditions or qualify the system/paging repair."
+  },
+  "context_scope": {
+    "live_operations": {
+      "destroy": 1,
+      "create": 3,
+      "set_root": 2
+    },
+    "live_system_context_or_process_records": 0,
+    "live_prepare_paging_complete_refusal_records": 0,
+    "cold_graphics_C013_KMD_records": 448,
+    "cold_context_operations": {
+      "create": 3,
+      "set_root": 2,
+      "destroy": 29
+    },
+    "absence_limit": "Cold circular overwrite, observed loss and unsupported encodings prevent historical/global absence claims."
+  },
+  "cold_originals": [
+    {
+      "source_boot": 97983,
+      "collection_boot": 98075,
+      "provider": "graphics",
+      "name": "graphics.etl.002",
+      "bytes": 67108864,
+      "sha256": "9b3048438c66273314d178553632f4088b405762aaea8d9ed2273ea9dee16c1f",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398939984977915,
+        "buffers_written": 33120,
+        "events_lost": 5,
+        "boot_time_filetime": 134398864954189460,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 97983,
+      "collection_boot": 98075,
+      "provider": "kernel",
+      "name": "kernel.etl.002",
+      "bytes": 67108864,
+      "sha256": "08bd70436a2202be4c68e54d69ad16f87312a4fafc9be2190ad7ce33046f38dc",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398939986689067,
+        "buffers_written": 29906,
+        "events_lost": 4082,
+        "boot_time_filetime": 134398864954189460,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 97983,
+      "collection_boot": 98075,
+      "provider": "loader",
+      "name": "loader.etl.002",
+      "bytes": 9568256,
+      "sha256": "1ce87dfb4eca0b2b6019964e509a95c39bfb1ecd8ac59dc68788ce1d697d1c6d",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398939984874918,
+        "buffers_written": 146,
+        "events_lost": 0,
+        "boot_time_filetime": 134398864954189460,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 97983,
+      "collection_boot": 98075,
+      "provider": "tgd3d",
+      "name": "tgd3d.etl.002",
+      "bytes": 33554432,
+      "sha256": "11b7dc62b5b95ada297bd653b41b451a72d71f99531db11a60a8d6594695e184",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398939984841928,
+        "buffers_written": 21699,
+        "events_lost": 0,
+        "boot_time_filetime": 134398864954189460,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98075,
+      "collection_boot": 98249,
+      "provider": "graphics",
+      "name": "graphics.etl.003",
+      "bytes": 67108864,
+      "sha256": "882f31856493a323333d6bb6bee7862e1df85467858b158730a845115667de10",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398952238032353,
+        "buffers_written": 2943,
+        "events_lost": 1,
+        "boot_time_filetime": 134398940005568395,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98075,
+      "collection_boot": 98249,
+      "provider": "kernel",
+      "name": "kernel.etl.003",
+      "bytes": 67108864,
+      "sha256": "2d09b0824412a98511a2e3870667daa89b838d6e3215865e8110dd34ef4e7825",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398952240046942,
+        "buffers_written": 4118,
+        "events_lost": 12207,
+        "boot_time_filetime": 134398940005568395,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98075,
+      "collection_boot": 98249,
+      "provider": "loader",
+      "name": "loader.etl.003",
+      "bytes": 9830400,
+      "sha256": "a5f590ebc34dc1e9a2cedf5e16fea29d266bb4c645112039d9675dc5abcab39c",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398952237894858,
+        "buffers_written": 150,
+        "events_lost": 0,
+        "boot_time_filetime": 134398940005568395,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98075,
+      "collection_boot": 98249,
+      "provider": "tgd3d",
+      "name": "tgd3d.etl.003",
+      "bytes": 65536,
+      "sha256": "d2f3fdb740cbdf105ccd3128b8e17534678596098b98e58e72020ad5cbadd5c0",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398952237800433,
+        "buffers_written": 1,
+        "events_lost": 0,
+        "boot_time_filetime": 134398940005568395,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98157,
+      "collection_boot": 98249,
+      "provider": "graphics",
+      "name": "graphics.etl.004",
+      "bytes": 67108864,
+      "sha256": "a41ac12ebcccb55d9ce9e6d8fb371595a2c1fc8081d0450df05da9b50e858a85",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398961281644370,
+        "buffers_written": 3934,
+        "events_lost": 0,
+        "boot_time_filetime": 134398952258907599,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98157,
+      "collection_boot": 98249,
+      "provider": "kernel",
+      "name": "kernel.etl.004",
+      "bytes": 67108864,
+      "sha256": "afc8328a13976a10bcf0fe0a4fbe63271964929a3378c1134b5672394abf7de0",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398961283440890,
+        "buffers_written": 3707,
+        "events_lost": 9310,
+        "boot_time_filetime": 134398952258907599,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98157,
+      "collection_boot": 98249,
+      "provider": "loader",
+      "name": "loader.etl.004",
+      "bytes": 8454144,
+      "sha256": "0d1ee5c993df67fecfacb26ae077f1cce8d7c53327622358435eba2369d3ae15",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398961281503452,
+        "buffers_written": 129,
+        "events_lost": 0,
+        "boot_time_filetime": 134398952258907599,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98157,
+      "collection_boot": 98249,
+      "provider": "tgd3d",
+      "name": "tgd3d.etl.004",
+      "bytes": 33554432,
+      "sha256": "389b19671242bdf95449e8d90e21db860cb200423939c49b0bcba8a219d78c71",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398961281477116,
+        "buffers_written": 2443,
+        "events_lost": 0,
+        "boot_time_filetime": 134398952258907599,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98249,
+      "collection_boot": 98337,
+      "provider": "graphics",
+      "name": "graphics.etl.001",
+      "bytes": 67108864,
+      "sha256": "f51197fd6112fba8ecd6f7fcd85a21ef41a83b1409fc1069838268d68b73542b",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398970734087750,
+        "buffers_written": 2415,
+        "events_lost": 0,
+        "boot_time_filetime": 134398961302403633,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98249,
+      "collection_boot": 98337,
+      "provider": "kernel",
+      "name": "kernel.etl.001",
+      "bytes": 67108864,
+      "sha256": "6ab338348696c6c5b139ac29828baf8af156ebeaafa4b420ed926cc0e1193bec",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398970735707473,
+        "buffers_written": 3102,
+        "events_lost": 9620,
+        "boot_time_filetime": 134398961302403633,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98249,
+      "collection_boot": 98337,
+      "provider": "loader",
+      "name": "loader.etl.001",
+      "bytes": 8126464,
+      "sha256": "71b4b9f81360a70bc6790ba796c2e801a512616e507ce170fc92fa0d187eaf45",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398970733943830,
+        "buffers_written": 124,
+        "events_lost": 0,
+        "boot_time_filetime": 134398961302403633,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    },
+    {
+      "source_boot": 98249,
+      "collection_boot": 98337,
+      "provider": "tgd3d",
+      "name": "tgd3d.etl.001",
+      "bytes": 65536,
+      "sha256": "1173392e82813313446dcd5a29ff09b3f1f505abc81d948533ccdbf94887474b",
+      "header": {
+        "buffer_size": 65536,
+        "end_time": 134398970733904206,
+        "buffers_written": 1,
+        "events_lost": 0,
+        "boot_time_filetime": 134398961302403633,
+        "qpc_frequency": 19200000,
+        "clock_context": 1,
+        "buffers_lost": 0
+      }
+    }
+  ],
+  "cold_scope": {
+    "files": 16,
+    "bytes": 640090112,
+    "all_source_copy_source_host_hashes_match": true,
+    "all_boot_headers_match_System12_StartTime_at_100ns": true,
+    "full_capture_or_zero_loss_proved": false
+  },
+  "system": {
+    "boots": [
+      97983,
+      98075,
+      98157,
+      98249,
+      98337
+    ],
+    "planned_1074": [
+      98059,
+      98141,
+      98233,
+      98321
+    ],
+    "four_owned_restart_comments_match": true,
+    "old_unexplained_records": [
+      97992,
+      98001
+    ],
+    "new_unexplained_selected_System_records": 0,
+    "scope": "Selected ID query since97983; no claim about all event classes."
+  },
+  "formal_restoration": {
+    "boot": 98337,
+    "phase": "Finished",
+    "Code": 0,
+    "AC": "Online",
+    "components": 8,
+    "actual_loaded_paths": 5,
+    "full_hashes_and_paths_match": true,
+    "selected_equals_permanent": true,
+    "source": "df08e8583abc202732036597f5cb7f0519ba11a5",
+    "DWM_PID": 1464,
+    "DWM_start": "2026-11-23T08:45:25.0669662Z",
+    "trial_and_token_removed": true,
+    "candidate_OEM32_removed_by_checked_Finish": true,
+    "exact_restore_task_removed": true,
+    "related_process_task_ETW_active_diagnostic_driver_counts": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "diagnostic_roots_retained_as_inactive_evidence": true,
+    "TDR_settings_original_absence_restored": true,
+    "watchdog_natural_drain_ms": 4223,
+    "watchdog_processes_killed": 0,
+    "runtime_originals": 60,
+    "runtime_original_bytes": 209419211
+  },
+  "dump_boundary": {
+    "operational_XML_parsed": 256,
+    "parse_skips": 0,
+    "WATCHDOG_events": [
+      {
+        "record": 1253,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:29:47.4344092Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 884,
+        "tid": 888
+      },
+      {
+        "record": 1252,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8862227Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1251,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8857743Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1250,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8851929Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1249,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8847818Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1248,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8843684Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1247,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8839531Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1246,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8835371Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1245,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8830888Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1244,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.8817967Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1243,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.7487141Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      },
+      {
+        "record": 1242,
+        "id": 1001,
+        "provider": "Microsoft-Windows-WerKernel",
+        "utc": "2026-11-23T08:22:47.7468824Z",
+        "data": {
+          "ComponentName": "WATCHDOG",
+          "RequestedPolicy": "1",
+          "GrantedPolicy": "1",
+          "Status": "3221225625",
+          "ThrottleCheckResult": "0"
+        },
+        "pid": 4,
+        "tid": 924
+      }
+    ],
+    "KernelDump_new_events": [
+      {
+        "record": 1755,
+        "id": 10,
+        "provider": "Microsoft-Windows-Kernel-Dump",
+        "utc": "2026-11-23T08:45:20.4691329Z",
+        "data": {},
+        "pid": 360,
+        "tid": 372
+      },
+      {
+        "record": 1754,
+        "id": 10,
+        "provider": "Microsoft-Windows-Kernel-Dump",
+        "utc": "2026-11-23T08:29:45.9345244Z",
+        "data": {},
+        "pid": 356,
+        "tid": 368
+      },
+      {
+        "record": 1753,
+        "id": 10,
+        "provider": "Microsoft-Windows-Kernel-Dump",
+        "utc": "2026-11-23T08:14:46.4049287Z",
+        "data": {},
+        "pid": 356,
+        "tid": 368
+      },
+      {
+        "record": 1752,
+        "id": 10,
+        "provider": "Microsoft-Windows-Kernel-Dump",
+        "utc": "2026-11-23T07:54:08.7238814Z",
+        "data": {},
+        "pid": 360,
+        "tid": 372
+      }
+    ],
+    "CrashDumpEnabled": 3,
+    "standard_path_dump_metadata_unchanged": 11,
+    "old_dump_contents_rehashed": false,
+    "whole_system_no_dump_proved": false,
+    "NT_classic_bugcheck_arrival": "unknown",
+    "writer_failure_stage_and_root_cause": "unknown",
+    "interpretation": "WER Operational1001 is a live-dump request completion status, not System BugCheck1001. Same PID/TID and nearby UTC narrow observation but do not reveal the internal writer stage. Status name is not a memory/quota root-cause finding."
+  },
+  "faults": {
+    "open": 20,
+    "closed_by_batch": 0,
+    "new": 0
+  },
+  "historical_limits": [
+    "91476/DWM152586,95090 and legacy first-Present causal boundaries remain unknown.",
+    "Original f6264ee11289, rehearsal94382->94557 and consumed KMT/TDR/dump controls were not replayed by this review.",
+    "All four470e1dbc deferred contracts and their existing re-entry conditions remain unknown/unchanged.",
+    "New formal hash readback after known unexplained boot97983 does not turn that boot into a passed acceptance."
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/display/tdr-changes-in-windows-8",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_resetengine"
+  ],
+  "local_audit_sha256": "32197ef043c93b5addd2f44f2e53002a7e6b41038fa972c97876e07e64821ebb",
+  "local_audit_script_sha256": "7697f9974cf17239dfcbb9ee240391c75937f2860cb342290490a92fd794f0b6",
+  "workspace_preservation": {
+    "main_preexisting_files_unchanged": 42,
+    "production_candidate_source_not_integrated": true
+  },
+  "publication_scope": "Evidence only. Selected df08/079 formal baseline and20 open faults retained; candidate c4 repair not qualified or promoted.",
+  "review_corrections": [
+    {
+      "id": "MAIN-CONTEXT-HEADER-1",
+      "severity": "evidence_wording",
+      "disposition": "139 KMD records match the nine enumerated fields and payload; all raw scanned offset4 values are0 while EVENT_RECORD export flags are0x240. Whole-header identity is not claimed."
+    },
+    {
+      "id": "MAIN-CONTEXT-COUNT-1",
+      "severity": "metadata",
+      "disposition": "The R2 manifest binds109 inputs; including manifest.json the frozen directory contains110 files."
+    }
+  ],
+  "cold_loss_detail": {
+    "97983": {
+      "graphics": 5,
+      "kernel": 4082
+    },
+    "98075": {
+      "graphics": 1,
+      "kernel": 12207
+    },
+    "98157": {
+      "kernel": 9310
+    },
+    "98249": {
+      "kernel": 9620
+    },
+    "scope": "Actual per-file EventsLost header counters; a zero value on another stream is not proof of full history or no circular overwrite."
+  },
+  "ordinary_transport_failure": {
+    "path": "context-evidence-160/native-actions/info-081442225498/context-cycle-01a204e6-081442227785-info-result.json",
+    "exit": 255,
+    "stdout_bytes": 0,
+    "scope": "Read-only Info handshake during the planned candidate startup; later original readback remains98157. No retry of the consumed Engine control is inferred or required."
+  },
+  "remaining": [
+    "Actual repaired adapter-reset/system-paging context branch and its before/after lifetime, root and generation evidence.",
+    "Actual Windows packet retirement across recovery; this7451 returned fence alone does not prove it.",
+    "Internal live-dump failure stage and NT classic bugcheck arrival, kept distinct from the observed WATCHDOG status.",
+    "Legacy SEQUENTIAL first-Present cause,91476/DWM152586 and95090 remain independent unknowns.",
+    "The98157 Engine request is consumed and must not be replayed to obtain another branch."
+  ],
+  "policy_ledger_identity": {
+    "installed_policy_revision": "605644880f1a4c183121cfb645a6a9e775aa2dac2e5fcb707ed9ddfe4eb300eb",
+    "installed_policy_embedded_ledger_sha256": "f47973bfd40a9798854f746bef9fbf05bf1f9b9c0774401adca158c6811bf056",
+    "reviewed_repository_intake_ledger_sha256": "ae54ea5347a26787d0a4d2adef927f39c2655f6d09c4a1c10d426f58e507c1c6",
+    "scope": "Installed policy and newer repository evidence ledger are distinct. This evidence publication changes no device policy or baseline selection."
+  }
+}

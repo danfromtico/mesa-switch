@@ -1,0 +1,263 @@
+{
+  "status": "Prior baseline reset after native activation. The owner selected the repaired ARM64 UMD following a successful live activation and readback; reset root cause remains open.",
+  "timezone": "UTC",
+  "activation": {
+    "before_boot": "2026-11-19T08:42:26.6740220Z",
+    "requested": "2026-11-19T09:07:16.0710085Z",
+    "code0": "2026-11-19T09:07:23.3369516Z",
+    "next_boot": "2026-11-19T09:08:05.0332860Z",
+    "post_restart_code": 43,
+    "loaded_in_dwm": [
+      "D3D10Warp.dll",
+      "TegraGpuD3DVk.dll",
+      "libvulkan_nouveau.dll"
+    ],
+    "automatic_task_after_restart": "Disabled",
+    "code0_to_next_reported_boot_seconds": 41.7
+  },
+  "identity": {
+    "kmd": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "kmd_source": "8e9f265f7d0ebb9deab6b57dd576d76e2d0c736f",
+    "tgd3d": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+    "nvk": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "previous_verified_same_components_code0": "2026-11-18T17:29:52.5612830Z",
+    "presentation_baseline": "GPU prerotation, 720x1280 physical row scan. This attempt observed a successful SetTimings with path rotation 2. The incident did not sample active DC registers.",
+    "os_setting_since_previous_boot": "Machine-wide current orientation saved via CDS_GLOBAL | CDS_UPDATEREGISTRY | CDS_NORESET."
+  },
+  "system": {
+    "events": [
+      {
+        "id": 41,
+        "record": 70864,
+        "bugcheck": "0"
+      },
+      {
+        "id": 6008,
+        "record": 70855,
+        "bugcheck": null
+      }
+    ],
+    "boot_record": 70846
+  },
+  "trace": {
+    "sha256": "1bcf4353c86c02042d0a7d6f6a504588a1ff7a0f89cd669c9289d2b0d3b6a4cf",
+    "bytes": 2621440,
+    "finalized": false,
+    "complete_buffers": 40,
+    "buffer_bytes": 65536,
+    "decoded_events": 6494,
+    "first_time": "2026-11-19T09:07:22.418198+00:00",
+    "last_time": "2026-11-19T09:07:30.432953+00:00",
+    "dwm_pid": 772,
+    "copy_validation_errors": [
+      "2026-11-19T09:07:26.442976+00:00",
+      "2026-11-19T09:07:28.364042+00:00",
+      "2026-11-19T09:07:29.761585+00:00"
+    ],
+    "frozen_error_site": "tgd3d_ddi11.cpp:378; E_INVALIDARG for a copy/update flag outside bits 0 and 1. The original event omits the flags value and operation.",
+    "execution_events": {
+      "preempt_success": 60,
+      "worker_failure": 0,
+      "submit_failure": 0,
+      "reset_begin": 0,
+      "reset_end": 0
+    },
+    "other_incident_captures_same_site": [
+      {
+        "file": "dxvk-games-01a1ec52/perf-modules/tgd3d-d3d9-present/x86-private-flip-5604c5a0e2bec4a6/interop-queue-20261119T024320Z.etl",
+        "closed": false,
+        "invalid_buffers": 0,
+        "line_counts": {
+          "378": 1
+        },
+        "first_match": "2026-11-19T02:43:50.979481+00:00"
+      },
+      {
+        "file": "dxvk-games-01a1ec52/perf-modules/tgd3d-d3d9-present/x86-private-flip-7767645c86d35970/interop-queue-20261119T024959Z.etl",
+        "closed": false,
+        "invalid_buffers": 0,
+        "line_counts": {
+          "378": 1
+        },
+        "first_match": "2026-11-19T02:50:29.341541+00:00"
+      }
+    ],
+    "coverage": "No terminal event or loss count available after the unfinalized trace tail. Both matching earlier captures preceded unexpected restarts. This comparison did not establish a successful control with the same error."
+  },
+  "fix": {
+    "scope": "Accept the documented TILEABLE flag for normal synchronized D3D11.1 copy/update, record the actual extended flags in ETW, and enforce removal-only runtime error callbacks while retaining original internal HRESULTs.",
+    "source_builds": {
+      "arm64": {
+        "src/nouveau/tgd3d/TegraGpuD3DVk.dll": "5b0c401b726f06ebcb404c55702a41259b3c6db791451b030b8746d83c2d8f47",
+        "src/nouveau/tgd3d/tests/tgd3d-contracts.exe": "1424e0e096720e24c296cf024cb114d6701e35fa3fbf34f8fdf39b080c509da1"
+      },
+      "x86": {
+        "src/nouveau/tgd3d/TegraGpuD3DVk.dll": "689779432557f4a15a637392bdd4f38ef06888315a49b03cd5222bed04fbe026"
+      },
+      "x64": {
+        "src/nouveau/tgd3d/TegraGpuD3DVk.dll": "a23a3be71c5e3186ad2ac0e2c5d58e7624b8b2d8b3270885b380baa97d148261",
+        "src/nouveau/tgd3d/tests/tgd3d-contracts.exe": "5c43fce25941c7d7907841c2c8a3bbf45ddb0fcbff4e6f5a77f1cde974e83305"
+      }
+    },
+    "negative_control": "The previous handler failed the new tileable byte-copy test.",
+    "cpu_positive": "x64 Wine CPU contracts passed, including byte ranges for TILEABLE copy and TILEABLE|DISCARD update, unknown flags, and allocation failures.",
+    "cpu_positive_sha256": "6a1ba3e5130d9b7bcbe83212b7651eb28cb54400c56ae16f2ce2571c3f192eba",
+    "signed_single_translation_unit_arm64_candidate": {
+      "base_signed_sha256": "ded6fa4affec0f18773503d282f9b44939090488202ef5f25ea1d879dd862f0d",
+      "base_relinked_normalized_sha256": "32ad69204ac832b6c0064786b34ee6b9a154adc55c86f517e7d26185fedc25c4",
+      "changed_link_objects": [
+        "src/nouveau/tgd3d/TegraGpuD3DVk.dll.p/tgd3d_ddi11.cpp.obj"
+      ],
+      "signed": {
+        "bytes": 3339272,
+        "unsigned": "86c833ee8e16b8e4498ed848571aefdbe9cabbdb07e61bee5a98d2b2aaaa7aa7",
+        "sha256": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e"
+      },
+      "frozen_source_delta_sha256": {
+        "tgd3d_ddi11.cpp": "4832c310aa9a5a62e47c8dcf9b37c5c98000f30bb44b1057b1ce5535d316b351",
+        "tgd3d_trace.h": "7dbf7e1d80c2c166a4f5149f521e06d2e8c2d017e4a7fd78caf7819a60fed11d"
+      },
+      "status": "selected"
+    },
+    "hardware_AB": "The candidate reached Code 0 with the same KMD and NVK, passed the baseline observation window and returned correct texture data on GM20B.",
+    "spec": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3d10umddi/ne-d3d10umddi-d3d11_1_ddi_copy_flags"
+  },
+  "accepted_baseline": {
+    "canonical_fix_commit": "8e7a1bf85785a84cc26ceebaca8c82854d77af88",
+    "source_parent": "c77f8a61fd4b627b218fee1db34b654b4e7233a2",
+    "installed_umd_sha256": "49fa08a2731c083c59f23ba5a5a3db9e82c40613ef7a0fa4df233cc20bccd20e",
+    "installed_kmd_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+    "installed_nvk_sha256": "e563a81d6196c91dde95aaa112ff410c3b32f07ebf9754609428c34f27e52934",
+    "selected_utc": "2026-11-19T09:33:57.2370310Z",
+    "observation_boot": "2026-11-19T09:08:05.0393220Z",
+    "verified_code0_until_utc": "2026-11-19T09:45:46.6277686Z",
+    "same_dwm_pid": 1380,
+    "single_trial_scope": "One successful startup on the repaired UMD. The 12 MiB circular trace preserved only the last 59 seconds; the raw flags of the earlier DWM failures remain unknown.",
+    "desktop_trace_sha256": "407015512277d087c793ae7fc48d1c0dc1a9d80f7050e22fba3123ae9eca0d0f",
+    "private_ddi_readback": {
+      "device": "10de:012e GM20B",
+      "pid": 956,
+      "exit": 0,
+      "copied_pixels": 28,
+      "untouched_pixels": 63,
+      "copy_flags": [
+        {
+          "flags": 6,
+          "status": "0x0"
+        },
+        {
+          "flags": 4,
+          "status": "0x0"
+        }
+      ],
+      "trace_sha256": "fc59f01fae5749bb9658a7adc3309111654207b1aaa268eb6a4d9512ead22071",
+      "stdout_sha256": "8ffedb30be70c83529bbae6631260cba0f01c60e3e56e34600f143dd37626aa2",
+      "probe_signed_sha256": "55820a2013387f46b112af923f083763b24fb04dd2dfe2d3ed76a9ea14acec0c"
+    },
+    "canonical_builds": {
+      "arm64": {
+        "src/nouveau/tgd3d/TegraGpuD3DVk.dll": "d14738834cc376ef6837086849807a0bac4d9cdeb7e1d47cf2e9a6940323a665",
+        "src/nouveau/tgd3d/tests/tgd3d-contracts.exe": "edac6d00b222a69f11cfdd68a96c439462d607595a1774d9ccb8d31bceabaac1"
+      },
+      "x86": {
+        "src/nouveau/tgd3d/TegraGpuD3DVk.dll": "0f5fec8056ad8ec1ab208c71e35ae4aecdeb3f14b53fb63b99b61fd4e5153d32"
+      },
+      "x64": {
+        "src/nouveau/tgd3d/TegraGpuD3DVk.dll": "3dfb5388e51550bd11fc44f8aaa16852901dd7648ba8dbacc648fb0943cf9a7d",
+        "src/nouveau/tgd3d/tests/tgd3d-contracts.exe": "c0c390bc30495b74df829f4a86914da840859aab2f0a949c50349cda420e240b"
+      }
+    },
+    "canonical_x64_contract_log_sha256": "e7d385f6a0b5fef83c41f440d7c7c298b753d6cf0b2bd315a93a1618a2bcc875",
+    "startup": {
+      "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2",
+      "task": "Tgd3dDefaultEnable",
+      "enabled": false,
+      "persistent_boot_permit": false,
+      "manual_activation_until": "Strict public FL11_1 on physical GM20B",
+      "rollback_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\s5-kmd-fence-6c86354e\\tgd3d-video-ddi-ded6fa4a-20261118-230849",
+      "rollback_script": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\Restore-ShaderCache.ps1"
+    },
+    "display_observation": {
+      "kind": "orderly Windows restart with native GPU auto activation disabled",
+      "first_windows_logo": "portrait (operator)",
+      "account_sign_in": "landscape (operator)",
+      "power_off_cold_boot": "pending"
+    },
+    "installed_file_inventory": [
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchpwrbtn.sys",
+        "Sha256": "879550E4EB292619F45DE86EB458FC94F07149CA3DE95BC88369166FCD64914E",
+        "Length": 32280
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\tegragpurender.sys",
+        "Sha256": "6C86354E781E76D671C20BF14B124248A6E1AA264DCAB6D459A6B14D551469B0",
+        "Length": 249352
+      },
+      {
+        "Path": "D:\\bootloader\\ini\\woa-lite-home.ini",
+        "Sha256": "71A3B54BA6E31406E213B17F16054564716222B06BF6844CA63DE065D7D86A7F",
+        "Length": 138
+      },
+      {
+        "Path": "C:\\Windows\\System32\\acpitabl.dat",
+        "Sha256": "9EB6A7E17CCA34E4F7DDBFD55BF31FCB8E1FF2AB0B852574C0406CE1A5935849",
+        "Length": 4993
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchbattery.sys",
+        "Sha256": "3DB052E29CE3EA98F48704DD31222AB58CFBC9FACCBB6CEC278F732EF6772F60",
+        "Length": 42440
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\Pacecar\\Pacecar.Switch.exe",
+        "Sha256": "135285DA2255E087C8B37E5034B023035A01D3990AB2B10E4E0220BDC56C7D24",
+        "Length": 1537544
+      },
+      {
+        "Path": "D:\\switchroot\\woa-lite-home\\bl33.bin",
+        "Sha256": "7F9457FBE3B4A789EA5EB64533006CEA96689B78759608E8F4227CECF457904E",
+        "Length": 921600
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\app\\libvulkan_nouveau.dll",
+        "Sha256": "E563A81D6196C91DDE95AAA112FF410C3B32F07EBF9754609428C34F27E52934",
+        "Length": 17656776
+      },
+      {
+        "Path": "C:\\Windows\\System32\\drivers\\switchfan.sys",
+        "Sha256": "0453418EDC0F830007F9ACF1AD6211D98D13A25F8FEA664AEB85A86C6C331CB5",
+        "Length": 104456
+      },
+      {
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\copy-trial-49fa08a2\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "49FA08A2731C083C59F23BA5A5A3DB9E82C40613EF7A0FA4DF233CC20BCCD20E",
+        "Length": 3339272
+      },
+      {
+        "Path": "C:\\Users\\ruje\\AppData\\Local\\SwitchWOA\\SwitchPowerTray\\SwitchPowerTray.exe",
+        "Sha256": "45B42D7847867098E9A1ECCB4246EBB5DD00B21C838E717B24A8E1DE8D96D637",
+        "Length": 60416
+      }
+    ],
+    "one_time_native_boot": {
+      "boot_utc": "2026-11-19T10:00:17.9857600Z",
+      "verified_utc": "2026-11-19T10:01:50.4854660Z",
+      "code": 0,
+      "dwm_pid": 1440,
+      "mapped_modules": [
+        "D3D10Warp.dll",
+        "TegraGpuD3DVk.dll",
+        "libvulkan_nouveau.dll"
+      ],
+      "startup_gate_status": 0,
+      "hardware_status": 0,
+      "panel_status": 0,
+      "token_after_driver_start": 0,
+      "permission_restored": true,
+      "persistent_native_grant": false,
+      "automatic_logon_activation": "Disabled",
+      "physical_observation": "Owner reached the desktop. Boot-logo orientation and first sign-in orientation on this native one-shot boot were not separately observed."
+    }
+  }
+}

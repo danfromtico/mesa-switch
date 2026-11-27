@@ -34,10 +34,13 @@
 #include "sw/gdi/gdi_sw_winsys.h"
 
 #include "winddk_compat.h"
+#include <d3d9.h>
 #include <d3dkmthk.h>
+#include <d3dumddi.h>
 
-extern struct pipe_screen *
-d3d10_create_screen(void);
+extern HRESULT
+d3d10_create_screen(HANDLE hRTAdapter, const D3DDDI_ADAPTERCALLBACKS *callbacks,
+                    struct pipe_screen **result);
 
 static HDC
 d3d10_gdi_acquire_hdc(void *winsys_drawable_handle) {
@@ -55,9 +58,13 @@ d3d10_gdi_release_hdc(void *winsys_drawable_handle, HDC hDC) {
    ReleaseDC(hWnd, hDC);
 }
 
-struct pipe_screen *
-d3d10_create_screen(void)
+HRESULT
+d3d10_create_screen(HANDLE hRTAdapter, const D3DDDI_ADAPTERCALLBACKS *callbacks,
+                    struct pipe_screen **result)
 {
+   (void)hRTAdapter;
+   (void)callbacks;
+   *result = NULL;
    const char *default_driver;
    const char *driver;
    struct pipe_screen *screen = NULL;
@@ -90,10 +97,11 @@ d3d10_create_screen(void)
    if (screen == NULL)
       goto no_screen;
 
-   return debug_screen_wrap( screen );
+   *result = debug_screen_wrap(screen);
+   return *result ? S_OK : E_OUTOFMEMORY;
 
 no_screen:
    winsys->destroy(winsys);
 no_winsys:
-   return NULL;
+   return E_OUTOFMEMORY;
 }

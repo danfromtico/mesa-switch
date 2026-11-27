@@ -1,0 +1,57 @@
+{
+  "trace_export_live": {
+    "source": "existing local d3d10 trace exporter (read-only reuse; no main merge)",
+    "sha256": "a89508cf90e8ad7b1d25a558a122c92b03c148c16e2a3040d828e79329bcfcbb"
+  },
+  "scripts": {
+    "Start-DxgBootTrace.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Start-DxgBootTrace.ps1",
+      "sha256": "5d61adbeed6b487cb82619e2928b418c9fa01e7fbe5a6a56fac911b32d93ac04"
+    },
+    "Stop-DxgBootTrace.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Stop-DxgBootTrace.ps1",
+      "sha256": "223c4ba778c4974666173fb316ae26fa1dd6e4090b834edaec49c410ee68bdaf"
+    },
+    "Start-NativeUmdTrace.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Start-NativeUmdTrace.ps1",
+      "sha256": "52d436eaa9df0e4daf6038c2a6c8d381b6c18297b9bc170198a400bc992a5a7b"
+    },
+    "Read-NativeUmdEvidence.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Read-NativeUmdEvidence.ps1",
+      "sha256": "b5f0e0521851e2aee2234c65cbeebdfe840c647b7e98398c80a88693c5d9fbcb"
+    },
+    "Assert-NativeDesktop.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Assert-NativeDesktop.ps1",
+      "sha256": "d4d5530eeb07386d24723d8951f1f72a777f5f2ac7b82fa97e5fabaab40bc48d"
+    },
+    "Observe-Desktop161.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Observe-Desktop161.ps1",
+      "sha256": "7c71f6d23a399b846ecc9c8c6dd3e5502efd94e63ceb07ffd5c0a0dc4fd87fba"
+    },
+    "Start-Desktop161.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Start-Desktop161.ps1",
+      "sha256": "c86a1da6116c6c7f5ffed1196dd8574d9e11eb2a7b3e0d9a6c99dccc430cfa7c"
+    },
+    "Restore-AfterBoot161.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Restore-AfterBoot161.ps1",
+      "sha256": "258cda8ac67f7fb7b0265a42638fbb556d1bf118667d471af695a741e0f9b620"
+    },
+    "restore-preference.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/restore-preference.ps1",
+      "sha256": "4a4031c16b8beb6c7b7668a1de64eeac4d8949c2faff6b7ebb3e7f2b3ce31043"
+    },
+    "Capture-DesktopEvidence.ps1": {
+      "source": "existing repository tool",
+      "sha256": "ff22b95bba31e37c74e82e967e651ed14cfc8dcc4a368cbdc10c51b89fd15351"
+    },
+    "Enable-RuntimeAppContainerRead.ps1": {
+      "source": "existing repository tool",
+      "sha256": "416f96806b7e2a9dfb57e65b63bbc31e988ec4fa2291d2b9741416e04fa80edf"
+    },
+    "Exercise-DesktopWindow.ps1": {
+      "source": "desktop161-map-poll-20261113/scripts/Exercise-DesktopWindow.ps1",
+      "sha256": "0a3105c4df91b368c0d50a04a6be81d1720fb98d39e8d300d14e81924e69bf90",
+      "adaptation": "Own-window minimize/restore and owned overlay for the requested interaction stage"
+    }
+  }
+}

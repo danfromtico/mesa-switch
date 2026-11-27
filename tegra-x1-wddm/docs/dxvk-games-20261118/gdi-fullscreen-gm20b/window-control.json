@@ -1,0 +1,57 @@
+{
+  "case": "普通翻转窗口和横屏无边框窗口",
+  "signed_inputs": {
+    "case.exe": "8efd27d4736eddbb608d7fa108b9d9154b182fb97fc6b79cc1420ae5fec5d0da",
+    "Board-Case.ps1": "fbb749f8ce274e75495e0a913f5d681788757972c1bf739449827ab7fa6a07f9",
+    "borderless.exe": "0cad6852355aedb6641780155ea71adadb2d56e7918301bdc5772309d3fab4db",
+    "os-trace.exe": "128b9b8659ec87c6ba6484d68c3097a5d13e857c06c1a2d77eec9a01c0dd029d",
+    "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+    "flip.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "gdi-source-formats.exe": "2614aaff4cff1131ec52bcb17f6fdde5d9ac947874d63182f9d5c7085f99a53f",
+    "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+    "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+    "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5"
+  },
+  "begin": "2026-11-20T20:57:11.0888548Z",
+  "end": "2026-11-20T20:57:32.3187163Z",
+  "before": {
+    "dwm": 1412,
+    "power": "Online",
+    "code": 0,
+    "boot": 85471,
+    "package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0"
+  },
+  "after": {
+    "dwm": 1412,
+    "power": "Online",
+    "code": 0,
+    "boot": 85471,
+    "package": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\gdi-source-modes-76d5c526a0a0"
+  },
+  "adapter_luid": "0000000000005afe",
+  "model": [
+    {
+      "expected": 0,
+      "match": true,
+      "name": "gdi-source-formats.exe",
+      "hash": "2614aaff4cff1131ec52bcb17f6fdde5d9ac947874d63182f9d5c7085f99a53f",
+      "exit": 0
+    }
+  ],
+  "normal_flip": [
+    "DRAW_DEVICE software=0 luid=0000000000005afe display_luid=0000000000005afe vendor=414f5753 device=31304630 fl=b000 name=Tegra X1 (GM20B) .158 GM20B native GDI display modes 76d5c526a0a0",
+    "CLEAR_SCREEN matched=5 tested=5"
+  ],
+  "borderless": [
+    "WINDOW luid=0000000000005afe width=1280 height=720 rotation=2 level=b100 hr=00000000",
+    "PRESENT frame=0 hr=00000000",
+    "DESKTOP frame=0 samples=5 expected=5",
+    "PRESENT frame=1 hr=00000000",
+    "DESKTOP frame=1 samples=5 expected=5",
+    "PRESENT frame=2 hr=00000000",
+    "DESKTOP frame=2 samples=5 expected=5",
+    "CLOSE keys=1 alive=0 rc=0"
+  ],
+  "journal_returned": true,
+  "source_receipt_sha256": "6c0a85b528d9ca02183e8570aa6bdcc2f7e73582d566f910f15844a5bfd133ea"
+}

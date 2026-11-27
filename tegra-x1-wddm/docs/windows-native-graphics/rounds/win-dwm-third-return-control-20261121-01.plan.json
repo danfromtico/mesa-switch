@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "round_id": "win-dwm-third-return-control-20261121-01",
+  "contract_id": "WIN-DWM-THIRD-KMD-CONTROL-COVERAGE",
+  "windows_question": "WIN-DWM-THIRD-KMD-CONTROL-COVERAGE",
+  "owner": "Windows dxgkrnl 调度与 DWM GPU 上下文",
+  "question": "本次已封存的正常 DWM 跟踪是否覆盖历史 3524 字节队列包两次抢占后的第三次提交？",
+  "method": "只分析已封存 ETL。无新增实机运行。",
+  "conditions": {
+    "machine": "Switch Lite GM20B",
+    "system": "Windows 11 ARM64",
+    "observed_windows_build": 22631,
+    "graphics_interface": "WDDM 2.6",
+    "selected": {
+      "path": "graphics-baseline.json",
+      "sha256": "0969ac1f0bf95e6804147fa4d0077d994df734a2b02a90d384d9b3138764d3a7"
+    },
+    "driver_source": "2c35ae83a7903df4b4c22821f45a816cf08b7ac9",
+    "power": "交流供电，手持模式",
+    "permanent_boot": {
+      "path": "nvk-arm64ec-d31b8620/selection.json",
+      "sha256": "22598e83100305b6f39e5b0d3b3a7f4e6235a23a4bdfc786bc02e425d4f0eee7"
+    }
+  },
+  "pass_condition": "该窗口同启动 ETL 中，DWM、GM20B 节点 0、3524 字节、两次抢占与第三次提交身份连贯，且可核对第三次 KMD 入返和同包完成。",
+  "observations": [
+    "按 DWM PID 与设备、QPC、适配器、上下文及节点选取普通软件队列包。",
+    "按队列序号核两次确认为抢占的 DMA 停止，再查最后一次发包、KMD 入返和同包完成。",
+    "将同次场景可比范围与 91476 的历史原件并列，保留旧重启的因果边界。"
+  ],
+  "inputs": {
+    "boot": 94004,
+    "trace": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-kmd-return-v2-calibration-20261121-01/evidence/display.etl",
+      "sha256": "fe0b20ae490d671b7fad7b4918e6512868b75f98f1dca83175f6732243aeb0d5",
+      "bytes": 10551296
+    },
+    "prior": [
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-post-present-retire-20261121-01.result.json",
+        "sha256": "4e2d449cc39bc0df5338f4d2369cdbf13736fafafde09e33520e80bd787b1148"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-kmd-return-v2-calibration-20261121-01.result.json",
+        "sha256": "2fe87401eac810e054077fbd85714bf2d492392faf3bcf75a23a9af3e4e5667c"
+      }
+    ],
+    "decoder_sha256": "967d3c98972f4e06a036b0919d5629e06ba9fb674799254165de6b1a0420d65e"
+  }
+}

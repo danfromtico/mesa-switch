@@ -136,6 +136,9 @@ void util_barrier_init(util_barrier *barrier, unsigned count);
 
 void util_barrier_destroy(util_barrier *barrier);
 
+/* One participant per generation returns true. All participants must return
+ * before the barrier can be destroyed.
+ */
 bool util_barrier_wait(util_barrier *barrier);
 
 /*

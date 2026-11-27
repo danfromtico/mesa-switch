@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "review_utc": "2026-11-22T15:07:05.594149+00:00",
+  "status": "Bounded historical addendum accepted; initiating cause remains unknown",
+  "entry": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/historical-after-native-20261122/HISTORICAL_BOUNDARY_ADDENDUM.json",
+    "bytes": 3293,
+    "sha256": "9d69724a3293d8e92837f47cc470debff0cdc479f63c9475a036868323611115"
+  },
+  "archive": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/historical-after-native-addendum-01a202a1-20261122.zip",
+    "bytes": 192391,
+    "sha256": "a2602cb5de53e6a7c93df9681cbd53eb7c83113474bf045841695c13da9a837e"
+  },
+  "main_review_thread": "01a2026b-02b8-7ea3-996a-e5472b0bde3f",
+  "manifest_files_verified": 37,
+  "archive_members_verified": 38,
+  "accepted_reference_files_verified": 11,
+  "new_static_evidence": {
+    "comparator_boot": 91918,
+    "image_and_PDB": {
+      "PDB_GUID": "af63a8a4-9d01-fa37-1a26-6959e133eb0b",
+      "PDB_info_age": 2,
+      "PDB_DBI_age": 1,
+      "PE_RSDS": {
+        "guid": "af63a8a4-9d01-fa37-1a26-6959e133eb0b",
+        "age": 1
+      },
+      "identity_matches_using_DBI_age": true,
+      "TPI_type_count": 0,
+      "Has_Types_presence_does_not_mean_private_layout_records": true,
+      "exact_public_entries": [
+        {
+          "symbol": "VidSchFlushAdapter",
+          "segment": 7,
+          "offset": 616032,
+          "rva": "0xf9660"
+        },
+        {
+          "symbol": "VidSchiSetSchedulerStatus",
+          "segment": 7,
+          "offset": 612712,
+          "rva": "0xf8968"
+        },
+        {
+          "symbol": "VidSchTerminateAdapter",
+          "segment": 7,
+          "offset": 623088,
+          "rva": "0xfb1f0"
+        },
+        {
+          "symbol": "VidSchiResume",
+          "segment": 7,
+          "offset": 612608,
+          "rva": "0xf8900"
+        },
+        {
+          "symbol": "VidSchiHandleControlEvent",
+          "segment": 7,
+          "offset": 611152,
+          "rva": "0xf8350"
+        }
+      ],
+      "image_sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5",
+      "pdb_sha256": "54ed9eab4bff5bdcec9c5571ab05fe415052a106ad39ad9f713e939f87b65f3a",
+      "incident_91476_image_identity_known": false,
+      "independent_readonly_tools": "PE/MSF streams plus llvm-pdbutil; no source or binary mutation"
+    },
+    "raw_instruction_checks": [
+      {
+        "file": "control-handler-r2.json",
+        "instructions_or_words": 34
+      },
+      {
+        "file": "send-prologue-r2.json",
+        "instructions_or_words": 42
+      },
+      {
+        "file": "scheduler-prologue-r2.json",
+        "instructions_or_words": 32
+      },
+      {
+        "file": "flush-adapter-r2.json",
+        "instructions_or_words": 208
+      }
+    ],
+    "literal_write": [
+      {
+        "rva": "0xf8388",
+        "bytes": "e1010054",
+        "opcode": "b.ne 0x1c00f83c4"
+      },
+      {
+        "rva": "0xf838c",
+        "bytes": "68008052",
+        "opcode": "mov w8, 3"
+      },
+      {
+        "rva": "0xf8390",
+        "bytes": "21028052",
+        "opcode": "mov w1, 0x11"
+      },
+      {
+        "rva": "0xf8394",
+        "bytes": "68c60bb9",
+        "opcode": "str w8, [x19, 0xbc4]"
+      },
+      {
+        "rva": "0xf8398",
+        "bytes": "b2040094",
+        "opcode": "bl 0x1c00f9660"
+      }
+    ],
+    "interpretation": "The function entry at0xf8350 retains incoming x0 in x19. In the inspected branch, mov w8,3 at0xf838c is followed by mov w1,0x11 and str w8,[x19,#0xbc4] at0xf8394, then a direct call to the exact VidSchFlushAdapter public entry. This is a static possible path, not a sampled incident branch or proof of a recovered private field type.",
+    "no_inference": [
+      "Same numeric displacement across different pointer chains does not prove identical object roles.",
+      "The existence of a TDR writer does not mean every nonzero field value indicates TDR.",
+      "A nearest public name at a distant offset is not a proven function extent.",
+      "PDB Has Types means stream presence here; independent TPI inspection shows zero type records.",
+      "The PE/DBI age is1 while PDB Info age is2; matching GUID and DBI/RSDS age establish comparator identity, not identity of the unpreserved91476 image."
+    ]
+  },
+  "calibration_reuse": {
+    "utc": "2026-11-22T14:53:30.540959+00:00",
+    "supersedes_planning_only_field": "static-decision-delta.json/new_trace_need",
+    "actual_new_calibration_actions": 0,
+    "decision": "Reuse existing accepted symmetric boundary calibration; do not port or deploy ef790 solely for calibration. No new worktree, code change, compile, dispatch, or device session from this historical addendum.",
+    "accepted_94004": {
+      "app_dma": 4328,
+      "dwm_dma": 4321,
+      "chain": "same lifetime/context/thread; KMD entry/admission/actual NTSTATUS return, GP_PUT, GPU-fence readback, Windows interrupt/completion/retirement",
+      "limit": "normal controls only, not original incident initiating failure"
+    },
+    "accepted_94382_to_94557": {
+      "application_dma": 6763,
+      "attempts": 116,
+      "complete": 111,
+      "dwm_complete": 110,
+      "dwm_preemption_receipts": 5,
+      "cross_restart_journal_readback": true,
+      "replay": false
+    },
+    "request_f6264ee11289": {
+      "application_executions": 1,
+      "original_request_dispatches": 1,
+      "replay": false
+    },
+    "candidate_native_batch": {
+      "program_runs": 1,
+      "ordinary_case": 1,
+      "context_and_submit_null_case": 1,
+      "replay_to_fill_close_count": false
+    }
+  },
+  "causal_gaps": [
+    {
+      "incident": "original three legacy no-write boots",
+      "missing": "Post-CALL matched DXGI/KMT/KMD boundary, or same-boot dump/reset evidence; cannot distinguish Present from post-return device query before durable RETURN.",
+      "retained_controls": "Later explicit non-GDI rejection remained alive; later corrected rendering controls passed. These do not reconstruct original reset cause."
+    },
+    {
+      "incident": "91476 / DWM DMA152586",
+      "missing": "Exact incident OS image identity, actual chosen branch/stack, KMD entry/return, completion and initiating reset.",
+      "last_record_limit": "Paging152584 snapshot is not target152586 hardware state."
+    },
+    {
+      "incident": "95090 early candidate startup",
+      "missing": "Original initiating failure remains absent from accepted read-only retained materials."
+    }
+  ],
+  "new_device_actions": 0,
+  "new_builds": 0,
+  "new_dispatches": 0,
+  "no_original_or_control_replay": true,
+  "full_goal_complete": false,
+  "formal_last_verified_at_delivery": {
+    "boot": 96614,
+    "source": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/formal-restoration-20261122.json",
+    "scope": "Historical delivered snapshot; independent promotion activation is a separate later task."
+  },
+  "independent_main_proofs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/historical-after-native-main-proof-20261122.json",
+      "bytes": 3051,
+      "sha256": "d34e414a5cbec57a1f5f4529ecb9e90f90a5ee2251b37dbf4d81a2ac6b4a0d4c"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/historical-after-native-identity-main-proof-20261122.json",
+      "bytes": 1266,
+      "sha256": "b2cf0c4bcd7522f7ef64b580e4f972f09c74121023641200606e10f4009c6d0a"
+    }
+  ],
+  "publication_status": "Prepared consolidated historical evidence record; no root-cause closure or new hardware test."
+}

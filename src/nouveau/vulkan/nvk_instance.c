@@ -10,6 +10,7 @@
 #include "nvkmd/nvkmd.h"
 
 #include "vk_common_entrypoints.h"
+#include "vk_internal_exts.h"
 #include "vulkan/wsi/wsi_common.h"
 
 #include "util/build_id.h"
@@ -49,6 +50,9 @@ static const struct vk_instance_extension_table instance_extensions = {
 #endif
 #ifdef VK_USE_PLATFORM_XLIB_XRANDR_EXT
    .EXT_acquire_xlib_display = true,
+#endif
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+   .KHR_win32_surface = true,
 #endif
 #ifdef VK_USE_PLATFORM_DISPLAY_KHR
    .KHR_display = true,
@@ -95,6 +99,10 @@ nvk_EnumerateInstanceLayerProperties(uint32_t *pPropertyCount,
    return VK_SUCCESS;
 }
 
+#ifdef _WIN32
+VkResult nvk_enumerate_windows_physical_devices(struct vk_instance *instance);
+#endif
+
 #ifdef __SWITCH__
 static VkResult
 nvk_enumerate_switch_physical_devices(struct vk_instance *_instance)
@@ -133,10 +141,12 @@ nvk_init_debug_flags(struct nvk_instance *instance)
       { "gart", NVK_DEBUG_FORCE_GART },
       { "coherent", NVK_DEBUG_FORCE_COHERENT },
       { "no_compression", NVK_DEBUG_NO_COMPRESSION },
+      { "log", NVK_DEBUG_LOG },
       { NULL, 0 },
    };
 
    instance->debug_flags = parse_debug_string(os_get_option("NVK_DEBUG"), flags);
+   instance->vk.enable_debug_logging = instance->debug_flags & NVK_DEBUG_LOG;
 }
 
 static void
@@ -200,9 +210,19 @@ nvk_CreateInstance(const VkInstanceCreateInfo *pCreateInfo,
    nvk_init_experimental_flags(instance);
    nvk_init_dri_options(instance);
 
+   instance->allow_embedded_gm20b = false;
+#ifdef _WIN32
+   const struct nvk_embedded_instance_info *embedded =
+      vk_find_struct_const(pCreateInfo->pNext, NVK_EMBEDDED_INSTANCE_INFO_MESA);
+   instance->allow_embedded_gm20b = embedded && embedded->allow_experimental_device;
+#endif
+
 #ifdef __SWITCH__
    instance->vk.physical_devices.enumerate =
       nvk_enumerate_switch_physical_devices;
+#elif defined(_WIN32)
+   instance->vk.physical_devices.enumerate =
+      nvk_enumerate_windows_physical_devices;
 #else
    instance->vk.physical_devices.try_create_for_drm =
       nvk_create_drm_physical_device;

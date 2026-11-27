@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "round_id": "c19-sealed-members-20261121-01",
+  "contract_id": "dxgkrnl.h:684:4",
+  "declaration_sha256": "d1712feb8b70de545e106e40fdd3f8045a0ab20fc78958e3fdbac823898dd53e",
+  "started_utc": "2026-11-22T02:53:04.137388+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "在启动 91476 的两份独立完整 ETL 中，越进程创建与打开均关联到各自运行内的同一共享资源及全局分配。每个资源从创建方、打开方到打开完成后，三次查询的成员数均为 1。",
+  "gap": "缺该已共享资源进入固定成员状态的直接 Windows 记录，或自然发生的等价成员约束结果。单成员计数稳定只覆盖这些正常操作。",
+  "observation": {
+    "boot": 91476,
+    "complete_windows_create_open_controls": [
+      {
+        "round_id": "c27-sealed-members-20261121-01",
+        "create": {
+          "pid": 1440,
+          "tid": 1460,
+          "operation": "resource_create_return",
+          "begin": 64778437932,
+          "end": 64778506632,
+          "caller_allocation": 1073742272,
+          "caller_resource": 1073742208,
+          "matched_device_allocation": true,
+          "event36_qpc": 64778506177,
+          "device": "device1",
+          "adapter": "adapter1",
+          "resource": "resource1",
+          "shared": "shared1",
+          "global_allocation": "global1",
+          "matched_adapter_allocation": true,
+          "event33_qpc": 64778505744,
+          "bytes": 65536,
+          "flags": 536871040,
+          "read_segment": 0,
+          "write_segment": 2,
+          "preferred": 2
+        },
+        "open": {
+          "pid": 4004,
+          "tid": 7652,
+          "operation": "resource_open_return",
+          "begin": 64781086492,
+          "end": 64781150059,
+          "caller_allocation": 1073742272,
+          "caller_resource": 1073742208,
+          "matched_device_allocation": true,
+          "event36_qpc": 64781149397,
+          "device": "device2",
+          "adapter": "adapter1",
+          "resource": "resource2",
+          "shared": "shared1",
+          "global_allocation": "global1",
+          "matched_adapter_allocation": false
+        },
+        "member_query": [
+          {
+            "qpc": 64778675624,
+            "pid": 1440,
+            "phase": "before",
+            "count": 1
+          },
+          {
+            "qpc": 64781022772,
+            "pid": 4004,
+            "phase": "child",
+            "count": 1
+          },
+          {
+            "qpc": 64781965591,
+            "pid": 1440,
+            "phase": "after",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "round_id": "c27-shared-resource-owner-20261121-01",
+        "create": {
+          "pid": 5376,
+          "tid": 3784,
+          "operation": "resource_create_return",
+          "begin": 63230457297,
+          "end": 63241551726,
+          "caller_allocation": 1073742272,
+          "caller_resource": 1073742208,
+          "matched_device_allocation": true,
+          "event36_qpc": 63241551081,
+          "device": "device1",
+          "adapter": "adapter1",
+          "resource": "resource1",
+          "shared": "shared1",
+          "global_allocation": "global1",
+          "matched_adapter_allocation": true,
+          "event33_qpc": 63241550700,
+          "bytes": 65536,
+          "flags": 536871040,
+          "read_segment": 0,
+          "write_segment": 2,
+          "preferred": 2
+        },
+        "open": {
+          "pid": 1368,
+          "tid": 6556,
+          "operation": "resource_open_return",
+          "begin": 63299919956,
+          "end": 63299977733,
+          "caller_allocation": 1073742272,
+          "caller_resource": 1073742208,
+          "matched_device_allocation": true,
+          "event36_qpc": 63299977341,
+          "device": "device2",
+          "adapter": "adapter1",
+          "resource": "resource2",
+          "shared": "shared1",
+          "global_allocation": "global1",
+          "matched_adapter_allocation": false
+        },
+        "member_query": [
+          {
+            "qpc": 63261360993,
+            "pid": 5376,
+            "phase": "before",
+            "count": 1
+          },
+          {
+            "qpc": 63299608748,
+            "pid": 1368,
+            "phase": "child",
+            "count": 1
+          },
+          {
+            "qpc": 63300389480,
+            "pid": 5376,
+            "phase": "after",
+            "count": 1
+          }
+        ]
+      }
+    ]
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-sealed-members-20261121-01.result.json",
+      "sha256": "c2780e8d8428b31e95e358c8ff3927f1fdb752ca6e615ea3be89e3120dcd8834"
+    },
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-resource-owner-20261121-01.result.json",
+      "sha256": "b94f19b04f80d2c90d502a1398436b19326dd031f5616351f00da8b29217b3d0"
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "status": "Integration and device review after direct miniport status collection",
+  "selected_source": "c05e254932dd975bdf69e7046949596dbeb84561",
+  "selected_components": {
+    "tegragpurender.sys": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_d3d_arm64.dll": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df"
+  },
+  "items": [
+    {
+      "scope": "Context-free no-DMA flip and rotated primary mode query",
+      "historical_components": {
+        "no_dma_mmio": "102218b0d69af15e1259a9f4047dec049eb8a61228b10eaf3551898cea8172b7",
+        "rotated_primary_mode": "a82f2510be5b6718f91349956e1eea706cf60c4012e11c16865d1426389ce32c"
+      },
+      "integration_source": "40e857df",
+      "selected_kmd": "76d5c526a0a0e2eff6b7be31944e1f748dc6d06f4d0da09e9d8b74ebc371d611",
+      "accepted": "Selected with the GDI display-mode fix and the measured exclusive and ordinary window cases.",
+      "remaining": "The special null-context flip and rotated-storage CheckDisplayMode inputs still require an actual Windows call.",
+      "evidence": "KMD_DISPLAY_CONTRACTS_20261120.json"
+    },
+    {
+      "scope": "Native GDI display mode and DXGI encoded color copy",
+      "source_commits": [
+        "c05e2549",
+        "e6852733"
+      ],
+      "accepted": "Hardware-selected seven-file profile. The open ledger records each original-scenario acceptance.",
+      "evidence": "graphics-baseline.json"
+    },
+    {
+      "scope": "WDDM 2.0 process-scoped Present1 input word",
+      "integration_source": "abd9f213",
+      "selected_umd": "cd352fa8f009f4c6d0c974513847546c66fb099b259e22da51a0d13ad7b373df",
+      "remaining": "Functional source exists on tgd3d-vulkan outside the selected UMD lineage. The optional multi-frame path and its third-frame restart have separate open faults.",
+      "evidence": "dxvk-games-20261118/dxgi-copy-cd352fa8/merged-source-checks.json"
+    },
+    {
+      "scope": "EMC failed vote delivery",
+      "integration_source": "84952aad731896ee97ba91d38a52d13f8cbbc2fe",
+      "original": "454ea62d70f74665b3839efd29de5f51bfbdabd8",
+      "remaining": "Shipped display KMD and merged EMC source have different provenance. Recorded decode completion did not establish exit stability.",
+      "evidence": "EMC_VOTE_DELIVERY_20261118.json"
+    },
+    {
+      "scope": "Ordinary virtual context DMA pool",
+      "source": "60220e9e",
+      "candidate_kmd": "61787148742b664f1c876570dfed46c61f75e8a66adaa432357214874ac3e8ab",
+      "qualification": "Flip control passed. Original sequential presentation returned occluded.",
+      "evidence": "legacy-sequential-step4/virtual-dma-trial-61787148.json"
+    },
+    {
+      "scope": "Typed linear window back-buffer association",
+      "source": "e1314a2c769b92e971640caf67e1a67db270a5ad",
+      "candidate_umd": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "evidence": "legacy-sequential-step4/linear-aperture-trial-b4f6c7bf.json",
+      "qualification": "The paired native Code 0 trial produced a resource-associated 921600-byte window back buffer. The flip control passed. The original sequential window returned occluded and exited 4."
+    },
+    {
+      "scope": "Standard allocation-only GDI texture import",
+      "status": "Independent local candidate",
+      "evidence": "legacy-sequential-step4/virtual-dma-trial-61787148.json",
+      "remaining": "Archived model distinguishes baseline/candidate. No application OpenResource or Blt callback was recorded during the failed current-window trace."
+    },
+    {
+      "scope": "Display and boot/power changes already present in the working tree",
+      "files": [
+        "AGENTS.md",
+        "tegra-x1-wddm/platform/t214_dc.c",
+        "tegra-x1-wddm/platform/t214_dc.h",
+        "tegra-x1-wddm/tests/dc_model.h",
+        "tegra-x1-wddm/tests/test_context_windows.c",
+        "tegra-x1-wddm/tests/test_dc_portrait.c",
+        "tegra-x1-wddm/tests/test_panel_scanout_windows.c",
+        "tegra-x1-wddm/tests/test_panel_timings_windows.c",
+        "tegra-x1-wddm/tools/dvfs-integration/Install-AfterBoot.ps1",
+        "tegra-x1-wddm/tools/dvfs-integration/Merge-Common.ps1",
+        "tegra-x1-wddm/tools/dvfs-integration/Power-State.ps1",
+        "tegra-x1-wddm/tools/dvfs-integration/Restore-Dvfs.ps1",
+        "tegra-x1-wddm/tools/dvfs-integration/Stage-Boot.ps1",
+        "tegra-x1-wddm/tools/tgd3d-default/Default-Start.ps1",
+        "tegra-x1-wddm/tools/tgd3d-trial/Common.ps1",
+        "tegra-x1-wddm/tools/tgd3d-trial/Switch-Kmd.ps1",
+        "tegra-x1-wddm/windows/allocation.c",
+        "tegra-x1-wddm/windows/panel.c",
+        "tegra-x1-wddm/windows/panel.h",
+        "tegra-x1-wddm/windows/panel_scanout.c",
+        "tegra-x1-wddm/windows/panel_vidpn.c",
+        "tegra-x1-wddm/windows/query.c"
+      ],
+      "remaining": "The working-tree changes are outside the two frozen trial deltas. Column scan, the extra MPO/display claims, and recovery/activation changes retain their own hardware requirements.",
+      "evidence": "SWITCH_GRAPHICS_HANDOFF.md"
+    },
+    {
+      "scope": "Standard CPU-readable window staging surfaces",
+      "source": "aa49f69c8362ddb6e0547ad8f30bb951c9548a5e",
+      "candidate_kmd": "09e40be1b2e634c2944b0d852f0fa48ada7ebe2aed56971f5ef76c451508f344",
+      "evidence": "legacy-sequential-step4/standard-staging-trial-09e40be1.json",
+      "qualification": "ARM64 models passed. The original native window obtained its 640x360 staging surface and Windows issued the blit. The first Present still returned occluded and the application exited 4.",
+      "remaining": "The corrected allocation is now exercised by Windows. The existing GDI-specific KMD implementation rejects the ordinary-context copy before a GPU submission. Correct this remaining path and qualify the original application. The historical reset remains separately unconfirmed.",
+      "direct_driver_evidence": "legacy-sequential-step4/staging-ddi-result-13286e3e.json"
+    },
+    {
+      "scope": "Miniport presentation-status diagnostics",
+      "source": "961609375c3a45fb830d84b2f93c474767d3ef7d",
+      "candidate_kmd": "13286e3eb6aeadfda1aac07b138ae21697ba07ecb2c6baf4a5b471f9c2d9e02b",
+      "evidence": "legacy-sequential-step4/staging-ddi-result-13286e3e.json",
+      "qualification": "Direct drawing-thread entry and return were observed in the original window. The observation build preserves the original refusal and has no independent functional qualification."
+    }
+  ],
+  "open_faults": [
+    {
+      "id": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+      "workaround": "Keep this native Blt path out of daily launches. A client with a validated flip option may use the verified legacy FLIP_SEQUENTIAL route within its tested scope. The six-frame control matched 15 desktop samples. The WARP empty-window control is a separate software result.",
+      "closure": "Identify the initiating failure and fix it. Retest the original legacy SEQUENTIAL trigger on AC at least three consecutive times, including correct visible output, normal exit and desktop continuity."
+    },
+    {
+      "id": "GM20B-WDDM20-PRESENT1-REMOVAL",
+      "workaround": "Keep the experimental WDDM 2.0 offer confined to a one-time diagnostic client. Use only application paths with independent physical acceptance for daily use.",
+      "closure": "Verify actual rendering, on-screen output and normal exit through the affected system swap effects on three consecutive trials. Keep the legacy restart open until its own criteria pass."
+    },
+    {
+      "id": "GM20B-WDDM20-FLIP-RESTART",
+      "workaround": "Keep multi-frame rendering through the process-scoped WDDM 2.0 candidate in diagnostics. The previous legacy FLIP_SEQUENTIAL six-frame control is qualified only for its measured client and scene.",
+      "closure": "Identify and repair the initiating fault. Run the original multi-frame scene on external power at least three consecutive times with the tested components, verified display samples, normal exit and a continuous desktop."
+    },
+    {
+      "id": "SWITCH-LOAD-TRANSITION-RESTART",
+      "workaround": "Keep unqualified heavy-load paths in diagnostics. Use only a previously accepted alternative for the specific application and workload. No universal game or extraction workaround has been verified.",
+      "closure": "Separate triggers with identified causes and document a fix and three consecutive original-scenario retests for each remaining restart."
+    },
+    {
+      "id": "SWITCH-WIFI-STARTUP",
+      "workaround": "Use confirmed working connectivity for remote operation. Keep startup reliability out of acceptance until it is tested.",
+      "closure": "Identify the startup failure and qualify the corrected driver on repeated Windows boots with actual network access."
+    },
+    {
+      "id": "GM20B-NATIVE-RECOVERY-BOOT-RESTART",
+      "workaround": "Keep the accepted signed profile and its Code 43 recovery path available. After a necessary recovery, check the most recent boot ID, Code 0, loaded components and compositor before starting a graphics workload. These checks verified the recovered desktop on boot 84936. A preventive workaround remains open.",
+      "closure": "Identify the initiating cause on the native recovery boot. After repair, repeat the same controlled return to the accepted profile on AC at least three consecutive times without an extra boot; confirm the login/desktop, Code 0, loaded component hashes and a normal window exit."
+    },
+    {
+      "id": "SWITCH-COMMIT-PRESSURE-RESTART",
+      "workaround": "After an interruption, read the boot events and verify the selected seven-file profile, compositor, Code 0 and power before starting graphics work. Limit diagnostic queries to the relevant records. A preventive workaround for this incident is unverified.",
+      "closure": "Identify the workload and initiating cause, correct it, and verify three consecutive runs under the original conditions with adequate commit headroom, normal exit and a continuous desktop."
+    }
+  ],
+  "boot": 86993,
+  "open_faults_source": "open-faults.json"
+}

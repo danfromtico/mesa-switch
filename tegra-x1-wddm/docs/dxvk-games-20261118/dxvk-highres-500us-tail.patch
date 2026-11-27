@@ -1,0 +1,27 @@
+--- a/src/util/util_sleep.cpp
++++ b/src/util/util_sleep.cpp
+@@ -116,18 +116,14 @@
+     if (!m_initialized.load())
+       initialize();
+ 
+-    // Busy-wait for the last couple of milliseconds since sleeping
+-    // on Windows is highly inaccurate and inconsistent.
++#ifdef _WIN32
++    // Reserve the last half millisecond for spin after the blocking wait.
++    const TimerDuration sleepThreshold = 500us;
++#else
+     TimerDuration sleepThreshold = m_sleepThreshold;
+-
+-    if (m_sleepGranularity != TimerDuration::zero()) {
+-      auto margin = duration / 6;
+-#ifdef _WIN32
+-      if (threadTimer.available())
+-        margin = std::min(margin, m_sleepGranularity);
++    if (m_sleepGranularity != TimerDuration::zero())
++      sleepThreshold += duration / 6;
+ #endif
+-      sleepThreshold += margin;
+-    }
+ 
+     TimerDuration remaining = duration;
+     TimePoint t1 = t0;

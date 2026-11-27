@@ -65,8 +65,10 @@ struct nvk_root_descriptor_table {
 
    uint64_t interlock_buffer_addr;
 
+   /* Upper half of the D3D 16-sample pattern; keep the normal root ABI stable. */
+   struct nak_sample_location tir_high_locations[8];
    /* Align the following arrays to 0x100 on pre-Pascal GPUs. */
-   uint8_t __padding[0x98];
+   uint8_t __padding[0x90];
 
    /*
     * Arrays with dynamic (shader-provided) indices need to fit in a single
@@ -203,6 +205,7 @@ struct nvk_rendering_state {
    /* True if all the conditions are met to allow rendering to linear */
    bool linear;
    bool zcull_enabled;
+   uint8_t tir_samples;
 };
 
 struct nvk_graphics_state {
@@ -309,6 +312,9 @@ nvk_cmd_buffer_pool(struct nvk_cmd_buffer *cmd)
 }
 
 void nvk_cmd_buffer_new_push(struct nvk_cmd_buffer *cmd);
+void nvk_cmd_buffer_flush_indirect_continuation(struct nvk_cmd_buffer *cmd);
+
+void nvk_push_legacy_host_wfi(struct nv_push *p, uint32_t subchannel);
 
 #define NVK_CMD_BUFFER_MAX_PUSH 512
 
@@ -463,7 +469,8 @@ VkResult nvk_cmd_flush_cs_qmd(struct nvk_cmd_buffer *cmd,
                               const struct nvk_cmd_state *state,
                               uint32_t global_size[3],
                               uint64_t *qmd_addr_out,
-                              uint64_t *root_desc_addr_out);
+                              uint64_t *root_desc_addr_out,
+                              uint32_t *inline_qmd);
 
 void nvk_cmd_flush_gfx_dynamic_state(struct nvk_cmd_buffer *cmd);
 void nvk_cmd_flush_gfx_shaders(struct nvk_cmd_buffer *cmd);

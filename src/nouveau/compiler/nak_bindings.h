@@ -5,6 +5,8 @@
 
 #include "nak_private.h"
 
+#ifndef _WIN32
+
 #include "nouveau_bo.h"
 #include "nouveau_context.h"
 #include "nouveau_device.h"
@@ -18,3 +20,5 @@
 enum ENUM_PACKED drm_rs_ioctls {
    DRM_RS_IOCTL(NOUVEAU_EXEC),
 };
+
+#endif

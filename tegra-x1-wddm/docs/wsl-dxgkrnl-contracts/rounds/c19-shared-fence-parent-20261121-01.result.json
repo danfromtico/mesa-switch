@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "round_id": "c19-shared-fence-parent-20261121-01",
+  "contract_id": "dxgkrnl.h:231:1",
+  "declaration_sha256": "be8f06d34d2498378a6675f59c4dbc45cd9ff2b84bf66c0a94744bb5f645e9ac",
+  "started_utc": "2026-11-22T02:52:57.361879+00:00",
+  "status": "未知",
+  "target_hit": false,
+  "device_executions": 0,
+  "unexplained_restart": false,
+  "finding": "启动 91476 的完整 ETL 中，传统全局打开（非 NT）返回成功，其两端 1069 均给出同一对象 sync2。创建端 PID 1368 有设备归属，打开端 PID 5552 的 1069 设备字段为空。打开方随后对该局部句柄发出的值 1 公开等待调用返回成功。",
+  "gap": "需源自同一打开的 Windows 全局表项或内部父对象关系；事件 1069 只提供对象与当前局部句柄的关联。原历史 SEQUENTIAL 三次也无同对象的 1069。",
+  "observation": {
+    "boot": 91476,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "owner_report_1069": {
+      "qpc": 69601960490,
+      "pid": 1368,
+      "tid": 3720,
+      "event": 1069,
+      "device": "device1",
+      "local": 1073742272,
+      "object": "sync2"
+    },
+    "open_report_1069": {
+      "qpc": 69604008902,
+      "pid": 5552,
+      "tid": 3256,
+      "event": 1069,
+      "device": null,
+      "local": 1073742208,
+      "object": "sync2"
+    },
+    "public_open": {
+      "qpc": 69604009136,
+      "pid": 5552,
+      "tid": 3256,
+      "event": "global_open",
+      "status": "00000000",
+      "global": "1073742018",
+      "local": "1073742208"
+    },
+    "public_wait": {
+      "qpc": 69604528232,
+      "pid": 5552,
+      "tid": 3256,
+      "event": "global_wait",
+      "status": "00000000",
+      "context": "1073742272",
+      "local": "1073742208",
+      "value": "1"
+    }
+  },
+  "windows_evidence": [
+    {
+      "path": "wsl-dxgkrnl-contracts/rounds/c27-shared-parent-20261121-01.result.json",
+      "sha256": "f0e2a76f89e0af3ed5a95be771d6cdd70bf8989e7cf255561f0eb12c64d21799"
+    }
+  ]
+}

@@ -1,0 +1,378 @@
+{
+  "schema": 1,
+  "round_id": "c27-shared-private-data-20261121-01",
+  "contract_id": "ioctl.c:1710:4",
+  "declaration_sha256": "e56e94472d01d7149769ae5f8608ae4377be083d398211351c5b6fdf288603c6",
+  "board_issuance_sha256": "06850d0f1e6ca53d8fc6d094c1d60e0076fb55feff828f8b27ef8a06ed5979c8",
+  "chronology": "实机签发文件绑定已在故障表登记的计划哈希。程序 QPC 与 ETW 在同一次启动内比较，系统启动用 Event 12 RecordId 标识。",
+  "started_utc": "2026-11-21T13:12:16.4272663Z",
+  "before": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:12:16.4272663Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "after": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:12:33.3902502Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "status": "已满足",
+  "target_hit": true,
+  "unexplained_restart": false,
+  "finding": "独立打开方查询到 1 份分配、16 字节逐分配私有数据。OpenResourceFromNtHandle 返回的分配描述符指向该输出缓冲，版本、标志和 65536 字节大小逐字段匹配创建输入。",
+  "gap": null,
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 308,
+      "utc": "2026-11-21T13:12:24.6663768Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 63790516553,
+        "pid": 308,
+        "tid": 7824,
+        "event": "start",
+        "mode": "resource"
+      },
+      {
+        "qpc": 63791113407,
+        "pid": 308,
+        "tid": 7824,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 63791263115,
+        "pid": 308,
+        "tid": 7824,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 63791329058,
+        "pid": 308,
+        "tid": 7824,
+        "event": "resource_create_begin",
+        "device": "1073742016",
+        "create_resource": "1",
+        "shared": "1",
+        "existing": "0",
+        "version": "1",
+        "flags": "0",
+        "bytes": "65536",
+        "private_bytes": "16"
+      },
+      {
+        "qpc": 63791513737,
+        "pid": 308,
+        "tid": 7824,
+        "event": "resource_create_return",
+        "status": "00000000",
+        "device": "1073742016",
+        "allocation": "1073742272",
+        "resource": "1073742208",
+        "existing": "0"
+      },
+      {
+        "qpc": 63791574335,
+        "pid": 308,
+        "tid": 7824,
+        "event": "resource_export",
+        "status": "00000000",
+        "resource": "1073742208",
+        "nt": "252"
+      },
+      {
+        "qpc": 63791637301,
+        "pid": 308,
+        "tid": 7824,
+        "event": "resource_query",
+        "phase": "before",
+        "device": "1073742016",
+        "nt": "252",
+        "status": "00000000",
+        "count": "1",
+        "private_bytes": "16",
+        "runtime_bytes": "0",
+        "resource_bytes": "0"
+      },
+      {
+        "qpc": 63792002811,
+        "pid": 308,
+        "tid": 7824,
+        "event": "child_started",
+        "role": "child-resource",
+        "nt": "1",
+        "child_pid": "8064"
+      },
+      {
+        "qpc": 63793627913,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "start",
+        "mode": "child-resource"
+      },
+      {
+        "qpc": 63793699209,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 63793935648,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 63793999795,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "resource_query",
+        "phase": "child",
+        "device": "1073742016",
+        "nt": "256",
+        "status": "00000000",
+        "count": "1",
+        "private_bytes": "16",
+        "runtime_bytes": "0",
+        "resource_bytes": "0"
+      },
+      {
+        "qpc": 63794065012,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "resource_open_begin",
+        "device": "1073742016",
+        "nt": "256",
+        "count": "1"
+      },
+      {
+        "qpc": 63794129511,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "resource_open_return",
+        "status": "00000000",
+        "device": "1073742016",
+        "allocation": "1073742272",
+        "resource": "1073742208",
+        "size": "16",
+        "total": "16",
+        "output_link": "1",
+        "version": "1",
+        "flags": "0",
+        "bytes": "65536"
+      },
+      {
+        "qpc": 63794188589,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "resource_close",
+        "device": "1073742016",
+        "resource": "1073742208",
+        "status": "00000000"
+      },
+      {
+        "qpc": 63794257346,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 63794317655,
+        "pid": 8064,
+        "tid": 3080,
+        "event": "exit",
+        "code": "0"
+      },
+      {
+        "qpc": 63794558630,
+        "pid": 308,
+        "tid": 7824,
+        "event": "child_exit",
+        "exit": "0",
+        "child_pid": "8064"
+      },
+      {
+        "qpc": 63794641894,
+        "pid": 308,
+        "tid": 7824,
+        "event": "resource_query",
+        "phase": "after",
+        "device": "1073742016",
+        "nt": "252",
+        "status": "00000000",
+        "count": "1",
+        "private_bytes": "16",
+        "runtime_bytes": "0",
+        "resource_bytes": "0"
+      },
+      {
+        "qpc": 63794726650,
+        "pid": 308,
+        "tid": 7824,
+        "event": "resource_close",
+        "device": "1073742016",
+        "resource": "1073742208",
+        "status": "00000000"
+      },
+      {
+        "qpc": 63795095019,
+        "pid": 308,
+        "tid": 7824,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 63795156991,
+        "pid": 308,
+        "tid": 7824,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=9"
+      ]
+    },
+    "actor_event_counts": {
+      "27": 2,
+      "33": 1,
+      "36": 2,
+      "28": 2
+    },
+    "devices": [
+      {
+        "pid": 308,
+        "tid": 7824,
+        "qpc": 63791259834,
+        "caller_device": 1073742016,
+        "device": "device1",
+        "adapter": "adapter1"
+      },
+      {
+        "pid": 8064,
+        "tid": 3080,
+        "qpc": 63793931960,
+        "caller_device": 1073742016,
+        "device": "device2",
+        "adapter": "adapter1"
+      }
+    ],
+    "allocation_joins": [
+      {
+        "pid": 308,
+        "tid": 7824,
+        "operation": "resource_create_return",
+        "begin": 63791329058,
+        "end": 63791513737,
+        "caller_allocation": 1073742272,
+        "caller_resource": 1073742208,
+        "matched_device_allocation": true,
+        "event36_qpc": 63791513209,
+        "device": "device1",
+        "adapter": "adapter1",
+        "resource": "resource1",
+        "shared": "shared1",
+        "global_allocation": "global1",
+        "matched_adapter_allocation": true,
+        "event33_qpc": 63791512683,
+        "bytes": 65536,
+        "flags": 536871040,
+        "read_segment": 0,
+        "write_segment": 2,
+        "preferred": 2
+      },
+      {
+        "pid": 8064,
+        "tid": 3080,
+        "operation": "resource_open_return",
+        "begin": 63794065012,
+        "end": 63794129511,
+        "caller_allocation": 1073742272,
+        "caller_resource": 1073742208,
+        "matched_device_allocation": true,
+        "event36_qpc": 63794128855,
+        "device": "device2",
+        "adapter": "adapter1",
+        "resource": "resource2",
+        "shared": "shared1",
+        "global_allocation": "global1",
+        "matched_adapter_allocation": false
+      }
+    ],
+    "gpu_signal_packets": [],
+    "cpu_sync": [],
+    "sync_identity": []
+  },
+  "raw_files_sha256": {
+    "result.json": "cdba851257dfab798b893e49da268c29dddafb15d3093296e4bfa6a60a72f243",
+    "issued.json": "06850d0f1e6ca53d8fc6d094c1d60e0076fb55feff828f8b27ef8a06ed5979c8",
+    "result.zip": "38f55a5fd69cf13be540bc6e331e5f9c2687cf1d9443bd4b69204ab8f7a97708",
+    "journal.tsv": "45aae24189cae73120a4d8458f2c595bdf5c63cd56e9adbe3c2f11fca3ce6cff",
+    "trace.etl": "0ef273c5d2057ad623db0266039a832161d6b873649b136a09ac6e4e9ed1a169",
+    "client.json": "fe16575ab64bb7ff6164c65842f1104adb25c6c08c0f4cbfecacccde2c9f363f"
+  },
+  "installed_event_manifest_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_initial_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "evidence_scope": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "覆盖共享分配数据交给打开端的阶段。重定向表面的专用布局及历史首次 Present 中实际传递的描述符仍须当次记录。"
+}

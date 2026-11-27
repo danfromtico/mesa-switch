@@ -1,0 +1,280 @@
+{
+  "schema": 1,
+  "round_id": "c27-monitored-cpu-va-20261121-01",
+  "contract_id": "dxgkrnl.h:197:2",
+  "declaration_sha256": "c0fa1fc6733cc304254e5f6d67c7b5e29ffb035a0f6e55f23424f5a45c2a9562",
+  "board_issuance_sha256": "237960b2edd87a37c64d0e2621259c2f1e0105429279f0a9bc8dba0c2c502a3d",
+  "chronology": "实机签发文件绑定已在故障表登记的计划哈希。程序 QPC 与 ETW 在同一次启动内比较，系统启动用 Event 12 RecordId 标识。",
+  "started_utc": "2026-11-21T13:11:03.8708205Z",
+  "before": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:11:03.8708205Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "after": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:11:21.0975065Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "status": "已满足",
+  "target_hit": true,
+  "unexplained_restart": false,
+  "finding": "同一受监控围栏的 CPU 映射先读到 0。事件 30、1069 和 294 关联到同一设备、上下文、局部围栏和 GPU 信号值 1。成功等待后该映射读到 1。本轮没有可配对的调度包退役事件。",
+  "gap": null,
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 3108,
+      "utc": "2026-11-21T13:11:12.2611895Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 62403326078,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "start",
+        "mode": "monitor"
+      },
+      {
+        "qpc": 62403447577,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 62403550581,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 62403704324,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "context",
+        "device": "1073742016",
+        "context": "1073742208",
+        "status": "00000000"
+      },
+      {
+        "qpc": 62403798368,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "fence_create_begin",
+        "type": "monitored",
+        "device": "1073742016",
+        "initial": "0"
+      },
+      {
+        "qpc": 62404070794,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "fence_create",
+        "status": "00000000",
+        "local": "1073742272",
+        "mapped": "1"
+      },
+      {
+        "qpc": 62404183157,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "fence_value",
+        "when": "before",
+        "local": "1073742272",
+        "value": "0",
+        "query": "48",
+        "protection": "2"
+      },
+      {
+        "qpc": 62404292024,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "gpu_signal_begin",
+        "context": "1073742208",
+        "local": "1073742272",
+        "value": "1"
+      },
+      {
+        "qpc": 62404398573,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "gpu_signal_return",
+        "context": "1073742208",
+        "local": "1073742272",
+        "status": "00000000"
+      },
+      {
+        "qpc": 62404503431,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "fence_value",
+        "when": "after",
+        "local": "1073742272",
+        "value": "1",
+        "wait": "00000000"
+      },
+      {
+        "qpc": 62404635700,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "fence_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 62404713217,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "context_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 62404787360,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 62404852119,
+        "pid": 3108,
+        "tid": 8000,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=9"
+      ]
+    },
+    "actor_event_counts": {
+      "27": 1,
+      "30": 1,
+      "1069": 1,
+      "294": 1,
+      "297": 1,
+      "31": 1,
+      "28": 1
+    },
+    "devices": [
+      {
+        "pid": 3108,
+        "tid": 8000,
+        "qpc": 62403548416,
+        "caller_device": 1073742016,
+        "device": "device1",
+        "adapter": "adapter1"
+      }
+    ],
+    "allocation_joins": [],
+    "gpu_signal_packets": [
+      {
+        "pid": 3108,
+        "tid": 8000,
+        "signal_qpc": 62404398212,
+        "fence_value": [
+          1
+        ],
+        "context": "ctx1",
+        "object": "sync1",
+        "matching_starts": 0,
+        "context_handle_matched": true,
+        "sync_handle_matched": true,
+        "context_and_sync_same_device": true
+      }
+    ],
+    "cpu_sync": [
+      {
+        "qpc": 62404502889,
+        "pid": 3108,
+        "tid": 8000,
+        "event": 297,
+        "device": "device1",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          1
+        ]
+      }
+    ],
+    "sync_identity": [
+      {
+        "qpc": 62404070364,
+        "pid": 3108,
+        "tid": 8000,
+        "event": 1069,
+        "device": "device1",
+        "local": 1073742272,
+        "object": "sync1"
+      }
+    ]
+  },
+  "raw_files_sha256": {
+    "result.json": "55dca407cfcd40cb8b7945662233af9be62235f8e6ee00bd02a0f96ca9f4e8b7",
+    "issued.json": "237960b2edd87a37c64d0e2621259c2f1e0105429279f0a9bc8dba0c2c502a3d",
+    "result.zip": "722cc262470f203e0df5103859a45428bd15001e9640cb8d4f275a605ec90a71",
+    "journal.tsv": "69673c0e619af8901bcd50eac9cbb4496c4c00436817af6645e5b9d3bf456e0e",
+    "trace.etl": "819fb3ff98062d73da78020a2de29af858ad910ca548bba7e67066bcb6c6f779",
+    "client.json": "3e01131864bfbdb8fb50df3bdf1680f5707c7c1a86f5aa934e0412e3748bfaf0"
+  },
+  "installed_event_manifest_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_initial_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "evidence_scope": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "为旧回执补充独立的 CPU 读值对照。历史启动只有 GPU 信号退役，仍缺当时绘图进程的 CPU 读取。",
+  "analysis_revision": {
+    "prior_status": "未知",
+    "prior_finding": "缺少同一围栏 CPU 映射两次读值或同一上下文的完整 GPU 信号关联。缺少符合声明的完整配对",
+    "prior_result_sha256": "3eee1311a5842473e6894c8fa7a778cf7a416e53920d3c317298db1f29b8ad63",
+    "basis": "对同一原始归档补充核对 KMT 句柄、事件 30 的上下文、事件 1069 的同步对象和事件 294 的实际信号。"
+  }
+}

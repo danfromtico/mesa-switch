@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "state": "one-use-fix-tested-game-scene-observed-promotion-pending",
+  "source_commit": "44e9bac92bcea8f030865cc853b129105cf92b63",
+  "target": "Switch Lite / DESKTOP-5RCUK3G",
+  "windows": {
+    "build": "22631.2861",
+    "release": "23H2"
+  },
+  "diagnostic": {
+    "received_utc": "2026-11-27T20:23:36.552423+00:00",
+    "photo_sha256": "956c2762058a5c2a532d8429464794260b56a0d4015e7a8b2267911903ee60d6",
+    "stop_code": "0xE0535751",
+    "parameters": [
+      "0x000000000000000b",
+      "0x00000000c00000bb",
+      "0x0000020100000005",
+      "0x00000000000000fe"
+    ],
+    "decoded": {
+      "Operation": 11,
+      "Status": "0xc00000bb",
+      "Site": 5,
+      "PageTableLevel": 1,
+      "UpdateMode": 2,
+      "HasAllocation": false,
+      "DriverProtection": "0xfe"
+    },
+    "interpretation": "Known leaf kind 0xfe rejected because PageTableLevel==1; GPU_PHYSICAL mode 2 is supported. hAllocation is NULL, so the directory-allocation rejection is not involved.",
+    "planned_stop": true
+  },
+  "fix": "Permit an already-supported NVK leaf kind on GPU_PHYSICAL directory updates; EncodePage still writes a plain child-table PDE. Preserve CPU initialization, unsupported-kind, PTE-flag, ownership and span validation.",
+  "page_table_levels": 2,
+  "baseline_kmd_sha256": "1d7fcf5d75ed70858e0d7ebdf293cb449586f25619d6f2ff7ee55c647b8c4c6a",
+  "candidate_files": {
+    "tegragpurender/NETB_img.bin": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+    "tegragpurender/fecs.bin": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+    "tegragpurender/fecs_sig.bin": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+    "tegragpurender/gpccs.bin": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+    "tegragpurender/gpmu_ucode_desc.bin": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+    "tegragpurender/gpmu_ucode_image.bin": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699",
+    "tegragpurender/nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender/pmu_bl.bin": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+    "tegragpurender/pmu_sig.bin": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+    "tegragpurender/tegragpuno3d.dll": "30a37ea3062d6b712ca5d6dd17261c42c39ec930257a57405ea1a140e29c4e40",
+    "tegragpurender/tegragpurender.inf": "8f50e3a29e8839a897c0138b7ec1a8a724e7ad44a833b72a8f5e3e465374751a",
+    "tegragpurender/tegragpurender.sys": "1f556e56024818b4b0b2715f32aae2a77413f4d768d6bd41d038648bc012623c",
+    "test-paging-after.exe": "d67fd021222fe9137d1b65d11441c4667c098dd8bc5e201094b50680e927809a",
+    "test-paging-before.exe": "c92e70299474f38233c2a67ab2ef8d6a64e12f96608534f4bfe76222ecc8bda7",
+    "tegragpurender/tegragpurender.cat": "8cee50da18f6101a994b3575db69c87ebbd38dd2a3bca21208c291e0d072cc24"
+  },
+  "native_before_after": {
+    "BootRecord": 106117,
+    "GpuProblemCode": 43,
+    "Tests": [
+      {
+        "Name": "test-paging-before.exe",
+        "ExitCode": 44327,
+        "Stdout": "",
+        "Stderr": "FAIL paging/resource control line 739\n"
+      },
+      {
+        "Name": "test-paging-after.exe",
+        "ExitCode": 0,
+        "Stdout": "PASS: WDK physical system/table PTEs, multipass ordering, alias bounds and TLB failures\r\n",
+        "Stderr": ""
+      }
+    ],
+    "Catalog": {
+      "ExitCode": 0,
+      "Stdout": "..................................\nSignability test complete.\r\n\nErrors:\r\nNone\r\n\nWarnings:\r\nNone\r\n\nCatalog generation complete.\r\nC:\\ProgramData\\SwitchWOA\\Pal4PdeKind-20261127\\package\\tegragpurender.cat\r\n",
+      "Stderr": ""
+    },
+    "CatalogSha256": "B12C161819F7D346699D04BD66F0563DB3DDF74317AF663CC94EE625D4D74651"
+  },
+  "activation": {
+    "BootRecord": 106117,
+    "GpuProblemCode": 0,
+    "GpuOemInf": "oem49.inf",
+    "GpuVersion": "0.1.0.158",
+    "GpuDeviceDesc": "Tegra X1 (GM20B) .158 7229d1926659",
+    "GpuSysSha256": "1f556e56024818b4b0b2715f32aae2a77413f4d768d6bd41d038648bc012623c",
+    "AllowNativeBoot": false,
+    "AllowDesktopStart": false,
+    "PermitValueAfter": 0,
+    "PermitConsumed": true,
+    "DisplayParameters": 1,
+    "StartupReceipts": {
+      "InitializeStatus": 0,
+      "TraceStatus": 0,
+      "BootPermitStatus": 0,
+      "StartGateStatus": 0,
+      "ResourceStatus": 0,
+      "HardwareStatus": 0,
+      "HardwareStage": 314,
+      "PanelStatus": 0,
+      "PostDisplayMapStatus": 0,
+      "BootGpuTargetKhz": 460800,
+      "BootGpuMeasuredKhz": 460800,
+      "BootGpuRailUv": 800000,
+      "PagingStopProbeArmed": "0xE0535751"
+    },
+    "UserModeDriverName": [
+      "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_e6d1f5e5b0c094d6\\tegragpuno3d.dll",
+      "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-fault-isr-1d7fcf5d75ed\\app\\TegraGpuD3DVk.dll",
+      "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-fault-isr-1d7fcf5d75ed\\app\\TegraGpuD3DVk.dll",
+      "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_e6d1f5e5b0c094d6\\tegragpuno3d.dll"
+    ],
+    "VulkanDriverName": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-fault-isr-1d7fcf5d75ed\\app\\nvk_windows_icd.json",
+    "SdProblemCode": 0,
+    "SdVersion": "0.5.1.11",
+    "SdSysSha256": "e83ba40cf98c8bce6224112cd6130c7b833bebfb5af28be0c4b605dd741bbe35",
+    "FanProblemCode": 0,
+    "FanTempSoC": 38,
+    "FanSysSha256": "1bdb70e94ae94ee2aeaea001bd92634540737611d28ddf4e9b93675de0731c36",
+    "I2cSysSha256": "b632905162c6e25c0ffbfd6fb5f807e10fd612463681bf90ac9f0c5ae95d31f9",
+    "DwmModules": [
+      {
+        "Pid": 1376,
+        "Name": "TegraGpuD3DVk.dll",
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-fault-isr-1d7fcf5d75ed\\app\\TegraGpuD3DVk.dll",
+        "Sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff"
+      },
+      {
+        "Pid": 1376,
+        "Name": "libvulkan_nouveau.dll",
+        "Path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\tdr-fault-isr-1d7fcf5d75ed\\app\\libvulkan_nouveau.dll",
+        "Sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab"
+      }
+    ]
+  },
+  "pal4_acceptance": {
+    "status": "owner-observed-launch-and-game-scene; formal-qualification-pending",
+    "successful_original_launches": 1,
+    "real_display_verified": true,
+    "normal_exit_verified": false,
+    "evidence": "game-runs-20261127/README.md",
+    "limitations": "Owner reported slow movies/gameplay and absent game audio. No full three-run acceptance or permanent baseline promotion has been completed."
+  },
+  "permit_policy": "one-use only; diagnostic stop probe retained",
+  "local_evidence_directory": "/Users/rujian/Documents/Codex/switch-lite-pal4-pde-kind-evidence-20261127",
+  "recovery_script": "C:\\ProgramData\\SwitchWOA\\Pal4PdeKind-20261127\\Restore-LiteBaselineAfterPagingProbe.ps1",
+  "review": "self review, per user direction; no external model delegation",
+  "post_diagnostic_boot": {
+    "Computer": "DESKTOP-5RCUK3G",
+    "BootRecord": 106117,
+    "GpuProblemCode": 43,
+    "KmdSha256": "D7DD3C9C6ACD01A0002540EE8062725351AEDF4B087A48AC5CC8DA4E62854657",
+    "SdSha256": "E83BA40CF98C8BCE6224112CD6130C7B833BEBFB5AF28BE0C4B605DD741BBE35",
+    "AllowNativeBoot": false,
+    "AllowDesktopStart": false,
+    "StartGateStatus": 3221225635,
+    "HardwareStatus": 4294967295,
+    "WindowsBuild": "22631",
+    "WindowsUBR": 2861,
+    "DisplayVersion": "23H2"
+  },
+  "reset_classification": "Operator confirmed manual restart after the intentional diagnostic stop; not classified as an unexplained spontaneous reboot.",
+  "diagnostic_policy": "User requested diagnostic capability as a standard KMD feature. Project instructions updated; always-on error recording and a runtime one-use stop switch are separate pending work. This candidate retains the existing opt-in one-use stop probe.",
+  "later_state": {
+    "observed_utc": "2026-11-27T21:40:12.4794171Z",
+    "boot_record": 106396,
+    "gpu_problem_code": 43,
+    "explanation": "Subsequent System Event 1074 entries record user-session RuntimeBroker shutdown/restart requests. The consumed one-use candidate is not permanently authorized. This is not a new Code 0 acceptance."
+  },
+  "scoped_daily_baseline": {
+    "status": "selected-and-permanent-boot-verified",
+    "source_commit": "d1c07b6a8c4cc812ba8fdbdd53a3780dcac9c7a2",
+    "kmd_sha256": "1d88065b2e4a8ed777c40da0802331ed542763ca1520ee5630c2a150185813d5",
+    "qualification_boot": 106486,
+    "permanent_boot": 106579,
+    "daily_paging_diagnostics": true,
+    "active_stop_probe": false,
+    "evidence": "pal4-pde-kind-daily-20261127/README.md",
+    "scope": "Scoped directory-kind repair; original forced-stop image not promoted; game audio/performance and full original-scenario closure remain open."
+  }
+}

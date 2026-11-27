@@ -1,0 +1,354 @@
+diff --git a/AcpiTables/Dsdt/Dsdt.asl b/AcpiTables/Dsdt/Dsdt.asl
+index f4f7552428169fa9cceda3cad3449d10d8942b68..807f21f12c4f61f7c49acb6d97a0583b38827718 100644
+--- a/AcpiTables/Dsdt/Dsdt.asl
++++ b/AcpiTables/Dsdt/Dsdt.asl
+@@ -19,6 +19,9 @@
+ #ifdef SWITCH_WIFI_RUNTIME
+ #include "../../WindowsDrivers/drivers/SwitchWifi/platform/tegra_resources.h"
+ #endif
++#ifdef SWITCH_LITE_GPU
++#include "../../TegraGpu/platform/t214_resources.h"
++#endif
+ 
+ DefinitionBlock("DsdtTable.aml", "DSDT", 1, "NVIDIA", "TEGRA210", EFI_ACPI_ARM_OEM_REVISION) 
+ {
+@@ -477,6 +480,43 @@ DefinitionBlock("DsdtTable.aml", "DSDT", 1, "NVIDIA", "TEGRA210", EFI_ACPI_ARM_O
+             }
+         }
+ #endif
++#ifdef SWITCH_LITE_GPU
++        // GPU0 owns the render engine resources. The optional POST aperture
++        // lets DxgKrnl match the firmware scanout to this same device.
++        Device (GPU0)
++        {
++            Name (_HID, T214_GPU_ACPI_ID)
++            Name (_UID, Zero)
++            Name (_CLS, Package () { 0x03, 0x02, Zero })
++            Name (_DEP, Package () { \_SB.FAN0 })
++            Name (_CRS, ResourceTemplate ()
++            {
++                Memory32Fixed (ReadWrite, T214_GPU_REG_BASE, T214_GPU_REG_SIZE)
++                Memory32Fixed (ReadWrite, T214_GPU_BAR1_BASE, T214_GPU_BAR1_SIZE)
++                Memory32Fixed (ReadWrite, T214_GPU_AUX_BASE, T214_GPU_AUX_SIZE)
++#define GPU_POWER_ASL(Base, Size) Memory32Fixed (ReadWrite, Base, Size)
++                T214_GPU_POWER_RESOURCES(GPU_POWER_ASL)
++#undef GPU_POWER_ASL
++#define GPU_ID_ASL(Base, Size) Memory32Fixed (ReadOnly, Base, Size)
++                T214_GPU_ID_RESOURCES(GPU_ID_ASL)
++#undef GPU_ID_ASL
++#ifdef SWITCH_LITE_GPU_IRQ
++                // CPU-side forwarding for GPU nonstall SPI 158; no wake policy.
++                Memory32Fixed (ReadWrite, T214_GPU_LIC_BASE, T214_GPU_LIC_SIZE)
++#endif
++#ifdef SWITCH_LITE_GPU_POST
++                Memory32Fixed (ReadWrite, T214_GPU_POST_FB_BASE, T214_GPU_POST_FB_SIZE)
++                Memory32Fixed (ReadWrite, T214_GPU_DC_BASE, T214_GPU_DC_SIZE)
++#endif
++                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive) { T214_GPU_STALL_GSI }
++                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive) { T214_GPU_NONSTALL_GSI }
++#ifdef SWITCH_LITE_GPU_POST
++                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive) { T214_GPU_DC_GSI }
++#endif
++            })
++            Method (_STA, 0, NotSerialized) { Return (0x0F) }
++        }
++#endif
+ #ifdef SWITCH_LITE_DISPLAY
+         // Display-only ownership of Hekate's existing POST framebuffer.
+         // The Windows miniport obtains the active address/stride through
+diff --git a/Library/PlatformBootManagerLib/LiteGpuI2c.h b/Library/PlatformBootManagerLib/LiteGpuI2c.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..9ac3c1fe7ced8f231c776e2aa1a4367be5edd022
+--- /dev/null
++++ b/Library/PlatformBootManagerLib/LiteGpuI2c.h
+@@ -0,0 +1,23 @@
++// SPDX-License-Identifier: GPL-2.0-only
++#ifndef LITE_GPU_I2C_H
++#define LITE_GPU_I2C_H
++
++#include <stdbool.h>
++#include <stdint.h>
++#include <Library/I2cLib.h>
++
++static bool GpuReadPmic (void *Context, uint8_t Address, uint8_t Reg, uint8_t *Value)
++{
++  (VOID)Context;
++  return i2c_xfer_packet (I2C_5, Address, &Reg, 1, Value, 1) != 0;
++}
++
++static bool GpuWritePmic (void *Context, uint8_t Address, uint8_t Reg, uint8_t Value)
++{
++  (VOID)Context;
++  // I2cLib packet transfers require a nonempty receive phase. A PMIC register
++  // write is a standalone two-byte transaction through the small-write API.
++  return i2c_send_byte (I2C_5, Address, Reg, Value) != 0;
++}
++
++#endif
+diff --git a/Library/PlatformBootManagerLib/LiteGpuPowerCheck.c b/Library/PlatformBootManagerLib/LiteGpuPowerCheck.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..650a12de8ad99869e137f1805e17cc5765032025
+--- /dev/null
++++ b/Library/PlatformBootManagerLib/LiteGpuPowerCheck.c
+@@ -0,0 +1,79 @@
++// SPDX-License-Identifier: GPL-2.0-only
++#ifdef SWITCH_LITE_GPU
++#include <Uefi.h>
++#include <Library/BaseLib.h>
++#include <Library/BaseMemoryLib.h>
++#include <Library/IoLib.h>
++#include <Library/I2cLib.h>
++#include <Library/UefiLib.h>
++#include <Library/UefiBootServicesTableLib.h>
++#include <Library/UefiRuntimeServicesTableLib.h>
++
++// Compile the canonical backend source from the standalone GPU checkout.
++#include "../../TegraGpu/platform/t214_power.c"
++#include "../../TegraGpu/core/identity.h"
++#include "LiteGpuI2c.h"
++
++STATIC uint32_t GpuRead32 (void *Context, uint32_t Address)
++{
++  (VOID)Context;
++  return MmioRead32 (Address);
++}
++
++STATIC void GpuWrite32 (void *Context, uint32_t Address, uint32_t Value)
++{
++  (VOID)Context;
++  MmioWrite32 (Address, Value);
++  MemoryFence ();
++}
++
++STATIC void GpuDelay (void *Context, uint32_t Microseconds)
++{
++  (VOID)Context;
++  gBS->Stall (Microseconds);
++}
++
++VOID LiteGpuPowerCheck (VOID)
++{
++  struct tg_gpu_power State;
++  struct tg_gpu_power_io Io = { NULL, GpuRead32, GpuWrite32, GpuReadPmic, GpuWritePmic, GpuDelay };
++  enum tg_gpu_power_result Result, Restore;
++  UINT8 Value, Pmic = 0;
++  BOOLEAN Probe31, Probe33;
++  UINT32 Boot0, Boot0Again;
++  struct tg_gpu_identity Identity;
++
++  ZeroMem (&State, sizeof (State));
++  Print (L"T214 GPU POWER CHECK R3 / NO DMA\r\n");
++  Print (L"Windows does not start during this check.\r\n");
++  Print (L"HIDREV %08x  RESET_X %08x  CLAMP %08x\r\n",
++         MmioRead32 (0x70000804), MmioRead32 (0x6000628C), MmioRead32 (0x7000E6D4));
++  i2c_init (I2C_5);
++  Probe31 = GpuReadPmic (NULL, 0x31, 0x26, &Value);
++  Probe33 = GpuReadPmic (NULL, 0x33, 0x26, &Value);
++  if (Probe31 != Probe33) Pmic = Probe31 ? 0x31 : 0x33;
++  Result = tg_gpu_power_up (&Io, Pmic, &State);
++  Print (L"PMIC %02x  power result %u  stage %u\r\n", Pmic, Result, State.stage);
++  Print (L"Saved M1 VOUT %02x  EN_CTRL %02x  PLLP_OUT5 %08x\r\n",
++         State.original_voltage, State.original_enable, State.original_pllp_out5);
++  Print (L"Current PLLP_OUT5 %08x  CLOCK_X %08x\r\n",
++         MmioRead32 (0x6000667C), MmioRead32 (0x60006280));
++  if (Result == TG_GPU_POWER_OK) {
++    Boot0 = MmioRead32 (0x57000000);
++    gBS->Stall (10);
++    Boot0Again = MmioRead32 (0x57000000);
++    Print (L"GPU BOOT0 %08x  repeat %08x\r\n", Boot0, Boot0Again);
++    if (Boot0 == Boot0Again && tg_gpu_identify (Boot0, &Identity) &&
++        Identity.chipset == TG_GPU_CHIP_GM20B_B)
++      Print (L"GM20B_B (T214) IDENTIFIED; GPU execution has not been tested.\r\n");
++    else
++      Print (L"GPU identity not confirmed.\r\n");
++  }
++  Restore = tg_gpu_power_down (&Io, &State);
++  Print (L"Restore result %u  resources still owned %u\r\n", Restore, State.owned);
++  Print (L"Photograph this result. Powering off in 30 seconds.\r\n");
++  for (UINTN I = 0; I < 30; ++I) gBS->Stall (1000000);
++  gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);
++  CpuDeadLoop ();
++}
++#endif
+diff --git a/Library/PlatformBootManagerLib/LiteHomeBoot.c b/Library/PlatformBootManagerLib/LiteHomeBoot.c
+index 9a7baa80a09c9eeacd46d3afbf23af1fd0f4be7e..06fd4b308c00e5b17c61ebeca498ec2686f52183 100644
+--- a/Library/PlatformBootManagerLib/LiteHomeBoot.c
++++ b/Library/PlatformBootManagerLib/LiteHomeBoot.c
+@@ -15,6 +15,9 @@
+ 
+ #define WINDOWS_LOADER L"\\EFI\\Microsoft\\Boot\\bootmgfw.efi"
+ STATIC BOOLEAN IsWindowsPartition (EFI_HANDLE Handle);
++#ifdef SWITCH_LITE_GPU
++VOID LiteGpuPowerCheck (VOID);
++#endif
+ 
+ #if defined(SWITCH_LITE_TOUCH) && defined(SWITCH_LITE_PERFORMANCE)
+ #include "../../Drivers/WifiBtApp/t214/power.h"
+@@ -316,6 +319,9 @@ PlatformBootManagerAfterConsole (VOID)
+   EfiBootManagerConnectAll ();
+ #if defined(SWITCH_LITE_TOUCH) && defined(SWITCH_LITE_PERFORMANCE)
+   CheckPowerBeforeWindows ();
++#ifdef SWITCH_LITE_GPU
++  if (BootCheckMode ("gpu_check=") == 1) LiteGpuPowerCheck ();
++#endif
+   CheckWifiBeforeWindows ();
+ #endif
+   Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiSimpleFileSystemProtocolGuid, NULL, &Count, &Volumes);
+diff --git a/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf b/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
+index 21b01390859865c661c2a5592687aa0b6ff14017..3d08546e52cd8da30221542afc11b61fc2e7dff0 100644
+--- a/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
++++ b/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
+@@ -34,6 +34,7 @@
+ [Sources]
+   PlatformBm.c
+   LiteHomeBoot.c
++  LiteGpuPowerCheck.c
+ 
+ [Packages]
+   MdeModulePkg/MdeModulePkg.dec
+diff --git a/NintendoSwitch.dsc b/NintendoSwitch.dsc
+index c6edd32e32fe4d5214034d9b4730961082f3ee21..3fc9a35a6a2ec34e34cf9c592c386342665c5f1c 100644
+--- a/NintendoSwitch.dsc
++++ b/NintendoSwitch.dsc
+@@ -35,6 +35,42 @@
+   DEFINE LITE_BACKLIGHT_FLAGS  =
+   DEFINE LITE_BOOT_SD_FLAGS    =
+   DEFINE LITE_XUSB_FLAGS        =
++  DEFINE LITE_GPU_FLAGS         =
++!ifdef SWITCH_LITE_GPU
++  !ifndef SWITCH_HEKATE
++    !error "SWITCH_LITE_GPU requires the Hekate HDH-001 boot chain"
++  !endif
++  !ifndef SWITCH_LITE_TOUCH
++    !error "SWITCH_LITE_GPU requires the HDH-001 board profile"
++  !endif
++  !ifndef SWITCH_LITE_PERFORMANCE
++    !error "SWITCH_LITE_GPU requires the reserved BL33 environment"
++  !endif
++  !ifndef SWITCH_LITE_FAN
++    !error "SWITCH_LITE_GPU requires the Lite fan/PMIC owner"
++  !endif
++  !ifndef SWITCH_LITE_BOOT_SD
++    !error "SWITCH_LITE_GPU requires the bounded Windows boot profile"
++  !endif
++  DEFINE LITE_GPU_FLAGS = -DSWITCH_LITE_GPU=1
++!endif
++  DEFINE LITE_GPU_IRQ_FLAGS =
++!ifdef SWITCH_LITE_GPU_IRQ
++  !ifndef SWITCH_LITE_GPU
++    !error "SWITCH_LITE_GPU_IRQ requires SWITCH_LITE_GPU"
++  !endif
++  DEFINE LITE_GPU_IRQ_FLAGS = -DSWITCH_LITE_GPU_IRQ=1
++!endif
++  DEFINE LITE_GPU_POST_FLAGS =
++!ifdef SWITCH_LITE_GPU_POST
++  !ifndef SWITCH_LITE_GPU
++    !error "SWITCH_LITE_GPU_POST requires SWITCH_LITE_GPU"
++  !endif
++  !ifdef SWITCH_LITE_DISPLAY
++    !error "Only one ACPI device can own the POST framebuffer"
++  !endif
++  DEFINE LITE_GPU_POST_FLAGS = -DSWITCH_LITE_GPU_POST=1
++!endif
+ !ifdef SWITCH_LITE_XUSB
+   !ifndef SWITCH_WIFI_RUNTIME
+     !error "SWITCH_LITE_XUSB requires the B01 shared PCIe/UPHY preparation"
+@@ -171,7 +207,7 @@
+ [BuildOptions.common]
+ !ifdef SWITCH_HEKATE
+   # Boot chain: hekate (L4T launcher) -> BL31 -> bl33.bin (stub + this FD).
+-  GCC:*_*_AARCH64_CC_FLAGS = -std=gnu11 -Wno-unused-variable -DSWITCH_BOOT_CHAIN_HEKATE=1 $(EXCFB_FLAGS) $(LITE_TOUCH_FLAGS) $(LITE_FAN_FLAGS) $(LITE_PERFORMANCE_FLAGS) $(WIFI_RUNTIME_FLAGS) $(LITE_XUSB_FLAGS) $(LITE_BOOT_SD_FLAGS)
++  GCC:*_*_AARCH64_CC_FLAGS = -std=gnu11 -Wno-unused-variable -DSWITCH_BOOT_CHAIN_HEKATE=1 $(EXCFB_FLAGS) $(LITE_GPU_FLAGS) $(LITE_TOUCH_FLAGS) $(LITE_FAN_FLAGS) $(LITE_PERFORMANCE_FLAGS) $(WIFI_RUNTIME_FLAGS) $(LITE_XUSB_FLAGS) $(LITE_BOOT_SD_FLAGS)
+ !else
+   GCC:*_*_AARCH64_CC_FLAGS = -Wno-unused-variable $(EXCFB_FLAGS)
+ !endif
+@@ -222,7 +258,7 @@
+ !else
+   DEFINE ACPI_ASL_SWOA           =
+ !endif
+-  GCC:*_*_AARCH64_ASLPP_FLAGS = $(LITE_XUSB_FLAGS) $(LITE_SIO_FLAGS) $(WIFI_RUNTIME_FLAGS) $(LITE_BOOT_SD_FLAGS) $(LITE_BACKLIGHT_FLAGS) $(LITE_BLUETOOTH_FLAGS) $(LITE_AUDIO_FLAGS) $(LITE_DISPLAY_FLAGS) $(LITE_SYSTEM_FLAGS) $(LITE_PERFORMANCE_FLAGS) $(LITE_FAN_FLAGS) $(LITE_POWER_FLAGS) $(LITE_TOUCH_FLAGS) $(ACPI_ASL_SDNV) $(ACPI_ASL_SWOA) $(ACPI_ASL_EMMC) $(ACPI_ASL_XHCI) $(ACPI_ASL_EHCI) $(ACPI_ASL_EHCI_TXFILL)
++  GCC:*_*_AARCH64_ASLPP_FLAGS = $(LITE_GPU_FLAGS) $(LITE_GPU_IRQ_FLAGS) $(LITE_GPU_POST_FLAGS) $(LITE_XUSB_FLAGS) $(LITE_SIO_FLAGS) $(WIFI_RUNTIME_FLAGS) $(LITE_BOOT_SD_FLAGS) $(LITE_BACKLIGHT_FLAGS) $(LITE_BLUETOOTH_FLAGS) $(LITE_AUDIO_FLAGS) $(LITE_DISPLAY_FLAGS) $(LITE_SYSTEM_FLAGS) $(LITE_PERFORMANCE_FLAGS) $(LITE_FAN_FLAGS) $(LITE_POWER_FLAGS) $(LITE_TOUCH_FLAGS) $(ACPI_ASL_SDNV) $(ACPI_ASL_SWOA) $(ACPI_ASL_EMMC) $(ACPI_ASL_XHCI) $(ACPI_ASL_EHCI) $(ACPI_ASL_EHCI_TXFILL)
+ 
+ ################################################################################
+ #
+diff --git a/Tools/host-tests/gpu-i2c/run.sh b/Tools/host-tests/gpu-i2c/run.sh
+new file mode 100644
+index 0000000000000000000000000000000000000000..799b5be0b656677628a43370ae01eba51e47e473
+--- /dev/null
++++ b/Tools/host-tests/gpu-i2c/run.sh
+@@ -0,0 +1,10 @@
++#!/bin/sh
++# SPDX-License-Identifier: GPL-2.0-only
++set -eu
++test_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
++source_dir=$(CDPATH= cd -- "$test_dir/../../.." && pwd)
++out=${1:?output directory}
++mkdir -p "$out"
++"${CC:-cc}" -std=c11 -O2 -Wall -Wextra -Werror -I "$source_dir/Include" \
++    "$test_dir/test.c" -o "$out/test-gpu-i2c"
++"$out/test-gpu-i2c"
+diff --git a/Tools/host-tests/gpu-i2c/test.c b/Tools/host-tests/gpu-i2c/test.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..2367bfc0be34fae7ed0a715c94706306e6c81a78
+--- /dev/null
++++ b/Tools/host-tests/gpu-i2c/test.c
+@@ -0,0 +1,59 @@
++// SPDX-License-Identifier: GPL-2.0-only
++#include <stdint.h>
++#include <stdbool.h>
++#include <stddef.h>
++#include <stdio.h>
++#include <assert.h>
++
++/* Include the production adapter and the real I2cLib declarations. */
++typedef uint8_t UINT8;
++typedef uint32_t UINT32;
++typedef void VOID;
++#include "../../../Library/PlatformBootManagerLib/LiteGpuI2c.h"
++
++static unsigned int packet_calls, writes, rejected_empty_reads;
++static UINT32 last_address, last_register;
++static UINT8 last_value;
++static bool bus_ok = true;
++
++int i2c_xfer_packet(UINT32 idx, UINT32 address, const UINT8 *tx, UINT32 tx_size,
++                    UINT8 *rx, UINT32 rx_size)
++{
++    /* The production I2cLib rejects rx_size == 0 before touching MMIO. */
++    if (rx_size == 0) { ++rejected_empty_reads; return 0; }
++    assert(idx == I2C_5 && address == 0x33);
++    assert(tx && tx_size == 1 && rx && rx_size == 1);
++    ++packet_calls;
++    if (!bus_ok) return 0;
++    *rx = 0x50;
++    return 1;
++}
++
++UINT32 i2c_send_byte(UINT32 idx, UINT32 address, UINT32 reg, UINT8 value)
++{
++    assert(idx == I2C_5);
++    ++writes;
++    last_address = address;
++    last_register = reg;
++    last_value = value;
++    return bus_ok ? 1 : 0;
++}
++
++int main(void)
++{
++    UINT8 value = 0;
++    assert(GpuReadPmic(NULL, 0x33, 0x23, &value) && value == 0x50);
++    if (!GpuWritePmic(NULL, 0x33, 0x23, 0x6e)) {
++        fputs("GPU PMIC adapter used the wrong write transport.\n", stderr);
++        return 1;
++    }
++    assert(writes == 1 && packet_calls == 1 && rejected_empty_reads == 0);
++    assert(last_address == 0x33 && last_register == 0x23 && last_value == 0x6e);
++    assert(GpuWritePmic(NULL, 0x33, 0x06, 0x41));
++    assert(last_register == 0x06 && last_value == 0x41);
++    bus_ok = false;
++    assert(!GpuWritePmic(NULL, 0x33, 0x23, 0x50));
++    assert(!GpuReadPmic(NULL, 0x33, 0x23, &value));
++    puts("GPU PMIC adapter contract passed (host; no hardware I/O).");
++    return 0;
++}

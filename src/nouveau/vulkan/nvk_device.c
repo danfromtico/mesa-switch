@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "nvk_device.h"
+#include <string.h>
 
 #include "nvk_cmd_buffer.h"
 #include "nvk_entrypoints.h"
@@ -12,6 +13,10 @@
 #include "nvk_shader.h"
 #include "layers/nvk_app_workarounds.h"
 #include "nvkmd/nvkmd.h"
+#ifdef _WIN32
+#include "nvkmd/windows/nvkmd_windows.h"
+#include "vk_internal_exts.h"
+#endif
 
 #ifdef __SWITCH__
 #include "nvkmd/switch/nvkmd_switch.h"
@@ -311,6 +316,22 @@ nvk_device_try_destroy_queues(struct nvk_device *dev,
 }
 #endif
 
+static bool
+nvk_device_quiesce_runtime(struct nvk_device *dev)
+{
+#ifdef _WIN32
+   if (dev->nvkmd) {
+      const struct wsi_win32_runtime *runtime = &nvkmd_windows_dev(dev->nvkmd)->runtime;
+      if (runtime->version && runtime->quiesce(runtime->context) != VK_SUCCESS) {
+         vk_loge(VK_LOG_OBJS(&dev->vk.base),
+                 "NVK runtime contexts remain live; retaining GPU storage");
+         return false;
+      }
+   }
+#endif
+   return true;
+}
+
 VKAPI_ATTR VkResult VKAPI_CALL
 nvk_CreateDevice(VkPhysicalDevice physicalDevice,
                  const VkDeviceCreateInfo *pCreateInfo,
@@ -320,6 +341,13 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
    VK_FROM_HANDLE(nvk_physical_device, pdev, physicalDevice);
    VkResult result = VK_ERROR_OUT_OF_HOST_MEMORY;
    struct nvk_device *dev;
+#ifdef _WIN32
+   const struct wsi_win32_runtime_device_info *runtime_info =
+      vk_find_struct_const(pCreateInfo->pNext, WSI_WIN32_RUNTIME_DEVICE_INFO_MESA);
+   if (runtime_info && (!runtime_info->runtime || !runtime_info->accepted))
+      return VK_ERROR_INITIALIZATION_FAILED;
+   if (runtime_info) *runtime_info->accepted = false;
+#endif
 #ifdef __SWITCH__
    bool upload_finished = false;
 #endif
@@ -345,11 +373,26 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
    uint32_t queue_count = 0;
    for (uint32_t i = 0; i < pCreateInfo->queueCreateInfoCount; i++)
       queue_count += pCreateInfo->pQueueCreateInfos[i].queueCount;
+#ifdef _WIN32
+   if (runtime_info && !queue_count) {
+      result = VK_ERROR_INITIALIZATION_FAILED;
+      goto fail_init;
+   }
+#endif
 
    if (queue_count > 0) {
       result = nvkmd_pdev_create_dev(pdev->nvkmd, &pdev->vk.base, &dev->nvkmd);
       if (result != VK_SUCCESS)
          goto fail_init;
+
+#ifdef _WIN32
+      if (runtime_info) {
+         result = nvkmd_windows_set_runtime(dev->nvkmd, runtime_info->runtime);
+         if (result != VK_SUCCESS) goto fail_nvkmd;
+         /* Runtime callbacks must stay on the thread entering the UMD. */
+         dev->vk.submit_mode = VK_QUEUE_SUBMIT_MODE_IMMEDIATE;
+      }
+#endif
 
 #ifdef __SWITCH__
       nvk_device_init_cpu_write_mem_policy(dev);
@@ -363,7 +406,7 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
       dev->vk.get_timestamp = nvk_device_get_timestamp;
 #ifdef __SWITCH__
       dev->vk.copy_sync_payloads = nvkmd_switch_sync_copy_payloads;
-#else
+#elif !defined(_WIN32)
       dev->vk.copy_sync_payloads = vk_drm_syncobj_copy_payloads;
 #endif
 
@@ -450,8 +493,13 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
       enum nvkmd_mem_map_flags shader_map_flags = 0;
       if (pdev->info.bar_size_B >= pdev->info.vram_size_B)
          shader_map_flags = NVKMD_MEM_MAP_WR;
+      enum nvkmd_mem_flags shader_mem_flags = NVKMD_MEM_LOCAL;
+#ifdef _WIN32
+      if (shader_map_flags)
+         shader_mem_flags |= NVKMD_MEM_GPU_READ_ONLY;
+#endif
       result = nvk_heap_init(dev, &dev->shader_heap,
-                             NVKMD_MEM_LOCAL, shader_map_flags,
+                             shader_mem_flags, shader_map_flags,
                              2048 /* overalloc */,
                              pdev->info.cls_eng3d < VOLTA_A);
       if (result != VK_SUCCESS)
@@ -515,11 +563,23 @@ nvk_CreateDevice(VkPhysicalDevice physicalDevice,
          goto fail_mem_cache;
    }
 
+   /* The matched tgd3d frontend opts into the private embedded instance and
+    * identifies its engine at instance creation. A merely loaded UMD DLL
+    * cannot identify which frontend owns this successfully created device. */
+   const struct nvk_instance *instance = nvk_physical_device_instance(pdev);
+   const bool tgd3d_frontend = instance->allow_embedded_gm20b &&
+      instance->vk.app_info.engine_name &&
+      strcmp(instance->vk.app_info.engine_name, "tgd3d") == 0;
+   util_graphics_api_marker_open(&dev->graphics_api_marker, tgd3d_frontend ? 3 : 1);
    *pDevice = nvk_device_to_handle(dev);
+#ifdef _WIN32
+   if (runtime_info) *runtime_info->accepted = true;
+#endif
 
    return VK_SUCCESS;
 
 fail_mem_cache:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
 #ifdef __SWITCH__
    /* Establish queue completion before releasing even cache/meta-owned GPU
     * objects.  On failure the failed vkCreateDevice() intentionally leaves
@@ -533,6 +593,7 @@ fail_mem_cache:
    vk_pipeline_cache_destroy(dev->vk.mem_cache, NULL);
 #endif
 fail_queues:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
 #ifdef __SWITCH__
    if (!nvk_device_try_destroy_queues(dev, "device-create unwind"))
       return result;
@@ -558,24 +619,32 @@ fail_queue_resources:
    if (dev->vab_memory)
       nvkmd_mem_unref(dev->vab_memory);
 fail_slm:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
    nvk_slm_area_finish(&dev->slm);
    if (pdev->info.cls_eng3d < MAXWELL_B)
       nvk_heap_finish(dev, &dev->qmd_heap);
 fail_event_heap:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
    nvk_heap_finish(dev, &dev->event_heap);
 fail_shader_heap:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
    nvk_heap_finish(dev, &dev->shader_heap);
 fail_edb_bview_cache:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
    nvk_edb_bview_cache_finish(dev, &dev->edb_bview_cache);
 fail_samplers:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
    nvk_descriptor_table_finish(dev, &dev->samplers);
 fail_images:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
    nvk_descriptor_table_finish(dev, &dev->images);
 fail_zero_page:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
    if (dev->interlock_memory)
       nvkmd_mem_unref(dev->interlock_memory);
    nvkmd_mem_unref(dev->zero_page);
 fail_upload:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
 #ifdef __SWITCH__
    if (!upload_finished &&
        !nvk_upload_queue_try_finish(dev, &dev->upload)) {
@@ -588,6 +657,7 @@ fail_upload:
    nvk_upload_queue_finish(dev, &dev->upload);
 #endif
 fail_nvkmd:
+   if (!nvk_device_quiesce_runtime(dev)) return result;
    nvkmd_dev_destroy(dev->nvkmd);
 fail_init:
    vk_device_finish(&dev->vk);
@@ -603,6 +673,11 @@ nvk_DestroyDevice(VkDevice _device, const VkAllocationCallbacks *pAllocator)
 
    if (!dev)
       return;
+
+   /* Runtime contexts are owned by a different device than the allocator.
+    * Close them successfully before releasing any allocation, including on
+    * failed construction/device removal. A failed proof quarantines storage. */
+   if (!nvk_device_quiesce_runtime(dev)) return;
 
    const struct nvk_physical_device *pdev = nvk_device_physical(dev);
 
@@ -671,6 +746,7 @@ nvk_DestroyDevice(VkDevice _device, const VkAllocationCallbacks *pAllocator)
       nvkmd_dev_destroy(dev->nvkmd);
    }
 
+   util_graphics_api_marker_close(&dev->graphics_api_marker);
    vk_device_finish(&dev->vk);
    vk_free(&dev->vk.alloc, dev);
 }

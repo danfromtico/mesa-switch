@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "change_kind": "independent",
+  "source_commit": "7f626083c90f73a6aa9279fafdf40e2777c0e6c6",
+  "base_commit": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "changed_paths": [
+    "tegra-x1-wddm/platform/t214_clock.c",
+    "tegra-x1-wddm/platform/t214_gr_context.c",
+    "tegra-x1-wddm/platform/t214_gr_context_regs.h",
+    "tegra-x1-wddm/tests/test_clock.c",
+    "tegra-x1-wddm/tests/test_execute_init.c",
+    "tegra-x1-wddm/tests/test_gr_context.c"
+  ],
+  "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+  "components": {
+    "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "trial": {
+    "selected": "trial",
+    "dwm": 1456,
+    "boot_record": 92083,
+    "inf": "oem28.inf",
+    "loaded": {
+      "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+    },
+    "directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvgpu-parity-30331aa3cb57",
+    "gpu_code": 0,
+    "dwm_start": "2026-11-21T17:38:27.7857199Z",
+    "components": {
+      "tegragpurender.sys": "30331aa3cb578a9c634023e7b336421d706fce8e68dd00e4cf3e29773e91aff0",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "power": "Online",
+    "one_time": true,
+    "utc": "2026-11-21T17:39:56.3519080Z"
+  },
+  "cases": [
+    {
+      "name": "Signed native KMD, one-time Code 0 and interactive shell on GM20B",
+      "evidence_file": "native-desktop.json",
+      "evidence_sha256": "44de706e7f1400fc8cb90ab714340badea2b0dd72bed1242a06ad3ed7386bc2c",
+      "passed": true,
+      "before_boot": 92083,
+      "after_boot": 92083
+    },
+    {
+      "name": "Native handheld power sample on the candidate desktop",
+      "evidence_file": "handheld-power.json",
+      "evidence_sha256": "dcd7c2f8e5d2e6203a1dd42e6ca362e36e6504321598ed139d2afa10ae8774c8",
+      "passed": true,
+      "before_boot": 92083,
+      "after_boot": 92083
+    }
+  ],
+  "system_log": {
+    "complete": true,
+    "first_record": 92066,
+    "last_record": 92152,
+    "boot_records": [
+      92083
+    ],
+    "abnormal_events": [],
+    "restarts": [
+      {
+        "explained": true,
+        "kind": "controlled",
+        "boot_record": 92083,
+        "cause": "SwitchWOA graphics receipt one-time candidate boot",
+        "system_records": [
+          92067,
+          92069,
+          92083
+        ],
+        "evidence_file": "system-interval.json",
+        "evidence_sha256": "35b59a5d787f23c2da91a299b378103e56c11aa64485702bb2575123ca360ad0"
+      }
+    ]
+  }
+}

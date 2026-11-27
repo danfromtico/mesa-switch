@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "utc": "2026-11-24T08:01:02.994663+00:00",
+  "status": "bounded_resource_failures_verified_cause_open",
+  "reviewer_thread": "01a20b2b-9760-7e92-a0e1-19deb1db9a47",
+  "capture_boot": 100286,
+  "capture_source": "tegra-x1-wddm/docs/windows-native-graphics/c4-sd0513-unexplained-boot100286-20261124.native-original.json",
+  "UMD_original": {
+    "sha256": "f3b62e1fd488f376590bba0c6370a4a093db279979dcd0bcdf986171ba6c19b4",
+    "bytes": 33554432,
+    "original_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/storage-native-r2/collection-work/existing-etw-objects/f3b62e1fd488f376590bba0c6370a4a093db279979dcd0bcdf986171ba6c19b4",
+    "retention": "Complete original retained locally; sample frames below are exact original bytes."
+  },
+  "raw_payloads_compared": 136663,
+  "physical_frame_counts": {
+    "UMD": 136665,
+    "Loader": 2212,
+    "Graphics": 599850
+  },
+  "actors": [
+    {
+      "pid": 5496,
+      "process_start_FILETIME": 134399721435338049,
+      "image": "Explorer.EXE",
+      "retained_records": 133281
+    },
+    {
+      "pid": 1408,
+      "process_start_FILETIME": 134399721063411612,
+      "image": "dwm.exe",
+      "retained_records": 3382
+    }
+  ],
+  "failure": {
+    "status_hex": "0x887a0004",
+    "same_thread_entry_resource_error_return_chains": 552,
+    "physically_adjacent_chains": 541,
+    "dimension_value": 3,
+    "bind_flags": "0x28",
+    "width": 32,
+    "height": 32,
+    "reporting_source": "tgd3d_resource.cpp:470",
+    "ordinary_resource_error_reporting_scope": "RemovalOnlyErrorScope; this location reports the retained internal failure and does not identify its originating return branch.",
+    "same_pixels_or_restart_cause_proved": false
+  },
+  "source_identity": [
+    {
+      "git_object": "b02c99e37a9c11c942e237af5fc4642598946c76:src/nouveau/tgd3d/tgd3d_trace.h",
+      "path": "src/nouveau/tgd3d/tgd3d_trace.h",
+      "sha256": "a331d38df1a84e76e940744e49bb99fd0c0bd9421d66df268aef121ac3062f77"
+    },
+    {
+      "git_object": "b02c99e37a9c11c942e237af5fc4642598946c76:src/nouveau/tgd3d/tgd3d_trace.cpp",
+      "path": "src/nouveau/tgd3d/tgd3d_trace.cpp",
+      "sha256": "19f4fe95f39efa1cc80a532faf64347c2ae39730b7d9932c70bb5fa150e2d2b6"
+    },
+    {
+      "git_object": "b02c99e37a9c11c942e237af5fc4642598946c76:src/nouveau/tgd3d/tgd3d_resource.cpp",
+      "path": "src/nouveau/tgd3d/tgd3d_resource.cpp",
+      "sha256": "d5c021353f5b1bdaba8a246f8a557317e830f5762c0db3161df1f56382591cd1"
+    }
+  ],
+  "example_chain_raw_frames": [
+    {
+      "raw_offset": 25577064,
+      "bytes": 176,
+      "raw_sha256": "a6730b4f80b116c8ebff2342c9f7aef62aa95c2ce9508609dffc75922242b79f",
+      "raw_base64": "sAATwAAAAAA0FgAAeBUAABV3nJUJAAAAbkwMXwt6UkudOi9tHotKEREAAgAEAAAAAQAAAAAAAABjBgAAlQUAAAAAAAAAAAAAAAAAAAAAAAAKAACAAAAAAAAAAAAAAAAAsHUEGwAAAABFAHgAcABsAG8AcgBlAHIALgBFAFgARQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQZUQptV73QE=",
+      "decoded": {
+        "buffer_index": 390,
+        "offset": 25577064,
+        "qpc": 41164764949,
+        "pid": 5496,
+        "tid": 5684,
+        "id": 17,
+        "event": "RESOURCE_PHASE",
+        "version": 2,
+        "header_flags": 0,
+        "event_property": 0,
+        "payload_bytes": 96,
+        "schema": "numeric_v2",
+        "result": -2147483638,
+        "result_hex": "0x8000000a",
+        "reserved": 0,
+        "arg0": 0,
+        "arg1": 453277104,
+        "image": "Explorer.EXE",
+        "process_start_time": 134399721435338049
+      }
+    },
+    {
+      "raw_offset": 25577240,
+      "bytes": 176,
+      "raw_sha256": "9360242514d179a293d9c7ca563daa19b021824da6977ddbc0edc15b51b43dd5",
+      "raw_base64": "sAATwAAAAAA0FgAAeBUAAI93nJUJAAAAbkwMXwt6UkudOi9tHotKEQgAAgAEAAAAAQAAAAAAAABjBgAAlQUAAAAAAAAAAAAAAAAAAAAAAAAKAACAAAAAACgAAAADAAAAIAAAACAAAABFAHgAcABsAG8AcgBlAHIALgBFAFgARQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQZUQptV73QE=",
+      "decoded": {
+        "buffer_index": 390,
+        "offset": 25577240,
+        "qpc": 41164765071,
+        "pid": 5496,
+        "tid": 5684,
+        "id": 8,
+        "event": "RESOURCE",
+        "version": 2,
+        "header_flags": 0,
+        "event_property": 0,
+        "payload_bytes": 96,
+        "schema": "numeric_v2",
+        "result": -2147483638,
+        "result_hex": "0x8000000a",
+        "reserved": 0,
+        "arg0": 12884901928,
+        "arg1": 137438953504,
+        "image": "Explorer.EXE",
+        "process_start_time": 134399721435338049
+      }
+    },
+    {
+      "raw_offset": 25577416,
+      "bytes": 288,
+      "raw_sha256": "9773066e89a0fd40472c01a76db768a8eed70f6e5679c126c6ea0313e8ff4fe2",
+      "raw_base64": "IAETwAAAAAA0FgAAeBUAAGJ4nJUJAAAAbkwMXwt6UkudOi9tHotKERQAAgAEAAAAAQAAAAAAAABjBgAAlQUAAAAAAAAAAAAAAAAAAAAAAAAEAHqI1gEAAEUAeABwAGwAbwByAGUAcgAuAEUAWABFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB0AGcAZAAzAGQAXwByAGUAcwBvAHUAcgBjAGUALgBjAHAAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEGVEKbVe90B",
+      "decoded": {
+        "buffer_index": 390,
+        "offset": 25577416,
+        "qpc": 41164765282,
+        "pid": 5496,
+        "tid": 5684,
+        "id": 20,
+        "event": "ERROR",
+        "version": 2,
+        "header_flags": 0,
+        "event_property": 0,
+        "payload_bytes": 208,
+        "schema": "error_v2",
+        "result": -2005270524,
+        "result_hex": "0x887a0004",
+        "line": 470,
+        "image": "Explorer.EXE",
+        "file": "tgd3d_resource.cpp",
+        "process_start_time": 134399721435338049
+      }
+    },
+    {
+      "raw_offset": 25577704,
+      "bytes": 176,
+      "raw_sha256": "35cd0a038a26d9970fe129091b953452ba873fad44a21d0b1f9a5455c57e3ef5",
+      "raw_base64": "sAATwAAAAAA0FgAAeBUAAKKGnJUJAAAAbkwMXwt6UkudOi9tHotKEREAAgAEAAAAAQAAAAAAAABjBgAAlQUAAAAAAAAAAAAAAAAAAAAAAAAEAHqIAAAAAAAAAAAAAAAAsHUEGwAAAABFAHgAcABsAG8AcgBlAHIALgBFAFgARQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQZUQptV73QE=",
+      "decoded": {
+        "buffer_index": 390,
+        "offset": 25577704,
+        "qpc": 41164768930,
+        "pid": 5496,
+        "tid": 5684,
+        "id": 17,
+        "event": "RESOURCE_PHASE",
+        "version": 2,
+        "header_flags": 0,
+        "event_property": 0,
+        "payload_bytes": 96,
+        "schema": "numeric_v2",
+        "result": -2005270524,
+        "result_hex": "0x887a0004",
+        "reserved": 0,
+        "arg0": 0,
+        "arg1": 453277104,
+        "image": "Explorer.EXE",
+        "process_start_time": 134399721435338049
+      }
+    }
+  ],
+  "review_limits": [
+    "Physical record coverage is only of these copied byte ranges; active-copy consistency, overwrite and source event loss remain unresolved.",
+    "UMD raw fields were independently decoded; KMD payload semantics were not independently re-decoded in this check.",
+    "Loader flags1 retains extension bytes in the library payload view. No loader payload interpretation or process-lifetime binding is accepted here.",
+    "Raw GUID occurrence counts are not used as completeness evidence.",
+    "Unrelated incomplete/nested resource frames are retained as ambiguities. Each counted unsupported failure is separately checked as a consecutive same-thread entry/resource/error/return quadruple with matching process start and resource identity.",
+    "Resource trace fields lack format, MiscFlags, SampleDesc and other descriptor fields in installed079; these observed failures do not select one source return branch or establish the Home/menu pixels, prior reboot, or TDR cause."
+  ],
+  "other_incomplete_or_nested_resource_frame_ambiguities": 182,
+  "source_loss_and_consistency": {
+    "UMD_before_copy_after_hashes_differ": true,
+    "UMD_QUERY0_EventsLost_samples": [
+      0,
+      0
+    ],
+    "Graphics_QUERY0_EventsLost_samples": [
+      1236003,
+      1651389
+    ],
+    "query_time_counters_are_not_historical_completeness_proof": true,
+    "circular_overwrite_retained": true
+  },
+  "missing_observations": [
+    "Full resource descriptor including format, SampleDesc and MiscFlags",
+    "Fault-frame and window/pixel identity",
+    "An actual link to previous application/UI restart episodes or NT/TDR arrival"
+  ],
+  "independent_verification_sha256": "818250207ec8bbf85b4e01de31f961da6f844eabab761ad8450d4f11f71c6fec",
+  "verification_script_sha256": "be9675b7a90ff0a6a6b5e6e8eabf808699ebc316308632ea07d90faf05a2bf2a",
+  "main_review_receipt_sha256": "f79f85eeadcd01da8516eafc129e3ca67ec51dda92e2c7e7a1e9c2555231c62e",
+  "new_driver_source_or_binary_changes": 0,
+  "new_native_controls_for_review": 0,
+  "main_device_actions": 0,
+  "candidate_promotion": false,
+  "faults_closed": 0,
+  "goal_complete": false
+}

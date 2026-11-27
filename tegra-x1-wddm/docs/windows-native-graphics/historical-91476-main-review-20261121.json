@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "review_thread": "01a201d4-d569-7fd0-84bd-20573a8968ce",
+  "reviewed_utc": "2026-11-22T07:30:55.689091+00:00",
+  "reviewed_commit": "02bc8cb2bda29dbe91a5b47e34cdee3642c8ceda",
+  "status": "边界证据审核通过；根因仍未知",
+  "incident_boot": 91476,
+  "target_dma": 152586,
+  "comparator_boot": 91918,
+  "independent_readback": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/historical-91476-independent-readback.json",
+    "sha256": "ea8b08cea26715b08508774b95d4d1fa586b959f1eb2c3b0f3e12be5f2dbc408"
+  },
+  "verified_references": 25,
+  "image": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.sys",
+    "sha256": "94fa72e5cee778b7cd12bedf13550a78414231df8612547c74f0bc3ed11a62c5"
+  },
+  "pdb": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/dma175-binary-identity/dxgmms2.pdb",
+    "sha256": "54ed9eab4bff5bdcec9c5571ab05fe415052a106ad39ad9f713e939f87b65f3a"
+  },
+  "original_archive": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+    "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+  },
+  "checks": {
+    "instruction_words_verified": 270,
+    "selector_dispatch_words_verified": 8,
+    "selector5_target_rva": "0x101ac",
+    "literal5_call_sites": [
+      "0xf8fc",
+      "0x3dc18"
+    ],
+    "suppression_branch_rva": "0xd47c -> 0xd6c0",
+    "bypassed_submit_ddi_sites": [
+      "0xd568",
+      "0xd5bc",
+      "0xd604"
+    ],
+    "static_path_preconditions": [
+      "helper at 0xd3dc returns x0=0",
+      "[x23+0xbc4] != 0 at 0xd430",
+      "[x21] != 0 at 0xd47c",
+      "called helpers complete and return"
+    ],
+    "same_incident_thread": [
+      4,
+      888
+    ],
+    "submit_qpc": 223221950698,
+    "later_queue_select_qpc": 223221966230,
+    "later_selection_delay_ms": 0.8089583333333333,
+    "last_scene_snapshot_qpc": 223221945396,
+    "last_scene_snapshot_bytes": 152,
+    "last_scene_snapshot_request_fence": 20571,
+    "last_scene_snapshot_submission_fence": 152584,
+    "last_scene_snapshot_stage": 10,
+    "work_flags": "0x7003",
+    "poll_count": 0,
+    "hardware_sample_valid_bits": 0,
+    "snapshot_source_files_equal_c137_git_blobs": 4,
+    "paging152584_packet_type_in_both_windows_streams": 1
+  },
+  "stream_boundary": "21 KMD execution snapshots are retained only in app/scene/video.etl; app/display.etl retains none. Both original streams independently contain the paging152584 Windows submission.",
+  "accepted_interpretation": "原次同线程继续选包只证明调度活动。91918比较映像存在绕过三个提交DDI调用点的静态路径；这不是91476实际分支。原最后KMD记录属于先前分页152584，零缓存且无有效采样不能证明目标152586硬件健康。",
+  "limits": {
+    "incident_dxgmms2_full_hash": null,
+    "incident_branch": null,
+    "target_kmd_entry_return": null,
+    "target_gpu_completion": null,
+    "target_windows_retirement": null,
+    "initiating_reset_cause": null,
+    "repair_accepted": false
+  },
+  "execution_scope": {
+    "new_device_executions": 0,
+    "new_ssh_operations": 0,
+    "request_f6264ee11289_consumed": true,
+    "replay_allowed": false,
+    "last_verified_formal_boot": 96251,
+    "baseline_changed": false,
+    "explorer_is_current_prerequisite": false,
+    "publication_check_only_at_actual_release": true
+  },
+  "sources": {
+    "round": {
+      "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/windows-native-graphics/rounds/win-dwm-152586-select-callflow-20261121-01.result.json",
+      "sha256": "85dcfd54eac9a04bac95129b2e14780884a06ed5aee91653d76f6ea2021c3ddf"
+    },
+    "raw_snapshot": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/last-kmd-152584.bin",
+      "sha256": "9a76d4b1c0de037b2154c73d3e8ef79458f22b7ed77828e235c636b904b71398"
+    },
+    "independent_external_review": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/root-cause-event179/independent-review.json",
+      "sha256": "42f0150fd0ef44a1d630aa882107df63c22aaf7a11e58d4f426b8c62abea4151"
+    },
+    "frozen_package": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/first-present-successor-01a201d2/historical-91476-boundary-review.zip",
+      "sha256": "332546fb2d9cc67ee384b93ab9e5fedae17c09499d5df86fea650e8db5943885"
+    }
+  },
+  "official_contract_crosscheck": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_submitcommandvirtual",
+      "note": "文档将STATUS_SUCCESS定义为命令格式有效；STATUS_INVALID_PARAMETER另有错误设备和围栏处理要求，其他返回值会触发系统bugcheck。本文档不是事故次调用或返回的证据。"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmddi/nc-d3dkmddi-dxgkddi_preemptcommand",
+      "note": "抢占回调返回错误可导致系统bugcheck；已经完成的工作需要按文档通知调度器。事故快照的RequestFence、当前工作SubmissionFence与实际回调返回必须分别核验。"
+    }
+  ],
+  "next": "执行会话继续原版本的提交抑制字段、上下文和分配生命周期分析。三个历史重启范围维持开放；本轮没有找到复位首因。"
+}

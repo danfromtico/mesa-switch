@@ -1,0 +1,335 @@
+/* SPDX-License-Identifier: MIT
+ *
+ * Adapter and device entry points.
+ */
+#include "tgd3d.h"
+
+#include <string.h>
+
+namespace tgd3d {
+
+static inline Adapter *A(D3D10DDI_HADAPTER h) { return static_cast<Adapter *>(h.pDrvPrivate); }
+
+static void APIENTRY Flush(D3D10DDI_HDEVICE hDevice)
+{
+   Device *dev = D(hDevice);
+   /* Submit, then keep the runtime's own context behind the render queue.
+    * The production path waits on the CPU only for bounded queue backpressure. */
+   /* A new failure is reported by flush itself. A previously removed device
+    * takes its early-return path and needs a notification for this DDI. */
+   const bool wasLost = FAILED(dev->lost);
+   HRESULT hr = flush(dev, true);
+   if (FAILED(hr) && wasLost)
+      TG_ERROR(dev, hr);
+}
+
+static void APIENTRY RelocateDeviceFuncs(D3D10DDI_HDEVICE, D3D10DDI_DEVICEFUNCS *)
+{
+   /* The table is not retained. */
+}
+
+static void APIENTRY CheckFormatSupport(D3D10DDI_HDEVICE hDevice, DXGI_FORMAT format, UINT *out)
+{
+   Device *dev = D(hDevice);
+   const FormatInfo *info = format_info(format);
+   *out = 0;
+   if (format == DXGI_FORMAT_NV12) {
+      *out = video_device_supported(dev) ? D3D11_1DDI_FORMAT_SUPPORT_DECODER_OUTPUT :
+                                          D3D10_DDI_FORMAT_SUPPORT_NOT_SUPPORTED;
+      return;
+   }
+   if (!info || ((info->flags & FMT_BC) && !dev->caps->textureCompressionBC)) {
+      *out = D3D10_DDI_FORMAT_SUPPORT_NOT_SUPPORTED;
+      return;
+   }
+   if (info->flags & FMT_NO_VIEW)
+      return;       /* creation only */
+   VkFormat vk = info->vk != VK_FORMAT_UNDEFINED ? info->vk : info->depth;
+   if ((info->flags & FMT_R_AS_ALPHA) && !dev->hasA8)
+      vk = VK_FORMAT_R8_UNORM;
+   VkFormatProperties props = {};
+   dev->adapter->vk.vk.GetPhysicalDeviceFormatProperties(dev->adapter->vk.pdev, vk, &props);
+   const VkFormatFeatureFlags f = props.optimalTilingFeatures;
+   if (f & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)
+      *out |= D3D10_DDI_FORMAT_SUPPORT_SHADER_SAMPLE;
+   /* A8 stored as R8 can be sampled through a swizzle but not rendered. */
+   if ((f & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT) &&
+       !((info->flags & FMT_R_AS_ALPHA) && !dev->hasA8)) {
+      *out |= D3D10_DDI_FORMAT_SUPPORT_RENDERTARGET;
+      if (dev->interfaceVersion >= D3D11_1_DDI_INTERFACE_VERSION && dev->caps->logicOp &&
+          (info->flags & FMT_UINT))
+         *out |= D3D11_1DDI_FORMAT_SUPPORT_OUTPUT_MERGER_LOGIC_OP;
+      if (f & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT)
+         *out |= D3D10_DDI_FORMAT_SUPPORT_BLENDABLE;
+   }
+}
+
+static void APIENTRY CheckMultisampleQualityLevels(D3D10DDI_HDEVICE, DXGI_FORMAT, UINT samples,
+                                                   UINT *levels)
+{
+   *levels = samples == 1 ? 1 : 0;      /* multisampling is not implemented */
+}
+
+static bool device_teardown(Device *dev)
+{
+   if (!video_device_destroy(dev)) {
+      trace_message("video session cleanup failed; retaining device state for process cleanup");
+      return false;
+   }
+   if (dev->runtimeQueue) {
+      if (dev->vkdev && dev->fence && dev->cmdPool) flush(dev, false);
+      if (FAILED(runtime_queue_quiesce(dev))) {
+         trace_message("runtime context teardown failed; retaining GPU objects until process cleanup");
+         return false;
+      }
+   }
+   if (dev->vkdev) {
+      if (!dev->runtimeQueue && dev->fence && dev->cmdPool) {
+         flush(dev, false);
+         if (SUCCEEDED(dev->lost) && dev->submitted) {
+            if (FAILED(wait_sequence(dev, dev->submitted, TGD3D_WAIT_DESTROY)) &&
+                !cleanup_idle(dev))
+               return false;
+         } else {
+            if (!cleanup_idle(dev)) return false;
+         }
+         retire(dev);
+      }
+      /* The device is idle: release everything still deferred. */
+      retire(dev, true);
+      release_parked_images(dev);
+      blit_destroy(dev);
+      device_layouts_destroy(dev);
+      cmd_destroy(dev);
+      upload_destroy(dev);
+      sync_destroy(dev);
+      dev->vk.DestroyDevice(dev->vkdev, nullptr);
+      dev->vkdev = VK_NULL_HANDLE;
+   }
+   const HRESULT hr = runtime_queue_finish(dev);
+   if (FAILED(hr)) {
+      // The queue state still owns callbacks into this Device.
+      trace_error(hr, __FILE__, __LINE__);
+      return false;
+   }
+   runtime_device_destroy(dev);
+   return true;
+}
+
+void release_device(DeviceSlot *slot)
+{
+   Device *dev = slot->state;
+   if (device_teardown(dev)) {
+      delete dev;
+   } else {
+      /* No work may subsequently be submitted through this runtime slot.
+       * Keep the real ICD children and their host owners alive on this
+       * terminal path. CloseAdapter must also keep their parent alive. */
+      Adapter *adapter = dev->adapter;
+      seal_runtime_owners(dev);
+      AcquireSRWLockExclusive(&adapter->teardownLock);
+      dev->nextUndrained = adapter->undrainedDevices;
+      adapter->undrainedDevices = dev;
+      ReleaseSRWLockExclusive(&adapter->teardownLock);
+      trace_message("Device teardown incomplete; retaining device until process exit");
+   }
+   slot->state = nullptr;
+}
+
+static void APIENTRY DestroyDevice(D3D10DDI_HDEVICE hDevice)
+{
+   Device *dev = D(hDevice);
+   trace(TGD3D_TRACE_DESTROY_DEVICE, dev->lost, dev->submitted, dev->completed());
+   release_device(static_cast<DeviceSlot *>(hDevice.pDrvPrivate));
+}
+
+void device_fill_table(D3D10DDI_DEVICEFUNCS *table)
+{
+   table->pfnFlush = Flush;
+   table->pfnRelocateDeviceFuncs = RelocateDeviceFuncs;
+   table->pfnCheckFormatSupport = CheckFormatSupport;
+   table->pfnCheckMultisampleQualityLevels = CheckMultisampleQualityLevels;
+   table->pfnDestroyDevice = DestroyDevice;
+}
+
+static bool device_interface(const Adapter *adapter, UINT interfaceVersion, UINT version, UINT flags)
+{
+   switch (interfaceVersion) {
+   case D3D10_0_DDI_INTERFACE_VERSION:
+   case D3D10_0_x_DDI_INTERFACE_VERSION:
+   case D3D10_0_7_DDI_INTERFACE_VERSION:
+      return true; // retain the accepted legacy negotiation
+   case D3DWDDM2_0_DDI_INTERFACE_VERSION:
+      if (HIWORD(version) < D3DWDDM2_0_DDI_BUILD_VERSION) return false;
+      [[fallthrough]];
+   case D3D11_1_DDI_INTERFACE_VERSION: {
+      const UINT level = D3D11DDI_EXTRACT_3DPIPELINELEVEL_FROM_FLAGS(flags);
+      return (native_pipeline_levels(adapter) & (UINT32_C(1) << level)) != 0;
+   }
+   default:
+      return false;
+   }
+}
+
+static HRESULT APIENTRY RetrieveSubObject(D3D10DDI_HDEVICE hDevice, UINT32 id,
+                                          SIZE_T size, void *params, SIZE_T out_size, void *out)
+{
+   /* This entry is free-threaded: read immutable negotiation state and fill
+    * only public ABI buffers. No runtime callbacks or hardware operations. */
+   if (id != D3D11_1DDI_VIDEO_FUNCTIONS || !video_device_supported(D(hDevice))) return E_NOINTERFACE;
+   if (size != sizeof(D3D11_1DDI_VIDEO_INPUT) || out_size != sizeof(D3D11_1DDI_VIDEO_OUTPUT) ||
+       !params || !out) return E_INVALIDARG;
+   auto *input = static_cast<D3D11_1DDI_VIDEO_INPUT *>(params);
+   if (!input->p11VideoDeviceFuncs || (input->Relocate != FALSE && input->Relocate != TRUE)) return E_INVALIDARG;
+   video_fill_table(input->p11VideoDeviceFuncs);
+   static_cast<D3D11_1DDI_VIDEO_OUTPUT *>(out)->Reserved = 0;
+   trace(TGD3D_TRACE_VIDEO, S_OK, 10, uint64_t(size) << 32 | out_size);
+   return S_OK;
+}
+
+SIZE_T APIENTRY CalcPrivateDeviceSize(D3D10DDI_HADAPTER h,
+                                     const D3D10DDIARG_CALCPRIVATEDEVICESIZE *args)
+{
+   if (!args || !device_interface(A(h), args->Interface, args->Version, args->Flags)) return 0;
+   if (args->Interface == D3D11_1_DDI_INTERFACE_VERSION && !h.pDrvPrivate) return 0;
+   return sizeof(DeviceSlot);
+}
+
+HRESULT initialize_graphics_device(Device *dev, bool use_runtime_queue, bool allow_independent)
+{
+   unsigned stage = 1;
+   const uint64_t identity = (uintptr_t)dev;
+   trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
+   HRESULT hr = runtime_device_create(dev);
+   trace(TGD3D_TRACE_DEVICE_STAGE, hr, stage, identity);
+   if (SUCCEEDED(hr)) {
+      stage = 2;
+      trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
+      if (use_runtime_queue)
+         hr = runtime_queue_prepare(dev, &dev->runtimeTransport);
+      if (use_runtime_queue && dev->interfaceVersion != D3DWDDM2_0_DDI_INTERFACE_VERSION) {
+         const unsigned callbacks = (dev->kt.pfnCreateContextVirtualCb ? 1u : 0u) |
+                                    (dev->kt.pfnSubmitCommandCb ? 2u : 0u);
+         trace(TGD3D_TRACE_RUNTIME_TRANSPORT, hr, (UINT64_C(6) << 32) | dev->interfaceVersion, callbacks);
+      }
+      // An older callback table can still serve the original legacy path.
+      // prepare checks it before allocating any state or creating a context.
+      if (allow_independent && hr == DXGI_ERROR_UNSUPPORTED)
+         hr = S_OK;
+      if (SUCCEEDED(hr)) {
+         const VkResult result = dev->adapter->vk.createDevice(&dev->vkdev, &dev->vk, &dev->queue,
+            dev->runtimeQueue ? &dev->runtimeTransport : nullptr);
+         hr = result == VK_SUCCESS ? S_OK :
+              result == VK_ERROR_OUT_OF_HOST_MEMORY ? E_OUTOFMEMORY : DXGI_ERROR_UNSUPPORTED;
+         dev->runtimeQueueAccepted = dev->runtimeQueue && SUCCEEDED(hr);
+      }
+      trace(TGD3D_TRACE_DEVICE_STAGE, hr, stage, identity);
+   }
+   if (SUCCEEDED(hr)) {
+      stage = 3;
+      trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
+      hr = sync_create(dev);
+      trace(TGD3D_TRACE_DEVICE_STAGE, hr, stage, identity);
+   }
+   if (SUCCEEDED(hr)) {
+      stage = 4;
+      trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
+      hr = cmd_create(dev);
+      trace(TGD3D_TRACE_DEVICE_STAGE, hr, stage, identity);
+   }
+   if (SUCCEEDED(hr)) {
+      stage = 5;
+      trace(TGD3D_TRACE_DEVICE_STAGE, E_PENDING, stage, identity);
+      hr = device_layouts_create(dev);
+      trace(TGD3D_TRACE_DEVICE_STAGE, hr, stage, identity);
+   }
+   if (FAILED(hr)) {
+      trace(TGD3D_TRACE_CREATE_DEVICE, hr, dev->interfaceVersion, stage);
+      return hr;
+   }
+   /* Enable native VK_FORMAT_A8_UNORM only when VK_KHR_maintenance5 was
+    * enabled on the device and optimal A8 color-target/blend/sample caps
+    * were confirmed on the physical device. */
+   dev->hasA8 = dev->caps && dev->caps->formatA8;
+   return S_OK;
+}
+
+HRESULT APIENTRY CreateDevice(D3D10DDI_HADAPTER hAdapter, D3D10DDIARG_CREATEDEVICE *args)
+{
+   if (!hAdapter.pDrvPrivate || !args || !args->hDrvDevice.pDrvPrivate ||
+       !args->pKTCallbacks || !args->pUMCallbacks || !args->pDeviceFuncs ||
+       !args->DXGIBaseDDI.pDXGIDDIBaseFunctions)
+      return E_INVALIDARG;
+   Adapter *adapter = A(hAdapter);
+   if (!device_interface(adapter, args->Interface, args->Version, args->Flags)) {
+      trace(TGD3D_TRACE_CREATE_DEVICE, DXGI_ERROR_UNSUPPORTED, args->Interface, args->Flags);
+      return DXGI_ERROR_UNSUPPORTED;
+   }
+   const bool ddi11 = args->Interface == D3D11_1_DDI_INTERFACE_VERSION;
+   if (ddi11 && !args->ppfnRetrieveSubObject) return DXGI_ERROR_UNSUPPORTED;
+   wchar_t window_opt_in[2] = {};
+   const bool video_window = ddi11 &&
+      GetEnvironmentVariableW(L"TGD3D_VIDEO_WINDOW_VALIDATE", window_opt_in, 2) == 1 &&
+      window_opt_in[0] == L'1';
+   const bool modern = args->Interface == D3DWDDM2_0_DDI_INTERFACE_VERSION;
+   if (modern && (!args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb ||
+                  !args->pKTCallbacks->pfnEvictCb)) return DXGI_ERROR_UNSUPPORTED;
+   auto *slot = new (args->hDrvDevice.pDrvPrivate) DeviceSlot{};
+   try {
+      slot->state = new Device();
+   } catch (const std::bad_alloc &) {
+      return E_OUTOFMEMORY;
+   }
+   Device *dev = slot->state;
+   dev->adapter = adapter;
+   dev->hRTDevice = args->hRTDevice;
+   dev->hRTCoreLayer = args->hRTCoreLayer;
+   runtime_copy_callbacks(&dev->kt, args->pKTCallbacks);
+   /* Read fields through the negotiated type; do not copy a callback table
+    * using the current SDK's size or cast the two context-create signatures. */
+   if (modern) {
+      dev->um.pfnSetErrorCb = args->pWDDM2_0UMCallbacks->pfnSetErrorCb;
+      dev->createContextVirtual = args->pWDDM2_0UMCallbacks->pfnCreateContextVirtualCb;
+   } else if (ddi11) {
+      dev->um.pfnSetErrorCb = args->p11UMCallbacks->pfnSetErrorCb;
+   } else {
+      dev->um.pfnSetErrorCb = args->pUMCallbacks->pfnSetErrorCb;
+   }
+   dev->dxgi = args->DXGIBaseDDI.pDXGIBaseCallbacks;
+   dev->interfaceVersion = args->Interface;
+   dev->caps = &adapter->vk.caps;
+   dev->nvk = adapter->vk.nvk;
+
+   const bool legacy_flip = dev->nvk && args->Interface == D3D10_0_7_DDI_INTERFACE_VERSION;
+   HRESULT hr = initialize_graphics_device(dev, (modern && dev->nvk) || video_window || legacy_flip, legacy_flip);
+   if (FAILED(hr)) {
+      release_device(slot);
+      return hr;
+   }
+
+   if (ddi11) {
+      device_fill_table11(args->p11_1DeviceFuncs);
+      dxgi_fill_presentation12(args->DXGIBaseDDI.pDXGIDDIBaseFunctions3,
+                              IS_DXGI_MULTIPLANE_OVERLAY_FUNCTIONS(args->Interface, args->Version));
+      *args->ppfnRetrieveSubObject = RetrieveSubObject;
+   } else if (modern) {
+      device_fill_table20(args->pWDDM2_0DeviceFuncs);
+      dxgi_fill_presentation14(args->DXGIBaseDDI.pDXGIDDIBaseFunctions5);
+      if (args->ppfnRetrieveSubObject) *args->ppfnRetrieveSubObject = RetrieveSubObject;
+   } else {
+      D3D10DDI_DEVICEFUNCS *table = args->pDeviceFuncs;
+      resource_fill_table(table);
+      state_fill_table(table);
+      shader_fill_table(table);
+      draw_fill_table(table);
+      query_fill_table(table);
+      device_fill_table(table);
+      /* The Windows 7 revisions pass DXGI1.1, adding shared-surface resolve. */
+      dxgi_fill_table(args->DXGIBaseDDI.pDXGIDDIBaseFunctions2,
+                      IS_DXGI1_1_BASE_FUNCTIONS(args->Interface, args->Version));
+   }
+   trace(TGD3D_TRACE_CREATE_DEVICE, S_OK, args->Interface, 0);
+   return S_OK;
+}
+
+}

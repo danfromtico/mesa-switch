@@ -1,0 +1,296 @@
+{
+  "selected_kernel_sha256": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+  "source_patch_sha256": "081a805ef7f8920f2114927f6825e2b4b802f2dbf499ac4e30ba13df5da840ba",
+  "previous_kernel_sha256": "6c86354e781e76d671c20bf14b124248a6e1aa264dcab6d459a6b14d551469b0",
+  "trial_boot": 81024,
+  "permanent_boot": 81111,
+  "persistent_permission_directory": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\window-copy-fc6e8d0876f7",
+  "gpu_problem_code": 0,
+  "active_inf": "oem19.inf",
+  "retained_previous_inf": "oem15.inf",
+  "user_mode_components": {
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+  },
+  "physical_qualification": {
+    "qualified": true,
+    "boot": 81024,
+    "kernel": "fc6e8d0876f7e69e16970809fcf191b6187f0d146a6f563dde2d45ca78a6d1f4",
+    "umd": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "cases": [
+      {
+        "mode": "warp-blit",
+        "case": "WindowCopyCheck-261120-102549366642",
+        "archive_sha256": "7ed5542a3f53e34732e9044f0e0b4e0fdeef505aa811f0ab1d1a2b5c5fcd807c",
+        "dwm_pid": 1452,
+        "pixel_comparisons": 462802
+      },
+      {
+        "mode": "native-blit",
+        "case": "WindowCopyCheck-261120-102648791392",
+        "archive_sha256": "0e4db0c2a69d2c3828a77266666a9fac1d08fefeade906c01e155bdebce2f126",
+        "dwm_pid": 1452,
+        "pixel_comparisons": 462802
+      },
+      {
+        "mode": "native-chain",
+        "case": "WindowCopyCheck-261120-102746858148",
+        "archive_sha256": "5b6dd0b24e01f22e4f0ec779d35e44007cec9046027e9dfc24a1dc6d90ad1dc0",
+        "dwm_pid": 1452,
+        "pixel_comparisons": 1152000,
+        "strict_public_d3d11_level": "11_1",
+        "strict_public_readback": {
+          "foreground": 280,
+          "background": 309,
+          "mismatches": 0
+        },
+        "strict_signed_client_sha256": "1f45a6784afba24396a799ee8d7b1b6830962ec057a4ff555de650ba0b93728f"
+      }
+    ],
+    "physical_arm64_wdk_model_sha256": "56f494c1a6d844100ff4fcc29b39c0909fb95f8f309c59344be30cf92ae2c346",
+    "qualification_scope": "The on-board WDK model checks the kernel copy packet. The installed kernel passes the public native surface and rectangle pixel controls. Windows chooses the rendering implementation used for the public DC copy."
+  },
+  "cleanup": {
+    "controller_removed": true,
+    "daily_package_exists": true,
+    "staging_marker_removed": true,
+    "transfer_removed": true,
+    "previous_package_exists": true
+  },
+  "selection_scope": "The kernel accepts bounded window-surface copies. The observed first-Present stability issue is tracked separately.",
+  "subrect_model": {
+    "scope": "WDK host model of valid window-sized subrectangles using the candidate UMD descriptors.",
+    "input_umd_sha256": "48abd8daa1091039dd28fa6817b1db7d92a811755d9ec95950faf8de21057a2a",
+    "functional_kernel_source_patch": "081a805ef7f8920f2114927f6825e2b4b802f2dbf499ac4e30ba13df5da840ba",
+    "destination_allocation_bytes": 978944,
+    "destination_visible_rows_with_pitch_bytes": 970368,
+    "rectangles": [
+      [
+        1,
+        1,
+        20,
+        9
+      ],
+      [
+        639,
+        359,
+        641,
+        361
+      ]
+    ],
+    "returned_multipass_offsets": [
+      1,
+      2
+    ],
+    "returned_statuses": [
+      "STATUS_GRAPHICS_INSUFFICIENT_DMA_BUFFER",
+      "STATUS_SUCCESS"
+    ],
+    "verified_source_and_destination_byte_offsets_and_line_extents": true,
+    "model_sha256": "ac7a871a7f18d1f3bee80d4543a37fcb7568ff0d93237187ec3df4b58c33b1bf",
+    "fixture_sha256": "02cf30c4833b0daed8be3fd374c9f9b3ff4272621053786e8156088d701a1887"
+  },
+  "source_files_sha256": {
+    "tegra-x1-wddm/windows/allocation.c": "a29cf200ba605c006dfc645e0010b468e31c12ede0fddf761416e31724200734",
+    "tegra-x1-wddm/windows/present.c": "1761b3f302cb5b86558f17e7de30e71a46016814e3d3d83d6dc9e43cf7d1958d",
+    "tegra-x1-wddm/tests/test_context_windows.c": "516371ed650be0306ee31c44c25da0b8b433c29f645eb5ac89ffe862974aea35"
+  },
+  "permanent_boot_cleanup": {
+    "boot": 81111,
+    "sku_firmware": "HDH-001",
+    "case_count": 3,
+    "task_count": 0
+  },
+  "installed_kernel_public_controls": [
+    {
+      "mode": "warp-blit",
+      "display_adapter_luid": "0000000000005a6c",
+      "external_power": "Online",
+      "signed_client_sha256": "8c34423ee29c3450fc2c4f93bcea096b9133467b03da7421990e041cfee1f73b",
+      "archive_sha256": "7ed5542a3f53e34732e9044f0e0b4e0fdeef505aa811f0ab1d1a2b5c5fcd807c",
+      "dwm_pid_before": 1452,
+      "dwm_pid_after": 1452,
+      "exit": 0,
+      "adapters": [
+        [
+          "1",
+          "0000000000005b62",
+          "0000000000005a6c",
+          "1414",
+          "008c",
+          "b000"
+        ],
+        [
+          "1",
+          "0000000000005b62",
+          "0000000000005a6c",
+          "1414",
+          "008c",
+          "b000"
+        ]
+      ],
+      "copied_rectangles": [
+        [
+          "0",
+          "231401",
+          "1001",
+          "0",
+          "2564"
+        ],
+        [
+          "1",
+          "231401",
+          "1001",
+          "0",
+          "2564"
+        ]
+      ]
+    },
+    {
+      "mode": "native-blit",
+      "display_adapter_luid": "0000000000005a6c",
+      "external_power": "Online",
+      "signed_client_sha256": "8c34423ee29c3450fc2c4f93bcea096b9133467b03da7421990e041cfee1f73b",
+      "archive_sha256": "0e4db0c2a69d2c3828a77266666a9fac1d08fefeade906c01e155bdebce2f126",
+      "dwm_pid_before": 1452,
+      "dwm_pid_after": 1452,
+      "exit": 0,
+      "adapters": [
+        [
+          "0",
+          "0000000000005a6c",
+          "0000000000005a6c",
+          "414f5753",
+          "31304630",
+          "b000"
+        ],
+        [
+          "0",
+          "0000000000005a6c",
+          "0000000000005a6c",
+          "414f5753",
+          "31304630",
+          "b000"
+        ]
+      ],
+      "copied_rectangles": [
+        [
+          "0",
+          "231401",
+          "1001",
+          "0",
+          "2564"
+        ],
+        [
+          "1",
+          "231401",
+          "1001",
+          "0",
+          "2564"
+        ]
+      ]
+    },
+    {
+      "mode": "native-chain",
+      "display_adapter_luid": "0000000000005a6c",
+      "external_power": "Online",
+      "signed_client_sha256": "8c34423ee29c3450fc2c4f93bcea096b9133467b03da7421990e041cfee1f73b",
+      "archive_sha256": "5b6dd0b24e01f22e4f0ec779d35e44007cec9046027e9dfc24a1dc6d90ad1dc0",
+      "dwm_pid_before": 1452,
+      "dwm_pid_after": 1452,
+      "exit": 0,
+      "adapter": [
+        "0",
+        "0000000000005a6c",
+        "0000000000005a6c",
+        "414f5753",
+        "31304630",
+        "b000"
+      ],
+      "gpu_frames": [
+        [
+          "PlainControl",
+          "0",
+          "230400",
+          "0",
+          "2560"
+        ],
+        [
+          "BeforeDCRead",
+          "0",
+          "230400",
+          "0",
+          "2560"
+        ],
+        [
+          "AfterDCWrite",
+          "0",
+          "230400",
+          "0",
+          "2560"
+        ],
+        [
+          "BeforeDCRead",
+          "1",
+          "230400",
+          "0",
+          "2560"
+        ],
+        [
+          "AfterDCWrite",
+          "1",
+          "230400",
+          "0",
+          "2560"
+        ]
+      ],
+      "gdi_samples": [
+        [
+          "0",
+          "13",
+          "0"
+        ],
+        [
+          "1",
+          "13",
+          "0"
+        ]
+      ],
+      "native_modules": [
+        [
+          "c954304f784433109e0f41dff2a4d3eaf1cbc82c738b01c0234eb60f0ee2804d",
+          "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+        ]
+      ],
+      "strict_d3d11_output": [
+        "hardware-adapter\t0000000000005a6c\t10de\t12e\t53",
+        "runtime\thardware\tb100\t414f5753\t31304630\t0\t0000000000005a6c",
+        "triangle-readback\t280\t309",
+        "complete\t1"
+      ],
+      "strict_d3d11_exit": 0
+    }
+  ],
+  "signed_catalog_sha256": "90f82f9c3b8c71827390b25d1f94e5d7fa570e348d12912fb6189c2a6397b1b0",
+  "signed_catalog_members": [
+    "NETB_img.bin",
+    "fecs.bin",
+    "fecs_sig.bin",
+    "gpccs.bin",
+    "gpmu_ucode_desc.bin",
+    "gpmu_ucode_image.bin",
+    "nv_acr_ucode_prod.bin",
+    "pmu_bl.bin",
+    "pmu_sig.bin",
+    "tegragpuno3d.dll",
+    "tegragpurender.inf",
+    "tegragpurender.sys"
+  ],
+  "related_first_present_measurement": {
+    "instrumented_kernel_sha256": "6e2ea90712973c1155767efb91177ce23a8cfb48f8456ffa566fd12c4f79b589",
+    "record_commit": "84b1a80f3553b1bdb7073860867dd4febbc45108",
+    "finding": "Native first Present restarted with the corresponding instrumented kernel and the typed-window UMD. The kernel copy fix was qualified separately. The copy engine Windows selected in the public pixel controls remains undetermined."
+  }
+}

@@ -1,0 +1,300 @@
+{
+  "schema": 1,
+  "scope": "Independent review of the SD miniport producer/image binding,bounded public SDK contracts,runtime file identities and the outgoing exclusive-device handoff.",
+  "verdict": "producer_image_binding_and_bounded_public_SDK_review_accepted;no_SD_fix_or_runtime_dump_acceptance",
+  "archive": {
+    "sha256": "9360d56ed95434aa1ba16ffd3403f207fe46aedc8075cce06d6c61fda48efcca",
+    "bytes": 733416,
+    "archive_members": 127,
+    "individual_members_SHA_verified": 126,
+    "manifest_sha256": "7fe0dff81815711451ed567ff58676fa2a1124024d5f148f28e30abad97d031b"
+  },
+  "all_archive_lengths_full_SHA256_CRC_safe_paths_verified": true,
+  "producer_image_binding": {
+    "producer_commit": "5345692e4b7ec0d52e80937ae451bb2c52750fe8",
+    "Git_producer_tree_files_verified": 23,
+    "intake_files_verified": 4,
+    "retained_private_input_hash_verified": true,
+    "rebuild_compile_link_exits": [
+      0,
+      0
+    ],
+    "rebuilt_unsigned_byte_identical": true,
+    "unsigned_sha256": "f024bc0de76e087d76566537ab56e5d8fd5ae3bf4baa6e35ab40a95e2db7ea2d",
+    "unsigned_bytes": 46080,
+    "signed_sha256": "5389b30d3a04fad330b9afef36b0d500ad363c6c5b39c55c9b60096669bfd945",
+    "signed_bytes": 48056,
+    "PE_machine": "ARM64",
+    "six_sections": {
+      ".text": {
+        "virtual_size": 37336,
+        "rva": 4096,
+        "raw_size": 37376,
+        "raw_offset": 1024,
+        "sha256": "05dacc0ff9ef43258b53db00ed5033f1c3a89d2d81f6e4e738edd9f782208457"
+      },
+      ".rdata": {
+        "virtual_size": 4664,
+        "rva": 45056,
+        "raw_size": 5120,
+        "raw_offset": 38400,
+        "sha256": "570685ebc71bcf877477cf11b4f583ef321a78dd653b59d6e543c2de55cd3e43"
+      },
+      ".data": {
+        "virtual_size": 2304,
+        "rva": 53248,
+        "raw_size": 1024,
+        "raw_offset": 43520,
+        "sha256": "3e048d6fb092ba8de1c0a0cdab60306823fd709923ad0091b30722849206a9a7"
+      },
+      ".pdata": {
+        "virtual_size": 464,
+        "rva": 57344,
+        "raw_size": 512,
+        "raw_offset": 44544,
+        "sha256": "1b92907750ca63b31776a98091afc59d6e48d140f6492e3e6955d3ad10c063dc"
+      },
+      "INIT": {
+        "virtual_size": 132,
+        "rva": 61440,
+        "raw_size": 512,
+        "raw_offset": 45056,
+        "sha256": "bcc0b02cc1b8cc190d90d884ab8c8a34d3a4d24558609e9615f6fc5c30082c62"
+      },
+      ".reloc": {
+        "virtual_size": 40,
+        "rva": 65536,
+        "raw_size": 512,
+        "raw_offset": 45568,
+        "sha256": "44b4c6b78beb2e60ac35ae026d50970b6efaf67c6aae2bdcc7e8c52184379fef"
+      }
+    },
+    "signing_checksum_security_directory_certificate_only_difference": true,
+    "new_SD_signing_or_installation": false,
+    "main_rebuilds": 0,
+    "private_header_values_published": false
+  },
+  "source_review": {
+    "reviewed_areas": [
+      "DriverEntry and static initialization table;CrashdumpMode preparation with PASSIVE_LEVEL annotation and mapped resource lifetime.",
+      "Dump reset-all clock/card transition path,PIO selection and interrupt status/polling behavior.",
+      "First dump write identity/extent validation before reserving the outstanding request;failed validation returns without admitting the write.",
+      "Request/completion and nonpaged/IRQL assumptions under the retained public SDPORT SDK interface."
+    ],
+    "main_source_checks": "Pinned producer Git blobs and both source tar archives were verified. The relevant initialization,crash-mode resource preparation,first-write guard ordering and failure cleanup were inspected against the retained SDK and independent review.",
+    "conclusion": "No confirmed direct violation of the reviewed SDK26100 contract was established. This is not a general bug-free determination or a runtime dump acceptance. No speculative SD production fix was made.",
+    "actual_state_limits": "Physical card,PMIC,clock state and private target facts during a dump remain unobserved. Source guards and advertised support do not prove a functioning dump instance.",
+    "private_inputs": "Retained private header hash matched the original producer input;its values are omitted from this report.",
+    "intake_precedence": "Initial not-yet-bound notes and the missing-common-header compile failure remain preserved. The completed second build and independent byte comparisons establish the subsequent source/image binding."
+  },
+  "SDK_interface": {
+    "version": "10.0.26100.0",
+    "sha256": "7d08a8fa90f7418212c02c3d9a81feba79169f02b339e4594cd1b252c0791b72",
+    "local_header_equal": true,
+    "runtime_ABI_equivalence_proved": false
+  },
+  "runtime_identity": {
+    "Win32_OS_version": "10.0.22631",
+    "Win32_OS_build": "22631",
+    "UBR": 2861,
+    "Event12_kernel_fields": {
+      "MajorVersion": "10",
+      "MinorVersion": "0",
+      "BuildVersion": "22621",
+      "QfeVersion": "2861",
+      "ServiceVersion": "0",
+      "BootMode": "0",
+      "StartTime": "2026-11-22T23:28:03.7824656Z"
+    },
+    "module_file_identities": [
+      {
+        "path": "C:\\Windows\\System32\\drivers\\nvtsdhc.sys",
+        "sha256": "5389b30d3a04fad330b9afef36b0d500ad363c6c5b39c55c9b60096669bfd945",
+        "name": "nvtsdhc.sys",
+        "bytes": 48056,
+        "version": null
+      },
+      {
+        "path": "C:\\Windows\\System32\\drivers\\sdport.sys",
+        "sha256": "4d37508433432784ae4b28edc3edb8495841cfbc67fbcdd08683e32778696572",
+        "name": "sdport.sys",
+        "bytes": 109552,
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      },
+      {
+        "path": "C:\\Windows\\System32\\drivers\\dumpsd.sys",
+        "sha256": "1803fd913e6092d722224e60d206250bdea3e4677873f25363c84767c2d0c26b",
+        "name": "dumpsd.sys",
+        "bytes": 197992,
+        "version": "10.0.22621.1 (WinBuild.160101.0800)"
+      },
+      {
+        "path": "C:\\Windows\\System32\\drivers\\crashdmp.sys",
+        "sha256": "f4548421b9d7a087ed6c22d809b64442f28ed85f8eeaf9a56536a88a8abd3f8b",
+        "name": "crashdmp.sys",
+        "bytes": 120288,
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      },
+      {
+        "path": "C:\\Windows\\System32\\drivers\\werkernel.sys",
+        "sha256": "069a0a37f243341f75cf7bcbfb9e816b432b696cd0e59167ef46b05d5c887d4f",
+        "name": "werkernel.sys",
+        "bytes": 66928,
+        "version": "10.0.22621.2506 (WinBuild.160101.0800)"
+      }
+    ],
+    "virtual_dump_modules_loaded_proved": false,
+    "policy_member_native_wire_local_mappings": [
+      {
+        "wire_name": "active-policy/manifest.json",
+        "local_name": "active-policy/manifest.json",
+        "sha256": "d55687ab330e49d47a550f3affa398ded0da0b52a6b4f4e3b27d10fa05dc9bd2",
+        "bytes": 720
+      },
+      {
+        "wire_name": "active-policy/Baseline-Device.ps1",
+        "local_name": "active-policy/Baseline-Device.ps1",
+        "sha256": "2daa42faea42a2be4913738b8d97aed138b718a558eaa99ee8e538bb6351d74c",
+        "bytes": 13554
+      },
+      {
+        "wire_name": "active-policy/Baseline-Promotion.ps1",
+        "local_name": "active-policy/Baseline-Promotion.ps1",
+        "sha256": "b9395d94851d1457acc07ee0119a33faad757b9d3a6fe6f366e1e56eb8e5c35e",
+        "bytes": 22953
+      },
+      {
+        "wire_name": "active-policy/Install-GraphicsBootPolicy.ps1",
+        "local_name": "active-policy/Install-GraphicsBootPolicy.ps1",
+        "sha256": "5ecebad470d243814b2ce90354f2e09dcd947715babda834152a59c074c5d505",
+        "bytes": 8335
+      },
+      {
+        "wire_name": "active-policy/Invoke-GraphicsBootPolicy.ps1",
+        "local_name": "active-policy/Invoke-GraphicsBootPolicy.ps1",
+        "sha256": "b366e79db9c0f55aed09a9c7d19bf71df63b5c361e2cf7f8b48f517c3f62f0a2",
+        "bytes": 1304
+      },
+      {
+        "wire_name": "active-policy/Native-Boot.ps1",
+        "local_name": "active-policy/Native-Boot.ps1",
+        "sha256": "d2b3224084221321be52fe4440f1e67008a1b955ae2d1c3c1fe80e62da26ebfe",
+        "bytes": 12129
+      },
+      {
+        "wire_name": "active-policy/graphics-baseline.json",
+        "local_name": "active-policy/graphics-baseline.json",
+        "sha256": "2b3a2624cd826fa41f47e4c621e6fdee9cd0e6a25161fab78eb9ec3ca5ef9154",
+        "bytes": 1119
+      },
+      {
+        "wire_name": "active-policy/open-faults.json",
+        "local_name": "active-policy/open-faults.json",
+        "sha256": "c58acef79b849fcc7a209ecaaf3b420bdda82a7664842db3f938e2ac36adbd2f",
+        "bytes": 421179
+      },
+      {
+        "wire_name": "active-policy/Native-Boot.ps1",
+        "local_name": "active-policy-root/Native-Boot.ps1",
+        "sha256": "b366e79db9c0f55aed09a9c7d19bf71df63b5c361e2cf7f8b48f517c3f62f0a2",
+        "bytes": 1304
+      }
+    ],
+    "policy_root_launcher_collision_resolved_without_new_native_read": true,
+    "GPU_registry_driver_session_TDR_mutations": 0
+  },
+  "version_correction": {
+    "R1_incorrect_layer": "The initial review attributed SDK26100 to the runtime inbox dump stack.",
+    "R2_corrected_layers": "Win32_OS10.0.22631/UBR2861;System12 kernel22621;installed sdport,crashdmp and werkernel22621.2506;dumpsd22621.1.",
+    "nvtsdhc_version_resource": null,
+    "boundary": "The reviewed26100 SDK interface does not establish22621 runtime ABI/behavior equivalence. File versions/hashes do not prove virtual dump_* module loading or callback execution.",
+    "raw_R1_retained": true,
+    "independent_R2_correction_verified": true
+  },
+  "native_collection_boundaries": {
+    "successful_r2_transport_exit": 0,
+    "policy_manifest_members_full_native_wire_host_verified": 9,
+    "duplicate_name_handling": "The active revision Native-Boot.ps1 and root launcher shared a wire name but had distinct content identities. Source operation provenance and full hashes bind their separate retained paths;the launcher also shares bytes with Invoke-GraphicsBootPolicy.ps1. The captured native stdout was preserved and extraction was completed locally without another native read.",
+    "earlier_failure": "Initial placeholder composition failed before the successful second collection;ordinary error originals retained.",
+    "new_GPU_TDR_crash_or_SD_installation": false
+  },
+  "independent_reviews": [
+    {
+      "round": "sd0512-review-r1",
+      "conversation": "3be4781b-cd40-4bc7-b8c6-c31a813b6ef8",
+      "model": "gemini-4-neon-high",
+      "frozen_files": 31,
+      "overall": "no_confirmed_direct_contract_gap",
+      "findings": []
+    },
+    {
+      "round": "sd0512-review-r2",
+      "conversation": "a1e3b822-7b7a-4486-a312-33aed7910717",
+      "model": "gemini-4-neon-high",
+      "frozen_files": 5,
+      "overall": "approve_bounded_correction",
+      "findings": [
+        {
+          "id": "R2-FACT-001",
+          "severity": "factual_correction",
+          "status": "verified_and_corrected_in_addendum"
+        },
+        {
+          "id": "R2-BOUNDARY-002",
+          "severity": "scope_clarification",
+          "status": "verified_and_narrowed_in_addendum"
+        }
+      ]
+    }
+  ],
+  "outgoing_device_handoff": {
+    "utc": "2026-11-23T03:12:08.100459+00:00",
+    "from_thread": "01a204e6-bb5e-7a63-b829-4718f86cbd1e",
+    "to_thread": "01a20660-8713-7611-8387-059d4e5b97d8",
+    "both_locks_recorded": true,
+    "local_owned_native_jobs": 0,
+    "native_owned_tasks_processes_services_sessions": 0,
+    "actual_lease_owner_at_main_local_read": "01a20660-8713-7611-8387-059d4e5b97d8",
+    "last_outgoing_formal_boot": 97530,
+    "code": 0,
+    "components": 8,
+    "actual_loaded_hashes_paths": 5,
+    "dwm": 1420,
+    "last_outgoing_readback_utc": "2026-11-23T03:12:07.1530246Z",
+    "receiving_native_readback_in_this_archive": false,
+    "scope": "Verified outgoing owned-job drain and formal snapshot plus local lease registration. Do not generalize to all system jobs or to receiver subsequent GPU state. Receiver native acceptance original is not included in this batch.",
+    "main_lease_changes": 0
+  },
+  "baseline_scope": {
+    "boot": 97530,
+    "code": 0,
+    "KMD": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+    "component_count": 8,
+    "actual_loaded_path_hash_count": 5,
+    "selected_equals_permanent": true,
+    "trial": false,
+    "token": false,
+    "DWM_pid": 1420,
+    "last_outgoing_native_readback_utc": "2026-11-23T03:12:07.1530246Z",
+    "descriptor_sha256": "2b3a2624cd826fa41f47e4c621e6fdee9cd0e6a25161fab78eb9ec3ca5ef9154",
+    "scope": "This is the outgoing TDR-owner snapshot. The Neon/Present1 executor owns the lease afterward;its subsequent GPU state is not inferred from this snapshot.",
+    "receiver_native_readback_original_reviewed_in_this_batch": false
+  },
+  "remaining": [
+    "Actual NT bugcheck arrival for97437.",
+    "Dump-stack preparation and virtual module loading.",
+    "Failing dump callback or writer stage.",
+    "Physical storage/card/PMIC/clock state and actual durable dump writes.",
+    "Runtime22621 behavior compared with the public26100 SDK.",
+    "Historical legacy SEQUENTIAL first-Present root cause."
+  ],
+  "GPU_candidate_work": "Separate local TDR instrumentation and repair work is outside this SD batch and has no qualification here.",
+  "open_faults": 19,
+  "faults_closed": 0,
+  "SD_source_changes": 0,
+  "SD_installations": 0,
+  "baseline_promoted": false,
+  "main_device_operations": 0,
+  "main_lease_changes": 0,
+  "historical_root_cause_found": false
+}

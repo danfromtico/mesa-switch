@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "round_id": "pal4-texture7-allocation-owner-20261121-02",
+  "contract_id": "dxgkrnl.h:746:2",
+  "observed_boot_sequence": [
+    91083,
+    91158,
+    91184,
+    91251
+  ],
+  "game_issuance": {
+    "boot": 91083,
+    "pid": 3564,
+    "utc": "2026-11-21T11:48:13.1378483Z",
+    "sha256": "6a396426350177b18a3efcf82b96f04afc250424191b3284bd0c3d28597702aa"
+  },
+  "unobserved_intervals": [
+    {
+      "from_boot": 91158,
+      "to_boot": 91184,
+      "new_boot_events": [
+        {
+          "id": 12,
+          "record": 91184,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-21T11:49:18.5700493Z",
+          "fields": {}
+        },
+        {
+          "id": 6008,
+          "record": 91185,
+          "provider": "EventLog",
+          "utc": "2026-11-21T11:51:11.7140952Z",
+          "fields": {}
+        },
+        {
+          "id": 41,
+          "record": 91202,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-21T11:49:23.3801376Z",
+          "fields": {
+            "BugcheckCode": "0",
+            "SleepInProgress": "0",
+            "PowerButtonTimestamp": "0",
+            "BugcheckInfoFromEFI": "false",
+            "LongPowerButtonPressDetected": "false"
+          }
+        }
+      ],
+      "planned_shutdown_records": [],
+      "game_reissued_by_test": false,
+      "cause": "未知"
+    },
+    {
+      "from_boot": 91184,
+      "to_boot": 91251,
+      "new_boot_events": [
+        {
+          "id": 12,
+          "record": 91251,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-21T11:51:04.4972008Z",
+          "fields": {}
+        },
+        {
+          "id": 6008,
+          "record": 91260,
+          "provider": "EventLog",
+          "utc": "2026-11-21T11:53:18.5805697Z",
+          "fields": {}
+        },
+        {
+          "id": 41,
+          "record": 91269,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-21T11:51:08.8778542Z",
+          "fields": {
+            "BugcheckCode": "0",
+            "SleepInProgress": "0",
+            "PowerButtonTimestamp": "0",
+            "BugcheckInfoFromEFI": "false",
+            "LongPowerButtonPressDetected": "false"
+          }
+        }
+      ],
+      "planned_shutdown_records": [],
+      "game_reissued_by_test": false,
+      "cause": "未知"
+    }
+  ],
+  "system_readback_sha256": "8b94791f93d7b6450de05ff7ad0154a51b8c7c502e532b11bf450320d6407c1c",
+  "original_dll_restoration": {
+    "boot": 91251,
+    "sha256": "8642fca6aa40b2b289da4c4cd5334fb984b2bbf3313ffa4ddc46c3238539ceab"
+  },
+  "scope": "一次性游戏启动器只写入了一份签发及 PID 记录。后续两次 Windows 启动之间没有该启动器再次执行游戏的记录。中间启动的桌面、负载与重启原因缺少直接观测。"
+}

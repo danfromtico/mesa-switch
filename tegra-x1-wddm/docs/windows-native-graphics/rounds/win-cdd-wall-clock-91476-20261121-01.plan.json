@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "round_id": "win-cdd-wall-clock-91476-20261121-01",
+  "contract_id": "WIN-CDD-BOARD-RECOVERY",
+  "windows_question": "WIN-CDD-BOARD-RECOVERY",
+  "question": "启动 91476 的可用时钟能否将复位时间定位到 DWM 第三次提交附近？",
+  "method": "本地对齐两路原始 ETL 时钟、同启动板端时锚与恢复启动 System 记录。",
+  "device_executions": 0,
+  "pass_condition": "验证双 ETL 的起始时锚一致，核对恢复内核启动时刻和 6008 所报关机时刻是否相容。",
+  "observations": [
+    "同一压缩档内绑定板端启动 91476 的 UTC/QPC 时锚，使用各 ETL 头部的 StartTime、QPC 和 PerfFreq 换算留存事件。",
+    "独立解析恢复开机的事件 12、41 和 6008。比较事件 12 的 StartTime、6008 载荷和事件实际写入时间。"
+  ],
+  "inputs": {
+    "raw": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/interrupted.zip",
+        "sha256": "2c1dca823c73a9900ad8a9d1188fe766ebbc109418c45e67a07ce84d5299b3ab"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/exact-windows-reboot.json",
+        "sha256": "9e96882bdb82f7ad0caf34b51e7788748143cf7360872dfdaf162fe067bde2b0"
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/runs/win-present-board-only-cdd-20261121-01/incident-analysis.json",
+        "sha256": "b1aa491cfe5d24996d9549c47bf0328d82b3b39cfbf872e4bf3d32fe174c2c99"
+      }
+    ],
+    "retained": [
+      {
+        "path": "windows-native-graphics/rounds/win-present-board-only-cdd-20261121-01.result.json",
+        "sha256": "7dc9d39f8aecf944905d095e24e54283bf622a7b91488129ec5f042c77534099"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-tail-20261121-01.result.json",
+        "sha256": "88276f1c69708d28dbc676b2be1d80cf70e095206fd6d55ddc0e3402fde2b586"
+      },
+      {
+        "path": "windows-native-graphics/rounds/win-board-cdd-dwm-third-submit-kmd-20261121-01.result.json",
+        "sha256": "b97826c7574f0db6de4be58c130eafd3f4b376185d40318fd6c97834e8e46317"
+      }
+    ]
+  }
+}

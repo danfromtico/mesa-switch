@@ -71,11 +71,5 @@ AssertFail(const char *expr,
            const char *function)
 {
    DebugPrintf("%s:%u:%s: Assertion `%s' failed.\n", file, line, function, expr);
-#if defined(__GNUC__)
-   __asm("int3");
-#elif defined(_MSC_VER)
-   __debugbreak();
-#else
    DebugBreak();
-#endif
 }

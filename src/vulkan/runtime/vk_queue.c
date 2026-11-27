@@ -34,6 +34,7 @@
 #include "vk_device.h"
 #include "vk_fence.h"
 #include "vk_log.h"
+#include "vk_internal_exts.h"
 #include "vk_physical_device.h"
 #include "vk_semaphore.h"
 #include "vk_sync.h"
@@ -424,6 +425,13 @@ vk_queue_submits_merge(struct vk_queue *queue,
                        struct vk_queue_submit *first,
                        struct vk_queue_submit *second)
 {
+#ifdef _WIN32
+   /* VidMm write references belong to this command submission. Preserve the
+    * boundary (and the 16-entry limit) when either batch writes a displayable
+    * resource; the generic merge must not discard this private metadata. */
+   if (first->win32_written_count || second->win32_written_count)
+      return NULL;
+#endif
    /* Don't merge if there are signals in between: see 'Signal operation order' */
    if (first->signal_count > 0 &&
        (second->command_buffer_count ||
@@ -903,6 +911,34 @@ vk_queue_submit_create(struct vk_queue *queue,
    if (unlikely(submit == NULL))
       return vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
 
+#ifdef _WIN32
+   const struct wsi_win32_written_primaries *written =
+      vk_find_struct_const(info->pNext, WSI_WIN32_WRITTEN_PRIMARIES_MESA);
+   if (written) {
+      if (!queue->supports_wsi_written_primaries || written->version != 1 ||
+          written->count > ARRAY_SIZE(submit->win32_written_allocations) ||
+          (written->count && !info->command_buffer_count)) {
+         result = vk_error(queue, VK_ERROR_FEATURE_NOT_PRESENT);
+         goto fail;
+      }
+      for (uint32_t i = 0; i < written->count; ++i) {
+         if (!written->allocations[i]) {
+            result = vk_error(queue, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+            goto fail;
+         }
+         for (uint32_t j = 0; j < i; ++j) {
+            if (written->allocations[j] == written->allocations[i]) {
+               result = vk_error(queue, VK_ERROR_INVALID_EXTERNAL_HANDLE);
+               goto fail;
+            }
+         }
+      }
+      submit->win32_written_count = written->count;
+      memcpy(submit->win32_written_allocations, written->allocations,
+             written->count * sizeof(written->allocations[0]));
+   }
+#endif
+
    /* From the Vulkan 1.2.194 spec:
     *
     *    "If the VkSubmitInfo::pNext chain does not include this structure,
@@ -1307,8 +1343,14 @@ vk_common_QueueSubmit2(VkQueue _queue,
       };
       struct vk_queue_submit *submit;
       result = vk_queue_submit_create(queue, &info, &submit);
-      if (unlikely(result != VK_SUCCESS))
+      if (unlikely(result != VK_SUCCESS)) {
+         /* A later batch can reject private write metadata before the
+          * previous batch has been handed to the driver. Release its owned
+          * arrays and temporary sync references rather than leaking them. */
+         if (last_submit != NULL)
+            vk_queue_submit_destroy(queue, last_submit);
          return result;
+      }
 
       result = vk_queue_merge_submit(queue, &last_submit, submit);
       if (unlikely(result != VK_SUCCESS))

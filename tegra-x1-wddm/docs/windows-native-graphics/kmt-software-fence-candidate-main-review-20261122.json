@@ -1,0 +1,1228 @@
+{
+  "schema": 1,
+  "review_utc": "2026-11-22T14:35:37.510561+00:00",
+  "main_review_thread": "01a2026b-02b8-7ea3-996a-e5472b0bde3f",
+  "execution_thread": "01a202a1-7c8c-70c1-8363-52cc06d2708b",
+  "disposition": "Accepted scoped candidate hardware evidence and formal restoration; production promotion and fault closure remain unaccepted.",
+  "candidate_commit": "b88d7dcc3b6f2b2fe48a8b9d7c0a0f2e41a0453e",
+  "candidate_worktree": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/kmt-software-fence-01a202a1",
+  "candidate_source_integrated_into_main": false,
+  "candidate_source_pushed": false,
+  "selected_baseline_changed": false,
+  "main_device_connections": 0,
+  "main_test_dispatches": 0,
+  "delivery": {
+    "entry": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/NATIVE_CANDIDATE_DELIVERY.json",
+      "bytes": 5696,
+      "sha256": "36d6d49d9a7a308f035cef1fa7be9891c05e703060f0a5e25ef000f087819778"
+    },
+    "identity": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-native-candidate-01a202a1-20261122-identity.json",
+      "bytes": 767,
+      "sha256": "b6f4b0a4e93aa0e3fbd7a3fcd8cb87b2fc3eab3c176d14ed7230434bded2f7dd"
+    },
+    "archive_verification": {
+      "manifest_files": 1104,
+      "manifest_sha256": "277aa50ead9d52fcc12477aaa99019c856d8347e53f8fa5e54c0edca17fb833c",
+      "file_errors": [],
+      "archive_bytes": 11466221,
+      "archive_sha256": "c8332146b41912045514060f2db27dcadb5cd7a6154129c7d15655d2eb1e646e",
+      "archive_members": 1105,
+      "duplicate_names": 0,
+      "CRC_error": null,
+      "archive_disk_mismatch": []
+    }
+  },
+  "source_review": {
+    "changed_files": [
+      "tegra-x1-wddm/windows/work_queue.c",
+      "tegra-x1-wddm/tests/test_context_windows.c"
+    ],
+    "sufficient_source_defect": "SubmitCommandVirtual deliberately skips command capture for NullRendering. The old queue admission still rejected any nonzero UMD private size without a snapshot outside Present exceptions. The new non-Paging/non-ContextSwitch NullRendering predicate selects the reserved owned entry and excludes ignored UMD bytes from that snapshot requirement.",
+    "ownership_and_order": "The existing locked tail queue and software-fence service retain ordering behind prior GPU/rejected work. The owned reserved record outlives OS private storage; accepted records are released by existing completion/preemption/reset paths. No new context pointer is retained by software work.",
+    "unchanged_boundaries": [
+      "Paging and ContextSwitch keep their previous branches.",
+      "Unknown flag mask checks and context/closing checks remain.",
+      "Non-NullRendering zero-DMA/nonzero-UMD admission is unchanged and not newly qualified.",
+      "No new blanket scheduler serialization, lifetime or no-deadlock claim."
+    ],
+    "source_causality_status": "Source defect is established for this input predicate and consistent with the bound96251 internal failure; no branch-specific old live trace or final DDI NTSTATUS is retroactively supplied.",
+    "build_proof": {
+      "candidate_commit": "b88d7dcc3b6f2b2fe48a8b9d7c0a0f2e41a0453e",
+      "sources_match_commit_and_frozen": [
+        {
+          "path": "tegra-x1-wddm/windows/work_queue.c",
+          "sha256": "1c8d644b3f822390a833ec7c9f64727d8ad9ecd61346f8ccdba9437f64fb594c"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/work_queue.h",
+          "sha256": "b4a924148af57770034fd4457c4abd5ae93de9c78676d6424a3cf8104aa27770"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/context.c",
+          "sha256": "7aa0a007bc1a59b35eaccdcd9ff3e7ea054aa1f0a985e73545d585815225a4d8"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/context.h",
+          "sha256": "55a65f7b6353ccfbc94b39f3f4f083934382983b3f3bff1a8dab0ba464f89217"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/submit_ddi.c",
+          "sha256": "b01cef642b9c660226fd24e468b861f9f21b3176fba6ae7ba6a3fcda0e2d1548"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/submit_worker.c",
+          "sha256": "4164d780de0d7362c5dad4112d3c8ff8bf30c63c0129cc9842880b9d4d1924b0"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/worker.c",
+          "sha256": "ca5a4c0b61db2a19d93467381a75cd03d0419c14bb3ad327fefa0c96ffcf756b"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/command_snapshot.c",
+          "sha256": "ca1f56d6854831119f86b971dcb78831a764661771e38ccf6d9ee374eb41c039"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/command_snapshot.h",
+          "sha256": "ce10051b9b20003ac626109692f843c2778cb4cd61dd37051be686170dcfa3c3"
+        },
+        {
+          "path": "tegra-x1-wddm/windows/diagnostic_events.h",
+          "sha256": "8b637c807b11e8994e6507c87bd47af793d92b88d88eec619df654ba7b87b98f"
+        }
+      ],
+      "formal_KMD_source": "e1b2208760dd88c2e11c86eceb60272cb3f16433",
+      "production_diff_paths": [
+        "tegra-x1-wddm/tools/build.py",
+        "tegra-x1-wddm/windows/work_queue.c"
+      ],
+      "build_py_delta": "Only6 lines add an INF firmware-label condition; no command/compiler change. Same native158/display/460800 recipe retained.",
+      "unsigned_SYS_sha256": "ded77e4fb698625e1132c690208436cdd00a7cab58ebd530cc0c4a19158f0fa8",
+      "signed_SYS_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+      "signed_prefix_equal_except_checksum_security_directory": true,
+      "certificate_bytes": 3080,
+      "ARM64_PE_count": 16,
+      "PE_files": [
+        {
+          "path": "build/test-nvdec-adapter.exe",
+          "machine": "ARM64",
+          "sha256": "d3dc558d11b022d781d76dc82d2020484acbddea4dc99433605da92a46845191"
+        },
+        {
+          "path": "build/test-paging.exe",
+          "machine": "ARM64",
+          "sha256": "d992570a0524ef6cc19674d3715db5148920ae63b5059c4a7c259ff090d3470f"
+        },
+        {
+          "path": "build/test-hardware.exe",
+          "machine": "ARM64",
+          "sha256": "105e287f68ff04fa94d7927b080c03337c04de9e9c453b5d576de893021a6653"
+        },
+        {
+          "path": "build/test-worker.exe",
+          "machine": "ARM64",
+          "sha256": "4a81affe68e5c2daf8117e4715fa763a1a27ec84c4bc49f384ff3ff96a1d03f0"
+        },
+        {
+          "path": "build/test-native-start.exe",
+          "machine": "ARM64",
+          "sha256": "e63f70da97afc54df78bbb2b672aa8aba94b2e2f60022e8ecf226b02d5429b57"
+        },
+        {
+          "path": "build/test-nvdec-memory.exe",
+          "machine": "ARM64",
+          "sha256": "00aae498df9766f4d3e825baece1d055f6186c81213c6dcaab1b37892967a45b"
+        },
+        {
+          "path": "build/test-diagnostic.exe",
+          "machine": "ARM64",
+          "sha256": "1c1b31ef350da64c3cb7137d801e56c931e887a7ad778a1a2be478543adfd208"
+        },
+        {
+          "path": "build/test-host1x-clock.exe",
+          "machine": "ARM64",
+          "sha256": "ee94786da435f262a4ae9276b5d3c4e2e77226f3e1cbdbcdd9f35eeeaae42149"
+        },
+        {
+          "path": "build/test-panel-timings.exe",
+          "machine": "ARM64",
+          "sha256": "afd9ba04bd301428ec267392d2b9ec82cb66ebaede34b307ca6ee991cfd48f0e"
+        },
+        {
+          "path": "build/test-startup-diagnostic.exe",
+          "machine": "ARM64",
+          "sha256": "458b33c09b3394dcd2d3789fe17cc357d3c6d4aec5c142849d95555694661f9d"
+        },
+        {
+          "path": "build/test-context.exe",
+          "machine": "ARM64",
+          "sha256": "d9c8e66458c34ad91a6a5c5dc3a6656632419c71145466b1e519a25726d22153"
+        },
+        {
+          "path": "build/test-platform.exe",
+          "machine": "ARM64",
+          "sha256": "c70c8bf5f7783065bfc3e51e8f32b3ab6325942d5b85b7794bdbad84372b21f6"
+        },
+        {
+          "path": "build/test-dvfs.exe",
+          "machine": "ARM64",
+          "sha256": "075562668303826c88e2a5c3456b17889312e25880c8c7e7324ff831f666d2a8"
+        },
+        {
+          "path": "build/test-panel-scanout.exe",
+          "machine": "ARM64",
+          "sha256": "258b0d9deb851dca779dc3b31d0c4ea2a65028e19eccc17d52f7747cd0887e63"
+        },
+        {
+          "path": "build/kit/tegragpurender/tegragpuno3d.dll",
+          "machine": "ARM64",
+          "sha256": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d"
+        },
+        {
+          "path": "build/kit/tegragpurender/tegragpurender.sys",
+          "machine": "ARM64",
+          "sha256": "ded77e4fb698625e1132c690208436cdd00a7cab58ebd530cc0c4a19158f0fa8"
+        }
+      ],
+      "original_compile_firmware_inputs_verified": 9,
+      "runtime_inherited_files_verified": [
+        "fecs_sig.bin",
+        "fecs.bin",
+        "pmu_bl.bin",
+        "tegragpuno3d.dll",
+        "gpccs.bin",
+        "nv_acr_ucode_prod.bin",
+        "gpmu_ucode_desc.bin",
+        "pmu_sig.bin",
+        "gpmu_ucode_image.bin",
+        "NETB_img.bin"
+      ],
+      "runtime_package_members": 13,
+      "Windows_CAT_member_verifications": 12,
+      "signed_probe_sha256": "f5006121270ab3d94c35b4a5ede29fb5a3c2dd805c20b140fff5bcf8ceac3eeb",
+      "host_build_exit": 0,
+      "host_stderr_bytes": 0,
+      "host_skipped_checks": [
+        "NVDEC firmware model test skipped: --nvdec-firmware not provided",
+        "NVDEC H.264 control test skipped: --nvdec-sample not provided"
+      ],
+      "model_r2_terminal": {
+        "exited": true,
+        "exit": 0,
+        "timed_out": false,
+        "kill_requested": false,
+        "kill_error": null,
+        "wait_error": null
+      },
+      "model_r1_limit": {
+        "original_exit": 1879,
+        "original_check": "interrupts==before+4 && PoolsInUse()==pools",
+        "fact": "This was a compound assertion; individual operand values were not captured in r1.",
+        "source_inference": "The new owned NullRendering entry should remain allocated until fence105 completes, so the old borrowed-entry pool expectation is expected to change. This is an interpretation, not a separately measured r1 counter.",
+        "r2_change": "Split event and pool assertions, use the real24-byte ABI1/8-byte command input, require one pending allocation, then no MMIO and exactly one completion with pool back to baseline. Mutate ignored fixture payload after admission to verify independent queue storage; this is model stress, not proof Windows allows early private-buffer reuse."
+      },
+      "protected_files": 22,
+      "protected_mismatches": [],
+      "production_acceptance": "Scoped candidate evidence only; no new selected baseline or closure authorization inferred."
+    },
+    "PE_count_note": "Executor PE inspection lists15 images (SYS plus14 test executables); main additionally checked generated No3D DLL, yielding16 ARM64 PE files. Runtime No3D remains inherited from the formal package.",
+    "host_check_scope": "Host build exited0 with empty stderr. NVDEC firmware and H.264-control checks explicitly skipped for absent inputs; do not claim those passed.",
+    "independent_review_proof": {
+      "reviews": [
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/fence-observation-r1/review/parsed-review.json",
+          "sha256": "b90e8ae462ca3478ae24760a3a286e740496c4b31ae19dbfedbefc08937e6780",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/fence-observation-r1/review/stdout.json",
+          "raw_sha256": "e4f7302e782de1ec09fb05d19b8b141cebaa0ccf6c689fb22c69cb85737bd843",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/fence-observation-r2/review/parsed-review.json",
+          "sha256": "72cf587410e355658135916b22f076d3be6c6d4af27616debac807a0dd148055",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/fence-observation-r2/review/stdout.json",
+          "raw_sha256": "d570116acb8c9240d284914fab5cbbb97353f19dc9e533e7e04ec267e3215ab9",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/review/parsed-review-r1.json",
+          "sha256": "2f1f874c37052501d7e5fe82218f0132b80267355f04af8265dbab47889ce32a",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/review/stdout.json",
+          "raw_sha256": "7bf853c38acdabd708f94ff5bb51a0f28311ae6a8af3cb5ee32f4836e99b8980",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [
+            "frozen_inputs_sha256"
+          ],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/review/parsed-review.json",
+          "sha256": "b492b84979ae8147d1e447b8fd3273a9dbe8bc5fbaac0b2cc90509db0245d056",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/review-r2/stdout.json",
+          "raw_sha256": "8dc4c68a8429d99fbd14cbe804da7f15d201cc77351d821a93671cd4edebc3e1",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [
+            "frozen_inputs_sha256",
+            "derived_from",
+            "prior_full_review"
+          ],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/review-offline/parsed-review.json",
+          "sha256": "a763306d73ee8ee7d627aaccdc9378969571c7cce491274675ea2cd1a0958b90",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/review-offline/stdout.json",
+          "raw_sha256": "934af1aadbc0bb862cd6e469aae890866abfd62553ae88a612e4d2bfb2cddbc3",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/review-r2/parsed-review.json",
+          "sha256": "3573d0a30e3a4c4403780726f90abd492de700f6f81bfd790701734db449dada",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/review-r2/stdout.json",
+          "raw_sha256": "8dc4c68a8429d99fbd14cbe804da7f15d201cc77351d821a93671cd4edebc3e1",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [
+            "frozen_inputs_sha256"
+          ],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/review/parsed-review.json",
+          "sha256": "1cfaee20865e04dafe5d6554f8e56b4b896eb282de8e52932d38662b5ccbac9c",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/review/stdout-r2.json",
+          "raw_sha256": "0ff15f0310b0cf23a993416ae9aa1cda09430bd8a9f4e1f71bae219a84281eac",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "request_changes",
+          "findings_count": 2,
+          "derived_metadata_fields": [
+            "frozen_inputs_sha256"
+          ],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/review-r2/parsed-review.json",
+          "sha256": "e1ddef86e915191a45c65343b924407ff68fcb8ec8cb9ecc146dfc328cd505ca",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/review-r2/stdout.json",
+          "raw_sha256": "f7006f76377d0247f554d582f7cf24586ebdf067df2fa4a343a429b64ea594b1",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [
+            "frozen_inputs_sha256"
+          ],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/review-r3/parsed-review.json",
+          "sha256": "3cde09078a07b3c03b5d54ca02538df31ab42bb5cd9b1ac4364d409d0da84017",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/review-r3/stdout.json",
+          "raw_sha256": "b1ea4329ea38c6e165a26b33ad61491fdc613ae53bd6477e483558515e43cded",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [
+            "frozen_inputs_sha256"
+          ],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/review/parsed-review.json",
+          "sha256": "1533766bc6ba77f497718b6df4185dea1c89a06ceef3cfe70399f1a449f76318",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/review/stdout.json",
+          "raw_sha256": "437bf54e82efeadcc383056582c784770b37823e3b73eabd9094d57b0891e62a",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        },
+        {
+          "report": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/review-test-r2/parsed-review.json",
+          "sha256": "1ce7ac81e596e2ebaeac538b5f176ec16ad36922e0c4cc411691b0015db9a7a5",
+          "raw": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/review-test-r2/stdout.json",
+          "raw_sha256": "4a1ca40b161d09ab6c0a6239711f7efe46da3fff045b8966017df522527dc2ba",
+          "native_conversation": "573afcaf-11cb-430a-b8be-7164661144c7",
+          "model": "gemini-4-neon-high",
+          "overall": "approve",
+          "findings_count": 0,
+          "derived_metadata_fields": [],
+          "raw_response_matches_after_excluding_declared_provenance_fields": true
+        }
+      ],
+      "final_freezes": [
+        {
+          "manifest": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/frozen-inputs.json",
+          "sha256": "53b36fd01f39a525014872dd8bc0788ce2459c675f9af42b66b1446543709e89",
+          "files": 40,
+          "mismatches": []
+        },
+        {
+          "manifest": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/frozen-inputs.json",
+          "sha256": "881a49aa2f5d2fc55b6ee49207979679cfd78becc077a6bae6ab560daed85622",
+          "files": 14,
+          "mismatches": []
+        }
+      ],
+      "audit_parser_correction": "Initial same-directory raw-equality assertion was too restrictive: designated parsed-review.json pointers include explicit derived_from/prior_full_review provenance and point to the later incremental raw response. Originals and separate process identities were verified rather than treating the pointer as a new full review."
+    }
+  },
+  "native_completion": {
+    "candidate_boot": 96434,
+    "published_inf": "oem31.inf",
+    "candidate_KMD_sha256": "ce54d025163fc18c7358b20f1fbf306b2e454473ff8d7711ba83777ca5d47173",
+    "one_use": {
+      "closed_boot": 96338,
+      "armed_token": 1,
+      "active_boot": 96434,
+      "consumed_token": 0,
+      "permanent": null
+    },
+    "program_runs": 1,
+    "PID": 7520,
+    "program_exit": 0,
+    "journal_records": 46,
+    "journal_contiguous": true,
+    "signed_probe_sha256": "f5006121270ab3d94c35b4a5ede29fb5a3c2dd805c20b140fff5bcf8ceac3eeb",
+    "DMA_bytes": 8,
+    "UMD_private_bytes": 24,
+    "ordinary_and_Null_cases": [
+      {
+        "case": 0,
+        "native_context": 1073742208,
+        "Dxg_context": 18446682531280387504,
+        "KMD_context": 18446701252750338544,
+        "lifetime_qpc": [
+          26514124901,
+          26515485866
+        ],
+        "adapter_luid": 23584,
+        "submission": 17515,
+        "sequence": 1,
+        "scheduler_qpc": 26515088063,
+        "scheduler_pid_tid": [
+          4,
+          784
+        ],
+        "wrapper_qpc": [
+          26515088123,
+          26515088589
+        ],
+        "retirement_qpc": {
+          "177": 26515132770,
+          "176": 26515133062,
+          "180": 26515133227
+        },
+        "direct_observations": {
+          "FenceCpuAddress": {
+            "record": 10,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26514910764,
+            "operation": "FenceCpuAddress",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 65536,
+            "observed": 1765326454848
+          },
+          "FenceInitialValue": {
+            "record": 11,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26514965356,
+            "operation": "FenceInitialValue",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 65536,
+            "observed": 0
+          },
+          "BeforeSubmitCommand": {
+            "record": 12,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26515025370,
+            "operation": "BeforeSubmitCommand",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 65536,
+            "observed": 24
+          },
+          "SubmitCommand": {
+            "record": 13,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26515087002,
+            "operation": "SubmitCommand",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 65536,
+            "observed": 0
+          },
+          "SignalGpuFence": {
+            "record": 14,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26515164211,
+            "operation": "SignalGpuFence",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 65536,
+            "observed": 0
+          },
+          "WaitCpuFenceKmtRaw": {
+            "record": 15,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26515222895,
+            "operation": "WaitCpuFenceKmtRaw",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 65536,
+            "observed": 1073742336
+          },
+          "WaitCpuFenceEventWin32": {
+            "record": 16,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26515280054,
+            "operation": "WaitCpuFenceEventWin32",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 65536,
+            "observed": 0
+          },
+          "WaitCpuFence": {
+            "record": 18,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26515404506,
+            "operation": "WaitCpuFence",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 65536,
+            "observed": 1
+          },
+          "CaseResult": {
+            "record": 23,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26516108983,
+            "operation": "CaseResult",
+            "status": "00000000",
+            "case": 0,
+            "context": 1073742208,
+            "context_flags": 0,
+            "submit_null": 0,
+            "gpu_va": 0,
+            "observed": 1
+          }
+        },
+        "context_flags_event": 0
+      },
+      {
+        "case": 1,
+        "native_context": 1073742400,
+        "Dxg_context": 18446682531280387504,
+        "KMD_context": 18446701252750339456,
+        "lifetime_qpc": [
+          26516202248,
+          26517927104
+        ],
+        "adapter_luid": 23584,
+        "submission": 17540,
+        "sequence": 1,
+        "scheduler_qpc": 26517394025,
+        "scheduler_pid_tid": [
+          4,
+          784
+        ],
+        "wrapper_qpc": [
+          26517394116,
+          26517394586
+        ],
+        "retirement_qpc": {
+          "177": 26517397174,
+          "176": 26517397654,
+          "180": 26517397910
+        },
+        "direct_observations": {
+          "FenceCpuAddress": {
+            "record": 31,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26517196938,
+            "operation": "FenceCpuAddress",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 65536,
+            "observed": 1765326454848
+          },
+          "FenceInitialValue": {
+            "record": 32,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26517262344,
+            "operation": "FenceInitialValue",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 65536,
+            "observed": 0
+          },
+          "BeforeSubmitCommand": {
+            "record": 33,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26517326468,
+            "operation": "BeforeSubmitCommand",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 65536,
+            "observed": 24
+          },
+          "SubmitCommand": {
+            "record": 34,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26517392643,
+            "operation": "SubmitCommand",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 65536,
+            "observed": 0
+          },
+          "SignalGpuFence": {
+            "record": 35,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26517455986,
+            "operation": "SignalGpuFence",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 65536,
+            "observed": 0
+          },
+          "WaitCpuFenceKmtRaw": {
+            "record": 36,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26517539408,
+            "operation": "WaitCpuFenceKmtRaw",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 65536,
+            "observed": 1073742528
+          },
+          "WaitCpuFenceEventWin32": {
+            "record": 37,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26517622767,
+            "operation": "WaitCpuFenceEventWin32",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 65536,
+            "observed": 0
+          },
+          "WaitCpuFence": {
+            "record": 39,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26517854290,
+            "operation": "WaitCpuFence",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 65536,
+            "observed": 1
+          },
+          "CaseResult": {
+            "record": 44,
+            "pid": 7520,
+            "tid": 5368,
+            "qpc": 26518351836,
+            "operation": "CaseResult",
+            "status": "00000000",
+            "case": 1,
+            "context": 1073742400,
+            "context_flags": 1,
+            "submit_null": 1,
+            "gpu_va": 0,
+            "observed": 1
+          }
+        },
+        "context_flags_event": 0
+      }
+    ],
+    "raw_ETL_sha256": "0d2b1af389475ea83e50ac6e3cd0043aa6c804f265add4647fd5075225f90157",
+    "buffer_count": 6,
+    "all_filled_buffer_bytes_consumed": true,
+    "events_lost": 0,
+    "buffers_lost": 0,
+    "strict_required_records": 1507,
+    "strict_required_event_ids": [
+      27,
+      30,
+      31,
+      105,
+      106,
+      110,
+      175,
+      176,
+      177,
+      180,
+      433
+    ],
+    "strict_records_equal_executor_decoding": true,
+    "KMD_event_sources": [
+      1
+    ],
+    "SubmitFailure_count": 0,
+    "same_candidate_boot_and_DWM": true,
+    "DDI_final_return_status_observed": false,
+    "source_and_program_limits": [
+      "105/106 Function5063 entry/return are matched on the scheduler thread, but contain no final NTSTATUS.",
+      "Both context and submit NullRendering flags change together. Their independent effects remain unisolated.",
+      "FenceCpuAddress.observed contains the CPU pointer; gpu_va is a different field. Both mappings are non-null, initial values0, raw KMT status0, Win32 wait result0, final dereferenced fence1.",
+      "The same Dxg context and CPU pointer can be reused after destruction; independent create/destroy lifetimes and native handles delimit each case.",
+      "The old96251 MAX observation still does not distinguish a real MAX read from its null-pointer fallback.",
+      "Added observation records and the pointer check can affect timing. This is not a controlled historical reboot experiment.",
+      "A software NullRendering fence does not mean its command bytes executed on the GPU. Retirement events alone are insufficient; the direct fence witness supplies completion here.",
+      "No window or Present ran. No relation to91476/DWM DMA152586 or95090 has been established."
+    ]
+  },
+  "preparation_failures": {
+    "cycle_lock": {
+      "boot": 96338,
+      "event": {
+        "provider": "Microsoft-Windows-PowerShell",
+        "id": 4100,
+        "record": 242113
+      },
+      "boundary": "SYSTEM Boot action failed acquiring cycle.lock before the Run-Action business switch and its inner catch; retained task result1.",
+      "fix": "Bounded wait only for observed IOException Win32 sharing/lock codes32/33, preserving exclusive lock; original script/config retained before continuing the same task."
+    },
+    "capture_arguments": {
+      "initial_program_runs": 0,
+      "start_exit": 2,
+      "stop_exit": 2,
+      "cause": "Initial logger prefix did not satisfy the unchanged collector name predicate before trace APIs.",
+      "correction": "Supported exact logger argument and a fresh preparation subdirectory; both controllers use the original parent CreateNew dispatch slot. Initial17-member failure archive retained; successful40-member archive contains one journal and one dispatch slot."
+    },
+    "SSH": "One banner exchange timeout is retained as transport failure;3-minute reconnect returned the same96434 boot. No replay or reboot inferred.",
+    "cleanup": "The comma/concatenation expression originally formed one string; parentheses and the combined remaining-path check were fixed and incrementally reviewed before actual cleanup.",
+    "compiler_and_model": "Ordinary header compile error and model r1 compound assertion1879 retained separately; final changed header and fixture passed their corresponding checks.",
+    "service_review": "No new actual service refusal in this batch. Prior interruption, owner authorization and user-reported permission remain separate; no independently verified platform approval is asserted."
+  },
+  "formal_restoration": {
+    "schema": 1,
+    "archives": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/probe-result.zip",
+        "sha256": "c84a18f0fc4251b7f578c3c905537de97eb36d1e0f4263a0c9bcbc6bb0155e9d",
+        "members": 17,
+        "normalized_bytes_equal": true,
+        "CRC_ok": true
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/results/native-result.zip",
+        "sha256": "fcd3bb6ba1617e806006b67a1586f8bf36ed37b2efca253decbd463d70045409",
+        "members": 40,
+        "normalized_bytes_equal": true,
+        "CRC_ok": true
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/cycle-result.zip",
+        "sha256": "9def1a7d842016b0c4873d3418c45bcfece4d585dfaba789c9f057f20b554c26",
+        "members": 29,
+        "normalized_bytes_equal": true,
+        "CRC_ok": true
+      }
+    ],
+    "snapshots": [
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/profile-formal-132436463836.json",
+        "sha256": "230d97377a529832d2f04cada1cee7a9fb348c9784d9643617404c2f30f9883f",
+        "boot": 96251,
+        "utc": "2026-11-22T13:24:35.3004166Z",
+        "dwm": 1420,
+        "dwm_start": "2026-11-22T06:37:29.9939088Z",
+        "profile": "formal",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+        "trial": false,
+        "token_file_exists": false,
+        "matching_raw_transport": [
+          "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/transport/kmd-software-fence-01a202a1-132419994540-profile-formal.stdout"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/profile-candidate-134902188692.json",
+        "sha256": "e3e72b9558495545c53be1061b952d8cc44ccfe0b4ca5be3e9e035591d2b4e97",
+        "boot": 96434,
+        "utc": "2026-11-22T13:48:56.7591961Z",
+        "dwm": 1268,
+        "dwm_start": "2026-11-22T13:45:29.5307921Z",
+        "profile": "candidate",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": null,
+        "trial": true,
+        "token_file_exists": true,
+        "matching_raw_transport": [
+          "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/transport/kmd-software-fence-01a202a1-134839533748-profile-candidate.stdout"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/profile-formal-142050508503.json",
+        "sha256": "64d802a0be75543b4a3323b9c87e080fd057d9bb01a9a386227503c218a82d99",
+        "boot": 96614,
+        "utc": "2026-11-22T14:20:49.6016898Z",
+        "dwm": 1440,
+        "dwm_start": "2026-11-22T14:16:05.6673384Z",
+        "profile": "formal",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+        "trial": false,
+        "token_file_exists": false,
+        "matching_raw_transport": [
+          "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/transport/kmd-software-fence-01a202a1-142033924795-profile-formal.stdout"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/profile-formal-141811348987.json",
+        "sha256": "5de5e6ae042da674121339d70d0fd3f3dbc20a6b1c820ba4d3fe9223078a9ebc",
+        "boot": 96614,
+        "utc": "2026-11-22T14:18:10.3937916Z",
+        "dwm": 1440,
+        "dwm_start": "2026-11-22T14:16:05.6673384Z",
+        "profile": "formal",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+        "trial": false,
+        "token_file_exists": false,
+        "matching_raw_transport": [
+          "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/transport/kmd-software-fence-01a202a1-141753239743-profile-formal.stdout"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/profile-candidate-140719979607.json",
+        "sha256": "32f4ecfbfc34a8cba6437a5e91fd033c737416f7405a7376e77149ee4504a12d",
+        "boot": 96434,
+        "utc": "2026-11-22T14:07:14.5157554Z",
+        "dwm": 1268,
+        "dwm_start": "2026-11-22T13:45:29.5307921Z",
+        "profile": "candidate",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": null,
+        "trial": true,
+        "token_file_exists": true,
+        "matching_raw_transport": [
+          "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/transport/kmd-software-fence-01a202a1-140658658292-profile-candidate.stdout"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/profile-formal-142125085865.json",
+        "sha256": "e8e768384c3239ad6d661585d7221ee534a47a9c90556a0216ed5f068cd316c7",
+        "boot": 96614,
+        "utc": "2026-11-22T14:21:24.2940999Z",
+        "dwm": 1440,
+        "dwm_start": "2026-11-22T14:16:05.6673384Z",
+        "profile": "formal",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+        "trial": false,
+        "token_file_exists": false,
+        "matching_raw_transport": [
+          "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/transport/kmd-software-fence-01a202a1-142109721078-profile-formal.stdout"
+        ]
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/probe-result/baseline-before-run.json",
+        "sha256": "3237fb442b485b3dd222a4cacd35f8b17493b5a45d8561a72788ef5970c4f989",
+        "boot": 96434,
+        "utc": "2026-11-22T13:49:53.6208031Z",
+        "dwm": 1268,
+        "dwm_start": "2026-11-22T13:45:29.5307921Z",
+        "profile": "candidate",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": null,
+        "trial": true,
+        "token_file_exists": true,
+        "matching_raw_transport": []
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/results/probe-result/baseline-after-run.json",
+        "sha256": "22e1d1816146e84b06e0135b02970e826c8861f762f8bc4ade03caef8439fbcf",
+        "boot": 96434,
+        "utc": "2026-11-22T13:50:04.5276371Z",
+        "dwm": 1268,
+        "dwm_start": "2026-11-22T13:45:29.5307921Z",
+        "profile": "candidate",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": null,
+        "trial": true,
+        "token_file_exists": true,
+        "matching_raw_transport": []
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/results/normalized/capture-ready-1/baseline-before-run.json",
+        "sha256": "bef4b43904d070e32f8b08f8dd0b85b9b27f114ae02a2f0776a2db175a7abe66",
+        "boot": 96434,
+        "utc": "2026-11-22T14:07:46.4507174Z",
+        "dwm": 1268,
+        "dwm_start": "2026-11-22T13:45:29.5307921Z",
+        "profile": "candidate",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": null,
+        "trial": true,
+        "token_file_exists": true,
+        "matching_raw_transport": []
+      },
+      {
+        "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/probe-capture-recovery/results/normalized/capture-ready-1/baseline-after-run.json",
+        "sha256": "4602797d94f8380c7004144316517652cbc43bfb1677aa389c89c7462b0d81e8",
+        "boot": 96434,
+        "utc": "2026-11-22T14:07:57.7698747Z",
+        "dwm": 1268,
+        "dwm_start": "2026-11-22T13:45:29.5307921Z",
+        "profile": "candidate",
+        "components_verified": 8,
+        "actual_loaded_verified": 5,
+        "permanent": null,
+        "trial": true,
+        "token_file_exists": true,
+        "matching_raw_transport": []
+      }
+    ],
+    "one_use_candidate": {
+      "closed_boot": 96338,
+      "armed_token": 1,
+      "active_boot": 96434,
+      "consumed_token": 0,
+      "permanent": null
+    },
+    "formal_restored_boot": 96614,
+    "formal_components": {
+      "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+      "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+      "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+      "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+      "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+    },
+    "same_candidate_boot_and_DWM": true,
+    "planned_restart_acks": [
+      {
+        "boot": 96251,
+        "phase": "ClosedForTrial",
+        "reason": "enter closed gate before selecting candidate",
+        "utc": "2026-11-22T13:26:48.9347969Z",
+        "queued": true
+      },
+      {
+        "boot": 96338,
+        "phase": "CandidateArmed",
+        "reason": "one-time candidate boot",
+        "utc": "2026-11-22T13:43:59.8021382Z",
+        "queued": true
+      },
+      {
+        "boot": 96434,
+        "phase": "ClosedForRestore",
+        "reason": "close native gate for baseline restore",
+        "utc": "2026-11-22T14:10:10.8103761Z",
+        "queued": true
+      },
+      {
+        "boot": 96521,
+        "phase": "BaselineArmed",
+        "reason": "restore verified permanent baseline",
+        "utc": "2026-11-22T14:14:48.3061193Z",
+        "queued": true
+      }
+    ],
+    "matching_system_requests": [
+      {
+        "record": 96322,
+        "provider": "User32",
+        "utc": "2026-11-22T13:26:49.0606878Z",
+        "id": 1074
+      },
+      {
+        "record": 96418,
+        "provider": "User32",
+        "utc": "2026-11-22T13:43:59.8958857Z",
+        "id": 1074
+      },
+      {
+        "record": 96505,
+        "provider": "User32",
+        "utc": "2026-11-22T14:10:10.9822523Z",
+        "id": 1074
+      },
+      {
+        "record": 96597,
+        "provider": "User32",
+        "utc": "2026-11-22T14:14:48.3998707Z",
+        "id": 1074
+      }
+    ],
+    "matching_boot_events": [
+      {
+        "record": 96338,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T13:27:13.9495837Z",
+        "id": 12
+      },
+      {
+        "record": 96434,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T13:44:30.7040114Z",
+        "id": 12
+      },
+      {
+        "record": 96521,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T14:10:35.8619396Z",
+        "id": 12
+      },
+      {
+        "record": 96614,
+        "provider": "Microsoft-Windows-Kernel-General",
+        "utc": "2026-11-22T14:15:12.5044585Z",
+        "id": 12
+      }
+    ],
+    "selected_system_event_count_in_batch": 8,
+    "selected_query_reaches_before_batch": true,
+    "cleanup": {
+      "remaining": [],
+      "utc": "2026-11-22T14:21:09.7197927Z",
+      "export_archives_removed": 3,
+      "temporary_roots_removed": 5,
+      "boot": 96614,
+      "recovery_task_absent": true,
+      "probe_task_removed": true,
+      "candidate_oem_absent": true
+    },
+    "cleanup_raw_transport": [
+      "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/native-cycle/transport/kmd-software-fence-01a202a1-142050511952-capture-ready-cleanup.stdout"
+    ],
+    "cross_restart_readback": {
+      "boot": 96614,
+      "proof": "Executed cleanup hashes the original preparation ZIP, successful native ZIP, cycle ZIP, final results and shared dispatch slot against their previously retrieved full SHA-256 after both restoration reboots; normalized successful archive contains the raw ETL and46-record journal.",
+      "native_archive_sha256": "fcd3bb6ba1617e806006b67a1586f8bf36ed37b2efca253decbd463d70045409",
+      "scope": "Planned restoration reboots; no new abnormal reboot or replay of the accepted94382->94557 rehearsal."
+    },
+    "limits": [
+      "Selected System IDs and timestamps only; not a complete audit of every private TDR or every system event.",
+      "System snapshot lacks full1074 message/XML; correlate with owned restart acknowledgements and boot timestamps, do not infer restart author solely from provider.",
+      "Old named ETW absence checks are not all-session absence. Exact new collector stop returned0 with loss0.",
+      "Readback verifies on-disk file identities; no independent live kernel-image memory hash is claimed."
+    ]
+  },
+  "promotion_and_fault_disposition": {
+    "fault_id": "GM20B-KMT-NULLRENDERING-COMPLETION-96251",
+    "status": "open",
+    "candidate_use": "This one changed-KMD candidate program supports the bounded repair observation. It is not a selected production baseline.",
+    "closure_rule": "Baseline-Promotion.ps1 Assert-SwitchFaultLedger requires at least3 distinct original-scenario passing evidence receipts for closure; this batch has one program and one NullRendering case, plus its ordinary control. No closure record is created.",
+    "promotion_rule": "A new selected baseline additionally requires repository qualification and separation from each applicable open fault. No such candidate qualification or promotion is claimed.",
+    "no_replay_order": "This review does not dispatch or request repetition of the consumed baseline diagnostic or this completed unchanged candidate batch merely to fill counts. Execution chooses justified subsequent work under existing authorization and scope.",
+    "open_fault_count": 17,
+    "closed_fault_count": 3
+  },
+  "historical_and_deferred": {
+    "91476_DWM_DMA152586": "Unknown original submit Flags, exact KMD entry/return and first reset boundary remain; separate evidence retained.",
+    "95090": "Separate early-startup/reset boundary remains unknown; candidate96434 and planned restoration do not resolve it.",
+    "original_request": "f6264ee11289 application1/dispatch1/Finished unchanged; no replay.",
+    "normal_rehearsal": "94382->94557 remains the previously accepted run, not repeated.",
+    "deferred_contract_review": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/first-present-native-root-20261122/kmt-software-fence-candidate-20261122/deferred-contracts-after-native-20261122.json",
+      "bytes": 4279,
+      "sha256": "9a54f29aa88ff18be4e933ab5acc4b8c1be8612583a6cdb8934b54e8c5731323"
+    },
+    "contracts": [
+      {
+        "contract_id": "dxgkrnl.h:231:1",
+        "status": "未知",
+        "disposition": "unknown retained; original conditions unchanged",
+        "retained_result": {
+          "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/c5live-shared-parent-20261121-01.result.json",
+          "sha256": "f20a5888cbb4555d4b9d807519560f041be00baccfbbe793166911b36af26943",
+          "bytes": 16111
+        },
+        "new_native_program_scope": "one KMT two-case8-byte/24-byte DMA/private payload completion; no Present/shared-resource/property test",
+        "same_object_gap": "This program creates its own device/contexts/fences; it does not perform the legacy global sharing/open operation or name the global-table parent/derived relation.",
+        "contract_specific_device_runs": 0,
+        "original_revisit_when": "能在同一次共享和打开中直接关联全局表项、父对象和派生实例时复测。"
+      },
+      {
+        "contract_id": "dxgkrnl.h:684:4",
+        "status": "未知",
+        "disposition": "unknown retained; original conditions unchanged",
+        "retained_result": {
+          "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/c5live-sealed-resource-20261121-01.result.json",
+          "sha256": "cfd19064daaf65c3f0c9455a55b12cd07ba73b8d18efe7350669a0162ac791bc",
+          "bytes": 11952
+        },
+        "new_native_program_scope": "one KMT two-case8-byte/24-byte DMA/private payload completion; no Present/shared-resource/property test",
+        "same_object_gap": "No shared/sealed resource membership operation or fixed-membership observable result was added.",
+        "contract_specific_device_runs": 0,
+        "original_revisit_when": "出现可观测的固定成员状态或正常受支持的等价成员约束结果时复测。"
+      },
+      {
+        "contract_id": "dxgkrnl.h:759:2",
+        "status": "未知",
+        "disposition": "unknown retained; original conditions unchanged",
+        "retained_result": {
+          "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/c5live-allocation-cache-20261121-01.result.json",
+          "sha256": "bdee32d73601ebda88d92ea01465c382a73b43d4ef646820b403d37855efe35d",
+          "bytes": 8462
+        },
+        "new_native_program_scope": "one KMT two-case8-byte/24-byte DMA/private payload completion; no Present/shared-resource/property test",
+        "same_object_gap": "Monitored-fence CPU mapping and initial/final values do not pair the original allocation Cached=1 property with a real cacheable mapping.",
+        "contract_specific_device_runs": 0,
+        "original_revisit_when": "取得真实可缓存分配，并能在同一映射上读取具名 Cached 属性时复测。"
+      },
+      {
+        "contract_id": "dxgvmbus.c:3651:2",
+        "status": "未知",
+        "disposition": "unknown retained; original conditions unchanged",
+        "retained_result": {
+          "path": "/Users/rujian/Documents/Codex/mesa-switch-woa-tgd3d-vulkan/tegra-x1-wddm/docs/wsl-dxgkrnl-contracts/rounds/c5live-allocation-property-20261121-01.result.json",
+          "sha256": "cfaea46aef76420ba314e9abecd64f6c61308da48a62fab0a537d072b44b2409",
+          "bytes": 8095
+        },
+        "new_native_program_scope": "one KMT two-case8-byte/24-byte DMA/private payload completion; no Present/shared-resource/property test",
+        "same_object_gap": "No UpdateAllocationProperty call or supported asynchronous0x103 + same-queue paging fence observation was added.",
+        "contract_specific_device_runs": 0,
+        "original_revisit_when": "驱动和系统支持相应属性更新，且合法工作负载可进入异步完成分支时复测。"
+      }
+    ],
+    "new_direct_contract_evidence": false,
+    "full_goal_complete": false
+  },
+  "local_independent_proofs": [
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/candidate-96434-archive-proof-20261122.json",
+      "bytes": 359,
+      "sha256": "e585f37d54a10eb755947cb0aa2a5c84a2f8f3a6598d8d6051ca28000d8d5c57"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/candidate-96434-raw-main-proof-20261122.json",
+      "bytes": 11279,
+      "sha256": "02bb91b9dfd13180c6c5b96e961a0f29c2b104e6018f3b6faa61eb30b42a0c70"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/candidate-96434-restoration-main-proof-20261122.json",
+      "bytes": 14141,
+      "sha256": "a747d6e4cc891bafbcb1f744f87940884b68a0a2ee4bdfb179ed142e2e43ca1d"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/candidate-96434-source-build-main-proof-20261122.json",
+      "bytes": 6792,
+      "sha256": "da7ed0fcefdcb1db48fdc4f5ad87be01582423f88a8bdb7ee1d5e588273dc2da"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/candidate-96434-review-lineage-main-proof-20261122.json",
+      "bytes": 10848,
+      "sha256": "e6cf7cfebeb1977d59140e679449cbb5d5476e6f1f1744d6e986aa416657ec0b"
+    },
+    {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/first-present-01a201d4/evidence/candidate-96434-actual-tools-20261122.json",
+      "bytes": 24764,
+      "sha256": "06879619512f98dbd027112654b3a480fab33a4914208f17fbc1eb70090927a8"
+    }
+  ],
+  "preservation": {
+    "main_before_commit": "78162f2a91a7a7bad3b910ae868f1642645fb376",
+    "protected_tracked_files": 22,
+    "protected_file_hashes_unchanged": true,
+    "candidate_and_evidence_worktrees_modified_by_main": false,
+    "only_future_push_refspec": "refs/heads/tgd3d-vulkan:refs/heads/tgd3d-vulkan"
+  }
+}

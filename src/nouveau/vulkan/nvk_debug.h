@@ -45,6 +45,9 @@ enum nvk_debug {
 
    /* Disable image compression */
    NVK_DEBUG_NO_COMPRESSION = 1ull << 9,
+
+   /* Enable Vulkan diagnostic logging in release builds */
+   NVK_DEBUG_LOG = 1ull << 10,
 };
 
 enum nvk_experimental {

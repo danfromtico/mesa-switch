@@ -1,0 +1,149 @@
+The GM20B page-table format in core/gm20b_mmu.c is adapted from Linux
+nouveau v6.12, nvkm/subdev/mmu/vmmgf100.c, vmmgk20a.c, vmmgm200.c,
+and vmmgm20b.c. These files carry the following license:
+
+Copyright 2017 Red Hat Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE COPYRIGHT HOLDER(S) OR AUTHOR(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+The unmodified command encoder is compiled from an external mesa-switch
+checkout, revision 0ff52079ca9e9e837ed27eb95a8d239f439a1864:
+src/nouveau/horizon/nouveau_horizon_gm20b.c
+Copyright 2026 Mesa Switch port contributors. SPDX-License-Identifier: MIT.
+Retain Mesa's license notices when distributing a linked binary.
+
+WDDM resource ownership is based on the public Microsoft render-only sample
+at de4a2161991eda254013da6c18226f5ea06e4a9c. Its Raspberry Pi hardware
+initialization and software renderer are not used.
+
+platform/t214_power.c and its interface/test are GPL-2.0-only, with power
+ordering adapted from Switchroot nvgpu platform_gk20a_tegra.c at
+1ae0167d360287ca78f5a2572f0de42594140312 (Copyright 2014-2019 NVIDIA), and
+MC drain ordering from Switchroot drivers/platform/tegra/mc/mc.c
+(Copyright 2010 Google and 2011-2021 NVIDIA). See LICENSES/GPL-2.0-only.txt for the GPL version 2 text. B01 rail assignments and register definitions follow
+Switchroot's tegra210b01-nx-pmic.dtsi and CTCaer's Hekate max77812.h.
+OUT5 divider/override programming follows Switchroot clk-tegra-periph.c and
+clk-divider.c (Copyright 2012-2017 NVIDIA, GPL-2.0-only).
+
+platform/t214_clock.c uses the C1 NA PLL sequence and counter algorithm from
+Switchroot nvgpu gm20b/clk_gm20b.c, revision 1ae0167d360287ca78f5a2572f0de42594140312.
+Copyright (c) 2014-2018 NVIDIA CORPORATION. All rights reserved.
+The MIT license text above applies to this code. Voltage characterization
+data follows GPUB01_NA_CVB_TABLE in drivers/soc/tegra/tegra210-dvfs.c at
+CTCaer/switch-l4t-kernel-4.9 revision 2d0059fd3167a8df756de2aa0489d4aa70a9fc15.
+
+core/execute.c adapts the RAMFC, BAR1, MMU and FIFO setup from the same
+Switchroot nvgpu revision: gk20a/fifo_gk20a.c, gm20b/fifo_gm20b.c,
+common/bus/bus_gm20b.c, common/fb/fb_gm20b.c, common/mc/mc_gm20b.c,
+common/priv_ring/priv_ring_gm20b.c and their GM20B register headers.
+Physical/IOMMU address selection follows gk20a/mm_gk20a.c and
+common/mm/nvgpu_mem.c in that revision (Copyright 2017-2020 NVIDIA).
+PBDMA enable ordering follows Linux nouveau v6.12 engine/fifo/gk104.c,
+gk104_fifo_init_pbdmas (Copyright 2012 Red Hat Inc.; MIT notice above).
+PBDMA stall setup follows engine/fifo/gf100.c (Copyright 2012 Red Hat Inc.).
+The Maxwell runlist code in engine/fifo/gm107.c through gm200.c was also
+consulted (Copyright 2015-2016 Red Hat Inc.); the T214 channel-only entry uses
+Switchroot's gk20a_get_ch_runlist_entry. The MIT notice above applies.
+Copyright (c) 2014-2018 NVIDIA CORPORATION. All rights reserved.
+The MIT license text above applies. The Windows probe links this code with
+the GPL-2.0-only power sequence and is distributed under GPL-2.0-only.
+
+core/channel.c's read-only reset-time PBDMA snapshot uses the same pinned
+Switchroot/NVIDIA GM20B hw_pbdma_gm20b.h register definitions, including
+distinct PB GET and PB FETCH addresses. The MIT license text above applies.
+
+platform/t214_mmu.c follows the TLB invalidate sequence in the same
+Switchroot nvgpu common/fb/fb_gm20b.c (Copyright 2014-2018 NVIDIA).
+The MIT license text above applies.
+
+platform/t214_frontend.c and platform/t214_gr_gating.h adapt the cold reset,
+GR access and force-run gating values from the same Switchroot revision:
+gk20a/gr_gk20a.c, common/mc/mc_gm20b.c, common/therm/therm_gm20b.c and
+common/clock_gating/gm20b_gating_reglist.c (Copyright 2014-2018 NVIDIA).
+The MIT license text above applies; the extracted table also retains it.
+
+core/gr_firmware.c follows the NETB region layout, byte padding, DMA surface
+layout and T21x Falcon bootstrap-header ABI in the same Switchroot revision,
+gk20a/gr_ctx_gk20a.{c,h} and gr_gk20a.{c,h} (Copyright 2014-2018 NVIDIA).
+The MIT license text above applies. Proprietary firmware files are not embedded
+in this source. An operator-supplied firmware directory is copied into the local
+probe package as separate files, subject to its NVIDIA firmware license.
+
+platform/t214_gr.c follows non-context initialization and DMA bootstrap in
+gk20a/gr_gk20a.c and gm20b/gr_gm20b.c from the same Switchroot revision.
+Copyright (c) 2014-2018 NVIDIA CORPORATION. The MIT license text above applies.
+Falcon DMA IDLE bit semantics were checked against Linux v6.12 drm/tegra/falcon.h
+and falcon.c; no Linux Tegra implementation is copied into this helper.
+
+platform/t214_gr_context.c adapts the exclusive cold graphics-context,
+global-buffer, floorsweep, FECS bind and golden-image-save sequences from
+the same gk20a/gr_gk20a.c and gm20b/gr_gm20b.c. Its selected register field
+definitions in t214_gr_context_regs.h come from include/nvgpu/hw/gm20b
+hw_gr_gm20b.h, hw_ctxsw_prog_gm20b.h, hw_top_gm20b.h and
+hw_pri_ringmaster_gm20b.h, with type spelling and whitespace adjusted.
+Copyright (c) 2014-2018 NVIDIA CORPORATION. The MIT license above applies.
+
+platform/t214_gr_context.c's helper-invocation load policy also follows
+Linux nouveau gk110_grctx_generate_r419f78 (ctxgk110.c, Linux v6.12;
+Copyright 2013 Red Hat Inc., MIT) and NVK's draw-state initialization.
+The MIT notice above applies. The NETB input remains external firmware.
+
+core/acr_firmware.c follows the signed-binary headers, GM20B WPR/LSB layout
+and PMU/FECS loader descriptors in Switchroot nvgpu 1ae0167d,
+gm20b/acr_gm20b.c and include/nvgpu/acr/{nvgpu_acr,acr_lsfm,acr_flcnbl}.h.
+Copyright (c) 2015-2018 NVIDIA CORPORATION. The MIT license above applies.
+Linux nouveau v6.12 subdev/acr/gm20b.c and gm200.c were consulted to confirm
+that the existing WPR carveout is read and used, not allocated from OS RAM.
+The NVIDIA signatures and firmware remain external licensed files; no
+firmware binary is embedded in this repository. Packing is not authentication.
+
+platform/t214_acr.c follows PMU reset, memory scrub, PIO bootloader upload,
+the PMU-specific instance/aperture setup and HS completion in the same
+Switchroot revision: gm20b/pmu_gm20b.c, gk20a/flcn_gk20a.c,
+common/pmu/pmu.c, common/fb/fb_gm20b.c and the GM20B gating/register tables.
+Copyright (c) 2014-2018 NVIDIA CORPORATION. The MIT license above applies.
+Nouveau v6.12 subdev/instmem/gk20a.c was also consulted for the noncoherent
+system-memory backing of the PMU instance. Hardware authentication and the
+subsequent PMU RTOS/FECS bootstrap are distinct from local ordering tests.
+
+core/channel.c follows the channel bind, disable, preempt and runlist removal
+ordering in the same Switchroot nvgpu gk20a/fifo_gk20a.c and common/fifo/channel.c,
+with Linux nouveau v6.12 engine/fifo/gk104.c and gf100.c as references.
+Copyright (c) 2014-2018 NVIDIA CORPORATION. All rights reserved.
+Copyright 2012 Red Hat Inc. The MIT license text above applies.
+
+core/fault.c follows the same Switchroot GM20B interrupt classification and
+W1C order in gm20b/fifo_gm20b.c and gk20a/fifo_gk20a.c.
+Copyright (c) 2014-2018 NVIDIA CORPORATION. The MIT license text above applies.
+
+core/present_halfturn.c is an altered, restricted adaptation of deko3d's
+source/maxwell/gpu_transfer.cpp (Blit2DEngine/setupTransfer) and the FlipX/FlipY
+pixel-centre convention in source/dk_image.cpp at revision
+373bfd43d8b2d805fa2eb7d406dbb823032df958. Copyright (C) 2018-2020 fincs,
+Zlib license, retained verbatim in LICENSES/Zlib.txt. Only linear BGRA/XRGB
+180-degree copies are supported by this bounded WDDM command encoder; it
+does not import the Horizon memory, synchronization, or queue ABI. Mesa's
+nvc0_surface.c was also consulted for the 902D linear surface layout.
+
+The reviewed HighOPT numerical characterization also uses the full
+GPUB01_NA_CVB_TABLE_HIOPT in tegra210-dvfs.c at
+2d0059fd3167a8df756de2aa0489d4aa70a9fc15 (NVIDIA / CTCaer).
+The 76.8..844.8 MHz subset was cross-checked against the installed Noble table;
+the OC continuation through 1228.8 MHz comes from the fixed upstream source,
+not from a physical OC result. See docs/DVFS_REVIEWED_20261114.md.

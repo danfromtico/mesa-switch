@@ -1,0 +1,365 @@
+{
+  "schema": 1,
+  "round_id": "c5live-first-present-fence-20261121-02",
+  "contract_id": "dxgkrnl.h:145:1",
+  "status": "已满足",
+  "declaration_sha256": "0093c179c00d6f37d6f958f93f944df41696fe152f7370a588353b1ae9dd0342",
+  "started_utc": "2026-11-22T03:01:22.918774+00:00",
+  "device_executions": 1,
+  "target_hit": true,
+  "unexplained_restart": false,
+  "finding": "正式启动 94176 的 PID 5284／TID 6060，同一对象的两条 1069 匹配两个设备和不同局部句柄。294 的值 1 信号与 297 的事件 428 均归同对象。事件等待返回 WAIT_OBJECT_0 并读回值 1，随后同 HWND 首次 SEQUENTIAL Present 的事件 184、公开返回均为 0，耗时 25.313 ms。应用退出 0，桌面连续。",
+  "gap": "本次已补齐目标对象链。它覆盖应用自有共享监控围栏和 CPU 事件完成；未观察到该对象的独立同对象 DMA 包、GPU 等待方、历史三次 CALL 后事件，以及 91476 的 DWM DMA 152586 完成。",
+  "before": {
+    "boot": 94176,
+    "dwm": 1428,
+    "dwm_start": "2026-11-21T23:12:10.5181790Z",
+    "session": 1,
+    "code": 0,
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "ac": "Online",
+    "trial": false,
+    "utc": "2026-11-22T03:01:28.4534418Z"
+  },
+  "after": {
+    "boot": 94176,
+    "dwm": 1428,
+    "dwm_start": "2026-11-21T23:12:10.5181790Z",
+    "session": 1,
+    "code": 0,
+    "selection": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe",
+    "ac": "Online",
+    "trial": false,
+    "utc": "2026-11-22T03:01:45.8049976Z"
+  },
+  "observation": {
+    "verdict_scope": "仅裁决本次正常 ARM64 D3D11 自有共享监控围栏在首次 SEQUENTIAL Present 前的原生可比子句。",
+    "adapter_luid": "0000000000005c10",
+    "pid": 5284,
+    "tid": 6060,
+    "qpc_hz": 19200000,
+    "shared_fence": {
+      "instance": "fence1",
+      "create_event_1069_qpc": 264992906623,
+      "open_event_1069_qpc": 264992912409,
+      "creation_device": "device1",
+      "opening_device": "device2",
+      "creation_local": 1073745536,
+      "opening_local": 1073745600,
+      "app_export_and_open_nt_handle": 420,
+      "dxgkrnl_async_registration_qpc": 264992916769,
+      "async_event": 428,
+      "signal_event_294_qpc": 264992919205,
+      "drawing_context_local": 1073742144,
+      "initial_value": 0,
+      "signal_value": 1,
+      "completed_value": 1,
+      "wait_result": "WAIT_OBJECT_0",
+      "same_object_signal_queue_packets_245": 0,
+      "win32_wait_api_ms": 0.029,
+      "wait_return_before_first_call_ms": 167.711
+    },
+    "present": {
+      "hwnd": 131140,
+      "kmt_event_184_qpc": 264996623320,
+      "kmt_status": 0,
+      "result": "S_OK",
+      "duration_ms": 25.313,
+      "foreground_pixel": 0,
+      "normal_exit": true
+    },
+    "journal": [
+      {
+        "name": "start",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264989373639,
+        "hr": "00000000",
+        "value": 19200000
+      },
+      {
+        "name": "factory",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264989837450,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "dxgi_adapter",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264989845259,
+        "hr": "00000000",
+        "value": 23568
+      },
+      {
+        "name": "gm20b_luid",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264989845964,
+        "hr": "00000000",
+        "value": 23568
+      },
+      {
+        "name": "drawing_device",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264991828285,
+        "hr": "00000000",
+        "value": 45056
+      },
+      {
+        "name": "waiting_device",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992900790,
+        "hr": "00000000",
+        "value": 45056
+      },
+      {
+        "name": "drawing_fence_interface",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992902125,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "waiting_fence_interface",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992902603,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "drawing_signal_interface",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992902974,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "fence_create",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992908451,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "fence_export",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992910350,
+        "hr": "00000000",
+        "value": 420
+      },
+      {
+        "name": "fence_open",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992912762,
+        "hr": "00000000",
+        "value": 420
+      },
+      {
+        "name": "opened_before_signal",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992914805,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "completion_event",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992915511,
+        "hr": "00000000",
+        "value": 428
+      },
+      {
+        "name": "fence_register",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992916889,
+        "hr": "00000000",
+        "value": 1
+      },
+      {
+        "name": "gpu_signal",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992919543,
+        "hr": "00000000",
+        "value": 1
+      },
+      {
+        "name": "wait_begin",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992921205,
+        "hr": "00000000",
+        "value": 428
+      },
+      {
+        "name": "wait_return",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992921760,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "opened_after_wait",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264992922096,
+        "hr": "00000000",
+        "value": 1
+      },
+      {
+        "name": "create_sequential",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264993299602,
+        "hr": "00000000",
+        "value": 131140
+      },
+      {
+        "name": "present_begin",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264996141812,
+        "hr": "00000000",
+        "value": 131140
+      },
+      {
+        "name": "present_return",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264996627822,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "dwm_flush",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264998464757,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "device_state",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 264998466434,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "visible_center_pixel",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 265000055853,
+        "hr": "00000000",
+        "value": 0
+      },
+      {
+        "name": "exit",
+        "pid": 5284,
+        "tid": 6060,
+        "qpc": 265003525905,
+        "hr": "00000000",
+        "value": 0
+      }
+    ],
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_sha256": "81870a65054b9a32c168b4249092afa648395fcb4df5289b1d28022da3afa917",
+    "adapter_query_sha256": "aac8362ee3dd2c394afbadc2c94271b39ab2ea77cdf53180b457950a14a46c51"
+  },
+  "client": {
+    "timed_out": false,
+    "pid": 5284,
+    "utc": "2026-11-22T03:01:37.6517403Z",
+    "session": 1,
+    "exit": 0
+  },
+  "capture": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-first-present-fence-20261121-02/evidence.zip",
+    "sha256": "38495ca788a628c3fee747ab56839865bde567d971aa6d8bb4706b5e7a2ab5e2"
+  },
+  "verified_preflight": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/initial-formal.json",
+    "sha256": "02826ee856b58dd3883126e43cba21b8387e21b78823a7c7c37be5f2e195b663"
+  },
+  "verified_postflight": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-first-present-fence-20261121-02/after.json",
+    "sha256": "a4739bf0d38ae6b981ee33b7d03007b1bf0a640227880bbb54b4a53de0f3523e"
+  },
+  "cleanup": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/native-5-board/c5live-first-present-fence-20261121-02/cleanup.json",
+    "sha256": "4f676b368ce8c0ba38035bfdedd8066835f543cbc6d3b14f8490cde968323b09"
+  },
+  "fixture": {
+    "Measure.ps1": "cefe8bf12e30623eabf6da3420e5f0607cee8a9ebc9bafe965f9b25dcd0476a0",
+    "window_fence.exe": "d346fd9ef969b35fae7376cf4ab92abb856b0c7d1243f655ec92b6f76a98684a",
+    "trace.exe": "6f0e3a1367eeaef1dc3ff939dee0b580dbc1566d284096558455e90145c9eeaf",
+    "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29"
+  },
+  "approved_component_sha256": {
+    "nv_acr_ucode_prod.bin": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "d31b862075fea612ae646db42691d064f7999fdf89d37f9450ddeb085a47e590",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_dwm_and_kernel_loaded": {
+    "tegragpurender.sys": "69ba174ebe1772b6b4eaac633c3cc5afe1eb3c6155c8ea1aa430c8a9b060c0ce",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3"
+  },
+  "application_modules": {
+    "libvulkan_nouveau.dll": {
+      "sha256": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+      "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\libvulkan_nouveau.dll"
+    },
+    "tg_d3d_arm64.dll": {
+      "sha256": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+      "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_d3d_arm64.DLL"
+    },
+    "tegragpud3dvk.dll": {
+      "sha256": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+      "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\TegraGpuD3DVk.dll"
+    },
+    "tg_nvk_arm64.dll": {
+      "sha256": "a143bee5ba425358055e050bf87a0097038032b343f57ca9b1f2c81e043eadc3",
+      "path": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\nvk-ec-d31b862075fe\\app\\tg_nvk_arm64.DLL"
+    }
+  },
+  "trace_stop": {
+    "exit": 0,
+    "output": [
+      "ETW status=0 lost=0 lost_buffers=0 written=15"
+    ]
+  },
+  "new_system_events": [],
+  "scope": "本次正式桌面和合法应用自有对象；旧启动和之前测试各有独立回执。"
+}

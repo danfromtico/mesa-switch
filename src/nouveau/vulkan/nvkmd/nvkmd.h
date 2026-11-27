@@ -61,6 +61,9 @@ enum nvkmd_mem_flags {
     * CPU/GPU snooping may also require this for coherent host memory.
     */
    NVKMD_MEM_GPU_UNCACHED = 1 << 6,
+
+   /** Restrict GPU mappings to reads while allowing CPU uploads. */
+   NVKMD_MEM_GPU_READ_ONLY = 1 << 7,
 };
 
 #define NVKMD_MEM_PLACEMENT_FLAGS \
@@ -121,6 +124,7 @@ enum nvkmd_bind_op {
 
 struct nvkmd_info {
    bool has_dma_buf;
+   bool has_win32_memory;
    bool has_host_ptr_import;
    bool has_get_vram_used;
    bool has_alloc_tiled;
@@ -164,6 +168,8 @@ struct nvkmd_pdev {
    const struct vk_sync_type *const *sync_types;
 };
 
+struct wsi_win32_memory;
+
 struct nvkmd_dev_ops {
    void (*destroy)(struct nvkmd_dev *dev);
 
@@ -188,6 +194,19 @@ struct nvkmd_dev_ops {
    VkResult (*import_dma_buf)(struct nvkmd_dev *dev,
                               struct vk_object_base *log_obj,
                               int fd, struct nvkmd_mem **mem_out);
+
+   VkResult (*import_win32_handle)(struct nvkmd_dev *dev,
+                                  struct vk_object_base *log_obj,
+                                  void *handle, uint64_t size_B, uint64_t align_B,
+                                  uint8_t pte_kind, enum nvkmd_mem_flags flags,
+                                  struct nvkmd_mem **mem_out);
+
+   VkResult (*import_wsi_win32_memory)(struct nvkmd_dev *dev,
+                                      struct vk_object_base *log_obj,
+                                      const struct wsi_win32_memory *memory,
+                                      uint64_t size_B, uint64_t align_B,
+                                      uint8_t pte_kind, enum nvkmd_mem_flags flags,
+                                      struct nvkmd_mem **mem_out);
 
    /* Optional (may be NULL): wrap caller-owned page-aligned host memory in a
     * GPU-mapped nvkmd_mem.  Backs VK_EXT_external_memory_host.
@@ -319,6 +338,10 @@ struct nvkmd_ctx_exec {
     */
    bool incomplete;
    bool no_prefetch;
+#ifdef _WIN32
+   uint32_t written_count;
+   const uint32_t *written_allocations;
+#endif
 };
 
 struct nvkmd_ctx_bind {
@@ -485,6 +508,21 @@ VkResult MUST_CHECK
 nvkmd_dev_import_dma_buf(struct nvkmd_dev *dev,
                          struct vk_object_base *log_obj,
                          int fd, struct nvkmd_mem **mem_out);
+
+VkResult MUST_CHECK
+nvkmd_dev_import_wsi_win32_memory(struct nvkmd_dev *dev,
+                                 struct vk_object_base *log_obj,
+                                 const struct wsi_win32_memory *memory,
+                                 uint64_t size_B, uint64_t align_B,
+                                 uint8_t pte_kind, enum nvkmd_mem_flags flags,
+                                 struct nvkmd_mem **mem_out);
+
+VkResult MUST_CHECK
+nvkmd_dev_import_win32_handle(struct nvkmd_dev *dev,
+                             struct vk_object_base *log_obj,
+                             void *handle, uint64_t size_B, uint64_t align_B,
+                             uint8_t pte_kind, enum nvkmd_mem_flags flags,
+                             struct nvkmd_mem **mem_out);
 
 VkResult MUST_CHECK
 nvkmd_dev_import_host_ptr(struct nvkmd_dev *dev,

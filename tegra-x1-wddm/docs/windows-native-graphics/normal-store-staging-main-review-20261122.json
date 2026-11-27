@@ -1,0 +1,236 @@
+{
+  "schema": 1,
+  "decision": "accept_normal_driverstore_staging_evidence_only",
+  "main_device_operations": 0,
+  "archive": {
+    "filename": "context-normal-store-staging-01a204e6.zip",
+    "sha256": "f13acda953d54097c9368a95459d62f80730839e38bca953da6a9d8b730de728",
+    "bytes": 2317873,
+    "members": 156,
+    "originals": 155,
+    "manifest_sha256": "9961043cf14ddfef8e94bbfbb5e1a16d3d51c42414f891b33f3f5910e0f367c4",
+    "all_SHA_bytes_CRC_verified": true
+  },
+  "native_transport": {
+    "originals": 28,
+    "all_native_base64_host_bytes_SHA_verified": true,
+    "exit": 0,
+    "read_errors": 0,
+    "staging_PID": 4056,
+    "process_terminal": true,
+    "process_exit": 0,
+    "output_drained": true,
+    "timeout": false
+  },
+  "source_reviews": {
+    "r1": {
+      "conversation": "4117f306-b75c-4741-90bb-7dee262a6b17",
+      "model": "gemini-4-neon-high",
+      "frozen_files": 32,
+      "outcome": "needs_correction",
+      "findings": 6,
+      "manifest_sha256": "6eda420940bd6a7b80f7cfc793fe894ee9de8d9f27ba362b13afca1a3901e0d9"
+    },
+    "r2": {
+      "conversation": "fdb5054c-788c-4fee-8516-a66b8d58c538",
+      "model": "gemini-4-neon-high",
+      "frozen_files": 37,
+      "outcome": "approve_normal_driverstore_staging_only",
+      "findings": 0,
+      "manifest_sha256": "50427ff997f1eb82bf17c357c6b9754823e7840cf5e8d2dee955b207f6788f6a"
+    }
+  },
+  "operation": {
+    "source": "84102fb442f3eedf3be7861aa92645d5cc5f6833",
+    "package_manifest_sha256": "23af0c9fc21515c4a4c58888ce998caff2439ec167a9c1300f2bb97d971a7455",
+    "pnputil_executions": 1,
+    "arguments": "/add-driver \"C:\\Program Files\\SwitchWOA-ContextStore-95b73754e44f-01a204e6\\package\\tegragpurender.inf\"",
+    "install_flag": false,
+    "reboot_flag": false,
+    "old_completion_replayed": false,
+    "new_TDR_requests": 0
+  },
+  "store": {
+    "directory": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230",
+    "published_inf": "oem32.inf",
+    "required_files": [
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\fecs_sig.bin",
+        "sha256": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+        "name": "fecs_sig.bin",
+        "bytes": 108
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\fecs.bin",
+        "sha256": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+        "name": "fecs.bin",
+        "bytes": 528
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\pmu_bl.bin",
+        "sha256": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+        "name": "pmu_bl.bin",
+        "bytes": 1280
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\tegragpuno3d.dll",
+        "sha256": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+        "name": "tegragpuno3d.dll",
+        "bytes": 2048
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\gpccs.bin",
+        "sha256": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+        "name": "gpccs.bin",
+        "bytes": 528
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\nv_acr_ucode_prod.bin",
+        "sha256": "f948c259ca1c9fc8aad3013fe67372243be025b2790016f0ad9e60f7f4534841",
+        "name": "nv_acr_ucode_prod.bin",
+        "bytes": 18944
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\gpmu_ucode_desc.bin",
+        "sha256": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+        "name": "gpmu_ucode_desc.bin",
+        "bytes": 652
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\pmu_sig.bin",
+        "sha256": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+        "name": "pmu_sig.bin",
+        "bytes": 76
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\gpmu_ucode_image.bin",
+        "sha256": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699",
+        "name": "gpmu_ucode_image.bin",
+        "bytes": 47872
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\NETB_img.bin",
+        "sha256": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+        "name": "NETB_img.bin",
+        "bytes": 70502
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\tegragpurender.inf",
+        "sha256": "d3b657068c78a51829dad7789339941c068bb8464ae9eca8f317dbbf7f6405a8",
+        "name": "tegragpurender.inf",
+        "bytes": 1536
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\tegragpurender.sys",
+        "sha256": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+        "name": "tegragpurender.sys",
+        "bytes": 257984
+      },
+      {
+        "path": "C:\\Windows\\System32\\DriverStore\\FileRepository\\tegragpurender.inf_arm64_9149c554fb6d8230\\tegragpurender.cat",
+        "sha256": "a3058b2eae1973c594feeceb69eb638bc550c7fb02757c085b413f315fc61c11",
+        "name": "tegragpurender.cat",
+        "bytes": 7237
+      }
+    ],
+    "readback_scope": "Native full-file hashes and lengths of 13 required Store members match the host-held 13 input originals; Store file contents were not separately transferred.",
+    "published_binding_scope": "Reviewed successful script checks published INF hash and both SetupAPI path mappings; OEM number alone is not package identity."
+  },
+  "setupapi": {
+    "raw_sha256": "58e6a06a31bf2d9d07a9cc4888c73d7ffb7b5485ba28ae996ab1e69a7e97b2b8",
+    "transaction_lines": [
+      14249,
+      14353
+    ],
+    "pre_log_prefix_hash_matches": true,
+    "transactions_since_prefix": 1,
+    "specific_catalog_path_status": "0x800b0109",
+    "trusted_publisher_status_Win32": "0xe0000241",
+    "IMPORT_VALIDATE": "0x00000000",
+    "signer_score": "0x0F000000 (Authenticode)",
+    "signer_name": "Switch Lite GPU Test Code",
+    "final_status": "SUCCESS",
+    "native_catalog_registration": "oem32.cat by the same normal staging transaction",
+    "not_proved": [
+      "WHQL/Microsoft signature",
+      "kernel-load Code Integrity acceptance",
+      "standalone SignTool verification"
+    ]
+  },
+  "formal": {
+    "boot": 97983,
+    "Code": 0,
+    "AC": "Online",
+    "DWM_PID": 1400,
+    "DWM_start": "2026-11-23T05:49:40.9551376Z",
+    "source": "df08e8583abc202732036597f5cb7f0519ba11a5",
+    "selected_equals_permanent": true,
+    "components": 8,
+    "actual_loaded_paths": 5,
+    "full_hash_matches": true,
+    "active_inf": "oem31.inf (script-enforced readback)",
+    "private_x86_matches": true,
+    "known_events": [
+      [
+        97983,
+        12
+      ],
+      [
+        97992,
+        6008
+      ],
+      [
+        98001,
+        41
+      ]
+    ],
+    "new_selected_System_events": 0,
+    "GPU_acceptance_qualified": false
+  },
+  "candidate": {
+    "SYS_sha256": "c4f04a10e86ae32780997e1fcf51c0d7465dd6a8f01a9f887575d43cba931164",
+    "CAT_sha256": "a3058b2eae1973c594feeceb69eb638bc550c7fb02757c085b413f315fc61c11",
+    "device_installed": false,
+    "KMD_loaded": false,
+    "promoted": false,
+    "actual_TDR_recovery_verified": false
+  },
+  "scope_corrections": [
+    "Normal staging itself registers the driver package/catalog. No explicit certificate/trust-policy modification was requested; do not claim zero system trust-database or registry writes.",
+    "Standalone completion execution remains unknown. The normal staging transaction is separate evidence and does not retroactively complete the consumed SignTool step.",
+    "Boot 97983 retains known unexplained reboot evidence. An unchanged desktop during staging is not new GPU qualification.",
+    "The staged OEM32 number was reused; future deployment binds the full Store path, INF, SYS, CAT and all required-member hashes."
+  ],
+  "next_dependency": "Use this exact already-staged package identity for independently reviewed deployment/restoration. Do not repeat add-driver or the old unknown completion. Revoke permanent permission before actual KMD replacement; candidate remains single-use until corresponding native acceptance.",
+  "faults": {
+    "open": 20,
+    "closed": 3,
+    "new": 0,
+    "closed_by_this_batch": 0
+  },
+  "historical_limits": [
+    "91476/DWM152586,95090 and legacy first-Present causal boundaries remain unknown.",
+    "Original f6264ee11289, rehearsal94382->94557 and consumed KMT/TDR/dump controls were not replayed by this review.",
+    "All four470e1dbc deferred contracts and their existing re-entry conditions remain unknown/unchanged.",
+    "New formal hash readback after known unexplained boot97983 does not turn that boot into a passed acceptance."
+  ],
+  "references": [
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/pnputil-command-syntax",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/driver-store",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/signature-categories-and-driver-installation"
+  ],
+  "goal_complete": false,
+  "local_audit_sha256": "49a3aa3ac04632ba97e8a0208c21317d32d2b7ef6949f52d58455567f2c66cae",
+  "local_audit_script_sha256": "b568ad5c4638b6ecc5001494df03e3a9dbc2650590c21a2adfebdf1208bd5605",
+  "workspace_preservation": {
+    "main_preexisting_files_unchanged": 42,
+    "candidate_source_not_integrated": true
+  },
+  "publication_scope": "Evidence only; current selected df08/079 formal baseline and all 20 open faults remain unchanged.",
+  "SDK_status_binding": {
+    "SDK": "10.0.26100.0",
+    "Win32_0xe0000241": "ERROR_AUTHENTICODE_TRUSTED_PUBLISHER; SetupAPI.h expression APPLICATION_ERROR_MASK | ERROR_SEVERITY_ERROR | 0x241",
+    "HRESULT_0x800F0241": "SPAPI_E_AUTHENTICODE_TRUSTED_PUBLISHER is a different literal, not the raw transaction code",
+    "0x800b0109": "CERT_E_UNTRUSTEDROOT; first signature path result preserved"
+  }
+}

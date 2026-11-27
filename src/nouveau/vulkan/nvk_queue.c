@@ -82,12 +82,40 @@ static void
 nvk_queue_state_init(struct nvk_queue_state *qs)
 {
    memset(qs, 0, sizeof(*qs));
+#ifdef _WIN32
+   list_inithead(&qs->retired_slm);
+#endif
 }
+
+#ifdef _WIN32
+struct nvk_retired_slm {
+   struct list_head link;
+   struct nvkmd_mem *mem;
+   uint64_t time_point;
+};
+
+static void
+nvk_queue_release_slm(struct nvk_device *dev, struct nvk_queue_state *qs,
+                      uint64_t completed)
+{
+   list_for_each_entry_safe(struct nvk_retired_slm, slm, &qs->retired_slm, link) {
+      if (slm->time_point > completed)
+         break;
+
+      list_del(&slm->link);
+      nvkmd_mem_unref(slm->mem);
+      vk_free(&dev->vk.alloc, slm);
+   }
+}
+#endif
 
 static void
 nvk_queue_state_finish(struct nvk_device *dev,
                        struct nvk_queue_state *qs)
 {
+#ifdef _WIN32
+   nvk_queue_release_slm(dev, qs, UINT64_MAX);
+#endif
    if (qs->slm.mem)
       nvkmd_mem_unref(qs->slm.mem);
 }
@@ -101,6 +129,16 @@ nvk_queue_state_update(struct nvk_queue *queue,
    struct nvkmd_mem *mem;
    uint32_t alloc_count, bytes_per_warp, bytes_per_tpc;
    bool dirty = false;
+#ifdef _WIN32
+   if (!list_is_empty(&qs->retired_slm)) {
+      uint64_t completed;
+      VkResult result = vk_sync_get_value(&dev->vk, queue->push_stream.sync,
+                                          &completed);
+      if (result != VK_SUCCESS)
+         return result;
+      nvk_queue_release_slm(dev, qs, completed);
+   }
+#endif
 #ifdef __SWITCH__
    struct nouveau_horizon_zbc_state zbc_state;
    const bool zbc_dirty =
@@ -123,8 +161,24 @@ nvk_queue_state_update(struct nvk_queue *queue,
    mem = nvk_slm_area_get_mem_ref(&dev->slm, &bytes_per_warp, &bytes_per_tpc);
    if (qs->slm.mem != mem || qs->slm.bytes_per_warp != bytes_per_warp ||
        qs->slm.bytes_per_tpc != bytes_per_tpc) {
-      if (qs->slm.mem)
+      if (qs->slm.mem) {
+#ifdef _WIN32
+         struct nvk_retired_slm *old = vk_alloc(&dev->vk.alloc, sizeof(*old), 8,
+                                                VK_SYSTEM_ALLOCATION_SCOPE_DEVICE);
+         if (!old) {
+            if (mem)
+               nvkmd_mem_unref(mem);
+            return vk_error(dev, VK_ERROR_OUT_OF_HOST_MEMORY);
+         }
+
+         /* The state push signals this point after earlier SLM users. */
+         old->mem = qs->slm.mem;
+         old->time_point = queue->push_stream.next_time_point;
+         list_addtail(&old->link, &qs->retired_slm);
+#else
          nvkmd_mem_unref(qs->slm.mem);
+#endif
+      }
       qs->slm.mem = mem;
       qs->slm.bytes_per_warp = bytes_per_warp;
       qs->slm.bytes_per_tpc = bytes_per_tpc;
@@ -439,6 +493,60 @@ nvk_queue_submit_exec(struct nvk_queue *queue,
    result = nvk_queue_submit_cmd_buffers(queue, submit);
    if (result != VK_SUCCESS)
       goto fail;
+#elif defined(_WIN32)
+   uint32_t max_execs = 0;
+   for (unsigned i = 0; i < submit->command_buffer_count; i++) {
+      struct nvk_cmd_buffer *cmd =
+         container_of(submit->command_buffers[i], struct nvk_cmd_buffer, vk);
+      const uint32_t cmd_execs =
+         util_dynarray_num_elements(&cmd->pushes, struct nvk_cmd_push);
+      if (cmd_execs > UINT32_MAX - max_execs) {
+         result = vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
+         goto fail;
+      }
+      max_execs += cmd_execs;
+   }
+
+   if (max_execs > 0) {
+      if (max_execs > SIZE_MAX / sizeof(struct nvkmd_ctx_exec)) {
+         result = vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
+         goto fail;
+      }
+      STACK_ARRAY(struct nvkmd_ctx_exec, execs, max_execs);
+      if (!execs) {
+         result = vk_error(queue, VK_ERROR_OUT_OF_HOST_MEMORY);
+         goto fail;
+      }
+      uint32_t exec_count = 0;
+
+      for (unsigned i = 0; i < submit->command_buffer_count; i++) {
+         struct nvk_cmd_buffer *cmd =
+            container_of(submit->command_buffers[i], struct nvk_cmd_buffer, vk);
+
+         util_dynarray_foreach(&cmd->pushes, struct nvk_cmd_push, push) {
+            if (push->range == 0)
+               continue;
+
+            execs[exec_count++] = (struct nvkmd_ctx_exec) {
+               .addr = push->addr,
+               .size_B = push->range,
+               .incomplete = push->incomplete,
+               .no_prefetch = push->no_prefetch,
+               .written_count = submit->win32_written_count,
+               .written_allocations = submit->win32_written_allocations,
+            };
+         }
+      }
+
+      if (exec_count > 0)
+         result = nvkmd_ctx_exec(queue->exec_ctx, &queue->vk.base,
+                                 exec_count, execs);
+
+      STACK_ARRAY_FINISH(execs);
+
+      if (result != VK_SUCCESS)
+         goto fail;
+   }
 #else
    for (unsigned i = 0; i < submit->command_buffer_count; i++) {
       struct nvk_cmd_buffer *cmd =
@@ -537,6 +645,11 @@ nvk_queue_init_context_state(struct nvk_queue *queue)
                 nvk_queue_subchannels_from_engines(queue->engines));
    struct nv_push *p = &push;
 
+#ifdef _WIN32
+   if (queue->engines & NVKMD_ENGINE_COPY)
+      nvk_push_bind_copy(p, pdev->info.cls_copy);
+#endif
+
    /* M2MF state */
    if (pdev->info.cls_m2mf <= FERMI_MEMORY_TO_MEMORY_FORMAT_A) {
       /* we absolutely do not support Fermi, but if somebody wants to toy
@@ -568,6 +681,11 @@ nvk_queue_init_context_state(struct nvk_queue *queue)
    }
 
    result = nvk_queue_push(queue, &push);
+#ifdef _WIN32
+   /* The KMD admits later MME calls after this context's upload retires. */
+   if (result == VK_SUCCESS && (queue->engines & NVKMD_ENGINE_3D))
+      result = nvk_mem_stream_sync(dev, &queue->push_stream, queue->exec_ctx);
+#endif
 #ifdef __SWITCH__
    if (result == VK_SUCCESS && zbc_programmed)
       nvk_queue_commit_zbc_state(queue, &zbc_state);
@@ -625,6 +743,9 @@ nvk_queue_create(struct nvk_device *dev,
    result = vk_queue_init(&queue->vk, &dev->vk, pCreateInfo, index_in_family);
    if (result != VK_SUCCESS)
       goto fail_alloc;
+#ifdef _WIN32
+   queue->vk.supports_wsi_written_primaries = true;
+#endif
 
    nvk_queue_state_init(&queue->state);
 
@@ -813,11 +934,11 @@ nvk_queue_destroy(struct nvk_device *dev, struct nvk_queue *queue)
       nvk_upload_queue_sync(dev, &dev->upload);
       nvkmd_mem_unref(queue->draw_cb0);
    }
-   nvk_queue_state_finish(dev, &queue->state);
    if (queue->bind_ctx != NULL)
       nvkmd_ctx_destroy(queue->bind_ctx);
    if (queue->exec_ctx != NULL)
       nvkmd_ctx_destroy(queue->exec_ctx);
+   nvk_queue_state_finish(dev, &queue->state);
    vk_queue_finish(&queue->vk);
    vk_free(&dev->vk.alloc, queue);
 #endif

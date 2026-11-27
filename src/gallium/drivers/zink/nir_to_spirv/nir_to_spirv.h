@@ -85,7 +85,9 @@ type_is_counter(const struct glsl_type *type)
 static inline VkDescriptorType
 zink_sampler_type(const struct glsl_type *type)
 {
-   assert(glsl_type_is_sampler(type));
+   assert(glsl_type_is_sampler(type) || glsl_type_is_texture(type));
+   if (glsl_type_is_bare_sampler(type))
+      return VK_DESCRIPTOR_TYPE_SAMPLER;
    switch (glsl_get_sampler_dim(type)) {
    case GLSL_SAMPLER_DIM_1D:
    case GLSL_SAMPLER_DIM_2D:
@@ -94,7 +96,8 @@ zink_sampler_type(const struct glsl_type *type)
    case GLSL_SAMPLER_DIM_RECT:
    case GLSL_SAMPLER_DIM_MS:
    case GLSL_SAMPLER_DIM_EXTERNAL:
-      return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+      return glsl_type_is_texture(type) ? VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE :
+                                         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
    case GLSL_SAMPLER_DIM_BUF:
       return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
    default:

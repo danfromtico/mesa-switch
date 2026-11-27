@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "reviewed_utc": "2026-11-22T11:17:26.579029+00:00",
+  "source_commit_on_wrong_branch": "582f1799b0923be2dbe0a53a899c5cecbed5e4ca",
+  "source_path": "tegra-x1-wddm/tools/Capture-DesktopEvidence.ps1",
+  "source_sha256": "81a6dd6d58dbbef10574504a812a0c8ecf68d4b1f20ac08017fa99a584700c10",
+  "scope": "Only progress logging around existing desktop capture operations; no driver or baseline change.",
+  "independent_review": {
+    "model": "gemini-4-neon-high",
+    "conversation_id": "56237fa7-1674-441b-aaa1-ac5f8403b16b",
+    "status": "approve",
+    "blocking_findings": 0,
+    "nonblocking_findings": 1,
+    "raw": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/branch-correction-20261122/review/read-only-followup/stdout.json",
+      "bytes": 6282,
+      "sha256": "a28a892d8c799e9ed80bb95e89ad3edc72cd3bf1a07625d3e71078b0b35adcd2"
+    },
+    "parsed": {
+      "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/dma-checkpoint-main-review/work/branch-correction-20261122/review/parsed-review.json",
+      "bytes": 5868,
+      "sha256": "6623f9daf9c1c1fbf3c35d94941e51656993f4a9592482f36080ba23ba3f8559"
+    },
+    "coverage_files": 5,
+    "first_attempt": "No report: headless command permission missing. Same conversation continued using only explicitly allowed read_file; no command permission expanded."
+  },
+  "local_validation": {
+    "parse_errors": 0,
+    "helper_records": 3,
+    "prefix_preserved": true,
+    "phase_pid_elapsed_valid": true,
+    "whole_capture_executed": false,
+    "device_actions": 0,
+    "PowerShell": "7.7.0",
+    "exit_code": 0,
+    "scope": "PowerShell parsing and exact progress helper with local scratch files; no Windows capture, graphics workload or device operation."
+  },
+  "main_adjudication": "Transfer approved within static/local scope. Keep source unchanged; a missing terminal progress marker alone is not a hang or success result. Combine process exit status, stderr and controller timeout state.",
+  "native_windows_capture_acceptance": false,
+  "device_actions": 0,
+  "selected_baseline_changed": false,
+  "root_cause_claim": false,
+  "historical_faults_closed": 0
+}

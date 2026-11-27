@@ -37,6 +37,11 @@
 #include "Query.h"
 
 #include "Debug.h"
+#include "Trace.h"
+#ifdef D3D10_UMD_HARDWARE
+#include "RuntimeMemory.h"
+#include "frontend/winsys_handle.h"
+#endif
 
 #include "util/u_math.h"
 #include "util/u_rect.h"
@@ -196,6 +201,13 @@ CreateResource(D3D10DDI_HDEVICE hDevice,                                // IN
                D3D10DDI_HRTRESOURCE hRTResource)                        // IN
 {
    LOG_ENTRYPOINT();
+   D3D10Trace(D3D10_TRACE_RESOURCE_CREATE_BEGIN, S_OK,
+              (uint64_t)pCreateResource->Format << 32 | pCreateResource->ResourceDimension,
+              (uint64_t)pCreateResource->MiscFlags << 32 | pCreateResource->BindFlags);
+   D3D10Trace(D3D10_TRACE_RESOURCE_CREATE_SIZE, S_OK,
+              (uint64_t)pCreateResource->pMipInfoList[0].TexelWidth << 32 |
+                 pCreateResource->pMipInfoList[0].TexelHeight,
+              (uint64_t)pCreateResource->ArraySize << 32 | pCreateResource->MipLevels);
 
    if ((pCreateResource->MiscFlags & D3D10_DDI_RESOURCE_MISC_SHARED) ||
        (pCreateResource->pPrimaryDesc &&
@@ -252,6 +264,8 @@ CreateResource(D3D10DDI_HDEVICE hDevice,                                // IN
    Resource *pResource = CastResource(hResource);
 
    memset(pResource, 0, sizeof *pResource);
+   pResource->device = CastDevice(hDevice);
+   pResource->runtime_resource = hRTResource.handle;
 
 #if 0
    if (pCreateResource->pPrimaryDesc) {
@@ -292,6 +306,10 @@ CreateResource(D3D10DDI_HDEVICE hDevice,                                // IN
    templat.nr_storage_samples = pCreateResource->SampleDesc.Count;
    templat.bind       = translate_resource_flags(pCreateResource->BindFlags);
    templat.usage      = translate_resource_usage(pCreateResource->Usage);
+#ifdef D3D10_UMD_HARDWARE
+   const bool shared = pCreateResource->MiscFlags & D3D10_DDI_RESOURCE_MISC_SHARED;
+   if (shared) templat.bind |= PIPE_BIND_SHARED;
+#endif
 
    if (templat.target != PIPE_BUFFER) {
       if (!screen->is_format_supported(screen,
@@ -307,8 +325,35 @@ CreateResource(D3D10DDI_HDEVICE hDevice,                                // IN
       }
    }
 
-   pResource->resource = screen->resource_create(screen, &templat);
-   if (!pResource) {
+#ifdef D3D10_UMD_HARDWARE
+   if (pCreateResource->pPrimaryDesc || shared) {
+      if (!screen->resource_from_handle) {
+         SetError(hDevice, DXGI_ERROR_UNSUPPORTED);
+         return;
+      }
+      HRESULT hr = shared ?
+         RuntimeSharedCreate(CastDevice(hDevice), pCreateResource, hRTResource, &pResource->runtime_memory) :
+         RuntimePrimaryCreate(CastDevice(hDevice), pCreateResource, hRTResource, &pResource->runtime_memory);
+      if (FAILED(hr)) { SetError(hDevice, hr); return; }
+      struct winsys_handle handle = {};
+      handle.type = WINSYS_HANDLE_TYPE_WDDM_ALLOCATION;
+      handle.com_obj = const_cast<wsi_win32_memory *>(RuntimeResourceMemory(pResource->runtime_memory));
+      handle.stride = RuntimeResourcePitch(pResource->runtime_memory);
+      handle.size = RuntimeResourceMemory(pResource->runtime_memory)->size;
+      handle.format = templat.format;
+      pResource->resource = screen->resource_from_handle(screen, &templat, &handle,
+                                                         PIPE_HANDLE_USAGE_FRAMEBUFFER_WRITE);
+      if (!pResource->resource) {
+         hr = RuntimeResourceError(pResource->runtime_memory);
+         RuntimeResourceDestroy(pResource->runtime_memory);
+         pResource->runtime_memory = NULL;
+         SetError(hDevice, hr);
+         return;
+      }
+   } else
+#endif
+      pResource->resource = screen->resource_create(screen, &templat);
+   if (!pResource->resource) {
       DebugPrintf("%s: failed to create resource\n", __func__);
       SetError(hDevice, E_OUTOFMEMORY);
       return;
@@ -317,6 +362,13 @@ CreateResource(D3D10DDI_HDEVICE hDevice,                                // IN
    pResource->NumSubResources = pCreateResource->MipLevels * pCreateResource->ArraySize;
    pResource->transfers = (struct pipe_transfer **)calloc(pResource->NumSubResources,
                                                           sizeof *pResource->transfers);
+   if (!pResource->transfers) {
+      pResource->NumSubResources = 0;
+      DestroyResource(hDevice, hResource);
+      memset(pResource, 0, sizeof *pResource);
+      SetError(hDevice, E_OUTOFMEMORY);
+      return;
+   }
 
    if (pCreateResource->pInitialDataUP) {
       if (pResource->buffer) {
@@ -337,11 +389,14 @@ CreateResource(D3D10DDI_HDEVICE hDevice,                                // IN
                                 PIPE_MAP_UNSYNCHRONIZED,
                                 &box,
                                 &transfer);
-         assert(map);
-         if (map) {
-            memcpy(map, pInitialDataUP->pSysMem, box.width);
-            pipe_buffer_unmap(pipe, transfer);
+         if (!map) {
+            DestroyResource(hDevice, hResource);
+            memset(pResource, 0, sizeof *pResource);
+            SetError(hDevice, E_OUTOFMEMORY);
+            return;
          }
+         memcpy(map, pInitialDataUP->pSysMem, box.width);
+         pipe_buffer_unmap(pipe, transfer);
       } else {
          for (UINT SubResource = 0; SubResource < pResource->NumSubResources; ++SubResource) {
             const D3D10_DDIARG_SUBRESOURCE_UP* pInitialDataUP =
@@ -360,24 +415,29 @@ CreateResource(D3D10DDI_HDEVICE hDevice,                                // IN
                                     PIPE_MAP_UNSYNCHRONIZED,
                                     &box,
                                     &transfer);
-            assert(map);
-            if (map) {
-               for (int z = 0; z < box.depth; ++z) {
-                  uint8_t *dst = (uint8_t*)map + z*transfer->layer_stride;
-                  const uint8_t *src = (const uint8_t*)pInitialDataUP->pSysMem + z*pInitialDataUP->SysMemSlicePitch;
-                  util_copy_rect(dst,
-                                 templat.format,
-                                 transfer->stride,
-                                 0, 0, box.width, box.height,
-                                 src,
-                                 pInitialDataUP->SysMemPitch,
-                                 0, 0);
-               }
-               pipe_texture_unmap(pipe, transfer);
+            if (!map) {
+               DestroyResource(hDevice, hResource);
+               memset(pResource, 0, sizeof *pResource);
+               SetError(hDevice, E_OUTOFMEMORY);
+               return;
             }
+            for (int z = 0; z < box.depth; ++z) {
+               uint8_t *dst = (uint8_t*)map + z*transfer->layer_stride;
+               const uint8_t *src = (const uint8_t*)pInitialDataUP->pSysMem + z*pInitialDataUP->SysMemSlicePitch;
+               util_copy_rect(dst,
+                              templat.format,
+                              transfer->stride,
+                              0, 0, box.width, box.height,
+                              src,
+                              pInitialDataUP->SysMemPitch,
+                              0, 0);
+            }
+            pipe_texture_unmap(pipe, transfer);
          }
       }
    }
+   D3D10Trace(D3D10_TRACE_RESOURCE_CREATE_END, S_OK,
+              pCreateResource->Format, pResource->NumSubResources);
 }
 
 
@@ -418,8 +478,59 @@ OpenResource(D3D10DDI_HDEVICE hDevice,                            // IN
              D3D10DDI_HRESOURCE hResource,                        // IN
              D3D10DDI_HRTRESOURCE hRTResource)                    // IN
 {
+#ifdef D3D10_UMD_HARDWARE
+   Resource *resource = CastResource(hResource);
+   memset(resource, 0, sizeof(*resource));
+   resource->device = CastDevice(hDevice);
+   resource->runtime_resource = hRTResource.handle;
+   auto screen = resource->device->pipe->screen;
+   RuntimeSharedDescription description = {};
+   HRESULT hr = screen->resource_from_handle ?
+      RuntimeSharedOpen(resource->device, pOpenResource, hRTResource,
+                        &resource->runtime_memory, &description) : DXGI_ERROR_UNSUPPORTED;
+   if (SUCCEEDED(hr)) {
+      pipe_resource templat = {};
+      templat.target = PIPE_TEXTURE_2D;
+      templat.format = FormatTranslate(description.format, FALSE);
+      templat.width0 = description.width;
+      templat.height0 = description.height;
+      templat.depth0 = templat.array_size = 1;
+      templat.nr_samples = templat.nr_storage_samples = 1;
+      templat.bind = translate_resource_flags(description.bind_flags) | PIPE_BIND_SHARED;
+      templat.usage = translate_resource_usage(static_cast<D3D10_DDI_RESOURCE_USAGE>(description.usage));
+      winsys_handle handle = {};
+      handle.type = WINSYS_HANDLE_TYPE_WDDM_ALLOCATION;
+      handle.com_obj = const_cast<wsi_win32_memory *>(RuntimeResourceMemory(resource->runtime_memory));
+      handle.stride = description.pitch;
+      handle.size = RuntimeResourceMemory(resource->runtime_memory)->size;
+      handle.format = templat.format;
+      resource->resource = screen->resource_from_handle(screen, &templat, &handle,
+                                                         PIPE_HANDLE_USAGE_FRAMEBUFFER_WRITE);
+      if (!resource->resource) hr = RuntimeResourceError(resource->runtime_memory);
+   }
+   if (SUCCEEDED(hr)) {
+      resource->Format = description.format;
+      resource->MipLevels = 1;
+      resource->transfers = static_cast<pipe_transfer **>(calloc(1, sizeof(pipe_transfer *)));
+      if (!resource->transfers) hr = E_OUTOFMEMORY;
+      else resource->NumSubResources = 1;
+   }
+   D3D10Trace(D3D10_TRACE_OPEN_RESOURCE, hr,
+              (uint64_t)description.width << 32 | description.height,
+              (uint64_t)pOpenResource->NumAllocations << 32 | description.pitch);
+   if (FAILED(hr)) {
+      /* A failed OpenResource will not receive DestroyResource from the
+       * runtime. Unwind the storage and callbacks here, in ownership order. */
+      pipe_resource_reference(&resource->resource, NULL);
+      RuntimeResourceDestroy(resource->runtime_memory);
+      memset(resource, 0, sizeof(*resource));
+      SetError(hDevice, hr);
+   }
+#else
    LOG_UNSUPPORTED_ENTRYPOINT();
+   D3D10Trace(D3D10_TRACE_OPEN_RESOURCE, E_OUTOFMEMORY, 0, 0);
    SetError(hDevice, E_OUTOFMEMORY);
+#endif
 }
 
 
@@ -461,8 +572,28 @@ DestroyResource(D3D10DDI_HDEVICE hDevice,       // IN
       }
    }
    free(pResource->transfers);
+   while (pResource->views) DetachResourceView(pResource->views);
 
-   pipe_resource_reference(&pResource->resource, NULL);
+#ifdef D3D10_UMD_HARDWARE
+   /* The runtime resource is no longer valid after this DDI returns. Finish
+    * GPU use before releasing its allocation, even if Zink retains a cached
+    * object wrapper until a later batch cleanup. */
+   HRESULT completion = RuntimeResourceFinish(CastDevice(hDevice), pResource);
+#endif
+   if (pResource->buffer) {
+      /* The backend can retain borrowed buffer bindings after ClearState.
+       * Transfer our ownership so it can finish those uses before freeing. */
+      pipe_resource_release(pipe, pResource->resource);
+      pResource->resource = NULL;
+   } else {
+      pipe_resource_reference(&pResource->resource, NULL);
+   }
+#ifdef D3D10_UMD_HARDWARE
+   HRESULT released = RuntimeResourceDestroy(pResource->runtime_memory);
+   pResource->runtime_memory = NULL;
+   if (FAILED(completion)) SetError(hDevice, completion);
+   else if (FAILED(released)) SetError(hDevice, released);
+#endif
 }
 
 
@@ -485,6 +616,9 @@ ResourceMap(D3D10DDI_HDEVICE hDevice,                                // IN
             __out D3D10DDI_MAPPED_SUBRESOURCE *pMappedSubResource)   // OUT
 {
    LOG_ENTRYPOINT();
+   memset(pMappedSubResource, 0, sizeof *pMappedSubResource);
+   if (CheckDeviceRemoved(hDevice))
+      return;
 
    struct pipe_context *pipe = CastPipeContext(hDevice);
    Resource *pResource = CastResource(hResource);
@@ -540,6 +674,18 @@ ResourceMap(D3D10DDI_HDEVICE hDevice,                                // IN
                               usage,
                               &box,
                               &pResource->transfers[SubResource]);
+   }
+   /* Mapping may wait for an asynchronous submission. A non-NULL host
+    * pointer is not usable readback if that submission lost the device. */
+   if (CheckDeviceRemoved(hDevice)) {
+      if (map) {
+         if (pResource->buffer)
+            pipe_buffer_unmap(pipe, pResource->transfers[SubResource]);
+         else
+            pipe_texture_unmap(pipe, pResource->transfers[SubResource]);
+         pResource->transfers[SubResource] = NULL;
+      }
+      return;
    }
    if (!map) {
       DebugPrintf("%s: failed to map resource\n", __func__);

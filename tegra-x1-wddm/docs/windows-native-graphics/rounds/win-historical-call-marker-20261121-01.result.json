@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "round_id": "win-historical-call-marker-20261121-01",
+  "contract_id": "WIN-OLD-RESET",
+  "windows_question": "WIN-OLD-RESET",
+  "plan_sha256": "82acf8bf2cfa00ade8705cdfca78c0a67b48d2652c8f62c3fd9460502859dfbf",
+  "status": "故障开放",
+  "finding": "三次原空窗口最后已经返回的应用侧 API 均为绘图设备 GetDeviceRemovedReason，值为 S_OK；下一条持久标记为首次 Present CALL。签名客户端在 Present 返回后先读取设备移除原因，再持久写入 RETURN。三次均缺这两条后置标记。",
+  "missing_observation": "三次原故障的 CALL 之后缺同启动 DXGI Start/Stop、KMT 接收/返回、后置设备查询或早期复位记录。尚不能区分故障发生在公开 Present 内、返回后的查询内，或持久 RETURN 标记之前的其他位置。",
+  "device_executions": 0,
+  "evidence": {
+    "client_sha256": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d",
+    "build_manifest_sha256": "059f19f9fdadc488f0925307a913485c3517cb44dede45bc989c1444dcec2450",
+    "client_patch_sha256": "61334630b65cf7ddab48c6320742280870662279179e43374f836b666afef714",
+    "patched_source_sha256": "b7ba60207ddaa6372edcc705bf76ae627c3d279b3b85648ef6b92fb28df988a3",
+    "cases": [
+      {
+        "case": "Ddi20Case-261120-122121366257",
+        "boot": 82058,
+        "pid": 1812,
+        "tid": 6340,
+        "effect": "Sequential",
+        "archive_sha256": "49be144f2dd9763ae0bb9310c2f0abdb0a32ab388aa84343238b19cf839a5878",
+        "journal_sha256": "0a98c384bde1d6fb23df9b1fe917a439e21688f5df37b7c4cb9c4d130daa8b0a",
+        "last_completed_pre_call_api": "680609 6340 OBSERVE RemovedReasonBeforePresent 00000000",
+        "last_durable_call": "680609 6340 CALL Present 00000000 qpc=13070969930",
+        "post_call_markers": []
+      },
+      {
+        "case": "Ddi20Case-261120-122937785753",
+        "boot": 82221,
+        "pid": 4672,
+        "tid": 4712,
+        "effect": "Sequential",
+        "archive_sha256": "27b2b33e90200635dcf1fa30b78f7be4d7f8fc34ac556ee1b51c7b0ba372add8",
+        "journal_sha256": "3181fddd56a4ab44fd02d082da4661137204c3507dfe9055a74bc9af687a6a7f",
+        "last_completed_pre_call_api": "122343 4712 OBSERVE RemovedReasonBeforePresent 00000000",
+        "last_durable_call": "122343 4712 CALL Present 00000000 qpc=2352403757",
+        "post_call_markers": []
+      },
+      {
+        "case": "Ddi20Case-261120-123625091734",
+        "boot": 82382,
+        "pid": 5828,
+        "tid": 7656,
+        "effect": "Sequential",
+        "archive_sha256": "3c9cbc928edfbea40d6839ec532cc7a826702761a2bf910463abe6a40a1eba65",
+        "journal_sha256": "a788913732710448c4c73c440e2a2dbc66ecd758af3c8ff3890a54cdc6da18fd",
+        "last_completed_pre_call_api": "122843 7656 OBSERVE RemovedReasonBeforePresent 00000000",
+        "last_durable_call": "122843 7656 CALL Present 00000000 qpc=2361927374",
+        "post_call_markers": []
+      },
+      {
+        "case": "Ddi20Case-261120-121855717865",
+        "boot": 82058,
+        "pid": 5712,
+        "tid": 4692,
+        "effect": "FlipSequential",
+        "archive_sha256": "6677a160e0f23a3618a3ff1d7dd3db0aea21c91c2315caba9a6d7d65000b8a2a",
+        "journal_sha256": "d27a4b9668bdda27ff9b893928f4c3ca7d6f1ee4246d28b041e05340c12e4421",
+        "last_completed_pre_call_api": "537046 4692 OBSERVE RemovedReasonBeforePresent 00000000",
+        "last_durable_call": "537062 4692 CALL Present 00000000 qpc=10314713895",
+        "post_call_markers": [
+          "537062 4692 RETURN Present 00000000 qpc=10314788877",
+          "537078 4692 OBSERVE RemovedReasonAfterPresent 00000000"
+        ]
+      }
+    ],
+    "marker_order": [
+      "journal.mark(\"OBSERVE\",\"RemovedReasonBeforePresent\",device->GetDeviceRemovedReason())",
+      "journal.mark(\"CALL\",\"Present\")",
+      "HRESULT result=swap->Present(1,0)",
+      "HRESULT after_present=observe_reason ? device->GetDeviceRemovedReason() : S_OK",
+      "journal.mark(\"RETURN\",\"Present\",result)"
+    ],
+    "boundaries": {
+      "last_return": "三次原绘图线程在公开 CALL 紧前均记录 GetDeviceRemovedReason 返回 S_OK。分页检查属于更早的内存阶段。",
+      "last_entry": "写入 IDXGISwapChain::Present(1,0) 的 CALL 标记，API 函数体入口本身无回执。",
+      "first_anomaly_or_missing": "三次原故障的 CALL 之后缺同启动 DXGI Start/Stop、KMT 接收/返回、后置设备查询或早期复位记录。尚不能区分故障发生在公开 Present 内、返回后的查询内，或持久 RETURN 标记之前的其他位置。"
+    }
+  }
+}

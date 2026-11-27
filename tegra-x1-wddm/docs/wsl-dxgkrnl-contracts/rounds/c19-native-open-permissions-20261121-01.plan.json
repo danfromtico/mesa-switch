@@ -1,0 +1,20 @@
+{
+  "round_id": "c19-native-open-permissions-20261121-01",
+  "contract_id": "dxgvmbus.c:889:2",
+  "declared_utc": "2026-11-22T02:54:00.683087+00:00",
+  "source_commit": "a989171929bed4ea681be8d77333845ce1c1732a",
+  "comment_sha256": "465b1fdd8ca31a79d837c082ce2cd725067f5696b92631c61a65751cf2db93a4",
+  "related_fault": "GM20B-LEGACY-SEQUENTIAL-RESTART",
+  "actor": "Switch Windows ARM64 原生图形栈及本条指定的应用、对象或驱动。",
+  "predicate": "打开 DEFAULT 和 INTRA_GPU 时各自的 CPU 映射权限。",
+  "question": "打开 DEFAULT 与 INTRA_GPU 时分别得到什么 CPU 映射权限？",
+  "method": "只复用本条原来的 Windows 能力回执，并核对当前正式系统版本与该 API 的受支持条件。",
+  "required_observation": "打开 DEFAULT 与 INTRA_GPU 时分别得到什么 CPU 映射权限？",
+  "satisfied_if": "适用条件成立，Windows 本机原件明确记录同一对象与调用区间，支持本条的原生可比语义。",
+  "violated_if": "适用条件成立且同一对象、调用区间的直接原生回执否定本条。",
+  "unknown_if": "设备能力不具备、目标调用未发生、对象或事件缺失，或者仅有其他启动的正常对照。",
+  "prior": {
+    "path": "wsl-dxgkrnl-contracts/rounds/c27-native-open-permissions-20261121-01.result.json",
+    "sha256": "4a15f491057548bf3f4e5bc21f0cadb47e8b5f4bd1b8a8ac6ede065621c94aa6"
+  }
+}

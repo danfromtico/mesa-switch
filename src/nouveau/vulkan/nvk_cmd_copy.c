@@ -205,9 +205,8 @@ nouveau_copy_rect(struct nvk_cmd_buffer *cmd,
                   uint8_t data_transfer_type)
 {
    uint32_t src_bw, dst_bw;
+   uint32_t remap_components = 0;
    if (copy->remap.comp_size > 0) {
-      struct nv_push *p = nvk_cmd_buffer_push(cmd, 2);
-
       assert(copy->src.bpp % copy->remap.comp_size == 0);
       assert(copy->dst.bpp % copy->remap.comp_size == 0);
       uint32_t num_src_comps = copy->src.bpp / copy->remap.comp_size;
@@ -218,7 +217,7 @@ nouveau_copy_rect(struct nvk_cmd_buffer *cmd,
        */
       src_bw = dst_bw = 1;
 
-      P_IMMD(p, NV90B5, SET_REMAP_COMPONENTS, {
+      V_NV90B5_SET_REMAP_COMPONENTS(remap_components, {
          .dst_x = copy->remap.dst[0],
          .dst_y = copy->remap.dst[1],
          .dst_z = copy->remap.dst[2],
@@ -258,7 +257,12 @@ nouveau_copy_rect(struct nvk_cmd_buffer *cmd,
                      copy->dst.offset_el.y * copy->dst.row_stride;
       }
 
-      struct nv_push *p = nvk_cmd_buffer_push(cmd, 31);
+      struct nv_push *p = nvk_cmd_buffer_push(cmd, 33);
+
+      if (copy->remap.comp_size > 0) {
+         P_MTHD(p, NV90B5, SET_REMAP_COMPONENTS);
+         nv_push_val(p, NV90B5_SET_REMAP_COMPONENTS, remap_components);
+      }
 
       P_MTHD(p, NV90B5, OFFSET_IN_UPPER);
       P_NV90B5_OFFSET_IN_UPPER(p, src_addr >> 32);
@@ -923,29 +927,25 @@ nvk_cmd_fill_memory_ce(struct nvk_cmd_buffer *cmd,
 {
    uint32_t max_dim = 1 << 15;
 
-   struct nv_push *p = nvk_cmd_buffer_push(cmd, 7);
-
-   P_IMMD(p, NV90B5, SET_REMAP_CONST_A, data);
-   P_IMMD(p, NV90B5, SET_REMAP_COMPONENTS, {
-      .dst_x = DST_X_CONST_A,
-      .dst_y = DST_Y_CONST_A,
-      .dst_z = DST_Z_CONST_A,
-      .dst_w = DST_W_CONST_A,
-      .component_size = COMPONENT_SIZE_FOUR,
-      .num_src_components = NUM_SRC_COMPONENTS_ONE,
-      .num_dst_components = NUM_DST_COMPONENTS_ONE,
-   });
-
-   P_MTHD(p, NV90B5, PITCH_IN);
-   P_NV90B5_PITCH_IN(p, max_dim * 4);
-   P_NV90B5_PITCH_OUT(p, max_dim * 4);
-
    while (size >= 4) {
-      struct nv_push *p = nvk_cmd_buffer_push(cmd, 8);
+      struct nv_push *p = nvk_cmd_buffer_push(cmd, 15);
+
+      P_IMMD(p, NV90B5, SET_REMAP_CONST_A, data);
+      P_IMMD(p, NV90B5, SET_REMAP_COMPONENTS, {
+         .dst_x = DST_X_CONST_A,
+         .dst_y = DST_Y_CONST_A,
+         .dst_z = DST_Z_CONST_A,
+         .dst_w = DST_W_CONST_A,
+         .component_size = COMPONENT_SIZE_FOUR,
+         .num_src_components = NUM_SRC_COMPONENTS_ONE,
+         .num_dst_components = NUM_DST_COMPONENTS_ONE,
+      });
 
       P_MTHD(p, NV90B5, OFFSET_OUT_UPPER);
       P_NV90B5_OFFSET_OUT_UPPER(p, dst_addr >> 32);
       P_NV90B5_OFFSET_OUT_LOWER(p, dst_addr & 0xffffffff);
+      P_NV90B5_PITCH_IN(p, max_dim * 4);
+      P_NV90B5_PITCH_OUT(p, max_dim * 4);
 
       uint64_t width, height;
       if (size >= (uint64_t)max_dim * (uint64_t)max_dim * 4) {

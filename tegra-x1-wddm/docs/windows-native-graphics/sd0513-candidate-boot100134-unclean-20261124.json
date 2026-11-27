@@ -1,0 +1,121 @@
+{
+  "boot_before": 99935,
+  "observed_boot": 100134,
+  "native_candidate": {
+    "DeviceID": "ACPI\\NVDA0101\\0",
+    "InfName": "oem35.inf",
+    "DriverVersion": "0.5.1.3",
+    "DriverDate": "/Date(1795392000000)/",
+    "IsSigned": false
+  },
+  "SD_file": {
+    "path": "C:\\Windows\\System32\\drivers\\nvtsdhc.sys",
+    "sha256": "7100cc604cdce194afe7b6bb19f7f51ac29aa54784e53ac7de6adfbc6e021470",
+    "bytes": 50616
+  },
+  "SD_loaded_file_identity": {
+    "file": {
+      "path": "C:\\Windows\\System32\\drivers\\nvtsdhc.sys",
+      "sha256": "7100cc604cdce194afe7b6bb19f7f51ac29aa54784e53ac7de6adfbc6e021470",
+      "bytes": 50616
+    },
+    "reported_path": "\\SystemRoot\\System32\\drivers\\nvtsdhc.sys",
+    "identity_scope": "Enumerated loaded module path and on-disk file SHA256; no relocated kernel-memory hash",
+    "base": "0xfffff80018780000"
+  },
+  "SD_code": 0,
+  "native_restart_request": "sd-restartcandidate-e9ecbf774f23",
+  "request_queue_terminal": {
+    "path": "C:\\Program Files\\SwitchWOA-SDNative-0513-01a2094a-r1\\operations\\sd-restartcandidate-e9ecbf774f23.result.json",
+    "sha256": "f9027808e34c9796f6632d46290a504d7582637b0de9c7280060c8528ca63859",
+    "bytes": 13884
+  },
+  "queue_API_return_succeeded": true,
+  "physical_restart_request_consumed_no_replay": true,
+  "new_selected_events": [
+    {
+      "record": 100134,
+      "id": 12,
+      "provider": "Microsoft-Windows-Kernel-General",
+      "utc": "2026-11-24T03:33:03.8779066Z",
+      "fields": {
+        "MajorVersion": "10",
+        "MinorVersion": "0",
+        "BuildVersion": "22621",
+        "QfeVersion": "2861",
+        "ServiceVersion": "0",
+        "BootMode": "0",
+        "StartTime": "2026-11-24T03:33:02.1360343Z"
+      }
+    },
+    {
+      "record": 100143,
+      "id": 6008,
+      "provider": "EventLog",
+      "utc": "2026-11-24T04:11:59.9759287Z",
+      "fields": {
+        "0": "11:46:31",
+        "1": "‎2026/‎11/‎24",
+        "2": null,
+        "3": null,
+        "4": "3053",
+        "5": null,
+        "6": null
+      }
+    },
+    {
+      "record": 100152,
+      "id": 41,
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "utc": "2026-11-24T03:33:08.2555924Z",
+      "fields": {
+        "BugcheckCode": "0",
+        "BugcheckParameter1": "0x0",
+        "BugcheckParameter2": "0x0",
+        "BugcheckParameter3": "0x0",
+        "BugcheckParameter4": "0x0",
+        "SleepInProgress": "0",
+        "PowerButtonTimestamp": "0",
+        "BootAppStatus": "0",
+        "Checkpoint": "0",
+        "ConnectedStandbyInProgress": "false",
+        "SystemSleepTransitionsToOn": "0",
+        "CsEntryScenarioInstanceId": "0",
+        "BugcheckInfoFromEFI": "false",
+        "CheckpointStatus": "0",
+        "CsEntryScenarioInstanceIdV2": "0",
+        "LongPowerButtonPressDetected": "false",
+        "LidReliability": "false",
+        "InputSuppressionState": "0",
+        "PowerButtonSuppressionState": "0",
+        "LidState": "3"
+      }
+    }
+  ],
+  "unclean_boot_records": true,
+  "1074_in_selected_span": false,
+  "actual_shutdown_or_reset_cause": "unknown",
+  "relation_of_planned_queue_to_unclean_boot": "not proved by temporal proximity or Code0; actual dispatch and new boot retained separately",
+  "clock_nonmonotonic": true,
+  "NT_arrival": "unknown",
+  "real_dump_files_observed": [],
+  "NormalIO_consumed": false,
+  "DumpAcceptance_consumed": false,
+  "candidate_boot_qualified": false,
+  "readable_dump_qualified": false,
+  "restoration_not_started": true,
+  "current_owner_constraint": {
+    "retain_SD0513_candidate": true,
+    "restoration_actions_authorized_now": false,
+    "continue_SD_investigation": true
+  },
+  "next": "Collect existing full native System/shutdown/boot evidence under existing lease; assess this boundary before any further trial",
+  "source_raw": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/storage-native-r2/collection-work/native-original-archive/objects/9742046df0b6fc990ec4488447185e6db9184a47099cd7e731ee68dd867a7ab9",
+    "sha256": "9742046df0b6fc990ec4488447185e6db9184a47099cd7e731ee68dd867a7ab9"
+  },
+  "source_System_XML": {
+    "path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/work/tdr-contract-evidence-01a204e6/dump-repair-after-c4-99580-r1/storage-native-r2/collection-work/native-original-archive/objects/04ea4410f4c960572133d95fa320ce3261de841b2e4e7b101da7d6373373ebc1",
+    "sha256": "04ea4410f4c960572133d95fa320ce3261de841b2e4e7b101da7d6373373ebc1"
+  }
+}

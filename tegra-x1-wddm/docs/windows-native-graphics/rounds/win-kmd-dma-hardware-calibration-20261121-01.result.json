@@ -1,0 +1,1987 @@
+{
+  "schema": 1,
+  "round_id": "win-kmd-dma-hardware-calibration-20261121-01",
+  "contract_id": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+  "windows_question": "WIN-KMD-DMA-HARDWARE-CALIBRATION",
+  "plan_sha256": "b19b57bd37d47f198a3eb6fbe0bf4865292cb6e2899f3b4e421262435489366a",
+  "status": "故障开放",
+  "finding": "候选的一次性启动前，91650 已持久记录令牌值 1、Code 43，并收到 Windows 重启请求 1074。其后 91732 记录 6008/41，BugcheckCode=0。应用未发出，未取得候选 Code 0 或四阶段配对。最后一条关机实证是 91725/6006，距下一次有记录的内核开始 57.750 秒。前后两次受控对照均有 109/13，本段缺失。 启动 91832 已恢复正式 Code 0、永久许可和加载哈希。",
+  "missing_observation": "没有收到候选 Code 0 或工作负载回执。异常开机转换的第一失败组件、板级记录及原案 152586 的实际 KMD 接收仍待证。",
+  "device_executions": 0,
+  "evidence": {
+    "calibration": null,
+    "trial_profile": null,
+    "system_boot_audit": {
+      "start": 91557,
+      "end": 91832,
+      "events": [
+        {
+          "record": 91633,
+          "provider": "User32",
+          "utc": "2026-11-21T16:08:23.1334118Z",
+          "data": [
+            {
+              "value": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+              "name": "param1"
+            },
+            {
+              "value": "DESKTOP-5RCUK3G",
+              "name": "param2"
+            },
+            {
+              "value": "没有找到这个原因的标题",
+              "name": "param3"
+            },
+            {
+              "value": "0x81000000",
+              "name": "param4"
+            },
+            {
+              "value": "重启",
+              "name": "param5"
+            },
+            {
+              "value": "SwitchWOA graphics receipt enter closed gate before selecting candidate",
+              "name": "param6"
+            },
+            {
+              "value": "DESKTOP-5RCUK3G\\ruje",
+              "name": "param7"
+            }
+          ],
+          "id": 1074
+        },
+        {
+          "record": 91650,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-21T16:08:50.6162365Z",
+          "data": [
+            {
+              "value": "10",
+              "name": "MajorVersion"
+            },
+            {
+              "value": "0",
+              "name": "MinorVersion"
+            },
+            {
+              "value": "22621",
+              "name": "BuildVersion"
+            },
+            {
+              "value": "2861",
+              "name": "QfeVersion"
+            },
+            {
+              "value": "0",
+              "name": "ServiceVersion"
+            },
+            {
+              "value": "0",
+              "name": "BootMode"
+            },
+            {
+              "value": "2026-11-21T16:08:48.9530609Z",
+              "name": "StartTime"
+            }
+          ],
+          "id": 12
+        },
+        {
+          "record": 91722,
+          "provider": "User32",
+          "utc": "2026-11-21T16:11:50.7202974Z",
+          "data": [
+            {
+              "value": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+              "name": "param1"
+            },
+            {
+              "value": "DESKTOP-5RCUK3G",
+              "name": "param2"
+            },
+            {
+              "value": "没有找到这个原因的标题",
+              "name": "param3"
+            },
+            {
+              "value": "0x81000000",
+              "name": "param4"
+            },
+            {
+              "value": "重启",
+              "name": "param5"
+            },
+            {
+              "value": "SwitchWOA graphics receipt one-time candidate boot",
+              "name": "param6"
+            },
+            {
+              "value": "DESKTOP-5RCUK3G\\ruje",
+              "name": "param7"
+            }
+          ],
+          "id": 1074
+        },
+        {
+          "record": 91732,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-21T16:13:04.2104999Z",
+          "data": [
+            {
+              "value": "10",
+              "name": "MajorVersion"
+            },
+            {
+              "value": "0",
+              "name": "MinorVersion"
+            },
+            {
+              "value": "22621",
+              "name": "BuildVersion"
+            },
+            {
+              "value": "2861",
+              "name": "QfeVersion"
+            },
+            {
+              "value": "0",
+              "name": "ServiceVersion"
+            },
+            {
+              "value": "0",
+              "name": "BootMode"
+            },
+            {
+              "value": "2026-11-21T16:13:02.5383807Z",
+              "name": "StartTime"
+            }
+          ],
+          "id": 12
+        },
+        {
+          "record": 91741,
+          "provider": "EventLog",
+          "utc": "2026-11-21T16:14:55.7066228Z",
+          "data": [
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            }
+          ],
+          "id": 6008
+        },
+        {
+          "record": 91750,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-21T16:13:08.3340512Z",
+          "data": [
+            {
+              "value": "0",
+              "name": "BugcheckCode"
+            },
+            {
+              "value": "0x0",
+              "name": "BugcheckParameter1"
+            },
+            {
+              "value": "0x0",
+              "name": "BugcheckParameter2"
+            },
+            {
+              "value": "0x0",
+              "name": "BugcheckParameter3"
+            },
+            {
+              "value": "0x0",
+              "name": "BugcheckParameter4"
+            },
+            {
+              "value": "0",
+              "name": "SleepInProgress"
+            },
+            {
+              "value": "0",
+              "name": "PowerButtonTimestamp"
+            },
+            {
+              "value": "0",
+              "name": "BootAppStatus"
+            },
+            {
+              "value": "0",
+              "name": "Checkpoint"
+            },
+            {
+              "value": "false",
+              "name": "ConnectedStandbyInProgress"
+            },
+            {
+              "value": "0",
+              "name": "SystemSleepTransitionsToOn"
+            },
+            {
+              "value": "0",
+              "name": "CsEntryScenarioInstanceId"
+            },
+            {
+              "value": "false",
+              "name": "BugcheckInfoFromEFI"
+            },
+            {
+              "value": "0",
+              "name": "CheckpointStatus"
+            },
+            {
+              "value": "0",
+              "name": "CsEntryScenarioInstanceIdV2"
+            },
+            {
+              "value": "false",
+              "name": "LongPowerButtonPressDetected"
+            },
+            {
+              "value": "false",
+              "name": "LidReliability"
+            },
+            {
+              "value": "0",
+              "name": "InputSuppressionState"
+            },
+            {
+              "value": "0",
+              "name": "PowerButtonSuppressionState"
+            },
+            {
+              "value": "3",
+              "name": "LidState"
+            }
+          ],
+          "id": 41
+        },
+        {
+          "record": 91815,
+          "provider": "User32",
+          "utc": "2026-11-21T16:17:58.9345250Z",
+          "data": [
+            {
+              "value": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+              "name": "param1"
+            },
+            {
+              "value": "DESKTOP-5RCUK3G",
+              "name": "param2"
+            },
+            {
+              "value": "没有找到这个原因的标题",
+              "name": "param3"
+            },
+            {
+              "value": "0x81000000",
+              "name": "param4"
+            },
+            {
+              "value": "重启",
+              "name": "param5"
+            },
+            {
+              "value": "SwitchWOA graphics receipt restore verified permanent baseline",
+              "name": "param6"
+            },
+            {
+              "value": "DESKTOP-5RCUK3G\\ruje",
+              "name": "param7"
+            }
+          ],
+          "id": 1074
+        },
+        {
+          "record": 91832,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "utc": "2026-11-21T16:18:22.9747403Z",
+          "data": [
+            {
+              "value": "10",
+              "name": "MajorVersion"
+            },
+            {
+              "value": "0",
+              "name": "MinorVersion"
+            },
+            {
+              "value": "22621",
+              "name": "BuildVersion"
+            },
+            {
+              "value": "2861",
+              "name": "QfeVersion"
+            },
+            {
+              "value": "0",
+              "name": "ServiceVersion"
+            },
+            {
+              "value": "0",
+              "name": "BootMode"
+            },
+            {
+              "value": "2026-11-21T16:18:21.3015689Z",
+              "name": "StartTime"
+            }
+          ],
+          "id": 12
+        }
+      ],
+      "planned": [
+        {
+          "intent": {
+            "boot": 91557,
+            "phase": "ClosedForTrial",
+            "reason": "enter closed gate before selecting candidate",
+            "utc": "2026-11-21T16:08:22.8521635Z",
+            "queued": true
+          },
+          "next_boot": 91650,
+          "system_1074": [
+            {
+              "record": 91633,
+              "provider": "User32",
+              "utc": "2026-11-21T16:08:23.1334118Z",
+              "data": [
+                {
+                  "value": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+                  "name": "param1"
+                },
+                {
+                  "value": "DESKTOP-5RCUK3G",
+                  "name": "param2"
+                },
+                {
+                  "value": "没有找到这个原因的标题",
+                  "name": "param3"
+                },
+                {
+                  "value": "0x81000000",
+                  "name": "param4"
+                },
+                {
+                  "value": "重启",
+                  "name": "param5"
+                },
+                {
+                  "value": "SwitchWOA graphics receipt enter closed gate before selecting candidate",
+                  "name": "param6"
+                },
+                {
+                  "value": "DESKTOP-5RCUK3G\\ruje",
+                  "name": "param7"
+                }
+              ],
+              "id": 1074
+            }
+          ]
+        },
+        {
+          "intent": {
+            "boot": 91650,
+            "phase": "CandidateArmed",
+            "reason": "one-time candidate boot",
+            "utc": "2026-11-21T16:11:50.5484206Z",
+            "queued": true
+          },
+          "next_boot": 91732,
+          "system_1074": [
+            {
+              "record": 91722,
+              "provider": "User32",
+              "utc": "2026-11-21T16:11:50.7202974Z",
+              "data": [
+                {
+                  "value": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+                  "name": "param1"
+                },
+                {
+                  "value": "DESKTOP-5RCUK3G",
+                  "name": "param2"
+                },
+                {
+                  "value": "没有找到这个原因的标题",
+                  "name": "param3"
+                },
+                {
+                  "value": "0x81000000",
+                  "name": "param4"
+                },
+                {
+                  "value": "重启",
+                  "name": "param5"
+                },
+                {
+                  "value": "SwitchWOA graphics receipt one-time candidate boot",
+                  "name": "param6"
+                },
+                {
+                  "value": "DESKTOP-5RCUK3G\\ruje",
+                  "name": "param7"
+                }
+              ],
+              "id": 1074
+            }
+          ]
+        },
+        {
+          "intent": {
+            "boot": 91732,
+            "phase": "BaselineArmed",
+            "reason": "restore verified permanent baseline",
+            "utc": "2026-11-21T16:17:58.7470254Z",
+            "queued": true
+          },
+          "next_boot": 91832,
+          "system_1074": [
+            {
+              "record": 91815,
+              "provider": "User32",
+              "utc": "2026-11-21T16:17:58.9345250Z",
+              "data": [
+                {
+                  "value": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+                  "name": "param1"
+                },
+                {
+                  "value": "DESKTOP-5RCUK3G",
+                  "name": "param2"
+                },
+                {
+                  "value": "没有找到这个原因的标题",
+                  "name": "param3"
+                },
+                {
+                  "value": "0x81000000",
+                  "name": "param4"
+                },
+                {
+                  "value": "重启",
+                  "name": "param5"
+                },
+                {
+                  "value": "SwitchWOA graphics receipt restore verified permanent baseline",
+                  "name": "param6"
+                },
+                {
+                  "value": "DESKTOP-5RCUK3G\\ruje",
+                  "name": "param7"
+                }
+              ],
+              "id": 1074
+            }
+          ]
+        }
+      ],
+      "all_planned": false,
+      "unexpected": [
+        {
+          "record": 91741,
+          "provider": "EventLog",
+          "utc": "2026-11-21T16:14:55.7066228Z",
+          "data": [
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            },
+            {
+              "value": null,
+              "name": null
+            }
+          ],
+          "id": 6008
+        },
+        {
+          "record": 91750,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "utc": "2026-11-21T16:13:08.3340512Z",
+          "data": [
+            {
+              "value": "0",
+              "name": "BugcheckCode"
+            },
+            {
+              "value": "0x0",
+              "name": "BugcheckParameter1"
+            },
+            {
+              "value": "0x0",
+              "name": "BugcheckParameter2"
+            },
+            {
+              "value": "0x0",
+              "name": "BugcheckParameter3"
+            },
+            {
+              "value": "0x0",
+              "name": "BugcheckParameter4"
+            },
+            {
+              "value": "0",
+              "name": "SleepInProgress"
+            },
+            {
+              "value": "0",
+              "name": "PowerButtonTimestamp"
+            },
+            {
+              "value": "0",
+              "name": "BootAppStatus"
+            },
+            {
+              "value": "0",
+              "name": "Checkpoint"
+            },
+            {
+              "value": "false",
+              "name": "ConnectedStandbyInProgress"
+            },
+            {
+              "value": "0",
+              "name": "SystemSleepTransitionsToOn"
+            },
+            {
+              "value": "0",
+              "name": "CsEntryScenarioInstanceId"
+            },
+            {
+              "value": "false",
+              "name": "BugcheckInfoFromEFI"
+            },
+            {
+              "value": "0",
+              "name": "CheckpointStatus"
+            },
+            {
+              "value": "0",
+              "name": "CsEntryScenarioInstanceIdV2"
+            },
+            {
+              "value": "false",
+              "name": "LongPowerButtonPressDetected"
+            },
+            {
+              "value": "false",
+              "name": "LidReliability"
+            },
+            {
+              "value": "0",
+              "name": "InputSuppressionState"
+            },
+            {
+              "value": "0",
+              "name": "PowerButtonSuppressionState"
+            },
+            {
+              "value": "3",
+              "name": "LidState"
+            }
+          ],
+          "id": 41
+        }
+      ]
+    },
+    "formal_restored": {
+      "boot": 91832,
+      "desktop": 1432,
+      "code": 0,
+      "power": "Online",
+      "mode": 1,
+      "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+      "loaded": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618"
+      },
+      "components": {
+        "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+        "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+        "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+        "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+        "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+        "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+        "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+      },
+      "sha256": "4bd333a3154e5d44c5767577e259d423fb5bb88ef046bdac8449bf8a15b111c5"
+    },
+    "cleanup": {
+      "controller": {
+        "accepted": {
+          "trial": null,
+          "task": false,
+          "code": 0,
+          "phase_boot": 91832,
+          "utc": "2026-11-21T16:21:14.6822328Z",
+          "boot": 91832,
+          "token": null,
+          "inf": "oem27.inf",
+          "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+          "phase": "Finished",
+          "last_error": null,
+          "kmd": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+          "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b"
+        },
+        "removed_trial_root": true,
+        "candidate_package_removed": "oem28.inf",
+        "recovery_task_removed": true
+      },
+      "profile": {
+        "removed": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\dma-boundary-ba56e4350720",
+        "restored": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+        "sha256": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18"
+      },
+      "window": null
+    },
+    "raw_boot_receipt": "8b0ed8eea1ca02c146f0d55201230a119ac12621887cd97aaff68999a6d8eb53",
+    "historical_control": {
+      "control_boot": 87268,
+      "pid": 5872,
+      "dwm": 1468,
+      "app_luid": "0000000000005590",
+      "etl_sha256": "baad5d18dda92cdcc24ac0e83f8ff45dac96d735b647f12ba24d47b1e4a7d9c8",
+      "input_sha256": "32b47d29f3dc401dc6ecc309d82b7c28ad1a3ead92d8219ec109692fab5f2b10",
+      "context": {
+        "device": {
+          "qpc": 9713677277,
+          "pid": 5872,
+          "tid": 6600,
+          "provider": "kernel",
+          "id": 27,
+          "version": 2,
+          "fields": {
+            "hProcessId": 5872,
+            "pDxgAdapter": 18446616546758111232,
+            "ClientType": 1,
+            "hDevice": 18446705603124133904,
+            "RequestVSync": 1,
+            "DisableGpuTimeout": 0,
+            "hThunkHandle": 1073742080,
+            "DxgProcess": 18446705603117079856,
+            "HostDeviceHandle": 0,
+            "VirtualGpu": 0
+          }
+        },
+        "context": {
+          "qpc": 9714447328,
+          "pid": 5872,
+          "tid": 6600,
+          "provider": "kernel",
+          "id": 30,
+          "version": 0,
+          "fields": {
+            "hDevice": 18446705603124133904,
+            "NodeOrdinal": 0,
+            "EngineAffinity": 1,
+            "DmaBufferSize": 65536,
+            "DmaBufferSegmentSet": 2,
+            "DmaBufferPrivateDataSize": 65864,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "Flags": 0,
+            "hContext": 18446705603123238560,
+            "ContextHandle": 1073743040,
+            "ParentDxgContext": 0
+          }
+        },
+        "association": {
+          "qpc": 9714448499,
+          "pid": 5872,
+          "tid": 6600,
+          "provider": "kernel",
+          "id": 433,
+          "version": 1,
+          "fields": {
+            "pDxgObject": 18446705603123238560,
+            "pSchObject": 18446616546794023776,
+            "hKmdHandle": 18446616546725804496,
+            "hOsHandle": 18446616546778023792
+          }
+        },
+        "end_qpc": 9904531304
+      },
+      "chain": {
+        "enqueue": {
+          "qpc": 9714520355,
+          "pid": 5872,
+          "tid": 6600,
+          "provider": "kernel",
+          "id": 178,
+          "version": 1,
+          "fields": {
+            "hContext": 18446705603123238560,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "DmaBufferSize": 7508,
+            "AllocationListSize": 0,
+            "PatchLocationListSize": 0,
+            "bPresent": 0,
+            "hDmaBuffer": 0,
+            "pQueuePacket": 18446616546764927776,
+            "ProgressFenceValue": 0
+          }
+        },
+        "start": {
+          "qpc": 9714522213,
+          "pid": 4,
+          "tid": 932,
+          "provider": "kernel",
+          "id": 175,
+          "version": 1,
+          "fields": {
+            "hContext": 18446705603123238560,
+            "hQueuePacketContext": 0,
+            "PacketType": 0,
+            "uliSubmissionId": 12234,
+            "ulQueueSubmitSequence": 1,
+            "pDmaBuffer": 0,
+            "QuantumStatus": 1
+          }
+        },
+        "completion_interrupt": {
+          "qpc": 9714574471,
+          "pid": 4,
+          "tid": 928,
+          "provider": "kernel",
+          "id": 177,
+          "version": 1,
+          "fields": {
+            "hContext": 18446705603123238560,
+            "PacketType": 0,
+            "uliCompletionId": 12234,
+            "ulQueueSubmitSequence": 1,
+            "InterruptType": 1,
+            "QuantumStatus": 1,
+            "FaultedVirtualAddress": 0,
+            "PageFaultFlags": 0,
+            "FaultedProcessHandle": 0
+          }
+        },
+        "completion": {
+          "qpc": 9714574947,
+          "pid": 4,
+          "tid": 928,
+          "provider": "kernel",
+          "id": 176,
+          "version": 0,
+          "fields": {
+            "hContext": 18446705603123238560,
+            "PacketType": 0,
+            "uliCompletionId": 12234,
+            "ulQueueSubmitSequence": 1,
+            "bPreempted": 0
+          }
+        },
+        "retire": {
+          "qpc": 9714575109,
+          "pid": 4,
+          "tid": 928,
+          "provider": "kernel",
+          "id": 180,
+          "version": 1,
+          "fields": {
+            "hContext": 18446705603123238560,
+            "PacketType": 0,
+            "SubmitSequence": 1,
+            "bPreempted": 0,
+            "bTimeouted": 0,
+            "pQueuePacket": 18446616546764927776
+          }
+        }
+      },
+      "before_first_present_ms": 9708.264
+    },
+    "runner_adjustments": [
+      {
+        "file": "cycle.py",
+        "planned_sha256": "e50d9c09b31ae7687afabc012fd6168c861f6aa168e73bfdaf29c701dc2a4745",
+        "actual_sha256": "a37e596e3ecbea75999cb04d186e1ac8e58d474da3d3af3929bc37159e375c57",
+        "reason": "Correct the local import name before any protected controller or reboot command executes"
+      }
+    ],
+    "candidate_signature": {
+      "status": "Valid",
+      "sha256": "0718352b0b39ad9ebeb11bc94bbeb9fb55f84de4d6cb18f8abb99df5bc202e6d",
+      "members": {
+        "nv_acr_ucode_prod.bin": "594a6ceed45aefd6c92b9e9089bae2bcee8db5730fa9cffaebe443eb8655a772",
+        "fecs_sig.bin": "0cca8b6fb18bdc660ad65970f54ec9dd5c51ae9d9ab68244b1c4dc017f6248fc",
+        "tegragpurender.sys": "ba56e4350720a262804e669787f7f431fd65e1b0250183266bc850122dcf2171",
+        "gpccs.bin": "97bda367d2b2cffa98b8084dae7803233474e439d1bdf6edc4029b405695f7ba",
+        "pmu_sig.bin": "de3aab7bf47484ce8b8cf4f66de551e43f06d8f3db177bf9e5aaf1b653a5c132",
+        "NETB_img.bin": "5b285e5de99b935c2619e54b1656b8a2f271ba845e80952faadfd09960d6eea3",
+        "tegragpurender.inf": "7e9279bb8c031b239663880adbc7967d23b231458755041e13cf230f3e7f8a09",
+        "pmu_bl.bin": "364cf184d6f3ae0130ae449748e688d76bba3e33de2704ca536a5144751f12e1",
+        "gpmu_ucode_desc.bin": "e76b29528f63ab09ce85e91767c8a3fa5dc6a4704c7ca0efb1faf095f1faf76b",
+        "fecs.bin": "6b5a3ce1f2fd1381b8aed500e0d034561a8b3054e7702e8447e12fcde7978253",
+        "tegragpuno3d.dll": "bf490b3816830cd1d2db79113bb24a9e384094ed742c83815985d7ed9ba3280d",
+        "gpmu_ucode_image.bin": "1e14af6fb9760cfb37c95199bbbb2c01f51ba1ad6b56104a27beac137368e699"
+      },
+      "tool_sha256": "29955332740f64db0d2cd67d787fef0ddc0a77525337f966e34e77d8d9a6002e"
+    },
+    "aborted_candidate": {
+      "new_fault": "GM20B-DMA-CANDIDATE-BOOT-RESTART-91732",
+      "retained": {
+        "pnp": [
+          {
+            "key": "DEVPKEY_Device_ProblemCode",
+            "data": 43
+          },
+          {
+            "key": "DEVPKEY_Device_ProblemStatus",
+            "data": 0
+          },
+          {
+            "key": "DEVPKEY_Device_DriverInfPath",
+            "data": "oem27.inf"
+          }
+        ],
+        "captured_utc": "2026-11-21T16:17:46.9032741Z",
+        "logs": [
+          {
+            "name": "Microsoft-Windows-Kernel-PnP/Configuration",
+            "rows": [
+              {
+                "id": 411,
+                "data": [
+                  {
+                    "Value": "ACPI\\SWOA0F01\\0",
+                    "Name": "DeviceInstanceId"
+                  },
+                  {
+                    "Value": "oem27.inf",
+                    "Name": "DriverName"
+                  },
+                  {
+                    "Value": "{4d36e968-e325-11ce-bfc1-08002be10318}",
+                    "Name": "ClassGuid"
+                  },
+                  {
+                    "Value": "tegragpurender",
+                    "Name": "ServiceName"
+                  },
+                  {
+                    "Value": null,
+                    "Name": "LowerFilters"
+                  },
+                  {
+                    "Value": null,
+                    "Name": "UpperFilters"
+                  },
+                  {
+                    "Value": "0x0",
+                    "Name": "Problem"
+                  },
+                  {
+                    "Value": "0xc00000e5",
+                    "Name": "Status"
+                  }
+                ],
+                "provider": "Microsoft-Windows-Kernel-PnP",
+                "record": 1339,
+                "utc": "2026-11-21T16:16:08.6995298Z",
+                "log": "Microsoft-Windows-Kernel-PnP/Configuration"
+              },
+              {
+                "id": 400,
+                "data": [
+                  {
+                    "Value": "ACPI\\SWOA0F01\\0",
+                    "Name": "DeviceInstanceId"
+                  },
+                  {
+                    "Value": "oem27.inf",
+                    "Name": "DriverName"
+                  },
+                  {
+                    "Value": "{4d36e968-e325-11ce-bfc1-08002be10318}",
+                    "Name": "ClassGuid"
+                  },
+                  {
+                    "Value": "11/21/2026",
+                    "Name": "DriverDate"
+                  },
+                  {
+                    "Value": "0.1.0.158",
+                    "Name": "DriverVersion"
+                  },
+                  {
+                    "Value": "SwitchWOA",
+                    "Name": "DriverProvider"
+                  },
+                  {
+                    "Value": "false",
+                    "Name": "DriverInbox"
+                  },
+                  {
+                    "Value": "Install.NT",
+                    "Name": "DriverSection"
+                  },
+                  {
+                    "Value": "0xff0003",
+                    "Name": "DriverRank"
+                  },
+                  {
+                    "Value": "ACPI\\SWOA0F01",
+                    "Name": "MatchingDeviceId"
+                  },
+                  {
+                    "Value": "oem92.inf:ACPI\\SWOA0F01:00FF0003 oem93.inf:ACPI\\SWOA0F01:00FF0003 oem94.inf:ACPI\\SWOA0F01:00FF0003 oem95.inf:ACPI\\SWOA0F01:00FF0003 oem96.inf:ACPI\\SWOA0F01:00FF0003 oem97.inf:ACPI\\SWOA0F01:00FF0003 oem98.inf:ACPI\\SWOA0F01:00FF0003 oem99.inf:ACPI\\SWOA0F01:00FF0003 oem100.inf:ACPI\\SWOA0F01:00FF0003 oem101.inf:ACPI\\SWOA0F01:00FF0003 oem102.inf:ACPI\\SWOA0F01:00FF0003 oem103.inf:ACPI\\SWOA0F01:00FF0003 oem104.inf:ACPI\\SWOA0F01:00FF0003 oem105.inf:ACPI\\SWOA0F01:00FF0003 oem106.inf:ACPI\\SWOA0F01:00FF0003 oem109.inf:ACPI\\SWOA0F01:00FF0003 oem118.inf:ACPI\\SWOA0F01:00FF0003 oem132.inf:ACPI\\SWOA0F01:00FF0003 oem133.inf:ACPI\\SWOA0F01:00FF0003 oem134.inf:ACPI\\SWOA0F01:00FF0003 oem135.inf:ACPI\\SWOA0F01:00FF0003 oem136.inf:ACPI\\SWOA0F01:00FF0003 oem137.inf:ACPI\\SWOA0F01:00FF0003 oem138.inf:ACPI\\SWOA0F01:00FF0003 oem139.inf:ACPI\\SWOA0F01:00FF0003 oem140.inf:ACPI\\SWOA0F01:00FF0003 oem0.inf:ACPI\\SWOA0F01:00FF0003 oem3.inf:ACPI\\SWOA0F01:00FF0003 oem4.inf:ACPI\\SWOA0F01:00FF0003 oem5.inf:ACPI\\SWOA0F01:00FF0003 oem7.inf:ACPI\\SWOA0F01:00FF0003 oem10.inf:ACPI\\SWOA0F01:00FF0003 oem11.inf:ACPI\\SWOA0F01:00FF0003 oem12.inf:ACPI\\SWOA0F01:00FF0003 oem13.inf:ACPI\\SWOA0F01:00FF0003 oem15.inf:ACPI\\SWOA0F01:00FF0003 oem16.inf:ACPI\\SWOA0F01:00FF0003 oem1.inf:ACPI\\SWOA0F01:00FF0003 oem8.inf:ACPI\\SWOA0F01:00FF0003 oem19.inf:ACPI\\SWOA0F01:00FF0003 oem25.inf:ACPI\\SWOA0F01:00FF0003 oem20.inf:ACPI\\SWOA0F01:00FF0003 oem28.inf:ACPI\\SWOA0F01:00FF0003",
+                    "Name": "OutrankedDrivers"
+                  },
+                  {
+                    "Value": "true",
+                    "Name": "DeviceUpdated"
+                  },
+                  {
+                    "Value": "0x0",
+                    "Name": "Status"
+                  },
+                  {
+                    "Value": "ACPI_HAL\\PNP0C08\\0",
+                    "Name": "ParentDeviceInstanceId"
+                  }
+                ],
+                "provider": "Microsoft-Windows-Kernel-PnP",
+                "record": 1338,
+                "utc": "2026-11-21T16:16:08.6625585Z",
+                "log": "Microsoft-Windows-Kernel-PnP/Configuration"
+              },
+              {
+                "id": 411,
+                "data": [
+                  {
+                    "Value": "ACPI\\SWOA0F01\\0",
+                    "Name": "DeviceInstanceId"
+                  },
+                  {
+                    "Value": "oem28.inf",
+                    "Name": "DriverName"
+                  },
+                  {
+                    "Value": "{4d36e968-e325-11ce-bfc1-08002be10318}",
+                    "Name": "ClassGuid"
+                  },
+                  {
+                    "Value": "tegragpurender",
+                    "Name": "ServiceName"
+                  },
+                  {
+                    "Value": null,
+                    "Name": "LowerFilters"
+                  },
+                  {
+                    "Value": null,
+                    "Name": "UpperFilters"
+                  },
+                  {
+                    "Value": "0x0",
+                    "Name": "Problem"
+                  },
+                  {
+                    "Value": "0xc00000e5",
+                    "Name": "Status"
+                  }
+                ],
+                "provider": "Microsoft-Windows-Kernel-PnP",
+                "record": 1337,
+                "utc": "2026-11-21T16:10:54.4345784Z",
+                "log": "Microsoft-Windows-Kernel-PnP/Configuration"
+              },
+              {
+                "id": 400,
+                "data": [
+                  {
+                    "Value": "ACPI\\SWOA0F01\\0",
+                    "Name": "DeviceInstanceId"
+                  },
+                  {
+                    "Value": "oem28.inf",
+                    "Name": "DriverName"
+                  },
+                  {
+                    "Value": "{4d36e968-e325-11ce-bfc1-08002be10318}",
+                    "Name": "ClassGuid"
+                  },
+                  {
+                    "Value": "11/21/2026",
+                    "Name": "DriverDate"
+                  },
+                  {
+                    "Value": "0.1.0.158",
+                    "Name": "DriverVersion"
+                  },
+                  {
+                    "Value": "SwitchWOA",
+                    "Name": "DriverProvider"
+                  },
+                  {
+                    "Value": "false",
+                    "Name": "DriverInbox"
+                  },
+                  {
+                    "Value": "Install.NT",
+                    "Name": "DriverSection"
+                  },
+                  {
+                    "Value": "0xff0003",
+                    "Name": "DriverRank"
+                  },
+                  {
+                    "Value": "ACPI\\SWOA0F01",
+                    "Name": "MatchingDeviceId"
+                  },
+                  {
+                    "Value": "oem92.inf:ACPI\\SWOA0F01:00FF0003 oem93.inf:ACPI\\SWOA0F01:00FF0003 oem94.inf:ACPI\\SWOA0F01:00FF0003 oem95.inf:ACPI\\SWOA0F01:00FF0003 oem96.inf:ACPI\\SWOA0F01:00FF0003 oem97.inf:ACPI\\SWOA0F01:00FF0003 oem98.inf:ACPI\\SWOA0F01:00FF0003 oem99.inf:ACPI\\SWOA0F01:00FF0003 oem100.inf:ACPI\\SWOA0F01:00FF0003 oem101.inf:ACPI\\SWOA0F01:00FF0003 oem102.inf:ACPI\\SWOA0F01:00FF0003 oem103.inf:ACPI\\SWOA0F01:00FF0003 oem104.inf:ACPI\\SWOA0F01:00FF0003 oem105.inf:ACPI\\SWOA0F01:00FF0003 oem106.inf:ACPI\\SWOA0F01:00FF0003 oem109.inf:ACPI\\SWOA0F01:00FF0003 oem118.inf:ACPI\\SWOA0F01:00FF0003 oem132.inf:ACPI\\SWOA0F01:00FF0003 oem133.inf:ACPI\\SWOA0F01:00FF0003 oem134.inf:ACPI\\SWOA0F01:00FF0003 oem135.inf:ACPI\\SWOA0F01:00FF0003 oem136.inf:ACPI\\SWOA0F01:00FF0003 oem137.inf:ACPI\\SWOA0F01:00FF0003 oem138.inf:ACPI\\SWOA0F01:00FF0003 oem139.inf:ACPI\\SWOA0F01:00FF0003 oem140.inf:ACPI\\SWOA0F01:00FF0003 oem0.inf:ACPI\\SWOA0F01:00FF0003 oem3.inf:ACPI\\SWOA0F01:00FF0003 oem4.inf:ACPI\\SWOA0F01:00FF0003 oem5.inf:ACPI\\SWOA0F01:00FF0003 oem7.inf:ACPI\\SWOA0F01:00FF0003 oem10.inf:ACPI\\SWOA0F01:00FF0003 oem11.inf:ACPI\\SWOA0F01:00FF0003 oem12.inf:ACPI\\SWOA0F01:00FF0003 oem13.inf:ACPI\\SWOA0F01:00FF0003 oem15.inf:ACPI\\SWOA0F01:00FF0003 oem16.inf:ACPI\\SWOA0F01:00FF0003 oem1.inf:ACPI\\SWOA0F01:00FF0003 oem8.inf:ACPI\\SWOA0F01:00FF0003 oem19.inf:ACPI\\SWOA0F01:00FF0003 oem25.inf:ACPI\\SWOA0F01:00FF0003 oem20.inf:ACPI\\SWOA0F01:00FF0003 oem27.inf:ACPI\\SWOA0F01:00FF0003",
+                    "Name": "OutrankedDrivers"
+                  },
+                  {
+                    "Value": "true",
+                    "Name": "DeviceUpdated"
+                  },
+                  {
+                    "Value": "0x0",
+                    "Name": "Status"
+                  },
+                  {
+                    "Value": "ACPI_HAL\\PNP0C08\\0",
+                    "Name": "ParentDeviceInstanceId"
+                  }
+                ],
+                "provider": "Microsoft-Windows-Kernel-PnP",
+                "record": 1336,
+                "utc": "2026-11-21T16:10:54.3281483Z",
+                "log": "Microsoft-Windows-Kernel-PnP/Configuration"
+              }
+            ],
+            "enabled": true
+          },
+          {
+            "name": "Microsoft-Windows-CodeIntegrity/Operational",
+            "rows": [],
+            "enabled": true
+          },
+          {
+            "name": "Microsoft-Windows-TaskScheduler/Operational",
+            "rows": [],
+            "enabled": false
+          }
+        ],
+        "boot": 91732,
+        "startup_at_recovery_state": {
+          "StartGateStatus": 3221225635,
+          "BootGpuRailUv": 0,
+          "BootGpuTargetKhz": 460800,
+          "BootPermitStatus": 3221225524,
+          "HardwareStatus": 4294967295,
+          "BootGpuMeasuredKhz": 0
+        },
+        "system": [
+          {
+            "id": 41,
+            "data": [
+              {
+                "Value": "0",
+                "Name": "BugcheckCode"
+              },
+              {
+                "Value": "0x0",
+                "Name": "BugcheckParameter1"
+              },
+              {
+                "Value": "0x0",
+                "Name": "BugcheckParameter2"
+              },
+              {
+                "Value": "0x0",
+                "Name": "BugcheckParameter3"
+              },
+              {
+                "Value": "0x0",
+                "Name": "BugcheckParameter4"
+              },
+              {
+                "Value": "0",
+                "Name": "SleepInProgress"
+              },
+              {
+                "Value": "0",
+                "Name": "PowerButtonTimestamp"
+              },
+              {
+                "Value": "0",
+                "Name": "BootAppStatus"
+              },
+              {
+                "Value": "0",
+                "Name": "Checkpoint"
+              },
+              {
+                "Value": "false",
+                "Name": "ConnectedStandbyInProgress"
+              },
+              {
+                "Value": "0",
+                "Name": "SystemSleepTransitionsToOn"
+              },
+              {
+                "Value": "0",
+                "Name": "CsEntryScenarioInstanceId"
+              },
+              {
+                "Value": "false",
+                "Name": "BugcheckInfoFromEFI"
+              },
+              {
+                "Value": "0",
+                "Name": "CheckpointStatus"
+              },
+              {
+                "Value": "0",
+                "Name": "CsEntryScenarioInstanceIdV2"
+              },
+              {
+                "Value": "false",
+                "Name": "LongPowerButtonPressDetected"
+              },
+              {
+                "Value": "false",
+                "Name": "LidReliability"
+              },
+              {
+                "Value": "0",
+                "Name": "InputSuppressionState"
+              },
+              {
+                "Value": "0",
+                "Name": "PowerButtonSuppressionState"
+              },
+              {
+                "Value": "3",
+                "Name": "LidState"
+              }
+            ],
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "record": 91750,
+            "utc": "2026-11-21T16:13:08.3340512Z",
+            "log": "System"
+          },
+          {
+            "id": 6008,
+            "data": [
+              {
+                "Value": null,
+                "Name": null
+              },
+              {
+                "Value": null,
+                "Name": null
+              },
+              {
+                "Value": null,
+                "Name": null
+              },
+              {
+                "Value": null,
+                "Name": null
+              },
+              {
+                "Value": null,
+                "Name": null
+              },
+              {
+                "Value": null,
+                "Name": null
+              },
+              {
+                "Value": null,
+                "Name": null
+              }
+            ],
+            "provider": "EventLog",
+            "record": 91741,
+            "utc": "2026-11-21T16:14:55.7066228Z",
+            "log": "System"
+          },
+          {
+            "id": 12,
+            "data": [
+              {
+                "Value": "10",
+                "Name": "MajorVersion"
+              },
+              {
+                "Value": "0",
+                "Name": "MinorVersion"
+              },
+              {
+                "Value": "22621",
+                "Name": "BuildVersion"
+              },
+              {
+                "Value": "2861",
+                "Name": "QfeVersion"
+              },
+              {
+                "Value": "0",
+                "Name": "ServiceVersion"
+              },
+              {
+                "Value": "0",
+                "Name": "BootMode"
+              },
+              {
+                "Value": "2026-11-21T16:13:02.5383807Z",
+                "Name": "StartTime"
+              }
+            ],
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91732,
+            "utc": "2026-11-21T16:13:04.2104999Z",
+            "log": "System"
+          },
+          {
+            "id": 1074,
+            "data": [
+              {
+                "Value": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+                "Name": "param1"
+              },
+              {
+                "Value": "DESKTOP-5RCUK3G",
+                "Name": "param2"
+              },
+              {
+                "Value": "没有找到这个原因的标题",
+                "Name": "param3"
+              },
+              {
+                "Value": "0x81000000",
+                "Name": "param4"
+              },
+              {
+                "Value": "重启",
+                "Name": "param5"
+              },
+              {
+                "Value": "SwitchWOA graphics receipt one-time candidate boot",
+                "Name": "param6"
+              },
+              {
+                "Value": "DESKTOP-5RCUK3G\\ruje",
+                "Name": "param7"
+              }
+            ],
+            "provider": "User32",
+            "record": 91722,
+            "utc": "2026-11-21T16:11:50.7202974Z",
+            "log": "System"
+          },
+          {
+            "id": 12,
+            "data": [
+              {
+                "Value": "10",
+                "Name": "MajorVersion"
+              },
+              {
+                "Value": "0",
+                "Name": "MinorVersion"
+              },
+              {
+                "Value": "22621",
+                "Name": "BuildVersion"
+              },
+              {
+                "Value": "2861",
+                "Name": "QfeVersion"
+              },
+              {
+                "Value": "0",
+                "Name": "ServiceVersion"
+              },
+              {
+                "Value": "0",
+                "Name": "BootMode"
+              },
+              {
+                "Value": "2026-11-21T16:08:48.9530609Z",
+                "Name": "StartTime"
+              }
+            ],
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91650,
+            "utc": "2026-11-21T16:08:50.6162365Z",
+            "log": "System"
+          },
+          {
+            "id": 1074,
+            "data": [
+              {
+                "Value": "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+                "Name": "param1"
+              },
+              {
+                "Value": "DESKTOP-5RCUK3G",
+                "Name": "param2"
+              },
+              {
+                "Value": "没有找到这个原因的标题",
+                "Name": "param3"
+              },
+              {
+                "Value": "0x81000000",
+                "Name": "param4"
+              },
+              {
+                "Value": "重启",
+                "Name": "param5"
+              },
+              {
+                "Value": "SwitchWOA graphics receipt enter closed gate before selecting candidate",
+                "Name": "param6"
+              },
+              {
+                "Value": "DESKTOP-5RCUK3G\\ruje",
+                "Name": "param7"
+              }
+            ],
+            "provider": "User32",
+            "record": 91633,
+            "utc": "2026-11-21T16:08:23.1334118Z",
+            "log": "System"
+          }
+        ],
+        "selection": {
+          "selection-baseline.json": {
+            "boot": 91732,
+            "rc": 0,
+            "ok": true,
+            "reboot": false,
+            "utc": "2026-11-21T16:16:09.2237177Z",
+            "published": "oem27.inf"
+          },
+          "selection-trial.json": {
+            "boot": 91650,
+            "rc": 0,
+            "ok": true,
+            "reboot": false,
+            "utc": "2026-11-21T16:10:54.9931082Z",
+            "published": "oem28.inf"
+          },
+          "restart-needed.json": {
+            "phase": "BaselineArmed",
+            "utc": "2026-11-21T16:16:33.4657901Z",
+            "boot": 91732,
+            "reason": "restore verified permanent baseline"
+          },
+          "cycle-state.json": {
+            "phase": "BaselineArmed",
+            "boot": 91732,
+            "utc": "2026-11-21T16:16:33.2939176Z",
+            "history": [
+              {
+                "phase": "Prepared",
+                "boot": 91557,
+                "utc": "2026-11-21T16:07:35.0509780Z"
+              },
+              {
+                "phase": "Disarming",
+                "boot": 91557,
+                "utc": "2026-11-21T16:07:50.5944768Z"
+              },
+              {
+                "phase": "ClosedForTrial",
+                "boot": 91557,
+                "utc": "2026-11-21T16:08:03.2448351Z"
+              },
+              {
+                "phase": "SelectingCandidate",
+                "boot": 91650,
+                "utc": "2026-11-21T16:10:48.5514392Z"
+              },
+              {
+                "phase": "CandidateGateClosed",
+                "boot": 91650,
+                "utc": "2026-11-21T16:10:58.2828203Z"
+              },
+              {
+                "phase": "CandidateArmed",
+                "boot": 91650,
+                "utc": "2026-11-21T16:11:38.0327996Z"
+              },
+              {
+                "phase": "Restoring",
+                "boot": 91732,
+                "utc": "2026-11-21T16:16:03.7862146Z"
+              },
+              {
+                "phase": "BaselineArmed",
+                "boot": 91732,
+                "utc": "2026-11-21T16:16:33.2939176Z"
+              }
+            ],
+            "candidate_oem": "oem28.inf"
+          }
+        }
+      },
+      "raw_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/live-calibration/activation/aborted-candidate-boot.json",
+      "raw_sha256": "f08c756866a8e7bf9494b7c9c71885c542222b20c4cd41a3d23d51d31a9514fc",
+      "expanded_time_window": {
+        "raw_sha256": "fd994911b862c8db92a73cd84ab859374c29ccbd3ea3b08770b70fe815661a97",
+        "device_scope": "System event interval from previous healthy planned transition through the baseline recovery request",
+        "selected": [
+          {
+            "id": 1074,
+            "provider": "User32",
+            "record": 91633,
+            "values": [
+              "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+              "DESKTOP-5RCUK3G",
+              "没有找到这个原因的标题",
+              "0x81000000",
+              "重启",
+              "SwitchWOA graphics receipt enter closed gate before selecting candidate",
+              "DESKTOP-5RCUK3G\\ruje"
+            ],
+            "time": "2026-11-21T16:08:23.1334118Z"
+          },
+          {
+            "id": 6006,
+            "provider": "EventLog",
+            "record": 91635,
+            "values": [
+              "0100000000000000"
+            ],
+            "time": "2026-11-21T16:08:39.6438801Z"
+          },
+          {
+            "id": 6005,
+            "provider": "EventLog",
+            "record": 91644,
+            "values": [
+              "EA070B0006001500100009002D003B000000000000000000"
+            ],
+            "time": "2026-11-21T16:09:45.0625214Z"
+          },
+          {
+            "id": 109,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "record": 91647,
+            "values": [
+              "5",
+              "0",
+              "5"
+            ],
+            "time": "2026-11-21T16:08:43.7048288Z"
+          },
+          {
+            "id": 13,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91649,
+            "values": [
+              "11/22/2026 00:08:46"
+            ],
+            "time": "2026-11-21T16:08:46.6861228Z"
+          },
+          {
+            "id": 12,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91650,
+            "values": [
+              "10",
+              "0",
+              "22621",
+              "2861",
+              "0",
+              "0",
+              "11/22/2026 00:08:48"
+            ],
+            "time": "2026-11-21T16:08:50.6162365Z"
+          },
+          {
+            "id": 20,
+            "provider": "Microsoft-Windows-Kernel-Boot",
+            "record": 91652,
+            "values": [
+              "True",
+              "True",
+              "1",
+              "2"
+            ],
+            "time": "2026-11-21T16:08:50.6173379Z"
+          },
+          {
+            "id": 27,
+            "provider": "Microsoft-Windows-Kernel-Boot",
+            "record": 91655,
+            "values": [
+              "0",
+              " TESTSIGNING  NOEXECUTE=OPTIN  FVEBOOT=2149076992  NOVGA"
+            ],
+            "time": "2026-11-21T16:08:50.6177311Z"
+          },
+          {
+            "id": 20,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91658,
+            "values": [
+              "0",
+              "True",
+              "0",
+              "0"
+            ],
+            "time": "2026-11-21T16:08:50.6316835Z"
+          },
+          {
+            "id": 1074,
+            "provider": "User32",
+            "record": 91722,
+            "values": [
+              "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+              "DESKTOP-5RCUK3G",
+              "没有找到这个原因的标题",
+              "0x81000000",
+              "重启",
+              "SwitchWOA graphics receipt one-time candidate boot",
+              "DESKTOP-5RCUK3G\\ruje"
+            ],
+            "time": "2026-11-21T16:11:50.7202974Z"
+          },
+          {
+            "id": 6006,
+            "provider": "EventLog",
+            "record": 91725,
+            "values": [
+              "0100000000000000"
+            ],
+            "time": "2026-11-21T16:12:04.7879189Z"
+          },
+          {
+            "id": 12,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91732,
+            "values": [
+              "10",
+              "0",
+              "22621",
+              "2861",
+              "0",
+              "0",
+              "11/22/2026 00:13:02"
+            ],
+            "time": "2026-11-21T16:13:04.2104999Z"
+          },
+          {
+            "id": 20,
+            "provider": "Microsoft-Windows-Kernel-Boot",
+            "record": 91734,
+            "values": [
+              "True",
+              "True",
+              "1",
+              "2"
+            ],
+            "time": "2026-11-21T16:13:04.2115839Z"
+          },
+          {
+            "id": 27,
+            "provider": "Microsoft-Windows-Kernel-Boot",
+            "record": 91737,
+            "values": [
+              "0",
+              " TESTSIGNING  NOEXECUTE=OPTIN  FVEBOOT=2149076992  NOVGA"
+            ],
+            "time": "2026-11-21T16:13:04.2117987Z"
+          },
+          {
+            "id": 20,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91740,
+            "values": [
+              "0",
+              "True",
+              "0",
+              "0"
+            ],
+            "time": "2026-11-21T16:13:04.2258656Z"
+          },
+          {
+            "id": 6008,
+            "provider": "EventLog",
+            "record": 91741,
+            "values": [
+              "0:13:07",
+              "‎2026/‎11/‎22",
+              "",
+              "",
+              "35",
+              "",
+              "",
+              "EA070B000000160000000D0007000801EA070B000600150010000D00070008013C0000003C000000000000000000000000000000000000000100000000000000"
+            ],
+            "time": "2026-11-21T16:14:55.7066228Z"
+          },
+          {
+            "id": 6005,
+            "provider": "EventLog",
+            "record": 91743,
+            "values": [
+              "EA070B000600150010000E003700C5020000000000000000"
+            ],
+            "time": "2026-11-21T16:14:55.7097930Z"
+          },
+          {
+            "id": 41,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "record": 91750,
+            "values": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "False",
+              "0",
+              "0",
+              "False",
+              "0",
+              "0",
+              "False",
+              "False",
+              "0",
+              "0",
+              "3"
+            ],
+            "time": "2026-11-21T16:13:08.3340512Z"
+          },
+          {
+            "id": 1074,
+            "provider": "User32",
+            "record": 91815,
+            "values": [
+              "C:\\Windows\\System32\\shutdown.exe (DESKTOP-5RCUK3G)",
+              "DESKTOP-5RCUK3G",
+              "没有找到这个原因的标题",
+              "0x81000000",
+              "重启",
+              "SwitchWOA graphics receipt restore verified permanent baseline",
+              "DESKTOP-5RCUK3G\\ruje"
+            ],
+            "time": "2026-11-21T16:17:58.9345250Z"
+          },
+          {
+            "id": 6006,
+            "provider": "EventLog",
+            "record": 91818,
+            "values": [
+              "01000000FFFFFFFF"
+            ],
+            "time": "2026-11-21T16:18:13.1865454Z"
+          },
+          {
+            "id": 109,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "record": 91829,
+            "values": [
+              "5",
+              "0",
+              "5"
+            ],
+            "time": "2026-11-21T16:18:16.8925621Z"
+          },
+          {
+            "id": 13,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91831,
+            "values": [
+              "11/22/2026 00:18:19"
+            ],
+            "time": "2026-11-21T16:18:19.1099668Z"
+          },
+          {
+            "id": 12,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91832,
+            "values": [
+              "10",
+              "0",
+              "22621",
+              "2861",
+              "0",
+              "0",
+              "11/22/2026 00:18:21"
+            ],
+            "time": "2026-11-21T16:18:22.9747403Z"
+          },
+          {
+            "id": 20,
+            "provider": "Microsoft-Windows-Kernel-Boot",
+            "record": 91834,
+            "values": [
+              "True",
+              "True",
+              "1",
+              "2"
+            ],
+            "time": "2026-11-21T16:18:22.9758518Z"
+          },
+          {
+            "id": 27,
+            "provider": "Microsoft-Windows-Kernel-Boot",
+            "record": 91837,
+            "values": [
+              "0",
+              " TESTSIGNING  NOEXECUTE=OPTIN  FVEBOOT=2149076992  NOVGA"
+            ],
+            "time": "2026-11-21T16:18:22.9762488Z"
+          },
+          {
+            "id": 20,
+            "provider": "Microsoft-Windows-Kernel-General",
+            "record": 91840,
+            "values": [
+              "0",
+              "True",
+              "0",
+              "0"
+            ],
+            "time": "2026-11-21T16:18:22.9904092Z"
+          }
+        ],
+        "recent_windows_dump_headers": []
+      },
+      "activation_intent": {
+        "boot": 91650,
+        "phase": "CandidateArmed",
+        "reason": "one-time candidate boot",
+        "utc": "2026-11-21T16:11:50.5484206Z",
+        "queued": true
+      },
+      "ssh_loss": {
+        "issued_reboot_path": "/Users/rujian/Documents/Codex/switch-gm20b-fullscreen-work/windows-native-graphics-01a1fe13/kmd-dma-boundary-candidate/live-calibration/activation/requested-91650-CandidateArmed.json",
+        "issued_reboot_sha256": "f990c4c73bdd67c2f3c71f22e11135c819af4f8197c19b8ec9af23d71e272ada",
+        "reason": "Network SSH port 22 connection timed out after requested candidate boot; no graphics workload issued",
+        "first_failed_attempt_utc": "2026-11-21T16:14:24.677477+00:00",
+        "next_due_utc": "2026-11-21T16:17:24.677477+00:00",
+        "pause_deadline_utc": "2026-11-21T16:44:24.677477+00:00"
+      },
+      "task_launch_count": 0,
+      "launch_input_preserved": {
+        "Board-Case.ps1": "9dbbc7a2e709ff06b470ea9d540b89fc3121eb77c861cb5880b3ff628621fca4",
+        "adapter-query.exe": "03fc63b20bcd6b96b247f1bb26db192152585191e993ffa23bf00bf0a5769c29",
+        "frames.nv12": "fcbe2373760b8e252cf60048f31a5853e3bf6c532528f548a4cbfe5a2c0364a0",
+        "observer.exe": "7543f4be522a469dce1ab6ab253ee2c5227009f49d4c7d7bda232d4dea440c57",
+        "os-trace.exe": "51dbecf43bb74394760139fd377bfe4859f8b0dccf2fb4d5853aebdf0ab9112f",
+        "sample720.mp4": "632a751bbee7491ef80da53dcb91b25fb7681ba1b14984c048048f462353620a",
+        "sample720.sha256": "2672b87711e46732fe426460d7c3bbc675da78d8aca6e6b716eaf2ad43527ce5",
+        "step4-present.exe": "fd64bd1b981c520ee25c5e406ae9ccadae85631056b7f7e62b47b3afe8ce537d"
+      },
+      "bounded_system_sequence": {
+        "raw_sha256": "fd994911b862c8db92a73cd84ab859374c29ccbd3ea3b08770b70fe815661a97",
+        "candidate_shutdown_request": {
+          "record": 91722,
+          "id": 1074,
+          "provider": "User32",
+          "time": "2026-11-21T16:11:50.7202974Z"
+        },
+        "last_attested_stage": {
+          "record": 91725,
+          "id": 6006,
+          "provider": "EventLog",
+          "time": "2026-11-21T16:12:04.7879189Z"
+        },
+        "next_recorded_kernel_start": {
+          "record": 91732,
+          "id": 12,
+          "provider": "Microsoft-Windows-Kernel-General",
+          "time": "2026-11-21T16:13:04.2104999Z",
+          "event_start_time": "2026-11-21T16:13:02.5383807Z",
+          "interval_after_event_log_stop_seconds": 57.750462
+        },
+        "first_anomaly": {
+          "event_log": {
+            "record": 91741,
+            "id": 6008,
+            "provider": "EventLog",
+            "time": "2026-11-21T16:14:55.7066228Z"
+          },
+          "kernel_power": {
+            "record": 91750,
+            "id": 41,
+            "provider": "Microsoft-Windows-Kernel-Power",
+            "time": "2026-11-21T16:13:08.3340512Z"
+          },
+          "bugcheck_code": 0,
+          "last_candidate_boundary": "The 109/13 pair is absent between the candidate restart request and the next recorded kernel start."
+        },
+        "boot_status_record": {
+          "record": 91734,
+          "id": 20,
+          "provider": "Microsoft-Windows-Kernel-Boot",
+          "time": "2026-11-21T16:13:04.2115839Z",
+          "LastShutdownGood": "true",
+          "LastBootGood": "true",
+          "LastBootId": "1",
+          "BootStatusPolicy": "2"
+        },
+        "reported_event6008_clock_fields": [
+          "0:13:07",
+          "‎2026/‎11/‎22"
+        ],
+        "shutdown_order_controls": [
+          [
+            {
+              "record": 91633,
+              "id": 1074,
+              "provider": "User32",
+              "time": "2026-11-21T16:08:23.1334118Z"
+            },
+            {
+              "record": 91635,
+              "id": 6006,
+              "provider": "EventLog",
+              "time": "2026-11-21T16:08:39.6438801Z"
+            },
+            {
+              "record": 91647,
+              "id": 109,
+              "provider": "Microsoft-Windows-Kernel-Power",
+              "time": "2026-11-21T16:08:43.7048288Z"
+            },
+            {
+              "record": 91649,
+              "id": 13,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "time": "2026-11-21T16:08:46.6861228Z"
+            },
+            {
+              "record": 91650,
+              "id": 12,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "time": "2026-11-21T16:08:50.6162365Z"
+            }
+          ],
+          [
+            {
+              "record": 91815,
+              "id": 1074,
+              "provider": "User32",
+              "time": "2026-11-21T16:17:58.9345250Z"
+            },
+            {
+              "record": 91818,
+              "id": 6006,
+              "provider": "EventLog",
+              "time": "2026-11-21T16:18:13.1865454Z"
+            },
+            {
+              "record": 91829,
+              "id": 109,
+              "provider": "Microsoft-Windows-Kernel-Power",
+              "time": "2026-11-21T16:18:16.8925621Z"
+            },
+            {
+              "record": 91831,
+              "id": 13,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "time": "2026-11-21T16:18:19.1099668Z"
+            },
+            {
+              "record": 91832,
+              "id": 12,
+              "provider": "Microsoft-Windows-Kernel-General",
+              "time": "2026-11-21T16:18:22.9747403Z"
+            }
+          ]
+        ],
+        "observation_limit": "LastShutdownGood and LastBootGood are recorded alongside 6008/41. Event 6008 reports a local wall time after the recorded kernel start; these fields do not timestamp a physical reset or prove which KMD callback ran.",
+        "microsoft": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs",
+        "short_finding": "最后一条关机实证是 91725/6006，距下一次有记录的内核开始 57.750 秒。前后两次受控对照均有 109/13，本段缺失。",
+        "fault_summary_en": "The Windows restart request 91722 was acknowledged and the Event Log service stopped at 91725. The next recorded kernel boot was 91732, 57.750 seconds after that stop. The two adjacent controlled transitions retained Kernel-Power 109 and Kernel-General 13, while this interval did not. Boot 91732 recorded 6008 and Kernel-Power 41 with BugcheckCode 0; Kernel-Boot 20 simultaneously reported LastShutdownGood and LastBootGood as true. No candidate Code 0, program launch, dump, or actual reset cause was captured."
+      }
+    },
+    "boundaries": {
+      "last_entry": {
+        "phase": "CandidateArmed",
+        "boot": 91650,
+        "utc": "2026-11-21T16:11:38.0327996Z"
+      },
+      "last_return": {
+        "record": 91725,
+        "id": 6006,
+        "provider": "EventLog",
+        "time": "2026-11-21T16:12:04.7879189Z"
+      },
+      "first_anomaly_or_missing": {
+        "event_log": {
+          "record": 91741,
+          "id": 6008,
+          "provider": "EventLog",
+          "time": "2026-11-21T16:14:55.7066228Z"
+        },
+        "kernel_power": {
+          "record": 91750,
+          "id": 41,
+          "provider": "Microsoft-Windows-Kernel-Power",
+          "time": "2026-11-21T16:13:08.3340512Z"
+        },
+        "bugcheck_code": 0,
+        "last_candidate_boundary": "The 109/13 pair is absent between the candidate restart request and the next recorded kernel start."
+      }
+    }
+  }
+}

@@ -527,10 +527,10 @@ if with_tests
   test('gallium-aux',
     executable(
       'gallium-aux',
-      'util/u_surface_test.cpp',
+      ['util/u_surface_test.cpp', 'nir/tgsi_to_nir_test.cpp'],
       include_directories : [inc_include, inc_src, inc_gallium, inc_gallium_aux],
       link_with: libgallium,
-      dependencies : [idep_gtest, idep_mesautil],
+      dependencies : [idep_gtest, idep_mesautil, idep_nir],
     ),
     suite: 'gallium',
     protocol : 'gtest',

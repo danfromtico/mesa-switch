@@ -2,8 +2,12 @@
 # SPDX-License-Identifier: MIT
 
 subdir('headers')
-subdir('drm')
-subdir('winsys')
+if with_platform_windows
+  idep_nouveau_ws = declare_dependency()
+else
+  subdir('drm')
+  subdir('winsys')
+endif
 if with_platform_switch
   subdir('horizon')
 endif

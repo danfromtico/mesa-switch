@@ -6,48 +6,13 @@
 #define NVK_MME_H 1
 
 #include "mme_builder.h"
+#include "nvk_mme_slots.h"
 #include "nvk_private.h"
 
 #include "nak.h"
 
 struct nv_device_info;
-
-enum nvk_mme {
-   NVK_MME_SELECT_CB0,
-   NVK_MME_BIND_CBUF_DESC,
-   NVK_MME_CLEAR,
-   NVK_MME_UPDATE_WINDOW_CLIP,
-   NVK_MME_BIND_IB,
-   NVK_MME_BIND_VB,
-   NVK_MME_SET_VB_ENABLES,
-   NVK_MME_SET_VB_STRIDE,
-   NVK_MME_SET_TESS_PARAMS,
-   NVK_MME_SET_SHADING_RATE_CONTROL,
-   NVK_MME_SET_ANTI_ALIAS,
-   NVK_MME_DRAW,
-   NVK_MME_DRAW_INDEXED,
-   NVK_MME_DRAW_INDIRECT,
-   NVK_MME_DRAW_INDEXED_INDIRECT,
-   NVK_MME_DRAW_INDIRECT_COUNT,
-   NVK_MME_DRAW_INDEXED_INDIRECT_COUNT,
-   NVK_MME_BEGIN_COND_RENDER,
-   NVK_MME_ADD_CS_INVOCATIONS,
-   NVK_MME_DISPATCH_INDIRECT,
-   NVK_MME_WRITE_CS_INVOCATIONS,
-   NVK_MME_XFB_COUNTER_LOAD,
-   NVK_MME_XFB_DRAW_INDIRECT,
-   NVK_MME_SET_PRIV_REG,
-   NVK_MME_SET_WRITE_MASK,
-   NVK_MME_SET_CONSERVATIVE_RASTER_STATE,
-   NVK_MME_SET_VIEWPORT_MIN_MAX_Z,
-   NVK_MME_SET_Z_CLAMP,
-   NVK_MME_SET_STATISTICS_COUNTERS,
-   NVK_MME_DRAW_MESH,
-   NVK_MME_DRAW_MESH_INDIRECT,
-   NVK_MME_DRAW_MESH_INDIRECT_COUNT,
-
-   NVK_MME_COUNT,
-};
+struct nv_push;
 
 /*
  * For the compute MME, as tested in scratch_limit_compute in the unit tests,
@@ -234,6 +199,9 @@ typedef void (*nvk_mme_builder_func)(struct mme_builder *b);
 
 uint32_t *nvk_build_mme(const struct nv_device_info *devinfo,
                         enum nvk_mme mme, size_t *size_out);
+bool nvk_push_mme_programs(struct nv_push *push,
+                           const struct nv_device_info *devinfo,
+                           bool allow_privileged);
 
 void nvk_mme_select_cb0(struct mme_builder *b);
 void nvk_mme_bind_cbuf_desc(struct mme_builder *b);

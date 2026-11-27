@@ -1,0 +1,368 @@
+{
+  "schema": 1,
+  "round_id": "c27-sync-process-handle-20261121-01",
+  "contract_id": "dxgkrnl.h:199:2",
+  "declaration_sha256": "6d63c52fe5c62ccef5e1e18b27fc5742b447674f7928a79fc28ab997afa4683a",
+  "board_issuance_sha256": "9016d8699e7bf6675f4b299653a8aa271c7fcdce081521f3e0ac0bbc54029b05",
+  "chronology": "实机签发文件绑定已在故障表登记的计划哈希。程序 QPC 与 ETW 在同一次启动内比较，系统启动用 Event 12 RecordId 标识。",
+  "started_utc": "2026-11-21T13:15:33.1744176Z",
+  "before": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:15:33.1744176Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "after": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:15:50.3484240Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "status": "已满足",
+  "target_hit": true,
+  "unexplained_restart": false,
+  "finding": "两个不同 PID 在各自设备持有同一 NT 共享监控围栏的本地 KMT 句柄。打开方等待值 1 后发出值 2，创建方读到应答，两端分别正常释放。",
+  "gap": null,
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 7964,
+      "utc": "2026-11-21T13:15:41.0385780Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 67561421522,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "start",
+        "mode": "shared"
+      },
+      {
+        "qpc": 67561547120,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 67561631613,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 67561916084,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "shared_fence",
+        "status": "00000000",
+        "device": "1073742016",
+        "local": "1073742208",
+        "mapped": "1",
+        "type": "monitored",
+        "nt_sharing": "1"
+      },
+      {
+        "qpc": 67561980263,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "export",
+        "status": "00000000",
+        "local": "1073742208",
+        "nt": "228"
+      },
+      {
+        "qpc": 67562080349,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "parent_signal",
+        "status": "00000000",
+        "local": "1073742208",
+        "value": "1"
+      },
+      {
+        "qpc": 67562348274,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "child_started",
+        "role": "child-fence",
+        "nt": "1",
+        "child_pid": "3784"
+      },
+      {
+        "qpc": 67563832404,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "start",
+        "mode": "child-fence"
+      },
+      {
+        "qpc": 67563951848,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 67564048471,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 67564170541,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "open_begin",
+        "device": "1073742016",
+        "nt": "244",
+        "no_signal": "0"
+      },
+      {
+        "qpc": 67564431399,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "open_return",
+        "status": "00000000",
+        "device": "1073742016",
+        "local": "1073742208",
+        "mapped": "1",
+        "no_signal": "0"
+      },
+      {
+        "qpc": 67564503949,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "child_wait",
+        "status": "00000000",
+        "value": "1",
+        "local": "1073742208"
+      },
+      {
+        "qpc": 67564568537,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "child_signal",
+        "status": "00000000",
+        "local": "1073742208",
+        "value": "2"
+      },
+      {
+        "qpc": 67564647825,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "opened_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 67564737393,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 67564804291,
+        "pid": 3784,
+        "tid": 7820,
+        "event": "exit",
+        "code": "0"
+      },
+      {
+        "qpc": 67565094431,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "child_exit",
+        "exit": "0",
+        "child_pid": "3784"
+      },
+      {
+        "qpc": 67565164448,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "parent_read",
+        "local": "1073742208",
+        "value": "2"
+      },
+      {
+        "qpc": 67565259689,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "fence_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 67565662434,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 67565725084,
+        "pid": 7964,
+        "tid": 4980,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=8"
+      ]
+    },
+    "actor_event_counts": {
+      "27": 2,
+      "1069": 2,
+      "296": 2,
+      "297": 1,
+      "28": 2
+    },
+    "devices": [
+      {
+        "pid": 7964,
+        "tid": 4980,
+        "qpc": 67561628779,
+        "caller_device": 1073742016,
+        "device": "device1",
+        "adapter": "adapter1"
+      },
+      {
+        "pid": 3784,
+        "tid": 7820,
+        "qpc": 67564044401,
+        "caller_device": 1073742016,
+        "device": "device2",
+        "adapter": "adapter1"
+      }
+    ],
+    "allocation_joins": [],
+    "gpu_signal_packets": [],
+    "cpu_sync": [
+      {
+        "qpc": 67562080143,
+        "pid": 7964,
+        "tid": 4980,
+        "event": 296,
+        "device": "device1",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          1
+        ]
+      },
+      {
+        "qpc": 67564502870,
+        "pid": 3784,
+        "tid": 7820,
+        "event": 297,
+        "device": "device2",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          1
+        ]
+      },
+      {
+        "qpc": 67564568251,
+        "pid": 3784,
+        "tid": 7820,
+        "event": 296,
+        "device": "device2",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          2
+        ]
+      }
+    ],
+    "sync_identity": [
+      {
+        "qpc": 67561915745,
+        "pid": 7964,
+        "tid": 4980,
+        "event": 1069,
+        "device": "device1",
+        "local": 1073742208,
+        "object": "sync1"
+      },
+      {
+        "qpc": 67564430790,
+        "pid": 3784,
+        "tid": 7820,
+        "event": 1069,
+        "device": "device2",
+        "local": 1073742208,
+        "object": "sync1"
+      }
+    ]
+  },
+  "raw_files_sha256": {
+    "result.json": "116c8578be6ae26665409901ea4bea783874c07790d0fd98cea08db98a7d0714",
+    "issued.json": "9016d8699e7bf6675f4b299653a8aa271c7fcdce081521f3e0ac0bbc54029b05",
+    "result.zip": "5e90fdc1e2fefc1575457e1ef8d11b526e466c49abeff8a7808a3cdaf3f6f229",
+    "journal.tsv": "204a432b088722eb9742439728088d149824569035070b4e1973169abb4b4888",
+    "trace.etl": "301b96773ca873da959e37d9a5a187ea60fd3d9bab01df31836baccc40e09178",
+    "client.json": "b36fac972102b5d906bebe48b1d7f798864e415aba205cc5a67cf39cdcf31a46"
+  },
+  "installed_event_manifest_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_initial_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "evidence_scope": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "帮助把绘图进程的局部同步句柄与 DWM 的局部句柄分开。历史判定需要同时确认进程和共享对象。"
+}

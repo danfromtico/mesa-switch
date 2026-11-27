@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "round_id": "c27-allocation-property-20261121-01",
+  "contract_id": "dxgvmbus.c:3651:2",
+  "declaration_sha256": "10ea19676188c75860bb9e8a9546860a6f637763abd5eba5a8c93752a626977a",
+  "board_issuance_sha256": "6d18a53fcc20b0661456493bc08d5a03a60c1ecdb1287e24816e3f639d3d7eea",
+  "chronology": "实机签发文件绑定已在故障表登记的计划哈希。程序 QPC 与 ETW 在同一次启动内比较，系统启动用 Event 12 RecordId 标识。",
+  "started_utc": "2026-11-21T13:14:01.0230455Z",
+  "before": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:14:01.0230455Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "after": {
+    "boot": 91476,
+    "permanent": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm": 1400,
+    "selected": "C:\\ProgramData\\SwitchWOA\\GpuUpdate\\startup-diagnostic-56113d6c2b2b",
+    "dwm_start": "2026-11-21T12:17:38.1187736Z",
+    "utc": "2026-11-21T13:14:17.1121474Z",
+    "code": 0,
+    "mode": 1,
+    "session": 1,
+    "ac": "Online"
+  },
+  "status": "未知",
+  "target_hit": false,
+  "unexplained_restart": false,
+  "finding": "本次自有分配的 Unmoveable 更新返回 STATUS_NOT_IMPLEMENTED（0xc0000002），输出分页围栏为 0。未取得这次 API 的异步成功回执。",
+  "gap": "本次自有分配的 Unmoveable 更新返回 STATUS_NOT_IMPLEMENTED（0xc0000002），输出分页围栏为 0。未取得这次 API 的异步成功回执。",
+  "observation": {
+    "client": {
+      "timed_out": false,
+      "pid": 8068,
+      "utc": "2026-11-21T13:14:08.6693855Z",
+      "session": 1,
+      "exit": 0
+    },
+    "journal": [
+      {
+        "qpc": 65791479538,
+        "pid": 8068,
+        "tid": 536,
+        "event": "start",
+        "mode": "property"
+      },
+      {
+        "qpc": 65791622127,
+        "pid": 8068,
+        "tid": 536,
+        "event": "adapter",
+        "luid": "0000000000005c10",
+        "vendor": "10de",
+        "chip": "12e",
+        "sm": "53"
+      },
+      {
+        "qpc": 65791714003,
+        "pid": 8068,
+        "tid": 536,
+        "event": "device",
+        "status": "00000000",
+        "dev": "1073742016",
+        "queue": "1073742144",
+        "paging": "1073742080"
+      },
+      {
+        "qpc": 65791791309,
+        "pid": 8068,
+        "tid": 536,
+        "event": "alloc",
+        "status": "00000000",
+        "device": "1073742016",
+        "allocation": "1073742208",
+        "resource": "0",
+        "bytes": "65536"
+      },
+      {
+        "qpc": 65791894066,
+        "pid": 8068,
+        "tid": 536,
+        "event": "property_begin",
+        "queue": "1073742144",
+        "allocation": "1073742208",
+        "mask": "8",
+        "flags": "2"
+      },
+      {
+        "qpc": 65791958814,
+        "pid": 8068,
+        "tid": 536,
+        "event": "property_return",
+        "status": "c0000002",
+        "queue": "1073742144",
+        "allocation": "1073742208",
+        "target": "0"
+      },
+      {
+        "qpc": 65792024302,
+        "pid": 8068,
+        "tid": 536,
+        "event": "free",
+        "status": "00000000"
+      },
+      {
+        "qpc": 65792100107,
+        "pid": 8068,
+        "tid": 536,
+        "event": "device_close",
+        "status": "00000000"
+      },
+      {
+        "qpc": 65792199118,
+        "pid": 8068,
+        "tid": 536,
+        "event": "exit",
+        "code": "0"
+      }
+    ],
+    "journal_error": null,
+    "trace_quality": {
+      "damaged": [],
+      "zero_buffers": 0,
+      "lost_events": 0,
+      "lost_buffers": 0,
+      "complete": true
+    },
+    "trace_stop": {
+      "exit": 0,
+      "output": [
+        "ETW status=0 lost=0 lost_buffers=0 written=10"
+      ]
+    },
+    "actor_event_counts": {
+      "27": 1,
+      "33": 1,
+      "36": 1,
+      "297": 1,
+      "28": 1
+    },
+    "devices": [
+      {
+        "pid": 8068,
+        "tid": 536,
+        "qpc": 65791710424,
+        "caller_device": 1073742016,
+        "device": "device1",
+        "adapter": "adapter1"
+      }
+    ],
+    "allocation_joins": [
+      {
+        "pid": 8068,
+        "tid": 536,
+        "operation": "alloc",
+        "begin": 65791714003,
+        "end": 65791791309,
+        "caller_allocation": 1073742208,
+        "caller_resource": 0,
+        "matched_device_allocation": true,
+        "event36_qpc": 65791785929,
+        "device": "device1",
+        "adapter": "adapter1",
+        "resource": null,
+        "shared": null,
+        "global_allocation": "global1",
+        "matched_adapter_allocation": true,
+        "event33_qpc": 65791784129,
+        "bytes": 65536,
+        "flags": 129,
+        "read_segment": 0,
+        "write_segment": 2,
+        "preferred": 2
+      }
+    ],
+    "gpu_signal_packets": [],
+    "cpu_sync": [
+      {
+        "qpc": 65791788424,
+        "pid": 8068,
+        "tid": 536,
+        "event": 297,
+        "device": "device1",
+        "objects": [
+          "sync1"
+        ],
+        "values": [
+          7001
+        ]
+      }
+    ],
+    "sync_identity": []
+  },
+  "raw_files_sha256": {
+    "result.json": "4c42b3db179f3daaef4d49f2fc44b7b4e1c67e8ca93ce00269e34d78b75ec080",
+    "issued.json": "6d18a53fcc20b0661456493bc08d5a03a60c1ecdb1287e24816e3f639d3d7eea",
+    "result.zip": "d6d69e67dc5dda57d2dd7511622ef3e7188829822bbe4e4473e1e8d4660332a4",
+    "journal.tsv": "d1e5656430b274ef4b611f5277c5e9923a8cf83dc4d3d0fe69ca62c10f16f96d",
+    "trace.etl": "56321f8631f200d10dcf7a202058a6f2637b2f6a72444521c6e7ea02b322d121",
+    "client.json": "16557b9191669ec86f50f9489d9ee459706b8ec839c46848bdc1dbf03b71050e"
+  },
+  "installed_event_manifest_sha256": "8bf739b966555b9de8edf22dbdf29bae0e9c8259b480cdac0b17308b1f5221ba",
+  "baseline_source": "c137ce757b055557cff4b70068e8e2500dd92962",
+  "accepted_components_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_x64.dll": "d4b99b9c2e76ec9c19e327611256e6c918a471ff2d3a514361a78d4a4f9feae7",
+    "tg_nvk_x64.dll": "0271c571715c9c994a80593799b9e0b232abb96afbe86470cab012168acef606",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "same_boot_initial_loaded_sha256": {
+    "tegragpurender.sys": "56113d6c2b2b81a57e7ea22f726903bcaa4cb18ccf26723a57b152ba4c3d7d18",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "tg_nvk_arm64.dll": "51ff97f63d85362a9dfd5c6b1a20a240882a273c34baff75c7368424e5a2f618",
+    "tg_d3d_arm64.dll": "b4f6c7bf7d3c3378f35ccd04ea5ef3c4f0125b898632d59ae30a52cfcd3b88b5"
+  },
+  "evidence_scope": "限于本次测试进程、设备和对象。历史三次首次 Present 需要各自的调用和后续事件。",
+  "present_significance": "单独检查属性更新的分页路径。映射或 MakeResident 返回 0x103 都不能说明首次 Present 调用了这个 API。",
+  "analysis_revision": {
+    "prior_status": "未知",
+    "prior_finding": "本轮 property 的调用方原始返回为 c0000002。声明的异步返回条件未命中。",
+    "prior_result_sha256": "65ef56149e5dfbfc80e3aa170015a6f0adf2110a76bf256b0c1ced2f7e0e18fd",
+    "basis": "对同一原始回执复核对象、调用条件和时间。"
+  }
+}
