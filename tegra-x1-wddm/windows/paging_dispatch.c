@@ -21,7 +21,8 @@ static BOOLEAN system_context(TG_GPU_CONTEXT_ENGINE *e,HANDLE h)
     }
     return FALSE;
 }
-NTSTATUS APIENTRY TgGpuDdiBuildPagingBuffer(HANDLE adapter,DXGKARG_BUILDPAGINGBUFFER *a)
+NTSTATUS TgGpuBuildPagingRequest(HANDLE adapter, DXGKARG_BUILDPAGINGBUFFER *a,
+                                TG_GPU_PAGING_REJECTION *rejection)
 {
     TG_GPU_CONTEXT_ENGINE *e=adapter;TG_GPU_PROCESS *p;TG_GPU_ROOT_TABLE root={0};
     TG_GPU_PAGING_BUILD build={0};TG_GPU_QUEUE_ENTRY *entry;KIRQL irql;
@@ -41,6 +42,9 @@ NTSTATUS APIENTRY TgGpuDdiBuildPagingBuffer(HANDLE adapter,DXGKARG_BUILDPAGINGBU
         KeAcquireSpinLock(&e->Lock,&irql);
         status=e->Stopping?STATUS_DEVICE_NOT_READY:TgGpuUpdatePagingAperture(e->Tables,a);
         KeReleaseSpinLock(&e->Lock,irql);
+        if (status == STATUS_NOT_SUPPORTED && a->Operation == DXGK_OPERATION_MAP_APERTURE_SEGMENT)
+            return TgGpuRejectPaging(rejection, TgGpuPagingRejectApertureFlags,
+                                     a->MapApertureSegment.Flags.Value);
         return status;
     }
     if(a->Operation==DXGK_OPERATION_UPDATE_PAGE_TABLE) {
@@ -57,7 +61,8 @@ NTSTATUS APIENTRY TgGpuDdiBuildPagingBuffer(HANDLE adapter,DXGKARG_BUILDPAGINGBU
          * called while the GPU is isolated and must perform no MMIO. */
         return a->Transfer.hAllocation ? TgGpuValidatePagingAllocation(e,a->Transfer.hAllocation,
             a->Transfer.TransferOffset,0) : STATUS_SUCCESS;
-    } else return STATUS_NOT_SUPPORTED;
+    } else return TgGpuRejectPaging(rejection, TgGpuPagingRejectOperation,
+                                   a->MultipassOffset);
     KeAcquireSpinLock(&e->Lock,&irql);p=virtual_dma?NULL:process(e,owner);
     /* VidMm selects CPU_VIRTUAL while setting up the system address space,
      * both for clearing tables and for populating its initial mappings. */
@@ -70,11 +75,15 @@ NTSTATUS APIENTRY TgGpuDdiBuildPagingBuffer(HANDLE adapter,DXGKARG_BUILDPAGINGBU
     ++e->Creating;KeReleaseSpinLock(&e->Lock,irql);
     build.Tables=e->Tables;build.TableBytes=TG_GPU_TABLE_BYTES;
     build.GpuPagesUncached=build.InitialMappingUncached=TRUE;
+    build.Rejection=rejection;
     if(a->Operation==DXGK_OPERATION_UPDATE_PAGE_TABLE) {
         const DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE *u=&a->UpdatePageTable;
         if(u->hAllocation) {
-            status=u->PageTableLevel?STATUS_NOT_SUPPORTED:TgGpuValidatePagingAllocation(e,u->hAllocation,
-                u->AllocationOffsetInBytes,(UINT64)count*PAGE_SIZE);
+            status = u->PageTableLevel
+                ? TgGpuRejectPaging(rejection, TgGpuPagingRejectDirectoryAllocation,
+                                   u->PageTableLevel)
+                : TgGpuValidatePagingAllocation(e, u->hAllocation,
+                    u->AllocationOffsetInBytes, (UINT64)count * PAGE_SIZE);
             if(!NT_SUCCESS(status))goto done;
         }
         scratch=ExAllocatePool2(POOL_FLAG_NON_PAGED,(SIZE_T)(count?count:1)*sizeof(*scratch),TAG);
@@ -135,5 +144,11 @@ done:
     KeAcquireSpinLock(&e->Lock,&irql);if (p) --p->PagingReferences;--e->Creating;
     KeReleaseSpinLock(&e->Lock,irql);return status;
 }
+
+NTSTATUS APIENTRY TgGpuDdiBuildPagingBuffer(HANDLE adapter, DXGKARG_BUILDPAGINGBUFFER *args)
+{
+    return TgGpuBuildPagingRequest(adapter, args, NULL);
+}
+
 void TgGpuRegisterPagingDdi(DRIVER_INITIALIZATION_DATA *d)
 {d->DxgkDdiBuildPagingBuffer=TgGpuDdiBuildPagingBuffer;}

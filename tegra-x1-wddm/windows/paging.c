@@ -2,6 +2,7 @@
 #include "paging.h"
 
 _Static_assert(sizeof(DXGK_PTE) == 16, "Windows PTE layout changed");
+_Static_assert(sizeof(DXGK_UPDATEPAGETABLEFLAGS) == sizeof(ULONG), "Unexpected page table flags");
 
 static NTSTATUS EncodePage(UINT Level, UINT8 Kind, const DXGK_PTE *Pte,
                           const TG_GPU_PAGE_UPDATE_TARGET *Target, UINT64 *Encoded)
@@ -13,7 +14,7 @@ static NTSTATUS EncodePage(UINT Level, UINT8 Kind, const DXGK_PTE *Pte,
     if (Pte->Zero || Pte->CacheCoherent || Pte->NoExecute || Pte->LargePage ||
         Pte->PhysicalAdapterIndex || Pte->Reserved ||
         (Level == 1 && (Pte->ReadOnly || Pte->PageTablePageSize != DXGK_PTE_PAGE_TABLE_PAGE_4KB)))
-        return STATUS_NOT_SUPPORTED;
+        return TgGpuRejectPaging(Target->Rejection, TgGpuPagingRejectPteFlags, Pte->Flags);
     /* VidMm supplies the upper address bits as a 4 KiB page number.
      * Both segment offsets and system addresses reach the resolver in bytes. */
     if (Pte->PageAddress > (UINT64_MAX >> PAGE_SHIFT))
@@ -21,7 +22,8 @@ static NTSTATUS EncodePage(UINT Level, UINT8 Kind, const DXGK_PTE *Pte,
     /* A level-1 entry points to a contiguous table in the dedicated table
      * segment. Segment zero cannot promise this for a 128 KiB allocation.
      */
-    if (Level == 1 && !Pte->Segment) return STATUS_NOT_SUPPORTED;
+    if (Level == 1 && !Pte->Segment)
+        return TgGpuRejectPaging(Target->Rejection, TgGpuPagingRejectDirectorySegment, Pte->Flags);
     status = Target->Resolve(Target->ResolveContext, (UINT)Pte->Segment,
         Pte->PageAddress << PAGE_SHIFT,
         Level ? TG_GPU_TABLE_BYTES : PAGE_SIZE, &address);
@@ -49,14 +51,23 @@ NTSTATUS TgGpuEncodePageTable(const DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE *Upda
         Update->PageTableLevel > 1 || Update->Reserved0)
         return STATUS_INVALID_PARAMETER;
     if (Update->Flags.Use64KBPages ||
-        Update->Flags.Reserved || Update->pPageTableEntries64KB)
-        return STATUS_NOT_SUPPORTED;
-    /* NVK passes the Maxwell kind as DriverProtection on its 4 KiB GPUVA
-     * mappings. Table pointers and CPU bootstrap retain pitch semantics. */
+        Update->Flags.Reserved || Update->pPageTableEntries64KB) {
+        ULONG flags;
+        RtlCopyMemory(&flags, &Update->Flags, sizeof(flags));
+        UINT64 has_64kb_entries = Update->pPageTableEntries64KB != NULL;
+        return TgGpuRejectPaging(Target->Rejection, TgGpuPagingRejectUpdateFlags,
+                                 (has_64kb_entries << 32) | flags);
+    }
+    /* The PAL4 capture has a GPU_PHYSICAL level-1 update with a NULL
+     * allocation and the known leaf kind 0xfe. Accept a supported kind on
+     * this directory path, but EncodePage must still encode only the table
+     * pointer there. Kind bits belong exclusively to leaf PTEs. Preserve
+     * the existing pitch-only CPU initialization contract. */
     if (!tg_gpu_pte_kind_supported(Update->DriverProtection) ||
         (Update->DriverProtection &&
-         (Update->PageTableLevel || Update->UpdateMode != DXGK_PAGETABLEUPDATE_GPU_PHYSICAL)))
-        return STATUS_NOT_SUPPORTED;
+         Update->UpdateMode != DXGK_PAGETABLEUPDATE_GPU_PHYSICAL))
+        return TgGpuRejectPaging(Target->Rejection, TgGpuPagingRejectDriverProtection,
+                                 Update->DriverProtection);
     if (!Update->PageTableLevel && Target->Size != TG_GPU_TABLE_BYTES)
         return STATUS_INVALID_PARAMETER;
     entries = Target->Size / sizeof(UINT64);
@@ -85,7 +96,8 @@ NTSTATUS TgGpuUpdatePageTable(const DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE *Upda
         Update->PageTableAddress.CpuVirtual != (PVOID)Target->Entries ||
         Update->UpdateMode != DXGK_PAGETABLEUPDATE_CPU_VIRTUAL)
         return STATUS_INVALID_PARAMETER;
-    if (!Target->CpuMappingUncached) return STATUS_NOT_SUPPORTED;
+    if (!Target->CpuMappingUncached)
+        return TgGpuRejectPaging(Target->Rejection, TgGpuPagingRejectCpuAlias, 2);
     status = TgGpuEncodePageTable(Update, Target);
     if (!NT_SUCCESS(status)) return status;
     TgGpuDataSyncBarrier();

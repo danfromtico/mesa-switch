@@ -7,6 +7,35 @@
 #ifdef TG_GPU_NATIVE_TEST_VERSION
 #include "native_start_test.h"
 #endif
+#ifdef TG_GPU_PAGING_STOP_PROBE
+#include "paging_dispatch.h"
+
+#define TG_GPU_PAGING_PROBE_BUGCHECK 0xe0535751u
+enum { PagingProbeInactive, PagingProbeArmed, PagingProbeCaptured };
+static volatile LONG g_PagingProbeState;
+
+static NTSTATUS APIENTRY probe_paging_buffer(HANDLE adapter, DXGKARG_BUILDPAGINGBUFFER *args)
+{
+    TG_GPU_PAGING_REJECTION rejection = {0};
+    NTSTATUS status = TgGpuBuildPagingRequest(adapter, args, &rejection);
+    if (status == STATUS_NOT_SUPPORTED && args &&
+        InterlockedCompareExchange(&g_PagingProbeState, PagingProbeCaptured,
+                                   PagingProbeArmed) == PagingProbeArmed) {
+        /* V2 parameter 3: site[31:0], level[39:32], mode[47:40],
+         * allocation-present[48]. Parameter 4 retains the full detail. */
+        ULONG_PTR context = (ULONG)rejection.Site;
+        if (args->Operation == DXGK_OPERATION_UPDATE_PAGE_TABLE) {
+            const DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE *u = &args->UpdatePageTable;
+            context |= ((ULONG_PTR)u->PageTableLevel & 0xffu) << 32;
+            context |= ((ULONG_PTR)u->UpdateMode & 0xffu) << 40;
+            context |= (ULONG_PTR)(u->hAllocation != NULL) << 48;
+        }
+        KeBugCheckEx(TG_GPU_PAGING_PROBE_BUGCHECK, (ULONG)args->Operation,
+                     (ULONG)status, context, rejection.Detail);
+    }
+    return status;
+}
+#endif
 
 static DXGKDDI_STOP_DEVICE *g_BaseStopDevice;
 static DXGKDDI_STOP_DEVICE_AND_RELEASE_POST_DISPLAY_OWNERSHIP *g_BaseStopAndRelease;
@@ -119,8 +148,14 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
     a->Panel.ChildReported=TRUE;
 #endif
     if(status==STATUS_SUCCESS)TgNvdecAdapterInitialize(a);
-    if (NT_SUCCESS(status))
+    if (NT_SUCCESS(status)) {
         TgGpuRecordStartup(a,TgGpuStartupComplete,status);
+#ifdef TG_GPU_PAGING_STOP_PROBE
+        if (InterlockedCompareExchange(&g_PagingProbeState, PagingProbeArmed,
+                                       PagingProbeInactive) == PagingProbeInactive)
+            record_status(L"PagingStopProbeArmed", (NTSTATUS)TG_GPU_PAGING_PROBE_BUGCHECK);
+#endif
+    }
     return status;
 }
 
@@ -244,6 +279,9 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
     DRIVER_INITIALIZATION_DATA d={0};
     d.Version=DXGKDDI_INTERFACE_VERSION;
     TgGpuRegisterAdapterDdis(&d);
+#ifdef TG_GPU_PAGING_STOP_PROBE
+    d.DxgkDdiBuildPagingBuffer=probe_paging_buffer;
+#endif
     d.DxgkDdiCollectDiagnosticInfo=TgGpuDdiCollectDiagnosticInfo;
     d.DxgkDdiStartDevice=start_device;
     d.DxgkDdiSetPowerState=set_power;
