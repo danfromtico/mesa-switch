@@ -2,7 +2,9 @@
 
 This tree contains the Tegra X1 (GM20B) kernel driver and Mesa NVK transport for Windows 11 ARM64 on Nintendo Switch. [NVK Windows backend](../src/nouveau/vulkan/nvkmd/windows/)
 
-Switch Lite (HDH-001) has a verified permanent-boot baseline. In the latest Switch OLED (HEG-001) test, the kernel driver completed startup and Windows called the display timing and source visibility callbacks. Windows kept running with a black internal panel. The tester found no `umd.log`. An earlier independent HEG-001 setup displayed the Windows desktop on GM20B using SwBatt. [Current OLED port and testing by Tsunami714!](https://github.com/Tsunami714a) · [Earlier GPU desktop and SwBatt reference by DanilKhmyrov](https://github.com/DanilKhmyrov) · [Hardware status and baseline hashes](../README.md#hardware-status) · [OLED startup observations](docs/OLED_WDDM_QUERY_REVIEW_20261127.md#oled-实机启动记录)
+Switch Lite (HDH-001) has a verified permanent-boot baseline. [Hardware status and baseline hashes](../README.md#hardware-status)
+
+On Switch OLED (HEG-001), Tsunami714! reported successful KMD startup, a call to the MPO3 present callback and an interactive desktop. The tgd3d UMD loaded. Its adapter check rejected the paging-only KMD because it lacked `NATIVE_SUBMIT`. A native `.201` KMD is on the SD card for the next test. DanilKhmyrov previously demonstrated a GPU-rendered desktop on a separate HEG-001 setup using SwBatt. [OLED port by Tsunami714!](https://github.com/Tsunami714a) · [UMD results](docs/OLED_WDDM_QUERY_REVIEW_20261127.md#桌面与-umd-实测) · [One-time startup permit for the OLED port](docs/OLED_WDDM_QUERY_REVIEW_20261127.md#oled-移植版的一次性启动许可) · [Earlier desktop test by DanilKhmyrov](docs/OLED_WDDM_QUERY_REVIEW_20261127.md#独立的-oled-gpu-桌面实测)
 
 The long-term goal is a complete native Vulkan implementation, verified
 with version-appropriate VK-GL-CTS coverage and physical GM20B tests.

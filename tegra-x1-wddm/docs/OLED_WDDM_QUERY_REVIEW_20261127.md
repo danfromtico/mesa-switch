@@ -21,6 +21,36 @@ ARM64 WDK 10.0.26100 构建已链接 WDDM 显示版和 MCDM 纯计算版。使�
 
 ## OLED 实机启动记录
 
+### 桌面与 UMD 实测
+
+Tsunami714! 在 HEG-001 上观察到可交互的 Windows 桌面。下表按测试轮次列出结果。依据为测试者提供的日志摘录、11 月 27 日 23:50 的交接记录和源码包 `switch-woa-full-driver-src-20261127.zip`（SHA-256 `456f05727208b2dd9bdf73e8b93468fab4d4df607bef76a67ac21f2fb4b2a17c`）。[OLED 移植与实机测试](https://github.com/Tsunami714a)
+
+| 测试轮次 | 观察结果 |
+| --- | --- |
+| 移植版 PBUS 轮询修正（补丁 01） | 误报从 617 次降至 0 次。`4631`、`4632`、`4633` 返回 0，随后出现 `467`。标记 `4842` 表示进入 MPO3 地址回调。该轮未观察到异常重启。 |
+| DXGI 枚举和首次建卡测试 | 启用 GPU 后，DXGI 枚举到 `Tegra X1 (GM20B)`。KMT 的 DX11 槽位查询当时返回 `0xC000000D`，指定 Tegra 适配器的 `D3D11CreateDevice` 返回 `0x887A0004`。 |
+| 修正 UMD 注册后 | 测试者报告 ETW 记录了 `TegraGpuD3DVk.dll` 的映像加载，`umd.log` 出现 `dllmain:attach`、`open-native:enter` 和 `adapter-info`。KMD 记录 `8750:1 / 8751:1 / 8752:1`，对应 `PagingOnly=1`、身份已就绪、返回 flags 为 `0x1`。UMD 要求同时具备 `LUID_VALID` 和 `NATIVE_SUBMIT`（合计 `0x3`），因此在打开 Vulkan 之前返回 `DXGI_ERROR_UNSUPPORTED`。 |
+| native `.201` 候选 | 使用 `--display --native-test-version 201` 构建。测试者在卡上核对了 KMD 的版本标记、大小（319,864 字节）和 SHA-256 前缀 `0E880BD9D08685E6`。这份 KMD 在 Tegra 上成功建卡及 DWM 使用硬件渲染的结果仍待实机确认。 |
+
+仓库 INF 的 `UserModeDriverName` 默认是四项 `REG_MULTI_SZ`，均指向随 KMD 提供的 `tegragpuno3d.dll`。桌面安装脚本按实际设备实例找到显示类键，再将 DX10 和 DX11 槽位（索引 1、2）指向 tgd3d 的完整路径。复测时可按本次枚举的 Tegra LUID 查询槽位，并核对进程实际加载的 DLL 路径及完整 SHA-256。测试者曾在该机替换 DriverStore 内的桩 DLL。[KMD 包的 INF](../windows/tegragpurender.inf) · [桌面安装脚本](../tools/tgd3d-default/Install-Default.ps1)
+
+源码包的 KMD 已包含补丁 01，SwBatt 已包含补丁 02。实机有新桥的电压和时钟遥测，仍缺同一轮带令牌的 `CLAIM_RAIL`、`RELEASE_RAIL` 记录。补丁 03 随包提供，包内 `swhid.c` 匹配该补丁的修改前版本。
+
+### OLED 移植版的一次性启动许可
+
+这份 OLED 移植版在 native 许可之前增加了 `ArmStart` 检查。以下顺序来自源码包的 `01-kmd/windows/render_miniport.c` 和 `01-kmd/windows/native_start_test.c`。Windows 的服务配置 `Start=3` 表示按需启动，PnP 可以在开机枚举到设备时启动驱动。[Windows PnP 启动类型](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/inf-addservice-directive)
+
+1. `StartDevice` 记录 `44` 后，检查 `Services\tegragpurender\Parameters` 下的 DWORD `ArmStart`。值为 `1` 时尝试清零并刷盘。检查失败会记录 `499` 并返回 `STATUS_DEVICE_NOT_READY`。
+2. native `.201` 随后检查服务键。使用一次性许可时，`AllowNativeBoot` 子键应当不存在，`AllowDesktopStart` 子键在检查当时须可打开。驱动打开 `%SystemRoot%\System32\drivers\TgGpuBootTest201.bin`，要求文件恰好 4096 字节、首 DWORD 为 `1`，成功消费时将其写为 `0` 并刷盘。若能打开 `AllowNativeBoot`，native 检查会跳过许可文件。[共用 native 许可实现](../windows/native_start_test.c)
+
+仓库的 Lite `.158` 桌面测试脚本会在当前会话创建易失的 `AllowDesktopStart` 子键，并使用 `TgGpuBootTest158.bin`。跨重启测试 OLED `.201` 时，要在 PnP 启动时核对相应子键和 `.201` 文件。可用 Windows 系统启动事件确定开机时间，再用 `devices.txt` 确认登录脚本是否写入记录。[Lite 桌面测试脚本](../tools/tgd3d-trial/Start-Desktop.ps1)
+
+交接中另有一次 `42 → 44 → 481` 的摘录，许可文件首 DWORD 仍为 `1`。`481` 表示进入设备移除回调。定位退出位置需要同次启动的 KMD 加载路径、完整 SHA-256，以及 `Parameters` 中本次更新的 `BootPermitStatus`、`StartGateStatus`、`ResourceStatus` 原始值。
+
+复测探针版时，可用同次启动的 `8750:0 / 8751:1 / 8752:3`、`adapter-flags 3/3` 和 `vk-open:end` 返回值定位进度。指定该次枚举的 Tegra LUID，`D3D11CreateDevice` 返回 `S_OK` 即可确认建卡。DWM 硬件渲染与呈现还需对应的进程证据。[构建参数](../tools/build.py) · [UMD 适配器校验](../../src/nouveau/tgd3d/tgd3d_entry.cpp)
+
+### 首次走完 KMD 启动序列
+
 Tsunami714! 报告 HEG-001 的内核显示驱动（KMD）首次走完启动序列。进入系统后内屏一直黑屏，Windows 在整个观察期间持续运行。[OLED 移植与实机测试](https://github.com/Tsunami714a)
 
 | 本轮阶段 | 测试者提供的记录 |
@@ -41,7 +71,7 @@ Tsunami714! 报告 HEG-001 的内核显示驱动（KMD）首次走完启动序�
 
 `dxgkrnl` 已请求设置时序和源可见性。`4832` 写在实际设置可见性的调用之前。`4840` 只覆盖常规地址回调，驱动另有多平面叠加（MPO3）的地址回调。该轮首帧是否提交到内屏及 GPU 的设备管理器状态仍待确认。
 
-测试者报告 UMD 仍未加载，现场没有找到 `umd.log`。要确认 DWM 的加载结果以及 C++ 运行库是否与黑屏有关，还缺同次启动的模块或加载错误记录。
+首次黑屏这轮没有留下 `umd.log`，当时 DWM 是否加载 UMD 未能确认。后续测试取得了上文列出的映像加载和 UMD 入口记录。
 
 ### 早期启动对照
 
