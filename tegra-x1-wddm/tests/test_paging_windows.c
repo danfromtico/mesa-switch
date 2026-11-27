@@ -440,6 +440,14 @@ static void TestSegment(void)
     ptes[0].Valid = 1; ptes[0].Segment = 1; ptes[0].PageAddress = TG_GPU_TABLE_BYTES >> PAGE_SHIFT;
     CHECK(NT_SUCCESS(TgGpuUpdatePageTable(&update,&target)));
     CHECK(target.Entries[0] == UINT64_C(0x0090020500000000));
+    /* A known data kind must not change a directory's table pointer. */
+    update.DriverProtection = 0xfe;
+    CHECK(NT_SUCCESS(TgGpuUpdatePageTable(&update,&target)));
+    CHECK(target.Entries[0] == UINT64_C(0x0090020500000000));
+    update.DriverProtection = 0xff;
+    CHECK(TgGpuUpdatePageTable(&update,&target) == STATUS_NOT_SUPPORTED);
+    CHECK(target.Entries[0] == UINT64_C(0x0090020500000000));
+    update.DriverProtection = 0;
     /* Reject the whole batch when a later child table crosses the pool end. */
     update.StartIndex = 1; update.NumPageTableEntries = 2; ptes[1] = ptes[0];
     ptes[1].PageAddress = (sizeof(segment_bytes)-PAGE_SIZE) >> PAGE_SHIFT;
@@ -610,7 +618,7 @@ static void TestPagingBuffer(void)
     TG_GPU_ROOT_TABLE root = {0};
     DXGKARG_SETROOTPAGETABLE set = {.Address={1,0,TG_GPU_TABLE_BYTES},.NumEntries=1};
     TG_GPU_PAGING_BUILD build = {&segment,TG_GPU_TABLE_BYTES,&root,
-        scratch,TG_GPU_TABLE_ENTRIES,TRUE,TRUE};
+        scratch,TG_GPU_TABLE_ENTRIES,TRUE,TRUE,NULL};
     DXGK_PTE ptes[3] = {0};
     DXGKARG_BUILDPAGINGBUFFER args = {0}, flush = {0};
     UINT64 *entries = (UINT64 *)segment_bytes;
@@ -721,6 +729,17 @@ static void TestPagingBuffer(void)
         CHECK(completed==bytes && entries[10]==(((UINT64)kinds[i]<<36)|UINT64_C(0x100900015)));
     }
 
+    /* The deferred directory path must retain the same PDE encoding too. */
+    args.pDmaBuffer=commands;args.DmaSize=sizeof(commands);
+    args.UpdatePageTable.PageTableLevel=1;
+    args.UpdatePageTable.DriverProtection=0xfe;
+    ptes[0]=(DXGK_PTE){.Valid=1,.Segment=1,.PageAddress=TG_GPU_TABLE_BYTES>>PAGE_SHIFT};
+    CHECK(TgGpuBuildPagingBuffer(&args,&build)==STATUS_SUCCESS);
+    bytes=(UCHAR *)args.pDmaBuffer-commands;
+    CHECK(TgGpuExecutePagingBuffer(&segment,commands,bytes,TRUE,&io,&power,&completed,NULL)==STATUS_SUCCESS);
+    CHECK(completed==bytes && entries[10]==UINT64_C(0x0090020500000000));
+    args.UpdatePageTable.PageTableLevel=0;
+
     /* Mandatory immediate initialization accepts a different CPU alias only
      * when every page resolves to the owned contiguous table span.
      */
@@ -728,8 +747,16 @@ static void TestPagingBuffer(void)
     args.UpdatePageTable.UpdateMode=DXGK_PAGETABLEUPDATE_CPU_VIRTUAL;
     args.UpdatePageTable.PageTableAddress.CpuVirtual=alias_bytes;
     args.UpdatePageTable.StartIndex=12;args.UpdatePageTable.NumPageTableEntries=1;
-    ptes[0].Valid=1;ptes[0].Segment=1;ptes[0].PageAddress=1;
-    CHECK(TgGpuBuildPagingBuffer(&args,&build)==STATUS_NOT_SUPPORTED);
+    ptes[0]=(DXGK_PTE){.Valid=1,.ReadOnly=1,.Segment=1,.PageAddress=1};
+    for (UINT kind_index=0;kind_index<sizeof(kinds);++kind_index) {
+        args.UpdatePageTable.DriverProtection=kinds[kind_index];
+        CHECK(TgGpuBuildPagingBuffer(&args,&build)==STATUS_SUCCESS);
+        CHECK(!args.pDmaBuffer && entries[12]==
+            (((UINT64)kinds[kind_index]<<36)|UINT64_C(0x100900015)));
+    }
+    UINT64 previous=entries[12];
+    args.UpdatePageTable.DriverProtection=0xff;
+    CHECK(TgGpuBuildPagingBuffer(&args,&build)==STATUS_NOT_SUPPORTED && entries[12]==previous);
     args.UpdatePageTable.DriverProtection=0;ptes[0].ReadOnly=0;
     CHECK(NT_SUCCESS(TgGpuBuildPagingBuffer(&args,&build)));
     CHECK(entries[12]==UINT64_C(0x100900011));
@@ -804,7 +831,7 @@ void start(void)
     DXGK_PTE ptes[3] = {0};
     DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE u = {0};
     TG_GPU_PAGE_UPDATE_TARGET target = {table, sizeof(table), scratch,
-        TG_GPU_TABLE_ENTRIES, TRUE, TRUE, Resolve, NULL};
+        TG_GPU_TABLE_ENTRIES, TRUE, TRUE, Resolve, NULL, NULL};
     DXGK_PAGE_TABLE_LEVEL_DESC desc;
     UINT64 before;
     ULONG i, written;

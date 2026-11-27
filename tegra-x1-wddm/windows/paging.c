@@ -58,11 +58,12 @@ NTSTATUS TgGpuEncodePageTable(const DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE *Upda
         return TgGpuRejectPaging(Target->Rejection, TgGpuPagingRejectUpdateFlags,
                                  (has_64kb_entries << 32) | flags);
     }
-    /* NVK passes the Maxwell kind as DriverProtection on its 4 KiB GPUVA
-     * mappings. Table pointers and CPU bootstrap retain pitch semantics. */
-    if (!tg_gpu_pte_kind_supported(Update->DriverProtection) ||
-        (Update->DriverProtection &&
-         (Update->PageTableLevel || Update->UpdateMode != DXGK_PAGETABLEUPDATE_GPU_PHYSICAL)))
+    /* NVK's DriverProtection is the data-page kind, independent of whether
+     * the table is written immediately through a CPU alias or by a paging
+     * packet. EncodePage applies it only to leaf PTEs. A directory entry
+     * always encodes a table pointer, even if a known leaf kind accompanies
+     * the request; never insert that kind into the PDE address bits. */
+    if (!tg_gpu_pte_kind_supported(Update->DriverProtection))
         return TgGpuRejectPaging(Target->Rejection, TgGpuPagingRejectDriverProtection,
                                  Update->DriverProtection);
     if (!Update->PageTableLevel && Target->Size != TG_GPU_TABLE_BYTES)

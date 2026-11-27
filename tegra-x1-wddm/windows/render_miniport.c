@@ -9,7 +9,7 @@
 #ifdef TG_GPU_PAGING_STOP_PROBE
 #include "paging_dispatch.h"
 
-#define TG_GPU_PAGING_PROBE_BUGCHECK 0xe0535750u
+#define TG_GPU_PAGING_PROBE_BUGCHECK 0xe0535751u
 enum { PagingProbeInactive, PagingProbeArmed, PagingProbeCaptured };
 static volatile LONG g_PagingProbeState;
 
@@ -19,9 +19,19 @@ static NTSTATUS APIENTRY probe_paging_buffer(HANDLE adapter, DXGKARG_BUILDPAGING
     NTSTATUS status = TgGpuBuildPagingRequest(adapter, args, &rejection);
     if (status == STATUS_NOT_SUPPORTED && args &&
         InterlockedCompareExchange(&g_PagingProbeState, PagingProbeCaptured,
-                                   PagingProbeArmed) == PagingProbeArmed)
+                                   PagingProbeArmed) == PagingProbeArmed) {
+        /* V2 parameter 3: site[31:0], level[39:32], mode[47:40],
+         * allocation-present[48]. Parameter 4 retains the full detail. */
+        ULONG_PTR context = (ULONG)rejection.Site;
+        if (args->Operation == DXGK_OPERATION_UPDATE_PAGE_TABLE) {
+            const DXGK_BUILDPAGINGBUFFER_UPDATEPAGETABLE *u = &args->UpdatePageTable;
+            context |= ((ULONG_PTR)u->PageTableLevel & 0xffu) << 32;
+            context |= ((ULONG_PTR)u->UpdateMode & 0xffu) << 40;
+            context |= (ULONG_PTR)(u->hAllocation != NULL) << 48;
+        }
         KeBugCheckEx(TG_GPU_PAGING_PROBE_BUGCHECK, (ULONG)args->Operation,
-                     (ULONG)status, (ULONG)rejection.Site, rejection.Detail);
+                     (ULONG)status, context, rejection.Detail);
+    }
     return status;
 }
 #endif
