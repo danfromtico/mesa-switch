@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "state": "one-use-fix-candidate-active",
+  "state": "one-use-fix-tested-game-scene-observed-promotion-pending",
   "source_commit": "44e9bac92bcea8f030865cc853b129105cf92b63",
   "target": "Switch Lite / DESKTOP-5RCUK3G",
   "windows": {
@@ -130,10 +130,12 @@
     ]
   },
   "pal4_acceptance": {
-    "status": "pending",
-    "successful_original_launches": 0,
-    "real_display_verified": false,
-    "normal_exit_verified": false
+    "status": "owner-observed-launch-and-game-scene; formal-qualification-pending",
+    "successful_original_launches": 1,
+    "real_display_verified": true,
+    "normal_exit_verified": false,
+    "evidence": "game-runs-20261127/README.md",
+    "limitations": "Owner reported slow movies/gameplay and absent game audio. No full three-run acceptance or permanent baseline promotion has been completed."
   },
   "permit_policy": "one-use only; diagnostic stop probe retained",
   "local_evidence_directory": "/Users/rujian/Documents/Codex/switch-lite-pal4-pde-kind-evidence-20261127",
@@ -154,5 +156,11 @@
     "DisplayVersion": "23H2"
   },
   "reset_classification": "Operator confirmed manual restart after the intentional diagnostic stop; not classified as an unexplained spontaneous reboot.",
-  "diagnostic_policy": "User requested diagnostic capability as a standard KMD feature. Project instructions updated; always-on error recording and a runtime one-use stop switch are separate pending work. This candidate retains the existing opt-in one-use stop probe."
+  "diagnostic_policy": "User requested diagnostic capability as a standard KMD feature. Project instructions updated; always-on error recording and a runtime one-use stop switch are separate pending work. This candidate retains the existing opt-in one-use stop probe.",
+  "later_state": {
+    "observed_utc": "2026-11-27T21:40:12.4794171Z",
+    "boot_record": 106396,
+    "gpu_problem_code": 43,
+    "explanation": "Subsequent System Event 1074 entries record user-session RuntimeBroker shutdown/restart requests. The consumed one-use candidate is not permanently authorized. This is not a new Code 0 acceptance."
+  }
 }
