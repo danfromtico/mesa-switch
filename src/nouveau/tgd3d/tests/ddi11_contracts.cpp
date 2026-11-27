@@ -69,6 +69,7 @@ static void adapter_caps_contracts()
    c.graphicsUavStages = VK_SHADER_STAGE_ALL_GRAPHICS;
    c.graphicsUavSlots = 64;
    c.tirSamples = VK_SAMPLE_COUNT_16_BIT;
+   c.formatA8 = true;
    auto levels = [&](UINT expected) {
       CHECK(functions.pfnGetCaps({&high}, &query) == S_OK && out.caps == expected);
       for (UINT level = 0; level <= 6; ++level) {
@@ -77,12 +78,22 @@ static void adapter_caps_contracts()
          CHECK(!!CalcPrivateDeviceSize({&high}, &size) == !!(expected & (1u << level)));
       }
    };
+   /* FL11_1 stays opt-in by default until attachment-bound TIR is supported. */
+   CHECK(SetEnvironmentVariableW(L"TGD3D_FL11_1_APPLICATION", nullptr));
+   levels(7);
+   for (const wchar_t *value : {L"0", L"10", L"", L"true"}) {
+      CHECK(SetEnvironmentVariableW(L"TGD3D_FL11_1_APPLICATION", value));
+      levels(7);
+   }
+   CHECK(SetEnvironmentVariableW(L"TGD3D_FL11_1_APPLICATION", L"1"));
    levels(15);
+   c.formatA8 = false; levels(7); c.formatA8 = true;
    c.graphicsUavSlots = 63; levels(7); c.graphicsUavSlots = 64;
    c.tirSamples = 0; levels(7); c.attachmentlessSamples = VK_SAMPLE_COUNT_16_BIT;
    c.logicOp = false; levels(7); c.logicOp = true;
    c.graphicsUavStages &= ~VK_SHADER_STAGE_GEOMETRY_BIT; levels(7);
    c.tessellationShader = false; levels(1);
+   CHECK(SetEnvironmentVariableW(L"TGD3D_FL11_1_APPLICATION", nullptr));
    D3D11_1DDI_D3D11_OPTIONS_DATA options = {};
    D3D10_2DDIARG_GETCAPS optionsQuery = {D3D11_1DDICAPS_D3D11_OPTIONS, nullptr, &options, sizeof(options)};
    for (bool supported : {false, true}) {

@@ -22,7 +22,7 @@ template<typename R, typename... A> struct Stub<R(VKAPI_PTR *)(A...)> {
 static struct {
    UINT failure, coreCreates, ktCreates, contexts, queues, devices, objects, errors;
    UINT deadContexts, deadQueues, deadDevices, deadObjects;
-   bool modern;
+   bool modern, maintenance5Requested;
    UINT64 paging;
 } s;
 static VkDeviceApi api;
@@ -32,9 +32,15 @@ static void init(Adapter *adapter, D3DDDI_DEVICECALLBACKS *kt,
 {
    adapter->vk.caps.cbSlots = D3D_CB_SLOTS;
    adapter->vk.vk.GetPhysicalDeviceFeatures2 = [](VkPhysicalDevice, VkPhysicalDeviceFeatures2 *) VKAPI_CALL {};
-   adapter->vk.vk.CreateDevice = [](VkPhysicalDevice, const VkDeviceCreateInfo *,
+   adapter->vk.vk.CreateDevice = [](VkPhysicalDevice, const VkDeviceCreateInfo *info,
                                    const VkAllocationCallbacks *, VkDevice *out) VKAPI_CALL {
       if (s.failure == 5) return VK_ERROR_OUT_OF_HOST_MEMORY;
+      s.maintenance5Requested = false;
+      for (uint32_t i = 0; info && i < info->enabledExtensionCount; ++i) {
+         if (info->ppEnabledExtensionNames[i] &&
+             !std::strcmp(info->ppEnabledExtensionNames[i], VK_KHR_MAINTENANCE_5_EXTENSION_NAME))
+            s.maintenance5Requested = true;
+      }
       *out = H<VkDevice>(0x100); ++s.devices; return VK_SUCCESS;
    };
    adapter->vk.vk.GetDeviceProcAddr = [](VkDevice, const char *name) VKAPI_CALL -> PFN_vkVoidFunction {
@@ -402,11 +408,14 @@ void device_contracts()
       args.ppfnRetrieveSubObject = &retrieve;
       D3D10DDIARG_CALCPRIVATEDEVICESIZE size = {args.Interface, 0, 0};
       if (withVideo) {
+         adapter.vk.caps.maintenance5 = true;
+         adapter.vk.caps.formatA8 = true;
          adapter.videoEnabled = true;
          adapter.videoFirmware.resize(128000);
       }
       CHECK(CalcPrivateDeviceSize({&adapter}, &size) == sizeof(DeviceSlot));
       CHECK(CreateDevice({&adapter}, &args) == S_OK && s.ktCreates == 1 && !s.coreCreates && retrieve);
+      CHECK(s.maintenance5Requested == withVideo && D(args.hDrvDevice)->hasA8 == withVideo);
       for (unsigned i=0;i<8;++i) CHECK(dxgi[i] == 0xcc && dxgi[dxgi_size+8+i] == 0xcc);
       CHECK(!args.DXGIBaseDDI.pDXGIDDIBaseFunctions3->pfnPresentMultiplaneOverlay);
       struct { UINT64 before; D3D11_1DDI_VIDEODEVICEFUNCS table; UINT64 after; } video = {};

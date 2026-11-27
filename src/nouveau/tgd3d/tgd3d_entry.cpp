@@ -92,8 +92,16 @@ UINT tgd3d::native_pipeline_levels(const Adapter *adapter)
    constexpr VkShaderStageFlags stages = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT |
       VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT |
       VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-   if (c.logicOp && (c.graphicsUavStages & stages) == stages && c.graphicsUavSlots >= 64 &&
-       ((c.attachmentlessSamples | c.tirSamples) & VK_SAMPLE_COUNT_16_BIT))
+   /* Attachment-bound target-independent rasterization (ForcedSampleCount > 1
+    * with a bound render target, used by Direct2D/WinUI on FL11_1) is not yet
+    * implemented in draw/NVK. Keep FL11_1 opt-in so desktop shell/WinUI stays
+    * on FL11_0 instead of hitting dropped TIR draws. */
+   wchar_t fl11_1_opt_in[2] = {};
+   const bool fl11_1_enabled =
+      GetEnvironmentVariableW(L"TGD3D_FL11_1_APPLICATION", fl11_1_opt_in, std::size(fl11_1_opt_in)) == 1 &&
+      fl11_1_opt_in[0] == L'1';
+   if (fl11_1_enabled && c.formatA8 && c.logicOp && (c.graphicsUavStages & stages) == stages &&
+       c.graphicsUavSlots >= 64 && ((c.attachmentlessSamples | c.tirSamples) & VK_SAMPLE_COUNT_16_BIT))
       levels |= D3D11DDI_ENCODE_3DPIPELINESUPPORT_CAP(D3D11_1DDI_3DPIPELINELEVEL_11_1);
    return levels;
 }
@@ -185,7 +193,9 @@ HRESULT tgd3d::open_native_adapter(HANDLE runtime_handle, const D3DDDI_ADAPTERCA
    adapter->luid = luid;
    hr = adapter->vk.open(luid);
    trace(TGD3D_TRACE_VULKAN, hr, luid,
-         (uint64_t)adapter->vk.nvk << 32 | adapter->vk.caps.apiVersion);
+         ((uint64_t)adapter->vk.caps.formatA8 << 34) |
+         ((uint64_t)adapter->vk.caps.maintenance5 << 33) |
+         ((uint64_t)adapter->vk.nvk << 32) | adapter->vk.caps.apiVersion);
    if (FAILED(hr)) {
       trace_message(adapter->vk.failure);
       delete adapter;

@@ -861,8 +861,11 @@ static bool nonzero_uuid(const uint8_t *uuid)
 
 HRESULT runtime_shared_tiled_validate(Device *dev, const Resource *res)
 {
+   const bool displayable = res && (res->misc & D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE) != 0;
    if (!dev || !res || !dev->nvk || !dev->caps || !dev->adapter ||
-       dev->interfaceVersion < D3DWDDM2_0_DDI_INTERFACE_VERSION || !dev->adapter->luid ||
+       dev->interfaceVersion < (displayable ? D3DWDDM2_0_DDI_INTERFACE_VERSION :
+                                              D3D11_1_DDI_INTERFACE_VERSION) ||
+       !dev->adapter->luid ||
        !nonzero_uuid(dev->caps->deviceUUID) || !nonzero_uuid(dev->caps->driverUUID) ||
        res->dim != D3D10DDIRESOURCE_TEXTURE2D || res->primary || res->depth != 1 ||
        res->usage != D3D10_DDI_USAGE_DEFAULT || res->mapFlags || res->mips != 1 ||
@@ -879,7 +882,10 @@ HRESULT runtime_shared_tiled_validate(Device *dev, const Resource *res)
    case DXGI_FORMAT_B8G8R8A8_UNORM: case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
    case DXGI_FORMAT_B8G8R8X8_UNORM: case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
    case DXGI_FORMAT_R10G10B10A2_UNORM: case DXGI_FORMAT_R16G16B16A16_FLOAT:
+   case DXGI_FORMAT_R8_UNORM:
       return S_OK;
+   case DXGI_FORMAT_A8_UNORM:
+      return dev->hasA8 ? S_OK : DXGI_ERROR_UNSUPPORTED;
    default: return DXGI_ERROR_UNSUPPORTED;
    }
 }

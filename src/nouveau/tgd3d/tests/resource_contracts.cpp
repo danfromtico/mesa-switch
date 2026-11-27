@@ -99,6 +99,87 @@ static void dynamic_unmap_failure_contract()
    std::puts("PASS: failed dynamic-texture Unmap releases its upload once, preserves other live slices and submits no GPU work (CPU control)");
 }
 
+static void a8_render_target_contract()
+{
+   static VkFormat queriedFormat, createdFormat;
+   static VkImageUsageFlags createdUsage;
+   for (bool hasA8 : {false, true}) {
+      Adapter adapter; Device dev; init(&dev, &adapter);
+      failureStep = 0; failureResult = VK_SUCCESS;
+      queriedFormat = createdFormat = VK_FORMAT_UNDEFINED;
+      createdUsage = 0;
+      dev.hasA8 = hasA8;
+      adapter.vk.vk.GetPhysicalDeviceFormatProperties = [](VkPhysicalDevice, VkFormat format,
+                                                           VkFormatProperties *props) VKAPI_CALL {
+         queriedFormat = format;
+         props->optimalTilingFeatures =
+            VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
+            VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT |
+            VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
+            VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT;
+      };
+      dev.vk.CreateImage = [](VkDevice, const VkImageCreateInfo *info, const VkAllocationCallbacks *,
+                              VkImage *out) VKAPI_CALL {
+         ++calls;
+         createdFormat = info->format;
+         createdUsage = info->usage;
+         *out = (VkImage)(uintptr_t)2; ++liveImages; return VK_SUCCESS;
+      };
+      D3D10DDI_DEVICEFUNCS table = {};
+      device_fill_table(&table);
+      resource_fill_table(&table);
+      UINT support = 0;
+      table.pfnCheckFormatSupport({&dev}, DXGI_FORMAT_A8_UNORM, &support);
+      CHECK(queriedFormat == (hasA8 ? VK_FORMAT_A8_UNORM : VK_FORMAT_R8_UNORM));
+      CHECK((support & D3D10_DDI_FORMAT_SUPPORT_SHADER_SAMPLE) != 0);
+      CHECK(!!(support & D3D10_DDI_FORMAT_SUPPORT_RENDERTARGET) == hasA8);
+      CHECK(!!(support & D3D10_DDI_FORMAT_SUPPORT_BLENDABLE) == hasA8);
+
+      D3D10DDI_MIPINFO mip = {};
+      mip.TexelWidth = 32; mip.TexelHeight = 32; mip.TexelDepth = 1;
+      D3D10DDIARG_CREATERESOURCE desc = {};
+      desc.pMipInfoList = &mip; desc.MipLevels = desc.ArraySize = desc.SampleDesc.Count = 1;
+      desc.ResourceDimension = D3D10DDIRESOURCE_TEXTURE2D;
+      desc.Format = DXGI_FORMAT_A8_UNORM;
+      desc.Usage = D3D10_DDI_USAGE_DEFAULT;
+      desc.BindFlags = D3D10_DDI_BIND_SHADER_RESOURCE | D3D10_DDI_BIND_RENDER_TARGET;
+      alignas(Resource) unsigned char storage[sizeof(Resource)];
+      table.pfnCreateResource({&dev}, &desc, {storage}, {});
+      if (hasA8) {
+         CHECK(!notifications && SUCCEEDED(dev.lost) && calls == 3);
+         CHECK(createdFormat == VK_FORMAT_A8_UNORM);
+         CHECK((createdUsage & (VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) ==
+               (VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT));
+         table.pfnDestroyResource({&dev}, {storage});
+         CHECK(!dev.resources && !liveImages && !liveMemory);
+      } else {
+         CHECK(notifications == 1 && reported == D3DDDIERR_DEVICEREMOVED && FAILED(dev.lost));
+         CHECK(calls == 0 && !dev.resources && !liveImages && !liveMemory);
+      }
+      /* Shared D3D11.1 tiled A8_UNORM SRV|RTV (WinUI/D2D glyph masks) follows hasA8. */
+      dev.lost = S_OK; dev.nvk = true;
+      dev.interfaceVersion = D3D11_1_DDI_INTERFACE_VERSION;
+      adapter.luid = 0x600f;
+      adapter.vk.caps.maxImageDimension2D = 16384;
+      adapter.vk.caps.maxImageArrayLayers = 2048;
+      adapter.vk.caps.deviceUUID[0] = 1;
+      adapter.vk.caps.driverUUID[0] = 2;
+      Resource sharedA8 = {};
+      sharedA8.dim = D3D10DDIRESOURCE_TEXTURE2D;
+      sharedA8.usage = D3D10_DDI_USAGE_DEFAULT;
+      sharedA8.bind = D3D10_DDI_BIND_SHADER_RESOURCE | D3D10_DDI_BIND_RENDER_TARGET;
+      sharedA8.misc = D3D10_DDI_RESOURCE_MISC_SHARED;
+      sharedA8.format = DXGI_FORMAT_A8_UNORM;
+      sharedA8.width = sharedA8.height = 32;
+      sharedA8.depth = sharedA8.mips = sharedA8.arraySize = 1;
+      CHECK(runtime_shared_tiled_validate(&dev, &sharedA8) ==
+            (hasA8 ? S_OK : DXGI_ERROR_UNSUPPORTED));
+      sharedA8.misc |= D3DWDDM2_0DDI_RESOURCE_MISC_DISPLAYABLE_SURFACE;
+      CHECK(runtime_shared_tiled_validate(&dev, &sharedA8) == DXGI_ERROR_UNSUPPORTED);
+   }
+   std::puts("PASS: DXGI_FORMAT_A8_UNORM SRV|RTV follows native VK_FORMAT_A8_UNORM capability (CPU control)");
+}
+
 void resource_creation_contracts()
 {
    /* Private image, pooled buffer, dedicated buffer and staging texture. */
@@ -154,5 +235,6 @@ void resource_creation_contracts()
       CHECK(reported == (error == VK_ERROR_UNKNOWN ? E_FAIL : E_OUTOFMEMORY));
    }
    dynamic_unmap_failure_contract();
+   a8_render_target_contract();
    std::puts("PASS: image/buffer/staging allocation and map failures report OOM after cleanup; removed devices allocate nothing; view errors retain their class (CPU control)");
 }

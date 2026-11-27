@@ -253,6 +253,8 @@ struct VulkanCaps {
    bool instanceDivisor = false;
    bool instanceZeroDivisor = false;
    bool formatA4B4G4R4 = false;
+   bool maintenance5 = false;
+   bool formatA8 = false;
    bool externalSemaphoreWin32 = false;
    bool externalMemoryHost = false;
    bool occlusionQueryPrecise = false;

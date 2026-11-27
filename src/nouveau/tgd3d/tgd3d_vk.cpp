@@ -43,10 +43,12 @@ struct FeatureChain {
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_FEATURES_EXT};
    VkPhysicalDevice4444FormatsFeaturesEXT fmt4444 = {
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT};
+   VkPhysicalDeviceMaintenance5FeaturesKHR maintenance5 = {
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_FEATURES_KHR};
 
    VkPhysicalDeviceTransformFeedbackFeaturesEXT xfb = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_FEATURES_EXT};
 
-   void link(bool with_divisor, bool with_4444, bool with_xfb)
+   void link(bool with_divisor, bool with_4444, bool with_xfb, bool with_maintenance5)
    {
       core.pNext = &v11;
       v11.pNext = &v12;
@@ -67,7 +69,16 @@ struct FeatureChain {
          tail = &fmt4444.pNext;
          *tail = nullptr;
       }
-      if (with_xfb) *tail = &xfb;
+      if (with_xfb) {
+         *tail = &xfb;
+         tail = &xfb.pNext;
+         *tail = nullptr;
+      }
+      if (with_maintenance5) {
+         *tail = &maintenance5;
+         tail = &maintenance5.pNext;
+         *tail = nullptr;
+      }
    }
 };
 
@@ -254,7 +265,8 @@ HRESULT VulkanAdapter::open(uint64_t luid)
 
    FeatureChain have;
    const bool has_xfb = ext.has(VK_EXT_TRANSFORM_FEEDBACK_EXTENSION_NAME);
-   have.link(has_divisor, has_4444, has_xfb);
+   const bool has_maintenance5 = ext.has(VK_KHR_MAINTENANCE_5_EXTENSION_NAME);
+   have.link(has_divisor, has_4444, has_xfb, has_maintenance5);
    vk.GetPhysicalDeviceFeatures2(pdev, &have.core);
    const VkPhysicalDeviceFeatures &f = have.core.features;
    struct { VkBool32 value; const char *name; } needed[] = {
@@ -345,6 +357,19 @@ HRESULT VulkanAdapter::open(uint64_t luid)
    caps.instanceDivisor = has_divisor && have.divisor.vertexAttributeInstanceRateDivisor;
    caps.instanceZeroDivisor = has_divisor && have.divisor.vertexAttributeInstanceRateZeroDivisor;
    caps.formatA4B4G4R4 = has_4444 && have.fmt4444.formatA4B4G4R4;
+   caps.maintenance5 = has_maintenance5 && have.maintenance5.maintenance5;
+   if (caps.maintenance5) {
+      VkFormatProperties a8 = {};
+      vk.GetPhysicalDeviceFormatProperties(pdev, VK_FORMAT_A8_UNORM, &a8);
+      constexpr VkFormatFeatureFlags requiredA8 =
+         VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT |
+         VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT |
+         VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
+         VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT |
+         VK_FORMAT_FEATURE_TRANSFER_SRC_BIT |
+         VK_FORMAT_FEATURE_TRANSFER_DST_BIT;
+      caps.formatA8 = (a8.optimalTilingFeatures & requiredA8) == requiredA8;
+   }
 
    vk.GetPhysicalDeviceMemoryProperties(pdev, &caps.memory);
    count = 0;
@@ -382,9 +407,9 @@ VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue
                                      const wsi_win32_runtime *runtime) const
 {
    FeatureChain have, want;
-   have.link(caps.instanceDivisor, caps.formatA4B4G4R4, caps.transformFeedback);
+   have.link(caps.instanceDivisor, caps.formatA4B4G4R4, caps.transformFeedback, caps.maintenance5);
    vk.GetPhysicalDeviceFeatures2(pdev, &have.core);
-   want.link(caps.instanceDivisor, caps.formatA4B4G4R4, caps.transformFeedback);
+   want.link(caps.instanceDivisor, caps.formatA4B4G4R4, caps.transformFeedback, caps.maintenance5);
    const VkPhysicalDeviceFeatures &hf = have.core.features;
    VkPhysicalDeviceFeatures &f = want.core.features;
    f.independentBlend = f.depthBiasClamp = f.fillModeNonSolid = f.samplerAnisotropy = VK_TRUE;
@@ -440,6 +465,10 @@ VkResult VulkanAdapter::createDevice(VkDevice *device, VkDeviceApi *api, VkQueue
       extensions.push_back(VK_EXT_VERTEX_ATTRIBUTE_DIVISOR_EXTENSION_NAME);
    if (caps.formatA4B4G4R4)
       extensions.push_back(VK_EXT_4444_FORMATS_EXTENSION_NAME);
+   if (caps.maintenance5) {
+      want.maintenance5.maintenance5 = VK_TRUE;
+      extensions.push_back(VK_KHR_MAINTENANCE_5_EXTENSION_NAME);
+   }
    if (nvk)
       extensions.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
    else

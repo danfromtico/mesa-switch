@@ -652,9 +652,16 @@ void create_resource_with_stride(D3D10DDI_HDEVICE hDevice, const D3D10DDIARG_CRE
    dev->resources = res;
    trace(TGD3D_TRACE_RESOURCE_PHASE, E_PENDING, 0, (uintptr_t)res);
    HRESULT hr = create_resource(dev, desc, res);
-   if (FAILED(hr))
+   if (FAILED(hr)) {
+      trace(TGD3D_TRACE_RESOURCE_FAIL, hr,
+            ((uint64_t)desc->Format << 32) | desc->MiscFlags,
+            ((uint64_t)(desc->SampleDesc.Count & 0xffffu) << 48) |
+            ((uint64_t)(desc->Usage & 0xffffu) << 32) |
+            ((uint64_t)(desc->MipLevels & 0xffffu) << 16) |
+            (desc->ArraySize & 0xffffu));
       resource_fail(dev, res, hr,
          (desc->BindFlags & D3D10_DDI_BIND_PRESENT) ? desc->pPrimaryDesc : nullptr);
+   }
    trace(TGD3D_TRACE_RESOURCE_PHASE, hr, 0, (uintptr_t)res);
 }
 

@@ -247,9 +247,10 @@ HRESULT initialize_graphics_device(Device *dev, bool use_runtime_queue, bool all
       trace(TGD3D_TRACE_CREATE_DEVICE, hr, dev->interfaceVersion, stage);
       return hr;
    }
-   /* This consumer requests Vulkan 1.3 and does not enable maintenance5.
-    * A 1.4-capable physical device alone does not enable native A8 usage. */
-   dev->hasA8 = false;
+   /* Enable native VK_FORMAT_A8_UNORM only when VK_KHR_maintenance5 was
+    * enabled on the device and optimal A8 color-target/blend/sample caps
+    * were confirmed on the physical device. */
+   dev->hasA8 = dev->caps && dev->caps->formatA8;
    return S_OK;
 }
 
