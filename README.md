@@ -16,15 +16,21 @@ An earlier HEG-001 setup used the SwBatt power-management bridge and switched to
 
 ### Switch Lite (HDH-001)
 
-The latest published permanent-boot check, boot record `103136`, recorded GPU Code 0. Desktop Window Manager loaded tgd3d and NVK from the approved driver directory. The signed kernel driver was built from `4c0cb225526e`. The table gives SHA-256 prefixes for the verified binaries. [Permanent-boot record and full hashes](tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/permanent-boot-103136.json) · [Kernel driver build](tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/build.json) · [GPU recovery tests](tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/qualification.json)
+The selected PAL4 page-directory repair passed a one-use qualification on boot
+`106486` and a subsequent **permanent boot at Code 0 on `106579`**. DWM loaded
+the exact approved tgd3d and NVK components. The daily KMD retains bounded
+paging diagnostics (`PagingDiagnosticsVersion=1`) with the active stop probe
+**off** (`PagingStopProbeArmed=0`). Source: `d1c07b6a8c4c`.
+[Scoped qualification and GPU readback](tegra-x1-wddm/docs/pal4-pde-kind-daily-20261127/README.md) ·
+[Permanent boot and full hashes](tegra-x1-wddm/docs/pal4-pde-kind-daily-20261127/permanent-boot.json)
 
 | Component | Binary | SHA-256 prefix |
 | --- | --- | --- |
-| WDDM kernel driver 0.1.0.158 | `tegragpurender.sys` | `1d7fcf5d75ed` |
+| WDDM kernel driver 0.1.0.158 | `tegragpurender.sys` | `1d88065b2e4a` |
 | tgd3d entry / native ARM64 implementation | `TegraGpuD3DVk.dll` / `tg_d3d_arm64.dll` | `9ff198aeabf1` / `0790651c6981` |
 | NVK entry / native ARM64 implementation | `libvulkan_nouveau.dll` / `tg_nvk_arm64.dll` | `3ca2d9eb0fdf` / `13ae4c9c5c34` |
 
-The repository's packaging manifest still selects the earlier kernel driver `c4f04a10e86a` with the same user-mode binaries. [Package baseline manifest](tegra-x1-wddm/docs/graphics-baseline.json) · [Open driver issues](tegra-x1-wddm/docs/open-faults.json)
+The packaging manifest and the device's permanent permission now select the same `1d88065b2e4a` KMD. The user-mode binaries are unchanged. This is a scoped paging repair; game performance, PAL4 audio and the other open driver issues remain under investigation. [Package baseline manifest](tegra-x1-wddm/docs/graphics-baseline.json) · [Open driver issues](tegra-x1-wddm/docs/open-faults.json)
 
 ### Switch Lite feature tests
 

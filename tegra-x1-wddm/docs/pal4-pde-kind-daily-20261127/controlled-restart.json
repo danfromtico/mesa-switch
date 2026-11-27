@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "kind": "controlled",
+  "explained": true,
+  "cause": "One-use qualification reboot requested by shutdown.exe with the recorded PAL4 daily scoped-fix comment. GPU remained disabled until the trace and test activation on this new boot.",
+  "boot_record": 106486,
+  "system_records": [
+    106469,
+    106486
+  ],
+  "events": [
+    {
+      "Id": 12,
+      "Record": 106486,
+      "Provider": "Microsoft-Windows-Kernel-General",
+      "Utc": "2026-11-27T22:06:12.4899794Z",
+      "Message": "操作系统已在系统时间 ‎2026‎-‎11‎-‎27T22:06:10.552166200Z 启动。"
+    },
+    {
+      "Id": 1074,
+      "Record": 106469,
+      "Provider": "User32",
+      "Utc": "2026-11-27T22:05:47.4870747Z",
+      "Message": "The process C:\\Windows\\system32\\shutdown.exe (DESKTOP-5RCUK3G) has initiated the 重启 of computer DESKTOP-5RCUK3G on behalf of user DESKTOP-5RCUK3G\\ruje for the following reason: 没有找到这个原因的标题\r\n Reason Code: 0x800000ff\r\n Shutdown Type: 重启\r\n Comment: SwitchWOA PAL4 daily scoped-fix qualification"
+    }
+  ],
+  "first_record": 106468,
+  "last_record": 106561
+}

@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Existing small optimal image GPU working control",
+  "scenario": "small-optimal-image-control",
+  "source_commit": "d1c07b6a8c4cc812ba8fdbdd53a3780dcac9c7a2",
+  "before_boot": 106486,
+  "after_boot": 106486,
+  "passed": true,
+  "output_verified": true,
+  "normal_exit": true,
+  "desktop_available": true,
+  "loaded_components": {
+    "tegragpurender.sys": "1d88065b2e4a8ed777c40da0802331ed542763ca1520ee5630c2a150185813d5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+    "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+  },
+  "result": {
+    "Name": "vk-triangle.exe",
+    "Arguments": "\"C:\\ProgramData\\SwitchWOA\\GpuUpdate\\pal4-pde-kind-1d88065b2e4a\\app\\libvulkan_nouveau.dll\" 00000000000a8add",
+    "StartUtc": "2026-11-27T22:13:50.0770463Z",
+    "EndUtc": "2026-11-27T22:13:50.2497908Z",
+    "ExitCode": 0,
+    "Stdout": "{\"vulkan_draw\":true,\"luid\":\"00000000000a8add\",\"pixels\":1024,\"red\":300,\"blue\":724,\"guard_bytes\":128,\"directory_kind\":false,\"image_allocation_bytes\":4096}\r\n",
+    "Stderr": "WARNING: NVK is not a conformant Vulkan implementation, testing use only.\r\n"
+  }
+}

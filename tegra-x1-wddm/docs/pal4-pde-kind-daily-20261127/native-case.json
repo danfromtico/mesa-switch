@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Known-kind directory update with 69,206,016-byte optimal image GPU readback",
+  "scenario": "gpu-physical-directory-known-kind",
+  "source_commit": "d1c07b6a8c4cc812ba8fdbdd53a3780dcac9c7a2",
+  "before_boot": 106486,
+  "after_boot": 106486,
+  "passed": true,
+  "original_trigger": true,
+  "output_verified": true,
+  "normal_exit": true,
+  "desktop_available": true,
+  "loaded_components": {
+    "tegragpurender.sys": "1d88065b2e4a8ed777c40da0802331ed542763ca1520ee5630c2a150185813d5",
+    "TegraGpuD3DVk.dll": "9ff198aeabf1bcfad98410733d19bacd85e580e65023738be5641826936ba3ff",
+    "libvulkan_nouveau.dll": "3ca2d9eb0fdfd6aff8a7b667cb364f605629cb3e97dd7a4fe9ac924b10a6a8ab",
+    "tg_d3d_arm64.dll": "0790651c6981eff8bf528ee1efc2be7ef2d05203b64f11eca87f8dfb8afac334",
+    "tg_nvk_arm64.dll": "13ae4c9c5c347529e3d3fa76c52fda31ce014842946f3c90e05d0e10d8d8e5e8"
+  },
+  "output_scope": "Offscreen GPU image: 1024 checked pixels and 128 guard bytes; this does not assert a new physical-panel mode or full game qualification.",
+  "accepted_native_input": {
+    "Version": 1,
+    "Operation": 11,
+    "Status": 0,
+    "Site": 0,
+    "PageTableLevel": 1,
+    "UpdateMode": 2,
+    "HasAllocation": 0,
+    "UpdateFieldsValid": 1,
+    "Detail": 254
+  },
+  "native_input_evidence": "ETW event 12 during the bounded activation and GPU-readback interval. This proves the exact callback input was accepted; it does not attribute that event to an individual application mapping.",
+  "trace_loss": {
+    "action": "stop",
+    "status": 0,
+    "events_lost": 0,
+    "log_buffers_lost": 0,
+    "buffers_written": 2
+  },
+  "readback": {
+    "Name": "vk-triangle.exe",
+    "Arguments": "\"C:\\ProgramData\\SwitchWOA\\GpuUpdate\\pal4-pde-kind-1d88065b2e4a\\app\\libvulkan_nouveau.dll\" 00000000000a8add --directory-kind",
+    "StartUtc": "2026-11-27T22:13:49.4738826Z",
+    "EndUtc": "2026-11-27T22:13:50.0614332Z",
+    "ExitCode": 0,
+    "Stdout": "{\"vulkan_draw\":true,\"luid\":\"00000000000a8add\",\"pixels\":1024,\"red\":300,\"blue\":724,\"guard_bytes\":128,\"directory_kind\":true,\"image_allocation_bytes\":69206016}\r\n",
+    "Stderr": "WARNING: NVK is not a conformant Vulkan implementation, testing use only.\r\n"
+  },
+  "working_control": {
+    "Name": "vk-triangle.exe",
+    "Arguments": "\"C:\\ProgramData\\SwitchWOA\\GpuUpdate\\pal4-pde-kind-1d88065b2e4a\\app\\libvulkan_nouveau.dll\" 00000000000a8add",
+    "StartUtc": "2026-11-27T22:13:50.0770463Z",
+    "EndUtc": "2026-11-27T22:13:50.2497908Z",
+    "ExitCode": 0,
+    "Stdout": "{\"vulkan_draw\":true,\"luid\":\"00000000000a8add\",\"pixels\":1024,\"red\":300,\"blue\":724,\"guard_bytes\":128,\"directory_kind\":false,\"image_allocation_bytes\":4096}\r\n",
+    "Stderr": "WARNING: NVK is not a conformant Vulkan implementation, testing use only.\r\n"
+  },
+  "desktop": {
+    "gpu_code": 0,
+    "dwm_pid": 1396
+  },
+  "causal_fault_remains_open": true
+}
