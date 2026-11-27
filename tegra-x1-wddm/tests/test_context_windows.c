@@ -1680,6 +1680,13 @@ static __declspec(noinline) void TestAdapterQueries(TG_GPU_CONTEXT_ENGINE *e,DRI
     CHECK(physical.NumExecutionNodes==1 && physical.PagingNodeIndex==0);
     CHECK(physical.DxgkPhysicalAdapterHandle==e->Dxgk.DeviceHandle && physical.Flags.Value==2);
     CHECK(!physical.VPRPagingNode);
+    a.InputDataSize=sizeof(input)-1;
+    CHECK(d->DxgkDdiQueryAdapterInfo(e,&a)==STATUS_BUFFER_TOO_SMALL);
+    a.InputDataSize=sizeof(input);a.OutputDataSize=sizeof(physical)-1;
+    memset(&physical,0xa5,sizeof(physical));
+    CHECK(d->DxgkDdiQueryAdapterInfo(e,&a)==STATUS_BUFFER_TOO_SMALL);
+    for(i=0;i<sizeof(physical);++i) CHECK(((UCHAR *)&physical)[i]==0xa5);
+    a.OutputDataSize=sizeof(physical);
     input.PhysicalAdapterIndex=1;
     CHECK(d->DxgkDdiQueryAdapterInfo(e,&a)==STATUS_INVALID_PARAMETER);
     input.PhysicalAdapterIndex=0;e->Stopping=TRUE;
@@ -1701,7 +1708,8 @@ static __declspec(noinline) void TestAdapterQueries(TG_GPU_CONTEXT_ENGINE *e,DRI
           driver.MemoryManagementCaps.CrossAdapterResource && !driver.MemoryManagementCaps.IoMmuSupported);
     CHECK(driver.SupportPerEngineTDR);
     e->Tables->Scanout=scanout;
-    CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)));
+    CHECK(NT_SUCCESS(d->DxgkDdiQueryAdapterInfo(e,&a)) && driver.MiscCaps.ComputeOnly);
+    CHECK(NT_SUCCESS(TgGpuDdiQueryDisplayAdapterInfo(e,&a)));
     CHECK(driver.SupportNonVGA && driver.FlipCaps.FlipOnVSyncMmIo && !driver.MiscCaps.ComputeOnly);
     CHECK(driver.SupportSmoothRotation && !driver.SupportMultiPlaneOverlay && !driver.MaxOverlayPlanes);
     CHECK(driver.PresentationCaps.NoCacheCoherentApertureMemory &&
@@ -2785,6 +2793,29 @@ static __declspec(noinline) void TestAdapterLifecycle(const DXGKRNL_INTERFACE *c
     CHECK(d.DxgkDdiQueryAdapterInfo(a,&query)==STATUS_BUFFER_TOO_SMALL);
     query.OutputDataSize=sizeof(caps);
     CHECK(NT_SUCCESS(d.DxgkDdiQueryAdapterInfo(a,&query)) && caps.WDDMVersion==DXGKDDI_WDDMv2_6);
+    query.pInputData=NULL;query.InputDataSize=0;
+    CHECK(TgGpuDdiQueryDisplayAdapterInfo(a,&query)==STATUS_SUCCESS && caps.WDDMVersion==DXGKDDI_WDDMv2_6);
+    query.pInputData=(PVOID)&caps_in;query.InputDataSize=sizeof(caps_in)-1;
+    CHECK(TgGpuDdiQueryDisplayAdapterInfo(a,&query)==STATUS_BUFFER_TOO_SMALL);
+    /* Both package entry points must answer before the first table or device handle. */
+    struct { DXGK_DRIVERCAPS caps; ULONG guard; } driver;
+    memset(&driver,0xa5,sizeof(driver));
+    query=(DXGKARG_QUERYADAPTERINFO){.Type=DXGKQAITYPE_DRIVERCAPS,
+        .pOutputData=&driver.caps,.OutputDataSize=sizeof(driver)};
+    CHECK(d.DxgkDdiQueryAdapterInfo(a,&query)==STATUS_SUCCESS && driver.caps.MiscCaps.ComputeOnly);
+    CHECK(TgGpuDdiQueryDisplayAdapterInfo(a,&query)==STATUS_SUCCESS && !driver.caps.MiscCaps.ComputeOnly);
+    CHECK(driver.caps.WDDMVersion==caps.WDDMVersion && driver.caps.FlipCaps.FlipOnVSyncMmIo &&
+          driver.caps.HighestAcceptableAddress.QuadPart==T214_SYSTEM_LIMIT-1 && driver.guard==0xa5a5a5a5u);
+    query.OutputDataSize=sizeof(driver.caps)-1;memset(&driver,0xa5,sizeof(driver));
+    CHECK(TgGpuDdiQueryDisplayAdapterInfo(a,&query)==STATUS_BUFFER_TOO_SMALL);
+    for(UINT i=0;i<sizeof(driver);++i)CHECK(((UCHAR *)&driver)[i]==0xa5);
+    DXGK_DISPLAY_DRIVERCAPS_EXTENSION extension;
+    query=(DXGKARG_QUERYADAPTERINFO){.Type=DXGKQAITYPE_DISPLAY_DRIVERCAPS_EXTENSION,
+        .pOutputData=&extension,.OutputDataSize=sizeof(extension)};
+    CHECK(d.DxgkDdiQueryAdapterInfo(a,&query)==STATUS_NOT_SUPPORTED);
+    CHECK(TgGpuDdiQueryDisplayAdapterInfo(a,&query)==STATUS_SUCCESS);
+    query.Type=DXGKQAITYPE_QUERYSEGMENT4;
+    CHECK(TgGpuDdiQueryDisplayAdapterInfo(a,&query)==STATUS_DEVICE_NOT_READY);
     UINT physical_index=0;
     struct { DXGK_GPUVERSION info; UCHAR guard[8]; } gpu_version;
     const WCHAR architecture[]=L"Maxwell GM20B";
@@ -2847,7 +2878,9 @@ static __declspec(noinline) void TestAdapterLifecycle(const DXGKRNL_INTERFACE *c
     CHECK(d.DxgkDdiStartDevice(a,&start,&dxgk,&sources,&children)==STATUS_INVALID_DEVICE_STATE);
     DXGKARG_CREATEDEVICE device={.hDevice=(HANDLE)500};device.Flags.SystemDevice=1;
     CHECK(NT_SUCCESS(d.DxgkDdiCreateDevice(a,&device)));
+    a->Panel.ChildReported=TRUE; /* Emulate the display miniport publication. */
     CHECK(d.DxgkDdiStopDevice(a)==STATUS_DEVICE_BUSY && a->EngineReady && !a->QueueReady);
+    CHECK(a->Panel.ChildReported);
     CHECK(a->Engine.Stopping && !a->Engine.AdapterIdentityReady && resource_live && adapter_table_used);
     CHECK(NT_SUCCESS(d.DxgkDdiDestroyDevice(device.hDevice)));
     fail_free=TRUE;CHECK(d.DxgkDdiStopDevice(a)==STATUS_UNSUCCESSFUL && a->Engine.Commands.Handle);
@@ -2858,6 +2891,7 @@ static __declspec(noinline) void TestAdapterLifecycle(const DXGKRNL_INTERFACE *c
     CHECK(d.DxgkDdiStopDevice(a)==STATUS_UNSUCCESSFUL && resource_live==16 && !adapter_table_used);
     resource_fail_unmap=0;
     CHECK(NT_SUCCESS(d.DxgkDdiStopDevice(a)) && !resource_live && a->State==TgGpuAdapterAdded);
+    CHECK(!a->Panel.ChildReported);
     ResourceList(TRUE);CHECK(NT_SUCCESS(d.DxgkDdiStartDevice(a,&start,&dxgk,&sources,&children)));
     CHECK(NT_SUCCESS(d.DxgkDdiStopDevice(a)));
     CHECK(NT_SUCCESS(d.DxgkDdiRemoveDevice(a)));

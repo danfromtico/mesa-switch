@@ -13,7 +13,7 @@ static NTSTATUS buffers(const DXGKARG_QUERYADAPTERINFO *a, UINT input, UINT outp
     return STATUS_SUCCESS;
 }
 
-NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYADAPTERINFO *a)
+static NTSTATUS query_adapter_info(HANDLE adapter, const DXGKARG_QUERYADAPTERINFO *a, BOOLEAN display)
 {
     TG_GPU_CONTEXT_ENGINE *e=adapter;
     DXGK_SEGMENTDESCRIPTOR3 table;
@@ -23,7 +23,8 @@ NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYAD
     if (a->Type==DXGKQAITYPE_WDDMDEVICECAPS) {
         /* DxgKrnl asks before StartDevice has installed callbacks or tables. */
         const DXGK_WDDMDEVICECAPS caps={.WDDMVersion=wddm_version};
-        status=buffers(a,sizeof(DXGK_WDDMDEVICECAPSIN),sizeof(caps));
+        /* The version reply is fixed; an output-only query needs no input. */
+        status=buffers(a,a->InputDataSize ? sizeof(DXGK_WDDMDEVICECAPSIN) : 0,sizeof(caps));
         if (!NT_SUCCESS(status)) return status;
         RtlCopyMemory(a->pOutputData,&caps,sizeof(caps));
         return STATUS_SUCCESS;
@@ -40,30 +41,8 @@ NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYAD
         return STATUS_SUCCESS;
     }
     switch (a->Type) {
-    case DXGKQAITYPE_DRIVERCAPS:
-    case DXGKQAITYPE_DISPLAY_DRIVERCAPS_EXTENSION:
-    case DXGKQAITYPE_UMDRIVERPRIVATE:
-    case DXGKQAITYPE_QUERYSEGMENT4:
-    case DXGKQAITYPE_GPUMMUCAPS:
-    case DXGKQAITYPE_PAGETABLELEVELDESC:
-    case DXGKQAITYPE_PHYSICALADAPTERCAPS:
-    case DXGKQAITYPE_NUMPOWERCOMPONENTS:
-    case DXGKQAITYPE_HISTORYBUFFERPRECISION:
-        break;
-    default:
-        return STATUS_NOT_SUPPORTED;
-    }
-    /* Segment 1 backs page tables. Segment 2 gives VidMm a window into
-     * system memory for its DMA pool. */
-    if (e->Stopping || !e->Dxgk.DeviceHandle || !e->Tables || e->Tables->SegmentId!=1)
-        return STATUS_DEVICE_NOT_READY;
-    status=TgGpuDescribeTableSegment(e->Tables,&table);
-    if (!NT_SUCCESS(status)) return status;
-
-    switch (a->Type) {
     case DXGKQAITYPE_DRIVERCAPS: {
         DXGK_DRIVERCAPS caps={0};
-        const BOOLEAN display=e->Tables->Scanout.Handle!=NULL;
         status=buffers(a,0,sizeof(caps));
         if (!NT_SUCCESS(status)) return status;
         caps.HighestAcceptableAddress.QuadPart=T214_SYSTEM_LIMIT-1;
@@ -101,12 +80,31 @@ NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYAD
     }
     case DXGKQAITYPE_DISPLAY_DRIVERCAPS_EXTENSION: {
         const DXGK_DISPLAY_DRIVERCAPS_EXTENSION caps={0};
-        if (!e->Tables->Scanout.Handle) return STATUS_NOT_SUPPORTED;
+        if (!display) return STATUS_NOT_SUPPORTED;
         status=buffers(a,0,sizeof(caps));
         if (!NT_SUCCESS(status)) return status;
         RtlCopyMemory(a->pOutputData,&caps,sizeof(caps));
         return STATUS_SUCCESS;
     }
+    case DXGKQAITYPE_UMDRIVERPRIVATE:
+    case DXGKQAITYPE_QUERYSEGMENT4:
+    case DXGKQAITYPE_GPUMMUCAPS:
+    case DXGKQAITYPE_PAGETABLELEVELDESC:
+    case DXGKQAITYPE_PHYSICALADAPTERCAPS:
+    case DXGKQAITYPE_NUMPOWERCOMPONENTS:
+    case DXGKQAITYPE_HISTORYBUFFERPRECISION:
+        break;
+    default:
+        return STATUS_NOT_SUPPORTED;
+    }
+    /* Segment 1 backs page tables. Segment 2 gives VidMm a window into
+     * system memory for its DMA pool. */
+    if (e->Stopping || !e->Dxgk.DeviceHandle || !e->Tables || e->Tables->SegmentId!=1)
+        return STATUS_DEVICE_NOT_READY;
+    status=TgGpuDescribeTableSegment(e->Tables,&table);
+    if (!NT_SUCCESS(status)) return status;
+
+    switch (a->Type) {
     case DXGKQAITYPE_NUMPOWERCOMPONENTS: {
         const UINT components=0;
         status=buffers(a,0,sizeof(components));
@@ -241,6 +239,18 @@ NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYAD
     default:
         return STATUS_NOT_SUPPORTED;
     }
+}
+
+/* DriverEntry selects the display entry together with the panel DDIs.
+ * This decision is valid from AddDevice, before VidMm owns any segments. */
+NTSTATUS APIENTRY TgGpuDdiQueryAdapterInfo(HANDLE adapter, const DXGKARG_QUERYADAPTERINFO *a)
+{
+    return query_adapter_info(adapter,a,FALSE);
+}
+
+NTSTATUS APIENTRY TgGpuDdiQueryDisplayAdapterInfo(HANDLE adapter, const DXGKARG_QUERYADAPTERINFO *a)
+{
+    return query_adapter_info(adapter,a,TRUE);
 }
 
 void TgGpuRegisterQueryDdi(DRIVER_INITIALIZATION_DATA *d)

@@ -3,12 +3,8 @@
 #define TEGRA_GPU_QUERY_H
 #include "context.h"
 
-/* Memory/topology queries for the existing context engine adapter handle.
- * Start/stop and query calls must be serialized by the adapter lifecycle.
- * UMD-private identity reports the 512 MiB ceiling and OS adapter LUID; its
- * native-submit bit remains unset. DRIVERCAPS stays unsupported until real
- * submission and TDR are wired. This does not expose a complete adapter.
- */
+/* Both entry points use the same GM20B memory and execution capabilities. */
 DXGKDDI_QUERYADAPTERINFO TgGpuDdiQueryAdapterInfo;
+DXGKDDI_QUERYADAPTERINFO TgGpuDdiQueryDisplayAdapterInfo;
 void TgGpuRegisterQueryDdi(DRIVER_INITIALIZATION_DATA *);
 #endif

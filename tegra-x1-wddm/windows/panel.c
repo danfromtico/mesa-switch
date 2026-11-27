@@ -233,8 +233,9 @@ static NTSTATUS query_children(PVOID context, PDXGK_CHILD_DESCRIPTOR children, U
     TG_GPU_ADAPTER *adapter = context;
     if (!adapter || !children)
         return STATUS_INVALID_PARAMETER;
-    if (!adapter->Panel.Dc.owned)
+    if (!adapter->Panel.ChildReported)
         return STATUS_DEVICE_NOT_READY;
+    /* One reported child requires its descriptor and a zero terminator. */
     if (bytes < 2 * sizeof(*children))
         return STATUS_BUFFER_TOO_SMALL;
     RtlZeroMemory(children, 2 * sizeof(*children));
@@ -251,11 +252,15 @@ static NTSTATUS query_child_status(PVOID context, PDXGK_CHILD_STATUS status, BOO
 {
     TG_GPU_ADAPTER *adapter = context;
     UNREFERENCED_PARAMETER(nondestructive);
-    if (!adapter || !status || status->ChildUid != adapter->Panel.Boot.TargetId)
+    if (!adapter || !status)
+        return STATUS_INVALID_PARAMETER;
+    if (!adapter->Panel.ChildReported)
+        return STATUS_DEVICE_NOT_READY;
+    if (status->ChildUid != adapter->Panel.Boot.TargetId)
         return STATUS_INVALID_PARAMETER;
     if (status->Type != StatusConnection)
         return STATUS_NOT_SUPPORTED;
-    status->HotPlug.Connected = adapter->Panel.Dc.owned;
+    status->HotPlug.Connected = TRUE;
     return STATUS_SUCCESS;
 }
 
@@ -263,10 +268,12 @@ static NTSTATUS query_device_descriptor(PVOID context, ULONG uid, PDXGK_DEVICE_D
 {
     const TG_GPU_ADAPTER *adapter = context;
     PAGED_CODE();
-    if (!adapter || !descriptor || uid != adapter->Panel.Boot.TargetId)
+    if (!adapter || !descriptor)
         return STATUS_INVALID_PARAMETER;
-    if (!adapter->Panel.Dc.owned)
+    if (!adapter->Panel.ChildReported)
         return STATUS_DEVICE_NOT_READY;
+    if (uid != adapter->Panel.Boot.TargetId)
+        return STATUS_INVALID_PARAMETER;
     /* The internal DSI panel supplies its mode through RecommendMonitorModes. */
     return STATUS_MONITOR_NO_DESCRIPTOR;
 }
@@ -277,7 +284,7 @@ static NTSTATUS APIENTRY recommend_monitor_modes(HANDLE context, const DXGKARG_R
     PAGED_CODE();
     if (!adapter || !args || !args->pMonitorSourceModeSetInterface)
         return STATUS_INVALID_PARAMETER;
-    if (!adapter->Panel.Dc.owned || args->VideoPresentTargetId != adapter->Panel.Boot.TargetId)
+    if (!adapter->Panel.ChildReported || args->VideoPresentTargetId != adapter->Panel.Boot.TargetId)
         return STATUS_GRAPHICS_INVALID_VIDEO_PRESENT_TARGET;
     const DXGK_MONITORSOURCEMODESET_INTERFACE *modes = args->pMonitorSourceModeSetInterface;
     D3DKMDT_MONITOR_SOURCE_MODE *mode;
@@ -301,7 +308,7 @@ static NTSTATUS APIENTRY update_monitor_link_info(HANDLE context, DXGKARG_UPDATE
     PAGED_CODE();
     if (!adapter || !args)
         return STATUS_INVALID_PARAMETER;
-    if (!adapter->Panel.Dc.owned || args->VideoPresentTargetId != adapter->Panel.Boot.TargetId)
+    if (!adapter->Panel.ChildReported || args->VideoPresentTargetId != adapter->Panel.Boot.TargetId)
         return STATUS_GRAPHICS_INVALID_VIDEO_PRESENT_TARGET;
 
     /* The inherited DSI link runs fixed-rate SDR without link dithering. */

@@ -20,6 +20,8 @@ typedef struct _TG_GPU_PANEL {
     volatile PVOID PostCpuAddress;
     UINT SystemDisplayWidth, SystemDisplayHeight;
     BOOLEAN Stopping, NotifyVBlank, NotifyMpoVBlank, SourceVisible, TargetActive;
+    /* Valid from the one-child StartDevice result until successful StopDevice. */
+    BOOLEAN ChildReported;
 } TG_GPU_PANEL;
 
 struct _TG_GPU_ADAPTER;

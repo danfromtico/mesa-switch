@@ -4,6 +4,8 @@ An experimental Windows 11 GPU driver for the Tegra X1 (GM20B).
 The kernel driver and board integrations share this tree with the Mesa NVK
 Windows transport. Hardware verification started with Nintendo Switch Lite. [NVK Windows backend](../src/nouveau/vulkan/nvkmd/windows/)
 
+Switch OLED (HEG-001) port and compatibility findings by [Tsunami714!](https://github.com/Tsunami714a). [WDDM query review](docs/OLED_WDDM_QUERY_REVIEW_20261127.md)
+
 The long-term goal is a complete native Vulkan implementation, verified
 with version-appropriate VK-GL-CTS coverage and physical GM20B tests.
 The current milestone is stable native DWM composition through

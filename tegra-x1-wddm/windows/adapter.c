@@ -76,6 +76,7 @@ NTSTATUS APIENTRY TgGpuDdiStopDevice(PVOID context)
     TgGpuPlatformRefreshIsolation(&a->Platform,&a->Resources);
     status=TgGpuReleaseResources(&a->Engine.Dxgk,&a->Resources);
     if(!NT_SUCCESS(status))return status;
+    a->Panel.ChildReported=FALSE;
     a->State=TgGpuAdapterAdded;
     return STATUS_SUCCESS;
 }

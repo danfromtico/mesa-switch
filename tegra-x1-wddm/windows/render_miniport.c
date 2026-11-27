@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 #include "adapter.h"
 #include "allocation.h"
+#include "query.h"
 #include "reset_backend.h"
 #include "submit_ddi.h"
 #ifdef TG_GPU_NATIVE_TEST_VERSION
@@ -17,6 +18,7 @@ static VOID record_status(PCWSTR name, NTSTATUS status)
                               name,REG_DWORD,&value,sizeof(value));
 }
 
+#ifdef TG_GPU_PANEL_WDDM
 static VOID map_post_display(TG_GPU_ADAPTER *a)
 {
     if (!a || a->Panel.PostCpuAddress)
@@ -27,6 +29,7 @@ static VOID map_post_display(TG_GPU_ADAPTER *a)
     record_status(L"PostDisplayMapStatus",
         a->Panel.PostCpuAddress ? STATUS_SUCCESS : STATUS_INSUFFICIENT_RESOURCES);
 }
+#endif
 
 static VOID unmap_post_display(TG_GPU_ADAPTER *a)
 {
@@ -113,6 +116,7 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
     }
     map_post_display(a);
     *sources=*children=1;
+    a->Panel.ChildReported=TRUE;
 #endif
     if(status==STATUS_SUCCESS)TgNvdecAdapterInitialize(a);
     if (NT_SUCCESS(status))
@@ -258,6 +262,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
     d.DxgkDdiSetStablePowerState=set_stable_power;
     d.DxgkDdiSetVirtualMachineData=set_vm_data;
 #ifdef TG_GPU_PANEL_WDDM
+    d.DxgkDdiQueryAdapterInfo=TgGpuDdiQueryDisplayAdapterInfo;
     TgGpuRegisterPanelLifecycle(&d);
     TgGpuRegisterDisplaySubmissionDdis(&d);
 #else
