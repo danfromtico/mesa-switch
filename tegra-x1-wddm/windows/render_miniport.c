@@ -7,20 +7,55 @@
 #ifdef TG_GPU_NATIVE_TEST_VERSION
 #include "native_start_test.h"
 #endif
-#ifdef TG_GPU_PAGING_STOP_PROBE
+#ifdef TG_GPU_PAGING_DIAGNOSTICS
 #include "paging_dispatch.h"
+#include "diagnostic_events.h"
 
+static volatile LONG g_PagingFailureRecorded;
+static volatile LONG g_PagingDirectoryRecorded;
+
+#ifdef TG_GPU_PAGING_STOP_PROBE
 #define TG_GPU_PAGING_PROBE_BUGCHECK 0xe0535751u
 enum { PagingProbeInactive, PagingProbeArmed, PagingProbeCaptured };
 static volatile LONG g_PagingProbeState;
+#endif
 
-static NTSTATUS APIENTRY probe_paging_buffer(HANDLE adapter, DXGKARG_BUILDPAGINGBUFFER *args)
+static NTSTATUS APIENTRY diagnostic_paging_buffer(HANDLE adapter, DXGKARG_BUILDPAGINGBUFFER *args)
 {
     TG_GPU_PAGING_REJECTION rejection = {0};
     NTSTATUS status = TgGpuBuildPagingRequest(adapter, args, &rejection);
+    if (NT_SUCCESS(status) && args && args->Operation == DXGK_OPERATION_UPDATE_PAGE_TABLE &&
+        args->UpdatePageTable.PageTableLevel == 1 &&
+        args->UpdatePageTable.UpdateMode == DXGK_PAGETABLEUPDATE_GPU_PHYSICAL &&
+        args->UpdatePageTable.DriverProtection &&
+        InterlockedCompareExchange(&g_PagingDirectoryRecorded, 1, 0) == 0) {
+        const TG_GPU_PAGING_REJECTION_EVENT event = {
+            .Version = 1, .Operation = args->Operation, .Status = status,
+            .PageTableLevel = 1, .UpdateMode = DXGK_PAGETABLEUPDATE_GPU_PHYSICAL,
+            .HasAllocation = args->UpdatePageTable.hAllocation != NULL,
+            .UpdateFieldsValid = 1, .Detail = args->UpdatePageTable.DriverProtection,
+        };
+        TgGpuTracePagingDirectory(&event);
+    }
     if (status == STATUS_NOT_SUPPORTED && args &&
-        InterlockedCompareExchange(&g_PagingProbeState, PagingProbeCaptured,
-                                   PagingProbeArmed) == PagingProbeArmed) {
+        InterlockedCompareExchange(&g_PagingFailureRecorded, 1, 0) == 0) {
+        TG_GPU_PAGING_REJECTION_EVENT event = {
+            .Version = 1, .Operation = args->Operation, .Status = status,
+            .Site = rejection.Site, .Detail = rejection.Detail,
+        };
+        if (args->Operation == DXGK_OPERATION_UPDATE_PAGE_TABLE) {
+            event.PageTableLevel = args->UpdatePageTable.PageTableLevel;
+            event.UpdateMode = args->UpdatePageTable.UpdateMode;
+            event.HasAllocation = args->UpdatePageTable.hAllocation != NULL;
+            event.UpdateFieldsValid = 1;
+        }
+        /* No per-success trace, disk write or GPU register access. Recording
+         * needs an enabled ETW session; it is not a durable on-disk log. */
+        TgGpuTracePagingRejection(&event);
+#ifdef TG_GPU_PAGING_STOP_PROBE
+        if (InterlockedCompareExchange(&g_PagingProbeState, PagingProbeCaptured,
+                                       PagingProbeArmed) != PagingProbeArmed)
+            return status;
         /* V2 parameter 3: site[31:0], level[39:32], mode[47:40],
          * allocation-present[48]. Parameter 4 retains the full detail. */
         ULONG_PTR context = (ULONG)rejection.Site;
@@ -32,6 +67,7 @@ static NTSTATUS APIENTRY probe_paging_buffer(HANDLE adapter, DXGKARG_BUILDPAGING
         }
         KeBugCheckEx(TG_GPU_PAGING_PROBE_BUGCHECK, (ULONG)args->Operation,
                      (ULONG)status, context, rejection.Detail);
+#endif
     }
     return status;
 }
@@ -93,6 +129,15 @@ static NTSTATUS start_device(PVOID context,DXGK_START_INFO *start,
 {
     TG_GPU_ADAPTER *a=context;
     TgGpuRecordStartup(a,TgGpuStartupEntering,STATUS_PENDING);
+#ifdef TG_GPU_PAGING_DIAGNOSTICS
+    InterlockedExchange(&g_PagingFailureRecorded, 0);
+    InterlockedExchange(&g_PagingDirectoryRecorded, 0);
+    record_status(L"PagingDiagnosticsVersion", 1);
+    record_status(L"PagingStopProbeArmed", 0);
+#ifdef TG_GPU_PAGING_STOP_PROBE
+    InterlockedExchange(&g_PagingProbeState, PagingProbeInactive);
+#endif
+#endif
     /* Startup samples only. A closed gate or failed start must not leave an
      * old successful measurement looking like this activation's result.
      */
@@ -279,8 +324,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT object,PUNICODE_STRING path)
     DRIVER_INITIALIZATION_DATA d={0};
     d.Version=DXGKDDI_INTERFACE_VERSION;
     TgGpuRegisterAdapterDdis(&d);
-#ifdef TG_GPU_PAGING_STOP_PROBE
-    d.DxgkDdiBuildPagingBuffer=probe_paging_buffer;
+#ifdef TG_GPU_PAGING_DIAGNOSTICS
+    d.DxgkDdiBuildPagingBuffer=diagnostic_paging_buffer;
 #endif
     d.DxgkDdiCollectDiagnosticInfo=TgGpuDdiCollectDiagnosticInfo;
     d.DxgkDdiStartDevice=start_device;

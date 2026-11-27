@@ -115,6 +115,21 @@ typedef struct _TG_GPU_CONTEXT_EVENT {
 } TG_GPU_CONTEXT_EVENT;
 C_ASSERT(sizeof(TG_GPU_CONTEXT_EVENT)==120);
 
+/* Event 11/version 1: first unsupported paging request per StartDevice.
+ * UpdateFieldsValid distinguishes an update request from other operations.
+ * Detail is the rejection's scalar value, never a dereferenced allocation. */
+typedef struct _TG_GPU_PAGING_REJECTION_EVENT {
+    ULONG Version,Operation;
+    NTSTATUS Status;
+    ULONG Site,PageTableLevel,UpdateMode,HasAllocation,UpdateFieldsValid;
+    ULONGLONG Detail;
+} TG_GPU_PAGING_REJECTION_EVENT;
+C_ASSERT(sizeof(TG_GPU_PAGING_REJECTION_EVENT)==40);
+VOID TgGpuTracePagingRejection(const TG_GPU_PAGING_REJECTION_EVENT *record);
+/* Event 12/version 1 uses the same payload for the first accepted
+ * GPU_PHYSICAL level-1 request carrying a nonzero leaf kind. */
+VOID TgGpuTracePagingDirectory(const TG_GPU_PAGING_REJECTION_EVENT *record);
+
 /* Event 3/version 1: immutable owned command bytes before destructive reset.
  * One 144-byte header plus at most 1024 command bytes per event. */
 #define TG_GPU_TRACE_COMMAND_CHUNK_BYTES 1024u

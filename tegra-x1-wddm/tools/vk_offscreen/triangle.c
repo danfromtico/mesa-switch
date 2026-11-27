@@ -197,8 +197,9 @@ int main(int argc, char **argv)
 {
     const bool preview = argc == 4 && strcmp(argv[3], "--preview") == 0;
     const bool timings = argc == 4 && strcmp(argv[3], "--timings") == 0;
-    if (argc != 3 && !preview && !timings) {
-        fprintf(stderr, "usage: vk-triangle.exe <absolute-NVK-DLL> <hex-KMT-LUID> [--preview | --timings]\n");
+    const bool directory_kind = argc == 4 && strcmp(argv[3], "--directory-kind") == 0;
+    if (argc != 3 && !preview && !timings && !directory_kind) {
+        fprintf(stderr, "usage: vk-triangle.exe <absolute-NVK-DLL> <hex-KMT-LUID> [--preview | --timings | --directory-kind]\n");
         return 2;
     }
     if (strlen(argv[2]) != 16 || strspn(argv[2], "0123456789abcdefABCDEF") != 16)
@@ -298,13 +299,21 @@ int main(int argc, char **argv)
     const VkImageCreateInfo create_image = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .imageType = VK_IMAGE_TYPE_2D, .format = VK_FORMAT_R8G8B8A8_UNORM,
-        .extent = {WIDTH, HEIGHT, 1}, .mipLevels = 1, .arrayLayers = 1,
+        /* More than 64 MiB of optimal image backing spans a GM20B leaf
+         * table. Keep the rendered/read-back region at the original 32x32. */
+        .extent = {directory_kind ? 4096 : WIDTH, directory_kind ? 4097 : HEIGHT, 1},
+        .mipLevels = 1, .arrayLayers = 1,
         .samples = VK_SAMPLE_COUNT_1_BIT, .tiling = VK_IMAGE_TILING_OPTIMAL,
         .usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
     };
     CHECK(vkCreateImage(device, &create_image, NULL, &image));
     VkMemoryRequirements requirements;
     vkGetImageMemoryRequirements(device, image, &requirements);
+    const VkDeviceSize image_allocation_bytes = requirements.size;
+    if (directory_kind && image_allocation_bytes <= UINT64_C(64) * 1024 * 1024) {
+        fprintf(stderr, "Directory-kind control needs more than one leaf table of image backing\n");
+        goto done;
+    }
     VkMemoryAllocateInfo allocate = {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
         .allocationSize = requirements.size,
@@ -520,8 +529,10 @@ int main(int argc, char **argv)
     if (timings) stage_ticks[8] = ticks();
     exit_code = 0;
     printf("{\"vulkan_draw\":true,\"luid\":\"%016llx\",\"pixels\":1024,"
-           "\"red\":300,\"blue\":724,\"guard_bytes\":128}\n",
-           (unsigned long long)luid);
+           "\"red\":300,\"blue\":724,\"guard_bytes\":128,"
+           "\"directory_kind\":%s,\"image_allocation_bytes\":%" PRIu64 "}\n",
+           (unsigned long long)luid, directory_kind ? "true" : "false",
+           (uint64_t)image_allocation_bytes);
     if (preview) {
         const uint8_t *rgba = (const uint8_t *)mapped + GUARD;
         for (unsigned i = 0; i < PIXELS; i++, rgba += 4)
