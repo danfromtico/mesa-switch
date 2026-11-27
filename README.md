@@ -1,19 +1,35 @@
 # Mesa Switch for Windows ARM64
 
-This repository contains the GM20B WDDM kernel driver, the `tgd3d` Direct3D user-mode driver and the Mesa NVK Vulkan driver for Windows 11 ARM64 on Nintendo Switch Lite (HDH-001). On the active `tgd3d-vulkan` branch, DWM uses `tgd3d` to render through NVK on the Tegra X1 GPU. WinX supplies the firmware and ACPI tables. The companion Windows driver project supplies the board drivers and the clocks used by NVDEC. [WinX firmware](https://github.com/ruje0504-2/winx) · [Windows board drivers](https://github.com/ruje0504-2/Windows-for-Switch-Drivers)
+This repository contains the GM20B WDDM kernel driver, the `tgd3d` Direct3D user-mode driver and the Mesa NVK Vulkan driver for Windows 11 ARM64 on Nintendo Switch. On the active `tgd3d-vulkan` branch, DWM uses `tgd3d` to render through NVK on the Tegra X1 GPU. The tested Switch Lite configuration uses WinX firmware and ACPI tables. The companion Windows driver project supplies its board drivers and NVDEC clocks. [WinX firmware](https://github.com/ruje0504-2/winx) · [Windows board drivers](https://github.com/ruje0504-2/Windows-for-Switch-Drivers)
 
 ## Hardware status
 
-The development baseline selected on November 17, 2026 uses KMD `9ef86d7e`, UMD `c8a8eb9a` and ICD `e563a81d` (SHA-256 prefixes). The 720p combination is retained for recovery. [Full component hashes and recovery package](tegra-x1-wddm/docs/NVDEC_1080_D3D11VA_20261117.json)
+### Switch OLED (HEG-001 / Aula)
 
-| Area | Result on the tested Switch Lite |
+The port author reports that Windows starts and the screen can go black during display activation. The driver fails at different points when loaded at boot and when enabled after startup. The shared WDDM query fixes in `74638ab474d` await OLED hardware validation. OLED port and compatibility findings by [Tsunami714!](https://github.com/Tsunami714a). [WDDM query review](tegra-x1-wddm/docs/OLED_WDDM_QUERY_REVIEW_20261127.md)
+
+### Switch Lite (HDH-001)
+
+The latest published permanent-boot check, boot record `103136`, recorded GPU Code 0. Desktop Window Manager loaded tgd3d and NVK from the approved driver directory. The signed kernel driver was built from `4c0cb225526e`. The table gives SHA-256 prefixes for the verified binaries. [Permanent-boot record and full hashes](tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/permanent-boot-103136.json) · [Kernel driver build](tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/build.json) · [GPU recovery tests](tegra-x1-wddm/docs/tdr-fault-isr-1d7fcf5d/qualification.json)
+
+| Component | Binary | SHA-256 prefix |
+| --- | --- | --- |
+| WDDM kernel driver 0.1.0.158 | `tegragpurender.sys` | `1d7fcf5d75ed` |
+| tgd3d entry / native ARM64 implementation | `TegraGpuD3DVk.dll` / `tg_d3d_arm64.dll` | `9ff198aeabf1` / `0790651c6981` |
+| NVK entry / native ARM64 implementation | `libvulkan_nouveau.dll` / `tg_nvk_arm64.dll` | `3ca2d9eb0fdf` / `13ae4c9c5c34` |
+
+The repository's packaging manifest still selects the earlier kernel driver `c4f04a10e86a` with the same user-mode binaries. [Package baseline manifest](tegra-x1-wddm/docs/graphics-baseline.json) · [Open driver issues](tegra-x1-wddm/docs/open-faults.json)
+
+### Switch Lite feature tests
+
+| Area | Result on the build linked for each test |
 | --- | --- |
 | Desktop and internal panel | The fixed 90° desktop uses GPU prerotation and row scan, with a 1280×720 desktop on the native 720×1280 panel. The mode persisted across restart. An ordinary DWM window passed move, resize, minimize, restore and close checks. DC column scan and reliable switching between all four orientations remain open. [Display baseline](tegra-x1-wddm/docs/ROW_SCAN_BASELINE_20261116.md) · [Window checks](tegra-x1-wddm/docs/VKCUBE_ACCEPTANCE_20261116.md) |
 | Native Win32 Vulkan | On the earlier fixed-landscape build, ARM64 `vkcube` rendered through NVK on GM20B in a GDI/DWM window. The timed run lasted 300.289 seconds and exited normally. Resize and recovery after occlusion were observed on the panel. [Components, timing and observations](tegra-x1-wddm/docs/VKCUBE_ACCEPTANCE_20261116.md) |
 | H.264 hardware decoding | D3D11VA drove NVDEC in separate 720p and 1080p runs. Each decoded six frames that matched an independent NV12 reference. The 1080p test presented all six in a 640×360 window, showed the color pattern on the panel and closed to the desktop. Sustained playback and load-related restarts remain under investigation. 2K and 4K device tests are deferred. [720p run](tegra-x1-wddm/docs/NVDEC_720_COMPOSITOR_OPEN_20261117.json) · [1080p run](tegra-x1-wddm/docs/NVDEC_1080_D3D11VA_20261117.json) · [Restart observations](tegra-x1-wddm/docs/LOAD_STABILITY_FOLLOWUP_20261116.json) |
-| Direct3D 9/10/11 games | Integration of DXVK v3.1.1 for ARM64 is in progress. The published baseline has no representative game result covering native NVK rendering, input and normal exit. |
+| Direct3D 9/10/11 games | FTEQW loaded a LibreQuake map through x86, x64 and ARM64EC DXVK on the tested Lite. Each run handled input and returned to the desktop with exit code zero. [Game measurements](tegra-x1-wddm/docs/DXVK_ZINK_GAME_MATRIX_20261118.json) |
 | Earlier driver milestones | The `.87` KMD passed native Vulkan triangle readback. The `.130` display driver showed verified RGB bars. The `.144` driver passed Win32 Vulkan sharing, GPU access after producer release and re-export, with 32,768 payload words and 512 guards checked. [Display evidence](tegra-x1-wddm/docs/NATIVE_STARTUP_RESULT.md) · [Sharing evidence](tegra-x1-wddm/docs/VULKAN_WIN32_MEMORY.md) |
-| OpenGL and the earlier desktop frontend | Windows OpenGL via WGL → Zink → NVK awaits hardware validation. Development of the earlier Gallium/Zink desktop path on `main` is paused. [Earlier desktop results](tegra-x1-wddm/docs/NATIVE_DESKTOP_158.md) |
+| OpenGL and the earlier desktop frontend | FTEQW also ran the LibreQuake map through x86 and x64 Zink. Development of the earlier Gallium/Zink desktop path on `main` is paused. [Application tests](tegra-x1-wddm/docs/DXVK_GAMES.md) [Earlier desktop results](tegra-x1-wddm/docs/NATIVE_DESKTOP_158.md) |
 
 The 1080p run retained the Handheld profile, CPU DFLL, fan mode 1 and the 85% charge target. Direct Flip is deferred. Full Vulkan conformance remains a long-term goal, with version-appropriate VK-GL-CTS coverage still pending. [Power and display readback](tegra-x1-wddm/docs/NVDEC_1080_D3D11VA_20261117.json) · [Development handoff](tegra-x1-wddm/docs/TGD3D_COLD_BOOT_HANDOFF_20261113.md)
 

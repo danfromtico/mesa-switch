@@ -1,6 +1,10 @@
-## Current Switch graphics baseline · 2026-11-20
+## Current hardware status
 
-Windows starts the GM20B with KMD `fc6e8d08`, ARM64 tgd3d `cd352fa8` and NVK `51ff97f6`. On AC-powered boot `84195`, DWM loaded the selected native modules at Code 0. The protected boot tool issued permanent permission for the seven verified component hashes and preserved the previous complete recovery profile. [Signed profile](graphics-baseline.json) · [Permanent permission and rollback](dxvk-games-20261118/dxgi-copy-cd352fa8/permanent-boot.json) · [第四步交接](SWITCH_GRAPHICS_HANDOFF.md)
+The project overview lists the latest published Switch Lite permanent-boot result, the package manifest and the Switch OLED port status. [Hardware status and baseline hashes](../../README.md#hardware-status)
+
+## Switch Lite graphics baseline recorded on 2026-11-20
+
+Windows starts the GM20B with KMD `fc6e8d08`, ARM64 tgd3d `cd352fa8` and NVK `51ff97f6`. On AC-powered boot `84195`, DWM loaded the selected native modules at Code 0. The protected boot tool issued permanent permission for the seven verified component hashes and preserved the previous complete recovery profile. [Qualification for this profile](dxvk-games-20261118/dxgi-copy-cd352fa8/qualification.json) · [Permanent permission and rollback](dxvk-games-20261118/dxgi-copy-cd352fa8/permanent-boot.json) · [第四步交接](SWITCH_GRAPHICS_HANDOFF.md)
 
 Two historical display KMD repairs were retested with the selected native user-mode components. The ARM64 models distinguish the old and corrected results for a context-free MMIO flip and a rotated primary mode-size query. Windows supplied a context for all 171 instrumented no-DMA flips. All 171 primary queries had identity storage and `CheckDisplayMode=0`. Both the candidate and the permanent baseline returned `E_FAIL` on entry to the same exclusive fullscreen window. Their ordinary and 90-degree borderless windows displayed the expected colors and exited normally. The two repairs remain candidates for their target paths. The selected seven-component profile was restored on boot `84936`, after eight requested boots and one additional unexplained restart. Windows started boot `84914` following the last planned restore, then started `84936` approximately 47 seconds later without another shutdown request. Events 41 and 6008 are registered separately in the open-fault ledger. [KMD display trials and restoration](KMD_DISPLAY_CONTRACTS_20261120.json)
 
