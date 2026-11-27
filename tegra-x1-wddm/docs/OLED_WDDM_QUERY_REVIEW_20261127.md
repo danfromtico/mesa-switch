@@ -31,11 +31,43 @@ Tsunami714! 在 HEG-001 上观察到可交互的 Windows 桌面。下表按测�
 | DXGI 枚举和首次建卡测试 | 启用 GPU 后，DXGI 枚举到 `Tegra X1 (GM20B)`。KMT 的 DX11 槽位查询当时返回 `0xC000000D`，指定 Tegra 适配器的 `D3D11CreateDevice` 返回 `0x887A0004`。 |
 | 修正 UMD 注册后 | 测试者报告 ETW 记录了 `TegraGpuD3DVk.dll` 的映像加载，`umd.log` 出现 `dllmain:attach`、`open-native:enter` 和 `adapter-info`。KMD 记录 `8750:1 / 8751:1 / 8752:1`，对应 `PagingOnly=1`、身份已就绪、返回 flags 为 `0x1`。UMD 要求同时具备 `LUID_VALID` 和 `NATIVE_SUBMIT`（合计 `0x3`），因此在打开 Vulkan 之前返回 `DXGI_ERROR_UNSUPPORTED`。 |
 | native `.201` 候选 | 使用 `--display --native-test-version 201` 构建。测试者在卡上核对了 KMD 的版本标记、大小（319,864 字节）和 SHA-256 前缀 `0E880BD9D08685E6`。这份 KMD 在 Tegra 上成功建卡及 DWM 使用硬件渲染的结果仍待实机确认。 |
-| Vulkan 打开（后续实机反馈） | Tsunami714! 报告 HEG-001 上的 tgd3d UMD 已能打开 Vulkan。具体 Vulkan 调用及返回值、同轮加载的 KMD、UMD 和 ICD 的完整 SHA-256，以及 Tegra 上的 D3D11 建卡、DWM 硬件渲染和持续呈现仍待核实。 |
+| NVK 初始化（后续实测） | tgd3d 成功创建 Vulkan 实例，通过 LUID 匹配 Tegra 物理设备。下方列出日志和组件 SHA-256。 |
 
 仓库 INF 的 `UserModeDriverName` 默认是四项 `REG_MULTI_SZ`，均指向随 KMD 提供的 `tegragpuno3d.dll`。桌面安装脚本按实际设备实例找到显示类键，再将 DX10 和 DX11 槽位（索引 1、2）指向 tgd3d 的完整路径。复测时可按本次枚举的 Tegra LUID 查询槽位，并核对进程实际加载的 DLL 路径及完整 SHA-256。测试者曾在该机替换 DriverStore 内的桩 DLL。[KMD 包的 INF](../windows/tegragpurender.inf) · [桌面安装脚本](../tools/tgd3d-default/Install-Default.ps1)
 
 源码包的 KMD 已包含补丁 01，SwBatt 已包含补丁 02。实机有新桥的电压和时钟遥测，仍缺同一轮带令牌的 `CLAIM_RAIL`、`RELEASE_RAIL` 记录。补丁 03 随包提供，包内 `swhid.c` 匹配该补丁的修改前版本。
+
+#### NVK 初始化
+
+Tsunami714! 提供的 HEG-001 日志显示，KMD 上报 `8750:0 / 8751:1 / 8752:3`，对应 `PagingOnly=0`、适配器身份就绪、`LUID_VALID | NATIVE_SUBMIT`。该轮记录窗口内未报告蓝屏。[OLED 实测来源](https://github.com/Tsunami714a)
+
+```text
+adapter-flags 3 3
+vk-load 1 0
+vk-instance 0 1
+vk-enum 1 1
+vk-pdev 1 1
+vk-open:end 0 0
+create-device:enter 720911 23
+create-device:enter 720911 7
+```
+
+`vkCreateInstance` 返回 `VK_SUCCESS`。NVK ICD 枚举到一个物理设备，并通过 LUID 匹配 Tegra。`VulkanAdapter::open` 返回 `S_OK`。随后两次进入 tgd3d 的 D3D `CreateDevice`，创建 Vulkan 逻辑设备的 `vkCreateDevice` 由后续建卡阶段调用。该轮 `step.log` 记录 `4900`（分配入口）54 次、`4910`（分页入口）293 次、`4920`（虚拟地址提交入口）237 次、`4842`（MPO3 地址回调入口）1 次。D3D 建卡的成功返回、GPU 完成 fence 和 DWM 硬件呈现仍待确认。[NVK 初始化及逻辑设备创建](../../src/nouveau/tgd3d/tgd3d_vk.cpp) · [D3D 建卡流程](../../src/nouveau/tgd3d/tgd3d_device.cpp)
+
+第二次 `StartDevice` 尝试报告 `BootPermitStatus=0xC0000022` 和 `StartGateStatus=0xC00000A3`，与一次性许可拒绝一致。当前设备管理器 Code 0 仍待确认，以同一 Tegra 设备实例的 `DEVPKEY_Device_ProblemCode` 和 `DEVPKEY_Device_DevNodeStatus` 为准。[Windows 设备状态查询](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/retrieving-the-status-and-problem-code-for-a-device-instance)
+
+下表列出测试者报告的本轮组件及 SHA-256。
+
+| 组件 | 文件 | 字节 | SHA-256 |
+| --- | --- | ---: | --- |
+| KMD | `tegragpuw1.sys` | 319,864 | `211acdc935fe704c609c95e475e77a16bcba2e11d5eb33dd219c910590b173b0` |
+| tgd3d UMD | `tegragpuno3d.dll` / `TegraGpuD3DVk.dll` | 1,746,944 | `381eca56cc9e5875e6d0a3d376280c88c8f54928f4b8ca1bc3d317084ef27c66` |
+| NVK ICD | `libvulkan_nouveau.dll` | 20,441,088 | `45c9c5b0abe32a90fac86a137f515d3144bcae119c233dea00f9c7004b08cc66` |
+| SwBatt | `swbatt.sys` | 66,936 | `503703a61c7a5d370185607fb06f09def3738930c78f0b0f674ddd1f44077458` |
+
+#### OLED 的 0x10E 蓝屏
+
+测试者报告同配置的另一次启动发生 `VIDEO_MEMORY_MANAGEMENT_INTERNAL`（`0x10E`），参数 1 为 `0x8`。微软将此子码定义为拆分后的 DMA 缓冲区含有无效引用。故障轮的 `0x10E` 转储、其余参数及对应 DMA 包仍待取得。蓝屏根因和是否属于竞态均待确认。[微软 0x10E 子码表](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x10e---video-memory-management-internal)
 
 ### OLED 移植版的一次性启动许可
 
